@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <type_traits>
+#include <vector>
 
 namespace fiction
 {
@@ -48,6 +49,31 @@ T integral_abs(const T n) noexcept
     }
 
     return static_cast<T>(std::abs(static_cast<int64_t>(n)));  // needed to solve ambiguity of std::abs
+}
+
+/**
+ * Calculates the binomial coefficient \f$ \binom{n}{k} \f$.
+ *
+ * @param n The total number of items.
+ * @param k The number of items to choose from n.
+ * @return The binomial coefficient \f$ \binom{n}{k} \f$.
+ */
+[[nodiscard]] inline uint64_t binomial_coefficient(uint64_t n, uint64_t k) noexcept
+{
+    if (k > n)
+    {
+        return 0;
+    }
+    uint64_t result = 1;
+    if (2 * k > n)
+    {
+        k = n - k;
+    }
+    for (uint64_t i = 1; i <= k; i++)
+    {
+        result = result * (n + 1 - i) / i;
+    }
+    return result;
 }
 
 }  // namespace fiction

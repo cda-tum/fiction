@@ -84,7 +84,6 @@ TEST_CASE("Test for units", "[sidb-defects]")
     CHECK(defect_three.epsilon_r == 5);
     CHECK(defect_three.lambda_tf == 0.0);
 }
-
 TEST_CASE("Compare Defect", "[sidb-defects]")
 {
     SECTION("Different types")

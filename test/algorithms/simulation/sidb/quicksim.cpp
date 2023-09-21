@@ -14,6 +14,20 @@
 
 using namespace fiction;
 
+TEMPLATE_TEST_CASE("Zero iteration steps", "[quicksim]",
+                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+{
+    TestType lyt{};
+
+    const quicksim_params quicksim_params{sidb_simulation_parameters{2, -0.30}, 0};
+
+    const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+
+    CHECK(simulation_results.charge_distributions.empty());
+    REQUIRE(simulation_results.additional_simulation_parameters.empty());
+    CHECK(simulation_results.algorithm_name == "");
+}
+
 TEMPLATE_TEST_CASE("Empty layout QuickSim simulation", "[quicksim]",
                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
 {

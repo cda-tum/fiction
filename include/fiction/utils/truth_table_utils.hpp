@@ -184,63 +184,6 @@ namespace fiction
     return table;
 }
 /**
- * Creates and returns a truth table that implements an identity function in two variables.
- *
- * @return identity function in two variables.
- */
-[[nodiscard]] inline kitty::dynamic_truth_table create_double_wire_tt() noexcept
-{
-    static constexpr const char* truth_table_string = "11100100";
-
-    kitty::dynamic_truth_table table{3};
-    kitty::create_from_binary_string(table, truth_table_string);
-
-    return table;
-}
-/**
- * Creates and returns a truth table that implements a crossing in two variables.
- *
- * @return crossing in two variables.
- */
-[[nodiscard]] inline kitty::dynamic_truth_table create_crossing_wire_tt() noexcept
-{
-    static constexpr const char* truth_table_string = "11011000";
-
-    kitty::dynamic_truth_table table{3};
-    kitty::create_from_binary_string(table, truth_table_string);
-
-    return table;
-}
-/**
- * Creates and returns a truth table that implements a fan-out in one variable.
- *
- * @return fan-out in one variable.
- */
-[[nodiscard]] inline kitty::dynamic_truth_table create_fan_out_tt() noexcept
-{
-    static constexpr const char* truth_table_string = "1100";
-
-    kitty::dynamic_truth_table table{2};
-    kitty::create_from_binary_string(table, truth_table_string);
-
-    return table;
-}
-/**
- * Creates and returns a truth table that implements a half-adder in two variables.
- *
- * @return half-adder in two variables.
- */
-[[nodiscard]] inline kitty::dynamic_truth_table create_half_adder_tt() noexcept
-{
-    static constexpr const char* truth_table_string = "01101000";
-
-    kitty::dynamic_truth_table table{3};
-    kitty::create_from_binary_string(table, truth_table_string);
-
-    return table;
-}
-
-/**
  * Creates and returns a truth table that implements the majority function in three variables.
  *
  * @return Majority function in three variables.
@@ -253,6 +196,90 @@ namespace fiction
     kitty::create_from_words(table, &lit, &lit + 1);
 
     return table;
+}
+/**
+ * Creates and returns a vector of truth tables for a double wire multi-output function.
+ *
+ * This function generates a vector of truth tables, each representing one of the outputs
+ * of a double wire multi-output function in two variables. The function returns a vector containing
+ * two truth tables.
+ *
+ * @return Vector of truth tables, each representing an output of the double wire function.
+ */
+[[nodiscard]] inline std::vector<kitty::dynamic_truth_table> create_double_wire_tt() noexcept
+{
+    static constexpr const char* truth_table_string1 = "1100";  // Output 1
+    static constexpr const char* truth_table_string2 = "1010";  // Output 2
+
+    kitty::dynamic_truth_table table1{2};  // 2 input variables for Output 1
+    kitty::dynamic_truth_table table2{2};  // 2 input variables for Output 2
+
+    kitty::create_from_binary_string(table1, truth_table_string1);
+    kitty::create_from_binary_string(table2, truth_table_string2);
+
+    return std::vector<kitty::dynamic_truth_table>{table1, table2};
+}
+/**
+ * Creates and returns a vector of truth tables for a crossing wire multi-output function.
+ *
+ * This function generates a vector of truth tables, each representing one of the outputs
+ * of a crossing wire multi-output function in two variables. The function returns a vector containing
+ * two truth tables.
+ *
+ * @return Vector of truth tables, each representing an output of the crossing wire function.
+ */
+[[nodiscard]] inline std::vector<kitty::dynamic_truth_table> create_crossing_wire_tt() noexcept
+{
+    static constexpr const char* truth_table_string1 = "1010";  // Output 1
+    static constexpr const char* truth_table_string2 = "1100";  // Output 2
+
+    kitty::dynamic_truth_table table1{2};  // 2 input variables for Output 1
+    kitty::dynamic_truth_table table2{2};  // 2 input variables for Output 2
+
+    kitty::create_from_binary_string(table1, truth_table_string1);
+    kitty::create_from_binary_string(table2, truth_table_string2);
+
+    return std::vector<kitty::dynamic_truth_table>{table1, table2};
+}
+/**
+ * Creates and returns a vector of truth tables for a multi-output function with two variables.
+ *
+ * This function generates a vector of truth tables, each representing one of the outputs
+ * of a multi-output function in two variables.
+ *
+ * @return Vector of truth tables, each representing an output of the identity function.
+ */
+[[nodiscard]] inline std::vector<kitty::dynamic_truth_table> create_fan_out_tt() noexcept
+{
+    static constexpr const char* truth_table_string = "10";  // Output 1
+
+    kitty::dynamic_truth_table table{1};
+
+    kitty::create_from_binary_string(table, truth_table_string);
+
+    return std::vector<kitty::dynamic_truth_table>{table, table};
+}
+/**
+ * Creates and returns a vector of truth tables for a half adder multi-output function.
+ *
+ * This function generates a vector of truth tables, each representing one of the outputs
+ * of a half adder multi-output function in two variables. The function returns a vector containing
+ * two truth tables.
+ *
+ * @return Vector of truth tables, each representing an output of the half adder function.
+ */
+[[nodiscard]] inline std::vector<kitty::dynamic_truth_table> create_half_adder_tt() noexcept
+{
+    static constexpr const char* truth_table_string1 = "1000";  // Output 1
+    static constexpr const char* truth_table_string2 = "0110";  // Output 2
+
+    kitty::dynamic_truth_table table1{2};  // 2 input variables for Output 1
+    kitty::dynamic_truth_table table2{2};  // 2 input variables for Output 2
+
+    kitty::create_from_binary_string(table1, truth_table_string1);
+    kitty::create_from_binary_string(table2, truth_table_string2);
+
+    return std::vector<kitty::dynamic_truth_table>{table1, table2};
 }
 
 // NOLINTEND(*-pointer-arithmetic)

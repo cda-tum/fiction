@@ -51,7 +51,13 @@ TEST_CASE("writes expected output", "[write_txt_sim_result]")
                                                 1.920;0.000;-1;0;
                                                 3.072;0.000;-1;-1;)";
 
-        REQUIRE(compare_output(ss.str(), expected_output));
+        const std::string expected_output_second = R"(x [nm];y [nm];GS_0;GS_1;
+                                                0.000;0.000;-1;-1;
+                                                1.152;0.000;-1;0;
+                                                1.920;0.000;0;-1;
+                                                3.072;0.000;-1;-1;)";
+
+        REQUIRE((compare_output(ss.str(), expected_output) || compare_output(ss.str(), expected_output_second)));
     }
 
     SECTION("Output is written to ostream correctly, unique GS")

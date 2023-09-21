@@ -14,7 +14,7 @@
 
 using namespace fiction;
 
-TEMPLATE_TEST_CASE("Empty layout ExGS simulation", "[ExGS]",
+TEMPLATE_TEST_CASE("Empty layout ExGS simulation", "[exhaustive-ground-state-simulation]",
                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
 {
     TestType lyt{{20, 10}};
@@ -29,7 +29,7 @@ TEMPLATE_TEST_CASE("Empty layout ExGS simulation", "[ExGS]",
     CHECK(simulation_results.additional_simulation_parameters.empty());
 }
 
-TEMPLATE_TEST_CASE("Single SiDB ExGS simulation", "[ExGS]",
+TEMPLATE_TEST_CASE("Single SiDB ExGS simulation", "[exhaustive-ground-state-simulation]",
                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
 {
     TestType lyt{{20, 10}};
@@ -43,7 +43,22 @@ TEMPLATE_TEST_CASE("Single SiDB ExGS simulation", "[ExGS]",
     CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) == sidb_charge_state::NEGATIVE);
 }
 
-TEMPLATE_TEST_CASE("ExGS simulation of a two-pair BDL wire with one perturber", "[ExGS]",
+TEMPLATE_TEST_CASE("ExGS simulation of a one BDL pair with one perturber", "[exhaustive-ground-state-simulation]",
+                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+{
+    TestType lyt{{20, 10}};
+
+    lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({4, 0, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 0, 0}, TestType::cell_type::NORMAL);
+
+    const sidb_simulation_parameters params{2, -0.32};
+
+    const auto simulation_results = exhaustive_ground_state_simulation<TestType>(lyt, params);
+    CHECK(simulation_results.charge_distributions.size() == 1);
+}
+
+TEMPLATE_TEST_CASE("ExGS simulation of a two-pair BDL wire with one perturber", "[exhaustive-ground-state-simulation]",
                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
 {
     TestType lyt{{20, 10}};
@@ -86,7 +101,7 @@ TEMPLATE_TEST_CASE("ExGS simulation of a two-pair BDL wire with one perturber", 
                Catch::Matchers::WithinAbs(0.2460493219, physical_constants::POP_STABILITY_ERR));
 }
 
-TEMPLATE_TEST_CASE("ExGS simulation of a Y-shape SiDB arrangement", "[ExGS]",
+TEMPLATE_TEST_CASE("ExGS simulation of a Y-shape SiDB arrangement", "[exhaustive-ground-state-simulation]",
                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
 {
     TestType lyt{{20, 10}};
@@ -121,7 +136,7 @@ TEMPLATE_TEST_CASE("ExGS simulation of a Y-shape SiDB arrangement", "[ExGS]",
                Catch::Matchers::WithinAbs(0.3191788254, physical_constants::POP_STABILITY_ERR));
 }
 
-TEMPLATE_TEST_CASE("ExGS simulation of a Y-shape SiDB OR gate with input 01", "[ExGS]",
+TEMPLATE_TEST_CASE("ExGS simulation of a Y-shape SiDB OR gate with input 01", "[exhaustive-ground-state-simulation]",
                    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
 {
     TestType lyt{{20, 10}};
