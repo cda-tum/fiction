@@ -140,7 +140,7 @@ TEST_CASE("Use FO2 Bestagon gate without SiDB at {17, 11, 0} and generate origin
                                           1,
                                           sidb_simulation_engine::QUICKEXACT};
 
-    SECTION("generate original fo2")
+    SECTION("generate original FO2")
     {
         CHECK(lyt.get_cell_type({17, 11, 0}) == layout::technology::EMPTY);
 
@@ -156,10 +156,10 @@ TEST_CASE("Use FO2 Bestagon gate without SiDB at {17, 11, 0} and generate origin
     SECTION("replace the output perturbers by equivalent negatively charged defects")
     {
         sidb_defect_cell_clk_lyt_siqad defect_layout{lyt};
-        defect_layout.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::EMPTY);
-        defect_layout.assign_cell_type({2, 19, 0}, sidb_technology::cell_type::EMPTY);
-        CHECK(defect_layout.get_cell_type({36, 19, 0}) == layout::technology::EMPTY);
-        CHECK(defect_layout.get_cell_type({2, 19, 0}) == layout::technology::EMPTY);
+        defect_layout.assign_cell_type({36, 19, 0}, technology<sidb_defect_cell_clk_lyt_siqad>::cell_type::EMPTY);
+        defect_layout.assign_cell_type({2, 19, 0}, technology<sidb_defect_cell_clk_lyt_siqad>::cell_type::EMPTY);
+        CHECK(defect_layout.get_cell_type({36, 19, 0}) == technology<sidb_defect_cell_clk_lyt_siqad>::cell_type::EMPTY);
+        CHECK(defect_layout.get_cell_type({2, 19, 0}) == technology<sidb_defect_cell_clk_lyt_siqad>::cell_type::EMPTY);
 
         defect_layout.assign_sidb_defect(
             {36, 19, 0},
@@ -171,7 +171,8 @@ TEST_CASE("Use FO2 Bestagon gate without SiDB at {17, 11, 0} and generate origin
 
         REQUIRE(found_gate_layouts.size() == 1);
         CHECK(found_gate_layouts[0].num_cells() == 19);
-        CHECK(found_gate_layouts[0].get_cell_type({17, 11, 0}) == layout::technology::NORMAL);
+        CHECK(found_gate_layouts[0].get_cell_type({17, 11, 0}) ==
+              technology<sidb_defect_cell_clk_lyt_siqad>::cell_type::NORMAL);
     }
 }
 

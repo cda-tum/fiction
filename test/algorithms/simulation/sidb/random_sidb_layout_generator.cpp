@@ -25,7 +25,7 @@ TEST_CASE("Random cube::coord_t layout generation", "[generate-random-sidb-layou
     {
         const generate_random_sidb_layout_params<cube_layout> params{};
 
-        const auto lyt = generate_random_sidb_layout<cube_layout>(cube_layout{}, params);
+        const auto lyt = generate_random_sidb_layout(cube_layout{}, params);
 
         CHECK(lyt.num_cells() == 0);
         CHECK(lyt.x() == 0);
@@ -36,7 +36,7 @@ TEST_CASE("Random cube::coord_t layout generation", "[generate-random-sidb-layou
     {
         const generate_random_sidb_layout_params<cube_layout> params{{{5, 7, 2}, {-10, -10, 0}}};
 
-        const auto result_lyt = generate_random_sidb_layout<cube_layout>(cube_layout{}, params);
+        const auto result_lyt = generate_random_sidb_layout(cube_layout{}, params);
 
         CHECK(result_lyt.num_cells() == 0);
         result_lyt.foreach_cell(
@@ -52,7 +52,7 @@ TEST_CASE("Random cube::coord_t layout generation", "[generate-random-sidb-layou
     {
         const generate_random_sidb_layout_params<cube_layout> params{{{-10, -10, 0}, {5, 7, 2}}};
 
-        const auto result_lyt = generate_random_sidb_layout<cube_layout>(cube_layout{}, params);
+        const auto result_lyt = generate_random_sidb_layout(cube_layout{}, params);
 
         CHECK(result_lyt.num_cells() == 0);
         result_lyt.foreach_cell(
@@ -68,7 +68,7 @@ TEST_CASE("Random cube::coord_t layout generation", "[generate-random-sidb-layou
     {
         const generate_random_sidb_layout_params<cube_layout> params{{{-10, -10, 1}, {-10, -10, 1}}, 1};
 
-        const auto result_lyt = generate_random_sidb_layout<cube_layout>(cube_layout{}, params);
+        const auto result_lyt = generate_random_sidb_layout(cube_layout{}, params);
 
         CHECK(result_lyt.num_cells() == 1);
         result_lyt.foreach_cell(
@@ -84,7 +84,7 @@ TEST_CASE("Random cube::coord_t layout generation", "[generate-random-sidb-layou
     {
         const generate_random_sidb_layout_params<cube_layout> params{{{-10, -10, 0}, {5, 7, 1}}, 10};
 
-        const auto result_lyt = generate_random_sidb_layout<cube_layout>(cube_layout{}, params);
+        const auto result_lyt = generate_random_sidb_layout(cube_layout{}, params);
 
         CHECK(result_lyt.num_cells() == 10);
         result_lyt.foreach_cell(
@@ -106,7 +106,7 @@ TEST_CASE("Random cube::coord_t layout generation", "[generate-random-sidb-layou
             100,
             generate_random_sidb_layout_params<cube_layout>::positive_charges::ALLOWED};
 
-        const auto result_lyt = generate_random_sidb_layout<cube_layout>(cube_layout{}, params);
+        const auto result_lyt = generate_random_sidb_layout(cube_layout{}, params);
 
         CHECK(result_lyt.num_cells() == 100);
         result_lyt.foreach_cell(
@@ -124,7 +124,7 @@ TEST_CASE("Random cube::coord_t layout generation", "[generate-random-sidb-layou
             100,
             generate_random_sidb_layout_params<cube_layout>::positive_charges::FORBIDDEN};
 
-        const auto result_lyt = generate_random_sidb_layout<cube_layout>(cube_layout{}, params);
+        const auto result_lyt = generate_random_sidb_layout(cube_layout{}, params);
 
         CHECK(result_lyt.num_cells() == 100);
         result_lyt.foreach_cell(
@@ -182,7 +182,7 @@ TEST_CASE("Random cube::coord_t layout generation", "[generate-random-sidb-layou
             2,
             static_cast<uint64_t>(10E6),
             2};
-        const auto result_lyts = generate_multiple_random_sidb_layouts<cube_layout>(cube_layout{}, params);
+        const auto result_lyts = generate_multiple_random_sidb_layouts(cube_layout{}, params);
         REQUIRE(result_lyts.size() == 2);
 
         const auto& first_lyt  = result_lyts.front();
@@ -211,7 +211,7 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[generate-random-sidb-la
     {
         const generate_random_sidb_layout_params<sidb_cell_clk_lyt> params{};
 
-        const auto lyt = generate_random_sidb_layout<sidb_cell_clk_lyt>(sidb_cell_clk_lyt{}, params);
+        const auto lyt = generate_random_sidb_layout(sidb_cell_clk_lyt{}, params);
 
         CHECK(lyt.num_cells() == 0);
         CHECK(lyt.x() == 0);
@@ -222,7 +222,7 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[generate-random-sidb-la
     {
         const generate_random_sidb_layout_params<sidb_cell_clk_lyt> params{{{1, 1, 0}, {5, 7, 2}}};
 
-        const auto result_lyt = generate_random_sidb_layout<sidb_cell_clk_lyt>(sidb_cell_clk_lyt{}, params);
+        const auto result_lyt = generate_random_sidb_layout(sidb_cell_clk_lyt{}, params);
 
         CHECK(result_lyt.num_cells() == 0);
         result_lyt.foreach_cell(
@@ -238,7 +238,7 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[generate-random-sidb-la
     {
         const generate_random_sidb_layout_params<sidb_cell_clk_lyt> params{{{5, 5, 1}, {5, 5, 1}}, 1};
 
-        const auto result_lyt = generate_random_sidb_layout<sidb_cell_clk_lyt>(sidb_cell_clk_lyt{}, params);
+        const auto result_lyt = generate_random_sidb_layout(sidb_cell_clk_lyt{}, params);
 
         CHECK(result_lyt.num_cells() == 1);
         result_lyt.foreach_cell(
@@ -254,7 +254,7 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[generate-random-sidb-la
     {
         const generate_random_sidb_layout_params<sidb_cell_clk_lyt> params{{{1, 1, 0}, {50, 7, 1}}, 10};
 
-        const auto result_lyt = generate_random_sidb_layout<sidb_cell_clk_lyt>(sidb_cell_clk_lyt{}, params);
+        const auto result_lyt = generate_random_sidb_layout(sidb_cell_clk_lyt{}, params);
 
         CHECK(result_lyt.num_cells() == 10);
         result_lyt.foreach_cell(
@@ -276,7 +276,7 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[generate-random-sidb-la
             100,
             generate_random_sidb_layout_params<sidb_cell_clk_lyt>::positive_charges::ALLOWED};
 
-        const auto result_lyt = generate_random_sidb_layout<sidb_cell_clk_lyt>(sidb_cell_clk_lyt{}, params);
+        const auto result_lyt = generate_random_sidb_layout(sidb_cell_clk_lyt{}, params);
 
         CHECK(result_lyt.num_cells() == 100);
         result_lyt.foreach_cell(
@@ -294,7 +294,7 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[generate-random-sidb-la
             100,
             generate_random_sidb_layout_params<sidb_cell_clk_lyt>::positive_charges::FORBIDDEN};
 
-        const auto result_lyt = generate_random_sidb_layout<sidb_cell_clk_lyt>(sidb_cell_clk_lyt{}, params);
+        const auto result_lyt = generate_random_sidb_layout(sidb_cell_clk_lyt{}, params);
 
         CHECK(result_lyt.num_cells() == 100);
         result_lyt.foreach_cell(
@@ -327,7 +327,7 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[generate-random-sidb-la
             2,
             static_cast<uint64_t>(10E6),
             3};
-        const auto result_lyts = generate_multiple_random_sidb_layouts<sidb_cell_clk_lyt>(sidb_cell_clk_lyt{}, params);
+        const auto result_lyts = generate_multiple_random_sidb_layouts(sidb_cell_clk_lyt{}, params);
         CHECK(result_lyts.size() == 3);
 
         for (const auto& lyt : result_lyts)
@@ -350,7 +350,7 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[generate-random-sidb-la
             2,
             static_cast<uint64_t>(10E6),
             2};
-        const auto result_lyts = generate_multiple_random_sidb_layouts<sidb_cell_clk_lyt>(sidb_cell_clk_lyt{}, params);
+        const auto result_lyts = generate_multiple_random_sidb_layouts(sidb_cell_clk_lyt{}, params);
         REQUIRE(result_lyts.size() == 2);
 
         const auto& first_lyt  = result_lyts.front();
@@ -379,7 +379,7 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[generate-random-sidb-la
         skeleton_layout.assign_cell_type({0, 0}, sidb_cell_clk_lyt::technology::NORMAL);
         skeleton_layout.assign_cell_type({9, 1}, sidb_cell_clk_lyt::technology::NORMAL);
         skeleton_layout.assign_cell_type({5, 0}, sidb_cell_clk_lyt::technology::NORMAL);
-        const auto result_lyt = generate_random_sidb_layout<sidb_cell_clk_lyt>(skeleton_layout, params);
+        const auto result_lyt = generate_random_sidb_layout(skeleton_layout, params);
 
         CHECK(result_lyt.num_cells() == 13);
     }
@@ -411,7 +411,7 @@ TEST_CASE("Random siqad::coord_t layout generation", "[generate-random-sidb-layo
     {
         const generate_random_sidb_layout_params<sidb_cell_clk_lyt_siqad> params{};
 
-        const auto lyt = generate_random_sidb_layout<sidb_cell_clk_lyt_siqad>(sidb_cell_clk_lyt_siqad{}, params);
+        const auto lyt = generate_random_sidb_layout(sidb_cell_clk_lyt_siqad{}, params);
 
         CHECK(lyt.num_cells() == 0);
         CHECK(lyt.x() == 0);
@@ -438,7 +438,7 @@ TEST_CASE("Random siqad::coord_t layout generation", "[generate-random-sidb-layo
     {
         const generate_random_sidb_layout_params<sidb_cell_clk_lyt_siqad> params{{{1, 1, 0}, {5, 7, 1}}};
 
-        const auto result_lyt = generate_random_sidb_layout<sidb_cell_clk_lyt_siqad>(sidb_cell_clk_lyt_siqad{}, params);
+        const auto result_lyt = generate_random_sidb_layout(sidb_cell_clk_lyt_siqad{}, params);
 
         CHECK(result_lyt.num_cells() == 0);
         result_lyt.foreach_cell(
@@ -454,7 +454,7 @@ TEST_CASE("Random siqad::coord_t layout generation", "[generate-random-sidb-layo
     {
         const generate_random_sidb_layout_params<sidb_cell_clk_lyt_siqad> params{{{1, 1, 0}, {50, 7, 1}}, 10};
 
-        const auto result_lyt = generate_random_sidb_layout<sidb_cell_clk_lyt_siqad>(sidb_cell_clk_lyt_siqad{}, params);
+        const auto result_lyt = generate_random_sidb_layout(sidb_cell_clk_lyt_siqad{}, params);
 
         CHECK(result_lyt.num_cells() == 10);
         result_lyt.foreach_cell(
@@ -475,7 +475,7 @@ TEST_CASE("Random siqad::coord_t layout generation", "[generate-random-sidb-layo
             100,
             generate_random_sidb_layout_params<sidb_cell_clk_lyt_siqad>::positive_charges::ALLOWED};
 
-        const auto result_lyt = generate_random_sidb_layout<sidb_cell_clk_lyt_siqad>(sidb_cell_clk_lyt_siqad{}, params);
+        const auto result_lyt = generate_random_sidb_layout(sidb_cell_clk_lyt_siqad{}, params);
 
         CHECK(result_lyt.num_cells() == 100);
         result_lyt.foreach_cell(
@@ -493,7 +493,7 @@ TEST_CASE("Random siqad::coord_t layout generation", "[generate-random-sidb-layo
             10,
             generate_random_sidb_layout_params<sidb_cell_clk_lyt_siqad>::positive_charges::FORBIDDEN};
 
-        const auto result_lyt = generate_random_sidb_layout<sidb_cell_clk_lyt_siqad>(sidb_cell_clk_lyt_siqad{}, params);
+        const auto result_lyt = generate_random_sidb_layout(sidb_cell_clk_lyt_siqad{}, params);
 
         CHECK(result_lyt.num_cells() == 10);
         result_lyt.foreach_cell(
@@ -527,8 +527,7 @@ TEST_CASE("Random siqad::coord_t layout generation", "[generate-random-sidb-layo
             2,
             static_cast<uint64_t>(10E6),
             3};
-        const auto result_lyts =
-            generate_multiple_random_sidb_layouts<sidb_cell_clk_lyt_siqad>(sidb_cell_clk_lyt_siqad{}, params);
+        const auto result_lyts = generate_multiple_random_sidb_layouts(sidb_cell_clk_lyt_siqad{}, params);
         CHECK(result_lyts.size() == 3);
 
         for (const auto& lyt : result_lyts)
@@ -553,8 +552,7 @@ TEST_CASE("Random siqad::coord_t layout generation with defects", "[generate-ran
     {
         const generate_random_sidb_layout_params<sidb_defect_cell_clk_lyt_siqad> params{{{5, 5, 1}, {5, 5, 1}}, 1};
 
-        const auto result_lyt =
-            generate_random_sidb_layout<sidb_defect_cell_clk_lyt_siqad>(sidb_defect_cell_clk_lyt_siqad{}, params);
+        const auto result_lyt = generate_random_sidb_layout(sidb_defect_cell_clk_lyt_siqad{}, params);
 
         CHECK(result_lyt.num_cells() == 1);
         result_lyt.foreach_cell(
@@ -580,7 +578,7 @@ TEST_CASE("Random siqad::coord_t layout generation with defects", "[generate-ran
         auto defect_layout = sidb_defect_cell_clk_lyt_siqad{};
         defect_layout.assign_sidb_defect({2, 1, 1}, sidb_defect{sidb_defect_type::DB, -1, 5.6, 5});
 
-        const auto result_lyt = generate_random_sidb_layout<sidb_defect_cell_clk_lyt_siqad>(defect_layout, params);
+        const auto result_lyt = generate_random_sidb_layout(defect_layout, params);
 
         CHECK(result_lyt.num_cells() == 0);
         CHECK(result_lyt.num_defects() == 1);
@@ -601,7 +599,7 @@ TEST_CASE("Random siqad::coord_t layout generation with defects", "[generate-ran
         defect_layout.assign_sidb_defect({3, 1, 1}, sidb_defect{sidb_defect_type::DB, -1, 5.6, 5});
         defect_layout.assign_sidb_defect({4, 1, 1}, sidb_defect{sidb_defect_type::SINGLE_DIHYDRIDE, 1, 7.6, 7});
 
-        const auto result_lyt = generate_random_sidb_layout<sidb_defect_cell_clk_lyt_siqad>(defect_layout, params);
+        const auto result_lyt = generate_random_sidb_layout(defect_layout, params);
 
         CHECK(result_lyt.num_cells() == 1);
         CHECK(result_lyt.num_defects() == 2);
@@ -626,7 +624,7 @@ TEST_CASE("Random siqad::coord_t layout generation with defects", "[generate-ran
         defect_layout.assign_sidb_defect({7, 1, 0}, sidb_defect{sidb_defect_type::SINGLE_DIHYDRIDE, 1, 2.6, 7});
         defect_layout.assign_sidb_defect({2, 1, 0}, sidb_defect{sidb_defect_type::SINGLE_DIHYDRIDE, 1, 7.6, 4});
 
-        const auto result_lyt = generate_random_sidb_layout<sidb_defect_cell_clk_lyt_siqad>(defect_layout, params);
+        const auto result_lyt = generate_random_sidb_layout(defect_layout, params);
 
         CHECK(result_lyt.num_cells() == 10);
         CHECK(result_lyt.num_defects() == 5);

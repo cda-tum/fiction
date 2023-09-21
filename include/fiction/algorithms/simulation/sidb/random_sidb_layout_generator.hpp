@@ -115,7 +115,6 @@ Lyt generate_random_sidb_layout(const Lyt& lyt_skeleton, const generate_random_s
         const auto random_coord = random_coordinate(params.coordinate_pair.first, params.coordinate_pair.second);
 
         bool constraint_violation_positive_sidbs = false;
-        bool random_cell_is_identical_wih_defect = false;
 
         if (params.positive_sidbs == generate_random_sidb_layout_params<Lyt>::positive_charges::FORBIDDEN)
         {
@@ -130,25 +129,19 @@ Lyt generate_random_sidb_layout(const Lyt& lyt_skeleton, const generate_random_s
                     }
                 });
         }
+
+        bool random_cell_is_identical_wih_defect = false;
         // check if a defect does not yet occupy random coordinate.
         if constexpr (has_get_sidb_defect_v<Lyt>)
         {
-            lyt.foreach_sidb_defect(
-                [&random_cell_is_identical_wih_defect, &random_coord](const auto& cd)
-                {
-                    const auto& [cell, defect] = cd;
-                    if (cell == random_coord)
-                    {
-                        random_cell_is_identical_wih_defect = true;
-                    }
-                });
+            random_cell_is_identical_wih_defect = (lyt.get_sidb_defect(random_coord).type != sidb_defect_type::NONE);
         }
 
         // if the constraints that no positive SiDBs occur and the cell is not yet occupied by a defect are satisfied,
         // the SiDB is added to the layout
         if (!constraint_violation_positive_sidbs && !random_cell_is_identical_wih_defect)
         {
-            lyt.assign_cell_type(random_coord, Lyt::cell_type::NORMAL);
+            lyt.assign_cell_type(random_coord, technology<Lyt>::cell_type::NORMAL);
         }
         attempt_counter += 1;
     }
