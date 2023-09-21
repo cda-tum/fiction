@@ -138,7 +138,7 @@ macro(fiction_local_options)
     endif ()
 
     if (FICTION_ENABLE_COVERAGE)
-        include(cmake/Tests.cmake)
+        include(cmake/Coverage.cmake)
         fiction_enable_coverage(fiction_options)
     endif ()
 
