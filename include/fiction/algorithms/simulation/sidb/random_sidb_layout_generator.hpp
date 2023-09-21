@@ -131,7 +131,7 @@ Lyt generate_random_sidb_layout(const Lyt& lyt_skeleton, const generate_random_s
                 });
         }
 
-        // check if a defect does not already occupy random coordinate.
+        // check if a defect does not yet occupy random coordinate.
         if constexpr (has_get_sidb_defect_v<Lyt>)
         {
             lyt.foreach_sidb_defect(
@@ -145,7 +145,8 @@ Lyt generate_random_sidb_layout(const Lyt& lyt_skeleton, const generate_random_s
                 });
         }
 
-        // if the constraint that no positive SiDBs occur is satisfied, the SiDB is added to the layout
+        // if the constraints that no positive SiDBs occur and the cell is not yet occupied by a defect are satisfied,
+        // the SiDB is added to the layout
         if (!constraint_violation_positive_sidbs && !identical_wih_defect)
         {
             lyt.assign_cell_type(random_coord, Lyt::cell_type::NORMAL);
