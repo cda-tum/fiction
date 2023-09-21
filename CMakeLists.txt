@@ -44,8 +44,9 @@ string(
 
 target_compile_features(fiction_options INTERFACE cxx_std_${CMAKE_CXX_STANDARD})
 
-# Interface library to set project options
+# Alias for the options target
 add_library(fiction::fiction_options ALIAS fiction_options)
+# Alias for the warnings target
 add_library(fiction::fiction_warnings ALIAS fiction_warnings)
 
 # Include header files

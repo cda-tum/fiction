@@ -28,11 +28,11 @@ function(
                 /w14555 # expression has no effect; expected expression with side- effect
                 /w14619 # pragma warning: there is no warning number 'number'
                 /w14640 # Enable warning on thread un-safe static member initialization
-                /w14826 # Conversion from 'type1' to 'type2' is sign-extended. This may cause unexpected runtime behavior.
+                /w14826 # Conversion from 'type1' to 'type2' is sign-extended. This may cause unexpected runtime behavior
                 /w14905 # wide string literal cast to 'LPSTR'
                 /w14906 # string literal cast to 'LPWSTR'
                 /w14928 # illegal copy-initialization; more than one user-defined conversion has been implicitly applied
-                /permissive- # standards conformance mode for MSVC compiler.
+                /permissive- # standards conformance mode for MSVC compiler
         )
     endif ()
 
@@ -55,7 +55,6 @@ function(
                 -Wimplicit-fallthrough # warn on statements that fallthrough without an explicit annotation
                 -Wno-unknown-pragmas # do not warn if encountering unknown pragmas
                 -Wno-pragmas # do not warn if encountering unknown pragma options
-                -Wno-unknown-warning-option # do not warn if encountering unknown warning options
         )
     endif ()
 
@@ -106,7 +105,8 @@ function(
 
     target_compile_options(
             ${project_name}
-            INTERFACE # C++ warnings
+            INTERFACE
+            # C++ warnings
             $<$<COMPILE_LANGUAGE:CXX>:${PROJECT_WARNINGS_CXX}>
             # C warnings
             $<$<COMPILE_LANGUAGE:C>:${PROJECT_WARNINGS_C}>
