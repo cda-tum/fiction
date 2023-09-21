@@ -1,17 +1,22 @@
+include(${PROJECT_SOURCE_DIR}/cmake/CheckSubmodules.cmake)
+
 # Include alice
 set(ALICE_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(ALICE_TEST OFF CACHE BOOL "" FORCE)
+check_if_present(alice)
 add_subdirectory(alice)
 
 # Include mockturtle
 set(MOCKTURTLE_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(MOCKTURTLE_EXPERIMENTS OFF CACHE BOOL "" FORCE)
 set(MOCKTURTLE_TEST OFF CACHE BOOL "" FORCE)
+check_if_present(mockturtle)
 add_subdirectory(mockturtle)
 target_link_system_libraries(libfiction INTERFACE mockturtle)
 
 # Include Catch2
 if (FICTION_TEST)
+    check_if_present(Catch2)
     add_subdirectory(Catch2)
 endif ()
 
@@ -123,6 +128,7 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 endif ()
 
 # Include parallel_hashmap by Gregory Popovitch
+check_if_present(parallel-hashmap)
 target_include_directories(libfiction SYSTEM INTERFACE parallel-hashmap/parallel_hashmap)
 
 # Include undirected_graph by Fabian Löschner
@@ -138,5 +144,6 @@ target_link_system_libraries(libfiction INTERFACE graph-coloring)
 
 # Include tinyXML2
 set(tinyxml2_BUILD_TESTING OFF)
+check_if_present(tinyxml2)
 add_subdirectory(tinyxml2)
 target_link_system_libraries(libfiction INTERFACE tinyxml2::tinyxml2)
