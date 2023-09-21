@@ -21,7 +21,9 @@
 
 // data types cannot properly be converted to bit field types
 #pragma GCC diagnostic push
+#if defined(__GNUC__)
 #pragma GCC diagnostic ignored "-Wuseless-cast"
+#endif
 #pragma GCC diagnostic ignored "-Wconversion"
 
 namespace fiction
@@ -152,6 +154,8 @@ CellLyt apply_gate_library(const GateLyt& lyt)
 
 }  // namespace fiction
 
+#if defined(__GNUC__)
 #pragma GCC diagnostic pop
+#endif
 
 #endif  // FICTION_APPLY_GATE_LIBRARY_HPP

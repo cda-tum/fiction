@@ -17,7 +17,9 @@
 
 // data types cannot properly be converted to bit field types
 #pragma GCC diagnostic push
+#if defined(__GNUC__)
 #pragma GCC diagnostic ignored "-Wuseless-cast"
+#endif
 #pragma GCC diagnostic ignored "-Wconversion"
 
 namespace fiction
@@ -1074,4 +1076,5 @@ struct formatter<fiction::siqad::coord_t>
 }  // namespace fmt
 
 #pragma GCC diagnostic pop
+
 #endif  // FICTION_COORDINATES_HPP

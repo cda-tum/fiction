@@ -18,6 +18,10 @@
 #include <mockturtle/algorithms/simulation.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
+#if (PROGRESS_BARS)
+#include <mockturtle/utils/progress_bar.hpp>
+#endif
+
 #include <algorithm>
 #include <chrono>
 #include <exception>
@@ -35,17 +39,15 @@
 #pragma GCC diagnostic push  // GCC
 #pragma GCC diagnostic ignored "-Wshadow"
 #pragma GCC diagnostic ignored "-Wold-style-cast"
+#if defined(__GNUC__)
 #pragma GCC diagnostic ignored "-Wuseless-cast"
+#endif
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #pragma GCC diagnostic ignored "-Wrange-loop-analysis"
 #pragma warning(push, 0)  // MSVC
 #include <pybind11/embed.h>
 #pragma GCC diagnostic pop  // GCC
 #pragma warning(pop)        // MSVC
-
-#if (PROGRESS_BARS)
-#include <mockturtle/utils/progress_bar.hpp>
-#endif
 
 namespace fiction
 {

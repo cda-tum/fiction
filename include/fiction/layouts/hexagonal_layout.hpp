@@ -993,7 +993,9 @@ class hexagonal_layout
 
 // data types cannot properly be converted to bit field types
 #pragma GCC diagnostic push
+#if defined(__GNUC__)
 #pragma GCC diagnostic ignored "-Wuseless-cast"
+#endif
 #pragma GCC diagnostic ignored "-Wconversion"
 
 #pragma region coordinates
