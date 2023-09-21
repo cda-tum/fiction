@@ -1,12 +1,69 @@
-.directory
-.idea/
-cmake-build-*
-build/
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# LaTeX files
 *.aux
 *.log
 *.pdf
 *.synctex.gz
-/.vs
+
+# Doxygen files
+*.bak
+
+# Build directories
+cmake-build-*
+build/
+
+# IDE files
+*.directory
+*.idea
+*.vs
+
+# Experiment files
 *.json
-__pycache__
+*.csv
+
+# Coverage files
 lcov.info
+
+# Python
+__pycache__
+venv/
+*.egg-info
+*.env
+
+# Archive files
+*.zip
+*.tar.*
+*.7z
+*.rar
