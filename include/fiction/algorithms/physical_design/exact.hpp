@@ -162,22 +162,19 @@ struct exact_physical_design_stats
 namespace detail
 {
 
-template <typename Lyt, typename Ntk>
+template <typename Lyt>
 class exact_impl
 {
   public:
-    exact_impl(const Ntk& src, const exact_physical_design_params<Lyt>& p, exact_physical_design_stats& st) :
+    exact_impl(mockturtle::names_view<technology_network>& src, const exact_physical_design_params<Lyt>& p,
+               exact_physical_design_stats& st) :
             ps{p},
             pst{st}
     {
-        mockturtle::names_view<technology_network> intermediate_ntk{
-            fanout_substitution<mockturtle::names_view<technology_network>>(
-                src, {fanout_substitution_params::substitution_strategy::BREADTH, ps.scheme->max_out_degree, 1ul})};
-
         // create PO nodes in the network
-        intermediate_ntk.substitute_po_signals();
+        src.substitute_po_signals();
 
-        ntk = std::make_shared<topology_ntk_t>(mockturtle::fanout_view{intermediate_ntk});
+        ntk = std::make_shared<topology_ntk_t>(mockturtle::fanout_view{src});
 
         lower_bound = static_cast<decltype(lower_bound)>(ntk->num_gates() + ntk->num_pis());
 
@@ -3173,10 +3170,14 @@ std::optional<Lyt> exact(const Ntk& ntk, const exact_physical_design_params<Lyt>
         }
     }
 
-    exact_physical_design_stats  st{};
-    detail::exact_impl<Lyt, Ntk> p{ntk, ps, st};
+    mockturtle::names_view<technology_network> intermediate_ntk{
+        fanout_substitution<mockturtle::names_view<technology_network>>(
+            ntk, {fanout_substitution_params::substitution_strategy::BREADTH, ps.scheme->max_out_degree, 1ul})};
 
-    auto result = p.run();
+    exact_physical_design_stats st{};
+    detail::exact_impl<Lyt>     p{intermediate_ntk, ps, st};
+
+    const auto result = p.run();
 
     if (pst)
     {
