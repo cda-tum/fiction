@@ -39,6 +39,11 @@ else()
   message(STATUS "No colored compiler diagnostic set for '${CMAKE_CXX_COMPILER_ID}' compiler.")
 endif()
 
+# Use bigobj for MSVC due to many inline and template functions
+if (MSVC)
+  add_compile_options(/bigobj)
+endif ()
+
 
 # run vcvarsall when msvc is used
 include(${CMAKE_CURRENT_LIST_DIR}/VCEnvironment.cmake)
