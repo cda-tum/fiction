@@ -13,6 +13,7 @@
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/obstruction_layout.hpp>
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
+#include <fiction/layouts/synchronization_element_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/technology/cell_technologies.hpp>
