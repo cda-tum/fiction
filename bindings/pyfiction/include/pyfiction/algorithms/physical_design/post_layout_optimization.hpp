@@ -7,8 +7,8 @@
 
 #include "pyfiction/documentation.hpp"
 
-#include <fiction/types.hpp>
 #include <fiction/algorithms/physical_design/post_layout_optimization.hpp>
+#include <fiction/types.hpp>
 
 #include <pybind11/pybind11.h>
 
@@ -24,7 +24,7 @@ void post_layout_optimization(pybind11::module& m)
     using namespace pybind11::literals;
 
     pybind11::class_<fiction::post_layout_optimization_stats>(m, "post_layout_optimization_stats",
-                                                          DOC(fiction_post_layout_optimization_stats))
+                                                              DOC(fiction_post_layout_optimization_stats))
         .def(pybind11::init<>())
         .def("__repr__",
              [](const fiction::post_layout_optimization_stats& stats)
@@ -36,10 +36,8 @@ void post_layout_optimization(pybind11::module& m)
 
         ;
 
-    m.def(
-        "post_layout_optimization",
-        &fiction::post_layout_optimization<Lyt>,
-        "layout"_a, "statistics"_a = nullptr, DOC(fiction_post_layout_optimization));
+    m.def("post_layout_optimization", &fiction::post_layout_optimization<Lyt>, "layout"_a, "statistics"_a = nullptr,
+          DOC(fiction_post_layout_optimization));
 }
 
 }  // namespace detail
