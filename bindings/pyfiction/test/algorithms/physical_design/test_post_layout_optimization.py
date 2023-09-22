@@ -10,5 +10,6 @@ class TestPostLayoutOptimiztaion(unittest.TestCase):
     def test_post_layout_optimization(self):
         network = read_logic_network(dir_path + "/../../resources/mux21.v")
         layout = orthogonal(network)
-        post_layout_optimization(layout)
+
+        post_layout_optimization(layout, statistics=post_layout_optimization_stats())
         self.assertEqual(equivalence_checking(network, layout), eq_type.STRONG)

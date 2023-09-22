@@ -23,13 +23,23 @@ void post_layout_optimization(pybind11::module& m)
 {
     using namespace pybind11::literals;
 
+    pybind11::class_<fiction::post_layout_optimization_stats>(m, "post_layout_optimization_stats",
+                                                          DOC(fiction_post_layout_optimization_stats))
+        .def(pybind11::init<>())
+        .def("__repr__",
+             [](const fiction::post_layout_optimization_stats& stats)
+             {
+                 std::stringstream stream{};
+                 stats.report(stream);
+                 return stream.str();
+             })
+
+        ;
+
     m.def(
         "post_layout_optimization",
-        [](const Lyt& lyt)
-        {
-            fiction::post_layout_optimization<Lyt>(lyt);
-        },
-        "layout"_a, DOC(fiction_post_layout_optimization));
+        &fiction::post_layout_optimization<Lyt>,
+        "layout"_a, "statistics"_a = nullptr, DOC(fiction_post_layout_optimization));
 }
 
 }  // namespace detail
