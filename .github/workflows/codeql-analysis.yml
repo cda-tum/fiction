@@ -45,8 +45,8 @@ jobs:
       fail-fast: false
       matrix:
         language: [ 'cpp', 'python' ]
-        compiler: [ g++-11 ]
-        build_type: [ Release ]
+        compiler: [ clang++-11 ]
+        build_type: [ Debug ]
 
     steps:
       - name: Install libraries and the respective compiler
