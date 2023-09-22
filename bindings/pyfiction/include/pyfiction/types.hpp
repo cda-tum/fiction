@@ -13,7 +13,6 @@
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/obstruction_layout.hpp>
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
-#include <fiction/layouts/synchronization_element_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/technology/cell_technologies.hpp>
@@ -55,18 +54,16 @@ using py_hexagonal_layout = fiction::hexagonal_layout<py_offset_coordinate, fict
 /**
  * Cartesian clocked layout.
  */
-using py_cartesian_clocked_layout =
-    fiction::synchronization_element_layout<fiction::clocked_layout<fiction::tile_based_layout<py_cartesian_layout>>>;
+using py_cartesian_clocked_layout = fiction::clocked_layout<fiction::tile_based_layout<py_cartesian_layout>>;
 /**
  * Shifted Cartesian clocked layout.
  */
-using py_shifted_cartesian_clocked_layout = fiction::synchronization_element_layout<
-    fiction::clocked_layout<fiction::tile_based_layout<py_shifted_cartesian_layout>>>;
+using py_shifted_cartesian_clocked_layout =
+    fiction::clocked_layout<fiction::tile_based_layout<py_shifted_cartesian_layout>>;
 /**
  * Hexagonal clocked layout.
  */
-using py_hexagonal_clocked_layout =
-    fiction::synchronization_element_layout<fiction::clocked_layout<fiction::tile_based_layout<py_hexagonal_layout>>>;
+using py_hexagonal_clocked_layout = fiction::clocked_layout<fiction::tile_based_layout<py_hexagonal_layout>>;
 /**
  * Cartesian gate layout.
  */
