@@ -127,6 +127,11 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     message(STATUS "Parallel STL algorithms are enabled on MSVC by default")
 endif ()
 
+# Include JSON by Niels Lohmann
+set(JSON_BuildTests OFF CACHE INTERNAL "")
+add_subdirectory(json EXCLUDE_FROM_ALL)
+target_link_system_libraries(libfiction INTERFACE nlohmann_json::nlohmann_json)
+
 # Include parallel_hashmap by Gregory Popovitch
 check_if_present(parallel-hashmap)
 target_include_directories(libfiction SYSTEM INTERFACE parallel-hashmap/parallel_hashmap)
@@ -138,12 +143,12 @@ target_include_directories(libfiction SYSTEM INTERFACE undirected_graph/source)
 target_include_directories(libfiction SYSTEM INTERFACE combinations)
 
 # Include graph-coloring by Brian Crites
-add_subdirectory(graph-coloring/)
+add_subdirectory(graph-coloring EXCLUDE_FROM_ALL)
 target_include_directories(libfiction SYSTEM INTERFACE graph-coloring/Header)
 target_link_system_libraries(libfiction INTERFACE graph-coloring)
 
 # Include tinyXML2
 set(tinyxml2_BUILD_TESTING OFF)
 check_if_present(tinyxml2)
-add_subdirectory(tinyxml2)
+add_subdirectory(tinyxml2 EXCLUDE_FROM_ALL)
 target_link_system_libraries(libfiction INTERFACE tinyxml2::tinyxml2)
