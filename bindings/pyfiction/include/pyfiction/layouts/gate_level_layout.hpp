@@ -209,6 +209,7 @@ void gate_level_layout(pybind11::module& m, const std::string& topology)
                 return std::make_pair(bb.get_min(), bb.get_max());
             },
             DOC(fiction_bounding_box_2d_overridden))
+        .def("is_dead", &GateLyt::is_dead, "n"_a, DOC(fiction_gate_level_layout_is_dead))
         .def("__repr__",
              [](const GateLyt& lyt) -> std::string
              {

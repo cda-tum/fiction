@@ -19,7 +19,7 @@ namespace fiction
  *
  * @tparam Lyt Cell-level layout type.
  * @param charge_lyts Vector of charge_distribution_surface objects.
- * @return Value of the minimum energy found in the input vector.
+ * @return Value of the minimum energy found in the input vector (unit: eV).
  */
 template <typename Lyt>
 [[nodiscard]] double minimum_energy(const std::vector<charge_distribution_surface<Lyt>>& charge_lyts) noexcept

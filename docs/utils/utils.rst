@@ -59,7 +59,6 @@ Layout Utils
 .. doxygenfunction:: fiction::convert_to_fiction_coordinates
 .. doxygenfunction:: fiction::random_coordinate
 
-
 Placement Utils
 ---------------
 
@@ -188,3 +187,11 @@ Hashing
 This header defines implementations for ``std::hash`` for several data types.
 
 .. doxygenfunction:: fiction::hash_combine
+
+
+`phmap`
+-------
+
+**Header:** ``fiction/utils/phmap_utils.hpp``
+
+.. doxygentypedef:: fiction::locked_parallel_flat_hash_map

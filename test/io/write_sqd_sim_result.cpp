@@ -185,7 +185,7 @@ TEST_CASE("Write empty simulation result", "[sqd-sim-result]")
             "</sim_out>\n",
             FICTION_VERSION, FICTION_REPO, fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(std::time(nullptr))),
             sim_result.physical_parameters.lambda_tf, sim_result.physical_parameters.epsilon_r,
-            sim_result.physical_parameters.mu);
+            sim_result.physical_parameters.mu_minus);
 
         write_sqd_sim_result(sim_result, simulation_stream);
 
@@ -220,7 +220,7 @@ TEST_CASE("Write empty simulation result", "[sqd-sim-result]")
             "</sim_out>\n",
             FICTION_VERSION, FICTION_REPO, fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(std::time(nullptr))),
             sim_result.physical_parameters.lambda_tf, sim_result.physical_parameters.epsilon_r,
-            sim_result.physical_parameters.mu);
+            sim_result.physical_parameters.mu_minus);
 
         sim_result.additional_simulation_parameters.emplace_back("param1", "value1");
         sim_result.additional_simulation_parameters.emplace_back("param2", 2);
@@ -285,13 +285,13 @@ TEST_CASE("Write simulation result with ExGS simulation", "[sqd-sim-result]")
         "        <dbdot x=\"72.960000\" y=\"0.000000\"/>\n"
         "    </physloc>\n"
         "    <elec_dist>\n"
-        "        <dist energy=\"0.246027\" count=\"1\" physically_valid=\"1\" "
+        "        <dist energy=\"0.246049\" count=\"1\" physically_valid=\"1\" "
         "state_count=\"3\">-0-0-0-</dist>\n"
         "    </elec_dist>\n"
         "</sim_out>\n",
         FICTION_VERSION, FICTION_REPO, fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(std::time(nullptr))),
         sim_result.simulation_runtime.count(), sim_result.physical_parameters.lambda_tf,
-        sim_result.physical_parameters.epsilon_r, sim_result.physical_parameters.mu);
+        sim_result.physical_parameters.epsilon_r, sim_result.physical_parameters.mu_minus);
 
     write_sqd_sim_result(sim_result, simulation_stream);
 
@@ -339,13 +339,13 @@ TEST_CASE("Write simulation result with ExGS simulation and positive DBs", "[sqd
         "        <dbdot x=\"26.880000\" y=\"0.000000\"/>\n"
         "    </physloc>\n"
         "    <elec_dist>\n"
-        "        <dist energy=\"-0.953023\" count=\"1\" physically_valid=\"1\" state_count=\"3\">-+-</dist>\n"
+        "        <dist energy=\"-0.953108\" count=\"1\" physically_valid=\"1\" state_count=\"3\">-+-</dist>\n"
         "        <dist energy=\"0.000000\" count=\"1\" physically_valid=\"1\" state_count=\"3\">0-0</dist>\n"
         "    </elec_dist>\n"
         "</sim_out>\n",
         FICTION_VERSION, FICTION_REPO, fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(std::time(nullptr))),
         sim_result.simulation_runtime.count(), sim_result.physical_parameters.lambda_tf,
-        sim_result.physical_parameters.epsilon_r, sim_result.physical_parameters.mu);
+        sim_result.physical_parameters.epsilon_r, sim_result.physical_parameters.mu_minus);
 
     write_sqd_sim_result(sim_result, simulation_stream);
 

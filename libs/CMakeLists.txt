@@ -146,4 +146,3 @@ set(tinyxml2_BUILD_TESTING OFF)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tinyxml2/)
 set_property(TARGET tinyxml2 PROPERTY POSITION_INDEPENDENT_CODE ON)
 target_link_libraries(libfiction INTERFACE tinyxml2::tinyxml2)
-

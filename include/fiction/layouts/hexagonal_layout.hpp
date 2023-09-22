@@ -201,6 +201,15 @@ class hexagonal_layout
                       "odd_column_hex, even_column_hex");
     }
     /**
+     * Clones the layout returning a deep copy.
+     *
+     * @return Deep copy of the layout.
+     */
+    [[nodiscard]] hexagonal_layout clone() const noexcept
+    {
+        return hexagonal_layout(std::make_shared<hexagonal_layout_storage>(*strg));
+    }
+    /**
      * Creates and returns a coordinate in the layout from the given x-, y-, and z-values.
      *
      * @note This function is equivalent to calling `OffsetCoordinateType(x, y, z)`.

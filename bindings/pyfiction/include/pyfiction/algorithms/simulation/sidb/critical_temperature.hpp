@@ -58,11 +58,13 @@ inline void critical_temperature(pybind11::module& m)
     /**
      * Critical temperature mode.
      */
-    py::enum_<fiction::critical_temperature_mode>(m, "critical_temperature_mode",
-                                                  DOC(fiction_critical_temperature_mode))
-        .value("GATE_BASED_SIMULATION", fiction::critical_temperature_mode::GATE_BASED_SIMULATION,
+    py::enum_<fiction::critical_temperature_params::critical_temperature_mode>(m, "critical_temperature_mode",
+                                                                               DOC(fiction_critical_temperature_mode))
+        .value("GATE_BASED_SIMULATION",
+               fiction::critical_temperature_params::critical_temperature_mode::GATE_BASED_SIMULATION,
                DOC(fiction_critical_temperature_mode_GATE_BASED_SIMULATION))
-        .value("NON_GATE_BASED_SIMULATION", fiction::critical_temperature_mode::NON_GATE_BASED_SIMULATION,
+        .value("NON_GATE_BASED_SIMULATION",
+               fiction::critical_temperature_params::critical_temperature_mode::NON_GATE_BASED_SIMULATION,
                DOC(fiction_critical_temperature_mode_NON_GATE_BASED_SIMULATION))
 
         ;
@@ -70,9 +72,12 @@ inline void critical_temperature(pybind11::module& m)
     /**
      * Simulation engine.
      */
-    py::enum_<fiction::simulation_engine>(m, "simulation_engine", DOC(fiction_simulation_engine))
-        .value("EXACT", fiction::simulation_engine::EXACT, DOC(fiction_simulation_engine_EXACT))
-        .value("APPROXIMATE", fiction::simulation_engine::APPROXIMATE, DOC(fiction_simulation_engine_APPROXIMATE))
+    py::enum_<fiction::critical_temperature_params::simulation_engine>(m, "simulation_engine",
+                                                                       DOC(fiction_simulation_engine))
+        .value("EXACT", fiction::critical_temperature_params::simulation_engine::EXACT,
+               DOC(fiction_simulation_engine_EXACT))
+        .value("APPROXIMATE", fiction::critical_temperature_params::simulation_engine::APPROXIMATE,
+               DOC(fiction_simulation_engine_APPROXIMATE))
 
         ;
 

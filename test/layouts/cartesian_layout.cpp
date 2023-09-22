@@ -53,6 +53,23 @@ TEST_CASE("Coordinate creation", "[cartesian-layout]")
     CHECK(lyt.coord(2, 1) == offset::ucoord_t{2, 1});
 }
 
+TEST_CASE("Deep copy Cartesian layout", "[cartesian-layout]")
+{
+    const cartesian_layout original{{5, 5, 0}};
+
+    auto copy = original.clone();
+
+    copy.resize({10, 10, 1});
+
+    CHECK(original.x() == 5);
+    CHECK(original.y() == 5);
+    CHECK(original.z() == 0);
+
+    CHECK(copy.x() == 10);
+    CHECK(copy.y() == 10);
+    CHECK(copy.z() == 1);
+}
+
 TEST_CASE("Cartesian coordinate iteration", "[cartesian-layout]")
 {
     cartesian_layout<offset::ucoord_t>::aspect_ratio ar{9, 9, 1};

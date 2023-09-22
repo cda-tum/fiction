@@ -8,11 +8,13 @@ class TestEnumerateAllPaths(unittest.TestCase):
                     clocked_shifted_cartesian_layout((4, 4), "2DDWave"),
                     shifted_cartesian_gate_layout((4, 4), "2DDWave", "Layout"),
                     clocked_hexagonal_layout((4, 4), "2DDWave"), hexagonal_gate_layout((4, 4), "2DDWave", "Layout")]:
-            self.assertEqual(enumerate_all_clocking_paths(lyt, offset_coordinate(0, 0), offset_coordinate(0, 0)), [[(0, 0)]])
-            self.assertEqual(enumerate_all_clocking_paths(lyt, offset_coordinate(0, 0), offset_coordinate(1, 0)), [[(0, 0), (1, 0)]])
-            self.assertEqual(enumerate_all_clocking_paths(lyt, offset_coordinate(0, 0), offset_coordinate(0, 1)), [[(0, 0), (0, 1)]])
+            self.assertEqual(enumerate_all_paths(lyt, offset_coordinate(0, 0), offset_coordinate(0, 0)), [[(0, 0)]])
+            self.assertEqual(enumerate_all_paths(lyt, offset_coordinate(0, 0), offset_coordinate(1, 0)),
+                             [[(0, 0), (1, 0)]])
+            self.assertEqual(enumerate_all_paths(lyt, offset_coordinate(0, 0), offset_coordinate(0, 1)),
+                             [[(0, 0), (0, 1)]])
 
-            paths = enumerate_all_clocking_paths(lyt, offset_coordinate(0, 0), offset_coordinate(1, 1))
+            paths = enumerate_all_paths(lyt, offset_coordinate(0, 0), offset_coordinate(1, 1))
 
             self.assertIn([(0, 0), (0, 1), (1, 1)], paths)
             self.assertIn([(0, 0), (1, 0), (1, 1)], paths)

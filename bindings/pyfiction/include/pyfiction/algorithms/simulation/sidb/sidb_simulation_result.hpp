@@ -10,6 +10,7 @@
 
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 
+#include <pybind11/chrono.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
@@ -48,7 +49,7 @@ inline void sidb_simulation_result(pybind11::module& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::sidb_simulation_result<py_charge_distribution_surface>(m);
+    detail::sidb_simulation_result<py_cds_base>(m);
 }
 
 }  // namespace pyfiction

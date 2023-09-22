@@ -22,17 +22,17 @@ namespace detail
 {
 
 template <typename Lyt>
-void enumerate_all_clocking_paths(pybind11::module& m)
+void enumerate_all_paths(pybind11::module& m)
 {
     using namespace pybind11::literals;
 
     m.def(
-        "enumerate_all_clocking_paths",
+        "enumerate_all_paths",
         [](const Lyt& lyt, const fiction::coordinate<Lyt>& source, const fiction::coordinate<Lyt>& target,
-           const fiction::enumerate_all_clocking_paths_params& params)
+           const fiction::enumerate_all_paths_params& params)
         {
-            const auto all_paths = fiction::enumerate_all_clocking_paths<fiction::layout_coordinate_path<Lyt>, Lyt>(
-                lyt, {source, target}, params);
+            const auto all_paths =
+                fiction::enumerate_all_paths<fiction::layout_coordinate_path<Lyt>, Lyt>(lyt, {source, target}, params);
 
             std::vector<std::vector<fiction::coordinate<Lyt>>> paths{};
             paths.reserve(all_paths.size());
@@ -44,35 +44,35 @@ void enumerate_all_clocking_paths(pybind11::module& m)
 
             return paths;
         },
-        "layout"_a, "source"_a, "target"_a, "params"_a = fiction::enumerate_all_clocking_paths_params{},
-        DOC(fiction_enumerate_all_clocking_paths));
+        "layout"_a, "source"_a, "target"_a, "params"_a = fiction::enumerate_all_paths_params{});
+        //, DOC(fiction_enumerate_all_paths));
 }
 
 }  // namespace detail
 
-inline void enumerate_all_clocking_paths(pybind11::module& m)
+inline void enumerate_all_paths(pybind11::module& m)
 {
     namespace py = pybind11;
 
-    py::class_<fiction::enumerate_all_clocking_paths_params>(m, "enumerate_all_clocking_paths_params",
-                                                             DOC(fiction_enumerate_all_clocking_paths_params))
+    py::class_<fiction::enumerate_all_paths_params>(m, "enumerate_all_paths_params")
+                                                    //, DOC(fiction_enumerate_all_paths_params))
         .def(py::init<>())
-        .def_readwrite("crossings", &fiction::enumerate_all_clocking_paths_params::crossings,
-                       DOC(fiction_enumerate_all_clocking_paths_params_crossings))
+        .def_readwrite("crossings", &fiction::enumerate_all_paths_params::crossings)
+                       //, DOC(fiction_enumerate_all_paths_params_crossings))
 
         ;
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::enumerate_all_clocking_paths<py_cartesian_obstruction_layout>(m);
-    detail::enumerate_all_clocking_paths<py_cartesian_gate_layout>(m);
-    detail::enumerate_all_clocking_paths<py_cartesian_clocked_layout>(m);
-    detail::enumerate_all_clocking_paths<py_shifted_cartesian_obstruction_layout>(m);
-    detail::enumerate_all_clocking_paths<py_shifted_cartesian_gate_layout>(m);
-    detail::enumerate_all_clocking_paths<py_shifted_cartesian_clocked_layout>(m);
-    detail::enumerate_all_clocking_paths<py_hexagonal_obstruction_layout>(m);
-    detail::enumerate_all_clocking_paths<py_hexagonal_gate_layout>(m);
-    detail::enumerate_all_clocking_paths<py_hexagonal_clocked_layout>(m);
+    detail::enumerate_all_paths<py_cartesian_obstruction_layout>(m);
+    detail::enumerate_all_paths<py_cartesian_gate_layout>(m);
+    detail::enumerate_all_paths<py_cartesian_clocked_layout>(m);
+    detail::enumerate_all_paths<py_shifted_cartesian_obstruction_layout>(m);
+    detail::enumerate_all_paths<py_shifted_cartesian_gate_layout>(m);
+    detail::enumerate_all_paths<py_shifted_cartesian_clocked_layout>(m);
+    detail::enumerate_all_paths<py_hexagonal_obstruction_layout>(m);
+    detail::enumerate_all_paths<py_hexagonal_gate_layout>(m);
+    detail::enumerate_all_paths<py_hexagonal_clocked_layout>(m);
 }
 
 }  // namespace pyfiction

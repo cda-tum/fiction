@@ -21,6 +21,10 @@ on:
       - '.github/workflows/windows.yml'
   merge_group:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
 defaults:
   run:
     shell: pwsh  # use pwsh as directory handling does not seem to work with bash
@@ -51,7 +55,7 @@ jobs:
 
     steps:
       - name: Clone Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
 
@@ -83,6 +87,7 @@ jobs:
           -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
           -DFICTION_CLI=ON
           -DFICTION_TEST=ON
+          -DFICTION_BENCHMARK=ON
           -DFICTION_EXPERIMENTS=ON
           -DFICTION_Z3=ON
           -DMOCKTURTLE_EXAMPLES=OFF

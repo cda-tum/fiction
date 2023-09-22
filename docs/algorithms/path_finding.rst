@@ -9,15 +9,39 @@ Distance functions compute (an approximation for) the distance between two coord
 
         .. doxygenfunction:: fiction::manhattan_distance
         .. doxygenfunction:: fiction::euclidean_distance
+        .. doxygenfunction:: fiction::twoddwave_distance
 
         .. doxygenclass:: fiction::distance_functor
            :members:
         .. doxygenclass:: fiction::manhattan_distance_functor
         .. doxygenclass:: fiction::euclidean_distance_functor
+        .. doxygenclass:: fiction::twoddwave_distance_functor
 
     .. tab:: Python
         .. autofunction:: fiction.pyfiction.manhattan_distance
         .. autofunction:: fiction.pyfiction.euclidean_distance
+
+Distance Maps
+-------------
+
+Distance maps can store the distance from a coordinate to all other coordinates. They are particularly useful when
+repeatedly calling complex distance functions that are expensive to evaluate. The distance maps can serve as a
+lookup-table for these cases.
+
+**Header:** ``fiction/algorithms/path_finding/distance_map.hpp``
+
+.. doxygentypedef:: fiction::distance_map
+.. doxygentypedef:: fiction::sparse_distance_map
+
+.. doxygenfunction:: fiction::initialize_distance_map
+.. doxygenfunction:: fiction::initialize_sparse_distance_map
+
+.. doxygenclass:: fiction::distance_map_functor
+   :members:
+.. doxygenclass:: fiction::sparse_distance_map_functor
+   :members:
+.. doxygenclass:: fiction::smart_distance_cache_functor
+   :members:
 
 Cost Functions
 --------------
@@ -83,9 +107,9 @@ Enumerate All Paths
     .. tab:: C++
         **Header:** ``fiction/algorithms/path_finding/enumerate_all_paths.hpp``
 
-        .. doxygenstruct:: fiction::enumerate_all_clocking_paths_params
+        .. doxygenstruct:: fiction::enumerate_all_paths_params
            :members:
-        .. doxygenfunction:: fiction::enumerate_all_clocking_paths
+        .. doxygenfunction:: fiction::enumerate_all_paths
     .. tab:: Python
         .. autoclass:: fiction.pyfiction.enumerate_all_clocking_paths_params
             :members:

@@ -4,7 +4,6 @@
 
 #include <catch2/catch_template_test_macros.hpp>
 
-#include <fiction/algorithms/simulation/sidb/calculate_energy_and_state_type.hpp>
 #include <fiction/algorithms/simulation/sidb/energy_distribution.hpp>
 #include <fiction/algorithms/simulation/sidb/occupation_probability_of_excited_states.hpp>
 #include <fiction/utils/math_utils.hpp>
@@ -22,7 +21,7 @@ TEST_CASE("occupation probability of all erroneous charge distribution states", 
 
         const sidb_energy_distribution distribution{{0.1, 2}};
 
-        CHECK(round_to_n_decimal_places(occupation_probability_non_gate_based(distribution, 10), 6) == 0.0);
+        CHECK(round_to_n_decimal_places(occupation_probability_non_gate_based(distribution, 10.0), 6) == 0.0);
         CHECK(round_to_n_decimal_places(occupation_probability_non_gate_based(distribution, 0.01), 6) == 0.0);
     }
 

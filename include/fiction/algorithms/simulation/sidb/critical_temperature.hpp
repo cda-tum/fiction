@@ -9,6 +9,7 @@
 #include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
 #include "fiction/algorithms/simulation/sidb/occupation_probability_of_excited_states.hpp"
+#include "fiction/algorithms/simulation/sidb/quickexact.hpp"
 #include "fiction/algorithms/simulation/sidb/quicksim.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/cell_technologies.hpp"
@@ -37,46 +38,47 @@
 
 namespace fiction
 {
-/**
- * An enumeration of modes to use for the Critical Temperature Simulation.
- */
-enum class critical_temperature_mode
-{
-    /**
-     * The Critical Temperature is determined by considering the gate logic of the given layout. In this mode, it is
-     * distinguished between excited charge distributions that produce the correct output (with respect to a truth
-     * table) and those that do not.
-     */
-    GATE_BASED_SIMULATION,
-    /**
-     * The Critical Temperature is determined by ignoring the gate logic of the given layout. This mode does not
-     * distinguish between excited charge distributions that produce the correct output (with respect to a truth table)
-     * and those that do not.
-     */
-    NON_GATE_BASED_SIMULATION
-};
-
-/**
- * An enumeration of simulation modes (exact vs. approximate) to use for the Critical Temperature Simulation.
- */
-enum class simulation_engine
-{
-    /**
-     * This simulation engine computes Critical Temperature values with 100 % accuracy.
-     */
-    EXACT,
-    /**
-     * This simulation engine quickly calculates the Critical Temperature. However, there may be deviations from the
-     * exact Critical Temperature. This mode is recommended for larger layouts (> 40 SiDBs).
-     */
-    APPROXIMATE
-};
 
 /**
  * This struct stores the parameters for the `critical_temperature` algorithm.
  */
 struct critical_temperature_params
 {
+    /**
+     * An enumeration of modes to use for the Critical Temperature Simulation.
+     */
+    enum class critical_temperature_mode
+    {
+        /**
+         * The Critical Temperature is determined by considering the gate logic of the given layout. In this mode, it is
+         * distinguished between excited charge distributions that produce the correct output (with respect to a truth
+         * table) and those that do not.
+         */
+        GATE_BASED_SIMULATION,
+        /**
+         * The Critical Temperature is determined by ignoring the gate logic of the given layout. This mode does not
+         * distinguish between excited charge distributions that produce the correct output (with respect to a truth
+         * table) and those that do not.
+         */
+        NON_GATE_BASED_SIMULATION
+    };
+
+    /**
+     * An enumeration of simulation modes (exact vs. approximate) to use for the Critical Temperature Simulation.
+     */
+    enum class simulation_engine
+    {
+        /**
+         * This simulation engine computes Critical Temperature values with 100 % accuracy.
+         */
+        EXACT,
+        /**
+         * This simulation engine quickly calculates the Critical Temperature. However, there may be deviations from the
+         * exact Critical Temperature. This mode is recommended for larger layouts (> 40 SiDBs).
+         */
+        APPROXIMATE
+    };
+
     /**
      * Simulation mode to determine the Critical Temperature.
      */
@@ -95,9 +97,9 @@ struct critical_temperature_params
      */
     double confidence_level{0.99};
     /**
-     * Simulation stops at max_temperature (room temperature ~300 K).
+     * Simulation stops at max_temperature (~ 126 °C by default) (unit: K).
      */
-    uint64_t max_temperature{400};
+    double max_temperature{400};
     /**
      * Truth table of the given gate (if layout is simulated in `gate-based` mode).
      */
@@ -121,15 +123,15 @@ struct critical_temperature_stats
      */
     std::string algorithm_name{};
     /**
-     * Critical Temperature of the given layout.
+     * Critical Temperature of the given layout (unit: K).
      */
-    double critical_temperature{};
+    double critical_temperature{0};
     /**
      * Number of physically valid charge configurations.
      */
     uint64_t num_valid_lyt{};
     /**
-     * Energy difference between the ground state and the first (erroneous) excited state.
+     * Energy difference between the ground state and the first (erroneous) excited state (unit: eV).
      */
     double energy_between_ground_state_and_first_erroneous = std::numeric_limits<double>::infinity();
     /**
@@ -178,12 +180,14 @@ class critical_temperature_impl
         }
 
         sidb_simulation_result<Lyt> simulation_results{};
-        if (parameter.engine == simulation_engine::EXACT)
+        if (parameter.engine == critical_temperature_params::simulation_engine::EXACT)
         {
-            temperature_stats.algorithm_name = "ExGS";
-            // All physically valid charge configurations are determined for the given layout (exhaustive ground state
-            // simulation is used to provide 100 % accuracy for the Critical Temperature).
-            simulation_results = exhaustive_ground_state_simulation(layout, parameter.simulation_params.phys_params);
+            temperature_stats.algorithm_name = "QuickExact";
+            // All physically valid charge configurations are determined for the given layout (`QuickExact` simulation
+            // is used to provide 100 % accuracy for the Critical Temperature).
+            const quickexact_params<Lyt> params{parameter.simulation_params.phys_params,
+                                                quickexact_params<Lyt>::automatic_base_number_detection::OFF};
+            simulation_results = quickexact(layout, params);
         }
         else
         {
@@ -199,7 +203,7 @@ class critical_temperature_impl
         // If the layout consists of only one SiDB, the maximum temperature is returned as the Critical Temperature.
         if (layout.num_cells() == 1u)
         {
-            temperature_stats.critical_temperature = static_cast<double>(parameter.max_temperature);
+            temperature_stats.critical_temperature = parameter.max_temperature;
         }
 
         else if (layout.num_cells() > 1)
@@ -213,6 +217,17 @@ class critical_temperature_impl
             // The goal is to sort the cells from left to right and top to bottom.
             std::sort(all_cells.begin(), all_cells.end());
 
+            auto lowest_energy = round_to_n_decimal_places(minimum_energy(simulation_results.charge_distributions), 6);
+            charge_distribution_surface<Lyt> lyt_copy{};
+            for (const auto& lyt : simulation_results.charge_distributions)
+            {
+                if (std::fabs(round_to_n_decimal_places(lyt.get_system_energy(), 6) - lowest_energy) <
+                    std::numeric_limits<double>::epsilon())
+                {
+                    lyt_copy = charge_distribution_surface<Lyt>{lyt};
+                }
+            }
+
             // The energy distribution of the physically valid charge configurations for the given layout is determined.
             const auto distribution = energy_distribution(simulation_results.charge_distributions);
 
@@ -224,8 +239,8 @@ class critical_temperature_impl
             {
                 if (parameter.truth_table.num_bits() == 8)  // number of bits of truth table.
                 {
-                    output_bits_index = {-4, -3};           // double wire, cx, etc.
-                    // Truth table entries for given inputs are collected.
+                    output_bits_index = {-4, -3};
+                    // double-wire, cx, etc Truth table entries for given inputs are collected.
                     output_bits.push_back(kitty::get_bit(parameter.truth_table, parameter.input_bit * 2 + 1) != 0u);
                     output_bits.push_back(kitty::get_bit(parameter.truth_table, parameter.input_bit * 2) != 0u);
                 }
@@ -233,8 +248,8 @@ class critical_temperature_impl
 
             else if (parameter.truth_table.num_vars() == 1 && parameter.truth_table.num_bits() == 2)
             {
-                output_bits_index = {-2};  // Wire, inverter, etc. -2 due to placed perturber.
-                // Truth table entry for given input is collected.
+                output_bits_index = {-2};
+                // Wire, inverter, etc. -2 due to placed perturber. Truth table entry for given input is collected.
                 output_bits.push_back(kitty::get_bit(parameter.truth_table, parameter.input_bit) != 0u);
             }
 
@@ -243,14 +258,14 @@ class critical_temperature_impl
                 if (parameter.truth_table.num_bits() == 4 &&
                     parameter.truth_table != create_fan_out_tt())  // and, or, nand, etc.
                 {
-                    output_bits_index = {-2};                      // One output SiDB. -2 due to placed perturber.
-                    // Truth table entry for given inputs is collected.
+                    output_bits_index = {-2};
+                    // One output SiDB. -2 due to placed perturber. Truth table entry for given inputs is collected.
                     output_bits.push_back(kitty::get_bit(parameter.truth_table, parameter.input_bit) != 0u);
                 }
                 else
                 {
                     output_bits_index = {-4, -3};  // fo2.
-                    // Truth table entries for given input is collected.
+                    // Truth table entries for given input are collected.
                     output_bits.push_back(kitty::get_bit(parameter.truth_table, parameter.input_bit * 2 + 1) != 0u);
                     output_bits.push_back(kitty::get_bit(parameter.truth_table, parameter.input_bit * 2) != 0u);
                 }
@@ -295,16 +310,18 @@ class critical_temperature_impl
     bool non_gate_based_simulation()
     {
         sidb_simulation_result<Lyt> simulation_results{};
-        if (parameter.engine == simulation_engine::EXACT)
+        if (parameter.engine == critical_temperature_params::simulation_engine::EXACT)
         {
-            temperature_stats.algorithm_name = "exgs";
-            // All physically valid charge configurations are determined for the given layout (exhaustive ground state
-            // simulation is used to provide 100 % accuracy for the Critical Temperature).
-            simulation_results = exhaustive_ground_state_simulation(layout, parameter.simulation_params.phys_params);
+            temperature_stats.algorithm_name = "QuickExact";
+            // All physically valid charge configurations are determined for the given layout (`QuickExact` simulation
+            // is used to provide 100 % accuracy for the Critical Temperature).
+            const quickexact_params<Lyt> params{parameter.simulation_params.phys_params,
+                                                quickexact_params<Lyt>::automatic_base_number_detection::OFF};
+            simulation_results = quickexact(layout, params);
         }
         else
         {
-            temperature_stats.algorithm_name = "quicksim";
+            temperature_stats.algorithm_name = "QuickSim";
             // All physically valid charge configurations are determined for the given layout (exhaustive ground state
             // simulation is used to provide 100 % accuracy for the Critical Temperature).
             simulation_results = quicksim(layout, parameter.simulation_params);
@@ -326,12 +343,12 @@ class critical_temperature_impl
                 (first_excited_state_energy - ground_state_energy) * 1000;
         }
 
-        std::vector<double> temp_values{};
-        temp_values.reserve(parameter.max_temperature * 100);
+        std::vector<double> temp_values{};  // unit: K
+        temp_values.reserve(static_cast<uint64_t>(parameter.max_temperature * 100));
 
-        for (uint64_t i = 1; i <= parameter.max_temperature * 100; i++)
+        for (uint64_t i = 1; i <= static_cast<uint64_t>(parameter.max_temperature * 100); i++)
         {
-            temp_values.push_back(static_cast<double>(i) / 100.0);
+            temp_values.emplace_back(static_cast<double>(i) / 100.0);
         }
 
         // This function determines the Critical Temperature (CT) for a given confidence level.
@@ -346,10 +363,10 @@ class critical_temperature_impl
                 break;
             }
 
-            if (std::abs(temp - static_cast<double>(parameter.max_temperature)) < 0.001)
+            if (std::abs(temp - parameter.max_temperature) < 0.001)
             {
                 // Maximal temperature is stored as the Critical Temperature.
-                temperature_stats.critical_temperature = static_cast<double>(parameter.max_temperature);
+                temperature_stats.critical_temperature = parameter.max_temperature;
             }
         }
 
@@ -363,7 +380,7 @@ class critical_temperature_impl
      *
      * @param energy_and_state_type All energies of all physically valid charge distributions with the corresponding
      * state type (i.e. transparent, erroneous).
-     * @param min_energy Minimal energy of all physically valid charge distributions of a given layout.
+     * @param min_energy Minimal energy of all physically valid charge distributions of a given layout (unit: eV).
      * @return State type (i.e. transparent, erroneous) of the ground state is returned.
      */
     bool energy_between_ground_state_and_first_erroneous(const sidb_energy_and_state_type& energy_and_state_type,
@@ -399,11 +416,11 @@ class critical_temperature_impl
     {
         // Vector with temperature values from 0.01 to max_temperature * 100 K in 0.01 K steps is generated.
         std::vector<double> temp_values{};
-        temp_values.reserve(parameter.max_temperature * 100);
+        temp_values.reserve(static_cast<uint64_t>(parameter.max_temperature * 100));
 
-        for (uint64_t i = 1; i <= parameter.max_temperature * 100; i++)
+        for (uint64_t i = 1; i <= static_cast<uint64_t>(parameter.max_temperature * 100); i++)
         {
-            temp_values.push_back(static_cast<double>(i) / 100.0);
+            temp_values.emplace_back(static_cast<double>(i) / 100.0);
         }
         // This function determines the Critical Temperature for a given confidence level.
         for (const auto& temp : temp_values)
@@ -417,10 +434,10 @@ class critical_temperature_impl
                 break;
             }
 
-            if (std::abs(temp - static_cast<double>(parameter.max_temperature)) < 0.001)
+            if (std::abs(temp - parameter.max_temperature) < 0.001)
             {
                 // Maximal temperature is stored as Critical Temperature.
-                temperature_stats.critical_temperature = static_cast<double>(parameter.max_temperature);
+                temperature_stats.critical_temperature = parameter.max_temperature;
             }
         }
     }
@@ -428,7 +445,7 @@ class critical_temperature_impl
     /**
      * SiDB cell-level layout.
      */
-    const Lyt& layout{};
+    Lyt layout{};
     /**
      * Parameters for the `critical_temperature` algorithm.
      */
@@ -444,8 +461,9 @@ class critical_temperature_impl
 /**
  *
  * This algorithm performs temperature-aware SiDB simulation as proposed in \"Temperature Behavior of Silicon Dangling
- * Bond Logic\" by J. Drewniok, M. Walter, and R. Wille in IEEE-NANO 2023. It comes in two flavors: gate-based and
- * non-gate based, which can be specified using the `critical_temperature_mode` parameter.
+ * Bond Logic\" by J. Drewniok, M. Walter, and R. Wille in IEEE NANO 2023
+ * (https://ieeexplore.ieee.org/document/10231259). It comes in two flavors: gate-based and non-gate based, which can be
+ * specified using the `critical_temperature_mode` parameter.
  *
  * For gate-based simulation, the Critical Temperature is defined as follows: The temperature at which the excited
  * charge distributions are populated by more than \f$ 1 - \eta \f$, where \f$ \eta \in [0,1] \f$.
@@ -473,7 +491,7 @@ bool critical_temperature(const Lyt& lyt, const critical_temperature_params& par
 
     bool result = false;
 
-    if (params.temperature_mode == critical_temperature_mode::GATE_BASED_SIMULATION)
+    if (params.temperature_mode == critical_temperature_params::critical_temperature_mode::GATE_BASED_SIMULATION)
     {
         result = p.gate_based_simulation();
     }

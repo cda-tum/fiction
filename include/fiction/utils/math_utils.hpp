@@ -25,8 +25,9 @@ template <typename T>
 T round_to_n_decimal_places(const T number, const uint64_t n) noexcept
 {
     static_assert(std::is_arithmetic_v<T>, "T is not a number type");
-    const T factor = std::pow(10, n);
-    return std::round(number * factor) / factor;
+
+    const auto factor = std::pow(10.0, static_cast<double>(n));
+    return static_cast<T>(std::round(static_cast<double>(number) * factor) / factor);
 }
 
 /**
