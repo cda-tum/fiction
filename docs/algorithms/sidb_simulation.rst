@@ -86,7 +86,8 @@ Temperature Behavior
 
 .. doxygenstruct:: fiction::critical_temperature_params
    :members:
-.. doxygenfunction:: fiction::critical_temperature
+.. doxygenfunction:: fiction::critical_temperature_gate_based
+.. doxygenfunction:: fiction::critical_temperature_non_gate_based
 
 **Header:** ``fiction/algorithms/simulation/sidb/occupation_probability_excited_states.hpp``
 
@@ -118,7 +119,7 @@ Time-to-Solution (TTS) Statistics
    :members:
 .. doxygenstruct:: fiction::time_to_solution_stats
    :members:
-.. doxygenfunction:: fiction::sim_acc_tts
+.. doxygenfunction:: fiction::time_to_solution
 
 
 Random SiDB Layout Generator
@@ -133,6 +134,13 @@ Random SiDB Layout Generator
 
 Operational Domain Computation
 ##############################
+
+**Header:** ``fiction/algorithms/simulation/sidb/is_operational.hpp``
+
+.. doxygenenum:: fiction::operational_status
+.. doxygenstruct:: fiction::is_operational_params
+   :members:
+.. doxygenfunction:: fiction::is_operational
 
 **Header:** ``fiction/algorithms/simulation/sidb/operational_domain.hpp``
 

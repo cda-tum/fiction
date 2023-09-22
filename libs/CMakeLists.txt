@@ -1,10 +1,15 @@
 include(${PROJECT_SOURCE_DIR}/cmake/CheckSubmodules.cmake)
 
+# Include pybind11
+add_subdirectory(pybind11)
+
 # Include alice
-set(ALICE_EXAMPLES OFF CACHE BOOL "" FORCE)
-set(ALICE_TEST OFF CACHE BOOL "" FORCE)
-check_if_present(alice)
-add_subdirectory(alice)
+if (FICTION_CLI)
+    set(ALICE_EXAMPLES OFF CACHE BOOL "" FORCE)
+    set(ALICE_TEST OFF CACHE BOOL "" FORCE)
+    check_if_present(alice)
+    add_subdirectory(alice)
+endif ()
 
 # Include mockturtle
 set(MOCKTURTLE_EXAMPLES OFF CACHE BOOL "" FORCE)

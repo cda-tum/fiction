@@ -19,7 +19,7 @@
 using namespace fiction;
 
 TEMPLATE_TEST_CASE(
-    "time to solution test", "[sim_acc_tss]",
+    "time to solution test", "[time-to-solution]",
     (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
     (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, odd_row_hex>>>),
     (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, even_row_hex>>>),
@@ -35,7 +35,7 @@ TEMPLATE_TEST_CASE(
         const quicksim_params            quicksim_params{params};
         time_to_solution_stats           tts_stat_quickexact{};
         const time_to_solution_params    tts_params_quickexact{exhaustive_sidb_simulation_engine::QUICKEXACT};
-        sim_acc_tts<TestType>(lyt, quicksim_params, tts_params_quickexact, &tts_stat_quickexact);
+        time_to_solution<TestType>(lyt, quicksim_params, tts_params_quickexact, &tts_stat_quickexact);
 
         CHECK(tts_stat_quickexact.algorithm == "QuickExact");
         CHECK_THAT(tts_stat_quickexact.acc, Catch::Matchers::WithinAbs(0.0, 0.00001));
@@ -45,7 +45,7 @@ TEMPLATE_TEST_CASE(
 
         time_to_solution_stats        tts_stat_exgs{};
         const time_to_solution_params tts_params_exgs{exhaustive_sidb_simulation_engine::EXGS};
-        sim_acc_tts<TestType>(lyt, quicksim_params, tts_params_exgs, &tts_stat_exgs);
+        time_to_solution<TestType>(lyt, quicksim_params, tts_params_exgs, &tts_stat_exgs);
 
         CHECK(tts_stat_exgs.algorithm == "QuickExact");
         CHECK_THAT(tts_stat_exgs.acc, Catch::Matchers::WithinAbs(0.0, 0.00001));
@@ -69,7 +69,7 @@ TEMPLATE_TEST_CASE(
 
         const time_to_solution_params tts_params_exgs{exhaustive_sidb_simulation_engine::EXGS};
         time_to_solution_stats        tts_stat_exgs{};
-        sim_acc_tts<TestType>(lyt, quicksim_params, tts_params_exgs, &tts_stat_exgs);
+        time_to_solution<TestType>(lyt, quicksim_params, tts_params_exgs, &tts_stat_exgs);
 
         CHECK(tts_stat_exgs.acc == 100);
         CHECK(tts_stat_exgs.time_to_solution > 0.0);
@@ -77,7 +77,7 @@ TEMPLATE_TEST_CASE(
 
         time_to_solution_stats        tts_stat_quickexact{};
         const time_to_solution_params tts_params{exhaustive_sidb_simulation_engine::QUICKEXACT};
-        sim_acc_tts<TestType>(lyt, quicksim_params, tts_params, &tts_stat_quickexact);
+        time_to_solution<TestType>(lyt, quicksim_params, tts_params, &tts_stat_quickexact);
 
         REQUIRE(tts_stat_quickexact.acc == 100);
         CHECK(tts_stat_quickexact.time_to_solution > 0.0);

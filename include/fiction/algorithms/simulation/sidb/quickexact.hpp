@@ -45,7 +45,6 @@ struct quickexact_params
          */
         OFF
     };
-
     /**
      * All parameters for physical SiDB simulations.
      */
@@ -556,7 +555,7 @@ class quickexact_impl
  * @tparam Lyt SiDB cell-level layout type.
  * @param lyt Layout to simulate.
  * @param params Parameter required for the simulation.
- * @return Simulation result.
+ * @return Simulation Results.
  */
 template <typename Lyt>
 [[nodiscard]] sidb_simulation_result<Lyt> quickexact(const Lyt& lyt, const quickexact_params<Lyt>& params = {}) noexcept
