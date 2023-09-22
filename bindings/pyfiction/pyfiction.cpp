@@ -12,6 +12,7 @@
 #include "pyfiction/algorithms/physical_design/color_routing.hpp"
 #include "pyfiction/algorithms/physical_design/exact.hpp"
 #include "pyfiction/algorithms/physical_design/orthogonal.hpp"
+#include "pyfiction/algorithms/physical_design/post_layout_optimization.hpp"
 #include "pyfiction/algorithms/properties/critical_path_length_and_throughput.hpp"
 #include "pyfiction/algorithms/simulation/logic_simulation.hpp"
 #include "pyfiction/algorithms/simulation/sidb/calculate_energy_and_state_type.hpp"
