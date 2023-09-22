@@ -30,4 +30,12 @@ foreach (filename ${FILENAMES})
     get_filename_component(basename ${filename} NAME_WE)
     add_executable(${basename} ${filename})
     target_link_libraries(${basename} PUBLIC fiction_experiments)
+
+    if (CMAKE_BUILD_TYPE STREQUAL "Release")
+        add_custom_command(
+                TARGET ${basename}
+                POST_BUILD
+                COMMAND ${CMAKE_STRIP} $<TARGET_FILE:${basename}>
+        )
+    endif ()
 endforeach ()

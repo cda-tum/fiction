@@ -9,4 +9,12 @@ foreach (FILE IN LISTS FILENAMES)
 
     add_test(NAME ${NAME} COMMAND ${BENCH_NAME}) # group tests by file
     #    catch_discover_tests(${BENCH_NAME})
+
+    if (CMAKE_BUILD_TYPE STREQUAL "Release")
+        add_custom_command(
+                TARGET ${BENCH_NAME}
+                POST_BUILD
+                COMMAND ${CMAKE_STRIP} $<TARGET_FILE:${BENCH_NAME}>
+        )
+    endif ()
 endforeach ()
