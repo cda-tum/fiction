@@ -7,7 +7,7 @@ on:
 jobs:
   get_docstrings:
     name: Auto-generate docstrings for pyfiction from C++ code
-    runs-on: ubuntu-22.04.2
+    runs-on: ubuntu-22.04
     steps:
       - name: Clone Repository
         uses: actions/checkout@v3
