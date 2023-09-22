@@ -1,5 +1,5 @@
 //
-// Created by marcel on 15.12.22.
+// Created by simon on 22.09.23.
 //
 
 #ifndef PYFICTION_HEXAGONALIZATION_HPP
@@ -7,8 +7,8 @@
 
 #include "pyfiction/documentation.hpp"
 
-#include <fiction/types.hpp>
 #include <fiction/algorithms/physical_design/hexagonalization.hpp>
+#include <fiction/types.hpp>
 
 #include <pybind11/pybind11.h>
 
@@ -25,11 +25,8 @@ void hexagonalization(pybind11::module& m)
 
     m.def(
         "hexagonalization",
-        [](const Lyt& lyt) -> fiction::hex_even_row_gate_clk_lyt
-        {
-            return fiction::hexagonalization<Lyt>(lyt);
-        },
-        "layout"_a, DOC(fiction_hexagonalization));
+        [](const Lyt& lyt) -> py_hexagonal_gate_layout { return fiction::hexagonalization<Lyt>(lyt); }, "layout"_a,
+        DOC(fiction_hexagonalization));
 }
 
 }  // namespace detail
