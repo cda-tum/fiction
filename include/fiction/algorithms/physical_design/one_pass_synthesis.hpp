@@ -39,7 +39,7 @@
 #pragma GCC diagnostic push  // GCC
 #pragma GCC diagnostic ignored "-Wshadow"
 #pragma GCC diagnostic ignored "-Wold-style-cast"
-#if defined(__GNUC__)
+#ifndef __clang__
 #pragma GCC diagnostic ignored "-Wuseless-cast"
 #endif
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"

@@ -11,17 +11,16 @@
 #include "fiction/traits.hpp"
 #include "fiction/utils/layout_utils.hpp"
 
+#if (PROGRESS_BARS)
+#include <mockturtle/utils/progress_bar.hpp>
+#endif
 #include <mockturtle/traits.hpp>
 
 #include <type_traits>
 
-#if (PROGRESS_BARS)
-#include <mockturtle/utils/progress_bar.hpp>
-#endif
-
 // data types cannot properly be converted to bit field types
 #pragma GCC diagnostic push
-#if defined(__GNUC__)
+#ifndef __clang__
 #pragma GCC diagnostic ignored "-Wuseless-cast"
 #endif
 #pragma GCC diagnostic ignored "-Wconversion"
@@ -154,8 +153,6 @@ CellLyt apply_gate_library(const GateLyt& lyt)
 
 }  // namespace fiction
 
-#if defined(__GNUC__)
 #pragma GCC diagnostic pop
-#endif
 
 #endif  // FICTION_APPLY_GATE_LIBRARY_HPP
