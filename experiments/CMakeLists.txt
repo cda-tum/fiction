@@ -31,6 +31,7 @@ foreach (filename ${FILENAMES})
     add_executable(${basename} ${filename})
     target_link_libraries(${basename} PUBLIC fiction_experiments)
 
+    # Strip the executable if we are in Release mode
     if (CMAKE_BUILD_TYPE STREQUAL "Release")
         add_custom_command(
                 TARGET ${basename}

@@ -7,9 +7,9 @@ include_directories(${PROJECT_BINARY_DIR}/include/)
 add_executable(fiction ${SOURCES})
 
 # Link against the project settings, libfiction and alice
-target_link_libraries(fiction PRIVATE fiction_options fiction_warnings libfiction alice)
+target_link_libraries(fiction PRIVATE libfiction alice)
 
-# Strip the executable if we are in release mode
+# Strip the executable if we are in Release mode
 if (CMAKE_BUILD_TYPE STREQUAL "Release")
     add_custom_command(
             TARGET fiction
