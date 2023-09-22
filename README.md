@@ -209,8 +209,11 @@ When a layout is compiled to the cell level via the application of a technology-
 simulated using a physical model. Currently, the following simulation algorithms are implemented in *fiction*:
 
 - Silicon Dangling Bonds (SiDBs)
-    - [Exhaustive Groundstate Simulation (ExGS)](https://fiction.readthedocs.io/en/latest/algorithms/sidb_simulation.html#_CPPv4I0EN7fiction34exhaustive_ground_state_simulationEvRK3LytRK26sidb_simulation_parametersP10exgs_statsI3LytE)
-    - [*QuickSim* Groundstate Simulation](https://arxiv.org/abs/2303.03422)
+    - [*QuickExact*](https://arxiv.org/abs/2308.04487)
+    - [*QuickSim* Groundstate Simulation](https://ieeexplore.ieee.org/document/10231266)
+    - [Critical Temperature](https://ieeexplore.ieee.org/document/10231259)
+    - [Exhaustive Groundstate Simulation *(ExGS)*](https://open.library.ubc.ca/soa/cIRcle/collections/ubctheses/24/items/1.0392909)
+
 
 ## Clocking Schemes
 

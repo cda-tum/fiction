@@ -32,11 +32,12 @@ namespace detail
  * @return coordinate on the hexagonal grid.
  */
 template <typename CartLyt, typename HexLyt>
-[[nodiscard]] fiction::coordinate<HexLyt> to_hex(fiction::coordinate<CartLyt> cartesian_coordinate,
-                                                 int64_t                      cartesian_layout_height) noexcept
+[[nodiscard]] coordinate<HexLyt> to_hex(coordinate<CartLyt> cartesian_coordinate,
+                                        int64_t             cartesian_layout_height) noexcept
 {
     static_assert(is_cartesian_layout_v<CartLyt>, "Old coordinate is not Cartesian");
     static_assert(is_hexagonal_layout_v<HexLyt>, "New coordinate is not hexagonal");
+
     const auto y = cartesian_coordinate.x + cartesian_coordinate.y;
     const auto x = static_cast<int64_t>(
         cartesian_coordinate.x +
@@ -44,7 +45,7 @@ template <typename CartLyt, typename HexLyt>
             std::ceil(std::floor(static_cast<double>(cartesian_layout_height) / 2) - static_cast<double>(y) / 2)));
     const auto z = cartesian_coordinate.z;
 
-    return fiction::coordinate<HexLyt>{x, y, z};
+    return coordinate<HexLyt>{x, y, z};
 }
 }  // namespace detail
 
@@ -54,18 +55,21 @@ template <typename CartLyt, typename HexLyt>
  * How a 45° Turn Prevents the Reinvention of the Wheel\" by S. Hofmann, M. Walter, and R. Wille in IEEE NANO 2023
  * (https://ieeexplore.ieee.org/document/10231278).
  *
- * @param Lyt Gate-level layout that is 2DDWave-clocked.
- *
+ * @tparam HexLyt Even-row hexagonal gate-level layout return type.
+ * @tparam CartLyt Input Cartesian gate-level layout type.
+ * @param lyt 2DDWave-clocked Cartesian gate-level layout to hexagonalize.
  * @return Hexagonal representation of the Cartesian layout.
  */
-template <typename Lyt>
-[[nodiscard]] hex_even_row_gate_clk_lyt hexagonalization(const Lyt& lyt) noexcept
+template <typename HexLyt, typename CartLyt>
+[[nodiscard]] HexLyt hexagonalization(const CartLyt& lyt) noexcept
 {
-    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate level layout");
-    static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
-    assert(lyt.is_clocking_scheme(clock_name::TWODDWAVE));
+    static_assert(is_gate_level_layout_v<HexLyt>, "HexLyt is not a gate-level layout");
+    static_assert(is_hexagonal_layout_v<HexLyt>, "HexLyt is not a hexagonal layout");
+    static_assert(has_even_row_hex_arrangement_v<HexLyt>, "HexLyt does not have an even row hexagon arrangement");
 
-    using hex_lyt = hex_even_row_gate_clk_lyt;
+    static_assert(is_gate_level_layout_v<CartLyt>, "Lyt is not a gate-level layout");
+    static_assert(is_cartesian_layout_v<CartLyt>, "Lyt is not a Cartesian layout");
+    assert(lyt.is_clocking_scheme(clock_name::TWODDWAVE));
 
     // get width, height and depth of Cartesian layout
     const auto layout_width  = static_cast<int64_t>(lyt.x()) + 1;
@@ -74,12 +78,13 @@ template <typename Lyt>
 
     // calculate max width, height and depth of hexagonal layout
     const auto hex_height =
-        detail::to_hex<Lyt, hex_lyt>(coordinate<Lyt>(layout_width - 1, layout_height - 1, 0), layout_height).y;
-    const auto hex_width = detail::to_hex<Lyt, hex_lyt>(coordinate<Lyt>(layout_width - 1, 0, 0), layout_height).x;
+        detail::to_hex<CartLyt, HexLyt>(coordinate<CartLyt>(layout_width - 1, layout_height - 1, 0), layout_height).y;
+    const auto hex_width =
+        detail::to_hex<CartLyt, HexLyt>(coordinate<CartLyt>(layout_width - 1, 0, 0), layout_height).x;
     const auto hex_depth = layout_depth;
 
     // instantiate hexagonal layout
-    hex_lyt hex_layout{{hex_width, hex_height, hex_depth}, fiction::row_clocking<hex_lyt>()};
+    HexLyt hex_layout{{hex_width, hex_height, hex_depth}, row_clocking<HexLyt>()};
 
     // iterate through cartesian layout diagonally
     for (int64_t k = 0; k < layout_width + layout_height - 1; ++k)
@@ -92,9 +97,9 @@ template <typename Lyt>
                 for (int64_t z = 0; z <= hex_depth; ++z)
                 {
                     // old coordinate
-                    const coordinate<Lyt> old_coord{x, y, z};
+                    const coordinate<CartLyt> old_coord{x, y, z};
                     // new coordinate
-                    const coordinate<Lyt> hex{detail::to_hex<Lyt, hex_lyt>(old_coord, layout_height)};
+                    const coordinate<CartLyt> hex{detail::to_hex<CartLyt, HexLyt>(old_coord, layout_height)};
 
                     if (lyt.is_empty_tile(old_coord))
                     {
@@ -109,9 +114,10 @@ template <typename Lyt>
 
                     if (const auto signals = lyt.incoming_data_flow(old_coord); signals.size() == 1)
                     {
-                        const auto signal     = signals[0];
+                        const auto signal = signals[0];
+
                         const auto hex_signal = hex_layout.make_signal(
-                            hex_layout.get_node(detail::to_hex<Lyt, hex_lyt>(signal, layout_height)));
+                            hex_layout.get_node(detail::to_hex<CartLyt, HexLyt>(signal, layout_height)));
 
                         if (lyt.is_po(node))
                         {
@@ -129,12 +135,13 @@ template <typename Lyt>
 
                     else if (signals.size() == 2)
                     {
-                        const auto signal_a     = signals[0];
-                        const auto signal_b     = signals[1];
+                        const auto signal_a = signals[0];
+                        const auto signal_b = signals[1];
+
                         const auto hex_signal_a = hex_layout.make_signal(
-                            hex_layout.get_node(detail::to_hex<Lyt, hex_lyt>(signal_a, layout_height)));
+                            hex_layout.get_node(detail::to_hex<CartLyt, HexLyt>(signal_a, layout_height)));
                         const auto hex_signal_b = hex_layout.make_signal(
-                            hex_layout.get_node(detail::to_hex<Lyt, hex_lyt>(signal_b, layout_height)));
+                            hex_layout.get_node(detail::to_hex<CartLyt, HexLyt>(signal_b, layout_height)));
 
                         if (lyt.is_and(node))
                         {
@@ -171,7 +178,9 @@ template <typename Lyt>
             }
         }
     }
-    restore_names<Lyt, hex_lyt>(lyt, hex_layout);
+
+    restore_names<CartLyt, HexLyt>(lyt, hex_layout);
+
     return hex_layout;
 }
 

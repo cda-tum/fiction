@@ -63,7 +63,7 @@ class write_location_and_ground_state_impl
             }
             os << '\n';
 
-            auto       sidbs              = ground_state_layouts.front().get_all_sidb_cells();
+            auto       sidbs              = ground_state_layouts.front().get_sidb_order();
             const auto physical_parameter = ground_state_layouts.front().get_phys_params();
 
             std::sort(sidbs.begin(), sidbs.end());

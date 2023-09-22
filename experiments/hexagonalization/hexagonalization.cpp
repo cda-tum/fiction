@@ -36,6 +36,7 @@ int main()  // NOLINT
 {
     using gate_lyt = fiction::gate_level_layout<
         fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>;
+    using hex_lyt  = fiction::hex_even_row_gate_clk_lyt;
     using cell_lyt = fiction::sidb_cell_clk_lyt;
 
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t,
@@ -128,9 +129,9 @@ int main()  // NOLINT
         fiction::critical_path_length_and_throughput_stats cp_tp_stats{};
         fiction::critical_path_length_and_throughput(gate_level_layout, &cp_tp_stats);
 
-        const std::chrono::steady_clock::time_point begin      = std::chrono::steady_clock::now();
-        const auto                                  hex_layout = fiction::hexagonalization<gate_lyt>(gate_level_layout);
-        const auto                                  end        = std::chrono::steady_clock::now();
+        const std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+        const auto hex_layout = fiction::hexagonalization<hex_lyt, gate_lyt>(gate_level_layout);
+        const auto end        = std::chrono::steady_clock::now();
 
         // check equivalence
         fiction::equivalence_checking_stats eq_stats{};
