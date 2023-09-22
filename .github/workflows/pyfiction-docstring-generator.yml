@@ -22,7 +22,7 @@ jobs:
 
       - name: Install pybind11_mkdoc and clang
         working-directory: ${{ github.workspace }}
-        run: pip install pybind11_mkdoc clang
+        run: pip install git+https://github.com/pybind/pybind11_mkdoc.git@master clang==14
 
       - name: Create docstrings file
         working-directory: ${{ github.workspace }}
