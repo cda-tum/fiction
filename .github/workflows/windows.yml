@@ -86,6 +86,7 @@ jobs:
           cmake ${{github.workspace}} -G "${{matrix.env}}" -A x64 -T ${{matrix.toolset}}
           -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
           -DFICTION_ENABLE_UNITY_BUILD=ON
+          -DFICTION_ENABLE_PCH=ON
           -DFICTION_CLI=ON
           -DFICTION_TEST=ON
           -DFICTION_BENCHMARK=ON

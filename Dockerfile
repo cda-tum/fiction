@@ -18,6 +18,7 @@ COPY . fiction/
 RUN cmake -S fiction -B fiction/build \
     -DCMAKE_BUILD_TYPE=Release \
     -DFICTION_ENABLE_UNITY_BUILD=ON \
+    -DFICTION_ENABLE_PCH=ON \
     -DFICTION_CLI=ON \
     -DFICTION_TEST=OFF \
     -DFICTION_EXPERIMENTS=OFF \

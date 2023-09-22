@@ -93,6 +93,7 @@ jobs:
           -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
           -DCMAKE_BUILD_TYPE=$BUILD_TYPE
           -DFICTION_ENABLE_UNITY_BUILD=ON
+          -DFICTION_ENABLE_PCH=ON
           -DFICTION_CLI=OFF
           -DFICTION_TEST=ON
           -DFICTION_Z3=ON
