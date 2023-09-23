@@ -11,11 +11,15 @@ target_link_libraries(fiction PRIVATE libfiction alice)
 
 # Strip the executable if we are in Release mode
 if (CMAKE_BUILD_TYPE STREQUAL "Release")
-    add_custom_command(
-            TARGET fiction
-            POST_BUILD
-            COMMAND ${CMAKE_STRIP} $<TARGET_FILE:fiction>
-    )
+    if (CMAKE_STRIP)
+        add_custom_command(
+                TARGET fiction
+                POST_BUILD
+                COMMAND ${CMAKE_STRIP} $<TARGET_FILE:fiction>
+        )
+    else ()
+        message(WARNING "Strip command is not available. The executables will not be stripped.")
+    endif ()
 endif ()
 
 
