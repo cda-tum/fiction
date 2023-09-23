@@ -11,6 +11,7 @@
 #include <mockturtle/networks/detail/foreach.hpp>
 
 #include <algorithm>
+#include <cassert>
 #include <cstdint>
 #include <functional>
 #include <memory>
