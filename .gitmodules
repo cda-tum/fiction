@@ -15,7 +15,7 @@
 	url = https://github.com/leethomason/tinyxml2.git
 [submodule "libs/pybind11"]
 	path = libs/pybind11
-	url = https://github.com:pybind/pybind11.git
+	url = https://github.com/pybind/pybind11.git
 [submodule "libs/json"]
 	path = libs/json
-	url = https://github.com:nlohmann/json.git
+	url = https://github.com/nlohmann/json.git
