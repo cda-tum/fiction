@@ -79,7 +79,9 @@ inline constexpr std::array<sidb_defect_type, 11> INDEX_TO_DEFECT{
 
 // data types cannot properly be converted to bit field types
 #pragma GCC diagnostic push
+#ifndef __clang__
 #pragma GCC diagnostic ignored "-Wuseless-cast"
+#endif
 #pragma GCC diagnostic ignored "-Wconversion"
 
 template <typename Lyt>

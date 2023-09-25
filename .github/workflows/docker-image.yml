@@ -11,6 +11,7 @@ on:
       - 'libs/**'
       - '.github/workflows/docker-image.yml'
       - 'Dockerfile'
+      - '.dockerignore'
   pull_request:
     branches: [ 'main' ]
     paths:
@@ -21,6 +22,7 @@ on:
       - 'libs/**'
       - '.github/workflows/docker-image.yml'
       - 'Dockerfile'
+      - '.dockerignore'
   merge_group:
 
 concurrency:
@@ -34,5 +36,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
       - name: Build the Docker image
         run: docker build --build-arg NUMBER_OF_JOBS=2 . --file Dockerfile --tag fiction:$(date +%s)
