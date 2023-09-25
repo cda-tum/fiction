@@ -1,18 +1,28 @@
+include(${PROJECT_SOURCE_DIR}/cmake/CheckSubmodules.cmake)
+
+# Include pybind11
+add_subdirectory(pybind11)
+
 # Include alice
-set(ALICE_EXAMPLES OFF CACHE BOOL "" FORCE)
-set(ALICE_TEST OFF CACHE BOOL "" FORCE)
-add_subdirectory(alice/)
+if (FICTION_CLI)
+    set(ALICE_EXAMPLES OFF CACHE BOOL "" FORCE)
+    set(ALICE_TEST OFF CACHE BOOL "" FORCE)
+    check_if_present(alice)
+    add_subdirectory(alice)
+endif ()
 
 # Include mockturtle
 set(MOCKTURTLE_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(MOCKTURTLE_EXPERIMENTS OFF CACHE BOOL "" FORCE)
 set(MOCKTURTLE_TEST OFF CACHE BOOL "" FORCE)
-add_subdirectory(mockturtle/)
-target_link_libraries(libfiction INTERFACE mockturtle)
+check_if_present(mockturtle)
+add_subdirectory(mockturtle)
+target_link_system_libraries(libfiction INTERFACE mockturtle)
 
 # Include Catch2
 if (FICTION_TEST)
-    add_subdirectory(Catch2/)
+    check_if_present(Catch2)
+    add_subdirectory(Catch2)
 endif ()
 
 # Mugen is not available under Windows
@@ -44,7 +54,7 @@ if (NOT WIN32)
         endif ()
 
         # Embedding the pybind11 interpreter
-        target_link_libraries(libfiction INTERFACE pybind11::embed)
+        target_link_system_libraries(libfiction INTERFACE pybind11::embed)
 
         configure_file(${CMAKE_CURRENT_SOURCE_DIR}/mugen/mugen_info.hpp.in utils/mugen_info.hpp)
         target_include_directories(libfiction INTERFACE ${PROJECT_BINARY_DIR}/libs/)
@@ -76,7 +86,7 @@ if (FICTION_Z3)
         # Include Z3 library
         target_include_directories(libfiction INTERFACE SYSTEM ${Z3_CXX_INCLUDE_DIRS})
         # Link Z3
-        target_link_libraries(libfiction INTERFACE ${Z3_LIBRARIES})
+        target_link_system_libraries(libfiction INTERFACE ${Z3_LIBRARIES})
 
         # use libc++ on macOS
         if (APPLE)
@@ -113,7 +123,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID MATCHES ".*Cla
         # Include TBB
         target_include_directories(libfiction INTERFACE ${TBB_INCLUDE_DIRS})
         # Link TBB
-        target_link_libraries(libfiction INTERFACE TBB::tbb)
+        target_link_system_libraries(libfiction INTERFACE TBB::tbb)
     else ()
         message(STATUS "Parallel STL algorithms are disabled. If you want to use them, please install TBB and set the TBB_ROOT_DIR, TBB_INCLUDE_DIR, and TBB_LIBRARY variables accordingly.")
     endif ()
@@ -122,24 +132,28 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     message(STATUS "Parallel STL algorithms are enabled on MSVC by default")
 endif ()
 
+# Include JSON by Niels Lohmann
+set(JSON_BuildTests OFF CACHE INTERNAL "")
+add_subdirectory(json EXCLUDE_FROM_ALL)
+target_link_system_libraries(libfiction INTERFACE nlohmann_json::nlohmann_json)
+
 # Include parallel_hashmap by Gregory Popovitch
-target_include_directories(libfiction SYSTEM INTERFACE parallel-hashmap/parallel_hashmap/)
+check_if_present(parallel-hashmap)
+target_include_directories(libfiction SYSTEM INTERFACE parallel-hashmap/parallel_hashmap)
 
 # Include undirected_graph by Fabian Löschner
-target_include_directories(libfiction SYSTEM INTERFACE undirected_graph/source/)
+target_include_directories(libfiction SYSTEM INTERFACE undirected_graph/source)
 
 # Include combinations by Howard Hinnant
-target_include_directories(libfiction SYSTEM INTERFACE combinations/)
+target_include_directories(libfiction SYSTEM INTERFACE combinations)
 
 # Include graph-coloring by Brian Crites
-add_subdirectory(graph-coloring/)
+add_subdirectory(graph-coloring EXCLUDE_FROM_ALL)
 target_include_directories(libfiction SYSTEM INTERFACE graph-coloring/Header)
-target_link_libraries(libfiction INTERFACE graph-coloring)
+target_link_system_libraries(libfiction INTERFACE graph-coloring)
 
 # Include tinyXML2
 set(tinyxml2_BUILD_TESTING OFF)
-add_subdirectory(tinyxml2/)
-target_link_libraries(libfiction INTERFACE tinyxml2::tinyxml2)
-
-# Include units
-target_include_directories(libfiction SYSTEM INTERFACE units/include/)
+check_if_present(tinyxml2)
+add_subdirectory(tinyxml2 EXCLUDE_FROM_ALL)
+target_link_system_libraries(libfiction INTERFACE tinyxml2::tinyxml2)

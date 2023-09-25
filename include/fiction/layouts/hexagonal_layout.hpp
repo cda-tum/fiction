@@ -12,6 +12,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <cstdint>
 #include <functional>
 #include <memory>
@@ -993,7 +994,9 @@ class hexagonal_layout
 
 // data types cannot properly be converted to bit field types
 #pragma GCC diagnostic push
+#ifndef __clang__
 #pragma GCC diagnostic ignored "-Wuseless-cast"
+#endif
 #pragma GCC diagnostic ignored "-Wconversion"
 
 #pragma region coordinates
