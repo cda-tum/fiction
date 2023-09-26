@@ -43,6 +43,11 @@ inline constexpr const char* LAYOUT_METADATA = "    <layout>\n"
                                                "        <name>{}</name>\n"
                                                "        <topology>{}</topology>\n"
                                                "        <clocking>{}</clocking>\n"
+                                               "        <size>\n"
+                                               "          <x>{}</x>\n"
+                                               "          <y>{}</y>\n"
+                                               "          <z>{}</z>\n"
+                                               "        </size>\n"
                                                "    </layout>\n";
 
 }  // namespace fcn

@@ -6,10 +6,12 @@
 #define FICTION_READ_GATE_LEVEL_LAYOUT_HPP
 
 #include "fiction/traits.hpp"
+#include "fiction/utils/name_utils.hpp"
+
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
-#include "fiction/utils/name_utils.hpp"
+#include <fiction/layouts/tile_based_layout.hpp>
 
 #include <tinyxml2.h>
 
@@ -27,12 +29,12 @@ namespace fiction
 {
 
 /**
- * Exception thrown when an error occurs during parsing of an FCN file.
+ * Exception thrown when an error occurs during parsing of an gate_level file.
  */
-class fcn_parsing_error : public std::runtime_error
+class gate_level_parsing_error : public std::runtime_error
 {
   public:
-    explicit fcn_parsing_error(const std::string_view& msg) noexcept : std::runtime_error(msg.data()) {}
+    explicit gate_level_parsing_error(const std::string_view& msg) noexcept : std::runtime_error(msg.data()) {}
 };
 
 namespace detail
@@ -61,19 +63,19 @@ class read_gate_level_layout_impl
 
         if (xml_document.ErrorID() != 0)
         {
-            throw fcn_parsing_error("Error parsing FCN file: " + std::string(xml_document.ErrorName()));
+            throw gate_level_parsing_error("Error parsing gate_level file: " + std::string(xml_document.ErrorName()));
         }
 
         auto* const fcn_root = xml_document.FirstChildElement("fcn");
         if (fcn_root == nullptr)
         {
-            throw fcn_parsing_error("Error parsing FCN file: no root element 'fcn'");
+            throw gate_level_parsing_error("Error parsing gate_level file: no root element 'fcn'");
         }
 
         auto* const layout = fcn_root->FirstChildElement("layout");
         if (layout == nullptr)
         {
-            throw fcn_parsing_error("Error parsing FCN file: no element 'layout'");
+            throw gate_level_parsing_error("Error parsing gate_level file: no element 'layout'");
         }
 
         auto* const name = layout->FirstChildElement("name");
@@ -88,6 +90,82 @@ class read_gate_level_layout_impl
             lyt.replace_clocking_scheme(*get_clocking_scheme<Lyt>(clocking->GetText()));
         }
 
+        auto* const size = layout->FirstChildElement("size");
+        if (size != nullptr)
+        {
+            int       x = std::stoi(size->FirstChildElement("x")->GetText());
+            int       y = std::stoi(size->FirstChildElement("y")->GetText());
+            int       z = std::stoi(size->FirstChildElement("z")->GetText());
+            tile<Lyt> max_pos{x, y, z};
+            lyt.resize(max_pos);
+        }
+
+        std::vector<Gate> gates{};
+        auto* const       gates_xml = fcn_root->FirstChildElement("gates");
+        if (gates_xml != nullptr)
+        {
+            for (const auto* gate_xml = gates_xml->FirstChildElement("gate"); gate_xml != nullptr;
+                 gate_xml             = gate_xml->NextSiblingElement("gate"))
+            {
+                Gate gate;
+                gate.id   = std::stoi(gate_xml->FirstChildElement("id")->GetText());
+                gate.type = gate_xml->FirstChildElement("type")->GetText();
+
+                auto* const pi_name = gate_xml->FirstChildElement("name");
+                if (pi_name != nullptr)
+                {
+                    gate.name = pi_name->GetText();
+                }
+
+                auto* const loc = gate_xml->FirstChildElement("loc");
+                gate.loc.x      = std::stoull(loc->FirstChildElement("x")->GetText());
+                gate.loc.y      = std::stoull(loc->FirstChildElement("y")->GetText());
+                gate.loc.z      = std::stoull(loc->FirstChildElement("z")->GetText());
+
+                auto* const incoming = gate_xml->FirstChildElement("incoming");
+                if (incoming != nullptr)
+                {
+                    for (const auto* signal = incoming->FirstChildElement("signal"); signal != nullptr;
+                         signal             = incoming->NextSiblingElement("signal"))
+                    {
+                        tile<Lyt> incoming_signal{};
+                        incoming_signal.x = std::stoull(signal->FirstChildElement("x")->GetText());
+                        incoming_signal.y = std::stoull(signal->FirstChildElement("y")->GetText());
+                        incoming_signal.z = std::stoull(signal->FirstChildElement("z")->GetText());
+                        gate.incoming.push_back(incoming_signal);
+                    }
+                }
+
+                gates.push_back(gate);
+            }
+        }
+        std::sort(gates.begin(), gates.end(), Gate::compareById);
+
+        for (const Gate& gate : gates)
+        {
+            auto location = gate.loc;
+
+            if (gate.type == "PI")
+            {
+                lyt.create_pi(gate.name, {location.x, location.y, location.z});
+            }
+
+            else if (gate.type == "AND")
+            {
+                auto incoming_tile_1 = gate.incoming.front();
+                auto incoming_tile_2 = gate.incoming.back();
+                lyt.create_and(lyt.make_signal(lyt.get_node(incoming_tile_1)),
+                               lyt.make_signal(lyt.get_node(incoming_tile_2)), {location.x, location.y, location.z});
+            }
+
+            else if (gate.type == "PO")
+            {
+                auto incoming_tile = gate.incoming.front();
+                lyt.create_po(lyt.make_signal(lyt.get_node(incoming_tile)), gate.name,
+                              {location.x, location.y, location.z});
+            }
+        }
+
         return lyt;
     }
 
@@ -97,18 +175,32 @@ class read_gate_level_layout_impl
      */
     Lyt lyt;
     /**
-     * The input stream from which the FCN file is read.
+     * The input stream from which the gate_level file is read.
      */
     std::istream& is;
+
+    struct Gate
+    {
+        int                    id;
+        std::string            type;
+        std::string            name;
+        tile<Lyt>              loc;
+        std::vector<tile<Lyt>> incoming;
+
+        static bool compareById(const Gate& gate1, const Gate& gate2)
+        {
+            return gate1.id < gate2.id;
+        }
+    };
 };
 
 }  // namespace detail
 
 /**
- * Reads a gate-level layout from an fcn file provided as an input stream. The format is used by fiction
+ * Reads a gate-level layout from a gate_level file provided as an input stream. The format is used by fiction
  * (https://github.com/cda-tum/fiction).
  *
- * May throw an `fcn_parsing_exception` if the fcn file is malformed.
+ * May throw an `gate_level_parsing_exception` if the gate_level file is malformed.
  *
  * @tparam Lyt The layout type to be created from an input.
  * @param is The input stream to read from.
@@ -124,10 +216,10 @@ Lyt read_gate_level_layout(std::istream& is, const std::string_view& name = "")
     return lyt;
 }
 /**
- * Reads a gate-level layout from an fcn file provided as an input stream. The format is used by fiction
+ * Reads a gate-level layout from an gate_level file provided as an input stream. The format is used by fiction
  * (https://github.com/cda-tum/fiction).
  *
- * May throw an `fcn_parsing_exception` if the fcn file is malformed.
+ * May throw an `gate_level_parsing_exception` if the gate_level file is malformed.
  *
  * This is an in-place version of read_gate_level_layout that utilizes the given layout as a target to write to.
  *
@@ -143,10 +235,10 @@ void read_gate_level_layout(Lyt& lyt, std::istream& is)
     lyt = p.run();
 }
 /**
- * Reads a gate-level layout from an fcn file provided as an input stream. The format is used by fiction
+ * Reads a gate-level layout from a gate_level file provided as an input stream. The format is used by fiction
  * (https://github.com/cda-tum/fiction).
  *
- * May throw an `fcn_parsing_exception` if the fcn file is malformed.
+ * May throw an `gate_level_parsing_exception` if the gate_level file is malformed.
  *
  * @tparam Lyt The layout type to be created from an input.
  * @param filename The file name to open and read from.
@@ -168,10 +260,10 @@ Lyt read_gate_level_layout(const std::string_view& filename, const std::string_v
     return lyt;
 }
 /**
- * Reads a gate-level layout from an fcn file provided as an input stream. The format is used by fiction
+ * Reads a gate-level layout from an gate_level file provided as an input stream. The format is used by fiction
  * (https://github.com/cda-tum/fiction).
 
- * May throw an `fcn_parsing_exception` if the fcn file is malformed.
+ * May throw an `gate_level_parsing_exception` if the gate_level file is malformed.
  *
  * This is an in-place version of `read_gate_level_layout` that utilizes the given layout as a target to write to.
  *
