@@ -57,7 +57,6 @@ void check_parsing_equiv(const Ntk& ntk)
     std::stringstream layout_stream{};
     write_gate_level_layout(layout, layout_stream);
 
-    std::cout << layout_stream.str();
     const auto read_layout = read_gate_level_layout<Lyt>(layout_stream, get_name(layout));
 
     compare_written_and_read_layout(layout, read_layout);

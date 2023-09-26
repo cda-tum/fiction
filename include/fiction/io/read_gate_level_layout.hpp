@@ -145,7 +145,7 @@ class read_gate_level_layout_impl
             for (const Gate& gate : gates)
             {
                 tile<Lyt> location{gate.loc.x, gate.loc.y, gate.loc.z};
-                for (tile<Lyt> i : gate.incoming) std::cout << i << std::endl;
+
                 if (gate.type == "PI")
                 {
                     lyt.create_pi(gate.name, location);
