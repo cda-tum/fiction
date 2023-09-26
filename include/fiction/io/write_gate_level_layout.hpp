@@ -84,10 +84,6 @@ class write_gate_level_layout_impl
         header << fmt::format(fcn::FICTION_METADATA, FICTION_VERSION, FICTION_REPO, time_str);
 
         std::string layout_name = get_name(lyt);
-        if (layout_name == "")
-        {
-            layout_name = "X";
-        }
 
         const auto clocking_scheme = lyt.get_clocking_scheme().name;
 

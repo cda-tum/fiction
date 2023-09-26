@@ -79,7 +79,7 @@ class read_gate_level_layout_impl
         }
 
         auto* const name = layout->FirstChildElement("name");
-        if (name != nullptr)
+        if (name != nullptr and name->GetText())
         {
             std::string layout_name = name->GetText();
             set_name(lyt, layout_name);
