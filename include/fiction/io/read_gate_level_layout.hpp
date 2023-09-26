@@ -122,11 +122,11 @@ class read_gate_level_layout_impl
                 gate.loc.y      = std::stoull(loc->FirstChildElement("y")->GetText());
                 gate.loc.z      = std::stoull(loc->FirstChildElement("z")->GetText());
 
-                auto* const incoming = gate_xml->FirstChildElement("incoming");
-                if (incoming != nullptr)
+                auto* const incoming_signals = gate_xml->FirstChildElement("incoming");
+                if (incoming_signals != nullptr)
                 {
-                    for (const auto* signal = incoming->FirstChildElement("signal"); signal != nullptr;
-                         signal             = incoming->NextSiblingElement("signal"))
+                    for (const auto* signal = incoming_signals->FirstChildElement("signal"); signal != nullptr;
+                         signal             = signal->NextSiblingElement("signal"))
                     {
                         tile<Lyt> incoming_signal{};
                         incoming_signal.x = std::stoull(signal->FirstChildElement("x")->GetText());
@@ -143,26 +143,71 @@ class read_gate_level_layout_impl
 
         for (const Gate& gate : gates)
         {
-            auto location = gate.loc;
-
+            tile<Lyt> location{gate.loc.x, gate.loc.y, gate.loc.z};
+            for (tile<Lyt> i : gate.incoming) std::cout << i << std::endl;
             if (gate.type == "PI")
             {
-                lyt.create_pi(gate.name, {location.x, location.y, location.z});
+                lyt.create_pi(gate.name, location);
             }
 
-            else if (gate.type == "AND")
+            else if (gate.incoming.size() == 1)
+            {
+                auto incoming_tile   = gate.incoming.front();
+                auto incoming_signal = lyt.make_signal(lyt.get_node(incoming_tile));
+
+                if (gate.type == "PO")
+                {
+                    lyt.create_po(lyt.make_signal(lyt.get_node(incoming_tile)), gate.name, location);
+                }
+
+                else if (gate.type == "BUF")
+                {
+                    lyt.create_buf(incoming_signal, location);
+                }
+
+                else if (gate.type == "INV")
+                {
+                    lyt.create_not(incoming_signal, location);
+                }
+            }
+
+            else if (gate.incoming.size() == 2)
             {
                 auto incoming_tile_1 = gate.incoming.front();
                 auto incoming_tile_2 = gate.incoming.back();
-                lyt.create_and(lyt.make_signal(lyt.get_node(incoming_tile_1)),
-                               lyt.make_signal(lyt.get_node(incoming_tile_2)), {location.x, location.y, location.z});
-            }
 
-            else if (gate.type == "PO")
-            {
-                auto incoming_tile = gate.incoming.front();
-                lyt.create_po(lyt.make_signal(lyt.get_node(incoming_tile)), gate.name,
-                              {location.x, location.y, location.z});
+                auto incoming_signal_1 = lyt.make_signal(lyt.get_node(incoming_tile_1));
+                auto incoming_signal_2 = lyt.make_signal(lyt.get_node(incoming_tile_2));
+
+                if (gate.type == "AND")
+                {
+                    lyt.create_and(incoming_signal_1, incoming_signal_2, location);
+                }
+
+                else if (gate.type == "NAND")
+                {
+                    lyt.create_nand(incoming_signal_1, incoming_signal_2, location);
+                }
+
+                else if (gate.type == "OR")
+                {
+                    lyt.create_or(incoming_signal_1, incoming_signal_2, location);
+                }
+
+                else if (gate.type == "NOR")
+                {
+                    lyt.create_nor(incoming_signal_1, incoming_signal_2, location);
+                }
+
+                else if (gate.type == "XOR")
+                {
+                    lyt.create_xor(incoming_signal_1, incoming_signal_2, location);
+                }
+
+                else if (gate.type == "XNOR")
+                {
+                    lyt.create_xnor(incoming_signal_1, incoming_signal_2, location);
+                }
             }
         }
 
