@@ -6,10 +6,13 @@
 #define FICTION_WRITE_GATE_LEVEL_LAYOUT_HPP
 
 #include "fiction/traits.hpp"
+#include <fiction/layouts/clocked_layout.hpp>
+#include <fiction/layouts/clocking_scheme.hpp>
 #include "utils/version_info.hpp"
 
 #include <fmt/chrono.h>
 #include <fmt/format.h>
+#include <mockturtle/views/topo_view.hpp>
 
 #include <chrono>
 #include <ctime>
@@ -49,6 +52,18 @@ inline constexpr const char* LAYOUT_METADATA = "    <layout>\n"
                                                "          <z>{}</z>\n"
                                                "        </size>\n"
                                                "    </layout>\n";
+inline constexpr const char* OPEN_GATES         = "<gates>\n";
+inline constexpr const char* CLOSE_GATES       = "</gates>\n";
+inline constexpr const char* PI_GATE = "    <gate>\n"
+                                       "      <id>{}</id>\n"
+                                       "      <type>PI</type>\n"
+                                       "      <name>{}</name>\n"
+                                       "      <loc>\n"
+                                       "        <x>{}</x>\n"
+                                       "        <y>{}</y>\n"
+                                       "        <z>{}</z>\n"
+                                       "      </loc>\n"
+                                       "    </gate>\n";
 
 }  // namespace fcn
 
@@ -68,14 +83,37 @@ class write_gate_level_layout_impl
 
         header << fmt::format(fcn::FICTION_METADATA, FICTION_VERSION, FICTION_REPO, time_str);
 
-        const auto clocking_scheme = lyt.get_clocking_scheme().name();
+        std::string layout_name = get_name(lyt);
+        if (layout_name == "")
+        {
+            layout_name = "X";
+        }
 
-        layout_metadata << fmt::format(fcn::LAYOUT_METADATA, get_name(lyt), "Cartesian", clocking_scheme, lyt.x(), lyt.y(), lyt.z());
+        const auto clocking_scheme = lyt.get_clocking_scheme().name;
+
+        layout_metadata << fmt::format(fcn::LAYOUT_METADATA, layout_name, "Cartesian", clocking_scheme, lyt.x(), lyt.y(), lyt.z());
 
         os << header.str();
 
         os << layout_metadata.str();
 
+        os << fcn::OPEN_GATES;
+
+        mockturtle::topo_view layout_topo{lyt};
+
+        layout_topo.foreach_pi([&](const auto& gate){
+                                     const tile<Lyt> coord = lyt.get_tile(gate);
+                                     std::stringstream pi_tile{};
+                                     pi_tile << fmt::format(fcn::PI_GATE, "0", lyt.get_name(gate), coord.x, coord.y, coord.z);
+                                     os << pi_tile.str();
+                                 });
+
+        layout_topo.foreach_gate([&](const auto& gate){
+                                     const tile<Lyt> old_coord = lyt.get_tile(gate);
+                                     std::cout << old_coord;
+        });
+
+        os << fcn::CLOSE_GATES;
         os << fcn::CLOSE_FCN;
     }
 

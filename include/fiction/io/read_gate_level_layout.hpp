@@ -81,7 +81,8 @@ class read_gate_level_layout_impl
         auto* const name = layout->FirstChildElement("name");
         if (name != nullptr)
         {
-            set_name(lyt, name->GetText());
+            std::string layout_name = name->GetText();
+            set_name(lyt, layout_name);
         }
 
         auto* const clocking = layout->FirstChildElement("clocking");
@@ -138,75 +139,76 @@ class read_gate_level_layout_impl
 
                 gates.push_back(gate);
             }
-        }
-        std::sort(gates.begin(), gates.end(), Gate::compareById);
 
-        for (const Gate& gate : gates)
-        {
-            tile<Lyt> location{gate.loc.x, gate.loc.y, gate.loc.z};
-            for (tile<Lyt> i : gate.incoming) std::cout << i << std::endl;
-            if (gate.type == "PI")
+            std::sort(gates.begin(), gates.end(), Gate::compareById);
+
+            for (const Gate& gate : gates)
             {
-                lyt.create_pi(gate.name, location);
-            }
-
-            else if (gate.incoming.size() == 1)
-            {
-                auto incoming_tile   = gate.incoming.front();
-                auto incoming_signal = lyt.make_signal(lyt.get_node(incoming_tile));
-
-                if (gate.type == "PO")
+                tile<Lyt> location{gate.loc.x, gate.loc.y, gate.loc.z};
+                for (tile<Lyt> i : gate.incoming) std::cout << i << std::endl;
+                if (gate.type == "PI")
                 {
-                    lyt.create_po(lyt.make_signal(lyt.get_node(incoming_tile)), gate.name, location);
+                    lyt.create_pi(gate.name, location);
                 }
 
-                else if (gate.type == "BUF")
+                else if (gate.incoming.size() == 1)
                 {
-                    lyt.create_buf(incoming_signal, location);
+                    auto incoming_tile   = gate.incoming.front();
+                    auto incoming_signal = lyt.make_signal(lyt.get_node(incoming_tile));
+
+                    if (gate.type == "PO")
+                    {
+                        lyt.create_po(lyt.make_signal(lyt.get_node(incoming_tile)), gate.name, location);
+                    }
+
+                    else if (gate.type == "BUF")
+                    {
+                        lyt.create_buf(incoming_signal, location);
+                    }
+
+                    else if (gate.type == "INV")
+                    {
+                        lyt.create_not(incoming_signal, location);
+                    }
                 }
 
-                else if (gate.type == "INV")
+                else if (gate.incoming.size() == 2)
                 {
-                    lyt.create_not(incoming_signal, location);
-                }
-            }
+                    auto incoming_tile_1 = gate.incoming.front();
+                    auto incoming_tile_2 = gate.incoming.back();
 
-            else if (gate.incoming.size() == 2)
-            {
-                auto incoming_tile_1 = gate.incoming.front();
-                auto incoming_tile_2 = gate.incoming.back();
+                    auto incoming_signal_1 = lyt.make_signal(lyt.get_node(incoming_tile_1));
+                    auto incoming_signal_2 = lyt.make_signal(lyt.get_node(incoming_tile_2));
 
-                auto incoming_signal_1 = lyt.make_signal(lyt.get_node(incoming_tile_1));
-                auto incoming_signal_2 = lyt.make_signal(lyt.get_node(incoming_tile_2));
+                    if (gate.type == "AND")
+                    {
+                        lyt.create_and(incoming_signal_1, incoming_signal_2, location);
+                    }
 
-                if (gate.type == "AND")
-                {
-                    lyt.create_and(incoming_signal_1, incoming_signal_2, location);
-                }
+                    else if (gate.type == "NAND")
+                    {
+                        lyt.create_nand(incoming_signal_1, incoming_signal_2, location);
+                    }
 
-                else if (gate.type == "NAND")
-                {
-                    lyt.create_nand(incoming_signal_1, incoming_signal_2, location);
-                }
+                    else if (gate.type == "OR")
+                    {
+                        lyt.create_or(incoming_signal_1, incoming_signal_2, location);
+                    }
 
-                else if (gate.type == "OR")
-                {
-                    lyt.create_or(incoming_signal_1, incoming_signal_2, location);
-                }
+                    else if (gate.type == "NOR")
+                    {
+                        lyt.create_nor(incoming_signal_1, incoming_signal_2, location);
+                    }
 
-                else if (gate.type == "NOR")
-                {
-                    lyt.create_nor(incoming_signal_1, incoming_signal_2, location);
-                }
+                    else if (gate.type == "XOR")
+                    {
+                        lyt.create_xor(incoming_signal_1, incoming_signal_2, location);
+                    }
 
-                else if (gate.type == "XOR")
-                {
-                    lyt.create_xor(incoming_signal_1, incoming_signal_2, location);
-                }
-
-                else if (gate.type == "XNOR")
-                {
-                    lyt.create_xnor(incoming_signal_1, incoming_signal_2, location);
+                    else if (gate.type == "XNOR")
+                    {
+                        lyt.create_xnor(incoming_signal_1, incoming_signal_2, location);
+                    }
                 }
             }
         }
