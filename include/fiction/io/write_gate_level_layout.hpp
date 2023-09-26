@@ -70,7 +70,7 @@ class write_gate_level_layout_impl
 
         const auto clocking_scheme = lyt.get_clocking_scheme().name();
 
-        layout_metadata << fmt::format(get_name(lyt), "Cartesian", clocking_scheme, lyt.x(), lyt.y(), lyt.z());
+        layout_metadata << fmt::format(fcn::LAYOUT_METADATA, get_name(lyt), "Cartesian", clocking_scheme, lyt.x(), lyt.y(), lyt.z());
 
         os << header.str();
 
