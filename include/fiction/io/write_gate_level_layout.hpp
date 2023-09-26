@@ -30,9 +30,9 @@ namespace detail
 namespace fcn
 {
 
-inline constexpr const char* FCN_HEADER    = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-inline constexpr const char* OPEN_FCN    = "<fcn>\n";
-inline constexpr const char* CLOSE_FCN  = "</fcn>\n";
+inline constexpr const char* FCN_HEADER       = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+inline constexpr const char* OPEN_FCN         = "<fcn>\n";
+inline constexpr const char* CLOSE_FCN        = "</fcn>\n";
 inline constexpr const char* FICTION_METADATA = "    <fiction>\n"
                                                 "        <fiction_version>{}</fiction_version>\n"
                                                 "        <available_at>{}</available_at>\n"
@@ -60,7 +60,7 @@ class write_gate_level_layout_impl
 
     void run()
     {
-        std::stringstream header{};
+        std::stringstream header{}, layout_metadata{};
 
         header << fcn::FCN_HEADER << fcn::OPEN_FCN;
 
@@ -68,7 +68,13 @@ class write_gate_level_layout_impl
 
         header << fmt::format(fcn::FICTION_METADATA, FICTION_VERSION, FICTION_REPO, time_str);
 
+        const auto clocking_scheme = lyt.get_clocking_scheme().name();
+
+        layout_metadata << fmt::format(get_name(lyt), "Cartesian", clocking_scheme, lyt.x(), lyt.y(), lyt.z());
+
         os << header.str();
+
+        os << layout_metadata.str();
 
         os << fcn::CLOSE_FCN;
     }
