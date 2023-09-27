@@ -98,8 +98,7 @@ class read_gate_level_layout_impl
             int       x       = std::stoi(size->FirstChildElement("x")->GetText());
             int       y       = std::stoi(size->FirstChildElement("y")->GetText());
             int       z       = std::stoi(size->FirstChildElement("z")->GetText());
-            tile<Lyt> max_pos = {};
-            max_pos           = {x, y, z};
+            tile<Lyt> max_pos{x, y, z};
             lyt.resize(max_pos);
         }
 
@@ -135,7 +134,7 @@ class read_gate_level_layout_impl
                     for (const auto* signal = incoming_signals->FirstChildElement("signal"); signal != nullptr;
                          signal             = signal->NextSiblingElement("signal"))
                     {
-                        tile<Lyt> incoming_signal = {};
+                        tile<Lyt> incoming_signal;
                         incoming_signal.x         = std::stoull(signal->FirstChildElement("x")->GetText());
                         incoming_signal.y         = std::stoull(signal->FirstChildElement("y")->GetText());
                         incoming_signal.z         = std::stoull(signal->FirstChildElement("z")->GetText());
