@@ -180,7 +180,8 @@ TEST_CASE("Parsing error: no element 'layout'", "[fcn]")
                                               "<fcn>\n"
                                               "    <name>Test</name>\n"
                                               "    <topology>cartesian</topology>\n"
-                                              "    <clocking>2DDWave</clocking>\n";
+                                              "    <clocking>2DDWave</clocking>\n"
+                                              "</fcn>\n";
 
     std::istringstream layout_stream{fcn_layout};
 
