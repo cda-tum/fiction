@@ -121,9 +121,13 @@ class read_gate_level_layout_impl
                 }
 
                 auto* const loc = gate_xml->FirstChildElement("loc");
-                gate.loc.x      = std::stoull(loc->FirstChildElement("x")->GetText());
-                gate.loc.y      = std::stoull(loc->FirstChildElement("y")->GetText());
-                gate.loc.z      = std::stoull(loc->FirstChildElement("z")->GetText());
+                if (loc == nullptr)
+                {
+                    throw gate_level_parsing_error("Error parsing gate_level file: no element 'loc'");
+                }
+                gate.loc.x = std::stoull(loc->FirstChildElement("x")->GetText());
+                gate.loc.y = std::stoull(loc->FirstChildElement("y")->GetText());
+                gate.loc.z = std::stoull(loc->FirstChildElement("z")->GetText());
 
                 auto* const incoming_signals = gate_xml->FirstChildElement("incoming");
                 if (incoming_signals != nullptr)
