@@ -95,11 +95,11 @@ class read_gate_level_layout_impl
         auto* const size = layout->FirstChildElement("size");
         if (size != nullptr)
         {
-            int       x = std::stoi(size->FirstChildElement("x")->GetText());
-            int       y = std::stoi(size->FirstChildElement("y")->GetText());
-            int       z = std::stoi(size->FirstChildElement("z")->GetText());
-            tile<Lyt> max_pos;
-            max_pos = {x, y, z};
+            int       x       = std::stoi(size->FirstChildElement("x")->GetText());
+            int       y       = std::stoi(size->FirstChildElement("y")->GetText());
+            int       z       = std::stoi(size->FirstChildElement("z")->GetText());
+            tile<Lyt> max_pos = {};
+            max_pos           = {x, y, z};
             lyt.resize(max_pos);
         }
 
@@ -110,9 +110,9 @@ class read_gate_level_layout_impl
             for (const auto* gate_xml = gates_xml->FirstChildElement("gate"); gate_xml != nullptr;
                  gate_xml             = gate_xml->NextSiblingElement("gate"))
             {
-                gate_storage gate;
-                gate.id   = std::stoi(gate_xml->FirstChildElement("id")->GetText());
-                gate.type = gate_xml->FirstChildElement("type")->GetText();
+                gate_storage gate = {};
+                gate.id           = std::stoi(gate_xml->FirstChildElement("id")->GetText());
+                gate.type         = gate_xml->FirstChildElement("type")->GetText();
 
                 auto* const pi_name = gate_xml->FirstChildElement("name");
                 if (pi_name != nullptr and pi_name->GetText())
@@ -135,10 +135,10 @@ class read_gate_level_layout_impl
                     for (const auto* signal = incoming_signals->FirstChildElement("signal"); signal != nullptr;
                          signal             = signal->NextSiblingElement("signal"))
                     {
-                        tile<Lyt> incoming_signal;
-                        incoming_signal.x = std::stoull(signal->FirstChildElement("x")->GetText());
-                        incoming_signal.y = std::stoull(signal->FirstChildElement("y")->GetText());
-                        incoming_signal.z = std::stoull(signal->FirstChildElement("z")->GetText());
+                        tile<Lyt> incoming_signal = {};
+                        incoming_signal.x         = std::stoull(signal->FirstChildElement("x")->GetText());
+                        incoming_signal.y         = std::stoull(signal->FirstChildElement("y")->GetText());
+                        incoming_signal.z         = std::stoull(signal->FirstChildElement("z")->GetText());
                         gate.incoming.push_back(incoming_signal);
                     }
                 }
