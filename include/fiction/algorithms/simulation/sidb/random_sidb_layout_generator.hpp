@@ -129,10 +129,19 @@ Lyt generate_random_sidb_layout(const Lyt& lyt_skeleton, const generate_random_s
                     }
                 });
         }
-        // if the constraint that no positive SiDBs occur is satisfied, the SiDB is added to the layout
-        if (!constraint_violation_positive_sidbs)
+
+        bool random_cell_is_identical_wih_defect = false;
+        // check if a defect does not yet occupy random coordinate.
+        if constexpr (has_get_sidb_defect_v<Lyt>)
         {
-            lyt.assign_cell_type(random_coord, Lyt::cell_type::NORMAL);
+            random_cell_is_identical_wih_defect = (lyt.get_sidb_defect(random_coord).type != sidb_defect_type::NONE);
+        }
+
+        // if the constraints that no positive SiDBs occur and the cell is not yet occupied by a defect are satisfied,
+        // the SiDB is added to the layout
+        if (!constraint_violation_positive_sidbs && !random_cell_is_identical_wih_defect)
+        {
+            lyt.assign_cell_type(random_coord, technology<Lyt>::cell_type::NORMAL);
         }
         attempt_counter += 1;
     }
