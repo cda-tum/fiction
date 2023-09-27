@@ -98,18 +98,19 @@ class read_gate_level_layout_impl
             int       x = std::stoi(size->FirstChildElement("x")->GetText());
             int       y = std::stoi(size->FirstChildElement("y")->GetText());
             int       z = std::stoi(size->FirstChildElement("z")->GetText());
-            tile<Lyt> max_pos{x, y, z};
+            tile<Lyt> max_pos;
+            max_pos = {x, y, z};
             lyt.resize(max_pos);
         }
 
-        std::vector<Gate> gates{};
-        auto* const       gates_xml = fcn_root->FirstChildElement("gates");
+        std::vector<gate_storage> gates;
+        auto* const               gates_xml = fcn_root->FirstChildElement("gates");
         if (gates_xml != nullptr)
         {
             for (const auto* gate_xml = gates_xml->FirstChildElement("gate"); gate_xml != nullptr;
                  gate_xml             = gate_xml->NextSiblingElement("gate"))
             {
-                Gate gate;
+                gate_storage gate;
                 gate.id   = std::stoi(gate_xml->FirstChildElement("id")->GetText());
                 gate.type = gate_xml->FirstChildElement("type")->GetText();
 
@@ -130,7 +131,7 @@ class read_gate_level_layout_impl
                     for (const auto* signal = incoming_signals->FirstChildElement("signal"); signal != nullptr;
                          signal             = signal->NextSiblingElement("signal"))
                     {
-                        tile<Lyt> incoming_signal{};
+                        tile<Lyt> incoming_signal;
                         incoming_signal.x = std::stoull(signal->FirstChildElement("x")->GetText());
                         incoming_signal.y = std::stoull(signal->FirstChildElement("y")->GetText());
                         incoming_signal.z = std::stoull(signal->FirstChildElement("z")->GetText());
@@ -141,9 +142,9 @@ class read_gate_level_layout_impl
                 gates.push_back(gate);
             }
 
-            std::sort(gates.begin(), gates.end(), Gate::compareById);
+            std::sort(gates.begin(), gates.end(), gate_storage::compare_by_id);
 
-            for (const Gate& gate : gates)
+            for (const gate_storage& gate : gates)
             {
                 tile<Lyt> location{gate.loc.x, gate.loc.y, gate.loc.z};
 
@@ -234,15 +235,15 @@ class read_gate_level_layout_impl
      */
     std::istream& is;
 
-    struct Gate
+    struct gate_storage
     {
-        int                    id;
+        int                    id{};
         std::string            type;
         std::string            name;
-        tile<Lyt>              loc;
-        std::vector<tile<Lyt>> incoming;
+        tile<Lyt>              loc{};
+        std::vector<tile<Lyt>> incoming{};
 
-        static bool compareById(const Gate& gate1, const Gate& gate2)
+        static bool compare_by_id(const gate_storage& gate1, const gate_storage& gate2)
         {
             return gate1.id < gate2.id;
         }

@@ -183,7 +183,6 @@ class write_gate_level_layout_impl
                         const auto node_fun = lyt.node_function(gate);
 
                         os << fmt::format(fcn::GATE, id, kitty::to_binary(node_fun), "", coord.x, coord.y, coord.z);
-                        //   hex_layout.create_node({hex_signal_a, hex_signal_b}, node_fun, hex);
                     }
                     os << fcn::OPEN_INCOMING;
                     os << fmt::format(fcn::SIGNAL, signal_a.x, signal_a.y, signal_a.z);
