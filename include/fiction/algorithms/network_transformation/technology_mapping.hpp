@@ -172,7 +172,7 @@ struct technology_mapping_params
     return params;
 }
 /**
- * Auxiliary function to create technology mapping parameters for AND, OR, NAND, NOR, XOR, XNOR, IMPL, REPL, ANB, BNA,
+ * Auxiliary function to create technology mapping parameters for AND, OR, NAND, NOR, XOR, XNOR, LE, GE, LT, GT,
  * and NOT gates.
  *
  * @return Technology mapping parameters.

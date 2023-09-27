@@ -35,11 +35,12 @@ template <typename CellLyt, typename GateLibrary, typename GateLyt>
 class apply_gate_library_impl
 {
   public:
-    explicit apply_gate_library_impl(const GateLyt& lyt) :
+    explicit apply_gate_library_impl(const GateLyt& lyt, const sidb_surface<CellLyt>& defect_surface) :
             gate_lyt{lyt},
             cell_lyt{aspect_ratio<CellLyt>{((gate_lyt.x() + 1) * GateLibrary::gate_x_size()) - 1,
                                            ((gate_lyt.y() + 1) * GateLibrary::gate_y_size()) - 1, gate_lyt.z()},
-                     gate_lyt.get_clocking_scheme(), "", GateLibrary::gate_x_size(), GateLibrary::gate_y_size()}
+                     gate_lyt.get_clocking_scheme(), "", GateLibrary::gate_x_size(), GateLibrary::gate_y_size()},
+            sidb_surface{defect_surface}
     {}
 
     CellLyt run()
@@ -60,7 +61,7 @@ class apply_gate_library_impl
                         relative_to_absolute_cell_position<GateLibrary::gate_x_size(), GateLibrary::gate_y_size(),
                                                            GateLyt, CellLyt>(gate_lyt, t, cell<CellLyt>{0, 0});
 
-                    assign_gate(c, GateLibrary::set_up_gate(gate_lyt, t), n);
+                    assign_gate(c, GateLibrary::set_up_gate(gate_lyt, t, sidb_surface), n);
                 }
 #if (PROGRESS_BARS)
                 // update progress
@@ -85,6 +86,7 @@ class apply_gate_library_impl
   private:
     GateLyt gate_lyt;
     CellLyt cell_lyt;
+    sidb_surface<CellLyt> sidb_surface;
 
     void assign_gate(const cell<CellLyt>& c, const typename GateLibrary::fcn_gate& g,
                      const mockturtle::node<GateLyt>& n)
@@ -133,7 +135,7 @@ class apply_gate_library_impl
  * @return A cell-level layout that implements `lyt`'s gate types with building blocks defined in `GateLibrary`.
  */
 template <typename CellLyt, typename GateLibrary, typename GateLyt>
-CellLyt apply_gate_library(const GateLyt& lyt)
+CellLyt apply_gate_library(const GateLyt& lyt, const sidb_surface<CellLyt> &defect_surface)
 {
     static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
     static_assert(!has_siqad_coord_v<CellLyt>, "CellLyt cannot have SiQAD coordinates");
@@ -144,7 +146,7 @@ CellLyt apply_gate_library(const GateLyt& lyt)
     static_assert(std::is_same_v<technology<CellLyt>, technology<GateLibrary>>,
                   "CellLyt and GateLibrary must implement the same technology");
 
-    detail::apply_gate_library_impl<CellLyt, GateLibrary, GateLyt> p{lyt};
+    detail::apply_gate_library_impl<CellLyt, GateLibrary, GateLyt> p{lyt, defect_surface};
 
     auto result = p.run();
 

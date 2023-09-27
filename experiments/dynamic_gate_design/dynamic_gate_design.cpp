@@ -9,15 +9,19 @@
 #include <fiction/algorithms/network_transformation/technology_mapping.hpp>  // technology mapping
 #include <fiction/algorithms/physical_design/apply_gate_library.hpp>         // layout conversion to cell-level
 #include <fiction/algorithms/physical_design/exact.hpp>                      // SMT-based physical design of FCN layouts
+#include <fiction/algorithms/physical_design/orthogonal.hpp>
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
+#include <fiction/io/read_sidb_surface_defects.hpp>                               // reader for simulated SiDB surfaces
 #include <fiction/io/read_sqd_layout.hpp>                                         // reader for SiQAD files
-#include <fiction/io/write_sqd_layout.hpp>                   // writer for SiQAD files (physical simulation)
-#include <fiction/networks/technology_network.hpp>           // technology-mapped network type
-#include <fiction/technology/area.hpp>                       // area requirement calculations
-#include <fiction/technology/cell_technologies.hpp>          // cell implementations
-#include <fiction/technology/sidb_dynamic_gate_library.hpp>  // a dynamic SiDB gate library
-#include <fiction/technology/sidb_surface.hpp>               // SiDB surface with support for atomic defects
-#include <fiction/types.hpp>                                 // pre-defined types suitable for the FCN domain
+#include <fiction/io/write_sqd_layout.hpp>                     // writer for SiQAD files (physical simulation)
+#include <fiction/networks/technology_network.hpp>             // technology-mapped network type
+#include <fiction/technology/area.hpp>                         // area requirement calculations
+#include <fiction/technology/cell_technologies.hpp>            // cell implementations
+#include <fiction/technology/sidb_dynamic_gate_library.hpp>    // a dynamic SiDB gate library
+#include <fiction/technology/sidb_skeleton_bestagon_library.hpp>
+#include <fiction/technology/sidb_surface.hpp>                 // SiDB surface with support for atomic defects
+#include <fiction/traits.hpp>
+#include <fiction/types.hpp>                                   // pre-defined types suitable for the FCN domain
 
 #include <fmt/format.h>                                        // output formatting
 #include <lorina/lorina.hpp>                                   // Verilog/BLIF/AIGER/... file parsing
@@ -41,8 +45,9 @@ int main()  // NOLINT
     using cell_lyt = fiction::sidb_cell_clk_lyt;
 
     static const std::string layouts_folder = fmt::format("{}/dynamic_gate_design/layouts", EXPERIMENTS_PATH);
-    static const std::string surface_data_path =
-        fmt::format("{}/dynamic_gate_design/PATH-TO-SURFACE-DATA.sqd", EXPERIMENTS_PATH);
+        const auto               surface_lattice = fiction::read_sidb_surface_defects<cell_lyt>(
+            "../../experiments/defect_aware_physical_design/1_percent_with_charged_surface.txt", "py_test_surface");
+    // const auto surface_lattice = fiction::sidb_surface<cell_lyt>{};
 
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint64_t, uint64_t,
                             uint64_t, uint32_t, uint32_t, uint64_t, uint64_t, double, bool, uint64_t, double>
@@ -70,8 +75,16 @@ int main()  // NOLINT
     const fiction::sidb_surface_params surface_params{
         std::unordered_set<fiction::sidb_defect_type>{fiction::sidb_defect_type::DB}};
 
-    fiction::sidb_surface<cell_lyt> surface_lattice{surface_params};
-    fiction::read_sqd_layout(surface_lattice, surface_data_path);
+//    static const std::string surface_data_path =
+//        fmt::format("{}/defect_aware_physical_design/defects_full56_Oct.xml", EXPERIMENTS_PATH);
+//    fiction::sidb_surface<cell_lyt> surface_lattice{surface_params};
+//    std::cout << surface_lattice.num_defects() << std::endl;
+//    fiction::read_sqd_layout(surface_lattice, surface_data_path);
+    const auto number_defects = surface_lattice.num_defects();
+    std::cout << number_defects << std::endl;
+
+    // fiction::sidb_surface<cell_lyt> surface_lattice{surface_params};
+    // fiction::read_sqd_layout(surface_lattice, surface_data_path);
 
     // instantiate a complete XAG NPN database for node re-synthesis
     const mockturtle::xag_npn_resynthesis<mockturtle::xag_network,                    // the input network type
@@ -85,6 +98,11 @@ int main()  // NOLINT
 
     const fiction::technology_mapping_params tech_map_params = fiction::all_2_input_functions();
 
+    const auto lattice_tiling = gate_lyt{{12, 17}};
+
+    const auto black_list =
+        fiction::sidb_surface_analysis<fiction::sidb_skeleton_bestagon_library>(lattice_tiling, surface_lattice);
+
     // parameters for SMT-based physical design
     fiction::exact_physical_design_params<gate_lyt> exact_params{};
     exact_params.scheme        = fiction::ptr<gate_lyt>(fiction::row_clocking<gate_lyt>(fiction::num_clks::FOUR));
@@ -93,11 +111,16 @@ int main()  // NOLINT
     exact_params.desynchronize = true;
     exact_params.timeout       = 3'600'000;  // 1h in ms
     fiction::exact_physical_design_stats exact_stats{};
+    exact_params.black_list = black_list;
 
-    static constexpr const uint64_t bench_select = fiction_experiments::all & ~fiction_experiments::b1_r2 &
-                                                   ~fiction_experiments::clpl & ~fiction_experiments::two_bit_add_maj &
-                                                   ~fiction_experiments::parity & ~fiction_experiments::iscas85 &
-                                                   ~fiction_experiments::epfl;
+    fiction::orthogonal_physical_design_stats stats{};
+
+    constexpr const uint64_t bench_select = fiction_experiments::all & ~fiction_experiments::parity &
+                                            ~fiction_experiments::two_bit_add_maj & ~fiction_experiments::b1_r2 &
+                                            ~fiction_experiments::clpl & ~fiction_experiments::iscas85 &
+                                            ~fiction_experiments::epfl & ~fiction_experiments::half_adder;
+
+//    constexpr const uint64_t bench_select = fiction_experiments::t;
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
@@ -121,6 +144,9 @@ int main()  // NOLINT
 
         // perform layout generation with an SMT-based exact algorithm
         const auto gate_level_layout = fiction::exact<gate_lyt>(mapped_network, exact_params, &exact_stats);
+        //
+        //        const auto gate_level_layout = fiction::orthogonal<gate_lyt>(mapped_network,
+        //        fiction::orthogonal_physical_design_params{}, &stats);
 
         if (gate_level_layout.has_value())
         {
@@ -137,16 +163,19 @@ int main()  // NOLINT
             // TODO this can be achieved by implementing an in-place version of apply_gate_library
 
             // apply gate library
-            const auto cell_level_layout =
-                fiction::apply_gate_library<cell_lyt, fiction::sidb_dynamic_gate_library>(*gate_level_layout);
+            const auto cell_level_layout = fiction::apply_gate_library<cell_lyt, fiction::sidb_dynamic_gate_library>(
+                *gate_level_layout, surface_lattice);
 
             // compute area
             fiction::area_stats                            area_stats{};
             fiction::area_params<fiction::sidb_technology> area_ps{};
             fiction::area(cell_level_layout, area_ps, &area_stats);
+            fiction::sidb_surface<cell_lyt> defect_surface{cell_level_layout};
 
+            surface_lattice.foreach_sidb_defect([&defect_surface](const auto& defect)
+                                                { defect_surface.assign_sidb_defect(defect.first, defect.second); });
             // write a SiQAD simulation file
-            fiction::write_sqd_layout(cell_level_layout, fmt::format("{}/{}.sqd", layouts_folder, benchmark));
+            fiction::write_sqd_layout(defect_surface, fmt::format("{}/{}.sqd", layouts_folder, benchmark));
 
             // log results
             bestagon_exp(

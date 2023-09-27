@@ -119,8 +119,11 @@ class quickexact_impl
                     {
                         for (const auto& [cell, defect] : real_placed_defects)
                         {
-                            charge_lyt_with_assigned_dependent_cell.add_sidb_defect_to_potential_landscape(cell,
-                                                                                                           defect);
+                            if (defect.charge != 0)
+                            {
+                                charge_lyt_with_assigned_dependent_cell.add_sidb_defect_to_potential_landscape(cell,
+                                                                                                               defect);
+                            }
                         }
                     }
 

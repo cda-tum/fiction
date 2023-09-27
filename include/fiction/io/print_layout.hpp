@@ -389,12 +389,24 @@ void print_sidb_layout(std::ostream& os, const Lyt& lyt, const bool cs_color = t
 
             std::sort(defects.begin(), defects.end());
 
-            min_nw = min_nw > defects.front() ?
-                         defects.front() :
-                         min_nw;  // if a defect is more north-west than nw, this position is used as min
-            max_se = max_se < defects.back() ?
-                         defects.back() :
-                         max_se;  // if a defect is more south-east than se, this position is used as max
+            if (min_nw.x > defects.front().x)
+            {
+                min_nw.x = defects.front().x;
+            }
+            else if (min_nw.y > defects.front().y)
+            {
+                min_nw.y = defects.front().y;
+            }
+
+            if (max_se.x < defects.back().x)
+            {
+                max_se.x = defects.back().x;
+            }
+            else if (max_se.y < defects.back().y)
+            {
+                max_se.y = defects.back().y;
+            }
+            // if a defect is more south-east than se, this position is used as max
         }
     }
 
