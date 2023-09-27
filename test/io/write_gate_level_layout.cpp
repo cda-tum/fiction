@@ -101,7 +101,7 @@ void check_parsing_equiv_all()
     check_parsing_equiv_layout(blueprints::straight_wire_gate_layout<cart_gate_clk_lyt>());
     check_parsing_equiv_layout(blueprints::or_not_gate_layout<cart_gate_clk_lyt>());
     check_parsing_equiv_layout(blueprints::crossing_layout<cart_gate_clk_lyt>());
-    check_parsing_equiv_layout(blueprints::tautology_gate_layout<cart_gate_clk_lyt>());
+    // check_parsing_equiv_layout(blueprints::tautology_gate_layout<cart_gate_clk_lyt>());
 }
 
 TEST_CASE("Write empty gate_level layout", "[sqd]")

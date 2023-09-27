@@ -113,7 +113,7 @@ class read_gate_level_layout_impl
                 gate.type = gate_xml->FirstChildElement("type")->GetText();
 
                 auto* const pi_name = gate_xml->FirstChildElement("name");
-                if (pi_name != nullptr)
+                if (pi_name != nullptr and pi_name->GetText())
                 {
                     gate.name = pi_name->GetText();
                 }
@@ -153,12 +153,12 @@ class read_gate_level_layout_impl
 
                 else if (gate.incoming.size() == 1)
                 {
-                    auto incoming_tile   = gate.incoming.front();
-                    auto incoming_signal = lyt.make_signal(lyt.get_node(incoming_tile));
+                    tile<Lyt> incoming_tile{gate.incoming.front().x, gate.incoming.front().y, gate.incoming.front().z};
+                    auto      incoming_signal = lyt.make_signal(lyt.get_node(incoming_tile));
 
                     if (gate.type == "PO")
                     {
-                        lyt.create_po(lyt.make_signal(lyt.get_node(incoming_tile)), gate.name, location);
+                        lyt.create_po(incoming_signal, gate.name, location);
                     }
 
                     else if (gate.type == "BUF")
@@ -174,8 +174,9 @@ class read_gate_level_layout_impl
 
                 else if (gate.incoming.size() == 2)
                 {
-                    auto incoming_tile_1 = gate.incoming.front();
-                    auto incoming_tile_2 = gate.incoming.back();
+                    tile<Lyt> incoming_tile_1{gate.incoming.front().x, gate.incoming.front().y,
+                                              gate.incoming.front().z};
+                    tile<Lyt> incoming_tile_2{gate.incoming.back().x, gate.incoming.back().y, gate.incoming.back().z};
 
                     auto incoming_signal_1 = lyt.make_signal(lyt.get_node(incoming_tile_1));
                     auto incoming_signal_2 = lyt.make_signal(lyt.get_node(incoming_tile_2));
