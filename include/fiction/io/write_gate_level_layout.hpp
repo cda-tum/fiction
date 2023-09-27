@@ -13,6 +13,7 @@
 
 #include <fmt/chrono.h>
 #include <fmt/format.h>
+#include <kitty/print.hpp>
 #include <mockturtle/views/topo_view.hpp>
 
 #include <chrono>
@@ -177,13 +178,13 @@ class write_gate_level_layout_impl
                     {
                         os << fmt::format(fcn::GATE, id, "XNOR", "", coord.x, coord.y, coord.z);
                     }
-                    // else if (lyt.is_function(node))
-                    //{
-                    //
-                    //  const auto node_fun = lyt.node_function(node);
+                    else if (lyt.is_function(gate))
+                    {
+                        const auto node_fun = lyt.node_function(gate);
 
-                    //   hex_layout.create_node({hex_signal_a, hex_signal_b}, node_fun, hex);
-                    //}
+                        os << fmt::format(fcn::GATE, id, kitty::to_binary(node_fun), "", coord.x, coord.y, coord.z);
+                        //   hex_layout.create_node({hex_signal_a, hex_signal_b}, node_fun, hex);
+                    }
                     os << fcn::OPEN_INCOMING;
                     os << fmt::format(fcn::SIGNAL, signal_a.x, signal_a.y, signal_a.z);
                     os << fmt::format(fcn::SIGNAL, signal_b.x, signal_b.y, signal_b.z);

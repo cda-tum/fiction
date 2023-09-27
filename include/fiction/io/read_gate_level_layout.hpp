@@ -13,6 +13,7 @@
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
 
+#include <kitty/constructors.hpp>
 #include <tinyxml2.h>
 
 #include <algorithm>
@@ -209,6 +210,12 @@ class read_gate_level_layout_impl
                     else if (gate.type == "XNOR")
                     {
                         lyt.create_xnor(incoming_signal_1, incoming_signal_2, location);
+                    }
+                    else
+                    {
+                        kitty::dynamic_truth_table tt_t(2u);
+                        kitty::create_from_binary_string(tt_t, gate.type);
+                        lyt.create_node({incoming_signal_1, incoming_signal_2}, tt_t, location);
                     }
                 }
             }
