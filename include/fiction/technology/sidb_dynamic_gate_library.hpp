@@ -18,6 +18,17 @@
 
 namespace fiction
 {
+/**
+ * This struct stores the parameter to design gates on the fly.
+ */
+struct sidb_dynamic_gate_library_params
+{
+    design_sidb_gates_params params{sidb_simulation_parameters{2, -0.32},
+                                    design_sidb_gates_params::design_sidb_gates_mode::RANDOM,
+                                    {{25, 8, 0}, {35, 14, 0}},
+                                    4,
+                                    sidb_simulation_engine::QUICKEXACT};
+};
 
 class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 46>  // width and height of a hexagon
 {
@@ -26,7 +37,8 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
 
     template <typename GateLyt, typename CellLyt>
     [[nodiscard]] static fcn_gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t,
-                                              const sidb_surface<CellLyt>& sidb_surface)
+                                              const sidb_surface<CellLyt>&           sidb_surface,
+                                              const sidb_dynamic_gate_library_params parameter = {})
     {
         static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt must be a gate level layout.");
         static_assert(!has_siqad_coord_v<CellLyt>, "CellLyt has SiQAD coordinates.");
@@ -35,23 +47,23 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
         const auto f = lyt.node_function(n);
         const auto p = determine_port_routing(lyt, t);
 
-        const design_sidb_gates_params params{sidb_simulation_parameters{2, -0.32},
-                                              design_sidb_gates_params::design_sidb_gates_mode::RANDOM,
-                                              {{15, 7, 0}, {25, 13, 0}},
-                                              4,
-                                              sidb_simulation_engine::QUICKEXACT};
-
-        auto absolut_cell       = cell<CellLyt>{t.x * 45, t.y * (60 * 3 / 4), t.z};
-        auto absolut_cell_siqad = fiction::siqad::to_siqad_coord(absolut_cell);
+        // center cell of the bestagon tile
+        auto center_cell = relative_to_absolute_cell_position<gate_x_size(), gate_y_size(), GateLyt, CellLyt>(
+            lyt, t, cell<CellLyt>{gate_x_size() / 2, gate_y_size() / 2});
+        // center cell of the current tile
+        auto absolute_cell = relative_to_absolute_cell_position<gate_x_size(), gate_y_size(), GateLyt, CellLyt>(
+            lyt, t, cell<CellLyt>{0, 0});
+        auto absolute_cell_siqad = fiction::siqad::to_siqad_coord(absolute_cell);
+        auto center_cell_siqad   = fiction::siqad::to_siqad_coord(center_cell);
 
         auto layout        = sidb_defect_cell_clk_lyt_siqad{};
-        auto update_layout = [&layout, &absolut_cell, &absolut_cell_siqad](const auto& cd)
+        auto update_layout = [&layout, &center_cell, &center_cell_siqad, &absolute_cell_siqad](const auto& cd)
         {
-            if (euclidean_distance(CellLyt{}, cd.first, absolut_cell) < 30)
+            // all defects (charged) in a distance of 60 from the center are taken into account.
+            if (euclidean_distance(CellLyt{}, cd.first, center_cell) < 60)
             {
-
                 auto defect_pos_siqad    = fiction::siqad::to_siqad_coord(cd.first);
-                auto shifted_defect_cell = defect_pos_siqad - absolut_cell_siqad;
+                auto shifted_defect_cell = defect_pos_siqad - absolute_cell_siqad;
                 if (is_charged_defect(cd.second))
                 {
                     if (cd.second.type == sidb_defect_type::DB)
@@ -72,7 +84,8 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
             }
         };
 
-        std::string path = " ";
+        const auto skeleton_path = fmt::format("{}/skeleton_bestagons_with_tags/", EXPERIMENTS_PATH);
+
         try
         {
             if constexpr (fiction::has_is_fanout_v<GateLyt>)
@@ -81,14 +94,11 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
                 {
                     if (lyt.fanout_size(n) == 2)
                     {
-                        path = FANOUT_MAP.at(p);
-                        std::cout << path << std::endl;
-                        layout = read_sqd_layout<sidb_defect_cell_clk_lyt_siqad>(
-                            "/Users/jandrewniok/CLionProjects/fiction_fork/experiments/skeleton_bestagons_with_tags/" +
-                            path);
+                        layout = read_sqd_layout<sidb_defect_cell_clk_lyt_siqad>(skeleton_path + ONE_IN_TWO_OUT.at(p));
                         // erase defects
                         sidb_surface.foreach_sidb_defect(update_layout);
-                        const auto found_gate_layouts = design_sidb_gates(layout, create_fan_out_tt(), params);
+                        const auto found_gate_layouts =
+                            design_sidb_gates(layout, create_fan_out_tt(), parameter.params);
                         std::cout << fmt::format("{} : defects", found_gate_layouts[0].num_defects()) << std::endl;
                         fiction::write_sqd_layout(found_gate_layouts[0],
                                                   fmt::format("{}/{}.sqd",
@@ -113,40 +123,13 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
                             // two possible options: actual crossover and (parallel) hourglass wire
                             const auto pa = determine_port_routing(lyt, at);
 
-                            path = CROSSING_MAP.at({p, pa});
+                            auto path = CROSSING_MAP.at({p, pa});
                             if (path == "2o2o_hour.sqd")
                             {
-                                path = "2i2o.sqd";
-                                std::cout << path << std::endl;
-                                layout = read_sqd_layout<sidb_defect_cell_clk_lyt_siqad>(
-                                    "/Users/jandrewniok/CLionProjects/fiction_fork/experiments/"
-                                    "skeleton_bestagons_with_tags/" +
-                                    path);
+                                layout = read_sqd_layout<sidb_defect_cell_clk_lyt_siqad>(skeleton_path + "2i2o.sqd");
                                 sidb_surface.foreach_sidb_defect(update_layout);
                                 const auto found_gate_layouts =
-                                    design_sidb_gates(layout, create_double_wire_tt(), params);
-                                std::cout << fmt::format("{} : defects", found_gate_layouts[0].num_defects())
-                                          << std::endl;
-                                fiction::write_sqd_layout(found_gate_layouts[0],
-                                                          fmt::format("{}/{}.sqd",
-                                                                      "/Users/jandrewniok/CLionProjects/fiction_fork/"
-                                                                      "experiments/defect_aware_physical_design/single_gates",
-                                                                      n));
-                                const auto list = cell_level_layout_to_list(found_gate_layouts.front());
-                                std::cout << "finished hourglass" << std::endl;
-                                return cell_list_to_gate<char>(list);
-                            }
-                            else if (path == "2o2o_cx.sqd")
-                            {
-                                path = "2i2o.sqd";
-                                std::cout << path << std::endl;
-                                layout = read_sqd_layout<sidb_defect_cell_clk_lyt_siqad>(
-                                    "/Users/jandrewniok/CLionProjects/fiction_fork/experiments/"
-                                    "skeleton_bestagons_with_tags/" +
-                                    path);
-                                sidb_surface.foreach_sidb_defect(update_layout);
-                                const auto found_gate_layouts =
-                                    design_sidb_gates(layout, create_crossing_wire_tt(), params);
+                                    design_sidb_gates(layout, create_double_wire_tt(), parameter.params);
                                 std::cout << fmt::format("{} : defects", found_gate_layouts[0].num_defects())
                                           << std::endl;
                                 fiction::write_sqd_layout(
@@ -155,24 +138,37 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
                                                 "/Users/jandrewniok/CLionProjects/fiction_fork/"
                                                 "experiments/defect_aware_physical_design/single_gates",
                                                 n));
-                                std::cout << "finished crossing" << std::endl;
                                 const auto list = cell_level_layout_to_list(found_gate_layouts.front());
+                                std::cout << "finished hourglass" << std::endl;
                                 return cell_list_to_gate<char>(list);
                             }
+
+                            layout = read_sqd_layout<sidb_defect_cell_clk_lyt_siqad>(skeleton_path + "2i2o.sqd");
+                            sidb_surface.foreach_sidb_defect(update_layout);
+                            const auto found_gate_layouts =
+                                design_sidb_gates(layout, create_crossing_wire_tt(), parameter.params);
+                            std::cout << fmt::format("{} : defects", found_gate_layouts[0].num_defects()) << std::endl;
+                            fiction::write_sqd_layout(
+                                found_gate_layouts[0],
+                                fmt::format("{}/{}.sqd",
+                                            "/Users/jandrewniok/CLionProjects/fiction_fork/"
+                                            "experiments/defect_aware_physical_design/single_gates",
+                                            n));
+                            std::cout << "finished crossing" << std::endl;
+                            const auto list = cell_level_layout_to_list(found_gate_layouts.front());
+                            return cell_list_to_gate<char>(list);
                         }
 
-                        path = WIRE_MAP.at(p);
+                        auto path = ONE_INPUT_ONE_OUTPUT.at(p);
                         if (path == "empty")
                         {
                             return EMPTY_GATE;
                         }
                         std::cout << path << std::endl;
-                        layout = read_sqd_layout<sidb_defect_cell_clk_lyt_siqad>(
-                            "/Users/jandrewniok/CLionProjects/fiction_fork/experiments/skeleton_bestagons_with_tags/" +
-                            path);
+                        layout = read_sqd_layout<sidb_defect_cell_clk_lyt_siqad>(skeleton_path + path);
                         sidb_surface.foreach_sidb_defect(update_layout);
                         std::cout << fmt::format("{} : defects", layout.num_defects()) << std::endl;
-                        const auto found_gate_layouts = design_sidb_gates(layout, std::vector<tt>{f}, params);
+                        const auto found_gate_layouts = design_sidb_gates(layout, std::vector<tt>{f}, parameter.params);
                         const auto list               = cell_level_layout_to_list(found_gate_layouts.front());
                         fiction::write_sqd_layout(found_gate_layouts[0],
                                                   fmt::format("{}/{}.sqd",
@@ -189,20 +185,17 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
             {
                 if (lyt.is_inv(n))
                 {
-                    path = INVERTER_MAP.at(p);
-                    std::cout << path << std::endl;
-                    layout = read_sqd_layout<sidb_defect_cell_clk_lyt_siqad>(
-                        "/Users/jandrewniok/CLionProjects/fiction_fork/experiments/skeleton_bestagons_with_tags/" +
-                        path);
+                    layout =
+                        read_sqd_layout<sidb_defect_cell_clk_lyt_siqad>(skeleton_path + ONE_INPUT_ONE_OUTPUT.at(p));
                     sidb_surface.foreach_sidb_defect(update_layout);
                     std::cout << fmt::format("{} : defects", layout.num_defects()) << std::endl;
-                    const auto found_gate_layouts = design_sidb_gates(layout, std::vector<tt>{f}, params);
+                    const auto found_gate_layouts = design_sidb_gates(layout, std::vector<tt>{f}, parameter.params);
                     fiction::write_sqd_layout(found_gate_layouts[0],
                                               fmt::format("{}/{}.sqd",
                                                           "/Users/jandrewniok/CLionProjects/fiction_fork/"
                                                           "experiments/defect_aware_physical_design/single_gates",
                                                           n));
-                    const auto list               = cell_level_layout_to_list(found_gate_layouts.front());
+                    const auto list = cell_level_layout_to_list(found_gate_layouts.front());
                     std::cout << "finished" << std::endl;
                     return cell_list_to_gate<char>(list);
                 }
@@ -211,20 +204,16 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
             {
                 if (lyt.is_and(n))
                 {
-                    path = CONJUNCTION_MAP.at(p);
-                    std::cout << path << std::endl;
-                    layout = read_sqd_layout<sidb_defect_cell_clk_lyt_siqad>(
-                        "/Users/jandrewniok/CLionProjects/fiction_fork/experiments/skeleton_bestagons_with_tags/" +
-                        path);
+                    layout = read_sqd_layout<sidb_defect_cell_clk_lyt_siqad>(skeleton_path + TWO_IN_ONE_OUT.at(p));
                     sidb_surface.foreach_sidb_defect(update_layout);
                     std::cout << fmt::format("{} : defects", layout.num_defects()) << std::endl;
-                    const auto found_gate_layouts = design_sidb_gates(layout, std::vector<tt>{f}, params);
+                    const auto found_gate_layouts = design_sidb_gates(layout, std::vector<tt>{f}, parameter.params);
                     fiction::write_sqd_layout(found_gate_layouts[0],
                                               fmt::format("{}/{}.sqd",
                                                           "/Users/jandrewniok/CLionProjects/fiction_fork/"
                                                           "experiments/defect_aware_physical_design/single_gates",
                                                           n));
-                    const auto list               = cell_level_layout_to_list(found_gate_layouts.front());
+                    const auto list = cell_level_layout_to_list(found_gate_layouts.front());
                     std::cout << "finished" << std::endl;
                     return cell_list_to_gate<char>(list);
                 }
@@ -233,20 +222,16 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
             {
                 if (lyt.is_or(n))
                 {
-                    path = CONJUNCTION_MAP.at(p);
-                    std::cout << path << std::endl;
-                    layout = read_sqd_layout<sidb_defect_cell_clk_lyt_siqad>(
-                        "/Users/jandrewniok/CLionProjects/fiction_fork/experiments/skeleton_bestagons_with_tags/" +
-                        path);
+                    layout = read_sqd_layout<sidb_defect_cell_clk_lyt_siqad>(skeleton_path + TWO_IN_ONE_OUT.at(p));
                     sidb_surface.foreach_sidb_defect(update_layout);
                     std::cout << fmt::format("{} : defects", layout.num_defects()) << std::endl;
-                    const auto found_gate_layouts = design_sidb_gates(layout, std::vector<tt>{f}, params);
+                    const auto found_gate_layouts = design_sidb_gates(layout, std::vector<tt>{f}, parameter.params);
                     fiction::write_sqd_layout(found_gate_layouts[0],
                                               fmt::format("{}/{}.sqd",
                                                           "/Users/jandrewniok/CLionProjects/fiction_fork/"
                                                           "experiments/defect_aware_physical_design/single_gates",
                                                           n));
-                    const auto list               = cell_level_layout_to_list(found_gate_layouts.front());
+                    const auto list = cell_level_layout_to_list(found_gate_layouts.front());
                     std::cout << "finished" << std::endl;
                     return cell_list_to_gate<char>(list);
                 }
@@ -255,14 +240,10 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
             {
                 if (lyt.is_nand(n))
                 {
-                    path = CONJUNCTION_MAP.at(p);
-                    std::cout << path << std::endl;
-                    layout = read_sqd_layout<sidb_defect_cell_clk_lyt_siqad>(
-                        "/Users/jandrewniok/CLionProjects/fiction_fork/experiments/skeleton_bestagons_with_tags/" +
-                        path);
+                    layout = read_sqd_layout<sidb_defect_cell_clk_lyt_siqad>(skeleton_path + TWO_IN_ONE_OUT.at(p));
                     sidb_surface.foreach_sidb_defect(update_layout);
                     std::cout << fmt::format("{} : defects", layout.num_defects()) << std::endl;
-                    const auto found_gate_layouts = design_sidb_gates(layout, std::vector<tt>{f}, params);
+                    const auto found_gate_layouts = design_sidb_gates(layout, std::vector<tt>{f}, parameter.params);
                     fiction::write_sqd_layout(found_gate_layouts[0],
                                               fmt::format("{}/{}.sqd",
                                                           "/Users/jandrewniok/CLionProjects/fiction_fork/"
@@ -277,20 +258,16 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
             {
                 if (lyt.is_nor(n))
                 {
-                    path = CONJUNCTION_MAP.at(p);
-                    std::cout << path << std::endl;
-                    layout = read_sqd_layout<sidb_defect_cell_clk_lyt_siqad>(
-                        "/Users/jandrewniok/CLionProjects/fiction_fork/experiments/skeleton_bestagons_with_tags/" +
-                        path);
+                    layout = read_sqd_layout<sidb_defect_cell_clk_lyt_siqad>(skeleton_path + TWO_IN_ONE_OUT.at(p));
                     sidb_surface.foreach_sidb_defect(update_layout);
                     std::cout << fmt::format("{} : defects", layout.num_defects()) << std::endl;
-                    const auto found_gate_layouts = design_sidb_gates(layout, std::vector<tt>{f}, params);
+                    const auto found_gate_layouts = design_sidb_gates(layout, std::vector<tt>{f}, parameter.params);
                     fiction::write_sqd_layout(found_gate_layouts[0],
                                               fmt::format("{}/{}.sqd",
                                                           "/Users/jandrewniok/CLionProjects/fiction_fork/"
                                                           "experiments/defect_aware_physical_design/single_gates",
                                                           n));
-                    const auto list               = cell_level_layout_to_list(found_gate_layouts.front());
+                    const auto list = cell_level_layout_to_list(found_gate_layouts.front());
                     std::cout << "finished" << std::endl;
                     return cell_list_to_gate<char>(list);
                 }
@@ -299,20 +276,16 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
             {
                 if (lyt.is_xor(n))
                 {
-                    path = CONJUNCTION_MAP.at(p);
-                    std::cout << path << std::endl;
-                    layout = read_sqd_layout<sidb_defect_cell_clk_lyt_siqad>(
-                        "/Users/jandrewniok/CLionProjects/fiction_fork/experiments/skeleton_bestagons_with_tags/" +
-                        path);
+                    layout = read_sqd_layout<sidb_defect_cell_clk_lyt_siqad>(skeleton_path + TWO_IN_ONE_OUT.at(p));
                     sidb_surface.foreach_sidb_defect(update_layout);
                     std::cout << fmt::format("{} : defects", layout.num_defects()) << std::endl;
-                    const auto found_gate_layouts = design_sidb_gates(layout, std::vector<tt>{f}, params);
+                    const auto found_gate_layouts = design_sidb_gates(layout, std::vector<tt>{f}, parameter.params);
                     fiction::write_sqd_layout(found_gate_layouts[0],
                                               fmt::format("{}/{}.sqd",
                                                           "/Users/jandrewniok/CLionProjects/fiction_fork/"
                                                           "experiments/defect_aware_physical_design/single_gates",
                                                           n));
-                    const auto list               = cell_level_layout_to_list(found_gate_layouts.front());
+                    const auto list = cell_level_layout_to_list(found_gate_layouts.front());
                     std::cout << "finished" << std::endl;
                     return cell_list_to_gate<char>(list);
                 }
@@ -321,14 +294,12 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
             {
                 if (lyt.is_xnor(n))
                 {
-                    path = CONJUNCTION_MAP.at(p);
+                    auto path = TWO_IN_ONE_OUT.at(p);
                     std::cout << path << std::endl;
-                    layout = read_sqd_layout<sidb_defect_cell_clk_lyt_siqad>(
-                        "/Users/jandrewniok/CLionProjects/fiction_fork/experiments/skeleton_bestagons_with_tags/" +
-                        path);
+                    layout = read_sqd_layout<sidb_defect_cell_clk_lyt_siqad>(skeleton_path + path);
                     sidb_surface.foreach_sidb_defect(update_layout);
                     std::cout << fmt::format("{} : defects", layout.num_defects()) << std::endl;
-                    const auto found_gate_layouts = design_sidb_gates(layout, std::vector<tt>{f}, params);
+                    const auto found_gate_layouts = design_sidb_gates(layout, std::vector<tt>{f}, parameter.params);
                     const auto list               = cell_level_layout_to_list(found_gate_layouts.front());
                     std::cout << "finished" << std::endl;
                     return cell_list_to_gate<char>(list);
@@ -338,20 +309,18 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
             {
                 if (lyt.is_ge(n))
                 {
-                    path = CONJUNCTION_MAP.at(p);
+                    auto path = TWO_IN_ONE_OUT.at(p);
                     std::cout << path << std::endl;
-                    layout = read_sqd_layout<sidb_defect_cell_clk_lyt_siqad>(
-                        "/Users/jandrewniok/CLionProjects/fiction_fork/experiments/skeleton_bestagons_with_tags/" +
-                        path);
+                    layout = read_sqd_layout<sidb_defect_cell_clk_lyt_siqad>(skeleton_path + path);
                     sidb_surface.foreach_sidb_defect(update_layout);
                     std::cout << fmt::format("{} : defects", layout.num_defects()) << std::endl;
-                    const auto found_gate_layouts = design_sidb_gates(layout, std::vector<tt>{f}, params);
+                    const auto found_gate_layouts = design_sidb_gates(layout, std::vector<tt>{f}, parameter.params);
                     fiction::write_sqd_layout(found_gate_layouts[0],
                                               fmt::format("{}/{}.sqd",
                                                           "/Users/jandrewniok/CLionProjects/fiction_fork/"
                                                           "experiments/defect_aware_physical_design/single_gates",
                                                           n));
-                    const auto list               = cell_level_layout_to_list(found_gate_layouts.front());
+                    const auto list = cell_level_layout_to_list(found_gate_layouts.front());
                     std::cout << "finished" << std::endl;
                     return cell_list_to_gate<char>(list);
                 }
@@ -360,20 +329,18 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
             {
                 if (lyt.is_le(n))
                 {
-                    path = CONJUNCTION_MAP.at(p);
+                    auto path = TWO_IN_ONE_OUT.at(p);
                     std::cout << path << std::endl;
-                    layout = read_sqd_layout<sidb_defect_cell_clk_lyt_siqad>(
-                        "/Users/jandrewniok/CLionProjects/fiction_fork/experiments/skeleton_bestagons_with_tags/" +
-                        path);
+                    layout = read_sqd_layout<sidb_defect_cell_clk_lyt_siqad>(skeleton_path + path);
                     sidb_surface.foreach_sidb_defect(update_layout);
                     std::cout << fmt::format("{} : defects", layout.num_defects()) << std::endl;
-                    const auto found_gate_layouts = design_sidb_gates(layout, std::vector<tt>{f}, params);
+                    const auto found_gate_layouts = design_sidb_gates(layout, std::vector<tt>{f}, parameter.params);
                     fiction::write_sqd_layout(found_gate_layouts[0],
                                               fmt::format("{}/{}.sqd",
                                                           "/Users/jandrewniok/CLionProjects/fiction_fork/"
                                                           "experiments/defect_aware_physical_design/single_gates",
                                                           n));
-                    const auto list               = cell_level_layout_to_list(found_gate_layouts.front());
+                    const auto list = cell_level_layout_to_list(found_gate_layouts.front());
                     std::cout << "finished" << std::endl;
                     return cell_list_to_gate<char>(list);
                 }
@@ -382,14 +349,12 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
             {
                 if (lyt.is_gt(n))
                 {
-                    path = CONJUNCTION_MAP.at(p);
+                    auto path = TWO_IN_ONE_OUT.at(p);
                     std::cout << path << std::endl;
-                    layout = read_sqd_layout<sidb_defect_cell_clk_lyt_siqad>(
-                        "/Users/jandrewniok/CLionProjects/fiction_fork/experiments/skeleton_bestagons_with_tags/" +
-                        path);
+                    layout = read_sqd_layout<sidb_defect_cell_clk_lyt_siqad>(skeleton_path + path);
                     sidb_surface.foreach_sidb_defect(update_layout);
                     std::cout << fmt::format("{} : defects", layout.num_defects()) << std::endl;
-                    const auto found_gate_layouts = design_sidb_gates(layout, std::vector<tt>{f}, params);
+                    const auto found_gate_layouts = design_sidb_gates(layout, std::vector<tt>{f}, parameter.params);
                     fiction::write_sqd_layout(found_gate_layouts[0],
                                               fmt::format("{}/{}.sqd",
                                                           "/Users/jandrewniok/CLionProjects/fiction_fork/"
@@ -404,14 +369,12 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
             {
                 if (lyt.is_lt(n))
                 {
-                    path = CONJUNCTION_MAP.at(p);
+                    auto path = TWO_IN_ONE_OUT.at(p);
                     std::cout << path << std::endl;
-                    layout = read_sqd_layout<sidb_defect_cell_clk_lyt_siqad>(
-                        "/Users/jandrewniok/CLionProjects/fiction_fork/experiments/skeleton_bestagons_with_tags/" +
-                        path);
+                    layout = read_sqd_layout<sidb_defect_cell_clk_lyt_siqad>(skeleton_path + path);
                     sidb_surface.foreach_sidb_defect(update_layout);
                     std::cout << fmt::format("{} : defects", layout.num_defects()) << std::endl;
-                    const auto found_gate_layouts = design_sidb_gates(layout, std::vector<tt>{f}, params);
+                    const auto found_gate_layouts = design_sidb_gates(layout, std::vector<tt>{f}, parameter.params);
                     fiction::write_sqd_layout(found_gate_layouts[0],
                                               fmt::format("{}/{}.sqd",
                                                           "/Users/jandrewniok/CLionProjects/fiction_fork/"
@@ -430,40 +393,47 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
     }
 
   private:
+    /**
+     * Generates a cell-level layout as a 2D array of characters based on the provided cell layout information.
+     *
+     * @tparam CellLyt Cell-level layout type.
+     * @param lyt Cell-level layout
+     * @return A 2D array of characters representing the cell-level layout.
+     */
     template <typename Lyt>
-    static std::array<std::array<char, 60>, 46> cell_level_layout_to_list(const Lyt& lyt)
+    static std::array<std::array<char, gate_x_size()>, gate_y_size()> cell_level_layout_to_list(const Lyt& lyt)
     {
-        uint64_t                             counter = 0;
-        std::array<std::array<char, 60>, 46> empty_array{};
-        const auto                           all_cell = all_sidbs_in_spanned_area({-10, -1, 0}, {49, 21, 1});
-        for (auto i = 0u; i < 46; i++)
+
+        std::array<std::array<char, gate_x_size()>, gate_y_size()> result{};
+        const auto                                                 all_cell =
+            all_sidbs_in_spanned_area({0, 0, 0}, to_siqad_coord(cell<Lyt>{gate_x_size() - 1, gate_y_size() - 1}));
+        uint64_t counter = 0;
+
+        for (auto& row : result)
         {
-            std::array<char, 60> inner_array{};
-            for (auto j = 0u; j < 60; j++)
+            for (auto& cell : row)
             {
-                if ((lyt.get_cell_type(all_cell[counter]) == Lyt::technology::cell_type::NORMAL) ||
-                    (lyt.get_cell_type(all_cell[counter]) == Lyt::technology::cell_type::OUTPUT))
-                {
-                    if (all_cell[counter].y != 19 || all_cell[counter].z != 0)
-                    {
-                        inner_array[j] = 'x';
-                    }
-                    else
-                    {
-                        inner_array[j] = ' ';
-                    }
-                }
-                else
-                {
-                    inner_array[j] = ' ';
-                }
-                counter += 1;
+                const auto cell_type = lyt.get_cell_type(all_cell[counter]);
+                cell                 = (cell_type == Lyt::technology::cell_type::NORMAL ||
+                        cell_type == Lyt::technology::cell_type::OUTPUT) ?
+                                           (all_cell[counter].y != 20 || all_cell[counter].z != 0) ? 'x' : ' ' :
+                                           ' ';
+                counter++;
             }
-            empty_array[i] = inner_array;
         }
-        return empty_array;
+
+        return result;
     }
 
+    /**
+     * This function determines the port routing for a specific tile within a layout represented by the object `lyt` of
+     * type `Lyt`. It examines the tile's characteristics and connectivity to determine the appropriate incoming and
+     * outgoing connector ports and populates them in a `port_list` object.
+     *
+     * @param lyt A reference to an object of type `Lyt` representing the layout.
+     * @param t The tile for which port routing is being determined.
+     * @return A `port_list` object containing the determined port directions for incoming and outgoing signals.
+     */
     template <typename Lyt>
     [[nodiscard]] static port_list<port_direction> determine_port_routing(const Lyt& lyt, const tile<Lyt>& t) noexcept
     {
@@ -524,9 +494,9 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
         phmap::flat_hash_map<std::pair<port_list<port_direction>, port_list<port_direction>>, std::string>;
 
     /**
-     * Lookup table for wire mirroring. Maps ports to corresponding wires.
+     * Lookup table for one input Boolean functions.
      */
-    static inline const port_gate_map WIRE_MAP = {
+    static inline const port_gate_map ONE_INPUT_ONE_OUTPUT = {
         // primary inputs
         {{{}, {port_direction(port_direction::cardinal::SOUTH_WEST)}}, "1i1o_s.sqd"},
         {{{}, {port_direction(port_direction::cardinal::SOUTH_EAST)}}, "1i1o_d.sqd"},
@@ -551,7 +521,7 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
         {{{}, {}}, "empty"},
     };
     /**
-     * Lookup table for wire crossings and hourglass wires. Maps ports to corresponding crossovers.
+     * Lookup table for wire crossings and hourglass wires.
      */
     static inline const double_port_gate_map CROSSING_MAP = {
         {{{{port_direction(port_direction::cardinal::NORTH_WEST)},
@@ -576,33 +546,9 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
          "2o2o_cx.sqd"},
     };
     /**
-     * Lookup table for inverter mirroring. Maps ports to corresponding inverters.
+     * Lookup table for two input Boolean function (e.g., AND, OR, ...).
      */
-    static inline const port_gate_map INVERTER_MAP = {
-        // straight inverters
-        {{{port_direction(port_direction::cardinal::NORTH_WEST)},
-          {port_direction(port_direction::cardinal::SOUTH_WEST)}},
-         "1i1o_s.sqd"},
-        {{{port_direction(port_direction::cardinal::NORTH_EAST)},
-          {port_direction(port_direction::cardinal::SOUTH_EAST)}},
-         "1i1o_sm.sqd"},
-        // diagonal inverters
-        {{{port_direction(port_direction::cardinal::NORTH_WEST)},
-          {port_direction(port_direction::cardinal::SOUTH_EAST)}},
-         "1i1o_d.sqd"},
-        {{{port_direction(port_direction::cardinal::NORTH_EAST)},
-          {port_direction(port_direction::cardinal::SOUTH_WEST)}},
-         "1i1o_dm.sqd"},
-        // without inputs
-        {{{}, {port_direction(port_direction::cardinal::SOUTH_WEST)}}, "1i1o_s.sqd"},
-        {{{}, {port_direction(port_direction::cardinal::SOUTH_EAST)}}, "1i1o_d.sqd"},
-        // without outputs
-        {{{port_direction(port_direction::cardinal::NORTH_WEST)}, {}}, "1i1o_d.sqd"},
-        {{{port_direction(port_direction::cardinal::NORTH_EAST)}, {}}, "1i1o_sm.sqd"}};
-    /**
-     * Lookup table for conjunction mirroring. Maps ports to corresponding AND gates.
-     */
-    static inline const port_gate_map CONJUNCTION_MAP = {
+    static inline const port_gate_map TWO_IN_ONE_OUT = {
         {{{port_direction(port_direction::cardinal::NORTH_WEST), port_direction(port_direction::cardinal::NORTH_EAST)},
           {port_direction(port_direction::cardinal::SOUTH_EAST)}},
          "2i1o.sqd"},
@@ -610,13 +556,9 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
           {port_direction(port_direction::cardinal::SOUTH_WEST)}},
          "2i1o_m.sqd"}};
     /**
-     * Lookup table for negated disjunction mirroring. Maps ports to corresponding NOR gates.
+     * Lookup table for fan-out.
      */
-
-    /**
-     * Lookup table for fanout mirroring. Maps ports to corresponding fan-out gates.
-     */
-    static inline const port_gate_map FANOUT_MAP = {
+    static inline const port_gate_map ONE_IN_TWO_OUT = {
         {{{port_direction(port_direction::cardinal::NORTH_WEST)},
           {port_direction(port_direction::cardinal::SOUTH_EAST), port_direction(port_direction::cardinal::SOUTH_WEST)}},
          "1i2o.sqd"},

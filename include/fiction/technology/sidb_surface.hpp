@@ -178,16 +178,18 @@ class sidb_surface<Lyt, false> : public Lyt
      * If the given coordinate is defect-free, the empty set is returned.
      *
      * @param c Coordinate whose defect extent is to be determined.
+     * @param incorporate_defect_into_gate_design If set to `true`, charged defects are treated like neutral defects,
+     * `false`otherwise.
      * @return All SiDB positions affected by the defect at coordinate c.
      */
     [[nodiscard]] std::unordered_set<typename Lyt::coordinate>
-    affected_sidbs(const typename Lyt::coordinate& c) const noexcept
+    affected_sidbs(const typename Lyt::coordinate& c, const bool incorporate_defect_into_gate_design = false) const noexcept
     {
         std::unordered_set<typename Lyt::coordinate> influenced_sidbs{};
 
         if (const auto d = get_sidb_defect(c); d.type != sidb_defect_type::NONE)
         {
-            const auto [horizontal_extent, vertical_extent] = defect_extent(d);
+            const auto [horizontal_extent, vertical_extent] = defect_extent(d, incorporate_defect_into_gate_design);
 
             for (auto y = static_cast<int64_t>(c.y - vertical_extent); y <= static_cast<int64_t>(c.y + vertical_extent);
                  ++y)
@@ -211,14 +213,17 @@ class sidb_surface<Lyt, false> : public Lyt
      *
      * If the given surface is defect-free, the empty set is returned.
      *
+     * @param incorporate_defect_into_gate_design If set to `true`, charged defects are treated like neutral defects,
+     * `false`otherwise.
      * @return All SiDB positions affected by any defect on the surface.
      */
-    [[nodiscard]] std::unordered_set<typename Lyt::coordinate> all_affected_sidbs() const noexcept
+    [[nodiscard]] std::unordered_set<typename Lyt::coordinate>
+    all_affected_sidbs(const bool incorporate_defect_into_gate_design = false) const noexcept
     {
         std::unordered_set<typename Lyt::coordinate> influenced_sidbs{};
 
-        foreach_sidb_defect([&influenced_sidbs, this](const auto& it)
-                            { influenced_sidbs.merge(affected_sidbs(it.first)); });
+        foreach_sidb_defect([&influenced_sidbs, &incorporate_defect_into_gate_design, this](const auto& it)
+                            { influenced_sidbs.merge(affected_sidbs(it.first, incorporate_defect_into_gate_design)); });
 
         return influenced_sidbs;
     }

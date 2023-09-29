@@ -35,14 +35,72 @@ template <typename CellLyt, typename GateLibrary, typename GateLyt>
 class apply_gate_library_impl
 {
   public:
-    explicit apply_gate_library_impl(const GateLyt& lyt, const sidb_surface<CellLyt>& defect_surface) :
+    explicit apply_gate_library_impl(const GateLyt& lyt) :
             gate_lyt{lyt},
             cell_lyt{aspect_ratio<CellLyt>{((gate_lyt.x() + 1) * GateLibrary::gate_x_size()) - 1,
                                            ((gate_lyt.y() + 1) * GateLibrary::gate_y_size()) - 1, gate_lyt.z()},
-                     gate_lyt.get_clocking_scheme(), "", GateLibrary::gate_x_size(), GateLibrary::gate_y_size()},
-            sidb_surface{defect_surface}
+                     gate_lyt.get_clocking_scheme(), "", GateLibrary::gate_x_size(), GateLibrary::gate_y_size()}
     {}
 
+    /**
+     * This function dynamically designs gates based on the provided atomic defects and gate types defined in `lyt`.
+     * It creates a cell-level layout by adapting a gate-level layout on-the-fly to implement the gate types using
+     * building blocks from the `GateLibrary`. Atomic defects are incorporated into the gate designs during this
+     * process.
+     *
+     * @param defect_surface Defect surface with atomic defects.
+     * @return A cell-level layout implementing gate types with building blocks defined in `GateLibrary`.
+     */
+    CellLyt run_dynamic_gates(const sidb_surface<CellLyt>& defect_surface)
+    {
+#if (PROGRESS_BARS)
+        // initialize a progress bar
+        mockturtle::progress_bar bar{static_cast<uint32_t>(gate_lyt.size()), "[i] applying gate library: |{0}|"};
+#endif
+        gate_lyt.foreach_node(
+            [&, this](const auto& n, [[maybe_unused]] auto i)
+            {
+                if (!gate_lyt.is_constant(n))
+                {
+                    const auto t = gate_lyt.get_tile(n);
+
+                    // retrieve the top-leftmost cell in tile t
+                    const auto c =
+                        relative_to_absolute_cell_position<GateLibrary::gate_x_size(), GateLibrary::gate_y_size(),
+                                                           GateLyt, CellLyt>(gate_lyt, t, cell<CellLyt>{0, 0});
+
+                    assign_gate(c, GateLibrary::set_up_gate(gate_lyt, t, defect_surface), n);
+                }
+#if (PROGRESS_BARS)
+                // update progress
+                bar(i);
+#endif
+            });
+
+        // perform post-layout optimization if necessary
+        if constexpr (has_post_layout_optimization_v<GateLibrary, CellLyt>)
+        {
+            GateLibrary::post_layout_optimization(cell_lyt);
+        }
+        // if available, recover layout name
+        if constexpr (has_get_layout_name_v<GateLyt> && has_set_layout_name_v<CellLyt>)
+        {
+            cell_lyt.set_layout_name(gate_lyt.get_layout_name());
+        }
+
+        return cell_lyt;
+    }
+
+    /**
+     * Run the cell layout generation process.
+     *
+     * This function performs the cell layout generation process based on the gate library and the gate-level layout
+     * information provided by `GateLibrary` and `gate_lyt`. It iterates through the nodes in the gate-level layout and
+     * assigns gates to cells based on their corresponding positions and types. Optionally, it performs post-layout
+     * optimization and sets the layout name if certain conditions are met.
+     *
+     * @return A `CellLyt` object representing the generated cell layout.
+     */
     CellLyt run()
     {
 #if (PROGRESS_BARS)
@@ -61,7 +119,7 @@ class apply_gate_library_impl
                         relative_to_absolute_cell_position<GateLibrary::gate_x_size(), GateLibrary::gate_y_size(),
                                                            GateLyt, CellLyt>(gate_lyt, t, cell<CellLyt>{0, 0});
 
-                    assign_gate(c, GateLibrary::set_up_gate(gate_lyt, t, sidb_surface), n);
+                    assign_gate(c, GateLibrary::set_up_gate(gate_lyt, t), n);
                 }
 #if (PROGRESS_BARS)
                 // update progress
@@ -86,7 +144,6 @@ class apply_gate_library_impl
   private:
     GateLyt gate_lyt;
     CellLyt cell_lyt;
-    sidb_surface<CellLyt> sidb_surface;
 
     void assign_gate(const cell<CellLyt>& c, const typename GateLibrary::fcn_gate& g,
                      const mockturtle::node<GateLyt>& n)
@@ -135,7 +192,7 @@ class apply_gate_library_impl
  * @return A cell-level layout that implements `lyt`'s gate types with building blocks defined in `GateLibrary`.
  */
 template <typename CellLyt, typename GateLibrary, typename GateLyt>
-CellLyt apply_gate_library(const GateLyt& lyt, const sidb_surface<CellLyt> &defect_surface)
+CellLyt apply_gate_library(const GateLyt& lyt)
 {
     static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
     static_assert(!has_siqad_coord_v<CellLyt>, "CellLyt cannot have SiQAD coordinates");
@@ -146,9 +203,41 @@ CellLyt apply_gate_library(const GateLyt& lyt, const sidb_surface<CellLyt> &defe
     static_assert(std::is_same_v<technology<CellLyt>, technology<GateLibrary>>,
                   "CellLyt and GateLibrary must implement the same technology");
 
-    detail::apply_gate_library_impl<CellLyt, GateLibrary, GateLyt> p{lyt, defect_surface};
+    detail::apply_gate_library_impl<CellLyt, GateLibrary, GateLyt> p{lyt};
 
     auto result = p.run();
+
+    return result;
+}
+/**
+ * Applies a dynamic gate library (i.e., gate are designed on the fly by respecting atomic defects) to a given
+ * gate-level layout and, thereby, creates and returns a cell-level layout.
+ *
+ * May pass through, and thereby throw, an `unsupported_gate_type_exception` or an
+ * `unsupported_gate_orientation_exception`.
+ *
+ * @tparam CellLyt Type of the returned cell-level layout.
+ * @tparam GateLibrary Type of the gate library to apply.
+ * @tparam GateLyt Type of the gate-level layout to apply the library to.
+ * @param lyt The gate-level layout.
+ * @param defect_surface Defect surface with all atomic defects.
+ * @return A cell-level layout that implements `lyt`'s gate types with building blocks defined in `GateLibrary`.
+ */
+template <typename CellLyt, typename GateLibrary, typename GateLyt>
+CellLyt apply_gate_library_dynamic_gates(const GateLyt& lyt, const sidb_surface<CellLyt>& defect_surface)
+{
+    static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
+    static_assert(!has_siqad_coord_v<CellLyt>, "CellLyt cannot have SiQAD coordinates");
+    static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
+    static_assert(mockturtle::has_is_constant_v<GateLyt>, "GateLyt does not implement the is_constant function");
+    static_assert(mockturtle::has_foreach_node_v<GateLyt>, "GateLyt does not implement the foreach_node function");
+
+    static_assert(std::is_same_v<technology<CellLyt>, technology<GateLibrary>>,
+                  "CellLyt and GateLibrary must implement the same technology");
+
+    detail::apply_gate_library_impl<CellLyt, GateLibrary, GateLyt> p{lyt};
+
+    auto result = p.run_dynamic_gates(defect_surface);
 
     return result;
 }

@@ -197,7 +197,6 @@ class design_sidb_gates_impl
                                     }
                                 });
                         }
-                        const auto defects = result_lyt.num_defects();
                         if (const auto [status, sim_calls] =
                                 is_operational(result_lyt, truth_table, params_is_operational);
                             status == operational_status::OPERATIONAL)

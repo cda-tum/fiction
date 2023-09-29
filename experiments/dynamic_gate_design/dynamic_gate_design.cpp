@@ -44,10 +44,12 @@ int main()  // NOLINT
     using gate_lyt = fiction::hex_even_row_gate_clk_lyt;
     using cell_lyt = fiction::sidb_cell_clk_lyt;
 
-    static const std::string layouts_folder = fmt::format("{}/dynamic_gate_design/layouts", EXPERIMENTS_PATH);
-        const auto               surface_lattice = fiction::read_sidb_surface_defects<cell_lyt>(
-            "../../experiments/defect_aware_physical_design/1_percent_with_charged_surface.txt", "py_test_surface");
-    // const auto surface_lattice = fiction::sidb_surface<cell_lyt>{};
+    static const std::string layouts_folder  = fmt::format("{}/dynamic_gate_design/layouts", EXPERIMENTS_PATH);
+//    const auto               surface_lattice = fiction::read_sidb_surface_defects<cell_lyt>(
+//        "../../experiments/defect_aware_physical_design/1_percent_with_charged_surface.txt", "py_test_surface");
+//    const auto lattice_tiling = gate_lyt{{11, 30}};
+
+    //     const auto surface_lattice = fiction::sidb_surface<cell_lyt>{};
 
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint64_t, uint64_t,
                             uint64_t, uint32_t, uint32_t, uint64_t, uint64_t, double, bool, uint64_t, double>
@@ -75,13 +77,14 @@ int main()  // NOLINT
     const fiction::sidb_surface_params surface_params{
         std::unordered_set<fiction::sidb_defect_type>{fiction::sidb_defect_type::DB}};
 
-//    static const std::string surface_data_path =
-//        fmt::format("{}/defect_aware_physical_design/defects_full56_Oct.xml", EXPERIMENTS_PATH);
-//    fiction::sidb_surface<cell_lyt> surface_lattice{surface_params};
-//    std::cout << surface_lattice.num_defects() << std::endl;
-//    fiction::read_sqd_layout(surface_lattice, surface_data_path);
-    const auto number_defects = surface_lattice.num_defects();
-    std::cout << number_defects << std::endl;
+        static const std::string surface_data_path =
+            fmt::format("{}/defect_aware_physical_design/defects_full70.xml", EXPERIMENTS_PATH);
+        fiction::sidb_surface<cell_lyt> surface_lattice{surface_params};
+        std::cout << surface_lattice.num_defects() << std::endl;
+        fiction::read_sqd_layout(surface_lattice, surface_data_path);
+        const auto number_defects = surface_lattice.num_defects();
+        std::cout << number_defects << std::endl;
+        const auto lattice_tiling = gate_lyt{{11, 17}};
 
     // fiction::sidb_surface<cell_lyt> surface_lattice{surface_params};
     // fiction::read_sqd_layout(surface_lattice, surface_data_path);
@@ -98,8 +101,6 @@ int main()  // NOLINT
 
     const fiction::technology_mapping_params tech_map_params = fiction::all_2_input_functions();
 
-    const auto lattice_tiling = gate_lyt{{12, 17}};
-
     const auto black_list =
         fiction::sidb_surface_analysis<fiction::sidb_skeleton_bestagon_library>(lattice_tiling, surface_lattice);
 
@@ -113,14 +114,12 @@ int main()  // NOLINT
     fiction::exact_physical_design_stats exact_stats{};
     exact_params.black_list = black_list;
 
-    fiction::orthogonal_physical_design_stats stats{};
-
-    constexpr const uint64_t bench_select = fiction_experiments::all & ~fiction_experiments::parity &
-                                            ~fiction_experiments::two_bit_add_maj & ~fiction_experiments::b1_r2 &
-                                            ~fiction_experiments::clpl & ~fiction_experiments::iscas85 &
-                                            ~fiction_experiments::epfl & ~fiction_experiments::half_adder;
-
-//    constexpr const uint64_t bench_select = fiction_experiments::t;
+//        constexpr const uint64_t bench_select = fiction_experiments::all & ~fiction_experiments::parity &
+//                                                ~fiction_experiments::two_bit_add_maj & ~fiction_experiments::b1_r2 &
+//                                                ~fiction_experiments::clpl & ~fiction_experiments::iscas85 &
+//                                                ~fiction_experiments::epfl & ~fiction_experiments::half_adder;
+//
+    constexpr const uint64_t bench_select = fiction_experiments::t;
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
@@ -144,9 +143,6 @@ int main()  // NOLINT
 
         // perform layout generation with an SMT-based exact algorithm
         const auto gate_level_layout = fiction::exact<gate_lyt>(mapped_network, exact_params, &exact_stats);
-        //
-        //        const auto gate_level_layout = fiction::orthogonal<gate_lyt>(mapped_network,
-        //        fiction::orthogonal_physical_design_params{}, &stats);
 
         if (gate_level_layout.has_value())
         {
@@ -159,12 +155,10 @@ int main()  // NOLINT
             fiction::critical_path_length_and_throughput_stats cp_tp_stats{};
             fiction::critical_path_length_and_throughput(*gate_level_layout, &cp_tp_stats);
 
-            // TODO incorporate surface_lattice into apply_gate_library
-            // TODO this can be achieved by implementing an in-place version of apply_gate_library
-
             // apply gate library
-            const auto cell_level_layout = fiction::apply_gate_library<cell_lyt, fiction::sidb_dynamic_gate_library>(
-                *gate_level_layout, surface_lattice);
+            const auto cell_level_layout =
+                fiction::apply_gate_library_dynamic_gates<cell_lyt, fiction::sidb_dynamic_gate_library>(
+                    *gate_level_layout, surface_lattice);
 
             // compute area
             fiction::area_stats                            area_stats{};

@@ -54,7 +54,8 @@ using surface_black_list =
  * @return A black list of gate functions associated with tiles.
  */
 template <typename GateLibrary, typename GateLyt, typename CellLyt>
-[[nodiscard]] auto sidb_surface_analysis(const GateLyt& gate_lyt, const sidb_surface<CellLyt>& surface) noexcept
+[[nodiscard]] auto sidb_surface_analysis(const GateLyt& gate_lyt, const sidb_surface<CellLyt>& surface,
+                                         const bool incorporate_defect_into_gate_design = false) noexcept
 {
     static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
     static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
@@ -71,7 +72,7 @@ template <typename GateLibrary, typename GateLyt, typename CellLyt>
 
     surface_black_list<GateLyt, port_type> black_list{};
 
-    const auto sidbs_affected_by_defects = surface.all_affected_sidbs();
+    const auto sidbs_affected_by_defects = surface.all_affected_sidbs(incorporate_defect_into_gate_design);
     const auto gate_implementations      = GateLibrary::get_functional_implementations();
     const auto gate_ports                = GateLibrary::get_gate_ports();
 
@@ -110,8 +111,6 @@ template <typename GateLibrary, typename GateLyt, typename CellLyt>
                             {
                                 black_list[t][fun].push_back(port);
                             }
-
-                            return;  // skip to next gate
                         }
                     }
                 }
@@ -124,9 +123,10 @@ template <typename GateLibrary, typename GateLyt, typename CellLyt>
         [&](const auto& t) constexpr
         {
             // for each gate in the library
-            std::for_each(gate_implementations.cbegin(), gate_implementations.cend(),
-                          // analyze the defect impact
-                          std::bind(analyze_gate, std::placeholders::_1, t));
+            for (const auto& it : gate_implementations)
+            {
+                analyze_gate(it, t);
+            }
         });
 
     return black_list;
