@@ -8,8 +8,8 @@
 #include "fiction/traits.hpp"
 #include "utils/version_info.hpp"
 
-#include <fiction/layouts/clocked_layout.hpp>
-#include <fiction/layouts/clocking_scheme.hpp>
+#include "fiction/layouts/clocked_layout.hpp"
+#include "fiction/layouts/clocking_scheme.hpp"
 
 #include <fmt/chrono.h>
 #include <fmt/format.h>
@@ -84,7 +84,8 @@ class write_gate_level_layout_impl
 
     void run()
     {
-        std::stringstream header{}, layout_metadata{};
+        std::stringstream header{};
+        std::stringstream layout_metadata{};
 
         header << fcn::FCN_HEADER << fcn::OPEN_FCN;
 
@@ -106,12 +107,12 @@ class write_gate_level_layout_impl
         os << fcn::OPEN_GATES;
 
         mockturtle::topo_view layout_topo{lyt};
-        int                   id = 0;
+        uint32_t                   id = 0;
 
         layout_topo.foreach_pi(
             [&](const auto& gate)
             {
-                const tile<Lyt> coord = lyt.get_tile(gate);
+                const auto coord = lyt.get_tile(gate);
                 os << fcn::OPEN_GATE;
                 os << fmt::format(fcn::GATE, id, "PI", lyt.get_name(gate), coord.x, coord.y, coord.z);
                 os << fcn::CLOSE_GATE;
@@ -121,7 +122,7 @@ class write_gate_level_layout_impl
         layout_topo.foreach_gate(
             [&](const auto& gate)
             {
-                const tile<Lyt> coord = lyt.get_tile(gate);
+                const auto coord = lyt.get_tile(gate);
                 if (const auto signals = lyt.incoming_data_flow(coord); signals.size() == 1)
                 {
                     os << fcn::OPEN_GATE;

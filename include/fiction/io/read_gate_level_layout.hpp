@@ -8,10 +8,10 @@
 #include "fiction/traits.hpp"
 #include "fiction/utils/name_utils.hpp"
 
-#include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
-#include <fiction/layouts/gate_level_layout.hpp>
-#include <fiction/layouts/tile_based_layout.hpp>
+#include "fiction/layouts/cartesian_layout.hpp"
+#include "fiction/layouts/clocked_layout.hpp"
+#include "fiction/layouts/gate_level_layout.hpp"
+#include "fiction/layouts/tile_based_layout.hpp"
 
 #include <kitty/constructors.hpp>
 #include <tinyxml2.h>
@@ -80,7 +80,7 @@ class read_gate_level_layout_impl
         }
 
         auto* const name = layout->FirstChildElement("name");
-        if (name != nullptr and name->GetText())
+        if (name != nullptr && name->GetText())
         {
             std::string layout_name = name->GetText();
             set_name(lyt, layout_name);
@@ -98,23 +98,23 @@ class read_gate_level_layout_impl
             int       x = std::stoi(size->FirstChildElement("x")->GetText());
             int       y = std::stoi(size->FirstChildElement("y")->GetText());
             int       z = std::stoi(size->FirstChildElement("z")->GetText());
-            tile<Lyt> max_pos{x, y, z};
+            const tile<Lyt> max_pos{x, y, z};
             lyt.resize(max_pos);
         }
 
-        std::vector<gate_storage> gates;
+        std::vector<gate_storage> gates{};
         auto* const               gates_xml = fcn_root->FirstChildElement("gates");
         if (gates_xml != nullptr)
         {
             for (const auto* gate_xml = gates_xml->FirstChildElement("gate"); gate_xml != nullptr;
                  gate_xml             = gate_xml->NextSiblingElement("gate"))
             {
-                gate_storage gate = {};
+                gate_storage gate{};
                 gate.id           = std::stoi(gate_xml->FirstChildElement("id")->GetText());
                 gate.type         = gate_xml->FirstChildElement("type")->GetText();
 
                 auto* const pi_name = gate_xml->FirstChildElement("name");
-                if (pi_name != nullptr and pi_name->GetText())
+                if (pi_name != nullptr && pi_name->GetText())
                 {
                     gate.name = pi_name->GetText();
                 }
@@ -134,7 +134,7 @@ class read_gate_level_layout_impl
                     for (const auto* signal = incoming_signals->FirstChildElement("signal"); signal != nullptr;
                          signal             = signal->NextSiblingElement("signal"))
                     {
-                        tile<Lyt> incoming_signal;
+                        tile<Lyt> incoming_signal{};
                         incoming_signal.x = std::stoull(signal->FirstChildElement("x")->GetText());
                         incoming_signal.y = std::stoull(signal->FirstChildElement("y")->GetText());
                         incoming_signal.z = std::stoull(signal->FirstChildElement("z")->GetText());
@@ -147,9 +147,9 @@ class read_gate_level_layout_impl
 
             std::sort(gates.begin(), gates.end(), gate_storage::compare_by_id);
 
-            for (const gate_storage& gate : gates)
+            for (const auto& gate : gates)
             {
-                tile<Lyt> location{gate.loc.x, gate.loc.y, gate.loc.z};
+                const tile<Lyt> location{gate.loc.x, gate.loc.y, gate.loc.z};
 
                 if (gate.type == "PI")
                 {
@@ -158,8 +158,8 @@ class read_gate_level_layout_impl
 
                 else if (gate.incoming.size() == 1)
                 {
-                    tile<Lyt> incoming_tile{gate.incoming.front().x, gate.incoming.front().y, gate.incoming.front().z};
-                    auto      incoming_signal = lyt.make_signal(lyt.get_node(incoming_tile));
+                    const tile<Lyt> incoming_tile{gate.incoming.front().x, gate.incoming.front().y, gate.incoming.front().z};
+                    const auto      incoming_signal = lyt.make_signal(lyt.get_node(incoming_tile));
 
                     if (gate.type == "PO")
                     {
@@ -179,12 +179,12 @@ class read_gate_level_layout_impl
 
                 else if (gate.incoming.size() == 2)
                 {
-                    tile<Lyt> incoming_tile_1{gate.incoming.front().x, gate.incoming.front().y,
+                    const tile<Lyt> incoming_tile_1{gate.incoming.front().x, gate.incoming.front().y,
                                               gate.incoming.front().z};
-                    tile<Lyt> incoming_tile_2{gate.incoming.back().x, gate.incoming.back().y, gate.incoming.back().z};
+                    const tile<Lyt> incoming_tile_2{gate.incoming.back().x, gate.incoming.back().y, gate.incoming.back().z};
 
-                    auto incoming_signal_1 = lyt.make_signal(lyt.get_node(incoming_tile_1));
-                    auto incoming_signal_2 = lyt.make_signal(lyt.get_node(incoming_tile_2));
+                    const auto incoming_signal_1 = lyt.make_signal(lyt.get_node(incoming_tile_1));
+                    const auto incoming_signal_2 = lyt.make_signal(lyt.get_node(incoming_tile_2));
 
                     if (gate.type == "AND")
                     {
@@ -234,7 +234,7 @@ class read_gate_level_layout_impl
      */
     Lyt lyt;
     /**
-     * The input stream from which the gate_level file is read.
+     * The input stream from which the gate-level layout is read.
      */
     std::istream& is;
 
@@ -246,7 +246,7 @@ class read_gate_level_layout_impl
         tile<Lyt>              loc{};
         std::vector<tile<Lyt>> incoming{};
 
-        static bool compare_by_id(const gate_storage& gate1, const gate_storage& gate2)
+        static bool compare_by_id(const gate_storage& gate1, const gate_storage& gate2) noexcept
         {
             return gate1.id < gate2.id;
         }
@@ -266,7 +266,7 @@ class read_gate_level_layout_impl
  * @param name The name to give to the generated layout.
  */
 template <typename Lyt>
-Lyt read_gate_level_layout(std::istream& is, const std::string_view& name = "")
+[[nodiscard]] Lyt read_gate_level_layout(std::istream& is, const std::string_view& name = "")
 {
     detail::read_gate_level_layout_impl<Lyt> p{is, name};
 
@@ -304,7 +304,7 @@ void read_gate_level_layout(Lyt& lyt, std::istream& is)
  * @param name The name to give to the generated layout.
  */
 template <typename Lyt>
-Lyt read_gate_level_layout(const std::string_view& filename, const std::string_view& name = "")
+[[nodiscard]] Lyt read_gate_level_layout(const std::string_view& filename, const std::string_view& name = "")
 {
     std::ifstream is{filename.data(), std::ifstream::in};
 
