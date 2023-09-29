@@ -1572,11 +1572,11 @@ class gate_level_layout : public ClockedLayout
         create_and_cache(lit_and, 2);
         create_and_cache(lit_or, 2);
         create_and_cache(lit_xor, 2);
+        create_and_cache(lit_maj, 3);
         create_and_cache(lit_lt, 2);
         create_and_cache(lit_gt, 2);
         create_and_cache(lit_ge, 2);
         create_and_cache(lit_le, 2);
-        create_and_cache(lit_maj, 3);
     }
 
     void assign_node(const tile& t, const node n)
