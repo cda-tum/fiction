@@ -5,13 +5,12 @@
 #ifndef FICTION_READ_GATE_LEVEL_LAYOUT_HPP
 #define FICTION_READ_GATE_LEVEL_LAYOUT_HPP
 
-#include "fiction/traits.hpp"
-#include "fiction/utils/name_utils.hpp"
-
 #include "fiction/layouts/cartesian_layout.hpp"
 #include "fiction/layouts/clocked_layout.hpp"
 #include "fiction/layouts/gate_level_layout.hpp"
 #include "fiction/layouts/tile_based_layout.hpp"
+#include "fiction/traits.hpp"
+#include "fiction/utils/name_utils.hpp"
 
 #include <kitty/constructors.hpp>
 #include <tinyxml2.h>
@@ -57,10 +56,10 @@ class read_gate_level_layout_impl
         // tinyXML2 does not support std::istream, so we have to read the whole file into a string first
         std::stringstream buffer{};
         buffer << is.rdbuf();
-        const std::string sqd_content{buffer.str()};
+        const std::string gate_level_content{buffer.str()};
 
         tinyxml2::XMLDocument xml_document{};
-        xml_document.Parse(sqd_content.c_str());
+        xml_document.Parse(gate_level_content.c_str());
 
         if (xml_document.ErrorID() != 0)
         {
@@ -89,15 +88,28 @@ class read_gate_level_layout_impl
         auto* const clocking = layout->FirstChildElement("clocking");
         if (clocking != nullptr)
         {
-            lyt.replace_clocking_scheme(*get_clocking_scheme<Lyt>(clocking->GetText()));
+            const auto clocking_scheme = get_clocking_scheme<Lyt>(clocking->GetText());
+            if (clocking_scheme.has_value())
+            {
+                lyt.replace_clocking_scheme(*clocking_scheme);
+            }
+            else
+            {
+                throw gate_level_parsing_error("Error parsing gate_level file: unknown clocking scheme: " +
+                                               std::string(clocking->GetText()));
+            }
+        }
+        else
+        {
+            throw gate_level_parsing_error("Error parsing gate_level file: no element 'clocking'");
         }
 
         auto* const size = layout->FirstChildElement("size");
         if (size != nullptr)
         {
-            int       x = std::stoi(size->FirstChildElement("x")->GetText());
-            int       y = std::stoi(size->FirstChildElement("y")->GetText());
-            int       z = std::stoi(size->FirstChildElement("z")->GetText());
+            int             x = std::stoi(size->FirstChildElement("x")->GetText());
+            int             y = std::stoi(size->FirstChildElement("y")->GetText());
+            int             z = std::stoi(size->FirstChildElement("z")->GetText());
             const tile<Lyt> max_pos{x, y, z};
             lyt.resize(max_pos);
         }
@@ -110,8 +122,8 @@ class read_gate_level_layout_impl
                  gate_xml             = gate_xml->NextSiblingElement("gate"))
             {
                 gate_storage gate{};
-                gate.id           = std::stoi(gate_xml->FirstChildElement("id")->GetText());
-                gate.type         = gate_xml->FirstChildElement("type")->GetText();
+                gate.id   = std::stoi(gate_xml->FirstChildElement("id")->GetText());
+                gate.type = gate_xml->FirstChildElement("type")->GetText();
 
                 auto* const pi_name = gate_xml->FirstChildElement("name");
                 if (pi_name != nullptr && pi_name->GetText())
@@ -158,7 +170,8 @@ class read_gate_level_layout_impl
 
                 else if (gate.incoming.size() == 1)
                 {
-                    const tile<Lyt> incoming_tile{gate.incoming.front().x, gate.incoming.front().y, gate.incoming.front().z};
+                    const tile<Lyt> incoming_tile{gate.incoming.front().x, gate.incoming.front().y,
+                                                  gate.incoming.front().z};
                     const auto      incoming_signal = lyt.make_signal(lyt.get_node(incoming_tile));
 
                     if (gate.type == "PO")
@@ -180,8 +193,9 @@ class read_gate_level_layout_impl
                 else if (gate.incoming.size() == 2)
                 {
                     const tile<Lyt> incoming_tile_1{gate.incoming.front().x, gate.incoming.front().y,
-                                              gate.incoming.front().z};
-                    const tile<Lyt> incoming_tile_2{gate.incoming.back().x, gate.incoming.back().y, gate.incoming.back().z};
+                                                    gate.incoming.front().z};
+                    const tile<Lyt> incoming_tile_2{gate.incoming.back().x, gate.incoming.back().y,
+                                                    gate.incoming.back().z};
 
                     const auto incoming_signal_1 = lyt.make_signal(lyt.get_node(incoming_tile_1));
                     const auto incoming_signal_2 = lyt.make_signal(lyt.get_node(incoming_tile_2));
@@ -230,7 +244,7 @@ class read_gate_level_layout_impl
 
   private:
     /**
-     * The layout to which the parsed cells are added.
+     * The layout which will be altered based on the parsed information.
      */
     Lyt lyt;
     /**

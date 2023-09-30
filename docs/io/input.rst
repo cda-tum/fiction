@@ -19,6 +19,18 @@ Truth Tables
 .. doxygenclass:: fiction::tt_reader
    :members:
 
+Gate-level Layouts
+##################
+
+**Header:** ``fiction/io/read_gate_level_layout.hpp``
+
+.. doxygenfunction:: fiction::read_gate_level_layout(std::istream& is, const std::string_view& name = "")
+.. doxygenfunction:: fiction::read_gate_level_layout(Lyt& lyt, std::istream& is)
+.. doxygenfunction:: fiction::read_gate_level_layout(const std::string_view& filename, const std::string_view& name = "")
+.. doxygenfunction:: fiction::read_gate_level_layout(Lyt& lyt, const std::string_view& filename)
+
+.. doxygenclass:: fiction::gate_level_parsing_error
+
 Cell-level Layouts
 ##################
 

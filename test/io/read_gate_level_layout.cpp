@@ -268,3 +268,36 @@ TEST_CASE("Parsing error: no root element 'loc'", "[fcn]")
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
+
+TEST_CASE("Parsing error: no element 'clocking'", "[fcn]")
+{
+    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fcn>\n"
+                                              "  <layout>\n"
+                                              "    <name>Test</name>\n"
+                                              "    <topology>cartesian</topology>\n"
+                                              "  </layout>\n"
+                                              "</fcn>\n";
+
+    std::istringstream layout_stream{fcn_layout};
+
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+}
+
+TEST_CASE("Parsing error: unknown clocking scheme", "[fcn]")
+{
+    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fcn>\n"
+                                              "  <layout>\n"
+                                              "    <name>Test</name>\n"
+                                              "    <topology>cartesian</topology>\n"
+                                              "    <clocking>CoolClocking</clocking>\n"
+                                              "  </layout>\n"
+                                              "</fcn>\n";
+
+    std::istringstream layout_stream{fcn_layout};
+
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+}

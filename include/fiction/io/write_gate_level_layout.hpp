@@ -5,11 +5,10 @@
 #ifndef FICTION_WRITE_GATE_LEVEL_LAYOUT_HPP
 #define FICTION_WRITE_GATE_LEVEL_LAYOUT_HPP
 
-#include "fiction/traits.hpp"
-#include "utils/version_info.hpp"
-
 #include "fiction/layouts/clocked_layout.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
+#include "fiction/traits.hpp"
+#include "utils/version_info.hpp"
 
 #include <fmt/chrono.h>
 #include <fmt/format.h>
@@ -107,10 +106,10 @@ class write_gate_level_layout_impl
         os << fcn::OPEN_GATES;
 
         mockturtle::topo_view layout_topo{lyt};
-        uint32_t                   id = 0;
+        uint32_t              id = 0;
 
         layout_topo.foreach_pi(
-            [&](const auto& gate)
+            [&id, this](const auto& gate)
             {
                 const auto coord = lyt.get_tile(gate);
                 os << fcn::OPEN_GATE;
@@ -120,7 +119,7 @@ class write_gate_level_layout_impl
             });
 
         layout_topo.foreach_gate(
-            [&](const auto& gate)
+            [&id, this](const auto& gate)
             {
                 const auto coord = lyt.get_tile(gate);
                 if (const auto signals = lyt.incoming_data_flow(coord); signals.size() == 1)
@@ -199,8 +198,13 @@ class write_gate_level_layout_impl
     }
 
   private:
+    /**
+     * The layout to be written.
+     */
     Lyt lyt;
-
+    /**
+     * The output stream to which the gate-level layout is written.
+     */
     std::ostream& os;
 };
 
