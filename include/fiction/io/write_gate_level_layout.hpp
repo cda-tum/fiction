@@ -240,7 +240,7 @@ class write_gate_level_layout_impl
                     os << fmt::format(fcn::GATE, id, kitty::to_hex(node_fun), "", coord.x, coord.y, coord.z);
 
                     os << fcn::OPEN_INCOMING;
-                    for (uint i = 0; i <= signals.size(); i++)
+                    for (std::size_t i = 0; i <= signals.size(); i++)
                     {
                         os << fmt::format(fcn::SIGNAL, signals[i].x, signals[i].y, signals[i].z);
                     }

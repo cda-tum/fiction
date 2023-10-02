@@ -476,15 +476,15 @@ class read_gate_level_layout_impl
                 }
                 else if (std::all_of(gate.type.begin(), gate.type.end(), ::isxdigit))
                 {
-                    auto num_incoming_signals = static_cast<uint32_t>(gate.incoming.size());
+                    const auto                           num_incoming_signals = gate.incoming.size();
                     std::vector<mockturtle::signal<Lyt>> incoming_signals{};
-                    for (uint32_t i = 0; i < num_incoming_signals; i++)
+                    for (std::size_t i = 0; i < num_incoming_signals; i++)
                     {
                         tile<Lyt> incoming_tile_i{gate.incoming[i].x, gate.incoming[i].y, gate.incoming[i].z};
                         auto      incoming_signal_i = lyt.make_signal(lyt.get_node(incoming_tile_i));
                         incoming_signals.push_back(incoming_signal_i);
                     }
-                    kitty::dynamic_truth_table tt_t(num_incoming_signals);
+                    kitty::dynamic_truth_table tt_t(static_cast<uint32_t>(num_incoming_signals));
                     kitty::create_from_hex_string(tt_t, gate.type);
                     lyt.create_node({incoming_signals}, tt_t, location);
                 }
