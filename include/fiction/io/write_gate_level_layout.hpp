@@ -191,6 +191,32 @@ class write_gate_level_layout_impl
                     os << fcn::CLOSE_GATE;
                     id++;
                 }
+                else if (signals.size() == 3)
+                {
+                    os << fcn::OPEN_GATE;
+
+                    const auto signal_a = signals[0];
+                    const auto signal_b = signals[1];
+                    const auto signal_c = signals[2];
+
+                    if (lyt.is_maj(gate))
+                    {
+                        os << fmt::format(fcn::GATE, id, "MAJ", "", coord.x, coord.y, coord.z);
+                    }
+                    else if (lyt.is_function(gate))
+                    {
+                        const auto node_fun = lyt.node_function(gate);
+
+                        os << fmt::format(fcn::GATE, id, kitty::to_binary(node_fun), "", coord.x, coord.y, coord.z);
+                    }
+                    os << fcn::OPEN_INCOMING;
+                    os << fmt::format(fcn::SIGNAL, signal_a.x, signal_a.y, signal_a.z);
+                    os << fmt::format(fcn::SIGNAL, signal_b.x, signal_b.y, signal_b.z);
+                    os << fmt::format(fcn::SIGNAL, signal_c.x, signal_c.y, signal_c.z);
+                    os << fcn::CLOSE_INCOMING;
+                    os << fcn::CLOSE_GATE;
+                    id++;
+                }
             });
 
         os << fcn::CLOSE_GATES;

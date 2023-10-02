@@ -27,6 +27,11 @@ TEST_CASE("Read empty FCN layout", "[fcn]")
                                               "    <name>Test</name>\n"
                                               "    <topology>cartesian</topology>\n"
                                               "    <clocking>2DDWave</clocking>\n"
+                                              "    <size>\n"
+                                              "      <x>0</x>\n"
+                                              "      <y>0</y>\n"
+                                              "      <z>0</z>\n"
+                                              "    </size>\n"
                                               "  </layout>\n"
                                               "</fcn>\n";
 
@@ -174,7 +179,7 @@ TEST_CASE("Parsing error: no root element 'fcn'", "[fcn]")
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'layout'", "[fcn]")
+TEST_CASE("Parsing error: no element 'layout' in 'fcn'", "[fcn]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
@@ -189,7 +194,353 @@ TEST_CASE("Parsing error: no element 'layout'", "[fcn]")
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
-TEST_CASE("Parsing error: no root element 'loc'", "[fcn]")
+TEST_CASE("Parsing error: no element 'clocking' in 'layout'", "[fcn]")
+{
+    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fcn>\n"
+                                              "  <layout>\n"
+                                              "    <name>Test</name>\n"
+                                              "    <topology>cartesian</topology>\n"
+                                              "  </layout>\n"
+                                              "</fcn>\n";
+
+    std::istringstream layout_stream{fcn_layout};
+
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+}
+
+TEST_CASE("Parsing error: unknown clocking scheme", "[fcn]")
+{
+    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fcn>\n"
+                                              "  <layout>\n"
+                                              "    <name>Test</name>\n"
+                                              "    <topology>cartesian</topology>\n"
+                                              "    <clocking>CoolClocking</clocking>\n"
+                                              "  </layout>\n"
+                                              "</fcn>\n";
+
+    std::istringstream layout_stream{fcn_layout};
+
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+}
+
+TEST_CASE("Parsing error: no element 'size' in 'layout'", "[fcn]")
+{
+    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fcn>\n"
+                                              "  <layout>\n"
+                                              "    <name>Test</name>\n"
+                                              "    <topology>cartesian</topology>\n"
+                                              "    <clocking>2DDWave</clocking>\n"
+                                              "      <x>2</x>\n"
+                                              "      <y>1</y>\n"
+                                              "      <z>0</z>\n"
+                                              "  </layout>\n"
+                                              "</fcn>\n";
+
+    std::istringstream layout_stream{fcn_layout};
+
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+}
+
+TEST_CASE("Parsing error: no element 'x' in 'size'", "[fcn]")
+{
+    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fcn>\n"
+                                              "  <layout>\n"
+                                              "    <name>Test</name>\n"
+                                              "    <topology>cartesian</topology>\n"
+                                              "    <clocking>2DDWave</clocking>\n"
+                                              "    <size>\n"
+                                              "      <y>1</y>\n"
+                                              "      <z>0</z>\n"
+                                              "    </size>\n"
+                                              "  </layout>\n"
+                                              "</fcn>\n";
+
+    std::istringstream layout_stream{fcn_layout};
+
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+}
+
+TEST_CASE("Parsing error: no element 'y' in 'size'", "[fcn]")
+{
+    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fcn>\n"
+                                              "  <layout>\n"
+                                              "    <name>Test</name>\n"
+                                              "    <topology>cartesian</topology>\n"
+                                              "    <clocking>2DDWave</clocking>\n"
+                                              "    <size>\n"
+                                              "      <x>2</x>\n"
+                                              "      <z>0</z>\n"
+                                              "    </size>\n"
+                                              "  </layout>\n"
+                                              "</fcn>\n";
+
+    std::istringstream layout_stream{fcn_layout};
+
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+}
+
+TEST_CASE("Parsing error: no element 'z' in 'size'", "[fcn]")
+{
+    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fcn>\n"
+                                              "  <layout>\n"
+                                              "    <name>Test</name>\n"
+                                              "    <topology>cartesian</topology>\n"
+                                              "    <clocking>2DDWave</clocking>\n"
+                                              "    <size>\n"
+                                              "      <x>2</x>\n"
+                                              "      <y>1</y>\n"
+                                              "    </size>\n"
+                                              "  </layout>\n"
+                                              "</fcn>\n";
+
+    std::istringstream layout_stream{fcn_layout};
+
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+}
+
+TEST_CASE("Parsing error: no element 'id' in 'gate", "[fcn]")
+{
+    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fcn>\n"
+                                              "  <layout>\n"
+                                              "    <name>Test</name>\n"
+                                              "    <topology>cartesian</topology>\n"
+                                              "    <clocking>2DDWave</clocking>\n"
+                                              "    <size>\n"
+                                              "      <x>2</x>\n"
+                                              "      <y>1</y>\n"
+                                              "      <z>0</z>\n"
+                                              "    </size>\n"
+                                              "  </layout>\n"
+                                              "  <gates>\n"
+                                              "    <gate>\n"
+                                              "      <type>PI</type>\n"
+                                              "      <name>pi0</name>\n"
+                                              "      <loc>\n"
+                                              "        <x>0</x>\n"
+                                              "        <y>1</y>\n"
+                                              "        <z>0</z>\n"
+                                              "      </loc>\n"
+                                              "    </gate>\n"
+                                              "  </gates>\n"
+                                              "</fcn>\n";
+
+    std::istringstream layout_stream{fcn_layout};
+
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+}
+
+TEST_CASE("Parsing error: no element 'type' in 'gate", "[fcn]")
+{
+    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fcn>\n"
+                                              "  <layout>\n"
+                                              "    <name>Test</name>\n"
+                                              "    <topology>cartesian</topology>\n"
+                                              "    <clocking>2DDWave</clocking>\n"
+                                              "    <size>\n"
+                                              "      <x>2</x>\n"
+                                              "      <y>1</y>\n"
+                                              "      <z>0</z>\n"
+                                              "    </size>\n"
+                                              "  </layout>\n"
+                                              "  <gates>\n"
+                                              "    <gate>\n"
+                                              "      <id>0</id>\n"
+                                              "      <name>pi0</name>\n"
+                                              "      <loc>\n"
+                                              "        <x>0</x>\n"
+                                              "        <y>1</y>\n"
+                                              "        <z>0</z>\n"
+                                              "      </loc>\n"
+                                              "    </gate>\n"
+                                              "  </gates>\n"
+                                              "</fcn>\n";
+
+    std::istringstream layout_stream{fcn_layout};
+
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+}
+
+TEST_CASE("Parsing error: no element 'name' in 'gate", "[fcn]")
+{
+    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fcn>\n"
+                                              "  <layout>\n"
+                                              "    <name>Test</name>\n"
+                                              "    <topology>cartesian</topology>\n"
+                                              "    <clocking>2DDWave</clocking>\n"
+                                              "    <size>\n"
+                                              "      <x>2</x>\n"
+                                              "      <y>1</y>\n"
+                                              "      <z>0</z>\n"
+                                              "    </size>\n"
+                                              "  </layout>\n"
+                                              "  <gates>\n"
+                                              "    <gate>\n"
+                                              "      <id>0</id>\n"
+                                              "      <type>PI</type>\n"
+                                              "      <loc>\n"
+                                              "        <x>0</x>\n"
+                                              "        <y>1</y>\n"
+                                              "        <z>0</z>\n"
+                                              "      </loc>\n"
+                                              "    </gate>\n"
+                                              "  </gates>\n"
+                                              "</fcn>\n";
+
+    std::istringstream layout_stream{fcn_layout};
+
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+}
+
+TEST_CASE("Parsing error: no element 'loc' in 'gate'", "[fcn]")
+{
+    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fcn>\n"
+                                              "  <layout>\n"
+                                              "    <name>Test</name>\n"
+                                              "    <topology>cartesian</topology>\n"
+                                              "    <clocking>2DDWave</clocking>\n"
+                                              "    <size>\n"
+                                              "      <x>2</x>\n"
+                                              "      <y>1</y>\n"
+                                              "      <z>0</z>\n"
+                                              "    </size>\n"
+                                              "  </layout>\n"
+                                              "  <gates>\n"
+                                              "    <gate>\n"
+                                              "      <id>0</id>\n"
+                                              "      <type>PI</type>\n"
+                                              "      <name>pi0</name>\n"
+                                              "        <x>0</x>\n"
+                                              "        <y>1</y>\n"
+                                              "        <z>0</z>\n"
+                                              "    </gate>\n"
+                                              "  </gates>\n"
+                                              "</fcn>\n";
+
+    std::istringstream layout_stream{fcn_layout};
+
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+}
+
+TEST_CASE("Parsing error: no element 'x' in 'loc'", "[fcn]")
+{
+    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fcn>\n"
+                                              "  <layout>\n"
+                                              "    <name>Test</name>\n"
+                                              "    <topology>cartesian</topology>\n"
+                                              "    <clocking>2DDWave</clocking>\n"
+                                              "    <size>\n"
+                                              "      <x>2</x>\n"
+                                              "      <y>1</y>\n"
+                                              "      <z>0</z>\n"
+                                              "    </size>\n"
+                                              "  </layout>\n"
+                                              "  <gates>\n"
+                                              "    <gate>\n"
+                                              "      <id>0</id>\n"
+                                              "      <type>PI</type>\n"
+                                              "      <name>pi0</name>\n"
+                                              "      <loc>\n"
+                                              "        <y>1</y>\n"
+                                              "        <z>0</z>\n"
+                                              "      </loc>\n"
+                                              "    </gate>\n"
+                                              "  </gates>\n"
+                                              "</fcn>\n";
+
+    std::istringstream layout_stream{fcn_layout};
+
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+}
+
+TEST_CASE("Parsing error: no element 'y' in 'loc'", "[fcn]")
+{
+    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fcn>\n"
+                                              "  <layout>\n"
+                                              "    <name>Test</name>\n"
+                                              "    <topology>cartesian</topology>\n"
+                                              "    <clocking>2DDWave</clocking>\n"
+                                              "    <size>\n"
+                                              "      <x>2</x>\n"
+                                              "      <y>1</y>\n"
+                                              "      <z>0</z>\n"
+                                              "    </size>\n"
+                                              "  </layout>\n"
+                                              "  <gates>\n"
+                                              "    <gate>\n"
+                                              "      <id>0</id>\n"
+                                              "      <type>PI</type>\n"
+                                              "      <name>pi0</name>\n"
+                                              "      <loc>\n"
+                                              "        <x>0</x>\n"
+                                              "        <z>0</z>\n"
+                                              "      </loc>\n"
+                                              "    </gate>\n"
+                                              "  </gates>\n"
+                                              "</fcn>\n";
+
+    std::istringstream layout_stream{fcn_layout};
+
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+}
+
+TEST_CASE("Parsing error: no element 'z' in 'loc'", "[fcn]")
+{
+    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fcn>\n"
+                                              "  <layout>\n"
+                                              "    <name>Test</name>\n"
+                                              "    <topology>cartesian</topology>\n"
+                                              "    <clocking>2DDWave</clocking>\n"
+                                              "    <size>\n"
+                                              "      <x>2</x>\n"
+                                              "      <y>1</y>\n"
+                                              "      <z>0</z>\n"
+                                              "    </size>\n"
+                                              "  </layout>\n"
+                                              "  <gates>\n"
+                                              "    <gate>\n"
+                                              "      <id>0</id>\n"
+                                              "      <type>PI</type>\n"
+                                              "      <name>pi0</name>\n"
+                                              "      <loc>\n"
+                                              "        <x>0</x>\n"
+                                              "        <y>1</y>\n"
+                                              "      </loc>\n"
+                                              "    </gate>\n"
+                                              "  </gates>\n"
+                                              "</fcn>\n";
+
+    std::istringstream layout_stream{fcn_layout};
+
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+}
+
+TEST_CASE("Parsing error: unknown gate type", "[fcn]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
@@ -227,12 +578,94 @@ TEST_CASE("Parsing error: no root element 'loc'", "[fcn]")
                                               "    <gate>\n"
                                               "      <id>2</id>\n"
                                               "      <type>AND</type>\n"
+                                              "      <loc>\n"
                                               "        <x>1</x>\n"
                                               "        <y>1</y>\n"
                                               "        <z>0</z>\n"
+                                              "      </loc>\n"
                                               "      <incoming>\n"
                                               "        <signal>\n"
                                               "          <x>0</x>\n"
+                                              "          <y>1</y>\n"
+                                              "          <z>0</z>\n"
+                                              "        </signal>\n"
+                                              "        <signal>\n"
+                                              "          <x>1</x>\n"
+                                              "          <y>0</y>\n"
+                                              "          <z>0</z>\n"
+                                              "        </signal>\n"
+                                              "      </incoming>\n"
+                                              "    </gate>\n"
+                                              "    <gate>\n"
+                                              "      <id>3</id>\n"
+                                              "      <type>unknown</type>\n"
+                                              "      <loc>\n"
+                                              "        <x>2</x>\n"
+                                              "        <y>1</y>\n"
+                                              "        <z>0</z>\n"
+                                              "      </loc>\n"
+                                              "      <incoming>\n"
+                                              "        <signal>\n"
+                                              "          <x>1</x>\n"
+                                              "          <y>1</y>\n"
+                                              "          <z>0</z>\n"
+                                              "        </signal>\n"
+                                              "      </incoming>\n"
+                                              "    </gate>\n"
+                                              "  </gates>\n"
+                                              "</fcn>\n";
+
+    std::istringstream layout_stream{fcn_layout};
+
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+}
+
+TEST_CASE("Parsing error: no element 'x' in 'signal'", "[fcn]")
+{
+    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fcn>\n"
+                                              "  <layout>\n"
+                                              "    <name>Test</name>\n"
+                                              "    <topology>cartesian</topology>\n"
+                                              "    <clocking>2DDWave</clocking>\n"
+                                              "    <size>\n"
+                                              "      <x>2</x>\n"
+                                              "      <y>1</y>\n"
+                                              "      <z>0</z>\n"
+                                              "    </size>\n"
+                                              "  </layout>\n"
+                                              "  <gates>\n"
+                                              "    <gate>\n"
+                                              "      <id>0</id>\n"
+                                              "      <type>PI</type>\n"
+                                              "      <name>pi0</name>\n"
+                                              "      <loc>\n"
+                                              "        <x>0</x>\n"
+                                              "        <y>1</y>\n"
+                                              "        <z>0</z>\n"
+                                              "      </loc>\n"
+                                              "    </gate>\n"
+                                              "    <gate>\n"
+                                              "      <id>1</id>\n"
+                                              "      <type>PI</type>\n"
+                                              "      <name>pi1</name>\n"
+                                              "      <loc>\n"
+                                              "        <x>1</x>\n"
+                                              "        <y>0</y>\n"
+                                              "        <z>0</z>\n"
+                                              "      </loc>\n"
+                                              "    </gate>\n"
+                                              "    <gate>\n"
+                                              "      <id>2</id>\n"
+                                              "      <type>AND</type>\n"
+                                              "      <loc>\n"
+                                              "        <x>1</x>\n"
+                                              "        <y>1</y>\n"
+                                              "        <z>0</z>\n"
+                                              "      </loc>\n"
+                                              "      <incoming>\n"
+                                              "        <signal>\n"
                                               "          <y>1</y>\n"
                                               "          <z>0</z>\n"
                                               "        </signal>\n"
@@ -269,14 +702,79 @@ TEST_CASE("Parsing error: no root element 'loc'", "[fcn]")
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'clocking'", "[fcn]")
+TEST_CASE("Parsing error: no element 'y' in 'signal'", "[fcn]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
                                               "  <layout>\n"
                                               "    <name>Test</name>\n"
                                               "    <topology>cartesian</topology>\n"
+                                              "    <clocking>2DDWave</clocking>\n"
+                                              "    <size>\n"
+                                              "      <x>2</x>\n"
+                                              "      <y>1</y>\n"
+                                              "      <z>0</z>\n"
+                                              "    </size>\n"
                                               "  </layout>\n"
+                                              "  <gates>\n"
+                                              "    <gate>\n"
+                                              "      <id>0</id>\n"
+                                              "      <type>PI</type>\n"
+                                              "      <name>pi0</name>\n"
+                                              "      <loc>\n"
+                                              "        <x>0</x>\n"
+                                              "        <y>1</y>\n"
+                                              "        <z>0</z>\n"
+                                              "      </loc>\n"
+                                              "    </gate>\n"
+                                              "    <gate>\n"
+                                              "      <id>1</id>\n"
+                                              "      <type>PI</type>\n"
+                                              "      <name>pi1</name>\n"
+                                              "      <loc>\n"
+                                              "        <x>1</x>\n"
+                                              "        <y>0</y>\n"
+                                              "        <z>0</z>\n"
+                                              "      </loc>\n"
+                                              "    </gate>\n"
+                                              "    <gate>\n"
+                                              "      <id>2</id>\n"
+                                              "      <type>AND</type>\n"
+                                              "      <loc>\n"
+                                              "        <x>1</x>\n"
+                                              "        <y>1</y>\n"
+                                              "        <z>0</z>\n"
+                                              "      </loc>\n"
+                                              "      <incoming>\n"
+                                              "        <signal>\n"
+                                              "          <x>0</x>\n"
+                                              "          <z>0</z>\n"
+                                              "        </signal>\n"
+                                              "        <signal>\n"
+                                              "          <x>1</x>\n"
+                                              "          <y>0</y>\n"
+                                              "          <z>0</z>\n"
+                                              "        </signal>\n"
+                                              "      </incoming>\n"
+                                              "    </gate>\n"
+                                              "    <gate>\n"
+                                              "      <id>3</id>\n"
+                                              "      <type>PO</type>\n"
+                                              "      <name>po0</name>\n"
+                                              "      <loc>\n"
+                                              "        <x>2</x>\n"
+                                              "        <y>1</y>\n"
+                                              "        <z>0</z>\n"
+                                              "      </loc>\n"
+                                              "      <incoming>\n"
+                                              "        <signal>\n"
+                                              "          <x>1</x>\n"
+                                              "          <y>1</y>\n"
+                                              "          <z>0</z>\n"
+                                              "        </signal>\n"
+                                              "      </incoming>\n"
+                                              "    </gate>\n"
+                                              "  </gates>\n"
                                               "</fcn>\n";
 
     std::istringstream layout_stream{fcn_layout};
@@ -285,15 +783,79 @@ TEST_CASE("Parsing error: no element 'clocking'", "[fcn]")
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
-TEST_CASE("Parsing error: unknown clocking scheme", "[fcn]")
+TEST_CASE("Parsing error: no element 'z' in 'signal'", "[fcn]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
                                               "  <layout>\n"
                                               "    <name>Test</name>\n"
                                               "    <topology>cartesian</topology>\n"
-                                              "    <clocking>CoolClocking</clocking>\n"
+                                              "    <clocking>2DDWave</clocking>\n"
+                                              "    <size>\n"
+                                              "      <x>2</x>\n"
+                                              "      <y>1</y>\n"
+                                              "      <z>0</z>\n"
+                                              "    </size>\n"
                                               "  </layout>\n"
+                                              "  <gates>\n"
+                                              "    <gate>\n"
+                                              "      <id>0</id>\n"
+                                              "      <type>PI</type>\n"
+                                              "      <name>pi0</name>\n"
+                                              "      <loc>\n"
+                                              "        <x>0</x>\n"
+                                              "        <y>1</y>\n"
+                                              "        <z>0</z>\n"
+                                              "      </loc>\n"
+                                              "    </gate>\n"
+                                              "    <gate>\n"
+                                              "      <id>1</id>\n"
+                                              "      <type>PI</type>\n"
+                                              "      <name>pi1</name>\n"
+                                              "      <loc>\n"
+                                              "        <x>1</x>\n"
+                                              "        <y>0</y>\n"
+                                              "        <z>0</z>\n"
+                                              "      </loc>\n"
+                                              "    </gate>\n"
+                                              "    <gate>\n"
+                                              "      <id>2</id>\n"
+                                              "      <type>AND</type>\n"
+                                              "      <loc>\n"
+                                              "        <x>1</x>\n"
+                                              "        <y>1</y>\n"
+                                              "        <z>0</z>\n"
+                                              "      </loc>\n"
+                                              "      <incoming>\n"
+                                              "        <signal>\n"
+                                              "          <x>0</x>\n"
+                                              "          <y>1</y>\n"
+                                              "        </signal>\n"
+                                              "        <signal>\n"
+                                              "          <x>1</x>\n"
+                                              "          <y>0</y>\n"
+                                              "          <z>0</z>\n"
+                                              "        </signal>\n"
+                                              "      </incoming>\n"
+                                              "    </gate>\n"
+                                              "    <gate>\n"
+                                              "      <id>3</id>\n"
+                                              "      <type>PO</type>\n"
+                                              "      <name>po0</name>\n"
+                                              "      <loc>\n"
+                                              "        <x>2</x>\n"
+                                              "        <y>1</y>\n"
+                                              "        <z>0</z>\n"
+                                              "      </loc>\n"
+                                              "      <incoming>\n"
+                                              "        <signal>\n"
+                                              "          <x>1</x>\n"
+                                              "          <y>1</y>\n"
+                                              "          <z>0</z>\n"
+                                              "        </signal>\n"
+                                              "      </incoming>\n"
+                                              "    </gate>\n"
+                                              "  </gates>\n"
                                               "</fcn>\n";
 
     std::istringstream layout_stream{fcn_layout};

@@ -58,6 +58,7 @@ class read_gate_level_layout_impl
         buffer << is.rdbuf();
         const std::string gate_level_content{buffer.str()};
 
+        // parse xml file
         tinyxml2::XMLDocument xml_document{};
         xml_document.Parse(gate_level_content.c_str());
 
@@ -78,6 +79,7 @@ class read_gate_level_layout_impl
             throw gate_level_parsing_error("Error parsing gate_level file: no element 'layout'");
         }
 
+        // set layout name
         auto* const name = layout->FirstChildElement("name");
         if (name != nullptr && name->GetText())
         {
@@ -85,6 +87,7 @@ class read_gate_level_layout_impl
             set_name(lyt, layout_name);
         }
 
+        // set clocking scheme
         auto* const clocking = layout->FirstChildElement("clocking");
         if (clocking != nullptr)
         {
@@ -104,16 +107,52 @@ class read_gate_level_layout_impl
             throw gate_level_parsing_error("Error parsing gate_level file: no element 'clocking'");
         }
 
+        // set layout size
         auto* const size = layout->FirstChildElement("size");
         if (size != nullptr)
         {
-            int             x = std::stoi(size->FirstChildElement("x")->GetText());
-            int             y = std::stoi(size->FirstChildElement("y")->GetText());
-            int             z = std::stoi(size->FirstChildElement("z")->GetText());
+            auto* const size_x = size->FirstChildElement("x");
+            int         x      = 0;
+            if (size_x != nullptr and size_x->GetText())
+            {
+                x = std::stoi(size_x->GetText());
+            }
+            else
+            {
+                throw gate_level_parsing_error("Error parsing gate_level file: no element 'x' in 'size'");
+            }
+
+            auto* const size_y = size->FirstChildElement("y");
+            int         y      = 0;
+            if (size_y != nullptr and size_y->GetText())
+            {
+                y = std::stoi(size_y->GetText());
+            }
+            else
+            {
+                throw gate_level_parsing_error("Error parsing gate_level file: no element 'y' in 'size'");
+            }
+
+            auto* const size_z = size->FirstChildElement("z");
+            int         z      = 0;
+            if (size_z != nullptr and size_z->GetText())
+            {
+                z = std::stoi(size_z->GetText());
+            }
+            else
+            {
+                throw gate_level_parsing_error("Error parsing gate_level file: no element 'z' in 'size'");
+            }
+
             const tile<Lyt> max_pos{x, y, z};
             lyt.resize(max_pos);
         }
+        else
+        {
+            throw gate_level_parsing_error("Error parsing gate_level file: no element 'size'");
+        }
 
+        // parse layout gates
         std::vector<gate_storage> gates{};
         auto* const               gates_xml = fcn_root->FirstChildElement("gates");
         if (gates_xml != nullptr)
@@ -122,13 +161,39 @@ class read_gate_level_layout_impl
                  gate_xml             = gate_xml->NextSiblingElement("gate"))
             {
                 gate_storage gate{};
-                gate.id   = std::stoi(gate_xml->FirstChildElement("id")->GetText());
-                gate.type = gate_xml->FirstChildElement("type")->GetText();
 
-                auto* const pi_name = gate_xml->FirstChildElement("name");
-                if (pi_name != nullptr && pi_name->GetText())
+                auto* const gate_id = gate_xml->FirstChildElement("id");
+                if (gate_id != nullptr and gate_id->GetText())
                 {
-                    gate.name = pi_name->GetText();
+                    gate.id = std::stoi(gate_id->GetText());
+                }
+                else
+                {
+                    throw gate_level_parsing_error("Error parsing gate_level file: no element 'id' in 'gate'");
+                }
+
+                auto* const gate_type = gate_xml->FirstChildElement("type");
+                if (gate_type != nullptr and gate_type->GetText())
+                {
+                    gate.type = gate_type->GetText();
+                }
+                else
+                {
+                    throw gate_level_parsing_error("Error parsing gate_level file: no element 'type' in 'gate'");
+                }
+
+                if (gate.type == "PI" || gate.type == "PO")
+                {
+                    auto* const pi_po_name = gate_xml->FirstChildElement("name");
+                    if (pi_po_name != nullptr && pi_po_name->GetText())
+                    {
+                        gate.name = pi_po_name->GetText();
+                    }
+                    else
+                    {
+                        throw gate_level_parsing_error(
+                            "Error parsing gate_level file: no element 'name' in 'gate' for input/output");
+                    }
                 }
 
                 auto* const loc = gate_xml->FirstChildElement("loc");
@@ -136,9 +201,39 @@ class read_gate_level_layout_impl
                 {
                     throw gate_level_parsing_error("Error parsing gate_level file: no element 'loc'");
                 }
-                gate.loc.x = std::stoull(loc->FirstChildElement("x")->GetText());
-                gate.loc.y = std::stoull(loc->FirstChildElement("y")->GetText());
-                gate.loc.z = std::stoull(loc->FirstChildElement("z")->GetText());
+
+                // get x-coordinate
+                auto* const loc_x = loc->FirstChildElement("x");
+                if (loc_x != nullptr and loc_x->GetText())
+                {
+                    gate.loc.x = std::stoull(loc_x->GetText());
+                }
+                else
+                {
+                    throw gate_level_parsing_error("Error parsing gate_level file: no element 'x' in 'loc'");
+                }
+
+                // get y-coordinate
+                auto* const loc_y = loc->FirstChildElement("y");
+                if (loc_y != nullptr and loc_y->GetText())
+                {
+                    gate.loc.y = std::stoull(loc_y->GetText());
+                }
+                else
+                {
+                    throw gate_level_parsing_error("Error parsing gate_level file: no element 'y' in 'loc'");
+                }
+
+                // get z-coordinate
+                auto* const loc_z = loc->FirstChildElement("z");
+                if (loc_z != nullptr and loc_z->GetText())
+                {
+                    gate.loc.z = std::stoull(loc_z->GetText());
+                }
+                else
+                {
+                    throw gate_level_parsing_error("Error parsing gate_level file: no element 'z' in 'loc'");
+                }
 
                 auto* const incoming_signals = gate_xml->FirstChildElement("incoming");
                 if (incoming_signals != nullptr)
@@ -147,9 +242,37 @@ class read_gate_level_layout_impl
                          signal             = signal->NextSiblingElement("signal"))
                     {
                         tile<Lyt> incoming_signal{};
-                        incoming_signal.x = std::stoull(signal->FirstChildElement("x")->GetText());
-                        incoming_signal.y = std::stoull(signal->FirstChildElement("y")->GetText());
-                        incoming_signal.z = std::stoull(signal->FirstChildElement("z")->GetText());
+
+                        auto* const incoming_signal_x = signal->FirstChildElement("x");
+                        if (incoming_signal_x != nullptr and incoming_signal_x->GetText())
+                        {
+                            incoming_signal.x = std::stoull(incoming_signal_x->GetText());
+                        }
+                        else
+                        {
+                            throw gate_level_parsing_error("Error parsing gate_level file: no element 'x' in 'signal'");
+                        }
+
+                        auto* const incoming_signal_y = signal->FirstChildElement("y");
+                        if (incoming_signal_y != nullptr and incoming_signal_y->GetText())
+                        {
+                            incoming_signal.y = std::stoull(incoming_signal_y->GetText());
+                        }
+                        else
+                        {
+                            throw gate_level_parsing_error("Error parsing gate_level file: no element 'y' in 'signal'");
+                        }
+
+                        auto* const incoming_signal_z = signal->FirstChildElement("z");
+                        if (incoming_signal_z != nullptr and incoming_signal_z->GetText())
+                        {
+                            incoming_signal.z = std::stoull(incoming_signal_z->GetText());
+                        }
+                        else
+                        {
+                            throw gate_level_parsing_error("Error parsing gate_level file: no element 'z' in 'signal'");
+                        }
+
                         gate.incoming.push_back(incoming_signal);
                     }
                 }
@@ -157,6 +280,7 @@ class read_gate_level_layout_impl
                 gates.push_back(gate);
             }
 
+            // sort gates ascending based on id
             std::sort(gates.begin(), gates.end(), gate_storage::compare_by_id);
 
             for (const auto& gate : gates)
@@ -187,6 +311,12 @@ class read_gate_level_layout_impl
                     else if (gate.type == "INV")
                     {
                         lyt.create_not(incoming_signal, location);
+                    }
+
+                    else
+                    {
+                        throw gate_level_parsing_error("Error parsing gate_level file: unknown gate type: " +
+                                                       std::string(gate.type));
                     }
                 }
 
@@ -236,6 +366,34 @@ class read_gate_level_layout_impl
                         lyt.create_node({incoming_signal_1, incoming_signal_2}, tt_t, location);
                     }
                 }
+                else if (gate.incoming.size() == 3)
+                {
+                    const tile<Lyt> incoming_tile_1{gate.incoming.front().x, gate.incoming.front().y,
+                                                    gate.incoming.front().z};
+                    const tile<Lyt> incoming_tile_2{gate.incoming[1].x, gate.incoming[1].y, gate.incoming[1].z};
+                    const tile<Lyt> incoming_tile_3{gate.incoming.back().x, gate.incoming.back().y,
+                                                    gate.incoming.back().z};
+
+                    const auto incoming_signal_1 = lyt.make_signal(lyt.get_node(incoming_tile_1));
+                    const auto incoming_signal_2 = lyt.make_signal(lyt.get_node(incoming_tile_2));
+                    const auto incoming_signal_3 = lyt.make_signal(lyt.get_node(incoming_tile_3));
+
+                    if (gate.type == "MAJ")
+                    {
+                        lyt.create_maj(incoming_signal_1, incoming_signal_2, incoming_signal_3, location);
+                    }
+                    else
+                    {
+                        kitty::dynamic_truth_table tt_t(3u);
+                        kitty::create_from_binary_string(tt_t, gate.type);
+                        lyt.create_node({incoming_signal_1, incoming_signal_2, incoming_signal_3}, tt_t, location);
+                    }
+                }
+                else
+                {
+                    throw gate_level_parsing_error(
+                        "Error parsing gate_level file: gate has more than 3 incoming signals");
+                }
             }
         }
 
@@ -251,15 +409,42 @@ class read_gate_level_layout_impl
      * The input stream from which the gate-level layout is read.
      */
     std::istream& is;
-
+    /**
+     * @struct gate_storage
+     *
+     * Represents a gate in a fcn layout, storing its unique ID, type, name, location, and incoming connections.
+     */
     struct gate_storage
     {
-        int                    id{};
-        std::string            type;
-        std::string            name;
-        tile<Lyt>              loc{};
+        /**
+         * Unique identifier for the gate.
+         */
+        int id{};
+        /**
+         * Type of the gate, can be an alias (AND, OR, PI, ..) or the implemented function in a binary or hexadecimal
+         * form.
+         */
+        std::string type;
+        /**
+         * Name of the gate (for inputs and outputs).
+         */
+        std::string name;
+        /**
+         * Location of the gate represented its x-, y- and z-coordinate.
+         */
+        tile<Lyt> loc{};
+        /**
+         * List of incoming connections to the gate.
+         */
         std::vector<tile<Lyt>> incoming{};
 
+        /**
+         * Static member function to compare gate_storage objects by their IDs.
+         *
+         * @param gate1 First gate to be compared.
+         * @param gate2 Second gate to be compared.
+         * @return True if gate1's ID is less than gate2's ID, false otherwise.
+         */
         static bool compare_by_id(const gate_storage& gate1, const gate_storage& gate2) noexcept
         {
             return gate1.id < gate2.id;
