@@ -87,26 +87,6 @@ class read_gate_level_layout_impl
             set_name(lyt, layout_name);
         }
 
-        // set clocking scheme
-        auto* const clocking = layout->FirstChildElement("clocking");
-        if (clocking != nullptr)
-        {
-            const auto clocking_scheme = get_clocking_scheme<Lyt>(clocking->GetText());
-            if (clocking_scheme.has_value())
-            {
-                lyt.replace_clocking_scheme(*clocking_scheme);
-            }
-            else
-            {
-                throw gate_level_parsing_error("Error parsing gate_level file: unknown clocking scheme: " +
-                                               std::string(clocking->GetText()));
-            }
-        }
-        else
-        {
-            throw gate_level_parsing_error("Error parsing gate_level file: no element 'clocking'");
-        }
-
         // set layout size
         auto* const size = layout->FirstChildElement("size");
         if (size != nullptr)
@@ -150,6 +130,90 @@ class read_gate_level_layout_impl
         else
         {
             throw gate_level_parsing_error("Error parsing gate_level file: no element 'size'");
+        }
+
+        // set clocking scheme
+        auto* const clocking = layout->FirstChildElement("clocking");
+        if (clocking != nullptr)
+        {
+            auto* const clocking_scheme_name = clocking->FirstChildElement("name");
+            if (clocking_scheme_name != nullptr and clocking_scheme_name->GetText())
+            {
+                const auto clocking_scheme = get_clocking_scheme<Lyt>(clocking_scheme_name->GetText());
+                if (clocking_scheme.has_value())
+                {
+                    if (strcmp(clocking_scheme_name->GetText(), "OPEN") == 0)
+                    {
+                        auto* const clock_zones = clocking->FirstChildElement("zones");
+                        if (clock_zones != nullptr)
+                        {
+                            for (const auto* clock_zone = clock_zones->FirstChildElement("zone"); clock_zone != nullptr;
+                                 clock_zone             = clock_zone->NextSiblingElement("zone"))
+                            {
+                                auto* const clocking_zone_x = clock_zone->FirstChildElement("x");
+                                int         x_coord         = 0;
+                                if (clocking_zone_x != nullptr and clocking_zone_x->GetText())
+                                {
+                                    x_coord = std::stoi(clocking_zone_x->GetText());
+                                }
+                                else
+                                {
+                                    throw gate_level_parsing_error(
+                                        "Error parsing gate_level file: no element 'x' in 'zone'");
+                                }
+
+                                auto* const clocking_zone_y = clock_zone->FirstChildElement("y");
+                                int         y_coord         = 0;
+                                if (clocking_zone_y != nullptr and clocking_zone_y->GetText())
+                                {
+                                    y_coord = std::stoi(clocking_zone_y->GetText());
+                                }
+                                else
+                                {
+                                    throw gate_level_parsing_error(
+                                        "Error parsing gate_level file: no element 'y' in 'zone'");
+                                }
+
+                                auto* const clocking_zone_clock = clock_zone->FirstChildElement("clock");
+                                uint8_t     clock               = 0;
+                                if (clocking_zone_clock != nullptr and clocking_zone_clock->GetText())
+                                {
+                                    clock = static_cast<uint8_t>(*clocking_zone_clock->GetText());
+                                }
+                                else
+                                {
+                                    throw gate_level_parsing_error(
+                                        "Error parsing gate_level file: no element 'clock' in 'zone'");
+                                }
+
+                                lyt.assign_clock_number({x_coord, y_coord}, clock);
+                            }
+                        }
+                        else
+                        {
+                            throw gate_level_parsing_error(
+                                "Error parsing gate_level file: no element 'zones' in 'clocking'");
+                        }
+                    }
+                    else
+                    {
+                        lyt.replace_clocking_scheme(*clocking_scheme);
+                    }
+                }
+                else
+                {
+                    throw gate_level_parsing_error("Error parsing gate_level file: unknown clocking scheme: " +
+                                                   std::string(clocking_scheme_name->GetText()));
+                }
+            }
+            else
+            {
+                throw gate_level_parsing_error("Error parsing gate_level file: no element 'name' in 'clocking'");
+            }
+        }
+        else
+        {
+            throw gate_level_parsing_error("Error parsing gate_level file: no element 'clocking'");
         }
 
         // parse layout gates
@@ -243,6 +307,7 @@ class read_gate_level_layout_impl
                     {
                         tile<Lyt> incoming_signal{};
 
+                        // get x-coordinate of incoming signal
                         auto* const incoming_signal_x = signal->FirstChildElement("x");
                         if (incoming_signal_x != nullptr and incoming_signal_x->GetText())
                         {
@@ -253,6 +318,7 @@ class read_gate_level_layout_impl
                             throw gate_level_parsing_error("Error parsing gate_level file: no element 'x' in 'signal'");
                         }
 
+                        // get y-coordinate of incoming signal
                         auto* const incoming_signal_y = signal->FirstChildElement("y");
                         if (incoming_signal_y != nullptr and incoming_signal_y->GetText())
                         {
@@ -263,6 +329,7 @@ class read_gate_level_layout_impl
                             throw gate_level_parsing_error("Error parsing gate_level file: no element 'y' in 'signal'");
                         }
 
+                        // get z-coordinate of incoming signal
                         auto* const incoming_signal_z = signal->FirstChildElement("z");
                         if (incoming_signal_z != nullptr and incoming_signal_z->GetText())
                         {
@@ -287,9 +354,17 @@ class read_gate_level_layout_impl
             {
                 const tile<Lyt> location{gate.loc.x, gate.loc.y, gate.loc.z};
 
-                if (gate.type == "PI")
+                if (gate.incoming.size() == 0)
                 {
-                    lyt.create_pi(gate.name, location);
+                    if (gate.type == "PI")
+                    {
+                        lyt.create_pi(gate.name, location);
+                    }
+                    else
+                    {
+                        throw gate_level_parsing_error("Error parsing gate_level file: unknown gate type: " +
+                                                       std::string(gate.type));
+                    }
                 }
 
                 else if (gate.incoming.size() == 1)
@@ -359,11 +434,16 @@ class read_gate_level_layout_impl
                     {
                         lyt.create_xnor(incoming_signal_1, incoming_signal_2, location);
                     }
-                    else
+                    else if (std::all_of(gate.type.begin(), gate.type.end(), ::isxdigit))
                     {
                         kitty::dynamic_truth_table tt_t(2u);
-                        kitty::create_from_binary_string(tt_t, gate.type);
+                        kitty::create_from_hex_string(tt_t, gate.type);
                         lyt.create_node({incoming_signal_1, incoming_signal_2}, tt_t, location);
+                    }
+                    else
+                    {
+                        throw gate_level_parsing_error("Error parsing gate_level file: unknown gate type: " +
+                                                       std::string(gate.type));
                     }
                 }
                 else if (gate.incoming.size() == 3)
@@ -382,17 +462,36 @@ class read_gate_level_layout_impl
                     {
                         lyt.create_maj(incoming_signal_1, incoming_signal_2, incoming_signal_3, location);
                     }
-                    else
+                    else if (std::all_of(gate.type.begin(), gate.type.end(), ::isxdigit))
                     {
                         kitty::dynamic_truth_table tt_t(3u);
-                        kitty::create_from_binary_string(tt_t, gate.type);
+                        kitty::create_from_hex_string(tt_t, gate.type);
                         lyt.create_node({incoming_signal_1, incoming_signal_2, incoming_signal_3}, tt_t, location);
                     }
+                    else
+                    {
+                        throw gate_level_parsing_error("Error parsing gate_level file: unknown gate type: " +
+                                                       std::string(gate.type));
+                    }
+                }
+                else if (std::all_of(gate.type.begin(), gate.type.end(), ::isxdigit))
+                {
+                    auto num_incoming_signals = static_cast<uint32_t>(gate.incoming.size());
+                    std::vector<mockturtle::signal<Lyt>> incoming_signals{};
+                    for (uint32_t i = 0; i < num_incoming_signals; i++)
+                    {
+                        tile<Lyt> incoming_tile_i{gate.incoming[i].x, gate.incoming[i].y, gate.incoming[i].z};
+                        auto      incoming_signal_i = lyt.make_signal(lyt.get_node(incoming_tile_i));
+                        incoming_signals.push_back(incoming_signal_i);
+                    }
+                    kitty::dynamic_truth_table tt_t(num_incoming_signals);
+                    kitty::create_from_hex_string(tt_t, gate.type);
+                    lyt.create_node({incoming_signals}, tt_t, location);
                 }
                 else
                 {
-                    throw gate_level_parsing_error(
-                        "Error parsing gate_level file: gate has more than 3 incoming signals");
+                    throw gate_level_parsing_error("Error parsing gate_level file: unknown gate type: " +
+                                                   std::string(gate.type));
                 }
             }
         }
@@ -467,6 +566,11 @@ class read_gate_level_layout_impl
 template <typename Lyt>
 [[nodiscard]] Lyt read_gate_level_layout(std::istream& is, const std::string_view& name = "")
 {
+    static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
+    static_assert(is_tile_based_layout_v<Lyt>, "Lyt is not a tile-based layout");
+    static_assert(is_clocked_layout_v<Lyt>, "Lyt is not a clocked layout");
+    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+
     detail::read_gate_level_layout_impl<Lyt> p{is, name};
 
     const auto lyt = p.run();
@@ -488,6 +592,11 @@ template <typename Lyt>
 template <typename Lyt>
 void read_gate_level_layout(Lyt& lyt, std::istream& is)
 {
+    static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
+    static_assert(is_tile_based_layout_v<Lyt>, "Lyt is not a tile-based layout");
+    static_assert(is_clocked_layout_v<Lyt>, "Lyt is not a clocked layout");
+    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+
     detail::read_gate_level_layout_impl<Lyt> p{lyt, is};
 
     lyt = p.run();

@@ -43,35 +43,45 @@ inline constexpr const char* FICTION_METADATA = "  <fiction>\n"
                                                 "    <date>{}</date>\n"
                                                 "  </fiction>\n";
 
-inline constexpr const char* LAYOUT_METADATA = "  <layout>\n"
-                                               "    <name>{}</name>\n"
-                                               "    <topology>{}</topology>\n"
-                                               "    <clocking>{}</clocking>\n"
-                                               "    <size>\n"
-                                               "      <x>{}</x>\n"
-                                               "      <y>{}</y>\n"
-                                               "      <z>{}</z>\n"
-                                               "    </size>\n"
-                                               "  </layout>\n";
-inline constexpr const char* OPEN_GATES      = "  <gates>\n";
-inline constexpr const char* CLOSE_GATES     = "  </gates>\n";
-inline constexpr const char* OPEN_GATE       = "    <gate>\n";
-inline constexpr const char* CLOSE_GATE      = "    </gate>\n";
-inline constexpr const char* GATE            = "      <id>{}</id>\n"
-                                               "      <type>{}</type>\n"
-                                               "      <name>{}</name>\n"
-                                               "      <loc>\n"
-                                               "        <x>{}</x>\n"
-                                               "        <y>{}</y>\n"
-                                               "        <z>{}</z>\n"
-                                               "      </loc>\n";
-inline constexpr const char* OPEN_INCOMING   = "      <incoming>\n";
-inline constexpr const char* CLOSE_INCOMING  = "      </incoming>\n";
-inline constexpr const char* SIGNAL          = "        <signal>\n"
-                                               "          <x>{}</x>\n"
-                                               "          <y>{}</y>\n"
-                                               "          <z>{}</z>\n"
-                                               "        </signal>\n";
+inline constexpr const char* OPEN_LAYOUT_METADATA  = "  <layout>\n";
+inline constexpr const char* CLOSE_LAYOUT_METADATA = "  </layout>\n";
+inline constexpr const char* LAYOUT_METADATA       = "    <name>{}</name>\n"
+                                                     "    <topology>{}</topology>\n"
+                                                     "    <size>\n"
+                                                     "      <x>{}</x>\n"
+                                                     "      <y>{}</y>\n"
+                                                     "      <z>{}</z>\n"
+                                                     "    </size>\n";
+inline constexpr const char* OPEN_CLOCKING         = "    <clocking>\n";
+inline constexpr const char* CLOSE_CLOCKING        = "    </clocking>\n";
+inline constexpr const char* CLOCKING_SCHEME_NAME  = "      <name>{}</name>\n";
+inline constexpr const char* OPEN_CLOCK_ZONES      = "      <zones>\n";
+inline constexpr const char* CLOSE_CLOCK_ZONES     = "      </zones>\n";
+inline constexpr const char* CLOCK_ZONE            = "        <zone>\n"
+                                                     "          <x>{}</x>\n"
+                                                     "          <y>{}</y>\n"
+                                                     "          <clock>{}</clock>\n"
+                                                     "        </zone>\n";
+
+inline constexpr const char* OPEN_GATES     = "  <gates>\n";
+inline constexpr const char* CLOSE_GATES    = "  </gates>\n";
+inline constexpr const char* OPEN_GATE      = "    <gate>\n";
+inline constexpr const char* CLOSE_GATE     = "    </gate>\n";
+inline constexpr const char* GATE           = "      <id>{}</id>\n"
+                                              "      <type>{}</type>\n"
+                                              "      <name>{}</name>\n"
+                                              "      <loc>\n"
+                                              "        <x>{}</x>\n"
+                                              "        <y>{}</y>\n"
+                                              "        <z>{}</z>\n"
+                                              "      </loc>\n";
+inline constexpr const char* OPEN_INCOMING  = "      <incoming>\n";
+inline constexpr const char* CLOSE_INCOMING = "      </incoming>\n";
+inline constexpr const char* SIGNAL         = "        <signal>\n"
+                                              "          <x>{}</x>\n"
+                                              "          <y>{}</y>\n"
+                                              "          <z>{}</z>\n"
+                                              "        </signal>\n";
 
 }  // namespace fcn
 
@@ -86,28 +96,44 @@ class write_gate_level_layout_impl
         std::stringstream header{};
         std::stringstream layout_metadata{};
 
+        // metadata
         header << fcn::FCN_HEADER << fcn::OPEN_FCN;
-
         const auto time_str = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(std::time(nullptr)));
-
         header << fmt::format(fcn::FICTION_METADATA, FICTION_VERSION, FICTION_REPO, time_str);
-
-        std::string layout_name = get_name(lyt);
-
-        const auto clocking_scheme = lyt.get_clocking_scheme().name;
-
-        layout_metadata << fmt::format(fcn::LAYOUT_METADATA, layout_name, "Cartesian", clocking_scheme, lyt.x(),
-                                       lyt.y(), lyt.z());
-
         os << header.str();
 
+        os << fcn::OPEN_LAYOUT_METADATA;
+        std::string layout_name = get_name(lyt);
+        layout_metadata << fmt::format(fcn::LAYOUT_METADATA, layout_name, "Cartesian", lyt.x(), lyt.y(), lyt.z());
         os << layout_metadata.str();
+
+        os << fcn::OPEN_CLOCKING;
+        const auto clocking_scheme = lyt.get_clocking_scheme();
+        os << fmt::format(fcn::CLOCKING_SCHEME_NAME, clocking_scheme.name);
+
+        if (clocking_scheme.name == "OPEN")
+        {
+            os << fcn::OPEN_CLOCK_ZONES;
+            for (uint64_t x = 0; x <= lyt.x(); ++x)
+            {
+                for (uint64_t y = 0; y <= lyt.y(); ++y)
+                {
+                    int clock = clocking_scheme({x, y});
+                    os << fmt::format(fcn::CLOCK_ZONE, x, y, clock);
+                }
+            }
+            os << fcn::CLOSE_CLOCK_ZONES;
+        }
+        os << fcn::CLOSE_CLOCKING;
+        os << fcn::CLOSE_LAYOUT_METADATA;
 
         os << fcn::OPEN_GATES;
 
+        // create topological ordering
         mockturtle::topo_view layout_topo{lyt};
         uint32_t              id = 0;
 
+        // inputs
         layout_topo.foreach_pi(
             [&id, this](const auto& gate)
             {
@@ -118,14 +144,14 @@ class write_gate_level_layout_impl
                 id++;
             });
 
+        // gates
         layout_topo.foreach_gate(
             [&id, this](const auto& gate)
             {
+                os << fcn::OPEN_GATE;
                 const auto coord = lyt.get_tile(gate);
                 if (const auto signals = lyt.incoming_data_flow(coord); signals.size() == 1)
                 {
-                    os << fcn::OPEN_GATE;
-
                     const auto signal = signals[0];
 
                     if (lyt.is_po(gate))
@@ -144,13 +170,9 @@ class write_gate_level_layout_impl
                     os << fcn::OPEN_INCOMING;
                     os << fmt::format(fcn::SIGNAL, signal.x, signal.y, signal.z);
                     os << fcn::CLOSE_INCOMING;
-                    os << fcn::CLOSE_GATE;
-                    id++;
                 }
                 else if (signals.size() == 2)
                 {
-                    os << fcn::OPEN_GATE;
-
                     const auto signal_a = signals[0];
                     const auto signal_b = signals[1];
 
@@ -182,19 +204,15 @@ class write_gate_level_layout_impl
                     {
                         const auto node_fun = lyt.node_function(gate);
 
-                        os << fmt::format(fcn::GATE, id, kitty::to_binary(node_fun), "", coord.x, coord.y, coord.z);
+                        os << fmt::format(fcn::GATE, id, kitty::to_hex(node_fun), "", coord.x, coord.y, coord.z);
                     }
                     os << fcn::OPEN_INCOMING;
                     os << fmt::format(fcn::SIGNAL, signal_a.x, signal_a.y, signal_a.z);
                     os << fmt::format(fcn::SIGNAL, signal_b.x, signal_b.y, signal_b.z);
                     os << fcn::CLOSE_INCOMING;
-                    os << fcn::CLOSE_GATE;
-                    id++;
                 }
                 else if (signals.size() == 3)
                 {
-                    os << fcn::OPEN_GATE;
-
                     const auto signal_a = signals[0];
                     const auto signal_b = signals[1];
                     const auto signal_c = signals[2];
@@ -207,16 +225,29 @@ class write_gate_level_layout_impl
                     {
                         const auto node_fun = lyt.node_function(gate);
 
-                        os << fmt::format(fcn::GATE, id, kitty::to_binary(node_fun), "", coord.x, coord.y, coord.z);
+                        os << fmt::format(fcn::GATE, id, kitty::to_hex(node_fun), "", coord.x, coord.y, coord.z);
                     }
                     os << fcn::OPEN_INCOMING;
                     os << fmt::format(fcn::SIGNAL, signal_a.x, signal_a.y, signal_a.z);
                     os << fmt::format(fcn::SIGNAL, signal_b.x, signal_b.y, signal_b.z);
                     os << fmt::format(fcn::SIGNAL, signal_c.x, signal_c.y, signal_c.z);
                     os << fcn::CLOSE_INCOMING;
-                    os << fcn::CLOSE_GATE;
-                    id++;
                 }
+                else if (lyt.is_function(gate))
+                {
+                    const auto node_fun = lyt.node_function(gate);
+
+                    os << fmt::format(fcn::GATE, id, kitty::to_hex(node_fun), "", coord.x, coord.y, coord.z);
+
+                    os << fcn::OPEN_INCOMING;
+                    for (uint i = 0; i <= signals.size(); i++)
+                    {
+                        os << fmt::format(fcn::SIGNAL, signals[i].x, signals[i].y, signals[i].z);
+                    }
+                    os << fcn::CLOSE_INCOMING;
+                }
+                os << fcn::CLOSE_GATE;
+                id++;
             });
 
         os << fcn::CLOSE_GATES;
@@ -248,6 +279,11 @@ class write_gate_level_layout_impl
 template <typename Lyt>
 void write_gate_level_layout(const Lyt& lyt, std::ostream& os)
 {
+    static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
+    static_assert(is_tile_based_layout_v<Lyt>, "Lyt is not a tile-based layout");
+    static_assert(is_clocked_layout_v<Lyt>, "Lyt is not a clocked layout");
+    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+
     detail::write_gate_level_layout_impl p{lyt, os};
 
     p.run();
