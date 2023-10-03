@@ -233,7 +233,6 @@ class write_gate_level_layout_impl
                     os << fmt::format(fcn::SIGNAL, signal_c.x, signal_c.y, signal_c.z);
                     os << fcn::CLOSE_INCOMING;
                 }
-                /*
                 else if (lyt.is_function(gate))
                 {
                     const auto node_fun = lyt.node_function(gate);
@@ -241,12 +240,12 @@ class write_gate_level_layout_impl
                     os << fmt::format(fcn::GATE, id, kitty::to_hex(node_fun), "", coord.x, coord.y, coord.z);
 
                     os << fcn::OPEN_INCOMING;
-                    for (std::size_t i = 0; i <= signals.size(); i++)
+                    for (std::size_t i = 0; i < signals.size(); i++)
                     {
                         os << fmt::format(fcn::SIGNAL, signals[i].x, signals[i].y, signals[i].z);
                     }
                     os << fcn::CLOSE_INCOMING;
-                }*/
+                }
                 os << fcn::CLOSE_GATE;
                 id++;
             });

@@ -29,7 +29,7 @@ namespace fiction
 {
 
 /**
- * Exception thrown when an error occurs during parsing of an gate_level file.
+ * Exception thrown when an error occurs during parsing of a gate_level file.
  */
 class gate_level_parsing_error : public std::runtime_error
 {

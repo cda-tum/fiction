@@ -107,7 +107,7 @@ void check_parsing_equiv_all()
     check_parsing_equiv_layout(blueprints::use_and_gate_layout<cart_gate_clk_lyt>());
     check_parsing_equiv_layout(blueprints::res_maj_gate_layout<cart_gate_clk_lyt>());
     check_parsing_equiv_layout(blueprints::res_tautology_gate_layout<cart_gate_clk_lyt>());
-    // check_parsing_equiv_layout(blueprints::open_tautology_gate_layout<cart_gate_clk_lyt>());
+    check_parsing_equiv_layout(blueprints::open_tautology_gate_layout<hex_even_row_gate_clk_lyt>());
     check_parsing_equiv_layout(blueprints::crossing_layout<cart_gate_clk_lyt>());
     check_parsing_equiv_layout(blueprints::fanout_layout<cart_gate_clk_lyt>());
     check_parsing_equiv_layout(blueprints::unbalanced_and_layout<cart_gate_clk_lyt>());
