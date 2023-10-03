@@ -554,10 +554,9 @@ class read_gate_level_layout_impl
 }  // namespace detail
 
 /**
- * Reads a gate-level layout from a gate_level file provided as an input stream. The format is used by fiction
- * (https://github.com/cda-tum/fiction).
+ * Reads a gate-level layout from a gate_level file provided as an input stream.
  *
- * May throw an `gate_level_parsing_exception` if the gate_level file is malformed.
+ * May throw a `gate_level_parsing_exception` if the gate_level file is malformed.
  *
  * @tparam Lyt The layout type to be created from an input.
  * @param is The input stream to read from.
@@ -578,10 +577,9 @@ template <typename Lyt>
     return lyt;
 }
 /**
- * Reads a gate-level layout from an gate_level file provided as an input stream. The format is used by fiction
- * (https://github.com/cda-tum/fiction).
+ * Reads a gate-level layout from an gate_level file provided as an input stream.
  *
- * May throw an `gate_level_parsing_exception` if the gate_level file is malformed.
+ * May throw a `gate_level_parsing_exception` if the gate_level file is malformed.
  *
  * This is an in-place version of read_gate_level_layout that utilizes the given layout as a target to write to.
  *
@@ -602,10 +600,9 @@ void read_gate_level_layout(Lyt& lyt, std::istream& is)
     lyt = p.run();
 }
 /**
- * Reads a gate-level layout from a gate_level file provided as an input stream. The format is used by fiction
- * (https://github.com/cda-tum/fiction).
+ * Reads a gate-level layout from a gate_level file provided as an input stream.
  *
- * May throw an `gate_level_parsing_exception` if the gate_level file is malformed.
+ * May throw a `gate_level_parsing_exception` if the gate_level file is malformed.
  *
  * @tparam Lyt The layout type to be created from an input.
  * @param filename The file name to open and read from.
@@ -627,14 +624,13 @@ template <typename Lyt>
     return lyt;
 }
 /**
- * Reads a gate-level layout from an gate_level file provided as an input stream. The format is used by fiction
- * (https://github.com/cda-tum/fiction).
-
- * May throw an `gate_level_parsing_exception` if the gate_level file is malformed.
+ * Reads a gate-level layout from an gate_level file provided as an input stream.
+ *
+ * May throw a `gate_level_parsing_exception` if the gate_level file is malformed.
  *
  * This is an in-place version of `read_gate_level_layout` that utilizes the given layout as a target to write to.
  *
- * @tparam Lyt The layout type to be used as input. Must be a cell-level SiDB layout.
+ * @tparam Lyt The layout type to be used as input.
  * @param lyt The layout to write to.
  * @param filename The file name to open and read from.
  */

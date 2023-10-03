@@ -268,7 +268,7 @@ class write_gate_level_layout_impl
 }  // namespace detail
 
 /**
- * Writes a gate-level layout to a fcn file that is used by Fiction (https://github.com/cda-tum/fiction).
+ * Writes a gate-level layout to a file.
  *
  * This overload uses an output stream to write into.
  *
@@ -289,13 +289,13 @@ void write_gate_level_layout(const Lyt& lyt, std::ostream& os)
     p.run();
 }
 /**
- * Writes a gate-level layout to a fcn file that is used by Fiction (https://github.com/cda-tum/fiction).
+ * Writes a gate-level layout to a file.
  *
  * This overload uses a file name to create and write into.
  *
  * @tparam Lyt Layout.
  * @param lyt The layout to be written.
- * @param filename The file name to create and write into. Should preferably use the `.fcn` extension.
+ * @param filename The file name to create and write into.
  */
 template <typename Lyt>
 void write_gate_level_layout(const Lyt& lyt, const std::string_view& filename)
