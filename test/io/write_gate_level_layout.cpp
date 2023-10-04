@@ -100,8 +100,17 @@ void check_parsing_equiv_all()
     check_parsing_equiv_layout(blueprints::straight_wire_gate_layout<cart_gate_clk_lyt>());
     check_parsing_equiv_layout(blueprints::three_wire_paths_gate_layout<cart_gate_clk_lyt>());
     check_parsing_equiv_layout(blueprints::xor_maj_gate_layout<cart_gate_clk_lyt>());
+    check_parsing_equiv_layout(blueprints::single_input_tautology_gate_layout<cart_gate_clk_lyt>());
     check_parsing_equiv_layout(blueprints::tautology_gate_layout<cart_gate_clk_lyt>());
     check_parsing_equiv_layout(blueprints::and_or_gate_layout<cart_gate_clk_lyt>());
+    check_parsing_equiv_layout(blueprints::and_or_gate_layout<cart_odd_row_gate_clk_lyt>());
+    check_parsing_equiv_layout(blueprints::and_or_gate_layout<cart_even_row_gate_clk_lyt>());
+    check_parsing_equiv_layout(blueprints::and_or_gate_layout<cart_odd_col_gate_clk_lyt>());
+    check_parsing_equiv_layout(blueprints::and_or_gate_layout<cart_even_col_gate_clk_lyt>());
+    check_parsing_equiv_layout(blueprints::and_or_gate_layout<hex_odd_row_gate_clk_lyt>());
+    check_parsing_equiv_layout(blueprints::and_or_gate_layout<hex_even_row_gate_clk_lyt>());
+    check_parsing_equiv_layout(blueprints::and_or_gate_layout<hex_odd_col_gate_clk_lyt>());
+    check_parsing_equiv_layout(blueprints::and_or_gate_layout<hex_even_col_gate_clk_lyt>());
     check_parsing_equiv_layout(blueprints::and_not_gate_layout<cart_gate_clk_lyt>());
     check_parsing_equiv_layout(blueprints::or_not_gate_layout<cart_gate_clk_lyt>());
     check_parsing_equiv_layout(blueprints::use_and_gate_layout<cart_gate_clk_lyt>());
@@ -118,7 +127,7 @@ void check_parsing_equiv_all()
     check_parsing_equiv_layout(blueprints::optimization_layout_corner_case_outputs_2<cart_gate_clk_lyt>());
 }
 
-TEST_CASE("Write empty gate_level layout", "[sqd]")
+TEST_CASE("Write empty gate_level layout", "[fcn]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
 
@@ -133,7 +142,7 @@ TEST_CASE("Write empty gate_level layout", "[sqd]")
     compare_written_and_read_layout(layout, read_layout);
 }
 
-TEST_CASE("Write and read layouts")
+TEST_CASE("Write and read layouts", "[fcn]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
 

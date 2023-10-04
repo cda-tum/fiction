@@ -401,6 +401,327 @@ TEST_CASE("Parsing error: no element 'clock' in 'zone'", "[fcn]")
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
+TEST_CASE("Parsing error: no element 'topology' in 'layout'", "[fcn]")
+{
+    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fcn>\n"
+                                              "  <layout>\n"
+                                              "    <name>Test</name>\n"
+                                              "    <size>\n"
+                                              "      <x>0</x>\n"
+                                              "      <y>0</y>\n"
+                                              "      <z>0</z>\n"
+                                              "    </size>\n"
+                                              "    <clocking>\n"
+                                              "      <name>2DDWave</name>\n"
+                                              "    </clocking>\n"
+                                              "  </layout>\n"
+                                              "</fcn>\n";
+
+    std::istringstream layout_stream{fcn_layout};
+
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+}
+
+TEST_CASE("Parsing error: unknown topology", "[fcn]")
+{
+    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fcn>\n"
+                                              "  <layout>\n"
+                                              "    <name>Test</name>\n"
+                                              "    <topology>unknown</topology>\n"
+                                              "    <size>\n"
+                                              "      <x>0</x>\n"
+                                              "      <y>0</y>\n"
+                                              "      <z>0</z>\n"
+                                              "    </size>\n"
+                                              "    <clocking>\n"
+                                              "      <name>2DDWave</name>\n"
+                                              "    </clocking>\n"
+                                              "  </layout>\n"
+                                              "</fcn>\n";
+
+    std::istringstream layout_stream{fcn_layout};
+
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+}
+
+TEST_CASE("Parsing error: Lyt is not a cartesian layout", "[fcn]")
+{
+    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fcn>\n"
+                                              "  <layout>\n"
+                                              "    <name>Test</name>\n"
+                                              "    <topology>cartesian</topology>\n"
+                                              "    <size>\n"
+                                              "      <x>0</x>\n"
+                                              "      <y>0</y>\n"
+                                              "      <z>0</z>\n"
+                                              "    </size>\n"
+                                              "    <clocking>\n"
+                                              "      <name>2DDWave</name>\n"
+                                              "    </clocking>\n"
+                                              "  </layout>\n"
+                                              "</fcn>\n";
+
+    std::istringstream layout_stream{fcn_layout};
+
+    using gate_layout = gate_level_layout<
+        clocked_layout<tile_based_layout<shifted_cartesian_layout<offset::ucoord_t, odd_row_cartesian>>>>;
+    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+}
+
+TEST_CASE("Parsing error: Lyt is not a shifted_cartesian layout", "[fcn]")
+{
+    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fcn>\n"
+                                              "  <layout>\n"
+                                              "    <name>Test</name>\n"
+                                              "    <topology>odd_row_cartesian</topology>\n"
+                                              "    <size>\n"
+                                              "      <x>0</x>\n"
+                                              "      <y>0</y>\n"
+                                              "      <z>0</z>\n"
+                                              "    </size>\n"
+                                              "    <clocking>\n"
+                                              "      <name>2DDWave</name>\n"
+                                              "    </clocking>\n"
+                                              "  </layout>\n"
+                                              "</fcn>\n";
+
+    std::istringstream layout_stream{fcn_layout};
+
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+}
+
+TEST_CASE("Parsing error: Lyt is not an odd_row_cartesian layout", "[fcn]")
+{
+    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fcn>\n"
+                                              "  <layout>\n"
+                                              "    <name>Test</name>\n"
+                                              "    <topology>odd_row_cartesian</topology>\n"
+                                              "    <size>\n"
+                                              "      <x>0</x>\n"
+                                              "      <y>0</y>\n"
+                                              "      <z>0</z>\n"
+                                              "    </size>\n"
+                                              "    <clocking>\n"
+                                              "      <name>2DDWave</name>\n"
+                                              "    </clocking>\n"
+                                              "  </layout>\n"
+                                              "</fcn>\n";
+
+    std::istringstream layout_stream{fcn_layout};
+
+    using gate_layout = gate_level_layout<
+        clocked_layout<tile_based_layout<shifted_cartesian_layout<offset::ucoord_t, even_row_cartesian>>>>;
+    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+}
+
+TEST_CASE("Parsing error: Lyt is not an even_row_cartesian layout", "[fcn]")
+{
+    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fcn>\n"
+                                              "  <layout>\n"
+                                              "    <name>Test</name>\n"
+                                              "    <topology>even_row_cartesian</topology>\n"
+                                              "    <size>\n"
+                                              "      <x>0</x>\n"
+                                              "      <y>0</y>\n"
+                                              "      <z>0</z>\n"
+                                              "    </size>\n"
+                                              "    <clocking>\n"
+                                              "      <name>2DDWave</name>\n"
+                                              "    </clocking>\n"
+                                              "  </layout>\n"
+                                              "</fcn>\n";
+
+    std::istringstream layout_stream{fcn_layout};
+
+    using gate_layout = gate_level_layout<
+        clocked_layout<tile_based_layout<shifted_cartesian_layout<offset::ucoord_t, odd_row_cartesian>>>>;
+    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+}
+
+TEST_CASE("Parsing error: Lyt is not an odd_column_cartesian layout", "[fcn]")
+{
+    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fcn>\n"
+                                              "  <layout>\n"
+                                              "    <name>Test</name>\n"
+                                              "    <topology>odd_column_cartesian</topology>\n"
+                                              "    <size>\n"
+                                              "      <x>0</x>\n"
+                                              "      <y>0</y>\n"
+                                              "      <z>0</z>\n"
+                                              "    </size>\n"
+                                              "    <clocking>\n"
+                                              "      <name>2DDWave</name>\n"
+                                              "    </clocking>\n"
+                                              "  </layout>\n"
+                                              "</fcn>\n";
+
+    std::istringstream layout_stream{fcn_layout};
+
+    using gate_layout = gate_level_layout<
+        clocked_layout<tile_based_layout<shifted_cartesian_layout<offset::ucoord_t, odd_row_cartesian>>>>;
+    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+}
+
+TEST_CASE("Parsing error: Lyt is not an even_column_cartesian layout", "[fcn]")
+{
+    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fcn>\n"
+                                              "  <layout>\n"
+                                              "    <name>Test</name>\n"
+                                              "    <topology>even_column_cartesian</topology>\n"
+                                              "    <size>\n"
+                                              "      <x>0</x>\n"
+                                              "      <y>0</y>\n"
+                                              "      <z>0</z>\n"
+                                              "    </size>\n"
+                                              "    <clocking>\n"
+                                              "      <name>2DDWave</name>\n"
+                                              "    </clocking>\n"
+                                              "  </layout>\n"
+                                              "</fcn>\n";
+
+    std::istringstream layout_stream{fcn_layout};
+
+    using gate_layout = gate_level_layout<
+        clocked_layout<tile_based_layout<shifted_cartesian_layout<offset::ucoord_t, odd_row_cartesian>>>>;
+    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+}
+
+TEST_CASE("Parsing error: Lyt is not a hexagonal layout", "[fcn]")
+{
+    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fcn>\n"
+                                              "  <layout>\n"
+                                              "    <name>Test</name>\n"
+                                              "    <topology>odd_row_hex</topology>\n"
+                                              "    <size>\n"
+                                              "      <x>0</x>\n"
+                                              "      <y>0</y>\n"
+                                              "      <z>0</z>\n"
+                                              "    </size>\n"
+                                              "    <clocking>\n"
+                                              "      <name>2DDWave</name>\n"
+                                              "    </clocking>\n"
+                                              "  </layout>\n"
+                                              "</fcn>\n";
+
+    std::istringstream layout_stream{fcn_layout};
+
+    using gate_layout = gate_level_layout<
+        clocked_layout<tile_based_layout<shifted_cartesian_layout<offset::ucoord_t, odd_row_cartesian>>>>;
+    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+}
+
+TEST_CASE("Parsing error: Lyt is not an odd_row_hex layout", "[fcn]")
+{
+    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fcn>\n"
+                                              "  <layout>\n"
+                                              "    <name>Test</name>\n"
+                                              "    <topology>odd_row_hex</topology>\n"
+                                              "    <size>\n"
+                                              "      <x>0</x>\n"
+                                              "      <y>0</y>\n"
+                                              "      <z>0</z>\n"
+                                              "    </size>\n"
+                                              "    <clocking>\n"
+                                              "      <name>2DDWave</name>\n"
+                                              "    </clocking>\n"
+                                              "  </layout>\n"
+                                              "</fcn>\n";
+
+    std::istringstream layout_stream{fcn_layout};
+
+    using gate_layout =
+        gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, even_row_hex>>>>;
+    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+}
+
+TEST_CASE("Parsing error: Lyt is not an even_row_hex layout", "[fcn]")
+{
+    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fcn>\n"
+                                              "  <layout>\n"
+                                              "    <name>Test</name>\n"
+                                              "    <topology>even_row_hex</topology>\n"
+                                              "    <size>\n"
+                                              "      <x>0</x>\n"
+                                              "      <y>0</y>\n"
+                                              "      <z>0</z>\n"
+                                              "    </size>\n"
+                                              "    <clocking>\n"
+                                              "      <name>2DDWave</name>\n"
+                                              "    </clocking>\n"
+                                              "  </layout>\n"
+                                              "</fcn>\n";
+
+    std::istringstream layout_stream{fcn_layout};
+
+    using gate_layout =
+        gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, odd_row_hex>>>>;
+    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+}
+
+TEST_CASE("Parsing error: Lyt is not an odd_column_hex layout", "[fcn]")
+{
+    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fcn>\n"
+                                              "  <layout>\n"
+                                              "    <name>Test</name>\n"
+                                              "    <topology>odd_column_hex</topology>\n"
+                                              "    <size>\n"
+                                              "      <x>0</x>\n"
+                                              "      <y>0</y>\n"
+                                              "      <z>0</z>\n"
+                                              "    </size>\n"
+                                              "    <clocking>\n"
+                                              "      <name>2DDWave</name>\n"
+                                              "    </clocking>\n"
+                                              "  </layout>\n"
+                                              "</fcn>\n";
+
+    std::istringstream layout_stream{fcn_layout};
+
+    using gate_layout =
+        gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, odd_row_hex>>>>;
+    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+}
+
+TEST_CASE("Parsing error: Lyt is not an even_column_hex layout", "[fcn]")
+{
+    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fcn>\n"
+                                              "  <layout>\n"
+                                              "    <name>Test</name>\n"
+                                              "    <topology>even_column_hex</topology>\n"
+                                              "    <size>\n"
+                                              "      <x>0</x>\n"
+                                              "      <y>0</y>\n"
+                                              "      <z>0</z>\n"
+                                              "    </size>\n"
+                                              "    <clocking>\n"
+                                              "      <name>2DDWave</name>\n"
+                                              "    </clocking>\n"
+                                              "  </layout>\n"
+                                              "</fcn>\n";
+
+    std::istringstream layout_stream{fcn_layout};
+
+    using gate_layout =
+        gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, odd_row_hex>>>>;
+    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+}
+
 TEST_CASE("Parsing error: no element 'size' in 'layout'", "[fcn]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"

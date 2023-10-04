@@ -24,6 +24,7 @@
 #include <string>
 #include <string_view>
 #include <unordered_map>
+#include <unordered_set>
 
 namespace fiction
 {
@@ -87,6 +88,118 @@ class read_gate_level_layout_impl
             set_name(lyt, layout_name);
         }
 
+        // check topology
+        auto* const topology = layout->FirstChildElement("topology");
+        if (topology != nullptr && topology->GetText())
+        {
+            const auto                      topology_name = topology->GetText();
+            std::unordered_set<std::string> shifted_cartesian{"odd_row_cartesian", "even_row_cartesian",
+                                                              "odd_column_cartesian", "even_column_cartesian"};
+            std::unordered_set<std::string> hex{"odd_row_hex", "even_row_hex", "odd_column_hex", "even_column_hex"};
+
+            if (std::strcmp(topology_name, "cartesian") == 0)
+            {
+                if constexpr (!is_cartesian_layout_v<Lyt>)
+                {
+                    throw gate_level_parsing_error("Error parsing gate_level file: Lyt is not a cartesian layout");
+                }
+            }
+            else if (shifted_cartesian.find(topology_name) != shifted_cartesian.end())
+            {
+                if constexpr (is_shifted_cartesian_layout_v<Lyt>)
+                {
+                    if (std::strcmp(topology_name, "odd_row_cartesian") == 0)
+                    {
+                        if constexpr (!has_odd_row_cartesian_arrangement_v<Lyt>)
+                        {
+                            throw gate_level_parsing_error(
+                                "Error parsing gate_level file: Lyt is not an odd_row_cartesian layout");
+                        }
+                    }
+                    else if (std::strcmp(topology_name, "even_row_cartesian") == 0)
+                    {
+                        if constexpr (!has_even_row_cartesian_arrangement_v<Lyt>)
+                        {
+                            throw gate_level_parsing_error(
+                                "Error parsing gate_level file: Lyt is not an even_row_cartesian layout");
+                        }
+                    }
+                    else if (std::strcmp(topology_name, "odd_column_cartesian") == 0)
+                    {
+                        if constexpr (!has_odd_column_cartesian_arrangement_v<Lyt>)
+                        {
+                            throw gate_level_parsing_error(
+                                "Error parsing gate_level file: Lyt is not an odd_column_cartesian layout");
+                        }
+                    }
+                    else if (std::strcmp(topology_name, "even_column_cartesian") == 0)
+                    {
+                        if constexpr (!has_even_column_cartesian_arrangement_v<Lyt>)
+                        {
+                            throw gate_level_parsing_error(
+                                "Error parsing gate_level file: Lyt is not an even_column_cartesian layout");
+                        }
+                    }
+                }
+                else
+                {
+                    throw gate_level_parsing_error(
+                        "Error parsing gate_level file: Lyt is not a shifted_cartesian layout");
+                }
+            }
+            else if (hex.find(topology_name) != hex.end())
+            {
+                if constexpr (is_hexagonal_layout_v<Lyt>)
+                {
+                    if (std::strcmp(topology_name, "odd_row_hex") == 0)
+                    {
+                        if constexpr (!has_odd_row_hex_arrangement_v<Lyt>)
+                        {
+                            throw gate_level_parsing_error(
+                                "Error parsing gate_level file: Lyt is not an odd_row_hex layout");
+                        }
+                    }
+                    else if (std::strcmp(topology_name, "even_row_hex") == 0)
+                    {
+                        if constexpr (!has_even_row_hex_arrangement_v<Lyt>)
+                        {
+                            throw gate_level_parsing_error(
+                                "Error parsing gate_level file: Lyt is not an even_row_hex layout");
+                        }
+                    }
+                    else if (std::strcmp(topology_name, "odd_column_hex") == 0)
+                    {
+                        if constexpr (!has_odd_column_hex_arrangement_v<Lyt>)
+                        {
+                            throw gate_level_parsing_error(
+                                "Error parsing gate_level file: Lyt is not an odd_column_hex layout");
+                        }
+                    }
+                    else if (std::strcmp(topology_name, "even_column_hex") == 0)
+                    {
+                        if constexpr (!has_even_column_hex_arrangement_v<Lyt>)
+                        {
+                            throw gate_level_parsing_error(
+                                "Error parsing gate_level file: Lyt is not an even_column_hex layout");
+                        }
+                    }
+                }
+                else
+                {
+                    throw gate_level_parsing_error("Error parsing gate_level file: Lyt is not a hexagonal layout");
+                }
+            }
+            else
+            {
+                throw gate_level_parsing_error("Error parsing gate_level file: unknown topology: " +
+                                               std::string(topology_name));
+            }
+        }
+        else
+        {
+            throw gate_level_parsing_error("Error parsing gate_level file: no element 'topology' in 'layout'");
+        }
+
         // set layout size
         auto* const size = layout->FirstChildElement("size");
         if (size != nullptr)
@@ -129,7 +242,7 @@ class read_gate_level_layout_impl
         }
         else
         {
-            throw gate_level_parsing_error("Error parsing gate_level file: no element 'size'");
+            throw gate_level_parsing_error("Error parsing gate_level file: no element 'size' in 'layout'");
         }
 
         // set clocking scheme
@@ -213,7 +326,7 @@ class read_gate_level_layout_impl
         }
         else
         {
-            throw gate_level_parsing_error("Error parsing gate_level file: no element 'clocking'");
+            throw gate_level_parsing_error("Error parsing gate_level file: no element 'clocking' in 'layout'");
         }
 
         // parse layout gates
@@ -387,7 +500,12 @@ class read_gate_level_layout_impl
                     {
                         lyt.create_not(incoming_signal, location);
                     }
-
+                    else if (std::all_of(gate.type.begin(), gate.type.end(), ::isxdigit))
+                    {
+                        kitty::dynamic_truth_table tt_t(1u);
+                        kitty::create_from_hex_string(tt_t, gate.type);
+                        lyt.create_node({incoming_signal}, tt_t, location);
+                    }
                     else
                     {
                         throw gate_level_parsing_error("Error parsing gate_level file: unknown gate type: " +

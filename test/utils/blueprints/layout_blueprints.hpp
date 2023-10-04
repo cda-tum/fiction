@@ -85,26 +85,6 @@ GateLyt xor_maj_gate_layout() noexcept
 }
 
 template <typename GateLyt>
-GateLyt tautology_gate_layout() noexcept
-{
-    REQUIRE(mockturtle::has_create_node_v<GateLyt>);
-
-    GateLyt layout{typename GateLyt::aspect_ratio{2, 2, 1}, fiction::twoddwave_clocking<GateLyt>()};
-
-    const auto x1 = layout.create_pi("x1", {1, 0});
-    const auto x2 = layout.create_pi("x2", {0, 1});
-
-    kitty::dynamic_truth_table tt_t(2u);
-    kitty::create_from_hex_string(tt_t, "F");
-
-    const auto n_xor = layout.create_node({x1, x2}, tt_t, {1, 1});
-
-    layout.create_po(n_xor, "f1", {2, 1});
-
-    return layout;
-}
-
-template <typename GateLyt>
 GateLyt and_or_gate_layout() noexcept
 {
     GateLyt layout{typename GateLyt::aspect_ratio{3, 1, 0}, fiction::open_clocking<GateLyt>()};
@@ -202,6 +182,45 @@ GateLyt res_maj_gate_layout() noexcept
     const auto maj = layout.create_maj(x1, x2, x3, {1, 1});
 
     layout.create_po(maj, "f1", {1, 2});
+
+    return layout;
+}
+
+template <typename GateLyt>
+GateLyt single_input_tautology_gate_layout() noexcept
+{
+    REQUIRE(mockturtle::has_create_node_v<GateLyt>);
+
+    GateLyt layout{typename GateLyt::aspect_ratio{2, 0, 0}, fiction::twoddwave_clocking<GateLyt>()};
+
+    const auto x1 = layout.create_pi("x1", {0, 0});
+
+    kitty::dynamic_truth_table tt_t(1u);
+    kitty::create_from_hex_string(tt_t, "3");
+
+    const auto n = layout.create_node({x1}, tt_t, {1, 0});
+
+    layout.create_po(n, "f1", {2, 0});
+
+    return layout;
+}
+
+template <typename GateLyt>
+GateLyt tautology_gate_layout() noexcept
+{
+    REQUIRE(mockturtle::has_create_node_v<GateLyt>);
+
+    GateLyt layout{typename GateLyt::aspect_ratio{2, 2, 1}, fiction::twoddwave_clocking<GateLyt>()};
+
+    const auto x1 = layout.create_pi("x1", {1, 0});
+    const auto x2 = layout.create_pi("x2", {0, 1});
+
+    kitty::dynamic_truth_table tt_t(2u);
+    kitty::create_from_hex_string(tt_t, "F");
+
+    const auto n_xor = layout.create_node({x1, x2}, tt_t, {1, 1});
+
+    layout.create_po(n_xor, "f1", {2, 1});
 
     return layout;
 }

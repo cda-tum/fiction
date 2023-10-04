@@ -104,7 +104,52 @@ class write_gate_level_layout_impl
 
         os << fcn::OPEN_LAYOUT_METADATA;
         std::string layout_name = get_name(lyt);
-        layout_metadata << fmt::format(fcn::LAYOUT_METADATA, layout_name, "Cartesian", lyt.x(), lyt.y(), lyt.z());
+
+        std::string topology = "";
+        if constexpr (is_cartesian_layout_v<Lyt>)
+        {
+            topology = "cartesian";
+        }
+        else if constexpr (is_shifted_cartesian_layout_v<Lyt>)
+        {
+            if constexpr (has_odd_row_cartesian_arrangement_v<Lyt>)
+            {
+                topology = "odd_row_cartesian";
+            }
+            else if constexpr (has_even_row_cartesian_arrangement_v<Lyt>)
+            {
+                topology = "even_row_cartesian";
+            }
+            else if constexpr (has_odd_column_cartesian_arrangement_v<Lyt>)
+            {
+                topology = "odd_column_cartesian";
+            }
+            else if constexpr (has_even_column_cartesian_arrangement_v<Lyt>)
+            {
+                topology = "even_column_cartesian";
+            }
+        }
+        else if constexpr (is_hexagonal_layout_v<Lyt>)
+        {
+            if constexpr (has_odd_row_hex_arrangement_v<Lyt>)
+            {
+                topology = "odd_row_hex";
+            }
+            else if constexpr (has_even_row_hex_arrangement_v<Lyt>)
+            {
+                topology = "even_row_hex";
+            }
+            else if constexpr (has_odd_column_hex_arrangement_v<Lyt>)
+            {
+                topology = "odd_column_hex";
+            }
+            else if constexpr (has_even_column_hex_arrangement_v<Lyt>)
+            {
+                topology = "even_column_hex";
+            }
+        }
+
+        layout_metadata << fmt::format(fcn::LAYOUT_METADATA, layout_name, topology, lyt.x(), lyt.y(), lyt.z());
         os << layout_metadata.str();
 
         os << fcn::OPEN_CLOCKING;
@@ -165,6 +210,12 @@ class write_gate_level_layout_impl
                     else if (lyt.is_inv(gate))
                     {
                         os << fmt::format(fcn::GATE, id, "INV", "", coord.x, coord.y, coord.z);
+                    }
+                    else if (lyt.is_function(gate))
+                    {
+                        const auto node_fun = lyt.node_function(gate);
+
+                        os << fmt::format(fcn::GATE, id, kitty::to_hex(node_fun), "", coord.x, coord.y, coord.z);
                     }
 
                     os << fcn::OPEN_INCOMING;
