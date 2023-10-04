@@ -27,3 +27,17 @@ updates:
       timezone: "Europe/Berlin"
     assignees:
       - "marcelwa"
+
+  - package-ecosystem: "pip"
+    directory: "/docs/"
+    groups:
+      documentation:
+        patterns:
+          - "*"
+    schedule:
+      interval: "weekly"
+      day: "friday"
+      time: "06:00"
+      timezone: "Europe/Berlin"
+    assignees:
+      - "marcelwa"
