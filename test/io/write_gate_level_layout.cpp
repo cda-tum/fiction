@@ -97,37 +97,48 @@ void check_parsing_equiv_all()
     check_parsing_equiv<Lyt>(blueprints::clpl<technology_network>());
     check_parsing_equiv<Lyt>(blueprints::one_to_five_path_difference_network<technology_network>());
     check_parsing_equiv<Lyt>(blueprints::nand_xnor_network<technology_network>());
-    check_parsing_equiv_layout(blueprints::straight_wire_gate_layout<cart_gate_clk_lyt>());
-    check_parsing_equiv_layout(blueprints::three_wire_paths_gate_layout<cart_gate_clk_lyt>());
-    check_parsing_equiv_layout(blueprints::xor_maj_gate_layout<cart_gate_clk_lyt>());
-    check_parsing_equiv_layout(blueprints::single_input_tautology_gate_layout<cart_gate_clk_lyt>());
-    check_parsing_equiv_layout(blueprints::tautology_gate_layout<cart_gate_clk_lyt>());
-    check_parsing_equiv_layout(blueprints::and_or_gate_layout<cart_gate_clk_lyt>());
-    check_parsing_equiv_layout(blueprints::and_or_gate_layout<cart_odd_row_gate_clk_lyt>());
-    check_parsing_equiv_layout(blueprints::and_or_gate_layout<cart_even_row_gate_clk_lyt>());
-    check_parsing_equiv_layout(blueprints::and_or_gate_layout<cart_odd_col_gate_clk_lyt>());
-    check_parsing_equiv_layout(blueprints::and_or_gate_layout<cart_even_col_gate_clk_lyt>());
-    check_parsing_equiv_layout(blueprints::and_or_gate_layout<hex_odd_row_gate_clk_lyt>());
-    check_parsing_equiv_layout(blueprints::and_or_gate_layout<hex_even_row_gate_clk_lyt>());
-    check_parsing_equiv_layout(blueprints::and_or_gate_layout<hex_odd_col_gate_clk_lyt>());
-    check_parsing_equiv_layout(blueprints::and_or_gate_layout<hex_even_col_gate_clk_lyt>());
-    check_parsing_equiv_layout(blueprints::and_not_gate_layout<cart_gate_clk_lyt>());
-    check_parsing_equiv_layout(blueprints::or_not_gate_layout<cart_gate_clk_lyt>());
-    check_parsing_equiv_layout(blueprints::use_and_gate_layout<cart_gate_clk_lyt>());
-    check_parsing_equiv_layout(blueprints::res_maj_gate_layout<cart_gate_clk_lyt>());
-    check_parsing_equiv_layout(blueprints::res_tautology_gate_layout<cart_gate_clk_lyt>());
-    check_parsing_equiv_layout(blueprints::open_tautology_gate_layout<hex_even_row_gate_clk_lyt>());
-    check_parsing_equiv_layout(blueprints::crossing_layout<cart_gate_clk_lyt>());
-    check_parsing_equiv_layout(blueprints::fanout_layout<cart_gate_clk_lyt>());
-    check_parsing_equiv_layout(blueprints::unbalanced_and_layout<cart_gate_clk_lyt>());
-    check_parsing_equiv_layout(blueprints::shifted_cart_and_or_inv_gate_layout<cart_odd_col_gate_clk_lyt>());
-    check_parsing_equiv_layout(blueprints::row_clocked_and_xor_gate_layout<cart_even_row_gate_clk_lyt>());
-    check_parsing_equiv_layout(blueprints::optimization_layout<cart_gate_clk_lyt>());
-    check_parsing_equiv_layout(blueprints::optimization_layout_corner_case_outputs_1<cart_gate_clk_lyt>());
-    check_parsing_equiv_layout(blueprints::optimization_layout_corner_case_outputs_2<cart_gate_clk_lyt>());
 }
 
-TEST_CASE("Write empty gate_level layout", "[fcn]")
+void check_parsing_equiv_layout_all()
+{
+    check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::straight_wire_gate_layout<cart_gate_clk_lyt>());
+    check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::three_wire_paths_gate_layout<cart_gate_clk_lyt>());
+    check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::xor_maj_gate_layout<cart_gate_clk_lyt>());
+    check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::single_input_tautology_gate_layout<cart_gate_clk_lyt>());
+    check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::tautology_gate_layout<cart_gate_clk_lyt>());
+    check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::and_or_gate_layout<cart_gate_clk_lyt>());
+    check_parsing_equiv_layout<cart_odd_row_gate_clk_lyt>(blueprints::and_or_gate_layout<cart_odd_row_gate_clk_lyt>());
+    check_parsing_equiv_layout<cart_even_row_gate_clk_lyt>(
+        blueprints::and_or_gate_layout<cart_even_row_gate_clk_lyt>());
+    check_parsing_equiv_layout<cart_odd_col_gate_clk_lyt>(blueprints::and_or_gate_layout<cart_odd_col_gate_clk_lyt>());
+    check_parsing_equiv_layout<cart_even_col_gate_clk_lyt>(
+        blueprints::and_or_gate_layout<cart_even_col_gate_clk_lyt>());
+    check_parsing_equiv_layout<hex_odd_row_gate_clk_lyt>(blueprints::and_or_gate_layout<hex_odd_row_gate_clk_lyt>());
+    check_parsing_equiv_layout<hex_even_row_gate_clk_lyt>(blueprints::and_or_gate_layout<hex_even_row_gate_clk_lyt>());
+    check_parsing_equiv_layout<hex_odd_col_gate_clk_lyt>(blueprints::and_or_gate_layout<hex_odd_col_gate_clk_lyt>());
+    check_parsing_equiv_layout<hex_even_col_gate_clk_lyt>(blueprints::and_or_gate_layout<hex_even_col_gate_clk_lyt>());
+    check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::and_not_gate_layout<cart_gate_clk_lyt>());
+    check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::or_not_gate_layout<cart_gate_clk_lyt>());
+    check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::use_and_gate_layout<cart_gate_clk_lyt>());
+    check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::res_maj_gate_layout<cart_gate_clk_lyt>());
+    check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::res_tautology_gate_layout<cart_gate_clk_lyt>());
+    check_parsing_equiv_layout<hex_even_row_gate_clk_lyt>(
+        blueprints::open_tautology_gate_layout<hex_even_row_gate_clk_lyt>());
+    check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::crossing_layout<cart_gate_clk_lyt>());
+    check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::fanout_layout<cart_gate_clk_lyt>());
+    check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::unbalanced_and_layout<cart_gate_clk_lyt>());
+    check_parsing_equiv_layout<cart_odd_col_gate_clk_lyt>(
+        blueprints::shifted_cart_and_or_inv_gate_layout<cart_odd_col_gate_clk_lyt>());
+    check_parsing_equiv_layout<cart_even_row_gate_clk_lyt>(
+        blueprints::row_clocked_and_xor_gate_layout<cart_even_row_gate_clk_lyt>());
+    check_parsing_equiv_layout<cart_gate_clk_lyt>(blueprints::optimization_layout<cart_gate_clk_lyt>());
+    check_parsing_equiv_layout<cart_gate_clk_lyt>(
+        blueprints::optimization_layout_corner_case_outputs_1<cart_gate_clk_lyt>());
+    check_parsing_equiv_layout<cart_gate_clk_lyt>(
+        blueprints::optimization_layout_corner_case_outputs_2<cart_gate_clk_lyt>());
+}
+
+TEST_CASE("Write empty gate_level layout", "[write-gate-level-layout]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
 
@@ -142,9 +153,10 @@ TEST_CASE("Write empty gate_level layout", "[fcn]")
     compare_written_and_read_layout(layout, read_layout);
 }
 
-TEST_CASE("Write and read layouts", "[fcn]")
+TEST_CASE("Write and read layouts", "[write-gate-level-layout]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
 
     check_parsing_equiv_all<gate_layout>();
+    check_parsing_equiv_layout_all();
 }

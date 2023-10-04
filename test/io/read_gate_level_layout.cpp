@@ -19,7 +19,7 @@
 
 using namespace fiction;
 
-TEST_CASE("Read empty FCN layout", "[fcn]")
+TEST_CASE("Read empty FCN layout", "[read-gate-level-layout]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
@@ -52,7 +52,7 @@ TEST_CASE("Read empty FCN layout", "[fcn]")
     check(read_gate_level_layout<gate_layout>(layout_stream));
 }
 
-TEST_CASE("Read simple FCN layout", "[fcn]")
+TEST_CASE("Read simple FCN layout", "[read-gate-level-layout]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
@@ -152,7 +152,7 @@ TEST_CASE("Read simple FCN layout", "[fcn]")
     check(read_gate_level_layout<gate_layout>(layout_stream));
 }
 
-TEST_CASE("Parsing error: malformed xml", "[fcn]")
+TEST_CASE("Parsing error: malformed xml", "[read-gate-level-layout]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
@@ -175,7 +175,7 @@ TEST_CASE("Parsing error: malformed xml", "[fcn]")
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
-TEST_CASE("Parsing error: no root element 'fcn'", "[fcn]")
+TEST_CASE("Parsing error: no root element 'fcn'", "[read-gate-level-layout]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "  <layout>\n"
@@ -197,7 +197,7 @@ TEST_CASE("Parsing error: no root element 'fcn'", "[fcn]")
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'layout' in 'fcn'", "[fcn]")
+TEST_CASE("Parsing error: no element 'layout' in 'fcn'", "[read-gate-level-layout]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
@@ -219,7 +219,7 @@ TEST_CASE("Parsing error: no element 'layout' in 'fcn'", "[fcn]")
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'clocking' in 'layout'", "[fcn]")
+TEST_CASE("Parsing error: no element 'clocking' in 'layout'", "[read-gate-level-layout]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
@@ -240,7 +240,7 @@ TEST_CASE("Parsing error: no element 'clocking' in 'layout'", "[fcn]")
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'name' in 'clocking'", "[fcn]")
+TEST_CASE("Parsing error: no element 'name' in 'clocking'", "[read-gate-level-layout]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
@@ -263,7 +263,7 @@ TEST_CASE("Parsing error: no element 'name' in 'clocking'", "[fcn]")
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
-TEST_CASE("Parsing error: unknown clocking scheme", "[fcn]")
+TEST_CASE("Parsing error: unknown clocking scheme", "[read-gate-level-layout]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
@@ -287,7 +287,7 @@ TEST_CASE("Parsing error: unknown clocking scheme", "[fcn]")
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'zones' in 'clocking'", "[fcn]")
+TEST_CASE("Parsing error: no element 'zones' in 'clocking'", "[read-gate-level-layout]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
@@ -311,7 +311,7 @@ TEST_CASE("Parsing error: no element 'zones' in 'clocking'", "[fcn]")
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'x' in 'zone'", "[fcn]")
+TEST_CASE("Parsing error: no element 'x' in 'zone'", "[read-gate-level-layout]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
@@ -341,7 +341,7 @@ TEST_CASE("Parsing error: no element 'x' in 'zone'", "[fcn]")
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'y' in 'zone'", "[fcn]")
+TEST_CASE("Parsing error: no element 'y' in 'zone'", "[read-gate-level-layout]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
@@ -371,7 +371,7 @@ TEST_CASE("Parsing error: no element 'y' in 'zone'", "[fcn]")
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'clock' in 'zone'", "[fcn]")
+TEST_CASE("Parsing error: no element 'clock' in 'zone'", "[read-gate-level-layout]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
@@ -401,7 +401,7 @@ TEST_CASE("Parsing error: no element 'clock' in 'zone'", "[fcn]")
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'topology' in 'layout'", "[fcn]")
+TEST_CASE("Parsing error: no element 'topology' in 'layout'", "[read-gate-level-layout]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
@@ -424,7 +424,7 @@ TEST_CASE("Parsing error: no element 'topology' in 'layout'", "[fcn]")
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
-TEST_CASE("Parsing error: unknown topology", "[fcn]")
+TEST_CASE("Parsing error: unknown topology", "[read-gate-level-layout]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
@@ -448,7 +448,7 @@ TEST_CASE("Parsing error: unknown topology", "[fcn]")
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
-TEST_CASE("Parsing error: Lyt is not a cartesian layout", "[fcn]")
+TEST_CASE("Parsing error: Lyt is not a cartesian layout", "[read-gate-level-layout]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
@@ -473,7 +473,7 @@ TEST_CASE("Parsing error: Lyt is not a cartesian layout", "[fcn]")
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
-TEST_CASE("Parsing error: Lyt is not a shifted_cartesian layout", "[fcn]")
+TEST_CASE("Parsing error: Lyt is not a shifted_cartesian layout", "[read-gate-level-layout]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
@@ -497,7 +497,7 @@ TEST_CASE("Parsing error: Lyt is not a shifted_cartesian layout", "[fcn]")
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
-TEST_CASE("Parsing error: Lyt is not an odd_row_cartesian layout", "[fcn]")
+TEST_CASE("Parsing error: Lyt is not an odd_row_cartesian layout", "[read-gate-level-layout]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
@@ -522,7 +522,7 @@ TEST_CASE("Parsing error: Lyt is not an odd_row_cartesian layout", "[fcn]")
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
-TEST_CASE("Parsing error: Lyt is not an even_row_cartesian layout", "[fcn]")
+TEST_CASE("Parsing error: Lyt is not an even_row_cartesian layout", "[read-gate-level-layout]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
@@ -547,7 +547,7 @@ TEST_CASE("Parsing error: Lyt is not an even_row_cartesian layout", "[fcn]")
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
-TEST_CASE("Parsing error: Lyt is not an odd_column_cartesian layout", "[fcn]")
+TEST_CASE("Parsing error: Lyt is not an odd_column_cartesian layout", "[read-gate-level-layout]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
@@ -572,7 +572,7 @@ TEST_CASE("Parsing error: Lyt is not an odd_column_cartesian layout", "[fcn]")
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
-TEST_CASE("Parsing error: Lyt is not an even_column_cartesian layout", "[fcn]")
+TEST_CASE("Parsing error: Lyt is not an even_column_cartesian layout", "[read-gate-level-layout]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
@@ -597,7 +597,7 @@ TEST_CASE("Parsing error: Lyt is not an even_column_cartesian layout", "[fcn]")
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
-TEST_CASE("Parsing error: Lyt is not a hexagonal layout", "[fcn]")
+TEST_CASE("Parsing error: Lyt is not a hexagonal layout", "[read-gate-level-layout]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
@@ -622,7 +622,7 @@ TEST_CASE("Parsing error: Lyt is not a hexagonal layout", "[fcn]")
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
-TEST_CASE("Parsing error: Lyt is not an odd_row_hex layout", "[fcn]")
+TEST_CASE("Parsing error: Lyt is not an odd_row_hex layout", "[read-gate-level-layout]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
@@ -647,7 +647,7 @@ TEST_CASE("Parsing error: Lyt is not an odd_row_hex layout", "[fcn]")
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
-TEST_CASE("Parsing error: Lyt is not an even_row_hex layout", "[fcn]")
+TEST_CASE("Parsing error: Lyt is not an even_row_hex layout", "[read-gate-level-layout]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
@@ -672,7 +672,7 @@ TEST_CASE("Parsing error: Lyt is not an even_row_hex layout", "[fcn]")
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
-TEST_CASE("Parsing error: Lyt is not an odd_column_hex layout", "[fcn]")
+TEST_CASE("Parsing error: Lyt is not an odd_column_hex layout", "[read-gate-level-layout]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
@@ -697,7 +697,7 @@ TEST_CASE("Parsing error: Lyt is not an odd_column_hex layout", "[fcn]")
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
-TEST_CASE("Parsing error: Lyt is not an even_column_hex layout", "[fcn]")
+TEST_CASE("Parsing error: Lyt is not an even_column_hex layout", "[read-gate-level-layout]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
@@ -722,7 +722,7 @@ TEST_CASE("Parsing error: Lyt is not an even_column_hex layout", "[fcn]")
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'size' in 'layout'", "[fcn]")
+TEST_CASE("Parsing error: no element 'size' in 'layout'", "[read-gate-level-layout]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
@@ -744,7 +744,7 @@ TEST_CASE("Parsing error: no element 'size' in 'layout'", "[fcn]")
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'x' in 'size'", "[fcn]")
+TEST_CASE("Parsing error: no element 'x' in 'size'", "[read-gate-level-layout]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
@@ -767,7 +767,7 @@ TEST_CASE("Parsing error: no element 'x' in 'size'", "[fcn]")
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'y' in 'size'", "[fcn]")
+TEST_CASE("Parsing error: no element 'y' in 'size'", "[read-gate-level-layout]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
@@ -790,7 +790,7 @@ TEST_CASE("Parsing error: no element 'y' in 'size'", "[fcn]")
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'z' in 'size'", "[fcn]")
+TEST_CASE("Parsing error: no element 'z' in 'size'", "[read-gate-level-layout]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
@@ -813,7 +813,7 @@ TEST_CASE("Parsing error: no element 'z' in 'size'", "[fcn]")
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'id' in 'gate", "[fcn]")
+TEST_CASE("Parsing error: no element 'id' in 'gate", "[read-gate-level-layout]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
@@ -848,7 +848,7 @@ TEST_CASE("Parsing error: no element 'id' in 'gate", "[fcn]")
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'type' in 'gate", "[fcn]")
+TEST_CASE("Parsing error: no element 'type' in 'gate", "[read-gate-level-layout]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
@@ -883,7 +883,7 @@ TEST_CASE("Parsing error: no element 'type' in 'gate", "[fcn]")
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'name' in 'gate", "[fcn]")
+TEST_CASE("Parsing error: no element 'name' in 'gate", "[read-gate-level-layout]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
@@ -918,7 +918,7 @@ TEST_CASE("Parsing error: no element 'name' in 'gate", "[fcn]")
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'loc' in 'gate'", "[fcn]")
+TEST_CASE("Parsing error: no element 'loc' in 'gate'", "[read-gate-level-layout]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
@@ -952,7 +952,7 @@ TEST_CASE("Parsing error: no element 'loc' in 'gate'", "[fcn]")
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'x' in 'loc'", "[fcn]")
+TEST_CASE("Parsing error: no element 'x' in 'loc'", "[read-gate-level-layout]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
@@ -987,7 +987,7 @@ TEST_CASE("Parsing error: no element 'x' in 'loc'", "[fcn]")
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'y' in 'loc'", "[fcn]")
+TEST_CASE("Parsing error: no element 'y' in 'loc'", "[read-gate-level-layout]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
@@ -1022,7 +1022,7 @@ TEST_CASE("Parsing error: no element 'y' in 'loc'", "[fcn]")
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'z' in 'loc'", "[fcn]")
+TEST_CASE("Parsing error: no element 'z' in 'loc'", "[read-gate-level-layout]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
@@ -1057,7 +1057,7 @@ TEST_CASE("Parsing error: no element 'z' in 'loc'", "[fcn]")
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
-TEST_CASE("Parsing error: unknown gate type with 0 incoming signals", "[fcn]")
+TEST_CASE("Parsing error: unknown gate type with 0 incoming signals", "[read-gate-level-layout]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
@@ -1141,7 +1141,7 @@ TEST_CASE("Parsing error: unknown gate type with 0 incoming signals", "[fcn]")
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
-TEST_CASE("Parsing error: unknown gate type with 1 incoming signal", "[fcn]")
+TEST_CASE("Parsing error: unknown gate type with 1 incoming signal", "[read-gate-level-layout]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
@@ -1224,7 +1224,7 @@ TEST_CASE("Parsing error: unknown gate type with 1 incoming signal", "[fcn]")
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
-TEST_CASE("Parsing error: unknown gate type with 2 incoming signals", "[fcn]")
+TEST_CASE("Parsing error: unknown gate type with 2 incoming signals", "[read-gate-level-layout]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
@@ -1308,7 +1308,7 @@ TEST_CASE("Parsing error: unknown gate type with 2 incoming signals", "[fcn]")
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
-TEST_CASE("Parsing error: unknown gate type with 3 incoming signals", "[fcn]")
+TEST_CASE("Parsing error: unknown gate type with 3 incoming signals", "[read-gate-level-layout]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
@@ -1407,7 +1407,7 @@ TEST_CASE("Parsing error: unknown gate type with 3 incoming signals", "[fcn]")
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
-TEST_CASE("Parsing error: unknown gate type with more than 3 incoming signals", "[fcn]")
+TEST_CASE("Parsing error: unknown gate type with more than 3 incoming signals", "[read-gate-level-layout]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
@@ -1531,7 +1531,7 @@ TEST_CASE("Parsing error: unknown gate type with more than 3 incoming signals", 
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'x' in 'signal'", "[fcn]")
+TEST_CASE("Parsing error: no element 'x' in 'signal'", "[read-gate-level-layout]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
@@ -1614,7 +1614,7 @@ TEST_CASE("Parsing error: no element 'x' in 'signal'", "[fcn]")
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'y' in 'signal'", "[fcn]")
+TEST_CASE("Parsing error: no element 'y' in 'signal'", "[read-gate-level-layout]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"
@@ -1697,7 +1697,7 @@ TEST_CASE("Parsing error: no element 'y' in 'signal'", "[fcn]")
     CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'z' in 'signal'", "[fcn]")
+TEST_CASE("Parsing error: no element 'z' in 'signal'", "[read-gate-level-layout]")
 {
     static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<fcn>\n"

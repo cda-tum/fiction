@@ -16,6 +16,7 @@
 #include <mockturtle/views/topo_view.hpp>
 
 #include <chrono>
+#include <cstdlib>
 #include <ctime>
 #include <fstream>
 #include <ostream>
@@ -93,14 +94,10 @@ class write_gate_level_layout_impl
 
     void run()
     {
-        std::stringstream header{};
-        std::stringstream layout_metadata{};
-
         // metadata
-        header << fcn::FCN_HEADER << fcn::OPEN_FCN;
+        os << fcn::FCN_HEADER << fcn::OPEN_FCN;
         const auto time_str = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(std::time(nullptr)));
-        header << fmt::format(fcn::FICTION_METADATA, FICTION_VERSION, FICTION_REPO, time_str);
-        os << header.str();
+        os << fmt::format(fcn::FICTION_METADATA, FICTION_VERSION, FICTION_REPO, time_str);
 
         os << fcn::OPEN_LAYOUT_METADATA;
         std::string layout_name = get_name(lyt);
@@ -149,8 +146,7 @@ class write_gate_level_layout_impl
             }
         }
 
-        layout_metadata << fmt::format(fcn::LAYOUT_METADATA, layout_name, topology, lyt.x(), lyt.y(), lyt.z());
-        os << layout_metadata.str();
+        os << fmt::format(fcn::LAYOUT_METADATA, layout_name, topology, lyt.x(), lyt.y(), lyt.z());
 
         os << fcn::OPEN_CLOCKING;
         const auto clocking_scheme = lyt.get_clocking_scheme();
@@ -176,119 +172,119 @@ class write_gate_level_layout_impl
 
         // create topological ordering
         mockturtle::topo_view layout_topo{lyt};
-        uint32_t              id = 0;
+        uint32_t              gate_id = 0;
 
         // inputs
         layout_topo.foreach_pi(
-            [&id, this](const auto& gate)
+            [&gate_id, this](const auto& gate)
             {
                 const auto coord = lyt.get_tile(gate);
                 os << fcn::OPEN_GATE;
-                os << fmt::format(fcn::GATE, id, "PI", lyt.get_name(gate), coord.x, coord.y, coord.z);
+                os << fmt::format(fcn::GATE, gate_id, "PI", lyt.get_name(gate), coord.x, coord.y, coord.z);
                 os << fcn::CLOSE_GATE;
-                id++;
+                gate_id++;
             });
 
         // gates
         layout_topo.foreach_gate(
-            [&id, this](const auto& gate)
+            [&gate_id, this](const auto& gate)
             {
                 os << fcn::OPEN_GATE;
                 const auto coord = lyt.get_tile(gate);
                 if (const auto signals = lyt.incoming_data_flow(coord); signals.size() == 1)
                 {
-                    const auto signal = signals[0];
+                    const auto incoming_signal = signals[0];
 
                     if (lyt.is_po(gate))
                     {
-                        os << fmt::format(fcn::GATE, id, "PO", lyt.get_name(gate), coord.x, coord.y, coord.z);
+                        os << fmt::format(fcn::GATE, gate_id, "PO", lyt.get_name(gate), coord.x, coord.y, coord.z);
                     }
                     else if (lyt.is_wire(gate))
                     {
-                        os << fmt::format(fcn::GATE, id, "BUF", "", coord.x, coord.y, coord.z);
+                        os << fmt::format(fcn::GATE, gate_id, "BUF", "", coord.x, coord.y, coord.z);
                     }
                     else if (lyt.is_inv(gate))
                     {
-                        os << fmt::format(fcn::GATE, id, "INV", "", coord.x, coord.y, coord.z);
+                        os << fmt::format(fcn::GATE, gate_id, "INV", "", coord.x, coord.y, coord.z);
                     }
                     else if (lyt.is_function(gate))
                     {
                         const auto node_fun = lyt.node_function(gate);
 
-                        os << fmt::format(fcn::GATE, id, kitty::to_hex(node_fun), "", coord.x, coord.y, coord.z);
+                        os << fmt::format(fcn::GATE, gate_id, kitty::to_hex(node_fun), "", coord.x, coord.y, coord.z);
                     }
 
                     os << fcn::OPEN_INCOMING;
-                    os << fmt::format(fcn::SIGNAL, signal.x, signal.y, signal.z);
+                    os << fmt::format(fcn::SIGNAL, incoming_signal.x, incoming_signal.y, incoming_signal.z);
                     os << fcn::CLOSE_INCOMING;
                 }
                 else if (signals.size() == 2)
                 {
-                    const auto signal_a = signals[0];
-                    const auto signal_b = signals[1];
+                    const auto incoming_signal_a = signals[0];
+                    const auto incoming_signal_b = signals[1];
 
                     if (lyt.is_and(gate))
                     {
-                        os << fmt::format(fcn::GATE, id, "AND", "", coord.x, coord.y, coord.z);
+                        os << fmt::format(fcn::GATE, gate_id, "AND", "", coord.x, coord.y, coord.z);
                     }
                     else if (lyt.is_nand(gate))
                     {
-                        os << fmt::format(fcn::GATE, id, "NAND", "", coord.x, coord.y, coord.z);
+                        os << fmt::format(fcn::GATE, gate_id, "NAND", "", coord.x, coord.y, coord.z);
                     }
                     else if (lyt.is_or(gate))
                     {
-                        os << fmt::format(fcn::GATE, id, "OR", "", coord.x, coord.y, coord.z);
+                        os << fmt::format(fcn::GATE, gate_id, "OR", "", coord.x, coord.y, coord.z);
                     }
                     else if (lyt.is_nor(gate))
                     {
-                        os << fmt::format(fcn::GATE, id, "NOR", "", coord.x, coord.y, coord.z);
+                        os << fmt::format(fcn::GATE, gate_id, "NOR", "", coord.x, coord.y, coord.z);
                     }
                     else if (lyt.is_xor(gate))
                     {
-                        os << fmt::format(fcn::GATE, id, "XOR", "", coord.x, coord.y, coord.z);
+                        os << fmt::format(fcn::GATE, gate_id, "XOR", "", coord.x, coord.y, coord.z);
                     }
                     else if (lyt.is_xnor(gate))
                     {
-                        os << fmt::format(fcn::GATE, id, "XNOR", "", coord.x, coord.y, coord.z);
+                        os << fmt::format(fcn::GATE, gate_id, "XNOR", "", coord.x, coord.y, coord.z);
                     }
                     else if (lyt.is_function(gate))
                     {
                         const auto node_fun = lyt.node_function(gate);
 
-                        os << fmt::format(fcn::GATE, id, kitty::to_hex(node_fun), "", coord.x, coord.y, coord.z);
+                        os << fmt::format(fcn::GATE, gate_id, kitty::to_hex(node_fun), "", coord.x, coord.y, coord.z);
                     }
                     os << fcn::OPEN_INCOMING;
-                    os << fmt::format(fcn::SIGNAL, signal_a.x, signal_a.y, signal_a.z);
-                    os << fmt::format(fcn::SIGNAL, signal_b.x, signal_b.y, signal_b.z);
+                    os << fmt::format(fcn::SIGNAL, incoming_signal_a.x, incoming_signal_a.y, incoming_signal_a.z);
+                    os << fmt::format(fcn::SIGNAL, incoming_signal_b.x, incoming_signal_b.y, incoming_signal_b.z);
                     os << fcn::CLOSE_INCOMING;
                 }
                 else if (signals.size() == 3)
                 {
-                    const auto signal_a = signals[0];
-                    const auto signal_b = signals[1];
-                    const auto signal_c = signals[2];
+                    const auto incoming_signal_a = signals[0];
+                    const auto incoming_signal_b = signals[1];
+                    const auto incoming_signal_c = signals[2];
 
                     if (lyt.is_maj(gate))
                     {
-                        os << fmt::format(fcn::GATE, id, "MAJ", "", coord.x, coord.y, coord.z);
+                        os << fmt::format(fcn::GATE, gate_id, "MAJ", "", coord.x, coord.y, coord.z);
                     }
                     else if (lyt.is_function(gate))
                     {
                         const auto node_fun = lyt.node_function(gate);
 
-                        os << fmt::format(fcn::GATE, id, kitty::to_hex(node_fun), "", coord.x, coord.y, coord.z);
+                        os << fmt::format(fcn::GATE, gate_id, kitty::to_hex(node_fun), "", coord.x, coord.y, coord.z);
                     }
                     os << fcn::OPEN_INCOMING;
-                    os << fmt::format(fcn::SIGNAL, signal_a.x, signal_a.y, signal_a.z);
-                    os << fmt::format(fcn::SIGNAL, signal_b.x, signal_b.y, signal_b.z);
-                    os << fmt::format(fcn::SIGNAL, signal_c.x, signal_c.y, signal_c.z);
+                    os << fmt::format(fcn::SIGNAL, incoming_signal_a.x, incoming_signal_a.y, incoming_signal_a.z);
+                    os << fmt::format(fcn::SIGNAL, incoming_signal_b.x, incoming_signal_b.y, incoming_signal_b.z);
+                    os << fmt::format(fcn::SIGNAL, incoming_signal_c.x, incoming_signal_c.y, incoming_signal_c.z);
                     os << fcn::CLOSE_INCOMING;
                 }
                 else if (lyt.is_function(gate))
                 {
                     const auto node_fun = lyt.node_function(gate);
 
-                    os << fmt::format(fcn::GATE, id, kitty::to_hex(node_fun), "", coord.x, coord.y, coord.z);
+                    os << fmt::format(fcn::GATE, gate_id, kitty::to_hex(node_fun), "", coord.x, coord.y, coord.z);
 
                     os << fcn::OPEN_INCOMING;
                     for (std::size_t i = 0; i < signals.size(); i++)
@@ -298,7 +294,7 @@ class write_gate_level_layout_impl
                     os << fcn::CLOSE_INCOMING;
                 }
                 os << fcn::CLOSE_GATE;
-                id++;
+                gate_id++;
             });
 
         os << fcn::CLOSE_GATES;
