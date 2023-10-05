@@ -2,8 +2,8 @@
 // Created by simon on 25.09.23.
 //
 
-#ifndef FICTION_READ_GATE_LEVEL_LAYOUT_HPP
-#define FICTION_READ_GATE_LEVEL_LAYOUT_HPP
+#ifndef FICTION_READ_FGL_LAYOUT_HPP
+#define FICTION_READ_FGL_LAYOUT_HPP
 
 #include "fiction/layouts/cartesian_layout.hpp"
 #include "fiction/layouts/clocked_layout.hpp"
@@ -32,59 +32,59 @@ namespace fiction
 {
 
 /**
- * Exception thrown when an error occurs during parsing of a file containing a gate_level layout.
+ * Exception thrown when an error occurs during parsing of a .fgl file containing a gate-level layout.
  */
-class gate_level_parsing_error : public std::runtime_error
+class fgl_parsing_error : public std::runtime_error
 {
   public:
     /**
-     * Constructs a gate_level_parsing_error object with the given error message.
+     * Constructs a fgl_parsing_error object with the given error message.
      *
      * @param msg The error message describing the parsing error.
      */
-    explicit gate_level_parsing_error(const std::string_view& msg) noexcept : std::runtime_error(msg.data()) {}
+    explicit fgl_parsing_error(const std::string_view& msg) noexcept : std::runtime_error(msg.data()) {}
 };
 
 namespace detail
 {
 
 template <typename Lyt>
-class read_gate_level_layout_impl
+class read_fgl_layout_impl
 {
   public:
-    read_gate_level_layout_impl(std::istream& s, const std::string_view& name) : lyt{}, is{s}
+    read_fgl_layout_impl(std::istream& s, const std::string_view& name) : lyt{}, is{s}
     {
         set_name(lyt, name);
     }
 
-    read_gate_level_layout_impl(Lyt& tgt, std::istream& s) : lyt{tgt}, is{s} {}
+    read_fgl_layout_impl(Lyt& tgt, std::istream& s) : lyt{tgt}, is{s} {}
 
     Lyt run()
     {
         // tinyXML2 does not support std::istream, so we have to read the whole file into a string first
         std::stringstream buffer{};
         buffer << is.rdbuf();
-        const std::string gate_level_content{buffer.str()};
+        const std::string fgl_content{buffer.str()};
 
         // parse xml file
         tinyxml2::XMLDocument xml_document{};
-        xml_document.Parse(gate_level_content.c_str());
+        xml_document.Parse(fgl_content.c_str());
 
         if (xml_document.ErrorID() != 0)
         {
-            throw gate_level_parsing_error(fmt::format("Error parsing gate_level file: {}", xml_document.ErrorName()));
+            throw fgl_parsing_error(fmt::format("Error parsing FGL file: {}", xml_document.ErrorName()));
         }
 
-        auto* const fcn_root = xml_document.FirstChildElement("fcn");
-        if (fcn_root == nullptr)
+        auto* const fgl_root = xml_document.FirstChildElement("fgl");
+        if (fgl_root == nullptr)
         {
-            throw gate_level_parsing_error("Error parsing gate_level file: no root element 'fcn'");
+            throw fgl_parsing_error("Error parsing FGL file: no root element 'fgl'");
         }
 
-        auto* const layout = fcn_root->FirstChildElement("layout");
+        auto* const layout = fgl_root->FirstChildElement("layout");
         if (layout == nullptr)
         {
-            throw gate_level_parsing_error("Error parsing gate_level file: no element 'layout'");
+            throw fgl_parsing_error("Error parsing FGL file: no element 'layout'");
         }
 
         // set layout name
@@ -109,7 +109,7 @@ class read_gate_level_layout_impl
             {
                 if constexpr (!is_cartesian_layout_v<Lyt>)
                 {
-                    throw gate_level_parsing_error("Error parsing gate_level file: Lyt is not a cartesian layout");
+                    throw fgl_parsing_error("Error parsing FGL file: Lyt is not a cartesian layout");
                 }
             }
             else if (std::find(std::begin(shifted_cartesian), std::end(shifted_cartesian), topology_name) !=
@@ -121,39 +121,36 @@ class read_gate_level_layout_impl
                     {
                         if constexpr (!has_odd_row_cartesian_arrangement_v<Lyt>)
                         {
-                            throw gate_level_parsing_error(
-                                "Error parsing gate_level file: Lyt is not an odd_row_cartesian layout");
+                            throw fgl_parsing_error("Error parsing FGL file: Lyt is not an odd_row_cartesian layout");
                         }
                     }
                     else if (std::strcmp(topology_name, "even_row_cartesian") == 0)
                     {
                         if constexpr (!has_even_row_cartesian_arrangement_v<Lyt>)
                         {
-                            throw gate_level_parsing_error(
-                                "Error parsing gate_level file: Lyt is not an even_row_cartesian layout");
+                            throw fgl_parsing_error("Error parsing FGL file: Lyt is not an even_row_cartesian layout");
                         }
                     }
                     else if (std::strcmp(topology_name, "odd_column_cartesian") == 0)
                     {
                         if constexpr (!has_odd_column_cartesian_arrangement_v<Lyt>)
                         {
-                            throw gate_level_parsing_error(
-                                "Error parsing gate_level file: Lyt is not an odd_column_cartesian layout");
+                            throw fgl_parsing_error(
+                                "Error parsing FGL file: Lyt is not an odd_column_cartesian layout");
                         }
                     }
                     else if (std::strcmp(topology_name, "even_column_cartesian") == 0)
                     {
                         if constexpr (!has_even_column_cartesian_arrangement_v<Lyt>)
                         {
-                            throw gate_level_parsing_error(
-                                "Error parsing gate_level file: Lyt is not an even_column_cartesian layout");
+                            throw fgl_parsing_error(
+                                "Error parsing FGL file: Lyt is not an even_column_cartesian layout");
                         }
                     }
                 }
                 else
                 {
-                    throw gate_level_parsing_error(
-                        "Error parsing gate_level file: Lyt is not a shifted_cartesian layout");
+                    throw fgl_parsing_error("Error parsing FGL file: Lyt is not a shifted_cartesian layout");
                 }
             }
             else if (std::find(std::begin(hex), std::end(hex), topology_name) != hex.end())
@@ -164,49 +161,44 @@ class read_gate_level_layout_impl
                     {
                         if constexpr (!has_odd_row_hex_arrangement_v<Lyt>)
                         {
-                            throw gate_level_parsing_error(
-                                "Error parsing gate_level file: Lyt is not an odd_row_hex layout");
+                            throw fgl_parsing_error("Error parsing FGL file: Lyt is not an odd_row_hex layout");
                         }
                     }
                     else if (std::strcmp(topology_name, "even_row_hex") == 0)
                     {
                         if constexpr (!has_even_row_hex_arrangement_v<Lyt>)
                         {
-                            throw gate_level_parsing_error(
-                                "Error parsing gate_level file: Lyt is not an even_row_hex layout");
+                            throw fgl_parsing_error("Error parsing FGL file: Lyt is not an even_row_hex layout");
                         }
                     }
                     else if (std::strcmp(topology_name, "odd_column_hex") == 0)
                     {
                         if constexpr (!has_odd_column_hex_arrangement_v<Lyt>)
                         {
-                            throw gate_level_parsing_error(
-                                "Error parsing gate_level file: Lyt is not an odd_column_hex layout");
+                            throw fgl_parsing_error("Error parsing FGL file: Lyt is not an odd_column_hex layout");
                         }
                     }
                     else if (std::strcmp(topology_name, "even_column_hex") == 0)
                     {
                         if constexpr (!has_even_column_hex_arrangement_v<Lyt>)
                         {
-                            throw gate_level_parsing_error(
-                                "Error parsing gate_level file: Lyt is not an even_column_hex layout");
+                            throw fgl_parsing_error("Error parsing FGL file: Lyt is not an even_column_hex layout");
                         }
                     }
                 }
                 else
                 {
-                    throw gate_level_parsing_error("Error parsing gate_level file: Lyt is not a hexagonal layout");
+                    throw fgl_parsing_error("Error parsing FGL file: Lyt is not a hexagonal layout");
                 }
             }
             else
             {
-                throw gate_level_parsing_error(
-                    fmt::format("Error parsing gate_level file: unknown topology: {}", topology_name));
+                throw fgl_parsing_error(fmt::format("Error parsing FGL file: unknown topology: {}", topology_name));
             }
         }
         else
         {
-            throw gate_level_parsing_error("Error parsing gate_level file: no element 'topology' in 'layout'");
+            throw fgl_parsing_error("Error parsing FGL file: no element 'topology' in 'layout'");
         }
 
         // set layout size
@@ -221,7 +213,7 @@ class read_gate_level_layout_impl
             }
             else
             {
-                throw gate_level_parsing_error("Error parsing gate_level file: no element 'x' in 'size'");
+                throw fgl_parsing_error("Error parsing FGL file: no element 'x' in 'size'");
             }
 
             auto* const size_y = size->FirstChildElement("y");
@@ -232,7 +224,7 @@ class read_gate_level_layout_impl
             }
             else
             {
-                throw gate_level_parsing_error("Error parsing gate_level file: no element 'y' in 'size'");
+                throw fgl_parsing_error("Error parsing FGL file: no element 'y' in 'size'");
             }
 
             auto* const size_z = size->FirstChildElement("z");
@@ -243,7 +235,7 @@ class read_gate_level_layout_impl
             }
             else
             {
-                throw gate_level_parsing_error("Error parsing gate_level file: no element 'z' in 'size'");
+                throw fgl_parsing_error("Error parsing FGL file: no element 'z' in 'size'");
             }
 
             const aspect_ratio<Lyt> ar{x, y, z};
@@ -251,7 +243,7 @@ class read_gate_level_layout_impl
         }
         else
         {
-            throw gate_level_parsing_error("Error parsing gate_level file: no element 'size' in 'layout'");
+            throw fgl_parsing_error("Error parsing FGL file: no element 'size' in 'layout'");
         }
 
         // set clocking scheme
@@ -265,6 +257,8 @@ class read_gate_level_layout_impl
                 if (clocking_scheme.has_value())
                 {
                     lyt.replace_clocking_scheme(*clocking_scheme);
+                    static const std::array<std::string, 3> open_clocking_schemes{"OPEN", "OPEN3", "OPEN4"};
+
                     auto* const clock_zones = clocking->FirstChildElement("zones");
                     if (clock_zones != nullptr)
                     {
@@ -279,8 +273,7 @@ class read_gate_level_layout_impl
                             }
                             else
                             {
-                                throw gate_level_parsing_error(
-                                    "Error parsing gate_level file: no element 'x' in 'zone'");
+                                throw fgl_parsing_error("Error parsing FGL file: no element 'x' in 'zone'");
                             }
 
                             auto* const clocking_zone_y = clock_zone->FirstChildElement("y");
@@ -291,8 +284,7 @@ class read_gate_level_layout_impl
                             }
                             else
                             {
-                                throw gate_level_parsing_error(
-                                    "Error parsing gate_level file: no element 'y' in 'zone'");
+                                throw fgl_parsing_error("Error parsing FGL file: no element 'y' in 'zone'");
                             }
 
                             auto* const clocking_zone_clock = clock_zone->FirstChildElement("clock");
@@ -303,38 +295,37 @@ class read_gate_level_layout_impl
                             }
                             else
                             {
-                                throw gate_level_parsing_error(
-                                    "Error parsing gate_level file: no element 'clock' in 'zone'");
+                                throw fgl_parsing_error("Error parsing FGL file: no element 'clock' in 'zone'");
                             }
 
                             lyt.assign_clock_number({x_coord, y_coord}, clock);
                         }
                     }
-                    else if (strcmp(clocking_scheme_name->GetText(), "OPEN") == 0)
+                    else if (std::find(std::begin(open_clocking_schemes), std::end(open_clocking_schemes),
+                                       clocking_scheme_name->GetText()) != open_clocking_schemes.end())
                     {
-                        throw gate_level_parsing_error(
-                            "Error parsing gate_level file: no element 'zones' in 'clocking'");
+                        throw fgl_parsing_error("Error parsing FGL file: no element 'zones' in 'clocking'");
                     }
                 }
                 else
                 {
-                    throw gate_level_parsing_error(fmt::format(
-                        "Error parsing gate_level file: unknown clocking scheme: {}", clocking_scheme_name->GetText()));
+                    throw fgl_parsing_error(fmt::format("Error parsing FGL file: unknown clocking scheme: {}",
+                                                        clocking_scheme_name->GetText()));
                 }
             }
             else
             {
-                throw gate_level_parsing_error("Error parsing gate_level file: no element 'name' in 'clocking'");
+                throw fgl_parsing_error("Error parsing FGL file: no element 'name' in 'clocking'");
             }
         }
         else
         {
-            throw gate_level_parsing_error("Error parsing gate_level file: no element 'clocking' in 'layout'");
+            throw fgl_parsing_error("Error parsing FGL file: no element 'clocking' in 'layout'");
         }
 
         // parse layout gates
         std::vector<gate_storage> gates{};
-        auto* const               gates_xml = fcn_root->FirstChildElement("gates");
+        auto* const               gates_xml = fgl_root->FirstChildElement("gates");
         if (gates_xml != nullptr)
         {
             for (const auto* gate_xml = gates_xml->FirstChildElement("gate"); gate_xml != nullptr;
@@ -349,7 +340,7 @@ class read_gate_level_layout_impl
                 }
                 else
                 {
-                    throw gate_level_parsing_error("Error parsing gate_level file: no element 'id' in 'gate'");
+                    throw fgl_parsing_error("Error parsing FGL file: no element 'id' in 'gate'");
                 }
 
                 auto* const gate_type = gate_xml->FirstChildElement("type");
@@ -359,7 +350,7 @@ class read_gate_level_layout_impl
                 }
                 else
                 {
-                    throw gate_level_parsing_error("Error parsing gate_level file: no element 'type' in 'gate'");
+                    throw fgl_parsing_error("Error parsing FGL file: no element 'type' in 'gate'");
                 }
 
                 if (gate.type == "PI" || gate.type == "PO")
@@ -371,15 +362,14 @@ class read_gate_level_layout_impl
                     }
                     else
                     {
-                        throw gate_level_parsing_error(
-                            "Error parsing gate_level file: no element 'name' in 'gate' for input/output");
+                        throw fgl_parsing_error("Error parsing FGL file: no element 'name' in 'gate' for input/output");
                     }
                 }
 
                 auto* const loc = gate_xml->FirstChildElement("loc");
                 if (loc == nullptr)
                 {
-                    throw gate_level_parsing_error("Error parsing gate_level file: no element 'loc'");
+                    throw fgl_parsing_error("Error parsing FGL file: no element 'loc'");
                 }
 
                 // get x-coordinate
@@ -390,7 +380,7 @@ class read_gate_level_layout_impl
                 }
                 else
                 {
-                    throw gate_level_parsing_error("Error parsing gate_level file: no element 'x' in 'loc'");
+                    throw fgl_parsing_error("Error parsing FGL file: no element 'x' in 'loc'");
                 }
 
                 // get y-coordinate
@@ -401,7 +391,7 @@ class read_gate_level_layout_impl
                 }
                 else
                 {
-                    throw gate_level_parsing_error("Error parsing gate_level file: no element 'y' in 'loc'");
+                    throw fgl_parsing_error("Error parsing FGL file: no element 'y' in 'loc'");
                 }
 
                 // get z-coordinate
@@ -412,7 +402,7 @@ class read_gate_level_layout_impl
                 }
                 else
                 {
-                    throw gate_level_parsing_error("Error parsing gate_level file: no element 'z' in 'loc'");
+                    throw fgl_parsing_error("Error parsing FGL file: no element 'z' in 'loc'");
                 }
 
                 auto* const incoming_signals = gate_xml->FirstChildElement("incoming");
@@ -431,7 +421,7 @@ class read_gate_level_layout_impl
                         }
                         else
                         {
-                            throw gate_level_parsing_error("Error parsing gate_level file: no element 'x' in 'signal'");
+                            throw fgl_parsing_error("Error parsing FGL file: no element 'x' in 'signal'");
                         }
 
                         // get y-coordinate of incoming signal
@@ -442,7 +432,7 @@ class read_gate_level_layout_impl
                         }
                         else
                         {
-                            throw gate_level_parsing_error("Error parsing gate_level file: no element 'y' in 'signal'");
+                            throw fgl_parsing_error("Error parsing FGL file: no element 'y' in 'signal'");
                         }
 
                         // get z-coordinate of incoming signal
@@ -453,7 +443,7 @@ class read_gate_level_layout_impl
                         }
                         else
                         {
-                            throw gate_level_parsing_error("Error parsing gate_level file: no element 'z' in 'signal'");
+                            throw fgl_parsing_error("Error parsing FGL file: no element 'z' in 'signal'");
                         }
 
                         gate.incoming.push_back(incoming);
@@ -481,8 +471,8 @@ class read_gate_level_layout_impl
                     }
                     else
                     {
-                        throw gate_level_parsing_error(
-                            fmt::format("Error parsing gate_level file: unknown gate type: {}", gate.type));
+                        throw fgl_parsing_error(
+                            fmt::format("Error parsing FGL file: unknown gate type: {}", gate.type));
                     }
                 }
 
@@ -526,8 +516,8 @@ class read_gate_level_layout_impl
                     }
                     else
                     {
-                        throw gate_level_parsing_error(
-                            fmt::format("Error parsing gate_level file: unknown gate type: {}", gate.type));
+                        throw fgl_parsing_error(
+                            fmt::format("Error parsing FGL file: unknown gate type: {}", gate.type));
                     }
                 }
 
@@ -599,8 +589,8 @@ class read_gate_level_layout_impl
                     }
                     else
                     {
-                        throw gate_level_parsing_error(
-                            fmt::format("Error parsing gate_level file: unknown gate type: {}", gate.type));
+                        throw fgl_parsing_error(
+                            fmt::format("Error parsing FGL file: unknown gate type: {}", gate.type));
                     }
                 }
                 else if (gate.incoming.size() == 3)
@@ -633,8 +623,8 @@ class read_gate_level_layout_impl
                     }
                     else
                     {
-                        throw gate_level_parsing_error(
-                            fmt::format("Error parsing gate_level file: unknown gate type: {}", gate.type));
+                        throw fgl_parsing_error(
+                            fmt::format("Error parsing FGL file: unknown gate type: {}", gate.type));
                     }
                 }
                 else if (std::all_of(gate.type.begin(), gate.type.end(), ::isxdigit))
@@ -656,8 +646,7 @@ class read_gate_level_layout_impl
                 }
                 else
                 {
-                    throw gate_level_parsing_error(
-                        fmt::format("Error parsing gate_level file: unknown gate type: {}", gate.type));
+                    throw fgl_parsing_error(fmt::format("Error parsing FGL file: unknown gate type: {}", gate.type));
                 }
             }
         }
@@ -720,62 +709,62 @@ class read_gate_level_layout_impl
 }  // namespace detail
 
 /**
- * Reads a gate-level layout from a gate_level file provided as an input stream.
+ * Reads a gate-level layout from an FGL file provided as an input stream.
  *
- * May throw a `gate_level_parsing_exception` if the gate_level file is malformed.
+ * May throw a `fgl_parsing_exception` if the FGL file is malformed.
  *
  * @tparam Lyt The layout type to be created from an input.
  * @param is The input stream to read from.
  * @param name The name to give to the generated layout.
  */
 template <typename Lyt>
-[[nodiscard]] Lyt read_gate_level_layout(std::istream& is, const std::string_view& name = "")
+[[nodiscard]] Lyt read_fgl_layout(std::istream& is, const std::string_view& name = "")
 {
     static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
     static_assert(is_tile_based_layout_v<Lyt>, "Lyt is not a tile-based layout");
     static_assert(is_clocked_layout_v<Lyt>, "Lyt is not a clocked layout");
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
 
-    detail::read_gate_level_layout_impl<Lyt> p{is, name};
+    detail::read_fgl_layout_impl<Lyt> p{is, name};
 
     const auto lyt = p.run();
 
     return lyt;
 }
 /**
- * Reads a gate-level layout from an gate_level file provided as an input stream.
+ * Reads a gate-level layout from an FGL file provided as an input stream.
  *
- * May throw a `gate_level_parsing_exception` if the gate_level file is malformed.
+ * May throw a `fgl_parsing_exception` if the FGL file is malformed.
  *
- * This is an in-place version of read_gate_level_layout that utilizes the given layout as a target to write to.
+ * This is an in-place version of read_fgl_layout that utilizes the given layout as a target to write to.
  *
  * @tparam Lyt The layout type to be used as input.
  * @param lyt The layout to write to.
  * @param is The input stream to read from.
  */
 template <typename Lyt>
-void read_gate_level_layout(Lyt& lyt, std::istream& is)
+void read_fgl_layout(Lyt& lyt, std::istream& is)
 {
     static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
     static_assert(is_tile_based_layout_v<Lyt>, "Lyt is not a tile-based layout");
     static_assert(is_clocked_layout_v<Lyt>, "Lyt is not a clocked layout");
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
 
-    detail::read_gate_level_layout_impl<Lyt> p{lyt, is};
+    detail::read_fgl_layout_impl<Lyt> p{lyt, is};
 
     lyt = p.run();
 }
 /**
- * Reads a gate-level layout from a gate_level file provided as an input stream.
+ * Reads a gate-level layout from an FGL file provided as an input stream.
  *
- * May throw a `gate_level_parsing_exception` if the gate_level file is malformed.
+ * May throw a `fgl_parsing_exception` if the FGL file is malformed.
  *
  * @tparam Lyt The layout type to be created from an input.
  * @param filename The file name to open and read from.
  * @param name The name to give to the generated layout.
  */
 template <typename Lyt>
-[[nodiscard]] Lyt read_gate_level_layout(const std::string_view& filename, const std::string_view& name = "")
+[[nodiscard]] Lyt read_fgl_layout(const std::string_view& filename, const std::string_view& name = "")
 {
     std::ifstream is{filename.data(), std::ifstream::in};
 
@@ -784,24 +773,24 @@ template <typename Lyt>
         throw std::ifstream::failure("could not open file");
     }
 
-    const auto lyt = read_gate_level_layout<Lyt>(is, name);
+    const auto lyt = read_fgl_layout<Lyt>(is, name);
     is.close();
 
     return lyt;
 }
 /**
- * Reads a gate-level layout from an gate_level file provided as an input stream.
+ * Reads a gate-level layout from an FGL file provided as an input stream.
  *
- * May throw a `gate_level_parsing_exception` if the gate_level file is malformed.
+ * May throw a `fgl_parsing_exception` if the FGL file is malformed.
  *
- * This is an in-place version of `read_gate_level_layout` that utilizes the given layout as a target to write to.
+ * This is an in-place version of `read_fgl_layout` that utilizes the given layout as a target to write to.
  *
  * @tparam Lyt The layout type to be used as input.
  * @param lyt The layout to write to.
  * @param filename The file name to open and read from.
  */
 template <typename Lyt>
-void read_gate_level_layout(Lyt& lyt, const std::string_view& filename)
+void read_fgl_layout(Lyt& lyt, const std::string_view& filename)
 {
     std::ifstream is{filename.data(), std::ifstream::in};
 
@@ -810,10 +799,10 @@ void read_gate_level_layout(Lyt& lyt, const std::string_view& filename)
         throw std::ifstream::failure("could not open file");
     }
 
-    read_gate_level_layout<Lyt>(lyt, is);
+    read_fgl_layout<Lyt>(lyt, is);
     is.close();
 }
 
 }  // namespace fiction
 
-#endif  // FICTION_READ_GATE_LEVEL_LAYOUT_HPP
+#endif  // FICTION_READ_FGL_LAYOUT_HPP

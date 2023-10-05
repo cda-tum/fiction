@@ -4,7 +4,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <fiction/io/read_gate_level_layout.hpp>
+#include <fiction/io/read_fgl_layout.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
@@ -19,10 +19,10 @@
 
 using namespace fiction;
 
-TEST_CASE("Read empty FCN layout", "[read-gate-level-layout]")
+TEST_CASE("Read empty FGL layout", "[read-fgl-layout]")
 {
-    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fcn>\n"
+    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fgl>\n"
                                               "  <layout>\n"
                                               "    <name>Test</name>\n"
                                               "    <topology>cartesian</topology>\n"
@@ -35,9 +35,9 @@ TEST_CASE("Read empty FCN layout", "[read-gate-level-layout]")
                                               "      <name>2DDWave</name>\n"
                                               "    </clocking>\n"
                                               "  </layout>\n"
-                                              "</fcn>\n";
+                                              "</fgl>\n";
 
-    std::istringstream layout_stream{fcn_layout};
+    std::istringstream layout_stream{fgl_layout};
 
     const auto check = [](const auto& lyt)
     {
@@ -49,13 +49,13 @@ TEST_CASE("Read empty FCN layout", "[read-gate-level-layout]")
     };
 
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
-    check(read_gate_level_layout<gate_layout>(layout_stream));
+    check(read_fgl_layout<gate_layout>(layout_stream));
 }
 
-TEST_CASE("Read simple FCN layout", "[read-gate-level-layout]")
+TEST_CASE("Read simple FGL layout", "[read-fgl-layout]")
 {
-    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fcn>\n"
+    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fgl>\n"
                                               "  <layout>\n"
                                               "    <name>Test</name>\n"
                                               "    <topology>cartesian</topology>\n"
@@ -128,9 +128,9 @@ TEST_CASE("Read simple FCN layout", "[read-gate-level-layout]")
                                               "      </incoming>\n"
                                               "    </gate>\n"
                                               "  </gates>\n"
-                                              "</fcn>\n";
+                                              "</fgl>\n";
 
-    std::istringstream layout_stream{fcn_layout};
+    std::istringstream layout_stream{fgl_layout};
 
     const auto check = [](const auto& lyt)
     {
@@ -149,13 +149,13 @@ TEST_CASE("Read simple FCN layout", "[read-gate-level-layout]")
     };
 
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
-    check(read_gate_level_layout<gate_layout>(layout_stream));
+    check(read_fgl_layout<gate_layout>(layout_stream));
 }
 
-TEST_CASE("Parsing error: malformed xml", "[read-gate-level-layout]")
+TEST_CASE("Parsing error: malformed xml", "[read-fgl-layout]")
 {
-    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fcn>\n"
+    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fgl>\n"
                                               "  <layout>\n"
                                               "    <name>Test</name>\n"
                                               "    <topology>cartesian</topology>\n"
@@ -169,15 +169,15 @@ TEST_CASE("Parsing error: malformed xml", "[read-gate-level-layout]")
                                               "    </clocking>\n"
                                               "  </layout>\n";
 
-    std::istringstream layout_stream{fcn_layout};
+    std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
-    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
-TEST_CASE("Parsing error: no root element 'fcn'", "[read-gate-level-layout]")
+TEST_CASE("Parsing error: no root element 'fgl'", "[read-fgl-layout]")
 {
-    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "  <layout>\n"
                                               "    <name>Test</name>\n"
                                               "    <topology>cartesian</topology>\n"
@@ -191,16 +191,16 @@ TEST_CASE("Parsing error: no root element 'fcn'", "[read-gate-level-layout]")
                                               "    </clocking>\n"
                                               "  </layout>\n";
 
-    std::istringstream layout_stream{fcn_layout};
+    std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
-    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'layout' in 'fcn'", "[read-gate-level-layout]")
+TEST_CASE("Parsing error: no element 'layout' in 'fgl'", "[read-fgl-layout]")
 {
-    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fcn>\n"
+    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fgl>\n"
                                               "    <name>Test</name>\n"
                                               "    <topology>cartesian</topology>\n"
                                               "    <size>\n"
@@ -211,18 +211,18 @@ TEST_CASE("Parsing error: no element 'layout' in 'fcn'", "[read-gate-level-layou
                                               "    <clocking>\n"
                                               "      <name>2DDWave</name>\n"
                                               "    </clocking>\n"
-                                              "</fcn>\n";
+                                              "</fgl>\n";
 
-    std::istringstream layout_stream{fcn_layout};
+    std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
-    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'clocking' in 'layout'", "[read-gate-level-layout]")
+TEST_CASE("Parsing error: no element 'clocking' in 'layout'", "[read-fgl-layout]")
 {
-    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fcn>\n"
+    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fgl>\n"
                                               "  <layout>\n"
                                               "    <name>Test</name>\n"
                                               "    <topology>cartesian</topology>\n"
@@ -232,18 +232,18 @@ TEST_CASE("Parsing error: no element 'clocking' in 'layout'", "[read-gate-level-
                                               "      <z>0</z>\n"
                                               "    </size>\n"
                                               "  </layout>\n"
-                                              "</fcn>\n";
+                                              "</fgl>\n";
 
-    std::istringstream layout_stream{fcn_layout};
+    std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
-    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'name' in 'clocking'", "[read-gate-level-layout]")
+TEST_CASE("Parsing error: no element 'name' in 'clocking'", "[read-fgl-layout]")
 {
-    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fcn>\n"
+    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fgl>\n"
                                               "  <layout>\n"
                                               "    <name>Test</name>\n"
                                               "    <topology>cartesian</topology>\n"
@@ -255,18 +255,18 @@ TEST_CASE("Parsing error: no element 'name' in 'clocking'", "[read-gate-level-la
                                               "    <clocking>\n"
                                               "    </clocking>\n"
                                               "  </layout>\n"
-                                              "</fcn>\n";
+                                              "</fgl>\n";
 
-    std::istringstream layout_stream{fcn_layout};
+    std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
-    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
-TEST_CASE("Parsing error: unknown clocking scheme", "[read-gate-level-layout]")
+TEST_CASE("Parsing error: unknown clocking scheme", "[read-fgl-layout]")
 {
-    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fcn>\n"
+    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fgl>\n"
                                               "  <layout>\n"
                                               "    <name>Test</name>\n"
                                               "    <topology>cartesian</topology>\n"
@@ -279,18 +279,18 @@ TEST_CASE("Parsing error: unknown clocking scheme", "[read-gate-level-layout]")
                                               "      <name>CoolClocking</name>\n"
                                               "    </clocking>\n"
                                               "  </layout>\n"
-                                              "</fcn>\n";
+                                              "</fgl>\n";
 
-    std::istringstream layout_stream{fcn_layout};
+    std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
-    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'zones' in 'clocking'", "[read-gate-level-layout]")
+TEST_CASE("Parsing error: no element 'zones' in 'clocking'", "[read-fgl-layout]")
 {
-    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fcn>\n"
+    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fgl>\n"
                                               "  <layout>\n"
                                               "    <name>Test</name>\n"
                                               "    <topology>cartesian</topology>\n"
@@ -303,18 +303,18 @@ TEST_CASE("Parsing error: no element 'zones' in 'clocking'", "[read-gate-level-l
                                               "      <name>OPEN</name>\n"
                                               "    </clocking>\n"
                                               "  </layout>\n"
-                                              "</fcn>\n";
+                                              "</fgl>\n";
 
-    std::istringstream layout_stream{fcn_layout};
+    std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
-    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'x' in 'zone'", "[read-gate-level-layout]")
+TEST_CASE("Parsing error: no element 'x' in 'zone'", "[read-fgl-layout]")
 {
-    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fcn>\n"
+    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fgl>\n"
                                               "  <layout>\n"
                                               "    <name>Test</name>\n"
                                               "    <topology>cartesian</topology>\n"
@@ -333,18 +333,18 @@ TEST_CASE("Parsing error: no element 'x' in 'zone'", "[read-gate-level-layout]")
                                               "      </zones>\n"
                                               "    </clocking>\n"
                                               "  </layout>\n"
-                                              "</fcn>\n";
+                                              "</fgl>\n";
 
-    std::istringstream layout_stream{fcn_layout};
+    std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
-    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'y' in 'zone'", "[read-gate-level-layout]")
+TEST_CASE("Parsing error: no element 'y' in 'zone'", "[read-fgl-layout]")
 {
-    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fcn>\n"
+    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fgl>\n"
                                               "  <layout>\n"
                                               "    <name>Test</name>\n"
                                               "    <topology>cartesian</topology>\n"
@@ -363,18 +363,18 @@ TEST_CASE("Parsing error: no element 'y' in 'zone'", "[read-gate-level-layout]")
                                               "      </zones>\n"
                                               "    </clocking>\n"
                                               "  </layout>\n"
-                                              "</fcn>\n";
+                                              "</fgl>\n";
 
-    std::istringstream layout_stream{fcn_layout};
+    std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
-    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'clock' in 'zone'", "[read-gate-level-layout]")
+TEST_CASE("Parsing error: no element 'clock' in 'zone'", "[read-fgl-layout]")
 {
-    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fcn>\n"
+    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fgl>\n"
                                               "  <layout>\n"
                                               "    <name>Test</name>\n"
                                               "    <topology>cartesian</topology>\n"
@@ -393,18 +393,18 @@ TEST_CASE("Parsing error: no element 'clock' in 'zone'", "[read-gate-level-layou
                                               "      </zones>\n"
                                               "    </clocking>\n"
                                               "  </layout>\n"
-                                              "</fcn>\n";
+                                              "</fgl>\n";
 
-    std::istringstream layout_stream{fcn_layout};
+    std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
-    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'topology' in 'layout'", "[read-gate-level-layout]")
+TEST_CASE("Parsing error: no element 'topology' in 'layout'", "[read-fgl-layout]")
 {
-    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fcn>\n"
+    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fgl>\n"
                                               "  <layout>\n"
                                               "    <name>Test</name>\n"
                                               "    <size>\n"
@@ -416,18 +416,18 @@ TEST_CASE("Parsing error: no element 'topology' in 'layout'", "[read-gate-level-
                                               "      <name>2DDWave</name>\n"
                                               "    </clocking>\n"
                                               "  </layout>\n"
-                                              "</fcn>\n";
+                                              "</fgl>\n";
 
-    std::istringstream layout_stream{fcn_layout};
+    std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
-    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
-TEST_CASE("Parsing error: unknown topology", "[read-gate-level-layout]")
+TEST_CASE("Parsing error: unknown topology", "[read-fgl-layout]")
 {
-    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fcn>\n"
+    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fgl>\n"
                                               "  <layout>\n"
                                               "    <name>Test</name>\n"
                                               "    <topology>unknown</topology>\n"
@@ -440,18 +440,18 @@ TEST_CASE("Parsing error: unknown topology", "[read-gate-level-layout]")
                                               "      <name>2DDWave</name>\n"
                                               "    </clocking>\n"
                                               "  </layout>\n"
-                                              "</fcn>\n";
+                                              "</fgl>\n";
 
-    std::istringstream layout_stream{fcn_layout};
+    std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
-    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
-TEST_CASE("Parsing error: Lyt is not a cartesian layout", "[read-gate-level-layout]")
+TEST_CASE("Parsing error: Lyt is not a cartesian layout", "[read-fgl-layout]")
 {
-    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fcn>\n"
+    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fgl>\n"
                                               "  <layout>\n"
                                               "    <name>Test</name>\n"
                                               "    <topology>cartesian</topology>\n"
@@ -464,19 +464,19 @@ TEST_CASE("Parsing error: Lyt is not a cartesian layout", "[read-gate-level-layo
                                               "      <name>2DDWave</name>\n"
                                               "    </clocking>\n"
                                               "  </layout>\n"
-                                              "</fcn>\n";
+                                              "</fgl>\n";
 
-    std::istringstream layout_stream{fcn_layout};
+    std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = gate_level_layout<
         clocked_layout<tile_based_layout<shifted_cartesian_layout<offset::ucoord_t, odd_row_cartesian>>>>;
-    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
-TEST_CASE("Parsing error: Lyt is not a shifted_cartesian layout", "[read-gate-level-layout]")
+TEST_CASE("Parsing error: Lyt is not a shifted_cartesian layout", "[read-fgl-layout]")
 {
-    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fcn>\n"
+    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fgl>\n"
                                               "  <layout>\n"
                                               "    <name>Test</name>\n"
                                               "    <topology>odd_row_cartesian</topology>\n"
@@ -489,18 +489,18 @@ TEST_CASE("Parsing error: Lyt is not a shifted_cartesian layout", "[read-gate-le
                                               "      <name>2DDWave</name>\n"
                                               "    </clocking>\n"
                                               "  </layout>\n"
-                                              "</fcn>\n";
+                                              "</fgl>\n";
 
-    std::istringstream layout_stream{fcn_layout};
+    std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
-    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
-TEST_CASE("Parsing error: Lyt is not an odd_row_cartesian layout", "[read-gate-level-layout]")
+TEST_CASE("Parsing error: Lyt is not an odd_row_cartesian layout", "[read-fgl-layout]")
 {
-    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fcn>\n"
+    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fgl>\n"
                                               "  <layout>\n"
                                               "    <name>Test</name>\n"
                                               "    <topology>odd_row_cartesian</topology>\n"
@@ -513,19 +513,19 @@ TEST_CASE("Parsing error: Lyt is not an odd_row_cartesian layout", "[read-gate-l
                                               "      <name>2DDWave</name>\n"
                                               "    </clocking>\n"
                                               "  </layout>\n"
-                                              "</fcn>\n";
+                                              "</fgl>\n";
 
-    std::istringstream layout_stream{fcn_layout};
+    std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = gate_level_layout<
         clocked_layout<tile_based_layout<shifted_cartesian_layout<offset::ucoord_t, even_row_cartesian>>>>;
-    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
-TEST_CASE("Parsing error: Lyt is not an even_row_cartesian layout", "[read-gate-level-layout]")
+TEST_CASE("Parsing error: Lyt is not an even_row_cartesian layout", "[read-fgl-layout]")
 {
-    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fcn>\n"
+    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fgl>\n"
                                               "  <layout>\n"
                                               "    <name>Test</name>\n"
                                               "    <topology>even_row_cartesian</topology>\n"
@@ -538,19 +538,19 @@ TEST_CASE("Parsing error: Lyt is not an even_row_cartesian layout", "[read-gate-
                                               "      <name>2DDWave</name>\n"
                                               "    </clocking>\n"
                                               "  </layout>\n"
-                                              "</fcn>\n";
+                                              "</fgl>\n";
 
-    std::istringstream layout_stream{fcn_layout};
+    std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = gate_level_layout<
         clocked_layout<tile_based_layout<shifted_cartesian_layout<offset::ucoord_t, odd_row_cartesian>>>>;
-    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
-TEST_CASE("Parsing error: Lyt is not an odd_column_cartesian layout", "[read-gate-level-layout]")
+TEST_CASE("Parsing error: Lyt is not an odd_column_cartesian layout", "[read-fgl-layout]")
 {
-    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fcn>\n"
+    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fgl>\n"
                                               "  <layout>\n"
                                               "    <name>Test</name>\n"
                                               "    <topology>odd_column_cartesian</topology>\n"
@@ -563,19 +563,19 @@ TEST_CASE("Parsing error: Lyt is not an odd_column_cartesian layout", "[read-gat
                                               "      <name>2DDWave</name>\n"
                                               "    </clocking>\n"
                                               "  </layout>\n"
-                                              "</fcn>\n";
+                                              "</fgl>\n";
 
-    std::istringstream layout_stream{fcn_layout};
+    std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = gate_level_layout<
         clocked_layout<tile_based_layout<shifted_cartesian_layout<offset::ucoord_t, odd_row_cartesian>>>>;
-    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
-TEST_CASE("Parsing error: Lyt is not an even_column_cartesian layout", "[read-gate-level-layout]")
+TEST_CASE("Parsing error: Lyt is not an even_column_cartesian layout", "[read-fgl-layout]")
 {
-    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fcn>\n"
+    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fgl>\n"
                                               "  <layout>\n"
                                               "    <name>Test</name>\n"
                                               "    <topology>even_column_cartesian</topology>\n"
@@ -588,19 +588,19 @@ TEST_CASE("Parsing error: Lyt is not an even_column_cartesian layout", "[read-ga
                                               "      <name>2DDWave</name>\n"
                                               "    </clocking>\n"
                                               "  </layout>\n"
-                                              "</fcn>\n";
+                                              "</fgl>\n";
 
-    std::istringstream layout_stream{fcn_layout};
+    std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = gate_level_layout<
         clocked_layout<tile_based_layout<shifted_cartesian_layout<offset::ucoord_t, odd_row_cartesian>>>>;
-    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
-TEST_CASE("Parsing error: Lyt is not a hexagonal layout", "[read-gate-level-layout]")
+TEST_CASE("Parsing error: Lyt is not a hexagonal layout", "[read-fgl-layout]")
 {
-    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fcn>\n"
+    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fgl>\n"
                                               "  <layout>\n"
                                               "    <name>Test</name>\n"
                                               "    <topology>odd_row_hex</topology>\n"
@@ -613,19 +613,19 @@ TEST_CASE("Parsing error: Lyt is not a hexagonal layout", "[read-gate-level-layo
                                               "      <name>2DDWave</name>\n"
                                               "    </clocking>\n"
                                               "  </layout>\n"
-                                              "</fcn>\n";
+                                              "</fgl>\n";
 
-    std::istringstream layout_stream{fcn_layout};
+    std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = gate_level_layout<
         clocked_layout<tile_based_layout<shifted_cartesian_layout<offset::ucoord_t, odd_row_cartesian>>>>;
-    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
-TEST_CASE("Parsing error: Lyt is not an odd_row_hex layout", "[read-gate-level-layout]")
+TEST_CASE("Parsing error: Lyt is not an odd_row_hex layout", "[read-fgl-layout]")
 {
-    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fcn>\n"
+    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fgl>\n"
                                               "  <layout>\n"
                                               "    <name>Test</name>\n"
                                               "    <topology>odd_row_hex</topology>\n"
@@ -638,19 +638,19 @@ TEST_CASE("Parsing error: Lyt is not an odd_row_hex layout", "[read-gate-level-l
                                               "      <name>2DDWave</name>\n"
                                               "    </clocking>\n"
                                               "  </layout>\n"
-                                              "</fcn>\n";
+                                              "</fgl>\n";
 
-    std::istringstream layout_stream{fcn_layout};
+    std::istringstream layout_stream{fgl_layout};
 
     using gate_layout =
         gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, even_row_hex>>>>;
-    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
-TEST_CASE("Parsing error: Lyt is not an even_row_hex layout", "[read-gate-level-layout]")
+TEST_CASE("Parsing error: Lyt is not an even_row_hex layout", "[read-fgl-layout]")
 {
-    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fcn>\n"
+    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fgl>\n"
                                               "  <layout>\n"
                                               "    <name>Test</name>\n"
                                               "    <topology>even_row_hex</topology>\n"
@@ -663,19 +663,19 @@ TEST_CASE("Parsing error: Lyt is not an even_row_hex layout", "[read-gate-level-
                                               "      <name>2DDWave</name>\n"
                                               "    </clocking>\n"
                                               "  </layout>\n"
-                                              "</fcn>\n";
+                                              "</fgl>\n";
 
-    std::istringstream layout_stream{fcn_layout};
+    std::istringstream layout_stream{fgl_layout};
 
     using gate_layout =
         gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, odd_row_hex>>>>;
-    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
-TEST_CASE("Parsing error: Lyt is not an odd_column_hex layout", "[read-gate-level-layout]")
+TEST_CASE("Parsing error: Lyt is not an odd_column_hex layout", "[read-fgl-layout]")
 {
-    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fcn>\n"
+    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fgl>\n"
                                               "  <layout>\n"
                                               "    <name>Test</name>\n"
                                               "    <topology>odd_column_hex</topology>\n"
@@ -688,19 +688,19 @@ TEST_CASE("Parsing error: Lyt is not an odd_column_hex layout", "[read-gate-leve
                                               "      <name>2DDWave</name>\n"
                                               "    </clocking>\n"
                                               "  </layout>\n"
-                                              "</fcn>\n";
+                                              "</fgl>\n";
 
-    std::istringstream layout_stream{fcn_layout};
+    std::istringstream layout_stream{fgl_layout};
 
     using gate_layout =
         gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, odd_row_hex>>>>;
-    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
-TEST_CASE("Parsing error: Lyt is not an even_column_hex layout", "[read-gate-level-layout]")
+TEST_CASE("Parsing error: Lyt is not an even_column_hex layout", "[read-fgl-layout]")
 {
-    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fcn>\n"
+    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fgl>\n"
                                               "  <layout>\n"
                                               "    <name>Test</name>\n"
                                               "    <topology>even_column_hex</topology>\n"
@@ -713,19 +713,19 @@ TEST_CASE("Parsing error: Lyt is not an even_column_hex layout", "[read-gate-lev
                                               "      <name>2DDWave</name>\n"
                                               "    </clocking>\n"
                                               "  </layout>\n"
-                                              "</fcn>\n";
+                                              "</fgl>\n";
 
-    std::istringstream layout_stream{fcn_layout};
+    std::istringstream layout_stream{fgl_layout};
 
     using gate_layout =
         gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, odd_row_hex>>>>;
-    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'size' in 'layout'", "[read-gate-level-layout]")
+TEST_CASE("Parsing error: no element 'size' in 'layout'", "[read-fgl-layout]")
 {
-    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fcn>\n"
+    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fgl>\n"
                                               "  <layout>\n"
                                               "    <name>Test</name>\n"
                                               "    <topology>cartesian</topology>\n"
@@ -736,18 +736,18 @@ TEST_CASE("Parsing error: no element 'size' in 'layout'", "[read-gate-level-layo
                                               "      <name>2DDWave</name>\n"
                                               "    </clocking>\n"
                                               "  </layout>\n"
-                                              "</fcn>\n";
+                                              "</fgl>\n";
 
-    std::istringstream layout_stream{fcn_layout};
+    std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
-    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'x' in 'size'", "[read-gate-level-layout]")
+TEST_CASE("Parsing error: no element 'x' in 'size'", "[read-fgl-layout]")
 {
-    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fcn>\n"
+    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fgl>\n"
                                               "  <layout>\n"
                                               "    <name>Test</name>\n"
                                               "    <topology>cartesian</topology>\n"
@@ -759,18 +759,18 @@ TEST_CASE("Parsing error: no element 'x' in 'size'", "[read-gate-level-layout]")
                                               "      <name>2DDWave</name>\n"
                                               "    </clocking>\n"
                                               "  </layout>\n"
-                                              "</fcn>\n";
+                                              "</fgl>\n";
 
-    std::istringstream layout_stream{fcn_layout};
+    std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
-    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'y' in 'size'", "[read-gate-level-layout]")
+TEST_CASE("Parsing error: no element 'y' in 'size'", "[read-fgl-layout]")
 {
-    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fcn>\n"
+    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fgl>\n"
                                               "  <layout>\n"
                                               "    <name>Test</name>\n"
                                               "    <topology>cartesian</topology>\n"
@@ -782,18 +782,18 @@ TEST_CASE("Parsing error: no element 'y' in 'size'", "[read-gate-level-layout]")
                                               "      <name>2DDWave</name>\n"
                                               "    </clocking>\n"
                                               "  </layout>\n"
-                                              "</fcn>\n";
+                                              "</fgl>\n";
 
-    std::istringstream layout_stream{fcn_layout};
+    std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
-    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'z' in 'size'", "[read-gate-level-layout]")
+TEST_CASE("Parsing error: no element 'z' in 'size'", "[read-fgl-layout]")
 {
-    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fcn>\n"
+    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fgl>\n"
                                               "  <layout>\n"
                                               "    <name>Test</name>\n"
                                               "    <topology>cartesian</topology>\n"
@@ -805,18 +805,18 @@ TEST_CASE("Parsing error: no element 'z' in 'size'", "[read-gate-level-layout]")
                                               "      <name>2DDWave</name>\n"
                                               "    </clocking>\n"
                                               "  </layout>\n"
-                                              "</fcn>\n";
+                                              "</fgl>\n";
 
-    std::istringstream layout_stream{fcn_layout};
+    std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
-    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'id' in 'gate", "[read-gate-level-layout]")
+TEST_CASE("Parsing error: no element 'id' in 'gate", "[read-fgl-layout]")
 {
-    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fcn>\n"
+    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fgl>\n"
                                               "  <layout>\n"
                                               "    <name>Test</name>\n"
                                               "    <topology>cartesian</topology>\n"
@@ -840,18 +840,18 @@ TEST_CASE("Parsing error: no element 'id' in 'gate", "[read-gate-level-layout]")
                                               "      </loc>\n"
                                               "    </gate>\n"
                                               "  </gates>\n"
-                                              "</fcn>\n";
+                                              "</fgl>\n";
 
-    std::istringstream layout_stream{fcn_layout};
+    std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
-    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'type' in 'gate", "[read-gate-level-layout]")
+TEST_CASE("Parsing error: no element 'type' in 'gate", "[read-fgl-layout]")
 {
-    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fcn>\n"
+    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fgl>\n"
                                               "  <layout>\n"
                                               "    <name>Test</name>\n"
                                               "    <topology>cartesian</topology>\n"
@@ -875,18 +875,18 @@ TEST_CASE("Parsing error: no element 'type' in 'gate", "[read-gate-level-layout]
                                               "      </loc>\n"
                                               "    </gate>\n"
                                               "  </gates>\n"
-                                              "</fcn>\n";
+                                              "</fgl>\n";
 
-    std::istringstream layout_stream{fcn_layout};
+    std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
-    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'name' in 'gate", "[read-gate-level-layout]")
+TEST_CASE("Parsing error: no element 'name' in 'gate", "[read-fgl-layout]")
 {
-    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fcn>\n"
+    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fgl>\n"
                                               "  <layout>\n"
                                               "    <name>Test</name>\n"
                                               "    <topology>cartesian</topology>\n"
@@ -910,18 +910,18 @@ TEST_CASE("Parsing error: no element 'name' in 'gate", "[read-gate-level-layout]
                                               "      </loc>\n"
                                               "    </gate>\n"
                                               "  </gates>\n"
-                                              "</fcn>\n";
+                                              "</fgl>\n";
 
-    std::istringstream layout_stream{fcn_layout};
+    std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
-    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'loc' in 'gate'", "[read-gate-level-layout]")
+TEST_CASE("Parsing error: no element 'loc' in 'gate'", "[read-fgl-layout]")
 {
-    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fcn>\n"
+    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fgl>\n"
                                               "  <layout>\n"
                                               "    <name>Test</name>\n"
                                               "    <topology>cartesian</topology>\n"
@@ -944,18 +944,18 @@ TEST_CASE("Parsing error: no element 'loc' in 'gate'", "[read-gate-level-layout]
                                               "        <z>0</z>\n"
                                               "    </gate>\n"
                                               "  </gates>\n"
-                                              "</fcn>\n";
+                                              "</fgl>\n";
 
-    std::istringstream layout_stream{fcn_layout};
+    std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
-    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'x' in 'loc'", "[read-gate-level-layout]")
+TEST_CASE("Parsing error: no element 'x' in 'loc'", "[read-fgl-layout]")
 {
-    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fcn>\n"
+    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fgl>\n"
                                               "  <layout>\n"
                                               "    <name>Test</name>\n"
                                               "    <topology>cartesian</topology>\n"
@@ -979,18 +979,18 @@ TEST_CASE("Parsing error: no element 'x' in 'loc'", "[read-gate-level-layout]")
                                               "      </loc>\n"
                                               "    </gate>\n"
                                               "  </gates>\n"
-                                              "</fcn>\n";
+                                              "</fgl>\n";
 
-    std::istringstream layout_stream{fcn_layout};
+    std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
-    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'y' in 'loc'", "[read-gate-level-layout]")
+TEST_CASE("Parsing error: no element 'y' in 'loc'", "[read-fgl-layout]")
 {
-    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fcn>\n"
+    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fgl>\n"
                                               "  <layout>\n"
                                               "    <name>Test</name>\n"
                                               "    <topology>cartesian</topology>\n"
@@ -1014,18 +1014,18 @@ TEST_CASE("Parsing error: no element 'y' in 'loc'", "[read-gate-level-layout]")
                                               "      </loc>\n"
                                               "    </gate>\n"
                                               "  </gates>\n"
-                                              "</fcn>\n";
+                                              "</fgl>\n";
 
-    std::istringstream layout_stream{fcn_layout};
+    std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
-    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'z' in 'loc'", "[read-gate-level-layout]")
+TEST_CASE("Parsing error: no element 'z' in 'loc'", "[read-fgl-layout]")
 {
-    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fcn>\n"
+    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fgl>\n"
                                               "  <layout>\n"
                                               "    <name>Test</name>\n"
                                               "    <topology>cartesian</topology>\n"
@@ -1049,18 +1049,18 @@ TEST_CASE("Parsing error: no element 'z' in 'loc'", "[read-gate-level-layout]")
                                               "      </loc>\n"
                                               "    </gate>\n"
                                               "  </gates>\n"
-                                              "</fcn>\n";
+                                              "</fgl>\n";
 
-    std::istringstream layout_stream{fcn_layout};
+    std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
-    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
-TEST_CASE("Parsing error: unknown gate type with 0 incoming signals", "[read-gate-level-layout]")
+TEST_CASE("Parsing error: unknown gate type with 0 incoming signals", "[read-fgl-layout]")
 {
-    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fcn>\n"
+    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fgl>\n"
                                               "  <layout>\n"
                                               "    <name>Test</name>\n"
                                               "    <topology>cartesian</topology>\n"
@@ -1133,18 +1133,18 @@ TEST_CASE("Parsing error: unknown gate type with 0 incoming signals", "[read-gat
                                               "      </incoming>\n"
                                               "    </gate>\n"
                                               "  </gates>\n"
-                                              "</fcn>\n";
+                                              "</fgl>\n";
 
-    std::istringstream layout_stream{fcn_layout};
+    std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
-    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
-TEST_CASE("Parsing error: unknown gate type with 1 incoming signal", "[read-gate-level-layout]")
+TEST_CASE("Parsing error: unknown gate type with 1 incoming signal", "[read-fgl-layout]")
 {
-    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fcn>\n"
+    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fgl>\n"
                                               "  <layout>\n"
                                               "    <name>Test</name>\n"
                                               "    <topology>cartesian</topology>\n"
@@ -1216,18 +1216,18 @@ TEST_CASE("Parsing error: unknown gate type with 1 incoming signal", "[read-gate
                                               "      </incoming>\n"
                                               "    </gate>\n"
                                               "  </gates>\n"
-                                              "</fcn>\n";
+                                              "</fgl>\n";
 
-    std::istringstream layout_stream{fcn_layout};
+    std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
-    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
-TEST_CASE("Parsing error: unknown gate type with 2 incoming signals", "[read-gate-level-layout]")
+TEST_CASE("Parsing error: unknown gate type with 2 incoming signals", "[read-fgl-layout]")
 {
-    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fcn>\n"
+    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fgl>\n"
                                               "  <layout>\n"
                                               "    <name>Test</name>\n"
                                               "    <topology>cartesian</topology>\n"
@@ -1300,18 +1300,18 @@ TEST_CASE("Parsing error: unknown gate type with 2 incoming signals", "[read-gat
                                               "      </incoming>\n"
                                               "    </gate>\n"
                                               "  </gates>\n"
-                                              "</fcn>\n";
+                                              "</fgl>\n";
 
-    std::istringstream layout_stream{fcn_layout};
+    std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
-    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
-TEST_CASE("Parsing error: unknown gate type with 3 incoming signals", "[read-gate-level-layout]")
+TEST_CASE("Parsing error: unknown gate type with 3 incoming signals", "[read-fgl-layout]")
 {
-    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fcn>\n"
+    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fgl>\n"
                                               "  <layout>\n"
                                               "    <name>Test</name>\n"
                                               "    <topology>cartesian</topology>\n"
@@ -1399,18 +1399,18 @@ TEST_CASE("Parsing error: unknown gate type with 3 incoming signals", "[read-gat
                                               "      </incoming>\n"
                                               "    </gate>\n"
                                               "  </gates>\n"
-                                              "</fcn>\n";
+                                              "</fgl>\n";
 
-    std::istringstream layout_stream{fcn_layout};
+    std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
-    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
-TEST_CASE("Parsing error: unknown gate type with more than 3 incoming signals", "[read-gate-level-layout]")
+TEST_CASE("Parsing error: unknown gate type with more than 3 incoming signals", "[read-fgl-layout]")
 {
-    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fcn>\n"
+    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fgl>\n"
                                               "  <layout>\n"
                                               "    <name>Test</name>\n"
                                               "    <topology>cartesian</topology>\n"
@@ -1523,18 +1523,18 @@ TEST_CASE("Parsing error: unknown gate type with more than 3 incoming signals", 
                                               "      </incoming>\n"
                                               "    </gate>\n"
                                               "  </gates>\n"
-                                              "</fcn>\n";
+                                              "</fgl>\n";
 
-    std::istringstream layout_stream{fcn_layout};
+    std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
-    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'x' in 'signal'", "[read-gate-level-layout]")
+TEST_CASE("Parsing error: no element 'x' in 'signal'", "[read-fgl-layout]")
 {
-    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fcn>\n"
+    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fgl>\n"
                                               "  <layout>\n"
                                               "    <name>Test</name>\n"
                                               "    <topology>cartesian</topology>\n"
@@ -1606,101 +1606,18 @@ TEST_CASE("Parsing error: no element 'x' in 'signal'", "[read-gate-level-layout]
                                               "      </incoming>\n"
                                               "    </gate>\n"
                                               "  </gates>\n"
-                                              "</fcn>\n";
+                                              "</fgl>\n";
 
-    std::istringstream layout_stream{fcn_layout};
-
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
-    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
-}
-
-TEST_CASE("Parsing error: no element 'y' in 'signal'", "[read-gate-level-layout]")
-{
-    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fcn>\n"
-                                              "  <layout>\n"
-                                              "    <name>Test</name>\n"
-                                              "    <topology>cartesian</topology>\n"
-                                              "    <size>\n"
-                                              "      <x>2</x>\n"
-                                              "      <y>1</y>\n"
-                                              "      <z>0</z>\n"
-                                              "    </size>\n"
-                                              "    <clocking>\n"
-                                              "      <name>2DDWave</name>\n"
-                                              "    </clocking>\n"
-                                              "  </layout>\n"
-                                              "  <gates>\n"
-                                              "    <gate>\n"
-                                              "      <id>0</id>\n"
-                                              "      <type>PI</type>\n"
-                                              "      <name>pi0</name>\n"
-                                              "      <loc>\n"
-                                              "        <x>0</x>\n"
-                                              "        <y>1</y>\n"
-                                              "        <z>0</z>\n"
-                                              "      </loc>\n"
-                                              "    </gate>\n"
-                                              "    <gate>\n"
-                                              "      <id>1</id>\n"
-                                              "      <type>PI</type>\n"
-                                              "      <name>pi1</name>\n"
-                                              "      <loc>\n"
-                                              "        <x>1</x>\n"
-                                              "        <y>0</y>\n"
-                                              "        <z>0</z>\n"
-                                              "      </loc>\n"
-                                              "    </gate>\n"
-                                              "    <gate>\n"
-                                              "      <id>2</id>\n"
-                                              "      <type>AND</type>\n"
-                                              "      <loc>\n"
-                                              "        <x>1</x>\n"
-                                              "        <y>1</y>\n"
-                                              "        <z>0</z>\n"
-                                              "      </loc>\n"
-                                              "      <incoming>\n"
-                                              "        <signal>\n"
-                                              "          <x>0</x>\n"
-                                              "          <z>0</z>\n"
-                                              "        </signal>\n"
-                                              "        <signal>\n"
-                                              "          <x>1</x>\n"
-                                              "          <y>0</y>\n"
-                                              "          <z>0</z>\n"
-                                              "        </signal>\n"
-                                              "      </incoming>\n"
-                                              "    </gate>\n"
-                                              "    <gate>\n"
-                                              "      <id>3</id>\n"
-                                              "      <type>PO</type>\n"
-                                              "      <name>po0</name>\n"
-                                              "      <loc>\n"
-                                              "        <x>2</x>\n"
-                                              "        <y>1</y>\n"
-                                              "        <z>0</z>\n"
-                                              "      </loc>\n"
-                                              "      <incoming>\n"
-                                              "        <signal>\n"
-                                              "          <x>1</x>\n"
-                                              "          <y>1</y>\n"
-                                              "          <z>0</z>\n"
-                                              "        </signal>\n"
-                                              "      </incoming>\n"
-                                              "    </gate>\n"
-                                              "  </gates>\n"
-                                              "</fcn>\n";
-
-    std::istringstream layout_stream{fcn_layout};
+    std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
-    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }
 
-TEST_CASE("Parsing error: no element 'z' in 'signal'", "[read-gate-level-layout]")
+TEST_CASE("Parsing error: no element 'y' in 'signal'", "[read-fgl-layout]")
 {
-    static constexpr const char* fcn_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                                              "<fcn>\n"
+    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fgl>\n"
                                               "  <layout>\n"
                                               "    <name>Test</name>\n"
                                               "    <topology>cartesian</topology>\n"
@@ -1745,6 +1662,89 @@ TEST_CASE("Parsing error: no element 'z' in 'signal'", "[read-gate-level-layout]
                                               "      <incoming>\n"
                                               "        <signal>\n"
                                               "          <x>0</x>\n"
+                                              "          <z>0</z>\n"
+                                              "        </signal>\n"
+                                              "        <signal>\n"
+                                              "          <x>1</x>\n"
+                                              "          <y>0</y>\n"
+                                              "          <z>0</z>\n"
+                                              "        </signal>\n"
+                                              "      </incoming>\n"
+                                              "    </gate>\n"
+                                              "    <gate>\n"
+                                              "      <id>3</id>\n"
+                                              "      <type>PO</type>\n"
+                                              "      <name>po0</name>\n"
+                                              "      <loc>\n"
+                                              "        <x>2</x>\n"
+                                              "        <y>1</y>\n"
+                                              "        <z>0</z>\n"
+                                              "      </loc>\n"
+                                              "      <incoming>\n"
+                                              "        <signal>\n"
+                                              "          <x>1</x>\n"
+                                              "          <y>1</y>\n"
+                                              "          <z>0</z>\n"
+                                              "        </signal>\n"
+                                              "      </incoming>\n"
+                                              "    </gate>\n"
+                                              "  </gates>\n"
+                                              "</fgl>\n";
+
+    std::istringstream layout_stream{fgl_layout};
+
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
+}
+
+TEST_CASE("Parsing error: no element 'z' in 'signal'", "[read-fgl-layout]")
+{
+    static constexpr const char* fgl_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<fgl>\n"
+                                              "  <layout>\n"
+                                              "    <name>Test</name>\n"
+                                              "    <topology>cartesian</topology>\n"
+                                              "    <size>\n"
+                                              "      <x>2</x>\n"
+                                              "      <y>1</y>\n"
+                                              "      <z>0</z>\n"
+                                              "    </size>\n"
+                                              "    <clocking>\n"
+                                              "      <name>2DDWave</name>\n"
+                                              "    </clocking>\n"
+                                              "  </layout>\n"
+                                              "  <gates>\n"
+                                              "    <gate>\n"
+                                              "      <id>0</id>\n"
+                                              "      <type>PI</type>\n"
+                                              "      <name>pi0</name>\n"
+                                              "      <loc>\n"
+                                              "        <x>0</x>\n"
+                                              "        <y>1</y>\n"
+                                              "        <z>0</z>\n"
+                                              "      </loc>\n"
+                                              "    </gate>\n"
+                                              "    <gate>\n"
+                                              "      <id>1</id>\n"
+                                              "      <type>PI</type>\n"
+                                              "      <name>pi1</name>\n"
+                                              "      <loc>\n"
+                                              "        <x>1</x>\n"
+                                              "        <y>0</y>\n"
+                                              "        <z>0</z>\n"
+                                              "      </loc>\n"
+                                              "    </gate>\n"
+                                              "    <gate>\n"
+                                              "      <id>2</id>\n"
+                                              "      <type>AND</type>\n"
+                                              "      <loc>\n"
+                                              "        <x>1</x>\n"
+                                              "        <y>1</y>\n"
+                                              "        <z>0</z>\n"
+                                              "      </loc>\n"
+                                              "      <incoming>\n"
+                                              "        <signal>\n"
+                                              "          <x>0</x>\n"
                                               "          <y>1</y>\n"
                                               "        </signal>\n"
                                               "        <signal>\n"
@@ -1772,10 +1772,10 @@ TEST_CASE("Parsing error: no element 'z' in 'signal'", "[read-gate-level-layout]
                                               "      </incoming>\n"
                                               "    </gate>\n"
                                               "  </gates>\n"
-                                              "</fcn>\n";
+                                              "</fgl>\n";
 
-    std::istringstream layout_stream{fcn_layout};
+    std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
-    CHECK_THROWS_AS(read_gate_level_layout<gate_layout>(layout_stream), gate_level_parsing_error);
+    CHECK_THROWS_AS(read_fgl_layout<gate_layout>(layout_stream), fgl_parsing_error);
 }

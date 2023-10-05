@@ -9,8 +9,8 @@
 #include "utils/equivalence_checking_utils.hpp"
 
 #include <fiction/algorithms/physical_design/orthogonal.hpp>
-#include <fiction/io/read_gate_level_layout.hpp>
-#include <fiction/io/write_gate_level_layout.hpp>
+#include <fiction/io/read_fgl_layout.hpp>
+#include <fiction/io/write_fgl_layout.hpp>
 #include <fiction/layouts/bounding_box.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
@@ -55,9 +55,9 @@ void check_parsing_equiv(const Ntk& ntk)
     const auto layout = orthogonal<Lyt>(ntk, {});
 
     std::stringstream layout_stream{};
-    write_gate_level_layout(layout, layout_stream);
+    write_fgl_layout(layout, layout_stream);
 
-    const auto read_layout = read_gate_level_layout<Lyt>(layout_stream, get_name(layout));
+    const auto read_layout = read_fgl_layout<Lyt>(layout_stream, get_name(layout));
 
     compare_written_and_read_layout(layout, read_layout);
 
@@ -70,8 +70,8 @@ template <typename Lyt>
 void check_parsing_equiv_layout(const Lyt& lyt)
 {
     std::stringstream layout_stream{};
-    write_gate_level_layout(lyt, layout_stream);
-    const auto read_layout = read_gate_level_layout<Lyt>(layout_stream, lyt.get_layout_name());
+    write_fgl_layout(lyt, layout_stream);
+    const auto read_layout = read_fgl_layout<Lyt>(layout_stream, lyt.get_layout_name());
 
     compare_written_and_read_layout(lyt, read_layout);
 
@@ -138,22 +138,19 @@ void check_parsing_equiv_layout_all()
         blueprints::optimization_layout_corner_case_outputs_2<cart_gate_clk_lyt>());
 }
 
-TEST_CASE("Write empty gate_level layout", "[write-gate-level-layout]")
+TEST_CASE("Write empty gate_level layout", "[write-fgl-layout]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
-
     const gate_layout layout{{}, "empty"};
 
     std::stringstream layout_stream{};
-
-    write_gate_level_layout(layout, layout_stream);
-
-    const auto read_layout = read_gate_level_layout<gate_layout>(layout_stream, "empty");
+    write_fgl_layout(layout, layout_stream);
+    const auto read_layout = read_fgl_layout<gate_layout>(layout_stream, "empty");
 
     compare_written_and_read_layout(layout, read_layout);
 }
 
-TEST_CASE("Write and read layouts", "[write-gate-level-layout]")
+TEST_CASE("Write and read layouts", "[write-fgl-layout]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
 

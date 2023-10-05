@@ -2,8 +2,8 @@
 // Created by simon on 25.09.23.
 //
 
-#ifndef FICTION_WRITE_GATE_LEVEL_LAYOUT_HPP
-#define FICTION_WRITE_GATE_LEVEL_LAYOUT_HPP
+#ifndef FICTION_WRITE_FGL_LAYOUT_HPP
+#define FICTION_WRITE_FGL_LAYOUT_HPP
 
 #include "fiction/layouts/clocked_layout.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
@@ -35,9 +35,9 @@ namespace detail
 namespace fcn
 {
 
-inline constexpr const char* FCN_HEADER       = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
-inline constexpr const char* OPEN_FCN         = "<fcn>\n";
-inline constexpr const char* CLOSE_FCN        = "</fcn>\n";
+inline constexpr const char* FGL_HEADER       = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+inline constexpr const char* OPEN_FGL         = "<fgl>\n";
+inline constexpr const char* CLOSE_FGL        = "</fgl>\n";
 inline constexpr const char* FICTION_METADATA = "  <fiction>\n"
                                                 "    <fiction_version>{}</fiction_version>\n"
                                                 "    <available_at>{}</available_at>\n"
@@ -87,15 +87,15 @@ inline constexpr const char* SIGNAL         = "        <signal>\n"
 }  // namespace fcn
 
 template <typename Lyt>
-class write_gate_level_layout_impl
+class write_fgl_layout_impl
 {
   public:
-    write_gate_level_layout_impl(const Lyt& src, std::ostream& s) : lyt{src}, os{s} {}
+    write_fgl_layout_impl(const Lyt& src, std::ostream& s) : lyt{src}, os{s} {}
 
     void run()
     {
         // metadata
-        os << fcn::FCN_HEADER << fcn::OPEN_FCN;
+        os << fcn::FGL_HEADER << fcn::OPEN_FGL;
         const auto time_str = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(std::time(nullptr)));
         os << fmt::format(fcn::FICTION_METADATA, FICTION_VERSION, FICTION_REPO, time_str);
 
@@ -152,7 +152,7 @@ class write_gate_level_layout_impl
         const auto clocking_scheme = lyt.get_clocking_scheme();
         os << fmt::format(fcn::CLOCKING_SCHEME_NAME, clocking_scheme.name);
 
-        if (clocking_scheme.name == "OPEN" || !clocking_scheme.is_regular())
+        if (!clocking_scheme.is_regular())
         {
             os << fcn::OPEN_CLOCK_ZONES;
             for (uint64_t x = 0; x <= lyt.x(); ++x)
@@ -298,7 +298,7 @@ class write_gate_level_layout_impl
             });
 
         os << fcn::CLOSE_GATES;
-        os << fcn::CLOSE_FCN;
+        os << fcn::CLOSE_FGL;
     }
 
   private:
@@ -315,7 +315,7 @@ class write_gate_level_layout_impl
 }  // namespace detail
 
 /**
- * Writes a gate-level layout to a file.
+ * Writes an FGL layout to a file.
  *
  * This overload uses an output stream to write into.
  *
@@ -324,28 +324,28 @@ class write_gate_level_layout_impl
  * @param os The output stream to write into.
  */
 template <typename Lyt>
-void write_gate_level_layout(const Lyt& lyt, std::ostream& os)
+void write_fgl_layout(const Lyt& lyt, std::ostream& os)
 {
     static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
     static_assert(is_tile_based_layout_v<Lyt>, "Lyt is not a tile-based layout");
     static_assert(is_clocked_layout_v<Lyt>, "Lyt is not a clocked layout");
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
 
-    detail::write_gate_level_layout_impl p{lyt, os};
+    detail::write_fgl_layout_impl p{lyt, os};
 
     p.run();
 }
 /**
- * Writes a gate-level layout to a file.
+ * Writes an FGL layout to a file.
  *
  * This overload uses a file name to create and write into.
  *
  * @tparam Lyt Layout.
  * @param lyt The layout to be written.
- * @param filename The file name to create and write into.
+ * @param filename The file name to create and write into. Should preferably use the .fgl extension.
  */
 template <typename Lyt>
-void write_gate_level_layout(const Lyt& lyt, const std::string_view& filename)
+void write_fgl_layout(const Lyt& lyt, const std::string_view& filename)
 {
     std::ofstream os{filename.data(), std::ofstream::out};
 
@@ -354,10 +354,10 @@ void write_gate_level_layout(const Lyt& lyt, const std::string_view& filename)
         throw std::ofstream::failure("could not open file");
     }
 
-    write_gate_level_layout(lyt, os);
+    write_fgl_layout(lyt, os);
     os.close();
 }
 
 }  // namespace fiction
 
-#endif  // FICTION_WRITE_GATE_LEVEL_LAYOUT_HPP
+#endif  // FICTION_WRITE_FGL_LAYOUT_HPP
