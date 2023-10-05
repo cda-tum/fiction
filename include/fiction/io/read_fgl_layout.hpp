@@ -28,6 +28,9 @@
 #include <unordered_set>
 #include <vector>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
+
 namespace fiction
 {
 
@@ -805,5 +808,6 @@ void read_fgl_layout(Lyt& lyt, const std::string_view& filename)
 }
 
 }  // namespace fiction
+#pragma GCC diagnostic pop
 
 #endif  // FICTION_READ_FGL_LAYOUT_HPP
