@@ -102,6 +102,7 @@ class write_fgl_layout_impl
         os << fcn::OPEN_LAYOUT_METADATA;
         std::string layout_name = get_name(lyt);
 
+        // check if topology matches Lyt
         std::string topology = "";
         if constexpr (is_cartesian_layout_v<Lyt>)
         {
@@ -152,6 +153,7 @@ class write_fgl_layout_impl
         const auto clocking_scheme = lyt.get_clocking_scheme();
         os << fmt::format(fcn::CLOCKING_SCHEME_NAME, clocking_scheme.name);
 
+        // if clocking scheme is irregular, overwrite clock zones
         if (!clocking_scheme.is_regular())
         {
             os << fcn::OPEN_CLOCK_ZONES;

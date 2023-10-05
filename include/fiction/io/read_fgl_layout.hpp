@@ -377,7 +377,7 @@ class read_fgl_layout_impl
                 auto* const loc_x = loc->FirstChildElement("x");
                 if (loc_x != nullptr && loc_x->GetText())
                 {
-                    gate.loc.x = std::stoull(loc_x->GetText());
+                    gate.loc.x = static_cast<decltype(gate.loc.x)>(std::stoull(loc_x->GetText()));
                 }
                 else
                 {
@@ -388,7 +388,7 @@ class read_fgl_layout_impl
                 auto* const loc_y = loc->FirstChildElement("y");
                 if (loc_y != nullptr && loc_y->GetText())
                 {
-                    gate.loc.y = std::stoull(loc_y->GetText());
+                    gate.loc.y = static_cast<decltype(gate.loc.y)>(std::stoull(loc_y->GetText()));
                 }
                 else
                 {
@@ -399,7 +399,7 @@ class read_fgl_layout_impl
                 auto* const loc_z = loc->FirstChildElement("z");
                 if (loc_z != nullptr && loc_z->GetText())
                 {
-                    gate.loc.z = std::stoull(loc_z->GetText());
+                    gate.loc.z = static_cast<decltype(gate.loc.z)>(std::stoull(loc_z->GetText()));
                 }
                 else
                 {
@@ -418,7 +418,7 @@ class read_fgl_layout_impl
                         auto* const incoming_signal_x = incoming_signal->FirstChildElement("x");
                         if (incoming_signal_x != nullptr && incoming_signal_x->GetText())
                         {
-                            incoming.x = std::stoull(incoming_signal_x->GetText());
+                            incoming.x = static_cast<decltype(incoming.x)>(std::stoull(incoming_signal_x->GetText()));
                         }
                         else
                         {
@@ -429,7 +429,7 @@ class read_fgl_layout_impl
                         auto* const incoming_signal_y = incoming_signal->FirstChildElement("y");
                         if (incoming_signal_y != nullptr && incoming_signal_y->GetText())
                         {
-                            incoming.y = std::stoull(incoming_signal_y->GetText());
+                            incoming.y = static_cast<decltype(incoming.y)>(std::stoull(incoming_signal_y->GetText()));
                         }
                         else
                         {
@@ -440,7 +440,7 @@ class read_fgl_layout_impl
                         auto* const incoming_signal_z = incoming_signal->FirstChildElement("z");
                         if (incoming_signal_z != nullptr && incoming_signal_z->GetText())
                         {
-                            incoming.z = std::stoull(incoming_signal_z->GetText());
+                            incoming.z = static_cast<decltype(incoming.z)>(std::stoull(incoming_signal_z->GetText()));
                         }
                         else
                         {
