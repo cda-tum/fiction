@@ -152,7 +152,7 @@ class write_gate_level_layout_impl
         const auto clocking_scheme = lyt.get_clocking_scheme();
         os << fmt::format(fcn::CLOCKING_SCHEME_NAME, clocking_scheme.name);
 
-        if (clocking_scheme.name == "OPEN")
+        if (clocking_scheme.name == "OPEN" || !clocking_scheme.is_regular())
         {
             os << fcn::OPEN_CLOCK_ZONES;
             for (uint64_t x = 0; x <= lyt.x(); ++x)

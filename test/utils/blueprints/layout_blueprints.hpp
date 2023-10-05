@@ -174,6 +174,7 @@ template <typename GateLyt>
 GateLyt res_maj_gate_layout() noexcept
 {
     GateLyt layout{typename GateLyt::aspect_ratio{2, 2, 0}, fiction::res_clocking<GateLyt>()};
+    layout.assign_clock_number({0, 0}, static_cast<typename GateLyt::clock_number_t>(0));
 
     const auto x1 = layout.create_pi("x1", {0, 1});
     const auto x2 = layout.create_pi("x2", {1, 0});

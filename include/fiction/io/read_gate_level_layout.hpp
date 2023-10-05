@@ -99,10 +99,11 @@ class read_gate_level_layout_impl
         auto* const topology = layout->FirstChildElement("topology");
         if (topology != nullptr && topology->GetText())
         {
-            const auto                      topology_name = topology->GetText();
-            std::unordered_set<std::string> shifted_cartesian{"odd_row_cartesian", "even_row_cartesian",
-                                                              "odd_column_cartesian", "even_column_cartesian"};
-            std::unordered_set<std::string> hex{"odd_row_hex", "even_row_hex", "odd_column_hex", "even_column_hex"};
+            const auto                              topology_name = topology->GetText();
+            static const std::array<std::string, 4> shifted_cartesian{"odd_row_cartesian", "even_row_cartesian",
+                                                                      "odd_column_cartesian", "even_column_cartesian"};
+            static const std::array<std::string, 4> hex{"odd_row_hex", "even_row_hex", "odd_column_hex",
+                                                        "even_column_hex"};
 
             if (std::strcmp(topology_name, "cartesian") == 0)
             {
@@ -111,7 +112,8 @@ class read_gate_level_layout_impl
                     throw gate_level_parsing_error("Error parsing gate_level file: Lyt is not a cartesian layout");
                 }
             }
-            else if (shifted_cartesian.find(topology_name) != shifted_cartesian.end())
+            else if (std::find(std::begin(shifted_cartesian), std::end(shifted_cartesian), topology_name) !=
+                     shifted_cartesian.end())
             {
                 if constexpr (is_shifted_cartesian_layout_v<Lyt>)
                 {
@@ -154,7 +156,7 @@ class read_gate_level_layout_impl
                         "Error parsing gate_level file: Lyt is not a shifted_cartesian layout");
                 }
             }
-            else if (hex.find(topology_name) != hex.end())
+            else if (std::find(std::begin(hex), std::end(hex), topology_name) != hex.end())
             {
                 if constexpr (is_hexagonal_layout_v<Lyt>)
                 {
@@ -262,62 +264,56 @@ class read_gate_level_layout_impl
                 const auto clocking_scheme = get_clocking_scheme<Lyt>(clocking_scheme_name->GetText());
                 if (clocking_scheme.has_value())
                 {
-                    if (strcmp(clocking_scheme_name->GetText(), "OPEN") == 0)
+                    lyt.replace_clocking_scheme(*clocking_scheme);
+                    auto* const clock_zones = clocking->FirstChildElement("zones");
+                    if (clock_zones != nullptr)
                     {
-                        auto* const clock_zones = clocking->FirstChildElement("zones");
-                        if (clock_zones != nullptr)
+                        for (const auto* clock_zone = clock_zones->FirstChildElement("zone"); clock_zone != nullptr;
+                             clock_zone             = clock_zone->NextSiblingElement("zone"))
                         {
-                            for (const auto* clock_zone = clock_zones->FirstChildElement("zone"); clock_zone != nullptr;
-                                 clock_zone             = clock_zone->NextSiblingElement("zone"))
+                            auto* const clocking_zone_x = clock_zone->FirstChildElement("x");
+                            int         x_coord         = 0;
+                            if (clocking_zone_x != nullptr && clocking_zone_x->GetText())
                             {
-                                auto* const clocking_zone_x = clock_zone->FirstChildElement("x");
-                                int         x_coord         = 0;
-                                if (clocking_zone_x != nullptr && clocking_zone_x->GetText())
-                                {
-                                    x_coord = std::stoi(clocking_zone_x->GetText());
-                                }
-                                else
-                                {
-                                    throw gate_level_parsing_error(
-                                        "Error parsing gate_level file: no element 'x' in 'zone'");
-                                }
-
-                                auto* const clocking_zone_y = clock_zone->FirstChildElement("y");
-                                int         y_coord         = 0;
-                                if (clocking_zone_y != nullptr && clocking_zone_y->GetText())
-                                {
-                                    y_coord = std::stoi(clocking_zone_y->GetText());
-                                }
-                                else
-                                {
-                                    throw gate_level_parsing_error(
-                                        "Error parsing gate_level file: no element 'y' in 'zone'");
-                                }
-
-                                auto* const clocking_zone_clock = clock_zone->FirstChildElement("clock");
-                                uint8_t     clock               = 0;
-                                if (clocking_zone_clock != nullptr && clocking_zone_clock->GetText())
-                                {
-                                    clock = static_cast<uint8_t>(*clocking_zone_clock->GetText());
-                                }
-                                else
-                                {
-                                    throw gate_level_parsing_error(
-                                        "Error parsing gate_level file: no element 'clock' in 'zone'");
-                                }
-
-                                lyt.assign_clock_number({x_coord, y_coord}, clock);
+                                x_coord = std::stoi(clocking_zone_x->GetText());
                             }
-                        }
-                        else
-                        {
-                            throw gate_level_parsing_error(
-                                "Error parsing gate_level file: no element 'zones' in 'clocking'");
+                            else
+                            {
+                                throw gate_level_parsing_error(
+                                    "Error parsing gate_level file: no element 'x' in 'zone'");
+                            }
+
+                            auto* const clocking_zone_y = clock_zone->FirstChildElement("y");
+                            int         y_coord         = 0;
+                            if (clocking_zone_y != nullptr && clocking_zone_y->GetText())
+                            {
+                                y_coord = std::stoi(clocking_zone_y->GetText());
+                            }
+                            else
+                            {
+                                throw gate_level_parsing_error(
+                                    "Error parsing gate_level file: no element 'y' in 'zone'");
+                            }
+
+                            auto* const clocking_zone_clock = clock_zone->FirstChildElement("clock");
+                            uint8_t     clock               = 0;
+                            if (clocking_zone_clock != nullptr && clocking_zone_clock->GetText())
+                            {
+                                clock = static_cast<uint8_t>(*clocking_zone_clock->GetText());
+                            }
+                            else
+                            {
+                                throw gate_level_parsing_error(
+                                    "Error parsing gate_level file: no element 'clock' in 'zone'");
+                            }
+
+                            lyt.assign_clock_number({x_coord, y_coord}, clock);
                         }
                     }
-                    else
+                    else if (strcmp(clocking_scheme_name->GetText(), "OPEN") == 0)
                     {
-                        lyt.replace_clocking_scheme(*clocking_scheme);
+                        throw gate_level_parsing_error(
+                            "Error parsing gate_level file: no element 'zones' in 'clocking'");
                     }
                 }
                 else
@@ -478,7 +474,10 @@ class read_gate_level_layout_impl
                 {
                     if (gate.type == "PI")
                     {
-                        lyt.create_pi(gate.name, location);
+                        if constexpr (mockturtle::has_create_pi_v<Lyt>)
+                        {
+                            lyt.create_pi(gate.name, location);
+                        }
                     }
                     else
                     {
@@ -495,23 +494,35 @@ class read_gate_level_layout_impl
 
                     if (gate.type == "PO")
                     {
-                        lyt.create_po(incoming_signal, gate.name, location);
+                        if constexpr (mockturtle::has_create_po_v<Lyt>)
+                        {
+                            lyt.create_po(incoming_signal, gate.name, location);
+                        }
                     }
 
                     else if (gate.type == "BUF")
                     {
-                        lyt.create_buf(incoming_signal, location);
+                        if constexpr (mockturtle::has_create_buf_v<Lyt>)
+                        {
+                            lyt.create_buf(incoming_signal, location);
+                        }
                     }
 
                     else if (gate.type == "INV")
                     {
-                        lyt.create_not(incoming_signal, location);
+                        if constexpr (mockturtle::has_create_not_v<Lyt>)
+                        {
+                            lyt.create_not(incoming_signal, location);
+                        }
                     }
                     else if (std::all_of(gate.type.begin(), gate.type.end(), ::isxdigit))
                     {
-                        kitty::dynamic_truth_table tt_t(1u);
-                        kitty::create_from_hex_string(tt_t, gate.type);
-                        lyt.create_node({incoming_signal}, tt_t, location);
+                        if constexpr (mockturtle::has_create_node_v<Lyt>)
+                        {
+                            kitty::dynamic_truth_table tt_t(1u);
+                            kitty::create_from_hex_string(tt_t, gate.type);
+                            lyt.create_node({incoming_signal}, tt_t, location);
+                        }
                     }
                     else
                     {
@@ -532,38 +543,59 @@ class read_gate_level_layout_impl
 
                     if (gate.type == "AND")
                     {
-                        lyt.create_and(incoming_signal_1, incoming_signal_2, location);
+                        if constexpr (mockturtle::has_create_and_v<Lyt>)
+                        {
+                            lyt.create_and(incoming_signal_1, incoming_signal_2, location);
+                        }
                     }
 
                     else if (gate.type == "NAND")
                     {
-                        lyt.create_nand(incoming_signal_1, incoming_signal_2, location);
+                        if constexpr (mockturtle::has_create_nand_v<Lyt>)
+                        {
+                            lyt.create_nand(incoming_signal_1, incoming_signal_2, location);
+                        }
                     }
 
                     else if (gate.type == "OR")
                     {
-                        lyt.create_or(incoming_signal_1, incoming_signal_2, location);
+                        if constexpr (mockturtle::has_create_or_v<Lyt>)
+                        {
+                            lyt.create_or(incoming_signal_1, incoming_signal_2, location);
+                        }
                     }
 
                     else if (gate.type == "NOR")
                     {
-                        lyt.create_nor(incoming_signal_1, incoming_signal_2, location);
+                        if constexpr (mockturtle::has_create_nor_v<Lyt>)
+                        {
+                            lyt.create_nor(incoming_signal_1, incoming_signal_2, location);
+                        }
                     }
 
                     else if (gate.type == "XOR")
                     {
-                        lyt.create_xor(incoming_signal_1, incoming_signal_2, location);
+                        if constexpr (mockturtle::has_create_xor_v<Lyt>)
+                        {
+                            lyt.create_xor(incoming_signal_1, incoming_signal_2, location);
+                        }
                     }
 
                     else if (gate.type == "XNOR")
                     {
-                        lyt.create_xnor(incoming_signal_1, incoming_signal_2, location);
+                        if constexpr (mockturtle::has_create_xnor_v<Lyt>)
+                        {
+                            lyt.create_xnor(incoming_signal_1, incoming_signal_2, location);
+                        }
                     }
                     else if (std::all_of(gate.type.begin(), gate.type.end(), ::isxdigit))
                     {
-                        kitty::dynamic_truth_table tt_t(2u);
-                        kitty::create_from_hex_string(tt_t, gate.type);
-                        lyt.create_node({incoming_signal_1, incoming_signal_2}, tt_t, location);
+                        if constexpr (mockturtle::has_create_node_v<Lyt>)
+                        {
+                            kitty::dynamic_truth_table tt_t(2u);
+                            kitty::create_from_hex_string(tt_t, gate.type);
+                            lyt.create_node({incoming_signal_1, incoming_signal_2}, tt_t, location);
+                        }
                     }
                     else
                     {
@@ -585,13 +617,19 @@ class read_gate_level_layout_impl
 
                     if (gate.type == "MAJ")
                     {
-                        lyt.create_maj(incoming_signal_1, incoming_signal_2, incoming_signal_3, location);
+                        if constexpr (mockturtle::has_create_maj_v<Lyt>)
+                        {
+                            lyt.create_maj(incoming_signal_1, incoming_signal_2, incoming_signal_3, location);
+                        }
                     }
                     else if (std::all_of(gate.type.begin(), gate.type.end(), ::isxdigit))
                     {
-                        kitty::dynamic_truth_table tt_t(3u);
-                        kitty::create_from_hex_string(tt_t, gate.type);
-                        lyt.create_node({incoming_signal_1, incoming_signal_2, incoming_signal_3}, tt_t, location);
+                        if constexpr (mockturtle::has_create_node_v<Lyt>)
+                        {
+                            kitty::dynamic_truth_table tt_t(3u);
+                            kitty::create_from_hex_string(tt_t, gate.type);
+                            lyt.create_node({incoming_signal_1, incoming_signal_2, incoming_signal_3}, tt_t, location);
+                        }
                     }
                     else
                     {
@@ -601,17 +639,20 @@ class read_gate_level_layout_impl
                 }
                 else if (std::all_of(gate.type.begin(), gate.type.end(), ::isxdigit))
                 {
-                    const auto                           num_incoming_signals = gate.incoming.size();
-                    std::vector<mockturtle::signal<Lyt>> incoming_signals{};
-                    for (std::size_t i = 0; i < num_incoming_signals; i++)
+                    if constexpr (mockturtle::has_create_node_v<Lyt>)
                     {
-                        tile<Lyt> incoming_tile_i{gate.incoming[i].x, gate.incoming[i].y, gate.incoming[i].z};
-                        auto      incoming_signal_i = lyt.make_signal(lyt.get_node(incoming_tile_i));
-                        incoming_signals.push_back(incoming_signal_i);
+                        const auto                           num_incoming_signals = gate.incoming.size();
+                        std::vector<mockturtle::signal<Lyt>> incoming_signals{};
+                        for (std::size_t i = 0; i < num_incoming_signals; i++)
+                        {
+                            tile<Lyt> incoming_tile_i{gate.incoming[i].x, gate.incoming[i].y, gate.incoming[i].z};
+                            auto      incoming_signal_i = lyt.make_signal(lyt.get_node(incoming_tile_i));
+                            incoming_signals.push_back(incoming_signal_i);
+                        }
+                        kitty::dynamic_truth_table tt_t(static_cast<uint32_t>(num_incoming_signals));
+                        kitty::create_from_hex_string(tt_t, gate.type);
+                        lyt.create_node({incoming_signals}, tt_t, location);
                     }
-                    kitty::dynamic_truth_table tt_t(static_cast<uint32_t>(num_incoming_signals));
-                    kitty::create_from_hex_string(tt_t, gate.type);
-                    lyt.create_node({incoming_signals}, tt_t, location);
                 }
                 else
                 {
