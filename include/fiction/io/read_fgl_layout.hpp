@@ -99,39 +99,39 @@ class read_fgl_layout_impl
         auto* const topology = layout->FirstChildElement("topology");
         if (topology != nullptr && topology->GetText())
         {
-            const auto                              topology_name = topology->GetText();
-            static const std::array<std::string, 4> shifted_cartesian{"odd_row_cartesian", "even_row_cartesian",
-                                                                      "odd_column_cartesian", "even_column_cartesian"};
-            static const std::array<std::string, 4> hex{"odd_row_hex", "even_row_hex", "odd_column_hex",
-                                                        "even_column_hex"};
+            const std::string                           topology_name = topology->GetText();
+            static constexpr std::array<const char*, 4> shifted_cartesian{
+                "odd_row_cartesian", "even_row_cartesian", "odd_column_cartesian", "even_column_cartesian"};
+            static constexpr std::array<const char*, 4> hex{"odd_row_hex", "even_row_hex", "odd_column_hex",
+                                                            "even_column_hex"};
 
-            if (std::strcmp(topology_name, "cartesian") == 0)
+            if (topology_name == "cartesian")
             {
                 if constexpr (!is_cartesian_layout_v<Lyt>)
                 {
                     throw fgl_parsing_error("Error parsing FGL file: Lyt is not a cartesian layout");
                 }
             }
-            else if (std::find(std::begin(shifted_cartesian), std::end(shifted_cartesian), topology_name) !=
+            else if (std::find(shifted_cartesian.begin(), shifted_cartesian.end(), topology_name) !=
                      shifted_cartesian.end())
             {
                 if constexpr (is_shifted_cartesian_layout_v<Lyt>)
                 {
-                    if (std::strcmp(topology_name, "odd_row_cartesian") == 0)
+                    if (topology_name == "odd_row_cartesian")
                     {
                         if constexpr (!has_odd_row_cartesian_arrangement_v<Lyt>)
                         {
                             throw fgl_parsing_error("Error parsing FGL file: Lyt is not an odd_row_cartesian layout");
                         }
                     }
-                    else if (std::strcmp(topology_name, "even_row_cartesian") == 0)
+                    else if (topology_name == "even_row_cartesian")
                     {
                         if constexpr (!has_even_row_cartesian_arrangement_v<Lyt>)
                         {
                             throw fgl_parsing_error("Error parsing FGL file: Lyt is not an even_row_cartesian layout");
                         }
                     }
-                    else if (std::strcmp(topology_name, "odd_column_cartesian") == 0)
+                    else if (topology_name == "odd_column_cartesian")
                     {
                         if constexpr (!has_odd_column_cartesian_arrangement_v<Lyt>)
                         {
@@ -139,7 +139,7 @@ class read_fgl_layout_impl
                                 "Error parsing FGL file: Lyt is not an odd_column_cartesian layout");
                         }
                     }
-                    else if (std::strcmp(topology_name, "even_column_cartesian") == 0)
+                    else if (topology_name == "even_column_cartesian")
                     {
                         if constexpr (!has_even_column_cartesian_arrangement_v<Lyt>)
                         {
@@ -153,32 +153,32 @@ class read_fgl_layout_impl
                     throw fgl_parsing_error("Error parsing FGL file: Lyt is not a shifted_cartesian layout");
                 }
             }
-            else if (std::find(std::begin(hex), std::end(hex), topology_name) != hex.end())
+            else if (std::find(hex.begin(), hex.end(), topology_name) != hex.end())
             {
                 if constexpr (is_hexagonal_layout_v<Lyt>)
                 {
-                    if (std::strcmp(topology_name, "odd_row_hex") == 0)
+                    if (topology_name == "odd_row_hex")
                     {
                         if constexpr (!has_odd_row_hex_arrangement_v<Lyt>)
                         {
                             throw fgl_parsing_error("Error parsing FGL file: Lyt is not an odd_row_hex layout");
                         }
                     }
-                    else if (std::strcmp(topology_name, "even_row_hex") == 0)
+                    else if (topology_name == "even_row_hex")
                     {
                         if constexpr (!has_even_row_hex_arrangement_v<Lyt>)
                         {
                             throw fgl_parsing_error("Error parsing FGL file: Lyt is not an even_row_hex layout");
                         }
                     }
-                    else if (std::strcmp(topology_name, "odd_column_hex") == 0)
+                    else if (topology_name == "odd_column_hex")
                     {
                         if constexpr (!has_odd_column_hex_arrangement_v<Lyt>)
                         {
                             throw fgl_parsing_error("Error parsing FGL file: Lyt is not an odd_column_hex layout");
                         }
                     }
-                    else if (std::strcmp(topology_name, "even_column_hex") == 0)
+                    else if (topology_name == "even_column_hex")
                     {
                         if constexpr (!has_even_column_hex_arrangement_v<Lyt>)
                         {
@@ -257,7 +257,7 @@ class read_fgl_layout_impl
                 if (clocking_scheme.has_value())
                 {
                     lyt.replace_clocking_scheme(*clocking_scheme);
-                    static const std::array<std::string, 3> open_clocking_schemes{"OPEN", "OPEN3", "OPEN4"};
+                    static constexpr std::array<const char*, 3> open_clocking_schemes{"OPEN", "OPEN3", "OPEN4"};
 
                     auto* const clock_zones = clocking->FirstChildElement("zones");
                     if (clock_zones != nullptr)
@@ -302,7 +302,8 @@ class read_fgl_layout_impl
                         }
                     }
                     else if (std::find(std::begin(open_clocking_schemes), std::end(open_clocking_schemes),
-                                       clocking_scheme_name->GetText()) != open_clocking_schemes.end())
+                                       static_cast<std::string>(clocking_scheme_name->GetText())) !=
+                             open_clocking_schemes.end())
                     {
                         throw fgl_parsing_error("Error parsing FGL file: no element 'zones' in 'clocking'");
                     }
