@@ -12,14 +12,15 @@
 #include <fiction/traits.hpp>
 
 #include <fmt/format.h>
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
 
 #include <algorithm>
 #include <cctype>
 #include <set>
 #include <string>
 #include <type_traits>
+
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 namespace pyfiction
 {
@@ -78,9 +79,9 @@ void fcn_technology_cell_level_layout(pybind11::module& m)
     /**
      * Cell-level clocked Cartesian layout.
      */
-    py::class_<py_cartesian_technology_cell_layout,
-               fiction::synchronization_element_layout<fiction::clocked_layout<
-                   fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>>(
+    py::class_<
+        py_cartesian_technology_cell_layout,
+        fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>(
         m, fmt::format("{}_layout", tech_name).c_str(), DOC(fiction_cell_level_layout))
         .def(py::init<>())
         .def(py::init<const fiction::aspect_ratio<py_cartesian_technology_cell_layout>&>(), "dimension"_a,

@@ -1,37 +1,32 @@
 //
-// Created by marcel on 19.09.23.
+// Created by simon on 22.09.23.
 //
 
 #ifndef PYFICTION_POST_LAYOUT_OPTIMIZATION_HPP
 #define PYFICTION_POST_LAYOUT_OPTIMIZATION_HPP
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/physical_design/post_layout_optimization.hpp>
-
-#include <sstream>
+#include <fiction/types.hpp>
 
 #include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
 
 namespace pyfiction
 {
 
-/**
- * Post-layout optimization for Cartesian 2DDWave-clocked gate-level layouts.
- */
-inline void post_layout_optimization(pybind11::module& m)
+namespace detail
 {
-    namespace py = pybind11;
+
+template <typename Lyt>
+void post_layout_optimization(pybind11::module& m)
+{
     using namespace pybind11::literals;
 
-    py::class_<fiction::post_layout_optimization_stats>(m, "post_layout_optimization_stats")
-        //, DOC(fiction_post_layout_optimization_stats))
-
-        .def(py::init<>())
+    pybind11::class_<fiction::post_layout_optimization_stats>(m, "post_layout_optimization_stats",
+                                                              DOC(fiction_post_layout_optimization_stats))
+        .def(pybind11::init<>())
         .def_readonly("time_total", &fiction::post_layout_optimization_stats::time_total)
-        // , DOC(fiction_post_layout_optimization_stats_time_total))
         .def("__repr__",
              [](const fiction::post_layout_optimization_stats& stats)
              {
@@ -42,9 +37,15 @@ inline void post_layout_optimization(pybind11::module& m)
 
         ;
 
-    m.def("post_layout_optimization", &fiction::post_layout_optimization<py_cartesian_gate_layout>, "lyt"_a,
-          "statistics"_a = nullptr);
-    //, DOC(fiction_post_layout_optimization));
+    m.def("post_layout_optimization", &fiction::post_layout_optimization<Lyt>, "layout"_a, "statistics"_a = nullptr,
+          DOC(fiction_post_layout_optimization));
+}
+
+}  // namespace detail
+
+inline void post_layout_optimization(pybind11::module& m)
+{
+    detail::post_layout_optimization<py_cartesian_gate_layout>(m);
 }
 
 }  // namespace pyfiction

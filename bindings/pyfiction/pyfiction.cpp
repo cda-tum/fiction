@@ -91,6 +91,8 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::hexagonalization(m);
     pyfiction::apply_gate_library(m);
     pyfiction::color_routing(m);
+    pyfiction::hexagonalization(m);
+    pyfiction::post_layout_optimization(m);
     /**
      * Algorithms: Network Transformation
      */
