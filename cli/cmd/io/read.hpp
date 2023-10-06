@@ -46,7 +46,7 @@ class read_command : public command
         add_option("filename", filename, "Filename or directory")->required();
         add_option("topology", topology,
                    "Topology for gate-level layouts. Can be 'cartesian' or of the form "
-                   "'<odd|even>_<row|column>_<cartesian|hex>");
+                   "'<odd|even>_<row|column>_<cartesian|hex>'");
         add_flag("--aig,-a", "Parse file as AIG");
         add_flag("--xag,-x", "Parse file as XAG");
         add_flag("--mig,-m", "Parse file as MIG");
