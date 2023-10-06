@@ -91,7 +91,7 @@ SiDB Operational Domain
 Technology-independent Gate-level Layouts
 #########################################
 
-**Header:** ``fiction/io/write_gate_level_layout.hpp``
+**Header:** ``fiction/io/write_fgl_layout.hpp``
 
-.. doxygenfunction:: fiction::write_gate_level_layout(const Lyt& lyt, std::ostream& os)
-.. doxygenfunction:: fiction::write_gate_level_layout(const Lyt& lyt, const std::string_view& filename)
+.. doxygenfunction:: fiction::write_fgl_layout(const Lyt& lyt, std::ostream& os)
+.. doxygenfunction:: fiction::write_fgl_layout(const Lyt& lyt, const std::string_view& filename)
