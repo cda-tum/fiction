@@ -5,6 +5,7 @@
 #ifndef FICTION_CALCULATE_ENERGY_AND_STATE_TYPE_HPP
 #define FICTION_CALCULATE_ENERGY_AND_STATE_TYPE_HPP
 
+#include "fiction/algorithms/iter/bdl_input_iterator.hpp"
 #include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/utils/math_utils.hpp"
@@ -20,7 +21,7 @@ namespace fiction
 
 /**
  *  Data type to collect electrostatic potential energies (in eV) of charge distributions with corresponding state types
- * (i.e., true = transparent, false = erroneous).
+ * (i.e., `true` = transparent, `false` = erroneous).
  */
 using sidb_energy_and_state_type = std::vector<std::pair<double, bool>>;
 
@@ -28,26 +29,30 @@ using sidb_energy_and_state_type = std::vector<std::pair<double, bool>>;
  * This function takes in an SiDB energy distribution. For each charge distribution, the state type is determined (i.e.
  * erroneous, transparent).
  *
- * @tparam Lyt SiDB cell-level layout type (representing a gate).
+ * @tparam Lyt SiDB cell-level layout type.
+ * @tparam TT The type of the truth table specifying the gate behavior.
  * @param energy_distribution Energy distribution.
- * @param output_cells SiDBs in the layout from which the output is read.
- * @param output_bits Truth table entry for a given input (e.g. 0 for AND (00 as input) or 1 for a wire (input 1)).
- * @return sidb_energy_and_state_type Electrostatic potential energy of all charge distributions with state type.
+ * @param valid_charge_distributions Physically valid charge distributions.
+ * @param output_bdl_pairs Output BDL pairs.
+ * @param spec Expected Boolean function of the layout given as a multi-output truth table.
+ * @param input_index The index of the current input configuration.
+ * @return Electrostatic potential energy of all charge distributions with state type.
  */
-template <typename Lyt>
+template <typename Lyt, typename TT>
 [[nodiscard]] sidb_energy_and_state_type
 calculate_energy_and_state_type(const sidb_energy_distribution&                      energy_distribution,
-                                const std::vector<charge_distribution_surface<Lyt>>& valid_lyts,
-                                const std::vector<typename Lyt::cell>&               output_cells,
-                                const std::vector<bool>&                             output_bits) noexcept
+                                const std::vector<charge_distribution_surface<Lyt>>& valid_charge_distributions,
+                                const std::vector<bdl_pair<Lyt>>& output_bdl_pairs, const std::vector<TT>& spec,
+                                const uint64_t input_index) noexcept
 
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
+    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
-    assert(!output_cells.empty() && "No output cell provided.");
-    assert(!output_bits.empty() && "No output bits provided.");
+    assert(!output_bdl_pairs.empty() && "No output cell provided.");
+    assert((spec.size() == output_bdl_pairs.size()) && "Number of truth tables and output BDL pairs does not match");
 
     sidb_energy_and_state_type energy_and_state_type{};
 
@@ -55,31 +60,23 @@ calculate_energy_and_state_type(const sidb_energy_distribution&                 
     {
         // round the energy value to six decimal places to overcome potential rounding errors.
         const auto energy_value = round_to_n_decimal_places(energy, 6);
-        for (const auto& valid_layout : valid_lyts)
+        for (const auto& valid_layout : valid_charge_distributions)
         {
             // round the energy value of the given valid_layout to six decimal places to overcome possible rounding
             // errors and to provide comparability with the energy_value from before.
             if (round_to_n_decimal_places(valid_layout.get_system_energy(), 6) == energy_value)
             {
-                // collect the charge state of the output SiDBs.
-                std::vector<sidb_charge_state> charge_states(output_cells.size());
-                std::transform(output_cells.cbegin(), output_cells.cend(), charge_states.begin(),
-                               [&](const auto& cell) { return valid_layout.get_charge_state(cell); });
-
-                // Convert the charge states of the output SiDBs to bits (-1 -> 1, 0 -> 0).
-                std::vector<bool> charge(charge_states.size());
-                std::transform(charge_states.cbegin(), charge_states.cend(), charge.begin(),
-                               [](const auto& state) { return static_cast<bool>(-charge_state_to_sign(state)); });
-
-                if (charge == output_bits)
+                bool correct_output = true;
+                for (auto i = 0u; i < output_bdl_pairs.size(); i++)
                 {
-                    // The output SiDB matches the truth table entry. Hence, state is called transparent.
-                    energy_and_state_type.emplace_back(energy, true);
+                    if (static_cast<bool>(-charge_state_to_sign(valid_layout.get_charge_state(
+                            output_bdl_pairs[i].lower))) != kitty::get_bit(spec[i], input_index))
+                    {
+                        correct_output = false;
+                    }
                 }
-                else
-                {
-                    energy_and_state_type.emplace_back(energy, false);
-                }
+                // The output SiDB matches the truth table entry. Hence, state is called transparent.
+                energy_and_state_type.emplace_back(energy, correct_output);
             }
         }
     }

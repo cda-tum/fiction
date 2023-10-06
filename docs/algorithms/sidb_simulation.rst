@@ -123,7 +123,8 @@ Temperature Behavior
 
         .. doxygenstruct:: fiction::critical_temperature_params
            :members:
-        .. doxygenfunction:: fiction::critical_temperature
+        .. doxygenfunction:: fiction::critical_temperature_gate_based
+        .. doxygenfunction:: fiction::critical_temperature_non_gate_based
 
         **Header:** ``fiction/algorithms/simulation/sidb/occupation_probability_excited_states.hpp``
 
@@ -167,9 +168,11 @@ Time-to-Solution (TTS) Statistics
     .. tab:: C++
         **Header:** ``fiction/algorithms/simulation/sidb/time_to_solution.hpp``
 
-        .. doxygenfunction:: fiction::sim_acc_tts
         .. doxygenstruct:: fiction::time_to_solution_params
            :members:
+        .. doxygenstruct:: fiction::time_to_solution_stats
+           :members:
+        .. doxygenfunction:: fiction::time_to_solution
 
     .. tab:: Python
         .. autofunction:: fiction.pyfiction.sim_acc_tts
@@ -187,6 +190,13 @@ Random SiDB Layout Generator
 
 Operational Domain Computation
 ##############################
+
+**Header:** ``fiction/algorithms/simulation/sidb/is_operational.hpp``
+
+.. doxygenenum:: fiction::operational_status
+.. doxygenstruct:: fiction::is_operational_params
+   :members:
+.. doxygenfunction:: fiction::is_operational
 
 **Header:** ``fiction/algorithms/simulation/sidb/operational_domain.hpp``
 

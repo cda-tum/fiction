@@ -104,14 +104,7 @@ Lyt generate_random_sidb_layout(const Lyt& lyt_skeleton, const generate_random_s
 
     const uint64_t number_of_sidbs_of_final_layout = lyt_skeleton.num_cells() + params.number_of_sidbs;
 
-    Lyt lyt{};
-
-    if (lyt_skeleton.num_cells() != 0)
-    {
-        lyt_skeleton.foreach_cell([&lyt, &lyt_skeleton](const auto& cell)
-                                  { lyt.assign_cell_type(cell, lyt_skeleton.get_cell_type(cell)); });
-    }
-
+    Lyt lyt{lyt_skeleton.clone()};
     // counts the attempts to place the given number of SiDBs
     uint64_t attempt_counter = 0;
 
@@ -125,7 +118,7 @@ Lyt generate_random_sidb_layout(const Lyt& lyt_skeleton, const generate_random_s
 
         if (params.positive_sidbs == generate_random_sidb_layout_params<Lyt>::positive_charges::FORBIDDEN)
         {
-            // checks if the new coordinate is not closer than 2 cells (Euclidean distance) from an already
+            // checks if the new coordinate is not closer than 2 cells (Euclidean distance) to an already
             // placed SiDB
             lyt.foreach_cell(
                 [&lyt, &random_coord, &constraint_violation_positive_sidbs, &params](const auto& c1)
@@ -136,10 +129,19 @@ Lyt generate_random_sidb_layout(const Lyt& lyt_skeleton, const generate_random_s
                     }
                 });
         }
-        // if the constraint that no positive SiDBs occur is satisfied, the SiDB is added to the layout
-        if (!constraint_violation_positive_sidbs)
+
+        bool random_cell_is_identical_wih_defect = false;
+        // check if a defect does not yet occupy random coordinate.
+        if constexpr (has_get_sidb_defect_v<Lyt>)
         {
-            lyt.assign_cell_type(random_coord, Lyt::cell_type::NORMAL);
+            random_cell_is_identical_wih_defect = (lyt.get_sidb_defect(random_coord).type != sidb_defect_type::NONE);
+        }
+
+        // if the constraints that no positive SiDBs occur and the cell is not yet occupied by a defect are satisfied,
+        // the SiDB is added to the layout
+        if (!constraint_violation_positive_sidbs && !random_cell_is_identical_wih_defect)
+        {
+            lyt.assign_cell_type(random_coord, technology<Lyt>::cell_type::NORMAL);
         }
         attempt_counter += 1;
     }

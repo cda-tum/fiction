@@ -12,7 +12,7 @@
 
 using namespace fiction;
 
-TEST_CASE("Test influence distance function", "[maximum_defect_influence_position_and_distance]")
+TEST_CASE("Test influence distance function", "[maximum-defect-influence-position-and-distance]")
 {
     SECTION("empty layout")
     {

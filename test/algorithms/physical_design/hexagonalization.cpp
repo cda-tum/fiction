@@ -16,6 +16,7 @@
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
+#include <fiction/types.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/views/names_view.hpp>
@@ -26,7 +27,7 @@ template <typename Lyt, typename Ntk>
 void check_mapping_equiv(const Ntk& ntk)
 {
     const auto layout     = orthogonal<Lyt>(ntk, {});
-    const auto hex_layout = hexagonalization<Lyt>(layout);
+    const auto hex_layout = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(layout);
 
     check_eq(ntk, layout);
     check_eq(ntk, hex_layout);
@@ -36,7 +37,7 @@ void check_mapping_equiv(const Ntk& ntk)
 template <typename Lyt>
 void check_mapping_equiv_layout(const Lyt& lyt)
 {
-    const auto hex_layout = hexagonalization<Lyt>(lyt);
+    const auto hex_layout = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(lyt);
 
     check_eq(lyt, hex_layout);
     CHECK(lyt.get_layout_name() == hex_layout.get_layout_name());

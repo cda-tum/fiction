@@ -56,3 +56,59 @@ TEMPLATE_TEST_CASE("integral_abs should compute the absolute value of a number o
 
     CHECK(integral_abs(integral_abs(x) - (x < 0 ? -x : x)) == 0);
 }
+
+TEST_CASE("Binomial Coefficient Tests")
+{
+    SECTION("C(5, 2)")
+    {
+        const uint64_t result = binomial_coefficient(5, 2);
+        REQUIRE(result == 10);  // C(5, 2) = 10
+    }
+
+    SECTION("C(10, 3)")
+    {
+        const uint64_t result = binomial_coefficient(10, 3);
+        REQUIRE(result == 120);  // C(10, 3) = 120
+    }
+
+    SECTION("C(0, 0)")
+    {
+        const uint64_t result = binomial_coefficient(0, 0);
+        REQUIRE(result == 1);  // C(0, 0) = 1
+    }
+
+    SECTION("C(8, 8)")
+    {
+        const uint64_t result = binomial_coefficient(8, 8);
+        REQUIRE(result == 1);  // C(8, 8) = 1
+    }
+
+    SECTION("C(7, 10)")
+    {
+        const uint64_t result = binomial_coefficient(7, 10);
+        REQUIRE(result == 0);  // C(7, 10) = 0 (k > n)
+    }
+    SECTION("C(15, 7)")
+    {
+        const uint64_t result = binomial_coefficient(15, 7);
+        REQUIRE(result == 6435);  // C(15, 7) = 6435
+    }
+
+    SECTION("C(20, 10)")
+    {
+        const uint64_t result = binomial_coefficient(20, 10);
+        REQUIRE(result == 184756);  // C(20, 10) = 184,756
+    }
+
+    SECTION("C(30, 15)")
+    {
+        const uint64_t result = binomial_coefficient(30, 15);
+        REQUIRE(result == 155117520);  // C(30, 15) = 155,117,520
+    }
+
+    SECTION("C(50, 25)")
+    {
+        const uint64_t result = binomial_coefficient(50, 25);
+        REQUIRE(result == 126410606437752);  // C(50, 25) = 126,410,606,437,752
+    }
+}

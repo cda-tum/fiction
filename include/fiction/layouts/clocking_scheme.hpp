@@ -221,7 +221,7 @@ static auto columnar_clocking(const num_clks& n = num_clks::FOUR) noexcept
     static const typename clocking_scheme<clock_zone<Lyt>>::clock_function columnar_3_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept
     {
-        constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 3u>, 3u> cutout{
+        static constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 3u>, 3u> cutout{
             {{{0, 1, 2}}, {{0, 1, 2}}, {{0, 1, 2}}}};
 
         return cutout[cz.y % 3ul][cz.x % 3ul];
@@ -230,7 +230,7 @@ static auto columnar_clocking(const num_clks& n = num_clks::FOUR) noexcept
     static const typename clocking_scheme<clock_zone<Lyt>>::clock_function columnar_4_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept
     {
-        constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 4u>, 4u> cutout{
+        static constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 4u>, 4u> cutout{
             {{{0, 1, 2, 3}}, {{0, 1, 2, 3}}, {{0, 1, 2, 3}}, {{0, 1, 2, 3}}}};
 
         return cutout[cz.y % 4ul][cz.x % 4ul];
@@ -268,7 +268,7 @@ static auto row_clocking(const num_clks& n = num_clks::FOUR) noexcept
     static const typename clocking_scheme<clock_zone<Lyt>>::clock_function row_3_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept
     {
-        constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 3u>, 3u> cutout{
+        static constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 3u>, 3u> cutout{
             {{{0, 0, 0}}, {{1, 1, 1}}, {{2, 2, 2}}}};
 
         return cutout[cz.y % 3ul][cz.x % 3ul];
@@ -277,7 +277,7 @@ static auto row_clocking(const num_clks& n = num_clks::FOUR) noexcept
     static const typename clocking_scheme<clock_zone<Lyt>>::clock_function row_4_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept
     {
-        constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 4u>, 4u> cutout{
+        static constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 4u>, 4u> cutout{
             {{{0, 0, 0, 0}}, {{1, 1, 1, 1}}, {{2, 2, 2, 2}}, {{3, 3, 3, 3}}}};
 
         return cutout[cz.y % 4ul][cz.x % 4ul];
@@ -314,7 +314,7 @@ static auto twoddwave_clocking(const num_clks& n = num_clks::FOUR) noexcept
     static const typename clocking_scheme<clock_zone<Lyt>>::clock_function twoddwave_3_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept
     {
-        constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 3u>, 3u> cutout{
+        static constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 3u>, 3u> cutout{
             {{{0, 1, 2}}, {{1, 2, 0}}, {{2, 0, 1}}}};
 
         return cutout[cz.y % 3ul][cz.x % 3ul];
@@ -323,7 +323,7 @@ static auto twoddwave_clocking(const num_clks& n = num_clks::FOUR) noexcept
     static const typename clocking_scheme<clock_zone<Lyt>>::clock_function twoddwave_4_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept
     {
-        constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 4u>, 4u> cutout{
+        static constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 4u>, 4u> cutout{
             {{{0, 1, 2, 3}}, {{1, 2, 3, 0}}, {{2, 3, 0, 1}}, {{3, 0, 1, 2}}}};
 
         return cutout[cz.y % 4ul][cz.x % 4ul];
@@ -544,7 +544,7 @@ static auto use_clocking() noexcept
     static const typename clocking_scheme<clock_zone<Lyt>>::clock_function use_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept
     {
-        constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 4u>, 4u> cutout{
+        static constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 4u>, 4u> cutout{
             {{{0, 1, 2, 3}},
              {{3, 2, 1, 0}},
              {{2, 3, 0, 1}},
@@ -573,7 +573,7 @@ static auto res_clocking() noexcept
     static const typename clocking_scheme<clock_zone<Lyt>>::clock_function res_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept
     {
-        constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 4u>, 4u> cutout{
+        static constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 4u>, 4u> cutout{
             {{{3, 0, 1, 2}},
              {{0, 1, 0, 3}},
              {{1, 2, 3, 0}},
@@ -602,7 +602,7 @@ static auto esr_clocking() noexcept
     static const typename clocking_scheme<clock_zone<Lyt>>::clock_function esr_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept
     {
-        constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 4u>, 4u> cutout{
+        static constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 4u>, 4u> cutout{
             {{{3, 0, 1, 2}},
              {{0, 1, 2, 3}},
              {{1, 2, 3, 0}},
@@ -631,7 +631,7 @@ static auto cfe_clocking() noexcept
     static const typename clocking_scheme<clock_zone<Lyt>>::clock_function cfe_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept
     {
-        constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 4u>, 4u> cutout{
+        static constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 4u>, 4u> cutout{
             {{{0, 1, 0, 1}},
              {{3, 2, 3, 2}},
              {{0, 1, 0, 1}},
@@ -659,7 +659,7 @@ static auto bancs_clocking() noexcept
     static const typename clocking_scheme<clock_zone<Lyt>>::clock_function bancs_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept
     {
-        constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 3u>, 6u> cutout{
+        static constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 3u>, 6u> cutout{
             {{{0, 1, 2}},
              {{2, 1, 0}},
              {{2, 0, 1}},

@@ -25,13 +25,13 @@
 namespace fiction
 {
 /**
- * This struct stores the parameters for the `QuickExact` algorithm.
+ * This struct stores the parameters for the *QuickExact* algorithm.
  */
 template <typename Lyt>
 struct quickexact_params
 {
     /**
-     * Modes to use for the `QuickExact` algorithm.
+     * Modes to use for the *QuickExact* algorithm.
      */
     enum class automatic_base_number_detection
     {
@@ -45,13 +45,12 @@ struct quickexact_params
          */
         OFF
     };
-
     /**
      * All parameters for physical SiDB simulations.
      */
     sidb_simulation_parameters physical_parameters{};
     /**
-     * If ON, `QuickExact` checks before which base number is required for the simulation, i.e., whether 3-state is
+     * If `ON`, *QuickExact* checks which base number is required for the simulation, i.e., whether 3-state is
      * necessary or 2-state simulation is sufficient.
      */
     automatic_base_number_detection base_number_detection = automatic_base_number_detection::ON;
@@ -526,37 +525,37 @@ class quickexact_impl
 }  // namespace detail
 
 /**
- * `QuickExact` is a quick and exact physical simulation algorithm designed specifically for SiDB layouts. It is
+ * *QuickExact* is a quick and exact physical simulation algorithm designed specifically for SiDB layouts. It is
  * proposed in \"The Need for Speed: Efficient Exact Simulation of Silicon Dangling Bond Logic\" by J. Drewniok, M.
  * Walter, and R. Wille (https://arxiv.org/abs/2308.04487). It determines all physically valid charge configurations of
- * a given layout, providing a significant performance advantage of more than three orders of magnitude over `ExGS`
- * (exhaustive_ground_state_simulation.hpp).
+ * a given layout, providing a significant performance advantage of more than three orders of magnitude over *ExGS*
+ * (`exhaustive_ground_state_simulation`).
  *
- * The performance improvement of `QuickExact` can be attributed to the incorporation of three key ideas:
+ * The performance improvement of *QuickExact* can be attributed to the incorporation of three key ideas:
  *
- * 1. Advanced Negative SiDB Detection: `QuickExact` efficiently identifies SiDBs that require negative charges
+ * 1. Advanced Negative SiDB Detection: *QuickExact* efficiently identifies SiDBs that require negative charges
  *    in a physically valid charge distribution. By pre-assigned them in advance, the search space is pruned
  *    by a factor of \f$2^k\f$, where k is the number of found SiDBs.
  *
  * 2. Dependent SiDB Selection: The algorithm selects a dependent SiDB, whose charge state is always derived
  *    from its n-1 neighbors. This dependency simplifies the computation process and contributes to the overall
- *    efficiency of `QuickExact`.
+ *    efficiency of *QuickExact*.
  *
- * 3. Gray Code Representation: `QuickExact` employs Gray code to represent and traverse through all charge
+ * 3. Gray Code Representation: *QuickExact* employs Gray code to represent and traverse through all charge
  *    configurations. By using Gray code, only one charge state changes at a time, making the computation
  *    of the local electrostatic potential easier.
  *
- * Additionally, `QuickExact` also considers global and local electrostatic potentials, as well as existing defects.
+ * Additionally, *QuickExact* also considers global and local electrostatic potentials, as well as existing defects.
  * This holistic approach ensures an accurate representation of the physical behavior of the SiDB layout.
  *
- * In summary, `QuickExact` combines advanced SiDB charge detection, dependent SiDB selection, and the use of Gray code
+ * In summary, *QuickExact* combines advanced SiDB charge detection, dependent SiDB selection, and the use of Gray code
  * to achieve outstanding performance and enable efficient simulations of SiDB layouts, even in scenarios where
  * positively-charged SiDBs occur due to small spacing.
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @param lyt Layout to simulate.
  * @param params Parameter required for the simulation.
- * @return Simulation result.
+ * @return Simulation Results.
  */
 template <typename Lyt>
 [[nodiscard]] sidb_simulation_result<Lyt> quickexact(const Lyt& lyt, const quickexact_params<Lyt>& params = {}) noexcept

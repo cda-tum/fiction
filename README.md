@@ -18,36 +18,23 @@
   </picture>
 </p>
 
-This code base provides a framework for **fi**eld-**c**oupled **t**echnology-**i**ndependent **o**pen **n**anocomputing
-developed as part of the _Munich Nanotech Toolkit_ (_MNT_) by
-the [Chair for Design Automation](https://www.cda.cit.tum.de/)
-at the [Technical University of Munich](https://www.tum.de/). It is written in C++17 using the
-[EPFL Logic Synthesis Libraries](https://github.com/lsils/lstools-showcase). Thereby, *fiction*
-focuses on the logic synthesis, placement, routing, clocking, and verification of emerging nanotechnologies. As a
-promising class of beyond-CMOS technologies,
-[Field-coupled Nanocomputing (FCN)](https://www.springer.com/de/book/9783662437216) devices like Quantum-dot Cellular
-Automata (QCA) in manifold forms (e.g., atomic or molecular), Nanomagnet Logic (NML) devices, Silicon Dangling Bonds
-(SiDBs), and many more, allow for high computing performance with tremendously low power consumption without the flow of
-electric current.
+This code base provides a C++17 framework for **fi**eld-**c**oupled **t**echnology-**i**ndependent **o**pen
+**n**anocomputing developed as part of the _Munich Nanotech Toolkit_ (_MNT_) by the
+[Chair for Design Automation](https://www.cda.cit.tum.de/) at the [Technical University of Munich](https://www.tum.de/).
+Within *fiction*, algorithms for logic synthesis, placement, routing, clocking, verification, and simulation for
+[Field-coupled Nanocomputing (FCN)](https://www.springer.com/de/book/9783662437216) technologies are implemented.
 
-With ongoing research in the field, it is unclear, which technology will eventually be competing with CMOS. To be as
-generic as possible, *fiction* can perform physical design tasks for FCN circuit layouts on data structures that
-abstract from particular technology or cell design. Using an extensible set of gate libraries, technologies, and cell
-types, these can easily be compiled down to any desired FCN technology for physical simulation.
+To this end, most physical design tasks can be performed on generic data structures that abstract from particular
+technology or cell design. Using an extensible set of gate libraries, technologies, and cell types, these can easily
+be compiled down to any desired FCN technology for physical simulation.
 
-The *fiction* framework is academic software and aims at researchers and developers in the FCN domain who want to obtain
-cell-accurate circuit layouts from logical specifications or who want to implement their physical design algorithms.
-
-For these use cases, *fiction* offers
-a [C++ header-only library](https://fiction.readthedocs.io/en/latest/getting_started.html#using-fiction-as-a-header-only-library)
-and
-a [Python module](https://fiction.readthedocs.io/en/latest/getting_started.html#the-python-module)
-that provide data types and algorithms for recurring tasks, e.g., logic network and layout types on different
-abstraction levels, clocking schemes, gate libraries, placement, routing, clocking, verification, and simulation
-algorithms, etc. Additionally, *fiction* comes with an
-ABC-like [CLI tool](https://fiction.readthedocs.io/en/latest/getting_started.html#using-fiction-as-a-stand-alone-cli-tool)
-that allows quick access to its core functionality. To quickly script ideas, *fiction* also provides an
-[experiment playground](https://fiction.readthedocs.io/en/latest/getting_started.html#building-experiments)
+For these use cases, *fiction* provides
+a [header-only library](https://fiction.readthedocs.io/en/latest/getting_started.html#using-fiction-as-a-header-only-library)
+that provides data types and algorithms for recurring tasks, e.g., logic network and layout types on different
+abstraction levels, clocking schemes, gate libraries, design automation algorithms, etc. Additionally, *fiction* comes
+with an ABC-like
+[CLI tool](https://fiction.readthedocs.io/en/latest/getting_started.html#using-fiction-as-a-stand-alone-cli-tool)
+that allows quick access to its core functionality.
 
 
 <p align="center">
@@ -56,7 +43,8 @@ that allows quick access to its core functionality. To quickly script ideas, *fi
   </a>
 </p>
 
-If you have any questions, comments, or suggestions, please do not hesitate to get in touch.
+If you have any questions, feel free to contact us via [fcn.cda@xcit.tum.de](mailto:fcn.cda@xcit.tum.de) or by
+creating an issue on [GitHub](https://github.com/cda-tum/fiction/issues).
 
 ## Quick Start
 
@@ -89,7 +77,7 @@ cli/fiction
 
 ### The Header-only Library
 
-> Add `fiction` as a subdirectory to your CMake project and link against `libfiction` (assuming your project is
+> Add `fiction` as a sub-directory to your CMake project and link against `libfiction` (assuming your project is
 > called `fanfiction`):
 
 ```CMake
@@ -99,39 +87,12 @@ target_link_libraries(fanfiction libfiction)
 
 > Include the headers you need:
 
-```c++
+```C++
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/technology/qca_one_library.hpp>
 #include <fiction/io/write_qca_layout.hpp>
 #include <fiction/...>
-```
-
-### The Experiments Playground
-
-Inside the `fiction/experiments/` folder, create a new folder for your experiment and create a new `*.cpp` file inside:
-
-```c++
-int main(int argc, char* argv[])
-{
-  // your code goes here
-}
-```
-
-You have full access to *fiction*'s header-only library and your files can be built using CMake:
-
-```bash
-cmake . -B build -DFICTION_EXPERIMENTS=ON
-cd build
-cmake --build . -j4
-```
-
-### The Python Module
-
-> Install *fiction* from PyPI:
-
-```bash
-pip install mnt.fiction
 ```
 
 For a full getting started guide, please refer to
@@ -142,7 +103,7 @@ the [documentation](https://fiction.readthedocs.io/en/latest/getting_started.htm
 Physical design in *fiction* can be performed technology-independent. Only if resulted layouts are to be physically,
 simulated, a specific technology implementation is required. To this end, *fiction* supports various potential FCN
 implementations together with gate libraries to compile gate-level layout abstractions down to the cell level.
-Additionally, output formats for state-of-the-art physical simulator engines are supported.
+Additionally, output formats for external physical simulator engines are also supported.
 
 ### Quantum-dot Cellular Automata (QCA)
 
@@ -207,8 +168,8 @@ resulting Verilog/AIGER/BLIF/... files can be parsed by *fiction*. Alternatively
 ### Physical Design
 
 For automatic FCN layout obtainment, *fiction* provides algorithms that
-take [mockturtle logic networks](https://mockturtle.readthedocs.io/en/latest/implementations.html) as input
-specification and output placed, routed, and clocked circuits.
+receive [mockturtle logic networks](https://mockturtle.readthedocs.io/en/latest/implementations.html) as input
+specification and output placed, routed, and clocked generic FCN circuits.
 
 <img src="docs/_static/compare1.png" alt="QCA Layout" align="right" width="280"/>
 
@@ -239,15 +200,18 @@ When a layout is compiled to the cell level via the application of a technology-
 simulated using a physical model. Currently, the following simulation algorithms are implemented in *fiction*:
 
 - Silicon Dangling Bonds (SiDBs)
-    - [Exhaustive Groundstate Simulation (ExGS)](https://fiction.readthedocs.io/en/latest/algorithms/sidb_simulation.html#_CPPv4I0EN7fiction34exhaustive_ground_state_simulationEvRK3LytRK26sidb_simulation_parametersP10exgs_statsI3LytE)
-    - [*QuickSim* Groundstate Simulation](https://arxiv.org/abs/2303.03422)
+    - [*QuickExact*](https://arxiv.org/abs/2308.04487)
+    - [*QuickSim* Groundstate Simulation](https://ieeexplore.ieee.org/document/10231266)
+    - [Critical Temperature](https://ieeexplore.ieee.org/document/10231259)
+    - [Exhaustive Groundstate Simulation *(ExGS)*](https://open.library.ubc.ca/soa/cIRcle/collections/ubctheses/24/items/1.0392909)
+
 
 ## Clocking Schemes
 
-There are highly regular clocking schemes proposed for FCN technologies which can be used as a floor plan for physical
+Regular clocking schemes have been proposed in the FCN literature, which can be used as a floor plans for physical
 design. However, sometimes it can make sense to have more freedom and assign clock numbers on the fly. That is
-why *fiction*
-supports [regular and irregular clocking schemes](https://fiction.readthedocs.io/en/latest/layouts/clocking_scheme.html)
+why *fiction* supports both
+[regular and irregular clocking schemes](https://fiction.readthedocs.io/en/latest/layouts/clocking_scheme.html)
 with variable amounts of clock numbers as QCA for instance uses four clock phases but iNML needs only three.
 
 Built-in schemes are
@@ -273,8 +237,9 @@ plus the mentioned irregular open clocking that works via a clock map instead of
 With many FCN technologies considered planar, wire crossings should be minimized if possible. However, there are some
 options in QCA where, using a second layer, crossings over short distances and co-planar rotated cells become possible.
 As both are just technical implementations of the same concept, *fiction* supports crossings as wires in a second grid
-layer in its data structures. They will also be represented as such in corresponding SVG and QCADesigner output.
-However, note that it is to be interpreted as the concept of crossings and could also be realized co-planar.
+layer in its data structures for all FCN technologies. They will also be represented as such in corresponding SVG and
+QCADesigner output. However, note that it is to be interpreted as the concept of crossings and could also be realized
+co-planar.
 
 Wires are only allowed to cross other wires! Wires crossing gates is considered to lead to unstable signals.
 
@@ -331,8 +296,7 @@ Cell-level layouts:
 
 # Reference
 
-In case you are using *fiction* in your work, we would be thankful if you referred to it by citing the following
-publication:
+Since *fiction* is academic software, we would be thankful if you referred to it by citing the following publication:
 
 ```bibtex
 @misc{fiction,
@@ -346,5 +310,5 @@ publication:
 }
 ```
 
-Additionally, many algorithms implemented in *fiction* have been published individually. For a full list of publications
-based upon *fiction*, please refer to the [documentation](https://fiction.readthedocs.io/en/latest/publications.html).
+Additionally, many algorithms implemented in *fiction* have been published individually. For a full list of
+publications, please refer to the [documentation](https://fiction.readthedocs.io/en/latest/publications.html).

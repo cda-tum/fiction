@@ -266,6 +266,15 @@ class bdl_input_iterator
     {
         return current_input_index >= m;
     }
+    /**
+     * Returns the total number of input BDL pairs of the given SiDB gate layout.
+     *
+     * @return The number of input BDL pairs.
+     */
+    [[nodiscard]] uint64_t get_number_of_inputs() const noexcept
+    {
+        return num_inputs;
+    }
 
   private:
     /**

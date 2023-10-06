@@ -215,6 +215,22 @@ linked against *fiction* and compiled as a stand-alone binary using the followin
   cd build
   cmake --build . -j4
 
+
+Noteworthy CMake options
+------------------------
+
+The following CMake options are available which have a potential positive impact on the build process, debugging
+attempts, or performance of the resulting binaries:
+
+* ``-DFICTION_ENABLE_IPO=ON``: Enable IPO/LTO to improve performance of resulting binaries on some systems.
+* ``-DFICTION_ENABLE_PCH=ON``: Enable precompiled headers (PCH) to speed up compilation.
+* ``-DFICTION_ENABLE_UNITY_BUILD=ON``: Enable unity builds to speed up compilation.
+* ``-DFICTION_ENABLE_SANITIZER_ADDRESS=ON``: Enable the address sanitizer to detect memory issues.
+* ``-DFICTION_ENABLE_SANITIZER_LEAK=ON``: Enable the leak sanitizer to detect memory leaks.
+* ``-DFICTION_ENABLE_SANITIZER_UNDEFINED=ON``: Enable the undefined behavior sanitizer to detect undefined behavior.
+* ``-DFICTION_ENABLE_SANITIZER_THREAD=ON``: Enable the thread sanitizer to detect multithreading-related problems.
+* ``-DFICTION_ENABLE_SANITIZER_MEMORY=ON``: Enable the memory sanitizer to detect uninitialized reads.
+
 Uninstall
 ---------
 

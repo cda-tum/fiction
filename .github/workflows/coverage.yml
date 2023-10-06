@@ -93,14 +93,16 @@ jobs:
           cmake ${{github.workspace}}
           -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
           -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+          -DFICTION_ENABLE_UNITY_BUILD=ON
+          -DFICTION_ENABLE_PCH=ON
           -DFICTION_CLI=OFF
           -DFICTION_TEST=ON
           -DFICTION_Z3=ON
           -DFICTION_ENABLE_MUGEN=ON
           -DFICTION_PROGRESS_BARS=OFF
+          -DFICTION_WARNINGS_AS_ERRORS=OFF
+          -DFICTION_ENABLE_COVERAGE=ON
           -DMOCKTURTLE_EXAMPLES=OFF
-          -DWARNINGS_AS_ERRORS=OFF
-          -DENABLE_COVERAGE=ON
 
       - name: Build
         working-directory: ${{github.workspace}}/build

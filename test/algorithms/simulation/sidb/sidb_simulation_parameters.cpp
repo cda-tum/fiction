@@ -11,7 +11,7 @@
 
 using namespace fiction;
 
-TEST_CASE("Test sidb_simulation_parameters", "[sidb_simulation_parameters]")
+TEST_CASE("Test sidb_simulation_parameters", "[sidb-simulation-parameters]")
 {
     SECTION("Test constructor, parameter values and overwrite values")
     {
