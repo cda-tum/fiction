@@ -16,6 +16,7 @@
 #include <tinyxml2.h>
 
 #include <algorithm>
+#include <array>
 #include <cctype>
 #include <cstdlib>
 #include <exception>
@@ -24,8 +25,6 @@
 #include <sstream>
 #include <string>
 #include <string_view>
-#include <unordered_map>
-#include <unordered_set>
 #include <vector>
 
 #pragma GCC diagnostic push

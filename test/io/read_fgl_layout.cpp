@@ -13,9 +13,6 @@
 #include <fiction/utils/name_utils.hpp>
 
 #include <sstream>
-#include <string>
-#include <type_traits>
-#include <unordered_set>
 
 using namespace fiction;
 

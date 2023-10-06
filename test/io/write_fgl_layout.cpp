@@ -25,9 +25,7 @@
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/views/names_view.hpp>
 
-#include <map>
 #include <sstream>
-#include <string>
 
 using namespace fiction;
 
