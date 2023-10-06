@@ -191,7 +191,7 @@ class design_sidb_gates_impl
                             result_lyt.foreach_sidb_defect(
                                 [&result_lyt](const auto& cd)
                                 {
-                                    if (is_neutrally_charged_defect(result_lyt.get_sidb_defect(cd.first)))
+                                    if (is_neutrally_charged_defect(cd.second))
                                     {
                                         result_lyt.assign_sidb_defect(cd.first, sidb_defect{sidb_defect_type::NONE});
                                     }
@@ -207,7 +207,7 @@ class design_sidb_gates_impl
                                 skeleton_layout.foreach_sidb_defect(
                                     [this, &result_lyt](const auto& cd)
                                     {
-                                        if (is_neutrally_charged_defect(skeleton_layout.get_sidb_defect(cd.first)))
+                                        if (is_neutrally_charged_defect(cd.second))
                                         {
                                             result_lyt.assign_sidb_defect(cd.first, cd.second);
                                         }
@@ -217,6 +217,10 @@ class design_sidb_gates_impl
                             gate_layout_is_found = true;
                             break;
                         }
+//                        {
+//                            const std::lock_guard lock{mutex_to_protect_designed_gate_layouts};
+//                            counter += 1;
+//                        }
                     }
                 });
         }
@@ -388,7 +392,17 @@ template <typename Lyt, typename TT>
         return p.run_exhaustive_design();
     }
 
-    return p.run_random_design();
+    std::vector<Lyt> found_lyts{};
+    while (found_lyts.empty())
+    {
+        design_sidb_gates_params parameter{params};
+        detail::design_sidb_gates_impl<Lyt, TT> p_random{skeleton, spec, parameter};
+        const auto result = p.run_random_design();
+        found_lyts = result;
+        parameter.number_of_sidbs +=1;
+        std::cout << "increase number of SiDBs" << std::endl;
+    }
+    return found_lyts;
 }
 
 }  // namespace fiction

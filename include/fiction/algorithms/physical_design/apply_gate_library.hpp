@@ -224,7 +224,7 @@ CellLyt apply_gate_library(const GateLyt& lyt)
  * @return A cell-level layout that implements `lyt`'s gate types with building blocks defined in `GateLibrary`.
  */
 template <typename CellLyt, typename GateLibrary, typename GateLyt>
-CellLyt apply_gate_library_dynamic_gates(const GateLyt& lyt, const sidb_surface<CellLyt>& defect_surface)
+CellLyt apply_dynamic_gate_library(const GateLyt& lyt, const sidb_surface<CellLyt>& defect_surface)
 {
     static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
     static_assert(!has_siqad_coord_v<CellLyt>, "CellLyt cannot have SiQAD coordinates");

@@ -167,6 +167,18 @@ inline constexpr const uint16_t SIDB_NEUTRAL_DEFECT_HORIZONTAL_SPACING = 1u;
  */
 inline constexpr const uint16_t SIDB_NEUTRAL_DEFECT_VERTICAL_SPACING = 0u;
 /**
+ * Horizontal distance to avoid charged SiDB defects while the defect is incorporated into the SiDB gate design process.
+ * The value is to be understood as the number of DB positions rather than the number of dimers.
+ * This is true even though each defect always affects the entire dimer.
+ */
+inline constexpr const uint16_t SIDB_CHARGED_DEFECT_HORIZONTAL_SPACING_ON_THE_FLY_DESIGN = 4u;
+/**
+ * Vertical distance to avoid charged SiDB defects while the defect is incorporated into the SiDB gate design process.
+ * The value is to be understood as the number of DB positions rather than the number of dimers.
+ * This is true even though each defect always affects the entire dimer.
+ */
+inline constexpr const uint16_t SIDB_CHARGED_DEFECT_VERTICAL_SPACING_ON_THE_FLY_DESIGN = 4u;
+/**
  * Returns the extent of a defect as a pair of SiDB distances in horizontal and vertical direction. If defect is the
  * `NONE` defect type, `{0, 0}` is returned.
  *
@@ -182,7 +194,8 @@ defect_extent(const sidb_defect& defect, bool incorporate_defect_into_gate_desig
     {
         if (incorporate_defect_into_gate_design)
         {
-            return {SIDB_NEUTRAL_DEFECT_HORIZONTAL_SPACING, SIDB_NEUTRAL_DEFECT_VERTICAL_SPACING};
+            return {SIDB_CHARGED_DEFECT_HORIZONTAL_SPACING_ON_THE_FLY_DESIGN,
+                    SIDB_CHARGED_DEFECT_VERTICAL_SPACING_ON_THE_FLY_DESIGN};
         }
         return {SIDB_CHARGED_DEFECT_HORIZONTAL_SPACING, SIDB_CHARGED_DEFECT_VERTICAL_SPACING};
     }

@@ -6,14 +6,6 @@
         <version>0.3.3</version>
         <date>2023-09-28 10:23:25</date>
     </program>
-    <!--GUI Flags-->
-    <gui>
-        <zoom>0.0611291</zoom>
-        <displayed_region x1="-65.5989" y1="-40.0791" x2="175.694" y2="63.4722"/>
-        <scroll x="-233" y="-389"/>
-    </gui>
-    <!--Layer Properties-->
-    <!--Layer ID is intrinsic to the layer order-->
     <layers>
         <layer_prop>
             <name>Lattice</name>
