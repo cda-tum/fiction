@@ -27,9 +27,6 @@
 #include <string_view>
 #include <vector>
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wconversion"
-
 namespace fiction
 {
 
@@ -114,8 +111,8 @@ class read_fgl_layout_impl
                     throw fgl_parsing_error("Error parsing FGL file: Lyt is not a cartesian layout");
                 }
             }
-            else if (std::find(shifted_cartesian.begin(), shifted_cartesian.end(), topology_name) !=
-                     shifted_cartesian.end())
+            else if (std::find(shifted_cartesian.cbegin(), shifted_cartesian.cend(), topology_name) !=
+                     shifted_cartesian.cend())
             {
                 if constexpr (is_shifted_cartesian_layout_v<Lyt>)
                 {
@@ -155,7 +152,7 @@ class read_fgl_layout_impl
                     throw fgl_parsing_error("Error parsing FGL file: Lyt is not a shifted_cartesian layout");
                 }
             }
-            else if (std::find(hex.begin(), hex.end(), topology_name) != hex.end())
+            else if (std::find(hex.cbegin(), hex.cend(), topology_name) != hex.cend())
             {
                 if constexpr (is_hexagonal_layout_v<Lyt>)
                 {
@@ -303,9 +300,9 @@ class read_fgl_layout_impl
                             lyt.assign_clock_number({x_coord, y_coord}, clock);
                         }
                     }
-                    else if (std::find(std::begin(open_clocking_schemes), std::end(open_clocking_schemes),
+                    else if (std::find(open_clocking_schemes.cbegin(), open_clocking_schemes.cend(),
                                        static_cast<std::string>(clocking_scheme_name->GetText())) !=
-                             open_clocking_schemes.end())
+                             open_clocking_schemes.cend())
                     {
                         throw fgl_parsing_error("Error parsing FGL file: no element 'zones' in 'clocking'");
                     }
@@ -375,6 +372,8 @@ class read_fgl_layout_impl
                     throw fgl_parsing_error("Error parsing FGL file: no element 'loc'");
                 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
                 // get x-coordinate
                 auto* const loc_x = loc->FirstChildElement("x");
                 if (loc_x != nullptr && loc_x->GetText())
@@ -452,6 +451,7 @@ class read_fgl_layout_impl
                         gate.incoming.push_back(incoming);
                     }
                 }
+#pragma GCC diagnostic pop
 
                 gates.push_back(gate);
             }
@@ -714,7 +714,7 @@ class read_fgl_layout_impl
 /**
  * Reads a gate-level layout from an FGL file provided as an input stream.
  *
- * May throw a `fgl_parsing_exception` if the FGL file is malformed.
+ * May throw an `fgl_parsing_exception` if the FGL file is malformed.
  *
  * @tparam Lyt The layout type to be created from an input.
  * @param is The input stream to read from.
@@ -723,9 +723,6 @@ class read_fgl_layout_impl
 template <typename Lyt>
 [[nodiscard]] Lyt read_fgl_layout(std::istream& is, const std::string_view& name = "")
 {
-    static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
-    static_assert(is_tile_based_layout_v<Lyt>, "Lyt is not a tile-based layout");
-    static_assert(is_clocked_layout_v<Lyt>, "Lyt is not a clocked layout");
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
 
     detail::read_fgl_layout_impl<Lyt> p{is, name};
@@ -737,7 +734,7 @@ template <typename Lyt>
 /**
  * Reads a gate-level layout from an FGL file provided as an input stream.
  *
- * May throw a `fgl_parsing_exception` if the FGL file is malformed.
+ * May throw an `fgl_parsing_exception` if the FGL file is malformed.
  *
  * This is an in-place version of read_fgl_layout that utilizes the given layout as a target to write to.
  *
@@ -748,9 +745,6 @@ template <typename Lyt>
 template <typename Lyt>
 void read_fgl_layout(Lyt& lyt, std::istream& is)
 {
-    static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
-    static_assert(is_tile_based_layout_v<Lyt>, "Lyt is not a tile-based layout");
-    static_assert(is_clocked_layout_v<Lyt>, "Lyt is not a clocked layout");
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
 
     detail::read_fgl_layout_impl<Lyt> p{lyt, is};
@@ -760,7 +754,7 @@ void read_fgl_layout(Lyt& lyt, std::istream& is)
 /**
  * Reads a gate-level layout from an FGL file provided as an input stream.
  *
- * May throw a `fgl_parsing_exception` if the FGL file is malformed.
+ * May throw an `fgl_parsing_exception` if the FGL file is malformed.
  *
  * @tparam Lyt The layout type to be created from an input.
  * @param filename The file name to open and read from.
@@ -784,7 +778,7 @@ template <typename Lyt>
 /**
  * Reads a gate-level layout from an FGL file provided as an input stream.
  *
- * May throw a `fgl_parsing_exception` if the FGL file is malformed.
+ * May throw an `fgl_parsing_exception` if the FGL file is malformed.
  *
  * This is an in-place version of `read_fgl_layout` that utilizes the given layout as a target to write to.
  *
@@ -807,6 +801,5 @@ void read_fgl_layout(Lyt& lyt, const std::string_view& filename)
 }
 
 }  // namespace fiction
-#pragma GCC diagnostic pop
 
 #endif  // FICTION_READ_FGL_LAYOUT_HPP

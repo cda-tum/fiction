@@ -44,7 +44,9 @@ class read_command : public command
                        "In a directory, only files with extension '.v', '.aig', '.blif' are considered.")
     {
         add_option("filename", filename, "Filename or directory")->required();
-        add_option("topology", topology, "Topology for gate-level layouts");
+        add_option("topology", topology,
+                   "Topology for gate-level layouts. Can be 'cartesian' or of the form "
+                   "'<odd|even>_<row|column>_<cartesian|hex>");
         add_flag("--aig,-a", "Parse file as AIG");
         add_flag("--xag,-x", "Parse file as XAG");
         add_flag("--mig,-m", "Parse file as MIG");
@@ -112,130 +114,127 @@ class read_command : public command
 
                     store_ntks(reader);
                 }
-                if (is_set("fgl"))
-                {
-                    if (!topology.empty())
-                    {
-                        if (std::filesystem::exists(filename))
-                        {
-                            if (std::filesystem::is_regular_file(filename))
-                            {
-                                try
-                                {
-                                    if (topology == "cartesian")
-                                    {
-                                        store<fiction::gate_layout_t>().extend() =
-                                            std::make_shared<fiction::cart_gate_clk_lyt>(
-                                                fiction::read_fgl_layout<fiction::cart_gate_clk_lyt>(filename));
-                                    }
-                                    else if (topology == "odd_row_cartesian")
-                                    {
-                                        store<fiction::gate_layout_t>().extend() =
-                                            std::make_shared<fiction::cart_odd_row_gate_clk_lyt>(
-                                                fiction::read_fgl_layout<fiction::cart_odd_row_gate_clk_lyt>(filename));
-                                    }
-                                    else if (topology == "even_row_cartesian")
-                                    {
-                                        store<fiction::gate_layout_t>().extend() =
-                                            std::make_shared<fiction::cart_even_row_gate_clk_lyt>(
-                                                fiction::read_fgl_layout<fiction::cart_even_row_gate_clk_lyt>(
-                                                    filename));
-                                    }
-                                    else if (topology == "odd_column_cartesian")
-                                    {
-                                        store<fiction::gate_layout_t>().extend() =
-                                            std::make_shared<fiction::cart_odd_col_gate_clk_lyt>(
-                                                fiction::read_fgl_layout<fiction::cart_odd_col_gate_clk_lyt>(filename));
-                                    }
-                                    else if (topology == "even_column_cartesian")
-                                    {
-                                        store<fiction::gate_layout_t>().extend() =
-                                            std::make_shared<fiction::cart_even_col_gate_clk_lyt>(
-                                                fiction::read_fgl_layout<fiction::cart_even_col_gate_clk_lyt>(
-                                                    filename));
-                                    }
-                                    else if (topology == "odd_row_hex")
-                                    {
-                                        store<fiction::gate_layout_t>().extend() =
-                                            std::make_shared<fiction::hex_odd_row_gate_clk_lyt>(
-                                                fiction::read_fgl_layout<fiction::hex_odd_row_gate_clk_lyt>(filename));
-                                    }
-                                    else if (topology == "even_row_hex")
-                                    {
-                                        store<fiction::gate_layout_t>().extend() =
-                                            std::make_shared<fiction::hex_even_row_gate_clk_lyt>(
-                                                fiction::read_fgl_layout<fiction::hex_even_row_gate_clk_lyt>(filename));
-                                    }
-                                    else if (topology == "odd_column_hex")
-                                    {
-                                        store<fiction::gate_layout_t>().extend() =
-                                            std::make_shared<fiction::hex_odd_col_gate_clk_lyt>(
-                                                fiction::read_fgl_layout<fiction::hex_odd_col_gate_clk_lyt>(filename));
-                                    }
-                                    else if (topology == "even_column_hex")
-                                    {
-                                        store<fiction::gate_layout_t>().extend() =
-                                            std::make_shared<fiction::hex_even_col_gate_clk_lyt>(
-                                                fiction::read_fgl_layout<fiction::hex_even_col_gate_clk_lyt>(filename));
-                                    }
-                                    else
-                                    {
-                                        env->out() << fmt::format("[e] given topology does not exist: {}", topology)
-                                                   << std::endl;
-                                    }
-                                }
-                                catch (const fiction::fgl_parsing_error& e)
-                                {
-                                    env->out() << e.what() << std::endl;
-                                }
-                            }
-                            else
-                            {
-                                env->out() << "[e] given file name does not point to a regular file" << std::endl;
-                            }
-                        }
-                        else
-                        {
-                            env->out() << "[e] given file name does not exist" << std::endl;
-                        }
-                    }
-                    else
-                    {
-                        env->out() << "[e] for reading gate-level layouts, the topology has to be set" << std::endl;
-                    }
-                }
-                if (is_set("qca"))
+                if (is_set("fgl") || is_set("qca"))
                 {
                     if (std::filesystem::exists(filename))
                     {
                         if (std::filesystem::is_regular_file(filename))
                         {
-                            try
+                            if (is_set("fgl"))
                             {
-                                const auto layout_name = std::filesystem::path{filename}.stem().string();
+                                if (!topology.empty())
+                                {
+                                    try
+                                    {
+                                        if (topology == "cartesian")
+                                        {
+                                            store<fiction::gate_layout_t>().extend() =
+                                                std::make_shared<fiction::cart_gate_clk_lyt>(
+                                                    fiction::read_fgl_layout<fiction::cart_gate_clk_lyt>(filename));
+                                        }
+                                        else if (topology == "odd_row_cartesian")
+                                        {
+                                            store<fiction::gate_layout_t>().extend() =
+                                                std::make_shared<fiction::cart_odd_row_gate_clk_lyt>(
+                                                    fiction::read_fgl_layout<fiction::cart_odd_row_gate_clk_lyt>(
+                                                        filename));
+                                        }
+                                        else if (topology == "even_row_cartesian")
+                                        {
+                                            store<fiction::gate_layout_t>().extend() =
+                                                std::make_shared<fiction::cart_even_row_gate_clk_lyt>(
+                                                    fiction::read_fgl_layout<fiction::cart_even_row_gate_clk_lyt>(
+                                                        filename));
+                                        }
+                                        else if (topology == "odd_column_cartesian")
+                                        {
+                                            store<fiction::gate_layout_t>().extend() =
+                                                std::make_shared<fiction::cart_odd_col_gate_clk_lyt>(
+                                                    fiction::read_fgl_layout<fiction::cart_odd_col_gate_clk_lyt>(
+                                                        filename));
+                                        }
+                                        else if (topology == "even_column_cartesian")
+                                        {
+                                            store<fiction::gate_layout_t>().extend() =
+                                                std::make_shared<fiction::cart_even_col_gate_clk_lyt>(
+                                                    fiction::read_fgl_layout<fiction::cart_even_col_gate_clk_lyt>(
+                                                        filename));
+                                        }
+                                        else if (topology == "odd_row_hex")
+                                        {
+                                            store<fiction::gate_layout_t>().extend() =
+                                                std::make_shared<fiction::hex_odd_row_gate_clk_lyt>(
+                                                    fiction::read_fgl_layout<fiction::hex_odd_row_gate_clk_lyt>(
+                                                        filename));
+                                        }
+                                        else if (topology == "even_row_hex")
+                                        {
+                                            store<fiction::gate_layout_t>().extend() =
+                                                std::make_shared<fiction::hex_even_row_gate_clk_lyt>(
+                                                    fiction::read_fgl_layout<fiction::hex_even_row_gate_clk_lyt>(
+                                                        filename));
+                                        }
+                                        else if (topology == "odd_column_hex")
+                                        {
+                                            store<fiction::gate_layout_t>().extend() =
+                                                std::make_shared<fiction::hex_odd_col_gate_clk_lyt>(
+                                                    fiction::read_fgl_layout<fiction::hex_odd_col_gate_clk_lyt>(
+                                                        filename));
+                                        }
+                                        else if (topology == "even_column_hex")
+                                        {
+                                            store<fiction::gate_layout_t>().extend() =
+                                                std::make_shared<fiction::hex_even_col_gate_clk_lyt>(
+                                                    fiction::read_fgl_layout<fiction::hex_even_col_gate_clk_lyt>(
+                                                        filename));
+                                        }
+                                        else
+                                        {
+                                            env->out() << fmt::format("[e] given topology does not exist: {}", topology)
+                                                       << std::endl;
+                                        }
+                                    }
+                                    catch (const fiction::fgl_parsing_error& e)
+                                    {
+                                        env->out() << e.what() << std::endl;
+                                    }
+                                }
+                                else
+                                {
+                                    env->out() << "[e] for reading gate-level layouts, the topology has to be set"
+                                               << std::endl;
+                                }
+                            }
+                            if (is_set("qca"))
+                            {
+                                try
+                                {
+                                    const auto layout_name = std::filesystem::path{filename}.stem().string();
 
-                                store<fiction::cell_layout_t>().extend() =
-                                    std::make_shared<fiction::stacked_qca_cell_clk_lyt>(
-                                        fiction::read_fqca_layout<fiction::stacked_qca_cell_clk_lyt>(filename,
-                                                                                                     layout_name));
-                            }
-                            catch (const fiction::unsupported_character_exception& e)
-                            {
-                                env->out()
-                                    << fmt::format("character '{}' is not supported as a cell designator", e.which())
-                                    << std::endl;
-                            }
-                            catch (const fiction::undefined_cell_label_exception& e)
-                            {
-                                env->out() << fmt::format("cell label '{}' was used in the cell definition section but "
-                                                          "never defined above",
-                                                          e.which())
-                                           << std::endl;
-                            }
-                            catch (const fiction::unrecognized_cell_definition_exception& e)
-                            {
-                                env->out()
-                                    << fmt::format("unsupported cell definition in line {}", e.where()) << std::endl;
+                                    store<fiction::cell_layout_t>().extend() =
+                                        std::make_shared<fiction::stacked_qca_cell_clk_lyt>(
+                                            fiction::read_fqca_layout<fiction::stacked_qca_cell_clk_lyt>(filename,
+                                                                                                         layout_name));
+                                }
+                                catch (const fiction::unsupported_character_exception& e)
+                                {
+                                    env->out() << fmt::format("character '{}' is not supported as a cell designator",
+                                                              e.which())
+                                               << std::endl;
+                                }
+                                catch (const fiction::undefined_cell_label_exception& e)
+                                {
+                                    env->out()
+                                        << fmt::format("cell label '{}' was used in the cell definition section but "
+                                                       "never defined above",
+                                                       e.which())
+                                        << std::endl;
+                                }
+                                catch (const fiction::unrecognized_cell_definition_exception& e)
+                                {
+                                    env->out() << fmt::format("unsupported cell definition in line {}", e.where())
+                                               << std::endl;
+                                }
                             }
                         }
                         else

@@ -23,8 +23,6 @@
 #include <sstream>
 #include <string>
 #include <string_view>
-#include <unordered_map>
-#include <vector>
 
 namespace fiction
 {
@@ -328,9 +326,6 @@ class write_fgl_layout_impl
 template <typename Lyt>
 void write_fgl_layout(const Lyt& lyt, std::ostream& os)
 {
-    static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
-    static_assert(is_tile_based_layout_v<Lyt>, "Lyt is not a tile-based layout");
-    static_assert(is_clocked_layout_v<Lyt>, "Lyt is not a clocked layout");
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
 
     detail::write_fgl_layout_impl p{lyt, os};
