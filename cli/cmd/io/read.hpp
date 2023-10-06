@@ -6,6 +6,7 @@
 #define FICTION_CMD_READ_HPP
 
 #include <fiction/io/network_reader.hpp>
+#include <fiction/io/read_fgl_layout.hpp>
 #include <fiction/io/read_fqca_layout.hpp>
 #include <fiction/types.hpp>
 
@@ -22,7 +23,7 @@ namespace alice
  *
  * Currently parses Verilog, AIGER, and BLIF using the lorina parsers.
  *
- * Parses FQCA via a custom reader function.
+ * Parses FGL and FQCA via custom reader functions.
  *
  * For more information see: https://github.com/hriener/lorina
  */
@@ -38,14 +39,17 @@ class read_command : public command
             command(e, "Reads a file or a directory of files and creates logic network or FCN layout objects "
                        "which will be put into the respective store. Current supported file types are:\n"
                        "Logic networks: Verilog, AIGER, BLIF.\n"
+                       "Gate-level layouts: FGL.\n"
                        "Cell-level layouts: FQCA.\n"
                        "In a directory, only files with extension '.v', '.aig', '.blif' are considered.")
     {
         add_option("filename", filename, "Filename or directory")->required();
+        add_option("topology", topology, "Topology for gate-level layouts");
         add_flag("--aig,-a", "Parse file as AIG");
         add_flag("--xag,-x", "Parse file as XAG");
         add_flag("--mig,-m", "Parse file as MIG");
         add_flag("--tec,-t", "Parse file as technology network");
+        add_flag("--fgl,-f", "Parse file as fiction gate-level layout");
         add_flag("--qca,-q", "Parse file as QCA cell-level layout");
         add_flag("--sort,-s", sort, "Sort networks in given directory by vertex count prior to storing them");
     }
@@ -64,13 +68,21 @@ class read_command : public command
             }
         };
 
-        if (!is_set("aig") && !is_set("xag") && !is_set("mig") && !is_set("tec") && !is_set("qca"))
+        if (!is_set("aig") && !is_set("xag") && !is_set("mig") && !is_set("tec") && !is_set("fgl") && !is_set("qca"))
         {
             env->out() << "[e] at least one network or layout type must be specified" << std::endl;
+        }
+        else if ((is_set("aig") || is_set("xag") || is_set("mig") || is_set("tec")) && is_set("fql"))
+        {
+            env->out() << "[e] cannot parse files as both logic networks and gate-level layouts" << std::endl;
         }
         else if ((is_set("aig") || is_set("xag") || is_set("mig") || is_set("tec")) && is_set("qca"))
         {
             env->out() << "[e] cannot parse files as both logic networks and cell-level layouts" << std::endl;
+        }
+        else if (is_set("fql") && is_set("qca"))
+        {
+            env->out() << "[e] cannot parse files as both gate-level and cell-level layouts" << std::endl;
         }
         else
         {
@@ -99,6 +111,98 @@ class read_command : public command
                     fiction::network_reader<fiction::tec_ptr> reader{filename, env->out()};
 
                     store_ntks(reader);
+                }
+                if (is_set("fgl"))
+                {
+                    if (!topology.empty())
+                    {
+                        if (std::filesystem::exists(filename))
+                        {
+                            if (std::filesystem::is_regular_file(filename))
+                            {
+                                try
+                                {
+                                    if (topology == "cartesian")
+                                    {
+                                        store<fiction::gate_layout_t>().extend() =
+                                            std::make_shared<fiction::cart_gate_clk_lyt>(
+                                                fiction::read_fgl_layout<fiction::cart_gate_clk_lyt>(filename));
+                                    }
+                                    else if (topology == "odd_row_cartesian")
+                                    {
+                                        store<fiction::gate_layout_t>().extend() =
+                                            std::make_shared<fiction::cart_odd_row_gate_clk_lyt>(
+                                                fiction::read_fgl_layout<fiction::cart_odd_row_gate_clk_lyt>(filename));
+                                    }
+                                    else if (topology == "even_row_cartesian")
+                                    {
+                                        store<fiction::gate_layout_t>().extend() =
+                                            std::make_shared<fiction::cart_even_row_gate_clk_lyt>(
+                                                fiction::read_fgl_layout<fiction::cart_even_row_gate_clk_lyt>(
+                                                    filename));
+                                    }
+                                    else if (topology == "odd_column_cartesian")
+                                    {
+                                        store<fiction::gate_layout_t>().extend() =
+                                            std::make_shared<fiction::cart_odd_col_gate_clk_lyt>(
+                                                fiction::read_fgl_layout<fiction::cart_odd_col_gate_clk_lyt>(filename));
+                                    }
+                                    else if (topology == "even_column_cartesian")
+                                    {
+                                        store<fiction::gate_layout_t>().extend() =
+                                            std::make_shared<fiction::cart_even_col_gate_clk_lyt>(
+                                                fiction::read_fgl_layout<fiction::cart_even_col_gate_clk_lyt>(
+                                                    filename));
+                                    }
+                                    else if (topology == "odd_row_hex")
+                                    {
+                                        store<fiction::gate_layout_t>().extend() =
+                                            std::make_shared<fiction::hex_odd_row_gate_clk_lyt>(
+                                                fiction::read_fgl_layout<fiction::hex_odd_row_gate_clk_lyt>(filename));
+                                    }
+                                    else if (topology == "even_row_hex")
+                                    {
+                                        store<fiction::gate_layout_t>().extend() =
+                                            std::make_shared<fiction::hex_even_row_gate_clk_lyt>(
+                                                fiction::read_fgl_layout<fiction::hex_even_row_gate_clk_lyt>(filename));
+                                    }
+                                    else if (topology == "odd_column_hex")
+                                    {
+                                        store<fiction::gate_layout_t>().extend() =
+                                            std::make_shared<fiction::hex_odd_col_gate_clk_lyt>(
+                                                fiction::read_fgl_layout<fiction::hex_odd_col_gate_clk_lyt>(filename));
+                                    }
+                                    else if (topology == "even_column_hex")
+                                    {
+                                        store<fiction::gate_layout_t>().extend() =
+                                            std::make_shared<fiction::hex_even_col_gate_clk_lyt>(
+                                                fiction::read_fgl_layout<fiction::hex_even_col_gate_clk_lyt>(filename));
+                                    }
+                                    else
+                                    {
+                                        env->out() << fmt::format("[e] given topology does not exist: {}", topology)
+                                                   << std::endl;
+                                    }
+                                }
+                                catch (const fiction::fgl_parsing_error& e)
+                                {
+                                    env->out() << e.what() << std::endl;
+                                }
+                            }
+                            else
+                            {
+                                env->out() << "[e] given file name does not point to a regular file" << std::endl;
+                            }
+                        }
+                        else
+                        {
+                            env->out() << "[e] given file name does not exist" << std::endl;
+                        }
+                    }
+                    else
+                    {
+                        env->out() << "[e] for reading gate-level layouts, the topology has to be set" << std::endl;
+                    }
                 }
                 if (is_set("qca"))
                 {
@@ -160,6 +264,10 @@ class read_command : public command
      * Verilog filename.
      */
     std::string filename;
+    /**
+     * Gate-level layout topology.
+     */
+    std::string topology;
     /**
      * Flag to indicate that files should be sorted by file size.
      */
