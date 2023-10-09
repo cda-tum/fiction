@@ -38,6 +38,14 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: '${{matrix.config.os}}-pyfiction'
+          variant: ccache
+          save: true
+          max-size: 10G
+
       # on Linux, the action does not work because it can't install to the manylinux container
       - if: runner.os != 'Linux'
         name: Install Z3
@@ -76,11 +84,12 @@ jobs:
         uses: actions/checkout@v3
         with:
           submodules: recursive
+          fetch-depth: 0
 
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: '${{matrix.os}}-pyfiction'
+          key: 'ubuntu-latest-pyfiction'
           variant: ccache
           save: true
           max-size: 10G
