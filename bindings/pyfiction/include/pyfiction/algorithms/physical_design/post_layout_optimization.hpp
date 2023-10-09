@@ -23,6 +23,14 @@ void post_layout_optimization(pybind11::module& m)
 {
     using namespace pybind11::literals;
 
+    m.def("post_layout_optimization", &fiction::post_layout_optimization<Lyt>, "lyt"_a, "pst"_a = nullptr,
+          DOC(fiction_post_layout_optimization));
+}
+
+}  // namespace detail
+
+inline void post_layout_optimization(pybind11::module& m)
+{
     pybind11::class_<fiction::post_layout_optimization_stats>(m, "post_layout_optimization_stats",
                                                               DOC(fiction_post_layout_optimization_stats))
         .def(pybind11::init<>())
@@ -37,14 +45,6 @@ void post_layout_optimization(pybind11::module& m)
 
         ;
 
-    m.def("post_layout_optimization", &fiction::post_layout_optimization<Lyt>, "layout"_a, "statistics"_a = nullptr,
-          DOC(fiction_post_layout_optimization));
-}
-
-}  // namespace detail
-
-inline void post_layout_optimization(pybind11::module& m)
-{
     detail::post_layout_optimization<py_cartesian_gate_layout>(m);
 }
 

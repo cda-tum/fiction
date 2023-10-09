@@ -29,13 +29,14 @@ class CalculateEnergyAndStateTypeUnitTest(unittest.TestCase):
         charge_lyt_two.assign_charge_state((5, 2), sidb_charge_state.NEGATIVE)
         charge_lyt_two.update_after_charge_change()
 
-        energy_distribution = {0.45752725052: 1, 0.12311716: 0}
+        energy_distr = {0.45752725052: 1, 0.12311716: 0}
         valid_lyts = [charge_distribution_surface(), charge_distribution_surface()]
         valid_lyts = [charge_lyt_one, charge_lyt_two]
         output_cells = [(1, 1, 0)]
         output_bits = [False]
 
         # TODO Tests has to be added
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -3150,7 +3150,9 @@ std::optional<Lyt> exact(const Ntk& ntk, const exact_physical_design_params& ps 
                   "Ntk is not a network type");  // Ntk is being converted to a topology_network anyway, therefore,
                                                  // this is the only relevant check here
 
-    if (const auto clocking_scheme = get_clocking_scheme<Lyt>(ps.scheme); !clocking_scheme.has_value())
+    const auto clocking_scheme = get_clocking_scheme<Lyt>(ps.scheme);
+
+    if (!clocking_scheme.has_value())
     {
         throw unsupported_clocking_scheme_exception();
     }
@@ -3179,10 +3181,11 @@ std::optional<Lyt> exact(const Ntk& ntk, const exact_physical_design_params& ps 
 
     mockturtle::names_view<technology_network> intermediate_ntk{
         fanout_substitution<mockturtle::names_view<technology_network>>(
-            ntk, {fanout_substitution_params::substitution_strategy::BREADTH, ps.scheme->max_out_degree, 1ul})};
+            ntk, {fanout_substitution_params::substitution_strategy::BREADTH, clocking_scheme->max_out_degree, 1ul})};
 
     exact_physical_design_stats st{};
-    detail::exact_impl<Lyt>     p{intermediate_ntk, ps, st};
+
+    detail::exact_impl<Lyt> p{intermediate_ntk, ps, st};
 
     auto result = p.run();
 
@@ -3219,7 +3222,9 @@ std::optional<Lyt> exact_with_blacklist(const Ntk& ntk, const surface_black_list
                   "Ntk is not a network type");  // Ntk is being converted to a topology_network anyway, therefore,
                                                  // this is the only relevant check here
 
-    if (const auto clocking_scheme = get_clocking_scheme<Lyt>(ps.scheme); !clocking_scheme.has_value())
+    const auto clocking_scheme = get_clocking_scheme<Lyt>(ps.scheme);
+
+    if (!clocking_scheme.has_value())
     {
         throw unsupported_clocking_scheme_exception();
     }
@@ -3246,8 +3251,13 @@ std::optional<Lyt> exact_with_blacklist(const Ntk& ntk, const surface_black_list
         }
     }
 
-    exact_physical_design_stats  st{};
-    detail::exact_impl<Lyt, Ntk> p{ntk, ps, st, black_list};
+    mockturtle::names_view<technology_network> intermediate_ntk{
+        fanout_substitution<mockturtle::names_view<technology_network>>(
+            ntk, {fanout_substitution_params::substitution_strategy::BREADTH, clocking_scheme->max_out_degree, 1ul})};
+
+    exact_physical_design_stats st{};
+
+    detail::exact_impl<Lyt> p{intermediate_ntk, ps, st, black_list};
 
     auto result = p.run();
 

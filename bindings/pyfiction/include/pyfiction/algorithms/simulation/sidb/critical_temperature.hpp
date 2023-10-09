@@ -45,7 +45,7 @@ void critical_temperature(pybind11::module& m)
 
         ;
 
-    m.def("critical_temperature", &fiction::critical_temperature<Lyt>, "layout"_a,
+    m.def("critical_temperature_gate_based", &fiction::critical_temperature_gate_based<Lyt, py_tt>, "lyt"_a, "spec"_a,
           "params"_a = fiction::critical_temperature_params{}, "stats"_a = nullptr, DOC(fiction_critical_temperature));
 }
 
@@ -58,26 +58,26 @@ inline void critical_temperature(pybind11::module& m)
     /**
      * Critical temperature mode.
      */
-    py::enum_<fiction::critical_temperature_params::critical_temperature_mode>(m, "critical_temperature_mode",
-                                                                               DOC(fiction_critical_temperature_mode))
+    py::enum_<fiction::critical_temperature_params::critical_temperature_mode>(
+        m, "critical_temperature_mode", DOC(fiction_critical_temperature_params_critical_temperature_mode))
         .value("GATE_BASED_SIMULATION",
                fiction::critical_temperature_params::critical_temperature_mode::GATE_BASED_SIMULATION,
-               DOC(fiction_critical_temperature_mode_GATE_BASED_SIMULATION))
+               DOC(fiction_critical_temperature_params_critical_temperature_mode_GATE_BASED_SIMULATION))
         .value("NON_GATE_BASED_SIMULATION",
                fiction::critical_temperature_params::critical_temperature_mode::NON_GATE_BASED_SIMULATION,
-               DOC(fiction_critical_temperature_mode_NON_GATE_BASED_SIMULATION))
+               DOC(fiction_critical_temperature_params_critical_temperature_mode_NON_GATE_BASED_SIMULATION))
 
         ;
 
     /**
      * Simulation engine.
      */
-    py::enum_<fiction::critical_temperature_params::simulation_engine>(m, "simulation_engine",
-                                                                       DOC(fiction_simulation_engine))
+    py::enum_<fiction::critical_temperature_params::simulation_engine>(
+        m, "simulation_engine", DOC(fiction_critical_temperature_params_simulation_engine))
         .value("EXACT", fiction::critical_temperature_params::simulation_engine::EXACT,
-               DOC(fiction_simulation_engine_EXACT))
+               DOC(fiction_critical_temperature_params_simulation_engine_EXACT))
         .value("APPROXIMATE", fiction::critical_temperature_params::simulation_engine::APPROXIMATE,
-               DOC(fiction_simulation_engine_APPROXIMATE))
+               DOC(fiction_critical_temperature_params_simulation_engine_APPROXIMATE))
 
         ;
 
@@ -87,20 +87,16 @@ inline void critical_temperature(pybind11::module& m)
     py::class_<fiction::critical_temperature_params>(m, "critical_temperature_params",
                                                      DOC(fiction_critical_temperature_params))
         .def(py::init<>())
-        .def_readwrite("engine", &fiction::critical_temperature_params::engine,
-                       DOC(fiction_critical_temperature_params_engine))
-        .def_readwrite("temperature_mode", &fiction::critical_temperature_params::temperature_mode,
-                       DOC(fiction_critical_temperature_params_temperature_mode))
         .def_readwrite("simulation_params", &fiction::critical_temperature_params::simulation_params,
                        DOC(fiction_critical_temperature_params_simulation_params))
+        .def_readwrite("engine", &fiction::critical_temperature_params::engine,
+                       DOC(fiction_critical_temperature_params_engine))
         .def_readwrite("confidence_level", &fiction::critical_temperature_params::confidence_level,
                        DOC(fiction_critical_temperature_params_confidence_level))
         .def_readwrite("max_temperature", &fiction::critical_temperature_params::max_temperature,
                        DOC(fiction_critical_temperature_params_max_temperature))
-        .def_readwrite("truth_table", &fiction::critical_temperature_params::truth_table,
-                       DOC(fiction_critical_temperature_params_truth_table))
-        .def_readwrite("input_bit", &fiction::critical_temperature_params::input_bit,
-                       DOC(fiction_critical_temperature_params_input_bit))
+        .def_readwrite("bdl_params", &fiction::critical_temperature_params::bdl_params,
+                       DOC(fiction_critical_temperature_params_bdl_params))
 
         ;
 

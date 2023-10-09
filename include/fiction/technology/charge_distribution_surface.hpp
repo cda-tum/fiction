@@ -264,10 +264,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param external_potential Externally applied local electrostatic potential.
      */
     explicit charge_distribution_surface(
-        const Lyt& lyt,
-        const sidb_simulation_parameters& params = sidb_simulation_parameters{},
-        const sidb_charge_state cs = sidb_charge_state::NEGATIVE,
-        const typename Lyt::cell& variable_cells = {},
+        const Lyt& lyt, const sidb_simulation_parameters& params = sidb_simulation_parameters{},
+        const sidb_charge_state cs = sidb_charge_state::NEGATIVE, const typename Lyt::cell& variable_cells = {},
         const std::unordered_map<typename Lyt::cell, double>& external_potential = {}) :
             Lyt(lyt),
             strg{std::make_shared<charge_distribution_storage>(params, external_potential, variable_cells)}

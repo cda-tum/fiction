@@ -68,7 +68,7 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
 
-    if (ps.interation_steps == 0)
+    if (ps.iteration_steps == 0)
     {
         return sidb_simulation_result<Lyt>{};
     }

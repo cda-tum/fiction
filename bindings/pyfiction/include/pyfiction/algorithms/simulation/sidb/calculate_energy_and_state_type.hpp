@@ -24,8 +24,9 @@ void calculate_energy_and_state_type(pybind11::module& m)
 {
     using namespace pybind11::literals;
 
-    m.def("calculate_energy_and_state_type", &fiction::calculate_energy_and_state_type<Lyt>, "energy_distribution"_a,
-          "valid_lyts"_a, "output_cells"_a, "output_bits"_a, DOC(fiction_calculate_energy_and_state_type));
+    m.def("calculate_energy_and_state_type", &fiction::calculate_energy_and_state_type<Lyt, py_tt>,
+          "energy_distribution"_a, "valid_charge_distributions"_a, "output_bdl_pairs"_a, "spec"_a, "input_index"_a,
+          DOC(fiction_calculate_energy_and_state_type));
 }
 
 }  // namespace detail

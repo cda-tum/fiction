@@ -32,36 +32,32 @@ inline void charge_distribution_surface(pybind11::module& m)
     /**
      * Dependent cell mode.
      */
-    py::enum_<fiction::dependent_cell_mode>(m, "dependent_cell_mode")
-        //, DOC(fiction_dependent_cell_mode))
-        .value("FIXED", fiction::dependent_cell_mode::FIXED)
-        //, DOC(fiction_dependent_cell_mode_FIXED))
-        .value("VARIABLE", fiction::dependent_cell_mode::VARIABLE)
-        //, DOC(fiction_dependent_cell_mode_VARIABLE))
+    py::enum_<fiction::dependent_cell_mode>(m, "dependent_cell_mode", DOC(fiction_dependent_cell_mode))
+        .value("FIXED", fiction::dependent_cell_mode::FIXED, DOC(fiction_dependent_cell_mode_FIXED))
+        .value("VARIABLE", fiction::dependent_cell_mode::VARIABLE, DOC(fiction_dependent_cell_mode_VARIABLE))
 
         ;
 
     /**
      * Energy calculation.
      */
-    py::enum_<fiction::energy_calculation>(m, "energy_calculation")
-        //, DOC(fiction_energy_calculation))
-        .value("KEEP_OLD_ENERGY_VALUE", fiction::energy_calculation::KEEP_OLD_ENERGY_VALUE)
-        //, DOC(fiction_energy_calculation_KEEP_OLD_ENERGY_VALUE))
-        .value("UPDATE_ENERGY", fiction::energy_calculation::UPDATE_ENERGY)
-        //, DOC(fiction_energy_calculation_UPDATE_ENERGY))
+    py::enum_<fiction::energy_calculation>(m, "energy_calculation", DOC(fiction_energy_calculation))
+        .value("KEEP_OLD_ENERGY_VALUE", fiction::energy_calculation::KEEP_OLD_ENERGY_VALUE,
+               DOC(fiction_energy_calculation_KEEP_OLD_ENERGY_VALUE))
+        .value("UPDATE_ENERGY", fiction::energy_calculation::UPDATE_ENERGY,
+               DOC(fiction_energy_calculation_UPDATE_ENERGY))
 
         ;
 
     /**
      * Charge distribution history.
      */
-    py::enum_<fiction::charge_distribution_history>(m, "charge_distribution_history")
-        //, DOC(fiction_charge_distribution_history))
-        .value("CONSIDER", fiction::charge_distribution_history::CONSIDER)
-        //, DOC(fiction_charge_distribution_history_CONSIDER))
-        .value("NEGLECT", fiction::charge_distribution_history::NEGLECT)
-        //, DOC(fiction_charge_distribution_history_NEGLECT))
+    py::enum_<fiction::charge_distribution_history>(m, "charge_distribution_history",
+                                                    DOC(fiction_charge_distribution_history))
+        .value("CONSIDER", fiction::charge_distribution_history::CONSIDER,
+               DOC(fiction_charge_distribution_history_CONSIDER))
+        .value("NEGLECT", fiction::charge_distribution_history::NEGLECT,
+               DOC(fiction_charge_distribution_history_NEGLECT))
 
         ;
 
@@ -179,7 +175,7 @@ inline void charge_distribution_surface(pybind11::module& m)
         .def("get_charge_state_by_index", &py_charge_distribution_surface::get_charge_state_by_index, "index"_a)
         .def("get_all_sidb_charges", &py_charge_distribution_surface::get_all_sidb_charges)
         .def("negative_sidb_detection", &py_charge_distribution_surface::negative_sidb_detection)
-        .def("get_nm_distance_between_cells", &py_charge_distribution_surface::get_nm_distance_between_cells, "c1"_a,
+        .def("get_nm_distance_between_sidbs", &py_charge_distribution_surface::get_nm_distance_between_sidbs, "c1"_a,
              "c2"_a)
         .def("get_nm_distance_by_indices", &py_charge_distribution_surface::get_nm_distance_by_indices, "index1"_a,
              "index2"_a)
@@ -194,15 +190,8 @@ inline void charge_distribution_surface(pybind11::module& m)
              "index1"_a, "index2"_a)
         .def("get_potential_between_sidbs", &py_charge_distribution_surface::get_potential_between_sidbs, "c1"_a,
              "c2"_a)
-        .def("get_electrostatic_potential_by_indices",
-             &py_charge_distribution_surface::get_electrostatic_potential_by_indices, "index1"_a, "index2"_a)
-        //        .def("potential_between_sidbs_by_index",
-        //        &py_charge_distribution_surface::potential_between_sidbs_by_index,
-        //             "index1"_a, "index2"_a)
-        //        .def("potential_between_sidbs", &py_charge_distribution_surface::potential_between_sidbs, "c1"_a,
-        //        "c2"_a) .def("potential_between_sidbs_by_indices",
-        //        &py_charge_distribution_surface::potential_between_sidbs_by_indices,
-        //             "index1"_a, "index2"_a)
+        .def("get_potential_by_indices", &py_charge_distribution_surface::get_potential_by_indices, "index1"_a,
+             "index2"_a)
         .def("update_local_potential", &py_charge_distribution_surface::update_local_potential)
         .def("get_local_potential", &py_charge_distribution_surface::get_local_potential, "c"_a)
         .def("get_local_potential_by_index", &py_charge_distribution_surface::get_local_potential_by_index, "index"_a)
@@ -232,7 +221,7 @@ inline void charge_distribution_surface(pybind11::module& m)
              "potential_value"_a, "dependent_cell"_a = fiction::dependent_cell_mode::FIXED)
         .def("is_three_state_simulation_required", &py_charge_distribution_surface::is_three_state_simulation_required)
         .def("get_positive_candidates", &py_charge_distribution_surface::get_positive_candidates)
-        .def("positive_cell_to_index", &py_charge_distribution_surface::positive_cell_to_index, "c"_a)
+        .def("three_state_cell_to_index", &py_charge_distribution_surface::three_state_cell_to_index, "c"_a)
         .def("two_state_cell_to_index", &py_charge_distribution_surface::two_state_cell_to_index, "c"_a)
         .def("index_to_cell", &py_charge_distribution_surface::index_to_cell, "index"_a)
         .def("index_to_three_state_cell", &py_charge_distribution_surface::index_to_three_state_cell, "index"_a)
@@ -240,17 +229,15 @@ inline void charge_distribution_surface(pybind11::module& m)
 
         .def("chargeless_potential_at_given_distance",
              &py_charge_distribution_surface::chargeless_potential_at_given_distance, "distance"_a)
-
         .def("chargeless_potential_generated_by_defect_at_given_distance",
              &py_charge_distribution_surface::chargeless_potential_generated_by_defect_at_given_distance, "distance"_a,
              "defect"_a = fiction::sidb_defect{})
-
         .def("assign_local_external_potential", &py_charge_distribution_surface::assign_local_external_potential,
              "external_potential"_a)
-        .def("get_external_potentials", &py_charge_distribution_surface::get_external_potentials)
-        .def("get_defect_potentials", &py_charge_distribution_surface::get_defect_potentials)
-
+        .def("get_local_external_potentials", &py_charge_distribution_surface::get_local_external_potentials)
+        .def("get_local_defect_potentials", &py_charge_distribution_surface::get_local_defect_potentials)
         .def("get_defects", &py_charge_distribution_surface::get_defects)
+
         .def("update_charge_state_of_dependent_cell",
              &py_charge_distribution_surface::update_charge_state_of_dependent_cell)
         .def("get_charge_index_of_sub_layout", &py_charge_distribution_surface::get_charge_index_of_sub_layout)

@@ -25,8 +25,9 @@ void hexagonalization(pybind11::module& m)
 
     m.def(
         "hexagonalization",
-        [](const Lyt& lyt) -> py_hexagonal_gate_layout { return fiction::hexagonalization<Lyt>(lyt); }, "layout"_a,
-        DOC(fiction_hexagonalization));
+        [](const Lyt& lyt) -> py_hexagonal_gate_layout
+        { return fiction::hexagonalization<py_hexagonal_gate_layout, Lyt>(lyt); },
+        "layout"_a, DOC(fiction_hexagonalization));
 }
 
 }  // namespace detail
