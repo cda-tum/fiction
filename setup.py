@@ -37,6 +37,10 @@ class CMakeBuild(build_ext):
                       '-DFICTION_CLI=OFF',
                       '-DFICTION_TEST=OFF',
                       '-DFICTION_EXPERIMENTS=OFF',
+                      '-DFICTION_BENCHMARK=OFF',
+                      '-DFICTION_ENABLE_IPO=ON',
+                      '-DFICTION_ENABLE_PCH=ON',
+                      '-DFICTION_ENABLE_UNITY_BUILD=ON',
                       '-DFICTION_PYTHON_BINDINGS=ON',
                       f'-DFICTION_Z3={z3}',
                       ]
