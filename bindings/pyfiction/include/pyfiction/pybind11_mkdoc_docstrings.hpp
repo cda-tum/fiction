@@ -5532,6 +5532,48 @@ neutral).
 Parameter ``charge_layout``:
     Initialized charge layout.)doc";
 
+static const char *__doc_fiction_detail_read_fgl_layout_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_read_fgl_layout_impl_gate_storage =
+R"doc(@struct gate_storage
+
+Represents a gate in a fcn layout, storing its unique ID, type, name,
+location, and incoming connections.)doc";
+
+static const char *__doc_fiction_detail_read_fgl_layout_impl_gate_storage_compare_by_id =
+R"doc(Static member function to compare gate_storage objects by their IDs.
+
+Parameter ``gate1``:
+    First gate to be compared.
+
+Parameter ``gate2``:
+    Second gate to be compared.
+
+Returns:
+    True if gate1's ID is less than gate2's ID, false otherwise.)doc";
+
+static const char *__doc_fiction_detail_read_fgl_layout_impl_gate_storage_id = R"doc(Unique identifier for the gate.)doc";
+
+static const char *__doc_fiction_detail_read_fgl_layout_impl_gate_storage_incoming = R"doc(List of incoming connections to the gate.)doc";
+
+static const char *__doc_fiction_detail_read_fgl_layout_impl_gate_storage_loc = R"doc(Location of the gate represented its x-, y- and z-coordinate.)doc";
+
+static const char *__doc_fiction_detail_read_fgl_layout_impl_gate_storage_name = R"doc(Name of the gate (for inputs and outputs).)doc";
+
+static const char *__doc_fiction_detail_read_fgl_layout_impl_gate_storage_type =
+R"doc(Type of the gate, can be an alias (AND, OR, PI, ..) or the implemented
+function in a binary or hexadecimal form.)doc";
+
+static const char *__doc_fiction_detail_read_fgl_layout_impl_is = R"doc(The input stream from which the gate-level layout is read.)doc";
+
+static const char *__doc_fiction_detail_read_fgl_layout_impl_lyt = R"doc(The layout which will be altered based on the parsed information.)doc";
+
+static const char *__doc_fiction_detail_read_fgl_layout_impl_read_fgl_layout_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_read_fgl_layout_impl_read_fgl_layout_impl_2 = R"doc()doc";
+
+static const char *__doc_fiction_detail_read_fgl_layout_impl_run = R"doc()doc";
+
 static const char *__doc_fiction_detail_read_fqca_layout_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_read_fqca_layout_impl_cell_label_map = R"doc()doc";
@@ -5772,6 +5814,16 @@ Returns:
 static const char *__doc_fiction_detail_wire_east = R"doc()doc";
 
 static const char *__doc_fiction_detail_wire_south = R"doc()doc";
+
+static const char *__doc_fiction_detail_write_fgl_layout_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_write_fgl_layout_impl_lyt = R"doc(The layout to be written.)doc";
+
+static const char *__doc_fiction_detail_write_fgl_layout_impl_os = R"doc(The output stream to which the gate-level layout is written.)doc";
+
+static const char *__doc_fiction_detail_write_fgl_layout_impl_run = R"doc()doc";
+
+static const char *__doc_fiction_detail_write_fgl_layout_impl_write_fgl_layout_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_write_fqca_layout_impl = R"doc()doc";
 
@@ -7075,6 +7127,16 @@ Parameter ``g``:
 
 Returns:
     Transposed `fcn_gate`.)doc";
+
+static const char *__doc_fiction_fgl_parsing_error =
+R"doc(Exception thrown when an error occurs during parsing of a .fgl file
+containing a gate-level layout.)doc";
+
+static const char *__doc_fiction_fgl_parsing_error_fgl_parsing_error =
+R"doc(Constructs a fgl_parsing_error object with the given error message.
+
+Parameter ``msg``:
+    The error message describing the parsing error.)doc";
 
 static const char *__doc_fiction_find_first_two_of =
 R"doc(A derivative of `std::find_first_of` that uses the example
@@ -11776,6 +11838,72 @@ R"doc(Standard constructor with forward reference.
 Parameter ``range``:
     Begin and end iterator pair.)doc";
 
+static const char *__doc_fiction_read_fgl_layout =
+R"doc(Reads a gate-level layout from an FGL file provided as an input
+stream.
+
+May throw an `fgl_parsing_exception` if the FGL file is malformed.
+
+Template parameter ``Lyt``:
+    The layout type to be created from an input.
+
+Parameter ``is``:
+    The input stream to read from.
+
+Parameter ``name``:
+    The name to give to the generated layout.)doc";
+
+static const char *__doc_fiction_read_fgl_layout_2 =
+R"doc(Reads a gate-level layout from an FGL file provided as an input
+stream.
+
+May throw an `fgl_parsing_exception` if the FGL file is malformed.
+
+This is an in-place version of read_fgl_layout that utilizes the given
+layout as a target to write to.
+
+Template parameter ``Lyt``:
+    The layout type to be used as input.
+
+Parameter ``lyt``:
+    The layout to write to.
+
+Parameter ``is``:
+    The input stream to read from.)doc";
+
+static const char *__doc_fiction_read_fgl_layout_3 =
+R"doc(Reads a gate-level layout from an FGL file provided as an input
+stream.
+
+May throw an `fgl_parsing_exception` if the FGL file is malformed.
+
+Template parameter ``Lyt``:
+    The layout type to be created from an input.
+
+Parameter ``filename``:
+    The file name to open and read from.
+
+Parameter ``name``:
+    The name to give to the generated layout.)doc";
+
+static const char *__doc_fiction_read_fgl_layout_4 =
+R"doc(Reads a gate-level layout from an FGL file provided as an input
+stream.
+
+May throw an `fgl_parsing_exception` if the FGL file is malformed.
+
+This is an in-place version of `read_fgl_layout` that utilizes the
+given layout as a target to write to.
+
+Template parameter ``Lyt``:
+    The layout type to be used as input.
+
+Parameter ``lyt``:
+    The layout to write to.
+
+Parameter ``filename``:
+    The file name to open and read from.)doc";
+
 static const char *__doc_fiction_read_fqca_layout =
 R"doc(Reads a cell-level QCA layout from an fqca file provided as an input
 stream. The format is used by QCA-STACK by Willem Lambooy
@@ -13805,6 +13933,35 @@ Parameter ``lyt``:
 
 Parameter ``filename``:
     Filename)doc";
+
+static const char *__doc_fiction_write_fgl_layout =
+R"doc(Writes an FGL layout to a file.
+
+This overload uses an output stream to write into.
+
+Template parameter ``Lyt``:
+    Layout.
+
+Parameter ``lyt``:
+    The layout to be written.
+
+Parameter ``os``:
+    The output stream to write into.)doc";
+
+static const char *__doc_fiction_write_fgl_layout_2 =
+R"doc(Writes an FGL layout to a file.
+
+This overload uses a file name to create and write into.
+
+Template parameter ``Lyt``:
+    Layout.
+
+Parameter ``lyt``:
+    The layout to be written.
+
+Parameter ``filename``:
+    The file name to create and write into. Should preferably use the
+    .fgl extension.)doc";
 
 static const char *__doc_fiction_write_fqca_layout =
 R"doc(Writes a cell-level QCA layout to an fqca file provided as an output
