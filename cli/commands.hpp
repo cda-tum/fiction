@@ -8,6 +8,7 @@
 #include "cmd/general/clear.hpp"
 #include "cmd/general/version.hpp"
 #include "cmd/io/blif.hpp"
+#include "cmd/io/fgl.hpp"
 #include "cmd/io/fqca.hpp"
 #include "cmd/io/qca.hpp"
 #include "cmd/io/qcc.hpp"
