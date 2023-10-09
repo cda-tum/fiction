@@ -9,7 +9,7 @@ if (CMAKE_BUILD_TYPE STREQUAL "Release")
         add_custom_command(
                 TARGET pyfiction
                 POST_BUILD
-                COMMAND ${CMAKE_STRIP} $<TARGET_FILE:fiction>
+                COMMAND ${CMAKE_STRIP} $<TARGET_FILE:pyfiction>
         )
     else ()
         message(WARNING "Strip command is not available. The executables will not be stripped.")
