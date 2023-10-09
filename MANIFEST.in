@@ -3,7 +3,6 @@ prune cli
 
 graft libs/
 prune libs/Catch2/**
-prune libs/alice/**
 prune libs/mockturtle/lib/nauty/**
 
 prune **/.git
