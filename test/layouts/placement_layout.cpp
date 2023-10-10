@@ -212,6 +212,8 @@ TEMPLATE_TEST_CASE(
 
     placement_layout place_lyt{lyt, ntk};
 
+    CHECK(place_lyt.net_cost() == 0);
+
     ntk.foreach_node([&place_lyt, i = 0u](const auto& n) mutable { place_lyt.place(n, {i++, 0}); });
 
     CHECK(place_lyt.net_cost(2) == 3);
@@ -219,4 +221,6 @@ TEMPLATE_TEST_CASE(
     CHECK(place_lyt.net_cost(4) == 2);
     CHECK(place_lyt.net_cost(5) == 5);
     CHECK(place_lyt.net_cost(6) == 1);
+
+    CHECK(place_lyt.net_cost() == 12);
 }

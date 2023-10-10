@@ -20,6 +20,7 @@
 #include <random>
 #include <type_traits>
 #include <utility>
+#include <valarray>
 #include <vector>
 
 namespace fiction
@@ -54,6 +55,7 @@ class placement_layout<GateLyt, Ntk, Dist, false> : public GateLyt
                 ntk{network},
                 dist_fn{dist},
                 node_to_tile{network},
+                net_costs(Dist{0}, node_to_tile.size()),
                 random_node_functor{ntk.get_constant(false) == ntk.get_constant(true) ? 1u : 2u, ntk.size() - 1u}
         {}
         /**
@@ -72,6 +74,10 @@ class placement_layout<GateLyt, Ntk, Dist, false> : public GateLyt
          * Maps layout coordinate indices to network nodes.
          */
         std::vector<mockturtle::node<Ntk>> tile_index_to_node;
+        /**
+         * Stores the approximated net costs of each node.
+         */
+        std::valarray<Dist> net_costs;
         /**
          * A random-number generator.
          */
@@ -157,6 +163,8 @@ class placement_layout<GateLyt, Ntk, Dist, false> : public GateLyt
 
                 ++i;
             });
+
+        initialize_net_costs();
     }
     /**
      * Assign node `n` to tile `t`.
@@ -177,6 +185,8 @@ class placement_layout<GateLyt, Ntk, Dist, false> : public GateLyt
         strg->node_to_tile[n] = t;
         // store node position
         strg->tile_index_to_node[tile_to_index(t)] = n;
+
+        update_net_costs(n);
     }
     /**
      * Returns a random tile of this layout.
@@ -239,6 +249,10 @@ class placement_layout<GateLyt, Ntk, Dist, false> : public GateLyt
         // swap tile contents
         strg->tile_index_to_node[tile_to_index(t)]      = n;
         strg->tile_index_to_node[tile_to_index(n_tile)] = t_node;
+
+        // update costs
+        update_net_costs(n);
+        update_net_costs(t_node);
     }
     /**
      * Swaps the position of a random node with the contents of a random tile. If the tile is empty, the node is
@@ -272,46 +286,25 @@ class placement_layout<GateLyt, Ntk, Dist, false> : public GateLyt
         return strg->tile_index_to_node[tile_to_index(t)];
     }
     /**
-     * Calculates the net cost of the given node. The net cost are defined as the sum of distances to all predecessors
-     * and successors in the layout.
+     * Returns the net cost of a given node. The net cost are defined as the sum of distances to all predecessors and
+     * successors in the layout.
      *
-     * @param n The node whose net cost is to be calculated.
+     * @param n The node whose net cost is to be returned.
      * @return The net cost of the given node.
      */
     [[nodiscard]] Dist net_cost(const mockturtle::node<Ntk>& n) const noexcept
     {
-        Dist cost{0};
-
-        if (strg->ntk.is_constant(n))
-        {
-            return cost;
-        }
-
-        const auto n_t = strg->node_to_tile[n];
-
-        strg->ntk.foreach_fanin(n,
-                                [this, &cost, &n_t](auto const& fi)
-                                {
-                                    const auto fi_t = strg->node_to_tile[strg->ntk.get_node(fi)];
-
-                                    const auto add_cost = strg->dist_fn(*this, fi_t, n_t);
-
-                                    cost += add_cost;
-                                });
-
-        strg->ntk.foreach_fanout(n,
-                                 [this, &cost, &n_t](auto const& fon)
-                                 {
-                                     const auto fo_t = strg->node_to_tile[fon];
-
-                                     const auto add_cost = strg->dist_fn(*this, n_t, fo_t);
-
-                                     cost += add_cost;
-                                 });
-
-        return cost;
+        return strg->net_costs[n];
     }
-
+    /**
+     * Returns the accumulated net cost of all placed nodes.
+     *
+     * @return The accumulated net cost of all placed nodes.
+     */
+    [[nodiscard]] Dist net_cost() const noexcept
+    {
+        return strg->net_costs.sum();
+    }
     /**
      * Applies a given function to each node of the associated network and its tile. Therefore, the function must
      * accept two arguments: a node and a tile.
@@ -354,6 +347,76 @@ class placement_layout<GateLyt, Ntk, Dist, false> : public GateLyt
     [[nodiscard]] std::size_t tile_to_index(const tile& t) const noexcept
     {
         return t.x + t.y * (this->x() + 1);
+    }
+    /**
+     * Recomputes the net cost of the given node.
+     *
+     * @param n The node whose net cost is to be recomputed.
+     * @return The net cost of the given node.
+     */
+    [[nodiscard]] Dist compute_net_cost(const mockturtle::node<Ntk>& n) const noexcept
+    {
+        Dist cost{0};
+
+        if (strg->ntk.is_constant(n))
+        {
+            return cost;
+        }
+
+        const auto n_t = strg->node_to_tile[n];
+
+        strg->ntk.foreach_fanin(n, [this, &cost, &n_t](auto const& fi)
+                                { cost += strg->dist_fn(*this, strg->node_to_tile[strg->ntk.get_node(fi)], n_t); });
+
+        strg->ntk.foreach_fanout(n, [this, &cost, &n_t](auto const& fon)
+                                 { cost += strg->dist_fn(*this, n_t, strg->node_to_tile[fon]); });
+
+        return cost;
+    }
+    /**
+     * Updates the net costs depending on node `n`. This function assumes `n` has been moved. Thereby, not only its net
+     * cost are updated, but also the net costs of all nodes that are connected to `n`.
+     *
+     * @param n The node whose net cost is to be updated.
+     */
+    void update_net_costs(const mockturtle::node<Ntk>& n) const noexcept
+    {
+        Dist cost{0};
+
+        if (strg->ntk.is_constant(n))
+        {
+            return;
+        }
+
+        const auto n_t = strg->node_to_tile[n];
+
+        strg->ntk.foreach_fanin(n,
+                                [this, &cost, &n_t](auto const& fi)
+                                {
+                                    const auto fin = strg->ntk.get_node(fi);
+
+                                    strg->net_costs[strg->ntk.node_to_index(fin)] = compute_net_cost(fin);
+
+                                    cost += strg->dist_fn(*this, strg->node_to_tile[fin], n_t);
+                                });
+
+        strg->ntk.foreach_fanout(n,
+                                 [this, &cost, &n_t](auto const& fon)
+                                 {
+                                     strg->net_costs[strg->ntk.node_to_index(fon)] = compute_net_cost(fon);
+
+                                     cost += strg->dist_fn(*this, n_t, strg->node_to_tile[fon]);
+                                 });
+
+        strg->net_costs[strg->ntk.node_to_index(n)] = cost;
+    }
+    /**
+     * Initializes the net costs of all placed nodes.
+     */
+    void initialize_net_costs() noexcept
+    {
+        this->foreach_placed_node([this](const auto& n, const auto&)
+                                  { strg->net_costs[strg->ntk.node_to_index(n)] = compute_net_cost(n); });
     }
 };
 
