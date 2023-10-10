@@ -7,6 +7,7 @@
 
 #include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
+#include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/traits.hpp"
 
@@ -49,91 +50,83 @@ struct quicksim_params
 };
 
 /**
- * This struct stores the simulation runtime and all physically valid charge layouts gained by the *QuickSim* algorithm.
- *
- * @paramt Lyt Cell-level layout type.
- */
-template <typename Lyt>
-struct quicksim_stats
-{
-    /**
-     * Total simulation runtime.
-     */
-    mockturtle::stopwatch<>::duration time_total{0};
-    /**
-     * Vector of all physically valid charge layouts.
-     */
-    std::vector<charge_distribution_surface<Lyt>> valid_lyts{};
-    /**
-     * Report the simulation statistics in a human-readable fashion.
-     *
-     * @param out Output stream to write to.
-     */
-    void report(std::ostream& out = std::cout)
-    {
-        out << fmt::format("[i] total runtime: {:.2f} secs\n", mockturtle::to_seconds(time_total));
-
-        if (!energy_distribution<Lyt>(valid_lyts).empty())
-        {
-            for (auto [energy, count] : energy_distribution<Lyt>(valid_lyts))
-            {
-                out << fmt::format("[i] lowest energy state: {:.4f} meV \n", minimum_energy(valid_lyts));
-                out << fmt::format("[i] energy: {} | occurrence: {} \n", energy, count);
-            }
-        }
-        else
-        {
-            std::cout << "no state found" << std::endl;
-        }
-
-        std::cout << "_____________________________________________________ \n";
-    }
-};
-
-/**
- * The *QuickSim* algorithm is an electrostatic ground state simulation algorithm for SiDB layouts. It determines
- * physically valid charge configurations (with minimal energy) of a given (already initialized) charge distribution
- * layout. Depending on the simulation parameters, the ground state is found with a certain probability after one run.
+ * The *QuickSim* algorithm which was proposed in \"QuickSim: Efficient and Accurate Physical Simulation of Silicon
+ * Dangling Bond Logic\" by J. Drewniok, M. Walter, S. S. H. Ng, K. Walus, and R. Wille in IEEE NANO 2023
+ * (https://ieeexplore.ieee.org/document/10231266) is an electrostatic ground state simulation algorithm for SiDB
+ * layouts. It determines physically valid charge configurations (with minimal energy) of a given (already initialized)
+ * charge distribution layout. Depending on the simulation parameters, the ground state is found with a certain
+ * probability after one run.
  *
  * @tparam Lyt Cell-level layout type.
  * @param lyt The layout to simulate.
  * @param ps Physical parameters. They are material-specific and may vary from experiment to experiment.
- * @param pst Statistics. They store the simulation results (simulation runtime as well as all physically valid charge
- * distribution layouts).
+ * @return sidb_simulation_result is returned with all results.
  */
 template <typename Lyt>
-void quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}, quicksim_stats<Lyt>* pst = nullptr)
+sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{})
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
 
-    quicksim_stats<Lyt> st{};
-    st.valid_lyts.reserve(ps.interation_steps);
+    if (ps.interation_steps == 0)
+    {
+        return sidb_simulation_result<Lyt>{};
+    }
+
+    sidb_simulation_result<Lyt> st{};
+    st.algorithm_name = "QuickSim";
+    st.additional_simulation_parameters.emplace_back("iteration_steps", ps.interation_steps);
+    st.additional_simulation_parameters.emplace_back("alpha", ps.alpha);
+    st.physical_parameters = ps.phys_params;
+    st.charge_distributions.reserve(ps.interation_steps);
+
+    mockturtle::stopwatch<>::duration time_counter{};
 
     // measure run time (artificial scope)
     {
-        mockturtle::stopwatch stop{st.time_total};
+        const mockturtle::stopwatch stop{time_counter};
 
         charge_distribution_surface charge_lyt{lyt};
 
         // set the given physical parameters
-        charge_lyt.set_physical_parameters(ps.phys_params);
+        charge_lyt.assign_physical_parameters(ps.phys_params);
+        charge_lyt.assign_base_number(2);
+        charge_lyt.assign_all_charge_states(sidb_charge_state::NEGATIVE);
+        charge_lyt.update_after_charge_change(dependent_cell_mode::VARIABLE);
+        const auto negative_sidb_indices = charge_lyt.negative_sidb_detection();
 
-        charge_lyt.set_all_charge_states(sidb_charge_state::NEUTRAL);
-        charge_lyt.update_after_charge_change();
-
+        // Check that the layout with all SiDBs negatively charged is physically valid.
         if (charge_lyt.is_physically_valid())
         {
-            st.valid_lyts.push_back(charge_distribution_surface<Lyt>{charge_lyt});
+            st.charge_distributions.push_back(charge_distribution_surface<Lyt>{charge_lyt});
         }
 
-        charge_lyt.set_all_charge_states(sidb_charge_state::NEGATIVE);
+        // Check that the layout with all SiDBs neutrally charged is physically valid.
+        charge_lyt.assign_all_charge_states(sidb_charge_state::NEUTRAL);
         charge_lyt.update_after_charge_change();
 
+        if (!negative_sidb_indices.empty())
+        {
+            if (charge_lyt.is_physically_valid())
+            {
+                st.charge_distributions.push_back(charge_distribution_surface<Lyt>{charge_lyt});
+            }
+        }
+
+        // Check if the layout where all SiDBs that need to be negatively charged are negatively charged and the rest
+        // are neutrally charged is physically valid.
+        for (const auto& index : negative_sidb_indices)
+        {
+            charge_lyt.assign_charge_state_by_cell_index(static_cast<uint64_t>(index), sidb_charge_state::NEGATIVE);
+        }
+        charge_lyt.update_after_charge_change();
         if (charge_lyt.is_physically_valid())
         {
-            st.valid_lyts.push_back(charge_distribution_surface<Lyt>{charge_lyt});
+            st.charge_distributions.push_back(charge_distribution_surface<Lyt>{charge_lyt});
         }
+
+        charge_lyt.assign_all_charge_states(sidb_charge_state::NEUTRAL);
+        charge_lyt.update_after_charge_change();
 
         // If the number of threads is initially set to zero, the simulation is run with one thread.
         const uint64_t num_threads = std::max(ps.number_threads, uint64_t{1});
@@ -143,17 +136,6 @@ void quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}, qui
             std::max(ps.interation_steps / num_threads,
                      uint64_t{1});  // If the number of set threads is greater than the number of iterations, the
                                     // number of threads defines how many times QuickSim is repeated
-
-        // Only 60 % of all cells are used as the negatively charged cell in the first iteration step.
-        uint64_t upper_bound = 0;
-        if (charge_lyt.num_cells() < 10)
-        {
-            upper_bound = charge_lyt.num_cells();
-        }
-        else
-        {
-            upper_bound = static_cast<uint64_t>(std::round(0.6 * static_cast<double>(charge_lyt.num_cells())));
-        }
 
         std::vector<std::thread> threads{};
         threads.reserve(num_threads);
@@ -168,23 +150,40 @@ void quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}, qui
 
                     for (uint64_t l = 0ul; l < iter_per_thread; ++l)
                     {
-                        for (uint64_t i = 0ul; i < upper_bound; ++i)
+                        for (uint64_t i = 0ul; i < charge_lyt.num_cells(); ++i)
                         {
+                            {
+                                const std::lock_guard lock{mutex};
+                                if (std::find(negative_sidb_indices.cbegin(), negative_sidb_indices.cend(), i) !=
+                                    negative_sidb_indices.cend())
+                                {
+                                    continue;
+                                }
+                            }
+
                             std::vector<uint64_t> index_start{i};
-                            charge_lyt_copy.set_all_charge_states(sidb_charge_state::NEUTRAL);
+
+                            charge_lyt_copy.assign_all_charge_states(sidb_charge_state::NEUTRAL);
+
+                            for (const auto& index : negative_sidb_indices)
+                            {
+                                charge_lyt_copy.assign_charge_state_by_cell_index(static_cast<uint64_t>(index),
+                                                                                  sidb_charge_state::NEGATIVE);
+                                index_start.push_back(static_cast<uint64_t>(index));
+                            }
+
                             charge_lyt_copy.assign_charge_state_by_cell_index(i, sidb_charge_state::NEGATIVE);
-                            charge_lyt_copy.update_local_potential();
-                            charge_lyt_copy.set_system_energy_to_zero();
-                            charge_lyt_copy.validity_check();
+                            charge_lyt_copy.update_after_charge_change();
 
                             if (charge_lyt_copy.is_physically_valid())
                             {
                                 const std::lock_guard lock{mutex};
-                                st.valid_lyts.push_back(charge_distribution_surface<Lyt>{charge_lyt_copy});
+                                st.charge_distributions.push_back(charge_distribution_surface<Lyt>{charge_lyt_copy});
                             }
 
                             const auto upper_limit =
-                                static_cast<uint64_t>(static_cast<double>(charge_lyt_copy.num_cells()) / 1.5);
+                                std::min(static_cast<uint64_t>(static_cast<double>(charge_lyt_copy.num_cells()) / 1.5),
+                                         charge_lyt.num_cells() - negative_sidb_indices.size());
 
                             for (uint64_t num = 0ul; num < upper_limit; num++)
                             {
@@ -194,7 +193,8 @@ void quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}, qui
                                 if (charge_lyt_copy.is_physically_valid())
                                 {
                                     const std::lock_guard lock{mutex};
-                                    st.valid_lyts.push_back(charge_distribution_surface<Lyt>{charge_lyt_copy});
+                                    st.charge_distributions.push_back(
+                                        charge_distribution_surface<Lyt>{charge_lyt_copy});
                                 }
                             }
                         }
@@ -208,10 +208,9 @@ void quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}, qui
         }
     }
 
-    if (pst)
-    {
-        *pst = st;
-    }
+    st.simulation_runtime = time_counter;
+
+    return st;
 }
 
 }  // namespace fiction

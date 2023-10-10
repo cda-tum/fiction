@@ -10,6 +10,9 @@
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
 
+#include <string>
+#include <string_view>
+
 namespace fiction
 {
 
@@ -44,15 +47,15 @@ std::string get_name(const NtkOrLyt& ntk_or_lyt) noexcept
  * @param name Name to assign to given network or layout.
  */
 template <typename NtkOrLyt>
-void set_name(NtkOrLyt& ntk_or_lyt, const std::string& name) noexcept
+void set_name(NtkOrLyt& ntk_or_lyt, const std::string_view& name) noexcept
 {
     if constexpr (mockturtle::has_set_network_name_v<NtkOrLyt>)
     {
-        return ntk_or_lyt.set_network_name(name);
+        return ntk_or_lyt.set_network_name(name.data());
     }
     else if constexpr (fiction::has_set_layout_name_v<NtkOrLyt>)
     {
-        return ntk_or_lyt.set_layout_name(name);
+        return ntk_or_lyt.set_layout_name(name.data());
     }
 }
 /**
@@ -246,7 +249,7 @@ void restore_signal_names(
  * @param ntk_src Source logic network whose I/O names are to be transferred to `ntk_dest`.
  * @param ntk_dest Target logic network whose I/O names are to be assigned `ntk_src`'s names.
  */
-template <typename NtkSrc, typename NtkDest, typename T>
+template <typename NtkSrc, typename NtkDest>
 void restore_names(const NtkSrc& ntk_src, NtkDest& ntk_dest) noexcept
 {
     restore_network_name(ntk_src, ntk_dest);

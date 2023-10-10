@@ -22,6 +22,7 @@
 #include <ostream>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -411,9 +412,9 @@ void write_qll_layout(const Lyt& lyt, std::ostream& os)
  * @param ps Parameters.
  */
 template <typename Lyt>
-void write_qll_layout(const Lyt& lyt, const std::string& filename)
+void write_qll_layout(const Lyt& lyt, const std::string_view& filename)
 {
-    std::ofstream os{filename.c_str(), std::ofstream::out};
+    std::ofstream os{filename.data(), std::ofstream::out};
 
     if (!os.is_open())
     {

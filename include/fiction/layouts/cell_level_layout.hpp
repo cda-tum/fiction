@@ -14,6 +14,7 @@
 
 #include <memory>
 #include <string>
+#include <string_view>
 #include <utility>
 
 namespace fiction
@@ -57,8 +58,8 @@ class cell_level_layout : public ClockedLayout
     template <typename Cell>
     struct cell_level_layout_storage
     {
-        explicit cell_level_layout_storage(std::string name, uint16_t tile_x = 1u, uint16_t tile_y = 1u) :
-                layout_name{std::move(name)},
+        explicit cell_level_layout_storage(const std::string_view& name, uint16_t tile_x = 1u, uint16_t tile_y = 1u) :
+                layout_name{name},
                 tile_size_x{tile_x},
                 tile_size_y{tile_y}
         {}
@@ -115,8 +116,35 @@ class cell_level_layout : public ClockedLayout
     {
         static_assert(is_clocked_layout_v<ClockedLayout>, "ClockedLayout is not a clocked layout type");
     }
-
+    /**
+     * Copy constructor from another layout's storage.
+     *
+     * @param s Storage of another cell_level_layout.
+     */
     explicit cell_level_layout(std::shared_ptr<cell_level_layout_storage<cell>> s) : strg{std::move(s)} {}
+    /**
+     * Copy constructor from another `ClockedLayout`.
+     *
+     * @param lyt Clocked layout.
+     */
+    explicit cell_level_layout(const ClockedLayout& lyt) :
+            ClockedLayout(lyt),
+            strg{std::make_shared<cell_level_layout_storage<cell>>("", 1, 1)}
+    {
+        static_assert(is_clocked_layout_v<ClockedLayout>, "ClockedLayout is not a clocked layout type");
+    }
+    /**
+     * Clones the layout returning a deep copy.
+     *
+     * @return Deep copy of the layout.
+     */
+    [[nodiscard]] cell_level_layout clone() const noexcept
+    {
+        cell_level_layout copy{ClockedLayout::clone()};
+        copy.strg = std::make_shared<cell_level_layout_storage<cell>>(*strg);
+
+        return copy;
+    }
 
 #pragma endregion
 
@@ -264,7 +292,7 @@ class cell_level_layout : public ClockedLayout
      */
     [[nodiscard]] std::string get_layout_name() const noexcept
     {
-        return strg->layout_name;
+        return strg->layout_name.data();
     }
     /**
      * Returns the number of non-empty cell types that were assigned to the layout.

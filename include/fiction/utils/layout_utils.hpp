@@ -11,9 +11,13 @@
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <cstdint>
 #include <limits>
+#include <random>
+#include <type_traits>
+#include <utility>
 
 namespace fiction
 {
@@ -53,6 +57,7 @@ template <uint16_t GateSizeX, uint16_t GateSizeY, typename GateLyt, typename Cel
                                                                const cell<CellLyt>& relative_c) noexcept
 {
     static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
+    static_assert(!has_siqad_coord_v<CellLyt>, "CellLyt cannot have SiQAD coordinates");
     static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
 
     assert(relative_c.x < GateSizeX && relative_c.y < GateSizeY &&
@@ -251,11 +256,11 @@ Lyt normalize_layout_coordinates(const Lyt& lyt) noexcept
     lyt.foreach_cell(
         [&x_offset, &y_offset](const auto& c)
         {
-            if (c.y <= y_offset)
+            if (c.y < y_offset)
             {
                 y_offset = c.y;
             }
-            if (c.x <= x_offset)
+            if (c.x < x_offset)
             {
                 x_offset = c.x;
             }
@@ -292,7 +297,7 @@ sidb_cell_clk_lyt_siqad convert_to_siqad_coordinates(const Lyt& lyt) noexcept
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-    sidb_cell_clk_lyt_siqad lyt_new{{lyt.x(), lyt.y(), lyt.z()},
+    sidb_cell_clk_lyt_siqad lyt_new{{lyt.x(), (lyt.y() - lyt.y() % 2) / 2},
                                     lyt.get_layout_name(),
                                     lyt.get_tile_size_x(),
                                     lyt.get_tile_size_y()};
@@ -323,7 +328,7 @@ Lyt convert_to_fiction_coordinates(const sidb_cell_clk_lyt_siqad& lyt) noexcept
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-    Lyt lyt_new{{lyt.x(), lyt.y(), lyt.z()}, lyt.get_layout_name(), lyt.get_tile_size_x(), lyt.get_tile_size_y()};
+    Lyt lyt_new{{lyt.x(), 2 * lyt.y() + 1}, lyt.get_layout_name(), lyt.get_tile_size_x(), lyt.get_tile_size_y()};
 
     const auto assign_coordinates = [&lyt_new](const auto& base_lyt) noexcept
     {
@@ -340,7 +345,7 @@ Lyt convert_to_fiction_coordinates(const sidb_cell_clk_lyt_siqad& lyt) noexcept
     {
         auto lyt_normalized = normalize_layout_coordinates<sidb_cell_clk_lyt_siqad>(lyt);
         assign_coordinates(lyt_normalized);
-        lyt_new.resize({lyt_normalized.x(), lyt_normalized.y(), lyt_normalized.z()});
+        lyt_new.resize({lyt_normalized.x(), 2 * lyt_normalized.y() + 1});
     }
     else
     {
@@ -348,6 +353,97 @@ Lyt convert_to_fiction_coordinates(const sidb_cell_clk_lyt_siqad& lyt) noexcept
     }
 
     return lyt_new;
+}
+/**
+ * Generates a random coordinate within the region spanned by two given coordinates. The two given coordinates form the
+ * top left corner and the bottom right corner of the spanned region.
+ *
+ * @tparam CoordinateType The coordinate implementation to be used.
+ * @param coordinate1 Top left Coordinate.
+ * @param coordinate2 Bottom right Coordinate (coordinate order is not important, automatically swapped if
+ * necessary).
+ * @return Randomly generated coordinate.
+ */
+template <typename CoordinateType>
+CoordinateType random_coordinate(CoordinateType coordinate1, CoordinateType coordinate2) noexcept
+{
+    static_assert(std::is_same_v<CoordinateType, offset::ucoord_t> || std::is_same_v<CoordinateType, cube::coord_t> ||
+                      std::is_same_v<CoordinateType, siqad::coord_t>,
+                  "CoordinateType is unknown");
+
+    static std::mt19937_64 generator(std::random_device{}());
+
+    if (coordinate1 > coordinate2)
+    {
+        std::swap(coordinate1, coordinate2);
+    }
+
+    if constexpr (std::is_same_v<CoordinateType, siqad::coord_t>)
+    {
+        std::uniform_int_distribution<> dist_x(coordinate1.x, coordinate2.x);
+        std::uniform_int_distribution<> dist_y(coordinate1.y, coordinate2.y);
+        std::uniform_int_distribution<> dist_z(0, 1);
+
+        return std::clamp(siqad::coord_t{dist_x(generator), dist_y(generator), dist_z(generator)}, coordinate1,
+                          coordinate2);
+    }
+
+    else
+    {
+        std::uniform_int_distribution<> dist_x(coordinate1.x, coordinate2.x);
+        std::uniform_int_distribution<> dist_y(coordinate1.y, coordinate2.y);
+        std::uniform_int_distribution<> dist_z(coordinate1.z, coordinate2.z);
+
+        return {dist_x(generator), dist_y(generator), dist_z(generator)};
+    }
+}
+/**
+ * Generates a vector of all SiQAD cells within an area spanned by two SiQAD coordinates.
+ *
+ * This function calculates and returns a vector of all SiQAD cells that span the area
+ * between the northwest (cell_nw) and southeast (cell_se) cells, inclusive.
+ * The cells are generated in a top-down, left-to-right fashion within the specified area.
+ *
+ * @param cell_nw The northwest SiQAD cell defining the starting point of the area.
+ * @param cell_se The southeast SiQAD cell defining the ending point of the area.
+ * @return A vector containing all cells within the specified area.
+ */
+[[nodiscard]] inline std::vector<siqad::coord_t> all_sidbs_in_spanned_area(const siqad::coord_t& cell_nw,
+                                                                           const siqad::coord_t& cell_se) noexcept
+{
+    const auto c1_cube          = siqad::to_fiction_coord<cube::coord_t>(cell_nw);
+    const auto c2_cube          = siqad::to_fiction_coord<cube::coord_t>(cell_se);
+    const auto total_cell_count = static_cast<uint64_t>(std::abs(c1_cube.x - c2_cube.x) + 1) *
+                                  static_cast<uint64_t>(std::abs(c1_cube.y - c2_cube.y) + 1);
+
+    std::vector<siqad::coord_t> all_cells{};
+    all_cells.reserve(total_cell_count);
+
+    auto current_cell = cell_nw;
+
+    // collect all cells in the area (spanned by the nw `north-west` and se `south-east` cell) going from top to down
+    // from left to right.
+    while (current_cell <= cell_se)
+    {
+        all_cells.push_back(current_cell);
+        if (current_cell.x < cell_se.x)
+        {
+            current_cell.x += 1;
+        }
+        else if ((current_cell.x == cell_se.x) && current_cell.z == 0)
+        {
+            current_cell.z += 1;
+            current_cell.x = cell_nw.x;
+        }
+        else
+        {
+            current_cell.x = cell_nw.x;
+            current_cell.y += 1;
+            current_cell.z = 0;
+        }
+    }
+
+    return all_cells;
 }
 
 }  // namespace fiction

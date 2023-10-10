@@ -21,12 +21,13 @@
 #include <cstdint>
 #include <cstdlib>
 #include <string>
+#include <string_view>
 
 using gate_lyt = fiction::gate_level_layout<
     fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>;
 
 using color_routing_experiment =
-    experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, std::string, uint64_t, uint64_t, uint64_t,
+    experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, std::string_view, uint64_t, uint64_t, uint64_t,
                             uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint64_t, double, double, double, double,
                             bool>;
 
@@ -182,8 +183,9 @@ void ortho_sat_complete()
                                                       "runtime graph coloring (sec)",
                                                       "equivalent"};
 
-    constexpr const uint64_t bench_select =
-        fiction_experiments::all & ~fiction_experiments::majority & ~fiction_experiments::newtag;
+    constexpr const uint64_t bench_select = fiction_experiments::all & ~fiction_experiments::majority &
+                                            ~fiction_experiments::newtag & ~fiction_experiments::iscas85 &
+                                            ~fiction_experiments::epfl;
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {

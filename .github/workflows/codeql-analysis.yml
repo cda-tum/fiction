@@ -25,6 +25,10 @@ on:
   schedule:
     - cron: '30 5 * * 6'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
 env:
   Z3_VERSION: 4.10.0
 
@@ -41,10 +45,21 @@ jobs:
       fail-fast: false
       matrix:
         language: [ 'cpp', 'python' ]
-        compiler: [ g++-11 ]
-        build_type: [ Release ]
+        compiler: [ clang++-11 ]
+        build_type: [ Debug ]
 
     steps:
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: true
+          dotnet: false
+          haskell: false
+          large-packages: false
+          docker-images: false
+          swap-storage: false
+          
       - name: Install libraries and the respective compiler
         run: sudo apt-get update && sudo apt-get install -yq libtbb-dev ${{matrix.compiler}}
 
@@ -54,7 +69,7 @@ jobs:
           python-version: '3.9.x'
 
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
           fetch-depth: 0
@@ -66,6 +81,9 @@ jobs:
           variant: ccache
           save: true
           max-size: 10G
+
+      - name: Setup mold
+        uses: rui314/setup-mold@v1
 
       - name: Install pip packages
         uses: BSFishy/pip-action@v1
@@ -100,14 +118,16 @@ jobs:
           cmake ${{github.workspace}}
           -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
           -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
+          -DFICTION_ENABLE_UNITY_BUILD=ON
+          -DFICTION_ENABLE_PCH=ON
           -DFICTION_CLI=ON
           -DFICTION_TEST=ON
           -DFICTION_EXPERIMENTS=ON
           -DFICTION_Z3=ON
           -DFICTION_ENABLE_MUGEN=ON
           -DFICTION_PROGRESS_BARS=OFF
+          -DFICTION_WARNINGS_AS_ERRORS=OFF
           -DMOCKTURTLE_EXAMPLES=OFF
-          -DWARNINGS_AS_ERRORS=OFF
 
       - if: matrix.language == 'cpp'
         name: Build fiction

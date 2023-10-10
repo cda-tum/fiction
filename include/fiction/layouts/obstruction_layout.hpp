@@ -56,7 +56,7 @@ class obstruction_layout<Lyt, false> : public Lyt
     /**
      * Standard constructor for empty layouts.
      */
-    obstruction_layout() : Lyt(), strg{std::make_shared<obstruction_layout_storage>()}
+    obstruction_layout() : Lyt(), obstr_strg{std::make_shared<obstruction_layout_storage>()}
     {
         static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
     }
@@ -65,7 +65,7 @@ class obstruction_layout<Lyt, false> : public Lyt
      *
      * @param lyt Existing layout that is to be extended by an obstruction interface.
      */
-    explicit obstruction_layout(const Lyt& lyt) : Lyt(lyt), strg{std::make_shared<obstruction_layout_storage>()}
+    explicit obstruction_layout(const Lyt& lyt) : Lyt(lyt), obstr_strg{std::make_shared<obstruction_layout_storage>()}
     {
         static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
     }
@@ -76,7 +76,7 @@ class obstruction_layout<Lyt, false> : public Lyt
      */
     void obstruct_coordinate(const typename Lyt::coordinate& c) noexcept
     {
-        strg->obstructed_coordinates.insert(c);
+        obstr_strg->obstructed_coordinates.insert(c);
     }
     /**
      * Marks the connection from coordinate `src` to coordinate `tgt` as obstructed.
@@ -88,7 +88,7 @@ class obstruction_layout<Lyt, false> : public Lyt
      */
     void obstruct_connection(const typename Lyt::coordinate& src, const typename Lyt::coordinate& tgt) noexcept
     {
-        strg->obstructed_connections.insert({src, tgt});
+        obstr_strg->obstructed_connections.insert({src, tgt});
     }
     /**
      * Clears the obstruction status of the given coordinate `c` if the obstruction was manually marked via
@@ -98,7 +98,7 @@ class obstruction_layout<Lyt, false> : public Lyt
      */
     void clear_obstructed_coordinate(const typename Lyt::coordinate& c) noexcept
     {
-        strg->obstructed_coordinates.erase(c);
+        obstr_strg->obstructed_coordinates.erase(c);
     }
     /**
      * Clears the obstruction status of the connection from coordinate `src` to coordinate `tgt` if the obstruction was
@@ -109,21 +109,21 @@ class obstruction_layout<Lyt, false> : public Lyt
      */
     void clear_obstructed_connection(const typename Lyt::coordinate& src, const typename Lyt::coordinate& tgt) noexcept
     {
-        strg->obstructed_connections.erase({src, tgt});
+        obstr_strg->obstructed_connections.erase({src, tgt});
     }
     /**
      * Clears all obstructed coordinates that were manually marked via `obstruct_coordinate`.
      */
     void clear_obstructed_coordinates() noexcept
     {
-        strg->obstructed_coordinates.clear();
+        obstr_strg->obstructed_coordinates.clear();
     }
     /**
      * Clears all obstructed connections that were manually marked via `obstruct_connection`.
      */
     void clear_obstructed_connections() noexcept
     {
-        strg->obstructed_connections.clear();
+        obstr_strg->obstructed_connections.clear();
     }
     /**
      * Checks if the given coordinate is obstructed of some sort.
@@ -133,7 +133,7 @@ class obstruction_layout<Lyt, false> : public Lyt
      */
     [[nodiscard]] bool is_obstructed_coordinate(const typename Lyt::coordinate& c) const noexcept
     {
-        if (strg->obstructed_coordinates.count(c) > 0)
+        if (obstr_strg->obstructed_coordinates.count(c) > 0)
         {
             return true;
         }
@@ -160,7 +160,7 @@ class obstruction_layout<Lyt, false> : public Lyt
     [[nodiscard]] bool is_obstructed_connection(const typename Lyt::coordinate& src,
                                                 const typename Lyt::coordinate& tgt) const noexcept
     {
-        if (strg->obstructed_connections.count({src, tgt}) > 0)
+        if (obstr_strg->obstructed_connections.count({src, tgt}) > 0)
         {
             return true;
         }
@@ -176,7 +176,7 @@ class obstruction_layout<Lyt, false> : public Lyt
     }
 
   private:
-    storage strg;
+    storage obstr_strg;
 };
 
 template <class T>

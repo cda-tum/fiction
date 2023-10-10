@@ -1,56 +1,67 @@
-# Large parts of this build system are based on Jason Turner's C++ Starter Project (https://github.com/lefticus/cpp_starter_project)
+# Large parts of this build system are based on Jason Turner's
+# C++ Starter Project (https://github.com/lefticus/cpp_starter_project) and
+# CMake Template (https://github.com/cpp-best-practices/cmake_template)
 
-cmake_minimum_required(VERSION 3.15)
-project(fiction
-        LANGUAGES CXX
-        VERSION 0.4.0)
+cmake_minimum_required(VERSION 3.21)
 
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/StandardProjectSettings.cmake)
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/PreventInSourceBuilds.cmake)
-
-# Set C++ standard; at least C++17 is required
-set(FICTION_CXX_STANDARD "17" CACHE STRING "C++ standard")
-set(CMAKE_CXX_STANDARD ${FICTION_CXX_STANDARD})
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-# Interface library to set project options
-add_library(project_options INTERFACE)
-
-# Option to enable time tracing with clang
-if (CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
-    option(ENABLE_BUILD_WITH_TIME_TRACE "Enable -ftime-trace to generate time tracing .json files on clang" OFF)
-    if (ENABLE_BUILD_WITH_TIME_TRACE)
-        target_compile_options(project_options INTERFACE -ftime-trace)
-    endif ()
+# Only set the CMAKE_CXX_STANDARD if it is not set by someone else
+if (NOT DEFINED CMAKE_CXX_STANDARD)
+    # Set C++ standard; at least C++17 is required
+    set(CMAKE_CXX_STANDARD 17)
 endif ()
 
-# Use the warnings specified in CompilerWarnings.cmake
-add_library(project_warnings INTERFACE)
+# strongly encouraged to enable this globally to avoid conflicts between
+# -Wpedantic being enabled and -std=c++20 and -std=gnu++20 for example
+# when compiling with PCH enabled
+set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Enable cache system
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Cache.cmake)
+# Set the project name and version
+project(fiction
+        VERSION 0.5.0
+        DESCRIPTION "An open-source design automation framework for Field-coupled Nanotechnologies"
+        HOMEPAGE_URL "https://github.com/cda-tum/fiction"
+        LANGUAGES CXX C)
 
-# Standard compiler warnings
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/CompilerWarnings.cmake)
-set_project_warnings(project_warnings)
+include(cmake/PreventInSourceBuilds.cmake)
+include(cmake/ProjectOptions.cmake)
 
-# Sanitizer options if supported by compiler
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/Sanitizers.cmake)
-enable_sanitizers(project_options)
+fiction_setup_options()
+fiction_global_options()
+fiction_local_options()
 
-# Allow for static analysis options
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/StaticAnalyzers.cmake)
+
+# don't know if this should be set globally from here or not...
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+
+set(GIT_SHA
+        "Unknown"
+        CACHE STRING "SHA this build was generated from")
+string(
+        SUBSTRING "${GIT_SHA}"
+        0
+        8
+        GIT_SHORT_SHA)
+
+target_compile_features(fiction_options INTERFACE cxx_std_${CMAKE_CXX_STANDARD})
+
+# Alias for the options target
+add_library(fiction::fiction_options ALIAS fiction_options)
+# Alias for the warnings target
+add_library(fiction::fiction_warnings ALIAS fiction_warnings)
+
+# Include header files
+add_subdirectory(include)
+
+# Include libraries
+add_subdirectory(libs)
 
 # Enable progress bars
 if (NOT WIN32)
     option(FICTION_PROGRESS_BARS "Enable animated progress bars in command line" ON)
     if (FICTION_PROGRESS_BARS)
-        target_compile_definitions(project_options INTERFACE PROGRESS_BARS)
+        target_compile_definitions(fiction_options INTERFACE PROGRESS_BARS)
     endif ()
 endif ()
-
-# Include header files
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # CLI
 option(FICTION_CLI "Build fiction CLI" ON)
@@ -74,5 +85,17 @@ if (FICTION_TEST)
     add_subdirectory(test)
 endif ()
 
-# Include libraries
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/libs)
+# If MSVC is being used, and ASAN is enabled, we need to set the debugger environment
+# so that it behaves well with MSVC's debugger, and we can run the target from visual studio
+if (MSVC)
+    get_all_installable_targets(all_targets)
+    message("all_targets=${all_targets}")
+    set_target_properties(${all_targets} PROPERTIES VS_DEBUGGER_ENVIRONMENT "PATH=$(VC_ExecutablePath_x64);%PATH%")
+endif ()
+
+# set the startup project for the "play" button in MSVC
+set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT intro)
+
+if (CMAKE_SKIP_INSTALL_RULES)
+    return()
+endif ()

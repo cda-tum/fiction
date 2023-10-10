@@ -20,6 +20,36 @@ TEST_CASE("Synchronization element layout traits", "[synchronization-element-lay
     CHECK(has_synchronization_elements_v<se_layout>);
 }
 
+TEST_CASE("Deep copy synchronization element layout", "[synchronization-element-layout]")
+{
+    using se_layout = synchronization_element_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>;
+
+    se_layout original{{5, 5, 0}, twoddwave_clocking<se_layout>()};
+    original.assign_synchronization_element({0, 0}, 1);
+    original.assign_synchronization_element({1, 0}, 2);
+
+    auto copy = original.clone();
+
+    copy.resize({10, 10, 1});
+    copy.replace_clocking_scheme(use_clocking<se_layout>());
+    copy.assign_synchronization_element({0, 0}, 2);
+    copy.assign_synchronization_element({1, 0}, 3);
+
+    CHECK(original.x() == 5);
+    CHECK(original.y() == 5);
+    CHECK(original.z() == 0);
+    CHECK(original.is_clocking_scheme(clock_name::TWODDWAVE));
+    CHECK(original.get_synchronization_element({0, 0}) == 1);
+    CHECK(original.get_synchronization_element({1, 0}) == 2);
+
+    CHECK(copy.x() == 10);
+    CHECK(copy.y() == 10);
+    CHECK(copy.z() == 1);
+    CHECK(copy.is_clocking_scheme(clock_name::USE));
+    CHECK(copy.get_synchronization_element({0, 0}) == 2);
+    CHECK(copy.get_synchronization_element({1, 0}) == 3);
+}
+
 TEST_CASE("Shifted clocking with synchronization elements", "[synchronization-element-layout]")
 {
     using se_layout = synchronization_element_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>;

@@ -2,10 +2,10 @@
 // Created by marcel on 09.04.20.
 //
 
-#if (MUGEN)
-
 #ifndef FICTION_ONE_PASS_SYNTHESIS_HPP
 #define FICTION_ONE_PASS_SYNTHESIS_HPP
+
+#if (MUGEN)
 
 #include "fiction/algorithms/iter/aspect_ratio_iterator.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
@@ -17,6 +17,10 @@
 #include <kitty/print.hpp>
 #include <mockturtle/algorithms/simulation.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
+
+#if (PROGRESS_BARS)
+#include <mockturtle/utils/progress_bar.hpp>
+#endif
 
 #include <algorithm>
 #include <chrono>
@@ -35,17 +39,15 @@
 #pragma GCC diagnostic push  // GCC
 #pragma GCC diagnostic ignored "-Wshadow"
 #pragma GCC diagnostic ignored "-Wold-style-cast"
+#ifndef __clang__
 #pragma GCC diagnostic ignored "-Wuseless-cast"
+#endif
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #pragma GCC diagnostic ignored "-Wrange-loop-analysis"
 #pragma warning(push, 0)  // MSVC
 #include <pybind11/embed.h>
 #pragma GCC diagnostic pop  // GCC
 #pragma warning(pop)        // MSVC
-
-#if (PROGRESS_BARS)
-#include <mockturtle/utils/progress_bar.hpp>
-#endif
 
 namespace fiction
 {
@@ -945,7 +947,7 @@ class one_pass_synthesis_impl
  * parameters; `std::nullopt`, otherwise.
  */
 template <typename Lyt, typename TT>
-std::optional<Lyt> one_pass_synthesis(const std::vector<TT>& tts, one_pass_synthesis_params<Lyt> ps = {},
+std::optional<Lyt> one_pass_synthesis(const std::vector<TT>& tts, const one_pass_synthesis_params<Lyt>& ps = {},
                                       one_pass_synthesis_stats* pst = nullptr)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
@@ -983,7 +985,7 @@ std::optional<Lyt> one_pass_synthesis(const std::vector<TT>& tts, one_pass_synth
  * parameters; `std::nullopt`, otherwise.
  */
 template <typename Lyt, typename Ntk>
-std::optional<Lyt> one_pass_synthesis(const Ntk& ntk, one_pass_synthesis_params<Lyt> ps = {},
+std::optional<Lyt> one_pass_synthesis(const Ntk& ntk, const one_pass_synthesis_params<Lyt>& ps = {},
                                       one_pass_synthesis_stats* pst = nullptr)
 {
     static_assert(
@@ -1009,6 +1011,6 @@ std::optional<Lyt> one_pass_synthesis(const Ntk& ntk, one_pass_synthesis_params<
 
 }  // namespace fiction
 
-#endif  // FICTION_ONE_PASS_SYNTHESIS_HPP
-
 #endif  // MUGEN
+
+#endif  // FICTION_ONE_PASS_SYNTHESIS_HPP

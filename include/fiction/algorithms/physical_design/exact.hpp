@@ -2,10 +2,10 @@
 // Created by marcel on 06.01.20.
 //
 
-#if (FICTION_Z3_SOLVER)
-
 #ifndef FICTION_EXACT_HPP
 #define FICTION_EXACT_HPP
+
+#if (FICTION_Z3_SOLVER)
 
 #include "fiction/algorithms/iter/aspect_ratio_iterator.hpp"
 #include "fiction/algorithms/network_transformation/fanout_substitution.hpp"
@@ -162,22 +162,19 @@ struct exact_physical_design_stats
 namespace detail
 {
 
-template <typename Lyt, typename Ntk>
+template <typename Lyt>
 class exact_impl
 {
   public:
-    exact_impl(const Ntk& src, const exact_physical_design_params<Lyt>& p, exact_physical_design_stats& st) :
+    exact_impl(mockturtle::names_view<technology_network>& src, const exact_physical_design_params<Lyt>& p,
+               exact_physical_design_stats& st) :
             ps{p},
             pst{st}
     {
-        mockturtle::names_view<technology_network> intermediate_ntk{
-            fanout_substitution<mockturtle::names_view<technology_network>>(
-                src, {fanout_substitution_params::substitution_strategy::BREADTH, ps.scheme->max_out_degree, 1ul})};
-
         // create PO nodes in the network
-        intermediate_ntk.substitute_po_signals();
+        src.substitute_po_signals();
 
-        ntk = std::make_shared<topology_ntk_t>(mockturtle::fanout_view{intermediate_ntk});
+        ntk = std::make_shared<topology_ntk_t>(mockturtle::fanout_view{src});
 
         lower_bound = static_cast<decltype(lower_bound)>(ntk->num_gates() + ntk->num_pis());
 
@@ -355,28 +352,23 @@ class exact_impl
         {
             generate_smt_instance();
 
-            switch (solver->check(check_point->assumptions))
+            if (const auto z3_result = solver->check(check_point->assumptions); z3_result == z3::sat)
             {
-                case z3::sat:
+                // optimize the generated result
+                if (auto opt = optimize(); opt != nullptr)
                 {
-                    // optimize the generated result
-                    if (auto opt = optimize(); opt != nullptr)
-                    {
-                        opt->check();
-                        assign_layout(opt->get_model());
-                    }
-                    else
-                    {
-                        assign_layout(solver->get_model());
-                    }
+                    opt->check();
+                    assign_layout(opt->get_model());
+                }
+                else
+                {
+                    assign_layout(solver->get_model());
+                }
 
-                    return true;
-                }
-                default:
-                {
-                    return false;
-                }
+                return true;
             }
+
+            return false;
         }
         /**
          * Stores the current solver state in the solver tree with aspect ratio ar as key.
@@ -3146,7 +3138,7 @@ class exact_impl
  * parameters; `std::nullopt`, otherwise.
  */
 template <typename Lyt, typename Ntk>
-std::optional<Lyt> exact(const Ntk& ntk, exact_physical_design_params<Lyt> ps = {},
+std::optional<Lyt> exact(const Ntk& ntk, const exact_physical_design_params<Lyt>& ps = {},
                          exact_physical_design_stats* pst = nullptr)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
@@ -3178,10 +3170,14 @@ std::optional<Lyt> exact(const Ntk& ntk, exact_physical_design_params<Lyt> ps = 
         }
     }
 
-    exact_physical_design_stats  st{};
-    detail::exact_impl<Lyt, Ntk> p{ntk, ps, st};
+    mockturtle::names_view<technology_network> intermediate_ntk{
+        fanout_substitution<mockturtle::names_view<technology_network>>(
+            ntk, {fanout_substitution_params::substitution_strategy::BREADTH, ps.scheme->max_out_degree, 1ul})};
 
-    auto result = p.run();
+    exact_physical_design_stats st{};
+    detail::exact_impl<Lyt>     p{intermediate_ntk, ps, st};
+
+    const auto result = p.run();
 
     if (pst)
     {
@@ -3193,6 +3189,6 @@ std::optional<Lyt> exact(const Ntk& ntk, exact_physical_design_params<Lyt> ps = 
 
 }  // namespace fiction
 
-#endif  // FICTION_EXACT_HPP
-
 #endif  // FICTION_Z3_SOLVER
+
+#endif  // FICTION_EXACT_HPP

@@ -1,8 +1,9 @@
 Getting started
 ===============
 
-The *fiction* framework provides stand-alone CLI tool as well as a header-only library that can be used in external projects.
-Both are written in C++17 and are continuously tested on ubuntu, macOS, and Windows with multiple compilers. See the build badges in the README file for more information.
+The *fiction* framework provides a stand-alone CLI tool as well as a header-only library that can be used in external projects.
+Both are written in C++17 and are continuously tested on Ubuntu, macOS, and Windows with multiple compilers.
+See the build badges in the README file for more information.
 
 
 Compilation requirements
@@ -10,7 +11,7 @@ Compilation requirements
 
 The repository should always be cloned recursively with all submodules::
 
-  git clone --recursive https://github.com/marcelwa/fiction.git
+  git clone --recursive https://github.com/cda-tum/fiction.git
 
 Several third-party libraries will be cloned within the ``libs`` folder. The ``cmake`` build process will take care of
 them automatically. Should the repository have been cloned before, the commands::
@@ -19,7 +20,7 @@ them automatically. Should the repository have been cloned before, the commands:
 
 will fetch the latest version of all external modules used. Additionally, only ``CMake`` and a C++17 compiler are required.
 
-At the time of writing, for parallel STL algorithms to work when using GCC, the TBB library (``libtbb-dev`` on ubuntu) is
+At the time of writing, for parallel STL algorithms to work when using GCC, the TBB library (``libtbb-dev`` on Ubuntu) is
 needed. It is an optional dependency that can be installed for a performance boost in certain scenarios. For your
 preferred compiler, see the current implementation state of `P0024R2 <https://en.cppreference.com/w/cpp/compiler_support/17>`_.
 
@@ -43,7 +44,8 @@ The CLI tool can then be run using::
   cli/fiction
 
 
-Here is an example of running *fiction* to perform a full physical design flow on a QCA circuit layout that can afterward be simulated in QCADesigner:
+Here is an example of running *fiction* to perform a full physical design flow on a QCA circuit layout that can
+afterward be simulated in QCADesigner:
 
 .. figure:: /_static/fiction_cli_example.gif
    :alt: CLI example
@@ -69,8 +71,16 @@ to your ``CMakeLists.txt``::
     add_subdirectory(fiction/)
     target_link_libraries(fanfiction libfiction)
 
-Note that ``target_link_libraries`` must be called after the respective ``add_executable`` statement that defines
-``fanfiction``. Within your code files, you can then call
+.. note::
+
+    The command ``target_link_libraries`` must be called after the respective ``add_executable`` statement that defines
+    ``fanfiction``.
+
+    By default *fiction*'s CLI is enabled and will be built, which can be time-consuming. If you do not need it, you can
+    disable it by passing ``-DFICTION_CLI=OFF`` to your ``cmake`` call or adding
+    ``set(FICTION_CLI OFF CACHE BOOL "" FORCE)`` **before** ``add_subdirectory(fiction/)``.
+
+Within your code files, you can then call
 
 .. code-block:: c++
 
@@ -94,7 +104,7 @@ SMT-based ``exact`` P&R
 #######################
 
 The :ref:`exact placement and routing algorithm <exact>` utilizes the `SMT solver Z3 <https://github.com/Z3Prover/z3>`_.
-Follow the `installation instructions <https://github.com/Z3Prover/z3/blob/master/README-CMake.md>`_ and make sure to call
+Follow the `installation instructions <https://github.com/Z3Prover/z3/blob/master/README-CMake.md>`_ and call
 ``sudo make install`` to install headers, scripts, and the binary.
 
 .. note::
@@ -103,7 +113,7 @@ Follow the `installation instructions <https://github.com/Z3Prover/z3/blob/maste
 
 Finally, before building *fiction*, pass ``-DFICTION_Z3=ON`` to the ``cmake`` call. It should be able to find
 Z3's include path and link against the binary automatically if installed correctly. Otherwise, you can use
-``-DFICTION_Z3_SEARCH_PATHS=<path_to_z3>`` to set a list of locations that are to be searched for the installed solver.
+``-DZ3_ROOT=<path_to_z3_root>`` to set Z3's root directory that is to be searched for the installed solver.
 
 SAT-based ``onepass`` synthesis
 ###############################
@@ -112,7 +122,7 @@ The :ref:`one-pass synthesis algorithm <onepass>` is embedded via the Python3 sc
 `Mugen <https://github.com/whaaswijk/mugen>`_ by Winston Haaswijk using `pybind11 <https://github.com/pybind/pybind11>`_.
 It has some further Python dependencies that can be installed via ``pip3``::
 
-    pip3 install python-sat==0.1.6.dev6 wrapt_timeout_decorator graphviz
+    pip3 install -r libs/mugen/requirements.txt
 
 The Python3 integration is experimental and may cause issues on some systems. It is currently not available on Windows
 and some macOS versions due to issues with ``python-sat``. Mugen requires at least Python 3.7!
@@ -125,10 +135,9 @@ Building tests
 
 Unit tests can be built with CMake via a respective flag on the command line and executed via ``ctest``::
 
-  mkdir build
+  cmake . -B build -DFICTION_TEST=ON
   cd build
-  cmake -DFICTION_TEST=ON ..
-  make
+  cmake --build . -j4
   ctest
 
 
@@ -139,11 +148,38 @@ The ``experiments`` folder provides a playground for quickly scripting some idea
 A ``fictionlib_demo.cpp`` demonstrates the usage. Any ``*.cpp`` file that is placed in that folder is automatically
 linked against *fiction* and compiled as a stand-alone binary using the following commands::
 
-  mkdir build
+  cmake . -B build -DFICTION_EXPERIMENTS=ON
   cd build
-  cmake -DFICTION_EXPERIMENTS=ON ..
-  make
+  cmake --build . -j4
 
+
+Building code benchmarks
+------------------------
+
+Using ``Catch2``'s micro-benchmarking feature, you can compile and run code tests that evaluate the performance of
+certain code constructs. The ``test/benchmark`` folder provides a selection of benchmarks we were running to evaluate
+the performance of our code during development. Any ``*.cpp`` file that is placed in that folder is automatically
+linked against *fiction* and compiled as a stand-alone binary using the following commands::
+
+  cmake . -B build -DFICTION_BENCHMARK=ON
+  cd build
+  cmake --build . -j4
+
+
+Noteworthy CMake options
+------------------------
+
+The following CMake options are available which have a potential positive impact on the build process, debugging
+attempts, or performance of the resulting binaries:
+
+* ``-DFICTION_ENABLE_IPO=ON``: Enable IPO/LTO to improve performance of resulting binaries on some systems.
+* ``-DFICTION_ENABLE_PCH=ON``: Enable precompiled headers (PCH) to speed up compilation.
+* ``-DFICTION_ENABLE_UNITY_BUILD=ON``: Enable unity builds to speed up compilation.
+* ``-DFICTION_ENABLE_SANITIZER_ADDRESS=ON``: Enable the address sanitizer to detect memory issues.
+* ``-DFICTION_ENABLE_SANITIZER_LEAK=ON``: Enable the leak sanitizer to detect memory leaks.
+* ``-DFICTION_ENABLE_SANITIZER_UNDEFINED=ON``: Enable the undefined behavior sanitizer to detect undefined behavior.
+* ``-DFICTION_ENABLE_SANITIZER_THREAD=ON``: Enable the thread sanitizer to detect multithreading-related problems.
+* ``-DFICTION_ENABLE_SANITIZER_MEMORY=ON``: Enable the memory sanitizer to detect uninitialized reads.
 
 Uninstall
 ---------

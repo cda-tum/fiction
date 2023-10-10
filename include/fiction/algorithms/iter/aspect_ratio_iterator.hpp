@@ -5,18 +5,19 @@
 #ifndef FICTION_ASPECT_RATIO_ITERATOR_HPP
 #define FICTION_ASPECT_RATIO_ITERATOR_HPP
 
-#include <algorithm>
 #include <cmath>
 #include <cstdint>
+#include <iterator>
 #include <vector>
 
 namespace fiction
 {
 /**
  * An iterator type that iterates over increasingly larger 2D aspect ratios via factorization, starting from a number of
- * faces n. After iterating over all possible factorizations of n, the next step increases n and continues with the
- * factorization. Thereby, a sequence of aspect ratios starting from \f$ n = 4 \f$ faces looks like this: \f$ 1 \times
- * 4, 4 \times 1, 2 \times 2, 1 \times 5, 5 \times 1, 1 \times 6, 6 \times 1, 2 \times 3, 3 \times 2, \dots \f$
+ * faces \f$ n \f$. After iterating over all possible factorizations of n, the next step increases \f$ n \f$ and
+ * continues with the factorization. Thereby, a sequence of aspect ratios starting from \f$ n = 4 \f$ faces looks like
+ * this: \f$ 1 \times 4, 4 \times 1, 2 \times 2, 1 \times 5, 5 \times 1, 1 \times 6, 6 \times 1, 2 \times 3, 3 \times 2,
+ * \dots \f$
  *
  * @tparam AspectRatio Aspect ratio type.
  */
@@ -26,10 +27,10 @@ class aspect_ratio_iterator
   public:
     /**
      * Standard constructor. Takes a starting value and computes an initial factorization.
-     * The value n represents the amount of faces in the desired aspect ratios. For example, \f$ n = 1 \f$ will yield
-     * aspect ratios with exactly \f$ 1 \f$ face, i.e. \f$ 1 \times 1 \f$ which is equal to `ucoord_t{0, 0}`. If \f$ n =
-     * 2 \f$, the aspect ratios \f$ 1 \times 2 \f$ and \f$ 2 \times 1 \f$ will result, which are equal to `ucoord_t{0,
-     * 1}` and `ucoord_t{1, 0}`. Both examples with `AspectRatio == offset::ucoord_t`.
+     * The value `n` represents the amount of faces in the desired aspect ratios. For example, \f$ n = 1 \f$ will
+     * yield aspect ratios with exactly \f$ 1 \f$ face, i.e. \f$ 1 \times 1 \f$ which is equal to `ucoord_t{0, 0}`. If
+     * \f$ n = 2 \f$, the aspect ratios \f$ 1 \times 2 \f$ and \f$ 2 \times 1 \f$ will result, which are equal to
+     * `ucoord_t{0, 1}` and `ucoord_t{1, 0}`. Both examples with `AspectRatio == offset::ucoord_t`.
      *
      * @param n Starting value of the aspect ratio iteration.
      */
@@ -39,7 +40,7 @@ class aspect_ratio_iterator
     }
     /**
      * Lets the iterator point to the next dimension of the current factorization. If there are no next factors,
-     * num is incremented and the next factors are computed.
+     * `num` is incremented and the next factors are computed.
      *
      * Prefix version.
      *
@@ -59,7 +60,7 @@ class aspect_ratio_iterator
     }
     /**
      * Creates a new iterator that points to the next dimension of the current factorization. If there are no next
-     * factors, num is incremented and the next factors are computed.
+     * factors, `num` is incremented and the next factors are computed.
      *
      * Postfix version. Less performance than the prefix version due to copy construction.
      *
@@ -74,47 +75,47 @@ class aspect_ratio_iterator
         return result;
     }
 
-    AspectRatio operator*() const
+    [[nodiscard]] AspectRatio operator*() const
     {
         return *it;
     }
 
-    bool operator==(const uint64_t m) const noexcept
+    [[nodiscard]] bool operator==(const uint64_t m) const noexcept
     {
         return num == m;
     }
 
-    bool operator==(const aspect_ratio_iterator& other) const
+    [[nodiscard]] bool operator==(const aspect_ratio_iterator& other) const
     {
         return (num == other.num) && (*it == *(other.it));
     }
 
-    bool operator!=(const uint64_t m) const noexcept
+    [[nodiscard]] bool operator!=(const uint64_t m) const noexcept
     {
         return num != m;
     }
 
-    bool operator!=(const aspect_ratio_iterator& other) const
+    [[nodiscard]] bool operator!=(const aspect_ratio_iterator& other) const
     {
         return !(*this == other);
     }
 
-    bool operator<(const uint64_t m) const noexcept
+    [[nodiscard]] bool operator<(const uint64_t m) const noexcept
     {
         return num < m;
     }
 
-    bool operator<(const aspect_ratio_iterator& other) const
+    [[nodiscard]] bool operator<(const aspect_ratio_iterator& other) const
     {
         return (num < other.num) || (num == other.num && *it < *(other.it));
     }
 
-    bool operator<=(const uint64_t m) const noexcept
+    [[nodiscard]] bool operator<=(const uint64_t m) const noexcept
     {
         return num <= m;
     }
 
-    bool operator<=(const aspect_ratio_iterator& other) const
+    [[nodiscard]] bool operator<=(const aspect_ratio_iterator& other) const
     {
         return (num <= other.num) || (num == other.num && *it <= *(other.it));
     }
@@ -160,7 +161,7 @@ class aspect_ratio_iterator
         it = factors.begin();
     }
     /**
-     * Computes the next possible num where a factorization \f$ (x, y) \f$ with \f$ x \cdot y = num \f$ exists.
+     * Computes the next possible `num` where a factorization \f$ (x, y) \f$ with \f$ x \cdot y = num \f$ exists.
      */
     void next() noexcept
     {

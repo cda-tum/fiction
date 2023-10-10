@@ -5,13 +5,21 @@
 #ifndef FICTION_PRINT_LAYOUT_HPP
 #define FICTION_PRINT_LAYOUT_HPP
 
+#include "fiction/layouts/bounding_box.hpp"
+#include "fiction/technology/charge_distribution_surface.hpp"
+#include "fiction/technology/sidb_defects.hpp"
+#include "fiction/technology/sidb_surface.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
+#include "fiction/utils/layout_utils.hpp"
 
 #include <fmt/color.h>
 #include <fmt/format.h>
 
+#include <algorithm>
 #include <array>
+#include <cstdint>
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -32,6 +40,23 @@ static const std::array<fmt::text_style, 4> CLOCK_COLOR{{fmt::fg(fmt::color::bla
                                                          fmt::fg(fmt::color::black) | fmt::bg(fmt::color::light_gray),
                                                          fmt::fg(fmt::color::white) | fmt::bg(fmt::color::gray),
                                                          fmt::fg(fmt::color::white) | fmt::bg(fmt::color::dark_gray)}};
+// Escape color sequence for negatively charged SiDB colors (cyan).
+static const auto SIDB_NEG_COLOR = fmt::fg(fmt::color::cyan);
+// Escape color sequence for positively charged SiDB colors (red).
+static const auto SIDB_POS_COLOR = fmt::fg(fmt::color::red);
+// Escape color sequence for charge-neutral SiDB colors (white).
+static const auto SIDB_NEUT_COLOR = fmt::fg(fmt::color::white);
+// Escape color sequence for lattice background colors (grey).
+static const auto SIDB_LAT_COLOR = fmt::fg(fmt::color::gray);
+
+// Escape color sequence for positively charged defect colors (red).
+static const auto SIDB_DEF_POS_COLOR = fmt::fg(fmt::color::red);
+// Escape color sequence for negatively charged defect colors (blue).
+static const auto SIDB_DEF_NEG_COLOR = fmt::fg(fmt::color::blue);
+// Escape color sequence for neutrally charged defect colors (yellow).
+static const auto SIDB_DEF_NEU_COLOR = fmt::fg(fmt::color::yellow);
+// Empty escape color sequence
+inline constexpr auto NO_COLOR = fmt::text_style{};
 
 }  // namespace detail
 
@@ -46,7 +71,7 @@ static const std::array<fmt::text_style, 4> CLOCK_COLOR{{fmt::fg(fmt::color::bla
  */
 template <typename Lyt>
 void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_color = true,
-                             const bool clk_color = false) noexcept
+                             const bool clk_color = false)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
 
@@ -222,6 +247,7 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
 
         ++r_ctr;
     }
+
     // flush stream
     os << std::endl;
 }
@@ -236,7 +262,7 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
  */
 template <typename Lyt>
 void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_color = true,
-                             const bool clk_color = false) noexcept
+                             const bool clk_color = false)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
 
@@ -304,8 +330,220 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
         }
         os << '\n';
     }
+
     // flush stream
     os << std::endl;
+}
+/**
+ * Writes a simplified 2D representation of an SiDB layout (SiDB and defect charges are supported) to an output stream.
+ *
+ * @tparam Lyt SiDB cell-level layout with charge-information based on SiQAD coordinates or defect-information, e.g., a
+ * `charge_distribution_surface` or `sidb_surface`.
+ * @param os Output stream to write into.
+ * @param lyt The layout of which the information is to be printed.
+ * @param cs_color Flag to utilize color escapes for charge states.
+ * @param crop_layout Flag to print the 2D bounding box of the layout, while leaving a maximum padding of one dimer row
+ * and two columns.
+ * @param draw_lattice Flag to enable lattice background drawing.
+ */
+template <typename Lyt>
+void print_sidb_layout(std::ostream& os, const Lyt& lyt, const bool cs_color = true, const bool crop_layout = false,
+                       const bool draw_lattice = true)
+{
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
+
+    // empty layout
+    if (lyt.is_empty())
+    {
+        if constexpr (has_get_sidb_defect_v<Lyt>)
+        {
+            if (lyt.num_defects() == 0)
+            {
+                os << "[i] empty layout" << std::endl;
+                return;
+            }
+        }
+        else
+        {
+            os << "[i] empty layout" << std::endl;
+            return;
+        }
+    }
+
+    const bounding_box_2d bb{lyt};
+
+    auto min_nw = bb.get_min();
+    auto max_se = bb.get_max();
+
+    std::vector<typename Lyt::cell> defects{};
+
+    // if defects exist in the layout
+    if constexpr (has_get_sidb_defect_v<Lyt>)
+    {
+        if (lyt.num_defects() != 0)
+        {
+            defects.reserve(lyt.num_defects());
+            lyt.foreach_sidb_defect([&defects](const auto& c) { defects.push_back(c.first); });
+
+            std::sort(defects.begin(), defects.end());
+
+            min_nw = min_nw > defects.front() ?
+                         defects.front() :
+                         min_nw;  // if a defect is more north-west than nw, this position is used as min
+            max_se = max_se < defects.back() ?
+                         defects.back() :
+                         max_se;  // if a defect is more south-east than se, this position is used as max
+        }
+    }
+
+    if (crop_layout)
+    {
+        // apply padding of maximally one dimer row and two columns
+        min_nw = min_nw - coordinate<Lyt>{2, 1};
+        max_se = max_se + coordinate<Lyt>{2, 1};
+
+        // ensure only full dimer rows are printed
+        min_nw.z = 0;
+        max_se.z = 1;
+    }
+
+    // loop coordinate is initialized with the north-west coordinate
+    auto loop_coordinate = min_nw;
+
+    while (loop_coordinate <= max_se)
+    {
+        // Is set to true if either charge or defect is printed at loop coordinate
+        bool already_printed = false;
+
+        // Check if layout is only a charge distribution surface
+        if constexpr (has_get_charge_state_v<Lyt>)
+        {
+            switch (lyt.get_charge_state(
+                loop_coordinate))  // switch over the charge state of the SiDB at the current coordinate
+            {
+                case sidb_charge_state::NEGATIVE:
+                {
+                    os << fmt::format(cs_color ? detail::SIDB_NEG_COLOR : detail::NO_COLOR, " ● ");
+                    already_printed = true;
+                    break;
+                }
+                case sidb_charge_state::POSITIVE:
+                {
+                    os << fmt::format(cs_color ? detail::SIDB_POS_COLOR : detail::NO_COLOR, " ⨁ ");
+                    already_printed = true;
+                    break;
+                }
+                case sidb_charge_state::NEUTRAL:
+                {
+                    os << fmt::format(cs_color ? detail::SIDB_NEUT_COLOR : detail::NO_COLOR, " ◯ ");
+                    already_printed = true;
+                    break;
+                }
+                case sidb_charge_state::NONE:
+                {
+                    break;
+                }
+            }
+        }
+
+        if constexpr (has_get_sidb_defect_v<Lyt>)
+        {
+            if (lyt.get_sidb_defect(loop_coordinate) != sidb_defect{sidb_defect_type::NONE})
+            {
+                if (is_negatively_charged_defect(lyt.get_sidb_defect(loop_coordinate)))
+                {
+                    os << fmt::format(cs_color ? detail::SIDB_DEF_NEG_COLOR : detail::NO_COLOR, " ⊟ ");
+                    already_printed = true;
+                }
+                else if (is_positively_charged_defect(lyt.get_sidb_defect(loop_coordinate)))
+                {
+                    os << fmt::format(cs_color ? detail::SIDB_DEF_POS_COLOR : detail::NO_COLOR, " ⊞ ");
+                    already_printed = true;
+                }
+                else if (is_neutrally_charged_defect(lyt.get_sidb_defect(loop_coordinate)))
+                {
+                    os << fmt::format(cs_color ? detail::SIDB_DEF_NEU_COLOR : detail::NO_COLOR, " ⊡ ");
+                    already_printed = true;
+                }
+            }
+        }
+
+        if (!already_printed && lyt.get_cell_type(loop_coordinate) != sidb_technology::cell_type::EMPTY)
+        {
+            os << fmt::format(cs_color ? detail::SIDB_DEF_NEU_COLOR : detail::NO_COLOR, " o ");
+            already_printed = true;
+        }
+
+        if (!already_printed)
+        {
+            os << (draw_lattice ? fmt::format(cs_color ? detail::SIDB_LAT_COLOR : detail::NO_COLOR, " · ") : "  ");
+        }
+
+        // if the x-coordinate of loop_coordinate is still less than the x-coordinate of the south-west cell, the
+        // x-coordinate is increased by 1
+        if (loop_coordinate.x < max_se.x)
+        {
+            loop_coordinate.x += 1;
+        }
+        else if (loop_coordinate.x == max_se.x && loop_coordinate != max_se)
+        {
+            if (loop_coordinate.z == 1)
+            {
+                os << "\n\n";  // gap between two dimers
+            }
+            else
+            {
+                os << "\n";
+            }
+            loop_coordinate.x = min_nw.x;
+            loop_coordinate.y += (loop_coordinate.z == 1) ? 1 : 0;
+            loop_coordinate.z = (loop_coordinate.z == 0) ? 1 : 0;
+        }
+        else if (loop_coordinate == max_se)
+        {
+            os << "\n\n";  // add a gap between two dimers
+            break;
+        }
+    }
+    // flush stream
+    os << std::endl;
+}
+/**
+ * A unified printer of the versions above. Depending on the passed layout type, this function will automatically select
+ * the appropriate printer to use. This simplifies printing by enabling the statement `print_layout(lyt)`.
+ *
+ * @note This function will use the respective function's default settings to print the layout.
+ *
+ * @tparam Lyt Any coordinate layout type.
+ * @param lyt The coordinate layout.
+ * @param os The output stream to write into.
+ */
+template <typename Lyt>
+void print_layout(const Lyt& lyt, std::ostream& os = std::cout)
+{
+    static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
+
+    if constexpr (is_gate_level_layout_v<Lyt>)
+    {
+        print_gate_level_layout(os, lyt);
+    }
+    else if constexpr (is_cell_level_layout_v<Lyt>)
+    {
+        if constexpr (has_sidb_technology_v<Lyt>)
+        {
+            print_sidb_layout(os, lyt);
+        }
+        else
+        {
+            print_cell_level_layout(os, lyt);
+        }
+    }
+    else
+    {
+        os << "[e] unknown layout type" << std::endl;
+    }
 }
 
 }  // namespace fiction
