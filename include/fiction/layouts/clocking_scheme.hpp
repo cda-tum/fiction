@@ -8,11 +8,13 @@
 #include "fiction/layouts/coordinates.hpp"
 #include "fiction/traits.hpp"
 
+#include <fmt/format.h>
 #include <phmap.h>
 
 #include <algorithm>
 #include <array>
 #include <cctype>
+#include <exception>
 #include <functional>
 #include <optional>
 #include <string>
@@ -57,7 +59,7 @@ class clocking_scheme
      */
     explicit clocking_scheme(std::string_view n, clock_function f, const degree in_deg, const degree out_deg,
                              const clock_number cn = 4, const bool r = true) noexcept :
-            name{std::move(n)},
+            name{n},
             max_in_degree{in_deg},
             max_out_degree{out_deg},
             num_clocks{cn},
@@ -750,6 +752,37 @@ std::optional<clocking_scheme<clock_zone<Lyt>>> get_clocking_scheme(const std::s
 
     return std::nullopt;
 }
+
+/**
+ * Exception that can be thrown when an unsupported clocking scheme is requested.
+ */
+class unsupported_clocking_scheme_exception : public std::exception
+{
+  public:
+    /**
+     * Constructs a new unsupported clocking scheme exception.
+     *
+     * @param name Given name of the unsupported clocking scheme.
+     */
+    explicit unsupported_clocking_scheme_exception(const std::string_view& name) :
+            msg{fmt::format("Unsupported clocking scheme {}.", name)}
+    {}
+    /**
+     * Returns the exception message.
+     *
+     * @return Exception message.
+     */
+    [[nodiscard]] const char* what() const noexcept override
+    {
+        return msg.c_str();
+    }
+
+  private:
+    /**
+     * Exception message.
+     */
+    std::string msg;
+};
 
 }  // namespace fiction
 

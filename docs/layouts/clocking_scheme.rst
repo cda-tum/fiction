@@ -88,9 +88,10 @@ BANCS
 
 .. doxygenfunction:: fiction::bancs_clocking
 
-Utility functions
------------------
+Utility
+-------
 
 .. doxygenfunction:: fiction::ptr(clocking_scheme<clock_zone<Lyt>>&& scheme) noexcept
 .. doxygenfunction:: fiction::is_linear_scheme(const clocking_scheme<clock_zone<Lyt>>& scheme) noexcept
 .. doxygenfunction:: fiction::get_clocking_scheme(const std::string_view& name) noexcept
+.. doxygenclass:: fiction::unsupported_clocking_scheme_exception
