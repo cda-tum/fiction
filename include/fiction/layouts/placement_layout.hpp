@@ -5,10 +5,12 @@
 #ifndef FICTION_PLACEMENT_LAYOUT_HPP
 #define FICTION_PLACEMENT_LAYOUT_HPP
 
+#include "fiction/algorithms/path_finding/distance.hpp"
 #include "fiction/traits.hpp"
 
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
+#include <mockturtle/views/fanout_view.hpp>
 
 #include <algorithm>
 #include <cassert>
@@ -23,22 +25,22 @@
 namespace fiction
 {
 
-template <typename GateLyt, typename Ntk,
+template <typename GateLyt, typename Ntk, typename Dist = uint64_t,
           bool has_placement_interface = std::conjunction_v<has_initialize_random_placement<GateLyt>,
                                                             has_random_tile<GateLyt>, has_random_node<GateLyt>>>
 class placement_layout : public GateLyt
 {};
 
-template <typename GateLyt, typename Ntk>
-class placement_layout<GateLyt, Ntk, true> : public GateLyt
+template <typename GateLyt, typename Ntk, typename Dist>
+class placement_layout<GateLyt, Ntk, Dist, true> : public GateLyt
 {
   public:
     explicit placement_layout(const Ntk&) : GateLyt() {}
     placement_layout(const GateLyt& lyt, const Ntk&) : GateLyt(lyt) {}
 };
 
-template <typename GateLyt, typename Ntk>
-class placement_layout<GateLyt, Ntk, false> : public GateLyt
+template <typename GateLyt, typename Ntk, typename Dist>
+class placement_layout<GateLyt, Ntk, Dist, false> : public GateLyt
 {
   public:
     using tile = typename GateLyt::tile;
@@ -48,19 +50,24 @@ class placement_layout<GateLyt, Ntk, false> : public GateLyt
         /**
          * Default constructor.
          */
-        explicit placement_layout_storage(const Ntk& network) :
+        explicit placement_layout_storage(const Ntk& network, const distance_functor<GateLyt, Dist>& dist) :
                 ntk{network},
+                dist_fn{dist},
                 node_to_tile{network},
                 random_node_functor{ntk.get_constant(false) == ntk.get_constant(true) ? 1u : 2u, ntk.size() - 1u}
         {}
         /**
-         * The associated network
+         * The associated network wrapped in a fanout view to enable the foreach_fanout function.
          */
-        const Ntk ntk;
+        const mockturtle::fanout_view<Ntk> ntk;
+        /**
+         * Distance cost functor to estimate wire costs.
+         */
+        const distance_functor<GateLyt, Dist> dist_fn;
         /**
          * Maps network nodes to their layout coordinates.
          */
-        mockturtle::node_map<coordinate<GateLyt>, Ntk> node_to_tile;
+        mockturtle::node_map<tile, Ntk> node_to_tile;
         /**
          * Maps layout coordinate indices to network nodes.
          */
@@ -69,10 +76,21 @@ class placement_layout<GateLyt, Ntk, false> : public GateLyt
          * A random-number generator.
          */
         std::mt19937_64 generator{std::random_device{}()};
-
+        /**
+         * Random functor for the layout's x-dimension.
+         */
         std::uniform_int_distribution<uint64_t> random_x_functor;
+        /**
+         * Random functor for the layout's y-dimension.
+         */
         std::uniform_int_distribution<uint64_t> random_y_functor;
+        /**
+         * Random functor for the layout's border tiles.
+         */
         std::uniform_int_distribution<uint64_t> random_border_tile_functor;
+        /**
+         * Random functor for the network's nodes.
+         */
         std::uniform_int_distribution<uint32_t> random_node_functor;
     };
 
@@ -84,9 +102,10 @@ class placement_layout<GateLyt, Ntk, false> : public GateLyt
      * @param lyt Existing layout that is to be extended by a placement interface.
      * @param ntk The network whose nodes are to be placed.
      */
-    placement_layout(const GateLyt& lyt, const Ntk& ntk) :
+    placement_layout(const GateLyt& lyt, const Ntk& ntk,
+                     const distance_functor<GateLyt, Dist>& dist_fn = manhattan_distance_functor<GateLyt, uint64_t>{}) :
             GateLyt(lyt),
-            strg{std::make_shared<placement_layout_storage>(ntk)}
+            strg{std::make_shared<placement_layout_storage>(ntk, dist_fn)}
     {
         static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate level layout");
         static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
@@ -138,6 +157,26 @@ class placement_layout<GateLyt, Ntk, false> : public GateLyt
 
                 ++i;
             });
+    }
+    /**
+     * Assign node `n` to tile `t`.
+     *
+     * @param n Node to assign to `t`.
+     * @param t Tile to be assigned `n`.
+     */
+    void place(const mockturtle::node<Ntk>& n, const tile& t) noexcept
+    {
+        assert(this->is_within_bounds(t) && "Tile is not within layout bounds");
+
+        if (strg->ntk.is_constant(n))
+        {
+            return;
+        }
+
+        // place node
+        strg->node_to_tile[n] = t;
+        // store node position
+        strg->tile_index_to_node[tile_to_index(t)] = n;
     }
     /**
      * Returns a random tile of this layout.
@@ -232,6 +271,47 @@ class placement_layout<GateLyt, Ntk, false> : public GateLyt
     {
         return strg->tile_index_to_node[tile_to_index(t)];
     }
+    /**
+     * Calculates the net cost of the given node. The net cost are defined as the sum of distances to all predecessors
+     * and successors in the layout.
+     *
+     * @param n The node whose net cost is to be calculated.
+     * @return The net cost of the given node.
+     */
+    [[nodiscard]] Dist net_cost(const mockturtle::node<Ntk>& n) const noexcept
+    {
+        Dist cost{0};
+
+        if (strg->ntk.is_constant(n))
+        {
+            return cost;
+        }
+
+        const auto n_t = strg->node_to_tile[n];
+
+        strg->ntk.foreach_fanin(n,
+                                [this, &cost, &n_t](auto const& fi)
+                                {
+                                    const auto fi_t = strg->node_to_tile[strg->ntk.get_node(fi)];
+
+                                    const auto add_cost = strg->dist_fn(*this, fi_t, n_t);
+
+                                    cost += add_cost;
+                                });
+
+        strg->ntk.foreach_fanout(n,
+                                 [this, &cost, &n_t](auto const& fon)
+                                 {
+                                     const auto fo_t = strg->node_to_tile[fon];
+
+                                     const auto add_cost = strg->dist_fn(*this, n_t, fo_t);
+
+                                     cost += add_cost;
+                                 });
+
+        return cost;
+    }
+
     /**
      * Applies a given function to each node of the associated network and its tile. Therefore, the function must
      * accept two arguments: a node and a tile.

@@ -69,13 +69,40 @@ TEMPLATE_TEST_CASE(
 
     auto num_placed_nodes = 0u;
     place_lyt.foreach_placed_node(
-        [&place_lyt, &num_placed_nodes](const auto&, const auto& c)
+        [&place_lyt, &num_placed_nodes](const auto&, const auto& t)
         {
             ++num_placed_nodes;
-            CHECK(place_lyt.is_within_bounds(c));
+            CHECK(place_lyt.is_within_bounds(t));
         });
 
     CHECK(num_placed_nodes == 4u);
+}
+
+TEMPLATE_TEST_CASE(
+    "Manual placement", "[placement-layout]", (gate_level_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>),
+    (gate_level_layout<synchronization_element_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>>),
+    (gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>),
+    (gate_level_layout<clocked_layout<hexagonal_layout<offset::ucoord_t>>>))
+{
+    using Ntk = technology_network;
+    auto ntk  = blueprints::unbalanced_and_inv_network<Ntk>();
+    ntk.substitute_po_signals();
+
+    REQUIRE(ntk.size() == 7u);
+
+    const TestType lyt{{6, 0}};
+
+    placement_layout place_lyt{lyt, ntk};
+
+    ntk.foreach_node([&place_lyt, i = 0u](const auto& n) mutable { place_lyt.place(n, {i++, 0}); });
+
+    place_lyt.foreach_placed_node(
+        [&place_lyt, i = 2u](const auto& n, const auto& t) mutable
+        {
+            CHECK(t == tile<decltype(place_lyt)>{i++, 0});
+            CHECK(place_lyt.get_node_tile(n) == t);
+            CHECK(place_lyt.get_tile_node(t) == n);
+        });
 }
 
 TEMPLATE_TEST_CASE(
@@ -167,4 +194,29 @@ TEMPLATE_TEST_CASE(
     {
         place_lyt.swap_random_node_and_random_tile();
     }
+}
+
+TEMPLATE_TEST_CASE(
+    "Net cost", "[placement-layout]", (gate_level_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>),
+    (gate_level_layout<synchronization_element_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>>),
+    (gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>),
+    (gate_level_layout<clocked_layout<hexagonal_layout<offset::ucoord_t>>>))
+{
+    using Ntk = technology_network;
+    auto ntk  = blueprints::unbalanced_and_inv_network<Ntk>();
+    ntk.substitute_po_signals();
+
+    REQUIRE(ntk.size() == 7u);
+
+    const TestType lyt{{6, 0}};
+
+    placement_layout place_lyt{lyt, ntk};
+
+    ntk.foreach_node([&place_lyt, i = 0u](const auto& n) mutable { place_lyt.place(n, {i++, 0}); });
+
+    CHECK(place_lyt.net_cost(2) == 3);
+    CHECK(place_lyt.net_cost(3) == 1);
+    CHECK(place_lyt.net_cost(4) == 2);
+    CHECK(place_lyt.net_cost(5) == 5);
+    CHECK(place_lyt.net_cost(6) == 1);
 }
