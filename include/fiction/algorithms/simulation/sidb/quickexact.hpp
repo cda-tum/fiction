@@ -107,11 +107,11 @@ class quickexact_impl
                 // If the layout consists of SiDBs that do not need to be negatively charged.
                 if (!all_sidbs_in_lyt_without_negative_preassigned_ones.empty())
                 {
-                    // The first cell from all_sidbs_in_lyt_without_negative_preassigned_ones is chosen as the
-                    // dependent-cell to initialize the layout (pre-assigned negatively charged SiDBs were erased with
-                    // generate_layout_without_negative_sidbs). All SiDBs are set to neutrally charged.
                     if constexpr (has_get_sidb_defect_v<Lyt>)
                     {
+                        // The first cell from all_sidbs_in_lyt_without_negative_preassigned_ones is chosen as the
+                        // dependent-cell to initialize the layout (pre-assigned negatively charged SiDBs were erased
+                        // with generate_layout_without_negative_sidbs). All SiDBs are set to neutrally charged.
                         charge_distribution_surface charge_lyt_with_assigned_dependent_cell{
                             static_cast<sidb_defect_cell_clk_lyt_siqad>(layout)};
                         charge_lyt_with_assigned_dependent_cell.assign_physical_parameters(params.physical_parameters);
@@ -503,7 +503,6 @@ class quickexact_impl
      * - It assigns the local external potential from the `params.local_external_potential` configuration to the charge
      * layout.
      * - It assigns the global external potential from `params.global_potential` to the charge layout.
-     *
      */
     void initialize_charge_layout() noexcept
     {
@@ -533,6 +532,16 @@ class quickexact_impl
         number_of_sidbs = charge_lyt.num_cells();
     }
 
+    /**
+     * This function conducts physical simulation on the given charge layout based on the specified parameters.
+     * If three-state simulation is not required, it performs a two-state simulation with a base number of 2.
+     * If three-state simulation is required, it performs a three-state simulation with a base number of 3.
+     * The simulation results are stored in the 'result' object, including additional simulation parameters.
+     *
+     * @tparam ChargeLyt The type representing the charge layout to simulate.
+     * @param three_state_simulation_required `True` if a three-state simulation is required, `false` otherwise.
+     * @param charge_layout A reference to the charge layout to be simulated.
+     */
     template <typename ChargeLyt>
     void conduct_simulation(const bool three_state_simulation_required, ChargeLyt& charge_layout)
     {
