@@ -31,9 +31,11 @@
 // #include "pyfiction/algorithms/simulation/sidb/time_to_solution.hpp"
 #include "pyfiction/algorithms/verification/design_rule_violations.hpp"
 #include "pyfiction/algorithms/verification/equivalence_checking.hpp"
+#include "pyfiction/io/read_fgl_layout.hpp"
 #include "pyfiction/io/read_fqca_layout.hpp"
 #include "pyfiction/io/read_sqd_layout.hpp"
 #include "pyfiction/io/write_dot_layout.hpp"
+#include "pyfiction/io/write_fgl_layout.hpp"
 #include "pyfiction/io/write_fqca_layout.hpp"
 #include "pyfiction/io/write_qca_layout.hpp"
 #include "pyfiction/io/write_qcc_layout.hpp"
@@ -139,12 +141,14 @@ PYBIND11_MODULE(pyfiction, m)
      * Input/Output
      */
     pyfiction::write_dot_layout(m);
+    pyfiction::write_fgl_layout(m);
     pyfiction::write_qca_layout(m);
     pyfiction::write_svg_layout(m);
     pyfiction::write_sqd_layout(m);
     pyfiction::write_qcc_layout(m);
     pyfiction::write_qll_layout(m);
     pyfiction::write_fqca_layout(m);
+    pyfiction::read_fgl_layout(m);
     pyfiction::read_fqca_layout(m);
     pyfiction::read_sqd_layout(m);
     /**

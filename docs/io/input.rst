@@ -22,14 +22,22 @@ Truth Tables
 Gate-level Layouts
 ##################
 
-**Header:** ``fiction/io/read_fgl_layout.hpp``
+.. tabs::
+    .. tab:: C++
 
-.. doxygenfunction:: fiction::read_fgl_layout(std::istream& is, const std::string_view& name = "")
-.. doxygenfunction:: fiction::read_fgl_layout(Lyt& lyt, std::istream& is)
-.. doxygenfunction:: fiction::read_fgl_layout(const std::string_view& filename, const std::string_view& name = "")
-.. doxygenfunction:: fiction::read_fgl_layout(Lyt& lyt, const std::string_view& filename)
+        **Header:** ``fiction/io/read_fgl_layout.hpp``
 
-.. doxygenclass:: fiction::fgl_parsing_error
+        .. doxygenfunction:: fiction::read_fgl_layout(std::istream& is, const std::string_view& name = "")
+        .. doxygenfunction:: fiction::read_fgl_layout(Lyt& lyt, std::istream& is)
+        .. doxygenfunction:: fiction::read_fgl_layout(const std::string_view& filename, const std::string_view& name = "")
+        .. doxygenfunction:: fiction::read_fgl_layout(Lyt& lyt, const std::string_view& filename)
+
+        .. doxygenclass:: fiction::fgl_parsing_error
+
+    .. tab:: Python
+        .. autofunction:: fiction.pyfiction.read_cartesian_fgl_layout
+        .. autofunction:: fiction.pyfiction.read_shifted_cartesian_fgl_layout
+        .. autofunction:: fiction.pyfiction.read_hexagonal_fgl_layout
 
 Cell-level Layouts
 ##################
@@ -47,8 +55,7 @@ Cell-level Layouts
         .. doxygenclass:: fiction::sqd_parsing_error
 
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.read_sqd_layout
-            :members:
+        .. autofunction:: fiction.pyfiction.read_sqd_layout
 
 .. tabs::
     .. tab:: C++
@@ -62,8 +69,7 @@ Cell-level Layouts
         .. doxygenclass:: fiction::unrecognized_cell_definition_exception
 
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.read_fqca_layout
-            :members:
+        .. autofunction:: fiction.pyfiction.read_fqca_layout
 
 SiDB Surface Defects
 ####################
