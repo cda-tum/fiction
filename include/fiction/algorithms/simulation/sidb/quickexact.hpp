@@ -73,9 +73,12 @@ class quickexact_impl
   public:
     quickexact_impl(const Lyt& lyt, const quickexact_params<Lyt>& parameter) :
             layout{lyt},
-            charge_lyt{lyt, parameter.physical_parameters, sidb_charge_state::NEGATIVE},
+            charge_lyt{lyt},
             params{parameter}
-    {}
+    {
+        charge_lyt.assign_all_charge_states(sidb_charge_state::NEGATIVE);
+        charge_lyt.assign_physical_parameters(parameter.physical_parameters);
+    }
 
     sidb_simulation_result<Lyt> run() noexcept
     {
@@ -107,51 +110,79 @@ class quickexact_impl
                     // The first cell from all_sidbs_in_lyt_without_negative_preassigned_ones is chosen as the
                     // dependent-cell to initialize the layout (pre-assigned negatively charged SiDBs were erased with
                     // generate_layout_without_negative_sidbs). All SiDBs are set to neutrally charged.
-                    charge_distribution_surface charge_lyt_with_assigned_dependent_cell{
-                        layout, params.physical_parameters, sidb_charge_state::NEUTRAL,
-                        all_sidbs_in_lyt_without_negative_preassigned_ones[0]};
-
-                    charge_lyt_with_assigned_dependent_cell.assign_local_external_potential(
-                        params.local_external_potential);
-                    charge_lyt_with_assigned_dependent_cell.assign_global_external_potential(params.global_potential);
-
                     if constexpr (has_get_sidb_defect_v<Lyt>)
                     {
+                        charge_distribution_surface charge_lyt_with_assigned_dependent_cell{
+                            static_cast<sidb_defect_cell_clk_lyt_siqad>(layout)};
+                        charge_lyt_with_assigned_dependent_cell.assign_physical_parameters(params.physical_parameters);
+                        charge_lyt_with_assigned_dependent_cell.assign_all_charge_states(sidb_charge_state::NEUTRAL);
+                        charge_lyt_with_assigned_dependent_cell.assign_dependent_cell(
+                            all_sidbs_in_lyt_without_negative_preassigned_ones[0]);
+
+                        charge_lyt_with_assigned_dependent_cell.assign_local_external_potential(
+                            params.local_external_potential);
+                        charge_lyt_with_assigned_dependent_cell.assign_global_external_potential(
+                            params.global_potential);
+
                         for (const auto& [cell, defect] : real_placed_defects)
                         {
                             charge_lyt_with_assigned_dependent_cell.add_sidb_defect_to_potential_landscape(cell,
                                                                                                            defect);
                         }
-                    }
 
-                    // IMPORTANT: The pre-assigned negatively charged SiDBs (they have to be negatively charged to
-                    // fulfill the population stability) are considered as negatively charged defects in the layout.
-                    // Hence, there are no "real" defects assigned, but in order to set some SiDBs with a fixed negative
-                    // charge, this way of implementation is chosen.
-                    for (const auto& cell : preassigned_negative_sidbs)
-                    {
-                        charge_lyt_with_assigned_dependent_cell.add_sidb_defect_to_potential_landscape(
-                            cell, sidb_defect{sidb_defect_type::UNKNOWN, -1,
-                                              charge_lyt_with_assigned_dependent_cell.get_phys_params().epsilon_r,
-                                              charge_lyt_with_assigned_dependent_cell.get_phys_params().lambda_tf});
-                    }
+                        // IMPORTANT: The pre-assigned negatively charged SiDBs (they have to be negatively charged to
+                        // fulfill the population stability) are considered as negatively charged defects in the layout.
+                        // Hence, there are no "real" defects assigned, but in order to set some SiDBs with a fixed
+                        // negative charge, this way of implementation is chosen.
+                        for (const auto& cell : preassigned_negative_sidbs)
+                        {
+                            charge_lyt_with_assigned_dependent_cell.add_sidb_defect_to_potential_landscape(
+                                cell, sidb_defect{sidb_defect_type::UNKNOWN, -1,
+                                                  charge_lyt_with_assigned_dependent_cell.get_phys_params().epsilon_r,
+                                                  charge_lyt_with_assigned_dependent_cell.get_phys_params().lambda_tf});
+                        }
 
-                    // Update all local potentials, system energy and physically validity. The Flag is set to "Variable"
-                    // to allow dependent cell to change its charge state based on the N-1 SiDBs to fulfill the local
-                    // population stability in its position.
-                    charge_lyt_with_assigned_dependent_cell.update_after_charge_change(dependent_cell_mode::VARIABLE);
+                        // Update all local potentials, system energy and physically validity. The Flag is set to
+                        // "Variable" to allow dependent cell to change its charge state based on the N-1 SiDBs to
+                        // fulfill the local population stability in its position.
+                        charge_lyt_with_assigned_dependent_cell.update_after_charge_change(
+                            dependent_cell_mode::VARIABLE);
 
-                    // If no positively charged SiDB can occur in the layout.
-                    if (!three_state_simulation_required)
-                    {
-                        result.additional_simulation_parameters.emplace_back("base_number", uint64_t{2});
-                        two_state_simulation(charge_lyt_with_assigned_dependent_cell);
+                        conduct_simulation(three_state_simulation_required, charge_lyt_with_assigned_dependent_cell);
                     }
-                    // If positively charged SiDBs can occur in the layout, 3-state simulation is conducted.
                     else
                     {
-                        result.additional_simulation_parameters.emplace_back("base_number", uint64_t{3});
-                        three_state_simulation(charge_lyt_with_assigned_dependent_cell);
+                        charge_distribution_surface charge_lyt_with_assigned_dependent_cell{
+                            static_cast<sidb_cell_clk_lyt_siqad>(layout)};
+                        charge_lyt_with_assigned_dependent_cell.assign_physical_parameters(params.physical_parameters);
+                        charge_lyt_with_assigned_dependent_cell.assign_all_charge_states(sidb_charge_state::NEUTRAL);
+                        charge_lyt_with_assigned_dependent_cell.assign_dependent_cell(
+                            all_sidbs_in_lyt_without_negative_preassigned_ones[0]);
+
+                        charge_lyt_with_assigned_dependent_cell.assign_local_external_potential(
+                            params.local_external_potential);
+                        charge_lyt_with_assigned_dependent_cell.assign_global_external_potential(
+                            params.global_potential);
+
+                        // IMPORTANT: The pre-assigned negatively charged SiDBs (they have to be negatively charged to
+                        // fulfill the population stability) are considered as negatively charged defects in the layout.
+                        // Hence, there are no "real" defects assigned, but in order to set some SiDBs with a fixed
+                        // negative charge, this way of implementation is chosen.
+                        for (const auto& cell : preassigned_negative_sidbs)
+                        {
+                            charge_lyt_with_assigned_dependent_cell.add_sidb_defect_to_potential_landscape(
+                                cell, sidb_defect{sidb_defect_type::UNKNOWN, -1,
+                                                  charge_lyt_with_assigned_dependent_cell.get_phys_params().epsilon_r,
+                                                  charge_lyt_with_assigned_dependent_cell.get_phys_params().lambda_tf});
+                        }
+
+                        // Update all local potentials, system energy and physically validity. The Flag is set to
+                        // "Variable" to allow dependent cell to change its charge state based on the N-1 SiDBs to
+                        // fulfill the local population stability in its position.
+                        charge_lyt_with_assigned_dependent_cell.update_after_charge_change(
+                            dependent_cell_mode::VARIABLE);
+
+                        conduct_simulation(three_state_simulation_required, charge_lyt_with_assigned_dependent_cell);
                     }
                 }
 
@@ -272,10 +303,13 @@ class quickexact_impl
     /**
      * This function conducts 2-state physical simulation (negative, neutral).
      *
+     * @tparam ChargeLyt Type of the charge distribution surface.
      * @param charge_layout Initialized charge layout.
      */
-    void two_state_simulation(charge_distribution_surface<Lyt>& charge_layout) noexcept
+    template <typename ChargeLyt>
+    void two_state_simulation(ChargeLyt& charge_layout) noexcept
     {
+        static_assert(is_cell_level_layout_v<ChargeLyt>, "ChargeLyt is not a cell-level layout");
         charge_layout.assign_base_number(2);
         uint64_t previous_charge_index = 0;
 
@@ -320,10 +354,13 @@ class quickexact_impl
     /**
      * This function conducts 3-state physical simulation (negative, neutral, positive).
      *
+     * @tparam ChargeLyt Type of the charge distribution surface.
      * @param charge_layout Initialized charge layout.
      */
-    void three_state_simulation(charge_distribution_surface<Lyt>& charge_layout) noexcept
+    template <typename ChargeLyt>
+    void three_state_simulation(ChargeLyt& charge_layout) noexcept
     {
+        static_assert(is_cell_level_layout_v<ChargeLyt>, "ChargeLyt is not a cell-level layout");
         charge_layout.assign_all_charge_states(sidb_charge_state::NEGATIVE);
         charge_layout.update_after_charge_change();
         // Not executed to detect if 3-state simulation is required, but to detect the SiDBs that could be positively
@@ -495,7 +532,24 @@ class quickexact_impl
         // store the number of SiDBs, since the number of active cells changes during simulation.
         number_of_sidbs = charge_lyt.num_cells();
     }
+
+    template <typename ChargeLyt>
+    void conduct_simulation(const bool three_state_simulation_required, ChargeLyt& charge_layout)
+    {
+        if (!three_state_simulation_required)
+        {
+            result.additional_simulation_parameters.emplace_back("base_number", uint64_t{2});
+            two_state_simulation(charge_layout);
+        }
+        // If positively charged SiDBs can occur in the layout, 3-state simulation is conducted.
+        else
+        {
+            result.additional_simulation_parameters.emplace_back("base_number", uint64_t{3});
+            three_state_simulation(charge_layout);
+        }
+    }
     /**
+     *
      * This function is used to generate a layout without the SiDBs that are pre-assigned to be negatively charged in a
      * physically-valid layout.
      */

@@ -312,6 +312,17 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return positions;
     }
     /**
+     * This function assigns a cell type to a given cell of the underlying cell-level layout.
+     *
+     * @param cell Cell whose type is changed.
+     * @param cell_type Cell type which is assigned to the given cell.
+     */
+    void assign_cell_type(const typename Lyt::cell& cell, const typename Lyt::cell_type& cell_type) noexcept
+    {
+        Lyt::assign_cell_type(cell, cell_type);
+        initialize(sidb_charge_state::NEGATIVE);
+    }
+    /**
      * This function assigns the physical parameters for the simulation.
      *
      * @param params Physical parameters to be assigned.
@@ -1764,6 +1775,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     void initialize(const sidb_charge_state cs = sidb_charge_state::NEGATIVE) noexcept
     {
+        strg->sidb_order  = {};
+        strg->cell_charge = {};
         strg->sidb_order.reserve(this->num_cells());
         strg->cell_charge.reserve(this->num_cells());
         this->foreach_cell([this](const auto& c1) { strg->sidb_order.push_back(c1); });
