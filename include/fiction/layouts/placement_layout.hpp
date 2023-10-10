@@ -231,7 +231,7 @@ class placement_layout<GateLyt, Ntk, false> : public GateLyt
 
     std::size_t tile_to_index(const tile& t) const noexcept
     {
-        return t.y * (this->y() + 1) + t.x;
+        return t.x + t.y * (this->x() + 1);
     }
 };
 
