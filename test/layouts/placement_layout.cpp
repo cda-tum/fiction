@@ -67,7 +67,15 @@ TEMPLATE_TEST_CASE(
     placement_layout place_lyt{lyt, ntk};
     place_lyt.initialize_random_placement();
 
-    place_lyt.foreach_placed_node([&place_lyt](const auto&, const auto& c) { CHECK(place_lyt.is_within_bounds(c)); });
+    auto num_placed_nodes = 0u;
+    place_lyt.foreach_placed_node(
+        [&place_lyt, &num_placed_nodes](const auto&, const auto& c)
+        {
+            ++num_placed_nodes;
+            CHECK(place_lyt.is_within_bounds(c));
+        });
+
+    CHECK(num_placed_nodes == 4u);
 }
 
 TEMPLATE_TEST_CASE(
@@ -89,6 +97,14 @@ TEMPLATE_TEST_CASE(
     {
         const auto t = place_lyt.random_tile();
         CHECK(place_lyt.is_within_bounds(t));
+    }
+
+    // sample 100 tiles at the border and check if they are all within the layout bounds and at the border
+    for (auto i = 0u; i < 100u; ++i)
+    {
+        const auto t = place_lyt.random_border_tile();
+        CHECK(place_lyt.is_within_bounds(t));
+        CHECK(place_lyt.is_at_any_border(t));
     }
 }
 
@@ -145,5 +161,10 @@ TEMPLATE_TEST_CASE(
         CHECK(place_lyt.get_tile_node(t) == n);
         CHECK(place_lyt.get_node_tile(t_old_n) == n_old_t);
         CHECK(place_lyt.get_tile_node(n_old_t) == t_old_n);
+    }
+
+    for (auto i = 0u; i < 100u; ++i)
+    {
+        place_lyt.swap_random_node_and_random_tile();
     }
 }

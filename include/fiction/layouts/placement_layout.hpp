@@ -56,7 +56,7 @@ class placement_layout<GateLyt, Ntk, false> : public GateLyt
         /**
          * The associated network
          */
-        const Ntk& ntk;
+        const Ntk ntk;
         /**
          * Maps network nodes to their layout coordinates.
          */
@@ -72,6 +72,7 @@ class placement_layout<GateLyt, Ntk, false> : public GateLyt
 
         std::uniform_int_distribution<uint64_t> random_x_functor;
         std::uniform_int_distribution<uint64_t> random_y_functor;
+        std::uniform_int_distribution<uint64_t> random_border_tile_functor;
         std::uniform_int_distribution<uint32_t> random_node_functor;
     };
 
@@ -90,8 +91,12 @@ class placement_layout<GateLyt, Ntk, false> : public GateLyt
         static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate level layout");
         static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
 
-        strg->random_x_functor   = std::uniform_int_distribution<uint64_t>(0, this->x());
-        strg->random_y_functor   = std::uniform_int_distribution<uint64_t>(0, this->y());
+        strg->random_x_functor = std::uniform_int_distribution<uint64_t>(0, this->x());
+        strg->random_y_functor = std::uniform_int_distribution<uint64_t>(0, this->y());
+
+        strg->random_border_tile_functor =
+            std::uniform_int_distribution<uint64_t>(0, 2 * this->x() + 2 * this->y() - 4);
+
         strg->tile_index_to_node = std::vector<mockturtle::node<Ntk>>(this->area());
     }
     /**
@@ -139,16 +144,40 @@ class placement_layout<GateLyt, Ntk, false> : public GateLyt
      *
      * @return A random tile.
      */
-    tile random_tile() const noexcept
+    [[nodiscard]] tile random_tile() const noexcept
     {
-        return {strg->random_x_functor(strg->generator), strg->random_x_functor(strg->generator)};
+        return {strg->random_x_functor(strg->generator), strg->random_y_functor(strg->generator)};
+    }
+    /**
+     * Returns a random tile at the border of this layout.
+     *
+     * @return A random border tile.
+     */
+    [[nodiscard]] tile random_border_tile() const noexcept
+    {
+        const auto border_tile_index = strg->random_border_tile_functor(strg->generator);
+
+        if (border_tile_index < this->x())
+        {
+            return {border_tile_index, 0};
+        }
+        if (border_tile_index < this->x() + this->y() - 1)
+        {
+            return {this->x(), border_tile_index - this->x() + 1};
+        }
+        if (border_tile_index < 2 * this->x() + this->y() - 2)
+        {
+            return {2 * this->x() + this->y() - 2 - border_tile_index, this->y()};
+        }
+
+        return {0, 2 * this->x() + 2 * this->y() - 3 - border_tile_index};
     }
     /**
      * Returns a random node of the associated network.
      *
      * @return A random node of the associated network.
      */
-    mockturtle::node<Ntk> random_node() const noexcept
+    [[nodiscard]] mockturtle::node<Ntk> random_node() const noexcept
     {
         return strg->ntk.index_to_node(strg->random_node_functor(strg->generator));
     }
@@ -171,25 +200,25 @@ class placement_layout<GateLyt, Ntk, false> : public GateLyt
         // swap tile contents
         strg->tile_index_to_node[tile_to_index(t)]      = n;
         strg->tile_index_to_node[tile_to_index(n_tile)] = t_node;
-
-        // TODO think about how you can use std::swap here
     }
-    //    void swap_random_tiles() noexcept
-    //    {
-    //        const auto t1 = random_tile();
-    //        const auto t2 = random_tile();
-    //
-    //        std::swap(strg->tile_index_to_node[tile_to_index(t1)], strg->tile_index_to_node[tile_to_index(t2)]);
-    //        std::swap(strg->node_to_tile[strg->tile_index_to_node[tile_to_index(t1)]],
-    //                  strg->node_to_tile[strg->tile_index_to_node[tile_to_index(t2)]]);
-    //    }
+    /**
+     * Swaps the position of a random node with the contents of a random tile. If the tile is empty, the node is
+     * merely relocated.
+     */
+    void swap_random_node_and_random_tile() noexcept
+    {
+        const auto n = random_node();
+        const auto t = random_tile();
+
+        swap_node_and_tile(n, t);
+    }
     /**
      * Returns the tile of a given node.
      *
      * @param n The node whose tile is to be returned.
      * @return The tile of the given node.
      */
-    tile get_node_tile(const mockturtle::node<Ntk>& n) const noexcept
+    [[nodiscard]] tile get_node_tile(const mockturtle::node<Ntk>& n) const noexcept
     {
         return strg->node_to_tile[n];
     }
@@ -199,14 +228,16 @@ class placement_layout<GateLyt, Ntk, false> : public GateLyt
      * @param t The tile whose node is to be returned.
      * @return The node at the given tile.
      */
-    mockturtle::node<Ntk> get_tile_node(const tile& t) const noexcept
+    [[nodiscard]] mockturtle::node<Ntk> get_tile_node(const tile& t) const noexcept
     {
         return strg->tile_index_to_node[tile_to_index(t)];
     }
     /**
+     * Applies a given function to each node of the associated network and its tile. Therefore, the function must
+     * accept two arguments: a node and a tile.
      *
-     * @tparam Fn
-     * @param fn
+     * @tparam Fn The type of the function to be applied.
+     * @param fn The function to be applied.
      */
     template <typename Fn>
     void foreach_placed_node(Fn&& fn) const
@@ -214,22 +245,33 @@ class placement_layout<GateLyt, Ntk, false> : public GateLyt
         strg->ntk.foreach_node(
             [this, &fn](auto const& n)
             {
-                if (!strg->ntk.is_constant(n))
+                if (strg->ntk.is_constant(n))
                 {
-                    if (const auto t = strg->node_to_tile[n]; !t.is_dead())
-                    {
-                        assert(t == strg->node_to_tile[n] && "node placement data is out of sync");
+                    return;
+                }
 
-                        std::invoke(std::forward<Fn>(fn), n, t);
-                    }
+                if (const auto t = strg->node_to_tile[n]; !t.is_dead())
+                {
+                    assert(t == strg->node_to_tile[n] && "node placement data is out of sync");
+
+                    std::invoke(std::forward<Fn>(fn), n, t);
                 }
             });
     }
 
   private:
+    /**
+     * The storage of the placement layout.
+     */
     storage strg;
 
-    std::size_t tile_to_index(const tile& t) const noexcept
+    /**
+     * Converts a tile to an index.
+     *
+     * @param t The tile to be converted.
+     * @return The index of the given tile.
+     */
+    [[nodiscard]] std::size_t tile_to_index(const tile& t) const noexcept
     {
         return t.x + t.y * (this->x() + 1);
     }
