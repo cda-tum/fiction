@@ -35,7 +35,7 @@ template <typename Lyt>
     // The charge layout is initialized with negatively charged SiDBs. Therefore, the local electrostatic potentials are
     // maximal. In this extreme case, if the banding is not sufficient for any SiDB to be positively charged, it will
     // not be for any other charge distribution. Therefore, no positively charged SiDBs can occur.
-    charge_distribution_surface charge_lyt{lyt};
+    charge_distribution_surface<Lyt> charge_lyt{lyt};
     charge_lyt.assign_physical_parameters(sim_params);
     charge_lyt.assign_all_charge_states(sidb_charge_state::NEGATIVE);
 
