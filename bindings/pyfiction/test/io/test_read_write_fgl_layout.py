@@ -10,20 +10,29 @@ z3 = os.environ.get("z3", "OFF")
 
 class TestReadWriteFglLayout(unittest.TestCase):
 
-    def test_read_write_cartesian(self):
+    def test_read_write(self):
         network = read_logic_network(dir_path + "/../resources/mux21.v")
-        layout = orthogonal(network)
-        write_fgl_layout(layout, "mux21.fgl")
-        read_layout = read_fgl_layout("mux21.fgl")
-        self.assertEqual(equivalence_checking(read_layout, layout), eq_type.STRONG)
+        cart_layout = orthogonal(network)
+        write_fgl_layout(cart_layout, "mux21_cartesian.fgl")
+        read_cart_layout = read_cartesian_fgl_layout("mux21_cartesian.fgl")
+        self.assertEqual(equivalence_checking(read_cart_layout, cart_layout), eq_type.STRONG)
 
-    @unittest.skipIf(z3 == "OFF", "Z3 not enabled")
-    def test_read_write_hexagonal(self):
-        network = read_logic_network(dir_path + "/../resources/mux21.v")
-        layout = exact_hexagonal(network)
-        write_fgl_layout(layout, "mux21_hex.fgl")
-        read_layout = read_fgl_layout("mux21_hex.fgl")
-        self.assertEqual(equivalence_checking(read_layout, layout), eq_type.STRONG)
+        hex_layout = hexagonalization(cart_layout)
+        write_fgl_layout(hex_layout, "mux21_hexagonal.fgl")
+        read_hexagonal_layout = read_hexagonal_fgl_layout("mux21_hexagonal.fgl")
+        self.assertEqual(equivalence_checking(read_hexagonal_layout, hex_layout), eq_type.STRONG)
+
+        shifted_cart_layout = shifted_cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout")
+        write_fgl_layout(shifted_cart_layout, "empty_shifted_cartesian.fgl")
+        read_shifted_cart_layout = read_shifted_cartesian_fgl_layout("empty_shifted_cartesian.fgl")
+        self.assertEqual(equivalence_checking(read_shifted_cart_layout, shifted_cart_layout), eq_type.STRONG)
+
+        try:
+            os.remove("mux21_cartesian.fgl")
+            os.remove("mux21_hexagonal.fgl")
+            os.remove("empty_shifted_cartesian.fgl")
+        except OSError as e:
+            print("Error: %s - %s." % (e.filename, e.strerror))
 
 
 if __name__ == '__main__':

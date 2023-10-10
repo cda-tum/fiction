@@ -18,28 +18,23 @@
 namespace pyfiction
 {
 
-namespace detail
-{
-
-template <typename Lyt>
-void read_fgl_layout(pybind11::module& m)
+inline void read_fgl_layout(pybind11::module& m)
 {
     using namespace pybind11::literals;
 
-    Lyt (*read_fgl_layout_function_pointer)(const std::string_view&, const std::string_view&) =
-        &fiction::read_fgl_layout<Lyt>;
+    py_cartesian_gate_layout (*read_cartesian_fgl_layout_function_pointer)(
+        const std::string_view&, const std::string_view&) = &fiction::read_fgl_layout<py_cartesian_gate_layout>;
+    py_shifted_cartesian_gate_layout (*read_shifted_cartesian_fgl_layout_function_pointer)(
+        const std::string_view&, const std::string_view&) = &fiction::read_fgl_layout<py_shifted_cartesian_gate_layout>;
+    py_hexagonal_gate_layout (*read_hexagonal_fgl_layout_function_pointer)(
+        const std::string_view&, const std::string_view&) = &fiction::read_fgl_layout<py_hexagonal_gate_layout>;
 
-    m.def("read_fgl_layout", read_fgl_layout_function_pointer, "filename"_a, "layout_name"_a = "",
+    m.def("read_cartesian_fgl_layout", read_cartesian_fgl_layout_function_pointer, "filename"_a, "layout_name"_a = "",
           DOC(fiction_read_fgl_layout_3));
-}
-
-}  // namespace detail
-
-inline void read_fgl_layout(pybind11::module& m)
-{
-    detail::read_fgl_layout<py_cartesian_gate_layout>(m);
-    detail::read_fgl_layout<py_shifted_cartesian_gate_layout>(m);
-    detail::read_fgl_layout<py_hexagonal_gate_layout>(m);
+    m.def("read_shifted_cartesian_fgl_layout", read_shifted_cartesian_fgl_layout_function_pointer, "filename"_a,
+          "layout_name"_a = "", DOC(fiction_read_fgl_layout_3));
+    m.def("read_hexagonal_fgl_layout", read_hexagonal_fgl_layout_function_pointer, "filename"_a, "layout_name"_a = "",
+          DOC(fiction_read_fgl_layout_3));
 }
 
 }  // namespace pyfiction
