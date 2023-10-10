@@ -291,21 +291,25 @@ class gate_level_drvs_impl
         nlohmann::json unplaced_report{};
 
         auto all_placed = true;
-        lyt.foreach_node(
-            [&unplaced_report, &all_placed, this](const auto& n)
-            {
-                // skip constants
-                if (!lyt.is_constant(n))
+
+        if (!lyt.is_empty())
+        {
+            lyt.foreach_node(
+                [&unplaced_report, &all_placed, this](const auto& n)
                 {
-                    // if a node is alive but placed on a dead tile (e.g. not placed at all)
-                    if (lyt.get_tile(n).is_dead())
+                    // skip constants
+                    if (!lyt.is_constant(n))
                     {
-                        all_placed = false;
-                        log_node(n, unplaced_report);
-                        ++pst.warnings;
+                        // if a node is alive but placed on a dead tile (e.g. not placed at all)
+                        if (lyt.get_tile(n).is_dead())
+                        {
+                            all_placed = false;
+                            log_node(n, unplaced_report);
+                            ++pst.warnings;
+                        }
                     }
-                }
-            });
+                });
+        }
 
         pst.report["Unplaced nodes"] = unplaced_report;
 
@@ -321,23 +325,27 @@ class gate_level_drvs_impl
         nlohmann::json placed_dead_report{};
 
         auto all_alive = true;
-        lyt.foreach_tile(
-            [&placed_dead_report, &all_alive, this](const auto& t)
-            {
-                // skip empty tiles
-                if (!lyt.is_empty_tile(t))
-                {
-                    const auto n = lyt.get_node(t);
 
-                    // if the node is dead but placed
-                    if (lyt.is_dead(n))
+        if (!lyt.is_empty())
+        {
+            lyt.foreach_tile(
+                [&placed_dead_report, &all_alive, this](const auto& t)
+                {
+                    // skip empty tiles
+                    if (!lyt.is_empty_tile(t))
                     {
-                        all_alive = false;
-                        log_tile(t, placed_dead_report);
-                        ++pst.warnings;
+                        const auto n = lyt.get_node(t);
+
+                        // if the node is dead but placed
+                        if (lyt.is_dead(n))
+                        {
+                            all_alive = false;
+                            log_tile(t, placed_dead_report);
+                            ++pst.warnings;
+                        }
                     }
-                }
-            });
+                });
+        }
 
         pst.report["Dead placed nodes"] = placed_dead_report;
 
@@ -353,29 +361,33 @@ class gate_level_drvs_impl
         nlohmann::json non_adjacency_report{};
 
         auto adjacencies_respected = true;
-        lyt.foreach_tile(
-            [this, &non_adjacency_report, &adjacencies_respected](const auto& t)
-            {
-                // skip empty tiles
-                if (lyt.is_empty_tile(t))
-                {
-                    return;
-                }
 
-                const auto n = lyt.get_node(t);
-
-                for (const auto& child : lyt.strg->nodes[n].children)
+        if (!lyt.is_empty())
+        {
+            lyt.foreach_tile(
+                [this, &non_adjacency_report, &adjacencies_respected](const auto& t)
                 {
-                    const auto ct = lyt.get_tile(lyt.get_node(child.index));
-                    if (!lyt.is_adjacent_elevation_of(t, ct))
+                    // skip empty tiles
+                    if (lyt.is_empty_tile(t))
                     {
-                        adjacencies_respected = false;
-                        log_tile(ct, non_adjacency_report);
-                        log_tile(t, non_adjacency_report);
-                        ++pst.drvs;
+                        return;
                     }
-                }
-            });
+
+                    const auto n = lyt.get_node(t);
+
+                    for (const auto& child : lyt.strg->nodes[n].children)
+                    {
+                        const auto ct = lyt.get_tile(lyt.get_node(child.index));
+                        if (!lyt.is_adjacent_elevation_of(t, ct))
+                        {
+                            adjacencies_respected = false;
+                            log_tile(ct, non_adjacency_report);
+                            log_tile(t, non_adjacency_report);
+                            ++pst.drvs;
+                        }
+                    }
+                });
+        }
 
         pst.report["Non adjacent connections"] = non_adjacency_report;
 
@@ -391,26 +403,30 @@ class gate_level_drvs_impl
         nlohmann::json connections_report{};
 
         auto all_connected = true;
-        lyt.foreach_tile(
-            [this, &connections_report, &all_connected](const auto& t)
-            {
-                if (lyt.is_empty_tile(t))
+
+        if (!lyt.is_empty())
+        {
+            lyt.foreach_tile(
+                [this, &connections_report, &all_connected](const auto& t)
                 {
-                    return;
-                }
+                    if (lyt.is_empty_tile(t))
+                    {
+                        return;
+                    }
 
-                const auto n = lyt.get_node(t);
+                    const auto n = lyt.get_node(t);
 
-                const bool dangling_inp_connection = lyt.fanin_size(n) == 0 && !lyt.is_pi_tile(t);
-                const bool dangling_out_connection = lyt.fanout_size(n) == 0 && !lyt.is_po_tile(t);
+                    const bool dangling_inp_connection = lyt.fanin_size(n) == 0 && !lyt.is_pi_tile(t);
+                    const bool dangling_out_connection = lyt.fanout_size(n) == 0 && !lyt.is_po_tile(t);
 
-                if (dangling_out_connection || dangling_inp_connection)
-                {
-                    all_connected = false;
-                    log_tile(t, connections_report);
-                    ++pst.drvs;
-                }
-            });
+                    if (dangling_out_connection || dangling_inp_connection)
+                    {
+                        all_connected = false;
+                        log_tile(t, connections_report);
+                        ++pst.drvs;
+                    }
+                });
+        }
 
         pst.report["Missing connections"] = connections_report;
 
@@ -426,19 +442,23 @@ class gate_level_drvs_impl
         nlohmann::json crossing_report{};
 
         auto all_wire_crossings = true;
-        lyt.foreach_wire(
-            [this, &crossing_report, &all_wire_crossings](const auto& w)
-            {
-                if (const auto t = lyt.get_tile(w); lyt.is_crossing_layer(t))
+
+        if (!lyt.is_empty())
+        {
+            lyt.foreach_wire(
+                [this, &crossing_report, &all_wire_crossings](const auto& w)
                 {
-                    if (!lyt.is_wire_tile(lyt.below(t)))
+                    if (const auto t = lyt.get_tile(w); lyt.is_crossing_layer(t))
                     {
-                        all_wire_crossings = false;
-                        log_tile(t, crossing_report);
-                        ++pst.drvs;
+                        if (!lyt.is_wire_tile(lyt.below(t)))
+                        {
+                            all_wire_crossings = false;
+                            log_tile(t, crossing_report);
+                            ++pst.drvs;
+                        }
                     }
-                }
-            });
+                });
+        }
 
         pst.report["Wires crossing gates"] = crossing_report;
 
@@ -454,28 +474,32 @@ class gate_level_drvs_impl
         nlohmann::json data_flow_report{};
 
         auto data_flow_respected = true;
-        lyt.foreach_tile(
-            [this, &data_flow_report, &data_flow_respected](const auto& t)
-            {
-                if (lyt.is_empty_tile(t))
-                {
-                    return;
-                }
 
-                const auto n = lyt.get_node(t);
-
-                for (const auto& child : lyt.strg->nodes[n].children)
+        if (!lyt.is_empty())
+        {
+            lyt.foreach_tile(
+                [this, &data_flow_report, &data_flow_respected](const auto& t)
                 {
-                    const auto ct = lyt.get_tile(lyt.get_node(child.index));
-                    if (!lyt.is_incoming_clocked(t, ct))
+                    if (lyt.is_empty_tile(t))
                     {
-                        data_flow_respected = false;
-                        log_tile(ct, data_flow_report);
-                        log_tile(t, data_flow_report);
-                        ++pst.drvs;
+                        return;
                     }
-                }
-            });
+
+                    const auto n = lyt.get_node(t);
+
+                    for (const auto& child : lyt.strg->nodes[n].children)
+                    {
+                        const auto ct = lyt.get_tile(lyt.get_node(child.index));
+                        if (!lyt.is_incoming_clocked(t, ct))
+                        {
+                            data_flow_respected = false;
+                            log_tile(ct, data_flow_report);
+                            log_tile(t, data_flow_report);
+                            ++pst.drvs;
+                        }
+                    }
+                });
+        }
 
         pst.report["Improperly clocked tiles"] = data_flow_report;
 
@@ -492,30 +516,33 @@ class gate_level_drvs_impl
 
         auto ios_present = true;
 
-        uint32_t num_io{0ul};
-
-        const auto count_io = [&num_io]([[maybe_unused]] const mockturtle::node<Lyt>& io) { ++num_io; };
-
-        has_io_report["Specified PIs"] = lyt.num_pis();
-        lyt.foreach_pi(count_io);
-        has_io_report["Counted PIs"] = num_io;
-
-        if (lyt.num_pis() != num_io || lyt.num_pis() == 0 || num_io == 0)
+        if (!lyt.is_empty())
         {
-            ios_present = false;
-            ++pst.drvs;
-        }
+            uint32_t num_io{0ul};
 
-        num_io = 0ul;
+            const auto count_io = [&num_io]([[maybe_unused]] const mockturtle::node<Lyt>& io) { ++num_io; };
 
-        has_io_report["Specified POs"] = lyt.num_pos();
-        lyt.foreach_po([this, &count_io](const auto& o) { count_io(lyt.get_node(o)); });
-        has_io_report["Counted POs"] = num_io;
+            has_io_report["Specified PIs"] = lyt.num_pis();
+            lyt.foreach_pi(count_io);
+            has_io_report["Counted PIs"] = num_io;
 
-        if (lyt.num_pos() != num_io || lyt.num_pos() == 0 || num_io == 0)
-        {
-            ios_present = false;
-            ++pst.drvs;
+            if (lyt.num_pis() != num_io || lyt.num_pis() == 0 || num_io == 0)
+            {
+                ios_present = false;
+                ++pst.drvs;
+            }
+
+            num_io = 0ul;
+
+            has_io_report["Specified POs"] = lyt.num_pos();
+            lyt.foreach_po([this, &count_io](const auto& o) { count_io(lyt.get_node(o)); });
+            has_io_report["Counted POs"] = num_io;
+
+            if (lyt.num_pos() != num_io || lyt.num_pos() == 0 || num_io == 0)
+            {
+                ios_present = false;
+                ++pst.drvs;
+            }
         }
 
         pst.report["I/O counts"] = has_io_report;
@@ -533,18 +560,21 @@ class gate_level_drvs_impl
 
         auto all_non_empty = true;
 
-        const auto check_io = [this, &empty_io_report, &all_non_empty](const mockturtle::node<Lyt>& io)
+        if (!lyt.is_empty())
         {
-            if (const auto iot = lyt.get_tile(io); lyt.is_empty_tile(iot))
+            const auto check_io = [this, &empty_io_report, &all_non_empty](const mockturtle::node<Lyt>& io)
             {
-                all_non_empty = false;
-                log_tile(iot, empty_io_report);
-                ++pst.drvs;
-            }
-        };
+                if (const auto iot = lyt.get_tile(io); lyt.is_empty_tile(iot))
+                {
+                    all_non_empty = false;
+                    log_tile(iot, empty_io_report);
+                    ++pst.drvs;
+                }
+            };
 
-        lyt.foreach_pi(check_io);
-        lyt.foreach_po([this, &check_io](const auto& o) { check_io(lyt.get_node(o)); });
+            lyt.foreach_pi(check_io);
+            lyt.foreach_po([this, &check_io](const auto& o) { check_io(lyt.get_node(o)); });
+        }
 
         pst.report["Empty I/O ports"] = empty_io_report;
 
@@ -561,18 +591,21 @@ class gate_level_drvs_impl
 
         auto all_pin = true;
 
-        const auto check_io = [this, &io_pin_report, &all_pin](const mockturtle::node<Lyt>& io)
+        if (!lyt.is_empty())
         {
-            if (const auto iot = lyt.get_tile(io); !lyt.is_buf(io))
+            const auto check_io = [this, &io_pin_report, &all_pin](const mockturtle::node<Lyt>& io)
             {
-                all_pin = false;
-                log_tile(iot, io_pin_report);
-                ++pst.warnings;
-            }
-        };
+                if (const auto iot = lyt.get_tile(io); !lyt.is_buf(io))
+                {
+                    all_pin = false;
+                    log_tile(iot, io_pin_report);
+                    ++pst.warnings;
+                }
+            };
 
-        lyt.foreach_pi(check_io);
-        lyt.foreach_po([this, &check_io](const auto& o) { check_io(lyt.get_node(o)); });
+            lyt.foreach_pi(check_io);
+            lyt.foreach_po([this, &check_io](const auto& o) { check_io(lyt.get_node(o)); });
+        }
 
         pst.report["Gate I/O ports"] = io_pin_report;
 
@@ -589,18 +622,21 @@ class gate_level_drvs_impl
 
         auto all_border = true;
 
-        const auto check_io = [this, &border_report, &all_border](const mockturtle::node<Lyt>& io)
+        if (!lyt.is_empty())
         {
-            if (const auto iot = lyt.get_tile(io); !lyt.is_at_any_border(iot))
+            const auto check_io = [this, &border_report, &all_border](const mockturtle::node<Lyt>& io)
             {
-                all_border = false;
-                log_tile(iot, border_report);
-                ++pst.warnings;
-            }
-        };
+                if (const auto iot = lyt.get_tile(io); !lyt.is_at_any_border(iot))
+                {
+                    all_border = false;
+                    log_tile(iot, border_report);
+                    ++pst.warnings;
+                }
+            };
 
-        lyt.foreach_pi(check_io);
-        lyt.foreach_po([this, &check_io](const auto& o) { check_io(lyt.get_node(o)); });
+            lyt.foreach_pi(check_io);
+            lyt.foreach_po([this, &check_io](const auto& o) { check_io(lyt.get_node(o)); });
+        }
 
         pst.report["Border I/O ports"] = border_report;
 
@@ -628,9 +664,9 @@ class gate_level_drvs_impl
  * @param pst Statistics.
  */
 template <typename Lyt>
-void gate_level_drvs(const Lyt& lyt, gate_level_drv_params ps = {}, gate_level_drv_stats* pst = nullptr)
+void gate_level_drvs(const Lyt& lyt, const gate_level_drv_params& ps = {}, gate_level_drv_stats* pst = nullptr)
 {
-    static_assert(mockturtle::is_network_type_v<Lyt>, "Lyt is not a network type");
+    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(mockturtle::has_get_node_v<Lyt>, "Lyt does not implement the get_node function");
     static_assert(mockturtle::has_node_to_index_v<Lyt>, "Lyt does not implement the node_to_index function");
     static_assert(mockturtle::has_is_constant_v<Lyt>, "Lyt does not implement the is_constant function");
