@@ -11,9 +11,9 @@
 #include <fiction/io/read_fgl_layout.hpp>
 #include <fiction/traits.hpp>
 
-#include <pybind11/pybind11.h>
-
 #include <string_view>
+
+#include <pybind11/pybind11.h>
 
 namespace pyfiction
 {
@@ -29,7 +29,8 @@ void read_fgl_layout(pybind11::module& m)
     Lyt (*read_fgl_layout_function_pointer)(const std::string_view&, const std::string_view&) =
         &fiction::read_fgl_layout<Lyt>;
 
-    m.def("read_fgl_layout", read_fgl_layout_function_pointer, "filename"_a, "layout_name"_a = "", DOC(fiction_read_fgl_layout_3));
+    m.def("read_fgl_layout", read_fgl_layout_function_pointer, "filename"_a, "layout_name"_a = "",
+          DOC(fiction_read_fgl_layout_3));
 }
 
 }  // namespace detail

@@ -26,6 +26,5 @@ class TestReadWriteFglLayout(unittest.TestCase):
         self.assertEqual(equivalence_checking(read_layout, layout), eq_type.STRONG)
 
 
-
 if __name__ == '__main__':
     unittest.main()

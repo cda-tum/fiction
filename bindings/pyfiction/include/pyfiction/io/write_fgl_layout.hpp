@@ -11,9 +11,9 @@
 #include <fiction/io/write_fgl_layout.hpp>
 #include <fiction/traits.hpp>
 
-#include <pybind11/pybind11.h>
-
 #include <string_view>
+
+#include <pybind11/pybind11.h>
 
 namespace pyfiction
 {
@@ -28,10 +28,7 @@ void write_fgl_layout(pybind11::module& m)
 
     m.def(
         "write_fgl_layout",
-        [](const Lyt& lyt, const std::string_view& filename)
-        {
-            fiction::write_fgl_layout<Lyt>(lyt, filename);
-        },
+        [](const Lyt& lyt, const std::string_view& filename) { fiction::write_fgl_layout<Lyt>(lyt, filename); },
         "layout"_a, "filename"_a, DOC(fiction_write_fgl_layout_2));
 }
 
