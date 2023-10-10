@@ -5,5 +5,6 @@ Simulated Annealing
 
 .. doxygenfunction:: fiction::linear_temperature_schedule
 .. doxygenfunction:: fiction::geometric_temperature_schedule
+.. doxygenenum:: fiction::temperature_schedules
 .. doxygenfunction:: fiction::simulated_annealing
 .. doxygenfunction:: fiction::multi_simulated_annealing

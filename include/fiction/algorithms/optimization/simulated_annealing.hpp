@@ -39,6 +39,20 @@ constexpr auto geometric_temperature_schedule(const double t) noexcept
     return t * 0.99;
 }
 /**
+ * Available temperature schedule types.
+ */
+enum class temperature_schedule
+{
+    /**
+     * Linearly decreasing temperature schedule.
+     */
+    LINEAR,
+    /**
+     * Logarithmically decreasing temperature schedule.
+     */
+    GEOMETRIC
+};
+/**
  * Simulated Annealing (SA) is a probabilistic optimization algorithm that is used to find a local minimum of a given
  * function. SA was first proposed in \"Optimization by simulated annealing\" by S. Kirkpatrick, C. D. Gelatt Jr, and M.
  * P. Vecchi in Science 1983. It is a metaheuristic that is inspired by the annealing process in metallurgy. The
