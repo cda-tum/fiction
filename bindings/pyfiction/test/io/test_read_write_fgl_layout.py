@@ -1,11 +1,8 @@
 from fiction.pyfiction import *
-from dotenv import load_dotenv
 import unittest
 import os
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
-load_dotenv()
-z3 = os.environ.get("z3", "OFF")
 
 
 class TestReadWriteFglLayout(unittest.TestCase):
