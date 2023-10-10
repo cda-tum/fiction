@@ -11,7 +11,6 @@ prune **/app
 prune **/apps
 prune **/doc
 prune **/docs
-prune **/meta
 prune **/plots
 prune **/css
 prune **/html
