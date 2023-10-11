@@ -36,8 +36,10 @@ template <typename GateLyt, typename Ntk, typename Dist>
 class placement_layout<GateLyt, Ntk, Dist, true> : public GateLyt
 {
   public:
-    explicit placement_layout(const Ntk&) : GateLyt() {}
-    placement_layout(const GateLyt& lyt, const Ntk&) : GateLyt(lyt) {}
+    placement_layout(const GateLyt& lyt, const Ntk&,
+                     const distance_functor<GateLyt, Dist>& = manhattan_distance_functor<GateLyt, uint64_t>{}) :
+            GateLyt(lyt)
+    {}
 };
 
 template <typename GateLyt, typename Ntk, typename Dist>
