@@ -36,7 +36,7 @@ namespace fiction
  * nodes.
  */
 template <typename Lyt, typename Ntk>
-[[nodiscard]] mockturtle::node_map<mockturtle::node<Lyt>, Ntk> reserve_input_nodes(Lyt& lyt, const Ntk& ntk) noexcept
+mockturtle::node_map<mockturtle::node<Lyt>, Ntk> reserve_input_nodes(Lyt& lyt, const Ntk& ntk) noexcept
 {
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
     static_assert(mockturtle::has_foreach_pi_v<Ntk>, "Ntk does not implement the foreach_pi function");
@@ -79,8 +79,7 @@ template <typename Lyt, typename Ntk>
  * @return Signal pointing to the placed gate in `lyt`.
  */
 template <typename Lyt, typename Ntk>
-[[nodiscard]] mockturtle::signal<Lyt> place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk,
-                                            const mockturtle::node<Ntk>& n) noexcept
+mockturtle::signal<Lyt> place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n) noexcept
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout type");
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
@@ -101,8 +100,9 @@ template <typename Lyt, typename Ntk>
     }
     // more gate types go here
 
-    assert(false);  // n must be of some supported type
-    return {};      // fix -Wreturn-type warning
+    assert(false && "n must be of some supported type");
+
+    return {};  // fix -Wreturn-type warning
 }
 /**
  * Place 1-input gates.
@@ -117,8 +117,8 @@ template <typename Lyt, typename Ntk>
  * @return Signal pointing to the placed gate in `lyt`.
  */
 template <typename Lyt, typename Ntk>
-[[nodiscard]] mockturtle::signal<Lyt> place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk,
-                                            const mockturtle::node<Ntk>& n, const mockturtle::signal<Lyt>& a) noexcept
+mockturtle::signal<Lyt> place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
+                              const mockturtle::signal<Lyt>& a) noexcept
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout type");
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
@@ -139,8 +139,9 @@ template <typename Lyt, typename Ntk>
     }
     // more gate types go here
 
-    assert(false);  // n must be of some supported type
-    return {};      // fix -Wreturn-type warning
+    assert(false && "n must be of some supported type");
+
+    return {};  // fix -Wreturn-type warning
 }
 
 /**
@@ -159,9 +160,9 @@ template <typename Lyt, typename Ntk>
  * @return Signal pointing to the placed gate in `lyt`.
  */
 template <typename Lyt, typename Ntk>
-[[nodiscard]] mockturtle::signal<Lyt>
-place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n, const mockturtle::signal<Lyt>& a,
-      const mockturtle::signal<Lyt>& b, const std::optional<bool>& c = std::nullopt) noexcept
+mockturtle::signal<Lyt> place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
+                              const mockturtle::signal<Lyt>& a, const mockturtle::signal<Lyt>& b,
+                              const std::optional<bool>& c = std::nullopt) noexcept
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout type");
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
@@ -229,8 +230,9 @@ place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>&
         }
     }
 
-    assert(false);  // n must be of some supported type
-    return {};      // fix -Wreturn-type warning
+    assert(false && "n must be of some supported type");
+
+    return {};  // fix -Wreturn-type warning
 }
 /**
  * Place 3-input gates.
@@ -247,9 +249,9 @@ place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>&
  * @return Signal pointing to the placed gate in `lyt`.
  */
 template <typename Lyt, typename Ntk>
-[[nodiscard]] mockturtle::signal<Lyt> place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk,
-                                            const mockturtle::node<Ntk>& n, const mockturtle::signal<Lyt>& a,
-                                            const mockturtle::signal<Lyt>& b, const mockturtle::signal<Lyt>& c) noexcept
+mockturtle::signal<Lyt> place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
+                              const mockturtle::signal<Lyt>& a, const mockturtle::signal<Lyt>& b,
+                              const mockturtle::signal<Lyt>& c) noexcept
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout type");
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
@@ -289,9 +291,8 @@ template <typename Lyt, typename Ntk>
  * @return Signal to the newly placed gate in `lyt`.
  */
 template <typename Lyt, typename Ntk>
-[[nodiscard]] mockturtle::signal<Lyt> place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk,
-                                            const mockturtle::node<Ntk>&                              n,
-                                            const mockturtle::node_map<mockturtle::signal<Lyt>, Ntk>& node2pos) noexcept
+mockturtle::signal<Lyt> place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
+                              const mockturtle::node_map<mockturtle::signal<Lyt>, Ntk>& node2pos) noexcept
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout type");
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
@@ -329,8 +330,9 @@ template <typename Lyt, typename Ntk>
 
     // NOLINTEND(*-else-after-return)
 
-    assert(false);  // unsupported number of fanins
-    return {};      // fix -Wreturn-type warning
+    assert(false && "unsupported number of fanins");
+
+    return {};  // fix -Wreturn-type warning
 }
 /**
  * A container class to help identify layout locations of branching nodes like fanouts. When a node from a network is to
@@ -440,7 +442,7 @@ struct branching_signal_container
  * @return Signal to the newly placed gate in `lyt`.
  */
 template <typename Lyt, typename Ntk, uint16_t fanout_size = 2>
-[[nodiscard]] mockturtle::signal<Lyt>
+mockturtle::signal<Lyt>
 place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
       const mockturtle::node_map<branching_signal_container<Lyt, Ntk, fanout_size>, Ntk>& node2pos) noexcept
 {
@@ -481,8 +483,9 @@ place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>&
 
     // NOLINTEND(*-else-after-return)
 
-    assert(false);  // unsupported number of fanins
-    return {};      // fix -Wreturn-type warning
+    assert(false && "unsupported number of fanins");
+
+    return {};  // fix -Wreturn-type warning
 }
 
 }  // namespace fiction

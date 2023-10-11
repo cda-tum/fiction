@@ -224,3 +224,44 @@ TEMPLATE_TEST_CASE(
 
     CHECK(place_lyt.net_cost() == 12);
 }
+
+TEMPLATE_TEST_CASE(
+    "Apply placement", "[placement-layout]", (gate_level_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>),
+    (gate_level_layout<synchronization_element_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>>),
+    (gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>),
+    (gate_level_layout<clocked_layout<hexagonal_layout<offset::ucoord_t>>>))
+{
+    using Ntk = technology_network;
+    auto ntk  = blueprints::unbalanced_and_inv_network<Ntk>();
+    ntk.substitute_po_signals();
+
+    REQUIRE(ntk.size() == 7u);
+
+    const TestType lyt{{6, 0}};
+
+    placement_layout place_lyt{lyt, ntk};
+
+    ntk.foreach_node([&place_lyt, i = 0u](const auto& n) mutable { place_lyt.place(n, {i++, 0}); });
+
+    const auto gate_lyt = place_lyt.apply_placement();
+
+    CHECK(gate_lyt.size() == 7u);
+    CHECK(gate_lyt.num_pis() == 2u);
+    CHECK(gate_lyt.num_pos() == 1u);
+    CHECK(gate_lyt.num_gates() == 2u);
+    CHECK(gate_lyt.num_wires() == 3u);
+
+    CHECK(gate_lyt.get_node({0, 0}) == 0);  // constant 0 not placed
+    CHECK(gate_lyt.get_node({1, 0}) == 0);  // constant 1 not placed
+    CHECK(gate_lyt.get_node({2, 0}) == 2);
+    CHECK(gate_lyt.get_node({3, 0}) == 3);
+    CHECK(gate_lyt.get_node({4, 0}) == 4);
+    CHECK(gate_lyt.get_node({5, 0}) == 5);
+    CHECK(gate_lyt.get_node({6, 0}) == 6);
+
+    CHECK(gate_lyt.is_pi(2));
+    CHECK(gate_lyt.is_pi(3));
+    CHECK(gate_lyt.is_inv(4));
+    CHECK(gate_lyt.is_and(5));
+    CHECK(gate_lyt.is_po(6));
+}

@@ -255,7 +255,7 @@ class gate_level_layout : public ClockedLayout
         return static_cast<signal>(t);
     }
 
-    signal create_po(const signal& s, [[maybe_unused]] const std::string& name = {}, const tile& t = {})
+    signal create_po(const signal& s, const std::string& name = {}, const tile& t = {})
     {
         const auto n = static_cast<node>(strg->nodes.size());
         strg->nodes.emplace_back();     // empty node data
@@ -967,7 +967,7 @@ class gate_level_layout : public ClockedLayout
     }
     /**
      * Applies a function to all gates (excluding dead ones) in the layout. Uses `is_gate` to check whether a node is a
-     * gate.
+     * gate. Thereby, this includes wires and fan-outs, but excludes PIs.
      *
      * @tparam Fn Functor type that has to comply with the restrictions imposed by
      * `mockturtle::foreach_element_if`.

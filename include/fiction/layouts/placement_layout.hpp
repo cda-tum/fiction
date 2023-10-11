@@ -7,7 +7,10 @@
 
 #include "fiction/algorithms/path_finding/distance.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/utils/name_utils.hpp"
+#include "fiction/utils/placement_utils.hpp"
 
+#include <fmt/format.h>
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
 #include <mockturtle/views/fanout_view.hpp>
@@ -332,6 +335,64 @@ class placement_layout<GateLyt, Ntk, Dist, false> : public GateLyt
                     std::invoke(std::forward<Fn>(fn), n, t);
                 }
             });
+    }
+    /**
+     * Applies the current placement to the underlying layout type and returns that layout.
+     *
+     * Since the `placement_layout` data type is build to swap gates and determine their costs as efficiently as
+     * possible, it does neglects some functionality of the underlying layout type. This function should be called after
+     * a sufficient placement has been determined.
+     *
+     * @return The underlying layout type with the current placement applied.
+     */
+    GateLyt apply_placement() noexcept
+    {
+        GateLyt lyt{*this};
+
+        // place PIs
+        strg->ntk.foreach_pi([&lyt, this](auto const& pi)
+                             { fiction::place(lyt, strg->node_to_tile[pi], strg->ntk, pi); });
+
+        // place gates
+        strg->ntk.foreach_gate(
+            [&lyt, this, po_counter = 0u](auto const& n) mutable noexcept
+            {
+                // 1-input gates
+                if (strg->ntk.fanin_size(n) == 1)
+                {
+                    if (strg->ntk.is_po(n))  // special case for primary outputs
+                    {
+                        lyt.create_po(mockturtle::signal<GateLyt>{},
+                                      strg->ntk.has_output_name(po_counter) ? strg->ntk.get_output_name(po_counter++) :
+                                                                              fmt::format("po{}", po_counter++),
+                                      strg->node_to_tile[n]);
+                    }
+                    else
+                    {
+                        fiction::place(lyt, strg->node_to_tile[n], strg->ntk, n, mockturtle::signal<GateLyt>{});
+                    }
+                }
+                // 2-input gates
+                else if (strg->ntk.fanin_size(n) == 2)
+                {
+                    fiction::place(lyt, strg->node_to_tile[n], strg->ntk, n, mockturtle::signal<GateLyt>{},
+                                   mockturtle::signal<GateLyt>{});
+                }
+                // 3-input gates
+                else if (strg->ntk.fanin_size(n) == 3)
+                {
+                    fiction::place(lyt, strg->node_to_tile[n], strg->ntk, n, mockturtle::signal<GateLyt>{},
+                                   mockturtle::signal<GateLyt>{}, mockturtle::signal<GateLyt>{});
+                }
+                else
+                {
+                    assert(false && "unsupported fanin size");
+                }
+            });
+
+        restore_names(strg->ntk, lyt);
+
+        return lyt;
     }
 
   private:
