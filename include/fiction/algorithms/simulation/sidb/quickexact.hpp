@@ -34,7 +34,7 @@ enum class required_simulation_base_number
      */
     THREE,
     /**
-     * Two state simulation (i.e., negative and neutral) simulation is sufficient.
+     * Two state simulation (i.e., negative and neutral) is sufficient.
      */
     TWO
 };
