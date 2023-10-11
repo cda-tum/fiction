@@ -30,13 +30,13 @@ namespace fiction
 enum class required_simulation_base_number
 {
     /**
-     * Three state simulation (i.e., negative, neutral, and positive) is required.
-     */
-    THREE,
-    /**
      * Two state simulation (i.e., negative and neutral) is sufficient.
      */
-    TWO
+    TWO,
+    /**
+     * Three state simulation (i.e., negative, neutral, and positive) is required.
+     */
+    THREE
 };
 /**
  * This struct stores the parameters for the *QuickExact* algorithm.
@@ -106,18 +106,13 @@ class quickexact_impl
             initialize_charge_layout();
 
             // Determine if three state simulation (i.e., positively charged SiDBs can occur) is required.
-            required_simulation_base_number base_number{};
-            if ((params.base_number_detection == quickexact_params<Lyt>::automatic_base_number_detection::ON &&
+            required_simulation_base_number base_number =
+                (params.base_number_detection == quickexact_params<Lyt>::automatic_base_number_detection::ON &&
                  charge_lyt.is_three_state_simulation_required()) ||
-                (params.base_number_detection == quickexact_params<Lyt>::automatic_base_number_detection::OFF &&
-                 params.physical_parameters.base == 3))
-            {
-                base_number = required_simulation_base_number::THREE;
-            }
-            else
-            {
-                base_number = required_simulation_base_number::TWO;
-            }
+                        (params.base_number_detection == quickexact_params<Lyt>::automatic_base_number_detection::OFF &&
+                         params.physical_parameters.base == 3) ?
+                    required_simulation_base_number::THREE :
+                    required_simulation_base_number::TWO;
 
             // If layout has at least two SiDBs, all SiDBs that have to be negatively charged are erased from the
             // layout.
