@@ -37,8 +37,10 @@ class TestLogicNetwork(unittest.TestCase):
         self.assertEqual(network.num_pos(), 1)
         self.assertEqual(network.pos(), [9])
         self.assertTrue(network.is_po(9))
-        self.assertTrue(network.has_output_name(0))
-        self.assertEqual(network.get_output_name(0), "out")
+        self.assertEqual(network.po_index(9), 0)
+        self.assertEqual(network.po_at(0), 9)
+        self.assertTrue(network.has_output_name(network.po_index(9)))
+        self.assertEqual(network.get_output_name(network.po_index(9)), "out")
 
         self.assertEqual(network.fanins(0), [])
         self.assertEqual(network.fanins(1), [])

@@ -146,7 +146,11 @@ void network(pybind11::module& m, const std::string& network_name)
             "index"_a)
         .def(
             "get_output_name", [](const Ntk& ntk, const uint32_t index) { return ntk.get_output_name(index); },
-            "index"_a);
+            "index"_a)
+        .def(
+            "po_index", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.po_index(n); }, "n"_a)
+        .def(
+            "po_at", [](const Ntk& ntk, const uint32_t index) { return ntk.po_at(index); }, "index"_a);
 
     /**
      * Network parsing function.
