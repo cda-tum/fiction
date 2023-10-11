@@ -27,10 +27,18 @@ class TestLogicNetwork(unittest.TestCase):
         self.assertTrue(network.is_pi(2))
         self.assertTrue(network.is_pi(3))
         self.assertTrue(network.is_pi(4))
+        self.assertTrue(network.has_name(2))
+        self.assertTrue(network.has_name(3))
+        self.assertTrue(network.has_name(4))
+        self.assertEqual(network.get_name(2), "in0")
+        self.assertEqual(network.get_name(3), "in1")
+        self.assertEqual(network.get_name(4), "in2")
 
         self.assertEqual(network.num_pos(), 1)
         self.assertEqual(network.pos(), [9])
         self.assertTrue(network.is_po(9))
+        self.assertTrue(network.has_output_name(0))
+        self.assertEqual(network.get_output_name(0), "out")
 
         self.assertEqual(network.fanins(0), [])
         self.assertEqual(network.fanins(1), [])

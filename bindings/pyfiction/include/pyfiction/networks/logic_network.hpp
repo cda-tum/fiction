@@ -13,6 +13,7 @@
 
 #include <fmt/format.h>
 #include <mockturtle/traits.hpp>
+
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
@@ -136,8 +137,16 @@ void network(pybind11::module& m, const std::string& network_name)
         .def(
             "is_xnor", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.is_xnor(n); }, "n"_a,
             DOC(fiction_technology_network_is_xnor))
-
-        ;
+        .def(
+            "has_name", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.has_name(n); }, "n"_a)
+        .def(
+            "get_name", [](const Ntk& ntk, const mockturtle::node<Ntk>& n) { return ntk.get_name(n); }, "n"_a)
+        .def(
+            "has_output_name", [](const Ntk& ntk, const uint32_t index) { return ntk.has_output_name(index); },
+            "index"_a)
+        .def(
+            "get_output_name", [](const Ntk& ntk, const uint32_t index) { return ntk.get_output_name(index); },
+            "index"_a);
 
     /**
      * Network parsing function.
