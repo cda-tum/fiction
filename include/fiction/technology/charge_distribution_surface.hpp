@@ -314,12 +314,12 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     /**
      * This function assigns a cell type to a given cell of the underlying cell-level layout.
      *
-     * @param cell Cell whose type is changed.
-     * @param cell_type Cell type which is assigned to the given cell.
+     * @param c Cell whose type is changed.
+     * @param ct Cell type which is assigned to the given cell.
      */
-    void assign_cell_type(const typename Lyt::cell& cell, const typename Lyt::cell_type& cell_type) noexcept
+    void assign_cell_type(const typename Lyt::cell& c, const typename Lyt::cell_type& ct) noexcept
     {
-        Lyt::assign_cell_type(cell, cell_type);
+        Lyt::assign_cell_type(c, ct);
         initialize(sidb_charge_state::NEGATIVE);
     }
     /**

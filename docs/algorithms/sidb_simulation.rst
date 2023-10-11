@@ -40,6 +40,7 @@ Exhaustive Ground State Simulation
 
 **Header:** ``fiction/algorithms/simulation/sidb/quickexact.hpp``
 
+.. doxygenenum:: fiction::required_simulation_base_number
 .. doxygenstruct:: fiction::quickexact_params
    :members:
 .. doxygenfunction:: fiction::quickexact

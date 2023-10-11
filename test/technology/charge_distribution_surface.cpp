@@ -40,6 +40,7 @@ TEMPLATE_TEST_CASE(
     TestType lyt{};
 
     using charge_layout = charge_distribution_surface<TestType>;
+    CHECK(is_charge_distribution_surface_v<charge_layout>);
     CHECK(is_cell_level_layout_v<charge_layout>);
     CHECK(has_assign_charge_state_v<charge_layout>);
     CHECK(has_get_charge_state_v<charge_layout>);
@@ -48,6 +49,7 @@ TEMPLATE_TEST_CASE(
     const charge_layout charge_lyt_from_lyt{lyt};
 
     using charge_charge_layout = charge_distribution_surface<charge_layout>;
+    CHECK(is_charge_distribution_surface_v<charge_charge_layout>);
     CHECK(is_cell_level_layout_v<charge_charge_layout>);
     CHECK(has_assign_charge_state_v<charge_charge_layout>);
     CHECK(has_get_charge_state_v<charge_charge_layout>);
