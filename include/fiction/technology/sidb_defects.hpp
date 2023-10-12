@@ -171,13 +171,13 @@ inline constexpr const uint16_t SIDB_NEUTRAL_DEFECT_VERTICAL_SPACING = 0u;
  * The value is to be understood as the number of DB positions rather than the number of dimers.
  * This is true even though each defect always affects the entire dimer.
  */
-inline constexpr const uint16_t SIDB_CHARGED_DEFECT_HORIZONTAL_SPACING_ON_THE_FLY_DESIGN = 4u;
+inline constexpr const uint16_t SIDB_CHARGED_DEFECT_HORIZONTAL_SPACING_ON_THE_FLY_DESIGN = 5u;
 /**
  * Vertical distance to avoid charged SiDB defects while the defect is incorporated into the SiDB gate design process.
  * The value is to be understood as the number of DB positions rather than the number of dimers.
  * This is true even though each defect always affects the entire dimer.
  */
-inline constexpr const uint16_t SIDB_CHARGED_DEFECT_VERTICAL_SPACING_ON_THE_FLY_DESIGN = 4u;
+inline constexpr const uint16_t SIDB_CHARGED_DEFECT_VERTICAL_SPACING_ON_THE_FLY_DESIGN = 5u;
 /**
  * Returns the extent of a defect as a pair of SiDB distances in horizontal and vertical direction. If defect is the
  * `NONE` defect type, `{0, 0}` is returned.

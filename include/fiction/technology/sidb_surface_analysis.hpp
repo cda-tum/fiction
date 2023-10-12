@@ -111,7 +111,7 @@ template <typename GateLibrary, typename GateLyt, typename CellLyt>
                             {
                                 black_list[t][fun].push_back(port);
                             }
-                            return;
+                            break;
                         }
                     }
                 }

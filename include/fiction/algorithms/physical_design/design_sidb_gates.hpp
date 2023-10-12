@@ -400,7 +400,6 @@ template <typename Lyt, typename TT>
         const auto result = p.run_random_design();
         found_lyts = result;
         parameter.number_of_sidbs +=1;
-        std::cout << "increase number of SiDBs" << std::endl;
     }
     return found_lyts;
 }
