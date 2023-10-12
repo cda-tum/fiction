@@ -24,7 +24,7 @@ namespace fiction
  * @param t The current temperature.
  * @return The next temperature, i.e. \f$ \texttt{t} - 10 \f$.
  */
-constexpr auto linear_temperature_schedule(const double t) noexcept
+[[nodiscard]] constexpr auto linear_temperature_schedule(const double t) noexcept
 {
     return t - 10.0;
 }
@@ -34,7 +34,7 @@ constexpr auto linear_temperature_schedule(const double t) noexcept
  * @param t The current temperature.
  * @return The next temperature, i.e. \f$ \texttt{t} \cdot 0.99 \f$.
  */
-constexpr auto geometric_temperature_schedule(const double t) noexcept
+[[nodiscard]] constexpr auto geometric_temperature_schedule(const double t) noexcept
 {
     return t * 0.99;
 }
@@ -80,7 +80,7 @@ enum class temperature_schedule
  * @return A pair of the optimized state and its cost value.
  */
 template <typename State, typename CostFunc, typename TempFunc, typename NextFunc>
-std::pair<State, std::invoke_result_t<CostFunc, State>>
+[[nodiscard]] std::pair<State, std::invoke_result_t<CostFunc, State>>
 simulated_annealing(const State& init_state, const double init_temp, const double final_temp, const std::size_t cycles,
                     CostFunc&& cost, TempFunc&& schedule, NextFunc&& next) noexcept
 {
@@ -171,7 +171,7 @@ simulated_annealing(const State& init_state, const double init_temp, const doubl
  * @return A pair of the overall best optimized state and its cost value.
  */
 template <typename RandStateFunc, typename CostFunc, typename TempFunc, typename NextFunc>
-std::pair<std::invoke_result_t<RandStateFunc>, std::invoke_result_t<CostFunc, std::invoke_result_t<RandStateFunc>>>
+[[nodiscard]] std::pair<std::invoke_result_t<RandStateFunc>, std::invoke_result_t<CostFunc, std::invoke_result_t<RandStateFunc>>>
 multi_simulated_annealing(const double init_temp, const double final_temp, const std::size_t cycles,
                           const std::size_t instances, RandStateFunc&& rand_state, CostFunc&& cost, TempFunc&& schedule,
                           NextFunc&& next) noexcept

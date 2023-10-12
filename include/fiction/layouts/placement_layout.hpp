@@ -56,13 +56,80 @@ class placement_layout<GateLyt, Ntk, Dist, false> : public GateLyt
         /**
          * Default constructor.
          */
-        explicit placement_layout_storage(const Ntk& network, const distance_functor<GateLyt, Dist>& dist) :
+        placement_layout_storage(const Ntk& network, const distance_functor<GateLyt, Dist>& dist) :
                 ntk{network},
                 dist_fn{dist},
                 node_to_tile{network},
                 net_costs(Dist{0}, node_to_tile.size()),
                 random_node_functor{ntk.get_constant(false) == ntk.get_constant(true) ? 1u : 2u, ntk.size() - 1u}
         {}
+
+        placement_layout_storage(const placement_layout_storage& other) :
+                ntk{other.ntk},
+                dist_fn{other.dist_fn},
+                node_to_tile{other.node_to_tile},
+                tile_index_to_node{other.tile_index_to_node},
+                net_costs{other.net_costs},
+                generator{other.generator},
+                random_x_functor{other.random_x_functor},
+                random_y_functor{other.random_y_functor},
+                random_border_tile_functor{other.random_border_tile_functor},
+                random_node_functor{other.random_node_functor}
+        {}
+
+        placement_layout_storage(placement_layout_storage&& other) noexcept :
+                ntk{std::move(other.ntk)},
+                dist_fn{std::move(other.dist_fn)},
+                node_to_tile{std::move(other.node_to_tile)},
+                tile_index_to_node{std::move(other.tile_index_to_node)},
+                net_costs{std::move(other.net_costs)},
+                generator{std::move(other.generator)},
+                random_x_functor{std::move(other.random_x_functor)},
+                random_y_functor{std::move(other.random_y_functor)},
+                random_border_tile_functor{std::move(other.random_border_tile_functor)},
+                random_node_functor{std::move(other.random_node_functor)}
+        {}
+
+        placement_layout_storage& operator=(const placement_layout_storage& other)
+        {
+            if (this != &other)
+            {
+                ntk                        = other.ntk;
+                dist_fn                    = other.dist_fn;
+                node_to_tile               = other.node_to_tile;
+                tile_index_to_node         = other.tile_index_to_node;
+                net_costs                  = other.net_costs;
+                generator                  = other.generator;
+                random_x_functor           = other.random_x_functor;
+                random_y_functor           = other.random_y_functor;
+                random_border_tile_functor = other.random_border_tile_functor;
+                random_node_functor        = other.random_node_functor;
+            }
+
+            return *this;
+        }
+
+        placement_layout_storage& operator=(placement_layout_storage&& other) noexcept
+        {
+            if (this != &other)
+            {
+                ntk                        = std::move(other.ntk);
+                dist_fn                    = std::move(other.dist_fn);
+                node_to_tile               = std::move(other.node_to_tile);
+                tile_index_to_node         = std::move(other.tile_index_to_node);
+                net_costs                  = std::move(other.net_costs);
+                generator                  = std::move(other.generator);
+                random_x_functor           = std::move(other.random_x_functor);
+                random_y_functor           = std::move(other.random_y_functor);
+                random_border_tile_functor = std::move(other.random_border_tile_functor);
+                random_node_functor        = std::move(other.random_node_functor);
+            }
+
+            return *this;
+        }
+
+        ~placement_layout_storage() noexcept = default;
+
         /**
          * The associated network wrapped in a fanout view to enable the foreach_fanout function.
          */
@@ -130,6 +197,60 @@ class placement_layout<GateLyt, Ntk, Dist, false> : public GateLyt
         strg->tile_index_to_node = std::vector<mockturtle::node<Ntk>>(this->area());
     }
     /**
+     * Copy constructor. Creates a deep-copy of the placement layout and its associated storage.
+     *
+     * @param other The placement layout to be copied.
+     */
+    placement_layout(const placement_layout& other) :
+            GateLyt(other),
+            strg{std::make_shared<placement_layout_storage>(*other.strg)}
+    {}
+    /**
+     * Move constructor. Creates a new layout storage and moves the contents.
+     *
+     * @param other The placement layout to be moved.
+     */
+    placement_layout(placement_layout&& other) noexcept :
+            GateLyt(other),
+            strg{std::make_shared<placement_layout_storage>(std::move(*other.strg))}
+    {}
+    /**
+     * Copy assignment operator. Creates a deep-copy of the placement layout and its associated storage.
+     *
+     * @param other The placement layout to be copied.
+     * @return A reference to this placement layout.
+     */
+    placement_layout& operator=(const placement_layout& other)
+    {
+        if (this != &other)
+        {
+            GateLyt::operator=(other);
+            strg = std::make_shared<placement_layout_storage>(*other.strg);
+        }
+
+        return *this;
+    }
+    /**
+     * Move assignment operator. Creates a new layout storage and moves the contents.
+     *
+     * @param other The placement layout to be moved.
+     * @return A reference to this placement layout.
+     */
+    placement_layout& operator=(placement_layout&& other) noexcept
+    {
+        if (this != &other)
+        {
+            GateLyt::operator=(other);
+            strg = std::make_shared<placement_layout_storage>(std::move(*other.strg));
+        }
+
+        return *this;
+    }
+    /**
+     * Default destructor.
+     */
+    ~placement_layout() noexcept = default;
+    /**
      * The resize function is not available.
      */
     void resize(const typename GateLyt::aspect_ratio& ar) = delete;
@@ -191,7 +312,9 @@ class placement_layout<GateLyt, Ntk, Dist, false> : public GateLyt
         // store node position
         strg->tile_index_to_node[tile_to_index(t)] = n;
 
-        update_net_costs(n);
+        //        update_net_costs(n);
+
+        initialize_net_costs();
     }
     /**
      * Returns a random tile of this layout.
@@ -244,6 +367,8 @@ class placement_layout<GateLyt, Ntk, Dist, false> : public GateLyt
      */
     void swap_node_and_tile(const mockturtle::node<Ntk>& n, const tile& t) noexcept
     {
+        assert(this->is_within_bounds(t) && "Tile is not within layout bounds");
+
         const auto n_tile = strg->node_to_tile[n];
         const auto t_node = strg->tile_index_to_node[tile_to_index(t)];
 
@@ -256,8 +381,10 @@ class placement_layout<GateLyt, Ntk, Dist, false> : public GateLyt
         strg->tile_index_to_node[tile_to_index(n_tile)] = t_node;
 
         // update costs
-        update_net_costs(n);
-        update_net_costs(t_node);
+        //        update_net_costs(n);
+        //        update_net_costs(t_node);
+
+        initialize_net_costs();
     }
     /**
      * Swaps the position of a random node with the contents of a random tile. If the tile is empty, the node is
@@ -288,6 +415,8 @@ class placement_layout<GateLyt, Ntk, Dist, false> : public GateLyt
      */
     [[nodiscard]] mockturtle::node<Ntk> get_tile_node(const tile& t) const noexcept
     {
+        assert(this->is_within_bounds(t) && "Tile is not within layout bounds");
+
         return strg->tile_index_to_node[tile_to_index(t)];
     }
     /**
@@ -347,16 +476,25 @@ class placement_layout<GateLyt, Ntk, Dist, false> : public GateLyt
      */
     GateLyt apply_placement() noexcept
     {
-        GateLyt lyt{*this};
+        GateLyt lyt{{this->x(), this->y()}, this->get_clocking_scheme(), this->get_layout_name()};
 
         // place PIs
-        strg->ntk.foreach_pi([&lyt, this](auto const& pi)
-                             { fiction::place(lyt, strg->node_to_tile[pi], strg->ntk, pi); });
+        strg->ntk.foreach_pi(
+            [&lyt, this](auto const& pi)
+            {
+                const auto t = strg->node_to_tile[pi];
+                assert(this->is_within_bounds(t) && "Tile is not within layout bounds");
+
+                fiction::place(lyt, t, strg->ntk, pi);
+            });
 
         // place gates
         strg->ntk.foreach_gate(
             [&lyt, this, po_counter = 0u](auto const& n) mutable noexcept
             {
+                const auto t = strg->node_to_tile[n];
+                assert(this->is_within_bounds(t) && "Tile is not within layout bounds");
+
                 // 1-input gates
                 if (strg->ntk.fanin_size(n) == 1)
                 {
@@ -365,24 +503,23 @@ class placement_layout<GateLyt, Ntk, Dist, false> : public GateLyt
                         lyt.create_po(mockturtle::signal<GateLyt>{},
                                       strg->ntk.has_output_name(po_counter) ? strg->ntk.get_output_name(po_counter++) :
                                                                               fmt::format("po{}", po_counter++),
-                                      strg->node_to_tile[n]);
+                                      t);
                     }
                     else
                     {
-                        fiction::place(lyt, strg->node_to_tile[n], strg->ntk, n, mockturtle::signal<GateLyt>{});
+                        fiction::place(lyt, t, strg->ntk, n, mockturtle::signal<GateLyt>{});
                     }
                 }
                 // 2-input gates
                 else if (strg->ntk.fanin_size(n) == 2)
                 {
-                    fiction::place(lyt, strg->node_to_tile[n], strg->ntk, n, mockturtle::signal<GateLyt>{},
-                                   mockturtle::signal<GateLyt>{});
+                    fiction::place(lyt, t, strg->ntk, n, mockturtle::signal<GateLyt>{}, mockturtle::signal<GateLyt>{});
                 }
                 // 3-input gates
                 else if (strg->ntk.fanin_size(n) == 3)
                 {
-                    fiction::place(lyt, strg->node_to_tile[n], strg->ntk, n, mockturtle::signal<GateLyt>{},
-                                   mockturtle::signal<GateLyt>{}, mockturtle::signal<GateLyt>{});
+                    fiction::place(lyt, t, strg->ntk, n, mockturtle::signal<GateLyt>{}, mockturtle::signal<GateLyt>{},
+                                   mockturtle::signal<GateLyt>{});
                 }
                 else
                 {
@@ -409,6 +546,8 @@ class placement_layout<GateLyt, Ntk, Dist, false> : public GateLyt
      */
     [[nodiscard]] std::size_t tile_to_index(const tile& t) const noexcept
     {
+        assert(this->is_within_bounds(t) && "Tile is not within layout bounds");
+
         return t.x + t.y * (this->x() + 1);
     }
     /**
