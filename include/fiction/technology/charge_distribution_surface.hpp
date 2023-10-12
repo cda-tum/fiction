@@ -126,16 +126,10 @@ class charge_distribution_surface<Lyt, false> : public Lyt
          * Standard constructor for the charge_distribution_storage.
          *
          * @param params Physical parameters used for the simulation (µ_minus, base number, ...).
-         * @param external_potential Externally applied local electrostatic potential.
-         * @param variable_cell SiDB which charge state is variable (called dependent-cell).
          */
-        explicit charge_distribution_storage(
-            const sidb_simulation_parameters&                     params             = sidb_simulation_parameters{},
-            const std::unordered_map<typename Lyt::cell, double>& external_potential = {},
-            const typename Lyt::cell&                             variable_cell      = {}) :
-                phys_params{params},
-                local_external_pot{external_potential},
-                dependent_cell{variable_cell} {};
+        explicit charge_distribution_storage(const sidb_simulation_parameters& params = sidb_simulation_parameters{}) :
+                phys_params{params}
+        {}
         /**
          * Stores all physical parameters used for the simulation.
          */
@@ -254,6 +248,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
         initialize(cs);
     }
+
     /**
      * Standard constructor for existing layouts.
      *
@@ -263,12 +258,11 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param variable_cells SiDB which charge state is variable (called dependent-cell).
      * @param external_potential Externally applied local electrostatic potential.
      */
-    explicit charge_distribution_surface(
-        const Lyt& lyt, const sidb_simulation_parameters& params = sidb_simulation_parameters{},
-        const sidb_charge_state cs = sidb_charge_state::NEGATIVE, const typename Lyt::cell& variable_cells = {},
-        const std::unordered_map<typename Lyt::cell, double>& external_potential = {}) :
+    explicit charge_distribution_surface(const Lyt&                        lyt,
+                                         const sidb_simulation_parameters& params = sidb_simulation_parameters{},
+                                         const sidb_charge_state           cs     = sidb_charge_state::NEGATIVE) :
             Lyt(lyt),
-            strg{std::make_shared<charge_distribution_storage>(params, external_potential, variable_cells)}
+            strg{std::make_shared<charge_distribution_storage>(params)}
     {
         static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
         static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
@@ -316,6 +310,17 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         }
 
         return positions;
+    }
+    /**
+     * This function assigns a cell type to a given cell of the underlying cell-level layout.
+     *
+     * @param c Cell whose type is changed.
+     * @param ct Cell type which is assigned to the given cell.
+     */
+    void assign_cell_type(const typename Lyt::cell& c, const typename Lyt::cell_type& ct) noexcept
+    {
+        Lyt::assign_cell_type(c, ct);
+        initialize(sidb_charge_state::NEGATIVE);
     }
     /**
      * This function assigns the physical parameters for the simulation.
@@ -426,6 +431,22 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             strg->cell_charge[i] = cs;
         }
         this->charge_distribution_to_index();
+    }
+    /**
+     * This function assigns the dependent cell (i.e., cell which charge state is set based on the neighbor cells
+     * and the population stability).
+     *
+     * @param dependent_cell cell which is set as the dependent cell.
+     *
+     * @note dependent_cell has to be part of the initialized charge distribution surface layout.
+     */
+    void assign_dependent_cell(const typename Lyt::cell& dependent_cell) noexcept
+    {
+        assert(cell_to_index(dependent_cell) != -1 && "dependent cell is not part of the layout");
+        strg->dependent_cell = dependent_cell;
+        strg->max_charge_index =
+            static_cast<uint64_t>(std::pow(static_cast<double>(strg->phys_params.base), this->num_cells() - 1) - 1);
+        strg->dependent_cell_index = static_cast<uint64_t>(cell_to_index(strg->dependent_cell));
     }
     /**
      * This function assigns the base number for the simulation.
@@ -1754,6 +1775,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     void initialize(const sidb_charge_state cs = sidb_charge_state::NEGATIVE) noexcept
     {
+        strg->sidb_order  = {};
+        strg->cell_charge = {};
         strg->sidb_order.reserve(this->num_cells());
         strg->cell_charge.reserve(this->num_cells());
         this->foreach_cell([this](const auto& c1) { strg->sidb_order.push_back(c1); });
@@ -1767,17 +1790,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         this->charge_distribution_to_index();
         this->initialize_nm_distance_matrix();
         this->initialize_potential_matrix();
-        if (!strg->dependent_cell.is_dead())
-        {
-            strg->max_charge_index =
-                static_cast<uint64_t>(std::pow(static_cast<double>(strg->phys_params.base), this->num_cells() - 1) - 1);
-        }
-        else
-        {
-            strg->max_charge_index =
-                static_cast<uint64_t>(std::pow(static_cast<double>(strg->phys_params.base), this->num_cells()) - 1);
-        }
-        strg->dependent_cell_index = static_cast<uint64_t>(cell_to_index(strg->dependent_cell));
+        strg->max_charge_index =
+            static_cast<uint64_t>(std::pow(static_cast<double>(strg->phys_params.base), this->num_cells()) - 1);
         this->update_local_potential();
         this->recompute_system_energy();
         this->validity_check();
@@ -1991,16 +2005,6 @@ charge_distribution_surface(const T&, const sidb_simulation_parameters&) -> char
 
 template <class T>
 charge_distribution_surface(const T&, const sidb_simulation_parameters&, sidb_charge_state cs)
-    -> charge_distribution_surface<T>;
-
-template <class T>
-charge_distribution_surface(const T&, const sidb_simulation_parameters&, sidb_charge_state cs,
-                            const typename T::cell& variable_cells) -> charge_distribution_surface<T>;
-
-template <class T>
-charge_distribution_surface(const T&, const sidb_simulation_parameters&, sidb_charge_state cs,
-                            const typename T::cell&                             variable_cells,
-                            const std::unordered_map<typename T::cell, double>& external_pot)
     -> charge_distribution_surface<T>;
 
 }  // namespace fiction

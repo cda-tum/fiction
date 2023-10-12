@@ -52,7 +52,7 @@ exhaustive_ground_state_simulation(const Lyt&                        lyt,
     {
         const mockturtle::stopwatch stop{time_counter};
 
-        charge_distribution_surface charge_lyt{lyt};
+        charge_distribution_surface<Lyt> charge_lyt{lyt};
 
         charge_lyt.assign_physical_parameters(params);
         charge_lyt.assign_all_charge_states(sidb_charge_state::NEGATIVE);
