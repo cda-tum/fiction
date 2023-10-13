@@ -47,11 +47,11 @@ int main()  // NOLINT
 
     static const std::string layouts_folder = fmt::format("{}/dynamic_gate_design/layouts", EXPERIMENTS_PATH);
 
-        const auto surface_lattice = fiction::read_sidb_surface_defects<cell_lyt>(
-            fmt::format("../../experiments/defect_aware_physical_design/{}_percent_with_charged_surface.txt", 0.5),
-            "py_test_surface");
+    const auto surface_lattice = fiction::read_sidb_surface_defects<cell_lyt>(
+        fmt::format("../../experiments/defect_aware_physical_design/{}_percent_with_charged_surface.txt", 1),
+        "py_test_surface");
 
-        const auto lattice_tiling = gate_lyt{{11, 30}};
+    const auto lattice_tiling = gate_lyt{{11, 30}};
 
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint64_t, uint64_t,
                             uint64_t, uint32_t, uint32_t, uint64_t, uint64_t, double, bool, uint64_t, double>
@@ -104,9 +104,8 @@ int main()  // NOLINT
 
     const fiction::technology_mapping_params tech_map_params = fiction::all_2_input_functions();
 
-        const auto black_list =
-            fiction::sidb_surface_analysis<fiction::sidb_skeleton_bestagon_library>(lattice_tiling,
-            surface_lattice, true);
+    const auto black_list =
+        fiction::sidb_surface_analysis<fiction::sidb_skeleton_bestagon_library>(lattice_tiling, surface_lattice, true);
 
     // parameters for SMT-based physical design
     fiction::exact_physical_design_params<gate_lyt> exact_params{};
@@ -120,15 +119,14 @@ int main()  // NOLINT
     fiction::exact_physical_design_stats exact_stats{};
     exact_params.black_list = black_list;
 
-            constexpr const uint64_t bench_select =
-                fiction_experiments::all & ~fiction_experiments::parity & ~fiction_experiments::two_bit_add_maj &
-                ~fiction_experiments::b1_r2 & ~fiction_experiments::clpl & ~fiction_experiments::iscas85 &
-                ~fiction_experiments::epfl & ~fiction_experiments::half_adder & ~fiction_experiments::full_adder &
-                ~fiction_experiments::one_bit_add_aoig & ~fiction_experiments::one_bit_add_maj &
-                ~fiction_experiments::cm82a_5;
-    //    //
+    constexpr const uint64_t bench_select =
+        fiction_experiments::all & ~fiction_experiments::parity & ~fiction_experiments::two_bit_add_maj &
+        ~fiction_experiments::b1_r2 & ~fiction_experiments::clpl & ~fiction_experiments::iscas85 &
+        ~fiction_experiments::epfl & ~fiction_experiments::half_adder & ~fiction_experiments::full_adder &
+        ~fiction_experiments::one_bit_add_aoig & ~fiction_experiments::one_bit_add_maj & ~fiction_experiments::cm82a_5;
+    //
 
-//    constexpr const uint64_t bench_select = fiction_experiments::xor5_r1;
+    //    constexpr const uint64_t bench_select = fiction_experiments::t;
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
@@ -170,8 +168,8 @@ int main()  // NOLINT
 
             // apply dynamic gate library
             const auto cell_level_layout =
-                fiction::apply_dynamic_gate_library<cell_lyt, fiction::sidb_dynamic_gate_library>(
-                    *gate_level_layout, surface_lattice);
+                fiction::apply_dynamic_gate_library<cell_lyt, fiction::sidb_dynamic_gate_library>(*gate_level_layout,
+                                                                                                  surface_lattice);
 
             // compute area
             fiction::area_stats                            area_stats{};
@@ -179,11 +177,11 @@ int main()  // NOLINT
             fiction::area(cell_level_layout, area_ps, &area_stats);
             fiction::sidb_surface<cell_lyt> defect_surface{cell_level_layout};
 
-                        surface_lattice.foreach_sidb_defect([&defect_surface](const auto& defect)
-                                                            { defect_surface.assign_sidb_defect(defect.first,
-                                                            defect.second); });
+            surface_lattice.foreach_sidb_defect([&defect_surface](const auto& defect)
+                                                { defect_surface.assign_sidb_defect(defect.first, defect.second); });
             // write a SiQAD simulation file
-            fiction::write_sqd_layout(defect_surface, fmt::format("{}/{}_wo_blacklist.sqd", layouts_folder, benchmark));
+            fiction::write_sqd_layout(defect_surface,
+                                      fmt::format("{}/{}_after_huge_change.sqd", layouts_folder, benchmark));
 
             // log results
             bestagon_exp(

@@ -294,6 +294,7 @@ class sidb_bestagon_library : public fcn_gate_library<sidb_technology, 60, 46>  
         return ports;
     }
 
+  private:
     template <typename Lyt>
     [[nodiscard]] static port_list<port_direction> determine_port_routing(const Lyt& lyt, const tile<Lyt>& t) noexcept
     {
