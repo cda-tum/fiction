@@ -317,6 +317,9 @@ class fcn_gate_library
      */
     static constexpr const fcn_gate EMPTY_GATE =
         fiction::create_array<GateSizeY>(fiction::create_array<GateSizeX>(Technology::cell_type::EMPTY));
+
+    static constexpr const fcn_gate ERROR =
+        fiction::create_array<GateSizeY>(fiction::create_array<GateSizeX>(Technology::cell_type::NORMAL));
 };
 
 }  // namespace fiction

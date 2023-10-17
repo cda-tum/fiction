@@ -6,14 +6,17 @@
 
 #include "fiction_experiments.hpp"
 
+#include <fiction/algorithms/iter/aspect_ratio_iterator.hpp>
 #include <fiction/algorithms/network_transformation/technology_mapping.hpp>  // technology mapping
 #include <fiction/algorithms/physical_design/apply_gate_library.hpp>         // layout conversion to cell-level
+#include <fiction/algorithms/physical_design/dynamic_gate_layout.hpp>
 #include <fiction/algorithms/physical_design/exact.hpp>                      // SMT-based physical design of FCN layouts
 #include <fiction/algorithms/physical_design/orthogonal.hpp>
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/io/read_sidb_surface_defects.hpp>                               // reader for simulated SiDB surfaces
 #include <fiction/io/read_sqd_layout.hpp>                                         // reader for SiQAD files
 #include <fiction/io/write_sqd_layout.hpp>                   // writer for SiQAD files (physical simulation)
+#include <fiction/layouts/coordinates.hpp>
 #include <fiction/networks/technology_network.hpp>           // technology-mapped network type
 #include <fiction/technology/area.hpp>                       // area requirement calculations
 #include <fiction/technology/cell_technologies.hpp>          // cell implementations
@@ -47,112 +50,114 @@ int main()  // NOLINT
 
     static const std::string layouts_folder = fmt::format("{}/dynamic_gate_design/layouts", EXPERIMENTS_PATH);
 
-    const auto surface_lattice = fiction::read_sidb_surface_defects<cell_lyt>(
-        fmt::format("../../experiments/defect_aware_physical_design/{}_percent_with_charged_surface.txt", 1),
-        "py_test_surface");
+    std::vector<double> defct_conc = {1};
 
-    const auto lattice_tiling = gate_lyt{{11, 30}};
-
-    experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint64_t, uint64_t,
-                            uint64_t, uint32_t, uint32_t, uint64_t, uint64_t, double, bool, uint64_t, double>
-        bestagon_exp{"bestagon",
-                     "benchmark",
-                     "inputs",
-                     "outputs",
-                     "initial nodes",
-                     "initial depth",
-                     "optimized nodes",
-                     "optimized depth",
-                     "layout width (in tiles)",
-                     "layout height (in tiles)",
-                     "layout area (in tiles)",
-                     "gates",
-                     "wires",
-                     "critical path",
-                     "throughput",
-                     "runtime (in sec)",
-                     "equivalent",
-                     "SiDB dots",
-                     "layout area in nm²"};
-
-    //    // parameterize the H-Si(100) 2x1 surface to ignore certain defect types
-    //    const fiction::sidb_surface_params surface_params{
-    //        std::unordered_set<fiction::sidb_defect_type>{fiction::sidb_defect_type::DB}};
-
-    //    const fiction::sidb_surface_params surface_params{};
-    //            static const std::string surface_data_path =
-    //                fmt::format("{}/defect_aware_physical_design/defects_full56_Oct.xml", EXPERIMENTS_PATH);
-    //            fiction::sidb_surface<cell_lyt> surface_lattice{surface_params};
-    //            std::cout << surface_lattice.num_defects() << std::endl;
-    //            fiction::read_sqd_layout(surface_lattice, surface_data_path);
-    //            const auto number_defects = surface_lattice.num_defects();
-    //            std::cout << number_defects << std::endl;
-    //            const auto lattice_tiling = gate_lyt{{13, 14}};
-
-    // fiction::sidb_surface<cell_lyt> surface_lattice{surface_params};
-    // fiction::read_sqd_layout(surface_lattice, surface_data_path);
-
-    // instantiate a complete XAG NPN database for node re-synthesis
-    const mockturtle::xag_npn_resynthesis<mockturtle::xag_network,                    // the input network type
-                                          mockturtle::xag_network,                    // the database network type
-                                          mockturtle::xag_npn_db_kind::xag_complete>  // the kind of database to use
-        resynthesis_function{};
-
-    // parameters for cut rewriting
-    mockturtle::cut_rewriting_params cut_params{};
-    cut_params.cut_enumeration_ps.cut_size = 4;
-
-    const fiction::technology_mapping_params tech_map_params = fiction::all_2_input_functions();
-
-    const auto black_list =
-        fiction::sidb_surface_analysis<fiction::sidb_skeleton_bestagon_library>(lattice_tiling, surface_lattice, true);
-
-    // parameters for SMT-based physical design
-    fiction::exact_physical_design_params<gate_lyt> exact_params{};
-    exact_params.scheme        = fiction::ptr<gate_lyt>(fiction::row_clocking<gate_lyt>(fiction::num_clks::FOUR));
-    exact_params.crossings     = true;
-    exact_params.border_io     = false;
-    exact_params.desynchronize = false;
-    exact_params.timeout       = 3'600'000;  // 1h in ms
-    exact_params.upper_bound_x = 11;
-    exact_params.upper_bound_y = 30;
-    fiction::exact_physical_design_stats exact_stats{};
-    exact_params.black_list = black_list;
-
-    constexpr const uint64_t bench_select =
-        fiction_experiments::all & ~fiction_experiments::parity & ~fiction_experiments::two_bit_add_maj &
-        ~fiction_experiments::b1_r2 & ~fiction_experiments::clpl & ~fiction_experiments::iscas85 &
-        ~fiction_experiments::epfl & ~fiction_experiments::half_adder & ~fiction_experiments::full_adder &
-        ~fiction_experiments::one_bit_add_aoig & ~fiction_experiments::one_bit_add_maj & ~fiction_experiments::cm82a_5;
-    //
-
-    //    constexpr const uint64_t bench_select = fiction_experiments::t;
-
-    for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
+    for (const auto& conc : defct_conc)
     {
-        fmt::print("[i] processing {}\n", benchmark);
-        mockturtle::xag_network xag{};
+        std::cout << conc << std::endl;
+        const auto surface_lattice = fiction::read_sidb_surface_defects<cell_lyt>(
+            fmt::format("../../experiments/defect_aware_physical_design/{}_percent_with_charged_surface.txt", conc),
+            "py_test_surface");
 
-        const auto read_verilog_result =
-            lorina::read_verilog(fiction_experiments::benchmark_path(benchmark), mockturtle::verilog_reader(xag));
-        assert(read_verilog_result == lorina::return_code::success);
+        const auto lattice_tiling = gate_lyt{{11, 30}};
 
-        // compute depth
-        const mockturtle::depth_view depth_xag{xag};
+        experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint64_t,
+                                uint64_t, uint64_t, uint32_t, uint32_t, uint64_t, uint64_t, double, bool, uint64_t,
+                                double>
+            bestagon_exp{"bestagon",
+                         "benchmark",
+                         "inputs",
+                         "outputs",
+                         "initial nodes",
+                         "initial depth",
+                         "optimized nodes",
+                         "optimized depth",
+                         "layout width (in tiles)",
+                         "layout height (in tiles)",
+                         "layout area (in tiles)",
+                         "gates",
+                         "wires",
+                         "critical path",
+                         "throughput",
+                         "runtime (in sec)",
+                         "equivalent",
+                         "SiDB dots",
+                         "layout area in nm²"};
 
-        // rewrite network cuts using the given re-synthesis function
-        const auto cut_xag = mockturtle::cut_rewriting(xag, resynthesis_function, cut_params);
+//        constexpr const uint64_t bench_select =
+//            fiction_experiments::all & ~fiction_experiments::parity & ~fiction_experiments::two_bit_add_maj &
+//            ~fiction_experiments::b1_r2 & ~fiction_experiments::clpl & ~fiction_experiments::iscas85 &
+//            ~fiction_experiments::epfl & ~fiction_experiments::half_adder & ~fiction_experiments::full_adder &
+//            ~fiction_experiments::one_bit_add_aoig & ~fiction_experiments::one_bit_add_maj & ~fiction_experiments::cm82a_5;
 
-        // perform technology mapping
-        const auto mapped_network = fiction::technology_mapping(cut_xag, tech_map_params);
-        // compute depth
-        const mockturtle::depth_view depth_mapped_network{mapped_network};
+        constexpr const uint64_t bench_select = fiction_experiments::majority_5_r1;
 
-        // perform layout generation with an SMT-based exact algorithm
-        const auto gate_level_layout = fiction::exact<gate_lyt>(mapped_network, exact_params, &exact_stats);
-
-        if (gate_level_layout.has_value())
+        for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
         {
+            fmt::print("[i] processing {}\n", benchmark);
+            mockturtle::xag_network xag{};
+
+            const auto read_verilog_result =
+                lorina::read_verilog(fiction_experiments::benchmark_path(benchmark), mockturtle::verilog_reader(xag));
+            assert(read_verilog_result == lorina::return_code::success);
+
+            // compute depth
+            const mockturtle::depth_view depth_xag{xag};
+
+            const fiction::technology_mapping_params tech_map_params = fiction::all_2_input_functions();
+
+            // parameters for cut rewriting
+            mockturtle::cut_rewriting_params cut_params{};
+            cut_params.cut_enumeration_ps.cut_size = 4;
+
+            const mockturtle::xag_npn_resynthesis<
+                mockturtle::xag_network,                    // the input network type
+                mockturtle::xag_network,                    // the database network type
+                mockturtle::xag_npn_db_kind::xag_complete>  // the kind of database to use
+                resynthesis_function{};
+
+            // rewrite network cuts using the given re-synthesis function
+            const auto cut_xag = mockturtle::cut_rewriting(xag, resynthesis_function, cut_params);
+
+            // perform technology mapping
+            const auto mapped_network = fiction::technology_mapping(cut_xag, tech_map_params);
+            // compute depth
+            const mockturtle::depth_view depth_mapped_network{mapped_network};
+
+            std::optional<gate_lyt> gate_level_layout = std::nullopt;
+            cell_lyt                cell_level_layout{{}, "fail"};
+
+            // fiction::aspect_ratio_iterator<fiction::offset::ucoord_t> ari{1};
+            std::pair<uint64_t, uint64_t> pair = {0, 0};
+
+            auto black_list = fiction::sidb_surface_analysis<fiction::sidb_skeleton_bestagon_library>(
+                lattice_tiling, surface_lattice, true, pair);
+
+            while (!gate_level_layout.has_value() || cell_level_layout.get_layout_name() == "fail")
+            {
+                std::cout << black_list.size() << std::endl;
+                gate_level_layout = fiction::run<cell_lyt, gate_lyt, fiction::sidb_skeleton_bestagon_library>(
+                    layouts_folder, surface_lattice, lattice_tiling, benchmark, pair, black_list);
+                if (gate_level_layout.has_value())
+                {
+                    cell_level_layout =
+                        fiction::apply_dynamic_gate_library<cell_lyt, fiction::sidb_dynamic_gate_library, gate_lyt,
+                                                            fiction::sidb_skeleton_bestagon_library>(
+                            *gate_level_layout, surface_lattice, fiction::sidb_dynamic_gate_library_params{}, pair,
+                            black_list);
+                    //                pair.first += 1;
+                    //                pair.second += 1;
+                    // ari++;
+                }
+                else
+                {
+                    // ari++;
+                    //                pair.first += 1;
+                    //                pair.second += 1;
+                }
+                std::cout << fmt::format("x: {} | y: {}", pair.first, pair.second) << std::endl;
+            }
+
             // check equivalence
             const auto miter = mockturtle::miter<fiction::technology_network>(mapped_network, *gate_level_layout);
             const auto eq    = mockturtle::equivalence_checking(*miter);
@@ -162,14 +167,7 @@ int main()  // NOLINT
             fiction::critical_path_length_and_throughput_stats cp_tp_stats{};
             fiction::critical_path_length_and_throughput(*gate_level_layout, &cp_tp_stats);
 
-            // apply Bestagon gate library
-            //            const auto cell_level_layout =
-            //                fiction::apply_gate_library<cell_lyt, fiction::sidb_bestagon_library>(*gate_level_layout);
-
             // apply dynamic gate library
-            const auto cell_level_layout =
-                fiction::apply_dynamic_gate_library<cell_lyt, fiction::sidb_dynamic_gate_library>(*gate_level_layout,
-                                                                                                  surface_lattice);
 
             // compute area
             fiction::area_stats                            area_stats{};
@@ -184,23 +182,15 @@ int main()  // NOLINT
                                       fmt::format("{}/{}_after_huge_change.sqd", layouts_folder, benchmark));
 
             // log results
-            bestagon_exp(
-                benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(), mapped_network.num_gates(),
-                depth_mapped_network.depth(), gate_level_layout->x() + 1, gate_level_layout->y() + 1,
-                (gate_level_layout->x() + 1) * (gate_level_layout->y() + 1), gate_level_layout->num_gates(),
-                gate_level_layout->num_wires(), cp_tp_stats.critical_path_length, cp_tp_stats.throughput,
-                mockturtle::to_seconds(exact_stats.time_total), *eq, cell_level_layout.num_cells(), area_stats.area);
-        }
-        else  // no layout was obtained
-        {
-            // log results
             bestagon_exp(benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(),
-                         mapped_network.num_gates(), depth_mapped_network.depth(), 0, 0, 0, 0, 0, 0, 0,
-                         mockturtle::to_seconds(exact_stats.time_total), false, 0, 0);
+                         mapped_network.num_gates(), depth_mapped_network.depth(), gate_level_layout->x() + 1,
+                         gate_level_layout->y() + 1, (gate_level_layout->x() + 1) * (gate_level_layout->y() + 1),
+                         gate_level_layout->num_gates(), gate_level_layout->num_wires(),
+                         cp_tp_stats.critical_path_length, cp_tp_stats.throughput, 0.0, *eq,
+                         cell_level_layout.num_cells(), area_stats.area);
+            bestagon_exp.save();
+            bestagon_exp.table();
         }
-
-        bestagon_exp.save();
-        bestagon_exp.table();
     }
 
     return EXIT_SUCCESS;

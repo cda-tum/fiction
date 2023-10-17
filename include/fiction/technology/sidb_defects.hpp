@@ -167,18 +167,6 @@ inline constexpr const uint16_t SIDB_NEUTRAL_DEFECT_HORIZONTAL_SPACING = 1u;
  */
 inline constexpr const uint16_t SIDB_NEUTRAL_DEFECT_VERTICAL_SPACING = 0u;
 /**
- * Horizontal distance to avoid charged SiDB defects while the defect is incorporated into the SiDB gate design process.
- * The value is to be understood as the number of DB positions rather than the number of dimers.
- * This is true even though each defect always affects the entire dimer.
- */
-inline constexpr const uint16_t SIDB_CHARGED_DEFECT_HORIZONTAL_SPACING_ON_THE_FLY_DESIGN = 5u;
-/**
- * Vertical distance to avoid charged SiDB defects while the defect is incorporated into the SiDB gate design process.
- * The value is to be understood as the number of DB positions rather than the number of dimers.
- * This is true even though each defect always affects the entire dimer.
- */
-inline constexpr const uint16_t SIDB_CHARGED_DEFECT_VERTICAL_SPACING_ON_THE_FLY_DESIGN = 5u;
-/**
  * Returns the extent of a defect as a pair of SiDB distances in horizontal and vertical direction. If defect is the
  * `NONE` defect type, `{0, 0}` is returned.
  *
@@ -188,14 +176,13 @@ inline constexpr const uint16_t SIDB_CHARGED_DEFECT_VERTICAL_SPACING_ON_THE_FLY_
  * @return Number of horizontal and vertical SiDBs that are affected by the given defect type.
  */
 [[nodiscard]] static constexpr std::pair<uint16_t, uint16_t>
-defect_extent(const sidb_defect& defect, bool incorporate_defect_into_gate_design = false) noexcept
+defect_extent(const sidb_defect& defect, bool incorporate_defect_into_gate_design = false, const std::pair<uint16_t, uint16_t> &distance = {0,0}) noexcept
 {
     if (is_charged_defect(defect))
     {
         if (incorporate_defect_into_gate_design)
         {
-            return {SIDB_CHARGED_DEFECT_HORIZONTAL_SPACING_ON_THE_FLY_DESIGN,
-                    SIDB_CHARGED_DEFECT_VERTICAL_SPACING_ON_THE_FLY_DESIGN};
+            return distance;
         }
         return {SIDB_CHARGED_DEFECT_HORIZONTAL_SPACING, SIDB_CHARGED_DEFECT_VERTICAL_SPACING};
     }

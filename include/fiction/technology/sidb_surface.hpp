@@ -183,13 +183,13 @@ class sidb_surface<Lyt, false> : public Lyt
      * @return All SiDB positions affected by the defect at coordinate c.
      */
     [[nodiscard]] std::unordered_set<typename Lyt::coordinate>
-    affected_sidbs(const typename Lyt::coordinate& c, const bool incorporate_defect_into_gate_design = false) const noexcept
+    affected_sidbs(const typename Lyt::coordinate& c, const bool incorporate_defect_into_gate_design = false, const std::pair<uint16_t, uint16_t> &distance = {0,0}) const noexcept
     {
         std::unordered_set<typename Lyt::coordinate> influenced_sidbs{};
 
         if (const auto d = get_sidb_defect(c); d.type != sidb_defect_type::NONE)
         {
-            const auto [horizontal_extent, vertical_extent] = defect_extent(d, incorporate_defect_into_gate_design);
+            const auto [horizontal_extent, vertical_extent] = defect_extent(d, incorporate_defect_into_gate_design, distance);
 
             for (auto y = static_cast<int64_t>(c.y - vertical_extent); y <= static_cast<int64_t>(c.y + vertical_extent);
                  ++y)
@@ -218,12 +218,12 @@ class sidb_surface<Lyt, false> : public Lyt
      * @return All SiDB positions affected by any defect on the surface.
      */
     [[nodiscard]] std::unordered_set<typename Lyt::coordinate>
-    all_affected_sidbs(const bool incorporate_defect_into_gate_design = false) const noexcept
+    all_affected_sidbs(const bool incorporate_defect_into_gate_design = false, const std::pair<uint64_t, uint64_t> &distance = {0,0}) const noexcept
     {
         std::unordered_set<typename Lyt::coordinate> influenced_sidbs{};
 
-        foreach_sidb_defect([&influenced_sidbs, &incorporate_defect_into_gate_design, this](const auto& it)
-                            { influenced_sidbs.merge(affected_sidbs(it.first, incorporate_defect_into_gate_design)); });
+        foreach_sidb_defect([&influenced_sidbs, &incorporate_defect_into_gate_design, &distance, this](const auto& it)
+                            { influenced_sidbs.merge(affected_sidbs(it.first, incorporate_defect_into_gate_design, distance)); });
 
         return influenced_sidbs;
     }
