@@ -43,15 +43,29 @@ Fanout Substitution
 Technology Mapping
 ------------------
 
-**Header:** ``fiction/algorithms/network_transformation/technology_mapping.hpp``
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/algorithms/network_transformation/technology_mapping.hpp``
 
-.. doxygenstruct:: fiction::technology_mapping_params
-   :members:
-.. doxygenfunction:: fiction::and_or_not
-.. doxygenfunction:: fiction::and_or_not_maj
-.. doxygenfunction:: fiction::all_standard_2_input_functions
-.. doxygenfunction:: fiction::all_standard_3_input_functions
-.. doxygenfunction:: fiction::all_supported_standard_functions
-.. doxygenstruct:: fiction::technology_mapping_stats
-   :members:
-.. doxygenfunction:: fiction::technology_mapping
+        .. doxygenstruct:: fiction::technology_mapping_params
+           :members:
+        .. doxygenfunction:: fiction::and_or_not
+        .. doxygenfunction:: fiction::and_or_not_maj
+        .. doxygenfunction:: fiction::all_standard_2_input_functions
+        .. doxygenfunction:: fiction::all_standard_3_input_functions
+        .. doxygenfunction:: fiction::all_supported_standard_functions
+        .. doxygenstruct:: fiction::technology_mapping_stats
+           :members:
+        .. doxygenfunction:: fiction::technology_mapping
+
+    .. tab:: Python
+        .. autoclass:: fiction.pyfiction.technology_mapping_params
+            :members:
+        .. autofunction:: fiction.pyfiction.and_or_not
+        .. autofunction:: fiction.pyfiction.and_or_not_maj
+        .. autofunction:: fiction.pyfiction.all_standard_2_input_functions
+        .. autofunction:: fiction.pyfiction.all_standard_3_input_functions
+        .. autofunction:: fiction.pyfiction.all_supported_standard_functions
+        .. autoclass:: fiction.pyfiction.technology_mapping_stats
+            :members:
+        .. autofunction:: fiction.pyfiction.technology_mapping
