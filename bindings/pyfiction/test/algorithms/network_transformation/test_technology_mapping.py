@@ -16,7 +16,7 @@ class TestTechnologyMapping(unittest.TestCase):
         params.or2 = True
         mapped_network = technology_mapping(network, params)
         self.assertEqual(mapped_network.num_gates(), 4)
-        self.assertNotEqual(equivalence_checking(network, mapped_network), eq_type.STRONG)
+        self.assertEqual(equivalence_checking(network, mapped_network), eq_type.STRONG)
         for gate in mapped_network.gates():
             self.assertTrue(network.is_and(gate) | network.is_or(gate) | network.is_inv(gate))
 
