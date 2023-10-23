@@ -80,33 +80,34 @@ template <typename CartLyt, typename HexLyt>
  * @tparam HexLyt Even-row hexagonal gate-level layout return type.
  * @tparam CartLyt Input Cartesian gate-level layout type.
  * @param lyt 2DDWave-clocked Cartesian gate-level layout to hexagonalize.
+ * @param cartesian_layout_width Width of the Cartesian layout.
+ * @param cartesian_layout_height Height of the Cartesian layout.
  *
  * @return offset.
  */
 template <typename CartLyt, typename HexLyt>
-[[nodiscard]] uint64_t get_offset(CartLyt lyt) noexcept
+[[nodiscard]] uint64_t get_offset(CartLyt lyt, uint64_t cartesian_layout_width,
+                                  uint64_t cartesian_layout_height) noexcept
 {
     static_assert(is_cartesian_layout_v<CartLyt>, "CartLyt is not a Cartesian layout");
     static_assert(is_hexagonal_layout_v<HexLyt>, "HexLyt is not a hexagonal layout");
-
-    const auto rows = lyt.y() + 1;
-    const auto cols = lyt.x() + 1;
 
     auto     found_non_empty_tile = false;
     uint64_t offset               = 0;
 
     // Iterate through diagonals
-    for (uint64_t i = 0; (i < rows + cols - 1) && !found_non_empty_tile; ++i)
+    for (uint64_t diagonal_idx = 0;
+         (diagonal_idx < cartesian_layout_height + cartesian_layout_width - 1) && !found_non_empty_tile; ++diagonal_idx)
     {
-        for (uint64_t j = 0; j < rows; ++j)
+        for (uint64_t idx = 0; idx < cartesian_layout_height; ++idx)
         {
-            if (i - j >= 0 && i - j < cols)
+            if (0 <= diagonal_idx - idx < cartesian_layout_width)
             {
-                const tile<CartLyt> current_tile = {i - j, rows - 1 - j};
+                const tile<CartLyt> current_tile = {diagonal_idx - idx, cartesian_layout_height - 1 - idx};
                 if (!lyt.is_empty_tile(current_tile))
                 {
                     found_non_empty_tile = true;
-                    const auto coord     = detail::to_hex<CartLyt, HexLyt>(current_tile, rows);
+                    const auto coord     = detail::to_hex<CartLyt, HexLyt>(current_tile, cartesian_layout_height);
                     if (coord.x > offset)
                     {
                         offset = coord.x;
@@ -162,7 +163,7 @@ template <typename HexLyt, typename CartLyt>
         const mockturtle::stopwatch stop{stats.time_total};
 
         // calculate offset
-        const auto offset = detail::get_offset<CartLyt, HexLyt>(lyt);
+        const auto offset = detail::get_offset<CartLyt, HexLyt>(lyt, layout_width, layout_height);
 
         // iterate through cartesian layout diagonally
         for (uint64_t k = 0; k < layout_width + layout_height - 1; ++k)
