@@ -85,8 +85,8 @@ template <typename CartLyt, typename HexLyt>
  *
  * @return offset.
  */
-template <typename CartLyt, typename HexLyt>
-[[nodiscard]] uint64_t get_offset(CartLyt lyt, uint64_t cartesian_layout_width,
+template <typename HexLyt, typename CartLyt>
+[[nodiscard]] uint64_t get_offset(const CartLyt& lyt, uint64_t cartesian_layout_width,
                                   uint64_t cartesian_layout_height) noexcept
 {
     static_assert(is_cartesian_layout_v<CartLyt>, "CartLyt is not a Cartesian layout");
@@ -101,7 +101,7 @@ template <typename CartLyt, typename HexLyt>
     {
         for (uint64_t idx = 0; idx < cartesian_layout_height; ++idx)
         {
-            if (0 <= diagonal_idx - idx < cartesian_layout_width)
+            if ((diagonal_idx - idx) < cartesian_layout_width)
             {
                 const tile<CartLyt> current_tile = {diagonal_idx - idx, cartesian_layout_height - 1 - idx};
                 if (!lyt.is_empty_tile(current_tile))
@@ -163,7 +163,7 @@ template <typename HexLyt, typename CartLyt>
         const mockturtle::stopwatch stop{stats.time_total};
 
         // calculate offset
-        const auto offset = detail::get_offset<CartLyt, HexLyt>(lyt, layout_width, layout_height);
+        const auto offset = detail::get_offset<HexLyt, CartLyt>(lyt, layout_width, layout_height);
 
         // iterate through cartesian layout diagonally
         for (uint64_t k = 0; k < layout_width + layout_height - 1; ++k)
