@@ -37,11 +37,10 @@ namespace fiction
 template <class InputIt, class ForwardIt>
 InputIt find_first_two_of(InputIt first, InputIt last, ForwardIt s_first, ForwardIt s_last) noexcept
 {
+    static_assert(std::is_base_of_v<std::input_iterator_tag, typename std::iterator_traits<InputIt>::iterator_category>,
+                  "InputIt must meet the requirements of LegacyInputIterator");
     static_assert(
-        std::is_base_of<std::input_iterator_tag, typename std::iterator_traits<InputIt>::iterator_category>::value,
-        "InputIt must meet the requirements of LegacyInputIterator");
-    static_assert(
-        std::is_base_of<std::forward_iterator_tag, typename std::iterator_traits<ForwardIt>::iterator_category>::value,
+        std::is_base_of_v<std::forward_iterator_tag, typename std::iterator_traits<ForwardIt>::iterator_category>,
         "ForwardIt must meet the requirements of LegacyForwardIterator");
 
     for (; first != last - 1; ++first)
@@ -103,7 +102,7 @@ class searchable_priority_queue : public std::priority_queue<T, Container, Compa
      * @param val Value to search for.
      * @return Iterator to the stored value or to the end of the container if `val` is not contained.
      */
-    iterator find(const T& val)
+    iterator find(const T& val) noexcept
     {
         auto first = begin(), last = end();
 
@@ -126,7 +125,7 @@ class searchable_priority_queue : public std::priority_queue<T, Container, Compa
      * @param val Value to search for.
      * @return Iterator to the stored value or to the end of the container if `val` is not contained.
      */
-    const_iterator find(const T& val) const
+    const_iterator find(const T& val) const noexcept
     {
         auto       first = cbegin();
         const auto last  = cend();
@@ -149,7 +148,7 @@ class searchable_priority_queue : public std::priority_queue<T, Container, Compa
      * @param val Value to search for.
      * @return `true` iff `val` is contained in the priority queue.
      */
-    bool contains(const T& val) const
+    bool contains(const T& val) const noexcept
     {
         return find(val) != this->c.cend();
     }
