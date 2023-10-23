@@ -101,7 +101,7 @@ template <typename HexLyt, typename CartLyt>
     {
         for (uint64_t idx = 0; idx < cartesian_layout_height; ++idx)
         {
-            if ((diagonal_idx - idx) < cartesian_layout_width)
+            if (diagonal_idx - idx < cartesian_layout_width)
             {
                 const tile<CartLyt> current_tile = {diagonal_idx - idx, cartesian_layout_height - 1 - idx};
                 if (!lyt.is_empty_tile(current_tile))
