@@ -45,28 +45,26 @@ namespace detail
 {
 
 /**
- * Utility function to transform a Cartesian coordinate into a hexagonal one.
+ * Utility function to transform a Cartesian tile into a hexagonal one.
  *
- * @param cartesian_coordinate Coordinate on the Cartesian grid.
+ * @param cartesian_tile Tile on the Cartesian grid.
  * @param cartesian_layout_height Height of the Cartesian layout.
  *
- * @return coordinate on the hexagonal grid.
+ * @return corresponding tile on the hexagonal grid.
  */
 template <typename CartLyt, typename HexLyt>
-[[nodiscard]] coordinate<HexLyt> to_hex(coordinate<CartLyt> cartesian_coordinate,
-                                        uint64_t            cartesian_layout_height) noexcept
+[[nodiscard]] tile<HexLyt> to_hex(tile<CartLyt> cartesian_tile, uint64_t cartesian_layout_height) noexcept
 {
-    static_assert(is_cartesian_layout_v<CartLyt>, "Old coordinate is not Cartesian");
-    static_assert(is_hexagonal_layout_v<HexLyt>, "New coordinate is not hexagonal");
+    static_assert(is_cartesian_layout_v<CartLyt>, "Old tile is not Cartesian");
+    static_assert(is_hexagonal_layout_v<HexLyt>, "New tile is not hexagonal");
 
-    const auto y = cartesian_coordinate.x + cartesian_coordinate.y;
+    const auto y = cartesian_tile.x + cartesian_tile.y;
     const auto x = static_cast<int64_t>(
-        cartesian_coordinate.x +
-        static_cast<int64_t>(
-            std::ceil(std::floor(static_cast<double>(cartesian_layout_height) / 2) - static_cast<double>(y) / 2)));
-    const auto z = cartesian_coordinate.z;
+        cartesian_tile.x + static_cast<int64_t>(std::ceil(std::floor(static_cast<double>(cartesian_layout_height) / 2) -
+                                                          static_cast<double>(y) / 2)));
+    const auto z = cartesian_tile.z;
 
-    return coordinate<HexLyt>{x, y, z};
+    return tile<HexLyt>{x, y, z};
 }
 
 /**
@@ -151,9 +149,8 @@ template <typename HexLyt, typename CartLyt>
 
     // calculate max width, height and depth of hexagonal layout
     const auto hex_height =
-        detail::to_hex<CartLyt, HexLyt>(coordinate<CartLyt>(layout_width - 1, layout_height - 1, 0), layout_height).y;
-    const auto hex_width =
-        detail::to_hex<CartLyt, HexLyt>(coordinate<CartLyt>(layout_width - 1, 0, 0), layout_height).x;
+        detail::to_hex<CartLyt, HexLyt>(tile<CartLyt>(layout_width - 1, layout_height - 1, 0), layout_height).y;
+    const auto hex_width = detail::to_hex<CartLyt, HexLyt>(tile<CartLyt>(layout_width - 1, 0, 0), layout_height).x;
     const auto hex_depth = layout_depth;
 
     // instantiate hexagonal layout
@@ -177,10 +174,10 @@ template <typename HexLyt, typename CartLyt>
                 {
                     for (uint64_t z = 0; z <= hex_depth; ++z)
                     {
-                        // old coordinate
-                        const coordinate<CartLyt> old_coord{x, y, z};
-                        // new coordinate
-                        coordinate<CartLyt> hex{detail::to_hex<CartLyt, HexLyt>(old_coord, layout_height)};
+                        // old tile
+                        const tile<CartLyt> old_coord{x, y, z};
+                        // new tile
+                        tile<CartLyt> hex{detail::to_hex<CartLyt, HexLyt>(old_coord, layout_height)};
                         hex.x -= offset;
 
                         if (lyt.is_empty_tile(old_coord))
