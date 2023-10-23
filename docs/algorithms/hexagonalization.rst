@@ -21,4 +21,6 @@ The respective coordinates on the hexagonal grid are calculated as follows:
 .. figure:: /_static/hexagonalization.svg
    :width: 600
 
+.. doxygenstruct:: fiction::hexagonalization_stats
+   :members:
 .. doxygenfunction:: fiction::hexagonalization
