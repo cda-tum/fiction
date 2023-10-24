@@ -33,7 +33,7 @@ struct sidb_dynamic_gate_library_params
 
     uint64_t canvas_sidb_complex_gates = 4;
 
-    double influence_radius_charged_defects = 15;
+    double influence_radius_charged_defects = 15; // (unit: nm)
 };
 
 /**
