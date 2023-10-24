@@ -9,20 +9,18 @@
 #include <fiction/algorithms/iter/aspect_ratio_iterator.hpp>
 #include <fiction/algorithms/network_transformation/technology_mapping.hpp>  // technology mapping
 #include <fiction/algorithms/physical_design/apply_gate_library.hpp>         // layout conversion to cell-level
-#include <fiction/algorithms/physical_design/dynamic_gate_layout.hpp>
 #include <fiction/algorithms/physical_design/exact.hpp>                      // SMT-based physical design of FCN layouts
 #include <fiction/algorithms/physical_design/orthogonal.hpp>
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/io/read_sidb_surface_defects.hpp>                               // reader for simulated SiDB surfaces
-#include <fiction/io/read_sqd_layout.hpp>                                         // reader for SiQAD files
-#include <fiction/io/write_sqd_layout.hpp>                   // writer for SiQAD files (physical simulation)
+#include <fiction/io/write_sqd_layout.hpp>                     // writer for SiQAD files (physical simulation)
 #include <fiction/layouts/coordinates.hpp>
-#include <fiction/networks/technology_network.hpp>           // technology-mapped network type
-#include <fiction/technology/area.hpp>                       // area requirement calculations
-#include <fiction/technology/cell_technologies.hpp>          // cell implementations
-#include <fiction/technology/sidb_dynamic_gate_library.hpp>  // a dynamic SiDB gate library
+#include <fiction/networks/technology_network.hpp>             // technology-mapped network type
+#include <fiction/technology/area.hpp>                         // area requirement calculations
+#include <fiction/technology/cell_technologies.hpp>            // cell implementations
+#include <fiction/technology/sidb_defects.hpp>
+#include <fiction/technology/sidb_dynamic_gate_library.hpp>    // a dynamic SiDB gate library
 #include <fiction/technology/sidb_skeleton_bestagon_library.hpp>
-#include <fiction/technology/sidb_skeleton_bestagon_library_optimized.hpp>
 #include <fiction/technology/sidb_surface.hpp>                 // SiDB surface with support for atomic defects
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>                                   // pre-defined types suitable for the FCN domain
@@ -43,6 +41,9 @@
 #include <string>
 #include <unordered_set>
 
+// This script conducts defect-aware placement and routing with defect-aware on-the-fly SiDB gate design. Thereby, SDB
+// circuits can be designed in the presence of atomic defects.
+
 int main()  // NOLINT
 {
     using gate_lyt = fiction::hex_even_row_gate_clk_lyt;
@@ -50,14 +51,34 @@ int main()  // NOLINT
 
     static const std::string layouts_folder = fmt::format("{}/dynamic_gate_design/layouts", EXPERIMENTS_PATH);
 
-    std::vector<double> defct_conc = {1};
+    const std::vector<double> defect_concentrations = {1, 0.5, 5};
 
-    for (const auto& conc : defct_conc)
+    for (const auto& concentration : defect_concentrations)
     {
-        std::cout << conc << std::endl;
-        const auto surface_lattice = fiction::read_sidb_surface_defects<cell_lyt>(
-            fmt::format("../../experiments/defect_aware_physical_design/{}_percent_with_charged_surface.txt", conc),
+        std::cout << fmt::format("--------------- defect concentration: {} % --------------- ", concentration)
+                  << std::endl;
+        auto surface_lattice = fiction::read_sidb_surface_defects<cell_lyt>(
+            fmt::format("../../experiments/defect_aware_physical_design/{}_percent_with_charged_surface.txt",
+                        concentration),
             "py_test_surface");
+
+        surface_lattice.foreach_sidb_defect(
+            [&surface_lattice](const auto& cd)
+            {
+                if (is_charged_defect(cd.second))
+                {
+                    if (cd.second.type == fiction::sidb_defect_type::DB)
+                    {
+                        surface_lattice.assign_sidb_defect(
+                            cd.first, fiction::sidb_defect{fiction::sidb_defect_type::DB, -1, 4.1, 1.8});
+                    }
+                    else if (cd.second.type == fiction::sidb_defect_type::SI_VACANCY)
+                    {
+                        surface_lattice.assign_sidb_defect(
+                            cd.first, fiction::sidb_defect{fiction::sidb_defect_type::SI_VACANCY, -1, 10.6, 5.9});
+                    }
+                }
+            });
 
         const auto lattice_tiling = gate_lyt{{11, 30}};
 
@@ -84,17 +105,25 @@ int main()  // NOLINT
                          "SiDB dots",
                          "layout area in nm²"};
 
-//        constexpr const uint64_t bench_select =
-//            fiction_experiments::all & ~fiction_experiments::parity & ~fiction_experiments::two_bit_add_maj &
-//            ~fiction_experiments::b1_r2 & ~fiction_experiments::clpl & ~fiction_experiments::iscas85 &
-//            ~fiction_experiments::epfl & ~fiction_experiments::half_adder & ~fiction_experiments::full_adder &
-//            ~fiction_experiments::one_bit_add_aoig & ~fiction_experiments::one_bit_add_maj & ~fiction_experiments::cm82a_5;
+        // parameters for SMT-based physical design
+        fiction::exact_physical_design_params<gate_lyt> exact_params{};
+        exact_params.scheme        = fiction::ptr<gate_lyt>(fiction::row_clocking<gate_lyt>(fiction::num_clks::FOUR));
+        exact_params.crossings     = false;
+        exact_params.border_io     = false;
+        exact_params.desynchronize = true;
+        exact_params.upper_bound_x = 11;         // 12 x 31 tiles
+        exact_params.upper_bound_y = 30;         // 12 x 31 tiles
+        exact_params.timeout       = 3'600'000;  // 1h in ms
 
-        constexpr const uint64_t bench_select = fiction_experiments::majority_5_r1;
+        constexpr const uint64_t bench_select =
+            fiction_experiments::all & ~fiction_experiments::parity & ~fiction_experiments::two_bit_add_maj &
+            ~fiction_experiments::b1_r2 & ~fiction_experiments::clpl & ~fiction_experiments::iscas85 &
+            ~fiction_experiments::epfl & ~fiction_experiments::half_adder & ~fiction_experiments::full_adder &
+            ~fiction_experiments::one_bit_add_aoig & ~fiction_experiments::one_bit_add_maj;
 
         for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
         {
-            fmt::print("[i] processing {}\n", benchmark);
+            fmt::print("[attempts] processing {}\n", benchmark);
             mockturtle::xag_network xag{};
 
             const auto read_verilog_result =
@@ -127,35 +156,41 @@ int main()  // NOLINT
             std::optional<gate_lyt> gate_level_layout = std::nullopt;
             cell_lyt                cell_level_layout{{}, "fail"};
 
-            // fiction::aspect_ratio_iterator<fiction::offset::ucoord_t> ari{1};
-            std::pair<uint64_t, uint64_t> pair = {0, 0};
-
             auto black_list = fiction::sidb_surface_analysis<fiction::sidb_skeleton_bestagon_library>(
-                lattice_tiling, surface_lattice, true, pair);
+                lattice_tiling, surface_lattice, true);
 
-            while (!gate_level_layout.has_value() || cell_level_layout.get_layout_name() == "fail")
+            uint64_t attempts = 0;
+
+            mockturtle::stopwatch<>::duration time_counter{};
+
             {
-                std::cout << black_list.size() << std::endl;
-                gate_level_layout = fiction::run<cell_lyt, gate_lyt, fiction::sidb_skeleton_bestagon_library>(
-                    layouts_folder, surface_lattice, lattice_tiling, benchmark, pair, black_list);
-                if (gate_level_layout.has_value())
+                const mockturtle::stopwatch stop{time_counter};
+
+                while (!gate_level_layout.has_value() || cell_level_layout.get_layout_name() == "fail")
                 {
-                    cell_level_layout =
-                        fiction::apply_dynamic_gate_library<cell_lyt, fiction::sidb_dynamic_gate_library, gate_lyt,
-                                                            fiction::sidb_skeleton_bestagon_library>(
-                            *gate_level_layout, surface_lattice, fiction::sidb_dynamic_gate_library_params{}, pair,
-                            black_list);
-                    //                pair.first += 1;
-                    //                pair.second += 1;
-                    // ari++;
+                    exact_params.black_list = black_list;
+                    fiction::exact_physical_design_stats exact_stats{};
+                    if (!gate_level_layout.has_value() && attempts > 0)
+                    {
+                        break;
+                    }
+                    std::cout << black_list.size() << std::endl;
+                    gate_level_layout = fiction::exact<gate_lyt>(mapped_network, exact_params, &exact_stats);
+                    if (gate_level_layout.has_value())
+                    {
+                        cell_level_layout =
+                            fiction::apply_dynamic_gate_library<cell_lyt, fiction::sidb_dynamic_gate_library, gate_lyt,
+                                                                fiction::sidb_skeleton_bestagon_library>(
+                                *gate_level_layout, surface_lattice, fiction::sidb_dynamic_gate_library_params{},
+                                black_list);
+                    }
+                    attempts++;
                 }
-                else
-                {
-                    // ari++;
-                    //                pair.first += 1;
-                    //                pair.second += 1;
-                }
-                std::cout << fmt::format("x: {} | y: {}", pair.first, pair.second) << std::endl;
+            }
+
+            if (!gate_level_layout.has_value())
+            {
+                continue;
             }
 
             // check equivalence
@@ -179,15 +214,15 @@ int main()  // NOLINT
                                                 { defect_surface.assign_sidb_defect(defect.first, defect.second); });
             // write a SiQAD simulation file
             fiction::write_sqd_layout(defect_surface,
-                                      fmt::format("{}/{}_after_huge_change.sqd", layouts_folder, benchmark));
+                                      fmt::format("{}/{}_{}_percent.sqd", layouts_folder, benchmark, concentration));
 
             // log results
             bestagon_exp(benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(),
                          mapped_network.num_gates(), depth_mapped_network.depth(), gate_level_layout->x() + 1,
                          gate_level_layout->y() + 1, (gate_level_layout->x() + 1) * (gate_level_layout->y() + 1),
                          gate_level_layout->num_gates(), gate_level_layout->num_wires(),
-                         cp_tp_stats.critical_path_length, cp_tp_stats.throughput, 0.0, *eq,
-                         cell_level_layout.num_cells(), area_stats.area);
+                         cp_tp_stats.critical_path_length, cp_tp_stats.throughput, mockturtle::to_seconds(time_counter),
+                         *eq, cell_level_layout.num_cells(), area_stats.area);
             bestagon_exp.save();
             bestagon_exp.table();
         }

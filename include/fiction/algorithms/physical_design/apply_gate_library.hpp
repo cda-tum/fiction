@@ -5,6 +5,7 @@
 #ifndef FICTION_APPLY_GATE_LIBRARY_HPP
 #define FICTION_APPLY_GATE_LIBRARY_HPP
 
+#include "fiction/technology/fcn_gate_library.hpp"
 #include "fiction/technology/inml_topolinano_library.hpp"
 #include "fiction/technology/qca_one_library.hpp"
 #include "fiction/technology/sidb_bestagon_library.hpp"
@@ -32,7 +33,7 @@ namespace fiction
 namespace detail
 {
 
-template <typename CellLyt, typename GateLibrary, typename GateLyt, typename GateLibraryblack>
+template <typename CellLyt, typename GateLibrary, typename GateLyt>
 class apply_gate_library_impl
 {
   public:
@@ -49,14 +50,18 @@ class apply_gate_library_impl
      * building blocks from the `GateLibrary`. Atomic defects are incorporated into the gate designs during this
      * process.
      *
+     * @tparam GateLibraryblack Type of the gate-level layout used to generate the blacklist.
      * @param defect_surface Defect surface with atomic defects.
+     * @param params Parameter for the dynamic gate library.
+     * @param black_list Blacklist.
      * @return A cell-level layout implementing gate types with building blocks defined in `GateLibrary`.
      */
+    template <typename GateLibraryblack>
     CellLyt run_dynamic_gates(
-        const sidb_surface<CellLyt>&            defect_surface,
-        const sidb_dynamic_gate_library_params& params   = sidb_dynamic_gate_library_params{},
-        const std::pair<uint64_t, uint64_t>&    distance = {0, 0},
-        surface_black_list<GateLyt, typename decltype(GateLibraryblack::get_gate_ports())::mapped_type::value_type::port_type>& black_list = {})
+        const sidb_surface<CellLyt>& defect_surface, const sidb_dynamic_gate_library_params& params,
+        surface_black_list<GateLyt,
+                           typename decltype(GateLibraryblack::get_gate_ports())::mapped_type::value_type::port_type>&
+            black_list)
     {
 #if (PROGRESS_BARS)
         // initialize a progress bar
@@ -78,12 +83,10 @@ class apply_gate_library_impl
                         relative_to_absolute_cell_position<GateLibrary::gate_x_size(), GateLibrary::gate_y_size(),
                                                            GateLyt, CellLyt>(gate_lyt, t, cell<CellLyt>{0, 0});
 
-                    const auto gate = GateLibrary::template set_up_gate<GateLyt, CellLyt, GateLibraryblack>(gate_lyt, t, defect_surface, params, distance, black_list);
-                    if (gate ==
-                        fiction::create_array<GateLibrary::gate_y_size()>(
-                            fiction::create_array<GateLibrary::gate_x_size()>(CellLyt::technology::cell_type::NORMAL)))
+                    const auto gate = GateLibrary::template set_up_gate<GateLyt, CellLyt, GateLibraryblack>(
+                        gate_lyt, t, defect_surface, params, black_list);
+                    if (gate == GateLibrary::template ERROR<CellLyt>)
                     {
-                        std::cout << "fail lyt" << std::endl;
                         cell_lyt = CellLyt{{}, "fail"};
                         return;
                     }
@@ -99,6 +102,15 @@ class apply_gate_library_impl
         if constexpr (has_post_layout_optimization_v<GateLibrary, CellLyt>)
         {
             GateLibrary::post_layout_optimization(cell_lyt);
+        }
+
+        // if available, recover layout name
+        if constexpr (has_get_layout_name_v<GateLyt> && has_set_layout_name_v<CellLyt>)
+        {
+            if (cell_lyt.get_layout_name() != "fail")
+            {
+                cell_lyt.set_layout_name(gate_lyt.get_layout_name());
+            }
         }
 
         return cell_lyt;
@@ -204,7 +216,7 @@ class apply_gate_library_impl
  * @param lyt The gate-level layout.
  * @return A cell-level layout that implements `lyt`'s gate types with building blocks defined in `GateLibrary`.
  */
-template <typename CellLyt, typename GateLibrary, typename GateLyt, typename GateLibraryblack>
+template <typename CellLyt, typename GateLibrary, typename GateLyt>
 CellLyt apply_gate_library(const GateLyt& lyt)
 {
     static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
@@ -216,7 +228,7 @@ CellLyt apply_gate_library(const GateLyt& lyt)
     static_assert(std::is_same_v<technology<CellLyt>, technology<GateLibrary>>,
                   "CellLyt and GateLibrary must implement the same technology");
 
-    detail::apply_gate_library_impl<CellLyt, GateLibrary, GateLyt, GateLibraryblack> p{lyt};
+    detail::apply_gate_library_impl<CellLyt, GateLibrary, GateLyt> p{lyt};
 
     auto result = p.run();
 
@@ -232,17 +244,18 @@ CellLyt apply_gate_library(const GateLyt& lyt)
  * @tparam CellLyt Type of the returned cell-level layout.
  * @tparam GateLibrary Type of the gate library to apply.
  * @tparam GateLyt Type of the gate-level layout to apply the library to.
+ * @tparam GateLibraryblack Type of the gate-level layout used to generate the blacklist.
  * @param lyt The gate-level layout.
  * @param defect_surface Defect surface with all atomic defects.
+ * @param params Parameter for the dynamic gate library.
+ * @param black_list Blacklist.
  * @return A cell-level layout that implements `lyt`'s gate types with building blocks defined in `GateLibrary`.
  */
 template <typename CellLyt, typename GateLibrary, typename GateLyt, typename GateLibraryblack>
 CellLyt apply_dynamic_gate_library(
-    const GateLyt& lyt, const sidb_surface<CellLyt>& defect_surface,
-    const sidb_dynamic_gate_library_params& params   = sidb_dynamic_gate_library_params{},
-    const std::pair<uint64_t, uint64_t>&    distance = {0, 0},
-    surface_black_list<GateLyt, typename decltype(GateLibraryblack::get_gate_ports())::mapped_type::value_type::port_type>
-        &black_list = {})
+    const GateLyt& lyt, const sidb_surface<CellLyt>& defect_surface, const sidb_dynamic_gate_library_params& params,
+    surface_black_list<
+        GateLyt, typename decltype(GateLibraryblack::get_gate_ports())::mapped_type::value_type::port_type>& black_list)
 {
     static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
     static_assert(!has_siqad_coord_v<CellLyt>, "CellLyt cannot have SiQAD coordinates");
@@ -253,9 +266,9 @@ CellLyt apply_dynamic_gate_library(
     static_assert(std::is_same_v<technology<CellLyt>, technology<GateLibrary>>,
                   "CellLyt and GateLibrary must implement the same technology");
 
-    detail::apply_gate_library_impl<CellLyt, GateLibrary, GateLyt, GateLibraryblack> p{lyt};
+    detail::apply_gate_library_impl<CellLyt, GateLibrary, GateLyt> p{lyt};
 
-    auto result = p.run_dynamic_gates(defect_surface, params, distance, black_list);
+    auto result = p.template run_dynamic_gates<GateLibraryblack>(defect_surface, params, black_list);
 
     return result;
 }

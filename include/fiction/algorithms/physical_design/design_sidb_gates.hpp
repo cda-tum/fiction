@@ -193,57 +193,6 @@ class design_sidb_gates_impl
 
         return designed_gate_layouts;
     }
-    //    [[nodiscard]] std::vector<Lyt> run_exhaustive_design() noexcept
-    //    {
-    //        const is_operational_params params_is_operational{params.phys_params, params.sim_engine};
-    //        auto all_combinations = determine_all_combinations_of_given_sidbs_in_canvas();
-    //
-    //        std::unordered_set<typename Lyt::coordinate> sidbs_affected_by_defects = {};
-    //
-    //        if constexpr (has_get_sidb_defect_v<Lyt>)
-    //        {
-    //            sidbs_affected_by_defects = skeleton_layout.all_affected_sidbs(true);
-    //        }
-    //
-    //        std::vector<Lyt> designed_gate_layouts = {};
-    //
-    //        // Shuffle the vector randomly
-    //        std::random_device rd;
-    //        std::mt19937 g(rd());
-    //        std::shuffle(all_combinations.begin(), all_combinations.end(), g);
-    //
-    //        for (const auto& combination : all_combinations)
-    //        {
-    //            if (!are_sidbs_too_close(combination, sidbs_affected_by_defects))
-    //            {
-    //                auto layout_with_added_cells = skeleton_layout_with_canvas_sidbs(combination);
-    //
-    //                if constexpr (has_get_sidb_defect_v<Lyt>)
-    //                {
-    //                    layout_with_added_cells.foreach_sidb_defect(
-    //                        [&layout_with_added_cells](const auto& cd)
-    //                        {
-    //                            if (is_neutrally_charged_defect(cd.second))
-    //                            {
-    //                                layout_with_added_cells.assign_sidb_defect(cd.first,
-    //                                                                           sidb_defect{sidb_defect_type::NONE});
-    //                            }
-    //                        });
-    //                }
-    //
-    //                if (const auto [status, sim_calls] =
-    //                        is_operational(layout_with_added_cells, truth_table, params_is_operational);
-    //                    status == operational_status::OPERATIONAL)
-    //                {
-    //                    designed_gate_layouts.push_back(layout_with_added_cells);
-    //                    break;  // Stop after finding the first solution
-    //                }
-    //            }
-    //        }
-    //
-    //        return designed_gate_layouts;
-    //    }
-
     /**
      * Design gates randomly and in parallel.
      *
@@ -309,10 +258,6 @@ class design_sidb_gates_impl
                             gate_layout_is_found = true;
                             break;
                         }
-                        //                        {
-                        //                            const std::lock_guard
-                        //                            lock{mutex_to_protect_designed_gate_layouts}; counter += 1;
-                        //                        }
                     }
                 });
         }
@@ -396,12 +341,22 @@ class design_sidb_gates_impl
     {
         for (std::size_t i = 0; i < cell_indices.size(); i++)
         {
+            if constexpr (has_get_sidb_defect_v<Lyt>)
+            {
+                if (skeleton_layout.get_sidb_defect(all_sidbs_in_cavas[cell_indices[i]]).type != sidb_defect_type::NONE)
+                {
+                    return true;
+                }
+            }
+            if (affected_cells.count(all_sidbs_in_cavas[cell_indices[i]]) > 0)
+            {
+                return true;
+            }
             for (std::size_t j = i + 1; j < cell_indices.size(); j++)
             {
                 if (sidb_nanometer_distance<sidb_cell_clk_lyt_siqad>(skeleton_layout,
                                                                      all_sidbs_in_cavas[cell_indices[i]],
-                                                                     all_sidbs_in_cavas[cell_indices[j]]) < 0.5 ||
-                    affected_cells.count(all_sidbs_in_cavas[cell_indices[i]]) > 0)
+                                                                     all_sidbs_in_cavas[cell_indices[j]]) < 0.5)
                 {
                     return true;
                 }
@@ -483,24 +438,11 @@ template <typename Lyt, typename TT>
 
     if (params.design_mode == design_sidb_gates_params::design_sidb_gates_mode::EXHAUSTIVE)
     {
-        const auto exhaustive = p.run_exhaustive_design();
-        if (exhaustive.empty())
-        {
-            std::cout << "no result" << std::endl;
-        }
-        return exhaustive;
+        return p.run_exhaustive_design();
     }
 
-    std::vector<Lyt> found_lyts{};
-    while (found_lyts.empty())
-    {
-        design_sidb_gates_params                parameter{params};
-        detail::design_sidb_gates_impl<Lyt, TT> p_random{skeleton, spec, parameter};
-        const auto                              result = p.run_random_design();
-        found_lyts                                     = result;
-        parameter.number_of_sidbs += 1;
-    }
-    return found_lyts;
+    detail::design_sidb_gates_impl<Lyt, TT> p_random{skeleton, spec, params};
+    return p.run_random_design();
 }
 
 }  // namespace fiction

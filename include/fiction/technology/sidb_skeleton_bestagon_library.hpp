@@ -22,7 +22,7 @@ namespace fiction
 {
 
 /**
- * A SiDB skeleton gate library for all two input Boolean functions
+ * A Bestagon SiDB skeleton gate library for all two input Boolean functions.
  */
 class sidb_skeleton_bestagon_library
         : public fcn_gate_library<sidb_technology, 60, 46>  // width and height of a hexagon
@@ -606,7 +606,6 @@ class sidb_skeleton_bestagon_library
     }})};
 
     // clang-format on
-
 };
 
 }  // namespace fiction
