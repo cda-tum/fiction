@@ -85,7 +85,7 @@ class apply_gate_library_impl
 
                     const auto gate = GateLibrary::template set_up_gate<GateLyt, CellLyt, GateLibraryblack>(
                         gate_lyt, t, defect_surface, params, black_list);
-                    if (gate == GateLibrary::template ERROR<CellLyt>)
+                    if (gate == GateLibrary::ERROR)
                     {
                         cell_lyt = CellLyt{{}, "fail"};
                         return;
