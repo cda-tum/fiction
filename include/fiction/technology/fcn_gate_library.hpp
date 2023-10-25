@@ -261,6 +261,13 @@ class fcn_gate_library
         return GateSizeY;
     }
 
+    /**
+     * Single error gate in given technology and tile size.
+     *
+     */
+    static constexpr const fcn_gate ERROR =
+        fiction::create_array<GateSizeY>(fiction::create_array<GateSizeX>(Technology::cell_type::NORMAL));
+
   protected:
     /**
      * Transposes the given `fcn_gate` at compile time.
@@ -317,12 +324,6 @@ class fcn_gate_library
      */
     static constexpr const fcn_gate EMPTY_GATE =
         fiction::create_array<GateSizeY>(fiction::create_array<GateSizeX>(Technology::cell_type::EMPTY));
-    /**
-     * Single error gate in given technology and tile size.
-     *
-     */
-    static constexpr const fcn_gate ERROR =
-        fiction::create_array<GateSizeY>(fiction::create_array<GateSizeX>(Technology::cell_type::NORMAL));
 };
 
 }  // namespace fiction

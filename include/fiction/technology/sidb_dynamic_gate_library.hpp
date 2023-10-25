@@ -7,6 +7,8 @@
 
 #include "fiction/algorithms/path_finding/distance.hpp"
 #include "fiction/algorithms/physical_design/design_sidb_gates.hpp"
+#include "fiction/algorithms/simulation/sidb/is_gate_design_impossible.hpp"
+#include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/io/read_sqd_layout.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/fcn_gate_library.hpp"
@@ -28,7 +30,7 @@ struct sidb_dynamic_gate_library_params
                                     design_sidb_gates_params::design_sidb_gates_mode::EXHAUSTIVE,
                                     {{24, 8, 1}, {34, 14, 0}},
                                     3,
-                                    sidb_simulation_engine::QUICKEXACT};
+                                    sidb_simulation_engine::QUICKEXACT, 1};
 
     uint64_t canvas_sidb_complex_gates = 3;
 
@@ -421,31 +423,43 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
             GateLyt, typename decltype(GateLibrary::get_gate_ports())::mapped_type::value_type::port_type>& black_list,
         const port_list<port_direction>& p, const tile<GateLyt>& tile)
     {
-        const auto found_gate_layouts = design_sidb_gates(skeleton, std::vector<tt>{t}, params);
-        if (found_gate_layouts.empty())
+        if (t == create_crossing_wire_tt() || t==create_double_wire_tt())
         {
-            black_list[tile][t.front()].push_back(p);
-            return ERROR;
+            if (gate_design_impossible(skeleton, t,
+                                       is_operational_params{params.phys_params, sidb_simulation_engine::QUICKEXACT}))
+            {
+                black_list[tile][create_id_tt()].push_back(p);
+                return ERROR;
+            }
+            const auto found_gate_layouts = design_sidb_gates(skeleton, t, params);
+            if (found_gate_layouts.empty())
+            {
+                black_list[tile][create_id_tt()].push_back(p);
+                return ERROR;
+            }
+            const auto lyt = cell_list_to_gate<char>(cell_level_layout_to_list(found_gate_layouts.front()));
+            return lyt;
+        }
+        else
+        {
+            if (gate_design_impossible(skeleton, t,
+                                       is_operational_params{params.phys_params, sidb_simulation_engine::QUICKEXACT}))
+            {
+                black_list[tile][t.front()].push_back(p);
+                return ERROR;
+            }
+            const auto found_gate_layouts = design_sidb_gates(skeleton, t, params);
+            if (found_gate_layouts.empty())
+            {
+                black_list[tile][t.front()].push_back(p);
+                return ERROR;
+            }
+            const auto lyt = cell_list_to_gate<char>(cell_level_layout_to_list(found_gate_layouts.front()));
+            return lyt;
         }
 
-        const auto lyt = cell_list_to_gate<char>(cell_level_layout_to_list(found_gate_layouts.front()));
-        if (t == create_crossing_wire_tt())
-        {
-            auto lyt_found = found_gate_layouts.front();
-            skeleton.foreach_sidb_defect([&lyt_found](const auto& defect)
-                                         { lyt_found.assign_sidb_defect(defect.first, defect.second); });
-            fiction::write_sqd_layout(lyt_found, "/Users/jandrewniok/CLionProjects/fiction_fork/experiments/"
-                                                 "defect_aware_physical_design/single_gates/cx.sqd");
-        }
-        if (t == create_double_wire_tt())
-        {
-            auto lyt_found = found_gate_layouts.front();
-            skeleton.foreach_sidb_defect([&lyt_found](const auto& defect)
-                                         { lyt_found.assign_sidb_defect(defect.first, defect.second); });
-            fiction::write_sqd_layout(lyt_found, "/Users/jandrewniok/CLionProjects/fiction_fork/experiments/"
-                                                 "defect_aware_physical_design/single_gates/db.sqd");
-        }
-        return lyt;
+
+
     }
 
     /**
