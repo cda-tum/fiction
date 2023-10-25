@@ -10,7 +10,6 @@
 #include "fiction/io/read_sqd_layout.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/fcn_gate_library.hpp"
-#include "fiction/technology/sidb_bestagon_library.hpp"
 #include "fiction/technology/sidb_surface.hpp"
 #include "fiction/technology/sidb_surface_analysis.hpp"
 #include "fiction/traits.hpp"
@@ -31,9 +30,9 @@ struct sidb_dynamic_gate_library_params
                                     3,
                                     sidb_simulation_engine::QUICKEXACT};
 
-    uint64_t canvas_sidb_complex_gates = 4;
+    uint64_t canvas_sidb_complex_gates = 3;
 
-    double influence_radius_charged_defects = 15; // (unit: nm)
+    double influence_radius_charged_defects = 15;  // (unit: nm)
 };
 
 /**
@@ -115,13 +114,11 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
                             // two possible options: actual crossover and (parallel) hourglass wire
                             const auto pa = determine_port_routing(lyt, at);
 
-                            auto cell_list = TWO_IN_TWO_OUT_MAP.at({p, pa});
-
-                            if (cell_list == DOUBLE_WIRE)
+                            if (auto cell_list = TWO_IN_TWO_OUT_MAP.at({p, pa}); cell_list == DOUBLE_WIRE)
                             {
                                 const auto layout = add_defect_in_the_surrounding_to_layout(
                                     sidb_surface,
-                                    cell_list_to_cell_level_layout<sidb_defect_cell_clk_lyt_siqad>(cell_list),
+                                    cell_list_to_cell_level_layout<sidb_defect_cell_clk_lyt_siqad>(TWO_IN_TWO_OUT),
                                     center_cell_siqad, absolute_cell_siqad, parameter);
 
                                 if (is_bestagon_gate_applicable(
@@ -138,7 +135,8 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
                             }
 
                             const auto layout = add_defect_in_the_surrounding_to_layout(
-                                sidb_surface, cell_list_to_cell_level_layout<sidb_defect_cell_clk_lyt_siqad>(cell_list),
+                                sidb_surface,
+                                cell_list_to_cell_level_layout<sidb_defect_cell_clk_lyt_siqad>(TWO_IN_TWO_OUT),
                                 center_cell_siqad, absolute_cell_siqad, parameter);
 
                             if (is_bestagon_gate_applicable(
@@ -154,7 +152,7 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
                                 layout, create_crossing_wire_tt(), complex_gate_param.params, black_list, p, t);
                         }
 
-                        auto cell_list = ONE_IN_ONE_OUT_MAP.at(p);
+                        const auto cell_list = ONE_IN_ONE_OUT_MAP.at(p);
                         if (cell_list == EMPTY_GATE)
                         {
                             return EMPTY_GATE;
@@ -342,13 +340,16 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
      *         otherwise, returns `false`.
      */
     template <typename Lyt>
-    [[nodiscard]] static bool is_bestagon_gate_applicable(const Lyt& bestagon_lyt, sidb_surface<Lyt> defect_lyt,
+    [[nodiscard]] static bool is_bestagon_gate_applicable(const Lyt& bestagon_lyt, const sidb_surface<Lyt>& defect_lyt,
                                                           const design_sidb_gates_params& parameter,
                                                           const std::vector<tt>&          truth_table)
     {
+        auto       defect_copy               = defect_lyt.clone();
+        const auto sidbs_affected_by_defects = defect_copy.all_affected_sidbs(true);
+
         bool is_bestagon_gate_applicable = true;
-        defect_lyt.foreach_sidb_defect(
-            [&bestagon_lyt, &is_bestagon_gate_applicable](const auto& cd)
+        defect_copy.foreach_sidb_defect(
+            [&bestagon_lyt, &is_bestagon_gate_applicable, &sidbs_affected_by_defects](const auto& cd)
             {
                 if (is_charged_defect(cd.second))
                 {
@@ -356,10 +357,9 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
                     return;
                 }
                 bestagon_lyt.foreach_cell(
-                    [&cd, &is_bestagon_gate_applicable](const auto& c)
+                    [&cd, &is_bestagon_gate_applicable, &sidbs_affected_by_defects](const auto& c)
                     {
-                        if (c.x <= cd.first.x + SIDB_NEUTRAL_DEFECT_HORIZONTAL_SPACING ||
-                            (c.x >= cd.first.x - SIDB_NEUTRAL_DEFECT_HORIZONTAL_SPACING && c.y == cd.first.y))
+                        if (sidbs_affected_by_defects.count(c))
                         {
                             is_bestagon_gate_applicable = false;
                             return;
@@ -370,10 +370,10 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
         {
             return is_bestagon_gate_applicable;
         }
-        bestagon_lyt.foreach_cell([&defect_lyt, &bestagon_lyt](const auto& c)
-                                  { defect_lyt.assign_cell_type(c, bestagon_lyt.get_cell_type(c)); });
+        bestagon_lyt.foreach_cell([&defect_copy, &bestagon_lyt](const auto& c)
+                                  { defect_copy.assign_cell_type(c, bestagon_lyt.get_cell_type(c)); });
         const auto status =
-            is_operational(defect_lyt, truth_table, is_operational_params{parameter.phys_params, parameter.sim_engine})
+            is_operational(defect_copy, truth_table, is_operational_params{parameter.phys_params, parameter.sim_engine})
                 .first;
         return static_cast<bool>(status == operational_status::OPERATIONAL);
     }
@@ -437,7 +437,24 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
             return ERROR<Lyt>;
         }
 
-        return cell_list_to_gate<char>(cell_level_layout_to_list(found_gate_layouts.front()));
+        const auto lyt = cell_list_to_gate<char>(cell_level_layout_to_list(found_gate_layouts.front()));
+        if (t == create_crossing_wire_tt())
+        {
+            auto lyt_found = found_gate_layouts.front();
+            skeleton.foreach_sidb_defect([&lyt_found](const auto& defect)
+                                         { lyt_found.assign_sidb_defect(defect.first, defect.second); });
+            fiction::write_sqd_layout(lyt_found, "/Users/jandrewniok/CLionProjects/fiction_fork/experiments/"
+                                                 "defect_aware_physical_design/single_gates/cx.sqd");
+        }
+        if (t == create_double_wire_tt())
+        {
+            auto lyt_found = found_gate_layouts.front();
+            skeleton.foreach_sidb_defect([&lyt_found](const auto& defect)
+                                         { lyt_found.assign_sidb_defect(defect.first, defect.second); });
+            fiction::write_sqd_layout(lyt_found, "/Users/jandrewniok/CLionProjects/fiction_fork/experiments/"
+                                                 "defect_aware_physical_design/single_gates/db.sqd");
+        }
+        return lyt;
     }
 
     /**
@@ -451,7 +468,7 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
     template <typename Lyt>
     [[nodiscard]] static Lyt cell_list_to_cell_level_layout(const fcn_gate& cell_list) noexcept
     {
-        Lyt lyt{aspect_ratio<Lyt>{gate_x_size(), gate_y_size()}};
+        Lyt lyt{{std::numeric_limits<uint64_t>::max(), std::numeric_limits<uint64_t>::max()}};
 
         const auto all_cell =
             all_sidbs_in_spanned_area({0, 0, 0}, to_siqad_coord(cell<Lyt>{gate_x_size() - 1, gate_y_size() - 1}));
@@ -512,10 +529,11 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
             {
                 // all defects (charged) in a distance of influence_radius_charged_defects from the center are taken
                 // into account.
-                if (sidb_nanometer_distance(sidb_cell_clk_lyt_siqad{}, fiction::siqad::to_siqad_coord(cd.first),
-                                            center_cell_siqad) < params.influence_radius_charged_defects)
+                const auto defect_in_siqad = fiction::siqad::to_siqad_coord(cd.first);
+                if (sidb_nanometer_distance(sidb_cell_clk_lyt_siqad{}, defect_in_siqad, center_cell_siqad) <
+                    params.influence_radius_charged_defects)
                 {
-                    const auto defect_position_in_siqad_coordinate = fiction::siqad::to_siqad_coord(cd.first);
+                    const auto defect_position_in_siqad_coordinate = defect_in_siqad;
                     const auto relative_cell = defect_position_in_siqad_coordinate - absolute_cell_siqad;
                     lyt_copy.assign_sidb_defect(relative_cell, cd.second);
                 }
@@ -1170,22 +1188,22 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
            {port_direction(port_direction::cardinal::SOUTH_WEST)}},
           {{port_direction(port_direction::cardinal::NORTH_EAST)},
            {port_direction(port_direction::cardinal::SOUTH_EAST)}}},
-         TWO_IN_TWO_OUT},
+         DOUBLE_WIRE},
         {{{{port_direction(port_direction::cardinal::NORTH_EAST)},
            {port_direction(port_direction::cardinal::SOUTH_EAST)}},
           {{port_direction(port_direction::cardinal::NORTH_WEST)},
            {port_direction(port_direction::cardinal::SOUTH_WEST)}}},
-         TWO_IN_TWO_OUT},
+         DOUBLE_WIRE},
         {{{{port_direction(port_direction::cardinal::NORTH_WEST)},
            {port_direction(port_direction::cardinal::SOUTH_EAST)}},
           {{port_direction(port_direction::cardinal::NORTH_EAST)},
            {port_direction(port_direction::cardinal::SOUTH_WEST)}}},
-         TWO_IN_TWO_OUT},
+         CROSSING},
         {{{{port_direction(port_direction::cardinal::NORTH_EAST)},
            {port_direction(port_direction::cardinal::SOUTH_WEST)}},
           {{port_direction(port_direction::cardinal::NORTH_WEST)},
            {port_direction(port_direction::cardinal::SOUTH_EAST)}}},
-         TWO_IN_TWO_OUT},
+         CROSSING},
     };
     /**
      * Lookup table for two input Boolean function (e.g., AND, OR, ...).
