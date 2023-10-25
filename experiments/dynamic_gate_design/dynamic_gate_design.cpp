@@ -51,32 +51,36 @@ int main()  // NOLINT
 
     static const std::string layouts_folder = fmt::format("{}/dynamic_gate_design/layouts", EXPERIMENTS_PATH);
 
-    const std::vector<double> defect_concentrations = {1, 0.5, 5};
+    const std::vector<double> defect_concentrations = {1};
 
     for (const auto& concentration : defect_concentrations)
     {
         std::cout << fmt::format("--------------- defect concentration: {} % --------------- ", concentration)
                   << std::endl;
-        auto surface_lattice = fiction::read_sidb_surface_defects<cell_lyt>(
+        auto surface_lattice_initial = fiction::read_sidb_surface_defects<cell_lyt>(
             fmt::format("../../experiments/defect_aware_physical_design/{}_percent_with_charged_surface.txt",
                         concentration),
             "py_test_surface");
 
-        surface_lattice.foreach_sidb_defect(
+        fiction::sidb_surface<cell_lyt> surface_lattice{
+            {std::numeric_limits<uint64_t>::max(), std::numeric_limits<uint64_t>::max()}};
+
+        surface_lattice_initial.foreach_sidb_defect(
             [&surface_lattice](const auto& cd)
             {
-                if (is_charged_defect(cd.second))
+                if (cd.second.type == fiction::sidb_defect_type::DB)
                 {
-                    if (cd.second.type == fiction::sidb_defect_type::DB)
-                    {
-                        surface_lattice.assign_sidb_defect(
-                            cd.first, fiction::sidb_defect{fiction::sidb_defect_type::DB, -1, 4.1, 1.8});
-                    }
-                    else if (cd.second.type == fiction::sidb_defect_type::SI_VACANCY)
-                    {
-                        surface_lattice.assign_sidb_defect(
-                            cd.first, fiction::sidb_defect{fiction::sidb_defect_type::SI_VACANCY, -1, 10.6, 5.9});
-                    }
+                    surface_lattice.assign_sidb_defect(
+                        cd.first, fiction::sidb_defect{fiction::sidb_defect_type::DB, -1, 4.1, 1.8});
+                }
+                else if (cd.second.type == fiction::sidb_defect_type::SI_VACANCY)
+                {
+                    surface_lattice.assign_sidb_defect(
+                        cd.first, fiction::sidb_defect{fiction::sidb_defect_type::SI_VACANCY, -1, 10.6, 5.9});
+                }
+                else
+                {
+                    surface_lattice.assign_sidb_defect(cd.first, cd.second);
                 }
             });
 
