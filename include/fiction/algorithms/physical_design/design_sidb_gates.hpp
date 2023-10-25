@@ -75,6 +75,10 @@ struct design_sidb_gates_params
      * The simulation engine to be used for the operational domain computation.
      */
     sidb_simulation_engine sim_engine{sidb_simulation_engine::QUICKEXACT};
+    /**
+     * The percentage of all combinations that are tested before the design process is canceled.
+     */
+    std::size_t procentual_maximum_attemps = 1;
 };
 
 namespace detail
@@ -125,6 +129,10 @@ class design_sidb_gates_impl
 
         const auto total_comb = binomial_coefficient(all_sidbs_in_cavas.size(), params.number_of_sidbs);
 
+        // Shuffle the combinations before dividing them among threads
+        std::shuffle(all_combinations.begin(), all_combinations.end(),
+                     std::default_random_engine(std::random_device()()));
+
         const auto add_combination_to_layout_and_check_operation =
             [this, &mutex_to_protect_designer_gate_layouts, &params_is_operational, &designed_gate_layouts,
              &sidbs_affected_by_defects, &solutionFound, &global_iteration_counter,
@@ -133,7 +141,8 @@ class design_sidb_gates_impl
             for (const auto& comb : combination)
             {
                 global_iteration_counter++;
-                if (!solutionFound && !are_sidbs_too_close(comb, sidbs_affected_by_defects))
+                if (!solutionFound && !are_sidbs_too_close(comb, sidbs_affected_by_defects) &&
+                    global_iteration_counter < static_cast<uint64_t>(params.procentual_maximum_attemps * total_comb))
                 {
                     auto layout_with_added_cells = skeleton_layout_with_canvas_sidbs(comb);
 
@@ -161,10 +170,6 @@ class design_sidb_gates_impl
                                 designed_gate_layouts.push_back(layout_with_added_cells);
                             }
                             solutionFound = true;
-
-                            // Optionally, signal all threads to exit
-                            // Uncomment the following line to signal all threads to exit
-                            // solutionFound.store(true, std::memory_order_relaxed);
                         }
                     }
                 }
