@@ -133,7 +133,7 @@ class apply_gate_library_impl
         mockturtle::progress_bar bar{static_cast<uint32_t>(gate_lyt.size()), "[i] applying gate library: |{0}|"};
 #endif
         gate_lyt.foreach_node(
-            [this, &bar](const auto& n, [[maybe_unused]] auto i)
+            [&, this](const auto& n, [[maybe_unused]] auto i)
             {
                 if (!gate_lyt.is_constant(n))
                 {
