@@ -140,7 +140,6 @@ class design_sidb_gates_impl
         {
             for (const auto& comb : combination)
             {
-                global_iteration_counter++;
                 if (!solutionFound && !are_sidbs_too_close(comb, sidbs_affected_by_defects) &&
                     global_iteration_counter < static_cast<uint64_t>(params.procentual_maximum_attemps * total_comb))
                 {
@@ -173,6 +172,7 @@ class design_sidb_gates_impl
                         }
                     }
                 }
+                global_iteration_counter++;
             }
         };
 
