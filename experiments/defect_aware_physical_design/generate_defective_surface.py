@@ -55,7 +55,7 @@ class defect_surface:
                               [4, 1, 2, 0.05],  # single_dihydride
                               [5, 4, 2, 0.05],  # onebyone
                               [6, 4, 4, 0.05],  # threebyone
-                              [7, 1, 2, 0.3],  # siloxane
+                              [7, 1, 2, 0.1],  # siloxane
                               [8, 1, 2, 0.1],  # raised_si
                               [9, 3, 2, 0.05],  # etch pit
                               [10, 1, 2, 0.05]  # missing_dimer
@@ -97,10 +97,17 @@ class defect_surface:
                         i = i - 1
                         pass
 
-    def draw_panels(self):
+    def draw_panels(self):  # DB_panels,DB_pattern_extended, pattern):
+        # draws the DB_pattern_extended with rectangles to show each pannel
+
         width_nm = self.a1 * self.surface_width
         height_nm = self.a2 * self.surface_height
-        fig = plt.figure()
+        # print(height_nm,width_nm)
+        # lattice_points = np.where(self.surface_lattice>=-1)
+        # DB_top_points = np.where(self.surface_lattice==0)
+        # DB_bottom_points = np.where(self.surface_lattice==1)
+        # print(lattice_points)
+        fig = plt.figure(figsize=((width_nm + 1) / 10, (height_nm + 1) / 10), dpi=100)
         ax = fig.add_subplot(1, 1, 1)
         plt.gca().invert_yaxis()
 
@@ -129,30 +136,19 @@ class defect_surface:
         plt.xticks([])
         plt.yticks([])
         plt.legend()
+        # print(self.DB_pattern_extended.shape)
+        plt.show()
 
     def save_to_file(self, filename='test.txt'):
-        with open(filename, 'w') as file:
-            for row in self.surface_lattice:
-                # Write an opening bracket
-                file.write('[')
-
-                # Loop through the elements in the row and write them with commas and spaces
-                for i, element in enumerate(row):
-                    file.write(str(element))
-
-                    # If it's not the last element, write a comma and space
-                    if i < len(row) - 1:
-                        file.write(' ')
-
-                # Write a closing bracket and a newline character for the next row
-                file.write(']\n')
+        np.savetxt(filename, self.surface_lattice)
+        print('file_saved')
 
 
 surface_width = 740
 surface_height = 1090
-coverage = 0.1
+coverage = 0.005
 surface = defect_surface(surface_width=surface_width, surface_height=surface_height)
 surface.add_defects(coverage=coverage)
 print(surface.surface_lattice)
-#surface.draw_panels()
-surface.save_to_file('test.txt')
+# surface.draw_panels()
+# surface.save_to_file('test.txt')
