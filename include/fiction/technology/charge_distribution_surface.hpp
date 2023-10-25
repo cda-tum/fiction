@@ -303,9 +303,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         std::vector<std::pair<double, double>> positions{};
         positions.reserve(strg->sidb_order.size());
 
-        for (const auto& cell : strg->sidb_order)
+        for (const auto& c : strg->sidb_order)
         {
-            auto pos = sidb_nm_position<Lyt>(strg->phys_params, cell);
+            auto pos = sidb_nm_position<Lyt>(strg->phys_params, c);
             positions.push_back(std::make_pair(pos.first, pos.second));
         }
 
