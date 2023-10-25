@@ -30,7 +30,8 @@ struct sidb_dynamic_gate_library_params
                                     design_sidb_gates_params::design_sidb_gates_mode::EXHAUSTIVE,
                                     {{24, 8, 1}, {34, 14, 0}},
                                     3,
-                                    sidb_simulation_engine::QUICKEXACT, 1};
+                                    sidb_simulation_engine::QUICKEXACT,
+                                    1};
 
     uint64_t canvas_sidb_complex_gates = 3;
 
@@ -423,7 +424,7 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
             GateLyt, typename decltype(GateLibrary::get_gate_ports())::mapped_type::value_type::port_type>& black_list,
         const port_list<port_direction>& p, const tile<GateLyt>& tile)
     {
-        if (t == create_crossing_wire_tt() || t==create_double_wire_tt())
+        if (t == create_crossing_wire_tt() || t == create_double_wire_tt())
         {
             if (gate_design_impossible(skeleton, t,
                                        is_operational_params{params.phys_params, sidb_simulation_engine::QUICKEXACT}))
@@ -457,9 +458,6 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
             const auto lyt = cell_list_to_gate<char>(cell_level_layout_to_list(found_gate_layouts.front()));
             return lyt;
         }
-
-
-
     }
 
     /**

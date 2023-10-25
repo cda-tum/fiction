@@ -125,8 +125,8 @@ int main()  // NOLINT
             ~fiction_experiments::epfl & ~fiction_experiments::half_adder & ~fiction_experiments::full_adder &
             ~fiction_experiments::one_bit_add_aoig & ~fiction_experiments::one_bit_add_maj;
 
-//        constexpr const uint64_t bench_select =
-//            fiction_experiments::t;
+        //        constexpr const uint64_t bench_select =
+        //            fiction_experiments::t;
 
         for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
         {

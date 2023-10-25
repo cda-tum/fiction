@@ -78,7 +78,7 @@ struct design_sidb_gates_params
     /**
      * The percentage of all combinations that are tested before the design process is canceled.
      */
-    double  procentual_maximum_attemps = 1.0;
+    double procentual_maximum_attemps = 1.0;
 };
 
 namespace detail
