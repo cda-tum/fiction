@@ -10,4 +10,4 @@ in the same :ref:`technology <fcn-cell-technologies>` as the provided gate libra
 implementations for each gate present in the passed ``gate_level_layout``.
 
 .. doxygenfunction:: fiction::apply_gate_library(const GateLyt& lyt)
-.. doxygenfunction:: fiction::apply_dynamic_gate_library
+.. doxygenfunction:: fiction::apply_dynamic_gate_library(const GateLyt& lyt, const sidb_surface<CellLyt>& defect_surface, const sidb_dynamic_gate_library_params& params, surface_black_list<GateLyt, typename decltype(GateLibraryblack::get_gate_ports())::mapped_type::value_type::port_type>& black_list)
