@@ -323,7 +323,7 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
      * @tparam CellLyt The type of the cell-level layout.
      */
     template <typename CellLyt>
-    static constexpr const fcn_gate ERROR =
+    static constexpr fcn_gate ERROR =
         fiction::create_array<gate_y_size()>(fiction::create_array<gate_x_size()>(CellLyt::cell_type::NORMAL));
 
   private:
