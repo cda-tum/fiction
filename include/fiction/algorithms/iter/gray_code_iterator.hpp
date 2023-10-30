@@ -231,7 +231,7 @@ class gray_code_iterator
     constexpr uint64_t operator[](size_t index) const noexcept
     {
         // Calculate the Gray code at the specified position
-        uint64_t result = start_number + static_cast<uint64_t>(index);
+        uint64_t result = start_number + index;
         result ^= (result >> 1u);
         return result;
     }
