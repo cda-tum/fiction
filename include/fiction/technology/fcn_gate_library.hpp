@@ -265,8 +265,8 @@ class fcn_gate_library
      * Single error gate in given technology and tile size.
      *
      */
-    static constexpr const fcn_gate ERROR =
-        fiction::create_array<GateSizeY>(fiction::create_array<GateSizeX>(Technology::cell_type::NORMAL));
+    static constexpr fcn_gate ERROR =
+        fiction::create_array<GateSizeY>(fiction::create_array<GateSizeX>(Technology::cell_type::INPUT));
 
   protected:
     /**
