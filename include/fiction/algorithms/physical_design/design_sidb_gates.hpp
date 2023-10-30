@@ -143,20 +143,8 @@ class design_sidb_gates_impl
                 if (!solution_found && !are_sidbs_too_close(comb, sidbs_affected_by_defects) &&
                     global_iteration_counter < static_cast<uint64_t>(params.procentual_maximum_attemps * total_comb))
                 {
+                    // canvas SiDBs are added to the skeleton
                     auto layout_with_added_cells = skeleton_layout_with_canvas_sidbs(comb);
-
-                    if constexpr (has_get_sidb_defect_v<Lyt>)
-                    {
-                        layout_with_added_cells.foreach_sidb_defect(
-                            [&layout_with_added_cells](const auto& cd)
-                            {
-                                if (is_neutrally_charged_defect(cd.second))
-                                {
-                                    layout_with_added_cells.assign_sidb_defect(cd.first,
-                                                                               sidb_defect{sidb_defect_type::NONE});
-                                }
-                            });
-                    }
 
                     if (!solution_found)
                     {

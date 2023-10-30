@@ -231,10 +231,11 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
         defect_layout.assign_sidb_defect(
             {20, 12, 0},
             sidb_defect{sidb_defect_type::DB, -1, params.phys_params.epsilon_r, params.phys_params.lambda_tf});
+        defect_layout.assign_sidb_defect({23, 12, 0}, sidb_defect{sidb_defect_type::GUNK});
 
         const auto found_gate_layouts = design_sidb_gates(defect_layout, std::vector<tt>{create_and_tt()}, params);
         REQUIRE(!found_gate_layouts.empty());
-        CHECK(found_gate_layouts.front().num_defects() == 2);
+        CHECK(found_gate_layouts.front().num_defects() == 3);
         CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
 
         found_gate_layouts.front().foreach_cell(

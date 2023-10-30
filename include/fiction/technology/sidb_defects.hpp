@@ -101,7 +101,7 @@ struct sidb_defect
  */
 [[nodiscard]] static constexpr bool is_charged_defect(const sidb_defect& defect) noexcept
 {
-    return defect.type == sidb_defect_type::DB || defect.type == sidb_defect_type::SI_VACANCY;
+    return defect.charge != 0 || defect.type == sidb_defect_type::DB || defect.type == sidb_defect_type::SI_VACANCY;
 }
 /**
  * Checks whether the given defect is positively charged.
