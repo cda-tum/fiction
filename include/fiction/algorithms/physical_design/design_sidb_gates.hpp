@@ -124,7 +124,7 @@ class design_sidb_gates_impl
 
         std::vector<Lyt>      designed_gate_layouts = {};
         std::mutex            mutex_to_protect_designer_gate_layouts;
-        std::atomic<bool>     solutionFound = false;
+        std::atomic<bool>     solution_found = false;
         std::atomic<uint64_t> global_iteration_counter(0);
 
         const auto total_comb = binomial_coefficient(all_sidbs_in_cavas.size(), params.number_of_sidbs);
@@ -135,12 +135,12 @@ class design_sidb_gates_impl
 
         const auto add_combination_to_layout_and_check_operation =
             [this, &mutex_to_protect_designer_gate_layouts, &params_is_operational, &designed_gate_layouts,
-             &sidbs_affected_by_defects, &solutionFound, &global_iteration_counter,
+             &sidbs_affected_by_defects, &solution_found, &global_iteration_counter,
              &total_comb](const auto& combination) noexcept
         {
             for (const auto& comb : combination)
             {
-                if (!solutionFound && !are_sidbs_too_close(comb, sidbs_affected_by_defects) &&
+                if (!solution_found && !are_sidbs_too_close(comb, sidbs_affected_by_defects) &&
                     global_iteration_counter < static_cast<uint64_t>(params.procentual_maximum_attemps * total_comb))
                 {
                     auto layout_with_added_cells = skeleton_layout_with_canvas_sidbs(comb);
@@ -158,7 +158,7 @@ class design_sidb_gates_impl
                             });
                     }
 
-                    if (!solutionFound)
+                    if (!solution_found)
                     {
                         if (const auto [status, sim_calls] =
                                 is_operational(layout_with_added_cells, truth_table, params_is_operational);
@@ -168,7 +168,7 @@ class design_sidb_gates_impl
                                 const std::lock_guard lock_vector{mutex_to_protect_designer_gate_layouts};
                                 designed_gate_layouts.push_back(layout_with_added_cells);
                             }
-                            solutionFound = true;
+                            solution_found = true;
                         }
                     }
                 }

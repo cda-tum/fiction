@@ -30,7 +30,7 @@ namespace fiction
  *
  */
 template <typename Lyt, typename TT>
-bool gate_design_impossible(const Lyt& layout, const std::vector<TT>& spec, const is_operational_params& params = {})
+bool is_gate_design_impossible(const Lyt& layout, const std::vector<TT>& spec, const is_operational_params& params = {})
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");

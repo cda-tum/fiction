@@ -7,7 +7,7 @@
 
 #include "fiction/algorithms/path_finding/distance.hpp"
 #include "fiction/algorithms/physical_design/design_sidb_gates.hpp"
-#include "fiction/algorithms/simulation/sidb/is_gate_design_impossible.hpp"
+#include "fiction/algorithms/physical_design/is_gate_design_impossible.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/io/read_sqd_layout.hpp"
 #include "fiction/technology/cell_technologies.hpp"
@@ -426,8 +426,8 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
     {
         if (t == create_crossing_wire_tt() || t == create_double_wire_tt())
         {
-            if (gate_design_impossible(skeleton, t,
-                                       is_operational_params{params.phys_params, sidb_simulation_engine::QUICKEXACT}))
+            if (is_gate_design_impossible(
+                    skeleton, t, is_operational_params{params.phys_params, sidb_simulation_engine::QUICKEXACT}))
             {
                 black_list[tile][create_id_tt()].push_back(p);
                 return ERROR;
@@ -441,23 +441,21 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
             const auto lyt = cell_list_to_gate<char>(cell_level_layout_to_list(found_gate_layouts.front()));
             return lyt;
         }
-        else
+
+        if (is_gate_design_impossible(skeleton, t,
+                                      is_operational_params{params.phys_params, sidb_simulation_engine::QUICKEXACT}))
         {
-            if (gate_design_impossible(skeleton, t,
-                                       is_operational_params{params.phys_params, sidb_simulation_engine::QUICKEXACT}))
-            {
-                black_list[tile][t.front()].push_back(p);
-                return ERROR;
-            }
-            const auto found_gate_layouts = design_sidb_gates(skeleton, t, params);
-            if (found_gate_layouts.empty())
-            {
-                black_list[tile][t.front()].push_back(p);
-                return ERROR;
-            }
-            const auto lyt = cell_list_to_gate<char>(cell_level_layout_to_list(found_gate_layouts.front()));
-            return lyt;
+            black_list[tile][t.front()].push_back(p);
+            return ERROR;
         }
+        const auto found_gate_layouts = design_sidb_gates(skeleton, t, params);
+        if (found_gate_layouts.empty())
+        {
+            black_list[tile][t.front()].push_back(p);
+            return ERROR;
+        }
+        const auto lyt = cell_list_to_gate<char>(cell_level_layout_to_list(found_gate_layouts.front()));
+        return lyt;
     }
 
     /**
