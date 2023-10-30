@@ -21,6 +21,8 @@ namespace fiction
  * This function assesses whether it is impossible to design a gate for a given truth table in the provided layout due
  * to atomic defects.
  *
+ * @note If the function returns `false`, it does not imply that it is possible to design a SiDB gate for given parameters.
+ *
  * @tparam Lyt The type of the layout.
  * @tparam TT The type of the truth table.
  * @param layout The layout for which gate design feasibility is being checked.
