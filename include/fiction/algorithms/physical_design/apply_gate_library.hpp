@@ -279,7 +279,6 @@ template <typename CellLyt, typename GateLibrary, typename GateLyt, typename Gat
     try
     {
         return p.template run_dynamic_gates<GateLibraryblack>(defect_surface, params, black_list);
-
     }
     catch (const std::exception& e)
     {

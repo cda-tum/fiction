@@ -430,7 +430,6 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
         }
 
         throw unsupported_gate_type_exception(t);
-
     }
 
   private:
