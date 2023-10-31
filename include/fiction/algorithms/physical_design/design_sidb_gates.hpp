@@ -175,8 +175,8 @@ class design_sidb_gates_impl
         {
             std::size_t start = i * chunk_size;
             std::size_t end   = (i == num_threads - 1) ? all_combinations.size() : (i + 1) * chunk_size;
-            std::vector<std::vector<std::size_t>> chunk_combinations(all_combinations.begin() + start,
-                                                                     all_combinations.begin() + end);
+            std::vector<std::vector<std::size_t>> chunk_combinations(
+                all_combinations.begin() + start, all_combinations.begin() + static_cast<std::size_t>(end));
             threads.emplace_back(add_combination_to_layout_and_check_operation, chunk_combinations);
         }
 
