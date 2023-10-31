@@ -87,3 +87,11 @@ SiDB Operational Domain
    :members:
 .. doxygenfunction:: fiction::write_operational_domain(const operational_domain& opdom, std::ostream& os, const write_operational_domain_params& params = {})
 .. doxygenfunction:: fiction::write_operational_domain(const operational_domain& opdom, const std::string_view& filename, const write_operational_domain_params& params = {})
+
+Technology-independent Gate-level Layouts
+#########################################
+
+**Header:** ``fiction/io/write_fgl_layout.hpp``
+
+.. doxygenfunction:: fiction::write_fgl_layout(const Lyt& lyt, std::ostream& os)
+.. doxygenfunction:: fiction::write_fgl_layout(const Lyt& lyt, const std::string_view& filename)

@@ -40,14 +40,16 @@ TEMPLATE_TEST_CASE(
     TestType lyt{};
 
     using charge_layout = charge_distribution_surface<TestType>;
+    CHECK(is_charge_distribution_surface_v<charge_layout>);
     CHECK(is_cell_level_layout_v<charge_layout>);
     CHECK(has_assign_charge_state_v<charge_layout>);
     CHECK(has_get_charge_state_v<charge_layout>);
 
-    const charge_layout defect_lyt{};
-    const charge_layout defect_lyt_from_lyt{lyt};
+    const charge_layout charge_lyt{};
+    const charge_layout charge_lyt_from_lyt{lyt};
 
     using charge_charge_layout = charge_distribution_surface<charge_layout>;
+    CHECK(is_charge_distribution_surface_v<charge_charge_layout>);
     CHECK(is_cell_level_layout_v<charge_charge_layout>);
     CHECK(has_assign_charge_state_v<charge_charge_layout>);
     CHECK(has_get_charge_state_v<charge_charge_layout>);
@@ -157,10 +159,9 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_layout.get_charge_state_by_index(1) == sidb_charge_state::NEGATIVE);
         CHECK(charge_layout.get_charge_state_by_index(2) == sidb_charge_state::NEGATIVE);
 
-        charge_distribution_surface charge_layout_quickexact{lyt,
-                                                             sidb_simulation_parameters{2},
-                                                             sidb_charge_state::NEGATIVE,
-                                                             {5, 4}};
+        charge_distribution_surface charge_layout_quickexact{lyt, sidb_simulation_parameters{2},
+                                                             sidb_charge_state::NEGATIVE};
+        charge_layout_quickexact.assign_dependent_cell({5, 4});
         charge_layout_quickexact.is_three_state_simulation_required();
         CHECK(charge_layout_quickexact.get_charge_index_and_base().first == 0);
         charge_layout_quickexact.increase_charge_index_by_one(
@@ -178,10 +179,9 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({6, 5}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({7, 5}, TestType::cell_type::NORMAL);
         // assign dependent-cell at {5,5}
-        charge_distribution_surface charge_layout{lyt,
-                                                  sidb_simulation_parameters{3, -0.25},
-                                                  sidb_charge_state::NEGATIVE,
-                                                  {5, 5}};
+        charge_distribution_surface charge_layout{lyt, sidb_simulation_parameters{3, -0.25},
+                                                  sidb_charge_state::NEGATIVE};
+        charge_layout.assign_dependent_cell({5, 5});
         CHECK(charge_layout.get_max_charge_index() == 8);
         CHECK(charge_layout.get_max_charge_index_sub_layout() == 0);
 
@@ -274,10 +274,8 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({10, 8}, TestType::cell_type::NORMAL);
 
         // dependent-cell is within the sublayout
-        charge_distribution_surface charge_layout{lyt,
-                                                  sidb_simulation_parameters{},
-                                                  sidb_charge_state::NEGATIVE,
-                                                  {5, 5}};
+        charge_distribution_surface charge_layout{lyt, sidb_simulation_parameters{}, sidb_charge_state::NEGATIVE};
+        charge_layout.assign_dependent_cell({5, 5});
         CHECK(charge_layout.is_three_state_simulation_required());
         charge_layout.assign_charge_state({6, 5}, sidb_charge_state::POSITIVE);
         charge_layout.assign_charge_state({7, 5}, sidb_charge_state::POSITIVE);
@@ -285,10 +283,9 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_layout.get_charge_index_of_sub_layout() == 8);
 
         // dependent-cell is not within the sublayout
-        charge_distribution_surface charge_layout_dependent_cell_not_in_sublayout{lyt,
-                                                                                  sidb_simulation_parameters{},
-                                                                                  sidb_charge_state::NEGATIVE,
-                                                                                  {10, 4}};
+        charge_distribution_surface charge_layout_dependent_cell_not_in_sublayout{lyt, sidb_simulation_parameters{},
+                                                                                  sidb_charge_state::NEGATIVE};
+        charge_layout_dependent_cell_not_in_sublayout.assign_dependent_cell({10, 4});
         CHECK(charge_layout_dependent_cell_not_in_sublayout.is_three_state_simulation_required());
         charge_layout_dependent_cell_not_in_sublayout.assign_charge_state({5, 5}, sidb_charge_state::POSITIVE);
         charge_layout_dependent_cell_not_in_sublayout.assign_charge_state({6, 5}, sidb_charge_state::POSITIVE);
@@ -753,11 +750,8 @@ TEMPLATE_TEST_CASE(
         lyt_new.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
         lyt_new.assign_cell_type({10, 5, 1}, TestType::cell_type::NORMAL);
 
-        charge_distribution_surface charge_layout_new{lyt_new,
-                                                      params,
-                                                      sidb_charge_state::NEUTRAL,
-                                                      {},
-                                                      {{{0, 0, 1}, -0.5}}};
+        charge_distribution_surface charge_layout_new{lyt_new, params, sidb_charge_state::NEUTRAL};
+        charge_layout_new.assign_local_external_potential({{{0, 0, 1}, -0.5}});
         REQUIRE(!charge_layout_new.get_local_external_potentials().empty());
         CHECK(charge_layout_new.get_local_external_potentials().size() == 1);
         CHECK(charge_layout_new.get_local_external_potentials().size() == 1);
@@ -1021,7 +1015,8 @@ TEMPLATE_TEST_CASE(
         lyt_new.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
         lyt_new.assign_cell_type({10, 4, 1}, TestType::cell_type::NORMAL);
 
-        charge_distribution_surface charge_layout_new{lyt_new, params, sidb_charge_state::NEGATIVE, {10, 4, 1}};
+        charge_distribution_surface charge_layout_new{lyt_new, params, sidb_charge_state::NEGATIVE};
+        charge_layout_new.assign_dependent_cell({10, 4, 1});
 
         charge_layout_new.assign_charge_state({0, 3, 1}, sidb_charge_state::NEGATIVE);
         charge_layout_new.assign_charge_state({1, 3, 0}, sidb_charge_state::NEGATIVE);
@@ -1052,7 +1047,8 @@ TEMPLATE_TEST_CASE(
         lyt_new.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
         lyt_new.assign_cell_type({10, 4, 1}, TestType::cell_type::NORMAL);
 
-        charge_distribution_surface charge_layout_new{lyt_new, params, sidb_charge_state::NEGATIVE, {10, 4, 1}};
+        charge_distribution_surface charge_layout_new{lyt_new, params, sidb_charge_state::NEGATIVE};
+        charge_layout_new.assign_dependent_cell({10, 4, 1});
 
         REQUIRE(charge_layout_new.get_local_potential({0, 3, 1}).has_value());
         REQUIRE(charge_layout_new.get_local_potential({1, 3, 0}).has_value());
@@ -1078,7 +1074,8 @@ TEMPLATE_TEST_CASE(
         lyt_new.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
         lyt_new.assign_cell_type({10, 4, 1}, TestType::cell_type::NORMAL);
 
-        charge_distribution_surface charge_layout_new{lyt_new, params, sidb_charge_state::NEGATIVE, {10, 4, 1}};
+        charge_distribution_surface charge_layout_new{lyt_new, params, sidb_charge_state::NEGATIVE};
+        charge_layout_new.assign_dependent_cell({10, 4, 1});
 
         charge_layout_new.assign_charge_state({0, 3, 1}, sidb_charge_state::NEGATIVE);
         charge_layout_new.assign_charge_state({1, 3, 0}, sidb_charge_state::NEUTRAL);
@@ -1127,10 +1124,8 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({3, 0, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({5, 0, 0}, TestType::cell_type::NORMAL);
 
-        charge_distribution_surface charge_layout{lyt,
-                                                  sidb_simulation_parameters{},
-                                                  sidb_charge_state::NEGATIVE,
-                                                  {3, 0, 0}};
+        charge_distribution_surface charge_layout{lyt, sidb_simulation_parameters{}, sidb_charge_state::NEGATIVE};
+        charge_layout.assign_dependent_cell({3, 0, 0});
         CHECK(charge_layout.get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
         CHECK(charge_layout.get_charge_state({3, 0, 0}) == sidb_charge_state::NEGATIVE);
         CHECK(charge_layout.get_charge_state({5, 0, 0}) == sidb_charge_state::NEGATIVE);
@@ -1150,7 +1145,8 @@ TEMPLATE_TEST_CASE(
 
         const sidb_simulation_parameters params{2, -0.32};
 
-        charge_distribution_surface charge_layout{lyt, params, sidb_charge_state::NEGATIVE, {3, 0, 0}};
+        charge_distribution_surface charge_layout{lyt, params, sidb_charge_state::NEGATIVE};
+        charge_layout.assign_dependent_cell({3, 0, 0});
         CHECK(charge_layout.get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
         CHECK(charge_layout.get_charge_state({3, 0, 0}) == sidb_charge_state::NEGATIVE);
         CHECK(charge_layout.get_charge_state({5, 0, 0}) == sidb_charge_state::NEGATIVE);
@@ -1174,10 +1170,8 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({3, 0, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({5, 0, 0}, TestType::cell_type::NORMAL);
 
-        charge_distribution_surface charge_layout{lyt,
-                                                  sidb_simulation_parameters{},
-                                                  sidb_charge_state::NEGATIVE,
-                                                  {3, 0, 0}};
+        charge_distribution_surface charge_layout{lyt, sidb_simulation_parameters{}, sidb_charge_state::NEGATIVE};
+        charge_layout.assign_dependent_cell({3, 0, 0});
         CHECK(charge_layout.get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
         CHECK(charge_layout.get_charge_state({3, 0, 0}) == sidb_charge_state::NEGATIVE);
         CHECK(charge_layout.get_charge_state({5, 0, 0}) == sidb_charge_state::NEGATIVE);
@@ -1197,7 +1191,8 @@ TEMPLATE_TEST_CASE(
 
         const sidb_simulation_parameters params{2, -0.32};
 
-        charge_distribution_surface charge_layout{lyt, params, sidb_charge_state::NEGATIVE, {0, 0, 0}};
+        charge_distribution_surface charge_layout{lyt, params, sidb_charge_state::NEGATIVE};
+        charge_layout.assign_dependent_cell({0, 0, 0});
         CHECK(charge_layout.get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
         CHECK(charge_layout.get_charge_state({3, 0, 0}) == sidb_charge_state::NEGATIVE);
         CHECK(charge_layout.get_charge_state({5, 0, 0}) == sidb_charge_state::NEGATIVE);
@@ -1667,11 +1662,8 @@ TEMPLATE_TEST_CASE(
         lyt_new.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
         lyt_new.assign_cell_type({10, 5, 1}, TestType::cell_type::NORMAL);
 
-        charge_distribution_surface charge_layout_new{lyt_new,
-                                                      params,
-                                                      sidb_charge_state::NEUTRAL,
-                                                      {},
-                                                      {{{0, 0, 1}, -0.5}}};
+        charge_distribution_surface charge_layout_new{lyt_new, params, sidb_charge_state::NEUTRAL};
+        charge_layout_new.assign_local_external_potential({{{0, 0, 1}, -0.5}});
         REQUIRE(!charge_layout_new.get_local_external_potentials().empty());
         CHECK(charge_layout_new.get_local_external_potentials().size() == 1);
         CHECK(charge_layout_new.get_local_external_potentials().size() == 1);
@@ -1792,7 +1784,7 @@ TEMPLATE_TEST_CASE(
         lyt_new.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
         lyt_new.assign_cell_type({10, 5, 1}, TestType::cell_type::NORMAL);
 
-        charge_distribution_surface charge_layout_new{lyt_new, params, sidb_charge_state::NEUTRAL, {}};
+        charge_distribution_surface charge_layout_new{lyt_new, params, sidb_charge_state::NEUTRAL};
 
         charge_layout_new.add_sidb_defect_to_potential_landscape(
             {5, 1, 1}, sidb_defect{sidb_defect_type::UNKNOWN, -1, charge_layout_new.get_phys_params().epsilon_r,
@@ -1816,7 +1808,7 @@ TEMPLATE_TEST_CASE(
         lyt_new.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
         lyt_new.assign_cell_type({10, 5, 1}, TestType::cell_type::NORMAL);
 
-        charge_distribution_surface charge_layout_new{lyt_new, params, sidb_charge_state::NEUTRAL, {}};
+        charge_distribution_surface charge_layout_new{lyt_new, params, sidb_charge_state::NEUTRAL};
 
         charge_layout_new.add_sidb_defect_to_potential_landscape(
             {5, 1, 1}, sidb_defect{sidb_defect_type::UNKNOWN, 1, charge_layout_new.get_phys_params().epsilon_r,
@@ -1839,7 +1831,7 @@ TEMPLATE_TEST_CASE(
         lyt_new.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
         lyt_new.assign_cell_type({10, 5, 1}, TestType::cell_type::NORMAL);
 
-        charge_distribution_surface charge_layout_new{lyt_new, params, sidb_charge_state::NEUTRAL, {}};
+        charge_distribution_surface charge_layout_new{lyt_new, params, sidb_charge_state::NEUTRAL};
 
         REQUIRE(charge_layout_new.get_local_potential({0, 0, 0}).has_value());
         REQUIRE(charge_layout_new.get_local_potential({10, 5, 1}).has_value());
@@ -1860,7 +1852,7 @@ TEMPLATE_TEST_CASE(
         lyt_new.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
         lyt_new.assign_cell_type({10, 5, 1}, TestType::cell_type::NORMAL);
 
-        charge_distribution_surface charge_layout{lyt_new, params, sidb_charge_state::NEUTRAL, {}};
+        charge_distribution_surface charge_layout{lyt_new, params, sidb_charge_state::NEUTRAL};
 
         REQUIRE(charge_layout.get_local_potential({0, 0, 0}).has_value());
         REQUIRE(charge_layout.get_local_potential({10, 5, 1}).has_value());
@@ -1912,7 +1904,8 @@ TEMPLATE_TEST_CASE(
 
         const sidb_simulation_parameters params{2, -0.32};
 
-        charge_distribution_surface charge_layout{lyt, params, sidb_charge_state::NEGATIVE, {0, 0, 0}};
+        charge_distribution_surface charge_layout{lyt, params, sidb_charge_state::NEGATIVE};
+        charge_layout.assign_dependent_cell({0, 0, 0});
 
         REQUIRE(charge_layout.get_local_potential({0, 0, 0}).has_value());
         REQUIRE(charge_layout.get_local_potential({3, 0, 0}).has_value());
@@ -1980,7 +1973,8 @@ TEMPLATE_TEST_CASE(
 
         const sidb_simulation_parameters params{2, -0.32};
 
-        charge_distribution_surface charge_layout{lyt, params, sidb_charge_state::NEGATIVE, {0, 0, 0}};
+        charge_distribution_surface charge_layout{lyt, params, sidb_charge_state::NEGATIVE};
+        charge_layout.assign_dependent_cell({0, 0, 0});
 
         REQUIRE(charge_layout.get_local_potential({0, 0, 0}).has_value());
         REQUIRE(charge_layout.get_local_potential({3, 0, 0}).has_value());
@@ -2049,7 +2043,8 @@ TEMPLATE_TEST_CASE(
 
         const sidb_simulation_parameters params{2, -0.32};
 
-        charge_distribution_surface charge_layout{lyt, params, sidb_charge_state::NEUTRAL, {0, 0, 0}};
+        charge_distribution_surface charge_layout{lyt, params, sidb_charge_state::NEUTRAL};
+        charge_layout.assign_dependent_cell({0, 0, 0});
 
         REQUIRE(charge_layout.get_local_potential({0, 0, 0}).has_value());
         REQUIRE(charge_layout.get_local_potential({3, 0, 0}).has_value());
@@ -2085,7 +2080,8 @@ TEMPLATE_TEST_CASE(
 
         const sidb_simulation_parameters params{2, -0.32};
 
-        charge_distribution_surface charge_layout{lyt, params, sidb_charge_state::NEUTRAL, {0, 0, 0}};
+        charge_distribution_surface charge_layout{lyt, params, sidb_charge_state::NEUTRAL};
+        charge_layout.assign_dependent_cell({0, 0, 0});
 
         REQUIRE(charge_layout.get_local_potential({0, 0, 0}).has_value());
         REQUIRE(charge_layout.get_local_potential({3, 0, 0}).has_value());

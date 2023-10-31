@@ -123,7 +123,6 @@ class design_sidb_gates_impl
             if (!are_sidbs_too_close(combination))
             {
                 auto layout_with_added_cells = skeleton_layout_with_canvas_sidbs(combination);
-
                 if (const auto [status, sim_calls] =
                         is_operational(layout_with_added_cells, truth_table, params_is_operational);
                     status == operational_status::OPERATIONAL)
@@ -317,8 +316,8 @@ class design_sidb_gates_impl
 
 /**
  * The *SiDB Gate Designer* designs SiDB gate implementations based on a specified Boolean function, a
- * skeleton structure, canvas size, and a predetermined number of canvas SiDBs. Two different design modes are
- * implemented: `exhaustive` and `random design`.
+ * skeleton layout (can hold defects), canvas size, and a predetermined number of canvas SiDBs. Two different design
+ * modes are implemented: `exhaustive` and `random design`.
  *
  * The `exhaustive design` is composed of three steps:
  * 1. In the initial step, all possible distributions of `number_of_sidbs` SiDBs within a given canvas are

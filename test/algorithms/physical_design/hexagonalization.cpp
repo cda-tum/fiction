@@ -26,8 +26,9 @@ using namespace fiction;
 template <typename Lyt, typename Ntk>
 void check_mapping_equiv(const Ntk& ntk)
 {
-    const auto layout     = orthogonal<Lyt>(ntk, {});
-    const auto hex_layout = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(layout);
+    const auto             layout = orthogonal<Lyt>(ntk, {});
+    hexagonalization_stats stats{};
+    const auto             hex_layout = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(layout, &stats);
 
     check_eq(ntk, layout);
     check_eq(ntk, hex_layout);
@@ -37,7 +38,8 @@ void check_mapping_equiv(const Ntk& ntk)
 template <typename Lyt>
 void check_mapping_equiv_layout(const Lyt& lyt)
 {
-    const auto hex_layout = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(lyt);
+    hexagonalization_stats stats{};
+    const auto             hex_layout = hexagonalization<hex_even_row_gate_clk_lyt, Lyt>(lyt, &stats);
 
     check_eq(lyt, hex_layout);
     CHECK(lyt.get_layout_name() == hex_layout.get_layout_name());
