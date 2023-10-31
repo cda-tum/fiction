@@ -141,7 +141,8 @@ class design_sidb_gates_impl
             for (const auto& comb : combination)
             {
                 if (!solution_found && !are_sidbs_too_close(comb, sidbs_affected_by_defects) &&
-                    global_iteration_counter < static_cast<uint64_t>(params.procentual_maximum_attemps * total_comb))
+                    global_iteration_counter <
+                        static_cast<uint64_t>(params.procentual_maximum_attemps * static_cast<double>(total_comb)))
                 {
                     // canvas SiDBs are added to the skeleton
                     auto layout_with_added_cells = skeleton_layout_with_canvas_sidbs(comb);
@@ -165,15 +166,15 @@ class design_sidb_gates_impl
         };
 
         const unsigned int num_threads = std::thread::hardware_concurrency();
-        const size_t       chunk_size  = all_combinations.size() / num_threads;
+        const std::size_t  chunk_size  = all_combinations.size() / num_threads;
 
         std::vector<std::thread> threads;
         threads.reserve(num_threads);
 
-        for (unsigned int i = 0; i < num_threads; ++i)
+        for (auto i = 0u; i < num_threads; ++i)
         {
-            size_t start = i * chunk_size;
-            size_t end   = (i == num_threads - 1) ? all_combinations.size() : (i + 1) * chunk_size;
+            std::size_t start = i * chunk_size;
+            std::size_t end   = (i == num_threads - 1) ? all_combinations.size() : (i + 1) * chunk_size;
             std::vector<std::vector<std::size_t>> chunk_combinations(all_combinations.begin() + start,
                                                                      all_combinations.begin() + end);
             threads.emplace_back(add_combination_to_layout_and_check_operation, chunk_combinations);
@@ -239,7 +240,7 @@ class design_sidb_gates_impl
                             if constexpr (has_get_sidb_defect_v<Lyt>)
                             {
                                 skeleton_layout.foreach_sidb_defect(
-                                    [this, &result_lyt](const auto& cd)
+                                    [&result_lyt](const auto& cd)
                                     {
                                         if (is_neutrally_charged_defect(cd.second))
                                         {

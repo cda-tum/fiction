@@ -13,17 +13,17 @@
 #include <fiction/algorithms/physical_design/orthogonal.hpp>
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/io/read_sidb_surface_defects.hpp>                               // reader for simulated SiDB surfaces
-#include <fiction/io/write_sqd_layout.hpp>  // writer for SiQAD files (physical simulation)
+#include <fiction/io/write_sqd_layout.hpp>                     // writer for SiQAD files (physical simulation)
 #include <fiction/layouts/coordinates.hpp>
-#include <fiction/networks/technology_network.hpp>   // technology-mapped network type
-#include <fiction/technology/area.hpp>               // area requirement calculations
-#include <fiction/technology/cell_technologies.hpp>  // cell implementations
+#include <fiction/networks/technology_network.hpp>             // technology-mapped network type
+#include <fiction/technology/area.hpp>                         // area requirement calculations
+#include <fiction/technology/cell_technologies.hpp>            // cell implementations
 #include <fiction/technology/sidb_defects.hpp>
-#include <fiction/technology/sidb_dynamic_gate_library.hpp>  // a dynamic SiDB gate library
+#include <fiction/technology/sidb_dynamic_gate_library.hpp>    // a dynamic SiDB gate library
 #include <fiction/technology/sidb_skeleton_bestagon_library.hpp>
-#include <fiction/technology/sidb_surface.hpp>  // SiDB surface with support for atomic defects
+#include <fiction/technology/sidb_surface.hpp>                 // SiDB surface with support for atomic defects
 #include <fiction/traits.hpp>
-#include <fiction/types.hpp>  // pre-defined types suitable for the FCN domain
+#include <fiction/types.hpp>                                   // pre-defined types suitable for the FCN domain
 
 #include <fmt/format.h>                                        // output formatting
 #include <lorina/lorina.hpp>                                   // Verilog/BLIF/AIGER/... file parsing
@@ -170,10 +170,12 @@ int main()  // NOLINT
 
             mockturtle::stopwatch<>::duration time_counter{};
 
+            bool gate_design_failed = true;
+
             {
                 const mockturtle::stopwatch stop{time_counter};
 
-                while (!gate_level_layout.has_value() || cell_level_layout.get_layout_name() == "fail")
+                while (!gate_level_layout.has_value() || gate_design_failed)
                 {
                     exact_params.black_list = black_list;
                     fiction::exact_physical_design_stats exact_stats{};
@@ -185,11 +187,19 @@ int main()  // NOLINT
                     gate_level_layout = fiction::exact<gate_lyt>(mapped_network, exact_params, &exact_stats);
                     if (gate_level_layout.has_value())
                     {
-                        cell_level_layout =
-                            fiction::apply_dynamic_gate_library<cell_lyt, fiction::sidb_dynamic_gate_library, gate_lyt,
-                                                                fiction::sidb_skeleton_bestagon_library>(
-                                *gate_level_layout, surface_lattice, fiction::sidb_dynamic_gate_library_params{},
-                                black_list);
+                        try
+                        {
+                            cell_level_layout =
+                                fiction::apply_dynamic_gate_library<cell_lyt, fiction::sidb_dynamic_gate_library,
+                                                                    gate_lyt, fiction::sidb_skeleton_bestagon_library>(
+                                    *gate_level_layout, surface_lattice, fiction::sidb_dynamic_gate_library_params{},
+                                    black_list);
+                            gate_design_failed = false;
+                        }
+                        catch (const std::exception& e)
+                        {
+                            gate_design_failed = true;
+                        }
                     }
                     attempts++;
                 }

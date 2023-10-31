@@ -129,7 +129,7 @@ int main()  // NOLINT
     // parameters for SMT-based physical design
     fiction::exact_physical_design_params<gate_lyt> exact_params{};
     exact_params.scheme        = fiction::ptr<gate_lyt>(fiction::row_clocking<gate_lyt>(fiction::num_clks::FOUR));
-    exact_params.crossings     = true;
+    exact_params.crossings     = false;
     exact_params.border_io     = false;
     exact_params.desynchronize = false;
     exact_params.upper_bound_x = 11;      // 12 x 31 tiles

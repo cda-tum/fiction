@@ -261,13 +261,6 @@ class fcn_gate_library
         return GateSizeY;
     }
 
-    /**
-     * Single error gate in given technology and tile size.
-     *
-     */
-    static constexpr fcn_gate ERROR =
-        fiction::create_array<GateSizeY>(fiction::create_array<GateSizeX>(Technology::cell_type::INPUT));
-
   protected:
     /**
      * Transposes the given `fcn_gate` at compile time.
