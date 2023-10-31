@@ -128,38 +128,45 @@ class apply_gate_library_impl
         // initialize a progress bar
         mockturtle::progress_bar bar{static_cast<uint32_t>(gate_lyt.size()), "[i] applying gate library: |{0}|"};
 #endif
-        gate_lyt.foreach_node(
-            [&, this](const auto& n, [[maybe_unused]] auto i)
-            {
-                if (!gate_lyt.is_constant(n))
+        try
+        {
+            gate_lyt.foreach_node(
+                [&, this](const auto& n, [[maybe_unused]] auto i)
                 {
-                    const auto t = gate_lyt.get_tile(n);
+                    if (!gate_lyt.is_constant(n))
+                    {
+                        const auto t = gate_lyt.get_tile(n);
 
-                    // retrieve the top-leftmost cell in tile t
-                    const auto c =
-                        relative_to_absolute_cell_position<GateLibrary::gate_x_size(), GateLibrary::gate_y_size(),
-                                                           GateLyt, CellLyt>(gate_lyt, t, cell<CellLyt>{0, 0});
+                        // retrieve the top-leftmost cell in tile t
+                        const auto c =
+                            relative_to_absolute_cell_position<GateLibrary::gate_x_size(), GateLibrary::gate_y_size(),
+                                                               GateLyt, CellLyt>(gate_lyt, t, cell<CellLyt>{0, 0});
 
-                    assign_gate(c, GateLibrary::set_up_gate(gate_lyt, t), n);
-                }
+                        assign_gate(c, GateLibrary::set_up_gate(gate_lyt, t), n);
+                    }
 #if (PROGRESS_BARS)
-                // update progress
-                bar(i);
+                    // update progress
+                    bar(i);
 #endif
-            });
+                });
 
-        // perform post-layout optimization if necessary
-        if constexpr (has_post_layout_optimization_v<GateLibrary, CellLyt>)
-        {
-            GateLibrary::post_layout_optimization(cell_lyt);
-        }
-        // if available, recover layout name
-        if constexpr (has_get_layout_name_v<GateLyt> && has_set_layout_name_v<CellLyt>)
-        {
-            cell_lyt.set_layout_name(gate_lyt.get_layout_name());
-        }
+            // perform post-layout optimization if necessary
+            if constexpr (has_post_layout_optimization_v<GateLibrary, CellLyt>)
+            {
+                GateLibrary::post_layout_optimization(cell_lyt);
+            }
+            // if available, recover layout name
+            if constexpr (has_get_layout_name_v<GateLyt> && has_set_layout_name_v<CellLyt>)
+            {
+                cell_lyt.set_layout_name(gate_lyt.get_layout_name());
+            }
 
-        return cell_lyt;
+            return cell_lyt;
+        }
+        catch (const std::exception& e)
+        {
+            throw;
+        }
     }
 
   private:
@@ -226,9 +233,14 @@ template <typename CellLyt, typename GateLibrary, typename GateLyt>
 
     detail::apply_gate_library_impl<CellLyt, GateLibrary, GateLyt> p{lyt};
 
-    auto result = p.run();
-
-    return result;
+    try
+    {
+        return p.run();
+    }
+    catch (const std::exception& e)
+    {
+        throw;
+    }
 }
 /**
  * Applies a dynamic gate library (i.e., gate are designed on the fly by respecting atomic defects) to a given
@@ -266,8 +278,8 @@ template <typename CellLyt, typename GateLibrary, typename GateLyt, typename Gat
 
     try
     {
-        auto result = p.template run_dynamic_gates<GateLibraryblack>(defect_surface, params, black_list);
-        return result;
+        return p.template run_dynamic_gates<GateLibraryblack>(defect_surface, params, black_list);
+
     }
     catch (const std::exception& e)
     {
