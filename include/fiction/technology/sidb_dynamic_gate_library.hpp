@@ -101,15 +101,8 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
                             cell_list_to_cell_level_layout<sidb_defect_cell_clk_lyt_siqad>(ONE_IN_TWO_OUT_MAP.at(p)),
                             center_cell_siqad, absolute_cell_siqad, parameter);
 
-                        try
-                        {
-                            return design_gate<sidb_defect_cell_clk_lyt_siqad, GateLyt, GateLibraryblack>(
-                                layout, create_fan_out_tt(), parameter.params, black_list, p, t);
-                        }
-                        catch (const std::exception& e)
-                        {
-                            throw;
-                        }
+                        return design_gate<sidb_defect_cell_clk_lyt_siqad, GateLyt, GateLibraryblack>(
+                            layout, create_fan_out_tt(), parameter.params, black_list, p, t);
                     }
                 }
             }
@@ -141,15 +134,9 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
 
                                 auto complex_gate_param                   = parameter;
                                 complex_gate_param.params.number_of_sidbs = parameter.canvas_sidb_complex_gates;
-                                try
-                                {
-                                    return design_gate<sidb_defect_cell_clk_lyt_siqad, GateLyt, GateLibraryblack>(
-                                        layout, create_double_wire_tt(), complex_gate_param.params, black_list, p, t);
-                                }
-                                catch (const std::exception& e)
-                                {
-                                    throw;
-                                }
+
+                                return design_gate<sidb_defect_cell_clk_lyt_siqad, GateLyt, GateLibraryblack>(
+                                    layout, create_double_wire_tt(), complex_gate_param.params, black_list, p, t);
                             }
 
                             const auto layout = add_defect_in_the_surrounding_to_layout(
@@ -166,15 +153,9 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
 
                             auto complex_gate_param                   = parameter;
                             complex_gate_param.params.number_of_sidbs = parameter.canvas_sidb_complex_gates;
-                            try
-                            {
-                                return design_gate<sidb_defect_cell_clk_lyt_siqad, GateLyt, GateLibraryblack>(
-                                    layout, create_crossing_wire_tt(), complex_gate_param.params, black_list, p, t);
-                            }
-                            catch (const std::exception& e)
-                            {
-                                throw;
-                            }
+
+                            return design_gate<sidb_defect_cell_clk_lyt_siqad, GateLyt, GateLibraryblack>(
+                                layout, create_crossing_wire_tt(), complex_gate_param.params, black_list, p, t);
                         }
 
                         const auto cell_list = ONE_IN_ONE_OUT_MAP.at(p);
@@ -186,15 +167,8 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
                             sidb_surface, cell_list_to_cell_level_layout<sidb_defect_cell_clk_lyt_siqad>(cell_list),
                             center_cell_siqad, absolute_cell_siqad, parameter);
 
-                        try
-                        {
-                            return design_gate<sidb_defect_cell_clk_lyt_siqad, GateLyt, GateLibraryblack>(
-                                layout, std::vector<tt>{f}, parameter.params, black_list, p, t);
-                        }
-                        catch (const std::exception& e)
-                        {
-                            throw;
-                        }
+                        return design_gate<sidb_defect_cell_clk_lyt_siqad, GateLyt, GateLibraryblack>(
+                            layout, std::vector<tt>{f}, parameter.params, black_list, p, t);
                     }
                     return EMPTY_GATE;
                 }
@@ -208,15 +182,8 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
                         cell_list_to_cell_level_layout<sidb_defect_cell_clk_lyt_siqad>(ONE_IN_ONE_OUT_MAP.at(p)),
                         center_cell_siqad, absolute_cell_siqad, parameter);
 
-                    try
-                    {
-                        return design_gate<sidb_defect_cell_clk_lyt_siqad, GateLyt, GateLibraryblack>(
-                            layout, std::vector<tt>{f}, parameter.params, black_list, p, t);
-                    }
-                    catch (const std::exception& e)
-                    {
-                        throw;
-                    }
+                    return design_gate<sidb_defect_cell_clk_lyt_siqad, GateLyt, GateLibraryblack>(
+                        layout, std::vector<tt>{f}, parameter.params, black_list, p, t);
                 }
             }
             if constexpr (mockturtle::has_is_and_v<GateLyt>)
@@ -227,15 +194,9 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
                         sidb_surface,
                         cell_list_to_cell_level_layout<sidb_defect_cell_clk_lyt_siqad>(TWO_IN_ONE_OUT_MAP.at(p)),
                         center_cell_siqad, absolute_cell_siqad, parameter);
-                    try
-                    {
-                        return design_gate<sidb_defect_cell_clk_lyt_siqad, GateLyt, GateLibraryblack>(
-                            layout, std::vector<tt>{f}, parameter.params, black_list, p, t);
-                    }
-                    catch (const std::exception& e)
-                    {
-                        throw;
-                    }
+
+                    return design_gate<sidb_defect_cell_clk_lyt_siqad, GateLyt, GateLibraryblack>(
+                        layout, std::vector<tt>{f}, parameter.params, black_list, p, t);
                 }
             }
             if constexpr (mockturtle::has_is_or_v<GateLyt>)
@@ -247,15 +208,8 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
                         cell_list_to_cell_level_layout<sidb_defect_cell_clk_lyt_siqad>(TWO_IN_ONE_OUT_MAP.at(p)),
                         center_cell_siqad, absolute_cell_siqad, parameter);
 
-                    try
-                    {
-                        return design_gate<sidb_defect_cell_clk_lyt_siqad, GateLyt, GateLibraryblack>(
-                            layout, std::vector<tt>{f}, parameter.params, black_list, p, t);
-                    }
-                    catch (const std::exception& e)
-                    {
-                        throw;
-                    }
+                    return design_gate<sidb_defect_cell_clk_lyt_siqad, GateLyt, GateLibraryblack>(
+                        layout, std::vector<tt>{f}, parameter.params, black_list, p, t);
                 }
             }
             if constexpr (fiction::has_is_nand_v<GateLyt>)
@@ -267,15 +221,8 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
                         cell_list_to_cell_level_layout<sidb_defect_cell_clk_lyt_siqad>(TWO_IN_ONE_OUT_MAP.at(p)),
                         center_cell_siqad, absolute_cell_siqad, parameter);
 
-                    try
-                    {
-                        return design_gate<sidb_defect_cell_clk_lyt_siqad, GateLyt, GateLibraryblack>(
-                            layout, std::vector<tt>{f}, parameter.params, black_list, p, t);
-                    }
-                    catch (const std::exception& e)
-                    {
-                        throw;
-                    }
+                    return design_gate<sidb_defect_cell_clk_lyt_siqad, GateLyt, GateLibraryblack>(
+                        layout, std::vector<tt>{f}, parameter.params, black_list, p, t);
                 }
             }
             if constexpr (fiction::has_is_nor_v<GateLyt>)
@@ -287,15 +234,8 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
                         cell_list_to_cell_level_layout<sidb_defect_cell_clk_lyt_siqad>(TWO_IN_ONE_OUT_MAP.at(p)),
                         center_cell_siqad, absolute_cell_siqad, parameter);
 
-                    try
-                    {
-                        return design_gate<sidb_defect_cell_clk_lyt_siqad, GateLyt, GateLibraryblack>(
-                            layout, std::vector<tt>{f}, parameter.params, black_list, p, t);
-                    }
-                    catch (const std::exception& e)
-                    {
-                        throw;
-                    }
+                    return design_gate<sidb_defect_cell_clk_lyt_siqad, GateLyt, GateLibraryblack>(
+                        layout, std::vector<tt>{f}, parameter.params, black_list, p, t);
                 }
             }
             if constexpr (mockturtle::has_is_xor_v<GateLyt>)
@@ -307,15 +247,8 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
                         cell_list_to_cell_level_layout<sidb_defect_cell_clk_lyt_siqad>(TWO_IN_ONE_OUT_MAP.at(p)),
                         center_cell_siqad, absolute_cell_siqad, parameter);
 
-                    try
-                    {
-                        return design_gate<sidb_defect_cell_clk_lyt_siqad, GateLyt, GateLibraryblack>(
-                            layout, std::vector<tt>{f}, parameter.params, black_list, p, t);
-                    }
-                    catch (const std::exception& e)
-                    {
-                        throw;
-                    }
+                    return design_gate<sidb_defect_cell_clk_lyt_siqad, GateLyt, GateLibraryblack>(
+                        layout, std::vector<tt>{f}, parameter.params, black_list, p, t);
                 }
             }
             if constexpr (fiction::has_is_xnor_v<GateLyt>)
@@ -327,15 +260,8 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
                         cell_list_to_cell_level_layout<sidb_defect_cell_clk_lyt_siqad>(TWO_IN_ONE_OUT_MAP.at(p)),
                         center_cell_siqad, absolute_cell_siqad, parameter);
 
-                    try
-                    {
-                        return design_gate<sidb_defect_cell_clk_lyt_siqad, GateLyt, GateLibraryblack>(
-                            layout, std::vector<tt>{f}, parameter.params, black_list, p, t);
-                    }
-                    catch (const std::exception& e)
-                    {
-                        throw;
-                    }
+                    return design_gate<sidb_defect_cell_clk_lyt_siqad, GateLyt, GateLibraryblack>(
+                        layout, std::vector<tt>{f}, parameter.params, black_list, p, t);
                 }
             }
             if constexpr (fiction::has_is_ge_v<GateLyt>)
@@ -347,15 +273,8 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
                         cell_list_to_cell_level_layout<sidb_defect_cell_clk_lyt_siqad>(TWO_IN_ONE_OUT_MAP.at(p)),
                         center_cell_siqad, absolute_cell_siqad, parameter);
 
-                    try
-                    {
-                        return design_gate<sidb_defect_cell_clk_lyt_siqad, GateLyt, GateLibraryblack>(
-                            layout, std::vector<tt>{f}, parameter.params, black_list, p, t);
-                    }
-                    catch (const std::exception& e)
-                    {
-                        throw;
-                    }
+                    return design_gate<sidb_defect_cell_clk_lyt_siqad, GateLyt, GateLibraryblack>(
+                        layout, std::vector<tt>{f}, parameter.params, black_list, p, t);
                 }
             }
             if constexpr (fiction::has_is_le_v<GateLyt>)
@@ -367,15 +286,8 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
                         cell_list_to_cell_level_layout<sidb_defect_cell_clk_lyt_siqad>(TWO_IN_ONE_OUT_MAP.at(p)),
                         center_cell_siqad, absolute_cell_siqad, parameter);
 
-                    try
-                    {
-                        return design_gate<sidb_defect_cell_clk_lyt_siqad, GateLyt, GateLibraryblack>(
-                            layout, std::vector<tt>{f}, parameter.params, black_list, p, t);
-                    }
-                    catch (const std::exception& e)
-                    {
-                        throw;
-                    }
+                    return design_gate<sidb_defect_cell_clk_lyt_siqad, GateLyt, GateLibraryblack>(
+                        layout, std::vector<tt>{f}, parameter.params, black_list, p, t);
                 }
             }
             if constexpr (fiction::has_is_gt_v<GateLyt>)
@@ -386,15 +298,9 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
                         sidb_surface,
                         cell_list_to_cell_level_layout<sidb_defect_cell_clk_lyt_siqad>(TWO_IN_ONE_OUT_MAP.at(p)),
                         center_cell_siqad, absolute_cell_siqad, parameter);
-                    try
-                    {
-                        return design_gate<sidb_defect_cell_clk_lyt_siqad, GateLyt, GateLibraryblack>(
-                            layout, std::vector<tt>{f}, parameter.params, black_list, p, t);
-                    }
-                    catch (const std::exception& e)
-                    {
-                        throw;
-                    }
+
+                    return design_gate<sidb_defect_cell_clk_lyt_siqad, GateLyt, GateLibraryblack>(
+                        layout, std::vector<tt>{f}, parameter.params, black_list, p, t);
                 }
             }
             if constexpr (fiction::has_is_lt_v<GateLyt>)
@@ -406,15 +312,8 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
                         cell_list_to_cell_level_layout<sidb_defect_cell_clk_lyt_siqad>(TWO_IN_ONE_OUT_MAP.at(p)),
                         center_cell_siqad, absolute_cell_siqad, parameter);
 
-                    try
-                    {
-                        return design_gate<sidb_defect_cell_clk_lyt_siqad, GateLyt, GateLibraryblack>(
-                            layout, std::vector<tt>{f}, parameter.params, black_list, p, t);
-                    }
-                    catch (const std::exception& e)
-                    {
-                        throw;
-                    }
+                    return design_gate<sidb_defect_cell_clk_lyt_siqad, GateLyt, GateLibraryblack>(
+                        layout, std::vector<tt>{f}, parameter.params, black_list, p, t);
                 }
             }
         }
