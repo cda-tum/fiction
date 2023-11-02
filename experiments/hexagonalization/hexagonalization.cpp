@@ -5,10 +5,10 @@
 #include <fiction/algorithms/physical_design/orthogonal.hpp>  // scalable heuristic for physical design of FCN layouts
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/algorithms/verification/equivalence_checking.hpp>               // SAT-based equivalence checking
-#include <fiction/layouts/bounding_box.hpp>  // computes a minimum-sized box around all non-empty coordinates in a given layout
-#include <fiction/technology/area.hpp>                        // area requirement calculations
-#include <fiction/technology/cell_technologies.hpp>           // cell implementations
-#include <fiction/technology/sidb_bestagon_library.hpp>       // a pre-defined SiDB gate library
+#include <fiction/io/network_reader.hpp>                                          // read networks from files
+#include <fiction/technology/area.hpp>                                            // area requirement calculations
+#include <fiction/technology/cell_technologies.hpp>                               // cell implementations
+#include <fiction/technology/sidb_bestagon_library.hpp>                           // a pre-defined SiDB gate library
 #include <fiction/technology/technology_mapping_library.hpp>  // pre-defined gate types for technology mapping
 #include <fiction/traits.hpp>                                 // traits for type-checking
 #include <fiction/types.hpp>                                  // pre-defined types suitable for the FCN domain
@@ -20,7 +20,6 @@
 #include <mockturtle/algorithms/mapper.hpp>                    // Technology mapping on the logic level
 #include <mockturtle/algorithms/node_resynthesis/xag_npn.hpp>  // NPN databases for cut rewriting of XAGs and AIGs
 #include <mockturtle/io/genlib_reader.hpp>                     // call-backs to read Genlib files into gate libraries
-#include <mockturtle/io/verilog_reader.hpp>                    // call-backs to read Verilog files into networks
 #include <mockturtle/networks/xag.hpp>                         // XOR-AND-inverter graphs
 #include <mockturtle/utils/tech_library.hpp>                   // technology library utils
 
@@ -104,12 +103,11 @@ int main()  // NOLINT
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
         fmt::print("[i] processing {}\n", benchmark);
-        mockturtle::xag_network xag{};
 
-        const auto read_verilog_result =                                          // NOLINT
-            lorina::read_verilog(fiction_experiments::benchmark_path(benchmark),  // NOLINT
-                                 mockturtle::verilog_reader(xag));                // NOLINT
-        assert(read_verilog_result == lorina::return_code::success);
+        std::ostringstream                        os{};
+        fiction::network_reader<fiction::xag_ptr> reader{fiction_experiments::benchmark_path(benchmark), os};
+        const auto                                nets = reader.get_networks();
+        const auto                                xag  = *nets.front();
 
         // compute depth
         const mockturtle::depth_view depth_xag{xag};

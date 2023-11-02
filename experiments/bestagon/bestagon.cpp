@@ -9,6 +9,7 @@
 #include <fiction/algorithms/physical_design/apply_gate_library.hpp>  // layout conversion to cell-level
 #include <fiction/algorithms/physical_design/exact.hpp>               // SMT-based physical design of FCN layouts
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
+#include <fiction/io/network_reader.hpp>                                          // read networks from files
 #include <fiction/io/write_sqd_layout.hpp>                    // writer for SiQAD files (physical simulation)
 #include <fiction/networks/technology_network.hpp>            // technology-mapped network type
 #include <fiction/technology/area.hpp>                        // area requirement calculations
@@ -27,7 +28,6 @@
 #include <mockturtle/algorithms/miter.hpp>                     // miter structure
 #include <mockturtle/algorithms/node_resynthesis/xag_npn.hpp>  // NPN databases for cut rewriting of XAGs and AIGs
 #include <mockturtle/io/genlib_reader.hpp>                     // call-backs to read Genlib files into gate libraries
-#include <mockturtle/io/verilog_reader.hpp>                    // call-backs to read Verilog files into networks
 #include <mockturtle/networks/klut.hpp>                        // k-LUT network
 #include <mockturtle/networks/xag.hpp>                         // XOR-AND-inverter graphs
 #include <mockturtle/utils/tech_library.hpp>                   // technology library utils
@@ -114,11 +114,11 @@ int main()  // NOLINT
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
         fmt::print("[i] processing {}\n", benchmark);
-        mockturtle::xag_network xag{};
 
-        const auto read_verilog_result =
-            lorina::read_verilog(fiction_experiments::benchmark_path(benchmark), mockturtle::verilog_reader(xag));
-        assert(read_verilog_result == lorina::return_code::success);
+        std::ostringstream                        os{};
+        fiction::network_reader<fiction::xag_ptr> reader{fiction_experiments::benchmark_path(benchmark), os};
+        const auto                                nets = reader.get_networks();
+        const auto                                xag  = *nets.front();
 
         // compute depth
         mockturtle::depth_view depth_xag{xag};

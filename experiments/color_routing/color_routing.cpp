@@ -10,13 +10,11 @@
 #include <fiction/algorithms/physical_design/exact.hpp>              // SMT-based physical design of FCN layouts
 #include <fiction/algorithms/physical_design/orthogonal.hpp>         // OGD-based physical design of FCN layouts
 #include <fiction/algorithms/verification/equivalence_checking.hpp>  // equivalence checking of FCN layouts
+#include <fiction/io/network_reader.hpp>                             // read networks from files
 #include <fiction/types.hpp>                                         // pre-defined types suitable for the FCN domain
 #include <fiction/utils/routing_utils.hpp>                           // routing utility functions
 
-#include <fmt/format.h>                      // output formatting
-#include <lorina/lorina.hpp>                 // Verilog/BLIF/AIGER/... file parsing
-#include <mockturtle/io/verilog_reader.hpp>  // call-backs to read Verilog files into networks
-#include <mockturtle/networks/aig.hpp>       // AND-inverter graphs
+#include <fmt/format.h>  // output formatting
 
 #include <cstdint>
 #include <cstdlib>
@@ -43,11 +41,10 @@ Ntk read_ntk(const std::string& name)
 {
     fmt::print("[i] processing {}\n", name);
 
-    Ntk network{};
-
-    const auto read_verilog_result =
-        lorina::read_verilog(fiction_experiments::benchmark_path(name), mockturtle::verilog_reader(network));
-    assert(read_verilog_result == lorina::return_code::success);
+    std::ostringstream                        os{};
+    fiction::network_reader<fiction::tec_ptr> reader{fiction_experiments::benchmark_path(name), os};
+    const auto                                nets    = reader.get_networks();
+    const auto                                network = *nets.front();
 
     return network;
 }

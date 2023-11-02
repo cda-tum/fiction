@@ -4,10 +4,9 @@
 #include <fiction/algorithms/physical_design/post_layout_optimization.hpp>  // scalable heuristic for physical design of FCN layouts
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/algorithms/verification/equivalence_checking.hpp>               // SAT-based equivalence checking
+#include <fiction/io/network_reader.hpp>                                          // read networks from files
 
-#include <fmt/format.h>                      // output formatting
-#include <lorina/lorina.hpp>                 // Verilog/BLIF/AIGER/... file parsing
-#include <mockturtle/io/verilog_reader.hpp>  // call-backs to read Verilog files into networks
+#include <fmt/format.h>  // output formatting
 
 #include <cassert>
 #include <chrono>
@@ -52,11 +51,10 @@ int main()  // NOLINT
     {
         fmt::print("[i] processing {}\n", benchmark);
 
-        fiction::technology_network network{};
-
-        const auto read_verilog_result =
-            lorina::read_verilog(fiction_experiments::benchmark_path(benchmark), mockturtle::verilog_reader(network));
-        assert(read_verilog_result == lorina::return_code::success);
+        std::ostringstream                        os{};
+        fiction::network_reader<fiction::tec_ptr> reader{fiction_experiments::benchmark_path(benchmark), os};
+        const auto                                nets    = reader.get_networks();
+        const auto                                network = *nets.front();
 
         // perform layout generation with an OGD-based heuristic algorithm
         auto gate_level_layout = fiction::orthogonal<gate_lyt>(network, {}, &orthogonal_stats);

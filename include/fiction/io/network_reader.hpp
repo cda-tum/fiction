@@ -5,6 +5,8 @@
 #ifndef FICTION_NETWORK_READER_HPP
 #define FICTION_NETWORK_READER_HPP
 
+#include "fiction/algorithms/network_transformation/network_conversion.hpp"
+
 #include <lorina/aiger.hpp>
 #include <lorina/common.hpp>
 #include <lorina/diagnostics.hpp>
@@ -194,7 +196,7 @@ class network_reader
                     ntk.set_network_name(name);
                 }
 
-                networks.push_back(std::make_shared<Ntk>(ntk));
+                networks.push_back(std::make_shared<Ntk>(convert_network<Ntk>(ntk)));
             }
             else
             {

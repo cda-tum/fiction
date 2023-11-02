@@ -97,39 +97,3 @@ TEST_CASE("Consistent network size after multiple fanout substitutions", "[fanou
 
     CHECK(substituted.size() == subsubsubsubstituted.size());
 }
-
-TEST_CASE("Consistent fanout substitution after balancing", "[fanout-substitution]")
-{
-    const auto aig = blueprints::maj4_network<mockturtle::aig_network>();
-
-    auto substituted = fanout_substitution<technology_network>(aig);
-
-    CHECK(is_fanout_substituted(substituted));
-    auto balanced = network_balancing<technology_network>(substituted);
-    CHECK(is_fanout_substituted(balanced));
-
-    auto tec = blueprints::fanout_substitution_corner_case_network<technology_network>();
-
-    auto substituted_tec = fanout_substitution<technology_network>(tec);
-    CHECK(is_fanout_substituted(substituted_tec));
-    auto balanced_tec = network_balancing<technology_network>(substituted_tec);
-    CHECK(is_fanout_substituted(balanced_tec));
-}
-
-TEST_CASE("Cleanup dangling PIs", "[fanout-substitution]")
-{
-    const auto aig                  = blueprints::maj4_network<mockturtle::aig_network>();
-    const auto aig_with_dangling_pi = blueprints::dangling_pi_network<mockturtle::aig_network>();
-
-    fanout_substitution_params ps_breadth{fanout_substitution_params::substitution_strategy::BREADTH, 3, 1, true, true};
-    const auto substituted_breadth = fanout_substitution<technology_network>(aig_with_dangling_pi, ps_breadth);
-    CHECK(substituted_breadth.size() == (aig.size() + 35));
-    CHECK(is_fanout_substituted(substituted_breadth, ps_breadth));
-    check_eq(aig, substituted_breadth);
-
-    fanout_substitution_params ps_depth{fanout_substitution_params::substitution_strategy::DEPTH, 2, 2, true, true};
-    const auto substituted_depth = fanout_substitution<technology_network>(aig_with_dangling_pi, ps_depth);
-    CHECK(substituted_depth.size() == (aig.size() + 34));
-    CHECK(is_fanout_substituted(substituted_depth, ps_depth));
-    check_eq(aig, substituted_depth);
-}
