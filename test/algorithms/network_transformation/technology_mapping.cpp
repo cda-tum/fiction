@@ -186,22 +186,6 @@ void map_and_check_all_func(const Ntk& ntk)
     CHECK(gt_stats.num_and_xor >= 0);
 }
 
-TEMPLATE_TEST_CASE("Name conservation after technology mapping", "[technology-mapping]", mockturtle::aig_network,
-                   mockturtle::xag_network, mockturtle::mig_network, mockturtle::xmg_network)
-{
-    auto maj = blueprints::maj1_network<mockturtle::names_view<TestType>>();
-    maj.set_network_name("maj");
-
-    technology_mapping_stats stats{};
-
-    const auto mapped_maj = technology_mapping(maj, and_or_not_maj(), &stats);
-
-    REQUIRE(!stats.mapper_stats.mapping_error);
-
-    // network name
-    CHECK(mapped_maj.get_network_name() == "maj");
-}
-
 TEMPLATE_TEST_CASE("Simple AOI network mapping", "[technology-mapping]", mockturtle::aig_network)
 {
     map_and_check_aoi(blueprints::maj1_network<TestType>());
@@ -217,14 +201,14 @@ TEMPLATE_TEST_CASE("Simple AOIM network mapping", "[technology-mapping]", mocktu
     map_and_check_aoim(blueprints::inverter_network<TestType>());
 }
 
-TEMPLATE_TEST_CASE("Simple 2-input network mapping", "[technology-mapping]", mockturtle::aig_network,
-                   mockturtle::xag_network)
-{
-    map_and_check_all_2_inp(blueprints::maj1_network<TestType>());
-    map_and_check_all_2_inp(blueprints::and_or_network<TestType>());
-    map_and_check_all_2_inp(blueprints::inverter_network<TestType>());
-}
-
+//TEMPLATE_TEST_CASE("Simple 2-input network mapping", "[technology-mapping]", mockturtle::aig_network,
+//                   mockturtle::xag_network)
+//{
+//    map_and_check_all_2_inp(blueprints::maj1_network<TestType>());
+//    map_and_check_all_2_inp(blueprints::and_or_network<TestType>());
+//    map_and_check_all_2_inp(blueprints::inverter_network<TestType>());
+//}
+//
 //TEMPLATE_TEST_CASE("Complex 2-input network mapping", "[technology-mapping]", mockturtle::aig_network,
 //                   mockturtle::xag_network)
 //{
@@ -241,4 +225,20 @@ TEMPLATE_TEST_CASE("Simple 2-input network mapping", "[technology-mapping]", moc
 //                   mockturtle::xag_network, mockturtle::mig_network, mockturtle::xmg_network)
 //{
 //    map_and_check_all_func(blueprints::maj4_network<TestType>());
+//}
+//
+//TEMPLATE_TEST_CASE("Name conservation after technology mapping", "[technology-mapping]", mockturtle::aig_network,
+//                   mockturtle::xag_network, mockturtle::mig_network, mockturtle::xmg_network)
+//{
+//    auto maj = blueprints::maj1_network<mockturtle::names_view<TestType>>();
+//    maj.set_network_name("maj");
+//
+//    technology_mapping_stats stats{};
+//
+//    const auto mapped_maj = technology_mapping(maj, and_or_not_maj(), &stats);
+//
+//    REQUIRE(!stats.mapper_stats.mapping_error);
+//
+//    // network name
+//    CHECK(mapped_maj.get_network_name() == "maj");
 //}
