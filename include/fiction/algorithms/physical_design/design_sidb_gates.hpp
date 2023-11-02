@@ -165,18 +165,18 @@ class design_sidb_gates_impl
             }
         };
 
-        const unsigned int num_threads = std::thread::hardware_concurrency();
-        const std::size_t  chunk_size  = all_combinations.size() / num_threads;
+        const uint64_t    num_threads = std::thread::hardware_concurrency();
+        const std::size_t chunk_size  = all_combinations.size() / num_threads;
 
         std::vector<std::thread> threads;
         threads.reserve(num_threads);
 
         for (auto i = 0u; i < num_threads; ++i)
         {
-            std::size_t start = i * chunk_size;
-            std::size_t end   = (i == num_threads - 1) ? all_combinations.size() : (i + 1) * chunk_size;
-            std::vector<std::vector<std::size_t>> chunk_combinations(
-                all_combinations.begin() + start, all_combinations.begin() + static_cast<std::size_t>(end));
+            const std::size_t start = i * chunk_size;
+            const std::size_t end   = (i == num_threads - 1) ? all_combinations.size() : (i + 1) * chunk_size;
+            std::vector<std::vector<std::size_t>> chunk_combinations(all_combinations.begin() + start,
+                                                                     all_combinations.begin() + end);
             threads.emplace_back(add_combination_to_layout_and_check_operation, chunk_combinations);
         }
 

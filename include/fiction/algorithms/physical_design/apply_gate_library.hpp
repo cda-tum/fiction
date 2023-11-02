@@ -282,7 +282,7 @@ template <typename CellLyt, typename GateLibrary, typename GateLyt, typename Gat
     }
     catch (const std::exception& e)
     {
-        throw;  // Re-throw the exception to propagate it up the call stack.
+        throw;
     }
 }
 

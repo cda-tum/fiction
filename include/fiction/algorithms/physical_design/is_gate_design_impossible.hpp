@@ -18,10 +18,10 @@ namespace fiction
 {
 
 /**
- * This function assesses whether it is impossible to design a gate for a given truth table in the provided layout due
- * to atomic defects.
+ * This function assesses whether it is impossible to design an SiDB gate for a given truth table in the provided layout
+ * due to atomic defects.
  *
- * @note If the function returns `false`, it does not imply that it is possible to design a SiDB gate for given
+ * @note If the function returns `false`, it does not imply that it is possible to design an SiDB gate for given
  * parameters.
  *
  * @tparam Lyt The type of the layout.
@@ -61,17 +61,21 @@ bool is_gate_design_impossible(const Lyt& layout, const std::vector<TT>& spec, c
                 }
             });
 
+        // this function checks if parts of the bdl pairs are already neutrally charged due to nearby charged atomic
+        // defects.
         for (const auto& bdl : bdl_pairs)
         {
             if ((-(*charge_lyt.get_local_potential(bdl.lower)) + params.simulation_parameter.mu_minus) >
                 -physical_constants::POP_STABILITY_ERR)
             {
-                return true;
+                return true;  // the lower part can never be negatively charged. Thus, BDL property is not fulfilled
+                              // anymore
             }
             if ((-(*charge_lyt.get_local_potential(bdl.upper)) + params.simulation_parameter.mu_minus) >
                 -physical_constants::POP_STABILITY_ERR)
             {
-                return true;
+                return true;  // the upper part can never be negatively charged. Thus, BDL property is not fulfilled
+                              // anymore
             }
         }
     }

@@ -95,8 +95,7 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
                 {
                     if (lyt.fanout_size(n) == 2)
                     {
-
-                        const auto layout = add_defect_in_the_surrounding_to_layout<CellLyt>(
+                        const auto layout = add_defect_to_skeleton<CellLyt>(
                             sidb_surface,
                             cell_list_to_cell_level_layout<sidb_defect_cell_clk_lyt_siqad>(ONE_IN_TWO_OUT_MAP.at(p)),
                             center_cell_siqad, absolute_cell_siqad, parameter);
@@ -120,7 +119,7 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
 
                             if (auto cell_list = TWO_IN_TWO_OUT_MAP.at({p, pa}); cell_list == DOUBLE_WIRE)
                             {
-                                const auto layout = add_defect_in_the_surrounding_to_layout(
+                                const auto layout = add_defect_to_skeleton(
                                     sidb_surface,
                                     cell_list_to_cell_level_layout<sidb_defect_cell_clk_lyt_siqad>(TWO_IN_TWO_OUT),
                                     center_cell_siqad, absolute_cell_siqad, parameter);
@@ -139,7 +138,7 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
                                     layout, create_double_wire_tt(), complex_gate_param.params, black_list, p, t);
                             }
 
-                            const auto layout = add_defect_in_the_surrounding_to_layout(
+                            const auto layout = add_defect_to_skeleton(
                                 sidb_surface,
                                 cell_list_to_cell_level_layout<sidb_defect_cell_clk_lyt_siqad>(TWO_IN_TWO_OUT),
                                 center_cell_siqad, absolute_cell_siqad, parameter);
@@ -163,7 +162,7 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
                         {
                             return EMPTY_GATE;
                         }
-                        const auto layout = add_defect_in_the_surrounding_to_layout(
+                        const auto layout = add_defect_to_skeleton(
                             sidb_surface, cell_list_to_cell_level_layout<sidb_defect_cell_clk_lyt_siqad>(cell_list),
                             center_cell_siqad, absolute_cell_siqad, parameter);
 
@@ -177,7 +176,7 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
             {
                 if (lyt.is_inv(n))
                 {
-                    const auto layout = add_defect_in_the_surrounding_to_layout(
+                    const auto layout = add_defect_to_skeleton(
                         sidb_surface,
                         cell_list_to_cell_level_layout<sidb_defect_cell_clk_lyt_siqad>(ONE_IN_ONE_OUT_MAP.at(p)),
                         center_cell_siqad, absolute_cell_siqad, parameter);
@@ -190,7 +189,7 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
             {
                 if (lyt.is_and(n))
                 {
-                    const auto layout = add_defect_in_the_surrounding_to_layout(
+                    const auto layout = add_defect_to_skeleton(
                         sidb_surface,
                         cell_list_to_cell_level_layout<sidb_defect_cell_clk_lyt_siqad>(TWO_IN_ONE_OUT_MAP.at(p)),
                         center_cell_siqad, absolute_cell_siqad, parameter);
@@ -203,7 +202,7 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
             {
                 if (lyt.is_or(n))
                 {
-                    const auto layout = add_defect_in_the_surrounding_to_layout(
+                    const auto layout = add_defect_to_skeleton(
                         sidb_surface,
                         cell_list_to_cell_level_layout<sidb_defect_cell_clk_lyt_siqad>(TWO_IN_ONE_OUT_MAP.at(p)),
                         center_cell_siqad, absolute_cell_siqad, parameter);
@@ -216,7 +215,7 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
             {
                 if (lyt.is_nand(n))
                 {
-                    const auto layout = add_defect_in_the_surrounding_to_layout(
+                    const auto layout = add_defect_to_skeleton(
                         sidb_surface,
                         cell_list_to_cell_level_layout<sidb_defect_cell_clk_lyt_siqad>(TWO_IN_ONE_OUT_MAP.at(p)),
                         center_cell_siqad, absolute_cell_siqad, parameter);
@@ -229,7 +228,7 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
             {
                 if (lyt.is_nor(n))
                 {
-                    const auto layout = add_defect_in_the_surrounding_to_layout(
+                    const auto layout = add_defect_to_skeleton(
                         sidb_surface,
                         cell_list_to_cell_level_layout<sidb_defect_cell_clk_lyt_siqad>(TWO_IN_ONE_OUT_MAP.at(p)),
                         center_cell_siqad, absolute_cell_siqad, parameter);
@@ -242,7 +241,7 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
             {
                 if (lyt.is_xor(n))
                 {
-                    const auto layout = add_defect_in_the_surrounding_to_layout(
+                    const auto layout = add_defect_to_skeleton(
                         sidb_surface,
                         cell_list_to_cell_level_layout<sidb_defect_cell_clk_lyt_siqad>(TWO_IN_ONE_OUT_MAP.at(p)),
                         center_cell_siqad, absolute_cell_siqad, parameter);
@@ -255,7 +254,7 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
             {
                 if (lyt.is_xnor(n))
                 {
-                    const auto layout = add_defect_in_the_surrounding_to_layout(
+                    const auto layout = add_defect_to_skeleton(
                         sidb_surface,
                         cell_list_to_cell_level_layout<sidb_defect_cell_clk_lyt_siqad>(TWO_IN_ONE_OUT_MAP.at(p)),
                         center_cell_siqad, absolute_cell_siqad, parameter);
@@ -268,7 +267,7 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
             {
                 if (lyt.is_ge(n))
                 {
-                    const auto layout = add_defect_in_the_surrounding_to_layout(
+                    const auto layout = add_defect_to_skeleton(
                         sidb_surface,
                         cell_list_to_cell_level_layout<sidb_defect_cell_clk_lyt_siqad>(TWO_IN_ONE_OUT_MAP.at(p)),
                         center_cell_siqad, absolute_cell_siqad, parameter);
@@ -281,7 +280,7 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
             {
                 if (lyt.is_le(n))
                 {
-                    const auto layout = add_defect_in_the_surrounding_to_layout(
+                    const auto layout = add_defect_to_skeleton(
                         sidb_surface,
                         cell_list_to_cell_level_layout<sidb_defect_cell_clk_lyt_siqad>(TWO_IN_ONE_OUT_MAP.at(p)),
                         center_cell_siqad, absolute_cell_siqad, parameter);
@@ -294,7 +293,7 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
             {
                 if (lyt.is_gt(n))
                 {
-                    const auto layout = add_defect_in_the_surrounding_to_layout(
+                    const auto layout = add_defect_to_skeleton(
                         sidb_surface,
                         cell_list_to_cell_level_layout<sidb_defect_cell_clk_lyt_siqad>(TWO_IN_ONE_OUT_MAP.at(p)),
                         center_cell_siqad, absolute_cell_siqad, parameter);
@@ -307,7 +306,7 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
             {
                 if (lyt.is_lt(n))
                 {
-                    const auto layout = add_defect_in_the_surrounding_to_layout(
+                    const auto layout = add_defect_to_skeleton(
                         sidb_surface,
                         cell_list_to_cell_level_layout<sidb_defect_cell_clk_lyt_siqad>(TWO_IN_ONE_OUT_MAP.at(p)),
                         center_cell_siqad, absolute_cell_siqad, parameter);
@@ -529,9 +528,10 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
      * @return The updated skeleton with added defects from the surrounding area.
      */
     template <typename Lyt, typename LytSkeleton>
-    [[nodiscard]] static LytSkeleton add_defect_in_the_surrounding_to_layout(
-        const sidb_surface<Lyt>& defect_surface, const LytSkeleton& skeleton, const siqad::coord_t& center_cell_siqad,
-        const siqad::coord_t& absolute_cell_siqad, const sidb_dynamic_gate_library_params& params)
+    [[nodiscard]] static LytSkeleton
+    add_defect_to_skeleton(const sidb_surface<Lyt>& defect_surface, const LytSkeleton& skeleton,
+                           const siqad::coord_t& center_cell_siqad, const siqad::coord_t& absolute_cell_siqad,
+                           const sidb_dynamic_gate_library_params& params)
     {
         static_assert(!has_siqad_coord_v<Lyt>, "Lyt has SiQAD coordinates.");
         static_assert(has_siqad_coord_v<LytSkeleton>, "Lyt_skeleton does not have SiQAD coordinates.");

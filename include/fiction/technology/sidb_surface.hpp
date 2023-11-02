@@ -216,19 +216,19 @@ class sidb_surface<Lyt, false> : public Lyt
      *
      * If the given surface is defect-free, the empty set is returned.
      *
-     * @param incorporate_defect_into_gate_design If set to `true`, charged defects are treated like neutral defects,
+     * @param user_defined_spacing_charged_defects If set to `true`, charged defects are treated like neutral defects,
      * `false`otherwise.
      * @return All SiDB positions affected by any defect on the surface.
      */
     [[nodiscard]] std::unordered_set<typename Lyt::coordinate>
-    all_affected_sidbs(const bool                           incorporate_defect_into_gate_design = false,
-                       const std::pair<uint64_t, uint64_t>& distance                            = {0, 0}) const noexcept
+    all_affected_sidbs(const bool                           user_defined_spacing_charged_defects = false,
+                       const std::pair<uint64_t, uint64_t>& distance = {0, 0}) const noexcept
     {
         std::unordered_set<typename Lyt::coordinate> influenced_sidbs{};
 
         foreach_sidb_defect(
-            [&influenced_sidbs, &incorporate_defect_into_gate_design, &distance, this](const auto& it)
-            { influenced_sidbs.merge(affected_sidbs(it.first, incorporate_defect_into_gate_design, distance)); });
+            [&influenced_sidbs, &user_defined_spacing_charged_defects, &distance, this](const auto& it)
+            { influenced_sidbs.merge(affected_sidbs(it.first, user_defined_spacing_charged_defects, distance)); });
 
         return influenced_sidbs;
     }
