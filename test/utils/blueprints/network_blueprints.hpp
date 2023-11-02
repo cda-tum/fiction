@@ -368,7 +368,7 @@ mockturtle::names_view<Ntk> dangling_pi_network()
     const auto                  c = ntk.create_pi("c");
     const auto                  d = ntk.create_pi("d");
     const auto                  e = ntk.create_pi("e");
-    [[maybe_unused]] const auto f = ntk.create_pi("f");
+    ntk.create_pi("f");
 
     const auto m1 = ntk.create_maj(a, b, c);
     const auto m2 = ntk.create_maj(b, c, d);
