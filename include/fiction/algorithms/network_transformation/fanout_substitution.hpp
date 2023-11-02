@@ -54,6 +54,14 @@ struct fanout_substitution_params
      * Maximum number of outputs any gate is allowed to have before substitution applies.
      */
     uint32_t threshold = 1ul;
+    /**
+     * Omit dangling PIs.
+     */
+    bool cleanup_dangling_pis = true;
+    /**
+     * Omit redundant POs, i.e. POs connected to a PI or constant.
+     */
+    bool remove_redundant_pos = true;
 };
 
 namespace detail
@@ -134,6 +142,12 @@ class fanout_substitution_impl
 
         // restore signal names if applicable
         fiction::restore_names(ntk_topo, substituted, old2new);
+
+        // Remove dangling PIs and POs
+        if (ps.cleanup_dangling_pis || ps.remove_redundant_pos)
+        {
+            substituted = mockturtle::cleanup_dangling(substituted, ps.cleanup_dangling_pis, ps.remove_redundant_pos);
+        }
 
         return substituted;
     }
