@@ -1,5 +1,3 @@
-include(${CMAKE_CURRENT_LIST_DIR}/Utilities.cmake)
-
 macro(detect_architecture)
     # detect the architecture
     string(TOLOWER "${CMAKE_SYSTEM_PROCESSOR}" CMAKE_SYSTEM_PROCESSOR_LOWER)

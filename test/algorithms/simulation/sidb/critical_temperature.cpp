@@ -23,14 +23,11 @@ using namespace fiction;
 TEMPLATE_TEST_CASE(
     "Test critical_temperature function", "[critical-temperature]",
     (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, odd_row_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, even_row_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, odd_column_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, even_column_hex>>>))
+    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
     SECTION("No physically valid charge distribution could be found")
     {
-        TestType lyt{{10, 10}};
+        TestType lyt{};
 
         lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
         lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::INPUT);
@@ -92,7 +89,7 @@ TEMPLATE_TEST_CASE(
 
     SECTION("four SiDBs with two valid charge distributions, QuickExact")
     {
-        TestType lyt{{10, 10}};
+        TestType lyt{};
         lyt.assign_cell_type({0, 1}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({2, 1}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({4, 1}, TestType::cell_type::NORMAL);
@@ -112,7 +109,7 @@ TEMPLATE_TEST_CASE(
 
     SECTION("Y-shape SiDB AND gate")
     {
-        TestType lyt{{20, 10}, "AND gate"};
+        TestType lyt{};
 
         lyt.assign_cell_type({0, 0, 1}, sidb_technology::cell_type::INPUT);
         lyt.assign_cell_type({2, 1, 1}, sidb_technology::cell_type::INPUT);

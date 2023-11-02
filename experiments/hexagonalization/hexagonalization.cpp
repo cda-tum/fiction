@@ -93,8 +93,10 @@ int main()  // NOLINT
     assert(read_genlib_result == lorina::return_code::success);
     const mockturtle::tech_library<2> gate_lib{gates};
 
-    // stats for SMT-based physical design
+    // stats for ortho
     fiction::orthogonal_physical_design_stats orthogonal_stats{};
+    // stats for hexagonalization
+    fiction::hexagonalization_stats hexagonalization_stats{};
 
     static constexpr const uint64_t bench_select = fiction_experiments::all & ~fiction_experiments::log2 &
                                                    ~fiction_experiments::sqrt & ~fiction_experiments::multiplier;
@@ -129,9 +131,8 @@ int main()  // NOLINT
         fiction::critical_path_length_and_throughput_stats cp_tp_stats{};
         fiction::critical_path_length_and_throughput(gate_level_layout, &cp_tp_stats);
 
-        const std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
-        const auto hex_layout = fiction::hexagonalization<hex_lyt, gate_lyt>(gate_level_layout);
-        const auto end        = std::chrono::steady_clock::now();
+        const auto hex_layout =
+            fiction::hexagonalization<hex_lyt, gate_lyt>(gate_level_layout, &hexagonalization_stats);
 
         // check equivalence
         fiction::equivalence_checking_stats eq_stats{};
@@ -145,26 +146,21 @@ int main()  // NOLINT
         const auto cell_level_layout =
             fiction::apply_gate_library<cell_lyt, fiction::sidb_bestagon_library>(hex_layout);
 
-        // calculate bounding box
-        const auto bounding_box      = fiction::bounding_box_2d(hex_layout);
-        const auto hex_layout_width  = bounding_box.get_x_size() + 1;
-        const auto hex_layout_height = bounding_box.get_y_size() + 1;
-
         // compute area
         fiction::area_stats                            area_stats{};
         fiction::area_params<fiction::sidb_technology> area_ps{};
         fiction::area(cell_level_layout, area_ps, &area_stats);
 
         // log results
-        hexagonalization_exp(benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(),
-                             cut_xag.num_gates(), depth_cut_xag.depth(), mapped_network.num_gates(),
-                             depth_mapped_network.depth(), gate_level_layout.x() + 1, gate_level_layout.y() + 1,
-                             (gate_level_layout.x() + 1) * (gate_level_layout.y() + 1), hex_layout_width,
-                             hex_layout_height, hex_layout_width * hex_layout_height, gate_level_layout.num_gates(),
-                             gate_level_layout.num_wires(), cp_tp_stats.critical_path_length, cp_tp_stats.throughput,
-                             mockturtle::to_seconds(orthogonal_stats.time_total),
-                             static_cast<double>(std::chrono::duration_cast<std::chrono::seconds>(end - begin).count()),
-                             eq_result, cell_level_layout.num_cells(), area_stats.area);
+        hexagonalization_exp(
+            benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(), cut_xag.num_gates(),
+            depth_cut_xag.depth(), mapped_network.num_gates(), depth_mapped_network.depth(), gate_level_layout.x() + 1,
+            gate_level_layout.y() + 1, (gate_level_layout.x() + 1) * (gate_level_layout.y() + 1), (hex_layout.x() + 1),
+            (hex_layout.y() + 1), (hex_layout.x() + 1) * (hex_layout.y() + 1), gate_level_layout.num_gates(),
+            gate_level_layout.num_wires(), cp_tp_stats.critical_path_length, cp_tp_stats.throughput,
+            mockturtle::to_seconds(orthogonal_stats.time_total),
+            mockturtle::to_seconds(hexagonalization_stats.time_total), eq_result, cell_level_layout.num_cells(),
+            area_stats.area);
 
         hexagonalization_exp.save();
         hexagonalization_exp.table();
