@@ -13,17 +13,17 @@
 #include <fiction/algorithms/physical_design/orthogonal.hpp>
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/io/read_sidb_surface_defects.hpp>                               // reader for simulated SiDB surfaces
-#include <fiction/io/write_sqd_layout.hpp>                     // writer for SiQAD files (physical simulation)
+#include <fiction/io/write_sqd_layout.hpp>  // writer for SiQAD files (physical simulation)
 #include <fiction/layouts/coordinates.hpp>
-#include <fiction/networks/technology_network.hpp>             // technology-mapped network type
-#include <fiction/technology/area.hpp>                         // area requirement calculations
-#include <fiction/technology/cell_technologies.hpp>            // cell implementations
+#include <fiction/networks/technology_network.hpp>   // technology-mapped network type
+#include <fiction/technology/area.hpp>               // area requirement calculations
+#include <fiction/technology/cell_technologies.hpp>  // cell implementations
 #include <fiction/technology/sidb_defects.hpp>
-#include <fiction/technology/sidb_dynamic_gate_library.hpp>    // a dynamic SiDB gate library
+#include <fiction/technology/sidb_dynamic_gate_library.hpp>  // a dynamic SiDB gate library
 #include <fiction/technology/sidb_skeleton_bestagon_library.hpp>
-#include <fiction/technology/sidb_surface.hpp>                 // SiDB surface with support for atomic defects
+#include <fiction/technology/sidb_surface.hpp>  // SiDB surface with support for atomic defects
 #include <fiction/traits.hpp>
-#include <fiction/types.hpp>                                   // pre-defined types suitable for the FCN domain
+#include <fiction/types.hpp>  // pre-defined types suitable for the FCN domain
 
 #include <fmt/format.h>                                        // output formatting
 #include <lorina/lorina.hpp>                                   // Verilog/BLIF/AIGER/... file parsing
