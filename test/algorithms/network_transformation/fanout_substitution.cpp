@@ -97,3 +97,21 @@ TEST_CASE("Consistent network size after multiple fanout substitutions", "[fanou
 
     CHECK(substituted.size() == subsubsubsubstituted.size());
 }
+
+TEST_CASE("Consistent fanout substitution after balancing", "[fanout-substitution]")
+{
+    const auto aig = blueprints::maj4_network<mockturtle::aig_network>();
+
+    auto substituted = fanout_substitution<technology_network>(aig);
+
+    CHECK(is_fanout_substituted(substituted));
+    auto balanced = network_balancing<technology_network>(substituted);
+    CHECK(is_fanout_substituted(balanced));
+
+    auto tec = blueprints::fanout_substitution_corner_case_network<technology_network>();
+
+    auto substituted_tec = fanout_substitution<technology_network>(tec);
+    CHECK(is_fanout_substituted(substituted_tec));
+    auto balanced_tec = network_balancing<technology_network>(substituted_tec);
+    CHECK(is_fanout_substituted(balanced_tec));
+}
