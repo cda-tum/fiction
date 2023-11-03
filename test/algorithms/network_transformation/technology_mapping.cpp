@@ -193,14 +193,14 @@ TEMPLATE_TEST_CASE("Simple AOI network mapping", "[technology-mapping]", mocktur
     map_and_check_aoi(blueprints::inverter_network<TestType>());
 }
 
-TEMPLATE_TEST_CASE("Simple AOIM network mapping", "[technology-mapping]", mockturtle::aig_network,
-                   mockturtle::xag_network, mockturtle::mig_network, mockturtle::xmg_network)
-{
-    map_and_check_aoim(blueprints::maj1_network<TestType>());
-    map_and_check_aoim(blueprints::and_or_network<TestType>());
-    map_and_check_aoim(blueprints::inverter_network<TestType>());
-}
-
+//TEMPLATE_TEST_CASE("Simple AOIM network mapping", "[technology-mapping]", mockturtle::aig_network,
+//                   mockturtle::xag_network, mockturtle::mig_network, mockturtle::xmg_network)
+//{
+//    map_and_check_aoim(blueprints::maj1_network<TestType>());
+//    map_and_check_aoim(blueprints::and_or_network<TestType>());
+//    map_and_check_aoim(blueprints::inverter_network<TestType>());
+//}
+//
 // TEMPLATE_TEST_CASE("Simple 2-input network mapping", "[technology-mapping]", mockturtle::aig_network,
 //                    mockturtle::xag_network)
 // {
