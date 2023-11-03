@@ -61,9 +61,9 @@ assess_physical_popstability(const Lyt& lyt, const sidb_simulation_parameters& p
     std::sort(simulation_results.charge_distributions.begin(), simulation_results.charge_distributions.end(),
               [](const auto& lhs, const auto& rhs) { return lhs.get_system_energy() < rhs.get_system_energy(); });
 
-    for (auto i = 0u; i < simulation_results.charge_distributions.size(); i++)
+    std::size_t valid_state_counter = 0;
+    for (auto const& charge_lyt : simulation_results.charge_distributions)
     {
-        const auto         charge_lyt{simulation_results.charge_distributions[i]};
         typename Lyt::cell unstable_cell{};
         double             minimum_potential_difference_to_ext_transition = std::numeric_limits<double>::max();
 
@@ -130,7 +130,9 @@ assess_physical_popstability(const Lyt& lyt, const sidb_simulation_parameters& p
                     }
                 }
             });
-        results.emplace(i, std::make_tuple(unstable_cell, transition, minimum_potential_difference_to_ext_transition));
+        results.emplace(valid_state_counter,
+                        std::make_tuple(unstable_cell, transition, minimum_potential_difference_to_ext_transition));
+        valid_state_counter += 1;
     }
 
     return results;
