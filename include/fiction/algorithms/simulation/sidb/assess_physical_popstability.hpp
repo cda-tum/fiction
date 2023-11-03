@@ -149,10 +149,7 @@ assess_physical_popstability(const Lyt& lyt, const sidb_simulation_parameters& p
                 valid_state_counter += 1;
                 break;
             }
-            else
-            {
-                continue;
-            }
+            continue;
         }
     }
 
