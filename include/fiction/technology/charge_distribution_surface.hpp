@@ -1282,11 +1282,14 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     void assign_global_external_potential(const double        potential_value,
                                           dependent_cell_mode dependent_cell = dependent_cell_mode::FIXED) noexcept
     {
-        this->foreach_cell(
-            [this, &potential_value](const auto& c) {
-                strg->local_external_pot.insert({c, potential_value});
-            });
-        this->update_after_charge_change(dependent_cell);
+        if (potential_value != 0.0)
+        {
+            this->foreach_cell(
+                [this, &potential_value](const auto& c) {
+                    strg->local_external_pot.insert({c, potential_value});
+                });
+            this->update_after_charge_change(dependent_cell);
+        }
     }
     /**
      * This function determines if given layout has to be simulated with three states since positively charged SiDBs can
@@ -1764,6 +1767,23 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     {
         strg->cell_charge.push_back(charge);
         strg->sidb_order.push_back(c);
+
+        // sort sidbs by the relation given by the coordinates and sort charge vector accordingly
+        std::vector<std::pair<typename Lyt::cell, sidb_charge_state>> combined_vector{};
+        combined_vector.reserve(strg->cell_charge.size());
+
+        for (size_t i = 0; i < strg->sidb_order.size(); i++)
+        {
+            combined_vector.emplace_back(strg->sidb_order[i], strg->cell_charge[i]);
+        }
+
+        std::sort(combined_vector.begin(), combined_vector.end());
+
+        for (size_t i = 0; i < combined_vector.size(); i++)
+        {
+            strg->sidb_order[i]  = combined_vector[i].first;
+            strg->cell_charge[i] = combined_vector[i].second;
+        }
     }
 
   private:
