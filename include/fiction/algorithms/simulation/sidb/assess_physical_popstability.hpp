@@ -58,81 +58,102 @@ assess_physical_popstability(const Lyt& lyt, const sidb_simulation_parameters& p
     std::unordered_map<std::size_t, std::tuple<typename Lyt::cell, enum transition_type, double>> results {};
     auto transition = transition_type::NEUTRAL_TO_NEGATIVE;
 
-    std::sort(simulation_results.charge_distributions.begin(), simulation_results.charge_distributions.end(),
-              [](const auto& lhs, const auto& rhs) { return lhs.get_system_energy() < rhs.get_system_energy(); });
+    std::vector<std::pair<double, uint64_t>> energy_and_unique_charge_index{};
+
+    std::transform(simulation_results.charge_distributions.begin(), simulation_results.charge_distributions.end(),
+                   std::back_inserter(energy_and_unique_charge_index),
+                   [](const auto& ch_lyt)
+                   { return std::make_pair(ch_lyt.get_system_energy(), ch_lyt.get_charge_index_and_base().first); });
+
+    // Sort the vector in ascending order of the double value
+    std::sort(energy_and_unique_charge_index.begin(), energy_and_unique_charge_index.end(),
+              [](const auto& lhs, const auto& rhs) { return lhs.first < rhs.first; });
 
     std::size_t valid_state_counter = 0;
-    for (auto const& charge_lyt : simulation_results.charge_distributions)
-    {
-        typename Lyt::cell unstable_cell{};
-        double             minimum_potential_difference_to_ext_transition = std::numeric_limits<double>::max();
 
-        charge_lyt.foreach_cell(
-            [&charge_lyt, &minimum_potential_difference_to_ext_transition, &unstable_cell, &params,
-             &transition](const auto& c)
+    // Access the unique indices
+    for (const auto& [energy, index] : energy_and_unique_charge_index)
+    {
+        for (auto const& charge_lyt : simulation_results.charge_distributions)
+        {
+            if (charge_lyt.get_charge_index_and_base().first == index)
             {
-                switch (charge_lyt.get_charge_state(c))
-                {
-                    case sidb_charge_state::NEGATIVE:
+                typename Lyt::cell unstable_cell{};
+                double             minimum_potential_difference_to_ext_transition = std::numeric_limits<double>::max();
+
+                charge_lyt.foreach_cell(
+                    [&charge_lyt, &minimum_potential_difference_to_ext_transition, &unstable_cell, &params,
+                     &transition](const auto& c)
                     {
-                        if (std::abs(-*charge_lyt.get_local_potential(c) + params.mu_minus) <
-                            minimum_potential_difference_to_ext_transition)
+                        switch (charge_lyt.get_charge_state(c))
                         {
-                            minimum_potential_difference_to_ext_transition =
-                                std::abs(-*charge_lyt.get_local_potential(c) + params.mu_minus);
-                            unstable_cell = c;
-                            transition    = transition_type::NEGATIVE_TO_NEUTRAL;
-                        }
-                        break;
-                    }
-                    case sidb_charge_state::NEUTRAL:
-                    {
-                        if (std::abs(-*charge_lyt.get_local_potential(c) + params.mu_minus) <
-                            std::abs(-*charge_lyt.get_local_potential(c) + params.mu_plus()))
-                        {
-                            if (std::abs(-*charge_lyt.get_local_potential(c) + params.mu_minus) <
-                                minimum_potential_difference_to_ext_transition)
+                            case sidb_charge_state::NEGATIVE:
                             {
-                                minimum_potential_difference_to_ext_transition =
-                                    std::abs(-*charge_lyt.get_local_potential(c) + params.mu_minus);
-                                unstable_cell = c;
-                                transition    = transition_type::NEUTRAL_TO_NEGATIVE;
+                                if (std::abs(-*charge_lyt.get_local_potential(c) + params.mu_minus) <
+                                    minimum_potential_difference_to_ext_transition)
+                                {
+                                    minimum_potential_difference_to_ext_transition =
+                                        std::abs(-*charge_lyt.get_local_potential(c) + params.mu_minus);
+                                    unstable_cell = c;
+                                    transition    = transition_type::NEGATIVE_TO_NEUTRAL;
+                                }
+                                break;
+                            }
+                            case sidb_charge_state::NEUTRAL:
+                            {
+                                if (std::abs(-*charge_lyt.get_local_potential(c) + params.mu_minus) <
+                                    std::abs(-*charge_lyt.get_local_potential(c) + params.mu_plus()))
+                                {
+                                    if (std::abs(-*charge_lyt.get_local_potential(c) + params.mu_minus) <
+                                        minimum_potential_difference_to_ext_transition)
+                                    {
+                                        minimum_potential_difference_to_ext_transition =
+                                            std::abs(-*charge_lyt.get_local_potential(c) + params.mu_minus);
+                                        unstable_cell = c;
+                                        transition    = transition_type::NEUTRAL_TO_NEGATIVE;
+                                    }
+                                }
+                                else
+                                {
+                                    if (std::abs(-*charge_lyt.get_local_potential(c) + params.mu_plus()) <
+                                        minimum_potential_difference_to_ext_transition)
+                                    {
+                                        minimum_potential_difference_to_ext_transition =
+                                            std::abs(-*charge_lyt.get_local_potential(c) + params.mu_plus());
+                                        unstable_cell = c;
+                                        transition    = transition_type::NEUTRAL_TO_POSITIVE;
+                                    }
+                                }
+                                break;
+                            }
+                            case sidb_charge_state::POSITIVE:
+                            {
+                                if (std::abs(-*charge_lyt.get_local_potential(c) + params.mu_plus()) <
+                                    minimum_potential_difference_to_ext_transition)
+                                {
+                                    minimum_potential_difference_to_ext_transition =
+                                        std::abs(-*charge_lyt.get_local_potential(c) + params.mu_plus());
+                                    unstable_cell = c;
+                                    transition    = transition_type::POSITIVE_TO_NEUTRAL;
+                                }
+                                break;
+                            }
+                            case sidb_charge_state::NONE:
+                            {
+                                break;
                             }
                         }
-                        else
-                        {
-                            if (std::abs(-*charge_lyt.get_local_potential(c) + params.mu_plus()) <
-                                minimum_potential_difference_to_ext_transition)
-                            {
-                                minimum_potential_difference_to_ext_transition =
-                                    std::abs(-*charge_lyt.get_local_potential(c) + params.mu_plus());
-                                unstable_cell = c;
-                                transition    = transition_type::NEUTRAL_TO_POSITIVE;
-                            }
-                        }
-                        break;
-                    }
-                    case sidb_charge_state::POSITIVE:
-                    {
-                        if (std::abs(-*charge_lyt.get_local_potential(c) + params.mu_plus()) <
-                            minimum_potential_difference_to_ext_transition)
-                        {
-                            minimum_potential_difference_to_ext_transition =
-                                std::abs(-*charge_lyt.get_local_potential(c) + params.mu_plus());
-                            unstable_cell = c;
-                            transition    = transition_type::POSITIVE_TO_NEUTRAL;
-                        }
-                        break;
-                    }
-                    case sidb_charge_state::NONE:
-                    {
-                        break;
-                    }
-                }
-            });
-        results.emplace(valid_state_counter,
-                        std::make_tuple(unstable_cell, transition, minimum_potential_difference_to_ext_transition));
-        valid_state_counter += 1;
+                    });
+                results.emplace(valid_state_counter, std::make_tuple(unstable_cell, transition,
+                                                                     minimum_potential_difference_to_ext_transition));
+                valid_state_counter += 1;
+                break;
+            }
+            else
+            {
+                continue;
+            }
+        }
     }
 
     return results;
