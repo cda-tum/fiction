@@ -35,15 +35,15 @@ enum class transition_type
 
 /**
  * This function calculates the minimum electrostatic potential to the closest charge transition for a SiDB layout at
- * given physical parameters. It records information about the transition closest SiDB, the transition type, and the
- * potential difference.
+ * given physical parameters. It records information about the SiDB which is closest to a charge transition, the
+ * transition type, and the electrostatic potential needed for the charge transition.
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @param lyt The layout for which pop stability is assessed.
  * @param params The simulation parameters used for the assessment.
  * @return An unordered map where each key represents the charge distribution in ascending energy order (i.e., key = 0
- * is the ground state of the system), and the value is a tuple containing the transition closest SiDB, the closest
- * transition type (e.g., NEUTRAL_TO_NEGATIVE), and the minimum electrostatic potential.
+ * is the ground state of the system), and the value is a tuple containing the SiDB which is closest to a charge
+ * transition, the transition type (e.g., `NEUTRAL_TO_NEGATIVE`), and the minimum electrostatic potential.
  */
 template <typename Lyt>
 std::unordered_map<std::size_t, std::tuple<typename Lyt::cell, enum transition_type, double>>
