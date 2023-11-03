@@ -86,7 +86,7 @@ class quickexact_impl
 {
   public:
     quickexact_impl(const Lyt& lyt, const quickexact_params<Lyt>& parameter) :
-            layout{lyt},
+            layout{lyt.clone()},
             charge_lyt{lyt},
             params{parameter}
     {
@@ -337,22 +337,14 @@ class quickexact_impl
 
             if (charge_layout.is_physically_valid())
             {
-                charge_distribution_surface<Lyt> charge_lyt_copy{charge_layout};
+                charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
+
+                charge_layout.foreach_cell(
+                    [&charge_lyt_copy, &charge_layout](const auto& c)
+                    { charge_lyt_copy.assign_charge_state(c, charge_layout.get_charge_state(c)); });
+
+                charge_lyt_copy.update_after_charge_change();
                 charge_lyt_copy.recompute_system_energy();
-
-                // The pre-assigned negatively-charged SiDBs are added to the final layout.
-                for (const auto& cell : preassigned_negative_sidbs)
-                {
-                    charge_lyt_copy.add_sidb(cell, sidb_charge_state::NEGATIVE);
-                }
-
-                if constexpr (has_get_sidb_defect_v<Lyt>)
-                {
-                    for (const auto& [cell, defect] : real_placed_defects)
-                    {
-                        charge_lyt_copy.assign_sidb_defect(cell, defect);
-                    }
-                }
                 result.charge_distributions.push_back(charge_lyt_copy);
             }
         }
@@ -390,23 +382,14 @@ class quickexact_impl
             {
                 if (charge_layout.is_physically_valid())
                 {
-                    charge_distribution_surface<Lyt> charge_lyt_copy{charge_layout};
+                    charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
+
+                    charge_layout.foreach_cell(
+                        [&charge_lyt_copy, &charge_layout](const auto& c)
+                        { charge_lyt_copy.assign_charge_state(c, charge_layout.get_charge_state(c)); });
+
+                    charge_lyt_copy.update_after_charge_change();
                     charge_lyt_copy.recompute_system_energy();
-
-                    // The pre-assigned negatively-charged SiDBs are added to the final layout.
-                    for (const auto& cell : preassigned_negative_sidbs)
-                    {
-                        charge_lyt_copy.add_sidb(cell, sidb_charge_state::NEGATIVE);
-                    }
-
-                    if constexpr (has_get_sidb_defect_v<Lyt>)
-                    {
-                        for (const auto& [cell, defect] : real_placed_defects)
-                        {
-                            charge_lyt_copy.assign_sidb_defect(cell, defect);
-                        }
-                    }
-
                     result.charge_distributions.push_back(charge_lyt_copy);
                 }
 
