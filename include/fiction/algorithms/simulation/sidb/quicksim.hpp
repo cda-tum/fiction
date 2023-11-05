@@ -93,7 +93,7 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
         charge_lyt.assign_base_number(2);
         charge_lyt.assign_all_charge_states(sidb_charge_state::NEGATIVE);
         charge_lyt.update_after_charge_change(dependent_cell_mode::VARIABLE);
-        const auto negative_sidb_indices = charge_lyt.negative_sidb_detection();
+        const auto& negative_sidb_indices = charge_lyt.negative_sidb_detection();
 
         // Check that the layout with all SiDBs negatively charged is physically valid.
         if (charge_lyt.is_physically_valid())
@@ -152,13 +152,10 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
                     {
                         for (uint64_t i = 0ul; i < charge_lyt.num_cells(); ++i)
                         {
+                            if (std::find(negative_sidb_indices.cbegin(), negative_sidb_indices.cend(), i) !=
+                                negative_sidb_indices.cend())
                             {
-                                const std::lock_guard lock{mutex};
-                                if (std::find(negative_sidb_indices.cbegin(), negative_sidb_indices.cend(), i) !=
-                                    negative_sidb_indices.cend())
-                                {
-                                    continue;
-                                }
+                                continue;
                             }
 
                             std::vector<uint64_t> index_start{i};
