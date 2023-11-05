@@ -25,7 +25,7 @@ TEMPLATE_TEST_CASE(
 
     const auto simulation_results = exhaustive_ground_state_simulation<TestType>(lyt, params);
 
-    CHECK(simulation_results.charge_distributions.empty());
+    CHECK(simulation_results.charge_distributions.size() == 1);
     CHECK(simulation_results.additional_simulation_parameters.empty());
     CHECK(simulation_results.algorithm_name == "ExGS");
     CHECK(simulation_results.additional_simulation_parameters.empty());
