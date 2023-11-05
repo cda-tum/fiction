@@ -329,28 +329,28 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     void assign_physical_parameters(const sidb_simulation_parameters& params) const noexcept
     {
-        if ((strg->phys_params.base == params.base) && (strg->phys_params.lat_b == params.lat_b) &&
-            (strg->phys_params.lat_c == params.lat_c) && (strg->phys_params.epsilon_r == params.epsilon_r) &&
-            (strg->phys_params.lambda_tf == params.lambda_tf))
+        const sidb_simulation_parameters old_params = strg->phys_params;
+        strg->phys_params                           = params;
+
+        if (old_params.base != params.base)
         {
-            strg->phys_params                  = params;
-            strg->charge_index_and_base.second = params.base;
+            strg->charge_index_and_base.second = strg->phys_params.base;
             strg->max_charge_index = static_cast<uint64_t>(std::pow(strg->phys_params.base, this->num_cells())) - 1;
-            this->update_local_potential();
-            this->recompute_system_energy();
-            this->validity_check();
         }
-        else
-        {
-            strg->phys_params = params;
+
+        if (old_params.lat_a != params.lat_a || old_params.lat_b != params.lat_b || old_params.lat_c != params.lat_c)
+        {  // lattice changed
             this->initialize_nm_distance_matrix();
             this->initialize_potential_matrix();
-            strg->charge_index_and_base.second = params.base;
-            strg->max_charge_index = static_cast<uint64_t>(std::pow(strg->phys_params.base, this->num_cells())) - 1;
-            this->update_local_potential();
-            this->recompute_system_energy();
-            this->validity_check();
         }
+        else if (old_params.epsilon_r != params.epsilon_r || old_params.lambda_tf != params.lambda_tf)
+        {  // potential changed
+            this->initialize_potential_matrix();
+        }
+
+        this->update_local_potential();
+        this->recompute_system_energy();
+        this->validity_check();
     }
     /**
      * This function retrieves the physical parameters of the simulation.
