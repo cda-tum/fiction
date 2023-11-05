@@ -221,7 +221,8 @@ TEMPLATE_TEST_CASE(
         CHECK_THAT(charge_layout.get_system_energy() - system_energy_maximum, Catch::Matchers::WithinAbs(0.0, 0.00001));
 
         // update energy and dependent cell is variable with respect to its charge state
-        charge_layout.update_after_charge_change(dependent_cell_mode::VARIABLE, energy_calculation::UPDATE_ENERGY);
+        charge_layout.update_after_charge_change(dependent_cell_mode::VARIABLE,
+                                                 energy_calculation::FORCE_UPDATE_ENERGY);
         CHECK(charge_layout.get_system_energy() < system_energy_maximum);
 
         // assign charge states to dependent cell and check that charge index does not change since dependent-cell is
@@ -250,12 +251,12 @@ TEMPLATE_TEST_CASE(
         charge_layout.assign_charge_state({7, 5}, sidb_charge_state::POSITIVE);
         CHECK(charge_layout.get_charge_state({7, 5}) == sidb_charge_state::POSITIVE);
         CHECK(charge_layout.get_charge_index_and_base().first == charge_layout.get_max_charge_index());
-        charge_layout.update_after_charge_change();
+        charge_layout.update_after_charge_change(dependent_cell_mode::FIXED, energy_calculation::FORCE_UPDATE_ENERGY);
         CHECK_THAT(charge_layout.get_system_energy() - system_energy_maximum, Catch::Matchers::WithinAbs(0.0, 0.00001));
 
         // change charge state of the dependent-cell and check if system energy is reduced
         charge_layout.assign_charge_state({5, 5}, sidb_charge_state::NEGATIVE);
-        charge_layout.update_after_charge_change();
+        charge_layout.update_after_charge_change(dependent_cell_mode::FIXED, energy_calculation::FORCE_UPDATE_ENERGY);
         CHECK(charge_layout.get_system_energy() < system_energy_maximum);
 
         CHECK(charge_layout.get_charge_index_of_sub_layout() == 8);
@@ -1330,7 +1331,8 @@ TEMPLATE_TEST_CASE(
                                 charge_layout_new.get_phys_params().lambda_tf});
         CHECK_THAT(charge_layout_new.chargeless_potential_generated_by_defect_at_given_distance(0.0),
                    Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
-        charge_layout_new.update_after_charge_change();
+        charge_layout_new.update_after_charge_change(dependent_cell_mode::FIXED,
+                                                     energy_calculation::FORCE_UPDATE_ENERGY);
         CHECK_THAT(charge_layout.get_system_energy() - charge_layout_new.get_system_energy(),
                    Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
     }
