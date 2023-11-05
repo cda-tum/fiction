@@ -80,6 +80,23 @@ enum class charge_distribution_history
 };
 
 /**
+ * An enumeration of modes to specifying if the charge index should be recomputed fully.
+ */
+enum class charge_index_recomputation
+{
+    /**
+     * The charge index is recomputed from scratch since we don't know if the the charge index was incremented after the
+     * last charge index computation.
+     */
+    FROM_SCRATCH,
+    /**
+     * The charge index is recomputed with the leading zeroes ignored. We can apply this optimization if we know that
+     * the charge index was incremented after the last charge index computation.
+     */
+    IGNORE_LEADING_ZEROES
+};
+
+/**
  * A layout type to layer on top of any SiDB cell-level layout. It implements an interface to store and access
  * SiDBs' charge states.
  *
@@ -1175,7 +1192,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             }
             else
             {
-                this->index_to_charge_distribution();
+                this->index_to_charge_distribution(charge_index_recomputation::IGNORE_LEADING_ZEROES);
             }
             this->update_after_charge_change(dependent_cell, energy_calculation_mode, history_mode);
         }
@@ -1681,7 +1698,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             }
             else
             {
-                this->index_to_charge_distribution();
+                this->index_to_charge_distribution(charge_index_recomputation::IGNORE_LEADING_ZEROES);
             }
             this->update_after_charge_change(dependent_cell_fixed, recompute_system_energy, consider_history);
         }
@@ -1964,8 +1981,13 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     }
     /**
      *  The stored unique index is converted to a charge distribution.
+     *
+     *  @param charge_index_recompuation_mode Flag that can be set to `IGNORE_LEADING_ZEROES` if the charge index was
+     * incremented before calling this function to enable an optimization. When set to `IGNORE_LEADING_ZEROES`, the
+     * leading zeroes of the charge index are ignored.
      */
-    void index_to_charge_distribution() noexcept
+    void index_to_charge_distribution(const charge_index_recomputation charge_index_recomputation_mode =
+                                          charge_index_recomputation::FROM_SCRATCH) const noexcept
     {
         // A charge index of zero corresponds to a layout with all SiDBs set to negative.
         if (strg->charge_index_and_base.first == 0)
@@ -2002,6 +2024,11 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
             charge_quot /= base;
             counter -= 1;
+        }
+
+        if (charge_index_recomputation_mode == charge_index_recomputation::IGNORE_LEADING_ZEROES)
+        {
+            return;
         }
 
         // If the counter is >= 0, then the first <counter> cells should be assigned a negative charge state.
