@@ -152,7 +152,7 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
                         for (uint64_t i = 0ul; i < charge_lyt.num_cells(); ++i)
                         {
                             if (std::find(negative_sidb_indices.cbegin(), negative_sidb_indices.cend(), i) !=
-                                    negative_sidb_indices.cend())
+                                negative_sidb_indices.cend())
                             {
                                 continue;
                             }
@@ -169,7 +169,8 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
                             }
 
                             charge_lyt_copy.assign_charge_state_by_cell_index(i, sidb_charge_state::NEGATIVE);
-                            charge_lyt_copy.update_after_charge_change(dependent_cell_mode::FIXED, energy_calculation::FORCE_UPDATE_ENERGY);
+                            charge_lyt_copy.update_after_charge_change(dependent_cell_mode::FIXED,
+                                                                       energy_calculation::FORCE_UPDATE_ENERGY);
 
                             if (charge_lyt_copy.is_physically_valid())
                             {

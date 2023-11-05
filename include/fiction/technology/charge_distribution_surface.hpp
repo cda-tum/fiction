@@ -938,7 +938,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
         this->validity_check();
 
-        if (energy_calculation_mode == energy_calculation::FORCE_UPDATE_ENERGY || (strg->validity && energy_calculation_mode == energy_calculation::UPDATE_ENERGY))
+        if (energy_calculation_mode == energy_calculation::FORCE_UPDATE_ENERGY ||
+            (strg->validity && energy_calculation_mode == energy_calculation::UPDATE_ENERGY))
         {
             this->recompute_system_energy();
         }
