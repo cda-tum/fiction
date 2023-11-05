@@ -60,7 +60,11 @@ enum class energy_calculation
      * The electrostatic potential energy of a given charge distribution is updated after it is changed and population
      * and configuration stability criteria are met.
      */
-    UPDATE_ENERGY
+    UPDATE_ENERGY,
+    /**
+     * The electrostatic potential energy of a given charge distribution is updated after it is changed.
+     */
+    FORCE_UPDATE_ENERGY
 };
 
 /**
@@ -934,7 +938,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
         this->validity_check();
 
-        if (strg->validity && energy_calculation_mode == energy_calculation::UPDATE_ENERGY)
+        if (energy_calculation_mode == energy_calculation::FORCE_UPDATE_ENERGY || (strg->validity && energy_calculation_mode == energy_calculation::UPDATE_ENERGY))
         {
             this->recompute_system_energy();
         }
