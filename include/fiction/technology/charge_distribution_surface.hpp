@@ -57,7 +57,8 @@ enum class energy_calculation
      */
     KEEP_OLD_ENERGY_VALUE,
     /**
-     * The electrostatic potential energy of a given charge distribution is updated after it is changed.
+     * The electrostatic potential energy of a given charge distribution is updated after it is changed and population
+     * and configuration stability criteria are met.
      */
     UPDATE_ENERGY
 };
@@ -925,15 +926,18 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         const charge_distribution_history history_mode            = charge_distribution_history::NEGLECT) const noexcept
     {
         this->update_local_potential(history_mode);
+
         if (dependent_cell == dependent_cell_mode::VARIABLE)
         {
             this->update_charge_state_of_dependent_cell();
         }
-        if (energy_calculation_mode == energy_calculation::UPDATE_ENERGY)
+
+        this->validity_check();
+
+        if (strg->validity && energy_calculation_mode == energy_calculation::UPDATE_ENERGY)
         {
             this->recompute_system_energy();
         }
-        this->validity_check();
     }
     /**
      * The physically validity of the current charge distribution is evaluated and stored in the storage struct. A
