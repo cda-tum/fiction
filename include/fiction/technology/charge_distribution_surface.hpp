@@ -1177,7 +1177,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             }
             else
             {
-                this->index_to_charge_distribution();
+                this->index_to_charge_distribution(true);
             }
             this->update_after_charge_change(dependent_cell, energy_calculation_mode, history_mode);
         }
@@ -1279,8 +1279,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param dependent_cell dependent_cell_mode::FIXED if the state of the dependent cell should not change,
      * dependent_cell_mode::VARIABLE if it should.
      */
-    void assign_global_external_potential(const double        potential_value,
-                                          dependent_cell_mode dependent_cell = dependent_cell_mode::FIXED) const noexcept
+    void
+    assign_global_external_potential(const double        potential_value,
+                                     dependent_cell_mode dependent_cell = dependent_cell_mode::FIXED) const noexcept
     {
         this->foreach_cell(
             [this, &potential_value](const auto& c) {
@@ -1494,8 +1495,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param cell Cell to which the local external potential is applied.
      * @param external_voltage External electrostatic potential in Volt applied to different cells.
      */
-    void
-    assign_local_external_potential(const std::unordered_map<typename Lyt::cell, double>& external_potential) const noexcept
+    void assign_local_external_potential(
+        const std::unordered_map<typename Lyt::cell, double>& external_potential) const noexcept
     {
         strg->local_external_pot = external_potential;
         this->update_after_charge_change();
@@ -1675,7 +1676,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             }
             else
             {
-                this->index_to_charge_distribution();
+                this->index_to_charge_distribution(true);
             }
             this->update_after_charge_change(dependent_cell_fixed, recompute_system_energy, consider_history);
         }
@@ -1941,8 +1942,11 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     }
     /**
      *  The stored unique index is converted to a charge distribution.
+     *
+     *  @param incremented Flag that can be set to true when the charge index was incremented before calling this
+     * function to enable an optimization. When set to true, the leading zeroes of the charge index are not handled.
      */
-    void index_to_charge_distribution() const noexcept
+    void index_to_charge_distribution(const bool incremented = false) const noexcept
     {
         // A charge index of zero corresponds to a layout with all SiDBs set to negative.
         if (strg->charge_index_and_base.first == 0)
@@ -1979,6 +1983,11 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
             charge_quot /= base;
             counter -= 1;
+        }
+
+        if (incremented)
+        {
+            return;
         }
 
         // If the counter is >= 0, then the first <counter> cells should be assigned a negative charge state.
