@@ -36,6 +36,22 @@ TEMPLATE_TEST_CASE(
         CHECK(is_ground_state(simulation_results_exgs, simulation_results_quicksim));
     }
 
+    SECTION("layout with two SiDBs placed directly next to each other with non-realistic relative permittivity")
+    {
+        TestType lyt{{20, 10}};
+
+        lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({2, 3, 0}, TestType::cell_type::NORMAL);
+
+        charge_distribution_surface      charge_layout{lyt};
+        const sidb_simulation_parameters params{2, -0.32, 1.0e-3};
+        const auto simulation_results_exgs = exhaustive_ground_state_simulation<TestType>(charge_layout, params);
+        const quicksim_params quicksim_params{params};
+        const auto            simulation_results_quicksim = quicksim<TestType>(charge_layout, quicksim_params);
+
+        CHECK(!is_ground_state(simulation_results_exgs, simulation_results_quicksim));
+    }
+
     SECTION("layout with seven SiDBs placed")
     {
         TestType lyt{{20, 10}};
