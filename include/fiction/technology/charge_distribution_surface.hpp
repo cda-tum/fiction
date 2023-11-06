@@ -411,7 +411,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param update_charge_index `true` if the charge index should be changed, `false` otherwise.
      */
     void assign_charge_state(const typename Lyt::cell& c, const sidb_charge_state cs,
-                             const bool update_charge_index = true) const noexcept
+                             const bool update_charge_index = true) noexcept
     {
         if (auto index = cell_to_index(c); index != -1)
         {
@@ -429,7 +429,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param index The index of the cell.
      * @param cs The charge state to be assign to the cell.
      */
-    void assign_charge_by_cell_index(const uint64_t index, const sidb_charge_state cs) const noexcept
+    void assign_charge_by_cell_index(const uint64_t index, const sidb_charge_state cs) noexcept
     {
         strg->cell_charge[index] = cs;
         this->charge_distribution_to_index();
@@ -1041,7 +1041,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * IMPORTANT: This function can be used whenever a charge distribution needs to be converted to a charge index.
      * However, this function is not optimized compared to charge_distribution_to_index.
      */
-    void charge_distribution_to_index_general() const noexcept
+    void charge_distribution_to_index_general() noexcept
     {
         const uint8_t base = strg->phys_params.base;
 
@@ -1063,7 +1063,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * The charge distribution of the charge distribution surface is converted to a unique index. It is used to map
      * every possible charge distribution of an SiDB layout to a unique index.
      */
-    void charge_distribution_to_index() const noexcept
+    void charge_distribution_to_index() noexcept
     {
         const uint8_t base = strg->phys_params.base;
 
@@ -1873,7 +1873,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     /**
      * Initializes the distance matrix between all the cells of the layout.
      */
-    void initialize_nm_distance_matrix() const noexcept
+    void initialize_nm_distance_matrix() noexcept
     {
         strg->nm_dist_mat =
             std::vector<std::vector<double>>(this->num_cells(), std::vector<double>(this->num_cells(), 0.0));
@@ -1890,7 +1890,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     /**
      * Initializes the potential matrix between all the cells of the layout.
      */
-    void initialize_potential_matrix() const noexcept
+    void initialize_potential_matrix() noexcept
     {
         strg->pot_mat =
             std::vector<std::vector<double>>(this->num_cells(), std::vector<double>(this->num_cells(), 0.0));
@@ -1987,7 +1987,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * leading zeroes of the charge index are ignored.
      */
     void index_to_charge_distribution(const charge_index_recomputation charge_index_recomputation_mode =
-                                          charge_index_recomputation::FROM_SCRATCH) const noexcept
+                                          charge_index_recomputation::FROM_SCRATCH) noexcept
     {
         // A charge index of zero corresponds to a layout with all SiDBs set to negative.
         if (strg->charge_index_and_base.first == 0)
