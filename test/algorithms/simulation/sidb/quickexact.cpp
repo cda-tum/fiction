@@ -1422,4 +1422,3 @@ TEMPLATE_TEST_CASE(
 
     CHECK(simulation_results.charge_distributions.empty());
 }
-
