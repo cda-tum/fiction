@@ -158,7 +158,7 @@ class cell_level_layout : public ClockedLayout
      * @param c Cell position.
      * @param ct Cell type to assign to `c`.
      */
-    void assign_cell_type(const cell& c, const cell_type& ct) const noexcept
+    void assign_cell_type(const cell& c, const cell_type& ct) noexcept
     {
         if (Technology::is_empty_cell(ct))
         {
@@ -212,7 +212,7 @@ class cell_level_layout : public ClockedLayout
      * @param c Cell position to assign cell mode `m` to.
      * @param m Cell mode to assign to cell position `c`.
      */
-    void assign_cell_mode(const cell& c, const cell_mode& m) const noexcept
+    void assign_cell_mode(const cell& c, const cell_mode& m) noexcept
     {
         if (Technology::is_normal_cell_mode(m))
         {
@@ -245,7 +245,7 @@ class cell_level_layout : public ClockedLayout
      * @param c Cell position to assign cell name `n` to.
      * @param n Cell name to assign to cell position `c`.
      */
-    void assign_cell_name(const cell& c, const std::string& n) const noexcept
+    void assign_cell_name(const cell& c, const std::string& n) noexcept
     {
         if (n.empty())
         {
@@ -281,7 +281,7 @@ class cell_level_layout : public ClockedLayout
      *
      * @param name Layout name to assign.
      */
-    void set_layout_name(const std::string& name) const noexcept
+    void set_layout_name(const std::string& name) noexcept
     {
         strg->layout_name = name;
     }
