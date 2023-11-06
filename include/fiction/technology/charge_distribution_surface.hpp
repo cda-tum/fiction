@@ -1041,7 +1041,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * IMPORTANT: This function can be used whenever a charge distribution needs to be converted to a charge index.
      * However, this function is not optimized compared to charge_distribution_to_index.
      */
-    void charge_distribution_to_index_general() noexcept
+    void charge_distribution_to_index_general() const noexcept
     {
         const uint8_t base = strg->phys_params.base;
 
@@ -1063,7 +1063,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * The charge distribution of the charge distribution surface is converted to a unique index. It is used to map
      * every possible charge distribution of an SiDB layout to a unique index.
      */
-    void charge_distribution_to_index() noexcept
+    void charge_distribution_to_index() const noexcept
     {
         const uint8_t base = strg->phys_params.base;
 
