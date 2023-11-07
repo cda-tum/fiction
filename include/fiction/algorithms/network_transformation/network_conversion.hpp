@@ -38,7 +38,6 @@ class convert_network_impl<NtkDest, NtkSrc, true>
 
     NtkDest run()
     {
-        ntk = mockturtle::cleanup_dangling<NtkSrc, NtkDest>(ntk, true, true);
         return ntk;
     }
 
@@ -225,6 +224,8 @@ NtkDest convert_network(const NtkSrc& ntk)
     detail::convert_network_impl<NtkDest, NtkSrc> p{ntk};
 
     auto result = p.run();
+
+    result = mockturtle::cleanup_dangling<NtkDest, NtkDest>(result, true, false);
 
     return result;
 }
