@@ -1407,18 +1407,31 @@ TEMPLATE_TEST_CASE(
 }
 
 TEMPLATE_TEST_CASE(
-    "QuickExact simulation of two SiDBs placed directly next to each other with non-realistic relative permittivity", "[quickexact]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
+    "QuickExact simulation of two SiDBs placed directly next to each other with non-realistic relative permittivity",
+    "[quickexact]", (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
     (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
     TestType lyt{};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({2, 3, 0}, TestType::cell_type::NORMAL);
 
-    const quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.32, 1.0e-3},
-                                             quickexact_params<TestType>::automatic_base_number_detection::OFF};
+    SECTION("automatic base number detection is off")
+    {
+        const quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.32, 1.0e-3},
+                                                 quickexact_params<TestType>::automatic_base_number_detection::OFF};
 
-    const auto simulation_results = quickexact<TestType>(lyt, params);
+        const auto simulation_results = quickexact<TestType>(lyt, params);
 
-    CHECK(simulation_results.charge_distributions.empty());
+        CHECK(simulation_results.charge_distributions.empty());
+    }
+
+    SECTION("automatic base number detection is on")
+    {
+        const quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.32, 1.0e-3},
+                                                 quickexact_params<TestType>::automatic_base_number_detection::ON};
+
+        const auto simulation_results = quickexact<TestType>(lyt, params);
+
+        CHECK(simulation_results.charge_distributions.size() == 2);
+    }
 }
