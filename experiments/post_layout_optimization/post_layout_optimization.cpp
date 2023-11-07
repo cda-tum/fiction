@@ -21,9 +21,9 @@ Ntk read_ntk(const std::string& name)
     std::ostringstream                        os{};
     fiction::network_reader<fiction::tec_ptr> reader{fiction_experiments::benchmark_path(name), os};
     const auto                                nets    = reader.get_networks();
-    const auto                                network = *nets.front();
+    const auto                                tec_net = *nets.front();
 
-    return network;
+    return tec_net;
 }
 
 int main()  // NOLINT
