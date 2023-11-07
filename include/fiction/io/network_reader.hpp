@@ -196,7 +196,7 @@ class network_reader
                     ntk.set_network_name(name);
                 }
 
-                networks.push_back(std::make_shared<Ntk>(convert_network<Ntk>(ntk)));
+                networks.push_back(std::make_shared<Ntk>(convert_network<Ntk, Ntk>(ntk)));
             }
             else
             {
