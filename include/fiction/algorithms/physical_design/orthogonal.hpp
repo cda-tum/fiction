@@ -394,8 +394,11 @@ class orthogonal_impl
     {
         // measure run time
         mockturtle::stopwatch stop{pst.time_total};
+        ntk.substitute_po_signals();
+        mockturtle::topo_view ntk_topo{ntk};
+
         // compute a coloring
-        const auto ctn = east_south_edge_coloring(ntk);
+        const auto ctn = east_south_edge_coloring(ntk_topo);
 
         mockturtle::node_map<mockturtle::signal<Lyt>, decltype(ctn.color_ntk)> node2pos{ctn.color_ntk};
 
@@ -598,7 +601,7 @@ class orthogonal_impl
     }
 
   private:
-    mockturtle::topo_view<mockturtle::fanout_view<mockturtle::names_view<technology_network>>> ntk;
+    mockturtle::fanout_view<mockturtle::names_view<technology_network>> ntk;
 
     orthogonal_physical_design_params ps;
     orthogonal_physical_design_stats& pst;

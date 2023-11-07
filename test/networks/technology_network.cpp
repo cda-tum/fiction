@@ -14,6 +14,7 @@
 #include <kitty/operations.hpp>
 #include <kitty/operators.hpp>
 #include <mockturtle/networks/sequential.hpp>
+#include <mockturtle/views/topo_view.hpp>
 
 #include <vector>
 
@@ -822,4 +823,34 @@ TEST_CASE("substitute PO signals", "[technology-network]")
     CHECK(tec.fanout_size(a) == 1);
     CHECK(tec.fanout_size(i) == 2);
     CHECK(tec.fanout_size(b) == 1);
+}
+
+TEST_CASE("substitute PO signals corner case", "[technology-network]")
+{
+    technology_network tec{};
+
+    const auto x1 = tec.create_pi();
+    const auto x2 = tec.create_pi();
+
+    const auto a = tec.create_and(x1, x2);
+
+    tec.create_po(a);
+    tec.create_po(a);
+
+    CHECK(tec.size() == 5);
+    CHECK(tec.is_po(a));
+    CHECK(tec.fanout_size(a) == 2);
+
+    tec.substitute_po_signals();
+    mockturtle::topo_view tec_topo{tec};
+
+    CHECK(tec.size() == 7);
+    CHECK(!tec_topo.is_po(a));
+    CHECK(tec_topo.fanout_size(a) == 2);
+
+    std::vector<uint64_t> nodes{};
+    tec_topo.foreach_node([&](const auto& node) { nodes.push_back(node); });
+
+    tec_topo.foreach_po([&](const auto& gate)
+                        { CHECK(std::find(nodes.begin(), nodes.end(), tec_topo.get_node(gate)) != nodes.end()); });
 }
