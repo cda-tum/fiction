@@ -30,7 +30,6 @@
 #include <mockturtle/algorithms/miter.hpp>                     // miter structure
 #include <mockturtle/algorithms/node_resynthesis/xag_npn.hpp>  // NPN databases for cut rewriting of XAGs and AIGs
 #include <mockturtle/io/genlib_reader.hpp>                     // call-backs to read Genlib files into gate libraries
-#include <mockturtle/io/verilog_reader.hpp>                    // call-backs to read Verilog files into networks
 #include <mockturtle/networks/klut.hpp>                        // kLUT network
 #include <mockturtle/networks/xag.hpp>                         // XOR-AND-inverter graphs
 #include <mockturtle/utils/tech_library.hpp>                   // technology library utils
@@ -45,6 +44,19 @@
 
 // NOTE: You can find the surface data in the following repository:
 // https://github.com/cda-tum/sidb-defect-aware-physical-design
+
+template <typename Ntk>
+Ntk read_ntk(const std::string& name)
+{
+    fmt::print("[i] processing {}\n", name);
+
+    std::ostringstream                        os{};
+    fiction::network_reader<fiction::xag_ptr> reader{fiction_experiments::benchmark_path(name), os};
+    const auto                                nets    = reader.get_networks();
+    const auto                                network = *nets.front();
+
+    return network;
+}
 
 int main()  // NOLINT
 {
@@ -147,12 +159,7 @@ int main()  // NOLINT
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
-        fmt::print("[i] processing {}\n", benchmark);
-        mockturtle::xag_network xag{};
-
-        [[maybe_unused]] const auto read_verilog_result =
-            lorina::read_verilog(fiction_experiments::benchmark_path(benchmark), mockturtle::verilog_reader(xag));
-        assert(read_verilog_result == lorina::return_code::success);
+        const auto xag = read_ntk<fiction::xag_nt>(benchmark);
 
         // compute depth
         mockturtle::depth_view depth_xag{xag};

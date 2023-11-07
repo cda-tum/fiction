@@ -31,6 +31,19 @@
 #include <string>
 #include <vector>
 
+template <typename Ntk>
+Ntk read_ntk(const std::string& name)
+{
+    fmt::print("[i] processing {}\n", name);
+
+    std::ostringstream                        os{};
+    fiction::network_reader<fiction::xag_ptr> reader{fiction_experiments::benchmark_path(name), os};
+    const auto                                nets    = reader.get_networks();
+    const auto                                network = *nets.front();
+
+    return network;
+}
+
 int main()  // NOLINT
 {
     using gate_lyt = fiction::gate_level_layout<
@@ -102,12 +115,7 @@ int main()  // NOLINT
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
-        fmt::print("[i] processing {}\n", benchmark);
-
-        std::ostringstream                        os{};
-        fiction::network_reader<fiction::xag_ptr> reader{fiction_experiments::benchmark_path(benchmark), os};
-        const auto                                nets = reader.get_networks();
-        const auto                                xag  = *nets.front();
+        const auto xag = read_ntk<fiction::xag_nt>(benchmark);
 
         // compute depth
         const mockturtle::depth_view depth_xag{xag};

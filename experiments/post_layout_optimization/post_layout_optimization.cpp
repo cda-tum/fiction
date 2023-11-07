@@ -13,6 +13,19 @@
 #include <cstdlib>
 #include <string>
 
+template <typename Ntk>
+Ntk read_ntk(const std::string& name)
+{
+    fmt::print("[i] processing {}\n", name);
+
+    std::ostringstream                        os{};
+    fiction::network_reader<fiction::tec_ptr> reader{fiction_experiments::benchmark_path(name), os};
+    const auto                                nets    = reader.get_networks();
+    const auto                                network = *nets.front();
+
+    return network;
+}
+
 int main()  // NOLINT
 {
     using gate_lyt =
@@ -49,12 +62,7 @@ int main()  // NOLINT
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
-        fmt::print("[i] processing {}\n", benchmark);
-
-        std::ostringstream                        os{};
-        fiction::network_reader<fiction::tec_ptr> reader{fiction_experiments::benchmark_path(benchmark), os};
-        const auto                                nets    = reader.get_networks();
-        const auto                                network = *nets.front();
+        const auto network = read_ntk<fiction::technology_network>(benchmark);
 
         // perform layout generation with an OGD-based heuristic algorithm
         auto gate_level_layout = fiction::orthogonal<gate_lyt>(network, {}, &orthogonal_stats);
