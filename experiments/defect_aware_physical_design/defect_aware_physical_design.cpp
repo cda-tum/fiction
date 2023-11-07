@@ -9,6 +9,7 @@
 #include <fiction/algorithms/physical_design/apply_gate_library.hpp>  // layout conversion to cell-level
 #include <fiction/algorithms/physical_design/exact.hpp>               // SMT-based physical design of FCN layouts
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
+#include <fiction/io/network_reader.hpp>                                          // read networks from files
 #include <fiction/io/read_sidb_surface_defects.hpp>                               // reader for simulated SiDB surfaces
 #include <fiction/io/read_sqd_layout.hpp>                     // reader for SiDB layouts including surface scan data
 #include <fiction/io/write_sqd_layout.hpp>                    // writer for SiQAD files (physical simulation)
