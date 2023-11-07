@@ -10,6 +10,7 @@
 
 #include <fiction/algorithms/physical_design/orthogonal.hpp>
 #include <fiction/algorithms/physical_design/post_layout_optimization.hpp>
+#include <fiction/algorithms/verification/equivalence_checking.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
@@ -34,6 +35,17 @@ void check_mapping_equiv(const Ntk& ntk)
     post_layout_optimization<Lyt>(layout, &stats);
 
     check_eq(ntk, layout);
+    equivalence_checking_stats st{};
+
+    equivalence_checking(ntk, layout, &st);
+
+    if (st.eq == eq_type::NO)
+    {
+        std::stringstream print_stream{};
+        print_gate_level_layout(print_stream, layout, false, false);
+        std::cout << "Layout Name: " << layout.get_layout_name();
+        std::cout << print_stream.str();
+    }
 
     CHECK(mockturtle::to_seconds(stats.time_total) > 0);
 }
