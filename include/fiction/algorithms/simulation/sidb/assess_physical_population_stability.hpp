@@ -222,7 +222,7 @@ class assess_physical_population_stability_impl
     /**
      * Layout to analyze.
      */
-    const Lyt layout;
+    const Lyt& layout;
     /**
      * Parameters used for the physical simulation.
      */
