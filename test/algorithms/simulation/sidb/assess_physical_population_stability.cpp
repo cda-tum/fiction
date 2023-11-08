@@ -4,7 +4,7 @@
 
 #include <catch2/catch_template_test_macros.hpp>
 
-#include <fiction/algorithms/simulation/sidb/assess_physical_popstability.hpp>
+#include <fiction/algorithms/simulation/sidb/assess_physical_population_stability.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
@@ -14,21 +14,21 @@ using namespace fiction;
 
 using layout = sidb_cell_clk_lyt_siqad;
 
-TEST_CASE("Single SiDB", "[assess-physical-popstability]")
+TEST_CASE("Single SiDB", "[assess-physical-population-stability]")
 {
     layout lyt{};
 
     lyt.assign_cell_type({1, 1, 0}, sidb_technology::cell_type::NORMAL);
 
-    const auto result = assess_physical_popstability(lyt, sidb_simulation_parameters{2, -0.32});
+    const auto result = assess_physical_population_stability(lyt, sidb_simulation_parameters{2, -0.32});
     REQUIRE(result.size() == 1);
-    const auto [cell, status, potential_difference] = result.at(0);
-    CHECK(cell == siqad::coord_t{1, 1, 0});
-    CHECK(status == transition_type::NEGATIVE_TO_NEUTRAL);
-    CHECK(potential_difference == 0.32);
+    const auto population_stability_detail = result.at(0);
+    CHECK(population_stability_detail.critical_cell == siqad::coord_t{1, 1, 0});
+    CHECK(population_stability_detail.transition_from_to == transition_type::NEGATIVE_TO_NEUTRAL);
+    CHECK(population_stability_detail.minimum_potential_difference_to_transition == 0.32);
 }
 
-TEST_CASE("Three SiDBs with positive charge states", "[assess-physical-popstability]")
+TEST_CASE("Three SiDBs with positive charge states", "[assess-physical-population-stability]")
 {
     layout lyt{};
 
@@ -36,34 +36,34 @@ TEST_CASE("Three SiDBs with positive charge states", "[assess-physical-popstabil
     lyt.assign_cell_type({1, 1, 1}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::NORMAL);
 
-    const auto result = assess_physical_popstability(lyt, sidb_simulation_parameters{2, -0.32});
+    const auto result = assess_physical_population_stability(lyt, sidb_simulation_parameters{2, -0.32});
     REQUIRE(result.size() == 3);
 
     SECTION("Ground state")
     {
-        const auto [cell, status, potential_difference] = result.at(0);
-        CHECK(cell == siqad::coord_t{2, 1, 0});
-        CHECK(status == transition_type::NEGATIVE_TO_NEUTRAL);
-        CHECK(potential_difference < 0.43);
+        const auto population_stability_detail = result.at(0);
+        CHECK(population_stability_detail.critical_cell == siqad::coord_t{2, 1, 0});
+        CHECK(population_stability_detail.transition_from_to == transition_type::NEGATIVE_TO_NEUTRAL);
+        CHECK(population_stability_detail.minimum_potential_difference_to_transition < 0.43);
     }
     SECTION("1st excited state")
     {
-        const auto [cell, status, potential_difference] = result.at(1);
-        CHECK(cell == siqad::coord_t{2, 1, 0});
-        CHECK(status == transition_type::NEGATIVE_TO_NEUTRAL);
-        CHECK(potential_difference < 0.23);
+        const auto population_stability_detail = result.at(1);
+        CHECK(population_stability_detail.critical_cell == siqad::coord_t{2, 1, 0});
+        CHECK(population_stability_detail.transition_from_to == transition_type::NEGATIVE_TO_NEUTRAL);
+        CHECK(population_stability_detail.minimum_potential_difference_to_transition < 0.23);
     }
 
     SECTION("2nd excited state")
     {
-        const auto [cell, status, potential_difference] = result.at(2);
-        CHECK(cell == siqad::coord_t{1, 1, 1});
-        CHECK(status == transition_type::NEUTRAL_TO_NEGATIVE);
-        CHECK(potential_difference < 0.21);
+        const auto population_stability_detail = result.at(2);
+        CHECK(population_stability_detail.critical_cell == siqad::coord_t{1, 1, 1});
+        CHECK(population_stability_detail.transition_from_to == transition_type::NEUTRAL_TO_NEGATIVE);
+        CHECK(population_stability_detail.minimum_potential_difference_to_transition < 0.21);
     }
 }
 
-TEST_CASE("Bestagon AND gate", "[assess-physical-popstability]")
+TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]")
 {
     layout lyt{};
 
@@ -96,7 +96,7 @@ TEST_CASE("Bestagon AND gate", "[assess-physical-popstability]")
 
     lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
 
-    const auto result = assess_physical_popstability(lyt, sidb_simulation_parameters{2, -0.32});
+    const auto result = assess_physical_population_stability(lyt, sidb_simulation_parameters{2, -0.32});
     REQUIRE(result.size() == 8);
     const auto [cell, status, potential_difference] = result.at(0);
     CHECK(cell == siqad::coord_t{2, 1, 0});
@@ -104,7 +104,7 @@ TEST_CASE("Bestagon AND gate", "[assess-physical-popstability]")
     CHECK(potential_difference < 0.021);
 }
 
-TEST_CASE("Bestagon CROSSING gate input 11", "[assess-physical-popstability]")
+TEST_CASE("Bestagon CROSSING gate input 11", "[assess-physical-population-stability]")
 {
     layout lyt{};
 
@@ -147,10 +147,10 @@ TEST_CASE("Bestagon CROSSING gate input 11", "[assess-physical-popstability]")
 
     CHECK(lyt.num_cells() == 27);
 
-    const auto result = assess_physical_popstability(lyt, sidb_simulation_parameters{2, -0.32});
+    const auto result = assess_physical_population_stability(lyt, sidb_simulation_parameters{2, -0.32});
     REQUIRE(result.size() == 20);
-    const auto [cell, status, potential_difference] = result.at(0);
-    CHECK(cell == siqad::coord_t{14, 9, 0});
-    CHECK(status == transition_type::NEUTRAL_TO_NEGATIVE);
-    CHECK(potential_difference < 0.01);
+    const auto population_stability_detail = result.at(0);
+    CHECK(population_stability_detail.critical_cell == siqad::coord_t{14, 9, 0});
+    CHECK(population_stability_detail.transition_from_to == transition_type::NEUTRAL_TO_NEGATIVE);
+    CHECK(population_stability_detail.minimum_potential_difference_to_transition < 0.01);
 }

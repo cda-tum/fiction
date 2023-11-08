@@ -178,7 +178,9 @@ Binary-dot Logic (BDL) Pair Detection
 Assess Population Stability
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**Header:** ``fiction/algorithms/simulation/sidb/assess_physical_popstability.hpp``
+**Header:** ``fiction/algorithms/simulation/sidb/assess_physical_population_stability.hpp``
 
 .. doxygenenum:: fiction::transition_type
-.. doxygenfunction:: fiction::assess_physical_popstability
+.. doxygenstruct:: fiction::population_stability_information
+   :members:
+.. doxygenfunction:: fiction::assess_physical_population_stability
