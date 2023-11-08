@@ -96,12 +96,66 @@ TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]")
 
     lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
 
-    const auto result = assess_physical_population_stability(lyt, sidb_simulation_parameters{2, -0.32});
-    REQUIRE(result.size() == 8);
-    const auto [cell, status, potential_difference] = result.at(0);
-    CHECK(cell == siqad::coord_t{2, 1, 0});
-    CHECK(status == transition_type::NEUTRAL_TO_NEGATIVE);
-    CHECK(potential_difference < 0.021);
+    SECTION("no input specified")
+    {
+        const auto result = assess_physical_population_stability(lyt, sidb_simulation_parameters{2, -0.32});
+        REQUIRE(result.size() == 8);
+        const auto population_stability_detail = result.at(0);
+        CHECK(population_stability_detail.critical_cell == siqad::coord_t{2, 1, 0});
+        CHECK(population_stability_detail.transition_from_to == transition_type::NEUTRAL_TO_NEGATIVE);
+        CHECK(population_stability_detail.minimum_potential_difference_to_transition < 0.021);
+    }
+
+    SECTION("input 00")
+    {
+        lyt.assign_cell_type({36, 1, 0}, sidb_technology::cell_type::EMPTY);
+        lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::EMPTY);
+        const auto result = assess_physical_population_stability(lyt, sidb_simulation_parameters{2, -0.32});
+        REQUIRE(result.size() == 2);
+        const auto population_stability_detail = result.at(0);
+        CHECK(population_stability_detail.critical_cell == siqad::coord_t{14, 5, 0});
+        CHECK(population_stability_detail.transition_from_to == transition_type::NEUTRAL_TO_NEGATIVE);
+        CHECK(population_stability_detail.minimum_potential_difference_to_transition < 0.026);
+    }
+
+    SECTION("input 01")
+    {
+        lyt.assign_cell_type({36, 1, 0}, sidb_technology::cell_type::EMPTY);
+        lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::EMPTY);
+
+        const auto result = assess_physical_population_stability(lyt, sidb_simulation_parameters{2, -0.32});
+        REQUIRE(result.size() == 4);
+        const auto population_stability_detail = result.at(0);
+        CHECK(population_stability_detail.critical_cell == siqad::coord_t{32, 18, 0});
+        CHECK(population_stability_detail.transition_from_to == transition_type::NEUTRAL_TO_NEGATIVE);
+        CHECK(population_stability_detail.minimum_potential_difference_to_transition < 0.041);
+    }
+
+    SECTION("input 10")
+    {
+        lyt.assign_cell_type({38, 0, 0}, sidb_technology::cell_type::EMPTY);
+        lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::EMPTY);
+
+        const auto result = assess_physical_population_stability(lyt, sidb_simulation_parameters{2, -0.32});
+        REQUIRE(result.size() == 8);
+        const auto population_stability_detail = result.at(0);
+        CHECK(population_stability_detail.critical_cell == siqad::coord_t{19, 8, 0});
+        CHECK(population_stability_detail.transition_from_to == transition_type::NEUTRAL_TO_NEGATIVE);
+        CHECK(population_stability_detail.minimum_potential_difference_to_transition < 0.02);
+    }
+
+    SECTION("input 11")
+    {
+        lyt.assign_cell_type({36, 1, 0}, sidb_technology::cell_type::EMPTY);
+        lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::EMPTY);
+
+        const auto result = assess_physical_population_stability(lyt, sidb_simulation_parameters{2, -0.32});
+        REQUIRE(result.size() == 2);
+        const auto population_stability_detail = result.at(0);
+        CHECK(population_stability_detail.critical_cell == siqad::coord_t{14, 5, 0});
+        CHECK(population_stability_detail.transition_from_to == transition_type::NEUTRAL_TO_NEGATIVE);
+        CHECK(population_stability_detail.minimum_potential_difference_to_transition < 0.026);
+    }
 }
 
 TEST_CASE("Bestagon CROSSING gate input 11", "[assess-physical-population-stability]")
