@@ -70,7 +70,7 @@ struct population_stability_information
 };
 
 /**
- * Data type to pair that pairs the electrostatic energy of a given charge distribution with its charge index.
+ * Data type that pairs the electrostatic energy of a given charge distribution with its charge index.
  */
 using energy_and_charge_index = std::pair<double, uint64_t>;
 
