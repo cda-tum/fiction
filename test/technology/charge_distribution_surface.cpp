@@ -1065,6 +1065,38 @@ TEMPLATE_TEST_CASE(
         }
     }
 
+    SECTION("dependent cell in alignment with the base number")
+    {
+        TestType                         lyt_new{{11, 11}};
+        const sidb_simulation_parameters params{2, -0.32};
+
+        lyt_new.assign_cell_type({0, 1, 1}, TestType::cell_type::NORMAL);
+        lyt_new.assign_cell_type({0, 1, 0}, TestType::cell_type::NORMAL);
+        lyt_new.assign_cell_type({2, 1, 1}, TestType::cell_type::NORMAL);
+
+        charge_distribution_surface charge_layout_new{lyt_new, params, sidb_charge_state::NEGATIVE};
+        charge_layout_new.assign_dependent_cell({0, 1, 1});
+
+        charge_layout_new.assign_charge_state({0, 1, 1}, sidb_charge_state::NEGATIVE);
+        charge_layout_new.assign_charge_state({0, 1, 0}, sidb_charge_state::NEGATIVE);
+        charge_layout_new.assign_charge_state({2, 1, 1}, sidb_charge_state::NEGATIVE);
+        charge_layout_new.update_after_charge_change();
+
+        charge_layout_new.update_charge_state_of_dependent_cell();
+        CHECK(charge_layout_new.get_charge_state({0, 1, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_layout_new.get_charge_state({0, 1, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_layout_new.get_charge_state({2, 1, 1}) == sidb_charge_state::NEGATIVE);
+
+        charge_layout_new.assign_base_number(3);
+        charge_layout_new.assign_charge_state({0, 1, 1}, sidb_charge_state::NEGATIVE);
+        charge_layout_new.assign_charge_state({0, 1, 0}, sidb_charge_state::NEGATIVE);
+        charge_layout_new.assign_charge_state({2, 1, 1}, sidb_charge_state::NEGATIVE);
+        charge_layout_new.update_after_charge_change(dependent_cell_mode::VARIABLE);
+        CHECK(charge_layout_new.get_charge_state({0, 1, 1}) == sidb_charge_state::POSITIVE);
+        CHECK(charge_layout_new.get_charge_state({0, 1, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(charge_layout_new.get_charge_state({2, 1, 1}) == sidb_charge_state::NEGATIVE);
+    }
+
     SECTION("adding dependent cell and compare local potential and system energy")
     {
         TestType                         lyt_new{{11, 11}};
