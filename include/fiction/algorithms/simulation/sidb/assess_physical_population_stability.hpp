@@ -63,7 +63,16 @@ struct population_stability_information
      * Absolute electrostatic potential required for the charge state transition.
      */
     double minimum_potential_difference_to_transition{};
+    /**
+     * Total electrostatic energy of given charge distribution.
+     */
+    double system_energy{};
 };
+
+/**
+ * Data type to pair that pairs the electrostatic energy of a given charge distribution with its charge index.
+ */
+using energy_and_charge_index = std::pair<double, uint64_t>;
 
 namespace detail
 {
@@ -84,25 +93,23 @@ class assess_physical_population_stability_impl
     {}
 
     /**
-     * Runs the assessment of population stability for a given SiDB layout using the provided simulation parameters.
-     * This function determines the minimum electrostatic potential required for charge state transitions in the layout
-     * and identifies the corresponding critical SiDB and the type of charge state transition.
+     * Runs a population stability assessment for a given SiDB layout using the provided simulation parameters.
+     * This function determines the minimum electrostatic potential required for charge state transitions within the
+     * layout and identifies the corresponding critical SiDB along with the type of charge state transition.
      *
-     * @return An unordered map where each key represents the charge distribution in ascending energy order, and the
-     * value is a structure containing information about the critical SiDB, the type of charge state transition, and the
-     * minimum electrostatic potential required for the transition.
+     * @return A vector of population stability information structures, where each element represents a charge
+     * distribution in ascending energy order. Each structure contains details about the critical SiDB, the type of
+     * charge state transition, and the minimum electrostatic potential required for the charge transition.
      */
-    [[nodiscard]] std::unordered_map<std::size_t, population_stability_information<Lyt>> run() noexcept
+    [[nodiscard]] std::vector<population_stability_information<Lyt>> run() noexcept
     {
         const quickexact_params<Lyt> parameter{params};
         const auto                   simulation_results = quickexact(layout, parameter);
         auto                         transition         = transition_type::NEUTRAL_TO_NEGATIVE;
         const auto energy_and_unique_charge_index       = collect_energy_and_charge_index(simulation_results);
 
-        std::unordered_map<std::size_t, population_stability_information<Lyt>>
-            valid_states_and_detailed_popstability_information{};
-
-        std::size_t valid_state_counter = 0;
+        std::vector<population_stability_information<Lyt>> valid_states_and_detailed_popstability_information{};
+        valid_states_and_detailed_popstability_information.reserve(simulation_results.charge_distributions.size());
 
         // Access the unique indices
         for (const auto& [energy, index] : energy_and_unique_charge_index)
@@ -177,11 +184,9 @@ class assess_physical_population_stability_impl
                                 }
                             }
                         });
-                    valid_states_and_detailed_popstability_information.emplace(
-                        valid_state_counter,
-                        population_stability_information<Lyt>{critical_cell, transition,
-                                                              minimum_potential_difference_to_transition});
-                    valid_state_counter += 1;
+                    valid_states_and_detailed_popstability_information.push_back(population_stability_information<Lyt>{
+                        critical_cell, transition, minimum_potential_difference_to_transition,
+                        charge_lyt.get_system_energy()});
                     break;
                 }
             }
@@ -191,31 +196,31 @@ class assess_physical_population_stability_impl
     };
 
     /**
-     * This function collects the system energy with the corresponding charge index information of all physically valid
+     * Collects the system energy with the corresponding charge index information of all physically valid
      * charge distributions of a given SiDB layout.
      *
      * @param sim_results The simulation results, including all physically valid charge distributions.
-     * @return A vector of pairs, each containing a double value representing the system energy and a uint64_t
-     * representing the unique charge index. The vector is sorted in ascending order of the energy values.
+     * @return A vector of energy_and_charge_index pairs, where each pair consists of a double value representing
+     * the system energy and a uint64_t representing the unique charge index. The vector is sorted in ascending order
+     * of the energy values.
      */
-    [[nodiscard]] std::vector<std::pair<double, uint64_t>>
+    [[nodiscard]] std::vector<energy_and_charge_index>
     collect_energy_and_charge_index(const sidb_simulation_result<Lyt>& sim_results) noexcept
     {
-        std::unordered_map<std::size_t, std::tuple<typename Lyt::cell, transition_type, double>> results{};
-
-        std::vector<std::pair<double, uint64_t>> energy_and_unique_charge_index{};
+        std::vector<energy_and_charge_index> energy_and_charge_index{};
+        energy_and_charge_index.reserve(sim_results.charge_distributions.size());
 
         std::transform(sim_results.charge_distributions.cbegin(), sim_results.charge_distributions.cend(),
-                       std::back_inserter(energy_and_unique_charge_index),
+                       std::back_inserter(energy_and_charge_index),
                        [](const auto& ch_lyt) {
                            return std::make_pair(ch_lyt.get_system_energy(), ch_lyt.get_charge_index_and_base().first);
                        });
 
         // Sort the vector in ascending order of the double value
-        std::sort(energy_and_unique_charge_index.begin(), energy_and_unique_charge_index.end(),
+        std::sort(energy_and_charge_index.begin(), energy_and_charge_index.end(),
                   [](const auto& lhs, const auto& rhs) { return lhs.first < rhs.first; });
 
-        return energy_and_unique_charge_index;
+        return energy_and_charge_index;
     }
 
   private:
@@ -245,7 +250,7 @@ class assess_physical_population_stability_impl
  * minimum electrostatic potential required for the transition.
  */
 template <typename Lyt>
-[[nodiscard]] std::unordered_map<std::size_t, population_stability_information<Lyt>>
+[[nodiscard]] std::vector<population_stability_information<Lyt>>
 assess_physical_population_stability(const Lyt& lyt, const sidb_simulation_parameters& params)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");

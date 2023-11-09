@@ -183,4 +183,5 @@ Assess Population Stability
 .. doxygenenum:: fiction::transition_type
 .. doxygenstruct:: fiction::population_stability_information
    :members:
+.. doxygentypedef:: fiction::energy_and_charge_index
 .. doxygenfunction:: fiction::assess_physical_population_stability
