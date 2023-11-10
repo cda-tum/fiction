@@ -19,7 +19,7 @@ namespace fiction
  * The electrostatic potential on hydrogen-passivated Silicon is typically modeled using a screened Coulomb potential.
  * This electrostatic potential is commonly employed to determine the electrostatic potential for a given distance
  * (between SiDB and point under consideration) and given physical parameters. However, the function provided here
- * serves the inverse purpose by calculating the distance for a given potential and set of physical parameters.
+ * serves the inverse purpose by calculating the distance for a given potential and given physical parameters.
  *
  * @param params The physical parameters for a given hydrogen-passivated Silicon surface.
  * @param potential The electrostatic potential (unit: V) to be converted to a distance.
