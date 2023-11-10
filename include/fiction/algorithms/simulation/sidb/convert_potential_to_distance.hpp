@@ -16,7 +16,7 @@
 namespace fiction
 {
 /**
- * This function converts a given electrostatic potential (unit: e) to the corresponding distance (unit: nm) for given
+ * This function converts a given electrostatic potential to the corresponding distance for given
  * physical parameters via the screened Coulomb potential.
  *
  * @param params The simulation parameters.
