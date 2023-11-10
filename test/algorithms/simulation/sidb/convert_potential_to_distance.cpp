@@ -21,49 +21,49 @@ TEST_CASE("Conversion of potential to distance", "[convert-potential-to-distance
         uint64_t const precision         = 1;
         const double   potential_value   = 5.0;
         const double   expected_distance = 0.1;
-        REQUIRE_THAT(convert_potential_to_distance(params, potential_value, precision),
+        REQUIRE_THAT(convert_potential_to_distance(potential_value, params, precision),
                      Catch::Matchers::WithinAbs(expected_distance, 1e-5));
     }
 
-    SECTION("Valid conversion with custom parameters, precision is one")
+    SECTION("Valid conversion with custom parameters, precision is 1")
     {
         params.epsilon_r                 = 2.0;
         params.lambda_tf                 = 1.0;
         const uint64_t precision         = 1;
         const double   potential_value   = 0.01;
         const double   expected_distance = 3.2;
-        REQUIRE_THAT(convert_potential_to_distance(params, potential_value, precision),
+        REQUIRE_THAT(convert_potential_to_distance(potential_value, params, precision),
                      Catch::Matchers::WithinAbs(expected_distance, 1e-5));
     }
 
-    SECTION("Valid conversion with custom parameters, precision is two")
+    SECTION("Valid conversion with custom parameters, precision is 2")
     {
         params.epsilon_r                 = 2.0;
         params.lambda_tf                 = 1.0;
         const uint64_t precision         = 2;
         const double   potential_value   = 0.01;
         const double   expected_distance = 3.14;
-        REQUIRE_THAT(convert_potential_to_distance(params, potential_value, precision),
+        REQUIRE_THAT(convert_potential_to_distance(potential_value, params, precision),
                      Catch::Matchers::WithinAbs(expected_distance, 1e-5));
     }
 
-    SECTION("Valid conversion with custom parameters, precision is three")
+    SECTION("Valid conversion with custom parameters, precision is 3")
     {
         params.epsilon_r                 = 2.0;
         params.lambda_tf                 = 1.0;
         const uint64_t precision         = 3;
         const double   potential_value   = 0.01;
         const double   expected_distance = 3.135;
-        REQUIRE_THAT(convert_potential_to_distance(params, potential_value, precision),
+        REQUIRE_THAT(convert_potential_to_distance(potential_value, params, precision),
                      Catch::Matchers::WithinAbs(expected_distance, 1e-5));
     }
 
-    SECTION("Zero precision")
+    SECTION("Valid conversion with custom parameters, precision is 0")
     {
         const uint64_t precision         = 0;
         const double   potential_value   = 0.03;
         const double   expected_distance = 4;
-        REQUIRE_THAT(convert_potential_to_distance(params, potential_value, precision),
+        REQUIRE_THAT(convert_potential_to_distance(potential_value, params, precision),
                      Catch::Matchers::WithinAbs(expected_distance, 1e-5));
     }
 
@@ -72,7 +72,7 @@ TEST_CASE("Conversion of potential to distance", "[convert-potential-to-distance
         const uint64_t precision         = 3;
         const double   potential_value   = std::numeric_limits<double>::infinity();
         const double   expected_distance = 0.001;
-        REQUIRE_THAT(convert_potential_to_distance(params, potential_value, precision),
+        REQUIRE_THAT(convert_potential_to_distance(potential_value, params, precision),
                      Catch::Matchers::WithinAbs(expected_distance, 1e-5));
     }
 }

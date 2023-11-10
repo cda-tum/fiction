@@ -16,20 +16,26 @@
 namespace fiction
 {
 /**
- * This function converts a given electrostatic potential to the corresponding distance for given
- * physical parameters via the screened Coulomb potential.
+ * The electrostatic potential on hydrogen-passivated Silicon is typically modeled using a screened Coulomb potential.
+ * This electrostatic potential is commonly employed to determine the electrostatic potential for a given distance
+ * (between SiDB and point under consideration) and given physical parameters. However, the function provided here
+ * serves the inverse purpose by calculating the distance for a given potential and set of physical parameters.
  *
- * @param params The simulation parameters.
- * @param potential The electrostatic potential (unit: V) to be converted to a distance (unit: nm).
+ * @param params The physical parameters for a given hydrogen-passivated Silicon surface.
+ * @param potential The electrostatic potential (unit: V) to be converted to a distance.
  * @param precision The precision level for the conversion, specifying the number of decimal places.
- * @return The distance (unit: nm) corresponding to the given electrostatic potential (unit: V).
+ * @return The distance (unit: nm) corresponding to the given electrostatic potential.
+ *
+ * @note The runtime depends on the set precision.
  */
-[[nodiscard]] double convert_potential_to_distance(const sidb_simulation_parameters& params, const double potential,
-                                                   const uint64_t precision)
+[[nodiscard]] inline double
+convert_potential_to_distance(const double                      potential,
+                              const sidb_simulation_parameters& params    = sidb_simulation_parameters{},
+                              const uint64_t                    precision = 2) noexcept
 {
     // function to calculate the electrostatic potential for a given distance and given physical parameters on the H-Si
     // surface.
-    auto calculate_potential_for_given_distance = [&params](double distance)
+    const auto calculate_potential_for_given_distance = [&params](const double distance) noexcept
     {
         return params.k() * params.epsilon_r / params.epsilon_r / (distance * 1e-9) *
                std::exp(-distance / params.lambda_tf) * physical_constants::ELEMENTARY_CHARGE;
