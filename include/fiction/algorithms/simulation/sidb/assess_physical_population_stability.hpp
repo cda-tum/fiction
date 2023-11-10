@@ -65,7 +65,7 @@ struct population_stability_information
      */
     double minimum_potential_difference_to_transition{};
     /**
-     * Distance (unit: nm) corresponding to the minimum potential difference (unit: V).
+     * Distance (unit: nm) corresponding to the minimum potential difference.
      */
     double distance_corresponding_to_potential{};
     /**
@@ -84,16 +84,26 @@ struct assess_physical_population_stability_params
      */
     sidb_simulation_parameters physical_parameters{};
     /**
-     * The precision level for the conversion from the minimum potential difference (unit: V) to the corresponding
-     * distance (unit: nm).
+     * The precision level for the conversion from the minimum potential difference to the corresponding
+     * distance.
      */
     uint64_t precision_for_distance_corresponding_to_potential = 2;
 };
 
 /**
- * Data type that pairs the electrostatic energy of a given charge distribution with its charge index.
+ * This struct represents the electrostatic energy and charge index of a charge distribution.
  */
-using energy_and_charge_index = std::pair<double, uint64_t>;
+struct energy_and_charge_index
+{
+    /**
+     * Electrostatic energy of the charge distribution.
+     */
+    double energy;
+    /**
+     * Charge index of the charge distribution.
+     */
+    uint64_t charge_index;
+};
 
 namespace detail
 {
@@ -106,12 +116,12 @@ class assess_physical_population_stability_impl
      * Constructor for assess_physical_population_stability_impl.
      *
      * @param lyt SiDB layout.
-     * @param parameter The simulation parameters used for the assessment.
+     * @param parameters The simulation parameters used for the assessment.
      */
     assess_physical_population_stability_impl(const Lyt&                                         lyt,
-                                              const assess_physical_population_stability_params& parameter) :
+                                              const assess_physical_population_stability_params& parameters) :
             layout{lyt},
-            params{parameter}
+            params{parameters}
     {}
 
     /**
@@ -125,13 +135,12 @@ class assess_physical_population_stability_impl
      */
     [[nodiscard]] std::vector<population_stability_information<Lyt>> run() noexcept
     {
-        const quickexact_params<Lyt> parameter{params.physical_parameters};
-        const auto                   simulation_results = quickexact(layout, parameter);
-        auto                         transition         = transition_type::NEUTRAL_TO_NEGATIVE;
+        const quickexact_params<Lyt> quickexact_parameters{params.physical_parameters};
+        const auto                   simulation_results = quickexact(layout, quickexact_parameters);
         const auto energy_and_unique_charge_index       = collect_energy_and_charge_index(simulation_results);
 
-        std::vector<population_stability_information<Lyt>> valid_states_and_detailed_popstability_information{};
-        valid_states_and_detailed_popstability_information.reserve(simulation_results.charge_distributions.size());
+        std::vector<population_stability_information<Lyt>> popstability_information{};
+        popstability_information.reserve(simulation_results.charge_distributions.size());
 
         // Access the unique indices
         for (const auto& [energy, index] : energy_and_unique_charge_index)
@@ -140,72 +149,31 @@ class assess_physical_population_stability_impl
             {
                 if (charge_lyt.get_charge_index_and_base().first == index)
                 {
-                    typename Lyt::cell critical_cell{};
-                    double minimum_potential_difference_to_transition = std::numeric_limits<double>::infinity();
+                    population_stability_information<Lyt> population_stability_info{};
+                    population_stability_info.minimum_potential_difference_to_transition =
+                        std::numeric_limits<double>::infinity();
 
                     charge_lyt.foreach_cell(
-                        [this, &charge_lyt, &minimum_potential_difference_to_transition, &critical_cell,
-                         &transition](const auto& c)
+                        [this, &charge_lyt, &population_stability_info](const auto& c)
                         {
                             switch (charge_lyt.get_charge_state(c))
                             {
                                 case sidb_charge_state::NEGATIVE:
                                 {
-                                    if (std::abs(-*charge_lyt.get_local_potential(c) +
-                                                 params.physical_parameters.mu_minus) <
-                                        minimum_potential_difference_to_transition)
-                                    {
-                                        minimum_potential_difference_to_transition = std::abs(
-                                            -*charge_lyt.get_local_potential(c) + params.physical_parameters.mu_minus);
-                                        critical_cell = c;
-                                        transition    = transition_type::NEGATIVE_TO_NEUTRAL;
-                                    }
+                                    population_stability_info = handle_negative_charges(
+                                        *charge_lyt.get_local_potential(c), c, population_stability_info);
                                     break;
                                 }
                                 case sidb_charge_state::NEUTRAL:
                                 {
-                                    if (std::abs(-*charge_lyt.get_local_potential(c) +
-                                                 params.physical_parameters.mu_minus) <
-                                        std::abs(-*charge_lyt.get_local_potential(c) +
-                                                 params.physical_parameters.mu_plus()))
-                                    {
-                                        if (std::abs(-*charge_lyt.get_local_potential(c) +
-                                                     params.physical_parameters.mu_minus) <
-                                            minimum_potential_difference_to_transition)
-                                        {
-                                            minimum_potential_difference_to_transition =
-                                                std::abs(-*charge_lyt.get_local_potential(c) +
-                                                         params.physical_parameters.mu_minus);
-                                            critical_cell = c;
-                                            transition    = transition_type::NEUTRAL_TO_NEGATIVE;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (std::abs(-*charge_lyt.get_local_potential(c) +
-                                                     params.physical_parameters.mu_plus()) <
-                                            minimum_potential_difference_to_transition)
-                                        {
-                                            minimum_potential_difference_to_transition =
-                                                std::abs(-*charge_lyt.get_local_potential(c) +
-                                                         params.physical_parameters.mu_plus());
-                                            critical_cell = c;
-                                            transition    = transition_type::NEUTRAL_TO_POSITIVE;
-                                        }
-                                    }
+                                    population_stability_info = handle_neutral_charges(
+                                        *charge_lyt.get_local_potential(c), c, population_stability_info);
                                     break;
                                 }
                                 case sidb_charge_state::POSITIVE:
                                 {
-                                    if (std::abs(-*charge_lyt.get_local_potential(c) +
-                                                 params.physical_parameters.mu_plus()) <
-                                        minimum_potential_difference_to_transition)
-                                    {
-                                        minimum_potential_difference_to_transition = std::abs(
-                                            -*charge_lyt.get_local_potential(c) + params.physical_parameters.mu_plus());
-                                        critical_cell = c;
-                                        transition    = transition_type::POSITIVE_TO_NEUTRAL;
-                                    }
+                                    population_stability_info = handle_positive_charges(
+                                        *charge_lyt.get_local_potential(c), c, population_stability_info);
                                     break;
                                 }
                                 case sidb_charge_state::NONE:
@@ -214,47 +182,18 @@ class assess_physical_population_stability_impl
                                 }
                             }
                         });
-                    valid_states_and_detailed_popstability_information.push_back(population_stability_information<Lyt>{
-                        critical_cell, transition, minimum_potential_difference_to_transition,
-                        convert_potential_to_distance(params.physical_parameters,
-                                                      minimum_potential_difference_to_transition,
-                                                      params.precision_for_distance_corresponding_to_potential),
-                        charge_lyt.get_system_energy()});
+                    population_stability_info.system_energy                       = charge_lyt.get_system_energy();
+                    population_stability_info.distance_corresponding_to_potential = convert_potential_to_distance(
+                        population_stability_info.minimum_potential_difference_to_transition,
+                        params.physical_parameters, params.precision_for_distance_corresponding_to_potential);
+                    popstability_information.push_back(population_stability_info);
                     break;
                 }
             }
         }
 
-        return valid_states_and_detailed_popstability_information;
+        return popstability_information;
     };
-
-    /**
-     * Collects the system energy with the corresponding charge index information of all physically valid
-     * charge distributions of a given SiDB layout.
-     *
-     * @param sim_results The simulation results, including all physically valid charge distributions.
-     * @return A vector of energy_and_charge_index pairs, where each pair consists of a double value representing
-     * the system energy and a uint64_t representing the unique charge index. The vector is sorted in ascending order
-     * of the energy values.
-     */
-    [[nodiscard]] std::vector<energy_and_charge_index>
-    collect_energy_and_charge_index(const sidb_simulation_result<Lyt>& sim_results) noexcept
-    {
-        std::vector<energy_and_charge_index> energy_and_charge_index{};
-        energy_and_charge_index.reserve(sim_results.charge_distributions.size());
-
-        std::transform(sim_results.charge_distributions.cbegin(), sim_results.charge_distributions.cend(),
-                       std::back_inserter(energy_and_charge_index),
-                       [](const auto& ch_lyt) {
-                           return std::make_pair(ch_lyt.get_system_energy(), ch_lyt.get_charge_index_and_base().first);
-                       });
-
-        // Sort the vector in ascending order of the double value
-        std::sort(energy_and_charge_index.begin(), energy_and_charge_index.end(),
-                  [](const auto& lhs, const auto& rhs) { return lhs.first < rhs.first; });
-
-        return energy_and_charge_index;
-    }
 
   private:
     /**
@@ -265,6 +204,128 @@ class assess_physical_population_stability_impl
      * Parameters required to assess the population stability.
      */
     const assess_physical_population_stability_params& params;
+
+    /**
+     * This function checks if the absolute difference between the given local potential and
+     * µ- is smaller than the current minimum potential difference to transition for a negatively charged SiDB.
+     * If `true`, it updates the population stability information with the new minimum difference and critical cell.
+     *
+     * @param local_potential The local potential associated with the cell.
+     * @param c The cell for which the charge state is being considered (SiDB is negatively charged).
+     * @param pop_stability_information The current population stability information.
+     *
+     * @return An updated population stability information with potential transition details.
+     */
+    [[nodiscard]] population_stability_information<Lyt>
+    handle_negative_charges(const double local_potential, const typename Lyt::cell& c,
+                            const population_stability_information<Lyt>& pop_stability_information) noexcept
+    {
+        auto updated_pop_stability_information = pop_stability_information;
+        if (std::abs(-local_potential + params.physical_parameters.mu_minus) <
+            updated_pop_stability_information.minimum_potential_difference_to_transition)
+        {
+            updated_pop_stability_information.minimum_potential_difference_to_transition =
+                std::abs(-local_potential + params.physical_parameters.mu_minus);
+            updated_pop_stability_information.critical_cell      = c;
+            updated_pop_stability_information.transition_from_to = transition_type::NEGATIVE_TO_NEUTRAL;
+        }
+        return updated_pop_stability_information;
+    }
+    /**
+     * This function checks if the absolute difference between the given local potential and
+     * µ- or µ+ is smaller than the current minimum potential difference.
+     * If `true`, it updates the population stability information with the new minimum difference and critical cell.
+     *
+     * @param local_potential The local potential associated with the cell.
+     * @param c The cell for which the charge state is being considered (SiDB is neutrally charged).
+     * @param pop_stability_information The current population stability information.
+     *
+     * @return An updated population stability information with potential transition details.
+     */
+    [[nodiscard]] population_stability_information<Lyt>
+    handle_neutral_charges(const double local_potential, const typename Lyt::cell& c,
+                           const population_stability_information<Lyt>& pop_stability_information) noexcept
+    {
+        auto updated_pop_stability_information = pop_stability_information;
+        if (std::abs(-local_potential + params.physical_parameters.mu_minus) <
+            std::abs(-local_potential + params.physical_parameters.mu_plus()))
+        {
+            if (std::abs(-local_potential + params.physical_parameters.mu_minus) <
+                updated_pop_stability_information.minimum_potential_difference_to_transition)
+            {
+                updated_pop_stability_information.minimum_potential_difference_to_transition =
+                    std::abs(-local_potential + params.physical_parameters.mu_minus);
+                updated_pop_stability_information.critical_cell      = c;
+                updated_pop_stability_information.transition_from_to = transition_type::NEUTRAL_TO_NEGATIVE;
+            }
+        }
+        else
+        {
+            if (std::abs(-local_potential + params.physical_parameters.mu_plus()) <
+                updated_pop_stability_information.minimum_potential_difference_to_transition)
+            {
+                updated_pop_stability_information.minimum_potential_difference_to_transition =
+                    std::abs(-local_potential + params.physical_parameters.mu_plus());
+                updated_pop_stability_information.critical_cell      = c;
+                updated_pop_stability_information.transition_from_to = transition_type::NEUTRAL_TO_POSITIVE;
+            }
+        }
+        return updated_pop_stability_information;
+    }
+    /**
+     * This function checks if the absolute difference between the given local potential and µ+ is smaller than the
+     * current minimum potential difference. If true`, it updates the
+     * population stability information with the new minimum difference and critical cell.
+     *
+     * @param local_potential The local potential associated with the cell.
+     * @param c The cell for which the charge state is being considered (SiDB is positively charged).
+     * @param pop_stability_information The current population stability information.
+     *
+     * @return An updated population stability information with potential transition details.
+     */
+    [[nodiscard]] population_stability_information<Lyt>
+    handle_positive_charges(const double local_potential, const typename Lyt::cell& c,
+                            const population_stability_information<Lyt>& pop_stability_information) noexcept
+    {
+        auto updated_pop_stability_information = pop_stability_information;
+        if (std::abs(-local_potential + params.physical_parameters.mu_plus()) <
+            updated_pop_stability_information.minimum_potential_difference_to_transition)
+        {
+            updated_pop_stability_information.minimum_potential_difference_to_transition =
+                std::abs(-local_potential + params.physical_parameters.mu_plus());
+            updated_pop_stability_information.critical_cell      = c;
+            updated_pop_stability_information.transition_from_to = transition_type::POSITIVE_TO_NEUTRAL;
+        }
+        return updated_pop_stability_information;
+    }
+    /**
+     * Collects the system energy with the corresponding charge index information of all physically valid
+     * charge distributions of a given SiDB layout.
+     *
+     * @param sim_results The simulation results, including all physically valid charge distributions.
+     * @return A vector of energy_and_charge_index pairs, where each pair consists of a double value representing
+     * the system energy and a uint64_t representing the unique charge index. The vector is sorted in ascending order
+     * of the energy values.
+     */
+    [[nodiscard]] std::vector<energy_and_charge_index>
+    collect_energy_and_charge_index(const sidb_simulation_result<Lyt>& sim_results) const noexcept
+    {
+        std::vector<energy_and_charge_index> energy_charge_index{};
+        energy_charge_index.reserve(sim_results.charge_distributions.size());
+
+        std::transform(
+            sim_results.charge_distributions.cbegin(), sim_results.charge_distributions.cend(),
+            std::back_inserter(energy_charge_index),
+            [](const auto& ch_lyt) {
+                return energy_and_charge_index{ch_lyt.get_system_energy(), ch_lyt.get_charge_index_and_base().first};
+            });
+
+        // Sort the vector in ascending order of the double value
+        std::sort(energy_charge_index.begin(), energy_charge_index.end(),
+                  [](const auto& lhs, const auto& rhs) { return lhs.energy < rhs.energy; });
+
+        return energy_charge_index;
+    }
 };
 
 }  // namespace detail
@@ -272,19 +333,17 @@ class assess_physical_population_stability_impl
 /**
  * This function assesses the population stability of each physically valid charge distributions of a given SiDB layout.
  * It determines the minimum absolute electrostatic potential required to induce a charge distribution transition.
- * The function also identifies the critical SiDB and the charge state transition (i.e., the change from one charge
- * state to another).
- *
+ * The function also identifies the SiDB (critical SiDB) for which this is the case and the corresponding charge state
+ * transition (i.e., the change from one charge state to another).
  * @tparam Lyt SiDB cell-level layout type.
  * @param lyt The layout for which the population stability is assessed.
  * @param params Parameters used to assess the population stability.
- * @return An unordered map where each key represents the charge distribution in ascending energy order, and the
- * value is a structure containing information about the critical SiDB, the type of charge state transition, and the
- * minimum electrostatic potential required for the transition.
+ * @return A vector of population stability information for all physically valid charge distributions of the given SiDB
+ * layout.
  */
 template <typename Lyt>
 [[nodiscard]] std::vector<population_stability_information<Lyt>>
-assess_physical_population_stability(const Lyt& lyt, const assess_physical_population_stability_params& params)
+assess_physical_population_stability(const Lyt& lyt, const assess_physical_population_stability_params& params) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
