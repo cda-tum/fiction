@@ -3,6 +3,7 @@
 //
 
 #include <catch2/catch_template_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
@@ -324,7 +325,6 @@ TEST_CASE("Generate random siqad::coord_t coordinate", "[layout-utils]")
         const auto randomly_generated_coordinate = random_coordinate<siqad::coord_t>({-10, -1, 0}, {-10, -1, 1});
         CHECK(randomly_generated_coordinate.x == -10);
         CHECK(randomly_generated_coordinate.y == -1);
-        CHECK(randomly_generated_coordinate.z >= 0);
         CHECK(randomly_generated_coordinate.z <= 1);
     }
 
@@ -333,7 +333,6 @@ TEST_CASE("Generate random siqad::coord_t coordinate", "[layout-utils]")
         const auto randomly_generated_coordinate = random_coordinate<siqad::coord_t>({-10, -1, 1}, {-10, -1, 0});
         CHECK(randomly_generated_coordinate.x == -10);
         CHECK(randomly_generated_coordinate.y == -1);
-        CHECK(randomly_generated_coordinate.z >= 0);
         CHECK(randomly_generated_coordinate.z <= 1);
     }
 }
