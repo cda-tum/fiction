@@ -50,7 +50,8 @@ int main()  // NOLINT
     using gate_lyt = fiction::hex_even_row_gate_clk_lyt;
     using cell_lyt = fiction::sidb_cell_clk_lyt;
 
-    static const std::string layouts_folder = fmt::format("{}/physical_design_with_on_the_fly_gate_design/layouts", EXPERIMENTS_PATH);
+    static const std::string layouts_folder =
+        fmt::format("{}/physical_design_with_on_the_fly_gate_design/layouts", EXPERIMENTS_PATH);
 
     const std::vector<double> defect_concentrations = {1};
 
@@ -165,7 +166,7 @@ int main()  // NOLINT
             cell_lyt                cell_level_layout{{}, "fail"};
 
             auto black_list = fiction::sidb_surface_analysis<fiction::sidb_skeleton_bestagon_library>(
-                lattice_tiling, surface_lattice, std::make_pair(0,0));
+                lattice_tiling, surface_lattice, std::make_pair(0, 0));
 
             uint64_t attempts = 0;
 
