@@ -45,19 +45,19 @@ class apply_gate_library_impl
     {}
 
     /**
-     * This function dynamically designs gates based on the provided atomic defects and gate types defined in `lyt`.
+     * This function designs gates on-the-fly based on the provided atomic defects and gate types defined in `lyt`.
      * It creates a cell-level layout by adapting a gate-level layout on-the-fly to implement the gate types using
      * building blocks from the `GateLibrary`. Atomic defects are incorporated into the gate designs during this
      * process.
      *
-     * @tparam GateLibraryblack Type of the gate-level layout used to generate the blacklist.
+     * @tparam GateLibraryblack Type of the gate library used to generate the blacklist.
      * @param defect_surface Defect surface with atomic defects.
-     * @param params Parameter for the dynamic gate library.
+     * @param params Parameter for the gate library.
      * @param black_list Blacklist.
      * @return A cell-level layout implementing gate types with building blocks defined in `GateLibrary`.
      */
     template <typename GateLibraryblack>
-    [[nodiscard]] CellLyt run_dynamic_gates(
+    [[nodiscard]] CellLyt design_gates_on_the_fly(
         const sidb_surface<CellLyt>& defect_surface, const sidb_on_the_fly_gate_library_params& params,
         surface_black_list<GateLyt,
                            typename decltype(GateLibraryblack::get_gate_ports())::mapped_type::value_type::port_type>&
@@ -255,7 +255,7 @@ template <typename CellLyt, typename GateLibrary, typename GateLyt>
  * @tparam GateLibraryblack Type of the Gate Library to generate the blacklist.
  * @param lyt The gate-level layout.
  * @param defect_surface Defect surface with all atomic defects.
- * @param params Parameter for the dynamic gate library.
+ * @param params Parameter for the gate library.
  * @param black_list Blacklist.
  * @return A cell-level layout that implements `lyt`'s gate types with building blocks defined in `GateLibrary`.
  */
@@ -278,7 +278,7 @@ template <typename CellLyt, typename GateLibrary, typename GateLyt, typename Gat
 
     try
     {
-        return p.template run_dynamic_gates<GateLibraryblack>(defect_surface, params, black_list);
+        return p.template design_gates_on_the_fly<GateLibraryblack>(defect_surface, params, black_list);
     }
     catch (const std::exception& e)
     {
