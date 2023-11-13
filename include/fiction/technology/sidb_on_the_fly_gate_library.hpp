@@ -17,8 +17,8 @@
 #include "fiction/utils/layout_utils.hpp"
 
 #include <array>
+#include <exception>
 #include <limits>
-#include <stdexcept>
 #include <utility>
 #include <vector>
 

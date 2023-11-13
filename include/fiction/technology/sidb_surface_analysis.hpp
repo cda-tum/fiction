@@ -50,14 +50,14 @@ using surface_black_list =
  * @tparam CellLyt Cell-level layout type that is underlying to the SiDB surface.
  * @param gate_lyt Gate-level layout instance that specifies the aspect ratio.
  * @param surface SiDB surface that instantiates the defects.
- * @param incorporate_defect_into_gate_design If set to `true`, charged defects are treated like neutral defects,
- * `false`otherwise.
+ * @param user_defined_spacing_charged_defects Influence of charged atomic defects on SiDBs, represented as an optional
+ * pair of horizontal and vertical spacings.
  * @return A black list of gate functions associated with tiles.
  */
 template <typename GateLibrary, typename GateLyt, typename CellLyt>
-[[nodiscard]] auto
-sidb_surface_analysis(const GateLyt& gate_lyt, const sidb_surface<CellLyt>& surface,
-                      const std::optional<std::pair<uint64_t, uint64_t>>& distance = std::nullopt) noexcept
+[[nodiscard]] auto sidb_surface_analysis(
+    const GateLyt& gate_lyt, const sidb_surface<CellLyt>& surface,
+    const std::optional<std::pair<uint64_t, uint64_t>>& user_defined_spacing_charged_defects = std::nullopt) noexcept
 {
     static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
     static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
@@ -74,7 +74,7 @@ sidb_surface_analysis(const GateLyt& gate_lyt, const sidb_surface<CellLyt>& surf
 
     surface_black_list<GateLyt, port_type> black_list{};
 
-    const auto sidbs_affected_by_defects = surface.all_affected_sidbs(distance);
+    const auto sidbs_affected_by_defects = surface.all_affected_sidbs(user_defined_spacing_charged_defects);
     const auto gate_implementations      = GateLibrary::get_functional_implementations();
     const auto gate_ports                = GateLibrary::get_gate_ports();
 
