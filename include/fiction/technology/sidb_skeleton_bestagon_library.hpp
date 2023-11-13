@@ -13,16 +13,12 @@
 #include "fiction/utils/hash.hpp"
 #include "fiction/utils/truth_table_utils.hpp"
 
-#include <fmt/format.h>
-#include <phmap.h>
-
-#include <vector>
-
 namespace fiction
 {
 
 /**
- * A Bestagon SiDB skeleton gate library for all two input Boolean functions.
+ * This library contains SiDB I/O wires designed for both 1- and 2-input functions.
+ * Each wire comprises 2 BDL pairs. The library contains all mirrored versions, a double wire and a crossing.
  */
 class sidb_skeleton_bestagon_library
         : public fcn_gate_library<sidb_technology, 60, 46>  // width and height of a hexagon

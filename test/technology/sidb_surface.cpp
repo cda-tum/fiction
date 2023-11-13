@@ -14,6 +14,7 @@
 
 #include <type_traits>
 #include <unordered_set>
+#include <utility>
 
 using namespace fiction;
 
@@ -249,7 +250,7 @@ TEMPLATE_TEST_CASE(
 
         CHECK(defect_layout.num_defects() == 2);
 
-        CHECK(defect_layout.affected_sidbs({5, 4}, true, {26, 13}) ==
+        CHECK(defect_layout.affected_sidbs({5, 4}, std::make_pair(26, 13)) ==
               decltype(defect_layout.affected_sidbs({5, 4})){
                   {{0, 0}, {1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0}, {9, 0}, {10, 0}, {11, 0},
                    {0, 1}, {1, 1}, {2, 1}, {3, 1}, {4, 1}, {5, 1}, {6, 1}, {7, 1}, {8, 1}, {9, 1}, {10, 1}, {11, 1},
@@ -262,7 +263,7 @@ TEMPLATE_TEST_CASE(
                    {0, 8}, {1, 8}, {2, 8}, {3, 8}, {4, 8}, {5, 8}, {6, 8}, {7, 8}, {8, 8}, {9, 8}, {10, 8}, {11, 8},
                    {0, 9}, {1, 9}, {2, 9}, {3, 9}, {4, 9}, {5, 9}, {6, 9}, {7, 9}, {8, 9}, {9, 9}, {10, 9}, {11, 9}}});
 
-        CHECK(defect_layout.affected_sidbs({5, 5}, true, {26, 13}) ==
+        CHECK(defect_layout.affected_sidbs({5, 5}, std::make_pair(26, 13)) ==
               decltype(defect_layout.affected_sidbs({5, 5})){
                   {{0, 0}, {1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0}, {9, 0}, {10, 0}, {11, 0},
                    {0, 1}, {1, 1}, {2, 1}, {3, 1}, {4, 1}, {5, 1}, {6, 1}, {7, 1}, {8, 1}, {9, 1}, {10, 1}, {11, 1},
@@ -275,7 +276,7 @@ TEMPLATE_TEST_CASE(
                    {0, 8}, {1, 8}, {2, 8}, {3, 8}, {4, 8}, {5, 8}, {6, 8}, {7, 8}, {8, 8}, {9, 8}, {10, 8}, {11, 8},
                    {0, 9}, {1, 9}, {2, 9}, {3, 9}, {4, 9}, {5, 9}, {6, 9}, {7, 9}, {8, 9}, {9, 9}, {10, 9}, {11, 9}}});
 
-        CHECK(defect_layout.all_affected_sidbs(true, {26, 13}) ==
+        CHECK(defect_layout.all_affected_sidbs(std::make_pair(26, 13)) ==
               decltype(defect_layout.all_affected_sidbs()){
                   {{0, 0}, {1, 0}, {2, 0}, {3, 0}, {4, 0}, {5, 0}, {6, 0}, {7, 0}, {8, 0}, {9, 0}, {10, 0}, {11, 0},
                    {0, 1}, {1, 1}, {2, 1}, {3, 1}, {4, 1}, {5, 1}, {6, 1}, {7, 1}, {8, 1}, {9, 1}, {10, 1}, {11, 1},
@@ -297,9 +298,10 @@ TEMPLATE_TEST_CASE(
 
         CHECK(defect_layout.num_defects() == 2);
 
-        CHECK(defect_layout.affected_sidbs({5, 4}, true) == decltype(defect_layout.affected_sidbs({5, 4})){{{5, 4}}});
+        CHECK(defect_layout.affected_sidbs({5, 4}, std::make_pair(0, 0)) ==
+              decltype(defect_layout.affected_sidbs({5, 4})){{{5, 4}}});
 
-        CHECK(defect_layout.affected_sidbs({5, 4}, true, {2, 1}) ==
+        CHECK(defect_layout.affected_sidbs({5, 4}, std::make_pair(2, 1)) ==
               decltype(defect_layout.affected_sidbs({5, 4})){{{3, 3},
                                                               {4, 3},
                                                               {5, 3},

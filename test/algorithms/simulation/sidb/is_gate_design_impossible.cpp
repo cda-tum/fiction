@@ -2,10 +2,9 @@
 // Created by Jan Drewniok on 25.10.23.
 //
 
-#include "fiction/algorithms/physical_design/is_gate_design_impossible.hpp"
-
 #include <catch2/catch_template_test_macros.hpp>
 
+#include <fiction/algorithms/physical_design/is_gate_design_impossible.hpp>
 #include <fiction/technology/sidb_defects.hpp>
 #include <fiction/technology/sidb_surface.hpp>
 #include <fiction/traits.hpp>
@@ -13,7 +12,7 @@
 
 using namespace fiction;
 
-TEST_CASE("SiQAD's AND gate with input BDL pairs of different size", "[is-operational]")
+TEST_CASE("SiQAD's AND gate with input BDL pairs of different size", "[is-gate-design-impossible]")
 {
     using layout = sidb_defect_cell_clk_lyt_siqad;
 
@@ -51,7 +50,7 @@ TEST_CASE("SiQAD's AND gate with input BDL pairs of different size", "[is-operat
     }
 }
 
-TEST_CASE("Bestagon CROSSING gate", "[is-operational]")
+TEST_CASE("Bestagon CROSSING gate", "[is-gate-design-impossible]")
 {
     using layout = sidb_defect_cell_clk_lyt_siqad;
 

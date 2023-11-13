@@ -19,7 +19,7 @@
 #include <fiction/technology/area.hpp>               // area requirement calculations
 #include <fiction/technology/cell_technologies.hpp>  // cell implementations
 #include <fiction/technology/sidb_defects.hpp>
-#include <fiction/technology/sidb_dynamic_gate_library.hpp>  // a dynamic SiDB gate library
+#include <fiction/technology/sidb_on_the_fly_gate_library.hpp>  // a dynamic SiDB gate library
 #include <fiction/technology/sidb_skeleton_bestagon_library.hpp>
 #include <fiction/technology/sidb_surface.hpp>  // SiDB surface with support for atomic defects
 #include <fiction/traits.hpp>
@@ -40,6 +40,7 @@
 #include <cstdlib>
 #include <string>
 #include <unordered_set>
+#include <utility>
 
 // This script conducts defect-aware placement and routing with defect-aware on-the-fly SiDB gate design. Thereby, SDB
 // circuits can be designed in the presence of atomic defects.
@@ -49,7 +50,7 @@ int main()  // NOLINT
     using gate_lyt = fiction::hex_even_row_gate_clk_lyt;
     using cell_lyt = fiction::sidb_cell_clk_lyt;
 
-    static const std::string layouts_folder = fmt::format("{}/dynamic_gate_design/layouts", EXPERIMENTS_PATH);
+    static const std::string layouts_folder = fmt::format("{}/physical_design_with_on_the_fly_gate_design/layouts", EXPERIMENTS_PATH);
 
     const std::vector<double> defect_concentrations = {1};
 
@@ -164,7 +165,7 @@ int main()  // NOLINT
             cell_lyt                cell_level_layout{{}, "fail"};
 
             auto black_list = fiction::sidb_surface_analysis<fiction::sidb_skeleton_bestagon_library>(
-                lattice_tiling, surface_lattice, true);
+                lattice_tiling, surface_lattice, std::make_pair(0,0));
 
             uint64_t attempts = 0;
 
@@ -190,9 +191,10 @@ int main()  // NOLINT
                         try
                         {
                             cell_level_layout =
-                                fiction::apply_dynamic_gate_library<cell_lyt, fiction::sidb_dynamic_gate_library,
-                                                                    gate_lyt, fiction::sidb_skeleton_bestagon_library>(
-                                    *gate_level_layout, surface_lattice, fiction::sidb_dynamic_gate_library_params{},
+                                fiction::apply_on_the_fly_gate_library<cell_lyt, fiction::sidb_on_the_fly_gate_library,
+                                                                       gate_lyt,
+                                                                       fiction::sidb_skeleton_bestagon_library>(
+                                    *gate_level_layout, surface_lattice, fiction::sidb_on_the_fly_gate_library_params{},
                                     black_list);
                             gate_design_failed = false;
                         }

@@ -2,14 +2,13 @@
 // Created by Jan Drewniok 20.09.23.
 //
 
-#ifndef FICTION_SIDB_DYNAMIC_GATE_LIBRARY_HPP
-#define FICTION_SIDB_DYNAMIC_GATE_LIBRARY_HPP
+#ifndef FICTION_SIDB_ON_THE_FLY_GATE_LIBRARY_HPP
+#define FICTION_SIDB_ON_THE_FLY_GATE_LIBRARY_HPP
 
 #include "fiction/algorithms/path_finding/distance.hpp"
 #include "fiction/algorithms/physical_design/design_sidb_gates.hpp"
 #include "fiction/algorithms/physical_design/is_gate_design_impossible.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
-#include "fiction/io/read_sqd_layout.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/fcn_gate_library.hpp"
 #include "fiction/technology/sidb_surface.hpp"
@@ -18,24 +17,37 @@
 #include "fiction/utils/layout_utils.hpp"
 
 #include <array>
+#include <limits>
 #include <stdexcept>
+#include <utility>
+#include <vector>
 
 namespace fiction
 {
 /**
- * This struct stores the parameter to design gates on the fly.
+ * This struct encapsulates parameters for the dynamic gate library.
  */
-struct sidb_dynamic_gate_library_params
+struct sidb_on_the_fly_gate_library_params
 {
+    /**
+     * This struct holds parameters to design SiDB gates on-the-fly.
+     */
     design_sidb_gates_params params{sidb_simulation_parameters{2, -0.32},
                                     design_sidb_gates_params::design_sidb_gates_mode::EXHAUSTIVE,
                                     {{24, 8, 1}, {34, 14, 0}},
                                     3,
                                     sidb_simulation_engine::QUICKEXACT,
                                     1};
-
+    /**
+     * This variable defines the number of canvas SiDBs dedicated to complex gates, such as crossing, double wire,
+     * and half-adder.
+     */
     uint64_t canvas_sidb_complex_gates = 3;
 
+    /**
+     * This variable specifies the radius around the middle of the hexagon where atomic defects are incorporated into
+     * the gate design.
+     */
     double influence_radius_charged_defects = 15;  // (unit: nm)
 };
 
@@ -43,10 +55,10 @@ struct sidb_dynamic_gate_library_params
  * An on-the-fly gate library for SiDB technology. It allows the design of SiDB gates tailored to given atomic defects,
  * thus enabling the design of SiDB circuits in the presence of atomic defects.
  */
-class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 46>  // width and height of a hexagon
+class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60, 46>  // width and height of a hexagon
 {
   public:
-    explicit sidb_dynamic_gate_library() = delete;
+    explicit sidb_on_the_fly_gate_library() = delete;
 
     /**
      * Overrides the corresponding function in fcn_gate_library. Given a tile `t`, this function takes all necessary
@@ -58,7 +70,7 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
      * @tparam GateLibraryblack Type of the gate-level layout used to generate the blacklist.
      * @param lyt Layout that hosts tile `t`.
      * @param t Tile to be realized as a Bestagon gate.
-     * @param sidb_surface SiDB durface which stores all atomic defects.
+     * @param sidb_surface SiDB surface which stores all atomic defects.
      * @param parameter Parameter to design SiDB gates on-the-fly.
      * @param black_list A blacklist to avoid gate placements on certain ports.
      * @return Bestagon gate representation of `t` including mirroring.
@@ -66,7 +78,7 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
     template <typename GateLyt, typename CellLyt, typename GateLibraryblack>
     static fcn_gate set_up_gate(
         const GateLyt& lyt, const tile<GateLyt>& t, const sidb_surface<CellLyt>& sidb_surface,
-        const sidb_dynamic_gate_library_params& parameter = sidb_dynamic_gate_library_params{},
+        const sidb_on_the_fly_gate_library_params& parameter = sidb_on_the_fly_gate_library_params{},
         surface_black_list<GateLyt,
                            typename decltype(GateLibraryblack::get_gate_ports())::mapped_type::value_type::port_type>&
             black_list = {})
@@ -349,7 +361,7 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
                                                           const std::vector<tt>&          truth_table)
     {
         auto       defect_copy               = defect_lyt.clone();
-        const auto sidbs_affected_by_defects = defect_copy.all_affected_sidbs(true);
+        const auto sidbs_affected_by_defects = defect_copy.all_affected_sidbs(std::pair(0, 0));
 
         bool is_bestagon_gate_applicable = true;
         defect_copy.foreach_sidb_defect(
@@ -531,7 +543,7 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
     [[nodiscard]] static LytSkeleton
     add_defect_to_skeleton(const sidb_surface<Lyt>& defect_surface, const LytSkeleton& skeleton,
                            const siqad::coord_t& center_cell_siqad, const siqad::coord_t& absolute_cell_siqad,
-                           const sidb_dynamic_gate_library_params& params)
+                           const sidb_on_the_fly_gate_library_params& params)
     {
         static_assert(!has_siqad_coord_v<Lyt>, "Lyt has SiQAD coordinates.");
         static_assert(has_siqad_coord_v<LytSkeleton>, "Lyt_skeleton does not have SiQAD coordinates.");
@@ -1241,4 +1253,4 @@ class sidb_dynamic_gate_library : public fcn_gate_library<sidb_technology, 60, 4
 
 }  // namespace fiction
 
-#endif  // FICTION_SIDB_DYNAMIC_GATE_LIBRARY_HPP
+#endif  // FICTION_SIDB_ON_THE_FLY_GATE_LIBRARY_HPP

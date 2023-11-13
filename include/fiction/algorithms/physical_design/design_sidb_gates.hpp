@@ -119,7 +119,7 @@ class design_sidb_gates_impl
 
         if constexpr (has_get_sidb_defect_v<Lyt>)
         {
-            sidbs_affected_by_defects = skeleton_layout.all_affected_sidbs(true);
+            sidbs_affected_by_defects = skeleton_layout.all_affected_sidbs(std::make_pair(0, 0));
         }
 
         std::vector<Lyt>      designed_gate_layouts = {};

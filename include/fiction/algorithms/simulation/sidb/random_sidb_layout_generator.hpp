@@ -106,7 +106,7 @@ Lyt generate_random_sidb_layout(const Lyt& lyt_skeleton, const generate_random_s
 
     if constexpr (has_get_sidb_defect_v<Lyt>)
     {
-        sidbs_affected_by_defects = lyt_skeleton.all_affected_sidbs(true);
+        sidbs_affected_by_defects = lyt_skeleton.all_affected_sidbs(std::make_pair(0, 0));
     }
 
     const uint64_t number_of_sidbs_of_final_layout = lyt_skeleton.num_cells() + params.number_of_sidbs;

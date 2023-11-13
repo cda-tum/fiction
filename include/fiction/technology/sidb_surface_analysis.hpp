@@ -17,6 +17,7 @@
 #include <cstdint>
 #include <type_traits>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 namespace fiction
@@ -54,9 +55,9 @@ using surface_black_list =
  * @return A black list of gate functions associated with tiles.
  */
 template <typename GateLibrary, typename GateLyt, typename CellLyt>
-[[nodiscard]] auto sidb_surface_analysis(const GateLyt& gate_lyt, const sidb_surface<CellLyt>& surface,
-                                         const bool incorporate_defect_into_gate_design = false,
-                                         const std::pair<uint64_t, uint64_t>& distance  = {0, 0}) noexcept
+[[nodiscard]] auto
+sidb_surface_analysis(const GateLyt& gate_lyt, const sidb_surface<CellLyt>& surface,
+                      const std::optional<std::pair<uint64_t, uint64_t>>& distance = std::nullopt) noexcept
 {
     static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
     static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
@@ -73,7 +74,7 @@ template <typename GateLibrary, typename GateLyt, typename CellLyt>
 
     surface_black_list<GateLyt, port_type> black_list{};
 
-    const auto sidbs_affected_by_defects = surface.all_affected_sidbs(incorporate_defect_into_gate_design, distance);
+    const auto sidbs_affected_by_defects = surface.all_affected_sidbs(distance);
     const auto gate_implementations      = GateLibrary::get_functional_implementations();
     const auto gate_ports                = GateLibrary::get_gate_ports();
 

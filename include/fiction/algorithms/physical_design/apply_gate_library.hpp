@@ -9,7 +9,7 @@
 #include "fiction/technology/inml_topolinano_library.hpp"
 #include "fiction/technology/qca_one_library.hpp"
 #include "fiction/technology/sidb_bestagon_library.hpp"
-#include "fiction/technology/sidb_dynamic_gate_library.hpp"
+#include "fiction/technology/sidb_on_the_fly_gate_library.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/layout_utils.hpp"
 
@@ -58,7 +58,7 @@ class apply_gate_library_impl
      */
     template <typename GateLibraryblack>
     [[nodiscard]] CellLyt run_dynamic_gates(
-        const sidb_surface<CellLyt>& defect_surface, const sidb_dynamic_gate_library_params& params,
+        const sidb_surface<CellLyt>& defect_surface, const sidb_on_the_fly_gate_library_params& params,
         surface_black_list<GateLyt,
                            typename decltype(GateLibraryblack::get_gate_ports())::mapped_type::value_type::port_type>&
             black_list)
@@ -243,7 +243,7 @@ template <typename CellLyt, typename GateLibrary, typename GateLyt>
     }
 }
 /**
- * Applies a dynamic gate library (i.e., gate are designed on the fly by respecting atomic defects) to a given
+ * Applies an on-the-fly gate library (i.e., gate are designed on-the-fly by respecting atomic defects) to a given
  * gate-level layout and, thereby, creates and returns a cell-level layout.
  *
  * May pass through, and thereby throw, an `unsupported_gate_type_exception` or an
@@ -252,7 +252,7 @@ template <typename CellLyt, typename GateLibrary, typename GateLyt>
  * @tparam CellLyt Type of the returned cell-level layout.
  * @tparam GateLibrary Type of the gate library to apply.
  * @tparam GateLyt Type of the gate-level layout to apply the library to.
- * @tparam GateLibraryblack Type of the gate-level layout used to generate the blacklist.
+ * @tparam GateLibraryblack Type of the Gate Library to generate the blacklist.
  * @param lyt The gate-level layout.
  * @param defect_surface Defect surface with all atomic defects.
  * @param params Parameter for the dynamic gate library.
@@ -260,8 +260,8 @@ template <typename CellLyt, typename GateLibrary, typename GateLyt>
  * @return A cell-level layout that implements `lyt`'s gate types with building blocks defined in `GateLibrary`.
  */
 template <typename CellLyt, typename GateLibrary, typename GateLyt, typename GateLibraryblack>
-[[nodiscard]] CellLyt apply_dynamic_gate_library(
-    const GateLyt& lyt, const sidb_surface<CellLyt>& defect_surface, const sidb_dynamic_gate_library_params& params,
+[[nodiscard]] CellLyt apply_on_the_fly_gate_library(
+    const GateLyt& lyt, const sidb_surface<CellLyt>& defect_surface, const sidb_on_the_fly_gate_library_params& params,
     surface_black_list<
         GateLyt, typename decltype(GateLibraryblack::get_gate_ports())::mapped_type::value_type::port_type>& black_list)
 {

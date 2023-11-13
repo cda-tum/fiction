@@ -59,12 +59,12 @@ SiDB Bestagon Library
 .. doxygenclass:: fiction::sidb_bestagon_library
    :members:
 
-Dynamic SiDB Bestagon Library
----------------------
+On-the-fly SiDB Library
+-----------------------
 
-**Header:** ``fiction/technology/sidb_dynamic_gate_library.hpp``
+**Header:** ``fiction/technology/sidb_on_the_fly_gate_library.hpp``
 
-.. doxygenstruct:: fiction::sidb_dynamic_gate_library_params
+.. doxygenstruct:: fiction::sidb_on_the_fly_gate_library_params
    :members:
-.. doxygenclass:: fiction::sidb_dynamic_gate_library
+.. doxygenclass:: fiction::sidb_on_the_fly_gate_library
    :members:

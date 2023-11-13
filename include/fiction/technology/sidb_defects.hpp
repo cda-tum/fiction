@@ -8,6 +8,7 @@
 #include <cassert>
 #include <cmath>
 #include <cstdint>
+#include <optional>
 #include <utility>
 
 namespace fiction
@@ -167,24 +168,24 @@ inline constexpr const uint16_t SIDB_NEUTRAL_DEFECT_HORIZONTAL_SPACING = 1u;
  */
 inline constexpr const uint16_t SIDB_NEUTRAL_DEFECT_VERTICAL_SPACING = 0u;
 /**
- * Returns the extent of a defect as a pair of SiDB distances in horizontal and vertical direction. If defect is the
- * `NONE` defect type, `{0, 0}` is returned.
+ * Returns the extent of a defect as a pair of SiDB distances in the horizontal and vertical directions.
+ * If the defect type is `NONE`, `{0, 0}` is returned.
  *
  * @param defect Defect type to evaluate.
- * @param incorporate_defect_into_gate_design If set to `true`, the influence of charged atomic defects on SiDBs
- * is given by the input `charged_defect_spacing`. If set to `false`, default values are used.
- * @param charged_defect_spacing Influence of charged atomic defects on SiDBs.
- * @return Number of horizontal and vertical SiDBs that are affected by the given defect type.
+ * @param user_defined_spacing_charged_defects Influence of charged atomic defects on SiDBs, represented as an optional
+ * pair of horizontal and vertical spacings.
+ * @return A pair of uint16_t values representing the number of horizontal and vertical SiDBs affected by the given
+ * defect type.
  */
-[[nodiscard]] static constexpr std::pair<uint16_t, uint16_t>
-defect_extent(const sidb_defect& defect, bool incorporate_defect_into_gate_design = false,
-              const std::pair<uint16_t, uint16_t>& charged_defect_spacing = {0, 0}) noexcept
+[[nodiscard]] static constexpr std::pair<uint16_t, uint16_t> defect_extent(
+    const sidb_defect&                                  defect,
+    const std::optional<std::pair<uint16_t, uint16_t>>& user_defined_spacing_charged_defects = std::nullopt) noexcept
 {
     if (is_charged_defect(defect))
     {
-        if (incorporate_defect_into_gate_design)
+        if (user_defined_spacing_charged_defects.has_value())
         {
-            return charged_defect_spacing;
+            return user_defined_spacing_charged_defects.value();
         }
         return {SIDB_CHARGED_DEFECT_HORIZONTAL_SPACING, SIDB_CHARGED_DEFECT_VERTICAL_SPACING};
     }
