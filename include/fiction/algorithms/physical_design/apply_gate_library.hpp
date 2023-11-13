@@ -53,63 +53,52 @@ class apply_gate_library_impl
      * @tparam GateLibraryblack Type of the gate library used to generate the blacklist.
      * @param defect_surface Defect surface with atomic defects.
      * @param params Parameter for the gate library.
-     * @param black_list Blacklist.
      * @return A cell-level layout implementing gate types with building blocks defined in `GateLibrary`.
      */
     template <typename GateLibraryblack>
-    [[nodiscard]] CellLyt design_gates_on_the_fly(
-        const sidb_surface<CellLyt>& defect_surface, const sidb_on_the_fly_gate_library_params& params,
-        surface_black_list<GateLyt,
-                           typename decltype(GateLibraryblack::get_gate_ports())::mapped_type::value_type::port_type>&
-            black_list)
+    [[nodiscard]] CellLyt design_gates_on_the_fly(const sidb_surface<CellLyt>&               defect_surface,
+                                                  const sidb_on_the_fly_gate_library_params& params)
     {
 #if (PROGRESS_BARS)
         // initialize a progress bar
         mockturtle::progress_bar bar{static_cast<uint32_t>(gate_lyt.size()), "[i] applying gate library: |{0}|"};
 #endif
-        try
-        {
-            gate_lyt.foreach_node(
-                [&, this](const auto& n, [[maybe_unused]] auto i)
+        gate_lyt.foreach_node(
+            [&, this](const auto& n, [[maybe_unused]] auto i)
+            {
+                if (!gate_lyt.is_constant(n))
                 {
-                    if (!gate_lyt.is_constant(n))
-                    {
-                        const auto t = gate_lyt.get_tile(n);
+                    const auto t = gate_lyt.get_tile(n);
 
-                        // retrieve the top-leftmost cell in tile t
-                        const auto c =
-                            relative_to_absolute_cell_position<GateLibrary::gate_x_size(), GateLibrary::gate_y_size(),
-                                                               GateLyt, CellLyt>(gate_lyt, t, cell<CellLyt>{0, 0});
+                    // retrieve the top-leftmost cell in tile t
+                    const auto c =
+                        relative_to_absolute_cell_position<GateLibrary::gate_x_size(), GateLibrary::gate_y_size(),
+                                                           GateLyt, CellLyt>(gate_lyt, t, cell<CellLyt>{0, 0});
 
-                        const auto gate = GateLibrary::template set_up_gate<GateLyt, CellLyt, GateLibraryblack>(
-                            gate_lyt, t, defect_surface, params, black_list);
+                    const auto gate = GateLibrary::template set_up_gate<GateLyt, CellLyt, GateLibraryblack>(
+                        gate_lyt, t, defect_surface, params);
 
-                        assign_gate(c, gate, n);
-                    }
+                    assign_gate(c, gate, n);
+                }
 #if (PROGRESS_BARS)
-                    // update progress
-                    bar(i);
+                // update progress
+                bar(i);
 #endif
-                });
+            });
 
-            // perform post-layout optimization if necessary
-            if constexpr (has_post_layout_optimization_v<GateLibrary, CellLyt>)
-            {
-                GateLibrary::post_layout_optimization(cell_lyt);
-            }
-
-            // if available, recover layout name
-            if constexpr (has_get_layout_name_v<GateLyt> && has_set_layout_name_v<CellLyt>)
-            {
-                cell_lyt.set_layout_name(gate_lyt.get_layout_name());
-            }
-
-            return cell_lyt;
-        }
-        catch (const std::exception& e)
+        // perform post-layout optimization if necessary
+        if constexpr (has_post_layout_optimization_v<GateLibrary, CellLyt>)
         {
-            throw;
+            GateLibrary::post_layout_optimization(cell_lyt);
         }
+
+        // if available, recover layout name
+        if constexpr (has_get_layout_name_v<GateLyt> && has_set_layout_name_v<CellLyt>)
+        {
+            cell_lyt.set_layout_name(gate_lyt.get_layout_name());
+        }
+
+        return cell_lyt;
     }
 
     /**
@@ -128,45 +117,39 @@ class apply_gate_library_impl
         // initialize a progress bar
         mockturtle::progress_bar bar{static_cast<uint32_t>(gate_lyt.size()), "[i] applying gate library: |{0}|"};
 #endif
-        try
-        {
-            gate_lyt.foreach_node(
-                [&, this](const auto& n, [[maybe_unused]] auto i)
+
+        gate_lyt.foreach_node(
+            [&, this](const auto& n, [[maybe_unused]] auto i)
+            {
+                if (!gate_lyt.is_constant(n))
                 {
-                    if (!gate_lyt.is_constant(n))
-                    {
-                        const auto t = gate_lyt.get_tile(n);
+                    const auto t = gate_lyt.get_tile(n);
 
-                        // retrieve the top-leftmost cell in tile t
-                        const auto c =
-                            relative_to_absolute_cell_position<GateLibrary::gate_x_size(), GateLibrary::gate_y_size(),
-                                                               GateLyt, CellLyt>(gate_lyt, t, cell<CellLyt>{0, 0});
+                    // retrieve the top-leftmost cell in tile t
+                    const auto c =
+                        relative_to_absolute_cell_position<GateLibrary::gate_x_size(), GateLibrary::gate_y_size(),
+                                                           GateLyt, CellLyt>(gate_lyt, t, cell<CellLyt>{0, 0});
 
-                        assign_gate(c, GateLibrary::set_up_gate(gate_lyt, t), n);
-                    }
+                    assign_gate(c, GateLibrary::set_up_gate(gate_lyt, t), n);
+                }
 #if (PROGRESS_BARS)
-                    // update progress
-                    bar(i);
+                // update progress
+                bar(i);
 #endif
-                });
+            });
 
-            // perform post-layout optimization if necessary
-            if constexpr (has_post_layout_optimization_v<GateLibrary, CellLyt>)
-            {
-                GateLibrary::post_layout_optimization(cell_lyt);
-            }
-            // if available, recover layout name
-            if constexpr (has_get_layout_name_v<GateLyt> && has_set_layout_name_v<CellLyt>)
-            {
-                cell_lyt.set_layout_name(gate_lyt.get_layout_name());
-            }
-
-            return cell_lyt;
-        }
-        catch (const std::exception& e)
+        // perform post-layout optimization if necessary
+        if constexpr (has_post_layout_optimization_v<GateLibrary, CellLyt>)
         {
-            throw;
+            GateLibrary::post_layout_optimization(cell_lyt);
         }
+        // if available, recover layout name
+        if constexpr (has_get_layout_name_v<GateLyt> && has_set_layout_name_v<CellLyt>)
+        {
+            cell_lyt.set_layout_name(gate_lyt.get_layout_name());
+        }
+
+        return cell_lyt;
     }
 
   private:
@@ -233,14 +216,7 @@ template <typename CellLyt, typename GateLibrary, typename GateLyt>
 
     detail::apply_gate_library_impl<CellLyt, GateLibrary, GateLyt> p{lyt};
 
-    try
-    {
-        return p.run();
-    }
-    catch (const std::exception& e)
-    {
-        throw;
-    }
+    return p.run();
 }
 /**
  * Applies an on-the-fly gate library (i.e., gate are designed on-the-fly by respecting atomic defects) to a given
@@ -256,14 +232,11 @@ template <typename CellLyt, typename GateLibrary, typename GateLyt>
  * @param lyt The gate-level layout.
  * @param defect_surface Defect surface with all atomic defects.
  * @param params Parameter for the gate library.
- * @param black_list Blacklist.
  * @return A cell-level layout that implements `lyt`'s gate types with building blocks defined in `GateLibrary`.
  */
 template <typename CellLyt, typename GateLibrary, typename GateLyt, typename GateLibraryblack>
-[[nodiscard]] CellLyt apply_on_the_fly_gate_library(
-    const GateLyt& lyt, const sidb_surface<CellLyt>& defect_surface, const sidb_on_the_fly_gate_library_params& params,
-    surface_black_list<
-        GateLyt, typename decltype(GateLibraryblack::get_gate_ports())::mapped_type::value_type::port_type>& black_list)
+[[nodiscard]] CellLyt apply_on_the_fly_gate_library(const GateLyt& lyt, const sidb_surface<CellLyt>& defect_surface,
+                                                    const sidb_on_the_fly_gate_library_params& params)
 {
     static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
     static_assert(!has_siqad_coord_v<CellLyt>, "CellLyt cannot have SiQAD coordinates");
@@ -276,14 +249,7 @@ template <typename CellLyt, typename GateLibrary, typename GateLyt, typename Gat
 
     detail::apply_gate_library_impl<CellLyt, GateLibrary, GateLyt> p{lyt};
 
-    try
-    {
-        return p.template design_gates_on_the_fly<GateLibraryblack>(defect_surface, params, black_list);
-    }
-    catch (const std::exception& e)
-    {
-        throw;
-    }
+    return p.template design_gates_on_the_fly<GateLibraryblack>(defect_surface, params);
 }
 
 }  // namespace fiction

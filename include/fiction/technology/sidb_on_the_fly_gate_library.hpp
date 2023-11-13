@@ -24,6 +24,84 @@
 
 namespace fiction
 {
+
+/**
+ * This exception is thrown when an error occurs during the design of an SiDB gate.
+ * It provides information about the tile, truth table, and port list associated with the error.
+ *
+ * @tparam TT The type representing the truth table.
+ * @tparam GateLyt The type representing the gate-level layout.
+ */
+template <typename TT, typename GateLyt>
+class gate_design_exception : public std::exception
+{
+  public:
+    /**
+     * @brief Constructor for the gate_design_exception class.
+     *
+     * @param ti The tile associated with the error.
+     * @param spec The truth table associated with the error.
+     * @param portlist The port list associated with the error.
+     */
+    explicit gate_design_exception(const tile<GateLyt>& ti, const TT& spec,
+                                   const port_list<port_direction>& portlist) noexcept :
+            std::exception(),
+            tile{ti},
+            truth_table{spec},
+            p{portlist}
+    {}
+
+    /**
+     * Get the tile associated with the exception.
+     *
+     * @return The tile associated with the error.
+     */
+    [[nodiscard]] tile<GateLyt> which_tile() const noexcept
+    {
+        return tile;
+    }
+
+    /**
+     * Get the truth table associated with the exception.
+     *
+     * @return The truth table associated with the error.
+     */
+    [[nodiscard]] TT which_truth_table() const noexcept
+    {
+        return truth_table;
+    }
+
+    /**
+     * Get the port list associated with the exception.
+     *
+     * @return The port list associated with the error.
+     */
+    [[nodiscard]] port_list<port_direction> which_port_list() const noexcept
+    {
+        return p;
+    }
+
+  private:
+    /**
+     * The tile associated with the error.
+     *
+     * @return The tile associated with the error.
+     */
+    const tile<GateLyt> tile{};
+    /**
+     * The truth table associated with the error.
+     *
+     * @return The port list associated with the error.
+     */
+    const TT truth_table{};
+    /**
+     * The port list associated with the error.
+     *
+     * @return The port list associated with the error.
+     */
+    const port_list<port_direction> p;
+};
+
 /**
  * This struct encapsulates parameters for the dynamic gate library.
  */
@@ -72,16 +150,12 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
      * @param t Tile to be realized as a Bestagon gate.
      * @param sidb_surface SiDB surface which stores all atomic defects.
      * @param parameter Parameter to design SiDB gates on-the-fly.
-     * @param black_list A blacklist to avoid gate placements on certain ports.
      * @return Bestagon gate representation of `t` including mirroring.
      */
     template <typename GateLyt, typename CellLyt, typename GateLibraryblack>
-    static fcn_gate set_up_gate(
-        const GateLyt& lyt, const tile<GateLyt>& t, const sidb_surface<CellLyt>& sidb_surface,
-        const sidb_on_the_fly_gate_library_params& parameter = sidb_on_the_fly_gate_library_params{},
-        surface_black_list<GateLyt,
-                           typename decltype(GateLibraryblack::get_gate_ports())::mapped_type::value_type::port_type>&
-            black_list = {})
+    static fcn_gate
+    set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t, const sidb_surface<CellLyt>& sidb_surface,
+                const sidb_on_the_fly_gate_library_params& parameter = sidb_on_the_fly_gate_library_params{})
     {
         static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt must be a gate level layout.");
         static_assert(!has_siqad_coord_v<CellLyt>, "CellLyt has SiQAD coordinates.");
@@ -113,7 +187,7 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
                             center_cell_siqad, absolute_cell_siqad, parameter);
 
                         return design_gate<sidb_defect_cell_clk_lyt_siqad, GateLyt, GateLibraryblack>(
-                            layout, create_fan_out_tt(), parameter.params, black_list, p, t);
+                            layout, create_fan_out_tt(), parameter.params, p, t);
                     }
                 }
             }
@@ -147,7 +221,7 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
                                 complex_gate_param.params.number_of_sidbs = parameter.canvas_sidb_complex_gates;
 
                                 return design_gate<sidb_defect_cell_clk_lyt_siqad, GateLyt, GateLibraryblack>(
-                                    layout, create_double_wire_tt(), complex_gate_param.params, black_list, p, t);
+                                    layout, create_double_wire_tt(), complex_gate_param.params, p, t);
                             }
 
                             const auto layout = add_defect_to_skeleton(
@@ -166,7 +240,7 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
                             complex_gate_param.params.number_of_sidbs = parameter.canvas_sidb_complex_gates;
 
                             return design_gate<sidb_defect_cell_clk_lyt_siqad, GateLyt, GateLibraryblack>(
-                                layout, create_crossing_wire_tt(), complex_gate_param.params, black_list, p, t);
+                                layout, create_crossing_wire_tt(), complex_gate_param.params, p, t);
                         }
 
                         const auto cell_list = ONE_IN_ONE_OUT_MAP.at(p);
@@ -179,7 +253,7 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
                             center_cell_siqad, absolute_cell_siqad, parameter);
 
                         return design_gate<sidb_defect_cell_clk_lyt_siqad, GateLyt, GateLibraryblack>(
-                            layout, std::vector<tt>{f}, parameter.params, black_list, p, t);
+                            layout, std::vector<tt>{f}, parameter.params, p, t);
                     }
                     return EMPTY_GATE;
                 }
@@ -194,7 +268,7 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
                         center_cell_siqad, absolute_cell_siqad, parameter);
 
                     return design_gate<sidb_defect_cell_clk_lyt_siqad, GateLyt, GateLibraryblack>(
-                        layout, std::vector<tt>{f}, parameter.params, black_list, p, t);
+                        layout, std::vector<tt>{f}, parameter.params, p, t);
                 }
             }
             if constexpr (mockturtle::has_is_and_v<GateLyt>)
@@ -207,7 +281,7 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
                         center_cell_siqad, absolute_cell_siqad, parameter);
 
                     return design_gate<sidb_defect_cell_clk_lyt_siqad, GateLyt, GateLibraryblack>(
-                        layout, std::vector<tt>{f}, parameter.params, black_list, p, t);
+                        layout, std::vector<tt>{f}, parameter.params, p, t);
                 }
             }
             if constexpr (mockturtle::has_is_or_v<GateLyt>)
@@ -220,7 +294,7 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
                         center_cell_siqad, absolute_cell_siqad, parameter);
 
                     return design_gate<sidb_defect_cell_clk_lyt_siqad, GateLyt, GateLibraryblack>(
-                        layout, std::vector<tt>{f}, parameter.params, black_list, p, t);
+                        layout, std::vector<tt>{f}, parameter.params, p, t);
                 }
             }
             if constexpr (fiction::has_is_nand_v<GateLyt>)
@@ -233,7 +307,7 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
                         center_cell_siqad, absolute_cell_siqad, parameter);
 
                     return design_gate<sidb_defect_cell_clk_lyt_siqad, GateLyt, GateLibraryblack>(
-                        layout, std::vector<tt>{f}, parameter.params, black_list, p, t);
+                        layout, std::vector<tt>{f}, parameter.params, p, t);
                 }
             }
             if constexpr (fiction::has_is_nor_v<GateLyt>)
@@ -246,7 +320,7 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
                         center_cell_siqad, absolute_cell_siqad, parameter);
 
                     return design_gate<sidb_defect_cell_clk_lyt_siqad, GateLyt, GateLibraryblack>(
-                        layout, std::vector<tt>{f}, parameter.params, black_list, p, t);
+                        layout, std::vector<tt>{f}, parameter.params, p, t);
                 }
             }
             if constexpr (mockturtle::has_is_xor_v<GateLyt>)
@@ -259,7 +333,7 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
                         center_cell_siqad, absolute_cell_siqad, parameter);
 
                     return design_gate<sidb_defect_cell_clk_lyt_siqad, GateLyt, GateLibraryblack>(
-                        layout, std::vector<tt>{f}, parameter.params, black_list, p, t);
+                        layout, std::vector<tt>{f}, parameter.params, p, t);
                 }
             }
             if constexpr (fiction::has_is_xnor_v<GateLyt>)
@@ -272,7 +346,7 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
                         center_cell_siqad, absolute_cell_siqad, parameter);
 
                     return design_gate<sidb_defect_cell_clk_lyt_siqad, GateLyt, GateLibraryblack>(
-                        layout, std::vector<tt>{f}, parameter.params, black_list, p, t);
+                        layout, std::vector<tt>{f}, parameter.params, p, t);
                 }
             }
             if constexpr (fiction::has_is_ge_v<GateLyt>)
@@ -285,7 +359,7 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
                         center_cell_siqad, absolute_cell_siqad, parameter);
 
                     return design_gate<sidb_defect_cell_clk_lyt_siqad, GateLyt, GateLibraryblack>(
-                        layout, std::vector<tt>{f}, parameter.params, black_list, p, t);
+                        layout, std::vector<tt>{f}, parameter.params, p, t);
                 }
             }
             if constexpr (fiction::has_is_le_v<GateLyt>)
@@ -298,7 +372,7 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
                         center_cell_siqad, absolute_cell_siqad, parameter);
 
                     return design_gate<sidb_defect_cell_clk_lyt_siqad, GateLyt, GateLibraryblack>(
-                        layout, std::vector<tt>{f}, parameter.params, black_list, p, t);
+                        layout, std::vector<tt>{f}, parameter.params, p, t);
                 }
             }
             if constexpr (fiction::has_is_gt_v<GateLyt>)
@@ -311,7 +385,7 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
                         center_cell_siqad, absolute_cell_siqad, parameter);
 
                     return design_gate<sidb_defect_cell_clk_lyt_siqad, GateLyt, GateLibraryblack>(
-                        layout, std::vector<tt>{f}, parameter.params, black_list, p, t);
+                        layout, std::vector<tt>{f}, parameter.params, p, t);
                 }
             }
             if constexpr (fiction::has_is_lt_v<GateLyt>)
@@ -324,7 +398,7 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
                         center_cell_siqad, absolute_cell_siqad, parameter);
 
                     return design_gate<sidb_defect_cell_clk_lyt_siqad, GateLyt, GateLibraryblack>(
-                        layout, std::vector<tt>{f}, parameter.params, black_list, p, t);
+                        layout, std::vector<tt>{f}, parameter.params, p, t);
                 }
             }
         }
@@ -332,11 +406,6 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
         catch (const std::out_of_range&)
         {
             throw unsupported_gate_orientation_exception(t, p);
-        }
-
-        catch (const std::logic_error&)
-        {
-            throw;
         }
 
         throw unsupported_gate_type_exception(t);
@@ -440,25 +509,24 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
      * @return A fcn gate object, or an error fcn gate if no suitable layout is found.
      */
     template <typename Lyt, typename GateLyt, typename GateLibrary>
-    [[nodiscard]] static fcn_gate design_gate(
-        const Lyt& skeleton, const std::vector<tt>& t, const design_sidb_gates_params& params,
-        surface_black_list<
-            GateLyt, typename decltype(GateLibrary::get_gate_ports())::mapped_type::value_type::port_type>& black_list,
-        const port_list<port_direction>& p, const tile<GateLyt>& tile)
+    [[nodiscard]] static fcn_gate design_gate(const Lyt& skeleton, const std::vector<tt>& t,
+                                              const design_sidb_gates_params&  params,
+                                              const port_list<port_direction>& p, const tile<GateLyt>& tile)
     {
         if (t == create_crossing_wire_tt() || t == create_double_wire_tt())
         {
             if (is_gate_design_impossible(
                     skeleton, t, is_operational_params{params.phys_params, sidb_simulation_engine::QUICKEXACT}))
             {
-                black_list[tile][create_id_tt()].push_back(p);
-                throw std::logic_error("Gate cannot be designed.");
+                throw gate_design_exception<tt, GateLyt>(tile, create_id_tt(), p);
+                // black_list[tile][create_id_tt()].push_back(p);
+                // throw std::logic_error("Gate cannot be designed.");
             }
             const auto found_gate_layouts = design_sidb_gates(skeleton, t, params);
             if (found_gate_layouts.empty())
             {
-                black_list[tile][create_id_tt()].push_back(p);
-                throw std::logic_error("Gate cannot be designed.");
+                throw gate_design_exception<tt, GateLyt>(tile, create_id_tt(), p);
+                // throw std::logic_error("Gate cannot be designed.");
             }
             const auto lyt = cell_list_to_gate<char>(cell_level_layout_to_list(found_gate_layouts.front()));
             return lyt;
@@ -467,14 +535,16 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
         if (is_gate_design_impossible(skeleton, t,
                                       is_operational_params{params.phys_params, sidb_simulation_engine::QUICKEXACT}))
         {
-            black_list[tile][t.front()].push_back(p);
-            throw std::logic_error("Gate cannot be designed.");
+            // black_list[tile][t.front()].push_back(p);
+            throw gate_design_exception<tt, GateLyt>(tile, t.front(), p);
+            // throw std::logic_error("Gate cannot be designed.");
         }
         const auto found_gate_layouts = design_sidb_gates(skeleton, t, params);
         if (found_gate_layouts.empty())
         {
-            black_list[tile][t.front()].push_back(p);
-            throw std::logic_error("Gate cannot be designed.");
+            // black_list[tile][t.front()].push_back(p);
+            throw gate_design_exception<tt, GateLyt>(tile, t.front(), p);
+            // throw std::logic_error("Gate cannot be designed.");
         }
         const auto lyt = cell_list_to_gate<char>(cell_level_layout_to_list(found_gate_layouts.front()));
         return lyt;

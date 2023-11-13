@@ -24,6 +24,7 @@
 #include <fiction/technology/sidb_surface.hpp>  // SiDB surface with support for atomic defects
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>  // pre-defined types suitable for the FCN domain
+#include <fiction/utils/truth_table_utils.hpp>
 
 #include <fmt/format.h>                                        // output formatting
 #include <lorina/lorina.hpp>                                   // Verilog/BLIF/AIGER/... file parsing
@@ -195,13 +196,14 @@ int main()  // NOLINT
                                 fiction::apply_on_the_fly_gate_library<cell_lyt, fiction::sidb_on_the_fly_gate_library,
                                                                        gate_lyt,
                                                                        fiction::sidb_skeleton_bestagon_library>(
-                                    *gate_level_layout, surface_lattice, fiction::sidb_on_the_fly_gate_library_params{},
-                                    black_list);
+                                    *gate_level_layout, surface_lattice,
+                                    fiction::sidb_on_the_fly_gate_library_params{});
                             gate_design_failed = false;
                         }
-                        catch (const std::logic_error& e)
+                        catch (const fiction::gate_design_exception<fiction::tt, gate_lyt>& e)
                         {
                             gate_design_failed = true;
+                            black_list[e.which_tile()][e.which_truth_table()].push_back(e.which_port_list());
                         }
 
                         catch (const std::exception& e)
