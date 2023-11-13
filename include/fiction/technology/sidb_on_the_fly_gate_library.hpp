@@ -46,7 +46,7 @@ class gate_design_exception : public std::exception
     explicit gate_design_exception(const tile<GateLyt>& ti, const TT& spec,
                                    const port_list<port_direction>& portlist) noexcept :
             std::exception(),
-            tile{ti},
+            error_tile{ti},
             truth_table{spec},
             p{portlist}
     {}
@@ -58,7 +58,7 @@ class gate_design_exception : public std::exception
      */
     [[nodiscard]] tile<GateLyt> which_tile() const noexcept
     {
-        return tile;
+        return error_tile;
     }
 
     /**
@@ -87,7 +87,7 @@ class gate_design_exception : public std::exception
      *
      * @return The tile associated with the error.
      */
-    const tile<GateLyt> tile{};
+    const tile<GateLyt> error_tile{};
     /**
      * The truth table associated with the error.
      *
