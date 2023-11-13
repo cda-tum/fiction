@@ -1551,18 +1551,23 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             }
             else if ((loc_pot_cell + strg->phys_params.mu_plus()) > -physical_constants::POP_STABILITY_ERR)
             {
-                if (strg->cell_charge[strg->dependent_cell_index] != sidb_charge_state::POSITIVE)
+                // dependent-cell can only be positively charged when the base number is set to three state simulation.
+                if (strg->charge_index_and_base.second == 3)
                 {
-                    const auto charge_diff = (-charge_state_to_sign(strg->cell_charge[strg->dependent_cell_index]) + 1);
-                    for (uint64_t i = 0u; i < strg->pot_mat.size(); ++i)
+                    if (strg->cell_charge[strg->dependent_cell_index] != sidb_charge_state::POSITIVE)
                     {
-                        if (i != strg->dependent_cell_index)
+                        const auto charge_diff =
+                            (-charge_state_to_sign(strg->cell_charge[strg->dependent_cell_index]) + 1);
+                        strg->cell_charge[strg->dependent_cell_index] = sidb_charge_state::POSITIVE;
+                        for (uint64_t i = 0u; i < strg->pot_mat.size(); ++i)
                         {
-                            strg->local_pot[i] +=
-                                (this->get_potential_by_indices(i, strg->dependent_cell_index)) * charge_diff;
+                            if (i != strg->dependent_cell_index)
+                            {
+                                strg->local_pot[i] +=
+                                    (this->get_potential_by_indices(i, strg->dependent_cell_index)) * charge_diff;
+                            }
                         }
                     }
-                    strg->cell_charge[strg->dependent_cell_index] = sidb_charge_state::POSITIVE;
                 }
             }
 

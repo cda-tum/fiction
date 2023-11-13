@@ -268,6 +268,14 @@ class quickexact_impl
         static_assert(has_siqad_coord_v<ChargeLyt>, "ChargeLyt is not based on SiQAD coordinates");
         static_assert(is_charge_distribution_surface_v<ChargeLyt>, "ChargeLyt is not a charge distribution surface");
 
+        if (base_number == required_simulation_base_number::THREE)
+        {
+            charge_lyt.assign_base_number(3);
+        }
+        else
+        {
+            charge_lyt.assign_base_number(2);
+        }
         charge_layout.assign_physical_parameters(params.physical_parameters);
         charge_layout.assign_all_charge_states(sidb_charge_state::NEUTRAL);
         charge_layout.assign_dependent_cell(all_sidbs_in_lyt_without_negative_preassigned_ones[0]);
