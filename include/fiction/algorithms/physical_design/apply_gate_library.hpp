@@ -219,7 +219,7 @@ template <typename CellLyt, typename GateLibrary, typename GateLyt>
     return p.run();
 }
 /**
- * Applies an on-the-fly gate library (i.e., gate are designed on-the-fly by respecting atomic defects) to a given
+ * Applies an on-the-fly gate library (i.e., gates are designed on-the-fly by respecting atomic defects) to a given
  * gate-level layout and, thereby, creates and returns a cell-level layout.
  *
  * May pass through, and thereby throw, an `unsupported_gate_type_exception` or an
