@@ -5,6 +5,7 @@
 #ifndef FICTION_AREA_HPP
 #define FICTION_AREA_HPP
 
+#include "fiction/layouts/bounding_box.hpp"
 #include "fiction/traits.hpp"
 
 #include <cstdint>
@@ -60,6 +61,32 @@ void area(const Lyt& lyt, area_params<technology<Lyt>, AreaType>& ps = {}, area_
 
     st.area = (static_cast<AreaType>(lyt.x() + 1) * ps.width + static_cast<AreaType>(lyt.x()) * ps.hspace) *
               (static_cast<AreaType>(lyt.y() + 1) * ps.height + static_cast<AreaType>(lyt.y()) * ps.vspace);
+
+    if (pst)
+    {
+        *pst = st;
+    }
+}
+/**
+ * Computes real-world area requirements in nm² of the bounding box of a given cell-level layout. For this purpose, each
+ * cell position in the layout is assigned a vertical and horizontal size. Additionally, a spacing between cell
+ * positions in horizontal and vertical direction is taken into account.
+ *
+ * @tparam Lyt Cell-level layout type.
+ * @tparam AreaType Type for area representation.
+ * @param lyt The cell-level layout whose area is desired.
+ */
+template <typename Lyt, typename AreaType = double>
+void area(const bounding_box_2d<Lyt>& bb, area_params<technology<Lyt>, AreaType>& ps = {},
+          area_stats<AreaType>* pst = nullptr)
+{
+    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+
+    area_stats st{};
+
+    st.area =
+        (static_cast<AreaType>(bb.get_x_size() + 1) * ps.width + static_cast<AreaType>(bb.get_x_size()) * ps.hspace) *
+        (static_cast<AreaType>(bb.get_y_size() + 1) * ps.height + static_cast<AreaType>(bb.get_y_size()) * ps.vspace);
 
     if (pst)
     {
