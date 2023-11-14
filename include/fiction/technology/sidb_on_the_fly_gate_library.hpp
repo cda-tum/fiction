@@ -87,19 +87,19 @@ class gate_design_exception : public std::exception
      *
      * @return The tile associated with the error.
      */
-    const tile<GateLyt> error_tile{};
+    const tile<GateLyt> &error_tile{};
     /**
      * The truth table associated with the error.
      *
      * @return The port list associated with the error.
      */
-    const TT truth_table{};
+    const TT &truth_table{};
     /**
      * The port list associated with the error.
      *
      * @return The port list associated with the error.
      */
-    const port_list<port_direction> p;
+    const port_list<port_direction> &p;
 };
 
 /**
