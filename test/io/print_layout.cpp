@@ -429,8 +429,9 @@ TEST_CASE("Print Bestagon OR-gate with defect", "[print-charge-layout]")
         sidb_simulation_parameters{3, -0.32}, sidb_charge_state::NEGATIVE};
 
     cl.assign_sidb_defect({18, 3, 0}, sidb_defect{sidb_defect_type::UNKNOWN, 1});
-    cl.assign_sidb_defect({40, 3, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1});
+    cl.assign_sidb_defect({44, 2, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1});
     cl.assign_sidb_defect({40, 5, 1}, sidb_defect{sidb_defect_type::UNKNOWN, 0});
+    cl.assign_sidb_defect({42, 20, 0}, sidb_defect{sidb_defect_type::UNKNOWN, 1});
 
     cl.assign_charge_state({42, 3, 0}, sidb_charge_state::NEGATIVE);
 
@@ -461,7 +462,10 @@ TEST_CASE("Print Bestagon OR-gate with defect", "[print-charge-layout]")
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
         "\n"
-        " ·  ·  ◯  ·  ⊞  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ⊟  ·  ●  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ⊟ \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        " ·  ·  ◯  ·  ⊞  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ●  ·  · \n"
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
         "\n"
         " ·  ·  ·  ·  ●  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ●  ·  ·  ·  · \n"
@@ -510,6 +514,9 @@ TEST_CASE("Print Bestagon OR-gate with defect", "[print-charge-layout]")
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
         "\n"
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ●  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ⊞  ·  · \n"
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
         "\n"
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
