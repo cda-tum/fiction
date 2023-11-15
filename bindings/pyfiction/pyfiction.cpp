@@ -12,6 +12,7 @@
 #include "pyfiction/algorithms/path_finding/k_shortest_paths.hpp"
 #include "pyfiction/algorithms/physical_design/apply_gate_library.hpp"
 #include "pyfiction/algorithms/physical_design/color_routing.hpp"
+// #include "pyfiction/algorithms/physical_design/design_sidb_gates.hpp"
 #include "pyfiction/algorithms/physical_design/exact.hpp"
 #include "pyfiction/algorithms/physical_design/hexagonalization.hpp"
 #include "pyfiction/algorithms/physical_design/orthogonal.hpp"
@@ -83,24 +84,6 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::cell_level_layouts(m);
     pyfiction::obstruction_layouts(m);
     /**
-     * Networks
-     */
-    pyfiction::logic_network(m);
-    /**
-     * Algorithms: Physical Design
-     */
-    pyfiction::exact(m);
-    pyfiction::orthogonal(m);
-    pyfiction::apply_gate_library(m);
-    pyfiction::color_routing(m);
-    pyfiction::hexagonalization(m);
-    pyfiction::post_layout_optimization(m);
-    /**
-     * Algorithms: Network Transformation
-     */
-    pyfiction::fanout_substitution(m);
-    pyfiction::network_balancing(m);
-    /**
      * Algorithms: Simulation
      */
     pyfiction::logic_simulation(m);
@@ -117,12 +100,31 @@ PYBIND11_MODULE(pyfiction, m)
     //    pyfiction::critical_temperature(m);
     //    pyfiction::time_to_solution(m);
     /**
+     * Networks
+     */
+    pyfiction::logic_network(m);
+    /**
+     * Algorithms: Network Transformation
+     */
+    pyfiction::fanout_substitution(m);
+    pyfiction::network_balancing(m);
+    /**
      * Algorithms: Path Finding
      */
     pyfiction::distance(m);
     pyfiction::a_star(m);
     pyfiction::yen_k_shortest_paths(m);
     pyfiction::enumerate_all_paths(m);
+    /**
+     * Algorithms: Physical Design
+     */
+    pyfiction::exact(m);
+    pyfiction::orthogonal(m);
+    pyfiction::apply_gate_library(m);
+    pyfiction::color_routing(m);
+    pyfiction::hexagonalization(m);
+    pyfiction::post_layout_optimization(m);
+    //    pyfiction::design_sidb_gates(m);
     /**
      * Algorithms: Properties
      */
