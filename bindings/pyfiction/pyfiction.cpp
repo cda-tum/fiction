@@ -101,17 +101,6 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::fanout_substitution(m);
     pyfiction::network_balancing(m);
     /**
-     * Algorithms: Path Finding
-     */
-    pyfiction::distance(m);
-    pyfiction::a_star(m);
-    pyfiction::yen_k_shortest_paths(m);
-    pyfiction::enumerate_all_paths(m);
-    /**
-     * Algorithms: Properties
-     */
-    pyfiction::critical_path_length_and_throughput(m);
-    /**
      * Algorithms: Simulation
      */
     pyfiction::logic_simulation(m);
@@ -127,6 +116,17 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::occupation_probability_of_excited_states(m);
     //    pyfiction::critical_temperature(m);
     //    pyfiction::time_to_solution(m);
+    /**
+     * Algorithms: Path Finding
+     */
+    pyfiction::distance(m);
+    pyfiction::a_star(m);
+    pyfiction::yen_k_shortest_paths(m);
+    pyfiction::enumerate_all_paths(m);
+    /**
+     * Algorithms: Properties
+     */
+    pyfiction::critical_path_length_and_throughput(m);
     /*
      * Algorithms: Verification
      */

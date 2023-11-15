@@ -27,8 +27,8 @@ void distance(pybind11::module& m)
           DOC(fiction_manhattan_distance));
     m.def("euclidean_distance", &fiction::euclidean_distance<Lyt>, "layout"_a, "source"_a, "target"_a,
           DOC(fiction_euclidean_distance));
-    m.def("twoddwave_distance", &fiction::twoddwave_distance<Lyt>, "layout"_a, "source"_a, "target"_a);
-    //, DOC(fiction_twoddwave_distance));
+    m.def("twoddwave_distance", &fiction::twoddwave_distance<Lyt>, "layout"_a, "source"_a, "target"_a,
+          DOC(fiction_twoddwave_distance));
 }
 
 }  // namespace detail
@@ -38,6 +38,11 @@ inline void distance(pybind11::module& m)
     detail::distance<py_cartesian_layout>(m);
     detail::distance<py_shifted_cartesian_layout>(m);
     detail::distance<py_hexagonal_layout>(m);
+
+    using namespace pybind11::literals;
+
+    m.def("sidb_nanometer_distance", &fiction::sidb_nanometer_distance<py_charge_distribution_surface>, "layout"_a,
+          "source"_a, "target"_a, "sp"_a = fiction::sidb_simulation_parameters{});
 }
 
 }  // namespace pyfiction
