@@ -145,47 +145,51 @@ class assess_physical_population_stability_impl
                     // Compare with the first element of the pair returned by get_charge_index_and_base()
                     return charge_lyt.get_charge_index_and_base().first == energy_and_index.charge_index;
                 });
-            if (it != simulation_results.charge_distributions.end())
-            {
-                population_stability_information<Lyt> population_stability_info{};
-                population_stability_info.minimum_potential_difference_to_transition =
-                    std::numeric_limits<double>::infinity();
 
-                (*it).foreach_cell(
-                    [this, &it, &population_stability_info](const auto& c)
-                    {
-                        switch ((*it).get_charge_state(c))
-                        {
-                            case sidb_charge_state::NEGATIVE:
-                            {
-                                population_stability_info = handle_negative_charges(*(*it).get_local_potential(c), c,
-                                                                                    population_stability_info);
-                                break;
-                            }
-                            case sidb_charge_state::NEUTRAL:
-                            {
-                                population_stability_info =
-                                    handle_neutral_charges(*(*it).get_local_potential(c), c, population_stability_info);
-                                break;
-                            }
-                            case sidb_charge_state::POSITIVE:
-                            {
-                                population_stability_info = handle_positive_charges(*(*it).get_local_potential(c), c,
-                                                                                    population_stability_info);
-                                break;
-                            }
-                            case sidb_charge_state::NONE:
-                            {
-                                break;
-                            }
-                        }
-                    });
-                population_stability_info.system_energy                       = (*it).get_system_energy();
-                population_stability_info.distance_corresponding_to_potential = convert_potential_to_distance(
-                    population_stability_info.minimum_potential_difference_to_transition, params.physical_parameters,
-                    params.precision_for_distance_corresponding_to_potential);
-                popstability_information.push_back(population_stability_info);
+            if (it == simulation_results.charge_distributions.end())
+            {
+                continue;
             }
+
+            const auto                            charge_lyt = *it;
+            population_stability_information<Lyt> population_stability_info{};
+            population_stability_info.minimum_potential_difference_to_transition =
+                std::numeric_limits<double>::infinity();
+
+            charge_lyt.foreach_cell(
+                [this, &it, &population_stability_info](const auto& c)
+                {
+                    switch ((*it).get_charge_state(c))
+                    {
+                        case sidb_charge_state::NEGATIVE:
+                        {
+                            population_stability_info = handle_negative_charges(*charge_lyt.get_local_potential(c), c,
+                                                                                population_stability_info);
+                            break;
+                        }
+                        case sidb_charge_state::NEUTRAL:
+                        {
+                            population_stability_info = handle_neutral_charges(*charge_lyt.get_local_potential(c), c,
+                                                                               population_stability_info);
+                            break;
+                        }
+                        case sidb_charge_state::POSITIVE:
+                        {
+                            population_stability_info = handle_positive_charges(*charge_lyt.get_local_potential(c), c,
+                                                                                population_stability_info);
+                            break;
+                        }
+                        case sidb_charge_state::NONE:
+                        {
+                            break;
+                        }
+                    }
+                });
+            population_stability_info.system_energy                       = charge_lyt.get_system_energy();
+            population_stability_info.distance_corresponding_to_potential = convert_potential_to_distance(
+                population_stability_info.minimum_potential_difference_to_transition, params.physical_parameters,
+                params.precision_for_distance_corresponding_to_potential);
+            popstability_information.push_back(population_stability_info);
         }
 
         return popstability_information;
@@ -231,6 +235,7 @@ class assess_physical_population_stability_impl
                             const population_stability_information<Lyt>& pop_stability_information) noexcept
     {
         auto updated_pop_stability_information = pop_stability_information;
+
         if (std::abs(-local_potential + params.physical_parameters.mu_minus) <
             updated_pop_stability_information.minimum_potential_difference_to_transition)
         {
@@ -239,6 +244,7 @@ class assess_physical_population_stability_impl
             updated_pop_stability_information.critical_cell      = c;
             updated_pop_stability_information.transition_from_to = transition_type::NEGATIVE_TO_NEUTRAL;
         }
+
         return updated_pop_stability_information;
     }
     /**
@@ -269,6 +275,7 @@ class assess_physical_population_stability_impl
                 updated_pop_stability_information.transition_from_to = transition_type::NEUTRAL_TO_NEGATIVE;
             }
         }
+
         else
         {
             if (std::abs(-local_potential + params.physical_parameters.mu_plus()) <
@@ -280,6 +287,7 @@ class assess_physical_population_stability_impl
                 updated_pop_stability_information.transition_from_to = transition_type::NEUTRAL_TO_POSITIVE;
             }
         }
+
         return updated_pop_stability_information;
     }
     /**
@@ -306,6 +314,7 @@ class assess_physical_population_stability_impl
             updated_pop_stability_information.critical_cell      = c;
             updated_pop_stability_information.transition_from_to = transition_type::POSITIVE_TO_NEUTRAL;
         }
+
         return updated_pop_stability_information;
     }
     /**
