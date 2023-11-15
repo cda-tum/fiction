@@ -151,15 +151,16 @@ class assess_physical_population_stability_impl
                 continue;
             }
 
-            const auto                            charge_lyt = *it;
+            const auto charge_lyt = *it;
+
             population_stability_information<Lyt> population_stability_info{};
             population_stability_info.minimum_potential_difference_to_transition =
                 std::numeric_limits<double>::infinity();
 
             charge_lyt.foreach_cell(
-                [this, &it, &population_stability_info](const auto& c)
+                [this, &charge_lyt, &population_stability_info](const auto& c)
                 {
-                    switch ((*it).get_charge_state(c))
+                    switch (charge_lyt.get_charge_state(c))
                     {
                         case sidb_charge_state::NEGATIVE:
                         {
