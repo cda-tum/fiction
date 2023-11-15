@@ -2,6 +2,8 @@
 // Created by marcel on 02.06.22.
 //
 
+#define PYBIND11_DETAILED_ERROR_MESSAGES
+
 #include "pyfiction/algorithms/network_transformation/fanout_substitution.hpp"
 #include "pyfiction/algorithms/network_transformation/network_balancing.hpp"
 #include "pyfiction/algorithms/path_finding/a_star.hpp"
