@@ -24,6 +24,7 @@ project(fiction
 
 include(cmake/PreventInSourceBuilds.cmake)
 include(cmake/ProjectOptions.cmake)
+include(cmake/Utilities.cmake)
 
 fiction_setup_options()
 fiction_global_options()

@@ -14,8 +14,10 @@
 
 using namespace fiction;
 
-TEMPLATE_TEST_CASE("Zero iteration steps", "[quicksim]",
-                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+TEMPLATE_TEST_CASE(
+    "Zero iteration steps", "[quicksim]",
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
+    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
     TestType lyt{};
 
@@ -28,10 +30,12 @@ TEMPLATE_TEST_CASE("Zero iteration steps", "[quicksim]",
     CHECK(simulation_results.algorithm_name == "");
 }
 
-TEMPLATE_TEST_CASE("Empty layout QuickSim simulation", "[quicksim]",
-                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+TEMPLATE_TEST_CASE(
+    "Empty layout QuickSim simulation", "[quicksim]",
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
+    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
-    TestType lyt{{20, 10}};
+    TestType lyt{};
 
     const quicksim_params quicksim_params{sidb_simulation_parameters{2, -0.30}};
 
@@ -49,10 +53,12 @@ TEMPLATE_TEST_CASE("Empty layout QuickSim simulation", "[quicksim]",
     CHECK(simulation_results.charge_distributions.empty());
 }
 
-TEMPLATE_TEST_CASE("Single SiDB QuickSim simulation", "[quicksim]",
-                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+TEMPLATE_TEST_CASE(
+    "Single SiDB QuickSim simulation", "[quicksim]",
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
+    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
-    TestType lyt{{20, 10}};
+    TestType lyt{};
 
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
 
@@ -82,10 +88,12 @@ void check_for_runtime_measurement(const sidb_simulation_result<Lyt>& stats) noe
     CHECK(stats.simulation_runtime.count() > 0);
 }
 
-TEMPLATE_TEST_CASE("QuickSim simulation of several SiDBs with varying thread counts", "[quicksim]",
-                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+TEMPLATE_TEST_CASE(
+    "QuickSim simulation of several SiDBs with varying thread counts", "[quicksim]",
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
+    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
-    TestType lyt{{20, 10}};
+    TestType lyt{};
 
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({3, 3, 0}, TestType::cell_type::NORMAL);
@@ -149,10 +157,12 @@ TEMPLATE_TEST_CASE("QuickSim simulation of several SiDBs with varying thread cou
     }
 }
 
-TEMPLATE_TEST_CASE("QuickSim simulation of an SiDB layout comprising of 10 SiDBs with varying thread counts",
-                   "[quicksim]", (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+TEMPLATE_TEST_CASE(
+    "QuickSim simulation of an SiDB layout comprising of 10 SiDBs with varying thread counts", "[quicksim]",
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
+    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
-    TestType lyt{{20, 10}};
+    TestType lyt{};
 
     lyt.assign_cell_type({-13, -1, 1}, TestType::cell_type::NORMAL);
 
@@ -254,10 +264,12 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an SiDB layout comprising of 10 SiDBs
     }
 }
 
-TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shape SiDB arrangement with varying thread counts", "[quicksim]",
-                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+TEMPLATE_TEST_CASE(
+    "QuickSim simulation of a Y-shape SiDB arrangement with varying thread counts", "[quicksim]",
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
+    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
-    TestType lyt{{20, 10}};
+    TestType lyt{};
 
     lyt.assign_cell_type({-11, -2, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({-10, -1, 0}, TestType::cell_type::NORMAL);
@@ -343,10 +355,12 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shape SiDB arrangement with varyi
     }
 }
 
-TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shape SiDB OR gate with input 01 and varying thread counts",
-                   "[quicksim]", (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+TEMPLATE_TEST_CASE(
+    "QuickSim simulation of a Y-shape SiDB OR gate with input 01 and varying thread counts", "[quicksim]",
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
+    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
-    TestType lyt{{20, 10}};
+    TestType lyt{};
 
     lyt.assign_cell_type({6, 2, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({8, 3, 0}, TestType::cell_type::NORMAL);
@@ -435,10 +449,12 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shape SiDB OR gate with input 01 
     }
 }
 
-TEMPLATE_TEST_CASE("QuickSim simulation of an SiDB BDL pair with varying thread counts", "[quicksim]",
-                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+TEMPLATE_TEST_CASE(
+    "QuickSim simulation of an SiDB BDL pair with varying thread counts", "[quicksim]",
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
+    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
-    TestType lyt{{20, 10}};
+    TestType lyt{};
 
     lyt.assign_cell_type({6, 2, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({8, 2, 0}, TestType::cell_type::NORMAL);
@@ -514,11 +530,15 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an SiDB BDL pair with varying thread 
     }
 }
 
-TEMPLATE_TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs", "[quicksim]",
-                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+TEMPLATE_TEST_CASE(
+    "QuickSim simulation of an layout comprising of 13 SiDBs", "[quicksim]",
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
+    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
-    TestType lyt{{20, 10}};
+    // initialize SiDB layout
+    TestType lyt{};
 
+    // design random SiDB layout
     lyt.assign_cell_type({11, 15, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({37, 8, 0}, TestType::cell_type::NORMAL);
 
@@ -544,8 +564,10 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs", "[
 
     quicksim_params quicksim_params{params};
 
+    // check QuickSim parameters
     REQUIRE(quicksim_params.phys_params.mu_minus == -0.32);
 
+    // lambda function to check charge configurations
     const auto check_charge_configuration = [](const sidb_simulation_result<TestType>& stats) noexcept
     {
         REQUIRE(!stats.charge_distributions.empty());
@@ -576,6 +598,7 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs", "[
         check_for_runtime_measurement(simulation_results);
         check_charge_configuration(simulation_results);
     }
+
     SECTION("0 threads")
     {
         quicksim_params.number_threads = 0;
@@ -618,10 +641,12 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs", "[
     }
 }
 
-TEMPLATE_TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs, all negatively charged", "[quicksim]",
-                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+TEMPLATE_TEST_CASE(
+    "QuickSim simulation of an layout comprising of 13 SiDBs, all negatively charged", "[quicksim]",
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
+    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
-    TestType lyt{{20, 10}};
+    TestType lyt{};
 
     lyt.assign_cell_type({26, 10, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({23, 19, 1}, TestType::cell_type::NORMAL);
@@ -712,10 +737,12 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs, all
     }
 }
 
-TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shape SiDB OR gate with input 01", "[ExGS]",
-                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+TEMPLATE_TEST_CASE(
+    "QuickSim simulation of a Y-shape SiDB OR gate with input 01", "[ExGS]",
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
+    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
-    TestType lyt{{20, 10}};
+    TestType lyt{};
 
     lyt.assign_cell_type({6, 2, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({8, 3, 0}, TestType::cell_type::NORMAL);

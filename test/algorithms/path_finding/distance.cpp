@@ -461,32 +461,41 @@ TEST_CASE("a_star distance functor", "[distance]")
 
 TEST_CASE("SiDB nanometer distance", "[distance]")
 {
+    using namespace Catch::Matchers;
     const sidb_cell_clk_lyt_siqad layout{};
 
-    CHECK(sidb_nanometer_distance(layout, {0, 0}, {0, 0}) == 0);
-    CHECK(sidb_nanometer_distance(layout, {1, 0}, {1, 0}) == 0);
-    CHECK(sidb_nanometer_distance(layout, {0, 1}, {0, 1}) == 0);
+    CHECK_THAT(sidb_nanometer_distance(layout, {0, 0}, {0, 0}), WithinAbs(0.0, 0.00001));
+    CHECK_THAT(sidb_nanometer_distance(layout, {1, 0}, {1, 0}), WithinAbs(0.0, 0.00001));
+    CHECK_THAT(sidb_nanometer_distance(layout, {0, 1}, {0, 1}), WithinAbs(0.0, 0.00001));
 
-    CHECK(sidb_nanometer_distance(layout, {-3, 0}, {-3, 0}) == 0);
-    CHECK(sidb_nanometer_distance(layout, {0, -5}, {0, -5}) == 0);
+    CHECK_THAT(sidb_nanometer_distance(layout, {-3, 0}, {-3, 0}), WithinAbs(0.0, 0.00001));
+    CHECK_THAT(sidb_nanometer_distance(layout, {0, -5}, {0, -5}), WithinAbs(0.0, 0.00001));
 
-    CHECK(sidb_nanometer_distance(layout, {0, 1, 1}, {0, 1, 1}) == 0);
-    CHECK(sidb_nanometer_distance(layout, {0, 0}, {1, 0}) == sidb_simulation_parameters{}.lat_a * 0.1);
-    CHECK(sidb_nanometer_distance(layout, {0, 0}, {0, 1}) == sidb_simulation_parameters{}.lat_b * 0.1);
-    CHECK(sidb_nanometer_distance(layout, {0, 0}, {0, 0, 1}) == sidb_simulation_parameters{}.lat_c * 0.1);
+    CHECK_THAT(sidb_nanometer_distance(layout, {0, 1, 1}, {0, 1, 1}), WithinAbs(0.0, 0.00001));
+    CHECK_THAT(sidb_nanometer_distance(layout, {0, 0}, {1, 0}),
+               WithinAbs(sidb_simulation_parameters{}.lat_a * 0.1, 0.00001));
+    CHECK_THAT(sidb_nanometer_distance(layout, {0, 0}, {0, 1}),
+               WithinAbs(sidb_simulation_parameters{}.lat_b * 0.1, 0.00001));
+    CHECK_THAT(sidb_nanometer_distance(layout, {0, 0}, {0, 0, 1}),
+               WithinAbs(sidb_simulation_parameters{}.lat_c * 0.1, 0.00001));
 
-    CHECK(sidb_nanometer_distance(layout, {0, 0}, {-1, 0}) == sidb_simulation_parameters{}.lat_a * 0.1);
-    CHECK(sidb_nanometer_distance(layout, {0, 0}, {0, -1}) == sidb_simulation_parameters{}.lat_b * 0.1);
-    CHECK(sidb_nanometer_distance(layout, {0, 0}, {0, 0, -1}) == sidb_simulation_parameters{}.lat_c * 0.1);
+    CHECK_THAT(sidb_nanometer_distance(layout, {0, 0}, {-1, 0}),
+               WithinAbs(sidb_simulation_parameters{}.lat_a * 0.1, 0.00001));
+    CHECK_THAT(sidb_nanometer_distance(layout, {0, 0}, {0, -1}),
+               WithinAbs(sidb_simulation_parameters{}.lat_b * 0.1, 0.00001));
+    CHECK_THAT(sidb_nanometer_distance(layout, {0, 0}, {0, 0, -1}),
+               WithinAbs(sidb_simulation_parameters{}.lat_c * 0.1, 0.00001));
 
-    CHECK(sidb_nanometer_distance(layout, {0, 0}, {0, 2, 1}) ==
-          sidb_simulation_parameters{}.lat_b * 0.2 + sidb_simulation_parameters{}.lat_c * 0.1);
-    CHECK(sidb_nanometer_distance(layout, {0, 0}, {0, -2, 1}) ==
-          sidb_simulation_parameters{}.lat_b * 0.2 - sidb_simulation_parameters{}.lat_c * 0.1);
-    CHECK(sidb_nanometer_distance(layout, {0, -2, 1}, {0, 0}) ==
-          sidb_simulation_parameters{}.lat_b * 0.2 - sidb_simulation_parameters{}.lat_c * 0.1);
+    CHECK_THAT(sidb_nanometer_distance(layout, {0, 0}, {0, 2, 1}),
+               WithinAbs(sidb_simulation_parameters{}.lat_b * 0.2 + sidb_simulation_parameters{}.lat_c * 0.1, 0.00001));
+    CHECK_THAT(sidb_nanometer_distance(layout, {0, 0}, {0, -2, 1}),
+               WithinAbs(sidb_simulation_parameters{}.lat_b * 0.2 - sidb_simulation_parameters{}.lat_c * 0.1, 0.00001));
+    CHECK_THAT(sidb_nanometer_distance(layout, {0, -2, 1}, {0, 0}),
+               WithinAbs(sidb_simulation_parameters{}.lat_b * 0.2 - sidb_simulation_parameters{}.lat_c * 0.1, 0.00001));
 
-    CHECK(sidb_nanometer_distance(layout, {0, 2, 1}, {-5, 1, 0}) ==
-          std::hypot(sidb_simulation_parameters{}.lat_a * 0.5,
-                     sidb_simulation_parameters{}.lat_b * 0.1 + sidb_simulation_parameters{}.lat_c * 0.1));
+    CHECK_THAT(
+        sidb_nanometer_distance(layout, {0, 2, 1}, {-5, 1, 0}),
+        WithinAbs(std::hypot(sidb_simulation_parameters{}.lat_a * 0.5,
+                             sidb_simulation_parameters{}.lat_b * 0.1 + sidb_simulation_parameters{}.lat_c * 0.1),
+                  0.00001));
 }
