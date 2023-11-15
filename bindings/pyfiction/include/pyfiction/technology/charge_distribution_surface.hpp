@@ -72,12 +72,9 @@ inline void charge_distribution_surface(pybind11::module& m)
         .def(py::init<const fiction::sidb_simulation_parameters&, const fiction::sidb_charge_state&>(),
              "params"_a = fiction::sidb_simulation_parameters{}, "cs"_a = fiction::sidb_charge_state::NEGATIVE)
 
-        .def(py::init<const py_cds_base&, const fiction::sidb_simulation_parameters&, const fiction::sidb_charge_state&,
-                      const fiction::cell<py_cds_base>&,
-                      const std::unordered_map<fiction::cell<py_cds_base>, double>&>(),
-             "lyt"_a, "params"_a = fiction::sidb_simulation_parameters{}, "cs"_a = fiction::sidb_charge_state::NEGATIVE,
-             "variable_cells"_a      = fiction::cell<py_cds_base>{},
-             "external_potentials"_a = std::unordered_map<fiction::cell<py_cds_base>, double>{})
+        .def(py::init<const py_cds_base&, const fiction::sidb_simulation_parameters&,
+                      const fiction::sidb_charge_state&>(),
+             "lyt"_a, "params"_a = fiction::sidb_simulation_parameters{}, "cs"_a = fiction::sidb_charge_state::NEGATIVE)
 
         .def(py::init<const py_charge_distribution_surface&>(), "lyt"_a)
 
@@ -157,6 +154,7 @@ inline void charge_distribution_surface(pybind11::module& m)
             "c"_a, DOC(fiction_cell_level_layout_is_po))
 
         .def("get_all_sidb_locations_in_nm", &py_charge_distribution_surface::get_all_sidb_locations_in_nm)
+        .def("assign_cell_type", &py_charge_distribution_surface::assign_cell_type, "c"_a, "ct"_a)
         .def("assign_physical_parameters", &py_charge_distribution_surface::assign_physical_parameters, "params"_a)
         .def("get_phys_params", &py_charge_distribution_surface::get_phys_params)
         .def("charge_exists", &py_charge_distribution_surface::charge_exists, "cs"_a)
@@ -165,6 +163,7 @@ inline void charge_distribution_surface(pybind11::module& m)
              "update_charge_index"_a = true)
         .def("assign_charge_by_cell_index", &py_charge_distribution_surface::assign_charge_by_cell_index, "i"_a, "cs"_a)
         .def("assign_all_charge_states", &py_charge_distribution_surface::assign_all_charge_states, "cs"_a)
+        .def("assign_dependent_cell", &py_charge_distribution_surface::assign_dependent_cell, "dependent_cell"_a)
         .def("assign_base_number", &py_charge_distribution_surface::assign_base_number, "base"_a)
         .def("add_sidb_defect_to_potential_landscape",
              &py_charge_distribution_surface::add_sidb_defect_to_potential_landscape, "c"_a, "defect"_a)
