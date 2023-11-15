@@ -1204,6 +1204,7 @@ TEMPLATE_TEST_CASE(
 {
     TestType lyt{};
 
+    // three BDL pairs with one perturber
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
 
     lyt.assign_cell_type({5, 0, 0}, TestType::cell_type::NORMAL);
@@ -1218,6 +1219,7 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type({26, 0, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({29, 0, 0}, TestType::cell_type::NORMAL);
 
+    // quickexact parameters are initialized
     quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.28},
                                        quickexact_params<TestType>::automatic_base_number_detection::OFF};
 
@@ -1225,6 +1227,7 @@ TEMPLATE_TEST_CASE(
     {
         const auto simulation_results = quickexact<TestType>(lyt, params);
 
+        // check that physically valid charge distributions were found
         REQUIRE(!simulation_results.charge_distributions.empty());
 
         // find the ground state, which is the charge distribution with the lowest energy
@@ -1232,6 +1235,7 @@ TEMPLATE_TEST_CASE(
             simulation_results.charge_distributions.cbegin(), simulation_results.charge_distributions.cend(),
             [](const auto& lhs, const auto& rhs) { return lhs.get_system_energy() < rhs.get_system_energy(); });
 
+        // check that charge distribution is correct; binary 1 is propagated through the BDL wire
         CHECK(ground_state->get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
         CHECK(ground_state->get_charge_state({5, 0, 0}) == sidb_charge_state::NEUTRAL);
         CHECK(ground_state->get_charge_state({8, 0, 0}) == sidb_charge_state::NEGATIVE);
@@ -1248,6 +1252,7 @@ TEMPLATE_TEST_CASE(
 
     SECTION("Increased mu_minus")
     {
+        // set small absolute value for µ
         params.physical_parameters.mu_minus = -0.1;
 
         const auto simulation_results = quickexact<TestType>(lyt, params);
@@ -1259,6 +1264,7 @@ TEMPLATE_TEST_CASE(
             simulation_results.charge_distributions.cbegin(), simulation_results.charge_distributions.cend(),
             [](const auto& lhs, const auto& rhs) { return lhs.get_system_energy() < rhs.get_system_energy(); });
 
+        // check charge distribution of the ground state; BDL wire no longer works as intended
         CHECK(ground_state->get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
         CHECK(ground_state->get_charge_state({5, 0, 0}) == sidb_charge_state::NEUTRAL);
         CHECK(ground_state->get_charge_state({8, 0, 0}) == sidb_charge_state::NEUTRAL);
@@ -1275,6 +1281,7 @@ TEMPLATE_TEST_CASE(
 
     SECTION("Decreased mu_minus")
     {
+        // set large absolute value for µ
         params.physical_parameters.mu_minus = -0.7;
 
         const auto simulation_results = quickexact<TestType>(lyt, params);
@@ -1286,6 +1293,8 @@ TEMPLATE_TEST_CASE(
             simulation_results.charge_distributions.cbegin(), simulation_results.charge_distributions.cend(),
             [](const auto& lhs, const auto& rhs) { return lhs.get_system_energy() < rhs.get_system_energy(); });
 
+        // Due to the set µ-value, all SiDBs are negatively charged (electrostatic interaction is not strong enough to
+        // change the charge state of individual SiDBs).
         CHECK(ground_state->get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
         CHECK(ground_state->get_charge_state({5, 0, 0}) == sidb_charge_state::NEGATIVE);
         CHECK(ground_state->get_charge_state({8, 0, 0}) == sidb_charge_state::NEGATIVE);
@@ -1302,6 +1311,7 @@ TEMPLATE_TEST_CASE(
 
     SECTION("Decreased lambda_tf")
     {
+        // set small lambda value, i.e., electrostatic screening is significant.
         params.physical_parameters.lambda_tf = 1;
 
         const auto simulation_results = quickexact<TestType>(lyt, params);
@@ -1312,6 +1322,8 @@ TEMPLATE_TEST_CASE(
             simulation_results.charge_distributions.cbegin(), simulation_results.charge_distributions.cend(),
             [](const auto& lhs, const auto& rhs) { return lhs.get_system_energy() < rhs.get_system_energy(); });
 
+        // Due to the small lambda value, the electrostatic interaction is small. Hence, all SiDBs are negatively
+        // charged.
         CHECK(ground_state->get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
         CHECK(ground_state->get_charge_state({5, 0, 0}) == sidb_charge_state::NEGATIVE);
         CHECK(ground_state->get_charge_state({8, 0, 0}) == sidb_charge_state::NEGATIVE);
@@ -1328,6 +1340,7 @@ TEMPLATE_TEST_CASE(
 
     SECTION("Increased lambda_tf")
     {
+        // set large lambda value, i.e., electrostatic screening is small.
         params.physical_parameters.lambda_tf = 10;
 
         const auto simulation_results = quickexact<TestType>(lyt, params);
@@ -1339,6 +1352,7 @@ TEMPLATE_TEST_CASE(
             simulation_results.charge_distributions.cbegin(), simulation_results.charge_distributions.cend(),
             [](const auto& lhs, const auto& rhs) { return lhs.get_system_energy() < rhs.get_system_energy(); });
 
+        // check charge distribution of the ground state; BDL wire works as intended
         CHECK(ground_state->get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
         CHECK(ground_state->get_charge_state({5, 0, 0}) == sidb_charge_state::NEUTRAL);
         CHECK(ground_state->get_charge_state({8, 0, 0}) == sidb_charge_state::NEGATIVE);
@@ -1355,6 +1369,7 @@ TEMPLATE_TEST_CASE(
 
     SECTION("Increased epsilon_r")
     {
+        // set large relative permittivity
         params.physical_parameters.epsilon_r = 10;
 
         const auto simulation_results = quickexact<TestType>(lyt, params);
@@ -1365,6 +1380,8 @@ TEMPLATE_TEST_CASE(
             simulation_results.charge_distributions.cbegin(), simulation_results.charge_distributions.cend(),
             [](const auto& lhs, const auto& rhs) { return lhs.get_system_energy() < rhs.get_system_energy(); });
 
+        // The electrostatic interaction is small, due to the large relative permittivity.
+        // Therefore, all SiDBs are negatively charged.
         CHECK(ground_state->get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
         CHECK(ground_state->get_charge_state({5, 0, 0}) == sidb_charge_state::NEGATIVE);
         CHECK(ground_state->get_charge_state({8, 0, 0}) == sidb_charge_state::NEGATIVE);
@@ -1381,6 +1398,7 @@ TEMPLATE_TEST_CASE(
 
     SECTION("Decrease epsilon_r, positively charged SiDBs can occur")
     {
+        // set small relative permittivity
         params.physical_parameters.epsilon_r = 1;
 
         const auto simulation_results = quickexact<TestType>(lyt, params);
@@ -1391,6 +1409,8 @@ TEMPLATE_TEST_CASE(
             simulation_results.charge_distributions.cbegin(), simulation_results.charge_distributions.cend(),
             [](const auto& lhs, const auto& rhs) { return lhs.get_system_energy() < rhs.get_system_energy(); });
 
+        // The electrostatic interaction is strong, due to the small relative permittivity.
+        // Therefore, SiDBs can even be positively charged.
         CHECK(ground_state->get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
         CHECK(ground_state->get_charge_state({5, 0, 0}) == sidb_charge_state::POSITIVE);
         CHECK(ground_state->get_charge_state({8, 0, 0}) == sidb_charge_state::NEGATIVE);
