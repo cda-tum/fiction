@@ -4,7 +4,12 @@ from fiction.pyfiction import *
 
 
 class TestAStar(unittest.TestCase):
-    def test_path_finding(self):
+
+    def test_non_clocked_path_finding(self):
+        for lyt in [cartesian_layout((4, 4)), shifted_cartesian_layout((4, 4)), hexagonal_layout((4, 4))]:
+            self.assertListEqual(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(0, 0)), [(0, 0)])
+
+    def test_clocked_path_finding(self):
         for lyt in [clocked_cartesian_layout((4, 4), "2DDWave"), cartesian_gate_layout((4, 4), "2DDWave", "Layout"),
                     clocked_shifted_cartesian_layout((4, 4), "2DDWave"),
                     shifted_cartesian_gate_layout((4, 4), "2DDWave", "Layout"),

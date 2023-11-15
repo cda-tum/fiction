@@ -3,6 +3,10 @@ import unittest
 
 
 class TestEnumerateAllPaths(unittest.TestCase):
+    def test_non_clocked_paths(self):
+        for lyt in [cartesian_layout((4, 4)), shifted_cartesian_layout((4, 4)), hexagonal_layout((4, 4))]:
+            self.assertListEqual(enumerate_all_paths(lyt, offset_coordinate(0, 0), offset_coordinate(0, 0)), [[(0, 0)]])
+
     def test_clocking_paths(self):
         for lyt in [clocked_cartesian_layout((4, 4), "2DDWave"), cartesian_gate_layout((4, 4), "2DDWave", "Layout"),
                     clocked_shifted_cartesian_layout((4, 4), "2DDWave"),
