@@ -185,8 +185,6 @@ Assess Population Stability
    :members:
 .. doxygenstruct:: fiction::assess_physical_population_stability_params
    :members:
-.. doxygenstruct:: fiction::energy_and_charge_index
-   :members:
 .. doxygenfunction:: fiction::assess_physical_population_stability
 
 
