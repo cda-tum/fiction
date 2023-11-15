@@ -127,8 +127,8 @@ setup(
     ],
     keywords='MNT fiction nanotechnology fcn qca nml sidb design automation placement routing clocking simulation',
     project_urls={
-        'Source': 'https://github.com/marcelwa/fiction',
-        'Tracker': 'https://github.com/marcelwa/fiction/issues',
+        'Source': 'https://github.com/cda-tum/fiction',
+        'Tracker': 'https://github.com/cda-tum/fiction/issues',
         'Documentation': 'https://fiction.readthedocs.io/en/latest/',
         'Research': 'https://www.cda.cit.tum.de/research/fcn/',
     }

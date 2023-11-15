@@ -88,7 +88,7 @@ locally.
 #### Use the GitHub Action (preferred)
 
 Go to
-the [pyfiction-docstring-generator](https://github.com/marcelwa/fiction/actions/workflows/pyfiction-docstring-generator.yml)
+the [pyfiction-docstring-generator](https://github.com/cda-tum/fiction/actions/workflows/pyfiction-docstring-generator.yml)
 workflow on GitHub and run it. Upon completion, it will make the `pybind11_mkdoc_docstrings.hpp` file available as an
 artifact. Download the file and replace the existing one.
 

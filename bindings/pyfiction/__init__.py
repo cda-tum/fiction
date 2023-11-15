@@ -1,7 +1,7 @@
 """MNT fiction framework.
 
 This file is part of the MNT fiction framework released under the MIT license.
-See https://github.com/marcelwa/fiction for more information.
+See https://github.com/cda-tum/fiction for more information.
 """
 
 import os
