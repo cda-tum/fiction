@@ -151,7 +151,7 @@ class assess_physical_population_stability_impl
                 continue;
             }
 
-            const auto charge_lyt = charge_distribution_surface<Lyt>(*it);
+            const auto& charge_lyt = *it;
 
             population_stability_information<Lyt> population_stability_info{};
             population_stability_info.minimum_potential_difference_to_transition =
