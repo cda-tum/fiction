@@ -692,7 +692,6 @@ class operational_domain_impl
      * Determines whether the point at step position `(x, y)` has already been sampled and returns the operational value
      * at `(x, y)` if it already exists. Here, `x` and `y` represent steps in the x and y dimension, respectively, not
      * the actual values of the parameters.
-     *avoid
      * @param sp Step point to check.
      * @return The operational status of the point at step position `sp = (x, y)` or `std::nullopt` if `(x, y)` has not
      * been sampled yet.
