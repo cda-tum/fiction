@@ -100,7 +100,7 @@ namespace fiction
         {
             // round the energy value of the given valid_layout to six decimal places and check if they are different
             if (std::abs(round_to_n_decimal_places(it.first, 6) - round_to_n_decimal_places(min_energy, 6)) >
-                physical_constants::POP_STABILITY_ERR)
+                physical_constants::FLOATING_POINT_EPSILON)
             {
                 return sum + std::exp(-((it.first - min_energy) * 12'000 / temperature));
             }

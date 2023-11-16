@@ -621,7 +621,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                     // Check if the maximum band bending is sufficient to shift (0/-) above the Fermi level. The local
                     // potential is converted from J to eV to compare the band bending with the Fermi level (which is
                     // also given in eV).
-                    if ((-*local_pot + strg->phys_params.mu_minus) < -physical_constants::POP_STABILITY_ERR)
+                    if ((-*local_pot + strg->phys_params.mu_minus) < -physical_constants::FLOATING_POINT_EPSILON)
                     {
                         negative_sidbs.push_back(cell_to_index(c));
                     }
@@ -948,12 +948,12 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         for (const auto& it : strg->local_pot)  // this for-loop checks if the "population stability" is fulfilled.
         {
             bool valid = (((strg->cell_charge[for_loop_counter] == sidb_charge_state::NEGATIVE) &&
-                           (-it + strg->phys_params.mu_minus < physical_constants::POP_STABILITY_ERR)) ||
+                           (-it + strg->phys_params.mu_minus < physical_constants::FLOATING_POINT_EPSILON)) ||
                           ((strg->cell_charge[for_loop_counter] == sidb_charge_state::POSITIVE) &&
-                           (-it + mu_p > -physical_constants::POP_STABILITY_ERR)) ||
+                           (-it + mu_p > -physical_constants::FLOATING_POINT_EPSILON)) ||
                           ((strg->cell_charge[for_loop_counter] == sidb_charge_state::NEUTRAL) &&
-                           (-it + strg->phys_params.mu_minus > -physical_constants::POP_STABILITY_ERR) &&
-                           (-it + mu_p < physical_constants::POP_STABILITY_ERR)));
+                           (-it + strg->phys_params.mu_minus > -physical_constants::FLOATING_POINT_EPSILON) &&
+                           (-it + mu_p < physical_constants::FLOATING_POINT_EPSILON)));
             for_loop_counter += 1;
             if (!valid)
             {
@@ -994,8 +994,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
                     if (const auto e_del = hop_del(i, j);
                         (charge_state_to_sign(strg->cell_charge[j]) > charge_state_to_sign(strg->cell_charge[i])) &&
-                        (e_del < -physical_constants::POP_STABILITY_ERR))  // Checks if energetically favored
-                                                                           // hops exist between two SiDBs.
+                        (e_del < -physical_constants::FLOATING_POINT_EPSILON))  // Checks if energetically favored
+                                                                                // hops exist between two SiDBs.
                     {
                         hop_counter = 1;
 
@@ -1318,7 +1318,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             {
                 if (const auto local_pot = this->get_local_potential(c); local_pot.has_value())
                 {
-                    if ((-(*local_pot) + strg->phys_params.mu_plus()) > -physical_constants::POP_STABILITY_ERR)
+                    if ((-(*local_pot) + strg->phys_params.mu_plus()) > -physical_constants::FLOATING_POINT_EPSILON)
                     {
                         if (c == strg->dependent_cell)
                         {
@@ -1537,7 +1537,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         if (!strg->dependent_cell.is_dead())
         {
             const auto loc_pot_cell = -strg->local_pot[strg->dependent_cell_index];
-            if ((loc_pot_cell + strg->phys_params.mu_minus) < physical_constants::POP_STABILITY_ERR)
+            if ((loc_pot_cell + strg->phys_params.mu_minus) < physical_constants::FLOATING_POINT_EPSILON)
             {
                 if (strg->cell_charge[strg->dependent_cell_index] != sidb_charge_state::NEGATIVE)
                 {
@@ -1553,7 +1553,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                     strg->cell_charge[strg->dependent_cell_index] = sidb_charge_state::NEGATIVE;
                 }
             }
-            else if ((loc_pot_cell + strg->phys_params.mu_plus()) > -physical_constants::POP_STABILITY_ERR)
+            else if ((loc_pot_cell + strg->phys_params.mu_plus()) > -physical_constants::FLOATING_POINT_EPSILON)
             {
                 // dependent-cell can only be positively charged when the base number is set to three state simulation.
                 if (strg->charge_index_and_base.second == 3)

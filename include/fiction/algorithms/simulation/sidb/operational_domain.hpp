@@ -16,6 +16,7 @@
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/layouts/cell_level_layout.hpp"
+#include "fiction/technology/physical_constants.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/execution_utils.hpp"
 #include "fiction/utils/hash.hpp"
@@ -691,15 +692,23 @@ class operational_domain_impl
      * Determines whether the point at step position `(x, y)` has already been sampled and returns the operational value
      * at `(x, y)` if it already exists. Here, `x` and `y` represent steps in the x and y dimension, respectively, not
      * the actual values of the parameters.
-     *
+     *avoid
      * @param sp Step point to check.
      * @return The operational status of the point at step position `sp = (x, y)` or `std::nullopt` if `(x, y)` has not
      * been sampled yet.
      */
     [[nodiscard]] inline std::optional<operational_status> has_already_been_sampled(const step_point& sp) const noexcept
     {
-        if (const auto it = op_domain.operational_values.find(to_parameter_point(sp));
-            it != op_domain.operational_values.cend())
+        const auto parameter_point = to_parameter_point(sp);
+        const auto it = std::find_if(op_domain.operational_values.cbegin(), op_domain.operational_values.cend(),
+                                     [&parameter_point](const auto& parameter_status_pair)
+                                     {
+                                         return std::abs(parameter_status_pair.first.x - parameter_point.x) <
+                                                    physical_constants::FLOATING_POINT_EPSILON &&
+                                                std::abs(parameter_status_pair.first.y - parameter_point.y) <
+                                                    physical_constants::FLOATING_POINT_EPSILON;
+                                     });
+        if (it != op_domain.operational_values.cend())
         {
             return it->second;
         }

@@ -211,7 +211,7 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_lyt_first.get_charge_state({17, -1, 1}) == sidb_charge_state::NEGATIVE);
 
         CHECK_THAT(charge_lyt_first.get_system_energy(),
-                   Catch::Matchers::WithinAbs(0.4798721334, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0.4798721334, physical_constants::FLOATING_POINT_EPSILON));
     };
 
     SECTION("Default settings")
@@ -302,7 +302,7 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_lyt_first.get_charge_state({-7, 3, 0}) == sidb_charge_state::NEGATIVE);
 
         CHECK_THAT(charge_lyt_first.get_system_energy(),
-                   Catch::Matchers::WithinAbs(0.3191788254, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0.3191788254, physical_constants::FLOATING_POINT_EPSILON));
     };
 
     SECTION("Default settings")
@@ -396,7 +396,7 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == sidb_charge_state::NEGATIVE);
 
         CHECK_THAT(charge_lyt_first.get_system_energy(),
-                   Catch::Matchers::WithinAbs(0.4662582096, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0.4662582096, physical_constants::FLOATING_POINT_EPSILON));
     };
 
     SECTION("Default settings")
@@ -776,7 +776,7 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::NEUTRAL);
 
         CHECK_THAT(charge_lyt_first.get_system_energy(),
-                   Catch::Matchers::WithinAbs(0.4662582096, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0.4662582096, physical_constants::FLOATING_POINT_EPSILON));
     }
 
     SECTION("Increased mu_minus")
@@ -800,7 +800,7 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::NEUTRAL);
 
         CHECK_THAT(charge_lyt_first.get_system_energy(),
-                   Catch::Matchers::WithinAbs(0.061037632, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0.061037632, physical_constants::FLOATING_POINT_EPSILON));
     }
 
     SECTION("Decreased mu_minus")
@@ -824,7 +824,7 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::NEGATIVE);
 
         CHECK_THAT(charge_lyt_first.get_system_energy(),
-                   Catch::Matchers::WithinAbs(2.069954113, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(2.069954113, physical_constants::FLOATING_POINT_EPSILON));
     }
 
     SECTION("Decreased lambda_tf")
@@ -848,7 +848,7 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::NEGATIVE);
 
         CHECK_THAT(charge_lyt_first.get_system_energy(),
-                   Catch::Matchers::WithinAbs(0.5432404075, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0.5432404075, physical_constants::FLOATING_POINT_EPSILON));
     }
 
     SECTION("Increased lambda_tf")
@@ -872,7 +872,7 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::NEUTRAL);
 
         CHECK_THAT(charge_lyt_first.get_system_energy(),
-                   Catch::Matchers::WithinAbs(0.2930574885, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0.2930574885, physical_constants::FLOATING_POINT_EPSILON));
     }
 
     SECTION("Increased epsilon_r")
@@ -896,6 +896,6 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::NEGATIVE);
 
         CHECK_THAT(charge_lyt_first.get_system_energy(),
-                   Catch::Matchers::WithinAbs(0.505173434, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0.505173434, physical_constants::FLOATING_POINT_EPSILON));
     }
 }

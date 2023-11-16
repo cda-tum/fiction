@@ -21,9 +21,9 @@ constexpr double ELEMENTARY_CHARGE = 1.6021766 * 1E-19;
  */
 constexpr double K_E = 8.987552 * 1E9;
 /**
- * The pop stability error is used for physical simulations to avoid floating-point errors.
+ * The floating point epsilon is used to avoid floating point errors.
  */
-constexpr double POP_STABILITY_ERR = 1E-6;
+constexpr double FLOATING_POINT_EPSILON = 1E-6;
 /**
  * A value of \f$ \pi \f$ that is accurate to 11 decimal places.
  */

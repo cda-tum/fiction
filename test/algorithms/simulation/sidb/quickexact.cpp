@@ -362,7 +362,7 @@ TEMPLATE_TEST_CASE(
     CHECK(charge_lyt_first.get_charge_state({19, 0, 0}) == sidb_charge_state::NEGATIVE);
 
     CHECK_THAT(charge_lyt_first.get_system_energy(),
-               Catch::Matchers::WithinAbs(0.2460493219, physical_constants::POP_STABILITY_ERR));
+               Catch::Matchers::WithinAbs(0.2460493219, physical_constants::FLOATING_POINT_EPSILON));
 }
 
 TEMPLATE_TEST_CASE("QuickExact simulation of a one-pair BDL wire with two perturbers", "[quickexact]",
@@ -400,7 +400,7 @@ TEMPLATE_TEST_CASE("QuickExact simulation of a one-pair BDL wire with two pertur
     CHECK(charge_lyt_first.get_charge_state({15, 0, 0}) == sidb_charge_state::NEGATIVE);
 
     CHECK_THAT(charge_lyt_first.get_system_energy(),
-               Catch::Matchers::WithinAbs(0.1152677452, physical_constants::POP_STABILITY_ERR));
+               Catch::Matchers::WithinAbs(0.1152677452, physical_constants::FLOATING_POINT_EPSILON));
 }
 
 TEMPLATE_TEST_CASE(
@@ -437,7 +437,7 @@ TEMPLATE_TEST_CASE(
     CHECK(charge_lyt_first.get_charge_state({-7, 3, 0}) == sidb_charge_state::NEGATIVE);
 
     CHECK_THAT(charge_lyt_first.get_system_energy(),
-               Catch::Matchers::WithinAbs(0.3191788254, physical_constants::POP_STABILITY_ERR));
+               Catch::Matchers::WithinAbs(0.3191788254, physical_constants::FLOATING_POINT_EPSILON));
 }
 
 TEMPLATE_TEST_CASE(
@@ -477,7 +477,7 @@ TEMPLATE_TEST_CASE(
     CHECK(charge_lyt_first.get_charge_state({6, 2, 0}) == sidb_charge_state::NEGATIVE);
 
     CHECK_THAT(charge_lyt_first.get_system_energy(),
-               Catch::Matchers::WithinAbs(0.4662582096, physical_constants::POP_STABILITY_ERR));
+               Catch::Matchers::WithinAbs(0.4662582096, physical_constants::FLOATING_POINT_EPSILON));
 }
 
 TEMPLATE_TEST_CASE(
@@ -766,7 +766,7 @@ TEMPLATE_TEST_CASE(
 
     for (const auto& layout : simulation_results.charge_distributions)
     {
-        if (std::abs(layout.get_system_energy() - energy_min) < physical_constants::POP_STABILITY_ERR)
+        if (std::abs(layout.get_system_energy() - energy_min) < physical_constants::FLOATING_POINT_EPSILON)
         {
             CHECK(layout.get_charge_state({1, 3, 0}) == sidb_charge_state::NEGATIVE);
             CHECK(layout.get_charge_state({1, 3, 0}) == sidb_charge_state::NEGATIVE);
@@ -819,7 +819,7 @@ TEMPLATE_TEST_CASE(
     REQUIRE(simulation_results.charge_distributions.size() == 2);
     const auto& charge_lyt_first = simulation_results.charge_distributions.front();
     CHECK_THAT(charge_lyt_first.get_system_energy(),
-               Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+               Catch::Matchers::WithinAbs(0, physical_constants::FLOATING_POINT_EPSILON));
 }
 
 TEMPLATE_TEST_CASE(
@@ -1083,7 +1083,7 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::NEUTRAL);
 
         CHECK_THAT(charge_lyt_first.get_system_energy(),
-                   Catch::Matchers::WithinAbs(0.4662582096, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0.4662582096, physical_constants::FLOATING_POINT_EPSILON));
     }
 
     SECTION("Increased mu_minus")
@@ -1105,7 +1105,7 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::NEUTRAL);
 
         CHECK_THAT(charge_lyt_first.get_system_energy(),
-                   Catch::Matchers::WithinAbs(0.061037632, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0.061037632, physical_constants::FLOATING_POINT_EPSILON));
     }
 
     SECTION("Decreased mu_minus")
@@ -1127,7 +1127,7 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::NEGATIVE);
 
         CHECK_THAT(charge_lyt_first.get_system_energy(),
-                   Catch::Matchers::WithinAbs(2.069954113, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(2.069954113, physical_constants::FLOATING_POINT_EPSILON));
     }
 
     SECTION("Decreased lambda_tf")
@@ -1149,7 +1149,7 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::NEGATIVE);
 
         CHECK_THAT(charge_lyt_first.get_system_energy(),
-                   Catch::Matchers::WithinAbs(0.5432404075, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0.5432404075, physical_constants::FLOATING_POINT_EPSILON));
     }
 
     SECTION("Increased lambda_tf")
@@ -1171,7 +1171,7 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::NEUTRAL);
 
         CHECK_THAT(charge_lyt_first.get_system_energy(),
-                   Catch::Matchers::WithinAbs(0.2930574885, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0.2930574885, physical_constants::FLOATING_POINT_EPSILON));
     }
 
     SECTION("Increased epsilon_r")
@@ -1193,7 +1193,7 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::NEGATIVE);
 
         CHECK_THAT(charge_lyt_first.get_system_energy(),
-                   Catch::Matchers::WithinAbs(0.505173434, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0.505173434, physical_constants::FLOATING_POINT_EPSILON));
     }
 }
 
@@ -1247,7 +1247,7 @@ TEMPLATE_TEST_CASE(
         CHECK(ground_state->get_charge_state({29, 0, 0}) == sidb_charge_state::NEGATIVE);
 
         CHECK_THAT(ground_state->get_system_energy(),
-                   Catch::Matchers::WithinAbs(0.274134844, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0.274134844, physical_constants::FLOATING_POINT_EPSILON));
     }
 
     SECTION("Increased mu_minus")
@@ -1276,7 +1276,7 @@ TEMPLATE_TEST_CASE(
         CHECK(ground_state->get_charge_state({29, 0, 0}) == sidb_charge_state::NEGATIVE);
 
         CHECK_THAT(ground_state->get_system_energy(),
-                   Catch::Matchers::WithinAbs(0.0329179963, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0.0329179963, physical_constants::FLOATING_POINT_EPSILON));
     }
 
     SECTION("Decreased mu_minus")
@@ -1306,7 +1306,7 @@ TEMPLATE_TEST_CASE(
         CHECK(ground_state->get_charge_state({29, 0, 0}) == sidb_charge_state::NEGATIVE);
 
         CHECK_THAT(ground_state->get_system_energy(),
-                   Catch::Matchers::WithinAbs(1.8649862557, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(1.8649862557, physical_constants::FLOATING_POINT_EPSILON));
     }
 
     SECTION("Decreased lambda_tf")
@@ -1335,7 +1335,7 @@ TEMPLATE_TEST_CASE(
         CHECK(ground_state->get_charge_state({29, 0, 0}) == sidb_charge_state::NEGATIVE);
 
         CHECK_THAT(ground_state->get_system_energy(),
-                   Catch::Matchers::WithinAbs(0.4606785472, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0.4606785472, physical_constants::FLOATING_POINT_EPSILON));
     }
 
     SECTION("Increased lambda_tf")
@@ -1364,7 +1364,7 @@ TEMPLATE_TEST_CASE(
         CHECK(ground_state->get_charge_state({29, 0, 0}) == sidb_charge_state::NEGATIVE);
 
         CHECK_THAT(ground_state->get_system_energy(),
-                   Catch::Matchers::WithinAbs(0.3967750406, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0.3967750406, physical_constants::FLOATING_POINT_EPSILON));
     }
 
     SECTION("Increased epsilon_r")
@@ -1393,7 +1393,7 @@ TEMPLATE_TEST_CASE(
         CHECK(ground_state->get_charge_state({29, 0, 0}) == sidb_charge_state::NEGATIVE);
 
         CHECK_THAT(ground_state->get_system_energy(),
-                   Catch::Matchers::WithinAbs(1.0443923032, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(1.0443923032, physical_constants::FLOATING_POINT_EPSILON));
     }
 
     SECTION("Decrease epsilon_r, positively charged SiDBs can occur")
@@ -1422,7 +1422,7 @@ TEMPLATE_TEST_CASE(
         CHECK(ground_state->get_charge_state({29, 0, 0}) == sidb_charge_state::NEGATIVE);
 
         CHECK_THAT(ground_state->get_system_energy(),
-                   Catch::Matchers::WithinAbs(-5.0592576221, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(-5.0592576221, physical_constants::FLOATING_POINT_EPSILON));
     }
 }
 

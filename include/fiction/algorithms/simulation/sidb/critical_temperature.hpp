@@ -336,7 +336,7 @@ class critical_temperature_impl
             // value of the given valid_layout to six decimal places to overcome possible rounding errors and for
             // comparability with the min_energy.
             if (std::abs(round_to_n_decimal_places(energy, 6) - round_to_n_decimal_places(min_energy, 6)) <
-                    physical_constants::POP_STABILITY_ERR &&
+                    physical_constants::FLOATING_POINT_EPSILON &&
                 state_type)
             {
                 ground_state_is_transparent = true;

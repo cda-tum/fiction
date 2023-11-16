@@ -44,7 +44,7 @@ template <typename Lyt>
         {
             if (const auto local_pot = charge_lyt.get_local_potential(c); local_pot.has_value())
             {
-                if ((-(*local_pot) + mu_plus) > -physical_constants::POP_STABILITY_ERR)
+                if ((-(*local_pot) + mu_plus) > -physical_constants::FLOATING_POINT_EPSILON)
                 {
                     result = true;
 

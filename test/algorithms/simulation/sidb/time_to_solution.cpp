@@ -93,6 +93,6 @@ TEMPLATE_TEST_CASE(
                               std::log(1.0 - tts_stat_quickexact.acc));
         }
         CHECK_THAT(tts_stat_quickexact.time_to_solution - tts_calculated,
-                   Catch::Matchers::WithinAbs(0.0, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0.0, physical_constants::FLOATING_POINT_EPSILON));
     }
 }

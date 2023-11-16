@@ -36,7 +36,7 @@ TEST_CASE("Test influence distance function", "[maximum-defect-influence-positio
 
         const auto [defect_pos, distance] = maximum_defect_influence_position_and_distance(lyt, sim_params);
         CHECK_THAT(round_to_n_decimal_places(distance, 6),
-                   Catch::Matchers::WithinAbs(0.665060, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0.665060, physical_constants::FLOATING_POINT_EPSILON));
         CHECK((((defect_pos.x == -1) && (defect_pos.y == -1) && (defect_pos.z == 1)) ||
                ((defect_pos.x == 1) && (defect_pos.y == -1) && (defect_pos.z == 1))));
     }
@@ -50,7 +50,7 @@ TEST_CASE("Test influence distance function", "[maximum-defect-influence-positio
         const auto [defect_pos, distance] = maximum_defect_influence_position_and_distance(lyt, sim_params);
         CHECK_THAT(round_to_n_decimal_places(distance, 4) -
                        round_to_n_decimal_places(sidb_nanometer_distance(lyt, {0, 0, 0}, {-1, 0, 1}), 4),
-                   Catch::Matchers::WithinAbs(0.0, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0.0, physical_constants::FLOATING_POINT_EPSILON));
     }
 
     SECTION("layout with one SiDB, negative defect, large lambda_tf")
@@ -62,7 +62,7 @@ TEST_CASE("Test influence distance function", "[maximum-defect-influence-positio
         const auto [defect_pos, distance] = maximum_defect_influence_position_and_distance(lyt, sim_params);
         CHECK_THAT(round_to_n_decimal_places(distance, 4) -
                        round_to_n_decimal_places(sidb_nanometer_distance(lyt, {0, 0, 0}, {0, 1, 0}), 4),
-                   Catch::Matchers::WithinAbs(0.0, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0.0, physical_constants::FLOATING_POINT_EPSILON));
     }
 
     SECTION("layout with one pertuber and one DB pair, negative defect")
@@ -78,7 +78,7 @@ TEST_CASE("Test influence distance function", "[maximum-defect-influence-positio
         const auto [defect_pos, distance] = maximum_defect_influence_position_and_distance(lyt, sim_params);
         CHECK_THAT(round_to_n_decimal_places(distance, 4) -
                        round_to_n_decimal_places(sidb_nanometer_distance(lyt, {6, 0, 0}, {10, 0, 0}), 4),
-                   Catch::Matchers::WithinAbs(0.0, physical_constants::POP_STABILITY_ERR));
+                   Catch::Matchers::WithinAbs(0.0, physical_constants::FLOATING_POINT_EPSILON));
     }
 
     SECTION("QuickExact simulation of a Y-shape SiDB OR gate with input 01")
