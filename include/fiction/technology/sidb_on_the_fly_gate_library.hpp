@@ -507,14 +507,11 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
                     skeleton, t, is_operational_params{params.phys_params, sidb_simulation_engine::QUICKEXACT}))
             {
                 throw gate_design_exception<tt, GateLyt>(tile, create_id_tt(), p);
-                // black_list[tile][create_id_tt()].push_back(p);
-                // throw std::logic_error("Gate cannot be designed.");
             }
             const auto found_gate_layouts = design_sidb_gates(skeleton, t, params);
             if (found_gate_layouts.empty())
             {
                 throw gate_design_exception<tt, GateLyt>(tile, create_id_tt(), p);
-                // throw std::logic_error("Gate cannot be designed.");
             }
             const auto lyt = cell_list_to_gate<char>(cell_level_layout_to_list(found_gate_layouts.front()));
             return lyt;
@@ -523,16 +520,12 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
         if (is_gate_design_impossible(skeleton, t,
                                       is_operational_params{params.phys_params, sidb_simulation_engine::QUICKEXACT}))
         {
-            // black_list[tile][t.front()].push_back(p);
             throw gate_design_exception<tt, GateLyt>(tile, t.front(), p);
-            // throw std::logic_error("Gate cannot be designed.");
         }
         const auto found_gate_layouts = design_sidb_gates(skeleton, t, params);
         if (found_gate_layouts.empty())
         {
-            // black_list[tile][t.front()].push_back(p);
             throw gate_design_exception<tt, GateLyt>(tile, t.front(), p);
-            // throw std::logic_error("Gate cannot be designed.");
         }
         const auto lyt = cell_list_to_gate<char>(cell_level_layout_to_list(found_gate_layouts.front()));
         return lyt;
