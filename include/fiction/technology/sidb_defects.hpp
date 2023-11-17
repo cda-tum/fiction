@@ -172,25 +172,32 @@ inline constexpr const uint16_t SIDB_NEUTRAL_DEFECT_VERTICAL_SPACING = 0u;
  * If the defect type is `NONE`, `{0, 0}` is returned.
  *
  * @param defect Defect type to evaluate.
- * @param user_defined_spacing_charged_defects Influence of charged atomic defects on SiDBs, represented as an optional
- * pair of horizontal and vertical spacings.
+ * @param charged_defect_spacing_overwrite Override the default influence distance of charged atomic defects on SiDBs
+ * with an optional pair of horizontal and vertical distances.
+ * @param neutral_defect_spacing_overwrite Override the default influence distance of neutral atomic defects on SiDBs
+* with an optional pair of horizontal and vertical distances.
  * @return A pair of uint16_t values representing the number of horizontal and vertical SiDBs affected by the given
  * defect type.
  */
 [[nodiscard]] static constexpr std::pair<uint16_t, uint16_t> defect_extent(
     const sidb_defect&                                  defect,
-    const std::optional<std::pair<uint16_t, uint16_t>>& user_defined_spacing_charged_defects = std::nullopt) noexcept
+    const std::optional<std::pair<uint16_t, uint16_t>>& charged_defect_spacing_overwrite = std::nullopt,
+    const std::optional<std::pair<uint16_t, uint16_t>>& neutral_defect_spacing_overwrite = std::nullopt) noexcept
 {
     if (is_charged_defect(defect))
     {
-        if (user_defined_spacing_charged_defects.has_value())
+        if (charged_defect_spacing_overwrite.has_value())
         {
-            return user_defined_spacing_charged_defects.value();
+            return charged_defect_spacing_overwrite.value();
         }
         return {SIDB_CHARGED_DEFECT_HORIZONTAL_SPACING, SIDB_CHARGED_DEFECT_VERTICAL_SPACING};
     }
     if (is_neutral_defect(defect))
     {
+        if (neutral_defect_spacing_overwrite.has_value())
+        {
+            return neutral_defect_spacing_overwrite.value();
+        }
         return {SIDB_NEUTRAL_DEFECT_HORIZONTAL_SPACING, SIDB_NEUTRAL_DEFECT_VERTICAL_SPACING};
     }
 

@@ -51,13 +51,13 @@ class apply_gate_library_impl
      * process.
      *
      * @tparam GateLibraryblack Type of the gate library used to generate the blacklist.
+     * @tparam Params Type of the parameter used for the on-the-fly gate library.
      * @param defect_surface Defect surface with atomic defects.
      * @param params Parameter for the gate library.
      * @return A cell-level layout implementing gate types with building blocks defined in `GateLibrary`.
      */
-    template <typename GateLibraryblack>
-    [[nodiscard]] CellLyt design_gates_on_the_fly(const sidb_surface<CellLyt>&               defect_surface,
-                                                  const sidb_on_the_fly_gate_library_params& params)
+    template <typename GateLibraryblack, typename Params>
+    [[nodiscard]] CellLyt design_gates_on_the_fly(const sidb_surface<CellLyt>& defect_surface, const Params& params)
     {
 #if (PROGRESS_BARS)
         // initialize a progress bar
@@ -75,7 +75,7 @@ class apply_gate_library_impl
                         relative_to_absolute_cell_position<GateLibrary::gate_x_size(), GateLibrary::gate_y_size(),
                                                            GateLyt, CellLyt>(gate_lyt, t, cell<CellLyt>{0, 0});
 
-                    const auto gate = GateLibrary::template set_up_gate<GateLyt, CellLyt, GateLibraryblack>(
+                    const auto gate = GateLibrary::template set_up_gate<GateLyt, CellLyt, GateLibraryblack, Params>(
                         gate_lyt, t, defect_surface, params);
 
                     assign_gate(c, gate, n);
@@ -228,19 +228,21 @@ template <typename CellLyt, typename GateLibrary, typename GateLyt>
  * @tparam CellLyt Type of the returned cell-level layout.
  * @tparam GateLibrary Type of the gate library to apply.
  * @tparam GateLyt Type of the gate-level layout to apply the library to.
- * @tparam GateLibraryblack Type of the Gate Library to generate the blacklist.
+ * @tparam GateLibraryblack Type of the gate library to generate the blacklist.
+ * @tparam Params Type of the parameter used for the on-the-fly gate library.
  * @param lyt The gate-level layout.
  * @param defect_surface Defect surface with all atomic defects.
  * @param params Parameter for the gate library.
  * @return A cell-level layout that implements `lyt`'s gate types with building blocks defined in `GateLibrary`.
  */
-template <typename CellLyt, typename GateLibrary, typename GateLyt, typename GateLibraryblack>
+template <typename CellLyt, typename GateLibrary, typename GateLyt, typename GateLibraryblack, typename Params>
 [[nodiscard]] CellLyt apply_on_the_fly_gate_library(const GateLyt& lyt, const sidb_surface<CellLyt>& defect_surface,
-                                                    const sidb_on_the_fly_gate_library_params& params)
+                                                    const Params& params)
 {
     static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
-    static_assert(!has_siqad_coord_v<CellLyt>, "CellLyt cannot have SiQAD coordinates");
     static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
+    static_assert(has_offset_ucoord_v<CellLyt> || has_cube_coord_v<CellLyt>,
+                  "CellLyt must be either based on cube or offset coordinates");
     static_assert(mockturtle::has_is_constant_v<GateLyt>, "GateLyt does not implement the is_constant function");
     static_assert(mockturtle::has_foreach_node_v<GateLyt>, "GateLyt does not implement the foreach_node function");
 
@@ -249,7 +251,7 @@ template <typename CellLyt, typename GateLibrary, typename GateLyt, typename Gat
 
     detail::apply_gate_library_impl<CellLyt, GateLibrary, GateLyt> p{lyt};
 
-    return p.template design_gates_on_the_fly<GateLibraryblack>(defect_surface, params);
+    return p.template design_gates_on_the_fly<GateLibraryblack, Params>(defect_surface, params);
 }
 
 }  // namespace fiction

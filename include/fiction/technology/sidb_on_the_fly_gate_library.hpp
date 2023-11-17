@@ -7,7 +7,6 @@
 
 #include "fiction/algorithms/path_finding/distance.hpp"
 #include "fiction/algorithms/physical_design/design_sidb_gates.hpp"
-#include "fiction/algorithms/physical_design/is_gate_design_impossible.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/fcn_gate_library.hpp"
@@ -15,6 +14,7 @@
 #include "fiction/technology/sidb_surface_analysis.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/layout_utils.hpp"
+#include "sidb_is_gate_design_impossible.hpp"
 
 #include <array>
 #include <exception>
@@ -37,7 +37,7 @@ class gate_design_exception : public std::exception
 {
   public:
     /**
-     * @brief Constructor for the gate_design_exception class.
+     * Constructor for the gate_design_exception class.
      *
      * @param ti The tile associated with the error.
      * @param spec The truth table associated with the error.
@@ -53,8 +53,6 @@ class gate_design_exception : public std::exception
 
     /**
      * Get the tile associated with the exception.
-     *
-     * @return The tile associated with the error.
      */
     [[nodiscard]] tile<GateLyt> which_tile() const noexcept
     {
@@ -63,8 +61,6 @@ class gate_design_exception : public std::exception
 
     /**
      * Get the truth table associated with the exception.
-     *
-     * @return The truth table associated with the error.
      */
     [[nodiscard]] TT which_truth_table() const noexcept
     {
@@ -73,8 +69,6 @@ class gate_design_exception : public std::exception
 
     /**
      * Get the port list associated with the exception.
-     *
-     * @return The port list associated with the error.
      */
     [[nodiscard]] port_list<port_direction> which_port_list() const noexcept
     {
@@ -84,26 +78,20 @@ class gate_design_exception : public std::exception
   private:
     /**
      * The tile associated with the error.
-     *
-     * @return The tile associated with the error.
      */
-    const tile<GateLyt>& error_tile{};
+    const tile<GateLyt> error_tile{};
     /**
      * The truth table associated with the error.
-     *
-     * @return The port list associated with the error.
      */
-    const TT& truth_table{};
+    const TT truth_table{};
     /**
      * The port list associated with the error.
-     *
-     * @return The port list associated with the error.
      */
-    const port_list<port_direction>& p;
+    const port_list<port_direction> p;
 };
 
 /**
- * This struct encapsulates parameters for the dynamic gate library.
+ * This struct encapsulates parameters for the on-the-fly SiDB gate library.
  */
 struct sidb_on_the_fly_gate_library_params
 {
@@ -121,7 +109,6 @@ struct sidb_on_the_fly_gate_library_params
      * and half-adder.
      */
     uint64_t canvas_sidb_complex_gates = 3;
-
     /**
      * This variable specifies the radius around the middle of the hexagon where atomic defects are incorporated into
      * the gate design.
@@ -157,8 +144,9 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
     set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t, const sidb_surface<CellLyt>& sidb_surface,
                 const sidb_on_the_fly_gate_library_params& parameter = sidb_on_the_fly_gate_library_params{})
     {
-        static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt must be a gate level layout.");
-        static_assert(!has_siqad_coord_v<CellLyt>, "CellLyt has SiQAD coordinates.");
+        static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt must be a gate-level layout");
+        static_assert(has_offset_ucoord_v<CellLyt> || has_cube_coord_v<CellLyt>,
+                      "CellLyt must be either based on cube or offset coordinates");
 
         const auto n = lyt.get_node(t);
         const auto f = lyt.node_function(n);
@@ -600,7 +588,7 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
      * to the skeleton. The defects within a specified distance from the center cell are taken into account.
      * The resulting skeleton with added defects is returned.
      *
-     * @tparam Lyt The type of the skeleton, which should not have SiQAD coordinates.
+     * @tparam CellLyt The type of the defect surface, which should not have SiQAD coordinates.
      * @tparam LytSkeleton The type of the skeleton, which should have SiQAD coordinates.
      * @param defect_surface The defect surface containing defects to be added.
      * @param skeleton The skeleton to which defects will be added.
@@ -609,14 +597,15 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
      * @param params Parameters for defect handling.
      * @return The updated skeleton with added defects from the surrounding area.
      */
-    template <typename Lyt, typename LytSkeleton>
+    template <typename CellLyt, typename LytSkeleton>
     [[nodiscard]] static LytSkeleton
-    add_defect_to_skeleton(const sidb_surface<Lyt>& defect_surface, const LytSkeleton& skeleton,
+    add_defect_to_skeleton(const sidb_surface<CellLyt>& defect_surface, const LytSkeleton& skeleton,
                            const siqad::coord_t& center_cell_siqad, const siqad::coord_t& absolute_cell_siqad,
                            const sidb_on_the_fly_gate_library_params& params)
     {
-        static_assert(!has_siqad_coord_v<Lyt>, "Lyt has SiQAD coordinates.");
-        static_assert(has_siqad_coord_v<LytSkeleton>, "Lyt_skeleton does not have SiQAD coordinates.");
+        static_assert(has_offset_ucoord_v<CellLyt> || has_cube_coord_v<CellLyt>,
+                      "CellLyt must be either based on cube or offset coordinates");
+        static_assert(has_siqad_coord_v<LytSkeleton>, "Lyt_skeleton does not have SiQAD coordinates");
         auto lyt_copy = LytSkeleton{skeleton.clone()};
         defect_surface.foreach_sidb_defect(
             [&defect_surface, &lyt_copy, &skeleton, &center_cell_siqad, &absolute_cell_siqad, &params](const auto& cd)

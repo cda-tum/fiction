@@ -4,7 +4,7 @@
 
 #include <catch2/catch_template_test_macros.hpp>
 
-#include <fiction/algorithms/physical_design/is_gate_design_impossible.hpp>
+#include "fiction/technology/sidb_is_gate_design_impossible.hpp"
 #include <fiction/technology/sidb_defects.hpp>
 #include <fiction/technology/sidb_surface.hpp>
 #include <fiction/traits.hpp>

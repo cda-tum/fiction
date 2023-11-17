@@ -2,8 +2,8 @@
 // Created by Jan Drewniok on 25.10.23.
 //
 
-#ifndef FICTION_IS_GATE_DESIGN_IMPOSSIBLE_HPP
-#define FICTION_IS_GATE_DESIGN_IMPOSSIBLE_HPP
+#ifndef FICTION_SIDB_IS_GATE_DESIGN_IMPOSSIBLE_HPP
+#define FICTION_SIDB_IS_GATE_DESIGN_IMPOSSIBLE_HPP
 
 #include "fiction/algorithms/iter/bdl_input_iterator.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
@@ -84,4 +84,4 @@ bool is_gate_design_impossible(const Lyt& layout, const std::vector<TT>& spec, c
 
 }  // namespace fiction
 
-#endif  // FICTION_IS_GATE_DESIGN_IMPOSSIBLE_HPP
+#endif  // FICTION_SIDB_IS_GATE_DESIGN_IMPOSSIBLE_HPP

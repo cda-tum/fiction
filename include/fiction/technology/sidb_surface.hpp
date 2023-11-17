@@ -179,20 +179,24 @@ class sidb_surface<Lyt, false> : public Lyt
      * If the given coordinate is defect-free, the empty set is returned.
      *
      * @param c Coordinate whose defect extent is to be determined.
-     * @param user_defined_spacing_charged_defects Influence of charged atomic defects on SiDBs, represented as an
-     * optional pair of horizontal and vertical spacings.
+     * @param charged_defect_spacing_overwrite Override the default influence distance of charged atomic defects on
+     * SiDBs with an optional pair of horizontal and vertical distances.
+     * @param neutral_defect_spacing_overwrite Override the default influence distance of neutral atomic defects on
+     * SiDBs with an optional pair of horizontal and vertical distances.
      * @return All SiDB positions affected by the defect at coordinate c.
      */
     [[nodiscard]] std::unordered_set<typename Lyt::coordinate>
     affected_sidbs(const typename Lyt::coordinate&                     c,
-                   const std::optional<std::pair<uint16_t, uint16_t>>& user_defined_spacing_charged_defects =
+                   const std::optional<std::pair<uint16_t, uint16_t>>& charged_defect_spacing_overwrite = std::nullopt,
+                   const std::optional<std::pair<uint16_t, uint16_t>>& neutral_defect_spacing_overwrite =
                        std::nullopt) const noexcept
     {
         std::unordered_set<typename Lyt::coordinate> influenced_sidbs{};
 
         if (const auto d = get_sidb_defect(c); d.type != sidb_defect_type::NONE)
         {
-            const auto [horizontal_extent, vertical_extent] = defect_extent(d, user_defined_spacing_charged_defects);
+            const auto [horizontal_extent, vertical_extent] =
+                defect_extent(d, charged_defect_spacing_overwrite, neutral_defect_spacing_overwrite);
 
             for (auto y = static_cast<int64_t>(c.y - vertical_extent); y <= static_cast<int64_t>(c.y + vertical_extent);
                  ++y)
@@ -216,19 +220,26 @@ class sidb_surface<Lyt, false> : public Lyt
      *
      * If the given surface is defect-free, the empty set is returned.
      *
-     * @param user_defined_spacing_charged_defects Influence of charged atomic defects on SiDBs, represented as an
-     * optional pair of horizontal and vertical spacings.
+     * @param charged_defect_spacing_overwrite Override the default influence distance of charged atomic defects on
+     * SiDBs with an optional pair of horizontal and vertical distances.
+     * @param neutral_defect_spacing_overwrite Override the default influence distance of neutral atomic defects on
+     * SiDBs with an optional pair of horizontal and vertical distances.
      * @return All SiDB positions affected by any defect on the surface.
      */
-    [[nodiscard]] std::unordered_set<typename Lyt::coordinate>
-    all_affected_sidbs(const std::optional<std::pair<uint64_t, uint64_t>>& user_defined_spacing_charged_defects =
-                           std::nullopt) const noexcept
+    [[nodiscard]] std::unordered_set<typename Lyt::coordinate> all_affected_sidbs(
+        const std::optional<std::pair<uint64_t, uint64_t>>& charged_defect_spacing_overwrite = std::nullopt,
+        const std::optional<std::pair<uint64_t, uint64_t>>& neutral_defect_spacing_overwrite =
+            std::nullopt) const noexcept
     {
         std::unordered_set<typename Lyt::coordinate> influenced_sidbs{};
 
         foreach_sidb_defect(
-            [&influenced_sidbs, &user_defined_spacing_charged_defects, this](const auto& it)
-            { influenced_sidbs.merge(affected_sidbs(it.first, user_defined_spacing_charged_defects)); });
+            [&influenced_sidbs, &charged_defect_spacing_overwrite, &neutral_defect_spacing_overwrite,
+             this](const auto& it)
+            {
+                influenced_sidbs.merge(
+                    affected_sidbs(it.first, charged_defect_spacing_overwrite, neutral_defect_spacing_overwrite));
+            });
 
         return influenced_sidbs;
     }
