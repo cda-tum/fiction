@@ -77,9 +77,10 @@ template <typename GateLibrary, typename GateLyt, typename CellLyt>
 
     surface_black_list<GateLyt, port_type> black_list{};
 
-    const auto sidbs_affected_by_defects = surface.all_affected_sidbs(charged_defect_spacing_overwrite, neutral_defect_spacing_overwrite);
-    const auto gate_implementations      = GateLibrary::get_functional_implementations();
-    const auto gate_ports                = GateLibrary::get_gate_ports();
+    const auto sidbs_affected_by_defects =
+        surface.all_affected_sidbs(charged_defect_spacing_overwrite, neutral_defect_spacing_overwrite);
+    const auto gate_implementations = GateLibrary::get_functional_implementations();
+    const auto gate_ports           = GateLibrary::get_gate_ports();
 
     // a lambda that analyzes defect impact on a gate at a given layout tile
     // it had to be extracted from the foreach_tile lambda because its nesting caused an C1001: internal compiler error

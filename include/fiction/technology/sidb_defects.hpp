@@ -175,7 +175,7 @@ inline constexpr const uint16_t SIDB_NEUTRAL_DEFECT_VERTICAL_SPACING = 0u;
  * @param charged_defect_spacing_overwrite Override the default influence distance of charged atomic defects on SiDBs
  * with an optional pair of horizontal and vertical distances.
  * @param neutral_defect_spacing_overwrite Override the default influence distance of neutral atomic defects on SiDBs
-* with an optional pair of horizontal and vertical distances.
+ * with an optional pair of horizontal and vertical distances.
  * @return A pair of uint16_t values representing the number of horizontal and vertical SiDBs affected by the given
  * defect type.
  */
