@@ -534,8 +534,10 @@ TEMPLATE_TEST_CASE(
     (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
     (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
+    // initialize SiDB layout
     TestType lyt{};
 
+    // design random SiDB layout
     lyt.assign_cell_type({11, 15, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({37, 8, 0}, TestType::cell_type::NORMAL);
 
@@ -561,8 +563,10 @@ TEMPLATE_TEST_CASE(
 
     quicksim_params quicksim_params{params};
 
+    // check QuickSim parameters
     REQUIRE(quicksim_params.phys_params.mu_minus == -0.32);
 
+    // lambda function to check charge configurations
     const auto check_charge_configuration = [](const sidb_simulation_result<TestType>& stats) noexcept
     {
         REQUIRE(!stats.charge_distributions.empty());
@@ -593,6 +597,7 @@ TEMPLATE_TEST_CASE(
         check_for_runtime_measurement(simulation_results);
         check_charge_configuration(simulation_results);
     }
+
     SECTION("0 threads")
     {
         quicksim_params.number_threads = 0;

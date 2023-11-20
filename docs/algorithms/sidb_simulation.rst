@@ -173,3 +173,24 @@ Binary-dot Logic (BDL) Pair Detection
 .. doxygenstruct:: fiction::detect_bdl_pairs_params
    :members:
 .. doxygenfunction:: fiction::detect_bdl_pairs
+
+
+Assess Population Stability
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Header:** ``fiction/algorithms/simulation/sidb/assess_physical_population_stability.hpp``
+
+.. doxygenenum:: fiction::transition_type
+.. doxygenstruct:: fiction::population_stability_information
+   :members:
+.. doxygenstruct:: fiction::assess_physical_population_stability_params
+   :members:
+.. doxygenfunction:: fiction::assess_physical_population_stability
+
+
+Convert Potential to Distance
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Header:** ``fiction/algorithms/simulation/sidb/convert_potential_to_distance.hpp``
+
+.. doxygenfunction:: fiction::convert_potential_to_distance

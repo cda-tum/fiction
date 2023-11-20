@@ -871,7 +871,7 @@ class operational_domain_impl
         const auto decr_x = (x > 0) ? x - 1 : x;
         const auto incr_x = (x + 1 < x_indices.size()) ? x + 1 : x;
         const auto decr_y = (y > 0) ? y - 1 : y;
-        const auto incr_y = (y + 1 < x_indices.size()) ? y + 1 : y;
+        const auto incr_y = (y + 1 < y_indices.size()) ? y + 1 : y;
 
         // add neighbors in clockwise direction
 
