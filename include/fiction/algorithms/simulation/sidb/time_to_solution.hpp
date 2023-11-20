@@ -105,14 +105,14 @@ void time_to_solution(Lyt& lyt, const quicksim_params& quicksim_params, const ti
     sidb_simulation_result<Lyt> simulation_result{};
     if (tts_params.engine == exhaustive_sidb_simulation_engine::QUICKEXACT)
     {
-        st.algorithm      = "QuickExact";
-        simulation_result = exhaustive_ground_state_simulation(lyt, quicksim_params.phys_params);
-    }
-    else
-    {
         const quickexact_params<Lyt> params{quicksim_params.phys_params};
         st.algorithm      = "QuickExact";
         simulation_result = quickexact(lyt, params);
+    }
+    else
+    {
+        st.algorithm      = "ExGS";
+        simulation_result = exhaustive_ground_state_simulation(lyt, quicksim_params.phys_params);
     }
 
     st.single_runtime_exhaustive = mockturtle::to_seconds(simulation_result.simulation_runtime);
