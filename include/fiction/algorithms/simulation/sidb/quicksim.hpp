@@ -78,6 +78,12 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
     st.additional_simulation_parameters.emplace_back("iteration_steps", ps.interation_steps);
     st.additional_simulation_parameters.emplace_back("alpha", ps.alpha);
     st.physical_parameters = ps.phys_params;
+
+    if (lyt.num_cells() == 0)
+    {
+        return st;
+    }
+
     st.charge_distributions.reserve(ps.interation_steps);
 
     mockturtle::stopwatch<>::duration time_counter{};

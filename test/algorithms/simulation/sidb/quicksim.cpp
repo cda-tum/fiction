@@ -43,7 +43,7 @@ TEMPLATE_TEST_CASE(
 
     const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
 
-    CHECK(simulation_results.charge_distributions.size() == 2);
+    CHECK(simulation_results.charge_distributions.empty());
     REQUIRE(!simulation_results.additional_simulation_parameters.empty());
     CHECK(simulation_results.algorithm_name == "QuickSim");
     CHECK(simulation_results.additional_simulation_parameters[0].first == "iteration_steps");

@@ -99,6 +99,11 @@ class quickexact_impl
         result.algorithm_name      = "QuickExact";
         result.physical_parameters = params.physical_parameters;
 
+        if (layout.num_cells() == 0)
+        {
+            return result;
+        }
+
         mockturtle::stopwatch<>::duration time_counter{};
         {
             const mockturtle::stopwatch stop{time_counter};
