@@ -199,10 +199,6 @@ class quickexact_impl
                     result.charge_distributions.push_back(charge_lyt_copy);
                 }
             }
-            else
-            {
-                result.charge_distributions.push_back(charge_lyt);
-            }
 
             for (const auto& cell : preassigned_negative_sidbs)
             {

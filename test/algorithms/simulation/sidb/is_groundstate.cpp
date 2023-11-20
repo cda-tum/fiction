@@ -33,7 +33,7 @@ TEMPLATE_TEST_CASE(
         const quicksim_params quicksim_params{params};
         const auto            simulation_results_quicksim = quicksim<TestType>(charge_layout, quicksim_params);
 
-        CHECK(is_ground_state(simulation_results_exgs, simulation_results_quicksim));
+        CHECK(!is_ground_state(simulation_results_exgs, simulation_results_quicksim));
     }
 
     SECTION("layout with two SiDBs placed directly next to each other with non-realistic relative permittivity")
