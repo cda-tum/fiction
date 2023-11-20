@@ -133,16 +133,16 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
      * @tparam GateLyt Pointy-top hexagonal gate-level layout type.
      * @tparam CellLyt The type of the cell-level layout.
      * @tparam GateLibraryblack Type of the gate-level layout used to generate the blacklist.
+     * @tparam Params Type of the parameter used for the on-the-fly gate library.
      * @param lyt Layout that hosts tile `t`.
      * @param t Tile to be realized as a Bestagon gate.
      * @param sidb_surface SiDB surface which stores all atomic defects.
      * @param parameter Parameter to design SiDB gates on-the-fly.
      * @return Bestagon gate representation of `t` including mirroring.
      */
-    template <typename GateLyt, typename CellLyt, typename GateLibraryblack>
-    static fcn_gate
-    set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t, const sidb_surface<CellLyt>& sidb_surface,
-                const sidb_on_the_fly_gate_library_params& parameter = sidb_on_the_fly_gate_library_params{})
+    template <typename GateLyt, typename CellLyt, typename GateLibraryblack, typename Params>
+    static fcn_gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t, const sidb_surface<CellLyt>& sidb_surface,
+                                const Params& parameter = Params{})
     {
         static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt must be a gate-level layout");
         static_assert(has_offset_ucoord_v<CellLyt> || has_cube_coord_v<CellLyt>,
@@ -405,6 +405,7 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
      * various conditions, including the presence of defects and spacing requirements.
      *
      * @tparam Lyt The type of the cell-level layout.
+     * @tparam Params Type of the parameter used for the on-the-fly gate library.
      * @param bestagon_lyt The Bestagon gate which is to be applied.
      * @param defect_lyt The layout with defects that may affect gate applicability.
      * @param parameter Parameters for the gate design and simulation.
@@ -412,10 +413,9 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
      * @return `true` if the Bestagon gate is applicable to the layout, considering the provided conditions;
      *         otherwise, returns `false`.
      */
-    template <typename Lyt>
+    template <typename Lyt, typename Params>
     [[nodiscard]] static bool is_bestagon_gate_applicable(const Lyt& bestagon_lyt, const sidb_surface<Lyt>& defect_lyt,
-                                                          const design_sidb_gates_params& parameter,
-                                                          const std::vector<tt>&          truth_table)
+                                                          const Params& parameter, const std::vector<tt>& truth_table)
     {
         auto       defect_copy               = defect_lyt.clone();
         const auto sidbs_affected_by_defects = defect_copy.all_affected_sidbs(std::pair(0, 0));
@@ -484,9 +484,9 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
     /**
      * Designs an SiDB gate implementation if possible.
      *
+     * @tparam Lyt The type of the cell-level layout.
      * @tparam GateLyt Pointy-top hexagonal gate-level layout type.
-     * @tparam CellLyt The type of the cell-level layout.
-     * @tparam GateLibraryblack Type of the gate-level layout used to generate the blacklist.
+     * @tparam Params Type of the parameter used for the on-the-fly gate library.
      * @param skeleton Skeleton with atomic defects if available.
      * @param t A vector of truth tables representing the logic functions for the gate.
      * @param params Parameters for the SiDB gate design process.
@@ -496,7 +496,7 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
      *
      * @return A fcn gate object, or an error fcn gate if no suitable layout is found.
      */
-    template <typename Lyt, typename GateLyt, typename GateLibrary>
+    template <typename Lyt, typename GateLyt, typename Params>
     [[nodiscard]] static fcn_gate design_gate(const Lyt& skeleton, const std::vector<tt>& t,
                                               const design_sidb_gates_params&  params,
                                               const port_list<port_direction>& p, const tile<GateLyt>& tile)
