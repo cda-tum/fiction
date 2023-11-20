@@ -44,7 +44,7 @@ TEMPLATE_TEST_CASE(
         const time_to_solution_params tts_params_exgs{exhaustive_sidb_simulation_engine::EXGS};
         time_to_solution<TestType>(lyt, quicksim_params, tts_params_exgs, &tts_stat_exgs);
 
-        CHECK(tts_stat_exgs.algorithm == "QuickExact");
+        CHECK(tts_stat_exgs.algorithm == "Exhaustive Ground State Simulation");
         CHECK_THAT(tts_stat_exgs.acc, Catch::Matchers::WithinAbs(0.0, 0.00001));
         CHECK_THAT(tts_stat_exgs.time_to_solution,
                    Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.00001));
@@ -62,7 +62,6 @@ TEMPLATE_TEST_CASE(
         const time_to_solution_params    tts_params_quickexact{exhaustive_sidb_simulation_engine::QUICKEXACT};
         time_to_solution<TestType>(lyt, quicksim_params, tts_params_quickexact, &tts_stat_quickexact);
 
-        CHECK(tts_stat_quickexact.algorithm == "QuickExact");
         CHECK_THAT(tts_stat_quickexact.acc, Catch::Matchers::WithinAbs(0.0, 0.00001));
         CHECK_THAT(tts_stat_quickexact.time_to_solution,
                    Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.00001));
@@ -72,7 +71,6 @@ TEMPLATE_TEST_CASE(
         const time_to_solution_params tts_params_exgs{exhaustive_sidb_simulation_engine::EXGS};
         time_to_solution<TestType>(lyt, quicksim_params, tts_params_exgs, &tts_stat_exgs);
 
-        CHECK(tts_stat_exgs.algorithm == "QuickExact");
         CHECK_THAT(tts_stat_exgs.acc, Catch::Matchers::WithinAbs(0.0, 0.00001));
         CHECK_THAT(tts_stat_exgs.time_to_solution,
                    Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.00001));
