@@ -52,7 +52,7 @@ struct is_operational_params
     /**
      * The simulation parameters for the physical simulation of the ground state.
      */
-    sidb_simulation_parameters simulation_parameter{};
+    sidb_simulation_parameters sim_params{};
     /**
      * The simulation engine to be used for the operational domain computation.
      */
@@ -115,7 +115,7 @@ class is_operational_impl
             ++simulator_invocations;
 
             // if positively charged SiDBs can occur, the SiDB layout is considered as non-operational
-            if (can_positive_charges_occur(*bii, parameters.simulation_parameter))
+            if (can_positive_charges_occur(*bii, parameters.sim_params))
             {
                 return operational_status::NON_OPERATIONAL;
             }
@@ -223,23 +223,23 @@ class is_operational_impl
     [[nodiscard]] sidb_simulation_result<Lyt>
     physical_simulation_of_layout(const bdl_input_iterator<Lyt>& bdl_iterator) noexcept
     {
-        assert(parameters.simulation_parameter.base == 2 && "base number is set to 3");
+        assert(parameters.sim_params.base == 2 && "base number is set to 3");
         if (parameters.sim_engine == sidb_simulation_engine::EXGS)
         {
             // perform an exhaustive ground state simulation
-            return exhaustive_ground_state_simulation(*bdl_iterator, parameters.simulation_parameter);
+            return exhaustive_ground_state_simulation(*bdl_iterator, parameters.sim_params);
         }
         if (parameters.sim_engine == sidb_simulation_engine::QUICKSIM)
         {
             // perform a heuristic simulation
-            const quicksim_params qs_params{parameters.simulation_parameter, 500, 0.6};
+            const quicksim_params qs_params{parameters.sim_params, 500, 0.6};
             return quicksim(*bdl_iterator, qs_params);
         }
         if (parameters.sim_engine == sidb_simulation_engine::QUICKEXACT)
         {
             // perform exact simulation
             const quickexact_params<Lyt> quickexact_params{
-                parameters.simulation_parameter, fiction::quickexact_params<Lyt>::automatic_base_number_detection::OFF};
+                parameters.sim_params, fiction::quickexact_params<Lyt>::automatic_base_number_detection::OFF};
             return quickexact(*bdl_iterator, quickexact_params);
         }
 
@@ -275,13 +275,14 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
     static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
-    assert(lyt.num_pis() > 0 && "skeleton needs input cells");
-    assert(lyt.num_pos() > 0 && "skeleton needs output cells");
+    assert(lyt.num_pis() > 0 && "lyt needs input cells");
+    assert(lyt.num_pos() > 0 && "lyt needs output cells");
 
     assert(!spec.empty());
     // all elements in tts must have the same number of variables
-    assert(std::adjacent_find(spec.begin(), spec.end(),
-                              [](const auto& a, const auto& b) { return a.num_vars() != b.num_vars(); }) == spec.end());
+    assert(std::adjacent_find(spec.cbegin(), spec.cend(),
+                              [](const auto& a, const auto& b)
+                              { return a.num_vars() != b.num_vars(); }) == spec.cend());
 
     detail::is_operational_impl<Lyt, TT> p{lyt, spec, params};
 
