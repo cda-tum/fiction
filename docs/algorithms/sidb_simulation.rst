@@ -58,20 +58,23 @@ Heuristic Ground State Simulation
 Exhaustive Ground State Simulation
 ##################################
 
-**Header:** ``fiction/algorithms/simulation/sidb/quickexact.hpp``
-
-.. doxygenenum:: fiction::required_simulation_base_number
-.. doxygenstruct:: fiction::quickexact_params
-   :members:
-.. doxygenfunction:: fiction::quickexact
-
 .. tabs::
     .. tab:: C++
+        **Header:** ``fiction/algorithms/simulation/sidb/quickexact.hpp``
+
+        .. doxygenstruct:: fiction::quickexact_params
+           :members:
+        .. doxygenfunction:: fiction::quickexact
+
         **Header:** ``fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp``
 
         .. doxygenfunction:: fiction::exhaustive_ground_state_simulation
 
     .. tab:: Python
+        .. autoclass:: fiction.pyfiction.quickexact_params
+            :members:
+        .. autofunction:: fiction.pyfiction.quickexact
+
         .. autofunction:: fiction.pyfiction.exhaustive_ground_state_simulation
 
 
@@ -183,7 +186,11 @@ Time-to-Solution (TTS) Statistics
         .. doxygenfunction:: fiction::time_to_solution
 
     .. tab:: Python
-        .. autofunction:: fiction.pyfiction.sim_acc_tts
+        .. autoclass:: fiction.pyfiction.time_to_solution_params
+            :members:
+        .. autoclass:: fiction.pyfiction.time_to_solution_stats
+            :members:
+        .. autofunction:: fiction.pyfiction.time_to_solution
 
 
 Random SiDB Layout Generator
@@ -286,19 +293,35 @@ Binary-dot Logic (BDL) Pair Detection
 Assess Population Stability
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**Header:** ``fiction/algorithms/simulation/sidb/assess_physical_population_stability.hpp``
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/algorithms/simulation/sidb/assess_physical_population_stability.hpp``
 
-.. doxygenenum:: fiction::transition_type
-.. doxygenstruct:: fiction::population_stability_information
-   :members:
-.. doxygenstruct:: fiction::assess_physical_population_stability_params
-   :members:
-.. doxygenfunction:: fiction::assess_physical_population_stability
+        .. doxygenenum:: fiction::transition_type
+        .. doxygenstruct:: fiction::population_stability_information
+           :members:
+        .. doxygenstruct:: fiction::assess_physical_population_stability_params
+           :members:
+        .. doxygenfunction:: fiction::assess_physical_population_stability
+
+    .. tab:: Python
+        .. autoclass:: fiction.pyfiction.transition_type
+            :members:
+        .. autoclass:: fiction.pyfiction.population_stability_information
+            :members:
+        .. autoclass:: fiction.pyfiction.assess_physical_population_stability_params
+            :members:
+        .. autofunction:: fiction.pyfiction.assess_physical_population_stability
 
 
 Convert Potential to Distance
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**Header:** ``fiction/algorithms/simulation/sidb/convert_potential_to_distance.hpp``
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/algorithms/simulation/sidb/convert_potential_to_distance.hpp``
 
-.. doxygenfunction:: fiction::convert_potential_to_distance
+        .. doxygenfunction:: fiction::convert_potential_to_distance
+
+    .. tab:: Python
+        .. autofunction:: fiction.pyfiction.convert_potential_to_distance
