@@ -5,7 +5,7 @@ import os
 import datetime
 
 
-class SIDBSimulationResultUnitTest(unittest.TestCase):
+class TestSiDBSimulationResult(unittest.TestCase):
 
     def test_sidb_simulation_result(self):
         # Use standard constructor.

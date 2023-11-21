@@ -3,7 +3,7 @@ import unittest
 import os
 
 
-class CalculateEnergyAndStateTypeUnitTest(unittest.TestCase):
+class TestCalculateEnergyAndStateType(unittest.TestCase):
 
     def test_calculate_energy_and_state_type(self):
         layout_one = sidb_layout((10, 10))

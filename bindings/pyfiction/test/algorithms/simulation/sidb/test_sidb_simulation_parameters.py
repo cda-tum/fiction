@@ -3,7 +3,7 @@ import unittest
 import os
 
 
-class SIDBSimulationParametersTest(unittest.TestCase):
+class TestSiDBSimulationParameters(unittest.TestCase):
 
     def test_initialization(self):
         params = sidb_simulation_parameters()
