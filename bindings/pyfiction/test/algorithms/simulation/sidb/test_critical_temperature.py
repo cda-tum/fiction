@@ -39,7 +39,7 @@ class TestCriticalTemperature(unittest.TestCase):
 
         critical_temperature_gate_based(cds, spec, params, stats)
 
-        self.assertEqual(stats.algorithm_name, "QuickExact")
+        self.assertEqual(stats.algorithm_name, "QuickSim")
         self.assertLessEqual(stats.critical_temperature, 400)
         self.assertGreater(stats.num_valid_lyt, 1)
 
