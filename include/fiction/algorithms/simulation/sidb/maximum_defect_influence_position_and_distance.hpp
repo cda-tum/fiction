@@ -98,49 +98,53 @@ class maximum_defect_influence_position_and_distance_impl
         // simulate the impact of the defect at a given position on the ground state of the SiDB layout
         const auto process_defect = [&](const auto& defect) noexcept
         {
-            sidb_surface<Lyt> lyt_defect{};
-
-            layout.foreach_cell([this, &lyt_defect](const auto& cell)
-                                { lyt_defect.assign_cell_type(cell, layout.get_cell_type(cell)); });
-
-            // assign defect to layout
-            lyt_defect.assign_sidb_defect(defect, params.defect);
-            // conduct simulation with defect
-            auto simulation_result_defect = quickexact(lyt_defect, params_defect);
-
-            const auto min_energy_defect          = minimum_energy(simulation_result_defect.charge_distributions);
-            uint64_t   charge_index_defect_layout = 0;
-
-            // get the charge index of the ground state
-            for (const auto& lyt_simulation_with_defect : simulation_result_defect.charge_distributions)
+            if (layout.get_cell_type(defect) == Lyt::technology::cell_type::EMPTY)
             {
-                if (std::fabs(round_to_n_decimal_places(lyt_simulation_with_defect.get_system_energy(), 6) -
-                              round_to_n_decimal_places(min_energy_defect, 6)) < std::numeric_limits<double>::epsilon())
+                sidb_surface<Lyt> lyt_defect{};
+
+                layout.foreach_cell([this, &lyt_defect](const auto& cell)
+                                    { lyt_defect.assign_cell_type(cell, layout.get_cell_type(cell)); });
+
+                // assign defect to layout
+                lyt_defect.assign_sidb_defect(defect, params.defect);
+                // conduct simulation with defect
+                auto simulation_result_defect = quickexact(lyt_defect, params_defect);
+
+                const auto min_energy_defect          = minimum_energy(simulation_result_defect.charge_distributions);
+                uint64_t   charge_index_defect_layout = 0;
+
+                // get the charge index of the ground state
+                for (const auto& lyt_simulation_with_defect : simulation_result_defect.charge_distributions)
                 {
-                    lyt_simulation_with_defect.charge_distribution_to_index_general();
-                    charge_index_defect_layout = lyt_simulation_with_defect.get_charge_index_and_base().first;
-                }
-            }
-
-            // defect changes the ground state, i.e., the charge index is changed compared to the charge
-            // distribution without placed defect.
-            if (charge_index_defect_layout != charge_index_layout)
-            {
-                auto distance = std::numeric_limits<double>::max();
-                layout.foreach_cell(
-                    [this, &defect, &distance](const auto& cell)
+                    if (std::fabs(round_to_n_decimal_places(lyt_simulation_with_defect.get_system_energy(), 6) -
+                                  round_to_n_decimal_places(min_energy_defect, 6)) <
+                        std::numeric_limits<double>::epsilon())
                     {
-                        if (sidb_nanometer_distance<Lyt>(layout, cell, defect) < distance)
-                        {
-                            distance = sidb_nanometer_distance<Lyt>(layout, cell, defect);
-                        }
-                    });
+                        lyt_simulation_with_defect.charge_distribution_to_index_general();
+                        charge_index_defect_layout = lyt_simulation_with_defect.get_charge_index_and_base().first;
+                    }
+                }
 
-                // the distance is larger than the current maximum one.
-                if (distance > avoidance_distance)
+                // defect changes the ground state, i.e., the charge index is changed compared to the charge
+                // distribution without placed defect.
+                if (charge_index_defect_layout != charge_index_layout)
                 {
-                    max_defect_position = defect;
-                    avoidance_distance  = distance;
+                    auto distance = std::numeric_limits<double>::max();
+                    layout.foreach_cell(
+                        [this, &defect, &distance](const auto& cell)
+                        {
+                            if (sidb_nanometer_distance<Lyt>(layout, cell, defect) < distance)
+                            {
+                                distance = sidb_nanometer_distance<Lyt>(layout, cell, defect);
+                            }
+                        });
+
+                    // the distance is larger than the current maximum one.
+                    if (distance > avoidance_distance)
+                    {
+                        max_defect_position = defect;
+                        avoidance_distance  = distance;
+                    }
                 }
             }
         };
@@ -187,43 +191,7 @@ class maximum_defect_influence_position_and_distance_impl
         se.x = se.x + params.additional_scanning_area.first;
         se.y = se.y + params.additional_scanning_area.second;
 
-        // start to place the defect at the north-west cell
-        auto defect_cell = nw;
-
-        // maximum number of placable defects in the given bounding box
-        const uint64_t max_defect_positions =
-            static_cast<uint64_t>(std::abs(se.x - nw.x) + 1) * static_cast<uint64_t>(std::abs(se.y - nw.y) + 1) * 2;
-        defect_cells.reserve(max_defect_positions);
-
-        // collect all cells in the bounding box area (spanned by the nw and se) going from top to down from left to
-        // right.
-        while (defect_cell <= se)
-        {
-            // Defect can only be placed at free locations.
-            if (layout.get_cell_type(defect_cell) == sidb_technology::cell_type::EMPTY)
-            {
-                defect_cells.push_back(defect_cell);
-            }
-            if (defect_cell.x < se.x)
-            {
-                defect_cell.x += 1;
-            }
-            else if ((defect_cell.x == se.x) && defect_cell.z == 0)
-            {
-                defect_cell.z += 1;
-                defect_cell.x = nw.x;
-            }
-            else if ((defect_cell.x == se.x) && defect_cell.z == 1)
-            {
-                defect_cell.x = nw.x;
-                defect_cell.y += 1;
-                defect_cell.z = 0;
-            }
-            else
-            {
-                break;
-            }
-        }
+        defect_cells = all_sidbs_in_spanned_area(nw, se);
     }
 };
 
@@ -249,7 +217,8 @@ maximum_defect_influence_position_and_distance(const Lyt&                       
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
+    static_assert(!has_offset_ucoord_v<Lyt>, "Lyt should not be based on offset coordinates");
+    static_assert(!is_charge_distribution_surface_v<Lyt>, "Lyt cannot be a charge distribution surface");
 
     detail::maximum_defect_influence_position_and_distance_impl<Lyt> p{lyt, sim_params};
 

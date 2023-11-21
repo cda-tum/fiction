@@ -39,6 +39,7 @@ namespace fiction
  * This struct contains parameters and settings to design SiDB gates.
  *
  */
+template <typename Lyt>
 struct design_sidb_gates_params
 {
     /**
@@ -66,7 +67,7 @@ struct design_sidb_gates_params
     /**
      * Canvas spanned by the northwest and southeast cell.
      */
-    std::pair<siqad::coord_t, siqad::coord_t> canvas{};
+    std::pair<typename Lyt::cell, typename Lyt::cell> canvas{};
     /**
      * Number of SiDBs placed in the canvas to create a working gate.
      */
@@ -92,7 +93,7 @@ class design_sidb_gates_impl
      * @param tt Expected Boolean function of the layout given as a multi-output truth table.
      * @param ps Parameters and settings for the gate designer.
      */
-    design_sidb_gates_impl(const Lyt& skeleton, const std::vector<TT>& tt, const design_sidb_gates_params& ps) :
+    design_sidb_gates_impl(const Lyt& skeleton, const std::vector<TT>& tt, const design_sidb_gates_params<Lyt>& ps) :
             skeleton_layout{skeleton},
             truth_table{tt},
             params{ps},
@@ -220,11 +221,11 @@ class design_sidb_gates_impl
     /**
      * Parameters for the *SiDB Gate Designer*.
      */
-    const design_sidb_gates_params& params;
+    const design_sidb_gates_params<Lyt>& params;
     /**
      * All cells within the canvas.
      */
-    const std::vector<fiction::siqad::coord_t> all_sidbs_in_cavas;
+    const std::vector<typename Lyt::cell> all_sidbs_in_cavas;
     /**
      * Calculates all possible combinations of distributing the given number of SiDBs within a canvas
      * based on the provided parameters. It generates combinations of SiDB indices (representing the cell position in
@@ -279,9 +280,8 @@ class design_sidb_gates_impl
         {
             for (std::size_t j = i + 1; j < cell_indices.size(); j++)
             {
-                if (sidb_nanometer_distance<sidb_cell_clk_lyt_siqad>(skeleton_layout,
-                                                                     all_sidbs_in_cavas[cell_indices[i]],
-                                                                     all_sidbs_in_cavas[cell_indices[j]]) < 0.5)
+                if (sidb_nanometer_distance<Lyt>(skeleton_layout, all_sidbs_in_cavas[cell_indices[i]],
+                                                 all_sidbs_in_cavas[cell_indices[j]]) < 0.5)
                 {
                     return true;
                 }
@@ -344,12 +344,13 @@ class design_sidb_gates_impl
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] std::vector<Lyt> design_sidb_gates(const Lyt& skeleton, const std::vector<TT>& spec,
-                                                 const design_sidb_gates_params& params = {}) noexcept
+                                                 const design_sidb_gates_params<Lyt>& params = {}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
+    static_assert(!is_charge_distribution_surface_v<Lyt>, "Lyt cannot be a charge distribution surface");
+    static_assert(!has_offset_ucoord_v<Lyt>, "Lyt cannot be based on offset coordinates");
 
     assert(skeleton.num_pis() > 0 && "skeleton needs input cells");
     assert(skeleton.num_pos() > 0 && "skeleton needs output cells");
@@ -361,7 +362,7 @@ template <typename Lyt, typename TT>
 
     detail::design_sidb_gates_impl<Lyt, TT> p{skeleton, spec, params};
 
-    if (params.design_mode == design_sidb_gates_params::design_sidb_gates_mode::EXHAUSTIVE)
+    if (params.design_mode == design_sidb_gates_params<Lyt>::design_sidb_gates_mode::EXHAUSTIVE)
     {
         return p.run_exhaustive_design();
     }

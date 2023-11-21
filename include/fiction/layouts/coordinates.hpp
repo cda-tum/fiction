@@ -780,15 +780,19 @@ struct coord_t
  * @param coord SiQAD coordinate to convert.
  * @return Coordinate of type `CoordinateType`.
  */
-template <typename CoordinateType>
-constexpr CoordinateType to_fiction_coord(const coord_t& coord) noexcept
+template <typename CoordinateTypeOutput, typename CoordinateTypeInput>
+constexpr CoordinateTypeOutput to_fiction_coord(const CoordinateTypeInput& coord) noexcept
 {
+    if constexpr (std::is_same_v<CoordinateTypeInput, CoordinateTypeOutput>)
+    {
+        return coord;
+    }
     if (!coord.is_dead())
     {
         return {coord.x, coord.y * 2 + coord.z};
     }
 
-    return CoordinateType{};
+    return CoordinateTypeOutput{};
 }
 /**
  * Converts any coordinate type to SiQAD coordinates.

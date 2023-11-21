@@ -899,3 +899,105 @@ TEMPLATE_TEST_CASE(
                    Catch::Matchers::WithinAbs(0.505173434, physical_constants::POP_STABILITY_ERR));
     }
 }
+
+TEMPLATE_TEST_CASE(
+    "QuickSim simulation of a Y-shape SiDB arrangement with varying thread counts, cube coordinates", "[quicksim]",
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>),
+    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>>))
+{
+    TestType lyt{};
+
+    lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{-11, -2, 0}),
+                         TestType::cell_type::NORMAL);
+    lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{-10, -1, 0}),
+                         TestType::cell_type::NORMAL);
+    lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{-4, -1, 0}),
+                         TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{-3, -2, 0}),
+                         TestType::cell_type::NORMAL);
+    lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{-7, 0, 1}), TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{-7, 1, 1}), TestType::cell_type::NORMAL);
+    lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{-7, 3, 0}), TestType::cell_type::NORMAL);
+
+    const sidb_simulation_parameters params{2, -0.32};
+
+    quicksim_params quicksim_params{params};
+
+    REQUIRE(quicksim_params.phys_params.mu_minus == -0.32);
+
+    const auto check_charge_configuration = [](const sidb_simulation_result<TestType>& stats) noexcept
+    {
+        REQUIRE(!stats.charge_distributions.empty());
+
+        const auto& charge_lyt_first = stats.charge_distributions.front();
+
+        CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{-11, -2, 0})) ==
+              sidb_charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{-10, -1, 0})) ==
+              sidb_charge_state::NEUTRAL);
+        CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{-3, -2, 0})) ==
+              sidb_charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{-4, -1, 0})) ==
+              sidb_charge_state::NEUTRAL);
+        CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{-7, 0, 1})) ==
+              sidb_charge_state::NEGATIVE);
+        CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{-7, 1, 1})) ==
+              sidb_charge_state::NEUTRAL);
+        CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{-7, 3, 0})) ==
+              sidb_charge_state::NEGATIVE);
+
+        CHECK_THAT(charge_lyt_first.get_system_energy(),
+                   Catch::Matchers::WithinAbs(0.3191788254, physical_constants::POP_STABILITY_ERR));
+    };
+
+    SECTION("Default settings")
+    {
+        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+
+        check_for_absence_of_positive_charges(simulation_results);
+        check_for_runtime_measurement(simulation_results);
+        check_charge_configuration(simulation_results);
+    }
+    SECTION("0 threads")
+    {
+        quicksim_params.number_threads = 0;
+
+        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+
+        check_for_absence_of_positive_charges(simulation_results);
+        check_for_runtime_measurement(simulation_results);
+        check_charge_configuration(simulation_results);
+    }
+    SECTION("1 thread")
+    {
+        quicksim_params.number_threads = 1;
+
+        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+
+        check_for_absence_of_positive_charges(simulation_results);
+        check_for_runtime_measurement(simulation_results);
+        check_charge_configuration(simulation_results);
+    }
+    SECTION("2 threads")
+    {
+        quicksim_params.number_threads = 2;
+
+        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+
+        check_for_absence_of_positive_charges(simulation_results);
+        check_for_runtime_measurement(simulation_results);
+        check_charge_configuration(simulation_results);
+    }
+    SECTION("100 threads")
+    {
+        quicksim_params.number_threads = 100;
+
+        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+
+        check_for_absence_of_positive_charges(simulation_results);
+        check_for_runtime_measurement(simulation_results);
+        check_charge_configuration(simulation_results);
+    }
+}

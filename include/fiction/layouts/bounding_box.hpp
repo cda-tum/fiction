@@ -67,7 +67,7 @@ class bounding_box_2d
             int32_t min_y = std::numeric_limits<int32_t>::max();
             int32_t max_y = std::numeric_limits<int32_t>::min();
 
-            uint8_t min_z = 0;
+            uint8_t min_z = 1;
             uint8_t max_z = 0;
 
             layout.foreach_cell(
