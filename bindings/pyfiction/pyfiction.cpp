@@ -38,7 +38,7 @@
 #include "pyfiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "pyfiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "pyfiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
-// #include "pyfiction/algorithms/simulation/sidb/time_to_solution.hpp"
+ #include "pyfiction/algorithms/simulation/sidb/time_to_solution.hpp"
 #include "pyfiction/algorithms/verification/design_rule_violations.hpp"
 #include "pyfiction/algorithms/verification/equivalence_checking.hpp"
 #include "pyfiction/inout/read_fgl_layout.hpp"

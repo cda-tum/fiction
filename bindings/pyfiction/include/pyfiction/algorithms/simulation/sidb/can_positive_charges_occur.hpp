@@ -22,7 +22,6 @@ namespace detail
 template <typename Lyt>
 void can_positive_charges_occur(pybind11::module& m)
 {
-    namespace py = pybind11;
     using namespace pybind11::literals;
 
     m.def("can_positive_charges_occur", &fiction::can_positive_charges_occur<Lyt>, "lyt"_a, "sim_params"_a,
@@ -33,8 +32,6 @@ void can_positive_charges_occur(pybind11::module& m)
 
 inline void can_positive_charges_occur(pybind11::module& m)
 {
-    namespace py = pybind11;
-
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
     detail::can_positive_charges_occur<py_charge_distribution_surface>(m);

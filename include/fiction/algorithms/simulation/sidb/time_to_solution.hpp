@@ -46,9 +46,8 @@ struct time_to_solution_params
 
 /**
  * This struct stores the time-to-solution, the simulation accuracy and the average single simulation runtime of
- * *QuickSim* quicksim, the single runtime of the exact simulator used, and the number of valid charge
- * configurations found by the exact algorithm.
- *
+ * *QuickSim*, the single runtime of the exact simulator used, and the number of valid charge configurations found by
+ * the exact algorithm.
  */
 struct time_to_solution_stats
 {
