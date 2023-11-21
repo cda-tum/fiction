@@ -112,30 +112,33 @@ Placement Utils
 Routing Utils
 -------------
 
-**Header:** ``fiction/utils/routing_utils.hpp``
-
-.. doxygenstruct:: fiction::routing_objective
-   :members:
-
-.. doxygenclass:: fiction::layout_coordinate_path
-   :members:
-
-.. doxygenclass:: fiction::path_collection
-   :members:
-.. doxygenclass:: fiction::path_set
-   :members:
-
-.. doxygenfunction:: fiction::is_crossable_wire
-
 .. tabs::
     .. tab:: C++
+        **Header:** ``fiction/utils/routing_utils.hpp``
+
+        .. doxygenstruct:: fiction::routing_objective
+           :members:
+
+        .. doxygenclass:: fiction::layout_coordinate_path
+           :members:
+
+        .. doxygenclass:: fiction::path_collection
+           :members:
+        .. doxygenclass:: fiction::path_set
+           :members:
+
+        .. doxygenfunction:: fiction::is_crossable_wire
+
         .. doxygenfunction:: fiction::route_path
 
-    .. tab:: Python
-        .. autofunction:: fiction.pyfiction.route_path
+        .. doxygenfunction:: fiction::extract_routing_objectives
+        .. doxygenfunction:: fiction::clear_routing
 
-.. doxygenfunction:: fiction::extract_routing_objectives
-.. doxygenfunction:: fiction::clear_routing
+    .. tab:: Python
+        .. autofunction:: fiction.pyfiction.is_crossable_wire
+        .. autofunction:: fiction.pyfiction.route_path
+        .. autofunction:: fiction.pyfiction.extract_routing_objectives
+        .. autofunction:: fiction.pyfiction.clear_routing
 
 
 Name Utils
