@@ -20,6 +20,7 @@
 #include "pyfiction/algorithms/properties/critical_path_length_and_throughput.hpp"
 #include "pyfiction/algorithms/simulation/logic_simulation.hpp"
 #include "pyfiction/algorithms/simulation/sidb/calculate_energy_and_state_type.hpp"
+#include "pyfiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp"
 #include "pyfiction/algorithms/simulation/sidb/critical_temperature.hpp"
 #include "pyfiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "pyfiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
@@ -92,6 +93,7 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::sidb_simulation_engine(m);
     pyfiction::sidb_simulation_parameters(m);
     pyfiction::sidb_simulation_result(m);
+    pyfiction::can_positive_charges_occur(m);
     pyfiction::exhaustive_ground_state_simulation(m);
     pyfiction::quicksim(m);
     pyfiction::is_ground_state(m);
