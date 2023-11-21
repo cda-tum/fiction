@@ -22,6 +22,7 @@
 #include "pyfiction/algorithms/simulation/sidb/calculate_energy_and_state_type.hpp"
 #include "pyfiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp"
 #include "pyfiction/algorithms/simulation/sidb/critical_temperature.hpp"
+#include "pyfiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
 #include "pyfiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "pyfiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
 #include "pyfiction/algorithms/simulation/sidb/is_ground_state.hpp"
@@ -94,6 +95,7 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::sidb_simulation_parameters(m);
     pyfiction::sidb_simulation_result(m);
     pyfiction::can_positive_charges_occur(m);
+    pyfiction::detect_bdl_pairs(m);
     pyfiction::exhaustive_ground_state_simulation(m);
     pyfiction::quicksim(m);
     pyfiction::is_ground_state(m);
