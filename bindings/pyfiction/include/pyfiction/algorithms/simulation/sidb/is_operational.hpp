@@ -22,7 +22,6 @@ namespace detail
 template <typename Lyt>
 void is_operational(pybind11::module& m)
 {
-    namespace py = pybind11;
     using namespace pybind11::literals;
 
     m.def("is_operational", &fiction::is_operational<Lyt, py_tt>, "lyt"_a, "spec"_a,

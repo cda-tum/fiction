@@ -36,7 +36,7 @@ enum class sidb_defect_type
     UNKNOWN            // unknown defect
 };
 /**
- * In accordance with the paper mentioned above, the sidb_defect struct is used to represent a specific defect on the
+ * In accordance with the paper mentioned above, the `sidb_defect` struct is used to represent a specific defect on the
  * H-Si(100) 2x1 surface that has a charge as well as relative permittivity (`epsilon_r`) and Thomas-Fermi screening
  * distance (`lambda_tf`) values associated to it.
  *
@@ -49,9 +49,9 @@ struct sidb_defect
     /**
      * Standard constructor.
      */
-    explicit sidb_defect(const sidb_defect_type defect_type = sidb_defect_type::UNKNOWN,
-                         const int64_t electric_charge = 0.0, const double relative_permittivity = 0.0,
-                         const double screening_distance = 0.0) noexcept :
+    constexpr explicit sidb_defect(const sidb_defect_type defect_type = sidb_defect_type::UNKNOWN,
+                                   const int64_t electric_charge = 0.0, const double relative_permittivity = 0.0,
+                                   const double screening_distance = 0.0) noexcept :
             type{defect_type},
             charge{electric_charge},
             epsilon_r{relative_permittivity},
@@ -60,22 +60,22 @@ struct sidb_defect
         assert((epsilon_r >= 0) && "epsilon_r has to be >= 0.0");
         assert((lambda_tf >= 0.0) && "lambda_tf has to be >= 0.0 nanometer");
     }
-    /**s
+    /**
      * Type of defect.
      */
-    const sidb_defect_type type;
+    sidb_defect_type type;
     /**
      * Electrical charge in units of the elementary charge e (e.g., 1 ^= 1*e, -2 ^= -2*e).
      */
-    const int64_t charge;
+    int64_t charge;
     /**
      * Electric permittivity (unitless).
      */
-    const double epsilon_r;
+    double epsilon_r;
     /**
      * Thomas-Fermi screening distance in nm.
      */
-    const double lambda_tf;
+    double lambda_tf;
     /**
      * This operator compares two sidb_defect instances for equality. It checks if the type, charge,
      * epsilon_r, and lambda_tf members of the two instances are equal.
