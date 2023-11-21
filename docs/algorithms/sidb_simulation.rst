@@ -22,7 +22,6 @@ Physical Parameters
 Simulation Result
 #################
 
-
 .. tabs::
     .. tab:: C++
         **Header:** ``fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp``
@@ -79,10 +78,18 @@ Exhaustive Ground State Simulation
 Engine Selectors
 ################
 
-**Header:** ``fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp``
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp``
 
-.. doxygenenum:: fiction::sidb_simulation_engine
-.. doxygenenum:: fiction::exhaustive_sidb_simulation_engine
+        .. doxygenenum:: fiction::sidb_simulation_engine
+        .. doxygenenum:: fiction::exhaustive_sidb_simulation_engine
+
+    .. tab:: Python
+        .. autoclass:: fiction.pyfiction.sidb_simulation_engine
+            :members:
+        .. autoclass:: fiction.pyfiction.exhaustive_sidb_simulation_engine
+            :members:
 
 
 Energy Calculation
@@ -192,40 +199,69 @@ Random SiDB Layout Generator
 Operational Domain Computation
 ##############################
 
-**Header:** ``fiction/algorithms/simulation/sidb/is_operational.hpp``
+..tabs::
+    .. tab:: C++
+        **Header:** ``fiction/algorithms/simulation/sidb/is_operational.hpp``
 
-.. doxygenenum:: fiction::operational_status
-.. doxygenstruct:: fiction::is_operational_params
-   :members:
-.. doxygenfunction:: fiction::is_operational
+        .. doxygenenum:: fiction::operational_status
+        .. doxygenstruct:: fiction::is_operational_params
+           :members:
+        .. doxygenfunction:: fiction::is_operational
 
-**Header:** ``fiction/algorithms/simulation/sidb/operational_domain.hpp``
+        **Header:** ``fiction/algorithms/simulation/sidb/operational_domain.hpp``
 
-.. doxygenstruct:: fiction::operational_domain
-   :members:
+        .. doxygenstruct:: fiction::operational_domain
+           :members:
 
-.. doxygenstruct:: fiction::operational_domain_params
-   :members:
-.. doxygenstruct:: fiction::operational_domain_stats
-   :members:
+        .. doxygenstruct:: fiction::operational_domain_params
+           :members:
+        .. doxygenstruct:: fiction::operational_domain_stats
+           :members:
 
-.. doxygenfunction:: fiction::operational_domain_grid_search
-.. doxygenfunction:: fiction::operational_domain_random_sampling
-.. doxygenfunction:: fiction::operational_domain_flood_fill
-.. doxygenfunction:: fiction::operational_domain_contour_tracing
+        .. doxygenfunction:: fiction::operational_domain_grid_search
+        .. doxygenfunction:: fiction::operational_domain_random_sampling
+        .. doxygenfunction:: fiction::operational_domain_flood_fill
+        .. doxygenfunction:: fiction::operational_domain_contour_tracing
+
+    .. tab:: Python
+        .. autoclass:: fiction.pyfiction.operational_status
+            :members:
+        .. autoclass:: fiction.pyfiction.is_operational_params
+            :members:
+        .. autofunction:: fiction.pyfiction.is_operational
 
 
 Utility Functions
 #################
 
+Charge Detection
+^^^^^^^^^^^^^^^^
+
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp``
+
+        .. doxygenfunction:: fiction::can_positive_charges_occur
+
+    .. tab:: Python
+        .. autofunction:: fiction.pyfiction.can_positive_charges_occur
 
 Binary-dot Logic (BDL) Pair Detection
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**Header:** ``fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp``
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp``
 
-.. doxygenstruct:: fiction::bdl_pair
-   :members:
-.. doxygenstruct:: fiction::detect_bdl_pairs_params
-   :members:
-.. doxygenfunction:: fiction::detect_bdl_pairs
+        .. doxygenstruct:: fiction::bdl_pair
+           :members:
+        .. doxygenstruct:: fiction::detect_bdl_pairs_params
+           :members:
+        .. doxygenfunction:: fiction::detect_bdl_pairs
+
+    .. tab:: Python
+        .. autoclass:: fiction.pyfiction.bdl_pair
+            :members:
+        .. autoclass:: fiction.pyfiction.detect_bdl_pairs_params
+            :members:
+        .. autofunction:: fiction.pyfiction.detect_bdl_pairs
