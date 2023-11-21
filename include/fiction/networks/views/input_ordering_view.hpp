@@ -6,6 +6,7 @@
 #define FICTION_INPUT_ORDERING_VIEW_HPP
 
 #include "fiction/utils/network_utils.hpp"
+#include "fiction/traits.hpp"
 
 #include <mockturtle/networks/detail/foreach.hpp>
 #include <mockturtle/traits.hpp>
@@ -29,7 +30,7 @@ namespace fiction
  * @tparam Ntk mockturtle network type.
  * @tparam sorted Flag that determines whether Ntk is already wrapped in a topo_view.
  */
-template <class Ntk, bool sorted = fiction::is_input_ordered_v<Ntk>>
+template <typename Ntk, bool sorted = fiction::is_input_ordered_v<Ntk>>
 class input_ordering_view
 {};
 
@@ -510,7 +511,7 @@ template <typename Ntk>
 class input_ordering_view<Ntk, true> : public Ntk
 {
   public:
-    explicit input_ordering_view(Ntk const& ntk) : Ntk(ntk) {}
+    input_ordering_view(Ntk const& ntk) : Ntk(ntk) {}
 };
 
 template <class T>

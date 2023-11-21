@@ -204,7 +204,7 @@ class inverter_substitution_impl
                             // Preserve Outputs
                             const auto index = po_it - x_inv.cbegin();
                             preserved_po.push_back(
-                                m_inv[static_cast<std::vector<long unsigned int>::size_type>(index)]);
+                                m_inv[static_cast<std::vector<uint64_t>::size_type>(index)]);
                         }
                         return true;  // keep looping
                     }

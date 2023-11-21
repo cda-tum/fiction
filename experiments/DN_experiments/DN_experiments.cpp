@@ -32,7 +32,13 @@ Ntk read_ntk(const std::string& name)
 
     const auto read_verilog_result =
         lorina::read_verilog(fiction_experiments::benchmark_path(name), mockturtle::verilog_reader(network));
-    assert(read_verilog_result == lorina::return_code::success);
+
+    // Force use of read_verilog_result in case NDEBUG is defined (release mode)
+    if (read_verilog_result != lorina::return_code::success)
+    {
+        // Replace this with your actual error handling code
+        throw std::runtime_error("Failed to read Verilog file");
+    }
 
     return network;
 }
@@ -41,7 +47,7 @@ void ortho_ordering_exp_stats()
 {
     ortho_stats = {};
 
-    experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint32_t,
+    experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint64_t, uint32_t,
                             double, std::size_t>
         ordering_exp{"ordering",
                      "benchmark",

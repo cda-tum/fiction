@@ -425,6 +425,74 @@ void place_two_fanin_gate_null(Lyt& layout, const coloring_container<Ntk>& ctn, 
     ++latest_pos.y;
 }
 
+template <typename Ntk, typename Lyt>
+void place_outputs(Lyt& layout, const coloring_container<Ntk>& ctn, tile<Lyt>& latest_pos, uint32_t po_counter,
+                   mockturtle::node_map<mockturtle::signal<Lyt>, decltype(ctn.color_ntk)>& node2pos)
+{
+    bool                               multi_out_node = false;
+    std::vector<mockturtle::node<Ntk>> out_nodes;
+    uint32_t                           inputs_border = ctn.color_ntk.num_pis();
+    tile<Lyt>                          po_tile{};
+    ctn.color_ntk.foreach_po(
+        [&po_counter, &out_nodes, &multi_out_node, &node2pos, &ctn, &layout, &latest_pos, &inputs_border,
+         &po_tile](const auto& po)
+        {
+            if (!ctn.color_ntk.is_constant(po))
+            {
+                const auto n_s = node2pos[po];
+
+                if (std::find(out_nodes.begin(), out_nodes.end(), po) != out_nodes.end())
+                {
+                    multi_out_node = true;
+                }
+
+                // determine PO orientation
+                if (is_eastern_po_orientation_available(ctn, po) && !multi_out_node)
+                {
+                    po_tile = static_cast<tile<Lyt>>(n_s);
+                    layout.resize({latest_pos.x, latest_pos.y - 1, 1});
+                }
+                else
+                {
+                    po_tile = static_cast<tile<Lyt>>(n_s);
+                    po_tile = static_cast<tile<Lyt>>(wire_south(layout, po_tile, {po_tile.x, po_tile.y + 2}));
+                    if (po_tile.y < inputs_border)
+                    {
+                        po_tile = static_cast<tile<Lyt>>(wire_south(layout, po_tile, {po_tile.x, latest_pos.y + 1}));
+                        ++latest_pos.y;
+                    }
+                    layout.resize({latest_pos.x, latest_pos.y - 1, 1});
+                }
+                // check if PO position is located at the border
+                if (layout.is_at_eastern_border({po_tile.x + 1, po_tile.y}) && !multi_out_node)
+                {
+                    ++po_tile.x;
+                    layout.create_po(n_s,
+                                     ctn.color_ntk.has_output_name(po_counter) ?
+                                         ctn.color_ntk.get_output_name(po_counter++) :
+                                         fmt::format("po{}", po_counter++),
+                                     po_tile);
+                }
+                // place PO at the border and connect it by wire segments
+                else
+                {
+                    const tile<Lyt> anker{po_tile};
+
+                    po_tile = layout.eastern_border_of(po_tile);
+
+                    layout.create_po(wire_east(layout, anker, po_tile),
+                                     ctn.color_ntk.has_output_name(po_counter) ?
+                                         ctn.color_ntk.get_output_name(po_counter++) :
+                                         fmt::format("po{}", po_counter++),
+                                     po_tile);
+                    multi_out_node = false;
+                }
+
+                out_nodes.push_back(po);
+            }
+        });
+}
+
 template <typename Lyt, typename Ntk>
 class orthogonal_ordering_network_impl
 {
@@ -460,7 +528,7 @@ class orthogonal_ordering_network_impl
         // Reserve new columns for inverters in the ordering network
         if (ctn.color_ntk.nc_inv_flag())
         {
-            latest_pos.x = latest_pos.x + ctn.color_ntk.nc_inv_num() + 1;
+            latest_pos.x = latest_pos.x + static_cast<uint64_t>(ctn.color_ntk.nc_inv_num()) + 1u;
         }
         // new column inverter tracker
         std::uint64_t insert_position_inv{1};
@@ -567,69 +635,7 @@ class orthogonal_ordering_network_impl
             });
 
         // Since the layout size is only known after placing all gates, the POs are placed after the main algorithm
-        bool                               multi_out_node = false;
-        std::vector<mockturtle::node<Ntk>> out_nodes;
-        uint32_t                           inputs_border = ctn.color_ntk.num_pis();
-        tile<Lyt>                          po_tile{};
-        ctn.color_ntk.foreach_po(
-            [this, &out_nodes, &multi_out_node, &node2pos, &ctn, &layout, &latest_pos, &inputs_border,
-             &po_tile](const auto& po)
-            {
-                if (!ctn.color_ntk.is_constant(po))
-                {
-                    const auto n_s = node2pos[po];
-
-                    if (std::find(out_nodes.begin(), out_nodes.end(), po) != out_nodes.end())
-                    {
-                        multi_out_node = true;
-                    }
-
-                    // determine PO orientation
-                    if (is_eastern_po_orientation_available(ctn, po) && !multi_out_node)
-                    {
-                        po_tile = static_cast<tile<Lyt>>(n_s);
-                        layout.resize({latest_pos.x, latest_pos.y - 1, 1});
-                    }
-                    else
-                    {
-                        po_tile = static_cast<tile<Lyt>>(n_s);
-                        po_tile = static_cast<tile<Lyt>>(wire_south(layout, po_tile, {po_tile.x, po_tile.y + 2}));
-                        if (po_tile.y < inputs_border)
-                        {
-                            po_tile =
-                                static_cast<tile<Lyt>>(wire_south(layout, po_tile, {po_tile.x, latest_pos.y + 1}));
-                            ++latest_pos.y;
-                        }
-                        layout.resize({latest_pos.x, latest_pos.y - 1, 1});
-                    }
-                    // check if PO position is located at the border
-                    if (layout.is_at_eastern_border({po_tile.x + 1, po_tile.y}) && !multi_out_node)
-                    {
-                        ++po_tile.x;
-                        layout.create_po(n_s,
-                                         ctn.color_ntk.has_output_name(po_counter) ?
-                                             ctn.color_ntk.get_output_name(po_counter++) :
-                                             fmt::format("po{}", po_counter++),
-                                         po_tile);
-                    }
-                    // place PO at the border and connect it by wire segments
-                    else
-                    {
-                        const tile<Lyt> anker{po_tile};
-
-                        po_tile = layout.eastern_border_of(po_tile);
-
-                        layout.create_po(wire_east(layout, anker, po_tile),
-                                         ctn.color_ntk.has_output_name(po_counter) ?
-                                             ctn.color_ntk.get_output_name(po_counter++) :
-                                             fmt::format("po{}", po_counter++),
-                                         po_tile);
-                        multi_out_node = false;
-                    }
-
-                    out_nodes.push_back(po);
-                }
-            });
+        place_outputs(layout, ctn, latest_pos, po_counter, node2pos);
 
         // restore possibly set signal names
         restore_names(ctn.color_ntk, layout, node2pos);
@@ -653,7 +659,8 @@ class orthogonal_ordering_network_impl
     input_ordering_view<mockturtle::fanout_view<mockturtle::names_view<technology_network>>> ntk;
 
     orthogonal_physical_design_params ps;
-    orthogonal_physical_design_stats& pst;
+    orthogonal_physical_design_stats& pst; // NOLINT
+    // This line will suppress the warning cppcoreguidelines-avoid-const-or-ref-data-members
 
     uint32_t po_counter{0};
 };

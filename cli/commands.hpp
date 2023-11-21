@@ -28,6 +28,7 @@
 #include "cmd/logic/random.hpp"
 #include "cmd/logic/simulate.hpp"
 #include "cmd/physical_design/exact.hpp"
+#include "cmd/physical_design/hex.hpp"
 #include "cmd/physical_design/onepass.hpp"
 #include "cmd/physical_design/optimize.hpp"
 #include "cmd/physical_design/ortho.hpp"
