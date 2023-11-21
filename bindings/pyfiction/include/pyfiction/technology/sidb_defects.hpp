@@ -9,6 +9,7 @@
 
 #include <fiction/technology/sidb_defects.hpp>
 
+#include <pybind11/operators.h>
 #include <pybind11/pybind11.h>
 
 namespace pyfiction
@@ -17,7 +18,7 @@ namespace pyfiction
 inline void sidb_defects(pybind11::module& m)
 {
     namespace py = pybind11;
-    using namespace pybind11::literals;
+    using namespace py::literals;
 
     py::enum_<fiction::sidb_defect_type>(m, "sidb_defect_type", DOC(fiction_sidb_defect_type))
         .value("NONE", fiction::sidb_defect_type::NONE, DOC(fiction_sidb_defect_type_NONE))
@@ -49,20 +50,18 @@ inline void sidb_defects(pybind11::module& m)
         .def_readonly("epsilon_r", &fiction::sidb_defect::epsilon_r, DOC(fiction_sidb_defect_epsilon_r))
         .def_readonly("lambda_tf", &fiction::sidb_defect::lambda_tf, DOC(fiction_sidb_defect_lambda_tf))
 
-        .def(py::self == py::self, "rhs"_a)
-             //, DOC(fiction_sidb_defect_operator_eq))
-        .def(py::self != py::self, "rhs"_a)
-             //, DOC(fiction_sidb_defect_operator_ne))
+        .def(py::self == py::self, "rhs"_a, DOC(fiction_sidb_defect_operator_eq))
+        .def(py::self != py::self, "rhs"_a, DOC(fiction_sidb_defect_operator_ne))
 
         ;
 
     m.def("is_charged_defect", &fiction::is_charged_defect, "defect"_a, DOC(fiction_is_charged_defect));
-    m.def("is_positively_charged_defect", &fiction::is_positively_charged_defect, "defect"_a);
-    //, DOC(fiction_is_positively_charged_defect));
-    m.def("is_negatively_charged_defect", &fiction::is_negatively_charged_defect, "defect"_a);
-    //, DOC(fiction_is_negatively_charged_defect));
-    m.def("is_neutrally_charged_defect", &fiction::is_neutrally_charged_defect, "defect"_a);
-    // ,DOC(fiction_is_neutrally_charged_defect));
+    m.def("is_positively_charged_defect", &fiction::is_positively_charged_defect, "defect"_a,
+          DOC(fiction_is_positively_charged_defect));
+    m.def("is_negatively_charged_defect", &fiction::is_negatively_charged_defect, "defect"_a,
+          DOC(fiction_is_negatively_charged_defect));
+    m.def("is_neutrally_charged_defect", &fiction::is_neutrally_charged_defect, "defect"_a,
+          DOC(fiction_is_neutrally_charged_defect));
 
     m.def("defect_extent", &fiction::defect_extent, "defect"_a, DOC(fiction_defect_extent));
 }

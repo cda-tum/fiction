@@ -36,7 +36,6 @@
 // #include "pyfiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp"
 #include "pyfiction/algorithms/simulation/sidb/assess_physical_population_stability.hpp"
 #include "pyfiction/algorithms/simulation/sidb/convert_potential_to_distance.hpp"
-#include "pyfiction/algorithms/simulation/sidb/sidb_charge_state.hpp"
 #include "pyfiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "pyfiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "pyfiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
@@ -69,7 +68,9 @@
 #include "pyfiction/networks/truth_tables.hpp"
 #include "pyfiction/technology/area.hpp"
 #include "pyfiction/technology/charge_distribution_surface.hpp"
+#include "pyfiction/technology/sidb_charge_state.hpp"
 #include "pyfiction/technology/sidb_defects.hpp"
+#include "pyfiction/technology/sidb_nm_position.hpp"
 #include "pyfiction/utils/routing_utils.hpp"
 #include "pyfiction/utils/truth_table_utils.hpp"
 
@@ -164,6 +165,7 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::area(m);
     pyfiction::sidb_defects(m);
     pyfiction::sidb_charge_state(m);
+    pyfiction::sidb_nm_position(m);
     pyfiction::charge_distribution_surface(m);
     /**
      * Input/Output

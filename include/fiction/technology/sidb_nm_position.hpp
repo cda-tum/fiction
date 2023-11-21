@@ -35,6 +35,7 @@ template <typename Lyt>
 
     return std::make_pair(x, y);
 }
+
 }  // namespace fiction
 
 #endif  // FICTION_NM_POSITION_HPP
