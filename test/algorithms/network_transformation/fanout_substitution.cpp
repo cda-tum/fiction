@@ -52,8 +52,8 @@ TEST_CASE("Simple fanout substitution", "[fanout-substitution]")
 {
     const auto tec = blueprints::multi_output_and_network<technology_network>();
 
-    fanout_substitution_params ps_depth{fanout_substitution_params::substitution_strategy::DEPTH};
-    fanout_substitution_params ps_breadth{fanout_substitution_params::substitution_strategy::BREADTH};
+    const fanout_substitution_params ps_depth{fanout_substitution_params::substitution_strategy::DEPTH};
+    const fanout_substitution_params ps_breadth{fanout_substitution_params::substitution_strategy::BREADTH};
 
     substitute(tec, ps_depth, tec.size() + 3);
     substitute(tec, ps_breadth, tec.size() + 3);
@@ -64,8 +64,8 @@ TEST_CASE("Complex fanout substitution", "[fanout-substitution]")
     const auto tec = blueprints::maj4_network<technology_network>();
     CHECK(!is_fanout_substituted(tec));
 
-    fanout_substitution_params ps_depth{fanout_substitution_params::substitution_strategy::DEPTH};
-    fanout_substitution_params ps_breadth{fanout_substitution_params::substitution_strategy::BREADTH};
+    const fanout_substitution_params ps_depth{fanout_substitution_params::substitution_strategy::DEPTH};
+    const fanout_substitution_params ps_breadth{fanout_substitution_params::substitution_strategy::BREADTH};
 
     substitute(tec, ps_depth, tec.size() + 7);
 
@@ -79,8 +79,8 @@ TEST_CASE("Degree and threshold in fanout substitution", "[fanout-substitution]"
 {
     const auto aig = blueprints::maj4_network<mockturtle::aig_network>();
 
-    fanout_substitution_params ps_31{fanout_substitution_params::substitution_strategy::BREADTH, 3, 1};
-    fanout_substitution_params ps_22{fanout_substitution_params::substitution_strategy::DEPTH, 2, 2};
+    const fanout_substitution_params ps_31{fanout_substitution_params::substitution_strategy::BREADTH, 3, 1};
+    const fanout_substitution_params ps_22{fanout_substitution_params::substitution_strategy::DEPTH, 2, 2};
 
     substitute(aig, ps_31, aig.size() + 35);
     substitute(aig, ps_22, aig.size() + 34);
