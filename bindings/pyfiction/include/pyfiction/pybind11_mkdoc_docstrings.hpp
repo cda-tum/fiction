@@ -242,6 +242,22 @@ Template parameter ``AreaType``:
 Parameter ``lyt``:
     The cell-level layout whose area is desired.)doc";
 
+static const char *__doc_fiction_area_3 =
+R"doc(Computes real-world area requirements in nm² of the bounding box of a
+given cell-level layout. For this purpose, each cell position in the
+layout is assigned a vertical and horizontal size. Additionally, a
+spacing between cell positions in horizontal and vertical direction is
+taken into account.
+
+Template parameter ``Lyt``:
+    Cell-level layout type.
+
+Template parameter ``AreaType``:
+    Type for area representation.
+
+Parameter ``lyt``:
+    The cell-level layout whose area is desired.)doc";
+
 static const char *__doc_fiction_area_params = R"doc()doc";
 
 static const char *__doc_fiction_area_params_height = R"doc()doc";
@@ -336,6 +352,37 @@ static const char *__doc_fiction_aspect_ratio_iterator_operator_mul = R"doc()doc
 static const char *__doc_fiction_aspect_ratio_iterator_operator_ne = R"doc()doc";
 
 static const char *__doc_fiction_aspect_ratio_iterator_operator_ne_2 = R"doc()doc";
+
+static const char *__doc_fiction_assess_physical_population_stability =
+R"doc(This function assesses the population stability of each physically
+valid charge distributions of a given SiDB layout. It determines the
+minimum absolute electrostatic potential required to induce a charge
+distribution transition. The function also identifies the SiDB for
+which this is the case (critical SiDB) and the corresponding charge
+state transition (i.e., the change from one charge state to another).
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Parameter ``lyt``:
+    The layout for which the population stability is assessed.
+
+Parameter ``params``:
+    Parameters used to assess the population stability.
+
+Returns:
+    A vector of population stability information for all physically
+    valid charge distributions of the given SiDB layout.)doc";
+
+static const char *__doc_fiction_assess_physical_population_stability_params =
+R"doc(This struct stores the parameters required to assess the population
+stability.)doc";
+
+static const char *__doc_fiction_assess_physical_population_stability_params_physical_parameters = R"doc(Parameters for the electrostatic potential.)doc";
+
+static const char *__doc_fiction_assess_physical_population_stability_params_precision_for_distance_corresponding_to_potential =
+R"doc(The precision level for the conversion from the minimum potential
+difference to the corresponding distance.)doc";
 
 static const char *__doc_fiction_bancs_clocking =
 R"doc(Returns the BANCS clocking as defined in \"BANCS: Bidirectional
@@ -1737,10 +1784,6 @@ static const char *__doc_fiction_charge_distribution_surface_3 = R"doc()doc";
 
 static const char *__doc_fiction_charge_distribution_surface_4 = R"doc()doc";
 
-static const char *__doc_fiction_charge_distribution_surface_5 = R"doc()doc";
-
-static const char *__doc_fiction_charge_distribution_surface_6 = R"doc()doc";
-
 static const char *__doc_fiction_charge_distribution_surface_charge_distribution_surface = R"doc()doc";
 
 static const char *__doc_fiction_charge_state_to_sign =
@@ -2252,6 +2295,33 @@ Parameter ``ntk``:
 Returns:
     A logic network of type `NtkDest` that is logically equivalent to
     `ntk`.)doc";
+
+static const char *__doc_fiction_convert_potential_to_distance =
+R"doc(The electrostatic potential on hydrogen-passivated silicon is
+typically modeled using a screened Coulomb potential. This
+electrostatic potential is commonly employed to determine the
+electrostatic potential for a given distance (between SiDB and point
+under consideration) and given physical parameters. However, the
+function provided here serves the inverse purpose by calculating the
+distance for a given potential and given physical parameters.
+
+@note Runtime depends exponentially on the provided precision.
+
+Parameter ``params``:
+    The physical parameters for a given hydrogen-passivated silicon
+    surface.
+
+Parameter ``potential``:
+    The electrostatic potential (unit: V) to be converted to a
+    distance.
+
+Parameter ``precision``:
+    The precision level for the conversion, specifying the number of
+    decimal places.
+
+Returns:
+    The distance (unit: nm) corresponding to the given electrostatic
+    potential.)doc";
 
 static const char *__doc_fiction_convert_to_fiction_coordinates =
 R"doc(Converts the coordinates of a given cell-level layout to fiction
@@ -3231,6 +3301,119 @@ static const char *__doc_fiction_detail_apply_gate_library_impl_cell_lyt = R"doc
 static const char *__doc_fiction_detail_apply_gate_library_impl_gate_lyt = R"doc()doc";
 
 static const char *__doc_fiction_detail_apply_gate_library_impl_run = R"doc()doc";
+
+static const char *__doc_fiction_detail_assess_physical_population_stability_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_assess_physical_population_stability_impl_assess_physical_population_stability_impl =
+R"doc(Constructor for assess_physical_population_stability_impl.
+
+Parameter ``lyt``:
+    SiDB layout.
+
+Parameter ``parameters``:
+    The simulation parameters used for the assessment.)doc";
+
+static const char *__doc_fiction_detail_assess_physical_population_stability_impl_collect_energy_and_charge_index =
+R"doc(Collects the system energy with the corresponding charge index
+information of all physically valid charge distributions of a given
+SiDB layout.
+
+Parameter ``sim_results``:
+    The simulation results, including all physically valid charge
+    distributions.
+
+Returns:
+    A vector of energy_and_charge_index pairs, where each pair
+    consists of a double value representing the system energy and a
+    uint64_t representing the unique charge index. The vector is
+    sorted in ascending order of the energy values.)doc";
+
+static const char *__doc_fiction_detail_assess_physical_population_stability_impl_energy_and_charge_index =
+R"doc(This struct represents the electrostatic energy and charge index of a
+charge distribution.)doc";
+
+static const char *__doc_fiction_detail_assess_physical_population_stability_impl_energy_and_charge_index_charge_index = R"doc(Charge index of the charge distribution.)doc";
+
+static const char *__doc_fiction_detail_assess_physical_population_stability_impl_energy_and_charge_index_energy = R"doc(Electrostatic energy of the charge distribution.)doc";
+
+static const char *__doc_fiction_detail_assess_physical_population_stability_impl_handle_negative_charges =
+R"doc(This function checks if the absolute difference between the given
+local potential and µ- is smaller than the current minimum potential
+difference to transition for a negatively charged SiDB. If `true`, it
+updates the population stability information with the new minimum
+difference and critical cell.
+
+Parameter ``local_potential``:
+    The local potential associated with the cell.
+
+Parameter ``c``:
+    The cell for which the charge state is being considered (SiDB is
+    negatively charged).
+
+Parameter ``pop_stability_information``:
+    The current population stability information.
+
+Returns:
+    An updated population stability information with potential
+    transition details.)doc";
+
+static const char *__doc_fiction_detail_assess_physical_population_stability_impl_handle_neutral_charges =
+R"doc(This function checks if the absolute difference between the given
+local potential and µ- or µ+ is smaller than the current minimum
+potential difference. If `true`, it updates the population stability
+information with the new minimum difference and critical cell.
+
+Parameter ``local_potential``:
+    The local potential associated with the cell.
+
+Parameter ``c``:
+    The cell for which the charge state is being considered (SiDB is
+    neutrally charged).
+
+Parameter ``pop_stability_information``:
+    The current population stability information.
+
+Returns:
+    An updated population stability information with potential
+    transition details.)doc";
+
+static const char *__doc_fiction_detail_assess_physical_population_stability_impl_handle_positive_charges =
+R"doc(This function checks if the absolute difference between the given
+local potential and µ+ is smaller than the current minimum potential
+difference. If true`, it updates the population stability information
+with the new minimum difference and critical cell.
+
+Parameter ``local_potential``:
+    The local potential associated with the cell.
+
+Parameter ``c``:
+    The cell for which the charge state is being considered (SiDB is
+    positively charged).
+
+Parameter ``pop_stability_information``:
+    The current population stability information.
+
+Returns:
+    An updated population stability information with potential
+    transition details.)doc";
+
+static const char *__doc_fiction_detail_assess_physical_population_stability_impl_layout = R"doc(Layout to analyze.)doc";
+
+static const char *__doc_fiction_detail_assess_physical_population_stability_impl_params = R"doc(Parameters required to assess the population stability.)doc";
+
+static const char *__doc_fiction_detail_assess_physical_population_stability_impl_run =
+R"doc(Runs a population stability assessment for a given SiDB layout using
+the provided simulation parameters. This function determines the
+minimum electrostatic potential required for charge state transitions
+within the layout and identifies the corresponding critical SiDB along
+with the type of charge state transition.
+
+Returns:
+    A vector of population stability information structures, where
+    each element represents a charge distribution in ascending energy
+    order. Each structure contains details about the critical SiDB,
+    the type of charge state transition, and the minimum electrostatic
+    potential required for the charge transition.)doc";
 
 static const char *__doc_fiction_detail_color_routing_impl = R"doc()doc";
 
@@ -4683,6 +4866,36 @@ Parameter ``op``:
 Returns:
     fanin and fanout gates, wires to be deleted and old routing paths.)doc";
 
+static const char *__doc_fiction_detail_get_offset =
+R"doc(Utility function to calculate the offset that has to be subtracted
+from any x-coordinate on the hexagonal layout.
+
+This function iterates through diagonals starting from the bottom left
+corner until it finds a non-empty tile or until it has traversed all
+diagonals. In each iteration, it checks tiles along the diagonal line.
+If it finds a non-empty tile, it calculates an offset value, which is
+the number of columns on the left side of the hexagonal layout that
+will be empty. This offset is based on the leftmost tile that will
+appear in the hexagonal layout.
+
+Template parameter ``HexLyt``:
+    Even-row hexagonal gate-level layout return type.
+
+Template parameter ``CartLyt``:
+    Input Cartesian gate-level layout type.
+
+Parameter ``lyt``:
+    2DDWave-clocked Cartesian gate-level layout to hexagonalize.
+
+Parameter ``cartesian_layout_width``:
+    Width of the Cartesian layout.
+
+Parameter ``cartesian_layout_height``:
+    Height of the Cartesian layout.
+
+Returns:
+    offset.)doc";
+
 static const char *__doc_fiction_detail_get_path_and_obstruct =
 R"doc(This helper function computes a path between two coordinates using the
 A* algorithm. It then obstructs the tiles along the path in the given
@@ -5477,6 +5690,20 @@ static const char *__doc_fiction_detail_quickexact_impl_all_sidbs_in_lyt_without
 
 static const char *__doc_fiction_detail_quickexact_impl_charge_lyt = R"doc(Charge distribution surface.)doc";
 
+static const char *__doc_fiction_detail_quickexact_impl_conduct_simulation =
+R"doc(This function initializes the charge layout with necessary parameters,
+and conducts the physical simulation based on whether a three-state
+simulation is required.
+
+Template parameter ``ChargeLyt``:
+    The type of Charge Layout.
+
+Template parameter ``ChargeLyt``:
+    The type representing the charge layout to simulate.
+
+Parameter ``base_number``:
+    `THREE` if a three-state simulation is required, `TWO` otherwise.)doc";
+
 static const char *__doc_fiction_detail_quickexact_impl_generate_layout_without_negative_sidbs =
 R"doc(This function is used to generate a layout without the SiDBs that are
 pre-assigned to be negatively charged in a physically-valid layout.)doc";
@@ -5522,12 +5749,18 @@ static const char *__doc_fiction_detail_quickexact_impl_three_state_simulation =
 R"doc(This function conducts 3-state physical simulation (negative, neutral,
 positive).
 
+Template parameter ``ChargeLyt``:
+    Type of the charge distribution surface.
+
 Parameter ``charge_layout``:
     Initialized charge layout.)doc";
 
 static const char *__doc_fiction_detail_quickexact_impl_two_state_simulation =
 R"doc(This function conducts 2-state physical simulation (negative,
 neutral).
+
+Template parameter ``ChargeLyt``:
+    Type of the charge distribution surface.
 
 Parameter ``charge_layout``:
     Initialized charge layout.)doc";
@@ -5799,17 +6032,16 @@ Returns:
     The string representation of the sweep parameter.)doc";
 
 static const char *__doc_fiction_detail_to_hex =
-R"doc(Utility function to transform a Cartesian coordinate into a hexagonal
-one.
+R"doc(Utility function to transform a Cartesian tile into a hexagonal one.
 
-Parameter ``cartesian_coordinate``:
-    Coordinate on the Cartesian grid.
+Parameter ``cartesian_tile``:
+    Tile on the Cartesian grid.
 
 Parameter ``cartesian_layout_height``:
     Height of the Cartesian layout.
 
 Returns:
-    coordinate on the hexagonal grid.)doc";
+    corresponding tile on the hexagonal grid.)doc";
 
 static const char *__doc_fiction_detail_wire_east = R"doc()doc";
 
@@ -9666,6 +9898,16 @@ Parameter ``lyt``:
 Returns:
     Hexagonal representation of the Cartesian layout.)doc";
 
+static const char *__doc_fiction_hexagonalization_stats = R"doc(This struct stores statistics about the hexagonalization process.)doc";
+
+static const char *__doc_fiction_hexagonalization_stats_duration = R"doc(Runtime of the hexagonalization process.)doc";
+
+static const char *__doc_fiction_hexagonalization_stats_report =
+R"doc(Reports the statistics to the given output stream.
+
+Parameter ``out``:
+    Output stream.)doc";
+
 static const char *__doc_fiction_high_degree_fanin_exception =
 R"doc(Exception class that can be thrown if some network exceeds a legal
 number of fanins.)doc";
@@ -9913,6 +10155,8 @@ static const char *__doc_fiction_is_cartesian_layout = R"doc()doc";
 
 static const char *__doc_fiction_is_cell_level_layout = R"doc()doc";
 
+static const char *__doc_fiction_is_charge_distribution_surface = R"doc()doc";
+
 static const char *__doc_fiction_is_charged_defect =
 R"doc(Checks whether the given defect is charged. Charged defects are to be
 avoided by a larger distance.
@@ -10084,7 +10328,7 @@ static const char *__doc_fiction_is_operational_params_sim_engine =
 R"doc(The simulation engine to be used for the operational domain
 computation.)doc";
 
-static const char *__doc_fiction_is_operational_params_simulation_parameter =
+static const char *__doc_fiction_is_operational_params_sim_params =
 R"doc(The simulation parameters for the physical simulation of the ground
 state.)doc";
 
@@ -10259,7 +10503,7 @@ describes the number of dimer rows.)doc";
 
 static const char *__doc_fiction_maximum_defect_influence_distance_params_defect = R"doc(The defect to calculate the maximum defect influence distance for.)doc";
 
-static const char *__doc_fiction_maximum_defect_influence_distance_params_physical_params = R"doc(Physical simulation parameters.)doc";
+static const char *__doc_fiction_maximum_defect_influence_distance_params_sim_params = R"doc(Physical simulation parameters.)doc";
 
 static const char *__doc_fiction_maximum_defect_influence_position_and_distance =
 R"doc(Calculates the maximum distance at which a given defect can influence
@@ -10275,7 +10519,7 @@ Parameter ``lyt``:
     The SiDB cell-level layout for which the influence distance is
     being determined.
 
-Parameter ``sim_params``:
+Parameter ``params``:
     Parameters used to calculate the defect's maximum influence
     distance.
 
@@ -11231,6 +11475,29 @@ Returns:
 
 static const char *__doc_fiction_pointy_top_hex = R"doc(\verbatim / \ / \ | | | | \ / \ / \endverbatim)doc";
 
+static const char *__doc_fiction_population_stability_information =
+R"doc(This struct encapsulates information related to the population
+stability of a charge distribution. It includes details about the SiDB
+closest to a charge transition (critical cell), the specific charge
+state transition, the electrostatic potential difference required for
+the transition, the corresponding distance, and the total
+electrostatic energy of the given charge distribution.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.)doc";
+
+static const char *__doc_fiction_population_stability_information_critical_cell = R"doc(SiDB cell which is closest to a charge transition.)doc";
+
+static const char *__doc_fiction_population_stability_information_distance_corresponding_to_potential = R"doc(Distance (unit: nm) corresponding to the minimum potential difference.)doc";
+
+static const char *__doc_fiction_population_stability_information_minimum_potential_difference_to_transition =
+R"doc(Absolute electrostatic potential (unit: V) required for the charge
+state transition.)doc";
+
+static const char *__doc_fiction_population_stability_information_system_energy = R"doc(Total electrostatic energy (unit: eV) of given charge distribution.)doc";
+
+static const char *__doc_fiction_population_stability_information_transition_from_to = R"doc(Charge transition from the current charge state to the closest one.)doc";
+
 static const char *__doc_fiction_port_direction =
 R"doc(A port direction is a relative (cardinal) direction of a port within a
 tile. Useful, when no exact port locations within a tile are needed.)doc";
@@ -12097,6 +12364,14 @@ Parameter ``relative_c``:
 Returns:
     Absolute cell position in a layout.)doc";
 
+static const char *__doc_fiction_required_simulation_base_number = R"doc(Base number required for the correct physical simulation.)doc";
+
+static const char *__doc_fiction_required_simulation_base_number_THREE =
+R"doc(Three state simulation (i.e., negative, neutral, and positive) is
+required.)doc";
+
+static const char *__doc_fiction_required_simulation_base_number_TWO = R"doc(Two state simulation (i.e., negative and neutral) is sufficient.)doc";
+
 static const char *__doc_fiction_res_clocking =
 R"doc(Returns the RES clocking as defined in \"An efficient clocking scheme
 for quantum-dot cellular automata\" by Mrinal Goswami, Anindan Mondal,
@@ -12525,7 +12800,7 @@ static const char *__doc_fiction_sidb_charge_state_NONE = R"doc()doc";
 static const char *__doc_fiction_sidb_charge_state_POSITIVE = R"doc()doc";
 
 static const char *__doc_fiction_sidb_defect =
-R"doc(In accordance with the paper mentioned above, the sidb_defect struct
+R"doc(In accordance with the paper mentioned above, the `sidb_defect` struct
 is used to represent a specific defect on the H-Si(100) 2x1 surface
 that has a charge as well as relative permittivity (`epsilon_r`) and
 Thomas-Fermi screening distance (`lambda_tf`) values associated to it.
@@ -12563,7 +12838,7 @@ the H–Si(100) surface through multi-mode scanning probe microscopy\"
 by Jeremiah Croshaw, Thomas Dienel, Taleana Huff, and Robert Wolkow in
 Journal of Nanotechnology in 2020.)doc";
 
-static const char *__doc_fiction_sidb_defect_type_2 = R"doc(s Type of defect.)doc";
+static const char *__doc_fiction_sidb_defect_type_2 = R"doc(Type of defect.)doc";
 
 static const char *__doc_fiction_sidb_defect_type_DB = R"doc()doc";
 
@@ -13643,6 +13918,20 @@ R"doc(Single simulation runtime of the exhaustive ground state searcher in
 seconds.)doc";
 
 static const char *__doc_fiction_time_to_solution_stats_time_to_solution = R"doc(Time-to-solution in seconds.)doc";
+
+static const char *__doc_fiction_transition_type =
+R"doc(Possible types of charge transitions that can occur in an SiDB layout.
+These transitions represent changes in the charge state of SiDBs,
+including transitions from neutral to negative, negative to neutral,
+neutral to positive, and positive to neutral.)doc";
+
+static const char *__doc_fiction_transition_type_NEGATIVE_TO_NEUTRAL = R"doc(SiDB is negatively charged, but is closest to being neutrally charged.)doc";
+
+static const char *__doc_fiction_transition_type_NEUTRAL_TO_NEGATIVE = R"doc(SiDB is neutrally charged, but is closest to being negatively charged.)doc";
+
+static const char *__doc_fiction_transition_type_NEUTRAL_TO_POSITIVE = R"doc(SiDB is neutrally charged, but is closest to being positively charged.)doc";
+
+static const char *__doc_fiction_transition_type_POSITIVE_TO_NEUTRAL = R"doc(SiDB is positively charged, but is closest to being neutrally charged.)doc";
 
 static const char *__doc_fiction_tt_reader =
 R"doc(Simple reader to parse truth tables from files. The files must be

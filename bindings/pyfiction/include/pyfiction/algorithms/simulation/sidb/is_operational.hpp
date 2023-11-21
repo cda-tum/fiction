@@ -44,7 +44,7 @@ inline void is_operational(pybind11::module& m)
     py::class_<fiction::is_operational_params>(m, "is_operational_params", DOC(fiction_is_operational_params))
         .def(py::init<>())
         .def_readwrite("sim_params", &fiction::is_operational_params::sim_params,
-                       DOC(fiction_is_operational_params_simulation_parameter))
+                       DOC(fiction_is_operational_params_sim_params))
         .def_readwrite("sim_engine", &fiction::is_operational_params::sim_engine,
                        DOC(fiction_is_operational_params_sim_engine))
         .def_readwrite("bdl_params", &fiction::is_operational_params::bdl_params,
