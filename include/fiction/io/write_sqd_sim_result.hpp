@@ -192,8 +192,8 @@ class write_sqd_sim_result_impl
         os << siqad::OPEN_SIM_PARAMS;
 
         // physical parameters
-        os << fmt::format(siqad::PHYS_SIM_PARAMS, sim_result.physical_parameters.lambda_tf.value(),
-                          sim_result.physical_parameters.epsilon_r, sim_result.physical_parameters.mu.value());
+        os << fmt::format(siqad::PHYS_SIM_PARAMS, sim_result.physical_parameters.lambda_tf,
+                          sim_result.physical_parameters.epsilon_r, sim_result.physical_parameters.mu_minus);
 
         // additional simulation parameters
         std::for_each(sim_result.additional_simulation_parameters.cbegin(),
@@ -223,11 +223,8 @@ class write_sqd_sim_result_impl
                       {
                           const auto [nm_x, nm_y] = sidb_nm_position<Lyt>(sim_result.physical_parameters, c);
 
-                          os << fmt::format(
-                              siqad::DBDOT,
-                              units::convert<units::length::nanometer, units::length::angstrom>(nm_x.value()),
-                              units::convert<units::length::nanometer, units::length::angstrom>(
-                                  nm_y.value()));  // convert nm to Angstrom
+                          os << fmt::format(siqad::DBDOT, nm_x * 10,
+                                            nm_y * 10);  // convert nm to Angstrom
                       });
 
         os << siqad::CLOSE_PHYSLOC;
@@ -251,8 +248,7 @@ class write_sqd_sim_result_impl
 
         // sort the surface references by their system energy
         std::sort(ordered_surface_pointers.begin(), ordered_surface_pointers.end(),
-                  [](const auto& a, const auto& b)
-                  { return a->get_system_energy().value() < b->get_system_energy().value(); });
+                  [](const auto& a, const auto& b) { return a->get_system_energy() < b->get_system_energy(); });
 
         // write the distributions to the output stream
         std::for_each(
@@ -269,7 +265,7 @@ class write_sqd_sim_result_impl
 
                 os << fmt::format(
                     siqad::DIST_ENERGY,
-                    surface->get_system_energy().value(),    // system energy
+                    surface->get_system_energy(),            // system energy
                     1,                                       // occurrence count
                     surface->is_physically_valid() ? 1 : 0,  // physical validity
                     3,  // simulation state count (fixed to 3 since state count = 2 is not supported by SiQAD yet).

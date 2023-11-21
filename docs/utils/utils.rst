@@ -44,6 +44,10 @@ Truth Table Utils
 .. doxygenfunction:: fiction::create_xor_tt
 .. doxygenfunction:: fiction::create_xnor_tt
 .. doxygenfunction:: fiction::create_maj_tt
+.. doxygenfunction:: fiction::create_double_wire_tt
+.. doxygenfunction:: fiction::create_crossing_wire_tt
+.. doxygenfunction:: fiction::create_fan_out_tt
+.. doxygenfunction:: fiction::create_half_adder_tt
 
 
 Layout Utils
@@ -58,6 +62,8 @@ Layout Utils
 .. doxygenfunction:: fiction::convert_to_siqad_coordinates
 .. doxygenfunction:: fiction::convert_to_fiction_coordinates
 .. doxygenfunction:: fiction::random_coordinate
+.. doxygenfunction:: fiction::all_sidbs_in_spanned_area
+
 
 Placement Utils
 ---------------
@@ -124,23 +130,6 @@ Array Utils
 .. doxygenfunction:: fiction::convert_array
 .. doxygenfunction:: fiction::convert_array_of_arrays
 
-Unit Utils
------------
-
-**Header:** ``fiction/utils/unit_utils.hpp``
-
-.. doxygentypedef:: coulomb_constant_unit
-.. doxygenvariable:: POP_STABILITY_ERR
-
-There are several suffix operators exposed in this file for convenient use of units, namely
-* ``_angstrom``
-* ``_eV``
-* ``_K``
-* ``_nm``
-* ``_s``
-* ``_V``
-
-This enables the use of units as follows: e.g., ``40_K``, ``40.1_nm``.
 
 STL Extensions
 --------------
@@ -197,3 +186,21 @@ Hashing
 This header defines implementations for ``std::hash`` for several data types.
 
 .. doxygenfunction:: fiction::hash_combine
+
+
+Math Utils
+----------
+
+**Header:** ``fiction/utils/math_utils.hpp``
+
+.. doxygenfunction:: fiction::round_to_n_decimal_places
+.. doxygenfunction:: fiction::integral_abs
+.. doxygenfunction:: fiction::binomial_coefficient
+
+
+`phmap`
+-------
+
+**Header:** ``fiction/utils/phmap_utils.hpp``
+
+.. doxygentypedef:: fiction::locked_parallel_flat_hash_map

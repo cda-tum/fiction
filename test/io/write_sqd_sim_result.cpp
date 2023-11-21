@@ -184,8 +184,8 @@ TEST_CASE("Write empty simulation result", "[sqd-sim-result]")
             "    </elec_dist>\n"
             "</sim_out>\n",
             FICTION_VERSION, FICTION_REPO, fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(std::time(nullptr))),
-            sim_result.physical_parameters.lambda_tf.to<double>(), sim_result.physical_parameters.epsilon_r,
-            sim_result.physical_parameters.mu.to<double>());
+            sim_result.physical_parameters.lambda_tf, sim_result.physical_parameters.epsilon_r,
+            sim_result.physical_parameters.mu_minus);
 
         write_sqd_sim_result(sim_result, simulation_stream);
 
@@ -219,8 +219,8 @@ TEST_CASE("Write empty simulation result", "[sqd-sim-result]")
             "    </elec_dist>\n"
             "</sim_out>\n",
             FICTION_VERSION, FICTION_REPO, fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(std::time(nullptr))),
-            sim_result.physical_parameters.lambda_tf.value(), sim_result.physical_parameters.epsilon_r,
-            sim_result.physical_parameters.mu.value());
+            sim_result.physical_parameters.lambda_tf, sim_result.physical_parameters.epsilon_r,
+            sim_result.physical_parameters.mu_minus);
 
         sim_result.additional_simulation_parameters.emplace_back("param1", "value1");
         sim_result.additional_simulation_parameters.emplace_back("param2", 2);
@@ -251,7 +251,7 @@ TEST_CASE("Write simulation result with ExGS simulation", "[sqd-sim-result]")
     lyt.assign_cell_type({17, 0, 0}, sidb_layout::cell_type::NORMAL);
     lyt.assign_cell_type({19, 0, 0}, sidb_layout::cell_type::NORMAL);
 
-    const sidb_simulation_parameters params{2, -0.32_eV};
+    const sidb_simulation_parameters params{2, -0.32};
 
     auto sim_result = exhaustive_ground_state_simulation<sidb_layout>(lyt, params);
 
@@ -285,13 +285,13 @@ TEST_CASE("Write simulation result with ExGS simulation", "[sqd-sim-result]")
         "        <dbdot x=\"72.960000\" y=\"0.000000\"/>\n"
         "    </physloc>\n"
         "    <elec_dist>\n"
-        "        <dist energy=\"0.246081\" count=\"1\" physically_valid=\"1\" "
+        "        <dist energy=\"0.246049\" count=\"1\" physically_valid=\"1\" "
         "state_count=\"3\">-0-0-0-</dist>\n"
         "    </elec_dist>\n"
         "</sim_out>\n",
         FICTION_VERSION, FICTION_REPO, fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(std::time(nullptr))),
-        sim_result.simulation_runtime.count(), sim_result.physical_parameters.lambda_tf.value(),
-        sim_result.physical_parameters.epsilon_r, sim_result.physical_parameters.mu.value());
+        sim_result.simulation_runtime.count(), sim_result.physical_parameters.lambda_tf,
+        sim_result.physical_parameters.epsilon_r, sim_result.physical_parameters.mu_minus);
 
     write_sqd_sim_result(sim_result, simulation_stream);
 
@@ -310,7 +310,7 @@ TEST_CASE("Write simulation result with ExGS simulation and positive DBs", "[sqd
     lyt.assign_cell_type({6, 0, 0}, sidb_layout::cell_type::NORMAL);
     lyt.assign_cell_type({7, 0, 0}, sidb_layout::cell_type::NORMAL);
 
-    const sidb_simulation_parameters params{3, -0.32_eV};
+    const sidb_simulation_parameters params{3, -0.32};
 
     auto sim_result = exhaustive_ground_state_simulation<sidb_layout>(lyt, params);
 
@@ -339,13 +339,13 @@ TEST_CASE("Write simulation result with ExGS simulation and positive DBs", "[sqd
         "        <dbdot x=\"26.880000\" y=\"0.000000\"/>\n"
         "    </physloc>\n"
         "    <elec_dist>\n"
-        "        <dist energy=\"-0.953230\" count=\"1\" physically_valid=\"1\" state_count=\"3\">-+-</dist>\n"
+        "        <dist energy=\"-0.953108\" count=\"1\" physically_valid=\"1\" state_count=\"3\">-+-</dist>\n"
         "        <dist energy=\"0.000000\" count=\"1\" physically_valid=\"1\" state_count=\"3\">0-0</dist>\n"
         "    </elec_dist>\n"
         "</sim_out>\n",
         FICTION_VERSION, FICTION_REPO, fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(std::time(nullptr))),
-        sim_result.simulation_runtime.count(), sim_result.physical_parameters.lambda_tf.value(),
-        sim_result.physical_parameters.epsilon_r, sim_result.physical_parameters.mu.value());
+        sim_result.simulation_runtime.count(), sim_result.physical_parameters.lambda_tf,
+        sim_result.physical_parameters.epsilon_r, sim_result.physical_parameters.mu_minus);
 
     write_sqd_sim_result(sim_result, simulation_stream);
 

@@ -5,14 +5,12 @@
 #ifndef FICTION_IS_GROUND_STATE_HPP
 #define FICTION_IS_GROUND_STATE_HPP
 
-#include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
 #include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
+#include "fiction/algorithms/simulation/sidb/quickexact.hpp"
 #include "fiction/algorithms/simulation/sidb/quicksim.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/math_utils.hpp"
-
-#include <units.h>
 
 #include <cmath>
 
@@ -44,7 +42,7 @@ template <typename Lyt>
     const auto min_energy_exact  = minimum_energy(exhaustive_results.charge_distributions);
     const auto min_energy_new_ap = minimum_energy(quicksim_results.charge_distributions);
 
-    return round_to_n_decimal_places(units::math::abs(min_energy_exact - min_energy_new_ap), 6).value() == 0;
+    return round_to_n_decimal_places(std::abs(min_energy_exact - min_energy_new_ap), 6) == 0;
 }
 
 }  // namespace fiction

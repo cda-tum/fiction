@@ -5,45 +5,30 @@
 #ifndef FICTION_MATH_UTILS_HPP
 #define FICTION_MATH_UTILS_HPP
 
-#include "fiction/utils/units_utils.hpp"
-#include "units.h"
-
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
 #include <type_traits>
+#include <vector>
 
 namespace fiction
 {
 
 /**
- * Rounds a number or unit (allowed are: temperature, length, voltage, and energy) to a specified number of decimal
- * places.
+ * Rounds a number to a specified number of decimal places.
  *
- * @tparam T The type of the number or unit to round.
- * @param number The number or unit to round.
- * @param n The number or unit of decimal places to round to.
- * @return The number or unit rounded to n decimal places.
+ * @tparam T The type of the number to round.
+ * @param number The number to round.
+ * @param n The number of decimal places to round to.
+ * @return The number rounded to n decimal places.
  */
 template <typename T>
 T round_to_n_decimal_places(const T number, const uint64_t n) noexcept
 {
-    static_assert(std::is_arithmetic_v<T> || units::traits::is_temperature_unit<T>::value ||
-                      units::traits::is_length_unit<T>::value || units::traits::is_voltage_unit<T>::value ||
-                      units::traits::is_energy_unit<T>::value,
-                  "T is neither a number type nor a unit type");
+    static_assert(std::is_arithmetic_v<T>, "T is not a number type");
 
-    if constexpr (std::is_arithmetic_v<T>)
-    {
-        const auto factor = std::pow(10.0, static_cast<double>(n));
-        return static_cast<T>(std::round(static_cast<double>(number) * factor) / static_cast<double>(factor));
-    }
-    else if constexpr (units::traits::is_temperature_unit<T>::value || units::traits::is_length_unit<T>::value ||
-                       units::traits::is_voltage_unit<T>::value || units::traits::is_energy_unit<T>::value)
-    {
-        const double factor = std::pow(10.0, n);
-        return static_cast<T>(std::round(static_cast<double>(number.value()) * factor) / factor);
-    }
+    const auto factor = std::pow(10.0, static_cast<double>(n));
+    return static_cast<T>(std::round(static_cast<double>(number) * factor) / factor);
 }
 
 /**
@@ -64,6 +49,31 @@ T integral_abs(const T n) noexcept
     }
 
     return static_cast<T>(std::abs(static_cast<int64_t>(n)));  // needed to solve ambiguity of std::abs
+}
+
+/**
+ * Calculates the binomial coefficient \f$ \binom{n}{k} \f$.
+ *
+ * @param n The total number of items.
+ * @param k The number of items to choose from n.
+ * @return The binomial coefficient \f$ \binom{n}{k} \f$.
+ */
+[[nodiscard]] inline uint64_t binomial_coefficient(uint64_t n, uint64_t k) noexcept
+{
+    if (k > n)
+    {
+        return 0;
+    }
+    uint64_t result = 1;
+    if (2 * k > n)
+    {
+        k = n - k;
+    }
+    for (uint64_t i = 1; i <= k; i++)
+    {
+        result = result * (n + 1 - i) / i;
+    }
+    return result;
 }
 
 }  // namespace fiction

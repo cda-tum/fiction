@@ -112,10 +112,12 @@ inline constexpr const char* CLOSE_DEFECTS_LAYER = "        </layer>\n";
 inline constexpr const char* CLOSE_DESIGN        = "    </design>\n";
 
 inline constexpr const char* LATTICE_COORDINATE = R"(<latcoord n="{}" m="{}" l="{}"/>)";
+inline constexpr const char* DOT_TYPE           = R"(<type>{}</type>)";
 
 inline constexpr const char* DBDOT_BLOCK = "            <dbdot>\n"
                                            "                <layer_id>2</layer_id>\n"
-                                           "                {}\n"
+                                           "                {}\n"  // lattice coordinates
+                                           "                {}\n"  // dot type
                                            "                <color>{}</color>\n"
                                            "            </dbdot>\n";
 
@@ -221,9 +223,27 @@ class write_sqd_layout_impl
                 // generate SiDB cells
                 if constexpr (has_sidb_technology_v<Lyt>)
                 {
-                    design << fmt::format(siqad::DBDOT_BLOCK,
-                                          fmt::format(siqad::LATTICE_COORDINATE, c.x, c.y / 2, c.y % 2),
-                                          siqad::NORMAL_COLOR);
+                    const auto type = this->lyt.get_cell_type(c);
+                    const auto type_str =
+                        type == sidb_technology::cell_type::NORMAL ? "" :
+                        type == sidb_technology::cell_type::INPUT  ? fmt::format(siqad::DOT_TYPE, "input") :
+                        type == sidb_technology::cell_type::OUTPUT ? fmt::format(siqad::DOT_TYPE, "output") :
+                                                                     "";
+
+                    if constexpr (has_siqad_coord_v<Lyt>)
+                    {
+                        design << fmt::format(siqad::DBDOT_BLOCK, fmt::format(siqad::LATTICE_COORDINATE, c.x, c.y, c.z),
+                                              type_str, siqad::NORMAL_COLOR);
+                    }
+                    else
+                    {
+                        const auto siqad_coord = fiction::siqad::to_siqad_coord(c);
+
+                        design << fmt::format(
+                            siqad::DBDOT_BLOCK,
+                            fmt::format(siqad::LATTICE_COORDINATE, siqad_coord.x, siqad_coord.y, siqad_coord.z),
+                            type_str, siqad::NORMAL_COLOR);
+                    }
                 }
                 // generate QCA cell blocks
                 else if constexpr (has_qca_technology_v<Lyt>)
@@ -239,21 +259,21 @@ class write_sqd_layout_impl
                     {
                         // top left
                         design << fmt::format(siqad::DBDOT_BLOCK,
-                                              fmt::format(siqad::LATTICE_COORDINATE, c.x * 14, c.y * 7, 0), color);
+                                              fmt::format(siqad::LATTICE_COORDINATE, c.x * 14, c.y * 7, 0), "", color);
                         // bottom right
                         design << fmt::format(siqad::DBDOT_BLOCK,
                                               fmt::format(siqad::LATTICE_COORDINATE, (c.x * 14) + 6, (c.y * 7) + 3, 0),
-                                              color);
+                                              "", color);
                     }
                     if (!qca_technology::is_const_0_cell(type))
                     {
                         // top right
                         design << fmt::format(siqad::DBDOT_BLOCK,
-                                              fmt::format(siqad::LATTICE_COORDINATE, (c.x * 14) + 6, c.y * 7, 0),
+                                              fmt::format(siqad::LATTICE_COORDINATE, (c.x * 14) + 6, c.y * 7, 0), "",
                                               color);
                         // bottom left
                         design << fmt::format(siqad::DBDOT_BLOCK,
-                                              fmt::format(siqad::LATTICE_COORDINATE, c.x * 14, (c.y * 7) + 3, 0),
+                                              fmt::format(siqad::LATTICE_COORDINATE, c.x * 14, (c.y * 7) + 3, 0), "",
                                               color);
                     }
                 }
@@ -273,15 +293,31 @@ class write_sqd_layout_impl
             lyt.foreach_sidb_defect(
                 [&design](const auto& cd)
                 {
-                    const auto& cell   = cd.first;
                     const auto& defect = cd.second;
 
-                    design << fmt::format(siqad::DEFECT_BLOCK,
-                                          fmt::format(siqad::LATTICE_COORDINATE, cell.x, cell.y / 2, cell.y % 2),
-                                          is_charged_defect(defect) ? fmt::format(siqad::COULOMB, defect.charge,
-                                                                                  defect.epsilon_r, defect.lambda_tf) :
-                                                                      "",
-                                          get_defect_type_name(defect.type));
+                    // layout is not based on SiQAD coordinates, coordinate transformation is performed
+                    if constexpr (has_siqad_coord_v<Lyt>)
+                    {
+                        const auto& cell = cd.first;
+
+                        design << fmt::format(
+                            siqad::DEFECT_BLOCK, fmt::format(siqad::LATTICE_COORDINATE, cell.x, cell.y, cell.z),
+                            is_charged_defect(defect) ?
+                                fmt::format(siqad::COULOMB, defect.charge, defect.epsilon_r, defect.lambda_tf) :
+                                "",
+                            get_defect_type_name(defect.type));
+                    }
+                    else
+                    {
+                        const auto cell = fiction::siqad::to_siqad_coord(cd.first);
+
+                        design << fmt::format(
+                            siqad::DEFECT_BLOCK, fmt::format(siqad::LATTICE_COORDINATE, cell.x, cell.y, cell.z),
+                            is_charged_defect(defect) ?
+                                fmt::format(siqad::COULOMB, defect.charge, defect.epsilon_r, defect.lambda_tf) :
+                                "",
+                            get_defect_type_name(defect.type));
+                    }
                 });
         }
     }

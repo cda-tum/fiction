@@ -64,6 +64,11 @@ SiQAD
 .. doxygenfunction:: fiction::write_sqd_sim_result(const sidb_simulation_result<Lyt>& sim_result, std::ostream& os)
 .. doxygenfunction:: fiction::write_sqd_sim_result(const sidb_simulation_result<Lyt>& sim_result, const std::string_view& filename)
 
+**Header:** ``fiction/io/write_location_and_ground_state.hpp``
+
+.. doxygenfunction:: fiction::write_location_and_ground_state(const sidb_simulation_result<Lyt>& sim_result, std::ostream& os)
+.. doxygenfunction:: fiction::write_location_and_ground_state(const sidb_simulation_result<Lyt>& sim_result, const std::string_view& filename)
+
 **Header:** ``fiction/io/read_sqd_layout.hpp``
 
 .. doxygenfunction:: fiction::read_sqd_layout(std::istream& is, const std::string_view& name = "")
@@ -72,3 +77,21 @@ SiQAD
 .. doxygenfunction:: fiction::read_sqd_layout(Lyt& lyt, const std::string_view& filename)
 
 .. doxygenclass:: fiction::sqd_parsing_error
+
+SiDB Operational Domain
+#######################
+
+**Header:** ``fiction/io/write_operational_domain.hpp``
+
+.. doxygenstruct:: fiction::write_operational_domain_params
+   :members:
+.. doxygenfunction:: fiction::write_operational_domain(const operational_domain& opdom, std::ostream& os, const write_operational_domain_params& params = {})
+.. doxygenfunction:: fiction::write_operational_domain(const operational_domain& opdom, const std::string_view& filename, const write_operational_domain_params& params = {})
+
+Technology-independent Gate-level Layouts
+#########################################
+
+**Header:** ``fiction/io/write_fgl_layout.hpp``
+
+.. doxygenfunction:: fiction::write_fgl_layout(const Lyt& lyt, std::ostream& os)
+.. doxygenfunction:: fiction::write_fgl_layout(const Lyt& lyt, const std::string_view& filename)

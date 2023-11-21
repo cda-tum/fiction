@@ -17,7 +17,7 @@
 using namespace fiction;
 
 TEMPLATE_TEST_CASE(
-    "check if ground state is found", "[is_ground_state]",
+    "check if ground state is found", "[is-ground-state]",
     (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
     (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, odd_row_hex>>>),
     (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, even_row_hex>>>),
@@ -28,7 +28,7 @@ TEMPLATE_TEST_CASE(
     {
         TestType                         lyt{{20, 10}};
         charge_distribution_surface      charge_layout{lyt};
-        const sidb_simulation_parameters params{2, -0.32_eV};
+        const sidb_simulation_parameters params{2, -0.32};
         const auto simulation_results_exgs = exhaustive_ground_state_simulation<TestType>(charge_layout, params);
         const quicksim_params quicksim_params{params};
         const auto            simulation_results_quicksim = quicksim<TestType>(charge_layout, quicksim_params);
@@ -51,7 +51,7 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({7, 10, 0}, TestType::cell_type::NORMAL);
 
         charge_distribution_surface      charge_layout{lyt};
-        const sidb_simulation_parameters params{2, -0.32_eV};
+        const sidb_simulation_parameters params{2, -0.32};
 
         const auto simulation_results_exgs = exhaustive_ground_state_simulation<TestType>(charge_layout, params);
 

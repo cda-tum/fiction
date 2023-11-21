@@ -62,6 +62,7 @@ Let there be a *fiction*
    io/input.rst
    io/visualization.rst
    io/physical_simulation.rst
+   io/utility.rst
 
 .. toctree::
    :maxdepth: 2
