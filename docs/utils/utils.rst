@@ -33,21 +33,38 @@ Network Utils
 Truth Table Utils
 -----------------
 
-**Header:** ``fiction/utils/truth_table_utils.hpp``
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/utils/truth_table_utils.hpp``
 
-.. doxygenfunction:: fiction::create_id_tt
-.. doxygenfunction:: fiction::create_not_tt
-.. doxygenfunction:: fiction::create_and_tt
-.. doxygenfunction:: fiction::create_or_tt
-.. doxygenfunction:: fiction::create_nand_tt
-.. doxygenfunction:: fiction::create_nor_tt
-.. doxygenfunction:: fiction::create_xor_tt
-.. doxygenfunction:: fiction::create_xnor_tt
-.. doxygenfunction:: fiction::create_maj_tt
-.. doxygenfunction:: fiction::create_double_wire_tt
-.. doxygenfunction:: fiction::create_crossing_wire_tt
-.. doxygenfunction:: fiction::create_fan_out_tt
-.. doxygenfunction:: fiction::create_half_adder_tt
+        .. doxygenfunction:: fiction::create_id_tt
+        .. doxygenfunction:: fiction::create_not_tt
+        .. doxygenfunction:: fiction::create_and_tt
+        .. doxygenfunction:: fiction::create_or_tt
+        .. doxygenfunction:: fiction::create_nand_tt
+        .. doxygenfunction:: fiction::create_nor_tt
+        .. doxygenfunction:: fiction::create_xor_tt
+        .. doxygenfunction:: fiction::create_xnor_tt
+        .. doxygenfunction:: fiction::create_maj_tt
+        .. doxygenfunction:: fiction::create_double_wire_tt
+        .. doxygenfunction:: fiction::create_crossing_wire_tt
+        .. doxygenfunction:: fiction::create_fan_out_tt
+        .. doxygenfunction:: fiction::create_half_adder_tt
+
+    .. tab:: Python
+        .. autofunction:: fiction.pyfiction.create_id_tt
+        .. autofunction:: fiction.pyfiction.create_not_tt
+        .. autofunction:: fiction.pyfiction.create_and_tt
+        .. autofunction:: fiction.pyfiction.create_or_tt
+        .. autofunction:: fiction.pyfiction.create_nand_tt
+        .. autofunction:: fiction.pyfiction.create_nor_tt
+        .. autofunction:: fiction.pyfiction.create_xor_tt
+        .. autofunction:: fiction.pyfiction.create_xnor_tt
+        .. autofunction:: fiction.pyfiction.create_maj_tt
+        .. autofunction:: fiction.pyfiction.create_double_wire_tt
+        .. autofunction:: fiction.pyfiction.create_crossing_wire_tt
+        .. autofunction:: fiction.pyfiction.create_fan_out_tt
+        .. autofunction:: fiction.pyfiction.create_half_adder_tt
 
 
 Layout Utils
