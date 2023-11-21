@@ -24,6 +24,6 @@ Orthogonal Ordering Network
 
 **Header:** ``fiction/algorithms/physical_design/ortho_ordering_network.hpp``
 
-Adjustment of ``orthogonal``, which orders the PIs of the logic network in order to save area and wire crossings.
+Adjustment of "orthogonal", which orders the PIs of the logic network in order to save area and wire crossings.
 
 .. doxygenfunction:: fiction::orthogonal_ordering_network
