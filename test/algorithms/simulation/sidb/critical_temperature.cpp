@@ -345,6 +345,8 @@ TEMPLATE_TEST_CASE(
                                                  critical_temperature_params::simulation_engine::EXACT, 0.99, 350};
         critical_temperature_gate_based(lyt, std::vector<tt>{create_id_tt()}, params, &criticalstats);
 
+        CHECK(criticalstats.algorithm_name == "QuickExact");
+
         CHECK_THAT(std::abs(criticalstats.energy_between_ground_state_and_first_erroneous),
                    Catch::Matchers::WithinAbs(305.95, 0.01));
         CHECK_THAT(std::abs(criticalstats.critical_temperature), Catch::Matchers::WithinAbs(0.00, 0.01));
@@ -370,6 +372,8 @@ TEMPLATE_TEST_CASE(
                                                  critical_temperature_params::simulation_engine::APPROXIMATE, 0.99,
                                                  750};
         critical_temperature_non_gate_based(lyt, params, &criticalstats);
+
+        CHECK(criticalstats.algorithm_name == "QuickSim");
 
         CHECK_THAT(std::abs(criticalstats.critical_temperature), Catch::Matchers::WithinAbs(11.55, 0.01));
     }
