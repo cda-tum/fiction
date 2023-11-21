@@ -33,7 +33,7 @@ Network Utils
 
     .. tab:: Python
         .. autoclass:: fiction.pyfiction.high_degree_fanin_exception
-           :members:
+            :members:
         .. autofunction:: fiction.pyfiction.has_high_degree_fanin_nodes
 
 

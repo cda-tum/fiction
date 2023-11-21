@@ -20,6 +20,7 @@ Distance functions compute (an approximation for) the distance between two coord
     .. tab:: Python
         .. autofunction:: fiction.pyfiction.manhattan_distance
         .. autofunction:: fiction.pyfiction.euclidean_distance
+        .. autofunction:: fiction.pyfiction.twoddwave_distance
 
 Distance Maps
 -------------

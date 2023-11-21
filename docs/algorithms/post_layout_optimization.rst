@@ -17,4 +17,6 @@ positions.
         .. doxygenfunction:: fiction::post_layout_optimization
 
     .. tab:: Python
+        .. autoclass:: fiction.pyfiction.post_layout_optimization_stats
+            :members:
         .. autofunction:: fiction.pyfiction.post_layout_optimization

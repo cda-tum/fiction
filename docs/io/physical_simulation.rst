@@ -21,6 +21,7 @@ QCADesigner
             :members:
         .. autofunction:: fiction.pyfiction.write_qca_layout
 
+
 QCA-STACK
 #########
 
@@ -68,6 +69,7 @@ QCA-STACK
         .. autoclass:: fiction.pyfiction.unrecognized_cell_definition_exception
             :members:
 
+
 ToPoliNano
 ##########
 
@@ -84,6 +86,7 @@ ToPoliNano
     .. tab:: Python
         .. autofunction:: fiction.pyfiction.write_qcc_layout
 
+
 MagCAD & SCERPA
 ###############
 
@@ -96,6 +99,7 @@ MagCAD & SCERPA
 
     .. tab:: Python
         .. autofunction:: fiction.pyfiction.write_qll_layout
+
 
 SiQAD
 #####

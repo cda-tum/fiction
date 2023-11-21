@@ -11,6 +11,7 @@ Logic Networks
 .. doxygenclass:: fiction::network_reader
    :members:
 
+
 Truth Tables
 ############
 
@@ -18,6 +19,7 @@ Truth Tables
 
 .. doxygenclass:: fiction::tt_reader
    :members:
+
 
 Gate-level Layouts
 ##################
@@ -39,6 +41,7 @@ Gate-level Layouts
         .. autofunction:: fiction.pyfiction.read_shifted_cartesian_fgl_layout
         .. autofunction:: fiction.pyfiction.read_hexagonal_fgl_layout
 
+
 Cell-level Layouts
 ##################
 
@@ -57,6 +60,9 @@ Cell-level Layouts
     .. tab:: Python
         .. autofunction:: fiction.pyfiction.read_sqd_layout
 
+        .. autoclass:: fiction.pyfiction.sqd_parsing_error
+            :members:
+
 .. tabs::
     .. tab:: C++
         **Header:** ``fiction/io/read_fqca_layout.hpp``
@@ -70,6 +76,7 @@ Cell-level Layouts
 
     .. tab:: Python
         .. autofunction:: fiction.pyfiction.read_fqca_layout
+
 
 SiDB Surface Defects
 ####################

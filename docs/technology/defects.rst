@@ -6,22 +6,42 @@ A collection of tools to model defects that can occur during the fabrication pro
 SiDB Defect Types
 -----------------
 
-**Header:** ``fiction/technology/sidb_defects.hpp``
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/technology/sidb_defects.hpp``
 
-.. doxygenenum:: fiction::sidb_defect_type
+        .. doxygenenum:: fiction::sidb_defect_type
 
-.. doxygenstruct:: fiction::sidb_defect
-   :members:
+        .. doxygenstruct:: fiction::sidb_defect
+           :members:
 
-.. doxygenfunction:: fiction::is_charged_defect
-.. doxygenfunction:: fiction::is_neutral_defect
+        .. doxygenfunction:: fiction::is_charged_defect
+        .. doxygenfunction:: fiction::is_positively_charged_defect
+        .. doxygenfunction:: fiction::is_negatively_charged_defect
+        .. doxygenfunction:: fiction::is_neutrally_charged_defect
+        .. doxygenfunction:: fiction::is_neutral_defect
 
-.. doxygenvariable:: fiction::SIDB_CHARGED_DEFECT_HORIZONTAL_SPACING
-.. doxygenvariable:: fiction::SIDB_CHARGED_DEFECT_VERTICAL_SPACING
-.. doxygenvariable:: fiction::SIDB_NEUTRAL_DEFECT_HORIZONTAL_SPACING
-.. doxygenvariable:: fiction::SIDB_NEUTRAL_DEFECT_VERTICAL_SPACING
+        .. doxygenvariable:: fiction::SIDB_CHARGED_DEFECT_HORIZONTAL_SPACING
+        .. doxygenvariable:: fiction::SIDB_CHARGED_DEFECT_VERTICAL_SPACING
+        .. doxygenvariable:: fiction::SIDB_NEUTRAL_DEFECT_HORIZONTAL_SPACING
+        .. doxygenvariable:: fiction::SIDB_NEUTRAL_DEFECT_VERTICAL_SPACING
 
-.. doxygenfunction:: fiction::defect_extent
+        .. doxygenfunction:: fiction::defect_extent
+
+    .. tab:: Python
+        .. autoclass:: fiction.technology.sidb_defect_type
+            :members:
+
+        .. autoclass:: fiction.technology.sidb_defect
+            :members:
+
+        .. autofunction:: fiction.technology.is_charged_defect
+        .. autofunction:: fiction.technology.is_positively_charged_defect
+        .. autofunction:: fiction.technology.is_negatively_charged_defect
+        .. autofunction:: fiction.technology.is_neutrally_charged_defect
+        .. autofunction:: fiction.technology.is_neutral_defect
+
+        .. autofunction:: fiction.technology.defect_extent
 
 
 SiDB Defect Surface
