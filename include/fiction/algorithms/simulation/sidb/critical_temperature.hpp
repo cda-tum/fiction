@@ -169,6 +169,8 @@ class critical_temperature_impl
 
     {
         stats.critical_temperature = params.max_temperature;
+        stats.algorithm_name =
+            (params.engine == critical_temperature_params::simulation_engine::EXACT) ? "QuickExact" : "QuickSim";
     }
 
     /**
@@ -186,7 +188,6 @@ class critical_temperature_impl
             stats.critical_temperature = 0.0;
             return true;
         }
-
         else if (layout.num_cells() > 1)
         {
             const auto output_bdl_pairs =
