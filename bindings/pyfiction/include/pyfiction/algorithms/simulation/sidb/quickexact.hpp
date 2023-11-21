@@ -26,9 +26,11 @@ void quickexact(pybind11::module& m)
     using namespace pybind11::literals;
 
     py::enum_<typename fiction::quickexact_params<Lyt>::automatic_base_number_detection>(
-        m, "automatic_base_number_detection")
-        .value("ON", fiction::quickexact_params<Lyt>::automatic_base_number_detection::ON)
-        .value("OFF", fiction::quickexact_params<Lyt>::automatic_base_number_detection::OFF)
+        m, "automatic_base_number_detection", DOC(fiction_quickexact_params_automatic_base_number_detection))
+        .value("ON", fiction::quickexact_params<Lyt>::automatic_base_number_detection::ON,
+               DOC(fiction_quickexact_params_automatic_base_number_detection_ON))
+        .value("OFF", fiction::quickexact_params<Lyt>::automatic_base_number_detection::OFF,
+               DOC(fiction_quickexact_params_automatic_base_number_detection_OFF))
 
         ;
 
