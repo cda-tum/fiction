@@ -22,6 +22,8 @@
 #include "cmd/logic/fanouts.hpp"
 #include "cmd/logic/gates.hpp"
 #include "cmd/logic/map.hpp"
+#include "cmd/logic/miginvopt.hpp"
+#include "cmd/logic/miginvprop.hpp"
 #include "cmd/logic/random.hpp"
 #include "cmd/logic/simulate.hpp"
 #include "cmd/physical_design/exact.hpp"
