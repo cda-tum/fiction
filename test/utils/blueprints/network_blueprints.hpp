@@ -489,7 +489,7 @@ mockturtle::names_view<Ntk> two_inverter_substitutions_a()
 
     const auto fo1 = ntk.create_buf(x1);
 
-    const auto n1 = ntk.create_not(fo1);
+    const auto n1  = ntk.create_not(fo1);
     const auto fo2 = ntk.create_buf(fo1);
 
     const auto n2 = ntk.create_not(fo2);

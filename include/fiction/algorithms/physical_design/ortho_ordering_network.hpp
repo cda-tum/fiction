@@ -659,7 +659,7 @@ class orthogonal_ordering_network_impl
     input_ordering_view<mockturtle::fanout_view<mockturtle::names_view<technology_network>>> ntk;
 
     orthogonal_physical_design_params ps;
-    orthogonal_physical_design_stats& pst; // NOLINT
+    orthogonal_physical_design_stats& pst;  // NOLINT
     // This line will suppress the warning cppcoreguidelines-avoid-const-or-ref-data-members
 
     uint32_t po_counter{0};
