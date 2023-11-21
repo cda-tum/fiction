@@ -118,7 +118,7 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::occupation_probability_of_excited_states(m);
     pyfiction::critical_temperature(m);
     //    pyfiction::random_sidb_layout_generator(m);
-    //    pyfiction::time_to_solution(m);
+    pyfiction::time_to_solution(m);
     /**
      * Logic Networks
      */

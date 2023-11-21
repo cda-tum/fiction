@@ -10,11 +10,11 @@
 
 #include <fiction/traits.hpp>
 
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-
 #include <cstdint>
 #include <vector>
+
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 namespace pyfiction
 {
@@ -243,6 +243,14 @@ inline void shifted_cartesian_layout(pybind11::module& m)
             [](const py_shifted_cartesian_layout& lyt, const py_offset_coordinate& c)
             { return lyt.adjacent_opposite_coordinates(c); },
             "c"_a, DOC(fiction_cartesian_layout_adjacent_opposite_coordinates))
+
+        .def("__repr__",
+             [](const py_shifted_cartesian_layout& lyt) -> std::string
+             {
+                 std::stringstream stream{};
+                 print_layout(lyt, stream);
+                 return stream.str();
+             })
 
         ;
 }

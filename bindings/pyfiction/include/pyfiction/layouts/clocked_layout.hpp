@@ -12,11 +12,12 @@
 #include <fiction/traits.hpp>
 
 #include <fmt/format.h>
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
 
 #include <set>
 #include <string>
+
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 namespace pyfiction
 {
@@ -72,6 +73,14 @@ void clocked_layout(pybind11::module& m, const std::string& topology)
         .def("in_degree", &ClockedLyt::in_degree, "cz"_a, DOC(fiction_clocked_layout_in_degree))
         .def("out_degree", &ClockedLyt::out_degree, "cz"_a, DOC(fiction_clocked_layout_out_degree))
         .def("degree", &ClockedLyt::degree, "cz"_a, DOC(fiction_clocked_layout_degree))
+
+        .def("__repr__",
+             [](const ClockedLyt& lyt) -> std::string
+             {
+                 std::stringstream stream{};
+                 print_layout(lyt, stream);
+                 return stream.str();
+             })
 
         ;
 }

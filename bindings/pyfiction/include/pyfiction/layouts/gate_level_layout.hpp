@@ -214,7 +214,7 @@ void gate_level_layout(pybind11::module& m, const std::string& topology)
              [](const GateLyt& lyt) -> std::string
              {
                  std::stringstream stream{};
-                 fiction::print_gate_level_layout(stream, lyt);
+                 fiction::print_layout(lyt, stream);
                  return stream.str();
              })
 

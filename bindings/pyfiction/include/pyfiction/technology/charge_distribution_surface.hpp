@@ -8,6 +8,8 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
+#include <fiction/io/print_layout.hpp>
+#include <fiction/technology/charge_distribution_surface.hpp>
 #include <fiction/technology/sidb_charge_state.hpp>
 
 #include <cstdint>
@@ -300,6 +302,14 @@ inline void charge_distribution_surface(pybind11::module& m)
                 return std::make_pair(bb.get_min(), bb.get_max());
             },
             DOC(fiction_bounding_box_2d_overridden))
+
+        .def("__repr__",
+             [](const py_charge_distribution_surface& lyt)
+             {
+                 std::stringstream ss;
+                 print_layout(lyt, ss);
+                 return ss.str();
+             })
 
         ;
 }

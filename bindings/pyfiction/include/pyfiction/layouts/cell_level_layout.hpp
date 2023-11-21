@@ -10,6 +10,7 @@
 
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/traits.hpp>
+#include <fiction/utils/layout_utils.hpp>
 
 #include <fmt/format.h>
 
@@ -156,6 +157,23 @@ void fcn_technology_cell_level_layout(pybind11::module& m)
                 return std::make_pair(bb.get_min(), bb.get_max());
             },
             DOC(fiction_bounding_box_2d_overridden))
+
+        .def("__repr__",
+             [](const py_cartesian_technology_cell_layout& lyt) -> std::string
+             {
+                 std::stringstream stream{};
+
+                 if constexpr (std::is_same_v<Technology, fiction::sidb_technology>)
+                 {
+                     print_layout(convert_to_siqad_coordinates(lyt), stream);
+                 }
+                 else
+                 {
+                     print_layout(lyt, stream);
+                 }
+
+                 return stream.str();
+             })
 
         ;
 }
