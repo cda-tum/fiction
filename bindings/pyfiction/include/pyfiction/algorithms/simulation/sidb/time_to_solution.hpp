@@ -24,7 +24,7 @@ void time_to_solution(pybind11::module& m)
 {
     using namespace pybind11::literals;
 
-    m.def("sim_acc_tts", &fiction::time_to_solution<Lyt>, "lyt"_a, "quickim_params"_a,
+    m.def("time_to_solution", &fiction::time_to_solution<Lyt>, "lyt"_a, "quickim_params"_a,
           "tts_params"_a = fiction::time_to_solution_params{}, "ps"_a = nullptr, DOC(fiction_time_to_solution));
 }
 

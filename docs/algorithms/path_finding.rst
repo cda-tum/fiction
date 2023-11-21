@@ -110,7 +110,8 @@ Enumerate All Paths
         .. doxygenstruct:: fiction::enumerate_all_paths_params
            :members:
         .. doxygenfunction:: fiction::enumerate_all_paths
+
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.enumerate_all_clocking_paths_params
+        .. autoclass:: fiction.pyfiction.enumerate_all_paths_params
             :members:
-        .. autofunction:: fiction.pyfiction.enumerate_all_clocking_paths
+        .. autofunction:: fiction.pyfiction.enumerate_all_paths

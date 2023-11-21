@@ -154,7 +154,8 @@ Temperature Behavior
             :members:
         .. autoclass:: fiction.pyfiction.critical_temperature_params
             :members:
-        .. autofunction:: fiction.pyfiction.critical_temperature
+        .. autofunction:: fiction.pyfiction.critical_temperature_gate_based
+        .. autofunction:: fiction.pyfiction.critical_temperature_non_gate_based
 
         .. autofunction:: fiction.pyfiction.occupation_probability_gate_based
         .. autofunction:: fiction.pyfiction.occupation_probability_non_gate_based
