@@ -64,14 +64,14 @@ template <typename Lyt, typename Dist = double>
     return static_cast<Dist>(std::hypot(x, y));
 }
 /**
- * The 2DDWave distance \f$ D \f$ between two layout coordinates \f$ s = (x_1, y_1) \f$ and \f$ t = (x_2, y_2) \f$ given
+ * The 2DDWave distance \f$D\f$ between two layout coordinates \f$s = (x_1, y_1)\f$ and \f$t = (x_2, y_2)\f$ given
  * by
  *
- *  \f$ D = |x_1 - x_2| + |y_1 - y_2| \f$ iff \f$ s \leq t \f$ and \f$ \infty \f$, otherwise.
+ *  \f$D = |x_1 - x_2| + |y_1 - y_2|\f$ iff \f$s \leq t\f$ and \f$\infty\f$, otherwise.
  *
- * Thereby, \f$ s \leq t \f$ iff \f$ x_1 \leq x_2 \f$ and \f$ y_1 \leq y_2 \f$.
+ * Thereby, \f$s \leq t\f$ iff \f$x_1 \leq x_2\f$ and \f$y_1 \leq y_2\f$.
  *
- * @note To represent \f$ \infty \f$, `std::numeric_limits<uint32_t>::max()` is returned for distances of infinite
+ * @note To represent \f$\infty\f$, `std::numeric_limits<uint32_t>::max()` is returned for distances of infinite
  * length. We are using `uint32_t` to prevent overflows when adding distances in the default `uint64_t` number range.
  *
  * @tparam Lyt Coordinate layout type.

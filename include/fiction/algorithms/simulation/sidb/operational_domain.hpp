@@ -46,9 +46,9 @@ namespace fiction
 /**
  * An operational domain is a set of simulation parameter values for which a given SiDB layout is logically operational.
  * This means that a layout is deemed operational if the layout's ground state corresponds with a given Boolean function
- * at the layout's outputs for all possible input combinations. In this implementation, \f$ n \f$ BDL input wires and a
+ * at the layout's outputs for all possible input combinations. In this implementation, \f$n\f$ BDL input wires and a
  * single BDL output wire are assumed for a given layout. Any operational domain computation algorithm toggles through
- * all \f$ 2^n \f$ input combinations and evaluates the layout's output behavior in accordance with the given Boolean
+ * all \f$2^n\f$ input combinations and evaluates the layout's output behavior in accordance with the given Boolean
  * function. The layout is only considered operational for a certain parameter combination, if the output behavior is
  * correct for all input combinations. The operational domain can be computed by sweeping over specified simulation
  * parameters and checking the operational status of the layout for each parameter combination. The operational domain
@@ -710,7 +710,7 @@ class operational_domain_impl
      * Logs and returns the operational status at the given point `sp = (x, y)`. If the point has already been sampled,
      * it returns the cached value. Otherwise, a ground state simulation is performed for all input combinations of the
      * stored layout using the given simulation parameters. It terminates as soon as a non-operational state is found.
-     * In the worst case, the function performs \f$ 2^n \f$ simulations, where \f$ n \f$ is the number of inputs of the
+     * In the worst case, the function performs \f$2^n\f$ simulations, where \f$n\f$ is the number of inputs of the
      * layout. This function is used by all operational domain computation techniques.
      *
      * Any investigated point is added to the stored `op_domain`, regardless of its operational status.
@@ -953,8 +953,8 @@ class operational_domain_impl
  * This algorithm uses a grid search to find the operational domain. The grid search is performed by exhaustively
  * sweeping the parameter space in the x and y dimensions. Since grid search is exhaustive, the algorithm is guaranteed
  * to find the operational domain, if it exists within the parameter range. However, the algorithm performs a quadratic
- * number of operational checks on the layout, where each operational check consists of up to \f$ 2^n \f$ exact ground
- * state simulations, where \f$ n \f$ is the number of inputs of the layout. Each exact ground state simulation has
+ * number of operational checks on the layout, where each operational check consists of up to \f$2^n\f$ exact ground
+ * state simulations, where \f$n\f$ is the number of inputs of the layout. Each exact ground state simulation has
  * exponential complexity in of itself. Therefore, the algorithm is only feasible for small layouts with few inputs.
  *
  * @tparam Lyt SiDB cell-level layout type.
@@ -996,8 +996,8 @@ operational_domain operational_domain_grid_search(const Lyt& lyt, const std::vec
  *
  * This algorithm uses random sampling to find a part of the operational domain that might not be complete. It performs
  * a total of `samples` uniformly-distributed random samples within the parameter range. For each sample, the algorithm
- * performs one operational check on the layout, where each operational check consists of up to \f$ 2^n \f$ exact
- * ground state simulations, where \f$ n \f$ is the number of inputs of the layout. Each exact ground state simulation
+ * performs one operational check on the layout, where each operational check consists of up to \f$2^n\f$ exact
+ * ground state simulations, where \f$n\f$ is the number of inputs of the layout. Each exact ground state simulation
  * has exponential complexity in of itself. Therefore, the algorithm is only feasible for small layouts with few inputs.
  *
  * @tparam Lyt SiDB cell-level layout type.
@@ -1046,7 +1046,7 @@ operational_domain operational_domain_random_sampling(const Lyt& lyt, const std:
  * It performs `samples` uniformly-distributed random samples within the parameter range. From there, it performs
  * another number of samples equal to the number of points within the operational domain plus the first non-operational
  * point in each direction. For each sample, the algorithm performs one operational check on the layout, where each
- * operational check consists of up to \f$ 2^n \f$ exact ground state simulations, where \f$ n \f$ is the number of
+ * operational check consists of up to \f$2^n\f$ exact ground state simulations, where \f$n\f$ is the number of
  * inputs of the layout. Each exact ground state simulation has exponential complexity in of itself. Therefore, the
  * algorithm is only feasible for small layouts with few inputs.
  *
@@ -1097,7 +1097,7 @@ operational_domain operational_domain_flood_fill(const Lyt& lyt, const std::vect
  * point is found. From there, it performs another number of samples equal to the distance to an edge of the operational
  * area. Finally, it performs up to 8 samples for each contour point (however, the actual number is usually much lower).
  * For each sample, the algorithm performs one operational check on the layout, where each operational check consists of
- * up to \f$ 2^n \f$ exact ground state simulations, where \f$ n \f$ is the number of inputs of the layout. Each exact
+ * up to \f$2^n\f$ exact ground state simulations, where \f$n\f$ is the number of inputs of the layout. Each exact
  * ground state simulation has exponential complexity in of itself. Therefore, the algorithm is only feasible for small
  * layouts with few inputs.
  *

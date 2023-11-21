@@ -255,7 +255,7 @@ class is_operational_impl
  * Determine the operational status of an SiDB layout.
  *
  * This function checks the operational status of a given gate layout using the `is_operational` algorithm. It
- * determines whether the gate layout is operational and returns the correct result for all \f$ 2^n \f$ input
+ * determines whether the gate layout is operational and returns the correct result for all \f$2^n\f$ input
  * combinations.
  *
  * @tparam Lyt SiDB cell-level layout type.

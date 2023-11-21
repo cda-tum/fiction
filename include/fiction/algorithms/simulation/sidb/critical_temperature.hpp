@@ -443,8 +443,8 @@ class critical_temperature_impl
  * (https://ieeexplore.ieee.org/document/10231259). It comes in two flavors: gate-based and non-gate based.
  *
  * For *Gate-based Critical Temperature* Simulation, the Critical Temperature is defined as follows:
- * The temperature at which the erroneous charge distributions are populated by more than \f$ 1 - \eta \f$, where \f$
- * \eta \in [0,1] \f$.
+ * The temperature at which the erroneous charge distributions are populated by more than \f$1 - \eta\f$, where
+ * \f$\eta \in [0,1]\f$.
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT The type of the truth table specifying the gate behavior.
@@ -482,7 +482,7 @@ bool critical_temperature_gate_based(const Lyt& lyt, const std::vector<TT>& spec
 }
 /**
  * For *Non-gate-based Critical Temperature* simulation, the Critical Temperature is defined as follows: The temperature
- * at which the excited charge distributions are populated by more than \f$ 1 - \eta \f$, where \f$ \eta \in [0,1] \f$
+ * at which the excited charge distributions are populated by more than \f$1 - \eta\f$, where \f$\eta \in [0,1]\f$
  * is the confidence level for the presence of a working gate.
  *
  * @tparam Lyt SiDB cell-level layout type.

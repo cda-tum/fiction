@@ -806,9 +806,8 @@ constexpr coord_t to_siqad_coord(const CoordinateType& coord) noexcept
 }  // namespace siqad
 
 /**
- * Computes the area of a given coordinate assuming its origin is (0, 0, 0). Calculates \f$ (|x| + 1) \cdot (|y| + 1)
- * \f$ by default. The exception is SiQAD coordinates, for which it computes \f$ (|x| + 1) \cdot (2 \cdot |y| + |z| + 1)
- * \f$.
+ * Computes the area of a given coordinate assuming its origin is (0, 0, 0). Calculates \f$(|x| + 1) \cdot (|y| + 1)\f$
+ * by default. The exception is SiQAD coordinates, for which it computes \f$(|x| + 1) \cdot (2 \cdot |y| + |z| + 1)\f$.
  *
  * @tparam CoordinateType Coordinate type.
  * @param coord Coordinate.
@@ -826,8 +825,8 @@ uint64_t area(const CoordinateType& coord) noexcept
     return (static_cast<uint64_t>(integral_abs(coord.x)) + 1) * (static_cast<uint64_t>(integral_abs(coord.y)) + 1);
 }
 /**
- * Computes the volume of a given coordinate assuming its origin is (0, 0, 0). Calculates \f$ (|x| + 1) \cdot (|y| + 1)
- * \cdot (|z| + 1) \f$ by default. For SiQAD coordinates, which are planar by definition, the area is returned.
+ * Computes the volume of a given coordinate assuming its origin is (0, 0, 0). Calculates \f$(|x| + 1) \cdot (|y| + 1)
+ * \cdot (|z| + 1)\f$ by default. For SiQAD coordinates, which are planar by definition, the area is returned.
  *
  * @tparam CoordinateType Coordinate type.
  * @param coord Coordinate.

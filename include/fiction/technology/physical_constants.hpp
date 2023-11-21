@@ -17,7 +17,7 @@ constexpr double EPSILON = 8.8541878 * 1E-12;
  */
 constexpr double ELEMENTARY_CHARGE = 1.6021766 * 1E-19;
 /**
- * The Coulomb constant \f$ k \f$ in \f$ N \cdot m^{2} \cdot C^{-2} \f$.
+ * The Coulomb constant \f$k\f$ in \f$N \cdot m^{2} \cdot C^{-2}\f$.
  */
 constexpr double K_E = 8.987552 * 1E9;
 /**
