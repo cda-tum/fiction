@@ -23,7 +23,10 @@ namespace detail
 template <typename Lyt>
 void read_sqd_layout(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
+    using namespace py::literals;
+
+    py::register_exception<fiction::sqd_parsing_error>(m, "sqd_parsing_error", PyExc_RuntimeError);
 
     Lyt (*read_sqd_layout_function_pointer)(const std::string_view&, const std::string_view&) =
         &fiction::read_sqd_layout<Lyt>;

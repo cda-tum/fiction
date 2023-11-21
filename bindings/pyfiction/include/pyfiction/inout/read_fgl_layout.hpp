@@ -20,7 +20,10 @@ namespace pyfiction
 
 inline void read_fgl_layout(pybind11::module& m)
 {
-    using namespace pybind11::literals;
+    namespace py = pybind11;
+    using namespace py::literals;
+
+    py::register_exception<fiction::fgl_parsing_error>(m, "fgl_parsing_error", PyExc_RuntimeError);
 
     py_cartesian_gate_layout (*read_cartesian_fgl_layout_function_pointer)(
         const std::string_view&, const std::string_view&) = &fiction::read_fgl_layout<py_cartesian_gate_layout>;

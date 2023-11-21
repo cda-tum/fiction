@@ -19,10 +19,10 @@
 #include <array>
 #include <cctype>
 #include <cstdlib>
-#include <exception>
 #include <fstream>
 #include <istream>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <vector>

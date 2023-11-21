@@ -10,9 +10,9 @@
 
 #include <fiction/io/read_fqca_layout.hpp>
 
-#include <pybind11/pybind11.h>
-
 #include <string_view>
+
+#include <pybind11/pybind11.h>
 
 namespace pyfiction
 {
@@ -36,6 +36,13 @@ void read_fqca_layout(pybind11::module& m)
 
 inline void read_fqca_layout(pybind11::module& m)
 {
+    namespace py = pybind11;
+
+    py::register_exception<fiction::unsupported_character_exception>(m, "unsupported_character_exception");
+    py::register_exception<fiction::undefined_cell_label_exception>(m, "undefined_cell_label_exception");
+    py::register_exception<fiction::unrecognized_cell_definition_exception>(m,
+                                                                            "unrecognized_cell_definition_exception");
+
     detail::read_fqca_layout<py_qca_layout>(m);
 }
 

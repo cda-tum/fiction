@@ -49,10 +49,13 @@
 #include "pyfiction/inout/write_dot_layout.hpp"
 #include "pyfiction/inout/write_fgl_layout.hpp"
 #include "pyfiction/inout/write_fqca_layout.hpp"
+#include "pyfiction/inout/write_location_and_ground_state.hpp"
+#include "pyfiction/inout/write_operational_domain.hpp"
 #include "pyfiction/inout/write_qca_layout.hpp"
 #include "pyfiction/inout/write_qcc_layout.hpp"
 #include "pyfiction/inout/write_qll_layout.hpp"
 #include "pyfiction/inout/write_sqd_layout.hpp"
+#include "pyfiction/inout/write_sqd_sim_result.hpp"
 #include "pyfiction/inout/write_svg_layout.hpp"
 #include "pyfiction/layouts/cartesian_layout.hpp"
 #include "pyfiction/layouts/cell_level_layout.hpp"
@@ -173,6 +176,9 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::write_qcc_layout(m);
     pyfiction::write_qll_layout(m);
     pyfiction::write_fqca_layout(m);
+    pyfiction::write_sqd_sim_result(m);
+    pyfiction::write_location_and_ground_state(m);
+    pyfiction::write_operational_domain(m);
     pyfiction::read_fgl_layout(m);
     pyfiction::read_fqca_layout(m);
     pyfiction::read_sqd_layout(m);
