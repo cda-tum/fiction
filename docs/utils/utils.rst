@@ -1,33 +1,40 @@
 Network Utils
 -------------
 
-**Header:** ``fiction/utils/network_utils.hpp``
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/utils/network_utils.hpp``
 
-.. doxygenstruct:: mockturtle::edge
+        .. doxygenstruct:: mockturtle::edge
 
-.. doxygenfunction:: fiction::foreach_edge
-.. doxygenfunction:: fiction::foreach_outgoing_edge
-.. doxygenfunction:: fiction::foreach_incoming_edge
-.. doxygenfunction:: fiction::fanouts
+        .. doxygenfunction:: fiction::foreach_edge
+        .. doxygenfunction:: fiction::foreach_outgoing_edge
+        .. doxygenfunction:: fiction::foreach_incoming_edge
+        .. doxygenfunction:: fiction::fanouts
 
-.. doxygenstruct:: fiction::fanin_container
-   :members:
+        .. doxygenstruct:: fiction::fanin_container
+           :members:
 
-.. doxygenfunction:: fiction::fanins
-.. doxygenfunction:: fiction::num_constant_fanins
+        .. doxygenfunction:: fiction::fanins
+        .. doxygenfunction:: fiction::num_constant_fanins
 
-.. doxygenclass:: fiction::high_degree_fanin_exception
+        .. doxygenclass:: fiction::high_degree_fanin_exception
 
-.. doxygenfunction:: fiction::has_high_degree_fanin_nodes
+        .. doxygenfunction:: fiction::has_high_degree_fanin_nodes
 
-.. doxygenstruct:: fiction::fanin_edge_container
-   :members:
+        .. doxygenstruct:: fiction::fanin_edge_container
+           :members:
 
-.. doxygenfunction:: fiction::fanin_edges
+        .. doxygenfunction:: fiction::fanin_edges
 
-.. doxygenfunction:: fiction::has_incoming_primary_input
-.. doxygenfunction:: fiction::all_incoming_edge_paths
-.. doxygenfunction:: fiction::inverse_levels
+        .. doxygenfunction:: fiction::has_incoming_primary_input
+        .. doxygenfunction:: fiction::all_incoming_edge_paths
+        .. doxygenfunction:: fiction::inverse_levels
+
+    .. tab:: Python
+        .. autoclass:: fiction.pyfiction.high_degree_fanin_exception
+           :members:
+        .. autofunction:: fiction.pyfiction.has_high_degree_fanin_nodes
 
 
 Truth Table Utils
