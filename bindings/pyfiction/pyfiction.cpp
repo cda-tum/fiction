@@ -31,6 +31,7 @@
 #include "pyfiction/algorithms/simulation/sidb/minimum_energy.hpp"
 #include "pyfiction/algorithms/simulation/sidb/occupation_probability_of_excited_states.hpp"
 #include "pyfiction/algorithms/simulation/sidb/operational_domain.hpp"
+#include "pyfiction/algorithms/simulation/sidb/quickexact.hpp"
 #include "pyfiction/algorithms/simulation/sidb/quicksim.hpp"
 #include "pyfiction/algorithms/simulation/sidb/sidb_charge_state.hpp"
 #include "pyfiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
@@ -104,6 +105,7 @@ PYBIND11_MODULE(pyfiction, m)
     //    pyfiction::maximum_defect_influence_distance(m);
     pyfiction::exhaustive_ground_state_simulation(m);
     pyfiction::quicksim(m);
+    pyfiction::quickexact(m);
     pyfiction::is_ground_state(m);
     pyfiction::minimum_energy(m);
     pyfiction::energy_distribution(m);

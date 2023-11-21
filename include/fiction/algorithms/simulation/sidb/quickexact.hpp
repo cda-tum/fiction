@@ -24,20 +24,7 @@
 
 namespace fiction
 {
-/**
- * Base number required for the correct physical simulation.
- */
-enum class required_simulation_base_number
-{
-    /**
-     * Two state simulation (i.e., negative and neutral) is sufficient.
-     */
-    TWO,
-    /**
-     * Three state simulation (i.e., negative, neutral, and positive) is required.
-     */
-    THREE
-};
+
 /**
  * This struct stores the parameters for the *QuickExact* algorithm.
  */
@@ -50,7 +37,7 @@ struct quickexact_params
     enum class automatic_base_number_detection
     {
         /**
-         * Simulation is conducted with the required base number (i.e, if positively charged SiDBs can occur, three
+         * Simulation is conducted with the required base number (i.e., if positively charged SiDBs can occur, three
          * state simulation is conducted).
          */
         ON,
@@ -69,7 +56,7 @@ struct quickexact_params
      */
     automatic_base_number_detection base_number_detection = automatic_base_number_detection::ON;
     /**
-     * Local external electrostatic potentials (e.g locally applied electrodes).
+     * Local external electrostatic potentials (e.g., locally applied electrodes).
      */
     std::unordered_map<cell<Lyt>, double> local_external_potential = {};
     /**
@@ -248,6 +235,20 @@ class quickexact_impl
      * Simulation results.
      */
     sidb_simulation_result<Lyt> result{};
+    /**
+     * Base number required for the correct physical simulation.
+     */
+    enum class required_simulation_base_number
+    {
+        /**
+         * Two state simulation (i.e., negative and neutral) is sufficient.
+         */
+        TWO,
+        /**
+         * Three state simulation (i.e., negative, neutral, and positive) is required.
+         */
+        THREE
+    };
     /**
      * This function initializes the charge layout with necessary parameters, and conducts
      * the physical simulation based on whether a three-state simulation is required.
