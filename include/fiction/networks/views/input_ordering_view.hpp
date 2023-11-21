@@ -5,8 +5,8 @@
 #ifndef FICTION_INPUT_ORDERING_VIEW_HPP
 #define FICTION_INPUT_ORDERING_VIEW_HPP
 
-#include "fiction/utils/network_utils.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/utils/network_utils.hpp"
 
 #include <mockturtle/networks/detail/foreach.hpp>
 #include <mockturtle/traits.hpp>
