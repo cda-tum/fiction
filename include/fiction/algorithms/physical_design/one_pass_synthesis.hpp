@@ -18,6 +18,10 @@
 #include <mockturtle/algorithms/simulation.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
+#if (PROGRESS_BARS)
+#include <mockturtle/utils/progress_bar.hpp>
+#endif
+
 #include <algorithm>
 #include <chrono>
 #include <exception>
@@ -35,17 +39,15 @@
 #pragma GCC diagnostic push  // GCC
 #pragma GCC diagnostic ignored "-Wshadow"
 #pragma GCC diagnostic ignored "-Wold-style-cast"
+#ifndef __clang__
 #pragma GCC diagnostic ignored "-Wuseless-cast"
+#endif
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #pragma GCC diagnostic ignored "-Wrange-loop-analysis"
-#pragma warning(push, 0)    // MSVC
+#pragma warning(push, 0)  // MSVC
 #include <pybind11/embed.h>
 #pragma GCC diagnostic pop  // GCC
 #pragma warning(pop)        // MSVC
-
-#if (PROGRESS_BARS)
-#include <mockturtle/utils/progress_bar.hpp>
-#endif
 
 namespace fiction
 {
@@ -166,7 +168,7 @@ class mugen_handler
             tts{spec},
             num_pis{spec[0].num_vars()},  // since all tts have to have the same number of variables
             lyt{sketch},
-            ps{std::move(p)},             // need a copy because timeout will be altered
+            ps{std::move(p)},  // need a copy because timeout will be altered
             pi_list(num_pis),
             mugen{pybind11::module::import("mugen")}
     {}

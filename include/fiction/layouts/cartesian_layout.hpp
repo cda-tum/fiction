@@ -11,6 +11,7 @@
 #include <mockturtle/networks/detail/foreach.hpp>
 
 #include <algorithm>
+#include <cassert>
 #include <cstdint>
 #include <functional>
 #include <memory>
@@ -81,6 +82,15 @@ class cartesian_layout
      * @param s Storage of another cartesian_layout.
      */
     explicit cartesian_layout(std::shared_ptr<cartesian_layout_storage> s) : strg{std::move(s)} {}
+    /**
+     * Clones the layout returning a deep copy.
+     *
+     * @return Deep copy of the layout.
+     */
+    [[nodiscard]] cartesian_layout clone() const noexcept
+    {
+        return cartesian_layout(std::make_shared<cartesian_layout_storage>(*strg));
+    }
 
 #pragma endregion
 
@@ -591,7 +601,7 @@ class cartesian_layout
      */
     [[nodiscard]] constexpr bool is_ground_layer(const OffsetCoordinateType& c) const noexcept
     {
-        return c.z == 0ull;
+        return c.z == decltype(c.z){0};
     }
     /**
      * Returns whether the given coordinate is located in a crossing layer where z is not minimal.
@@ -601,7 +611,7 @@ class cartesian_layout
      */
     [[nodiscard]] constexpr bool is_crossing_layer(const OffsetCoordinateType& c) const noexcept
     {
-        return c.z > 0ull;
+        return c.z > decltype(c.z){0};
     }
     /**
      * Returns whether the given coordinate is located within the layout bounds.

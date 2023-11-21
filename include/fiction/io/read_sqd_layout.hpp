@@ -87,7 +87,7 @@ class read_sqd_layout_impl
                 throw sqd_parsing_error("Error parsing SQD file: no attribute 'type' in element 'layer'");
             }
 
-            if (layer_type == std::string{"DB"} && !has_siqad_coord_v<Lyt>)
+            if (std::string{layer_type} == "DB")
             {
                 for (const auto* db_dot = layer->FirstChildElement("dbdot"); db_dot != nullptr;
                      db_dot             = db_dot->NextSiblingElement("dbdot"))
@@ -96,16 +96,7 @@ class read_sqd_layout_impl
                 }
             }
 
-            if (layer_type == std::string{"DB"} && has_siqad_coord_v<Lyt>)
-            {
-                for (const auto* db_dot = layer->FirstChildElement("dbdot"); db_dot != nullptr;
-                     db_dot             = db_dot->NextSiblingElement("dbdot"))
-                {
-                    parse_db_dot_siqad(db_dot);
-                }
-            }
-
-            else if (layer_type == std::string{"Defects"})
+            else if (std::string{layer_type} == "Defects")
             {
                 for (const auto* defect = layer->FirstChildElement("defect"); defect != nullptr;
                      defect             = defect->NextSiblingElement("defect"))
@@ -122,8 +113,13 @@ class read_sqd_layout_impl
     }
 
   private:
+    /**
+     * The layout to which the parsed cells are added.
+     */
     Lyt lyt;
-
+    /**
+     * The input stream from which the SQD file is read.
+     */
     std::istream& is;
     /**
      * The maximum position of a cell in the layout.
@@ -182,21 +178,52 @@ class read_sqd_layout_impl
             throw sqd_parsing_error("Error parsing SQD file: no attribute 'n', 'm' or 'l' in element 'latcoord'");
         }
 
-        return dimer_to_cell(std::stoll(n), std::stoll(m), std::stoll(l));
-    }
-
-    cell<Lyt> parse_latcoord_siqad(const tinyxml2::XMLElement* latcoord)
-    {
-        const auto n = latcoord->Attribute("n"), m = latcoord->Attribute("m"), l = latcoord->Attribute("l");
-
-        if (n == nullptr || m == nullptr || l == nullptr)
+        // special case for SiQAD coordinates
+        if constexpr (has_siqad_coord_v<Lyt>)
         {
-            throw sqd_parsing_error("Error parsing SQD file: no attribute 'n', 'm' or 'l' in element 'latcoord'");
+            return cell<Lyt>{std::stoll(n), std::stoll(m), std::stoll(l)};
         }
 
-        return cell<Lyt>(std::stoll(n), std::stoll(m), std::stoll(l));
+        // Cartesian coordinates
+        return dimer_to_cell(std::stoll(n), std::stoll(m), std::stoll(l));
     }
+    /**
+     * Parses the <type> attribute of a <dbdot> element from the SQD file and returns the corresponding cell type.
+     *
+     * @param db_dot The <dbdot> element.
+     * @return The cell type specified by the <dbdot> element. If non is specified, the cell type is assumed to be
+     * normal.
+     */
+    sidb_technology::cell_type parse_dot_type(const tinyxml2::XMLElement* dot_type)
+    {
+        // if no dot type is given, assume normal dot
+        if (dot_type == nullptr)
+        {
+            return sidb_technology::cell_type::NORMAL;
+        }
 
+        const auto* const type = dot_type->GetText();
+
+        if (type == nullptr)
+        {
+            throw sqd_parsing_error("Error parsing SQD file: no text in element 'type'");
+        }
+
+        if (std::string{type} == "input")
+        {
+            return sidb_technology::cell_type::INPUT;
+        }
+        if (std::string{type} == "output")
+        {
+            return sidb_technology::cell_type::OUTPUT;
+        }
+        if (std::string{type} == "normal")
+        {
+            return sidb_technology::cell_type::NORMAL;
+        }
+
+        throw sqd_parsing_error("Error parsing SQD file: invalid dot type");
+    }
     /**
      * Parses a <dbdot> element from the SQD file and adds the respective dot to the layout.
      *
@@ -211,19 +238,9 @@ class read_sqd_layout_impl
             throw sqd_parsing_error("Error parsing SQD file: no element 'latcoord' in element 'dbdot'");
         }
 
-        lyt.assign_cell_type(parse_latcoord(latcoord), sidb_technology::cell_type::NORMAL);
-    }
+        const auto* const dot_type = db_dot->FirstChildElement("type");
 
-    void parse_db_dot_siqad(const tinyxml2::XMLElement* db_dot)
-    {
-        const auto* const latcoord = db_dot->FirstChildElement("latcoord");
-
-        if (latcoord == nullptr)
-        {
-            throw sqd_parsing_error("Error parsing SQD file: no element 'latcoord' in element 'dbdot'");
-        }
-
-        lyt.assign_cell_type(parse_latcoord_siqad(latcoord), sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type(parse_latcoord(latcoord), parse_dot_type(dot_type));
     }
     /**
      * Parses a <val> attribute of a <type_label> element of a <property_map> element from the SQD file and converts it
@@ -269,7 +286,9 @@ class read_sqd_layout_impl
         {
             std::vector<cell<Lyt>> incl_cells{};
             sidb_defect_type       defect_type{sidb_defect_type::UNKNOWN};
-            double                 charge{0.0}, eps_r{0.0}, lambda_tf{0.0};
+            int64_t                charge{0};
+            double                 eps_r{0.0};
+            double                 lambda_tf{0.0};
 
             if (const auto* const incl_coords = defect->FirstChildElement("incl_coords"); incl_coords != nullptr)
             {
@@ -308,7 +327,7 @@ class read_sqd_layout_impl
                         "Error parsing SQD file: no attribute 'charge', 'eps_r', or 'lambda_tf' in element 'coulomb'");
                 }
 
-                charge    = std::stod(charge_string);
+                charge    = std::stoll(charge_string);
                 eps_r     = std::stod(eps_r_string);
                 lambda_tf = std::stod(lambda_tf_string);
             }

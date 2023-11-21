@@ -8,7 +8,10 @@
 #include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
 #include "fiction/algorithms/simulation/sidb/is_ground_state.hpp"
 #include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
+#include "fiction/algorithms/simulation/sidb/quickexact.hpp"
 #include "fiction/algorithms/simulation/sidb/quicksim.hpp"
+#include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
+#include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/traits.hpp"
 
@@ -24,9 +27,27 @@
 namespace fiction
 {
 
+struct time_to_solution_params
+{
+    /**
+     * Exhaustive simulation algorithm used to simulate the ground state as reference.
+     */
+    exhaustive_sidb_simulation_engine engine = exhaustive_sidb_simulation_engine::QUICKEXACT;
+    /**
+     * Number of iterations of the heuristic algorithm used to determine the simulation accuracy (`repetitions = 100`
+     * means that accuracy is precise to 1%).
+     */
+    uint64_t repetitions = 100;
+    /**
+     * Confidence level.
+     */
+    double confidence_level = 0.997;
+};
+
 /**
  * This struct stores the time-to-solution, the simulation accuracy and the average single simulation runtime of
- * *QuickSim* (see quicksim.hpp).
+ * *QuickSim* quicksim, the single runtime of the exact simulator used, and the number of valid charge
+ * configurations found by the exact algorithm.
  *
  */
 struct time_to_solution_stats
@@ -34,7 +55,7 @@ struct time_to_solution_stats
     /**
      * Time-to-solution in seconds.
      */
-    double time_to_solution{};
+    double time_to_solution{0};
     /**
      * Accuracy of the simulation.
      */
@@ -43,12 +64,14 @@ struct time_to_solution_stats
      * Average single simulation runtime in seconds.
      */
     double mean_single_runtime{};
-
     /**
-     * Single simulation runtime of the exhaustive ground state searcher.
+     * Single simulation runtime of the exhaustive ground state searcher in seconds.
      */
     double single_runtime_exhaustive{};
-
+    /**
+     * Exhaustive simulation algorithm used to simulate the ground state as reference.
+     */
+    std::string algorithm;
     /**
      * Print the results to the given output stream.
      *
@@ -56,8 +79,8 @@ struct time_to_solution_stats
      */
     void report(std::ostream& out = std::cout)
     {
-        out << fmt::format("[i] time_to_solution: {} | acc: {} | t_(s): {} | t_exhaustive(s): {}\n", time_to_solution,
-                           acc, mean_single_runtime, single_runtime_exhaustive);
+        out << fmt::format("time_to_solution: {} \n acc: {} \n t_(s): {} \n t_exhaustive(s): {} \n exact alg.: {}\n",
+                           time_to_solution, acc, mean_single_runtime, single_runtime_exhaustive, algorithm);
     }
 };
 /**
@@ -65,30 +88,40 @@ struct time_to_solution_stats
  *
  * @tparam Lyt Cell-level layout type.
  * @param lyt Layout that is used for the simulation.
- * @param sidb_params Physical SiDB parameters which are used for the simulation.
+ * @param quicksim_params Parameters required for the *QuickSim* algorithm.
+ * @param tts_params Parameters used for the time-to-solution calculation.
  * @param ps Pointer to a struct where the results (time_to_solution, acc, single runtime) are stored.
- * @param repetitions Number of repetitions to determine the simulation accuracy (`repetitions = 100` means that
- * accuracy is precise to 1%).
- * @param confidence_level The time-to-solution also depends on the given confidence level which can be set here.
  */
 template <typename Lyt>
-void sim_acc_tts(const Lyt& lyt, const quicksim_params& quicksim_params, time_to_solution_stats* ps = nullptr,
-                 const uint64_t& repetitions = 100, const double confidence_level = 0.997) noexcept
+void time_to_solution(Lyt& lyt, const quicksim_params& quicksim_params, const time_to_solution_params& tts_params = {},
+                      time_to_solution_stats* ps = nullptr) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
-    const auto simulation_results_exgs = exhaustive_ground_state_simulation(lyt, quicksim_params.phys_params);
-
     time_to_solution_stats st{};
-    st.single_runtime_exhaustive = mockturtle::to_seconds(simulation_results_exgs.simulation_runtime);
+
+    sidb_simulation_result<Lyt> simulation_result{};
+    if (tts_params.engine == exhaustive_sidb_simulation_engine::QUICKEXACT)
+    {
+        st.algorithm      = "QuickExact";
+        simulation_result = exhaustive_ground_state_simulation(lyt, quicksim_params.phys_params);
+    }
+    else
+    {
+        const quickexact_params<Lyt> params{quicksim_params.phys_params};
+        st.algorithm      = "QuickExact";
+        simulation_result = quickexact(lyt, params);
+    }
+
+    st.single_runtime_exhaustive = mockturtle::to_seconds(simulation_result.simulation_runtime);
 
     std::size_t         gs_count = 0;
     std::vector<double> time{};
-    time.reserve(repetitions);
+    time.reserve(tts_params.repetitions);
 
-    for (auto i = 0u; i < repetitions; ++i)
+    for (auto i = 0u; i < tts_params.repetitions; ++i)
     {
         sidb_simulation_result<Lyt> stats_quick{};
 
@@ -102,16 +135,17 @@ void sim_acc_tts(const Lyt& lyt, const quicksim_params& quicksim_params, time_to
 
         time.push_back(diff_first);
 
-        if (is_ground_state(simulation_results_quicksim, simulation_results_exgs))
+        if (is_ground_state(simulation_results_quicksim, simulation_result))
         {
             gs_count += 1;
         }
     }
 
-    const auto single_runtime = std::accumulate(time.begin(), time.end(), 0.0) / static_cast<double>(repetitions);
-    const auto acc            = static_cast<double>(gs_count) / static_cast<double>(repetitions);
+    const auto single_runtime =
+        std::accumulate(time.cbegin(), time.cend(), 0.0) / static_cast<double>(tts_params.repetitions);
+    const auto acc = static_cast<double>(gs_count) / static_cast<double>(tts_params.repetitions);
 
-    double tts = single_runtime;
+    double tts = 0.0;
 
     if (acc == 1)
     {
@@ -123,7 +157,7 @@ void sim_acc_tts(const Lyt& lyt, const quicksim_params& quicksim_params, time_to
     }
     else
     {
-        tts = (single_runtime * std::log(1.0 - confidence_level) / std::log(1.0 - acc));
+        tts = (single_runtime * std::log(1.0 - tts_params.confidence_level) / std::log(1.0 - acc));
     }
 
     st.time_to_solution    = tts;

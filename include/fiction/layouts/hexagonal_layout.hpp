@@ -12,6 +12,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <cstdint>
 #include <functional>
 #include <memory>
@@ -199,6 +200,15 @@ class hexagonal_layout
                           std::is_same_v<HexagonalCoordinateSystem, even_column_hex>,
                       "HexagonalCoordinateSystem has to be one of the following: odd_row_hex, even_row_hex, "
                       "odd_column_hex, even_column_hex");
+    }
+    /**
+     * Clones the layout returning a deep copy.
+     *
+     * @return Deep copy of the layout.
+     */
+    [[nodiscard]] hexagonal_layout clone() const noexcept
+    {
+        return hexagonal_layout(std::make_shared<hexagonal_layout_storage>(*strg));
     }
 
 #pragma endregion
@@ -984,7 +994,9 @@ class hexagonal_layout
 
 // data types cannot properly be converted to bit field types
 #pragma GCC diagnostic push
+#ifndef __clang__
 #pragma GCC diagnostic ignored "-Wuseless-cast"
+#endif
 #pragma GCC diagnostic ignored "-Wconversion"
 
 #pragma region coordinates

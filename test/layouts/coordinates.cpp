@@ -18,11 +18,11 @@
 
 using namespace fiction;
 
-#if defined(__GNUC__)
 #pragma GCC diagnostic push
+#if defined(__GNUC__)
 #pragma GCC diagnostic ignored "-Wuseless-cast"
-#pragma GCC diagnostic ignored "-Wconversion"
 #endif
+#pragma GCC diagnostic ignored "-Wconversion"
 
 TEST_CASE("Unsigned offset coordinates", "[coordinates]")
 {

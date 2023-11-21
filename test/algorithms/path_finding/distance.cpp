@@ -7,10 +7,12 @@
 
 #include <fiction/algorithms/path_finding/a_star.hpp>
 #include <fiction/algorithms/path_finding/distance.hpp>
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
+#include <fiction/types.hpp>
 
 #include <cmath>
 #include <limits>
@@ -213,48 +215,173 @@ TEST_CASE("Euclidean distance functor", "[distance]")
     }
 }
 
+TEST_CASE("2DDWave distance", "[distance]")
+{
+    SECTION("Unsigned Cartesian layout")
+    {
+        using cart_lyt = cartesian_layout<offset::ucoord_t>;
+
+        const cart_lyt layout{};
+
+        CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0}, {0, 0}) == 0);
+        CHECK(twoddwave_distance<cart_lyt>(layout, {1, 1}, {1, 1}) == 0);
+        CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0}, {0, 1}) == 1);
+        CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0}, {1, 1}) == 2);
+        CHECK(twoddwave_distance<cart_lyt>(layout, {1, 2}, {3, 3}) == 3);
+        CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0}, {4, 4}) == 8);
+        CHECK(twoddwave_distance<cart_lyt>(layout, {4, 4}, {0, 0}) == std::numeric_limits<uint32_t>::max());
+        CHECK(twoddwave_distance<cart_lyt>(layout, {2, 1}, {0, 2}) == std::numeric_limits<uint32_t>::max());
+        CHECK(twoddwave_distance<cart_lyt>(layout, {1, 0}, {0, 1}) == std::numeric_limits<uint32_t>::max());
+
+        // ignore z-axis
+        CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0, 1}, {8, 9, 0}) == 17);
+        CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0, 1}, {8, 9, 1}) == 17);
+    }
+    SECTION("Signed Cartesian layout")
+    {
+        using cart_lyt = cartesian_layout<cube::coord_t>;
+
+        const cart_lyt layout{};
+
+        CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0}, {0, 0}) == 0);
+        CHECK(twoddwave_distance<cart_lyt>(layout, {1, 1}, {1, 1}) == 0);
+        CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0}, {0, 1}) == 1);
+        CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0}, {1, 1}) == 2);
+        CHECK(twoddwave_distance<cart_lyt>(layout, {1, 2}, {3, 3}) == 3);
+        CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0}, {4, 4}) == 8);
+        CHECK(twoddwave_distance<cart_lyt>(layout, {4, 4}, {0, 0}) == std::numeric_limits<uint32_t>::max());
+        CHECK(twoddwave_distance<cart_lyt>(layout, {2, 1}, {0, 2}) == std::numeric_limits<uint32_t>::max());
+        CHECK(twoddwave_distance<cart_lyt>(layout, {1, 0}, {0, 1}) == std::numeric_limits<uint32_t>::max());
+
+        // ignore z-axis
+        CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0, 1}, {8, 9, 0}) == 17);
+        CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0, 1}, {8, 9, 1}) == 17);
+
+        // negative coordinates
+        CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0}, {-1, -1}) == std::numeric_limits<uint32_t>::max());
+        CHECK(twoddwave_distance<cart_lyt>(layout, {-2, -8}, {-6, -4}) == std::numeric_limits<uint32_t>::max());
+        CHECK(twoddwave_distance<cart_lyt>(layout, {-6, -4}, {-2, -8}) == std::numeric_limits<uint32_t>::max());
+        CHECK(twoddwave_distance<cart_lyt>(layout, {-4, -3}, {1, -1}) == 7);
+    }
+}
+
+TEST_CASE("2DDWave distance functor", "[distance]")
+{
+    SECTION("Unsigned Cartesian layout")
+    {
+        using cart_lyt = cartesian_layout<offset::ucoord_t>;
+
+        const cart_lyt layout{};
+
+        const twoddwave_distance_functor<cart_lyt> distance{};
+
+        CHECK(distance(layout, {0, 0}, {0, 0}) == 0);
+        CHECK(distance(layout, {1, 1}, {1, 1}) == 0);
+        CHECK(distance(layout, {0, 0}, {0, 1}) == 1);
+        CHECK(distance(layout, {0, 0}, {1, 1}) == 2);
+        CHECK(distance(layout, {1, 2}, {3, 3}) == 3);
+        CHECK(distance(layout, {0, 0}, {4, 4}) == 8);
+        CHECK(distance(layout, {4, 4}, {0, 0}) == std::numeric_limits<uint32_t>::max());
+
+        // ignore z-axis
+        CHECK(distance(layout, {0, 0, 1}, {8, 9, 0}) == 17);
+        CHECK(distance(layout, {0, 0, 1}, {8, 9, 1}) == 17);
+    }
+    SECTION("Signed Cartesian layout")
+    {
+        using cart_lyt = cartesian_layout<cube::coord_t>;
+
+        const cart_lyt layout{};
+
+        const twoddwave_distance_functor<cart_lyt> distance{};
+
+        CHECK(distance(layout, {0, 0}, {0, 0}) == 0);
+        CHECK(distance(layout, {1, 1}, {1, 1}) == 0);
+        CHECK(distance(layout, {0, 0}, {0, 1}) == 1);
+        CHECK(distance(layout, {0, 0}, {1, 1}) == 2);
+        CHECK(distance(layout, {1, 2}, {3, 3}) == 3);
+        CHECK(distance(layout, {0, 0}, {4, 4}) == 8);
+        CHECK(distance(layout, {4, 4}, {0, 0}) == std::numeric_limits<uint32_t>::max());
+
+        // ignore z-axis
+        CHECK(distance(layout, {0, 0, 1}, {8, 9, 0}) == 17);
+        CHECK(distance(layout, {0, 0, 1}, {8, 9, 1}) == 17);
+
+        // negative coordinates
+        CHECK(distance(layout, {0, 0}, {-1, -1}) == std::numeric_limits<uint32_t>::max());
+        CHECK(distance(layout, {-2, -8}, {-6, -4}) == std::numeric_limits<uint32_t>::max());
+        CHECK(distance(layout, {-6, -4}, {-2, -8}) == std::numeric_limits<uint32_t>::max());
+        CHECK(distance(layout, {-4, -3}, {1, -1}) == 7);
+    }
+}
+
 TEST_CASE("A* distance", "[distance]")
 {
     SECTION("Unsigned Cartesian layout")
     {
-        using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
+        using lyt = cartesian_layout<offset::ucoord_t>;
 
-        SECTION("2DDWave")
+        SECTION("coordinate path distance")
         {
-            const clk_lyt layout{{9, 4, 1}, twoddwave_clocking<clk_lyt>()};
+            const lyt layout{{9, 4, 1}};
 
             SECTION("Default distance type (uint64_t)")
             {
-                CHECK(a_star_distance<clk_lyt>(layout, {0, 0}, {0, 0}) == 0);
-                CHECK(a_star_distance<clk_lyt>(layout, {1, 1}, {1, 1}) == 0);
-                CHECK(a_star_distance<clk_lyt>(layout, {0, 0}, {0, 1}) == 1);
-                CHECK(a_star_distance<clk_lyt>(layout, {0, 0}, {1, 1}) == 2);
-                CHECK(a_star_distance<clk_lyt>(layout, {9, 1}, {6, 2}) == std::numeric_limits<uint64_t>::max());
-                CHECK(a_star_distance<clk_lyt>(layout, {6, 2}, {0, 4}) == std::numeric_limits<uint64_t>::max());
-                CHECK(a_star_distance<clk_lyt>(layout, {0, 4}, {9, 1}) == std::numeric_limits<uint64_t>::max());
+                CHECK(a_star_distance<lyt>(layout, {0, 0}, {0, 0}) == 0);
+                CHECK(a_star_distance<lyt>(layout, {1, 1}, {1, 1}) == 0);
+                CHECK(a_star_distance<lyt>(layout, {0, 0}, {0, 1}) == 1);
+                CHECK(a_star_distance<lyt>(layout, {0, 0}, {1, 1}) == 2);
+                CHECK(a_star_distance<lyt>(layout, {9, 1}, {6, 2}) == 4);
+                CHECK(a_star_distance<lyt>(layout, {6, 2}, {0, 4}) == 8);
+                CHECK(a_star_distance<lyt>(layout, {0, 4}, {9, 1}) == 12);
 
-                // A* is not meant for routing in the z-layer
-                CHECK(a_star_distance<clk_lyt>(layout, {6, 2, 1}, {0, 4, 0}) == std::numeric_limits<uint64_t>::max());
-                CHECK(a_star_distance<clk_lyt>(layout, {6, 2, 0}, {0, 4, 1}) == std::numeric_limits<uint64_t>::max());
-                CHECK(a_star_distance<clk_lyt>(layout, {0, 4, 1}, {9, 1, 1}) == std::numeric_limits<uint64_t>::max());
+                // A* is not meant for routing to the z-layer
+                CHECK(a_star_distance<lyt>(layout, {6, 2, 0}, {0, 4, 1}) == std::numeric_limits<uint64_t>::max());
+                CHECK(a_star_distance<lyt>(layout, {0, 4, 1}, {9, 1, 1}) == std::numeric_limits<uint64_t>::max());
             }
-            SECTION("Floating-point distance type (double)")
+        }
+        SECTION("clocking path distance")
+        {
+            using clk_lyt = clocked_layout<lyt>;
+
+            SECTION("2DDWave")
             {
-                using namespace Catch::Matchers;
+                const clk_lyt layout{{9, 4, 1}, twoddwave_clocking<clk_lyt>()};
 
-                CHECK_THAT((a_star_distance<clk_lyt, double>(layout, {0, 0}, {0, 0})), WithinAbs(0.0, 0.00001));
-                CHECK_THAT((a_star_distance<clk_lyt, double>(layout, {1, 1}, {1, 1})), WithinAbs(0.0, 0.00001));
-                CHECK_THAT((a_star_distance<clk_lyt, double>(layout, {0, 0}, {0, 1})), WithinAbs(1.0, 0.00001));
-                CHECK_THAT((a_star_distance<clk_lyt, double>(layout, {0, 0}, {1, 1})), WithinAbs(2.0, 0.00001));
+                SECTION("Default distance type (uint64_t)")
+                {
+                    CHECK(a_star_distance<clk_lyt>(layout, {0, 0}, {0, 0}) == 0);
+                    CHECK(a_star_distance<clk_lyt>(layout, {1, 1}, {1, 1}) == 0);
+                    CHECK(a_star_distance<clk_lyt>(layout, {0, 0}, {0, 1}) == 1);
+                    CHECK(a_star_distance<clk_lyt>(layout, {0, 0}, {1, 1}) == 2);
+                    CHECK(a_star_distance<clk_lyt>(layout, {9, 1}, {6, 2}) == std::numeric_limits<uint64_t>::max());
+                    CHECK(a_star_distance<clk_lyt>(layout, {6, 2}, {0, 4}) == std::numeric_limits<uint64_t>::max());
+                    CHECK(a_star_distance<clk_lyt>(layout, {0, 4}, {9, 1}) == std::numeric_limits<uint64_t>::max());
 
-                CHECK(std::isinf(a_star_distance<clk_lyt, double>(layout, {9, 1}, {6, 2})));
-                CHECK(std::isinf(a_star_distance<clk_lyt, double>(layout, {6, 2}, {0, 4})));
-                CHECK(std::isinf(a_star_distance<clk_lyt, double>(layout, {0, 4}, {9, 1})));
+                    // A* is not meant for routing to the z-layer
+                    CHECK(a_star_distance<clk_lyt>(layout, {6, 2, 0}, {0, 4, 1}) ==
+                          std::numeric_limits<uint64_t>::max());
+                    CHECK(a_star_distance<clk_lyt>(layout, {0, 4, 1}, {9, 1, 1}) ==
+                          std::numeric_limits<uint64_t>::max());
+                }
+                SECTION("Floating-point distance type (double)")
+                {
+                    using namespace Catch::Matchers;
 
-                // A* is not meant for routing in the z-layer
-                CHECK(std::isinf(a_star_distance<clk_lyt, double>(layout, {6, 2, 1}, {0, 4, 0})));
-                CHECK(std::isinf(a_star_distance<clk_lyt, double>(layout, {6, 2, 0}, {0, 4, 1})));
-                CHECK(std::isinf(a_star_distance<clk_lyt, double>(layout, {0, 4, 1}, {9, 1, 1})));
+                    CHECK_THAT((a_star_distance<clk_lyt, double>(layout, {0, 0}, {0, 0})), WithinAbs(0.0, 0.00001));
+                    CHECK_THAT((a_star_distance<clk_lyt, double>(layout, {1, 1}, {1, 1})), WithinAbs(0.0, 0.00001));
+                    CHECK_THAT((a_star_distance<clk_lyt, double>(layout, {0, 0}, {0, 1})), WithinAbs(1.0, 0.00001));
+                    CHECK_THAT((a_star_distance<clk_lyt, double>(layout, {0, 0}, {1, 1})), WithinAbs(2.0, 0.00001));
+
+                    CHECK(std::isinf(a_star_distance<clk_lyt, double>(layout, {9, 1}, {6, 2})));
+                    CHECK(std::isinf(a_star_distance<clk_lyt, double>(layout, {6, 2}, {0, 4})));
+                    CHECK(std::isinf(a_star_distance<clk_lyt, double>(layout, {0, 4}, {9, 1})));
+
+                    // A* is not meant for routing in the z-layer
+                    CHECK(std::isinf(a_star_distance<clk_lyt, double>(layout, {6, 2, 1}, {0, 4, 0})));
+                    CHECK(std::isinf(a_star_distance<clk_lyt, double>(layout, {6, 2, 0}, {0, 4, 1})));
+                    CHECK(std::isinf(a_star_distance<clk_lyt, double>(layout, {0, 4, 1}, {9, 1, 1})));
+                }
             }
         }
     }
@@ -264,49 +391,111 @@ TEST_CASE("a_star distance functor", "[distance]")
 {
     SECTION("Unsigned Cartesian layout")
     {
-        using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
+        using lyt = cartesian_layout<offset::ucoord_t>;
 
-        SECTION("2DDWave")
+        SECTION("coordinate path distance")
         {
-            const clk_lyt layout{{9, 4, 1}, twoddwave_clocking<clk_lyt>()};
+            const lyt layout{{9, 4, 1}};
 
-            SECTION("Default distance type (uint64_t)")
+            const a_star_distance_functor<lyt> distance{};
+
+            CHECK(distance(layout, {0, 0}, {0, 0}) == 0);
+            CHECK(distance(layout, {1, 1}, {1, 1}) == 0);
+            CHECK(distance(layout, {0, 0}, {0, 1}) == 1);
+            CHECK(distance(layout, {0, 0}, {1, 1}) == 2);
+            CHECK(distance(layout, {9, 1}, {6, 2}) == 4);
+            CHECK(distance(layout, {6, 2}, {0, 4}) == 8);
+            CHECK(distance(layout, {0, 4}, {9, 1}) == 12);
+
+            // A* is not meant for routing to the z-layer
+            CHECK(distance(layout, {6, 2, 0}, {0, 4, 1}) == std::numeric_limits<uint64_t>::max());
+            CHECK(distance(layout, {0, 4, 1}, {9, 1, 1}) == std::numeric_limits<uint64_t>::max());
+        }
+        SECTION("clocking path distance")
+        {
+            using clk_lyt = clocked_layout<lyt>;
+
+            SECTION("2DDWave")
             {
-                const a_star_distance_functor<clk_lyt> distance{};
+                const clk_lyt layout{{9, 4, 1}, twoddwave_clocking<clk_lyt>()};
 
-                CHECK(distance(layout, {0, 0}, {0, 0}) == 0);
-                CHECK(distance(layout, {1, 1}, {1, 1}) == 0);
-                CHECK(distance(layout, {0, 0}, {0, 1}) == 1);
-                CHECK(distance(layout, {0, 0}, {1, 1}) == 2);
-                CHECK(distance(layout, {9, 1}, {6, 2}) == std::numeric_limits<uint64_t>::max());
-                CHECK(distance(layout, {6, 2}, {0, 4}) == std::numeric_limits<uint64_t>::max());
-                CHECK(distance(layout, {0, 4}, {9, 1}) == std::numeric_limits<uint64_t>::max());
+                SECTION("Default distance type (uint64_t)")
+                {
+                    const a_star_distance_functor<clk_lyt> distance{};
 
-                // A* is not meant for routing in the z-layer
-                CHECK(distance(layout, {6, 2, 1}, {0, 4, 0}) == std::numeric_limits<uint64_t>::max());
-                CHECK(distance(layout, {6, 2, 0}, {0, 4, 1}) == std::numeric_limits<uint64_t>::max());
-                CHECK(distance(layout, {0, 4, 1}, {9, 1, 1}) == std::numeric_limits<uint64_t>::max());
-            }
-            SECTION("Floating-point distance type (double)")
-            {
-                using namespace Catch::Matchers;
+                    CHECK(distance(layout, {0, 0}, {0, 0}) == 0);
+                    CHECK(distance(layout, {1, 1}, {1, 1}) == 0);
+                    CHECK(distance(layout, {0, 0}, {0, 1}) == 1);
+                    CHECK(distance(layout, {0, 0}, {1, 1}) == 2);
+                    CHECK(distance(layout, {9, 1}, {6, 2}) == std::numeric_limits<uint64_t>::max());
+                    CHECK(distance(layout, {6, 2}, {0, 4}) == std::numeric_limits<uint64_t>::max());
+                    CHECK(distance(layout, {0, 4}, {9, 1}) == std::numeric_limits<uint64_t>::max());
 
-                const a_star_distance_functor<clk_lyt, double> distance{};
+                    // A* is not meant for routing to the z-layer
+                    CHECK(distance(layout, {6, 2, 0}, {0, 4, 1}) == std::numeric_limits<uint64_t>::max());
+                    CHECK(distance(layout, {0, 4, 1}, {9, 1, 1}) == std::numeric_limits<uint64_t>::max());
+                }
+                SECTION("Floating-point distance type (double)")
+                {
+                    using namespace Catch::Matchers;
 
-                CHECK_THAT(distance(layout, {0, 0}, {0, 0}), WithinAbs(0.0, 0.00001));
-                CHECK_THAT(distance(layout, {1, 1}, {1, 1}), WithinAbs(0.0, 0.00001));
-                CHECK_THAT(distance(layout, {0, 0}, {0, 1}), WithinAbs(1.0, 0.00001));
-                CHECK_THAT(distance(layout, {0, 0}, {1, 1}), WithinAbs(2.0, 0.00001));
+                    const a_star_distance_functor<clk_lyt, double> distance{};
 
-                CHECK(std::isinf(distance(layout, {9, 1}, {6, 2})));
-                CHECK(std::isinf(distance(layout, {6, 2}, {0, 4})));
-                CHECK(std::isinf(distance(layout, {0, 4}, {9, 1})));
+                    CHECK_THAT(distance(layout, {0, 0}, {0, 0}), WithinAbs(0.0, 0.00001));
+                    CHECK_THAT(distance(layout, {1, 1}, {1, 1}), WithinAbs(0.0, 0.00001));
+                    CHECK_THAT(distance(layout, {0, 0}, {0, 1}), WithinAbs(1.0, 0.00001));
+                    CHECK_THAT(distance(layout, {0, 0}, {1, 1}), WithinAbs(2.0, 0.00001));
 
-                // A* is not meant for routing in the z-layer
-                CHECK(std::isinf(distance(layout, {6, 2, 1}, {0, 4, 0})));
-                CHECK(std::isinf(distance(layout, {6, 2, 0}, {0, 4, 1})));
-                CHECK(std::isinf(distance(layout, {0, 4, 1}, {9, 1, 1})));
+                    CHECK(std::isinf(distance(layout, {9, 1}, {6, 2})));
+                    CHECK(std::isinf(distance(layout, {6, 2}, {0, 4})));
+                    CHECK(std::isinf(distance(layout, {0, 4}, {9, 1})));
+
+                    // A* is not meant for routing to the z-layer
+                    CHECK(std::isinf(distance(layout, {6, 2, 0}, {0, 4, 1})));
+                    CHECK(std::isinf(distance(layout, {0, 4, 1}, {9, 1, 1})));
+                }
             }
         }
     }
+}
+
+TEST_CASE("SiDB nanometer distance", "[distance]")
+{
+    using namespace Catch::Matchers;
+    const sidb_cell_clk_lyt_siqad layout{};
+
+    CHECK_THAT(sidb_nanometer_distance(layout, {0, 0}, {0, 0}), WithinAbs(0.0, 0.00001));
+    CHECK_THAT(sidb_nanometer_distance(layout, {1, 0}, {1, 0}), WithinAbs(0.0, 0.00001));
+    CHECK_THAT(sidb_nanometer_distance(layout, {0, 1}, {0, 1}), WithinAbs(0.0, 0.00001));
+
+    CHECK_THAT(sidb_nanometer_distance(layout, {-3, 0}, {-3, 0}), WithinAbs(0.0, 0.00001));
+    CHECK_THAT(sidb_nanometer_distance(layout, {0, -5}, {0, -5}), WithinAbs(0.0, 0.00001));
+
+    CHECK_THAT(sidb_nanometer_distance(layout, {0, 1, 1}, {0, 1, 1}), WithinAbs(0.0, 0.00001));
+    CHECK_THAT(sidb_nanometer_distance(layout, {0, 0}, {1, 0}),
+               WithinAbs(sidb_simulation_parameters{}.lat_a * 0.1, 0.00001));
+    CHECK_THAT(sidb_nanometer_distance(layout, {0, 0}, {0, 1}),
+               WithinAbs(sidb_simulation_parameters{}.lat_b * 0.1, 0.00001));
+    CHECK_THAT(sidb_nanometer_distance(layout, {0, 0}, {0, 0, 1}),
+               WithinAbs(sidb_simulation_parameters{}.lat_c * 0.1, 0.00001));
+
+    CHECK_THAT(sidb_nanometer_distance(layout, {0, 0}, {-1, 0}),
+               WithinAbs(sidb_simulation_parameters{}.lat_a * 0.1, 0.00001));
+    CHECK_THAT(sidb_nanometer_distance(layout, {0, 0}, {0, -1}),
+               WithinAbs(sidb_simulation_parameters{}.lat_b * 0.1, 0.00001));
+    CHECK_THAT(sidb_nanometer_distance(layout, {0, 0}, {0, 0, -1}),
+               WithinAbs(sidb_simulation_parameters{}.lat_c * 0.1, 0.00001));
+
+    CHECK_THAT(sidb_nanometer_distance(layout, {0, 0}, {0, 2, 1}),
+               WithinAbs(sidb_simulation_parameters{}.lat_b * 0.2 + sidb_simulation_parameters{}.lat_c * 0.1, 0.00001));
+    CHECK_THAT(sidb_nanometer_distance(layout, {0, 0}, {0, -2, 1}),
+               WithinAbs(sidb_simulation_parameters{}.lat_b * 0.2 - sidb_simulation_parameters{}.lat_c * 0.1, 0.00001));
+    CHECK_THAT(sidb_nanometer_distance(layout, {0, -2, 1}, {0, 0}),
+               WithinAbs(sidb_simulation_parameters{}.lat_b * 0.2 - sidb_simulation_parameters{}.lat_c * 0.1, 0.00001));
+
+    CHECK_THAT(
+        sidb_nanometer_distance(layout, {0, 2, 1}, {-5, 1, 0}),
+        WithinAbs(std::hypot(sidb_simulation_parameters{}.lat_a * 0.5,
+                             sidb_simulation_parameters{}.lat_b * 0.1 + sidb_simulation_parameters{}.lat_c * 0.1),
+                  0.00001));
 }
