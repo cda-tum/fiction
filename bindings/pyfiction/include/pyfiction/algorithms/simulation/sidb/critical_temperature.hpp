@@ -46,7 +46,12 @@ void critical_temperature(pybind11::module& m)
         ;
 
     m.def("critical_temperature_gate_based", &fiction::critical_temperature_gate_based<Lyt, py_tt>, "lyt"_a, "spec"_a,
-          "params"_a = fiction::critical_temperature_params{}, "stats"_a = nullptr, DOC(fiction_critical_temperature));
+          "params"_a = fiction::critical_temperature_params{}, "stats"_a = nullptr,
+          DOC(fiction_critical_temperature_gate_based));
+
+    m.def("critical_temperature_non_gate_based", &fiction::critical_temperature_non_gate_based<Lyt>, "lyt"_a,
+          "params"_a = fiction::critical_temperature_params{}, "stats"_a = nullptr,
+          DOC(fiction_critical_temperature_non_gate_based));
 }
 
 }  // namespace detail

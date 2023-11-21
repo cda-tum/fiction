@@ -479,7 +479,6 @@ bool critical_temperature_gate_based(const Lyt& lyt, const std::vector<TT>& spec
 
     return result;
 }
-
 /**
  * For *Non-gate-based Critical Temperature* simulation, the Critical Temperature is defined as follows: The temperature
  * at which the excited charge distributions are populated by more than \f$ 1 - \eta \f$, where \f$ \eta \in [0,1] \f$

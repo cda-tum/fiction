@@ -20,14 +20,14 @@
 #include "pyfiction/algorithms/properties/critical_path_length_and_throughput.hpp"
 #include "pyfiction/algorithms/simulation/logic_simulation.hpp"
 #include "pyfiction/algorithms/simulation/sidb/calculate_energy_and_state_type.hpp"
-#include "pyfiction/algorithms/simulation/sidb/sidb_charge_state.hpp"
-// #include "pyfiction/algorithms/simulation/sidb/critical_temperature.hpp"
+#include "pyfiction/algorithms/simulation/sidb/critical_temperature.hpp"
 #include "pyfiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "pyfiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
 #include "pyfiction/algorithms/simulation/sidb/is_ground_state.hpp"
 #include "pyfiction/algorithms/simulation/sidb/minimum_energy.hpp"
 #include "pyfiction/algorithms/simulation/sidb/occupation_probability_of_excited_states.hpp"
 #include "pyfiction/algorithms/simulation/sidb/quicksim.hpp"
+#include "pyfiction/algorithms/simulation/sidb/sidb_charge_state.hpp"
 #include "pyfiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "pyfiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "pyfiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
@@ -54,10 +54,12 @@
 #include "pyfiction/layouts/obstruction_layout.hpp"
 #include "pyfiction/layouts/shifted_cartesian_layout.hpp"
 #include "pyfiction/networks/logic_network.hpp"
+#include "pyfiction/networks/truth_tables.hpp"
 #include "pyfiction/technology/area.hpp"
 #include "pyfiction/technology/charge_distribution_surface.hpp"
 #include "pyfiction/technology/sidb_defects.hpp"
 #include "pyfiction/utils/routing_utils.hpp"
+#include "pyfiction/utils/truth_table_utils.hpp"
 
 #include <pybind11/pybind11.h>
 
@@ -97,12 +99,13 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::energy_distribution(m);
     pyfiction::calculate_energy_and_state_type(m);
     pyfiction::occupation_probability_of_excited_states(m);
-    //    pyfiction::critical_temperature(m);
+    pyfiction::critical_temperature(m);
     //    pyfiction::time_to_solution(m);
     /**
-     * Networks
+     * Logic Networks
      */
     pyfiction::logic_network(m);
+    pyfiction::truth_tables(m);
     /**
      * Algorithms: Network Transformation
      */
@@ -159,4 +162,5 @@ PYBIND11_MODULE(pyfiction, m)
      * Utils
      */
     pyfiction::routing_utils(m);
+    pyfiction::truth_table_utils(m);
 }
