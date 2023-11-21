@@ -230,6 +230,22 @@ Operational Domain Computation
             :members:
         .. autofunction:: fiction.pyfiction.is_operational
 
+        .. autoclass:: fiction.pyfiction.sweep_parameter
+            :members:
+        .. autoclass:: fiction.pyfiction.parameter_point
+            :members:
+        .. autoclass:: fiction.pyfiction.operational_domain
+            :members:
+        .. autoclass:: fiction.pyfiction.operational_domain_params
+            :members:
+        .. autoclass:: fiction.pyfiction.operational_domain_stats
+            :members:
+
+        .. autofunction:: fiction.pyfiction.operational_domain_grid_search
+        .. autofunction:: fiction.pyfiction.operational_domain_random_sampling
+        .. autofunction:: fiction.pyfiction.operational_domain_flood_fill
+        .. autofunction:: fiction.pyfiction.operational_domain_contour_tracing
+
 
 Utility Functions
 #################
