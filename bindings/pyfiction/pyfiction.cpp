@@ -71,6 +71,7 @@
 #include "pyfiction/technology/sidb_charge_state.hpp"
 #include "pyfiction/technology/sidb_defects.hpp"
 #include "pyfiction/technology/sidb_nm_position.hpp"
+#include "pyfiction/utils/layout_utils.hpp"
 #include "pyfiction/utils/routing_utils.hpp"
 #include "pyfiction/utils/truth_table_utils.hpp"
 
@@ -187,6 +188,7 @@ PYBIND11_MODULE(pyfiction, m)
     /**
      * Utils
      */
+    pyfiction::layout_utils(m);
     pyfiction::routing_utils(m);
     pyfiction::truth_table_utils(m);
 }
