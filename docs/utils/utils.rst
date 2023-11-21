@@ -101,19 +101,25 @@ Layout Utils
 Placement Utils
 ---------------
 
-**Header:** ``fiction/utils/placement_utils.hpp``
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/utils/placement_utils.hpp``
 
-.. doxygenfunction:: fiction::reserve_input_nodes
-.. doxygenfunction:: fiction::place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n) noexcept
-.. doxygenfunction:: fiction::place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n, const mockturtle::signal<Lyt>& a) noexcept
-.. doxygenfunction:: fiction::place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n, const mockturtle::signal<Lyt>& a, const mockturtle::signal<Lyt>& b, const std::optional<bool>& c = std::nullopt) noexcept
-.. doxygenfunction:: fiction::place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n, const mockturtle::signal<Lyt>& a, const mockturtle::signal<Lyt>& b, const mockturtle::signal<Lyt>& c) noexcept
-.. doxygenfunction:: fiction::place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n, const mockturtle::node_map<mockturtle::signal<Lyt>, Ntk>& node2pos) noexcept
+        .. doxygenfunction:: fiction::reserve_input_nodes
+        .. doxygenfunction:: fiction::place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n) noexcept
+        .. doxygenfunction:: fiction::place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n, const mockturtle::signal<Lyt>& a) noexcept
+        .. doxygenfunction:: fiction::place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n, const mockturtle::signal<Lyt>& a, const mockturtle::signal<Lyt>& b, const std::optional<bool>& c = std::nullopt) noexcept
+        .. doxygenfunction:: fiction::place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n, const mockturtle::signal<Lyt>& a, const mockturtle::signal<Lyt>& b, const mockturtle::signal<Lyt>& c) noexcept
+        .. doxygenfunction:: fiction::place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n, const mockturtle::node_map<mockturtle::signal<Lyt>, Ntk>& node2pos) noexcept
 
-.. doxygenstruct:: fiction::branching_signal_container
-   :members:
+        .. doxygenstruct:: fiction::branching_signal_container
+           :members:
 
-.. doxygenfunction:: fiction::place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n, const mockturtle::node_map<branching_signal_container<Lyt, Ntk, fanout_size>, Ntk>& node2pos) noexcept
+        .. doxygenfunction:: fiction::place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n, const mockturtle::node_map<branching_signal_container<Lyt, Ntk, fanout_size>, Ntk>& node2pos) noexcept
+
+    .. tab:: Python
+        .. autofunction:: fiction.pyfiction.reserve_input_nodes
+        .. autofunction:: fiction.pyfiction.place
 
 
 Routing Utils

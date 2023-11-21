@@ -74,6 +74,7 @@
 #include "pyfiction/utils/layout_utils.hpp"
 #include "pyfiction/utils/name_utils.hpp"
 #include "pyfiction/utils/network_utils.hpp"
+#include "pyfiction/utils/placement_utils.hpp"
 #include "pyfiction/utils/routing_utils.hpp"
 #include "pyfiction/utils/truth_table_utils.hpp"
 
@@ -194,5 +195,6 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::routing_utils(m);
     pyfiction::name_utils(m);
     pyfiction::network_utils(m);
+    pyfiction::placement_utils(m);
     pyfiction::truth_table_utils(m);
 }
