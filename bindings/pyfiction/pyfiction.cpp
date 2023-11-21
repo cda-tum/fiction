@@ -33,6 +33,7 @@
 #include "pyfiction/algorithms/simulation/sidb/operational_domain.hpp"
 #include "pyfiction/algorithms/simulation/sidb/quickexact.hpp"
 #include "pyfiction/algorithms/simulation/sidb/quicksim.hpp"
+// #include "pyfiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp"
 #include "pyfiction/algorithms/simulation/sidb/sidb_charge_state.hpp"
 #include "pyfiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "pyfiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
@@ -112,6 +113,7 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::calculate_energy_and_state_type(m);
     pyfiction::occupation_probability_of_excited_states(m);
     pyfiction::critical_temperature(m);
+    //    pyfiction::random_sidb_layout_generator(m);
     //    pyfiction::time_to_solution(m);
     /**
      * Logic Networks
