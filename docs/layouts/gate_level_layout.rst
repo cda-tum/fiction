@@ -20,7 +20,7 @@ has to have a concrete position assigned, mockturtle cannot be used to generate 
            :members:
 
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.cartesian_gate_layout
+        .. autoclass:: mnt.pyfiction.cartesian_gate_layout
             :members:
-        .. autoclass:: fiction.pyfiction.hexagonal_gate_layout
+        .. autoclass:: mnt.pyfiction.hexagonal_gate_layout
             :members:

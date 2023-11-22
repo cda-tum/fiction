@@ -19,7 +19,7 @@ can be utilized or the clock numbers can be assigned manually.
            :members:
 
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.clocked_cartesian_layout
+        .. autoclass:: mnt.pyfiction.clocked_cartesian_layout
             :members:
-        .. autoclass:: fiction.pyfiction.clocked_hexagonal_layout
+        .. autoclass:: mnt.pyfiction.clocked_hexagonal_layout
             :members:

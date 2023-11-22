@@ -14,6 +14,6 @@ implementations for each gate present in the passed ``gate_level_layout``.
         .. doxygenfunction:: fiction::apply_gate_library(const GateLyt& lyt)
 
     .. tab:: Python
-        .. autofunction:: fiction.pyfiction.apply_qca_one_library
-        .. autofunction:: fiction.pyfiction.apply_topolinano_library
-        .. autofunction:: fiction.pyfiction.apply_bestagon_library
+        .. autofunction:: mnt.pyfiction.apply_qca_one_library
+        .. autofunction:: mnt.pyfiction.apply_topolinano_library
+        .. autofunction:: mnt.pyfiction.apply_bestagon_library

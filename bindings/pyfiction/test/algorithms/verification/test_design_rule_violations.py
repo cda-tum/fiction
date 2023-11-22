@@ -1,5 +1,5 @@
 import unittest
-from fiction import pyfiction
+from mnt import pyfiction
 
 
 class TestDesignRuleViolations(unittest.TestCase):

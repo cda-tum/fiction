@@ -26,5 +26,5 @@ orientation of the hexagons that can either be pointy-top up or flat-top up.
            :members:
 
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.hexagonal_layout
+        .. autoclass:: mnt.pyfiction.hexagonal_layout
             :members:

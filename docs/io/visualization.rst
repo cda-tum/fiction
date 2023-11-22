@@ -33,7 +33,7 @@ Graphviz (DOT) Drawers
         .. doxygenfunction:: fiction::write_dot_layout(const Lyt& lyt, const std::string_view& filename, const Drawer& drawer = {})
 
     .. tab:: Python
-        .. autofunction:: fiction.pyfiction.write_dot_layout
+        .. autofunction:: mnt.pyfiction.write_dot_layout
 
 SVG Images
 ##########
@@ -51,6 +51,6 @@ SVG Images
         .. doxygenclass:: fiction::unsupported_cell_type_exception
 
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.write_qca_layout_svg_params
+        .. autoclass:: mnt.pyfiction.write_qca_layout_svg_params
             :members:
-        .. autofunction:: fiction.pyfiction.write_qca_layout_svg
+        .. autofunction:: mnt.pyfiction.write_qca_layout_svg

@@ -14,7 +14,7 @@ An offset coordinate is a coordinate that defines a location via an offset from 
     .. tab:: C++
         .. doxygenstruct:: fiction::offset::ucoord_t
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.offset_coordinate
+        .. autoclass:: mnt.pyfiction.offset_coordinate
 
 Cube coordinates
 ----------------
@@ -26,7 +26,7 @@ At the same time, they can be used to address 3-dimensional grids.
     .. tab:: C++
         .. doxygenstruct:: fiction::cube::coord_t
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.cube_coordinate
+        .. autoclass:: mnt.pyfiction.cube_coordinate
 
 SiQAD coordinates
 -----------------
@@ -38,7 +38,7 @@ while the z value (0,1) points to the top or bottom Si atom in the dimer. The co
     .. tab:: C++
         .. doxygenstruct:: fiction::siqad::coord_t
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.siqad_coordinate
+        .. autoclass:: mnt.pyfiction.siqad_coordinate
 
 Coordinate iterator
 -------------------
@@ -59,15 +59,15 @@ Utility functions
         .. doxygenfunction:: fiction::siqad::to_siqad_coord(const CoordinateType& coord) noexcept
 
     .. tab:: Python
-        .. autofunction:: fiction.pyfiction.offset_area
-        .. autofunction:: fiction.pyfiction.cube_area
-        .. autofunction:: fiction.pyfiction.siqad_area
+        .. autofunction:: mnt.pyfiction.offset_area
+        .. autofunction:: mnt.pyfiction.cube_area
+        .. autofunction:: mnt.pyfiction.siqad_area
 
-        .. autofunction:: fiction.pyfiction.offset_volume
-        .. autofunction:: fiction.pyfiction.cube_volume
-        .. autofunction:: fiction.pyfiction.siqad_volume
+        .. autofunction:: mnt.pyfiction.offset_volume
+        .. autofunction:: mnt.pyfiction.cube_volume
+        .. autofunction:: mnt.pyfiction.siqad_volume
 
-        .. autofunction:: fiction.pyfiction.to_offset_coord
-        .. autofunction:: fiction.pyfiction.to_cube_coord
+        .. autofunction:: mnt.pyfiction.to_offset_coord
+        .. autofunction:: mnt.pyfiction.to_cube_coord
 
-        .. autofunction:: fiction.pyfiction.to_siqad_coord
+        .. autofunction:: mnt.pyfiction.to_siqad_coord

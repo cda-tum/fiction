@@ -16,7 +16,7 @@ Quantum-dot Cellular Automata (QCA)
            :members:
 
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.qca_technology
+        .. autoclass:: mnt.pyfiction.qca_technology
             :members:
 
 in-plane Nanomagnet Logic (iNML)
@@ -30,7 +30,7 @@ in-plane Nanomagnet Logic (iNML)
            :members:
 
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.inml_technology
+        .. autoclass:: mnt.pyfiction.inml_technology
             :members:
 
 Silicon Dangling Bonds (SiDB)
@@ -44,5 +44,5 @@ Silicon Dangling Bonds (SiDB)
            :members:
 
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.sidb_technology
+        .. autoclass:: mnt.pyfiction.sidb_technology
             :members:

@@ -11,5 +11,5 @@ Coordinate system that represents a Cartesian grid of compile-time coordinate ty
            :members:
 
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.cartesian_layout
+        .. autoclass:: mnt.pyfiction.cartesian_layout
             :members:

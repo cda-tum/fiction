@@ -26,5 +26,5 @@ orientation of the shift that can be horizontal and vertical.
            :members:
 
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.shifted_cartesian_layout
+        .. autoclass:: mnt.pyfiction.shifted_cartesian_layout
             :members:

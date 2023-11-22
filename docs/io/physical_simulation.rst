@@ -17,9 +17,9 @@ QCADesigner
         .. doxygenfunction:: fiction::write_qca_layout(const Lyt& lyt, const std::string_view& filename, write_qca_layout_params ps = {})
 
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.write_qca_layout_params
+        .. autoclass:: mnt.pyfiction.write_qca_layout_params
             :members:
-        .. autofunction:: fiction.pyfiction.write_qca_layout
+        .. autofunction:: mnt.pyfiction.write_qca_layout
 
 
 QCA-STACK
@@ -38,11 +38,11 @@ QCA-STACK
         .. doxygenclass:: fiction::out_of_cell_names_exception
 
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.write_fqca_layout_params
+        .. autoclass:: mnt.pyfiction.write_fqca_layout_params
             :members:
-        .. autofunction:: fiction.pyfiction.write_fqca_layout
+        .. autofunction:: mnt.pyfiction.write_fqca_layout
 
-        .. autoclass:: fiction.pyfiction.out_of_cell_names_exception
+        .. autoclass:: mnt.pyfiction.out_of_cell_names_exception
             :members:
 
 .. tabs::
@@ -60,13 +60,13 @@ QCA-STACK
            :members:
 
     .. tab:: Python
-        .. autofunction:: fiction.pyfiction.read_fqca_layout
+        .. autofunction:: mnt.pyfiction.read_fqca_layout
 
-        .. autoclass:: fiction.pyfiction.unsupported_character_exception
+        .. autoclass:: mnt.pyfiction.unsupported_character_exception
             :members:
-        .. autoclass:: fiction.pyfiction.undefined_cell_label_exception
+        .. autoclass:: mnt.pyfiction.undefined_cell_label_exception
             :members:
-        .. autoclass:: fiction.pyfiction.unrecognized_cell_definition_exception
+        .. autoclass:: mnt.pyfiction.unrecognized_cell_definition_exception
             :members:
 
 
@@ -84,7 +84,7 @@ ToPoliNano
         .. doxygenfunction:: fiction::write_qcc_layout(const Lyt& lyt, const std::string_view& filename, write_qcc_layout_params ps = {})
 
     .. tab:: Python
-        .. autofunction:: fiction.pyfiction.write_qcc_layout
+        .. autofunction:: mnt.pyfiction.write_qcc_layout
 
 
 MagCAD & SCERPA
@@ -98,7 +98,7 @@ MagCAD & SCERPA
         .. doxygenfunction:: fiction::write_qll_layout(const Lyt& lyt, const std::string_view& filename)
 
     .. tab:: Python
-        .. autofunction:: fiction.pyfiction.write_qll_layout
+        .. autofunction:: mnt.pyfiction.write_qll_layout
 
 
 SiQAD
@@ -131,12 +131,12 @@ SiQAD
         .. doxygenclass:: fiction::sqd_parsing_error
 
     .. tab:: Python
-        .. autofunction:: fiction.pyfiction.write_sqd_layout
-        .. autofunction:: fiction.pyfiction.write_sqd_sim_result
-        .. autofunction:: fiction.pyfiction.write_location_and_ground_state
-        .. autofunction:: fiction.pyfiction.read_sqd_layout
+        .. autofunction:: mnt.pyfiction.write_sqd_layout
+        .. autofunction:: mnt.pyfiction.write_sqd_sim_result
+        .. autofunction:: mnt.pyfiction.write_location_and_ground_state
+        .. autofunction:: mnt.pyfiction.read_sqd_layout
 
-        .. autoclass:: fiction.pyfiction.sqd_parsing_error
+        .. autoclass:: mnt.pyfiction.sqd_parsing_error
             :members:
 
 
@@ -153,9 +153,9 @@ SiDB Operational Domain
         .. doxygenfunction:: fiction::write_operational_domain(const operational_domain& opdom, const std::string_view& filename, const write_operational_domain_params& params = {})
 
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.write_operational_domain_params
+        .. autoclass:: mnt.pyfiction.write_operational_domain_params
             :members:
-        .. autofunction:: fiction.pyfiction.write_operational_domain
+        .. autofunction:: mnt.pyfiction.write_operational_domain
 
 
 Technology-independent Gate-level Layouts
@@ -172,7 +172,7 @@ Technology-independent Gate-level Layouts
            :members:
 
     .. tab:: Python
-        .. autofunction:: fiction.pyfiction.write_fgl_layout
+        .. autofunction:: mnt.pyfiction.write_fgl_layout
 
-        .. autoclass:: fiction.pyfiction.fgl_parsing_error
+        .. autoclass:: mnt.pyfiction.fgl_parsing_error
             :members:

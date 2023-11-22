@@ -10,9 +10,9 @@ Design Rule Violations (DRVs)
         .. doxygenfunction:: fiction::gate_level_drvs
 
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.gate_level_drv_params
+        .. autoclass:: mnt.pyfiction.gate_level_drv_params
             :members:
-        .. autofunction:: fiction.pyfiction.gate_level_drvs
+        .. autofunction:: mnt.pyfiction.gate_level_drvs
 
 .. _equiv:
 
@@ -27,6 +27,6 @@ Equivalence Checking
         .. doxygenfunction:: fiction::equivalence_checking
 
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.eq_type
+        .. autoclass:: mnt.pyfiction.eq_type
             :members:
-        .. autofunction:: fiction.pyfiction.equivalence_checking
+        .. autofunction:: mnt.pyfiction.equivalence_checking

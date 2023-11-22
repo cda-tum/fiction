@@ -18,11 +18,11 @@ Possible charge states of SiDBs.
         .. doxygenfunction:: fiction::charge_configuration_to_string
 
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.sidb_charge_state
+        .. autoclass:: mnt.pyfiction.sidb_charge_state
             :members:
-        .. autofunction:: fiction.pyfiction.charge_state_to_sign
-        .. autofunction:: fiction.pyfiction.sign_to_charge_state
-        .. autofunction:: fiction.pyfiction.charge_configuration_to_string
+        .. autofunction:: mnt.pyfiction.charge_state_to_sign
+        .. autofunction:: mnt.pyfiction.sign_to_charge_state
+        .. autofunction:: mnt.pyfiction.charge_configuration_to_string
 
 
 SiDB Charge Distribution Surface
@@ -43,7 +43,7 @@ distributions of the SiDBs. Charge distribution surfaces are returned by the SiD
            :members:
 
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.charge_distribution_surface
+        .. autoclass:: mnt.pyfiction.charge_distribution_surface
             :members:
 
 

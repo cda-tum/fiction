@@ -29,4 +29,4 @@ The respective coordinates on the hexagonal grid are calculated as follows:
 
 
     .. tab:: Python
-        .. autofunction:: fiction.pyfiction.hexagonalization
+        .. autofunction:: mnt.pyfiction.hexagonalization

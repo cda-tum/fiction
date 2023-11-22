@@ -19,6 +19,6 @@ to the layout.
         .. doxygenfunction:: fiction::color_routing(Lyt& lyt, const std::vector<routing_objective<Lyt>>& objectives, color_routing_params ps = {}, color_routing_stats* pst = nullptr)
 
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.color_routing_params
+        .. autoclass:: mnt.pyfiction.color_routing_params
             :members:
-        .. autofunction:: fiction.pyfiction.color_routing
+        .. autofunction:: mnt.pyfiction.color_routing

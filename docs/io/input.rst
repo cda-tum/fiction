@@ -37,9 +37,9 @@ Gate-level Layouts
         .. doxygenclass:: fiction::fgl_parsing_error
 
     .. tab:: Python
-        .. autofunction:: fiction.pyfiction.read_cartesian_fgl_layout
-        .. autofunction:: fiction.pyfiction.read_shifted_cartesian_fgl_layout
-        .. autofunction:: fiction.pyfiction.read_hexagonal_fgl_layout
+        .. autofunction:: mnt.pyfiction.read_cartesian_fgl_layout
+        .. autofunction:: mnt.pyfiction.read_shifted_cartesian_fgl_layout
+        .. autofunction:: mnt.pyfiction.read_hexagonal_fgl_layout
 
 
 Cell-level Layouts
@@ -58,9 +58,9 @@ Cell-level Layouts
         .. doxygenclass:: fiction::sqd_parsing_error
 
     .. tab:: Python
-        .. autofunction:: fiction.pyfiction.read_sqd_layout
+        .. autofunction:: mnt.pyfiction.read_sqd_layout
 
-        .. autoclass:: fiction.pyfiction.sqd_parsing_error
+        .. autoclass:: mnt.pyfiction.sqd_parsing_error
             :members:
 
 .. tabs::
@@ -75,7 +75,7 @@ Cell-level Layouts
         .. doxygenclass:: fiction::unrecognized_cell_definition_exception
 
     .. tab:: Python
-        .. autofunction:: fiction.pyfiction.read_fqca_layout
+        .. autofunction:: mnt.pyfiction.read_fqca_layout
 
 
 SiDB Surface Defects

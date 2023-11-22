@@ -23,7 +23,7 @@ class CMakeBuild(build_ext):
         if not extdir.endswith(os.path.sep):
             extdir += os.path.sep
 
-        # check if Z3 should be used. If no argument is given, fiction does not depend on Z3 by default.
+        # check if Z3 should be used. If no argument is given, pyfiction does not depend on Z3 by default.
         z3 = os.environ.get("z3", "OFF")
 
         # store environment variable
@@ -99,7 +99,7 @@ with open(README_PATH, encoding="utf8") as readme_file:
     README = readme_file.read()
 
 setup(
-    name='fiction',
+    name='mnt.pyfiction',
     version='0.5.0',
     author='Marcel Walter',
     author_email='marcel.walter@tum.de',
@@ -108,7 +108,7 @@ setup(
     long_description_content_type='text/markdown',
     license='MIT',
     url='https://www.cda.cit.tum.de/research/fcn/',
-    ext_modules=[CMakeExtension('pyfiction', namespace='fiction')],
+    ext_modules=[CMakeExtension('pyfiction', namespace='mnt')],
     cmdclass={"build_ext": CMakeBuild},
     zip_safe=False,
     python_requires=">=3.7",

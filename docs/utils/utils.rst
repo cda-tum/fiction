@@ -32,9 +32,9 @@ Network Utils
         .. doxygenfunction:: fiction::inverse_levels
 
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.high_degree_fanin_exception
+        .. autoclass:: mnt.pyfiction.high_degree_fanin_exception
             :members:
-        .. autofunction:: fiction.pyfiction.has_high_degree_fanin_nodes
+        .. autofunction:: mnt.pyfiction.has_high_degree_fanin_nodes
 
 
 Truth Table Utils
@@ -59,19 +59,19 @@ Truth Table Utils
         .. doxygenfunction:: fiction::create_half_adder_tt
 
     .. tab:: Python
-        .. autofunction:: fiction.pyfiction.create_id_tt
-        .. autofunction:: fiction.pyfiction.create_not_tt
-        .. autofunction:: fiction.pyfiction.create_and_tt
-        .. autofunction:: fiction.pyfiction.create_or_tt
-        .. autofunction:: fiction.pyfiction.create_nand_tt
-        .. autofunction:: fiction.pyfiction.create_nor_tt
-        .. autofunction:: fiction.pyfiction.create_xor_tt
-        .. autofunction:: fiction.pyfiction.create_xnor_tt
-        .. autofunction:: fiction.pyfiction.create_maj_tt
-        .. autofunction:: fiction.pyfiction.create_double_wire_tt
-        .. autofunction:: fiction.pyfiction.create_crossing_wire_tt
-        .. autofunction:: fiction.pyfiction.create_fan_out_tt
-        .. autofunction:: fiction.pyfiction.create_half_adder_tt
+        .. autofunction:: mnt.pyfiction.create_id_tt
+        .. autofunction:: mnt.pyfiction.create_not_tt
+        .. autofunction:: mnt.pyfiction.create_and_tt
+        .. autofunction:: mnt.pyfiction.create_or_tt
+        .. autofunction:: mnt.pyfiction.create_nand_tt
+        .. autofunction:: mnt.pyfiction.create_nor_tt
+        .. autofunction:: mnt.pyfiction.create_xor_tt
+        .. autofunction:: mnt.pyfiction.create_xnor_tt
+        .. autofunction:: mnt.pyfiction.create_maj_tt
+        .. autofunction:: mnt.pyfiction.create_double_wire_tt
+        .. autofunction:: mnt.pyfiction.create_crossing_wire_tt
+        .. autofunction:: mnt.pyfiction.create_fan_out_tt
+        .. autofunction:: mnt.pyfiction.create_half_adder_tt
 
 
 Layout Utils
@@ -91,11 +91,11 @@ Layout Utils
         .. doxygenfunction:: fiction::all_sidbs_in_spanned_area
 
     .. tab:: Python
-        .. autofunction:: fiction.pyfiction.num_adjacent_coordinates
-        .. autofunction:: fiction.pyfiction.normalize_layout_coordinates
-        .. autofunction:: fiction.pyfiction.convert_to_siqad_coordinates
-        .. autofunction:: fiction.pyfiction.convert_to_fiction_coordinates
-        .. autofunction:: fiction.pyfiction.random_coordinate
+        .. autofunction:: mnt.pyfiction.num_adjacent_coordinates
+        .. autofunction:: mnt.pyfiction.normalize_layout_coordinates
+        .. autofunction:: mnt.pyfiction.convert_to_siqad_coordinates
+        .. autofunction:: mnt.pyfiction.convert_to_fiction_coordinates
+        .. autofunction:: mnt.pyfiction.random_coordinate
 
 
 Placement Utils
@@ -118,8 +118,8 @@ Placement Utils
         .. doxygenfunction:: fiction::place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n, const mockturtle::node_map<branching_signal_container<Lyt, Ntk, fanout_size>, Ntk>& node2pos) noexcept
 
     .. tab:: Python
-        .. autofunction:: fiction.pyfiction.reserve_input_nodes
-        .. autofunction:: fiction.pyfiction.place
+        .. autofunction:: mnt.pyfiction.reserve_input_nodes
+        .. autofunction:: mnt.pyfiction.place
 
 
 Routing Utils
@@ -148,10 +148,10 @@ Routing Utils
         .. doxygenfunction:: fiction::clear_routing
 
     .. tab:: Python
-        .. autofunction:: fiction.pyfiction.is_crossable_wire
-        .. autofunction:: fiction.pyfiction.route_path
-        .. autofunction:: fiction.pyfiction.extract_routing_objectives
-        .. autofunction:: fiction.pyfiction.clear_routing
+        .. autofunction:: mnt.pyfiction.is_crossable_wire
+        .. autofunction:: mnt.pyfiction.route_path
+        .. autofunction:: mnt.pyfiction.extract_routing_objectives
+        .. autofunction:: mnt.pyfiction.clear_routing
 
 
 Name Utils
@@ -172,8 +172,8 @@ Name Utils
         .. doxygenfunction:: fiction::restore_names(const NtkSrc& ntk_src, NtkDest& ntk_dest, mockturtle::node_map<T, NtkSrc>& old2new) noexcept
 
     .. tab:: Python
-        .. autofunction:: fiction.pyfiction.get_name
-        .. autofunction:: fiction.pyfiction.set_name
+        .. autofunction:: mnt.pyfiction.get_name
+        .. autofunction:: mnt.pyfiction.set_name
 
 
 Array Utils

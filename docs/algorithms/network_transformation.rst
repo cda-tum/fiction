@@ -16,10 +16,10 @@ Network Balancing
            :members:
         .. doxygenfunction:: fiction::network_balancing
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.network_balancing_params
+        .. autoclass:: mnt.pyfiction.network_balancing_params
             :members:
-        .. autofunction:: fiction.pyfiction.network_balancing
-        .. autofunction:: fiction.pyfiction.is_balanced
+        .. autofunction:: mnt.pyfiction.network_balancing
+        .. autofunction:: mnt.pyfiction.is_balanced
 
 Fanout Substitution
 -------------------
@@ -33,9 +33,9 @@ Fanout Substitution
         .. doxygenfunction:: fiction::fanout_substitution
 
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.fanout_substitution_params
+        .. autoclass:: mnt.pyfiction.fanout_substitution_params
             :members:
-        .. autoclass:: fiction.pyfiction.substitution_strategy
+        .. autoclass:: mnt.pyfiction.substitution_strategy
             :members:
-        .. autofunction:: fiction.pyfiction.fanout_substitution
-        .. autofunction:: fiction.pyfiction.is_fanout_substituted
+        .. autofunction:: mnt.pyfiction.fanout_substitution
+        .. autofunction:: mnt.pyfiction.is_fanout_substituted

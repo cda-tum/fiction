@@ -16,7 +16,7 @@ network specifications under constraints. This approach finds exact results but 
         .. doxygenfunction:: fiction::exact_with_blacklist
 
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.exact_params
+        .. autoclass:: mnt.pyfiction.exact_params
             :members:
-        .. autofunction:: fiction.pyfiction.exact_cartesian
-        .. autofunction:: fiction.pyfiction.exact_hexagonal
+        .. autofunction:: mnt.pyfiction.exact_cartesian
+        .. autofunction:: mnt.pyfiction.exact_hexagonal

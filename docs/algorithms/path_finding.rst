@@ -18,9 +18,9 @@ Distance functions compute (an approximation for) the distance between two coord
         .. doxygenclass:: fiction::twoddwave_distance_functor
 
     .. tab:: Python
-        .. autofunction:: fiction.pyfiction.manhattan_distance
-        .. autofunction:: fiction.pyfiction.euclidean_distance
-        .. autofunction:: fiction.pyfiction.twoddwave_distance
+        .. autofunction:: mnt.pyfiction.manhattan_distance
+        .. autofunction:: mnt.pyfiction.euclidean_distance
+        .. autofunction:: mnt.pyfiction.twoddwave_distance
 
 Distance Maps
 -------------
@@ -73,10 +73,10 @@ A* Shortest Path
         .. doxygenclass:: fiction::a_star_distance_functor
 
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.a_star_params
+        .. autoclass:: mnt.pyfiction.a_star_params
             :members:
-        .. autofunction:: fiction.pyfiction.a_star
-        .. autofunction:: fiction.pyfiction.a_star_distance
+        .. autofunction:: mnt.pyfiction.a_star
+        .. autofunction:: mnt.pyfiction.a_star_distance
 
 Jump Point Search Shortest Path in a Cartesian Grid
 ---------------------------------------------------
@@ -97,9 +97,9 @@ k Shortest Paths
         .. doxygenfunction:: fiction::yen_k_shortest_paths
 
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.yen_k_shortest_paths_params
+        .. autoclass:: mnt.pyfiction.yen_k_shortest_paths_params
             :members:
-        .. autofunction:: fiction.pyfiction.yen_k_shortest_paths
+        .. autofunction:: mnt.pyfiction.yen_k_shortest_paths
 
 Enumerate All Paths
 -------------------
@@ -113,6 +113,6 @@ Enumerate All Paths
         .. doxygenfunction:: fiction::enumerate_all_paths
 
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.enumerate_all_paths_params
+        .. autoclass:: mnt.pyfiction.enumerate_all_paths_params
             :members:
-        .. autofunction:: fiction.pyfiction.enumerate_all_paths
+        .. autofunction:: mnt.pyfiction.enumerate_all_paths

@@ -30,20 +30,20 @@ SiDB Defect Types
         .. doxygenfunction:: fiction::defect_extent
 
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.sidb_defect_type
+        .. autoclass:: mnt.pyfiction.sidb_defect_type
             :members:
 
-        .. autoclass:: fiction.pyfiction.sidb_defect
+        .. autoclass:: mnt.pyfiction.sidb_defect
             :members:
 
-        .. autofunction:: fiction.pyfiction.is_charged_defect_type
-        .. autofunction:: fiction.pyfiction.is_neutral_defect_type
+        .. autofunction:: mnt.pyfiction.is_charged_defect_type
+        .. autofunction:: mnt.pyfiction.is_neutral_defect_type
 
-        .. autofunction:: fiction.pyfiction.is_positively_charged_defect
-        .. autofunction:: fiction.pyfiction.is_negatively_charged_defect
-        .. autofunction:: fiction.pyfiction.is_neutrally_charged_defect
+        .. autofunction:: mnt.pyfiction.is_positively_charged_defect
+        .. autofunction:: mnt.pyfiction.is_negatively_charged_defect
+        .. autofunction:: mnt.pyfiction.is_neutrally_charged_defect
 
-        .. autofunction:: fiction.pyfiction.defect_extent
+        .. autofunction:: mnt.pyfiction.defect_extent
 
 
 SiDB Defect Surface

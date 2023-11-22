@@ -1,4 +1,4 @@
-from fiction.pyfiction import *
+from mnt.pyfiction import *
 from dotenv import load_dotenv
 import unittest
 import os

@@ -26,5 +26,5 @@ Graph Coloring
         .. doxygenfunction:: fiction::determine_vertex_coloring
 
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.graph_coloring_engine
+        .. autoclass:: mnt.pyfiction.graph_coloring_engine
             :members:

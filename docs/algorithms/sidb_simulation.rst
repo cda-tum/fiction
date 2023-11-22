@@ -15,7 +15,7 @@ Physical Parameters
            :members:
 
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.sidb_simulation_parameters
+        .. autoclass:: mnt.pyfiction.sidb_simulation_parameters
             :members:
 
 
@@ -30,7 +30,7 @@ Simulation Result
            :members:
 
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.sidb_simulation_result
+        .. autoclass:: mnt.pyfiction.sidb_simulation_result
             :members:
 
 
@@ -49,10 +49,10 @@ Heuristic Ground State Simulation
         .. doxygenfunction:: fiction::quicksim
 
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.quicksim_params
+        .. autoclass:: mnt.pyfiction.quicksim_params
             :members:
 
-        .. autofunction:: fiction.pyfiction.quicksim
+        .. autofunction:: mnt.pyfiction.quicksim
 
 
 Exhaustive Ground State Simulation
@@ -71,11 +71,11 @@ Exhaustive Ground State Simulation
         .. doxygenfunction:: fiction::exhaustive_ground_state_simulation
 
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.quickexact_params
+        .. autoclass:: mnt.pyfiction.quickexact_params
             :members:
-        .. autofunction:: fiction.pyfiction.quickexact
+        .. autofunction:: mnt.pyfiction.quickexact
 
-        .. autofunction:: fiction.pyfiction.exhaustive_ground_state_simulation
+        .. autofunction:: mnt.pyfiction.exhaustive_ground_state_simulation
 
 
 Engine Selectors
@@ -89,9 +89,9 @@ Engine Selectors
         .. doxygenenum:: fiction::exhaustive_sidb_simulation_engine
 
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.sidb_simulation_engine
+        .. autoclass:: mnt.pyfiction.sidb_simulation_engine
             :members:
-        .. autoclass:: fiction.pyfiction.exhaustive_sidb_simulation_engine
+        .. autoclass:: mnt.pyfiction.exhaustive_sidb_simulation_engine
             :members:
 
 
@@ -116,11 +116,11 @@ Energy Calculation
         .. doxygenfunction:: fiction::is_ground_state
 
     .. tab:: Python
-        .. autofunction:: fiction.pyfiction.energy_distribution
+        .. autofunction:: mnt.pyfiction.energy_distribution
 
-        .. autofunction:: fiction.pyfiction.minimum_energy
+        .. autofunction:: mnt.pyfiction.minimum_energy
 
-        .. autofunction:: fiction.pyfiction.is_ground_state
+        .. autofunction:: mnt.pyfiction.is_ground_state
 
 
 Temperature Behavior
@@ -148,19 +148,19 @@ Temperature Behavior
         .. doxygenfunction:: fiction::calculate_energy_and_state_type
 
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.critical_temperature_mode
+        .. autoclass:: mnt.pyfiction.critical_temperature_mode
             :members:
-        .. autoclass:: fiction.pyfiction.simulation_engine
+        .. autoclass:: mnt.pyfiction.simulation_engine
             :members:
-        .. autoclass:: fiction.pyfiction.critical_temperature_params
+        .. autoclass:: mnt.pyfiction.critical_temperature_params
             :members:
-        .. autofunction:: fiction.pyfiction.critical_temperature_gate_based
-        .. autofunction:: fiction.pyfiction.critical_temperature_non_gate_based
+        .. autofunction:: mnt.pyfiction.critical_temperature_gate_based
+        .. autofunction:: mnt.pyfiction.critical_temperature_non_gate_based
 
-        .. autofunction:: fiction.pyfiction.occupation_probability_gate_based
-        .. autofunction:: fiction.pyfiction.occupation_probability_non_gate_based
+        .. autofunction:: mnt.pyfiction.occupation_probability_gate_based
+        .. autofunction:: mnt.pyfiction.occupation_probability_non_gate_based
 
-        .. autofunction:: fiction.pyfiction.calculate_energy_and_state_type
+        .. autofunction:: mnt.pyfiction.calculate_energy_and_state_type
 
 
 Maximum Defect Influence Distance
@@ -187,11 +187,11 @@ Time-to-Solution (TTS) Statistics
         .. doxygenfunction:: fiction::time_to_solution
 
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.time_to_solution_params
+        .. autoclass:: mnt.pyfiction.time_to_solution_params
             :members:
-        .. autoclass:: fiction.pyfiction.time_to_solution_stats
+        .. autoclass:: mnt.pyfiction.time_to_solution_stats
             :members:
-        .. autofunction:: fiction.pyfiction.time_to_solution
+        .. autofunction:: mnt.pyfiction.time_to_solution
 
 
 Random SiDB Layout Generator
@@ -232,27 +232,27 @@ Operational Domain Computation
         .. doxygenfunction:: fiction::operational_domain_contour_tracing
 
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.operational_status
+        .. autoclass:: mnt.pyfiction.operational_status
             :members:
-        .. autoclass:: fiction.pyfiction.is_operational_params
+        .. autoclass:: mnt.pyfiction.is_operational_params
             :members:
-        .. autofunction:: fiction.pyfiction.is_operational
+        .. autofunction:: mnt.pyfiction.is_operational
 
-        .. autoclass:: fiction.pyfiction.sweep_parameter
+        .. autoclass:: mnt.pyfiction.sweep_parameter
             :members:
-        .. autoclass:: fiction.pyfiction.parameter_point
+        .. autoclass:: mnt.pyfiction.parameter_point
             :members:
-        .. autoclass:: fiction.pyfiction.operational_domain
+        .. autoclass:: mnt.pyfiction.operational_domain
             :members:
-        .. autoclass:: fiction.pyfiction.operational_domain_params
+        .. autoclass:: mnt.pyfiction.operational_domain_params
             :members:
-        .. autoclass:: fiction.pyfiction.operational_domain_stats
+        .. autoclass:: mnt.pyfiction.operational_domain_stats
             :members:
 
-        .. autofunction:: fiction.pyfiction.operational_domain_grid_search
-        .. autofunction:: fiction.pyfiction.operational_domain_random_sampling
-        .. autofunction:: fiction.pyfiction.operational_domain_flood_fill
-        .. autofunction:: fiction.pyfiction.operational_domain_contour_tracing
+        .. autofunction:: mnt.pyfiction.operational_domain_grid_search
+        .. autofunction:: mnt.pyfiction.operational_domain_random_sampling
+        .. autofunction:: mnt.pyfiction.operational_domain_flood_fill
+        .. autofunction:: mnt.pyfiction.operational_domain_contour_tracing
 
 
 Utility Functions
@@ -268,7 +268,7 @@ Charge Detection
         .. doxygenfunction:: fiction::can_positive_charges_occur
 
     .. tab:: Python
-        .. autofunction:: fiction.pyfiction.can_positive_charges_occur
+        .. autofunction:: mnt.pyfiction.can_positive_charges_occur
 
 Binary-dot Logic (BDL) Pair Detection
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -284,11 +284,11 @@ Binary-dot Logic (BDL) Pair Detection
         .. doxygenfunction:: fiction::detect_bdl_pairs
 
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.bdl_pair
+        .. autoclass:: mnt.pyfiction.bdl_pair
             :members:
-        .. autoclass:: fiction.pyfiction.detect_bdl_pairs_params
+        .. autoclass:: mnt.pyfiction.detect_bdl_pairs_params
             :members:
-        .. autofunction:: fiction.pyfiction.detect_bdl_pairs
+        .. autofunction:: mnt.pyfiction.detect_bdl_pairs
 
 
 Assess Population Stability
@@ -306,13 +306,13 @@ Assess Population Stability
         .. doxygenfunction:: fiction::assess_physical_population_stability
 
     .. tab:: Python
-        .. autoclass:: fiction.pyfiction.transition_type
+        .. autoclass:: mnt.pyfiction.transition_type
             :members:
-        .. autoclass:: fiction.pyfiction.population_stability_information
+        .. autoclass:: mnt.pyfiction.population_stability_information
             :members:
-        .. autoclass:: fiction.pyfiction.assess_physical_population_stability_params
+        .. autoclass:: mnt.pyfiction.assess_physical_population_stability_params
             :members:
-        .. autofunction:: fiction.pyfiction.assess_physical_population_stability
+        .. autofunction:: mnt.pyfiction.assess_physical_population_stability
 
 
 Convert Potential to Distance
@@ -325,4 +325,4 @@ Convert Potential to Distance
         .. doxygenfunction:: fiction::convert_potential_to_distance
 
     .. tab:: Python
-        .. autofunction:: fiction.pyfiction.convert_potential_to_distance
+        .. autofunction:: mnt.pyfiction.convert_potential_to_distance

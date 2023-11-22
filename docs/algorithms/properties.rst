@@ -8,7 +8,7 @@ Critical Path (CP) and Throughput (TP)
         .. doxygenfunction:: fiction::critical_path_length_and_throughput
 
     .. tab:: Python
-        .. autofunction:: fiction.pyfiction.critical_path_length_and_throughput
+        .. autofunction:: mnt.pyfiction.critical_path_length_and_throughput
 
 Number of Gate Types
 --------------------

@@ -1,6 +1,6 @@
 import unittest
 
-from fiction.pyfiction import *
+from mnt.pyfiction import *
 
 
 class TestColorRouting(unittest.TestCase):
