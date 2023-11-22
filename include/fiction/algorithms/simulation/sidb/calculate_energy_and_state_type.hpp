@@ -50,7 +50,6 @@ calculate_energy_and_state_type(const sidb_energy_distribution&                 
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
     assert(!output_bdl_pairs.empty() && "No output cell provided.");

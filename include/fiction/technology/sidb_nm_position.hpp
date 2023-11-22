@@ -7,6 +7,7 @@
 
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/layouts/cell_level_layout.hpp"
+#include "fiction/layouts/coordinates.hpp"
 #include "fiction/traits.hpp"
 
 #include <utility>
@@ -28,12 +29,20 @@ template <typename Lyt>
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
-    const auto x = (c.x * sp.lat_a) * 0.1;
-    const auto y = (c.y * sp.lat_b + c.z * sp.lat_c) * .1;
-
-    return std::make_pair(x, y);
+    if constexpr (has_siqad_coord_v<Lyt>)
+    {
+        const auto x = (c.x * sp.lat_a) * 0.1;
+        const auto y = (c.y * sp.lat_b + c.z * sp.lat_c) * .1;
+        return std::make_pair(x, y);
+    }
+    else
+    {
+        const auto cell_in_siqad = siqad::to_siqad_coord(c);
+        const auto x             = (cell_in_siqad.x * sp.lat_a) * 0.1;
+        const auto y             = (cell_in_siqad.y * sp.lat_b + cell_in_siqad.z * sp.lat_c) * .1;
+        return std::make_pair(x, y);
+    }
 }
 }  // namespace fiction
 
