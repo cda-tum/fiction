@@ -121,7 +121,7 @@ TEST_CASE("Test influence distance function", "[maximum-defect-influence-positio
         const sidb_defect defect{sidb_defect_type::UNKNOWN, -1, sidb_simulation_parameters{}.epsilon_r,
                                  sidb_simulation_parameters{}.lambda_tf};
         const maximum_defect_influence_distance_params sim_params{defect, sidb_simulation_parameters{}};
-        cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>> lyt{{30,30}};
+        cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>> lyt{{30, 30}};
 
         lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{10, 0, 0}),
                              sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
@@ -147,6 +147,5 @@ TEST_CASE("Test influence distance function", "[maximum-defect-influence-positio
         CHECK(defect_pos.z == 0);
 
         CHECK_THAT(distance, Catch::Matchers::WithinAbs(2.8999201713, physical_constants::POP_STABILITY_ERR));
-
     }
 }

@@ -112,16 +112,24 @@ TEMPLATE_TEST_CASE("Y-shape SiDB OR gate with input 01, using offset coordinates
 {
     TestType lyt{{20, 10}};
 
-    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{6, 2, 0}), TestType::cell_type::NORMAL);
-    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{8, 3, 0}), TestType::cell_type::NORMAL);
-    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{12, 3, 0}), TestType::cell_type::NORMAL);
+    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{6, 2, 0}),
+                         TestType::cell_type::NORMAL);
+    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{8, 3, 0}),
+                         TestType::cell_type::NORMAL);
+    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{12, 3, 0}),
+                         TestType::cell_type::NORMAL);
 
-    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{14, 2, 0}), TestType::cell_type::NORMAL);
-    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{10, 5, 0}), TestType::cell_type::NORMAL);
+    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{14, 2, 0}),
+                         TestType::cell_type::NORMAL);
+    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{10, 5, 0}),
+                         TestType::cell_type::NORMAL);
 
-    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{10, 6, 1}), TestType::cell_type::NORMAL);
-    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{10, 8, 1}), TestType::cell_type::NORMAL);
-    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{16, 1, 0}), TestType::cell_type::NORMAL);
+    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{10, 6, 1}),
+                         TestType::cell_type::NORMAL);
+    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{10, 8, 1}),
+                         TestType::cell_type::NORMAL);
+    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{16, 1, 0}),
+                         TestType::cell_type::NORMAL);
 
     SECTION("Default values")
     {

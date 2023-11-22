@@ -1309,9 +1309,8 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
     }
 }
 
-TEMPLATE_TEST_CASE(
-    "Assign and delete charge states without defects, part one", "[charge-distribution-surface]",
-    (sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+TEMPLATE_TEST_CASE("Assign and delete charge states without defects, part one", "[charge-distribution-surface]",
+                   (sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 
 {
     TestType lyt{{11, 11}};
@@ -1559,9 +1558,8 @@ TEMPLATE_TEST_CASE(
     }
 }
 
-TEMPLATE_TEST_CASE(
-    "Assign and delete charge states without defects, part two", "[charge-distribution-surface]",
-    (sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+TEMPLATE_TEST_CASE("Assign and delete charge states without defects, part two", "[charge-distribution-surface]",
+                   (sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 
 {
     TestType lyt{{11, 11}};

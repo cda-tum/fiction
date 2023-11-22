@@ -779,7 +779,7 @@ TEMPLATE_TEST_CASE(
 
     const quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.32}};
     lyt.assign_sidb_defect({-1, -1, 1}, sidb_defect{sidb_defect_type::UNKNOWN, -1, params.physical_parameters.epsilon_r,
-                                                  params.physical_parameters.lambda_tf});
+                                                    params.physical_parameters.lambda_tf});
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
     REQUIRE(!simulation_results.charge_distributions.empty());
