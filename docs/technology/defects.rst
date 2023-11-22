@@ -15,11 +15,12 @@ SiDB Defect Types
         .. doxygenstruct:: fiction::sidb_defect
            :members:
 
-        .. doxygenfunction:: fiction::is_charged_defect
+        .. doxygenfunction:: fiction::is_charged_defect_type
+        .. doxygenfunction:: fiction::is_neutral_defect_type
+
         .. doxygenfunction:: fiction::is_positively_charged_defect
         .. doxygenfunction:: fiction::is_negatively_charged_defect
         .. doxygenfunction:: fiction::is_neutrally_charged_defect
-        .. doxygenfunction:: fiction::is_neutral_defect
 
         .. doxygenvariable:: fiction::SIDB_CHARGED_DEFECT_HORIZONTAL_SPACING
         .. doxygenvariable:: fiction::SIDB_CHARGED_DEFECT_VERTICAL_SPACING
@@ -29,19 +30,20 @@ SiDB Defect Types
         .. doxygenfunction:: fiction::defect_extent
 
     .. tab:: Python
-        .. autoclass:: fiction.technology.sidb_defect_type
+        .. autoclass:: fiction.pyfiction.sidb_defect_type
             :members:
 
-        .. autoclass:: fiction.technology.sidb_defect
+        .. autoclass:: fiction.pyfiction.sidb_defect
             :members:
 
-        .. autofunction:: fiction.technology.is_charged_defect
-        .. autofunction:: fiction.technology.is_positively_charged_defect
-        .. autofunction:: fiction.technology.is_negatively_charged_defect
-        .. autofunction:: fiction.technology.is_neutrally_charged_defect
-        .. autofunction:: fiction.technology.is_neutral_defect
+        .. autofunction:: fiction.pyfiction.is_charged_defect_type
+        .. autofunction:: fiction.pyfiction.is_neutral_defect_type
 
-        .. autofunction:: fiction.technology.defect_extent
+        .. autofunction:: fiction.pyfiction.is_positively_charged_defect
+        .. autofunction:: fiction.pyfiction.is_negatively_charged_defect
+        .. autofunction:: fiction.pyfiction.is_neutrally_charged_defect
+
+        .. autofunction:: fiction.pyfiction.defect_extent
 
 
 SiDB Defect Surface
