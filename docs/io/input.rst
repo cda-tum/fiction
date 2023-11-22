@@ -41,6 +41,9 @@ Gate-level Layouts
         .. autofunction:: mnt.pyfiction.read_shifted_cartesian_fgl_layout
         .. autofunction:: mnt.pyfiction.read_hexagonal_fgl_layout
 
+        .. autoclass:: mnt.pyfiction.fgl_parsing_error
+            :members:
+
 
 Cell-level Layouts
 ##################
