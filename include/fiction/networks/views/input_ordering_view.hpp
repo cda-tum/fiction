@@ -397,10 +397,6 @@ class input_ordering_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
                                                       wait.push_back(first_pi);
                                                       this->set_visited(n, this->trav_id());
                                                   }
-                                                  else
-                                                  {
-                                                      assert(false);
-                                                  }
 
                                                   if (this->visited(fin_inp) != this->trav_id())
                                                   {
