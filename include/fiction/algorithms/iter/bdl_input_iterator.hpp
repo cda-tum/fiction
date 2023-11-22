@@ -20,7 +20,7 @@ namespace fiction
  * for an \f$n\f$-input BDL layout, each with a unique input index. The input index is interpreted as a binary number,
  * where the \f$i\f$-th bit represents the input state of the \f$i\f$-th input BDL pair. If the bit is `1`, the lower
  * BDL dot is set and the upper BDL dot removed. If the bit is `0`, the upper BDL dot is removed and the lower BDL dot
- * set. The iterator creates and stores a deep-copy of the given layout. The state enumeration wraps around, i.e. after
+ * set. The iterator creates and stores a deep-copy of the given layout. The state enumeration wraps around, i.e., after
  * the last possible input state, the first input state is set again.
  *
  * The iterator satisfies the requirements of `LegacyRandomAccessIterator` and can be used in iterator-based `for`
