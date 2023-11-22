@@ -511,7 +511,7 @@ template <typename Ntk>
 class input_ordering_view<Ntk, true> : public Ntk
 {
   public:
-    input_ordering_view(Ntk const& ntk) : Ntk(ntk) {}
+    explicit input_ordering_view(Ntk const& ntk) : Ntk(ntk) {}
 };
 
 template <class T>

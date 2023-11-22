@@ -976,6 +976,31 @@ mockturtle::names_view<Ntk> four_inverter_substitutions_b()
     return ntk;
 }
 
+template <typename Ntk>
+mockturtle::names_view<Ntk> coloring_fo_one()
+{
+    mockturtle::names_view<Ntk> ntk{};
+
+    const auto x1 = ntk.create_pi();
+    const auto x2 = ntk.create_pi();
+    const auto x3 = ntk.create_pi();
+    const auto x4 = ntk.create_pi();
+    const auto x5 = ntk.create_pi();
+
+    const auto n1 = ntk.create_not(x1);
+    const auto n5 = ntk.create_not(x5);
+
+    const auto a1 = ntk.create_and(x2, n1);
+    const auto a2 = ntk.create_and(x3, x4);
+    const auto a3 = ntk.create_and(a1, n1);
+    const auto a4 = ntk.create_and(n5, a2);
+
+    ntk.create_po(a3);
+    ntk.create_po(a4);
+
+    return ntk;
+}
+
 }  // namespace blueprints
 
 #endif  // FICTION_NETWORK_BLUEPRINTS_HPP

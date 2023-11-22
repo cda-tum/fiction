@@ -198,14 +198,12 @@ coloring_container<Ntk> conditional_coloring(const Ntk& ntk) noexcept
                     auto fo_one = ctn.color_ntk.get_fo_one();
                     auto pi_pi  = ctn.color_ntk.get_pi_to_pi();
 
-                    // 1. fan-out node related to two PIs
                     if (ntk.is_fanout(current_node) && ntk.fanout_size(current_node) >= 2)
                     {
                         auto fo_two = ctn.color_ntk.get_fo_two();
-
                         // paint the fan-out node east
                         paint_node_and_edges(ctn, current_node, ctn.color_east);
-
+                        // 1. fan-out node related to two PIs
                         if (const auto it = find(fo_two.cbegin(), fo_two.cend(), pi); it != fo_two.cend())
                         {
                             int i = static_cast<int>(it - fo_two.cbegin());

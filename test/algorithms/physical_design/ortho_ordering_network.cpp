@@ -46,6 +46,10 @@ TEST_CASE("conditional_coloring", "[orthogonal-coloring]")
         fanout_substitution<technology_network>(blueprints::test_fanout_nodes_rank<mockturtle::mig_network>())}});
     check_colors(input_ordering_view{mockturtle::fanout_view{
         fanout_substitution<technology_network>(blueprints::test_fanout_swap<mockturtle::mig_network>())}});
+    check_colors(input_ordering_view{mockturtle::fanout_view{
+        fanout_substitution<technology_network>(blueprints::coloring_fo_one<mockturtle::mig_network>())}});
+    check_colors(input_ordering_view{mockturtle::fanout_view{
+        fanout_substitution<technology_network>(blueprints::par_check<mockturtle::mig_network>())}});
 }
 
 TEST_CASE("Ordering gate library application and design rule violation", "[orthogonal-ordering]")
@@ -81,6 +85,8 @@ TEST_CASE("Ordering gate library application and design rule violation", "[ortho
     check_ortho_ordering(blueprints::test_fanout_nodes_coloring_null<mockturtle::mig_network>());
     check_ortho_ordering(blueprints::test_fanout_nodes_rank<mockturtle::mig_network>());
     check_ortho_ordering(blueprints::test_fanout_swap<mockturtle::mig_network>());
+    check_ortho_ordering(blueprints::coloring_fo_one<mockturtle::mig_network>());
+    check_ortho_ordering(blueprints::par_check<mockturtle::mig_network>());
 
     // constant input network
     check_ortho_ordering(blueprints::unbalanced_and_inv_network<mockturtle::mig_network>());
