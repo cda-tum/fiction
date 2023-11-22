@@ -11,9 +11,11 @@
 #include <fiction/io/dot_drawers.hpp>
 #include <fiction/traits.hpp>
 
-#include <pybind11/pybind11.h>
+#include <mockturtle/io/write_dot.hpp>
 
 #include <string_view>
+
+#include <pybind11/pybind11.h>
 
 namespace pyfiction
 {
@@ -42,6 +44,18 @@ void write_dot_layout(pybind11::module& m)
         "layout"_a, "filename"_a, DOC(fiction_write_dot_layout));
 }
 
+template <typename Ntk>
+void write_dot_network(pybind11::module& m)
+{
+    using namespace pybind11::literals;
+
+    m.def(
+        "write_dot_network",
+        [](const Ntk& ntk, const std::string_view& filename)
+        { mockturtle::write_dot(ntk, filename.data(), fiction::technology_dot_drawer<Ntk>{}); },
+        "network"_a, "filename"_a);
+}
+
 }  // namespace detail
 
 inline void write_dot_layout(pybind11::module& m)
@@ -49,6 +63,8 @@ inline void write_dot_layout(pybind11::module& m)
     detail::write_dot_layout<py_cartesian_gate_layout>(m);
     detail::write_dot_layout<py_shifted_cartesian_gate_layout>(m);
     detail::write_dot_layout<py_hexagonal_gate_layout>(m);
+
+    detail::write_dot_network<py_logic_network>(m);
 }
 
 }  // namespace pyfiction
