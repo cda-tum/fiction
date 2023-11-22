@@ -38,6 +38,8 @@ namespace fiction
 /**
  * This struct contains parameters and settings to design SiDB gates.
  *
+ * @tparam Cell-level layout type.
+ *
  */
 template <typename Lyt>
 struct design_sidb_gates_params
@@ -97,7 +99,7 @@ class design_sidb_gates_impl
             skeleton_layout{skeleton},
             truth_table{tt},
             params{ps},
-            all_sidbs_in_cavas{all_sidbs_in_spanned_area(params.canvas.first, params.canvas.second)}
+            all_sidbs_in_canvas{all_sidbs_in_spanned_area(params.canvas.first, params.canvas.second)}
     {}
     /**
      * Design gates exhaustively and in parallel.
@@ -225,7 +227,7 @@ class design_sidb_gates_impl
     /**
      * All cells within the canvas.
      */
-    const std::vector<typename Lyt::cell> all_sidbs_in_cavas;
+    const std::vector<typename Lyt::cell> all_sidbs_in_canvas;
     /**
      * Calculates all possible combinations of distributing the given number of SiDBs within a canvas
      * based on the provided parameters. It generates combinations of SiDB indices (representing the cell position in
@@ -237,9 +239,9 @@ class design_sidb_gates_impl
     [[nodiscard]] std::vector<std::vector<std::size_t>> determine_all_combinations_of_given_sidbs_in_canvas() noexcept
     {
         std::vector<std::vector<std::size_t>> all_combinations{};
-        all_combinations.reserve(binomial_coefficient(all_sidbs_in_cavas.size(), params.number_of_sidbs));
+        all_combinations.reserve(binomial_coefficient(all_sidbs_in_canvas.size(), params.number_of_sidbs));
 
-        std::vector<std::size_t> numbers(all_sidbs_in_cavas.size());
+        std::vector<std::size_t> numbers(all_sidbs_in_canvas.size());
         std::iota(numbers.begin(), numbers.end(), 0);
 
         combinations::for_each_combination(
@@ -280,8 +282,8 @@ class design_sidb_gates_impl
         {
             for (std::size_t j = i + 1; j < cell_indices.size(); j++)
             {
-                if (sidb_nanometer_distance<Lyt>(skeleton_layout, all_sidbs_in_cavas[cell_indices[i]],
-                                                 all_sidbs_in_cavas[cell_indices[j]]) < 0.5)
+                if (sidb_nanometer_distance<Lyt>(skeleton_layout, all_sidbs_in_canvas[cell_indices[i]],
+                                                 all_sidbs_in_canvas[cell_indices[j]]) < 0.5)
                 {
                     return true;
                 }
@@ -301,11 +303,11 @@ class design_sidb_gates_impl
 
         for (const auto i : cell_indices)
         {
-            assert(i < all_sidbs_in_cavas.size() && "cell indices are out-of-range");
+            assert(i < all_sidbs_in_canvas.size() && "cell indices are out-of-range");
 
-            if (lyt_copy.get_cell_type(all_sidbs_in_cavas[i]) == sidb_technology::cell_type::EMPTY)
+            if (lyt_copy.get_cell_type(all_sidbs_in_canvas[i]) == sidb_technology::cell_type::EMPTY)
             {
-                lyt_copy.assign_cell_type(all_sidbs_in_cavas[i], sidb_technology::cell_type::NORMAL);
+                lyt_copy.assign_cell_type(all_sidbs_in_canvas[i], sidb_technology::cell_type::NORMAL);
             }
         }
 
@@ -350,7 +352,6 @@ template <typename Lyt, typename TT>
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
     static_assert(!is_charge_distribution_surface_v<Lyt>, "Lyt cannot be a charge distribution surface");
-    static_assert(!has_offset_ucoord_v<Lyt>, "Lyt cannot be based on offset coordinates");
 
     assert(skeleton.num_pis() > 0 && "skeleton needs input cells");
     assert(skeleton.num_pos() > 0 && "skeleton needs output cells");

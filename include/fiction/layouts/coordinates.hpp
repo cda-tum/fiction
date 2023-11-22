@@ -776,23 +776,19 @@ struct coord_t
 /**
  * Converts SiQAD coordinates to other coordinates (offset, cube).
  *
- * @tparam CoordinateType Coordinate type to convert to.
+ * @tparam CoordinateType The wanted coordinate type.
  * @param coord SiQAD coordinate to convert.
  * @return Coordinate of type `CoordinateType`.
  */
-template <typename CoordinateTypeOutput, typename CoordinateTypeInput>
-constexpr CoordinateTypeOutput to_fiction_coord(const CoordinateTypeInput& coord) noexcept
+template <typename CoordinateType>
+constexpr CoordinateType to_fiction_coord(const siqad::coord_t& coord) noexcept
 {
-    if constexpr (std::is_same_v<CoordinateTypeInput, CoordinateTypeOutput>)
-    {
-        return coord;
-    }
     if (!coord.is_dead())
     {
         return {coord.x, coord.y * 2 + coord.z};
     }
 
-    return CoordinateTypeOutput{};
+    return CoordinateType{};
 }
 /**
  * Converts any coordinate type to SiQAD coordinates.
