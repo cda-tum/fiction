@@ -207,7 +207,7 @@ Random SiDB Layout Generator
 Operational Domain Computation
 ##############################
 
-..tabs::
+.. tabs::
     .. tab:: C++
         **Header:** ``fiction/algorithms/simulation/sidb/is_operational.hpp``
 

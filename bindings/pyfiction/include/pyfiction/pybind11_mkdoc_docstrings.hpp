@@ -214,9 +214,9 @@ Returns:
 
 static const char *__doc_fiction_area =
 R"doc(Computes the area of a given coordinate assuming its origin is (0, 0,
-0). Calculates :math:` (|x| + 1) \cdot (|y| + 1) ` by default. The
-exception is SiQAD coordinates, for which it computes :math:` (|x| +
-1) \cdot (2 \cdot |y| + |z| + 1) `.
+0). Calculates :math:`(|x| + 1) \cdot (|y| + 1)` by default. The
+exception is SiQAD coordinates, for which it computes :math:`(|x| + 1)
+\cdot (2 \cdot |y| + |z| + 1)`.
 
 Template parameter ``CoordinateType``:
     Coordinate type.
@@ -398,13 +398,13 @@ Returns:
 
 static const char *__doc_fiction_bdl_input_iterator =
 R"doc(Iterator that iterates over all possible input states of a BDL layout.
-There are :math:` 2^n ` possible input states for an :math:`n`-input
-BDL layout, each with a unique input index. The input index is
-interpreted as a binary number, where the :math:`i`-th bit represents
-the input state of the :math:`i`-th input BDL pair. If the bit is `1`,
-the lower BDL dot is set and the upper BDL dot removed. If the bit is
-`0`, the upper BDL dot is removed and the lower BDL dot set. The
-iterator creates and stores a deep-copy of the given layout. The state
+There are :math:`2^n` possible input states for an :math:`n`-input BDL
+layout, each with a unique input index. The input index is interpreted
+as a binary number, where the :math:`i`-th bit represents the input
+state of the :math:`i`-th input BDL pair. If the bit is `1`, the lower
+BDL dot is set and the upper BDL dot removed. If the bit is `0`, the
+upper BDL dot is removed and the lower BDL dot set. The iterator
+creates and stores a deep-copy of the given layout. The state
 enumeration wraps around, i.e. after the last possible input state,
 the first input state is set again.
 
@@ -426,7 +426,7 @@ Parameter ``params``:
     Parameters for the BDL pair detection.)doc";
 
 static const char *__doc_fiction_bdl_input_iterator_current_input_index =
-R"doc(The current input index. There are :math:` 2^n ` possible input states
+R"doc(The current input index. There are :math:`2^n` possible input states
 for an :math:`n`-input BDL layout.)doc";
 
 static const char *__doc_fiction_bdl_input_iterator_get_number_of_inputs =
@@ -646,7 +646,7 @@ R"doc(The upper SiDB of the pair. Upper and lower are defined relative to
 each other via the `operator<` overload.)doc";
 
 static const char *__doc_fiction_binomial_coefficient =
-R"doc(Calculates the binomial coefficient :math:` \binom{n}{k} `.
+R"doc(Calculates the binomial coefficient :math:`\binom{n}{k}`.
 
 Parameter ``n``:
     The total number of items.
@@ -655,7 +655,7 @@ Parameter ``k``:
     The number of items to choose from n.
 
 Returns:
-    The binomial coefficient :math:` \binom{n}{k} `.)doc";
+    The binomial coefficient :math:`\binom{n}{k}`.)doc";
 
 static const char *__doc_fiction_bounding_box_2d =
 R"doc(A 2D bounding box object that computes a minimum-sized box around all
@@ -2683,8 +2683,8 @@ flavors: gate-based and non-gate based.
 
 For *Gate-based Critical Temperature* Simulation, the Critical
 Temperature is defined as follows: The temperature at which the
-erroneous charge distributions are populated by more than :math:` 1 -
-\eta `, where :math:` \eta \in [0,1] `.
+erroneous charge distributions are populated by more than :math:`1 -
+\eta`, where :math:`\eta \in [0,1]`.
 
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
@@ -2708,8 +2708,8 @@ Parameter ``pst``:
 static const char *__doc_fiction_critical_temperature_non_gate_based =
 R"doc(For *Non-gate-based Critical Temperature* simulation, the Critical
 Temperature is defined as follows: The temperature at which the
-excited charge distributions are populated by more than :math:` 1 -
-\eta `, where :math:` \eta \in [0,1] ` is the confidence level for the
+excited charge distributions are populated by more than :math:`1 -
+\eta`, where :math:`\eta \in [0,1]` is the confidence level for the
 presence of a working gate.
 
 Template parameter ``Lyt``:
@@ -5405,8 +5405,8 @@ y)`. If the point has already been sampled, it returns the cached
 value. Otherwise, a ground state simulation is performed for all input
 combinations of the stored layout using the given simulation
 parameters. It terminates as soon as a non-operational state is found.
-In the worst case, the function performs :math:` 2^n ` simulations,
-where :math:` n ` is the number of inputs of the layout. This function
+In the worst case, the function performs :math:`2^n` simulations,
+where :math:`n` is the number of inputs of the layout. This function
 is used by all operational domain computation techniques.
 
 Any investigated point is added to the stored `op_domain`, regardless
@@ -5740,6 +5740,14 @@ physically valid layout.)doc";
 static const char *__doc_fiction_detail_quickexact_impl_quickexact_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_quickexact_impl_real_placed_defects = R"doc(Collection of defects that are placed in addition to the SiDBs.)doc";
+
+static const char *__doc_fiction_detail_quickexact_impl_required_simulation_base_number = R"doc(Base number required for the correct physical simulation.)doc";
+
+static const char *__doc_fiction_detail_quickexact_impl_required_simulation_base_number_THREE =
+R"doc(Three state simulation (i.e., negative, neutral, and positive) is
+required.)doc";
+
+static const char *__doc_fiction_detail_quickexact_impl_required_simulation_base_number_TWO = R"doc(Two state simulation (i.e., negative and neutral) is sufficient.)doc";
 
 static const char *__doc_fiction_detail_quickexact_impl_result = R"doc(Simulation results.)doc";
 
@@ -8615,11 +8623,11 @@ layout with no positively charged SiDBs.)doc";
 
 static const char *__doc_fiction_generate_random_sidb_layout_params_maximal_attempts_for_multiple_layouts =
 R"doc(The maximum number of attempts allowed to generate the given number of
-unique layouts (default: :math:` 10^{6} `). Example: If the area,
-where SiDBs can be placed, is small and many SiDBs are to be placed,
-it may be difficult or even impossible to find several unique (given
-by number_of_unique_generated_layouts) layouts. Therefore, this
-parameter sets a limit for the maximum number of tries.)doc";
+unique layouts (default: :math:`10^{6}`). Example: If the area, where
+SiDBs can be placed, is small and many SiDBs are to be placed, it may
+be difficult or even impossible to find several unique (given by
+number_of_unique_generated_layouts) layouts. Therefore, this parameter
+sets a limit for the maximum number of tries.)doc";
 
 static const char *__doc_fiction_generate_random_sidb_layout_params_minimal_spacing =
 R"doc(If positively charged SiDBs should be prevented, SiDBs are not placed
@@ -9912,7 +9920,7 @@ static const char *__doc_fiction_high_degree_fanin_exception =
 R"doc(Exception class that can be thrown if some network exceeds a legal
 number of fanins.)doc";
 
-static const char *__doc_fiction_high_degree_fanin_exception_what = R"doc()doc";
+static const char *__doc_fiction_high_degree_fanin_exception_high_degree_fanin_exception = R"doc()doc";
 
 static const char *__doc_fiction_horizontal_shift_cartesian =
 R"doc(\verbatim +-------+ | | | | | | +---+---+---+ | | | | | | +-------+
@@ -9924,8 +9932,8 @@ and distance functor. It computes the distances between all pairs of
 coordinates in the layout and stores them in the distance map for
 quick subsequent access.
 
-This function performs :math:` \mathcal{O}(|L|^2) ` distance
-computations, where :math:` |L| ` is the number of coordinates in the
+This function performs :math:`\mathcal{O}(|L|^2)` distance
+computations, where :math:`|L|` is the number of coordinates in the
 layout.
 
 Template parameter ``Lyt``:
@@ -9949,8 +9957,8 @@ layout and distance functor. It computes the distances between all
 pairs of coordinates in the layout and stores them in the distance map
 for quick subsequent access.
 
-This function performs :math:` \mathcal{O}(|L|^2) ` distance
-computations, where :math:` |L| ` is the number of coordinates in the
+This function performs :math:`\mathcal{O}(|L|^2)` distance
+computations, where :math:`|L|` is the number of coordinates in the
 layout.
 
 Template parameter ``Lyt``:
@@ -10296,8 +10304,8 @@ R"doc(Determine the operational status of an SiDB layout.
 
 This function checks the operational status of a given gate layout
 using the `is_operational` algorithm. It determines whether the gate
-layout is operational and returns the correct result for all :math:`
-2^n ` input combinations.
+layout is operational and returns the correct result for all
+:math:`2^n` input combinations.
 
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
@@ -10933,18 +10941,19 @@ R"doc(An operational domain is a set of simulation parameter values for
 which a given SiDB layout is logically operational. This means that a
 layout is deemed operational if the layout's ground state corresponds
 with a given Boolean function at the layout's outputs for all possible
-input combinations. In this implementation, :math:` n ` BDL input
-wires and a single BDL output wire are assumed for a given layout. Any
-operational domain computation algorithm toggles through all :math:`
-2^n ` input combinations and evaluates the layout's output behavior in
-accordance with the given Boolean function. The layout is only
-considered operational for a certain parameter combination, if the
-output behavior is correct for all input combinations. The operational
-domain can be computed by sweeping over specified simulation
-parameters and checking the operational status of the layout for each
-parameter combination. The operational domain is then defined as the
-set of all parameter combinations for which the layout is operational.
-Different techniques for performing these sweep are implemented.)doc";
+input combinations. In this implementation, :math:`n` BDL input wires
+and a single BDL output wire are assumed for a given layout. Any
+operational domain computation algorithm toggles through all
+:math:`2^n` input combinations and evaluates the layout's output
+behavior in accordance with the given Boolean function. The layout is
+only considered operational for a certain parameter combination, if
+the output behavior is correct for all input combinations. The
+operational domain can be computed by sweeping over specified
+simulation parameters and checking the operational status of the
+layout for each parameter combination. The operational domain is then
+defined as the set of all parameter combinations for which the layout
+is operational. Different techniques for performing these sweep are
+implemented.)doc";
 
 static const char *__doc_fiction_operational_domain_contour_tracing =
 R"doc(Computes the operational domain of the given SiDB cell-level layout.
@@ -10969,9 +10978,9 @@ there, it performs another number of samples equal to the distance to
 an edge of the operational area. Finally, it performs up to 8 samples
 for each contour point (however, the actual number is usually much
 lower). For each sample, the algorithm performs one operational check
-on the layout, where each operational check consists of up to :math:`
-2^n ` exact ground state simulations, where :math:` n ` is the number
-of inputs of the layout. Each exact ground state simulation has
+on the layout, where each operational check consists of up to
+:math:`2^n` exact ground state simulations, where :math:`n` is the
+number of inputs of the layout. Each exact ground state simulation has
 exponential complexity in of itself. Therefore, the algorithm is only
 feasible for small layouts with few inputs.
 
@@ -11021,8 +11030,8 @@ parameter range. From there, it performs another number of samples
 equal to the number of points within the operational domain plus the
 first non-operational point in each direction. For each sample, the
 algorithm performs one operational check on the layout, where each
-operational check consists of up to :math:` 2^n ` exact ground state
-simulations, where :math:` n ` is the number of inputs of the layout.
+operational check consists of up to :math:`2^n` exact ground state
+simulations, where :math:`n` is the number of inputs of the layout.
 Each exact ground state simulation has exponential complexity in of
 itself. Therefore, the algorithm is only feasible for small layouts
 with few inputs.
@@ -11066,8 +11075,8 @@ in the x and y dimensions. Since grid search is exhaustive, the
 algorithm is guaranteed to find the operational domain, if it exists
 within the parameter range. However, the algorithm performs a
 quadratic number of operational checks on the layout, where each
-operational check consists of up to :math:` 2^n ` exact ground state
-simulations, where :math:` n ` is the number of inputs of the layout.
+operational check consists of up to :math:`2^n` exact ground state
+simulations, where :math:`n` is the number of inputs of the layout.
 Each exact ground state simulation has exponential complexity in of
 itself. Therefore, the algorithm is only feasible for small layouts
 with few inputs.
@@ -11192,8 +11201,8 @@ This algorithm uses random sampling to find a part of the operational
 domain that might not be complete. It performs a total of `samples`
 uniformly-distributed random samples within the parameter range. For
 each sample, the algorithm performs one operational check on the
-layout, where each operational check consists of up to :math:` 2^n `
-exact ground state simulations, where :math:` n ` is the number of
+layout, where each operational check consists of up to :math:`2^n`
+exact ground state simulations, where :math:`n` is the number of
 inputs of the layout. Each exact ground state simulation has
 exponential complexity in of itself. Therefore, the algorithm is only
 feasible for small layouts with few inputs.
@@ -11287,10 +11296,10 @@ according to its DFS tree, ordering the vertices using topological
 sorting instead of DFS, and adding an extra placement rule for nodes
 without predecessors.
 
-The algorithm works in polynomial time :math:` \mathcal{O}(3|N| + |L|)
-` where :math:` |N| ` is the number of nodes in the given network and
-:math:` |L| ` is the resulting layout size given by :math:` x \cdot y
-`, which approaches :math:` (\frac{|N|}{2})^2 ` asymptotically.
+The algorithm works in polynomial time :math:`\mathcal{O}(3|N| + |L|)`
+where :math:`|N|` is the number of nodes the given network and
+:math:`|L|` is the resulting layout size given by :math:`x \cdot y`,
+which approaches :math:`(\frac{|N|}{2})^2` asymptotically.
 
 May throw a high_degree_fanin_exception if `ntk` contains any node
 with a fan-in larger than 2.
@@ -11334,7 +11343,7 @@ static const char *__doc_fiction_orthogonal_physical_design_stats_y_size = R"doc
 
 static const char *__doc_fiction_out_of_cell_names_exception = R"doc()doc";
 
-static const char *__doc_fiction_out_of_cell_names_exception_what = R"doc()doc";
+static const char *__doc_fiction_out_of_cell_names_exception_out_of_cell_names_exception = R"doc()doc";
 
 static const char *__doc_fiction_out_of_place_edge_color_view =
 R"doc(A view that extends `mockturtle::out_of_place_color_view` such that it
@@ -11956,7 +11965,7 @@ R"doc(The base number from the physical parameter is used for the
 simulation.)doc";
 
 static const char *__doc_fiction_quickexact_params_automatic_base_number_detection_ON =
-R"doc(Simulation is conducted with the required base number (i.e, if
+R"doc(Simulation is conducted with the required base number (i.e., if
 positively charged SiDBs can occur, three state simulation is
 conducted).)doc";
 
@@ -11970,7 +11979,7 @@ R"doc(Global external electrostatic potential. Value is applied on each cell
 in the layout.)doc";
 
 static const char *__doc_fiction_quickexact_params_local_external_potential =
-R"doc(Local external electrostatic potentials (e.g locally applied
+R"doc(Local external electrostatic potentials (e.g., locally applied
 electrodes).)doc";
 
 static const char *__doc_fiction_quickexact_params_physical_parameters = R"doc(All parameters for physical SiDB simulations.)doc";
@@ -12363,14 +12372,6 @@ Parameter ``relative_c``:
 
 Returns:
     Absolute cell position in a layout.)doc";
-
-static const char *__doc_fiction_required_simulation_base_number = R"doc(Base number required for the correct physical simulation.)doc";
-
-static const char *__doc_fiction_required_simulation_base_number_THREE =
-R"doc(Three state simulation (i.e., negative, neutral, and positive) is
-required.)doc";
-
-static const char *__doc_fiction_required_simulation_base_number_TWO = R"doc(Two state simulation (i.e., negative and neutral) is sufficient.)doc";
 
 static const char *__doc_fiction_res_clocking =
 R"doc(Returns the RES clocking as defined in \"An efficient clocking scheme
@@ -13895,9 +13896,9 @@ precise to 1%).)doc";
 
 static const char *__doc_fiction_time_to_solution_stats =
 R"doc(This struct stores the time-to-solution, the simulation accuracy and
-the average single simulation runtime of *QuickSim* quicksim, the
-single runtime of the exact simulator used, and the number of valid
-charge configurations found by the exact algorithm.)doc";
+the average single simulation runtime of *QuickSim*, the single
+runtime of the exact simulator used, and the number of valid charge
+configurations found by the exact algorithm.)doc";
 
 static const char *__doc_fiction_time_to_solution_stats_acc = R"doc(Accuracy of the simulation.)doc";
 
@@ -13989,16 +13990,16 @@ Returns:
     2DDWave clocking scheme.)doc";
 
 static const char *__doc_fiction_twoddwave_distance =
-R"doc(The 2DDWave distance :math:` D ` between two layout coordinates
-:math:` s = (x_1, y_1) ` and :math:` t = (x_2, y_2) ` given by
+R"doc(The 2DDWave distance :math:`D` between two layout coordinates :math:`s
+= (x_1, y_1)` and :math:`t = (x_2, y_2)` given by
 
-:math:` D = |x_1 - x_2| + |y_1 - y_2| ` iff :math:` s \leq t ` and
-:math:` \infty `, otherwise.
+:math:`D = |x_1 - x_2| + |y_1 - y_2|` iff :math:`s \leq t` and
+:math:`\infty`, otherwise.
 
-Thereby, :math:` s \leq t ` iff :math:` x_1 \leq x_2 ` and :math:` y_1
-\leq y_2 `.
+Thereby, :math:`s \leq t` iff :math:`x_1 \leq x_2` and :math:`y_1 \leq
+y_2`.
 
-@note To represent :math:` \infty `,
+@note To represent :math:`\infty`,
 `std::numeric_limits<uint32_t>::max()` is returned for distances of
 infinite length. We are using `uint32_t` to prevent overflows when
 adding distances in the default `uint64_t` number range.
@@ -14186,8 +14187,8 @@ R"doc(\verbatim +-------+ | | | +-------+ | | | +-------+ | | | +-------+
 
 static const char *__doc_fiction_volume =
 R"doc(Computes the volume of a given coordinate assuming its origin is (0,
-0, 0). Calculates :math:` (|x| + 1) \cdot (|y| + 1) \cdot (|z| + 1) `
-by default. For SiQAD coordinates, which are planar by definition, the
+0, 0). Calculates :math:`(|x| + 1) \cdot (|y| + 1) \cdot (|z| + 1)` by
+default. For SiQAD coordinates, which are planar by definition, the
 area is returned.
 
 Template parameter ``CoordinateType``:
@@ -14653,10 +14654,10 @@ Parameter ``filename``:
     `.xml` extension.)doc";
 
 static const char *__doc_fiction_yen_k_shortest_paths =
-R"doc(Yen's algorithm for finding up to :math:` k ` shortest paths without
+R"doc(Yen's algorithm for finding up to :math:`k` shortest paths without
 loops from a source to a target coordinate. If :math:`k` is larger
 than the number of possible paths from source to target, the size of
-the returned path collection will be smaller than :math:` k `.
+the returned path collection will be smaller than :math:`k`.
 
 This implementation uses the A* algorithm with the Manhattan distance
 function internally.
@@ -14705,8 +14706,7 @@ Template parameter ``Lyt``:
     Type of the layout to perform path finding on.
 
 Parameter ``layout``:
-    The layout in which the :math:` k ` shortest paths are to be
-    found.
+    The layout in which the :math:`k` shortest paths are to be found.
 
 Parameter ``objective``:
     Source-target coordinate pair.
@@ -14718,7 +14718,7 @@ Parameter ``params``:
     Parameters.
 
 Returns:
-    A collection of up to :math:` k ` shortest loop-less paths in
+    A collection of up to :math:`k` shortest loop-less paths in
     `layout` from `objective.source` to `objective.target`.)doc";
 
 static const char *__doc_fiction_yen_k_shortest_paths_params = R"doc(Parameters for Yen's :math:`k`-shortest paths algorithm.)doc";
