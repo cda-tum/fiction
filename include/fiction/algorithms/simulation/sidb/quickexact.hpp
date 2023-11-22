@@ -125,12 +125,12 @@ class quickexact_impl
                 {
                     if constexpr (has_get_sidb_defect_v<Lyt>)
                     {
-                        charge_distribution_surface charge_layout{layout};
+                        charge_distribution_surface charge_layout{static_cast<Lyt>(layout)};
                         conduct_simulation(charge_layout, base_number);
                     }
                     else
                     {
-                        charge_distribution_surface charge_layout{layout};
+                        charge_distribution_surface charge_layout{static_cast<Lyt>(layout)};
                         conduct_simulation(charge_layout, base_number);
                     }
                 }
