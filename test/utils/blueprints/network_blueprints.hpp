@@ -977,7 +977,7 @@ mockturtle::names_view<Ntk> four_inverter_substitutions_b()
 }
 
 template <typename Ntk>
-mockturtle::names_view<Ntk> coloring_fo_one()
+mockturtle::names_view<Ntk> coloring_fo_one_a()
 {
     mockturtle::names_view<Ntk> ntk{};
 
@@ -997,6 +997,23 @@ mockturtle::names_view<Ntk> coloring_fo_one()
 
     ntk.create_po(a3);
     ntk.create_po(a4);
+
+    return ntk;
+}
+
+template <typename Ntk>
+mockturtle::names_view<Ntk> coloring_fo_one_b()
+{
+    mockturtle::names_view<Ntk> ntk{};
+
+    const auto x1 = ntk.create_pi();
+    const auto x2 = ntk.create_pi();
+
+    const auto n1 = ntk.create_not(x1);
+
+    const auto a1 = ntk.create_and(x2, n1);
+
+    ntk.create_po(a1);
 
     return ntk;
 }
