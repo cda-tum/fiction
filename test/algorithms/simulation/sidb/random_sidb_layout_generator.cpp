@@ -647,8 +647,8 @@ TEST_CASE("Random cube::coord_t layout generation with defects", "[generate-rand
     using lyt = sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>>;
 
     const generate_random_sidb_layout_params<lyt> params{
-        {to_fiction_coord<cube::coord_t>(siqad::coord_t{0, 0, 0}),
-         to_fiction_coord<cube::coord_t>(siqad::coord_t{10, 2, 0})},
+        {siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{0, 0, 0}),
+         siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{10, 2, 0})},
         10,
         generate_random_sidb_layout_params<lyt>::positive_charges::ALLOWED,
         2};
