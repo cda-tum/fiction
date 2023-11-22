@@ -54,7 +54,7 @@ QCA-STACK
 
         .. doxygenclass:: fiction::unsupported_character_exception
            :members:
-        .. doxygenclass:: fiction::unsupported_cell_label_exception
+        .. doxygenclass:: fiction::undefined_cell_label_exception
            :members:
         .. doxygenclass:: fiction::unrecognized_cell_definition_exception
            :members:
@@ -64,7 +64,7 @@ QCA-STACK
 
         .. autoclass:: fiction.pyfiction.unsupported_character_exception
             :members:
-        .. autoclass:: fiction.pyfiction.unsupported_cell_label_exception
+        .. autoclass:: fiction.pyfiction.undefined_cell_label_exception
             :members:
         .. autoclass:: fiction.pyfiction.unrecognized_cell_definition_exception
             :members:

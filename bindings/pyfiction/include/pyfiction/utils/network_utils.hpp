@@ -26,7 +26,7 @@ void has_high_degree_fanin_nodes(pybind11::module& m)
 {
     using namespace pybind11::literals;
 
-    m.def("has_high_degree_fain_nodes", &fiction::has_high_degree_fanin_nodes<Ntk>, "ntk"_a, "threshold"_a = 2,
+    m.def("has_high_degree_fanin_nodes", &fiction::has_high_degree_fanin_nodes<Ntk>, "ntk"_a, "threshold"_a = 2,
           DOC(fiction_has_high_degree_fanin_nodes));
 }
 
