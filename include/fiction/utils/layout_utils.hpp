@@ -452,8 +452,9 @@ template <typename CoordinateType>
     // for cube and offset coordinates
     else
     {
-        const auto total_cell_count = static_cast<std::size_t>(std::abs(cell_nw.x - cell_se.x) + 1) *
-                                      static_cast<std::size_t>(std::abs(cell_nw.y - cell_se.y) + 1);
+        const auto total_cell_count =
+            static_cast<uint64_t>(std::abs(static_cast<int64_t>(cell_nw.x) - static_cast<int64_t>(cell_se.x)) + 1) *
+            static_cast<uint64_t>(std::abs(static_cast<int64_t>(cell_nw.y) - static_cast<int64_t>(cell_se.y)) + 1);
         std::vector<CoordinateType> all_cells{};
         all_cells.reserve(total_cell_count);
 
