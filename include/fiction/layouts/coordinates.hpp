@@ -13,6 +13,7 @@
 #include <cstdint>
 #include <functional>
 #include <iostream>
+#include <limits>
 #include <type_traits>
 
 // data types cannot properly be converted to bit field types
@@ -804,6 +805,24 @@ constexpr coord_t to_siqad_coord(const CoordinateType& coord) noexcept
 }
 
 }  // namespace siqad
+
+/**
+ * Converts offset coordinates to cube coordinates
+ *
+ * @param coord Offset coordinate to convert to a cube coordinate.
+ * @return Cube coordinate.
+ */
+constexpr cube::coord_t offset_to_cube_coord(const offset::ucoord_t& coord) noexcept
+{
+    assert(coord.x <= std::numeric_limits<int32_t>::max() && coord.y <= std::numeric_limits<int32_t>::max() &&
+           coord.z <= std::numeric_limits<int32_t>::max() && "Coordinate is out-of-range and cannot be transformed");
+    if (!coord.is_dead())
+    {
+        return {static_cast<int32_t>(coord.x), static_cast<int32_t>(coord.y), static_cast<int32_t>(coord.z)};
+    }
+
+    return cube::coord_t{};
+}
 
 /**
  * Computes the area of a given coordinate assuming its origin is (0, 0, 0). Calculates \f$ (|x| + 1) \cdot (|y| + 1)

@@ -192,12 +192,22 @@ int main()  // NOLINT
                     {
                         try
                         {
-                            cell_level_layout =
-                                fiction::apply_on_the_fly_gate_library<cell_lyt, fiction::sidb_on_the_fly_gate_library,
-                                                                       gate_lyt,
-                                                                       fiction::sidb_skeleton_bestagon_library>(
-                                    *gate_level_layout, surface_lattice,
-                                    fiction::sidb_on_the_fly_gate_library_params{});
+                            const fiction::design_sidb_gates_params<fiction::cube::coord_t> design_gate_params{
+                                fiction::sidb_simulation_parameters{2, -0.32},
+                                fiction::design_sidb_gates_params<
+                                    fiction::cube::coord_t>::design_sidb_gates_mode::EXHAUSTIVE,
+                                {{24, 17}, {34, 28}},
+                                3,
+                                fiction::sidb_simulation_engine::QUICKEXACT,
+                                1};
+
+                            auto parameter_gate_library = fiction::sidb_on_the_fly_gate_library_params<cell_lyt>{
+                                surface_lattice, design_gate_params};
+
+                            cell_level_layout = fiction::apply_parameterized_gate_library<
+                                cell_lyt, fiction::sidb_on_the_fly_gate_library, gate_lyt,
+                                fiction::sidb_on_the_fly_gate_library_params<cell_lyt>>(*gate_level_layout,
+                                                                                        parameter_gate_library);
                             gate_design_failed = false;
                         }
                         catch (const fiction::gate_design_exception<fiction::tt, gate_lyt>& e)
@@ -240,8 +250,8 @@ int main()  // NOLINT
             surface_lattice.foreach_sidb_defect([&defect_surface](const auto& defect)
                                                 { defect_surface.assign_sidb_defect(defect.first, defect.second); });
             // write a SiQAD simulation file
-            fiction::write_sqd_layout(defect_surface,
-                                      fmt::format("{}/{}_{}_percent.sqd", layouts_folder, benchmark, concentration));
+            fiction::write_sqd_layout(defect_surface, fmt::format("{}/{}_{}_percent_after_big_change.sqd",
+                                                                  layouts_folder, benchmark, concentration));
 
             // log results
             bestagon_exp(benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(),

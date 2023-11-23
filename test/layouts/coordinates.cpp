@@ -129,6 +129,31 @@ TEST_CASE("SiQAD coordinate conversion", "[coordinates]")
     CHECK(t5_fiction.y == -3);
 }
 
+TEST_CASE("Offset to cube coordinate conversion", "[coordinates]")
+{
+    using offset = offset::ucoord_t;
+
+    auto t = offset{};
+    CHECK(t.is_dead());
+    auto fiction_d = offset_to_cube_coord(t);
+    CHECK(fiction_d.is_dead());
+
+    auto t0        = offset{0, 0, 0};
+    auto fiction_0 = offset_to_cube_coord(t0);
+    CHECK(!fiction_0.is_dead());
+
+    auto t1      = offset{1, 3, 1};
+    auto t1_cube = offset_to_cube_coord(t1);
+    CHECK(t1_cube.x == t1.x);
+    CHECK(t1_cube.y == 3);
+
+    auto t2      = offset{1, 2};
+    auto t2_cube = offset_to_cube_coord(t2);
+    CHECK(t2_cube.x == t2.x);
+    CHECK(t2_cube.y == 2);
+    CHECK(t2_cube.z == 0);
+}
+
 TEMPLATE_TEST_CASE("Coordinate iteration", "[coordinates]", offset::ucoord_t, cube::coord_t, siqad::coord_t)
 {
     using lyt_t = cartesian_layout<TestType>;

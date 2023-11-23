@@ -283,6 +283,36 @@ Lyt normalize_layout_coordinates(const Lyt& lyt) noexcept
 }
 
 /**
+ * Converts the offset coordinates of a given cell-level layout to cube coordinates. A new equivalent layout based on
+ * cube coordinates is returned.
+ *
+ * @tparam LytOffset Cell-level layout type based on`offset::ucoord_t`.
+ * @tparam LytCube Cell-level layout type based on`cube::coord_t`.
+ * @param lyt The layout that is to be converted is based on offset coordinates.
+ * @return A new equivalent layout based on cube coordinates.
+ */
+template <typename LytCube, typename LytOffset>
+LytCube convert_offset_to_cube_coordinates(const LytOffset& lyt) noexcept
+{
+    static_assert(is_cartesian_layout_v<LytOffset>, "Lyt is not a Cartesian layout");
+    static_assert(is_cell_level_layout_v<LytOffset>, "Lyt is not a cell-level layout");
+    static_assert(has_offset_ucoord_v<LytOffset>, "Lyt does not have offset coordinates");
+    static_assert(has_cube_coord_v<LytCube>, "Lyt does not have cube coordinates");
+
+    LytCube lyt_new{{lyt.x(), (lyt.y())}, lyt.get_layout_name(), lyt.get_tile_size_x(), lyt.get_tile_size_y()};
+
+    lyt.foreach_cell(
+        [&lyt_new, &lyt](const auto& c)
+        {
+            lyt_new.assign_cell_type(offset_to_cube_coord(c), lyt.get_cell_type(c));
+            lyt_new.assign_cell_mode(offset_to_cube_coord(c), lyt.get_cell_mode(c));
+            lyt_new.assign_cell_name(offset_to_cube_coord(c), lyt.get_cell_name(c));
+        });
+
+    return lyt_new;
+}
+
+/**
  * Converts the coordinates of a given cell-level layout to SiQAD coordinates. A new equivalent layout based on SiQAD
  * coordinates is returned.
  *
@@ -365,6 +395,7 @@ Lyt convert_to_fiction_coordinates(const sidb_cell_clk_lyt_siqad& lyt) noexcept
 
     return lyt_new;
 }
+
 /**
  * Generates a random coordinate within the region spanned by two given coordinates. The two given coordinates form the
  * top left corner and the bottom right corner of the spanned region.
@@ -453,8 +484,8 @@ template <typename CoordinateType>
     else
     {
         const auto total_cell_count =
-            static_cast<uint64_t>(std::abs(static_cast<int64_t>(cell_nw.x) - static_cast<int64_t>(cell_se.x)) + 1) *
-            static_cast<uint64_t>(std::abs(static_cast<int64_t>(cell_nw.y) - static_cast<int64_t>(cell_se.y)) + 1);
+            static_cast<uint64_t>(std::abs(static_cast<int64_t>(cell_se.x) - static_cast<int64_t>(cell_nw.x)) + 1) *
+            static_cast<uint64_t>(std::abs(static_cast<int64_t>(cell_se.y) - static_cast<int64_t>(cell_nw.y)) + 1);
         std::vector<CoordinateType> all_cells{};
         all_cells.reserve(total_cell_count);
 

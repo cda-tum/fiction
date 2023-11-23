@@ -38,10 +38,10 @@ namespace fiction
 /**
  * This struct contains parameters and settings to design SiDB gates.
  *
- * @tparam Cell-level layout type.
+ * @tparam CellType Type of the cells used.
  *
  */
-template <typename Lyt>
+template <typename CellType>
 struct design_sidb_gates_params
 {
     /**
@@ -69,7 +69,7 @@ struct design_sidb_gates_params
     /**
      * Canvas spanned by the northwest and southeast cell.
      */
-    std::pair<typename Lyt::cell, typename Lyt::cell> canvas{};
+    std::pair<CellType, CellType> canvas{};
     /**
      * Number of SiDBs placed in the canvas to create a working gate.
      */
@@ -96,14 +96,15 @@ class design_sidb_gates_impl
      * implementation with the provided skeleton layout and configuration parameters.
      *
      * @param skeleton The skeleton layout used as a basis for gate design.
-     * @param tt Expected Boolean function of the layout given as a multi-output truth table.
+     * @param spec Expected Boolean function of the layout given as a multi-output truth table.
      * @param ps Parameters and settings for the gate designer.
      */
-    design_sidb_gates_impl(const Lyt& skeleton, const std::vector<TT>& tt, const design_sidb_gates_params<Lyt>& ps) :
+    design_sidb_gates_impl(const Lyt& skeleton, const std::vector<TT>& spec,
+                           const design_sidb_gates_params<cell<Lyt>>& ps) :
             skeleton_layout{skeleton},
-            truth_table{tt},
-            params{ps},
-            all_sidbs_in_canvas{all_sidbs_in_spanned_area(params.canvas.first, params.canvas.second)}
+            truth_table{spec},
+            parameter{ps},
+            all_sidbs_in_canvas{all_sidbs_in_spanned_area(parameter.canvas.first, parameter.canvas.second)}
     {}
     /**
      * Design gates exhaustively and in parallel.
@@ -115,7 +116,7 @@ class design_sidb_gates_impl
      */
     [[nodiscard]] std::vector<Lyt> run_exhaustive_design() noexcept
     {
-        const is_operational_params params_is_operational{params.phys_params, params.sim_engine};
+        const is_operational_params params_is_operational{parameter.phys_params, parameter.sim_engine};
         auto                        all_combinations = determine_all_combinations_of_given_sidbs_in_canvas();
 
         std::unordered_set<typename Lyt::coordinate> sidbs_affected_by_defects = {};
@@ -130,7 +131,7 @@ class design_sidb_gates_impl
         std::atomic<bool>     solution_found = false;
         std::atomic<uint64_t> global_iteration_counter(0);
 
-        const auto total_comb = binomial_coefficient(all_sidbs_in_cavas.size(), params.number_of_sidbs);
+        const auto total_comb = binomial_coefficient(all_sidbs_in_canvas.size(), parameter.number_of_sidbs);
 
         // Shuffle the combinations before dividing them among threads
         std::shuffle(all_combinations.begin(), all_combinations.end(),
@@ -145,7 +146,7 @@ class design_sidb_gates_impl
             {
                 if (!solution_found && !are_sidbs_too_close(comb, sidbs_affected_by_defects) &&
                     global_iteration_counter <
-                        static_cast<uint64_t>(params.procentual_maximum_attemps * static_cast<double>(total_comb)))
+                        static_cast<uint64_t>(parameter.procentual_maximum_attemps * static_cast<double>(total_comb)))
                 {
                     // canvas SiDBs are added to the skeleton
                     auto layout_with_added_cells = skeleton_layout_with_canvas_sidbs(comb);
@@ -202,10 +203,10 @@ class design_sidb_gates_impl
     {
         std::vector<Lyt> randomly_designed_gate_layouts = {};
 
-        const is_operational_params params_is_operational{params.phys_params, params.sim_engine};
+        const is_operational_params params_is_operational{parameter.phys_params, parameter.sim_engine};
 
-        const generate_random_sidb_layout_params<Lyt> parameter{
-            params.canvas, params.number_of_sidbs,
+        const generate_random_sidb_layout_params<Lyt> parameter_random_layout{
+            parameter.canvas, parameter.number_of_sidbs,
             generate_random_sidb_layout_params<Lyt>::positive_charges::FORBIDDEN};
 
         const std::size_t        num_threads = std::thread::hardware_concurrency();
@@ -218,12 +219,12 @@ class design_sidb_gates_impl
         for (uint64_t z = 0u; z < num_threads; z++)
         {
             threads.emplace_back(
-                [this, &gate_layout_is_found, &mutex_to_protect_designed_gate_layouts, &parameter,
+                [this, &gate_layout_is_found, &mutex_to_protect_designed_gate_layouts, &parameter_random_layout,
                  &params_is_operational, &randomly_designed_gate_layouts]
                 {
                     while (!gate_layout_is_found)
                     {
-                        auto result_lyt = generate_random_sidb_layout<Lyt>(skeleton_layout, parameter);
+                        auto result_lyt = generate_random_sidb_layout<Lyt>(skeleton_layout, parameter_random_layout);
                         if constexpr (has_get_sidb_defect_v<Lyt>)
                         {
                             result_lyt.foreach_sidb_defect(
@@ -280,7 +281,7 @@ class design_sidb_gates_impl
     /**
      * Parameters for the *SiDB Gate Designer*.
      */
-    const design_sidb_gates_params<Lyt>& params;
+    const design_sidb_gates_params<typename Lyt::cell>& parameter;
     /**
      * All cells within the canvas.
      */
@@ -296,19 +297,19 @@ class design_sidb_gates_impl
     [[nodiscard]] std::vector<std::vector<std::size_t>> determine_all_combinations_of_given_sidbs_in_canvas() noexcept
     {
         std::vector<std::vector<std::size_t>> all_combinations{};
-        all_combinations.reserve(binomial_coefficient(all_sidbs_in_canvas.size(), params.number_of_sidbs));
+        all_combinations.reserve(binomial_coefficient(all_sidbs_in_canvas.size(), parameter.number_of_sidbs));
 
         std::vector<std::size_t> numbers(all_sidbs_in_canvas.size());
         std::iota(numbers.begin(), numbers.end(), 0);
 
         combinations::for_each_combination(
             numbers.begin(),
-            numbers.begin() + static_cast<std::vector<std::size_t>::difference_type>(params.number_of_sidbs),
+            numbers.begin() + static_cast<std::vector<std::size_t>::difference_type>(parameter.number_of_sidbs),
             numbers.end(),
             [this, &all_combinations](const auto begin, const auto end)
             {
                 std::vector<std::size_t> combination{};
-                combination.reserve(params.number_of_sidbs);
+                combination.reserve(parameter.number_of_sidbs);
 
                 for (auto it = begin; it != end; ++it)
                 {
@@ -331,6 +332,7 @@ class design_sidb_gates_impl
      * otherwise, it returns `false`.
      *
      * @param cell_indices A vector of cell indices to check for SiDB proximity.
+     * @tparam affected_cells All SiDBs that are affected by atomic defects.
      * @return `true` if any SiDBs are too close; otherwise, `false`.
      */
     [[nodiscard]] bool are_sidbs_too_close(const std::vector<std::size_t>&               cell_indices,
@@ -340,12 +342,13 @@ class design_sidb_gates_impl
         {
             if constexpr (has_get_sidb_defect_v<Lyt>)
             {
-                if (skeleton_layout.get_sidb_defect(all_sidbs_in_cavas[cell_indices[i]]).type != sidb_defect_type::NONE)
+                if (skeleton_layout.get_sidb_defect(all_sidbs_in_canvas[cell_indices[i]]).type !=
+                    sidb_defect_type::NONE)
                 {
                     return true;
                 }
             }
-            if (affected_cells.count(all_sidbs_in_cavas[cell_indices[i]]) > 0)
+            if (affected_cells.count(all_sidbs_in_canvas[cell_indices[i]]) > 0)
             {
                 return true;
             }
@@ -415,7 +418,7 @@ class design_sidb_gates_impl
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] std::vector<Lyt> design_sidb_gates(const Lyt& skeleton, const std::vector<TT>& spec,
-                                                 const design_sidb_gates_params<Lyt>& params = {}) noexcept
+                                                 const design_sidb_gates_params<cell<Lyt>>& params = {}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -432,7 +435,7 @@ template <typename Lyt, typename TT>
 
     detail::design_sidb_gates_impl<Lyt, TT> p{skeleton, spec, params};
 
-    if (params.design_mode == design_sidb_gates_params<Lyt>::design_sidb_gates_mode::EXHAUSTIVE)
+    if (params.design_mode == design_sidb_gates_params<cell<Lyt>>::design_sidb_gates_mode::EXHAUSTIVE)
     {
         return p.run_exhaustive_design();
     }

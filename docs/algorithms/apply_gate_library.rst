@@ -10,4 +10,4 @@ in the same :ref:`technology <fcn-cell-technologies>` as the provided gate libra
 implementations for each gate present in the passed ``gate_level_layout``.
 
 .. doxygenfunction:: fiction::apply_gate_library(const GateLyt& lyt)
-.. doxygenfunction:: fiction::apply_on_the_fly_gate_library
+.. doxygenfunction:: fiction::apply_parameterized_gate_library

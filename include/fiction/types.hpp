@@ -152,6 +152,9 @@ using inml_cell_clk_lyt_ptr = std::shared_ptr<inml_cell_clk_lyt>;
 using sidb_cell_clk_lyt     = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 using sidb_cell_clk_lyt_ptr = std::shared_ptr<sidb_cell_clk_lyt>;
 
+using sidb_cell_clk_lyt_cube     = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>;
+using sidb_cell_clk_lyt_ptr_cube = std::shared_ptr<sidb_cell_clk_lyt_cube>;
+
 using sidb_cell_clk_lyt_siqad = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>;
 using sidb_cell_clk_lyt_siqad_ptr = std::shared_ptr<sidb_cell_clk_lyt_siqad>;
 
