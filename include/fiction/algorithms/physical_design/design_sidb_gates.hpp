@@ -99,7 +99,7 @@ class design_sidb_gates_impl
             skeleton_layout{skeleton},
             truth_table{tt},
             params{ps},
-            all_sidbs_in_canvas{all_sidbs_in_spanned_area(params.canvas.first, params.canvas.second)}
+            all_sidbs_in_canvas{all_coordinates_in_spanned_area(params.canvas.first, params.canvas.second)}
     {}
     /**
      * Design gates exhaustively and in parallel.

@@ -328,15 +328,20 @@ Lyt convert_to_fiction_coordinates(const sidb_cell_clk_lyt_siqad& lyt) noexcept
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-    bool has_negative_coordinates = false;
+    bool are_cells_assigned_to_negative_coordinates = false;
 
+    // determine if cells are assigned to negative coordinates. If true, the layout must be normalized first when
+    // converting to offset coordinates.
     lyt.foreach_cell(
-        [&has_negative_coordinates](const auto& c)
+        [&are_cells_assigned_to_negative_coordinates](const auto& c)
         {
             if (c.x < 0 || c.y < 0)
             {
-                has_negative_coordinates = true;
+                are_cells_assigned_to_negative_coordinates = true;
+                return false;  // abort
             }
+
+            return true;  // keep looping
         });
 
     Lyt lyt_new{{lyt.x(), 2 * lyt.y() + 1}, lyt.get_layout_name(), lyt.get_tile_size_x(), lyt.get_tile_size_y()};
@@ -352,7 +357,7 @@ Lyt convert_to_fiction_coordinates(const sidb_cell_clk_lyt_siqad& lyt) noexcept
             });
     };
 
-    if (has_offset_ucoord_v<Lyt> && !lyt.is_empty() && has_negative_coordinates)
+    if (has_offset_ucoord_v<Lyt> && !lyt.is_empty() && are_cells_assigned_to_negative_coordinates)
     {
         auto lyt_normalized = normalize_layout_coordinates<sidb_cell_clk_lyt_siqad>(lyt);
         assign_coordinates(lyt_normalized);
@@ -405,21 +410,22 @@ CoordinateType random_coordinate(CoordinateType coordinate1, CoordinateType coor
     }
 }
 /**
- * Generates a vector of all SiQAD cells within an area spanned by two SiQAD coordinates.
+ * Generates a vector of all coordinates within an area spanned by two coordinates.
  *
- * This function calculates and returns a vector of all SiQAD cells that span the area
+ * This function calculates and returns a vector of all coordinates that span the area
  * between the northwest (cell_nw) and southeast (cell_se) cells, inclusive.
  * The cells are generated in a top-down, left-to-right fashion within the specified area.
  *
- * @param cell_nw The northwest SiQAD cell defining the starting point of the area.
- * @param cell_se The southeast SiQAD cell defining the ending point of the area.
+ * @tparam CoordinateType Coordinate Type.
+ * @param cell_nw The northwest cell defining the starting point of the area.
+ * @param cell_se The southeast cell defining the ending point of the area.
  * @return A vector containing all cells within the specified area.
  */
 template <typename CoordinateType>
-[[nodiscard]] inline std::vector<CoordinateType> all_sidbs_in_spanned_area(const CoordinateType& cell_nw,
-                                                                           const CoordinateType& cell_se) noexcept
+[[nodiscard]] inline std::vector<CoordinateType> all_coordinates_in_spanned_area(const CoordinateType& cell_nw,
+                                                                                 const CoordinateType& cell_se) noexcept
 {
-    // for siqad coordinates
+    // for SiQAD coordinates
     if constexpr (std::is_same_v<CoordinateType, siqad::coord_t>)
     {
         const auto c1_cube          = siqad::to_fiction_coord<cube::coord_t>(cell_nw);

@@ -12,7 +12,7 @@
 
 using namespace fiction;
 
-TEST_CASE("SiDB position in nanometer for siqad coordinate", "[sidb_nm_position]")
+TEST_CASE("SiDB position in nanometer for siqad coordinates", "[sidb-nm-position]")
 {
     using namespace Catch::Matchers;
 
@@ -104,7 +104,7 @@ TEST_CASE("SiDB position in nanometer for siqad coordinate", "[sidb_nm_position]
     }
 }
 
-TEST_CASE("SiDB position in nanometer for fiction coordinates", "[sidb_nm_position]")
+TEST_CASE("SiDB position in nanometer for fiction coordinates", "[sidb-nm-position]")
 {
     using namespace Catch::Matchers;
 
