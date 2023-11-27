@@ -479,7 +479,7 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
      * @param p The list of ports and their directions.
      * @param tile The specific tile on which the gate should be designed.
      *
-     * @return A fcn gate object, or an error fcn gate if no suitable layout is found.
+     * @return A fcn gate object.
      */
     template <typename LytSkeleton, typename TT, typename CellLyt, typename GateLyt>
     [[nodiscard]] static fcn_gate design_gate(const LytSkeleton& skeleton, const std::vector<TT>& spec,
@@ -578,29 +578,36 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
     add_defect_to_skeleton(const CellLyt& skeleton, const cell<CellLyt>& center_cell,
                            const cell<CellLyt>& absolute_cell, const Params& params)
     {
-        static_assert(has_offset_ucoord_v<CellLyt>, "CellLyt must be based on offset coordinates");
+        static_assert(has_offset_ucoord_v<CellLyt> || has_cube_coord_v<CellLyt>,
+                      "CellLyt must be either based on cube or offset coordinates");
 
-        const auto skeleton_in_cube_coordinates =
-            convert_offset_to_cube_coordinates<sidb_cell_clk_lyt_cube, CellLyt>(skeleton);
-        auto skeleton_with_defect_in_cube = sidb_surface{skeleton_in_cube_coordinates};
+        if constexpr (has_cube_coord_v<CellLyt>)
+        {
+            auto skeleton_with_defect = sidb_surface{skeleton};
 
-        const auto center_cell_cube   = offset_to_cube_coord(center_cell);
-        const auto absolute_cell_cube = offset_to_cube_coord(absolute_cell);
-
-        params.defect_surface.foreach_sidb_defect(
-            [&skeleton_with_defect_in_cube, &center_cell_cube, &absolute_cell_cube, &params](const auto& cd)
-            {
-                // all defects (charged) in a distance of influence_radius_charged_defects from the center are taken
-                // into account.
-                const auto defect_in_cube = fiction::offset_to_cube_coord(cd.first);
-                if (sidb_nanometer_distance(sidb_cell_clk_lyt_cube{}, center_cell_cube, defect_in_cube) <
-                    params.influence_radius_charged_defects)
+            params.defect_surface.foreach_sidb_defect(
+                [&skeleton_with_defect, &center_cell, &absolute_cell, &params](const auto& cd)
                 {
-                    const auto relative_cell = defect_in_cube - absolute_cell_cube;
-                    skeleton_with_defect_in_cube.assign_sidb_defect(relative_cell, cd.second);
-                }
-            });
-        return skeleton_with_defect_in_cube;
+                    // all defects (charged) in a distance of influence_radius_charged_defects from the center are taken
+                    // into account.
+                    const auto defect_in_cube = fiction::offset_to_cube_coord(cd.first);
+                    if (sidb_nanometer_distance(sidb_cell_clk_lyt_cube{}, center_cell, defect_in_cube) <
+                        params.influence_radius_charged_defects)
+                    {
+                        const auto relative_cell = defect_in_cube - absolute_cell;
+                        skeleton_with_defect.assign_sidb_defect(relative_cell, cd.second);
+                    }
+                });
+            return skeleton_with_defect;
+        }
+        else
+        {
+            const auto skeleton_in_cube_coordinates =
+                convert_offset_to_cube_coordinates<sidb_cell_clk_lyt_cube, CellLyt>(skeleton);
+            const auto center_cell_cube   = offset_to_cube_coord(center_cell);
+            const auto absolute_cell_cube = offset_to_cube_coord(absolute_cell);
+            return add_defect_to_skeleton(skeleton_in_cube_coordinates, center_cell_cube, absolute_cell_cube, params);
+        }
     }
 
     /**

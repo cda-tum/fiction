@@ -55,7 +55,7 @@ class apply_gate_library_impl
      * @return A cell-level layout implementing gate types with building blocks defined in `GateLibrary`.
      */
     template <typename Params>
-    [[nodiscard]] CellLyt design_gates_on_the_fly(const Params& params)
+    [[nodiscard]] CellLyt run_parameterized_gate_library(const Params& params)
     {
 #if (PROGRESS_BARS)
         // initialize a progress bar
@@ -235,8 +235,7 @@ template <typename CellLyt, typename GateLibrary, typename GateLyt, typename Par
 {
     static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
     static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
-    static_assert(has_offset_ucoord_v<CellLyt> || has_cube_coord_v<CellLyt>,
-                  "CellLyt must be either based on cube or offset coordinates");
+    static_assert(has_offset_ucoord_v<CellLyt>, "CellLyt must be based on offset coordinates");
     static_assert(mockturtle::has_is_constant_v<GateLyt>, "GateLyt does not implement the is_constant function");
     static_assert(mockturtle::has_foreach_node_v<GateLyt>, "GateLyt does not implement the foreach_node function");
 
@@ -245,7 +244,7 @@ template <typename CellLyt, typename GateLibrary, typename GateLyt, typename Par
 
     detail::apply_gate_library_impl<CellLyt, GateLibrary, GateLyt> p{lyt};
 
-    return p.template design_gates_on_the_fly<Params>(params);
+    return p.template run_parameterized_gate_library<Params>(params);
 }
 
 }  // namespace fiction
