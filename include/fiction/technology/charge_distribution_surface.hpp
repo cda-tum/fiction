@@ -83,7 +83,7 @@ enum class charge_distribution_history
  * A layout type to layer on top of any SiDB cell-level layout. It implements an interface to store and access
  * SiDBs' charge states.
  *
- * @tparam Lyt Cell-level layout based in SiQAD coordinates.
+ * @tparam Lyt Cell-level layout.
  * @tparam has_sidb_charge_distribution Automatically determines whether a charge distribution interface is already
  * present.
  */
@@ -242,7 +242,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             Lyt(),
             strg{std::make_shared<charge_distribution_storage>(params)}
     {
-        static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
         static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
         static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
@@ -264,7 +263,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             Lyt(lyt),
             strg{std::make_shared<charge_distribution_storage>(params)}
     {
-        static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
         static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
         static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
