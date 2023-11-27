@@ -62,7 +62,7 @@ class miginvopt_command : public command
                 // clone it because inverter optimization is an in-place algorithm
                 auto ntk_clone = ntk_ptr->clone();
 
-//                mockturtle::fanout_view fo_ntk_clone{ntk_clone};
+                //                mockturtle::fanout_view fo_ntk_clone{ntk_clone};
                 mockturtle::mig_inv_optimization(ntk_clone, &st);
 
                 const auto mig_ptr = std::make_shared<fiction::mig_nt>(ntk_clone);
