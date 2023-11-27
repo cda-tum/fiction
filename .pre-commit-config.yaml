@@ -51,3 +51,12 @@ repos:
       - id: clang-format
         types_or: [ c++, c ]
         args: [ "-style=file" ]
+
+  # CMake format and lint the CMakeLists.txt files
+  - repo: https://github.com/cheshirekow/cmake-format-precommit
+    rev: v0.6.13
+    hooks:
+      - id: cmake-format
+        additional_dependencies: [ pyyaml ]
+      - id: cmake-lint
+        additional_dependencies: [ pyyaml ]
