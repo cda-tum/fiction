@@ -29,9 +29,17 @@ repos:
       - id: mixed-line-ending
       - id: trailing-whitespace
 
-  # Handling unwanted unicode characters
+  # Handle unwanted unicode characters
   - repo: https://github.com/sirosen/texthooks
     rev: 0.6.2
     hooks:
       - id: fix-ligatures
       - id: fix-smartquotes
+
+  # Check for common RST mistakes
+  - repo: https://github.com/pre-commit/pygrep-hooks
+    rev: v1.10.0
+    hooks:
+      - id: rst-backticks
+      - id: rst-directive-colons
+      - id: rst-inline-touching-normal
