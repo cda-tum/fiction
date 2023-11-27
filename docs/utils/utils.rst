@@ -202,8 +202,8 @@ Math Utils
 .. doxygenfunction:: fiction::binomial_coefficient
 
 
-`phmap`
--------
+``phmap``
+---------
 
 **Header:** ``fiction/utils/phmap_utils.hpp``
 

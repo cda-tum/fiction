@@ -37,7 +37,7 @@ class tt_command : public command
                        "expression !E, the conjunction of multiple expressions (E...E), the disjunction of "
                        "multiple expressions {E...E}, the exclusive OR of multiple expressions [E...E], or the "
                        "majority of three expressions <EEE>. Examples are [(ab)(!ac)] to describe if-then-else, "
-                       "or !{!a!b} to describe the application of De Morgan’s law to (ab). The size of the truth "
+                       "or !{!a!b} to describe the application of De Morgan's law to (ab). The size of the truth "
                        "table must fit the largest variable in the expression, e.g., if c is the largest "
                        "variable, then the truth table have at least three variables.")
     {
