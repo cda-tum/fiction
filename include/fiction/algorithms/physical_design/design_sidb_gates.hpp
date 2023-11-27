@@ -303,11 +303,11 @@ class design_sidb_gates_impl
     /**
      * Parameters for the *SiDB Gate Designer*.
      */
-    const design_sidb_gates_params<typename Lyt::cell>& parameter;
+    design_sidb_gates_params<typename Lyt::cell> parameter;
     /**
      * All cells within the canvas.
      */
-    const std::vector<typename Lyt::cell> all_sidbs_in_canvas;
+    std::vector<typename Lyt::cell> all_sidbs_in_canvas;
     /**
      * Calculates all possible combinations of distributing the given number of SiDBs within a canvas
      * based on the provided parameters. It generates combinations of SiDB indices (representing the cell position in

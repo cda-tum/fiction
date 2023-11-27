@@ -72,7 +72,7 @@ TEST_CASE("Convert offset::ucoord_t layout to cube::coord_t layout", "[layout-ut
     {
         const auto x = 10, y = 10;
 
-        sidb_cell_clk_lyt lyt{{x, y}, "test"};
+        const sidb_cell_clk_lyt lyt{{x, y}, "test"};
 
         auto lyt_transformed = convert_offset_to_cube_coordinates<sidb_cell_clk_lyt_cube>(lyt);
 

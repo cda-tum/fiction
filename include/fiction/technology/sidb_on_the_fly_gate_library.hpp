@@ -449,8 +449,9 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
     cell_level_layout_to_list(const Lyt& lyt)
     {
         std::array<std::array<char, gate_x_size()>, gate_y_size()> result{};
-        const auto all_cell = all_sidbs_in_spanned_area({0, 0, 0}, cell<Lyt>{gate_x_size() - 1, gate_y_size() - 1});
-        uint64_t   counter  = 0;
+        const auto                                                 all_cell =
+            all_coordinates_in_spanned_area({0, 0, 0}, cell<Lyt>{gate_x_size() - 1, gate_y_size() - 1});
+        uint64_t counter = 0;
 
         for (auto& row : result)
         {
@@ -529,8 +530,9 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
     {
         Lyt lyt{{std::numeric_limits<uint64_t>::max(), std::numeric_limits<uint64_t>::max()}};
 
-        const auto all_cell = all_sidbs_in_spanned_area({0, 0, 0}, cell<Lyt>{gate_x_size() - 1, gate_y_size() - 1});
-        uint64_t   counter  = 0;
+        const auto all_cell =
+            all_coordinates_in_spanned_area({0, 0, 0}, cell<Lyt>{gate_x_size() - 1, gate_y_size() - 1});
+        uint64_t counter = 0;
 
         for (size_t i = 0; i < gate_y_size(); ++i)
         {
