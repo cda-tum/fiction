@@ -114,6 +114,10 @@ Besides, command ``fanouts`` enables the user to specify strategies when substit
 For instance, ``fanouts -d 3 -s 1`` allows 3-output fan-out nodes and substitutes cascading fan-outs in a depth-first fashion.
 This is done with default settings by the physical design approaches if not specified by the user.
 
+In a network with fan-outs and inverters as nodes, for instance, after using the ``fanouts`` command, the ``inv`` command
+can be used to reduce the number of inverters in the network. It does this by substituting inverters at the outgoing
+edges of fan-out nodes with a single inverter at the incoming edge of the same fan-out node.
+
 Physical design
 ---------------
 
@@ -178,6 +182,16 @@ For more information, see `the paper <https://dl.acm.org/doi/10.1145/3287624.328
 This scalable approach only works on logic networks which are AOIGs (MAJ gates do not work). The clocking scheme is fixed to
 `2DDWave <https://ieeexplore.ieee.org/document/1717097>`_ and the algorithm can only be slightly parameterized
 (see ``ortho -h``).
+
+OGD-based SDN (``ortho_ordering``)
+##################################
+
+The ordering of inputs is one of the Signal Distribution Networks (SDN)s added to the functionality of the oroginal
+``ortho`` algorithm. This SDN modifies the original algorithm by ordering inputs and optimizing inverter counts to save area
+and wire crossings in the layout.
+For more information, see `the paper <https://ieeexplore.ieee.org/abstract/document/10238604>`_.
+
+The possible parameters are the same as used for ``ortho`` (see ``ortho_ordering -h``).
 
 SAT-based one-pass synthesis (``onepass``)
 ##########################################

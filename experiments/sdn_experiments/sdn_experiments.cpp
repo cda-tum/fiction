@@ -4,10 +4,9 @@
 
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/physical_design/ortho_ordering_network.hpp>
-#include <fiction/algorithms/physical_design/orthogonal.hpp>  // OGD-based physical design of FCN layouts
-#include <fiction/types.hpp>                                  // pre-defined types suitable for the FCN domain
-#include <fiction/utils/routing_utils.hpp>                    // routing utility functions
+#include <fiction/algorithms/physical_design/ortho_ordering_network.hpp>  // OGD-based physical design of FCN layouts with input ordering
+#include <fiction/types.hpp>                // pre-defined types suitable for the FCN domain
+#include <fiction/utils/routing_utils.hpp>  // routing utility functions
 
 #include <fmt/format.h>                      // output formatting
 #include <lorina/lorina.hpp>                 // Verilog/BLIF/AIGER/... file parsing
@@ -18,10 +17,6 @@
 
 using gate_lyt = fiction::gate_level_layout<
     fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>;
-
-// NOLINTBEGIN(cppcoreguidelines-avoid-non-const-global-variables)
-static fiction::orthogonal_physical_design_stats ortho_stats{};
-// NOLINTEND(cppcoreguidelines-avoid-non-const-global-variables)
 
 template <typename Ntk>
 Ntk read_ntk(const std::string& name)
@@ -36,16 +31,15 @@ Ntk read_ntk(const std::string& name)
     // Force use of read_verilog_result in case NDEBUG is defined (release mode)
     if (read_verilog_result != lorina::return_code::success)
     {
-        // Replace this with your actual error handling code
         throw std::runtime_error("Failed to read Verilog file");
     }
 
     return network;
 }
 
-void ortho_ordering_exp_stats()
+int main()  // NOLINT
 {
-    ortho_stats = {};
+    static fiction::orthogonal_physical_design_stats ortho_stats = {};
 
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint64_t, uint32_t,
                             double, std::size_t>
@@ -68,7 +62,7 @@ void ortho_ordering_exp_stats()
     {
         const auto ntk = read_ntk<fiction::tec_nt>(benchmark);
 
-        // perform layout generation with an OGD-based algorithm
+        // perform layout generation with the OGD-based algorithm orthogonal including the ordering SDN
         const auto lyt = fiction::orthogonal_ordering_network<gate_lyt>(ntk, {}, &ortho_stats);
 
         fiction::gate_level_drv_stats  st = {};
@@ -87,11 +81,5 @@ void ortho_ordering_exp_stats()
         ordering_exp.save();
         ordering_exp.table();
     }
-}
-
-int main()  // NOLINT
-{
-    ortho_ordering_exp_stats();
-
     return EXIT_SUCCESS;
 }

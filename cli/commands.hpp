@@ -32,6 +32,7 @@
 #include "cmd/physical_design/onepass.hpp"
 #include "cmd/physical_design/optimize.hpp"
 #include "cmd/physical_design/ortho.hpp"
+#include "cmd/physical_design/ortho_ordering.hpp"
 #include "cmd/technology/area.hpp"
 #include "cmd/technology/cell.hpp"
 #include "cmd/technology/energy.hpp"

@@ -8,6 +8,15 @@
 
 #include <fiction/algorithms/network_transformation/fanout_substitution.hpp>
 #include <fiction/algorithms/network_transformation/inverter_substitution.hpp>
+#include <fiction/networks/technology_network.hpp>
+
+#include <mockturtle/traits.hpp>
+#include <mockturtle/views/fanout_view.hpp>
+#include <mockturtle/views/names_view.hpp>
+
+#include <algorithm>
+#include <cstdlib>
+#include <vector>
 
 using namespace fiction;
 

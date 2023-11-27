@@ -6,15 +6,22 @@
 #define FICTION_ORTHO_ORDERING_NETWORK_HPP
 
 #include "fiction/algorithms/network_transformation/inverter_substitution.hpp"
+#include "fiction/algorithms/physical_design/orthogonal.hpp"
 #include "fiction/networks/views/input_ordering_view.hpp"
-#include "orthogonal.hpp"
+
+#include <algorithm>
+#include <cstdint>
+#include <cstdlib>
+#include <vector>
 
 namespace fiction
 {
 
 namespace detail
 {
-// paints a node and all incoming edges
+/**
+ * Paints a node and all incoming edges
+ */
 template <typename Ntk>
 void paint_node_and_edges(const coloring_container<Ntk>& ctn, const mockturtle::node<Ntk>& n, const uint32_t color)
 {
@@ -24,6 +31,9 @@ void paint_node_and_edges(const coloring_container<Ntk>& ctn, const mockturtle::
     ctn.color_ntk.paint(mockturtle::node<Ntk>{n}, color);
 }
 
+/**
+ * Paints nodes and edges of all nodes affected by: PIs related to two PIs over a fan-out node
+ */
 template <typename Ntk>
 void paint_fo_two(const Ntk& ntk, const coloring_container<Ntk>& ctn, mockturtle::node<Ntk>& current_node)
 {
@@ -54,6 +64,9 @@ void paint_fo_two(const Ntk& ntk, const coloring_container<Ntk>& ctn, mockturtle
                        });
 }
 
+/**
+ * Paints nodes and edges of all nodes affected by: PIs related to one PI over a fan-out node
+ */
 template <typename Ntk>
 void paint_fo_one(const Ntk& ntk, const coloring_container<Ntk>& ctn, const mockturtle::node<Ntk>& current_node)
 {
@@ -90,6 +103,9 @@ void paint_fo_one(const Ntk& ntk, const coloring_container<Ntk>& ctn, const mock
     }
 }
 
+/**
+ * Paints nodes and edges of all nodes affected by: PIs related to one PI without fan-out node
+ */
 template <typename Ntk>
 void paint_pi_to_pi(const Ntk& ntk, const coloring_container<Ntk>& ctn, const mockturtle::node<Ntk>& current_node)
 {
@@ -105,7 +121,7 @@ void paint_pi_to_pi(const Ntk& ntk, const coloring_container<Ntk>& ctn, const mo
     }
 }
 
-/*
+/**
  * Conditional coloring computes a valid coloring for all the nodes, which are affected by the input ordering network.
  *
  * Two PIs are related to each other, when they are connected to the same two fan-in gate and between the PI and this
@@ -195,18 +211,18 @@ coloring_container<Ntk> conditional_coloring(const Ntk& ntk) noexcept
                         current_node = cur_fon[0];
                     }
 
-                    auto fo_one = ctn.color_ntk.get_fo_one();
-                    auto pi_pi  = ctn.color_ntk.get_pi_to_pi();
+                    const auto fo_one = ctn.color_ntk.get_fo_one();
+                    const auto pi_pi  = ctn.color_ntk.get_pi_to_pi();
 
                     if (ntk.is_fanout(current_node) && ntk.fanout_size(current_node) >= 2)
                     {
-                        auto fo_two = ctn.color_ntk.get_fo_two();
+                        const auto fo_two = ctn.color_ntk.get_fo_two();
                         // paint the fan-out node east
                         paint_node_and_edges(ctn, current_node, ctn.color_east);
                         // 1. fan-out node related to two PIs
                         if (const auto it = find(fo_two.cbegin(), fo_two.cend(), pi); it != fo_two.cend())
                         {
-                            int i = static_cast<int>(it - fo_two.cbegin());
+                            const auto i = std::distance(fo_two.cbegin(), it);
                             if (i % 3 == 0)
                             {
                                 // paint the related nodes
@@ -217,7 +233,7 @@ coloring_container<Ntk> conditional_coloring(const Ntk& ntk) noexcept
                     // 2. fan-out node related to one PI
                     else if (const auto it = find(fo_one.cbegin(), fo_one.cend(), pi); it != fo_one.cend())
                     {
-                        int i = static_cast<int>(it - fo_one.cbegin());
+                        const auto i = std::distance(fo_one.cbegin(), it);
                         if (i % 2 == 1)
                         {
                             // paint the related nodes
@@ -227,7 +243,7 @@ coloring_container<Ntk> conditional_coloring(const Ntk& ntk) noexcept
                     // 3. PI connected to node connected to PI
                     else if (const auto it_pi = find(pi_pi.cbegin(), pi_pi.cend(), pi); it_pi != pi_pi.cend())
                     {
-                        int i = static_cast<int>(it_pi - pi_pi.cbegin());
+                        const auto i = std::distance(pi_pi.cbegin(), it_pi);
                         if (i % 2 == 0)
                         {
                             // paint the related nodes
@@ -240,13 +256,16 @@ coloring_container<Ntk> conditional_coloring(const Ntk& ntk) noexcept
     return ctn;
 }
 
+/**
+ * Unordered PIs need to be wired to the east, as per the original orthogonal algorithm
+ * */
 template <typename Ntk, typename Lyt>
 void resolve_unaffected_pi(Lyt& layout, const coloring_container<Ntk>& ctn, const mockturtle::node<Ntk>& pre,
                            tile<Lyt>& pre_t, tile<Lyt>& latest_pos)
 {
-    auto fo_two = ctn.color_ntk.get_fo_two();
-    auto fo_one = ctn.color_ntk.get_fo_one();
-    auto pi_pi  = ctn.color_ntk.get_pi_to_pi();
+    const auto fo_two = ctn.color_ntk.get_fo_two();
+    const auto fo_one = ctn.color_ntk.get_fo_one();
+    const auto pi_pi  = ctn.color_ntk.get_pi_to_pi();
     if (ctn.color_ntk.is_pi(pre) && std::find(fo_two.cbegin(), fo_two.cend(), pre) == fo_two.cend() &&
         std::find(fo_one.cbegin(), fo_one.cend(), pre) == fo_one.cend() &&
         std::find(pi_pi.cbegin(), pi_pi.cend(), pre) == pi_pi.cend())
@@ -256,15 +275,18 @@ void resolve_unaffected_pi(Lyt& layout, const coloring_container<Ntk>& ctn, cons
     }
 }
 
+/**
+ * Placement and routing of a one fan-in gate colored east
+ */
 template <typename Ntk, typename Lyt>
 void place_one_fanin_gate_east(const Ntk& ntk, Lyt& layout, const coloring_container<Ntk>& ctn,
                                const mockturtle::node<Ntk>& n, const mockturtle::node<Ntk>& pre, tile<Lyt>& latest_pos,
-                               const tile<Lyt>& pre_t, std::uint64_t& insert_position_inv,
+                               const tile<Lyt>& pre_t, uint64_t& insert_position_inv,
                                mockturtle::node_map<mockturtle::signal<Lyt>, decltype(ctn.color_ntk)>& node2pos)
 {
     // new column for inverters
     auto insert_position = latest_pos.x;
-    if (ntk.nc_inv_flag() && ntk.is_inv(n) && ntk.is_pi(pre))
+    if (ntk.pi_inv_flag() && ntk.is_inv(n) && ntk.is_pi(pre))
     {
         insert_position = insert_position_inv;
         ++insert_position_inv;
@@ -281,6 +303,9 @@ void place_one_fanin_gate_east(const Ntk& ntk, Lyt& layout, const coloring_conta
     ++latest_pos.x;
 }
 
+/**
+ * Placement and routing of a one fan-in gate colored south
+ */
 template <typename Ntk, typename Lyt>
 void place_one_fanin_gate_south(Lyt& layout, const coloring_container<Ntk>& ctn, const mockturtle::node<Ntk>& n,
                                 tile<Lyt>& latest_pos, tile<Lyt>& latest_pos_inputs, const tile<Lyt>& pre_t,
@@ -304,6 +329,9 @@ void place_one_fanin_gate_south(Lyt& layout, const coloring_container<Ntk>& ctn,
     }
 }
 
+/**
+ * Placement and routing of a two fan-in gate colored east
+ */
 template <typename Lyt>
 void place_two_fanin_gate_east(Lyt& layout, tile<Lyt>& latest_pos, tile<Lyt>& latest_pos_inputs, tile<Lyt>& t,
                                tile<Lyt>& pre1_t, tile<Lyt>& pre2_t)
@@ -327,6 +355,9 @@ void place_two_fanin_gate_east(Lyt& layout, tile<Lyt>& latest_pos, tile<Lyt>& la
     }
 }
 
+/**
+ * Placement and routing of a two fan-in gate colored south
+ */
 template <typename Ntk, typename Lyt>
 void place_two_fanin_gate_south(Lyt& layout, const coloring_container<Ntk>& ctn, tile<Lyt>& latest_pos,
                                 const tile<Lyt>& latest_pos_inputs, const mockturtle::node<Ntk>& pre1,
@@ -386,6 +417,9 @@ void place_two_fanin_gate_south(Lyt& layout, const coloring_container<Ntk>& ctn,
     }
 }
 
+/**
+ * Placement and routing of a two fan-in gate colored null
+ */
 template <typename Ntk, typename Lyt>
 void place_two_fanin_gate_null(Lyt& layout, const coloring_container<Ntk>& ctn, tile<Lyt>& latest_pos, tile<Lyt>& t,
                                tile<Lyt>& pre1_t, tile<Lyt>& pre2_t, const mockturtle::node<Ntk>& pre1,
@@ -423,6 +457,9 @@ void place_two_fanin_gate_null(Lyt& layout, const coloring_container<Ntk>& ctn, 
     ++latest_pos.y;
 }
 
+/**
+ * Places the POs in the layout.
+ */
 template <typename Ntk, typename Lyt>
 void place_outputs(Lyt& layout, const coloring_container<Ntk>& ctn, tile<Lyt>& latest_pos, uint32_t po_counter,
                    mockturtle::node_map<mockturtle::signal<Lyt>, decltype(ctn.color_ntk)>& node2pos)
@@ -524,12 +561,12 @@ class orthogonal_ordering_network_impl
         tile<Lyt> latest_pos_inputs{0, 0};
 
         // Reserve new columns for inverters in the ordering network
-        if (ctn.color_ntk.nc_inv_flag())
+        if (ctn.color_ntk.pi_inv_flag())
         {
             latest_pos.x = latest_pos.x + static_cast<uint64_t>(ctn.color_ntk.nc_inv_num()) + 1u;
         }
         // new column inverter tracker
-        std::uint64_t insert_position_inv{1};
+        uint64_t insert_position_inv{1};
 
 #if (PROGRESS_BARS)
         // initialize a progress bar
@@ -649,14 +686,16 @@ class orthogonal_ordering_network_impl
 
   private:
     /**
-     * @param ntk Network with ordered PIs
-     * @param ps Design parameters for orthogonal P&R
-     * @param pst Design stats for orthogonal P&R
-     */
-
+     * Network with ordered PIs
+     * */
     input_ordering_view<mockturtle::fanout_view<mockturtle::names_view<technology_network>>> ntk;
-
+    /**
+     * Design parameters for orthogonal P&R
+     * */
     orthogonal_physical_design_params ps;
+    /**
+     * Design stats for orthogonal P&R
+     * */
     orthogonal_physical_design_stats& pst;  // NOLINT
     // This line will suppress the warning cppcoreguidelines-avoid-const-or-ref-data-members
 
@@ -666,32 +705,36 @@ class orthogonal_ordering_network_impl
 }  // namespace detail
 
 /**
- * A modification of the orthogonal algorithm, that addresses certain limitations of the original algorithm.
- * The modifications aim to save area, reduce wiring and wire crossings, and optimize the placement of nodes.
- * The first modification involves ordering Pis, which are connected as fan-ins to the same gate, and place them
- * side-by-side. The reduction of the distance between such 'related' nodes reduces the wiring effort.
- * The second drawback of the original algorithm relates to conflicts that arise when a PI has an outgoing edge
- * colored south, as it would lead to forbidden routing over other Pis. The modified algorithm uses a combination
- * of Pi ordering, conditional coloring, and a new placement rule for nodes colored 'south' to resolve conflicts
- * while still adhering to coloring constraints. This enables the algorithm to utilize the rows of the Pis effectively,
- * and minimize wire crossings.
+ * A modification of the `orthogonal` physical design algorithm as originally proposed in \"Versatile Signal
+ * Distribution Networks for Scalable Placement and Routing of Field-coupled Nanocomputing Technologies\" by M. Walter,
+ * B. Hien, R. Wille in ISVLSI 2023. The modification addresses certain limitations of the original and aim to save
+ * area, reduce wiring and wire crossings, and optimize the placement of nodes.
  *
- * Furthermore, the algorithm addresses the challenges posed by inverters. The function 'inverter_substitution'
- * substitutes two inverters at the fan-outs of a fan-out node with a single inverter at its fan-in.
- * This substitution significantly reduces area, wiring, and wire crossings, as fewer gates need to be placed.
+ * The first modification concerns the arrangement of PIs, which are linked as fan-ins to the same gate, and situating
+ * them adjacently. This narrowing of distance between such "linked" nodes minimizes wiring effort and thereby saves
+ * area.
  *
- * May throw a high_degree_fanin_exception if `ntk` contains any node with a fan-in larger than 2.
+ * The second drawback of the original algorithm relates to conflicts that arise from the coloring of outgoing edges of
+ * PIs, as it would lead to forbidden routing over other PIs. The modified algorithm uses a combination of PI ordering,
+ * conditional coloring, and a new placement rule to resolve conflicts while still adhering to coloring constraints.
+ * This enables the algorithm to utilize PI rows in the layout more effectively, hence, minimizing wire crossings.
+ *
+ * Finally, this algorithm addresses the challenges posed by inverters. The function `inverter_substitution`
+ * substitutes inverters at the outputs of each fan-out node with a single inverter at its input.
+ * This substitution significantly reduces area, wiring, and wire crossings, because fewer gates need to be placed.
+ *
+ * May throw a `high_degree_fanin_exception` if `ntk` contains any node with a fan-in larger than `2`.
  *
  * @tparam Lyt Desired gate-level layout type.
  * @tparam Ntk Network type that acts as specification.
- * @param ntk The network that is to place and route.
+ * @param ntk The network that is to be placed and routed.
  * @param ps Parameters.
  * @param pst Statistics.
  * @return A gate-level layout of type `Lyt` that implements `ntk` as an FCN circuit.
  */
 template <typename Lyt, typename Ntk>
-Lyt orthogonal_ordering_network(const Ntk& ntk, orthogonal_physical_design_params ps = {},
-                                orthogonal_physical_design_stats* pst = nullptr)
+[[nodiscard]] Lyt orthogonal_ordering_network(const Ntk& ntk, orthogonal_physical_design_params ps = {},
+                                              orthogonal_physical_design_stats* pst = nullptr)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(mockturtle::is_network_type_v<Ntk>,

@@ -14,7 +14,7 @@
 
 using namespace fiction;
 
-TEST_CASE("conditional_coloring", "[orthogonal-coloring]")
+TEST_CASE("conditional_coloring", "[orthogonal-ordering]")
 {
     const auto check_colors = [](const auto& ntk)
     {

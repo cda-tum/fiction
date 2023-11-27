@@ -1198,17 +1198,17 @@ template <class Ntk>
 inline constexpr bool is_input_ordered_v = is_input_ordered<Ntk>::value;
 #pragma endregion
 
-#pragma region has_nc_inv_flag
+#pragma region has_pi_inv_flag
 template <class Ntk, class = void>
-struct has_nc_inv_flag : std::false_type
+struct has_pi_inv_flag : std::false_type
 {};
 
 template <class Ntk>
-struct has_nc_inv_flag<Ntk, std::void_t<decltype(std::declval<Ntk>().nc_inv_flag())>> : std::true_type
+struct has_pi_inv_flag<Ntk, std::void_t<decltype(std::declval<Ntk>().pi_inv_flag())>> : std::true_type
 {};
 
 template <class Ntk>
-inline constexpr bool has_nc_inv_flag_v = has_nc_inv_flag<Ntk>::value;
+inline constexpr bool has_pi_inv_flag_v = has_pi_inv_flag<Ntk>::value;
 #pragma endregion
 
 #pragma region has_nc_inv_num

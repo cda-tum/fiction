@@ -31,19 +31,19 @@ namespace detail
 {
 
 /**
- * Connect all gates, that are not affected by the inverter substitution.
+ * Connects gates that are unaffected by the inverter substitution.
  *
- * @param ntk input network.
- * @param ntk_dest output network.
- * @param old2new node_map to assign the nodes of the old network to the new network.
- * @param children children of the current node.
- * @param g currently viewed node.
+ * @param ntk Input network.
+ * @param ntk_dest Output network.
+ * @param old2new `node_map` to assign the nodes of the old network to the new network.
+ * @param children Children of the current gate.
+ * @param g Currently viewed gate.
  * @return 'true' iff the assignment was successful.
  */
 template <typename Ntk, typename NtkDest>
 bool connect_children_to_gates(const Ntk& ntk, const NtkDest& ntk_dest,
                                mockturtle::node_map<mockturtle::signal<Ntk>, Ntk>& old2new,
-                               const std::vector<typename Ntk::signal>& children, const mockturtle::node<Ntk>& g)
+                               const mockturtle::node<Ntk>& g, const std::vector<typename Ntk::signal>& children)
 {
     if constexpr (mockturtle::has_is_and_v<Ntk> && mockturtle::has_create_and_v<Ntk>)
     {
@@ -217,7 +217,7 @@ class inverter_substitution_impl
                     }
                 }
                 // map all unaffected nodes
-                if (connect_children_to_gates(ntk, ntk_dest, old2new, children, g))
+                if (connect_children_to_gates(ntk, ntk_dest, old2new, g, children))
                 {
                     return true;  // keep looping
                 }
@@ -259,35 +259,50 @@ class inverter_substitution_impl
 
   private:
     /**
-     * @param ntk topologically ordered input logic network.
-     * @param fo_ntk fan-out view of ntk.
-     * @param x_inv inverter nodes, which get deleted.
-     * @param m_inv inverter nodes, which get moved to fan-in position.
-     * @param blc_fos fo nodes, where balancing is applied.
-     * @param preserved_po nodes where pos need to be preserved.
-     * @param rerun indicate if optimizations can be made.
+     * Alias for a topological view of a network.
      */
     using TopoNtkSrc = mockturtle::topo_view<Ntk>;
-    TopoNtkSrc                          ntk;
+    /**
+     * A topologically ordered input logic network.
+     */
+    TopoNtkSrc ntk;
+    /**
+     * This is a fan-out view of the network 'ntk'.
+     */
     mockturtle::fanout_view<TopoNtkSrc> fo_ntk{ntk};
-    std::vector<mockturtle::node<Ntk>>  x_inv{};
-    std::vector<mockturtle::node<Ntk>>  m_inv{};
-    std::vector<mockturtle::node<Ntk>>  blc_fos{};
-    std::vector<mockturtle::node<Ntk>>  preserved_po{};
-    bool                                rerun{true};
+    /**
+     * A collection of inverter nodes that are set to be deleted.
+     */
+    std::vector<mockturtle::node<Ntk>> x_inv{};
+    /**
+     * A collection of inverter nodes that are set to be moved to fan-in position.
+     */
+    std::vector<mockturtle::node<Ntk>> m_inv{};
+    /**
+     * These are fan-out nodes where balancing is applied.
+     */
+    std::vector<mockturtle::node<Ntk>> blc_fos{};
+    /**
+     * Collection of nodes where primary outputs need to be preserved.
+     */
+    std::vector<mockturtle::node<Ntk>> preserved_po{};
+    /**
+     * An indicator to check if optimizations can be applied or not.
+     */
+    bool rerun{true};
 };
 
 }  // namespace detail
 
 /**
- * Substitutes two inverters at the fan-outs of a fan-out node with one inverter at the fan-in of this node.
- * Therefore one inverter gets deleted and one inverter gets moved to the fan-in of the fan-out node.
- * All nodes, with fan-ins affected by deletion or moving of nodes are taken into account by the algorithm.
- * This is part of the Distribution Network I: Input_Ordering
+ * A network optimization algorithm that substitutes inverters at the outputs of all fan-out nodes with one single
+ * inverter at their inputs.
+ * Thereby, the total number of inverters is reduced.
+ * This is part of the Signal Distribution Networks I: Input Ordering.
  *
- * @tparam Ntk A logic network of type `Ntk` with optimized inverter count.
- * @param ntk The input logic network.
- * @return A logic network of type Ntk.
+ * @tparam Ntk Logic network type.
+ * @param ntk The input logic network whose inverter count is to be optimized.
+ * @return A network that is logically equivalent to `ntk`, but with an optimized inverter count.
  */
 template <typename Ntk>
 Ntk inverter_substitution(const Ntk& ntk)
