@@ -28,3 +28,10 @@ repos:
       - id: end-of-file-fixer
       - id: mixed-line-ending
       - id: trailing-whitespace
+
+  # Handling unwanted unicode characters
+  - repo: https://github.com/sirosen/texthooks
+    rev: 0.6.2
+    hooks:
+      - id: fix-ligatures
+      - id: fix-smartquotes
