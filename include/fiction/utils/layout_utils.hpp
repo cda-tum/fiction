@@ -328,6 +328,22 @@ Lyt convert_to_fiction_coordinates(const sidb_cell_clk_lyt_siqad& lyt) noexcept
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
+    bool are_cells_assigned_to_negative_coordinates = false;
+
+    // determine if cells are assigned to negative coordinates. If true, the layout must be normalized first when
+    // converting to offset coordinates.
+    lyt.foreach_cell(
+        [&are_cells_assigned_to_negative_coordinates](const auto& c)
+        {
+            if (c.x < 0 || c.y < 0)
+            {
+                are_cells_assigned_to_negative_coordinates = true;
+                return false;  // abort
+            }
+
+            return true;  // keep looping
+        });
+
     Lyt lyt_new{{lyt.x(), 2 * lyt.y() + 1}, lyt.get_layout_name(), lyt.get_tile_size_x(), lyt.get_tile_size_y()};
 
     const auto assign_coordinates = [&lyt_new](const auto& base_lyt) noexcept
@@ -341,7 +357,7 @@ Lyt convert_to_fiction_coordinates(const sidb_cell_clk_lyt_siqad& lyt) noexcept
             });
     };
 
-    if (has_offset_ucoord_v<Lyt> && !lyt.is_empty())
+    if (has_offset_ucoord_v<Lyt> && !lyt.is_empty() && are_cells_assigned_to_negative_coordinates)
     {
         auto lyt_normalized = normalize_layout_coordinates<sidb_cell_clk_lyt_siqad>(lyt);
         assign_coordinates(lyt_normalized);
@@ -367,10 +383,6 @@ Lyt convert_to_fiction_coordinates(const sidb_cell_clk_lyt_siqad& lyt) noexcept
 template <typename CoordinateType>
 CoordinateType random_coordinate(CoordinateType coordinate1, CoordinateType coordinate2) noexcept
 {
-    static_assert(std::is_same_v<CoordinateType, offset::ucoord_t> || std::is_same_v<CoordinateType, cube::coord_t> ||
-                      std::is_same_v<CoordinateType, siqad::coord_t>,
-                  "CoordinateType is unknown");
-
     static std::mt19937_64 generator(std::random_device{}());
 
     if (coordinate1 > coordinate2)
@@ -398,52 +410,82 @@ CoordinateType random_coordinate(CoordinateType coordinate1, CoordinateType coor
     }
 }
 /**
- * Generates a vector of all SiQAD cells within an area spanned by two SiQAD coordinates.
+ * Generates a vector of all coordinates within an area spanned by two coordinates.
  *
- * This function calculates and returns a vector of all SiQAD cells that span the area
+ * This function calculates and returns a vector of all coordinates that span the area
  * between the northwest (cell_nw) and southeast (cell_se) cells, inclusive.
  * The cells are generated in a top-down, left-to-right fashion within the specified area.
  *
- * @param cell_nw The northwest SiQAD cell defining the starting point of the area.
- * @param cell_se The southeast SiQAD cell defining the ending point of the area.
+ * @tparam CoordinateType Coordinate Type.
+ * @param cell_nw The northwest cell defining the starting point of the area.
+ * @param cell_se The southeast cell defining the ending point of the area.
  * @return A vector containing all cells within the specified area.
  */
-[[nodiscard]] inline std::vector<siqad::coord_t> all_sidbs_in_spanned_area(const siqad::coord_t& cell_nw,
-                                                                           const siqad::coord_t& cell_se) noexcept
+template <typename CoordinateType>
+[[nodiscard]] inline std::vector<CoordinateType> all_coordinates_in_spanned_area(const CoordinateType& cell_nw,
+                                                                                 const CoordinateType& cell_se) noexcept
 {
-    const auto c1_cube          = siqad::to_fiction_coord<cube::coord_t>(cell_nw);
-    const auto c2_cube          = siqad::to_fiction_coord<cube::coord_t>(cell_se);
-    const auto total_cell_count = static_cast<uint64_t>(std::abs(c1_cube.x - c2_cube.x) + 1) *
-                                  static_cast<uint64_t>(std::abs(c1_cube.y - c2_cube.y) + 1);
-
-    std::vector<siqad::coord_t> all_cells{};
-    all_cells.reserve(total_cell_count);
-
-    auto current_cell = cell_nw;
-
-    // collect all cells in the area (spanned by the nw `north-west` and se `south-east` cell) going from top to down
-    // from left to right.
-    while (current_cell <= cell_se)
+    // for SiQAD coordinates
+    if constexpr (std::is_same_v<CoordinateType, siqad::coord_t>)
     {
-        all_cells.push_back(current_cell);
-        if (current_cell.x < cell_se.x)
-        {
-            current_cell.x += 1;
-        }
-        else if ((current_cell.x == cell_se.x) && current_cell.z == 0)
-        {
-            current_cell.z += 1;
-            current_cell.x = cell_nw.x;
-        }
-        else
-        {
-            current_cell.x = cell_nw.x;
-            current_cell.y += 1;
-            current_cell.z = 0;
-        }
-    }
+        const auto c1_cube          = siqad::to_fiction_coord<cube::coord_t>(cell_nw);
+        const auto c2_cube          = siqad::to_fiction_coord<cube::coord_t>(cell_se);
+        const auto total_cell_count = static_cast<uint64_t>(std::abs(c1_cube.x - c2_cube.x) + 1) *
+                                      static_cast<uint64_t>(std::abs(c1_cube.y - c2_cube.y) + 1);
+        std::vector<CoordinateType> all_cells{};
+        all_cells.reserve(total_cell_count);
 
-    return all_cells;
+        auto current_cell = c1_cube;
+
+        // collect all cells in the area (spanned by the nw `north-west` and se `south-east` cell) going from top to
+        // down from left to right.
+        while (current_cell <= c2_cube)
+        {
+            all_cells.push_back(siqad::to_siqad_coord(current_cell));
+            if (current_cell.x < cell_se.x)
+            {
+                current_cell.x += 1;
+            }
+            else
+            {
+                current_cell.x = cell_nw.x;
+                current_cell.y += 1;
+            }
+        }
+
+        return all_cells;
+    }
+    // for cube and offset coordinates
+    else
+    {
+        const auto total_cell_count =
+            static_cast<uint64_t>(std::abs(static_cast<int64_t>(cell_nw.x) - static_cast<int64_t>(cell_se.x)) + 1) *
+            static_cast<uint64_t>(std::abs(static_cast<int64_t>(cell_nw.y) - static_cast<int64_t>(cell_se.y)) + 1);
+        std::vector<CoordinateType> all_cells{};
+        all_cells.reserve(total_cell_count);
+
+        auto current_cell = cell_nw;
+
+        // collect all cells in the area (spanned by the nw `north-west` and se `south-east` cell) going from top to
+        // down from left to right.
+        while (current_cell <= cell_se)
+        {
+
+            all_cells.push_back(current_cell);
+
+            if (current_cell.x < cell_se.x)
+            {
+                current_cell.x += 1;
+            }
+            else
+            {
+                current_cell.x = cell_nw.x;
+                current_cell.y += 1;
+            }
+        }
+
+        return all_cells;
+    }
 }
 
 }  // namespace fiction

@@ -107,7 +107,6 @@ sidb_nanometer_distance([[maybe_unused]] const Lyt& lyt, const coordinate<Lyt>& 
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not based on SiDB technology");
-    static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
     const auto pos_c1 = sidb_nm_position<Lyt>(sp, source);
     const auto pos_c2 = sidb_nm_position<Lyt>(sp, target);
