@@ -65,7 +65,8 @@ TEMPLATE_TEST_CASE(
 }
 
 TEMPLATE_TEST_CASE(
-    "ExGS simulation of a two-pair BDL wire with one perturber", "[exhaustive-ground-state-simulation]",
+    "ExGS simulation of a two-pair BDL wire with one perturber, using siqad coordinates",
+    "[exhaustive-ground-state-simulation]",
     (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
     (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
@@ -104,6 +105,119 @@ TEMPLATE_TEST_CASE(
     CHECK(charge_lyt_first.get_charge_state({13, 0, 0}) == sidb_charge_state::NEGATIVE);
     CHECK(charge_lyt_first.get_charge_state({17, 0, 0}) == sidb_charge_state::NEUTRAL);
     CHECK(charge_lyt_first.get_charge_state({19, 0, 0}) == sidb_charge_state::NEGATIVE);
+
+    CHECK_THAT(charge_lyt_first.get_system_energy(),
+               Catch::Matchers::WithinAbs(0.2460493219, physical_constants::POP_STABILITY_ERR));
+}
+
+TEMPLATE_TEST_CASE("ExGS simulation of a two-pair BDL wire with one perturber, using offset coordinates",
+                   "[exhaustive-ground-state-simulation]",
+                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>),
+                   (charge_distribution_surface<
+                       cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>))
+{
+    TestType lyt{};
+
+    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{0, 0, 0}),
+                         TestType::cell_type::NORMAL);
+    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{5, 0, 0}),
+                         TestType::cell_type::NORMAL);
+    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{7, 0, 0}),
+                         TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{11, 0, 0}),
+                         TestType::cell_type::NORMAL);
+    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{13, 0, 0}),
+                         TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{17, 0, 0}),
+                         TestType::cell_type::NORMAL);
+    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{19, 0, 0}),
+                         TestType::cell_type::NORMAL);
+
+    const sidb_simulation_parameters params{2, -0.32};
+
+    const auto simulation_results = exhaustive_ground_state_simulation<TestType>(lyt, params);
+
+    const auto size_before = simulation_results.charge_distributions.size();
+
+    const auto simulation_results_after = exhaustive_ground_state_simulation<TestType>(lyt, params);
+    auto       size_after               = simulation_results_after.charge_distributions.size();
+
+    CHECK(size_before == 1);
+    CHECK(size_after == 1);
+
+    REQUIRE(!simulation_results_after.charge_distributions.empty());
+
+    const auto& charge_lyt_first = simulation_results_after.charge_distributions.front();
+
+    CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{0, 0, 0})) ==
+          sidb_charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{5, 0, 0})) ==
+          sidb_charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{7, 0, 0})) ==
+          sidb_charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{11, 0, 0})) ==
+          sidb_charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{13, 0, 0})) ==
+          sidb_charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{17, 0, 0})) ==
+          sidb_charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{19, 0, 0})) ==
+          sidb_charge_state::NEGATIVE);
+
+    CHECK_THAT(charge_lyt_first.get_system_energy(),
+               Catch::Matchers::WithinAbs(0.2460493219, physical_constants::POP_STABILITY_ERR));
+}
+
+TEMPLATE_TEST_CASE(
+    "ExGS simulation of a two-pair BDL wire with one perturber, using cube coordinates",
+    "[exhaustive-ground-state-simulation]",
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>),
+    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>>))
+{
+    TestType lyt{};
+
+    lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{0, 0, 0}), TestType::cell_type::NORMAL);
+    lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{5, 0, 0}), TestType::cell_type::NORMAL);
+    lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{7, 0, 0}), TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{11, 0, 0}), TestType::cell_type::NORMAL);
+    lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{13, 0, 0}), TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{17, 0, 0}), TestType::cell_type::NORMAL);
+    lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{19, 0, 0}), TestType::cell_type::NORMAL);
+
+    const sidb_simulation_parameters params{2, -0.32};
+
+    const auto simulation_results = exhaustive_ground_state_simulation<TestType>(lyt, params);
+
+    const auto size_before = simulation_results.charge_distributions.size();
+
+    const auto simulation_results_after = exhaustive_ground_state_simulation<TestType>(lyt, params);
+    auto       size_after               = simulation_results_after.charge_distributions.size();
+
+    CHECK(size_before == 1);
+    CHECK(size_after == 1);
+
+    REQUIRE(!simulation_results_after.charge_distributions.empty());
+
+    const auto& charge_lyt_first = simulation_results_after.charge_distributions.front();
+
+    CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{0, 0, 0})) ==
+          sidb_charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{5, 0, 0})) ==
+          sidb_charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{7, 0, 0})) ==
+          sidb_charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{11, 0, 0})) ==
+          sidb_charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{13, 0, 0})) ==
+          sidb_charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{17, 0, 0})) ==
+          sidb_charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{19, 0, 0})) ==
+          sidb_charge_state::NEGATIVE);
 
     CHECK_THAT(charge_lyt_first.get_system_energy(),
                Catch::Matchers::WithinAbs(0.2460493219, physical_constants::POP_STABILITY_ERR));

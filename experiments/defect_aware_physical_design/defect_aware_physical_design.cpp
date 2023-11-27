@@ -138,7 +138,7 @@ int main()  // NOLINT
     exact_params.upper_bound_y = 30;  // 12 x 31 tiles
     // exact_params.upper_bound_x = 12;    // 13 x 18 tiles
     // exact_params.upper_bound_y = 17;    // 13 x 18 tiles
-    exact_params.timeout    = 3'600'000;  // 1h in ms
+    exact_params.timeout = 3'600'000;  // 1h in ms
     fiction::exact_physical_design_stats exact_stats{};
 
     constexpr const uint64_t bench_select = fiction_experiments::all & ~fiction_experiments::parity &

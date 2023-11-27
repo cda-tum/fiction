@@ -59,7 +59,7 @@ jobs:
           large-packages: false
           docker-images: false
           swap-storage: false
-          
+
       - name: Install libraries and the respective compiler
         run: sudo apt-get update && sudo apt-get install -yq libtbb-dev ${{matrix.compiler}}
 

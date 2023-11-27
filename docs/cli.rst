@@ -83,7 +83,7 @@ or be obtained by :ref:`simulating<command simulate>` a ``network`` or ``gate_la
 An expression ``E`` is a constant ``0`` or ``1``, or a variable ``a, b, ..., p``, the negation of an expression ``!E``, the
 conjunction of multiple expressions ``(E...E)``, the disjunction of multiple expressions ``{E...E}``, the exclusive OR of
 multiple expressions ``[E...E]``, or the majority of three expressions ``<EEE>``. Examples are ``[(ab)(!ac)]`` to describe
-if-then-else, or ``!{!a!b}`` to describe the application of De Morgan’s law to ``(ab)``. The size of the truth table must
+if-then-else, or ``!{!a!b}`` to describe the application of De Morgan's law to ``(ab)``. The size of the truth table must
 fit the largest variable in the expression, e.g., if ``c`` is the largest variable, then the truth table has at least
 three variables.
 
