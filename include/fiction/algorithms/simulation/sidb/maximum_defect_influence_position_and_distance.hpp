@@ -39,8 +39,7 @@ struct maximum_defect_influence_distance_params
      * The pair describes the width and height of the area around the gate, which is
      * also used to place defects.
      *
-     * @note The height of the area (second entry of the pair) is given in the y coordinate of the SiQAD coordinates.
-     * This means that it describes the number of dimer rows.
+     * @note If SiQAD coordinates are used, the second entry describes the number of dimer rows.
      */
     std::pair<int32_t, int32_t> additional_scanning_area{50, 6};
 };
@@ -191,7 +190,7 @@ class maximum_defect_influence_position_and_distance_impl
         se.x = se.x + params.additional_scanning_area.first;
         se.y = se.y + params.additional_scanning_area.second;
 
-        defect_cells = all_sidbs_in_spanned_area(nw, se);
+        defect_cells = all_coordinates_in_spanned_area(nw, se);
     }
 };
 
@@ -217,7 +216,7 @@ maximum_defect_influence_position_and_distance(const Lyt&                       
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(!has_offset_ucoord_v<Lyt>, "Lyt should not be based on offset coordinates");
+    static_assert(!has_offset_ucoord_v<Lyt>, "Lyt cannot be based on offset coordinates");
     static_assert(!is_charge_distribution_surface_v<Lyt>, "Lyt cannot be a charge distribution surface");
 
     detail::maximum_defect_influence_position_and_distance_impl<Lyt> p{lyt, sim_params};

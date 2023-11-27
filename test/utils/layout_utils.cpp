@@ -398,7 +398,7 @@ TEST_CASE("Generate all cells in area spanned by two cells, using siqad coordina
 {
     SECTION("two identical cells")
     {
-        const auto all_area_cells = all_sidbs_in_spanned_area<siqad::coord_t>({-10, -5, 0}, {-10, -5, 0});
+        const auto all_area_cells = all_coordinates_in_spanned_area<siqad::coord_t>({-10, -5, 0}, {-10, -5, 0});
         REQUIRE(all_area_cells.size() == 1);
         const auto first_cell = all_area_cells.front();
         CHECK(first_cell.x == -10);
@@ -408,7 +408,7 @@ TEST_CASE("Generate all cells in area spanned by two cells, using siqad coordina
 
     SECTION("two cells at the same y and z coordinate ")
     {
-        const auto all_area_cells = all_sidbs_in_spanned_area<siqad::coord_t>({-10, -5, 0}, {10, -5, 0});
+        const auto all_area_cells = all_coordinates_in_spanned_area<siqad::coord_t>({-10, -5, 0}, {10, -5, 0});
         REQUIRE(all_area_cells.size() == 21);
         const auto first_cell = all_area_cells.front();
         CHECK(first_cell.x == -10);
@@ -423,7 +423,7 @@ TEST_CASE("Generate all cells in area spanned by two cells, using siqad coordina
 
     SECTION("two cells at the same y coordinate ")
     {
-        const auto all_area_cells = all_sidbs_in_spanned_area<siqad::coord_t>({-10, 5, 0}, {10, 5, 1});
+        const auto all_area_cells = all_coordinates_in_spanned_area<siqad::coord_t>({-10, 5, 0}, {10, 5, 1});
         REQUIRE(all_area_cells.size() == 42);
         const auto first_cell = all_area_cells.front();
         CHECK(first_cell.x == -10);
@@ -438,7 +438,7 @@ TEST_CASE("Generate all cells in area spanned by two cells, using siqad coordina
 
     SECTION("two cells at the same x coordinate ")
     {
-        const auto all_area_cells = all_sidbs_in_spanned_area<siqad::coord_t>({10, 2, 0}, {10, 5, 1});
+        const auto all_area_cells = all_coordinates_in_spanned_area<siqad::coord_t>({10, 2, 0}, {10, 5, 1});
         REQUIRE(all_area_cells.size() == 8);
         const auto first_cell = all_area_cells.front();
         CHECK(first_cell.x == 10);
@@ -456,7 +456,7 @@ TEST_CASE("Generate all cells in area spanned by two cells, using cube coordinat
 {
     SECTION("two identical cells")
     {
-        const auto all_area_cells = all_sidbs_in_spanned_area<cube::coord_t>({-10, -10, 0}, {-10, -10, 0});
+        const auto all_area_cells = all_coordinates_in_spanned_area<cube::coord_t>({-10, -10, 0}, {-10, -10, 0});
         REQUIRE(all_area_cells.size() == 1);
         const auto first_cell = all_area_cells.front();
         CHECK(first_cell.x == -10);
@@ -471,7 +471,7 @@ TEST_CASE("Generate all cells in area spanned by two cells, using cube coordinat
 
     SECTION("two cells at the same y coordinate ")
     {
-        const auto all_area_cells = all_sidbs_in_spanned_area<cube::coord_t>({-10, 10}, {10, 11});
+        const auto all_area_cells = all_coordinates_in_spanned_area<cube::coord_t>({-10, 10}, {10, 11});
         REQUIRE(all_area_cells.size() == 42);
         const auto first_cell = all_area_cells.front();
         CHECK(first_cell.x == -10);
@@ -486,7 +486,7 @@ TEST_CASE("Generate all cells in area spanned by two cells, using cube coordinat
 
     SECTION("two cells at the same x coordinate ")
     {
-        const auto all_area_cells = all_sidbs_in_spanned_area<cube::coord_t>({10, 4, 0}, {10, 11});
+        const auto all_area_cells = all_coordinates_in_spanned_area<cube::coord_t>({10, 4, 0}, {10, 11});
         REQUIRE(all_area_cells.size() == 8);
         const auto first_cell = all_area_cells.front();
         CHECK(first_cell.x == 10);
@@ -504,7 +504,7 @@ TEST_CASE("Generate all cells in area spanned by two cells, using offset coordin
 {
     SECTION("two identical cells")
     {
-        const auto all_area_cells = all_sidbs_in_spanned_area<offset::ucoord_t>({10, 10, 0}, {10, 10, 0});
+        const auto all_area_cells = all_coordinates_in_spanned_area<offset::ucoord_t>({10, 10, 0}, {10, 10, 0});
         REQUIRE(all_area_cells.size() == 1);
         const auto first_cell = all_area_cells.front();
         CHECK(first_cell.x == 10);
@@ -519,7 +519,7 @@ TEST_CASE("Generate all cells in area spanned by two cells, using offset coordin
 
     SECTION("two cells at the same y coordinate ")
     {
-        const auto all_area_cells = all_sidbs_in_spanned_area<offset::ucoord_t>({0, 10}, {20, 11});
+        const auto all_area_cells = all_coordinates_in_spanned_area<offset::ucoord_t>({0, 10}, {20, 11});
         REQUIRE(all_area_cells.size() == 42);
         const auto first_cell = all_area_cells.front();
         CHECK(first_cell.x == 0);
@@ -534,7 +534,7 @@ TEST_CASE("Generate all cells in area spanned by two cells, using offset coordin
 
     SECTION("two cells at the same x coordinate ")
     {
-        const auto all_area_cells = all_sidbs_in_spanned_area<offset::ucoord_t>({10, 4, 0}, {10, 11});
+        const auto all_area_cells = all_coordinates_in_spanned_area<offset::ucoord_t>({10, 4, 0}, {10, 11});
         REQUIRE(all_area_cells.size() == 8);
         const auto first_cell = all_area_cells.front();
         CHECK(first_cell.x == 10);

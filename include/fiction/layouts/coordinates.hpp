@@ -777,7 +777,7 @@ struct coord_t
 /**
  * Converts SiQAD coordinates to other coordinates (offset, cube).
  *
- * @tparam CoordinateType The wanted coordinate type.
+ * @tparam CoordinateType The desired coordinate type.
  * @param coord SiQAD coordinate to convert.
  * @return Coordinate of type `CoordinateType`.
  */
