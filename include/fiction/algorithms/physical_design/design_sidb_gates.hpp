@@ -45,6 +45,20 @@ template <typename CellType>
 struct design_sidb_gates_params
 {
     /**
+     * Selector for the different termination conditions for the SiDB gate design process.
+     */
+    enum class termination_condition
+    {
+        /**
+         * The design process is terminated when a valid SiDB gate design is found.
+         */
+        SOLUTION_FOUND,
+        /**
+         * The design process ends after all possible combinations of SiDBs within the canvas are enumerated.
+         */
+        ALL_COMBINATIONS_ENUMERATED
+    };
+    /**
      * Selector for the available design approaches.
      */
     enum class design_sidb_gates_mode
@@ -82,6 +96,12 @@ struct design_sidb_gates_params
      * The percentage of all combinations that are tested before the design process is canceled.
      */
     double procentual_maximum_attemps = 1.0;
+    /**
+     * The design process is terminated after a valid SiDB gate design is found.
+     *
+     * @note This parameter has no effect unless the gate design is exhaustive.
+     */
+    termination_condition termination_cond = termination_condition::ALL_COMBINATIONS_ENUMERATED;
 };
 
 namespace detail
@@ -104,7 +124,7 @@ class design_sidb_gates_impl
             skeleton_layout{skeleton},
             truth_table{spec},
             parameter{ps},
-            all_sidbs_in_canvas{all_sidbs_in_spanned_area(parameter.canvas.first, parameter.canvas.second)}
+            all_sidbs_in_canvas{all_coordinates_in_spanned_area(parameter.canvas.first, parameter.canvas.second)}
     {}
     /**
      * Design gates exhaustively and in parallel.
@@ -144,26 +164,28 @@ class design_sidb_gates_impl
         {
             for (const auto& comb : combination)
             {
-                if (!solution_found && !are_sidbs_too_close(comb, sidbs_affected_by_defects) &&
+                if (!are_sidbs_too_close(comb, sidbs_affected_by_defects) &&
                     global_iteration_counter <
                         static_cast<uint64_t>(parameter.procentual_maximum_attemps * static_cast<double>(total_comb)))
                 {
                     // canvas SiDBs are added to the skeleton
                     auto layout_with_added_cells = skeleton_layout_with_canvas_sidbs(comb);
-
-                    if (!solution_found)
+                    if (const auto [status, sim_calls] =
+                            is_operational(layout_with_added_cells, truth_table, params_is_operational);
+                        status == operational_status::OPERATIONAL)
                     {
-                        if (const auto [status, sim_calls] =
-                                is_operational(layout_with_added_cells, truth_table, params_is_operational);
-                            status == operational_status::OPERATIONAL)
                         {
-                            {
-                                const std::lock_guard lock_vector{mutex_to_protect_designer_gate_layouts};
-                                designed_gate_layouts.push_back(layout_with_added_cells);
-                            }
-                            solution_found = true;
+                            const std::lock_guard lock_vector{mutex_to_protect_designer_gate_layouts};
+                            designed_gate_layouts.push_back(layout_with_added_cells);
                         }
+                        solution_found = true;
                     }
+                    if (solution_found && (parameter.termination_cond ==
+                                           design_sidb_gates_params<cell<Lyt>>::termination_condition::SOLUTION_FOUND))
+                    {
+                        return;
+                    }
+                    continue;
                 }
                 global_iteration_counter++;
             }
