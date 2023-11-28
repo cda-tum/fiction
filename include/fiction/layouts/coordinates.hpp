@@ -35,7 +35,7 @@ namespace offset
 /**
  * Unsigned offset coordinates.
  *
- * The implementation is optimized for memory-efficiency and fits within 64 bits. Coordinates span from \f$(0, 0, 0)\f$
+ * This implementation is optimized for memory-efficiency and fits within 64 bits. Coordinates span from \f$(0, 0, 0)\f$
  * to \f$(2^{31} - 1, 2^{31} - 1, 1)\f$. Each coordinate has a dead indicator `d` that can be used to represent
  * that it is not in use.
  */
@@ -307,7 +307,9 @@ namespace cube
 /**
  * Signed cube coordinates.
  *
- * Each coordinate has a dead indicator that can be used to represent that it is not in use.
+ * This implementation allows for negative coordinate values and offers a balance between memory consumption and range
+ * of values. Coordinates span from \f$(-2^{31}, -2^{31}, -2^{31})\f$ to \f$(2^{31} - 1, 2^{31} - 1, 2^{31} - 1)\f$.
+ * Each coordinate has a dead indicator `d` that can be used to represent that it is not in use.
  */
 struct coord_t
 {
