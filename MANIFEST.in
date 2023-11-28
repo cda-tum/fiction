@@ -1,6 +1,8 @@
 prune bib
 prune cli
 
+graft docs/_static/
+
 graft libs/
 prune libs/Catch2/**
 prune libs/mockturtle/lib/nauty/**
