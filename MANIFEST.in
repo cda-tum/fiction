@@ -12,7 +12,6 @@ prune **/.github
 prune **/app
 prune **/apps
 prune **/doc
-prune **/docs
 prune **/plots
 prune **/css
 prune **/html
