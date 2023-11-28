@@ -83,7 +83,7 @@ enum class charge_distribution_history
  * A layout type to layer on top of any SiDB cell-level layout. It implements an interface to store and access
  * SiDBs' charge states.
  *
- * @tparam Lyt Cell-level layout based in SiQAD coordinates.
+ * @tparam Lyt Cell-level layout.
  * @tparam has_sidb_charge_distribution Automatically determines whether a charge distribution interface is already
  * present.
  */
@@ -242,7 +242,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             Lyt(),
             strg{std::make_shared<charge_distribution_storage>(params)}
     {
-        static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
         static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
         static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
@@ -264,7 +263,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             Lyt(lyt),
             strg{std::make_shared<charge_distribution_storage>(params)}
     {
-        static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
         static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
         static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
@@ -1282,11 +1280,14 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     void assign_global_external_potential(const double        potential_value,
                                           dependent_cell_mode dependent_cell = dependent_cell_mode::FIXED) noexcept
     {
-        this->foreach_cell(
-            [this, &potential_value](const auto& c) {
-                strg->local_external_pot.insert({c, potential_value});
-            });
-        this->update_after_charge_change(dependent_cell);
+        if (potential_value != 0.0)
+        {
+            this->foreach_cell(
+                [this, &potential_value](const auto& c) {
+                    strg->local_external_pot.insert({c, potential_value});
+                });
+            this->update_after_charge_change(dependent_cell);
+        }
     }
     /**
      * This function determines if given layout has to be simulated with three states since positively charged SiDBs can
@@ -1555,18 +1556,23 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             }
             else if ((loc_pot_cell + strg->phys_params.mu_plus()) > -physical_constants::POP_STABILITY_ERR)
             {
-                if (strg->cell_charge[strg->dependent_cell_index] != sidb_charge_state::POSITIVE)
+                // dependent-cell can only be positively charged when the base number is set to three state simulation.
+                if (strg->charge_index_and_base.second == 3)
                 {
-                    const auto charge_diff = (-charge_state_to_sign(strg->cell_charge[strg->dependent_cell_index]) + 1);
-                    for (uint64_t i = 0u; i < strg->pot_mat.size(); ++i)
+                    if (strg->cell_charge[strg->dependent_cell_index] != sidb_charge_state::POSITIVE)
                     {
-                        if (i != strg->dependent_cell_index)
+                        const auto charge_diff =
+                            (-charge_state_to_sign(strg->cell_charge[strg->dependent_cell_index]) + 1);
+                        strg->cell_charge[strg->dependent_cell_index] = sidb_charge_state::POSITIVE;
+                        for (uint64_t i = 0u; i < strg->pot_mat.size(); ++i)
                         {
-                            strg->local_pot[i] +=
-                                (this->get_potential_by_indices(i, strg->dependent_cell_index)) * charge_diff;
+                            if (i != strg->dependent_cell_index)
+                            {
+                                strg->local_pot[i] +=
+                                    (this->get_potential_by_indices(i, strg->dependent_cell_index)) * charge_diff;
+                            }
                         }
                     }
-                    strg->cell_charge[strg->dependent_cell_index] = sidb_charge_state::POSITIVE;
                 }
             }
 
@@ -1764,6 +1770,23 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     {
         strg->cell_charge.push_back(charge);
         strg->sidb_order.push_back(c);
+
+        // sort sidbs by the relation given by the coordinates and sort charge vector accordingly
+        std::vector<std::pair<typename Lyt::cell, sidb_charge_state>> combined_vector{};
+        combined_vector.reserve(strg->cell_charge.size());
+
+        for (size_t i = 0; i < strg->sidb_order.size(); i++)
+        {
+            combined_vector.emplace_back(strg->sidb_order[i], strg->cell_charge[i]);
+        }
+
+        std::sort(combined_vector.begin(), combined_vector.end());
+
+        for (size_t i = 0; i < combined_vector.size(); i++)
+        {
+            strg->sidb_order[i]  = combined_vector[i].first;
+            strg->cell_charge[i] = combined_vector[i].second;
+        }
     }
 
   private:

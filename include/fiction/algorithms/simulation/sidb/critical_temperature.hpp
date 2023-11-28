@@ -17,6 +17,7 @@
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
+#include "fiction/technology/physical_constants.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
@@ -168,6 +169,8 @@ class critical_temperature_impl
 
     {
         stats.critical_temperature = params.max_temperature;
+        stats.algorithm_name =
+            (params.engine == critical_temperature_params::simulation_engine::EXACT) ? "QuickExact" : "QuickSim";
     }
 
     /**
@@ -185,7 +188,6 @@ class critical_temperature_impl
             stats.critical_temperature = 0.0;
             return true;
         }
-
         else if (layout.num_cells() > 1)
         {
             const auto output_bdl_pairs =
@@ -334,7 +336,9 @@ class critical_temperature_impl
             // Check if there is at least one ground state that satisfies the logic (transparent). Round the energy
             // value of the given valid_layout to six decimal places to overcome possible rounding errors and for
             // comparability with the min_energy.
-            if ((round_to_n_decimal_places(energy, 6) == round_to_n_decimal_places(min_energy, 6)) && state_type)
+            if (std::abs(round_to_n_decimal_places(energy, 6) - round_to_n_decimal_places(min_energy, 6)) <
+                    physical_constants::POP_STABILITY_ERR &&
+                state_type)
             {
                 ground_state_is_transparent = true;
             }

@@ -5,8 +5,10 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/algorithms/iter/bdl_input_iterator.hpp>
+#include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/types.hpp>
+#include <fiction/utils/layout_utils.hpp>
 
 #include <cstdint>
 #include <iterator>
@@ -226,63 +228,200 @@ TEST_CASE("SiQAD's AND gate iteration", "[bdl-input-iterator]")
 
     lyt.assign_cell_type({10, 9, 1}, sidb_technology::cell_type::NORMAL);
 
-    bdl_input_iterator<layout> bii{lyt};
-
-    for (auto i = 0; bii < 4; ++bii, ++i)
+    SECTION("siqad coordinates")
     {
-        switch (i)
+        bdl_input_iterator<layout> bii{lyt};
+
+        for (auto i = 0; bii < 4; ++bii, ++i)
         {
-            case 0:
+            switch (i)
             {
-                const auto& lyt_0 = *bii;
+                case 0:
+                {
+                    const auto& lyt_0 = *bii;
 
-                CHECK(lyt_0.get_cell_type({0, 0, 1}) == sidb_technology::cell_type::INPUT);
-                CHECK(lyt_0.get_cell_type({2, 1, 1}) == sidb_technology::cell_type::EMPTY);
+                    CHECK(lyt_0.get_cell_type({0, 0, 1}) == sidb_technology::cell_type::INPUT);
+                    CHECK(lyt_0.get_cell_type({2, 1, 1}) == sidb_technology::cell_type::EMPTY);
 
-                CHECK(lyt_0.get_cell_type({20, 0, 1}) == sidb_technology::cell_type::INPUT);
-                CHECK(lyt_0.get_cell_type({18, 1, 1}) == sidb_technology::cell_type::EMPTY);
+                    CHECK(lyt_0.get_cell_type({20, 0, 1}) == sidb_technology::cell_type::INPUT);
+                    CHECK(lyt_0.get_cell_type({18, 1, 1}) == sidb_technology::cell_type::EMPTY);
 
-                break;
+                    break;
+                }
+                case 1:
+                {
+                    const auto& lyt_1 = *bii;
+
+                    CHECK(lyt_1.get_cell_type({0, 0, 1}) == sidb_technology::cell_type::INPUT);
+                    CHECK(lyt_1.get_cell_type({2, 1, 1}) == sidb_technology::cell_type::EMPTY);
+
+                    CHECK(lyt_1.get_cell_type({20, 0, 1}) == sidb_technology::cell_type::EMPTY);
+                    CHECK(lyt_1.get_cell_type({18, 1, 1}) == sidb_technology::cell_type::INPUT);
+
+                    break;
+                }
+                case 2:
+                {
+                    const auto& lyt_2 = *bii;
+
+                    CHECK(lyt_2.get_cell_type({0, 0, 1}) == sidb_technology::cell_type::EMPTY);
+                    CHECK(lyt_2.get_cell_type({2, 1, 1}) == sidb_technology::cell_type::INPUT);
+
+                    CHECK(lyt_2.get_cell_type({20, 0, 1}) == sidb_technology::cell_type::INPUT);
+                    CHECK(lyt_2.get_cell_type({18, 1, 1}) == sidb_technology::cell_type::EMPTY);
+
+                    break;
+                }
+                case 3:
+                {
+                    const auto& lyt_3 = *bii;
+
+                    CHECK(lyt_3.get_cell_type({0, 0, 1}) == sidb_technology::cell_type::EMPTY);
+                    CHECK(lyt_3.get_cell_type({2, 1, 1}) == sidb_technology::cell_type::INPUT);
+
+                    CHECK(lyt_3.get_cell_type({20, 0, 1}) == sidb_technology::cell_type::EMPTY);
+                    CHECK(lyt_3.get_cell_type({18, 1, 1}) == sidb_technology::cell_type::INPUT);
+
+                    break;
+                }
+                default:
+                {
+                    CHECK(false);
+                }
             }
-            case 1:
+        }
+    }
+
+    SECTION("cube coordinates")
+    {
+        const auto layout_cube = convert_to_fiction_coordinates<
+            cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>>(lyt);
+        bdl_input_iterator<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>> bii{
+            layout_cube};
+
+        for (auto i = 0; bii < 4; ++bii, ++i)
+        {
+            switch (i)
             {
-                const auto& lyt_1 = *bii;
+                case 0:
+                {
+                    const auto& lyt_0 = *bii;
 
-                CHECK(lyt_1.get_cell_type({0, 0, 1}) == sidb_technology::cell_type::INPUT);
-                CHECK(lyt_1.get_cell_type({2, 1, 1}) == sidb_technology::cell_type::EMPTY);
+                    CHECK(lyt_0.get_cell_type({0, 1}) == sidb_technology::cell_type::INPUT);
+                    CHECK(lyt_0.get_cell_type({2, 3}) == sidb_technology::cell_type::EMPTY);
 
-                CHECK(lyt_1.get_cell_type({20, 0, 1}) == sidb_technology::cell_type::EMPTY);
-                CHECK(lyt_1.get_cell_type({18, 1, 1}) == sidb_technology::cell_type::INPUT);
+                    CHECK(lyt_0.get_cell_type({20, 1}) == sidb_technology::cell_type::INPUT);
+                    CHECK(lyt_0.get_cell_type({18, 3}) == sidb_technology::cell_type::EMPTY);
 
-                break;
+                    break;
+                }
+                case 1:
+                {
+                    const auto& lyt_1 = *bii;
+
+                    CHECK(lyt_1.get_cell_type({0, 1}) == sidb_technology::cell_type::INPUT);
+                    CHECK(lyt_1.get_cell_type({2, 3}) == sidb_technology::cell_type::EMPTY);
+
+                    CHECK(lyt_1.get_cell_type({20, 1}) == sidb_technology::cell_type::EMPTY);
+                    CHECK(lyt_1.get_cell_type({18, 3}) == sidb_technology::cell_type::INPUT);
+
+                    break;
+                }
+                case 2:
+                {
+                    const auto& lyt_2 = *bii;
+
+                    CHECK(lyt_2.get_cell_type({0, 1}) == sidb_technology::cell_type::EMPTY);
+                    CHECK(lyt_2.get_cell_type({2, 3}) == sidb_technology::cell_type::INPUT);
+
+                    CHECK(lyt_2.get_cell_type({20, 1}) == sidb_technology::cell_type::INPUT);
+                    CHECK(lyt_2.get_cell_type({18, 3}) == sidb_technology::cell_type::EMPTY);
+
+                    break;
+                }
+                case 3:
+                {
+                    const auto& lyt_3 = *bii;
+
+                    CHECK(lyt_3.get_cell_type({0, 1}) == sidb_technology::cell_type::EMPTY);
+                    CHECK(lyt_3.get_cell_type({2, 3}) == sidb_technology::cell_type::INPUT);
+
+                    CHECK(lyt_3.get_cell_type({20, 1}) == sidb_technology::cell_type::EMPTY);
+                    CHECK(lyt_3.get_cell_type({18, 3}) == sidb_technology::cell_type::INPUT);
+
+                    break;
+                }
+                default:
+                {
+                    CHECK(false);
+                }
             }
-            case 2:
+        }
+    }
+
+    SECTION("offset coordinates")
+    {
+        const auto layout_offset = convert_to_fiction_coordinates<
+            cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>(lyt);
+        bdl_input_iterator<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>> bii{
+            layout_offset};
+
+        for (auto i = 0; bii < 4; ++bii, ++i)
+        {
+            switch (i)
             {
-                const auto& lyt_2 = *bii;
+                case 0:
+                {
+                    const auto& lyt_0 = *bii;
 
-                CHECK(lyt_2.get_cell_type({0, 0, 1}) == sidb_technology::cell_type::EMPTY);
-                CHECK(lyt_2.get_cell_type({2, 1, 1}) == sidb_technology::cell_type::INPUT);
+                    CHECK(lyt_0.get_cell_type({0, 1}) == sidb_technology::cell_type::INPUT);
+                    CHECK(lyt_0.get_cell_type({2, 3}) == sidb_technology::cell_type::EMPTY);
 
-                CHECK(lyt_2.get_cell_type({20, 0, 1}) == sidb_technology::cell_type::INPUT);
-                CHECK(lyt_2.get_cell_type({18, 1, 1}) == sidb_technology::cell_type::EMPTY);
+                    CHECK(lyt_0.get_cell_type({20, 1}) == sidb_technology::cell_type::INPUT);
+                    CHECK(lyt_0.get_cell_type({18, 3}) == sidb_technology::cell_type::EMPTY);
 
-                break;
-            }
-            case 3:
-            {
-                const auto& lyt_3 = *bii;
+                    break;
+                }
+                case 1:
+                {
+                    const auto& lyt_1 = *bii;
 
-                CHECK(lyt_3.get_cell_type({0, 0, 1}) == sidb_technology::cell_type::EMPTY);
-                CHECK(lyt_3.get_cell_type({2, 1, 1}) == sidb_technology::cell_type::INPUT);
+                    CHECK(lyt_1.get_cell_type({0, 1}) == sidb_technology::cell_type::INPUT);
+                    CHECK(lyt_1.get_cell_type({2, 3}) == sidb_technology::cell_type::EMPTY);
 
-                CHECK(lyt_3.get_cell_type({20, 0, 1}) == sidb_technology::cell_type::EMPTY);
-                CHECK(lyt_3.get_cell_type({18, 1, 1}) == sidb_technology::cell_type::INPUT);
+                    CHECK(lyt_1.get_cell_type({20, 1}) == sidb_technology::cell_type::EMPTY);
+                    CHECK(lyt_1.get_cell_type({18, 3}) == sidb_technology::cell_type::INPUT);
 
-                break;
-            }
-            default:
-            {
-                CHECK(false);
+                    break;
+                }
+                case 2:
+                {
+                    const auto& lyt_2 = *bii;
+
+                    CHECK(lyt_2.get_cell_type({0, 1}) == sidb_technology::cell_type::EMPTY);
+                    CHECK(lyt_2.get_cell_type({2, 3}) == sidb_technology::cell_type::INPUT);
+
+                    CHECK(lyt_2.get_cell_type({20, 1}) == sidb_technology::cell_type::INPUT);
+                    CHECK(lyt_2.get_cell_type({18, 3}) == sidb_technology::cell_type::EMPTY);
+
+                    break;
+                }
+                case 3:
+                {
+                    const auto& lyt_3 = *bii;
+
+                    CHECK(lyt_3.get_cell_type({0, 1}) == sidb_technology::cell_type::EMPTY);
+                    CHECK(lyt_3.get_cell_type({2, 3}) == sidb_technology::cell_type::INPUT);
+
+                    CHECK(lyt_3.get_cell_type({20, 1}) == sidb_technology::cell_type::EMPTY);
+                    CHECK(lyt_3.get_cell_type({18, 3}) == sidb_technology::cell_type::INPUT);
+
+                    break;
+                }
+                default:
+                {
+                    CHECK(false);
+                }
             }
         }
     }

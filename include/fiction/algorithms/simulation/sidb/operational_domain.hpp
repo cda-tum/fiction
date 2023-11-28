@@ -871,7 +871,7 @@ class operational_domain_impl
         const auto decr_x = (x > 0) ? x - 1 : x;
         const auto incr_x = (x + 1 < x_indices.size()) ? x + 1 : x;
         const auto decr_y = (y > 0) ? y - 1 : y;
-        const auto incr_y = (y + 1 < x_indices.size()) ? y + 1 : y;
+        const auto incr_y = (y + 1 < y_indices.size()) ? y + 1 : y;
 
         // add neighbors in clockwise direction
 
@@ -973,7 +973,6 @@ operational_domain operational_domain_grid_search(const Lyt& lyt, const std::vec
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
     operational_domain_stats                 st{};
@@ -1017,7 +1016,6 @@ operational_domain operational_domain_random_sampling(const Lyt& lyt, const std:
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
     operational_domain_stats                 st{};
@@ -1066,7 +1064,6 @@ operational_domain operational_domain_flood_fill(const Lyt& lyt, const std::vect
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
     operational_domain_stats                 st{};
@@ -1118,7 +1115,6 @@ operational_domain operational_domain_contour_tracing(const Lyt& lyt, const std:
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
     operational_domain_stats                 st{};
