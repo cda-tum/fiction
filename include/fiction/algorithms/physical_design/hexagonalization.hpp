@@ -165,6 +165,16 @@ template <typename HexLyt, typename CartLyt>
         // calculate offset
         const auto offset = detail::get_offset<HexLyt, CartLyt>(lyt, layout_width, layout_height);
 
+        // inputs
+        lyt.foreach_pi(
+            [&lyt, &hex_layout, &offset, &layout_height](const auto& gate)
+            {
+                const auto    old_coord = lyt.get_tile(gate);
+                tile<CartLyt> hex{detail::to_hex<CartLyt, HexLyt>(old_coord, layout_height)};
+                hex.x -= offset;
+                hex_layout.create_pi(lyt.get_name(lyt.get_node(old_coord)), hex);
+            });
+
         // iterate through cartesian layout diagonally
         for (uint64_t k = 0; k < layout_width + layout_height - 1; ++k)
         {
@@ -189,7 +199,7 @@ template <typename HexLyt, typename CartLyt>
 
                         if (lyt.is_pi(node))
                         {
-                            hex_layout.create_pi(lyt.get_name(lyt.get_node(old_coord)), hex);
+                            continue;
                         }
 
                         if (const auto signals = lyt.incoming_data_flow(old_coord); signals.size() == 1)
