@@ -99,6 +99,33 @@ for each used header file to include *fiction*'s data types and algorithms. Ever
 directly located inside the ``fiction`` namespace.
 
 
+Python Bindings
+---------------
+
+The Python bindings can be installed via ``pip`` from `PyPI <https://pypi.org/project/mnt.pyfiction/>`_ where we publish
+wheels for every new release::
+
+  pip install mnt.pyfiction
+
+You can then import the bindings in your Python project:
+
+.. code-block:: python
+
+  from mnt import pyfiction
+
+The Python synopsis is modeled after the C++ API to make it feel as familiar as possible. However, all available Python
+bindings are additionally documented together with the C++ code on this site to make it easier to get started. For each
+module, you can toggle between the two languages using the tabs.
+
+.. note::
+
+    The *fiction* framework is primarily developed for C++ as a header-only library. The Python bindings are a thin
+    wrapper around the C++ code. We try our best to keep the bindings in sync with the C++ code, and to expose most of
+    *fiction*'s functionality in both C++ and Python. This is, unfortunately, not always possible. Should you encounter
+    features that are not (yet) available in *pyfiction*, please open
+    an `issue on GitHub <https://github.com/cda-tum/fiction/issues>`_.
+
+
 Enabling dependent functions
 ----------------------------
 
@@ -127,28 +154,12 @@ The :ref:`one-pass synthesis algorithm <onepass>` is embedded via the Python3 sc
 `Mugen <https://github.com/whaaswijk/mugen>`_ by Winston Haaswijk using `pybind11 <https://github.com/pybind/pybind11>`_.
 It has some further Python dependencies that can be installed via ``pip3``::
 
-    pip3 install -r libs/mugen/requirements.txt
+    pip install -r libs/mugen/requirements.txt
 
-The Python3 integration is experimental and may cause issues on some systems. It is currently not available on Windows
+The Python integration is experimental and may cause issues on some systems. It is currently not available on Windows
 and some macOS versions due to issues with ``python-sat``. Mugen requires at least Python 3.7!
 
 Finally, before building *fiction*, pass ``-DFICTION_ENABLE_MUGEN=ON`` to the ``cmake`` call.
-
-
-The Python module
------------------
-
-The Python module can be installed via ``pip`` from PyPI where we publish wheels for every new release::
-
-  pip install mnt.fiction
-
-This is the recommended way to use *fiction* in your Python projects.
-
-.. note::
-
-    *fiction* is primarily developed for C++ as a header-only library. The Python module is a thin wrapper around the
-    C++ code. It is therefore possible that some features are not yet available in the Python module. If you encounter
-    such a case, please open an issue on GitHub.
 
 
 Building experiments
