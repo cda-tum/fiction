@@ -43,8 +43,8 @@ that allows quick access to its core functionality.
   </a>
 </p>
 
-If you have any questions, feel free to contact us via [fcn.cda@xcit.tum.de](mailto:fcn.cda@xcit.tum.de) or by
-creating an issue on [GitHub](https://github.com/cda-tum/fiction/issues).
+If you have any questions, feel free to contact us via [nanotech.cda@xcit.tum.de](mailto:nanotech.cda@xcit.tum.de) or by
+creating an [issue on GitHub](https://github.com/cda-tum/fiction/issues).
 
 ## Quick Start
 
@@ -200,10 +200,12 @@ When a layout is compiled to the cell level via the application of a technology-
 simulated using a physical model. Currently, the following simulation algorithms are implemented in *fiction*:
 
 - Silicon Dangling Bonds (SiDBs)
-    - [*QuickExact*](https://arxiv.org/abs/2308.04487)
-    - [*QuickSim* Groundstate Simulation](https://ieeexplore.ieee.org/document/10231266)
-    - [Critical Temperature](https://ieeexplore.ieee.org/document/10231259)
-    - [Exhaustive Groundstate Simulation *(ExGS)*](https://open.library.ubc.ca/soa/cIRcle/collections/ubctheses/24/items/1.0392909)
+  - Electrostatic Ground State Simulation
+      - [*QuickExact*](https://arxiv.org/abs/2308.04487)
+      - [*QuickSim*](https://ieeexplore.ieee.org/document/10231266)
+      - [Exhaustive *(ExGS)*](https://open.library.ubc.ca/soa/cIRcle/collections/ubctheses/24/items/1.0392909)
+  - [Critical Temperature Simulation](https://ieeexplore.ieee.org/document/10231259)
+  - [Operational Domain Computation](https://www.cda.cit.tum.de/files/eda/2023_nanoarch_reducing_the_complexity_of_operational_domain_computation_in_silicon_dangling_bond_logic.pdf)
 
 
 ## Clocking Schemes
