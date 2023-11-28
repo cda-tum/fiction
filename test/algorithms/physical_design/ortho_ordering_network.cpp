@@ -7,6 +7,7 @@
 #include "utils/blueprints/network_blueprints.hpp"
 
 #include <fiction/algorithms/physical_design/apply_gate_library.hpp>
+#include <fiction/algorithms/verification/equivalence_checking.hpp>
 #include <fiction/algorithms/physical_design/ortho_ordering_network.hpp>
 #include <fiction/technology/qca_one_library.hpp>
 
@@ -114,4 +115,27 @@ TEST_CASE("Ordering name conservation after orthogonal physical design", "[ortho
 
     // PO names
     CHECK(layout.get_output_name(0) == "f");
+}
+
+TEST_CASE("Equivalence", "[orthogonal-ordering]")
+{
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+
+    auto mux21 = blueprints::mux21_network<mockturtle::names_view<mockturtle::aig_network>>();
+    mux21.set_network_name("mux21");
+
+    const auto layout = orthogonal_ordering_network<gate_layout>(mux21);
+
+    equivalence_checking_stats        st_eq{};
+    equivalence_checking(mux21, layout, &st_eq);
+
+    CHECK(st_eq.eq == eq_type::STRONG);
+
+    // network name
+    CHECK(layout.get_layout_name() == "mux21");
+
+    // PI names
+    CHECK(layout.get_name(layout.pi_at(0)) == "pi1");  // first PI
+    CHECK(layout.get_name(layout.pi_at(1)) == "pi2");  // second PI
+    CHECK(layout.get_name(layout.pi_at(2)) == "pi3");  // third PI
 }

@@ -536,6 +536,8 @@ class orthogonal_ordering_network_impl
                                      orthogonal_physical_design_stats& st) :
             ntk{input_ordering_view{mockturtle::fanout_view{
                 inverter_substitution(fanout_substitution<mockturtle::names_view<technology_network>>(src))}}},
+            inp_ntk{mockturtle::fanout_view{
+                inverter_substitution(fanout_substitution<mockturtle::names_view<technology_network>>(src))}},
             ps{p},
             pst{st}
     {}
@@ -553,7 +555,7 @@ class orthogonal_ordering_network_impl
         Lyt layout{{1, 1, 1}, twoddwave_clocking<Lyt>(ps.number_of_clock_phases)};
 
         // reserve PI nodes without positions
-        auto pi2node = reserve_input_nodes(layout, ctn.color_ntk);
+        auto pi2node = reserve_input_nodes(layout, inp_ntk);
 
         // first x-pos to use for gates is 1 because PIs take up the 0th column
         tile<Lyt> latest_pos{1, 0};
@@ -689,6 +691,10 @@ class orthogonal_ordering_network_impl
      * Network with ordered PIs
      * */
     input_ordering_view<mockturtle::fanout_view<mockturtle::names_view<technology_network>>> ntk;
+    /**
+     * Network without ordered PIs
+     * */
+    mockturtle::fanout_view<mockturtle::names_view<technology_network>> inp_ntk;
     /**
      * Design parameters for orthogonal P&R
      * */
