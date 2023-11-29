@@ -460,15 +460,15 @@ void place_two_fanin_gate_null(Lyt& layout, const coloring_container<Ntk>& ctn, 
 /**
  * Places the POs in the layout.
  */
-template <typename Ntk, typename Lyt>
-void place_outputs(Lyt& layout, const coloring_container<Ntk>& ctn, tile<Lyt>& latest_pos, uint32_t po_counter,
+template <typename Ntk, typename NtkI, typename Lyt>
+void place_outputs(Lyt& layout, NtkI inp_ntk, const coloring_container<Ntk>& ctn, tile<Lyt>& latest_pos, uint32_t po_counter,
                    mockturtle::node_map<mockturtle::signal<Lyt>, decltype(ctn.color_ntk)>& node2pos)
 {
     bool                               multi_out_node = false;
     std::vector<mockturtle::node<Ntk>> out_nodes;
     uint32_t                           inputs_border = ctn.color_ntk.num_pis();
     tile<Lyt>                          po_tile{};
-    ctn.color_ntk.foreach_po(
+    inp_ntk.foreach_po(
         [&po_counter, &out_nodes, &multi_out_node, &node2pos, &ctn, &layout, &latest_pos, &inputs_border,
          &po_tile](const auto& po)
         {
@@ -672,7 +672,7 @@ class orthogonal_ordering_network_impl
             });
 
         // Since the layout size is only known after placing all gates, the POs are placed after the main algorithm
-        place_outputs(layout, ctn, latest_pos, po_counter, node2pos);
+        place_outputs(layout, inp_ntk, ctn, latest_pos, po_counter, node2pos);
 
         // restore possibly set signal names
         restore_names(ctn.color_ntk, layout, node2pos);
