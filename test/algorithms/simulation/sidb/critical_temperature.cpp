@@ -317,6 +317,40 @@ TEMPLATE_TEST_CASE(
         CHECK_THAT(std::abs(criticalstats.critical_temperature - 0.85), Catch::Matchers::WithinAbs(0.00, 0.01));
     }
 
+    SECTION("OR gate")
+    {
+        TestType lyt{};
+
+        lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
+        lyt.assign_cell_type({26, 0, 0}, sidb_technology::cell_type::INPUT);
+
+        lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::INPUT);
+        lyt.assign_cell_type({24, 1, 0}, sidb_technology::cell_type::INPUT);
+
+        lyt.assign_cell_type({6, 2, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({20, 2, 0}, sidb_technology::cell_type::NORMAL);
+
+        lyt.assign_cell_type({8, 3, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({18, 3, 0}, sidb_technology::cell_type::NORMAL);
+
+        // three canvas SiDBs
+        lyt.assign_cell_type({12, 6, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({12, 7, 1}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({15, 11, 0}, sidb_technology::cell_type::NORMAL);
+
+        lyt.assign_cell_type({18, 13, 0}, sidb_technology::cell_type::OUTPUT);
+        lyt.assign_cell_type({20, 14, 0}, sidb_technology::cell_type::OUTPUT);
+
+        lyt.assign_cell_type({24, 15, 0}, sidb_technology::cell_type::NORMAL);
+
+        critical_temperature_stats<TestType> criticalstats{};
+        const critical_temperature_params    params{quicksim_params{sidb_simulation_parameters{2, -0.25}},
+                                                 critical_temperature_params::simulation_engine::EXACT, 0.99, 350};
+        critical_temperature_gate_based(lyt, std::vector<tt>{create_crossing_wire_tt()}, params, &criticalstats);
+
+        CHECK(criticalstats.critical_temperature < 350);
+    }
+
     SECTION("Not working diagonal Wire")
     {
         TestType lyt{};
