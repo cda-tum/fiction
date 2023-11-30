@@ -346,7 +346,7 @@ TEMPLATE_TEST_CASE(
         critical_temperature_stats<TestType> criticalstats{};
         const critical_temperature_params    params{quicksim_params{sidb_simulation_parameters{2, -0.25}},
                                                  critical_temperature_params::simulation_engine::EXACT, 0.99, 350};
-        critical_temperature_gate_based(lyt, std::vector<tt>{create_crossing_wire_tt()}, params, &criticalstats);
+        critical_temperature_gate_based(lyt, std::vector<tt>{create_or_tt()}, params, &criticalstats);
 
         CHECK(criticalstats.critical_temperature < 350);
     }
