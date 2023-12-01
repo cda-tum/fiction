@@ -5,7 +5,7 @@ import os
 
 class TestTimeToSolution(unittest.TestCase):
 
-    def test_seven_DBs(self):
+    def test_one_DBs(self):
         layout = sidb_layout((0, 0))
         layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
 
