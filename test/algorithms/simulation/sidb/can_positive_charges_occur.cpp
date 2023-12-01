@@ -9,10 +9,12 @@
 
 using namespace fiction;
 
-TEMPLATE_TEST_CASE("One BDL pair with one perturber", "[can-positive-charges-occur]",
-                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+TEMPLATE_TEST_CASE(
+    "One BDL pair with one perturber", "[can-positive-charges-occur]",
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
+    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
-    TestType lyt{{20, 10}};
+    TestType lyt{};
 
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({4, 0, 0}, TestType::cell_type::NORMAL);
@@ -37,10 +39,12 @@ TEMPLATE_TEST_CASE("One BDL pair with one perturber", "[can-positive-charges-occ
     }
 }
 
-TEMPLATE_TEST_CASE("Y-shape SiDB OR gate with input 01, using siqad coordinates", "[can-positive-charges-occur]",
-                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+TEMPLATE_TEST_CASE(
+    "Y-shape SiDB OR gate with input 01, using siqad coordinates", "[can-positive-charges-occur]",
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
+    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
-    TestType lyt{{20, 10}};
+    TestType lyt{};
 
     lyt.assign_cell_type({6, 2, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({8, 3, 0}, TestType::cell_type::NORMAL);
