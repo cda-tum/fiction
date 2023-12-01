@@ -43,7 +43,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'fiction'
-copyright = '2018-2023, Marcel Walter. 2023-present Chair for Design Automation, Technical University of Munich'
+copyright = '2018-2023: Marcel Walter. 2023-present: Chair for Design Automation, Technical University of Munich'
 author = 'Marcel Walter, Jan Drewniok, Simon Hofmann, Benjamin Hien'
 
 # The version info for the project you're documenting, acts as replacement for

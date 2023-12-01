@@ -165,6 +165,16 @@ template <typename HexLyt, typename CartLyt>
         // calculate offset
         const auto offset = detail::get_offset<HexLyt, CartLyt>(lyt, layout_width, layout_height);
 
+        // inputs
+        lyt.foreach_pi(
+            [&lyt, &hex_layout, &offset, &layout_height](const auto& gate)
+            {
+                const auto    old_coord = lyt.get_tile(gate);
+                tile<CartLyt> hex{detail::to_hex<CartLyt, HexLyt>(old_coord, layout_height)};
+                hex.x -= offset;
+                hex_layout.create_pi(lyt.get_name(lyt.get_node(old_coord)), hex);
+            });
+
         // iterate through cartesian layout diagonally
         for (uint64_t k = 0; k < layout_width + layout_height - 1; ++k)
         {
@@ -189,7 +199,7 @@ template <typename HexLyt, typename CartLyt>
 
                         if (lyt.is_pi(node))
                         {
-                            hex_layout.create_pi(lyt.get_name(lyt.get_node(old_coord)), hex);
+                            continue;
                         }
 
                         if (const auto signals = lyt.incoming_data_flow(old_coord); signals.size() == 1)
@@ -202,11 +212,7 @@ template <typename HexLyt, typename CartLyt>
 
                             const auto hex_signal = hex_layout.make_signal(hex_layout.get_node(hex_tile));
 
-                            if (lyt.is_po(node))
-                            {
-                                hex_layout.create_po(hex_signal, lyt.get_name(lyt.get_node(old_coord)), hex);
-                            }
-                            else if (lyt.is_wire(node))
+                            if (!lyt.is_po(node) and lyt.is_wire(node))
                             {
                                 hex_layout.create_buf(hex_signal, hex);
                             }
@@ -264,6 +270,23 @@ template <typename HexLyt, typename CartLyt>
                 }
             }
         }
+
+        // outputs
+        lyt.foreach_po(
+            [&lyt, &hex_layout, &offset, &layout_height](const auto& gate)
+            {
+                const auto old_coord = lyt.get_tile(lyt.get_node(gate));
+                const auto signal    = lyt.incoming_data_flow(old_coord)[0];
+
+                tile<CartLyt> hex{detail::to_hex<CartLyt, HexLyt>(old_coord, layout_height)};
+                auto          hex_tile = detail::to_hex<CartLyt, HexLyt>(signal, layout_height);
+                hex.x -= offset;
+                hex_tile.x -= offset;
+
+                const auto hex_signal = hex_layout.make_signal(hex_layout.get_node(hex_tile));
+                hex_layout.create_po(hex_signal, lyt.get_name(lyt.get_node(old_coord)), hex);
+            });
+
         // calculate bounding box
         const auto bounding_box         = bounding_box_2d(hex_layout);
         const auto layout_max           = bounding_box.get_max();
