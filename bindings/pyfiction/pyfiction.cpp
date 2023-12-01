@@ -34,7 +34,7 @@
 #include "pyfiction/algorithms/simulation/sidb/quickexact.hpp"
 #include "pyfiction/algorithms/simulation/sidb/quicksim.hpp"
 // #include "pyfiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp"
-// #include "pyfiction/algorithms/simulation/sidb/assess_physical_population_stability.hpp"
+#include "pyfiction/algorithms/simulation/sidb/assess_physical_population_stability.hpp"
 #include "pyfiction/algorithms/simulation/sidb/convert_potential_to_distance.hpp"
 #include "pyfiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "pyfiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
@@ -110,7 +110,7 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::sidb_simulation_parameters(m);
     pyfiction::sidb_simulation_result(m);
     pyfiction::can_positive_charges_occur(m);
-    //    pyfiction::assess_physical_population_stability(m);
+    pyfiction::assess_physical_population_stability(m);
     pyfiction::convert_potential_to_distance(m);
     pyfiction::detect_bdl_pairs(m);
     pyfiction::is_operational(m);

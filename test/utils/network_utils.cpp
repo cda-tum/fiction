@@ -42,7 +42,7 @@ TEST_CASE("High-degree fanin nodes", "[network-utils]")
     CHECK(!has_high_degree_fanin_nodes(and_inv, 3));
 
     CHECK(high_degree_fanin_exception{}.what() ==
-          std::string{"network contains nodes that exceed the supported non-constant fanin size"});
+          std::string{"network contains nodes that exceed the supported fanin size"});
 }
 
 TEST_CASE("Incoming primary input", "[network-utils]")

@@ -39,9 +39,7 @@ void assess_physical_population_stability(pybind11::module& m)
                        &fiction::population_stability_information<Lyt>::distance_corresponding_to_potential,
                        DOC(fiction_population_stability_information_distance_corresponding_to_potential))
         .def_readwrite("system_energy", &fiction::population_stability_information<Lyt>::system_energy,
-                       DOC(fiction_population_stability_information_system_energy))
-
-        ;
+                       DOC(fiction_population_stability_information_system_energy));
 
     m.def("assess_physical_population_stability", &fiction::assess_physical_population_stability<Lyt>, "lyt"_a,
           "params"_a = fiction::assess_physical_population_stability_params{},
@@ -62,9 +60,7 @@ inline void assess_physical_population_stability(pybind11::module& m)
         .value("NEUTRAL_TO_POSITIVE", fiction::transition_type::NEUTRAL_TO_POSITIVE,
                DOC(fiction_transition_type_NEUTRAL_TO_POSITIVE))
         .value("POSITIVE_TO_NEUTRAL", fiction::transition_type::POSITIVE_TO_NEUTRAL,
-               DOC(fiction_transition_type_POSITIVE_TO_NEUTRAL))
-
-        ;
+               DOC(fiction_transition_type_POSITIVE_TO_NEUTRAL));
 
     /**
      * Parameters.
@@ -72,15 +68,13 @@ inline void assess_physical_population_stability(pybind11::module& m)
     py::class_<fiction::assess_physical_population_stability_params>(
         m, "assess_physical_population_stability_params", DOC(fiction_assess_physical_population_stability_params))
         .def(py::init<>())
-        .def_readwrite("physical_parameters",
-                       &fiction::assess_physical_population_stability_params::physical_parameters,
+        .def_readwrite("simulation_parameters",
+                       &fiction::assess_physical_population_stability_params::simulation_parameters,
                        DOC(fiction_assess_physical_population_stability_params_physical_parameters))
         .def_readwrite(
             "precision_for_distance_corresponding_to_potential",
             &fiction::assess_physical_population_stability_params::precision_for_distance_corresponding_to_potential,
-            DOC(fiction_assess_physical_population_stability_params_precision_for_distance_corresponding_to_potential))
-
-        ;
+            DOC(fiction_assess_physical_population_stability_params_precision_for_distance_corresponding_to_potential));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
