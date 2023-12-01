@@ -21,7 +21,7 @@
 #include "pyfiction/algorithms/simulation/logic_simulation.hpp"
 #include "pyfiction/algorithms/simulation/sidb/calculate_energy_and_state_type.hpp"
 #include "pyfiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp"
-// #include "pyfiction/algorithms/simulation/sidb/critical_temperature.hpp"
+#include "pyfiction/algorithms/simulation/sidb/critical_temperature.hpp"
 #include "pyfiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
 #include "pyfiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "pyfiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
@@ -39,7 +39,7 @@
 #include "pyfiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "pyfiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "pyfiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
-// #include "pyfiction/algorithms/simulation/sidb/time_to_solution.hpp"
+#include "pyfiction/algorithms/simulation/sidb/time_to_solution.hpp"
 #include "pyfiction/algorithms/verification/design_rule_violations.hpp"
 #include "pyfiction/algorithms/verification/equivalence_checking.hpp"
 #include "pyfiction/inout/read_fgl_layout.hpp"
@@ -124,9 +124,9 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::energy_distribution(m);
     pyfiction::calculate_energy_and_state_type(m);
     pyfiction::occupation_probability_of_excited_states(m);
-    //    pyfiction::critical_temperature(m);
+    pyfiction::critical_temperature(m);
     pyfiction::random_sidb_layout_generator(m);
-    //    pyfiction::time_to_solution(m);
+    pyfiction::time_to_solution(m);
     /**
      * Logic Networks
      */
