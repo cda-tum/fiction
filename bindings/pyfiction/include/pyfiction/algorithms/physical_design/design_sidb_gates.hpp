@@ -24,26 +24,17 @@ namespace detail
 template <typename Lyt>
 void design_sidb_gates(pybind11::module& m)
 {
-    using namespace pybind11::literals;
-
-    m.def("design_sidb_gates", &fiction::design_sidb_gates<Lyt, py_tt>, "skeleton"_a, "spec"_a,
-          "params"_a = fiction::design_sidb_gates_params{}, DOC(fiction_design_sidb_gates));
-}
-
-}  // namespace detail
-
-inline void design_sidb_gates(pybind11::module& m)
-{
     namespace py = pybind11;
+    using namespace py::literals;
 
     /**
      * Design approach selector type.
      */
-    pybind11::enum_<fiction::design_sidb_gates_params::design_sidb_gates_mode>(
+    pybind11::enum_<typename fiction::design_sidb_gates_params<Lyt>::design_sidb_gates_mode>(
         m, "design_sidb_gates_mode", DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode))
-        .value("EXHAUSTIVE", fiction::design_sidb_gates_params::design_sidb_gates_mode::EXHAUSTIVE,
+        .value("EXHAUSTIVE", fiction::design_sidb_gates_params<Lyt>::design_sidb_gates_mode::EXHAUSTIVE,
                DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_EXHAUSTIVE))
-        .value("RANDOM", fiction::design_sidb_gates_params::design_sidb_gates_mode::RANDOM,
+        .value("RANDOM", fiction::design_sidb_gates_params<Lyt>::design_sidb_gates_mode::RANDOM,
                DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_RANDOM))
 
         ;
@@ -51,22 +42,31 @@ inline void design_sidb_gates(pybind11::module& m)
     /**
      * Parameters.
      */
-    py::class_<fiction::design_sidb_gates_params>(m, "design_sidb_gates_params", DOC(fiction_design_sidb_gates_params))
+    py::class_<fiction::design_sidb_gates_params<Lyt>>(m, "design_sidb_gates_params",
+                                                       DOC(fiction_design_sidb_gates_params))
         .def(py::init<>())
-        .def_readwrite("phys_params", &fiction::design_sidb_gates_params::phys_params,
+        .def_readwrite("phys_params", &fiction::design_sidb_gates_params<Lyt>::phys_params,
                        DOC(fiction_design_sidb_gates_params_phys_params))
-        .def_readwrite("design_mode", &fiction::design_sidb_gates_params::design_mode,
+        .def_readwrite("design_mode", &fiction::design_sidb_gates_params<Lyt>::design_mode,
                        DOC(fiction_design_sidb_gates_params_design_mode))
-        .def_readwrite("canvas", &fiction::design_sidb_gates_params::canvas,
+        .def_readwrite("canvas", &fiction::design_sidb_gates_params<Lyt>::canvas,
                        DOC(fiction_design_sidb_gates_params_canvas))
-        .def_readwrite("number_of_sidbs", &fiction::design_sidb_gates_params::number_of_sidbs,
+        .def_readwrite("number_of_sidbs", &fiction::design_sidb_gates_params<Lyt>::number_of_sidbs,
                        DOC(fiction_design_sidb_gates_params_number_of_sidbs))
-        .def_readwrite("sim_engine", &fiction::design_sidb_gates_params::sim_engine,
+        .def_readwrite("sim_engine", &fiction::design_sidb_gates_params<Lyt>::sim_engine,
                        DOC(fiction_design_sidb_gates_params_sim_engine))
 
         ;
 
-    detail::design_sidb_gates<py_charge_distribution_surface>(m);
+    m.def("design_sidb_gates", &fiction::design_sidb_gates<Lyt, py_tt>, "skeleton"_a, "spec"_a,
+          "params"_a = fiction::design_sidb_gates_params<Lyt>{}, DOC(fiction_design_sidb_gates));
+}
+
+}  // namespace detail
+
+inline void design_sidb_gates(pybind11::module& m)
+{
+    detail::design_sidb_gates<py_sidb_layout>(m);
 }
 
 }  // namespace pyfiction

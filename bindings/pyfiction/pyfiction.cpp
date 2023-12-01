@@ -12,7 +12,7 @@
 #include "pyfiction/algorithms/path_finding/k_shortest_paths.hpp"
 #include "pyfiction/algorithms/physical_design/apply_gate_library.hpp"
 #include "pyfiction/algorithms/physical_design/color_routing.hpp"
-// #include "pyfiction/algorithms/physical_design/design_sidb_gates.hpp"
+#include "pyfiction/algorithms/physical_design/design_sidb_gates.hpp"
 #include "pyfiction/algorithms/physical_design/exact.hpp"
 #include "pyfiction/algorithms/physical_design/hexagonalization.hpp"
 #include "pyfiction/algorithms/physical_design/orthogonal.hpp"
@@ -21,25 +21,25 @@
 #include "pyfiction/algorithms/simulation/logic_simulation.hpp"
 #include "pyfiction/algorithms/simulation/sidb/calculate_energy_and_state_type.hpp"
 #include "pyfiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp"
-#include "pyfiction/algorithms/simulation/sidb/critical_temperature.hpp"
+// #include "pyfiction/algorithms/simulation/sidb/critical_temperature.hpp"
 #include "pyfiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
 #include "pyfiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "pyfiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
 #include "pyfiction/algorithms/simulation/sidb/is_ground_state.hpp"
 #include "pyfiction/algorithms/simulation/sidb/is_operational.hpp"
 // #include "pyfiction/algorithms/simulation/sidb/maximum_defect_influence_position_and_distance.hpp"
+#include "pyfiction/algorithms/simulation/sidb/assess_physical_population_stability.hpp"
+#include "pyfiction/algorithms/simulation/sidb/convert_potential_to_distance.hpp"
 #include "pyfiction/algorithms/simulation/sidb/minimum_energy.hpp"
 #include "pyfiction/algorithms/simulation/sidb/occupation_probability_of_excited_states.hpp"
 #include "pyfiction/algorithms/simulation/sidb/operational_domain.hpp"
 #include "pyfiction/algorithms/simulation/sidb/quickexact.hpp"
 #include "pyfiction/algorithms/simulation/sidb/quicksim.hpp"
-// #include "pyfiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp"
-// #include "pyfiction/algorithms/simulation/sidb/assess_physical_population_stability.hpp"
-#include "pyfiction/algorithms/simulation/sidb/convert_potential_to_distance.hpp"
+#include "pyfiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp"
 #include "pyfiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "pyfiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "pyfiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
-#include "pyfiction/algorithms/simulation/sidb/time_to_solution.hpp"
+// #include "pyfiction/algorithms/simulation/sidb/time_to_solution.hpp"
 #include "pyfiction/algorithms/verification/design_rule_violations.hpp"
 #include "pyfiction/algorithms/verification/equivalence_checking.hpp"
 #include "pyfiction/inout/read_fgl_layout.hpp"
@@ -48,7 +48,7 @@
 #include "pyfiction/inout/write_dot_layout.hpp"
 #include "pyfiction/inout/write_fgl_layout.hpp"
 #include "pyfiction/inout/write_fqca_layout.hpp"
-#include "pyfiction/inout/write_location_and_ground_state.hpp"
+// #include "pyfiction/inout/write_location_and_ground_state.hpp"
 #include "pyfiction/inout/write_operational_domain.hpp"
 #include "pyfiction/inout/write_qca_layout.hpp"
 #include "pyfiction/inout/write_qcc_layout.hpp"
@@ -110,7 +110,7 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::sidb_simulation_parameters(m);
     pyfiction::sidb_simulation_result(m);
     pyfiction::can_positive_charges_occur(m);
-    //    pyfiction::assess_physical_population_stability(m);
+    pyfiction::assess_physical_population_stability(m);
     pyfiction::convert_potential_to_distance(m);
     pyfiction::detect_bdl_pairs(m);
     pyfiction::is_operational(m);
@@ -124,9 +124,9 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::energy_distribution(m);
     pyfiction::calculate_energy_and_state_type(m);
     pyfiction::occupation_probability_of_excited_states(m);
-    pyfiction::critical_temperature(m);
-    //    pyfiction::random_sidb_layout_generator(m);
-    pyfiction::time_to_solution(m);
+    //    pyfiction::critical_temperature(m);
+    pyfiction::random_sidb_layout_generator(m);
+    //    pyfiction::time_to_solution(m);
     /**
      * Logic Networks
      */
@@ -153,7 +153,7 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::color_routing(m);
     pyfiction::hexagonalization(m);
     pyfiction::post_layout_optimization(m);
-    //    pyfiction::design_sidb_gates(m);
+    pyfiction::design_sidb_gates(m);
     /**
      * Algorithms: Properties
      */
@@ -183,7 +183,7 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::write_qll_layout(m);
     pyfiction::write_fqca_layout(m);
     pyfiction::write_sqd_sim_result(m);
-    pyfiction::write_location_and_ground_state(m);
+    //    pyfiction::write_location_and_ground_state(m);
     pyfiction::write_operational_domain(m);
     pyfiction::read_fgl_layout(m);
     pyfiction::read_fqca_layout(m);

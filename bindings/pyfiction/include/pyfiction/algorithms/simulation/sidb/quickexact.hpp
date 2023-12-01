@@ -50,21 +50,8 @@ void quickexact(pybind11::module& m)
 
         ;
 
-    m.def(
-        "quickexact",
-        [](const Lyt&                                      lyt,
-           const typename fiction::quickexact_params<Lyt>& params) -> fiction::sidb_simulation_result<py_cds_base>
-        {
-            fiction::quickexact_params<py_cds_base> converted_params{
-                params.physical_parameters,
-                params.base_number_detection == fiction::quickexact_params<Lyt>::automatic_base_number_detection::ON ?
-                    fiction::quickexact_params<py_cds_base>::automatic_base_number_detection::ON :
-                    fiction::quickexact_params<py_cds_base>::automatic_base_number_detection::OFF,
-                params.local_external_potential, params.global_potential};
-
-            return fiction::quickexact<py_cds_base>(lyt, converted_params);
-        },
-        "lyt"_a, "params"_a = fiction::quickexact_params<Lyt>{}, DOC(fiction_quickexact));
+    m.def("quickexact", &fiction::quickexact<Lyt>, "lyt"_a, "params"_a = fiction::quickexact_params<Lyt>{},
+          DOC(fiction_quickexact));
 }
 
 }  // namespace detail
@@ -73,7 +60,7 @@ inline void quickexact(pybind11::module& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::quickexact<py_charge_distribution_surface>(m);
+    detail::quickexact<py_sidb_layout>(m);
 }
 
 }  // namespace pyfiction

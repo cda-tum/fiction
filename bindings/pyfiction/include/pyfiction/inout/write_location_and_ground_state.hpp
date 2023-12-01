@@ -9,10 +9,12 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/io/write_location_and_ground_state.hpp>
+#include <fiction/utils/layout_utils.hpp>
 
 #include <string_view>
 
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 namespace pyfiction
 {
@@ -27,16 +29,16 @@ void write_location_and_ground_state(pybind11::module& m)
 
     m.def(
         "write_location_and_ground_state",
-        [](const fiction::sidb_simulation_result<Lyt>& lyt, const std::string_view& filename)
-        { fiction::write_location_and_ground_state(lyt, filename); },
-        "layout"_a, "filename"_a, DOC(fiction_write_location_and_ground_state));
+        [](const fiction::sidb_simulation_result<Lyt>& sim_result, const std::string_view& filename)
+        { fiction::write_location_and_ground_state(sim_result, filename); },
+        "sim_result"_a, "filename"_a, DOC(fiction_write_location_and_ground_state));
 }
 
 }  // namespace detail
 
 inline void write_location_and_ground_state(pybind11::module& m)
 {
-    detail::write_location_and_ground_state<py_cds_base>(m);
+    detail::write_location_and_ground_state<py_sidb_layout>(m);
 }
 
 }  // namespace pyfiction

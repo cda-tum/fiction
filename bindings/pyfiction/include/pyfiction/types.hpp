@@ -107,18 +107,9 @@ using py_inml_layout = py_cartesian_cell_layout<fiction::inml_technology>;
 using py_sidb_layout = py_cartesian_cell_layout<fiction::sidb_technology>;
 /**
  * Charge distribution surface. This is a special SiDB cell-level layout that is used for the SiDB simulation
- * algorithms. It is based on SiQAD coordinates.
+ * algorithms.
  */
-using py_charge_distribution_surface = fiction::charge_distribution_surface<fiction::cell_level_layout<
-    fiction::sidb_technology, fiction::clocked_layout<fiction::cartesian_layout<fiction::siqad::coord_t>>>>;
-/**
- * The base type of py_charge_distribution_surface to prevent double inference of charge_distribution_surface in the
- * template parameter of many functions, which would yield a type not registered in pyfiction. This type is not
- * explicitly exposed. Don't use it on its own elsewhere unless you know what you are doing.
- */
-using py_cds_base =
-    fiction::cell_level_layout<fiction::sidb_technology,
-                               fiction::clocked_layout<fiction::cartesian_layout<fiction::siqad::coord_t>>>;
+using py_charge_distribution_surface = fiction::charge_distribution_surface<py_sidb_layout>;
 
 }  // namespace pyfiction
 

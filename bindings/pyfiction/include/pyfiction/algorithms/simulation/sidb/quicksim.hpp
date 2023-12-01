@@ -24,11 +24,7 @@ void quicksim(pybind11::module& m)
 {
     using namespace pybind11::literals;
 
-    m.def(
-        "quicksim",
-        [](const Lyt& lyt, const fiction::quicksim_params& params) -> fiction::sidb_simulation_result<py_cds_base>
-        { return fiction::quicksim<py_cds_base>(lyt, params); },
-        "lyt"_a, "params"_a = fiction::quicksim_params{}, DOC(fiction_quicksim));
+    m.def("quicksim", &fiction::quicksim<Lyt>, "lyt"_a, "params"_a = fiction::quicksim_params{}, DOC(fiction_quicksim));
 }
 
 }  // namespace detail
@@ -53,7 +49,7 @@ inline void quicksim(pybind11::module& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::quicksim<py_charge_distribution_surface>(m);
+    detail::quicksim<py_sidb_layout>(m);
 }
 
 }  // namespace pyfiction

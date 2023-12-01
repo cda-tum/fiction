@@ -84,7 +84,7 @@ inline void assess_physical_population_stability(pybind11::module& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::assess_physical_population_stability<py_charge_distribution_surface>(m);
+    detail::assess_physical_population_stability<py_sidb_layout>(m);
 }
 
 }  // namespace pyfiction
