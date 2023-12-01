@@ -500,7 +500,6 @@ double critical_temperature_non_gate_based(const Lyt& lyt, const critical_temper
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
     critical_temperature_stats<Lyt> st{};
 
