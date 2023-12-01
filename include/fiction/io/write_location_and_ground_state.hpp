@@ -40,15 +40,15 @@ class write_location_and_ground_state_impl
     {
         // this part searches for the ground state(s) among all physically valid charge distributions
         const auto min_energy =
-            round_to_n_decimal_places(minimum_energy<sidb_cell_clk_lyt_siqad>(sim_result.charge_distributions), 6);
+            round_to_n_decimal_places(minimum_energy(sim_result.charge_distributions), 6);
 
-        std::vector<charge_distribution_surface<sidb_cell_clk_lyt_siqad>> ground_state_layouts{};
+        std::vector<charge_distribution_surface<Lyt>> ground_state_layouts{};
         for (const auto& valid_layout : sim_result.charge_distributions)
         {
             if (std::fabs(round_to_n_decimal_places(valid_layout.get_system_energy(), 6) - min_energy) <
                 std::numeric_limits<double>::epsilon())
             {
-                ground_state_layouts.emplace_back(charge_distribution_surface<sidb_cell_clk_lyt_siqad>{valid_layout});
+                ground_state_layouts.emplace_back(charge_distribution_surface<Lyt>{valid_layout});
             }
         }
 
@@ -69,7 +69,7 @@ class write_location_and_ground_state_impl
             std::sort(sidbs.begin(), sidbs.end());
             for (const auto& sidb : sidbs)
             {
-                const auto pos = sidb_nm_position<sidb_cell_clk_lyt_siqad>(physical_parameter, sidb);
+                const auto pos = sidb_nm_position<Lyt>(physical_parameter, sidb);
                 os << fmt::format("{:.3f};{:.3f};", pos.first, pos.second);
                 for (const auto& valid_layout : ground_state_layouts)
                 {
@@ -108,7 +108,6 @@ void write_location_and_ground_state(const sidb_simulation_result<Lyt>& sim_resu
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
     detail::write_location_and_ground_state_impl p{sim_result, os};
 
