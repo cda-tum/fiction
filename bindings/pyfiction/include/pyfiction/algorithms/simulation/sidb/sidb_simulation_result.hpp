@@ -49,7 +49,7 @@ inline void sidb_simulation_result(pybind11::module& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::sidb_simulation_result<py_cds_base>(m);
+    detail::sidb_simulation_result<py_sidb_layout>(m);
 }
 
 }  // namespace pyfiction

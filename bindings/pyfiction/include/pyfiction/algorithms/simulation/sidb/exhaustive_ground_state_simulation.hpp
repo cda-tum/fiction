@@ -24,12 +24,8 @@ void exhaustive_ground_state_simulation(pybind11::module& m)
 {
     using namespace pybind11::literals;
 
-    m.def(
-        "exhaustive_ground_state_simulation",
-        [](const Lyt&                                 lyt,
-           const fiction::sidb_simulation_parameters& params) -> fiction::sidb_simulation_result<py_cds_base>
-        { return fiction::exhaustive_ground_state_simulation<py_cds_base>(lyt, params); },
-        "lyt"_a, "params"_a = fiction::sidb_simulation_parameters{}, DOC(fiction_exhaustive_ground_state_simulation));
+    m.def("exhaustive_ground_state_simulation", &fiction::exhaustive_ground_state_simulation<py_sidb_layout>, "lyt"_a,
+          "params"_a = fiction::sidb_simulation_parameters{}, DOC(fiction_exhaustive_ground_state_simulation));
 }
 
 }  // namespace detail
@@ -38,7 +34,7 @@ inline void exhaustive_ground_state_simulation(pybind11::module& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::exhaustive_ground_state_simulation<py_charge_distribution_surface>(m);
+    detail::exhaustive_ground_state_simulation<py_sidb_layout>(m);
 }
 
 }  // namespace pyfiction

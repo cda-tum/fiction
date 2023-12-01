@@ -35,9 +35,9 @@ class TestQuicksim(unittest.TestCase):
 
         groundstate = result.charge_distributions[0]
 
-        self.assertEqual(groundstate.get_charge_state((0, 0, 1)), sidb_charge_state.NEGATIVE)
-        self.assertEqual(groundstate.get_charge_state((4, 0, 1)), sidb_charge_state.NEUTRAL)
-        self.assertEqual(groundstate.get_charge_state((6, 0, 1)), sidb_charge_state.NEGATIVE)
+        self.assertEqual(groundstate.get_charge_state((0, 1)), sidb_charge_state.NEGATIVE)
+        self.assertEqual(groundstate.get_charge_state((4, 1)), sidb_charge_state.NEUTRAL)
+        self.assertEqual(groundstate.get_charge_state((6, 1)), sidb_charge_state.NEGATIVE)
 
 
 if __name__ == '__main__':

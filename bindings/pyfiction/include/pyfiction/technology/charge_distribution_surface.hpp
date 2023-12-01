@@ -65,95 +65,17 @@ inline void charge_distribution_surface(pybind11::module& m)
 
     /**
      * Charge distribution surface.
-     *
-     * @note The charge_distribution_type in pyfiction must be viewed as a stand-alone type. It does not inherit from
-     * any other existing pyfiction types. Therefore, it does not implement functions of lower level layout types.
      */
-    py::class_<py_charge_distribution_surface>(m, "charge_distribution_surface",
-                                               DOC(fiction_charge_distribution_surface))
+    py::class_<py_charge_distribution_surface, py_sidb_layout>(m, "charge_distribution_surface",
+                                                               DOC(fiction_charge_distribution_surface))
         .def(py::init<const fiction::sidb_simulation_parameters&, const fiction::sidb_charge_state&>(),
              "params"_a = fiction::sidb_simulation_parameters{}, "cs"_a = fiction::sidb_charge_state::NEGATIVE)
 
-        .def(py::init<const py_cds_base&, const fiction::sidb_simulation_parameters&,
+        .def(py::init<const py_sidb_layout&, const fiction::sidb_simulation_parameters&,
                       const fiction::sidb_charge_state&>(),
              "lyt"_a, "params"_a = fiction::sidb_simulation_parameters{}, "cs"_a = fiction::sidb_charge_state::NEGATIVE)
 
         .def(py::init<const py_charge_distribution_surface&>(), "lyt"_a)
-
-        .def(py::init(
-                 [](const py_sidb_layout&                      layout,
-                    const fiction::sidb_simulation_parameters& params = fiction::sidb_simulation_parameters{},
-                    const fiction::sidb_charge_state&          cs     = fiction::sidb_charge_state::NEGATIVE)
-                 {
-                     auto converted_layout = fiction::convert_to_siqad_coordinates(layout);
-                     return fiction::charge_distribution_surface(converted_layout, params, cs);
-                 }),
-             "layout"_a, "params"_a = fiction::sidb_simulation_parameters{},
-             "cs"_a = fiction::sidb_charge_state::NEGATIVE)
-
-        .def(
-            "x", [](const py_charge_distribution_surface& lyt) { return lyt.x(); }, DOC(fiction_cartesian_layout_x))
-        .def(
-            "y", [](const py_charge_distribution_surface& lyt) { return lyt.y(); }, DOC(fiction_cartesian_layout_y))
-        .def(
-            "z", [](const py_charge_distribution_surface& lyt) { return lyt.z(); }, DOC(fiction_cartesian_layout_z))
-        .def(
-            "area", [](const py_charge_distribution_surface& lyt) { return lyt.area(); },
-            DOC(fiction_cartesian_layout_area))
-        .def(
-            "resize",
-            [](py_charge_distribution_surface& lyt, const py_siqad_coordinate& dimension) { lyt.resize(dimension); },
-            "dimension"_a, DOC(fiction_cartesian_layout_resize))
-
-        .def(
-            "get_cell_type",
-            [](const py_charge_distribution_surface& lyt, const fiction::cell<py_charge_distribution_surface>& c)
-            { return lyt.get_cell_type(c); },
-            "c"_a, DOC(fiction_cell_level_layout_get_cell_type))
-        .def(
-            "is_empty_cell",
-            [](const py_charge_distribution_surface& lyt, const fiction::cell<py_charge_distribution_surface>& c)
-            { return lyt.is_empty_cell(c); },
-            "c"_a, DOC(fiction_cell_level_layout_is_empty_cell))
-        .def(
-            "assign_cell_name",
-            [](py_charge_distribution_surface& lyt, const fiction::cell<py_charge_distribution_surface>& c,
-               const std::string& n) { lyt.assign_cell_name(c, n); },
-            "c"_a, "n"_a, DOC(fiction_cell_level_layout_assign_cell_name))
-        .def(
-            "get_cell_name",
-            [](const py_charge_distribution_surface& lyt, const fiction::cell<py_charge_distribution_surface>& c)
-            { return lyt.get_cell_name(c); },
-            "c"_a, DOC(fiction_cell_level_layout_get_cell_name))
-        .def(
-            "set_layout_name",
-            [](py_charge_distribution_surface& lyt, const std::string& name) { lyt.set_layout_name(name); }, "name"_a,
-            DOC(fiction_cell_level_layout_set_layout_name))
-        .def(
-            "get_layout_name", [](const py_charge_distribution_surface& lyt) { return lyt.get_layout_name(); },
-            DOC(fiction_cell_level_layout_get_layout_name))
-        .def(
-            "num_cells", [](const py_charge_distribution_surface& lyt) { return lyt.num_cells(); },
-            DOC(fiction_cell_level_layout_num_cells))
-        .def(
-            "is_empty", [](const py_charge_distribution_surface& lyt) { return lyt.is_empty(); },
-            DOC(fiction_cell_level_layout_is_empty))
-        .def(
-            "num_pis", [](const py_charge_distribution_surface& lyt) { return lyt.num_pis(); },
-            DOC(fiction_cell_level_layout_num_pis))
-        .def(
-            "num_pos", [](const py_charge_distribution_surface& lyt) { return lyt.num_pos(); },
-            DOC(fiction_cell_level_layout_num_pos))
-        .def(
-            "is_pi",
-            [](const py_charge_distribution_surface& lyt, const fiction::cell<py_charge_distribution_surface>& c)
-            { return lyt.is_pi(c); },
-            "c"_a, DOC(fiction_cell_level_layout_is_pi))
-        .def(
-            "is_po",
-            [](const py_charge_distribution_surface& lyt, const fiction::cell<py_charge_distribution_surface>& c)
-            { return lyt.is_po(c); },
-            "c"_a, DOC(fiction_cell_level_layout_is_po))
 
         .def("get_all_sidb_locations_in_nm", &py_charge_distribution_surface::get_all_sidb_locations_in_nm)
         .def("assign_cell_type", &py_charge_distribution_surface::assign_cell_type, "c"_a, "ct"_a)
@@ -290,7 +212,7 @@ inline void charge_distribution_surface(pybind11::module& m)
 
         .def(
             "is_within_bounds",
-            [](const py_charge_distribution_surface& lyt, const py_siqad_coordinate& c)
+            [](const py_charge_distribution_surface& lyt, const fiction::coordinate<py_charge_distribution_surface>& c)
             { return lyt.is_within_bounds(c); },
             "c"_a, DOC(fiction_cartesian_layout_is_within_bounds))
 
@@ -307,7 +229,7 @@ inline void charge_distribution_surface(pybind11::module& m)
              [](const py_charge_distribution_surface& lyt)
              {
                  std::stringstream ss;
-                 print_layout(lyt, ss);
+                 print_layout(fiction::convert_to_siqad_coordinates(lyt), ss);
                  return ss.str();
              })
 

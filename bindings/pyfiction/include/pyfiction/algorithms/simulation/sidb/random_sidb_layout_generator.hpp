@@ -71,7 +71,7 @@ inline void random_sidb_layout_generator(pybind11::module& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::random_sidb_layout_generator<py_charge_distribution_surface>(m);
+    detail::random_sidb_layout_generator<py_sidb_layout>(m);
 }
 
 }  // namespace pyfiction
