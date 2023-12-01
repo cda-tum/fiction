@@ -66,7 +66,6 @@ struct critical_temperature_params
          */
         NON_GATE_BASED_SIMULATION
     };
-
     /**
      * An enumeration of simulation modes (exact vs. approximate) to use for the *Critical Temperature* Simulation.
      */
