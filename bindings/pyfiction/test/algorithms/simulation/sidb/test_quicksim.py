@@ -12,7 +12,7 @@ class TestQuicksim(unittest.TestCase):
         layout.assign_cell_type((6, 1), sidb_technology.cell_type.NORMAL)
 
         params = quicksim_params()
-        params.phys_params = sidb_simulation_parameters()
+        params.simulation_parameters = sidb_simulation_parameters()
         params.iteration_steps = 80
         params.alpha = 0.7
         self.assertEqual(params.iteration_steps, 80)

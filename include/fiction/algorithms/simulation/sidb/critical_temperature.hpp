@@ -85,7 +85,7 @@ struct critical_temperature_params
     /**
      * All Parameters for physical SiDB simulations.
      */
-    quicksim_params simulation_params{};
+    quicksim_params simulation_parameters{};
     /**
      * Simulation mode to determine the *Critical Temperature*.
      */
@@ -196,7 +196,7 @@ class critical_temperature_impl
             for (auto i = 0u; i < spec.front().num_bits(); ++i, ++bii)
             {
                 // if positively charged SiDBs can occur, the SiDB layout is considered as non-operational
-                if (can_positive_charges_occur(*bii, params.simulation_params.phys_params))
+                if (can_positive_charges_occur(*bii, params.simulation_parameters.simulation_parameters))
                 {
                     stats.critical_temperature = 0.0;
                     return;
@@ -249,7 +249,7 @@ class critical_temperature_impl
             stats.algorithm_name = "QuickExact";
             // All physically valid charge configurations are determined for the given layout (`QuickExact` simulation
             // is used to provide 100 % accuracy for the Critical Temperature).
-            const quickexact_params<Lyt> qe_params{params.simulation_params.phys_params,
+            const quickexact_params<Lyt> qe_params{params.simulation_parameters.simulation_parameters,
                                                    quickexact_params<Lyt>::automatic_base_number_detection::OFF};
             simulation_results = quickexact(layout, qe_params);
         }
@@ -258,7 +258,7 @@ class critical_temperature_impl
             stats.algorithm_name = "QuickSim";
             // All physically valid charge configurations are determined for the given layout (exhaustive ground state
             // simulation is used to provide 100 % accuracy for the Critical Temperature).
-            simulation_results = quicksim(layout, params.simulation_params);
+            simulation_results = quicksim(layout, params.simulation_parameters);
         }
 
         // The number of physically valid charge configurations is stored.
@@ -417,19 +417,19 @@ class critical_temperature_impl
     [[nodiscard]] sidb_simulation_result<Lyt>
     physical_simulation_of_layout(const bdl_input_iterator<Lyt>& bdl_iterator) noexcept
     {
-        assert(params.simulation_params.phys_params.base == 2 && "base number is set to 3");
+        assert(params.simulation_parameters.simulation_parameters.base == 2 && "base number is set to 3");
         if (params.engine == critical_temperature_params::simulation_engine::EXACT)
         {
             // perform exact simulation
             const quickexact_params<Lyt> quickexact_params{
-                params.simulation_params.phys_params,
+                params.simulation_parameters.simulation_parameters,
                 fiction::quickexact_params<Lyt>::automatic_base_number_detection::OFF};
             return quickexact(*bdl_iterator, quickexact_params);
         }
 
         if (params.engine == critical_temperature_params::simulation_engine::APPROXIMATE)
         {
-            return quicksim(*bdl_iterator, params.simulation_params);
+            return quicksim(*bdl_iterator, params.simulation_parameters);
         }
 
         assert(false && "unsupported simulation engine");

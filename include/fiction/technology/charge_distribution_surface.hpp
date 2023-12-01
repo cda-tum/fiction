@@ -128,12 +128,12 @@ class charge_distribution_surface<Lyt, false> : public Lyt
          * @param params Physical parameters used for the simulation (µ_minus, base number, ...).
          */
         explicit charge_distribution_storage(const sidb_simulation_parameters& params = sidb_simulation_parameters{}) :
-                phys_params{params}
+                simulation_parameters{params}
         {}
         /**
          * Stores all physical parameters used for the simulation.
          */
-        sidb_simulation_parameters phys_params{};
+        sidb_simulation_parameters simulation_parameters{};
         /**
          * All cells that are occupied by an SiDB are stored in order.
          */
@@ -303,7 +303,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
         for (const auto& c : strg->sidb_order)
         {
-            auto pos = sidb_nm_position<Lyt>(strg->phys_params, c);
+            auto pos = sidb_nm_position<Lyt>(strg->simulation_parameters, c);
             positions.push_back(std::make_pair(pos.first, pos.second));
         }
 
@@ -327,24 +327,24 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     void assign_physical_parameters(const sidb_simulation_parameters& params) noexcept
     {
-        if ((strg->phys_params.base == params.base) && (strg->phys_params.lat_b == params.lat_b) &&
-            (strg->phys_params.lat_c == params.lat_c) && (strg->phys_params.epsilon_r == params.epsilon_r) &&
-            (strg->phys_params.lambda_tf == params.lambda_tf))
+        if ((strg->simulation_parameters.base == params.base) && (strg->simulation_parameters.lat_b == params.lat_b) &&
+            (strg->simulation_parameters.lat_c == params.lat_c) && (strg->simulation_parameters.epsilon_r == params.epsilon_r) &&
+            (strg->simulation_parameters.lambda_tf == params.lambda_tf))
         {
-            strg->phys_params                  = params;
+            strg->simulation_parameters        = params;
             strg->charge_index_and_base.second = params.base;
-            strg->max_charge_index = static_cast<uint64_t>(std::pow(strg->phys_params.base, this->num_cells())) - 1;
+            strg->max_charge_index = static_cast<uint64_t>(std::pow(strg->simulation_parameters.base, this->num_cells())) - 1;
             this->update_local_potential();
             this->recompute_system_energy();
             this->validity_check();
         }
         else
         {
-            strg->phys_params = params;
+            strg->simulation_parameters = params;
             this->initialize_nm_distance_matrix();
             this->initialize_potential_matrix();
             strg->charge_index_and_base.second = params.base;
-            strg->max_charge_index = static_cast<uint64_t>(std::pow(strg->phys_params.base, this->num_cells())) - 1;
+            strg->max_charge_index = static_cast<uint64_t>(std::pow(strg->simulation_parameters.base, this->num_cells())) - 1;
             this->update_local_potential();
             this->recompute_system_energy();
             this->validity_check();
@@ -357,7 +357,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     [[nodiscard]] sidb_simulation_parameters get_phys_params() const noexcept
     {
-        return strg->phys_params;
+        return strg->simulation_parameters;
     }
 
     /**
@@ -443,7 +443,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         assert(cell_to_index(dependent_cell) != -1 && "dependent cell is not part of the layout");
         strg->dependent_cell = dependent_cell;
         strg->max_charge_index =
-            static_cast<uint64_t>(std::pow(static_cast<double>(strg->phys_params.base), this->num_cells() - 1) - 1);
+            static_cast<uint64_t>(std::pow(static_cast<double>(strg->simulation_parameters.base), this->num_cells() - 1) - 1);
         strg->dependent_cell_index = static_cast<uint64_t>(cell_to_index(strg->dependent_cell));
     }
     /**
@@ -453,7 +453,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     void assign_base_number(const uint8_t base) noexcept
     {
-        strg->phys_params.base             = base;
+        strg->simulation_parameters.base             = base;
         strg->charge_index_and_base.second = base;
         if (!strg->dependent_cell.is_dead())
         {
@@ -483,7 +483,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 this->foreach_cell(
                     [this, &c, &defect](const auto& c1)
                     {
-                        const auto dist = sidb_nanometer_distance<Lyt>(*this, c1, c, strg->phys_params);
+                        const auto dist = sidb_nanometer_distance<Lyt>(*this, c1, c, strg->simulation_parameters);
                         const auto pot  = chargeless_potential_generated_by_defect_at_given_distance(dist, defect);
 
                         if (strg->defect_local_pot.empty())
@@ -503,7 +503,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 this->foreach_cell(
                     [this, &c, &defect](const auto& c1)
                     {
-                        const auto dist = sidb_nanometer_distance<Lyt>(*this, c1, c, strg->phys_params);
+                        const auto dist = sidb_nanometer_distance<Lyt>(*this, c1, c, strg->simulation_parameters);
 
                         strg->defect_local_pot[c1] =
                             strg->defect_local_pot[c1] +
@@ -534,11 +534,11 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 {
                     strg->local_pot[static_cast<uint64_t>(cell_to_index(c1))] -=
                         chargeless_potential_generated_by_defect_at_given_distance(
-                            sidb_nanometer_distance<Lyt>(*this, c1, c, strg->phys_params), strg->defects[c]) *
+                            sidb_nanometer_distance<Lyt>(*this, c1, c, strg->simulation_parameters), strg->defects[c]) *
                         static_cast<double>(strg->defects[c].charge);
                     strg->defect_local_pot[c1] -=
                         chargeless_potential_generated_by_defect_at_given_distance(
-                            sidb_nanometer_distance<Lyt>(*this, c1, c, strg->phys_params), strg->defects[c]) *
+                            sidb_nanometer_distance<Lyt>(*this, c1, c, strg->simulation_parameters), strg->defects[c]) *
                         static_cast<double>(strg->defects[c].charge);
                 });
             strg->defects.erase(c);
@@ -619,7 +619,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                     // Check if the maximum band bending is sufficient to shift (0/-) above the Fermi level. The local
                     // potential is converted from J to eV to compare the band bending with the Fermi level (which is
                     // also given in eV).
-                    if ((-*local_pot + strg->phys_params.mu_minus) < -physical_constants::POP_STABILITY_ERR)
+                    if ((-*local_pot + strg->simulation_parameters.mu_minus) < -physical_constants::POP_STABILITY_ERR)
                     {
                         negative_sidbs.push_back(cell_to_index(c));
                     }
@@ -667,15 +667,15 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     [[nodiscard]] double calculate_chargeless_potential_between_sidbs_by_index(const uint64_t index1,
                                                                                const uint64_t index2) const noexcept
     {
-        assert(strg->phys_params.lambda_tf > 0.0 && "lambda_tf has to be > 0.0");
+        assert(strg->simulation_parameters.lambda_tf > 0.0 && "lambda_tf has to be > 0.0");
 
         if (strg->nm_dist_mat[index1][index2] == 0.0)
         {
             return 0.0;
         }
 
-        return (strg->phys_params.k() / (strg->nm_dist_mat[index1][index2] * 1E-9) *
-                std::exp(-strg->nm_dist_mat[index1][index2] / strg->phys_params.lambda_tf) *
+        return (strg->simulation_parameters.k() / (strg->nm_dist_mat[index1][index2] * 1E-9) *
+                std::exp(-strg->nm_dist_mat[index1][index2] / strg->simulation_parameters.lambda_tf) *
                 physical_constants::ELEMENTARY_CHARGE);
     }
     /**
@@ -797,7 +797,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         }
         else
         {
-            if (strg->phys_params.base == 2)
+            if (strg->simulation_parameters.base == 2)
             {
                 if (strg->cell_history_gray_code.first != -1)
                 {
@@ -892,7 +892,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             for (const auto& [cell2, defect2] : strg->defects)
             {
                 defect_interaction += chargeless_potential_at_given_distance(
-                    sidb_nanometer_distance<Lyt>(*this, cell1, cell2, strg->phys_params));
+                    sidb_nanometer_distance<Lyt>(*this, cell1, cell2, strg->simulation_parameters));
             }
         }
         strg->system_energy = total_potential + 0.5 * defect_energy + 0.5 * defect_interaction;
@@ -941,16 +941,16 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     {
         uint64_t   population_stability_not_fulfilled_counter = 0;
         uint64_t   for_loop_counter                           = 0;
-        const auto mu_p                                       = strg->phys_params.mu_plus();
+        const auto mu_p                                       = strg->simulation_parameters.mu_plus();
 
         for (const auto& it : strg->local_pot)  // this for-loop checks if the "population stability" is fulfilled.
         {
             bool valid = (((strg->cell_charge[for_loop_counter] == sidb_charge_state::NEGATIVE) &&
-                           (-it + strg->phys_params.mu_minus < physical_constants::POP_STABILITY_ERR)) ||
+                           (-it + strg->simulation_parameters.mu_minus < physical_constants::POP_STABILITY_ERR)) ||
                           ((strg->cell_charge[for_loop_counter] == sidb_charge_state::POSITIVE) &&
                            (-it + mu_p > -physical_constants::POP_STABILITY_ERR)) ||
                           ((strg->cell_charge[for_loop_counter] == sidb_charge_state::NEUTRAL) &&
-                           (-it + strg->phys_params.mu_minus > -physical_constants::POP_STABILITY_ERR) &&
+                           (-it + strg->simulation_parameters.mu_minus > -physical_constants::POP_STABILITY_ERR) &&
                            (-it + mu_p < physical_constants::POP_STABILITY_ERR)));
             for_loop_counter += 1;
             if (!valid)
@@ -1026,7 +1026,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     void charge_distribution_to_index_general() const noexcept
     {
-        const uint8_t base = strg->phys_params.base;
+        const uint8_t base = strg->simulation_parameters.base;
 
         uint64_t chargeindex = 0;
         uint64_t counter     = 0;
@@ -1048,7 +1048,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     void charge_distribution_to_index() const noexcept
     {
-        const uint8_t base = strg->phys_params.base;
+        const uint8_t base = strg->simulation_parameters.base;
 
         uint64_t chargeindex = 0;
         uint64_t counter     = 0;
@@ -1319,7 +1319,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             {
                 if (const auto local_pot = this->get_local_potential(c); local_pot.has_value())
                 {
-                    if ((-(*local_pot) + strg->phys_params.mu_plus()) > -physical_constants::POP_STABILITY_ERR)
+                    if ((-(*local_pot) + strg->simulation_parameters.mu_plus()) > -physical_constants::POP_STABILITY_ERR)
                     {
                         if (c == strg->dependent_cell)
                         {
@@ -1466,7 +1466,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             return 0.0;
         }
 
-        return (strg->phys_params.k() / (distance * 1E-9) * std::exp(-distance / strg->phys_params.lambda_tf) *
+        return (strg->simulation_parameters.k() / (distance * 1E-9) * std::exp(-distance / strg->simulation_parameters.lambda_tf) *
                 physical_constants::ELEMENTARY_CHARGE);
     }
     /**
@@ -1485,7 +1485,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             return 0.0;
         }
 
-        return strg->phys_params.k() * strg->phys_params.epsilon_r / defect.epsilon_r / (distance * 1e-9) *
+        return strg->simulation_parameters.k() * strg->simulation_parameters.epsilon_r / defect.epsilon_r / (distance * 1e-9) *
                std::exp(-distance / defect.lambda_tf) * physical_constants::ELEMENTARY_CHARGE;
     }
     /**
@@ -1538,7 +1538,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         if (!strg->dependent_cell.is_dead())
         {
             const auto loc_pot_cell = -strg->local_pot[strg->dependent_cell_index];
-            if ((loc_pot_cell + strg->phys_params.mu_minus) < physical_constants::POP_STABILITY_ERR)
+            if ((loc_pot_cell + strg->simulation_parameters.mu_minus) < physical_constants::POP_STABILITY_ERR)
             {
                 if (strg->cell_charge[strg->dependent_cell_index] != sidb_charge_state::NEGATIVE)
                 {
@@ -1554,7 +1554,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                     strg->cell_charge[strg->dependent_cell_index] = sidb_charge_state::NEGATIVE;
                 }
             }
-            else if ((loc_pot_cell + strg->phys_params.mu_plus()) > -physical_constants::POP_STABILITY_ERR)
+            else if ((loc_pot_cell + strg->simulation_parameters.mu_plus()) > -physical_constants::POP_STABILITY_ERR)
             {
                 // dependent-cell can only be positively charged when the base number is set to three state simulation.
                 if (strg->charge_index_and_base.second == 3)
@@ -1807,15 +1807,15 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         std::sort(strg->sidb_order.begin(), strg->sidb_order.end());
         this->foreach_cell([this, &cs](const auto&) { strg->cell_charge.push_back(cs); });
 
-        assert((((this->num_cells() < 41) && (strg->phys_params.base == 3)) ||
-                ((strg->phys_params.base == 2) && (this->num_cells() < 64))) &&
+        assert((((this->num_cells() < 41) && (strg->simulation_parameters.base == 3)) ||
+                ((strg->simulation_parameters.base == 2) && (this->num_cells() < 64))) &&
                "number of SiDBs is too large");
 
         this->charge_distribution_to_index();
         this->initialize_nm_distance_matrix();
         this->initialize_potential_matrix();
         strg->max_charge_index =
-            static_cast<uint64_t>(std::pow(static_cast<double>(strg->phys_params.base), this->num_cells()) - 1);
+            static_cast<uint64_t>(std::pow(static_cast<double>(strg->simulation_parameters.base), this->num_cells()) - 1);
         this->update_local_potential();
         this->recompute_system_energy();
         this->validity_check();
@@ -1829,7 +1829,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     void assign_base_number_to_three() noexcept
     {
-        strg->phys_params.base             = 3;
+        strg->simulation_parameters.base             = 3;
         strg->charge_index_and_base.second = 2;
         if (!strg->dependent_cell.is_dead())
         {
@@ -1866,7 +1866,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             for (uint64_t j = 0u; j < strg->sidb_order.size(); j++)
             {
                 strg->nm_dist_mat[i][j] =
-                    sidb_nanometer_distance<Lyt>(*this, strg->sidb_order[i], strg->sidb_order[j], strg->phys_params);
+                    sidb_nanometer_distance<Lyt>(*this, strg->sidb_order[i], strg->sidb_order[j], strg->simulation_parameters);
             }
         }
     }

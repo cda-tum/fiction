@@ -39,7 +39,7 @@ void quickexact(pybind11::module& m)
      */
     py::class_<fiction::quickexact_params<Lyt>>(m, "quickexact_params", DOC(fiction_quickexact_params))
         .def(py::init<>())
-        .def_readwrite("physical_parameters", &fiction::quickexact_params<Lyt>::physical_parameters,
+        .def_readwrite("simulation_parameters", &fiction::quickexact_params<Lyt>::simulation_parameters,
                        DOC(fiction_quickexact_params_physical_parameters))
         .def_readwrite("base_number_detection", &fiction::quickexact_params<Lyt>::base_number_detection,
                        DOC(fiction_quickexact_params_base_number_detection))
@@ -56,7 +56,7 @@ void quickexact(pybind11::module& m)
            const typename fiction::quickexact_params<Lyt>& params) -> fiction::sidb_simulation_result<py_cds_base>
         {
             fiction::quickexact_params<py_cds_base> converted_params{
-                params.physical_parameters,
+                params.simulation_parameters,
                 params.base_number_detection == fiction::quickexact_params<Lyt>::automatic_base_number_detection::ON ?
                     fiction::quickexact_params<py_cds_base>::automatic_base_number_detection::ON :
                     fiction::quickexact_params<py_cds_base>::automatic_base_number_detection::OFF,

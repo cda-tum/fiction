@@ -39,7 +39,7 @@ TEMPLATE_TEST_CASE(
 
     const quicksim_params quicksim_params{sidb_simulation_parameters{2, -0.30}};
 
-    REQUIRE(quicksim_params.phys_params.mu_minus == -0.30);
+    REQUIRE(quicksim_params.simulation_parameters.mu_minus == -0.30);
 
     const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
 
@@ -64,7 +64,7 @@ TEMPLATE_TEST_CASE(
 
     const quicksim_params quicksim_params{sidb_simulation_parameters{2, -0.30}};
 
-    REQUIRE(quicksim_params.phys_params.mu_minus == -0.30);
+    REQUIRE(quicksim_params.simulation_parameters.mu_minus == -0.30);
 
     const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
 
@@ -109,7 +109,7 @@ TEMPLATE_TEST_CASE(
 
     quicksim_params quicksim_params{params};
 
-    REQUIRE(quicksim_params.phys_params.mu_minus == -0.30);
+    REQUIRE(quicksim_params.simulation_parameters.mu_minus == -0.30);
 
     SECTION("Default settings")
     {
@@ -185,7 +185,7 @@ TEMPLATE_TEST_CASE(
 
     quicksim_params quicksim_params{params};
 
-    REQUIRE(quicksim_params.phys_params.mu_minus == -0.32);
+    REQUIRE(quicksim_params.simulation_parameters.mu_minus == -0.32);
 
     const auto check_charge_configuration = [](const sidb_simulation_result<TestType>& stats) noexcept
     {
@@ -285,7 +285,7 @@ TEMPLATE_TEST_CASE(
 
     quicksim_params quicksim_params{params};
 
-    REQUIRE(quicksim_params.phys_params.mu_minus == -0.32);
+    REQUIRE(quicksim_params.simulation_parameters.mu_minus == -0.32);
 
     const auto check_charge_configuration = [](const sidb_simulation_result<TestType>& stats) noexcept
     {
@@ -378,7 +378,7 @@ TEMPLATE_TEST_CASE(
 
     quicksim_params quicksim_params{params};
 
-    REQUIRE(quicksim_params.phys_params.mu_minus == -0.28);
+    REQUIRE(quicksim_params.simulation_parameters.mu_minus == -0.28);
 
     const auto check_charge_configuration = [](const sidb_simulation_result<TestType>& stats) noexcept
     {
@@ -464,7 +464,7 @@ TEMPLATE_TEST_CASE(
 
     quicksim_params quicksim_params{params};
 
-    REQUIRE(quicksim_params.phys_params.mu_minus == -0.25);
+    REQUIRE(quicksim_params.simulation_parameters.mu_minus == -0.25);
 
     const auto check_charge_configuration = [](const sidb_simulation_result<TestType>& stats) noexcept
     {
@@ -565,7 +565,7 @@ TEMPLATE_TEST_CASE(
     quicksim_params quicksim_params{params};
 
     // check QuickSim parameters
-    REQUIRE(quicksim_params.phys_params.mu_minus == -0.32);
+    REQUIRE(quicksim_params.simulation_parameters.mu_minus == -0.32);
 
     // lambda function to check charge configurations
     const auto check_charge_configuration = [](const sidb_simulation_result<TestType>& stats) noexcept
@@ -673,7 +673,7 @@ TEMPLATE_TEST_CASE(
 
     quicksim_params quicksim_params{params};
 
-    REQUIRE(quicksim_params.phys_params.mu_minus == -0.32);
+    REQUIRE(quicksim_params.simulation_parameters.mu_minus == -0.32);
 
     const auto check_charge_configuration = [](const sidb_simulation_result<TestType>& stats) noexcept
     {
@@ -925,7 +925,7 @@ TEMPLATE_TEST_CASE(
 
     quicksim_params quicksim_params{params};
 
-    REQUIRE(quicksim_params.phys_params.mu_minus == -0.32);
+    REQUIRE(quicksim_params.simulation_parameters.mu_minus == -0.32);
 
     const auto check_charge_configuration = [](const sidb_simulation_result<TestType>& stats) noexcept
     {

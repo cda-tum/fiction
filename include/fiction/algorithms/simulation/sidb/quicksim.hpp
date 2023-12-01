@@ -32,9 +32,9 @@ namespace fiction
 struct quicksim_params
 {
     /**
-     * General parameters for the simulation of the physical SiDB system.
+     * Simulation parameters for the simulation of the physical SiDB system.
      */
-    sidb_simulation_parameters phys_params{};
+    sidb_simulation_parameters simulation_parameters{};
     /**
      * Number of iterations to run the simulation for.
      */
@@ -77,7 +77,7 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
     st.algorithm_name = "QuickSim";
     st.additional_simulation_parameters.emplace_back("iteration_steps", ps.iteration_steps);
     st.additional_simulation_parameters.emplace_back("alpha", ps.alpha);
-    st.physical_parameters = ps.phys_params;
+    st.simulation_parameters = ps.simulation_parameters;
     st.charge_distributions.reserve(ps.iteration_steps);
 
     mockturtle::stopwatch<>::duration time_counter{};
@@ -89,7 +89,7 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
         charge_distribution_surface<Lyt> charge_lyt{lyt};
 
         // set the given physical parameters
-        charge_lyt.assign_physical_parameters(ps.phys_params);
+        charge_lyt.assign_physical_parameters(ps.simulation_parameters);
         charge_lyt.assign_base_number(2);
         charge_lyt.assign_all_charge_states(sidb_charge_state::NEGATIVE);
         charge_lyt.update_after_charge_change(dependent_cell_mode::VARIABLE);

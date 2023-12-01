@@ -768,7 +768,7 @@ Template parameter ``Lyt``:
 Parameter ``lyt``:
     The layout to be analyzed.
 
-Parameter ``sim_params``:
+Parameter ``simulation_parameters``:
     Physical parameters used to determine whether positively charged
     SiDBs can occur.)doc";
 
@@ -5594,7 +5594,7 @@ static const char* __doc_fiction_detail_operational_domain_impl_set_x_dimension_
     R"doc(Helper function that sets the value of the x dimension in the
 simulation parameters.
 
-Parameter ``sim_params``:
+Parameter ``simulation_parameters``:
     Simulation parameter object to set the x dimension value of.
 
 Parameter ``val``:
@@ -5604,7 +5604,7 @@ static const char* __doc_fiction_detail_operational_domain_impl_set_y_dimension_
     R"doc(Helper function that sets the value of the y dimension in the
 simulation parameters.
 
-Parameter ``sim_params``:
+Parameter ``simulation_parameters``:
     Simulation parameter object to set the y dimension value of.
 
 Parameter ``val``:
@@ -6432,7 +6432,7 @@ static const char* __doc_fiction_detail_write_sqd_sim_result_impl_write_physical
 format.)doc";
 
 static const char* __doc_fiction_detail_write_sqd_sim_result_impl_write_simulation_parameters =
-    R"doc(Writes both the `physical_parameters` as well as the
+    R"doc(Writes both the `simulation_parameters` as well as the
 `additional_simulation_parameters` to the output stream in XML format.)doc";
 
 static const char* __doc_fiction_detail_write_sqd_sim_result_impl_write_sqd_sim_result_impl = R"doc()doc";

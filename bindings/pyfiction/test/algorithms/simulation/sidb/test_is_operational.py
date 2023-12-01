@@ -28,13 +28,13 @@ class TestIsOperational(unittest.TestCase):
         lyt.assign_cell_type((10, 9, 1), sidb_technology.cell_type.NORMAL)
 
         params = is_operational_params()
-        params.sim_params = sidb_simulation_parameters(2, -0.28)
+        params.simulation_parameters = sidb_simulation_parameters(2, -0.28)
 
         [op_status, evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], params)
 
         self.assertEqual(op_status, operational_status.OPERATIONAL)
 
-        params.sim_params = sidb_simulation_parameters(2, -0.1)
+        params.simulation_parameters = sidb_simulation_parameters(2, -0.1)
 
         [op_status, evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], params)
 

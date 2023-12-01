@@ -105,11 +105,11 @@ void time_to_solution(Lyt& lyt, const quicksim_params& quicksim_params, const ti
     if (tts_params.engine == exhaustive_sidb_simulation_engine::QUICKEXACT)
     {
         st.algorithm      = "QuickExact";
-        simulation_result = exhaustive_ground_state_simulation(lyt, quicksim_params.phys_params);
+        simulation_result = exhaustive_ground_state_simulation(lyt, quicksim_params.simulation_parameters);
     }
     else
     {
-        const quickexact_params<Lyt> params{quicksim_params.phys_params};
+        const quickexact_params<Lyt> params{quicksim_params.simulation_parameters};
         st.algorithm      = "QuickExact";
         simulation_result = quickexact(lyt, params);
     }

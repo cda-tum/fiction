@@ -34,7 +34,7 @@ void sidb_simulation_result(pybind11::module& m)
                        DOC(fiction_sidb_simulation_result_simulation_runtime))
         .def_readwrite("charge_distributions", &fiction::sidb_simulation_result<Lyt>::charge_distributions,
                        DOC(fiction_sidb_simulation_result_charge_distributions))
-        .def_readwrite("physical_parameters", &fiction::sidb_simulation_result<Lyt>::physical_parameters,
+        .def_readwrite("simulation_parameters", &fiction::sidb_simulation_result<Lyt>::simulation_parameters,
                        DOC(fiction_sidb_simulation_result_physical_parameters))
         .def_readwrite("additional_simulation_parameters",
                        &fiction::sidb_simulation_result<Lyt>::additional_simulation_parameters,

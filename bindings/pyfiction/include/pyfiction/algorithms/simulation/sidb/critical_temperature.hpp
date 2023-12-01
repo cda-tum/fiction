@@ -92,7 +92,7 @@ inline void critical_temperature(pybind11::module& m)
     py::class_<fiction::critical_temperature_params>(m, "critical_temperature_params",
                                                      DOC(fiction_critical_temperature_params))
         .def(py::init<>())
-        .def_readwrite("simulation_params", &fiction::critical_temperature_params::simulation_params,
+        .def_readwrite("simulation_parameters", &fiction::critical_temperature_params::simulation_parameters,
                        DOC(fiction_critical_temperature_params_simulation_params))
         .def_readwrite("engine", &fiction::critical_temperature_params::engine,
                        DOC(fiction_critical_temperature_params_engine))
