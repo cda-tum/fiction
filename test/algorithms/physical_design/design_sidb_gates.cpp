@@ -2,20 +2,20 @@
 //// Created by Jan Drewniok on 12.09.23.
 ////
 //
-//#include <catch2/catch_template_test_macros.hpp>
+// #include <catch2/catch_template_test_macros.hpp>
 //
-//#include <fiction/algorithms/physical_design/design_sidb_gates.hpp>
-//#include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
-//#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
-//#include <fiction/layouts/cell_level_layout.hpp>
-//#include <fiction/layouts/coordinates.hpp>
-//#include <fiction/traits.hpp>
-//#include <fiction/types.hpp>
-//#include <fiction/utils/truth_table_utils.hpp>
+// #include <fiction/algorithms/physical_design/design_sidb_gates.hpp>
+// #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
+// #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
+// #include <fiction/layouts/cell_level_layout.hpp>
+// #include <fiction/layouts/coordinates.hpp>
+// #include <fiction/traits.hpp>
+// #include <fiction/types.hpp>
+// #include <fiction/utils/truth_table_utils.hpp>
 //
-//using namespace fiction;
+// using namespace fiction;
 //
-//TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[design-sidb-gates]")
+// TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[design-sidb-gates]")
 //{
 //
 //    using layout        = sidb_cell_clk_lyt_siqad;
@@ -125,7 +125,7 @@
 //    }
 //}
 //
-//TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[design-sidb-gates]")
+// TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[design-sidb-gates]")
 //{
 //    using layout = sidb_cell_clk_lyt_siqad;
 //
@@ -169,7 +169,7 @@
 //    }
 //}
 //
-//TEST_CASE("Use FO2 Bestagon gate without SiDB at {17, 11, 0} and generate original one", "[design-sidb-gates]")
+// TEST_CASE("Use FO2 Bestagon gate without SiDB at {17, 11, 0} and generate original one", "[design-sidb-gates]")
 //{
 //    using layout = sidb_cell_clk_lyt_siqad;
 //
@@ -237,16 +237,19 @@
 //        sidb_defect_cell_clk_lyt_siqad defect_layout{lyt};
 //        defect_layout.assign_cell_type({36, 19, 0}, technology<sidb_defect_cell_clk_lyt_siqad>::cell_type::EMPTY);
 //        defect_layout.assign_cell_type({2, 19, 0}, technology<sidb_defect_cell_clk_lyt_siqad>::cell_type::EMPTY);
-//        CHECK(defect_layout.get_cell_type({36, 19, 0}) == technology<sidb_defect_cell_clk_lyt_siqad>::cell_type::EMPTY);
-//        CHECK(defect_layout.get_cell_type({2, 19, 0}) == technology<sidb_defect_cell_clk_lyt_siqad>::cell_type::EMPTY);
+//        CHECK(defect_layout.get_cell_type({36, 19, 0}) ==
+//        technology<sidb_defect_cell_clk_lyt_siqad>::cell_type::EMPTY); CHECK(defect_layout.get_cell_type({2, 19, 0})
+//        == technology<sidb_defect_cell_clk_lyt_siqad>::cell_type::EMPTY);
 //
 //        defect_layout.assign_sidb_defect(
 //            {36, 19, 0},
 //            sidb_defect{sidb_defect_type::DB, -1, params.phys_params.epsilon_r, params.phys_params.lambda_tf});
-//        defect_layout.assign_sidb_defect({2, 19, 0}, sidb_defect{sidb_defect_type::DB, -1, params.phys_params.epsilon_r,
+//        defect_layout.assign_sidb_defect({2, 19, 0}, sidb_defect{sidb_defect_type::DB, -1,
+//        params.phys_params.epsilon_r,
 //                                                                 params.phys_params.lambda_tf});
 //
-//        const auto found_gate_layouts = design_sidb_gates(defect_layout, std::vector<tt>{create_fan_out_tt()}, params);
+//        const auto found_gate_layouts = design_sidb_gates(defect_layout, std::vector<tt>{create_fan_out_tt()},
+//        params);
 //
 //        REQUIRE(found_gate_layouts.size() == 1);
 //        CHECK(found_gate_layouts[0].num_cells() == 19);
@@ -255,7 +258,7 @@
 //    }
 //}
 //
-//TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
+// TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
 //{
 //    using layout = sidb_cell_clk_lyt_siqad;
 //
