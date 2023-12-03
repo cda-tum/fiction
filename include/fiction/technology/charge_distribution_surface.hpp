@@ -57,9 +57,14 @@ enum class energy_calculation
      */
     KEEP_OLD_ENERGY_VALUE,
     /**
+     * The electrostatic potential energy of a given charge distribution is updated after it is changed and population
+     * and configuration stability criteria are met.
+     */
+    UPDATE_ENERGY,
+    /**
      * The electrostatic potential energy of a given charge distribution is updated after it is changed.
      */
-    UPDATE_ENERGY
+    FORCE_UPDATE_ENERGY
 };
 
 /**
@@ -327,28 +332,28 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     void assign_physical_parameters(const sidb_simulation_parameters& params) noexcept
     {
-        if ((strg->phys_params.base == params.base) && (strg->phys_params.lat_b == params.lat_b) &&
-            (strg->phys_params.lat_c == params.lat_c) && (strg->phys_params.epsilon_r == params.epsilon_r) &&
-            (strg->phys_params.lambda_tf == params.lambda_tf))
+        const sidb_simulation_parameters old_params = strg->phys_params;
+        strg->phys_params                           = params;
+
+        if (old_params.base != params.base)
         {
-            strg->phys_params                  = params;
-            strg->charge_index_and_base.second = params.base;
+            strg->charge_index_and_base.second = strg->phys_params.base;
             strg->max_charge_index = static_cast<uint64_t>(std::pow(strg->phys_params.base, this->num_cells())) - 1;
-            this->update_local_potential();
-            this->recompute_system_energy();
-            this->validity_check();
         }
-        else
-        {
-            strg->phys_params = params;
+
+        if (old_params.lat_a != params.lat_a || old_params.lat_b != params.lat_b || old_params.lat_c != params.lat_c)
+        {  // lattice changed
             this->initialize_nm_distance_matrix();
             this->initialize_potential_matrix();
-            strg->charge_index_and_base.second = params.base;
-            strg->max_charge_index = static_cast<uint64_t>(std::pow(strg->phys_params.base, this->num_cells())) - 1;
-            this->update_local_potential();
-            this->recompute_system_energy();
-            this->validity_check();
         }
+        else if (old_params.epsilon_r != params.epsilon_r || old_params.lambda_tf != params.lambda_tf)
+        {  // potential changed
+            this->initialize_potential_matrix();
+        }
+
+        this->update_local_potential();
+        this->recompute_system_energy();
+        this->validity_check();
     }
     /**
      * This function retrieves the physical parameters of the simulation.
@@ -607,7 +612,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @return Vector of indices describing which SiDBs must be negatively charged.
      */
-    std::vector<int64_t> negative_sidb_detection() noexcept
+    std::vector<int64_t> negative_sidb_detection() const noexcept
     {
         std::vector<int64_t> negative_sidbs{};
         negative_sidbs.reserve(this->num_cells());
@@ -923,15 +928,19 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         const charge_distribution_history history_mode            = charge_distribution_history::NEGLECT) noexcept
     {
         this->update_local_potential(history_mode);
+
         if (dependent_cell == dependent_cell_mode::VARIABLE)
         {
             this->update_charge_state_of_dependent_cell();
         }
-        if (energy_calculation_mode == energy_calculation::UPDATE_ENERGY)
+
+        this->validity_check();
+
+        if (energy_calculation_mode == energy_calculation::FORCE_UPDATE_ENERGY ||
+            (strg->validity && energy_calculation_mode == energy_calculation::UPDATE_ENERGY))
         {
             this->recompute_system_energy();
         }
-        this->validity_check();
     }
     /**
      * The physically validity of the current charge distribution is evaluated and stored in the storage struct. A
@@ -939,73 +948,60 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     void validity_check() noexcept
     {
-        uint64_t   population_stability_not_fulfilled_counter = 0;
-        uint64_t   for_loop_counter                           = 0;
-        const auto mu_p                                       = strg->phys_params.mu_plus();
+        const auto mu_p = strg->phys_params.mu_plus();
 
-        for (const auto& it : strg->local_pot)  // this for-loop checks if the "population stability" is fulfilled.
+        for (uint64_t i = 0; i < strg->local_pot.size();
+             ++i)  // this for-loop checks if the "population stability" is fulfilled.
         {
-            bool valid = (((strg->cell_charge[for_loop_counter] == sidb_charge_state::NEGATIVE) &&
-                           (-it + strg->phys_params.mu_minus < physical_constants::POP_STABILITY_ERR)) ||
-                          ((strg->cell_charge[for_loop_counter] == sidb_charge_state::POSITIVE) &&
-                           (-it + mu_p > -physical_constants::POP_STABILITY_ERR)) ||
-                          ((strg->cell_charge[for_loop_counter] == sidb_charge_state::NEUTRAL) &&
-                           (-it + strg->phys_params.mu_minus > -physical_constants::POP_STABILITY_ERR) &&
-                           (-it + mu_p < physical_constants::POP_STABILITY_ERR)));
-            for_loop_counter += 1;
-            if (!valid)
+            if (((strg->cell_charge[i] == sidb_charge_state::NEGATIVE) &&
+                 (-strg->local_pot[i] + strg->phys_params.mu_minus < physical_constants::POP_STABILITY_ERR)) ||
+                ((strg->cell_charge[i] == sidb_charge_state::POSITIVE) &&
+                 (-strg->local_pot[i] + mu_p > -physical_constants::POP_STABILITY_ERR)) ||
+                ((strg->cell_charge[i] == sidb_charge_state::NEUTRAL) &&
+                 (-strg->local_pot[i] + strg->phys_params.mu_minus > -physical_constants::POP_STABILITY_ERR) &&
+                 (-strg->local_pot[i] + mu_p < physical_constants::POP_STABILITY_ERR)))
             {
-                strg->validity = false;  // if at least one SiDB does not fulfill the population stability, the validity
-                                         // of the given charge distribution is set to "false".
-                population_stability_not_fulfilled_counter += 1;
-                break;
+                continue;
+            }
+
+            strg->validity = false;  // if at least one SiDB does not fulfill the population stability, the validity of
+                                     // the given charge distribution is set to "false".
+            return;
+        }
+
+        // if population stability is fulfilled for all SiDBs, the "configuration stability" is checked.
+        const auto hop_del =
+            [this](const uint64_t c1, const uint64_t c2)  // energy change when charge hops between two SiDBs.
+        {
+            const int dn_i = (strg->cell_charge[c1] == sidb_charge_state::NEGATIVE) ? 1 : -1;
+            const int dn_j = -dn_i;
+
+            return strg->local_pot[c1] * dn_i + strg->local_pot[c2] * dn_j - strg->pot_mat[c1][c2] * 1;
+        };
+
+        for (uint64_t i = 0u; i < strg->local_pot.size(); ++i)
+        {
+            if (strg->cell_charge[i] == sidb_charge_state::POSITIVE)  // we do nothing with SiDB+
+            {
+                continue;
+            }
+
+            for (uint64_t j = 0u; j < strg->local_pot.size(); j++)
+            {
+                if (const auto e_del = hop_del(i, j);
+                    (charge_state_to_sign(strg->cell_charge[j]) > charge_state_to_sign(strg->cell_charge[i])) &&
+                    (e_del < -physical_constants::POP_STABILITY_ERR))  // Checks if energetically favored
+                                                                       // hops exist between two SiDBs.
+                {
+                    strg->validity = false;
+                    return;
+                }
             }
         }
 
-        if ((population_stability_not_fulfilled_counter == 0) &&
-            (for_loop_counter >
-             0))  // if population stability is fulfilled for all SiDBs, the "configuration stability" is checked.
-        {
-            const auto hop_del =
-                [this](const uint64_t c1, const uint64_t c2)  // energy change when charge hops between two SiDBs.
-            {
-                const int dn_i = (strg->cell_charge[c1] == sidb_charge_state::NEGATIVE) ? 1 : -1;
-                const int dn_j = -dn_i;
-
-                return strg->local_pot[c1] * dn_i + strg->local_pot[c2] * dn_j - strg->pot_mat[c1][c2] * 1;
-            };
-
-            uint64_t hop_counter = 0;
-            for (uint64_t i = 0u; i < strg->local_pot.size(); ++i)
-            {
-                if (strg->cell_charge[i] == sidb_charge_state::POSITIVE)  // we do nothing with SiDB+
-                {
-                    continue;
-                }
-
-                for (uint64_t j = 0u; j < strg->local_pot.size(); j++)
-                {
-                    if (hop_counter == 1)
-                    {
-                        break;
-                    }
-
-                    if (const auto e_del = hop_del(i, j);
-                        (charge_state_to_sign(strg->cell_charge[j]) > charge_state_to_sign(strg->cell_charge[i])) &&
-                        (e_del < -physical_constants::POP_STABILITY_ERR))  // Checks if energetically favored
-                                                                           // hops exist between two SiDBs.
-                    {
-                        hop_counter = 1;
-
-                        break;
-                    }
-                }
-            }
-
-            // If there is no jump that leads to a decrease in the potential energy of the system, the given charge
-            // distribution satisfies metastability.
-            strg->validity = hop_counter == 0;
-        }
+        // If there is no jump that leads to a decrease in the potential energy of the system, the given charge
+        // distribution satisfies metastability.
+        strg->validity = true;
     }
     /**
      * This function returns the currently stored validity of the present charge distribution layout.
@@ -1175,7 +1171,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             }
             else
             {
-                this->index_to_charge_distribution();
+                this->index_to_charge_distribution(true);
             }
             this->update_after_charge_change(dependent_cell, energy_calculation_mode, history_mode);
         }
@@ -1507,7 +1503,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @return External electrostatic potential as unordered map. The cell is used as key and the external electrostatic
      * potential in Volt (unit: V) at its position as value.
      */
-    std::unordered_map<typename Lyt::cell, double> get_local_external_potentials() noexcept
+    std::unordered_map<typename Lyt::cell, double> get_local_external_potentials() const noexcept
     {
         return strg->local_external_pot;
     }
@@ -1516,7 +1512,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @return Local electrostatic potential in Volt generated by the defects at each each cell.
      */
-    std::unordered_map<typename Lyt::cell, double> get_local_defect_potentials() noexcept
+    std::unordered_map<typename Lyt::cell, double> get_local_defect_potentials() const noexcept
     {
         return strg->defect_local_pot;
     }
@@ -1525,7 +1521,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @return Placed defects with cell position and type.
      */
-    std::unordered_map<typename Lyt::cell, const sidb_defect> get_defects() noexcept
+    std::unordered_map<typename Lyt::cell, const sidb_defect> get_defects() const noexcept
     {
         return strg->defects;
     }
@@ -1681,7 +1677,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             }
             else
             {
-                this->index_to_charge_distribution();
+                this->index_to_charge_distribution(true);
             }
             this->update_after_charge_change(dependent_cell_fixed, recompute_system_energy, consider_history);
         }
@@ -1755,7 +1751,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @return Vector with all cells.
      */
-    std::vector<typename Lyt::cell> get_sidb_order() noexcept
+    std::vector<typename Lyt::cell> get_sidb_order() const noexcept
     {
         return strg->sidb_order;
     }
@@ -1964,59 +1960,58 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     }
     /**
      *  The stored unique index is converted to a charge distribution.
+     *
+     *  @param incremented Flag that can be set to true when the charge index was incremented before calling this
+     * function to enable an optimization. When set to true, the leading zeroes of the charge index are not handled.
      */
-    void index_to_charge_distribution() noexcept
+    void index_to_charge_distribution(const bool incremented = false) noexcept
     {
-        auto       charge_quot          = strg->charge_index_and_base.first;
-        const auto base                 = strg->charge_index_and_base.second;
-        const auto num_charges          = this->num_cells();
-        auto       counter              = num_charges - 1;
-        const auto dependent_cell_index = cell_to_index(strg->dependent_cell);
-
         // A charge index of zero corresponds to a layout with all SiDBs set to negative.
-        if (charge_quot == 0)
+        if (strg->charge_index_and_base.first == 0)
         {
             this->assign_all_charge_states(sidb_charge_state::NEGATIVE);
+            return;
         }
-        else
-        {
-            while (charge_quot > 0)
-            {
-                const auto    charge_quot_int = static_cast<int64_t>(charge_quot);
-                const auto    base_int        = static_cast<int64_t>(base);
-                const int64_t quotient_int    = charge_quot_int / base_int;
-                const int64_t remainder_int   = charge_quot_int % base_int;
-                charge_quot                   = static_cast<uint64_t>(quotient_int);
-                // Dependent-SiDB is skipped since its charge state is not changed based on the charge index.
 
-                if (dependent_cell_index >= 0)
-                {
-                    if (counter != static_cast<uint64_t>(dependent_cell_index))
-                    {
-                        const auto sign = sign_to_charge_state(static_cast<int8_t>(remainder_int - 1));
-                        this->assign_charge_state_by_cell_index(counter, sign, false);
-                        counter -= 1;
-                    }
-                    // If the counter is at the dependent-cell location, it is reduced by one to get to the next
-                    // cell position.
-                    else
-                    {
-                        counter -= 1;
-                        const auto sign = sign_to_charge_state(static_cast<int8_t>(remainder_int - 1));
-                        // The charge state is only changed (i.e., the function assign_charge_state_by_cell_index is
-                        // called), if the nw charge state differs to the previous one. Only then will the cell be
-                        // added to the charge_distribution_history.
-                        this->assign_charge_state_by_cell_index(counter, sign, false);
-                        counter -= 1;
-                    }
-                }
-                else
-                {
-                    const auto sign = sign_to_charge_state(static_cast<int8_t>(remainder_int - 1));
-                    this->assign_charge_state_by_cell_index(counter, sign, false);
-                    counter -= 1;
-                }
+        const auto dependent_cell_index = cell_to_index(strg->dependent_cell);
+        const bool has_dependent_cell   = dependent_cell_index >= 0;
+
+        const auto base        = static_cast<uint64_t>(strg->charge_index_and_base.second);
+        uint64_t   charge_quot = strg->charge_index_and_base.first;
+
+        auto counter = static_cast<int64_t>(this->num_cells() - 1);
+
+        while (charge_quot > 0)
+        {
+            const auto charge_state = sign_to_charge_state(static_cast<int8_t>(charge_quot % base) - 1);
+
+            // Dependent-SiDB is skipped since its charge state is not changed based on the charge index.
+
+            // If the counter is at the dependent-cell location, it is reduced by one to get to the next
+            // cell position.
+            if (has_dependent_cell && counter == dependent_cell_index)
+            {
+                // The charge state is only changed (i.e., the function assign_charge_state_by_cell_index is
+                // called), if the nw charge state differs to the previous one. Only then will the cell be
+                // added to the charge_distribution_history.
+                counter -= 1;
             }
+
+            this->assign_charge_state_by_cell_index(static_cast<uint64_t>(counter), charge_state, false);
+
+            charge_quot /= base;
+            counter -= 1;
+        }
+
+        if (incremented)
+        {
+            return;
+        }
+
+        // If the counter is >= 0, then the first <counter> cells should be assigned a negative charge state.
+        for (uint64_t i = 0; static_cast<int64_t>(i) <= counter; ++i)
+        {
+            this->assign_charge_state_by_cell_index(i, sidb_charge_state::NEGATIVE, false);
         }
     }
 };

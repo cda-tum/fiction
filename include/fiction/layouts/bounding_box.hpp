@@ -133,10 +133,10 @@ class bounding_box_2d
                         }
                     }
                 });
-
-            x_size = max.x - min.x;
-            y_size = max.y - min.y;
         }
+
+        x_size = max.x - min.x;
+        y_size = max.y - min.y;
     }
     /**
      * Returns the minimum corner of the bounding box.

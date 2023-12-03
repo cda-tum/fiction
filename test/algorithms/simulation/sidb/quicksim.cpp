@@ -50,7 +50,6 @@ TEMPLATE_TEST_CASE(
     CHECK(std::any_cast<uint64_t>(simulation_results.additional_simulation_parameters[0].second) == 80);
     CHECK(simulation_results.additional_simulation_parameters[1].first == "alpha");
     CHECK(std::any_cast<double>(simulation_results.additional_simulation_parameters[1].second) == 0.7);
-    CHECK(simulation_results.charge_distributions.empty());
 }
 
 TEMPLATE_TEST_CASE(

@@ -48,6 +48,23 @@ TEMPLATE_TEST_CASE(
 }
 
 TEMPLATE_TEST_CASE(
+    "ExGS simulation of two SiDBs placed directly next to each other with non-realistic relative permittivity",
+    "[exhaustive-ground-state-simulation]",
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
+    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+{
+    TestType lyt{};
+    lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({2, 3, 0}, TestType::cell_type::NORMAL);
+
+    const sidb_simulation_parameters params{2, -0.32, 1.0e-3};
+
+    const auto simulation_results = exhaustive_ground_state_simulation<TestType>(lyt, params);
+
+    CHECK(simulation_results.charge_distributions.empty());
+}
+
+TEMPLATE_TEST_CASE(
     "ExGS simulation of a one BDL pair with one perturber", "[exhaustive-ground-state-simulation]",
     (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
     (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
