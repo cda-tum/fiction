@@ -461,7 +461,8 @@ void place_two_fanin_gate_null(Lyt& layout, const coloring_container<Ntk>& ctn, 
  * Places the POs in the layout.
  */
 template <typename Ntk, typename NtkI, typename Lyt>
-void place_outputs(Lyt& layout, NtkI inp_ntk, const coloring_container<Ntk>& ctn, tile<Lyt>& latest_pos, uint32_t po_counter,
+void place_outputs(Lyt& layout, NtkI inp_ntk, const coloring_container<Ntk>& ctn, tile<Lyt>& latest_pos,
+                   uint32_t                                                                po_counter,
                    mockturtle::node_map<mockturtle::signal<Lyt>, decltype(ctn.color_ntk)>& node2pos)
 {
     bool                               multi_out_node = false;

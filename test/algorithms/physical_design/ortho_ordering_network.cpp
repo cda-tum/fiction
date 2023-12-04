@@ -7,8 +7,8 @@
 #include "utils/blueprints/network_blueprints.hpp"
 
 #include <fiction/algorithms/physical_design/apply_gate_library.hpp>
-#include <fiction/algorithms/verification/equivalence_checking.hpp>
 #include <fiction/algorithms/physical_design/ortho_ordering_network.hpp>
+#include <fiction/algorithms/verification/equivalence_checking.hpp>
 #include <fiction/technology/qca_one_library.hpp>
 
 #include <iostream>
@@ -126,7 +126,7 @@ TEST_CASE("Equivalence", "[orthogonal-ordering]")
 
     const auto layout = orthogonal_ordering_network<gate_layout>(mux21);
 
-    equivalence_checking_stats        st_eq{};
+    equivalence_checking_stats st_eq{};
     equivalence_checking(mux21, layout, &st_eq);
 
     CHECK(st_eq.eq == eq_type::STRONG);
