@@ -178,15 +178,14 @@ class critical_temperature_impl
      *
      * @tparam TT The type of the truth table specifying the gate behavior.
      * @param spec Expected Boolean function of the layout given as a multi-output truth table.
-     * @return `true` if the simulation succeeds and *Gate-based Critical Temperature* is determined, `false` otherwise.
      */
     template <typename TT>
-    [[nodiscard]] bool gate_based_simulation(const std::vector<TT>& spec) noexcept
+    void gate_based_simulation(const std::vector<TT>& spec) noexcept
     {
         if (layout.is_empty())
         {
             stats.critical_temperature = 0.0;
-            return true;
+            return;
         }
         else if (layout.num_cells() > 1)
         {
@@ -200,7 +199,7 @@ class critical_temperature_impl
                 if (can_positive_charges_occur(*bii, params.simulation_params.phys_params))
                 {
                     stats.critical_temperature = 0.0;
-                    return true;
+                    return;
                 }
 
                 // performs physical simulation of a given SiDB layout at a given input combination
@@ -208,7 +207,7 @@ class critical_temperature_impl
                 if (sim_result.charge_distributions.empty())
                 {
                     stats.critical_temperature = 0.0;
-                    return true;
+                    return;
                 }
                 stats.num_valid_lyt = sim_result.charge_distributions.size();
                 // The energy distribution of the physically valid charge configurations for the given layout is
@@ -237,16 +236,12 @@ class critical_temperature_impl
                 }
             }
         }
-
-        return true;
     }
 
     /**
      * *Gate-based Critical Temperature* Simulation of a SiDB layout for a given Boolean function.
-     *
-     * @return `true` if the simulation succeeds and the *Critical Temperature* is determined, `false` otherwise.
      */
-    bool non_gate_based_simulation() noexcept
+    void non_gate_based_simulation() noexcept
     {
         sidb_simulation_result<Lyt> simulation_results{};
         if (params.engine == critical_temperature_params::simulation_engine::EXACT)
@@ -299,7 +294,7 @@ class critical_temperature_impl
         {
             // If the occupation probability of excited states exceeds the given threshold.
             if (occupation_probability_non_gate_based(distribution, temp) > (1 - params.confidence_level) &&
-                temp < stats.critical_temperature)
+                (temp < stats.critical_temperature))
             {
                 // The current temperature is stored as the critical temperature.
                 stats.critical_temperature = temp;
@@ -307,14 +302,21 @@ class critical_temperature_impl
                 break;
             }
 
-            if (std::abs(temp - params.max_temperature) < 0.001)
+            if (std::abs(temp - params.max_temperature) < 0.001 && (temp < stats.critical_temperature))
             {
                 // Maximal temperature is stored as the Critical Temperature.
                 stats.critical_temperature = params.max_temperature;
             }
         }
-
-        return true;
+    }
+    /**
+     * Returns the critical temperature.
+     *
+     * @return The critical temperature (unit: K).
+     */
+    [[nodiscard]] double get_critical_temperature() const noexcept
+    {
+        return stats.critical_temperature;
     }
 
   private:
@@ -373,13 +375,14 @@ class critical_temperature_impl
         for (const auto& temp : temp_values)
         {
             // If the occupation probability of erroneous states exceeds the given threshold...
-            if (occupation_probability_gate_based(energy_state_type, temp) > (1 - params.confidence_level))
+            if (occupation_probability_gate_based(energy_state_type, temp) > (1 - params.confidence_level) &&
+                (temp < stats.critical_temperature))
             {
                 // The current temperature is stored as Critical Temperature.
                 stats.critical_temperature = temp;
                 break;
             }
-            if (std::abs(temp - params.max_temperature) < 0.001)
+            if (std::abs(temp - params.max_temperature) < 0.001 && (temp < stats.critical_temperature))
             {
                 // Maximal temperature is stored as Critical Temperature.
                 stats.critical_temperature = params.max_temperature;
@@ -452,15 +455,15 @@ class critical_temperature_impl
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
  * @param params Simulation and physical parameters.
  * @param pst Statistics.
+ * @return The critical temperature (unit: K).
  */
 template <typename Lyt, typename TT>
-bool critical_temperature_gate_based(const Lyt& lyt, const std::vector<TT>& spec,
-                                     const critical_temperature_params& params = {},
-                                     critical_temperature_stats<Lyt>*   pst    = nullptr)
+double critical_temperature_gate_based(const Lyt& lyt, const std::vector<TT>& spec,
+                                       const critical_temperature_params& params = {},
+                                       critical_temperature_stats<Lyt>*   pst    = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
     assert(!spec.empty());
     // all elements in tts must have the same number of variables
@@ -471,14 +474,14 @@ bool critical_temperature_gate_based(const Lyt& lyt, const std::vector<TT>& spec
 
     detail::critical_temperature_impl<Lyt> p{lyt, params, st};
 
-    const auto result = p.gate_based_simulation(spec);
+    p.gate_based_simulation(spec);
 
     if (pst)
     {
         *pst = st;
     }
 
-    return result;
+    return p.get_critical_temperature();
 }
 
 /**
@@ -490,10 +493,11 @@ bool critical_temperature_gate_based(const Lyt& lyt, const std::vector<TT>& spec
  * @param lyt The layout to simulate.
  * @param params Simulation and physical parameters.
  * @param pst Statistics.
+ * @return The critical temperature (unit: K)
  */
 template <typename Lyt>
-bool critical_temperature_non_gate_based(const Lyt& lyt, const critical_temperature_params& params = {},
-                                         critical_temperature_stats<Lyt>* pst = nullptr)
+double critical_temperature_non_gate_based(const Lyt& lyt, const critical_temperature_params& params = {},
+                                           critical_temperature_stats<Lyt>* pst = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -503,14 +507,14 @@ bool critical_temperature_non_gate_based(const Lyt& lyt, const critical_temperat
 
     detail::critical_temperature_impl<Lyt> p{lyt, params, st};
 
-    const auto result = p.non_gate_based_simulation();
+    p.non_gate_based_simulation();
 
     if (pst)
     {
         *pst = st;
     }
 
-    return result;
+    return p.get_critical_temperature();
 }
 
 }  // namespace fiction

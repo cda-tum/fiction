@@ -125,12 +125,12 @@ class quickexact_impl
                 {
                     if constexpr (has_get_sidb_defect_v<Lyt>)
                     {
-                        charge_distribution_surface charge_layout{static_cast<sidb_defect_cell_clk_lyt_siqad>(layout)};
+                        charge_distribution_surface charge_layout{static_cast<Lyt>(layout)};
                         conduct_simulation(charge_layout, base_number);
                     }
                     else
                     {
-                        charge_distribution_surface charge_layout{static_cast<sidb_cell_clk_lyt_siqad>(layout)};
+                        charge_distribution_surface charge_layout{static_cast<Lyt>(layout)};
                         conduct_simulation(charge_layout, base_number);
                     }
                 }
@@ -261,7 +261,6 @@ class quickexact_impl
     {
         static_assert(is_cell_level_layout_v<ChargeLyt>, "ChargeLyt is not a cell-level layout");
         static_assert(has_sidb_technology_v<ChargeLyt>, "ChargeLyt is not an SiDB layout");
-        static_assert(has_siqad_coord_v<ChargeLyt>, "ChargeLyt is not based on SiQAD coordinates");
         static_assert(is_charge_distribution_surface_v<ChargeLyt>, "ChargeLyt is not a charge distribution surface");
 
         if (base_number == required_simulation_base_number::THREE)
@@ -327,7 +326,6 @@ class quickexact_impl
     {
         static_assert(is_cell_level_layout_v<ChargeLyt>, "ChargeLyt is not a cell-level layout");
         static_assert(has_sidb_technology_v<ChargeLyt>, "ChargeLyt is not an SiDB layout");
-        static_assert(has_siqad_coord_v<ChargeLyt>, "ChargeLyt is not based on SiQAD coordinates");
         static_assert(is_charge_distribution_surface_v<ChargeLyt>, "ChargeLyt is not a charge distribution surface");
 
         charge_layout.assign_base_number(2);
@@ -374,7 +372,6 @@ class quickexact_impl
     {
         static_assert(is_cell_level_layout_v<ChargeLyt>, "ChargeLyt is not a cell-level layout");
         static_assert(has_sidb_technology_v<ChargeLyt>, "ChargeLyt is not an SiDB layout");
-        static_assert(has_siqad_coord_v<ChargeLyt>, "ChargeLyt is not based on SiQAD coordinates");
         static_assert(is_charge_distribution_surface_v<ChargeLyt>, "ChargeLyt is not a charge distribution surface");
 
         charge_layout.assign_all_charge_states(sidb_charge_state::NEGATIVE);
@@ -583,7 +580,6 @@ template <typename Lyt>
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
     detail::quickexact_impl<Lyt> p{lyt, params};
 

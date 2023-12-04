@@ -641,3 +641,44 @@ TEST_CASE("Random siqad::coord_t layout generation with defects", "[generate-ran
             });
     }
 }
+
+TEST_CASE("Random cube::coord_t layout generation with defects", "[generate-random-sidb-layout]")
+{
+    using lyt = sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>>;
+
+    const generate_random_sidb_layout_params<lyt> params{
+        {siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{0, 0, 0}),
+         siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{10, 2, 0})},
+        10,
+        generate_random_sidb_layout_params<lyt>::positive_charges::ALLOWED,
+        2};
+
+    lyt layout{};
+
+    layout.assign_sidb_defect(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{2, 2, 0}),
+                              sidb_defect{sidb_defect_type::DB, -1, 5.6, 5});
+    layout.assign_sidb_defect(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{4, 1, 0}),
+                              sidb_defect{sidb_defect_type::SINGLE_DIHYDRIDE, 1, 7.6, 7});
+    layout.assign_sidb_defect(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{5, 1, 0}),
+                              sidb_defect{sidb_defect_type::SINGLE_DIHYDRIDE, 1, 7.6, 9});
+    layout.assign_sidb_defect(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{7, 1, 0}),
+                              sidb_defect{sidb_defect_type::SINGLE_DIHYDRIDE, 1, 2.6, 7});
+    layout.assign_sidb_defect(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{2, 1, 0}),
+                              sidb_defect{sidb_defect_type::SINGLE_DIHYDRIDE, 1, 7.6, 4});
+
+    const auto result_lyt = generate_random_sidb_layout(layout, params);
+
+    CHECK(result_lyt.num_cells() == 10);
+    CHECK(result_lyt.num_defects() == 5);
+
+    // check if all cells are not closer than two cells (Euclidean distance).
+    result_lyt.foreach_cell(
+        [](const auto& cell)
+        {
+            CHECK(cell != siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{2, 2, 0}));
+            CHECK(cell != siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{4, 1, 0}));
+            CHECK(cell != siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{5, 1, 0}));
+            CHECK(cell != siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{7, 1, 0}));
+            CHECK(cell != siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{2, 1, 0}));
+        });
+}

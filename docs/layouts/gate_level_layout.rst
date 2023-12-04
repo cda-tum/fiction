@@ -16,4 +16,3 @@ has to have a concrete position assigned, mockturtle cannot be used to generate 
 
 .. doxygenclass:: fiction::gate_level_layout
    :members:
-
