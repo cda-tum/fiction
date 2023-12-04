@@ -71,15 +71,15 @@ class maximum_defect_influence_position_and_distance_impl
 
     std::pair<typename Lyt::cell, double> run() noexcept
     {
-        const quickexact_params<sidb_surface<Lyt>> params_defect{
-            params.physical_params, quickexact_params<sidb_surface<Lyt>>::automatic_base_number_detection::OFF};
+        const quickexact_params<cell<Lyt>> params_defect{
+            params.physical_params, quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
 
         double          avoidance_distance{0};
         coordinate<Lyt> max_defect_position{};
 
-        const auto simulation_results =
-            quickexact(layout, quickexact_params<Lyt>{params.physical_params,
-                                                      quickexact_params<Lyt>::automatic_base_number_detection::OFF});
+        const auto simulation_results = quickexact(
+            layout, quickexact_params<cell<Lyt>>{params.physical_params,
+                                                 quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF});
 
         const auto min_energy          = minimum_energy(simulation_results.charge_distributions);
         uint64_t   charge_index_layout = 0;

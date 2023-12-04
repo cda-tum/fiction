@@ -110,7 +110,7 @@ void time_to_solution(Lyt& lyt, const quicksim_params& quicksim_params, const ti
     }
     else
     {
-        const quickexact_params<Lyt> params{quicksim_params.phys_params};
+        const quickexact_params<cell<Lyt>> params{quicksim_params.phys_params};
         st.algorithm      = "QuickExact";
         simulation_result = quickexact(lyt, params);
     }

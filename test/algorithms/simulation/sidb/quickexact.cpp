@@ -23,7 +23,7 @@ TEMPLATE_TEST_CASE(
 {
     TestType lyt{};
 
-    const quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.32}};
+    const quickexact_params<cell<TestType>> params{sidb_simulation_parameters{2, -0.32}};
 
     const auto simulation_results = quickexact(lyt, params);
 
@@ -41,7 +41,7 @@ TEMPLATE_TEST_CASE(
     TestType lyt{};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
 
-    const quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.32}};
+    const quickexact_params<cell<TestType>> params{sidb_simulation_parameters{2, -0.32}};
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
@@ -58,7 +58,7 @@ TEMPLATE_TEST_CASE(
 {
     TestType lyt{};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
-    const quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.25}};
+    const quickexact_params<cell<TestType>> params{sidb_simulation_parameters{2, -0.25}};
     lyt.assign_sidb_defect({1, 2, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1, params.physical_parameters.epsilon_r,
                                                   params.physical_parameters.lambda_tf});
 
@@ -78,7 +78,7 @@ TEMPLATE_TEST_CASE(
     TestType lyt{};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
 
-    const quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.25}};
+    const quickexact_params<cell<TestType>> params{sidb_simulation_parameters{2, -0.25}};
 
     lyt.assign_sidb_defect({1, 2, 0},
                            sidb_defect{sidb_defect_type::UNKNOWN, -1, params.physical_parameters.epsilon_r, 2});
@@ -86,6 +86,27 @@ TEMPLATE_TEST_CASE(
 
     REQUIRE(simulation_results.charge_distributions.size() == 1);
     CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) == sidb_charge_state::NEGATIVE);
+}
+
+TEMPLATE_TEST_CASE(
+    "One QCA with one atomic defect", "[quickexact]",
+    (sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>),
+    (charge_distribution_surface<
+        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>>))
+{
+    TestType layout{};
+    layout.assign_cell_type({0, 0}, sidb_technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 0}, sidb_technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 2}, sidb_technology::cell_type::NORMAL);
+    layout.assign_cell_type({0, 2}, sidb_technology::cell_type::NORMAL);
+
+    const quickexact_params<cell<TestType>> params{};
+
+    layout.assign_sidb_defect({5, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1, params.physical_parameters.epsilon_r,
+                                                  params.physical_parameters.lambda_tf});
+    const auto simulation_results = quickexact<TestType>(layout, params);
+
+    REQUIRE(simulation_results.charge_distributions.size() == 1);
 }
 
 TEMPLATE_TEST_CASE(
@@ -98,7 +119,7 @@ TEMPLATE_TEST_CASE(
     TestType lyt{};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
 
-    const quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.25}};
+    const quickexact_params<cell<TestType>> params{sidb_simulation_parameters{2, -0.25}};
 
     lyt.assign_sidb_defect({1, 6, 0},
                            sidb_defect{sidb_defect_type::UNKNOWN, -1, 0.3, params.physical_parameters.lambda_tf});
@@ -123,7 +144,7 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type({0, 1, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({2, 1, 0}, TestType::cell_type::NORMAL);
 
-    const quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.15}};
+    const quickexact_params<cell<TestType>> params{sidb_simulation_parameters{2, -0.15}};
 
     lyt.assign_sidb_defect({0, 0, 1}, sidb_defect{sidb_defect_type::UNKNOWN, -1, params.physical_parameters.epsilon_r,
                                                   params.physical_parameters.lambda_tf});
@@ -147,7 +168,7 @@ TEMPLATE_TEST_CASE(
     TestType lyt{};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
 
-    const quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.1}};
+    const quickexact_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.1}};
 
     lyt.assign_sidb_defect({1, 2, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -10, params.physical_parameters.epsilon_r,
                                                   params.physical_parameters.lambda_tf});
@@ -168,7 +189,7 @@ TEMPLATE_TEST_CASE(
     TestType lyt{};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
 
-    const quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.1}};
+    const quickexact_params<cell<TestType>> params{sidb_simulation_parameters{2, -0.1}};
 
     lyt.assign_sidb_defect({1, 2, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -10, params.physical_parameters.epsilon_r,
                                                   params.physical_parameters.lambda_tf * 10E-5});
@@ -189,7 +210,7 @@ TEMPLATE_TEST_CASE(
     TestType lyt{};
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
 
-    const quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.1}};
+    const quickexact_params<cell<TestType>> params{sidb_simulation_parameters{2, -0.1}};
 
     lyt.assign_sidb_defect({2, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -10, params.physical_parameters.epsilon_r,
                                                   params.physical_parameters.lambda_tf});
@@ -211,7 +232,7 @@ TEMPLATE_TEST_CASE(
     TestType lyt{};
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
 
-    quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.25}};
+    quickexact_params<cell<TestType>> params{sidb_simulation_parameters{2, -0.25}};
 
     params.local_external_potential.insert({{0, 0, 0}, -0.5});
 
@@ -229,7 +250,7 @@ TEMPLATE_TEST_CASE(
     TestType lyt{};
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
 
-    quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.25}};
+    quickexact_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.25}};
 
     params.local_external_potential.insert({{{0, 0, 0}, -1}});
     const auto simulation_results = quickexact<TestType>(lyt, params);
@@ -246,7 +267,7 @@ TEMPLATE_TEST_CASE(
     TestType lyt{};
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
 
-    quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.25}};
+    quickexact_params<cell<TestType>> params{sidb_simulation_parameters{2, -0.25}};
     params.global_potential = -0.26;
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
@@ -263,7 +284,7 @@ TEMPLATE_TEST_CASE(
     TestType lyt{};
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
 
-    quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.25}};
+    quickexact_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.25}};
     params.global_potential = -1;
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
@@ -279,7 +300,7 @@ TEMPLATE_TEST_CASE(
     TestType lyt{};
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
 
-    quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.25}};
+    quickexact_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.25}};
     params.global_potential = 1;
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
@@ -296,7 +317,7 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({3, 3, 0}, TestType::cell_type::NORMAL);
 
-    const quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.25}};
+    const quickexact_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.25}};
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
@@ -338,7 +359,7 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type({17, 0, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({19, 0, 0}, TestType::cell_type::NORMAL);
 
-    const quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.32}};
+    const quickexact_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.32}};
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
     auto       size_before        = simulation_results.charge_distributions.size();
@@ -386,7 +407,7 @@ TEMPLATE_TEST_CASE("QuickExact simulation of a one-pair BDL wire with two pertur
 
     charge_layout_kon.update_after_charge_change();
 
-    const quickexact_params<TestType> sim_params{sidb_simulation_parameters{3, -0.32}};
+    const quickexact_params<cell<TestType>> sim_params{sidb_simulation_parameters{3, -0.32}};
 
     const auto simulation_results = quickexact<TestType>(lyt, sim_params);
 
@@ -420,7 +441,7 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type({-7, 1, 1}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({-7, 3, 0}, TestType::cell_type::NORMAL);
 
-    const quickexact_params<TestType> sim_params{sidb_simulation_parameters{3, -0.32}};
+    const quickexact_params<cell<TestType>> sim_params{sidb_simulation_parameters{3, -0.32}};
 
     const auto simulation_results = quickexact<TestType>(lyt, sim_params);
 
@@ -459,7 +480,7 @@ TEMPLATE_TEST_CASE(
 
     lyt.assign_cell_type({10, 8, 1}, TestType::cell_type::NORMAL);
 
-    const quickexact_params<TestType> sim_params{sidb_simulation_parameters{2, -0.28}};
+    const quickexact_params<cell<TestType>> sim_params{sidb_simulation_parameters{2, -0.28}};
 
     const auto simulation_results = quickexact<TestType>(lyt, sim_params);
 
@@ -509,7 +530,7 @@ TEMPLATE_TEST_CASE("QuickExact simulation of a Y-shape SiDB OR gate with input 0
     lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{10, 8, 1}),
                          TestType::cell_type::NORMAL);
 
-    const quickexact_params<TestType> sim_params{sidb_simulation_parameters{2, -0.28}};
+    const quickexact_params<cell<TestType>> sim_params{sidb_simulation_parameters{2, -0.28}};
 
     const auto simulation_results = quickexact<TestType>(lyt, sim_params);
 
@@ -559,7 +580,7 @@ TEMPLATE_TEST_CASE(
 
     lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{10, 8, 1}), TestType::cell_type::NORMAL);
 
-    const quickexact_params<TestType> sim_params{sidb_simulation_parameters{2, -0.28}};
+    const quickexact_params<cell<TestType>> sim_params{sidb_simulation_parameters{2, -0.28}};
 
     const auto simulation_results = quickexact<TestType>(lyt, sim_params);
 
@@ -608,7 +629,7 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type({10, 8, 1}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({16, 1, 0}, TestType::cell_type::NORMAL);
 
-    quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.28}};
+    quickexact_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.28}};
     params.local_external_potential.insert({{{6, 2, 0}, -0.5}});
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
@@ -644,7 +665,7 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{10, 8, 1}), TestType::cell_type::NORMAL);
     lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{16, 1, 0}), TestType::cell_type::NORMAL);
 
-    quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.28}};
+    quickexact_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.28}};
     params.local_external_potential.insert({{siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{6, 2, 0}), -0.5}});
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
@@ -688,7 +709,7 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type({10, 8, 1}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({16, 1, 0}, TestType::cell_type::NORMAL);
 
-    quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.28}};
+    quickexact_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.28}};
     params.global_potential = -0.5;
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
@@ -724,7 +745,7 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type({10, 8, 1}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({16, 1, 0}, TestType::cell_type::NORMAL);
 
-    quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.28}};
+    quickexact_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.28}};
     params.global_potential = -2;
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
@@ -754,7 +775,7 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type({20, 0, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({30, 0, 0}, TestType::cell_type::NORMAL);
 
-    const quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.28}};
+    const quickexact_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.28}};
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
@@ -777,7 +798,7 @@ TEMPLATE_TEST_CASE(
 
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
 
-    const quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.32}};
+    const quickexact_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.32}};
     lyt.assign_sidb_defect({-1, -1, 1}, sidb_defect{sidb_defect_type::UNKNOWN, -1, params.physical_parameters.epsilon_r,
                                                     params.physical_parameters.lambda_tf});
     const auto simulation_results = quickexact<TestType>(lyt, params);
@@ -801,7 +822,7 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type({20, 0, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({30, 0, 0}, TestType::cell_type::NORMAL);
 
-    const quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.28}};
+    const quickexact_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.28}};
     lyt.assign_sidb_defect({1, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1, params.physical_parameters.epsilon_r,
                                                   params.physical_parameters.lambda_tf});
     const auto simulation_results = quickexact<TestType>(lyt, params);
@@ -828,7 +849,7 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type({20, 0, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({30, 0, 0}, TestType::cell_type::NORMAL);
 
-    const quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.28}};
+    const quickexact_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.28}};
 
     lyt.assign_sidb_defect({1, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1, params.physical_parameters.epsilon_r,
                                                   params.physical_parameters.lambda_tf});
@@ -861,7 +882,7 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type({20, 0, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({30, 0, 0}, TestType::cell_type::NORMAL);
 
-    const quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.28}};
+    const quickexact_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.28}};
 
     lyt.assign_sidb_defect({1, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, 1, params.physical_parameters.epsilon_r,
                                                   params.physical_parameters.lambda_tf});
@@ -896,7 +917,7 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type({6, 10, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({7, 10, 0}, TestType::cell_type::NORMAL);
 
-    const quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.28}};
+    const quickexact_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.28}};
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
@@ -924,7 +945,7 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type({2, 3, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({3, 3, 0}, TestType::cell_type::NORMAL);
 
-    const quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.25}};
+    const quickexact_params<cell<TestType>> params{sidb_simulation_parameters{2, -0.25}};
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
@@ -963,7 +984,7 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type({2, 3, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({3, 3, 0}, TestType::cell_type::NORMAL);
 
-    const quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.8}};
+    const quickexact_params<cell<TestType>> params{sidb_simulation_parameters{2, -0.8}};
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
@@ -987,7 +1008,7 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type({2, 3, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({3, 3, 0}, TestType::cell_type::NORMAL);
 
-    const quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.25}};
+    const quickexact_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.25}};
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
@@ -1012,7 +1033,7 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type({5, 3, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({6, 3, 0}, TestType::cell_type::NORMAL);
 
-    const quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.25}};
+    const quickexact_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.25}};
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
@@ -1039,7 +1060,7 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type({6, 0, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({7, 0, 0}, TestType::cell_type::NORMAL);
 
-    const quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.25}};
+    const quickexact_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.25}};
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
@@ -1063,7 +1084,7 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type({-1, -1, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({0, 2, 0}, TestType::cell_type::NORMAL);
 
-    const quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.25}};
+    const quickexact_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.25}};
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
@@ -1082,7 +1103,7 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type({2, 0, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({10, 0, 0}, TestType::cell_type::NORMAL);
 
-    const quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.1}};
+    const quickexact_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.1}};
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
@@ -1103,7 +1124,7 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type({7, 0, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({10, 0, 0}, TestType::cell_type::NORMAL);
 
-    const quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.25}};
+    const quickexact_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.25}};
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
@@ -1124,7 +1145,7 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type({6, 0, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({7, 0, 0}, TestType::cell_type::NORMAL);
 
-    const quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.32}};
+    const quickexact_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.32}};
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
@@ -1145,7 +1166,7 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type({6, 0, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({7, 0, 0}, TestType::cell_type::NORMAL);
 
-    const quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.32}};
+    const quickexact_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.32}};
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
@@ -1153,8 +1174,8 @@ TEMPLATE_TEST_CASE(
     CHECK(simulation_results.additional_simulation_parameters[0].first == "base_number");
     CHECK(std::any_cast<uint64_t>(simulation_results.additional_simulation_parameters[0].second) == 3);
 
-    const quickexact_params<TestType> params_new{sidb_simulation_parameters{2, -0.32},
-                                                 quickexact_params<TestType>::automatic_base_number_detection::OFF};
+    const quickexact_params<cell<TestType>> params_new{
+        sidb_simulation_parameters{2, -0.32}, quickexact_params<cell<TestType>>::automatic_base_number_detection::OFF};
 
     const auto simulation_results_new = quickexact<TestType>(lyt, params_new);
 
@@ -1190,7 +1211,7 @@ TEMPLATE_TEST_CASE(
 
     lyt.assign_cell_type({30, 15, 0}, TestType::cell_type::NORMAL);
 
-    const quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.32}};
+    const quickexact_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.32}};
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
@@ -1222,8 +1243,8 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type({10, 8, 1}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({16, 1, 0}, TestType::cell_type::NORMAL);
 
-    quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.28},
-                                       quickexact_params<TestType>::automatic_base_number_detection::OFF};
+    quickexact_params<cell<TestType>> params{sidb_simulation_parameters{2, -0.28},
+                                             quickexact_params<cell<TestType>>::automatic_base_number_detection::OFF};
 
     SECTION("Check if QuickExact is deterministic")
     {
@@ -1395,8 +1416,8 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type({29, 0, 0}, TestType::cell_type::NORMAL);
 
     // quickexact parameters are initialized
-    quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.28},
-                                       quickexact_params<TestType>::automatic_base_number_detection::OFF};
+    quickexact_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.28},
+                                             quickexact_params<cell<TestType>>::automatic_base_number_detection::OFF};
 
     SECTION("Standard Physical Parameters")
     {
@@ -1612,8 +1633,9 @@ TEMPLATE_TEST_CASE(
 
     SECTION("automatic base number detection is off")
     {
-        const quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.32, 1.0e-3},
-                                                 quickexact_params<TestType>::automatic_base_number_detection::OFF};
+        const quickexact_params<cell<TestType>> params{
+            sidb_simulation_parameters{2, -0.32, 1.0e-3},
+            quickexact_params<cell<TestType>>::automatic_base_number_detection::OFF};
 
         const auto simulation_results = quickexact<TestType>(lyt, params);
 
@@ -1622,8 +1644,9 @@ TEMPLATE_TEST_CASE(
 
     SECTION("automatic base number detection is on")
     {
-        const quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.32, 1.0e-3},
-                                                 quickexact_params<TestType>::automatic_base_number_detection::ON};
+        const quickexact_params<cell<TestType>> params{
+            sidb_simulation_parameters{2, -0.32, 1.0e-3},
+            quickexact_params<cell<TestType>>::automatic_base_number_detection::ON};
 
         const auto simulation_results = quickexact<TestType>(lyt, params);
 
