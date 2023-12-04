@@ -41,5 +41,5 @@ Utility functions
 .. doxygenfunction:: fiction::area(const CoordinateType& coord) noexcept
 .. doxygenfunction:: fiction::volume(const CoordinateType& coord) noexcept
 
-.. doxygenfunction:: fiction::siqad::to_fiction_coord(const coord_t& coord) noexcept
-.. doxygenfunction:: fiction::siqad::to_siqad_coord(const CoordinateType& coord) noexcept
+.. doxygenfunction:: fiction::siqad::to_fiction_coord
+.. doxygenfunction:: fiction::siqad::to_siqad_coord
