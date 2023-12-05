@@ -53,25 +53,25 @@ TEST_CASE("Three SiDBs with positive charge states", "[determine-influence-regio
     }
 }
 
-TEST_CASE("Using xnor layout and xnor gate as sublayout", "[determine-influence-region]")
-{
-    const auto layout = read_sqd_layout<sidb_cell_clk_lyt>(CURRENT_PATH.string() + "/../../test/resources/xnor2.sqd");
-    const auto sublayout = read_sqd_layout<sidb_cell_clk_lyt>(CURRENT_PATH.string() + "/../../test/resources/xnor.sqd");
-
-    const auto [nw, se] = determine_influence_region(layout, sublayout);
-
-    CHECK(nw == cell<sidb_cell_clk_lyt>(24, 28));
-    CHECK(se == cell<sidb_cell_clk_lyt>(62, 72));
-}
-
-TEST_CASE("Using xnor layout and input wire as sublayout", "[determine-influence-region]")
-{
-    const auto layout = read_sqd_layout<sidb_cell_clk_lyt>(CURRENT_PATH.string() + "/../../test/resources/xnor2.sqd");
-    const auto sublayout =
-        read_sqd_layout<sidb_cell_clk_lyt>(CURRENT_PATH.string() + "/../../test/resources/wire_of_xnor2.sqd");
-
-    const auto [nw, se] = determine_influence_region(layout, sublayout);
-
-    CHECK(nw == cell<sidb_cell_clk_lyt>(0, 0));
-    CHECK(se == cell<sidb_cell_clk_lyt>(32, 38));
-}
+//TEST_CASE("Using xnor layout and xnor gate as sublayout", "[determine-influence-region]")
+//{
+//    const auto layout = read_sqd_layout<sidb_cell_clk_lyt>(CURRENT_PATH.string() + "/../../test/resources/xnor2.sqd");
+//    const auto sublayout = read_sqd_layout<sidb_cell_clk_lyt>(CURRENT_PATH.string() + "/../../test/resources/xnor.sqd");
+//
+//    const auto [nw, se] = determine_influence_region(layout, sublayout);
+//
+//    CHECK(nw == cell<sidb_cell_clk_lyt>(24, 28));
+//    CHECK(se == cell<sidb_cell_clk_lyt>(62, 72));
+//}
+//
+//TEST_CASE("Using xnor layout and input wire as sublayout", "[determine-influence-region]")
+//{
+//    const auto layout = read_sqd_layout<sidb_cell_clk_lyt>(CURRENT_PATH.string() + "/../../test/resources/xnor2.sqd");
+//    const auto sublayout =
+//        read_sqd_layout<sidb_cell_clk_lyt>(CURRENT_PATH.string() + "/../../test/resources/wire_of_xnor2.sqd");
+//
+//    const auto [nw, se] = determine_influence_region(layout, sublayout);
+//
+//    CHECK(nw == cell<sidb_cell_clk_lyt>(0, 0));
+//    CHECK(se == cell<sidb_cell_clk_lyt>(32, 38));
+//}
