@@ -84,6 +84,7 @@ class determine_influence_region_impl
             }
             else
             {
+                // the influence region in the northwest direction is extended further towards the northwest
                 if (nw_influence_zone > min_cell_layout)
                 {
                     if (nw_influence_zone.x == min_cell_layout.x)
@@ -100,6 +101,7 @@ class determine_influence_region_impl
                         nw_influence_zone.y = nw_influence_zone.y - 1;
                     }
                 }
+                // the influence region in the southeast direction is extended further towards the southeast
                 if (se_influence_zone < max_cell_layout)
                 {
                     if (se_influence_zone.x == max_cell_layout.x)
@@ -142,8 +144,8 @@ class determine_influence_region_impl
      * @param layout The layout to simulate.
      * @return A set containing the charge indices of ground states.
      */
-    [[nodiscard]] std::set<uint64_t>
-    simulate_charge_indices_of_the_ground_states(const sidb_surface<Lyt>& layout_with_non_influencing_cells) noexcept
+    [[nodiscard]] std::set<uint64_t> simulate_charge_indices_of_the_ground_states(
+        const sidb_surface<Lyt>& layout_with_non_influencing_cells) const noexcept
     {
         const auto         simulation_results  = quickexact(layout_with_non_influencing_cells, quickexact_parameter);
         const auto         ground_state_energy = minimum_energy(simulation_results.charge_distributions);
@@ -209,7 +211,7 @@ class determine_influence_region_impl
      * @tparam Lyt The type of the layout.
      * @return `true` if the sublayout is a subset of the layout, `false` otherwise.
      */
-    bool is_sublayout_of_layout()
+    [[nodiscard]] bool is_sublayout_of_layout() const noexcept
     {
         std::vector<typename Lyt::cell> all_sidbs = {};
         all_sidbs.reserve(layout.num_cells());
@@ -268,7 +270,8 @@ class determine_influence_region_impl
  */
 template <typename Lyt>
 std::pair<typename Lyt::cell, typename Lyt::cell>
-determine_influence_region(const Lyt& layout, const Lyt& sublayout, const quickexact_params<cell<Lyt>>& params = {})
+determine_influence_region(const Lyt& layout, const Lyt& sublayout,
+                           const quickexact_params<cell<Lyt>>& params = {}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
