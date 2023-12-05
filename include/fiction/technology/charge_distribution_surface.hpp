@@ -1212,7 +1212,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @param charge_index charge index of the new charge distribution.
      */
-    void assign_charge_index(const uint64_t charge_index) noexcept
+    void assign_charge_index(const uint64_t charge_index) const noexcept
     {
         assert((charge_index <= strg->max_charge_index) && "charge index is too large");
         strg->charge_index_and_base.first = charge_index;
