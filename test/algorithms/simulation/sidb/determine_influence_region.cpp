@@ -16,7 +16,7 @@
 
 using namespace fiction;
 
-const auto current_path = std::filesystem::current_path();
+const auto CURRENT_PATH = std::filesystem::current_path();
 
 TEST_CASE("Three SiDBs with positive charge states", "[determine-influence-region]")
 {
@@ -55,8 +55,8 @@ TEST_CASE("Three SiDBs with positive charge states", "[determine-influence-regio
 
 TEST_CASE("Using xnor layout and xnor gate as sublayout", "[determine-influence-region]")
 {
-    const auto layout = read_sqd_layout<sidb_cell_clk_lyt>(current_path.string() + "/../../test/resources/xnor2.sqd");
-    const auto sublayout = read_sqd_layout<sidb_cell_clk_lyt>(current_path.string() + "/../../test/resources/xnor.sqd");
+    const auto layout = read_sqd_layout<sidb_cell_clk_lyt>(CURRENT_PATH.string() + "/../../test/resources/xnor2.sqd");
+    const auto sublayout = read_sqd_layout<sidb_cell_clk_lyt>(CURRENT_PATH.string() + "/../../test/resources/xnor.sqd");
 
     const auto [nw, se] = determine_influence_region(layout, sublayout);
 
@@ -66,9 +66,9 @@ TEST_CASE("Using xnor layout and xnor gate as sublayout", "[determine-influence-
 
 TEST_CASE("Using xnor layout and input wire as sublayout", "[determine-influence-region]")
 {
-    const auto layout = read_sqd_layout<sidb_cell_clk_lyt>(current_path.string() + "/../../test/resources/xnor2.sqd");
+    const auto layout = read_sqd_layout<sidb_cell_clk_lyt>(CURRENT_PATH.string() + "/../../test/resources/xnor2.sqd");
     const auto sublayout =
-        read_sqd_layout<sidb_cell_clk_lyt>(current_path.string() + "/../../test/resources/wire_of_xnor2.sqd");
+        read_sqd_layout<sidb_cell_clk_lyt>(CURRENT_PATH.string() + "/../../test/resources/wire_of_xnor2.sqd");
 
     const auto [nw, se] = determine_influence_region(layout, sublayout);
 

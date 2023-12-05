@@ -145,10 +145,7 @@ class determine_influence_region_impl
     [[nodiscard]] std::set<uint64_t>
     simulate_charge_indices_of_the_ground_states(const sidb_surface<Lyt>& layout_with_non_influencing_cells) noexcept
     {
-        const auto simulation_results = quickexact(layout_with_non_influencing_cells, quickexact_parameter);
-        const auto ground_state       = std::min_element(
-            simulation_results.charge_distributions.cbegin(), simulation_results.charge_distributions.cend(),
-            [](const auto& lhs, const auto& rhs) { return lhs.get_system_energy() < rhs.get_system_energy(); });
+        const auto         simulation_results  = quickexact(layout_with_non_influencing_cells, quickexact_parameter);
         const auto         ground_state_energy = minimum_energy(simulation_results.charge_distributions);
         std::set<uint64_t> charge_indices      = {};
         for (const auto& lyt : simulation_results.charge_distributions)
@@ -197,9 +194,6 @@ class determine_influence_region_impl
     {
         const auto simulation_results = quickexact(sublayout, quickexact_parameter);
         // find the ground state, which is the charge distribution with the lowest energy
-        const auto ground_state = std::min_element(
-            simulation_results.charge_distributions.cbegin(), simulation_results.charge_distributions.cend(),
-            [](const auto& lhs, const auto& rhs) { return lhs.get_system_energy() < rhs.get_system_energy(); });
         const auto ground_state_energy = minimum_energy(simulation_results.charge_distributions);
         for (const auto& lyt : simulation_results.charge_distributions)
         {
