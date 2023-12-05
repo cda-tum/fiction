@@ -2,9 +2,8 @@
 // Created by Jan Drewniok on 25.10.23.
 //
 
-#include <catch2/catch_template_test_macros.hpp>
-
-#include "fiction/technology/sidb_is_gate_design_impossible.hpp"
+#include "catch2/catch_template_test_macros.hpp"
+#include "fiction/technology/is_sidb_gate_design_impossible.hpp"
 
 #include <fiction/technology/sidb_defects.hpp>
 #include <fiction/technology/sidb_surface.hpp>

@@ -2,8 +2,8 @@
 // Created by Jan Drewniok on 25.10.23.
 //
 
-#ifndef FICTION_SIDB_IS_GATE_DESIGN_IMPOSSIBLE_HPP
-#define FICTION_SIDB_IS_GATE_DESIGN_IMPOSSIBLE_HPP
+#ifndef FICTION_IS_SIDB_GATE_DESIGN_IMPOSSIBLE_HPP
+#define FICTION_IS_SIDB_GATE_DESIGN_IMPOSSIBLE_HPP
 
 #include "fiction/algorithms/iter/bdl_input_iterator.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
@@ -17,14 +17,17 @@
 
 namespace fiction
 {
+/**
+ * This struct contains parameters to determine if SiDB gate design is impossible.
+ */
 struct is_gate_design_impossible_params
 {
     /**
-     * All Parameters for physical SiDB simulations.
+     * All parameters for physical SiDB simulations.
      */
     sidb_simulation_parameters phys_params{};
     /**
-     * The simulation engine to be used for the operational domain computation.
+     * The simulation engine to be used for simulation.
      */
     sidb_simulation_engine sim_engine{sidb_simulation_engine::QUICKEXACT};
 };
@@ -32,14 +35,11 @@ struct is_gate_design_impossible_params
  * This function assesses whether it is impossible to design an SiDB gate for a given truth table in the provided layout
  * due to atomic defects.
  *
- * @note If the function returns `false`, it does not imply that it is possible to design an SiDB gate for given
- * parameters.
- *
- * @tparam Lyt The type of the layout.
+ * @tparam Lyt Cell-level layout type.
  * @tparam TT The type of the truth table.
  * @param layout The layout for which gate design feasibility is being checked.
  * @param spec A vector of truth tables representing the gate's functionality.
- * @param params Parameter for the simulation.
+ * @param params Parameter to determine if the gate design is impossible.
  * @return `true` if gate design is impossible, `false` otherwise.
  *
  */
@@ -77,8 +77,7 @@ bool is_gate_design_impossible(const Lyt& layout, const std::vector<TT>& spec,
                 });
         }
 
-        // this function checks if parts of the bdl pairs are already neutrally charged due to nearby charged atomic
-        // defects.
+        // checks if parts of the bdl pairs are already neutrally charged due to nearby charged atomic defects.
         for (const auto& bdl : bdl_pairs)
         {
             if ((-(*charge_lyt.get_local_potential(bdl.lower)) + params.phys_params.mu_minus) >
@@ -100,4 +99,4 @@ bool is_gate_design_impossible(const Lyt& layout, const std::vector<TT>& spec,
 
 }  // namespace fiction
 
-#endif  // FICTION_SIDB_IS_GATE_DESIGN_IMPOSSIBLE_HPP
+#endif  // FICTION_IS_SIDB_GATE_DESIGN_IMPOSSIBLE_HPP

@@ -10,7 +10,7 @@
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/fcn_gate_library.hpp"
-#include "fiction/technology/sidb_is_gate_design_impossible.hpp"
+#include "fiction/technology/is_sidb_gate_design_impossible.hpp"
 #include "fiction/technology/sidb_surface.hpp"
 #include "fiction/technology/sidb_surface_analysis.hpp"
 #include "fiction/traits.hpp"
@@ -99,6 +99,9 @@ class gate_design_exception : public std::exception
 template <typename Lyt>
 struct sidb_on_the_fly_gate_library_params
 {
+    /**
+     * This layout stores all atomic defects.
+     */
     sidb_surface<Lyt> defect_surface{};
     /**
      * This struct holds parameters to design SiDB gates on-the-fly.
@@ -453,9 +456,9 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
             all_coordinates_in_spanned_area({0, 0, 0}, cell<Lyt>{gate_x_size() - 1, gate_y_size() - 1});
         uint64_t counter = 0;
 
-        for (auto& row : result)
+        for (const auto& row : result)
         {
-            for (auto& cell : row)
+            for (const auto& cell : row)
             {
                 const auto cell_type = lyt.get_cell_type(all_cell[counter]);
                 cell                 = (cell_type == Lyt::technology::cell_type::NORMAL ||
@@ -479,7 +482,6 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
      * @param parameter Parameters for the SiDB gate design process.
      * @param p The list of ports and their directions.
      * @param tile The specific tile on which the gate should be designed.
-     *
      * @return A fcn gate object.
      */
     template <typename LytSkeleton, typename TT, typename CellLyt, typename GateLyt>
@@ -534,27 +536,33 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
             all_coordinates_in_spanned_area({0, 0, 0}, cell<Lyt>{gate_x_size() - 1, gate_y_size() - 1});
         uint64_t counter = 0;
 
-        for (size_t i = 0; i < gate_y_size(); ++i)
+        for (std::size_t i = 0; i < gate_y_size(); ++i)
         {
-            for (size_t j = 0; j < gate_x_size(); ++j)
+            for (std::size_t j = 0; j < gate_x_size(); ++j)
             {
                 const auto cell = cell_list[i][j];
 
                 switch (cell)
                 {
                     case 'x':  // normal cell
+                    {
                         lyt.assign_cell_type(all_cell[counter], Lyt::technology::cell_type::NORMAL);
                         break;
-
+                    }
                     case 'i':  // input cell
+                    {
                         lyt.assign_cell_type(all_cell[counter], Lyt::technology::cell_type::INPUT);
                         break;
-
+                    }
                     case 'o':  // output cell
+                    {
                         lyt.assign_cell_type(all_cell[counter], Lyt::technology::cell_type::OUTPUT);
                         break;
-
-                    case ' ': break;
+                    }
+                    case ' ':
+                    {
+                        break;
+                    }
                 }
                 counter += 1;
             }

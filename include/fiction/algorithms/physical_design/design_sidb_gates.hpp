@@ -123,8 +123,8 @@ class design_sidb_gates_impl
                            const design_sidb_gates_params<cell<Lyt>>& ps) :
             skeleton_layout{skeleton},
             truth_table{spec},
-            parameter{ps},
-            all_sidbs_in_canvas{all_coordinates_in_spanned_area(parameter.canvas.first, parameter.canvas.second)}
+            params{ps},
+            all_sidbs_in_canvas{all_coordinates_in_spanned_area(params.canvas.first, params.canvas.second)}
     {}
     /**
      * Design gates exhaustively and in parallel.
@@ -136,7 +136,7 @@ class design_sidb_gates_impl
      */
     [[nodiscard]] std::vector<Lyt> run_exhaustive_design() noexcept
     {
-        const is_operational_params params_is_operational{parameter.phys_params, parameter.sim_engine};
+        const is_operational_params params_is_operational{params.phys_params, params.sim_engine};
         auto                        all_combinations = determine_all_combinations_of_given_sidbs_in_canvas();
 
         std::unordered_set<typename Lyt::coordinate> sidbs_affected_by_defects = {};
@@ -151,7 +151,7 @@ class design_sidb_gates_impl
         std::atomic<bool>     solution_found = false;
         std::atomic<uint64_t> global_iteration_counter(0);
 
-        const auto total_comb = binomial_coefficient(all_sidbs_in_canvas.size(), parameter.number_of_sidbs);
+        const auto total_comb = binomial_coefficient(all_sidbs_in_canvas.size(), params.number_of_sidbs);
 
         // Shuffle the combinations before dividing them among threads
         std::shuffle(all_combinations.begin(), all_combinations.end(),
@@ -164,9 +164,9 @@ class design_sidb_gates_impl
         {
             for (const auto& comb : combination)
             {
-                if (!are_sidbs_too_close(comb, sidbs_affected_by_defects) &&
+                if (!are_sidbs_too_close(cell_indices_to_cell_vector(comb), sidbs_affected_by_defects) &&
                     global_iteration_counter <
-                        static_cast<uint64_t>(parameter.procentual_maximum_attemps * static_cast<double>(total_comb)))
+                        static_cast<uint64_t>(params.procentual_maximum_attemps * static_cast<double>(total_comb)))
                 {
                     // canvas SiDBs are added to the skeleton
                     auto layout_with_added_cells = skeleton_layout_with_canvas_sidbs(comb);
@@ -180,7 +180,7 @@ class design_sidb_gates_impl
                         }
                         solution_found = true;
                     }
-                    if (solution_found && (parameter.termination_cond ==
+                    if (solution_found && (params.termination_cond ==
                                            design_sidb_gates_params<cell<Lyt>>::termination_condition::SOLUTION_FOUND))
                     {
                         return;
@@ -191,18 +191,18 @@ class design_sidb_gates_impl
             }
         };
 
-        const uint64_t    num_threads = std::thread::hardware_concurrency();
-        const std::size_t chunk_size  = all_combinations.size() / num_threads;
+        const auto num_threads = std::thread::hardware_concurrency();
+        const auto chunk_size  = all_combinations.size() / num_threads;
 
-        std::vector<std::thread> threads;
+        std::vector<std::thread> threads{};
         threads.reserve(num_threads);
 
         for (auto i = 0u; i < num_threads; ++i)
         {
-            const std::size_t start = i * chunk_size;
-            const std::size_t end   = (i == num_threads - 1) ? all_combinations.size() : (i + 1) * chunk_size;
-            std::vector<std::vector<std::size_t>> chunk_combinations(all_combinations.begin() + start,
-                                                                     all_combinations.begin() + end);
+            const auto start = i * chunk_size;
+            const auto end   = (i == num_threads - 1) ? all_combinations.size() : (i + 1) * chunk_size;
+            std::vector<std::vector<std::size_t>> chunk_combinations(all_combinations.cbegin() + start,
+                                                                     all_combinations.cbegin() + end);
             threads.emplace_back(add_combination_to_layout_and_check_operation, chunk_combinations);
         }
 
@@ -225,10 +225,10 @@ class design_sidb_gates_impl
     {
         std::vector<Lyt> randomly_designed_gate_layouts = {};
 
-        const is_operational_params params_is_operational{parameter.phys_params, parameter.sim_engine};
+        const is_operational_params params_is_operational{params.phys_params, params.sim_engine};
 
         const generate_random_sidb_layout_params<Lyt> parameter_random_layout{
-            parameter.canvas, parameter.number_of_sidbs,
+            params.canvas, params.number_of_sidbs,
             generate_random_sidb_layout_params<Lyt>::positive_charges::FORBIDDEN};
 
         const std::size_t        num_threads = std::thread::hardware_concurrency();
@@ -303,7 +303,7 @@ class design_sidb_gates_impl
     /**
      * Parameters for the *SiDB Gate Designer*.
      */
-    design_sidb_gates_params<typename Lyt::cell> parameter;
+    design_sidb_gates_params<typename Lyt::cell> params;
     /**
      * All cells within the canvas.
      */
@@ -316,22 +316,23 @@ class design_sidb_gates_impl
      *
      * @return All possible combinations as a vector of vectors of indices.
      */
-    [[nodiscard]] std::vector<std::vector<std::size_t>> determine_all_combinations_of_given_sidbs_in_canvas() noexcept
+    [[nodiscard]] std::vector<std::vector<std::size_t>>
+    determine_all_combinations_of_given_sidbs_in_canvas() const noexcept
     {
         std::vector<std::vector<std::size_t>> all_combinations{};
-        all_combinations.reserve(binomial_coefficient(all_sidbs_in_canvas.size(), parameter.number_of_sidbs));
+        all_combinations.reserve(binomial_coefficient(all_sidbs_in_canvas.size(), params.number_of_sidbs));
 
         std::vector<std::size_t> numbers(all_sidbs_in_canvas.size());
         std::iota(numbers.begin(), numbers.end(), 0);
 
         combinations::for_each_combination(
             numbers.begin(),
-            numbers.begin() + static_cast<std::vector<std::size_t>::difference_type>(parameter.number_of_sidbs),
+            numbers.begin() + static_cast<std::vector<std::size_t>::difference_type>(params.number_of_sidbs),
             numbers.end(),
             [this, &all_combinations](const auto begin, const auto end)
             {
                 std::vector<std::size_t> combination{};
-                combination.reserve(parameter.number_of_sidbs);
+                combination.reserve(params.number_of_sidbs);
 
                 for (auto it = begin; it != end; ++it)
                 {
@@ -353,31 +354,30 @@ class design_sidb_gates_impl
      * pair of SiDBs within a distance of 0.5 nanometers, it returns `true` to indicate that SiDBs are too close;
      * otherwise, it returns `false`.
      *
-     * @param cell_indices A vector of cell indices to check for SiDB proximity.
+     * @param cells A vector of cells to check for proximity.
      * @tparam affected_cells All SiDBs that are affected by atomic defects.
      * @return `true` if any SiDBs are too close; otherwise, `false`.
      */
-    [[nodiscard]] bool are_sidbs_too_close(const std::vector<std::size_t>&               cell_indices,
-                                           const std::unordered_set<typename Lyt::cell>& affected_cells = {}) noexcept
+    [[nodiscard]] bool
+    are_sidbs_too_close(const std::vector<typename Lyt::cell>&        cells,
+                        const std::unordered_set<typename Lyt::cell>& affected_cells = {}) const noexcept
     {
-        for (std::size_t i = 0; i < cell_indices.size(); i++)
+        for (std::size_t i = 0; i < cells.size(); i++)
         {
             if constexpr (has_get_sidb_defect_v<Lyt>)
             {
-                if (skeleton_layout.get_sidb_defect(all_sidbs_in_canvas[cell_indices[i]]).type !=
-                    sidb_defect_type::NONE)
+                if (skeleton_layout.get_sidb_defect(cells[i]).type != sidb_defect_type::NONE)
                 {
                     return true;
                 }
             }
-            if (affected_cells.count(all_sidbs_in_canvas[cell_indices[i]]) > 0)
+            if (affected_cells.count(cells[i]) > 0)
             {
                 return true;
             }
-            for (std::size_t j = i + 1; j < cell_indices.size(); j++)
+            for (std::size_t j = i + 1; j < cells.size(); j++)
             {
-                if (sidb_nanometer_distance<Lyt>(skeleton_layout, all_sidbs_in_canvas[cell_indices[i]],
-                                                 all_sidbs_in_canvas[cell_indices[j]]) < 0.5)
+                if (sidb_nanometer_distance<Lyt>(skeleton_layout, cells[i], cells[j]) < 0.5)
                 {
                     return true;
                 }
@@ -391,7 +391,7 @@ class design_sidb_gates_impl
      * @param cell_indices A vector of indices of cells to be added to the skeleton layout.
      * @return A copy of the original layout (`skeleton_layout`) with SiDB cells added at specified indices.
      */
-    [[nodiscard]] Lyt skeleton_layout_with_canvas_sidbs(const std::vector<std::size_t>& cell_indices) noexcept
+    [[nodiscard]] Lyt skeleton_layout_with_canvas_sidbs(const std::vector<std::size_t>& cell_indices) const noexcept
     {
         Lyt lyt_copy{skeleton_layout.clone()};
 
@@ -406,6 +406,24 @@ class design_sidb_gates_impl
         }
 
         return lyt_copy;
+    }
+    /**
+     * Converts a vector of cell indices to a vector of corresponding cells in the layout.
+     *
+     * @param cell_indices Vector of cell indices to convert.
+     * @return A vector of cells corresponding to the given indices.
+     */
+    [[nodiscard]] std::vector<typename Lyt::cell>
+    cell_indices_to_cell_vector(const std::vector<std::size_t>& cell_indices) const noexcept
+    {
+        std::vector<typename Lyt::cell> cells{};
+        cells.reserve(cell_indices.size());
+        for (const auto index : cell_indices)
+        {
+            assert(index < all_sidbs_in_canvas.size() && "Cell index is out of range.");
+            cells.push_back(all_sidbs_in_canvas[index]);
+        }
+        return cells;
     }
 };
 }  // namespace detail
