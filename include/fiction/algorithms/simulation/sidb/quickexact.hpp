@@ -111,7 +111,8 @@ class quickexact_impl
             required_simulation_base_number base_number =
                 (params.base_number_detection == quickexact_params<cell<Lyt>>::automatic_base_number_detection::ON &&
                  charge_lyt.is_three_state_simulation_required()) ||
-                        (params.base_number_detection == quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF &&
+                        (params.base_number_detection ==
+                             quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF &&
                          params.physical_parameters.base == 3) ?
                     required_simulation_base_number::THREE :
                     required_simulation_base_number::TWO;
@@ -578,7 +579,8 @@ class quickexact_impl
  * @return Simulation Results.
  */
 template <typename Lyt>
-[[nodiscard]] sidb_simulation_result<Lyt> quickexact(const Lyt& lyt, const quickexact_params<cell<Lyt>>& params = {}) noexcept
+[[nodiscard]] sidb_simulation_result<Lyt> quickexact(const Lyt&                          lyt,
+                                                     const quickexact_params<cell<Lyt>>& params = {}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
