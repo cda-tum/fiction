@@ -2,8 +2,8 @@
 // Created by Jan Drewniok on 03.12.23.
 //
 
-#ifndef FICTION_DETERMINE_INFLUENCE_REGION_HPP
-#define FICTION_DETERMINE_INFLUENCE_REGION_HPP
+#ifndef FICTION_DETERMINE_ELECTROSTATIC_INFLUENCE_REGION_HPP
+#define FICTION_DETERMINE_ELECTROSTATIC_INFLUENCE_REGION_HPP
 
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
 #include "fiction/layouts/bounding_box.hpp"
@@ -285,4 +285,4 @@ determine_influence_region(const Lyt& layout, const Lyt& sublayout, const quicke
 
 }  // namespace fiction
 
-#endif  // FICTION_DETERMINE_INFLUENCE_REGION_HPP
+#endif  // FICTION_DETERMINE_ELECTROSTATIC_INFLUENCE_REGION_HPP

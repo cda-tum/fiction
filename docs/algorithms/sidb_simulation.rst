@@ -194,3 +194,11 @@ Convert Potential to Distance
 **Header:** ``fiction/algorithms/simulation/sidb/convert_potential_to_distance.hpp``
 
 .. doxygenfunction:: fiction::convert_potential_to_distance
+
+
+Determine Electrostatic Influence Region
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Header:** ``fiction/algorithms/simulation/sidb/determine_electrostatic_influence_region.hpp``
+
+.. doxygenfunction:: fiction::determine_influence_region

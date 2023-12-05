@@ -5,7 +5,7 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
-#include <fiction/algorithms/simulation/sidb/determine_influence_region.hpp>
+#include <fiction/algorithms/simulation/sidb/determine_electrostatic_influence_region.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/io/read_sqd_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
