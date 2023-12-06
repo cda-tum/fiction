@@ -91,7 +91,7 @@ SiDB Operational Domain
 Technology-independent Gate-level Layouts
 #########################################
 
-Can be used to generate gate-level layout files (``.fgl``) as offered by [MNT Bench](https://www.cda.cit.tum.de/mntbench/).
+Can be used to generate gate-level layout files (``.fgl``) as offered by `MNT Bench <https://www.cda.cit.tum.de/mntbench/>`_.
 
 **Header:** ``fiction/io/write_fgl_layout.hpp``
 
