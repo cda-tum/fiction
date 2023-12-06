@@ -85,12 +85,11 @@ enum class charge_distribution_history
 enum class charge_index_recomputation
 {
     /**
-     * The charge index is recomputed from scratch since we don't know if the the charge index was incremented after the
-     * last charge index computation.
+     * The charge index is recomputed from scratch.
      */
     FROM_SCRATCH,
     /**
-     * The charge index is recomputed with the leading zeroes ignored. We can apply this optimization if we know that
+     * The charge index is recomputed with the leading zeroes ignored. This optimization can be applied if we know that
      * the charge index was incremented after the last charge index computation.
      */
     IGNORE_LEADING_ZEROES
