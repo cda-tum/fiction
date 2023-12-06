@@ -67,7 +67,7 @@ inline void time_to_solution(pybind11::module& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::time_to_solution<py_charge_distribution_surface>(m);
+    detail::time_to_solution<py_sidb_layout>(m);
 }
 
 }  // namespace pyfiction
