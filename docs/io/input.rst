@@ -22,6 +22,8 @@ Truth Tables
 Gate-level Layouts
 ##################
 
+Can be used to read gate-level layouts offered by [MNT Bench](https://www.cda.cit.tum.de/mntbench/).
+
 **Header:** ``fiction/io/read_fgl_layout.hpp``
 
 .. doxygenfunction:: fiction::read_fgl_layout(std::istream& is, const std::string_view& name = "")
