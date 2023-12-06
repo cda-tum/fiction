@@ -28,9 +28,16 @@ bool compare_output(const std::string& output, const std::string& expected)
     return clean_output == clean_expected;
 }
 
-TEST_CASE("writes expected output", "[write_txt_sim_result]")
+TEMPLATE_TEST_CASE(
+    "writes expected output", "[write_txt_sim_result]",
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
+    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (charge_distribution_surface<
+        cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>))
 {
-    sidb_cell_clk_lyt_siqad lyt{};
+
+    TestType lyt{};
 
     SECTION("Output is written to ostream correctly, degenerated GS")
     {
@@ -40,7 +47,7 @@ TEST_CASE("writes expected output", "[write_txt_sim_result]")
         lyt.assign_cell_type({8, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
 
         const sidb_simulation_parameters params{2, -0.32};
-        const auto simulation_results = exhaustive_ground_state_simulation<sidb_cell_clk_lyt_siqad>(lyt, params);
+        const auto                       simulation_results = exhaustive_ground_state_simulation<TestType>(lyt, params);
 
         std::stringstream ss;
         write_location_and_ground_state(simulation_results, ss);
@@ -67,7 +74,7 @@ TEST_CASE("writes expected output", "[write_txt_sim_result]")
         lyt.assign_cell_type({5, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
 
         const sidb_simulation_parameters params{2, -0.32};
-        const auto simulation_results = exhaustive_ground_state_simulation<sidb_cell_clk_lyt_siqad>(lyt, params);
+        const auto                       simulation_results = exhaustive_ground_state_simulation<TestType>(lyt, params);
 
         std::stringstream ss;
         write_location_and_ground_state(simulation_results, ss);

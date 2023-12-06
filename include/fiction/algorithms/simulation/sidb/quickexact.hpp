@@ -49,7 +49,7 @@ struct quickexact_params
     /**
      * All parameters for physical SiDB simulations.
      */
-    sidb_simulation_parameters physical_parameters{};
+    sidb_simulation_parameters simulation_parameters{};
     /**
      * If `ON`, *QuickExact* checks which base number is required for the simulation, i.e., whether 3-state is
      * necessary or 2-state simulation is sufficient.
@@ -78,13 +78,13 @@ class quickexact_impl
             params{parameter}
     {
         charge_lyt.assign_all_charge_states(sidb_charge_state::NEGATIVE);
-        charge_lyt.assign_physical_parameters(parameter.physical_parameters);
+        charge_lyt.assign_physical_parameters(parameter.simulation_parameters);
     }
 
     sidb_simulation_result<Lyt> run() noexcept
     {
         result.algorithm_name      = "QuickExact";
-        result.physical_parameters = params.physical_parameters;
+        result.simulation_parameters = params.simulation_parameters;
 
         mockturtle::stopwatch<>::duration time_counter{};
         {
@@ -97,7 +97,7 @@ class quickexact_impl
                 (params.base_number_detection == quickexact_params<Lyt>::automatic_base_number_detection::ON &&
                  charge_lyt.is_three_state_simulation_required()) ||
                         (params.base_number_detection == quickexact_params<Lyt>::automatic_base_number_detection::OFF &&
-                         params.physical_parameters.base == 3) ?
+                         params.simulation_parameters.base == 3) ?
                     required_simulation_base_number::THREE :
                     required_simulation_base_number::TWO;
 
@@ -272,7 +272,7 @@ class quickexact_impl
         {
             charge_lyt.assign_base_number(2);
         }
-        charge_layout.assign_physical_parameters(params.physical_parameters);
+        charge_layout.assign_physical_parameters(params.simulation_parameters);
         charge_layout.assign_all_charge_states(sidb_charge_state::NEUTRAL);
         charge_layout.assign_dependent_cell(all_sidbs_in_lyt_without_negative_preassigned_ones[0]);
 

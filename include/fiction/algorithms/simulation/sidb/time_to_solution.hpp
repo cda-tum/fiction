@@ -97,7 +97,6 @@ void time_to_solution(Lyt& lyt, const quicksim_params& quicksim_params, const ti
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
     time_to_solution_stats st{};
 
@@ -105,11 +104,11 @@ void time_to_solution(Lyt& lyt, const quicksim_params& quicksim_params, const ti
     if (tts_params.engine == exhaustive_sidb_simulation_engine::QUICKEXACT)
     {
         st.algorithm      = "QuickExact";
-        simulation_result = exhaustive_ground_state_simulation(lyt, quicksim_params.phys_params);
+        simulation_result = exhaustive_ground_state_simulation(lyt, quicksim_params.simulation_parameters);
     }
     else
     {
-        const quickexact_params<Lyt> params{quicksim_params.phys_params};
+        const quickexact_params<Lyt> params{quicksim_params.simulation_parameters};
         st.algorithm      = "QuickExact";
         simulation_result = quickexact(lyt, params);
     }

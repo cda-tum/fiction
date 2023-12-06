@@ -17,12 +17,12 @@ class TestSiDBSimulationResult(unittest.TestCase):
         # Assign values
         result.algorithm_name = "exgs"
         result.simulation_runtime = datetime.timedelta(seconds=100)
-        result.physical_parameters = params
+        result.simulation_parameters = params
 
         self.assertEqual(result.algorithm_name, "exgs")
-        self.assertEqual(result.physical_parameters.lat_a, params.lat_a)
-        self.assertEqual(result.physical_parameters.lat_b, params.lat_b)
-        self.assertEqual(result.physical_parameters.lat_c, params.lat_c)
+        self.assertEqual(result.simulation_parameters.lat_a, params.lat_a)
+        self.assertEqual(result.simulation_parameters.lat_b, params.lat_b)
+        self.assertEqual(result.simulation_parameters.lat_c, params.lat_c)
 
 
 if __name__ == '__main__':

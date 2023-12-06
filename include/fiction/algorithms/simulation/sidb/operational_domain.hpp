@@ -166,7 +166,7 @@ struct operational_domain_params
      * The simulation parameters for the operational domain computation. Most parameters will be kept constant across
      * sweeps, but the sweep parameters are adjusted in each simulation step and thus overwritten in this object.
      */
-    sidb_simulation_parameters sim_params{};
+    sidb_simulation_parameters simulation_parameters{};
     /**
      * The simulation engine to be used for the operational domain computation.
      */
@@ -746,7 +746,7 @@ class operational_domain_impl
         // increment the number of evaluated parameter combinations
         ++num_evaluated_parameter_combinations;
 
-        sidb_simulation_parameters sim_params = params.sim_params;
+        sidb_simulation_parameters sim_params = params.simulation_parameters;
         set_x_dimension_value(sim_params, param_point.x);
         set_y_dimension_value(sim_params, param_point.y);
 

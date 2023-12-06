@@ -35,7 +35,7 @@ struct maximum_defect_influence_distance_params
     /**
      * Physical simulation parameters.
      */
-    sidb_simulation_parameters sim_params{};
+    sidb_simulation_parameters simulation_parameters{};
     /**
      * The pair describes the width and height of the area around the gate, which is
      * also used to place defects.
@@ -74,13 +74,13 @@ class maximum_defect_influence_position_and_distance_impl
     std::pair<typename Lyt::cell, double> run() noexcept
     {
         const quickexact_params<sidb_surface<Lyt>> params_defect{
-            params.sim_params, quickexact_params<sidb_surface<Lyt>>::automatic_base_number_detection::OFF};
+            params.simulation_parameters, quickexact_params<sidb_surface<Lyt>>::automatic_base_number_detection::OFF};
 
         double          avoidance_distance{0};
         coordinate<Lyt> max_defect_position{};
 
         const auto simulation_results =
-            quickexact(layout, quickexact_params<Lyt>{params.sim_params,
+            quickexact(layout, quickexact_params<Lyt>{params.simulation_parameters,
                                                       quickexact_params<Lyt>::automatic_base_number_detection::OFF});
 
         const auto min_energy          = minimum_energy(simulation_results.charge_distributions);
