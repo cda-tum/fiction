@@ -300,7 +300,7 @@ Cell-level layouts:
 
 To objectively evaluate and compare software and design automation tools, [MNT Bench](https://www.cda.cit.tum.de/mntbench/) provides gate-level
 layouts for various gate libraries and clocking schemes, generated using the latest physical design and
-optimization algorithms. *fiction* offers the correpsonding read and write utitlities to generate gate-level layouts from gate-level layout files (``.fgl``) and vice versa.
+optimization algorithms, with *fiction* offering the correpsonding read and write utitlities to generate gate-level layouts from gate-level layout files (``.fgl``) and vice versa.
 
 # Reference
 
