@@ -296,6 +296,12 @@ Cell-level layouts:
 - Bounding box
 - Area usage in nm²
 
+## Benchmark Library
+
+To objectively evaluate and compare software and design automation tools, [MNT Bench](https://www.cda.cit.tum.de/mntbench/) provides gate-level
+layouts for various gate libraries and clocking schemes, generated using the latest physical design and
+optimization algorithms. *fiction* offers the correpsonding read and write utitlities to generate gate-level layouts from gate-level layout files (``.fgl``) and vice versa.
+
 # Reference
 
 Since *fiction* is academic software, we would be thankful if you referred to it by citing the following publication:
