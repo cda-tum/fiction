@@ -10,9 +10,9 @@ To objectively evaluate and compare software and design automation tools for the
 For convenience, they are also part of ``fiction`` to be directly used in experiments or the development of new physical design algorithms, optimizations, and simulators.
 
 # Gate-level Layouts
-Gate-level layouts generated with any of the physical design methods implemented in `fiction` can be stored in a human-readable file format (``.fgl``) with the
+Gate-level layouts generated with any of the physical design methods implemented in ``fiction``` can be stored in a human-readable file format (``.fgl``) with the
 correponding [write](https://fiction.readthedocs.io/en/latest/io/physical_simulation.html#technology-independent-gate-level-layouts) function.
 
 [MNT Bench](https://www.cda.cit.tum.de/mntbench/) offers gate-level layouts spanning various gate libraries, clocking schemes, physical
-design algorothms, and optimizations. These layouts can be [read](https://fiction.readthedocs.io/en/latest/io/input.html#gate-level-layouts) with fiction and used for testing new
+design algorothms, and optimizations. These layouts can be [read](https://fiction.readthedocs.io/en/latest/io/input.html#gate-level-layouts) with ``fiction`` and used for testing new
 post-layout optimization algorithms, creating cell-level layouts, or any other use case.
