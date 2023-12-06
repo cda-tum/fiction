@@ -8,7 +8,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 class TestPostLayoutOptimiztaion(unittest.TestCase):
 
     def test_post_layout_optimization_without_stats(self):
-        network = read_logic_network(dir_path + "/../../resources/mux21.v")
+        network = read_technology_network(dir_path + "/../../resources/mux21.v")
 
         layout = orthogonal(network)
 
@@ -19,7 +19,7 @@ class TestPostLayoutOptimiztaion(unittest.TestCase):
         self.assertEqual(equivalence_checking(network, layout), eq_type.STRONG)
 
     def test_post_layout_optimization_with_stats(self):
-        network = read_logic_network(dir_path + "/../../resources/mux21.v")
+        network = read_technology_network(dir_path + "/../../resources/mux21.v")
 
         layout = orthogonal(network)
 

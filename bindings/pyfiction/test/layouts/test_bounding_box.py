@@ -22,7 +22,7 @@ class TestBoundingBox(unittest.TestCase):
             self.assertEqual(max_coord.y - min_coord.y, 0)
 
     def test_initialize_gate_level_with_ortho_bounding_box(self):
-        network = read_logic_network(os.path.join(dir_path + "/../resources/mux21.v"))
+        network = read_technology_network(os.path.join(dir_path + "/../resources/mux21.v"))
         params = orthogonal_params()
         layout = orthogonal(network, params)
         min_coord, max_coord = layout.bounding_box_2d()
@@ -32,7 +32,7 @@ class TestBoundingBox(unittest.TestCase):
         self.assertEqual(max_coord.x - min_coord.x, 5)
         self.assertEqual(max_coord.y - min_coord.y, 7)
 
-        network = read_logic_network(os.path.join(dir_path + "/../resources/xnor2.v"))
+        network = read_technology_network(os.path.join(dir_path + "/../resources/xnor2.v"))
         layout = orthogonal(network, params)
         min_coord, max_coord = layout.bounding_box_2d()
 
@@ -41,7 +41,7 @@ class TestBoundingBox(unittest.TestCase):
         self.assertEqual(max_coord.x - min_coord.x, 5)
         self.assertEqual(max_coord.y - min_coord.y, 8)
 
-        network = read_logic_network(os.path.join(dir_path + "/../resources/xor2.v"))
+        network = read_technology_network(os.path.join(dir_path + "/../resources/xor2.v"))
         layout = orthogonal(network, params)
         min_coord, max_coord = layout.bounding_box_2d()
 
@@ -50,7 +50,7 @@ class TestBoundingBox(unittest.TestCase):
         self.assertEqual(max_coord.x - min_coord.x, 4)
         self.assertEqual(max_coord.y - min_coord.y, 7)
 
-        network = read_logic_network(os.path.join(dir_path + "/../resources/FA.v"))
+        network = read_technology_network(os.path.join(dir_path + "/../resources/FA.v"))
         layout = orthogonal(network, params)
         min_coord, max_coord = layout.bounding_box_2d()
 
@@ -60,7 +60,7 @@ class TestBoundingBox(unittest.TestCase):
         self.assertEqual(max_coord.y - min_coord.y, 11)
 
     def test_update_gate_level_bounding_box(self):
-        network = read_logic_network(os.path.join(dir_path + "/../resources/mux21.v"))
+        network = read_technology_network(os.path.join(dir_path + "/../resources/mux21.v"))
         params = orthogonal_params()
         layout = orthogonal(network, params)
         min_coord, max_coord = layout.bounding_box_2d()

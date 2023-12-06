@@ -11,14 +11,14 @@ z3 = os.environ.get("z3", "OFF")
 class TestApplyGateLibrary(unittest.TestCase):
 
     def test_apply_qca_one_library(self):
-        network = read_logic_network(dir_path + "/../../resources/mux21.v")
+        network = read_technology_network(dir_path + "/../../resources/mux21.v")
         layout = orthogonal(network)
 
         cell_layout = apply_qca_one_library(layout)
 
     @unittest.skipIf(z3 == "OFF", "Z3 not enabled")
     def test_apply_bestagon_library(self):
-        network = read_logic_network(dir_path + "/../../resources/mux21.v")
+        network = read_technology_network(dir_path + "/../../resources/mux21.v")
 
         params = exact_params()
         params.scheme = "ROW"
@@ -31,7 +31,7 @@ class TestApplyGateLibrary(unittest.TestCase):
 
     @unittest.skipIf(z3 == "OFF", "Z3 not enabled")
     def test_apply_topolinano_library(self):
-        network = read_logic_network(dir_path + "/../../resources/mux21.v")
+        network = read_technology_network(dir_path + "/../../resources/mux21.v")
 
         params = exact_params()
         params.scheme = "COLUMNAR3"

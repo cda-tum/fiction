@@ -64,7 +64,7 @@
 #include "pyfiction/layouts/hexagonal_layout.hpp"
 #include "pyfiction/layouts/obstruction_layout.hpp"
 #include "pyfiction/layouts/shifted_cartesian_layout.hpp"
-#include "pyfiction/networks/logic_network.hpp"
+#include "pyfiction/networks/logic_networks.hpp"
 #include "pyfiction/networks/truth_tables.hpp"
 #include "pyfiction/technology/area.hpp"
 #include "pyfiction/technology/charge_distribution_surface.hpp"
@@ -128,9 +128,9 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::random_sidb_layout_generator(m);
     //    pyfiction::time_to_solution(m);
     /**
-     * Logic Networks
+     * Logic
      */
-    pyfiction::logic_network(m);
+    pyfiction::logic_networks(m);
     pyfiction::truth_tables(m);
     /**
      * Algorithms: Network Transformation

@@ -10,8 +10,8 @@ class TestLogicSimulation(unittest.TestCase):
 
     @unittest.skipIf(z3 == "OFF", "Z3 not enabled")
     def test_logic_simulation(self):
-        xor2_net = read_logic_network(dir_path + "/../../resources/xor2.v")
-        xnor2_net = read_logic_network(dir_path + "/../../resources/xnor2.v")
+        xor2_net = read_technology_network(dir_path + "/../../resources/xor2.v")
+        xnor2_net = read_technology_network(dir_path + "/../../resources/xnor2.v")
 
         xor_sim = simulate(xor2_net)
         self.assertEqual(xor_sim["out"], [False, True, True, False])

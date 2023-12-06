@@ -2,8 +2,8 @@
 // Created by marcel on 07.06.22.
 //
 
-#ifndef PYFICTION_LOGIC_NETWORK_HPP
-#define PYFICTION_LOGIC_NETWORK_HPP
+#ifndef PYFICTION_LOGIC_NETWORKS_HPP
+#define PYFICTION_LOGIC_NETWORKS_HPP
 
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
@@ -175,12 +175,12 @@ void network(pybind11::module& m, const std::string& network_name)
 
 }  // namespace detail
 
-inline void logic_network(pybind11::module& m)
+inline void logic_networks(pybind11::module& m)
 {
     /**
-     * Logic network.
+     * Logic networks.
      */
-    detail::network<py_logic_network>(m, "logic_network");
+    detail::network<py_logic_network>(m, "technology_network");
     //    detail::network<fiction::aig_nt>(m, "aig_network");
     //    detail::network<fiction::mig_nt>(m, "mig_network");
     //    detail::network<fiction::xag_nt>(m, "xag_network");
@@ -188,4 +188,4 @@ inline void logic_network(pybind11::module& m)
 
 }  // namespace pyfiction
 
-#endif  // PYFICTION_LOGIC_NETWORK_HPP
+#endif  // PYFICTION_TECHNOLOGY_NETWORKS_HPP

@@ -6,10 +6,15 @@ Read logic networks, truth tables, or FCN layouts from file into data types.
 Logic Networks
 ##############
 
-**Header:** ``fiction/io/network_reader.hpp``
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/io/network_reader.hpp``
 
-.. doxygenclass:: fiction::network_reader
-   :members:
+        .. doxygenclass:: fiction::network_reader
+           :members:
+
+    .. tab:: Python
+        .. autofunction:: mnt.pyfiction.read_technology_network
 
 
 Truth Tables

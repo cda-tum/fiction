@@ -7,8 +7,8 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 
 class TestLogicNetwork(unittest.TestCase):
 
-    def test_read_logic_network(self):
-        network = read_logic_network(dir_path + "/../resources/mux21.v")
+    def test_read_technology_network(self):
+        network = read_technology_network(dir_path + "/../resources/mux21.v")
 
         self.assertEqual(network.size(), 10)
         self.assertEqual(network.nodes(), [i for i in range(10)])
@@ -54,10 +54,10 @@ class TestLogicNetwork(unittest.TestCase):
         self.assertEqual(network.fanins(9), [8])
 
         with self.assertRaises(RuntimeError):
-            network = read_logic_network(dir_path + "/mux41.v")
+            network = read_technology_network(dir_path + "/mux41.v")
 
     def test_is_gate_functions(self):
-        network = read_logic_network(dir_path + "/../resources/mux21.v")
+        network = read_technology_network(dir_path + "/../resources/mux21.v")
 
         for i in network.nodes():
             self.assertFalse(network.is_maj(i))
@@ -66,7 +66,7 @@ class TestLogicNetwork(unittest.TestCase):
             self.assertFalse(network.is_nand(i))
             self.assertFalse(network.is_nor(i))
 
-        network = read_logic_network(dir_path + "/../resources/FA.v")
+        network = read_technology_network(dir_path + "/../resources/FA.v")
 
         self.assertTrue(network.is_xor(6))
 

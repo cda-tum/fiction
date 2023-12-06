@@ -7,7 +7,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 
 class TestNetworkBalancing(unittest.TestCase):
     def test_balancing(self):
-        network = read_logic_network(dir_path + "/../../resources/mux21.v")
+        network = read_technology_network(dir_path + "/../../resources/mux21.v")
         self.assertEqual(network.num_gates(), 5)
 
         self.assertFalse(is_balanced(network))

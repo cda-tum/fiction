@@ -8,7 +8,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 class TestReadWriteFglLayout(unittest.TestCase):
 
     def test_read_write(self):
-        network = read_logic_network(dir_path + "/../resources/mux21.v")
+        network = read_technology_network(dir_path + "/../resources/mux21.v")
         cart_layout = orthogonal(network)
         write_fgl_layout(cart_layout, "mux21_cartesian.fgl")
         read_cart_layout = read_cartesian_fgl_layout("mux21_cartesian.fgl")

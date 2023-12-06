@@ -12,13 +12,13 @@ class TestExactCartesianPhysicalDesign(unittest.TestCase):
 
     @unittest.skipIf(z3 == "OFF", "Z3 not enabled")
     def test_exact_default(self):
-        network = read_logic_network(dir_path + "/../../resources/mux21.v")
+        network = read_technology_network(dir_path + "/../../resources/mux21.v")
         layout = exact_cartesian(network)
         self.assertEqual(equivalence_checking(network, layout), eq_type.STRONG)
 
     @unittest.skipIf(z3 == "OFF", "Z3 not enabled")
     def test_exact_with_parameters(self):
-        network = read_logic_network(dir_path + "/../../resources/mux21.v")
+        network = read_technology_network(dir_path + "/../../resources/mux21.v")
 
         params = exact_params()
         params.border_io = True
@@ -31,7 +31,7 @@ class TestExactCartesianPhysicalDesign(unittest.TestCase):
 
     @unittest.skipIf(z3 == "OFF", "Z3 not enabled")
     def test_exact_with_stats(self):
-        network = read_logic_network(dir_path + "/../../resources/mux21.v")
+        network = read_technology_network(dir_path + "/../../resources/mux21.v")
 
         stats = exact_stats()
 
@@ -44,13 +44,13 @@ class TestExactHexagonalPhysicalDesign(unittest.TestCase):
 
     @unittest.skipIf(z3 == "OFF", "Z3 not enabled")
     def test_exact_default(self):
-        network = read_logic_network(dir_path + "/../../resources/mux21.v")
+        network = read_technology_network(dir_path + "/../../resources/mux21.v")
         layout = exact_hexagonal(network)
         self.assertEqual(equivalence_checking(network, layout), eq_type.STRONG)
 
     @unittest.skipIf(z3 == "OFF", "Z3 not enabled")
     def test_exact_with_parameters(self):
-        network = read_logic_network(dir_path + "/../../resources/mux21.v")
+        network = read_technology_network(dir_path + "/../../resources/mux21.v")
 
         params = exact_params()
         params.border_io = True
@@ -63,7 +63,7 @@ class TestExactHexagonalPhysicalDesign(unittest.TestCase):
 
     @unittest.skipIf(z3 == "OFF", "Z3 not enabled")
     def test_exact_with_stats(self):
-        network = read_logic_network(dir_path + "/../../resources/mux21.v")
+        network = read_technology_network(dir_path + "/../../resources/mux21.v")
 
         stats = exact_stats()
 
