@@ -163,7 +163,7 @@ ALICE_ADD_STORE(fiction::gate_layout_t, "gate_layout", "g", "gate layout", "gate
 
 ALICE_PRINT_STORE(fiction::gate_layout_t, os, layout)
 {
-    const auto print = [&os](auto&& lyt_ptr) { fiction::print_gate_level_layout(os, *lyt_ptr); };
+    const auto print = [&os](auto&& lyt_ptr) { fiction::print_layout(*lyt_ptr, os); };
 
     std::visit(print, layout);
 }
@@ -373,7 +373,7 @@ ALICE_ADD_STORE(fiction::cell_layout_t, "cell_layout", "c", "cell layout", "cell
 
 ALICE_PRINT_STORE(fiction::cell_layout_t, os, layout)
 {
-    const auto print = [&os](auto&& lyt_ptr) { fiction::print_cell_level_layout(os, *lyt_ptr); };
+    const auto print = [&os](auto&& lyt_ptr) { fiction::print_layout(*lyt_ptr, os); };
 
     std::visit(print, layout);
 }
