@@ -50,6 +50,7 @@
 
 // physical simulation commands
 #ifdef FICTION_SIMULATION_FLOW
+#include "cmd/simulation/quickexact.hpp"
 #endif
 
 #endif  // FICTION_COMMANDS_HPP
