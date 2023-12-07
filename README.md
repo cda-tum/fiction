@@ -302,7 +302,7 @@ To objectively evaluate and compare software and design automation tools, [MNT B
 layouts for various gate libraries and clocking schemes, generated using the latest physical design and
 optimization algorithms, with *fiction* offering the corresponding read and write utilities to generate gate-level layouts from gate-level layout files (``.fgl``) and vice versa.
 
-Additionally, the [benchmarks](https://github.com/cda-tum/fiction/tree/main/benchmarks) folder contains the function descriptions of frequently used benchmark sets in verilog format (``.v``) provided by [MNT Bench](https://www.cda.cit.tum.de/mntbench/).
+Additionally, the [benchmarks](https://github.com/cda-tum/fiction/tree/main/benchmarks) folder contains the function descriptions of frequently used benchmark sets in Verilog format (``.v``) provided by [MNT Bench](https://www.cda.cit.tum.de/mntbench/).
 
 # Reference
 
