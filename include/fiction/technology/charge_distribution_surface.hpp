@@ -113,7 +113,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
          */
         using distance_matrix = std::vector<std::vector<double>>;
         /**
-         * The potential matrix is a vector of vectors storing the chargless electrostatic potentials in Volt (V).
+         * The potential matrix is a vector of vectors storing the charge-less electrostatic potentials in Volt (V).
          */
         using potential_matrix = std::vector<std::vector<double>>;
         /**
