@@ -302,22 +302,22 @@ class input_ordering_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
   private:
     /**
      * The input network
-     * */
+     */
     Ntk inp_ntk;
     /**
      * Topological view of the input network
-     * */
+     */
     std::vector<node> topo_order{};
     /**
-     * # Rank One: Primary Inputs (PIs) connected to Fan-Outs (FOs) and related to two PIs.
+     * Rank One: Primary Inputs (PIs) connected to Fan-Outs (FOs) and related to two PIs.
      */
     std::vector<node> first_rank{};
     /**
-     * # Rank Two: PIs connected to FOs and related to one PI.
+     * Rank Two: PIs connected to FOs and related to one PI.
      */
     std::vector<node> second_rank{};
     /**
-     * # Rank Three: PIs related to other PIs.
+     * Rank Three: PIs related to other PIs.
      */
     std::vector<node> third_rank{};
     /**
@@ -372,6 +372,12 @@ class input_ordering_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
     /**
      * A function that gets the connecting nodes between PIs. A connecting node is defined as a two-input node,
      * that has two PIs as its fan-ins when bypassing inverters and fan-outs.
+     *
+     * @param connecting_node Node that has two PIs as fan-ins skipping inverter and fan-out nodes.
+     * @param current_node Currently visited node.
+     * @param fon Fan-out node.
+     * @param inv_flag Flag indicating an inverter as fan-out.
+     * @param is_fan_out Flag indicating a fan-out node
      */
     void get_connecting_nodes(std::vector<node>& connecting_node, node& current_node, const node& fon, bool& inv_flag,
                               bool& is_fan_out)
@@ -424,6 +430,12 @@ class input_ordering_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
 
     /**
      * Compute the ranking of PIs, also determining the ordering in the network.
+     *
+     * @param connecting_node Node that has two PIs as fan-ins skipping inverter and fan-out nodes.
+     * @param is_fan_out Flag indicating a fan-out node
+     * @param n Network node.
+     * @param inv_flag Flag indicating an inverter as fan-out.
+     *
      */
     void compute_pi_ranking(const std::vector<node>& connecting_node, const bool& is_fan_out, node const& n,
                             const bool& inv_flag)
@@ -534,6 +546,8 @@ class input_ordering_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
 
     /**
      * Sort the PIs. PIs connected to the same two fan-in nodes are grouped together.
+     *
+     * @param n Starting node.
      */
     void input_sort(node const& n)
     {

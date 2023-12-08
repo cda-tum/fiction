@@ -51,17 +51,16 @@ Furthermore, if you use any of the design automation algorithms, please consider
           publisher={ACM New York, NY, USA}
         }
 
-* :ref:`Versatile Signal Distribution Networks <ortho_ordering>` (``ortho_ordering``):
+* :ref:`Ordering Distribution Network <ortho_ordering>` (``ortho_ordering``):
 
     .. code-block:: tex
 
         @inproceedings{walter2023versatile,
           title={Versatile Signal Distribution Networks for Scalable Placement and Routing of Field-coupled Nanocomputing Technologies},
           author={Walter, Marcel and Hien, Benjamin and Wille, Robert},
-          booktitle={2023 IEEE Computer Society Annual Symposium on VLSI (ISVLSI)},
+          booktitle={IEEE Computer Society Annual Symposium on VLSI (ISVLSI)},
           pages={1--6},
-          year={2023},
-          organization={IEEE}
+          year={2023}
         }
 
 * :ref:`One-pass synthesis <onepass>` (``onepass``):

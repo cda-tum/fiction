@@ -186,7 +186,7 @@ This scalable approach only works on logic networks which are AOIGs (MAJ gates d
 OGD-based SDN (``ortho_ordering``)
 ##################################
 
-The ordering of inputs is one of the Signal Distribution Networks (SDN)s added to the functionality of the oroginal
+The ordering of inputs is one of the Signal Distribution Networks (SDNs) added to the functionality of the original
 ``ortho`` algorithm. This SDN modifies the original algorithm by ordering inputs and optimizing inverter counts to save area
 and wire crossings in the layout.
 For more information, see `the paper <https://ieeexplore.ieee.org/abstract/document/10238604>`_.

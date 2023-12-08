@@ -31,8 +31,12 @@ namespace detail
 {
 
 /**
- * Connects gates that are unaffected by the inverter substitution.
+ * This function connects gates that aren't affected by the inverter substitution. It means that all the gates without
+ * any fan-ins or fan-outs impacted by the inverter substitution retain their functionality and are subsequently
+ * connected to their children.
  *
+ * @tparam Ntk Type of the input logic network.
+ * @tparam NtkDest Type of the returned logic network.
  * @param ntk Input network.
  * @param ntk_dest Output network.
  * @param old2new `node_map` to assign the nodes of the old network to the new network.
@@ -41,11 +45,11 @@ namespace detail
  * @return 'true' iff the assignment was successful.
  */
 template <typename Ntk, typename NtkDest>
-bool connect_children_to_gates(const Ntk& ntk, const NtkDest& ntk_dest,
+bool connect_children_to_gates(const Ntk& ntk, NtkDest& ntk_dest,
                                mockturtle::node_map<mockturtle::signal<Ntk>, Ntk>& old2new,
                                const mockturtle::node<Ntk>& g, const std::vector<typename Ntk::signal>& children)
 {
-    if constexpr (mockturtle::has_is_and_v<Ntk> && mockturtle::has_create_and_v<Ntk>)
+    if constexpr (mockturtle::has_is_and_v<Ntk> && mockturtle::has_create_and_v<NtkDest>)
     {
         if (ntk.is_and(g))
         {
@@ -53,7 +57,7 @@ bool connect_children_to_gates(const Ntk& ntk, const NtkDest& ntk_dest,
             return true;  // keep looping
         }
     }
-    if constexpr (mockturtle::has_is_or_v<Ntk> && mockturtle::has_create_or_v<Ntk>)
+    if constexpr (mockturtle::has_is_or_v<Ntk> && mockturtle::has_create_or_v<NtkDest>)
     {
         if (ntk.is_or(g))
         {
@@ -61,7 +65,7 @@ bool connect_children_to_gates(const Ntk& ntk, const NtkDest& ntk_dest,
             return true;  // keep looping
         }
     }
-    if constexpr (mockturtle::has_is_xor_v<Ntk> && mockturtle::has_create_xor_v<Ntk>)
+    if constexpr (mockturtle::has_is_xor_v<Ntk> && mockturtle::has_create_xor_v<NtkDest>)
     {
         if (ntk.is_xor(g))
         {
@@ -69,7 +73,7 @@ bool connect_children_to_gates(const Ntk& ntk, const NtkDest& ntk_dest,
             return true;  // keep looping
         }
     }
-    if constexpr (mockturtle::has_is_maj_v<Ntk> && mockturtle::has_create_maj_v<Ntk>)
+    if constexpr (mockturtle::has_is_maj_v<Ntk> && mockturtle::has_create_maj_v<NtkDest>)
     {
         if (ntk.is_maj(g))
         {
@@ -77,7 +81,7 @@ bool connect_children_to_gates(const Ntk& ntk, const NtkDest& ntk_dest,
             return true;  // keep looping
         }
     }
-    if constexpr (mockturtle::has_is_nary_and_v<Ntk> && mockturtle::has_create_nary_and_v<Ntk>)
+    if constexpr (mockturtle::has_is_nary_and_v<Ntk> && mockturtle::has_create_nary_and_v<NtkDest>)
     {
         if (ntk.is_nary_and(g))
         {
@@ -85,7 +89,7 @@ bool connect_children_to_gates(const Ntk& ntk, const NtkDest& ntk_dest,
             return true;  // keep looping
         }
     }
-    if constexpr (mockturtle::has_is_nary_or_v<Ntk> && mockturtle::has_create_nary_or_v<Ntk>)
+    if constexpr (mockturtle::has_is_nary_or_v<Ntk> && mockturtle::has_create_nary_or_v<NtkDest>)
     {
         if (ntk.is_nary_or(g))
         {
@@ -93,13 +97,18 @@ bool connect_children_to_gates(const Ntk& ntk, const NtkDest& ntk_dest,
             return true;  // keep looping
         }
     }
-    if constexpr (mockturtle::has_is_nary_xor_v<Ntk> && mockturtle::has_create_nary_xor_v<Ntk>)
+    if constexpr (mockturtle::has_is_nary_xor_v<Ntk> && mockturtle::has_create_nary_xor_v<NtkDest>)
     {
         if (ntk.is_nary_xor(g))
         {
             old2new[g] = ntk_dest.create_nary_xor(children);
             return true;  // keep looping
         }
+    }
+    if constexpr (mockturtle::has_node_function_v<Ntk> && mockturtle::has_create_node_v<NtkDest>)
+    {
+        old2new[g] = ntk_dest.create_node(children, ntk.node_function(g));
+        return true;  // keep looping
     }
     return false;  // gate type not supported
 }
@@ -189,7 +198,7 @@ class inverter_substitution_impl
                 bar(i);
 #endif
                 // map all affected nodes
-                if constexpr (mockturtle::has_create_buf_v<Ntk>)
+                if constexpr (fiction::has_is_inv_v<TopoNtkSrc> && mockturtle::has_create_buf_v<Ntk>)
                 {
                     if (ntk.is_inv(g) && std::find(m_inv.cbegin(), m_inv.cend(), g) != m_inv.cend())
                     {
@@ -208,7 +217,7 @@ class inverter_substitution_impl
                         return true;  // keep looping
                     }
                 }
-                if constexpr (mockturtle::has_create_not_v<Ntk>)
+                if constexpr (fiction::has_is_buf_v<TopoNtkSrc> && mockturtle::has_create_not_v<Ntk>)
                 {
                     if (ntk.is_buf(g) && std::find(blc_fos.cbegin(), blc_fos.cend(), g) != blc_fos.cend())
                     {
@@ -219,11 +228,6 @@ class inverter_substitution_impl
                 // map all unaffected nodes
                 if (connect_children_to_gates(ntk, ntk_dest, old2new, g, children))
                 {
-                    return true;  // keep looping
-                }
-                if constexpr (mockturtle::has_node_function_v<TopoNtkSrc> && mockturtle::has_create_node_v<Ntk>)
-                {
-                    old2new[g] = ntk_dest.create_node(children, ntk.node_function(g));
                     return true;  // keep looping
                 }
 
@@ -317,11 +321,6 @@ Ntk inverter_substitution(const Ntk& ntk)
     static_assert(mockturtle::has_get_constant_v<Ntk>, "Ntk does not implement the get_constant function");
     static_assert(mockturtle::has_create_pi_v<Ntk>, "Ntk does not implement the create_pi function");
     static_assert(mockturtle::has_create_po_v<Ntk>, "Ntk does not implement the create_po function");
-    static_assert(mockturtle::has_create_not_v<Ntk>, "Ntk does not implement the create_not function");
-    static_assert(mockturtle::has_create_and_v<Ntk>, "Ntk does not implement the create_and function");
-    static_assert(mockturtle::has_create_or_v<Ntk>, "Ntk does not implement the create_or function");
-    static_assert(mockturtle::has_create_xor_v<Ntk>, "Ntk does not implement the create_xor function");
-    static_assert(mockturtle::has_create_maj_v<Ntk>, "Ntk does not implement the create_maj function");
 
     static_assert(has_is_fanout_v<Ntk>, "Ntk does not implement the has_is_fanout function");
 

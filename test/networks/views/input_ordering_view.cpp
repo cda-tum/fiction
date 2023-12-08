@@ -24,21 +24,13 @@ TEST_CASE("Input ordering view traits", "[input-ordering-view]")
 
     CHECK(mockturtle::is_network_type_v<ntk>);
     CHECK(mockturtle::has_foreach_fanout_v<ntk>);
-    CHECK(!fiction::has_get_fo_two_v<ntk>);
-    CHECK(!fiction::has_get_fo_one_v<ntk>);
-    CHECK(!fiction::has_get_pi_to_pi_v<ntk>);
-    CHECK(!fiction::has_pi_inv_flag_v<ntk>);
-    CHECK(!fiction::has_nc_inv_num_v<ntk>);
+    CHECK(!fiction::is_input_ordered_v<ntk>);
 
     using ordered_ntk = input_ordering_view<mockturtle::fanout_view<mockturtle::names_view<technology_network>>>;
 
     CHECK(mockturtle::is_network_type_v<ordered_ntk>);
     CHECK(mockturtle::has_foreach_fanout_v<ntk>);
-    CHECK(fiction::has_get_fo_two_v<ordered_ntk>);
-    CHECK(fiction::has_get_fo_one_v<ordered_ntk>);
-    CHECK(fiction::has_get_pi_to_pi_v<ordered_ntk>);
-    CHECK(fiction::has_pi_inv_flag_v<ordered_ntk>);
-    CHECK(fiction::has_nc_inv_num_v<ordered_ntk>);
+    CHECK(fiction::is_input_ordered_v<ordered_ntk>);
 }
 
 TEST_CASE("Order mux technology network", "[input-ordering-view]")
@@ -55,7 +47,7 @@ TEST_CASE("Order mux technology network", "[input-ordering-view]")
     CHECK(nodes_order == expected_nodes_order);
 }
 
-TEST_CASE("Input_ordering consider all pis aig network", "[input-ordering-view]")
+TEST_CASE("Input ordering considering all PIs in an AIG network", "[input-ordering-view]")
 {
     auto test_nw = blueprints::test_fanout_nodes_rank<mockturtle::names_view<mockturtle::aig_network>>();
 

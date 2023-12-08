@@ -21,6 +21,11 @@ namespace detail
 {
 /**
  * Paints a node and all incoming edges
+ *
+ * @tparam Ntk The logic network type.
+ * @param ctn Container holding the colored network.
+ * @param n Node to be painted.
+ * @param color Color to paint ('south', 'east', 'null').
  */
 template <typename Ntk>
 void paint_node_and_edges(const coloring_container<Ntk>& ctn, const mockturtle::node<Ntk>& n, const uint32_t color)
@@ -33,6 +38,12 @@ void paint_node_and_edges(const coloring_container<Ntk>& ctn, const mockturtle::
 
 /**
  * Paints nodes and edges of all nodes affected by: PIs related to two PIs over a fan-out node
+ *
+ * @tparam Ntk The logic network type.
+ * @param ntk Network structure to be painted.
+ * @param ctn Container holding the colored network.
+ * @param current_node Currently visited node.
+ *
  */
 template <typename Ntk>
 void paint_fo_two(const Ntk& ntk, const coloring_container<Ntk>& ctn, mockturtle::node<Ntk>& current_node)
@@ -66,6 +77,11 @@ void paint_fo_two(const Ntk& ntk, const coloring_container<Ntk>& ctn, mockturtle
 
 /**
  * Paints nodes and edges of all nodes affected by: PIs related to one PI over a fan-out node
+ *
+ * @tparam Ntk The logic network type.
+ * @param ntk Network structure to be painted.
+ * @param ctn Container holding the colored network.
+ * @param current_node Currently visited node.
  */
 template <typename Ntk>
 void paint_fo_one(const Ntk& ntk, const coloring_container<Ntk>& ctn, const mockturtle::node<Ntk>& current_node)
@@ -105,6 +121,11 @@ void paint_fo_one(const Ntk& ntk, const coloring_container<Ntk>& ctn, const mock
 
 /**
  * Paints nodes and edges of all nodes affected by: PIs related to one PI without fan-out node
+ *
+ * @tparam Ntk The logic network type.
+ * @param ntk Network structure to be painted.
+ * @param ctn Container holding the colored network.
+ * @param current_node Currently visited node.
  */
 template <typename Ntk>
 void paint_pi_to_pi(const Ntk& ntk, const coloring_container<Ntk>& ctn, const mockturtle::node<Ntk>& current_node)
@@ -137,8 +158,8 @@ void paint_pi_to_pi(const Ntk& ntk, const coloring_container<Ntk>& ctn, const mo
  * 2. PI node connected to fan-out node and related to one PI (coloring is dependent on the coloring of the network)
  * 3. PI related to PI: color connecting node east
  *
+ * @tparam Ntk The logic network type.
  * @param ntk network to be colored based on the rules of the ordering network stated above
- *
  * @return the conditional coloring
  */
 template <typename Ntk>
@@ -257,8 +278,16 @@ coloring_container<Ntk> conditional_coloring(const Ntk& ntk) noexcept
 }
 
 /**
- * Unordered PIs need to be wired to the east, as per the original orthogonal algorithm
- * */
+ * Wires unordered PIs to the east based on the orthogonal algorithm.
+ *
+ * @tparam Ntk The logic network type.
+ * @tparam Lyt Gate-level layout type.
+ * @param layout Current gate-level layout.
+ * @param ctn Contains the colored network.
+ * @param pre Preceding node.
+ * @param pre_t Tile of the Preceding node.
+ * @param latest_pos Coordinates of next gate location.
+ */
 template <typename Ntk, typename Lyt>
 void resolve_unaffected_pi(Lyt& layout, const coloring_container<Ntk>& ctn, const mockturtle::node<Ntk>& pre,
                            tile<Lyt>& pre_t, tile<Lyt>& latest_pos)
@@ -277,6 +306,18 @@ void resolve_unaffected_pi(Lyt& layout, const coloring_container<Ntk>& ctn, cons
 
 /**
  * Placement and routing of a one fan-in gate colored east
+ *
+ * @tparam Ntk The logic network type.
+ * @tparam Lyt Gate-level layout type.
+ * @param layout Current gate-level layout.
+ * @param ctn Contains the colored network.
+ * @param n Viewed Node.
+ * @param pre Preceding node.
+ * @param pre_t Tile of the Preceding node.
+ * @param latest_pos Coordinates of next gate location.
+ * @param insert_position_inv X-Coordinates where inverters succeeding PIs are placed
+ * @param node2pos Mapping from network nodes to layout signals, i.e., a pointer to their position in the layout. The
+ * map is used to fetch location of the fanins. The `mockturtle::node_map` is not updated by this function.
  */
 template <typename Ntk, typename Lyt>
 void place_one_fanin_gate_east(const Ntk& ntk, Lyt& layout, const coloring_container<Ntk>& ctn,
@@ -305,6 +346,17 @@ void place_one_fanin_gate_east(const Ntk& ntk, Lyt& layout, const coloring_conta
 
 /**
  * Placement and routing of a one fan-in gate colored south
+ *
+ * @tparam Ntk The logic network type.
+ * @tparam Lyt Gate-level layout type.
+ * @param layout Current gate-level layout.
+ * @param ctn Contains the colored network.
+ * @param n Viewed Node.
+ * @param latest_pos Coordinates of next gate location.
+ * @param latest_pos_inputs Coordinates for PI placement
+ * @param pre_t Tile of the Preceding node.
+ * @param node2pos Mapping from network nodes to layout signals, i.e., a pointer to their position in the layout. The
+ * map is used to fetch location of the fanins. The `mockturtle::node_map` is not updated by this function.
  */
 template <typename Ntk, typename Lyt>
 void place_one_fanin_gate_south(Lyt& layout, const coloring_container<Ntk>& ctn, const mockturtle::node<Ntk>& n,
@@ -331,6 +383,14 @@ void place_one_fanin_gate_south(Lyt& layout, const coloring_container<Ntk>& ctn,
 
 /**
  * Placement and routing of a two fan-in gate colored east
+ *
+ * @tparam Lyt Gate-level layout type.
+ * @param layout Current gate-level layout.
+ * @param latest_pos Coordinates of next gate location.
+ * @param latest_pos_inputs Coordinates for PI placement
+ * @param t Viewed tile.
+ * @param pre1_t Tile of the first preceding node.
+ * @param pre2_t Tile of the second preceding node.
  */
 template <typename Lyt>
 void place_two_fanin_gate_east(Lyt& layout, tile<Lyt>& latest_pos, tile<Lyt>& latest_pos_inputs, tile<Lyt>& t,
@@ -356,7 +416,22 @@ void place_two_fanin_gate_east(Lyt& layout, tile<Lyt>& latest_pos, tile<Lyt>& la
 }
 
 /**
- * Placement and routing of a two fan-in gate colored south
+ * This function handles the placement and routing of a two fan-in gate slated for a southern position. A new rule from
+ * the Ordering Distribution Network is introduced in this function which enables southern placement without the need to
+ * add a new row.
+ *
+ * @tparam Ntk The logic network type.
+ * @tparam Lyt Gate-level layout type.
+ * @param layout Current gate-level layout.
+ * @param ctn Contains the colored network.
+ * @param latest_pos Coordinates of next gate location.
+ * @param latest_pos_inputs Coordinates for PI placement
+ * @param pre1 First preceding Node
+ * @param pre2 Second preceding node
+ * @param t Viewed tile.
+ * @param pre1_t Tile of the first preceding node.
+ * @param pre2_t Tile of the second preceding node.
+ *
  */
 template <typename Ntk, typename Lyt>
 void place_two_fanin_gate_south(Lyt& layout, const coloring_container<Ntk>& ctn, tile<Lyt>& latest_pos,
@@ -419,6 +494,17 @@ void place_two_fanin_gate_south(Lyt& layout, const coloring_container<Ntk>& ctn,
 
 /**
  * Placement and routing of a two fan-in gate colored null
+ *
+ * @tparam Ntk The logic network type.
+ * @tparam Lyt Gate-level layout type.
+ * @param layout Current gate-level layout.
+ * @param ctn Contains the colored network.
+ * @param latest_pos Coordinates of next gate location.
+ * @param t Viewed tile.
+ * @param pre1_t Tile of the first preceding node.
+ * @param pre2_t Tile of the second preceding node.
+ * @param pre1 First preceding Node
+ * @param pre2 Second preceding node
  */
 template <typename Ntk, typename Lyt>
 void place_two_fanin_gate_null(Lyt& layout, const coloring_container<Ntk>& ctn, tile<Lyt>& latest_pos, tile<Lyt>& t,
@@ -459,6 +545,17 @@ void place_two_fanin_gate_null(Lyt& layout, const coloring_container<Ntk>& ctn, 
 
 /**
  * Places the POs in the layout.
+ *
+ *@tparam Ntk The logic network type.
+ * @tparam Ntk The logic network type of the input network.
+ * @tparam Lyt Gate-level layout type.
+ * @param layout Current gate-level layout.
+ * @param inp_ntk Input network, so the order of the POs is preserved for equivalence checking.
+ * @param ctn Contains the colored network.
+ * @param latest_pos Coordinates of next gate location.
+ * @param po_counter Counter for POs.
+ * @param node2pos Mapping from network nodes to layout signals, i.e., a pointer to their position in the layout. The
+ * map is used to fetch location of the fanins. The `mockturtle::node_map` is not updated by this function.
  */
 template <typename Ntk, typename NtkI, typename Lyt>
 void place_outputs(Lyt& layout, NtkI inp_ntk, const coloring_container<Ntk>& ctn, tile<Lyt>& latest_pos,
@@ -690,22 +787,24 @@ class orthogonal_ordering_network_impl
   private:
     /**
      * Network with ordered PIs
-     * */
+     */
     input_ordering_view<mockturtle::fanout_view<mockturtle::names_view<technology_network>>> ntk;
     /**
      * Network without ordered PIs
-     * */
+     */
     mockturtle::fanout_view<mockturtle::names_view<technology_network>> inp_ntk;
     /**
      * Design parameters for orthogonal P&R
-     * */
+     */
     orthogonal_physical_design_params ps;
     /**
      * Design stats for orthogonal P&R
-     * */
+     */
     orthogonal_physical_design_stats& pst;  // NOLINT
     // This line will suppress the warning cppcoreguidelines-avoid-const-or-ref-data-members
-
+    /**
+     * Counter for POs
+     */
     uint32_t po_counter{0};
 };
 

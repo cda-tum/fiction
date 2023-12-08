@@ -17,9 +17,10 @@
 namespace alice
 {
 /**
- * Executes a modified heuristic physical approach based on scalable Design for Field-coupled Nanocomputing Circuits\"
- * by M. Walter, R. Wille, F. Sill Torres, D. Große, and R. Drechsler. See algo/ortho_ordering_network.hpp for more
- * details.
+ * Executes a modified heuristic physical approach based on \"Scalable Design for Field-coupled Nanocomputing Circuits\"
+ * by M. Walter, R. Wille, F. Sill Torres, D. Große, and R. Drechsler. The modified approach was first presented in
+ * \"Versatile Signal Distribution Networks for Scalable Placement and Routing of Field-coupled Nanocomputing
+ * Technologies\" by M. Walter, B. Hien and R. Wille. See algo/ortho_ordering_network.hpp for more details.
  */
 class ortho_ordering_command : public command
 {

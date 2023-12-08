@@ -1145,45 +1145,6 @@ template <class Ntk>
 inline constexpr bool has_is_and_xor_v = has_is_and_xor<Ntk>::value;
 #pragma endregion
 
-#pragma region has_get_fo_two
-template <class Ntk, class = void>
-struct has_get_fo_two : std::false_type
-{};
-
-template <class Ntk>
-struct has_get_fo_two<Ntk, std::void_t<decltype(std::declval<Ntk>().get_fo_two())>> : std::true_type
-{};
-
-template <class Ntk>
-inline constexpr bool has_get_fo_two_v = has_get_fo_two<Ntk>::value;
-#pragma endregion
-
-#pragma region has_get_fo_one
-template <class Ntk, class = void>
-struct has_get_fo_one : std::false_type
-{};
-
-template <class Ntk>
-struct has_get_fo_one<Ntk, std::void_t<decltype(std::declval<Ntk>().get_fo_one())>> : std::true_type
-{};
-
-template <class Ntk>
-inline constexpr bool has_get_fo_one_v = has_get_fo_one<Ntk>::value;
-#pragma endregion
-
-#pragma region has_get_pi_to_pi
-template <class Ntk, class = void>
-struct has_get_pi_to_pi : std::false_type
-{};
-
-template <class Ntk>
-struct has_get_pi_to_pi<Ntk, std::void_t<decltype(std::declval<Ntk>().get_pi_to_pi())>> : std::true_type
-{};
-
-template <class Ntk>
-inline constexpr bool has_get_pi_to_pi_v = has_get_pi_to_pi<Ntk>::value;
-#pragma endregion
-
 #pragma region is_input_ordered
 template <class Ntk, class = void>
 struct is_input_ordered : std::false_type
@@ -1196,32 +1157,6 @@ struct is_input_ordered<Ntk, std::enable_if_t<Ntk::is_input_ordered, std::void_t
 
 template <class Ntk>
 inline constexpr bool is_input_ordered_v = is_input_ordered<Ntk>::value;
-#pragma endregion
-
-#pragma region has_pi_inv_flag
-template <class Ntk, class = void>
-struct has_pi_inv_flag : std::false_type
-{};
-
-template <class Ntk>
-struct has_pi_inv_flag<Ntk, std::void_t<decltype(std::declval<Ntk>().pi_inv_flag())>> : std::true_type
-{};
-
-template <class Ntk>
-inline constexpr bool has_pi_inv_flag_v = has_pi_inv_flag<Ntk>::value;
-#pragma endregion
-
-#pragma region has_nc_inv_num
-template <class Ntk, class = void>
-struct has_nc_inv_num : std::false_type
-{};
-
-template <class Ntk>
-struct has_nc_inv_num<Ntk, std::void_t<decltype(std::declval<Ntk>().nc_inv_num())>> : std::true_type
-{};
-
-template <class Ntk>
-inline constexpr bool has_nc_inv_num_v = has_nc_inv_num<Ntk>::value;
 #pragma endregion
 
 }  // namespace fiction
