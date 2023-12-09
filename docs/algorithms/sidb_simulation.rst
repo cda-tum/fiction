@@ -71,6 +71,7 @@ Energy Calculation
 **Header:** ``fiction/algorithms/simulation/sidb/minimum_energy.hpp``
 
 .. doxygenfunction:: fiction::minimum_energy
+.. doxygenfunction:: fiction::minimum_energy_distribution
 
 
 **Header:** ``fiction/algorithms/simulation/sidb/is_ground_state.hpp``

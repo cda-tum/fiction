@@ -34,6 +34,27 @@ template <typename InputIt>
                            [](const double a, const auto& lyt) { return std::min(a, lyt.get_system_energy()); });
 }
 
+/**
+ * Returns the charge distribution of minimum energy contained in a range of `charge_distribution_surface` objects.
+ *
+ * @tparam InputIt must meet the requirements of `LegacyInputIterator`.
+ * @param first Begin of the range to examime.
+ * @param last End of the range to examine.
+ * @return Iterator to the minimum energy charge distribution found in the input range.
+ */
+template <typename InputIt>
+[[nodiscard]] InputIt minimum_energy_distribution(const InputIt first, const InputIt last) noexcept
+{
+    static_assert(std::is_base_of_v<std::input_iterator_tag, typename std::iterator_traits<InputIt>::iterator_category>,
+                  "InputIt must meet the requirements of LegacyInputIterator");
+    static_assert(is_charge_distribution_surface_v<typename std::iterator_traits<InputIt>::value_type>,
+                  "Range must be of charge_distribution_surface objects");
+
+    return std::min_element(first, last,
+                            [](const auto& cds1, const auto& cds2)
+                            { return cds1.get_system_energy() < cds2.get_system_energy(); });
+}
+
 }  // namespace fiction
 
 #endif  // FICTION_MINIMUM_ENERGY_HPP
