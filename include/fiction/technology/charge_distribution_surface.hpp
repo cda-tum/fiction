@@ -14,7 +14,6 @@
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/technology/sidb_nm_position.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/types.hpp"
 
 #include <algorithm>
 #include <bitset>
