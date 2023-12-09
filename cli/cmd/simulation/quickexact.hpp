@@ -5,6 +5,7 @@
 #ifndef FICTION_CMD_QUICKEXACT_HPP
 #define FICTION_CMD_QUICKEXACT_HPP
 
+#include <fiction/algorithms/simulation/sidb/minimum_energy.hpp>
 #include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
@@ -110,8 +111,11 @@ class quickexact_command : public command
                     }
                     else
                     {
+                        const auto min_energy_distr = fiction::minimum_energy_distribution(
+                            sim_result.charge_distributions.cbegin(), sim_result.charge_distributions.cend());
+
                         store<fiction::cell_layout_t>().extend() =
-                            std::make_shared<fiction::cds_sidb_cell_clk_lyt>(sim_result.charge_distributions.front());
+                            std::make_shared<fiction::cds_sidb_cell_clk_lyt>(*min_energy_distr);
                     }
                 }
             }

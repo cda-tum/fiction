@@ -33,7 +33,6 @@ template <typename InputIt>
     return std::accumulate(first, last, std::numeric_limits<double>::max(),
                            [](const double a, const auto& lyt) { return std::min(a, lyt.get_system_energy()); });
 }
-
 /**
  * Returns the charge distribution of minimum energy contained in a range of `charge_distribution_surface` objects.
  *
