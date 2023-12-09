@@ -13,6 +13,7 @@
 
 #include <alice/alice.hpp>
 
+#include <any>
 #include <variant>
 
 namespace alice
@@ -168,7 +169,10 @@ class quicksim_command : public command
              {"lambda_tf", sim_result.physical_parameters.lambda_tf},
              {"mu_minus", sim_result.physical_parameters.mu_minus}},
             {"Lowest state energy (meV)", sim_result.charge_distributions.front().get_system_energy()},
-            {"Number of stable states", sim_result.charge_distributions.size()}};
+            {"Number of stable states", sim_result.charge_distributions.size()},
+            {"Iteration steps",
+             std::any_cast<uint64_t>(sim_result.additional_simulation_parameters.at("iteration_steps"))},
+            {"alpha", std::any_cast<double>(sim_result.additional_simulation_parameters.at("alpha"))}};
     }
     /**
      * Resets the parameters to their default values.
