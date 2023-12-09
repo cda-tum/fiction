@@ -303,13 +303,13 @@ class quickexact_impl
 
         if (base_number == required_simulation_base_number::TWO)
         {
-            result.additional_simulation_parameters.emplace_back("base_number", uint64_t{2});
+            result.additional_simulation_parameters.emplace("base_number", uint64_t{2});
             two_state_simulation(charge_layout);
         }
         // If positively charged SiDBs can occur in the layout, 3-state simulation is conducted.
         else
         {
-            result.additional_simulation_parameters.emplace_back("base_number", uint64_t{3});
+            result.additional_simulation_parameters.emplace("base_number", uint64_t{3});
             three_state_simulation(charge_layout);
         }
     }

@@ -74,8 +74,8 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
 
     sidb_simulation_result<Lyt> st{};
     st.algorithm_name = "QuickSim";
-    st.additional_simulation_parameters.emplace_back("iteration_steps", ps.interation_steps);
-    st.additional_simulation_parameters.emplace_back("alpha", ps.alpha);
+    st.additional_simulation_parameters.emplace("iteration_steps", ps.interation_steps);
+    st.additional_simulation_parameters.emplace("alpha", ps.alpha);
     st.physical_parameters = ps.phys_params;
     st.charge_distributions.reserve(ps.interation_steps);
 
