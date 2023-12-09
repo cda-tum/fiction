@@ -37,8 +37,6 @@ class quicksim_command : public command
                    true);
         add_option("--lambda_tf,-l", physical_params.lambda_tf, "Thomas-Fermi screening distance (unit: nm)", true);
         add_option("--mu_minus,-m", physical_params.mu_minus, "Energy transition level (0/-) (unit: eV)", true);
-        add_option("--base,-b", physical_params.base,
-                   "2-state (neutral/negative) vs. 3-state (positive/neutral/negative) simulation", true);
         add_option("--iterations,-i", params.interation_steps, "Number of iterations to run the simulation for", true);
         add_option("--alpha,-a", params.alpha,
                    "alpha parameter (should be reduced if not charge distribution can be determined)", true);
