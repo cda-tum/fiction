@@ -135,6 +135,16 @@ inline constexpr const char* tech_impl_name = std::is_same_v<std::decay_t<Tech>,
                                               std::is_same_v<std::decay_t<Tech>, sidb_technology> ? sidb_name :
                                                                                                     "?";
 
+constexpr const char* qca_cell_name  = "cells";
+constexpr const char* inml_cell_name = "magnets";
+constexpr const char* sidb_cell_name = "dots";
+
+template <class Tech>
+inline constexpr const char* tech_cell_name = std::is_same_v<std::decay_t<Tech>, qca_technology>  ? qca_cell_name :
+                                              std::is_same_v<std::decay_t<Tech>, inml_technology> ? inml_cell_name :
+                                              std::is_same_v<std::decay_t<Tech>, sidb_technology> ? sidb_cell_name :
+                                                                                                    "?";
+
 /**
  * FCN cell-level layouts.
  */
