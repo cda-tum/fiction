@@ -5,29 +5,32 @@
 #ifndef FICTION_MINIMUM_ENERGY_HPP
 #define FICTION_MINIMUM_ENERGY_HPP
 
-#include "fiction/technology/charge_distribution_surface.hpp"
+#include "fiction/traits.hpp"
 
 #include <algorithm>
+#include <iterator>
 #include <limits>
-#include <vector>
 
 namespace fiction
 {
 
 /**
- * Computes the minimum energy of a vector of charge_distribution_surface objects.
+ * Computes the minimum energy of a range of `charge_distribution_surface` objects.
  *
- * @tparam Lyt Cell-level layout type.
- * @param charge_lyts Vector of charge_distribution_surface objects.
- * @return Value of the minimum energy found in the input vector (unit: eV).
+ * @tparam InputIt must meet the requirements of `LegacyInputIterator`.
+ * @param first Begin of the range to examime.
+ * @param last End of the range to examine.
+ * @return Value of the minimum energy found in the input range (unit: eV).
  */
-template <typename Lyt>
-[[nodiscard]] double minimum_energy(const std::vector<charge_distribution_surface<Lyt>>& charge_lyts) noexcept
+template <typename InputIt>
+[[nodiscard]] double minimum_energy(const InputIt first, const InputIt last) noexcept
 {
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(std::is_base_of_v<std::input_iterator_tag, typename std::iterator_traits<InputIt>::iterator_category>,
+                  "InputIt must meet the requirements of LegacyInputIterator");
+    static_assert(is_charge_distribution_surface_v<typename std::iterator_traits<InputIt>::value_type>,
+                  "Range must be of charge_distribution_surface objects");
 
-    return std::accumulate(charge_lyts.cbegin(), charge_lyts.cend(), std::numeric_limits<double>::max(),
+    return std::accumulate(first, last, std::numeric_limits<double>::max(),
                            [](const double a, const auto& lyt) { return std::min(a, lyt.get_system_energy()); });
 }
 
