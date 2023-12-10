@@ -46,10 +46,8 @@ TEMPLATE_TEST_CASE(
     CHECK(simulation_results.charge_distributions.empty());
     REQUIRE(!simulation_results.additional_simulation_parameters.empty());
     CHECK(simulation_results.algorithm_name == "QuickSim");
-    CHECK(simulation_results.additional_simulation_parameters[0].first == "iteration_steps");
-    CHECK(std::any_cast<uint64_t>(simulation_results.additional_simulation_parameters[0].second) == 80);
-    CHECK(simulation_results.additional_simulation_parameters[1].first == "alpha");
-    CHECK(std::any_cast<double>(simulation_results.additional_simulation_parameters[1].second) == 0.7);
+    CHECK(std::any_cast<uint64_t>(simulation_results.additional_simulation_parameters.at("iteration_steps")) == 80);
+    CHECK(std::any_cast<double>(simulation_results.additional_simulation_parameters.at("alpha")) == 0.7);
     CHECK(simulation_results.charge_distributions.empty());
 }
 
