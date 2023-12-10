@@ -5,6 +5,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "utils/blueprints/network_blueprints.hpp"
+#include "utils/equivalence_checking_utils.hpp"
 
 #include <fiction/algorithms/network_transformation/fanout_substitution.hpp>
 #include <fiction/algorithms/network_transformation/inverter_substitution.hpp>
@@ -51,6 +52,8 @@ TEST_CASE("Check correct substitution at one FO node", "[inverter-substitution]"
         assert(fo_to_inv.size() == inv_to_fo.size());
 
         auto balanced_ntk = inverter_substitution(ntk);
+        // check for equivalence
+        check_eq(ntk, balanced_ntk);
         CHECK(fo_ntk.num_gates() == balanced_ntk.num_gates() + 1);
         // check if the affected nodes have been assigned correctly
         int correct_node_assignment = 1;
@@ -77,6 +80,8 @@ TEST_CASE("Check if output network is substituted", "[inverter-substitution]")
     {
         auto balanced_ntk =
             mockturtle::fanout_view<mockturtle::names_view<technology_network>>(inverter_substitution(ntk));
+        // check for equivalence
+        check_eq(ntk, balanced_ntk);
         CHECK(ntk.num_gates() >= balanced_ntk.num_gates());
         int properly_substituted = 1;
 
@@ -94,7 +99,7 @@ TEST_CASE("Check if output network is substituted", "[inverter-substitution]")
                     if (do_substitute && fanout_inv.size() > 1)
                     {
                         properly_substituted = 0;
-                    }
+                    }  // check for equivalence
                 }
             });
         return properly_substituted;
@@ -138,6 +143,8 @@ TEST_CASE("Check output preservation", "[inverter-substitution]")
         const auto fo_ntk = mockturtle::fanout_view<mockturtle::names_view<technology_network>>(ntk);
         auto       balanced_ntk =
             mockturtle::fanout_view<mockturtle::names_view<technology_network>>(inverter_substitution(ntk));
+        // check for equivalence
+        check_eq(ntk, balanced_ntk);
 
         // Gather the affected nodes
         fo_ntk.foreach_gate(

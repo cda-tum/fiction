@@ -2,9 +2,11 @@
 // Created by benjamin on 11.04.23.
 //
 
+#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include "utils/blueprints/network_blueprints.hpp"
+#include "utils/equivalence_checking_utils.hpp"
 
 #include <fiction/algorithms/network_transformation/fanout_substitution.hpp>
 #include <fiction/networks/technology_network.hpp>
@@ -54,6 +56,8 @@ TEST_CASE("Input ordering considering all PIs in an AIG network", "[input-orderi
     auto ordered_aig_ntk{input_ordering_view{
         mockturtle::fanout_view{fanout_substitution<mockturtle::names_view<technology_network>>(test_nw)}}};
 
+    check_eq(test_nw, ordered_aig_ntk);
+
     std::vector<mockturtle::node<technology_network>> nodes_order;
     std::vector<mockturtle::node<technology_network>> expected_nodes_order{0, 1, 5,  4,  2,  3,  6,  8,
                                                                            7, 9, 10, 11, 12, 13, 14, 15};
@@ -66,8 +70,8 @@ TEST_CASE("Test inverters after PIs", "[input-ordering-view]")
 {
     auto test_nw = blueprints::input_ordering_inv_flag<mockturtle::names_view<technology_network>>();
 
-    auto ordered_aig_ntk{input_ordering_view{
+    auto ordered_tec_ntk{input_ordering_view{
         mockturtle::fanout_view{fanout_substitution<mockturtle::names_view<technology_network>>(test_nw)}}};
 
-    CHECK(ordered_aig_ntk.pi_inv_flag());
+    CHECK(ordered_tec_ntk.pi_inv_flag());
 }

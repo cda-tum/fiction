@@ -5,6 +5,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "utils/blueprints/network_blueprints.hpp"
+#include "utils/equivalence_checking_utils.hpp"
 
 #include <fiction/algorithms/physical_design/apply_gate_library.hpp>
 #include <fiction/algorithms/physical_design/ortho_ordering_network.hpp>
@@ -55,6 +56,14 @@ TEST_CASE("conditional_coloring", "[orthogonal-ordering]")
         fanout_substitution<technology_network>(blueprints::par_check<mockturtle::mig_network>())}});
 }
 
+void check_stats(const orthogonal_physical_design_stats& st) noexcept
+{
+    CHECK(st.x_size > 0);
+    CHECK(st.y_size > 0);
+    CHECK(st.num_gates > 0);
+    CHECK(st.num_wires > 0);
+}
+
 TEST_CASE("Ordering gate library application and design rule violation", "[orthogonal-ordering]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
@@ -65,6 +74,9 @@ TEST_CASE("Ordering gate library application and design rule violation", "[ortho
         orthogonal_physical_design_stats stats{};
 
         auto layout = orthogonal_ordering_network<gate_layout>(ntk, {}, &stats);
+
+        check_stats(stats);
+        check_eq(ntk, layout);
 
         CHECK_NOTHROW(apply_gate_library<cell_layout, qca_one_library>(layout));
 
@@ -115,27 +127,4 @@ TEST_CASE("Ordering name conservation after orthogonal physical design", "[ortho
 
     // PO names
     CHECK(layout.get_output_name(0) == "f");
-}
-
-TEST_CASE("Equivalence", "[orthogonal-ordering]")
-{
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
-
-    auto mux21 = blueprints::mux21_network<mockturtle::names_view<mockturtle::aig_network>>();
-    mux21.set_network_name("mux21");
-
-    const auto layout = orthogonal_ordering_network<gate_layout>(mux21);
-
-    equivalence_checking_stats st_eq{};
-    equivalence_checking(mux21, layout, &st_eq);
-
-    CHECK(st_eq.eq == eq_type::STRONG);
-
-    // network name
-    CHECK(layout.get_layout_name() == "mux21");
-
-    // PI names
-    CHECK(layout.get_name(layout.pi_at(0)) == "pi1");  // first PI
-    CHECK(layout.get_name(layout.pi_at(1)) == "pi2");  // second PI
-    CHECK(layout.get_name(layout.pi_at(2)) == "pi3");  // third PI
 }

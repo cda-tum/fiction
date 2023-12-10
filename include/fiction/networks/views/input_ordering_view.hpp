@@ -155,12 +155,20 @@ class input_ordering_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
     }
 
     /*! \brief Reimplementation of `foreach_ro`. */
+    // This is only for sequential circuits. The SFINAE is used, since foreach_ro will be called inside the equiv_check
     template <typename Fn>
     void foreach_ro(Fn&& fn) const
     {
-        mockturtle::detail::foreach_element_if(
-            topo_order.cbegin() + num_c, topo_order.cbegin() + num_c + num_p + num_r,
-            [this](auto n) { return inp_ntk.is_ro(n); }, fn);
+        if constexpr (mockturtle::has_is_ro_v<Ntk>)
+        {
+            mockturtle::detail::foreach_element_if(
+                topo_order.cbegin() + num_c, topo_order.cbegin() + num_c + num_p + num_r,
+                [this](auto n) { return inp_ntk.is_ro(n); }, fn);
+        }
+        else
+        {
+            // do nothing
+        }
     }
 
     node ro_at(uint32_t index) const
