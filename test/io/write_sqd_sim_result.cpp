@@ -222,10 +222,10 @@ TEST_CASE("Write empty simulation result", "[sqd-sim-result]")
             sim_result.physical_parameters.lambda_tf, sim_result.physical_parameters.epsilon_r,
             sim_result.physical_parameters.mu_minus);
 
-        sim_result.additional_simulation_parameters.emplace_back("param1", "value1");
-        sim_result.additional_simulation_parameters.emplace_back("param2", 2);
-        sim_result.additional_simulation_parameters.emplace_back("param3", 3.14);
-        sim_result.additional_simulation_parameters.emplace_back("param4", 'c');
+        sim_result.additional_simulation_parameters.emplace("param1", "value1");
+        sim_result.additional_simulation_parameters.emplace("param2", 2);
+        sim_result.additional_simulation_parameters.emplace("param3", 3.14);
+        sim_result.additional_simulation_parameters.emplace("param4", 'c');
 
         write_sqd_sim_result(sim_result, simulation_stream);
 

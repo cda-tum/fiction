@@ -6,7 +6,7 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include <fiction/algorithms/simulation/sidb/energy_distribution.hpp>
-#include <fiction/algorithms/simulation/sidb/quicksim.hpp>
+#include <fiction/algorithms/simulation/sidb/minimum_energy.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
@@ -32,11 +32,12 @@ TEMPLATE_TEST_CASE(
         const charge_distribution_surface                  charge_layout{lyt};
         std::vector<charge_distribution_surface<TestType>> all_lyts{};
 
-        CHECK_THAT(minimum_energy(all_lyts), Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.00001));
+        CHECK_THAT(minimum_energy(all_lyts.begin(), all_lyts.end()),
+                   Catch::Matchers::WithinAbs(std::numeric_limits<double>::infinity(), 0.00001));
 
         all_lyts.push_back(charge_layout);
 
-        CHECK(std::abs(minimum_energy(all_lyts) - 0) < 0.00000001);
+        CHECK(std::abs(minimum_energy(all_lyts.begin(), all_lyts.end()) - 0) < 0.00000001);
     }
 
     SECTION("layout with one SiDB placed")
@@ -46,11 +47,12 @@ TEMPLATE_TEST_CASE(
         const charge_distribution_surface                  charge_layout{lyt};
         std::vector<charge_distribution_surface<TestType>> all_lyts{};
 
-        CHECK_THAT(minimum_energy(all_lyts), Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.00001));
+        CHECK_THAT(minimum_energy(all_lyts.cbegin(), all_lyts.cend()),
+                   Catch::Matchers::WithinAbs(std::numeric_limits<double>::infinity(), 0.00001));
 
         all_lyts.push_back(charge_layout);
 
-        CHECK(std::abs(minimum_energy(all_lyts) - 0) < 0.00000001);
+        CHECK(std::abs(minimum_energy(all_lyts.cbegin(), all_lyts.cend()) - 0) < 0.00000001);
     }
 
     SECTION("layout with three SiDBs placed")
@@ -62,7 +64,8 @@ TEMPLATE_TEST_CASE(
         charge_distribution_surface                        charge_layout_first{lyt};
         std::vector<charge_distribution_surface<TestType>> all_lyts{};
 
-        CHECK_THAT(minimum_energy(all_lyts), Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.00001));
+        CHECK_THAT(minimum_energy(all_lyts.cbegin(), all_lyts.cend()),
+                   Catch::Matchers::WithinAbs(std::numeric_limits<double>::infinity(), 0.00001));
 
         charge_layout_first.assign_charge_state({0, 0}, sidb_charge_state::NEUTRAL);
 
@@ -79,6 +82,6 @@ TEMPLATE_TEST_CASE(
         charge_layout_second.recompute_system_energy();
         all_lyts.push_back(charge_layout_second);
 
-        CHECK_THAT(minimum_energy(all_lyts), Catch::Matchers::WithinAbs(0.0, 0.00001));
+        CHECK_THAT(minimum_energy(all_lyts.cbegin(), all_lyts.cend()), Catch::Matchers::WithinAbs(0.0, 0.00001));
     }
 }

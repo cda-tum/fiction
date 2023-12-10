@@ -30,8 +30,17 @@ template <typename InputIt>
     static_assert(is_charge_distribution_surface_v<typename std::iterator_traits<InputIt>::value_type>,
                   "Range must be of charge_distribution_surface objects");
 
-    return std::accumulate(first, last, std::numeric_limits<double>::max(),
-                           [](const double a, const auto& lyt) { return std::min(a, lyt.get_system_energy()); });
+    if (first != last)
+    {
+        return std::min_element(first, last,
+                                [](const auto& cds1, const auto& cds2)
+                                { return cds1.get_system_energy() < cds2.get_system_energy(); })
+            ->get_system_energy();
+    }
+    else
+    {
+        return std::numeric_limits<double>::infinity();
+    }
 }
 /**
  * Returns the charge distribution of minimum energy contained in a range of `charge_distribution_surface` objects.
