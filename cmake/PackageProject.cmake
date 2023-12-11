@@ -8,8 +8,8 @@ function(fiction_package_project)
     cmake_policy(SET CMP0103 NEW) # disallow multiple calls with the same NAME
   endif()
 
-  # if CMake version >= 3.23
-  if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.23")
+  # if CMake version >= 3.24
+  if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.24")
     cmake_policy(SET CMP0135 NEW) # enable new timestamp checking behavior for
                                   # fetching content
   endif()
