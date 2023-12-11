@@ -216,54 +216,6 @@ throughput (TP) and thereby, the amount of clock cycles the PIs need to be stall
 A ``network`` can also be simulated for comparison by using ``simulate -n``.
 
 
-Physical Simulation of SiDBs
-----------------------------
-
-Performing physical simulations on SiDB layouts is crucial for understanding layout behavior and
-facilitating rapid prototyping, eliminating the need for expensive and time-intensive fabrication processes.
-The command ``read --sqd`` (or ``read -s``) is used to import a SiDB layout from an sqd-file, a format compatible with `SiQAD <https://github.com/siqad/siqad>`_.
-The SiDB layout can be visualized using the ``print -c`` command. Currently, *fiction* provides two electrostatic physical simulators:
-an exact one (*QuickExact*) and a scalable one (*QuickSim*).
-
-QuickExact (``quickexact``)
-###########################
-
-*QuickExact* serves as an exact simulator, meticulously determining all physically valid charge distributions.
-It enumerates all possible charge distributions. However, by incorporating three techniques, namely
-1.) Physically-informed Search Space Pruning, 2.) Partial Solution Caching, and 3.) Effective State Enumeration, it provides
-a significant performance advantage of more than three orders of magnitude over ExGS from SiQAD. For additional details,
-see the `paper <https://www.cda.cit.tum.de/files/eda/2024_aspdac_efficient_exact_simulation.pdf>`_.
-
-Most important Parameters:
-
-- Relative permittivity (``-e``).
-- Thomas-Fermi screening (``-l``).
-- Energy transition level (0/-) (``-m``).
-- Base number for the simulation (``-b``)
-
-See ``quickexact -h`` for a full list.
-
-The simulated ground state charge distribution can be printed with ``print -c``.
-
-
-QuickSim (``quicksim``)
-#######################
-
-*QuickSim* serves as a scalable simulator designed to determine the ground state charge distribution
-for a given SiDB layout. To enhance efficiency, effective search space pruning techniques, such as
-(`max-min diversity distributions <https://onlinelibrary.wiley.com/doi/10.1002/net.20418>`_), are integrated.
-For more in-depth information, refer to the `paper <https://www.cda.cit.tum.de/files/eda/2023_ieeenano_quicksim_physical_simulation.pdf>`_.
-
-Most important Parameters:
-
-- Relative permittivity (``-e``).
-- Thomas-Fermi screening (``-l``).
-- Energy transition level (0/-) (``-m``).
-- Number of iterations (``-i``).
-- Alpha value (``-a``).
-
-The simulated ground state charge distribution can be printed with ``print -c``.
-
 Equivalence checking (``equiv``)
 --------------------------------
 
@@ -311,6 +263,54 @@ simulators are currently supported:
 - ``fqca <filename>`` creates a `QCA-STACK <https://github.com/wlambooy/QCA-STACK>`_ FQCA file
 
 If no filename is given, the stored layout name will be used and the file will be written to the current folder.
+
+Physical Simulation of SiDBs
+----------------------------
+
+Performing physical simulation of SiDB layouts is crucial for understanding layout behavior and
+facilitating rapid prototyping, eliminating the need for expensive and time-intensive fabrication processes.
+The command ``read --sqd`` (or ``read -s``) is used to import a SiDB layout from an sqd-file, a format compatible with `SiQAD <https://github.com/siqad/siqad>`_.
+The SiDB layout can be visualized using the ``print -c`` command. Currently, *fiction* provides two electrostatic physical simulators:
+an exact one (*QuickExact*) and a scalable one (*QuickSim*).
+
+QuickExact (``quickexact``)
+###########################
+
+*QuickExact* serves as an exact simulator, meticulously determining all physically valid charge distributions.
+It enumerates all possible charge distributions. However, by incorporating three techniques, namely
+1.) Physically-informed Search Space Pruning, 2.) Partial Solution Caching, and 3.) Effective State Enumeration, it provides
+a significant performance advantage of more than three orders of magnitude over ExGS from SiQAD. For additional details,
+see the `paper <https://www.cda.cit.tum.de/files/eda/2024_aspdac_efficient_exact_simulation.pdf>`_.
+
+Most important Parameters:
+
+- Relative permittivity (``-e``).
+- Thomas-Fermi screening (``-l``).
+- Energy transition level (0/-) (``-m``).
+- Base number for the simulation (``-b``)
+
+See ``quickexact -h`` for a full list.
+
+The simulated ground state charge distribution can be printed with ``print -c``.
+
+
+QuickSim (``quicksim``)
+#######################
+
+*QuickSim* serves as a scalable simulator designed to determine the ground state charge distribution
+for a given SiDB layout. To enhance efficiency, effective search space pruning techniques, such as
+(`max-min diversity distributions <https://onlinelibrary.wiley.com/doi/10.1002/net.20418>`_), are integrated.
+For more in-depth information, refer to the `paper <https://www.cda.cit.tum.de/files/eda/2023_ieeenano_quicksim_physical_simulation.pdf>`_.
+
+Most important Parameters:
+
+- Relative permittivity (``-e``).
+- Thomas-Fermi screening (``-l``).
+- Energy transition level (0/-) (``-m``).
+- Number of iterations (``-i``).
+- Alpha value (``-a``).
+
+The simulated ground state charge distribution can be printed with ``print -c``.
 
 Area usage (``area``)
 ---------------------
