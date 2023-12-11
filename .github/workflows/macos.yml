@@ -64,17 +64,9 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10.2'
-          cache: 'pip'
-
-      - name: Install distutils
-        run: python3.10 -m pip install distutils
-
-      # Setup TBB for parallel STL algorithms via Homebrew
-      - name: Setup TBB
+      # Setup TBB for parallel STL algorithms via Homebrew (macOS 11 is no longer supported)
+      - if: matrix.os != 'macos-11'
+        name: Setup TBB
         run: brew install tbb
 
       # Use XCode 13.2 as a workaround because XCode 14.0 seems broken
