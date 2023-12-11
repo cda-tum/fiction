@@ -37,10 +37,7 @@ template <typename InputIt>
                                 { return cds1.get_system_energy() < cds2.get_system_energy(); })
             ->get_system_energy();
     }
-    else
-    {
-        return std::numeric_limits<double>::infinity();
-    }
+    return std::numeric_limits<double>::infinity();
 }
 /**
  * Returns the charge distribution of minimum energy contained in a range of `charge_distribution_surface` objects.
