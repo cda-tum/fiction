@@ -56,7 +56,7 @@ struct quicksim_params
  * charge distribution layout. Depending on the simulation parameters, the ground state is found with a certain
  * probability after one run.
  *
- * @tparam Lyt Cell-level layout type.
+ * @tparam Lyt SiDB cell-level layout type.
  * @param lyt The layout to simulate.
  * @param ps Physical parameters. They are material-specific and may vary from experiment to experiment.
  * @return sidb_simulation_result is returned with all results.
