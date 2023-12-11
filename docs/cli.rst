@@ -81,9 +81,11 @@ or be obtained by :ref:`simulating<command simulate>` a ``network`` or ``gate_la
 `kitty documentation <https://libkitty.readthedocs.io/en/latest/reference.html#_CPPv4I0EN5kitty22create_from_expressionEbR2TTRKNSt6stringE>`_):
 
 An expression ``E`` is a constant ``0`` or ``1``, or a variable ``a, b, ..., p``, the negation of an expression ``!E``, the
-conjunction of multiple expressions ``(E...E)``, the disjunction of multiple expressions ``{E...E}``, the exclusive OR of
+conjunction of multiple expressions ``(E...E)``, the disjunction of multiple expressions ``{
+    E... E}``, the exclusive OR of
 multiple expressions ``[E...E]``, or the majority of three expressions ``<EEE>``. Examples are ``[(ab)(!ac)]`` to describe
-if-then-else, or ``!{!a!b}`` to describe the application of De Morgan's law to ``(ab)``. The size of the truth table must
+if-then-else, or ``!{
+    !a !b}`` to describe the application of De Morgan's law to ``(ab)``. The size of the truth table must
 fit the largest variable in the expression, e.g., if ``c`` is the largest variable, then the truth table has at least
 three variables.
 
@@ -214,6 +216,55 @@ Timing information, and thereby global synchronization, is not respected here. U
 throughput (TP) and thereby, the amount of clock cycles the PIs need to be stalled to generate the simulated outputs.
 
 A ``network`` can also be simulated for comparison by using ``simulate -n``.
+
+
+Physical Simulation of SiDBs
+----------------------------
+
+Performing physical simulations on SiDB layouts is crucial for understanding layout behavior and
+facilitating rapid prototyping, eliminating the need for expensive and time-intensive fabrication processes.
+The command ``read --sqd`` (or ``read -s``) is used to import a SiDB layout from an sqd-file, a format compatible with `SiQAD <https://github.com/siqad/siqad>`_.
+The SiDB layout can be visualized using the ``print -c`` command. Currently, *fiction* provides two electrostatic physical simulators:
+an exact one (*QuickExact*) and a scalable one (*QuickSim*).
+
+QuickExact (``quickexact``)
+###########################
+
+*QuickExact* serves as an exact simulator, meticulously determining all physically valid charge distributions.
+It enumerates all possible charge distributions. However, by incorporating three techniques, namely
+1.) Physically-informed Search Space Pruning, 2.) Partial Solution Caching, and 3.) Effective State Enumeration, it provides
+a significant performance advantage of more than three orders of magnitude over ExGS from SiQAD. For additional details,
+see the `paper <https://www.cda.cit.tum.de/files/eda/2024_aspdac_efficient_exact_simulation.pdf>`_.
+
+Most important Parameters:
+
+- Relative permittivity (``-e``).
+- Thomas-Fermi screening (``-l``).
+- Energy transition level (0/-) (``-m``).
+- Base number for the simulation (``-b``)
+
+See ``quickexact -h`` for a full list.
+
+The simulated ground state charge distribution can be printed with ``print -c``.
+
+
+QuickSim (``quicksim``)
+#######################
+
+*QuickSim* serves as a scalable simulator designed to determine the ground state charge distribution
+for a given SiDB layout. To enhance efficiency, effective search space pruning techniques, such as
+(`max-min diversity distributions <https://onlinelibrary.wiley.com/doi/10.1002/net.20418>`_), are integrated.
+For more in-depth information, refer to the `paper <https://www.cda.cit.tum.de/files/eda/2023_ieeenano_quicksim_physical_simulation.pdf>`_.
+
+Most important Parameters:
+
+- Relative permittivity (``-e``).
+- Thomas-Fermi screening (``-l``).
+- Energy transition level (0/-) (``-m``).
+- Number of iterations (``-i``).
+- Alpha value (``-a``).
+
+The simulated ground state charge distribution can be printed with ``print -c``.
 
 Equivalence checking (``equiv``)
 --------------------------------
@@ -365,7 +416,8 @@ Additionally, *fiction* itself can be part of a bash script. Consider the follow
 
     for filepath in ../benchmarks/TOY/*.v; do
         f="${filepath##*/}"
-        ./fiction -c "read $filepath; ortho; cell; qca ${f%.*}.qca"
+
+       ./fiction -c "read $filepath; ortho; cell; qca ${f%.*}.qca"
     done
 
 where the for-loop iterates over all Verilog files in the ``../benchmarks/TOY/`` folder. By using the flag ``-c``, a
