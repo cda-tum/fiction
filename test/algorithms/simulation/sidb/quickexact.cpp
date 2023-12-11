@@ -29,9 +29,7 @@ TEMPLATE_TEST_CASE(
     const auto simulation_results = quickexact(lyt, params);
 
     CHECK(simulation_results.charge_distributions.empty());
-    CHECK(simulation_results.additional_simulation_parameters.empty());
     CHECK(simulation_results.algorithm_name == "QuickExact");
-    CHECK(simulation_results.additional_simulation_parameters.empty());
 }
 
 TEMPLATE_TEST_CASE(
@@ -253,6 +251,7 @@ TEMPLATE_TEST_CASE(
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
     REQUIRE(simulation_results.charge_distributions.size() == 1);
+    CHECK(std::any_cast<double>(simulation_results.additional_simulation_parameters.at("global_potential")) == -0.26);
     CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) == sidb_charge_state::NEUTRAL);
 }
 

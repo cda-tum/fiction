@@ -39,6 +39,8 @@ class quickexact_command : public command
         add_option("--mu_minus,-m", physical_params.mu_minus, "Energy transition level (0/-) (unit: eV)", true);
         add_option("--base,-b", physical_params.base,
                    "2-state (neutral/negative) vs. 3-state (positive/neutral/negative) simulation", true);
+        add_option("--base_number_detection, -bd", params.base_number_detection,
+                   "Automatic base number detection (ON/OFF)", true);
         add_option("--global_potential,-g", params.global_potential,
                    "Global potential applied to the entire layout (unit: V)", true);
     }

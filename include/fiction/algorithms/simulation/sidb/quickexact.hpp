@@ -97,6 +97,7 @@ class quickexact_impl
     {
         result.algorithm_name      = "QuickExact";
         result.physical_parameters = params.physical_parameters;
+        result.additional_simulation_parameters.emplace("global_potential", params.global_potential);
 
         mockturtle::stopwatch<>::duration time_counter{};
         {

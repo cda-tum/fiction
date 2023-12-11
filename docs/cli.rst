@@ -287,7 +287,8 @@ Most important Parameters:
 - Relative permittivity (``-e``).
 - Thomas-Fermi screening (``-l``).
 - Energy transition level (0/-) (``-m``).
-- Base number for the simulation (``-b``)
+- Base number for the simulation (``-b``).
+- Automatic base number detection (``-bd``).
 
 See ``quickexact -h`` for a full list.
 
