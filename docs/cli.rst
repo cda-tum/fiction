@@ -415,7 +415,6 @@ Additionally, *fiction* itself can be part of a bash script. Consider the follow
 
     for filepath in ../benchmarks/TOY/*.v; do
         f="${filepath##*/}"
-
        ./fiction -c "read $filepath; ortho; cell; qca ${f%.*}.qca"
     done
 
