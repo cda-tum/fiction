@@ -67,9 +67,9 @@ class quicksim_command : public command
             return;
         }
 
-        if (physical_params.base != 2 && physical_params.base != 3)
+        if (physical_params.base != 2)
         {
-            env->out() << "[e] base must be 2 or 3" << std::endl;
+            env->out() << "[e] base must be 2" << std::endl;
             reset_params();
             return;
         }
@@ -164,11 +164,10 @@ class quicksim_command : public command
             {"Algorithm name", sim_result.algorithm_name},
             {"Simulation runtime", sim_result.simulation_runtime.count()},
             {"Physical parameters",
-             {"base", sim_result.physical_parameters.base},
              {"epsilon_r", sim_result.physical_parameters.epsilon_r},
              {"lambda_tf", sim_result.physical_parameters.lambda_tf},
              {"mu_minus", sim_result.physical_parameters.mu_minus}},
-            {"Lowest state energy (meV)", sim_result.charge_distributions.front().get_system_energy()},
+            {"Lowest state energy (eV)", sim_result.charge_distributions.front().get_system_energy()},
             {"Number of stable states", sim_result.charge_distributions.size()},
             {"Iteration steps",
              std::any_cast<uint64_t>(sim_result.additional_simulation_parameters.at("iteration_steps"))},
