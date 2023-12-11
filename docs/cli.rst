@@ -271,7 +271,7 @@ Performing physical simulation of SiDB layouts is crucial for understanding layo
 facilitating rapid prototyping, eliminating the need for expensive and time-intensive fabrication processes.
 The command ``read --sqd`` (or ``read -s``) is used to import a SiDB layout from an sqd-file, a format compatible with `SiQAD <https://github.com/siqad/siqad>`_.
 The SiDB layout can be visualized using the ``print -c`` command. Currently, *fiction* provides two electrostatic physical simulators:
-an exact one (*QuickExact*) and a scalable one (*QuickSim*).
+the exact one *QuickExact* and the scalable one *QuickSim*.
 
 QuickExact (``quickexact``)
 ###########################
