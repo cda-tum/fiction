@@ -191,7 +191,7 @@ TEST_CASE("Write empty simulation result", "[sqd-sim-result]")
 
         CHECK(simulation_stream.str() == sim_result_str);
     }
-    SECTION("with additional parameters")
+    SECTION("with additional parameter (string)")
     {
         const std::string sim_result_str = fmt::format(
             "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
@@ -209,9 +209,6 @@ TEST_CASE("Write empty simulation result", "[sqd-sim-result]")
             "        <eps_r>{}</eps_r>\n"
             "        <muzm>{}</muzm>\n"
             "        <param1>value1</param1>\n"
-            "        <param2>2</param2>\n"
-            "        <param3>3.140000</param3>\n"
-            "        <param4>c</param4>\n"
             "    </sim_params>\n"
             "    <physloc>\n"
             "    </physloc>\n"
@@ -223,9 +220,41 @@ TEST_CASE("Write empty simulation result", "[sqd-sim-result]")
             sim_result.physical_parameters.mu_minus);
 
         sim_result.additional_simulation_parameters.emplace("param1", "value1");
-        sim_result.additional_simulation_parameters.emplace("param2", 2);
+
+        write_sqd_sim_result(sim_result, simulation_stream);
+
+        CHECK(simulation_stream.str() == sim_result_str);
+    }
+
+    SECTION("with additional parameters (double)")
+    {
+        const std::string sim_result_str = fmt::format(
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+            "<sim_out>\n"
+            "    <eng_info>\n"
+            "        <engine>TestSim</engine>\n"
+            "        <version>{}</version>\n"
+            "        <repo>{}</repo>\n"
+            "        <return_code>0</return_code>\n"
+            "        <timestamp>{}</timestamp>\n"
+            "        <time_elapsed_s>42.0</time_elapsed_s>\n"
+            "    </eng_info>\n"
+            "    <sim_params>\n"
+            "        <debye_length>{}</debye_length>\n"
+            "        <eps_r>{}</eps_r>\n"
+            "        <muzm>{}</muzm>\n"
+            "        <param3>3.140000</param3>\n"
+            "    </sim_params>\n"
+            "    <physloc>\n"
+            "    </physloc>\n"
+            "    <elec_dist>\n"
+            "    </elec_dist>\n"
+            "</sim_out>\n",
+            FICTION_VERSION, FICTION_REPO, fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(std::time(nullptr))),
+            sim_result.physical_parameters.lambda_tf, sim_result.physical_parameters.epsilon_r,
+            sim_result.physical_parameters.mu_minus);
+
         sim_result.additional_simulation_parameters.emplace("param3", 3.14);
-        sim_result.additional_simulation_parameters.emplace("param4", 'c');
 
         write_sqd_sim_result(sim_result, simulation_stream);
 
