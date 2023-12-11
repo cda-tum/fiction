@@ -153,16 +153,15 @@ class quickexact_command : public command
      */
     nlohmann::json log() const override
     {
-        return nlohmann::json{
-            {"Algorithm name", sim_result.algorithm_name},
-            {"Simulation runtime", sim_result.simulation_runtime.count()},
-            {"Physical parameters",
-             {"base", sim_result.physical_parameters.base},
-             {"epsilon_r", sim_result.physical_parameters.epsilon_r},
-             {"lambda_tf", sim_result.physical_parameters.lambda_tf},
-             {"mu_minus", sim_result.physical_parameters.mu_minus}},
-            {"Ground state energy (meV)", sim_result.charge_distributions.front().get_system_energy()},
-            {"Number of stable states", sim_result.charge_distributions.size()}};
+        return nlohmann::json{{"Algorithm name", sim_result.algorithm_name},
+                              {"Simulation runtime", sim_result.simulation_runtime.count()},
+                              {"Physical parameters",
+                               {"base", sim_result.physical_parameters.base},
+                               {"epsilon_r", sim_result.physical_parameters.epsilon_r},
+                               {"lambda_tf", sim_result.physical_parameters.lambda_tf},
+                               {"mu_minus", sim_result.physical_parameters.mu_minus}},
+                              {"Ground state energy (eV)", sim_result.charge_distributions.front().get_system_energy()},
+                              {"Number of stable states", sim_result.charge_distributions.size()}};
     }
     /**
      * Resets the parameters to their default values.
