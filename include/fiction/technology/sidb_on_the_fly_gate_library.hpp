@@ -12,12 +12,13 @@
 #include "fiction/technology/fcn_gate_library.hpp"
 #include "fiction/technology/is_sidb_gate_design_impossible.hpp"
 #include "fiction/technology/sidb_surface.hpp"
-#include "fiction/technology/sidb_surface_analysis.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 #include "fiction/utils/layout_utils.hpp"
+#include "fiction/utils/truth_table_utils.hpp"
 
 #include <array>
+#include <cstdint>
 #include <exception>
 #include <limits>
 #include <utility>
@@ -106,13 +107,7 @@ struct sidb_on_the_fly_gate_library_params
     /**
      * This struct holds parameters to design SiDB gates on-the-fly.
      */
-    design_sidb_gates_params<cell<sidb_cell_clk_lyt_cube>> design_gate_params{
-        sidb_simulation_parameters{2, -0.32},
-        design_sidb_gates_params<cell<sidb_cell_clk_lyt_cube>>::design_sidb_gates_mode::EXHAUSTIVE,
-        {{}, {}},
-        3,
-        sidb_simulation_engine::QUICKEXACT,
-        1};
+    design_sidb_gates_params<cell<sidb_cell_clk_lyt_cube>> design_gate_params{};
     /**
      * This variable defines the number of canvas SiDBs dedicated to complex gates, such as crossing, double wire,
      * and half-adder.
@@ -449,16 +444,16 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
      */
     template <typename Lyt>
     [[nodiscard]] static std::array<std::array<char, gate_x_size()>, gate_y_size()>
-    cell_level_layout_to_list(const Lyt& lyt)
+    cell_level_layout_to_list(const Lyt& lyt) noexcept
     {
         std::array<std::array<char, gate_x_size()>, gate_y_size()> result{};
         const auto                                                 all_cell =
             all_coordinates_in_spanned_area({0, 0, 0}, cell<Lyt>{gate_x_size() - 1, gate_y_size() - 1});
         uint64_t counter = 0;
 
-        for (const auto& row : result)
+        for (auto& row : result)
         {
-            for (const auto& cell : row)
+            for (auto& cell : row)
             {
                 const auto cell_type = lyt.get_cell_type(all_cell[counter]);
                 cell                 = (cell_type == Lyt::technology::cell_type::NORMAL ||

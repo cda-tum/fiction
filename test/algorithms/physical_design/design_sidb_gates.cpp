@@ -113,8 +113,7 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
                 {{10, 4, 0}, {10, 4, 0}},
                 1,
                 sidb_simulation_engine::QUICKEXACT,
-                1.0,
-                design_sidb_gates_params<cell<layout>>::termination_condition::SOLUTION_FOUND};
+                design_sidb_gates_params<cell<layout>>::termination_condition::AFTER_FIRST_SOLUTION};
 
             const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_xnor_tt()}, params);
 

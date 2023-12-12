@@ -24,9 +24,9 @@
 #include <cassert>
 #include <cstdint>
 #include <cstdlib>
-#include <future>
 #include <numeric>
 #include <thread>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -52,7 +52,7 @@ struct design_sidb_gates_params
         /**
          * The design process is terminated when a valid SiDB gate design is found.
          */
-        SOLUTION_FOUND,
+        AFTER_FIRST_SOLUTION,
         /**
          * The design process ends after all possible combinations of SiDBs within the canvas are enumerated.
          */
@@ -92,10 +92,6 @@ struct design_sidb_gates_params
      * The simulation engine to be used for the operational domain computation.
      */
     sidb_simulation_engine sim_engine{sidb_simulation_engine::QUICKEXACT};
-    /**
-     * The percentage of all combinations that are tested before the design process is canceled.
-     */
-    double procentual_maximum_attemps = 1.0;
     /**
      * The design process is terminated after a valid SiDB gate design is found.
      *
@@ -146,12 +142,9 @@ class design_sidb_gates_impl
             sidbs_affected_by_defects = skeleton_layout.all_affected_sidbs(std::make_pair(0, 0));
         }
 
-        std::vector<Lyt>      designed_gate_layouts = {};
-        std::mutex            mutex_to_protect_designer_gate_layouts;
-        std::atomic<bool>     solution_found = false;
-        std::atomic<uint64_t> global_iteration_counter(0);
-
-        const auto total_comb = binomial_coefficient(all_sidbs_in_canvas.size(), params.number_of_sidbs);
+        std::vector<Lyt>  designed_gate_layouts = {};
+        std::mutex        mutex_to_protect_designer_gate_layouts;
+        std::atomic<bool> solution_found = false;
 
         // Shuffle the combinations before dividing them among threads
         std::shuffle(all_combinations.begin(), all_combinations.end(),
@@ -159,14 +152,11 @@ class design_sidb_gates_impl
 
         const auto add_combination_to_layout_and_check_operation =
             [this, &mutex_to_protect_designer_gate_layouts, &params_is_operational, &designed_gate_layouts,
-             &sidbs_affected_by_defects, &solution_found, &global_iteration_counter,
-             &total_comb](const auto& combination) noexcept
+             &sidbs_affected_by_defects, &solution_found](const auto& combination) noexcept
         {
             for (const auto& comb : combination)
             {
-                if (!are_sidbs_too_close(cell_indices_to_cell_vector(comb), sidbs_affected_by_defects) &&
-                    global_iteration_counter <
-                        static_cast<uint64_t>(params.procentual_maximum_attemps * static_cast<double>(total_comb)))
+                if (!are_sidbs_too_close(cell_indices_to_cell_vector(comb), sidbs_affected_by_defects))
                 {
                     // canvas SiDBs are added to the skeleton
                     auto layout_with_added_cells = skeleton_layout_with_canvas_sidbs(comb);
@@ -180,14 +170,14 @@ class design_sidb_gates_impl
                         }
                         solution_found = true;
                     }
-                    if (solution_found && (params.termination_cond ==
-                                           design_sidb_gates_params<cell<Lyt>>::termination_condition::SOLUTION_FOUND))
+                    if (solution_found &&
+                        (params.termination_cond ==
+                         design_sidb_gates_params<cell<Lyt>>::termination_condition::AFTER_FIRST_SOLUTION))
                     {
                         return;
                     }
                     continue;
                 }
-                global_iteration_counter++;
             }
         };
 
