@@ -101,6 +101,8 @@ class quickexact_command : public command
                 else
                 {
                     params.physical_parameters = physical_params;
+                    params.base_number_detection =
+                        fiction::quickexact_params<fiction::sidb_cell_clk_lyt>::automatic_base_number_detection::OFF;
 
                     sim_result = fiction::quickexact(*lyt_ptr, params);
 
@@ -168,6 +170,8 @@ class quickexact_command : public command
     {
         physical_params = fiction::sidb_simulation_parameters{2, -0.32, 5.6, 5.0};
         params          = {};
+        params.base_number_detection =
+            fiction::quickexact_params<fiction::sidb_cell_clk_lyt>::automatic_base_number_detection::OFF;
     }
 };
 
