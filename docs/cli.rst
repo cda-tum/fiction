@@ -284,9 +284,9 @@ see the `paper <https://www.cda.cit.tum.de/files/eda/2024_aspdac_efficient_exact
 
 Most important Parameters:
 
-- Relative permittivity (``-e``).
-- Thomas-Fermi screening (``-l``).
-- Energy transition level (0/-) (``-m``).
+- Relative permittivity :math: `\epsilon_r` (``-e``).
+- Thomas-Fermi screening :math: `\lambda_tf` (``-l``).
+- Energy transition level (0/-) :math: `\mu_-` (``-m``).
 - Base number for the simulation (``-b``).
 
 See ``quickexact -h`` for a full list.
@@ -304,11 +304,11 @@ For more in-depth information, refer to the `paper <https://www.cda.cit.tum.de/f
 
 Most important Parameters:
 
-- Relative permittivity (``-e``).
-- Thomas-Fermi screening (``-l``).
-- Energy transition level (0/-) (``-m``).
-- Number of iterations (``-i``).
-- Alpha value (``-a``).
+- Relative permittivity :math: `\epsilon_r` (``-e``).
+- Thomas-Fermi screening :math: `\lambda_tf` (``-l``).
+- Energy transition level (0/-) :math: `\mu_-` (``-m``).
+- Number of iterations I (``-i``).
+- Alpha value :math: `\alpha` (``-a``).
 
 The simulated ground state charge distribution can be printed with ``print -c``.
 
