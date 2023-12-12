@@ -5,19 +5,16 @@
 #ifndef FICTION_QUICKSIM_HPP
 #define FICTION_QUICKSIM_HPP
 
-#include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
+#include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/traits.hpp"
 
-#include <fmt/format.h>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
-#include <iostream>
-#include <limits>
 #include <mutex>
 #include <thread>
 #include <vector>

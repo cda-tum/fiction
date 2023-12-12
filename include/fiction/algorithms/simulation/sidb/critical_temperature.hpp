@@ -9,21 +9,16 @@
 #include "fiction/algorithms/simulation/sidb/calculate_energy_and_state_type.hpp"
 #include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
 #include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
-#include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
-#include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/occupation_probability_of_excited_states.hpp"
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
 #include "fiction/algorithms/simulation/sidb/quicksim.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/cell_technologies.hpp"
-#include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/physical_constants.hpp"
-#include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 #include "fiction/utils/hash.hpp"
 #include "fiction/utils/math_utils.hpp"
-#include "fiction/utils/truth_table_utils.hpp"
 
 #include <fmt/format.h>
 #include <kitty/bit_operations.hpp>
@@ -35,8 +30,8 @@
 #include <cstdint>
 #include <iterator>
 #include <limits>
-#include <map>
 #include <ostream>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -51,7 +46,7 @@ struct critical_temperature_params
     /**
      * An enumeration of modes to use for the *Critical Temperature* Simulation.
      */
-    enum class critical_temperature_mode
+    enum class critical_temperature_mode : uint8_t
     {
         /**
          * The *Critical Temperature* is determined by considering the gate logic of the given layout. In this mode, it
@@ -70,7 +65,7 @@ struct critical_temperature_params
     /**
      * An enumeration of simulation modes (exact vs. approximate) to use for the *Critical Temperature* Simulation.
      */
-    enum class simulation_engine
+    enum class simulation_engine : uint8_t
     {
         /**
          * This simulation engine computes *Critical Temperature* values with 100 % accuracy.
@@ -187,7 +182,8 @@ class critical_temperature_impl
             stats.critical_temperature = 0.0;
             return;
         }
-        else if (layout.num_cells() > 1)
+
+        if (layout.num_cells() > 1)
         {
             const auto output_bdl_pairs =
                 detect_bdl_pairs(layout, sidb_technology::cell_type::OUTPUT, params.bdl_params);
@@ -256,8 +252,8 @@ class critical_temperature_impl
         else
         {
             stats.algorithm_name = "QuickSim";
-            // All physically valid charge configurations are determined for the given layout (exhaustive ground state
-            // simulation is used to provide 100 % accuracy for the Critical Temperature).
+            // All physically valid charge configurations are determined for the given layout (probabilistic ground
+            // state simulation is used).
             simulation_results = quicksim(layout, params.simulation_params);
         }
 
@@ -467,8 +463,9 @@ double critical_temperature_gate_based(const Lyt& lyt, const std::vector<TT>& sp
 
     assert(!spec.empty());
     // all elements in tts must have the same number of variables
-    assert(std::adjacent_find(spec.begin(), spec.end(),
-                              [](const auto& a, const auto& b) { return a.num_vars() != b.num_vars(); }) == spec.end());
+    assert(std::adjacent_find(spec.cbegin(), spec.cend(),
+                              [](const auto& a, const auto& b)
+                              { return a.num_vars() != b.num_vars(); }) == spec.cend());
 
     critical_temperature_stats<Lyt> st{};
 

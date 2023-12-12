@@ -16,6 +16,7 @@
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/layouts/cell_level_layout.hpp"
+#include "fiction/technology/cell_technologies.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/execution_utils.hpp"
 #include "fiction/utils/hash.hpp"
@@ -33,6 +34,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <iterator>
+#include <numeric>
 #include <optional>
 #include <queue>
 #include <random>
