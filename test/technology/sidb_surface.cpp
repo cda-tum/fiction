@@ -116,7 +116,7 @@ TEMPLATE_TEST_CASE(
     (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, odd_column_hex>>>),
     (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, even_column_hex>>>))
 {
-    TestType lyt{{4, 4}};
+    TestType lyt{{1, 1}};
 
     sidb_surface<TestType> defect_layout{lyt};
 
