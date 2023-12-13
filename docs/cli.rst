@@ -285,7 +285,7 @@ see `the paper <https://www.cda.cit.tum.de/files/eda/2024_aspdac_efficient_exact
 Most important parameters:
 
 - Relative permittivity :math:`\epsilon_r` (``-e``)
-- Thomas-Fermi screening length :math:`\lambda_tf` (``-l``)
+- Thomas-Fermi screening length :math:`\lambda_{tf}` (``-l``)
 - Energy transition level (0/-) :math:`\mu_-` (``-m``)
 
 See ``quickexact -h`` for a full list.
@@ -304,7 +304,7 @@ For more in-depth information, refer to `the paper <https://ieeexplore.ieee.org/
 Most important parameters:
 
 - Relative permittivity :math:`\epsilon_r` (``-e``)
-- Thomas-Fermi screening :math:`\lambda_tf` (``-l``)
+- Thomas-Fermi screening :math:`\lambda_{tf}` (``-l``)
 - Energy transition level (0/-) :math:`\mu_-` (``-m``)
 - Number of iterations (``-i``)
 - :math:`\alpha` value (``-a``)
