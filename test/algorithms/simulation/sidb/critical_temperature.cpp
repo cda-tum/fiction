@@ -11,9 +11,9 @@
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
-#include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/types.hpp>
+#include <fiction/utils/truth_table_utils.hpp>
 
 #include <cmath>
 #include <limits>
