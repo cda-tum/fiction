@@ -13,6 +13,10 @@
 
 #include <alice/alice.hpp>
 
+#include <iostream>
+#include <memory>
+#include <string>
+#include <type_traits>
 #include <variant>
 
 namespace alice
@@ -37,8 +41,6 @@ class quickexact_command : public command
                    true);
         add_option("--lambda_tf,-l", physical_params.lambda_tf, "Thomas-Fermi screening distance (unit: nm)", true);
         add_option("--mu_minus,-m", physical_params.mu_minus, "Energy transition level (0/-) (unit: eV)", true);
-        add_option("--base,-b", physical_params.base,
-                   "2-state (neutral/negative) vs. 3-state (positive/neutral/negative) simulation", true);
         add_option("--global_potential,-g", params.global_potential,
                    "Global potential applied to the entire layout (unit: V)", true);
     }
@@ -58,17 +60,9 @@ class quickexact_command : public command
             reset_params();
             return;
         }
-
         if (physical_params.lambda_tf <= 0)
         {
             env->out() << "[e] lambda_tf must be positive" << std::endl;
-            reset_params();
-            return;
-        }
-
-        if (physical_params.base != 2 && physical_params.base != 3)
-        {
-            env->out() << "[e] base must be 2 or 3" << std::endl;
             reset_params();
             return;
         }

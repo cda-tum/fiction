@@ -14,6 +14,11 @@
 #include <alice/alice.hpp>
 
 #include <any>
+#include <cstdint>
+#include <iostream>
+#include <memory>
+#include <string>
+#include <type_traits>
 #include <variant>
 
 namespace alice
@@ -59,21 +64,12 @@ class quicksim_command : public command
             reset_params();
             return;
         }
-
         if (physical_params.lambda_tf <= 0)
         {
             env->out() << "[e] lambda_tf must be positive" << std::endl;
             reset_params();
             return;
         }
-
-        if (physical_params.base != 2)
-        {
-            env->out() << "[e] base must be 2" << std::endl;
-            reset_params();
-            return;
-        }
-
         if (params.alpha <= 0)
         {
             env->out() << "[e] alpha must be positive" << std::endl;
