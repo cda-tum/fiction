@@ -156,7 +156,7 @@ class quicksim_command : public command
      *
      * @return JSON object containing details about the simulation.
      */
-    nlohmann::json log() const override
+    [[nodiscard]] nlohmann::json log() const override
     {
         return nlohmann::json{
             {"Algorithm name", sim_result.algorithm_name},

@@ -41,7 +41,8 @@ namespace detail
  * @param param The sweep parameter to be converted.
  * @return The string representation of the sweep parameter.
  */
-static inline std::string sweep_parameter_to_string(const operational_domain::sweep_parameter& param) noexcept
+[[nodiscard]] static inline std::string
+sweep_parameter_to_string(const operational_domain::sweep_parameter& param) noexcept
 {
     switch (param)
     {

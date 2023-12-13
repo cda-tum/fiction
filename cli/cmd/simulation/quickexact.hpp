@@ -99,8 +99,6 @@ class quickexact_command : public command
                 else
                 {
                     params.physical_parameters = physical_params;
-                    params.base_number_detection =
-                        fiction::quickexact_params<fiction::sidb_cell_clk_lyt>::automatic_base_number_detection::OFF;
 
                     sim_result = fiction::quickexact(*lyt_ptr, params);
 
@@ -149,17 +147,21 @@ class quickexact_command : public command
      *
      * @return JSON object containing details about the simulation.
      */
-    nlohmann::json log() const override
+    [[nodiscard]] nlohmann::json log() const override
     {
-        return nlohmann::json{{"Algorithm name", sim_result.algorithm_name},
-                              {"Simulation runtime", sim_result.simulation_runtime.count()},
-                              {"Physical parameters",
-                               {"base", sim_result.physical_parameters.base},
-                               {"epsilon_r", sim_result.physical_parameters.epsilon_r},
-                               {"lambda_tf", sim_result.physical_parameters.lambda_tf},
-                               {"mu_minus", sim_result.physical_parameters.mu_minus}},
-                              {"Ground state energy (eV)", sim_result.charge_distributions.front().get_system_energy()},
-                              {"Number of stable states", sim_result.charge_distributions.size()}};
+        return nlohmann::json{
+            {"Algorithm name", sim_result.algorithm_name},
+            {"Simulation runtime", sim_result.simulation_runtime.count()},
+            {"Physical parameters",
+             {"base", std::any_cast<uint64_t>(sim_result.additional_simulation_parameters.at(
+                          "base_number"))},  // fetch the automatically inferred base
+             {"epsilon_r", sim_result.physical_parameters.epsilon_r},
+             {"lambda_tf", sim_result.physical_parameters.lambda_tf},
+             {"mu_minus", sim_result.physical_parameters.mu_minus},
+             {"global_potential",
+              std::any_cast<double>(sim_result.additional_simulation_parameters.at("global_potential"))}},
+            {"Ground state energy (eV)", sim_result.charge_distributions.front().get_system_energy()},
+            {"Number of stable states", sim_result.charge_distributions.size()}};
     }
     /**
      * Resets the parameters to their default values.
@@ -168,8 +170,6 @@ class quickexact_command : public command
     {
         physical_params = fiction::sidb_simulation_parameters{2, -0.32, 5.6, 5.0};
         params          = {};
-        params.base_number_detection =
-            fiction::quickexact_params<fiction::sidb_cell_clk_lyt>::automatic_base_number_detection::OFF;
     }
 };
 
