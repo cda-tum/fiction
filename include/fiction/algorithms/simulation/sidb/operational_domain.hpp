@@ -22,7 +22,6 @@
 #include "fiction/utils/hash.hpp"
 #include "fiction/utils/phmap_utils.hpp"
 
-#include <kitty/bit_operations.hpp>
 #include <kitty/traits.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 #include <phmap.h>
@@ -33,7 +32,6 @@
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
-#include <iterator>
 #include <numeric>
 #include <optional>
 #include <queue>
