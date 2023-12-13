@@ -280,14 +280,13 @@ QuickExact (``quickexact``)
 It enumerates all possible charge distributions. However, by incorporating three techniques, namely
 1.) Physically-informed Search Space Pruning, 2.) Partial Solution Caching, and 3.) Effective State Enumeration, it provides
 a significant performance advantage of more than three orders of magnitude over ExGS from SiQAD. For additional details,
-see the `paper <https://www.cda.cit.tum.de/files/eda/2024_aspdac_efficient_exact_simulation.pdf>`_.
+see `the paper <https://www.cda.cit.tum.de/files/eda/2024_aspdac_efficient_exact_simulation.pdf>`_.
 
-Most important Parameters:
+Most important parameters:
 
-- Relative permittivity :math: `\epsilon_r` (``-e``).
-- Thomas-Fermi screening :math: `\lambda_tf` (``-l``).
-- Energy transition level (0/-) :math: `\mu_-` (``-m``).
-- Base number for the simulation (``-b``).
+- Relative permittivity :math:`\epsilon_r` (``-e``)
+- Thomas-Fermi screening length :math:`\lambda_tf` (``-l``)
+- Energy transition level (0/-) :math:`\mu_-` (``-m``)
 
 See ``quickexact -h`` for a full list.
 
@@ -300,17 +299,55 @@ QuickSim (``quicksim``)
 *QuickSim* serves as a scalable simulator designed to determine the ground state charge distribution
 for a given SiDB layout. To enhance efficiency, effective search space pruning techniques, such as
 (`max-min diversity distributions <https://onlinelibrary.wiley.com/doi/10.1002/net.20418>`_), are integrated.
-For more in-depth information, refer to the `paper <https://www.cda.cit.tum.de/files/eda/2023_ieeenano_quicksim_physical_simulation.pdf>`_.
+For more in-depth information, refer to `the paper <https://ieeexplore.ieee.org/document/10231266>`_.
 
-Most important Parameters:
+Most important parameters:
 
-- Relative permittivity :math: `\epsilon_r` (``-e``).
-- Thomas-Fermi screening :math: `\lambda_tf` (``-l``).
-- Energy transition level (0/-) :math: `\mu_-` (``-m``).
-- Number of iterations I (``-i``).
-- Alpha value :math: `\alpha` (``-a``).
+- Relative permittivity :math:`\epsilon_r` (``-e``)
+- Thomas-Fermi screening :math:`\lambda_tf` (``-l``)
+- Energy transition level (0/-) :math:`\mu_-` (``-m``)
+- Number of iterations (``-i``)
+- :math:`\alpha` value (``-a``)
 
 The simulated ground state charge distribution can be printed with ``print -c``.
+
+
+Operational Domain (``opdom``)
+##############################
+
+Computes the operational domain of the current SiDB cell-level layout in store. The operational domain is the set of all
+parameter combinations for which the layout is logically operational. Logical operation is defined as the layout
+implementing the current truth table in store. The input BDL pairs of the layout are assumed to be in the same order as
+the inputs of the truth table.
+For more information, see `the paper <https://www.cda.cit.tum.de/files/eda/2023_nanoarch_reducing_the_complexity_of_operational_domain_computation_in_silicon_dangling_bond_logic.pdf>`_.
+
+The command ``opdom`` writes the operational domain to a CSV file with the given filename from where it can be further
+processed by other tools.
+
+The parameter space to sweep over can be specified by the user via the flags
+- ``--x_sweep``
+- ``--y_sweep``
+which have to be either ``epsilon_r``, ``lambda_tf``, or ``mu_minus``. The default is ``epsilon_r`` for ``--x_sweep`` and
+``lambda_tf`` for ``--y_sweep``.
+
+Additionally, min, max, and step size values can be specified for each parameter using the flags
+- ``--x_min``
+- ``--x_max``
+- ``--x_step``
+- ``--y_min``
+- ``--y_max``
+- ``--y_step``
+respectively. The default values are 1, 10, and 0.1 on both axis, for min, max, and step, respectively.
+
+By default, grid search is applied to explore the operational domain. The algorithm can be changed by specifying one of
+the following options:
+- ``--random_sampling``/``-r``
+- ``--flood_fill``/``-f``
+- ``--contour_tracing``/``-c``
+each of which start from a set of random samples, whose number has to be passed as an argument to the flag.
+
+See ``opdom -h`` for a full list of arguments.
+
 
 Area usage (``area``)
 ---------------------
