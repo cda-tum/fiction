@@ -18,6 +18,7 @@
 #include <any>
 #include <cstdint>
 #include <iostream>
+#include <limits>
 #include <memory>
 #include <string>
 #include <type_traits>
@@ -59,6 +60,7 @@ class quicksim_command : public command
     {
         // reset sim result
         sim_result = {};
+        min_energy = std::numeric_limits<double>::infinity();
 
         if (physical_params.epsilon_r <= 0)
         {
@@ -121,6 +123,8 @@ class quicksim_command : public command
                         const auto min_energy_distr = fiction::minimum_energy_distribution(
                             sim_result.charge_distributions.cbegin(), sim_result.charge_distributions.cend());
 
+                        min_energy = min_energy_distr->get_system_energy();
+
                         store<fiction::cell_layout_t>().extend() =
                             std::make_shared<fiction::cds_sidb_cell_clk_lyt>(*min_energy_distr);
                     }
@@ -150,6 +154,10 @@ class quicksim_command : public command
      * Simulation result.
      */
     fiction::sidb_simulation_result<fiction::sidb_cell_clk_lyt> sim_result{};
+    /**
+     * Minimum energy.
+     */
+    double min_energy{std::numeric_limits<double>::infinity()};
 
     /**
      * Logs the resulting information in a log file.
@@ -158,18 +166,25 @@ class quicksim_command : public command
      */
     [[nodiscard]] nlohmann::json log() const override
     {
-        return nlohmann::json{
-            {"Algorithm name", sim_result.algorithm_name},
-            {"Simulation runtime", sim_result.simulation_runtime.count()},
-            {"Physical parameters",
-             {"epsilon_r", sim_result.physical_parameters.epsilon_r},
-             {"lambda_tf", sim_result.physical_parameters.lambda_tf},
-             {"mu_minus", sim_result.physical_parameters.mu_minus}},
-            {"Lowest state energy (eV)", sim_result.charge_distributions.front().get_system_energy()},
-            {"Number of stable states", sim_result.charge_distributions.size()},
-            {"Iteration steps",
-             std::any_cast<uint64_t>(sim_result.additional_simulation_parameters.at("iteration_steps"))},
-            {"alpha", std::any_cast<double>(sim_result.additional_simulation_parameters.at("alpha"))}};
+        try
+        {
+            return nlohmann::json{
+                {"Algorithm name", sim_result.algorithm_name},
+                {"Simulation runtime", sim_result.simulation_runtime.count()},
+                {"Physical parameters",
+                 {{"epsilon_r", sim_result.physical_parameters.epsilon_r},
+                  {"lambda_tf", sim_result.physical_parameters.lambda_tf},
+                  {"mu_minus", sim_result.physical_parameters.mu_minus}}},
+                {"Lowest state energy (eV)", min_energy},
+                {"Number of stable states", sim_result.charge_distributions.size()},
+                {"Iteration steps",
+                 std::any_cast<uint64_t>(sim_result.additional_simulation_parameters.at("iteration_steps"))},
+                {"alpha", std::any_cast<double>(sim_result.additional_simulation_parameters.at("alpha"))}};
+        }
+        catch (...)
+        {
+            return nlohmann::json{};
+        }
     }
     /**
      * Resets the parameters to their default values.
