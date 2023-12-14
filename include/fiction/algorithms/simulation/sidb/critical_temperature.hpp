@@ -99,6 +99,10 @@ template <typename Lyt>
 struct critical_temperature_stats
 {
     /**
+     * All parameters for physical SiDB simulations.
+     */
+    sidb_simulation_parameters physical_parameters{};
+    /**
      * Name of the algorithm used to compute the physically valid charge distributions.
      */
     std::string algorithm_name{};
@@ -153,9 +157,10 @@ class critical_temperature_impl
             bii(bdl_input_iterator<Lyt>{layout, params.bdl_params})
 
     {
-        stats.critical_temperature = params.max_temperature;
+        stats.physical_parameters = params.physical_parameters;
         stats.algorithm_name =
             (params.engine == critical_temperature_params::simulation_engine::EXACT) ? "QuickExact" : "QuickSim";
+        stats.critical_temperature = params.max_temperature;
     }
 
     /**
