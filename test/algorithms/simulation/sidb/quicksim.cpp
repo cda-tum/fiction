@@ -7,11 +7,17 @@
 
 #include <fiction/algorithms/simulation/sidb/energy_distribution.hpp>
 #include <fiction/algorithms/simulation/sidb/quicksim.hpp>
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
+#include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/cell_technologies.hpp>
+#include <fiction/technology/charge_distribution_surface.hpp>
 #include <fiction/technology/physical_constants.hpp>
+#include <fiction/technology/sidb_charge_state.hpp>
+
+#include <cstdint>
 
 using namespace fiction;
 
@@ -372,8 +378,8 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type({10, 8, 1}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({16, 1, 0}, TestType::cell_type::NORMAL);
 
-    sidb_simulation_result<TestType> quicksimstats{};
-    const sidb_simulation_parameters params{2, -0.28};
+    const sidb_simulation_result<TestType> quicksim_stats{};
+    const sidb_simulation_parameters       params{2, -0.28};
 
     quicksim_params quicksim_params{params};
 
@@ -458,20 +464,19 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type({6, 2, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({8, 2, 0}, TestType::cell_type::NORMAL);
 
-    const sidb_simulation_result<TestType> quicksimstats{};
-    const sidb_simulation_parameters       params{2, -0.25};
+    const sidb_simulation_parameters params{2, -0.25};
 
     quicksim_params quicksim_params{params};
 
     REQUIRE(quicksim_params.phys_params.mu_minus == -0.25);
 
-    const auto check_charge_configuration = [](const sidb_simulation_result<TestType>& stats) noexcept
+    const auto check_charge_configuration = [](const sidb_simulation_result<TestType>& result) noexcept
     {
-        REQUIRE(!stats.charge_distributions.empty());
+        REQUIRE(!result.charge_distributions.empty());
 
-        REQUIRE(!energy_distribution(stats.charge_distributions).empty());
+        REQUIRE(!energy_distribution(result.charge_distributions).empty());
 
-        const auto& charge_lyt_first = stats.charge_distributions.front();
+        const auto& charge_lyt_first = result.charge_distributions.front();
 
         CHECK((((charge_lyt_first.get_charge_state({6, 2, 0}) == sidb_charge_state::NEGATIVE) &&
                 (charge_lyt_first.get_charge_state({8, 2, 0}) == sidb_charge_state::NEUTRAL)) ||
@@ -558,8 +563,7 @@ TEMPLATE_TEST_CASE(
 
     lyt.assign_cell_type({8, 10, 1}, TestType::cell_type::NORMAL);
 
-    const sidb_simulation_result<TestType> quicksimstats{};
-    const sidb_simulation_parameters       params{2, -0.32};
+    const sidb_simulation_parameters params{2, -0.32};
 
     quicksim_params quicksim_params{params};
 
@@ -667,7 +671,7 @@ TEMPLATE_TEST_CASE(
 
     lyt.assign_cell_type({30, 15, 0}, TestType::cell_type::NORMAL);
 
-    const sidb_simulation_result<TestType> quicksimstats{};
+    const sidb_simulation_result<TestType> quicksim_stats{};
     const sidb_simulation_parameters       params{2, -0.32};
 
     quicksim_params quicksim_params{params};
