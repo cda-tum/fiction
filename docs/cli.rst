@@ -311,6 +311,24 @@ Most important parameters:
 
 The simulated ground state charge distribution can be printed with ``print -c``.
 
+Critical Temperature (``temp``)
+###############################
+
+The critical temperature of an SiDB layout is the temperature at which the layout's ground state is populated with a
+probability larger than a certain threshold. This threshold is specified as a confidence level :math:`1 - \eta`, where
+:math:`\eta \in [0,1]`. The simulation can be conducted for gate-based SiDB layouts as well, where the gate is
+simulated with respect to the stability of a given Boolean function in form of the current truth table in store.
+For more in-depth information, refer to `the paper <https://ieeexplore.ieee.org/document/10231259>`_.
+
+Most important parameters:
+
+- Confidence level :math:`1 - \eta` (``-c``)
+- Maximum temperature in K to explore (``-t``)
+- Gate-based simulation toggle (``-g``)
+- Relative permittivity :math:`\epsilon_r` (``-e``)
+- Thomas-Fermi screening :math:`\lambda_{tf}` (``-l``)
+- Energy transition level (0/-) :math:`\mu_-` (``-m``)
+
 
 Operational Domain (``opdom``)
 ##############################

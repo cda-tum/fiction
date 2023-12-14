@@ -53,6 +53,7 @@
 #include "cmd/simulation/opdom.hpp"
 #include "cmd/simulation/quickexact.hpp"
 #include "cmd/simulation/quicksim.hpp"
+#include "cmd/simulation/temp.hpp"
 #endif
 
 #endif  // FICTION_COMMANDS_HPP
