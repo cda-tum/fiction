@@ -209,31 +209,39 @@ class opdom_command : public command
             const auto tt_ptr = ts.current();
 
             using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
-            using TT  = typename std::decay_t<decltype(tt_ptr)>::element_type;
 
             if constexpr (fiction::has_sidb_technology_v<Lyt>)
             {
+                if (lyt_ptr->num_pis() == 0 || lyt_ptr->num_pos() == 0)
+                {
+                    env->out() << fmt::format("[e] {} requires primary input and output cells to simulate its "
+                                              "Boolean function",
+                                              get_name(lyt_ptr))
+                               << std::endl;
+                    return;
+                }
+
                 params.sim_params = physical_params;
 
                 if (is_set("random_sampling"))
                 {
-                    op_domain = fiction::operational_domain_random_sampling<Lyt, TT>(
-                        *lyt_ptr, std::vector<TT>{*tt_ptr}, num_random_samples, params, &stats);
+                    op_domain = fiction::operational_domain_random_sampling(*lyt_ptr, std::vector<fiction::tt>{*tt_ptr},
+                                                                            num_random_samples, params, &stats);
                 }
                 else if (is_set("flood_fill"))
                 {
-                    op_domain = fiction::operational_domain_flood_fill<Lyt, TT>(*lyt_ptr, std::vector<TT>{*tt_ptr},
-                                                                                num_random_samples, params, &stats);
+                    op_domain = fiction::operational_domain_flood_fill(*lyt_ptr, std::vector<fiction::tt>{*tt_ptr},
+                                                                       num_random_samples, params, &stats);
                 }
                 else if (is_set("contour_tracing"))
                 {
-                    op_domain = fiction::operational_domain_contour_tracing<Lyt, TT>(
-                        *lyt_ptr, std::vector<TT>{*tt_ptr}, num_random_samples, params, &stats);
+                    op_domain = fiction::operational_domain_contour_tracing(*lyt_ptr, std::vector<fiction::tt>{*tt_ptr},
+                                                                            num_random_samples, params, &stats);
                 }
                 else
                 {
-                    op_domain = fiction::operational_domain_grid_search<Lyt, TT>(*lyt_ptr, std::vector<TT>{*tt_ptr},
-                                                                                 params, &stats);
+                    op_domain = fiction::operational_domain_grid_search(*lyt_ptr, std::vector<fiction::tt>{*tt_ptr},
+                                                                        params, &stats);
                 }
             }
             else
