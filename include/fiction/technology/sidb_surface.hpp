@@ -125,11 +125,11 @@ class sidb_surface<Lyt, false> : public Lyt
      */
     void assign_sidb_defect(const typename Lyt::coordinate& c, const sidb_defect& d) noexcept
     {
-        if (d.type == sidb_defect_type::NONE)  // delete defect
-        {
-            strg->defective_coordinates.erase(c);
-        }
-        else if (strg->params.ignore.count(d.type) == 0)  // add defect if this type is not ignored
+        // delete defect at the coordinate
+        strg->defective_coordinates.erase(c);
+
+        if (d.type != sidb_defect_type::NONE &&
+            strg->params.ignore.count(d.type) == 0)  // add defect if this type is not ignored and is not NONE
         {
             strg->defective_coordinates.insert({c, d});
         }
