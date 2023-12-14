@@ -166,7 +166,7 @@ class temp_command : public command
                         if (stats.num_valid_lyt > 1)
                         {
                             env->out() << fmt::format(
-                                              "[i] energy between the ground state and the first erroneous is {} eV",
+                                              "[i] energy between the ground state and the first erroneous is {} meV",
                                               fiction::round_to_n_decimal_places(
                                                   stats.energy_between_ground_state_and_first_erroneous, 2))
                                        << std::endl;
