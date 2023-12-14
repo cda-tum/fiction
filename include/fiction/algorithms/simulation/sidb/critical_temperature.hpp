@@ -115,7 +115,7 @@ struct critical_temperature_stats
      */
     uint64_t num_valid_lyt{};
     /**
-     * Energy difference between the ground state and the first (erroneous) excited state (unit: eV).
+     * Energy difference between the ground state and the first (erroneous) excited state (unit: meV).
      */
     double energy_between_ground_state_and_first_erroneous = std::numeric_limits<double>::infinity();
     /**
@@ -130,7 +130,7 @@ struct critical_temperature_stats
         if (num_valid_lyt != 0)
         {
             out << fmt::format("'# of physically valid charge configurations': {} | Energy between ground state and "
-                               "first erroneous: {}\n",
+                               "first erroneous in meV: {}\n",
                                num_valid_lyt, energy_between_ground_state_and_first_erroneous);
         }
         else
