@@ -1,5 +1,6 @@
 //
 // Created by Jan Drewniok on 18.12.22.
+//
 
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
@@ -28,9 +29,7 @@ TEMPLATE_TEST_CASE(
     const auto simulation_results = quickexact(lyt, params);
 
     CHECK(simulation_results.charge_distributions.empty());
-    CHECK(simulation_results.additional_simulation_parameters.empty());
     CHECK(simulation_results.algorithm_name == "QuickExact");
-    CHECK(simulation_results.additional_simulation_parameters.empty());
 }
 
 TEMPLATE_TEST_CASE(
@@ -252,6 +251,7 @@ TEMPLATE_TEST_CASE(
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
     REQUIRE(simulation_results.charge_distributions.size() == 1);
+    CHECK(std::any_cast<double>(simulation_results.additional_simulation_parameters.at("global_potential")) == -0.26);
     CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) == sidb_charge_state::NEUTRAL);
 }
 
@@ -1150,8 +1150,7 @@ TEMPLATE_TEST_CASE(
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
     REQUIRE(!simulation_results.additional_simulation_parameters.empty());
-    CHECK(simulation_results.additional_simulation_parameters[0].first == "base_number");
-    CHECK(std::any_cast<uint64_t>(simulation_results.additional_simulation_parameters[0].second) == 3);
+    CHECK(std::any_cast<uint64_t>(simulation_results.additional_simulation_parameters.at("base_number")) == 3);
 
     const quickexact_params<TestType> params_new{sidb_simulation_parameters{2, -0.32},
                                                  quickexact_params<TestType>::automatic_base_number_detection::OFF};
@@ -1159,8 +1158,7 @@ TEMPLATE_TEST_CASE(
     const auto simulation_results_new = quickexact<TestType>(lyt, params_new);
 
     REQUIRE(!simulation_results_new.additional_simulation_parameters.empty());
-    CHECK(simulation_results_new.additional_simulation_parameters[0].first == "base_number");
-    CHECK(std::any_cast<uint64_t>(simulation_results_new.additional_simulation_parameters[0].second) == 2);
+    CHECK(std::any_cast<uint64_t>(simulation_results_new.additional_simulation_parameters.at("base_number")) == 2);
 }
 
 TEMPLATE_TEST_CASE(

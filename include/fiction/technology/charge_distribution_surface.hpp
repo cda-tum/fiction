@@ -14,7 +14,6 @@
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/technology/sidb_nm_position.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/types.hpp"
 
 #include <algorithm>
 #include <bitset>
@@ -24,6 +23,7 @@
 #include <cstdlib>
 #include <iterator>
 #include <limits>
+#include <numeric>
 #include <optional>
 #include <random>
 #include <type_traits>
@@ -129,7 +129,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
          */
         using distance_matrix = std::vector<std::vector<double>>;
         /**
-         * The potential matrix is a vector of vectors storing the chargless electrostatic potentials in Volt (V).
+         * The potential matrix is a vector of vectors storing the charge-less electrostatic potentials in Volt (V).
          */
         using potential_matrix = std::vector<std::vector<double>>;
         /**
@@ -287,11 +287,11 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     /**
      * Copy constructor.
      *
-     * @param lyt charge_distribution_surface
+     * @param cds Other `charge_distribution_surface`.
      */
-    explicit charge_distribution_surface(const charge_distribution_surface<Lyt>& lyt) :
-            Lyt(lyt),
-            strg{std::make_shared<charge_distribution_storage>(*lyt.strg)}
+    charge_distribution_surface(const charge_distribution_surface<Lyt>& cds) :
+            Lyt(cds),
+            strg{std::make_shared<charge_distribution_storage>(*cds.strg)}
     {}
     /**
      * Copy assignment operator.
