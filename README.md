@@ -196,6 +196,8 @@ using
 
 ### Physical Simulation
 
+<img src="docs/_static/sidb_simulation.png" alt="SiDB simulation result" align="right" width="270"/>
+
 When a layout is compiled to the cell level via the application of a technology-dependent gate library, it can be
 simulated using a physical model. Currently, the following simulation algorithms are implemented in *fiction*:
 
