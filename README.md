@@ -225,7 +225,7 @@ Built-in schemes are
 |:--------------------------------------------------------:|:------------------------------------------------------------------------:|:---------------------------------------------------------------------------:|
 | <img src="docs/_static/use.png" alt="USE" height="200"/> |         <img src="docs/_static/res.png" alt="RES" height="200"/>         |          <img src="docs/_static/esr.png" alt="ESR" height="200"/>           |
 
-| [CFE](https://ietresearch.onlinelibrary.wiley.com/doi/10.1049/iet-cds.2019.0096) | [RIPPLE](https://scholarworks.rit.edu/cgi/viewcontent.cgi?referer=&httpsredir=1&article=8266&context=theses) |    [BANCS](https://ieeexplore.ieee.org/document/8533251)     |
+| [CFE](https://ietresearch.onlinelibrary.wiley.com/doi/10.1049/iet-cds.2019.0096) | [Ripple](https://scholarworks.rit.edu/cgi/viewcontent.cgi?referer=&httpsredir=1&article=8266&context=theses) |    [BANCS](https://ieeexplore.ieee.org/document/8533251)     |
 |:--------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------:|
 |             <img src="docs/_static/cfe.png" alt="CFE" height="200"/>             |                        <img src="docs/_static/ripple.png" alt="Ripple" height="200"/>                        | <img src="docs/_static/bancs.png" alt="BANCS" height="300"/> |
 

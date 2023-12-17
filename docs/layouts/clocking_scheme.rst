@@ -80,7 +80,7 @@ CFE
 
 .. doxygenfunction:: fiction::cfe_clocking
 
-RIPPLE
+Ripple
 ######
 
 .. figure:: /_static/ripple.png
