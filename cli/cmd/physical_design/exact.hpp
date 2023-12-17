@@ -38,7 +38,7 @@ class exact_command : public command
     {
         add_option("--clk_scheme,-s", clocking,
                    "Clocking scheme to use {OPEN[3|4], COLUMNAR[3|4], ROW[3|4] 2DDWAVE[3|4], 2DDWAVEHEX[3|4], USE, "
-                   "RES, ESR, CFE, BANCS}",
+                   "RES, ESR, CFE, RIPPLE, BANCS}",
                    true);
         add_option("--upper_x", ps.upper_bound_x, "Number of FCN gate tiles to use at maximum in x-direction");
         add_option("--upper_y", ps.upper_bound_y, "Number of FCN gate tiles to use at maximum in y-direction");
