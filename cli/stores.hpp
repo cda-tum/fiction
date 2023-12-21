@@ -24,6 +24,7 @@
 
 namespace alice
 {
+
 /**
  * Truth tables.
  *
@@ -163,7 +164,7 @@ ALICE_ADD_STORE(fiction::gate_layout_t, "gate_layout", "g", "gate layout", "gate
 
 ALICE_PRINT_STORE(fiction::gate_layout_t, os, layout)
 {
-    const auto print = [&os](auto&& lyt_ptr) { fiction::print_gate_level_layout(os, *lyt_ptr); };
+    const auto print = [&os](auto&& lyt_ptr) { fiction::print_layout(*lyt_ptr, os); };
 
     std::visit(print, layout);
 }
@@ -373,7 +374,7 @@ ALICE_ADD_STORE(fiction::cell_layout_t, "cell_layout", "c", "cell layout", "cell
 
 ALICE_PRINT_STORE(fiction::cell_layout_t, os, layout)
 {
-    const auto print = [&os](auto&& lyt_ptr) { fiction::print_cell_level_layout(os, *lyt_ptr); };
+    const auto print = [&os](auto&& lyt_ptr) { fiction::print_layout(*lyt_ptr, os); };
 
     std::visit(print, layout);
 }
@@ -391,10 +392,10 @@ ALICE_DESCRIBE_STORE(fiction::cell_layout_t, layout)
             z = lyt_ptr->z() + 1;
         }
 
-        return fmt::format("{} ({}) - {} × {}{}, I/O: {}/{}, cells: {}", lyt_ptr->get_layout_name(),
+        return fmt::format("{} ({}) - {} × {}{}, I/O: {}/{}, {}: {}", lyt_ptr->get_layout_name(),
                            fiction::tech_impl_name<fiction::technology<Lyt>>, lyt_ptr->x() + 1, lyt_ptr->y() + 1,
                            (z ? fmt::format(" × {}", z) : ""), lyt_ptr->num_pis(), lyt_ptr->num_pos(),
-                           lyt_ptr->num_cells());
+                           fiction::tech_cell_name<fiction::technology<Lyt>>, lyt_ptr->num_cells());
     };
 
     return std::visit(describe, layout);
@@ -413,10 +414,10 @@ ALICE_PRINT_STORE_STATISTICS(fiction::cell_layout_t, os, layout)
             z = lyt_ptr->z() + 1;
         }
 
-        os << fmt::format("[i] {} ({}) - {} × {}{}, I/O: {}/{}, cells: {}\n", lyt_ptr->get_layout_name(),
+        os << fmt::format("[i] {} ({}) - {} × {}{}, I/O: {}/{}, {}: {}\n", lyt_ptr->get_layout_name(),
                           fiction::tech_impl_name<fiction::technology<Lyt>>, lyt_ptr->x() + 1, lyt_ptr->y() + 1,
                           (z ? fmt::format(" × {}", z) : ""), lyt_ptr->num_pis(), lyt_ptr->num_pos(),
-                          lyt_ptr->num_cells());
+                          fiction::tech_cell_name<fiction::technology<Lyt>>, lyt_ptr->num_cells());
     };
 
     std::visit(print_statistics, layout);
@@ -432,7 +433,7 @@ ALICE_LOG_STORE_STATISTICS(fiction::cell_layout_t, layout)
                               {"technology", fiction::tech_impl_name<fiction::technology<Lyt>>},
                               {"inputs", lyt_ptr->num_pis()},
                               {"outputs", lyt_ptr->num_pos()},
-                              {"cells", lyt_ptr->num_cells()},
+                              {fiction::tech_cell_name<fiction::technology<Lyt>>, lyt_ptr->num_cells()},
                               {"layout",
                                {{"x-size", lyt_ptr->x() + 1},
                                 {"y-size", lyt_ptr->y() + 1},
