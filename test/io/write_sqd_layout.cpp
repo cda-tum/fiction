@@ -21,6 +21,7 @@
 #include <fiction/technology/sidb_defects.hpp>
 #include <fiction/technology/sidb_surface.hpp>
 #include <fiction/traits.hpp>
+#include <fiction/types.hpp>
 
 #include <map>
 #include <sstream>
@@ -46,7 +47,7 @@ void compare_written_and_read_layout(const WLyt& wlyt, const RLyt& rlyt) noexcep
     CHECK(wlyt.num_pis() == rlyt.num_pis());
     CHECK(wlyt.num_pos() == rlyt.num_pos());
 
-    wlyt.foreach_cell([&rlyt](const auto& c) { CHECK(rlyt.get_cell_type(c) == sidb_technology::cell_type::NORMAL); });
+    wlyt.foreach_cell([&wlyt, &rlyt](const auto& c) { CHECK(wlyt.get_cell_type(c) == rlyt.get_cell_type(c)); });
 
     if constexpr (has_foreach_sidb_defect_v<WLyt> && has_get_sidb_defect_v<RLyt>)
     {
@@ -97,6 +98,23 @@ TEST_CASE("Write single-dot SQD layout", "[sqd]")
     compare_written_and_read_layout(layout, read_layout);
 }
 
+TEST_CASE("Write single-dot SQD layout with SiQAD coordinates", "[sqd]")
+{
+    using sidb_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
+
+    sidb_cell_clk_lyt_siqad layout{{2, 2}};
+    layout.assign_cell_type({1, 2}, sidb_technology::cell_type::NORMAL);
+
+    std::stringstream layout_stream{};
+
+    write_sqd_layout(layout, layout_stream);
+
+    const auto read_layout = read_sqd_layout<sidb_layout>(layout_stream);
+
+    CHECK(read_layout.get_cell_type({1, 4}) == sidb_layout::cell_type::NORMAL);
+    CHECK(layout.get_cell_type({1, 2}) == sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+}
+
 TEST_CASE("Write multi-dot SQD layout", "[sqd]")
 {
     using sidb_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
@@ -117,14 +135,34 @@ TEST_CASE("Write multi-dot SQD layout", "[sqd]")
     compare_written_and_read_layout(layout, read_layout);
 }
 
-TEST_CASE("Write bestagon SQD layout", "[sqd]")
+TEST_CASE("Write multi-dot SQD layout with differing dot types", "[sqd]")
+{
+    using sidb_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
+
+    sidb_layout layout{{4, 4}};
+    layout.assign_cell_type({0, 0}, sidb_technology::cell_type::INPUT);
+    layout.assign_cell_type({1, 1}, sidb_technology::cell_type::OUTPUT);
+    layout.assign_cell_type({0, 2}, sidb_technology::cell_type::NORMAL);
+    layout.assign_cell_type({0, 3}, sidb_technology::cell_type::OUTPUT);
+    layout.assign_cell_type({4, 4}, sidb_technology::cell_type::INPUT);
+
+    std::stringstream layout_stream{};
+
+    write_sqd_layout(layout, layout_stream);
+
+    const auto read_layout = read_sqd_layout<sidb_layout>(layout_stream);
+
+    compare_written_and_read_layout(layout, read_layout);
+}
+
+TEST_CASE("Write Bestagon SQD layout", "[sqd]")
 {
     using gate_layout =
         gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, even_row_hex>>>>;
     using sidb_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 
     auto g_layout = blueprints::row_clocked_and_xor_gate_layout<gate_layout>();
-    g_layout.set_layout_name("bestagon");
+    g_layout.set_layout_name("Bestagon");
 
     const auto c_layout = apply_gate_library<sidb_layout, sidb_bestagon_library>(g_layout);
 
@@ -132,7 +170,7 @@ TEST_CASE("Write bestagon SQD layout", "[sqd]")
 
     write_sqd_layout(c_layout, layout_stream);
 
-    const auto read_layout = read_sqd_layout<sidb_layout>(layout_stream, "bestagon");
+    const auto read_layout = read_sqd_layout<sidb_layout>(layout_stream, "Bestagon");
 
     compare_written_and_read_layout(c_layout, read_layout);
 }
@@ -172,6 +210,61 @@ TEST_CASE("Write defective surface SQD layout", "[sqd]")
     write_sqd_layout(defect_layout, layout_stream);
 
     const auto read_layout = read_sqd_layout<sidb_surface<sidb_layout>>(layout_stream);
+
+    compare_written_and_read_layout(defect_layout, read_layout);
+}
+
+TEST_CASE("Write multi-dot SQD layout based on SiQAD coordinates", "[sqd]")
+{
+    sidb_cell_clk_lyt_siqad layout{{4, 4}};
+    layout.assign_cell_type({0, 0}, sidb_technology::cell_type::NORMAL);
+    layout.assign_cell_type({1, 1}, sidb_technology::cell_type::NORMAL);
+    layout.assign_cell_type({0, 2}, sidb_technology::cell_type::NORMAL);
+    layout.assign_cell_type({0, 3}, sidb_technology::cell_type::NORMAL);
+    layout.assign_cell_type({4, 4}, sidb_technology::cell_type::NORMAL);
+
+    std::stringstream layout_stream{};
+
+    write_sqd_layout(layout, layout_stream);
+
+    const auto read_layout = read_sqd_layout<sidb_cell_clk_lyt_siqad>(layout_stream);
+
+    compare_written_and_read_layout(layout, read_layout);
+}
+
+TEST_CASE("Write defective surface SQD layout based on SiQAD coordinates", "[sqd]")
+{
+    static const std::map<cell<sidb_cell_clk_lyt_siqad>, sidb_defect> defect_map{
+        {{{0, 0, 1}, sidb_defect{sidb_defect_type::NONE}},
+         {{0, 1}, sidb_defect{sidb_defect_type::DB}},
+         {{0, 2}, sidb_defect{sidb_defect_type::SI_VACANCY}},
+         {{0, 3}, sidb_defect{sidb_defect_type::SINGLE_DIHYDRIDE}},
+         {{0, 4, 1}, sidb_defect{sidb_defect_type::DIHYDRIDE_PAIR}},
+         {{0, 5, 1}, sidb_defect{sidb_defect_type::ONE_BY_ONE}},
+         {{0, 6}, sidb_defect{sidb_defect_type::THREE_BY_ONE}},
+         {{0, 7}, sidb_defect{sidb_defect_type::SILOXANE}},
+         {{0, 8}, sidb_defect{sidb_defect_type::RAISED_SI}},
+         {{0, 9}, sidb_defect{sidb_defect_type::MISSING_DIMER}},
+         {{0, 10, 1}, sidb_defect{sidb_defect_type::ETCH_PIT}},
+         {{0, 11}, sidb_defect{sidb_defect_type::STEP_EDGE}},
+         {{0, 12, 0}, sidb_defect{sidb_defect_type::GUNK}},
+         {{0, 13}, sidb_defect{sidb_defect_type::UNKNOWN}}}};
+
+    const sidb_cell_clk_lyt_siqad lyt{aspect_ratio<sidb_cell_clk_lyt_siqad>{0, defect_map.size() - 1}};
+
+    sidb_surface<sidb_cell_clk_lyt_siqad> defect_layout{lyt};
+
+    // assign defects
+    for (const auto& [c, d] : defect_map)
+    {
+        defect_layout.assign_sidb_defect(c, d);
+    }
+
+    std::stringstream layout_stream{};
+
+    write_sqd_layout(defect_layout, layout_stream);
+
+    const auto read_layout = read_sqd_layout<sidb_surface<sidb_cell_clk_lyt_siqad>>(layout_stream);
 
     compare_written_and_read_layout(defect_layout, read_layout);
 }

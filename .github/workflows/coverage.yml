@@ -21,6 +21,10 @@ on:
       - '.github/workflows/coverage.yml'
   merge_group:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
 defaults:
   run:
     shell: bash
@@ -44,12 +48,12 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -yq ${{matrix.compiler}}
 
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.9.x'
 
       - name: Clone Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
 
@@ -60,6 +64,9 @@ jobs:
           variant: ccache
           save: true
           max-size: 10G
+
+      - name: Setup mold
+        uses: rui314/setup-mold@v1
 
       - name: Install pip packages
         uses: BSFishy/pip-action@v1
@@ -85,14 +92,16 @@ jobs:
           cmake ${{github.workspace}}
           -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
           -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+          -DFICTION_ENABLE_UNITY_BUILD=ON
+          -DFICTION_ENABLE_PCH=ON
           -DFICTION_CLI=OFF
           -DFICTION_TEST=ON
           -DFICTION_Z3=ON
           -DFICTION_ENABLE_MUGEN=ON
           -DFICTION_PROGRESS_BARS=OFF
+          -DFICTION_WARNINGS_AS_ERRORS=OFF
+          -DFICTION_ENABLE_COVERAGE=ON
           -DMOCKTURTLE_EXAMPLES=OFF
-          -DWARNINGS_AS_ERRORS=OFF
-          -DENABLE_COVERAGE=ON
 
       - name: Build
         working-directory: ${{github.workspace}}/build
@@ -116,3 +125,4 @@ jobs:
           files: ${{github.workspace}}/lcov_filtered.info
           fail_ci_if_error: true
           verbose: true
+          token: ${{ secrets.CODECOV_TOKEN }}

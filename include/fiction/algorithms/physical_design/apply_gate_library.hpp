@@ -11,17 +11,18 @@
 #include "fiction/traits.hpp"
 #include "fiction/utils/layout_utils.hpp"
 
+#if (PROGRESS_BARS)
+#include <mockturtle/utils/progress_bar.hpp>
+#endif
 #include <mockturtle/traits.hpp>
 
 #include <type_traits>
 
-#if (PROGRESS_BARS)
-#include <mockturtle/utils/progress_bar.hpp>
-#endif
-
 // data types cannot properly be converted to bit field types
 #pragma GCC diagnostic push
+#ifndef __clang__
 #pragma GCC diagnostic ignored "-Wuseless-cast"
+#endif
 #pragma GCC diagnostic ignored "-Wconversion"
 
 namespace fiction
@@ -135,6 +136,7 @@ template <typename CellLyt, typename GateLibrary, typename GateLyt>
 CellLyt apply_gate_library(const GateLyt& lyt)
 {
     static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
+    static_assert(!has_siqad_coord_v<CellLyt>, "CellLyt cannot have SiQAD coordinates");
     static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
     static_assert(mockturtle::has_is_constant_v<GateLyt>, "GateLyt does not implement the is_constant function");
     static_assert(mockturtle::has_foreach_node_v<GateLyt>, "GateLyt does not implement the foreach_node function");

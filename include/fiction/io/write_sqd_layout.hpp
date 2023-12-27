@@ -18,6 +18,7 @@
 #include <ostream>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <vector>
 
@@ -30,7 +31,7 @@ namespace detail
 namespace siqad
 {
 
-inline constexpr const char* XML_HEADER    = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+inline constexpr const char* SQD_HEADER    = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
 inline constexpr const char* OPEN_SIQAD    = "<siqad>\n";
 inline constexpr const char* CLOSE_SIQAD   = "</siqad>\n";
 inline constexpr const char* PROGRAM_BLOCK = "    <program>\n"
@@ -111,10 +112,12 @@ inline constexpr const char* CLOSE_DEFECTS_LAYER = "        </layer>\n";
 inline constexpr const char* CLOSE_DESIGN        = "    </design>\n";
 
 inline constexpr const char* LATTICE_COORDINATE = R"(<latcoord n="{}" m="{}" l="{}"/>)";
+inline constexpr const char* DOT_TYPE           = R"(<type>{}</type>)";
 
 inline constexpr const char* DBDOT_BLOCK = "            <dbdot>\n"
                                            "                <layer_id>2</layer_id>\n"
-                                           "                {}\n"
+                                           "                {}\n"  // lattice coordinates
+                                           "                {}\n"  // dot type
                                            "                <color>{}</color>\n"
                                            "            </dbdot>\n";
 
@@ -167,7 +170,7 @@ class write_sqd_layout_impl
     {
         std::stringstream header{}, gui{}, design{};
 
-        header << siqad::XML_HEADER << siqad::OPEN_SIQAD;
+        header << siqad::SQD_HEADER << siqad::OPEN_SIQAD;
 
         const auto time_str = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(std::time(nullptr)));
 
@@ -220,9 +223,27 @@ class write_sqd_layout_impl
                 // generate SiDB cells
                 if constexpr (has_sidb_technology_v<Lyt>)
                 {
-                    design << fmt::format(siqad::DBDOT_BLOCK,
-                                          fmt::format(siqad::LATTICE_COORDINATE, c.x, c.y / 2, c.y % 2),
-                                          siqad::NORMAL_COLOR);
+                    const auto type = this->lyt.get_cell_type(c);
+                    const auto type_str =
+                        type == sidb_technology::cell_type::NORMAL ? "" :
+                        type == sidb_technology::cell_type::INPUT  ? fmt::format(siqad::DOT_TYPE, "input") :
+                        type == sidb_technology::cell_type::OUTPUT ? fmt::format(siqad::DOT_TYPE, "output") :
+                                                                     "";
+
+                    if constexpr (has_siqad_coord_v<Lyt>)
+                    {
+                        design << fmt::format(siqad::DBDOT_BLOCK, fmt::format(siqad::LATTICE_COORDINATE, c.x, c.y, c.z),
+                                              type_str, siqad::NORMAL_COLOR);
+                    }
+                    else
+                    {
+                        const auto siqad_coord = fiction::siqad::to_siqad_coord(c);
+
+                        design << fmt::format(
+                            siqad::DBDOT_BLOCK,
+                            fmt::format(siqad::LATTICE_COORDINATE, siqad_coord.x, siqad_coord.y, siqad_coord.z),
+                            type_str, siqad::NORMAL_COLOR);
+                    }
                 }
                 // generate QCA cell blocks
                 else if constexpr (has_qca_technology_v<Lyt>)
@@ -238,21 +259,21 @@ class write_sqd_layout_impl
                     {
                         // top left
                         design << fmt::format(siqad::DBDOT_BLOCK,
-                                              fmt::format(siqad::LATTICE_COORDINATE, c.x * 14, c.y * 7, 0), color);
+                                              fmt::format(siqad::LATTICE_COORDINATE, c.x * 14, c.y * 7, 0), "", color);
                         // bottom right
                         design << fmt::format(siqad::DBDOT_BLOCK,
                                               fmt::format(siqad::LATTICE_COORDINATE, (c.x * 14) + 6, (c.y * 7) + 3, 0),
-                                              color);
+                                              "", color);
                     }
                     if (!qca_technology::is_const_0_cell(type))
                     {
                         // top right
                         design << fmt::format(siqad::DBDOT_BLOCK,
-                                              fmt::format(siqad::LATTICE_COORDINATE, (c.x * 14) + 6, c.y * 7, 0),
+                                              fmt::format(siqad::LATTICE_COORDINATE, (c.x * 14) + 6, c.y * 7, 0), "",
                                               color);
                         // bottom left
                         design << fmt::format(siqad::DBDOT_BLOCK,
-                                              fmt::format(siqad::LATTICE_COORDINATE, c.x * 14, (c.y * 7) + 3, 0),
+                                              fmt::format(siqad::LATTICE_COORDINATE, c.x * 14, (c.y * 7) + 3, 0), "",
                                               color);
                     }
                 }
@@ -272,15 +293,31 @@ class write_sqd_layout_impl
             lyt.foreach_sidb_defect(
                 [&design](const auto& cd)
                 {
-                    const auto& cell   = cd.first;
                     const auto& defect = cd.second;
 
-                    design << fmt::format(siqad::DEFECT_BLOCK,
-                                          fmt::format(siqad::LATTICE_COORDINATE, cell.x, cell.y / 2, cell.y % 2),
-                                          is_charged_defect(defect) ? fmt::format(siqad::COULOMB, defect.charge,
-                                                                                  defect.epsilon_r, defect.lambda_tf) :
-                                                                      "",
-                                          get_defect_type_name(defect.type));
+                    // layout is not based on SiQAD coordinates, coordinate transformation is performed
+                    if constexpr (has_siqad_coord_v<Lyt>)
+                    {
+                        const auto& cell = cd.first;
+
+                        design << fmt::format(
+                            siqad::DEFECT_BLOCK, fmt::format(siqad::LATTICE_COORDINATE, cell.x, cell.y, cell.z),
+                            is_charged_defect(defect) ?
+                                fmt::format(siqad::COULOMB, defect.charge, defect.epsilon_r, defect.lambda_tf) :
+                                "",
+                            get_defect_type_name(defect.type));
+                    }
+                    else
+                    {
+                        const auto cell = fiction::siqad::to_siqad_coord(cd.first);
+
+                        design << fmt::format(
+                            siqad::DEFECT_BLOCK, fmt::format(siqad::LATTICE_COORDINATE, cell.x, cell.y, cell.z),
+                            is_charged_defect(defect) ?
+                                fmt::format(siqad::COULOMB, defect.charge, defect.epsilon_r, defect.lambda_tf) :
+                                "",
+                            get_defect_type_name(defect.type));
+                    }
                 });
         }
     }
@@ -292,7 +329,7 @@ class write_sqd_layout_impl
  * Writes a cell-level SiDB or QCA layout to an sqd file that is used by SiQAD (https://github.com/siqad/siqad),
  * a physical simulator for the SiDB technology platform.
  *
- * If The provided cell-level layout type can represent SiDB defects, they will be written to the file as well.
+ * If the provided cell-level layout type can represent SiDB defects, they will be written to the file as well.
  *
  * This overload uses an output stream to write into.
  *
@@ -314,18 +351,18 @@ void write_sqd_layout(const Lyt& lyt, std::ostream& os)
  * Writes a cell-level SiDB or QCA layout to an sqd file that is used by SiQAD (https://github.com/siqad/siqad),
  * a physical simulator for the SiDB technology platform.
  *
- * If The provided cell-level layout type can represent SiDB defects, they will be written to the file as well.
+ * If the provided cell-level layout type can represent SiDB defects, they will be written to the file as well.
  *
- * This overload uses file name to create and write into.
+ * This overload uses a file name to create and write into.
  *
  * @tparam Lyt Cell-level SiDB or QCA layout type.
  * @param lyt The layout to be written.
  * @param filename The file name to create and write into. Should preferably use the `.sqd` extension.
  */
 template <typename Lyt>
-void write_sqd_layout(const Lyt& lyt, const std::string& filename)
+void write_sqd_layout(const Lyt& lyt, const std::string_view& filename)
 {
-    std::ofstream os{filename.c_str(), std::ofstream::out};
+    std::ofstream os{filename.data(), std::ofstream::out};
 
     if (!os.is_open())
     {

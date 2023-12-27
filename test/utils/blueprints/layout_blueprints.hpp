@@ -171,6 +171,112 @@ GateLyt use_and_gate_layout() noexcept
 }
 
 template <typename GateLyt>
+GateLyt res_maj_gate_layout() noexcept
+{
+    GateLyt layout{typename GateLyt::aspect_ratio{2, 2, 0}, fiction::res_clocking<GateLyt>()};
+    layout.assign_clock_number({0, 0}, static_cast<typename GateLyt::clock_number_t>(0));
+
+    const auto x1 = layout.create_pi("x1", {0, 1});
+    const auto x2 = layout.create_pi("x2", {1, 0});
+    const auto x3 = layout.create_pi("x3", {2, 1});
+
+    const auto maj = layout.create_maj(x1, x2, x3, {1, 1});
+
+    layout.create_po(maj, "f1", {1, 2});
+
+    return layout;
+}
+
+template <typename GateLyt>
+GateLyt single_input_tautology_gate_layout() noexcept
+{
+    REQUIRE(mockturtle::has_create_node_v<GateLyt>);
+
+    GateLyt layout{typename GateLyt::aspect_ratio{2, 0, 0}, fiction::twoddwave_clocking<GateLyt>()};
+
+    const auto x1 = layout.create_pi("x1", {0, 0});
+
+    kitty::dynamic_truth_table tt_t(1u);
+    kitty::create_from_hex_string(tt_t, "3");
+
+    const auto n = layout.create_node({x1}, tt_t, {1, 0});
+
+    layout.create_po(n, "f1", {2, 0});
+
+    return layout;
+}
+
+template <typename GateLyt>
+GateLyt tautology_gate_layout() noexcept
+{
+    REQUIRE(mockturtle::has_create_node_v<GateLyt>);
+
+    GateLyt layout{typename GateLyt::aspect_ratio{2, 2, 1}, fiction::twoddwave_clocking<GateLyt>()};
+
+    const auto x1 = layout.create_pi("x1", {1, 0});
+    const auto x2 = layout.create_pi("x2", {0, 1});
+
+    kitty::dynamic_truth_table tt_t(2u);
+    kitty::create_from_hex_string(tt_t, "F");
+
+    const auto n_xor = layout.create_node({x1, x2}, tt_t, {1, 1});
+
+    layout.create_po(n_xor, "f1", {2, 1});
+
+    return layout;
+}
+
+template <typename GateLyt>
+GateLyt res_tautology_gate_layout() noexcept
+{
+    REQUIRE(mockturtle::has_create_node_v<GateLyt>);
+
+    GateLyt layout{typename GateLyt::aspect_ratio{2, 2, 0}, fiction::res_clocking<GateLyt>()};
+
+    const auto x1 = layout.create_pi("x1", {0, 1});
+    const auto x2 = layout.create_pi("x2", {1, 0});
+    const auto x3 = layout.create_pi("x3", {2, 1});
+
+    kitty::dynamic_truth_table tt_t(3u);
+    kitty::create_from_hex_string(tt_t, "FF");
+
+    const auto n = layout.create_node({x1, x2, x3}, tt_t, {1, 1});
+
+    layout.create_po(n, "f1", {1, 2});
+
+    return layout;
+}
+
+template <typename GateLyt>
+GateLyt open_tautology_gate_layout() noexcept
+{
+    REQUIRE(mockturtle::has_create_node_v<GateLyt>);
+
+    GateLyt layout{typename GateLyt::aspect_ratio{2, 2, 0}, fiction::open_clocking<GateLyt>()};
+
+    layout.assign_clock_number({0, 0}, static_cast<typename GateLyt::clock_number_t>(0));
+    layout.assign_clock_number({1, 0}, static_cast<typename GateLyt::clock_number_t>(0));
+    layout.assign_clock_number({0, 2}, static_cast<typename GateLyt::clock_number_t>(0));
+    layout.assign_clock_number({1, 2}, static_cast<typename GateLyt::clock_number_t>(0));
+    layout.assign_clock_number({1, 1}, static_cast<typename GateLyt::clock_number_t>(1));
+    layout.assign_clock_number({2, 1}, static_cast<typename GateLyt::clock_number_t>(2));
+
+    const auto x1 = layout.create_pi("x1", {0, 0});
+    const auto x2 = layout.create_pi("x2", {1, 0});
+    const auto x3 = layout.create_pi("x3", {0, 2});
+    const auto x4 = layout.create_pi("x4", {1, 2});
+
+    kitty::dynamic_truth_table tt_t(4u);
+    kitty::create_from_hex_string(tt_t, "FFFF");
+
+    const auto n = layout.create_node({x1, x2, x3, x4}, tt_t, {1, 1});
+
+    layout.create_po(n, "f1", {2, 1});
+
+    return layout;
+}
+
+template <typename GateLyt>
 GateLyt crossing_layout() noexcept
 {
     GateLyt layout{typename GateLyt::aspect_ratio{3, 2, 1}, fiction::twoddwave_clocking<GateLyt>()};
@@ -351,6 +457,65 @@ GateLyt row_clocked_and_xor_gate_layout() noexcept
     const auto xor1 = layout.create_xor(w1, a1, {1, 2});
 
     layout.create_po(xor1, "f1", {1, 3});
+
+    return layout;
+}
+
+template <typename GateLyt>
+GateLyt optimization_layout() noexcept
+{
+    GateLyt layout{{2, 3, 1}, fiction::twoddwave_clocking<GateLyt>()};
+
+    const auto x1 = layout.create_pi("x1", {0, 0});
+    const auto x2 = layout.create_pi("x2", {2, 0});
+
+    const auto w1 = layout.create_buf(x1, {0, 1});
+    const auto w2 = layout.create_buf(w1, {0, 2});
+    const auto w3 = layout.create_buf(w2, {1, 2});
+    const auto w4 = layout.create_buf(x2, {2, 1});
+
+    const auto and1 = layout.create_and(w3, w4, {2, 2});
+
+    layout.create_po(w2, "f1", {0, 3});
+    layout.create_po(and1, "f2", {2, 3});
+
+    return layout;
+}
+
+template <typename GateLyt>
+GateLyt optimization_layout_corner_case_outputs_1() noexcept
+{
+    GateLyt layout{{2, 3, 1}, fiction::twoddwave_clocking<GateLyt>()};
+
+    const auto x1 = layout.create_pi("x1", {0, 0});
+    const auto x2 = layout.create_pi("x2", {0, 1});
+
+    const auto not1 = layout.create_not(x1, {1, 0});
+    const auto w1   = layout.create_buf(x2, {1, 1});
+    const auto w2   = layout.create_buf(not1, {1, 1, 1});
+    const auto not2 = layout.create_not(w2, {1, 2});
+
+    layout.create_po(not2, "f1", {1, 3});
+    layout.create_po(w1, "f2", {2, 1});
+
+    return layout;
+}
+
+template <typename GateLyt>
+GateLyt optimization_layout_corner_case_outputs_2() noexcept
+{
+    GateLyt layout{{3, 2, 1}, fiction::twoddwave_clocking<GateLyt>()};
+
+    const auto x1 = layout.create_pi("x1", {0, 0});
+    const auto x2 = layout.create_pi("x2", {1, 0});
+
+    const auto not1 = layout.create_not(x1, {0, 1});
+    const auto w1   = layout.create_buf(not1, {1, 1});
+    const auto not2 = layout.create_not(w1, {2, 1});
+    const auto w2   = layout.create_buf(x2, {1, 1, 1});
+
+    layout.create_po(not2, "f1", {3, 1});
+    layout.create_po(w2, "f2", {1, 2});
 
     return layout;
 }

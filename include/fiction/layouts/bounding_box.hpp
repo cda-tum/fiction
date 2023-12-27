@@ -5,7 +5,12 @@
 #ifndef FICTION_BOUNDING_BOX_HPP
 #define FICTION_BOUNDING_BOX_HPP
 
+#include "fiction/layouts/cell_level_layout.hpp"
+#include "fiction/layouts/coordinates.hpp"
+#include "fiction/technology/cell_ports.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/types.hpp"
+#include "fiction/utils/layout_utils.hpp"
 
 // data types cannot properly be converted to bit field types
 #pragma GCC diagnostic push
@@ -53,32 +58,82 @@ class bounding_box_2d
             return;
         }
 
-        // set min to max coordinate in the layout
-        min = {layout.x(), layout.y()};
+        // the layout is based on SiQAD coordinates
+        if constexpr (has_siqad_coord_v<Lyt>)
+        {
+            int32_t min_x = std::numeric_limits<int32_t>::max();
+            int32_t max_x = std::numeric_limits<int32_t>::min();
 
-        layout.foreach_coordinate(
-            [this](const auto& c)
-            {
-                if (!is_empty_coordinate(c))
+            int32_t min_y = std::numeric_limits<int32_t>::max();
+            int32_t max_y = std::numeric_limits<int32_t>::min();
+
+            uint8_t min_z = 1;
+            uint8_t max_z = 0;
+
+            layout.foreach_cell(
+                [&min_x, &max_x, &min_y, &max_y, &min_z, &max_z](const auto& c)
                 {
-                    if (c.x < min.x)
+                    if (c.x < min_x)
                     {
-                        min.x = c.x;
+                        min_x = c.x;
                     }
-                    if (c.y < min.y)
+                    if (c.x > max_x)
                     {
-                        min.y = c.y;
+                        max_x = c.x;
                     }
-                    if (c.x > max.x)
+
+                    if (c.y == min_y && c.z < min_z)
                     {
-                        max.x = c.x;
+                        min_z = c.z;
                     }
-                    if (c.y > max.y)
+                    if (c.y < min_y)
                     {
-                        max.y = c.y;
+                        min_y = c.y;
+                        min_z = c.z;
                     }
-                }
-            });
+
+                    if (c.y == max_y && c.z > max_z)
+                    {
+                        max_z = c.z;
+                    }
+                    if (c.y > max_y)
+                    {
+                        max_y = c.y;
+                        max_z = c.z;
+                    }
+                });
+            min = {min_x, min_y, min_z};
+            max = {max_x, max_y, max_z};
+        }
+        else
+        {
+            // set min to max coordinate in the layout
+            min = {layout.x(), layout.y()};
+
+            layout.foreach_coordinate(
+                [this](const auto& c)
+                {
+                    if (!is_empty_coordinate(c))
+                    {
+                        if (c.x < min.x)
+                        {
+                            min.x = c.x;
+                        }
+                        if (c.y < min.y)
+                        {
+                            min.y = c.y;
+                        }
+                        if (c.x > max.x)
+                        {
+                            max.x = c.x;
+                        }
+                        if (c.y > max.y)
+                        {
+                            max.y = c.y;
+                        }
+                    }
+                });
+        }
 
         x_size = max.x - min.x;
         y_size = max.y - min.y;

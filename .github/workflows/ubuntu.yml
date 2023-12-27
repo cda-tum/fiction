@@ -21,6 +21,10 @@ on:
       - '.github/workflows/ubuntu.yml'
   merge_group:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
 defaults:
   run:
     shell: bash
@@ -33,19 +37,37 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-20.04, ubuntu-22.04 ]
-        compiler: [ g++-9, g++-10, clang++-10, clang++-11, clang++-12 ]
+        compiler: [ g++-10, g++-11, g++-12, clang++-10, clang++-11, clang++-12 ]
         build_type: [ Debug, Release ]
         exclude:
+          - os: ubuntu-20.04
+            compiler: g++-12
           - os: ubuntu-22.04
             compiler: clang++-10
         include:
+          - os: ubuntu-22.04
+            compiler: clang++-13
+            build_type: Debug
+          - os: ubuntu-22.04
+            compiler: clang++-13
+            build_type: Release
+          - os: ubuntu-22.04
+            compiler: clang++-14
+            build_type: Debug
+          - os: ubuntu-22.04
+            compiler: clang++-14
+            build_type: Release
+          - os: ubuntu-22.04
+            compiler: clang++-15
+            build_type: Debug
+          - os: ubuntu-22.04
+            compiler: clang++-15
+            build_type: Release
           - os: ubuntu-20.04
             compiler: g++-10
             build_type: Release
-            cppstandard: -DFICTION_CXX_STANDARD=20
+            cppstandard: -DCMAKE_CXX_STANDARD=20
             cppname: C++20
-          - os: ubuntu-22.04
-            compiler: g++-11
 
     name: ${{matrix.os}} with ${{matrix.compiler}} (${{matrix.build_type}} mode) ${{matrix.cppname}}
     runs-on: ${{matrix.os}}
@@ -55,12 +77,12 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -yq libtbb-dev ${{matrix.compiler}}
 
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.9.x'
 
       - name: Clone Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
 
@@ -71,6 +93,9 @@ jobs:
           variant: ccache
           save: true
           max-size: 10G
+
+      - name: Setup mold
+        uses: rui314/setup-mold@v1
 
       - name: Install pip packages
         uses: BSFishy/pip-action@v1
@@ -96,14 +121,17 @@ jobs:
           cmake ${{github.workspace}} ${{matrix.cppstandard}}
           -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
           -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
+          -DFICTION_ENABLE_UNITY_BUILD=ON
+          -DFICTION_ENABLE_PCH=ON
           -DFICTION_CLI=ON
           -DFICTION_TEST=ON
+          -DFICTION_BENCHMARK=OFF
           -DFICTION_EXPERIMENTS=ON
           -DFICTION_Z3=ON
           -DFICTION_ENABLE_MUGEN=ON
           -DFICTION_PROGRESS_BARS=OFF
+          -DFICTION_WARNINGS_AS_ERRORS=OFF
           -DMOCKTURTLE_EXAMPLES=OFF
-          -DWARNINGS_AS_ERRORS=OFF
 
       - name: Build fiction
         working-directory: ${{github.workspace}}/build

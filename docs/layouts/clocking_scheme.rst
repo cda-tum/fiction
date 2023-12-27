@@ -80,6 +80,14 @@ CFE
 
 .. doxygenfunction:: fiction::cfe_clocking
 
+Ripple
+######
+
+.. figure:: /_static/ripple.png
+   :width: 200
+
+.. doxygenfunction:: fiction::ripple_clocking
+
 BANCS
 #####
 
@@ -93,4 +101,4 @@ Utility functions
 
 .. doxygenfunction:: fiction::ptr(clocking_scheme<clock_zone<Lyt>>&& scheme) noexcept
 .. doxygenfunction:: fiction::is_linear_scheme(const clocking_scheme<clock_zone<Lyt>>& scheme) noexcept
-.. doxygenfunction:: fiction::get_clocking_scheme(const std::string& name) noexcept
+.. doxygenfunction:: fiction::get_clocking_scheme(const std::string_view& name) noexcept

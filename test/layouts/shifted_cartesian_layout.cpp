@@ -95,3 +95,20 @@ TEST_CASE("Shifted Cartesian layout traits", "[shifted-cartesian-layout]")
         check_common_traits<layout>();
     }
 }
+
+TEST_CASE("Deep copy shifted Cartesian layout", "[shifted-cartesian-layout]")
+{
+    const shifted_cartesian_layout original{{5, 5, 0}};
+
+    auto copy = original.clone();
+
+    copy.resize({10, 10, 1});
+
+    CHECK(original.x() == 5);
+    CHECK(original.y() == 5);
+    CHECK(original.z() == 0);
+
+    CHECK(copy.x() == 10);
+    CHECK(copy.y() == 10);
+    CHECK(copy.z() == 1);
+}

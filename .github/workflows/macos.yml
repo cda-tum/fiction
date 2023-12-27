@@ -21,6 +21,10 @@ on:
       - '.github/workflows/macos.yml'
   merge_group:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
 defaults:
   run:
     shell: bash
@@ -33,27 +37,22 @@ jobs:
     strategy:
       matrix:
         os: [ macos-11, macos-12 ]
-        compiler: [ g++-11, clang++ ]
+        compiler: [ g++-11, g++-12, clang++ ]
         build_type: [ Debug, Release ]
         include:
           - compiler: clang++
             ccompiler: clang
           - compiler: g++-11
-            ccompiler: gcc
-          - os: macos-11
-            compiler: g++-9
-            build_type: Debug
-          - os: macos-11
-            compiler: g++-9
-            build_type: Release
-            ccompiler: gcc
+            ccompiler: gcc-11
+          - compiler: g++-12
+            ccompiler: gcc-12
           - os: macos-11
             compiler: g++-10
-            ccompiler: gcc
+            ccompiler: gcc-10
             build_type: Debug
           - os: macos-11
             compiler: g++-10
-            ccompiler: gcc
+            ccompiler: gcc-10
             build_type: Release
 
     name: ${{matrix.os}} with ${{matrix.compiler}} (${{matrix.build_type}} mode)
@@ -61,12 +60,13 @@ jobs:
 
     steps:
       - name: Clone Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
 
-      # Setup TBB for parallel STL algorithms via Homebrew
-      - name: Setup TBB
+      # Setup TBB for parallel STL algorithms via Homebrew (macOS 11 is no longer supported)
+      - if: matrix.os != 'macos-11'
+        name: Setup TBB
         run: brew install tbb
 
       # Use XCode 13.2 as a workaround because XCode 14.0 seems broken
@@ -102,13 +102,16 @@ jobs:
           cmake ${{github.workspace}}
           -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
           -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
+          -DFICTION_ENABLE_UNITY_BUILD=ON
+          -DFICTION_ENABLE_PCH=ON
           -DFICTION_CLI=ON
           -DFICTION_TEST=ON
+          -DFICTION_BENCHMARK=OFF
           -DFICTION_EXPERIMENTS=ON
           -DFICTION_Z3=ON
           -DFICTION_PROGRESS_BARS=OFF
+          -DFICTION_WARNINGS_AS_ERRORS=OFF
           -DMOCKTURTLE_EXAMPLES=OFF
-          -DWARNINGS_AS_ERRORS=OFF
 
       - name: Build
         working-directory: ${{github.workspace}}/build

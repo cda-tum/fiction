@@ -10,6 +10,8 @@ Layout Printing
 
 .. doxygenfunction:: fiction::print_gate_level_layout
 .. doxygenfunction:: fiction::print_cell_level_layout
+.. doxygenfunction:: fiction::print_sidb_layout
+.. doxygenfunction:: fiction::print_layout
 
 Graphviz (DOT) Drawers
 ######################
@@ -25,7 +27,7 @@ Graphviz (DOT) Drawers
 .. doxygenclass:: fiction::gate_layout_hexagonal_drawer
 
 .. doxygenfunction:: fiction::write_dot_layout(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {})
-.. doxygenfunction:: fiction::write_dot_layout(const Lyt& lyt, const std::string& filename, const Drawer& drawer = {})
+.. doxygenfunction:: fiction::write_dot_layout(const Lyt& lyt, const std::string_view& filename, const Drawer& drawer = {})
 
 SVG Images
 ##########

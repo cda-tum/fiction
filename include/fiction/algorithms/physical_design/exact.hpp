@@ -76,6 +76,14 @@ struct exact_physical_design_params
     std::shared_ptr<clocking_scheme<typename Lyt::tile>> scheme =
         std::make_shared<clocking_scheme<typename Lyt::tile>>(twoddwave_clocking<Lyt>());
     /**
+     * Number of total tiles to use as an upper bound.
+     *
+     * @note If `upper_bound_area` and (either) `upper_bound_x` or `upper_bound_y` are set, the imposed search space
+     * restrictions are cumulative. E.g., if `upper_bound_area == 20` and `upper_bound_x == 4`, all aspect ratios with
+     * an x-dimension of more than 4 *and* a total area of more than 20 will be skipped.
+     */
+    uint16_t upper_bound_area = std::numeric_limits<uint16_t>::max();
+    /**
      * Number of tiles to use as an upper bound in x direction.
      */
     uint16_t upper_bound_x = std::numeric_limits<uint16_t>::max();
@@ -84,7 +92,9 @@ struct exact_physical_design_params
      */
     uint16_t upper_bound_y = std::numeric_limits<uint16_t>::max();
     /**
-     * Investigate only aspect ratios with the number of tiles given as upper bound.
+     * Exclusively investigate aspect ratios that conform with the restrictions imposed by the upper bound options.
+     * E.g., if `fixed_size == true` *and* `upper_bound_area == 20`, only aspect ratios with exactly 20 tiles will be
+     * examined. Restricted imposed by the `upper_bound_x` and `upper_bound_y` flags additionally apply.
      */
     bool fixed_size = false;
     /**
@@ -162,28 +172,26 @@ struct exact_physical_design_stats
 namespace detail
 {
 
-template <typename Lyt, typename Ntk>
+template <typename Lyt>
 class exact_impl
 {
   public:
-    exact_impl(const Ntk& src, const exact_physical_design_params<Lyt>& p, exact_physical_design_stats& st) :
+    exact_impl(mockturtle::names_view<technology_network>& src, const exact_physical_design_params<Lyt>& p,
+               exact_physical_design_stats& st) :
             ps{p},
             pst{st}
     {
-        mockturtle::names_view<technology_network> intermediate_ntk{
-            fanout_substitution<mockturtle::names_view<technology_network>>(
-                src, {fanout_substitution_params::substitution_strategy::BREADTH, ps.scheme->max_out_degree, 1ul})};
-
         // create PO nodes in the network
-        intermediate_ntk.substitute_po_signals();
+        src.substitute_po_signals();
 
-        ntk = std::make_shared<topology_ntk_t>(mockturtle::fanout_view{intermediate_ntk});
+        ntk = std::make_shared<topology_ntk_t>(mockturtle::fanout_view{src});
 
         lower_bound = static_cast<decltype(lower_bound)>(ntk->num_gates() + ntk->num_pis());
 
         // NOLINTNEXTLINE(*-prefer-member-initializer)
         ari = aspect_ratio_iterator<typename Lyt::aspect_ratio>{
-            ps.fixed_size ? static_cast<uint64_t>(ps.upper_bound_x * ps.upper_bound_y) :
+            ps.fixed_size ? std::min(static_cast<uint64_t>(ps.upper_bound_area),
+                                     static_cast<uint64_t>(ps.upper_bound_x * ps.upper_bound_y)) :
                             static_cast<uint64_t>(lower_bound)};
     }
 
@@ -273,7 +281,8 @@ class exact_impl
         [[nodiscard]] bool skippable(const typename Lyt::aspect_ratio& ar) const noexcept
         {
             // skip aspect ratios that extend beyond the specified upper bounds
-            if (ar.x >= params.upper_bound_x || ar.y >= params.upper_bound_y)
+            if ((ar.x + 1) * (ar.y + 1) > params.upper_bound_area || ar.x >= params.upper_bound_x ||
+                ar.y >= params.upper_bound_y)
             {
                 return true;
             }
@@ -2852,7 +2861,7 @@ class exact_impl
                 pst.num_aspect_ratios++;
             }
 
-            if (ar.x >= ps.upper_bound_x && ar.y >= ps.upper_bound_y)
+            if ((ar.x + 1) * (ar.y + 1) > ps.upper_bound_area || (ar.x >= ps.upper_bound_x && ar.y >= ps.upper_bound_y))
             {
                 return std::nullopt;
             }
@@ -3037,8 +3046,10 @@ class exact_impl
 
         smt_handler handler{std::make_shared<z3::context>(), layout, *ntk, ps};
 
-        for (; ari <= static_cast<uint64_t>(ps.upper_bound_x) * static_cast<uint64_t>(ps.upper_bound_y);
-             ++ari)  // <= to prevent overflow
+        const auto upper_bound = std::min(static_cast<uint64_t>(ps.upper_bound_area),
+                                          static_cast<uint64_t>(ps.upper_bound_x * ps.upper_bound_y));
+
+        for (; ari <= upper_bound; ++ari)  // <= to prevent overflow
         {
 
 #if (PROGRESS_BARS)
@@ -3173,10 +3184,14 @@ std::optional<Lyt> exact(const Ntk& ntk, const exact_physical_design_params<Lyt>
         }
     }
 
-    exact_physical_design_stats  st{};
-    detail::exact_impl<Lyt, Ntk> p{ntk, ps, st};
+    mockturtle::names_view<technology_network> intermediate_ntk{
+        fanout_substitution<mockturtle::names_view<technology_network>>(
+            ntk, {fanout_substitution_params::substitution_strategy::BREADTH, ps.scheme->max_out_degree, 1ul})};
 
-    auto result = p.run();
+    exact_physical_design_stats st{};
+    detail::exact_impl<Lyt>     p{intermediate_ntk, ps, st};
+
+    const auto result = p.run();
 
     if (pst)
     {

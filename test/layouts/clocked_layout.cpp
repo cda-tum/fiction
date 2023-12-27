@@ -22,6 +22,28 @@ TEST_CASE("Clocked layout traits", "[clocked-layout]")
     CHECK(has_foreach_outgoing_clocked_zone_v<layout>);
 }
 
+TEST_CASE("Deep copy clocked layout", "[clocked-layout]")
+{
+    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
+
+    const clk_lyt original{{5, 5, 0}, twoddwave_clocking<clk_lyt>()};
+
+    auto copy = original.clone();
+
+    copy.resize({10, 10, 1});
+    copy.replace_clocking_scheme(use_clocking<clk_lyt>());
+
+    CHECK(original.x() == 5);
+    CHECK(original.y() == 5);
+    CHECK(original.z() == 0);
+    CHECK(original.is_clocking_scheme(clock_name::TWODDWAVE));
+
+    CHECK(copy.x() == 10);
+    CHECK(copy.y() == 10);
+    CHECK(copy.z() == 1);
+    CHECK(copy.is_clocking_scheme(clock_name::USE));
+}
+
 TEST_CASE("Clock zone assignment", "[clocked-layout]")
 {
     using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
@@ -119,7 +141,7 @@ TEST_CASE("Iteration over clocking zones", "[clocked-layout]")
 {
     using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
 
-    clk_lyt layout{clk_lyt::aspect_ratio{2, 2, 0}, twoddwave_clocking<clk_lyt>()};
+    const clk_lyt layout{clk_lyt::aspect_ratio{2, 2, 0}, twoddwave_clocking<clk_lyt>()};
 
     CHECK(layout.incoming_clocked_zones({0, 0}).empty());
     CHECK(layout.outgoing_clocked_zones({2, 2}).empty());
@@ -149,7 +171,7 @@ TEST_CASE("Clocked layout properties", "[clocked-layout]")
 
     SECTION("2DDWave Clocking")
     {
-        clk_lyt layout{clk_lyt::aspect_ratio{2, 2, 0}, twoddwave_clocking<clk_lyt>()};
+        const clk_lyt layout{clk_lyt::aspect_ratio{2, 2, 0}, twoddwave_clocking<clk_lyt>()};
 
         CHECK(layout.in_degree({0, 0}) == static_cast<clk_lyt::degree_t>(0));
         CHECK(layout.in_degree({1, 0}) == static_cast<clk_lyt::degree_t>(1));
@@ -171,7 +193,7 @@ TEST_CASE("Clocked layout properties", "[clocked-layout]")
     }
     SECTION("USE Clocking")
     {
-        clk_lyt layout{clk_lyt::aspect_ratio{2, 2, 0}, use_clocking<clk_lyt>()};
+        const clk_lyt layout{clk_lyt::aspect_ratio{2, 2, 0}, use_clocking<clk_lyt>()};
 
         CHECK(layout.in_degree({0, 0}) == static_cast<clk_lyt::degree_t>(1));
         CHECK(layout.in_degree({1, 0}) == static_cast<clk_lyt::degree_t>(1));

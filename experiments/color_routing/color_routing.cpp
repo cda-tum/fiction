@@ -183,8 +183,9 @@ void ortho_sat_complete()
                                                       "runtime graph coloring (sec)",
                                                       "equivalent"};
 
-    constexpr const uint64_t bench_select =
-        fiction_experiments::all & ~fiction_experiments::majority & ~fiction_experiments::newtag;
+    constexpr const uint64_t bench_select = fiction_experiments::all & ~fiction_experiments::majority &
+                                            ~fiction_experiments::newtag & ~fiction_experiments::iscas85 &
+                                            ~fiction_experiments::epfl;
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
