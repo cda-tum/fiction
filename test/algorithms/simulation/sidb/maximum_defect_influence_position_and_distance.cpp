@@ -29,7 +29,7 @@ TEST_CASE("Test influence distance function", "[maximum-defect-influence-positio
     {
         const sidb_defect defect{sidb_defect_type::UNKNOWN, -1, sidb_simulation_parameters{}.epsilon_r,
                                  sidb_simulation_parameters{}.lambda_tf};
-        const maximum_defect_influence_distance_params sim_params{defect, sidb_simulation_parameters{}, {50, 6}};
+        const maximum_defect_influence_distance_params sim_params{defect, sidb_simulation_parameters{}, {2, 2}};
 
         sidb_cell_clk_lyt_siqad lyt{};
         lyt.assign_cell_type({0, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
@@ -103,6 +103,8 @@ TEST_CASE("Test influence distance function", "[maximum-defect-influence-positio
         CHECK(defect_pos.y == 4);
         CHECK(defect_pos.z == 1);
 
+        CHECK_THAT(distance, Catch::Matchers::WithinAbs(2.8999201713, physical_constants::POP_STABILITY_ERR));
+
         // number of threads given by the hardware
         const sidb_defect high_screening{sidb_defect_type::UNKNOWN, -1, sidb_simulation_parameters{}.epsilon_r, 1};
         const maximum_defect_influence_distance_params sim_params_high_screening{high_screening,
@@ -112,5 +114,38 @@ TEST_CASE("Test influence distance function", "[maximum-defect-influence-positio
             maximum_defect_influence_position_and_distance(lyt, sim_params_high_screening);
 
         CHECK(distance_high_screeing < distance);
+    }
+
+    SECTION("QuickExact simulation of a Y-shape SiDB OR gate with input 01, using cube coordinate")
+    {
+        const sidb_defect defect{sidb_defect_type::UNKNOWN, -1, sidb_simulation_parameters{}.epsilon_r,
+                                 sidb_simulation_parameters{}.lambda_tf};
+        const maximum_defect_influence_distance_params sim_params{defect, sidb_simulation_parameters{}};
+        cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>> lyt{{30, 30}};
+
+        lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{10, 0, 0}),
+                             sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+        lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{0, 1, 0}),
+                             sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+        lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{8, 1, 0}),
+                             sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+
+        lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{2, 2, 0}),
+                             sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+        lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{6, 2, 0}),
+                             sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+        lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{4, 4, 0}),
+                             sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+        lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{4, 5, 1}),
+                             sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+        lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{4, 7, 1}),
+                             sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+
+        const auto [defect_pos, distance] = maximum_defect_influence_position_and_distance(lyt, sim_params);
+        CHECK(defect_pos.x == 12);
+        CHECK(defect_pos.y == 9);
+        CHECK(defect_pos.z == 0);
+
+        CHECK_THAT(distance, Catch::Matchers::WithinAbs(2.8999201713, physical_constants::POP_STABILITY_ERR));
     }
 }

@@ -80,6 +80,14 @@ CFE
 
 .. doxygenfunction:: fiction::cfe_clocking
 
+Ripple
+######
+
+.. figure:: /_static/ripple.png
+   :width: 200
+
+.. doxygenfunction:: fiction::ripple_clocking
+
 BANCS
 #####
 

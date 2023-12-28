@@ -83,7 +83,7 @@ or be obtained by :ref:`simulating<command simulate>` a ``network`` or ``gate_la
 An expression ``E`` is a constant ``0`` or ``1``, or a variable ``a, b, ..., p``, the negation of an expression ``!E``, the
 conjunction of multiple expressions ``(E...E)``, the disjunction of multiple expressions ``{E...E}``, the exclusive OR of
 multiple expressions ``[E...E]``, or the majority of three expressions ``<EEE>``. Examples are ``[(ab)(!ac)]`` to describe
-if-then-else, or ``!{!a!b}`` to describe the application of De Morgan’s law to ``(ab)``. The size of the truth table must
+if-then-else, or ``!{!a!b}`` to describe the application of De Morgan's law to ``(ab)``. The size of the truth table must
 fit the largest variable in the expression, e.g., if ``c`` is the largest variable, then the truth table has at least
 three variables.
 
@@ -215,6 +215,7 @@ throughput (TP) and thereby, the amount of clock cycles the PIs need to be stall
 
 A ``network`` can also be simulated for comparison by using ``simulate -n``.
 
+
 Equivalence checking (``equiv``)
 --------------------------------
 
@@ -262,6 +263,109 @@ simulators are currently supported:
 - ``fqca <filename>`` creates a `QCA-STACK <https://github.com/wlambooy/QCA-STACK>`_ FQCA file
 
 If no filename is given, the stored layout name will be used and the file will be written to the current folder.
+
+Physical Simulation of SiDBs
+----------------------------
+
+Performing physical simulation of SiDB layouts is crucial for understanding layout behavior and
+facilitating rapid prototyping, eliminating the need for expensive and time-intensive fabrication processes.
+The command ``read --sqd`` (or ``read -s``) is used to import a SiDB layout from an sqd-file, a format compatible with `SiQAD <https://github.com/siqad/siqad>`_.
+The SiDB layout can be visualized using the ``print -c`` command. Currently, *fiction* provides two electrostatic physical simulators:
+the exact one *QuickExact* and the scalable one *QuickSim*.
+
+QuickExact (``quickexact``)
+###########################
+
+*QuickExact* serves as an exact simulator, meticulously determining all physically valid charge distributions.
+It enumerates all possible charge distributions. However, by incorporating three techniques, namely
+1.) Physically-informed Search Space Pruning, 2.) Partial Solution Caching, and 3.) Effective State Enumeration, it provides
+a significant performance advantage of more than three orders of magnitude over ExGS from SiQAD. For additional details,
+see `the paper <https://www.cda.cit.tum.de/files/eda/2024_aspdac_efficient_exact_simulation.pdf>`_.
+
+Most important parameters:
+
+- Relative permittivity :math:`\epsilon_r` (``-e``)
+- Thomas-Fermi screening length :math:`\lambda_{tf}` (``-l``)
+- Energy transition level (0/-) :math:`\mu_-` (``-m``)
+
+See ``quickexact -h`` for a full list.
+
+The simulated ground state charge distribution can be printed with ``print -c``.
+
+
+QuickSim (``quicksim``)
+#######################
+
+*QuickSim* serves as a scalable simulator designed to determine the ground state charge distribution
+for a given SiDB layout. To enhance efficiency, effective search space pruning techniques, such as
+(`max-min diversity distributions <https://onlinelibrary.wiley.com/doi/10.1002/net.20418>`_), are integrated.
+For more in-depth information, refer to `the paper <https://ieeexplore.ieee.org/document/10231266>`_.
+
+Most important parameters:
+
+- Relative permittivity :math:`\epsilon_r` (``-e``)
+- Thomas-Fermi screening :math:`\lambda_{tf}` (``-l``)
+- Energy transition level (0/-) :math:`\mu_-` (``-m``)
+- Number of iterations (``-i``)
+- :math:`\alpha` value (``-a``)
+
+The simulated ground state charge distribution can be printed with ``print -c``.
+
+Critical Temperature (``temp``)
+###############################
+
+The critical temperature of an SiDB layout is the temperature at which the layout's ground state is populated with a
+probability larger than a certain threshold. This threshold is specified as a confidence level :math:`1 - \eta`, where
+:math:`\eta \in [0,1]`. The simulation can be conducted for gate-based SiDB layouts as well, where the gate is
+simulated with respect to the stability of a given Boolean function in form of the current truth table in store.
+For more in-depth information, refer to `the paper <https://ieeexplore.ieee.org/document/10231259>`_.
+
+Most important parameters:
+
+- Confidence level :math:`1 - \eta` (``-c``)
+- Maximum temperature in K to explore (``-t``)
+- Gate-based simulation toggle (``-g``)
+- Relative permittivity :math:`\epsilon_r` (``-e``)
+- Thomas-Fermi screening :math:`\lambda_{tf}` (``-l``)
+- Energy transition level (0/-) :math:`\mu_-` (``-m``)
+
+
+Operational Domain (``opdom``)
+##############################
+
+Computes the operational domain of the current SiDB cell-level layout in store. The operational domain is the set of all
+parameter combinations for which the layout is logically operational. Logical operation is defined as the layout
+implementing the current truth table in store. The input BDL pairs of the layout are assumed to be in the same order as
+the inputs of the truth table.
+For more information, see `the paper <https://www.cda.cit.tum.de/files/eda/2023_nanoarch_reducing_the_complexity_of_operational_domain_computation_in_silicon_dangling_bond_logic.pdf>`_.
+
+The command ``opdom`` writes the operational domain to a CSV file with the given filename from where it can be further
+processed by other tools.
+
+The parameter space to sweep over can be specified by the user via the flags
+- ``--x_sweep``
+- ``--y_sweep``
+which have to be either ``epsilon_r``, ``lambda_tf``, or ``mu_minus``. The default is ``epsilon_r`` for ``--x_sweep`` and
+``lambda_tf`` for ``--y_sweep``.
+
+Additionally, min, max, and step size values can be specified for each parameter using the flags
+- ``--x_min``
+- ``--x_max``
+- ``--x_step``
+- ``--y_min``
+- ``--y_max``
+- ``--y_step``
+respectively. The default values are 1, 10, and 0.1 on both axis, for min, max, and step, respectively.
+
+By default, grid search is applied to explore the operational domain. The algorithm can be changed by specifying one of
+the following options:
+- ``--random_sampling``/``-r``
+- ``--flood_fill``/``-f``
+- ``--contour_tracing``/``-c``
+each of which start from a set of random samples, whose number has to be passed as an argument to the flag.
+
+See ``opdom -h`` for a full list of arguments.
+
 
 Area usage (``area``)
 ---------------------
@@ -365,7 +469,7 @@ Additionally, *fiction* itself can be part of a bash script. Consider the follow
 
     for filepath in ../benchmarks/TOY/*.v; do
         f="${filepath##*/}"
-        ./fiction -c "read $filepath; ortho; cell; qca ${f%.*}.qca"
+       ./fiction -c "read $filepath; ortho; cell; qca ${f%.*}.qca"
     done
 
 where the for-loop iterates over all Verilog files in the ``../benchmarks/TOY/`` folder. By using the flag ``-c``, a

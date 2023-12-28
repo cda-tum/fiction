@@ -56,7 +56,6 @@ struct bdl_pair
     {
         static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
         static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-        static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
     }
 };
 
@@ -96,7 +95,6 @@ std::vector<bdl_pair<Lyt>> detect_bdl_pairs(const Lyt& lyt, const typename techn
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
     // sanity check for parameter settings
     assert(params.minimum_distance <= params.maximum_distance);

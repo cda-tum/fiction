@@ -21,13 +21,10 @@ using namespace fiction;
 TEMPLATE_TEST_CASE(
     "time to solution test", "[time-to-solution]",
     (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, odd_row_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, even_row_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, odd_column_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, even_column_hex>>>))
+    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
 
-    TestType lyt{{20, 10}};
+    TestType lyt{};
 
     SECTION("layout with no SiDB placed")
     {
@@ -47,7 +44,7 @@ TEMPLATE_TEST_CASE(
         const time_to_solution_params tts_params_exgs{exhaustive_sidb_simulation_engine::EXGS};
         time_to_solution<TestType>(lyt, quicksim_params, tts_params_exgs, &tts_stat_exgs);
 
-        CHECK(tts_stat_exgs.algorithm == "QuickExact");
+        CHECK(tts_stat_exgs.algorithm == "ExGS");
         CHECK_THAT(tts_stat_exgs.acc, Catch::Matchers::WithinAbs(0.0, 0.00001));
         CHECK_THAT(tts_stat_exgs.time_to_solution,
                    Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.00001));

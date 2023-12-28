@@ -40,6 +40,7 @@ Exhaustive Ground State Simulation
 
 **Header:** ``fiction/algorithms/simulation/sidb/quickexact.hpp``
 
+.. doxygenenum:: fiction::required_simulation_base_number
 .. doxygenstruct:: fiction::quickexact_params
    :members:
 .. doxygenfunction:: fiction::quickexact
@@ -70,6 +71,7 @@ Energy Calculation
 **Header:** ``fiction/algorithms/simulation/sidb/minimum_energy.hpp``
 
 .. doxygenfunction:: fiction::minimum_energy
+.. doxygenfunction:: fiction::minimum_energy_distribution
 
 
 **Header:** ``fiction/algorithms/simulation/sidb/is_ground_state.hpp``
@@ -89,7 +91,7 @@ Temperature Behavior
 .. doxygenfunction:: fiction::critical_temperature_gate_based
 .. doxygenfunction:: fiction::critical_temperature_non_gate_based
 
-**Header:** ``fiction/algorithms/simulation/sidb/occupation_probability_excited_states.hpp``
+**Header:** ``fiction/algorithms/simulation/sidb/occupation_probability_of_excited_states.hpp``
 
 .. doxygenfunction:: fiction::occupation_probability_gate_based
 .. doxygenfunction:: fiction::occupation_probability_non_gate_based
@@ -128,6 +130,7 @@ Random SiDB Layout Generator
 **Header:** ``fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp``
 
 .. doxygenstruct:: fiction::generate_random_sidb_layout_params
+   :members:
 .. doxygenfunction:: fiction::generate_random_sidb_layout
 .. doxygenfunction:: fiction::generate_multiple_random_sidb_layouts
 
@@ -172,3 +175,24 @@ Binary-dot Logic (BDL) Pair Detection
 .. doxygenstruct:: fiction::detect_bdl_pairs_params
    :members:
 .. doxygenfunction:: fiction::detect_bdl_pairs
+
+
+Assess Population Stability
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Header:** ``fiction/algorithms/simulation/sidb/assess_physical_population_stability.hpp``
+
+.. doxygenenum:: fiction::transition_type
+.. doxygenstruct:: fiction::population_stability_information
+   :members:
+.. doxygenstruct:: fiction::assess_physical_population_stability_params
+   :members:
+.. doxygenfunction:: fiction::assess_physical_population_stability
+
+
+Convert Potential to Distance
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Header:** ``fiction/algorithms/simulation/sidb/convert_potential_to_distance.hpp``
+
+.. doxygenfunction:: fiction::convert_potential_to_distance

@@ -5,20 +5,17 @@
 #ifndef FICTION_QUICKSIM_HPP
 #define FICTION_QUICKSIM_HPP
 
-#include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
-#include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
+#include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
+#include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/traits.hpp"
 
-#include <fmt/format.h>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
-#include <iostream>
-#include <limits>
 #include <mutex>
 #include <thread>
 #include <vector>
@@ -57,7 +54,7 @@ struct quicksim_params
  * charge distribution layout. Depending on the simulation parameters, the ground state is found with a certain
  * probability after one run.
  *
- * @tparam Lyt Cell-level layout type.
+ * @tparam Lyt SiDB cell-level layout type.
  * @param lyt The layout to simulate.
  * @param ps Physical parameters. They are material-specific and may vary from experiment to experiment.
  * @return sidb_simulation_result is returned with all results.
@@ -75,8 +72,8 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
 
     sidb_simulation_result<Lyt> st{};
     st.algorithm_name = "QuickSim";
-    st.additional_simulation_parameters.emplace_back("iteration_steps", ps.interation_steps);
-    st.additional_simulation_parameters.emplace_back("alpha", ps.alpha);
+    st.additional_simulation_parameters.emplace("iteration_steps", ps.interation_steps);
+    st.additional_simulation_parameters.emplace("alpha", ps.alpha);
     st.physical_parameters = ps.phys_params;
     st.charge_distributions.reserve(ps.interation_steps);
 
@@ -86,7 +83,7 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
     {
         const mockturtle::stopwatch stop{time_counter};
 
-        charge_distribution_surface charge_lyt{lyt};
+        charge_distribution_surface<Lyt> charge_lyt{lyt};
 
         // set the given physical parameters
         charge_lyt.assign_physical_parameters(ps.phys_params);

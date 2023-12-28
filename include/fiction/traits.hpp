@@ -599,6 +599,24 @@ template <class Lyt>
 inline constexpr bool is_cell_level_layout_v = is_cell_level_layout<Lyt>::value;
 #pragma endregion
 
+#pragma region is_charge_distribution_surface
+template <class Lyt, class = void>
+struct is_charge_distribution_surface : std::false_type
+{};
+
+template <class Lyt>
+struct is_charge_distribution_surface<
+    Lyt,
+    std::enable_if_t<is_cell_level_layout_v<Lyt>,
+                     std::void_t<typename Lyt::storage,
+                                 decltype(std::declval<Lyt>().assign_charge_state(cell<Lyt>(), sidb_charge_state())),
+                                 decltype(std::declval<Lyt>().get_charge_state(cell<Lyt>()))>>> : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool is_charge_distribution_surface_v = is_charge_distribution_surface<Lyt>::value;
+#pragma endregion
+
 #pragma region has_is_empty_cell
 template <class Lyt, class = void>
 struct has_is_empty_cell : std::false_type
