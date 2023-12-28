@@ -384,8 +384,8 @@ class exact_ground_state_simulation_impl
      */
     void define_population_stability()
     {
-        const auto mu_minus = ctx.real_val(std::to_string(params.phys_params.mu).c_str());
-        const auto mu_plus  = ctx.real_val(std::to_string(params.phys_params.mu_p).c_str());
+        const auto mu_minus = ctx.real_val(std::to_string(params.phys_params.mu_minus).c_str());
+        const auto mu_plus  = ctx.real_val(std::to_string(params.phys_params.mu_plus()).c_str());
 
         charge_lyt.foreach_cell(
             [this, &mu_minus, &mu_plus](const sidb& s1)

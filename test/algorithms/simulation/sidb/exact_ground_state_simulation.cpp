@@ -110,7 +110,7 @@ TEMPLATE_TEST_CASE("SiDB OR gate with input 01", "[exact-sidb-sim]",
     CHECK(charge_lyt.get_charge_state({6, 2, 0}) == sidb_charge_state::NEGATIVE);
 
     CHECK_THAT(charge_lyt.get_system_energy(),
-               Catch::Matchers::WithinAbs(0.4662166947, physical_constants::POP_STABILITY_ERR));
+               Catch::Matchers::WithinAbs(0.4662582096, physical_constants::POP_STABILITY_ERR));
 }
 
 TEMPLATE_TEST_CASE("SiDB BDL wire with one perturber", "[exact-sidb-sim]",
@@ -144,7 +144,7 @@ TEMPLATE_TEST_CASE("SiDB BDL wire with one perturber", "[exact-sidb-sim]",
     CHECK(charge_lyt.get_charge_state({19, 0, 0}) == sidb_charge_state::NEGATIVE);
 
     CHECK_THAT(charge_lyt.get_system_energy(),
-               Catch::Matchers::WithinAbs(0.24602741408, physical_constants::POP_STABILITY_ERR));
+               Catch::Matchers::WithinAbs(0.2460493219, physical_constants::POP_STABILITY_ERR));
 }
 
 #else  // FICTION_Z3_SOLVER
