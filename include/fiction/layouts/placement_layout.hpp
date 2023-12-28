@@ -19,6 +19,7 @@
 #include <cassert>
 #include <cstdint>
 #include <functional>
+#include <iterator>
 #include <memory>
 #include <random>
 #include <type_traits>
@@ -61,7 +62,10 @@ class placement_layout<GateLyt, Ntk, Dist, false> : public GateLyt
                 dist_fn{dist},
                 node_to_tile{network},
                 net_costs(Dist{0}, node_to_tile.size()),
-                random_node_functor{ntk.get_constant(false) == ntk.get_constant(true) ? 1u : 2u, ntk.size() - 1u}
+                random_node_functor{ntk.num_pis() + ntk.num_gates() == 0u             ? 0u :
+                                    ntk.get_constant(false) == ntk.get_constant(true) ? 1u :
+                                                                                        2u,
+                                    ntk.size() - 1u}
         {}
 
         placement_layout_storage(const placement_layout_storage& other) :
@@ -151,6 +155,10 @@ class placement_layout<GateLyt, Ntk, Dist, false> : public GateLyt
          */
         std::valarray<Dist> net_costs;
         /**
+         * Stores the most recently swapped node-tile pair.
+         */
+        std::pair<mockturtle::node<GateLyt>, tile> last_swap{};
+        /**
          * A random-number generator.
          */
         std::mt19937_64 generator{std::random_device{}()};
@@ -213,7 +221,10 @@ class placement_layout<GateLyt, Ntk, Dist, false> : public GateLyt
     placement_layout(placement_layout&& other) noexcept :
             GateLyt(other),
             strg{std::make_shared<placement_layout_storage>(std::move(*other.strg))}
-    {}
+    {
+        assert(strg->ntk.num_pis() + strg->ntk.num_gates() <= this->area() &&
+               "The network has too many nodes for this layout");
+    }
     /**
      * Copy assignment operator. Creates a deep-copy of the placement layout and its associated storage.
      *
@@ -262,25 +273,25 @@ class placement_layout<GateLyt, Ntk, Dist, false> : public GateLyt
     void initialize_random_placement() noexcept
     {
         assert(this->is_empty() && "Layout is not empty");
-        assert(strg->ntk.num_pis() + strg->ntk.num_gates() <= this->area() &&
-               "The network has too many nodes for this layout");
 
-        // generate an index for each tile
-        std::vector<std::size_t> indices(this->area());
-        std::iota(indices.begin(), indices.end(), 0);
-        // shuffle the indices
-        std::shuffle(indices.begin(), indices.end(), strg->generator);
+        std::vector<tile> available_tiles{};
+        available_tiles.reserve(this->area());
+        this->foreach_ground_coordinate([&available_tiles](const auto& c) { available_tiles.push_back(c); });
+
+        std::vector<tile> sampled_tiles{};
+        sampled_tiles.reserve(strg->ntk.size());
+
+        std::sample(available_tiles.begin(), available_tiles.end(), std::back_inserter(sampled_tiles), strg->ntk.size(),
+                    strg->generator);
 
         // place nodes
         strg->ntk.foreach_node(
-            [this, &indices, i = 0u](auto const& n) mutable
+            [this, &sampled_tiles, i = 0u](auto const& n) mutable
             {
                 if (!strg->ntk.is_constant(n))
                 {
-                    const auto y = static_cast<uint64_t>(indices[i] / (this->y() + 1));
-                    const auto x = static_cast<uint64_t>(indices[i] % (this->y() + 1));
+                    const auto t = sampled_tiles[i];
 
-                    const auto t = tile{x, y};
                     // place node
                     strg->node_to_tile[n] = t;
                     // store node position
@@ -380,6 +391,9 @@ class placement_layout<GateLyt, Ntk, Dist, false> : public GateLyt
         strg->tile_index_to_node[tile_to_index(t)]      = n;
         strg->tile_index_to_node[tile_to_index(n_tile)] = t_node;
 
+        // store the given node and its original tile for potential undo
+        strg->last_swap = {n, n_tile};
+
         // update costs
         //        update_net_costs(n);
         //        update_net_costs(t_node);
@@ -396,6 +410,13 @@ class placement_layout<GateLyt, Ntk, Dist, false> : public GateLyt
         const auto t = random_tile();
 
         swap_node_and_tile(n, t);
+    }
+    /**
+     * Undoes the most recent swap.
+     */
+    void undo_swap() noexcept
+    {
+        swap_node_and_tile(strg->last_swap.first, strg->last_swap.second);
     }
     /**
      * Returns the tile of a given node.
@@ -532,6 +553,15 @@ class placement_layout<GateLyt, Ntk, Dist, false> : public GateLyt
         return lyt;
     }
 
+    /**
+     * Initializes the net costs of all placed nodes.
+     */
+    void initialize_net_costs() noexcept
+    {
+        this->foreach_placed_node([this](const auto& n, const auto&)
+                                  { strg->net_costs[strg->ntk.node_to_index(n)] = compute_net_cost(n); });
+    }
+
   private:
     /**
      * The storage of the placement layout.
@@ -611,14 +641,6 @@ class placement_layout<GateLyt, Ntk, Dist, false> : public GateLyt
                                  });
 
         strg->net_costs[strg->ntk.node_to_index(n)] = cost;
-    }
-    /**
-     * Initializes the net costs of all placed nodes.
-     */
-    void initialize_net_costs() noexcept
-    {
-        this->foreach_placed_node([this](const auto& n, const auto&)
-                                  { strg->net_costs[strg->ntk.node_to_index(n)] = compute_net_cost(n); });
     }
 };
 

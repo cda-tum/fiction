@@ -197,6 +197,60 @@ TEMPLATE_TEST_CASE(
 }
 
 TEMPLATE_TEST_CASE(
+    "Undo swapping", "[placement-layout]", (gate_level_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>),
+    (gate_level_layout<synchronization_element_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>>),
+    (gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>),
+    (gate_level_layout<clocked_layout<hexagonal_layout<offset::ucoord_t>>>))
+{
+    using Ntk = technology_network;
+    auto ntk  = blueprints::unbalanced_and_inv_network<Ntk>();
+    ntk.substitute_po_signals();
+
+    REQUIRE(ntk.size() == 7u);
+
+    const TestType lyt{{7, 0}};
+
+    placement_layout place_lyt{lyt, ntk};
+
+    CHECK(place_lyt.net_cost() == 0);
+
+    ntk.foreach_node([&place_lyt, i = 0u](const auto& n) mutable { place_lyt.place(n, {i++, 0}); });
+
+    REQUIRE(place_lyt.get_node_tile(2) == tile<decltype(place_lyt)>{2, 0});
+    REQUIRE(place_lyt.get_node_tile(3) == tile<decltype(place_lyt)>{3, 0});
+
+    // swap nodes 2 and 3
+    place_lyt.swap_node_and_tile(2, {3, 0});
+
+    REQUIRE(place_lyt.get_node_tile(2) == tile<decltype(place_lyt)>{3, 0});
+    REQUIRE(place_lyt.get_node_tile(3) == tile<decltype(place_lyt)>{2, 0});
+
+    // undo the swap
+    place_lyt.undo_swap();
+
+    CHECK(place_lyt.get_node_tile(2) == tile<decltype(place_lyt)>{2, 0});
+    CHECK(place_lyt.get_node_tile(3) == tile<decltype(place_lyt)>{3, 0});
+
+    // undo it again, which redoes it
+    place_lyt.undo_swap();
+
+    CHECK(place_lyt.get_node_tile(2) == tile<decltype(place_lyt)>{3, 0});
+    CHECK(place_lyt.get_node_tile(3) == tile<decltype(place_lyt)>{2, 0});
+
+    // swap with an empty tile
+    place_lyt.swap_node_and_tile(4, {7, 0});
+
+    CHECK(place_lyt.get_node_tile(4) == tile<decltype(place_lyt)>{7, 0});
+    CHECK(place_lyt.get_tile_node({4, 0}) == 0);  // should be empty
+
+    // undo the swap
+    place_lyt.undo_swap();
+
+    CHECK(place_lyt.get_node_tile(4) == tile<decltype(place_lyt)>{4, 0});
+    CHECK(place_lyt.get_tile_node({7, 0}) == 0);  // should be empty
+}
+
+TEMPLATE_TEST_CASE(
     "Net cost", "[placement-layout]", (gate_level_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>),
     (gate_level_layout<synchronization_element_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>>),
     (gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>),
