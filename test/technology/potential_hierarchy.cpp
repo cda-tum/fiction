@@ -324,7 +324,8 @@ TEST_CASE("13 DB exact cluster simulation", "[exact-cluster-simulation]")
     std::cout << "CC Store size: " << ce.charge_conf_store.size() << " ; PB Store size: " << ce.pot_bounds_store.size()
               << std::endl;
     CHECK(!res.charge_distributions.empty());
-    std::cout << "RUNTIME: " << res.simulation_runtime.count() << std::endl;
+    std::cout << "NUM CELLS: " << ce.cl.num_cells() << std::endl;
+    std::cout << "CLUSTEREXACT RUNTIME: " << res.simulation_runtime.count() << std::endl;
     std::cout << "PHYSICALLY VALID CHARGE LAYOUTS: " << res.charge_distributions.size() << std::endl;
     std::cout << "GROUND STATE ENERGY: "
               << minimum_energy(res.charge_distributions.cbegin(), res.charge_distributions.cend()) << std::endl;
@@ -354,7 +355,8 @@ TEST_CASE("13 DB exact cluster simulation (ExGS)", "[exact-cluster-simulation]")
 
     const auto& res = exhaustive_ground_state_simulation(lyt);
     CHECK(!res.charge_distributions.empty());
-    std::cout << "RUNTIME: " << res.simulation_runtime.count() << std::endl;
+    std::cout << "NUM CELLS: " << lyt.num_cells() << std::endl;
+    std::cout << "EXGS RUNTIME: " << res.simulation_runtime.count() << std::endl;
     std::cout << "PHYSICALLY VALID CHARGE LAYOUTS: " << res.charge_distributions.size() << std::endl;
     std::cout << "GROUND STATE ENERGY: "
               << minimum_energy(res.charge_distributions.cbegin(), res.charge_distributions.cend()) << std::endl;
@@ -385,7 +387,8 @@ TEST_CASE("13 DB exact cluster simulation (QuickExact)", "[exact-cluster-simulat
     const auto& res = quickexact(lyt);
     std::cout << res.simulation_runtime.count() << std::endl;
     CHECK(!res.charge_distributions.empty());
-    std::cout << "RUNTIME: " << res.simulation_runtime.count() << std::endl;
+    std::cout << "NUM CELLS: " << lyt.num_cells() << std::endl;
+    std::cout << "QUICKEXACT RUNTIME: " << res.simulation_runtime.count() << std::endl;
     std::cout << "PHYSICALLY VALID CHARGE LAYOUTS: " << res.charge_distributions.size() << std::endl;
     std::cout << "GROUND STATE ENERGY: "
               << minimum_energy(res.charge_distributions.cbegin(), res.charge_distributions.cend()) << std::endl;
@@ -421,7 +424,8 @@ TEST_CASE("16 DB exact cluster simulation", "[exact-cluster-simulation]")
               << std::endl;
     REQUIRE(res.charge_distributions.size() == 1);
     print_layout(res.charge_distributions[0]);
-    std::cout << "RUNTIME: " << res.simulation_runtime.count() << std::endl;
+    std::cout << "NUM CELLS: " << ce.cl.num_cells() << std::endl;
+    std::cout << "CLUSTEREXACT RUNTIME: " << res.simulation_runtime.count() << std::endl;
     std::cout << "PHYSICALLY VALID CHARGE LAYOUTS: " << res.charge_distributions.size() << std::endl;
     std::cout << "GROUND STATE ENERGY: "
               << minimum_energy(res.charge_distributions.cbegin(), res.charge_distributions.cend()) << std::endl;
@@ -455,6 +459,8 @@ TEST_CASE("16 DB exact cluster simulation (ExGS)", "[exact-cluster-simulation]")
     const auto& res = exhaustive_ground_state_simulation(lyt);
     REQUIRE(res.charge_distributions.size() == 1);
     print_layout(res.charge_distributions[0]);
+
+    std::cout << "NUM CELLS: " << lyt.num_cells() << std::endl;
     std::cout << "RUNTIME: " << res.simulation_runtime.count() << std::endl;
     std::cout << "PHYSICALLY VALID CHARGE LAYOUTS: " << res.charge_distributions.size() << std::endl;
     std::cout << "GROUND STATE ENERGY: "
@@ -489,7 +495,8 @@ TEST_CASE("16 DB exact cluster simulation (QuickExact)", "[exact-cluster-simulat
     const auto& res = quickexact(lyt);
     REQUIRE(res.charge_distributions.size() == 1);
     print_layout(res.charge_distributions[0]);
-    std::cout << "RUNTIME: " << res.simulation_runtime.count() << std::endl;
+    std::cout << "NUM CELLS: " << lyt.num_cells() << std::endl;
+    std::cout << "QUICKEXACT RUNTIME: " << res.simulation_runtime.count() << std::endl;
     std::cout << "PHYSICALLY VALID CHARGE LAYOUTS: " << res.charge_distributions.size() << std::endl;
     std::cout << "GROUND STATE ENERGY: "
               << minimum_energy(res.charge_distributions.cbegin(), res.charge_distributions.cend()) << std::endl;
@@ -511,7 +518,10 @@ TEST_CASE("Exact Cluster Simulation of 2 Bestagon PI", "[potential-hierarchy]")
     //        print_layout(cl);
     //    }
 
-    std::cout << "RUNTIME: " << res.simulation_runtime.count() << std::endl;
+    std::cout << "CC Store size: " << ce.charge_conf_store.size() << " ; PB Store size: " << ce.pot_bounds_store.size()
+              << std::endl;
+    std::cout << "NUM CELLS: " << ce.cl.num_cells() << std::endl;
+    std::cout << "CLUSTEREXACT RUNTIME: " << res.simulation_runtime.count() << std::endl;
     std::cout << "PHYSICALLY VALID CHARGE LAYOUTS: " << res.charge_distributions.size() << std::endl;
     std::cout << "GROUND STATE ENERGY: "
               << minimum_energy(res.charge_distributions.cbegin(), res.charge_distributions.cend()) << std::endl;
@@ -531,7 +541,56 @@ TEST_CASE("Exact Cluster Simulation of 2 Bestagon PI (QuickExact)", "[potential-
     //    {
     //        print_layout(cl);
     //    };
+    std::cout << "NUM CELLS: " << cds.num_cells() << std::endl;
+    std::cout << "QUICKEXACT RUNTIME: " << res.simulation_runtime.count() << std::endl;
+    std::cout << "PHYSICALLY VALID CHARGE LAYOUTS: " << res.charge_distributions.size() << std::endl;
+    std::cout << "GROUND STATE ENERGY: "
+              << minimum_energy(res.charge_distributions.cbegin(), res.charge_distributions.cend()) << std::endl;
+}
 
+TEST_CASE("Exact Cluster Simulation of 2 Bestagon NAND", "[potential-hierarchy]")
+{
+    gate_level_layout<hex_even_row_gate_clk_lyt> lyt{{2, 2}};
+    lyt.create_nand({}, {}, {0, 0});
+    lyt.create_nand({}, {}, {2, 2});
+
+    cluster_exact<layout> ce{charge_distribution_surface<layout>{
+        convert_to_siqad_coordinates(apply_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library>(lyt))}};
+    std::cout << "(CE) NUM CELLS: " << ce.cl.num_cells() << std::endl;
+    const auto& res = ce.FindGroundState(90);
+
+    //    for (const auto& cl : res.charge_distributions)
+    //    {
+    //        print_layout(cl);
+    //    }
+    //    std::cout << "NUM CELLS: " << ce.cl.num_cells() << std::endl;
+    std::cout << "CC Store size: " << ce.charge_conf_store.size() << " ; PB Store size: " << ce.pot_bounds_store.size()
+              << std::endl;
+    std::cout << "CLUSTEREXACT RUNTIME: " << res.simulation_runtime.count() << std::endl;
+    std::cout << "PHYSICALLY VALID CHARGE LAYOUTS: " << res.charge_distributions.size() << std::endl;
+    std::cout << "GROUND STATE ENERGY: "
+              << minimum_energy(res.charge_distributions.cbegin(), res.charge_distributions.cend()) << std::endl;
+}
+
+TEST_CASE("Exact Cluster Simulation of 2 Bestagon NAND (QuickExact)", "[potential-hierarchy]")
+{
+    gate_level_layout<hex_even_row_gate_clk_lyt> lyt{{2, 2}};
+    lyt.create_nand({}, {}, {0, 0});
+    lyt.create_nand({}, {}, {2, 2});
+
+    charge_distribution_surface<layout> cds{
+        convert_to_siqad_coordinates(apply_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library>(lyt))};
+
+    std::cout << "(QE) NUM CELLS: " << cds.num_cells() << std::endl;
+
+    const auto& res = quickexact(cds);
+
+    //    for (const auto& cl : res.charge_distributions)
+    //    {
+    //        print_layout(cl);
+    //    };
+
+    //    std::cout << "NUM CELLS: " << cds.num_cells() << std::endl;
     std::cout << "RUNTIME: " << res.simulation_runtime.count() << std::endl;
     std::cout << "PHYSICALLY VALID CHARGE LAYOUTS: " << res.charge_distributions.size() << std::endl;
     std::cout << "GROUND STATE ENERGY: "
@@ -546,14 +605,17 @@ TEST_CASE("Exact Cluster Simulation of 2 Bestagon OR", "[potential-hierarchy]")
 
     cluster_exact<layout> ce{charge_distribution_surface<layout>{
         convert_to_siqad_coordinates(apply_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library>(lyt))}};
-    std::cout << "NUM CELLS: " << ce.cl.num_cells() << std::endl;
+    std::cout << "(CE) NUM CELLS: " << ce.cl.num_cells() << std::endl;
     const auto& res = ce.FindGroundState(90);
 
     //    for (const auto& cl : res.charge_distributions)
     //    {
     //        print_layout(cl);
     //    }
-    std::cout << "RUNTIME: " << res.simulation_runtime.count() << std::endl;
+    //    std::cout << "NUM CELLS: " << ce.cl.num_cells() << std::endl;
+    std::cout << "CC Store size: " << ce.charge_conf_store.size() << " ; PB Store size: " << ce.pot_bounds_store.size()
+              << std::endl;
+    std::cout << "CLUSTEREXACT RUNTIME: " << res.simulation_runtime.count() << std::endl;
     std::cout << "PHYSICALLY VALID CHARGE LAYOUTS: " << res.charge_distributions.size() << std::endl;
     std::cout << "GROUND STATE ENERGY: "
               << minimum_energy(res.charge_distributions.cbegin(), res.charge_distributions.cend()) << std::endl;
@@ -567,32 +629,90 @@ TEST_CASE("Exact Cluster Simulation of 2 Bestagon OR (QuickExact)", "[potential-
 
     charge_distribution_surface<layout> cds{
         convert_to_siqad_coordinates(apply_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library>(lyt))};
+
+    std::cout << "(QE) NUM CELLS: " << cds.num_cells() << std::endl;
+
     const auto& res = quickexact(cds);
 
-    for (const auto& cl : res.charge_distributions)
-    {
-        print_layout(cl);
-    };
+    //    for (const auto& cl : res.charge_distributions)
+    //    {
+    //        print_layout(cl);
+    //    };
 
+    //    std::cout << "NUM CELLS: " << cds.num_cells() << std::endl;
     std::cout << "RUNTIME: " << res.simulation_runtime.count() << std::endl;
     std::cout << "PHYSICALLY VALID CHARGE LAYOUTS: " << res.charge_distributions.size() << std::endl;
     std::cout << "GROUND STATE ENERGY: "
               << minimum_energy(res.charge_distributions.cbegin(), res.charge_distributions.cend()) << std::endl;
 }
 
-// TEST_CASE("Exact Cluster Simulation of 2 Bestagon PI (ExGS)", "[potential-hierarchy]")
+//TEST_CASE("Exact Cluster Simulation of 2 Bestagon PI (differing min-size)", "[potential-hierarchy]")
 //{
-//     gate_level_layout<hex_even_row_gate_clk_lyt> lyt{{2,2}};
-//     lyt.create_pi("x1",{0,0});
-//     lyt.create_pi("x2",{2,2});
+//    gate_level_layout<hex_even_row_gate_clk_lyt> lyt{{2, 2}};
+//    lyt.create_pi({"x1"}, {0, 0});
+//    lyt.create_pi({"x2"}, {2, 2});
 //
-//     charge_distribution_surface<layout> cds{convert_to_siqad_coordinates(apply_gate_library<sidb_cell_clk_lyt,
-//     sidb_bestagon_library>(lyt))}; const auto& res = exhaustive_ground_state_simulation(cds); std::cout <<
-//     "PHYSICALLY VALID CHARGE LAYOUTS: " << res.charge_distributions.size() << std::endl;
+//    SECTION("Min-size 11")
+//    {
+//        cluster_exact<layout> ce2{charge_distribution_surface<layout>{convert_to_siqad_coordinates(
+//                                      apply_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library>(lyt))},
+//                                  11};
+//        std::cout << "NUM CELLS: " << ce2.cl.num_cells() << std::endl;
+//        const auto& res2 = ce2.FindGroundState(90);
+//        std::cout << "CC Store size: " << ce2.charge_conf_store.size()
+//                  << " ; PB Store size: " << ce2.pot_bounds_store.size() << std::endl;
+//        std::cout << "NUM CELLS: " << ce2.cl.num_cells() << std::endl;
+//        std::cout << "CLUSTEREXACT RUNTIME: " << res2.simulation_runtime.count() << std::endl;
+//        std::cout << "PHYSICALLY VALID CHARGE LAYOUTS: " << res2.charge_distributions.size() << std::endl;
+//        std::cout << "GROUND STATE ENERGY: "
+//                  << minimum_energy(res2.charge_distributions.cbegin(), res2.charge_distributions.cend()) << std::endl
+//                  << std::endl;
+//    }
+//    SECTION("Min-size 14")
+//    {
+//        cluster_exact<layout> ce{charge_distribution_surface<layout>{
+//            convert_to_siqad_coordinates(apply_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library>(lyt))}, 14};
+//        std::cout << "NUM CELLS: " << ce.cl.num_cells() << std::endl;
+//        const auto& res = ce.FindGroundState(90);
+//        std::cout << "CC Store size: " << ce.charge_conf_store.size()
+//                  << " ; PB Store size: " << ce.pot_bounds_store.size() << std::endl;
+//        std::cout << "NUM CELLS: " << ce.cl.num_cells() << std::endl;
+//        std::cout << "CLUSTEREXACT RUNTIME: " << res.simulation_runtime.count() << std::endl;
+//        std::cout << "PHYSICALLY VALID CHARGE LAYOUTS: " << res.charge_distributions.size() << std::endl;
+//        std::cout << "GROUND STATE ENERGY: "
+//                  << minimum_energy(res.charge_distributions.cbegin(), res.charge_distributions.cend()) << std::endl
+//                  << std::endl;
+//    }
+//    SECTION("Min-size 18")
+//    {
+//        cluster_exact<layout> ce3{charge_distribution_surface<layout>{convert_to_siqad_coordinates(
+//                                      apply_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library>(lyt))},
+//                                  18};
+//        std::cout << "NUM CELLS: " << ce3.cl.num_cells() << std::endl;
+//        const auto& res3 = ce3.FindGroundState(90);
+//        std::cout << "CC Store size: " << ce3.charge_conf_store.size()
+//                  << " ; PB Store size: " << ce3.pot_bounds_store.size() << std::endl;
+//        std::cout << "NUM CELLS: " << ce3.cl.num_cells() << std::endl;
+//        std::cout << "CLUSTEREXACT RUNTIME: " << res3.simulation_runtime.count() << std::endl;
+//        std::cout << "PHYSICALLY VALID CHARGE LAYOUTS: " << res3.charge_distributions.size() << std::endl;
+//        std::cout << "GROUND STATE ENERGY: "
+//                  << minimum_energy(res3.charge_distributions.cbegin(), res3.charge_distributions.cend()) << std::endl
+//                  << std::endl;
+//    }
+//    SECTION("Min-size 22")
+//    {
+//        cluster_exact<layout> ce4{charge_distribution_surface<layout>{convert_to_siqad_coordinates(
+//                                      apply_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library>(lyt))},
+//                                  22};
+//        std::cout << "NUM CELLS: " << ce4.cl.num_cells() << std::endl;
+//        const auto& res4 = ce4.FindGroundState(90);
 //
-//     for (const auto& cl : res.charge_distributions)
-//     {
-//         print_layout(cl);
-//     }
-//
-// }
+//        std::cout << "CC Store size: " << ce4.charge_conf_store.size()
+//                  << " ; PB Store size: " << ce4.pot_bounds_store.size() << std::endl;
+//        std::cout << "NUM CELLS: " << ce4.cl.num_cells() << std::endl;
+//        std::cout << "CLUSTEREXACT RUNTIME: " << res4.simulation_runtime.count() << std::endl;
+//        std::cout << "PHYSICALLY VALID CHARGE LAYOUTS: " << res4.charge_distributions.size() << std::endl;
+//        std::cout << "GROUND STATE ENERGY: "
+//                  << minimum_energy(res4.charge_distributions.cbegin(), res4.charge_distributions.cend()) << std::endl;
+//    }
+//}
