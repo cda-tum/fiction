@@ -355,7 +355,7 @@ class operational_domain_impl
 
         // for each sample point in parallel
         std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ step_point_samples.cbegin(), step_point_samples.cend(),
-                      [this](const auto& sp) { is_step_point_operational(to_step_point(to_parameter_point(sp))); });
+                      [this](const auto& sp) { is_step_point_operational(sp); });
 
         // a queue of (x, y) dimension step points to be evaluated
         std::queue<step_point> queue{};
@@ -597,8 +597,11 @@ class operational_domain_impl
      */
     [[nodiscard]] step_point to_step_point(const operational_domain::parameter_point& pp) const noexcept
     {
-        auto it_x = std::find(x_values.cbegin(), x_values.cend(), pp.x);
-        auto it_y = std::find(y_values.cbegin(), y_values.cend(), pp.y);
+        const auto it_x = std::lower_bound(x_values.cbegin(), x_values.cend(), pp.x);
+        const auto it_y = std::lower_bound(y_values.cbegin(), y_values.cend(), pp.y);
+
+        assert(it_x != x_values.cend() && "parameter point is outside of the x range");
+        assert(it_y != y_values.cend() && "parameter point is outside of the y range");
 
         const auto x_dis = std::distance(x_values.cbegin(), it_x);
         const auto y_dis = std::distance(y_values.cbegin(), it_y);
