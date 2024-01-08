@@ -323,6 +323,28 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             CHECK(op_domain_stats.num_non_operational_parameter_combinations <= 25);
         }
     }
+    SECTION("floating-point error")
+    {
+        op_domain_params.x_min  = 2.5;
+        op_domain_params.x_max  = 4.5;
+        op_domain_params.x_step = 0.9;
+
+        op_domain_params.y_min  = 2.5;
+        op_domain_params.y_max  = 2.6;
+        op_domain_params.y_step = 0.1;
+
+        SECTION("flood_fill")
+        {
+            const auto op_domain = operational_domain_flood_fill(lyt, std::vector<tt>{create_id_tt()}, 10000,
+                                                                 op_domain_params, &op_domain_stats);
+
+            // check if the operational domain has the correct size
+            CHECK(op_domain.operational_values.size() == 2);
+
+            CHECK(op_domain_stats.num_operational_parameter_combinations == 1);
+            CHECK(op_domain_stats.num_non_operational_parameter_combinations == 1);
+        }
+    }
     SECTION("semi-operational area")
     {
         op_domain_params.x_min  = 0.5;

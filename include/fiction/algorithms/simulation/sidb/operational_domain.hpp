@@ -32,6 +32,7 @@
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
+#include <iterator>
 #include <numeric>
 #include <optional>
 #include <queue>
@@ -354,7 +355,7 @@ class operational_domain_impl
 
         // for each sample point in parallel
         std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ step_point_samples.cbegin(), step_point_samples.cend(),
-                      [this](const auto& sp) { is_step_point_operational(sp); });
+                      [this](const auto& sp) { is_step_point_operational(to_step_point(to_parameter_point(sp))); });
 
         // a queue of (x, y) dimension step points to be evaluated
         std::queue<step_point> queue{};
@@ -596,8 +597,13 @@ class operational_domain_impl
      */
     [[nodiscard]] step_point to_step_point(const operational_domain::parameter_point& pp) const noexcept
     {
-        return {static_cast<std::size_t>((pp.x - params.x_min) / params.x_step),
-                static_cast<std::size_t>((pp.y - params.y_min) / params.y_step)};
+        auto it_x = std::find(x_values.cbegin(), x_values.cend(), pp.x);
+        auto it_y = std::find(y_values.cbegin(), y_values.cend(), pp.y);
+
+        const auto x_dis = std::distance(x_values.cbegin(), it_x);
+        const auto y_dis = std::distance(y_values.cbegin(), it_y);
+
+        return {static_cast<std::size_t>(x_dis), static_cast<std::size_t>(y_dis)};
     }
     /**
      * Calculates the number of steps in the x dimension based on the provided parameters.
