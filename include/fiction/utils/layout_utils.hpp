@@ -287,11 +287,12 @@ Lyt normalize_layout_coordinates(const Lyt& lyt) noexcept
  * coordinates is returned.
  *
  * @tparam Lyt Cell-level layout type based on fiction coordinates, e.g., `offset::ucoord_t` or `cube::coord_t`.
+ * @tparam TargetLyt Cell-level layout type based on SiQAD coordinates, i.e., `siqad::coord_t`.
  * @param lyt The layout that is to be converted to a new layout based on SiQAD coordinates.
  * @return A new equivalent layout based on SiQAD coordinates.
  */
 template <typename Lyt>
-sidb_cell_clk_lyt_siqad convert_to_siqad_coordinates(const Lyt& lyt) noexcept
+auto convert_to_siqad_coordinates(const Lyt& lyt) noexcept
 {
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
@@ -310,7 +311,22 @@ sidb_cell_clk_lyt_siqad convert_to_siqad_coordinates(const Lyt& lyt) noexcept
             lyt_new.assign_cell_name(siqad::to_siqad_coord<cell<Lyt>>(c), lyt.get_cell_name(c));
         });
 
-    return lyt_new;
+    if constexpr (is_charge_distribution_surface_v<Lyt>)
+    {
+        charge_distribution_surface lyt_new_cds{lyt_new};
+
+        lyt.foreach_cell(
+            [&lyt_new_cds, &lyt](const auto& c)
+            { lyt_new_cds.assign_charge_state(siqad::to_siqad_coord<cell<Lyt>>(c), lyt.get_charge_state(c), false); });
+
+        lyt_new_cds.assign_physical_parameters(lyt.get_phys_params());
+
+        return lyt_new_cds;
+    }
+    else
+    {
+        return lyt_new;
+    }
 }
 
 /**
