@@ -1102,7 +1102,7 @@ TEMPLATE_TEST_CASE(
 }
 
 TEMPLATE_TEST_CASE(
-    "4 DBs which can be only simulated if electron hop from negative to positiv is prohibited", "[quickexact]",
+    "4 DBs close to each other", "[quickexact]",
     (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
     (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
@@ -1247,8 +1247,7 @@ TEMPLATE_TEST_CASE(
         CHECK(charge_index.size() == 1);
     }
 
-    SECTION(
-        "Add SiDBs which are positively charged in the ground state, layout does not work fulfill the logic anymore.")
+    SECTION("Add SiDBs which are positively charged in the ground state, layout does not fulfill the logic anymore.")
     {
         params.physical_parameters.base = 3;
         lyt.assign_cell_type({15, 2, 1}, TestType::cell_type::NORMAL);
