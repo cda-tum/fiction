@@ -984,12 +984,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         {
             const auto hop_del =
                 [this](const uint64_t c1, const uint64_t c2)  // energy change when charge hops between two SiDBs.
-            {
-                const int dn_i = (strg->cell_charge[c1] == sidb_charge_state::NEGATIVE) ? 1 : -1;
-                const int dn_j = -dn_i;
-
-                return strg->local_pot[c1] * dn_i + strg->local_pot[c2] * dn_j - strg->pot_mat[c1][c2] * 1;
-            };
+            { return strg->local_pot[c1] - strg->local_pot[c2] - strg->pot_mat[c1][c2] * 1; };
 
             uint64_t hop_counter = 0;
             for (uint64_t i = 0u; i < strg->local_pot.size(); ++i)
