@@ -1371,6 +1371,42 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return required;
     }
     /**
+     * Counts the number of SiDBs with a negative charge state.
+     *
+     * @return The number of SiDBs with a negative charge state.
+     */
+    [[nodiscard]] std::size_t num_negative_sidbs() const noexcept
+    {
+        uint64_t count_negative_sidbs = 0;
+        this->foreach_cell([this, &count_negative_sidbs](const auto& c)
+                           { count_negative_sidbs += (get_charge_state(c) == sidb_charge_state::NEGATIVE) ? 1 : 0; });
+        return count_negative_sidbs;
+    }
+    /**
+     * Counts the number of SiDBs with a neutral charge state.
+     *
+     * @return The number of SiDBs with a neutral charge state.
+     */
+    [[nodiscard]] std::size_t num_neutral_sidbs() const noexcept
+    {
+        uint64_t count_neutral_sidbs = 0;
+        this->foreach_cell([this, &count_neutral_sidbs](const auto& c)
+                           { count_neutral_sidbs += (get_charge_state(c) == sidb_charge_state::NEUTRAL) ? 1 : 0; });
+        return count_neutral_sidbs;
+    }
+    /**
+     * Counts the number of SiDBs with a positive charge state.
+     *
+     * @return The number of SiDBs with a positive charge state.
+     */
+    [[nodiscard]] std::size_t num_positive_sidbs() const noexcept
+    {
+        uint64_t count_positive_sidbs = 0;
+        this->foreach_cell([this, &count_positive_sidbs](const auto& c)
+                           { count_positive_sidbs += (get_charge_state(c) == sidb_charge_state::POSITIVE) ? 1 : 0; });
+        return count_positive_sidbs;
+    }
+    /**
      * This functions returns all cells that could be positively charged. However, this must not be necessarily the case
      * in a physically valid layout.
      *
