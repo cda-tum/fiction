@@ -67,16 +67,19 @@ namespace
  *                              Defaults to offset::ucoord_t if not explicitly provided.
  */
 template <typename OffsetCoordinateType = offset::ucoord_t>
-class WiringReductionLayout : public cartesian_layout<OffsetCoordinateType>
+class wiring_reduction_layout : public cartesian_layout<OffsetCoordinateType>
 {
   public:
+    bool left_to_right;
     /**
      * This constructor initializes the WiringReductionLayout with an optional aspect ratio.
      *
      * @param ar The aspect ratio for the layout. Defaults to an empty aspect ratio if not provided.
      */
-    explicit WiringReductionLayout(const typename cartesian_layout<OffsetCoordinateType>::aspect_ratio& ar = {}) :
-            cartesian_layout<OffsetCoordinateType>(ar)
+    explicit wiring_reduction_layout(const typename cartesian_layout<OffsetCoordinateType>::aspect_ratio& ar = {},
+                                     bool left_to_right                                                      = true) :
+            cartesian_layout<OffsetCoordinateType>(ar),
+            left_to_right(left_to_right)
     {}
 
     /**
@@ -92,20 +95,41 @@ class WiringReductionLayout : public cartesian_layout<OffsetCoordinateType>
     template <typename Fn>
     void foreach_adjacent_coordinate(const OffsetCoordinateType& c, Fn&& fn) const
     {
-        if (c.x == 0)
+        if (wiring_reduction_layout<OffsetCoordinateType>::left_to_right)
         {
-            WiringReductionLayout<OffsetCoordinateType>::foreach_adjacent_coordinate_first_column(c,
-                                                                                                  std::forward<Fn>(fn));
-        }
-        else if (c.x == cartesian_layout<OffsetCoordinateType>::x())
-        {
-            WiringReductionLayout<OffsetCoordinateType>::foreach_adjacent_coordinate_last_column(c,
-                                                                                                 std::forward<Fn>(fn));
+            if (c.x == 0)
+            {
+                wiring_reduction_layout<OffsetCoordinateType>::foreach_adjacent_coordinate_first_column(
+                    c, std::forward<Fn>(fn));
+            }
+            else if (c.x == cartesian_layout<OffsetCoordinateType>::x())
+            {
+                wiring_reduction_layout<OffsetCoordinateType>::foreach_adjacent_coordinate_last_column(
+                    c, std::forward<Fn>(fn));
+            }
+            else
+            {
+                wiring_reduction_layout<OffsetCoordinateType>::foreach_adjacent_coordinate_middle_columns(
+                    c, std::forward<Fn>(fn));
+            }
         }
         else
         {
-            WiringReductionLayout<OffsetCoordinateType>::foreach_adjacent_coordinate_middle_columns(
-                c, std::forward<Fn>(fn));
+            if (c.y == 0)
+            {
+                wiring_reduction_layout<OffsetCoordinateType>::foreach_adjacent_coordinate_first_row(
+                    c, std::forward<Fn>(fn));
+            }
+            else if (c.y == cartesian_layout<OffsetCoordinateType>::y())
+            {
+                wiring_reduction_layout<OffsetCoordinateType>::foreach_adjacent_coordinate_last_row(
+                    c, std::forward<Fn>(fn));
+            }
+            else
+            {
+                wiring_reduction_layout<OffsetCoordinateType>::foreach_adjacent_coordinate_middle_rows(
+                    c, std::forward<Fn>(fn));
+            }
         }
     }
 
@@ -185,6 +209,83 @@ class WiringReductionLayout : public cartesian_layout<OffsetCoordinateType>
 
         apply_if_not_c(cartesian_layout<OffsetCoordinateType>::south(c));
     }
+
+    /**
+     * Iterates over adjacent coordinates of a given coordinate in the first row.
+     *
+     * This function iterates over adjacent coordinates of the given coordinate 'c' in the first row
+     * and applies the provided functor 'fn' to each valid adjacent coordinate.
+     *
+     * @tparam Fn Type of the functor to apply to each adjacent coordinate.
+     * @param c The reference coordinate for which adjacent coordinates are determined.
+     * @param fn The functor to apply to each adjacent coordinate.
+     */
+    template <typename Fn>
+    void foreach_adjacent_coordinate_first_row(const OffsetCoordinateType& c, Fn&& fn) const
+    {
+        const auto apply_if_not_c = [&c, &fn](const auto& cardinal) noexcept
+        {
+            if (cardinal != c)
+            {
+                std::invoke(std::forward<Fn>(fn), cardinal);
+            }
+        };
+
+        apply_if_not_c(cartesian_layout<OffsetCoordinateType>::south(cartesian_layout<OffsetCoordinateType>::east(c)));
+        apply_if_not_c(cartesian_layout<OffsetCoordinateType>::south(c));
+        apply_if_not_c(cartesian_layout<OffsetCoordinateType>::south(cartesian_layout<OffsetCoordinateType>::west(c)));
+        apply_if_not_c(cartesian_layout<OffsetCoordinateType>::east(c));
+    }
+
+    /**
+     * Iterates over adjacent coordinates of a given coordinate in the middle rows.
+     *
+     * This function iterates over adjacent coordinates of the given coordinate 'c' in the middle rows
+     * and applies the provided functor 'fn' to each valid adjacent coordinate.
+     *
+     * @tparam Fn Type of the functor to apply to each adjacent coordinate.
+     * @param c The reference coordinate for which adjacent coordinates are determined.
+     * @param fn The functor to apply to each adjacent coordinate.
+     */
+    template <typename Fn>
+    void foreach_adjacent_coordinate_middle_rows(const OffsetCoordinateType& c, Fn&& fn) const
+    {
+        const auto apply_if_not_c = [&c, &fn](const auto& cardinal) noexcept
+        {
+            if (cardinal != c)
+            {
+                std::invoke(std::forward<Fn>(fn), cardinal);
+            }
+        };
+
+        apply_if_not_c(cartesian_layout<OffsetCoordinateType>::south(cartesian_layout<OffsetCoordinateType>::east(c)));
+        apply_if_not_c(cartesian_layout<OffsetCoordinateType>::south(c));
+        apply_if_not_c(cartesian_layout<OffsetCoordinateType>::south(cartesian_layout<OffsetCoordinateType>::west(c)));
+    }
+
+    /**
+     * Iterates over adjacent coordinates of a given coordinate in the last row.
+     *
+     * This function iterates over adjacent coordinates of the given coordinate 'c' in the last row
+     * and applies the provided functor 'fn' to each valid adjacent coordinate.
+     *
+     * @tparam Fn Type of the functor to apply to each adjacent coordinate.
+     * @param c The reference coordinate for which adjacent coordinates are determined.
+     * @param fn The functor to apply to each adjacent coordinate.
+     */
+    template <typename Fn>
+    void foreach_adjacent_coordinate_last_row(const OffsetCoordinateType& c, Fn&& fn) const
+    {
+        const auto apply_if_not_c = [&c, &fn](const auto& cardinal) noexcept
+        {
+            if (cardinal != c)
+            {
+                std::invoke(std::forward<Fn>(fn), cardinal);
+            }
+        };
+
+        apply_if_not_c(cartesian_layout<OffsetCoordinateType>::east(c));
+    }
 };
 
 /**
@@ -195,7 +296,7 @@ class WiringReductionLayout : public cartesian_layout<OffsetCoordinateType>
  * provides functionality for a wiring reduction layout based on a Cartesian coordinate system.
  * This alias enhances code readability and indicates the association with wiring reduction features.
  */
-using wiring_reduction_layout = obstruction_layout<WiringReductionLayout<>>;
+using wiring_reduction_lyt = obstruction_layout<wiring_reduction_layout<>>;
 }  // namespace
 
 /**
@@ -213,114 +314,123 @@ using wiring_reduction_layout = obstruction_layout<WiringReductionLayout<>>;
  * @return A new layout with wiring reduction features.
  */
 template <typename Lyt>
-wiring_reduction_layout create_shifted_layout(const Lyt& lyt, const uint64_t x_offset = 0,
-                                              const uint64_t y_offset = 0) noexcept
+wiring_reduction_lyt create_shifted_layout(const Lyt& lyt, const uint64_t x_offset = 0, const uint64_t y_offset = 0,
+                                           bool left_to_right = true) noexcept
 {
-    // Get width, height, and depth of the Cartesian layout
-    const auto layout_width  = lyt.x() + 1;
-    const auto layout_height = lyt.y() + 1;
-    const auto layout_depth  = lyt.z();
-
     // Create WiringReductionLayout with specified offsets
-    WiringReductionLayout<> obs_shifted_layout{{lyt.x() + x_offset + 1, lyt.y() + y_offset + 1, lyt.z()}};
-    auto                    shifted_layout = wiring_reduction_layout(obs_shifted_layout);
+    wiring_reduction_layout<> obs_shifted_layout{{lyt.x() + x_offset + 1, lyt.y() + y_offset + 1, lyt.z()},
+                                                 left_to_right};
+    auto                      shifted_layout = wiring_reduction_lyt(obs_shifted_layout);
 
-    // Iterate through Cartesian layout diagonally
-    for (uint64_t k = 0; k < layout_width + layout_height - 1; ++k)
-    {
-        for (uint64_t x = 0; x < k + 1; ++x)
+    // Iterate through nodes in the layout
+    lyt.foreach_node(
+        [&lyt, &shifted_layout, &x_offset, &y_offset](const auto& node)
         {
-            const auto y = k - x;
-            if (y < layout_height && x < layout_width)
+            const tile<Lyt> old_coord = lyt.get_tile(node);
+            const tile<Lyt> new_coord{old_coord.x + x_offset, old_coord.y + y_offset, old_coord.z};
+
+            // Skip if the tile is empty
+            if (!lyt.is_empty_tile(old_coord))
             {
-                for (uint64_t z = 0; z <= layout_depth; ++z)
+                // Handle Primary Inputs (PI)
+                if (lyt.is_pi(node))
                 {
-                    // Old and new coordinates
-                    const tile<Lyt> old_coord{x, y, z};
-                    const tile<Lyt> new_coord{old_coord.x + x_offset, old_coord.y + y_offset, old_coord.z};
+                    shifted_layout.obstruct_coordinate(new_coord);
+                    shifted_layout.obstruct_coordinate({new_coord.x, new_coord.y, 1});
+                }
 
-                    // Skip if the tile is empty
-                    if (lyt.is_empty_tile(old_coord))
-                    {
-                        continue;
-                    }
-                    const auto node = lyt.get_node(old_coord);
+                // Handle single input gates and wires
+                if (const auto signals = lyt.incoming_data_flow(old_coord); signals.size() == 1)
+                {
+                    const auto      signal = signals[0];
+                    const tile<Lyt> shifted_tile{signal.x + x_offset, signal.y + y_offset, signal.z};
 
-                    // Handle Primary Inputs (PI)
-                    if (lyt.is_pi(node))
+                    // Obstruct the connection between the gate and its incoming signal
+                    shifted_layout.obstruct_connection(shifted_tile, new_coord);
+
+                    // Obstruct horizontal/vertical wires, non-wire gates (inv) and fanouts
+                    if (!lyt.is_wire(node) || (lyt.fanout_size(node) != 1) || (old_coord.z != 0) ||
+                        (lyt.has_western_incoming_signal({old_coord}) && lyt.has_eastern_outgoing_signal({old_coord}) &&
+                         shifted_layout.left_to_right) ||
+                        (lyt.has_northern_incoming_signal({old_coord}) &&
+                         lyt.has_southern_outgoing_signal({old_coord}) && !shifted_layout.left_to_right))
                     {
-                        shifted_layout.obstruct_coordinate(new_coord);
+                        shifted_layout.obstruct_coordinate({new_coord.x, new_coord.y, 0});
                         shifted_layout.obstruct_coordinate({new_coord.x, new_coord.y, 1});
                     }
 
-                    // Handle single input gates and wires
-                    if (const auto signals = lyt.incoming_data_flow(old_coord); signals.size() == 1)
+                    // For bent wires from north to east, obstruct the connection between the wire and the
+                    // coordinate to the bottom right/ top left
+                    else if (lyt.has_northern_incoming_signal({old_coord}) &&
+                             lyt.has_eastern_outgoing_signal({old_coord}))
                     {
-                        const auto      signal = signals[0];
-                        const tile<Lyt> shifted_tile{signal.x + x_offset, signal.y + y_offset, signal.z};
-
-                        // Obstruct the connection between the gate and its incoming signal
-                        shifted_layout.obstruct_connection(shifted_tile, new_coord);
-
-                        // Obstruct horizontal wires, non-wire gates (inv) and fanouts
-                        if ((lyt.has_western_incoming_signal({old_coord}) &&
-                             lyt.has_eastern_outgoing_signal({old_coord})) ||
-                            !lyt.is_wire(node) || (lyt.fanout_size(node) != 1) || (old_coord.z != 0))
-                        {
-                            shifted_layout.obstruct_coordinate({new_coord.x, new_coord.y, 0});
-                            shifted_layout.obstruct_coordinate({new_coord.x, new_coord.y, 1});
-                        }
-
-                        // For bent wires from north to east, obstruct the connection between the wire and the
-                        // coordinate to the bottom right
-                        else if (lyt.has_northern_incoming_signal({old_coord}) &&
-                                 lyt.has_eastern_outgoing_signal({old_coord}))
+                        if (shifted_layout.left_to_right)
                         {
                             shifted_layout.obstruct_connection(new_coord,
                                                                {new_coord.x + 1, new_coord.y + 1, new_coord.z});
                         }
-
-                        // For bent wires from west to south, obstruct the connection between the wire and the
-                        // coordinate to the top left
-                        else if (lyt.has_western_incoming_signal({old_coord}) &&
-                                 lyt.has_southern_outgoing_signal({old_coord}))
+                        else
                         {
                             shifted_layout.obstruct_connection({new_coord.x - 1, new_coord.y - 1, new_coord.z},
                                                                new_coord);
                         }
                     }
 
-                    // Handle double input gates (AND, OR, ...)
-                    else if (signals.size() == 2)
+                    // For bent wires from west to south, obstruct the connection between the wire and the
+                    // coordinate to the top left/ bottom right
+                    else if (lyt.has_western_incoming_signal({old_coord}) &&
+                             lyt.has_southern_outgoing_signal({old_coord}))
                     {
-                        const auto      signal_a = signals[0];
-                        const auto      signal_b = signals[1];
-                        const tile<Lyt> shifted_tile_a{signal_a.x + x_offset, signal_a.y + y_offset, signal_a.z};
-                        const tile<Lyt> shifted_tile_b{signal_b.x + x_offset, signal_b.y + y_offset, signal_b.z};
+                        if (shifted_layout.left_to_right)
+                        {
+                            shifted_layout.obstruct_connection({new_coord.x - 1, new_coord.y - 1, new_coord.z},
+                                                               new_coord);
+                        }
+                        else
+                        {
+                            shifted_layout.obstruct_connection(new_coord,
+                                                               {new_coord.x + 1, new_coord.y + 1, new_coord.z});
+                        }
+                    }
+                }
 
-                        shifted_layout.obstruct_connection(shifted_tile_a, new_coord);
-                        shifted_layout.obstruct_connection(shifted_tile_b, new_coord);
+                // Handle double input gates (AND, OR, ...)
+                else if (signals.size() == 2)
+                {
+                    const auto      signal_a = signals[0];
+                    const auto      signal_b = signals[1];
+                    const tile<Lyt> shifted_tile_a{signal_a.x + x_offset, signal_a.y + y_offset, signal_a.z};
+                    const tile<Lyt> shifted_tile_b{signal_b.x + x_offset, signal_b.y + y_offset, signal_b.z};
 
-                        shifted_layout.obstruct_coordinate(new_coord);
-                        shifted_layout.obstruct_coordinate({new_coord.x, new_coord.y, 1});
+                    shifted_layout.obstruct_connection(shifted_tile_a, new_coord);
+                    shifted_layout.obstruct_connection(shifted_tile_b, new_coord);
 
-                        // special case:
-                        // +→=
-                        // ↓ ↓
-                        // =→&
-                        //
-                        // -> No crossing between coordinate to the left and coordinate above the gate
-                        if (lyt.has_northern_incoming_signal({old_coord.x - 1, old_coord.y, old_coord.z}) &&
-                            lyt.has_western_incoming_signal({old_coord.x, old_coord.y - 1, old_coord.z}))
+                    shifted_layout.obstruct_coordinate(new_coord);
+                    shifted_layout.obstruct_coordinate({new_coord.x, new_coord.y, 1});
+
+                    // special case:
+                    // +→=
+                    // ↓ ↓
+                    // =→&
+                    //
+                    // -> No crossing between coordinate to the left and coordinate above the gate
+                    if (lyt.has_northern_incoming_signal({old_coord.x - 1, old_coord.y, old_coord.z}) &&
+                        lyt.has_western_incoming_signal({old_coord.x, old_coord.y - 1, old_coord.z}))
+                    {
+                        if (shifted_layout.left_to_right)
                         {
                             shifted_layout.obstruct_connection({new_coord.x - 1, new_coord.y, new_coord.z},
                                                                {new_coord.x, new_coord.y - 1, new_coord.z});
                         }
+                        else
+                        {
+                            shifted_layout.obstruct_connection({new_coord.x, new_coord.y - 1, new_coord.z},
+                                                               {new_coord.x - 1, new_coord.y, new_coord.z});
+                        }
                     }
                 }
             }
-        }
-    }
+        });
 
     return shifted_layout;
 }
@@ -329,7 +439,8 @@ wiring_reduction_layout create_shifted_layout(const Lyt& lyt, const uint64_t x_o
  * Add obstructions to the layout.
  *
  * This function adds obstructions to the provided WiringReductionLayout. It obstructs coordinates
- * along the top and bottom edges of the layout in both layers (0 and 1).
+ * along the top and bottom edges (for left to right) or along the left and right edges (for top to bottom) of the
+ * layout in both layers (0 and 1).
  *
  * @tparam Lyt Type of the Cartesian layout.
  * @param lyt The Cartesian layout to which obstructions will be added.
@@ -337,18 +448,37 @@ wiring_reduction_layout create_shifted_layout(const Lyt& lyt, const uint64_t x_o
 template <typename Lyt>
 void add_obstructions(Lyt& lyt) noexcept
 {
-    // Add obstructions to the top edge of the layout
-    for (uint64_t x = 1; x <= lyt.x(); x++)
+    if (lyt.left_to_right)
     {
-        lyt.obstruct_coordinate({x, 0, 0});
-        lyt.obstruct_coordinate({x, 0, 1});
-    }
+        // Add obstructions to the top edge of the layout
+        for (uint64_t x = 1; x <= lyt.x(); x++)
+        {
+            lyt.obstruct_coordinate({x, 0, 0});
+            lyt.obstruct_coordinate({x, 0, 1});
+        }
 
-    // Add obstructions to the bottom edge of the layout
-    for (uint64_t x = 0; x < lyt.x(); x++)
+        // Add obstructions to the bottom edge of the layout
+        for (uint64_t x = 0; x < lyt.x(); x++)
+        {
+            lyt.obstruct_coordinate({x, lyt.y(), 0});
+            lyt.obstruct_coordinate({x, lyt.y(), 1});
+        }
+    }
+    else
     {
-        lyt.obstruct_coordinate({x, lyt.y(), 0});
-        lyt.obstruct_coordinate({x, lyt.y(), 1});
+        // Add obstructions to the left edge of the layout
+        for (uint64_t y = 1; y <= lyt.y(); y++)
+        {
+            lyt.obstruct_coordinate({0, y, 0});
+            lyt.obstruct_coordinate({0, y, 1});
+        }
+
+        // Add obstructions to the right edge of the layout
+        for (uint64_t y = 0; y < lyt.y(); y++)
+        {
+            lyt.obstruct_coordinate({lyt.x(), y, 0});
+            lyt.obstruct_coordinate({lyt.y(), y, 1});
+        }
     }
 }
 /**
@@ -382,8 +512,9 @@ template <typename Lyt>
  *
  * This function updates the to-delete list by appending coordinates from the given possible path
  * in a Wiring Reduction layout. It considers coordinates that are not at the leftmost (x = 0) or rightmost (x =
- * lyt.x()) positions and shifts them to get the corresponding coordinates on the original layout. The coordinates are
- * then obstructed in both layers (0 and 1).
+ * lyt.x()) positions for left to right or at the top (y = 0) or bottom (y =
+ * lyt.y()) positions for top to bottom and shifts them to get the corresponding coordinates on the original layout. The
+ * coordinates are then obstructed in both layers (0 and 1).
  *
  * @tparam Lyt Type of the Wiring Reduction layout.
  * @param lyt The Wiring Reduction layout to be updated.
@@ -391,13 +522,14 @@ template <typename Lyt>
  * @param to_delete Reference to the to-delete list to be updated with new coordinates.
  */
 template <typename Lyt>
-void update_to_delete_list(Lyt& lyt, layout_coordinate_path<wiring_reduction_layout> possible_path,
-                           layout_coordinate_path<wiring_reduction_layout>& to_delete)
+void update_to_delete_list(Lyt& lyt, layout_coordinate_path<wiring_reduction_lyt>& possible_path,
+                           layout_coordinate_path<wiring_reduction_lyt>& to_delete)
 {
     for (const auto coord : possible_path)
     {
         // Check if the coordinate is not at the leftmost or rightmost position
-        if (coord.x != 0 && coord.x != lyt.x())
+        if ((lyt.left_to_right && coord.x != 0 && coord.x != lyt.x()) ||
+            (!lyt.left_to_right && coord.y != 0 && coord.y != lyt.y()))
         {
             // Create the corresponding coordinate on the original layout
             const fiction::coordinate<Lyt> shifted_coord{coord.x - 1, coord.y - 1, 0};
@@ -416,9 +548,9 @@ void update_to_delete_list(Lyt& lyt, layout_coordinate_path<wiring_reduction_lay
  * Calculate an offset matrix based on a to-delete list in a Wiring Reduction layout.
  *
  * This function calculates an offset matrix based on the provided to-delete list in a Wiring Reduction layout.
- * The offset matrix represents the number of deletable coordinates in the same column but above each specific
- * coordinate. The matrix is initialized with zeros and updated by incrementing the values for each deletable
- * coordinate.
+ * The offset matrix represents the number of deletable coordinates in the same column for left to right and same row
+ * for top to bottom but above/ to the right of each specific coordinate. The matrix is initialized with zeros and
+ * updated by incrementing the values for each deletable coordinate.
  *
  * @tparam Lyt Type of the Wiring Reduction layout.
  * @param lyt The Wiring Reduction layout for which the offset matrix is calculated.
@@ -427,7 +559,7 @@ void update_to_delete_list(Lyt& lyt, layout_coordinate_path<wiring_reduction_lay
  */
 template <typename Lyt>
 [[nodiscard]] std::vector<std::vector<uint64_t>>
-calculate_offset_matrix(Lyt& lyt, layout_coordinate_path<wiring_reduction_layout> to_delete) noexcept
+calculate_offset_matrix(Lyt& lyt, layout_coordinate_path<wiring_reduction_lyt>& to_delete, bool left_to_right) noexcept
 {
     // Initialize matrix with zeros
     std::vector<std::vector<uint64_t>> matrix(lyt.y() + 1, std::vector<uint64_t>(lyt.x() + 1, 0));
@@ -437,9 +569,19 @@ calculate_offset_matrix(Lyt& lyt, layout_coordinate_path<wiring_reduction_layout
     {
         uint64_t x = coord.x;
         uint64_t y = coord.y;
-        for (uint64_t i = lyt.y(); i > y; --i)
+        if (left_to_right)
         {
-            matrix[i][x] += 1;
+            for (uint64_t i = lyt.y(); i > y; --i)
+            {
+                matrix[i][x] += 1;
+            }
+        }
+        else
+        {
+            for (uint64_t i = lyt.x(); i > x; --i)
+            {
+                matrix[y][i] += 1;
+            }
         }
     }
 
@@ -460,8 +602,8 @@ calculate_offset_matrix(Lyt& lyt, layout_coordinate_path<wiring_reduction_layout
  *                     but above each specific coordinate.
  */
 template <typename Lyt>
-void delete_wires(Lyt& lyt, layout_coordinate_path<wiring_reduction_layout> to_delete,
-                  std::vector<std::vector<uint64_t>> offset_matrix)
+void delete_wires(Lyt& lyt, layout_coordinate_path<wiring_reduction_lyt>& to_delete,
+                  std::vector<std::vector<uint64_t>> offset_matrix, bool left_to_right)
 {
     // Create a copy of the original layout for reference
     auto layout_copy = lyt.clone();
@@ -472,75 +614,156 @@ void delete_wires(Lyt& lyt, layout_coordinate_path<wiring_reduction_layout> to_d
         lyt.clear_tile(tile);
     }
 
-    // Iterate through the layout to delete wires and adjust the layout
-    for (uint64_t x = 0; x <= lyt.x(); ++x)
+    if (left_to_right)
     {
-        for (uint64_t y = 0; y <= lyt.y(); ++y)
+        // Iterate through the layout to delete wires and adjust the layout
+        for (uint64_t x = 0; x <= lyt.x(); ++x)
         {
-            uint64_t offset = offset_matrix[y][x];
-
-            for (uint64_t z = 0; z <= lyt.z(); ++z)
+            for (uint64_t y = 0; y <= lyt.y(); ++y)
             {
-                const tile<Lyt> old_coord = {x, y, z};
+                uint64_t offset = offset_matrix[y][x];
 
-                // Check if the tile is not empty and has an offset
-                if (!(lyt.is_empty_tile(old_coord) && (offset != 0)))
+                for (uint64_t z = 0; z <= lyt.z(); ++z)
                 {
-                    const tile<Lyt> new_coord = {x, y - offset, z};
+                    const tile<Lyt> old_coord = {x, y, z};
 
-                    std::vector<mockturtle::signal<Lyt>> signals{};
-                    signals.reserve(layout_copy.fanin_size(layout_copy.get_node(old_coord)));
+                    // Check if the tile is not empty and has an offset
+                    if (!(lyt.is_empty_tile(old_coord) && (offset != 0)))
+                    {
+                        const tile<Lyt> new_coord = {x, y - offset, z};
 
-                    // Iterate through fanin and create signals for the new coordinates
-                    layout_copy.foreach_fanin(
-                        layout_copy.get_node(old_coord),
-                        [&lyt, &signals, &offset, &old_coord, &layout_copy, &offset_matrix](const auto& i)
-                        {
-                            auto fanin = static_cast<tile<Lyt>>(i);
+                        std::vector<mockturtle::signal<Lyt>> signals{};
+                        signals.reserve(layout_copy.fanin_size(layout_copy.get_node(old_coord)));
 
-                            if (fanin.y == old_coord.y)
+                        // Iterate through fanin and create signals for the new coordinates
+                        layout_copy.foreach_fanin(
+                            layout_copy.get_node(old_coord),
+                            [&lyt, &signals, &offset, &old_coord, &layout_copy, &offset_matrix](const auto& i)
                             {
-                                signals.push_back(lyt.make_signal(lyt.get_node({fanin.x, fanin.y - offset, fanin.z})));
-                            }
-                            else
-                            {
-                                bool traversing_deleted_wires = false;
+                                auto fanin = static_cast<tile<Lyt>>(i);
 
-                                // Check if traversing through deleted wires
-                                if (offset_matrix[fanin.y + 1][fanin.x] != offset_matrix[fanin.y][fanin.x])
+                                if (fanin.y == old_coord.y)
                                 {
-                                    fanin                    = {fanin.x, fanin.y, 0};
-                                    traversing_deleted_wires = true;
+                                    signals.push_back(
+                                        lyt.make_signal(lyt.get_node({fanin.x, fanin.y - offset, fanin.z})));
                                 }
-
-                                uint64_t offset_offset = 0;
-
-                                // If traversing through deleted wires, update the offset
-                                if (traversing_deleted_wires)
+                                else
                                 {
-                                    for (uint64_t o = 0; o < offset; ++o)
+                                    bool traversing_deleted_wires = false;
+
+                                    // Check if traversing through deleted wires
+                                    if (offset_matrix[fanin.y + 1][fanin.x] != offset_matrix[fanin.y][fanin.x])
                                     {
-                                        offset_offset++;
-                                        if (offset_matrix[fanin.y][fanin.x] != offset_matrix[fanin.y - 1][fanin.x])
+                                        fanin                    = {fanin.x, fanin.y, 0};
+                                        traversing_deleted_wires = true;
+                                    }
+
+                                    uint64_t offset_offset = 0;
+
+                                    // If traversing through deleted wires, update the offset
+                                    if (traversing_deleted_wires)
+                                    {
+                                        for (uint64_t o = 0; o < offset; ++o)
                                         {
-                                            fanin = {fanin.x, fanin.y - 1, fanin.z};
-                                        }
-                                        else
-                                        {
-                                            fanin = layout_copy.incoming_data_flow(fanin)[0];
-                                            break;
+                                            offset_offset++;
+                                            if (offset_matrix[fanin.y][fanin.x] != offset_matrix[fanin.y - 1][fanin.x])
+                                            {
+                                                fanin = {fanin.x, fanin.y - 1, fanin.z};
+                                            }
+                                            else
+                                            {
+                                                fanin = layout_copy.incoming_data_flow(fanin)[0];
+                                                break;
+                                            }
                                         }
                                     }
+
+                                    // Create signals for the new coordinates
+                                    signals.push_back(lyt.make_signal(
+                                        lyt.get_node({fanin.x, fanin.y - offset + offset_offset, fanin.z})));
                                 }
+                            });
 
-                                // Create signals for the new coordinates
-                                signals.push_back(lyt.make_signal(
-                                    lyt.get_node({fanin.x, fanin.y - offset + offset_offset, fanin.z})));
-                            }
-                        });
+                        // Move the node to the new coordinates
+                        lyt.move_node(lyt.get_node(old_coord), new_coord, signals);
+                    }
+                }
+            }
+        }
+    }
+    else
+    {
+        // Iterate through the layout to delete wires and adjust the layout
+        for (uint64_t y = 0; y <= lyt.y(); ++y)
+        {
+            for (uint64_t x = 0; x <= lyt.x(); ++x)
+            {
+                uint64_t offset = offset_matrix[y][x];
 
-                    // Move the node to the new coordinates
-                    lyt.move_node(lyt.get_node(old_coord), new_coord, signals);
+                for (uint64_t z = 0; z <= lyt.z(); ++z)
+                {
+                    const tile<Lyt> old_coord = {x, y, z};
+
+                    // Check if the tile is not empty and has an offset
+                    if (!(lyt.is_empty_tile(old_coord) && (offset != 0)))
+                    {
+                        const tile<Lyt> new_coord = {x - offset, y, z};
+
+                        std::vector<mockturtle::signal<Lyt>> signals{};
+                        signals.reserve(layout_copy.fanin_size(layout_copy.get_node(old_coord)));
+
+                        // Iterate through fanin and create signals for the new coordinates
+                        layout_copy.foreach_fanin(
+                            layout_copy.get_node(old_coord),
+                            [&lyt, &signals, &offset, &old_coord, &layout_copy, &offset_matrix](const auto& i)
+                            {
+                                auto fanin = static_cast<tile<Lyt>>(i);
+
+                                if (fanin.x == old_coord.x)
+                                {
+                                    signals.push_back(
+                                        lyt.make_signal(lyt.get_node({fanin.x - offset, fanin.y, fanin.z})));
+                                }
+                                else
+                                {
+                                    bool traversing_deleted_wires = false;
+
+                                    // Check if traversing through deleted wires
+                                    if (offset_matrix[fanin.y][fanin.x + 1] != offset_matrix[fanin.y][fanin.x])
+                                    {
+                                        fanin                    = {fanin.x, fanin.y, 0};
+                                        traversing_deleted_wires = true;
+                                    }
+
+                                    uint64_t offset_offset = 0;
+
+                                    // If traversing through deleted wires, update the offset
+                                    if (traversing_deleted_wires)
+                                    {
+                                        for (uint64_t o = 0; o < offset; ++o)
+                                        {
+                                            offset_offset++;
+                                            if (offset_matrix[fanin.y][fanin.x] != offset_matrix[fanin.y][fanin.x - 1])
+                                            {
+                                                fanin = {fanin.x - 1, fanin.y, fanin.z};
+                                            }
+                                            else
+                                            {
+                                                fanin = layout_copy.incoming_data_flow(fanin)[0];
+                                                break;
+                                            }
+                                        }
+                                    }
+
+                                    // Create signals for the new coordinates
+                                    signals.push_back(lyt.make_signal(
+                                        lyt.get_node({fanin.x - offset + offset_offset, fanin.y, fanin.z})));
+                                }
+                            });
+
+                        // Move the node to the new coordinates
+                        lyt.move_node(lyt.get_node(old_coord), new_coord, signals);
+                    }
                 }
             }
         }
@@ -578,7 +801,7 @@ void wiring_reduction(const Lyt& lyt, wiring_reduction_stats* pst = nullptr) noe
     // Check if the clocking scheme is 2DDWave
     if (!lyt.is_clocking_scheme(clock_name::TWODDWAVE))
     {
-        std::cout << "Clocking scheme is not 2DDWave" << std::endl;
+        std::cout << "Clocking scheme is not 2DDWave!\n";
         return;
     }
 
@@ -590,31 +813,51 @@ void wiring_reduction(const Lyt& lyt, wiring_reduction_stats* pst = nullptr) noe
         const mockturtle::stopwatch stop{stats.time_total};
 
         auto                                                    layout    = obstruction_layout<Lyt>(lyt);
-        layout_coordinate_path<detail::wiring_reduction_layout> to_delete = {};
+        layout_coordinate_path<detail::wiring_reduction_lyt> to_delete = {};
 
+        bool found_wires = false;
+
+        std::stringstream print_stream{};
+        print_gate_level_layout(print_stream, layout, false, false);
         // Perform wiring reduction iteratively until no further wires can be deleted
         do {
-            auto shifted_layout = detail::create_shifted_layout<Lyt>(layout, 1, 1);
-            detail::add_obstructions(shifted_layout);
-            to_delete = {};
+            found_wires = false;
 
-            // Get the initial possible path
-            auto possible_path = detail::get_path(shifted_layout, {0, 0}, {shifted_layout.x(), shifted_layout.y()});
-
-            // Iterate while there is a possible path
-            while (!possible_path.empty())
+            for (bool left_to_right : {true, false})
             {
-                detail::update_to_delete_list(shifted_layout, possible_path, to_delete);
+                auto shifted_layout = detail::create_shifted_layout<Lyt>(layout, 1, 1, left_to_right);
+                detail::add_obstructions(shifted_layout);
+                to_delete = {};
 
-                // Update possible_path for the next iteration
-                possible_path = detail::get_path(shifted_layout, {0, 0}, {shifted_layout.x(), shifted_layout.y()});
+                // Get the initial possible path
+                auto possible_path = detail::get_path(shifted_layout, {0, 0}, {shifted_layout.x(), shifted_layout.y()});
+
+                // Iterate while there is a possible path
+                while (!possible_path.empty())
+                {
+                    detail::update_to_delete_list(shifted_layout, possible_path, to_delete);
+
+                    // Update possible_path for the next iteration
+                    possible_path = detail::get_path(shifted_layout, {0, 0}, {shifted_layout.x(), shifted_layout.y()});
+                }
+
+                for (coordinate<detail::wiring_reduction_lyt> coord : to_delete)
+                {
+                    std::cout << coord;
+                }
+                // Calculate offset matrix and delete wires based on to-delete list
+                const auto offset_matrix = detail::calculate_offset_matrix<Lyt>(layout, to_delete, left_to_right);
+                detail::delete_wires(layout, to_delete, offset_matrix, left_to_right);
+
+                if (!to_delete.empty())
+                {
+                    found_wires = true;
+                }
             }
+        } while (found_wires);  // Continue until no further wires can be deleted
 
-            // Calculate offset matrix and delete wires based on to-delete list
-            const auto offset_matrix = detail::calculate_offset_matrix<Lyt>(layout, to_delete);
-            detail::delete_wires(layout, to_delete, offset_matrix);
-
-        } while (!to_delete.empty());  // Continue until no further wires can be deleted
+        print_gate_level_layout(print_stream, layout, false, false);
+        std::cout << print_stream.str();
     }
 
     // Record runtime statistics if a valid pointer is provided
