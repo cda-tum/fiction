@@ -12,10 +12,6 @@
 #include "fiction/layouts/cartesian_layout.hpp"
 #include "fiction/layouts/obstruction_layout.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/name_utils.hpp"
-#include "fiction/utils/placement_utils.hpp"
-
-#include <fiction/io/print_layout.hpp>
 
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
@@ -812,13 +808,11 @@ void wiring_reduction(const Lyt& lyt, wiring_reduction_stats* pst = nullptr) noe
     {
         const mockturtle::stopwatch stop{stats.time_total};
 
-        auto                                                    layout    = obstruction_layout<Lyt>(lyt);
+        auto                                                 layout    = obstruction_layout<Lyt>(lyt);
         layout_coordinate_path<detail::wiring_reduction_lyt> to_delete = {};
 
         bool found_wires = false;
 
-        std::stringstream print_stream{};
-        print_gate_level_layout(print_stream, layout, false, false);
         // Perform wiring reduction iteratively until no further wires can be deleted
         do {
             found_wires = false;
@@ -855,9 +849,6 @@ void wiring_reduction(const Lyt& lyt, wiring_reduction_stats* pst = nullptr) noe
                 }
             }
         } while (found_wires);  // Continue until no further wires can be deleted
-
-        print_gate_level_layout(print_stream, layout, false, false);
-        std::cout << print_stream.str();
     }
 
     // Record runtime statistics if a valid pointer is provided

@@ -1,7 +1,7 @@
 #include "fiction_experiments.hpp"
 
 #include <fiction/algorithms/physical_design/orthogonal.hpp>  // scalable heuristic for physical design of FCN layouts
-#include <fiction/algorithms/physical_design/wiring_reduction.hpp>  // wiring reduction algorithm
+#include <fiction/algorithms/physical_design/wiring_reduction.hpp>                // wiring reduction algorithm
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/algorithms/verification/equivalence_checking.hpp>               // SAT-based equivalence checking
 
@@ -22,30 +22,31 @@ int main()  // NOLINT
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t,
                             uint64_t, uint32_t, uint32_t, uint64_t, uint64_t, double, double, float, std::string>
         wiring_reduction_exp{"wiring_reduction",
-                         "benchmark",
-                         "inputs",
-                         "outputs",
-                         "initial nodes",
-                         "ortho layout width (in tiles)",
-                         "ortho layout height (in tiles)",
-                         "ortho layout area (in tiles)",
-                         "optimized layout width (in tiles)",
-                         "optimized layout height (in tiles)",
-                         "optimized layout area (in tiles)",
-                         "gates",
-                         "wires",
-                         "critical path",
-                         "throughput",
-                         "runtime ortho (in sec)",
-                         "runtime optimization (in sec)",
-                         "improvement (%)",
-                         "equivalent"};
+                             "benchmark",
+                             "inputs",
+                             "outputs",
+                             "initial nodes",
+                             "ortho layout width (in tiles)",
+                             "ortho layout height (in tiles)",
+                             "ortho layout area (in tiles)",
+                             "optimized layout width (in tiles)",
+                             "optimized layout height (in tiles)",
+                             "optimized layout area (in tiles)",
+                             "gates",
+                             "wires",
+                             "critical path",
+                             "throughput",
+                             "runtime ortho (in sec)",
+                             "runtime optimization (in sec)",
+                             "improvement (%)",
+                             "equivalent"};
 
     // stats for SMT-based physical design
     fiction::orthogonal_physical_design_stats orthogonal_stats{};
-    fiction::wiring_reduction_stats   wiring_reduction_stats{};
+    fiction::wiring_reduction_stats           wiring_reduction_stats{};
 
-    static constexpr const uint64_t bench_select = (fiction_experiments::trindade16 | fiction_experiments::fontes18) & ~fiction_experiments::clpl;
+    static constexpr const uint64_t bench_select =
+        (fiction_experiments::trindade16 | fiction_experiments::fontes18) & ~fiction_experiments::clpl;
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
@@ -93,11 +94,12 @@ int main()  // NOLINT
                              static_cast<float>(area_before_wiring_reduction);
         // log results
         wiring_reduction_exp(benchmark, network.num_pis(), network.num_pos(), network.num_gates(),
-                         width_before_wiring_reduction, height_before_wiring_reduction, area_before_wiring_reduction,
-                         width_after_wiring_reduction, height_after_wiring_reduction, area_after_wiring_reduction,
-                         gate_level_layout.num_gates(), gate_level_layout.num_wires(), cp_tp_stats.critical_path_length,
-                         cp_tp_stats.throughput, mockturtle::to_seconds(orthogonal_stats.time_total),
-                         mockturtle::to_seconds(wiring_reduction_stats.time_total), improv, eq_result);
+                             width_before_wiring_reduction, height_before_wiring_reduction,
+                             area_before_wiring_reduction, width_after_wiring_reduction, height_after_wiring_reduction,
+                             area_after_wiring_reduction, gate_level_layout.num_gates(), gate_level_layout.num_wires(),
+                             cp_tp_stats.critical_path_length, cp_tp_stats.throughput,
+                             mockturtle::to_seconds(orthogonal_stats.time_total),
+                             mockturtle::to_seconds(wiring_reduction_stats.time_total), improv, eq_result);
 
         wiring_reduction_exp.save();
         wiring_reduction_exp.table();
