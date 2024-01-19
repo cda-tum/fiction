@@ -8,8 +8,8 @@ on:
   pull_request:
   merge_group:
   push:
-  #    branches:
-  #      - main
+    branches:
+      - main
   workflow_dispatch:
 
 concurrency:
@@ -122,7 +122,7 @@ jobs:
     needs: [ build_wheels, build_sdist ]
     runs-on: ubuntu-latest
     name: Publish to PyPI
-#    if: github.event_name == 'release' && github.event.action == 'published'
+    if: github.event_name == 'release' && github.event.action == 'published'
     steps:
       - name: Download the previously stored artifacts
         uses: actions/download-artifact@v3
