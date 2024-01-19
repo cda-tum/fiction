@@ -49,11 +49,11 @@ To execute all tests, use the following command inside the package directory:
 
 ## Usage
 
-The bindings are available as a Python module named `fiction` in the namespace `mnt`. To use the bindings, simply
+The bindings are available as a Python module named `pyfiction` in the namespace `mnt`. To use the bindings, simply
 import the module in your Python script:
 
 ```python
-from mnt import fiction
+from mnt import pyfiction
 ```
 
 The bindings are documented using [pybind11's mkdoc utility tool](https://github.com/pybind/pybind11_mkdoc). To see
