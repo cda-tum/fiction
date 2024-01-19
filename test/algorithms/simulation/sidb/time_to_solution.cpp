@@ -44,7 +44,7 @@ TEMPLATE_TEST_CASE(
         const time_to_solution_params tts_params_exgs{exhaustive_sidb_simulation_engine::EXGS};
         time_to_solution<TestType>(lyt, quicksim_params, tts_params_exgs, &tts_stat_exgs);
 
-        CHECK(tts_stat_exgs.algorithm == "QuickExact");
+        CHECK(tts_stat_exgs.algorithm == "ExGS");
         CHECK_THAT(tts_stat_exgs.acc, Catch::Matchers::WithinAbs(0.0, 0.00001));
         CHECK_THAT(tts_stat_exgs.time_to_solution,
                    Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.00001));
@@ -97,10 +97,10 @@ TEMPLATE_TEST_CASE(
     }
 }
 
-TEMPLATE_TEST_CASE(
-    "time to solution test, using offset coordinates", "[time-to-solution]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>),
-    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>))
+TEMPLATE_TEST_CASE("time to solution test, using offset coordinates", "[time-to-solution]",
+                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>),
+                   (charge_distribution_surface<
+                       cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>))
 {
 
     TestType lyt{};

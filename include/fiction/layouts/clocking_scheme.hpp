@@ -166,6 +166,7 @@ inline constexpr const char* USE           = "USE";
 inline constexpr const char* RES           = "RES";
 inline constexpr const char* ESR           = "ESR";
 inline constexpr const char* CFE           = "CFE";
+inline constexpr const char* RIPPLE        = "RIPPLE";
 inline constexpr const char* BANCS         = "BANCS";
 
 }  // namespace clock_name
@@ -645,6 +646,34 @@ static auto cfe_clocking() noexcept
     // clang-format on
 }
 /**
+ * Returns the Ripple clocking as defined in \"Ripple Clock Schemes for Quantum-dot Cellular Automata Circuits\" by
+ * Prafull Purohit, Master Thesis, Rochester Institute of Technology, 2012.
+ *
+ * @tparam Lyt Clocked layout type.
+ * @return Ripple clocking scheme.
+ */
+template <typename Lyt>
+static auto ripple_clocking() noexcept
+{
+    // clang-format off
+
+   static const typename clocking_scheme<clock_zone<Lyt>>::clock_function ripple_clock_function =
+       [](const clock_zone<Lyt>& cz) noexcept
+   {
+       static constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 4u>, 4u> cutout{
+           {{{0, 1, 2, 3}},
+            {{3, 2, 1, 0}},
+            {{0, 1, 2, 3}},
+            {{3, 2, 1, 0}}}};
+
+       return cutout[cz.y % 4ul][cz.x % 4ul];
+   };
+
+   return clocking_scheme{clock_name::RIPPLE, ripple_clock_function, std::min(Lyt::max_fanin_size, 3u), 3u, 4u, true};
+
+    // clang-format on
+}
+/**
  * Returns the BANCS clocking as defined in \"BANCS: Bidirectional Alternating Nanomagnetic Clocking Scheme\" by
  * Ruan Evangelista Formigoni, Omar P. Vilela Neto, and Jose Augusto M. Nacif in SBCCI 2018.
  *
@@ -751,6 +780,7 @@ std::optional<clocking_scheme<clock_zone<Lyt>>> get_clocking_scheme(const std::s
         {clock_name::RES, res_clocking<Lyt>()},
         {clock_name::ESR, esr_clocking<Lyt>()},
         {clock_name::CFE, cfe_clocking<Lyt>()},
+        {clock_name::RIPPLE, ripple_clocking<Lyt>()},
         {clock_name::BANCS, bancs_clocking<Lyt>()}};
 
     std::string upper_name = name.data();

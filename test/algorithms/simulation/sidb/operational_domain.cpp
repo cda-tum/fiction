@@ -72,8 +72,8 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
     operational_domain_params op_domain_params{};
     op_domain_params.simulation_parameters = sim_params;
-    op_domain_params.x_dimension = operational_domain::sweep_parameter::EPSILON_R;
-    op_domain_params.y_dimension = operational_domain::sweep_parameter::LAMBDA_TF;
+    op_domain_params.x_dimension           = operational_domain::sweep_parameter::EPSILON_R;
+    op_domain_params.y_dimension           = operational_domain::sweep_parameter::LAMBDA_TF;
 
     operational_domain_stats op_domain_stats{};
 
@@ -323,6 +323,28 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             CHECK(op_domain_stats.num_non_operational_parameter_combinations <= 25);
         }
     }
+    SECTION("floating-point error")
+    {
+        op_domain_params.x_min  = 2.5;
+        op_domain_params.x_max  = 4.5;
+        op_domain_params.x_step = 0.9;
+
+        op_domain_params.y_min  = 2.5;
+        op_domain_params.y_max  = 2.6;
+        op_domain_params.y_step = 0.1;
+
+        SECTION("flood_fill")
+        {
+            const auto op_domain = operational_domain_flood_fill(lyt, std::vector<tt>{create_id_tt()}, 10000,
+                                                                 op_domain_params, &op_domain_stats);
+
+            // check if the operational domain has the correct size
+            CHECK(op_domain.operational_values.size() == 2);
+
+            CHECK(op_domain_stats.num_operational_parameter_combinations == 1);
+            CHECK(op_domain_stats.num_non_operational_parameter_combinations == 1);
+        }
+    }
     SECTION("semi-operational area")
     {
         op_domain_params.x_min  = 0.5;
@@ -433,14 +455,14 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
 
     operational_domain_params op_domain_params{};
     op_domain_params.simulation_parameters = sim_params;
-    op_domain_params.x_dimension = operational_domain::sweep_parameter::EPSILON_R;
-    op_domain_params.x_min       = 5.1;
-    op_domain_params.x_max       = 6.1;
-    op_domain_params.x_step      = 0.1;
-    op_domain_params.y_dimension = operational_domain::sweep_parameter::LAMBDA_TF;
-    op_domain_params.y_min       = 4.5;
-    op_domain_params.y_max       = 5.5;
-    op_domain_params.y_step      = 0.1;
+    op_domain_params.x_dimension           = operational_domain::sweep_parameter::EPSILON_R;
+    op_domain_params.x_min                 = 5.1;
+    op_domain_params.x_max                 = 6.1;
+    op_domain_params.x_step                = 0.1;
+    op_domain_params.y_dimension           = operational_domain::sweep_parameter::LAMBDA_TF;
+    op_domain_params.y_min                 = 4.5;
+    op_domain_params.y_max                 = 5.5;
+    op_domain_params.y_step                = 0.1;
 
     operational_domain_stats op_domain_stats{};
 
@@ -554,14 +576,14 @@ TEST_CASE("SiQAD's AND gate operational domain computation, using cube coordinat
 
     operational_domain_params op_domain_params{};
     op_domain_params.simulation_parameters = sim_params;
-    op_domain_params.x_dimension = operational_domain::sweep_parameter::EPSILON_R;
-    op_domain_params.x_min       = 5.1;
-    op_domain_params.x_max       = 6.1;
-    op_domain_params.x_step      = 0.1;
-    op_domain_params.y_dimension = operational_domain::sweep_parameter::LAMBDA_TF;
-    op_domain_params.y_min       = 4.5;
-    op_domain_params.y_max       = 5.5;
-    op_domain_params.y_step      = 0.1;
+    op_domain_params.x_dimension           = operational_domain::sweep_parameter::EPSILON_R;
+    op_domain_params.x_min                 = 5.1;
+    op_domain_params.x_max                 = 6.1;
+    op_domain_params.x_step                = 0.1;
+    op_domain_params.y_dimension           = operational_domain::sweep_parameter::LAMBDA_TF;
+    op_domain_params.y_min                 = 4.5;
+    op_domain_params.y_max                 = 5.5;
+    op_domain_params.y_step                = 0.1;
 
     operational_domain_stats op_domain_stats{};
 

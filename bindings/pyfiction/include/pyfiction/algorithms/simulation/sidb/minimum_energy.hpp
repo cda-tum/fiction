@@ -10,6 +10,8 @@
 
 #include <fiction/algorithms/simulation/sidb/minimum_energy.hpp>
 
+#include <vector>
+
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
@@ -24,7 +26,11 @@ void minimum_energy(pybind11::module& m)
 {
     using namespace pybind11::literals;
 
-    m.def("minimum_energy", &fiction::minimum_energy<Lyt>, "charge_lyts"_a, DOC(fiction_minimum_energy));
+    m.def(
+        "minimum_energy",
+        [](const std::vector<Lyt>& layouts) -> double
+        { return fiction::minimum_energy(layouts.cbegin(), layouts.cend()); },
+        "layouts"_a, DOC(fiction_minimum_energy));
 }
 
 }  // namespace detail

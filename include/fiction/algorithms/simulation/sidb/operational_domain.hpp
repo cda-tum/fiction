@@ -16,12 +16,12 @@
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/layouts/cell_level_layout.hpp"
+#include "fiction/technology/cell_technologies.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/execution_utils.hpp"
 #include "fiction/utils/hash.hpp"
 #include "fiction/utils/phmap_utils.hpp"
 
-#include <kitty/bit_operations.hpp>
 #include <kitty/traits.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 #include <phmap.h>
@@ -33,6 +33,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <iterator>
+#include <numeric>
 #include <optional>
 #include <queue>
 #include <random>
@@ -596,8 +597,16 @@ class operational_domain_impl
      */
     [[nodiscard]] step_point to_step_point(const operational_domain::parameter_point& pp) const noexcept
     {
-        return {static_cast<std::size_t>((pp.x - params.x_min) / params.x_step),
-                static_cast<std::size_t>((pp.y - params.y_min) / params.y_step)};
+        const auto it_x = std::lower_bound(x_values.cbegin(), x_values.cend(), pp.x);
+        const auto it_y = std::lower_bound(y_values.cbegin(), y_values.cend(), pp.y);
+
+        assert(it_x != x_values.cend() && "parameter point is outside of the x range");
+        assert(it_y != y_values.cend() && "parameter point is outside of the y range");
+
+        const auto x_dis = std::distance(x_values.cbegin(), it_x);
+        const auto y_dis = std::distance(y_values.cbegin(), it_y);
+
+        return {static_cast<std::size_t>(x_dis), static_cast<std::size_t>(y_dis)};
     }
     /**
      * Calculates the number of steps in the x dimension based on the provided parameters.

@@ -29,7 +29,7 @@ class TestCriticalTemperature(unittest.TestCase):
     def test_gate_based_simulation(self):
         layout = read_sqd_layout(dir_path + "/../../../resources/hex_21_inputsdbp_xor_v1.sqd", "xor_gate")
         params = critical_temperature_params()
-        params.simulation_parameters.simulation_parameters.base = 2
+        params.simulation_parameters.base = 2
         params.engine = simulation_engine.EXACT
 
         stats = critical_temperature_stats()

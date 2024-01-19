@@ -38,10 +38,11 @@ class exact_command : public command
     {
         add_option("--clk_scheme,-s", ps.scheme,
                    "Clocking scheme to use {OPEN[3|4], COLUMNAR[3|4], ROW[3|4] 2DDWAVE[3|4], 2DDWAVEHEX[3|4], USE, "
-                   "RES, ESR, CFE, BANCS}",
+                   "RES, ESR, CFE, RIPPLE, BANCS}",
                    true);
-        add_option("--upper_x", ps.upper_bound_x, "Number of FCN gate tiles to use at maximum in x-direction");
-        add_option("--upper_y", ps.upper_bound_y, "Number of FCN gate tiles to use at maximum in y-direction");
+        add_option("--upper_area", ps.upper_bound_area, "Upper bound for the total number of tiles");
+        add_option("--upper_x", ps.upper_bound_x, "Upper bound for the number of tiles in x-direction");
+        add_option("--upper_y", ps.upper_bound_y, "Upper bound for the number of tiles in y-direction");
         add_option("--fixed_size,-f", ps.fixed_size,
                    "Execute only one iteration with the given number of upper bound tiles");
         add_option("--timeout,-t", ps.timeout, "Timeout in seconds");
@@ -213,7 +214,7 @@ class exact_command : public command
             }
             else
             {
-                env->out() << fmt::format("[e] impossible to place and route {} within the given parameters",
+                env->out() << fmt::format("[e] impossible to place and route '{}' within the given parameters",
                                           std::visit(get_name, ntk_ptr))
                            << std::endl;
             }
@@ -228,7 +229,7 @@ class exact_command : public command
         }
         catch (...)
         {
-            env->out() << fmt::format("[e] an error occurred while placing and routing {} with the given parameters",
+            env->out() << fmt::format("[e] an error occurred while placing and routing '{}' with the given parameters",
                                       std::visit(get_name, ntk_ptr))
                        << std::endl;
         }

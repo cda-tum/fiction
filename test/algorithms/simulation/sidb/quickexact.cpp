@@ -1,5 +1,6 @@
 //
 // Created by Jan Drewniok on 18.12.22.
+//
 
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
@@ -28,9 +29,7 @@ TEMPLATE_TEST_CASE(
     const auto simulation_results = quickexact(lyt, params);
 
     CHECK(simulation_results.charge_distributions.empty());
-    CHECK(simulation_results.additional_simulation_parameters.empty());
     CHECK(simulation_results.algorithm_name == "QuickExact");
-    CHECK(simulation_results.additional_simulation_parameters.empty());
 }
 
 TEMPLATE_TEST_CASE(
@@ -149,8 +148,9 @@ TEMPLATE_TEST_CASE(
 
     const quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.1}};
 
-    lyt.assign_sidb_defect({1, 2, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -10, params.simulation_parameters.epsilon_r,
-                                                  params.simulation_parameters.lambda_tf});
+    lyt.assign_sidb_defect({1, 2, 0},
+                           sidb_defect{sidb_defect_type::UNKNOWN, -10, params.simulation_parameters.epsilon_r,
+                                       params.simulation_parameters.lambda_tf});
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
     REQUIRE(simulation_results.charge_distributions.size() == 1);
@@ -170,8 +170,9 @@ TEMPLATE_TEST_CASE(
 
     const quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.1}};
 
-    lyt.assign_sidb_defect({1, 2, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -10, params.simulation_parameters.epsilon_r,
-                                                  params.simulation_parameters.lambda_tf * 10E-5});
+    lyt.assign_sidb_defect({1, 2, 0},
+                           sidb_defect{sidb_defect_type::UNKNOWN, -10, params.simulation_parameters.epsilon_r,
+                                       params.simulation_parameters.lambda_tf * 10E-5});
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
@@ -191,10 +192,12 @@ TEMPLATE_TEST_CASE(
 
     const quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.1}};
 
-    lyt.assign_sidb_defect({2, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -10, params.simulation_parameters.epsilon_r,
-                                                  params.simulation_parameters.lambda_tf});
-    lyt.assign_sidb_defect({-2, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, 10, params.simulation_parameters.epsilon_r,
-                                                   params.simulation_parameters.lambda_tf});
+    lyt.assign_sidb_defect({2, 0, 0},
+                           sidb_defect{sidb_defect_type::UNKNOWN, -10, params.simulation_parameters.epsilon_r,
+                                       params.simulation_parameters.lambda_tf});
+    lyt.assign_sidb_defect({-2, 0, 0},
+                           sidb_defect{sidb_defect_type::UNKNOWN, 10, params.simulation_parameters.epsilon_r,
+                                       params.simulation_parameters.lambda_tf});
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
@@ -252,6 +255,7 @@ TEMPLATE_TEST_CASE(
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
     REQUIRE(simulation_results.charge_distributions.size() == 1);
+    CHECK(std::any_cast<double>(simulation_results.additional_simulation_parameters.at("global_potential")) == -0.26);
     CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) == sidb_charge_state::NEUTRAL);
 }
 
@@ -778,8 +782,9 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
 
     const quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.32}};
-    lyt.assign_sidb_defect({-1, -1, 1}, sidb_defect{sidb_defect_type::UNKNOWN, -1, params.simulation_parameters.epsilon_r,
-                                                    params.simulation_parameters.lambda_tf});
+    lyt.assign_sidb_defect({-1, -1, 1},
+                           sidb_defect{sidb_defect_type::UNKNOWN, -1, params.simulation_parameters.epsilon_r,
+                                       params.simulation_parameters.lambda_tf});
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
     REQUIRE(!simulation_results.charge_distributions.empty());
@@ -832,8 +837,9 @@ TEMPLATE_TEST_CASE(
 
     lyt.assign_sidb_defect({1, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1, params.simulation_parameters.epsilon_r,
                                                   params.simulation_parameters.lambda_tf});
-    lyt.assign_sidb_defect({31, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1, params.simulation_parameters.epsilon_r,
-                                                   params.simulation_parameters.lambda_tf});
+    lyt.assign_sidb_defect({31, 0, 0},
+                           sidb_defect{sidb_defect_type::UNKNOWN, -1, params.simulation_parameters.epsilon_r,
+                                       params.simulation_parameters.lambda_tf});
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
@@ -865,8 +871,9 @@ TEMPLATE_TEST_CASE(
 
     lyt.assign_sidb_defect({1, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, 1, params.simulation_parameters.epsilon_r,
                                                   params.simulation_parameters.lambda_tf});
-    lyt.assign_sidb_defect({31, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1, params.simulation_parameters.epsilon_r,
-                                                   params.simulation_parameters.lambda_tf});
+    lyt.assign_sidb_defect({31, 0, 0},
+                           sidb_defect{sidb_defect_type::UNKNOWN, -1, params.simulation_parameters.epsilon_r,
+                                       params.simulation_parameters.lambda_tf});
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
     REQUIRE(!simulation_results.charge_distributions.empty());
@@ -928,27 +935,16 @@ TEMPLATE_TEST_CASE(
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
-    REQUIRE(simulation_results.charge_distributions.size() == 3);
+    REQUIRE(simulation_results.charge_distributions.size() == 4);
 
-    auto energy_min = std::numeric_limits<double>::max();
-    for (const auto& layout : simulation_results.charge_distributions)
-    {
-        if (layout.get_system_energy() < energy_min)
-        {
-            energy_min = layout.get_system_energy();
-        }
-    }
+    const auto ground_state = std::min_element(
+        simulation_results.charge_distributions.cbegin(), simulation_results.charge_distributions.cend(),
+        [](const auto& lhs, const auto& rhs) { return lhs.get_system_energy() < rhs.get_system_energy(); });
 
-    for (const auto& layout : simulation_results.charge_distributions)
-    {
-        if (std::abs(layout.get_system_energy() - energy_min) < physical_constants::POP_STABILITY_ERR)
-        {
-            CHECK(layout.get_charge_state({1, 3, 0}) == sidb_charge_state::NEGATIVE);
-            CHECK(layout.get_charge_state({1, 3, 0}) == sidb_charge_state::NEGATIVE);
-            CHECK(layout.get_charge_state({2, 3, 0}) == sidb_charge_state::POSITIVE);
-            CHECK(layout.get_charge_state({3, 3, 0}) == sidb_charge_state::NEGATIVE);
-        }
-    }
+    CHECK(ground_state->get_charge_state({-1, 3, 0}) == sidb_charge_state::NEGATIVE);
+    CHECK(ground_state->get_charge_state({1, 3, 0}) == sidb_charge_state::POSITIVE);
+    CHECK(ground_state->get_charge_state({2, 3, 0}) == sidb_charge_state::NEGATIVE);
+    CHECK(ground_state->get_charge_state({3, 3, 0}) == sidb_charge_state::NEUTRAL);
 }
 
 TEMPLATE_TEST_CASE(
@@ -991,7 +987,7 @@ TEMPLATE_TEST_CASE(
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
-    REQUIRE(simulation_results.charge_distributions.size() == 2);
+    REQUIRE(simulation_results.charge_distributions.size() == 4);
     const auto& charge_lyt_first = simulation_results.charge_distributions.front();
     CHECK_THAT(charge_lyt_first.get_system_energy(),
                Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
@@ -1016,7 +1012,7 @@ TEMPLATE_TEST_CASE(
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
-    REQUIRE(simulation_results.charge_distributions.size() == 3);
+    REQUIRE(simulation_results.charge_distributions.size() == 10);
     const auto& charge_lyt_first = simulation_results.charge_distributions.front();
     CHECK(charge_lyt_first.get_system_energy() < 0.08);
     CHECK(charge_lyt_first.get_system_energy() > -2.74);
@@ -1043,7 +1039,7 @@ TEMPLATE_TEST_CASE(
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
-    CHECK(simulation_results.charge_distributions.size() == 5);
+    CHECK(simulation_results.charge_distributions.size() == 17);
 }
 
 TEMPLATE_TEST_CASE(
@@ -1109,7 +1105,26 @@ TEMPLATE_TEST_CASE(
 
     CHECK(lyt.num_cells() == 6);
 
-    CHECK(simulation_results.charge_distributions.size() == 1);
+    CHECK(simulation_results.charge_distributions.size() == 3);
+}
+
+TEMPLATE_TEST_CASE(
+    "4 DBs close to each other", "[quickexact]",
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
+    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+{
+    TestType lyt{};
+
+    lyt.assign_cell_type({0, 0, 1}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({3, 0, 1}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({5, 0, 1}, TestType::cell_type::NORMAL);
+
+    const quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.25}};
+
+    const auto simulation_results = quickexact<TestType>(lyt, params);
+
+    CHECK(simulation_results.charge_distributions.size() > 0);
 }
 
 TEMPLATE_TEST_CASE(
@@ -1150,8 +1165,7 @@ TEMPLATE_TEST_CASE(
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
     REQUIRE(!simulation_results.additional_simulation_parameters.empty());
-    CHECK(simulation_results.additional_simulation_parameters[0].first == "base_number");
-    CHECK(std::any_cast<uint64_t>(simulation_results.additional_simulation_parameters[0].second) == 3);
+    CHECK(std::any_cast<uint64_t>(simulation_results.additional_simulation_parameters.at("base_number")) == 3);
 
     const quickexact_params<TestType> params_new{sidb_simulation_parameters{2, -0.32},
                                                  quickexact_params<TestType>::automatic_base_number_detection::OFF};
@@ -1159,8 +1173,7 @@ TEMPLATE_TEST_CASE(
     const auto simulation_results_new = quickexact<TestType>(lyt, params_new);
 
     REQUIRE(!simulation_results_new.additional_simulation_parameters.empty());
-    CHECK(simulation_results_new.additional_simulation_parameters[0].first == "base_number");
-    CHECK(std::any_cast<uint64_t>(simulation_results_new.additional_simulation_parameters[0].second) == 2);
+    CHECK(std::any_cast<uint64_t>(simulation_results_new.additional_simulation_parameters.at("base_number")) == 2);
 }
 
 TEMPLATE_TEST_CASE(
@@ -1239,6 +1252,21 @@ TEMPLATE_TEST_CASE(
         }
         CHECK(ground_state.size() == 1);
         CHECK(charge_index.size() == 1);
+    }
+
+    SECTION("Add SiDBs which are positively charged in the ground state, layout does not fulfill the logic anymore.")
+    {
+        params.simulation_parameters.base = 3;
+        lyt.assign_cell_type({15, 2, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({15, 2, 0}, TestType::cell_type::NORMAL);
+
+        const auto simulation_results = quickexact<TestType>(lyt, params);
+        // find the ground state, which is the charge distribution with the lowest energy
+        const auto ground_state = std::min_element(
+            simulation_results.charge_distributions.cbegin(), simulation_results.charge_distributions.cend(),
+            [](const auto& lhs, const auto& rhs) { return lhs.get_system_energy() < rhs.get_system_energy(); });
+
+        CHECK(ground_state->num_positive_sidbs() > 0);
     }
 
     SECTION("Standard Physical Parameters")
@@ -1409,6 +1437,10 @@ TEMPLATE_TEST_CASE(
         const auto ground_state = std::min_element(
             simulation_results.charge_distributions.cbegin(), simulation_results.charge_distributions.cend(),
             [](const auto& lhs, const auto& rhs) { return lhs.get_system_energy() < rhs.get_system_energy(); });
+
+        CHECK(ground_state->num_negative_sidbs() == 5);
+        CHECK(ground_state->num_neutral_sidbs() == 4);
+        CHECK(ground_state->num_positive_sidbs() == 0);
 
         // check that charge distribution is correct; binary 1 is propagated through the BDL wire
         CHECK(ground_state->get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);

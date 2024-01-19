@@ -12,6 +12,7 @@
 #include <mockturtle/networks/detail/foreach.hpp>
 #include <phmap.h>
 
+#include <cstdint>
 #include <memory>
 #include <string>
 #include <string_view>
@@ -418,7 +419,7 @@ class cell_level_layout : public ClockedLayout
         using iterator_type = decltype(strg->cell_type_map.cbegin());
         mockturtle::detail::foreach_element_transform<iterator_type, cell>(
             strg->cell_type_map.cbegin(), strg->cell_type_map.cend(),
-            [](const auto& ct) { return static_cast<cell>(ct.first); }, fn);
+            [](const auto& ct) { return static_cast<cell>(ct.first); }, std::forward<Fn>(fn));
     }
     /**
      * Applies a function to all cell positions in the layout, even empty ones. This function, thereby, renames
@@ -445,7 +446,8 @@ class cell_level_layout : public ClockedLayout
     {
         using iterator_type = decltype(strg->inputs.cbegin());
         mockturtle::detail::foreach_element_transform<iterator_type, cell>(
-            strg->inputs.cbegin(), strg->inputs.cend(), [](const auto& i) { return static_cast<cell>(i); }, fn);
+            strg->inputs.cbegin(), strg->inputs.cend(), [](const auto& i) { return static_cast<cell>(i); },
+            std::forward<Fn>(fn));
     }
     /**
      * Applies a function to all primary output cells in the layout.
@@ -459,7 +461,8 @@ class cell_level_layout : public ClockedLayout
     {
         using iterator_type = decltype(strg->outputs.cbegin());
         mockturtle::detail::foreach_element_transform<iterator_type, cell>(
-            strg->outputs.cbegin(), strg->outputs.end(), [](const auto& o) { return static_cast<cell>(o); }, fn);
+            strg->outputs.cbegin(), strg->outputs.end(), [](const auto& o) { return static_cast<cell>(o); },
+            std::forward<Fn>(fn));
     }
 
 #pragma endregion

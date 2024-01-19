@@ -39,8 +39,8 @@ class write_location_and_ground_state_impl
     void run()
     {
         // this part searches for the ground state(s) among all physically valid charge distributions
-        const auto min_energy =
-            round_to_n_decimal_places(minimum_energy(sim_result.charge_distributions), 6);
+        const auto min_energy = round_to_n_decimal_places(
+            minimum_energy(sim_result.charge_distributions.cbegin(), sim_result.charge_distributions.cend()), 6);
 
         std::vector<charge_distribution_surface<Lyt>> ground_state_layouts{};
         for (const auto& valid_layout : sim_result.charge_distributions)

@@ -108,16 +108,34 @@ TEST_CASE("Read multi-dot SQD layout", "[sqd]")
 
     std::istringstream layout_stream{sqd_layout};
 
-    using sidb_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
-    const auto layout = read_sqd_layout<sidb_layout>(layout_stream);
+    SECTION("Fiction coordinates")
+    {
+        using sidb_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
+        const auto layout = read_sqd_layout<sidb_layout>(layout_stream);
 
-    CHECK(layout.x() == 2);
-    CHECK(layout.y() == 5);
+        CHECK(layout.x() == 2);
+        CHECK(layout.y() == 5);
 
-    CHECK(layout.get_cell_type({0, 0}) == sidb_technology::cell_type::NORMAL);
-    CHECK(layout.get_cell_type({0, 1}) == sidb_technology::cell_type::NORMAL);
-    CHECK(layout.get_cell_type({2, 4}) == sidb_technology::cell_type::NORMAL);
-    CHECK(layout.get_cell_type({2, 5}) == sidb_technology::cell_type::NORMAL);
+        CHECK(layout.get_cell_type({0, 0}) == sidb_technology::cell_type::NORMAL);
+        CHECK(layout.get_cell_type({0, 1}) == sidb_technology::cell_type::NORMAL);
+        CHECK(layout.get_cell_type({2, 4}) == sidb_technology::cell_type::NORMAL);
+        CHECK(layout.get_cell_type({2, 5}) == sidb_technology::cell_type::NORMAL);
+    }
+
+    SECTION("SiQAD coordinates")
+    {
+        using sqd_layout  = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>;
+        const auto layout = read_sqd_layout<sqd_layout>(layout_stream);
+
+        CHECK(layout.x() == 2);
+        CHECK(layout.y() == 2);
+        CHECK(layout.z() == 1);
+
+        CHECK(layout.get_cell_type({0, 0, 0}) == sidb_technology::cell_type::NORMAL);
+        CHECK(layout.get_cell_type({0, 0, 1}) == sidb_technology::cell_type::NORMAL);
+        CHECK(layout.get_cell_type({2, 2, 0}) == sidb_technology::cell_type::NORMAL);
+        CHECK(layout.get_cell_type({2, 2, 1}) == sidb_technology::cell_type::NORMAL);
+    }
 }
 
 TEST_CASE("Read multi-dot SQD layout with cell type definitions", "[sqd]")

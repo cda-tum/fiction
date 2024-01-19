@@ -6,6 +6,7 @@
 #define FICTION_MAXIMUM_DEFECT_INFLUENCE_POSITION_AND_DISTANCE_HPP
 
 #include "fiction/algorithms/simulation/sidb/critical_temperature.hpp"
+#include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/technology/sidb_defects.hpp"
@@ -83,8 +84,10 @@ class maximum_defect_influence_position_and_distance_impl
             quickexact(layout, quickexact_params<Lyt>{params.simulation_parameters,
                                                       quickexact_params<Lyt>::automatic_base_number_detection::OFF});
 
-        const auto min_energy          = minimum_energy(simulation_results.charge_distributions);
-        uint64_t   charge_index_layout = 0;
+        const auto min_energy = minimum_energy(simulation_results.charge_distributions.cbegin(),
+                                               simulation_results.charge_distributions.cend());
+
+        uint64_t charge_index_layout = 0;
 
         for (auto& lyt_result : simulation_results.charge_distributions)
         {
@@ -111,8 +114,10 @@ class maximum_defect_influence_position_and_distance_impl
                 // conduct simulation with defect
                 auto simulation_result_defect = quickexact(lyt_defect, params_defect);
 
-                const auto min_energy_defect          = minimum_energy(simulation_result_defect.charge_distributions);
-                uint64_t   charge_index_defect_layout = 0;
+                const auto min_energy_defect = minimum_energy(simulation_result_defect.charge_distributions.cbegin(),
+                                                              simulation_result_defect.charge_distributions.cend());
+
+                uint64_t charge_index_defect_layout = 0;
 
                 // get the charge index of the ground state
                 for (const auto& lyt_simulation_with_defect : simulation_result_defect.charge_distributions)

@@ -61,20 +61,6 @@ inline void critical_temperature(pybind11::module& m)
     namespace py = pybind11;
 
     /**
-     * Critical temperature mode.
-     */
-    py::enum_<fiction::critical_temperature_params::critical_temperature_mode>(
-        m, "critical_temperature_mode", DOC(fiction_critical_temperature_params_critical_temperature_mode))
-        .value("GATE_BASED_SIMULATION",
-               fiction::critical_temperature_params::critical_temperature_mode::GATE_BASED_SIMULATION,
-               DOC(fiction_critical_temperature_params_critical_temperature_mode_GATE_BASED_SIMULATION))
-        .value("NON_GATE_BASED_SIMULATION",
-               fiction::critical_temperature_params::critical_temperature_mode::NON_GATE_BASED_SIMULATION,
-               DOC(fiction_critical_temperature_params_critical_temperature_mode_NON_GATE_BASED_SIMULATION))
-
-        ;
-
-    /**
      * Simulation engine.
      */
     py::enum_<fiction::critical_temperature_params::simulation_engine>(

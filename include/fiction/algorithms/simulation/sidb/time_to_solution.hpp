@@ -7,7 +7,6 @@
 
 #include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
 #include "fiction/algorithms/simulation/sidb/is_ground_state.hpp"
-#include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
 #include "fiction/algorithms/simulation/sidb/quicksim.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
@@ -103,14 +102,14 @@ void time_to_solution(Lyt& lyt, const quicksim_params& quicksim_params, const ti
     sidb_simulation_result<Lyt> simulation_result{};
     if (tts_params.engine == exhaustive_sidb_simulation_engine::QUICKEXACT)
     {
-        st.algorithm      = "QuickExact";
-        simulation_result = exhaustive_ground_state_simulation(lyt, quicksim_params.simulation_parameters);
-    }
-    else
-    {
         const quickexact_params<Lyt> params{quicksim_params.simulation_parameters};
         st.algorithm      = "QuickExact";
         simulation_result = quickexact(lyt, params);
+    }
+    else
+    {
+        st.algorithm      = "ExGS";
+        simulation_result = exhaustive_ground_state_simulation(lyt, quicksim_params.simulation_parameters);
     }
 
     st.single_runtime_exhaustive = mockturtle::to_seconds(simulation_result.simulation_runtime);

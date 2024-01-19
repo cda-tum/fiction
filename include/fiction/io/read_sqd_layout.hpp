@@ -127,6 +127,26 @@ class read_sqd_layout_impl
     cell<Lyt> max_cell_pos{};
 
     /**
+     * Updates the bounding box given by the maximum position of a cell in the layout
+     *
+     * @param cell The cell to challenge the stored maximum position of a cell in the layout against.
+     */
+    void update_bounding_box(const cell<Lyt>& cell)
+    {
+        if (cell.x > max_cell_pos.x)
+        {
+            max_cell_pos.x = cell.x;
+        }
+        if (cell.y > max_cell_pos.y)
+        {
+            max_cell_pos.y = cell.y;
+        }
+        if (cell.z > max_cell_pos.z)
+        {
+            max_cell_pos.z = cell.z;
+        }
+    }
+    /**
      * Converts a dimer position to a cell position. Additionally updates the maximum cell position parsed so far.
      *
      * @param n The x-coordinate of the dimer.
@@ -147,19 +167,7 @@ class read_sqd_layout_impl
 
         const cell<Lyt> cell{n, m * 2 + l};
 
-        // store latest cell position via bounding box
-        if (cell.x > max_cell_pos.x)
-        {
-            max_cell_pos.x = cell.x;
-        }
-        if (cell.y > max_cell_pos.y)
-        {
-            max_cell_pos.y = cell.y;
-        }
-        if (cell.z > max_cell_pos.z)
-        {
-            max_cell_pos.z = cell.z;
-        }
+        update_bounding_box(cell);
 
         return cell;
     }
@@ -181,7 +189,9 @@ class read_sqd_layout_impl
         // special case for SiQAD coordinates
         if constexpr (has_siqad_coord_v<Lyt>)
         {
-            return cell<Lyt>{std::stoll(n), std::stoll(m), std::stoll(l)};
+            cell<Lyt> cell{std::stoll(n), std::stoll(m), std::stoll(l)};
+            update_bounding_box(cell);
+            return cell;
         }
 
         // Cartesian coordinates

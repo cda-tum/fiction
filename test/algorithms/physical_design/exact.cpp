@@ -661,6 +661,39 @@ TEST_CASE("High degree input networks", "[exact]")
     CHECK_NOTHROW(exact<cart_gate_clk_lyt>(blueprints::maj1_network<mockturtle::mig_network>(), res(configuration())));
 }
 
+TEST_CASE("Exact physical design with upper bounds", "[exact]")
+{
+    auto upper_bound_config = twoddwave(crossings(configuration()));
+
+    SECTION("total area")
+    {
+        upper_bound_config.upper_bound_area = 5u;  // allow only 5 tiles total; this will fail (and is tested for)
+
+        const auto half_adder = blueprints::half_adder_network<mockturtle::aig_network>();
+        const auto layout     = exact<cart_gate_clk_lyt>(half_adder, upper_bound_config);
+
+        // since a half adder cannot be synthesized on just 5 tiles, layout should not have a value
+        CHECK(!layout.has_value());
+    }
+    SECTION("individual bounds")
+    {
+        upper_bound_config.upper_bound_y = 3u;  // allow only 3 tiles in y direction; this will work
+
+        const auto mux    = blueprints::mux21_network<technology_network>();
+        auto       layout = exact<cart_gate_clk_lyt>(mux, upper_bound_config);
+
+        REQUIRE(layout.has_value());
+
+        CHECK(layout->y() <= 3);
+
+        upper_bound_config.upper_bound_x = 2u;  // additionally, allow only 2 tiles in x direction; this will now fail
+
+        layout = exact<cart_gate_clk_lyt>(mux, upper_bound_config);
+
+        CHECK(!layout.has_value());
+    }
+}
+
 TEST_CASE("Exact physical design timeout", "[exact]")
 {
     auto timeout_config    = use(crossings(configuration()));
