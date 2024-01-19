@@ -46,7 +46,7 @@ exhaustive_ground_state_simulation(const Lyt&                        lyt,
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
     sidb_simulation_result<Lyt> simulation_result{};
-    simulation_result.algorithm_name      = "ExGS";
+    simulation_result.algorithm_name        = "ExGS";
     simulation_result.simulation_parameters = params;
     mockturtle::stopwatch<>::duration time_counter{};
     {
