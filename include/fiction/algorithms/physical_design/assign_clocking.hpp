@@ -1,0 +1,338 @@
+//
+// Created by marcel on 20.01.24.
+//
+
+#ifndef FICTION_ASSIGN_CLOCKING_HPP
+#define FICTION_ASSIGN_CLOCKING_HPP
+
+#include "fiction/traits.hpp"
+#include "fiction/utils/hash.hpp"
+
+#include <bill/sat/cardinality.hpp>
+#include <bill/sat/interface/common.hpp>
+#include <bill/sat/solver.hpp>
+#include <bill/sat/tseytin.hpp>
+
+#include <algorithm>
+#include <unordered_map>
+#include <utility>
+
+namespace fiction
+{
+
+/**
+ * Parameters for the assign_clocking algorithm.
+ */
+struct assign_clocking_params
+{
+    /**
+     * The SAT solver to use.
+     */
+    bill::solvers sat_engine = bill::solvers::ghack;
+};
+
+struct assign_clocking_stats
+{
+    /**
+     * Total runtime.
+     */
+    mockturtle::stopwatch<>::duration time_total{0};
+
+    void report(std::ostream& out = std::cout) const
+    {
+        out << fmt::format("[i] total time  = {:.2f} secs\n", mockturtle::to_seconds(time_total));
+    }
+};
+
+namespace detail
+{
+
+template <typename Lyt, bill::solvers SolverType = bill::solvers::ghack>
+class sat_clocking_handler
+{
+  public:
+    /**
+     * Default constructor.
+     */
+    explicit sat_clocking_handler(Lyt& lyt) : layout{lyt}, max_clock_number{layout.num_clocks()}
+    {
+        // for each non-empty tile
+        layout.foreach_node(
+            [this](const auto& n)
+            {
+                // skip constants
+                if (layout.is_constant(n))
+                {
+                    return;
+                }
+
+                const auto t = layout.get_tile(n);
+
+                // for each possible clock number
+                for (typename Lyt::clock_number_t clk = 0; clk <= max_clock_number; ++clk)
+                {
+                    variables[{t, clk}] = solver.add_variable();
+                }
+            });
+    }
+
+    bool clock()
+    {
+        at_least_one_clock_number_per_tile();
+        at_most_one_clock_number_per_tile();
+        exclude_clock_assignments_that_violate_information_flow();
+
+        if (const auto sat_result = solver.solve(); sat_result == bill::result::states::satisfiable)
+        {
+            assign_clock_numbers(solver.get_model().model());
+            return true;
+        }
+
+        // SAT instance was not satisfiable
+        return false;
+    }
+
+  private:
+    /**
+     * The layout to clock.
+     */
+    Lyt& layout;
+    /**
+     * Maximum clock number in layout's clocking scheme.
+     */
+    const typename Lyt::clock_number_t max_clock_number;
+    /**
+     * The solver used to find a solution to the clocking problem.
+     */
+    bill::solver<SolverType> solver{};
+    /**
+     * Alias for a tile-clock number pair.
+     */
+    using tile_clock_number = std::pair<tile<Lyt>, typename Lyt::clock_number_t>;
+    /**
+     * Stores all variables.
+     */
+    std::unordered_map<tile_clock_number, bill::var_type> variables{};
+
+    /**
+     * Adds constraints to the solver that enforce the assignment of at least one clock number per tile.
+     */
+    void at_least_one_clock_number_per_tile()
+    {
+        // for each non-empty tile
+        layout.foreach_node(
+            [this](const auto& n)
+            {
+                if (layout.is_constant(n))
+                {
+                    return;
+                }
+
+                const auto t = layout.get_tile(n);
+
+                std::vector<bill::var_type> tc(max_clock_number + 1, 0);
+
+                // for each possible clock number
+                for (typename Lyt::clock_number_t clk = 0; clk <= max_clock_number; ++clk)
+                {
+                    tc[clk] = variables[{t, clk}];
+                }
+
+                bill::at_least_one(tc, solver);
+            });
+    }
+    /**
+     * Adds constraints to the solver that enforce the assignment of at most one clock number per tile.
+     */
+    void at_most_one_clock_number_per_tile()
+    {
+        // for each pair of clock numbers
+        for (typename Lyt::clock_number_t c1 = 0; c1 <= max_clock_number; ++c1)
+        {
+            // use an optimization here: c2 > c1 instead of c2 != c1 to save half the clauses
+            for (typename Lyt::clock_number_t c2 = c1 + 1; c2 <= max_clock_number; ++c2)
+            {
+                // for each non-empty tile
+                layout.foreach_node(
+                    [this, &c1, &c2](const auto& n)
+                    {
+                        if (layout.is_constant(n))
+                        {
+                            return;
+                        }
+
+                        const auto t = layout.get_tile(n);
+
+                        // not tile has clock 1 OR not tile has clock 2
+                        solver.add_clause({{bill::lit_type{variables[{t, c1}], bill::negative_polarity},
+                                            bill::lit_type{variables[{t, c2}], bill::negative_polarity}}});
+                    });
+            }
+        }
+    }
+    /**
+     * Adds constraints to the solver that exclude the assignment of non-adjacently clocked tiles.
+     */
+    void exclude_clock_assignments_that_violate_information_flow()
+    {
+        // for each non-empty tile
+        layout.foreach_node(
+            [this](const auto& n)
+            {
+                if (layout.is_constant(n))
+                {
+                    return;
+                }
+
+                const auto t1 = layout.get_tile(n);
+
+                // for each of t's predecessors (disregarding clocking)
+                const auto incoming_tiles = layout.template incoming_data_flow<false>(t1);
+                std::for_each(
+                    incoming_tiles.cbegin(), incoming_tiles.cend(),
+                    [this, &t1](const auto& t2)
+                    {
+                        // for each combination of possible clock numbers
+                        for (typename Lyt::clock_number_t c1 = 0; c1 <= max_clock_number; ++c1)
+                        {
+                            for (typename Lyt::clock_number_t c2 = 0; c2 <= max_clock_number; ++c2)
+                            {
+                                // if c2 is not c1's incoming clock number
+                                if (!(static_cast<typename Lyt::clock_number_t>((c2 + typename Lyt::clock_number_t{1}) %
+                                                                                max_clock_number) == c1))
+                                {
+                                    // not tile t1 has clock c1 OR not tile t2 has clock c2
+                                    solver.add_clause({{bill::lit_type{variables[{t1, c1}], bill::negative_polarity},
+                                                        bill::lit_type{variables[{t2, c2}], bill::negative_polarity}}});
+                                }
+                            }
+                        }
+                    });
+            });
+    }
+
+    void assign_clock_numbers(const bill::result::model_type& model) noexcept
+    {
+        // for each non-empty tile
+        layout.foreach_node(
+            [this, &model](const auto& n)
+            {
+                if (layout.is_constant(n))
+                {
+                    return;
+                }
+
+                const auto t = layout.get_tile(n);
+
+                // for each possible clock number
+                for (typename Lyt::clock_number_t clk = 0; clk <= max_clock_number; ++clk)
+                {
+                    // if tile t is clocked with clock number clk
+                    if (model.at(variables.at({t, clk})) == bill::lbool_type::true_)
+                    {
+                        layout.assign_clock_number(t, clk);
+                    }
+                }
+            });
+    }
+};
+
+template <typename Lyt>
+class assign_clocking_impl
+{
+  public:
+    assign_clocking_impl(Lyt& lyt, const assign_clocking_params& p, assign_clocking_stats& st) :
+            layout{lyt},
+            params{p},
+            stats{st}
+    {}
+
+    bool run()
+    {
+        // measure run time
+        mockturtle::stopwatch stop{stats.time_total};
+
+        if (layout.is_empty())
+        {
+            return true;
+        }
+
+        switch (params.sat_engine)
+        {
+            case bill::solvers::ghack:
+            {
+                return sat_clocking_handler<Lyt, bill::solvers::ghack>{layout}.clock();
+            }
+            case bill::solvers::glucose_41:
+            {
+                return sat_clocking_handler<Lyt, bill::solvers::glucose_41>{layout}.clock();
+            }
+            case bill::solvers::bsat2:
+            {
+                //                assert(false && "At the time of writing this code, bsat2 was not able to solve
+                //                clocking instances "
+                //                                "properly. It is, therefore, not recommended using it. If in the
+                //                                future an update " "to bill and/or bsat2 has been published, feel free
+                //                                to remove this assertion.");
+
+                return sat_clocking_handler<Lyt, bill::solvers::bsat2>{layout}.clock();
+            }
+#if !defined(BILL_WINDOWS_PLATFORM)
+            case bill::solvers::maple:
+            {
+                return sat_clocking_handler<Lyt, bill::solvers::maple>{layout}.clock();
+            }
+            case bill::solvers::bmcg:
+            {
+                return sat_clocking_handler<Lyt, bill::solvers::bmcg>{layout}.clock();
+            }
+#endif
+            default:
+            {
+                return sat_clocking_handler<Lyt>{layout}.clock();
+            }
+        }
+    }
+
+  private:
+    /**
+     * The layout to clock.
+     */
+    Lyt& layout;
+    /**
+     * Parameters.
+     */
+    assign_clocking_params params;
+    /**
+     * Statistics.
+     */
+    assign_clocking_stats& stats;
+};
+
+}  // namespace detail
+
+/**
+ *
+ * @return `true` iff `lyt` could be successfully clocked.
+ */
+template <typename Lyt>
+bool assign_clocking(Lyt& lyt, assign_clocking_params params = {}, assign_clocking_stats* stats = nullptr)
+{
+    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+
+    assign_clocking_stats             st{};
+    detail::assign_clocking_impl<Lyt> p{lyt, params, st};
+
+    const auto result = p.run();
+
+    if (stats)
+    {
+        *stats = st;
+    }
+
+    return result;
+}
+
+}  // namespace fiction
+
+#endif  // FICTION_ASSIGN_CLOCKING_HPP
