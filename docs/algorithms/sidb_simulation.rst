@@ -38,6 +38,8 @@ Heuristic Ground State Simulation
 Exhaustive Ground State Simulation
 ##################################
 
+.. _quickexact:
+
 **Header:** ``fiction/algorithms/simulation/sidb/quickexact.hpp``
 
 .. doxygenenum:: fiction::required_simulation_base_number
@@ -137,6 +139,8 @@ Random SiDB Layout Generator
 
 Operational Domain Computation
 ##############################
+
+.. _opdom:
 
 **Header:** ``fiction/algorithms/simulation/sidb/is_operational.hpp``
 

@@ -32,6 +32,7 @@
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
+#include <iterator>
 #include <numeric>
 #include <optional>
 #include <queue>
@@ -245,9 +246,9 @@ class operational_domain_impl
 {
   public:
     /**
-     * Standard constructor. Initializes the layout, the truth table, the parameters and the statistics. Also detects
-     * the output BDL pair, which is necessary for the operational domain computation. The layout must have exactly
-     * one output BDL pair.
+     * Standard constructor. Initializes the layout, the truth table, the parameters and the statistics. Also
+     * detects the output BDL pair, which is necessary for the operational domain computation. The layout must
+     * have exactly one output BDL pair.
      *
      * @param lyt SiDB cell-level layout to be evaluated.
      * @param spec Expected Boolean function of the layout given as a multi-output truth table.
@@ -596,8 +597,16 @@ class operational_domain_impl
      */
     [[nodiscard]] step_point to_step_point(const operational_domain::parameter_point& pp) const noexcept
     {
-        return {static_cast<std::size_t>((pp.x - params.x_min) / params.x_step),
-                static_cast<std::size_t>((pp.y - params.y_min) / params.y_step)};
+        const auto it_x = std::lower_bound(x_values.cbegin(), x_values.cend(), pp.x);
+        const auto it_y = std::lower_bound(y_values.cbegin(), y_values.cend(), pp.y);
+
+        assert(it_x != x_values.cend() && "parameter point is outside of the x range");
+        assert(it_y != y_values.cend() && "parameter point is outside of the y range");
+
+        const auto x_dis = std::distance(x_values.cbegin(), it_x);
+        const auto y_dis = std::distance(y_values.cbegin(), it_y);
+
+        return {static_cast<std::size_t>(x_dis), static_cast<std::size_t>(y_dis)};
     }
     /**
      * Calculates the number of steps in the x dimension based on the provided parameters.
@@ -606,7 +615,7 @@ class operational_domain_impl
      */
     [[nodiscard]] inline std::size_t num_x_steps() const noexcept
     {
-        return static_cast<std::size_t>((params.x_max - params.x_min) / params.x_step);
+        return static_cast<std::size_t>(std::round((params.x_max - params.x_min) / params.x_step));
     }
     /**
      * Calculates the number of steps in the y dimension based on the provided parameters.
@@ -615,7 +624,7 @@ class operational_domain_impl
      */
     [[nodiscard]] inline std::size_t num_y_steps() const noexcept
     {
-        return static_cast<std::size_t>((params.y_max - params.y_min) / params.y_step);
+        return static_cast<std::size_t>(std::round((params.y_max - params.y_min) / params.y_step));
     }
     /**
      * Potential sweep dimensions.
@@ -1048,6 +1057,10 @@ operational_domain operational_domain_random_sampling(const Lyt& lyt, const std:
  * inputs of the layout. Each exact ground state simulation has exponential complexity in of itself. Therefore, the
  * algorithm is only feasible for small layouts with few inputs.
  *
+ * This flavor of operational domain computation was proposed in \"Reducing the Complexity of Operational Domain
+ * Computation in Silicon Dangling Bond Logic\" by M. Walter, J. Drewniok, S. S. H. Ng, K. Walus, and R. Wille in
+ * NANOARCH 2023.
+ *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
  * @param lyt Layout to compute the operational domain for.
@@ -1097,6 +1110,10 @@ operational_domain operational_domain_flood_fill(const Lyt& lyt, const std::vect
  * up to \f$ 2^n \f$ exact ground state simulations, where \f$ n \f$ is the number of inputs of the layout. Each exact
  * ground state simulation has exponential complexity in of itself. Therefore, the algorithm is only feasible for small
  * layouts with few inputs.
+ *
+ * This flavor of operational domain computation was proposed in \"Reducing the Complexity of Operational Domain
+ * Computation in Silicon Dangling Bond Logic\" by M. Walter, J. Drewniok, S. S. H. Ng, K. Walus, and R. Wille in
+ * NANOARCH 2023.
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
