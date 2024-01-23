@@ -8,6 +8,7 @@
 #include "fiction/algorithms/path_finding/a_star.hpp"
 #include "fiction/algorithms/path_finding/cost.hpp"
 #include "fiction/algorithms/path_finding/distance.hpp"
+#include "fiction/algorithms/physical_design/wiring_reduction.hpp"
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/obstruction_layout.hpp"
 #include "fiction/traits.hpp"
@@ -27,6 +28,18 @@
 
 namespace fiction
 {
+
+/**
+ * Parameters for the post-layout optimization algorithm.
+ */
+struct post_layout_optimization_params
+{
+    /**
+     * Run the wiring reduction algorithm before post-layout optimization (recommended for logic functions with >150
+     * gates).
+     */
+    bool wiring_reduction = false;
+};
 
 /**
  * This struct stores statistics about the post-layout optimization process.
@@ -374,7 +387,8 @@ layout_coordinate_path<Lyt> get_path_and_obstruct(Lyt& lyt, const tile<Lyt>& sta
  * @return Flag that indicates if gate was moved successfully and the new coordinate of the moved gate.
  */
 template <typename Lyt>
-[[nodiscard]] std::pair<bool, tile<Lyt>> improve_gate_location(Lyt& lyt, const tile<Lyt>& old_pos) noexcept
+[[nodiscard]] std::pair<bool, tile<Lyt>> improve_gate_location(Lyt& lyt, const tile<Lyt>& old_pos,
+                                                               const tile<Lyt>& max_non_po) noexcept
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
@@ -382,7 +396,7 @@ template <typename Lyt>
 
     if (!lyt.is_clocking_scheme(clock_name::TWODDWAVE))
     {
-        std::cout << "Clocking scheme is not 2DDWave" << std::endl;
+        std::cout << "Clocking scheme is not 2DDWave\n";
         std::make_pair(false, old_pos);
     }
 
@@ -414,7 +428,7 @@ template <typename Lyt>
         {
             if (i == fanin)
             {
-                return std::make_pair(false, new_pos);
+                return std::make_pair(false, old_pos);
             }
         }
     }
@@ -467,7 +481,9 @@ template <typename Lyt>
 
             // only check better positions
             if (lyt.y() >= y && y >= min_y && lyt.x() >= x && x >= min_x && ((x + y) <= max_diagonal) &&
-                ((!lyt.is_pi_tile(current_pos)) || (lyt.is_pi_tile(current_pos) && (x == 0 || y == 0))))
+                ((!lyt.is_pi_tile(current_pos)) || (lyt.is_pi_tile(current_pos) && (x == 0 || y == 0))) &&
+                !(lyt.is_po_tile(current_pos) &&
+                  (((x <= max_non_po.x) && (y <= max_non_po.y)) || ((x + y) == (old_pos.x + old_pos.y)))))
             {
                 new_pos = {x, y};
                 if (lyt.is_empty_tile(new_pos) && lyt.is_empty_tile({new_pos.x, new_pos.y, 1}))
@@ -620,7 +636,7 @@ template <typename Lyt>
 
         lyt.move_node(lyt.get_node(old_pos), old_pos, signals);
 
-        // update children oóf fanouts
+        // update children of fanouts
         for (const auto& fanout : fanouts)
         {
             std::vector<mockturtle::signal<Lyt>> fout_signals{};
@@ -641,226 +657,6 @@ template <typename Lyt>
 }
 
 /**
- * Utility function that deletes all specified rows and columns.
- *
- * @tparam Lyt Cartesian gate-level layout type.
- * @param lyt Gate-level layout.
- * @param rows_to_delete Rows to be deleted.
- * @param columns_to_delete Columns to be deleted.
- *
- * @note This function requires the gate-level layout to be 2DDWave-clocked and Cartesian.
- */
-template <typename Lyt>
-void delete_rows_and_columns(Lyt& lyt, std::vector<uint64_t>& rows_to_delete,
-                             std::vector<uint64_t>& columns_to_delete) noexcept
-{
-    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
-    static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
-    if (!lyt.is_clocking_scheme(clock_name::TWODDWAVE))
-    {
-        std::cout << "Clocking scheme is not 2DDWave" << std::endl;
-        return;
-    }
-
-    auto layout_copy = lyt.clone();
-
-    // delete all excess wiring in rows with only vertical wires
-    for (uint64_t row : rows_to_delete)
-    {
-        for (uint64_t x = 0; x <= lyt.x(); ++x)
-        {
-            if (const tile<Lyt> old_pos = {x, row, 0}; !lyt.is_empty_tile(old_pos))
-            {
-                lyt.clear_tile(old_pos);
-            }
-        }
-    }
-
-    // delete all excess wiring in columns with only horizontal wires
-    for (uint64_t column : columns_to_delete)
-    {
-        for (uint64_t y = 0; y <= lyt.y(); ++y)
-        {
-            if (const tile<Lyt> old_pos = {column, y, 0}; !lyt.is_empty_tile(old_pos))
-            {
-                lyt.clear_tile(old_pos);
-            }
-        }
-    }
-
-    for (uint64_t x = 0; x <= lyt.x(); ++x)
-    {
-        // calculate column offset based on number of columns deleted to the left of current column
-        uint64_t column_offset = 0;
-        if (!columns_to_delete.empty())
-        {
-            column_offset = static_cast<uint64_t>(
-                std::upper_bound(columns_to_delete.cbegin(), columns_to_delete.cend(), x) - columns_to_delete.cbegin());
-        }
-        for (uint64_t y = 0; y <= lyt.y(); ++y)
-        {
-            // calculate row offset based on number of rows deleted above the current row
-            uint64_t row_offset = 0;
-            if (!rows_to_delete.empty())
-            {
-                row_offset = static_cast<uint64_t>(std::upper_bound(rows_to_delete.cbegin(), rows_to_delete.cend(), y) -
-                                                   rows_to_delete.cbegin());
-            }
-
-            for (uint64_t z = 0; z <= lyt.z(); ++z)
-            {
-
-                if (const tile<Lyt> old_pos = {x, y, z}; !lyt.is_empty_tile(old_pos))
-                {
-                    const tile<Lyt> new_pos = {x - column_offset, y - row_offset, z};
-
-                    std::vector<mockturtle::signal<Lyt>> fins{};
-
-                    for (auto& fanin : layout_copy.incoming_data_flow(old_pos))
-                    {
-                        // skip removed columns and decrease column offset
-                        uint64_t excess_column_offset = 0;
-                        if (!columns_to_delete.empty())
-                        {
-                            while (std::find(std::cbegin(columns_to_delete), std::cend(columns_to_delete), fanin.x) !=
-                                   std::cend(columns_to_delete))
-                            {
-                                fanin = layout_copy.incoming_data_flow(fanin)[0];
-                                excess_column_offset++;
-                            }
-                        }
-
-                        // skip removed rows and decrease row offset
-                        uint64_t excess_row_offset = 0;
-                        if (!rows_to_delete.empty())
-                        {
-                            while (std::find(std::begin(rows_to_delete), std::end(rows_to_delete), fanin.y) !=
-                                   std::end(rows_to_delete))
-                            {
-                                fanin = layout_copy.incoming_data_flow(fanin)[0];
-                                excess_row_offset++;
-                            }
-                        }
-
-                        fins.push_back(
-                            lyt.make_signal(lyt.get_node({fanin.x - column_offset + excess_column_offset,
-                                                          fanin.y - row_offset + excess_row_offset, fanin.z})));
-                    }
-                    lyt.move_node(lyt.get_node(old_pos), new_pos, fins);
-                }
-            }
-        }
-    }
-}
-
-/**
- * Utility function that deletes rows that only contain vertically connected wires.
- *
- * @tparam Lyt Cartesian gate-level layout type.
- * @param lyt Gate-level layout.
- */
-template <typename Lyt>
-void delete_wires(Lyt& lyt) noexcept
-{
-    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
-    static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
-    if (!lyt.is_clocking_scheme(clock_name::TWODDWAVE))
-    {
-        std::cout << "Clocking scheme is not 2DDWave" << std::endl;
-        return;
-    }
-
-    std::vector<uint64_t> rows_to_delete{};
-    rows_to_delete.reserve(lyt.y());
-    for (uint64_t y = 0; y <= lyt.y(); ++y)
-    {
-        bool found_row = true;
-        for (uint64_t x = 0; x <= lyt.x(); ++x)
-        {
-            const bool is_vertical_wire =
-                (lyt.is_wire_tile({x, y}) && lyt.fanin_size(lyt.get_node({x, y})) == 1 &&
-                 lyt.fanout_size(lyt.get_node({x, y})) == 1 && lyt.has_northern_incoming_signal({x, y}) &&
-                 lyt.has_southern_outgoing_signal({x, y}));
-
-            if (!(is_vertical_wire || lyt.is_empty_tile({x, y})))
-            {
-                found_row = false;
-            }
-        }
-        if (found_row)
-        {
-            rows_to_delete.push_back(y);
-        }
-    }
-
-    std::vector<uint64_t> columns_to_delete{};
-    columns_to_delete.reserve(lyt.x());
-    for (uint64_t x = 0; x <= lyt.x(); ++x)
-    {
-        bool found_column = true;
-        for (uint64_t y = 0; y <= lyt.y(); ++y)
-        {
-            // Check if the column can be deleted based on certain conditions
-            const bool is_horizontal_wire =
-                (lyt.is_wire_tile({x, y}) && lyt.fanin_size(lyt.get_node({x, y})) == 1 &&
-                 lyt.fanout_size(lyt.get_node({x, y})) == 1 && lyt.has_western_incoming_signal({x, y}) &&
-                 lyt.has_eastern_outgoing_signal({x, y}));
-
-            if (!(is_horizontal_wire || lyt.is_empty_tile({x, y})))
-            {
-                found_column = false;
-            }
-        }
-        if (found_column)
-        {
-            columns_to_delete.push_back(x);
-        }
-    }
-
-    delete_rows_and_columns(lyt, rows_to_delete, columns_to_delete);
-}
-
-/**
- * This struct is used to hold information about an update to the layout, where a PO tile
- * is moved from its old coordinate to a new coordinate and connected to its new child node.
- *
- * @tparam Lyt Cartesian gate-level layout type.
- */
-template <typename Lyt>
-struct output_update
-{
-    /**
-     * The old coordinate of the PO.
-     */
-    tile<Lyt> old_coordinate;
-
-    /**
-     * The new coordinate of the PO.
-     */
-    tile<Lyt> new_coordinate;
-
-    /**
-     * The coordinate of the child node (after the update).
-     *
-     * This is the coordinate of the new child (i.e. incoming signal) after the update.
-     */
-    tile<Lyt> child_coordinate;
-
-    /**
-     * Construct a new Update object.
-     *
-     * @param old_coord The old coordinate of the PO.
-     * @param new_coord The new coordinate of the PO.
-     * @param child_coord The coordinate of the child node (after the update).
-     */
-    output_update(const tile<Lyt>& old_coord, const tile<Lyt>& new_coord, const tile<Lyt>& child_coord) :
-            old_coordinate(old_coord),
-            new_coordinate(new_coord),
-            child_coordinate(child_coord)
-    {}
-};
-
-/**
  * Utility function that traces back all output nodes and calculate optimal positions.
  *
  * @tparam Lyt Cartesian gate-level layout type.
@@ -873,119 +669,56 @@ void optimize_output_positions(Lyt& lyt) noexcept
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
     if (!lyt.is_clocking_scheme(clock_name::TWODDWAVE))
     {
-        std::cout << "Clocking scheme is not 2DDWave" << std::endl;
+        std::cout << "Clocking scheme is not 2DDWave\n";
         return;
     }
 
-    // get path from output to preceding gate
-    std::vector<layout_coordinate_path<Lyt>> paths{};
-    paths.reserve(lyt.num_pos());
-
-    lyt.foreach_po(
-        [&lyt, &paths](const auto& po)
-        {
-            tile<Lyt>                   po_tile = lyt.get_tile(lyt.get_node(po));
-            layout_coordinate_path<Lyt> route{};
-
-            // trace back outputs
-            lyt.foreach_fanin(lyt.get_node(po_tile),
-                              [&lyt, &route, &po_tile](const auto& fin)
-                              {
-                                  auto fanin = static_cast<tile<Lyt>>(fin);
-
-                                  route.insert(route.begin(), po_tile);
-                                  route.insert(route.begin(), fanin);
-
-                                  while (lyt.is_wire_tile(fanin) &&
-                                         lyt.fanout_size(lyt.get_node(fanin)) == 1  // -> Wire with single fanout
-                                         && !lyt.is_pi_tile(fanin))  // Can't go further back than until a PI
-                                  {
-                                      fanin = lyt.incoming_data_flow(fanin).front();
-                                      route.insert(route.begin(), fanin);
-                                  }
-                              });
-
-            paths.push_back(route);
-
-            if (route.size() != 2)  // Output is directly connected to a gate already
-            {
-                lyt.move_node(lyt.get_node(po), po_tile, {});
-            }
-        });
-
-    // calculate bounding box around gates without outputs
-    const auto min_x =
-        std::max_element(paths.begin(), paths.end(), [](const auto& a, const auto& b) { return a[1].x < b[1].x; })
-            ->at(1)
-            .x;
-    const auto min_y =
-        std::max_element(paths.begin(), paths.end(), [](const auto& a, const auto& b) { return a[1].y < b[1].y; })
-            ->at(1)
-            .y;
-
-    std::vector<output_update<Lyt>> output_updates{};
-    std::vector<tile<Lyt>>          cleared{};
-
-    // move output along its wiring until it lies on the bounding box
-    for (const auto& route : paths)
+    bool optimizable = true;
+    for (uint64_t x = 0; x <= lyt.x(); ++x)
     {
-        auto dangling = tile<Lyt>{};
-        auto new_pos  = tile<Lyt>{};
-        bool moved    = false;
-
-        for (const auto& tile : route)
+        if (!(lyt.is_empty_tile({x, lyt.y()}) ||
+              (lyt.is_po_tile({x, lyt.y(), 0}) && lyt.is_empty_tile({x + 1, lyt.y() - 1, 0}) && (x < lyt.x()))))
         {
-            if ((tile.x < min_x && tile.y < min_y))
-            {
-                dangling = tile;
-            }
-            else if (!lyt.is_po_tile(tile) && lyt.is_wire_tile(tile) && lyt.fanout_size(lyt.get_node(tile)) != 2)
-            {
-                lyt.clear_tile(tile);
-                cleared.emplace_back(tile);
-                if (new_pos.is_dead())
-                {
-                    new_pos = tile;
-                }
-            }
-            else if (!dangling.is_dead())
-            {
-                if (!new_pos.is_dead())
-                {
-                    new_pos = {new_pos.x, new_pos.y, 0};
-                    output_update<Lyt> new_update(tile, new_pos, dangling);
-                    output_updates.emplace_back(new_update);
-                }
-                moved = true;
-            }
-        }
-        if (!moved)
-        {
-            new_pos = {route[1].x, route[1].y, 0};
-            output_update<Lyt> new_update(route.back(), new_pos, route.front());
-            output_updates.emplace_back(new_update);
+            optimizable = false;
         }
     }
 
-    fix_wires(lyt, cleared);
-    for (const auto& [tile, new_pos, dangling] : output_updates)
+    if (optimizable)
     {
-        if (lyt.is_empty_tile(new_pos) || (tile == new_pos))
+        for (uint64_t x = 0; x < lyt.x(); ++x)
         {
-            lyt.move_node(lyt.get_node(tile), new_pos, {lyt.make_signal(lyt.get_node(dangling))});
-        }
-        else
-        {
-            lyt.create_buf(lyt.make_signal(lyt.get_node(dangling)), {new_pos.x, new_pos.y, 1});
-            if (new_pos.x == min_x)
+            if (lyt.is_po_tile({x, lyt.y(), 0}))
             {
-                lyt.move_node(lyt.get_node(tile), {new_pos.x + 1, new_pos.y, 0},
-                              {lyt.make_signal(lyt.get_node({new_pos.x, new_pos.y, 1}))});
+                std::vector<mockturtle::signal<Lyt>> signals{};
+                signals.reserve(lyt.fanin_size(lyt.get_node({x, lyt.y()})));
+                lyt.foreach_fanin(lyt.get_node({x, lyt.y()}),
+                                  [&signals](const auto& fanin) { signals.push_back(fanin); });
+                lyt.move_node(lyt.get_node({x, lyt.y()}), {x + 1, lyt.y() - 1, 0}, signals);
             }
-            else
+        }
+    }
+
+    optimizable = true;
+    for (uint64_t y = 0; y <= lyt.y(); ++y)
+    {
+        if (!(lyt.is_empty_tile({lyt.x(), y}) ||
+              (lyt.is_po_tile({lyt.x(), y, 0}) && lyt.is_empty_tile({lyt.x() - 1, y + 1, 0}) && (y < lyt.y()))))
+        {
+            optimizable = false;
+        }
+    }
+
+    if (optimizable)
+    {
+        for (uint64_t y = 0; y < lyt.y(); ++y)
+        {
+            if (lyt.is_po_tile({lyt.x(), y, 0}))
             {
-                lyt.move_node(lyt.get_node(tile), {new_pos.x, new_pos.y + 1, 0},
-                              {lyt.make_signal(lyt.get_node({new_pos.x, new_pos.y, 1}))});
+                std::vector<mockturtle::signal<Lyt>> signals{};
+                signals.reserve(lyt.fanin_size(lyt.get_node({lyt.x(), y})));
+                lyt.foreach_fanin(lyt.get_node({lyt.x(), y}),
+                                  [&signals](const auto& fanin) { signals.push_back(fanin); });
+                lyt.move_node(lyt.get_node({lyt.x(), y}), {lyt.x() - 1, y + 1, 0}, signals);
             }
         }
     }
@@ -1083,14 +816,15 @@ bool compare_gates(const tile<Lyt>& a, const tile<Lyt>& b)
  * @param lyt 2DDWave-clocked Cartesian gate-level layout to optimize.
  */
 template <typename Lyt>
-void post_layout_optimization(const Lyt& lyt, post_layout_optimization_stats* pst = nullptr) noexcept
+void post_layout_optimization(const Lyt& lyt, post_layout_optimization_params ps = {},
+                              post_layout_optimization_stats* pst = nullptr) noexcept
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
 
     if (!lyt.is_clocking_scheme(clock_name::TWODDWAVE))
     {
-        std::cout << "Clocking scheme is not 2DDWave" << std::endl;
+        std::cout << "Clocking scheme is not 2DDWave\n";
         return;
     }
 
@@ -1106,12 +840,21 @@ void post_layout_optimization(const Lyt& lyt, post_layout_optimization_stats* ps
         std::vector<tile<Lyt>> gate_tiles{};
         gate_tiles.reserve(layout.num_gates() + layout.num_pis() - layout.num_pos());
 
+        fiction::wiring_reduction_stats  wiring_reduction_stats{};
+        fiction::wiring_reduction_params wiring_reduction_params{};
+        wiring_reduction_params.fix_dead_nodes = true;
+
+        if (ps.wiring_reduction)
+        {
+            fiction::wiring_reduction(layout, wiring_reduction_params, &wiring_reduction_stats);
+        }
+
         layout.foreach_node(
             [&layout, &gate_tiles](const auto& node)
             {
                 if (const tile<Lyt> tile = layout.get_tile(node); layout.is_inv(node) || layout.is_and(node) ||
                                                                   layout.is_xor(node) || layout.is_fanout(node) ||
-                                                                  layout.is_or(node) || layout.is_pi_tile(tile))
+                    layout.is_or(node) || layout.is_pi_tile(tile) || layout.is_po_tile(tile))
                 {
                     layout.obstruct_coordinate({tile.x, tile.y, 1});
                     gate_tiles.emplace_back(tile);
@@ -1120,17 +863,26 @@ void post_layout_optimization(const Lyt& lyt, post_layout_optimization_stats* ps
 
         std::sort(gate_tiles.begin(), gate_tiles.end(), detail::compare_gates<Lyt>);
 
-        // sort gates based on diagonal line
-        std::sort(gate_tiles.begin(), gate_tiles.end(),
-                  [](const auto& a, const auto& b) { return a.x + a.y < b.x + b.y; });
-
         bool moved_at_least_one_gate = false;
 
         do {
             moved_at_least_one_gate = false;
+
+            tile<Lyt> max_non_po;
+            // Iterate through the vector in reverse
+            for (auto it = gate_tiles.rbegin(); it != gate_tiles.rend(); ++it)
+            {
+                // Stop if a condition based on the element is met
+                if (!layout.is_po_tile(*it))
+                {
+                    max_non_po = *it;
+                    break;
+                }
+            }
+
             for (auto& gate_tile : gate_tiles)
             {
-                const auto try_gate_relocation = detail::improve_gate_location(layout, gate_tile);
+                const auto try_gate_relocation = detail::improve_gate_location(layout, gate_tile, max_non_po);
 
                 if (std::get<0>(try_gate_relocation))
                 {
@@ -1142,16 +894,18 @@ void post_layout_optimization(const Lyt& lyt, post_layout_optimization_stats* ps
             std::sort(gate_tiles.begin(), gate_tiles.end(), detail::compare_gates<Lyt>);
         } while (moved_at_least_one_gate);
 
-        detail::delete_wires(layout);
-        detail::optimize_output_positions(layout);
         detail::fix_dead_nodes(layout, gate_tiles);
 
         // calculate bounding box
-        const auto bounding_box            = bounding_box_2d(layout);
-        const auto optimized_layout_width  = bounding_box.get_x_size();
-        const auto optimized_layout_height = bounding_box.get_y_size();
+        auto bounding_box = bounding_box_2d(layout);
+        layout.resize({bounding_box.get_x_size(), bounding_box.get_y_size(), layout.z()});
 
-        layout.resize({optimized_layout_width, optimized_layout_height, layout.z()});
+        fiction::wiring_reduction(layout, wiring_reduction_params, &wiring_reduction_stats);
+        detail::optimize_output_positions(layout);
+
+        // calculate bounding box
+        bounding_box.update_bounding_box();
+        layout.resize({bounding_box.get_x_size(), bounding_box.get_y_size(), layout.z()});
     }
 
     if (pst != nullptr)

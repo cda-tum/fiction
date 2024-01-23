@@ -37,7 +37,7 @@ int main()  // NOLINT
                              "critical path",
                              "throughput",
                              "runtime ortho (in sec)",
-                             "runtime optimization (in sec)",
+                             "runtime wiring_reduction (in sec)",
                              "improvement (%)",
                              "equivalent"};
 
@@ -73,7 +73,7 @@ int main()  // NOLINT
         const auto area_before_wiring_reduction   = width_before_wiring_reduction * height_before_wiring_reduction;
 
         // perform post-layout optimization
-        fiction::wiring_reduction<gate_lyt>(gate_level_layout, &wiring_reduction_stats);
+        fiction::wiring_reduction<gate_lyt>(gate_level_layout, {}, &wiring_reduction_stats);
 
         // check equivalence
         fiction::equivalence_checking_stats eq_stats{};

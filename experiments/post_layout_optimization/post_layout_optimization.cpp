@@ -44,6 +44,7 @@ int main()  // NOLINT
     // stats for SMT-based physical design
     fiction::orthogonal_physical_design_stats orthogonal_stats{};
     fiction::post_layout_optimization_stats   post_layout_optimization_stats{};
+    fiction::post_layout_optimization_params  post_layout_optimization_params{};
 
     static constexpr const uint64_t bench_select =
         fiction_experiments::all & ~fiction_experiments::epfl & ~fiction_experiments::iscas85;
@@ -73,7 +74,8 @@ int main()  // NOLINT
         const auto area_before_optimization   = width_before_optimization * height_before_optimization;
 
         // perform post-layout optimization
-        fiction::post_layout_optimization<gate_lyt>(gate_level_layout, &post_layout_optimization_stats);
+        fiction::post_layout_optimization<gate_lyt>(gate_level_layout, post_layout_optimization_params,
+                                                    &post_layout_optimization_stats);
 
         // check equivalence
         fiction::equivalence_checking_stats eq_stats{};

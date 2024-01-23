@@ -29,6 +29,17 @@ namespace fiction
 {
 
 /**
+ * Parameters for the wiring reduction algorithm.
+ */
+struct wiring_reduction_params
+{
+    /**
+     * Check and fix dead nodes after every iteration (needed if used in post-layout optimization).
+     */
+    bool fix_dead_nodes = false;
+};
+
+/**
  * This struct stores statistics about the wiring reduction process.
  */
 struct wiring_reduction_stats
@@ -789,7 +800,7 @@ void delete_wires(Lyt& lyt, layout_coordinate_path<wiring_reduction_lyt>& to_del
  * @param pst Pointer to a wiring_reduction_stats object to record runtime statistics (optional).
  */
 template <typename Lyt>
-void wiring_reduction(const Lyt& lyt, wiring_reduction_stats* pst = nullptr) noexcept
+void wiring_reduction(const Lyt& lyt, wiring_reduction_params ps = {}, wiring_reduction_stats* pst = nullptr) noexcept
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
@@ -835,13 +846,57 @@ void wiring_reduction(const Lyt& lyt, wiring_reduction_stats* pst = nullptr) noe
                     possible_path = detail::get_path(shifted_layout, {0, 0}, {shifted_layout.x(), shifted_layout.y()});
                 }
 
-                for (coordinate<detail::wiring_reduction_lyt> coord : to_delete)
-                {
-                    std::cout << coord;
-                }
                 // Calculate offset matrix and delete wires based on to-delete list
                 const auto offset_matrix = detail::calculate_offset_matrix<Lyt>(layout, to_delete, left_to_right);
                 detail::delete_wires(layout, to_delete, offset_matrix, left_to_right);
+
+                if (ps.fix_dead_nodes)
+                {
+                    for (uint64_t x = 0; x <= lyt.x(); ++x)
+                    {
+                        for (uint64_t y = 0; y <= lyt.y(); ++y)
+                        {
+                            for (uint64_t z = 0; z <= lyt.z(); ++z)
+                            {
+                                const tile<Lyt> old_coord = {x, y, z};
+
+                                // Find an empty coordinate to move the gate to.
+                                auto empty_pos = tile<Lyt>{};
+
+                                if (layout.is_dead(layout.get_node(old_coord)))
+                                {
+                                    layout.foreach_coordinate(
+                                        [&layout, &empty_pos](const auto& coord)
+                                        {
+                                            if (layout.is_empty_tile(coord))
+                                            {
+                                                empty_pos = coord;
+                                                return false;
+                                            }
+                                            return true;
+                                        });
+
+                                    // If an empty coordinate is found, proceed with moving the dead gates.
+                                    if (!empty_pos.is_dead())
+                                    {
+                                        // Collect fanin signals of the dead gate.
+                                        std::vector<mockturtle::signal<Lyt>> signals{};
+                                        signals.reserve(layout.fanin_size(layout.get_node(old_coord)));
+                                        layout.foreach_fanin(layout.get_node(old_coord), [&signals](const auto& fanin)
+                                                             { signals.push_back(fanin); });
+
+                                        // Move the dead gate to the empty coordinate.
+                                        layout.move_node(layout.get_node(old_coord), empty_pos);
+                                        layout.clear_tile(old_coord);
+
+                                        // Move the fanin signals to the newly moved gate.
+                                        layout.move_node(layout.get_node(empty_pos), old_coord, signals);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
 
                 if (!to_delete.empty())
                 {
