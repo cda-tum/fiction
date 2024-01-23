@@ -863,9 +863,10 @@ void post_layout_optimization(const Lyt& lyt, post_layout_optimization_params ps
 
         std::sort(gate_tiles.begin(), gate_tiles.end(), detail::compare_gates<Lyt>);
 
-        bool moved_at_least_one_gate = false;
+        bool moved_at_least_one_gate = true;
 
-        do {
+        while (moved_at_least_one_gate)
+        {
             moved_at_least_one_gate = false;
 
             tile<Lyt> max_non_po;
@@ -892,7 +893,7 @@ void post_layout_optimization(const Lyt& lyt, post_layout_optimization_params ps
             }
 
             std::sort(gate_tiles.begin(), gate_tiles.end(), detail::compare_gates<Lyt>);
-        } while (moved_at_least_one_gate);
+        }
 
         detail::fix_dead_nodes(layout, gate_tiles);
 

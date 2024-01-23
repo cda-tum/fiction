@@ -4,15 +4,27 @@
 #include <fiction/algorithms/physical_design/post_layout_optimization.hpp>  // scalable heuristic for physical design of FCN layouts
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/algorithms/verification/equivalence_checking.hpp>               // SAT-based equivalence checking
+#include <fiction/io/network_reader.hpp>                                          // read networks from files
 
 #include <fmt/format.h>                      // output formatting
-#include <lorina/lorina.hpp>                 // Verilog/BLIF/AIGER/... file parsing
-#include <mockturtle/io/verilog_reader.hpp>  // call-backs to read Verilog files into networks
 
 #include <cassert>
 #include <chrono>
 #include <cstdlib>
 #include <string>
+
+template <typename Ntk>
+Ntk read_ntk(const std::string& name)
+{
+    fmt::print("[i] processing {}\n", name);
+
+    std::ostringstream                        os{};
+    fiction::network_reader<fiction::tec_ptr> reader{fiction_experiments::benchmark_path(name), os};
+    const auto                                nets    = reader.get_networks();
+    const auto                                network = *nets.front();
+
+    return network;
+}
 
 int main()  // NOLINT
 {
@@ -44,20 +56,13 @@ int main()  // NOLINT
     // stats for SMT-based physical design
     fiction::orthogonal_physical_design_stats orthogonal_stats{};
     fiction::post_layout_optimization_stats   post_layout_optimization_stats{};
-    fiction::post_layout_optimization_params  post_layout_optimization_params{};
 
     static constexpr const uint64_t bench_select =
         fiction_experiments::all & ~fiction_experiments::epfl & ~fiction_experiments::iscas85;
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
-        fmt::print("[i] processing {}\n", benchmark);
-
-        fiction::technology_network network{};
-
-        const auto read_verilog_result =
-            lorina::read_verilog(fiction_experiments::benchmark_path(benchmark), mockturtle::verilog_reader(network));
-        assert(read_verilog_result == lorina::return_code::success);
+        const auto network = read_ntk<fiction::tec_nt>(benchmark);
 
         // perform layout generation with an OGD-based heuristic algorithm
         auto gate_level_layout = fiction::orthogonal<gate_lyt>(network, {}, &orthogonal_stats);
@@ -74,8 +79,7 @@ int main()  // NOLINT
         const auto area_before_optimization   = width_before_optimization * height_before_optimization;
 
         // perform post-layout optimization
-        fiction::post_layout_optimization<gate_lyt>(gate_level_layout, post_layout_optimization_params,
-                                                    &post_layout_optimization_stats);
+        fiction::post_layout_optimization<gate_lyt>(gate_level_layout, {}, &post_layout_optimization_stats);
 
         // check equivalence
         fiction::equivalence_checking_stats eq_stats{};

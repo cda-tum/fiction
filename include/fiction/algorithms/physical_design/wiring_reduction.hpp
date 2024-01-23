@@ -574,8 +574,8 @@ calculate_offset_matrix(Lyt& lyt, layout_coordinate_path<wiring_reduction_lyt>& 
     // Update matrix based on coordinates
     for (const auto& coord : to_delete)
     {
-        uint64_t x = coord.x;
-        uint64_t y = coord.y;
+        const uint64_t x = coord.x;
+        const uint64_t y = coord.y;
         if (left_to_right)
         {
             for (uint64_t i = lyt.y(); i > y; --i)
@@ -822,10 +822,11 @@ void wiring_reduction(const Lyt& lyt, wiring_reduction_params ps = {}, wiring_re
         auto                                                 layout    = obstruction_layout<Lyt>(lyt);
         layout_coordinate_path<detail::wiring_reduction_lyt> to_delete = {};
 
-        bool found_wires = false;
+        bool found_wires = true;
 
         // Perform wiring reduction iteratively until no further wires can be deleted
-        do {
+        while (found_wires)
+        {  // Continue until no further wires can be deleted
             found_wires = false;
 
             for (bool left_to_right : {true, false})
@@ -903,7 +904,7 @@ void wiring_reduction(const Lyt& lyt, wiring_reduction_params ps = {}, wiring_re
                     found_wires = true;
                 }
             }
-        } while (found_wires);  // Continue until no further wires can be deleted
+        }
     }
 
     // Record runtime statistics if a valid pointer is provided
