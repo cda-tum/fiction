@@ -84,9 +84,9 @@ class wiring_reduction_layout : public cartesian_layout<OffsetCoordinateType>
      * @param ar The aspect ratio for the layout. Defaults to an empty aspect ratio if not provided.
      */
     explicit wiring_reduction_layout(const typename cartesian_layout<OffsetCoordinateType>::aspect_ratio& ar = {},
-                                     bool left_to_right                                                      = true) :
+                                     bool search_left_to_right                                               = true) :
             cartesian_layout<OffsetCoordinateType>(ar),
-            left_to_right(left_to_right)
+            left_to_right(search_left_to_right)
     {}
 
     /**
@@ -138,22 +138,6 @@ class wiring_reduction_layout : public cartesian_layout<OffsetCoordinateType>
                     c, std::forward<Fn>(fn));
             }
         }
-    }
-
-    /**
-     * Returns `true` iff coordinate `c2` is one of the 8 neighbouring coordinates of coordinate `c1`.
-     *
-     * @param c1 Base coordinate.
-     * @param c2 Coordinate to test for its location in relation to `c1`.
-     * @return `true` iff `c2` is a neighbour of `c1`.
-     */
-    [[nodiscard]] bool is_adjacent_of(const OffsetCoordinateType& c1, const OffsetCoordinateType& c2) const noexcept
-    {
-        return is_north_of(c1, c2) || is_east_of(c1, c2) || is_south_of(c1, c2) || is_west_of(c1, c2) ||
-               is_north_of(cartesian_layout<OffsetCoordinateType>::east(c1), c2) ||
-               is_north_of(cartesian_layout<OffsetCoordinateType>::west(c1), c2) ||
-               is_south_of(cartesian_layout<OffsetCoordinateType>::east(c1), c2) ||
-               is_south_of(cartesian_layout<OffsetCoordinateType>::west(c1), c2);
     }
 
     /**
@@ -308,6 +292,13 @@ class wiring_reduction_layout : public cartesian_layout<OffsetCoordinateType>
         };
 
         apply_if_not_c(cartesian_layout<OffsetCoordinateType>::east(c));
+    }
+
+    [[nodiscard]] bool is_adjacent_elevation_of(const OffsetCoordinateType& c1,
+                                                const OffsetCoordinateType& c2) const noexcept
+    {
+        std::cout << "!!!!!!!!!!";
+        return is_adjacent_of(c1, c2) || is_adjacent_of(above(c1), c2) || is_adjacent_of(below(c1), c2);
     }
 };
 
@@ -523,7 +514,7 @@ template <typename Lyt>
 
     using dist = manhattan_distance_functor<Lyt, uint64_t>;
     using cost = unit_cost_functor<Lyt, uint8_t>;
-    static const a_star_params params{true};
+    static const a_star_params params{false};
 
     auto path = a_star<layout_coordinate_path<Lyt>>(lyt, {start, end}, dist(), cost(), params);
 
