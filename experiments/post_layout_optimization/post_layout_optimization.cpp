@@ -6,7 +6,7 @@
 #include <fiction/algorithms/verification/equivalence_checking.hpp>               // SAT-based equivalence checking
 #include <fiction/io/network_reader.hpp>                                          // read networks from files
 
-#include <fmt/format.h>                      // output formatting
+#include <fmt/format.h>  // output formatting
 
 #include <cassert>
 #include <chrono>
