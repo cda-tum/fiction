@@ -293,13 +293,6 @@ class wiring_reduction_layout : public cartesian_layout<OffsetCoordinateType>
 
         apply_if_not_c(cartesian_layout<OffsetCoordinateType>::east(c));
     }
-
-    [[nodiscard]] bool is_adjacent_elevation_of(const OffsetCoordinateType& c1,
-                                                const OffsetCoordinateType& c2) const noexcept
-    {
-        std::cout << "!!!!!!!!!!";
-        return is_adjacent_of(c1, c2) || is_adjacent_of(above(c1), c2) || is_adjacent_of(below(c1), c2);
-    }
 };
 
 /**
