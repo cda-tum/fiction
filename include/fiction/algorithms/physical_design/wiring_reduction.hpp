@@ -141,6 +141,22 @@ class wiring_reduction_layout : public cartesian_layout<OffsetCoordinateType>
     }
 
     /**
+     * Returns `true` iff coordinate `c2` is one of the 8 neighbouring coordinates of coordinate `c1`.
+     *
+     * @param c1 Base coordinate.
+     * @param c2 Coordinate to test for its location in relation to `c1`.
+     * @return `true` iff `c2` is a neighbour of `c1`.
+     */
+    [[nodiscard]] bool is_adjacent_of(const OffsetCoordinateType& c1, const OffsetCoordinateType& c2) const noexcept
+    {
+        return is_north_of(c1, c2) || is_east_of(c1, c2) || is_south_of(c1, c2) || is_west_of(c1, c2) ||
+               is_north_of(cartesian_layout<OffsetCoordinateType>::east(c1), c2) ||
+               is_north_of(cartesian_layout<OffsetCoordinateType>::west(c1), c2) ||
+               is_south_of(cartesian_layout<OffsetCoordinateType>::east(c1), c2) ||
+               is_south_of(cartesian_layout<OffsetCoordinateType>::west(c1), c2);
+    }
+
+    /**
      * Iterates over adjacent coordinates of a given coordinate in the first column.
      *
      * This function iterates over adjacent coordinates of the given coordinate 'c' in the first column
