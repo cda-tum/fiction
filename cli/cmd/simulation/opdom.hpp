@@ -21,6 +21,7 @@
 #include <cstdlib>
 #include <exception>
 #include <iostream>
+#include <optional>
 #include <string>
 #include <type_traits>
 #include <variant>
@@ -40,9 +41,7 @@ class opdom_command : public command
      * @param e alice::environment that specifies stores etc.
      */
     explicit opdom_command(const environment::ptr& e) :
-            command(e, "Opdom is a quick and exact electrostatic ground state simulation algorithm designed "
-                       "specifically for SiDB layouts. It provides a significant performance advantage of more than "
-                       "three orders of magnitude over ExGS from SiQAD.")
+            command(e, "Opdom is used to determine the operational domain of SiDB gate layouts.")
     {
         add_option("--random_sampling,-r", num_random_samples,
                    "Use random sampling instead of grid search with this many random samples");
@@ -230,13 +229,13 @@ class opdom_command : public command
                 }
                 else if (is_set("flood_fill"))
                 {
-                    op_domain = fiction::operational_domain_flood_fill(*lyt_ptr, std::vector<fiction::tt>{*tt_ptr},
-                                                                       num_random_samples, params, &stats);
+                    op_domain = fiction::operational_domain_flood_fill(
+                        *lyt_ptr, std::vector<fiction::tt>{*tt_ptr}, num_random_samples, params, std::nullopt, &stats);
                 }
                 else if (is_set("contour_tracing"))
                 {
-                    op_domain = fiction::operational_domain_contour_tracing(*lyt_ptr, std::vector<fiction::tt>{*tt_ptr},
-                                                                            num_random_samples, params, &stats);
+                    op_domain = fiction::operational_domain_contour_tracing(
+                        *lyt_ptr, std::vector<fiction::tt>{*tt_ptr}, num_random_samples, params, std::nullopt, &stats);
                 }
                 else
                 {

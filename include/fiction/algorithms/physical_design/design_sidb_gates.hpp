@@ -5,6 +5,8 @@
 #ifndef FICTION_DESIGN_SIDB_GATES_HPP
 #define FICTION_DESIGN_SIDB_GATES_HPP
 
+#include "fiction/algorithms/optimization/simulated_annealing.hpp"
+#include "fiction/algorithms/simulation/sidb/critical_temperature.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/operational_domain.hpp"
 #include "fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp"
@@ -26,6 +28,7 @@
 #include <cstdlib>
 #include <future>
 #include <numeric>
+#include <random>
 #include <thread>
 #include <utility>
 #include <vector>
@@ -35,6 +38,29 @@
 namespace fiction
 {
 
+struct design_sidb_gates_sa_params
+{
+    /**
+     * Temperature schedule type.
+     */
+    temperature_schedule schedule{temperature_schedule::LINEAR};
+    /**
+     * Initial temperature.
+     */
+    double initial_temperature{10000};
+    /**
+     * Final temperature.
+     */
+    double final_temperature{0.1};
+    /**
+     * Number of iterations per temperature.
+     */
+    std::size_t number_of_cycles{100};
+    /**
+     * Number of parallel runs to pick the overall best result from.
+     */
+    std::size_t number_of_instances{10};
+};
 /**
  * This struct contains parameters and settings to design SiDB gates.
  *
@@ -56,7 +82,11 @@ struct design_sidb_gates_params
         /**
          * Gate layouts are designed randomly.
          */
-        RANDOM
+        RANDOM,
+        /**
+         * Gate layouts are designed with Simulated Annealing.
+         */
+        SIMANNEAL
     };
     /**
      * All Parameters for physical SiDB simulations.
@@ -78,6 +108,8 @@ struct design_sidb_gates_params
      * The simulation engine to be used for the operational domain computation.
      */
     sidb_simulation_engine sim_engine{sidb_simulation_engine::QUICKEXACT};
+
+    design_sidb_gates_sa_params simanneal_params{};
 };
 
 namespace detail
@@ -99,8 +131,12 @@ class design_sidb_gates_impl
             skeleton_layout{skeleton},
             truth_table{tt},
             params{ps},
-            all_sidbs_in_canvas{all_coordinates_in_spanned_area(params.canvas.first, params.canvas.second)}
-    {}
+            all_cells_in_canvas{all_coordinates_in_spanned_area(params.canvas.first, params.canvas.second)}
+    {
+        // Use std::uniform_int_distribution to generate a random index
+        random_canvas_cell_functor = std::uniform_int_distribution<uint64_t>(0, all_cells_in_canvas.size() - 1);
+        random_canvas_sidb_functor = std::uniform_int_distribution<uint64_t>(0, params.number_of_sidbs - 1);
+    }
     /**
      * Design gates exhaustively and in parallel.
      *
@@ -210,6 +246,95 @@ class design_sidb_gates_impl
         return randomly_designed_gate_layouts;
     }
 
+    [[nodiscard]] std::vector<Lyt> run_sa_design() noexcept
+    {
+        std::vector<Lyt>                        randomly_designed_gate_layouts = {};
+        generate_random_sidb_layout_params<Lyt> parameter{
+            params.canvas, params.number_of_sidbs,
+            generate_random_sidb_layout_params<Lyt>::positive_charges::FORBIDDEN};
+        const is_operational_params params_is_operational{params.phys_params, params.sim_engine};
+        auto                        initial_lyt = generate_random_sidb_layout<Lyt>(skeleton_layout, parameter);
+
+        const auto temperature_schedule = params.simanneal_params.schedule == temperature_schedule::LINEAR ?
+                                              linear_temperature_schedule :
+                                              geometric_temperature_schedule;
+
+        canvas_sidbs = determine_canvas_sidbs(initial_lyt);
+
+        const critical_temperature_params ct_params{sidb_simulation_parameters{
+            2, params.phys_params.mu_minus, params.phys_params.epsilon_r, params.phys_params.lambda_tf}};
+
+        operational_domain_params op_domain_params{sidb_simulation_parameters{
+            2, params.phys_params.mu_minus, params.phys_params.epsilon_r, params.phys_params.lambda_tf}};
+        op_domain_params.x_min  = 4.0;
+        op_domain_params.x_max  = 6;
+        op_domain_params.x_step = 0.2;
+
+        op_domain_params.y_min  = 4.0;
+        op_domain_params.y_max  = 6;
+        op_domain_params.y_step = 0.2;
+
+        auto [optimized_placement, optimized_net_cost] = simulated_annealing<decltype(initial_lyt)>(
+            initial_lyt, params.simanneal_params.initial_temperature, params.simanneal_params.final_temperature,
+            params.simanneal_params.number_of_cycles,
+            [&, this](const auto& lyt)
+            {
+                const auto logic_cost = number_of_operational_input_combinations(lyt, truth_table, skeleton_layout,
+                                                                                 params_is_operational, params.canvas) *
+                                        10;
+                double temp_cost = 1;
+                double opo_cost = 1;
+                if (logic_cost != 0.0)
+                {
+                    temp_cost =
+                        (- critical_temperature_gate_based(lyt, truth_table, ct_params)) /
+                        ct_params.max_temperature;
+                    operational_domain_stats stats{};
+                    const auto               op_domain = operational_domain_flood_fill(
+                        lyt, truth_table, 1, op_domain_params, operational_domain::parameter_point{5.6, 5}, &stats);
+                    opo_cost = - stats.percentual_operational_area;
+                }
+
+                return static_cast<double>(logic_cost + temp_cost + opo_cost);
+            },
+            temperature_schedule,
+            [&](auto lyt)
+            {
+                // print_layout(lyt);
+                const auto lyt_swap = move_sidb(lyt);
+                //                                const auto cost_logic =
+                //                                static_cast<double>(number_of_operational_input_combinations(
+                //                                    lyt_swap, truth_table, skeleton_layout, params_is_operational,
+                //                                    params.canvas));
+                //                                std::cout << fmt::format("cost logic: {}",
+                //                                                         cost_logic)
+                //                                          << std::endl;
+                //                std::cout << fmt::format(
+                //                                 "cost temp: {}",
+                //                                 static_cast<double>(
+                //                                     (400 - critical_temperature_gate_based(lyt_swap, truth_table,
+                //                                     ct_params)) / 400))
+                //                          << std::endl;
+                return lyt_swap;
+            });
+
+        std::cout << fmt::format("final cost: {}", optimized_net_cost) << std::endl;
+        std::cout << fmt::format("cost logic: {}", static_cast<double>(number_of_operational_input_combinations(
+                                                       optimized_placement, truth_table, skeleton_layout,
+                                                       params_is_operational, params.canvas)))
+                  << std::endl;
+        std::cout << fmt::format("cost temp: {}", static_cast<double>(critical_temperature_gate_based(
+                                                      optimized_placement, truth_table, ct_params)))
+                  << std::endl;
+        operational_domain_stats stats{};
+        const auto               op_domain = operational_domain_flood_fill(
+            optimized_placement, truth_table, 1, op_domain_params, operational_domain::parameter_point{5.6, 5}, &stats);
+        std::cout << fmt::format("cost opdomain: {}", stats.percentual_operational_area)
+                  << std::endl;
+
+        return {optimized_placement};
+    }
+
   private:
     /**
      * The skeleton layout serves as a starting layout to which SiDBs are added to create unique SiDB layouts and, if
@@ -227,7 +352,59 @@ class design_sidb_gates_impl
     /**
      * All cells within the canvas.
      */
-    const std::vector<typename Lyt::cell> all_sidbs_in_canvas;
+    const std::vector<typename Lyt::cell> all_cells_in_canvas;
+    /**
+     * All SiDBs within the canvas.
+     */
+    std::vector<typename Lyt::cell> canvas_sidbs;
+
+    /**
+     * A random-number generator.
+     */
+    std::mt19937_64 generator{std::random_device{}()};
+    /**
+     *
+     */
+    std::uniform_int_distribution<uint64_t> random_canvas_sidb_functor;
+    /**
+     *
+     */
+    std::uniform_int_distribution<uint64_t> random_canvas_cell_functor;
+
+    [[nodiscard]] std::vector<typename Lyt::cell> determine_canvas_sidbs(const Lyt& lyt) const noexcept
+    {
+        std::vector<typename Lyt::cell> placed_canvas_sidbs = {};
+        placed_canvas_sidbs.reserve(params.number_of_sidbs);
+        lyt.foreach_cell(
+            [&](const auto& cell)
+            {
+                if (std::find(all_cells_in_canvas.begin(), all_cells_in_canvas.end(), cell) !=
+                    all_cells_in_canvas.end())
+                {
+                    placed_canvas_sidbs.emplace_back(cell);
+                }
+            });
+        return placed_canvas_sidbs;
+    }
+
+    [[nodiscard]] Lyt move_sidb(const Lyt& lyt) noexcept
+    {
+        auto       lyt_copy             = lyt.clone();
+        const auto random_index         = random_canvas_cell_functor(generator);
+        const auto random_index_replace = random_canvas_sidb_functor(generator);
+        const auto random_cell          = all_cells_in_canvas[random_index];
+        const auto replace_sidb         = canvas_sidbs[random_index_replace];
+
+        // cell has to be empty
+        if (!lyt_copy.is_empty_cell(random_cell))
+        {
+            return lyt_copy;
+        }
+        lyt_copy.assign_cell_type(replace_sidb, Lyt::technology::cell_type::EMPTY);
+        lyt_copy.assign_cell_type(random_cell, Lyt::technology::cell_type::NORMAL);
+        canvas_sidbs[random_index_replace] = random_cell;
+        return lyt_copy;
+    }
     /**
      * Calculates all possible combinations of distributing the given number of SiDBs within a canvas
      * based on the provided parameters. It generates combinations of SiDB indices (representing the cell position in
@@ -239,9 +416,9 @@ class design_sidb_gates_impl
     [[nodiscard]] std::vector<std::vector<std::size_t>> determine_all_combinations_of_given_sidbs_in_canvas() noexcept
     {
         std::vector<std::vector<std::size_t>> all_combinations{};
-        all_combinations.reserve(binomial_coefficient(all_sidbs_in_canvas.size(), params.number_of_sidbs));
+        all_combinations.reserve(binomial_coefficient(all_cells_in_canvas.size(), params.number_of_sidbs));
 
-        std::vector<std::size_t> numbers(all_sidbs_in_canvas.size());
+        std::vector<std::size_t> numbers(all_cells_in_canvas.size());
         std::iota(numbers.begin(), numbers.end(), 0);
 
         combinations::for_each_combination(
@@ -282,8 +459,8 @@ class design_sidb_gates_impl
         {
             for (std::size_t j = i + 1; j < cell_indices.size(); j++)
             {
-                if (sidb_nanometer_distance<Lyt>(skeleton_layout, all_sidbs_in_canvas[cell_indices[i]],
-                                                 all_sidbs_in_canvas[cell_indices[j]]) < 0.5)
+                if (sidb_nanometer_distance<Lyt>(skeleton_layout, all_cells_in_canvas[cell_indices[i]],
+                                                 all_cells_in_canvas[cell_indices[j]]) < 0.5)
                 {
                     return true;
                 }
@@ -303,11 +480,11 @@ class design_sidb_gates_impl
 
         for (const auto i : cell_indices)
         {
-            assert(i < all_sidbs_in_canvas.size() && "cell indices are out-of-range");
+            assert(i < all_cells_in_canvas.size() && "cell indices are out-of-range");
 
-            if (lyt_copy.get_cell_type(all_sidbs_in_canvas[i]) == sidb_technology::cell_type::EMPTY)
+            if (lyt_copy.get_cell_type(all_cells_in_canvas[i]) == sidb_technology::cell_type::EMPTY)
             {
-                lyt_copy.assign_cell_type(all_sidbs_in_canvas[i], sidb_technology::cell_type::NORMAL);
+                lyt_copy.assign_cell_type(all_cells_in_canvas[i], sidb_technology::cell_type::NORMAL);
             }
         }
 
@@ -367,8 +544,12 @@ template <typename Lyt, typename TT>
     {
         return p.run_exhaustive_design();
     }
+    else if (params.design_mode == design_sidb_gates_params<Lyt>::design_sidb_gates_mode::RANDOM)
+    {
+        return p.run_random_design();
+    }
 
-    return p.run_random_design();
+    return p.run_sa_design();
 }
 
 }  // namespace fiction
