@@ -150,7 +150,7 @@ Furthermore, if you use any of the design automation algorithms, please consider
     .. code-block:: tex
 
         @inproceedings{hofmann2023postlayout,
-          title={{Post-Layout Optimization for Field-Coupled Nanotechnologies}},
+          title={{Post-Layout Optimization for Field-coupled Nanotechnologies}},
           author={Hofmann, Simon and Walter, Marcel and Wille, Robert},
           booktitle={International Symposium on Nanoscale Architectures (NANOARCH)},
           year={2023}
