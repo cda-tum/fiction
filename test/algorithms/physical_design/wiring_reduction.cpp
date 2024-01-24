@@ -31,7 +31,7 @@ void check_layout_equiv(const Ntk& ntk)
     const auto layout = orthogonal<Lyt>(ntk, {});
 
     wiring_reduction_stats stats{};
-    wiring_reduction<Lyt>(layout, {}, &stats);
+    wiring_reduction<Lyt>(layout, &stats);
 
     check_eq(ntk, layout);
 
@@ -118,12 +118,12 @@ TEST_CASE("Layout equivalence", "[wiring_reduction]")
 
         const auto layout_corner_case_1 = blueprints::optimization_layout_corner_case_outputs_1<gate_layout>();
         wiring_reduction_stats stats_corner_case_1{};
-        wiring_reduction<gate_layout>(layout_corner_case_1, {}, &stats_corner_case_1);
+        wiring_reduction<gate_layout>(layout_corner_case_1, &stats_corner_case_1);
         check_eq(blueprints::optimization_layout_corner_case_outputs_1<gate_layout>(), layout_corner_case_1);
 
         const auto layout_corner_case_2 = blueprints::optimization_layout_corner_case_outputs_2<gate_layout>();
         wiring_reduction_stats stats_corner_case_2{};
-        wiring_reduction<gate_layout>(layout_corner_case_2, {}, &stats_corner_case_2);
+        wiring_reduction<gate_layout>(layout_corner_case_2, &stats_corner_case_2);
         check_eq(blueprints::optimization_layout_corner_case_outputs_2<gate_layout>(), layout_corner_case_2);
     }
 }

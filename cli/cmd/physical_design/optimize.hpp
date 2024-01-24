@@ -84,7 +84,7 @@ class optimize_command : public command
             {
                 if (is_set("wiring_reduction_only"))
                 {
-                    fiction::wiring_reduction(*lyt_copy_ptr, psw, &stw);
+                    fiction::wiring_reduction(*lyt_copy_ptr, &stw);
                 }
                 else
                 {
@@ -114,7 +114,6 @@ class optimize_command : public command
      * Parameters.
      */
     fiction::post_layout_optimization_params ps{};
-    fiction::wiring_reduction_params         psw{};
 };
 
 ALICE_ADD_COMMAND(optimize, "Physical Design")

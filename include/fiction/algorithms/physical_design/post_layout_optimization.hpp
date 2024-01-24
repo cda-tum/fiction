@@ -433,12 +433,31 @@ template <typename Lyt>
         }
     }
 
+    // if gate is a PI and directly connected to its fanout, no improvement is possible
+    if (lyt.is_pi_tile(old_pos))
+    {
+        for (const auto& fanout : fanouts)
+        {
+            for (const auto& i : lyt.outgoing_data_flow(old_pos))
+            {
+                if (i == fanout)
+                {
+                    return std::make_pair(false, old_pos);
+                }
+            }
+        }
+    }
+
     // remove wiring
     for (const auto& tile : to_clear)
     {
         lyt.clear_tile(tile);
         lyt.clear_obstructed_coordinate(tile);
     }
+
+    // remove children of gate to be moved
+    lyt.resize({lyt.x() + 2, lyt.y(), lyt.z()});
+    lyt.move_node(lyt.get_node(old_pos), {lyt.x(), 0}, {});
 
     // update children of fanouts
     for (const auto& fanout : fanouts)
@@ -459,7 +478,8 @@ template <typename Lyt>
     }
 
     // remove children of gate to be moved
-    lyt.move_node(lyt.get_node(old_pos), old_pos, {});
+    lyt.move_node(lyt.get_node({lyt.x(), 0}), old_pos, {});
+    lyt.resize({lyt.x() - 2, lyt.y(), lyt.z()});
 
     // fix wires that cross over empty tiles
     fix_wires(lyt, to_clear);
@@ -485,7 +505,7 @@ template <typename Lyt>
                 !(lyt.is_po_tile(current_pos) &&
                   (((x <= max_non_po.x) && (y <= max_non_po.y)) || ((x + y) == (old_pos.x + old_pos.y)))))
             {
-                new_pos = {x, y};
+                new_pos = tile<Lyt>{x, y};
                 if (lyt.is_empty_tile(new_pos) && lyt.is_empty_tile({new_pos.x, new_pos.y, 1}))
                 {
                     // move gate to new positions and update obstructions
@@ -725,59 +745,6 @@ void optimize_output_positions(Lyt& lyt) noexcept
 }
 
 /**
- * This function fixes dead nodes in the layout by moving them to available empty coordinates and back.
- * A dead node is a node in the layout that is placed, but not alive, which can happen during the optimization process.
- * The function finds an empty coordinate in the layout and moves the dead gates to that coordinate, before moving it
- * back to its old location and connecting any fanin signals again.
- *
- * @tparam Lyt Cartesian gate-level layout type.
- * @param lyt Gate-level layout.
- * @param gt Vector containing the coordinates of all gates in the layout.
- */
-template <typename Lyt>
-void fix_dead_nodes(Lyt& lyt, std::vector<tile<Lyt>>& gt) noexcept
-{
-    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
-    static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
-
-    // Find an empty coordinate to move the gate to.
-    auto empty_pos = tile<Lyt>{};
-
-    lyt.foreach_coordinate(
-        [&lyt, &empty_pos](const auto& coord)
-        {
-            if (lyt.is_empty_tile(coord))
-            {
-                empty_pos = coord;
-                return false;
-            }
-            return true;
-        });
-
-    // If an empty coordinate is found, proceed with moving the dead gates.
-    if (!empty_pos.is_dead())
-    {
-        for (const auto& gate : gt)
-        {
-            if (lyt.is_dead(lyt.get_node(gate)))
-            {
-                // Collect fanin signals of the dead gate.
-                std::vector<mockturtle::signal<Lyt>> signals{};
-                signals.reserve(lyt.fanin_size(lyt.get_node(gate)));
-                lyt.foreach_fanin(lyt.get_node(gate), [&signals](const auto& fanin) { signals.push_back(fanin); });
-
-                // Move the dead gate to the empty coordinate.
-                lyt.move_node(lyt.get_node(gate), empty_pos);
-                lyt.clear_tile(gate);
-
-                // Move the fanin signals to the newly moved gate.
-                lyt.move_node(lyt.get_node(empty_pos), gate, signals);
-            }
-        }
-    }
-}
-
-/**
  * Custom comparison function that sorts gates based on the sum of its coordinates and breaks ties based on the
  * x-coordinate.
  *
@@ -822,12 +789,6 @@ void post_layout_optimization(const Lyt& lyt, post_layout_optimization_params ps
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
 
-    if (!lyt.is_clocking_scheme(clock_name::TWODDWAVE))
-    {
-        std::cout << "Clocking scheme is not 2DDWave\n";
-        return;
-    }
-
     post_layout_optimization_stats stats{};
 
     // measure run time
@@ -841,12 +802,10 @@ void post_layout_optimization(const Lyt& lyt, post_layout_optimization_params ps
         gate_tiles.reserve(layout.num_gates() + layout.num_pis() - layout.num_pos());
 
         fiction::wiring_reduction_stats  wiring_reduction_stats{};
-        fiction::wiring_reduction_params wiring_reduction_params{};
-        wiring_reduction_params.fix_dead_nodes = true;
 
         if (ps.wiring_reduction)
         {
-            fiction::wiring_reduction(layout, wiring_reduction_params, &wiring_reduction_stats);
+            fiction::wiring_reduction(layout, &wiring_reduction_stats);
         }
 
         layout.foreach_node(
@@ -880,7 +839,6 @@ void post_layout_optimization(const Lyt& lyt, post_layout_optimization_params ps
                     break;
                 }
             }
-
             for (auto& gate_tile : gate_tiles)
             {
                 const auto try_gate_relocation = detail::improve_gate_location(layout, gate_tile, max_non_po);
@@ -895,13 +853,11 @@ void post_layout_optimization(const Lyt& lyt, post_layout_optimization_params ps
             std::sort(gate_tiles.begin(), gate_tiles.end(), detail::compare_gates<Lyt>);
         }
 
-        detail::fix_dead_nodes(layout, gate_tiles);
-
         // calculate bounding box
         auto bounding_box = bounding_box_2d(layout);
         layout.resize({bounding_box.get_x_size(), bounding_box.get_y_size(), layout.z()});
 
-        fiction::wiring_reduction(layout, wiring_reduction_params, &wiring_reduction_stats);
+        fiction::wiring_reduction(layout, &wiring_reduction_stats);
         detail::optimize_output_positions(layout);
 
         // calculate bounding box

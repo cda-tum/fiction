@@ -41,21 +41,67 @@ void check_layout_equiv(const Ntk& ntk)
 template <typename Lyt>
 void check_layout_equiv_all()
 {
-    check_layout_equiv<Lyt>(blueprints::maj1_network<mockturtle::aig_network>());
-    check_layout_equiv<Lyt>(blueprints::maj4_network<mockturtle::aig_network>());
-    check_layout_equiv<Lyt>(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>());
-    check_layout_equiv<Lyt>(blueprints::and_or_network<technology_network>());
-    check_layout_equiv<Lyt>(blueprints::nary_operation_network<technology_network>());
-    check_layout_equiv<Lyt>(blueprints::constant_gate_input_maj_network<technology_network>());
-    check_layout_equiv<Lyt>(blueprints::half_adder_network<technology_network>());
-    check_layout_equiv<Lyt>(blueprints::full_adder_network<technology_network>());
-    check_layout_equiv<Lyt>(blueprints::mux21_network<technology_network>());
-    check_layout_equiv<Lyt>(blueprints::se_coloring_corner_case_network<technology_network>());
-    check_layout_equiv<Lyt>(blueprints::fanout_substitution_corner_case_network<technology_network>());
-    check_layout_equiv<Lyt>(blueprints::inverter_network<technology_network>());
-    check_layout_equiv<Lyt>(blueprints::clpl<technology_network>());
-    check_layout_equiv<Lyt>(blueprints::one_to_five_path_difference_network<technology_network>());
-    check_layout_equiv<Lyt>(blueprints::nand_xnor_network<technology_network>());
+    SECTION("maj1_network")
+    {
+        check_layout_equiv<Lyt>(blueprints::maj1_network<mockturtle::aig_network>());
+    }
+    SECTION("maj4_network")
+    {
+        check_layout_equiv<Lyt>(blueprints::maj4_network<mockturtle::aig_network>());
+    }
+    SECTION("unbalanced_and_inv_network")
+    {
+        check_layout_equiv<Lyt>(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>());
+    }
+    SECTION("and_or_network")
+    {
+        check_layout_equiv<Lyt>(blueprints::and_or_network<technology_network>());
+    }
+    SECTION("nary_operation_network")
+    {
+        check_layout_equiv<Lyt>(blueprints::nary_operation_network<technology_network>());
+    }
+    SECTION("constant_gate_input_maj_network")
+    {
+        check_layout_equiv<Lyt>(blueprints::constant_gate_input_maj_network<technology_network>());
+    }
+    SECTION("half_adder_network")
+    {
+        check_layout_equiv<Lyt>(blueprints::half_adder_network<technology_network>());
+    }
+    SECTION("full_adder_network")
+    {
+        check_layout_equiv<Lyt>(blueprints::full_adder_network<technology_network>());
+    }
+    SECTION("mux21_network")
+    {
+        check_layout_equiv<Lyt>(blueprints::mux21_network<technology_network>());
+    }
+    SECTION("se_coloring_corner_case_network")
+    {
+        check_layout_equiv<Lyt>(blueprints::se_coloring_corner_case_network<technology_network>());
+    }
+    SECTION("fanout_substitution_corner_case_network")
+    {
+        check_layout_equiv<Lyt>(blueprints::fanout_substitution_corner_case_network<technology_network>());
+    }
+    SECTION("inverter_network")
+    {
+        check_layout_equiv<Lyt>(blueprints::inverter_network<technology_network>());
+    }
+    SECTION("clpl")
+    {
+        check_layout_equiv<Lyt>(blueprints::clpl<technology_network>());
+    }
+    SECTION("one_to_five_path_difference_network")
+    {
+        check_layout_equiv<Lyt>(blueprints::one_to_five_path_difference_network<technology_network>());
+    }
+
+    SECTION("nand_xnor_network")
+    {
+        check_layout_equiv<Lyt>(blueprints::nand_xnor_network<technology_network>());
+    }
 }
 
 TEST_CASE("Layout equivalence", "[post_layout_optimization]")
@@ -71,15 +117,21 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
     {
         using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
 
-        const auto layout_corner_case_1 = blueprints::optimization_layout_corner_case_outputs_1<gate_layout>();
-        post_layout_optimization_stats stats_corner_case_1{};
-        post_layout_optimization<gate_layout>(layout_corner_case_1, {}, &stats_corner_case_1);
-        check_eq(blueprints::optimization_layout_corner_case_outputs_1<gate_layout>(), layout_corner_case_1);
+        SECTION("optimization_layout_corner_case_outputs_1")
+        {
+            const auto layout_corner_case_1 = blueprints::optimization_layout_corner_case_outputs_1<gate_layout>();
+            post_layout_optimization_stats stats_corner_case_1{};
+            post_layout_optimization<gate_layout>(layout_corner_case_1, {}, &stats_corner_case_1);
+            check_eq(blueprints::optimization_layout_corner_case_outputs_1<gate_layout>(), layout_corner_case_1);
+        }
 
-        const auto layout_corner_case_2 = blueprints::optimization_layout_corner_case_outputs_2<gate_layout>();
-        post_layout_optimization_stats stats_corner_case_2{};
-        post_layout_optimization<gate_layout>(layout_corner_case_2, {}, &stats_corner_case_2);
-        check_eq(blueprints::optimization_layout_corner_case_outputs_2<gate_layout>(), layout_corner_case_2);
+        SECTION("optimization_layout_corner_case_outputs_2")
+        {
+            const auto layout_corner_case_2 = blueprints::optimization_layout_corner_case_outputs_2<gate_layout>();
+            post_layout_optimization_stats stats_corner_case_2{};
+            post_layout_optimization<gate_layout>(layout_corner_case_2, {}, &stats_corner_case_2);
+            check_eq(blueprints::optimization_layout_corner_case_outputs_2<gate_layout>(), layout_corner_case_2);
+        }
     }
 }
 
