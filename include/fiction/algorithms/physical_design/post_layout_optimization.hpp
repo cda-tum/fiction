@@ -77,6 +77,7 @@ void fix_wires(Lyt& lyt, const std::vector<tile<Lyt>>& deleted_coords) noexcept
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
+    static_assert(has_is_obstructed_coordinate_v<Lyt>, "Lyt is not an obstruction layout");
 
     std::unordered_set<tile<Lyt>> moved_tiles{};
     moved_tiles.reserve(deleted_coords.size());
@@ -355,6 +356,16 @@ template <typename Lyt>
 template <typename Lyt>
 layout_coordinate_path<Lyt> get_path_and_obstruct(Lyt& lyt, const tile<Lyt>& start, const tile<Lyt>& end)
 {
+    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+    static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
+    static_assert(has_is_obstructed_coordinate_v<Lyt>, "Lyt is not an obstruction layout");
+
+    if (!lyt.is_clocking_scheme(clock_name::TWODDWAVE))
+    {
+        std::cout << "Clocking scheme is not 2DDWave!\n";
+        return layout_coordinate_path<Lyt>{};
+    }
+
     using dist = twoddwave_distance_functor<Lyt, uint64_t>;
     using cost = unit_cost_functor<Lyt, uint8_t>;
     static const a_star_params params{true};
@@ -396,8 +407,8 @@ template <typename Lyt>
 
     if (!lyt.is_clocking_scheme(clock_name::TWODDWAVE))
     {
-        std::cout << "Clocking scheme is not 2DDWave\n";
-        std::make_pair(false, old_pos);
+        std::cout << "Clocking scheme is not 2DDWave!\n";
+        return std::make_pair(false, old_pos);
     }
 
     const auto& [fanins, fanouts, to_clear, old_path_from_fanin_1_to_gate, old_path_from_fanin_2_to_gate,
@@ -689,7 +700,7 @@ void optimize_output_positions(Lyt& lyt) noexcept
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
     if (!lyt.is_clocking_scheme(clock_name::TWODDWAVE))
     {
-        std::cout << "Clocking scheme is not 2DDWave\n";
+        std::cout << "Clocking scheme is not 2DDWave!\n";
         return;
     }
 
@@ -788,6 +799,12 @@ void post_layout_optimization(const Lyt& lyt, post_layout_optimization_params ps
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
+
+    if (!lyt.is_clocking_scheme(clock_name::TWODDWAVE))
+    {
+        std::cout << "Clocking scheme is not 2DDWave!\n";
+        return;
+    }
 
     post_layout_optimization_stats stats{};
 

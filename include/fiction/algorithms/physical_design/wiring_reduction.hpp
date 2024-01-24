@@ -313,6 +313,16 @@ template <typename Lyt>
 wiring_reduction_lyt create_shifted_layout(const Lyt& lyt, const uint64_t x_offset = 0, const uint64_t y_offset = 0,
                                            bool left_to_right = true) noexcept
 {
+    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+    static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
+
+    // Check if the clocking scheme is 2DDWave
+    if (!lyt.is_clocking_scheme(clock_name::TWODDWAVE))
+    {
+        std::cout << "Clocking scheme is not 2DDWave!\n";
+        return obstruction_layout<wiring_reduction_layout<>>{};
+    }
+
     // Create WiringReductionLayout with specified offsets
     wiring_reduction_layout<> obs_shifted_layout{{lyt.x() + x_offset + 1, lyt.y() + y_offset + 1, lyt.z()},
                                                  left_to_right};
@@ -444,6 +454,9 @@ wiring_reduction_lyt create_shifted_layout(const Lyt& lyt, const uint64_t x_offs
 template <typename Lyt>
 void add_obstructions(Lyt& lyt) noexcept
 {
+    static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
+    static_assert(has_is_obstructed_coordinate_v<Lyt>, "Lyt is not an obstruction layout");
+
     if (lyt.left_to_right)
     {
         // Add obstructions to the top edge of the layout
@@ -477,6 +490,7 @@ void add_obstructions(Lyt& lyt) noexcept
         }
     }
 }
+
 /**
  * This helper function computes a path between two coordinates using the A* algorithm.
  *
@@ -521,6 +535,9 @@ template <typename Lyt>
 void update_to_delete_list(Lyt& lyt, layout_coordinate_path<wiring_reduction_lyt>& possible_path,
                            layout_coordinate_path<wiring_reduction_lyt>& to_delete)
 {
+    static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
+    static_assert(has_is_obstructed_coordinate_v<Lyt>, "Lyt is not an obstruction layout");
+
     for (const auto coord : possible_path)
     {
         // Check if the coordinate is not at the leftmost or rightmost position
@@ -601,6 +618,16 @@ template <typename Lyt>
 void delete_wires(Lyt& lyt, layout_coordinate_path<wiring_reduction_lyt>& to_delete,
                   std::vector<std::vector<uint64_t>> offset_matrix, bool left_to_right)
 {
+    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+    static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
+
+    // Check if the clocking scheme is 2DDWave
+    if (!lyt.is_clocking_scheme(clock_name::TWODDWAVE))
+    {
+        std::cout << "Clocking scheme is not 2DDWave!\n";
+        return;
+    }
+
     // Create a copy of the original layout for reference
     auto layout_copy = lyt.clone();
 
