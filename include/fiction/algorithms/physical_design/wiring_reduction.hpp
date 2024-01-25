@@ -287,8 +287,8 @@ class wiring_reduction_layout : public cartesian_layout<OffsetCoordinateType>
 /**
  * Type alias for an obstruction layout specialized for finding excess wiring.
  *
- * The `wiring_reduction_layout` type is an alias for the specialization of the `obstruction_layout` template,
- * using the `WiringReductionLayout<>` class template as its template argument. The `WiringReductionLayout` class
+ * The `wiring_reduction_lyt` type is an alias for the specialization of the `obstruction_layout` template,
+ * using the `wiring_reduction_layout<>` class template as its template argument. The `wiring_reduction_layout` class
  * provides functionality for a wiring reduction layout based on a Cartesian coordinate system.
  * This alias enhances code readability and indicates the association with wiring reduction features.
  */
@@ -444,7 +444,7 @@ wiring_reduction_lyt create_shifted_layout(const Lyt& lyt, const uint64_t x_offs
 /**
  * Add obstructions to the layout.
  *
- * This function adds obstructions to the provided WiringReductionLayout. It obstructs coordinates
+ * This function adds obstructions to the provided wiring_reduction_layout. It obstructs coordinates
  * along the top and bottom edges (for left to right) or along the left and right edges (for top to bottom) of the
  * layout in both layers (0 and 1).
  *
@@ -518,16 +518,16 @@ template <typename Lyt>
 }
 
 /**
- * Update the to-delete list based on a possible path in a Wiring Reduction layout.
+ * Update the to-delete list based on a possible path in a wiring_reduction_layout.
  *
  * This function updates the to-delete list by appending coordinates from the given possible path
- * in a Wiring Reduction layout. It considers coordinates that are not at the leftmost (x = 0) or rightmost (x =
+ * in a wiring_reduction_layout. It considers coordinates that are not at the leftmost (x = 0) or rightmost (x =
  * lyt.x()) positions for left to right or at the top (y = 0) or bottom (y =
  * lyt.y()) positions for top to bottom and shifts them to get the corresponding coordinates on the original layout. The
  * coordinates are then obstructed in both layers (0 and 1).
  *
- * @tparam Lyt Type of the Wiring Reduction layout.
- * @param lyt The Wiring Reduction layout to be updated.
+ * @tparam Lyt Type of the wiring_reduction_layout.
+ * @param lyt The wiring_reduction_layout to be updated.
  * @param possible_path The path of coordinates to be considered for updating the to-delete list.
  * @param to_delete Reference to the to-delete list to be updated with new coordinates.
  */
@@ -558,15 +558,15 @@ void update_to_delete_list(Lyt& lyt, layout_coordinate_path<wiring_reduction_lyt
 }
 
 /**
- * Calculate an offset matrix based on a to-delete list in a Wiring Reduction layout.
+ * Calculate an offset matrix based on a to-delete list in a wiring_reduction_layout.
  *
- * This function calculates an offset matrix based on the provided to-delete list in a Wiring Reduction layout.
+ * This function calculates an offset matrix based on the provided to-delete list in a wiring_reduction_layout.
  * The offset matrix represents the number of deletable coordinates in the same column for left to right and same row
  * for top to bottom but above/ to the right of each specific coordinate. The matrix is initialized with zeros and
  * updated by incrementing the values for each deletable coordinate.
  *
- * @tparam Lyt Type of the Wiring Reduction layout.
- * @param lyt The Wiring Reduction layout for which the offset matrix is calculated.
+ * @tparam Lyt Type of the wiring_reduction_layout.
+ * @param lyt The wiring_reduction_layout for which the offset matrix is calculated.
  * @param to_delete The to-delete list representing coordinates to be considered for the offset matrix.
  * @return A 2D vector representing the calculated offset matrix.
  */
@@ -602,14 +602,14 @@ calculate_offset_matrix(Lyt& lyt, layout_coordinate_path<wiring_reduction_lyt>& 
 }
 
 /**
- * Delete wires from a Wiring Reduction layout based on specified coordinates and offset matrix.
+ * Delete wires from a wiring_reduction_layout based on specified coordinates and offset matrix.
  *
- * This function deletes wires from the provided Wiring Reduction layout based on the specified coordinates
+ * This function deletes wires from the provided wiring_reduction_layout based on the specified coordinates
  * and offset matrix. It clears the tiles in the to-delete list, shifts all gates to fill the empty coordinates, and
  * resizes the layout to an optimized size by calculating the bounding box.
  *
- * @tparam Lyt Type of the Wiring Reduction layout.
- * @param lyt The Wiring Reduction layout to be modified.
+ * @tparam Lyt Type of the wiring_reduction_layout.
+ * @param lyt The wiring_reduction_layout to be modified.
  * @param to_delete The to-delete list representing coordinates of wires to be deleted.
  * @param offset_matrix The offset matrix representing the number of obstructed coordinates in the same column
  *                     but above each specific coordinate.

@@ -688,7 +688,8 @@ template <typename Lyt>
 }
 
 /**
- * Utility function that traces back all output nodes and calculate optimal positions.
+ * Utility function that moves outputs in the last row to the previous row and in the last column to the previous
+ * column, if possible.
  *
  * @tparam Lyt Cartesian gate-level layout type.
  * @param lyt Gate-level layout.
@@ -782,8 +783,8 @@ bool compare_gates(const tile<Lyt>& a, const tile<Lyt>& b)
  * creates more compact layouts by freeing up space to the right and bottom, as all gates were moved to the top left
  * corner.
  *
- * After moving all gates, this algorithm also checks if excess wiring exists on the layout, i.e., rows that only
- * contain vertical wires or columns that only contain horizontal wires and removes them.
+ * After moving all gates, this algorithm also checks if excess wiring exists on the layout using the wiring_reduction
+ * algorithm
  *
  * As outputs have to lay on the border of a layout for better accessibility, they are also moved to new borders
  * determined based on the location of all other gates.
