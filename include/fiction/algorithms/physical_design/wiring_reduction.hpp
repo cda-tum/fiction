@@ -319,7 +319,7 @@ wiring_reduction_lyt create_shifted_layout(const Lyt& lyt, const uint64_t x_offs
     // Check if the clocking scheme is 2DDWave
     if (!lyt.is_clocking_scheme(clock_name::TWODDWAVE))
     {
-        std::cout << "Clocking scheme is not 2DDWave!\n";
+        std::cout << "[e] the given layout has to be 2DDWave-clocked\n";
         return obstruction_layout<wiring_reduction_layout<>>{};
     }
 
@@ -624,7 +624,7 @@ void delete_wires(Lyt& lyt, layout_coordinate_path<wiring_reduction_lyt>& to_del
     // Check if the clocking scheme is 2DDWave
     if (!lyt.is_clocking_scheme(clock_name::TWODDWAVE))
     {
-        std::cout << "Clocking scheme is not 2DDWave!\n";
+        std::cout << "[e] the given layout has to be 2DDWave-clocked\n";
         return;
     }
 
@@ -824,7 +824,7 @@ void wiring_reduction(const Lyt& lyt, wiring_reduction_stats* pst = nullptr) noe
     // Check if the clocking scheme is 2DDWave
     if (!lyt.is_clocking_scheme(clock_name::TWODDWAVE))
     {
-        std::cout << "Clocking scheme is not 2DDWave!\n";
+        std::cout << "[e] the given layout has to be 2DDWave-clocked\n";
         return;
     }
 

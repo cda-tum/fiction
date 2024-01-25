@@ -362,7 +362,7 @@ layout_coordinate_path<Lyt> get_path_and_obstruct(Lyt& lyt, const tile<Lyt>& sta
 
     if (!lyt.is_clocking_scheme(clock_name::TWODDWAVE))
     {
-        std::cout << "Clocking scheme is not 2DDWave!\n";
+        std::cout << "[e] the given layout has to be 2DDWave-clocked\n";
         return layout_coordinate_path<Lyt>{};
     }
 
@@ -407,7 +407,7 @@ template <typename Lyt>
 
     if (!lyt.is_clocking_scheme(clock_name::TWODDWAVE))
     {
-        std::cout << "Clocking scheme is not 2DDWave!\n";
+        std::cout << "[e] the given layout has to be 2DDWave-clocked\n";
         return std::make_pair(false, old_pos);
     }
 
@@ -701,7 +701,7 @@ void optimize_output_positions(Lyt& lyt) noexcept
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
     if (!lyt.is_clocking_scheme(clock_name::TWODDWAVE))
     {
-        std::cout << "Clocking scheme is not 2DDWave!\n";
+        std::cout << "[e] the given layout has to be 2DDWave-clocked\n";
         return;
     }
 
@@ -803,7 +803,7 @@ void post_layout_optimization(const Lyt& lyt, post_layout_optimization_params ps
 
     if (!lyt.is_clocking_scheme(clock_name::TWODDWAVE))
     {
-        std::cout << "Clocking scheme is not 2DDWave!\n";
+        std::cout << "[e] the given layout has to be 2DDWave-clocked\n";
         return;
     }
 
