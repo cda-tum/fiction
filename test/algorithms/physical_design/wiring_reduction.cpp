@@ -127,3 +127,24 @@ TEST_CASE("Layout equivalence", "[wiring_reduction]")
         check_eq(blueprints::optimization_layout_corner_case_outputs_2<gate_layout>(), layout_corner_case_2);
     }
 }
+
+TEST_CASE("Wrong clocking scheme", "[wiring_reduction]")
+{
+    using gate_layout    = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
+    const auto layout    = blueprints::use_and_gate_layout<gate_layout>();
+    auto       obstr_lyt = obstruction_layout<gate_layout>(layout);
+
+    SECTION("Call functions")
+    {
+        CHECK_NOTHROW(detail::create_shifted_layout(obstr_lyt, 1, 1, true));
+
+        layout_coordinate_path<detail::wiring_reduction_lyt> to_delete{};
+        std::vector<std::vector<uint64_t>>                   offset_matrix;
+
+        CHECK_NOTHROW(detail::delete_wires(obstr_lyt, to_delete, offset_matrix, true));
+
+        wiring_reduction_stats stats_wrong_clocking_scheme{};
+
+        CHECK_NOTHROW(wiring_reduction<gate_layout>(obstr_lyt, &stats_wrong_clocking_scheme));
+    }
+}

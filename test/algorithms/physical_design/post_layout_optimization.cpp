@@ -81,10 +81,6 @@ void check_layout_equiv_all()
     {
         check_layout_equiv<Lyt>(blueprints::se_coloring_corner_case_network<technology_network>());
     }
-    SECTION("fanout_substitution_corner_case_network")
-    {
-        check_layout_equiv<Lyt>(blueprints::fanout_substitution_corner_case_network<technology_network>());
-    }
     SECTION("inverter_network")
     {
         check_layout_equiv<Lyt>(blueprints::inverter_network<technology_network>());
@@ -97,7 +93,10 @@ void check_layout_equiv_all()
     {
         check_layout_equiv<Lyt>(blueprints::one_to_five_path_difference_network<technology_network>());
     }
-
+    SECTION("fanout_substitution_corner_case_network")
+    {
+        check_layout_equiv<Lyt>(blueprints::fanout_substitution_corner_case_network<technology_network>());
+    }
     SECTION("nand_xnor_network")
     {
         check_layout_equiv<Lyt>(blueprints::nand_xnor_network<technology_network>());
@@ -132,6 +131,23 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
             post_layout_optimization<gate_layout>(layout_corner_case_2, {}, &stats_corner_case_2);
             check_eq(blueprints::optimization_layout_corner_case_outputs_2<gate_layout>(), layout_corner_case_2);
         }
+    }
+
+    SECTION("Wiring Reduction before optimization")
+    {
+        using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+
+        const auto ntk    = blueprints::half_adder_network<technology_network>();
+        const auto layout = orthogonal<gate_layout>(ntk, {});
+
+        post_layout_optimization_stats  stats{};
+        post_layout_optimization_params params{};
+        params.wiring_reduction = true;
+        post_layout_optimization<gate_layout>(layout, params, &stats);
+
+        check_eq(ntk, layout);
+
+        CHECK(mockturtle::to_seconds(stats.time_total) > 0);
     }
 }
 
@@ -301,6 +317,8 @@ TEST_CASE("Wrong clocking scheme", "[post_layout_optimization]")
 
         CHECK_FALSE(std::get<0>(moved_gate_1));
         CHECK(std::get<1>(moved_gate_1) == old_pos_1);
+
+        CHECK_NOTHROW(detail::get_path_and_obstruct(obstr_lyt, {0, 0}, {0, 0}));
 
         std::vector<uint64_t> rows_to_delete{};
         std::vector<uint64_t> columns_to_delete{};
