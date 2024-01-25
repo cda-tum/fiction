@@ -54,6 +54,7 @@ Physical Design
    apply_gate_library.rst
    hexagonalization.rst
    post_layout_optimization.rst
+   wiring_reduction.rst
    design_sidb_gates.rst
 
 
