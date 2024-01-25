@@ -819,7 +819,7 @@ void post_layout_optimization(const Lyt& lyt, post_layout_optimization_params ps
         std::vector<tile<Lyt>> gate_tiles{};
         gate_tiles.reserve(layout.num_gates() + layout.num_pis() - layout.num_pos());
 
-        fiction::wiring_reduction_stats  wiring_reduction_stats{};
+        fiction::wiring_reduction_stats wiring_reduction_stats{};
 
         if (ps.wiring_reduction)
         {
