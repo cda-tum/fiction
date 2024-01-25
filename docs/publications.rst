@@ -90,7 +90,7 @@ Furthermore, if you use any of the design automation algorithms, please consider
 
     .. code-block:: tex
 
-        @inproceedings{drewniok2023quicksimIEEE,
+        @inproceedings{drewniok2023quicksim,
           title={{\emph{QuickSim}: Efficient \emph{and} Accurate Physical Simulation of Silicon Dangling Bond Logic}},
           author={Drewniok, Jan and Walter, Marcel and Ng, Samuel Sze Hang and Walus, Konrad and Wille, Robert},
           booktitle={IEEE International Conference on Nanotechnology (IEEE NANO)},
