@@ -139,7 +139,7 @@ TEST_CASE("Wrong clocking scheme", "[wiring_reduction]")
         CHECK_NOTHROW(detail::create_shifted_layout(obstr_lyt, 1, 1, true));
 
         layout_coordinate_path<detail::wiring_reduction_lyt> to_delete{};
-        std::vector<std::vector<uint64_t>>                   offset_matrix;
+        std::vector<std::vector<uint64_t>>                   const offset_matrix;
 
         CHECK_NOTHROW(detail::delete_wires(obstr_lyt, to_delete, offset_matrix, true));
 
