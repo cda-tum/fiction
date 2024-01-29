@@ -412,7 +412,7 @@ TEMPLATE_TEST_CASE(
 }
 
 TEMPLATE_TEST_CASE(
-    "Simulation of positive SiDBs", "[exhaustive-ground-state-simulation]",
+    "ExGS simulation of positively charged SiDBs", "[exhaustive-ground-state-simulation]",
     (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
     (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
