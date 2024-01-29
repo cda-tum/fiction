@@ -1655,3 +1655,42 @@ TEMPLATE_TEST_CASE(
         CHECK(simulation_results.charge_distributions.size() == 2);
     }
 }
+
+TEMPLATE_TEST_CASE(
+    "QuickExact simulation of positively charged SiDBs", "[quickexact]",
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
+    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+{
+    TestType lyt{};
+    lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({4, 0, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 0, 0}, TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type({11, 0, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 0, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({11, 0, 1}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 0, 1}, TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type({18, 0, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({20, 0, 0}, TestType::cell_type::NORMAL);
+
+    SECTION("automatic base number detection is off, base number is set to 3")
+    {
+        const quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.32},
+                                                 quickexact_params<TestType>::automatic_base_number_detection::OFF};
+
+        const auto simulation_results = quickexact<TestType>(lyt, params);
+
+        CHECK(simulation_results.charge_distributions.size() == 4);
+    }
+
+    SECTION("automatic base number detection is on, base number is set to 2")
+    {
+        const quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.32},
+                                                 quickexact_params<TestType>::automatic_base_number_detection::ON};
+
+        const auto simulation_results = quickexact<TestType>(lyt, params);
+
+        CHECK(simulation_results.charge_distributions.size() == 4);
+    }
+}

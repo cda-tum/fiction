@@ -410,3 +410,28 @@ TEMPLATE_TEST_CASE(
                    Catch::Matchers::WithinAbs(0.505173434, physical_constants::POP_STABILITY_ERR));
     }
 }
+
+TEMPLATE_TEST_CASE(
+    "Simulation of positive SiDBs", "[exhaustive-ground-state-simulation]",
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
+    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+{
+    TestType lyt{};
+    lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({4, 0, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 0, 0}, TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type({11, 0, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 0, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({11, 0, 1}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 0, 1}, TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type({18, 0, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({20, 0, 0}, TestType::cell_type::NORMAL);
+
+    const sidb_simulation_parameters params{3, -0.32};
+
+    const auto simulation_results = exhaustive_ground_state_simulation<TestType>(lyt, params);
+
+    CHECK(simulation_results.charge_distributions.size() == 4);
+}
