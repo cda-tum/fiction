@@ -1674,7 +1674,7 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type({18, 0, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({20, 0, 0}, TestType::cell_type::NORMAL);
 
-    SECTION("automatic base number detection is off, base number is set to 3")
+    SECTION("automatic base number detection is off, base number is 3")
     {
         const quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.32},
                                                  quickexact_params<TestType>::automatic_base_number_detection::OFF};
@@ -1684,7 +1684,7 @@ TEMPLATE_TEST_CASE(
         CHECK(simulation_results.charge_distributions.size() == 4);
     }
 
-    SECTION("automatic base number detection is on, base number is set to 2")
+    SECTION("automatic base number detection is on, base number is 2")
     {
         const quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.32},
                                                  quickexact_params<TestType>::automatic_base_number_detection::ON};
