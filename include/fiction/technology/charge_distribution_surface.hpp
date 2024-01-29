@@ -14,7 +14,6 @@
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/technology/sidb_nm_position.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/types.hpp"
 
 #include <algorithm>
 #include <bitset>
@@ -24,6 +23,7 @@
 #include <cstdlib>
 #include <iterator>
 #include <limits>
+#include <numeric>
 #include <optional>
 #include <random>
 #include <type_traits>
@@ -80,6 +80,22 @@ enum class charge_distribution_history
 };
 
 /**
+ * An enumeration of modes to specifying if the charge index should be recomputed fully.
+ */
+enum class charge_index_recomputation
+{
+    /**
+     * The charge index is recomputed from scratch.
+     */
+    FROM_SCRATCH,
+    /**
+     * The charge index is recomputed with the leading zeroes ignored. This optimization can be applied if we know that
+     * the charge index was incremented after the last charge index computation.
+     */
+    IGNORE_LEADING_ZEROES
+};
+
+/**
  * A layout type to layer on top of any SiDB cell-level layout. It implements an interface to store and access
  * SiDBs' charge states.
  *
@@ -113,7 +129,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
          */
         using distance_matrix = std::vector<std::vector<double>>;
         /**
-         * The potential matrix is a vector of vectors storing the chargless electrostatic potentials in Volt (V).
+         * The potential matrix is a vector of vectors storing the charge-less electrostatic potentials in Volt (V).
          */
         using potential_matrix = std::vector<std::vector<double>>;
         /**
@@ -271,11 +287,11 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     /**
      * Copy constructor.
      *
-     * @param lyt charge_distribution_surface
+     * @param cds Other `charge_distribution_surface`.
      */
-    explicit charge_distribution_surface(const charge_distribution_surface<Lyt>& lyt) :
-            Lyt(lyt),
-            strg{std::make_shared<charge_distribution_storage>(*lyt.strg)}
+    charge_distribution_surface(const charge_distribution_surface<Lyt>& cds) :
+            Lyt(cds),
+            strg{std::make_shared<charge_distribution_storage>(*cds.strg)}
     {}
     /**
      * Copy assignment operator.
@@ -394,7 +410,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param update_charge_index `true` if the charge index should be changed, `false` otherwise.
      */
     void assign_charge_state(const typename Lyt::cell& c, const sidb_charge_state cs,
-                             const bool update_charge_index = true) const noexcept
+                             const bool update_charge_index = true) noexcept
     {
         if (auto index = cell_to_index(c); index != -1)
         {
@@ -412,7 +428,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param index The index of the cell.
      * @param cs The charge state to be assign to the cell.
      */
-    void assign_charge_by_cell_index(const uint64_t index, const sidb_charge_state cs) const noexcept
+    void assign_charge_by_cell_index(const uint64_t index, const sidb_charge_state cs) noexcept
     {
         strg->cell_charge[index] = cs;
         this->charge_distribution_to_index();
@@ -968,12 +984,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         {
             const auto hop_del =
                 [this](const uint64_t c1, const uint64_t c2)  // energy change when charge hops between two SiDBs.
-            {
-                const int dn_i = (strg->cell_charge[c1] == sidb_charge_state::NEGATIVE) ? 1 : -1;
-                const int dn_j = -dn_i;
-
-                return strg->local_pot[c1] * dn_i + strg->local_pot[c2] * dn_j - strg->pot_mat[c1][c2] * 1;
-            };
+            { return strg->local_pot[c1] - strg->local_pot[c2] - strg->pot_mat[c1][c2]; };
 
             uint64_t hop_counter = 0;
             for (uint64_t i = 0u; i < strg->local_pot.size(); ++i)
@@ -1175,7 +1186,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             }
             else
             {
-                this->index_to_charge_distribution();
+                this->index_to_charge_distribution(charge_index_recomputation::IGNORE_LEADING_ZEROES);
             }
             this->update_after_charge_change(dependent_cell, energy_calculation_mode, history_mode);
         }
@@ -1358,6 +1369,42 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         }
 
         return required;
+    }
+    /**
+     * Counts the number of SiDBs with a negative charge state.
+     *
+     * @return The number of SiDBs with a negative charge state.
+     */
+    [[nodiscard]] std::size_t num_negative_sidbs() const noexcept
+    {
+        uint64_t count_negative_sidbs = 0;
+        this->foreach_cell([this, &count_negative_sidbs](const auto& c)
+                           { count_negative_sidbs += (get_charge_state(c) == sidb_charge_state::NEGATIVE) ? 1 : 0; });
+        return count_negative_sidbs;
+    }
+    /**
+     * Counts the number of SiDBs with a neutral charge state.
+     *
+     * @return The number of SiDBs with a neutral charge state.
+     */
+    [[nodiscard]] std::size_t num_neutral_sidbs() const noexcept
+    {
+        uint64_t count_neutral_sidbs = 0;
+        this->foreach_cell([this, &count_neutral_sidbs](const auto& c)
+                           { count_neutral_sidbs += (get_charge_state(c) == sidb_charge_state::NEUTRAL) ? 1 : 0; });
+        return count_neutral_sidbs;
+    }
+    /**
+     * Counts the number of SiDBs with a positive charge state.
+     *
+     * @return The number of SiDBs with a positive charge state.
+     */
+    [[nodiscard]] std::size_t num_positive_sidbs() const noexcept
+    {
+        uint64_t count_positive_sidbs = 0;
+        this->foreach_cell([this, &count_positive_sidbs](const auto& c)
+                           { count_positive_sidbs += (get_charge_state(c) == sidb_charge_state::POSITIVE) ? 1 : 0; });
+        return count_positive_sidbs;
     }
     /**
      * This functions returns all cells that could be positively charged. However, this must not be necessarily the case
@@ -1681,7 +1728,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             }
             else
             {
-                this->index_to_charge_distribution();
+                this->index_to_charge_distribution(charge_index_recomputation::IGNORE_LEADING_ZEROES);
             }
             this->update_after_charge_change(dependent_cell_fixed, recompute_system_energy, consider_history);
         }
@@ -1856,7 +1903,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     /**
      * Initializes the distance matrix between all the cells of the layout.
      */
-    void initialize_nm_distance_matrix() const noexcept
+    void initialize_nm_distance_matrix() noexcept
     {
         strg->nm_dist_mat =
             std::vector<std::vector<double>>(this->num_cells(), std::vector<double>(this->num_cells(), 0.0));
@@ -1873,7 +1920,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     /**
      * Initializes the potential matrix between all the cells of the layout.
      */
-    void initialize_potential_matrix() const noexcept
+    void initialize_potential_matrix() noexcept
     {
         strg->pot_mat =
             std::vector<std::vector<double>>(this->num_cells(), std::vector<double>(this->num_cells(), 0.0));
@@ -1964,59 +2011,60 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     }
     /**
      *  The stored unique index is converted to a charge distribution.
+     *
+     *  @param charge_index_recompuation_mode Flag that can be set to `IGNORE_LEADING_ZEROES` if the charge index was
+     * incremented before calling this function to enable an optimization. When set to `IGNORE_LEADING_ZEROES`, the
+     * leading zeroes of the charge index are ignored.
      */
-    void index_to_charge_distribution() noexcept
+    void index_to_charge_distribution(const charge_index_recomputation charge_index_recomputation_mode =
+                                          charge_index_recomputation::FROM_SCRATCH) noexcept
     {
-        auto       charge_quot          = strg->charge_index_and_base.first;
-        const auto base                 = strg->charge_index_and_base.second;
-        const auto num_charges          = this->num_cells();
-        auto       counter              = num_charges - 1;
-        const auto dependent_cell_index = cell_to_index(strg->dependent_cell);
-
         // A charge index of zero corresponds to a layout with all SiDBs set to negative.
-        if (charge_quot == 0)
+        if (strg->charge_index_and_base.first == 0)
         {
             this->assign_all_charge_states(sidb_charge_state::NEGATIVE);
+            return;
         }
-        else
-        {
-            while (charge_quot > 0)
-            {
-                const auto    charge_quot_int = static_cast<int64_t>(charge_quot);
-                const auto    base_int        = static_cast<int64_t>(base);
-                const int64_t quotient_int    = charge_quot_int / base_int;
-                const int64_t remainder_int   = charge_quot_int % base_int;
-                charge_quot                   = static_cast<uint64_t>(quotient_int);
-                // Dependent-SiDB is skipped since its charge state is not changed based on the charge index.
 
-                if (dependent_cell_index >= 0)
-                {
-                    if (counter != static_cast<uint64_t>(dependent_cell_index))
-                    {
-                        const auto sign = sign_to_charge_state(static_cast<int8_t>(remainder_int - 1));
-                        this->assign_charge_state_by_cell_index(counter, sign, false);
-                        counter -= 1;
-                    }
-                    // If the counter is at the dependent-cell location, it is reduced by one to get to the next
-                    // cell position.
-                    else
-                    {
-                        counter -= 1;
-                        const auto sign = sign_to_charge_state(static_cast<int8_t>(remainder_int - 1));
-                        // The charge state is only changed (i.e., the function assign_charge_state_by_cell_index is
-                        // called), if the nw charge state differs to the previous one. Only then will the cell be
-                        // added to the charge_distribution_history.
-                        this->assign_charge_state_by_cell_index(counter, sign, false);
-                        counter -= 1;
-                    }
-                }
-                else
-                {
-                    const auto sign = sign_to_charge_state(static_cast<int8_t>(remainder_int - 1));
-                    this->assign_charge_state_by_cell_index(counter, sign, false);
-                    counter -= 1;
-                }
+        const auto dependent_cell_index = cell_to_index(strg->dependent_cell);
+        const bool has_dependent_cell   = dependent_cell_index >= 0;
+
+        const auto base        = static_cast<uint64_t>(strg->charge_index_and_base.second);
+        uint64_t   charge_quot = strg->charge_index_and_base.first;
+
+        auto counter = static_cast<int64_t>(this->num_cells() - 1);
+
+        while (charge_quot > 0)
+        {
+            const auto charge_state = sign_to_charge_state(static_cast<int8_t>(charge_quot % base) - 1);
+
+            // Dependent-SiDB is skipped since its charge state is not changed based on the charge index.
+
+            // If the counter is at the dependent-cell location, it is reduced by one to get to the next
+            // cell position.
+            if (has_dependent_cell && counter == dependent_cell_index)
+            {
+                // The charge state is only changed (i.e., the function assign_charge_state_by_cell_index is
+                // called), if the nw charge state differs to the previous one. Only then will the cell be
+                // added to the charge_distribution_history.
+                counter -= 1;
             }
+
+            this->assign_charge_state_by_cell_index(static_cast<uint64_t>(counter), charge_state, false);
+
+            charge_quot /= base;
+            counter -= 1;
+        }
+
+        if (charge_index_recomputation_mode == charge_index_recomputation::IGNORE_LEADING_ZEROES)
+        {
+            return;
+        }
+
+        // If the counter is >= 0, then the first <counter> cells should be assigned a negative charge state.
+        for (uint64_t i = 0; static_cast<int64_t>(i) <= counter; ++i)
+        {
+            this->assign_charge_state_by_cell_index(i, sidb_charge_state::NEGATIVE, false);
         }
     }
 };

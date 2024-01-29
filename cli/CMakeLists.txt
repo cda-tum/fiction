@@ -9,6 +9,26 @@ add_executable(fiction ${SOURCES})
 # Link against the project settings, libfiction and alice
 target_link_libraries(fiction PRIVATE libfiction alice)
 
+# Compile-time decisions on which flows to compile
+
+# Logic synthesis flow
+option(FICTION_LOGIC_SYNTHESIS_FLOW "Enable the logic synthesis flow for the fiction CLI" ON)
+if(FICTION_LOGIC_SYNTHESIS_FLOW)
+  target_compile_definitions(fiction PRIVATE FICTION_LOGIC_SYNTHESIS_FLOW)
+endif()
+
+# Physical design flow
+option(FICTION_PHYSICAL_DESIGN_FLOW "Enable the physical design flow for the fiction CLI" ON)
+if(FICTION_PHYSICAL_DESIGN_FLOW)
+  target_compile_definitions(fiction PRIVATE FICTION_PHYSICAL_DESIGN_FLOW)
+endif()
+
+# Physical simulation flow
+option(FICTION_SIMULATION_FLOW "Enable the physical simulation flow for the fiction CLI" ON)
+if(FICTION_SIMULATION_FLOW)
+  target_compile_definitions(fiction PRIVATE FICTION_SIMULATION_FLOW)
+endif()
+
 # Strip the executable if we are in Release mode
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
   if(CMAKE_STRIP)

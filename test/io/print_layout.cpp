@@ -262,7 +262,7 @@ TEST_CASE("Print Bestagon OR-gate without defect", "[print-charge-layout]")
 
     layout.create_or({}, {}, {0, 0});
 
-    const charge_distribution_surface<sidb_cell_clk_lyt_siqad> cl{
+    charge_distribution_surface<sidb_cell_clk_lyt_siqad> cl{
         convert_to_siqad_coordinates(apply_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library>(layout)),
         sidb_simulation_parameters{3, -0.32}, sidb_charge_state::NEGATIVE};
 

@@ -196,17 +196,18 @@ using
 
 ### Physical Simulation
 
+<img src="docs/_static/sidb_simulation.png" alt="SiDB simulation result" align="right" width="270"/>
+
 When a layout is compiled to the cell level via the application of a technology-dependent gate library, it can be
 simulated using a physical model. Currently, the following simulation algorithms are implemented in *fiction*:
 
 - Silicon Dangling Bonds (SiDBs)
-  - Electrostatic Ground State Simulation
-      - [*QuickExact*](https://arxiv.org/abs/2308.04487)
-      - [*QuickSim*](https://ieeexplore.ieee.org/document/10231266)
-      - [Exhaustive *(ExGS)*](https://open.library.ubc.ca/soa/cIRcle/collections/ubctheses/24/items/1.0392909)
-  - [Critical Temperature Simulation](https://ieeexplore.ieee.org/document/10231259)
-  - [Operational Domain Computation](https://www.cda.cit.tum.de/files/eda/2023_nanoarch_reducing_the_complexity_of_operational_domain_computation_in_silicon_dangling_bond_logic.pdf)
-
+    - Electrostatic Ground State Simulation
+        - [*QuickExact*](https://arxiv.org/abs/2308.04487)
+        - [*QuickSim*](https://ieeexplore.ieee.org/document/10231266)
+        - [Exhaustive *(ExGS)*](https://open.library.ubc.ca/soa/cIRcle/collections/ubctheses/24/items/1.0392909)
+    - [Critical Temperature Simulation](https://ieeexplore.ieee.org/document/10231259)
+    - [Operational Domain Computation](https://www.cda.cit.tum.de/files/eda/2023_nanoarch_reducing_the_complexity_of_operational_domain_computation_in_silicon_dangling_bond_logic.pdf)
 
 ## Clocking Schemes
 
@@ -226,9 +227,9 @@ Built-in schemes are
 |:--------------------------------------------------------:|:------------------------------------------------------------------------:|:---------------------------------------------------------------------------:|
 | <img src="docs/_static/use.png" alt="USE" height="200"/> |         <img src="docs/_static/res.png" alt="RES" height="200"/>         |          <img src="docs/_static/esr.png" alt="ESR" height="200"/>           |
 
-| [CFE](https://ietresearch.onlinelibrary.wiley.com/doi/10.1049/iet-cds.2019.0096) |    [BANCS](https://ieeexplore.ieee.org/document/8533251)     |
-|:--------------------------------------------------------------------------------:|:------------------------------------------------------------:|
-|             <img src="docs/_static/cfe.png" alt="CFE" height="200"/>             | <img src="docs/_static/bancs.png" alt="BANCS" height="300"/> |
+| [CFE](https://ietresearch.onlinelibrary.wiley.com/doi/10.1049/iet-cds.2019.0096) | [Ripple](https://scholarworks.rit.edu/cgi/viewcontent.cgi?referer=&httpsredir=1&article=8266&context=theses) |    [BANCS](https://ieeexplore.ieee.org/document/8533251)     |
+|:--------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------:|
+|             <img src="docs/_static/cfe.png" alt="CFE" height="200"/>             |                        <img src="docs/_static/ripple.png" alt="Ripple" height="200"/>                        | <img src="docs/_static/bancs.png" alt="BANCS" height="300"/> |
 
 plus the mentioned irregular open clocking that works via a clock map instead of a regular extrapolated cutout.
 
@@ -298,11 +299,15 @@ Cell-level layouts:
 
 ## Benchmark Library
 
-To objectively evaluate and compare software and design automation tools, [MNT Bench](https://www.cda.cit.tum.de/mntbench/) provides gate-level
+To objectively evaluate and compare software and design automation
+tools, [MNT Bench](https://www.cda.cit.tum.de/mntbench/) provides gate-level
 layouts for various gate libraries and clocking schemes, generated using the latest physical design and
-optimization algorithms, with *fiction* offering the corresponding read and write utilities to generate gate-level layouts from gate-level layout files (``.fgl``) and vice versa.
+optimization algorithms, with *fiction* offering the corresponding read and write utilities to generate gate-level
+layouts from gate-level layout files (``.fgl``) and vice versa.
 
-Additionally, the [benchmarks](https://github.com/cda-tum/fiction/tree/main/benchmarks) folder contains the function descriptions of frequently used benchmark sets in Verilog format (``.v``) provided by [MNT Bench](https://www.cda.cit.tum.de/mntbench/).
+Additionally, the [benchmarks](https://github.com/cda-tum/fiction/tree/main/benchmarks) folder contains the function
+descriptions of frequently used benchmark sets in Verilog format (``.v``) provided
+by [MNT Bench](https://www.cda.cit.tum.de/mntbench/).
 
 # Reference
 

@@ -71,6 +71,7 @@ Energy Calculation
 **Header:** ``fiction/algorithms/simulation/sidb/minimum_energy.hpp``
 
 .. doxygenfunction:: fiction::minimum_energy
+.. doxygenfunction:: fiction::minimum_energy_distribution
 
 
 **Header:** ``fiction/algorithms/simulation/sidb/is_ground_state.hpp``
@@ -90,7 +91,7 @@ Temperature Behavior
 .. doxygenfunction:: fiction::critical_temperature_gate_based
 .. doxygenfunction:: fiction::critical_temperature_non_gate_based
 
-**Header:** ``fiction/algorithms/simulation/sidb/occupation_probability_excited_states.hpp``
+**Header:** ``fiction/algorithms/simulation/sidb/occupation_probability_of_excited_states.hpp``
 
 .. doxygenfunction:: fiction::occupation_probability_gate_based
 .. doxygenfunction:: fiction::occupation_probability_non_gate_based
@@ -129,6 +130,7 @@ Random SiDB Layout Generator
 **Header:** ``fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp``
 
 .. doxygenstruct:: fiction::generate_random_sidb_layout_params
+   :members:
 .. doxygenfunction:: fiction::generate_random_sidb_layout
 .. doxygenfunction:: fiction::generate_multiple_random_sidb_layouts
 

@@ -545,7 +545,14 @@ void print_layout(const Lyt& lyt, std::ostream& os = std::cout)
     {
         if constexpr (has_sidb_technology_v<Lyt>)
         {
-            print_sidb_layout(os, lyt);
+            if constexpr (has_siqad_coord_v<Lyt>)
+            {
+                print_sidb_layout(os, lyt);
+            }
+            else
+            {
+                print_sidb_layout(os, convert_to_siqad_coordinates(lyt));
+            }
         }
         else
         {

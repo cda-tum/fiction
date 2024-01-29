@@ -110,6 +110,28 @@ TEMPLATE_TEST_CASE(
 }
 
 TEMPLATE_TEST_CASE(
+    "Overwrite SiDB defect", "[sidb-surface]",
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, odd_row_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, even_row_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, odd_column_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, even_column_hex>>>))
+{
+    TestType lyt{{1, 1}};
+
+    sidb_surface<TestType> defect_layout{lyt};
+
+    defect_layout.assign_sidb_defect({0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, 1});
+    CHECK(defect_layout.get_sidb_defect({0, 0}).type == sidb_defect_type::UNKNOWN);
+    CHECK(defect_layout.get_sidb_defect({0, 0}).charge == 1);
+    CHECK(defect_layout.num_defects() == 1);
+
+    defect_layout.assign_sidb_defect({0, 0}, sidb_defect{sidb_defect_type::DB, -1});
+    CHECK(defect_layout.get_sidb_defect({0, 0}).charge == -1);
+    CHECK(defect_layout.num_defects() == 1);
+}
+
+TEMPLATE_TEST_CASE(
     "Non-defective SiDB surface", "[sidb-surface]",
     (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>),
     (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, odd_row_hex>>>),

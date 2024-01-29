@@ -6,15 +6,14 @@
 #define FICTION_QUICKEXACT_HPP
 
 #include "fiction/algorithms/iter/gray_code_iterator.hpp"
-#include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
-#include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
+#include "fiction/technology/sidb_charge_state.hpp"
+#include "fiction/technology/sidb_defects.hpp"
 #include "fiction/traits.hpp"
 
-#include <fmt/format.h>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
@@ -98,6 +97,7 @@ class quickexact_impl
     {
         result.algorithm_name      = "QuickExact";
         result.physical_parameters = params.physical_parameters;
+        result.additional_simulation_parameters.emplace("global_potential", params.global_potential);
 
         mockturtle::stopwatch<>::duration time_counter{};
         {
@@ -304,13 +304,13 @@ class quickexact_impl
 
         if (base_number == required_simulation_base_number::TWO)
         {
-            result.additional_simulation_parameters.emplace_back("base_number", uint64_t{2});
+            result.additional_simulation_parameters.emplace("base_number", uint64_t{2});
             two_state_simulation(charge_layout);
         }
         // If positively charged SiDBs can occur in the layout, 3-state simulation is conducted.
         else
         {
-            result.additional_simulation_parameters.emplace_back("base_number", uint64_t{3});
+            result.additional_simulation_parameters.emplace("base_number", uint64_t{3});
             three_state_simulation(charge_layout);
         }
     }
