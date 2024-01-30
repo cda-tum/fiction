@@ -9,24 +9,22 @@
 
 #include <fiction/algorithms/network_transformation/technology_mapping.hpp>  // technology mapping
 #include <fiction/algorithms/physical_design/apply_gate_library.hpp>         // layout conversion to cell-level
-#include <fiction/algorithms/physical_design/design_sidb_gates.hpp>
-#include <fiction/algorithms/physical_design/exact.hpp>  // SMT-based physical design of FCN layouts
+#include <fiction/algorithms/physical_design/design_sidb_gates.hpp>          // design gate
+#include <fiction/algorithms/physical_design/exact.hpp>                      // SMT-based physical design of FCN layouts
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
-#include <fiction/io/read_sidb_surface_defects.hpp>  // reader for simulated SiDB surfaces
-#include <fiction/io/write_sqd_layout.hpp>           // writer for SiQAD files (physical simulation)
-#include <fiction/layouts/coordinates.hpp>
-#include <fiction/networks/technology_network.hpp>   // technology-mapped network type
-#include <fiction/technology/area.hpp>               // area requirement calculations
-#include <fiction/technology/cell_technologies.hpp>  // cell implementations
-#include <fiction/technology/sidb_defects.hpp>
-#include <fiction/technology/sidb_on_the_fly_gate_library.hpp>  // a dynamic SiDB gate library
-#include <fiction/technology/sidb_skeleton_bestagon_library.hpp>
-#include <fiction/technology/sidb_surface.hpp>  // SiDB surface with support for atomic defects
-#include <fiction/technology/sidb_surface_analysis.hpp>
-#include <fiction/traits.hpp>
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>  // choose design engine (ExGS, QuickSim, QuickExact)
+#include <fiction/io/read_sidb_surface_defects.hpp>                       // reader for simulated SiDB surfaces
+#include <fiction/io/write_sqd_layout.hpp>                    // writer for SiQAD files (physical simulation)
+#include <fiction/layouts/coordinates.hpp>                    // layout coordinates
+#include <fiction/networks/technology_network.hpp>            // technology-mapped network type
+#include <fiction/technology/area.hpp>                        // area requirement calculations
+#include <fiction/technology/cell_technologies.hpp>           // cell implementations
+#include <fiction/technology/parameterized_gate_library.hpp>  // a dynamic SiDB gate library
+#include <fiction/technology/sidb_defects.hpp>                // Atomic defects
+#include <fiction/technology/sidb_skeleton_bestagon_library.hpp>  // a static skeleton SiDB gate library defining the input/output wires
+#include <fiction/technology/sidb_surface.hpp>                    // SiDB surface with support for atomic defects
+#include <fiction/technology/sidb_surface_analysis.hpp>  // Analyzes a given defective SiDB surface and matches it against gate tiles provided by a library
 #include <fiction/types.hpp>  // pre-defined types suitable for the FCN domain
-#include <fiction/utils/truth_table_utils.hpp>
 
 #include <fmt/format.h>                                        // output formatting
 #include <lorina/lorina.hpp>                                   // Verilog/BLIF/AIGER/... file parsing
@@ -36,8 +34,8 @@
 #include <mockturtle/algorithms/node_resynthesis/xag_npn.hpp>  // NPN databases for cut rewriting of XAGs and AIGs
 #include <mockturtle/io/verilog_reader.hpp>                    // call-backs to read Verilog files into networks
 #include <mockturtle/networks/xag.hpp>                         // XOR-AND-inverter graphs
-#include <mockturtle/utils/stopwatch.hpp>
-#include <mockturtle/views/depth_view.hpp>  // to determine network levels
+#include <mockturtle/utils/stopwatch.hpp>                      // used to measure runtime
+#include <mockturtle/views/depth_view.hpp>                     // to determine network levels
 
 #include <cassert>
 #include <cstdint>
@@ -46,7 +44,7 @@
 #include <string>
 #include <utility>
 
-// This script conducts defect-aware placement and routing with defect-aware on-the-fly SiDB gate design. Thereby, SDB
+// This script conducts defect-aware placement and routing with defect-aware on-the-fly SiDB gate design. Thereby, SiDB
 // circuits can be designed in the presence of atomic defects.
 
 int main()  // NOLINT
@@ -155,6 +153,7 @@ int main()  // NOLINT
         const mockturtle::xag_npn_resynthesis<mockturtle::xag_network,                    // the input network type
                                               mockturtle::xag_network,                    // the database network type
                                               mockturtle::xag_npn_db_kind::xag_complete>  // the kind of database to use
+
             resynthesis_function{};
 
         // rewrite network cuts using the given re-synthesis function
@@ -198,7 +197,7 @@ int main()  // NOLINT
                             fiction::sidb_on_the_fly_gate_library_params<cell_lyt>{surface_lattice, design_gate_params};
 
                         cell_level_layout = fiction::apply_parameterized_gate_library<
-                            cell_lyt, fiction::sidb_on_the_fly_gate_library, gate_lyt,
+                            cell_lyt, fiction::parameterized_gate_library, gate_lyt,
                             fiction::sidb_on_the_fly_gate_library_params<cell_lyt>>(*gate_level_layout,
                                                                                     parameter_gate_library);
                         gate_design_failed = false;

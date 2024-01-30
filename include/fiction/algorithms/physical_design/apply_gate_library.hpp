@@ -7,11 +7,12 @@
 
 #include "fiction/technology/fcn_gate_library.hpp"
 #include "fiction/technology/inml_topolinano_library.hpp"
+#include "fiction/technology/parameterized_gate_library.hpp"
 #include "fiction/technology/qca_one_library.hpp"
 #include "fiction/technology/sidb_bestagon_library.hpp"
-#include "fiction/technology/sidb_on_the_fly_gate_library.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/layout_utils.hpp"
+#include "fiction/utils/name_utils.hpp"
 
 #if (PROGRESS_BARS)
 #include <mockturtle/utils/progress_bar.hpp>
@@ -45,60 +46,6 @@ class apply_gate_library_impl
     {}
 
     /**
-     * This function designs gates on-the-fly based on the provided atomic defects and gate types defined in `lyt`.
-     * It creates a cell-level layout by adapting a gate-level layout on-the-fly to implement the gate types using
-     * building blocks from the `GateLibrary`. Atomic defects are incorporated into the gate designs during this
-     * process.
-     *
-     * @tparam Params Type of the parameter used for the on-the-fly gate library.
-     * @param params Parameter for the gate library.
-     * @return A cell-level layout implementing gate types with building blocks defined in `GateLibrary`.
-     */
-    template <typename Params>
-    [[nodiscard]] CellLyt run_parameterized_gate_library(const Params& params)
-    {
-#if (PROGRESS_BARS)
-        // initialize a progress bar
-        mockturtle::progress_bar bar{static_cast<uint32_t>(gate_lyt.size()), "[i] applying gate library: |{0}|"};
-#endif
-        gate_lyt.foreach_node(
-            [&, this](const auto& n, [[maybe_unused]] auto i)
-            {
-                if (!gate_lyt.is_constant(n))
-                {
-                    const auto t = gate_lyt.get_tile(n);
-
-                    // retrieve the top-leftmost cell in tile t
-                    const auto c =
-                        relative_to_absolute_cell_position<GateLibrary::gate_x_size(), GateLibrary::gate_y_size(),
-                                                           GateLyt, CellLyt>(gate_lyt, t, cell<CellLyt>{0, 0});
-
-                    const auto gate = GateLibrary::template set_up_gate<GateLyt, CellLyt, Params>(gate_lyt, t, params);
-
-                    assign_gate(c, gate, n);
-                }
-#if (PROGRESS_BARS)
-                // update progress
-                bar(i);
-#endif
-            });
-
-        // perform post-layout optimization if necessary
-        if constexpr (has_post_layout_optimization_v<GateLibrary, CellLyt>)
-        {
-            GateLibrary::post_layout_optimization(cell_lyt);
-        }
-
-        // if available, recover layout name
-        if constexpr (has_get_layout_name_v<GateLyt> && has_set_layout_name_v<CellLyt>)
-        {
-            cell_lyt.set_layout_name(gate_lyt.get_layout_name());
-        }
-
-        return cell_lyt;
-    }
-
-    /**
      * Run the cell layout generation process.
      *
      * This function performs the cell layout generation process based on the gate library and the gate-level layout
@@ -108,7 +55,7 @@ class apply_gate_library_impl
      *
      * @return A `CellLyt` object representing the generated cell layout.
      */
-    [[nodiscard]] CellLyt run()
+    [[nodiscard]] CellLyt run_static_gate_library()
     {
 #if (PROGRESS_BARS)
         // initialize a progress bar
@@ -148,11 +95,76 @@ class apply_gate_library_impl
 
         return cell_lyt;
     }
+    /**
+     * Run the cell layout generation process.
+     *
+     * This function performs the cell layout generation process based on the parameterized gate library and the
+     * gate-level layout information provided by `GateLibrary` and `gate_lyt`. It iterates through the nodes in the
+     * gate-level layout and assigns gates to cells based on their corresponding positions and types. Optionally, it
+     * performs post-layout optimization and sets the layout name if certain conditions are met.
+     *
+     * @tparam Type of the Parameters used for the parameterized gate library.
+     * @param params Parameters used for the parameterized gate library.
+     * @return A `CellLyt` object representing the generated cell layout.
+     */
+    template <typename Params>
+    [[nodiscard]] CellLyt run_parameterized_gate_library(const Params& params)
+    {
+#if (PROGRESS_BARS)
+        // initialize a progress bar
+        mockturtle::progress_bar bar{static_cast<uint32_t>(gate_lyt.size()), "[i] applying gate library: |{0}|"};
+#endif
+        gate_lyt.foreach_node(
+            [&, this](const auto& n, [[maybe_unused]] auto i)
+            {
+                if (!gate_lyt.is_constant(n))
+                {
+                    const auto t = gate_lyt.get_tile(n);
+
+                    // retrieve the top-leftmost cell in tile t
+                    const auto c =
+                        relative_to_absolute_cell_position<GateLibrary::gate_x_size(), GateLibrary::gate_y_size(),
+                                                           GateLyt, CellLyt>(gate_lyt, t, cell<CellLyt>{0, 0});
+
+                    const auto gate = GateLibrary::template set_up_gate<GateLyt, CellLyt, Params>(gate_lyt, t, params);
+
+                    assign_gate(c, gate, n);
+                }
+#if (PROGRESS_BARS)
+                // update progress
+                bar(i);
+#endif
+            });
+
+        // perform post-layout optimization if necessary
+        if constexpr (has_post_layout_optimization_v<GateLibrary, CellLyt>)
+        {
+            GateLibrary::post_layout_optimization(cell_lyt);
+        }
+
+        // if available, recover layout name
+        cell_lyt.set_layout_name(get_name(gate_lyt));
+
+        return cell_lyt;
+    }
 
   private:
+    /**
+     * Gate-level layout.
+     */
     GateLyt gate_lyt;
+    /**
+     * Cell-level layout.
+     */
     CellLyt cell_lyt;
 
+    /**
+     * This function assigns a given SiDB gate implemetation to the total cell layout.
+     *
+     * @param c Top-left cell of the tile where the gate is placed.
+     * @param g Gate implementation.
+     * @param n Corresponding node in the gate-level layout.
+     */
     void assign_gate(const cell<CellLyt>& c, const typename GateLibrary::fcn_gate& g,
                      const mockturtle::node<GateLyt>& n)
     {
@@ -213,19 +225,19 @@ template <typename CellLyt, typename GateLibrary, typename GateLyt>
 
     detail::apply_gate_library_impl<CellLyt, GateLibrary, GateLyt> p{lyt};
 
-    return p.run();
+    return p.run_static_gate_library();
 }
 /**
- * Applies an on-the-fly gate library (i.e., gates are designed on-the-fly by respecting atomic defects) to a given
+ * Applies a parameterized gate library to a given
  * gate-level layout and, thereby, creates and returns a cell-level layout.
  *
- * May pass through, and thereby throw, an `unsupported_gate_type_exception` or an
- * `unsupported_gate_orientation_exception`.
+ * May pass through, and thereby throw, an `unsupported_gate_type_exception`, an
+ * `unsupported_gate_orientation_exception` and any further custom exceptions of the gate libraries.
  *
  * @tparam CellLyt Type of the returned cell-level layout.
  * @tparam GateLibrary Type of the gate library to apply.
  * @tparam GateLyt Type of the gate-level layout to apply the library to.
- * @tparam Params Type of the parameter used for the on-the-fly gate library.
+ * @tparam Params Type of the parameter used for parameterized gate library.
  * @param lyt The gate-level layout.
  * @param params Parameter for the gate library.
  * @return A cell-level layout that implements `lyt`'s gate types with building blocks defined in `GateLibrary`.

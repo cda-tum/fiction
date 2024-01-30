@@ -816,12 +816,11 @@ constexpr cube::coord_t offset_to_cube_coord(const offset::ucoord_t& coord) noex
 {
     assert(coord.x <= std::numeric_limits<int32_t>::max() && coord.y <= std::numeric_limits<int32_t>::max() &&
            coord.z <= std::numeric_limits<int32_t>::max() && "Coordinate is out-of-range and cannot be transformed");
-    if (!coord.is_dead())
+    if (coord.is_dead())
     {
-        return {static_cast<int32_t>(coord.x), static_cast<int32_t>(coord.y), static_cast<int32_t>(coord.z)};
+        return cube::coord_t{};
     }
-
-    return cube::coord_t{};
+    return {static_cast<int32_t>(coord.x), static_cast<int32_t>(coord.y), static_cast<int32_t>(coord.z)};
 }
 
 /**

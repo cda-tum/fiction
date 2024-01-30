@@ -8,12 +8,18 @@
 #include "fiction/algorithms/iter/bdl_input_iterator.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
+#include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/layouts/cell_level_layout.hpp"
+#include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
+#include "fiction/technology/physical_constants.hpp"
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 #include "fiction/utils/truth_table_utils.hpp"
+
+#include <cassert>
+#include <vector>
 
 namespace fiction
 {
@@ -32,13 +38,15 @@ struct is_gate_design_impossible_params
     sidb_simulation_engine sim_engine{sidb_simulation_engine::QUICKEXACT};
 };
 /**
- * This function assesses whether it is impossible to design an SiDB gate for a given truth table in the provided layout
- * due to atomic defects.
+ * This function evaluates whether it is impossible to design a SiDB gate for a given truth table in the given layout
+ * due to atomic defects. It determines the possible charge states at the output BDL pairs. Atomic defects can cause a
+ * BDL pair to be neutrally charged only. Thus, the BDL pair would not work as intended.
  *
  * @tparam Lyt Cell-level layout type.
  * @tparam TT The type of the truth table.
  * @param layout The layout for which gate design feasibility is being checked.
- * @param spec A vector of truth tables representing the gate's functionality.
+ * @param spec A vector of truth tables (each truth table is representing one output) representing the gate's
+ * functionality.
  * @param params Parameter to determine if the gate design is impossible.
  * @return `true` if gate design is impossible, `false` otherwise.
  *
