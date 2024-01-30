@@ -331,8 +331,8 @@ class exact_ground_state_simulation_real_impl
      */
     void define_population_stability()
     {
-        const auto mu_minus = ctx.real_val(std::to_string(params.phys_params.mu).c_str());
-        const auto mu_plus  = ctx.real_val(std::to_string(params.phys_params.mu_p).c_str());
+        const auto mu_minus = ctx.real_val(std::to_string(params.phys_params.mu_minus).c_str());
+        const auto mu_plus  = ctx.real_val(std::to_string(params.phys_params.mu_plus()).c_str());
 
         charge_lyt.foreach_cell(
             [this, &mu_minus, &mu_plus](const sidb& s1)
@@ -384,8 +384,7 @@ class exact_ground_state_simulation_real_impl
     {
         const auto negative_sidb_indices = charge_lyt.negative_sidb_detection();
 
-        std::for_each(negative_sidb_indices.cbegin(), negative_sidb_indices.cend(),
-                      [this](const auto& sidb_index)
+        std::for_each(negative_sidb_indices.cbegin(), negative_sidb_indices.cend(), [this](const auto& sidb_index)
                       { optimizer.add(get_sidb_charge(charge_lyt.index_to_cell(sidb_index)) == ctx.real_val("-1")); });
 
         stats.number_of_pre_assigned_charges = negative_sidb_indices.size();
