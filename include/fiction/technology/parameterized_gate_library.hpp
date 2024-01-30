@@ -619,7 +619,8 @@ class parameterized_gate_library : public fcn_gate_library<sidb_technology, 60, 
                 convert_offset_to_cube_coordinates<sidb_cell_clk_lyt_cube, CellLyt>(skeleton);
             const auto center_cell_cube   = offset_to_cube_coord(center_cell);
             const auto absolute_cell_cube = offset_to_cube_coord(absolute_cell);
-            return add_defect_to_skeleton(skeleton_in_cube_coordinates, center_cell_cube, absolute_cell_cube, parameters);
+            return add_defect_to_skeleton(skeleton_in_cube_coordinates, center_cell_cube, absolute_cell_cube,
+                                          parameters);
         }
     }
 
