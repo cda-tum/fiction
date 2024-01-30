@@ -244,19 +244,19 @@ namespace detail
 template <typename Lyt, typename TT>
 class operational_domain_impl
 {
-  public:
-    /**
-     * Standard constructor. Initializes the layout, the truth table, the parameters and the statistics. Also detects
-     * the output BDL pair, which is necessary for the operational domain computation. The layout must have exactly
-     * one output BDL pair.
-     *
-     * @param lyt SiDB cell-level layout to be evaluated.
-     * @param spec Expected Boolean function of the layout given as a multi-output truth table.
-     * @param ps Parameters for the operational domain computation.
-     * @param st Statistics of the process.
-     */
-    operational_domain_impl(const Lyt& lyt, const std::vector<TT>& tt, const operational_domain_params& ps,
-                            operational_domain_stats& st) noexcept :
+    x public :
+            /**
+             * Standard constructor. Initializes the layout, the truth table, the parameters and the statistics. Also
+             * detects the output BDL pair, which is necessary for the operational domain computation. The layout must
+             * have exactly one output BDL pair.
+             *
+             * @param lyt SiDB cell-level layout to be evaluated.
+             * @param spec Expected Boolean function of the layout given as a multi-output truth table.
+             * @param ps Parameters for the operational domain computation.
+             * @param st Statistics of the process.
+             */
+            operational_domain_impl(const Lyt& lyt, const std::vector<TT>& tt, const operational_domain_params& ps,
+                                    operational_domain_stats& st) noexcept :
             layout{lyt},
             truth_table{tt},
             params{ps},
@@ -615,7 +615,7 @@ class operational_domain_impl
      */
     [[nodiscard]] inline std::size_t num_x_steps() const noexcept
     {
-        return static_cast<std::size_t>((params.x_max - params.x_min) / params.x_step);
+        return static_cast<std::size_t>(std::round((params.x_max - params.x_min) / params.x_step));
     }
     /**
      * Calculates the number of steps in the y dimension based on the provided parameters.
@@ -624,7 +624,7 @@ class operational_domain_impl
      */
     [[nodiscard]] inline std::size_t num_y_steps() const noexcept
     {
-        return static_cast<std::size_t>((params.y_max - params.y_min) / params.y_step);
+        return static_cast<std::size_t>(std::round((params.y_max - params.y_min) / params.y_step));
     }
     /**
      * Potential sweep dimensions.
