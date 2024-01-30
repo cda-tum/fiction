@@ -2,7 +2,6 @@
 // Created by Jan Drewniok on 20.10.23.
 //
 
-#include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #if (FICTION_Z3_SOLVER)
 
 #include "fiction_experiments.hpp"
@@ -194,12 +193,12 @@ int main()  // NOLINT
                     try
                     {
                         auto parameter_gate_library =
-                            fiction::sidb_on_the_fly_gate_library_params<cell_lyt>{surface_lattice, design_gate_params};
+                            fiction::parameterized_gate_library_params<cell_lyt>{surface_lattice, design_gate_params};
 
                         cell_level_layout = fiction::apply_parameterized_gate_library<
                             cell_lyt, fiction::parameterized_gate_library, gate_lyt,
-                            fiction::sidb_on_the_fly_gate_library_params<cell_lyt>>(*gate_level_layout,
-                                                                                    parameter_gate_library);
+                            fiction::parameterized_gate_library_params<cell_lyt>>(*gate_level_layout,
+                                                                                  parameter_gate_library);
                         gate_design_failed = false;
                     }
                     catch (const fiction::gate_design_exception<fiction::tt, gate_lyt>& e)
