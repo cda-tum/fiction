@@ -1062,10 +1062,11 @@ bool compare_gates(const tile<Lyt>& a, const tile<Lyt>& b)
 }  // namespace detail
 
 /**
- * Optimization algorithm that can be used to reduce the layout area of sub-optimal physical design created by
- * heuristics or machine learning. This optimization utilizes the distinct characteristics of the 2DDWave clocking
- * scheme, which only allows information flow from top to bottom and left to right, therefore only aforementioned
- * clocking scheme is supported.
+ * A post-layout optimization algorithm as originally proposed in \"Post-Layout Optimization for Field-coupled
+ * Nanotechnologies\" by S. Hofmann, M. Walter, and R. Wille in NANOARCH 2023. It can be used to reduce the area of a
+ * given sub-optimal Cartesian gate-level layout created by heuristics or machine learning. This optimization utilizes
+ * the distinct characteristics of the 2DDWave clocking scheme, which only allows information flow from top to bottom
+ * and left to right, therefore only aforementioned clocking scheme is supported.
  *
  * To reduce the layout area, first, gates are moved up and to the left as far as possible, including rerouting. This
  * creates more compact layouts by freeing up space to the right and bottom, as all gates were moved to the top left
@@ -1090,7 +1091,7 @@ void post_layout_optimization(const Lyt& lyt, post_layout_optimization_stats* ps
 
     if (!lyt.is_clocking_scheme(clock_name::TWODDWAVE))
     {
-        std::cout << "Clocking scheme is not 2DDWave" << std::endl;
+        std::cout << "[e] the given layout has to be 2DDWave-clocked" << std::endl;
         return;
     }
 
