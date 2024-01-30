@@ -3,6 +3,8 @@
 Optimizing 2DDWave-clocked Cartesian Layouts
 --------------------------------------------
 
+.. _post_layout_opt:
+
 **Header:** ``fiction/algorithms/physical_design/post_layout_optimization.hpp``
 
 This algorithm aims to decrease the overall layout area of a given 2DDWave-clocked Cartesian layout that has been
