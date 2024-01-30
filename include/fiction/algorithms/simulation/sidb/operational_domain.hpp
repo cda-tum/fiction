@@ -244,19 +244,19 @@ namespace detail
 template <typename Lyt, typename TT>
 class operational_domain_impl
 {
-    x public :
-            /**
-             * Standard constructor. Initializes the layout, the truth table, the parameters and the statistics. Also
-             * detects the output BDL pair, which is necessary for the operational domain computation. The layout must
-             * have exactly one output BDL pair.
-             *
-             * @param lyt SiDB cell-level layout to be evaluated.
-             * @param spec Expected Boolean function of the layout given as a multi-output truth table.
-             * @param ps Parameters for the operational domain computation.
-             * @param st Statistics of the process.
-             */
-            operational_domain_impl(const Lyt& lyt, const std::vector<TT>& tt, const operational_domain_params& ps,
-                                    operational_domain_stats& st) noexcept :
+  public:
+    /**
+     * Standard constructor. Initializes the layout, the truth table, the parameters and the statistics. Also
+     * detects the output BDL pair, which is necessary for the operational domain computation. The layout must
+     * have exactly one output BDL pair.
+     *
+     * @param lyt SiDB cell-level layout to be evaluated.
+     * @param spec Expected Boolean function of the layout given as a multi-output truth table.
+     * @param ps Parameters for the operational domain computation.
+     * @param st Statistics of the process.
+     */
+    operational_domain_impl(const Lyt& lyt, const std::vector<TT>& tt, const operational_domain_params& ps,
+                            operational_domain_stats& st) noexcept :
             layout{lyt},
             truth_table{tt},
             params{ps},
