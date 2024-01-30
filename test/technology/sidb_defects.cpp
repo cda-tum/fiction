@@ -49,6 +49,9 @@ TEST_CASE("Defect extent", "[sidb-defects]")
     static constexpr std::pair<uint16_t, uint16_t> charged_spacing{SIDB_CHARGED_DEFECT_HORIZONTAL_SPACING,
                                                                    SIDB_CHARGED_DEFECT_VERTICAL_SPACING};
 
+    static constexpr std::pair<uint16_t, uint16_t> neutral_spacing_overwrite{1, 0};
+    static constexpr std::pair<uint16_t, uint16_t> charged_spacing_overwrite{1, 1};
+
     CHECK(defect_extent(sidb_defect{sidb_defect_type::NONE}) == no_spacing);
     CHECK(defect_extent(sidb_defect{sidb_defect_type::DB}) == charged_spacing);
     CHECK(defect_extent(sidb_defect{sidb_defect_type::SI_VACANCY}) == charged_spacing);
@@ -63,6 +66,11 @@ TEST_CASE("Defect extent", "[sidb-defects]")
     CHECK(defect_extent(sidb_defect{sidb_defect_type::STEP_EDGE}) == neutral_spacing);
     CHECK(defect_extent(sidb_defect{sidb_defect_type::GUNK}) == neutral_spacing);
     CHECK(defect_extent(sidb_defect{sidb_defect_type::UNKNOWN}) == neutral_spacing);
+
+    CHECK(defect_extent(sidb_defect{sidb_defect_type::UNKNOWN, 0}, charged_spacing_overwrite,
+                        neutral_spacing_overwrite) == neutral_spacing_overwrite);
+    CHECK(defect_extent(sidb_defect{sidb_defect_type::UNKNOWN, -1}, charged_spacing_overwrite,
+                        neutral_spacing_overwrite) == charged_spacing_overwrite);
 }
 
 TEST_CASE("Test for units", "[sidb-defects]")
