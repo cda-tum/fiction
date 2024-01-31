@@ -249,9 +249,9 @@ class operational_domain_impl
 {
   public:
     /**
-     * Standard constructor. Initializes the layout, the truth table, the parameters and the statistics. Also detects
-     * the output BDL pair, which is necessary for the operational domain computation. The layout must have exactly
-     * one output BDL pair.
+     * Standard constructor. Initializes the layout, the truth table, the parameters and the statistics. Also
+     * detects the output BDL pair, which is necessary for the operational domain computation. The layout must
+     * have exactly one output BDL pair.
      *
      * @param lyt SiDB cell-level layout to be evaluated.
      * @param spec Expected Boolean function of the layout given as a multi-output truth table.
@@ -644,7 +644,7 @@ class operational_domain_impl
      */
     [[nodiscard]] inline std::size_t num_x_steps() const noexcept
     {
-        return static_cast<std::size_t>((params.x_max - params.x_min) / params.x_step);
+        return static_cast<std::size_t>(std::round((params.x_max - params.x_min) / params.x_step));
     }
     /**
      * Calculates the number of steps in the y dimension based on the provided parameters.
@@ -653,7 +653,7 @@ class operational_domain_impl
      */
     [[nodiscard]] inline std::size_t num_y_steps() const noexcept
     {
-        return static_cast<std::size_t>((params.y_max - params.y_min) / params.y_step);
+        return static_cast<std::size_t>(std::round((params.y_max - params.y_min) / params.y_step));
     }
     /**
      * Potential sweep dimensions.
@@ -1094,6 +1094,10 @@ operational_domain operational_domain_random_sampling(const Lyt& lyt, const std:
  * inputs of the layout. Each exact ground state simulation has exponential complexity in of itself. Therefore, the
  * algorithm is only feasible for small layouts with few inputs.
  *
+ * This flavor of operational domain computation was proposed in \"Reducing the Complexity of Operational Domain
+ * Computation in Silicon Dangling Bond Logic\" by M. Walter, J. Drewniok, S. S. H. Ng, K. Walus, and R. Wille in
+ * NANOARCH 2023.
+ *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
  * @param lyt Layout to compute the operational domain for.
@@ -1146,6 +1150,10 @@ operational_domain operational_domain_flood_fill(
  * up to \f$ 2^n \f$ exact ground state simulations, where \f$ n \f$ is the number of inputs of the layout. Each exact
  * ground state simulation has exponential complexity in of itself. Therefore, the algorithm is only feasible for small
  * layouts with few inputs.
+ *
+ * This flavor of operational domain computation was proposed in \"Reducing the Complexity of Operational Domain
+ * Computation in Silicon Dangling Bond Logic\" by M. Walter, J. Drewniok, S. S. H. Ng, K. Walus, and R. Wille in
+ * NANOARCH 2023.
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
