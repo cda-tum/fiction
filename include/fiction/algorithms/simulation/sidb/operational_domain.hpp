@@ -357,11 +357,15 @@ class operational_domain_impl
     {
         mockturtle::stopwatch stop{stats.time_total};
 
-        auto step_point_samples = generate_random_step_points(samples);
+        std::vector<step_point> step_point_samples = {};
 
         if (initial_parameter.has_value())
         {
             step_point_samples.emplace_back(to_step_point(initial_parameter.value()));
+        }
+        else
+        {
+            step_point_samples = generate_random_step_points(samples);
         }
 
         // for each sample point in parallel
@@ -979,8 +983,8 @@ class operational_domain_impl
         }
         // calculate the total number of parameter pairs
         const std::size_t total_parameter_pairs =
-            (static_cast<std::size_t>((params.x_max - params.x_min) / params.x_step) *
-             static_cast<std::size_t>((params.y_max - params.y_min) / params.y_step));
+            (static_cast<std::size_t>(std::round((params.x_max - params.x_min) / params.x_step)) *
+             static_cast<std::size_t>(std::round((params.y_max - params.y_min) / params.y_step)));
 
         // calculate the ratio of operational parameter pairs to the total number of parameter pairs
         stats.percentual_operational_area = static_cast<double>(stats.num_operational_parameter_combinations) /
