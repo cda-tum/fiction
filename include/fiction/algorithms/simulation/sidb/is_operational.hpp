@@ -176,7 +176,11 @@ class is_operational_impl
         // if we made it here, the layout is operational
         return operational_status::OPERATIONAL;
     }
-
+    /**
+     * Counts the number of input combinations yielding the correct output.
+     *
+     * @return The count of operational input combinations.
+     */
     [[nodiscard]] std::size_t count_number_of_non_operational_input_combinations() noexcept
     {
         assert(!output_bdl_pairs.empty() && "No output cell provided.");
@@ -257,7 +261,7 @@ class is_operational_impl
         }
 
         // if we made it here, the layout is operational
-        return truth_table.front().num_bits() - operational_input_combinations;
+        return (truth_table.front().num_bits() - operational_input_combinations);
     }
     /**
      * Returns the total number of simulator invocations.
@@ -369,12 +373,21 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
 
     return {p.run(), p.get_number_of_simulator_invocations()};
 }
-
+/**
+ * This function calculates the count of input combinations for which the SiDB-based logic, represented by the
+ * provided layout (`lyt`) and truth table specifications (`spec`), produces the correct output.
+ *
+ * @tparam Lyt Type of the cell-level layout.
+ * @tparam TT Type of the truth table.
+ * @param lyt The SiDB layout.
+ * @param spec Vector of truth table specifications.
+ * @param params Parameters to simualte if a input combination is operational.
+ * @return The count of operational input combinations.
+ *
+ */
 template <typename Lyt, typename TT>
-[[nodiscard]] uint64_t
-number_of_operational_input_combinations(const Lyt& lyt, const std::vector<TT>& spec, const Lyt& skeleton,
-                                         const is_operational_params&                             params = {},
-                                         const std::pair<typename Lyt::cell, typename Lyt::cell>& canvas = {}) noexcept
+[[nodiscard]] std::size_t number_of_operational_input_combinations(const Lyt& lyt, const std::vector<TT>& spec,
+                                                                   const is_operational_params& params = {}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
