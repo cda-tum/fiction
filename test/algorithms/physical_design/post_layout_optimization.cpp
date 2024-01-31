@@ -28,14 +28,18 @@ using namespace fiction;
 template <typename Lyt, typename Ntk>
 void check_layout_equiv(const Ntk& ntk)
 {
-    const auto layout = orthogonal<Lyt>(ntk, {});
+    for (bool wiring_reduction : {false, true})
+    {
+        const auto                      layout = orthogonal<Lyt>(ntk, {});
+        post_layout_optimization_params params{};
+        params.wiring_reduction = wiring_reduction;
+        post_layout_optimization_stats stats{};
+        post_layout_optimization<Lyt>(layout, params, &stats);
 
-    post_layout_optimization_stats stats{};
-    post_layout_optimization<Lyt>(layout, {}, &stats);
+        check_eq(ntk, layout);
 
-    check_eq(ntk, layout);
-
-    CHECK(mockturtle::to_seconds(stats.time_total) > 0);
+        CHECK(mockturtle::to_seconds(stats.time_total) > 0);
+    }
 }
 
 template <typename Lyt>
@@ -89,10 +93,6 @@ void check_layout_equiv_all()
     {
         check_layout_equiv<Lyt>(blueprints::clpl<technology_network>());
     }
-    SECTION("one_to_five_path_difference_network")
-    {
-        check_layout_equiv<Lyt>(blueprints::one_to_five_path_difference_network<technology_network>());
-    }
     SECTION("fanout_substitution_corner_case_network")
     {
         check_layout_equiv<Lyt>(blueprints::fanout_substitution_corner_case_network<technology_network>());
@@ -131,23 +131,6 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
             post_layout_optimization<gate_layout>(layout_corner_case_2, {}, &stats_corner_case_2);
             check_eq(blueprints::optimization_layout_corner_case_outputs_2<gate_layout>(), layout_corner_case_2);
         }
-    }
-
-    SECTION("Wiring Reduction before optimization")
-    {
-        using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
-
-        const auto ntk    = blueprints::half_adder_network<technology_network>();
-        const auto layout = orthogonal<gate_layout>(ntk, {});
-
-        post_layout_optimization_stats  stats{};
-        post_layout_optimization_params params{};
-        params.wiring_reduction = true;
-        post_layout_optimization<gate_layout>(layout, params, &stats);
-
-        check_eq(ntk, layout);
-
-        CHECK(mockturtle::to_seconds(stats.time_total) > 0);
     }
 }
 

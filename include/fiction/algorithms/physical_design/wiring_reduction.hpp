@@ -689,7 +689,8 @@ void delete_wires(Lyt& lyt, layout_coordinate_path<wiring_reduction_lyt>& to_del
                                         for (uint64_t o = 0; o < offset; ++o)
                                         {
                                             offset_offset++;
-                                            if (offset_matrix[fanin.y][fanin.x] != offset_matrix[fanin.y - 1][fanin.x])
+                                            if ((fanin.y > 0) && (offset_matrix[fanin.y][fanin.x] !=
+                                                                  offset_matrix[fanin.y - 1][fanin.x]))
                                             {
                                                 fanin = {fanin.x, fanin.y - 1, fanin.z};
                                             }
@@ -766,7 +767,8 @@ void delete_wires(Lyt& lyt, layout_coordinate_path<wiring_reduction_lyt>& to_del
                                         for (uint64_t o = 0; o < offset; ++o)
                                         {
                                             offset_offset++;
-                                            if (offset_matrix[fanin.y][fanin.x] != offset_matrix[fanin.y][fanin.x - 1])
+                                            if ((fanin.x > 0) && (offset_matrix[fanin.y][fanin.x] !=
+                                                                  offset_matrix[fanin.y][fanin.x - 1]))
                                             {
                                                 fanin = {fanin.x - 1, fanin.y, fanin.z};
                                             }

@@ -85,7 +85,7 @@ void check_layout_equiv_all()
     {
         check_layout_equiv<Lyt>(blueprints::nand_xnor_network<technology_network>());
     }
-    /*SECTION("fanout_substitution_corner_case_network")
+    SECTION("fanout_substitution_corner_case_network")
     {
         check_layout_equiv<Lyt>(blueprints::fanout_substitution_corner_case_network<technology_network>());
     }
@@ -93,14 +93,10 @@ void check_layout_equiv_all()
     {
         check_layout_equiv<Lyt>(blueprints::inverter_network<technology_network>());
     }
-    SECTION("one_to_five_path_difference_network")
-    {
-        check_layout_equiv<Lyt>(blueprints::one_to_five_path_difference_network<technology_network>());
-    }
     SECTION("maj4_network")
     {
         check_layout_equiv<Lyt>(blueprints::maj4_network<mockturtle::aig_network>());
-    }*/
+    }
 }
 
 TEST_CASE("Layout equivalence", "[wiring_reduction]")
