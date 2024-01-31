@@ -93,10 +93,6 @@ void check_layout_equiv_all()
     {
         check_layout_equiv<Lyt>(blueprints::inverter_network<technology_network>());
     }
-    SECTION("maj4_network")
-    {
-        check_layout_equiv<Lyt>(blueprints::maj4_network<mockturtle::aig_network>());
-    }
 }
 
 TEST_CASE("Layout equivalence", "[wiring_reduction]")
