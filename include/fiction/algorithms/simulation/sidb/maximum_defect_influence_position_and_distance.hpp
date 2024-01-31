@@ -17,6 +17,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <future>
 #include <limits>
 #include <utility>
 #include <vector>
@@ -45,6 +46,17 @@ struct maximum_defect_influence_distance_params
     std::pair<int32_t, int32_t> additional_scanning_area{50, 6};
 };
 
+/**
+ * Statistics for the maximum defect influence simulation.
+ */
+struct maximum_defect_influence_distance_stats
+{
+    /**
+     * The total runtime of the maximum defect influence simulation.
+     */
+    mockturtle::stopwatch<>::duration time_total{0};
+};
+
 namespace detail
 {
 /**
@@ -63,15 +75,19 @@ class maximum_defect_influence_position_and_distance_impl
 {
   public:
     maximum_defect_influence_position_and_distance_impl(const Lyt&                                      lyt,
-                                                        const maximum_defect_influence_distance_params& sim_params) :
+                                                        const maximum_defect_influence_distance_params& sim_params,
+                                                        maximum_defect_influence_distance_stats&        st) :
             layout{lyt},
-            params{sim_params}
+            params{sim_params},
+            stats{st}
     {
         collect_all_defect_cells();
     }
 
     std::pair<typename Lyt::cell, double> run() noexcept
     {
+        mockturtle::stopwatch stop{stats.time_total};
+
         const quickexact_params<sidb_surface<Lyt>> params_defect{
             params.physical_params, quickexact_params<sidb_surface<Lyt>>::automatic_base_number_detection::OFF};
 
@@ -154,7 +170,21 @@ class maximum_defect_influence_position_and_distance_impl
         };
 
         // Apply the process_defect function to each defect using std::for_each
-        std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ defect_cells.cbegin(), defect_cells.cend(), process_defect);
+
+        std::vector<std::future<void>> futures{};
+        futures.reserve(defect_cells.size());
+
+        // Start asynchronous tasks to process combinations in parallel
+        for (const auto& defect_cell : defect_cells)
+        {
+            futures.emplace_back(std::async(std::launch::async, process_defect, defect_cell));
+        }
+
+        for (auto& future : futures)
+        {
+            future.wait();
+        }
+        // std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ defect_cells.cbegin(), defect_cells.cend(), process_defect);
 
         return {max_defect_position, avoidance_distance};
     }
@@ -169,9 +199,14 @@ class maximum_defect_influence_position_and_distance_impl
      */
     maximum_defect_influence_distance_params params{};
     /**
+     * The statistics of the maximum defect influence position.
+     */
+    maximum_defect_influence_distance_stats& stats;
+    /**
      * All allowed defect positions.
      */
     std::vector<typename Lyt::cell> defect_cells{};
+
     /**
      * Collects all possible defect cell positions within a given layout while avoiding SiDB cells.
      *
@@ -217,16 +252,26 @@ class maximum_defect_influence_position_and_distance_impl
 template <typename Lyt>
 std::pair<typename Lyt::cell, double>
 maximum_defect_influence_position_and_distance(const Lyt&                                      lyt,
-                                               const maximum_defect_influence_distance_params& sim_params = {})
+                                               const maximum_defect_influence_distance_params& sim_params = {},
+                                               maximum_defect_influence_distance_stats*        pst        = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(!has_offset_ucoord_v<Lyt>, "Lyt cannot be based on offset coordinates");
     static_assert(!is_charge_distribution_surface_v<Lyt>, "Lyt cannot be a charge distribution surface");
 
-    detail::maximum_defect_influence_position_and_distance_impl<Lyt> p{lyt, sim_params};
+    maximum_defect_influence_distance_stats st{};
 
-    return p.run();
+    detail::maximum_defect_influence_position_and_distance_impl<Lyt> p{lyt, sim_params, st};
+
+    const auto result = p.run();
+
+    if (pst)
+    {
+        *pst = st;
+    }
+
+    return result;
 }
 
 }  // namespace fiction
