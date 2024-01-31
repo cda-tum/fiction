@@ -5,6 +5,8 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#include "mockturtle/utils/stopwatch.hpp"
+
 #include <fiction/algorithms/simulation/sidb/critical_temperature.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
@@ -288,7 +290,7 @@ TEMPLATE_TEST_CASE(
         params.alpha               = 0.7;
 
         critical_temperature_gate_based(lyt, std::vector<tt>{create_fan_out_tt()}, params, &critical_stats);
-
+        CHECK(mockturtle::to_seconds(critical_stats.time_total) > 0);
         CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.56),
                    Catch::Matchers::WithinAbs(0.00, 0.01));
         CHECK_THAT(std::abs(critical_stats.critical_temperature - 1.46), Catch::Matchers::WithinAbs(0.00, 0.01));
@@ -446,6 +448,7 @@ TEMPLATE_TEST_CASE(
         params.alpha               = 0.6;
 
         critical_temperature_non_gate_based(lyt, params, &critical_stats);
+        CHECK(mockturtle::to_seconds(critical_stats.time_total) > 0);
 
         CHECK(critical_stats.algorithm_name == "QuickSim");
 
