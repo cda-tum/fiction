@@ -32,25 +32,32 @@ int main()  // NOLINT
         fiction::gate_level_layout<fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<>>>>;
 
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t,
-                            uint64_t, uint32_t, uint32_t, uint64_t, uint64_t, double, double, float, std::string>
+                            uint64_t, uint64_t, size_t, size_t, float, uint64_t, uint64_t, float, uint64_t, uint64_t,
+                            float, double, double, float, std::string>
         wiring_reduction_exp{"wiring_reduction",
                              "benchmark",
                              "inputs",
                              "outputs",
                              "initial nodes",
-                             "ortho layout width (in tiles)",
-                             "ortho layout height (in tiles)",
-                             "ortho layout area (in tiles)",
-                             "optimized layout width (in tiles)",
-                             "optimized layout height (in tiles)",
-                             "optimized layout area (in tiles)",
+                             "width ortho",
+                             "height ortho",
+                             "area ortho",
+                             "width optimized",
+                             "height optimized",
+                             "area optimized",
                              "gates",
-                             "wires",
-                             "critical path",
-                             "throughput",
-                             "runtime ortho (in sec)",
-                             "runtime wiring_reduction (in sec)",
-                             "improvement (%)",
+                             "wires ortho",
+                             "wires optimized",
+                             "improv wires (%)",
+                             "critical path ortho",
+                             "critical path optimized",
+                             "improv cp (%)",
+                             "throughput ortho",
+                             "throughput optimized",
+                             "improv tp (%)",
+                             "runtime ortho (s)",
+                             "runtime wiring_reduction (s)",
+                             "improv area (%)",
                              "equivalent"};
 
     // stats for SMT-based physical design
@@ -67,6 +74,7 @@ int main()  // NOLINT
         // perform layout generation with an OGD-based heuristic algorithm
         auto gate_level_layout = fiction::orthogonal<gate_lyt>(network, {}, &orthogonal_stats);
 
+        auto num_wires = gate_level_layout.num_wires() - gate_level_layout.num_pis() - gate_level_layout.num_pos();
         //  compute critical path and throughput
         fiction::critical_path_length_and_throughput_stats cp_tp_stats{};
         fiction::critical_path_length_and_throughput(gate_level_layout, &cp_tp_stats);
@@ -81,6 +89,12 @@ int main()  // NOLINT
         // perform post-layout optimization
         fiction::wiring_reduction<gate_lyt>(gate_level_layout, &wiring_reduction_stats);
 
+        //  compute critical path and throughput
+        fiction::critical_path_length_and_throughput_stats cp_tp_stats_after{};
+        fiction::critical_path_length_and_throughput(gate_level_layout, &cp_tp_stats_after);
+
+        auto num_wires_after =
+            gate_level_layout.num_wires() - gate_level_layout.num_pis() - gate_level_layout.num_pos();
         // check equivalence
         fiction::equivalence_checking_stats eq_stats{};
         fiction::equivalence_checking<fiction::technology_network, gate_lyt>(network, gate_level_layout, &eq_stats);
@@ -96,16 +110,26 @@ int main()  // NOLINT
         const auto height_after_wiring_reduction = bounding_box_after_wiring_reduction.get_y_size() + 1;
         const auto area_after_wiring_reduction   = width_after_wiring_reduction * height_after_wiring_reduction;
 
-        const float improv = 100 * static_cast<float>((area_before_wiring_reduction - area_after_wiring_reduction)) /
-                             static_cast<float>(area_before_wiring_reduction);
+        const float improv_wires =
+            100 * static_cast<float>((num_wires - num_wires_after)) / static_cast<float>(num_wires);
+        const float improv_critical_path =
+            100 * static_cast<float>((cp_tp_stats.critical_path_length - cp_tp_stats_after.critical_path_length)) /
+            static_cast<float>(cp_tp_stats.critical_path_length);
+        const float improv_throughput = 100 *
+                                        static_cast<float>((cp_tp_stats.throughput - cp_tp_stats_after.throughput)) /
+                                        static_cast<float>(cp_tp_stats.throughput);
+        const float improv_area = 100 *
+                                  static_cast<float>((area_before_wiring_reduction - area_after_wiring_reduction)) /
+                                  static_cast<float>(area_before_wiring_reduction);
         // log results
         wiring_reduction_exp(benchmark, network.num_pis(), network.num_pos(), network.num_gates(),
                              width_before_wiring_reduction, height_before_wiring_reduction,
                              area_before_wiring_reduction, width_after_wiring_reduction, height_after_wiring_reduction,
-                             area_after_wiring_reduction, gate_level_layout.num_gates(), gate_level_layout.num_wires(),
-                             cp_tp_stats.critical_path_length, cp_tp_stats.throughput,
-                             mockturtle::to_seconds(orthogonal_stats.time_total),
-                             mockturtle::to_seconds(wiring_reduction_stats.time_total), improv, eq_result);
+                             area_after_wiring_reduction, gate_level_layout.num_gates(), num_wires, num_wires_after,
+                             improv_wires, cp_tp_stats.critical_path_length, cp_tp_stats_after.critical_path_length,
+                             improv_critical_path, cp_tp_stats.throughput, cp_tp_stats_after.throughput,
+                             improv_throughput, mockturtle::to_seconds(orthogonal_stats.time_total),
+                             mockturtle::to_seconds(wiring_reduction_stats.time_total), improv_area, eq_result);
 
         wiring_reduction_exp.save();
         wiring_reduction_exp.table();
