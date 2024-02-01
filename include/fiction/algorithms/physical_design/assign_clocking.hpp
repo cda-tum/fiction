@@ -69,18 +69,19 @@ class sat_clocking_handler
                 const auto t = layout.get_tile(n);
 
                 // for each possible clock number
-                for (typename Lyt::clock_number_t clk = 0; clk <= max_clock_number; ++clk)
+                for (typename Lyt::clock_number_t clk = 0; clk < max_clock_number; ++clk)
                 {
                     variables[{t, clk}] = solver.add_variable();
                 }
             });
     }
 
-    bool clock()
+    bool determine_clocks()
     {
         at_least_one_clock_number_per_tile();
         at_most_one_clock_number_per_tile();
         exclude_clock_assignments_that_violate_information_flow();
+        ensure_same_clock_number_on_crossing_tiles();
 
         if (const auto sat_result = solver.solve(); sat_result == bill::result::states::satisfiable)
         {
@@ -133,7 +134,7 @@ class sat_clocking_handler
                 std::vector<bill::var_type> tc(max_clock_number + 1, 0);
 
                 // for each possible clock number
-                for (typename Lyt::clock_number_t clk = 0; clk <= max_clock_number; ++clk)
+                for (typename Lyt::clock_number_t clk = 0; clk < max_clock_number; ++clk)
                 {
                     tc[clk] = variables[{t, clk}];
                 }
@@ -147,10 +148,10 @@ class sat_clocking_handler
     void at_most_one_clock_number_per_tile()
     {
         // for each pair of clock numbers
-        for (typename Lyt::clock_number_t c1 = 0; c1 <= max_clock_number; ++c1)
+        for (typename Lyt::clock_number_t c1 = 0; c1 < max_clock_number; ++c1)
         {
             // use an optimization here: c2 > c1 instead of c2 != c1 to save half the clauses
-            for (typename Lyt::clock_number_t c2 = c1 + 1; c2 <= max_clock_number; ++c2)
+            for (typename Lyt::clock_number_t c2 = c1 + 1; c2 < max_clock_number; ++c2)
             {
                 // for each non-empty tile
                 layout.foreach_node(
@@ -193,9 +194,9 @@ class sat_clocking_handler
                     [this, &t1](const auto& t2)
                     {
                         // for each combination of possible clock numbers
-                        for (typename Lyt::clock_number_t c1 = 0; c1 <= max_clock_number; ++c1)
+                        for (typename Lyt::clock_number_t c1 = 0; c1 < max_clock_number; ++c1)
                         {
-                            for (typename Lyt::clock_number_t c2 = 0; c2 <= max_clock_number; ++c2)
+                            for (typename Lyt::clock_number_t c2 = 0; c2 < max_clock_number; ++c2)
                             {
                                 // if c2 is not c1's incoming clock number
                                 if (!(static_cast<typename Lyt::clock_number_t>((c2 + typename Lyt::clock_number_t{1}) %
@@ -208,6 +209,32 @@ class sat_clocking_handler
                             }
                         }
                     });
+            });
+    }
+
+    void ensure_same_clock_number_on_crossing_tiles()
+    {
+        // for each crossing wire
+        layout.foreach_wire(
+            [this](const auto& w)
+            {
+                const auto t = layout.get_tile(w);
+
+                if (layout.is_ground_layer(t))
+                {
+                    return;
+                }
+
+                // fetch corresponding tile in ground layer
+                const auto ground_t = layout.below(t);
+
+                // for each possible clock number
+                for (typename Lyt::clock_number_t clk = 0; clk < max_clock_number; ++clk)
+                {
+                    // ensure that the clock number of both tiles is identical
+                    solver.add_clause(
+                        bill::add_tseytin_equals(solver, variables[{t, clk}], variables[{ground_t, clk}]));
+                }
             });
     }
 
@@ -225,12 +252,14 @@ class sat_clocking_handler
                 const auto t = layout.get_tile(n);
 
                 // for each possible clock number
-                for (typename Lyt::clock_number_t clk = 0; clk <= max_clock_number; ++clk)
+                for (typename Lyt::clock_number_t clk = 0; clk < max_clock_number; ++clk)
                 {
                     // if tile t is clocked with clock number clk
                     if (model.at(variables.at({t, clk})) == bill::lbool_type::true_)
                     {
                         layout.assign_clock_number(t, clk);
+                        layout.assign_clock_number(layout.above(t), clk);
+                        layout.assign_clock_number(layout.below(t), clk);
                     }
                 }
             });
@@ -261,35 +290,29 @@ class assign_clocking_impl
         {
             case bill::solvers::ghack:
             {
-                return sat_clocking_handler<Lyt, bill::solvers::ghack>{layout}.clock();
+                return sat_clocking_handler<Lyt, bill::solvers::ghack>{layout}.determine_clocks();
             }
             case bill::solvers::glucose_41:
             {
-                return sat_clocking_handler<Lyt, bill::solvers::glucose_41>{layout}.clock();
+                return sat_clocking_handler<Lyt, bill::solvers::glucose_41>{layout}.determine_clocks();
             }
             case bill::solvers::bsat2:
             {
-                //                assert(false && "At the time of writing this code, bsat2 was not able to solve
-                //                clocking instances "
-                //                                "properly. It is, therefore, not recommended using it. If in the
-                //                                future an update " "to bill and/or bsat2 has been published, feel free
-                //                                to remove this assertion.");
-
-                return sat_clocking_handler<Lyt, bill::solvers::bsat2>{layout}.clock();
+                return sat_clocking_handler<Lyt, bill::solvers::bsat2>{layout}.determine_clocks();
             }
 #if !defined(BILL_WINDOWS_PLATFORM)
             case bill::solvers::maple:
             {
-                return sat_clocking_handler<Lyt, bill::solvers::maple>{layout}.clock();
+                return sat_clocking_handler<Lyt, bill::solvers::maple>{layout}.determine_clocks();
             }
             case bill::solvers::bmcg:
             {
-                return sat_clocking_handler<Lyt, bill::solvers::bmcg>{layout}.clock();
+                return sat_clocking_handler<Lyt, bill::solvers::bmcg>{layout}.determine_clocks();
             }
 #endif
             default:
             {
-                return sat_clocking_handler<Lyt>{layout}.clock();
+                return sat_clocking_handler<Lyt>{layout}.determine_clocks();
             }
         }
     }
