@@ -46,8 +46,31 @@ jobs:
             ccompiler: gcc-11
           - compiler: g++-12
             ccompiler: gcc-12
-          - compiler: g++-13
+          - os: macos-11
+            compiler: g++-10
+            ccompiler: gcc-10
+            build_type: Debug
+          - os: macos-11
+            compiler: g++-10
+            ccompiler: gcc-10
+            build_type: Release
+          - os: macos-13
+            compiler: g++-13
             ccompiler: gcc-13
+            build_type: Debug
+          - os: macos-13
+            compiler: g++-13
+            ccompiler: gcc-13
+            build_type: Release
+          - os: macos-14
+            compiler: g++-13
+            ccompiler: gcc-13
+            build_type: Debug
+          - os: macos-14
+            compiler: g++-13
+            ccompiler: gcc-13
+            build_type: Release
+
 
     name: ${{matrix.os}} with ${{matrix.compiler}} (${{matrix.build_type}} mode)
     runs-on: ${{matrix.os}}
