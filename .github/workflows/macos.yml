@@ -71,7 +71,6 @@ jobs:
             ccompiler: gcc-13
             build_type: Release
 
-
     name: ${{matrix.os}} with ${{matrix.compiler}} (${{matrix.build_type}} mode)
     runs-on: ${{matrix.os}}
 
