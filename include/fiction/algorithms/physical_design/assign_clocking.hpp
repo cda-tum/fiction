@@ -14,8 +14,11 @@
 #include <bill/sat/tseytin.hpp>
 
 #include <algorithm>
+#include <functional>
+#include <ostream>
 #include <unordered_map>
 #include <utility>
+#include <vector>
 
 namespace fiction
 {
@@ -82,6 +85,7 @@ class sat_clocking_handler
         at_most_one_clock_number_per_tile();
         exclude_clock_assignments_that_violate_information_flow();
         ensure_same_clock_number_on_crossing_tiles();
+        symmetry_breaking();
 
         if (const auto sat_result = solver.solve(); sat_result == bill::result::states::satisfiable)
         {
@@ -211,7 +215,9 @@ class sat_clocking_handler
                     });
             });
     }
-
+    /**
+     * Adds constraints to the solver that ensure the assignment of the same clock number to crossing tiles.
+     */
     void ensure_same_clock_number_on_crossing_tiles()
     {
         // for each crossing wire
@@ -235,6 +241,38 @@ class sat_clocking_handler
                     solver.add_clause(
                         bill::add_tseytin_equals(solver, variables[{t, clk}], variables[{ground_t, clk}]));
                 }
+            });
+    }
+    /**
+     * Adds constraints to the solver that help to speed up the solving process by breaking symmetries in the solution
+     * space.
+     */
+    void symmetry_breaking()
+    {
+        const std::function<void(const mockturtle::node<Lyt>& n)> recurse =
+            [this, &recurse, clk = 0](const auto& n) mutable
+        {
+            const auto t = layout.get_tile(n);
+
+            // pre-assign tile t to clock number clk
+            solver.add_clause(variables[{t, ++clk % max_clock_number}]);
+
+            layout.foreach_fanout(n,
+                                  [this, &recurse](auto const& fon)
+                                  {
+                                      recurse(fon);
+
+                                      return false;  // terminate after one iteration
+                                  });
+        };
+
+        // only for the first PI
+        layout.foreach_pi(
+            [this, &recurse](const auto& pi)
+            {
+                recurse(pi);
+
+                return false;  // terminate after one iteration
             });
     }
 
