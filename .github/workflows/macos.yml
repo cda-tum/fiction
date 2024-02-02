@@ -36,7 +36,7 @@ jobs:
   build_and_test:
     strategy:
       matrix:
-        os: [ macos-11, macos-12, macos-13, macos-14 ]
+        os: [ macos-11, macos-12, macos-13 ]
         compiler: [ g++-11, g++-12, clang++ ]
         build_type: [ Debug, Release ]
         include:
@@ -59,14 +59,6 @@ jobs:
             ccompiler: gcc-13
             build_type: Debug
           - os: macos-13
-            compiler: g++-13
-            ccompiler: gcc-13
-            build_type: Release
-          - os: macos-14
-            compiler: g++-13
-            ccompiler: gcc-13
-            build_type: Debug
-          - os: macos-14
             compiler: g++-13
             ccompiler: gcc-13
             build_type: Release
