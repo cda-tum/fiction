@@ -52,6 +52,9 @@ jobs:
             ccompiler: gcc-11
           - compiler: g++-12
             ccompiler: gcc-12
+        exclude:
+          - os: macos-12
+            compiler: g++13
 
     name: ${{matrix.os}} with ${{matrix.compiler}} (${{matrix.build_type}} mode)
     runs-on: ${{matrix.os}}
