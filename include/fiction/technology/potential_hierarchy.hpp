@@ -21,17 +21,17 @@
 namespace fiction
 {
 
-struct ch_node;
-using ch_node_ptr = std::shared_ptr<ch_node>;
+struct pch_node;
+using pch_node_ptr = std::shared_ptr<pch_node>;
 
-struct ch_node
+struct pch_node
 {
     std::set<uint64_t>    c;
-    std::set<ch_node_ptr> v;
+    std::set<pch_node_ptr> v;
 
-    explicit ch_node(const std::set<uint64_t>& c_, std::set<ch_node_ptr>& v_) : c{c_}, v{v_} {}
+    explicit pch_node(const std::set<uint64_t>& c_, std::set<pch_node_ptr>& v_) : c{c_}, v{v_} {}
 
-    explicit ch_node(const std::set<ch_node_ptr>& v_)
+    explicit pch_node(const std::set<pch_node_ptr>& v_)
     {
         if (v_.size() == 1)
         {
@@ -40,7 +40,7 @@ struct ch_node
             return;
         }
 
-        for (const ch_node_ptr& h : v_)
+        for (const pch_node_ptr& h : v_)
         {
             c.insert(h->c.cbegin(), h->c.cend());
         }
@@ -189,17 +189,17 @@ class potential_hierarchy
     class pp_monoid
     {
       public:
-        std::pair<std::set<ch_node_ptr>, std::set<ch_node_ptr>> pp;
+        std::pair<std::set<pch_node_ptr>, std::set<pch_node_ptr>> pp;
 
         explicit pp_monoid() : pp{} {}
-        explicit pp_monoid(const ch_node_ptr& n, const bool conflict) :
-                pp{conflict ? std::make_pair(std::set<ch_node_ptr>{n}, std::set<ch_node_ptr>{}) :
-                              std::make_pair(std::set<ch_node_ptr>{}, std::set<ch_node_ptr>{n})}
+        explicit pp_monoid(const pch_node_ptr& n, const bool conflict) :
+                pp{conflict ? std::make_pair(std::set<pch_node_ptr>{n}, std::set<pch_node_ptr>{}) :
+                              std::make_pair(std::set<pch_node_ptr>{}, std::set<pch_node_ptr>{n})}
         {}
 
         pp_monoid operator+=(const pp_monoid& m) noexcept
         {
-            std::set<ch_node_ptr> u1{}, u2{};
+            std::set<pch_node_ptr> u1{}, u2{};
             std::set_union(this->pp.first.cbegin(), this->pp.first.cend(), m.pp.first.cbegin(), m.pp.first.cend(),
                            std::inserter(u1, u1.begin()));
             std::set_union(this->pp.second.cbegin(), this->pp.second.cend(), m.pp.second.cbegin(), m.pp.second.cend(),
@@ -210,7 +210,7 @@ class potential_hierarchy
         }
     };
 
-    pp_monoid resolve_conflict(const ch_node_ptr& n, const std::set<uint64_t>& conflict) const noexcept
+    pp_monoid resolve_conflict(const pch_node_ptr& n, const std::set<uint64_t>& conflict) const noexcept
     {
         if (conflict.empty())
         {
@@ -222,7 +222,7 @@ class potential_hierarchy
         }
 
         pp_monoid pp{};
-        for (const ch_node_ptr& h : n->v)
+        for (const pch_node_ptr& h : n->v)
         {
             std::set<uint64_t> conflict_cut{};
             std::set_intersection(h->c.cbegin(), h->c.cend(), conflict.cbegin(), conflict.cend(),
@@ -233,7 +233,7 @@ class potential_hierarchy
         return pp;
     }
 
-    void insert_cluster(ch_node& n, const std::set<uint64_t>& cluster) const noexcept
+    void insert_cluster(pch_node& n, const std::set<uint64_t>& cluster) const noexcept
     {
         if (n.c == cluster || cluster.empty())
         {
@@ -249,9 +249,9 @@ class potential_hierarchy
             }
         }
 
-        std::set<ch_node_ptr>                     children_overlapping_cluster{};
-        std::map<ch_node_ptr, std::set<uint64_t>> children_overlapping_cluster_intersections;
-        for (const ch_node_ptr& h : n.v)
+        std::set<pch_node_ptr>                     children_overlapping_cluster{};
+        std::map<pch_node_ptr, std::set<uint64_t>> children_overlapping_cluster_intersections;
+        for (const pch_node_ptr& h : n.v)
         {
             std::set<uint64_t> intersection{};
             std::set_intersection(h->c.cbegin(), h->c.cend(), cluster.cbegin(), cluster.cend(),
@@ -264,8 +264,8 @@ class potential_hierarchy
             }
         }
 
-        std::set<ch_node_ptr> conflicting_children{};
-        for (const ch_node_ptr& h : children_overlapping_cluster)
+        std::set<pch_node_ptr> conflicting_children{};
+        for (const pch_node_ptr& h : children_overlapping_cluster)
         {
             std::set<uint64_t> difference{};
             std::set_difference(h->c.cbegin(), h->c.cend(), cluster.cbegin(), cluster.cend(),
@@ -283,11 +283,11 @@ class potential_hierarchy
             {
                 n.v.erase(h);
             }
-            n.v.emplace(std::make_shared<ch_node>(cluster, children_overlapping_cluster));
+            n.v.emplace(std::make_shared<pch_node>(cluster, children_overlapping_cluster));
             return;
         }
 
-        for (const ch_node_ptr& h : conflicting_children)
+        for (const pch_node_ptr& h : conflicting_children)
         {
             n.v.erase(h);
 
@@ -295,8 +295,8 @@ class potential_hierarchy
 
             const auto& [conflicting, non_conflicting] = resolve_conflict(h, conflict).pp;
 
-            ch_node_ptr h_b = std::make_shared<ch_node>(conflicting);
-            ch_node_ptr h_t = std::make_shared<ch_node>(non_conflicting);
+            pch_node_ptr h_b = std::make_shared<pch_node>(conflicting);
+            pch_node_ptr h_t = std::make_shared<pch_node>(non_conflicting);
 
             std::set<uint64_t> non_conflict{};
             std::set_difference(conflict.cbegin(), conflict.cend(), h_b->c.cbegin(), h_b->c.cend(),
@@ -338,7 +338,7 @@ class potential_hierarchy
         return root;
     }
 
-    ch_node_ptr make_cluster_hierarchy() const noexcept
+    pch_node_ptr make_cluster_hierarchy() const noexcept
     {
         const double                 d_0 = solve_differential_equation();
         std::set<std::set<uint64_t>> agreed_clusters{};
@@ -359,14 +359,14 @@ class potential_hierarchy
             agreed_clusters.insert(clusters.cbegin(), clusters.cend());
         }
 
-        std::set<ch_node_ptr> leaves{};
+        std::set<pch_node_ptr> leaves{};
         for (const uint64_t i : sidb_indices)
         {
-            std::set<ch_node_ptr> leaf{};
-            leaves.emplace(std::make_shared<ch_node>(std::set<uint64_t>{i}, leaf));
+            std::set<pch_node_ptr> leaf{};
+            leaves.emplace(std::make_shared<pch_node>(std::set<uint64_t>{i}, leaf));
         }
 
-        ch_node_ptr root = std::make_shared<ch_node>(sidb_indices, leaves);
+        pch_node_ptr root = std::make_shared<pch_node>(sidb_indices, leaves);
 
         for (const std::set<uint64_t>& c : agreed_clusters)
         {

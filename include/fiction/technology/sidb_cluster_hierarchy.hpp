@@ -123,6 +123,48 @@ sidb_cluster_hierarchy_node sidb_cluster_hierarchy(
     return std::move(*nodes.cbegin()->second);
 };
 
+struct ch_node;
+using ch_node_ptr = std::shared_ptr<ch_node>;  // unique_ptr seems to be impossible with std::set?
+
+struct ch_node
+{
+    std::set<uint64_t>    c;
+    std::set<ch_node_ptr> v;
+
+    explicit ch_node(const std::set<uint64_t>& c_, std::set<ch_node_ptr> v_) : c{c_}, v{std::move(v_)} {}
+
+    explicit ch_node(const std::set<ch_node_ptr>& v_)
+    {
+        if (v_.size() == 1)
+        {
+            c = (*v_.cbegin())->c;
+            v = (*v_.cbegin())->v;
+            return;
+        }
+
+        for (const ch_node_ptr& h : v_)
+        {
+            c.insert(h->c.cbegin(), h->c.cend());
+        }
+        v = v_;
+    };
+};
+
+ch_node_ptr to_ch_node(const sidb_cluster_hierarchy_node& n)
+{
+    std::set<ch_node_ptr> v;
+
+    for (uint8_t c = 0; c < 2; ++c)
+    {
+        if (n.sub[c])
+        {
+            v.insert(to_ch_node(*n.sub[c]));
+        }
+    }
+
+    return std::make_shared<ch_node>(n.c, std::move(v));
+}
+
 }  // namespace fiction
 
 #endif  // FICTION_SIDB_CLUSTER_HIERARCHY_HPP

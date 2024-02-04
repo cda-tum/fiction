@@ -8,8 +8,9 @@
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 #include <fiction/technology/charge_distribution_surface.hpp>
 #include <fiction/technology/physical_constants.hpp>
-#include <fiction/technology/potential_hierarchy.hpp>
+// #include <fiction/technology/potential_hierarchy.hpp>
 #include <fiction/technology/sidb_charge_state.hpp>
+#include <fiction/technology/sidb_cluster_hierarchy.hpp>
 #include <fiction/utils/hash.hpp>
 
 #include <mockturtle/utils/stopwatch.hpp>
@@ -739,7 +740,7 @@ class cluster_exact
     [[nodiscard]] clustering get_clustering(const std::set<ch_node_ptr>& v) const noexcept
     {
         clustering xv{};
-        for (const std::shared_ptr<ch_node>& h : v)
+        for (const ch_node_ptr& h : v)
         {
             xv.emplace(obtain_cluster_information(h->c));
         }
@@ -962,8 +963,9 @@ class cluster_exact
         {
             const mockturtle::stopwatch stop{time_counter};
 
-            const ch_node_ptr& top_node =
-                potential_hierarchy<Lyt>{cl.get_sidb_order(), cl.get_phys_params(), theta}.make_cluster_hierarchy();
+            const ch_node_ptr& top_node = to_ch_node(sidb_cluster_hierarchy(cl));
+            //                potential_hierarchy<Lyt>{cl.get_sidb_order(), cl.get_phys_params(),
+            //                theta}.make_cluster_hierarchy();
 
             // first simulate base 2
             iterate_over_all_multisets(res, top_node);
