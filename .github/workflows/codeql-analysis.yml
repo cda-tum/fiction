@@ -132,7 +132,7 @@ jobs:
       - if: matrix.language == 'cpp'
         name: Build fiction
         working-directory: ${{github.workspace}}/build
-        run: cmake --build .
+        run: cmake --build . --config ${{matrix.build_type}} -j4
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
