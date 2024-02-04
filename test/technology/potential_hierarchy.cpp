@@ -73,8 +73,8 @@ TEST_CASE("8 DB cluster hierarchy", "[potential-hierarchy]")
         for (const auto& h_ : h->v)
         {
             cluster_exact<layout> ce{cl};
-            const double          x = ce.V_int_lower(h_->c, m);
-            const double          y = ce.V_int_upper(h_->c, m);
+            const double          x = ce.V_int_lower(cluster{h_->c}, m);
+            const double          y = ce.V_int_upper(cluster{h_->c}, m);
             CHECK(x != y);
         }
     }
@@ -133,7 +133,7 @@ TEST_CASE("Influence region test", "[potential-hierarchy]")
 
 TEST_CASE("TEST", "[potential-hierarchy]")
 {
-    clustering            xv{{0, 1}, {2, 3}, {4, 5}};
+    clustering            xv{cluster{{0, 1}}, cluster{{2, 3}}, cluster{{4, 5}}};
     charge_state_multiset m{sidb_charge_state::NEGATIVE, sidb_charge_state::NEGATIVE, sidb_charge_state::NEGATIVE,
                             sidb_charge_state::NEUTRAL,  sidb_charge_state::POSITIVE, sidb_charge_state::POSITIVE};
     charge_multiset_conf  cmc{xv, m};
@@ -188,7 +188,7 @@ TEST_CASE("TEST", "[potential-hierarchy]")
 
 TEST_CASE("Smaller cluster charge multiset assignment iteration", "[multiset-assignment-iteration]")
 {
-    clustering            xv{{0, 1, 2, 3, 4}, {5, 6, 7, 8}};
+    clustering            xv{cluster{{0, 1, 2, 3, 4}}, cluster{{5, 6, 7, 8}}};
     charge_state_multiset m = {sidb_charge_state::NEGATIVE, sidb_charge_state::NEGATIVE, sidb_charge_state::NEUTRAL,
                                sidb_charge_state::POSITIVE, sidb_charge_state::NEUTRAL,  sidb_charge_state::POSITIVE,
                                sidb_charge_state::NEUTRAL,  sidb_charge_state::NEUTRAL,  sidb_charge_state::NEUTRAL};
@@ -206,7 +206,7 @@ TEST_CASE("Smaller cluster charge multiset assignment iteration", "[multiset-ass
 
 TEST_CASE("Bigger cluster charge multiset assignment iteration", "[multiset-assignment-iteration]")
 {
-    clustering            xv{{0, 1, 2, 3}, {4, 5, 6, 7}, {8, 9, 10, 11}};
+    clustering            xv{cluster{{0, 1, 2, 3}}, cluster{{4, 5, 6, 7}}, cluster{{8, 9, 10, 11}}};
     charge_state_multiset m = {sidb_charge_state::NEGATIVE, sidb_charge_state::NEGATIVE, sidb_charge_state::NEUTRAL,
                                sidb_charge_state::POSITIVE, sidb_charge_state::NEUTRAL,  sidb_charge_state::POSITIVE,
                                sidb_charge_state::NEGATIVE, sidb_charge_state::NEGATIVE, sidb_charge_state::POSITIVE,
@@ -226,7 +226,7 @@ TEST_CASE("Bigger cluster charge multiset assignment iteration", "[multiset-assi
 
 TEST_CASE("Very large cluster charge multiset assignment iteration", "[multiset-assignment-iteration]")
 {
-    clustering xv{{0, 1, 2, 3}, {4, 5, 6, 7}, {8, 9, 10, 11}, {12, 13, 14, 15, 16}, {17}, {18, 19}, {20, 21, 22}};
+    clustering xv{cluster{{0, 1, 2, 3}}, cluster{{4, 5, 6, 7}}, cluster{{8, 9, 10, 11}}, cluster{{12, 13, 14, 15, 16}}, cluster{{17}}, cluster{{18, 19}}, cluster{{20, 21, 22}}};
 
     charge_state_multiset m = {sidb_charge_state::NEGATIVE, sidb_charge_state::NEGATIVE, sidb_charge_state::NEUTRAL,
                                sidb_charge_state::POSITIVE, sidb_charge_state::NEUTRAL,  sidb_charge_state::POSITIVE,
@@ -251,7 +251,7 @@ TEST_CASE("Very large cluster charge multiset assignment iteration", "[multiset-
 
 TEST_CASE("All charge state multisets of length 3", "[multiset-iteration]")
 {
-    clustering xv{{0, 1, 2}};
+    clustering xv{cluster{{0, 1, 2}}};
 
     charge_state_multiset m{sidb_charge_state::NEGATIVE, sidb_charge_state::NEGATIVE, sidb_charge_state::NEGATIVE,
                             sidb_charge_state::NEUTRAL,  sidb_charge_state::NEUTRAL,  sidb_charge_state::NEUTRAL,
@@ -303,6 +303,7 @@ TEST_CASE("13 DB exact cluster simulation", "[exact-cluster-simulation]")
     layout lyt{};
 
     lyt.assign_cell_type({50, -11, 1}, sidb_technology::cell_type::NORMAL);
+//    lyt.assign_cell_type({50, -11, 0}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({54, -9, 0}, sidb_technology::cell_type::NORMAL);
 
     lyt.assign_cell_type({10, -5, 1}, sidb_technology::cell_type::NORMAL);
@@ -597,11 +598,11 @@ TEST_CASE("Exact Cluster Simulation of 2 Bestagon NAND (QuickExact)", "[potentia
               << minimum_energy(res.charge_distributions.cbegin(), res.charge_distributions.cend()) << std::endl;
 }
 
-TEST_CASE("Exact Cluster Simulation of 2 Bestagon OR", "[potential-hierarchy]")
+TEST_CASE("Exact Cluster Simulation of 2 Bestagon AND", "[potential-hierarchy]")
 {
     gate_level_layout<hex_even_row_gate_clk_lyt> lyt{{2, 2}};
-    lyt.create_or({}, {}, {0, 0});
-    lyt.create_or({}, {}, {2, 2});
+    lyt.create_and({}, {}, {0, 0});
+    lyt.create_and({}, {}, {2, 2});
 
     cluster_exact<layout> ce{charge_distribution_surface<layout>{
         convert_to_siqad_coordinates(apply_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library>(lyt))}};
@@ -621,11 +622,11 @@ TEST_CASE("Exact Cluster Simulation of 2 Bestagon OR", "[potential-hierarchy]")
               << minimum_energy(res.charge_distributions.cbegin(), res.charge_distributions.cend()) << std::endl;
 }
 
-TEST_CASE("Exact Cluster Simulation of 2 Bestagon OR (QuickExact)", "[potential-hierarchy]")
+TEST_CASE("Exact Cluster Simulation of 2 Bestagon AND (QuickExact)", "[potential-hierarchy]")
 {
     gate_level_layout<hex_even_row_gate_clk_lyt> lyt{{2, 2}};
-    lyt.create_or({}, {}, {0, 0});
-    lyt.create_or({}, {}, {2, 2});
+    lyt.create_and({}, {}, {0, 0});
+    lyt.create_and({}, {}, {2, 2});
 
     charge_distribution_surface<layout> cds{
         convert_to_siqad_coordinates(apply_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library>(lyt))};

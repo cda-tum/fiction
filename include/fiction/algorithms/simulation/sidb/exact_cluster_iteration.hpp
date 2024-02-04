@@ -15,8 +15,12 @@
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
+#include <array>
+#include <cstdint>
+#include <limits>
 #include <map>
 #include <mutex>
+#include <optional>
 #include <set>
 #include <thread>
 #include <unordered_map>
@@ -26,7 +30,44 @@
 namespace fiction
 {
 
-using cluster    = std::set<uint64_t>;
+struct cluster
+{
+    std::set<uint64_t>                            c;
+    std::vector<std::optional<sidb_charge_state>> preassigned;
+    uint64_t                                      preassigned_count = 0;
+
+    explicit cluster() = default;
+
+    explicit cluster(const std::set<uint64_t>& c_) : c{c_}
+    {
+        preassigned.reserve(c.size());
+        for (uint64_t i = 0; i < c_.size(); ++i)
+        {
+            preassigned.emplace_back(std::nullopt);
+        }
+    }
+
+    [[nodiscard]] constexpr inline uint64_t size() const noexcept
+    {
+        return c.size();
+    }
+
+    constexpr inline bool operator==(const cluster& other) const noexcept
+    {
+        return c == other.c;
+    }
+
+    constexpr inline bool operator!=(const cluster& other) const noexcept
+    {
+        return c != other.c;
+    }
+
+    constexpr inline bool operator<(const cluster& other) const noexcept
+    {
+        return c < other.c;
+    }
+};
+
 using clustering = std::set<cluster>;
 
 // Define the type for a multiset of charge states
@@ -34,15 +75,17 @@ using charge_state_multiset = std::multiset<sidb_charge_state>;
 
 // Define the types for charge state assignments
 using sidb_charge_conf    = std::vector<sidb_charge_state>;
-using cluster_charge_conf = std::map<cluster, charge_state_multiset>;
+using cluster_charge_conf = std::map<std::set<uint64_t>, charge_state_multiset>;
 
 struct charge_multiset_conf
 {
     using charge_count = std::map<sidb_charge_state, uint64_t>;
 
+    const std::pair<std::vector<uint64_t>, std::set<uint64_t>> cluster_sizes;
+
     const charge_count match_charge_counts;
 
-    const size_t end_conf_hash;  // too probabilistic?
+    const std::size_t end_conf_hash;  // too probabilistic?
 
     uint64_t row_nr;
 
@@ -61,27 +104,25 @@ struct charge_multiset_conf
     std::vector<configuration> confs{};
 
     explicit charge_multiset_conf(const clustering& xv, const charge_state_multiset& m) :
+            cluster_sizes{get_cluster_sizes(xv)},
             match_charge_counts{{sidb_charge_state::NEGATIVE, m.count(sidb_charge_state::NEGATIVE)},
                                 {sidb_charge_state::NEUTRAL, m.count(sidb_charge_state::NEUTRAL)},
                                 {sidb_charge_state::POSITIVE, m.count(sidb_charge_state::POSITIVE)}},
-            end_conf_hash{compute_end_conf_hash(xv, m)},
-            row_nr{xv.size() - 1}
+            end_conf_hash{compute_end_conf_hash(cluster_sizes.first, m)},
+            row_nr{cluster_sizes.first.size() - 1}
     {
-        const uint64_t N = xv.size();
-
         // initialize with left diagonal configuration
-        confs.reserve(N);
-        for (uint64_t i = 0; i < N; ++i)
+        confs.reserve(cluster_sizes.first.size());
+        for (uint64_t i = 0; i < cluster_sizes.first.size(); ++i)
         {
             configuration conf{};
-            conf.lock_ix = std::next(xv.cbegin(), static_cast<int64_t>(i))->size() - 1;
+            conf.lock_ix = cluster_sizes.first[i] - 1;
 
             uint64_t row_total_assigned = 0;
             for (const sidb_charge_state cs : sidb_charge_state_iterator{})
             {
-                const uint64_t num_assignable =
-                    std::min(match_charge_counts.at(cs) - locked_charge_counts.at(cs),
-                             std::next(xv.cbegin(), static_cast<int64_t>(i))->size() - row_total_assigned);
+                const uint64_t num_assignable = std::min(match_charge_counts.at(cs) - locked_charge_counts.at(cs),
+                                                         cluster_sizes.first[i] - row_total_assigned);
 
                 conf.counts[cs] = num_assignable;
 
@@ -227,33 +268,58 @@ struct charge_multiset_conf
         return true;
     }
 
-    bool is_end_conf() const noexcept
+    [[nodiscard]] bool is_end_conf() const noexcept
     {
         size_t h = 0;
-        for (uint64_t i = 0; i < confs.size(); ++i)
+        for (const configuration& conf : confs)
         {
             for (const sidb_charge_state cs : sidb_charge_state_iterator{})
             {
-                hash_combine(h, confs[i].counts.at(cs));
+                hash_combine(h, conf.counts.at(cs));
             }
         }
         return h == end_conf_hash;
     }
 
-    cluster_charge_conf make_charge_multiset_conf(const clustering&   xv,
-                                                  cluster_charge_conf sigma = cluster_charge_conf{}) const noexcept
+    [[nodiscard]] cluster_charge_conf
+    make_charge_multiset_conf(const clustering& xv, cluster_charge_conf sigma = cluster_charge_conf{}) const noexcept
     {
-        for (uint64_t i = 0; i < xv.size(); ++i)
+        for (uint64_t i = 0, conf_ix = 0; i < xv.size(); ++i)
         {
-            std::vector<sidb_charge_state> conf = confs[i].vec;
-            sigma.insert(
-                {*std::next(xv.cbegin(), static_cast<int64_t>(i)), charge_state_multiset{conf.cbegin(), conf.cend()}});
+            const std::set<uint64_t>& c = std::next(xv.cbegin(), static_cast<int64_t>(i))->c;
+            if (cluster_sizes.second.count(i))
+            {
+                sigma.insert({c, charge_state_multiset{}});
+                continue;
+            }
+            const std::vector<sidb_charge_state> conf = confs[conf_ix++].vec;
+            sigma.insert({c, charge_state_multiset{conf.cbegin(), conf.cend()}});
         }
 
         return sigma;
     }
 
-    static size_t compute_end_conf_hash(const clustering& xv, const charge_state_multiset& m) noexcept
+    static std::pair<std::vector<uint64_t>, std::set<uint64_t>> get_cluster_sizes(const clustering& xv)
+    {
+        std::pair<std::vector<uint64_t>, std::set<uint64_t>> cluster_sizes{};
+        cluster_sizes.first.reserve(xv.size());
+        for (uint64_t i = 0; i < xv.size(); ++i)
+        {
+            const cluster& c    = *std::next(xv.cbegin(), static_cast<int64_t>(i));
+            uint64_t       size = c.size() - c.preassigned_count;
+            if (size == 0)
+            {
+                cluster_sizes.second.emplace(i);
+            }
+            else
+            {
+                cluster_sizes.first.emplace_back(c.size() - c.preassigned_count);
+            }
+        }
+        return cluster_sizes;
+    }
+
+    static size_t compute_end_conf_hash(const std::vector<uint64_t>& bin_sizes, const charge_state_multiset& m) noexcept
     {
         charge_count charge_counts{{sidb_charge_state::NEGATIVE, m.count(sidb_charge_state::NEGATIVE)},
                                    {sidb_charge_state::NEUTRAL, m.count(sidb_charge_state::NEUTRAL)},
@@ -261,17 +327,16 @@ struct charge_multiset_conf
 
         // compute right diagonal configuration
         std::vector<charge_count> row_charge_counts{};
-        row_charge_counts.reserve(xv.size());
-        for (uint64_t i = 0; i < xv.size(); ++i)
+        row_charge_counts.reserve(bin_sizes.size());
+        for (uint64_t i = 0; i < bin_sizes.size(); ++i)
         {
-            row_charge_counts.push_back(charge_count{});
+            row_charge_counts.emplace_back();
 
             uint64_t row_total_assigned = 0;
 
             for (const sidb_charge_state cs : sidb_charge_state_iterator{sidb_charge_state::POSITIVE, true})
             {
-                const uint64_t num_assignable = std::min(
-                    charge_counts.at(cs), std::next(xv.cbegin(), static_cast<int64_t>(i))->size() - row_total_assigned);
+                const uint64_t num_assignable = std::min(charge_counts.at(cs), bin_sizes[i] - row_total_assigned);
 
                 charge_counts[cs] -= num_assignable;
                 row_charge_counts[i][cs] = num_assignable;
@@ -281,11 +346,11 @@ struct charge_multiset_conf
 
         // compute hash
         size_t h = 0;
-        for (uint64_t i = 0; i < row_charge_counts.size(); ++i)
+        for (const charge_count& row_charge_count : row_charge_counts)
         {
             for (const sidb_charge_state cs : sidb_charge_state_iterator{})
             {
-                hash_combine(h, row_charge_counts[i].at(cs));
+                hash_combine(h, row_charge_count.at(cs));
             }
         }
 
@@ -297,18 +362,45 @@ template <typename Lyt>
 class cluster_exact
 {
   public:
-    cluster_exact(const Lyt& lyt, const uint64_t min_key_size = 12,
-                  const uint64_t num_threads = std::thread::hardware_concurrency()) :
-            cl{lyt},
+    explicit cluster_exact(const Lyt& lyt, const std::optional<uint64_t> min_key_size = std::nullopt,
+                           const uint64_t num_threads = std::thread::hardware_concurrency()) :
+            cl{get_charge_layout_and_check_three_state_simulation_required(lyt)},
+            negative_sidbs{get_negative_sidbs(cl)},
             mu_bounds_with_error{physical_constants::POP_STABILITY_ERR - cl.get_phys_params().mu_minus,
                                  -physical_constants::POP_STABILITY_ERR - cl.get_phys_params().mu_minus,
                                  physical_constants::POP_STABILITY_ERR - cl.get_phys_params().mu_plus(),
                                  -physical_constants::POP_STABILITY_ERR - cl.get_phys_params().mu_plus()},
-            minimum_key_size{min_key_size},
+            minimum_key_size{min_key_size.has_value() ?
+                                 min_key_size.value() :
+                                 std::min(12ul, static_cast<uint64_t>(static_cast<double>(cl.num_cells()) / 2.0))},
             threads{num_threads}
     {}
 
+    static charge_distribution_surface<Lyt> get_charge_layout_and_check_three_state_simulation_required(const Lyt& lyt)
+    {
+        charge_distribution_surface<Lyt> cl{lyt};
+        cl.assign_all_charge_states(sidb_charge_state::NEGATIVE);
+        cl.assign_base_number(2);
+        cl.is_three_state_simulation_required();
+        return cl;
+    }
+
+    static std::set<uint64_t> get_negative_sidbs(const charge_distribution_surface<Lyt>& cl)
+    {
+
+        const std::vector<int64_t>& negative_sidbs = cl.negative_sidb_detection();
+        std::set<uint64_t>          negative_sidbs_converted{};
+        for (const int64_t i : negative_sidbs)
+        {
+            negative_sidbs_converted.emplace(static_cast<uint64_t>(i));
+        }
+        return negative_sidbs_converted;
+    }
+
     const charge_distribution_surface<Lyt> cl;
+    const std::vector<sidb_charge_state>   possible_charge_states;
+    const std::set<uint64_t>               negative_sidbs;
+    std::set<uint64_t>                     positive_sidbs{};
 
     const std::array<double, 4> mu_bounds_with_error;
 
@@ -332,8 +424,7 @@ class cluster_exact
         }
 
         // Recursive case: Try assigning each charge state to the current element
-        for (sidb_charge_state charge_state :
-             {sidb_charge_state::NEGATIVE, sidb_charge_state::NEUTRAL, sidb_charge_state::POSITIVE})
+        for (const sidb_charge_state charge_state : {sidb_charge_state::NEGATIVE, sidb_charge_state::NEUTRAL})
         {
             current_assignment[current_index] = charge_state;
             generate_assignments_recursive(charge_confs, current_assignment, current_index + 1, remaining_count - 1,
@@ -364,7 +455,7 @@ class cluster_exact
 
       public:
         sidb_charge_conf_store_key() : multiset{} {}
-        sidb_charge_conf_store_key(const uint64_t& s, const charge_state_multiset& m) : size{s}, multiset{m} {}
+        sidb_charge_conf_store_key(const uint64_t& s, charge_state_multiset m) : size{s}, multiset{std::move(m)} {}
 
         bool operator==(const sidb_charge_conf_store_key& other) const noexcept
         {
@@ -384,7 +475,7 @@ class cluster_exact
 
     sidb_charge_conf_store charge_conf_store{};
 
-    enum class potential_bound
+    enum potential_bound
     {
         UPPER,
         LOWER
@@ -398,10 +489,10 @@ class cluster_exact
         potential_bound            bound{};
 
         potential_bounds_store_key() : charge_confs{} {}
-        potential_bounds_store_key(const cluster& c1_, const cluster& c2_,
-                                   const sidb_charge_conf_store_key& charge_confs_, const potential_bound bound_) :
-                c1{c1_},
-                c2{c2_},
+        potential_bounds_store_key(cluster c1_, cluster c2_, const sidb_charge_conf_store_key& charge_confs_,
+                                   const potential_bound bound_) :
+                c1{std::move(c1_)},
+                c2{std::move(c2_)},
                 charge_confs{charge_confs_},
                 bound{bound_}
         {}
@@ -414,8 +505,8 @@ class cluster_exact
         std::size_t operator()(const potential_bounds_store_key& key) const noexcept
         {
             std::size_t h = 0;
-            hash_combine(h, key.c1);
-            hash_combine(h, key.c2);
+            hash_combine(h, key.c1.c);
+            hash_combine(h, key.c2.c);
             hash_combine(h, sidb_charge_conf_store_key{}(key.charge_confs));
             hash_combine(h, key.bound);
             return h;
@@ -435,19 +526,24 @@ class cluster_exact
         double pot_bound = bound == potential_bound::LOWER ? std::numeric_limits<double>::infinity() :
                                                              -std::numeric_limits<double>::infinity();
 
-        for (const uint64_t i : c1)
+        for (const uint64_t i : c1.c)
         {
             for (const sidb_charge_conf& charge_conf : charge_confs)
             {
                 double energy = 0;
 
-                for (uint64_t ix = 0; ix < c2.size(); ++ix)
+                for (uint64_t cc_ix = 0, ix = 0; ix < c2.size(); ++ix)
                 {
-                    const uint64_t j = *std::next(c2.cbegin(), static_cast<int64_t>(ix));
-                    if (j != i)
+                    const uint64_t j = *std::next(c2.c.cbegin(), static_cast<int64_t>(ix));
+
+                    if (j == i)
                     {
-                        energy += cl.get_chargless_potential_by_indices(i, j) * charge_state_to_sign(charge_conf[ix]);
+                        continue;
                     }
+
+                    energy += cl.get_chargless_potential_by_indices(i, j) *
+                              (c2.preassigned[ix].has_value() ? charge_state_to_sign(c2.preassigned[ix].value()) :
+                                                                charge_state_to_sign(charge_conf[cc_ix++]));
                 }
 
                 pot_bound = bound == potential_bound::LOWER ? std::min(pot_bound, energy) : std::max(pot_bound, energy);
@@ -467,11 +563,10 @@ class cluster_exact
             if (charge_conf_store.count(key))
             {
                 return charge_conf_store.at(key);
-
             }
         }
 
-        const std::vector<sidb_charge_conf> charge_confs = generate_charge_confs(key.size, key.multiset);
+        const std::vector<sidb_charge_conf>& charge_confs = generate_charge_confs(key.size, key.multiset);
 
         {
             const std::lock_guard lock{cc_store_mutex};
@@ -491,7 +586,7 @@ class cluster_exact
     double get_cluster_potential(const cluster& c1, const cluster& c2, const charge_state_multiset& multiset,
                                  const potential_bound bound) noexcept
     {
-        const sidb_charge_conf_store_key charge_conf_key{c2.size(), multiset};
+        const sidb_charge_conf_store_key charge_conf_key{c2.c.size() - c2.preassigned_count, multiset};
 
         if (c1.size() + c2.size() < minimum_key_size)
         {
@@ -524,7 +619,7 @@ class cluster_exact
     }
 
     // Function to calculate the internal lower bound of local potential energy for a cluster C
-    double V_int_lower(const cluster& c, const charge_state_multiset& m)
+    double V_int_lower(const cluster& c, const charge_state_multiset& m) noexcept
     {
         if (c.size() == 1)
         {
@@ -535,7 +630,7 @@ class cluster_exact
     }
 
     // Function to calculate the internal upper bound of local potential energy for a cluster C
-    double V_int_upper(const cluster& c, const charge_state_multiset& m)
+    double V_int_upper(const cluster& c, const charge_state_multiset& m) noexcept
     {
         if (c.size() == 1)
         {
@@ -546,7 +641,7 @@ class cluster_exact
     }
 
     // Function to calculate the external lower bound of local potential energy for a cluster C in a clustering X
-    double V_ext_lower(const cluster& c, const cluster_charge_conf& sigma, const clustering& cs)
+    double V_ext_lower(const cluster& c, const cluster_charge_conf& sigma, const clustering& cs) noexcept
     {
         double energy = 0.0;
 
@@ -554,7 +649,7 @@ class cluster_exact
         {
             if (other_c != c)
             {
-                energy += get_cluster_potential(c, other_c, sigma.at(other_c), potential_bound::LOWER);
+                energy += get_cluster_potential(c, other_c, sigma.at(other_c.c), potential_bound::LOWER);
             }
         }
 
@@ -570,7 +665,7 @@ class cluster_exact
         {
             if (other_c != c)
             {
-                energy += get_cluster_potential(c, other_c, sigma.at(other_c), potential_bound::UPPER);
+                energy += get_cluster_potential(c, other_c, sigma.at(other_c.c), potential_bound::UPPER);
             }
         }
 
@@ -583,9 +678,9 @@ class cluster_exact
         for (const cluster& c : cs)
         {
             const charge_state_multiset& sigma_c =
-                sigma.at(c);  // Assume the charge assignment is the same for all clusters in the given clustering
+                sigma.at(c.c);  // Assume the charge assignment is the same for all clusters in the given clustering
 
-            if (sigma_c.count(sidb_charge_state::NEGATIVE))
+            if (sigma_c.count(sidb_charge_state::NEGATIVE) != 0)
             {  // NEGATIVE is in sigma_c
                 charge_state_multiset m_with_one_neg_less = sigma_c;
                 m_with_one_neg_less.erase(m_with_one_neg_less.lower_bound(sidb_charge_state::NEGATIVE));
@@ -597,7 +692,7 @@ class cluster_exact
                 }
             }
 
-            if (sigma_c.count(sidb_charge_state::POSITIVE))
+            if (possible_charge_states.size() == 3 && sigma_c.count(sidb_charge_state::POSITIVE) != 0)
             {  // POSITIVE is in sigma_c
                 charge_state_multiset m_with_one_pos_less = sigma_c;
                 m_with_one_pos_less.erase(m_with_one_pos_less.lower_bound(sidb_charge_state::POSITIVE));
@@ -609,7 +704,7 @@ class cluster_exact
                 }
             }
 
-            if (sigma_c.count(sidb_charge_state::NEUTRAL))
+            if (sigma_c.count(sidb_charge_state::NEUTRAL) != 0)
             {  // NEUTRAL is in sigma_c
                 if (-V_int_lower(c, sigma_c) - V_ext_lower(c, sigma, cs) <= mu_bounds_with_error[1] ||
                     -V_int_upper(c, sigma_c) - V_ext_upper(c, sigma, cs) >= mu_bounds_with_error[2])
@@ -622,12 +717,31 @@ class cluster_exact
         return true;
     }
 
-    clustering get_clustering(const std::set<ch_node_ptr>& v) const noexcept
+    [[nodiscard]] cluster obtain_cluster_information(const std::set<uint64_t>& c) const noexcept
+    {
+        cluster clus{c};
+        for (uint64_t i = 0; i < c.size(); ++i)
+        {
+            if (negative_sidbs.count(*std::next(c.cbegin(), static_cast<int64_t>(i))) != 0)
+            {
+                clus.preassigned[i] = sidb_charge_state::NEGATIVE;
+                clus.preassigned_count++;
+            }
+            else if (positive_sidbs.count(*std::next(c.cbegin(), static_cast<int64_t>(i))) != 0)
+            {
+                clus.preassigned[i] = sidb_charge_state::POSITIVE;
+                clus.preassigned_count++;
+            }
+        }
+        return clus;
+    }
+
+    [[nodiscard]] clustering get_clustering(const std::set<ch_node_ptr>& v) const noexcept
     {
         clustering xv{};
-        for (const auto& h : v)
+        for (const std::shared_ptr<ch_node>& h : v)
         {
-            xv.emplace(h->c);
+            xv.emplace(obtain_cluster_information(h->c));
         }
         return xv;
     }
@@ -651,17 +765,28 @@ class cluster_exact
             sidb_charge_conf charge_conf{};
             charge_conf.reserve(xv.size());
 
-            for (const auto& [_, m] : sigma)  // automatically sorted
+            for (const auto& [c, m] : sigma)  // automatically sorted
             {
-                charge_conf.push_back(*m.cbegin());
+                if (negative_sidbs.count(*c.cbegin()) != 0)
+                {
+                    charge_conf.emplace_back(sidb_charge_state::NEGATIVE);
+                }
+                else if (positive_sidbs.count(*c.cbegin()) != 0)
+                {
+                    charge_conf.emplace_back(sidb_charge_state::POSITIVE);
+                }
+                else
+                {
+                    charge_conf.emplace_back(*m.cbegin());
+                }
             }
             return {charge_conf};
         }
 
         // Find the node with the maximum cluster size
-        const ch_node_ptr& max_cluster_node = *std::max_element(v.cbegin(), v.cend(),
-                                                                [](const ch_node_ptr& node1, const ch_node_ptr& node2)
-                                                                { return node1->c.size() < node2->c.size(); });
+        const ch_node_ptr& max_cluster_node =
+            *std::max_element(v.cbegin(), v.cend(), [](const ch_node_ptr& node1, const ch_node_ptr& node2)
+                              { return node1->c.size() < node2->c.size(); });
 
         // Create a new set of clusters with the node replaced by its children
         std::set<ch_node_ptr> v_prime = v;
@@ -680,7 +805,7 @@ class cluster_exact
 
         for (const cluster& c : get_clustering(v_diff))
         {
-            sigma_prime.insert({c, sigma.at(c)});
+            sigma_prime.insert({c.c, sigma.at(c.c)});
         }
 
         charge_multiset_conf charge_multiset_conf_iterator{xv_bar, sigma.at(max_cluster_node->c)};
@@ -695,18 +820,19 @@ class cluster_exact
         return result;
     }
 
-    std::vector<std::vector<sidb_charge_state>> get_k_element_multisets(const ch_node_ptr& top_node)
+    std::vector<std::vector<sidb_charge_state>> get_k_element_multisets(const ch_node_ptr& top_node) const noexcept
     {
         charge_state_multiset m{};
-        for (const sidb_charge_state cs : sidb_charge_state_iterator{})
+        for (const sidb_charge_state cs : {sidb_charge_state::NEGATIVE, sidb_charge_state::NEUTRAL})
         {
             for (uint64_t i = 0; i < cl.num_cells(); ++i)
             {
                 m.emplace(cs);
             }
         }
+
         // compute k_element_multisets
-        charge_multiset_conf k_element_multisets{{top_node->c}, m};
+        charge_multiset_conf k_element_multisets{{obtain_cluster_information(top_node->c)}, m};
 
         std::vector<std::vector<sidb_charge_state>> multiset_vecs{{k_element_multisets.confs[0].vec}};
         while (k_element_multisets.next_conf())
@@ -715,6 +841,113 @@ class cluster_exact
         }
 
         return multiset_vecs;
+    }
+
+    bool check_if_all_are_preassigned(sidb_simulation_result<Lyt>& res) const noexcept
+    {
+        if (negative_sidbs.size() + positive_sidbs.size() < cl.num_cells())
+        {
+            return false;
+        }
+
+        for (const auto& [cs, preassigned_indices] : {std::make_pair(sidb_charge_state::NEGATIVE, negative_sidbs),
+                                                      std::make_pair(sidb_charge_state::POSITIVE, positive_sidbs)})
+        {
+            charge_distribution_surface cl_copy{cl};
+
+            for (const uint64_t i : preassigned_indices)
+            {
+                cl_copy.assign_charge_state_by_cell_index(i, cs, false);
+            }
+
+            cl_copy.update_local_potential();
+            cl_copy.recompute_system_energy();
+            cl_copy.declare_physically_valid();
+
+            res.charge_distributions.push_back(cl_copy);
+        }
+
+        return true;
+    }
+
+    void iterate_over_all_multisets(sidb_simulation_result<Lyt>& res, const ch_node_ptr& top_node) noexcept
+    {
+        if (check_if_all_are_preassigned(res))
+        {
+            return;
+        }
+
+        const clustering& xv = get_clustering(top_node->v);  // put this in parent scope
+
+        const std::vector<std::vector<sidb_charge_state>>& multiset_vecs = get_k_element_multisets(top_node);
+
+        const uint64_t num_threads = std::min(std::max(threads, 1ul), multiset_vecs.size());
+
+        // define the bit string ranges per thread
+        std::vector<std::pair<uint64_t, uint64_t>> ranges;
+        const uint64_t                             chunk_size = std::max(multiset_vecs.size() / num_threads, 1ul);
+        uint64_t                                   start      = 0;
+        uint64_t                                   end        = chunk_size - 1;
+
+        for (uint64_t i = 0; i < num_threads; ++i)
+        {
+            ranges.emplace_back(start, end);
+            start = end + 1;
+            end   = i == num_threads - 2 ? multiset_vecs.size() - 1 : start + chunk_size - 1;
+        }
+
+        std::vector<std::thread> threads_vec{};
+        threads_vec.reserve(num_threads);
+        std::mutex res_mutex{};
+
+        for (const std::pair<uint64_t, uint64_t>& range : ranges)
+        {
+            threads_vec.emplace_back(
+                [&]
+                {
+                    // Iterate over all charge multiset configurations in the assigned range
+                    for (uint64_t ix = range.first; ix <= range.second; ++ix)
+                    {
+                        charge_multiset_conf charge_multiset_conf_iterator{
+                            xv, charge_state_multiset{multiset_vecs[ix].cbegin(), multiset_vecs[ix].cend()}};
+
+                        do {
+                            // Call PopulationStableChargeConfigurations for each charge configuration
+                            const std::set<sidb_charge_conf>& pop_stable_confs = PopulationStableChargeConfigurations(
+                                top_node->v, charge_multiset_conf_iterator.make_charge_multiset_conf(xv));
+
+                            // Check stability and update ground state if needed
+                            for (const sidb_charge_conf& rho : pop_stable_confs)
+                            {
+                                charge_distribution_surface cl_copy{cl};
+
+                                for (uint64_t i = 0; i < cl.num_cells(); ++i)
+                                {
+                                    cl_copy.assign_charge_state_by_cell_index(i, rho[i], false);
+                                }
+
+                                cl_copy.update_local_potential();
+
+                                if (cl_copy.is_configuration_stable())
+                                {
+                                    cl_copy.recompute_system_energy();
+                                    cl_copy.declare_physically_valid();
+
+                                    {
+                                        const std::lock_guard lock{res_mutex};
+                                        res.charge_distributions.push_back(cl_copy);
+                                    }
+                                }
+                            }
+                        } while (charge_multiset_conf_iterator.next_conf());
+                    }
+                });
+        }
+
+        for (std::thread& t : threads_vec)
+        {
+            t.join();
+        }
     }
 
     // Function to find the ground state charge state assignment
@@ -732,77 +965,17 @@ class cluster_exact
             const ch_node_ptr& top_node =
                 potential_hierarchy<Lyt>{cl.get_sidb_order(), cl.get_phys_params(), theta}.make_cluster_hierarchy();
 
-            const clustering& xv = get_clustering(top_node->v);
+            // first simulate base 2
+            iterate_over_all_multisets(res, top_node);
 
-            const std::vector<std::vector<sidb_charge_state>>& multiset_vecs = get_k_element_multisets(top_node);
-
-            const uint64_t num_threads = std::min(std::max(threads, 1ul), multiset_vecs.size());
-
-            // define the bit string ranges per thread
-            std::vector<std::pair<uint64_t, uint64_t>> ranges;
-            const uint64_t                             chunk_size = std::max(multiset_vecs.size() / num_threads, 1ul);
-            uint64_t                                   start      = 0;
-            uint64_t                                   end        = chunk_size - 1;
-
-            for (uint64_t i = 0; i < num_threads; ++i)
+            if (cl.get_phys_params().base == 3)
             {
-                ranges.emplace_back(start, end);
-                start = end + 1;
-                end   = i == num_threads - 2 ? multiset_vecs.size() - 1 : start + chunk_size - 1;
-            }
-
-            std::vector<std::thread> threads_vec{};
-            threads_vec.reserve(num_threads);
-            std::mutex res_mutex{};
-
-            for (const std::pair<uint64_t, uint64_t>& range : ranges)
-            {
-                threads_vec.emplace_back(
-                    [&]
-                    {
-                        // Iterate over all charge multiset configurations in the assigned range
-                        for (uint64_t ix = range.first; ix <= range.second; ++ix)
-                        {
-                            charge_multiset_conf                 charge_multiset_conf_iterator{
-                                xv, charge_state_multiset{multiset_vecs[ix].cbegin(), multiset_vecs[ix].cend()}};
-
-                            do {
-                                // Call PopulationStableChargeConfigurations for each charge configuration
-                                const std::set<sidb_charge_conf>& pop_stable_confs =
-                                    PopulationStableChargeConfigurations(
-                                        top_node->v, charge_multiset_conf_iterator.make_charge_multiset_conf(xv));
-
-                                // Check stability and update ground state if needed
-                                for (const sidb_charge_conf& rho : pop_stable_confs)
-                                {
-                                    charge_distribution_surface cl_copy{cl};
-
-                                    for (uint64_t i = 0; i < cl.num_cells(); ++i)
-                                    {
-                                        cl_copy.assign_charge_state_by_cell_index(i, rho[i], false);
-                                    }
-
-                                    cl_copy.update_local_potential();
-
-                                    if (cl_copy.is_configuration_stable())
-                                    {
-                                        cl_copy.recompute_system_energy();
-                                        cl_copy.declare_physically_valid();
-
-                                        {
-                                            const std::lock_guard lock{res_mutex};
-                                            res.charge_distributions.push_back(cl_copy);
-                                        }
-                                    }
-                                }
-                            } while (charge_multiset_conf_iterator.next_conf());
-                        }
-                    });
-            }
-
-            for (std::thread& t : threads_vec)
-            {
-                t.join();
+                for (const cell<Lyt>& c : cl.get_positive_candidates())
+                {
+                    positive_sidbs.emplace(static_cast<uint64_t>(cl.cell_to_index(c)));
+                }
+                // then simulate base 2 again, but now with the positive candidates preassigned a POSITIVE charge state
+                iterate_over_all_multisets(res, top_node);
             }
         }
 
