@@ -156,13 +156,86 @@ int main()  // NOLINT
                 csvFile << "temp,op,popstab_neg_to_neu,popstab_neu_to_neg,defect_influence_arsenic,defect_influence_"
                            "vacancy\n";
 
-                // Write data to the CSV file
+                // Write data to the CSV file and calculate mean, max, min
+                double meanTemp = 0.0, maxTemp = std::numeric_limits<double>::min(),
+                       minTemp       = std::numeric_limits<double>::max();
+                double meanOpDomains = 0.0, maxOpDomains = std::numeric_limits<double>::min(),
+                       minOpDomains               = std::numeric_limits<double>::max();
+                double meanDefectInfluenceArsenic = 0.0, maxDefectInfluenceArsenic = std::numeric_limits<double>::min(),
+                       minDefectInfluenceArsenic  = std::numeric_limits<double>::max();
+                double meanDefectInfluenceVacancy = 0.0, maxDefectInfluenceVacancy = std::numeric_limits<double>::min(),
+                       minDefectInfluenceVacancy = std::numeric_limits<double>::max();
+                double meanPopStabilityNegToNeu = 0.0, maxPopStabilityNegToNeu = std::numeric_limits<double>::min(),
+                       minPopStabilityNegToNeu  = std::numeric_limits<double>::max();
+                double meanPopStabilityNeuToNeg = 0.0, maxPopStabilityNeuToNeg = std::numeric_limits<double>::min(),
+                       minPopStabilityNeuToNeg = std::numeric_limits<double>::max();
+
                 for (std::size_t k = 0; k < temps.size(); ++k)
                 {
                     csvFile << temps[k] << "," << op_domains[k] << "," << pop_stability_negative_to_neutral[k] << ","
                             << pop_stability_neutral_to_negative[k] << "," << defect_influence_arsenic[k] << ","
                             << defect_influence_vacancy[k] << "\n";
+
+                    // Update mean, max, min for temps
+                    meanTemp += temps[k];
+                    maxTemp = std::max(maxTemp, temps[k]);
+                    minTemp = std::min(minTemp, temps[k]);
+
+                    // Update mean, max, min for op_domains
+                    meanOpDomains += op_domains[k];
+                    maxOpDomains = std::max(maxOpDomains, op_domains[k]);
+                    minOpDomains = std::min(minOpDomains, op_domains[k]);
+
+                    // Update mean, max, min for defect_influence_arsenic
+                    meanDefectInfluenceArsenic += defect_influence_arsenic[k];
+                    maxDefectInfluenceArsenic = std::max(maxDefectInfluenceArsenic, defect_influence_arsenic[k]);
+                    minDefectInfluenceArsenic = std::min(minDefectInfluenceArsenic, defect_influence_arsenic[k]);
+
+                    // Update mean, max, min for defect_influence_vacancy
+                    meanDefectInfluenceVacancy += defect_influence_vacancy[k];
+                    maxDefectInfluenceVacancy = std::max(maxDefectInfluenceVacancy, defect_influence_vacancy[k]);
+                    minDefectInfluenceVacancy = std::min(minDefectInfluenceVacancy, defect_influence_vacancy[k]);
+
+                    // Update mean, max, min for pop_stability_negative_to_neutral
+                    meanPopStabilityNegToNeu += pop_stability_negative_to_neutral[k];
+                    maxPopStabilityNegToNeu = std::max(maxPopStabilityNegToNeu, pop_stability_negative_to_neutral[k]);
+                    minPopStabilityNegToNeu = std::min(minPopStabilityNegToNeu, pop_stability_negative_to_neutral[k]);
+
+                    // Update mean, max, min for pop_stability_neutral_to_negative
+                    meanPopStabilityNeuToNeg += pop_stability_neutral_to_negative[k];
+                    maxPopStabilityNeuToNeg = std::max(maxPopStabilityNeuToNeg, pop_stability_neutral_to_negative[k]);
+                    minPopStabilityNeuToNeg = std::min(minPopStabilityNeuToNeg, pop_stability_neutral_to_negative[k]);
                 }
+
+                // Calculate mean for temps, op_domains, and other metrics
+                meanTemp /= temps.size();
+                meanOpDomains /= op_domains.size();
+                meanDefectInfluenceArsenic /= defect_influence_arsenic.size();
+                meanDefectInfluenceVacancy /= defect_influence_vacancy.size();
+                meanPopStabilityNegToNeu /= pop_stability_negative_to_neutral.size();
+                meanPopStabilityNeuToNeg /= pop_stability_neutral_to_negative.size();
+
+                // Output mean, max, min for temps
+                std::cout << "temp: " << meanTemp << ";" << maxTemp << ";" << minTemp << std::endl;
+
+                // Output mean, max, min for op_domains
+                std::cout << "op: " << meanOpDomains << ";" << maxOpDomains << ";" << minOpDomains << std::endl;
+
+                // Output mean, max, min for temps
+                std::cout << "ars: " << meanDefectInfluenceArsenic << ";" << maxDefectInfluenceArsenic << ";"
+                          << minDefectInfluenceArsenic << std::endl;
+
+                // Output mean, max, min for op_domains
+                std::cout << "vac: " << meanDefectInfluenceVacancy << ";" << maxDefectInfluenceVacancy << ";"
+                          << minDefectInfluenceVacancy << std::endl;
+
+                // Output mean, max, min for temps
+                std::cout << "pop_neu_to_neg: " << meanPopStabilityNeuToNeg << ";" << maxPopStabilityNeuToNeg << ";"
+                          << minPopStabilityNeuToNeg << std::endl;
+
+                // Output mean, max, min for op_domains
+                std::cout << "pop_neg_to_neu: " << meanPopStabilityNegToNeu << ";" << maxPopStabilityNegToNeu << ";"
+                          << minPopStabilityNegToNeu << std::endl;
 
                 // Close the file
                 csvFile.close();
