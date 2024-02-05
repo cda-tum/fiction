@@ -28,7 +28,7 @@ using namespace fiction;
 template <typename Lyt, typename Ntk>
 void check_layout_equiv(const Ntk& ntk)
 {
-    for (bool wiring_reduction : {false, true})
+    for (bool const wiring_reduction : {false, true})
     {
         const auto                      layout = orthogonal<Lyt>(ntk, {});
         post_layout_optimization_params params{};
