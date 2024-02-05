@@ -770,7 +770,7 @@ void delete_wires(Lyt& lyt, layout_coordinate_path<wiring_reduction_lyt>& to_del
 }  // namespace detail
 
 /**
- * Perform wiring reduction on a 2DDWave clocking scheme layout.
+ * Perform wiring reduction on a 2DDWave-clocked Cartesian gate-level layout.
  *
  * This algorithm performs wiring reduction on a 2DDWave-clocked Cartesian gate-level layout by iteratively
  * finding tiles with excess wiring that can be deleted without changing the correctness of the underlying function.
