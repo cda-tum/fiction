@@ -239,7 +239,7 @@ class critical_temperature_impl
      */
     void non_gate_based_simulation() noexcept
     {
-        mockturtle::stopwatch stop{stats.time_total};
+        mockturtle::stopwatch       stop{stats.time_total};
         sidb_simulation_result<Lyt> simulation_results{};
 
         if (params.engine == critical_temperature_params::simulation_engine::EXACT)
@@ -470,9 +470,8 @@ double critical_temperature_gate_based(const Lyt& lyt, const std::vector<TT>& sp
 
     assert(!spec.empty());
     // all elements in tts must have the same number of variables
-    assert(std::adjacent_find(
-               spec.cbegin(), spec.cend(), (const auto& a, const auto& b) { return a.num_vars() != b.num_vars(); }) ==
-           spec.cend());
+    assert(std::adjacent_find(spec.cbegin(), spec.cend(), [](const auto& a, const auto& b)
+                              { return a.num_vars() != b.num_vars(); }) == spec.cend());
 
     critical_temperature_stats<Lyt> st{};
 

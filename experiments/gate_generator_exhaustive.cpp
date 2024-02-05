@@ -1,0 +1,174 @@
+//
+// Created by Jan Drewniok 01.01.23
+//
+
+#include "fiction/types.hpp"  // pre-defined types suitable for the FCN domain
+
+#include <fiction/algorithms/physical_design/design_sidb_gates.hpp>
+#include <fiction/algorithms/simulation/sidb/assess_physical_population_stability.hpp>
+#include <fiction/algorithms/simulation/sidb/assess_physical_population_stability_sidb_gate.hpp>
+#include <fiction/algorithms/simulation/sidb/maximum_defect_influence_position_and_distance_of_sidb_gate.hpp>
+#include <fiction/algorithms/simulation/sidb/quickexact.hpp>
+#include <fiction/io/print_layout.hpp>
+#include <fiction/io/read_sqd_layout.hpp>
+#include <fiction/utils/truth_table_utils.hpp>
+
+#include <array>
+
+using namespace fiction;
+
+int main()  // NOLINT
+{
+
+    static const std::string folder =
+        fmt::format("{}skeleton_bestagons_with_tags/skeleton_hex_inputsdbp_2i1o.sqd", EXPERIMENTS_PATH);
+
+    static const std::string solution_folder = fmt::format("{}metric_data/", EXPERIMENTS_PATH);
+
+    const auto skeleton = read_sqd_layout<sidb_cell_clk_lyt_siqad>(folder);
+
+    design_sidb_gates_params<sidb_cell_clk_lyt_siqad> params{
+        sidb_simulation_parameters{2, -0.32},
+        design_sidb_gates_params<sidb_cell_clk_lyt_siqad>::design_sidb_gates_mode::EXHAUSTIVE,
+        {{17, 7, 0}, {21, 11, 0}},
+        1,
+        sidb_simulation_engine::QUICKEXACT};
+
+    params.maximal_random_solutions = 100;
+
+    const auto truth_tables = std::vector<std::vector<tt>>{
+        std::vector<tt>{create_and_tt()},  std::vector<tt>{create_xor_tt()}, std::vector<tt>{create_or_tt()},
+        std::vector<tt>{create_xnor_tt()}, std::vector<tt>{create_nor_tt()}, std::vector<tt>{create_nand_tt()},
+        std::vector<tt>{create_lt_tt()},   std::vector<tt>{create_gt_tt()},  std::vector<tt>{create_le_tt()},
+        std::vector<tt>{create_ge_tt()}};
+
+    const critical_temperature_params ct_params{sidb_simulation_parameters{
+        2, params.phys_params.mu_minus, params.phys_params.epsilon_r, params.phys_params.lambda_tf}};
+
+    operational_domain_params op_domain_params{sidb_simulation_parameters{
+        2, params.phys_params.mu_minus, params.phys_params.epsilon_r, params.phys_params.lambda_tf}};
+    op_domain_params.x_min  = 4.0;
+    op_domain_params.x_max  = 6;
+    op_domain_params.x_step = 0.2;
+
+    op_domain_params.y_min  = 4.0;
+    op_domain_params.y_max  = 6;
+    op_domain_params.y_step = 0.2;
+
+    const assess_physical_population_stability_params_sidb_gate assess_params{
+        assess_physical_population_stability_params{sidb_simulation_parameters{
+            2, params.phys_params.mu_minus, params.phys_params.epsilon_r, params.phys_params.lambda_tf}}};
+
+    const maximum_defect_influence_position_and_distance_of_sidb_gate_params defect_avoidance_params_arsenic{
+        maximum_defect_influence_position_and_distance_of_sidb_gate_params{
+            {sidb_defect{sidb_defect_type::UNKNOWN, 1, 9.7, 2.1}, params.phys_params, {20, 3}}}};
+
+    const maximum_defect_influence_position_and_distance_of_sidb_gate_params defect_avoidance_params_vacancy{
+        maximum_defect_influence_position_and_distance_of_sidb_gate_params{
+            {sidb_defect{sidb_defect_type::SI_VACANCY, -1, 10.6, 5.9}, params.phys_params, {20, 3}}}};
+
+    uint64_t truth_counter = 0;
+
+    for (const auto& truth_table : truth_tables)
+    {
+        std::cout << fmt::format("truth counter: {}", truth_counter) << std::endl;
+        for (auto num_sidbs = 2u; num_sidbs < 3; num_sidbs++)
+        {
+            std::cout << fmt::format("num sidbs: {}", num_sidbs) << std::endl;
+            params.number_of_sidbs = num_sidbs;
+
+            mockturtle::stopwatch<>::duration time_total{};
+
+            std::vector<sidb_cell_clk_lyt_siqad> all_gate{};
+            std::vector<double>                  temps                             = {};
+            std::vector<double>                  op_domains                        = {};
+            std::vector<double>                  defect_influence_arsenic          = {};
+            std::vector<double>                  defect_influence_vacancy          = {};
+            std::vector<double>                  pop_stability_neutral_to_negative = {};
+            std::vector<double>                  pop_stability_negative_to_neutral = {};
+            {
+                mockturtle::stopwatch stop{time_total};
+
+                design_sidb_gates_stats stats{};
+
+                all_gate = design_sidb_gates<sidb_cell_clk_lyt_siqad, tt>(skeleton, truth_table, params, &stats);
+
+                std::cout << fmt::format("gate design finished and {} gates were found", all_gate.size()) << std::endl;
+
+                const auto calculate_metric_values = [&](const auto& gate) noexcept
+                {
+                    temps.push_back(critical_temperature_gate_based(gate, truth_table, ct_params));
+                    operational_domain_stats stats{};
+                    const auto               op_domain = operational_domain_flood_fill(
+                        gate, truth_table, 0, op_domain_params, operational_domain::parameter_point{5.6, 5}, &stats);
+                    op_domains.push_back(stats.percentual_operational_area);
+                    const auto maximum_defect_influence_arsenic =
+                        maximum_defect_influence_position_and_distance_of_sidb_gate(gate, truth_table,
+                                                                                    defect_avoidance_params_arsenic);
+                    defect_influence_arsenic.push_back(maximum_defect_influence_arsenic.second);
+                    const auto maximum_defect_influence_vacancy =
+                        maximum_defect_influence_position_and_distance_of_sidb_gate(gate, truth_table,
+                                                                                    defect_avoidance_params_vacancy);
+                    defect_influence_vacancy.push_back(maximum_defect_influence_vacancy.second);
+
+                    pop_stability_neutral_to_negative.push_back(
+                        assess_physical_population_stability_sidb_gate(gate, truth_table, assess_params, -1));
+                    pop_stability_negative_to_neutral.push_back(
+                        assess_physical_population_stability_sidb_gate(gate, truth_table, assess_params, 1));
+                };
+
+                // Create a vector to store std::future objects
+                std::vector<std::future<void>> futures{};
+                futures.reserve(all_gate.size());
+
+                // Start asynchronous tasks to process combinations in parallel
+                for (const auto& gate : all_gate)
+                {
+                    futures.emplace_back(std::async(std::launch::async, calculate_metric_values, gate));
+                }
+
+                // Wait for all tasks to finish
+                for (auto& future : futures)
+                {
+                    future.wait();
+                }
+
+                for (auto l = 0u; l < all_gate.size(); l++)
+                {
+                    const auto choose_gate = all_gate[l];
+                    write_sqd_layout(choose_gate,
+                                     fmt::format(solution_folder + "/sqd/17_7_21_11_numdbs_{}_ttnum_{}_{}.sqd",
+                                                 num_sidbs, truth_counter, l));
+                }
+
+                // Open a file for writing
+                std::ofstream csvFile(
+                    fmt::format(solution_folder + "/csv/17_7_21_11_numdbs_{}_ttnum_{}.csv", num_sidbs, truth_counter));
+
+                // Check if the file is open
+                if (!csvFile.is_open())
+                {
+                    std::cerr << "Error opening output.csv\n";
+                    return 1;
+                }
+
+                // Write headers to the CSV file
+                csvFile << "temp,op,popstab_neg_to_neu,popstab_neu_to_neg,defect_influence_arsenic,defect_influence_"
+                           "vacancy\n";
+
+                // Write data to the CSV file
+                for (std::size_t k = 0; k < temps.size(); ++k)
+                {
+                    csvFile << temps[k] << "," << op_domains[k] << "," << pop_stability_negative_to_neutral[k] << ","
+                            << pop_stability_neutral_to_negative[k] << "," << defect_influence_arsenic[k] << ","
+                            << defect_influence_vacancy[k] << "\n";
+                }
+
+                // Close the file
+                csvFile.close();
+            }
+        }
+        truth_counter++;
+    }
+    return EXIT_SUCCESS;
+}

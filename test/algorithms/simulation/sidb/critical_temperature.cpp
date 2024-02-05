@@ -352,7 +352,7 @@ TEMPLATE_TEST_CASE(
         CHECK_THAT(std::abs(critical_stats.critical_temperature - 0.85), Catch::Matchers::WithinAbs(0.00, 0.01));
     }
 
-    SECTION("OR gate")
+    SECTION("SiQAD OR gate")
     {
         lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
         lyt.assign_cell_type({26, 0, 0}, sidb_technology::cell_type::INPUT);

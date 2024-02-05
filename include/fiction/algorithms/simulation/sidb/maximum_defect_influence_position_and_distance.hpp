@@ -15,6 +15,8 @@
 #include "fiction/utils/execution_utils.hpp"
 #include "fiction/utils/layout_utils.hpp"
 
+#include <mockturtle/utils/stopwatch.hpp>
+
 #include <algorithm>
 #include <cmath>
 #include <future>
@@ -164,6 +166,8 @@ class maximum_defect_influence_position_and_distance_impl
                     {
                         max_defect_position = defect;
                         avoidance_distance  = distance;
+//                        std::cout << fmt::format("defect position x: {}, y: {}\n", max_defect_position.x,
+//                                                 max_defect_position.y, distance);
                     }
                 }
             }
