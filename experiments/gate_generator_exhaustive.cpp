@@ -122,16 +122,21 @@ int main()  // NOLINT
                 futures.reserve(all_gate.size());
 
                 // Start asynchronous tasks to process combinations in parallel
+//                for (const auto& gate : all_gate)
+////                {
+////                    futures.emplace_back(std::async(std::launch::async, calculate_metric_values, gate));
+////                }
+
                 for (const auto& gate : all_gate)
                 {
-                    futures.emplace_back(std::async(std::launch::async, calculate_metric_values, gate));
+                    calculate_metric_values(gate);
                 }
 
                 // Wait for all tasks to finish
-                for (auto& future : futures)
-                {
-                    future.wait();
-                }
+//                for (auto& future : futures)
+//                {
+//                    future.wait();
+//                }
 
                 for (auto l = 0u; l < all_gate.size(); l++)
                 {

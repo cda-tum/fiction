@@ -577,7 +577,7 @@ class design_sidb_gates_impl
 template <typename Lyt, typename TT>
 [[nodiscard]] std::vector<Lyt> design_sidb_gates(const Lyt& skeleton, const std::vector<TT>& spec,
                                                  const design_sidb_gates_params<Lyt>& params = {},
-                                                 design_sidb_gates_stats*             stats  = nullptr) noexcept
+                                                 design_sidb_gates_stats*             pst = nullptr) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -609,9 +609,9 @@ template <typename Lyt, typename TT>
     {
         result = p.run_sa_design();
     }
-    if (stats)
+    if (pst)
     {
-        *stats = st;
+        *pst = st;
     }
     return result;
 }
