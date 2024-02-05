@@ -20,7 +20,6 @@
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/views/names_view.hpp>
 
-#include <tuple>
 #include <vector>
 
 using namespace fiction;
@@ -28,18 +27,13 @@ using namespace fiction;
 template <typename Lyt, typename Ntk>
 void check_layout_equiv(const Ntk& ntk)
 {
-    for (bool const wiring_reduction : {false, true})
-    {
-        const auto                      layout = orthogonal<Lyt>(ntk, {});
-        post_layout_optimization_params params{};
-        params.wiring_reduction = wiring_reduction;
-        post_layout_optimization_stats stats{};
-        post_layout_optimization<Lyt>(layout, params, &stats);
+    const auto                     layout = orthogonal<Lyt>(ntk, {});
+    post_layout_optimization_stats stats{};
+    post_layout_optimization<Lyt>(layout, &stats);
 
-        check_eq(ntk, layout);
+    check_eq(ntk, layout);
 
-        CHECK(mockturtle::to_seconds(stats.time_total) > 0);
-    }
+    CHECK(mockturtle::to_seconds(stats.time_total) > 0);
 }
 
 template <typename Lyt>
@@ -116,7 +110,7 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
         {
             const auto layout_corner_case_1 = blueprints::optimization_layout_corner_case_outputs_1<gate_layout>();
             post_layout_optimization_stats stats_corner_case_1{};
-            post_layout_optimization<gate_layout>(layout_corner_case_1, {}, &stats_corner_case_1);
+            post_layout_optimization<gate_layout>(layout_corner_case_1, &stats_corner_case_1);
             check_eq(blueprints::optimization_layout_corner_case_outputs_1<gate_layout>(), layout_corner_case_1);
         }
 
@@ -124,7 +118,7 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
         {
             const auto layout_corner_case_2 = blueprints::optimization_layout_corner_case_outputs_2<gate_layout>();
             post_layout_optimization_stats stats_corner_case_2{};
-            post_layout_optimization<gate_layout>(layout_corner_case_2, {}, &stats_corner_case_2);
+            post_layout_optimization<gate_layout>(layout_corner_case_2, &stats_corner_case_2);
             check_eq(blueprints::optimization_layout_corner_case_outputs_2<gate_layout>(), layout_corner_case_2);
         }
     }
@@ -189,8 +183,7 @@ TEST_CASE("Optimization steps", "[post_layout_optimization]")
     // O ▢ O
     SECTION("Move gates 1")
     {
-        CHECK(std::get<0>(moved_gate_1) == true);
-        CHECK(std::get<1>(moved_gate_1) == new_pos_1);
+        CHECK(moved_gate_1 == new_pos_1);
         CHECK(obstr_lyt.is_pi_tile(new_pos_1) == true);
         CHECK(obstr_lyt.is_pi_tile(old_pos_1) == false);
     }
@@ -208,8 +201,7 @@ TEST_CASE("Optimization steps", "[post_layout_optimization]")
     // O ▢ O
     SECTION("Move gates 2")
     {
-        CHECK(std::get<0>(moved_gate_2) == true);
-        CHECK(std::get<1>(moved_gate_2) == new_pos_2);
+        CHECK(moved_gate_2 == new_pos_2);
         CHECK(obstr_lyt.fanout_size(obstr_lyt.get_node(old_pos_2)) == 1);
         CHECK(obstr_lyt.fanout_size(obstr_lyt.get_node(new_pos_2)) == 2);
     }
@@ -227,8 +219,7 @@ TEST_CASE("Optimization steps", "[post_layout_optimization]")
     // O ▢ O
     SECTION("Move gates 3")
     {
-        CHECK(std::get<0>(moved_gate_3) == true);
-        CHECK(std::get<1>(moved_gate_3) == new_pos_3);
+        CHECK(moved_gate_3 == new_pos_3);
         CHECK(obstr_lyt.is_and(obstr_lyt.get_node(new_pos_3)) == true);
         CHECK(obstr_lyt.is_and(obstr_lyt.get_node(old_pos_3)) == false);
     }
@@ -246,8 +237,7 @@ TEST_CASE("Optimization steps", "[post_layout_optimization]")
     // ▢ ▢ O
     SECTION("Move gates 4")
     {
-        CHECK(std::get<0>(moved_gate_4) == true);
-        CHECK(std::get<1>(moved_gate_4) == new_pos_4);
+        CHECK(moved_gate_4 == new_pos_4);
         CHECK(obstr_lyt.is_po(obstr_lyt.get_node(new_pos_4)) == true);
         CHECK(obstr_lyt.is_po(obstr_lyt.get_node(old_pos_4)) == false);
     }
@@ -265,8 +255,7 @@ TEST_CASE("Optimization steps", "[post_layout_optimization]")
     // ▢ ▢ ▢
     SECTION("Move gates 5")
     {
-        CHECK(std::get<0>(moved_gate_5) == true);
-        CHECK(std::get<1>(moved_gate_5) == new_pos_5);
+        CHECK(moved_gate_5 == new_pos_5);
         CHECK(obstr_lyt.is_po(obstr_lyt.get_node(new_pos_5)) == true);
         CHECK(obstr_lyt.is_po(obstr_lyt.get_node(old_pos_5)) == false);
     }
@@ -294,18 +283,10 @@ TEST_CASE("Wrong clocking scheme", "[post_layout_optimization]")
 
         const auto moved_gate_1 = detail::improve_gate_location(obstr_lyt, old_pos_1, {0, 0});
 
-        CHECK_FALSE(std::get<0>(moved_gate_1));
-        CHECK(std::get<1>(moved_gate_1) == old_pos_1);
-
-        CHECK_NOTHROW(detail::get_path_and_obstruct(obstr_lyt, {0, 0}, {0, 0}));
-
-        std::vector<uint64_t> rows_to_delete{};
-        std::vector<uint64_t> columns_to_delete{};
-
-        CHECK_NOTHROW(detail::optimize_output_positions(obstr_lyt));
+        CHECK_FALSE(moved_gate_1);
 
         post_layout_optimization_stats stats_wrong_clocking_scheme{};
 
-        CHECK_NOTHROW(post_layout_optimization<gate_layout>(obstr_lyt, {}, &stats_wrong_clocking_scheme));
+        CHECK_NOTHROW(post_layout_optimization<gate_layout>(obstr_lyt, &stats_wrong_clocking_scheme));
     }
 }

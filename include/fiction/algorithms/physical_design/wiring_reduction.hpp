@@ -17,12 +17,9 @@
 #include <mockturtle/utils/stopwatch.hpp>
 #include <mockturtle/views/topo_view.hpp>
 
-#include <algorithm>
-#include <cmath>
 #include <cstdint>
-#include <tuple>
-#include <unordered_map>
-#include <unordered_set>
+#include <ostream>
+#include <utility>
 #include <vector>
 
 namespace fiction
@@ -51,8 +48,6 @@ struct wiring_reduction_stats
 namespace detail
 {
 
-namespace
-{
 /**
  * Represents a layout used for wiring reduction derived from the cartesian_layout class.
  *
@@ -68,7 +63,7 @@ class wiring_reduction_layout : public cartesian_layout<OffsetCoordinateType>
   public:
     bool left_to_right;
     /**
-     * This constructor initializes the WiringReductionLayout with an optional aspect ratio.
+     * This constructor initializes the wiring_reduction_layout with an optional aspect ratio.
      *
      * @param ar The aspect ratio for the layout. Defaults to an empty aspect ratio if not provided.
      */
@@ -286,14 +281,8 @@ class wiring_reduction_layout : public cartesian_layout<OffsetCoordinateType>
 
 /**
  * Type alias for an obstruction layout specialized for finding excess wiring.
- *
- * The `wiring_reduction_lyt` type is an alias for the specialization of the `obstruction_layout` template,
- * using the `wiring_reduction_layout<>` class template as its template argument. The `wiring_reduction_layout` class
- * provides functionality for a wiring reduction layout based on a Cartesian coordinate system.
- * This alias enhances code readability and indicates the association with wiring reduction features.
  */
 using wiring_reduction_lyt = obstruction_layout<wiring_reduction_layout<>>;
-}  // namespace
 
 /**
  * Create a shifted layout suitable for finding excess wiring based on a Cartesian layout.
@@ -307,22 +296,13 @@ using wiring_reduction_lyt = obstruction_layout<wiring_reduction_layout<>>;
  * @param lyt The input Cartesian layout to be shifted.
  * @param x_offset The offset for shifting in the x-direction. Defaults to 0 if not specified.
  * @param y_offset The offset for shifting in the y-direction. Defaults to 0 if not specified.
+ * @param left_to_right If true, deletable paths are searched from left to right, otherwise from top to bottom.
  * @return A new layout with wiring reduction features.
  */
 template <typename Lyt>
 wiring_reduction_lyt create_shifted_layout(const Lyt& lyt, const uint64_t x_offset = 0, const uint64_t y_offset = 0,
                                            bool left_to_right = true) noexcept
 {
-    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
-    static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
-
-    // Check if the clocking scheme is 2DDWave
-    if (!lyt.is_clocking_scheme(clock_name::TWODDWAVE))
-    {
-        std::cout << "[e] the given layout has to be 2DDWave-clocked\n";
-        return obstruction_layout<wiring_reduction_layout<>>{};
-    }
-
     // Create WiringReductionLayout with specified offsets
     wiring_reduction_layout<> obs_shifted_layout{{lyt.x() + x_offset + 1, lyt.y() + y_offset + 1, lyt.z()},
                                                  left_to_right};
@@ -348,8 +328,9 @@ wiring_reduction_lyt create_shifted_layout(const Lyt& lyt, const uint64_t x_offs
                 // Handle single input gates and wires
                 if (const auto signals = lyt.incoming_data_flow(old_coord); signals.size() == 1)
                 {
-                    const auto      signal = signals[0];
-                    const tile<Lyt> shifted_tile{signal.x + x_offset, signal.y + y_offset, signal.z};
+                    const auto      incoming_signal = signals[0];
+                    const tile<Lyt> shifted_tile{incoming_signal.x + x_offset, incoming_signal.y + y_offset,
+                                                 incoming_signal.z};
 
                     // Obstruct the connection between the gate and its incoming signal
                     shifted_layout.obstruct_connection(shifted_tile, new_coord);
@@ -454,9 +435,6 @@ wiring_reduction_lyt create_shifted_layout(const Lyt& lyt, const uint64_t x_offs
 template <typename Lyt>
 void add_obstructions(Lyt& lyt) noexcept
 {
-    static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
-    static_assert(has_is_obstructed_coordinate_v<Lyt>, "Lyt is not an obstruction layout");
-
     if (lyt.left_to_right)
     {
         // Add obstructions to the top edge of the layout
@@ -505,16 +483,11 @@ template <typename Lyt>
 [[nodiscard]] layout_coordinate_path<Lyt> get_path(Lyt& lyt, const coordinate<Lyt>& start,
                                                    const coordinate<Lyt>& end) noexcept
 {
-    static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
-    static_assert(has_is_obstructed_coordinate_v<Lyt>, "Lyt is not an obstruction layout");
-
     using dist = manhattan_distance_functor<Lyt, uint64_t>;
     using cost = unit_cost_functor<Lyt, uint8_t>;
     static const a_star_params params{false};
 
-    auto path = a_star<layout_coordinate_path<Lyt>>(lyt, {start, end}, dist(), cost(), params);
-
-    return path;
+    return a_star<layout_coordinate_path<Lyt>>(lyt, {start, end}, dist(), cost(), params);
 }
 
 /**
@@ -535,9 +508,6 @@ template <typename Lyt>
 void update_to_delete_list(Lyt& lyt, layout_coordinate_path<wiring_reduction_lyt>& possible_path,
                            layout_coordinate_path<wiring_reduction_lyt>& to_delete)
 {
-    static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
-    static_assert(has_is_obstructed_coordinate_v<Lyt>, "Lyt is not an obstruction layout");
-
     for (const auto coord : possible_path)
     {
         // Check if the coordinate is not at the leftmost or rightmost position
@@ -568,11 +538,13 @@ void update_to_delete_list(Lyt& lyt, layout_coordinate_path<wiring_reduction_lyt
  * @tparam Lyt Type of the wiring_reduction_layout.
  * @param lyt The wiring_reduction_layout for which the offset matrix is calculated.
  * @param to_delete The to-delete list representing coordinates to be considered for the offset matrix.
+ * @param left_to_right If true, deletable paths are searched from left to right, otherwise from top to bottom.
  * @return A 2D vector representing the calculated offset matrix.
  */
 template <typename Lyt>
 [[nodiscard]] std::vector<std::vector<uint64_t>>
-calculate_offset_matrix(Lyt& lyt, layout_coordinate_path<wiring_reduction_lyt>& to_delete, bool left_to_right) noexcept
+calculate_offset_matrix(Lyt& lyt, layout_coordinate_path<wiring_reduction_lyt>& to_delete,
+                        bool left_to_right = true) noexcept
 {
     // Initialize matrix with zeros
     std::vector<std::vector<uint64_t>> matrix(lyt.y() + 1, std::vector<uint64_t>(lyt.x() + 1, 0));
@@ -580,8 +552,9 @@ calculate_offset_matrix(Lyt& lyt, layout_coordinate_path<wiring_reduction_lyt>& 
     // Update matrix based on coordinates
     for (const auto& coord : to_delete)
     {
-        const uint64_t x = coord.x;
-        const uint64_t y = coord.y;
+        const auto x = coord.x;
+        const auto y = coord.y;
+
         if (left_to_right)
         {
             for (uint64_t i = lyt.y(); i > y; --i)
@@ -611,30 +584,21 @@ calculate_offset_matrix(Lyt& lyt, layout_coordinate_path<wiring_reduction_lyt>& 
  * @tparam Lyt Type of the wiring_reduction_layout.
  * @param lyt The wiring_reduction_layout to be modified.
  * @param to_delete The to-delete list representing coordinates of wires to be deleted.
+ * @param left_to_right If true, deletable paths are searched from left to right, otherwise from top to bottom.
  * @param offset_matrix The offset matrix representing the number of obstructed coordinates in the same column
  *                     but above each specific coordinate.
  */
 template <typename Lyt>
 void delete_wires(Lyt& lyt, layout_coordinate_path<wiring_reduction_lyt>& to_delete,
-                  std::vector<std::vector<uint64_t>> offset_matrix, bool left_to_right)
+                  std::vector<std::vector<uint64_t>> offset_matrix, bool left_to_right = true)
 {
-    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
-    static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
-
-    // Check if the clocking scheme is 2DDWave
-    if (!lyt.is_clocking_scheme(clock_name::TWODDWAVE))
-    {
-        std::cout << "[e] the given layout has to be 2DDWave-clocked\n";
-        return;
-    }
-
     // Create a copy of the original layout for reference
     auto layout_copy = lyt.clone();
 
     // Clear tiles based on the to-delete list
-    for (const auto& tile : to_delete)
+    for (const auto& tile_to_delete : to_delete)
     {
-        lyt.clear_tile(tile);
+        lyt.clear_tile(tile_to_delete);
     }
 
     if (left_to_right)
@@ -808,13 +772,12 @@ void delete_wires(Lyt& lyt, layout_coordinate_path<wiring_reduction_lyt>& to_del
 /**
  * Perform wiring reduction on a 2DDWave clocking scheme layout.
  *
- * This function performs wiring reduction on a 2DDWave clocking scheme layout by iteratively creating
- * shifted layouts, adding obstructions, finding paths, updating the to-delete list, and deleting wires.
- * The process continues until no further wires can be deleted. Optionally, it measures and records
- * runtime statistics.
+ * This algorithm performs wiring reduction on a 2DDWave-clocked Cartesian gate-level layout by iteratively
+ * finding tiles with excess wiring that can be deleted without changing the correctness of the underlying function.
+ * The process continues until no further wires can be deleted.
  *
- * @tparam Lyt Type of the layout.
- * @param lyt The 2DDWave clocking scheme layout to be reduced.
+ * @tparam Lyt Cartesian gate-level layout type.
+ * @param lyt The 2DDWave-clocked layout whose wiring is to be reduced.
  * @param pst Pointer to a wiring_reduction_stats object to record runtime statistics (optional).
  */
 template <typename Lyt>
@@ -844,10 +807,11 @@ void wiring_reduction(const Lyt& lyt, wiring_reduction_stats* pst = nullptr) noe
 
         // Perform wiring reduction iteratively until no further wires can be deleted
         while (found_wires)
-        {  // Continue until no further wires can be deleted
+        {
+            // Continue until no further wires can be deleted
             found_wires = false;
 
-            for (bool left_to_right : {true, false})
+            for (const auto left_to_right : {true, false})
             {
                 auto shifted_layout = detail::create_shifted_layout<Lyt>(layout, 1, 1, left_to_right);
                 detail::add_obstructions(shifted_layout);

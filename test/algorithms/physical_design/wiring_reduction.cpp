@@ -20,9 +20,6 @@
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/views/names_view.hpp>
 
-#include <tuple>
-#include <vector>
-
 using namespace fiction;
 
 template <typename Lyt, typename Ntk>
@@ -129,11 +126,6 @@ TEST_CASE("Wrong clocking scheme", "[wiring_reduction]")
     SECTION("Call functions")
     {
         CHECK_NOTHROW(detail::create_shifted_layout(obstr_lyt, 1, 1, true));
-
-        layout_coordinate_path<detail::wiring_reduction_lyt> to_delete{};
-        const std::vector<std::vector<uint64_t>>             offset_matrix;
-
-        CHECK_NOTHROW(detail::delete_wires(obstr_lyt, to_delete, offset_matrix, true));
 
         wiring_reduction_stats stats_wrong_clocking_scheme{};
 

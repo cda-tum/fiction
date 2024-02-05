@@ -8,7 +8,6 @@
 
 #include <fmt/format.h>  // output formatting
 
-#include <cassert>
 #include <chrono>
 #include <cstdlib>
 #include <string>
@@ -21,9 +20,8 @@ Ntk read_ntk(const std::string& name)
     std::ostringstream                        os{};
     fiction::network_reader<fiction::tec_ptr> reader{fiction_experiments::benchmark_path(name), os};
     const auto                                nets    = reader.get_networks();
-    const auto                                network = *nets.front();
 
-    return network;
+    return *nets.front();
 }
 
 int main()  // NOLINT
@@ -62,10 +60,10 @@ int main()  // NOLINT
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
-        const auto network = read_ntk<fiction::tec_nt>(benchmark);
+        const auto benchmark_network = read_ntk<fiction::tec_nt>(benchmark);
 
         // perform layout generation with an OGD-based heuristic algorithm
-        auto gate_level_layout = fiction::orthogonal<gate_lyt>(network, {}, &orthogonal_stats);
+        auto gate_level_layout = fiction::orthogonal<gate_lyt>(benchmark_network, {}, &orthogonal_stats);
 
         //  compute critical path and throughput
         fiction::critical_path_length_and_throughput_stats cp_tp_stats{};
@@ -79,11 +77,12 @@ int main()  // NOLINT
         const auto area_before_optimization   = width_before_optimization * height_before_optimization;
 
         // perform post-layout optimization
-        fiction::post_layout_optimization<gate_lyt>(gate_level_layout, {}, &post_layout_optimization_stats);
+        fiction::post_layout_optimization<gate_lyt>(gate_level_layout, &post_layout_optimization_stats);
 
         // check equivalence
         fiction::equivalence_checking_stats eq_stats{};
-        fiction::equivalence_checking<fiction::technology_network, gate_lyt>(network, gate_level_layout, &eq_stats);
+        fiction::equivalence_checking<fiction::technology_network, gate_lyt>(benchmark_network, gate_level_layout,
+                                                                             &eq_stats);
 
         const std::string eq_result = eq_stats.eq == fiction::eq_type::STRONG ? "STRONG" :
                                       eq_stats.eq == fiction::eq_type::WEAK   ? "WEAK" :
@@ -99,8 +98,8 @@ int main()  // NOLINT
         const float improv = 100 * static_cast<float>((area_before_optimization - area_after_optimization)) /
                              static_cast<float>(area_before_optimization);
         // log results
-        optimization_exp(benchmark, network.num_pis(), network.num_pos(), network.num_gates(),
-                         width_before_optimization, height_before_optimization, area_before_optimization,
+        optimization_exp(benchmark, benchmark_network.num_pis(), benchmark_network.num_pos(),
+                         benchmark_network.num_gates(), width_before_optimization, height_before_optimization, area_before_optimization,
                          width_after_optimization, height_after_optimization, area_after_optimization,
                          gate_level_layout.num_gates(), gate_level_layout.num_wires(), cp_tp_stats.critical_path_length,
                          cp_tp_stats.throughput, mockturtle::to_seconds(orthogonal_stats.time_total),

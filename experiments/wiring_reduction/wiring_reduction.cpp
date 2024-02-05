@@ -8,7 +8,6 @@
 
 #include <fmt/format.h>  // output formatting
 
-#include <cassert>
 #include <chrono>
 #include <cstdlib>
 #include <string>
@@ -21,9 +20,8 @@ Ntk read_ntk(const std::string& name)
     std::ostringstream                        os{};
     fiction::network_reader<fiction::tec_ptr> reader{fiction_experiments::benchmark_path(name), os};
     const auto                                nets    = reader.get_networks();
-    const auto                                network = *nets.front();
 
-    return network;
+    return *nets.front();
 }
 
 int main()  // NOLINT
@@ -69,10 +67,10 @@ int main()  // NOLINT
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
-        const auto network = read_ntk<fiction::tec_nt>(benchmark);
+        const auto benchmark_network = read_ntk<fiction::tec_nt>(benchmark);
 
         // perform layout generation with an OGD-based heuristic algorithm
-        auto gate_level_layout = fiction::orthogonal<gate_lyt>(network, {}, &orthogonal_stats);
+        auto gate_level_layout = fiction::orthogonal<gate_lyt>(benchmark_network, {}, &orthogonal_stats);
 
         auto num_wires = gate_level_layout.num_wires() - gate_level_layout.num_pis() - gate_level_layout.num_pos();
         //  compute critical path and throughput
@@ -97,7 +95,8 @@ int main()  // NOLINT
             gate_level_layout.num_wires() - gate_level_layout.num_pis() - gate_level_layout.num_pos();
         // check equivalence
         fiction::equivalence_checking_stats eq_stats{};
-        fiction::equivalence_checking<fiction::technology_network, gate_lyt>(network, gate_level_layout, &eq_stats);
+        fiction::equivalence_checking<fiction::technology_network, gate_lyt>(benchmark_network, gate_level_layout,
+                                                                             &eq_stats);
 
         const std::string eq_result = eq_stats.eq == fiction::eq_type::STRONG ? "STRONG" :
                                       eq_stats.eq == fiction::eq_type::WEAK   ? "WEAK" :
@@ -122,8 +121,9 @@ int main()  // NOLINT
                                   static_cast<float>((area_before_wiring_reduction - area_after_wiring_reduction)) /
                                   static_cast<float>(area_before_wiring_reduction);
         // log results
-        wiring_reduction_exp(benchmark, network.num_pis(), network.num_pos(), network.num_gates(),
-                             width_before_wiring_reduction, height_before_wiring_reduction,
+        wiring_reduction_exp(
+            benchmark, benchmark_network.num_pis(), benchmark_network.num_pos(), benchmark_network.num_gates(),
+            width_before_wiring_reduction, height_before_wiring_reduction,
                              area_before_wiring_reduction, width_after_wiring_reduction, height_after_wiring_reduction,
                              area_after_wiring_reduction, gate_level_layout.num_gates(), num_wires, num_wires_after,
                              improv_wires, cp_tp_stats.critical_path_length, cp_tp_stats_after.critical_path_length,

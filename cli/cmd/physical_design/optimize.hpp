@@ -88,7 +88,7 @@ class optimize_command : public command
                 }
                 else
                 {
-                    fiction::post_layout_optimization(*lyt_copy_ptr, ps, &st);
+                    fiction::post_layout_optimization(*lyt_copy_ptr, &st);
                 }
                 fiction::restore_names(*lyt_ptr, *lyt_copy_ptr);
                 gls.extend() = lyt_copy_ptr;
@@ -108,12 +108,6 @@ class optimize_command : public command
             env->out() << "[e] an error occurred while optimizing\n";
         }
     }
-
-  private:
-    /**
-     * Parameters.
-     */
-    fiction::post_layout_optimization_params ps{};
 };
 
 ALICE_ADD_COMMAND(optimize, "Physical Design")
