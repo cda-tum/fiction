@@ -3,16 +3,16 @@
 //
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/physical_design/a_star_pr.hpp>                // wiring reduction algorithm
+#include <fiction/algorithms/physical_design/a_star_pr.hpp>                       // wiring reduction algorithm
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/algorithms/verification/equivalence_checking.hpp>               // SAT-based equivalence checking
 #include <fiction/io/network_reader.hpp>                                          // read networks from files
-#include <fiction/layouts/gate_level_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
-#include <fiction/layouts/tile_based_layout.hpp>
-#include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/networks/technology_network.hpp>
 #include <fiction/layouts/bounding_box.hpp>
+#include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/layouts/clocked_layout.hpp>
+#include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/tile_based_layout.hpp>
+#include <fiction/networks/technology_network.hpp>
 
 #include <fmt/format.h>  // output formatting
 
@@ -56,10 +56,10 @@ int main()  // NOLINT
                              "runtime a_star_pr (in sec)",
                              "equivalent"};
 
+    // fiction::a_star_pr_stats a_star_pr_stats{};
     fiction::a_star_pr_stats a_star_pr_stats{};
 
-    static constexpr const uint64_t bench_select =
-        (fiction_experiments::trindade16 | fiction_experiments::fontes18) & ~fiction_experiments::clpl;
+    static constexpr const uint64_t bench_select = fiction_experiments::mux21;
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
