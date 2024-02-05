@@ -19,7 +19,7 @@ Ntk read_ntk(const std::string& name)
 
     std::ostringstream                        os{};
     fiction::network_reader<fiction::tec_ptr> reader{fiction_experiments::benchmark_path(name), os};
-    const auto                                nets    = reader.get_networks();
+    const auto                                nets = reader.get_networks();
 
     return *nets.front();
 }
@@ -123,13 +123,12 @@ int main()  // NOLINT
         // log results
         wiring_reduction_exp(
             benchmark, benchmark_network.num_pis(), benchmark_network.num_pos(), benchmark_network.num_gates(),
-            width_before_wiring_reduction, height_before_wiring_reduction,
-                             area_before_wiring_reduction, width_after_wiring_reduction, height_after_wiring_reduction,
-                             area_after_wiring_reduction, gate_level_layout.num_gates(), num_wires, num_wires_after,
-                             improv_wires, cp_tp_stats.critical_path_length, cp_tp_stats_after.critical_path_length,
-                             improv_critical_path, cp_tp_stats.throughput, cp_tp_stats_after.throughput,
-                             improv_throughput, mockturtle::to_seconds(orthogonal_stats.time_total),
-                             mockturtle::to_seconds(wiring_reduction_stats.time_total), improv_area, eq_result);
+            width_before_wiring_reduction, height_before_wiring_reduction, area_before_wiring_reduction,
+            width_after_wiring_reduction, height_after_wiring_reduction, area_after_wiring_reduction,
+            gate_level_layout.num_gates(), num_wires, num_wires_after, improv_wires, cp_tp_stats.critical_path_length,
+            cp_tp_stats_after.critical_path_length, improv_critical_path, cp_tp_stats.throughput,
+            cp_tp_stats_after.throughput, improv_throughput, mockturtle::to_seconds(orthogonal_stats.time_total),
+            mockturtle::to_seconds(wiring_reduction_stats.time_total), improv_area, eq_result);
 
         wiring_reduction_exp.save();
         wiring_reduction_exp.table();

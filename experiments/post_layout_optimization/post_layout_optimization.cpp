@@ -19,7 +19,7 @@ Ntk read_ntk(const std::string& name)
 
     std::ostringstream                        os{};
     fiction::network_reader<fiction::tec_ptr> reader{fiction_experiments::benchmark_path(name), os};
-    const auto                                nets    = reader.get_networks();
+    const auto                                nets = reader.get_networks();
 
     return *nets.front();
 }
@@ -99,10 +99,11 @@ int main()  // NOLINT
                              static_cast<float>(area_before_optimization);
         // log results
         optimization_exp(benchmark, benchmark_network.num_pis(), benchmark_network.num_pos(),
-                         benchmark_network.num_gates(), width_before_optimization, height_before_optimization, area_before_optimization,
-                         width_after_optimization, height_after_optimization, area_after_optimization,
-                         gate_level_layout.num_gates(), gate_level_layout.num_wires(), cp_tp_stats.critical_path_length,
-                         cp_tp_stats.throughput, mockturtle::to_seconds(orthogonal_stats.time_total),
+                         benchmark_network.num_gates(), width_before_optimization, height_before_optimization,
+                         area_before_optimization, width_after_optimization, height_after_optimization,
+                         area_after_optimization, gate_level_layout.num_gates(), gate_level_layout.num_wires(),
+                         cp_tp_stats.critical_path_length, cp_tp_stats.throughput,
+                         mockturtle::to_seconds(orthogonal_stats.time_total),
                          mockturtle::to_seconds(post_layout_optimization_stats.time_total), improv, eq_result);
 
         optimization_exp.save();

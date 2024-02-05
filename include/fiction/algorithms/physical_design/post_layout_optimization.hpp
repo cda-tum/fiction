@@ -456,8 +456,8 @@ template <typename Lyt>
     // fix wires that cross over empty tiles
     fix_wires(lyt, to_clear);
 
-    bool moved_gate             = false;
-    auto current_pos            = old_pos;
+    bool moved_gate  = false;
+    auto current_pos = old_pos;
     // iterate over layout diagonally
     for (uint64_t k = 0; k < lyt.x() + lyt.y() + 1; ++k)
     {
