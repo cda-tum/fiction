@@ -737,7 +737,7 @@ bool compare_gates(const tile<Lyt>& a, const tile<Lyt>& b)
  * creates more compact layouts by freeing up space to the right and bottom, as all gates were moved to the top left
  * corner.
  *
- * After moving all gates, this algorithm also checks if excess wiring exists on the layout using the `wiringreduction`
+ * After moving all gates, this algorithm also checks if excess wiring exists on the layout using the `wiring_reduction`
  * algorithm (cf. `wiring_reduction.hpp`)
  *
  * As outputs have to lay on the border of a layout for better accessibility, they are also moved to new borders
