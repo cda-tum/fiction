@@ -72,7 +72,7 @@ int main()  // NOLINT
     for (const auto& truth_table : truth_tables)
     {
         std::cout << fmt::format("truth counter: {}", truth_counter) << std::endl;
-        for (auto num_sidbs = 2u; num_sidbs < 3; num_sidbs++)
+        for (auto num_sidbs = 2u; num_sidbs < 7; num_sidbs++)
         {
             std::cout << fmt::format("num sidbs: {}", num_sidbs) << std::endl;
             params.number_of_sidbs = num_sidbs;
