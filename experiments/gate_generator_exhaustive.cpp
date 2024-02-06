@@ -14,6 +14,7 @@
 #include <fiction/utils/truth_table_utils.hpp>
 
 #include <array>
+#include <mutex>
 
 using namespace fiction;
 
@@ -95,48 +96,112 @@ int main()  // NOLINT
 
                 std::cout << fmt::format("gate design finished and {} gates were found", all_gate.size()) << std::endl;
 
-                const auto calculate_metric_values = [&](const auto& gate) noexcept
-                {
-                    temps.push_back(critical_temperature_gate_based(gate, truth_table, ct_params));
-                    operational_domain_stats stats{};
-                    const auto               op_domain = operational_domain_flood_fill(
-                        gate, truth_table, 0, op_domain_params, operational_domain::parameter_point{5.6, 5}, &stats);
-                    op_domains.push_back(stats.percentual_operational_area);
-                    const auto maximum_defect_influence_arsenic =
-                        maximum_defect_influence_position_and_distance_of_sidb_gate(gate, truth_table,
-                                                                                    defect_avoidance_params_arsenic);
-                    defect_influence_arsenic.push_back(maximum_defect_influence_arsenic.second);
-                    const auto maximum_defect_influence_vacancy =
-                        maximum_defect_influence_position_and_distance_of_sidb_gate(gate, truth_table,
-                                                                                    defect_avoidance_params_vacancy);
-                    defect_influence_vacancy.push_back(maximum_defect_influence_vacancy.second);
+                // Define mutex for synchronization
+                std::mutex mtx;
 
-                    pop_stability_neutral_to_negative.push_back(
-                        assess_physical_population_stability_sidb_gate(gate, truth_table, assess_params, -1));
-                    pop_stability_negative_to_neutral.push_back(
-                        assess_physical_population_stability_sidb_gate(gate, truth_table, assess_params, 1));
+                const auto calculate_metric_values = [&](const auto& gate_chunk) noexcept
+                {
+                    // Local vectors to store calculated metrics
+                    std::vector<double> temps_local;
+                    std::vector<double> op_domains_local;
+                    std::vector<double> defect_influence_arsenic_local;
+                    std::vector<double> defect_influence_vacancy_local;
+                    std::vector<double> pop_stability_neutral_to_negative_local;
+                    std::vector<double> pop_stability_negative_to_neutral_local;
+
+                    for (const auto& gate : gate_chunk)
+                    {
+                        temps.push_back(critical_temperature_gate_based(gate, truth_table, ct_params));
+                        operational_domain_stats stats{};
+                        const auto               op_domain =
+                            operational_domain_flood_fill(gate, truth_table, 0, op_domain_params,
+                                                          operational_domain::parameter_point{5.6, 5}, &stats);
+                        op_domains.push_back(stats.percentual_operational_area);
+                        const auto maximum_defect_influence_arsenic =
+                            maximum_defect_influence_position_and_distance_of_sidb_gate(
+                                gate, truth_table, defect_avoidance_params_arsenic);
+                        defect_influence_arsenic.push_back(maximum_defect_influence_arsenic.second);
+                        const auto maximum_defect_influence_vacancy =
+                            maximum_defect_influence_position_and_distance_of_sidb_gate(
+                                gate, truth_table, defect_avoidance_params_vacancy);
+                        defect_influence_vacancy.push_back(maximum_defect_influence_vacancy.second);
+
+                        pop_stability_neutral_to_negative.push_back(
+                            assess_physical_population_stability_sidb_gate(gate, truth_table, assess_params, -1));
+                        pop_stability_negative_to_neutral.push_back(
+                            assess_physical_population_stability_sidb_gate(gate, truth_table, assess_params, 1));
+                    }
+
+                    // Acquire lock before modifying shared vectors
+                    std::lock_guard<std::mutex> lock(mtx);
+
+                    // Append local vectors to global vectors
+                    temps.insert(temps.end(), temps_local.begin(), temps_local.end());
+                    op_domains.insert(op_domains.end(), op_domains_local.begin(), op_domains_local.end());
+                    defect_influence_arsenic.insert(defect_influence_arsenic.end(),
+                                                    defect_influence_arsenic_local.begin(),
+                                                    defect_influence_arsenic_local.end());
+                    defect_influence_vacancy.insert(defect_influence_vacancy.end(),
+                                                    defect_influence_vacancy_local.begin(),
+                                                    defect_influence_vacancy_local.end());
+                    pop_stability_neutral_to_negative.insert(pop_stability_neutral_to_negative.end(),
+                                                             pop_stability_neutral_to_negative_local.begin(),
+                                                             pop_stability_neutral_to_negative_local.end());
+                    pop_stability_negative_to_neutral.insert(pop_stability_negative_to_neutral.end(),
+                                                             pop_stability_negative_to_neutral_local.begin(),
+                                                             pop_stability_negative_to_neutral_local.end());
                 };
 
-                // Create a vector to store std::future objects
-                std::vector<std::future<void>> futures{};
-                futures.reserve(all_gate.size());
+                // Define the number of threads to use
+                const size_t num_threads = std::thread::hardware_concurrency();
+                const size_t chunk_size  = (all_gate.size() + num_threads - 1) / num_threads;  // Calculate chunk size
 
-                // Start asynchronous tasks to process combinations in parallel
-//                for (const auto& gate : all_gate)
-////                {
-////                    futures.emplace_back(std::async(std::launch::async, calculate_metric_values, gate));
-////                }
+                // A vector to store threads
+                std::vector<std::thread> threads;
+                threads.reserve(num_threads);
 
-                for (const auto& gate : all_gate)
+                // Split the vector into chunks and process each chunk in its own thread
+                auto gate_it = all_gate.begin();
+                for (size_t i = 0; i < num_threads; ++i)
                 {
-                    calculate_metric_values(gate);
+                    auto chunk_start = gate_it;
+                    auto chunk_end   = std::min(gate_it + chunk_size, all_gate.end());
+
+                    threads.emplace_back(calculate_metric_values,
+                                         std::vector<sidb_cell_clk_lyt_siqad>(chunk_start, chunk_end));
+
+                    gate_it = chunk_end;
                 }
 
+                // Wait for all threads to finish
+                for (auto& thread : threads)
+                {
+                    thread.join();
+                }
+
+                // Start asynchronous tasks to process combinations in parallel
+                //                for (const auto& gate : all_gate)
+                //                {
+                //                    futures.emplace_back(std::async(std::launch::async, calculate_metric_values,
+                //                    gate));
+                //                }
+
+                //                for (const auto& gate : all_gate)
+                //                {
+                //                    calculate_metric_values(gate);
+                //                }
+
+                // for each y value in parallel
+                //                std::for_each(FICTION_EXECUTION_POLICY_PAR all_gate.cbegin(), all_gate.cend(),
+                //                                  [&](const sidb_cell_clk_lyt_siqad &gate) {
+                //                                  calculate_metric_values(gate);
+                //                              });
+
                 // Wait for all tasks to finish
-//                for (auto& future : futures)
-//                {
-//                    future.wait();
-//                }
+                //                for (auto& future : futures)
+                //                {
+                //                    future.wait();
+                //                }
 
                 for (auto l = 0u; l < all_gate.size(); l++)
                 {
