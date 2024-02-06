@@ -226,13 +226,13 @@ int main()  // NOLINT
                 {
                     const auto choose_gate = all_gate[l];
                     write_sqd_layout(choose_gate,
-                                     fmt::format(solution_folder + "/sqd/17_7_21_10_numdbs_{}_ttnum_{}_{}.sqd",
+                                     fmt::format(solution_folder + "/sqd/16_7_1_22_10_numdbs_{}_ttnum_{}_{}.sqd",
                                                  num_sidbs, truth_counter, l));
                 }
 
                 // Open a file for writing
                 std::ofstream csvFile(
-                    fmt::format(solution_folder + "/csv/17_7_21_10_numdbs_{}_ttnum_{}.csv", num_sidbs, truth_counter));
+                    fmt::format(solution_folder + "/csv/16_7_1_22_10_numdbs_{}_ttnum_{}.csv", num_sidbs, truth_counter));
 
                 // Check if the file is open
                 if (!csvFile.is_open())
