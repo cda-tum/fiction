@@ -50,7 +50,7 @@ int main()  // NOLINT
     design_sidb_gates_params<sidb_cell_clk_lyt_siqad> params{
         sidb_simulation_parameters{2, -0.32},
         design_sidb_gates_params<sidb_cell_clk_lyt_siqad>::design_sidb_gates_mode::EXHAUSTIVE,
-        {{17, 7, 0}, {21, 11, 0}},
+        {{17, 7, 1}, {21, 10, 0}},
         1,
         sidb_simulation_engine::QUICKEXACT};
 
@@ -226,13 +226,13 @@ int main()  // NOLINT
                 {
                     const auto choose_gate = all_gate[l];
                     write_sqd_layout(choose_gate,
-                                     fmt::format(solution_folder + "/sqd/17_7_21_11_numdbs_{}_ttnum_{}_{}.sqd",
+                                     fmt::format(solution_folder + "/sqd/17_7_21_10_numdbs_{}_ttnum_{}_{}.sqd",
                                                  num_sidbs, truth_counter, l));
                 }
 
                 // Open a file for writing
                 std::ofstream csvFile(
-                    fmt::format(solution_folder + "/csv/17_7_21_11_numdbs_{}_ttnum_{}.csv", num_sidbs, truth_counter));
+                    fmt::format(solution_folder + "/csv/17_7_21_10_numdbs_{}_ttnum_{}.csv", num_sidbs, truth_counter));
 
                 // Check if the file is open
                 if (!csvFile.is_open())
