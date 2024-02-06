@@ -13,6 +13,7 @@
 #include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
 #include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/io/print_layout.hpp>
 #include <fiction/io/read_sqd_layout.hpp>
 #include <fiction/technology/sidb_defects.hpp>
@@ -27,6 +28,7 @@
 #include <numeric>
 #include <string>
 #include <thread>
+#include <vector>
 
 using namespace fiction;
 
@@ -84,10 +86,10 @@ int main()  // NOLINT
 
     for (const auto& truth_table : truth_tables)
     {
-        std::cout << fmt::format("truth counter: {}", truth_counter) << std::endl;
+        std::cout << fmt::format("truth counter: {}", truth_counter) << '\n';
         for (auto num_sidbs = 2u; num_sidbs < 7; num_sidbs++)
         {
-            std::cout << fmt::format("num sidbs: {}", num_sidbs) << std::endl;
+            std::cout << fmt::format("num sidbs: {}", num_sidbs) << '\n';
             params.number_of_sidbs = num_sidbs;
 
             mockturtle::stopwatch<>::duration time_total{};
@@ -106,12 +108,12 @@ int main()  // NOLINT
 
                 all_gate = design_sidb_gates<sidb_cell_clk_lyt_siqad, tt>(skeleton, truth_table, params, &stats);
 
-                std::cout << fmt::format("gate design finished and {} gates were found", all_gate.size()) << std::endl;
+                std::cout << fmt::format("gate design finished and {} gates were found", all_gate.size()) << '\n';
 
                 // Define mutex for synchronization
                 std::mutex mtx;
 
-                const auto calculate_metric_values = [&](const auto& gate_chunk) noexcept
+                const auto calculate_metric_values = [&](const auto& gate_chunk)
                 {
                     // Local vectors to store calculated metrics
                     std::vector<double> temps_local;
@@ -145,7 +147,7 @@ int main()  // NOLINT
                     }
 
                     // Acquire lock before modifying shared vectors
-                    std::lock_guard<std::mutex> lock(mtx);
+                    const std::lock_guard<std::mutex> lock(mtx);
 
                     // Append local vectors to global vectors
                     temps.insert(temps.end(), temps_local.begin(), temps_local.end());
@@ -290,34 +292,34 @@ int main()  // NOLINT
                 }
 
                 // Calculate mean for temps, op_domains, and other metrics
-                meanTemp /= temps.size();
-                meanOpDomains /= op_domains.size();
-                meanDefectInfluenceArsenic /= defect_influence_arsenic.size();
-                meanDefectInfluenceVacancy /= defect_influence_vacancy.size();
-                meanPopStabilityNegToNeu /= pop_stability_negative_to_neutral.size();
-                meanPopStabilityNeuToNeg /= pop_stability_neutral_to_negative.size();
+                meanTemp /= static_cast<double>(temps.size());
+                meanOpDomains /= static_cast<double>(op_domains.size());
+                meanDefectInfluenceArsenic /= static_cast<double>(defect_influence_arsenic.size());
+                meanDefectInfluenceVacancy /= static_cast<double>(defect_influence_vacancy.size());
+                meanPopStabilityNegToNeu /= static_cast<double>(pop_stability_negative_to_neutral.size());
+                meanPopStabilityNeuToNeg /= static_cast<double>(pop_stability_neutral_to_negative.size());
 
                 // Output mean, max, min for temps
-                std::cout << "temp: " << meanTemp << ";" << maxTemp << ";" << minTemp << std::endl;
+                std::cout << "temp: " << meanTemp << ";" << maxTemp << ";" << minTemp << '\n';
 
                 // Output mean, max, min for op_domains
-                std::cout << "op: " << meanOpDomains << ";" << maxOpDomains << ";" << minOpDomains << std::endl;
+                std::cout << "op: " << meanOpDomains << ";" << maxOpDomains << ";" << minOpDomains << '\n';
 
                 // Output mean, max, min for temps
                 std::cout << "ars: " << meanDefectInfluenceArsenic << ";" << maxDefectInfluenceArsenic << ";"
-                          << minDefectInfluenceArsenic << std::endl;
+                          << minDefectInfluenceArsenic << '\n';
 
                 // Output mean, max, min for op_domains
                 std::cout << "vac: " << meanDefectInfluenceVacancy << ";" << maxDefectInfluenceVacancy << ";"
-                          << minDefectInfluenceVacancy << std::endl;
+                          << minDefectInfluenceVacancy << '\n';
 
                 // Output mean, max, min for temps
                 std::cout << "pop_neu_to_neg: " << meanPopStabilityNeuToNeg << ";" << maxPopStabilityNeuToNeg << ";"
-                          << minPopStabilityNeuToNeg << std::endl;
+                          << minPopStabilityNeuToNeg << '\n';
 
                 // Output mean, max, min for op_domains
                 std::cout << "pop_neg_to_neu: " << meanPopStabilityNegToNeu << ";" << maxPopStabilityNegToNeu << ";"
-                          << minPopStabilityNegToNeu << std::endl;
+                          << minPopStabilityNegToNeu << '\n';
 
                 // Close the file
                 csvFile.close();
