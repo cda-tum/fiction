@@ -16,6 +16,7 @@
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/io/print_layout.hpp>
 #include <fiction/io/read_sqd_layout.hpp>
+#include <fiction/io/write_sqd_layout.hpp>
 #include <fiction/technology/sidb_defects.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/truth_table_utils.hpp>
@@ -25,6 +26,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <mutex>
