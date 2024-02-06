@@ -314,12 +314,12 @@ class design_sidb_gates_impl
                     temp_cost =
                         -((critical_temperature_gate_based(lyt, truth_table, params.simanneal_params.ct_params)) /
                           params.simanneal_params.ct_params.max_temperature);
-                    operational_domain_stats stats{};
+                    operational_domain_stats stats_op{};
                     const auto               op_domain = operational_domain_flood_fill(
                         lyt, truth_table, 0, params.simanneal_params.op_params,
                         operational_domain::parameter_point{params.phys_params.epsilon_r, params.phys_params.lambda_tf},
-                        &stats);
-                    opo_cost = -stats.percentual_operational_area;
+                        &stats_op);
+                    opo_cost = -stats_op.percentual_operational_area;
                 }
                 //                            if (logic_cost + temp_cost + opo_cost < -0.5) {
                 //                                std::cout << fmt::format("cost: {}",

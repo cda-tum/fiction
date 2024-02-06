@@ -2,7 +2,7 @@
 // Created by Jan Drewniok 01.01.23
 //
 
-#include "fiction/types.hpp"  // pre-defined types suitable for the FCN domain
+// pre-defined types suitable for the FCN domain
 #include "mockturtle/utils/stopwatch.hpp"
 
 #include <fiction/algorithms/physical_design/design_sidb_gates.hpp>
@@ -12,18 +12,21 @@
 #include <fiction/algorithms/simulation/sidb/maximum_defect_influence_position_and_distance_of_sidb_gate.hpp>
 #include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
 #include <fiction/algorithms/simulation/sidb/quickexact.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/io/print_layout.hpp>
 #include <fiction/io/read_sqd_layout.hpp>
 #include <fiction/technology/sidb_defects.hpp>
+#include <fiction/types.hpp>
 #include <fiction/utils/truth_table_utils.hpp>
 
+#include <fmt/core.h>
+
 #include <algorithm>
-#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <fstream>
+#include <iostream>
 #include <mutex>
 #include <numeric>
 #include <string>
