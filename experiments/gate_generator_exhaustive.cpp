@@ -50,7 +50,7 @@ int main()  // NOLINT
     design_sidb_gates_params<sidb_cell_clk_lyt_siqad> params{
         sidb_simulation_parameters{2, -0.32},
         design_sidb_gates_params<sidb_cell_clk_lyt_siqad>::design_sidb_gates_mode::EXHAUSTIVE,
-        {{17, 7, 1}, {21, 10, 0}},
+        {{16, 7, 1}, {22, 10, 0}},
         1,
         sidb_simulation_engine::QUICKEXACT};
 
