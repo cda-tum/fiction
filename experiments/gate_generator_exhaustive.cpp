@@ -172,7 +172,7 @@ int main()  // NOLINT
                 };
 
                 // Define the number of threads to use
-                const size_t num_threads = 32;
+                const size_t num_threads = 16;
                 const size_t chunk_size  = (all_gate.size() + num_threads - 1) / num_threads;  // Calculate chunk size
 
                 // A vector to store threads
