@@ -81,11 +81,11 @@ int main()  // NOLINT
 
     const maximum_defect_influence_position_and_distance_of_sidb_gate_params defect_avoidance_params_arsenic{
         maximum_defect_influence_position_and_distance_of_sidb_gate_params{
-            {sidb_defect{sidb_defect_type::UNKNOWN, 1, 9.7, 2.1}, params.phys_params, {20, 3}}}};
+            {sidb_defect{sidb_defect_type::UNKNOWN, 1, 9.7, 2.1}, params.phys_params, {10, 3}}}};
 
     const maximum_defect_influence_position_and_distance_of_sidb_gate_params defect_avoidance_params_vacancy{
         maximum_defect_influence_position_and_distance_of_sidb_gate_params{
-            {sidb_defect{sidb_defect_type::SI_VACANCY, -1, 10.6, 5.9}, params.phys_params, {20, 3}}}};
+            {sidb_defect{sidb_defect_type::SI_VACANCY, -1, 10.6, 5.9}, params.phys_params, {10, 3}}}};
 
     uint64_t truth_counter = 0;
 
