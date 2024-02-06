@@ -409,7 +409,7 @@ assess_physical_population_stability(const Lyt& lyt, const assess_physical_popul
 
     detail::assess_physical_population_stability_impl<Lyt> p{lyt, params};
     return p.run();
-};
+}
 
 }  // namespace fiction
 

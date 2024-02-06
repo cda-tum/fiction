@@ -131,11 +131,11 @@ int main()  // NOLINT
                     for (const auto& gate : gate_chunk)
                     {
                         temps.push_back(critical_temperature_gate_based(gate, truth_table, ct_params));
-                        operational_domain_stats stats{};
+                        operational_domain_stats op_stats{};
                         const auto               op_domain =
                             operational_domain_flood_fill(gate, truth_table, 0, op_domain_params,
-                                                          operational_domain::parameter_point{5.6, 5}, &stats);
-                        op_domains.push_back(stats.percentual_operational_area);
+                                                          operational_domain::parameter_point{5.6, 5}, &op_stats);
+                        op_domains.push_back(op_stats.percentual_operational_area);
                         const auto maximum_defect_influence_arsenic =
                             maximum_defect_influence_position_and_distance_of_sidb_gate(
                                 gate, truth_table, defect_avoidance_params_arsenic);
@@ -172,7 +172,7 @@ int main()  // NOLINT
                 };
 
                 // Define the number of threads to use
-                const size_t num_threads = 5;
+                const size_t num_threads = 10;
                 const size_t chunk_size  = (all_gate.size() + num_threads - 1) / num_threads;  // Calculate chunk size
 
                 // A vector to store threads
