@@ -217,7 +217,7 @@ int main()  // NOLINT
                 };
 
                 // Define the number of threads to use
-                const size_t num_threads = 10;
+                const size_t num_threads = 5;
                 const size_t chunk_size  = (all_gate.size() + num_threads - 1) / num_threads;  // Calculate chunk size
 
                 // A vector to store threads
@@ -307,7 +307,7 @@ int main()  // NOLINT
                 {
                     csvFile << temps[k] << "," << op_domains[k] << "," << pop_stability_negative_to_neutral[k] << ","
                             << pop_stability_neutral_to_negative[k] << "," << defect_influence_arsenic[k] << ","
-                            << defect_influence_vacancy[k] << runtime[k] << "\n";
+                            << defect_influence_vacancy[k] << "," << runtime[k] << "\n";
 
                     // Update mean, max, min for temps
                     meanTemp += temps[k];
