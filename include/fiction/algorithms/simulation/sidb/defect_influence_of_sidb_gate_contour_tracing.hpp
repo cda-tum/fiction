@@ -22,7 +22,7 @@ namespace fiction
 struct defect_influence_params
 {
     maximum_defect_influence_distance_params defect_influence_params{};
-    is_operational_params                    is_operational_params{};
+    is_operational_params                    op_params{};
     detect_bdl_pairs_params                  bdl_pairs_params{};
 };
 
@@ -246,7 +246,7 @@ class defect_influence_impl
         ++num_evaluated_defect_positions;
 
         layout.assign_sidb_defect(c, params.defect_influence_params.defect);
-        const auto& [status, sim_calls] = is_operational(layout, truth_table, params.is_operational_params);
+        const auto& [status, sim_calls] = is_operational(layout, truth_table, params.op_params);
         layout.assign_sidb_defect(c, sidb_defect{sidb_defect_type::NONE});
         num_simulator_invocations += sim_calls;
 
