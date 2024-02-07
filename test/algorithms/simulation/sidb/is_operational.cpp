@@ -5,8 +5,11 @@
 #include <catch2/catch_template_test_macros.hpp>
 
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
+#include <fiction/technology/cell_technologies.hpp>
 #include <fiction/traits.hpp>
+#include <fiction/types.hpp>
 #include <fiction/utils/truth_table_utils.hpp>
 
 using namespace fiction;
@@ -161,7 +164,7 @@ TEST_CASE("Bestagon CROSSING gate", "[is-operational]")
 
 TEST_CASE("Bestagon AND gate", "[is-operational]")
 {
-    using layout = sidb_cell_clk_lyt_siqad;
+    using layout = sidb_defect_cell_clk_lyt_siqad;
 
     layout lyt{};
 
@@ -194,16 +197,41 @@ TEST_CASE("Bestagon AND gate", "[is-operational]")
 
     lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
 
-    CHECK(lyt.num_cells() == 23);
+    const sidb_simulation_parameters params{2, -0.32};
 
-    CHECK(
-        is_operational(lyt, std::vector<tt>{create_and_tt()},
-                       is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT})
-            .first == operational_status::OPERATIONAL);
-    CHECK(
-        is_operational(lyt, std::vector<tt>{create_and_tt()},
-                       is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT})
-            .first == operational_status::NON_OPERATIONAL);
+    SECTION("Without defects")
+    {
+        CHECK(lyt.num_cells() == 23);
+
+        CHECK(is_operational(
+                  lyt, std::vector<tt>{create_and_tt()},
+                  is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT})
+                  .first == operational_status::OPERATIONAL);
+        CHECK(is_operational(
+                  lyt, std::vector<tt>{create_and_tt()},
+                  is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT})
+                  .first == operational_status::NON_OPERATIONAL);
+    }
+    SECTION("With defects")
+    {
+        lyt.assign_sidb_defect({3, 16, 1},
+                               sidb_defect{sidb_defect_type::UNKNOWN, -1, params.epsilon_r, params.lambda_tf});
+        CHECK(is_operational(lyt, std::vector<tt>{create_and_tt()},
+                             is_operational_params{params, sidb_simulation_engine::QUICKEXACT})
+                  .first == operational_status::OPERATIONAL);
+
+        // move defect one to the right
+        lyt.move_sidb_defect({3, 16, 1}, {4, 16, 1});
+        CHECK(is_operational(lyt, std::vector<tt>{create_and_tt()},
+                             is_operational_params{params, sidb_simulation_engine::QUICKEXACT})
+                  .first == operational_status::OPERATIONAL);
+
+        // move defect one to the right
+        lyt.move_sidb_defect({4, 16, 1}, {5, 16, 1});
+        CHECK(is_operational(lyt, std::vector<tt>{create_and_tt()},
+                             is_operational_params{params, sidb_simulation_engine::QUICKEXACT})
+                  .first == operational_status::NON_OPERATIONAL);
+    }
 }
 
 TEST_CASE("Not working diagonal Wire", "[is-operational]")

@@ -9,7 +9,9 @@
 
 #include <fiction/algorithms/path_finding/distance.hpp>
 #include <fiction/algorithms/simulation/sidb/maximum_defect_influence_position_and_distance.hpp>
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
+#include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/physical_constants.hpp>
 #include <fiction/technology/sidb_defects.hpp>
 #include <fiction/utils/layout_utils.hpp>
@@ -155,7 +157,7 @@ TEST_CASE("Test influence distance function", "[maximum-defect-influence-positio
     }
 }
 
-TEST_CASE("Test influence distance function for Gate")
+TEST_CASE("Bestagon AND Gate influence distance function", "[maximum-defect-influence-position-and-distance]")
 {
     sidb_cell_clk_lyt_siqad lyt{};
 
@@ -191,8 +193,23 @@ TEST_CASE("Test influence distance function for Gate")
     const sidb_defect                              defect{sidb_defect_type::UNKNOWN, -1, 5.6, 5.0};
     const maximum_defect_influence_distance_params sim_params{defect, sidb_simulation_parameters{2, -0.32}, {20, 4}};
 
-    maximum_defect_influence_distance_stats stats{};
+    SECTION("input 00")
+    {
+        maximum_defect_influence_distance_stats stats{};
+        const auto [defect_pos, distance] = maximum_defect_influence_position_and_distance(lyt, sim_params, &stats);
+        std::cout << fmt::format("{} {} {} {}", defect_pos.x, defect_pos.y, defect_pos.z, distance) << std::endl;
+        CHECK(mockturtle::to_seconds(stats.time_total) > 1.0);
+    }
+    SECTION("input 01")
+    {
 
-    const auto [defect_pos, distance] = maximum_defect_influence_position_and_distance(lyt, sim_params, &stats);
-    CHECK(mockturtle::to_seconds(stats.time_total) > 1.0);
+    }
+    SECTION("input 10")
+    {
+
+    }
+    SECTION("input 11")
+    {
+
+    }
 }
