@@ -18,6 +18,7 @@
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/io/print_layout.hpp>
 #include <fiction/io/read_sqd_layout.hpp>
+#include <fiction/io/write_defect_operational_domain.hpp>
 #include <fiction/io/write_sqd_layout.hpp>
 #include <fiction/technology/sidb_defects.hpp>
 #include <fiction/types.hpp>
@@ -84,12 +85,12 @@ int main()  // NOLINT
     const maximum_defect_influence_distance_params defect_avoidance_params_arsenic{
         sidb_defect{sidb_defect_type::UNKNOWN, 1, 9.7, 2.1},
         params.phys_params,
-        {20, 20}};
+        {50, 20}};
 
     const maximum_defect_influence_distance_params defect_avoidance_params_vacancy{
         sidb_defect{sidb_defect_type::SI_VACANCY, -1, 10.6, 5.9},
         params.phys_params,
-        {20, 20}};
+        {50, 20}};
 
     uint64_t truth_counter = 0;
 
@@ -110,6 +111,7 @@ int main()  // NOLINT
             std::vector<double> defect_influence_vacancy          = {};
             std::vector<double> pop_stability_neutral_to_negative = {};
             std::vector<double> pop_stability_negative_to_neutral = {};
+            std::vector<double> runtime = {};
             {
                 mockturtle::stopwatch stop{time_total};
 
@@ -126,11 +128,19 @@ int main()  // NOLINT
                 {
                     // Local vectors to store calculated metrics
                     std::vector<double> temps_local;
+                    temps_local.reserve(gate_chunk.size());
                     std::vector<double> op_domains_local;
+                    op_domains_local.reserve(gate_chunk.size());
                     std::vector<double> defect_influence_arsenic_local;
+                    defect_influence_arsenic_local.reserve(gate_chunk.size());
                     std::vector<double> defect_influence_vacancy_local;
+                    defect_influence_vacancy_local.reserve(gate_chunk.size());
                     std::vector<double> pop_stability_neutral_to_negative_local;
+                    pop_stability_neutral_to_negative_local.reserve(gate_chunk.size());
                     std::vector<double> pop_stability_negative_to_neutral_local;
+                    pop_stability_negative_to_neutral_local.reserve(gate_chunk.size());
+                    std::vector<double> runtime_local;
+                    runtime.reserve(gate_chunk.size());
 
                     for (const auto& gate : gate_chunk)
                     {
@@ -151,6 +161,20 @@ int main()  // NOLINT
                             &arsenic_stats);
                         std::cout << fmt::format("runtime: {}", mockturtle::to_seconds(arsenic_stats.time_total))
                                   << '\n';
+                        runtime_local.push_back(mockturtle::to_seconds(arsenic_stats.time_total));
+//                        if (mockturtle::to_seconds(arsenic_stats.time_total) < 0.4)
+//                        {
+//                            write_operational_domain_params write_params{};
+//                            write_params.operational_tag     = "1";
+//                            write_params.non_operational_tag = "0";
+//                            write_operational_domain(
+//                                defect_influence_domain_arsenic,
+//                                "/Users/jandrewniok/CLionProjects/fiction_copy/fiction/experiments/test_defect_op.csv",
+//                                write_params);
+//                            write_sqd_layout(
+//                                gate,
+//                                "/Users/jandrewniok/CLionProjects/fiction_copy/fiction/experiments/test_defect_op.sqd");
+//                        }
 
                         defect_influence_arsenic.push_back(
                             max_min_avoidance_distance(siqad_gate, defect_influence_domain_arsenic));
@@ -175,6 +199,7 @@ int main()  // NOLINT
                     const std::lock_guard<std::mutex> lock(mtx);
 
                     // Append local vectors to global vectors
+                    runtime.insert(runtime.end(), runtime_local.begin(), runtime_local.end());
                     temps.insert(temps.end(), temps_local.begin(), temps_local.end());
                     op_domains.insert(op_domains.end(), op_domains_local.begin(), op_domains_local.end());
                     defect_influence_arsenic.insert(defect_influence_arsenic.end(),
@@ -192,7 +217,7 @@ int main()  // NOLINT
                 };
 
                 // Define the number of threads to use
-                const size_t num_threads = 1;
+                const size_t num_threads = 10;
                 const size_t chunk_size  = (all_gate.size() + num_threads - 1) / num_threads;  // Calculate chunk size
 
                 // A vector to store threads
@@ -262,7 +287,7 @@ int main()  // NOLINT
 
                 // Write headers to the CSV file
                 csvFile << "temp,op,popstab_neg_to_neu,popstab_neu_to_neg,defect_influence_arsenic,defect_influence_"
-                           "vacancy\n";
+                           "vacancy,runtime\n";
 
                 // Write data to the CSV file and calculate mean, max, min
                 double meanTemp = 0.0, maxTemp = std::numeric_limits<double>::min(),
@@ -282,7 +307,7 @@ int main()  // NOLINT
                 {
                     csvFile << temps[k] << "," << op_domains[k] << "," << pop_stability_negative_to_neutral[k] << ","
                             << pop_stability_neutral_to_negative[k] << "," << defect_influence_arsenic[k] << ","
-                            << defect_influence_vacancy[k] << "\n";
+                            << defect_influence_vacancy[k] << runtime[k] << "\n";
 
                     // Update mean, max, min for temps
                     meanTemp += temps[k];

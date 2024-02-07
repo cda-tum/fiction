@@ -199,22 +199,22 @@ class design_sidb_gates_impl
         futures.reserve(all_combinations.size());
 
         // Start asynchronous tasks to process combinations in parallel
-        //        for (const auto& combination : all_combinations)
-        //        {
-        //            futures.emplace_back(
-        //                std::async(std::launch::async, add_combination_to_layout_and_check_operation, combination));
-        //        }
-
         for (const auto& combination : all_combinations)
         {
-            add_combination_to_layout_and_check_operation(combination);
+            futures.emplace_back(
+                std::async(std::launch::async, add_combination_to_layout_and_check_operation, combination));
         }
 
-        // Wait for all tasks to finish
-        //        for (auto& future : futures)
+        //        for (const auto& combination : all_combinations)
         //        {
-        //            future.wait();
+        //            add_combination_to_layout_and_check_operation(combination);
         //        }
+
+        // Wait for all tasks to finish
+        for (auto& future : futures)
+        {
+            future.wait();
+        }
 
         return designed_gate_layouts;
     }
@@ -577,7 +577,7 @@ class design_sidb_gates_impl
 template <typename Lyt, typename TT>
 [[nodiscard]] std::vector<Lyt> design_sidb_gates(const Lyt& skeleton, const std::vector<TT>& spec,
                                                  const design_sidb_gates_params<Lyt>& params = {},
-                                                 design_sidb_gates_stats*             pst = nullptr) noexcept
+                                                 design_sidb_gates_stats*             pst    = nullptr) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");

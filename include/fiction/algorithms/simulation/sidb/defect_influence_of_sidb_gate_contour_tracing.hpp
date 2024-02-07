@@ -152,6 +152,9 @@ class defect_influence_impl
         auto nw = fiction::siqad::to_fiction_coord<cube::coord_t>(bb.get_min());  // north-west cell
         auto se = fiction::siqad::to_fiction_coord<cube::coord_t>(bb.get_max());  // south-east cell
 
+        nw_layout = nw;
+        se_layout = se;
+
         // shift nw and se cell by the additional scanning area to cover an area that is larger than the gate area.
         nw.x = nw.x - params.defect_influence_params.additional_scanning_area.first;
         nw.y = nw.y - params.defect_influence_params.additional_scanning_area.second;
@@ -193,9 +196,13 @@ class defect_influence_impl
     find_non_operational_defect_position_via_random_sampling(const std::size_t samples) noexcept
     {
         std::set<typename Lyt::cell> random_cells{};
+        auto left = nw_layout;
+        auto right = se_layout;
+        left.y = 16;
+        right.x = 14;
         while (random_cells.size() < samples)
         {
-            const auto random = random_coordinate(nw_cell, se_cell);
+            const auto random = random_coordinate(left, right);
             if (layout.is_empty_cell(random))
             {
                 random_cells.insert(random);
@@ -287,7 +294,6 @@ class defect_influence_impl
             const auto operational_status = is_defect_position_operational(current_defect_position);
 
             layout.assign_sidb_defect(current_defect_position, sidb_defect{sidb_defect_type::NONE});
-            ;
 
             if (operational_status == operational_status::NON_OPERATIONAL)
             {
@@ -400,7 +406,11 @@ class defect_influence_impl
 
     typename Lyt::cell nw_cell{};
 
+    typename Lyt::cell nw_layout{};
+
     typename Lyt::cell se_cell{};
+
+    typename Lyt::cell se_layout{};
 
     typename Lyt::cell current_defect_position{};
 
