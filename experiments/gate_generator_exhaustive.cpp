@@ -59,11 +59,17 @@ int main()  // NOLINT
 
     params.maximal_random_solutions = 100;
 
-    const auto truth_tables = std::vector<std::vector<tt>>{
-        std::vector<tt>{create_and_tt()},  std::vector<tt>{create_xor_tt()}, std::vector<tt>{create_or_tt()},
-        std::vector<tt>{create_xnor_tt()}, std::vector<tt>{create_nor_tt()}, std::vector<tt>{create_nand_tt()},
-        std::vector<tt>{create_lt_tt()},   std::vector<tt>{create_gt_tt()},  std::vector<tt>{create_le_tt()},
-        std::vector<tt>{create_ge_tt()}};
+    //    const auto truth_tables = std::vector<std::vector<tt>>{std::vector<tt>{create_or_tt()},
+    //        std::vector<tt>{create_xnor_tt()}, std::vector<tt>{create_nor_tt()}, std::vector<tt>{create_nand_tt()},
+    //        std::vector<tt>{create_lt_tt()},   std::vector<tt>{create_gt_tt()},  std::vector<tt>{create_le_tt()},
+    //        std::vector<tt>{create_ge_tt()}};
+
+//    const auto truth_tables =
+//        std::vector<std::vector<tt>>{std::vector<tt>{create_lt_tt()}, std::vector<tt>{create_gt_tt()},
+//                                     std::vector<tt>{create_le_tt()}, std::vector<tt>{create_ge_tt()}};
+
+    const auto truth_tables =
+            std::vector<std::vector<tt>>{std::vector<tt>{create_nand_tt()}};
 
     const critical_temperature_params ct_params{sidb_simulation_parameters{
         2, params.phys_params.mu_minus, params.phys_params.epsilon_r, params.phys_params.lambda_tf}};
@@ -92,12 +98,12 @@ int main()  // NOLINT
         params.phys_params,
         {50, 20}};
 
-    uint64_t truth_counter = 0;
+    uint64_t truth_counter = 5;
 
     for (const auto& truth_table : truth_tables)
     {
         std::cout << fmt::format("truth counter: {}", truth_counter) << '\n';
-        for (auto num_sidbs = 2u; num_sidbs < 5; num_sidbs++)
+        for (auto num_sidbs = 2u; num_sidbs < 7; num_sidbs++)
         {
             std::cout << fmt::format("num sidbs: {}", num_sidbs) << '\n';
             params.number_of_sidbs = num_sidbs;
@@ -111,7 +117,7 @@ int main()  // NOLINT
             std::vector<double> defect_influence_vacancy          = {};
             std::vector<double> pop_stability_neutral_to_negative = {};
             std::vector<double> pop_stability_negative_to_neutral = {};
-            std::vector<double> runtime = {};
+            std::vector<double> runtime                           = {};
             {
                 mockturtle::stopwatch stop{time_total};
 
@@ -144,12 +150,12 @@ int main()  // NOLINT
 
                     for (const auto& gate : gate_chunk)
                     {
-                        temps.push_back(critical_temperature_gate_based(gate, truth_table, ct_params));
+                        temps_local.push_back(critical_temperature_gate_based(gate, truth_table, ct_params));
                         operational_domain_stats op_stats{};
                         const auto               op_domain =
                             operational_domain_flood_fill(gate, truth_table, 0, op_domain_params,
                                                           operational_domain::parameter_point{5.6, 5}, &op_stats);
-                        op_domains.push_back(op_stats.percentual_operational_area);
+                        op_domains_local.push_back(op_stats.percentual_operational_area);
 
                         defect_influence_stats arsenic_stats{};
                         const auto siqad_gate = convert_to_fiction_coordinates<sidb_cell_clk_lyt_cube>(gate);
@@ -162,21 +168,21 @@ int main()  // NOLINT
                         std::cout << fmt::format("runtime: {}", mockturtle::to_seconds(arsenic_stats.time_total))
                                   << '\n';
                         runtime_local.push_back(mockturtle::to_seconds(arsenic_stats.time_total));
-//                        if (mockturtle::to_seconds(arsenic_stats.time_total) < 0.4)
-//                        {
-//                            write_operational_domain_params write_params{};
-//                            write_params.operational_tag     = "1";
-//                            write_params.non_operational_tag = "0";
-//                            write_operational_domain(
-//                                defect_influence_domain_arsenic,
-//                                "/Users/jandrewniok/CLionProjects/fiction_copy/fiction/experiments/test_defect_op.csv",
-//                                write_params);
-//                            write_sqd_layout(
-//                                gate,
-//                                "/Users/jandrewniok/CLionProjects/fiction_copy/fiction/experiments/test_defect_op.sqd");
-//                        }
+                        //                        if (mockturtle::to_seconds(arsenic_stats.time_total) < 0.4)
+                        //                        {
+                        //                            write_operational_domain_params write_params{};
+                        //                            write_params.operational_tag     = "1";
+                        //                            write_params.non_operational_tag = "0";
+                        //                            write_operational_domain(
+                        //                                defect_influence_domain_arsenic,
+                        //                                "/Users/jandrewniok/CLionProjects/fiction_copy/fiction/experiments/test_defect_op.csv",
+                        //                                write_params);
+                        //                            write_sqd_layout(
+                        //                                gate,
+                        //                                "/Users/jandrewniok/CLionProjects/fiction_copy/fiction/experiments/test_defect_op.sqd");
+                        //                        }
 
-                        defect_influence_arsenic.push_back(
+                        defect_influence_arsenic_local.push_back(
                             max_min_avoidance_distance(siqad_gate, defect_influence_domain_arsenic));
 
                         defect_influence_stats vacancy_stats{};
@@ -186,12 +192,12 @@ int main()  // NOLINT
                                 defect_avoidance_params_vacancy,
                                 is_operational_params{defect_avoidance_params_arsenic.physical_params}},
                             &vacancy_stats);
-                        defect_influence_vacancy.push_back(
+                        defect_influence_vacancy_local.push_back(
                             max_min_avoidance_distance(siqad_gate, defect_influence_domain_vacancy));
 
-                        pop_stability_neutral_to_negative.push_back(
+                        pop_stability_neutral_to_negative_local.push_back(
                             assess_physical_population_stability_sidb_gate(gate, truth_table, assess_params, -1));
-                        pop_stability_negative_to_neutral.push_back(
+                        pop_stability_negative_to_neutral_local.push_back(
                             assess_physical_population_stability_sidb_gate(gate, truth_table, assess_params, 1));
                     }
 
@@ -217,7 +223,7 @@ int main()  // NOLINT
                 };
 
                 // Define the number of threads to use
-                const size_t num_threads = 5;
+                const size_t num_threads = 10;
                 const size_t chunk_size  = (all_gate.size() + num_threads - 1) / num_threads;  // Calculate chunk size
 
                 // A vector to store threads
@@ -241,6 +247,8 @@ int main()  // NOLINT
                 {
                     thread.join();
                 }
+
+                std::cout << "determination is finished" << std::endl;
 
                 // Start asynchronous tasks to process combinations in parallel
                 //                for (const auto& gate : all_gate)
@@ -270,13 +278,13 @@ int main()  // NOLINT
                 {
                     const auto choose_gate = all_gate[l];
                     write_sqd_layout(choose_gate,
-                                     fmt::format(solution_folder + "/sqd/16_7_1_22_10_numdbs_{}_ttnum_{}_{}.sqd",
+                                     fmt::format(solution_folder + "/sqd/17_7_21_11_numdbs_{}_ttnum_{}_{}.sqd",
                                                  num_sidbs, truth_counter, l));
                 }
 
                 // Open a file for writing
-                std::ofstream csvFile(fmt::format(solution_folder + "/csv/16_7_1_22_10_numdbs_{}_ttnum_{}.csv",
-                                                  num_sidbs, truth_counter));
+                std::ofstream csvFile(
+                    fmt::format(solution_folder + "/csv/17_7_21_11_numdbs_{}_ttnum_{}.csv", num_sidbs, truth_counter));
 
                 // Check if the file is open
                 if (!csvFile.is_open())

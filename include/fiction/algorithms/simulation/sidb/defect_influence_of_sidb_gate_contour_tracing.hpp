@@ -78,7 +78,7 @@ class defect_influence_impl
         mockturtle::stopwatch stop{stats.time_total};
 
         // first, perform random sampling to find an operational starting point
-        const auto non_operational_starting_point = find_non_operational_defect_position_via_random_sampling(samples);
+        const auto non_operational_starting_point = find_operational_defect_position_at_the_top_left_corner();
 
         // if no operational point was found within the specified number of samples, return
         if (!non_operational_starting_point.has_value())
@@ -103,7 +103,7 @@ class defect_influence_impl
         assert(layout.num_defects() == 0 && "defect is added defect");
 
         // find an operational point on the contour starting from the randomly determined starting point
-        const auto contour_starting_point = find_non_operational_defect_position(*non_operational_starting_point);
+        const auto contour_starting_point = find_non_operational_defect_position_moving_right(*non_operational_starting_point);
 
         assert(layout.num_defects() == 0 && "more than one defect");
 
@@ -192,35 +192,49 @@ class defect_influence_impl
         return std::nullopt;
     }
 
+    [[nodiscard]] std::optional<typename Lyt::cell> find_operational_defect_position_at_the_top_left_corner() noexcept
+    {
+        auto startin_point = nw_cell;
+        startin_point.y = se_layout.y;
+        layout.assign_sidb_defect(startin_point, params.defect_influence_params.defect);
+        // determine the operational status
+        const auto operational_value = is_defect_position_operational(startin_point);
+        layout.assign_sidb_defect(startin_point, sidb_defect{sidb_defect_type::NONE});
+
+        // if the parameter combination is operational, return its step values in x and y dimension
+        if (operational_value == operational_status::OPERATIONAL)
+        {
+            return startin_point;
+        }
+
+        return std::nullopt;
+    }
+
     [[nodiscard]] std::optional<typename Lyt::cell>
     find_non_operational_defect_position_via_random_sampling(const std::size_t samples) noexcept
     {
         std::set<typename Lyt::cell> random_cells{};
-        auto left = nw_layout;
-        auto right = se_layout;
-        left.y = 16;
-        right.x = 14;
+        auto                         left  = nw_layout;
+        auto                         right = se_layout;
+        left.y                             = 11;
+        right.x                            = 14;
         while (random_cells.size() < samples)
         {
             const auto random = random_coordinate(left, right);
             if (layout.is_empty_cell(random))
             {
                 random_cells.insert(random);
-            }
-        }
+                layout.assign_sidb_defect(random, params.defect_influence_params.defect);
+                // determine the operational status
+                const auto operational_value = is_defect_position_operational(random);
 
-        for (const auto& random_cell : random_cells)
-        {
-            layout.assign_sidb_defect(random_cell, params.defect_influence_params.defect);
-            // determine the operational status
-            const auto operational_value = is_defect_position_operational(random_cell);
+                layout.assign_sidb_defect(random, sidb_defect{sidb_defect_type::NONE});
 
-            layout.assign_sidb_defect(random_cell, sidb_defect{sidb_defect_type::NONE});
-
-            // if the parameter combination is operational, return its step values in x and y dimension
-            if (operational_value == operational_status::NON_OPERATIONAL)
-            {
-                return random_cell;
+                // if the parameter combination is operational, return its step values in x and y dimension
+                if (operational_value == operational_status::NON_OPERATIONAL)
+                {
+                    return random;
+                }
             }
         }
 
@@ -253,6 +267,7 @@ class defect_influence_impl
         ++num_evaluated_defect_positions;
 
         layout.assign_sidb_defect(c, params.defect_influence_params.defect);
+        const auto num_defects          = layout.num_defects();
         const auto& [status, sim_calls] = is_operational(layout, truth_table, params.op_params);
         layout.assign_sidb_defect(c, sidb_defect{sidb_defect_type::NONE});
         num_simulator_invocations += sim_calls;
@@ -275,6 +290,39 @@ class defect_influence_impl
         }
 
         return std::nullopt;
+    }
+
+    [[nodiscard]] typename Lyt::cell
+    find_non_operational_defect_position_moving_right(const typename Lyt::cell& starting_defect_position) noexcept
+    {
+        auto latest_non_operational_defect_position = starting_defect_position;
+        // layout.assign_sidb_defect(starting_defect_position, params.defect_influence_params.defect);
+        previous_defect_position = starting_defect_position;
+
+        // move towards the left border of the parameter range
+        for (int64_t x = starting_defect_position.x; x <= se_layout.x; x++)
+        {
+            current_defect_position = {x, starting_defect_position.y};
+
+            layout.assign_sidb_defect(current_defect_position, params.defect_influence_params.defect);
+
+            const auto operational_status = is_defect_position_operational(current_defect_position);
+
+            layout.assign_sidb_defect(current_defect_position, sidb_defect{sidb_defect_type::NONE});
+
+            if (operational_status == operational_status::OPERATIONAL)
+            {
+                latest_non_operational_defect_position = current_defect_position;
+            }
+            else
+            {
+                return current_defect_position;
+            }
+        }
+
+        // if no boundary point was found, the operational area extends outside the parameter range
+        // return the latest operational point
+        return latest_non_operational_defect_position;
     }
 
     [[nodiscard]] typename Lyt::cell
