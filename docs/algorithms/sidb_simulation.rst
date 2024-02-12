@@ -18,6 +18,7 @@ Simulation Result
 
 **Header:** ``fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp``
 
+.. doxygenenum:: fiction::lattice_orientation
 .. doxygenstruct:: fiction::sidb_simulation_result
    :members:
 
@@ -79,6 +80,12 @@ Energy Calculation
 **Header:** ``fiction/algorithms/simulation/sidb/is_ground_state.hpp``
 
 .. doxygenfunction:: fiction::is_ground_state
+
+
+**Header:** ``fiction/algorithms/simulation/sidb/determine_the_groundstate_from_simulation_results.hpp``
+
+.. doxygenfunction:: fiction::determine_the_groundstate_from_simulation_results
+
 
 
 Temperature Behavior
