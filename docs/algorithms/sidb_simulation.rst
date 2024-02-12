@@ -87,7 +87,6 @@ Energy Calculation
 .. doxygenfunction:: fiction::determine_the_groundstate_from_simulation_results
 
 
-
 Temperature Behavior
 ####################
 
