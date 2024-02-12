@@ -32,8 +32,8 @@ template <typename Lyt>
 
     if constexpr (has_siqad_coord_v<Lyt>)
     {
-        const auto x = (c.x * sp.lat_a) * 0.1;
-        const auto y = (c.y * sp.lat_b + c.z * sp.lat_c) * 0.1;
+        const auto x = (c.x * sp.lat_a + c.z * sp.lat_c.first) * 0.1;
+        const auto y = (c.y * sp.lat_b + c.z * sp.lat_c.second) * 0.1;
 
         return {x, y};
     }
@@ -41,8 +41,8 @@ template <typename Lyt>
     {
         const auto cell_in_siqad = siqad::to_siqad_coord(c);
 
-        const auto x = (cell_in_siqad.x * sp.lat_a) * 0.1;
-        const auto y = (cell_in_siqad.y * sp.lat_b + cell_in_siqad.z * sp.lat_c) * 0.1;
+        const auto x = (cell_in_siqad.x * sp.lat_a + c.z * sp.lat_c.first) * 0.1;
+        const auto y = (cell_in_siqad.y * sp.lat_b + cell_in_siqad.z * sp.lat_c.second) * 0.1;
 
         return {x, y};
     }

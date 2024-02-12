@@ -5,6 +5,7 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#include <fiction/algorithms/simulation/sidb/determine_the_groundstate_from_simulation_results.hpp>
 #include <fiction/algorithms/simulation/sidb/energy_distribution.hpp>
 #include <fiction/algorithms/simulation/sidb/quicksim.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
@@ -1003,4 +1004,41 @@ TEMPLATE_TEST_CASE(
         check_for_runtime_measurement(simulation_results);
         check_charge_configuration(simulation_results);
     }
+}
+
+TEMPLATE_TEST_CASE(
+    "QuickSim gate simulation of Si-111 surface", "[quickexact]",
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
+    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+{
+    TestType lyt{};
+    lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({1, 1, 1}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({2, 2, 1}, TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type({8, 0, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 1, 1}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({5, 2, 1}, TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type({4, 8, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({4, 10, 0}, TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type({4, 14, 0}, TestType::cell_type::NORMAL);
+
+    const quicksim_params params{sidb_simulation_parameters{2, -0.32, 5.6, 5, lattice_orientation::SI_111}};
+
+    const auto simulation_results = quicksim<TestType>(lyt, params);
+
+    const auto ground_state = determine_the_groundstate_from_simulation_results(simulation_results);
+    REQUIRE(ground_state.size() == 1);
+
+    CHECK(ground_state.front().get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
+    CHECK(ground_state.front().get_charge_state({1, 1, 1}) == sidb_charge_state::NEUTRAL);
+    CHECK(ground_state.front().get_charge_state({2, 2, 1}) == sidb_charge_state::NEGATIVE);
+    CHECK(ground_state.front().get_charge_state({8, 0, 0}) == sidb_charge_state::NEGATIVE);
+    CHECK(ground_state.front().get_charge_state({6, 1, 1}) == sidb_charge_state::NEUTRAL);
+    CHECK(ground_state.front().get_charge_state({5, 2, 1}) == sidb_charge_state::NEGATIVE);
+    CHECK(ground_state.front().get_charge_state({4, 8, 0}) == sidb_charge_state::NEUTRAL);
+    CHECK(ground_state.front().get_charge_state({4, 10, 0}) == sidb_charge_state::NEGATIVE);
+    CHECK(ground_state.front().get_charge_state({4, 14, 0}) == sidb_charge_state::NEGATIVE);
 }

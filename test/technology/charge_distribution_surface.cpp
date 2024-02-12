@@ -517,16 +517,18 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
         CHECK(charge_layout.get_phys_params().lambda_tf == 5.0);
         CHECK(charge_layout.get_phys_params().lat_a == 3.84);
         CHECK(charge_layout.get_phys_params().lat_b == 7.68);
-        CHECK(charge_layout.get_phys_params().lat_c == 2.25);
+        CHECK(charge_layout.get_phys_params().lat_c.second == 2.25);
 
-        charge_layout.assign_physical_parameters(sidb_simulation_parameters{3, -0.4, 5.1, 5.5, 1, 2, 3});
+        charge_layout.assign_physical_parameters(
+            sidb_simulation_parameters{3, -0.4, 5.1, 5.5, lattice_orientation::SI_111});
         CHECK(charge_layout.get_phys_params().base == 3);
         CHECK(charge_layout.get_phys_params().mu_minus == -0.4);
         CHECK(charge_layout.get_phys_params().epsilon_r == 5.1);
         CHECK(charge_layout.get_phys_params().lambda_tf == 5.5);
-        CHECK(charge_layout.get_phys_params().lat_a == 1);
-        CHECK(charge_layout.get_phys_params().lat_b == 2);
-        CHECK(charge_layout.get_phys_params().lat_c == 3);
+        CHECK(charge_layout.get_phys_params().lat_a == 6.65);
+        CHECK(charge_layout.get_phys_params().lat_b == 3.84);
+        CHECK(charge_layout.get_phys_params().lat_c.first == 3.3255);
+        CHECK(charge_layout.get_phys_params().lat_c.second == 1.92);
     }
 
     SECTION("Distance matrix")
@@ -550,10 +552,10 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
         CHECK_THAT(charge_layout.get_nm_distance_between_sidbs({1, 0, 0}, {1, 0, 0}),
                    Catch::Matchers::WithinAbs(0.0, 0.00001));
         CHECK_THAT(charge_layout.get_nm_distance_between_sidbs({0, 0, 0}, {1, 1, 1}),
-                   Catch::Matchers::WithinAbs(
-                       std::hypot(sidb_simulation_parameters{}.lat_a * 0.1,
-                                  sidb_simulation_parameters{}.lat_b * 0.1 + sidb_simulation_parameters{}.lat_c * 0.1),
-                       0.00001));
+                   Catch::Matchers::WithinAbs(std::hypot(sidb_simulation_parameters{}.lat_a * 0.1,
+                                                         sidb_simulation_parameters{}.lat_b * 0.1 +
+                                                             sidb_simulation_parameters{}.lat_c.second * 0.1),
+                                              0.00001));
         CHECK_THAT(charge_layout.get_nm_distance_between_sidbs({1, 1, 1}, {1, 1, 1}),
                    Catch::Matchers::WithinAbs(0.0, 0.00001));
     }
@@ -945,7 +947,7 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
     SECTION("using chargeless and normal potential function")
     {
         TestType                         lyt_new{{11, 11}};
-        const sidb_simulation_parameters params{3, -0.32, 5.0, 3.84, 7.68, 2.25};
+        const sidb_simulation_parameters params{3, -0.32, 5.0};
 
         lyt_new.assign_cell_type({0, 0, 1}, TestType::cell_type::NORMAL);
         lyt_new.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
@@ -1434,18 +1436,12 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects, part one", 
         CHECK(charge_layout.get_phys_params().mu_minus == -0.2);
         CHECK(charge_layout.get_phys_params().epsilon_r == 5.6);
         CHECK(charge_layout.get_phys_params().lambda_tf == 5.0);
-        CHECK(charge_layout.get_phys_params().lat_a == 3.84);
-        CHECK(charge_layout.get_phys_params().lat_b == 7.68);
-        CHECK(charge_layout.get_phys_params().lat_c == 2.25);
 
-        charge_layout.assign_physical_parameters(sidb_simulation_parameters{3, -0.4, 5.1, 5.5, 1, 2, 3});
+        charge_layout.assign_physical_parameters(sidb_simulation_parameters{3, -0.4, 5.1, 5.5});
         CHECK(charge_layout.get_phys_params().base == 3);
         CHECK(charge_layout.get_phys_params().mu_minus == -0.4);
         CHECK(charge_layout.get_phys_params().epsilon_r == 5.1);
         CHECK(charge_layout.get_phys_params().lambda_tf == 5.5);
-        CHECK(charge_layout.get_phys_params().lat_a == 1);
-        CHECK(charge_layout.get_phys_params().lat_b == 2);
-        CHECK(charge_layout.get_phys_params().lat_c == 3);
     }
 
     SECTION("Distance matrix")
@@ -1468,10 +1464,10 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects, part one", 
         CHECK_THAT(charge_layout.get_nm_distance_between_sidbs({1, 0, 0}, {1, 0, 0}),
                    Catch::Matchers::WithinAbs(0.0, 0.00001));
         CHECK_THAT(charge_layout.get_nm_distance_between_sidbs({0, 0, 0}, {1, 1, 1}),
-                   Catch::Matchers::WithinAbs(
-                       std::hypot(sidb_simulation_parameters{}.lat_a * 0.1,
-                                  sidb_simulation_parameters{}.lat_b * 0.1 + sidb_simulation_parameters{}.lat_c * 0.1),
-                       0.00001));
+                   Catch::Matchers::WithinAbs(std::hypot(sidb_simulation_parameters{}.lat_a * 0.1,
+                                                         sidb_simulation_parameters{}.lat_b * 0.1 +
+                                                             sidb_simulation_parameters{}.lat_c.second * 0.1),
+                                              0.00001));
         CHECK_THAT(charge_layout.get_nm_distance_between_sidbs({1, 1, 1}, {1, 1, 1}),
                    Catch::Matchers::WithinAbs(0.0, 0.00001));
     }

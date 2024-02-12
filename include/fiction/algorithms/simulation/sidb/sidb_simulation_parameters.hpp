@@ -9,9 +9,24 @@
 
 #include <cassert>
 #include <cstdint>
+#include <utility>
 
 namespace fiction
 {
+/**
+ * Selector for the available Silicon lattice orientations.
+ */
+enum class lattice_orientation
+{
+    /**
+     * Silicon in 100 direction.
+     */
+    SI_100,
+    /**
+     * Silicon in 111 direction.
+     */
+    SI_111
+};
 
 /**
  * This struct collects all physical parameters for physical SiDB simulations. It can be useful to adjust them,
@@ -33,33 +48,46 @@ struct sidb_simulation_parameters
      * @param c lattice constant in Å.
      */
     constexpr explicit sidb_simulation_parameters(const uint8_t base_number = 3, const double mu = -0.32,
-                                                  const double relative_permittivity = 5.6,
-                                                  const double screening_distance = 5.0, const double a = 3.84,
-                                                  const double b = 7.68, const double c = 2.25) :
-            lat_a{a},
-            lat_b{b},
-            lat_c{c},
+                                                  const double              relative_permittivity = 5.6,
+                                                  const double              screening_distance    = 5.0,
+                                                  const lattice_orientation orientation = lattice_orientation::SI_100) :
             epsilon_r{relative_permittivity},
             lambda_tf{screening_distance},
             mu_minus{mu},
             base{base_number}
 
     {
+        if (orientation == lattice_orientation::SI_100)
+        {
+            lat_a = 3.84;       // in Å
+            lat_b = 7.68;       // in Å
+            lat_c = {0, 2.25};  // in Å
+        }
+        else if (orientation == lattice_orientation::SI_111)
+        {
+            lat_a = 6.65;            // in Å
+            lat_b = 3.84;            // in Å
+            lat_c = {3.3255, 1.92};  // in Å
+        }
+        else
+        {
+            assert(false && "Unknown lattice orientation");
+        }
         assert((base == 2 || base == 3) && "base must be 2 or 3");
     }
 
     /**
      * lat_a is the lattice vector in x-direction (unit: Å).
      */
-    double lat_a;
+    double lat_a{};
     /**
      * lat_b is the lattice vector in y-direction (unit: Å).
      */
-    double lat_b;
+    double lat_b{};
     /**
      * lat_c is the dimer pair separation (unit: Å).
      */
-    double lat_c;
+    std::pair<double, double> lat_c{};
     /**
      * epsilon_r is the electric permittivity. It is a material specific number (unit-less).
      */
