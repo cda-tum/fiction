@@ -4,8 +4,11 @@
 #ifndef FICTION_A_STAR_PR_HPP
 #define FICTION_A_STAR_PR_HPP
 
+#include "fiction/algorithms/network_transformation/fanout_substitution.hpp"
 #include "fiction/algorithms/path_finding/a_star.hpp"
+#include "fiction/algorithms/physical_design/color_routing.hpp"
 #include "fiction/algorithms/physical_design/orthogonal.hpp"
+#include "fiction/algorithms/physical_design/topo_view.hpp"
 #include "fiction/algorithms/verification/equivalence_checking.hpp"
 #include "fiction/io/print_layout.hpp"
 #include "fiction/layouts/bounding_box.hpp"
@@ -15,20 +18,19 @@
 #include "fiction/types.hpp"
 #include "fiction/utils/routing_utils.hpp"
 
-#include <fiction/utils/debug/network_writer.hpp>  // DOT writer for logic networks and layouts
-
 #include <mockturtle/networks/klut.hpp>
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 #include <mockturtle/views/fanout_view.hpp>
-#include <mockturtle/views/topo_view.hpp>
 
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <cstdint>
 #include <iostream>
 #include <queue>
+#include <random>
 #include <tuple>
 #include <unordered_map>
 #include <unordered_set>
@@ -111,24 +113,37 @@ get_possible_actions(Lyt& layout, Ntk& network, std::vector<mockturtle::node<Ntk
 
     if (network.is_pi(actions[current_node]))
     {
-        for (int x = 0; x <= layout.x(); ++x)
+        int count = 0;
+        // for (int k = 0; k <= std::max(layout.x(), layout.y()); ++k)
+        for (int k = 0; k <= layout.x(); k++)
         {
-            fiction::coordinate<Lyt> coord{x, layout.y(), 0};
-            std::vector<int>         tile{x, static_cast<int>(layout.y()), 0};
-
-            if (layout.is_empty_tile(coord))
+            if (k <= layout.x())
             {
-                possible_positions_nodes.push_back(tile);
+                fiction::coordinate<Lyt> coord{k, 0, 0};
+                std::vector<int>         tile{k, 0, 0};
+
+                if (layout.is_empty_tile(coord))
+                {
+                    using dist = twoddwave_distance_functor<Lyt, uint64_t>;
+                    using cost = unit_cost_functor<Lyt, uint8_t>;
+                    static const a_star_params params{true};
+
+                    layout.resize({layout.x() + 1, layout.y() + 1, 1});
+                    fiction::coordinate<Lyt> drain{layout.x(), layout.y(), 0};
+                    auto path_to_drain = fiction::a_star<fiction::layout_coordinate_path<Lyt>>(layout, {coord, drain},
+                                                                                               dist(), cost(), params);
+                    layout.resize({layout.x() - 1, layout.y() - 1, 1});
+
+                    if (!path_to_drain.empty())
+                    {
+                        possible_positions_nodes.push_back(tile);
+                        count++;
+                    }
+                }
             }
-        }
-        for (int y = 0; y < layout.y(); ++y)
-        {
-            fiction::coordinate<Lyt> coord{layout.x(), y, 0};
-            std::vector<int>         tile{static_cast<int>(layout.x()), y, 0};
-
-            if (layout.is_empty_tile(coord))
+            if (count >= 4)
             {
-                possible_positions_nodes.push_back(tile);
+                return possible_positions_nodes;
             }
         }
     }
@@ -159,20 +174,103 @@ get_possible_actions(Lyt& layout, Ntk& network, std::vector<mockturtle::node<Ntk
     }
     else if (preceding_nodes.size() == 1)
     {
+        int  count          = 0;
         int  node           = node_dict[preceding_nodes[0]];
         auto loc            = layout.get_tile(node);
-        auto outgoing_zones = layout.outgoing_clocked_zones(loc);
-        for (const auto& zone : outgoing_zones)
+        // iterate through cartesian layout diagonally
+        for (int k = 0; k < layout.x() + layout.y() + 1; ++k)
         {
-            std::vector<int> tile{zone.x, zone.y, 0};
-            if ((zone.x <= layout.x()) && (zone.y <= layout.y()) && layout.is_empty_tile({zone.x, zone.y, 0}))
+            for (int x = 0; x < k + 1; ++x)
             {
-                possible_positions_nodes.push_back(tile);
+                const auto y = k - x;
+                if ((loc.y + y) <= layout.y() && (loc.x + x) <= layout.x())
+                {
+                    std::vector<int> tile{loc.x + x, loc.y + y, 0};
+                    if (layout.is_empty_tile({loc.x + x, loc.y + y, 0}))
+                    {
+                        using dist = twoddwave_distance_functor<Lyt, uint64_t>;
+                        using cost = unit_cost_functor<Lyt, uint8_t>;
+                        static const a_star_params params{true};
+                        fiction::coordinate<Lyt>   previous{loc.x, loc.y, 0};
+                        fiction::coordinate<Lyt>   new_pos{loc.x + x, loc.y + y, 0};
+                        auto path_to_new_pos = fiction::a_star<fiction::layout_coordinate_path<Lyt>>(
+                            layout, {previous, new_pos}, dist(), cost(), params);
+                        if (!path_to_new_pos.empty())
+                        {
+                            // if (!network.is_fanout(actions[current_node]))
+                            if (true)
+                            {
+                                layout.resize({layout.x() + 1, layout.y() + 1, 1});
+                                fiction::coordinate<Lyt> drain{layout.x(), layout.y(), 0};
+                                auto path_to_drain = fiction::a_star<fiction::layout_coordinate_path<Lyt>>(
+                                    layout, {new_pos, drain}, dist(), cost(), params);
+                                layout.resize({layout.x() - 1, layout.y() - 1, 1});
+
+                                if (!path_to_drain.empty())
+                                {
+                                    possible_positions_nodes.push_back(tile);
+                                    count++;
+                                }
+                            }
+                            else
+                            {
+                                layout.resize({layout.x() + 1, layout.y() + 1, 1});
+                                std::vector<fiction::routing_objective<Lyt>> objectives{};
+                                fiction::coordinate<Lyt>                     drain{layout.x(), layout.y(), 0};
+                                objectives.push_back({new_pos, drain});
+                                fiction::coordinate<Lyt> drain2{layout.x() - 1, layout.y(), 0};
+                                objectives.push_back({new_pos, drain2});
+                                fiction::color_routing_params ps{};
+                                ps.path_limit      = 1;
+                                ps.crossings       = true;
+                                ps.engine          = fiction::graph_coloring_engine::MCS;
+                                const auto success = color_routing<Lyt>(layout, objectives, ps);
+                                layout.resize({layout.x() - 1, layout.y() - 1, 1});
+                                if (success)
+                                {
+                                    possible_positions_nodes.push_back(tile);
+                                    count++;
+                                }
+                            }
+                        }
+                    }
+                }
+                if (count >= 4)
+                {
+                    // for (auto t : possible_positions_nodes){for (auto tt : t){std::cout << tt;}std::cout << "\n";}
+                    return possible_positions_nodes;
+                }
             }
         }
+        /*using dist = twoddwave_distance_functor<Lyt, uint64_t>;
+        using cost = unit_cost_functor<Lyt, uint8_t>;
+        static const a_star_params params{true};
+        auto         start = loc;
+        layout.resize({layout.x() + 1, layout.y() + 1, 1});
+        fiction::tile<Lyt>         end{layout.x(), layout.y(), 0};
+        auto                       path =
+            fiction::a_star<fiction::layout_coordinate_path<Lyt>>(layout, {start, end}, dist(), cost(), params);
+        if (path.empty())
+        {
+            layout.resize({layout.x() - 1, layout.y() - 1, 1});
+            return possible_positions_nodes;
+        }
+        else
+        {
+            // Iterate through the array starting from the second element
+            for (int i = 1; i < sizeof(path) / sizeof(path[0]); ++i) {
+                if (path[i].z == 0){
+                    std::vector<int>         tile{static_cast<int>(path[i].x), static_cast<int>(path[i].y), 0};
+                    possible_positions_nodes.push_back(tile);
+                    layout.resize({layout.x() - 1, layout.y() - 1, 1});
+                    return possible_positions_nodes;
+                }
+            }
+        }*/
     }
     else if (preceding_nodes.size() == 2)
     {
+        int  count  = 0;
         int  node_1 = node_dict[preceding_nodes[0]];
         auto loc_1  = layout.get_tile(node_1);
         int  node_2 = node_dict[preceding_nodes[1]];
@@ -187,16 +285,60 @@ get_possible_actions(Lyt& layout, Ntk& network, std::vector<mockturtle::node<Ntk
         {
             min_y += 1;
         }
-        for (int x = min_x; x <= layout.x(); ++x)
+        for (int k = 0; k < layout.x() + layout.y() + 1; ++k)
         {
-            for (int y = min_y; y <= layout.y(); ++y)
+            for (int x = 0; x < k + 1; ++x)
             {
-                fiction::coordinate<Lyt> coord{x, y, 0};
-                std::vector<int>         tile{x, y, 0};
-
-                if (layout.is_empty_tile(coord))
+                const auto y = k - x;
+                if ((min_y + y) <= layout.y() && (min_x + x) <= layout.x())
                 {
-                    possible_positions_nodes.push_back(tile);
+                    fiction::coordinate<Lyt> coord{min_x + x, min_y + y, 0};
+                    std::vector<int>         tile{min_x + x, min_y + y, 0};
+
+                    if (layout.is_empty_tile(coord))
+                    {
+                        using dist = twoddwave_distance_functor<Lyt, uint64_t>;
+                        using cost = unit_cost_functor<Lyt, uint8_t>;
+                        static const a_star_params params{true};
+                        fiction::tile<Lyt>         start_1{loc_1.x, loc_1.y, loc_1.z};
+                        fiction::tile<Lyt>         start_2{loc_2.x, loc_2.y, loc_2.z};
+                        auto                       path_node_1 = fiction::a_star<fiction::layout_coordinate_path<Lyt>>(
+                            layout, {start_1, coord}, dist(), cost(), params);
+
+                        if (!path_node_1.empty())
+                        {
+                            for (auto el : path_node_1)
+                            {
+                                layout.obstruct_coordinate(el);
+                            }
+
+                            auto path_node_2 = fiction::a_star<fiction::layout_coordinate_path<Lyt>>(
+                                layout, {start_2, coord}, dist(), cost(), params);
+
+                            if (!path_node_2.empty())
+                            {
+                                layout.resize({layout.x() + 1, layout.y() + 1, 1});
+                                fiction::coordinate<Lyt> drain{layout.x(), layout.y(), 0};
+                                auto path_to_drain = fiction::a_star<fiction::layout_coordinate_path<Lyt>>(
+                                    layout, {coord, drain}, dist(), cost(), params);
+                                layout.resize({layout.x() - 1, layout.y() - 1, 1});
+
+                                if (!path_to_drain.empty())
+                                {
+                                    possible_positions_nodes.push_back(tile);
+                                    count++;
+                                }
+                            }
+                            for (auto el : path_node_1)
+                            {
+                                layout.clear_obstructed_coordinate(el);
+                            }
+                        }
+                    }
+                }
+                if (count >= 4)
+                {
+                    return possible_positions_nodes;
                 }
             }
         }
@@ -213,12 +355,29 @@ template <typename Lyt, typename Ntk>
 bool valid_layout(Lyt& layout, Ntk& network, std::unordered_map<mockturtle::node<Ntk>, mockturtle::node<Lyt>> node_dict,
                   bool& placement_possible)
 {
+    /*int count = 0;
+
     for (auto& node : node_dict)
     {
         if ((!layout.is_po_tile(layout.get_tile(node.second)) && (layout.fanout_size(node.second) == 0)) ||
             ((layout.fanout_size(node.second) == 1) && network.is_fanout(node.first)))
         {
-            auto tile  = layout.get_tile(node.second);
+            count++;
+        }
+    }
+    int offset = count;
+    std::vector<fiction::routing_objective<Lyt>> objectives{};
+    layout.resize({layout.x() + count, layout.y() + count, 1});*/
+    for (auto& node : node_dict)
+    {
+        auto tile = layout.get_tile(node.second);
+        if ((!layout.is_po_tile(layout.get_tile(node.second)) && (layout.fanout_size(node.second) == 0)) ||
+            ((layout.fanout_size(node.second) == 1) && network.is_fanout(node.first)))
+        {
+            /*fiction::coordinate<Lyt> start{tile.x, tile.y, tile.z};
+            fiction::coordinate<Lyt> end{layout.x(), layout.y() - count, 0};
+            objectives.push_back({start, end});
+            count--;*/
             using dist = twoddwave_distance_functor<Lyt, uint64_t>;
             using cost = unit_cost_functor<Lyt, uint8_t>;
             static const a_star_params params{true};
@@ -236,7 +395,64 @@ bool valid_layout(Lyt& layout, Ntk& network, std::unordered_map<mockturtle::node
                 return false;
             }
         }
+        if ((layout.fanout_size(node.second) == 0) && network.is_fanout(node.first))
+        {
+            if (!((layout.is_empty_tile({tile.x + 1, tile.y, 0}) ||
+                   (layout.is_empty_tile({tile.x + 1, tile.y, 1}) &&
+                    !layout.is_obstructed_coordinate({tile.x + 1, tile.y, 1}))) &&
+                  (layout.is_empty_tile({tile.x, tile.y + 1, 0}) ||
+                   (layout.is_empty_tile({tile.x, tile.y + 1, 1}) &&
+                    !layout.is_obstructed_coordinate({tile.x, tile.y + 1, 1})))))
+            {
+                placement_possible = false;
+                return false;
+            }
+        }
+        /*if ((layout.fanout_size(node.second) == 1) && network.is_fanout(node.first))
+        {
+            bool               below      = false;
+            fiction::tile<Lyt> lower_tile = {tile.x, tile.y + 1, 0};
+            layout.foreach_fanout(node.second,
+                                  [&layout, &below, &lower_tile](const auto& fout)
+                                  {
+                                      fiction::tile<Lyt> fanout = layout.get_tile(fout);
+                                      if ((fanout.x == lower_tile.x) && (fanout.y == lower_tile.y))
+                                      {
+                                          below = true;
+                                      }
+                                  });
+
+            if (below)
+            {
+
+                if (layout.is_wire_tile(lower_tile) && !layout.is_wire_tile({lower_tile.x, lower_tile.y, 1}) &&
+                    layout.is_obstructed_coordinate({lower_tile.x, lower_tile.y, 1}))
+                {
+                    if (!(layout.is_empty_tile({tile.x + 1, tile.y, 0}) && layout.is_empty_tile({lower_tile.x + 1,
+        lower_tile.y, 0}) && layout.is_empty_tile({tile.x + 2, tile.y, 0}) && layout.is_empty_tile({lower_tile.x + 2,
+        lower_tile.y, 0})))
+                    {
+                        placement_possible = false;
+                        return false;
+                    }
+                }
+            }
+        }*/
     }
+    /*fiction::color_routing_params ps{};
+    ps.path_limit = 10;
+    ps.crossings = true;
+    ps.engine = fiction::graph_coloring_engine::MCS;
+    const auto success = color_routing<Lyt>(layout, objectives, ps);
+    layout.resize({layout.x() - offset, layout.y() - offset, 1});
+    if (success){
+        return true;
+    }
+    else{
+        placement_possible = false;
+        return false;
+    }*/
+
     return true;
 }
 
@@ -285,8 +501,8 @@ void place_node_with_2_inputs(Lyt& layout, Ntk& network, int x, int y, int signa
     }
 }
 
-template <typename Ntk>
-std::tuple<double, bool> calculate_reward(bool placed_node, int current_node,
+template <typename Ntk, typename Lyt>
+std::tuple<double, bool> calculate_reward(Lyt& lyt, bool placed_node, int current_node,
                                           std::vector<mockturtle::node<Ntk>> actions, bool placement_possible,
                                           int& max_placed_nodes)
 {
@@ -297,17 +513,20 @@ std::tuple<double, bool> calculate_reward(bool placed_node, int current_node,
     {
         std::cout << "New best placement: " << current_node << "/" << actions.size() << std::endl;
         max_placed_nodes = current_node;
+        /*std::stringstream print_stream{};
+        print_gate_level_layout(print_stream, lyt, false, false);
+        std::cout << print_stream.str();*/
     }
 
     return std::make_tuple(reward, done);
 }
 
-template <typename Lyt, typename Ntk, typename coord_vector>
-std::pair<double, bool>
-step(std::vector<int> action, Lyt& layout, Ntk& network, bool& placement_possible, int& current_node,
-     std::vector<mockturtle::node<Ntk>> actions, std::vector<std::string> pi_names, std::vector<std::string> po_names,
-     int& current_pi, int& current_po, std::unordered_map<mockturtle::node<Ntk>, mockturtle::node<Lyt>> node_dict,
-     int& max_placed_nodes)
+template <typename Lyt, typename Ntk>
+std::pair<double, bool> step(std::vector<int> action, Lyt& layout, Ntk& network, bool& placement_possible,
+                             int& current_node, std::vector<mockturtle::node<Ntk>> actions,
+                             std::vector<std::string> po_names, int& current_pi, int& current_po,
+                             std::unordered_map<mockturtle::node<Ntk>, mockturtle::node<Lyt>>& node_dict,
+                             int& max_placed_nodes, mockturtle::node_map<mockturtle::node<Lyt>, Ntk>& pi2node)
 {
     int x = action[0];
     int y = action[1];
@@ -329,7 +548,7 @@ step(std::vector<int> action, Lyt& layout, Ntk& network, bool& placement_possibl
 
         if (num_fanins == 0)
         {
-            layout.create_pi(pi_names[current_pi], {x, y});
+            layout.move_node(pi2node[actions[current_node]], {x, y});
             placed_node = 1;
             current_pi += 1;
         }
@@ -353,6 +572,7 @@ step(std::vector<int> action, Lyt& layout, Ntk& network, bool& placement_possibl
             if (path.empty())
             {
                 placement_possible = false;
+                done               = true;
             }
             else
             {
@@ -366,7 +586,6 @@ step(std::vector<int> action, Lyt& layout, Ntk& network, bool& placement_possibl
 
                 for (auto el : path)
                 {
-
                     layout.obstruct_coordinate(el);
                 }
             }
@@ -417,6 +636,7 @@ step(std::vector<int> action, Lyt& layout, Ntk& network, bool& placement_possibl
                 else
                 {
                     placement_possible = false;
+                    done               = true;
 
                     for (auto el : path_node_1)
                     {
@@ -427,6 +647,7 @@ step(std::vector<int> action, Lyt& layout, Ntk& network, bool& placement_possibl
             else
             {
                 placement_possible = false;
+                done               = true;
             }
         }
         else
@@ -435,23 +656,22 @@ step(std::vector<int> action, Lyt& layout, Ntk& network, bool& placement_possibl
             throw std::runtime_error(error_message);
         }
 
-        node_dict[actions[current_node]] = layout.get_node({x, y});
-
         if (placed_node == 1)
         {
+            node_dict[actions[current_node]] = layout.get_node({x, y});
             current_node += 1;
             layout.obstruct_coordinate({x, y, 0});
             layout.obstruct_coordinate({x, y, 1});
         }
 
-        std::tie(reward, done) =
-            calculate_reward<Ntk>(placed_node, current_node, actions, placement_possible, max_placed_nodes);
+        std::tie(reward, done) = calculate_reward<Ntk, Lyt>(layout, placed_node, current_node, actions,
+                                                            placement_possible, max_placed_nodes);
     }
 
     return {reward, done};
 }
 
-template <typename Lyt, typename Ntk, typename coord_vector>
+template <typename Lyt, typename Ntk>
 Lyt reset(int min_layout_width, int min_layout_height, int& current_node, int& current_pi, int& current_po,
           bool& placement_possible, std::unordered_map<mockturtle::node<Ntk>, mockturtle::node<Lyt>>& node_dict)
 {
@@ -475,12 +695,18 @@ std::vector<std::pair<coord_vector, double>>
 neighbors(coord_vector                                                                  cur,
           std::unordered_map<coord_vector, std::vector<int>, detail::NestedVectorHash>& sequence_to_coord,
           std::unordered_map<coord_vector, coord_vector, detail::NestedVectorHash>& came_from, int count,
-          int max_layout_width, int max_layout_height, bool& improv_mode, int min_layout_width, int min_layout_height,
-          int& current_node, int& current_pi, int& current_po, bool& placement_possible,
-          std::unordered_map<mockturtle::node<Ntk>, mockturtle::node<Lyt>> node_dict, int& best_solution, Ntk& network,
-          std::vector<mockturtle::node<Ntk>> actions, std::vector<std::string> pi_names,
-          std::vector<std::string> po_names, int& max_placed_nodes)
+          bool& improv_mode, int& current_node, int& best_solution, Ntk& network,
+          std::vector<mockturtle::node<Ntk>>& actions, std::vector<std::string>& po_names, int& max_placed_nodes,
+          std::chrono::time_point<std::chrono::high_resolution_clock> start_time, bool first_frontier)
 {
+    bool      placement_possible = true;
+    int       current_pi         = 0;
+    int       current_po         = 0;
+    const int min_layout_width   = static_cast<int>(network.num_pis());
+    const int min_layout_height  = 1;
+    const int max_layout_width   = static_cast<int>(actions.size());
+    const int max_layout_height  = static_cast<int>(actions.size());
+    std::unordered_map<mockturtle::node<Ntk>, mockturtle::node<Lyt>> node_dict{};
     std::vector<std::pair<coord_vector, double>> next_actions;
     coord_vector                                 sequence;
     coord_vector                                 start = {{1000, 1000}};
@@ -494,8 +720,10 @@ neighbors(coord_vector                                                          
         }
     }
     std::reverse(sequence.begin(), sequence.end());
-    Lyt  layout = detail::reset<Lyt, Ntk, coord_vector>(min_layout_width, min_layout_height, current_node, current_pi,
-                                                        current_po, placement_possible, node_dict);
+    Lyt  layout  = detail::reset<Lyt, Ntk>(min_layout_width, min_layout_height, current_node, current_pi, current_po,
+                                           placement_possible, node_dict);
+    auto pi2node = reserve_input_nodes(layout, network);
+
     bool done   = false;
     std::vector<std::vector<int>> possible_actions{};
     if (sequence.empty())
@@ -510,23 +738,37 @@ neighbors(coord_vector                                                          
 
         if (!done)
         {
-            double reward;
+            double reward = 0;
             std::tie(reward, done) =
-                step<Lyt, Ntk, coord_vector>(action, layout, network, placement_possible, current_node, actions,
-                                             pi_names, po_names, current_pi, current_po, node_dict, max_placed_nodes);
+                step<Lyt, Ntk>(action, layout, network, placement_possible, current_node, actions, po_names, current_pi,
+                               current_po, node_dict, max_placed_nodes, pi2node);
             int area = 0;
-            /*if (improv_mode)
+            if (improv_mode)
             {
                 auto bb = fiction::bounding_box_2d(layout);
                 area    = (bb.get_x_size() + 1) * (bb.get_y_size() + 1);
-            }*/
-            if (reward > 1000)  // && (!improv_mode || (improv_mode && (area < best_solution))))
+            }
+            if (reward > 1000 && (!improv_mode || (area < best_solution)))
             {
                 auto bb = fiction::bounding_box_2d(layout);
                 layout.resize({bb.get_x_size(), bb.get_y_size(), layout.z()});
                 area = (layout.x() + 1) * (layout.y() + 1);
                 std::cout << "Found improved solution:" << std::endl;
-                // std::cout << "Total Time: " << time() - start << std::endl;
+                // Get the current time point after the operation
+                auto end = std::chrono::high_resolution_clock::now();
+                // Calculate the duration between start and end
+                auto duration_us  = std::chrono::duration_cast<std::chrono::microseconds>(end - start_time);
+                auto duration_ms  = std::chrono::duration_cast<std::chrono::milliseconds>(duration_us);
+                auto duration_sec = std::chrono::duration_cast<std::chrono::seconds>(duration_us);
+
+                // Extract microseconds, milliseconds, and seconds from the durations
+                auto us  = duration_us.count() % 1000;
+                auto ms  = duration_ms.count() % 1000;
+                auto sec = duration_sec.count();
+
+                // Output the elapsed time
+                std::cout << "Time taken: " << sec << " seconds, " << ms << " milliseconds, and " << us
+                          << " microseconds" << std::endl;
                 std::cout << "Evaluated Paths: " << count << std::endl;
                 std::cout << "Layout Dimension: " << layout.x() + 1 << " x " << layout.y() + 1 << " = " << area
                           << std::endl;
@@ -544,13 +786,13 @@ neighbors(coord_vector                                                          
 
                 return {};
             }
-            /*if (improv_mode)
+            if (improv_mode)
             {
                 if (area >= best_solution)
                 {
                     return {};
                 }
-            }*/
+            }
         }
         else
         {
@@ -579,12 +821,27 @@ neighbors(coord_vector                                                          
         auto new_sequence = sequence;
         new_sequence.push_back(action);
         sequence_to_coord[new_sequence] = action;
-        auto bb                         = fiction::bounding_box_2d(layout);
-        auto max_el                     = bb.get_max();
-        // double size                     = ((max_el.x + 1) * (max_el.y + 1)) / (max_layout_width * max_layout_height);
-        // double size2                    = ((action[0] + 1) * (action[1] + 1)) / (max_layout_width *
-        // max_layout_height);
-        next_actions.push_back({new_sequence, ((actions.size()) - (sequence.size() + 1))});  // + size + size2});
+        const auto   bb                 = fiction::bounding_box_2d(layout);
+        const auto   max_el             = bb.get_max();
+        const double rest_actions       = actions.size() - (sequence.size() + 1);
+        const double size0              = static_cast<double>(((max_el.x + 1) * (max_el.y + 1))) /
+                             static_cast<double>((max_layout_width * max_layout_height));
+        const double size1 = static_cast<double>(((std::max(static_cast<int>(layout.x() - 1), action[0]) + 1) *
+                                                  (std::max(static_cast<int>(layout.y() - 1), action[1]) + 1))) /
+                             static_cast<double>((max_layout_width * max_layout_height));
+        const double size2 = static_cast<double>(((action[0] + 1) * (action[1] + 1))) /
+                             static_cast<double>((max_layout_width * max_layout_height));
+
+        double priority = 0;
+        if (first_frontier)
+        {
+            priority = rest_actions + size0 + size2;
+        }
+        else
+        {
+            priority = rest_actions + size1 + size2;
+        }
+        next_actions.push_back({new_sequence, priority});
     }
 
     return next_actions;
@@ -594,7 +851,7 @@ neighbors(coord_vector                                                          
 
 
 template <typename Lyt, typename Ntk>
-Lyt a_star_pr(const Ntk& ntk, a_star_pr_stats* pst = nullptr) noexcept
+Lyt a_star_pr(Ntk& ntk, a_star_pr_stats* pst = nullptr) noexcept
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(mockturtle::is_network_type_v<Ntk>,
@@ -608,76 +865,107 @@ Lyt a_star_pr(const Ntk& ntk, a_star_pr_stats* pst = nullptr) noexcept
     {
         const mockturtle::stopwatch stop{stats.time_total};
         using coord_vector = std::vector<std::vector<int>>;
-        fiction::debug::write_dot_network(ntk);
+        ntk.substitute_po_signals();
+        fiction::fanout_substitution_params params{};
+        params.strategy = fiction::fanout_substitution_params::substitution_strategy::BREADTH;
         mockturtle::fanout_view network_substituted{
-            fanout_substitution<mockturtle::names_view<technology_network>>(ntk)};
-        mockturtle::topo_view network{network_substituted};
-        network.substitute_po_signals();
-        int                                              min_layout_width  = 1;
-        int                                              min_layout_height = 1;
-        int                                              max_layout_width  = 100;
-        int                                              max_layout_height = 100;
+            fanout_substitution<mockturtle::names_view<fiction::technology_network>>(ntk, params)};
+
+        fiction::topo_view network{network_substituted};
+
         std::vector<mockturtle::node<decltype(network)>> actions{};
-        fiction::debug::write_dot_network(network);
+        std::vector<std::string>                         po_names{};
+
         network.foreach_node(
-            [&actions, &network](const auto& n, [[maybe_unused]] const auto i)
+            [&actions, &network, &po_names](const auto& n, [[maybe_unused]] const auto i)
             {
                 if (!network.is_constant(n))
                 {
                     actions.push_back(n);
                 }
+                if (network.is_po(n))
+                {
+                    po_names.push_back(network.get_output_name(network.po_index(n)));
+                }
             });
 
-        std::vector<std::string> pi_names{};
-        ntk.foreach_pi([&pi_names, &ntk](const auto& pi) { pi_names.push_back(ntk.get_name(pi)); });
-
-        std::vector<std::string> po_names{};
-        ntk.foreach_po([&po_names, &ntk](const auto& po)
-                       { po_names.push_back(ntk.get_output_name(ntk.po_index(po))); });
-
         int                                                              current_node       = 0;
-        int                                                              current_pi         = 0;
-        int                                                              current_po         = 0;
-        bool                                                             placement_possible = true;
-        std::unordered_map<mockturtle::node<Ntk>, mockturtle::node<Lyt>> node_dict{};
         int                                                              max_placed_nodes = 0;
         int                                                              best_solution    = 100000;
         bool                                                             improv_mode      = false;
 
         std::unordered_map<coord_vector, std::vector<int>, detail::NestedVectorHash> sequence_to_coord;
+        std::unordered_map<coord_vector, std::vector<int>, detail::NestedVectorHash> sequence_to_coord2;
         detail::PriorityQueue<coord_vector>                                          frontier;
+        detail::PriorityQueue<coord_vector>                                          frontier2;
+
         std::unordered_map<coord_vector, coord_vector, detail::NestedVectorHash>     came_from;
+        std::unordered_map<coord_vector, coord_vector, detail::NestedVectorHash>     came_from2;
         coord_vector                                                                 current = {{1000, 1000}};
-        std::unordered_map<coord_vector, bool, detail::NestedVectorHash>             cost_so_far;
+        coord_vector                                                                 current2 = {{1000, 1000}};
+        std::unordered_map<coord_vector, double, detail::NestedVectorHash>           cost_so_far;
+        std::unordered_map<coord_vector, double, detail::NestedVectorHash>           cost_so_far2;
         cost_so_far[current] = 0;
-        Lyt  lyt{{min_layout_width - 1, min_layout_height - 1, 1}, twoddwave_clocking<Lyt>()};
+        cost_so_far2[current2] = 0;
+        Lyt  lyt{{}, twoddwave_clocking<Lyt>()};
         auto layout = fiction::obstruction_layout<Lyt>(lyt);
         int  count  = 0;
+
+        auto start          = std::chrono::high_resolution_clock::now();
+        bool first_frontier = true;
 
         while (true)
         {
             count++;
-            auto neighbors = detail::neighbors<decltype(layout), Ntk, coord_vector>(
-                current, sequence_to_coord, came_from, count, max_layout_width, max_layout_height, improv_mode,
-                min_layout_width, min_layout_height, current_node, current_pi, current_po, placement_possible,
-                node_dict, best_solution, network, actions, pi_names, po_names, max_placed_nodes);
-            for (const auto& [next, cost] : neighbors)
+            if (first_frontier)
             {
-                if (cost_so_far.find(next) == cost_so_far.end() || cost < cost_so_far[next])
+                auto neighbors = detail::neighbors<decltype(layout), Ntk, coord_vector>(
+                    current, sequence_to_coord, came_from, count, improv_mode, current_node, best_solution, network,
+                    actions, po_names, max_placed_nodes, start, first_frontier);
+                for (const auto& [next, cost] : neighbors)
                 {
-                    cost_so_far[next] = cost;
-                    int priority      = cost;
-                    frontier.put(next, priority);
-                    came_from[next] = current;
+                    if (cost_so_far.find(next) == cost_so_far.end() || cost < cost_so_far[next])
+                    {
+                        cost_so_far[next] = cost;
+                        double priority   = cost;
+                        frontier.put(next, priority);
+                        came_from[next] = current;
+                    }
                 }
-            }
-            if (frontier.empty())
-            {
-                break;
+                if (!frontier.empty())
+                {
+                    current        = frontier.get();
+                    first_frontier = false;
+                }
+                else
+                {
+                    break;
+                }
             }
             else
             {
-                current = frontier.get();
+                auto neighbors = detail::neighbors<decltype(layout), Ntk, coord_vector>(
+                    current2, sequence_to_coord2, came_from2, count, improv_mode, current_node, best_solution, network,
+                    actions, po_names, max_placed_nodes, start, first_frontier);
+                for (const auto& [next, cost] : neighbors)
+                {
+                    if (cost_so_far2.find(next) == cost_so_far2.end() || cost < cost_so_far2[next])
+                    {
+                        cost_so_far2[next] = cost;
+                        double priority    = cost;
+                        frontier2.put(next, priority);
+                        came_from2[next] = current2;
+                    }
+                }
+                if (!frontier2.empty())
+                {
+                    current2       = frontier2.get();
+                    first_frontier = true;
+                }
+                else
+                {
+                    break;
+                }
             }
         }
 

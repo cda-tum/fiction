@@ -3,7 +3,8 @@
 //
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/physical_design/a_star_pr.hpp>                       // wiring reduction algorithm
+#include <fiction/algorithms/physical_design/a_star_pr.hpp>  // wiring reduction algorithm
+#include <fiction/algorithms/physical_design/color_routing.hpp>
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/algorithms/verification/equivalence_checking.hpp>               // SAT-based equivalence checking
 #include <fiction/io/network_reader.hpp>                                          // read networks from files
@@ -16,7 +17,6 @@
 
 #include <fmt/format.h>  // output formatting
 
-#include <cassert>
 #include <chrono>
 #include <cstdlib>
 #include <string>
@@ -59,13 +59,13 @@ int main()  // NOLINT
     // fiction::a_star_pr_stats a_star_pr_stats{};
     fiction::a_star_pr_stats a_star_pr_stats{};
 
-    static constexpr const uint64_t bench_select = fiction_experiments::mux21;
+    static constexpr const uint64_t bench_select = fiction_experiments::xor5_r1;
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
-        const auto network = read_ntk<fiction::tec_nt>(benchmark);
+        auto network = read_ntk<fiction::tec_nt>(benchmark);
 
-        auto gate_level_layout = fiction::a_star_pr<gate_lyt>(network, &a_star_pr_stats);
+        auto gate_level_layout = fiction::a_star_pr<gate_lyt, fiction::tec_nt>(network, &a_star_pr_stats);
 
         //  compute critical path and throughput
         fiction::critical_path_length_and_throughput_stats cp_tp_stats{};
