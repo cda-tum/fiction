@@ -13,6 +13,7 @@
 #include <bill/sat/solver.hpp>
 #include <bill/sat/tseytin.hpp>
 #include <mockturtle/traits.hpp>
+#include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
 #include <functional>
@@ -59,7 +60,7 @@ class sat_clocking_handler
     /**
      * Default constructor.
      */
-    explicit sat_clocking_handler(Lyt& lyt) : layout{lyt}, max_clock_number{layout.num_clocks()}
+    explicit sat_clocking_handler(Lyt& lyt) : layout{lyt}, number_of_clocks{layout.num_clocks()}
     {
         // for each non-empty tile
         layout.foreach_node(
@@ -74,7 +75,7 @@ class sat_clocking_handler
                 const auto t = layout.get_tile(n);
 
                 // for each possible clock number
-                for (typename Lyt::clock_number_t clk = 0; clk < max_clock_number; ++clk)
+                for (typename Lyt::clock_number_t clk = 0; clk < number_of_clocks; ++clk)
                 {
                     variables[{t, clk}] = solver.add_variable();
                 }
@@ -113,9 +114,9 @@ class sat_clocking_handler
      */
     Lyt& layout;
     /**
-     * Maximum clock number in layout's clocking scheme.
+     * Number of clocks in layout's clocking scheme.
      */
-    const typename Lyt::clock_number_t max_clock_number;
+    const typename Lyt::clock_number_t number_of_clocks;
     /**
      * The solver used to find a solution to the clocking problem.
      */
@@ -146,10 +147,10 @@ class sat_clocking_handler
                 const auto t = layout.get_tile(n);
 
                 std::vector<bill::var_type> tc{};
-                tc.reserve(max_clock_number);
+                tc.reserve(number_of_clocks);
 
                 // for each possible clock number
-                for (typename Lyt::clock_number_t clk = 0; clk < max_clock_number; ++clk)
+                for (typename Lyt::clock_number_t clk = 0; clk < number_of_clocks; ++clk)
                 {
                     tc.push_back(variables[{t, clk}]);
                 }
@@ -163,10 +164,10 @@ class sat_clocking_handler
     void at_most_one_clock_number_per_tile() noexcept
     {
         // for each pair of clock numbers
-        for (typename Lyt::clock_number_t c1 = 0; c1 < max_clock_number; ++c1)
+        for (typename Lyt::clock_number_t c1 = 0; c1 < number_of_clocks; ++c1)
         {
             // use an optimization here: c2 > c1 instead of c2 != c1 to save half the clauses
-            for (typename Lyt::clock_number_t c2 = c1 + 1; c2 < max_clock_number; ++c2)
+            for (typename Lyt::clock_number_t c2 = c1 + 1; c2 < number_of_clocks; ++c2)
             {
                 // for each non-empty tile
                 layout.foreach_node(
@@ -209,13 +210,13 @@ class sat_clocking_handler
                     [this, &t1](const auto& t2)
                     {
                         // for each combination of possible clock numbers
-                        for (typename Lyt::clock_number_t c1 = 0; c1 < max_clock_number; ++c1)
+                        for (typename Lyt::clock_number_t c1 = 0; c1 < number_of_clocks; ++c1)
                         {
-                            for (typename Lyt::clock_number_t c2 = 0; c2 < max_clock_number; ++c2)
+                            for (typename Lyt::clock_number_t c2 = 0; c2 < number_of_clocks; ++c2)
                             {
                                 // if c2 is not c1's incoming clock number
                                 if (!(static_cast<typename Lyt::clock_number_t>((c2 + typename Lyt::clock_number_t{1}) %
-                                                                                max_clock_number) == c1))
+                                                                                number_of_clocks) == c1))
                                 {
                                     // not tile t1 has clock c1 OR not tile t2 has clock c2
                                     solver.add_clause({{bill::lit_type{variables[{t1, c1}], bill::negative_polarity},
@@ -246,7 +247,7 @@ class sat_clocking_handler
                 const auto ground_t = layout.below(t);
 
                 // for each possible clock number
-                for (typename Lyt::clock_number_t clk = 0; clk < max_clock_number; ++clk)
+                for (typename Lyt::clock_number_t clk = 0; clk < number_of_clocks; ++clk)
                 {
                     // ensure that the clock number of both tiles is identical
                     solver.add_clause(
@@ -266,7 +267,7 @@ class sat_clocking_handler
             const auto t = layout.get_tile(n);
 
             // pre-assign tile t to clock number clk
-            solver.add_clause(variables[{t, clk++ % max_clock_number}]);
+            solver.add_clause(variables[{t, clk++ % number_of_clocks}]);
 
             layout.foreach_fanout(n,
                                   [&recurse](auto const& fon)
@@ -279,7 +280,7 @@ class sat_clocking_handler
 
         // only for the first PI
         layout.foreach_pi(
-            [this, &recurse](const auto& pi)
+            [&recurse](const auto& pi)
             {
                 recurse(pi);
 
@@ -305,7 +306,7 @@ class sat_clocking_handler
                 const auto t = layout.get_tile(n);
 
                 // for each possible clock number
-                for (typename Lyt::clock_number_t clk = 0; clk < max_clock_number; ++clk)
+                for (typename Lyt::clock_number_t clk = 0; clk < number_of_clocks; ++clk)
                 {
                     // if tile t is clocked with clock number clk
                     if (model.at(variables.at({t, clk})) == bill::lbool_type::true_)
