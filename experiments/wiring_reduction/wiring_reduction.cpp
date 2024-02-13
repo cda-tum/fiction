@@ -1,15 +1,16 @@
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/physical_design/orthogonal.hpp>  // scalable heuristic for physical design of FCN layouts
-#include <fiction/algorithms/physical_design/wiring_reduction.hpp>                // wiring reduction algorithm
+#include <fiction/algorithms/physical_design/orthogonal.hpp>        // scalable heuristic for physical design
+#include <fiction/algorithms/physical_design/wiring_reduction.hpp>  // wiring reduction algorithm
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/algorithms/verification/equivalence_checking.hpp>               // SAT-based equivalence checking
 #include <fiction/io/network_reader.hpp>                                          // read networks from files
 
 #include <fmt/format.h>  // output formatting
 
-#include <chrono>
+#include <cstdint>
 #include <cstdlib>
+#include <sstream>
 #include <string>
 
 template <typename Ntk>
@@ -17,9 +18,11 @@ Ntk read_ntk(const std::string& name)
 {
     fmt::print("[i] processing {}\n", name);
 
-    std::ostringstream                        os{};
+    std::ostringstream os{};
+
     fiction::network_reader<fiction::tec_ptr> reader{fiction_experiments::benchmark_path(name), os};
-    const auto                                nets = reader.get_networks();
+
+    const auto nets = reader.get_networks();
 
     return *nets.front();
 }
@@ -93,6 +96,7 @@ int main()  // NOLINT
 
         auto num_wires_after =
             gate_level_layout.num_wires() - gate_level_layout.num_pis() - gate_level_layout.num_pos();
+
         // check equivalence
         fiction::equivalence_checking_stats eq_stats{};
         fiction::equivalence_checking<fiction::technology_network, gate_lyt>(benchmark_network, gate_level_layout,

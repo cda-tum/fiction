@@ -36,9 +36,9 @@ class optimize_command : public command
                        "by strategically repositioning gates within the layout, removing excess wiring, and "
                        "effectively relocating outputs to more favorable positions.")
     {
-        add_flag(
-            "--wiring_reduction_only,-w",
-            "Only apply the scalable wiring reduction algorithm (recommended for logic functions with >200 gates).");
+        add_flag("--wiring_reduction_only,-w",
+                 "Do not attempt gate repositioning, but apply wiring reduction "
+                 "exclusively (recommended for logic functions with >200 gates due to scalability reasons).");
     }
 
   protected:
@@ -64,11 +64,11 @@ class optimize_command : public command
 
         const auto& lyt = gls.current();
 
-        const auto check_clocking_scheme = [](auto&& lyt_ptr)
+        const auto is_twoddwave_clocked = [](auto&& lyt_ptr) -> bool
         { return lyt_ptr->is_clocking_scheme(fiction::clock_name::TWODDWAVE); };
 
         // error case: layout is not 2DDWave-clocked
-        if (const auto is_twoddwave_clocked = std::visit(check_clocking_scheme, lyt); !is_twoddwave_clocked)
+        if (!std::visit(is_twoddwave_clocked, lyt))
         {
             env->out() << "[e] layout has to be 2DDWave-clocked\n";
             return;
@@ -76,22 +76,24 @@ class optimize_command : public command
 
         const auto apply_optimization = [&](auto&& lyt_ptr)
         {
-            using Lyt               = typename std::decay_t<decltype(lyt_ptr)>::element_type;
-            auto       lyt_copy     = lyt_ptr->clone();
-            const auto lyt_copy_ptr = std::make_shared<Lyt>(lyt_copy);
+            using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
+
+            auto lyt_copy = lyt_ptr->clone();
 
             if constexpr (fiction::is_cartesian_layout_v<Lyt>)
             {
                 if (is_set("wiring_reduction_only"))
                 {
-                    fiction::wiring_reduction(*lyt_copy_ptr, &stw);
+                    fiction::wiring_reduction(lyt_copy, &stw);
                 }
                 else
                 {
-                    fiction::post_layout_optimization(*lyt_copy_ptr, &st);
+                    fiction::post_layout_optimization(lyt_copy, &st);
                 }
-                fiction::restore_names(*lyt_ptr, *lyt_copy_ptr);
-                gls.extend() = lyt_copy_ptr;
+
+                fiction::restore_names(*lyt_ptr, lyt_copy);
+
+                gls.extend() = std::make_shared<Lyt>(lyt_copy);
             }
             else
             {

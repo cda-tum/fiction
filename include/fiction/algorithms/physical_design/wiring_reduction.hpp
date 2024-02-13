@@ -18,6 +18,7 @@
 #include <mockturtle/views/topo_view.hpp>
 
 #include <cstdint>
+#include <functional>
 #include <ostream>
 #include <utility>
 #include <vector>
@@ -49,13 +50,13 @@ namespace detail
 {
 
 /**
- * Represents a layout used for wiring reduction derived from the cartesian_layout class.
+ * Represents a layout used for wiring reduction derived from the `cartesian_layout` class.
  *
  * This class provides functionality for a wiring reduction layout based on a Cartesian coordinate system.
- * It inherits from the cartesian_layout class and extends it with specific behavior for finding excess wiring.
+ * It inherits from the `cartesian_layout` class and extends it with specific behavior for finding excess wiring.
  *
- * @tparam OffsetCoordinateType The type of coordinates used in the layout.
- *                              Defaults to offset::ucoord_t if not explicitly provided.
+ * @tparam OffsetCoordinateType The type of coordinates used in the layout. Defaults to `offset::ucoord_t` if not
+ * explicitly provided.
  */
 template <typename OffsetCoordinateType = offset::ucoord_t>
 class wiring_reduction_layout : public cartesian_layout<OffsetCoordinateType>
@@ -63,7 +64,7 @@ class wiring_reduction_layout : public cartesian_layout<OffsetCoordinateType>
   public:
     bool left_to_right;
     /**
-     * This constructor initializes the wiring_reduction_layout with an optional aspect ratio.
+     * This constructor initializes the `wiring_reduction_layout` with an optional aspect ratio.
      *
      * @param ar The aspect ratio for the layout. Defaults to an empty aspect ratio if not provided.
      */
@@ -72,16 +73,15 @@ class wiring_reduction_layout : public cartesian_layout<OffsetCoordinateType>
             cartesian_layout<OffsetCoordinateType>(ar),
             left_to_right(search_left_to_right)
     {}
-
     /**
-     * Iterates over adjacent coordinates of a given coordinate.
+     * Iterates over adjacent coordinates of a given coordinate and applies a given functor.
      *
      * This function iterates over adjacent coordinates of the given coordinate 'c' and applies the provided
      * functor 'fn' to each valid adjacent coordinate. The behavior depends on the position of 'c' within the layout.
      *
      * @tparam Fn Type of the functor to apply to each adjacent coordinate.
      * @param c The reference coordinate for which adjacent coordinates are determined.
-     * @param fn The functor to apply to each adjacent coordinate.
+     * @param fn The functor to apply to each of `c`'s adjacent coordinates.
      */
     template <typename Fn>
     void foreach_adjacent_coordinate(const OffsetCoordinateType& c, Fn&& fn) const
@@ -123,7 +123,6 @@ class wiring_reduction_layout : public cartesian_layout<OffsetCoordinateType>
             }
         }
     }
-
     /**
      * Iterates over adjacent coordinates of a given coordinate in the first column.
      *
@@ -150,7 +149,6 @@ class wiring_reduction_layout : public cartesian_layout<OffsetCoordinateType>
         apply_if_not_c(cartesian_layout<OffsetCoordinateType>::east(cartesian_layout<OffsetCoordinateType>::south(c)));
         apply_if_not_c(cartesian_layout<OffsetCoordinateType>::south(c));
     }
-
     /**
      * Iterates over adjacent coordinates of a given coordinate in the middle columns.
      *
@@ -176,7 +174,6 @@ class wiring_reduction_layout : public cartesian_layout<OffsetCoordinateType>
         apply_if_not_c(cartesian_layout<OffsetCoordinateType>::east(c));
         apply_if_not_c(cartesian_layout<OffsetCoordinateType>::east(cartesian_layout<OffsetCoordinateType>::south(c)));
     }
-
     /**
      * Iterates over adjacent coordinates of a given coordinate in the last column.
      *
@@ -200,7 +197,6 @@ class wiring_reduction_layout : public cartesian_layout<OffsetCoordinateType>
 
         apply_if_not_c(cartesian_layout<OffsetCoordinateType>::south(c));
     }
-
     /**
      * Iterates over adjacent coordinates of a given coordinate in the first row.
      *
@@ -227,7 +223,6 @@ class wiring_reduction_layout : public cartesian_layout<OffsetCoordinateType>
         apply_if_not_c(cartesian_layout<OffsetCoordinateType>::south(cartesian_layout<OffsetCoordinateType>::west(c)));
         apply_if_not_c(cartesian_layout<OffsetCoordinateType>::east(c));
     }
-
     /**
      * Iterates over adjacent coordinates of a given coordinate in the middle rows.
      *
@@ -253,7 +248,6 @@ class wiring_reduction_layout : public cartesian_layout<OffsetCoordinateType>
         apply_if_not_c(cartesian_layout<OffsetCoordinateType>::south(c));
         apply_if_not_c(cartesian_layout<OffsetCoordinateType>::south(cartesian_layout<OffsetCoordinateType>::west(c)));
     }
-
     /**
      * Iterates over adjacent coordinates of a given coordinate in the last row.
      *
@@ -287,10 +281,9 @@ using wiring_reduction_lyt = obstruction_layout<wiring_reduction_layout<>>;
 /**
  * Create a shifted layout suitable for finding excess wiring based on a Cartesian layout.
  *
- * This function generates a new layout suitable for finding excess wiring by shifting the input layout
- * based on specified offsets. The generated layout is wrapped in an obstruction_layout.
- * The shifted layout is constructed by iterating through the input Cartesian layout
- * diagonally and obstructing connections and coordinates accordingly.
+ * This function generates a new layout suitable for finding excess wiring by shifting the input layout based on
+ * specified offsets. The generated layout is wrapped in an obstruction_layout. The shifted layout is constructed by
+ * iterating through the input Cartesian layout diagonally and obstructing connections and coordinates accordingly.
  *
  * @tparam Lyt Type of the input Cartesian layout.
  * @param lyt The input Cartesian layout to be shifted.
@@ -303,10 +296,11 @@ template <typename Lyt>
 wiring_reduction_lyt create_shifted_layout(const Lyt& lyt, const uint64_t x_offset = 0, const uint64_t y_offset = 0,
                                            bool left_to_right = true) noexcept
 {
-    // Create WiringReductionLayout with specified offsets
+    // Create a wiring_reduction_layout with specified offsets
     wiring_reduction_layout<> obs_shifted_layout{{lyt.x() + x_offset + 1, lyt.y() + y_offset + 1, lyt.z()},
                                                  left_to_right};
-    auto                      shifted_layout = wiring_reduction_lyt(obs_shifted_layout);
+
+    auto shifted_layout = wiring_reduction_lyt(obs_shifted_layout);
 
     // Iterate through nodes in the layout
     lyt.foreach_node(
@@ -384,10 +378,11 @@ wiring_reduction_lyt create_shifted_layout(const Lyt& lyt, const uint64_t x_offs
                 // Handle double input gates (AND, OR, ...)
                 else if (signals.size() == 2)
                 {
-                    const auto      signal_a = signals[0];
-                    const auto      signal_b = signals[1];
-                    const tile<Lyt> shifted_tile_a{signal_a.x + x_offset, signal_a.y + y_offset, signal_a.z};
-                    const tile<Lyt> shifted_tile_b{signal_b.x + x_offset, signal_b.y + y_offset, signal_b.z};
+                    const auto signal_a = signals[0];
+                    const auto signal_b = signals[1];
+
+                    const auto shifted_tile_a = tile<Lyt>{signal_a.x + x_offset, signal_a.y + y_offset, signal_a.z};
+                    const auto shifted_tile_b = tile<Lyt>{signal_b.x + x_offset, signal_b.y + y_offset, signal_b.z};
 
                     shifted_layout.obstruct_connection(shifted_tile_a, new_coord);
                     shifted_layout.obstruct_connection(shifted_tile_b, new_coord);
@@ -421,13 +416,12 @@ wiring_reduction_lyt create_shifted_layout(const Lyt& lyt, const uint64_t x_offs
 
     return shifted_layout;
 }
-
 /**
  * Add obstructions to the layout.
  *
- * This function adds obstructions to the provided wiring_reduction_layout. It obstructs coordinates
- * along the top and bottom edges (for left to right) or along the left and right edges (for top to bottom) of the
- * layout in both layers (0 and 1).
+ * This function adds obstructions to the provided wiring_reduction_layout. It obstructs coordinates along the top and
+ * bottom edges (for left to right) or along the left and right edges (for top to bottom) of the layout in both layers
+ * (0 and 1).
  *
  * @tparam Lyt Type of the Cartesian layout.
  * @param lyt The Cartesian layout to which obstructions will be added.
@@ -468,7 +462,6 @@ void add_obstructions(Lyt& lyt) noexcept
         }
     }
 }
-
 /**
  * This helper function computes a path between two coordinates using the A* algorithm.
  *
@@ -476,7 +469,6 @@ void add_obstructions(Lyt& lyt) noexcept
  * @param lyt Reference to the layout.
  * @param start The starting coordinate of the path.
  * @param end The ending coordinate of the path.
- *
  * @return The computed path as a sequence of coordinates in the layout.
  */
 template <typename Lyt>
@@ -485,22 +477,22 @@ template <typename Lyt>
 {
     using dist = manhattan_distance_functor<Lyt, uint64_t>;
     using cost = unit_cost_functor<Lyt, uint8_t>;
+
     static const a_star_params params{false};
 
     return a_star<layout_coordinate_path<Lyt>>(lyt, {start, end}, dist(), cost(), params);
 }
-
 /**
  * Update the to-delete list based on a possible path in a wiring_reduction_layout.
  *
  * This function updates the to-delete list by appending coordinates from the given possible path
- * in a wiring_reduction_layout. It considers coordinates that are not at the leftmost (x = 0) or rightmost (x =
- * lyt.x()) positions for left to right or at the top (y = 0) or bottom (y =
- * lyt.y()) positions for top to bottom and shifts them to get the corresponding coordinates on the original layout. The
- * coordinates are then obstructed in both layers (0 and 1).
+ * in a wiring_reduction_layout. It considers coordinates that are not at the leftmost (`x == 0`) or rightmost (`x ==
+ * lyt.x()`) positions for left to right, or at the top (`y == 0`) or bottom (`y == lyt.y()`) positions for top to
+ * bottom and shifts them to get the corresponding coordinates on the original layout. The coordinates are then
+ * obstructed in both layers (0 and 1).
  *
- * @tparam Lyt Type of the wiring_reduction_layout.
- * @param lyt The wiring_reduction_layout to be updated.
+ * @tparam Lyt Type of the `wiring_reduction_layout`.
+ * @param lyt The `wiring_reduction_layout` to be updated.
  * @param possible_path The path of coordinates to be considered for updating the to-delete list.
  * @param to_delete Reference to the to-delete list to be updated with new coordinates.
  */
@@ -526,17 +518,16 @@ void update_to_delete_list(Lyt& lyt, layout_coordinate_path<wiring_reduction_lyt
         }
     }
 }
-
 /**
- * Calculate an offset matrix based on a to-delete list in a wiring_reduction_layout.
+ * Calculate an offset matrix based on a to-delete list in a `wiring_reduction_layout`.
  *
- * This function calculates an offset matrix based on the provided to-delete list in a wiring_reduction_layout.
- * The offset matrix represents the number of deletable coordinates in the same column for left to right and same row
+ * This function calculates an offset matrix based on the provided to-delete list in a `wiring_reduction_layout`.
+ * The offset matrix represents the number of deletable coordinates in the same column for left to right, and same row
  * for top to bottom but above/ to the right of each specific coordinate. The matrix is initialized with zeros and
  * updated by incrementing the values for each deletable coordinate.
  *
- * @tparam Lyt Type of the wiring_reduction_layout.
- * @param lyt The wiring_reduction_layout for which the offset matrix is calculated.
+ * @tparam Lyt Type of the `wiring_reduction_layout`.
+ * @param lyt The `wiring_reduction_layout` for which the offset matrix is calculated.
  * @param to_delete The to-delete list representing coordinates to be considered for the offset matrix.
  * @param left_to_right If true, deletable paths are searched from left to right, otherwise from top to bottom.
  * @return A 2D vector representing the calculated offset matrix.
@@ -573,20 +564,19 @@ calculate_offset_matrix(Lyt& lyt, layout_coordinate_path<wiring_reduction_lyt>& 
 
     return matrix;
 }
-
 /**
- * Delete wires from a wiring_reduction_layout based on specified coordinates and offset matrix.
+ * Delete wires from a `wiring_reduction_layout` based on specified coordinates and offset matrix.
  *
- * This function deletes wires from the provided wiring_reduction_layout based on the specified coordinates
+ * This function deletes wires from the provided `wiring_reduction_layout` based on the specified coordinates
  * and offset matrix. It clears the tiles in the to-delete list, shifts all gates to fill the empty coordinates, and
  * resizes the layout to an optimized size by calculating the bounding box.
  *
- * @tparam Lyt Type of the wiring_reduction_layout.
- * @param lyt The wiring_reduction_layout to be modified.
+ * @tparam Lyt Type of the `wiring_reduction_layout`.
+ * @param lyt The `wiring_reduction_layout` to be modified.
  * @param to_delete The to-delete list representing coordinates of wires to be deleted.
  * @param left_to_right If true, deletable paths are searched from left to right, otherwise from top to bottom.
- * @param offset_matrix The offset matrix representing the number of obstructed coordinates in the same column
- *                     but above each specific coordinate.
+ * @param offset_matrix The offset matrix representing the number of obstructed coordinates in the same column but above
+ * each specific coordinate.
  */
 template <typename Lyt>
 void delete_wires(Lyt& lyt, layout_coordinate_path<wiring_reduction_lyt>& to_delete,
@@ -772,13 +762,13 @@ void delete_wires(Lyt& lyt, layout_coordinate_path<wiring_reduction_lyt>& to_del
 /**
  * Perform wiring reduction on a 2DDWave-clocked Cartesian gate-level layout.
  *
- * This algorithm performs wiring reduction on a 2DDWave-clocked Cartesian gate-level layout by iteratively
+ * This algorithm performs wiring reduction of a 2DDWave-clocked Cartesian gate-level layout by iteratively
  * finding tiles with excess wiring that can be deleted without changing the correctness of the underlying function.
  * The process continues until no further wires can be deleted.
  *
  * @tparam Lyt Cartesian gate-level layout type.
  * @param lyt The 2DDWave-clocked layout whose wiring is to be reduced.
- * @param pst Pointer to a wiring_reduction_stats object to record runtime statistics (optional).
+ * @param pst Pointer to a `wiring_reduction_stats` object to record runtime statistics (optional).
  */
 template <typename Lyt>
 void wiring_reduction(const Lyt& lyt, wiring_reduction_stats* pst = nullptr) noexcept

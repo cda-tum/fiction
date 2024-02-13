@@ -27,7 +27,8 @@ using namespace fiction;
 template <typename Lyt, typename Ntk>
 void check_layout_equiv(const Ntk& ntk)
 {
-    const auto                     layout = orthogonal<Lyt>(ntk, {});
+    const auto layout = orthogonal<Lyt>(ntk, {});
+
     post_layout_optimization_stats stats{};
     post_layout_optimization<Lyt>(layout, &stats);
 
@@ -158,7 +159,7 @@ TEST_CASE("Optimization steps", "[post_layout_optimization]")
     {
         const coordinate<gate_layout> old_pos = {2, 2};
 
-        const auto [fanins, fanouts, to_clear, r1, r2, r3, r4] = detail::get_fanin_and_fanouts(obstr_lyt, old_pos);
+        const auto& [fanins, fanouts, to_clear, r1, r2, r3, r4] = detail::get_fanin_and_fanouts(obstr_lyt, old_pos);
 
         CHECK(fanins == std::vector<coordinate<gate_layout>>{{0, 2}, {2, 0}});
         CHECK(fanouts == std::vector<coordinate<gate_layout>>{{2, 3}});
@@ -273,7 +274,8 @@ TEST_CASE("Optimization steps", "[post_layout_optimization]")
 
 TEST_CASE("Wrong clocking scheme", "[post_layout_optimization]")
 {
-    using gate_layout    = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
+
     const auto layout    = blueprints::use_and_gate_layout<gate_layout>();
     auto       obstr_lyt = obstruction_layout<gate_layout>(layout);
 

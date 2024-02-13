@@ -119,7 +119,8 @@ TEST_CASE("Layout equivalence", "[wiring_reduction]")
 
 TEST_CASE("Wrong clocking scheme", "[wiring_reduction]")
 {
-    using gate_layout    = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
+
     const auto layout    = blueprints::use_and_gate_layout<gate_layout>();
     auto       obstr_lyt = obstruction_layout<gate_layout>(layout);
 

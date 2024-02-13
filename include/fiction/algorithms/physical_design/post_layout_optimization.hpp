@@ -21,9 +21,12 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
+#include <optional>
+#include <ostream>
 #include <tuple>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 namespace fiction
@@ -159,7 +162,6 @@ struct fanin_fanout_data
      */
     layout_coordinate_path<Lyt> route_gate_to_fanout_2;
 };
-
 /**
  * This helper function is used to add a fanin coordinate to the appropriate route
  * based on whether it belongs to the the route from the first or second fanin to the gate.
@@ -181,7 +183,6 @@ void add_fanin_to_route(const tile<Lyt>& fanin, bool is_first_fanin, fanin_fanou
         ffd.route_fanin_2_to_gate.insert(ffd.route_fanin_2_to_gate.cbegin(), fanin);
     }
 }
-
 /**
  * This helper function is used to add a fanout coordinate to the appropriate route
  * based on whether it belongs to the the route from the gate to the first or second fanout.
@@ -203,7 +204,6 @@ void add_fanout_to_route(const tile<Lyt>& fanout, bool is_first_fanout, fanin_fa
         ffd.route_gate_to_fanout_2.push_back(fanout);
     }
 }
-
 /**
  * Utility function to trace back fanins and fanouts of a gate. Based on the gate to be moved, this function returns the
  * location of the fanins and fanouts, as well as the wiring in between them. Additionally, all wire tiles between
@@ -322,7 +322,6 @@ template <typename Lyt>
 
     return ffd;
 }
-
 /**
  * This helper function computes a path between two coordinates using the A* algorithm.
  * It then obstructs the tiles along the path in the given layout.
@@ -331,7 +330,6 @@ template <typename Lyt>
  * @param lyt Reference to the layout.
  * @param start The starting coordinate of the path.
  * @param end The ending coordinate of the path.
- *
  * @return The computed path as a sequence of coordinates in the layout.
  */
 template <typename Lyt>
@@ -351,7 +349,6 @@ layout_coordinate_path<Lyt> get_path_and_obstruct(Lyt& lyt, const tile<Lyt>& sta
 
     return path;
 }
-
 /**
  * Utility function that moves gates to new coordinates and checks if routing is possible.
  * This includes:
@@ -590,6 +587,7 @@ template <typename Lyt>
             break;
         }
     }
+
     // if no better coordinate was found, restore old wiring
     if (!moved_gate)
     {
@@ -647,9 +645,8 @@ template <typename Lyt>
 
     return new_pos;
 }
-
 /**
- * Utility function that moves outputs in the last row to the previous row and in the last column to the previous
+ * Utility function that moves outputs from the last row to the previous row, and from the last column to the previous
  * column, if possible.
  *
  * @tparam Lyt Cartesian gate-level layout type.
@@ -659,6 +656,7 @@ template <typename Lyt>
 void optimize_output_positions(Lyt& lyt) noexcept
 {
     bool optimizable = true;
+
     for (uint64_t x = 0; x <= lyt.x(); ++x)
     {
         if (!(lyt.is_empty_tile({x, lyt.y()}) ||
@@ -684,6 +682,7 @@ void optimize_output_positions(Lyt& lyt) noexcept
     }
 
     optimizable = true;
+
     for (uint64_t y = 0; y <= lyt.y(); ++y)
     {
         if (!(lyt.is_empty_tile({lyt.x(), y}) ||
@@ -708,15 +707,14 @@ void optimize_output_positions(Lyt& lyt) noexcept
         }
     }
 }
-
 /**
- * Custom comparison function that sorts gates based on the sum of its coordinates and breaks ties based on the
+ * Custom comparison function for sorting tiles based on the sum of their coordinates that breaks ties based on the
  * x-coordinate.
  *
  * @tparam Lyt Cartesian gate-level layout type.
- * @param a first gate
- * @param b second gate
- * @return result of the comparison
+ * @param a First tile to compare.
+ * @param b Second tile to compare.
+ * @return `true` iff `a < b` based on the aforementioned rule.
  */
 template <typename Lyt>
 bool compare_gates(const tile<Lyt>& a, const tile<Lyt>& b)
