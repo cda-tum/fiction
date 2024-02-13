@@ -82,9 +82,9 @@ Energy Calculation
 .. doxygenfunction:: fiction::is_ground_state
 
 
-**Header:** ``fiction/algorithms/simulation/sidb/determine_the_groundstate_from_simulation_results.hpp``
+**Header:** ``fiction/algorithms/simulation/sidb/determine_groundstate_from_simulation_results.hpp``
 
-.. doxygenfunction:: fiction::determine_the_groundstate_from_simulation_results
+.. doxygenfunction:: fiction::determine_groundstate_from_simulation_results
 
 
 Temperature Behavior
