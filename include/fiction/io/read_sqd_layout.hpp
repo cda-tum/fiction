@@ -5,6 +5,7 @@
 #ifndef FICTION_READ_SQD_LAYOUT_HPP
 #define FICTION_READ_SQD_LAYOUT_HPP
 
+#include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/traits.hpp"
@@ -21,6 +22,7 @@
 #include <string>
 #include <string_view>
 #include <unordered_map>
+#include <vector>
 
 namespace fiction
 {
@@ -37,16 +39,22 @@ class sqd_parsing_error : public std::runtime_error
 namespace detail
 {
 
-template <typename Lyt>
+template <typename Lyt, typename LatticeOrientation>
 class read_sqd_layout_impl
 {
   public:
-    read_sqd_layout_impl(std::istream& s, const std::string_view& name) : lyt{}, is{s}
+    read_sqd_layout_impl(std::istream& s, const std::string_view& name, const LatticeOrientation& orientation) :
+            lyt{orientation},
+            is{s}
     {
         set_name(lyt, name);
+        lyt.assign_lattice_orientation(orientation);
     }
 
-    read_sqd_layout_impl(Lyt& tgt, std::istream& s) : lyt{tgt}, is{s} {}
+    read_sqd_layout_impl(Lyt& tgt, std::istream& s, const LatticeOrientation& orientation) :
+            lyt{tgt, orientation},
+            is{s}
+    {}
 
     Lyt run()
     {
@@ -364,13 +372,15 @@ class read_sqd_layout_impl
  * @param is The input stream to read from.
  * @param name The name to give to the generated layout.
  */
-template <typename Lyt>
-Lyt read_sqd_layout(std::istream& is, const std::string_view& name = "")
+template <typename Lyt, typename LatticeOrientation = lattice_orientation>
+Lyt read_sqd_layout(std::istream& is, const LatticeOrientation& orientation = lattice_orientation::SI_100,
+                    const std::string_view& name = "")
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
+    static_assert(is_sidb_lattice_layout_v<Lyt, LatticeOrientation>, "Lyt must be a lattice layout");
 
-    detail::read_sqd_layout_impl<Lyt> p{is, name};
+    detail::read_sqd_layout_impl<Lyt, LatticeOrientation> p{is, name, orientation};
 
     const auto lyt = p.run();
 
@@ -390,13 +400,14 @@ Lyt read_sqd_layout(std::istream& is, const std::string_view& name = "")
  * @param lyt The layout to write to.
  * @param is The input stream to read from.
  */
-template <typename Lyt>
-void read_sqd_layout(Lyt& lyt, std::istream& is)
+template <typename Lyt, typename LatticeOrientation = lattice_orientation>
+void read_sqd_layout(Lyt& lyt, std::istream& is, const LatticeOrientation& orientation = lattice_orientation::SI_100)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
+    static_assert(is_sidb_lattice_layout_v<Lyt, LatticeOrientation>, "Lyt must be a lattice layout");
 
-    detail::read_sqd_layout_impl<Lyt> p{lyt, is};
+    detail::read_sqd_layout_impl<Lyt, LatticeOrientation> p{lyt, is, orientation};
 
     lyt = p.run();
 }
@@ -412,8 +423,10 @@ void read_sqd_layout(Lyt& lyt, std::istream& is)
  * @param filename The file name to open and read from.
  * @param name The name to give to the generated layout.
  */
-template <typename Lyt>
-Lyt read_sqd_layout(const std::string_view& filename, const std::string_view& name = "")
+template <typename Lyt, typename LatticeOrientation = lattice_orientation>
+Lyt read_sqd_layout(const std::string_view&   filename,
+                    const LatticeOrientation& orientation = lattice_orientation::SI_100,
+                    const std::string_view&   name        = "")
 {
     std::ifstream is{filename.data(), std::ifstream::in};
 
@@ -422,7 +435,7 @@ Lyt read_sqd_layout(const std::string_view& filename, const std::string_view& na
         throw std::ifstream::failure("could not open file");
     }
 
-    const auto lyt = read_sqd_layout<Lyt>(is, name);
+    const auto lyt = read_sqd_layout<Lyt>(is, orientation, name);
     is.close();
 
     return lyt;
@@ -441,8 +454,9 @@ Lyt read_sqd_layout(const std::string_view& filename, const std::string_view& na
  * @param lyt The layout to write to.
  * @param filename The file name to open and read from.
  */
-template <typename Lyt>
-void read_sqd_layout(Lyt& lyt, const std::string_view& filename)
+template <typename Lyt, typename LatticeOrientation = lattice_orientation>
+void read_sqd_layout(Lyt& lyt, const std::string_view& filename,
+                     const LatticeOrientation& orientation = lattice_orientation::SI_100)
 {
     std::ifstream is{filename.data(), std::ifstream::in};
 
@@ -451,7 +465,7 @@ void read_sqd_layout(Lyt& lyt, const std::string_view& filename)
         throw std::ifstream::failure("could not open file");
     }
 
-    read_sqd_layout<Lyt>(lyt, is);
+    read_sqd_layout<Lyt>(lyt, orientation, is);
     is.close();
 }
 

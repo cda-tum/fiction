@@ -7,6 +7,7 @@
 
 #include <fiction/io/write_sqd_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
+#include <fiction/technology/sidb_lattice_layout.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/name_utils.hpp>
@@ -61,9 +62,9 @@ class sqd_command : public command
         {
             using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
 
-            if constexpr (fiction::has_qca_technology_v<Lyt> || fiction::has_sidb_technology_v<Lyt>)
+            if constexpr (fiction::has_sidb_technology_v<Lyt>)
             {
-                fiction::write_sqd_layout(*lyt_ptr, filename);
+                fiction::write_sqd_layout(fiction::sidb_lattice_layout{*lyt_ptr}, filename);
             }
             else
             {

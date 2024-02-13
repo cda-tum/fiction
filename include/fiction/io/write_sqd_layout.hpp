@@ -12,6 +12,7 @@
 #include <fmt/chrono.h>
 #include <fmt/format.h>
 
+#include <cassert>
 #include <chrono>
 #include <ctime>
 #include <fstream>
@@ -47,59 +48,76 @@ inline constexpr const char* GUI_BLOCK = "    <gui>\n"
                                          "        <scroll x=\"{}\" y=\"{}\"/>\n"
                                          "    </gui>\n";
 
-inline constexpr const char* LAYERS_BLOCK                = "    <layers>\n{}"
-                                                           "    </layers>\n";
-inline constexpr const char* LATTICE_LAYER_DEFINITION    = "        <layer_prop>\n"
-                                                           "            <name>Lattice</name>\n"
-                                                           "            <type>Lattice</type>\n"
-                                                           "            <role>Design</role>\n"
-                                                           "            <zoffset>0</zoffset>\n"
-                                                           "            <zheight>0</zheight>\n"
-                                                           "            <visible>1</visible>\n"
-                                                           "            <active>0</active>\n"
-                                                           "            <lat_vec>\n"
-                                                           "                <a1 x=\"3.84\" y=\"0\"/>\n"
-                                                           "                <a2 x=\"0\" y=\"7.68\"/>\n"
-                                                           "                <N>2</N>\n"
-                                                           "                <b1 x=\"0\" y=\"0\"/>\n"
-                                                           "                <b2 x=\"0\" y=\"2.25\"/>\n"
-                                                           "            </lat_vec>\n"
-                                                           "        </layer_prop>\n";
-inline constexpr const char* SCREENSHOT_LAYER_DEFINITION = "        <layer_prop>\n"
-                                                           "            <name>Screenshot Overlay</name>\n"
-                                                           "            <type>Misc</type>\n"
-                                                           "            <role>Overlay</role>\n"
-                                                           "            <zoffset>0</zoffset>\n"
-                                                           "            <zheight>0</zheight>\n"
-                                                           "            <visible>0</visible>\n"
-                                                           "            <active>0</active>\n"
-                                                           "        </layer_prop>\n";
-inline constexpr const char* SURFACE_LAYER_DEFINITION    = "        <layer_prop>\n"
-                                                           "            <name>Surface</name>\n"
-                                                           "            <type>DB</type>\n"
-                                                           "            <role>Design</role>\n"
-                                                           "            <zoffset>0</zoffset>\n"
-                                                           "            <zheight>0</zheight>\n"
-                                                           "            <visible>1</visible>\n"
-                                                           "            <active>0</active>\n"
-                                                           "        </layer_prop>\n";
-inline constexpr const char* ELECTRODE_LAYER_DEFINITION  = "        <layer_prop>\n"
-                                                           "            <name>Metal</name>\n"
-                                                           "            <type>Electrode</type>\n"
-                                                           "            <role>Design</role>\n"
-                                                           "            <zoffset>1000</zoffset>\n"
-                                                           "            <zheight>100</zheight>\n"
-                                                           "            <visible>1</visible>\n"
-                                                           "            <active>0</active>\n"
-                                                           "        </layer_prop>\n";
-inline constexpr const char* DEFECT_LAYER_DEFINITION     = "        <layer_prop>\n"
-                                                           "            <name>Defects</name>\n"
-                                                           "            <type>Defects</type>\n"
-                                                           "            <zoffset>0</zoffset>\n"
-                                                           "            <zheight>0</zheight>\n"
-                                                           "            <visible>1</visible>\n"
-                                                           "            <active>0</active>\n"
-                                                           "        </layer_prop>\n";
+inline constexpr const char* LAYERS_BLOCK                    = "    <layers>\n{}"
+                                                               "    </layers>\n";
+inline constexpr const char* LATTICE_LAYER_DEFINITION_SI_100 = "        <layer_prop>\n"
+                                                               "            <name>Lattice</name>\n"
+                                                               "            <type>Lattice</type>\n"
+                                                               "            <role>Design</role>\n"
+                                                               "            <zoffset>0</zoffset>\n"
+                                                               "            <zheight>0</zheight>\n"
+                                                               "            <visible>1</visible>\n"
+                                                               "            <active>0</active>\n"
+                                                               "            <lat_vec>\n"
+                                                               "                <a1 x=\"3.84\" y=\"0\"/>\n"
+                                                               "                <a2 x=\"0\" y=\"7.68\"/>\n"
+                                                               "                <N>2</N>\n"
+                                                               "                <b1 x=\"0\" y=\"0\"/>\n"
+                                                               "                <b2 x=\"0\" y=\"2.25\"/>\n"
+                                                               "            </lat_vec>\n"
+                                                               "        </layer_prop>\n";
+inline constexpr const char* LATTICE_LAYER_DEFINITION_SI_111 = "        <layer_prop>\n"
+                                                               "            <name>Lattice</name>\n"
+                                                               "            <type>Lattice</type>\n"
+                                                               "            <role>Design</role>\n"
+                                                               "            <zoffset>0</zoffset>\n"
+                                                               "            <zheight>0</zheight>\n"
+                                                               "            <visible>1</visible>\n"
+                                                               "            <active>0</active>\n"
+                                                               "            <lat_vec>\n"
+                                                               "                 <name>Si(111) 1x1</name>\n"
+                                                               "                 <a1 x=\"6.65\" y=\"0\"/>\n"
+                                                               "                 <a2 x=\"0\" y=\"3.84\"/>\n"
+                                                               "                 <N>2</N>\n"
+                                                               "                 <b1 x=\"0\" y=\"0\"/>\n"
+                                                               "                 <b2 x=\"3.3255\" y=\"1.92\"/>\n"
+                                                               "            </lat_vec>\n"
+                                                               "        </layer_prop>\n";
+inline constexpr const char* SCREENSHOT_LAYER_DEFINITION     = "        <layer_prop>\n"
+                                                               "            <name>Screenshot Overlay</name>\n"
+                                                               "            <type>Misc</type>\n"
+                                                               "            <role>Overlay</role>\n"
+                                                               "            <zoffset>0</zoffset>\n"
+                                                               "            <zheight>0</zheight>\n"
+                                                               "            <visible>0</visible>\n"
+                                                               "            <active>0</active>\n"
+                                                               "        </layer_prop>\n";
+inline constexpr const char* SURFACE_LAYER_DEFINITION        = "        <layer_prop>\n"
+                                                               "            <name>Surface</name>\n"
+                                                               "            <type>DB</type>\n"
+                                                               "            <role>Design</role>\n"
+                                                               "            <zoffset>0</zoffset>\n"
+                                                               "            <zheight>0</zheight>\n"
+                                                               "            <visible>1</visible>\n"
+                                                               "            <active>0</active>\n"
+                                                               "        </layer_prop>\n";
+inline constexpr const char* ELECTRODE_LAYER_DEFINITION      = "        <layer_prop>\n"
+                                                               "            <name>Metal</name>\n"
+                                                               "            <type>Electrode</type>\n"
+                                                               "            <role>Design</role>\n"
+                                                               "            <zoffset>1000</zoffset>\n"
+                                                               "            <zheight>100</zheight>\n"
+                                                               "            <visible>1</visible>\n"
+                                                               "            <active>0</active>\n"
+                                                               "        </layer_prop>\n";
+inline constexpr const char* DEFECT_LAYER_DEFINITION         = "        <layer_prop>\n"
+                                                               "            <name>Defects</name>\n"
+                                                               "            <type>Defects</type>\n"
+                                                               "            <zoffset>0</zoffset>\n"
+                                                               "            <zheight>0</zheight>\n"
+                                                               "            <visible>1</visible>\n"
+                                                               "            <active>0</active>\n"
+                                                               "        </layer_prop>\n";
 
 inline constexpr const char* OPEN_DESIGN         = "    <design>\n";
 inline constexpr const char* LATTICE_LAYER       = "        <layer type=\"Lattice\"/>\n";
@@ -176,8 +194,22 @@ class write_sqd_layout_impl
 
         header << fmt::format(siqad::PROGRAM_BLOCK, "layout simulation", FICTION_VERSION, FICTION_REPO, time_str);
 
-        std::vector<const char*> active_layers{siqad::LATTICE_LAYER_DEFINITION, siqad::SCREENSHOT_LAYER_DEFINITION,
-                                               siqad::SURFACE_LAYER_DEFINITION, siqad::ELECTRODE_LAYER_DEFINITION};
+        std::vector<const char*> active_layers{};
+
+        if (lyt.get_lattice_orientation() == lattice_orientation::SI_100)
+        {
+            active_layers = {siqad::LATTICE_LAYER_DEFINITION_SI_100, siqad::SCREENSHOT_LAYER_DEFINITION,
+                             siqad::SURFACE_LAYER_DEFINITION, siqad::ELECTRODE_LAYER_DEFINITION};
+        }
+        else if (lyt.get_lattice_orientation() == lattice_orientation::SI_111)
+        {
+            active_layers = {siqad::LATTICE_LAYER_DEFINITION_SI_111, siqad::SCREENSHOT_LAYER_DEFINITION,
+                             siqad::SURFACE_LAYER_DEFINITION, siqad::ELECTRODE_LAYER_DEFINITION};
+        }
+        else
+        {
+            assert(false && "Unsupported lattice orientation");
+        }
 
         // add the defect layer if Lyt implements the defect interface
         if constexpr (has_get_sidb_defect_v<Lyt>)
@@ -342,6 +374,7 @@ void write_sqd_layout(const Lyt& lyt, std::ostream& os)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_qca_technology_v<Lyt> || has_sidb_technology_v<Lyt>, "Lyt must be a QCA or SiDB layout");
+    static_assert(is_sidb_lattice_layout_v<Lyt, lattice_orientation>, "Lyt must be a sidb lattice layout");
 
     detail::write_sqd_layout_impl p{lyt, os};
 

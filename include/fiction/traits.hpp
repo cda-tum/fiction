@@ -674,6 +674,56 @@ inline constexpr bool has_get_layout_name_v = has_get_layout_name<Ntk>::value;
 #pragma endregion
 
 /**
+ * SiDB lattice surfaces
+ */
+
+// Traits for determining if Lyt has assign_lattice_orientation member function
+template <class Lyt, class LatticeOrientation, class = void>
+struct has_assign_lattice_orientation : std::false_type
+{};
+
+template <class Lyt, class LatticeOrientation>
+struct has_assign_lattice_orientation<
+    Lyt, LatticeOrientation,
+    std::void_t<decltype(std::declval<Lyt>().assign_lattice_orientation(std::declval<LatticeOrientation>()))>>
+        : std::true_type
+{};
+
+template <class Lyt, class LatticeOrientation>
+inline constexpr bool has_assign_lattice_orientation_v = has_assign_lattice_orientation<Lyt, LatticeOrientation>::value;
+
+template <class Lyt, class = void>
+struct has_get_lattice_orientation : std::false_type
+{};
+
+template <class Lyt>
+struct has_get_lattice_orientation<Lyt, std::void_t<decltype(std::declval<Lyt>().get_lattice_orientation())>>
+        : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool has_get_lattice_orientation_v = has_get_lattice_orientation<Lyt>::value;
+
+#pragma region is_sidb_lattice_layout
+template <class Lyt, class LatticeOrientation, class = void>
+struct is_sidb_lattice_layout : std::false_type
+{};
+
+template <class Lyt, class LatticeOrientation>
+struct is_sidb_lattice_layout<
+    Lyt, LatticeOrientation,
+    std::enable_if_t<is_cell_level_layout_v<Lyt>, std::void_t<typename Lyt::storage,
+                                                              decltype(std::declval<Lyt>().assign_lattice_orientation(
+                                                                  std::declval<LatticeOrientation>())),
+                                                              decltype(std::declval<Lyt>().get_lattice_orientation())>>>
+        : std::true_type
+{};
+
+template <class Lyt, class LatticeOrientation>
+inline constexpr bool is_sidb_lattice_layout_v = is_sidb_lattice_layout<Lyt, LatticeOrientation>::value;
+#pragma endregion
+
+/**
  * SiDB surfaces
  */
 

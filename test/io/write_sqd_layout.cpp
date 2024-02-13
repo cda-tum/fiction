@@ -7,18 +7,21 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/algorithms/physical_design/apply_gate_library.hpp>
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/io/read_sqd_layout.hpp>
 #include <fiction/io/write_sqd_layout.hpp>
 #include <fiction/layouts/bounding_box.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
+#include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/sidb_bestagon_library.hpp>
 #include <fiction/technology/sidb_defects.hpp>
+#include <fiction/technology/sidb_lattice_layout.hpp>
 #include <fiction/technology/sidb_surface.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
@@ -75,11 +78,14 @@ TEST_CASE("Write empty SQD layout", "[sqd]")
 
     std::stringstream layout_stream{};
 
-    write_sqd_layout(layout, layout_stream);
+    const sidb_lattice_layout lattice_layout{layout, lattice_orientation::SI_100};
 
-    const auto read_layout = read_sqd_layout<sidb_layout>(layout_stream, "empty");
+    write_sqd_layout(lattice_layout, layout_stream);
 
-    compare_written_and_read_layout(layout, read_layout);
+    const auto read_layout =
+        read_sqd_layout<sidb_lattice_layout<sidb_layout>>(layout_stream, lattice_orientation::SI_100, "empty");
+
+    compare_written_and_read_layout(lattice_layout, read_layout);
 }
 
 TEST_CASE("Write single-dot SQD layout", "[sqd]")
@@ -89,13 +95,15 @@ TEST_CASE("Write single-dot SQD layout", "[sqd]")
     sidb_layout layout{{2, 2}};
     layout.assign_cell_type({1, 2}, sidb_technology::cell_type::NORMAL);
 
+    const sidb_lattice_layout lattice_layout{layout, lattice_orientation::SI_100};
+
     std::stringstream layout_stream{};
 
-    write_sqd_layout(layout, layout_stream);
+    write_sqd_layout(lattice_layout, layout_stream);
 
-    const auto read_layout = read_sqd_layout<sidb_layout>(layout_stream);
+    const auto read_layout = read_sqd_layout<sidb_lattice_layout<sidb_layout>>(layout_stream);
 
-    compare_written_and_read_layout(layout, read_layout);
+    compare_written_and_read_layout(lattice_layout, read_layout);
 }
 
 TEST_CASE("Write single-dot SQD layout with SiQAD coordinates", "[sqd]")
@@ -107,9 +115,9 @@ TEST_CASE("Write single-dot SQD layout with SiQAD coordinates", "[sqd]")
 
     std::stringstream layout_stream{};
 
-    write_sqd_layout(layout, layout_stream);
+    write_sqd_layout(sidb_lattice_layout{layout, lattice_orientation::SI_100}, layout_stream);
 
-    const auto read_layout = read_sqd_layout<sidb_layout>(layout_stream);
+    const auto read_layout = read_sqd_layout<sidb_lattice_layout<sidb_layout>>(layout_stream);
 
     CHECK(read_layout.get_cell_type({1, 4}) == sidb_layout::cell_type::NORMAL);
     CHECK(layout.get_cell_type({1, 2}) == sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
@@ -128,11 +136,13 @@ TEST_CASE("Write multi-dot SQD layout", "[sqd]")
 
     std::stringstream layout_stream{};
 
-    write_sqd_layout(layout, layout_stream);
+    sidb_lattice_layout lattice_layout{layout, lattice_orientation::SI_100};
 
-    const auto read_layout = read_sqd_layout<sidb_layout>(layout_stream);
+    write_sqd_layout(lattice_layout, layout_stream);
 
-    compare_written_and_read_layout(layout, read_layout);
+    const auto read_layout = read_sqd_layout<sidb_lattice_layout<sidb_layout>>(layout_stream);
+
+    compare_written_and_read_layout(lattice_layout, read_layout);
 }
 
 TEST_CASE("Write multi-dot SQD layout with differing dot types", "[sqd]")
@@ -148,11 +158,13 @@ TEST_CASE("Write multi-dot SQD layout with differing dot types", "[sqd]")
 
     std::stringstream layout_stream{};
 
-    write_sqd_layout(layout, layout_stream);
+    sidb_lattice_layout lattice_layout{layout, lattice_orientation::SI_100};
 
-    const auto read_layout = read_sqd_layout<sidb_layout>(layout_stream);
+    write_sqd_layout(lattice_layout, layout_stream);
 
-    compare_written_and_read_layout(layout, read_layout);
+    const auto read_layout = read_sqd_layout<sidb_lattice_layout<sidb_layout>>(layout_stream);
+
+    compare_written_and_read_layout(lattice_layout, read_layout);
 }
 
 TEST_CASE("Write Bestagon SQD layout", "[sqd]")
@@ -168,11 +180,14 @@ TEST_CASE("Write Bestagon SQD layout", "[sqd]")
 
     std::stringstream layout_stream{};
 
-    write_sqd_layout(c_layout, layout_stream);
+    sidb_lattice_layout lattice_layout{c_layout, lattice_orientation::SI_100};
 
-    const auto read_layout = read_sqd_layout<sidb_layout>(layout_stream, "Bestagon");
+    write_sqd_layout(lattice_layout, layout_stream);
 
-    compare_written_and_read_layout(c_layout, read_layout);
+    const auto read_layout =
+        read_sqd_layout<sidb_lattice_layout<sidb_layout>>(layout_stream, lattice_orientation::SI_100, "Bestagon");
+
+    compare_written_and_read_layout(lattice_layout, read_layout);
 }
 
 TEST_CASE("Write defective surface SQD layout", "[sqd]")
@@ -205,13 +220,15 @@ TEST_CASE("Write defective surface SQD layout", "[sqd]")
         defect_layout.assign_sidb_defect(c, d);
     }
 
+    const sidb_lattice_layout lattice_layout{defect_layout};
+
     std::stringstream layout_stream{};
 
-    write_sqd_layout(defect_layout, layout_stream);
+    write_sqd_layout(sidb_lattice_layout{defect_layout, lattice_orientation::SI_100}, layout_stream);
 
-    const auto read_layout = read_sqd_layout<sidb_surface<sidb_layout>>(layout_stream);
+    const auto read_layout = read_sqd_layout<sidb_lattice_layout<sidb_surface<sidb_layout>>>(layout_stream);
 
-    compare_written_and_read_layout(defect_layout, read_layout);
+    compare_written_and_read_layout(lattice_layout, read_layout);
 }
 
 TEST_CASE("Write multi-dot SQD layout based on SiQAD coordinates", "[sqd]")
@@ -225,11 +242,13 @@ TEST_CASE("Write multi-dot SQD layout based on SiQAD coordinates", "[sqd]")
 
     std::stringstream layout_stream{};
 
-    write_sqd_layout(layout, layout_stream);
+    const sidb_lattice_layout lattice_layout{layout, lattice_orientation::SI_100};
 
-    const auto read_layout = read_sqd_layout<sidb_cell_clk_lyt_siqad>(layout_stream);
+    write_sqd_layout(lattice_layout, layout_stream);
 
-    compare_written_and_read_layout(layout, read_layout);
+    const auto read_layout = read_sqd_layout<sidb_lattice_layout<sidb_cell_clk_lyt_siqad>>(layout_stream);
+
+    compare_written_and_read_layout(lattice_layout, read_layout);
 }
 
 TEST_CASE("Write defective surface SQD layout based on SiQAD coordinates", "[sqd]")
@@ -262,9 +281,11 @@ TEST_CASE("Write defective surface SQD layout based on SiQAD coordinates", "[sqd
 
     std::stringstream layout_stream{};
 
-    write_sqd_layout(defect_layout, layout_stream);
+    const sidb_lattice_layout lattice_layout{defect_layout, lattice_orientation::SI_100};
 
-    const auto read_layout = read_sqd_layout<sidb_surface<sidb_cell_clk_lyt_siqad>>(layout_stream);
+    write_sqd_layout(lattice_layout, layout_stream);
 
-    compare_written_and_read_layout(defect_layout, read_layout);
+    const auto read_layout = read_sqd_layout<sidb_lattice_layout<sidb_surface<sidb_cell_clk_lyt_siqad>>>(layout_stream);
+
+    compare_written_and_read_layout(lattice_layout, read_layout);
 }
