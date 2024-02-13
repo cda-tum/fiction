@@ -6,7 +6,6 @@
 #define FICTION_ASSIGN_CLOCKING_HPP
 
 #include "fiction/traits.hpp"
-#include "fiction/utils/hash.hpp"
 
 #include <bill/sat/cardinality.hpp>
 #include <bill/sat/interface/common.hpp>
@@ -27,7 +26,7 @@ namespace fiction
 {
 
 /**
- * Parameters for the assign_clocking algorithm.
+ * Parameters for the determine_clocking algorithm.
  */
 struct assign_clocking_params
 {
@@ -81,7 +80,13 @@ class sat_clocking_handler
                 }
             });
     }
-
+    /**
+     * Determines clock numbers for the layout.
+     *
+     * Constructs a SAT instance and passes it to a solver to find a valid clocking scheme.
+     *
+     * @return `true` iff a valid clocking scheme could be found.
+     */
     bool determine_clocks() noexcept
     {
         at_least_one_clock_number_per_tile();
@@ -90,8 +95,10 @@ class sat_clocking_handler
         ensure_same_clock_number_on_crossing_tiles();
         symmetry_breaking();
 
+        // pass to the solver
         if (const auto sat_result = solver.solve(); sat_result == bill::result::states::satisfiable)
         {
+            // extract model and assign clock numbers
             assign_clock_numbers(solver.get_model().model());
             return true;
         }
@@ -279,7 +286,11 @@ class sat_clocking_handler
                 return false;  // terminate after one iteration
             });
     }
-
+    /**
+     * Assigns clock numbers to the layout based on the provided model.
+     *
+     * @param model The model to extract the clocking scheme from.
+     */
     void assign_clock_numbers(const bill::result::model_type& model) noexcept
     {
         // for each non-empty tile
@@ -361,7 +372,7 @@ class assign_clocking_impl
 
   private:
     /**
-     * The layout to clock.
+     * The layout to assign clock numbers to.
      */
     Lyt& layout;
     /**
@@ -377,11 +388,21 @@ class assign_clocking_impl
 }  // namespace detail
 
 /**
+ * Determines clock numbers for the given gate-level layout. This algorithm parses the layout's gate and wire
+ * connections, disregarding any existing clocking information, and constructs a SAT instance to find a valid clock
+ * number assignment under which the information flow is respected. It then assigns these clock numbers as an irregular
+ * clock map to the given layout via the `assign_clock_number` function, overriding any existing clocking scheme.
  *
- * @return `true` iff `lyt` could be successfully clocked.
+ * If no valid clock number assignment exists for `lyt`, this function returns `false` and does not modify `lyt`.
+ *
+ * @tparam Lyt Gate-level layout type.
+ * @param lyt The gate-level layout to assign clock numbers to.
+ * @param params Parameters.
+ * @param stats Statistics.
+ * @return `true` iff `lyt` could be successfully clocked via a valid clock number assignment.
  */
 template <typename Lyt>
-bool assign_clocking(Lyt& lyt, assign_clocking_params params = {}, assign_clocking_stats* stats = nullptr)
+bool determine_clocking(Lyt& lyt, assign_clocking_params params = {}, assign_clocking_stats* stats = nullptr)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
 
