@@ -8,6 +8,7 @@
 #include "fiction/layouts/cartesian_layout.hpp"
 #include "fiction/layouts/cell_level_layout.hpp"
 #include "fiction/layouts/clocked_layout.hpp"
+#include "fiction/layouts/coordinates.hpp"
 #include "fiction/layouts/gate_level_layout.hpp"
 #include "fiction/layouts/hexagonal_layout.hpp"
 #include "fiction/layouts/shifted_cartesian_layout.hpp"
