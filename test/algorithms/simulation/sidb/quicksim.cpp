@@ -1029,7 +1029,7 @@ TEMPLATE_TEST_CASE(
 
     const auto simulation_results = quicksim<TestType>(lyt, params);
 
-    const auto ground_state = determine_the_groundstate_from_simulation_results(simulation_results);
+    const auto ground_state = determine_groundstate_from_simulation_results(simulation_results);
     REQUIRE(ground_state.size() == 1);
 
     CHECK(ground_state.front().get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);

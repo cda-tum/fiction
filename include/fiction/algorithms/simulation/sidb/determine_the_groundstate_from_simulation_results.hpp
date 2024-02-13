@@ -5,8 +5,8 @@
 #ifndef FICTION_DETERMINE_THE_GROUNDSTATE_FROM_CDS_HPP
 #define FICTION_DETERMINE_THE_GROUNDSTATE_FROM_CDS_HPP
 
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
-#include <fiction/technology/charge_distribution_surface.hpp>
+#include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
+#include "fiction/technology/charge_distribution_surface.hpp"
 
 #include <algorithm>
 #include <cstdint>
@@ -30,7 +30,7 @@ namespace fiction
  */
 template <typename Lyt>
 [[nodiscard]] std::vector<charge_distribution_surface<Lyt>>
-determine_the_groundstate_from_simulation_results(const sidb_simulation_result<Lyt>& simulation_results) noexcept
+determine_groundstate_from_simulation_results(const sidb_simulation_result<Lyt>& simulation_results) noexcept
 {
     std::vector<charge_distribution_surface<Lyt>> groundstate_charge_distributions{};
     std::set<uint64_t>                            charge_indices{};

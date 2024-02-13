@@ -42,7 +42,7 @@ TEST_CASE("Determine the groundstate from simulation results", "[determine-the-g
         results.charge_distributions = {cds1, cds2, cds3};
         results.algorithm_name       = "test";
 
-        const auto ground_state = determine_the_groundstate_from_simulation_results(results);
+        const auto ground_state = determine_groundstate_from_simulation_results(results);
         CHECK(ground_state.size() == 1);
     }
     SECTION("Several charge distributions with degeneracy")
@@ -75,7 +75,7 @@ TEST_CASE("Determine the groundstate from simulation results", "[determine-the-g
         results.charge_distributions = {cds1, cds2, cds3, cds4};
         results.algorithm_name       = "test";
 
-        const auto ground_states = determine_the_groundstate_from_simulation_results(results);
+        const auto ground_states = determine_groundstate_from_simulation_results(results);
         REQUIRE(ground_states.size() == 2);
         CHECK_THAT(ground_states[0].get_system_energy() - ground_states[1].get_system_energy(),
                    Catch::Matchers::WithinAbs(0.0, 0.00001));
