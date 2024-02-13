@@ -2,8 +2,8 @@
 // Created by marcel on 20.01.24.
 //
 
-#ifndef FICTION_ASSIGN_CLOCKING_HPP
-#define FICTION_ASSIGN_CLOCKING_HPP
+#ifndef FICTION_DETERMINE_CLOCKING_HPP
+#define FICTION_DETERMINE_CLOCKING_HPP
 
 #include "fiction/traits.hpp"
 
@@ -269,7 +269,7 @@ class sat_clocking_handler
             solver.add_clause(variables[{t, clk++ % max_clock_number}]);
 
             layout.foreach_fanout(n,
-                                  [this, &recurse](auto const& fon)
+                                  [&recurse](auto const& fon)
                                   {
                                       recurse(fon);
 
@@ -421,4 +421,4 @@ bool determine_clocking(Lyt& lyt, assign_clocking_params params = {}, assign_clo
 
 }  // namespace fiction
 
-#endif  // FICTION_ASSIGN_CLOCKING_HPP
+#endif  // FICTION_DETERMINE_CLOCKING_HPP

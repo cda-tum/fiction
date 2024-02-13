@@ -9,7 +9,7 @@
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
 
-#include <fiction/algorithms/physical_design/assign_clocking.hpp>
+#include <fiction/algorithms/physical_design/determine_clocking.hpp>
 #include <fiction/algorithms/physical_design/orthogonal.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
@@ -18,8 +18,7 @@
 #include <fiction/traits.hpp>
 
 #include <bill/sat/interface/common.hpp>
-
-#include <type_traits>
+#include <mockturtle/networks/aig.hpp>
 
 using namespace fiction;
 
@@ -48,7 +47,7 @@ void remove_assign_and_check_clocking(Lyt lyt)
     {
         remove_clocking(lyt);
 
-        const auto result = assign_clocking(lyt, assign_clocking_params{solver});
+        const auto result = determine_clocking(lyt, assign_clocking_params{solver});
 
         REQUIRE(result == true);
 
@@ -62,7 +61,7 @@ TEST_CASE("Assign clock numbers to an empty layout", "[assign-clocking]")
 
     gate_layout layout{{5, 5}};
 
-    CHECK(assign_clocking(layout) == true);
+    CHECK(determine_clocking(layout) == true);
 }
 
 TEST_CASE("Assign clock numbers to simple layouts", "[assign-clocking]")
