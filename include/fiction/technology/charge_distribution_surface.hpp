@@ -23,11 +23,14 @@
 #include <cstdlib>
 #include <iterator>
 #include <limits>
+#include <memory>
 #include <numeric>
 #include <optional>
 #include <random>
 #include <type_traits>
+#include <unordered_map>
 #include <utility>
+#include <vector>
 
 namespace fiction
 {
