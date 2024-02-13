@@ -55,7 +55,7 @@ void remove_assign_and_check_clocking(Lyt lyt)
     }
 }
 
-TEST_CASE("Assign clock numbers to an empty layout", "[assign-clocking]")
+TEST_CASE("Determine clock numbers for an empty layout", "[determine-clocking]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
 
@@ -64,7 +64,7 @@ TEST_CASE("Assign clock numbers to an empty layout", "[assign-clocking]")
     CHECK(determine_clocking(layout) == true);
 }
 
-TEST_CASE("Assign clock numbers to simple layouts", "[assign-clocking]")
+TEST_CASE("Determine clock numbers for simple layouts", "[determine-clocking]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
 
@@ -78,7 +78,7 @@ TEST_CASE("Assign clock numbers to simple layouts", "[assign-clocking]")
     remove_assign_and_check_clocking(blueprints::unbalanced_and_layout<gate_layout>());
 }
 
-TEST_CASE("Assign clock numbers to complex layouts", "[assign-clocking]")
+TEST_CASE("Determine clock numbers for complex layouts", "[determine-clocking]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
 
