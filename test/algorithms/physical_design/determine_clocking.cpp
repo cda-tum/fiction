@@ -4,7 +4,6 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "fiction/layouts/coordinates.hpp"
 #include "utils/blueprints/layout_blueprints.hpp"
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
@@ -13,7 +12,10 @@
 #include <fiction/algorithms/physical_design/orthogonal.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
+#include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/hexagonal_layout.hpp>
+#include <fiction/layouts/shifted_cartesian_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/traits.hpp>
 
@@ -86,4 +88,35 @@ TEST_CASE("Determine clock numbers for complex layouts", "[determine-clocking]")
     remove_assign_and_check_clocking(orthogonal<gate_layout>(blueprints::maj4_network<mockturtle::aig_network>()));
     remove_assign_and_check_clocking(
         orthogonal<gate_layout>(blueprints::nary_operation_network<mockturtle::aig_network>()));
+}
+
+TEST_CASE("Determine clock numbers for non-Cartesian layout topologies", "[determine-clocking]")
+{
+    SECTION("shifted Cartesian")
+    {
+        SECTION("odd column")
+        {
+            using gate_layout = gate_level_layout<
+                clocked_layout<tile_based_layout<shifted_cartesian_layout<offset::ucoord_t, odd_column_cartesian>>>>;
+
+            remove_assign_and_check_clocking(blueprints::shifted_cart_and_or_inv_gate_layout<gate_layout>());
+        }
+        SECTION("even row")
+        {
+            using gate_layout = gate_level_layout<
+                clocked_layout<tile_based_layout<shifted_cartesian_layout<offset::ucoord_t, even_row_cartesian>>>>;
+
+            remove_assign_and_check_clocking(blueprints::row_clocked_and_xor_gate_layout<gate_layout>());
+        }
+    }
+    SECTION("hexagonal")
+    {
+        SECTION("even row")
+        {
+            using gate_layout =
+                gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, even_row_hex>>>>;
+
+            remove_assign_and_check_clocking(blueprints::row_clocked_and_xor_gate_layout<gate_layout>());
+        }
+    }
 }
