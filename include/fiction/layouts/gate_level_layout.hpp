@@ -1146,8 +1146,9 @@ class gate_level_layout : public ClockedLayout
         data_flow.reserve(RespectClocking ? ClockedLayout::get_clocking_scheme().max_out_degree :
                                             ClockedLayout::max_fanin_size);  // reserve memory
 
-        foreach_fanout<RespectClocking>(get_node(t),
-                                        [this, &data_flow](const auto& fout) { data_flow.push_back(get_tile(fout)); });
+        const auto fanout_collector = [this, &data_flow](const auto& fout) { data_flow.push_back(get_tile(fout)); };
+
+        foreach_fanout<decltype(fanout_collector), RespectClocking>(get_node(t), std::move(fanout_collector));
 
         return data_flow;
     }

@@ -10,11 +10,14 @@
 
 #include <bill/sat/cardinality.hpp>
 #include <bill/sat/interface/common.hpp>
+#include <bill/sat/interface/types.hpp>
 #include <bill/sat/solver.hpp>
 #include <bill/sat/tseytin.hpp>
+#include <mockturtle/traits.hpp>
 
 #include <algorithm>
 #include <functional>
+#include <iostream>
 #include <ostream>
 #include <unordered_map>
 #include <utility>
@@ -79,7 +82,7 @@ class sat_clocking_handler
             });
     }
 
-    bool determine_clocks()
+    bool determine_clocks() noexcept
     {
         at_least_one_clock_number_per_tile();
         at_most_one_clock_number_per_tile();
@@ -122,7 +125,7 @@ class sat_clocking_handler
     /**
      * Adds constraints to the solver that enforce the assignment of at least one clock number per tile.
      */
-    void at_least_one_clock_number_per_tile()
+    void at_least_one_clock_number_per_tile() noexcept
     {
         // for each non-empty tile
         layout.foreach_node(
@@ -135,12 +138,13 @@ class sat_clocking_handler
 
                 const auto t = layout.get_tile(n);
 
-                std::vector<bill::var_type> tc(max_clock_number + 1, 0);
+                std::vector<bill::var_type> tc{};
+                tc.reserve(max_clock_number);
 
                 // for each possible clock number
                 for (typename Lyt::clock_number_t clk = 0; clk < max_clock_number; ++clk)
                 {
-                    tc[clk] = variables[{t, clk}];
+                    tc.push_back(variables[{t, clk}]);
                 }
 
                 bill::at_least_one(tc, solver);
@@ -149,7 +153,7 @@ class sat_clocking_handler
     /**
      * Adds constraints to the solver that enforce the assignment of at most one clock number per tile.
      */
-    void at_most_one_clock_number_per_tile()
+    void at_most_one_clock_number_per_tile() noexcept
     {
         // for each pair of clock numbers
         for (typename Lyt::clock_number_t c1 = 0; c1 < max_clock_number; ++c1)
@@ -178,7 +182,7 @@ class sat_clocking_handler
     /**
      * Adds constraints to the solver that exclude the assignment of non-adjacently clocked tiles.
      */
-    void exclude_clock_assignments_that_violate_information_flow()
+    void exclude_clock_assignments_that_violate_information_flow() noexcept
     {
         // for each non-empty tile
         layout.foreach_node(
@@ -218,7 +222,7 @@ class sat_clocking_handler
     /**
      * Adds constraints to the solver that ensure the assignment of the same clock number to crossing tiles.
      */
-    void ensure_same_clock_number_on_crossing_tiles()
+    void ensure_same_clock_number_on_crossing_tiles() noexcept
     {
         // for each crossing wire
         layout.foreach_wire(
@@ -247,7 +251,7 @@ class sat_clocking_handler
      * Adds constraints to the solver that help to speed up the solving process by breaking symmetries in the solution
      * space.
      */
-    void symmetry_breaking()
+    void symmetry_breaking() noexcept
     {
         const std::function<void(const mockturtle::node<Lyt>& n)> recurse =
             [this, &recurse, clk = 0](const auto& n) mutable
@@ -255,7 +259,7 @@ class sat_clocking_handler
             const auto t = layout.get_tile(n);
 
             // pre-assign tile t to clock number clk
-            solver.add_clause(variables[{t, ++clk % max_clock_number}]);
+            solver.add_clause(variables[{t, clk++ % max_clock_number}]);
 
             layout.foreach_fanout(n,
                                   [this, &recurse](auto const& fon)
