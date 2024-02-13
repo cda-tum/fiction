@@ -6,6 +6,7 @@
 #define FICTION_WRITE_SQD_LAYOUT_HPP
 
 #include "fiction/technology/cell_technologies.hpp"
+#include "fiction/technology/sidb_defects.hpp"
 #include "fiction/traits.hpp"
 #include "utils/version_info.hpp"
 
@@ -196,19 +197,22 @@ class write_sqd_layout_impl
 
         std::vector<const char*> active_layers{};
 
-        if (lyt.get_lattice_orientation() == lattice_orientation::SI_100)
+        if constexpr (is_sidb_lattice_layout_v<Lyt, lattice_orientation>)
         {
-            active_layers = {siqad::LATTICE_LAYER_DEFINITION_SI_100, siqad::SCREENSHOT_LAYER_DEFINITION,
-                             siqad::SURFACE_LAYER_DEFINITION, siqad::ELECTRODE_LAYER_DEFINITION};
-        }
-        else if (lyt.get_lattice_orientation() == lattice_orientation::SI_111)
-        {
-            active_layers = {siqad::LATTICE_LAYER_DEFINITION_SI_111, siqad::SCREENSHOT_LAYER_DEFINITION,
-                             siqad::SURFACE_LAYER_DEFINITION, siqad::ELECTRODE_LAYER_DEFINITION};
-        }
-        else
-        {
-            assert(false && "Unsupported lattice orientation");
+            if (lyt.get_lattice_orientation() == lattice_orientation::SI_100)
+            {
+                active_layers = {siqad::LATTICE_LAYER_DEFINITION_SI_100, siqad::SCREENSHOT_LAYER_DEFINITION,
+                                 siqad::SURFACE_LAYER_DEFINITION, siqad::ELECTRODE_LAYER_DEFINITION};
+            }
+            else if (lyt.get_lattice_orientation() == lattice_orientation::SI_111)
+            {
+                active_layers = {siqad::LATTICE_LAYER_DEFINITION_SI_111, siqad::SCREENSHOT_LAYER_DEFINITION,
+                                 siqad::SURFACE_LAYER_DEFINITION, siqad::ELECTRODE_LAYER_DEFINITION};
+            }
+            else
+            {
+                assert(false && "Unsupported lattice orientation");
+            }
         }
 
         // add the defect layer if Lyt implements the defect interface
