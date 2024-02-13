@@ -3,7 +3,9 @@
 //
 
 #include <fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp>
+#include <fiction/technology/sidb_lattice_layout.hpp>
 #include <fiction/io/read_sqd_layout.hpp>
+#include <fiction/io/write_sqd_layout.hpp>
 #include <fiction/types.hpp>
 
 #include <fmt/format.h>
@@ -171,7 +173,7 @@ int main(int argc, const char* argv[])  // NOLINT
                     generate_multiple_random_sidb_layouts<sidb_cell_clk_lyt>(sidb_cell_clk_lyt{}, params);
                 for (auto i = 0u; i < unique_lyts.size(); i++)
                 {
-                    write_sqd_layout(unique_lyts[i], fmt::format("{}/layout_{}.sqd", dir_path_sqd.string(), i));
+                    write_sqd_layout(sidb_lattice_layout{unique_lyts[i]}, fmt::format("{}/layout_{}.sqd", dir_path_sqd.string(), i));
                 }
             }
             catch (const std::filesystem::filesystem_error& ex)

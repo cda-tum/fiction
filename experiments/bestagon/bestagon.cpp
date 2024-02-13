@@ -9,11 +9,12 @@
 #include <fiction/algorithms/physical_design/apply_gate_library.hpp>  // layout conversion to cell-level
 #include <fiction/algorithms/physical_design/exact.hpp>               // SMT-based physical design of FCN layouts
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
-#include <fiction/io/write_sqd_layout.hpp>                    // writer for SiQAD files (physical simulation)
-#include <fiction/networks/technology_network.hpp>            // technology-mapped network type
-#include <fiction/technology/area.hpp>                        // area requirement calculations
-#include <fiction/technology/cell_technologies.hpp>           // cell implementations
-#include <fiction/technology/sidb_bestagon_library.hpp>       // a pre-defined SiDB gate library
+#include <fiction/io/write_sqd_layout.hpp>               // writer for SiQAD files (physical simulation)
+#include <fiction/networks/technology_network.hpp>       // technology-mapped network type
+#include <fiction/technology/area.hpp>                   // area requirement calculations
+#include <fiction/technology/cell_technologies.hpp>      // cell implementations
+#include <fiction/technology/sidb_bestagon_library.hpp>  // a pre-defined SiDB gate library
+#include <fiction/technology/sidb_lattice_layout.hpp>
 #include <fiction/technology/technology_mapping_library.hpp>  // pre-defined gate types for technology mapping
 #include <fiction/traits.hpp>                                 // traits for type-checking
 #include <fiction/types.hpp>                                  // pre-defined types suitable for the FCN domain
@@ -157,7 +158,8 @@ int main()  // NOLINT
             fiction::area(cell_level_layout, area_ps, &area_stats);
 
             // write a SiQAD simulation file
-            fiction::write_sqd_layout(cell_level_layout, fmt::format("{}/{}.sqd", layouts_folder, benchmark));
+            fiction::write_sqd_layout(fiction::sidb_lattice_layout{cell_level_layout},
+                                      fmt::format("{}/{}.sqd", layouts_folder, benchmark));
 
             // log results
             bestagon_exp(benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(),
