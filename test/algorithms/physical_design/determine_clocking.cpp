@@ -49,9 +49,12 @@ void remove_assign_and_check_clocking(Lyt lyt)
     {
         remove_clocking(lyt);
 
-        const auto result = determine_clocking(lyt, assign_clocking_params{solver});
+        determine_clocking_stats st{};
+
+        const auto result = determine_clocking(lyt, determine_clocking_params{solver}, &st);
 
         REQUIRE(result == true);
+        CHECK(mockturtle::to_seconds(st.time_total) > 0);
 
         check_eq(lyt, lyt_clone);
     }

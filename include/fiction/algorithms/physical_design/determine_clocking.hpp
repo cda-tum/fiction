@@ -29,7 +29,7 @@ namespace fiction
 /**
  * Parameters for the determine_clocking algorithm.
  */
-struct assign_clocking_params
+struct determine_clocking_params
 {
     /**
      * The SAT solver to use.
@@ -37,7 +37,7 @@ struct assign_clocking_params
     bill::solvers sat_engine = bill::solvers::ghack;
 };
 
-struct assign_clocking_stats
+struct determine_clocking_stats
 {
     /**
      * Total runtime.
@@ -324,7 +324,7 @@ template <typename Lyt>
 class assign_clocking_impl
 {
   public:
-    assign_clocking_impl(Lyt& lyt, const assign_clocking_params& p, assign_clocking_stats& st) :
+    assign_clocking_impl(Lyt& lyt, const determine_clocking_params& p, determine_clocking_stats& st) :
             layout{lyt},
             params{p},
             stats{st}
@@ -379,11 +379,11 @@ class assign_clocking_impl
     /**
      * Parameters.
      */
-    assign_clocking_params params;
+    determine_clocking_params params;
     /**
      * Statistics.
      */
-    assign_clocking_stats& stats;
+    determine_clocking_stats& stats;
 };
 
 }  // namespace detail
@@ -403,11 +403,12 @@ class assign_clocking_impl
  * @return `true` iff `lyt` could be successfully clocked via a valid clock number assignment.
  */
 template <typename Lyt>
-bool determine_clocking(Lyt& lyt, assign_clocking_params params = {}, assign_clocking_stats* stats = nullptr)
+bool determine_clocking(Lyt& lyt, const determine_clocking_params& params = {},
+                        determine_clocking_stats* stats = nullptr)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
 
-    assign_clocking_stats             st{};
+    determine_clocking_stats          st{};
     detail::assign_clocking_impl<Lyt> p{lyt, params, st};
 
     const auto result = p.run();
