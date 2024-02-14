@@ -276,7 +276,7 @@ class wiring_reduction_layout : public cartesian_layout<OffsetCoordinateType>
 /**
  * Type alias for an obstruction layout specialized for finding excess wiring.
  */
-using wiring_reduction_lyt = obstruction_layout<wiring_reduction_layout<>>;
+using wiring_reduction_lyt = obstruction_layout<wiring_reduction_layout<OffsetCoordinateType>>;
 
 /**
  * Create a shifted layout suitable for finding excess wiring based on a Cartesian layout.
