@@ -67,8 +67,8 @@ class cell_level_layout : public ClockedLayout
 
         std::string layout_name;
 
-        const uint16_t tile_size_x;
-        const uint16_t tile_size_y;
+        uint16_t tile_size_x;
+        uint16_t tile_size_y;
 
         phmap::parallel_flat_hash_map<Cell, cell_type> cell_type_map{};
         phmap::parallel_flat_hash_map<Cell, cell_mode> cell_mode_map{};
@@ -366,6 +366,15 @@ class cell_level_layout : public ClockedLayout
         return strg->tile_size_x;
     }
     /**
+     * Sets the underlying clock zone x-dimension size.
+     *
+     * @param tile_size_x Tile size in the x-dimension.
+     */
+    void set_tile_size_x(const uint64_t tile_size_x) noexcept
+    {
+        strg->tile_size_x = tile_size_x;
+    }
+    /**
      * Returns the underlying clock zone y-dimension size. That is, if this cell-level layout was obtained from the
      * application of a gate library, this function returns the cell size in y-dimension of each gate in the library.
      *
@@ -374,6 +383,15 @@ class cell_level_layout : public ClockedLayout
     [[nodiscard]] uint16_t get_tile_size_y() const noexcept
     {
         return strg->tile_size_y;
+    }
+    /**
+     * Sets the underlying clock zone y-dimension size.
+     *
+     * @param tile_size_y Tile size in the y-dimension.
+     */
+    void set_tile_size_y(const uint64_t tile_size_y) noexcept
+    {
+        strg->tile_size_y = tile_size_y;
     }
 
 #pragma endregion
