@@ -35,7 +35,7 @@ struct determine_clocking_params
     /**
      * The SAT solver to use.
      */
-    bill::solvers sat_engine = bill::solvers::ghack;
+    bill::solvers sat_engine = bill::solvers::bsat2;
 };
 /**
  * Statistics for the `determine_clocking` algorithm.
