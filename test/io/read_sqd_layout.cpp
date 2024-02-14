@@ -4,7 +4,6 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/io/read_sqd_layout.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
@@ -13,10 +12,10 @@
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/sidb_lattice_layout.hpp>
 #include <fiction/technology/sidb_surface.hpp>
+#include <fiction/traits.hpp>
 
 #include <sstream>
 #include <string>
-#include <type_traits>
 #include <unordered_set>
 
 using namespace fiction;
@@ -483,7 +482,7 @@ TEST_CASE("In-place SQD reader with ignored defects", "[sqd]")
 
     const sidb_surface_params params{std::unordered_set<sidb_defect_type>{sidb_defect_type::DB}};
     const sidb_layout         layout{params};
-    sidb_lattice_layout       lattice_layout{layout, lattice_orientation::SI_100};
+    sidb_lattice_layout       lattice_layout{layout, si_lattice_orientations::SI_100};
 
     read_sqd_layout(lattice_layout, layout_stream);
 

@@ -8,13 +8,16 @@
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
+#include <fiction/layouts/coordinates.hpp>
+#include <fiction/technology/sidb_lattice_layout.hpp>
 
 using namespace fiction;
 
-TEMPLATE_TEST_CASE("One BDL pair with one perturber", "[can-positive-charges-occur]",
-                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+TEMPLATE_TEST_CASE(
+    "One BDL pair with one perturber", "[can-positive-charges-occur]",
+    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
-    TestType lyt{{20, 10}};
+    TestType lyt{};
 
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({4, 0, 0}, TestType::cell_type::NORMAL);
@@ -39,10 +42,11 @@ TEMPLATE_TEST_CASE("One BDL pair with one perturber", "[can-positive-charges-occ
     }
 }
 
-TEMPLATE_TEST_CASE("Y-shape SiDB OR gate with input 01, using siqad coordinates", "[can-positive-charges-occur]",
-                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+TEMPLATE_TEST_CASE(
+    "Y-shape SiDB OR gate with input 01, using siqad coordinates", "[can-positive-charges-occur]",
+    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
-    TestType lyt{{20, 10}};
+    TestType lyt{};
 
     lyt.assign_cell_type({6, 2, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({8, 3, 0}, TestType::cell_type::NORMAL);
@@ -74,10 +78,11 @@ TEMPLATE_TEST_CASE("Y-shape SiDB OR gate with input 01, using siqad coordinates"
     }
 }
 
-TEMPLATE_TEST_CASE("Y-shape SiDB OR gate with input 01, using cube coordinates", "[can-positive-charges-occur]",
-                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>))
+TEMPLATE_TEST_CASE(
+    "Y-shape SiDB OR gate with input 01, using cube coordinates", "[can-positive-charges-occur]",
+    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>>))
 {
-    TestType lyt{{20, 10}};
+    TestType lyt{};
 
     lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{6, 2, 0}), TestType::cell_type::NORMAL);
     lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{8, 3, 0}), TestType::cell_type::NORMAL);
@@ -109,10 +114,11 @@ TEMPLATE_TEST_CASE("Y-shape SiDB OR gate with input 01, using cube coordinates",
     }
 }
 
-TEMPLATE_TEST_CASE("Y-shape SiDB OR gate with input 01, using offset coordinates", "[can-positive-charges-occur]",
-                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>))
+TEMPLATE_TEST_CASE(
+    "Y-shape SiDB OR gate with input 01, using offset coordinates", "[can-positive-charges-occur]",
+    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>))
 {
-    TestType lyt{{20, 10}};
+    TestType lyt{};
 
     lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{6, 2, 0}),
                          TestType::cell_type::NORMAL);

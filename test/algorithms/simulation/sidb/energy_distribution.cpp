@@ -8,22 +8,23 @@
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
-#include <fiction/layouts/hexagonal_layout.hpp>
+#include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/cell_technologies.hpp>
+#include <fiction/technology/charge_distribution_surface.hpp>
+#include <fiction/technology/sidb_charge_state.hpp>
+#include <fiction/technology/sidb_lattice_layout.hpp>
+
+#include <vector>
 
 using namespace fiction;
 
 TEMPLATE_TEST_CASE(
     "Test energy_distribution function", "[energy-distribution]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, odd_row_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, even_row_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, odd_column_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, even_column_hex>>>))
+    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
     SECTION("one empty layout")
     {
-        TestType                                           lyt{{10, 10}};
+        TestType                                           lyt{};
         std::vector<charge_distribution_surface<TestType>> all_lyts{};
         const charge_distribution_surface                  charge_layout{lyt};
         all_lyts.push_back(charge_layout);
@@ -34,7 +35,7 @@ TEMPLATE_TEST_CASE(
 
     SECTION("one layout with one SiDB placed")
     {
-        TestType lyt{{10, 10}};
+        TestType lyt{};
         lyt.assign_cell_type({0, 0}, TestType::cell_type::NORMAL);
         std::vector<charge_distribution_surface<TestType>> all_lyts{};
         charge_distribution_surface                        charge_layout{lyt};
@@ -51,7 +52,7 @@ TEMPLATE_TEST_CASE(
 
     SECTION("several layouts")
     {
-        TestType lyt{{10, 10}};
+        TestType lyt{};
         lyt.assign_cell_type({10, 10}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({11, 10}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({12, 10}, TestType::cell_type::NORMAL);

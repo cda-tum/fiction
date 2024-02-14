@@ -10,19 +10,22 @@
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/charge_distribution_surface.hpp>
 #include <fiction/technology/sidb_charge_state.hpp>
+#include <fiction/technology/sidb_lattice_layout.hpp>
 #include <fiction/types.hpp>
 
 using namespace fiction;
+
+using lattice = sidb_lattice_layout<sidb_cell_clk_lyt>;
 
 TEST_CASE("Determine the groundstate from simulation results", "[determine-the-groundstate-from-simulation-results]")
 {
     SECTION("Three distinct charge distributions")
     {
-        sidb_cell_clk_lyt lyt{};
+        lattice lyt{};
 
-        lyt.assign_cell_type({5, 4}, sidb_cell_clk_lyt::cell_type::NORMAL);
-        lyt.assign_cell_type({5, 5}, sidb_cell_clk_lyt::cell_type::NORMAL);
-        lyt.assign_cell_type({5, 6}, sidb_cell_clk_lyt::cell_type::NORMAL);
+        lyt.assign_cell_type({5, 4}, lattice::cell_type::NORMAL);
+        lyt.assign_cell_type({5, 5}, lattice::cell_type::NORMAL);
+        lyt.assign_cell_type({5, 6}, lattice::cell_type::NORMAL);
 
         const charge_distribution_surface cds1{lyt};
 
@@ -38,7 +41,7 @@ TEST_CASE("Determine the groundstate from simulation results", "[determine-the-g
         CHECK(cds2.get_system_energy() < cds3.get_system_energy());
         CHECK(cds2.get_system_energy() < cds1.get_system_energy());
 
-        sidb_simulation_result<sidb_cell_clk_lyt> results{};
+        sidb_simulation_result<lattice> results{};
         results.charge_distributions = {cds1, cds2, cds3};
         results.algorithm_name       = "test";
 
@@ -47,7 +50,7 @@ TEST_CASE("Determine the groundstate from simulation results", "[determine-the-g
     }
     SECTION("Several charge distributions with degeneracy")
     {
-        sidb_cell_clk_lyt lyt{};
+        lattice lyt{};
 
         lyt.assign_cell_type({5, 4}, sidb_cell_clk_lyt::cell_type::NORMAL);
         lyt.assign_cell_type({6, 4}, sidb_cell_clk_lyt::cell_type::NORMAL);
@@ -71,7 +74,7 @@ TEST_CASE("Determine the groundstate from simulation results", "[determine-the-g
 
         CHECK_THAT(cds2.get_system_energy() - cds1.get_system_energy(), Catch::Matchers::WithinAbs(0.0, 0.00001));
 
-        sidb_simulation_result<sidb_cell_clk_lyt> results{};
+        sidb_simulation_result<lattice> results{};
         results.charge_distributions = {cds1, cds2, cds3, cds4};
         results.algorithm_name       = "test";
 

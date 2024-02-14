@@ -5,15 +5,16 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp>
+#include <fiction/technology/sidb_lattice_layout.hpp>
 #include <fiction/types.hpp>
 
 using namespace fiction;
 
+using lattice = sidb_lattice_layout<sidb_cell_clk_lyt_siqad>;
+
 TEST_CASE("Empty layout BDL detection", "[detect-bdl-pairs]")
 {
-    using layout = sidb_cell_clk_lyt_siqad;
-
-    const layout lyt{};
+    const lattice lyt{};
 
     const auto result = detect_bdl_pairs(lyt, sidb_technology::cell_type::NORMAL);
 
@@ -39,11 +40,13 @@ TEST_CASE("Atomic wire BDL detection", "[detect-bdl-pairs]")
 
     detect_bdl_pairs_params params{};
 
+    const lattice lat{lyt};
+
     SECTION("default lower threshold")
     {
-        const auto input_bdl_pairs  = detect_bdl_pairs(lyt, sidb_technology::cell_type::INPUT, params);
-        const auto output_bdl_pairs = detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT, params);
-        const auto normal_bdl_pairs = detect_bdl_pairs(lyt, sidb_technology::cell_type::NORMAL, params);
+        const auto input_bdl_pairs  = detect_bdl_pairs(lat, sidb_technology::cell_type::INPUT, params);
+        const auto output_bdl_pairs = detect_bdl_pairs(lat, sidb_technology::cell_type::OUTPUT, params);
+        const auto normal_bdl_pairs = detect_bdl_pairs(lat, sidb_technology::cell_type::NORMAL, params);
 
         REQUIRE(input_bdl_pairs.empty());
         REQUIRE(output_bdl_pairs.empty());
@@ -64,9 +67,9 @@ TEST_CASE("Atomic wire BDL detection", "[detect-bdl-pairs]")
     {
         params.minimum_distance = 0.5;
 
-        const auto input_bdl_pairs  = detect_bdl_pairs(lyt, sidb_technology::cell_type::INPUT, params);
-        const auto output_bdl_pairs = detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT, params);
-        const auto normal_bdl_pairs = detect_bdl_pairs(lyt, sidb_technology::cell_type::NORMAL, params);
+        const auto input_bdl_pairs  = detect_bdl_pairs(lat, sidb_technology::cell_type::INPUT, params);
+        const auto output_bdl_pairs = detect_bdl_pairs(lat, sidb_technology::cell_type::OUTPUT, params);
+        const auto normal_bdl_pairs = detect_bdl_pairs(lat, sidb_technology::cell_type::NORMAL, params);
 
         REQUIRE(input_bdl_pairs.empty());
         REQUIRE(output_bdl_pairs.empty());
@@ -87,9 +90,9 @@ TEST_CASE("Atomic wire BDL detection", "[detect-bdl-pairs]")
     {
         params.minimum_distance = 0;
 
-        const auto input_bdl_pairs  = detect_bdl_pairs(lyt, sidb_technology::cell_type::INPUT, params);
-        const auto output_bdl_pairs = detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT, params);
-        const auto normal_bdl_pairs = detect_bdl_pairs(lyt, sidb_technology::cell_type::NORMAL, params);
+        const auto input_bdl_pairs  = detect_bdl_pairs(lat, sidb_technology::cell_type::INPUT, params);
+        const auto output_bdl_pairs = detect_bdl_pairs(lat, sidb_technology::cell_type::OUTPUT, params);
+        const auto normal_bdl_pairs = detect_bdl_pairs(lat, sidb_technology::cell_type::NORMAL, params);
 
         REQUIRE(input_bdl_pairs.size() == 1);
         REQUIRE(output_bdl_pairs.size() == 1);
@@ -141,10 +144,12 @@ TEST_CASE("BDL wire BDL detection", "[detect-bdl-pairs]")
     // set default lower threshold to 0 for testing
     params.minimum_distance = 0;
 
+    const lattice lat{lyt};
+
     SECTION("default upper threshold")
     {
-        const auto input_bdl_pairs  = detect_bdl_pairs(lyt, sidb_technology::cell_type::INPUT, params);
-        const auto output_bdl_pairs = detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT, params);
+        const auto input_bdl_pairs  = detect_bdl_pairs(lat, sidb_technology::cell_type::INPUT, params);
+        const auto output_bdl_pairs = detect_bdl_pairs(lat, sidb_technology::cell_type::OUTPUT, params);
 
         REQUIRE(input_bdl_pairs.size() == 1);
         REQUIRE(output_bdl_pairs.size() == 1);
@@ -164,8 +169,8 @@ TEST_CASE("BDL wire BDL detection", "[detect-bdl-pairs]")
     {
         params.maximum_distance = 1;
 
-        const auto input_bdl_pairs  = detect_bdl_pairs(lyt, sidb_technology::cell_type::INPUT, params);
-        const auto output_bdl_pairs = detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT, params);
+        const auto input_bdl_pairs  = detect_bdl_pairs(lat, sidb_technology::cell_type::INPUT, params);
+        const auto output_bdl_pairs = detect_bdl_pairs(lat, sidb_technology::cell_type::OUTPUT, params);
 
         REQUIRE(input_bdl_pairs.size() == 1);
         REQUIRE(output_bdl_pairs.size() == 1);
@@ -185,8 +190,8 @@ TEST_CASE("BDL wire BDL detection", "[detect-bdl-pairs]")
     {
         params.maximum_distance = 0.5;
 
-        const auto input_bdl_pairs  = detect_bdl_pairs(lyt, sidb_technology::cell_type::INPUT, params);
-        const auto output_bdl_pairs = detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT, params);
+        const auto input_bdl_pairs  = detect_bdl_pairs(lat, sidb_technology::cell_type::INPUT, params);
+        const auto output_bdl_pairs = detect_bdl_pairs(lat, sidb_technology::cell_type::OUTPUT, params);
 
         // the threshold is too small to detect any BDL pairs
         REQUIRE(input_bdl_pairs.empty());
@@ -217,8 +222,10 @@ TEST_CASE("SiQAD's AND gate BDL detection", "[detect-bdl-pairs]")
 
     lyt.assign_cell_type({10, 9, 1}, sidb_technology::cell_type::NORMAL);
 
-    const auto input_bdl_pairs  = detect_bdl_pairs(lyt, sidb_technology::cell_type::INPUT);
-    const auto output_bdl_pairs = detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT);
+    const lattice lat{lyt};
+
+    const auto input_bdl_pairs  = detect_bdl_pairs(lat, sidb_technology::cell_type::INPUT);
+    const auto output_bdl_pairs = detect_bdl_pairs(lat, sidb_technology::cell_type::OUTPUT);
 
     REQUIRE(input_bdl_pairs.size() == 2);
     REQUIRE(output_bdl_pairs.size() == 1);
@@ -277,8 +284,10 @@ TEST_CASE("Bestagon fan-out BDL detection", "[detect-bdl-pairs]")
     lyt.assign_cell_type({4, 20, 0}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({38, 20, 0}, sidb_technology::cell_type::NORMAL);
 
-    const auto input_bdl_pairs  = detect_bdl_pairs(lyt, sidb_technology::cell_type::INPUT);
-    const auto output_bdl_pairs = detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT);
+    const lattice lat{lyt};
+
+    const auto input_bdl_pairs  = detect_bdl_pairs(lat, sidb_technology::cell_type::INPUT);
+    const auto output_bdl_pairs = detect_bdl_pairs(lat, sidb_technology::cell_type::OUTPUT);
 
     REQUIRE(input_bdl_pairs.size() == 1);
     REQUIRE(output_bdl_pairs.size() == 2);

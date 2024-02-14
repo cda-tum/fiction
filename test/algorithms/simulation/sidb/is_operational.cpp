@@ -6,6 +6,7 @@
 
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
+#include <fiction/technology/sidb_lattice_layout.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/utils/truth_table_utils.hpp>
 
@@ -34,10 +35,12 @@ TEST_CASE("SiQAD's AND gate with input BDL pairs of different size", "[is-operat
 
     lyt.assign_cell_type({10, 9, 1}, sidb_technology::cell_type::NORMAL);
 
-    CHECK(is_operational(lyt, std::vector<tt>{create_and_tt()},
+    const sidb_lattice_layout lat{lyt};
+
+    CHECK(is_operational(lat, std::vector<tt>{create_and_tt()},
                          is_operational_params{sidb_simulation_parameters{2, -0.28}})
               .first == operational_status::OPERATIONAL);
-    CHECK(is_operational(lyt, std::vector<tt>{create_and_tt()},
+    CHECK(is_operational(lat, std::vector<tt>{create_and_tt()},
                          is_operational_params{sidb_simulation_parameters{2, -0.1}})
               .first == operational_status::NON_OPERATIONAL);
 }
@@ -76,14 +79,16 @@ TEST_CASE("Bestagon FO2 gate", "[is-operational]")
     lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({2, 19, 0}, sidb_technology::cell_type::NORMAL);
 
+    const sidb_lattice_layout lat{lyt};
+
     SECTION("using QuickExact")
     {
         CHECK(is_operational(
-                  lyt, std::vector<tt>{create_fan_out_tt()},
+                  lat, std::vector<tt>{create_fan_out_tt()},
                   is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT})
                   .first == operational_status::OPERATIONAL);
         CHECK(is_operational(
-                  lyt, std::vector<tt>{create_fan_out_tt()},
+                  lat, std::vector<tt>{create_fan_out_tt()},
                   is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT})
                   .first == operational_status::NON_OPERATIONAL);
     }
@@ -91,11 +96,11 @@ TEST_CASE("Bestagon FO2 gate", "[is-operational]")
     SECTION("using QuickSim")
     {
         CHECK(is_operational(
-                  lyt, std::vector<tt>{create_fan_out_tt()},
+                  lat, std::vector<tt>{create_fan_out_tt()},
                   is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKSIM})
                   .first == operational_status::OPERATIONAL);
         CHECK(is_operational(
-                  lyt, std::vector<tt>{create_fan_out_tt()},
+                  lat, std::vector<tt>{create_fan_out_tt()},
                   is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKSIM})
                   .first == operational_status::NON_OPERATIONAL);
     }
@@ -149,12 +154,14 @@ TEST_CASE("Bestagon CROSSING gate", "[is-operational]")
 
     CHECK(lyt.num_cells() == 29);
 
+    const sidb_lattice_layout lat{lyt};
+
     CHECK(
-        is_operational(lyt, create_crossing_wire_tt(),
+        is_operational(lat, create_crossing_wire_tt(),
                        is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT})
             .first == operational_status::OPERATIONAL);
     CHECK(
-        is_operational(lyt, create_crossing_wire_tt(),
+        is_operational(lat, create_crossing_wire_tt(),
                        is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT})
             .first == operational_status::NON_OPERATIONAL);
 }
@@ -196,12 +203,14 @@ TEST_CASE("Bestagon AND gate", "[is-operational]")
 
     CHECK(lyt.num_cells() == 23);
 
+    const sidb_lattice_layout lat{lyt};
+
     CHECK(
-        is_operational(lyt, std::vector<tt>{create_and_tt()},
+        is_operational(lat, std::vector<tt>{create_and_tt()},
                        is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT})
             .first == operational_status::OPERATIONAL);
     CHECK(
-        is_operational(lyt, std::vector<tt>{create_and_tt()},
+        is_operational(lat, std::vector<tt>{create_and_tt()},
                        is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT})
             .first == operational_status::NON_OPERATIONAL);
 }
@@ -231,8 +240,10 @@ TEST_CASE("Not working diagonal Wire", "[is-operational]")
 
     lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
 
+    const sidb_lattice_layout lat{lyt};
+
     CHECK(
-        is_operational(lyt, std::vector<tt>{create_id_tt()},
+        is_operational(lat, std::vector<tt>{create_id_tt()},
                        is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT})
             .first == operational_status::NON_OPERATIONAL);
 }
