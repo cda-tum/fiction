@@ -21,6 +21,7 @@
 
 #include <bill/sat/interface/common.hpp>
 #include <mockturtle/networks/aig.hpp>
+#include <mockturtle/utils/stopwatch.hpp>
 
 using namespace fiction;
 
@@ -122,4 +123,21 @@ TEST_CASE("Determine clock numbers for non-Cartesian layout topologies", "[deter
             remove_assign_and_check_clocking(blueprints::row_clocked_and_xor_gate_layout<gate_layout>());
         }
     }
+}
+
+TEST_CASE("Determine clock numbers for a 3-phase layout", "[determine-clocking]")
+{
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+
+    remove_assign_and_check_clocking(
+        orthogonal<gate_layout>(blueprints::maj1_network<mockturtle::aig_network>(), {num_clks::THREE}));
+}
+
+TEST_CASE("Determine clock numbers for a non-clockable layout", "[determine-clocking]")
+{
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+
+    auto lyt = blueprints::unclockable_gate_layout<gate_layout>();
+
+    CHECK(determine_clocking(lyt) == false);
 }

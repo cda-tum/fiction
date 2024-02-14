@@ -12,6 +12,7 @@
 #include <bill/sat/interface/types.hpp>
 #include <bill/sat/solver.hpp>
 #include <bill/sat/tseytin.hpp>
+#include <fmt/format.h>
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
@@ -27,7 +28,7 @@ namespace fiction
 {
 
 /**
- * Parameters for the determine_clocking algorithm.
+ * Parameters for the `determine_clocking` algorithm.
  */
 struct determine_clocking_params
 {
@@ -36,17 +37,23 @@ struct determine_clocking_params
      */
     bill::solvers sat_engine = bill::solvers::ghack;
 };
-
+/**
+ * Statistics for the `determine_clocking` algorithm.
+ */
 struct determine_clocking_stats
 {
     /**
      * Total runtime.
      */
     mockturtle::stopwatch<>::duration time_total{0};
-
+    /**
+     * Reports the statistics to the given output stream.
+     *
+     * @param out The output stream to report to.
+     */
     void report(std::ostream& out = std::cout) const
     {
-        out << fmt::format("[i] total time  = {:.2f} secs\n", mockturtle::to_seconds(time_total));
+        out << fmt::format("[i] total time = {:.2f} secs\n", mockturtle::to_seconds(time_total));
     }
 };
 
@@ -321,10 +328,10 @@ class sat_clocking_handler
 };
 
 template <typename Lyt>
-class assign_clocking_impl
+class determine_clocking_impl
 {
   public:
-    assign_clocking_impl(Lyt& lyt, const determine_clocking_params& p, determine_clocking_stats& st) :
+    determine_clocking_impl(Lyt& lyt, const determine_clocking_params& p, determine_clocking_stats& st) :
             layout{lyt},
             params{p},
             stats{st}
@@ -408,8 +415,8 @@ bool determine_clocking(Lyt& lyt, const determine_clocking_params& params = {},
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
 
-    determine_clocking_stats          st{};
-    detail::assign_clocking_impl<Lyt> p{lyt, params, st};
+    determine_clocking_stats             st{};
+    detail::determine_clocking_impl<Lyt> p{lyt, params, st};
 
     const auto result = p.run();
 
