@@ -266,10 +266,12 @@ Lyt normalize_layout_coordinates(const Lyt& lyt) noexcept
             }
         });
 
-    Lyt lyt_new{{lyt.x() - x_offset, lyt.y() - y_offset, lyt.z()},
-                lyt.get_layout_name(),
-                lyt.get_tile_size_x(),
-                lyt.get_tile_size_y()};
+    Lyt lyt_new{};
+
+    lyt_new.resize({lyt.x() - x_offset, lyt.y() - y_offset, lyt.z()});
+    lyt_new.set_layout_name(lyt.get_layout_name());
+    lyt_new.set_tile_size_x(lyt.get_tile_size_x());
+    lyt_new.set_tile_size_y(lyt.get_tile_size_y());
 
     lyt.foreach_cell(
         [&lyt_new, &lyt, &x_offset, &y_offset](const auto& c)
@@ -334,15 +336,16 @@ auto convert_to_siqad_coordinates(const Lyt& lyt) noexcept
  * `cube::coord_t`. A new equivalent layout based on fiction coordinates is returned.
  *
  * @tparam Lyt Cell-level layout type based on fiction coordinates.
+ * @tparam TargetLyt Cell-level layout type based on fiction coordinates.
  * @param lyt The layout that is to be converted to a new layout based on fiction coordinates.
  * @return A new equivalent layout based on fiction coordinates.
  */
-template <typename Lyt>
-Lyt convert_to_fiction_coordinates(const sidb_cell_clk_lyt_siqad& lyt) noexcept
+template <typename LytTarget, typename LytSource>
+LytTarget convert_to_fiction_coordinates(const LytSource& lyt) noexcept
 {
-    static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(is_cartesian_layout_v<LytSource>, "Lyt is not a Cartesian layout");
+    static_assert(is_cell_level_layout_v<LytSource>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<LytSource>, "Lyt is not an SiDB layout");
 
     bool are_cells_assigned_to_negative_coordinates = false;
 
@@ -360,22 +363,27 @@ Lyt convert_to_fiction_coordinates(const sidb_cell_clk_lyt_siqad& lyt) noexcept
             return true;  // keep looping
         });
 
-    Lyt lyt_new{{lyt.x(), 2 * lyt.y() + 1}, lyt.get_layout_name(), lyt.get_tile_size_x(), lyt.get_tile_size_y()};
+    LytTarget lyt_new{};
+
+    lyt_new.resize({lyt.x(), 2 * lyt.y() + 1});
+    lyt_new.set_layout_name(lyt.get_layout_name());
+    lyt_new.set_tile_size_x(lyt.get_tile_size_x());
+    lyt_new.set_tile_size_y(lyt.get_tile_size_y());
 
     const auto assign_coordinates = [&lyt_new](const auto& base_lyt) noexcept
     {
         base_lyt.foreach_cell(
             [&lyt_new, &base_lyt](const auto& c)
             {
-                lyt_new.assign_cell_type(siqad::to_fiction_coord<cell<Lyt>>(c), base_lyt.get_cell_type(c));
-                lyt_new.assign_cell_mode(siqad::to_fiction_coord<cell<Lyt>>(c), base_lyt.get_cell_mode(c));
-                lyt_new.assign_cell_name(siqad::to_fiction_coord<cell<Lyt>>(c), base_lyt.get_cell_name(c));
+                lyt_new.assign_cell_type(siqad::to_fiction_coord<cell<LytTarget>>(c), base_lyt.get_cell_type(c));
+                lyt_new.assign_cell_mode(siqad::to_fiction_coord<cell<LytTarget>>(c), base_lyt.get_cell_mode(c));
+                lyt_new.assign_cell_name(siqad::to_fiction_coord<cell<LytTarget>>(c), base_lyt.get_cell_name(c));
             });
     };
 
-    if (has_offset_ucoord_v<Lyt> && !lyt.is_empty() && are_cells_assigned_to_negative_coordinates)
+    if (has_offset_ucoord_v<LytTarget> && !lyt.is_empty() && are_cells_assigned_to_negative_coordinates)
     {
-        auto lyt_normalized = normalize_layout_coordinates<sidb_cell_clk_lyt_siqad>(lyt);
+        auto lyt_normalized = normalize_layout_coordinates<LytSource>(lyt);
         assign_coordinates(lyt_normalized);
         lyt_new.resize({lyt_normalized.x(), 2 * lyt_normalized.y() + 1});
     }

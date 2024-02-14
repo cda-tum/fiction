@@ -8,6 +8,7 @@
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/sidb_defects.hpp"
+#include "fiction/technology/sidb_lattice_properties.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/name_utils.hpp"
 
@@ -369,11 +370,15 @@ class read_sqd_layout_impl
  * May throw an `sqd_parsing_exception` if the sqd file is malformed.
  *
  * @tparam Lyt The layout type to be created from an input. Must be a cell-level SiDB layout.
+ * @tparam LatticeOrientation The type of the lattice orientation.
  * @param is The input stream to read from.
+ * @param orientation The lattice orientation.
  * @param name The name to give to the generated layout.
+ *
+ * @return The cell-level SiDB layout read from the sqd file.
  */
-template <typename Lyt, typename LatticeOrientation = lattice_orientation>
-Lyt read_sqd_layout(std::istream& is, const LatticeOrientation& orientation = lattice_orientation::SI_100,
+template <typename Lyt, typename LatticeOrientation = si_lattice_orientations>
+Lyt read_sqd_layout(std::istream& is, const LatticeOrientation& orientation = si_lattice_orientations::SI_100,
                     const std::string_view& name = "")
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
@@ -397,11 +402,14 @@ Lyt read_sqd_layout(std::istream& is, const LatticeOrientation& orientation = la
  * This is an in-place version of read_sqd_layout that utilizes the given layout as a target to write to.
  *
  * @tparam Lyt The layout type to be used as input. Must be a cell-level SiDB layout.
+ * @tparam LatticeOrientation The type of the lattice orientation.
  * @param lyt The layout to write to.
  * @param is The input stream to read from.
+ * @param orientation The lattice orientation.
  */
-template <typename Lyt, typename LatticeOrientation = lattice_orientation>
-void read_sqd_layout(Lyt& lyt, std::istream& is, const LatticeOrientation& orientation = lattice_orientation::SI_100)
+template <typename Lyt, typename LatticeOrientation = si_lattice_orientations>
+void read_sqd_layout(Lyt& lyt, std::istream& is,
+                     const LatticeOrientation& orientation = si_lattice_orientations::SI_100)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
@@ -420,12 +428,14 @@ void read_sqd_layout(Lyt& lyt, std::istream& is, const LatticeOrientation& orien
  * May throw an `sqd_parsing_exception` if the sqd file is malformed.
  *
  * @tparam Lyt The layout type to be created from an input. Must be a cell-level SiDB layout.
+ * @tparam LatticeOrientation The type of the lattice orientation.
  * @param filename The file name to open and read from.
+ * @param orientation The lattice orientation.
  * @param name The name to give to the generated layout.
  */
-template <typename Lyt, typename LatticeOrientation = lattice_orientation>
+template <typename Lyt, typename LatticeOrientation = si_lattice_orientations>
 Lyt read_sqd_layout(const std::string_view&   filename,
-                    const LatticeOrientation& orientation = lattice_orientation::SI_100,
+                    const LatticeOrientation& orientation = si_lattice_orientations::SI_100,
                     const std::string_view&   name        = "")
 {
     std::ifstream is{filename.data(), std::ifstream::in};
@@ -451,12 +461,14 @@ Lyt read_sqd_layout(const std::string_view&   filename,
  * This is an in-place version of `read_sqd_layout` that utilizes the given layout as a target to write to.
  *
  * @tparam Lyt The layout type to be used as input. Must be a cell-level SiDB layout.
+ * @tparam LatticeOrientation The type of the lattice orientation.
  * @param lyt The layout to write to.
  * @param filename The file name to open and read from.
+ * @param orientation The lattice orientation.
  */
-template <typename Lyt, typename LatticeOrientation = lattice_orientation>
+template <typename Lyt, typename LatticeOrientation = si_lattice_orientations>
 void read_sqd_layout(Lyt& lyt, const std::string_view& filename,
-                     const LatticeOrientation& orientation = lattice_orientation::SI_100)
+                     const LatticeOrientation& orientation = si_lattice_orientations::SI_100)
 {
     std::ifstream is{filename.data(), std::ifstream::in};
 

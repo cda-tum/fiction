@@ -9,6 +9,7 @@
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
+#include "fiction/technology/sidb_lattice_properties.hpp"
 #include "fiction/technology/sidb_nm_position.hpp"
 #include "fiction/traits.hpp"
 #include "utils/version_info.hpp"
@@ -19,6 +20,7 @@
 #include <algorithm>
 #include <any>
 #include <chrono>
+#include <cstdint>
 #include <ctime>
 #include <fstream>
 #include <functional>
@@ -218,15 +220,19 @@ class write_sqd_sim_result_impl
     {
         os << siqad::OPEN_PHYSLOC;
 
-        std::for_each(ordered_cells.cbegin(), ordered_cells.cend(),
-                      [this](const auto& c)
-                      {
-                          const auto [nm_x, nm_y] = sidb_nm_position<Lyt>(sim_result.physical_parameters, c);
+        if constexpr (is_sidb_lattice_layout_v<Lyt, si_lattice_orientations>)
+        {
+            std::for_each(ordered_cells.cbegin(), ordered_cells.cend(),
+                          [this](const auto& c)
+                          {
+                              const auto [nm_x, nm_y] = sidb_nm_position<Lyt>(
+                                  c, sim_result.charge_distributions.front().get_lattice_orientation(),
+                                  sim_result.charge_distributions.front().get_lattice_constants());
 
-                          os << fmt::format(siqad::DBDOT, nm_x * 10,
-                                            nm_y * 10);  // convert nm to Angstrom
-                      });
-
+                              os << fmt::format(siqad::DBDOT, nm_x * 10,
+                                                nm_y * 10);  // convert nm to Angstrom
+                          });
+        }
         os << siqad::CLOSE_PHYSLOC;
     }
 
@@ -259,8 +265,7 @@ class write_sqd_sim_result_impl
                 std::vector<sidb_charge_state> ordered_charges{};
                 ordered_charges.reserve(ordered_cells.size());
 
-                std::for_each(ordered_cells.cbegin(), ordered_cells.cend(),
-                              [&ordered_charges, &surface](const auto& c)
+                std::for_each(ordered_cells.cbegin(), ordered_cells.cend(), [&ordered_charges, &surface](const auto& c)
                               { ordered_charges.push_back(surface->get_charge_state(c)); });
 
                 os << fmt::format(

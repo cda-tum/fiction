@@ -197,14 +197,14 @@ class write_sqd_layout_impl
 
         std::vector<const char*> active_layers{};
 
-        if constexpr (is_sidb_lattice_layout_v<Lyt, lattice_orientation>)
+        if constexpr (is_sidb_lattice_layout_v<Lyt, si_lattice_orientations>)
         {
-            if (lyt.get_lattice_orientation() == lattice_orientation::SI_100)
+            if (lyt.get_lattice_orientation() == si_lattice_orientations::SI_100)
             {
                 active_layers = {siqad::LATTICE_LAYER_DEFINITION_SI_100, siqad::SCREENSHOT_LAYER_DEFINITION,
                                  siqad::SURFACE_LAYER_DEFINITION, siqad::ELECTRODE_LAYER_DEFINITION};
             }
-            else if (lyt.get_lattice_orientation() == lattice_orientation::SI_111)
+            else if (lyt.get_lattice_orientation() == si_lattice_orientations::SI_111)
             {
                 active_layers = {siqad::LATTICE_LAYER_DEFINITION_SI_111, siqad::SCREENSHOT_LAYER_DEFINITION,
                                  siqad::SURFACE_LAYER_DEFINITION, siqad::ELECTRODE_LAYER_DEFINITION};
@@ -378,7 +378,7 @@ void write_sqd_layout(const Lyt& lyt, std::ostream& os)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_qca_technology_v<Lyt> || has_sidb_technology_v<Lyt>, "Lyt must be a QCA or SiDB layout");
-    static_assert(is_sidb_lattice_layout_v<Lyt, lattice_orientation>, "Lyt must be a sidb lattice layout");
+    static_assert(is_sidb_lattice_layout_v<Lyt, si_lattice_orientations>, "Lyt must be a sidb lattice layout");
 
     detail::write_sqd_layout_impl p{lyt, os};
 
