@@ -41,6 +41,9 @@ struct post_layout_optimization_stats
      * Runtime of the post-layout optimization process.
      */
     mockturtle::stopwatch<>::duration time_total{0};
+    uint64_t                          x_size_before{0ull}, y_size_before{0ull};
+    uint64_t                          x_size_after{0ull}, y_size_after{0ull};
+    double_t                          area_improvement{0ull};
     /**
      * Reports the statistics to the given output stream.
      *
@@ -49,6 +52,9 @@ struct post_layout_optimization_stats
     void report(std::ostream& out = std::cout) const
     {
         out << fmt::format("[i] total time  = {:.2f} secs\n", mockturtle::to_seconds(time_total));
+        out << fmt::format("[i] layout size before optimization = {} × {}\n", x_size_before, y_size_before);
+        out << fmt::format("[i] layout size after optimization = {} × {}\n", x_size_after, y_size_after);
+        out << fmt::format("[i] area reduction = {}%\n", area_improvement);
     }
 };
 
@@ -754,6 +760,8 @@ void post_layout_optimization(const Lyt& lyt, post_layout_optimization_stats* ps
     // measure run time
     {
         const mockturtle::stopwatch stop{stats.time_total};
+        stats.x_size_before = lyt.x() + 1;
+        stats.y_size_before = lyt.y() + 1;
 
         // Optimization
         auto layout = obstruction_layout<Lyt>(lyt);
@@ -817,6 +825,15 @@ void post_layout_optimization(const Lyt& lyt, post_layout_optimization_stats* ps
         // calculate bounding box
         bounding_box.update_bounding_box();
         layout.resize({bounding_box.get_x_size(), bounding_box.get_y_size(), layout.z()});
+
+        stats.x_size_after         = layout.x() + 1;
+        stats.y_size_after         = layout.y() + 1;
+        const uint64_t area_before = stats.x_size_before * stats.y_size_before;
+        const uint64_t area_after  = stats.x_size_after * stats.y_size_after;
+        double_t       area_percentage_difference =
+            static_cast<double_t>(area_before - area_after) / static_cast<double_t>(area_before) * 100.0;
+        area_percentage_difference = round(area_percentage_difference * 100) / 100;
+        stats.area_improvement     = area_percentage_difference;
     }
 
     if (pst != nullptr)

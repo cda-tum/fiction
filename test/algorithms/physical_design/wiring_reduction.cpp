@@ -126,7 +126,7 @@ TEST_CASE("Wrong clocking scheme", "[wiring_reduction]")
 
     SECTION("Call functions")
     {
-        CHECK_NOTHROW(detail::create_shifted_layout(obstr_lyt, 1, 1, true));
+        CHECK_NOTHROW(detail::create_shifted_layout(obstr_lyt, 1, 1, detail::search_direction::HORIZONTALLY));
 
         wiring_reduction_stats stats_wrong_clocking_scheme{};
 

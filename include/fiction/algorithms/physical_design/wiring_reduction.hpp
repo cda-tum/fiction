@@ -10,13 +10,16 @@
 #include "fiction/algorithms/path_finding/distance.hpp"
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/cartesian_layout.hpp"
+#include "fiction/layouts/clocking_scheme.hpp"
+#include "fiction/layouts/coordinates.hpp"
 #include "fiction/layouts/obstruction_layout.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/utils/routing_utils.hpp"
 
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
-#include <mockturtle/views/topo_view.hpp>
 
+#include <cmath>
 #include <cstdint>
 #include <functional>
 #include <ostream>
@@ -35,6 +38,11 @@ struct wiring_reduction_stats
      * Runtime of the wiring reduction process.
      */
     mockturtle::stopwatch<>::duration time_total{0};
+    uint64_t                          x_size_before{0ull}, y_size_before{0ull};
+    uint64_t                          x_size_after{0ull}, y_size_after{0ull};
+    uint64_t                          num_wires_before{0ull}, num_wires_after{0ull};
+    double_t                          wiring_improvement{0ull}, area_improvement{0ull};
+
     /**
      * Reports the statistics to the given output stream.
      *
@@ -43,12 +51,23 @@ struct wiring_reduction_stats
     void report(std::ostream& out = std::cout) const
     {
         out << fmt::format("[i] total time  = {:.2f} secs\n", mockturtle::to_seconds(time_total));
+        out << fmt::format("[i] layout size before optimization = {} × {}\n", x_size_before, y_size_before);
+        out << fmt::format("[i] layout size after optimization = {} × {}\n", x_size_after, y_size_after);
+        out << fmt::format("[i] area reduction = {}%\n", wiring_improvement);
+        out << fmt::format("[i] num. wires before optimization = {}\n", num_wires_before);
+        out << fmt::format("[i] num. wires after optimization = {}\n", num_wires_after);
+        out << fmt::format("[i] wiring reduction = {}%\n", area_improvement);
     }
 };
 
 namespace detail
 {
 
+enum class search_direction : uint8_t
+{
+    HORIZONTALLY,
+    VERTICALLY
+};
 /**
  * Represents a layout used for wiring reduction derived from the `cartesian_layout` class.
  *
@@ -62,17 +81,36 @@ template <typename OffsetCoordinateType = offset::ucoord_t>
 class wiring_reduction_layout : public cartesian_layout<OffsetCoordinateType>
 {
   public:
-    bool left_to_right;
     /**
      * This constructor initializes the `wiring_reduction_layout` with an optional aspect ratio.
      *
      * @param ar The aspect ratio for the layout. Defaults to an empty aspect ratio if not provided.
+     * @param direction The search direction to be used. Defaults to HORIZONTALLY if not provided.
      */
     explicit wiring_reduction_layout(const typename cartesian_layout<OffsetCoordinateType>::aspect_ratio& ar = {},
-                                     bool search_left_to_right                                               = true) :
+                                     detail::search_direction direction = detail::search_direction::HORIZONTALLY) :
             cartesian_layout<OffsetCoordinateType>(ar),
-            left_to_right(search_left_to_right)
+            direction_(direction)
     {}
+    /**
+     * Getter for the search direction.
+     *
+     * @return The current search direction.
+     */
+    [[nodiscard]] detail::search_direction get_search_direction() const
+    {
+        return direction_;
+    }
+
+    /**
+     * Setter for the search direction.
+     *
+     * @param direction The new search direction to set.
+     */
+    [[maybe_unused]] void set_search_direction(detail::search_direction direction)
+    {
+        direction_ = direction;
+    }
     /**
      * Iterates over adjacent coordinates of a given coordinate and applies a given functor.
      *
@@ -86,7 +124,8 @@ class wiring_reduction_layout : public cartesian_layout<OffsetCoordinateType>
     template <typename Fn>
     void foreach_adjacent_coordinate(const OffsetCoordinateType& c, Fn&& fn) const
     {
-        if (wiring_reduction_layout<OffsetCoordinateType>::left_to_right)
+        if (wiring_reduction_layout<OffsetCoordinateType>::get_search_direction() ==
+            detail::search_direction::HORIZONTALLY)
         {
             if (c.x == 0)
             {
@@ -271,12 +310,15 @@ class wiring_reduction_layout : public cartesian_layout<OffsetCoordinateType>
 
         apply_if_not_c(cartesian_layout<OffsetCoordinateType>::east(c));
     }
+
+  private:
+    detail::search_direction direction_;
 };
 
 /**
  * Type alias for an obstruction layout specialized for finding excess wiring.
  */
-using wiring_reduction_lyt = obstruction_layout<wiring_reduction_layout<OffsetCoordinateType>>;
+using wiring_reduction_lyt = obstruction_layout<wiring_reduction_layout<offset::ucoord_t>>;
 
 /**
  * Create a shifted layout suitable for finding excess wiring based on a Cartesian layout.
@@ -285,20 +327,19 @@ using wiring_reduction_lyt = obstruction_layout<wiring_reduction_layout<OffsetCo
  * specified offsets. The generated layout is wrapped in an obstruction_layout. The shifted layout is constructed by
  * iterating through the input Cartesian layout diagonally and obstructing connections and coordinates accordingly.
  *
- * @tparam Lyt Type of the input Cartesian layout.
- * @param lyt The input Cartesian layout to be shifted.
+ * @tparam Lyt Type of the input Cartesian gate-level layout.
+ * @param lyt The input Cartesian gate-level layout to be shifted.
  * @param x_offset The offset for shifting in the x-direction. Defaults to 0 if not specified.
  * @param y_offset The offset for shifting in the y-direction. Defaults to 0 if not specified.
- * @param left_to_right If true, deletable paths are searched from left to right, otherwise from top to bottom.
+ * @param search_direction If set to horizontally, paths are searched from left to right, otherwise from top to bottom.
  * @return A new layout with wiring reduction features.
  */
 template <typename Lyt>
 wiring_reduction_lyt create_shifted_layout(const Lyt& lyt, const uint64_t x_offset = 0, const uint64_t y_offset = 0,
-                                           bool left_to_right = true) noexcept
+                      detail::search_direction direction = detail::search_direction::HORIZONTALLY) noexcept
 {
     // Create a wiring_reduction_layout with specified offsets
-    wiring_reduction_layout<> obs_shifted_layout{{lyt.x() + x_offset + 1, lyt.y() + y_offset + 1, lyt.z()},
-                                                 left_to_right};
+    wiring_reduction_layout<> obs_shifted_layout{{lyt.x() + x_offset + 1, lyt.y() + y_offset + 1, lyt.z()}, direction};
 
     auto shifted_layout = wiring_reduction_lyt(obs_shifted_layout);
 
@@ -312,8 +353,8 @@ wiring_reduction_lyt create_shifted_layout(const Lyt& lyt, const uint64_t x_offs
             // Skip if the tile is empty
             if (!lyt.is_empty_tile(old_coord))
             {
-                // Handle Primary Inputs (PI)
-                if (lyt.is_pi(node))
+                // Handle Primary Inputs (PI) and Primary Outputs (PO)
+                if (lyt.is_pi(node) || lyt.is_po(node))
                 {
                     shifted_layout.obstruct_coordinate(new_coord);
                     shifted_layout.obstruct_coordinate({new_coord.x, new_coord.y, 1});
@@ -332,9 +373,10 @@ wiring_reduction_lyt create_shifted_layout(const Lyt& lyt, const uint64_t x_offs
                     // Obstruct horizontal/vertical wires, non-wire gates (inv) and fanouts
                     if (!lyt.is_wire(node) || (lyt.fanout_size(node) != 1) || (old_coord.z != 0) ||
                         (lyt.has_western_incoming_signal({old_coord}) && lyt.has_eastern_outgoing_signal({old_coord}) &&
-                         shifted_layout.left_to_right) ||
+                         (shifted_layout.get_search_direction() == detail::search_direction::HORIZONTALLY)) ||
                         (lyt.has_northern_incoming_signal({old_coord}) &&
-                         lyt.has_southern_outgoing_signal({old_coord}) && !shifted_layout.left_to_right))
+                         lyt.has_southern_outgoing_signal({old_coord}) &&
+                         (shifted_layout.get_search_direction() == detail::search_direction::VERTICALLY)))
                     {
                         shifted_layout.obstruct_coordinate({new_coord.x, new_coord.y, 0});
                         shifted_layout.obstruct_coordinate({new_coord.x, new_coord.y, 1});
@@ -345,7 +387,7 @@ wiring_reduction_lyt create_shifted_layout(const Lyt& lyt, const uint64_t x_offs
                     else if (lyt.has_northern_incoming_signal({old_coord}) &&
                              lyt.has_eastern_outgoing_signal({old_coord}))
                     {
-                        if (shifted_layout.left_to_right)
+                        if (shifted_layout.get_search_direction() == detail::search_direction::HORIZONTALLY)
                         {
                             shifted_layout.obstruct_connection(new_coord,
                                                                {new_coord.x + 1, new_coord.y + 1, new_coord.z});
@@ -362,7 +404,7 @@ wiring_reduction_lyt create_shifted_layout(const Lyt& lyt, const uint64_t x_offs
                     else if (lyt.has_western_incoming_signal({old_coord}) &&
                              lyt.has_southern_outgoing_signal({old_coord}))
                     {
-                        if (shifted_layout.left_to_right)
+                        if (shifted_layout.get_search_direction() == detail::search_direction::HORIZONTALLY)
                         {
                             shifted_layout.obstruct_connection({new_coord.x - 1, new_coord.y - 1, new_coord.z},
                                                                new_coord);
@@ -399,7 +441,7 @@ wiring_reduction_lyt create_shifted_layout(const Lyt& lyt, const uint64_t x_offs
                     if (lyt.has_northern_incoming_signal({old_coord.x - 1, old_coord.y, old_coord.z}) &&
                         lyt.has_western_incoming_signal({old_coord.x, old_coord.y - 1, old_coord.z}))
                     {
-                        if (shifted_layout.left_to_right)
+                        if (shifted_layout.get_search_direction() == detail::search_direction::HORIZONTALLY)
                         {
                             shifted_layout.obstruct_connection({new_coord.x - 1, new_coord.y, new_coord.z},
                                                                {new_coord.x, new_coord.y - 1, new_coord.z});
@@ -423,13 +465,13 @@ wiring_reduction_lyt create_shifted_layout(const Lyt& lyt, const uint64_t x_offs
  * bottom edges (for left to right) or along the left and right edges (for top to bottom) of the layout in both layers
  * (0 and 1).
  *
- * @tparam Lyt Type of the Cartesian layout.
+ * @tparam ShiftedLyt Type of the `wiring_reduction_layout`.
  * @param lyt The Cartesian layout to which obstructions will be added.
  */
-template <typename Lyt>
-void add_obstructions(Lyt& lyt) noexcept
+template <typename ShiftedLyt>
+void add_obstructions(ShiftedLyt& lyt) noexcept
 {
-    if (lyt.left_to_right)
+    if (lyt.get_search_direction() == detail::search_direction::HORIZONTALLY)
     {
         // Add obstructions to the top edge of the layout
         for (uint64_t x = 1; x <= lyt.x(); x++)
@@ -465,22 +507,22 @@ void add_obstructions(Lyt& lyt) noexcept
 /**
  * This helper function computes a path between two coordinates using the A* algorithm.
  *
- * @tparam Lyt Cartesian gate-level layout type.
+ * @tparam ShiftedLyt Type of the `wiring_reduction_layout`.
  * @param lyt Reference to the layout.
  * @param start The starting coordinate of the path.
  * @param end The ending coordinate of the path.
  * @return The computed path as a sequence of coordinates in the layout.
  */
-template <typename Lyt>
-[[nodiscard]] layout_coordinate_path<Lyt> get_path(Lyt& lyt, const coordinate<Lyt>& start,
-                                                   const coordinate<Lyt>& end) noexcept
+template <typename ShiftedLyt>
+[[nodiscard]] layout_coordinate_path<ShiftedLyt> get_path(ShiftedLyt& lyt, const coordinate<ShiftedLyt>& start,
+                                                          const coordinate<ShiftedLyt>& end) noexcept
 {
-    using dist = manhattan_distance_functor<Lyt, uint64_t>;
-    using cost = unit_cost_functor<Lyt, uint8_t>;
+    using dist = manhattan_distance_functor<ShiftedLyt, uint64_t>;
+    using cost = unit_cost_functor<ShiftedLyt, uint8_t>;
 
     static const a_star_params params{false};
 
-    return a_star<layout_coordinate_path<Lyt>>(lyt, {start, end}, dist(), cost(), params);
+    return a_star<layout_coordinate_path<ShiftedLyt>>(lyt, {start, end}, dist(), cost(), params);
 }
 /**
  * Update the to-delete list based on a possible path in a wiring_reduction_layout.
@@ -491,23 +533,25 @@ template <typename Lyt>
  * bottom and shifts them to get the corresponding coordinates on the original layout. The coordinates are then
  * obstructed in both layers (0 and 1).
  *
- * @tparam Lyt Type of the `wiring_reduction_layout`.
+ * @tparam ShiftedLyt Type of the `wiring_reduction_layout`.
  * @param lyt The `wiring_reduction_layout` to be updated.
  * @param possible_path The path of coordinates to be considered for updating the to-delete list.
  * @param to_delete Reference to the to-delete list to be updated with new coordinates.
  */
-template <typename Lyt>
-void update_to_delete_list(Lyt& lyt, layout_coordinate_path<wiring_reduction_lyt>& possible_path,
+template <typename ShiftedLyt>
+void update_to_delete_list(ShiftedLyt& lyt, layout_coordinate_path<wiring_reduction_lyt>& possible_path,
                            layout_coordinate_path<wiring_reduction_lyt>& to_delete)
 {
     for (const auto coord : possible_path)
     {
         // Check if the coordinate is not at the leftmost or rightmost position
-        if ((lyt.left_to_right && coord.x != 0 && coord.x != lyt.x()) ||
-            (!lyt.left_to_right && coord.y != 0 && coord.y != lyt.y()))
+        if (((lyt.get_search_direction() == detail::search_direction::HORIZONTALLY) && coord.x != 0 &&
+             coord.x != lyt.x()) ||
+            ((lyt.get_search_direction() == detail::search_direction::VERTICALLY) && coord.y != 0 &&
+             coord.y != lyt.y()))
         {
             // Create the corresponding coordinate on the original layout
-            const fiction::coordinate<Lyt> shifted_coord{coord.x - 1, coord.y - 1, 0};
+            const fiction::coordinate<ShiftedLyt> shifted_coord{coord.x - 1, coord.y - 1, 0};
 
             // Append the corresponding coordinate to the to-delete list
             to_delete.append(shifted_coord);
@@ -518,27 +562,27 @@ void update_to_delete_list(Lyt& lyt, layout_coordinate_path<wiring_reduction_lyt
         }
     }
 }
+using offset_matrix = std::vector<std::vector<uint64_t>>;
 /**
  * Calculate an offset matrix based on a to-delete list in a `wiring_reduction_layout`.
  *
  * This function calculates an offset matrix based on the provided to-delete list in a `wiring_reduction_layout`.
- * The offset matrix represents the number of deletable coordinates in the same column for left to right, and same row
- * for top to bottom but above/ to the right of each specific coordinate. The matrix is initialized with zeros and
+ * The offset matrix represents the number of deletable coordinates in the same column but above of each specific
+ * coordinate when searching from left to right and the number of deletable coordinates in the same row but to the left
+ * of each specific coordinate when searching from top to bottom. The matrix is initialized with zeros and
  * updated by incrementing the values for each deletable coordinate.
  *
- * @tparam Lyt Type of the `wiring_reduction_layout`.
+ * @tparam ShiftedLyt Type of the `wiring_reduction_layout`.
  * @param lyt The `wiring_reduction_layout` for which the offset matrix is calculated.
  * @param to_delete The to-delete list representing coordinates to be considered for the offset matrix.
- * @param left_to_right If true, deletable paths are searched from left to right, otherwise from top to bottom.
  * @return A 2D vector representing the calculated offset matrix.
  */
-template <typename Lyt>
-[[nodiscard]] std::vector<std::vector<uint64_t>>
-calculate_offset_matrix(Lyt& lyt, layout_coordinate_path<wiring_reduction_lyt>& to_delete,
-                        bool left_to_right = true) noexcept
+template <typename ShiftedLyt>
+[[nodiscard]] offset_matrix calculate_offset_matrix(ShiftedLyt&                                   lyt,
+                                                    layout_coordinate_path<wiring_reduction_lyt>& to_delete) noexcept
 {
     // Initialize matrix with zeros
-    std::vector<std::vector<uint64_t>> matrix(lyt.y() + 1, std::vector<uint64_t>(lyt.x() + 1, 0));
+    offset_matrix matrix(lyt.y() + 1, std::vector<uint64_t>(lyt.x() + 1, 0));
 
     // Update matrix based on coordinates
     for (const auto& coord : to_delete)
@@ -546,7 +590,7 @@ calculate_offset_matrix(Lyt& lyt, layout_coordinate_path<wiring_reduction_lyt>& 
         const auto x = coord.x;
         const auto y = coord.y;
 
-        if (left_to_right)
+        if (lyt.get_search_direction() == detail::search_direction::HORIZONTALLY)
         {
             for (uint64_t i = lyt.y(); i > y; --i)
             {
@@ -574,14 +618,13 @@ calculate_offset_matrix(Lyt& lyt, layout_coordinate_path<wiring_reduction_lyt>& 
  * @tparam Lyt Type of the `wiring_reduction_layout`.
  * @param lyt The `wiring_reduction_layout` to be modified.
  * @param to_delete The to-delete list representing coordinates of wires to be deleted.
- * @param left_to_right If true, deletable paths are searched from left to right, otherwise from top to bottom.
- * @param offset_matrix The offset matrix representing the number of obstructed coordinates in the same column but above
  * each specific coordinate.
  */
-template <typename Lyt>
-void delete_wires(Lyt& lyt, layout_coordinate_path<wiring_reduction_lyt>& to_delete,
-                  std::vector<std::vector<uint64_t>> offset_matrix, bool left_to_right = true)
+template <typename Lyt, typename ShiftedLyt>
+void delete_wires(Lyt& lyt, ShiftedLyt& shifted_lyt, layout_coordinate_path<wiring_reduction_lyt>& to_delete)
 {
+    const auto offset_matrix = detail::calculate_offset_matrix<ShiftedLyt>(shifted_lyt, to_delete);
+
     // Create a copy of the original layout for reference
     auto layout_copy = lyt.clone();
 
@@ -591,7 +634,7 @@ void delete_wires(Lyt& lyt, layout_coordinate_path<wiring_reduction_lyt>& to_del
         lyt.clear_tile(tile_to_delete);
     }
 
-    if (left_to_right)
+    if (shifted_lyt.get_search_direction() == detail::search_direction::HORIZONTALLY)
     {
         // Iterate through the layout to delete wires and adjust the layout
         for (uint64_t x = 0; x <= lyt.x(); ++x)
@@ -789,6 +832,9 @@ void wiring_reduction(const Lyt& lyt, wiring_reduction_stats* pst = nullptr) noe
     // Measure runtime
     {
         const mockturtle::stopwatch stop{stats.time_total};
+        stats.num_wires_before = lyt.num_wires() - lyt.num_pis() - lyt.num_pos();
+        stats.x_size_before    = lyt.x() + 1;
+        stats.y_size_before    = lyt.y() + 1;
 
         auto                                                 layout    = obstruction_layout<Lyt>(lyt);
         layout_coordinate_path<detail::wiring_reduction_lyt> to_delete = {};
@@ -801,7 +847,8 @@ void wiring_reduction(const Lyt& lyt, wiring_reduction_stats* pst = nullptr) noe
             // Continue until no further wires can be deleted
             found_wires = false;
 
-            for (const auto left_to_right : {true, false})
+            for (const auto left_to_right :
+                 {detail::search_direction::HORIZONTALLY, detail::search_direction::VERTICALLY})
             {
                 auto shifted_layout = detail::create_shifted_layout<Lyt>(layout, 1, 1, left_to_right);
                 detail::add_obstructions(shifted_layout);
@@ -820,8 +867,7 @@ void wiring_reduction(const Lyt& lyt, wiring_reduction_stats* pst = nullptr) noe
                 }
 
                 // Calculate offset matrix and delete wires based on to-delete list
-                const auto offset_matrix = detail::calculate_offset_matrix<Lyt>(layout, to_delete, left_to_right);
-                detail::delete_wires(layout, to_delete, offset_matrix, left_to_right);
+                detail::delete_wires(layout, shifted_layout, to_delete);
 
                 if (!to_delete.empty())
                 {
@@ -829,6 +875,20 @@ void wiring_reduction(const Lyt& lyt, wiring_reduction_stats* pst = nullptr) noe
                 }
             }
         }
+
+        stats.x_size_after         = lyt.x() + 1;
+        stats.y_size_after         = lyt.y() + 1;
+        const uint64_t area_before = stats.x_size_before * stats.y_size_before;
+        const uint64_t area_after  = stats.x_size_after * stats.y_size_after;
+        double_t       wiring_percentage_difference =
+            static_cast<double_t>(area_before - area_after) / static_cast<double_t>(area_before) * 100.0;
+        wiring_percentage_difference        = round(wiring_percentage_difference * 100) / 100;
+        stats.wiring_improvement            = wiring_percentage_difference;
+        stats.num_wires_after               = lyt.num_wires() - lyt.num_pis() - lyt.num_pos();
+        double_t area_percentage_difference = static_cast<double_t>(stats.num_wires_before - stats.num_wires_after) /
+                                              static_cast<double_t>(stats.num_wires_before) * 100.0;
+        area_percentage_difference = round(area_percentage_difference * 100) / 100;
+        stats.area_improvement     = area_percentage_difference;
     }
 
     // Record runtime statistics if a valid pointer is provided

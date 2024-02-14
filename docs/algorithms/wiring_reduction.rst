@@ -5,9 +5,15 @@ Reducing Wiring in 2DDWave-clocked Cartesian Layouts
 
 **Header:** ``fiction/algorithms/physical_design/wiring_reduction.hpp``
 
-This algorithm performs wiring reduction of a 2DDWave-clocked Cartesian gate-level layout by iteratively
-finding tiles with excess wiring that can be deleted without changing the correctness of the underlying function.
-The process continues until no further wires can be deleted.
+This algorithm aims to minimize the number of wire segments, the area, and the length of the critical path in
+2DDWave-clocked Cartesian gate-level layouts.
+
+Initially, it constructs an equivalent layout where non-wire tiles are obstructed, and wire-tiles are obstructed
+selectively based on the search direction. Subsequently, it employs A* path-finding to identify cuts through the layout
+that are eligible for deletion.
+
+The removal of these wire tiles creates gaps, which are then filled by shifting all gates located beneath the emptied
+spaces upward and subsequently reconnecting them. This iterative process continues until convergence is achieved.
 
 .. doxygenstruct:: fiction::wiring_reduction_stats
    :members:

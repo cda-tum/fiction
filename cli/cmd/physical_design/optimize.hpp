@@ -39,6 +39,7 @@ class optimize_command : public command
         add_flag("--wiring_reduction_only,-w",
                  "Do not attempt gate repositioning, but apply wiring reduction "
                  "exclusively (recommended for logic functions with >200 gates due to scalability reasons).");
+        add_flag("--verbose,-v", "Be verbose");
     }
 
   protected:
@@ -85,10 +86,18 @@ class optimize_command : public command
                 if (is_set("wiring_reduction_only"))
                 {
                     fiction::wiring_reduction(lyt_copy, &stw);
+                    if (is_set("verbose"))
+                    {
+                        stw.report(env->out());
+                    }
                 }
                 else
                 {
                     fiction::post_layout_optimization(lyt_copy, &st);
+                    if (is_set("verbose"))
+                    {
+                        st.report(env->out());
+                    }
                 }
 
                 fiction::restore_names(*lyt_ptr, lyt_copy);
@@ -101,14 +110,7 @@ class optimize_command : public command
             }
         };
 
-        try
-        {
-            std::visit(apply_optimization, lyt);
-        }
-        catch (...)
-        {
-            env->out() << "[e] an error occurred while optimizing\n";
-        }
+        std::visit(apply_optimization, lyt);
     }
 };
 
