@@ -5,6 +5,7 @@
 #ifndef FICTION_DISTANCE_HPP
 #define FICTION_DISTANCE_HPP
 
+#include "fiction/technology/sidb_lattice_properties.hpp"
 #include "fiction/technology/sidb_nm_position.hpp"
 #include "fiction/traits.hpp"
 
@@ -95,26 +96,33 @@ template <typename Lyt, typename Dist = uint64_t>
  * Computes the distance between two SiDB cells in nanometers (unit: nm).
  *
  * @tparam Lyt SiDB cell-level layout type.
- * @tparam Dist Floating-point type for the distance.
- * @param c1 The first cell.
- * @param c2 The second cell.
+ * @tparam LatticeOrientation Type of the Si lattice orientation.
+ * @param source The source cell.
+ * @param target The target cell.
  * @return The distance between the two cells in nanometers (unit: nm).
  */
-template <typename Lyt>
-[[nodiscard]] constexpr double
-sidb_nanometer_distance([[maybe_unused]] const Lyt& lyt, const coordinate<Lyt>& source, const coordinate<Lyt>& target,
-                        const sidb_simulation_parameters& sp = sidb_simulation_parameters{}) noexcept
+template <typename Lyt, typename LatticeOrientation = si_lattice_orientations>
+[[nodiscard]] constexpr double sidb_nanometer_distance(const Lyt& lyt, const coordinate<Lyt>& source,
+                                                       const coordinate<Lyt>& target) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not based on SiDB technology");
+    static_assert(is_sidb_lattice_layout_v<Lyt, LatticeOrientation>, "Lyt is not an SiDB lattice layout");
 
-    const auto pos_c1 = sidb_nm_position<Lyt>(sp, source);
-    const auto pos_c2 = sidb_nm_position<Lyt>(sp, target);
+    if constexpr (is_sidb_lattice_layout_v<Lyt, LatticeOrientation>)
+    {
+        const auto pos_c1 = sidb_nm_position<Lyt>(source, lyt.get_lattice_orientation(), lyt.get_lattice_constants());
+        const auto pos_c2 = sidb_nm_position<Lyt>(target, lyt.get_lattice_orientation(), lyt.get_lattice_constants());
 
-    const auto x = pos_c1.first - pos_c2.first;
-    const auto y = pos_c1.second - pos_c2.second;
+        const auto x = pos_c1.first - pos_c2.first;
+        const auto y = pos_c1.second - pos_c2.second;
 
-    return std::hypot(x, y);
+        return std::hypot(x, y);
+    }
+    else
+    {
+        return {};
+    }
 }
 
 // NOLINTBEGIN(*-special-member-functions): virtual destructor is prudent
