@@ -634,12 +634,13 @@ void delete_wires(Lyt& lyt, ShiftedLyt& shifted_lyt, layout_coordinate_path<wiri
         lyt.clear_tile(tile_to_delete);
     }
 
-    if (shifted_lyt.get_search_direction() == detail::search_direction::HORIZONTALLY)
+    // Iterate through the layout to delete wires and adjust the layout
+    for (uint64_t k = 0; k < lyt.x() + lyt.y() + 1; ++k)
     {
-        // Iterate through the layout to delete wires and adjust the layout
-        for (uint64_t x = 0; x <= lyt.x(); ++x)
+        for (uint64_t x = 0; x < k + 1; ++x)
         {
-            for (uint64_t y = 0; y <= lyt.y(); ++y)
+            const uint64_t y = k - x;
+            if (x <= lyt.x() && y <= lyt.y())
             {
                 uint64_t offset = offset_matrix[y][x];
 
@@ -650,7 +651,15 @@ void delete_wires(Lyt& lyt, ShiftedLyt& shifted_lyt, layout_coordinate_path<wiri
                     // Check if the tile is not empty and has an offset
                     if (!(lyt.is_empty_tile(old_coord) && (offset != 0)))
                     {
-                        const tile<Lyt> new_coord = {x, y - offset, z};
+                        tile<Lyt> new_coord{};
+                        if (shifted_lyt.get_search_direction() == detail::search_direction::HORIZONTALLY)
+                        {
+                            new_coord = {x, y - offset, z};
+                        }
+                        else
+                        {
+                            new_coord = {x - offset, y, z};
+                        }
 
                         std::vector<mockturtle::signal<Lyt>> signals{};
                         signals.reserve(layout_copy.fanin_size(layout_copy.get_node(old_coord)));
@@ -658,128 +667,98 @@ void delete_wires(Lyt& lyt, ShiftedLyt& shifted_lyt, layout_coordinate_path<wiri
                         // Iterate through fanin and create signals for the new coordinates
                         layout_copy.foreach_fanin(
                             layout_copy.get_node(old_coord),
-                            [&lyt, &signals, &offset, &old_coord, &layout_copy, &offset_matrix](const auto& i)
+                            [&lyt, &signals, &offset, &old_coord, &layout_copy, &offset_matrix,
+                             &shifted_lyt](const auto& i)
                             {
                                 auto fanin = static_cast<tile<Lyt>>(i);
 
-                                if (fanin.y == old_coord.y)
+                                if (shifted_lyt.get_search_direction() == detail::search_direction::HORIZONTALLY)
                                 {
-                                    signals.push_back(
-                                        lyt.make_signal(lyt.get_node({fanin.x, fanin.y - offset, fanin.z})));
+                                    if (fanin.y == old_coord.y)
+                                    {
+                                        signals.push_back(
+                                            lyt.make_signal(lyt.get_node({fanin.x, fanin.y - offset, fanin.z})));
+                                    }
+                                    else
+                                    {
+                                        bool traversing_deleted_wires = false;
+
+                                        // Check if traversing through deleted wires
+                                        if (offset_matrix[fanin.y + 1][fanin.x] != offset_matrix[fanin.y][fanin.x])
+                                        {
+                                            fanin                    = {fanin.x, fanin.y, 0};
+                                            traversing_deleted_wires = true;
+                                        }
+
+                                        uint64_t offset_offset = 0;
+
+                                        // If traversing through deleted wires, update the offset
+                                        if (traversing_deleted_wires)
+                                        {
+                                            for (uint64_t o = 0; o < offset; ++o)
+                                            {
+                                                offset_offset++;
+                                                if ((fanin.y > 0) && (offset_matrix[fanin.y][fanin.x] !=
+                                                                      offset_matrix[fanin.y - 1][fanin.x]))
+                                                {
+                                                    fanin = {fanin.x, fanin.y - 1, fanin.z};
+                                                }
+                                                else
+                                                {
+                                                    fanin = layout_copy.incoming_data_flow(fanin)[0];
+                                                    break;
+                                                }
+                                            }
+                                        }
+
+                                        // Create signals for the new coordinates
+                                        signals.push_back(lyt.make_signal(
+                                            lyt.get_node({fanin.x, fanin.y - offset + offset_offset, fanin.z})));
+                                    }
                                 }
                                 else
                                 {
-                                    bool traversing_deleted_wires = false;
-
-                                    // Check if traversing through deleted wires
-                                    if (offset_matrix[fanin.y + 1][fanin.x] != offset_matrix[fanin.y][fanin.x])
+                                    if (fanin.x == old_coord.x)
                                     {
-                                        fanin                    = {fanin.x, fanin.y, 0};
-                                        traversing_deleted_wires = true;
+                                        signals.push_back(
+                                            lyt.make_signal(lyt.get_node({fanin.x - offset, fanin.y, fanin.z})));
                                     }
-
-                                    uint64_t offset_offset = 0;
-
-                                    // If traversing through deleted wires, update the offset
-                                    if (traversing_deleted_wires)
+                                    else
                                     {
-                                        for (uint64_t o = 0; o < offset; ++o)
+                                        bool traversing_deleted_wires = false;
+
+                                        // Check if traversing through deleted wires
+                                        if (offset_matrix[fanin.y][fanin.x + 1] != offset_matrix[fanin.y][fanin.x])
                                         {
-                                            offset_offset++;
-                                            if ((fanin.y > 0) && (offset_matrix[fanin.y][fanin.x] !=
-                                                                  offset_matrix[fanin.y - 1][fanin.x]))
+                                            fanin                    = {fanin.x, fanin.y, 0};
+                                            traversing_deleted_wires = true;
+                                        }
+
+                                        uint64_t offset_offset = 0;
+
+                                        // If traversing through deleted wires, update the offset
+                                        if (traversing_deleted_wires)
+                                        {
+                                            for (uint64_t o = 0; o < offset; ++o)
                                             {
-                                                fanin = {fanin.x, fanin.y - 1, fanin.z};
-                                            }
-                                            else
-                                            {
-                                                fanin = layout_copy.incoming_data_flow(fanin)[0];
-                                                break;
+                                                offset_offset++;
+                                                if ((fanin.x > 0) && (offset_matrix[fanin.y][fanin.x] !=
+                                                                      offset_matrix[fanin.y][fanin.x - 1]))
+                                                {
+                                                    fanin = {fanin.x - 1, fanin.y, fanin.z};
+                                                }
+                                                else
+                                                {
+                                                    fanin = layout_copy.incoming_data_flow(fanin)[0];
+                                                    break;
+                                                }
                                             }
                                         }
+
+                                        // Create signals for the new coordinates
+                                        signals.push_back(lyt.make_signal(
+                                            lyt.get_node({fanin.x - offset + offset_offset, fanin.y, fanin.z})));
                                     }
-
-                                    // Create signals for the new coordinates
-                                    signals.push_back(lyt.make_signal(
-                                        lyt.get_node({fanin.x, fanin.y - offset + offset_offset, fanin.z})));
-                                }
-                            });
-
-                        // Move the node to the new coordinates
-                        lyt.move_node(lyt.get_node(old_coord), new_coord, signals);
-                    }
-                }
-            }
-        }
-    }
-    else
-    {
-        // Iterate through the layout to delete wires and adjust the layout
-        for (uint64_t y = 0; y <= lyt.y(); ++y)
-        {
-            for (uint64_t x = 0; x <= lyt.x(); ++x)
-            {
-                uint64_t offset = offset_matrix[y][x];
-
-                for (uint64_t z = 0; z <= lyt.z(); ++z)
-                {
-                    const tile<Lyt> old_coord = {x, y, z};
-
-                    // Check if the tile is not empty and has an offset
-                    if (!(lyt.is_empty_tile(old_coord) && (offset != 0)))
-                    {
-                        const tile<Lyt> new_coord = {x - offset, y, z};
-
-                        std::vector<mockturtle::signal<Lyt>> signals{};
-                        signals.reserve(layout_copy.fanin_size(layout_copy.get_node(old_coord)));
-
-                        // Iterate through fanin and create signals for the new coordinates
-                        layout_copy.foreach_fanin(
-                            layout_copy.get_node(old_coord),
-                            [&lyt, &signals, &offset, &old_coord, &layout_copy, &offset_matrix](const auto& i)
-                            {
-                                auto fanin = static_cast<tile<Lyt>>(i);
-
-                                if (fanin.x == old_coord.x)
-                                {
-                                    signals.push_back(
-                                        lyt.make_signal(lyt.get_node({fanin.x - offset, fanin.y, fanin.z})));
-                                }
-                                else
-                                {
-                                    bool traversing_deleted_wires = false;
-
-                                    // Check if traversing through deleted wires
-                                    if (offset_matrix[fanin.y][fanin.x + 1] != offset_matrix[fanin.y][fanin.x])
-                                    {
-                                        fanin                    = {fanin.x, fanin.y, 0};
-                                        traversing_deleted_wires = true;
-                                    }
-
-                                    uint64_t offset_offset = 0;
-
-                                    // If traversing through deleted wires, update the offset
-                                    if (traversing_deleted_wires)
-                                    {
-                                        for (uint64_t o = 0; o < offset; ++o)
-                                        {
-                                            offset_offset++;
-                                            if ((fanin.x > 0) && (offset_matrix[fanin.y][fanin.x] !=
-                                                                  offset_matrix[fanin.y][fanin.x - 1]))
-                                            {
-                                                fanin = {fanin.x - 1, fanin.y, fanin.z};
-                                            }
-                                            else
-                                            {
-                                                fanin = layout_copy.incoming_data_flow(fanin)[0];
-                                                break;
-                                            }
-                                        }
-                                    }
-
-                                    // Create signals for the new coordinates
-                                    signals.push_back(lyt.make_signal(
-                                        lyt.get_node({fanin.x - offset + offset_offset, fanin.y, fanin.z})));
                                 }
                             });
 
