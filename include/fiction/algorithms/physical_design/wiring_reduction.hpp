@@ -53,10 +53,10 @@ struct wiring_reduction_stats
         out << fmt::format("[i] total time  = {:.2f} secs\n", mockturtle::to_seconds(time_total));
         out << fmt::format("[i] layout size before optimization = {} × {}\n", x_size_before, y_size_before);
         out << fmt::format("[i] layout size after optimization = {} × {}\n", x_size_after, y_size_after);
-        out << fmt::format("[i] area reduction = {}%\n", wiring_improvement);
+        out << fmt::format("[i] area reduction = {}%\n", area_improvement);
         out << fmt::format("[i] num. wires before optimization = {}\n", num_wires_before);
         out << fmt::format("[i] num. wires after optimization = {}\n", num_wires_after);
-        out << fmt::format("[i] wiring reduction = {}%\n", area_improvement);
+        out << fmt::format("[i] wiring reduction = {}%\n", wiring_improvement);
     }
 };
 
