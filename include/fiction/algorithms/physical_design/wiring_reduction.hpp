@@ -90,7 +90,7 @@ class wiring_reduction_layout : public cartesian_layout<OffsetCoordinateType>
     explicit wiring_reduction_layout(const typename cartesian_layout<OffsetCoordinateType>::aspect_ratio& ar = {},
                                      detail::search_direction direction = detail::search_direction::HORIZONTALLY) :
             cartesian_layout<OffsetCoordinateType>(ar),
-            direction_(direction)
+            search_dir(direction)
     {}
     /**
      * Getter for the search direction.
@@ -99,7 +99,7 @@ class wiring_reduction_layout : public cartesian_layout<OffsetCoordinateType>
      */
     [[nodiscard]] detail::search_direction get_search_direction() const
     {
-        return direction_;
+        return search_dir;
     }
 
     /**
@@ -109,7 +109,7 @@ class wiring_reduction_layout : public cartesian_layout<OffsetCoordinateType>
      */
     [[maybe_unused]] void set_search_direction(detail::search_direction direction)
     {
-        direction_ = direction;
+        search_dir = direction;
     }
     /**
      * Iterates over adjacent coordinates of a given coordinate and applies a given functor.
@@ -124,8 +124,7 @@ class wiring_reduction_layout : public cartesian_layout<OffsetCoordinateType>
     template <typename Fn>
     void foreach_adjacent_coordinate(const OffsetCoordinateType& c, Fn&& fn) const
     {
-        if (wiring_reduction_layout<OffsetCoordinateType>::get_search_direction() ==
-            detail::search_direction::HORIZONTALLY)
+        if (search_dir == detail::search_direction::HORIZONTALLY)
         {
             if (c.x == 0)
             {
@@ -312,7 +311,7 @@ class wiring_reduction_layout : public cartesian_layout<OffsetCoordinateType>
     }
 
   private:
-    detail::search_direction direction_;
+    detail::search_direction search_dir;
 };
 
 /**
@@ -335,7 +334,8 @@ using wiring_reduction_lyt = obstruction_layout<wiring_reduction_layout<offset::
  * @return A new layout with wiring reduction features.
  */
 template <typename Lyt>
-wiring_reduction_lyt create_shifted_layout(const Lyt& lyt, const uint64_t x_offset = 0, const uint64_t y_offset = 0,
+wiring_reduction_lyt
+create_shifted_layout(const Lyt& lyt, const uint64_t x_offset = 0, const uint64_t y_offset = 0,
                       detail::search_direction direction = detail::search_direction::HORIZONTALLY) noexcept
 {
     // Create a wiring_reduction_layout with specified offsets
@@ -649,7 +649,7 @@ void delete_wires(Lyt& lyt, ShiftedLyt& shifted_lyt, layout_coordinate_path<wiri
                     const tile<Lyt> old_coord = {x, y, z};
 
                     // Check if the tile is not empty and has an offset
-                    if (!(lyt.is_empty_tile(old_coord) && (offset != 0)))
+                    if (!(lyt.is_empty_tile(old_coord)) && (offset != 0))
                     {
                         tile<Lyt> new_coord{};
                         if (shifted_lyt.get_search_direction() == detail::search_direction::HORIZONTALLY)
@@ -699,7 +699,8 @@ void delete_wires(Lyt& lyt, ShiftedLyt& shifted_lyt, layout_coordinate_path<wiri
                                             {
                                                 offset_offset++;
                                                 if ((fanin.y > 0) && (offset_matrix[fanin.y][fanin.x] !=
-                                                                      offset_matrix[fanin.y - 1][fanin.x]))
+                                                     offset_matrix[fanin.y - 1][fanin.x]) &&
+                                                    (layout_copy.incoming_data_flow(fanin)[0].y != fanin.y))
                                                 {
                                                     fanin = {fanin.x, fanin.y - 1, fanin.z};
                                                 }
@@ -743,7 +744,8 @@ void delete_wires(Lyt& lyt, ShiftedLyt& shifted_lyt, layout_coordinate_path<wiri
                                             {
                                                 offset_offset++;
                                                 if ((fanin.x > 0) && (offset_matrix[fanin.y][fanin.x] !=
-                                                                      offset_matrix[fanin.y][fanin.x - 1]))
+                                                     offset_matrix[fanin.y][fanin.x - 1]) &&
+                                                    (layout_copy.incoming_data_flow(fanin)[0].x != fanin.x))
                                                 {
                                                     fanin = {fanin.x - 1, fanin.y, fanin.z};
                                                 }
