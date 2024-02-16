@@ -60,6 +60,7 @@ inline constexpr const char* LATTICE_LAYER_DEFINITION_SI_100 = "        <layer_p
                                                                "            <visible>1</visible>\n"
                                                                "            <active>0</active>\n"
                                                                "            <lat_vec>\n"
+                                                               "                <name>Si(111) 1x1</name>\n"
                                                                "                <a1 x=\"3.84\" y=\"0\"/>\n"
                                                                "                <a2 x=\"0\" y=\"7.68\"/>\n"
                                                                "                <N>2</N>\n"

@@ -134,6 +134,113 @@ class is_operational_impl
                 simulation_results.charge_distributions.cbegin(), simulation_results.charge_distributions.cend(),
                 [](const auto& lhs, const auto& rhs) { return lhs.get_system_energy() < rhs.get_system_energy(); });
 
+            uint64_t charge_counter = 0;
+
+            ground_state->foreach_cell(
+                [&ground_state, &charge_counter](const auto& c)
+                {
+                    if (c.y <= 10 || c.y >= 21)
+                    {
+                        if (ground_state->get_charge_state(c) == sidb_charge_state::NEGATIVE)
+                        {
+                            charge_counter++;
+                        }
+                    }
+                });
+
+            if (charge_counter != 12)
+            {
+                return operational_status::NON_OPERATIONAL;
+            }
+
+
+            // 2 input functions
+            const auto charge_state_output_upper_left_1  = ground_state->get_charge_state({4, 4});
+            const auto charge_state_output_lower_left_1  = ground_state->get_charge_state({5, 5, 1});
+            const auto charge_state_output_upper_right_1 = ground_state->get_charge_state({21, 4});
+            const auto charge_state_output_lower_right_1 = ground_state->get_charge_state({19, 5, 1});
+
+            const auto charge_state_output_upper_left_2  = ground_state->get_charge_state({8, 8});
+            const auto charge_state_output_lower_left_2  = ground_state->get_charge_state({9, 9, 1});
+            const auto charge_state_output_upper_right_2 = ground_state->get_charge_state({17, 8});
+            const auto charge_state_output_lower_right_2 = ground_state->get_charge_state({15, 9, 1});
+
+            const auto charge_state_output_wire_upper = ground_state->get_charge_state({15, 21,1});
+            const auto charge_state_output_wire_lower = ground_state->get_charge_state({17, 23});
+
+            if (i == 0)
+            {
+                if (!(charge_state_output_upper_left_1 == sidb_charge_state::NEGATIVE &&
+                      charge_state_output_upper_left_2 == sidb_charge_state::NEGATIVE) &&
+                    !(charge_state_output_lower_left_1 == sidb_charge_state::NEUTRAL &&
+                      charge_state_output_lower_left_2 == sidb_charge_state::NEUTRAL))
+                {
+                    return operational_status::NON_OPERATIONAL;
+                }
+                if (!(charge_state_output_upper_right_1 == sidb_charge_state::NEGATIVE &&
+                      charge_state_output_upper_right_2 == sidb_charge_state::NEGATIVE) &&
+                    !(charge_state_output_lower_right_1 == sidb_charge_state::NEUTRAL &&
+                      charge_state_output_lower_right_2 == sidb_charge_state::NEUTRAL))
+                {
+                    return operational_status::NON_OPERATIONAL;
+                }
+            }
+
+            if (i == 1)
+            {
+
+                if (!(charge_state_output_upper_left_1 == sidb_charge_state::NEGATIVE &&
+                      charge_state_output_upper_left_2 == sidb_charge_state::NEGATIVE) &&
+                    !(charge_state_output_lower_left_1 == sidb_charge_state::NEUTRAL &&
+                      charge_state_output_lower_left_2 == sidb_charge_state::NEUTRAL))
+                {
+                    return operational_status::NON_OPERATIONAL;
+                }
+                if (!(charge_state_output_upper_right_1 == sidb_charge_state::NEUTRAL &&
+                      charge_state_output_upper_right_2 == sidb_charge_state::NEUTRAL) &&
+                    !(charge_state_output_lower_right_1 == sidb_charge_state::NEGATIVE &&
+                      charge_state_output_lower_right_2 == sidb_charge_state::NEGATIVE))
+                {
+                    return operational_status::NON_OPERATIONAL;
+                }
+            }
+
+            if (i == 2)
+            {
+                if (!(charge_state_output_upper_left_1 == sidb_charge_state::NEUTRAL &&
+                      charge_state_output_upper_left_2 == sidb_charge_state::NEUTRAL) &&
+                    !(charge_state_output_lower_left_1 == sidb_charge_state::NEGATIVE &&
+                      charge_state_output_lower_left_2 == sidb_charge_state::NEGATIVE))
+                {
+                    return operational_status::NON_OPERATIONAL;
+                }
+                if (!(charge_state_output_upper_right_1 == sidb_charge_state::NEGATIVE &&
+                      charge_state_output_upper_right_2 == sidb_charge_state::NEGATIVE) &&
+                    !(charge_state_output_lower_right_1 == sidb_charge_state::NEUTRAL &&
+                      charge_state_output_lower_right_2 == sidb_charge_state::NEUTRAL))
+                {
+                    return operational_status::NON_OPERATIONAL;
+                }
+            }
+
+            if (i == 3)
+            {
+                if (!(charge_state_output_upper_left_1 == sidb_charge_state::NEUTRAL &&
+                      charge_state_output_upper_left_2 == sidb_charge_state::NEUTRAL) &&
+                    !(charge_state_output_lower_left_1 == sidb_charge_state::NEGATIVE &&
+                      charge_state_output_lower_left_2 == sidb_charge_state::NEGATIVE))
+                {
+                    return operational_status::NON_OPERATIONAL;
+                }
+                if (!(charge_state_output_upper_right_1 == sidb_charge_state::NEUTRAL &&
+                      charge_state_output_upper_right_2 == sidb_charge_state::NEUTRAL) &&
+                    !(charge_state_output_lower_right_1 == sidb_charge_state::NEGATIVE &&
+                      charge_state_output_lower_right_2 == sidb_charge_state::NEGATIVE))
+                {
+                    return operational_status::NON_OPERATIONAL;
+                }
+            }
+
             // ground state is degenerate
             if ((energy_distribution(simulation_results.charge_distributions).begin()->second) > 1)
             {
@@ -152,6 +259,12 @@ class is_operational_impl
                     return operational_status::NON_OPERATIONAL;
                 }
 
+                // if the output charge states are equal, the layout is not operational
+//                if (charge_state_output_wire_lower == charge_state_output_wire_upper)
+//                {
+//                    return operational_status::NON_OPERATIONAL;
+//                }
+
                 // if the expected output is 1, the expected charge states are (upper, lower) = (0, -1)
                 if (kitty::get_bit(truth_table[output], i))
                 {
@@ -160,6 +273,12 @@ class is_operational_impl
                     {
                         return operational_status::NON_OPERATIONAL;
                     }
+
+//                    if (charge_state_output_wire_upper != sidb_charge_state::NEUTRAL ||
+//                        charge_state_output_wire_lower != sidb_charge_state::NEGATIVE)
+//                    {
+//                        return operational_status::NON_OPERATIONAL;
+//                    }
                 }
                 // if the expected output is 0, the expected charge states are (upper, lower) = (-1, 0)
                 else
@@ -169,6 +288,12 @@ class is_operational_impl
                     {
                         return operational_status::NON_OPERATIONAL;
                     }
+
+//                    if (charge_state_output_wire_upper != sidb_charge_state::NEGATIVE ||
+//                        charge_state_output_wire_lower != sidb_charge_state::NEUTRAL)
+//                    {
+//                        return operational_status::NON_OPERATIONAL;
+//                    }
                 }
             }
         }

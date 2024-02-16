@@ -5,6 +5,8 @@
 #ifndef FICTION_SIDB_LATTICE_PROPERTIES_HPP
 #define FICTION_SIDB_LATTICE_PROPERTIES_HPP
 
+#include <utility>
+
 namespace fiction
 {
 
