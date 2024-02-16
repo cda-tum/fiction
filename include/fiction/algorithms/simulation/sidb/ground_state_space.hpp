@@ -10,8 +10,11 @@
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/technology/sidb_cluster_hierarchy.hpp"
 
+#include <mockturtle/utils/stopwatch.hpp>
+
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <cstdint>
 #include <functional>
 #include <limits>
@@ -47,6 +50,7 @@ class ground_state_space
                                 const sidb_simulation_parameters& phys_params = sidb_simulation_parameters{}) :
             clustering{
                 get_initial_clustering(to_sidb_cluster(sidb_cluster_hierarchy(lyt)), get_local_potential_bounds(lyt))},
+            bot{clustering},
             cds{charge_distribution_surface<Lyt>{lyt}},
             mu_bounds_with_error{physical_constants::POP_STABILITY_ERR - phys_params.mu_minus,
                                  -physical_constants::POP_STABILITY_ERR - phys_params.mu_minus,
@@ -216,35 +220,52 @@ class ground_state_space
             perceived_order_ixs.emplace_back(0);
         }
 
-        std::set<uint64_t> not_handled_sidb_ixs{};
+        // key: sidb_ix, val: row ixs to skip, since they have seen sidb_ix already
+        std::map<uint64_t, std::set<uint64_t>> not_handled_sidb_ixs_with_skip_rows{};
 
-        while (perceived_order_ixs[0] < c1->sidbs.size())
+        if (c1->uid == 24 && c2->uid == 37)
+        {
+            std::cout << "heree" << std::endl;
+        }
+
+        bool done = false;
+        while (!done)
         {
             // start a new equivalence class with the first sidb ix not yet in an equivalence class
             const uint64_t sidb_ix_eqv_class_seed = perceived_order_c2_to_c1[0][perceived_order_ixs[0]];
             perceived_ordered_eq_classes_c2_to_c1.emplace_back(std::set{sidb_ix_eqv_class_seed});
-            not_handled_sidb_ixs.emplace(sidb_ix_eqv_class_seed);
+            not_handled_sidb_ixs_with_skip_rows.emplace(std::make_pair(sidb_ix_eqv_class_seed, std::set<uint64_t>{}));
 
-            while (!not_handled_sidb_ixs.empty())
+            while (!not_handled_sidb_ixs_with_skip_rows.empty())
             {
                 // take first element of unhandled equivalence class members (out)
-                const uint64_t sidb_ix = *not_handled_sidb_ixs.cbegin();
-                not_handled_sidb_ixs.erase(not_handled_sidb_ixs.begin());
+                const auto [sidb_ix, skip_rows] = ([](const std::map<uint64_t, std::set<uint64_t>>::node_type nh)
+                                                   { return std::make_pair(nh.key(), nh.mapped()); })(
+                    not_handled_sidb_ixs_with_skip_rows.extract(not_handled_sidb_ixs_with_skip_rows.cbegin()));
+                //                not_handled_sidb_ixs.erase(not_handled_sidb_ixs.begin());
 
                 for (uint64_t row_ix = 0; row_ix < c2->sidbs.size(); ++row_ix)
                 {
+                    // skip row if this row already saw the current sidb_ix
+                    if (skip_rows.count(row_ix) != 0)
+                    {
+                        continue;
+                    }
+
                     // find equivalent sidb ixs by incrementing the pointer at the current perceived order
                     while (perceived_order_c2_to_c1[row_ix][perceived_order_ixs[row_ix]++] != sidb_ix)
                     {
                         const uint64_t eqv_sidb_ix = perceived_order_c2_to_c1[row_ix][perceived_order_ixs[row_ix] - 1];
                         perceived_ordered_eq_classes_c2_to_c1.back().emplace(eqv_sidb_ix);
-                        not_handled_sidb_ixs.emplace(eqv_sidb_ix);
+                        //                        not_handled_sidb_ixs.emplace(eqv_sidb_ix);
+                        not_handled_sidb_ixs_with_skip_rows[eqv_sidb_ix].emplace(row_ix);
                     }
 
                     // if one perceived order reaches the end, we have put all sidb ixs in equivalence classes
                     if (perceived_order_ixs[row_ix] == c1->sidbs.size())
                     {
-                        not_handled_sidb_ixs.clear();
+                        not_handled_sidb_ixs_with_skip_rows.clear();
+                        done = true;
                         break;
                     }
                 }
@@ -262,8 +283,6 @@ class ground_state_space
             {
                 continue;
             }
-
-            std::vector<std::vector<double>> pot_eq_classes{};
 
             const std::vector<std::vector<double>>& all_pots = compute_cluster_potential_matrix(c, other_c);
 
@@ -296,12 +315,27 @@ class ground_state_space
         C2_ACCUMULATE
     };
 
+    static bool may_take_cs(const uint64_t i, const sidb_clustering& bot, const sidb_charge_state cs)
+    {
+        for (const sidb_cluster_ptr& c : bot)
+        {
+            if (c->sidbs.count(i))
+            {
+                return c->charge_space.find(sidb_cluster_charge_state{cs}) != c->charge_space.cend();
+            }
+        }
+        return false;
+        //        const sidb_cluster_ptr& c_i = *std::find(bot.cbegin(), bot.cend(), [&](const sidb_cluster_ptr& c) {
+        //        return c->sidbs.count(i);});
+    }
+
     // compute the bound on the absolute potential projected from c1 onto c2 for n charges using the potential
     // equivalence classes information. for each element of c2, sum the potential received by n highest/lowest ordered
     // elements of c1.
     template <bound_calculation_mode bound, bound_operation_mode mode>
     static double compute_potential_bound_for_num_charges(const sidb_cluster_ptr& c1, const sidb_cluster_ptr& c2,
-                                                          uint64_t num_charges) noexcept
+                                                          uint64_t num_charges, const sidb_clustering& bot,
+                                                          const sidb_charge_state cs) noexcept
     {
         const ordered_potential_information& pot_info = c1->potential_equivalence_classes.at(c2->uid);
 
@@ -330,8 +364,16 @@ class ground_state_space
             {
                 const std::set<uint64_t>& eqv_class = pot_info.eqv_classes[pot_info.eqv_classes.size() - t];
 
+                uint64_t skipped = 0;
+
                 for (const uint64_t eqv_sidb_ix : eqv_class)
                 {
+                    if (!may_take_cs(*std::next(c1->sidbs.cbegin(), static_cast<int64_t>(eqv_sidb_ix)), bot, cs))
+                    {
+                        skipped++;
+                        continue;
+                    }
+
                     if constexpr (mode == bound_operation_mode::C2_BOUND)
                     {
                         sum += get_c2_onto_c1_pot(eqv_sidb_ix, c2->sidbs.size() + 1);  // ix of stored maximum
@@ -345,7 +387,7 @@ class ground_state_space
                     }
                 }
 
-                num_charges -= eqv_class.size();
+                num_charges -= eqv_class.size() - skipped;
             }
 
             last_t = pot_info.eqv_classes.size() - t;
@@ -356,8 +398,16 @@ class ground_state_space
             {
                 const std::set<uint64_t>& eqv_class = pot_info.eqv_classes[t - 1];
 
+                uint64_t skipped = 0;
+
                 for (const uint64_t eqv_sidb_ix : eqv_class)
                 {
+                    if (!may_take_cs(*std::next(c1->sidbs.cbegin(), static_cast<int64_t>(eqv_sidb_ix)), bot, cs))
+                    {
+                        skipped++;
+                        continue;
+                    }
+
                     if constexpr (mode == bound_operation_mode::C2_BOUND)
                     {
                         sum += get_c2_onto_c1_pot(eqv_sidb_ix, c2->sidbs.size());  // ix of stored minimum
@@ -371,7 +421,7 @@ class ground_state_space
                     }
                 }
 
-                num_charges -= eqv_class.size();
+                num_charges -= eqv_class.size() - skipped;
             }
 
             last_t = t - 1;
@@ -397,6 +447,11 @@ class ground_state_space
                 {
                     const uint64_t eqv_sidb_ix =
                         *std::next(pot_info.eqv_classes[last_t].cbegin(), static_cast<int64_t>(k));
+
+                    if (!may_take_cs(*std::next(c1->sidbs.cbegin(), static_cast<int64_t>(eqv_sidb_ix)), bot, cs))
+                    {
+                        break;
+                    }
 
                     if constexpr (mode == bound_operation_mode::C2_BOUND)
                     {
@@ -441,13 +496,17 @@ class ground_state_space
         // implement solution caching?
         if constexpr (bound == bound_calculation_mode::UPPER)
         {
-            return -compute_potential_bound_for_num_charges<bound_calculation_mode::UPPER, mode>(c1, c2, m.neg_count) +
-                   compute_potential_bound_for_num_charges<bound_calculation_mode::LOWER, mode>(c1, c2, m.pos_count);
+            return -compute_potential_bound_for_num_charges<bound_calculation_mode::UPPER, mode>(
+                       c1, c2, m.neg_count, bot, sidb_charge_state::NEGATIVE) +
+                   compute_potential_bound_for_num_charges<bound_calculation_mode::LOWER, mode>(
+                       c1, c2, m.pos_count, bot, sidb_charge_state::POSITIVE);
         }
         else
         {
-            return -compute_potential_bound_for_num_charges<bound_calculation_mode::LOWER, mode>(c1, c2, m.neg_count) +
-                   compute_potential_bound_for_num_charges<bound_calculation_mode::UPPER, mode>(c1, c2, m.pos_count);
+            return -compute_potential_bound_for_num_charges<bound_calculation_mode::LOWER, mode>(
+                       c1, c2, m.neg_count, bot, sidb_charge_state::NEGATIVE) +
+                   compute_potential_bound_for_num_charges<bound_calculation_mode::UPPER, mode>(
+                       c1, c2, m.pos_count, bot, sidb_charge_state::POSITIVE);
         }
     }
 
@@ -498,33 +557,7 @@ class ground_state_space
                 const sidb_cluster_charge_state& located_m_part =
                     *child->charge_space.find(sidb_cluster_charge_state{m_part});
 
-                if (debug)
-                {
-                    std::cout << "\nchild: ";
-                    for (const uint64_t i : child->sidbs)
-                    {
-                        std::cout << i << " ";
-                    }
-                    std::cout << "\t\t- : " << located_m_part.neg_count
-                              << "\t0 : " << child->sidbs.size() - located_m_part.neg_count - located_m_part.pos_count
-                              << "\t+ : " << located_m_part.pos_count << "\n";
-                }
-
                 double maybe_bound_value = internal_pot_bound_value<bound, without_one_cs>(child, located_m_part);
-                //                double one_cs_antibound  = 0;
-
-                if (debug)
-                {
-                    std::cout << "\nCchild: ";
-                    for (const uint64_t i : child->sidbs)
-                    {
-                        std::cout << i << " ";
-                    }
-                    std::cout << "\t\t- : " << located_m_part.neg_count
-                              << "\t0 : " << child->sidbs.size() - located_m_part.neg_count - located_m_part.pos_count
-                              << "\t+ : " << located_m_part.pos_count << "\n";
-                    std::cout << "internal: " << maybe_bound_value << std::endl;
-                }
 
                 // sum the bound values of m_part onto each sibling
                 for (const auto& [other_child, other_m_part] : decomposition)
@@ -539,74 +572,7 @@ class ground_state_space
 
                     maybe_bound_value += cluster_charge_state_bound_value<bound, bound_operation_mode::C2_BOUND>(
                         other_child, child, located_other_m_part);
-
-                    if (debug)
-                    {
-                        std::cout << "upd: " << maybe_bound_value << std::endl;
-                    }
-
-                    //                    if constexpr (without_one_cs != sidb_charge_state::NEGATIVE &&
-                    //                                  without_one_cs != sidb_charge_state::POSITIVE)
-                    //                    {
-                    //                        continue;
-                    //                    }
-                    //
-                    //                    if constexpr (without_one_cs == sidb_charge_state::NEGATIVE)
-                    //                    {
-                    //                        if (m_part >> 32ull == 0)
-                    //                        {
-                    //                            // neg_count == 0
-                    //                            continue;
-                    //                        }
-                    //                    }
-                    //                    else
-                    //                    {
-                    //                        if ((m_part << 32ull) >> 32ull == 0)
-                    //                        {
-                    //                            // pos_count == 0
-                    //                            continue;
-                    //                        }
-                    //                    }
-                    //
-                    //                    // the current child could contain the SiDB with charge state without_one_cs
-                    //                    for which the
-                    //                    // received potential is the bound for the current decomposition; compute the
-                    //                    opposing bound of
-                    //                    // the projected potential onto the siblings, and sum with the internal
-                    //                    opposing potential bound
-                    //                    // value of the m_part without this charge state
-                    //                    if constexpr (bound == bound_calculation_mode::UPPER)
-                    //                    {
-                    //                        one_cs_antibound +=
-                    //                        cluster_charge_state_bound_value<bound_calculation_mode::LOWER,
-                    //                                                                             bound_operation_mode::C2_BOUND>(
-                    //                            other_child, child, located_other_m_part);
-                    //                    }
-                    //                    else
-                    //                    {
-                    //                        one_cs_antibound +=
-                    //                        cluster_charge_state_bound_value<bound_calculation_mode::UPPER,
-                    //                                                                             bound_operation_mode::C2_BOUND>(
-                    //                            other_child, child, located_other_m_part);
-                    //                    }
-                    //
-                    //                    if (debug)
-                    //                    {
-                    //                        std::cout << "anti: " << one_cs_antibound << std::endl;
-                    ////                        std::cout << "new upd: "
-                    //                    }
                 }
-
-                //                if (debug)
-                //                {
-                //                    std::cout << "bound: " << maybe_bound_value << "\tanti: " << one_cs_antibound <<
-                //                    std::endl;
-                //                }
-                //
-                //                // the weakest opposing bound is subtracted from the bound for the current
-                //                decomposition; this gives the
-                //                // bound for the current decomposition where charge state without_one_cs is omitted
-                //                maybe_bound_value -= one_cs_antibound;
 
                 if constexpr (bound == bound_calculation_mode::UPPER)
                 {
@@ -619,58 +585,13 @@ class ground_state_space
             }
         }
 
-        if (debug)
-        {
-            std::cout << "BOUND: " << bound_value << std::endl << std::endl;
-        }
-
         return bound_value;
     }
 
     bool check_cluster_charge_state(const sidb_cluster_ptr& c, const sidb_cluster_charge_state& m) const noexcept
     {
-        if (debug)
-        {
-            std::cout << std::endl
-                      << "- : " << m.neg_count << "\t0 : " << c->sidbs.size() - m.neg_count - m.pos_count
-                      << "\t+ : " << m.pos_count << "\n"
-                      << std::endl;
-
-            for (const sidb_cluster_ptr& c_ : clustering)
-            {
-                for (const uint64_t i : c_->sidbs)
-                {
-                    std::cout << i << ' ';
-                }
-                std::cout << '\t';
-            }
-
-            std::cout << "\n\n";
-
-            for (const uint64_t i : c->sidbs)
-            {
-                std::cout << i << ' ';
-            }
-
-            std::cout << std::endl;
-        }
-
         if (m.neg_count != 0)
         {
-            if (debug)
-            {
-                std::cout << "\n"
-                          << std::endl
-                          << "min locpot: " << -c->local_pot_bounds.first << '\t'
-                          << -internal_pot_bound_value<bound_calculation_mode::LOWER, sidb_charge_state::NEGATIVE>(c, m)
-                          << "<- min intpot-N\t";
-                debug = false;
-                std::cout << (-c->local_pot_bounds.first -
-                                  internal_pot_bound_value<bound_calculation_mode::LOWER, sidb_charge_state::NEGATIVE>(
-                                      c, m) >=
-                              mu_bounds_with_error[0])
-                          << std::endl;
-            }
             if (-c->local_pot_bounds.first -
                     internal_pot_bound_value<bound_calculation_mode::LOWER, sidb_charge_state::NEGATIVE>(c, m) >=
                 mu_bounds_with_error[0])
@@ -681,19 +602,6 @@ class ground_state_space
 
         if (m.pos_count != 0)
         {
-            if (debug)
-            {
-                std::cout << '\n'
-                          << "max locpot: " << -c->local_pot_bounds.second << '\t'
-                          << -internal_pot_bound_value<bound_calculation_mode::UPPER, sidb_charge_state::POSITIVE>(c, m)
-                          << "<- max intpot-P\t";
-                debug = false;
-                std::cout << (-c->local_pot_bounds.first -
-                                  internal_pot_bound_value<bound_calculation_mode::UPPER, sidb_charge_state::POSITIVE>(
-                                      c, m) <=
-                              mu_bounds_with_error[3])
-                          << std::endl;
-            }
             if (-c->local_pot_bounds.second -
                     internal_pot_bound_value<bound_calculation_mode::UPPER, sidb_charge_state::POSITIVE>(c, m) <=
                 mu_bounds_with_error[3])
@@ -704,24 +612,6 @@ class ground_state_space
 
         if (m.contains_neutral_charge(c->sidbs.size()))
         {
-            if (debug)
-            {
-                std::cout << '\n'
-                          << "max locpot: " << -c->local_pot_bounds.second << '\t'
-                          << -internal_pot_bound_value<bound_calculation_mode::UPPER>(c, m) << "<- max intpot\t";
-                debug = false;
-                std::cout << (-c->local_pot_bounds.second -
-                                  internal_pot_bound_value<bound_calculation_mode::UPPER>(c, m) <=
-                              mu_bounds_with_error[1])
-                          << std::endl
-                          << "min locpot: " << -c->local_pot_bounds.first << '\t'
-                          << -internal_pot_bound_value<bound_calculation_mode::LOWER>(c, m) << "<- max intpot\t";
-                debug = false;
-                std::cout << (-c->local_pot_bounds.first -
-                                  internal_pot_bound_value<bound_calculation_mode::LOWER>(c, m) >=
-                              mu_bounds_with_error[2])
-                          << std::endl;
-            }
             if (-c->local_pot_bounds.second - internal_pot_bound_value<bound_calculation_mode::UPPER>(c, m) <=
                     mu_bounds_with_error[1] ||
                 -c->local_pot_bounds.first - internal_pot_bound_value<bound_calculation_mode::LOWER>(c, m) >=
@@ -747,7 +637,6 @@ class ground_state_space
             {
                 removed_multisets.push_back(static_cast<uint64_t>(m));
             }
-            debug = true;
         }
 
         if (!removed_multisets.empty())
@@ -1070,21 +959,25 @@ class ground_state_space
         apply_update(res);
     }
 
-    sidb_cluster_ptr compute_ground_state_space() noexcept
+    std::pair<sidb_cluster_ptr, std::chrono::duration<double>> compute_ground_state_space() noexcept
     {
-        while (clustering.size() > 1)
+        mockturtle::stopwatch<>::duration time_counter{};
         {
-            while (!update_charge_spaces())
-                ;
-            move_up_hierarchy();
+            const mockturtle::stopwatch stop{time_counter};
+
+            while (clustering.size() > 1)
+            {
+                while (!update_charge_spaces())
+                    ;
+                move_up_hierarchy();
+            }
         }
 
-        return *clustering.cbegin();
+        return {*clustering.cbegin(), time_counter};
     }
 
     sidb_clustering clustering{};
-
-    mutable bool debug{false};
+    sidb_clustering bot{};
 
   private:
     const charge_distribution_surface<Lyt> cds;
