@@ -6,6 +6,7 @@
 #define FICTION_SIDB_CHARGE_STATE_HPP
 
 #include <cstdint>
+#include <iterator>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -124,15 +125,13 @@ charge_configuration_to_string(const std::vector<sidb_charge_state>& charge_dist
 }
 
 /*
- * Iterator for SiDB charge states. Iterates -1 -> 0 -> +1 -> None by default, and -1 -> 0 -> +1 -> None when reversed.
+ * Iterator for SiDB charge states. Iterates -1 -> 0 -> +1 -> None.
  */
 class sidb_charge_state_iterator : public std::iterator<std::input_iterator_tag, sidb_charge_state>
 {
   public:
-    explicit sidb_charge_state_iterator(sidb_charge_state charge_state = sidb_charge_state::NEGATIVE,
-                                        const bool        reversed     = false) :
-            cs{charge_state},
-            reverse{reversed}
+    explicit sidb_charge_state_iterator(const sidb_charge_state charge_state = sidb_charge_state::NEGATIVE) :
+            cs{charge_state}
     {}
 
     // Check for inequality
@@ -149,12 +148,12 @@ class sidb_charge_state_iterator : public std::iterator<std::input_iterator_tag,
 
     sidb_charge_state_iterator begin() const noexcept
     {
-        return sidb_charge_state_iterator(cs, reverse);
+        return sidb_charge_state_iterator(cs);
     }
 
     sidb_charge_state_iterator end() const noexcept
     {
-        return sidb_charge_state_iterator(sidb_charge_state::NONE, reverse);
+        return sidb_charge_state_iterator{sidb_charge_state::NONE};
     }
 
     // Dereference operator
@@ -166,7 +165,7 @@ class sidb_charge_state_iterator : public std::iterator<std::input_iterator_tag,
     // Pre-increment operator
     sidb_charge_state_iterator& operator++() noexcept
     {
-        cs = sign_to_charge_state(charge_state_to_sign(cs) + (reverse ? -1 : 1));
+        cs = sign_to_charge_state(charge_state_to_sign(cs) + 1);
         return *this;
     }
 
@@ -180,7 +179,63 @@ class sidb_charge_state_iterator : public std::iterator<std::input_iterator_tag,
 
   private:
     sidb_charge_state cs;
-    const bool        reverse;
+};
+
+/*
+ * Reverse iterator for SiDB charge states. Iterates +1 -> 0 -> -1 -> None.
+ */
+class sidb_charge_state_reversed_iterator : public std::iterator<std::input_iterator_tag, sidb_charge_state>
+{
+  public:
+    explicit sidb_charge_state_reversed_iterator(const sidb_charge_state charge_state = sidb_charge_state::POSITIVE) :
+            cs{charge_state}
+    {}
+
+    // Check for inequality
+    bool operator!=(const sidb_charge_state_reversed_iterator& other) const noexcept
+    {
+        return cs != other.cs;
+    }
+
+    // Check for equality
+    bool operator==(const sidb_charge_state_reversed_iterator& other) const noexcept
+    {
+        return cs == other.cs;
+    }
+
+    sidb_charge_state_reversed_iterator begin() const noexcept
+    {
+        return sidb_charge_state_reversed_iterator(cs);
+    }
+
+    sidb_charge_state_reversed_iterator end() const noexcept
+    {
+        return sidb_charge_state_reversed_iterator{sidb_charge_state::NONE};
+    }
+
+    // Dereference operator
+    sidb_charge_state operator*() const noexcept
+    {
+        return cs;
+    }
+
+    // Pre-increment operator
+    sidb_charge_state_reversed_iterator& operator++() noexcept
+    {
+        cs = sign_to_charge_state(charge_state_to_sign(cs) - 1);
+        return *this;
+    }
+
+    // Post-increment operator
+    sidb_charge_state_reversed_iterator operator++(int) noexcept
+    {
+        sidb_charge_state_reversed_iterator temp(*this);
+        ++(*this);
+        return temp;
+    }
+
+  private:
+    sidb_charge_state cs;
 };
 
 }  // namespace fiction
