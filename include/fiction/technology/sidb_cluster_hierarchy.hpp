@@ -229,74 +229,11 @@ static constexpr inline int8_t trinary_multiset_conf_to_sign(const uint64_t m) n
     return static_cast<int8_t>(static_cast<uint32_t>(m) - (static_cast<uint32_t>(m) < m));
 }
 
-using sidb_cluster_charge_state_space = std::unordered_set<sidb_cluster_charge_state, sidb_cluster_charge_state>;
-
 enum class bound_calculation_mode : uint8_t
 {
     LOWER = 0,
     UPPER
 };
-
-// namespace bound_iteration
-//{
-//
-//// https://stackoverflow.com/questions/24015710/for-loop-over-template-arguments-types
-//
-// template <typename T>
-// struct cons
-//{
-//    using type = T;
-//};
-//
-// template <typename... T>
-// struct Set
-//{};
-//
-// template <typename F, typename E>
-// struct Forwarder
-//{
-//    Forwarder(F f) : inner(f) {}
-//
-//    template <typename... Args>
-//    void operator()(Args... args)
-//    {
-//        inner(cons<E>{}, args...);
-//    }
-//
-//    F inner;
-//};
-//
-// template <typename FirstSet, typename... Sets, typename F>
-// void combine(F func);
-//
-// template <typename Head, typename... Tail, typename... Sets, typename F>
-// void apply_set(F func, Set<Head, Tail...>, Sets... others);
-//
-// template <typename... Sets, typename F>
-// void apply_set(F func, Set<>, Sets... others);
-//
-// template <typename E, typename NextSet, typename... Sets, typename F>
-// void apply_item(F func, cons<E>, NextSet, Sets...);
-//
-// template <typename E, typename F>
-// void apply_item(F func, cons<E> e);
-//
-// struct iter
-//{
-//
-//    void operator()(cons<bound_calculation_mode>, cons<sidb_charge_state>) {}
-//};
-//
-//
-// template<typename T>
-// void iter_all()
-//{
-//    combine<Set<decltype(bound_calculation_mode::LOWER), decltype(bound_calculation_mode::UPPER)>,
-//            Set<decltype(sidb_charge_state::NEGATIVE), decltype(sidb_charge_state::POSITIVE),
-//                decltype(sidb_charge_state::NEUTRAL)>>(iter());
-//}
-//
-//}  // namespace bound_iteration
 
 // the bottom element of the respective potential bound domain; i.e. the potential bound of least information.
 template <bound_calculation_mode bound>
@@ -334,12 +271,14 @@ struct projector_bound
 
     constexpr inline bool operator<(const projector_bound<bound>& other) const noexcept
     {
-        return V < other.V;
-    }
-
-    constexpr inline bool operator>(const projector_bound<bound>& other) const noexcept
-    {
-        return V > other.V;
+        if constexpr (bound == bound_calculation_mode::LOWER)
+        {
+            return V < other.V;
+        }
+        else
+        {
+            return V > other.V;
+        }
     }
 
     constexpr inline projector_bound<bound>& operator+=(const projector_bound<bound>& other) noexcept
@@ -352,25 +291,34 @@ struct projector_bound
 
 struct projected_potential_bounds
 {
-    projector_bound<bound_calculation_mode::LOWER> neg_lb{};
-    projector_bound<bound_calculation_mode::UPPER> neg_ub{};
+    std::set<projector_bound<bound_calculation_mode::LOWER>> neg_lbs{};
+    std::set<projector_bound<bound_calculation_mode::UPPER>> neg_ubs{};
 
-    projector_bound<bound_calculation_mode::LOWER> pos_lb{};
-    projector_bound<bound_calculation_mode::UPPER> pos_ub{};
+    std::set<projector_bound<bound_calculation_mode::LOWER>> pos_lbs{};
+    std::set<projector_bound<bound_calculation_mode::UPPER>> pos_ubs{};
 
-    projector_bound<bound_calculation_mode::LOWER> neut_lb{};
-    projector_bound<bound_calculation_mode::UPPER> neut_ub{};
+    std::set<projector_bound<bound_calculation_mode::LOWER>> neut_lbs{};
+    std::set<projector_bound<bound_calculation_mode::UPPER>> neut_ubs{};
 
     explicit projected_potential_bounds() = default;
 
+    explicit projected_potential_bounds([[maybe_unused]] const bool self_projection) :
+            neg_lbs{std::set{projector_bound<bound_calculation_mode::LOWER>{0.0, sidb_charge_state::NEGATIVE}}},
+            neg_ubs{std::set{projector_bound<bound_calculation_mode::UPPER>{0.0, sidb_charge_state::NEGATIVE}}},
+            pos_lbs{std::set{projector_bound<bound_calculation_mode::LOWER>{0.0, sidb_charge_state::POSITIVE}}},
+            pos_ubs{std::set{projector_bound<bound_calculation_mode::UPPER>{0.0, sidb_charge_state::POSITIVE}}},
+            neut_lbs{std::set{projector_bound<bound_calculation_mode::LOWER>{0.0, sidb_charge_state::NEUTRAL}}},
+            neut_ubs{std::set{projector_bound<bound_calculation_mode::UPPER>{0.0, sidb_charge_state::NEUTRAL}}}
+    {}
+
     explicit projected_potential_bounds(const projector_bound<bound_calculation_mode::LOWER> lb,
                                         const projector_bound<bound_calculation_mode::UPPER> ub) :
-            neg_lb{lb},
-            neg_ub{ub},
-            pos_lb{lb},
-            pos_ub{ub},
-            neut_lb{lb},
-            neut_ub{ub}
+            neg_lbs{lb},
+            neg_ubs{ub},
+            pos_lbs{lb},
+            pos_ubs{ub},
+            neut_lbs{lb},
+            neut_ubs{ub}
     {}
 
     template <bound_calculation_mode bound, sidb_charge_state cs>
@@ -380,62 +328,83 @@ struct projected_potential_bounds
         {
             switch (cs)
             {
-                case sidb_charge_state::NEGATIVE: return neg_lb;
-                case sidb_charge_state::POSITIVE: return pos_lb;
-                default: return neut_lb;
+                case sidb_charge_state::NEGATIVE: return *neg_lbs.cbegin();
+                case sidb_charge_state::POSITIVE: return *pos_lbs.cbegin();
+                default: return *neut_lbs.cbegin();
             }
         }
         else
         {
             switch (cs)
             {
-                case sidb_charge_state::NEGATIVE: return neg_ub;
-                case sidb_charge_state::POSITIVE: return pos_ub;
-                default: return neut_ub;
+                case sidb_charge_state::NEGATIVE: return *neg_ubs.cbegin();
+                case sidb_charge_state::POSITIVE: return *pos_ubs.cbegin();
+                default: return *neut_ubs.cbegin();
             }
         }
     }
 
+    template <bound_calculation_mode bound>
+    void add_or_wipe_if_bottom(std::set<projector_bound<bound>>& bs, const projector_bound<bound> new_b) noexcept
+    {
+        // double equality for numeric limits seems to work well
+        if (new_b.V == potential_bound_bottom<bound>())
+        {
+            bs.clear();
+            return;
+        }
+
+        bs.emplace(new_b);
+    }
+
     template <bound_calculation_mode bound, sidb_charge_state cs>
-    projector_bound<bound> set(const projector_bound<bound>& new_bound) noexcept
+    void add(const projector_bound<bound>& new_bound) noexcept
     {
         if constexpr (bound == bound_calculation_mode::LOWER)
         {
             switch (cs)
             {
-                case sidb_charge_state::NEGATIVE: neg_lb = new_bound; break;
-                case sidb_charge_state::POSITIVE: pos_lb = new_bound; break;
-                default: neut_lb = new_bound;
+                case sidb_charge_state::NEGATIVE: add_or_wipe_if_bottom(neg_lbs, new_bound); break;
+                case sidb_charge_state::POSITIVE: add_or_wipe_if_bottom(pos_lbs, new_bound); break;
+                default: add_or_wipe_if_bottom(neut_lbs, new_bound);
             }
         }
         else
         {
             switch (cs)
             {
-                case sidb_charge_state::NEGATIVE: neg_ub = new_bound; break;
-                case sidb_charge_state::POSITIVE: pos_ub = new_bound; break;
-                default: neut_ub = new_bound;
+                case sidb_charge_state::NEGATIVE: add_or_wipe_if_bottom(neg_ubs, new_bound); break;
+                case sidb_charge_state::POSITIVE: add_or_wipe_if_bottom(pos_ubs, new_bound); break;
+                default: add_or_wipe_if_bottom(neut_ubs, new_bound);
             }
         }
     }
 };
 
+using sidb_cluster_charge_state_space      = std::unordered_set<sidb_cluster_charge_state, sidb_cluster_charge_state>;
+using sidb_cluster_charge_state_space_iter = sidb_cluster_charge_state_space::const_iterator;
+
 using sidb_clustering = std::set<sidb_cluster_ptr>;
 
 struct sidb_cluster
 {
-    const uint64_t uid{0};
+    using uid_t   = uint64_t;
+    using sidb_ix = uint64_t;
+    using m_conf  = uint64_t;
 
-    std::set<uint64_t> sidbs;
-    sidb_clustering    children;
-    sidb_cluster_ptr   parent{};
+    const uid_t uid{0};
+
+    std::set<sidb_ix> sidbs;
+    sidb_clustering   children;
+    sidb_cluster_ptr  parent{};
 
     //    interaction_bounds                       local_pot_bounds{};
-    std::unordered_map<uint64_t, projected_potential_bounds> proj_pot_bounds{};
+    std::unordered_map<uid_t, projected_potential_bounds> proj_pot_bounds{};
+    //    std::unordered_map<m_conf, std::projector_bound
 
     sidb_cluster_charge_state_space charge_space{};
 
-    explicit sidb_cluster(std::set<uint64_t> c, sidb_clustering v, uint64_t uid_) noexcept :
+    explicit sidb_cluster(std::set<sidb_ix> c, sidb_clustering v, uid_t uid_) noexcept :
             uid{c.size() == 1 ? *c.cbegin() : std::move(uid_)},
             sidbs{std::move(c)},
             children{std::move(v)}
