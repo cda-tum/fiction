@@ -249,39 +249,26 @@ static inline constexpr double potential_bound_bottom() noexcept
     }
 }
 
-// using potential_bounds            = std::array<double, 2>;
-// using cluster_charge_state_bounds = std::array<uint64_t, 2>;
-
-template <bound_calculation_mode bound>
-struct projector_bound
+struct potential_projection
 {
-    double   V{potential_bound_bottom<bound>()};
-    uint64_t M{};
+    double   V{0.0};
+    uint64_t M{0};
 
-    explicit projector_bound() = default;
+    explicit potential_projection() = default;
 
-    explicit projector_bound(const double init) : V{init} {}
-
-    explicit projector_bound(const uint64_t m) : M{m} {}
-
-    explicit projector_bound(const double init, const sidb_charge_state cs) :
+    //    explicit potential_projection(const uint64_t m) : M{m} {}
+    //
+    explicit potential_projection(const double init, const sidb_charge_state cs) :
             V{init},
             M{static_cast<uint64_t>(sidb_cluster_charge_state{cs})}
     {}
 
-    constexpr inline bool operator<(const projector_bound<bound>& other) const noexcept
+    constexpr inline bool operator<(const potential_projection& other) const noexcept
     {
-        if constexpr (bound == bound_calculation_mode::LOWER)
-        {
-            return V < other.V;
-        }
-        else
-        {
-            return V > other.V;
-        }
+        return V < other.V;
     }
 
-    constexpr inline projector_bound<bound>& operator+=(const projector_bound<bound>& other) noexcept
+    constexpr inline potential_projection& operator+=(const potential_projection& other) noexcept
     {
         V += other.V;
         M += other.M;  // addition should be fine
@@ -289,95 +276,75 @@ struct projector_bound
     }
 };
 
-struct projected_potential_bounds
+struct potential_projection_orders
 {
-    std::set<projector_bound<bound_calculation_mode::LOWER>> neg_lbs{};
-    std::set<projector_bound<bound_calculation_mode::UPPER>> neg_ubs{};
+    using proj_pot_order = std::set<potential_projection>;
 
-    std::set<projector_bound<bound_calculation_mode::LOWER>> pos_lbs{};
-    std::set<projector_bound<bound_calculation_mode::UPPER>> pos_ubs{};
+    // ix : onto_cs
+    // 0 : NEG ; 1 : NEUT ; 2 : POS
+    std::array<proj_pot_order, 3> orders{};
 
-    std::set<projector_bound<bound_calculation_mode::LOWER>> neut_lbs{};
-    std::set<projector_bound<bound_calculation_mode::UPPER>> neut_ubs{};
+    explicit potential_projection_orders() = default;
 
-    explicit projected_potential_bounds() = default;
-
-    explicit projected_potential_bounds([[maybe_unused]] const bool self_projection) :
-            neg_lbs{std::set{projector_bound<bound_calculation_mode::LOWER>{0.0, sidb_charge_state::NEGATIVE}}},
-            neg_ubs{std::set{projector_bound<bound_calculation_mode::UPPER>{0.0, sidb_charge_state::NEGATIVE}}},
-            pos_lbs{std::set{projector_bound<bound_calculation_mode::LOWER>{0.0, sidb_charge_state::POSITIVE}}},
-            pos_ubs{std::set{projector_bound<bound_calculation_mode::UPPER>{0.0, sidb_charge_state::POSITIVE}}},
-            neut_lbs{std::set{projector_bound<bound_calculation_mode::LOWER>{0.0, sidb_charge_state::NEUTRAL}}},
-            neut_ubs{std::set{projector_bound<bound_calculation_mode::UPPER>{0.0, sidb_charge_state::NEUTRAL}}}
+    explicit potential_projection_orders(const double inter_sidb_pot) :
+            orders{std::set{potential_projection{-inter_sidb_pot, sidb_charge_state::POSITIVE},
+                            potential_projection{0.0, sidb_charge_state::NEUTRAL},
+                            potential_projection{inter_sidb_pot, sidb_charge_state::NEGATIVE}}}
     {}
 
-    explicit projected_potential_bounds(const projector_bound<bound_calculation_mode::LOWER> lb,
-                                        const projector_bound<bound_calculation_mode::UPPER> ub) :
-            neg_lbs{lb},
-            neg_ubs{ub},
-            pos_lbs{lb},
-            pos_ubs{ub},
-            neut_lbs{lb},
-            neut_ubs{ub}
-    {}
-
-    template <bound_calculation_mode bound, sidb_charge_state cs>
-    projector_bound<bound> get() const noexcept
+    template <sidb_charge_state cs>
+    static constexpr inline uint8_t cs_ix() noexcept
     {
-        if constexpr (bound == bound_calculation_mode::LOWER)
-        {
-            switch (cs)
-            {
-                case sidb_charge_state::NEGATIVE: return *neg_lbs.cbegin();
-                case sidb_charge_state::POSITIVE: return *pos_lbs.cbegin();
-                default: return *neut_lbs.cbegin();
-            }
-        }
-        else
-        {
-            switch (cs)
-            {
-                case sidb_charge_state::NEGATIVE: return *neg_ubs.cbegin();
-                case sidb_charge_state::POSITIVE: return *pos_ubs.cbegin();
-                default: return *neut_ubs.cbegin();
-            }
-        }
-    }
-
-    template <bound_calculation_mode bound>
-    void add_or_wipe_if_bottom(std::set<projector_bound<bound>>& bs, const projector_bound<bound> new_b) noexcept
-    {
-        // double equality for numeric limits seems to work well
-        if (new_b.V == potential_bound_bottom<bound>())
-        {
-            bs.clear();
-            return;
-        }
-
-        bs.emplace(new_b);
+        return static_cast<uint8_t>(charge_state_to_sign(cs) + 1);
     }
 
     template <bound_calculation_mode bound, sidb_charge_state cs>
-    void add(const projector_bound<bound>& new_bound) noexcept
+    potential_projection get() const noexcept
     {
         if constexpr (bound == bound_calculation_mode::LOWER)
         {
-            switch (cs)
-            {
-                case sidb_charge_state::NEGATIVE: add_or_wipe_if_bottom(neg_lbs, new_bound); break;
-                case sidb_charge_state::POSITIVE: add_or_wipe_if_bottom(pos_lbs, new_bound); break;
-                default: add_or_wipe_if_bottom(neut_lbs, new_bound);
-            }
+            return *orders[cs_ix<cs>()].cbegin();
         }
         else
         {
-            switch (cs)
-            {
-                case sidb_charge_state::NEGATIVE: add_or_wipe_if_bottom(neg_ubs, new_bound); break;
-                case sidb_charge_state::POSITIVE: add_or_wipe_if_bottom(pos_ubs, new_bound); break;
-                default: add_or_wipe_if_bottom(neut_ubs, new_bound);
-            }
+            return *orders[cs_ix<cs>()].crbegin();
         }
+    }
+
+    template <bound_calculation_mode bound, sidb_charge_state cs>
+    void remove_bound() noexcept
+    {
+        if constexpr (bound == bound_calculation_mode::LOWER)
+        {
+            orders[cs_ix<cs>()].erase(orders[cs_ix<cs>()].cbegin());
+        }
+        else
+        {
+            orders[cs_ix<cs>()].erase(orders[cs_ix<cs>()].crbegin());
+        }
+    }
+
+    template <sidb_charge_state cs>
+    void remove_m_conf(const uint64_t m_conf) noexcept
+    {
+        for (uint8_t k = 0; k < 3; ++k)
+        {
+
+            orders[k].erase(*std::find_if(orders[k].cbegin(), orders[k].cend(),
+                                          [&](const potential_projection& pp) { return pp.M == m_conf; }));
+        }
+    }
+
+    template <sidb_charge_state cs>
+    void add(const potential_projection& pp) noexcept
+    {
+        orders[cs_ix<cs>()].emplace(pp);
+    }
+
+    template <sidb_charge_state cs>
+    void discard_onto_cs() noexcept
+    {
+        orders[cs_ix<cs>()].clear();
     }
 };
 
@@ -399,7 +366,7 @@ struct sidb_cluster
     sidb_cluster_ptr  parent{};
 
     //    interaction_bounds                       local_pot_bounds{};
-    std::unordered_map<uid_t, projected_potential_bounds> proj_pot_bounds{};
+    std::unordered_map<uid_t, potential_projection_orders> proj_pots{};
     //    std::unordered_map<m_conf, std::projector_bound
 
     sidb_cluster_charge_state_space charge_space{};
