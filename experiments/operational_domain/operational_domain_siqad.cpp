@@ -9,7 +9,7 @@
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/io/read_sqd_layout.hpp>           // reader for SiDB layouts
 #include <fiction/io/write_operational_domain.hpp>  // writer for operational domains
-#include <fiction/technology/sidb_lattice_layout.hpp>
+#include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/types.hpp>                    // pre-defined types suitable for the FCN domain
 #include <fiction/utils/truth_table_utils.hpp>  // truth tables helper functions
 

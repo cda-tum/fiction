@@ -9,7 +9,7 @@
 #include <fiction/io/read_fgl_layout.hpp>
 #include <fiction/io/read_fqca_layout.hpp>
 #include <fiction/io/read_sqd_layout.hpp>
-#include <fiction/technology/sidb_lattice_layout.hpp>
+#include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
@@ -217,10 +217,10 @@ class read_command : public command
                                     const auto layout_name = std::filesystem::path{filename}.stem().string();
 
                                     store<fiction::cell_layout_t>().extend() =
-                                        std::make_shared<fiction::sidb_lattice_layout<fiction::sidb_cell_clk_lyt>>(
+                                        std::make_shared<fiction::sidb_lattice<fiction::sidb_cell_clk_lyt>>(
                                             fiction::read_sqd_layout<
-                                                fiction::sidb_lattice_layout<fiction::sidb_cell_clk_lyt>>(
-                                                filename, fiction::lattice_orientation::SI_100, layout_name));
+                                                fiction::sidb_lattice<fiction::sidb_cell_clk_lyt>>(
+                                                filename, layout_name));
                                 }
                                 catch (const fiction::sqd_parsing_error& e)
                                 {

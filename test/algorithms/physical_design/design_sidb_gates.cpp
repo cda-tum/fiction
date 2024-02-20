@@ -9,12 +9,12 @@
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
-#include <fiction/technology/sidb_lattice_layout.hpp>
+#include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/technology/sidb_surface.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/truth_table_utils.hpp>
 #include <fiction/utils/layout_utils.hpp>
+#include <fiction/utils/truth_table_utils.hpp>
 
 #include <vector>
 
@@ -23,11 +23,11 @@ using namespace fiction;
 TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[design-sidb-gates]")
 {
 
-    using layout = sidb_lattice_layout<sidb_cell_clk_lyt_siqad>;
+    using layout = sidb_lattice<sidb_cell_clk_lyt_siqad>;
     using layout_cube =
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>>;
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>>;
     using layout_offset =
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
 
     layout lyt{};
 
@@ -104,7 +104,7 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
 
 TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[design-sidb-gates]")
 {
-    using layout = sidb_lattice_layout<sidb_cell_clk_lyt_siqad>;
+    using layout = sidb_lattice<sidb_cell_clk_lyt_siqad>;
 
     layout lyt{};
 
@@ -147,7 +147,7 @@ TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[
 
 TEST_CASE("Use FO2 Bestagon gate without SiDB at {17, 11, 0} and generate original one", "[design-sidb-gates]")
 {
-    using layout = sidb_lattice_layout<sidb_cell_clk_lyt_siqad>;
+    using layout = sidb_lattice<sidb_cell_clk_lyt_siqad>;
 
     layout lyt{};
 
@@ -232,7 +232,7 @@ TEST_CASE("Use FO2 Bestagon gate without SiDB at {17, 11, 0} and generate origin
 
 TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
 {
-    using lattice = sidb_lattice_layout<sidb_cell_clk_lyt_siqad>;
+    using lattice = sidb_lattice<sidb_cell_clk_lyt_siqad>;
 
     lattice lyt{};
 

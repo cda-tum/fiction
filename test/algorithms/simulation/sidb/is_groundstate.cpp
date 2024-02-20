@@ -10,14 +10,13 @@
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
-#include <fiction/technology/sidb_lattice_layout.hpp>
+#include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/types.hpp>
 
 using namespace fiction;
 
-TEMPLATE_TEST_CASE("check if ground state is found", "[is-ground-state]",
-                   (sidb_lattice_layout<sidb_cell_clk_lyt_siqad>),
-                   (charge_distribution_surface<sidb_lattice_layout<sidb_cell_clk_lyt_siqad>>))
+TEMPLATE_TEST_CASE("check if ground state is found", "[is-ground-state]", (sidb_lattice<sidb_cell_clk_lyt_siqad>),
+                   (charge_distribution_surface<sidb_lattice<sidb_cell_clk_lyt_siqad>>))
 {
     SECTION("layout with no SiDB placed")
     {

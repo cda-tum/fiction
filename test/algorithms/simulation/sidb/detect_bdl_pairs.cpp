@@ -5,12 +5,12 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp>
-#include <fiction/technology/sidb_lattice_layout.hpp>
+#include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/types.hpp>
 
 using namespace fiction;
 
-using lattice = sidb_lattice_layout<sidb_cell_clk_lyt_siqad>;
+using lattice = sidb_lattice<sidb_cell_clk_lyt_siqad>;
 
 TEST_CASE("Empty layout BDL detection", "[detect-bdl-pairs]")
 {

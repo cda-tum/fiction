@@ -14,7 +14,7 @@
 #include <fiction/technology/area.hpp>                   // area requirement calculations
 #include <fiction/technology/cell_technologies.hpp>      // cell implementations
 #include <fiction/technology/sidb_bestagon_library.hpp>  // a pre-defined SiDB gate library
-#include <fiction/technology/sidb_lattice_layout.hpp>
+#include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/technology/technology_mapping_library.hpp>  // pre-defined gate types for technology mapping
 #include <fiction/traits.hpp>                                 // traits for type-checking
 #include <fiction/types.hpp>                                  // pre-defined types suitable for the FCN domain

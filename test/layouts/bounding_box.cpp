@@ -8,7 +8,7 @@
 
 #include <fiction/layouts/bounding_box.hpp>
 #include <fiction/technology/cell_technologies.hpp>
-#include <fiction/technology/sidb_lattice_layout.hpp>
+#include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -231,7 +231,7 @@ TEST_CASE("2D bounding box for siqad layout", "[bounding-box]")
         lyt.assign_cell_type({-2, 4, 0}, sidb_cell_clk_lyt_siqad::technology::NORMAL);
         lyt.assign_cell_type({2, 4, 1}, sidb_cell_clk_lyt_siqad::technology::NORMAL);
 
-        const bounding_box_2d bb{sidb_lattice_layout{lyt}};
+        const bounding_box_2d bb{sidb_lattice{lyt}};
         const auto            nw = bb.get_min();
         const auto            se = bb.get_max();
 

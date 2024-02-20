@@ -12,7 +12,7 @@
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/cell_technologies.hpp>
-#include <fiction/technology/sidb_lattice_layout.hpp>
+#include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/types.hpp>
 
 using namespace fiction;
@@ -24,7 +24,7 @@ TEST_CASE("Single SiDB", "[assess-physical-population-stability]")
     layout lyt{};
     lyt.assign_cell_type({1, 1, 0}, sidb_technology::cell_type::NORMAL);
 
-    const sidb_lattice_layout lat{lyt};
+    const sidb_lattice lat{lyt};
 
     SECTION("Precision of distance_corresponding_to_potential is two")
     {
@@ -61,7 +61,7 @@ TEST_CASE("Three SiDBs with positive charge states", "[assess-physical-populatio
     lyt.assign_cell_type({1, 1, 1}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::NORMAL);
 
-    const sidb_lattice_layout lat{lyt};
+    const sidb_lattice lat{lyt};
 
     const auto result = assess_physical_population_stability(lat, params);
     REQUIRE(result.size() == 3);
@@ -135,7 +135,7 @@ TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]")
 
     lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
 
-    sidb_lattice_layout lat{lyt};
+    sidb_lattice lat{lyt};
 
     SECTION("no input specified")
     {
@@ -250,7 +250,7 @@ TEST_CASE("Bestagon CROSSING gate input 11, using siqad coordinates", "[assess-p
     lyt.assign_cell_type({2, 19, 0}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
 
-    const sidb_lattice_layout lat{lyt};
+    const sidb_lattice lat{lyt};
 
     CHECK(lyt.num_cells() == 27);
 
@@ -335,7 +335,7 @@ TEST_CASE("Bestagon CROSSING gate input 11, using cube coordinates", "[assess-ph
 
     CHECK(lyt.num_cells() == 27);
 
-    const sidb_lattice_layout lat{lyt};
+    const sidb_lattice lat{lyt};
 
     const auto result = assess_physical_population_stability(lat, params);
     REQUIRE(result.size() == 20);
@@ -418,7 +418,7 @@ TEST_CASE("Bestagon CROSSING gate input 11, using offset coordinates", "[assess-
 
     CHECK(lyt.num_cells() == 27);
 
-    const sidb_lattice_layout lat{lyt};
+    const sidb_lattice lat{lyt};
 
     const auto result = assess_physical_population_stability(lat, params);
     REQUIRE(result.size() == 20);

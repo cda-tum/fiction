@@ -8,7 +8,7 @@
 #include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/algorithms/simulation/sidb/quicksim.hpp>
 #include <fiction/technology/cell_technologies.hpp>
-#include <fiction/technology/sidb_lattice_layout.hpp>
+#include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/types.hpp>
 
 using namespace fiction;

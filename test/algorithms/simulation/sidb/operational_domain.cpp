@@ -7,7 +7,8 @@
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
-#include <fiction/technology/sidb_lattice_layout.hpp>
+#include <fiction/technology/cell_technologies.hpp>
+#include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/truth_table_utils.hpp>
 
@@ -70,7 +71,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
     // output perturber
     lyt.assign_cell_type({24, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-    const sidb_lattice_layout lat{lyt};
+    const sidb_lattice lat{lyt};
 
     sidb_simulation_parameters sim_params{};
     sim_params.base = 2;
@@ -454,7 +455,7 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
 
     lyt.assign_cell_type({10, 9, 1}, sidb_technology::cell_type::NORMAL);
 
-    const sidb_lattice_layout lat{lyt};
+    const sidb_lattice lat{lyt};
 
     sidb_simulation_parameters sim_params{};
     sim_params.base     = 2;
@@ -577,7 +578,7 @@ TEST_CASE("SiQAD's AND gate operational domain computation, using cube coordinat
     lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{10, 9, 1}),
                          sidb_technology::cell_type::NORMAL);
 
-    const sidb_lattice_layout lat{lyt};
+    const sidb_lattice lat{lyt};
 
     sidb_simulation_parameters sim_params{};
     sim_params.base     = 2;

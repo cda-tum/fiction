@@ -9,7 +9,7 @@
 #include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
-#include "fiction/technology/sidb_lattice_properties.hpp"
+#include "fiction/technology/sidb_lattice_types.hpp"
 #include "fiction/types.hpp"
 #include "fiction/utils/math_utils.hpp"
 
@@ -68,12 +68,11 @@ class write_location_and_ground_state_impl
             auto       sidbs        = ground_state.get_sidb_order();
 
             std::sort(sidbs.begin(), sidbs.end());
-            if constexpr (is_sidb_lattice_layout_v<Lyt, si_lattice_orientations>)
+            if constexpr (is_sidb_lattice_v<Lyt, typename Lyt::orientation>)
             {
                 for (const auto& sidb : sidbs)
                 {
-                    const auto pos = sidb_nm_position<Lyt>(sidb, ground_state.get_lattice_orientation(),
-                                                           ground_state.get_lattice_constants());
+                    const auto pos = sidb_nm_position<Lyt>(sidb);
                     os << fmt::format("{:.3f};{:.3f};", pos.first, pos.second);
                     for (const auto& valid_layout : ground_state_layouts)
                     {

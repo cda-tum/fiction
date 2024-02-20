@@ -8,7 +8,7 @@
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/sidb_defects.hpp"
-#include "fiction/technology/sidb_lattice_properties.hpp"
+#include "fiction/technology/sidb_lattice_types.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/name_utils.hpp"
 
@@ -45,17 +45,12 @@ template <typename Lyt>
 class read_sqd_layout_impl
 {
   public:
-    read_sqd_layout_impl(std::istream& s, const std::string_view& name) :
-            lyt{},
-            is{s}
+    read_sqd_layout_impl(std::istream& s, const std::string_view& name) : lyt{}, is{s}
     {
         set_name(lyt, name);
     }
 
-    read_sqd_layout_impl(Lyt& tgt, std::istream& s) :
-            lyt{tgt},
-            is{s}
-    {}
+    read_sqd_layout_impl(Lyt& tgt, std::istream& s) : lyt{tgt}, is{s} {}
 
     Lyt run()
     {
@@ -218,7 +213,7 @@ class read_sqd_layout_impl
      */
     void parse_lat_type(const tinyxml2::XMLElement* name)
     {
-        const auto *const text = name->GetText();
+        const auto* const text = name->GetText();
 
         if (text == nullptr)
         {
@@ -226,11 +221,17 @@ class read_sqd_layout_impl
         }
         if (std::string{text} == "Si(111) 1x1")
         {
-            lyt.assign_lattice_orientation(si_lattice_orientations::SI_111);
+            if (!has_same_lattice_orientation_v<Lyt, sidb_111_lattice>)
+            {
+                throw sqd_parsing_error("Error parsing SQD file: mismatch in lattice orientations");
+            }
         }
         else if (std::string{text} == "Si(100) 2x1")
         {
-            lyt.assign_lattice_orientation(si_lattice_orientations::SI_100);
+            if (!has_same_lattice_orientation_v<Lyt, sidb_100_lattice>)
+            {
+                throw sqd_parsing_error("Error parsing SQD file: mismatch in lattice orientations");
+            }
         }
         else
         {
@@ -434,12 +435,12 @@ class read_sqd_layout_impl
  *
  * @return The cell-level SiDB layout read from the sqd file.
  */
-template <typename Lyt, typename LatticeOrientation = si_lattice_orientations>
+template <typename Lyt>
 Lyt read_sqd_layout(std::istream& is, const std::string_view& name = "")
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
-    static_assert(is_sidb_lattice_layout_v<Lyt, LatticeOrientation>, "Lyt must be a lattice layout");
+    static_assert(is_sidb_lattice_v<Lyt, typename Lyt::orientation>, "Lyt must be a lattice layout");
 
     detail::read_sqd_layout_impl<Lyt> p{is, name};
 
@@ -463,12 +464,12 @@ Lyt read_sqd_layout(std::istream& is, const std::string_view& name = "")
  * @param is The input stream to read from.
  * @param orientation The lattice orientation.
  */
-template <typename Lyt, typename LatticeOrientation = si_lattice_orientations>
+template <typename Lyt>
 void read_sqd_layout(Lyt& lyt, std::istream& is)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
-    static_assert(is_sidb_lattice_layout_v<Lyt, LatticeOrientation>, "Lyt must be a lattice layout");
+    static_assert(is_sidb_lattice_v<Lyt, typename Lyt::orientation>, "Lyt must be a lattice layout");
 
     detail::read_sqd_layout_impl<Lyt> p{lyt, is};
 
@@ -488,13 +489,12 @@ void read_sqd_layout(Lyt& lyt, std::istream& is)
  * @param orientation The lattice orientation.
  * @param name The name to give to the generated layout.
  */
-template <typename Lyt, typename LatticeOrientation = si_lattice_orientations>
-Lyt read_sqd_layout(const std::string_view&   filename,
-                    const std::string_view&   name        = "")
+template <typename Lyt>
+Lyt read_sqd_layout(const std::string_view& filename, const std::string_view& name = "")
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
-    static_assert(is_sidb_lattice_layout_v<Lyt, LatticeOrientation>, "Lyt must be a lattice layout");
+    static_assert(is_sidb_lattice_v<Lyt, typename Lyt::orientation>, "Lyt must be a lattice layout");
 
     std::ifstream is{filename.data(), std::ifstream::in};
 
@@ -524,12 +524,12 @@ Lyt read_sqd_layout(const std::string_view&   filename,
  * @param filename The file name to open and read from.
  * @param orientation The lattice orientation.
  */
-template <typename Lyt, typename LatticeOrientation = si_lattice_orientations>
+template <typename Lyt>
 void read_sqd_layout(Lyt& lyt, const std::string_view& filename)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
-    static_assert(is_sidb_lattice_layout_v<Lyt, LatticeOrientation>, "Lyt must be a lattice layout");
+    static_assert(is_sidb_lattice_v<Lyt, typename Lyt::orientation>, "Lyt must be a lattice layout");
 
     std::ifstream is{filename.data(), std::ifstream::in};
 
@@ -538,7 +538,7 @@ void read_sqd_layout(Lyt& lyt, const std::string_view& filename)
         throw std::ifstream::failure("could not open file");
     }
 
-    read_sqd_layout<Lyt>(lyt,is);
+    read_sqd_layout<Lyt>(lyt, is);
     is.close();
 }
 

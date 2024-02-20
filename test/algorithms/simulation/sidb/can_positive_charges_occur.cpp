@@ -9,13 +9,12 @@
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
-#include <fiction/technology/sidb_lattice_layout.hpp>
+#include <fiction/technology/sidb_lattice.hpp>
 
 using namespace fiction;
 
-TEMPLATE_TEST_CASE(
-    "One BDL pair with one perturber", "[can-positive-charges-occur]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+TEMPLATE_TEST_CASE("One BDL pair with one perturber", "[can-positive-charges-occur]",
+                   (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
     TestType lyt{};
 
@@ -42,9 +41,8 @@ TEMPLATE_TEST_CASE(
     }
 }
 
-TEMPLATE_TEST_CASE(
-    "Y-shape SiDB OR gate with input 01, using siqad coordinates", "[can-positive-charges-occur]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+TEMPLATE_TEST_CASE("Y-shape SiDB OR gate with input 01, using siqad coordinates", "[can-positive-charges-occur]",
+                   (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
     TestType lyt{};
 
@@ -78,9 +76,8 @@ TEMPLATE_TEST_CASE(
     }
 }
 
-TEMPLATE_TEST_CASE(
-    "Y-shape SiDB OR gate with input 01, using cube coordinates", "[can-positive-charges-occur]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>>))
+TEMPLATE_TEST_CASE("Y-shape SiDB OR gate with input 01, using cube coordinates", "[can-positive-charges-occur]",
+                   (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>>))
 {
     TestType lyt{};
 
@@ -116,7 +113,7 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "Y-shape SiDB OR gate with input 01, using offset coordinates", "[can-positive-charges-occur]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>))
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>))
 {
     TestType lyt{};
 

@@ -3,9 +3,9 @@
 //
 
 #include <fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp>
-#include <fiction/technology/sidb_lattice_layout.hpp>
 #include <fiction/io/read_sqd_layout.hpp>
 #include <fiction/io/write_sqd_layout.hpp>
+#include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/types.hpp>
 
 #include <fmt/format.h>

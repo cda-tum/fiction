@@ -11,15 +11,15 @@
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/physical_constants.hpp>
-#include <fiction/technology/sidb_lattice_layout.hpp>
+#include <fiction/technology/sidb_lattice.hpp>
 
 using namespace fiction;
 
 TEMPLATE_TEST_CASE(
     "Empty layout ExGS simulation", "[exhaustive-ground-state-simulation]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
 
@@ -35,9 +35,9 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "Single SiDB ExGS simulation", "[exhaustive-ground-state-simulation]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
@@ -52,9 +52,9 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "ExGS simulation of a one BDL pair with one perturber", "[exhaustive-ground-state-simulation]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
 
@@ -71,9 +71,9 @@ TEMPLATE_TEST_CASE(
 TEMPLATE_TEST_CASE(
     "ExGS simulation of a two-pair BDL wire with one perturber, using siqad coordinates",
     "[exhaustive-ground-state-simulation]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
 
@@ -118,9 +118,9 @@ TEMPLATE_TEST_CASE(
 TEMPLATE_TEST_CASE(
     "ExGS simulation of a two-pair BDL wire with one perturber, using offset coordinates",
     "[exhaustive-ground-state-simulation]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>),
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>),
     (charge_distribution_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>>))
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>>))
 {
     TestType lyt{};
 
@@ -179,9 +179,9 @@ TEMPLATE_TEST_CASE(
 TEMPLATE_TEST_CASE(
     "ExGS simulation of a two-pair BDL wire with one perturber, using cube coordinates",
     "[exhaustive-ground-state-simulation]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>>),
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>>>))
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>>>))
 {
     TestType lyt{};
 
@@ -232,9 +232,9 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "ExGS simulation of a Y-shape SiDB arrangement", "[exhaustive-ground-state-simulation]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
 
@@ -270,9 +270,9 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "ExGS simulation of a Y-shape SiDB OR gate with input 01", "[exhaustive-ground-state-simulation]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
 
@@ -422,9 +422,9 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "ExGS simulation of positively charged SiDBs", "[exhaustive-ground-state-simulation]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);

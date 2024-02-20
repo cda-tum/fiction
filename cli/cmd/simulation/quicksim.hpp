@@ -110,7 +110,7 @@ class quicksim_command : public command
                 {
                     params.phys_params = physical_params;
 
-                    sim_result = fiction::quicksim(*lyt_ptr, params);
+                    sim_result = fiction::quicksim(fiction::sidb_lattice{*lyt_ptr}, params);
 
                     if (sim_result.charge_distributions.empty())
                     {

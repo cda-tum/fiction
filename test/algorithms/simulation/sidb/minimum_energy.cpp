@@ -14,7 +14,7 @@
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/charge_distribution_surface.hpp>
 #include <fiction/technology/sidb_charge_state.hpp>
-#include <fiction/technology/sidb_lattice_layout.hpp>
+#include <fiction/technology/sidb_lattice.hpp>
 
 #include <cmath>
 #include <limits>
@@ -22,8 +22,7 @@
 
 using namespace fiction;
 
-using lattice =
-    sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>;
+using lattice = sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>;
 
 TEST_CASE("Test minimum energy function", "[minimum-energy]")
 {

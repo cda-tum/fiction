@@ -14,7 +14,7 @@
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/technology/charge_distribution_surface.hpp>
 #include <fiction/technology/sidb_bestagon_library.hpp>
-#include <fiction/technology/sidb_lattice_layout.hpp>
+#include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -216,7 +216,7 @@ TEST_CASE("Print wire crossing cell-level layout", "[print-cell-level-layout]")
 TEST_CASE("Print empty charge layout", "[print-charge-layout]")
 {
     sidb_cell_clk_lyt_siqad lyt{{2, 2}, "Empty"};
-    sidb_lattice_layout     lat{lyt};
+    sidb_lattice            lat{lyt};
 
     const charge_distribution_surface layout{lat};
 
@@ -239,7 +239,7 @@ TEST_CASE("layout which is sidb_surface and charge distribution surface but empt
 {
     const sidb_surface<sidb_cell_clk_lyt_siqad> sidb_layout{{2, 2}};
 
-    const sidb_lattice_layout lat{sidb_layout};
+    const sidb_lattice lat{sidb_layout};
 
     const charge_distribution_surface layout{lat};
 
@@ -268,7 +268,7 @@ TEST_CASE("Print Bestagon OR-gate without defect", "[print-charge-layout]")
 
     const auto lyt = convert_to_siqad_coordinates(apply_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library>(layout));
 
-    const auto lat = sidb_lattice_layout{lyt};
+    const auto lat = sidb_lattice{lyt};
 
     charge_distribution_surface cl{lat, sidb_simulation_parameters{3, -0.32}, sidb_charge_state::NEGATIVE};
 
@@ -432,7 +432,7 @@ TEST_CASE("Print Bestagon OR-gate with defect", "[print-charge-layout]")
     const auto lyt = sidb_surface{
         convert_to_siqad_coordinates(apply_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library>(layout))};
 
-    const sidb_lattice_layout lat{lyt};
+    const sidb_lattice lat{lyt};
 
     charge_distribution_surface cl{lat, sidb_simulation_parameters{3, -0.32}, sidb_charge_state::NEGATIVE};
 

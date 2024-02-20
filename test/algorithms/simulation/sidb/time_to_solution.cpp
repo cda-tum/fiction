@@ -14,7 +14,7 @@
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/physical_constants.hpp>
-#include <fiction/technology/sidb_lattice_layout.hpp>
+#include <fiction/technology/sidb_lattice.hpp>
 
 #include <cmath>
 #include <limits>
@@ -23,9 +23,9 @@ using namespace fiction;
 
 TEMPLATE_TEST_CASE(
     "time to solution test", "[time-to-solution]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
 
     TestType lyt{};

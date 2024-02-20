@@ -17,7 +17,7 @@
 #include <fiction/technology/cell_technologies.hpp>      // cell implementations
 #include <fiction/technology/sidb_bestagon_library.hpp>  // a pre-defined SiDB gate library
 #include <fiction/technology/sidb_defects.hpp>           // SiDB defect classes
-#include <fiction/technology/sidb_lattice_layout.hpp>
+#include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/technology/sidb_surface.hpp>                // H-Si(100) 2x1 surface model
 #include <fiction/technology/sidb_surface_analysis.hpp>       // SiDB surface analysis
 #include <fiction/technology/technology_mapping_library.hpp>  // pre-defined gate types for technology mapping

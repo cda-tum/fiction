@@ -175,7 +175,7 @@ using sidb_defect_cell_clk_lyt_siqad     = sidb_surface<sidb_cell_clk_lyt_siqad>
 using sidb_defect_cell_clk_lyt_siqad_ptr = std::shared_ptr<sidb_defect_cell_clk_lyt_siqad>;
 
 using cell_layout_t = std::variant<qca_cell_clk_lyt_ptr, stacked_qca_cell_clk_lyt_ptr, inml_cell_clk_lyt_ptr,
-                                   sidb_cell_clk_lyt_ptr, cds_sidb_cell_clk_lyt_ptr>;
+                                   sidb_cell_clk_lyt_ptr>;
 
 }  // namespace fiction
 

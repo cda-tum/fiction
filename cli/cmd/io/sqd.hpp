@@ -7,7 +7,7 @@
 
 #include <fiction/io/write_sqd_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
-#include <fiction/technology/sidb_lattice_layout.hpp>
+#include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/name_utils.hpp>
@@ -64,7 +64,7 @@ class sqd_command : public command
 
             if constexpr (fiction::has_sidb_technology_v<Lyt>)
             {
-                fiction::write_sqd_layout(fiction::sidb_lattice_layout{*lyt_ptr}, filename);
+                fiction::write_sqd_layout(fiction::sidb_lattice{*lyt_ptr}, filename);
             }
             else
             {

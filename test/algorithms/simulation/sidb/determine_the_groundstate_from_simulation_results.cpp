@@ -10,12 +10,12 @@
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/charge_distribution_surface.hpp>
 #include <fiction/technology/sidb_charge_state.hpp>
-#include <fiction/technology/sidb_lattice_layout.hpp>
+#include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/types.hpp>
 
 using namespace fiction;
 
-using lattice = sidb_lattice_layout<sidb_cell_clk_lyt>;
+using lattice = sidb_lattice<sidb_cell_clk_lyt>;
 
 TEST_CASE("Determine the groundstate from simulation results", "[determine-the-groundstate-from-simulation-results]")
 {

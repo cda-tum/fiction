@@ -6,7 +6,7 @@
 
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
-#include <fiction/technology/sidb_lattice_layout.hpp>
+#include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/utils/truth_table_utils.hpp>
 
@@ -35,7 +35,7 @@ TEST_CASE("SiQAD's AND gate with input BDL pairs of different size", "[is-operat
 
     lyt.assign_cell_type({10, 9, 1}, sidb_technology::cell_type::NORMAL);
 
-    const sidb_lattice_layout lat{lyt};
+    const sidb_lattice lat{lyt};
 
     CHECK(is_operational(lat, std::vector<tt>{create_and_tt()},
                          is_operational_params{sidb_simulation_parameters{2, -0.28}})
@@ -79,7 +79,7 @@ TEST_CASE("Bestagon FO2 gate", "[is-operational]")
     lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({2, 19, 0}, sidb_technology::cell_type::NORMAL);
 
-    const sidb_lattice_layout lat{lyt};
+    const sidb_lattice lat{lyt};
 
     SECTION("using QuickExact")
     {
@@ -154,7 +154,7 @@ TEST_CASE("Bestagon CROSSING gate", "[is-operational]")
 
     CHECK(lyt.num_cells() == 29);
 
-    const sidb_lattice_layout lat{lyt};
+    const sidb_lattice lat{lyt};
 
     CHECK(
         is_operational(lat, create_crossing_wire_tt(),
@@ -203,7 +203,7 @@ TEST_CASE("Bestagon AND gate", "[is-operational]")
 
     CHECK(lyt.num_cells() == 23);
 
-    const sidb_lattice_layout lat{lyt};
+    const sidb_lattice lat{lyt};
 
     CHECK(
         is_operational(lat, std::vector<tt>{create_and_tt()},
@@ -240,7 +240,7 @@ TEST_CASE("Not working diagonal Wire", "[is-operational]")
 
     lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
 
-    const sidb_lattice_layout lat{lyt};
+    const sidb_lattice lat{lyt};
 
     CHECK(
         is_operational(lat, std::vector<tt>{create_id_tt()},

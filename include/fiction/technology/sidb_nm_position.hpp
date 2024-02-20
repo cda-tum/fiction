@@ -8,7 +8,7 @@
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/layouts/cell_level_layout.hpp"
 #include "fiction/layouts/coordinates.hpp"
-#include "fiction/technology/sidb_lattice_properties.hpp"
+#include "fiction/technology/sidb_lattice_types.hpp"
 #include "fiction/traits.hpp"
 
 #include <cassert>
@@ -26,27 +26,25 @@ namespace fiction
  * @param lattice_constants The lattice constants.
  * @return A pair representing the `(x,y)` position of `c` in nanometers from the layout origin.
  */
-template <typename Lyt, typename LatticeOrientation = si_lattice_orientations>
-[[nodiscard]] constexpr std::pair<double, double>
-sidb_nm_position(const cell<Lyt>& c, const LatticeOrientation& orientation = si_lattice_orientations::SI_100,
-                 const si_lattice_constants& lattice_constants = si_lattice_constants{}) noexcept
+template <typename Lyt>
+[[nodiscard]] constexpr std::pair<double, double> sidb_nm_position(const cell<Lyt>& c) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(is_sidb_lattice_layout_v<Lyt, LatticeOrientation>, "Lyt is not an SiDB layout");
+    static_assert(is_sidb_lattice_v<Lyt, typename Lyt::cell>, "Lyt is not an SiDB layout");
 
     if constexpr (has_siqad_coord_v<Lyt>)
     {
-        if (orientation == si_lattice_orientations::SI_100)
+        if (has_same_lattice_orientation_v<Lyt, sidb_100_lattice>)
         {
-            const auto x = (c.x * lattice_constants.lat_a_100 + c.z * lattice_constants.lat_c_100.first) * 0.1;
-            const auto y = (c.y * lattice_constants.lat_b_100 + c.z * lattice_constants.lat_c_100.second) * 0.1;
+            const auto x = (c.x * sidb_100_lattice::LAT_A + c.z * sidb_100_lattice::LAT_C.first) * 0.1;
+            const auto y = (c.y * sidb_100_lattice::LAT_B + c.z * sidb_100_lattice::LAT_C.second) * 0.1;
             return {x, y};
         }
-        else if (orientation == si_lattice_orientations::SI_111)
+        else if (has_same_lattice_orientation_v<Lyt, sidb_111_lattice>)
         {
-            const auto x = (c.x * lattice_constants.lat_a_111 + c.z * lattice_constants.lat_c_111.first) * 0.1;
-            const auto y = (c.y * lattice_constants.lat_b_111 + c.z * lattice_constants.lat_c_111.second) * 0.1;
+            const auto x = (c.x * sidb_111_lattice::LAT_A + c.z * sidb_111_lattice::LAT_C.first) * 0.1;
+            const auto y = (c.y * sidb_111_lattice::LAT_B + c.z * sidb_111_lattice::LAT_C.second) * 0.1;
             return {x, y};
         }
         else
@@ -59,22 +57,18 @@ sidb_nm_position(const cell<Lyt>& c, const LatticeOrientation& orientation = si_
     {
         const auto cell_in_siqad = siqad::to_siqad_coord(c);
 
-        if (orientation == si_lattice_orientations::SI_100)
+        if (has_same_lattice_orientation_v<Lyt, sidb_100_lattice>)
         {
-            const auto x =
-                (cell_in_siqad.x * lattice_constants.lat_a_100 + c.z * lattice_constants.lat_c_100.first) * 0.1;
+            const auto x = (cell_in_siqad.x * sidb_100_lattice::LAT_A + c.z * sidb_100_lattice::LAT_C.first) * 0.1;
             const auto y =
-                (cell_in_siqad.y * lattice_constants.lat_b_100 + cell_in_siqad.z * lattice_constants.lat_c_100.second) *
-                0.1;
+                (cell_in_siqad.y * sidb_100_lattice::LAT_B + cell_in_siqad.z * sidb_100_lattice::LAT_C.second) * 0.1;
             return {x, y};
         }
-        else if (orientation == si_lattice_orientations::SI_111)
+        else if (has_same_lattice_orientation_v<Lyt, sidb_111_lattice>)
         {
-            const auto x =
-                (cell_in_siqad.x * lattice_constants.lat_a_111 + c.z * lattice_constants.lat_c_111.first) * 0.1;
+            const auto x = (cell_in_siqad.x * sidb_111_lattice::LAT_A + c.z * sidb_111_lattice::LAT_C.first) * 0.1;
             const auto y =
-                (cell_in_siqad.y * lattice_constants.lat_b_111 + cell_in_siqad.z * lattice_constants.lat_c_111.second) *
-                0.1;
+                (cell_in_siqad.y * sidb_111_lattice::LAT_B + cell_in_siqad.z * sidb_111_lattice::LAT_C.second) * 0.1;
             return {x, y};
         }
         else

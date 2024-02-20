@@ -13,7 +13,7 @@
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/cell_technologies.hpp>
-#include <fiction/technology/sidb_lattice_layout.hpp>
+#include <fiction/technology/sidb_lattice.hpp>
 
 #include <any>
 #include <chrono>
@@ -159,7 +159,7 @@ TEST_CASE("Write empty simulation result", "[sqd-sim-result]")
     using namespace std::chrono_literals;
 
     using lattice =
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>;
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>;
 
     sidb_simulation_result<lattice> sim_result{};
 
@@ -290,7 +290,7 @@ TEST_CASE("Write simulation result with ExGS simulation", "[sqd-sim-result]")
 
     const sidb_simulation_parameters params{2, -0.32};
 
-    const sidb_lattice_layout lat{lyt};
+    const sidb_lattice lat{lyt};
 
     auto sim_result = exhaustive_ground_state_simulation(lat, params);
 
@@ -351,7 +351,7 @@ TEST_CASE("Write simulation result with ExGS simulation and positive DBs", "[sqd
 
     const sidb_simulation_parameters params{3, -0.32};
 
-    const sidb_lattice_layout lat{lyt};
+    const sidb_lattice lat{lyt};
 
     auto sim_result = exhaustive_ground_state_simulation(lat, params);
 

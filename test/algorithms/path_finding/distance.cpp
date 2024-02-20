@@ -11,7 +11,7 @@
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
-#include <fiction/technology/sidb_lattice_layout.hpp>
+#include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/types.hpp>
 
 #include <cmath>
@@ -463,7 +463,7 @@ TEST_CASE("a_star distance functor", "[distance]")
 TEST_CASE("SiDB nanometer distance", "[distance]")
 {
     using namespace Catch::Matchers;
-    using lattice = sidb_lattice_layout<sidb_cell_clk_lyt_siqad>;
+    using lattice = sidb_lattice<sidb_cell_clk_lyt_siqad>;
     const lattice layout{};
 
     CHECK_THAT(sidb_nanometer_distance(layout, {0, 0}, {0, 0}), WithinAbs(0.0, 0.00001));
@@ -475,32 +475,32 @@ TEST_CASE("SiDB nanometer distance", "[distance]")
 
     CHECK_THAT(sidb_nanometer_distance(layout, {0, 1, 1}, {0, 1, 1}), WithinAbs(0.0, 0.00001));
     CHECK_THAT(sidb_nanometer_distance(layout, {0, 0}, {1, 0}),
-               WithinAbs(si_lattice_constants{}.lat_a_100 * 0.1, 0.00001));
+               WithinAbs(sidb_100_lattice::LAT_A * 0.1, 0.00001));
     CHECK_THAT(sidb_nanometer_distance(layout, {0, 0}, {0, 1}),
-               WithinAbs(si_lattice_constants{}.lat_b_100 * 0.1, 0.00001));
+               WithinAbs(sidb_100_lattice::LAT_B * 0.1, 0.00001));
     CHECK_THAT(sidb_nanometer_distance(layout, {0, 0}, {0, 0, 1}),
-               WithinAbs(si_lattice_constants{}.lat_c_100.second * 0.1, 0.00001));
+               WithinAbs(sidb_100_lattice::LAT_C.second * 0.1, 0.00001));
 
     CHECK_THAT(sidb_nanometer_distance(layout, {0, 0}, {-1, 0}),
-               WithinAbs(si_lattice_constants{}.lat_a_100 * 0.1, 0.00001));
+               WithinAbs(sidb_100_lattice::LAT_A * 0.1, 0.00001));
     CHECK_THAT(sidb_nanometer_distance(layout, {0, 0}, {0, -1}),
-               WithinAbs(si_lattice_constants{}.lat_b_100 * 0.1, 0.00001));
+               WithinAbs(sidb_100_lattice::LAT_B * 0.1, 0.00001));
     CHECK_THAT(sidb_nanometer_distance(layout, {0, 0}, {0, 0, -1}),
-               WithinAbs(si_lattice_constants{}.lat_c_100.second * 0.1, 0.00001));
+               WithinAbs(sidb_100_lattice::LAT_C.second * 0.1, 0.00001));
 
     CHECK_THAT(
         sidb_nanometer_distance(layout, {0, 0}, {0, 2, 1}),
-        WithinAbs(si_lattice_constants{}.lat_b_100 * 0.2 + si_lattice_constants{}.lat_c_100.second * 0.1, 0.00001));
+        WithinAbs(sidb_100_lattice::LAT_B * 0.2 + sidb_100_lattice::LAT_C.second * 0.1, 0.00001));
     CHECK_THAT(
         sidb_nanometer_distance(layout, {0, 0}, {0, -2, 1}),
-        WithinAbs(si_lattice_constants{}.lat_b_100 * 0.2 - si_lattice_constants{}.lat_c_100.second * 0.1, 0.00001));
+        WithinAbs(sidb_100_lattice::LAT_B * 0.2 - sidb_100_lattice::LAT_C.second * 0.1, 0.00001));
     CHECK_THAT(
         sidb_nanometer_distance(layout, {0, -2, 1}, {0, 0}),
-        WithinAbs(si_lattice_constants{}.lat_b_100 * 0.2 - si_lattice_constants{}.lat_c_100.second * 0.1, 0.00001));
+        WithinAbs(sidb_100_lattice::LAT_B * 0.2 - sidb_100_lattice::LAT_C.second * 0.1, 0.00001));
 
     CHECK_THAT(
         sidb_nanometer_distance(layout, {0, 2, 1}, {-5, 1, 0}),
-        WithinAbs(std::hypot(si_lattice_constants{}.lat_a_100 * 0.5,
-                             si_lattice_constants{}.lat_b_100 * 0.1 + si_lattice_constants{}.lat_c_100.second * 0.1),
+        WithinAbs(std::hypot(sidb_100_lattice::LAT_A * 0.5,
+                             sidb_100_lattice::LAT_B * 0.1 + sidb_100_lattice::LAT_C.second * 0.1),
                   0.00001));
 }

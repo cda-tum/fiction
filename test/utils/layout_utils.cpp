@@ -8,7 +8,7 @@
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
-#include <fiction/technology/sidb_lattice_layout.hpp>
+#include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/layout_utils.hpp>
 
@@ -183,7 +183,7 @@ TEST_CASE("Convert SiQAD layout (sidb lattice layout) to offset::ucoord_t coordi
 {
     SECTION("empty layout")
     {
-        const sidb_lattice_layout<sidb_cell_clk_lyt_siqad> lyt{};
+        const sidb_lattice<sidb_cell_clk_lyt_siqad> lyt{};
 
         auto lyt_transformed = convert_to_fiction_coordinates<sidb_cell_clk_lyt>(lyt);
 

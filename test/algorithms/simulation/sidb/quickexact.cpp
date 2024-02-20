@@ -16,7 +16,7 @@
 #include <fiction/technology/physical_constants.hpp>
 #include <fiction/technology/sidb_charge_state.hpp>
 #include <fiction/technology/sidb_defects.hpp>
-#include <fiction/technology/sidb_lattice_layout.hpp>
+#include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/technology/sidb_surface.hpp>
 #include <fiction/utils/math_utils.hpp>
 
@@ -26,9 +26,9 @@ using namespace fiction;
 
 TEMPLATE_TEST_CASE(
     "Empty layout QuickExact simulation", "[quickexact]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
 
@@ -126,9 +126,8 @@ TEMPLATE_TEST_CASE(
 TEMPLATE_TEST_CASE(
     "four SiDBs QuickExact simulation with one negatively charge defect (changed epsilon_r) in proximity",
     "[quickexact]",
-    (sidb_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>),
-    (charge_distribution_surface<sidb_lattice_layout<
+    (sidb_surface<sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>),
+    (charge_distribution_surface<sidb_lattice<
          sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>>))
 {
     TestType lyt{};
@@ -154,9 +153,8 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "Single SiDB QuickExact simulation with one highly negatively charge defect in proximity", "[quickexact]",
-    (sidb_lattice_layout<
-        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>),
-    (charge_distribution_surface<sidb_lattice_layout<
+    (sidb_lattice<sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>),
+    (charge_distribution_surface<sidb_lattice<
          sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>>))
 {
     TestType lyt{};
@@ -176,9 +174,8 @@ TEMPLATE_TEST_CASE(
 TEMPLATE_TEST_CASE(
     "Single SiDB QuickExact simulation with one highly negatively charge defect in proximity but with high screening",
     "[quickexact]",
-    (sidb_lattice_layout<
-        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>),
-    (charge_distribution_surface<sidb_lattice_layout<
+    (sidb_lattice<sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>),
+    (charge_distribution_surface<sidb_lattice<
          sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>>))
 {
     TestType lyt{};
@@ -198,9 +195,8 @@ TEMPLATE_TEST_CASE(
 TEMPLATE_TEST_CASE(
     "Single SiDB QuickExact simulation with two highly negatively and oppositely charged defects in proximity",
     "[quickexact]",
-    (sidb_lattice_layout<
-        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>),
-    (charge_distribution_surface<sidb_lattice_layout<
+    (sidb_lattice<sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>),
+    (charge_distribution_surface<sidb_lattice<
          sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>>))
 {
     TestType lyt{};
@@ -222,9 +218,9 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "Single SiDB QuickExact simulation with local external potential", "[quickexact]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
@@ -241,9 +237,9 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "Single SiDB QuickExact simulation with local external potential (high)", "[quickexact]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
@@ -259,9 +255,9 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "Single SiDB QuickExact simulation with global external potential", "[quickexact]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
@@ -278,9 +274,9 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "Single SiDB QuickExact simulation with global external potential (high)", "[quickexact]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
@@ -295,9 +291,9 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "Single SiDB QuickExact simulation with global external potential (high, positive)", "[quickexact]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
@@ -312,9 +308,9 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "QuickExact simulation of a BDL pair", "[quickexact]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
@@ -347,9 +343,9 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "QuickExact simulation of a two-pair BDL wire with one perturber", "[quickexact]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
 
@@ -390,9 +386,8 @@ TEMPLATE_TEST_CASE(
                Catch::Matchers::WithinAbs(0.2460493219, physical_constants::POP_STABILITY_ERR));
 }
 
-TEMPLATE_TEST_CASE(
-    "QuickExact simulation of a one-pair BDL wire with two perturbers", "[quickexact]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+TEMPLATE_TEST_CASE("QuickExact simulation of a one-pair BDL wire with two perturbers", "[quickexact]",
+                   (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
     TestType lyt{};
 
@@ -431,9 +426,9 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "QuickExact simulation of a Y-shape SiDB arrangement", "[quickexact]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
 
@@ -470,9 +465,9 @@ TEMPLATE_TEST_CASE(
 TEMPLATE_TEST_CASE(
     "QuickExact simulation of a Y-shape SiDB OR gate with input 01, check energy and charge distribution",
     "[quickexact]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
 
@@ -513,9 +508,9 @@ TEMPLATE_TEST_CASE(
     "QuickExact simulation of a Y-shape SiDB OR gate with input 01, check energy and charge "
     "distribution, using offset coordinates",
     "[quickexact]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>),
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>),
     (charge_distribution_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>>))
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>>))
 {
     TestType lyt{};
 
@@ -572,10 +567,9 @@ TEMPLATE_TEST_CASE(
 TEMPLATE_TEST_CASE(
     "QuickExact simulation of a Y-shape SiDB OR gate with input 01, check energy and charge "
     "distribution, using offset coordinates",
-    "[quickexact]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>>),
+    "[quickexact]", (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>>>))
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>>>))
 {
     TestType lyt{};
 
@@ -625,9 +619,9 @@ TEMPLATE_TEST_CASE(
     "QuickExact simulation of a Y-shape SiDB OR gate with input 01 and local external potential at perturber, using "
     "siqad coordinates",
     "[quickexact]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
 
@@ -663,10 +657,9 @@ TEMPLATE_TEST_CASE(
 TEMPLATE_TEST_CASE(
     "QuickExact simulation of a Y-shape SiDB OR gate with input 01 and local external potential at perturber, using "
     "cube coordinates",
-    "[quickexact]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>>),
+    "[quickexact]", (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>>>))
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>>>))
 {
     TestType lyt{};
     lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{6, 2, 0}), TestType::cell_type::NORMAL);
@@ -708,9 +701,9 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "QuickExact simulation  of a Y-shape SiDB OR gate with input 01 and global external potential", "[quickexact]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
 
@@ -746,9 +739,9 @@ TEMPLATE_TEST_CASE(
 TEMPLATE_TEST_CASE(
     "QuickExact simulation of a Y-shape SiDB OR gate with input 01 and global external potential (high)",
     "[quickexact]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
 
@@ -783,9 +776,9 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "QuickExact simulation of four SiDBs (far away)", "[quickexact]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
 
@@ -809,9 +802,8 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "QuickExact with one SiDB and one negatively charged defect in proximity", "[quickexact]",
-    (sidb_lattice_layout<
-        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>),
-    (charge_distribution_surface<sidb_lattice_layout<
+    (sidb_lattice<sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>),
+    (charge_distribution_surface<sidb_lattice<
          sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>>))
 {
     TestType lyt{};
@@ -831,9 +823,8 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "QuickExact simulation  of four SiDBs (far away) with one negatively charged defects in proximity", "[quickexact]",
-    (sidb_lattice_layout<
-        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>),
-    (charge_distribution_surface<sidb_lattice_layout<
+    (sidb_lattice<sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>),
+    (charge_distribution_surface<sidb_lattice<
          sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>>))
 {
     TestType lyt{};
@@ -859,9 +850,8 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "QuickExact simulation of four SiDBs (far away) with two negatively charged defects in proximity", "[quickexact]",
-    (sidb_lattice_layout<
-        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>),
-    (charge_distribution_surface<sidb_lattice_layout<
+    (sidb_lattice<sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>),
+    (charge_distribution_surface<sidb_lattice<
          sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>>))
 {
     TestType lyt{};
@@ -893,9 +883,8 @@ TEMPLATE_TEST_CASE(
 TEMPLATE_TEST_CASE(
     "QuickExact simulation of four SiDBs (far away) with one negatively and positively charged defect in proximity",
     "[quickexact]",
-    (sidb_lattice_layout<
-        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>),
-    (charge_distribution_surface<sidb_lattice_layout<
+    (sidb_lattice<sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>),
+    (charge_distribution_surface<sidb_lattice<
          sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>>))
 {
     TestType lyt{};
@@ -925,9 +914,9 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "Seven randomly distributed DBs, test if dependent cell calculation works correctly", "[quickexact]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
 
@@ -959,9 +948,9 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "three DBs next to each other", "[quickexact]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
 
@@ -988,9 +977,9 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "three DBs next to each other, small mu-", "[quickexact]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
 
@@ -1013,9 +1002,9 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "four DBs next to each other, small mu-", "[quickexact]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
 
@@ -1036,9 +1025,9 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "seven DBs next to each other, small mu-", "[quickexact]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
 
@@ -1062,9 +1051,9 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "7 DBs next to each other (positively charged DBs occur)", "[quickexact]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
 
@@ -1088,9 +1077,9 @@ TEMPLATE_TEST_CASE(
 TEMPLATE_TEST_CASE(
     "7 DBs next to each other | only one physically valid charge distribution with only one neutrally charged DB",
     "[quickexact]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
 
@@ -1113,9 +1102,9 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "4 DBs next to each other (positively charged DBs occur)", "[quickexact]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
 
@@ -1133,9 +1122,9 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "5 DBs next to each other (positively charged DBs occur)", "[quickexact]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
 
@@ -1157,9 +1146,9 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "4 DBs close to each other", "[quickexact]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
 
@@ -1177,9 +1166,9 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "3 DBs next to each other (positively charged DBs occur)", "[quickexact]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
 
     TestType lyt{};
@@ -1200,9 +1189,9 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "3 DBs next to each other with automatic base number detection", "[quickexact]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
 
@@ -1228,9 +1217,9 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "13 DBs which are all negatively charged", "[quickexact]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
 
@@ -1270,9 +1259,9 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "QuickExact simulation of a Y-shape SiDB OR gate with input 01", "[quickexact]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
 
@@ -1454,9 +1443,9 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "QuickExact simulation of a 3 DB Wire", "[quickexact]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
 
@@ -1689,9 +1678,9 @@ TEMPLATE_TEST_CASE(
 TEMPLATE_TEST_CASE(
     "QuickExact simulation of two SiDBs placed directly next to each other with non-realistic relative permittivity",
     "[quickexact]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
@@ -1720,9 +1709,9 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "QuickExact simulation of positively charged SiDBs", "[quickexact]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
@@ -1760,12 +1749,12 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "QuickExact gate simulation of Si-111 surface", "[quickexact]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
-    (charge_distribution_surface<
-        sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>,
+                  sidb_111_lattice>),
+    (charge_distribution_surface<sidb_lattice<
+         cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>, sidb_111_lattice>>))
 {
     TestType lyt{};
-    lyt.assign_lattice_orientation(si_lattice_orientations::SI_111);
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({1, 1, 1}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({2, 2, 1}, TestType::cell_type::NORMAL);
@@ -1779,7 +1768,7 @@ TEMPLATE_TEST_CASE(
 
     lyt.assign_cell_type({4, 14, 0}, TestType::cell_type::NORMAL);
 
-    const sidb_lattice_layout lattice{lyt};
+    const sidb_lattice lattice{lyt};
 
     const quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.32, 5.6, 5}};
 

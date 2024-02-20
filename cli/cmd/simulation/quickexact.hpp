@@ -8,7 +8,7 @@
 #include <fiction/algorithms/simulation/sidb/minimum_energy.hpp>
 #include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
-#include <fiction/technology/sidb_lattice_layout.hpp>
+#include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/name_utils.hpp>
@@ -103,7 +103,7 @@ class quickexact_command : public command
                 {
                     params.physical_parameters = physical_params;
 
-                    sim_result = fiction::quickexact(*lyt_ptr, params);
+                    sim_result = fiction::quickexact(fiction::sidb_lattice{*lyt_ptr}, params);
 
                     if (sim_result.charge_distributions.empty())
                     {

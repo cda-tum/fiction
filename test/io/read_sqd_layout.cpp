@@ -10,7 +10,7 @@
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/cell_technologies.hpp>
-#include <fiction/technology/sidb_lattice_layout.hpp>
+#include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/technology/sidb_surface.hpp>
 #include <fiction/traits.hpp>
 
@@ -95,7 +95,7 @@ TEST_CASE("Read single-dot SQD layout", "[sqd]")
     };
 
     using sidb_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
-    check(read_sqd_layout<sidb_lattice_layout<sidb_layout>>(layout_stream));
+    check(read_sqd_layout<sidb_lattice<sidb_layout, sidb_111_lattice>>(layout_stream));
 }
 
 //TEST_CASE("Read multi-dot SQD layout", "[sqd]")

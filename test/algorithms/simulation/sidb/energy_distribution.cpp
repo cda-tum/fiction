@@ -12,15 +12,14 @@
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/charge_distribution_surface.hpp>
 #include <fiction/technology/sidb_charge_state.hpp>
-#include <fiction/technology/sidb_lattice_layout.hpp>
+#include <fiction/technology/sidb_lattice.hpp>
 
 #include <vector>
 
 using namespace fiction;
 
-TEMPLATE_TEST_CASE(
-    "Test energy_distribution function", "[energy-distribution]",
-    (sidb_lattice_layout<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+TEMPLATE_TEST_CASE("Test energy_distribution function", "[energy-distribution]",
+                   (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
     SECTION("one empty layout")
     {
