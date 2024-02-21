@@ -841,6 +841,46 @@ TEST_CASE("node and signal iteration", "[gate-level-layout]")
     CHECK(mask == 128);
 }
 
+TEST_CASE("Iteration disrespecting clocking", "[gate-level-layout]")
+{
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+
+    auto layout = blueprints::and_not_gate_layout<gate_layout>();
+
+    // remove clocking
+    layout.foreach_tile([&layout](const auto& t) { layout.assign_clock_number(t, 0); });
+
+    CHECK(layout.fanin_size<true>(layout.get_node({2, 0})) == 0);
+    CHECK(layout.fanin_size<false>(layout.get_node({2, 0})) == 0);
+    CHECK(layout.fanout_size<true>(layout.get_node({2, 0})) == 0);
+    CHECK(layout.fanout_size<false>(layout.get_node({2, 0})) == 1);
+
+    CHECK(layout.fanin_size<true>(layout.get_node({1, 1})) == 0);
+    CHECK(layout.fanin_size<false>(layout.get_node({1, 1})) == 0);
+    CHECK(layout.fanout_size<true>(layout.get_node({1, 1})) == 0);
+    CHECK(layout.fanout_size<false>(layout.get_node({1, 1})) == 2);
+
+    CHECK(layout.fanin_size<true>(layout.get_node({1, 0})) == 0);
+    CHECK(layout.fanin_size<false>(layout.get_node({1, 0})) == 2);
+    CHECK(layout.fanout_size<true>(layout.get_node({1, 0})) == 0);
+    CHECK(layout.fanout_size<false>(layout.get_node({1, 0})) == 1);
+
+    CHECK(layout.fanin_size<true>(layout.get_node({2, 1})) == 0);
+    CHECK(layout.fanin_size<false>(layout.get_node({2, 1})) == 1);
+    CHECK(layout.fanout_size<true>(layout.get_node({2, 1})) == 0);
+    CHECK(layout.fanout_size<false>(layout.get_node({2, 1})) == 1);
+
+    CHECK(layout.fanin_size<true>(layout.get_node({0, 0})) == 0);
+    CHECK(layout.fanin_size<false>(layout.get_node({0, 0})) == 1);
+    CHECK(layout.fanout_size<true>(layout.get_node({0, 0})) == 0);
+    CHECK(layout.fanout_size<false>(layout.get_node({0, 0})) == 0);
+
+    CHECK(layout.fanin_size<true>(layout.get_node({3, 1})) == 0);
+    CHECK(layout.fanin_size<false>(layout.get_node({3, 1})) == 1);
+    CHECK(layout.fanout_size<true>(layout.get_node({3, 1})) == 0);
+    CHECK(layout.fanout_size<false>(layout.get_node({3, 1})) == 0);
+}
+
 TEST_CASE("Gate-level layout properties", "[gate-level-layout]")
 {
     // adapted from mockturtle/test/networks/klut.cpp

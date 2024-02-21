@@ -79,7 +79,7 @@ class clocking_scheme
             return std::invoke(fn, cz);
         }
 
-        if (auto it = override.find(cz); it != override.end())
+        if (const auto it = override.find(cz); it != override.cend())
         {
             return it->second;
         }
