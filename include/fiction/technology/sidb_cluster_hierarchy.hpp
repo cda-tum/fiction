@@ -200,15 +200,9 @@ struct sidb_cluster_charge_state
         }
     }
 
-    constexpr inline bool contains_neutral_charge(const uint64_t cluster_size) const noexcept
-    {
-        return cluster_size > neg_count + pos_count;
-    }
-
     constexpr inline bool operator==(const sidb_cluster_charge_state& other) const noexcept
     {
         return static_cast<uint64_t>(*this) == static_cast<uint64_t>(other);
-        //        return neg_count == other.neg_count && pos_count == other.pos_count;
     }
 
     constexpr inline std::size_t operator()(const sidb_cluster_charge_state& m) const noexcept
@@ -231,16 +225,6 @@ struct sidb_cluster_charge_state
         return *this;
     }
 };
-
-// static constexpr inline bool is_trinary_multiset_conf(const uint64_t m) noexcept
-//{
-//     return !static_cast<bool>(m & 0xFFFFFFFEFFFFFFFEull);
-// }
-
-static constexpr inline int8_t trinary_multiset_conf_to_sign(const uint64_t m) noexcept
-{
-    return static_cast<int8_t>(static_cast<uint32_t>(m) - (static_cast<uint32_t>(m) < m));
-}
 
 enum class bound_calculation_mode : uint8_t
 {
@@ -336,18 +320,8 @@ struct potential_projection
 
     constexpr inline potential_projection& operator+=(const potential_projection& other) noexcept
     {
-        if (other.is_bottom())
-        {
-            V = other.V;
-            M = other.M;
-            std::cout << "explain" << std::endl;
-            exit(-1);
-        }
-        else
-        {
-            V += other.V;
-            M += other.M;
-        }
+        V += other.V;
+        M += other.M;
         return *this;
     }
 
@@ -361,28 +335,12 @@ struct potential_projection
 
     constexpr friend potential_projection operator-(potential_projection lhs, const potential_projection& rhs) noexcept
     {
-        if (lhs.is_bottom())
-        {
-            std::cout << "explain1" << std::endl;
-            exit(-1);
-        }
-        if (rhs.is_bottom())
-        {
-            std::cout << "explain2" << std::endl;
-            exit(-1);
-        }
-
         lhs -= rhs;
         return lhs;
     }
 
     constexpr friend potential_projection operator+(potential_projection lhs, const potential_projection& rhs) noexcept
     {
-        if (lhs.is_bottom())
-        {
-            std::cout << "explain11" << std::endl;
-            exit(-1);
-        }
         if (rhs.is_bottom())
         {
             return rhs;
@@ -480,19 +438,6 @@ struct potential_projection_orders
     }
 
     template <bound_calculation_mode bound, sidb_charge_state cs>
-    inline void remove_bound() noexcept
-    {
-        if constexpr (bound == bound_calculation_mode::LOWER)
-        {
-            orders[cs_ix<cs>()].erase(orders[cs_ix<cs>()].cbegin());
-        }
-        else
-        {
-            orders[cs_ix<cs>()].erase(orders[cs_ix<cs>()].crbegin());
-        }
-    }
-
-    template <bound_calculation_mode bound, sidb_charge_state cs>
     proj_pot_order::iterator get_pot_proj_for_m_conf(const uint64_t m_conf) const noexcept
     {
         if constexpr (bound == bound_calculation_mode::LOWER)
@@ -528,22 +473,7 @@ struct potential_projection_orders
     template <sidb_charge_state cs>
     inline void add(const potential_projection& pp) noexcept
     {
-        if (pp.is_bottom())
-        {
-            std::cout << "explainn" << std::endl;
-            exit(-1);
-        }
         orders[cs_ix<cs>()].emplace(pp);
-    }
-
-    template <bound_calculation_mode bound, sidb_charge_state cs>
-    void forward_proj_pot_bound(potential_projection_orders& to) const
-    {
-        const potential_projection& pot_proj = get<bound, cs>();
-        if (!pot_proj.is_bottom())
-        {
-            to.add<cs>(pot_proj);
-        }
     }
 
     template <sidb_charge_state cs>
@@ -556,20 +486,9 @@ struct potential_projection_orders
             to.add<cs>(*it);
         }
     }
-
-    //    template <sidb_charge_state cs>
-    //    void forward_proj_pots(potential_projection_orders& to) const
-    //    {
-    //        for (proj_pot_order::const_iterator it = std::next(orders[cs_ix<cs>()].cbegin(), 1);
-    //             it != std::next(orders[cs_ix<cs>()].begin(), orders[cs_ix<cs>()].size() - 1); ++it)
-    //        {
-    //            to.add<cs>(*it);
-    //        }
-    //    }
 };
 
 using sidb_cluster_charge_state_space      = std::unordered_set<sidb_cluster_charge_state, sidb_cluster_charge_state>;
-using sidb_cluster_charge_state_space_iter = sidb_cluster_charge_state_space::const_iterator;
 
 static constexpr inline uint64_t get_unique_cluster_id(const sidb_cluster_ptr& c) noexcept;
 
@@ -587,7 +506,6 @@ struct sidb_cluster
 {
     using uid_t   = uint64_t;
     using sidb_ix = uint64_t;
-    using m_conf  = uint64_t;
 
     const uid_t uid{0};
 
@@ -595,9 +513,7 @@ struct sidb_cluster
     sidb_clustering   children;
     sidb_cluster_ptr  parent{};
 
-    //    interaction_bounds                       local_pot_bounds{};
     std::unordered_map<uid_t, potential_projection_orders> proj_pots{};
-    //    std::unordered_map<m_conf, std::projector_bound
 
     sidb_cluster_charge_state_space charge_space{};
 
@@ -633,13 +549,6 @@ struct sidb_cluster
         }
     }
 
-    //    bool has_positive_charge_in_state_space() const noexcept
-    //    {
-    //        return std::find(charge_space.cbegin(), charge_space.cend(),
-    //                         [](const sidb_cluster_charge_state& m)
-    //                         { return m.count(sidb_charge_state::POSITIVE) != 0; }) != charge_space.cend();
-    //    }
-
     inline bool operator==(const sidb_cluster& other) const noexcept
     {
         return uid == other.uid;
@@ -660,12 +569,6 @@ static constexpr inline uint64_t get_cluster_size(const sidb_cluster_ptr& c) noe
 {
     return c->sidbs.size();
 }
-
-// static std::vector<sidb_cluster_charge_state_decomposition>
-// get_projector_state_decompositions(const sidb_cluster_projector_state& pst) noexcept
-//{
-//     return pst.projector->charge_space.find(sidb_cluster_charge_state{pst.multiset_conf})->decompositions;
-// }
 
 static sidb_cluster_ptr to_unique_sidb_cluster(const sidb_binary_cluster_hierarchy_node& n, uint64_t& uid)
 {
