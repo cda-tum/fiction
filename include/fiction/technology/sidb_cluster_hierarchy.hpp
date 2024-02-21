@@ -138,10 +138,23 @@ using sidb_cluster_ptr = std::shared_ptr<sidb_cluster>;
 
 struct sidb_cluster_charge_state;
 
+static constexpr inline uint64_t get_cluster_size(const sidb_cluster_ptr& c) noexcept;
+
 struct sidb_cluster_projector_state
 {
-    const sidb_cluster_ptr& projector{nullptr};
-    const uint64_t          multiset_conf{};
+    const sidb_cluster_ptr& projector;
+    const uint64_t          multiset_conf;
+
+    template <sidb_charge_state cs>
+    constexpr inline bool contains_cs() const noexcept
+    {
+        switch (cs)
+        {
+            case sidb_charge_state::NEGATIVE: return static_cast<bool>(multiset_conf >> 32);
+            case sidb_charge_state::POSITIVE: return static_cast<bool>(multiset_conf & 0xFFFFFFFF);
+            default: return (multiset_conf >> 32) + (multiset_conf & 0xFFFFFFFF) < get_cluster_size(projector);
+        }
+    }
 };
 
 using sidb_cluster_charge_state_decomposition = std::vector<sidb_cluster_projector_state>;
@@ -200,7 +213,7 @@ struct sidb_cluster_charge_state
 
     constexpr inline std::size_t operator()(const sidb_cluster_charge_state& m) const noexcept
     {
-        return static_cast<std::size_t>(static_cast<uint64_t>(m));
+        return std::hash<uint64_t>{}(static_cast<uint64_t>(m));
     }
 
     constexpr inline sidb_cluster_charge_state& operator+=(const sidb_cluster_charge_state& other) noexcept
@@ -219,10 +232,10 @@ struct sidb_cluster_charge_state
     }
 };
 
-static constexpr inline bool is_trinary_multiset_conf(const uint64_t m) noexcept
-{
-    return !static_cast<bool>(m & 0xFFFFFFFEFFFFFFFEull);
-}
+// static constexpr inline bool is_trinary_multiset_conf(const uint64_t m) noexcept
+//{
+//     return !static_cast<bool>(m & 0xFFFFFFFEFFFFFFFEull);
+// }
 
 static constexpr inline int8_t trinary_multiset_conf_to_sign(const uint64_t m) noexcept
 {
@@ -235,20 +248,6 @@ enum class bound_calculation_mode : uint8_t
     UPPER
 };
 
-// the bottom element of the respective potential bound domain; i.e. the potential bound of least information.
-template <bound_calculation_mode bound>
-static inline constexpr double potential_bound_bottom() noexcept
-{
-    if constexpr (bound == bound_calculation_mode::LOWER)
-    {
-        return -std::numeric_limits<double>::infinity();
-    }
-    else
-    {
-        return std::numeric_limits<double>::infinity();
-    }
-}
-
 struct potential_projection
 {
     double   V{0.0};
@@ -256,8 +255,6 @@ struct potential_projection
 
     explicit potential_projection() = default;
 
-    //    explicit potential_projection(const uint64_t m) : M{m} {}
-    //
     explicit potential_projection(const double init, const sidb_charge_state cs) :
             V{init},
             M{static_cast<uint64_t>(sidb_cluster_charge_state{cs})}
@@ -268,11 +265,131 @@ struct potential_projection
         return V < other.V;
     }
 
+    template <bound_calculation_mode bound>
+    static constexpr inline potential_projection bottom() noexcept
+    {
+        if constexpr (bound == bound_calculation_mode::LOWER)
+        {
+            return potential_projection{-std::numeric_limits<double>::infinity(), sidb_charge_state::NONE};
+        }
+        else
+        {
+            return potential_projection{std::numeric_limits<double>::infinity(), sidb_charge_state::NONE};
+        }
+    }
+
+    template <bound_calculation_mode bound>
+    static constexpr inline potential_projection top() noexcept
+    {
+        if constexpr (bound == bound_calculation_mode::LOWER)
+        {
+            return potential_projection{std::numeric_limits<double>::infinity(), sidb_charge_state::NONE};
+        }
+        else
+        {
+            return potential_projection{-std::numeric_limits<double>::infinity(), sidb_charge_state::NONE};
+        }
+    }
+
+    constexpr inline bool is_bottom() const noexcept
+    {
+        return std::isinf(V);
+    }
+
+    template <bound_calculation_mode bound>
+    inline void join(const potential_projection& other) noexcept
+    {
+        if constexpr (bound == bound_calculation_mode::LOWER)
+        {
+            if (*this < other)
+            {
+                *this = other;
+            }
+        }
+        else
+        {
+            if (*this < other)
+            {
+                *this = other;
+            }
+        }
+    };
+
+    template <bound_calculation_mode bound>
+    inline void meet(const potential_projection& other) noexcept
+    {
+        if constexpr (bound == bound_calculation_mode::LOWER)
+        {
+            if (other < *this)
+            {
+                *this = other;
+            }
+        }
+        else
+        {
+            if (other < *this)
+            {
+                *this = other;
+            }
+        }
+    };
+
     constexpr inline potential_projection& operator+=(const potential_projection& other) noexcept
     {
-        V += other.V;
-        M += other.M;  // addition should be fine
+        if (other.is_bottom())
+        {
+            V = other.V;
+            M = other.M;
+            std::cout << "explain" << std::endl;
+            exit(-1);
+        }
+        else
+        {
+            V += other.V;
+            M += other.M;
+        }
         return *this;
+    }
+
+    constexpr inline potential_projection& operator-=(const potential_projection& other) noexcept
+    {
+        assert(M >= other.M);
+        V -= other.V;
+        M -= other.M;
+        return *this;
+    }
+
+    constexpr friend potential_projection operator-(potential_projection lhs, const potential_projection& rhs) noexcept
+    {
+        if (lhs.is_bottom())
+        {
+            std::cout << "explain1" << std::endl;
+            exit(-1);
+        }
+        if (rhs.is_bottom())
+        {
+            std::cout << "explain2" << std::endl;
+            exit(-1);
+        }
+
+        lhs -= rhs;
+        return lhs;
+    }
+
+    constexpr friend potential_projection operator+(potential_projection lhs, const potential_projection& rhs) noexcept
+    {
+        if (lhs.is_bottom())
+        {
+            std::cout << "explain11" << std::endl;
+            exit(-1);
+        }
+        if (rhs.is_bottom())
+        {
+            return rhs;
+        }
+
+        lhs += rhs;
+        return lhs;
     }
 };
 
@@ -280,16 +397,36 @@ struct potential_projection_orders
 {
     using proj_pot_order = std::set<potential_projection>;
 
+    static inline proj_pot_order add_bottom_elts(proj_pot_order origin) noexcept
+    {
+        origin.emplace(potential_projection::bottom<bound_calculation_mode::LOWER>());
+        origin.emplace(potential_projection::bottom<bound_calculation_mode::UPPER>());
+        return origin;
+    }
+
     // ix : onto_cs
     // 0 : NEG ; 1 : NEUT ; 2 : POS
-    std::array<proj_pot_order, 3> orders{};
+    std::array<proj_pot_order, 3> orders{add_bottom_elts(proj_pot_order{}), add_bottom_elts(proj_pot_order{}),
+                                         add_bottom_elts(proj_pot_order{})};
 
     explicit potential_projection_orders() = default;
 
+    explicit potential_projection_orders([[maybe_unused]] const bool self_projection) :
+            orders{add_bottom_elts(std::set{potential_projection{0.0, sidb_charge_state::NEGATIVE}}),
+                   add_bottom_elts(std::set{potential_projection{0.0, sidb_charge_state::NEUTRAL}}),
+                   add_bottom_elts(std::set{potential_projection{0.0, sidb_charge_state::POSITIVE}})}
+    {}
+
+    static inline proj_pot_order initial_singleton_proj_pot_order(const double inter_sidb_pot) noexcept
+    {
+        return add_bottom_elts(std::set{potential_projection{-inter_sidb_pot, sidb_charge_state::POSITIVE},
+                                        potential_projection{0.0, sidb_charge_state::NEUTRAL},
+                                        potential_projection{inter_sidb_pot, sidb_charge_state::NEGATIVE}});
+    }
+
     explicit potential_projection_orders(const double inter_sidb_pot) :
-            orders{std::set{potential_projection{-inter_sidb_pot, sidb_charge_state::POSITIVE},
-                            potential_projection{0.0, sidb_charge_state::NEUTRAL},
-                            potential_projection{inter_sidb_pot, sidb_charge_state::NEGATIVE}}}
+            orders{initial_singleton_proj_pot_order(inter_sidb_pot), initial_singleton_proj_pot_order(inter_sidb_pot),
+                   initial_singleton_proj_pot_order(inter_sidb_pot)}
     {}
 
     template <sidb_charge_state cs>
@@ -298,21 +435,52 @@ struct potential_projection_orders
         return static_cast<uint8_t>(charge_state_to_sign(cs) + 1);
     }
 
+    template <sidb_charge_state cs>
+    constexpr inline bool onto_cs_pruned() const noexcept
+    {
+        return orders[cs_ix<cs>()].size() == 2;
+    }
+
+    template <sidb_charge_state cs>
+    inline void prune_cs() noexcept
+    {
+        orders[cs_ix<cs>()] = add_bottom_elts(proj_pot_order{});
+    }
+
     template <bound_calculation_mode bound, sidb_charge_state cs>
-    potential_projection get() const noexcept
+    inline potential_projection get() const noexcept
     {
         if constexpr (bound == bound_calculation_mode::LOWER)
         {
-            return *orders[cs_ix<cs>()].cbegin();
+            return *std::next(orders[cs_ix<cs>()].cbegin(), 1);
         }
         else
         {
-            return *orders[cs_ix<cs>()].crbegin();
+            return *std::next(orders[cs_ix<cs>()].crbegin(), 1);
         }
     }
 
     template <bound_calculation_mode bound, sidb_charge_state cs>
-    void remove_bound() noexcept
+    inline potential_projection get_sub_bound() const noexcept
+    {
+        assert(!onto_cs_pruned<cs>());
+
+        const uint64_t bound_m = get<bound, cs>().M;
+
+        if constexpr (bound == bound_calculation_mode::LOWER)
+        {
+            return *std::find_if(std::next(orders[cs_ix<cs>()].begin(), 2), std::prev(orders[cs_ix<cs>()].end(), 1),
+                                 [&](const potential_projection& pp) { return pp.M != bound_m; });
+        }
+        else
+        {
+            return *std::find_if(std::next(orders[cs_ix<cs>()].rbegin(), 2), std::prev(orders[cs_ix<cs>()].rend(), 1),
+                                 [&](const potential_projection& pp) { return pp.M != bound_m; });
+        }
+    }
+
+    template <bound_calculation_mode bound, sidb_charge_state cs>
+    inline void remove_bound() noexcept
     {
         if constexpr (bound == bound_calculation_mode::LOWER)
         {
@@ -324,34 +492,96 @@ struct potential_projection_orders
         }
     }
 
-    template <sidb_charge_state cs>
-    void remove_m_conf(const uint64_t m_conf) noexcept
+    template <bound_calculation_mode bound, sidb_charge_state cs>
+    proj_pot_order::iterator get_pot_proj_for_m_conf(const uint64_t m_conf) const noexcept
     {
-        for (uint8_t k = 0; k < 3; ++k)
+        if constexpr (bound == bound_calculation_mode::LOWER)
         {
-
-            orders[k].erase(*std::find_if(orders[k].cbegin(), orders[k].cend(),
-                                          [&](const potential_projection& pp) { return pp.M == m_conf; }));
+            return std::find_if(std::next(orders[cs_ix<cs>()].begin(), 1), std::prev(orders[cs_ix<cs>()].end(), 1),
+                                [&](const potential_projection& pp) { return pp.M == m_conf; });
+        }
+        else
+        {
+            return std::prev(std::find_if(std::next(orders[cs_ix<cs>()].rbegin(), 1),
+                                          std::prev(orders[cs_ix<cs>()].rend(), 1),
+                                          [&](const potential_projection& pp) { return pp.M == m_conf; })
+                                 .base(),
+                             1);
         }
     }
 
     template <sidb_charge_state cs>
-    void add(const potential_projection& pp) noexcept
+    void remove_m_conf(const uint64_t m_conf) noexcept
     {
-        orders[cs_ix<cs>()].emplace(pp);
+        if (onto_cs_pruned<cs>())
+        {
+            return;
+        }
+
+        proj_pot_order::iterator it = get_pot_proj_for_m_conf<bound_calculation_mode::LOWER, cs>(m_conf);
+        do {
+            orders[cs_ix<cs>()].erase(it);
+            it = get_pot_proj_for_m_conf<bound_calculation_mode::LOWER, cs>(m_conf);
+        } while (it != std::prev(orders[cs_ix<cs>()].cend(), 1));
     }
 
     template <sidb_charge_state cs>
-    void discard_onto_cs() noexcept
+    inline void add(const potential_projection& pp) noexcept
     {
-        orders[cs_ix<cs>()].clear();
+        if (pp.is_bottom())
+        {
+            std::cout << "explainn" << std::endl;
+            exit(-1);
+        }
+        orders[cs_ix<cs>()].emplace(pp);
     }
+
+    template <bound_calculation_mode bound, sidb_charge_state cs>
+    void forward_proj_pot_bound(potential_projection_orders& to) const
+    {
+        const potential_projection& pot_proj = get<bound, cs>();
+        if (!pot_proj.is_bottom())
+        {
+            to.add<cs>(pot_proj);
+        }
+    }
+
+    template <sidb_charge_state cs>
+    void copy_to_parent(potential_projection_orders& to) const
+    {
+        // linkedlist?
+        for (proj_pot_order::const_iterator it = std::next(orders[cs_ix<cs>()].begin(), 1);
+             it != std::prev(orders[cs_ix<cs>()].end(), 1); ++it)
+        {
+            to.add<cs>(*it);
+        }
+    }
+
+    //    template <sidb_charge_state cs>
+    //    void forward_proj_pots(potential_projection_orders& to) const
+    //    {
+    //        for (proj_pot_order::const_iterator it = std::next(orders[cs_ix<cs>()].cbegin(), 1);
+    //             it != std::next(orders[cs_ix<cs>()].begin(), orders[cs_ix<cs>()].size() - 1); ++it)
+    //        {
+    //            to.add<cs>(*it);
+    //        }
+    //    }
 };
 
 using sidb_cluster_charge_state_space      = std::unordered_set<sidb_cluster_charge_state, sidb_cluster_charge_state>;
 using sidb_cluster_charge_state_space_iter = sidb_cluster_charge_state_space::const_iterator;
 
-using sidb_clustering = std::set<sidb_cluster_ptr>;
+static constexpr inline uint64_t get_unique_cluster_id(const sidb_cluster_ptr& c) noexcept;
+
+struct sidb_cluster_ptr_hash
+{
+    constexpr inline std::size_t operator()(const sidb_cluster_ptr& c) const noexcept
+    {
+        return std::hash<uint64_t>{}(get_unique_cluster_id(c));
+    }
+};
+
+using sidb_clustering = std::unordered_set<sidb_cluster_ptr, sidb_cluster_ptr_hash>;
 
 struct sidb_cluster
 {
@@ -421,11 +651,21 @@ struct sidb_cluster
     }
 };
 
-static std::vector<sidb_cluster_charge_state_decomposition>
-get_projector_state_decompositions(const sidb_cluster_projector_state& pst) noexcept
+static constexpr inline uint64_t get_unique_cluster_id(const sidb_cluster_ptr& c) noexcept
 {
-    return pst.projector->charge_space.find(sidb_cluster_charge_state{pst.multiset_conf})->decompositions;
+    return c->uid;
 }
+
+static constexpr inline uint64_t get_cluster_size(const sidb_cluster_ptr& c) noexcept
+{
+    return c->sidbs.size();
+}
+
+// static std::vector<sidb_cluster_charge_state_decomposition>
+// get_projector_state_decompositions(const sidb_cluster_projector_state& pst) noexcept
+//{
+//     return pst.projector->charge_space.find(sidb_cluster_charge_state{pst.multiset_conf})->decompositions;
+// }
 
 static sidb_cluster_ptr to_unique_sidb_cluster(const sidb_binary_cluster_hierarchy_node& n, uint64_t& uid)
 {

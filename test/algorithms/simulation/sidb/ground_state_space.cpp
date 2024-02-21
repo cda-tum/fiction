@@ -182,7 +182,7 @@ TEMPLATE_TEST_CASE(
         }
     }
 
-    const auto& [top, time] = gss.compute_ground_state_space();
+    const auto& [top, time] = ground_state_space{lyt}.compute_ground_state_space();
 
     std::cout << "RUNTIME: " << (time.count() * 1000) << " ms" << std::endl;
 
@@ -199,65 +199,83 @@ TEMPLATE_TEST_CASE(
     REQUIRE(top->charge_space.cbegin()->decompositions.size() == 1);
     REQUIRE(top->charge_space.cbegin()->decompositions.cbegin()->size() == 2);
 
-    //    CHECK(top->charge_space.cbegin()->decompositions.cbegin()->cbegin()->first->sidbs == std::set{0ul, 1ul, 2ul});
-    //    CHECK((top->charge_space.cbegin()->decompositions.cbegin()->cbegin()->second >> 32ull) == 2);
-    //    CHECK(((top->charge_space.cbegin()->decompositions.cbegin()->cbegin()->second << 32ull) >> 32ull) == 0);
+    if (top->charge_space.cbegin()->decompositions.cbegin()->cbegin()->projector->sidbs.size() == 3)
+    {
+        CHECK(top->charge_space.cbegin()->decompositions.cbegin()->cbegin()->projector->sidbs ==
+              std::set{0ul, 1ul, 2ul});
+        CHECK((top->charge_space.cbegin()->decompositions.cbegin()->cbegin()->multiset_conf >> 32ull) == 2);
+        CHECK(((top->charge_space.cbegin()->decompositions.cbegin()->cbegin()->multiset_conf << 32ull) >> 32ull) == 0);
+
+        CHECK(std::next(top->charge_space.cbegin()->decompositions.cbegin()->cbegin(), 1)->projector->sidbs ==
+              std::set{3ul, 4ul, 5ul, 6ul});
+        CHECK((std::next(top->charge_space.cbegin()->decompositions.cbegin()->cbegin(), 1)->multiset_conf >> 32ull) ==
+              3);
+        CHECK(((std::next(top->charge_space.cbegin()->decompositions.cbegin()->cbegin(), 1)->multiset_conf << 32ull) >>
+               32ull) == 0);
+    }
+    else
+    {
+        CHECK(std::next(top->charge_space.cbegin()->decompositions.cbegin()->cbegin(), 1)->projector->sidbs ==
+              std::set{0ul, 1ul, 2ul});
+        CHECK((std::next(top->charge_space.cbegin()->decompositions.cbegin()->cbegin(), 1)->multiset_conf >> 32ull) ==
+              2);
+        CHECK(((std::next(top->charge_space.cbegin()->decompositions.cbegin()->cbegin(), 1)->multiset_conf << 32ull) >>
+               32ull) == 0);
+
+        CHECK(top->charge_space.cbegin()->decompositions.cbegin()->cbegin()->projector->sidbs ==
+              std::set{3ul, 4ul, 5ul, 6ul});
+        CHECK((top->charge_space.cbegin()->decompositions.cbegin()->cbegin()->multiset_conf >> 32ull) == 3);
+        CHECK(((top->charge_space.cbegin()->decompositions.cbegin()->cbegin()->multiset_conf << 32ull) >> 32ull) == 0);
+    }
     //
-    //    CHECK(std::next(top->charge_space.cbegin()->decompositions.cbegin()->cbegin(), 1)->first->sidbs ==
-    //          std::set{3ul, 4ul, 5ul, 6ul});
-    //    CHECK((std::next(top->charge_space.cbegin()->decompositions.cbegin()->cbegin(), 1)->second >> 32ull) == 3);
-    //    CHECK(((std::next(top->charge_space.cbegin()->decompositions.cbegin()->cbegin(), 1)->second << 32ull) >>
-    //    32ull) ==
-    //          0);
-
-    const charge_distribution_surface<TestType> cds{lyt};
-
-    const std::set<uint64_t> neg_sidbs  = {0, 1, 3, 5, 6};
-    const std::set<uint64_t> neut_sidbs = {2, 4};
-
-    double min_neg_recv = -std::numeric_limits<double>::infinity();
-    double max_neg_recv = std::numeric_limits<double>::infinity();
-
-    for (const uint64_t i : neg_sidbs)
-    {
-        double sum = 0;
-        for (const uint64_t j : neg_sidbs)
-        {
-            sum -= cds.get_chargeless_potential_by_indices(i, j);
-        }
-        min_neg_recv = std::max(min_neg_recv, sum);
-        max_neg_recv = std::min(max_neg_recv, sum);
-    }
-
-    //    CHECK(min_neg_recv <=
-    //          gss.template internal_pot_bound_value<bound_calculation_mode::LOWER,
-    //                                                sidb_charge_state::NEGATIVE>((*top->children.cbegin())->parent,
-    //                                                                             *top->charge_space.cbegin()));
-    //    CHECK(max_neg_recv >=
-    //          gss.template internal_pot_bound_value<bound_calculation_mode::UPPER,
-    //                                                sidb_charge_state::NEGATIVE>((*top->children.cbegin())->parent,
-    //                                                                             *top->charge_space.cbegin()));
-
-    double min_neut_recv = -std::numeric_limits<double>::infinity();
-    double max_neut_recv = std::numeric_limits<double>::infinity();
-
-    for (const uint64_t i : neut_sidbs)
-    {
-        double sum = 0;
-        for (const uint64_t j : neg_sidbs)
-        {
-            sum -= cds.get_chargeless_potential_by_indices(i, j);
-        }
-        min_neut_recv = std::max(min_neut_recv, sum);
-        max_neut_recv = std::min(max_neut_recv, sum);
-    }
-
-    //    CHECK(min_neut_recv <=
-    //          gss.template internal_pot_bound_value<bound_calculation_mode::LOWER>(
-    //              (*top->children.cbegin())->parent, *top->charge_space.cbegin()));
-    //    CHECK(max_neut_recv >=
-    //          gss.template internal_pot_bound_value<bound_calculation_mode::UPPER>(
-    //              (*top->children.cbegin())->parent, *top->charge_space.cbegin()));
+    //    const charge_distribution_surface<TestType> cds{lyt};
+    //
+    //    const std::set<uint64_t> neg_sidbs  = {0, 1, 3, 5, 6};
+    //    const std::set<uint64_t> neut_sidbs = {2, 4};
+    //
+    //    double min_neg_recv = -std::numeric_limits<double>::infinity();
+    //    double max_neg_recv = std::numeric_limits<double>::infinity();
+    //
+    //    for (const uint64_t i : neg_sidbs)
+    //    {
+    //        double sum = 0;
+    //        for (const uint64_t j : neg_sidbs)
+    //        {
+    //            sum -= cds.get_chargeless_potential_by_indices(i, j);
+    //        }
+    //        min_neg_recv = std::max(min_neg_recv, sum);
+    //        max_neg_recv = std::min(max_neg_recv, sum);
+    //    }
+    //
+    //    //    CHECK(min_neg_recv <=
+    //    //          gss.template internal_pot_bound_value<bound_calculation_mode::LOWER,
+    //    // sidb_charge_state::NEGATIVE>((*top->children.cbegin())->parent,
+    //    //                                                                             *top->charge_space.cbegin()));
+    //    //    CHECK(max_neg_recv >=
+    //    //          gss.template internal_pot_bound_value<bound_calculation_mode::UPPER,
+    //    // sidb_charge_state::NEGATIVE>((*top->children.cbegin())->parent,
+    //    //                                                                             *top->charge_space.cbegin()));
+    //
+    //    double min_neut_recv = -std::numeric_limits<double>::infinity();
+    //    double max_neut_recv = std::numeric_limits<double>::infinity();
+    //
+    //    for (const uint64_t i : neut_sidbs)
+    //    {
+    //        double sum = 0;
+    //        for (const uint64_t j : neg_sidbs)
+    //        {
+    //            sum -= cds.get_chargeless_potential_by_indices(i, j);
+    //        }
+    //        min_neut_recv = std::max(min_neut_recv, sum);
+    //        max_neut_recv = std::min(max_neut_recv, sum);
+    //    }
+    //
+    //    //    CHECK(min_neut_recv <=
+    //    //          gss.template internal_pot_bound_value<bound_calculation_mode::LOWER>(
+    //    //              (*top->children.cbegin())->parent, *top->charge_space.cbegin()));
+    //    //    CHECK(max_neut_recv >=
+    //    //          gss.template internal_pot_bound_value<bound_calculation_mode::UPPER>(
+    //    //              (*top->children.cbegin())->parent, *top->charge_space.cbegin()));
 }
 
 TEMPLATE_TEST_CASE(
@@ -285,7 +303,7 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type({10, 5, 1}, TestType::cell_type::NORMAL);  //  -    -       7
     lyt.assign_cell_type({8, 8, 1}, TestType::cell_type::NORMAL);   //  -    -       13
 
-    const auto res = quickexact(lyt);
+    //    const auto res = quickexact(lyt);
 
     ground_state_space gss{lyt};
 
@@ -299,63 +317,62 @@ TEMPLATE_TEST_CASE(
     //    CHECK_THAT(top->local_pot_bounds[1], Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
 }
 
-// TEMPLATE_TEST_CASE(
-//     "Ground state space of a 28 DB layout", "[ground-state-space]",
-//     (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-//     (charge_distribution_surface<cell_level_layout<sidb_technology,
-//     clocked_layout<cartesian_layout<siqad::coord_t>>>>))
-//{
-//     TestType lyt{};
-//     // V1   V2      num
-//     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);  //  -    -       0
-//     lyt.assign_cell_type({2, 2, 0}, TestType::cell_type::NORMAL);  //  -    -       4
-//     lyt.assign_cell_type({4, 1, 0}, TestType::cell_type::NORMAL);  //  0    0       2
-//
-//     lyt.assign_cell_type({0, 7, 0}, TestType::cell_type::NORMAL);  //  -    -       10
-//     lyt.assign_cell_type({1, 6, 0}, TestType::cell_type::NORMAL);  //  0    0       8
-//     lyt.assign_cell_type({6, 5, 1}, TestType::cell_type::NORMAL);  //  0    -       6
-//     lyt.assign_cell_type({4, 8, 1}, TestType::cell_type::NORMAL);  //  -    0       12
-//
-//     lyt.assign_cell_type({4, 0, 0}, TestType::cell_type::NORMAL);  //  0    0       1
-//     lyt.assign_cell_type({6, 2, 0}, TestType::cell_type::NORMAL);  //  0    0       5
-//     lyt.assign_cell_type({8, 1, 0}, TestType::cell_type::NORMAL);  //  -    -       3
-//
-//     lyt.assign_cell_type({4, 7, 0}, TestType::cell_type::NORMAL);   //  0    -       11
-//     lyt.assign_cell_type({5, 6, 0}, TestType::cell_type::NORMAL);   //  0    +       9
-//     lyt.assign_cell_type({10, 5, 1}, TestType::cell_type::NORMAL);  //  -    -       7
-//     lyt.assign_cell_type({8, 8, 1}, TestType::cell_type::NORMAL);   //  -    -       13
-//
-//     lyt.assign_cell_type({8, 0, 0}, TestType::cell_type::NORMAL);   //  -    -       0
-//     lyt.assign_cell_type({10, 2, 0}, TestType::cell_type::NORMAL);  //  -    -       4
-//     lyt.assign_cell_type({12, 1, 0}, TestType::cell_type::NORMAL);  //  0    0       2
-//
-//     lyt.assign_cell_type({8, 7, 0}, TestType::cell_type::NORMAL);   //  -    -       10
-//     lyt.assign_cell_type({9, 6, 0}, TestType::cell_type::NORMAL);   //  0    0       8
-//     lyt.assign_cell_type({14, 5, 1}, TestType::cell_type::NORMAL);  //  0    -       6
-//     lyt.assign_cell_type({12, 8, 1}, TestType::cell_type::NORMAL);  //  -    0       12
-//
-//     lyt.assign_cell_type({12, 0, 0}, TestType::cell_type::NORMAL);  //  0    0       1
-//     lyt.assign_cell_type({14, 2, 0}, TestType::cell_type::NORMAL);  //  0    0       5
-//     lyt.assign_cell_type({16, 1, 0}, TestType::cell_type::NORMAL);  //  -    -       3
-//
-//     lyt.assign_cell_type({12, 7, 0}, TestType::cell_type::NORMAL);  //  0    -       11
-//     lyt.assign_cell_type({13, 6, 0}, TestType::cell_type::NORMAL);  //  0    +       9
-//     lyt.assign_cell_type({18, 5, 1}, TestType::cell_type::NORMAL);  //  -    -       7
-//     lyt.assign_cell_type({16, 8, 1}, TestType::cell_type::NORMAL);  //  -    -       13
-//
-//     const auto res = quickexact(lyt);
-//
-//     ground_state_space gss{lyt};
-//
-//     const auto& [top, time] = gss.compute_ground_state_space();
-//
-//     std::cout << "RUNTIME: " << (time.count() * 1000) << " ms" << std::endl;
-//
-//     CHECK(top->sidbs.size() == 28);
-//
-//     CHECK_THAT(top->local_pot_bounds[0], Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+TEMPLATE_TEST_CASE(
+    "Ground state space of a 28 DB layout", "[ground-state-space]",
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
+    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+{
+    TestType lyt{};
+    // V1   V2      num
+    lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);  //  -    -       0
+    lyt.assign_cell_type({2, 2, 0}, TestType::cell_type::NORMAL);  //  -    -       4
+    lyt.assign_cell_type({4, 1, 0}, TestType::cell_type::NORMAL);  //  0    0       2
+
+    lyt.assign_cell_type({0, 7, 0}, TestType::cell_type::NORMAL);  //  -    -       10
+    lyt.assign_cell_type({1, 6, 0}, TestType::cell_type::NORMAL);  //  0    0       8
+    lyt.assign_cell_type({6, 5, 1}, TestType::cell_type::NORMAL);  //  0    -       6
+    lyt.assign_cell_type({4, 8, 1}, TestType::cell_type::NORMAL);  //  -    0       12
+
+    lyt.assign_cell_type({4, 0, 0}, TestType::cell_type::NORMAL);  //  0    0       1
+    lyt.assign_cell_type({6, 2, 0}, TestType::cell_type::NORMAL);  //  0    0       5
+    lyt.assign_cell_type({8, 1, 0}, TestType::cell_type::NORMAL);  //  -    -       3
+
+    lyt.assign_cell_type({4, 7, 0}, TestType::cell_type::NORMAL);   //  0    -       11
+    lyt.assign_cell_type({5, 6, 0}, TestType::cell_type::NORMAL);   //  0    +       9
+    lyt.assign_cell_type({10, 5, 1}, TestType::cell_type::NORMAL);  //  -    -       7
+    lyt.assign_cell_type({8, 8, 1}, TestType::cell_type::NORMAL);   //  -    -       13
+
+    lyt.assign_cell_type({8, 0, 0}, TestType::cell_type::NORMAL);   //  -    -       0
+    lyt.assign_cell_type({10, 2, 0}, TestType::cell_type::NORMAL);  //  -    -       4
+    lyt.assign_cell_type({12, 1, 0}, TestType::cell_type::NORMAL);  //  0    0       2
+
+    lyt.assign_cell_type({8, 7, 0}, TestType::cell_type::NORMAL);   //  -    -       10
+    lyt.assign_cell_type({9, 6, 0}, TestType::cell_type::NORMAL);   //  0    0       8
+    lyt.assign_cell_type({14, 5, 1}, TestType::cell_type::NORMAL);  //  0    -       6
+    lyt.assign_cell_type({12, 8, 1}, TestType::cell_type::NORMAL);  //  -    0       12
+
+    lyt.assign_cell_type({12, 0, 0}, TestType::cell_type::NORMAL);  //  0    0       1
+    lyt.assign_cell_type({14, 2, 0}, TestType::cell_type::NORMAL);  //  0    0       5
+    lyt.assign_cell_type({16, 1, 0}, TestType::cell_type::NORMAL);  //  -    -       3
+
+    lyt.assign_cell_type({12, 7, 0}, TestType::cell_type::NORMAL);  //  0    -       11
+    lyt.assign_cell_type({13, 6, 0}, TestType::cell_type::NORMAL);  //  0    +       9
+    lyt.assign_cell_type({18, 5, 1}, TestType::cell_type::NORMAL);  //  -    -       7
+    lyt.assign_cell_type({16, 8, 1}, TestType::cell_type::NORMAL);  //  -    -       13
+
+    //     const auto res = quickexact(lyt);
+
+    ground_state_space gss{lyt};
+
+    const auto& [top, time] = gss.compute_ground_state_space();
+
+    std::cout << "RUNTIME: " << (time.count() * 1000) << " ms" << std::endl;
+
+    CHECK(top->sidbs.size() == 28);
+
+    //     CHECK_THAT(top->local_pot_bounds[0], Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
 //     CHECK_THAT(top->local_pot_bounds[1], Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
-// }
+}
 //
 // TEMPLATE_TEST_CASE(
 //     "Ground state space of a 56 DB layout", "[ground-state-space]",
