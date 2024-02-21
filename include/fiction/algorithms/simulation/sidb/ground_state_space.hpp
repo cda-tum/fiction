@@ -19,6 +19,7 @@
 #include <functional>
 #include <limits>
 #include <memory>
+#include <optional>
 #include <set>
 #include <utility>
 #include <vector>
@@ -468,7 +469,7 @@ class ground_state_space
         return false;
     }
 
-    bool update_charge_spaces() const noexcept
+    bool update_charge_spaces(std::optional<sidb_cluster::uid_t> skip_cluster = std::nullopt) const noexcept
     {
         bool fixpoint = true;
 
@@ -476,7 +477,7 @@ class ground_state_space
         for (const sidb_cluster_ptr& c : clustering)
         {
             // skip if |charge space| = 1?
-            if (c->charge_space.size() > 1)
+            if (c->charge_space.size() > 1 || (skip_cluster.has_value() && skip_cluster.value() == c->uid))
             {
                 fixpoint &= check_charge_space(c);
             }
@@ -492,7 +493,7 @@ class ground_state_space
         {
             sidb_cluster_charge_state_space::iterator it = c->charge_space.find(m);
 
-            if (it != c->charge_space.end())
+            if (it != c->charge_space.cend())
             {
                 it->decompositions.emplace_back(m.decompositions[0]);
             }
@@ -564,6 +565,18 @@ class ground_state_space
         //                .forward_proj_pot_bound<bound, cs>(other_c->proj_pots[c->uid]);  // ADD MORE?
         //        }
 
+        //        const auto show = [](const uint64_t m, const uint64_t s)
+        //        {
+        //            return std::string{"N"} + std::to_string(m >> 32) + " Z" +
+        //                   std::to_string(s - ((m >> 32) + (m & 0xFFFFFFFF))) + " P" + std::to_string(m & 0xFFFFFFFF);
+        //        };
+
+        //        std::cout << "CONSTRUCTING " << (bound == bound_calculation_mode::LOWER ? "LOWER" : "UPPER")
+        //                  << " BOUND TO THE PROJECTED POTENTIAL ONTO "
+        //                  << charge_configuration_to_string(std::vector<sidb_charge_state>{cs}) << " IN " <<
+        //                  other_c->uid
+        //                  << std::endl;
+
         // construct external projected potential bounds for every decomposition of every element in the charge space
         for (const sidb_cluster_charge_state& m : c->charge_space)
         {
@@ -573,6 +586,10 @@ class ground_state_space
 
                 for (const sidb_cluster_projector_state& pst : decomposition)
                 {
+                    //                    std::cout << "requesting projector state bound " << pst.projector->uid << "  |
+                    //                    "
+                    //                              << show(pst.multiset_conf, pst.projector->sidbs.size()) <<
+                    //                              std::endl;
                     pot_proj_onto_other_c += get_proj_state_bound<bound, cs>(pst, other_c);
                 }
 
@@ -617,8 +634,7 @@ class ground_state_space
 
         while (!unhandled_clusters.empty())
         {
-            const sidb_cluster_ptr other_c = *unhandled_clusters.cbegin();
-            unhandled_clusters.erase(unhandled_clusters.begin());
+            const sidb_cluster_ptr other_c = unhandled_clusters.extract(unhandled_clusters.cbegin()).value();
 
             construct_merged_proj_pots_onto_cs<bound_calculation_mode::LOWER, sidb_charge_state::NEGATIVE>(c, other_c);
             construct_merged_proj_pots_onto_cs<bound_calculation_mode::LOWER, sidb_charge_state::POSITIVE>(c, other_c);
@@ -646,6 +662,11 @@ class ground_state_space
 
     bool move_up_hierarchy() noexcept
     {
+        if (clustering.size() == 1)
+        {
+            return false;
+        }
+
         // Find the parent with the minimum cluster size
         const sidb_cluster_ptr& min_parent =
             (*std::min_element(clustering.cbegin(), clustering.cend(),
@@ -669,13 +690,13 @@ class ground_state_space
 
         construct_merged_potential_projections(min_parent);
 
+        clustering.emplace(min_parent);
+
         // update the merged cluster charge space
         check_charge_space(min_parent);
 
         // and after that the charge spaces of the other clusters
-        const bool fixpoint = update_charge_spaces();
-
-        clustering.emplace(min_parent);
+        const bool fixpoint = update_charge_spaces(min_parent->uid);
 
         return fixpoint;
     }
@@ -693,7 +714,7 @@ class ground_state_space
             {
                 while (!update_charge_spaces())
                     ;
-                while (move_up_hierarchy() && clustering.size() > 1 && merges++ < max_merges)
+                while (move_up_hierarchy() && merges++ < max_merges)
                     ;
             }
         }
