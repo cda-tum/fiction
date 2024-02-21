@@ -246,7 +246,7 @@ struct potential_projection
 
     constexpr inline bool operator<(const potential_projection& other) const noexcept
     {
-        return V < other.V;
+        return V == other.V ? M < other.M : V < other.V;
     }
 
     template <bound_calculation_mode bound>

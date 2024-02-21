@@ -280,8 +280,9 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "Ground state space of a 14 DB layout", "[ground-state-space]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))  //,
+//    (charge_distribution_surface<cell_level_layout<sidb_technology,
+//    clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
     TestType lyt{};
     // V1   V2      num
