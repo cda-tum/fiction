@@ -7,8 +7,12 @@
 #include <fiction/algorithms/physical_design/design_sidb_gates.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
+#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
+#include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
+#include <fiction/technology/cell_technologies.hpp>
+#include <fiction/technology/sidb_defects.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/technology/sidb_surface.hpp>
 #include <fiction/traits.hpp>
@@ -304,5 +308,66 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
                 CHECK(cell != siqad::coord_t{15, 10, 0});
                 CHECK(cell != siqad::coord_t{20, 12, 0});
             });
+    }
+}
+
+TEST_CASE("Design AND Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
+{
+    using lattice = sidb_lattice<sidb_cell_clk_lyt_siqad, sidb_111_lattice>;
+
+    lattice lyt{};
+
+    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({25, 0, 0}, sidb_technology::cell_type::INPUT);
+
+    lyt.assign_cell_type({23, 1, 1}, sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({1, 1, 1}, sidb_technology::cell_type::INPUT);
+
+    lyt.assign_cell_type({4, 4, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({21, 2, 0}, sidb_technology::cell_type::NORMAL);
+
+    lyt.assign_cell_type({5, 5, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({19, 5, 1}, sidb_technology::cell_type::NORMAL);
+
+    lyt.assign_cell_type({8, 8, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({17, 8, 0}, sidb_technology::cell_type::NORMAL);
+
+    lyt.assign_cell_type({9, 9, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({15, 9, 1}, sidb_technology::cell_type::NORMAL);
+
+    lyt.assign_cell_type({15, 21, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({17, 23, 0}, sidb_technology::cell_type::NORMAL);
+
+    lyt.assign_cell_type({19, 25, 1}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({21, 27, 0}, sidb_technology::cell_type::OUTPUT);
+
+    lyt.assign_cell_type({23, 29, 1}, sidb_technology::cell_type::NORMAL);
+
+    SECTION("Random Generation")
+    {
+        const design_sidb_gates_params<lattice> params{
+            sidb_simulation_parameters{2, -0.32},
+            design_sidb_gates_params<lattice>::design_sidb_gates_mode::RANDOM,
+            {{10, 11, 0}, {14, 17, 0}},
+            3,
+            sidb_simulation_engine::QUICKEXACT};
+
+        const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_nor_tt()}, params);
+        REQUIRE(!found_gate_layouts.empty());
+        CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
+    }
+
+    SECTION("Random Generation")
+    {
+        const design_sidb_gates_params<lattice> params{
+            sidb_simulation_parameters{2, -0.32},
+            design_sidb_gates_params<lattice>::design_sidb_gates_mode::EXHAUSTIVE,
+            {{10, 11, 0}, {14, 17, 0}},
+            3,
+            sidb_simulation_engine::QUICKEXACT};
+
+        const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_nor_tt()}, params);
+        REQUIRE(found_gate_layouts.size() == 206);
+        CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
     }
 }
