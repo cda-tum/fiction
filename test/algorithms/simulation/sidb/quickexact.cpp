@@ -1768,11 +1768,9 @@ TEMPLATE_TEST_CASE(
 
     lyt.assign_cell_type({4, 14, 0}, TestType::cell_type::NORMAL);
 
-    const sidb_lattice lattice{lyt};
-
     const quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.32, 5.6, 5}};
 
-    const auto simulation_results = quickexact<TestType>(lattice, params);
+    const auto simulation_results = quickexact<TestType>(lyt, params);
 
     const auto ground_state = determine_groundstate_from_simulation_results(simulation_results);
     REQUIRE(ground_state.size() == 1);

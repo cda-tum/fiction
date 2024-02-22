@@ -6,8 +6,11 @@
 #define FICTION_PRINT_LAYOUT_HPP
 
 #include "fiction/layouts/bounding_box.hpp"
+#include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
+#include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/technology/sidb_defects.hpp"
+#include "fiction/technology/sidb_lattice.hpp"
 #include "fiction/technology/sidb_surface.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
@@ -353,6 +356,7 @@ void print_sidb_layout(std::ostream& os, const Lyt& lyt, const bool cs_color = t
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
+    static_assert(is_sidb_lattice_v<Lyt, sidb_111_lattice>, "Lyt is not an SiDB lattice");
 
     // empty layout
     if (lyt.is_empty())
@@ -489,7 +493,7 @@ void print_sidb_layout(std::ostream& os, const Lyt& lyt, const bool cs_color = t
         }
         else if (loop_coordinate.x == max_se.x && loop_coordinate != max_se)
         {
-            if (loop_coordinate.z == 1)
+            if (loop_coordinate.z == 1 && has_same_lattice_orientation_v<Lyt, sidb_100_lattice>)
             {
                 os << "\n\n";  // gap between two dimers
             }
@@ -500,10 +504,18 @@ void print_sidb_layout(std::ostream& os, const Lyt& lyt, const bool cs_color = t
             loop_coordinate.x = min_nw.x;
             loop_coordinate.y += (loop_coordinate.z == 1) ? 1 : 0;
             loop_coordinate.z = (loop_coordinate.z == 0) ? 1 : 0;
+            if (has_same_lattice_orientation_v<Lyt, sidb_111_lattice> && loop_coordinate.z == 1)
+            {
+                os << " ";
+            }
         }
         else if (loop_coordinate == max_se)
         {
-            os << "\n\n";  // add a gap between two dimers
+            if (has_same_lattice_orientation_v<Lyt, sidb_100_lattice>)
+            {
+                os << "\n\n";  // add a gap between two dimers
+                break;
+            }
             break;
         }
     }

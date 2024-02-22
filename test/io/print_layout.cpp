@@ -14,6 +14,7 @@
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/technology/charge_distribution_surface.hpp>
 #include <fiction/technology/sidb_bestagon_library.hpp>
+#include <fiction/technology/sidb_defects.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
@@ -546,7 +547,7 @@ TEST_CASE("Print layout without charges but defects", "[print-charge-layout]")
 
     SECTION("crop_layout option activated")
     {
-        print_sidb_layout(print_stream, cl, false, true, true);
+        print_sidb_layout(print_stream, sidb_lattice{cl}, false, true, true);
         //
         constexpr const char* layout_print = " ·  ·  ·  ·  ·  ·  ·  ·  · \n"
                                              " ·  ·  ·  ·  ·  ·  ·  ·  · \n"
@@ -564,7 +565,7 @@ TEST_CASE("Print layout without charges but defects", "[print-charge-layout]")
 
     SECTION("crop_layout option deactivated")
     {
-        print_sidb_layout(print_stream, cl, false, false, true);
+        print_sidb_layout(print_stream, sidb_lattice{cl}, false, false, true);
         //
         constexpr const char* layout_print = " ⊞  ·  ·  ·  · \n"
                                              " ·  ⊡  ·  ·  ⊟ \n"
@@ -588,7 +589,7 @@ TEST_CASE("Print Bestagon OR-gate", "[print-charge-layout]")
 
     std::stringstream print_stream{};
 
-    print_sidb_layout(print_stream, cell_layout_or_siqad, false, true, true);
+    print_sidb_layout(print_stream, sidb_lattice{cell_layout_or_siqad}, false, true, true);
 
     constexpr const char* layout_print =
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
@@ -649,6 +650,38 @@ TEST_CASE("Print Bestagon OR-gate", "[print-charge-layout]")
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
         "\n"
         "\n";
+
+    CHECK(layout_print == print_stream.str());
+}
+
+TEST_CASE("Print H-Si 111 surface with six cells", "[print-charge-layout]")
+{
+    sidb_cell_clk_lyt_siqad lyt{};
+
+    lyt.assign_cell_type({0, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+    lyt.assign_cell_type({1, 1, 1}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+    lyt.assign_cell_type({2, 2, 1}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+
+    lyt.assign_cell_type({8, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 1, 1}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+    lyt.assign_cell_type({5, 2, 1}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+
+    const sidb_lattice<decltype(lyt), sidb_111_lattice> lattice_lyt{lyt};
+
+    std::stringstream print_stream{};
+
+    print_sidb_layout(print_stream, lattice_lyt, false, true, true);
+
+    constexpr const char* layout_print = " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                         "  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                         " ·  ·  o  ·  ·  ·  ·  ·  ·  ·  o  ·  · \n"
+                                         "  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                         "  ·  ·  ·  o  ·  ·  ·  ·  o  ·  ·  ·  · \n"
+                                         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                         "  ·  ·  ·  ·  o  ·  ·  o  ·  ·  ·  ·  · \n"
+                                         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                         "  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n";
 
     CHECK(layout_print == print_stream.str());
 }
