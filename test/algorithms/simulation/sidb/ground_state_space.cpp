@@ -52,68 +52,6 @@ TEMPLATE_TEST_CASE(
     ground_state_space gss{lyt};
 
     gss.update_charge_spaces();
-
-    sidb_cluster_charge_state_space s{
-        sidb_cluster_charge_state{sidb_charge_state::POSITIVE, sidb_charge_state::NEUTRAL},
-        sidb_cluster_charge_state{sidb_charge_state::NEUTRAL, sidb_charge_state::NEGATIVE},
-        sidb_cluster_charge_state{sidb_charge_state::NEGATIVE, sidb_charge_state::NEGATIVE},
-        sidb_cluster_charge_state{sidb_charge_state::NEGATIVE, sidb_charge_state::NEUTRAL},
-        sidb_cluster_charge_state{sidb_charge_state::NEGATIVE, sidb_charge_state::POSITIVE}};
-
-    CHECK(s.size() == 4);
-    //    CHECK(*s.cbegin() == sidb_cluster_charge_state{sidb_charge_state::NEGATIVE, sidb_charge_state::NEGATIVE});
-    //    CHECK(*s.crbegin() == sidb_cluster_charge_state{sidb_charge_state::POSITIVE, sidb_charge_state::NEUTRAL});
-
-    sidb_cluster_charge_state m{sidb_charge_state::POSITIVE, sidb_charge_state::NEUTRAL};
-    sidb_cluster_charge_state m_{sidb_charge_state::POSITIVE, sidb_charge_state::NEUTRAL};
-    //    CHECK(*--s.crbegin().base() == m);
-    //    CHECK(*--(--s.crbegin().base()) ==
-    //          sidb_cluster_charge_state{sidb_charge_state::POSITIVE, sidb_charge_state::NEGATIVE});
-    //    sidb_cluster_charge_state_space s{};
-
-    //    while (!gss.sweep());
-    //
-    //    REQUIRE(gss.cl_min.get_phys_params().mu_minus == -0.32);
-    //
-    //    gss.cl_min.foreach_cell(
-    //        [&](const auto& cell)
-    //        {
-    //            if (cell != coordinate<TestType>{5, 3, 0})
-    //            {
-    //                CHECK(gss.cl_min.get_charge_state(cell) == sidb_charge_state::NEGATIVE);
-    //            }
-    //            else
-    //            {
-    //                CHECK(gss.cl_min.get_charge_state({5, 3, 0}) == sidb_charge_state::NEUTRAL);
-    //            }
-    //        });
-    //
-    //    gss.cl_max.foreach_cell(
-    //        [&](const auto& cell)
-    //        {
-    //            if (cell != coordinate<TestType>{5, 3, 0})
-    //            {
-    //                CHECK(gss.cl_max.get_charge_state(cell) == sidb_charge_state::NEGATIVE);
-    //            }
-    //            else
-    //            {
-    //                CHECK(gss.cl_max.get_charge_state({5, 3, 0}) == sidb_charge_state::NEUTRAL);
-    //            }
-    //        });
-    //
-    //    for (uint64_t i = 0; i < gss.possible_assignments.size(); ++i)
-    //    {
-    //        REQUIRE(gss.possible_assignments[i].size() == 1);
-    //
-    //        if (gss.cl_min.get_sidb_order()[i] != coordinate<TestType>{5, 3, 0})
-    //        {
-    //            CHECK(*gss.possible_assignments[i].cbegin() == sidb_charge_state::NEGATIVE);
-    //        }
-    //        else
-    //        {
-    //            CHECK(*gss.possible_assignments[i].cbegin() == sidb_charge_state::NEUTRAL);
-    //        }
-    //    }
 }
 
 TEMPLATE_TEST_CASE(
@@ -144,11 +82,50 @@ TEMPLATE_TEST_CASE(
 
     //    REQUIRE(gss.cl_min.get_phys_params().mu_minus == -0.32);
 }
+template <typename Lyt, bound_calculation_mode bound, sidb_charge_state onto_cs>
+static void verify_recv_pot_bound(const ground_state_space<Lyt>& gss) noexcept
+{
+    for (const sidb_cluster_ptr& c : gss.clustering)
+    {
+        if (ground_state_space<Lyt>::template onto_cs_pruned<onto_cs>(c))
+        {
+            continue;
+        }
 
-TEMPLATE_TEST_CASE(
-    "Ground state space of a 7 DB layout", "[ground-state-space]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+        double recv_pot_bound = 0;
+        for (const sidb_cluster_ptr& other_c : gss.clustering)
+        {
+            if (other_c != c)
+            {
+                recv_pot_bound += ground_state_space<Lyt>::template get_proj_bound<bound, onto_cs>(other_c, c).V;
+            }
+        }
+
+        recv_pot_bound -= c->get_recv_ext_pot_bound<bound, onto_cs>();
+
+        CHECK_THAT(recv_pot_bound, Catch::Matchers::WithinAbs(0.0, physical_constants::POP_STABILITY_ERR));
+        if (std::abs(recv_pot_bound) > physical_constants::POP_STABILITY_ERR)
+        {
+            std::cout << "BIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIP\n\n"
+                      << (bound == bound_calculation_mode::LOWER ? "LB" : "UB") << " ONTO "
+                      << charge_configuration_to_string(std::vector{onto_cs}) << "\nc: " << c->uid
+                      << "\nrecv_pot_bound: " << recv_pot_bound + c->get_recv_ext_pot_bound<bound, onto_cs>()
+                      << "\nstored_bound: " << c->get_recv_ext_pot_bound<bound, onto_cs>() << "\nclustering:\n";
+
+            for (const sidb_cluster_ptr& c_ : gss.clustering)
+            {
+                std::cout << c_->uid << std::endl;
+            }
+
+            std::cout << std::endl;
+        }
+    }
+}
+
+TEMPLATE_TEST_CASE("Ground state space of a 7 DB layout", "[ground-state-space]",
+                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+//    (charge_distribution_surface<cell_level_layout<sidb_technology,
+//    clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
     TestType lyt{};
 
@@ -162,6 +139,26 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type({4, 8, 1}, TestType::cell_type::NORMAL);
 
     //    const auto res = quickexact(lyt);
+
+    ground_state_space gss_recv_pot{lyt};
+
+    while (gss_recv_pot.clustering.size() > 1)
+    {
+        while (!gss_recv_pot.update_charge_spaces())
+        {
+            verify_recv_pot_bound<TestType, bound_calculation_mode::LOWER, sidb_charge_state::NEGATIVE>(gss_recv_pot);
+            verify_recv_pot_bound<TestType, bound_calculation_mode::UPPER, sidb_charge_state::POSITIVE>(gss_recv_pot);
+            verify_recv_pot_bound<TestType, bound_calculation_mode::LOWER, sidb_charge_state::NEUTRAL>(gss_recv_pot);
+            verify_recv_pot_bound<TestType, bound_calculation_mode::UPPER, sidb_charge_state::NEUTRAL>(gss_recv_pot);
+        }
+        while (gss_recv_pot.move_up_hierarchy())
+        {
+            verify_recv_pot_bound<TestType, bound_calculation_mode::LOWER, sidb_charge_state::NEGATIVE>(gss_recv_pot);
+            verify_recv_pot_bound<TestType, bound_calculation_mode::UPPER, sidb_charge_state::POSITIVE>(gss_recv_pot);
+            verify_recv_pot_bound<TestType, bound_calculation_mode::LOWER, sidb_charge_state::NEUTRAL>(gss_recv_pot);
+            verify_recv_pot_bound<TestType, bound_calculation_mode::UPPER, sidb_charge_state::NEUTRAL>(gss_recv_pot);
+        }
+    }
 
     ground_state_space gss{lyt};
 
@@ -196,36 +193,33 @@ TEMPLATE_TEST_CASE(
     CHECK(top->charge_space.cbegin()->neg_count == 5);
     CHECK(top->charge_space.cbegin()->pos_count == 0);
 
-    REQUIRE(top->charge_space.cbegin()->decompositions.size() == 1);
-    REQUIRE(top->charge_space.cbegin()->decompositions.cbegin()->size() == 2);
+    REQUIRE(top->charge_space.cbegin()->compositions.size() == 1);
+    REQUIRE(top->charge_space.cbegin()->compositions.cbegin()->size() == 2);
 
-    if (top->charge_space.cbegin()->decompositions.cbegin()->cbegin()->projector->sidbs.size() == 3)
+    if (top->charge_space.cbegin()->compositions.cbegin()->cbegin()->projector->sidbs.size() == 3)
     {
-        CHECK(top->charge_space.cbegin()->decompositions.cbegin()->cbegin()->projector->sidbs ==
-              std::set{0ul, 1ul, 2ul});
-        CHECK((top->charge_space.cbegin()->decompositions.cbegin()->cbegin()->multiset_conf >> 32ull) == 2);
-        CHECK(((top->charge_space.cbegin()->decompositions.cbegin()->cbegin()->multiset_conf << 32ull) >> 32ull) == 0);
+        CHECK(top->charge_space.cbegin()->compositions.cbegin()->cbegin()->projector->sidbs == std::set{0ul, 1ul, 2ul});
+        CHECK((top->charge_space.cbegin()->compositions.cbegin()->cbegin()->multiset_conf >> 32ull) == 2);
+        CHECK(((top->charge_space.cbegin()->compositions.cbegin()->cbegin()->multiset_conf << 32ull) >> 32ull) == 0);
 
-        CHECK(std::next(top->charge_space.cbegin()->decompositions.cbegin()->cbegin(), 1)->projector->sidbs ==
+        CHECK(std::next(top->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)->projector->sidbs ==
               std::set{3ul, 4ul, 5ul, 6ul});
-        CHECK((std::next(top->charge_space.cbegin()->decompositions.cbegin()->cbegin(), 1)->multiset_conf >> 32ull) ==
-              3);
-        CHECK(((std::next(top->charge_space.cbegin()->decompositions.cbegin()->cbegin(), 1)->multiset_conf << 32ull) >>
+        CHECK((std::next(top->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)->multiset_conf >> 32ull) == 3);
+        CHECK(((std::next(top->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)->multiset_conf << 32ull) >>
                32ull) == 0);
     }
     else
     {
-        CHECK(std::next(top->charge_space.cbegin()->decompositions.cbegin()->cbegin(), 1)->projector->sidbs ==
+        CHECK(std::next(top->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)->projector->sidbs ==
               std::set{0ul, 1ul, 2ul});
-        CHECK((std::next(top->charge_space.cbegin()->decompositions.cbegin()->cbegin(), 1)->multiset_conf >> 32ull) ==
-              2);
-        CHECK(((std::next(top->charge_space.cbegin()->decompositions.cbegin()->cbegin(), 1)->multiset_conf << 32ull) >>
+        CHECK((std::next(top->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)->multiset_conf >> 32ull) == 2);
+        CHECK(((std::next(top->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)->multiset_conf << 32ull) >>
                32ull) == 0);
 
-        CHECK(top->charge_space.cbegin()->decompositions.cbegin()->cbegin()->projector->sidbs ==
+        CHECK(top->charge_space.cbegin()->compositions.cbegin()->cbegin()->projector->sidbs ==
               std::set{3ul, 4ul, 5ul, 6ul});
-        CHECK((top->charge_space.cbegin()->decompositions.cbegin()->cbegin()->multiset_conf >> 32ull) == 3);
-        CHECK(((top->charge_space.cbegin()->decompositions.cbegin()->cbegin()->multiset_conf << 32ull) >> 32ull) == 0);
+        CHECK((top->charge_space.cbegin()->compositions.cbegin()->cbegin()->multiset_conf >> 32ull) == 3);
+        CHECK(((top->charge_space.cbegin()->compositions.cbegin()->cbegin()->multiset_conf << 32ull) >> 32ull) == 0);
     }
     //
     //    const charge_distribution_surface<TestType> cds{lyt};
@@ -278,9 +272,8 @@ TEMPLATE_TEST_CASE(
     //    //              (*top->children.cbegin())->parent, *top->charge_space.cbegin()));
 }
 
-TEMPLATE_TEST_CASE(
-    "Ground state space of a 14 DB layout", "[ground-state-space]",
-                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))  //,
+TEMPLATE_TEST_CASE("Ground state space of a 14 DB layout", "[ground-state-space]",
+                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
 //    (charge_distribution_surface<cell_level_layout<sidb_technology,
 //    clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
@@ -305,6 +298,26 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type({8, 8, 1}, TestType::cell_type::NORMAL);   //  -    -       13
 
     //    const auto res = quickexact(lyt);
+
+    ground_state_space gss_recv_pot{lyt};
+
+    while (gss_recv_pot.clustering.size() > 1)
+    {
+        while (!gss_recv_pot.update_charge_spaces())
+        {
+            verify_recv_pot_bound<TestType, bound_calculation_mode::LOWER, sidb_charge_state::NEGATIVE>(gss_recv_pot);
+            verify_recv_pot_bound<TestType, bound_calculation_mode::UPPER, sidb_charge_state::POSITIVE>(gss_recv_pot);
+            verify_recv_pot_bound<TestType, bound_calculation_mode::LOWER, sidb_charge_state::NEUTRAL>(gss_recv_pot);
+            verify_recv_pot_bound<TestType, bound_calculation_mode::UPPER, sidb_charge_state::NEUTRAL>(gss_recv_pot);
+        }
+        while (gss_recv_pot.move_up_hierarchy())
+        {
+            verify_recv_pot_bound<TestType, bound_calculation_mode::LOWER, sidb_charge_state::NEGATIVE>(gss_recv_pot);
+            verify_recv_pot_bound<TestType, bound_calculation_mode::UPPER, sidb_charge_state::POSITIVE>(gss_recv_pot);
+            verify_recv_pot_bound<TestType, bound_calculation_mode::LOWER, sidb_charge_state::NEUTRAL>(gss_recv_pot);
+            verify_recv_pot_bound<TestType, bound_calculation_mode::UPPER, sidb_charge_state::NEUTRAL>(gss_recv_pot);
+        }
+    }
 
     ground_state_space gss{lyt};
 
