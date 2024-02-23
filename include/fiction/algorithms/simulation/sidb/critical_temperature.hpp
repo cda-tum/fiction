@@ -92,10 +92,7 @@ struct critical_temperature_params
 
 /**
  * This struct stores the result of the temperature simulation.
- *
- * @paramt Lyt SiDB cell-level layout type.
  */
-template <typename Lyt>
 struct critical_temperature_stats
 {
     /**
@@ -150,7 +147,7 @@ class critical_temperature_impl
 {
   public:
     critical_temperature_impl(const Lyt& lyt, const critical_temperature_params& ps,
-                              critical_temperature_stats<Lyt>& st) :
+                              critical_temperature_stats& st) :
             layout{lyt},
             params{ps},
             stats{st},
@@ -394,7 +391,7 @@ class critical_temperature_impl
     /**
      * Statistics.
      */
-    critical_temperature_stats<Lyt>& stats;
+    critical_temperature_stats& stats;
     /**
      * Iterator that iterates over all possible input states.
      */
@@ -454,7 +451,7 @@ class critical_temperature_impl
 template <typename Lyt, typename TT>
 double critical_temperature_gate_based(const Lyt& lyt, const std::vector<TT>& spec,
                                        const critical_temperature_params& params = {},
-                                       critical_temperature_stats<Lyt>*   pst    = nullptr)
+                                       critical_temperature_stats*   pst    = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -465,7 +462,7 @@ double critical_temperature_gate_based(const Lyt& lyt, const std::vector<TT>& sp
                               [](const auto& a, const auto& b)
                               { return a.num_vars() != b.num_vars(); }) == spec.cend());
 
-    critical_temperature_stats<Lyt> st{};
+    critical_temperature_stats st{};
 
     detail::critical_temperature_impl<Lyt> p{lyt, params, st};
 
@@ -492,12 +489,12 @@ double critical_temperature_gate_based(const Lyt& lyt, const std::vector<TT>& sp
  */
 template <typename Lyt>
 double critical_temperature_non_gate_based(const Lyt& lyt, const critical_temperature_params& params = {},
-                                           critical_temperature_stats<Lyt>* pst = nullptr)
+                                           critical_temperature_stats* pst = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-    critical_temperature_stats<Lyt> st{};
+    critical_temperature_stats st{};
 
     detail::critical_temperature_impl<Lyt> p{lyt, params, st};
 

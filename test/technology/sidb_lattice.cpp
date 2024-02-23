@@ -25,8 +25,7 @@ TEMPLATE_TEST_CASE("layout traits", "[sidb-lattice]", (sidb_cell_clk_lyt), (cds_
 TEMPLATE_TEST_CASE("use different lattice orientations", "[sidb-lattice]", (sidb_cell_clk_lyt),
                    (sidb_cell_clk_lyt_siqad))
 {
-    using lattice_layout_100 = sidb_lattice<TestType, sidb_100_lattice>;
-    lattice_layout_100 lyt_100{};
+    sidb_lattice<TestType, sidb_100_lattice> lyt_100{};
     lyt_100.assign_cell_type({0, 0}, sidb_cell_clk_lyt::cell_type::NORMAL);
     lyt_100.assign_cell_type({3, 0}, sidb_cell_clk_lyt::cell_type::NORMAL);
     lyt_100.assign_cell_type({5, 0}, sidb_cell_clk_lyt::cell_type::NORMAL);

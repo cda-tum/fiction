@@ -225,22 +225,22 @@ class opdom_command : public command
 
                 if (is_set("random_sampling"))
                 {
-                    op_domain = fiction::operational_domain_random_sampling(fiction::sidb_lattice{*lyt_ptr}, std::vector<fiction::tt>{*tt_ptr},
+                    op_domain = fiction::operational_domain_random_sampling(*lyt_ptr, std::vector<fiction::tt>{*tt_ptr},
                                                                             num_random_samples, params, &stats);
                 }
                 else if (is_set("flood_fill"))
                 {
-                    op_domain = fiction::operational_domain_flood_fill(fiction::sidb_lattice{*lyt_ptr}, std::vector<fiction::tt>{*tt_ptr},
+                    op_domain = fiction::operational_domain_flood_fill(*lyt_ptr, std::vector<fiction::tt>{*tt_ptr},
                                                                        num_random_samples, params, &stats);
                 }
                 else if (is_set("contour_tracing"))
                 {
-                    op_domain = fiction::operational_domain_contour_tracing(fiction::sidb_lattice{*lyt_ptr}, std::vector<fiction::tt>{*tt_ptr},
+                    op_domain = fiction::operational_domain_contour_tracing(*lyt_ptr, std::vector<fiction::tt>{*tt_ptr},
                                                                             num_random_samples, params, &stats);
                 }
                 else
                 {
-                    op_domain = fiction::operational_domain_grid_search(fiction::sidb_lattice{*lyt_ptr}, std::vector<fiction::tt>{*tt_ptr},
+                    op_domain = fiction::operational_domain_grid_search(*lyt_ptr, std::vector<fiction::tt>{*tt_ptr},
                                                                         params, &stats);
                 }
             }

@@ -34,7 +34,7 @@ TEMPLATE_TEST_CASE(
     critical_temperature_params params{};
     sidb_simulation_parameters  physical_params{2, -0.32, 5.6, 5.0};
 
-    critical_temperature_stats<TestType> critical_stats{};
+    critical_temperature_stats critical_stats{};
 
     SECTION("No physically valid charge distribution could be found")
     {

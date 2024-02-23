@@ -76,6 +76,7 @@ TEMPLATE_TEST_CASE("Convert offset::ucoord_t layout to SiQAD coordinate layout",
 
         auto lyt_transformed = convert_to_siqad_coordinates<TestType>(lyt);
 
+        CHECK(lyt.get_layout_name() == "test");
         CHECK(lyt_transformed.is_empty());
         CHECK(lyt_transformed.area() == area_with_padding(lyt.area(), x, y));
         CHECK(lyt_transformed.get_layout_name() == lyt.get_layout_name());

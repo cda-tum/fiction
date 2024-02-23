@@ -1,7 +1,6 @@
 #ifndef FICTION_SIDB_LATTICE_TYPES_HPP
 #define FICTION_SIDB_LATTICE_TYPES_HPP
 
-#include <cstdint>
 #include <utility>
 
 namespace fiction

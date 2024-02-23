@@ -64,7 +64,7 @@ class sqd_command : public command
 
             if constexpr (fiction::has_sidb_technology_v<Lyt>)
             {
-                fiction::write_sqd_layout(fiction::sidb_lattice{*lyt_ptr}, filename);
+                fiction::write_sqd_layout(*lyt_ptr, filename);
             }
             else
             {

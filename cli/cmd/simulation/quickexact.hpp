@@ -9,6 +9,7 @@
 #include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
+#include <fiction/technology/sidb_lattice_types.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/name_utils.hpp>
@@ -43,6 +44,10 @@ class quickexact_command : public command
                        "specifically for SiDB layouts. It provides a significant performance advantage of more than "
                        "three orders of magnitude over ExGS from SiQAD.")
     {
+        add_option("--lattive_orientation,-si_o", orientation,
+                   "Clocking scheme to use {OPEN[3|4], COLUMNAR[3|4], ROW[3|4] 2DDWAVE[3|4], 2DDWAVEHEX[3|4], USE, "
+                   "RES, ESR, CFE, RIPPLE, BANCS}",
+                   true);
         add_option("--epsilon_r,-e", physical_params.epsilon_r, "Electric permittivity of the substrate (unit-less)",
                    true);
         add_option("--lambda_tf,-l", physical_params.lambda_tf, "Thomas-Fermi screening distance (unit: nm)", true);
@@ -101,9 +106,23 @@ class quickexact_command : public command
                 }
                 else
                 {
-                    params.physical_parameters = physical_params;
+                    if constexpr (fiction::has_same_lattice_orientation_v<Lyt, fiction::sidb_100_lattice>)
+                    {
+                        params.physical_parameters = physical_params;
+                        sim_result                 = fiction::quickexact(*lyt_ptr, params);
+                    }
+                    else if constexpr (fiction::has_same_lattice_orientation_v<Lyt, fiction::sidb_111_lattice>)
+                    {
+                        params.physical_parameters = physical_params;
+                        auto cps                   = convert_params<Lyt>(params);
+                        sim_result_111             = fiction::quickexact(*lyt_ptr, cps);
+                    }
 
-                    sim_result = fiction::quickexact(fiction::sidb_lattice{*lyt_ptr}, params);
+                    else
+                    {
+                        env->out() << "[e] no valid lattice orientation" << std::endl;
+                        return;
+                    }
 
                     if (sim_result.charge_distributions.empty())
                     {
@@ -112,13 +131,25 @@ class quickexact_command : public command
                     }
                     else
                     {
-                        const auto min_energy_distr = fiction::minimum_energy_distribution(
-                            sim_result.charge_distributions.cbegin(), sim_result.charge_distributions.cend());
+                        if constexpr (fiction::has_same_lattice_orientation_v<Lyt, fiction::sidb_100_lattice>)
+                        {
+                            const auto min_energy_distr = fiction::minimum_energy_distribution(
+                                sim_result.charge_distributions.cbegin(), sim_result.charge_distributions.cend());
 
-                        min_energy = min_energy_distr->get_system_energy();
+                            min_energy = min_energy_distr->get_system_energy();
+                            store<fiction::cell_layout_t>().extend() =
+                                std::make_shared<fiction::cds_sidb_cell_clk_lyt>(*min_energy_distr);
+                        }
+                        else if constexpr (fiction::has_same_lattice_orientation_v<Lyt, fiction::sidb_111_lattice>)
+                        {
+                            const auto min_energy_distr =
+                                fiction::minimum_energy_distribution(sim_result_111.charge_distributions.cbegin(),
+                                                                     sim_result_111.charge_distributions.cend());
 
-                        store<fiction::cell_layout_t>().extend() =
-                            std::make_shared<fiction::cds_sidb_cell_clk_lyt>(*min_energy_distr);
+                            min_energy = min_energy_distr->get_system_energy();
+                            store<fiction::cell_layout_t>().extend() =
+                                std::make_shared<fiction::cds_sidb_cell_clk_lyt_111>(*min_energy_distr);
+                        }
                     }
                 }
             }
@@ -143,13 +174,21 @@ class quickexact_command : public command
      */
     fiction::quickexact_params<fiction::sidb_cell_clk_lyt> params{};
     /**
-     * Simulation result.
+     * Simulation result for H-Si 100.
      */
     fiction::sidb_simulation_result<fiction::sidb_cell_clk_lyt> sim_result{};
+    /**
+     * Simulation result for H-Si 111.
+     */
+    fiction::sidb_simulation_result<fiction::sidb_cell_clk_lyt_111> sim_result_111{};
     /**
      * Minimum energy.
      */
     double min_energy{std::numeric_limits<double>::infinity()};
+    /**
+     * Identifier of H-Si lattice orientation.
+     */
+    std::string orientation{"100"};
 
     /**
      * Logs the resulting information in a log file.
@@ -187,6 +226,34 @@ class quickexact_command : public command
         physical_params = fiction::sidb_simulation_parameters{2, -0.32, 5.6, 5.0};
         params          = {};
     }
+
+    template <typename LytDest, typename LytSrc>
+    fiction::quickexact_params<LytDest> convert_params(const fiction::quickexact_params<LytSrc>& ps_src) const noexcept
+    {
+        fiction::quickexact_params<LytDest> ps_dest{};
+
+        ps_dest.physical_parameters = ps_src.physical_parameters;
+        ps_dest.global_potential    = ps_src.global_potential;
+
+        return ps_dest;
+    }
+
+    //    template <typename LytDest, typename LytSrc>
+    //    fiction::sidb_simulation_result<LytDest>
+    //    convert_results(const fiction::sidb_simulation_result<LytSrc>& results_src) const noexcept
+    //    {
+    //        fiction::sidb_simulation_result<LytDest> results_dest{};
+    //
+    //        results_dest.algorithm_name     = results_src.algorithm_name;
+    //        results_dest.simulation_runtime = results_src.simulation_runtime;
+    //        results_dest.additional_simulation_parameters =
+    //            results_src.additional_simulation_parameters;  // fetch the automatically inferred base number
+    //        results_dest.physical_parameters.epsilon_r = results_src.physical_parameters.epsilon_r;
+    //        results_dest.physical_parameters.lambda_tf = results_src.physical_parameters.lambda_tf;
+    //        results_dest.physical_parameters.mu_minus  = results_src.physical_parameters.mu_minus;
+    //        // TODO convert chare distribution surfaces
+    //        return results_dest;
+    //    }
 };
 
 ALICE_ADD_COMMAND(quickexact, "Simulation")

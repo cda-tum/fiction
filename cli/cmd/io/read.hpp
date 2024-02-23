@@ -216,11 +216,21 @@ class read_command : public command
                                 {
                                     const auto layout_name = std::filesystem::path{filename}.stem().string();
 
-                                    store<fiction::cell_layout_t>().extend() =
-                                        std::make_shared<fiction::sidb_lattice<fiction::sidb_cell_clk_lyt>>(
-                                            fiction::read_sqd_layout<
-                                                fiction::sidb_lattice<fiction::sidb_cell_clk_lyt>>(
-                                                filename, layout_name));
+                                    const auto layout =
+                                        fiction::read_sqd_layout<fiction::sidb_lattice<fiction::sidb_cell_clk_lyt>>(
+                                            filename, layout_name);
+                                    if constexpr (fiction::has_same_lattice_orientation_v<decltype(layout),
+                                                                                          fiction::sidb_100_lattice>)
+                                    {
+                                        store<fiction::cell_layout_t>().extend() =
+                                            std::make_shared<fiction::sidb_cell_clk_lyt>(layout);
+                                    }
+                                    else if constexpr (fiction::has_same_lattice_orientation_v<
+                                                           decltype(layout), fiction::sidb_111_lattice>)
+                                    {
+                                        store<fiction::cell_layout_t>().extend() =
+                                            std::make_shared<fiction::sidb_cell_clk_lyt_111>(layout);
+                                    }
                                 }
                                 catch (const fiction::sqd_parsing_error& e)
                                 {

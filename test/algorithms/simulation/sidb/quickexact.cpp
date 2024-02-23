@@ -17,6 +17,7 @@
 #include <fiction/technology/sidb_charge_state.hpp>
 #include <fiction/technology/sidb_defects.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
+#include <fiction/technology/sidb_lattice_types.hpp>
 #include <fiction/technology/sidb_surface.hpp>
 #include <fiction/utils/math_utils.hpp>
 
@@ -40,89 +41,88 @@ TEMPLATE_TEST_CASE(
     CHECK(simulation_results.algorithm_name == "QuickExact");
 }
 
-// TEMPLATE_TEST_CASE(
-//     "Single SiDB QuickExact simulation", "[quickexact]",
-//     (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-//     (charge_distribution_surface<cell_level_layout<sidb_technology,
-//     clocked_layout<cartesian_layout<siqad::coord_t>>>>))
-//{
-//     TestType lyt{};
-//     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
-//
-//     const quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.32}};
-//
-//     const auto simulation_results = quickexact<TestType>(lyt, params);
-//
-//     REQUIRE(simulation_results.charge_distributions.size() == 1);
-//     CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) ==
-//     sidb_charge_state::NEGATIVE);
-// }
+TEMPLATE_TEST_CASE(
+    "Single SiDB QuickExact simulation", "[quickexact]",
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>,
+                  sidb_100_lattice>),
+    (charge_distribution_surface<sidb_lattice<
+         cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>, sidb_100_lattice>>))
+{
+    TestType lyt{};
+    lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
 
-// TEMPLATE_TEST_CASE(
-//     "Single SiDB QuickExact simulation with one negatively charge defect (default initialization) in proximity",
-//     "[quickexact]",
-//     (sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
-//     (charge_distribution_surface<
-//         sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
-//{
-//     TestType lyt{};
-//     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
-//     const quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.25}};
-//     lyt.assign_sidb_defect({1, 2, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1,
-//     params.physical_parameters.epsilon_r,
-//                                                   params.physical_parameters.lambda_tf});
-//
-//     const auto simulation_results = quickexact<TestType>(lyt, params);
-//
-//     REQUIRE(simulation_results.charge_distributions.size() == 1);
-//     CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) ==
-//     sidb_charge_state::NEUTRAL);
-// }
-//
-// TEMPLATE_TEST_CASE(
-//     "Single SiDB QuickExact simulation with one negatively charge defect (changed lambda_tf) in proximity",
-//     "[quickexact]",
-//     (sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
-//     (charge_distribution_surface<
-//         sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
-//{
-//     TestType lyt{};
-//     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
-//
-//     const quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.25}};
-//
-//     lyt.assign_sidb_defect({1, 2, 0},
-//                            sidb_defect{sidb_defect_type::UNKNOWN, -1, params.physical_parameters.epsilon_r, 2});
-//     const auto simulation_results = quickexact<TestType>(lyt, params);
-//
-//     REQUIRE(simulation_results.charge_distributions.size() == 1);
-//     CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) ==
-//     sidb_charge_state::NEGATIVE);
-// }
-//
-// TEMPLATE_TEST_CASE(
-//     "Single SiDB QuickExact simulation with one negatively charge defect (changed epsilon_r) in proximity",
-//     "[quickexact]",
-//     (sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
-//     (charge_distribution_surface<
-//         sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
-//{
-//     TestType lyt{};
-//     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
-//
-//     const quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.25}};
-//
-//     lyt.assign_sidb_defect({1, 6, 0},
-//                            sidb_defect{sidb_defect_type::UNKNOWN, -1, 0.3, params.physical_parameters.lambda_tf});
-//
-//     const auto simulation_results = quickexact<TestType>(lyt, params);
-//
-//     REQUIRE(simulation_results.charge_distributions.size() == 1);
-//     CHECK(simulation_results.charge_distributions.front().num_defects() == 1);
-//     CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) ==
-//     sidb_charge_state::POSITIVE);
-// }
-//
+    const quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.32}};
+
+    const auto simulation_results = quickexact<TestType>(lyt, params);
+
+    REQUIRE(simulation_results.charge_distributions.size() == 1);
+    CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) == sidb_charge_state::NEGATIVE);
+}
+
+TEMPLATE_TEST_CASE(
+    "Single SiDB QuickExact simulation with one negatively charge defect (default initialization) in proximity",
+    "[quickexact]",
+    (sidb_surface<sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>,
+                               sidb_100_lattice>>),
+    (charge_distribution_surface<sidb_surface<sidb_lattice<
+         cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>, sidb_100_lattice>>>))
+{
+    TestType lyt{};
+    lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
+    const quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.25}};
+    lyt.assign_sidb_defect({1, 2, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1, params.physical_parameters.epsilon_r,
+                                                  params.physical_parameters.lambda_tf});
+
+    const auto simulation_results = quickexact<TestType>(lyt, params);
+
+    REQUIRE(simulation_results.charge_distributions.size() == 1);
+    CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) == sidb_charge_state::NEUTRAL);
+}
+
+TEMPLATE_TEST_CASE(
+    "Single SiDB QuickExact simulation with one negatively charge defect (changed lambda_tf) in proximity",
+    "[quickexact]",
+    (sidb_surface<sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>,
+                               sidb_100_lattice>>),
+    (charge_distribution_surface<sidb_surface<sidb_lattice<
+         cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>, sidb_100_lattice>>>))
+{
+    TestType lyt{};
+    lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
+
+    const quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.25}};
+
+    lyt.assign_sidb_defect({1, 2, 0},
+                           sidb_defect{sidb_defect_type::UNKNOWN, -1, params.physical_parameters.epsilon_r, 2});
+    const auto simulation_results = quickexact<TestType>(lyt, params);
+
+    REQUIRE(simulation_results.charge_distributions.size() == 1);
+    CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) == sidb_charge_state::NEGATIVE);
+}
+
+TEMPLATE_TEST_CASE(
+    "Single SiDB QuickExact simulation with one negatively charge defect (changed epsilon_r) in proximity",
+    "[quickexact]",
+    (sidb_surface<sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>,
+                               sidb_100_lattice>>),
+    (charge_distribution_surface<sidb_surface<sidb_lattice<
+         cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>, sidb_100_lattice>>>))
+{
+    TestType lyt{};
+    lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
+
+    const quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.25}};
+
+    lyt.assign_sidb_defect({1, 6, 0},
+                           sidb_defect{sidb_defect_type::UNKNOWN, -1, 0.3, params.physical_parameters.lambda_tf});
+
+    const auto simulation_results = quickexact<TestType>(lyt, params);
+
+    REQUIRE(simulation_results.charge_distributions.size() == 1);
+    CHECK(simulation_results.charge_distributions.front().num_defects() == 1);
+    CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) == sidb_charge_state::POSITIVE);
+}
+
 TEMPLATE_TEST_CASE(
     "four SiDBs QuickExact simulation with one negatively charge defect (changed epsilon_r) in proximity",
     "[quickexact]",
