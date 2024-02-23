@@ -122,10 +122,10 @@ static void verify_recv_pot_bound(const ground_state_space<Lyt>& gss) noexcept
     }
 }
 
-TEMPLATE_TEST_CASE("Ground state space of a 7 DB layout", "[ground-state-space]",
-                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
-//    (charge_distribution_surface<cell_level_layout<sidb_technology,
-//    clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+TEMPLATE_TEST_CASE(
+    "Ground state space of a 7 DB layout", "[ground-state-space]",
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
+    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
     TestType lyt{};
 
@@ -272,10 +272,10 @@ TEMPLATE_TEST_CASE("Ground state space of a 7 DB layout", "[ground-state-space]"
     //    //              (*top->children.cbegin())->parent, *top->charge_space.cbegin()));
 }
 
-TEMPLATE_TEST_CASE("Ground state space of a 14 DB layout", "[ground-state-space]",
-                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
-//    (charge_distribution_surface<cell_level_layout<sidb_technology,
-//    clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+TEMPLATE_TEST_CASE(
+    "Ground state space of a 14 DB layout", "[ground-state-space]",
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
+    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
     TestType lyt{};
     // V1   V2      num
@@ -324,6 +324,7 @@ TEMPLATE_TEST_CASE("Ground state space of a 14 DB layout", "[ground-state-space]
     const auto& [top, time] = gss.compute_ground_state_space();
 
     std::cout << "RUNTIME: " << (time.count() * 1000) << " ms" << std::endl;
+    std::cout << "TOP CLUSTER CHARGE SPACE SIZE: " << top->charge_space.size() << std::endl;
 
     CHECK(top->sidbs.size() == 14);
 
@@ -381,6 +382,7 @@ TEMPLATE_TEST_CASE(
     const auto& [top, time] = gss.compute_ground_state_space();
 
     std::cout << "RUNTIME: " << (time.count() * 1000) << " ms" << std::endl;
+    std::cout << "TOP CLUSTER CHARGE SPACE SIZE: " << top->charge_space.size() << std::endl;
 
     CHECK(top->sidbs.size() == 28);
 }
@@ -468,7 +470,170 @@ TEMPLATE_TEST_CASE(
 
     const auto& [top, time] = gss.compute_ground_state_space();
 
-    std::cout << "RUNTIME: " << (time.count() * 1000) << " ms" << std::endl;
+    std::cout << "RUNTIME: " << time.count() << " s" << std::endl;
+    std::cout << "TOP CLUSTER CHARGE SPACE SIZE: " << top->charge_space.size() << std::endl;
 
     CHECK(top->sidbs.size() == 56);
+}
+
+TEMPLATE_TEST_CASE(
+    "Ground state space of a 112 DB layout", "[ground-state-space]",
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
+    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+{
+    TestType lyt{};
+
+    // V1   V2      num
+    lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);  //  -    -       0
+    lyt.assign_cell_type({2, 2, 0}, TestType::cell_type::NORMAL);  //  -    -       4
+    lyt.assign_cell_type({4, 1, 0}, TestType::cell_type::NORMAL);  //  0    0       2
+
+    lyt.assign_cell_type({0, 7, 0}, TestType::cell_type::NORMAL);  //  -    -       10
+    lyt.assign_cell_type({1, 6, 0}, TestType::cell_type::NORMAL);  //  0    0       8
+    lyt.assign_cell_type({6, 5, 1}, TestType::cell_type::NORMAL);  //  0    -       6
+    lyt.assign_cell_type({4, 8, 1}, TestType::cell_type::NORMAL);  //  -    0       12
+
+    lyt.assign_cell_type({4, 0, 0}, TestType::cell_type::NORMAL);  //  0    0       1
+    lyt.assign_cell_type({6, 2, 0}, TestType::cell_type::NORMAL);  //  0    0       5
+    lyt.assign_cell_type({8, 1, 0}, TestType::cell_type::NORMAL);  //  -    -       3
+
+    lyt.assign_cell_type({4, 7, 0}, TestType::cell_type::NORMAL);   //  0    -       11
+    lyt.assign_cell_type({5, 6, 0}, TestType::cell_type::NORMAL);   //  0    +       9
+    lyt.assign_cell_type({10, 5, 1}, TestType::cell_type::NORMAL);  //  -    -       7
+    lyt.assign_cell_type({8, 8, 1}, TestType::cell_type::NORMAL);   //  -    -       13
+
+    lyt.assign_cell_type({8, 0, 0}, TestType::cell_type::NORMAL);   //  -    -       0
+    lyt.assign_cell_type({10, 2, 0}, TestType::cell_type::NORMAL);  //  -    -       4
+    lyt.assign_cell_type({12, 1, 0}, TestType::cell_type::NORMAL);  //  0    0       2
+
+    lyt.assign_cell_type({8, 7, 0}, TestType::cell_type::NORMAL);   //  -    -       10
+    lyt.assign_cell_type({9, 6, 0}, TestType::cell_type::NORMAL);   //  0    0       8
+    lyt.assign_cell_type({14, 5, 1}, TestType::cell_type::NORMAL);  //  0    -       6
+    lyt.assign_cell_type({12, 8, 1}, TestType::cell_type::NORMAL);  //  -    0       12
+
+    lyt.assign_cell_type({12, 0, 0}, TestType::cell_type::NORMAL);  //  0    0       1
+    lyt.assign_cell_type({14, 2, 0}, TestType::cell_type::NORMAL);  //  0    0       5
+    lyt.assign_cell_type({16, 1, 0}, TestType::cell_type::NORMAL);  //  -    -       3
+
+    lyt.assign_cell_type({12, 7, 0}, TestType::cell_type::NORMAL);  //  0    -       11
+    lyt.assign_cell_type({13, 6, 0}, TestType::cell_type::NORMAL);  //  0    +       9
+    lyt.assign_cell_type({18, 5, 1}, TestType::cell_type::NORMAL);  //  -    -       7
+    lyt.assign_cell_type({16, 8, 1}, TestType::cell_type::NORMAL);  //  -    -       13
+
+    lyt.assign_cell_type({16, 0, 0}, TestType::cell_type::NORMAL);  //  -    -       0
+    lyt.assign_cell_type({18, 2, 0}, TestType::cell_type::NORMAL);  //  -    -       4
+    lyt.assign_cell_type({20, 1, 0}, TestType::cell_type::NORMAL);  //  0    0       2
+
+    lyt.assign_cell_type({16, 7, 0}, TestType::cell_type::NORMAL);  //  -    -       10
+    lyt.assign_cell_type({17, 6, 0}, TestType::cell_type::NORMAL);  //  0    0       8
+    lyt.assign_cell_type({22, 5, 1}, TestType::cell_type::NORMAL);  //  0    -       6
+    lyt.assign_cell_type({20, 8, 1}, TestType::cell_type::NORMAL);  //  -    0       12
+
+    lyt.assign_cell_type({20, 0, 0}, TestType::cell_type::NORMAL);  //  0    0       1
+    lyt.assign_cell_type({22, 2, 0}, TestType::cell_type::NORMAL);  //  0    0       5
+    lyt.assign_cell_type({24, 1, 0}, TestType::cell_type::NORMAL);  //  -    -       3
+
+    lyt.assign_cell_type({20, 7, 0}, TestType::cell_type::NORMAL);  //  0    -       11
+    lyt.assign_cell_type({21, 6, 0}, TestType::cell_type::NORMAL);  //  0    +       9
+    lyt.assign_cell_type({26, 5, 1}, TestType::cell_type::NORMAL);  //  -    -       7
+    lyt.assign_cell_type({24, 8, 1}, TestType::cell_type::NORMAL);  //  -    -       13
+
+    lyt.assign_cell_type({24, 0, 0}, TestType::cell_type::NORMAL);  //  -    -       0
+    lyt.assign_cell_type({26, 2, 0}, TestType::cell_type::NORMAL);  //  -    -       4
+    lyt.assign_cell_type({28, 1, 0}, TestType::cell_type::NORMAL);  //  0    0       2
+
+    lyt.assign_cell_type({24, 7, 0}, TestType::cell_type::NORMAL);  //  -    -       10
+    lyt.assign_cell_type({25, 6, 0}, TestType::cell_type::NORMAL);  //  0    0       8
+    lyt.assign_cell_type({30, 5, 1}, TestType::cell_type::NORMAL);  //  0    -       6
+    lyt.assign_cell_type({28, 8, 1}, TestType::cell_type::NORMAL);  //  -    0       12
+
+    lyt.assign_cell_type({28, 0, 0}, TestType::cell_type::NORMAL);  //  0    0       1
+    lyt.assign_cell_type({30, 2, 0}, TestType::cell_type::NORMAL);  //  0    0       5
+    lyt.assign_cell_type({32, 1, 0}, TestType::cell_type::NORMAL);  //  -    -       3
+
+    lyt.assign_cell_type({28, 7, 0}, TestType::cell_type::NORMAL);  //  0    -       11
+    lyt.assign_cell_type({29, 6, 0}, TestType::cell_type::NORMAL);  //  0    +       9
+    lyt.assign_cell_type({34, 5, 1}, TestType::cell_type::NORMAL);  //  -    -       7
+    lyt.assign_cell_type({32, 8, 1}, TestType::cell_type::NORMAL);  //  -    -       13
+    // V1   V2      num
+    lyt.assign_cell_type({0 + 32, 0, 0}, TestType::cell_type::NORMAL);  //  -    -       0
+    lyt.assign_cell_type({2 + 32, 2, 0}, TestType::cell_type::NORMAL);  //  -    -       4
+    lyt.assign_cell_type({4 + 32, 1, 0}, TestType::cell_type::NORMAL);  //  0    0       2
+
+    lyt.assign_cell_type({0 + 32, 7, 0}, TestType::cell_type::NORMAL);  //  -    -       10
+    lyt.assign_cell_type({1 + 32, 6, 0}, TestType::cell_type::NORMAL);  //  0    0       8
+    lyt.assign_cell_type({6 + 32, 5, 1}, TestType::cell_type::NORMAL);  //  0    -       6
+    lyt.assign_cell_type({4 + 32, 8, 1}, TestType::cell_type::NORMAL);  //  -    0       12
+
+    lyt.assign_cell_type({4 + 32, 0, 0}, TestType::cell_type::NORMAL);  //  0    0       1
+    lyt.assign_cell_type({6 + 32, 2, 0}, TestType::cell_type::NORMAL);  //  0    0       5
+    lyt.assign_cell_type({8 + 32, 1, 0}, TestType::cell_type::NORMAL);  //  -    -       3
+
+    lyt.assign_cell_type({4 + 32, 7, 0}, TestType::cell_type::NORMAL);   //  0    -       11
+    lyt.assign_cell_type({5 + 32, 6, 0}, TestType::cell_type::NORMAL);   //  0    +       9
+    lyt.assign_cell_type({10 + 32, 5, 1}, TestType::cell_type::NORMAL);  //  -    -       7
+    lyt.assign_cell_type({8 + 32, 8, 1}, TestType::cell_type::NORMAL);   //  -    -       13
+
+    lyt.assign_cell_type({8 + 32, 0, 0}, TestType::cell_type::NORMAL);   //  -    -       0
+    lyt.assign_cell_type({10 + 32, 2, 0}, TestType::cell_type::NORMAL);  //  -    -       4
+    lyt.assign_cell_type({12 + 32, 1, 0}, TestType::cell_type::NORMAL);  //  0    0       2
+
+    lyt.assign_cell_type({8 + 32, 7, 0}, TestType::cell_type::NORMAL);   //  -    -       10
+    lyt.assign_cell_type({9 + 32, 6, 0}, TestType::cell_type::NORMAL);   //  0    0       8
+    lyt.assign_cell_type({14 + 32, 5, 1}, TestType::cell_type::NORMAL);  //  0    -       6
+    lyt.assign_cell_type({12 + 32, 8, 1}, TestType::cell_type::NORMAL);  //  -    0       12
+
+    lyt.assign_cell_type({12 + 32, 0, 0}, TestType::cell_type::NORMAL);  //  0    0       1
+    lyt.assign_cell_type({14 + 32, 2, 0}, TestType::cell_type::NORMAL);  //  0    0       5
+    lyt.assign_cell_type({16 + 32, 1, 0}, TestType::cell_type::NORMAL);  //  -    -       3
+
+    lyt.assign_cell_type({12 + 32, 7, 0}, TestType::cell_type::NORMAL);  //  0    -       11
+    lyt.assign_cell_type({13 + 32, 6, 0}, TestType::cell_type::NORMAL);  //  0    +       9
+    lyt.assign_cell_type({18 + 32, 5, 1}, TestType::cell_type::NORMAL);  //  -    -       7
+    lyt.assign_cell_type({16 + 32, 8, 1}, TestType::cell_type::NORMAL);  //  -    -       13
+
+    lyt.assign_cell_type({16 + 32, 0, 0}, TestType::cell_type::NORMAL);  //  -    -       0
+    lyt.assign_cell_type({18 + 32, 2, 0}, TestType::cell_type::NORMAL);  //  -    -       4
+    lyt.assign_cell_type({20 + 32, 1, 0}, TestType::cell_type::NORMAL);  //  0    0       2
+
+    lyt.assign_cell_type({16 + 32, 7, 0}, TestType::cell_type::NORMAL);  //  -    -       10
+    lyt.assign_cell_type({17 + 32, 6, 0}, TestType::cell_type::NORMAL);  //  0    0       8
+    lyt.assign_cell_type({22 + 32, 5, 1}, TestType::cell_type::NORMAL);  //  0    -       6
+    lyt.assign_cell_type({20 + 32, 8, 1}, TestType::cell_type::NORMAL);  //  -    0       12
+
+    lyt.assign_cell_type({20 + 32, 0, 0}, TestType::cell_type::NORMAL);  //  0    0       1
+    lyt.assign_cell_type({22 + 32, 2, 0}, TestType::cell_type::NORMAL);  //  0    0       5
+    lyt.assign_cell_type({24 + 32, 1, 0}, TestType::cell_type::NORMAL);  //  -    -       3
+
+    lyt.assign_cell_type({20 + 32, 7, 0}, TestType::cell_type::NORMAL);  //  0    -       11
+    lyt.assign_cell_type({21 + 32, 6, 0}, TestType::cell_type::NORMAL);  //  0    +       9
+    lyt.assign_cell_type({26 + 32, 5, 1}, TestType::cell_type::NORMAL);  //  -    -       7
+    lyt.assign_cell_type({24 + 32, 8, 1}, TestType::cell_type::NORMAL);  //  -    -       13
+
+    lyt.assign_cell_type({24 + 32, 0, 0}, TestType::cell_type::NORMAL);  //  -    -       0
+    lyt.assign_cell_type({26 + 32, 2, 0}, TestType::cell_type::NORMAL);  //  -    -       4
+    lyt.assign_cell_type({28 + 32, 1, 0}, TestType::cell_type::NORMAL);  //  0    0       2
+
+    lyt.assign_cell_type({24 + 32, 7, 0}, TestType::cell_type::NORMAL);  //  -    -       10
+    lyt.assign_cell_type({25 + 32, 6, 0}, TestType::cell_type::NORMAL);  //  0    0       8
+    lyt.assign_cell_type({30 + 32, 5, 1}, TestType::cell_type::NORMAL);  //  0    -       6
+    lyt.assign_cell_type({28 + 32, 8, 1}, TestType::cell_type::NORMAL);  //  -    0       12
+
+    lyt.assign_cell_type({28 + 32, 0, 0}, TestType::cell_type::NORMAL);  //  0    0       1
+    lyt.assign_cell_type({30 + 32, 2, 0}, TestType::cell_type::NORMAL);  //  0    0       5
+    lyt.assign_cell_type({32 + 32, 1, 0}, TestType::cell_type::NORMAL);  //  -    -       3
+
+    lyt.assign_cell_type({28 + 32, 7, 0}, TestType::cell_type::NORMAL);  //  0    -       11
+    lyt.assign_cell_type({29 + 32, 6, 0}, TestType::cell_type::NORMAL);  //  0    +       9
+    lyt.assign_cell_type({34 + 32, 5, 1}, TestType::cell_type::NORMAL);  //  -    -       7
+    lyt.assign_cell_type({32 + 32, 8, 1}, TestType::cell_type::NORMAL);  //  -    -       13
+
+    ground_state_space gss{lyt};
+
+    const auto& [top, time] = gss.compute_ground_state_space();
+
+    std::cout << "RUNTIME: " << time.count() << " s" << std::endl;
+    std::cout << "TOP CLUSTER CHARGE SPACE SIZE: " << top->charge_space.size() << std::endl;
+
+    CHECK(top->sidbs.size() == 112);
 }
