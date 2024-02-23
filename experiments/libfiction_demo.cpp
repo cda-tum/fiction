@@ -236,7 +236,7 @@ int main(int argc, char* argv[])  // NOLINT
     // write a SiQAD simulation file
 
     // TODO: Is it meaningful to save a QCA layout as a .sqd file?
-    //fiction::write_sqd_layout(ortho_cell_layout, designs + "ortho_qca.sqd");
+    // fiction::write_sqd_layout(ortho_cell_layout, designs + "ortho_qca.sqd");
 
     std::cout << std::endl;
 
