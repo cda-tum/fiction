@@ -38,7 +38,6 @@ using aspect_ratio = typename Lyt::aspect_ratio;
 template <typename Lyt>
 using coordinate = typename Lyt::coordinate;
 
-
 #pragma region has_north
 template <class Lyt, class = void>
 struct has_north : std::false_type
@@ -684,16 +683,15 @@ struct is_sidb_lattice : std::false_type
 {};
 
 template <class Lyt, class LatticeOrientation>
-struct is_sidb_lattice<
-    Lyt, LatticeOrientation> : std::true_type
+struct is_sidb_lattice<Lyt, LatticeOrientation> : std::true_type
 {};
 
 template <class Lyt, class LatticeOrientation>
 inline constexpr bool is_sidb_lattice_v = is_sidb_lattice<Lyt, LatticeOrientation>::value;
 
 template <typename Lyt, typename LatticeOrientation>
-inline constexpr const bool has_same_lattice_orientation_v = std::is_same_v<typename Lyt::orientation, LatticeOrientation>;
-
+inline constexpr const bool has_same_lattice_orientation_v =
+    std::is_same_v<typename Lyt::orientation, LatticeOrientation>;
 
 /**
  * SiDB surfaces

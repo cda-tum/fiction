@@ -146,8 +146,7 @@ template <typename Lyt>
 class critical_temperature_impl
 {
   public:
-    critical_temperature_impl(const Lyt& lyt, const critical_temperature_params& ps,
-                              critical_temperature_stats& st) :
+    critical_temperature_impl(const Lyt& lyt, const critical_temperature_params& ps, critical_temperature_stats& st) :
             layout{lyt},
             params{ps},
             stats{st},
@@ -451,15 +450,14 @@ class critical_temperature_impl
 template <typename Lyt, typename TT>
 double critical_temperature_gate_based(const Lyt& lyt, const std::vector<TT>& spec,
                                        const critical_temperature_params& params = {},
-                                       critical_temperature_stats*   pst    = nullptr)
+                                       critical_temperature_stats*        pst    = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
     assert(!spec.empty());
     // all elements in tts must have the same number of variables
-    assert(std::adjacent_find(spec.cbegin(), spec.cend(),
-                              [](const auto& a, const auto& b)
+    assert(std::adjacent_find(spec.cbegin(), spec.cend(), [](const auto& a, const auto& b)
                               { return a.num_vars() != b.num_vars(); }) == spec.cend());
 
     critical_temperature_stats st{};

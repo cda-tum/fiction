@@ -474,33 +474,25 @@ TEST_CASE("SiDB nanometer distance", "[distance]")
     CHECK_THAT(sidb_nanometer_distance(layout, {0, -5}, {0, -5}), WithinAbs(0.0, 0.00001));
 
     CHECK_THAT(sidb_nanometer_distance(layout, {0, 1, 1}, {0, 1, 1}), WithinAbs(0.0, 0.00001));
-    CHECK_THAT(sidb_nanometer_distance(layout, {0, 0}, {1, 0}),
-               WithinAbs(sidb_100_lattice::LAT_A * 0.1, 0.00001));
-    CHECK_THAT(sidb_nanometer_distance(layout, {0, 0}, {0, 1}),
-               WithinAbs(sidb_100_lattice::LAT_B * 0.1, 0.00001));
+    CHECK_THAT(sidb_nanometer_distance(layout, {0, 0}, {1, 0}), WithinAbs(sidb_100_lattice::LAT_A * 0.1, 0.00001));
+    CHECK_THAT(sidb_nanometer_distance(layout, {0, 0}, {0, 1}), WithinAbs(sidb_100_lattice::LAT_B * 0.1, 0.00001));
     CHECK_THAT(sidb_nanometer_distance(layout, {0, 0}, {0, 0, 1}),
                WithinAbs(sidb_100_lattice::LAT_C.second * 0.1, 0.00001));
 
-    CHECK_THAT(sidb_nanometer_distance(layout, {0, 0}, {-1, 0}),
-               WithinAbs(sidb_100_lattice::LAT_A * 0.1, 0.00001));
-    CHECK_THAT(sidb_nanometer_distance(layout, {0, 0}, {0, -1}),
-               WithinAbs(sidb_100_lattice::LAT_B * 0.1, 0.00001));
+    CHECK_THAT(sidb_nanometer_distance(layout, {0, 0}, {-1, 0}), WithinAbs(sidb_100_lattice::LAT_A * 0.1, 0.00001));
+    CHECK_THAT(sidb_nanometer_distance(layout, {0, 0}, {0, -1}), WithinAbs(sidb_100_lattice::LAT_B * 0.1, 0.00001));
     CHECK_THAT(sidb_nanometer_distance(layout, {0, 0}, {0, 0, -1}),
                WithinAbs(sidb_100_lattice::LAT_C.second * 0.1, 0.00001));
 
-    CHECK_THAT(
-        sidb_nanometer_distance(layout, {0, 0}, {0, 2, 1}),
-        WithinAbs(sidb_100_lattice::LAT_B * 0.2 + sidb_100_lattice::LAT_C.second * 0.1, 0.00001));
-    CHECK_THAT(
-        sidb_nanometer_distance(layout, {0, 0}, {0, -2, 1}),
-        WithinAbs(sidb_100_lattice::LAT_B * 0.2 - sidb_100_lattice::LAT_C.second * 0.1, 0.00001));
-    CHECK_THAT(
-        sidb_nanometer_distance(layout, {0, -2, 1}, {0, 0}),
-        WithinAbs(sidb_100_lattice::LAT_B * 0.2 - sidb_100_lattice::LAT_C.second * 0.1, 0.00001));
+    CHECK_THAT(sidb_nanometer_distance(layout, {0, 0}, {0, 2, 1}),
+               WithinAbs(sidb_100_lattice::LAT_B * 0.2 + sidb_100_lattice::LAT_C.second * 0.1, 0.00001));
+    CHECK_THAT(sidb_nanometer_distance(layout, {0, 0}, {0, -2, 1}),
+               WithinAbs(sidb_100_lattice::LAT_B * 0.2 - sidb_100_lattice::LAT_C.second * 0.1, 0.00001));
+    CHECK_THAT(sidb_nanometer_distance(layout, {0, -2, 1}, {0, 0}),
+               WithinAbs(sidb_100_lattice::LAT_B * 0.2 - sidb_100_lattice::LAT_C.second * 0.1, 0.00001));
 
-    CHECK_THAT(
-        sidb_nanometer_distance(layout, {0, 2, 1}, {-5, 1, 0}),
-        WithinAbs(std::hypot(sidb_100_lattice::LAT_A * 0.5,
-                             sidb_100_lattice::LAT_B * 0.1 + sidb_100_lattice::LAT_C.second * 0.1),
-                  0.00001));
+    CHECK_THAT(sidb_nanometer_distance(layout, {0, 2, 1}, {-5, 1, 0}),
+               WithinAbs(std::hypot(sidb_100_lattice::LAT_A * 0.5,
+                                    sidb_100_lattice::LAT_B * 0.1 + sidb_100_lattice::LAT_C.second * 0.1),
+                         0.00001));
 }

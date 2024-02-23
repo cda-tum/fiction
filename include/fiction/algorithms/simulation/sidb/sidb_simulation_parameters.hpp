@@ -34,8 +34,8 @@ struct sidb_simulation_parameters
      * @param c lattice constant in Å.
      */
     constexpr explicit sidb_simulation_parameters(const uint8_t base_number = 3, const double mu = -0.32,
-                                                  const double              relative_permittivity = 5.6,
-                                                  const double              screening_distance    = 5.0) :
+                                                  const double relative_permittivity = 5.6,
+                                                  const double screening_distance    = 5.0) :
             epsilon_r{relative_permittivity},
             lambda_tf{screening_distance},
             mu_minus{mu},

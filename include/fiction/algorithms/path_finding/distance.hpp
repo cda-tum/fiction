@@ -102,7 +102,7 @@ template <typename Lyt, typename Dist = uint64_t>
  * @return The distance between the two cells in nanometers (unit: nm).
  */
 template <typename Lyt>
-[[nodiscard]] constexpr double sidb_nanometer_distance(const Lyt&lyt, const coordinate<Lyt>& source,
+[[nodiscard]] constexpr double sidb_nanometer_distance(const Lyt& lyt, const coordinate<Lyt>& source,
                                                        const coordinate<Lyt>& target) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
