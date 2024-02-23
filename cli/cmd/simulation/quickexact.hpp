@@ -44,9 +44,8 @@ class quickexact_command : public command
                        "specifically for SiDB layouts. It provides a significant performance advantage of more than "
                        "three orders of magnitude over ExGS from SiQAD.")
     {
-        add_option("--lattive_orientation,-si_o", orientation,
-                   "Clocking scheme to use {OPEN[3|4], COLUMNAR[3|4], ROW[3|4] 2DDWAVE[3|4], 2DDWAVEHEX[3|4], USE, "
-                   "RES, ESR, CFE, RIPPLE, BANCS}",
+        add_option("--lattice_orientation,-si_o", orientation,
+                   "Lattice orientation to use {100, 111}",
                    true);
         add_option("--epsilon_r,-e", physical_params.epsilon_r, "Electric permittivity of the substrate (unit-less)",
                    true);
