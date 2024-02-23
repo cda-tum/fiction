@@ -44,9 +44,7 @@ class quickexact_command : public command
                        "specifically for SiDB layouts. It provides a significant performance advantage of more than "
                        "three orders of magnitude over ExGS from SiQAD.")
     {
-        add_option("--lattice_orientation,-si_o", orientation,
-                   "Lattice orientation to use {100, 111}",
-                   true);
+        add_option("--lattice_orientation,-si_o", orientation, "Lattice orientation to use {100, 111}", true);
         add_option("--epsilon_r,-e", physical_params.epsilon_r, "Electric permittivity of the substrate (unit-less)",
                    true);
         add_option("--lambda_tf,-l", physical_params.lambda_tf, "Thomas-Fermi screening distance (unit: nm)", true);
@@ -236,23 +234,6 @@ class quickexact_command : public command
 
         return ps_dest;
     }
-
-    //    template <typename LytDest, typename LytSrc>
-    //    fiction::sidb_simulation_result<LytDest>
-    //    convert_results(const fiction::sidb_simulation_result<LytSrc>& results_src) const noexcept
-    //    {
-    //        fiction::sidb_simulation_result<LytDest> results_dest{};
-    //
-    //        results_dest.algorithm_name     = results_src.algorithm_name;
-    //        results_dest.simulation_runtime = results_src.simulation_runtime;
-    //        results_dest.additional_simulation_parameters =
-    //            results_src.additional_simulation_parameters;  // fetch the automatically inferred base number
-    //        results_dest.physical_parameters.epsilon_r = results_src.physical_parameters.epsilon_r;
-    //        results_dest.physical_parameters.lambda_tf = results_src.physical_parameters.lambda_tf;
-    //        results_dest.physical_parameters.mu_minus  = results_src.physical_parameters.mu_minus;
-    //        // TODO convert chare distribution surfaces
-    //        return results_dest;
-    //    }
 };
 
 ALICE_ADD_COMMAND(quickexact, "Simulation")

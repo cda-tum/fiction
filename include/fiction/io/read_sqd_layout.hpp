@@ -97,12 +97,15 @@ class read_sqd_layout_impl
 
         const auto* const name = lat_vec_element->FirstChildElement("name");
 
-        if (name == nullptr)
+        std::string lattice_orientation = "Si(100) 2x1";
+
+        if (name != nullptr)
         {
-            throw sqd_parsing_error("Error parsing SQD file: no attribute 'name' in element 'lat_vec'");
+            const auto* const text = name->GetText();
+            lattice_orientation    = std::string{text};
         }
 
-        parse_lat_type(name);
+        parse_lat_type(lattice_orientation);
 
         const auto* const design_element = siqad_root->FirstChildElement("design");
 
@@ -211,22 +214,17 @@ class read_sqd_layout_impl
      * @param latcoord The <latcoord> element.
      * @return The cell position specified by the <latcoord> element.
      */
-    void parse_lat_type(const tinyxml2::XMLElement* name)
+    void parse_lat_type(const std::string& name)
     {
-        const auto* const text = name->GetText();
 
-        if (text == nullptr)
-        {
-            throw sqd_parsing_error("Error parsing SQD file: no text in element 'lat_type'");
-        }
-        if (std::string{text} == "Si(111) 1x1")
+        if (name == "Si(111) 1x1")
         {
             if (!has_same_lattice_orientation_v<Lyt, sidb_111_lattice>)
             {
                 throw sqd_parsing_error("Error parsing SQD file: mismatch in lattice orientations");
             }
         }
-        else if (std::string{text} == "Si(100) 2x1")
+        else if (name == "Si(100) 2x1")
         {
             if (!has_same_lattice_orientation_v<Lyt, sidb_100_lattice>)
             {
