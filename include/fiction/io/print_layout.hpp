@@ -556,7 +556,8 @@ void print_layout(const Lyt& lyt, std::ostream& os = std::cout)
             else
             {
                 const auto converted_lyt = convert_to_siqad_coordinates(lyt);
-                print_sidb_layout(os, sidb_lattice<decltype(converted_lyt), typename Lyt::orientation>{converted_lyt});
+                sidb_lattice<decltype(converted_lyt), typename Lyt::orientation> converted_lyt_lattice{converted_lyt};
+                print_sidb_layout(os, converted_lyt_lattice);
             }
         }
         else

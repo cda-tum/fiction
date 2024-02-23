@@ -299,35 +299,54 @@ auto convert_to_siqad_coordinates(const Lyt& lyt) noexcept
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(is_sidb_lattice_v<Lyt, typename Lyt::orientation>, "Lyt is not a SiDB lattice layout");
 
-    sidb_cell_clk_lyt_siqad lyt_new{{lyt.x(), (lyt.y() - lyt.y() % 2) / 2},
-                                    lyt.get_layout_name(),
-                                    lyt.get_tile_size_x(),
-                                    lyt.get_tile_size_y()};
-
-    lyt.foreach_cell(
-        [&lyt_new, &lyt](const auto& c)
-        {
-            lyt_new.assign_cell_type(siqad::to_siqad_coord<cell<Lyt>>(c), lyt.get_cell_type(c));
-            lyt_new.assign_cell_mode(siqad::to_siqad_coord<cell<Lyt>>(c), lyt.get_cell_mode(c));
-            lyt_new.assign_cell_name(siqad::to_siqad_coord<cell<Lyt>>(c), lyt.get_cell_name(c));
-        });
-
-    if constexpr (is_charge_distribution_surface_v<Lyt>)
+    auto processLayout = [&lyt](auto lyt_new)
     {
-        charge_distribution_surface lyt_new_cds{lyt_new};
+        lyt_new.resize({lyt.x(), (lyt.y() - lyt.y() % 2) / 2});
+        lyt_new.set_layout_name(lyt.get_layout_name());
+        lyt_new.set_tile_size_x(lyt.get_tile_size_x());
+        lyt_new.set_tile_size_y(lyt.get_tile_size_y());
 
         lyt.foreach_cell(
-            [&lyt_new_cds, &lyt](const auto& c)
-            { lyt_new_cds.assign_charge_state(siqad::to_siqad_coord<cell<Lyt>>(c), lyt.get_charge_state(c), false); });
+            [&lyt_new, &lyt](const auto& c)
+            {
+                lyt_new.assign_cell_type(siqad::to_siqad_coord(c), lyt.get_cell_type(c));
+                lyt_new.assign_cell_mode(siqad::to_siqad_coord(c), lyt.get_cell_mode(c));
+                lyt_new.assign_cell_name(siqad::to_siqad_coord(c), lyt.get_cell_name(c));
+            });
 
-        lyt_new_cds.assign_physical_parameters(lyt.get_phys_params());
+        if constexpr (is_charge_distribution_surface_v<decltype(lyt)>)
+        {
+            charge_distribution_surface lyt_new_cds{lyt_new};
 
-        return lyt_new_cds;
+            lyt.foreach_cell(
+                [&lyt_new_cds, &lyt](const auto& c)
+                { lyt_new_cds.assign_charge_state(siqad::to_siqad_coord(c), lyt.get_charge_state(c), false); });
+
+            lyt_new_cds.assign_physical_parameters(lyt.get_phys_params());
+
+            return lyt_new_cds;
+        }
+        else
+        {
+            return lyt_new;
+        }
+    };
+
+    if constexpr (has_same_lattice_orientation_v<Lyt, sidb_100_lattice>)
+    {
+        sidb_lattice<sidb_cell_clk_lyt_siqad, sidb_100_lattice> lyt_new{};
+        return processLayout(lyt_new);
+    }
+    else if constexpr (has_same_lattice_orientation_v<Lyt, sidb_111_lattice>)
+    {
+        sidb_lattice<sidb_cell_clk_lyt_siqad, sidb_111_lattice> lyt_new{};
+        return processLayout(lyt_new);
     }
     else
     {
-        return lyt_new;
+        assert(false && "No valid lattice orientation!");
     }
 }
 

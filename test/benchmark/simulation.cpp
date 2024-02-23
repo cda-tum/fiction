@@ -13,7 +13,7 @@
 
 using namespace fiction;
 
-using lattice = sidb_lattice_layout<sidb_cell_clk_lyt_siqad>;
+using lattice = sidb_lattice<sidb_cell_clk_lyt_siqad, sidb_100_lattice>;
 
 TEST_CASE("Benchmark simulators", "[benchmark]")
 {
