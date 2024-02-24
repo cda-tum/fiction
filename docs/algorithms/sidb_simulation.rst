@@ -194,6 +194,14 @@ Assess Population Stability
 .. doxygenfunction:: fiction::assess_physical_population_stability
 
 
+Positive Charge Detection
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Header:** ``fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp``
+
+.. doxygenfunction:: fiction::can_positive_charges_occur
+
+
 Convert Potential to Distance
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
