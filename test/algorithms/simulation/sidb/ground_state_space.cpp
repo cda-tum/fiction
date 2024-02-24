@@ -7,6 +7,7 @@
 
 #include <fiction/algorithms/simulation/sidb/ground_state_space.hpp>
 #include <fiction/algorithms/simulation/sidb/quickexact.hpp>
+#include <fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
@@ -14,6 +15,9 @@
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/charge_distribution_surface.hpp>
 #include <fiction/technology/physical_constants.hpp>
+#include <fiction/types.hpp>
+
+#include <fmt/format.h>
 
 #include <algorithm>
 #include <limits>
@@ -82,45 +86,45 @@ TEMPLATE_TEST_CASE(
 
     //    REQUIRE(gss.cl_min.get_phys_params().mu_minus == -0.32);
 }
-template <typename Lyt, bound_calculation_mode bound, sidb_charge_state onto_cs>
-static void verify_recv_pot_bound(const ground_state_space<Lyt>& gss) noexcept
-{
-    for (const sidb_cluster_ptr& c : gss.clustering)
-    {
-        if (ground_state_space<Lyt>::template onto_cs_pruned<onto_cs>(c))
-        {
-            continue;
-        }
-
-        double recv_pot_bound = 0;
-        for (const sidb_cluster_ptr& other_c : gss.clustering)
-        {
-            if (other_c != c)
-            {
-                recv_pot_bound += ground_state_space<Lyt>::template get_proj_bound<bound, onto_cs>(other_c, c).V;
-            }
-        }
-
-        recv_pot_bound -= c->get_recv_ext_pot_bound<bound, onto_cs>();
-
-        CHECK_THAT(recv_pot_bound, Catch::Matchers::WithinAbs(0.0, physical_constants::POP_STABILITY_ERR));
-        if (std::abs(recv_pot_bound) > physical_constants::POP_STABILITY_ERR)
-        {
-            std::cout << "BIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIP\n\n"
-                      << (bound == bound_calculation_mode::LOWER ? "LB" : "UB") << " ONTO "
-                      << charge_configuration_to_string(std::vector{onto_cs}) << "\nc: " << c->uid
-                      << "\nrecv_pot_bound: " << recv_pot_bound + c->get_recv_ext_pot_bound<bound, onto_cs>()
-                      << "\nstored_bound: " << c->get_recv_ext_pot_bound<bound, onto_cs>() << "\nclustering:\n";
-
-            for (const sidb_cluster_ptr& c_ : gss.clustering)
-            {
-                std::cout << c_->uid << std::endl;
-            }
-
-            std::cout << std::endl;
-        }
-    }
-}
+// template <typename Lyt, bound_calculation_mode bound, sidb_charge_state onto_cs>
+// static void verify_recv_pot_bound(const ground_state_space<Lyt>& gss) noexcept
+//{
+//     for (const sidb_cluster_ptr& c : gss.clustering)
+//     {
+//         if (ground_state_space<Lyt>::template onto_cs_pruned<onto_cs>(c))
+//         {
+//             continue;
+//         }
+//
+//         double recv_pot_bound = 0;
+//         for (const sidb_cluster_ptr& other_c : gss.clustering)
+//         {
+//             if (other_c != c)
+//             {
+//                 recv_pot_bound += ground_state_space<Lyt>::template get_proj_bound<bound, onto_cs>(other_c, c).V;
+//             }
+//         }
+//
+//         recv_pot_bound -= c->get_recv_ext_pot_bound<bound, onto_cs>();
+//
+//         CHECK_THAT(recv_pot_bound, Catch::Matchers::WithinAbs(0.0, physical_constants::POP_STABILITY_ERR));
+//         if (std::abs(recv_pot_bound) > physical_constants::POP_STABILITY_ERR)
+//         {
+//             std::cout << "BIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIP\n\n"
+//                       << (bound == bound_calculation_mode::LOWER ? "LB" : "UB") << " ONTO "
+//                       << charge_configuration_to_string(std::vector{onto_cs}) << "\nc: " << c->uid
+//                       << "\nrecv_pot_bound: " << recv_pot_bound + c->get_recv_ext_pot_bound<bound, onto_cs>()
+//                       << "\nstored_bound: " << c->get_recv_ext_pot_bound<bound, onto_cs>() << "\nclustering:\n";
+//
+//             for (const sidb_cluster_ptr& c_ : gss.clustering)
+//             {
+//                 std::cout << c_->uid << std::endl;
+//             }
+//
+//             std::cout << std::endl;
+//         }
+//     }
+// }
 
 TEMPLATE_TEST_CASE(
     "Ground state space of a 7 DB layout", "[ground-state-space]",
@@ -140,25 +144,29 @@ TEMPLATE_TEST_CASE(
 
     //    const auto res = quickexact(lyt);
 
-    ground_state_space gss_recv_pot{lyt};
-
-    while (gss_recv_pot.clustering.size() > 1)
-    {
-        while (!gss_recv_pot.update_charge_spaces())
-        {
-            verify_recv_pot_bound<TestType, bound_calculation_mode::LOWER, sidb_charge_state::NEGATIVE>(gss_recv_pot);
-            verify_recv_pot_bound<TestType, bound_calculation_mode::UPPER, sidb_charge_state::POSITIVE>(gss_recv_pot);
-            verify_recv_pot_bound<TestType, bound_calculation_mode::LOWER, sidb_charge_state::NEUTRAL>(gss_recv_pot);
-            verify_recv_pot_bound<TestType, bound_calculation_mode::UPPER, sidb_charge_state::NEUTRAL>(gss_recv_pot);
-        }
-        while (gss_recv_pot.move_up_hierarchy())
-        {
-            verify_recv_pot_bound<TestType, bound_calculation_mode::LOWER, sidb_charge_state::NEGATIVE>(gss_recv_pot);
-            verify_recv_pot_bound<TestType, bound_calculation_mode::UPPER, sidb_charge_state::POSITIVE>(gss_recv_pot);
-            verify_recv_pot_bound<TestType, bound_calculation_mode::LOWER, sidb_charge_state::NEUTRAL>(gss_recv_pot);
-            verify_recv_pot_bound<TestType, bound_calculation_mode::UPPER, sidb_charge_state::NEUTRAL>(gss_recv_pot);
-        }
-    }
+    //    ground_state_space gss_recv_pot{lyt};
+    //
+    //    while (gss_recv_pot.clustering.size() > 1)
+    //    {
+    //        while (!gss_recv_pot.update_charge_spaces())
+    //        {
+    //            verify_recv_pot_bound<TestType, bound_calculation_mode::LOWER,
+    //            sidb_charge_state::NEGATIVE>(gss_recv_pot); verify_recv_pot_bound<TestType,
+    //            bound_calculation_mode::UPPER, sidb_charge_state::POSITIVE>(gss_recv_pot);
+    //            verify_recv_pot_bound<TestType, bound_calculation_mode::LOWER,
+    //            sidb_charge_state::NEUTRAL>(gss_recv_pot); verify_recv_pot_bound<TestType,
+    //            bound_calculation_mode::UPPER, sidb_charge_state::NEUTRAL>(gss_recv_pot);
+    //        }
+    //        while (gss_recv_pot.move_up_hierarchy())
+    //        {
+    //            verify_recv_pot_bound<TestType, bound_calculation_mode::LOWER,
+    //            sidb_charge_state::NEGATIVE>(gss_recv_pot); verify_recv_pot_bound<TestType,
+    //            bound_calculation_mode::UPPER, sidb_charge_state::POSITIVE>(gss_recv_pot);
+    //            verify_recv_pot_bound<TestType, bound_calculation_mode::LOWER,
+    //            sidb_charge_state::NEUTRAL>(gss_recv_pot); verify_recv_pot_bound<TestType,
+    //            bound_calculation_mode::UPPER, sidb_charge_state::NEUTRAL>(gss_recv_pot);
+    //        }
+    //    }
 
     ground_state_space gss{lyt};
 
@@ -196,13 +204,13 @@ TEMPLATE_TEST_CASE(
     REQUIRE(top->charge_space.cbegin()->compositions.size() == 1);
     REQUIRE(top->charge_space.cbegin()->compositions.cbegin()->size() == 2);
 
-    if (top->charge_space.cbegin()->compositions.cbegin()->cbegin()->projector->sidbs.size() == 3)
+    if (top->charge_space.cbegin()->compositions.cbegin()->cbegin()->cluster->sidbs.size() == 3)
     {
-        CHECK(top->charge_space.cbegin()->compositions.cbegin()->cbegin()->projector->sidbs == std::set{0ul, 1ul, 2ul});
+        CHECK(top->charge_space.cbegin()->compositions.cbegin()->cbegin()->cluster->sidbs == std::set{0ul, 1ul, 2ul});
         CHECK((top->charge_space.cbegin()->compositions.cbegin()->cbegin()->multiset_conf >> 32ull) == 2);
         CHECK(((top->charge_space.cbegin()->compositions.cbegin()->cbegin()->multiset_conf << 32ull) >> 32ull) == 0);
 
-        CHECK(std::next(top->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)->projector->sidbs ==
+        CHECK(std::next(top->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)->cluster->sidbs ==
               std::set{3ul, 4ul, 5ul, 6ul});
         CHECK((std::next(top->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)->multiset_conf >> 32ull) == 3);
         CHECK(((std::next(top->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)->multiset_conf << 32ull) >>
@@ -210,13 +218,13 @@ TEMPLATE_TEST_CASE(
     }
     else
     {
-        CHECK(std::next(top->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)->projector->sidbs ==
+        CHECK(std::next(top->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)->cluster->sidbs ==
               std::set{0ul, 1ul, 2ul});
         CHECK((std::next(top->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)->multiset_conf >> 32ull) == 2);
         CHECK(((std::next(top->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)->multiset_conf << 32ull) >>
                32ull) == 0);
 
-        CHECK(top->charge_space.cbegin()->compositions.cbegin()->cbegin()->projector->sidbs ==
+        CHECK(top->charge_space.cbegin()->compositions.cbegin()->cbegin()->cluster->sidbs ==
               std::set{3ul, 4ul, 5ul, 6ul});
         CHECK((top->charge_space.cbegin()->compositions.cbegin()->cbegin()->multiset_conf >> 32ull) == 3);
         CHECK(((top->charge_space.cbegin()->compositions.cbegin()->cbegin()->multiset_conf << 32ull) >> 32ull) == 0);
@@ -299,25 +307,29 @@ TEMPLATE_TEST_CASE(
 
     //    const auto res = quickexact(lyt);
 
-    ground_state_space gss_recv_pot{lyt};
-
-    while (gss_recv_pot.clustering.size() > 1)
-    {
-        while (!gss_recv_pot.update_charge_spaces())
-        {
-            verify_recv_pot_bound<TestType, bound_calculation_mode::LOWER, sidb_charge_state::NEGATIVE>(gss_recv_pot);
-            verify_recv_pot_bound<TestType, bound_calculation_mode::UPPER, sidb_charge_state::POSITIVE>(gss_recv_pot);
-            verify_recv_pot_bound<TestType, bound_calculation_mode::LOWER, sidb_charge_state::NEUTRAL>(gss_recv_pot);
-            verify_recv_pot_bound<TestType, bound_calculation_mode::UPPER, sidb_charge_state::NEUTRAL>(gss_recv_pot);
-        }
-        while (gss_recv_pot.move_up_hierarchy())
-        {
-            verify_recv_pot_bound<TestType, bound_calculation_mode::LOWER, sidb_charge_state::NEGATIVE>(gss_recv_pot);
-            verify_recv_pot_bound<TestType, bound_calculation_mode::UPPER, sidb_charge_state::POSITIVE>(gss_recv_pot);
-            verify_recv_pot_bound<TestType, bound_calculation_mode::LOWER, sidb_charge_state::NEUTRAL>(gss_recv_pot);
-            verify_recv_pot_bound<TestType, bound_calculation_mode::UPPER, sidb_charge_state::NEUTRAL>(gss_recv_pot);
-        }
-    }
+    //    ground_state_space gss_recv_pot{lyt};
+    //
+    //    while (gss_recv_pot.clustering.size() > 1)
+    //    {
+    //        while (!gss_recv_pot.update_charge_spaces())
+    //        {
+    //            verify_recv_pot_bound<TestType, bound_calculation_mode::LOWER,
+    //            sidb_charge_state::NEGATIVE>(gss_recv_pot); verify_recv_pot_bound<TestType,
+    //            bound_calculation_mode::UPPER, sidb_charge_state::POSITIVE>(gss_recv_pot);
+    //            verify_recv_pot_bound<TestType, bound_calculation_mode::LOWER,
+    //            sidb_charge_state::NEUTRAL>(gss_recv_pot); verify_recv_pot_bound<TestType,
+    //            bound_calculation_mode::UPPER, sidb_charge_state::NEUTRAL>(gss_recv_pot);
+    //        }
+    //        while (gss_recv_pot.move_up_hierarchy())
+    //        {
+    //            verify_recv_pot_bound<TestType, bound_calculation_mode::LOWER,
+    //            sidb_charge_state::NEGATIVE>(gss_recv_pot); verify_recv_pot_bound<TestType,
+    //            bound_calculation_mode::UPPER, sidb_charge_state::POSITIVE>(gss_recv_pot);
+    //            verify_recv_pot_bound<TestType, bound_calculation_mode::LOWER,
+    //            sidb_charge_state::NEUTRAL>(gss_recv_pot); verify_recv_pot_bound<TestType,
+    //            bound_calculation_mode::UPPER, sidb_charge_state::NEUTRAL>(gss_recv_pot);
+    //        }
+    //    }
 
     ground_state_space gss{lyt};
 
@@ -636,4 +648,87 @@ TEMPLATE_TEST_CASE(
     std::cout << "TOP CLUSTER CHARGE SPACE SIZE: " << top->charge_space.size() << std::endl;
 
     CHECK(top->sidbs.size() == 112);
+}
+
+using sidb_lyt = sidb_cell_clk_lyt_siqad;
+
+static bool verify_ground_state_space_result(const charge_distribution_surface<sidb_lyt>& valid_cl,
+                                             const sidb_cluster_ptr&                      gss_node) noexcept
+{
+    sidb_cluster_charge_state cl_m_conf{};
+
+    for (const uint64_t i : gss_node->sidbs)
+    {
+        cl_m_conf.add_charge(valid_cl.get_charge_state_by_index(i));
+    }
+
+    const sidb_cluster_charge_state_space::const_iterator found_m_conf = gss_node->charge_space.find(cl_m_conf);
+
+    if (found_m_conf == gss_node->charge_space.cend())
+    {
+        return false;
+    }
+    else if (gss_node->sidbs.size() == 1)
+    {
+        return true;
+    }
+
+    bool found_charge_conf = false;
+
+    for (const sidb_cluster_charge_state_composition& composition : found_m_conf->compositions)
+    {
+        bool composition_has_correct_charge_conf = true;
+
+        for (const sidb_cluster_projector_state& pst : composition)
+        {
+            composition_has_correct_charge_conf &= verify_ground_state_space_result(valid_cl, pst.cluster);
+        }
+
+        found_charge_conf |= composition_has_correct_charge_conf;
+    }
+
+    return found_charge_conf;
+}
+
+TEST_CASE("Ground State Space verification on random layouts (only top level)", "[ground-state-space]")
+{
+
+    const std::pair<cell<sidb_lyt>, cell<sidb_lyt>> layout_dimensions = {cell<sidb_lyt>{0, 0}, cell<sidb_lyt>{4, 2}};
+
+    generate_random_sidb_layout_params<sidb_lyt> rlg_ps{};
+    rlg_ps.coordinate_pair                    = layout_dimensions;
+    rlg_ps.number_of_sidbs                    = 4;
+    rlg_ps.number_of_unique_generated_layouts = 100;
+
+    const std::vector<sidb_lyt>& lyts = generate_multiple_random_sidb_layouts(sidb_lyt{}, rlg_ps);
+
+    for (uint64_t i = 0; i < lyts.size(); ++i)
+    {
+        std::cout << "LAYOUT NUMBER: " << i << std::endl;
+
+        const sidb_simulation_result<sidb_lyt>& qe_res = quickexact(lyts[i]);
+
+        std::cout << "QUICKEXACT RUNTIME: " << qe_res.simulation_runtime.count() << " ms" << std::endl;
+        std::cout << "PHYSICALLY VALID CHARGE DISTRIBUTIONS: " << qe_res.charge_distributions.size() << std::endl;
+
+        const auto& [top, time] = ground_state_space{lyts[i]}.compute_ground_state_space();
+
+        std::cout << "RUNTIME: " << (time.count() * 1000) << " ms" << std::endl;
+        std::cout << "TOP CLUSTER CHARGE SPACE SIZE: " << top->charge_space.size() << std::endl;
+
+        for (const charge_distribution_surface<sidb_lyt>& cl : qe_res.charge_distributions)
+        {
+            const bool verification = verify_ground_state_space_result(cl, top);
+            CHECK(verification);
+            if (!verification)
+            {
+                for (const cell<sidb_lyt>& c : cl.get_sidb_order())
+                {
+                    std::cout << fmt::format("{}", c) << std::endl;
+                }
+            }
+        }
+
+        std::cout << std::endl;
+    }
 }
