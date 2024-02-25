@@ -793,7 +793,7 @@ TEST_CASE("Ground State Space verification on random layouts with 4 SiDBs", "[gr
     generate_random_sidb_layout_params<sidb_lyt> rlg_ps{};
     rlg_ps.coordinate_pair                    = layout_dimensions;
     rlg_ps.number_of_sidbs                    = 4;
-    rlg_ps.number_of_unique_generated_layouts = 100;
+    rlg_ps.number_of_unique_generated_layouts = 1000;
 
     const std::vector<sidb_lyt>& lyts = generate_multiple_random_sidb_layouts(sidb_lyt{}, rlg_ps);
 
@@ -808,7 +808,7 @@ TEST_CASE("Ground State Space verification on random layouts with 20 SiDBs", "[g
     generate_random_sidb_layout_params<sidb_lyt> rlg_ps{};
     rlg_ps.coordinate_pair                    = layout_dimensions;
     rlg_ps.number_of_sidbs                    = 20;
-    rlg_ps.number_of_unique_generated_layouts = 100;
+    rlg_ps.number_of_unique_generated_layouts = 10000;
 
     const std::vector<sidb_lyt>& lyts = generate_multiple_random_sidb_layouts(sidb_lyt{}, rlg_ps);
 
