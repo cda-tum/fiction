@@ -238,28 +238,41 @@ enum class bound_calculation_mode : uint8_t
     UPPER
 };
 
+template <bound_calculation_mode bound>
+static constexpr bound_calculation_mode invert_bound() noexcept
+{
+    if constexpr (bound == bound_calculation_mode::LOWER)
+    {
+        return bound_calculation_mode::UPPER;
+    }
+    else
+    {
+        return bound_calculation_mode::LOWER;
+    }
+}
+
 static constexpr inline bool is_potential_bound_bottom(const double bound) noexcept
 {
     return std::isinf(bound);
 }
 
 template <bound_calculation_mode bound>
-static constexpr inline bool joined_potential_bound_is_stricter(const double pot_bound, const double candidate) noexcept
+static constexpr inline bool potential_bound_meet_is_weaker(const double pot_bound, const double candidate) noexcept
 {
     if constexpr (bound == bound_calculation_mode::LOWER)
     {
-        return pot_bound < candidate;
+        return pot_bound > candidate;
     }
     else
     {
-        return pot_bound > candidate;
+        return pot_bound < candidate;
     }
 }
 
 template <bound_calculation_mode bound>
 static constexpr inline void take_meet_of_potential_bounds(double& pot_bound, const double other_pot_bound) noexcept
 {
-    if (pot_bound != other_pot_bound && !joined_potential_bound_is_stricter<bound>(pot_bound, other_pot_bound))
+    if (potential_bound_meet_is_weaker<bound>(pot_bound, other_pot_bound))
     {
         pot_bound = other_pot_bound;
     }
@@ -574,8 +587,15 @@ struct sidb_cluster
 
     template <bound_calculation_mode bound, sidb_charge_state onto_cs>
     constexpr inline void
-    set_recv_ext_pot_bound(const m_conf m,
-                           const double new_bound) noexcept  // verify.... iterate over all bounds when checking???
+    set_recv_ext_pot_bound(const m_conf m, const double new_bound) noexcept
+    {
+        recv_ext_pot_bounds[m][cs_bound_ix<bound, onto_cs>()] = new_bound;
+    }
+
+    template <bound_calculation_mode bound, sidb_charge_state onto_cs>
+    constexpr inline void
+    meet_recv_ext_pot_bound(const m_conf m,
+                            const double new_bound) noexcept  // verify.... iterate over all bounds when checking???
     {
         if (recv_ext_pot_bounds.count(m) == 0)
         {

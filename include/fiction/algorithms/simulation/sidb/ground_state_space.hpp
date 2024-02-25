@@ -191,7 +191,7 @@ class ground_state_space
         if (!is_potential_bound_bottom(pps_and_recv_bound.second))
         {
             pst.cluster->pot_projs[pst.cluster->uid].add_multiple<onto_cs>(pps_and_recv_bound.first, pst.multiset_conf);
-            pst.cluster->set_recv_ext_pot_bound<bound, onto_cs>(pst.multiset_conf, pps_and_recv_bound.second);
+            pst.cluster->meet_recv_ext_pot_bound<bound, onto_cs>(pst.multiset_conf, pps_and_recv_bound.second);
         }
     }
 
@@ -367,42 +367,38 @@ class ground_state_space
     }
 
     template <bound_calculation_mode bound, sidb_charge_state onto_cs>
-    static void derive_recv_ext_pot_bound_without_siblings(const sidb_cluster_ptr&            parent,
-                                                           const sidb_cluster_receptor_state& child_rst) noexcept
+    void compute_recv_ext_pot_bound_without_siblings(const sidb_cluster_receptor_state& child_rst) const noexcept
     {
         if (onto_cs_pruned<onto_cs>(child_rst.cluster) || !child_rst.contains_cs<onto_cs>())
         {
             return;
         }
 
-        double diff = 0;
+        double pot_without_siblings = 0;
 
-        for (const sidb_cluster_ptr& other_child : parent->children)
+        for (const sidb_cluster_ptr& non_sibling : clustering)
         {
-            if (other_child != child_rst.cluster)
-            {
-                diff -= get_proj_bound<bound, onto_cs>(other_child, child_rst).V;
-            }
+            pot_without_siblings += get_proj_bound<bound, onto_cs>(non_sibling, child_rst).V;  // ?
         }
 
-        child_rst.cluster->update_recv_ext_pot_bound<bound, onto_cs>(child_rst.multiset_conf, diff);
+        child_rst.cluster->set_recv_ext_pot_bound<bound, onto_cs>(child_rst.multiset_conf, pot_without_siblings);
     }
 
-    static void update_children_recv_bounds_omitting_pot_from_siblings(const sidb_cluster_ptr& parent) noexcept
+    void compute_children_recv_bounds_without_siblings(const sidb_cluster_ptr& parent) const noexcept
     {
         for (const sidb_cluster_ptr& child : parent->children)
         {
             for (const sidb_cluster_charge_state& m : child->charge_space)
             {
                 const sidb_cluster_receptor_state child_rst{child, static_cast<uint64_t>(m)};
-                derive_recv_ext_pot_bound_without_siblings<bound_calculation_mode::LOWER, sidb_charge_state::NEGATIVE>(
-                    parent, child_rst);
-                derive_recv_ext_pot_bound_without_siblings<bound_calculation_mode::UPPER, sidb_charge_state::POSITIVE>(
-                    parent, child_rst);
-                derive_recv_ext_pot_bound_without_siblings<bound_calculation_mode::LOWER, sidb_charge_state::NEUTRAL>(
-                    parent, child_rst);
-                derive_recv_ext_pot_bound_without_siblings<bound_calculation_mode::UPPER, sidb_charge_state::NEUTRAL>(
-                    parent, child_rst);
+                compute_recv_ext_pot_bound_without_siblings<bound_calculation_mode::LOWER, sidb_charge_state::NEGATIVE>(
+                    child_rst);
+                compute_recv_ext_pot_bound_without_siblings<bound_calculation_mode::UPPER, sidb_charge_state::POSITIVE>(
+                    child_rst);
+                compute_recv_ext_pot_bound_without_siblings<bound_calculation_mode::LOWER, sidb_charge_state::NEUTRAL>(
+                    child_rst);
+                compute_recv_ext_pot_bound_without_siblings<bound_calculation_mode::UPPER, sidb_charge_state::NEUTRAL>(
+                    child_rst);
             }
         }
     }
@@ -438,7 +434,7 @@ class ground_state_space
     {
         if (!parent_pst.contains_cs<onto_cs>())
         {
-            return std::make_pair(pot_proj_order{}, potential_projection::bottom<bound>().V);
+            return std::make_pair(pot_proj_order{}, potential_projection::top<bound>().V);
         }
 
         // construct internal potential projection bounds for this composition
@@ -446,7 +442,7 @@ class ground_state_space
 
         // construct the joined bound on the external and internal projected potential onto onto_cs for this
         // composition, and remember which cluster came with this bound
-        double                             total_proj_pot_bound = potential_projection::bottom<bound>().V;
+        double                             total_proj_pot_bound = potential_projection::top<bound>().V;
         const sidb_cluster_receptor_state* bound_rst            = nullptr;
 
         for (const sidb_cluster_receptor_state& rst : composition)
@@ -468,7 +464,7 @@ class ground_state_space
             const double total_proj_pot_bound_candidate =
                 rst.cluster->get_recv_ext_pot_bound<bound, onto_cs>(rst.multiset_conf) + int_pot_proj_onto_child.V;
 
-            if (joined_potential_bound_is_stricter<bound>(total_proj_pot_bound, total_proj_pot_bound_candidate))
+            if (potential_bound_meet_is_weaker<bound>(total_proj_pot_bound, total_proj_pot_bound_candidate))
             {
                 total_proj_pot_bound = total_proj_pot_bound_candidate;
                 bound_rst            = &rst;
@@ -604,7 +600,7 @@ class ground_state_space
 
         for (const sidb_cluster_ptr& child : parent->children)
         {
-            diff -= get_proj_bound<bound, onto_cs>(child, rst).V;
+            diff -= get_proj_bound<bound, onto_cs>(child, rst).V;  // wrong?
         }
 
         rst.cluster->update_recv_ext_pot_bound<bound, onto_cs>(rst.multiset_conf, diff);
@@ -685,14 +681,14 @@ class ground_state_space
                                { return c1->parent->sidbs.size() < c2->parent->sidbs.size(); }))
                 ->parent;
 
-        update_children_recv_bounds_omitting_pot_from_siblings(min_parent);
-
-        construct_merged_charge_state_space(min_parent);
-
         for (const sidb_cluster_ptr& c : min_parent->children)
         {
             clustering.erase(c);
         }
+
+        compute_children_recv_bounds_without_siblings(min_parent);
+
+        construct_merged_charge_state_space(min_parent);
 
         construct_merged_potential_projections(min_parent);
 

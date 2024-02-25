@@ -5,6 +5,7 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
 #include <fiction/algorithms/simulation/sidb/ground_state_space.hpp>
 #include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp>
@@ -690,25 +691,65 @@ static bool verify_ground_state_space_result(const charge_distribution_surface<s
     return found_charge_conf;
 }
 
-TEST_CASE("Ground State Space verification on random layouts (only top level)", "[ground-state-space]")
+TEST_CASE("Tiny fail 1", "[ground-state-space]")
 {
+    sidb_lyt lyt{};
+    lyt.assign_cell_type({2, 0, 1}, sidb_lyt::cell_type::NORMAL);  //  -    -       0
+    lyt.assign_cell_type({4, 0, 1}, sidb_lyt::cell_type::NORMAL);  //  -    -       4
+    lyt.assign_cell_type({3, 1, 0}, sidb_lyt::cell_type::NORMAL);  //  0    0       2
+    lyt.assign_cell_type({4, 1, 0}, sidb_lyt::cell_type::NORMAL);  //  0    0       2
 
-    const std::pair<cell<sidb_lyt>, cell<sidb_lyt>> layout_dimensions = {cell<sidb_lyt>{0, 0}, cell<sidb_lyt>{4, 2}};
+    const sidb_simulation_result<sidb_lyt>& qe_res   = quickexact(lyt);
+    const sidb_simulation_result<sidb_lyt>& exgs_res = exhaustive_ground_state_simulation(lyt);
+    const auto& [top, time]                          = ground_state_space{lyt}.compute_ground_state_space();
 
-    generate_random_sidb_layout_params<sidb_lyt> rlg_ps{};
-    rlg_ps.coordinate_pair                    = layout_dimensions;
-    rlg_ps.number_of_sidbs                    = 4;
-    rlg_ps.number_of_unique_generated_layouts = 100;
+    for (const charge_distribution_surface<sidb_lyt>& cl : qe_res.charge_distributions)
+    {
+        const bool verification = verify_ground_state_space_result(cl, top);
+        CHECK(verification);
+    }
 
-    const std::vector<sidb_lyt>& lyts = generate_multiple_random_sidb_layouts(sidb_lyt{}, rlg_ps);
+    for (const charge_distribution_surface<sidb_lyt>& cl : exgs_res.charge_distributions)
+    {
+        const bool verification = verify_ground_state_space_result(cl, top);
+        CHECK(verification);
+    }
+}
 
+TEST_CASE("Tiny fail 2", "[ground-state-space]")
+{
+    sidb_lyt lyt{};
+    lyt.assign_cell_type({1, 1, 0}, sidb_lyt::cell_type::NORMAL);  //  -    -       0
+    lyt.assign_cell_type({2, 1, 1}, sidb_lyt::cell_type::NORMAL);  //  -    -       4
+    lyt.assign_cell_type({2, 2, 0}, sidb_lyt::cell_type::NORMAL);  //  0    0       2
+    lyt.assign_cell_type({3, 2, 0}, sidb_lyt::cell_type::NORMAL);  //  0    0       2
+
+    const sidb_simulation_result<sidb_lyt>& qe_res   = quickexact(lyt);
+    const sidb_simulation_result<sidb_lyt>& exgs_res = exhaustive_ground_state_simulation(lyt);
+    const auto& [top, time]                          = ground_state_space{lyt}.compute_ground_state_space();
+
+    for (const charge_distribution_surface<sidb_lyt>& cl : qe_res.charge_distributions)
+    {
+        const bool verification = verify_ground_state_space_result(cl, top);
+        CHECK(verification);
+    }
+
+    for (const charge_distribution_surface<sidb_lyt>& cl : exgs_res.charge_distributions)
+    {
+        const bool verification = verify_ground_state_space_result(cl, top);
+        CHECK(verification);
+    }
+}
+
+static void verify_lyts(const std::vector<sidb_lyt>& lyts)
+{
     for (uint64_t i = 0; i < lyts.size(); ++i)
     {
         std::cout << "LAYOUT NUMBER: " << i << std::endl;
 
         const sidb_simulation_result<sidb_lyt>& qe_res = quickexact(lyts[i]);
 
-        std::cout << "QUICKEXACT RUNTIME: " << qe_res.simulation_runtime.count() << " ms" << std::endl;
+        std::cout << "QUICKEXACT RUNTIME: " << (qe_res.simulation_runtime.count() * 1000) << " ms" << std::endl;
         std::cout << "PHYSICALLY VALID CHARGE DISTRIBUTIONS: " << qe_res.charge_distributions.size() << std::endl;
 
         const auto& [top, time] = ground_state_space{lyts[i]}.compute_ground_state_space();
@@ -726,9 +767,50 @@ TEST_CASE("Ground State Space verification on random layouts (only top level)", 
                 {
                     std::cout << fmt::format("{}", c) << std::endl;
                 }
+
+                const sidb_simulation_result<sidb_lyt>& exgs_res = exhaustive_ground_state_simulation(lyts[i]);
+                for (const charge_distribution_surface<sidb_lyt>& cl_exgs : exgs_res.charge_distributions)
+                {
+                    const bool exgs_verification = verify_ground_state_space_result(cl_exgs, top);
+                    CHECK(exgs_verification);
+                    if (!exgs_verification)
+                    {
+                        std::cout << "EXGS AGREES with QUICKEXACT" << std::endl;
+                    }
+                }
             }
         }
 
         std::cout << std::endl;
     }
+}
+
+TEST_CASE("Ground State Space verification on random layouts with 4 SiDBs", "[ground-state-space]")
+{
+
+    const std::pair<cell<sidb_lyt>, cell<sidb_lyt>> layout_dimensions = {cell<sidb_lyt>{0, 0}, cell<sidb_lyt>{4, 2}};
+
+    generate_random_sidb_layout_params<sidb_lyt> rlg_ps{};
+    rlg_ps.coordinate_pair                    = layout_dimensions;
+    rlg_ps.number_of_sidbs                    = 4;
+    rlg_ps.number_of_unique_generated_layouts = 100;
+
+    const std::vector<sidb_lyt>& lyts = generate_multiple_random_sidb_layouts(sidb_lyt{}, rlg_ps);
+
+    verify_lyts(lyts);
+}
+
+TEST_CASE("Ground State Space verification on random layouts with 20 SiDBs", "[ground-state-space]")
+{
+
+    const std::pair<cell<sidb_lyt>, cell<sidb_lyt>> layout_dimensions = {cell<sidb_lyt>{0, 0}, cell<sidb_lyt>{24, 12}};
+
+    generate_random_sidb_layout_params<sidb_lyt> rlg_ps{};
+    rlg_ps.coordinate_pair                    = layout_dimensions;
+    rlg_ps.number_of_sidbs                    = 20;
+    rlg_ps.number_of_unique_generated_layouts = 100;
+
+    const std::vector<sidb_lyt>& lyts = generate_multiple_random_sidb_layouts(sidb_lyt{}, rlg_ps);
+
+    verify_lyts(lyts);
 }
