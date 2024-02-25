@@ -6,11 +6,17 @@
 
 #include "fiction/algorithms/network_transformation/fanout_substitution.hpp"
 #include "fiction/algorithms/path_finding/a_star.hpp"
+#include "fiction/algorithms/path_finding/cost.hpp"
+#include "fiction/algorithms/path_finding/distance.hpp"
+#include "fiction/algorithms/physical_design/apply_gate_library.hpp"
 #include "fiction/algorithms/physical_design/color_routing.hpp"
 #include "fiction/algorithms/physical_design/orthogonal.hpp"
-#include "fiction/algorithms/physical_design/topo_view.hpp"
+#include "fiction/algorithms/physical_design/topo_view_ci_to_co.hpp"
+#include "fiction/algorithms/physical_design/topo_view_co_to_ci.hpp"
 #include "fiction/algorithms/verification/equivalence_checking.hpp"
 #include "fiction/io/print_layout.hpp"
+#include "fiction/io/write_fgl_layout.hpp"
+#include "fiction/io/write_svg_layout.hpp"
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/layouts/obstruction_layout.hpp"
@@ -23,6 +29,7 @@
 #include <mockturtle/utils/node_map.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 #include <mockturtle/views/fanout_view.hpp>
+#include <mockturtle/views/names_view.hpp>
 
 #include <algorithm>
 #include <chrono>
@@ -102,10 +109,11 @@ class PriorityQueue {
     }
 };
 
-template <typename Lyt, typename Ntk, typename coord_vector>
+template <typename Lyt, typename Ntk>
 std::vector<std::vector<int>>
 get_possible_actions(Lyt& layout, Ntk& network, std::vector<mockturtle::node<Ntk>> actions, int current_node,
-                     std::unordered_map<mockturtle::node<Ntk>, mockturtle::node<Lyt>> node_dict)
+                     std::unordered_map<mockturtle::node<Ntk>, mockturtle::node<Lyt>> node_dict, bool pis_top,
+                     bool pis_left, int expansions)
 {
     std::vector<int> preceding_nodes{};
     network.foreach_fanin(actions[current_node], [&preceding_nodes](const auto& f) { preceding_nodes.push_back(f); });
@@ -114,10 +122,60 @@ get_possible_actions(Lyt& layout, Ntk& network, std::vector<mockturtle::node<Ntk
     if (network.is_pi(actions[current_node]))
     {
         int count = 0;
-        // for (int k = 0; k <= std::max(layout.x(), layout.y()); ++k)
-        for (int k = 0; k <= layout.x(); k++)
+        if (pis_top && pis_left)
         {
-            if (k <= layout.x())
+            for (int k = 0; k <= std::max(layout.x(), layout.y()); k++)
+            {
+                fiction::coordinate<Lyt> coord_top{k, 0, 0};
+                std::vector<int>         tile_top{k, 0, 0};
+                fiction::coordinate<Lyt> coord_left{0, k, 0};
+                std::vector<int>         tile_left{0, k, 0};
+
+                if (layout.is_empty_tile(coord_top))
+                {
+                    using dist = twoddwave_distance_functor<Lyt, uint64_t>;
+                    using cost = unit_cost_functor<Lyt, uint8_t>;
+                    static const a_star_params params{true};
+
+                    layout.resize({layout.x() + 1, layout.y() + 1, 1});
+                    fiction::coordinate<Lyt> drain{layout.x(), layout.y(), 0};
+                    auto                     path_to_drain = fiction::a_star<fiction::layout_coordinate_path<Lyt>>(
+                        layout, {coord_top, drain}, dist(), cost(), params);
+                    layout.resize({layout.x() - 1, layout.y() - 1, 1});
+
+                    if (!path_to_drain.empty())
+                    {
+                        possible_positions_nodes.push_back(tile_top);
+                        count++;
+                    }
+                }
+                if (layout.is_empty_tile(coord_left))
+                {
+                    using dist = twoddwave_distance_functor<Lyt, uint64_t>;
+                    using cost = unit_cost_functor<Lyt, uint8_t>;
+                    static const a_star_params params{true};
+
+                    layout.resize({layout.x() + 1, layout.y() + 1, 1});
+                    fiction::coordinate<Lyt> drain{layout.x(), layout.y(), 0};
+                    auto                     path_to_drain = fiction::a_star<fiction::layout_coordinate_path<Lyt>>(
+                        layout, {coord_left, drain}, dist(), cost(), params);
+                    layout.resize({layout.x() - 1, layout.y() - 1, 1});
+
+                    if (!path_to_drain.empty())
+                    {
+                        possible_positions_nodes.push_back(tile_left);
+                        count++;
+                    }
+                }
+                if (count >= 2 * expansions)
+                {
+                    return possible_positions_nodes;
+                }
+            }
+        }
+        else if (pis_top)
+        {
+            for (int k = 0; k <= layout.x(); k++)
             {
                 fiction::coordinate<Lyt> coord{k, 0, 0};
                 std::vector<int>         tile{k, 0, 0};
@@ -140,35 +198,95 @@ get_possible_actions(Lyt& layout, Ntk& network, std::vector<mockturtle::node<Ntk
                         count++;
                     }
                 }
+                if (count >= expansions)
+                {
+                    return possible_positions_nodes;
+                }
             }
-            if (count >= 4)
+        }
+        else if (pis_left)
+        {
+            for (int k = 0; k <= layout.y(); k++)
             {
-                return possible_positions_nodes;
+                fiction::coordinate<Lyt> coord{0, k, 0};
+                std::vector<int>         tile{0, k, 0};
+
+                if (layout.is_empty_tile(coord))
+                {
+                    using dist = twoddwave_distance_functor<Lyt, uint64_t>;
+                    using cost = unit_cost_functor<Lyt, uint8_t>;
+                    static const a_star_params params{true};
+
+                    layout.resize({layout.x() + 1, layout.y() + 1, 1});
+                    fiction::coordinate<Lyt> drain{layout.x(), layout.y(), 0};
+                    auto path_to_drain = fiction::a_star<fiction::layout_coordinate_path<Lyt>>(layout, {coord, drain},
+                                                                                               dist(), cost(), params);
+                    layout.resize({layout.x() - 1, layout.y() - 1, 1});
+
+                    if (!path_to_drain.empty())
+                    {
+                        possible_positions_nodes.push_back(tile);
+                        count++;
+                    }
+                }
+                if (count >= expansions)
+                {
+                    return possible_positions_nodes;
+                }
             }
+        }
+        else
+        {
+            throw std::runtime_error("Allowed location for PIs has to be specified");
         }
     }
     else if (network.is_po(actions[current_node]))
     {
+        int  count = 0;
         auto loc = layout.get_tile(node_dict[preceding_nodes[0]]);
-        for (int x = loc.x; x <= layout.x(); ++x)
+        for (int k = 0; k <= std::max(layout.x() - loc.x, layout.y() - loc.y); ++k)
         {
-            fiction::coordinate<Lyt> coord{x, layout.y(), 0};
-            std::vector<int>         tile{x, static_cast<int>(layout.y()), 0};
+            fiction::coordinate<Lyt> coord{loc.x + k, layout.y(), 0};
+            std::vector<int>         tile{loc.x + k, static_cast<int>(layout.y()), 0};
 
             if (layout.is_empty_tile(coord))
             {
-                possible_positions_nodes.push_back(tile);
+                using dist = twoddwave_distance_functor<Lyt, uint64_t>;
+                using cost = unit_cost_functor<Lyt, uint8_t>;
+                static const a_star_params params{true};
+                fiction::coordinate<Lyt>   previous{loc.x, loc.y, 0};
+                auto path_to_new_pos = fiction::a_star<fiction::layout_coordinate_path<Lyt>>(layout, {previous, coord},
+                                                                                             dist(), cost(), params);
+                if (!path_to_new_pos.empty())
+                {
+                    possible_positions_nodes.push_back(tile);
+                }
             }
-        }
 
-        for (int y = loc.y; y <= layout.y(); ++y)
-        {
-            fiction::coordinate<Lyt> coord{layout.x(), y, 0};
-            std::vector<int>         tile{static_cast<int>(layout.x()), y, 0};
-
-            if (layout.is_empty_tile(coord))
+            if (count >= expansions)
             {
-                possible_positions_nodes.push_back(tile);
+                return possible_positions_nodes;
+            }
+
+            fiction::coordinate<Lyt> coord2{layout.x(), loc.y + k, 0};
+            std::vector<int>         tile2{static_cast<int>(layout.x()), loc.y + k, 0};
+
+            if (layout.is_empty_tile(coord2))
+            {
+                using dist = twoddwave_distance_functor<Lyt, uint64_t>;
+                using cost = unit_cost_functor<Lyt, uint8_t>;
+                static const a_star_params params{true};
+                fiction::coordinate<Lyt>   previous{loc.x, loc.y, 0};
+                auto path_to_new_pos = fiction::a_star<fiction::layout_coordinate_path<Lyt>>(layout, {previous, coord2},
+                                                                                             dist(), cost(), params);
+                if (!path_to_new_pos.empty())
+                {
+                    possible_positions_nodes.push_back(tile2);
+                }
+            }
+            if (count >= expansions)
+            {
+                return possible_positions_nodes;
             }
         }
     }
@@ -235,7 +353,7 @@ get_possible_actions(Lyt& layout, Ntk& network, std::vector<mockturtle::node<Ntk
                         }
                     }
                 }
-                if (count >= 4)
+                if (count >= expansions)
                 {
                     // for (auto t : possible_positions_nodes){for (auto tt : t){std::cout << tt;}std::cout << "\n";}
                     return possible_positions_nodes;
@@ -336,7 +454,7 @@ get_possible_actions(Lyt& layout, Ntk& network, std::vector<mockturtle::node<Ntk
                         }
                     }
                 }
-                if (count >= 4)
+                if (count >= expansions)
                 {
                     return possible_positions_nodes;
                 }
@@ -697,7 +815,7 @@ neighbors(coord_vector                                                          
           std::unordered_map<coord_vector, coord_vector, detail::NestedVectorHash>& came_from, int count,
           bool& improv_mode, int& current_node, int& best_solution, Ntk& network,
           std::vector<mockturtle::node<Ntk>>& actions, std::vector<std::string>& po_names, int& max_placed_nodes,
-          std::chrono::time_point<std::chrono::high_resolution_clock> start_time, bool first_frontier)
+          std::chrono::time_point<std::chrono::high_resolution_clock> start_time, bool pis_top, bool pis_left, int expansions)
 {
     bool      placement_possible = true;
     int       current_pi         = 0;
@@ -728,8 +846,8 @@ neighbors(coord_vector                                                          
     std::vector<std::vector<int>> possible_actions{};
     if (sequence.empty())
     {
-        possible_actions =
-            detail::get_possible_actions<Lyt, Ntk, coord_vector>(layout, network, actions, current_node, node_dict);
+        possible_actions = detail::get_possible_actions<Lyt, Ntk>(layout, network, actions, current_node, node_dict,
+                                                                  pis_top, pis_left, expansions);
     }
 
     for (int idx = 0; idx < sequence.size(); ++idx)
@@ -783,7 +901,12 @@ neighbors(coord_vector                                                          
                 std::cout << "" << std::endl;
                 best_solution = area;
                 improv_mode   = true;
-
+                using cell_lyt =
+                    fiction::cell_level_layout<fiction::qca_technology,
+                                               fiction::clocked_layout<fiction::cartesian_layout<offset::ucoord_t>>>;
+                const auto cell_level_layout = fiction::apply_gate_library<cell_lyt, fiction::qca_one_library>(layout);
+                fiction::write_qca_layout_svg(cell_level_layout, network.get_network_name() + ".svg");
+                fiction::write_fgl_layout(layout, network.get_network_name() + ".fgl");
                 return {};
             }
             if (improv_mode)
@@ -812,8 +935,8 @@ neighbors(coord_vector                                                          
             {
                 return {};
             }
-            possible_actions =
-                detail::get_possible_actions<Lyt, Ntk, coord_vector>(layout, network, actions, current_node, node_dict);
+            possible_actions = detail::get_possible_actions<Lyt, Ntk>(layout, network, actions, current_node, node_dict,
+                                                                      pis_top, pis_left, expansions);
         }
     }
     for (auto action : possible_actions)
@@ -821,26 +944,14 @@ neighbors(coord_vector                                                          
         auto new_sequence = sequence;
         new_sequence.push_back(action);
         sequence_to_coord[new_sequence] = action;
-        const auto   bb                 = fiction::bounding_box_2d(layout);
-        const auto   max_el             = bb.get_max();
         const double rest_actions       = actions.size() - (sequence.size() + 1);
-        const double size0              = static_cast<double>(((max_el.x + 1) * (max_el.y + 1))) /
-                             static_cast<double>((max_layout_width * max_layout_height));
         const double size1 = static_cast<double>(((std::max(static_cast<int>(layout.x() - 1), action[0]) + 1) *
                                                   (std::max(static_cast<int>(layout.y() - 1), action[1]) + 1))) /
                              static_cast<double>((max_layout_width * max_layout_height));
         const double size2 = static_cast<double>(((action[0] + 1) * (action[1] + 1))) /
                              static_cast<double>((max_layout_width * max_layout_height));
 
-        double priority = 0;
-        if (first_frontier)
-        {
-            priority = rest_actions + size0 + size2;
-        }
-        else
-        {
-            priority = rest_actions + size1 + size2;
-        }
+        double priority = rest_actions + size1 + size2;
         next_actions.push_back({new_sequence, priority});
     }
 
@@ -851,7 +962,7 @@ neighbors(coord_vector                                                          
 
 
 template <typename Lyt, typename Ntk>
-Lyt a_star_pr(Ntk& ntk, a_star_pr_stats* pst = nullptr) noexcept
+Lyt a_star_pr(Ntk& ntk, a_star_pr_stats* pst = nullptr, bool high_effort = false) noexcept
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(mockturtle::is_network_type_v<Ntk>,
@@ -863,29 +974,73 @@ Lyt a_star_pr(Ntk& ntk, a_star_pr_stats* pst = nullptr) noexcept
 
     // Measure runtime
     {
-        const mockturtle::stopwatch stop{stats.time_total};
         using coord_vector = std::vector<std::vector<int>>;
         ntk.substitute_po_signals();
         fiction::fanout_substitution_params params{};
         params.strategy = fiction::fanout_substitution_params::substitution_strategy::BREADTH;
-        mockturtle::fanout_view network_substituted{
+        mockturtle::fanout_view network_substituted_breadth{
+            fanout_substitution<mockturtle::names_view<fiction::technology_network>>(ntk, params)};
+        params.strategy = fiction::fanout_substitution_params::substitution_strategy::DEPTH;
+        mockturtle::fanout_view network_substituted_depth{
             fanout_substitution<mockturtle::names_view<fiction::technology_network>>(ntk, params)};
 
-        fiction::topo_view network{network_substituted};
+        fiction::topo_view_co_to_ci network_breadth_co_to_ci{network_substituted_breadth};
+        fiction::topo_view_ci_to_co network_breadth_ci_to_co{network_substituted_breadth};
+        fiction::topo_view_co_to_ci network_depth_co_to_ci{network_substituted_depth};
+        fiction::topo_view_ci_to_co network_depth_ci_to_co{network_substituted_depth};
 
-        std::vector<mockturtle::node<decltype(network)>> actions{};
+        std::vector<mockturtle::node<decltype(network_breadth_co_to_ci)>> actions_breadth_co_to_ci{};
+        std::vector<mockturtle::node<decltype(network_breadth_ci_to_co)>> actions_breadth_ci_to_co{};
+        std::vector<mockturtle::node<decltype(network_depth_co_to_ci)>>   actions_depth_co_to_ci{};
+        std::vector<mockturtle::node<decltype(network_depth_co_to_ci)>>   actions_depth_ci_to_co{};
+
         std::vector<std::string>                         po_names{};
 
-        network.foreach_node(
-            [&actions, &network, &po_names](const auto& n, [[maybe_unused]] const auto i)
+        network_breadth_co_to_ci.foreach_node(
+            [&actions_breadth_co_to_ci, &network_breadth_co_to_ci](const auto& n)
             {
-                if (!network.is_constant(n))
+                if (!network_breadth_co_to_ci.is_constant(n) & !network_breadth_co_to_ci.is_po(n))
                 {
-                    actions.push_back(n);
+                    actions_breadth_co_to_ci.push_back(n);
                 }
-                if (network.is_po(n))
+            });
+        network_breadth_ci_to_co.foreach_node(
+            [&actions_breadth_ci_to_co, &network_breadth_ci_to_co](const auto& n)
+            {
+                if (!network_breadth_ci_to_co.is_constant(n) & !network_breadth_ci_to_co.is_po(n))
                 {
-                    po_names.push_back(network.get_output_name(network.po_index(n)));
+                    actions_breadth_ci_to_co.push_back(n);
+                }
+            });
+        network_depth_co_to_ci.foreach_node(
+            [&actions_depth_co_to_ci, &network_depth_co_to_ci](const auto& n)
+            {
+                if (!network_depth_co_to_ci.is_constant(n) & !network_depth_co_to_ci.is_po(n))
+                {
+                    actions_depth_co_to_ci.push_back(n);
+                }
+            });
+        network_depth_ci_to_co.foreach_node(
+            [&actions_depth_ci_to_co, &network_depth_ci_to_co](const auto& n)
+            {
+                if (!network_depth_ci_to_co.is_constant(n) & !network_depth_ci_to_co.is_po(n))
+                {
+                    actions_depth_ci_to_co.push_back(n);
+                }
+            });
+        network_substituted_breadth.foreach_co(
+            [&actions_breadth_co_to_ci, &actions_breadth_ci_to_co, &actions_depth_co_to_ci, &actions_depth_ci_to_co,
+             &network_substituted_breadth, &po_names](const auto& f)
+            {
+                auto n = network_substituted_breadth.get_node(f);
+                if (network_substituted_breadth.is_po(n))
+                {
+                    actions_breadth_co_to_ci.push_back(n);
+                    actions_breadth_ci_to_co.push_back(n);
+                    actions_depth_co_to_ci.push_back(n);
+                    actions_depth_ci_to_co.push_back(n);
+                    po_names.push_back(
+                        network_substituted_breadth.get_output_name(network_substituted_breadth.po_index(n)));
                 }
             });
 
@@ -894,59 +1049,152 @@ Lyt a_star_pr(Ntk& ntk, a_star_pr_stats* pst = nullptr) noexcept
         int                                                              best_solution    = 100000;
         bool                                                             improv_mode      = false;
 
-        std::unordered_map<coord_vector, std::vector<int>, detail::NestedVectorHash> sequence_to_coord;
+        std::unordered_map<coord_vector, std::vector<int>, detail::NestedVectorHash> sequence_to_coord1;
         std::unordered_map<coord_vector, std::vector<int>, detail::NestedVectorHash> sequence_to_coord2;
-        detail::PriorityQueue<coord_vector>                                          frontier;
-        detail::PriorityQueue<coord_vector>                                          frontier2;
+        std::unordered_map<coord_vector, std::vector<int>, detail::NestedVectorHash> sequence_to_coord3;
+        std::unordered_map<coord_vector, std::vector<int>, detail::NestedVectorHash> sequence_to_coord4;
+        std::unordered_map<coord_vector, std::vector<int>, detail::NestedVectorHash> sequence_to_coord5;
+        std::unordered_map<coord_vector, std::vector<int>, detail::NestedVectorHash> sequence_to_coord6;
+        std::unordered_map<coord_vector, std::vector<int>, detail::NestedVectorHash> sequence_to_coord7;
+        std::unordered_map<coord_vector, std::vector<int>, detail::NestedVectorHash> sequence_to_coord8;
+        std::unordered_map<coord_vector, std::vector<int>, detail::NestedVectorHash> sequence_to_coord9;
+        std::unordered_map<coord_vector, std::vector<int>, detail::NestedVectorHash> sequence_to_coord10;
+        std::unordered_map<coord_vector, std::vector<int>, detail::NestedVectorHash> sequence_to_coord11;
+        std::unordered_map<coord_vector, std::vector<int>, detail::NestedVectorHash> sequence_to_coord12;
 
-        std::unordered_map<coord_vector, coord_vector, detail::NestedVectorHash>     came_from;
+        detail::PriorityQueue<coord_vector>                                          frontier1;
+        detail::PriorityQueue<coord_vector>                                          frontier2;
+        detail::PriorityQueue<coord_vector>                                          frontier3;
+        detail::PriorityQueue<coord_vector>                                          frontier4;
+        detail::PriorityQueue<coord_vector>                                          frontier5;
+        detail::PriorityQueue<coord_vector>                                          frontier6;
+        detail::PriorityQueue<coord_vector>                                          frontier7;
+        detail::PriorityQueue<coord_vector>                                          frontier8;
+        detail::PriorityQueue<coord_vector>                                          frontier9;
+        detail::PriorityQueue<coord_vector>                                          frontier10;
+        detail::PriorityQueue<coord_vector>                                          frontier11;
+        detail::PriorityQueue<coord_vector>                                          frontier12;
+
+        std::unordered_map<coord_vector, coord_vector, detail::NestedVectorHash>     came_from1;
         std::unordered_map<coord_vector, coord_vector, detail::NestedVectorHash>     came_from2;
-        coord_vector                                                                 current = {{1000, 1000}};
+        std::unordered_map<coord_vector, coord_vector, detail::NestedVectorHash>     came_from3;
+        std::unordered_map<coord_vector, coord_vector, detail::NestedVectorHash>     came_from4;
+        std::unordered_map<coord_vector, coord_vector, detail::NestedVectorHash>     came_from5;
+        std::unordered_map<coord_vector, coord_vector, detail::NestedVectorHash>     came_from6;
+        std::unordered_map<coord_vector, coord_vector, detail::NestedVectorHash>     came_from7;
+        std::unordered_map<coord_vector, coord_vector, detail::NestedVectorHash>     came_from8;
+        std::unordered_map<coord_vector, coord_vector, detail::NestedVectorHash>     came_from9;
+        std::unordered_map<coord_vector, coord_vector, detail::NestedVectorHash>     came_from10;
+        std::unordered_map<coord_vector, coord_vector, detail::NestedVectorHash>     came_from11;
+        std::unordered_map<coord_vector, coord_vector, detail::NestedVectorHash>     came_from12;
+
+        coord_vector                                                                 current1  = {{1000, 1000}};
         coord_vector                                                                 current2 = {{1000, 1000}};
-        std::unordered_map<coord_vector, double, detail::NestedVectorHash>           cost_so_far;
+        coord_vector                                                                 current3  = {{1000, 1000}};
+        coord_vector                                                                 current4  = {{1000, 1000}};
+        coord_vector                                                                 current5  = {{1000, 1000}};
+        coord_vector                                                                 current6  = {{1000, 1000}};
+        coord_vector                                                                 current7  = {{1000, 1000}};
+        coord_vector                                                                 current8  = {{1000, 1000}};
+        coord_vector                                                                 current9  = {{1000, 1000}};
+        coord_vector                                                                 current10 = {{1000, 1000}};
+        coord_vector                                                                 current11 = {{1000, 1000}};
+        coord_vector                                                                 current12 = {{1000, 1000}};
+
+        std::unordered_map<coord_vector, double, detail::NestedVectorHash>           cost_so_far1;
         std::unordered_map<coord_vector, double, detail::NestedVectorHash>           cost_so_far2;
-        cost_so_far[current] = 0;
+        std::unordered_map<coord_vector, double, detail::NestedVectorHash>           cost_so_far3;
+        std::unordered_map<coord_vector, double, detail::NestedVectorHash>           cost_so_far4;
+        std::unordered_map<coord_vector, double, detail::NestedVectorHash>           cost_so_far5;
+        std::unordered_map<coord_vector, double, detail::NestedVectorHash>           cost_so_far6;
+        std::unordered_map<coord_vector, double, detail::NestedVectorHash>           cost_so_far7;
+        std::unordered_map<coord_vector, double, detail::NestedVectorHash>           cost_so_far8;
+        std::unordered_map<coord_vector, double, detail::NestedVectorHash>           cost_so_far9;
+        std::unordered_map<coord_vector, double, detail::NestedVectorHash>           cost_so_far10;
+        std::unordered_map<coord_vector, double, detail::NestedVectorHash>           cost_so_far11;
+        std::unordered_map<coord_vector, double, detail::NestedVectorHash>           cost_so_far12;
+
+        cost_so_far1[current1]   = 0;
         cost_so_far2[current2] = 0;
+        cost_so_far3[current3]   = 0;
+        cost_so_far4[current4]   = 0;
+        cost_so_far5[current5]   = 0;
+        cost_so_far6[current6]   = 0;
+        cost_so_far7[current7]   = 0;
+        cost_so_far8[current8]   = 0;
+        cost_so_far9[current9]   = 0;
+        cost_so_far10[current10] = 0;
+        cost_so_far11[current11] = 0;
+        cost_so_far12[current12] = 0;
+
         Lyt  lyt{{}, twoddwave_clocking<Lyt>()};
         auto layout = fiction::obstruction_layout<Lyt>(lyt);
         int  count  = 0;
 
         auto start          = std::chrono::high_resolution_clock::now();
         bool first_frontier = true;
+        bool second_frontier   = false;
+        bool third_frontier    = false;
+        bool fourth_frontier   = false;
+        bool fifth_frontier    = true;
+        bool sixth_frontier    = false;
+        bool seventh_frontier  = false;
+        bool eighth_frontier   = false;
+        bool ninth_frontier    = false;
+        bool tenth_frontier    = false;
+        bool eleventh_frontier = false;
+        bool twelfth_frontier  = false;
 
+        if (high_effort)
+        {
+            second_frontier   = true;
+            third_frontier    = true;
+            fourth_frontier   = true;
+            sixth_frontier    = true;
+            seventh_frontier  = true;
+            eighth_frontier   = true;
+            ninth_frontier    = true;
+            tenth_frontier    = true;
+            eleventh_frontier = true;
+            twelfth_frontier  = true;
+        }
+
+        const mockturtle::stopwatch stop{stats.time_total};
         while (true)
         {
-            count++;
+            if (improv_mode && false)
+            {
+                const auto ortho_layout = fiction::orthogonal<Lyt, Ntk>(ntk);
+                /*using cell_lyt = fiction::cell_level_layout<fiction::qca_technology,
+                fiction::clocked_layout<fiction::cartesian_layout<offset::ucoord_t>>>; const auto cell_level_layout =
+                    fiction::apply_gate_library<cell_lyt, fiction::qca_one_library>(ortho_layout);
+                fiction::write_qca_layout_svg(cell_level_layout, ntk.get_network_name() + "_ortho.svg");
+                fiction::write_fgl_layout(ortho_layout, ntk.get_network_name() + "_ortho.fgl");*/
+                return ortho_layout;
+            }
             if (first_frontier)
             {
+                count++;
                 auto neighbors = detail::neighbors<decltype(layout), Ntk, coord_vector>(
-                    current, sequence_to_coord, came_from, count, improv_mode, current_node, best_solution, network,
-                    actions, po_names, max_placed_nodes, start, first_frontier);
+                    current1, sequence_to_coord1, came_from1, count, improv_mode, current_node, best_solution,
+                    network_breadth_co_to_ci, actions_breadth_co_to_ci, po_names, max_placed_nodes, start, true, false, 4);
                 for (const auto& [next, cost] : neighbors)
                 {
-                    if (cost_so_far.find(next) == cost_so_far.end() || cost < cost_so_far[next])
+                    if (cost_so_far1.find(next) == cost_so_far1.end() || cost < cost_so_far1[next])
                     {
-                        cost_so_far[next] = cost;
+                        cost_so_far1[next] = cost;
                         double priority   = cost;
-                        frontier.put(next, priority);
-                        came_from[next] = current;
+                        frontier1.put(next, priority);
+                        came_from1[next] = current1;
                     }
                 }
-                if (!frontier.empty())
-                {
-                    current        = frontier.get();
-                    first_frontier = false;
-                }
-                else
-                {
-                    break;
-                }
             }
-            else
+            if (second_frontier)
             {
+                count++;
                 auto neighbors = detail::neighbors<decltype(layout), Ntk, coord_vector>(
-                    current2, sequence_to_coord2, came_from2, count, improv_mode, current_node, best_solution, network,
-                    actions, po_names, max_placed_nodes, start, first_frontier);
+                    current2, sequence_to_coord2, came_from2, count, improv_mode, current_node, best_solution,
+                    network_breadth_ci_to_co, actions_breadth_ci_to_co, po_names, max_placed_nodes, start, true, false, 4);
                 for (const auto& [next, cost] : neighbors)
                 {
                     if (cost_so_far2.find(next) == cost_so_far2.end() || cost < cost_so_far2[next])
@@ -957,15 +1205,315 @@ Lyt a_star_pr(Ntk& ntk, a_star_pr_stats* pst = nullptr) noexcept
                         came_from2[next] = current2;
                     }
                 }
-                if (!frontier2.empty())
+            }
+            if (third_frontier)
+            {
+                count++;
+                auto neighbors = detail::neighbors<decltype(layout), Ntk, coord_vector>(
+                    current3, sequence_to_coord3, came_from3, count, improv_mode, current_node, best_solution,
+                    network_depth_co_to_ci, actions_depth_co_to_ci, po_names, max_placed_nodes, start, true, false, 4);
+                for (const auto& [next, cost] : neighbors)
                 {
-                    current2       = frontier2.get();
-                    first_frontier = true;
+                    if (cost_so_far3.find(next) == cost_so_far3.end() || cost < cost_so_far3[next])
+                    {
+                        cost_so_far3[next] = cost;
+                        double priority    = cost;
+                        frontier3.put(next, priority);
+                        came_from3[next] = current3;
+                    }
+                }
+            }
+            if (fourth_frontier)
+            {
+                count++;
+                auto neighbors = detail::neighbors<decltype(layout), Ntk, coord_vector>(
+                    current4, sequence_to_coord4, came_from4, count, improv_mode, current_node, best_solution,
+                    network_depth_ci_to_co, actions_depth_ci_to_co, po_names, max_placed_nodes, start, true, false, 4);
+                for (const auto& [next, cost] : neighbors)
+                {
+                    if (cost_so_far4.find(next) == cost_so_far4.end() || cost < cost_so_far4[next])
+                    {
+                        cost_so_far4[next] = cost;
+                        double priority    = cost;
+                        frontier4.put(next, priority);
+                        came_from4[next] = current4;
+                    }
+                }
+            }
+            if (fifth_frontier)
+            {
+                count++;
+                auto neighbors = detail::neighbors<decltype(layout), Ntk, coord_vector>(
+                    current5, sequence_to_coord5, came_from5, count, improv_mode, current_node, best_solution,
+                    network_breadth_co_to_ci, actions_breadth_co_to_ci, po_names, max_placed_nodes, start, false, true, 4);
+                for (const auto& [next, cost] : neighbors)
+                {
+                    if (cost_so_far5.find(next) == cost_so_far5.end() || cost < cost_so_far5[next])
+                    {
+                        cost_so_far5[next] = cost;
+                        double priority    = cost;
+                        frontier5.put(next, priority);
+                        came_from5[next] = current5;
+                    }
+                }
+            }
+            if (sixth_frontier)
+            {
+                count++;
+                auto neighbors = detail::neighbors<decltype(layout), Ntk, coord_vector>(
+                    current6, sequence_to_coord6, came_from6, count, improv_mode, current_node, best_solution,
+                    network_breadth_ci_to_co, actions_breadth_ci_to_co, po_names, max_placed_nodes, start, false, true, 4);
+                for (const auto& [next, cost] : neighbors)
+                {
+                    if (cost_so_far6.find(next) == cost_so_far6.end() || cost < cost_so_far6[next])
+                    {
+                        cost_so_far6[next] = cost;
+                        double priority    = cost;
+                        frontier6.put(next, priority);
+                        came_from6[next] = current6;
+                    }
+                }
+            }
+            if (seventh_frontier)
+            {
+                count++;
+                auto neighbors = detail::neighbors<decltype(layout), Ntk, coord_vector>(
+                    current7, sequence_to_coord7, came_from7, count, improv_mode, current_node, best_solution,
+                    network_depth_co_to_ci, actions_depth_co_to_ci, po_names, max_placed_nodes, start, false, true, 4);
+                for (const auto& [next, cost] : neighbors)
+                {
+                    if (cost_so_far7.find(next) == cost_so_far7.end() || cost < cost_so_far7[next])
+                    {
+                        cost_so_far7[next] = cost;
+                        double priority    = cost;
+                        frontier7.put(next, priority);
+                        came_from7[next] = current7;
+                    }
+                }
+            }
+            if (eighth_frontier)
+            {
+                count++;
+                auto neighbors = detail::neighbors<decltype(layout), Ntk, coord_vector>(
+                    current8, sequence_to_coord8, came_from8, count, improv_mode, current_node, best_solution,
+                    network_depth_ci_to_co, actions_depth_ci_to_co, po_names, max_placed_nodes, start, false, true, 4);
+                for (const auto& [next, cost] : neighbors)
+                {
+                    if (cost_so_far8.find(next) == cost_so_far8.end() || cost < cost_so_far8[next])
+                    {
+                        cost_so_far8[next] = cost;
+                        double priority    = cost;
+                        frontier8.put(next, priority);
+                        came_from8[next] = current8;
+                    }
+                }
+            }
+            if (ninth_frontier)
+            {
+                count++;
+                auto neighbors = detail::neighbors<decltype(layout), Ntk, coord_vector>(
+                    current9, sequence_to_coord9, came_from9, count, improv_mode, current_node, best_solution,
+                    network_breadth_co_to_ci, actions_breadth_co_to_ci, po_names, max_placed_nodes, start, true, true, 4);
+                for (const auto& [next, cost] : neighbors)
+                {
+                    if (cost_so_far9.find(next) == cost_so_far9.end() || cost < cost_so_far9[next])
+                    {
+                        cost_so_far9[next] = cost;
+                        double priority    = cost;
+                        frontier9.put(next, priority);
+                        came_from9[next] = current9;
+                    }
+                }
+            }
+            if (tenth_frontier)
+            {
+                count++;
+                auto neighbors = detail::neighbors<decltype(layout), Ntk, coord_vector>(
+                    current10, sequence_to_coord10, came_from10, count, improv_mode, current_node, best_solution,
+                    network_breadth_ci_to_co, actions_breadth_ci_to_co, po_names, max_placed_nodes, start, true, true, 4);
+                for (const auto& [next, cost] : neighbors)
+                {
+                    if (cost_so_far10.find(next) == cost_so_far10.end() || cost < cost_so_far10[next])
+                    {
+                        cost_so_far10[next] = cost;
+                        double priority     = cost;
+                        frontier10.put(next, priority);
+                        came_from10[next] = current10;
+                    }
+                }
+            }
+            if (eleventh_frontier)
+            {
+                count++;
+                auto neighbors = detail::neighbors<decltype(layout), Ntk, coord_vector>(
+                    current11, sequence_to_coord11, came_from11, count, improv_mode, current_node, best_solution,
+                    network_depth_co_to_ci, actions_depth_co_to_ci, po_names, max_placed_nodes, start, true, true, 4);
+                for (const auto& [next, cost] : neighbors)
+                {
+                    if (cost_so_far11.find(next) == cost_so_far11.end() || cost < cost_so_far11[next])
+                    {
+                        cost_so_far11[next] = cost;
+                        double priority     = cost;
+                        frontier11.put(next, priority);
+                        came_from11[next] = current11;
+                    }
+                }
+            }
+            if (twelfth_frontier)
+            {
+                count++;
+                auto neighbors = detail::neighbors<decltype(layout), Ntk, coord_vector>(
+                    current12, sequence_to_coord12, came_from12, count, improv_mode, current_node, best_solution,
+                    network_depth_ci_to_co, actions_depth_ci_to_co, po_names, max_placed_nodes, start, true, true, 4);
+                for (const auto& [next, cost] : neighbors)
+                {
+                    if (cost_so_far12.find(next) == cost_so_far12.end() || cost < cost_so_far12[next])
+                    {
+                        cost_so_far12[next] = cost;
+                        double priority     = cost;
+                        frontier12.put(next, priority);
+                        came_from12[next] = current12;
+                    }
+                }
+            }
+            if (first_frontier)
+            {
+                if (!frontier1.empty())
+                {
+                    current1 = frontier1.get();
                 }
                 else
                 {
-                    break;
+                    first_frontier = false;
                 }
+            }
+            if (second_frontier)
+            {
+                if (!frontier2.empty())
+                {
+                    current2       = frontier2.get();
+                }
+                else
+                {
+                    second_frontier = false;
+                }
+            }
+            if (third_frontier)
+            {
+                if (!frontier3.empty())
+                {
+                    current3 = frontier3.get();
+                }
+                else
+                {
+                    third_frontier = false;
+                }
+            }
+            if (fourth_frontier)
+            {
+                if (!frontier4.empty())
+                {
+                    current4 = frontier4.get();
+                }
+                else
+                {
+                    fourth_frontier = false;
+                }
+            }
+            if (fifth_frontier)
+            {
+                if (!frontier5.empty())
+                {
+                    current5 = frontier5.get();
+                }
+                else
+                {
+                    fifth_frontier = false;
+                }
+            }
+            if (sixth_frontier)
+            {
+                if (!frontier6.empty())
+                {
+                    current6 = frontier6.get();
+                }
+                else
+                {
+                    sixth_frontier = false;
+                }
+            }
+            if (seventh_frontier)
+            {
+                if (!frontier7.empty())
+                {
+                    current7 = frontier7.get();
+                }
+                else
+                {
+                    seventh_frontier = false;
+                }
+            }
+            if (eighth_frontier)
+            {
+                if (!frontier8.empty())
+                {
+                    current8 = frontier8.get();
+                }
+                else
+                {
+                    eighth_frontier = false;
+                }
+            }
+            if (ninth_frontier)
+            {
+                if (!frontier9.empty())
+                {
+                    current9 = frontier9.get();
+                }
+                else
+                {
+                    ninth_frontier = false;
+                }
+            }
+            if (tenth_frontier)
+            {
+                if (!frontier10.empty())
+                {
+                    current10 = frontier10.get();
+                }
+                else
+                {
+                    tenth_frontier = false;
+                }
+            }
+            if (eleventh_frontier)
+            {
+                if (!frontier11.empty())
+                {
+                    current11 = frontier11.get();
+                }
+                else
+                {
+                    eleventh_frontier = false;
+                }
+            }
+            if (twelfth_frontier)
+            {
+                if (!frontier12.empty())
+                {
+                    current12 = frontier12.get();
+                }
+                else
+                {
+                    twelfth_frontier = false;
+                }
+            }
+
+            if (!(first_frontier || second_frontier || third_frontier || fourth_frontier || fifth_frontier ||
+                  sixth_frontier || seventh_frontier || eighth_frontier || ninth_frontier || tenth_frontier ||
+                  eleventh_frontier || twelfth_frontier))
+            {
+                break;
             }
         }
 
