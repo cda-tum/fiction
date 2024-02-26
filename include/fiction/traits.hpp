@@ -697,11 +697,9 @@ template <typename Lyt, typename = void>
 struct has_orientation : std::false_type
 {};
 
-
 template <typename Lyt>
 struct has_orientation<Lyt, std::void_t<typename Lyt::orientation>> : std::true_type
 {};
-
 
 template <typename Lyt>
 constexpr bool has_orientation_v = has_orientation<Lyt>::value;

@@ -9,6 +9,7 @@
 #include <fiction/algorithms/simulation/sidb/quicksim.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
+#include <fiction/technology/sidb_lattice_types.hpp>
 #include <fiction/types.hpp>
 
 using namespace fiction;

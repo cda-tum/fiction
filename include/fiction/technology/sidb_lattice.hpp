@@ -9,8 +9,7 @@
 #include "fiction/technology/sidb_lattice_types.hpp"
 #include "fiction/traits.hpp"
 
-#include <memory>
-#include <utility>
+#include <string>
 
 namespace fiction
 {
