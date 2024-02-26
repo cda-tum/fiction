@@ -60,7 +60,7 @@ TEST_CASE("Test influence distance function", "[maximum-defect-influence-positio
 
         const auto [defect_pos, distance] = maximum_defect_influence_position_and_distance(lat, sim_params);
         CHECK_THAT(round_to_n_decimal_places(distance, 4) -
-                       round_to_n_decimal_places(sidb_nanometer_distance(lat, {0, 0, 0}, {-1, 0, 1}), 4),
+                       round_to_n_decimal_places(sidb_nanometer_distance<decltype(lat)>({0, 0, 0}, {-1, 0, 1}), 4),
                    Catch::Matchers::WithinAbs(0.0, physical_constants::POP_STABILITY_ERR));
     }
 
@@ -75,7 +75,7 @@ TEST_CASE("Test influence distance function", "[maximum-defect-influence-positio
 
         const auto [defect_pos, distance] = maximum_defect_influence_position_and_distance(lat, sim_params);
         CHECK_THAT(round_to_n_decimal_places(distance, 4) -
-                       round_to_n_decimal_places(sidb_nanometer_distance(lat, {0, 0, 0}, {0, 1, 0}), 4),
+                       round_to_n_decimal_places(sidb_nanometer_distance<decltype(lat)>({0, 0, 0}, {0, 1, 0}), 4),
                    Catch::Matchers::WithinAbs(0.0, physical_constants::POP_STABILITY_ERR));
     }
 
@@ -93,7 +93,7 @@ TEST_CASE("Test influence distance function", "[maximum-defect-influence-positio
 
         const auto [defect_pos, distance] = maximum_defect_influence_position_and_distance(lat, sim_params);
         CHECK_THAT(round_to_n_decimal_places(distance, 4) -
-                       round_to_n_decimal_places(sidb_nanometer_distance(lat, {6, 0, 0}, {10, 0, 0}), 4),
+                       round_to_n_decimal_places(sidb_nanometer_distance<decltype(lat)>({6, 0, 0}, {10, 0, 0}), 4),
                    Catch::Matchers::WithinAbs(0.0, physical_constants::POP_STABILITY_ERR));
     }
 

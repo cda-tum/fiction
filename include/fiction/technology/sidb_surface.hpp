@@ -12,9 +12,9 @@
 #include <phmap.h>
 
 #include <cassert>
+#include <cstdint>
 #include <memory>
 #include <type_traits>
-#include <unordered_map>
 #include <unordered_set>
 #include <utility>
 

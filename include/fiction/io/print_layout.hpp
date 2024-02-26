@@ -357,174 +357,171 @@ void print_sidb_layout(std::ostream& os, const Lyt& lyt, const bool cs_color = t
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
-    static_assert(is_sidb_lattice_v<Lyt, sidb_100_lattice>, "Lyt is not an SiDB lattice");
+    static_assert(has_orientation_v<Lyt>, "Lyt is not an SiDB lattice");
 
-    if constexpr (is_sidb_lattice_v<Lyt, sidb_100_lattice>)
+    // empty layout
+    if (lyt.is_empty())
     {
-        // empty layout
-        if (lyt.is_empty())
+        if constexpr (has_get_sidb_defect_v<Lyt>)
         {
-            if constexpr (has_get_sidb_defect_v<Lyt>)
-            {
-                if (lyt.num_defects() == 0)
-                {
-                    os << "[i] empty layout" << std::endl;
-                    return;
-                }
-            }
-            else
+            if (lyt.num_defects() == 0)
             {
                 os << "[i] empty layout" << std::endl;
                 return;
             }
         }
-
-        const bounding_box_2d bb{lyt};
-
-        auto min_nw = bb.get_min();
-        auto max_se = bb.get_max();
-
-        std::vector<typename Lyt::cell> defects{};
-
-        // if defects exist in the layout
-        if constexpr (has_get_sidb_defect_v<Lyt>)
+        else
         {
-            if (lyt.num_defects() != 0)
-            {
-                defects.reserve(lyt.num_defects());
-                lyt.foreach_sidb_defect([&defects](const auto& c) { defects.push_back(c.first); });
-
-                std::sort(defects.begin(), defects.end());
-
-                min_nw = min_nw > defects.front() ?
-                             defects.front() :
-                             min_nw;  // if a defect is more north-west than nw, this position is used as min
-                max_se = max_se < defects.back() ?
-                             defects.back() :
-                             max_se;  // if a defect is more south-east than se, this position is used as max
-            }
+            os << "[i] empty layout" << std::endl;
+            return;
         }
+    }
 
-        if (crop_layout)
+    const bounding_box_2d bb{lyt};
+
+    auto min_nw = bb.get_min();
+    auto max_se = bb.get_max();
+
+    std::vector<typename Lyt::cell> defects{};
+
+    // if defects exist in the layout
+    if constexpr (has_get_sidb_defect_v<Lyt>)
+    {
+        if (lyt.num_defects() != 0)
         {
-            // apply padding of maximally one dimer row and two columns
-            min_nw = min_nw - coordinate<Lyt>{2, 1};
-            max_se = max_se + coordinate<Lyt>{2, 1};
+            defects.reserve(lyt.num_defects());
+            lyt.foreach_sidb_defect([&defects](const auto& c) { defects.push_back(c.first); });
 
-            // ensure only full dimer rows are printed
-            min_nw.z = 0;
-            max_se.z = 1;
+            std::sort(defects.begin(), defects.end());
+
+            min_nw = min_nw > defects.front() ?
+                         defects.front() :
+                         min_nw;  // if a defect is more north-west than nw, this position is used as min
+            max_se = max_se < defects.back() ?
+                         defects.back() :
+                         max_se;  // if a defect is more south-east than se, this position is used as max
         }
+    }
 
-        // loop coordinate is initialized with the north-west coordinate
-        auto loop_coordinate = min_nw;
+    if (crop_layout)
+    {
+        // apply padding of maximally one dimer row and two columns
+        min_nw = min_nw - coordinate<Lyt>{2, 1};
+        max_se = max_se + coordinate<Lyt>{2, 1};
 
-        while (loop_coordinate <= max_se)
+        // ensure only full dimer rows are printed
+        min_nw.z = 0;
+        max_se.z = 1;
+    }
+
+    // loop coordinate is initialized with the north-west coordinate
+    auto loop_coordinate = min_nw;
+
+    while (loop_coordinate <= max_se)
+    {
+        // Is set to true if either charge or defect is printed at loop coordinate
+        bool already_printed = false;
+
+        // Check if layout is only a charge distribution surface
+        if constexpr (has_get_charge_state_v<Lyt>)
         {
-            // Is set to true if either charge or defect is printed at loop coordinate
-            bool already_printed = false;
-
-            // Check if layout is only a charge distribution surface
-            if constexpr (has_get_charge_state_v<Lyt>)
+            switch (lyt.get_charge_state(
+                loop_coordinate))  // switch over the charge state of the SiDB at the current coordinate
             {
-                switch (lyt.get_charge_state(
-                    loop_coordinate))  // switch over the charge state of the SiDB at the current coordinate
+                case sidb_charge_state::NEGATIVE:
                 {
-                    case sidb_charge_state::NEGATIVE:
-                    {
-                        os << fmt::format(cs_color ? detail::SIDB_NEG_COLOR : detail::NO_COLOR, " ● ");
-                        already_printed = true;
-                        break;
-                    }
-                    case sidb_charge_state::POSITIVE:
-                    {
-                        os << fmt::format(cs_color ? detail::SIDB_POS_COLOR : detail::NO_COLOR, " ⨁ ");
-                        already_printed = true;
-                        break;
-                    }
-                    case sidb_charge_state::NEUTRAL:
-                    {
-                        os << fmt::format(cs_color ? detail::SIDB_NEUT_COLOR : detail::NO_COLOR, " ◯ ");
-                        already_printed = true;
-                        break;
-                    }
-                    case sidb_charge_state::NONE:
-                    {
-                        break;
-                    }
-                }
-            }
-
-            if constexpr (has_get_sidb_defect_v<Lyt>)
-            {
-                if (lyt.get_sidb_defect(loop_coordinate) != sidb_defect{sidb_defect_type::NONE})
-                {
-                    if (is_negatively_charged_defect(lyt.get_sidb_defect(loop_coordinate)))
-                    {
-                        os << fmt::format(cs_color ? detail::SIDB_DEF_NEG_COLOR : detail::NO_COLOR, " ⊟ ");
-                        already_printed = true;
-                    }
-                    else if (is_positively_charged_defect(lyt.get_sidb_defect(loop_coordinate)))
-                    {
-                        os << fmt::format(cs_color ? detail::SIDB_DEF_POS_COLOR : detail::NO_COLOR, " ⊞ ");
-                        already_printed = true;
-                    }
-                    else if (is_neutrally_charged_defect(lyt.get_sidb_defect(loop_coordinate)))
-                    {
-                        os << fmt::format(cs_color ? detail::SIDB_DEF_NEU_COLOR : detail::NO_COLOR, " ⊡ ");
-                        already_printed = true;
-                    }
-                }
-            }
-
-            if (!already_printed && lyt.get_cell_type(loop_coordinate) != sidb_technology::cell_type::EMPTY)
-            {
-                os << fmt::format(cs_color ? detail::SIDB_DEF_NEU_COLOR : detail::NO_COLOR, " o ");
-                already_printed = true;
-            }
-
-            if (!already_printed)
-            {
-                os << (draw_lattice ? fmt::format(cs_color ? detail::SIDB_LAT_COLOR : detail::NO_COLOR, " · ") : "  ");
-            }
-
-            // if the x-coordinate of loop_coordinate is still less than the x-coordinate of the south-west cell, the
-            // x-coordinate is increased by 1
-            if (loop_coordinate.x < max_se.x)
-            {
-                loop_coordinate.x += 1;
-            }
-            else if (loop_coordinate.x == max_se.x && loop_coordinate != max_se)
-            {
-                if (loop_coordinate.z == 1 && has_same_lattice_orientation_v<Lyt, sidb_100_lattice>)
-                {
-                    os << "\n\n";  // gap between two dimers
-                }
-                else
-                {
-                    os << "\n";
-                }
-                loop_coordinate.x = min_nw.x;
-                loop_coordinate.y += (loop_coordinate.z == 1) ? 1 : 0;
-                loop_coordinate.z = (loop_coordinate.z == 0) ? 1 : 0;
-                if (has_same_lattice_orientation_v<Lyt, sidb_111_lattice> && loop_coordinate.z == 1)
-                {
-                    os << " ";
-                }
-            }
-            else if (loop_coordinate == max_se)
-            {
-                if (has_same_lattice_orientation_v<Lyt, sidb_100_lattice>)
-                {
-                    os << "\n\n";  // add a gap between two dimers
+                    os << fmt::format(cs_color ? detail::SIDB_NEG_COLOR : detail::NO_COLOR, " ● ");
+                    already_printed = true;
                     break;
                 }
-                break;
+                case sidb_charge_state::POSITIVE:
+                {
+                    os << fmt::format(cs_color ? detail::SIDB_POS_COLOR : detail::NO_COLOR, " ⨁ ");
+                    already_printed = true;
+                    break;
+                }
+                case sidb_charge_state::NEUTRAL:
+                {
+                    os << fmt::format(cs_color ? detail::SIDB_NEUT_COLOR : detail::NO_COLOR, " ◯ ");
+                    already_printed = true;
+                    break;
+                }
+                case sidb_charge_state::NONE:
+                {
+                    break;
+                }
             }
         }
-        // flush stream
-        os << std::endl;
+
+        if constexpr (has_get_sidb_defect_v<Lyt>)
+        {
+            if (lyt.get_sidb_defect(loop_coordinate) != sidb_defect{sidb_defect_type::NONE})
+            {
+                if (is_negatively_charged_defect(lyt.get_sidb_defect(loop_coordinate)))
+                {
+                    os << fmt::format(cs_color ? detail::SIDB_DEF_NEG_COLOR : detail::NO_COLOR, " ⊟ ");
+                    already_printed = true;
+                }
+                else if (is_positively_charged_defect(lyt.get_sidb_defect(loop_coordinate)))
+                {
+                    os << fmt::format(cs_color ? detail::SIDB_DEF_POS_COLOR : detail::NO_COLOR, " ⊞ ");
+                    already_printed = true;
+                }
+                else if (is_neutrally_charged_defect(lyt.get_sidb_defect(loop_coordinate)))
+                {
+                    os << fmt::format(cs_color ? detail::SIDB_DEF_NEU_COLOR : detail::NO_COLOR, " ⊡ ");
+                    already_printed = true;
+                }
+            }
+        }
+
+        if (!already_printed && lyt.get_cell_type(loop_coordinate) != sidb_technology::cell_type::EMPTY)
+        {
+            os << fmt::format(cs_color ? detail::SIDB_DEF_NEU_COLOR : detail::NO_COLOR, " o ");
+            already_printed = true;
+        }
+
+        if (!already_printed)
+        {
+            os << (draw_lattice ? fmt::format(cs_color ? detail::SIDB_LAT_COLOR : detail::NO_COLOR, " · ") : "  ");
+        }
+
+        // if the x-coordinate of loop_coordinate is still less than the x-coordinate of the south-west cell, the
+        // x-coordinate is increased by 1
+        if (loop_coordinate.x < max_se.x)
+        {
+            loop_coordinate.x += 1;
+        }
+        else if (loop_coordinate.x == max_se.x && loop_coordinate != max_se)
+        {
+            if (loop_coordinate.z == 1 && has_same_lattice_orientation_v<Lyt, sidb_100_lattice>)
+            {
+                os << "\n\n";  // gap between two dimers
+            }
+            else
+            {
+                os << "\n";
+            }
+            loop_coordinate.x = min_nw.x;
+            loop_coordinate.y += (loop_coordinate.z == 1) ? 1 : 0;
+            loop_coordinate.z = (loop_coordinate.z == 0) ? 1 : 0;
+            if (has_same_lattice_orientation_v<Lyt, sidb_111_lattice> && loop_coordinate.z == 1)
+            {
+                os << " ";
+            }
+        }
+        else if (loop_coordinate == max_se)
+        {
+            if (has_same_lattice_orientation_v<Lyt, sidb_100_lattice>)
+            {
+                os << "\n\n";  // add a gap between two dimers
+                break;
+            }
+            break;
+        }
     }
+    // flush stream
+    os << std::endl;
 }
 /**
  * A unified printer of the versions above. Depending on the passed layout type, this function will automatically
@@ -547,7 +544,7 @@ void print_layout(const Lyt& lyt, std::ostream& os = std::cout)
     }
     else if constexpr (is_cell_level_layout_v<Lyt>)
     {
-        if constexpr (has_sidb_technology_v<Lyt> && is_sidb_lattice_v<Lyt, sidb_100_lattice>)
+        if constexpr (has_sidb_technology_v<Lyt> && has_orientation_v<Lyt>)
         {
             if constexpr (has_siqad_coord_v<Lyt>)
             {

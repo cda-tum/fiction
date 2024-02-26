@@ -44,7 +44,6 @@ class quickexact_command : public command
                        "specifically for SiDB layouts. It provides a significant performance advantage of more than "
                        "three orders of magnitude over ExGS from SiQAD.")
     {
-        add_option("--lattice_orientation,-o", orientation, "Lattice orientation to use {100, 111}", true);
         add_option("--epsilon_r,-e", physical_params.epsilon_r, "Electric permittivity of the substrate (unit-less)",
                    true);
         add_option("--lambda_tf,-l", physical_params.lambda_tf, "Thomas-Fermi screening distance (unit: nm)", true);
@@ -121,7 +120,7 @@ class quickexact_command : public command
                         return;
                     }
 
-                    if (sim_result.charge_distributions.empty())
+                    if (sim_result.charge_distributions.empty() && sim_result_111.charge_distributions.empty())
                     {
                         env->out() << fmt::format("[e] ground state of {} could not be determined", get_name(lyt_ptr))
                                    << std::endl;
@@ -182,10 +181,6 @@ class quickexact_command : public command
      * Minimum energy.
      */
     double min_energy{std::numeric_limits<double>::infinity()};
-    /**
-     * Identifier of H-Si lattice orientation.
-     */
-    std::string orientation{"100"};
 
     /**
      * Logs the resulting information in a log file.
@@ -225,7 +220,8 @@ class quickexact_command : public command
     }
 
     template <typename LytDest, typename LytSrc>
-    fiction::quickexact_params<LytDest> convert_params(const fiction::quickexact_params<LytSrc>& ps_src) const noexcept
+    [[nodiscard]] fiction::quickexact_params<LytDest>
+    convert_params(const fiction::quickexact_params<LytSrc>& ps_src) const noexcept
     {
         fiction::quickexact_params<LytDest> ps_dest{};
 

@@ -8,9 +8,13 @@
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
+#include <fiction/technology/sidb_defects.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
+#include <fiction/technology/sidb_surface.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/layout_utils.hpp>
+
+#include <cstdint>
 
 using namespace fiction;
 
@@ -123,6 +127,37 @@ TEMPLATE_TEST_CASE("Convert offset::ucoord_t layout to SiQAD coordinate layout",
         CHECK(lyt_transformed.get_cell_name({5, 1, 1}) == "input cell");
         CHECK(lyt_transformed.get_cell_name({5, 0, 1}) == "output cell");
     }
+}
+
+TEST_CASE("Convert cds/sidb_surface in offset::ucoord_t layout to SiQAD coordinate layout", "[layout-utils]")
+{
+    using TestType = sidb_surface<cds_sidb_cell_clk_lyt>;
+
+    TestType lyt{};
+
+    lyt.assign_cell_type({0, 0, 0}, TestType::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({1, 0, 0}, TestType::technology::cell_type::INPUT);
+    lyt.assign_cell_type({0, 3, 0}, TestType::technology::cell_type::OUTPUT);
+
+    lyt.assign_charge_state({0, 0, 0}, sidb_charge_state::NEUTRAL);
+    lyt.assign_charge_state({1, 0, 0}, sidb_charge_state::POSITIVE);
+    lyt.assign_charge_state({0, 3, 0}, sidb_charge_state::NEGATIVE);
+
+    lyt.assign_sidb_defect({5, 5, 0}, sidb_defect{sidb_defect_type::UNKNOWN});
+    lyt.assign_sidb_defect({2, 2, 0}, sidb_defect{sidb_defect_type::UNKNOWN});
+
+    auto lyt_transformed = convert_to_siqad_coordinates<TestType>(lyt);
+
+    CHECK(lyt_transformed.get_cell_type({0, 0, 0}) == TestType::technology::cell_type::NORMAL);
+    CHECK(lyt_transformed.get_cell_type({1, 0, 0}) == TestType::technology::cell_type::INPUT);
+    CHECK(lyt_transformed.get_cell_type({0, 1, 1}) == TestType::technology::cell_type::OUTPUT);
+
+    CHECK(lyt_transformed.get_charge_state({0, 0, 0}) == sidb_charge_state::NEUTRAL);
+    CHECK(lyt_transformed.get_charge_state({1, 0, 0}) == sidb_charge_state::POSITIVE);
+    CHECK(lyt_transformed.get_charge_state({0, 1, 1}) == sidb_charge_state::NEGATIVE);
+
+    CHECK(lyt_transformed.get_sidb_defect({5, 10, 0}) == sidb_defect{sidb_defect_type::UNKNOWN});
+    CHECK(lyt_transformed.get_sidb_defect({2, 1, 1}) == sidb_defect{sidb_defect_type::UNKNOWN});
 }
 
 TEST_CASE("Convert SiQAD layout to offset::ucoord_t coordinate layout", "[layout-utils]")

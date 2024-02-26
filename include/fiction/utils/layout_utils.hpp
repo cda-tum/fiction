@@ -8,6 +8,10 @@
 #include "fiction/layouts/cell_level_layout.hpp"
 #include "fiction/layouts/coordinates.hpp"
 #include "fiction/technology/cell_ports.hpp"
+#include "fiction/technology/charge_distribution_surface.hpp"
+#include "fiction/technology/sidb_lattice.hpp"
+#include "fiction/technology/sidb_lattice_types.hpp"
+#include "fiction/technology/sidb_surface.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 
@@ -289,7 +293,6 @@ Lyt normalize_layout_coordinates(const Lyt& lyt) noexcept
  * coordinates is returned.
  *
  * @tparam Lyt Cell-level layout type based on fiction coordinates, e.g., `offset::ucoord_t` or `cube::coord_t`.
- * @tparam TargetLyt Cell-level layout type based on SiQAD coordinates, i.e., `siqad::coord_t`.
  * @param lyt The layout that is to be converted to a new layout based on SiQAD coordinates.
  * @return A new equivalent layout based on SiQAD coordinates.
  */
@@ -299,9 +302,9 @@ auto convert_to_siqad_coordinates(const Lyt& lyt) noexcept
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(is_sidb_lattice_v<Lyt, typename Lyt::orientation>, "Lyt is not a SiDB lattice layout");
+    static_assert(has_orientation_v<Lyt>, "Lyt is not a SiDB lattice layout");
 
-    auto processLayout = [&lyt](auto lyt_new)
+    auto process_layout = [&lyt](auto lyt_new)
     {
         lyt_new.resize({lyt.x(), (lyt.y() - lyt.y() % 2) / 2});
         lyt_new.set_layout_name(lyt.get_layout_name());
@@ -316,7 +319,7 @@ auto convert_to_siqad_coordinates(const Lyt& lyt) noexcept
                 lyt_new.assign_cell_name(siqad::to_siqad_coord(c), lyt.get_cell_name(c));
             });
 
-        if constexpr (is_charge_distribution_surface_v<decltype(lyt)>)
+        if constexpr (is_charge_distribution_surface_v<Lyt>)
         {
             charge_distribution_surface lyt_new_cds{lyt_new};
 
@@ -326,7 +329,25 @@ auto convert_to_siqad_coordinates(const Lyt& lyt) noexcept
 
             lyt_new_cds.assign_physical_parameters(lyt.get_phys_params());
 
-            return lyt_new_cds;
+            if constexpr (has_get_sidb_defect_v<Lyt>)
+            {
+                sidb_surface lyt_surface{lyt_new_cds};
+                lyt.foreach_sidb_defect(
+                    [&lyt_surface, &lyt](const auto& cd)
+                    { lyt_surface.assign_sidb_defect(siqad::to_siqad_coord(cd.first), cd.second); });
+                return lyt_surface;
+            }
+            else
+            {
+                return lyt_new_cds;
+            }
+        }
+        else if constexpr (has_get_sidb_defect_v<Lyt>)
+        {
+            sidb_surface lyt_surface{lyt_new};
+            lyt.foreach_defect([&lyt_surface, &lyt](const auto& c)
+                               { lyt_surface.assign_defect(siqad::to_siqad_coord(c), lyt.get_defect(c)); });
+            return lyt_surface;
         }
         else
         {
@@ -337,12 +358,12 @@ auto convert_to_siqad_coordinates(const Lyt& lyt) noexcept
     if constexpr (has_same_lattice_orientation_v<Lyt, sidb_100_lattice>)
     {
         sidb_lattice<sidb_cell_clk_lyt_siqad, sidb_100_lattice> lyt_new{};
-        return processLayout(lyt_new);
+        return process_layout(lyt_new);
     }
     else if constexpr (has_same_lattice_orientation_v<Lyt, sidb_111_lattice>)
     {
         sidb_lattice<sidb_cell_clk_lyt_siqad, sidb_111_lattice> lyt_new{};
-        return processLayout(lyt_new);
+        return process_layout(lyt_new);
     }
     else
     {

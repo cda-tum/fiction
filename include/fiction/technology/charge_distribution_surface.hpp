@@ -506,7 +506,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 this->foreach_cell(
                     [this, &c, &defect](const auto& c1)
                     {
-                        const auto dist = sidb_nanometer_distance<Lyt>(*this, c1, c);
+                        const auto dist = sidb_nanometer_distance<Lyt>(c1, c);
                         const auto pot  = chargeless_potential_generated_by_defect_at_given_distance(dist, defect);
 
                         if (strg->defect_local_pot.empty())
@@ -526,7 +526,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 this->foreach_cell(
                     [this, &c, &defect](const auto& c1)
                     {
-                        const auto dist = sidb_nanometer_distance<Lyt>(*this, c1, c);
+                        const auto dist = sidb_nanometer_distance<Lyt>(c1, c);
 
                         strg->defect_local_pot[c1] =
                             strg->defect_local_pot[c1] +
@@ -556,11 +556,11 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 [this, &c](const auto& c1)
                 {
                     strg->local_pot[static_cast<uint64_t>(cell_to_index(c1))] -=
-                        chargeless_potential_generated_by_defect_at_given_distance(
-                            sidb_nanometer_distance<Lyt>(*this, c1, c), strg->defects[c]) *
+                        chargeless_potential_generated_by_defect_at_given_distance(sidb_nanometer_distance<Lyt>(c1, c),
+                                                                                   strg->defects[c]) *
                         static_cast<double>(strg->defects[c].charge);
                     strg->defect_local_pot[c1] -= chargeless_potential_generated_by_defect_at_given_distance(
-                                                      sidb_nanometer_distance<Lyt>(*this, c1, c), strg->defects[c]) *
+                                                      sidb_nanometer_distance<Lyt>(c1, c), strg->defects[c]) *
                                                   static_cast<double>(strg->defects[c].charge);
                 });
             strg->defects.erase(c);
@@ -914,7 +914,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             for (const auto& [cell2, defect2] : strg->defects)
             {
                 defect_interaction +=
-                    chargeless_potential_at_given_distance(sidb_nanometer_distance<Lyt>(*this, cell1, cell2));
+                    chargeless_potential_at_given_distance(sidb_nanometer_distance<Lyt>(cell1, cell2));
             }
         }
         strg->system_energy = total_potential + 0.5 * defect_energy + 0.5 * defect_interaction;
@@ -1918,7 +1918,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         {
             for (uint64_t j = 0u; j < strg->sidb_order.size(); j++)
             {
-                strg->nm_dist_mat[i][j] = sidb_nanometer_distance(*this, strg->sidb_order[i], strg->sidb_order[j]);
+                strg->nm_dist_mat[i][j] = sidb_nanometer_distance<Lyt>(strg->sidb_order[i], strg->sidb_order[j]);
             }
         }
     }

@@ -125,7 +125,7 @@ class quicksim_command : public command
                         return;
                     }
 
-                    if (sim_result.charge_distributions.empty())
+                    if (sim_result.charge_distributions.empty() && sim_result_111.charge_distributions.empty())
                     {
                         env->out() << fmt::format("[e] no stable charge distribution could be determined for {}",
                                                   get_name(lyt_ptr))

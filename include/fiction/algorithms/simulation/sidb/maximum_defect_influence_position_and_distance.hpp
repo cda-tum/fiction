@@ -133,13 +133,13 @@ class maximum_defect_influence_position_and_distance_impl
                 // distribution without placed defect.
                 if (charge_index_defect_layout != charge_index_layout)
                 {
-                    auto distance = std::numeric_limits<double>::max();
+                    auto distance = std::numeric_limits<double>::infinity();
                     layout.foreach_cell(
                         [this, &defect, &distance](const auto& cell)
                         {
-                            if (sidb_nanometer_distance<Lyt>(layout, cell, defect) < distance)
+                            if (sidb_nanometer_distance<Lyt>(cell, defect) < distance)
                             {
-                                distance = sidb_nanometer_distance<Lyt>(layout, cell, defect);
+                                distance = sidb_nanometer_distance<Lyt>(cell, defect);
                             }
                         });
 

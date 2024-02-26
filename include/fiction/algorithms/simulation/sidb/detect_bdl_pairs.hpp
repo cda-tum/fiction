@@ -153,7 +153,7 @@ std::vector<bdl_pair<Lyt>> detect_bdl_pairs(const Lyt& lyt, const typename techn
             {
                 for (auto j = i + 1; j < dots.size(); ++j)
                 {
-                    pairwise_distances.emplace_back(dots[i], dots[j], sidb_nanometer_distance(lyt, dots[i], dots[j]));
+                    pairwise_distances.emplace_back(dots[i], dots[j], sidb_nanometer_distance<Lyt>(dots[i], dots[j]));
                 }
             }
 

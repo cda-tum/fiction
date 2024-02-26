@@ -687,11 +687,24 @@ struct is_sidb_lattice<Lyt, LatticeOrientation> : std::true_type
 {};
 
 template <class Lyt, class LatticeOrientation>
-inline constexpr bool is_sidb_lattice_v = is_sidb_lattice<Lyt, LatticeOrientation>::value;
+inline constexpr bool is_sidb_lattice_v = is_sidb_lattice<Lyt, typename Lyt::orientation>::value;
 
 template <typename Lyt, typename LatticeOrientation>
 inline constexpr const bool has_same_lattice_orientation_v =
     std::is_same_v<typename Lyt::orientation, LatticeOrientation>;
+
+template <typename Lyt, typename = void>
+struct has_orientation : std::false_type
+{};
+
+
+template <typename Lyt>
+struct has_orientation<Lyt, std::void_t<typename Lyt::orientation>> : std::true_type
+{};
+
+
+template <typename Lyt>
+constexpr bool has_orientation_v = has_orientation<Lyt>::value;
 
 /**
  * SiDB surfaces
