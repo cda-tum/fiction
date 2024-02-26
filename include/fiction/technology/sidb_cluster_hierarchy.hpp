@@ -147,19 +147,22 @@ struct sidb_cluster_projector_state
     const uint64_t          multiset_conf;
 
     template <sidb_charge_state cs>
-    constexpr inline bool contains_cs() const noexcept
+    constexpr inline uint64_t get_count() const noexcept
     {
         switch (cs)
         {
-            case sidb_charge_state::NEGATIVE: return static_cast<bool>(multiset_conf >> 32);
-            case sidb_charge_state::POSITIVE: return static_cast<bool>(multiset_conf & 0xFFFFFFFF);
-            default: return (multiset_conf >> 32) + (multiset_conf & 0xFFFFFFFF) < get_cluster_size(cluster);
+            case sidb_charge_state::NEGATIVE: return multiset_conf >> 32;
+            case sidb_charge_state::POSITIVE: return multiset_conf & 0xFFFFFFFF;
+            default: return get_cluster_size(cluster) - (multiset_conf >> 32) - (multiset_conf & 0xFFFFFFFF);
         }
     }
-};
 
-template <sidb_charge_state cs>
-static constexpr inline bool get_onto_cs_pruned_for_sidb_ix(const sidb_cluster_ptr& c, const uint64_t sidb_ix) noexcept;
+    template <sidb_charge_state cs>
+    constexpr inline bool contains_cs() const noexcept
+    {
+        return static_cast<bool>(get_count<cs>());
+    }
+};
 
 struct sidb_cluster_receptor_state
 {
@@ -199,22 +202,6 @@ struct sidb_cluster_charge_state
         {
             case sidb_charge_state::NEGATIVE: neg_count++; break;
             case sidb_charge_state::POSITIVE: pos_count++; break;
-            default: break;
-        }
-    }
-
-    constexpr void remove_charge(const sidb_charge_state cs) noexcept
-    {
-        switch (cs)
-        {
-            case sidb_charge_state::NEGATIVE:
-                assert(neg_count > 0);
-                neg_count--;
-                break;
-            case sidb_charge_state::POSITIVE:
-                assert(pos_count > 0);
-                pos_count--;
-                break;
             default: break;
         }
     }
@@ -261,11 +248,6 @@ enum class bound_calculation_mode : uint8_t
     UPPER
 };
 
-static constexpr inline bool is_potential_bound_bottom(const double bound) noexcept
-{
-    return std::isinf(bound);
-}
-
 template <bound_calculation_mode bound>
 static constexpr inline bool potential_bound_meet_is_weaker(const double pot_bound, const double candidate) noexcept
 {
@@ -276,15 +258,6 @@ static constexpr inline bool potential_bound_meet_is_weaker(const double pot_bou
     else
     {
         return pot_bound < candidate;
-    }
-}
-
-template <bound_calculation_mode bound>
-static constexpr inline void take_meet_of_potential_bounds(double& pot_bound, const double other_pot_bound) noexcept
-{
-    if (potential_bound_meet_is_weaker<bound>(pot_bound, other_pot_bound))
-    {
-        pot_bound = other_pot_bound;
     }
 }
 
@@ -388,6 +361,18 @@ struct potential_projection_orders
         orders[cs_ix<cs>()].clear();
     }
 
+    template <sidb_charge_state cs>
+    constexpr inline bool erase_onto_sidb_ix_if_empty(const uint64_t sidb_ix) noexcept
+    {
+        if (orders[cs_ix<cs>()].at(sidb_ix).empty())
+        {
+            orders[cs_ix<cs>()].erase(sidb_ix);
+            return true;
+        }
+
+        return false;
+    }
+
     template <bound_calculation_mode bound, sidb_charge_state cs>
     constexpr inline potential_projection get(const uint64_t sidb_ix) const noexcept
     {
@@ -442,23 +427,15 @@ struct potential_projection_orders
     void remove_m_conf(const uint64_t m_conf, const uint64_t sidb_ix) noexcept
     {
         assert(!onto_cs_pruned<cs>());
+        if (orders[cs_ix<cs>()].at(sidb_ix).size() == 1)
+        {}
+
         for (pot_proj_order::const_iterator it = orders[cs_ix<cs>()].at(sidb_ix).cbegin();
              it != orders[cs_ix<cs>()].at(sidb_ix).cend();)
         {
             it->M == m_conf ? it = orders[cs_ix<cs>()][sidb_ix].erase(it) : ++it;
         }
     }
-
-    //    template <sidb_charge_state cs>
-    //    constexpr inline void remove_onto_m_conf_if_present(const uint64_t sidb_ix) noexcept
-    //    {
-    //        if (onto_cs_pruned<cs>())  // || orders[cs_ix<cs>()].count(onto_m) == 0)
-    //        {
-    //            return;
-    //        }
-    //
-    //        orders[cs_ix<cs>()].erase(sidb_ix);
-    //    }
 
     template <sidb_charge_state cs>
     constexpr inline void add(const potential_projection& pp, const uint64_t sidb_ix) noexcept

@@ -64,6 +64,30 @@ class ground_state_space
         }
     }
 
+    constexpr inline bool fail_onto_negative_charge(const double pot_bound) const noexcept
+    {
+        // V > e - mu-
+        return pot_bound > mu_bounds_with_error[0];
+    }
+
+    constexpr inline bool fail_onto_positive_charge(const double pot_bound) const noexcept
+    {
+        // V < -e - mu+
+        return pot_bound < mu_bounds_with_error[3];
+    }
+
+    constexpr inline bool ub_fail_onto_neutral_charge(const double pot_bound) const noexcept
+    {
+        // V < -e - mu-
+        return pot_bound < mu_bounds_with_error[1];
+    }
+
+    constexpr inline bool lb_fail_onto_neutral_charge(const double pot_bound) const noexcept
+    {
+        // V > e - mu+
+        return pot_bound > mu_bounds_with_error[2];
+    }
+
     static sidb_clustering
     get_initial_clustering(const sidb_cluster_ptr& c,
                            const std::pair<charge_distribution_surface<Lyt>, charge_distribution_surface<Lyt>>&
@@ -159,20 +183,21 @@ class ground_state_space
             .get_pot_proj_for_m_conf<bound, onto_cs>(pst.multiset_conf, rst.sidb_ix);
     }
 
+    template <bound_calculation_mode bound, sidb_charge_state onto_cs>
+    static constexpr inline double get_proj_pot_bound_for_internal_state(const sidb_cluster_projector_state& pst,
+                                                                         const uint64_t sidb_ix) noexcept
+    {
+        return pst.cluster->pot_projs.at(pst.cluster->uid)
+            .get_pot_proj_for_m_conf<bound, onto_cs>(pst.multiset_conf, sidb_ix)
+            .V;
+    }
+
     template <sidb_charge_state onto_cs>
     static constexpr inline void
     remove_all_cluster_charge_state_occurrences(const sidb_cluster_projector_state& rm_pst,
                                                 const sidb_cluster_receptor_state&  rst) noexcept
     {
         rm_pst.cluster->pot_projs[rst.cluster->uid].remove_m_conf<onto_cs>(rm_pst.multiset_conf, rst.sidb_ix);
-        //        rst.cluster->pot_projs[rm_pst.cluster->uid].remove_onto_m_conf_if_present<sidb_charge_state::NEGATIVE>(
-        //            rm_pst.multiset_conf);
-        //        rst.cluster->pot_projs[rm_pst.cluster->uid].remove_onto_m_conf_if_present<sidb_charge_state::POSITIVE>(
-        //            rm_pst.multiset_conf);
-        //        rst.cluster->pot_projs[rm_pst.cluster->uid].remove_onto_m_conf_if_present<sidb_charge_state::NEUTRAL>(
-        //            rm_pst.multiset_conf);
-
-        //        rm_pst.cluster->recv_ext_pot_bounds.erase(rm_pst.multiset_conf);
     }
 
     template <sidb_charge_state onto_cs>
@@ -188,15 +213,59 @@ class ground_state_space
     static constexpr inline void add_internal_pot_projs(const sidb_cluster_projector_state& pst,
                                                         const pot_proj_order_onto_sidb_ix&  pps_onto_sidb_ix) noexcept
     {
-        //        if (!is_potential_bound_bottom(pps_and_recv_bound.second))
-        //        {
         pst.cluster->pot_projs[pst.cluster->uid].add_multiple<onto_cs>(pps_onto_sidb_ix);
-        //        }
+    }
+
+    template <sidb_charge_state onto_cs>
+    constexpr inline bool charge_space_prunes_onto_cs(const sidb_cluster_receptor_state& rst) const noexcept
+    {
+        if (get_onto_cs_pruned_for_sidb_ix<onto_cs>(rst.sidb_ix))
+        {
+            return true;
+        }
+
+        if constexpr (onto_cs == sidb_charge_state::NEGATIVE)
+        {
+            return fail_onto_negative_charge(
+                get_proj_bound<bound_calculation_mode::LOWER, onto_cs>(rst.cluster, rst).V +
+                rst.cluster->get_recv_ext_pot_bound<bound_calculation_mode::LOWER, onto_cs>(rst.sidb_ix));
+        }
+        else if constexpr (onto_cs == sidb_charge_state::POSITIVE)
+        {
+            return fail_onto_positive_charge(
+                get_proj_bound<bound_calculation_mode::UPPER, onto_cs>(rst.cluster, rst).V +
+                rst.cluster->get_recv_ext_pot_bound<bound_calculation_mode::UPPER, onto_cs>(rst.sidb_ix));
+        }
+        else
+        {
+            return ub_fail_onto_neutral_charge(
+                       get_proj_bound<bound_calculation_mode::UPPER, onto_cs>(rst.cluster, rst).V +
+                       rst.cluster->get_recv_ext_pot_bound<bound_calculation_mode::UPPER, onto_cs>(rst.sidb_ix)) ||
+                   lb_fail_onto_neutral_charge(
+                       get_proj_bound<bound_calculation_mode::LOWER, onto_cs>(rst.cluster, rst).V +
+                       rst.cluster->get_recv_ext_pot_bound<bound_calculation_mode::LOWER, onto_cs>(rst.sidb_ix));
+        }
+    }
+
+    pruned_store derive_local_pruned_store(const sidb_cluster_ptr& c) const noexcept
+    {
+        pruned_store cluster_pruned_store{};
+
+        for (const uint64_t sidb_ix : c->sidbs)
+        {
+            sidb_cluster_receptor_state rst{c, sidb_ix};
+            cluster_pruned_store.emplace(std::make_pair(
+                sidb_ix, std::array<bool, 3>{charge_space_prunes_onto_cs<sidb_charge_state::NEGATIVE>(rst),
+                                             charge_space_prunes_onto_cs<sidb_charge_state::NEUTRAL>(rst),
+                                             charge_space_prunes_onto_cs<sidb_charge_state::POSITIVE>(rst)}));
+        }
+
+        return cluster_pruned_store;
     }
 
     template <bound_calculation_mode bound, sidb_charge_state onto_cs>
-    static void update_external_pot_proj_if_bound_removed(const sidb_cluster_projector_state& pst,
-                                                          const sidb_cluster_receptor_state&  rst) noexcept
+    static constexpr void update_external_pot_proj_if_bound_removed(const sidb_cluster_projector_state& pst,
+                                                                    const sidb_cluster_receptor_state&  rst) noexcept
     {
         const potential_projection& cur_bound = get_proj_bound<bound, onto_cs>(pst.cluster, rst);
 
@@ -208,8 +277,8 @@ class ground_state_space
     }
 
     template <sidb_charge_state onto_cs>
-    void update_external_potential_projection(const sidb_cluster_projector_state& pst,
-                                              const sidb_cluster_receptor_state&  rst) const noexcept
+    constexpr void update_external_potential_projection(const sidb_cluster_projector_state& pst,
+                                                        const sidb_cluster_receptor_state&  rst) const noexcept
     {
         if (get_onto_cs_pruned_for_sidb_ix<onto_cs>(rst.sidb_ix))
         {
@@ -231,12 +300,32 @@ class ground_state_space
     template <sidb_charge_state witness_cs>
     void handle_invalid_state(const sidb_cluster_projector_state& pst) noexcept
     {
+        if (pst.cluster->sidbs.size() == 1)
+        {
+            const uint64_t sidb_ix = *pst.cluster->sidbs.cbegin();
+            prune_onto_cs_for_sidb_ix<witness_cs>(sidb_ix);
+            if constexpr (witness_cs != sidb_charge_state::POSITIVE)
+            {
+                pst.cluster->set_recv_ext_pot_bound<bound_calculation_mode::LOWER, witness_cs>(
+                    sidb_ix, potential_projection::bottom<bound_calculation_mode::LOWER>().V);
+            }
+            if constexpr (witness_cs != sidb_charge_state::NEGATIVE)
+            {
+                pst.cluster->set_recv_ext_pot_bound<bound_calculation_mode::UPPER, witness_cs>(
+                    sidb_ix, potential_projection::bottom<bound_calculation_mode::UPPER>().V);
+            }
+        }
+
         for (const uint64_t sidb_ix : pst.cluster->sidbs)
         {
             if (!get_onto_cs_pruned_for_sidb_ix<witness_cs>(sidb_ix))
             {
                 remove_all_cluster_charge_state_occurrences<witness_cs>(
                     pst, sidb_cluster_receptor_state{pst.cluster, sidb_ix});
+                if (pst.cluster->pot_projs[pst.cluster->uid].erase_onto_sidb_ix_if_empty<witness_cs>(sidb_ix))
+                {
+                    prune_onto_cs_for_sidb_ix<witness_cs>(sidb_ix);
+                }
             }
         }
 
@@ -259,224 +348,83 @@ class ground_state_space
             if (pst.cluster->sidbs.size() == 1)
             {
                 other_c->pot_projs[pst.cluster->uid].prune_cs<witness_cs>();
-
-                const uint64_t sidb_ix = *pst.cluster->sidbs.cbegin();
-                prune_onto_cs_for_sidb_ix<witness_cs>(sidb_ix);
-                if constexpr (witness_cs != sidb_charge_state::POSITIVE)
-                {
-                    pst.cluster->set_recv_ext_pot_bound<bound_calculation_mode::LOWER, witness_cs>(
-                        sidb_ix, potential_projection::bottom<bound_calculation_mode::LOWER>().V);
-                }
-                if constexpr (witness_cs != sidb_charge_state::NEGATIVE)
-                {
-                    pst.cluster->set_recv_ext_pot_bound<bound_calculation_mode::UPPER, witness_cs>(
-                        sidb_ix, potential_projection::bottom<bound_calculation_mode::UPPER>().V);
-                }
-                //        rst.cluster->pot_projs[rm_pst.cluster->uid].remove_onto_m_conf_if_present<sidb_charge_state::NEGATIVE>(
-                //            rm_pst.multiset_conf);
-                //        rst.cluster->pot_projs[rm_pst.cluster->uid].remove_onto_m_conf_if_present<sidb_charge_state::POSITIVE>(
-                //            rm_pst.multiset_conf);
-                //        rst.cluster->pot_projs[rm_pst.cluster->uid].remove_onto_m_conf_if_present<sidb_charge_state::NEUTRAL>(
-                //            rm_pst.multiset_conf);
             }
         }
     }
 
-    using witness_store = std::vector<std::pair<uint64_t, sidb_charge_state>>;
-
-    template <bound_calculation_mode bound, sidb_charge_state onto_cs>
-    static inline std::pair<double, uint64_t>
-    compute_received_potential_bound_join(const sidb_cluster_projector_state& pst,
-                                          const pruned_store&                 local_pruned_store,
-                                          const witness_store&                used_witnesses) noexcept
+    template <sidb_charge_state onto_cs>
+    constexpr bool enough_validity_witnesses_exist(const sidb_cluster_projector_state& pst,
+                                                   const pruned_store& local_pruned_store) const noexcept
     {
-        double   recv_pot_bound  = potential_projection::bottom<bound>().V;
-        uint64_t witness_sidb_ix = 0;
+        uint64_t num_validity_witnesses_to_find = pst.get_count<onto_cs>();
 
-        for (const uint64_t sidb_ix : pst.cluster->sidbs)
+        for (uint64_t i = 0; num_validity_witnesses_to_find > 0 && i < pst.cluster->sidbs.size(); ++i)
         {
-            if (get_onto_cs_pruned_for_sidb_ix<onto_cs>(sidb_ix, local_pruned_store) ||
-                std::find_if(used_witnesses.cbegin(), used_witnesses.cend(),
-                             [&](const auto& pair) { return sidb_ix == pair.first; }) != used_witnesses.cend())
+            const uint64_t sidb_ix = *std::next(pst.cluster->sidbs.cbegin(), static_cast<int64_t>(i));
+
+            if (get_onto_cs_pruned_for_sidb_ix<onto_cs>(sidb_ix, local_pruned_store))
             {
                 continue;
             }
 
-            const double recv_pot_bound_onto_sidb_ix =
-                get_proj_state_bound<bound, onto_cs>(pst, sidb_cluster_receptor_state{pst.cluster, sidb_ix}).V +
-                pst.cluster->get_recv_ext_pot_bound<bound, onto_cs>(sidb_ix);
-            if (!potential_bound_meet_is_weaker<bound>(recv_pot_bound, recv_pot_bound_onto_sidb_ix))
+            if constexpr (onto_cs == sidb_charge_state::NEGATIVE)
             {
-                recv_pot_bound  = recv_pot_bound_onto_sidb_ix;
-                witness_sidb_ix = sidb_ix;
+                if (!fail_onto_negative_charge(
+                        get_proj_pot_bound_for_internal_state<bound_calculation_mode::LOWER, onto_cs>(pst, sidb_ix) +
+                        pst.cluster->get_recv_ext_pot_bound<bound_calculation_mode::LOWER, onto_cs>(sidb_ix)))
+                {
+                    num_validity_witnesses_to_find--;
+                }
+            }
+            else if constexpr (onto_cs == sidb_charge_state::POSITIVE)
+            {
+                if (!fail_onto_positive_charge(
+                        get_proj_pot_bound_for_internal_state<bound_calculation_mode::UPPER, onto_cs>(pst, sidb_ix) +
+                        pst.cluster->get_recv_ext_pot_bound<bound_calculation_mode::UPPER, onto_cs>(sidb_ix)))
+                {
+                    num_validity_witnesses_to_find--;
+                }
+            }
+            else
+            {
+                if (!ub_fail_onto_neutral_charge(
+                        get_proj_pot_bound_for_internal_state<bound_calculation_mode::UPPER, onto_cs>(pst, sidb_ix) +
+                        pst.cluster->get_recv_ext_pot_bound<bound_calculation_mode::UPPER, onto_cs>(sidb_ix)) &&
+                    !lb_fail_onto_neutral_charge(
+                        get_proj_pot_bound_for_internal_state<bound_calculation_mode::LOWER, onto_cs>(pst, sidb_ix) +
+                        pst.cluster->get_recv_ext_pot_bound<bound_calculation_mode::LOWER, onto_cs>(sidb_ix)))
+                {
+                    num_validity_witnesses_to_find--;
+                }
             }
         }
 
-        return {recv_pot_bound, witness_sidb_ix};
+        return num_validity_witnesses_to_find == 0;
     }
 
-    constexpr inline bool fail_onto_negative_charge(const double pot_bound) const noexcept
+    bool perform_potential_bound_analysis(const sidb_cluster_projector_state& pst,
+                                          const pruned_store&                 local_pruned_store) noexcept
     {
-        // V > e - mu-
-        return pot_bound > mu_bounds_with_error[0];
-    }
-
-    constexpr inline bool fail_onto_positive_charge(const double pot_bound) const noexcept
-    {
-        // V < -e - mu+
-        return pot_bound < mu_bounds_with_error[3];
-    }
-
-    constexpr inline bool ub_fail_onto_neutral_charge(const double pot_bound) const noexcept
-    {
-        // V < -e - mu-
-        return pot_bound < mu_bounds_with_error[1];
-    }
-
-    constexpr inline bool lb_fail_onto_neutral_charge(const double pot_bound) const noexcept
-    {
-        // V > e - mu+
-        return pot_bound > mu_bounds_with_error[2];
-    }
-
-    bool perform_potential_bound_analysis(const sidb_cluster_projector_state& pst, pruned_store& local_pruned_store,
-                                          witness_store& used_witnesses) noexcept
-    {
-        uint64_t neg_count  = pst.multiset_conf >> 32;
-        uint64_t pos_count  = pst.multiset_conf & 0xFFFFFFFF;
-        uint64_t neut_count = pst.cluster->sidbs.size() - neg_count - pos_count;
-
-        while (neg_count != 0 || pos_count != 0 || neut_count != 0)
+        if (!enough_validity_witnesses_exist<sidb_charge_state::NEGATIVE>(pst, local_pruned_store))
         {
-            if (neg_count != 0)
-            {
-                const auto& [pot_bound_join, witness_sidb_ix] =
-                    compute_received_potential_bound_join<bound_calculation_mode::LOWER, sidb_charge_state::NEGATIVE>(
-                        pst, local_pruned_store, used_witnesses);
+            handle_invalid_state<sidb_charge_state::NEGATIVE>(pst);
+            return false;
+        }
 
-                if (is_potential_bound_bottom(pot_bound_join))
-                {
-                    if (used_witnesses.empty())
-                    {
-                        handle_invalid_state<sidb_charge_state::NEGATIVE>(pst);
-                        return false;
-                    }
+        if (!enough_validity_witnesses_exist<sidb_charge_state::POSITIVE>(pst, local_pruned_store))
+        {
+            handle_invalid_state<sidb_charge_state::POSITIVE>(pst);
+            return false;
+        }
 
-                    uint64_t last_neg_witness =
-                        std::find_if(used_witnesses.crbegin(), used_witnesses.crend(),
-                                     [&](const auto pair) { return pair.second == sidb_charge_state::NEGATIVE; })
-                            ->first;
-
-                    // need all combinations
-                    prune_onto_cs_for_sidb_ix<sidb_charge_state::NEGATIVE>(last_neg_witness, local_pruned_store);
-                    used_witnesses.pop_back();
-                    neg_count++;
-                    continue;
-                }
-
-                if (fail_onto_negative_charge(pot_bound_join))
-                {
-                    prune_onto_cs_for_sidb_ix<sidb_charge_state::NEGATIVE>(witness_sidb_ix, local_pruned_store);
-                    continue;
-                }
-
-                used_witnesses.emplace_back(std::make_pair(witness_sidb_ix, sidb_charge_state::NEGATIVE));
-                neg_count--;
-            }
-
-            if (pos_count != 0)
-            {
-                const auto& [pot_bound_join, witness_sidb_ix] =
-                    compute_received_potential_bound_join<bound_calculation_mode::UPPER, sidb_charge_state::POSITIVE>(
-                        pst, local_pruned_store, used_witnesses);
-
-                if (is_potential_bound_bottom(pot_bound_join))
-                {
-                    if (used_witnesses.empty())
-                    {
-                        handle_invalid_state<sidb_charge_state::POSITIVE>(pst);
-                        return false;
-                    }
-
-                    uint64_t last_neg_witness =
-                        std::find_if(used_witnesses.crbegin(), used_witnesses.crend(),
-                                     [&](const auto pair) { return pair.second == sidb_charge_state::POSITIVE; })
-                            ->first;
-
-                    // need all combinations
-                    prune_onto_cs_for_sidb_ix<sidb_charge_state::POSITIVE>(last_neg_witness, local_pruned_store);
-                    used_witnesses.pop_back();
-                    pos_count++;
-                    continue;
-                }
-
-                if (fail_onto_positive_charge(pot_bound_join))
-                {
-                    prune_onto_cs_for_sidb_ix<sidb_charge_state::POSITIVE>(witness_sidb_ix, local_pruned_store);
-                    continue;
-                }
-
-                used_witnesses.emplace_back(std::make_pair(witness_sidb_ix, sidb_charge_state::POSITIVE));
-                pos_count--;
-            }
-
-            if (neut_count != 0)
-            {
-                const auto& [pot_ub_join, witness_sidb_ix] =
-                    compute_received_potential_bound_join<bound_calculation_mode::UPPER, sidb_charge_state::NEUTRAL>(
-                        pst, local_pruned_store, used_witnesses);
-
-                if (is_potential_bound_bottom(pot_ub_join))
-                {
-                    if (used_witnesses.empty())
-                    {
-                        handle_invalid_state<sidb_charge_state::NEUTRAL>(pst);
-                        return false;
-                    }
-
-                    uint64_t last_neg_witness =
-                        std::find_if(used_witnesses.crbegin(), used_witnesses.crend(),
-                                     [&](const auto pair) { return pair.second == sidb_charge_state::NEUTRAL; })
-                            ->first;
-
-                    // need all combinations
-                    prune_onto_cs_for_sidb_ix<sidb_charge_state::NEUTRAL>(last_neg_witness, local_pruned_store);
-                    used_witnesses.pop_back();
-                    neut_count--;
-                    continue;
-                }
-
-                if (ub_fail_onto_neutral_charge(pot_ub_join))
-                {
-                    prune_onto_cs_for_sidb_ix<sidb_charge_state::NEUTRAL>(witness_sidb_ix, local_pruned_store);
-                    continue;
-                }
-
-                const double pot_lb_for_witness =
-                    get_proj_state_bound<bound_calculation_mode::LOWER, sidb_charge_state::NEUTRAL>(
-                        pst, sidb_cluster_receptor_state{pst.cluster, witness_sidb_ix})
-                        .V +
-                    pst.cluster->get_recv_ext_pot_bound<bound_calculation_mode::LOWER, sidb_charge_state::NEUTRAL>(
-                        witness_sidb_ix);
-
-                if (lb_fail_onto_neutral_charge(pot_lb_for_witness))
-                {
-                    prune_onto_cs_for_sidb_ix<sidb_charge_state::NEUTRAL>(witness_sidb_ix, local_pruned_store);
-                    continue;
-                }
-
-                used_witnesses.emplace_back(std::make_pair(witness_sidb_ix, sidb_charge_state::NEUTRAL));
-                neut_count--;
-            }
+        if (!enough_validity_witnesses_exist<sidb_charge_state::NEUTRAL>(pst, local_pruned_store))
+        {
+            handle_invalid_state<sidb_charge_state::NEUTRAL>(pst);
+            return false;
         }
 
         return true;
     }
-
-    struct stable_bound
-    {
-        uint64_t sidb_ix;
-    };
 
     bool check_charge_space(const sidb_cluster_ptr& c) noexcept
     {
@@ -486,26 +434,17 @@ class ground_state_space
             return true;
         }
 
+        pruned_store local_pruned_store{derive_local_pruned_store(c)};
+
         bool fixpoint = true;
 
         std::vector<uint64_t> removed_ms{};
         removed_ms.reserve(c->charge_space.size());
 
-        std::array<std::pa, 3> stable_bounds = collect_stable_bounds(c);
-
         for (const sidb_cluster_charge_state& m : c->charge_space)
         {
-            pruned_store local_pruned_store{};
-            for (const uint64_t i : c->sidbs)
-            {
-                local_pruned_store.emplace(std::make_pair(i, global_pruned_store.at(i)));
-            }
-
-            witness_store used_witnesses{};
-            used_witnesses.reserve(c->sidbs.size());
-
             if (!perform_potential_bound_analysis(sidb_cluster_projector_state{c, static_cast<uint64_t>(m)},
-                                                  local_pruned_store, used_witnesses))
+                                                  local_pruned_store))
             {
                 removed_ms.emplace_back(static_cast<uint64_t>(m));
                 fixpoint = false;
@@ -634,8 +573,7 @@ class ground_state_space
                     continue;
                 }
 
-                potential_projection
-                    int_pot_proj_onto_receiver{};  // verify 37->pp37 at 4294967296; contains 8589934592
+                potential_projection int_pot_proj_onto_receiver{};
 
                 for (const sidb_cluster_projector_state& pst : composition)
                 {
@@ -795,7 +733,7 @@ class ground_state_space
 
         for (const sidb_cluster_ptr& child : parent->children)
         {
-            diff -= get_proj_bound<bound, onto_cs>(child, rst).V;  // wrong?
+            diff -= get_proj_bound<bound, onto_cs>(child, rst).V;
         }
 
         rst.cluster->update_recv_ext_pot_bound<bound, onto_cs>(rst.sidb_ix, diff);
