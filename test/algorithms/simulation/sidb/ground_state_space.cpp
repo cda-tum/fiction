@@ -411,7 +411,7 @@ TEMPLATE_TEST_CASE(
 }
 
 TEMPLATE_TEST_CASE(
-    "Ground state space of a 56 DB layout", "[ground-state-space]",
+    "Ground state space of a 56 DB layout", "[ground-state-space-big]",
     (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
     (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
@@ -500,7 +500,7 @@ TEMPLATE_TEST_CASE(
 }
 
 TEMPLATE_TEST_CASE(
-    "Ground state space of a 112 DB layout", "[ground-state-space]",
+    "Ground state space of a 112 DB layout", "[ground-state-space-big]",
     (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
     (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
@@ -955,7 +955,7 @@ TEST_CASE("Ground State Space verification on random layouts with 7 SiDBs", "[gr
     verify_lyts(lyts);
 }
 
-TEST_CASE("Ground State Space verification on random layouts with 20 SiDBs", "[ground-state-space]")
+TEST_CASE("Ground State Space verification on random layouts with 20 SiDBs", "[ground-state-space-big]")
 {
 
     const std::pair<cell<sidb_lyt>, cell<sidb_lyt>> layout_dimensions = {cell<sidb_lyt>{0, 0}, cell<sidb_lyt>{24, 12}};

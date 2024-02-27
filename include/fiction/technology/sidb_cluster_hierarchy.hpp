@@ -221,19 +221,6 @@ struct sidb_cluster_charge_state
         }
     }
 
-    //    std::unordered_set<uint64_t> get_sidbs() const noexcept
-    //    {
-    //        std::unordered_set<uint64_t> sidbs{};
-    //        for (const sidb_cluster_charge_state_composition& composition : compositions)
-    //        {
-    //            for (const sidb_cluster_projector_state& pst : composition)
-    //            {
-    //                sidbs.insert(pst.sidbs.cbegin(), pst.sidbs.cend());
-    //            }
-    //        }
-    //        return sidbs;
-    //    }
-
     constexpr inline bool operator==(const sidb_cluster_charge_state& other) const noexcept
     {
         return static_cast<uint64_t>(*this) == static_cast<uint64_t>(other);
