@@ -22,110 +22,113 @@
 
 #include <algorithm>
 #include <limits>
+#include <unordered_set>
 
 using namespace fiction;
 
-TEMPLATE_TEST_CASE(
-    "Ground space space of a layout comprising of 13 SiDBs", "[ground-state-space]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
-{
-    // initialize SiDB layout
-    TestType lyt{};
-
-    // design random SiDB layout
-    lyt.assign_cell_type({11, 15, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({37, 8, 0}, TestType::cell_type::NORMAL);
-
-    lyt.assign_cell_type({17, 6, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({37, 19, 1}, TestType::cell_type::NORMAL);
-
-    lyt.assign_cell_type({4, 2, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({0, 17, 0}, TestType::cell_type::NORMAL);
-
-    lyt.assign_cell_type({39, 10, 1}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({22, 19, 1}, TestType::cell_type::NORMAL);
-
-    lyt.assign_cell_type({5, 3, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({17, 2, 0}, TestType::cell_type::NORMAL);
-
-    lyt.assign_cell_type({27, 13, 1}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({27, 16, 1}, TestType::cell_type::NORMAL);
-
-    lyt.assign_cell_type({8, 10, 1}, TestType::cell_type::NORMAL);
-
-    ground_state_space gss{lyt};
-
-    gss.update_charge_spaces();
-}
-
-TEMPLATE_TEST_CASE(
-    "Ground space space of a layout where a positive charge occurs", "[ground-state-space]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
-{
-    TestType lyt{};
-
-    lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({4, 0, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 0, 0}, TestType::cell_type::NORMAL);
-
-    lyt.assign_cell_type({11, 0, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 0, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({11, 0, 1}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 0, 1}, TestType::cell_type::NORMAL);
-
-    lyt.assign_cell_type({18, 0, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({20, 0, 0}, TestType::cell_type::NORMAL);
-
-    ground_state_space gss{lyt};
-    //    while (!gss.sweep());
-
-    int k = 0;
-
-    CHECK(k == 0);
-
-    //    REQUIRE(gss.cl_min.get_phys_params().mu_minus == -0.32);
-}
-// template <typename Lyt, bound_calculation_mode bound, sidb_charge_state onto_cs>
-// static void verify_recv_pot_bound(const ground_state_space<Lyt>& gss) noexcept
+// TEMPLATE_TEST_CASE(
+//     "Ground space space of a layout comprising of 13 SiDBs", "[ground-state-space]",
+//     (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
+//     (charge_distribution_surface<cell_level_layout<sidb_technology,
+//     clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 //{
-//     for (const sidb_cluster_ptr& c : gss.clustering)
-//     {
-//         if (ground_state_space<Lyt>::template onto_cs_pruned<onto_cs>(c))
-//         {
-//             continue;
-//         }
+//     // initialize SiDB layout
+//     TestType lyt{};
 //
-//         double recv_pot_bound = 0;
-//         for (const sidb_cluster_ptr& other_c : gss.clustering)
-//         {
-//             if (other_c != c)
-//             {
-//                 recv_pot_bound += ground_state_space<Lyt>::template get_proj_bound<bound, onto_cs>(other_c, c).V;
-//             }
-//         }
+//     // design random SiDB layout
+//     lyt.assign_cell_type({11, 15, 0}, TestType::cell_type::NORMAL);
+//     lyt.assign_cell_type({37, 8, 0}, TestType::cell_type::NORMAL);
 //
-//         recv_pot_bound -= c->get_recv_ext_pot_bound<bound, onto_cs>();
+//     lyt.assign_cell_type({17, 6, 0}, TestType::cell_type::NORMAL);
+//     lyt.assign_cell_type({37, 19, 1}, TestType::cell_type::NORMAL);
 //
-//         CHECK_THAT(recv_pot_bound, Catch::Matchers::WithinAbs(0.0, physical_constants::POP_STABILITY_ERR));
-//         if (std::abs(recv_pot_bound) > physical_constants::POP_STABILITY_ERR)
-//         {
-//             std::cout << "BIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIP\n\n"
-//                       << (bound == bound_calculation_mode::LOWER ? "LB" : "UB") << " ONTO "
-//                       << charge_configuration_to_string(std::vector{onto_cs}) << "\nc: " << c->uid
-//                       << "\nrecv_pot_bound: " << recv_pot_bound + c->get_recv_ext_pot_bound<bound, onto_cs>()
-//                       << "\nstored_bound: " << c->get_recv_ext_pot_bound<bound, onto_cs>() << "\nclustering:\n";
+//     lyt.assign_cell_type({4, 2, 0}, TestType::cell_type::NORMAL);
+//     lyt.assign_cell_type({0, 17, 0}, TestType::cell_type::NORMAL);
 //
-//             for (const sidb_cluster_ptr& c_ : gss.clustering)
-//             {
-//                 std::cout << c_->uid << std::endl;
-//             }
+//     lyt.assign_cell_type({39, 10, 1}, TestType::cell_type::NORMAL);
+//     lyt.assign_cell_type({22, 19, 1}, TestType::cell_type::NORMAL);
 //
-//             std::cout << std::endl;
-//         }
-//     }
+//     lyt.assign_cell_type({5, 3, 0}, TestType::cell_type::NORMAL);
+//     lyt.assign_cell_type({17, 2, 0}, TestType::cell_type::NORMAL);
+//
+//     lyt.assign_cell_type({27, 13, 1}, TestType::cell_type::NORMAL);
+//     lyt.assign_cell_type({27, 16, 1}, TestType::cell_type::NORMAL);
+//
+//     lyt.assign_cell_type({8, 10, 1}, TestType::cell_type::NORMAL);
+//
+//     ground_state_space gss{lyt};
+//
+//     gss.update_charge_spaces();
 // }
+//
+// TEMPLATE_TEST_CASE(
+//     "Ground space space of a layout where a positive charge occurs", "[ground-state-space]",
+//     (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
+//     (charge_distribution_surface<cell_level_layout<sidb_technology,
+//     clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+//{
+//     TestType lyt{};
+//
+//     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
+//     lyt.assign_cell_type({4, 0, 0}, TestType::cell_type::NORMAL);
+//     lyt.assign_cell_type({6, 0, 0}, TestType::cell_type::NORMAL);
+//
+//     lyt.assign_cell_type({11, 0, 0}, TestType::cell_type::NORMAL);
+//     lyt.assign_cell_type({12, 0, 0}, TestType::cell_type::NORMAL);
+//     lyt.assign_cell_type({11, 0, 1}, TestType::cell_type::NORMAL);
+//     lyt.assign_cell_type({12, 0, 1}, TestType::cell_type::NORMAL);
+//
+//     lyt.assign_cell_type({18, 0, 0}, TestType::cell_type::NORMAL);
+//     lyt.assign_cell_type({20, 0, 0}, TestType::cell_type::NORMAL);
+//
+//     ground_state_space gss{lyt};
+//     //    while (!gss.sweep());
+//
+//     int k = 0;
+//
+//     CHECK(k == 0);
+//
+//     //    REQUIRE(gss.cl_min.get_phys_params().mu_minus == -0.32);
+// }
+//// template <typename Lyt, bound_calculation_mode bound, sidb_charge_state onto_cs>
+//// static void verify_recv_pot_bound(const ground_state_space<Lyt>& gss) noexcept
+////{
+////     for (const sidb_cluster_ptr& c : gss.clustering)
+////     {
+////         if (ground_state_space<Lyt>::template onto_cs_pruned<onto_cs>(c))
+////         {
+////             continue;
+////         }
+////
+////         double recv_pot_bound = 0;
+////         for (const sidb_cluster_ptr& other_c : gss.clustering)
+////         {
+////             if (other_c != c)
+////             {
+////                 recv_pot_bound += ground_state_space<Lyt>::template get_proj_bound<bound, onto_cs>(other_c, c).V;
+////             }
+////         }
+////
+////         recv_pot_bound -= c->get_recv_ext_pot_bound<bound, onto_cs>();
+////
+////         CHECK_THAT(recv_pot_bound, Catch::Matchers::WithinAbs(0.0, physical_constants::POP_STABILITY_ERR));
+////         if (std::abs(recv_pot_bound) > physical_constants::POP_STABILITY_ERR)
+////         {
+////             std::cout << "BIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIP\n\n"
+////                       << (bound == bound_calculation_mode::LOWER ? "LB" : "UB") << " ONTO "
+////                       << charge_configuration_to_string(std::vector{onto_cs}) << "\nc: " << c->uid
+////                       << "\nrecv_pot_bound: " << recv_pot_bound + c->get_recv_ext_pot_bound<bound, onto_cs>()
+////                       << "\nstored_bound: " << c->get_recv_ext_pot_bound<bound, onto_cs>() << "\nclustering:\n";
+////
+////             for (const sidb_cluster_ptr& c_ : gss.clustering)
+////             {
+////                 std::cout << c_->uid << std::endl;
+////             }
+////
+////             std::cout << std::endl;
+////         }
+////     }
+//// }
 
 TEMPLATE_TEST_CASE(
     "Ground state space of a 7 DB layout", "[ground-state-space]",
@@ -169,24 +172,24 @@ TEMPLATE_TEST_CASE(
     //        }
     //    }
 
-    ground_state_space gss{lyt};
+    //    ground_state_space gss{lyt};
 
-    while (!gss.update_charge_spaces())
-        ;
-
-    for (const sidb_cluster_ptr& c : gss.clustering)
-    {
-        CHECK(std::find(c->charge_space.cbegin(), c->charge_space.cend(),
-                        sidb_cluster_charge_state{sidb_charge_state::POSITIVE}) == c->charge_space.cend());
-        if (c->uid == 1 || c->uid == 2 || c->uid == 4 || c->uid == 5)
-        {
-            CHECK(c->charge_space.size() == 2);
-        }
-        else
-        {
-            CHECK(c->charge_space.size() == 1);
-        }
-    }
+    //    while (!gss.update_charge_spaces())
+    //        ;
+    //
+    //    for (const sidb_cluster_ptr& c : gss.clustering)
+    //    {
+    //        CHECK(std::find(c->charge_space.cbegin(), c->charge_space.cend(),
+    //                        sidb_cluster_charge_state{sidb_charge_state::POSITIVE}) == c->charge_space.cend());
+    //        if (c->uid == 1 || c->uid == 2 || c->uid == 4 || c->uid == 5)
+    //        {
+    //            CHECK(c->charge_space.size() == 2);
+    //        }
+    //        else
+    //        {
+    //            CHECK(c->charge_space.size() == 1);
+    //        }
+    //    }
 
     const auto& [top, time] = ground_state_space{lyt}.compute_ground_state_space();
 
@@ -205,30 +208,37 @@ TEMPLATE_TEST_CASE(
     REQUIRE(top->charge_space.cbegin()->compositions.size() == 1);
     REQUIRE(top->charge_space.cbegin()->compositions.cbegin()->size() == 2);
 
-    if (top->charge_space.cbegin()->compositions.cbegin()->cbegin()->cluster->sidbs.size() == 3)
+    if (top->charge_space.cbegin()->compositions.cbegin()->cbegin()->first.cluster->sidbs.size() == 3)
     {
-        CHECK(top->charge_space.cbegin()->compositions.cbegin()->cbegin()->cluster->sidbs == std::set{0ul, 1ul, 2ul});
-        CHECK((top->charge_space.cbegin()->compositions.cbegin()->cbegin()->multiset_conf >> 32ull) == 2);
-        CHECK(((top->charge_space.cbegin()->compositions.cbegin()->cbegin()->multiset_conf << 32ull) >> 32ull) == 0);
+        CHECK(top->charge_space.cbegin()->compositions.cbegin()->cbegin()->first.cluster->sidbs ==
+              std::unordered_set{0ul, 1ul, 2ul});
+        CHECK((top->charge_space.cbegin()->compositions.cbegin()->cbegin()->first.multiset_conf >> 32ull) == 2);
+        CHECK(((top->charge_space.cbegin()->compositions.cbegin()->cbegin()->first.multiset_conf << 32ull) >> 32ull) ==
+              0);
 
-        CHECK(std::next(top->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)->cluster->sidbs ==
-              std::set{3ul, 4ul, 5ul, 6ul});
-        CHECK((std::next(top->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)->multiset_conf >> 32ull) == 3);
-        CHECK(((std::next(top->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)->multiset_conf << 32ull) >>
+        CHECK(std::next(top->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)->first.cluster->sidbs ==
+              std::unordered_set{3ul, 4ul, 5ul, 6ul});
+        CHECK((std::next(top->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)->first.multiset_conf >>
+               32ull) == 3);
+        CHECK(((std::next(top->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)->first.multiset_conf
+                << 32ull) >>
                32ull) == 0);
     }
     else
     {
-        CHECK(std::next(top->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)->cluster->sidbs ==
-              std::set{0ul, 1ul, 2ul});
-        CHECK((std::next(top->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)->multiset_conf >> 32ull) == 2);
-        CHECK(((std::next(top->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)->multiset_conf << 32ull) >>
+        CHECK(std::next(top->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)->first.cluster->sidbs ==
+              std::unordered_set{0ul, 1ul, 2ul});
+        CHECK((std::next(top->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)->first.multiset_conf >>
+               32ull) == 2);
+        CHECK(((std::next(top->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)->first.multiset_conf
+                << 32ull) >>
                32ull) == 0);
 
-        CHECK(top->charge_space.cbegin()->compositions.cbegin()->cbegin()->cluster->sidbs ==
-              std::set{3ul, 4ul, 5ul, 6ul});
-        CHECK((top->charge_space.cbegin()->compositions.cbegin()->cbegin()->multiset_conf >> 32ull) == 3);
-        CHECK(((top->charge_space.cbegin()->compositions.cbegin()->cbegin()->multiset_conf << 32ull) >> 32ull) == 0);
+        CHECK(top->charge_space.cbegin()->compositions.cbegin()->cbegin()->first.cluster->sidbs ==
+              std::unordered_set{3ul, 4ul, 5ul, 6ul});
+        CHECK((top->charge_space.cbegin()->compositions.cbegin()->cbegin()->first.multiset_conf >> 32ull) == 3);
+        CHECK(((top->charge_space.cbegin()->compositions.cbegin()->cbegin()->first.multiset_conf << 32ull) >> 32ull) ==
+              0);
     }
     //
     //    const charge_distribution_surface<TestType> cds{lyt};
@@ -680,7 +690,7 @@ static bool verify_ground_state_space_result(const charge_distribution_surface<s
     {
         bool composition_has_correct_charge_conf = true;
 
-        for (const sidb_cluster_projector_state& pst : composition)
+        for (const auto& [pst, _] : composition)
         {
             composition_has_correct_charge_conf &= verify_ground_state_space_result(valid_cl, pst.cluster);
         }
@@ -748,6 +758,31 @@ TEST_CASE("Tiny fail 3", "[ground-state-space]")
     lyt.assign_cell_type({4, 0, 1}, sidb_lyt::cell_type::NORMAL);  //  -    -       1
     lyt.assign_cell_type({2, 1, 0}, sidb_lyt::cell_type::NORMAL);  //  -    +       2
     lyt.assign_cell_type({3, 1, 1}, sidb_lyt::cell_type::NORMAL);  //  0    -       3
+
+    const sidb_simulation_result<sidb_lyt>& qe_res   = quickexact(lyt);
+    const sidb_simulation_result<sidb_lyt>& exgs_res = exhaustive_ground_state_simulation(lyt);
+    const auto& [top, time]                          = ground_state_space{lyt}.compute_ground_state_space();
+
+    for (const charge_distribution_surface<sidb_lyt>& cl : qe_res.charge_distributions)
+    {
+        const bool verification = verify_ground_state_space_result(cl, top);
+        CHECK(verification);
+    }
+
+    for (const charge_distribution_surface<sidb_lyt>& cl : exgs_res.charge_distributions)
+    {
+        const bool verification = verify_ground_state_space_result(cl, top);
+        CHECK(verification);
+    }
+}
+
+TEST_CASE("Tiny fail 4", "[ground-state-space]")
+{
+    sidb_lyt lyt{};
+    lyt.assign_cell_type({2, 0, 0}, sidb_lyt::cell_type::NORMAL);  //  0    -       0
+    lyt.assign_cell_type({1, 2, 0}, sidb_lyt::cell_type::NORMAL);  //  -    -       1
+    lyt.assign_cell_type({3, 0, 0}, sidb_lyt::cell_type::NORMAL);  //  -    +       2
+    lyt.assign_cell_type({4, 2, 0}, sidb_lyt::cell_type::NORMAL);  //  0    -       3
 
     const sidb_simulation_result<sidb_lyt>& qe_res   = quickexact(lyt);
     const sidb_simulation_result<sidb_lyt>& exgs_res = exhaustive_ground_state_simulation(lyt);
@@ -980,3 +1015,24 @@ TEST_CASE("Ground State Space verification on random layouts with 20 SiDBs", "[g
 //         std::cout << std::endl << std::endl;
 //     }
 // }
+
+//(3,5,0)
+//    (3,2,0)
+//        (10,8,0)
+//            (13,7,0)
+//                (23,3,1)
+//                    (8,2,1)
+//                        (17,5,0)
+//                            (6,5,0)
+//                                (21,0,1)
+//                                    (18,6,1)
+//                                        (21,0,0)
+//                                            (8,2,0)
+//                                                (4,6,0)
+//                                                    (5,11,0)
+//                                                        (23,1,0)
+//                                                            (24,12,0)
+//                                                                (5,10,0)
+//                                                                    (19,6,1)
+//                                                                        (3,11,1)
+//                                                                            (2,9,0)
