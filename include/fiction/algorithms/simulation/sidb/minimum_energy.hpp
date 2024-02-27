@@ -55,8 +55,7 @@ template <typename InputIt>
     static_assert(is_charge_distribution_surface_v<typename std::iterator_traits<InputIt>::value_type>,
                   "Range must be of charge_distribution_surface objects");
 
-    return std::min_element(first, last,
-                            [](const auto& cds1, const auto& cds2)
+    return std::min_element(first, last, [](const auto& cds1, const auto& cds2)
                             { return cds1.get_system_energy() < cds2.get_system_energy(); });
 }
 

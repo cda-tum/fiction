@@ -333,7 +333,7 @@ auto convert_to_siqad_coordinates(const Lyt& lyt) noexcept
             {
                 sidb_surface lyt_surface{lyt_new_cds};
                 lyt.foreach_sidb_defect(
-                    [&lyt_surface, &lyt](const auto& cd)
+                    [&lyt_surface](const auto& cd)
                     { lyt_surface.assign_sidb_defect(siqad::to_siqad_coord(cd.first), cd.second); });
                 return lyt_surface;
             }
