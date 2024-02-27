@@ -5,5 +5,5 @@ SiDB Lattice Layout
 
 The SiDB lattice layout can be layered on top of any cell-level layout. It is used to store and access the H-Si lattice orientation.
 
-.. doxygenclass:: fiction::sidb_lattice< Lyt, LatticeOrientation >
+.. doxygenclass:: fiction::sidb_lattice
    :members:

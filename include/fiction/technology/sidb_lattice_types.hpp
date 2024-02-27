@@ -23,7 +23,9 @@ struct sidb_100_lattice
      */
     static constexpr std::pair<double, double> LAT_C = {0, 2.25};
 };
-
+/**
+ * H-Si 111 surface.
+ */
 struct sidb_111_lattice
 {
     /**
