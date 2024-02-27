@@ -794,54 +794,96 @@ TEST_CASE("Small fail", "[ground-state-space]")
     }
 }
 
+TEST_CASE("Big fail", "[ground-state-space]")
+{
+    sidb_lyt lyt{};
+    lyt.assign_cell_type({21, 0, 1}, sidb_lyt::cell_type::NORMAL);   //  0    -   0   0       0     -0
+    lyt.assign_cell_type({24, 0, 1}, sidb_lyt::cell_type::NORMAL);   //  -    -   -   -       1     -
+    lyt.assign_cell_type({8, 2, 0}, sidb_lyt::cell_type::NORMAL);    //  -    -   0   +       2     -0+
+    lyt.assign_cell_type({11, 3, 1}, sidb_lyt::cell_type::NORMAL);   //  0    +   0   -       3     -0+
+    lyt.assign_cell_type({18, 3, 1}, sidb_lyt::cell_type::NORMAL);   //  +    +   0   -       4     -0+
+    lyt.assign_cell_type({21, 6, 0}, sidb_lyt::cell_type::NORMAL);   //  -    -   -   0       5     -0
+    lyt.assign_cell_type({7, 7, 1}, sidb_lyt::cell_type::NORMAL);    //  -    -   -   -       6     -
+    lyt.assign_cell_type({16, 8, 0}, sidb_lyt::cell_type::NORMAL);   //  -    -   -   -       6     -
+    lyt.assign_cell_type({17, 8, 0}, sidb_lyt::cell_type::NORMAL);   //  -    -   -   -       6     -
+    lyt.assign_cell_type({9, 9, 0}, sidb_lyt::cell_type::NORMAL);    //  -    -   -   -       6     -
+    lyt.assign_cell_type({14, 9, 0}, sidb_lyt::cell_type::NORMAL);   //  -    -   -   -       6     -
+    lyt.assign_cell_type({15, 9, 0}, sidb_lyt::cell_type::NORMAL);   //  -    -   -   -       6     -
+    lyt.assign_cell_type({6, 10, 1}, sidb_lyt::cell_type::NORMAL);   //  -    -   -   -       6     -
+    lyt.assign_cell_type({9, 10, 1}, sidb_lyt::cell_type::NORMAL);   //  -    -   -   -       6     -
+    lyt.assign_cell_type({2, 11, 0}, sidb_lyt::cell_type::NORMAL);   //  -    -   -   -       6     -
+    lyt.assign_cell_type({10, 11, 0}, sidb_lyt::cell_type::NORMAL);  //  -    -   -   -       6     -
+    lyt.assign_cell_type({3, 11, 1}, sidb_lyt::cell_type::NORMAL);   //  -    -   -   -       6     -
+    lyt.assign_cell_type({24, 11, 1}, sidb_lyt::cell_type::NORMAL);  //  -    -   -   -       6     -
+    lyt.assign_cell_type({15, 12, 0}, sidb_lyt::cell_type::NORMAL);  //  -    -   -   -       6     -
+    lyt.assign_cell_type({24, 12, 0}, sidb_lyt::cell_type::NORMAL);  //  -    -   -   -       6     -
+
+    const sidb_simulation_result<sidb_lyt>& qe_res = quickexact(lyt);
+    const auto& [top, time]                        = ground_state_space{lyt}.compute_ground_state_space();
+
+    for (const charge_distribution_surface<sidb_lyt>& cl : qe_res.charge_distributions)
+    {
+        const bool verification = verify_ground_state_space_result(cl, top);
+        CHECK(verification);
+    }
+}
+
 static void verify_lyts(const std::vector<sidb_lyt>& lyts)
 {
     for (uint64_t i = 0; i < lyts.size(); ++i)
     {
         std::cout << "LAYOUT NUMBER: " << i << std::endl;
 
-        const sidb_simulation_result<sidb_lyt>& qe_res = quickexact(lyts[i]);
-
-        std::cout << "QUICKEXACT RUNTIME: " << (qe_res.simulation_runtime.count() * 1000) << " ms" << std::endl;
-        std::cout << "PHYSICALLY VALID CHARGE DISTRIBUTIONS: " << qe_res.charge_distributions.size() << std::endl;
+        lyts[i].foreach_cell([](const cell<sidb_lyt>& c) { std::cout << fmt::format("{}", c) << std::endl; });
 
         try
         {
-            const auto& [top, time] = ground_state_space{lyts[i]}.compute_ground_state_space();
+            const sidb_simulation_result<sidb_lyt>& qe_res = quickexact(lyts[i]);
 
-            std::cout << "RUNTIME: " << (time.count() * 1000) << " ms" << std::endl;
-            std::cout << "TOP CLUSTER CHARGE SPACE SIZE: " << top->charge_space.size() << std::endl;
+            std::cout << "QUICKEXACT RUNTIME: " << (qe_res.simulation_runtime.count() * 1000) << " ms" << std::endl;
+            std::cout << "PHYSICALLY VALID CHARGE DISTRIBUTIONS: " << qe_res.charge_distributions.size() << std::endl;
 
-            for (const charge_distribution_surface<sidb_lyt>& cl : qe_res.charge_distributions)
+            try
             {
-                const bool verification = verify_ground_state_space_result(cl, top);
-                CHECK(verification);
-                if (!verification)
-                {
-                    for (const cell<sidb_lyt>& c : cl.get_sidb_order())
-                    {
-                        std::cout << fmt::format("{}", c) << std::endl;
-                    }
+                const auto& [top, time] = ground_state_space{lyts[i]}.compute_ground_state_space();
 
-                    const sidb_simulation_result<sidb_lyt>& exgs_res = exhaustive_ground_state_simulation(lyts[i]);
-                    for (const charge_distribution_surface<sidb_lyt>& cl_exgs : exgs_res.charge_distributions)
+                std::cout << "RUNTIME: " << (time.count() * 1000) << " ms" << std::endl;
+                std::cout << "TOP CLUSTER CHARGE SPACE SIZE: " << top->charge_space.size() << std::endl;
+
+                for (const charge_distribution_surface<sidb_lyt>& cl : qe_res.charge_distributions)
+                {
+                    const bool verification = verify_ground_state_space_result(cl, top);
+                    CHECK(verification);
+                    if (!verification)
                     {
-                        const bool exgs_verification = verify_ground_state_space_result(cl_exgs, top);
-                        CHECK(exgs_verification);
-                        if (!exgs_verification)
+                        //                    for (const cell<sidb_lyt>& c : cl.get_sidb_order())
+                        //                    {
+                        //                        std::cout << fmt::format("{}", c) << std::endl;
+                        //                    }
+
+                        const sidb_simulation_result<sidb_lyt>& exgs_res = exhaustive_ground_state_simulation(lyts[i]);
+                        for (const charge_distribution_surface<sidb_lyt>& cl_exgs : exgs_res.charge_distributions)
                         {
-                            std::cout << "EXGS AGREES with QUICKEXACT" << std::endl;
+                            const bool exgs_verification = verify_ground_state_space_result(cl_exgs, top);
+                            CHECK(exgs_verification);
+                            if (!exgs_verification)
+                            {
+                                std::cout << "EXGS AGREES with QUICKEXACT" << std::endl;
+                            }
                         }
                     }
                 }
             }
+            catch (std::exception& e)
+            {
+                std::cout << "GROUND STATE SPACE CRASHED :(((((((((((((((((\n\n\n" << std::endl;
+                REQUIRE(false);
+            }
         }
         catch (std::exception& e)
         {
-            for (const cell<sidb_lyt>& c : qe_res.charge_distributions.cbegin()->get_sidb_order())
-            {
-                std::cout << fmt::format("{}", c) << std::endl;
-            }
+            std::cout << "QUICKEXACT CRASHED\n\n\n" << std::endl;
+            CHECK(false);
         }
 
         std::cout << std::endl;
@@ -892,3 +934,49 @@ TEST_CASE("Ground State Space verification on random layouts with 20 SiDBs", "[g
 
     verify_lyts(lyts);
 }
+
+// TEST_CASE("Compare modes 5", "[ground-state-space]")
+//{
+//     const std::pair<cell<sidb_lyt>, cell<sidb_lyt>> layout_dimensions = {cell<sidb_lyt>{0, 0}, cell<sidb_lyt>{4, 2}};
+//
+//     generate_random_sidb_layout_params<sidb_lyt> rlg_ps{};
+//     rlg_ps.coordinate_pair                    = layout_dimensions;
+//     rlg_ps.number_of_sidbs                    = 5;
+//     rlg_ps.number_of_unique_generated_layouts = 1000;
+//
+//     const std::vector<sidb_lyt>& lyts = generate_multiple_random_sidb_layouts(sidb_lyt{}, rlg_ps);
+//     for (const sidb_lyt& lyt : lyts)
+//     {
+//         std::cout << "NO MODE" << std::endl;
+//         const auto& [top, time] = ground_state_space{lyt}.compute_ground_state_space();
+//         std::cout << "RUNTIME: " << (time.count() * 1000) << " ms" << std::endl;
+//         std::cout << "TOP CLUSTER CHARGE SPACE SIZE: " << top->charge_space.size() << std::endl;
+//
+//
+//         std::cout << "\nMODE 0" << std::endl;
+//         ground_state_space gss{lyt};
+//         gss.mode = false;
+//         const auto& [top0, time0] = gss.compute_ground_state_space();
+//         std::cout << "RUNTIME: " << (time0.count() * 1000) << " ms" << std::endl;
+//         std::cout << "TOP CLUSTER CHARGE SPACE SIZE: " << top0->charge_space.size() << std::endl;
+//
+//         std::cout << "\nMODE 1" << std::endl;
+//         ground_state_space gss1{lyt};
+//         gss.mode = true;
+//         const auto& [top1, time1] = gss1.compute_ground_state_space();
+//         std::cout << "RUNTIME: " << (time1.count() * 1000) << " ms" << std::endl;
+//         std::cout << "TOP CLUSTER CHARGE SPACE SIZE: " << top1->charge_space.size() << std::endl;
+//
+//         if (top->charge_space.size() < top0->charge_space.size())
+//         {
+//             const sidb_simulation_result<sidb_lyt>& qe_res = quickexact(lyt);
+//             for (const cell<sidb_lyt>& c : qe_res.charge_distributions.cbegin()->get_sidb_order())
+//             {
+//                 std::cout << fmt::format("{}", c) << std::endl;
+//             }
+//             REQUIRE(false);
+//         }
+//
+//         std::cout << std::endl << std::endl;
+//     }
+// }
