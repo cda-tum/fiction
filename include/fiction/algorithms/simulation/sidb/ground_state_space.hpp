@@ -50,18 +50,14 @@ class ground_state_space
 
   public:
     explicit ground_state_space(const Lyt&                        lyt,
-                                const sidb_simulation_parameters& phys_params = sidb_simulation_parameters{},
-                                const uint64_t                    max_cluster_size_for_witness_partitioning = 8,
-                                const uint64_t number_of_threads = std::thread::hardware_concurrency()) noexcept :
+                                const sidb_simulation_parameters& phys_params = sidb_simulation_parameters{}) noexcept :
             clustering{
                 get_initial_clustering(to_sidb_cluster(sidb_cluster_hierarchy(lyt)), get_local_potential_bounds(lyt))},
             cds{charge_distribution_surface<Lyt>{lyt}},
             mu_bounds_with_error{physical_constants::POP_STABILITY_ERR - phys_params.mu_minus,
                                  -physical_constants::POP_STABILITY_ERR - phys_params.mu_minus,
                                  physical_constants::POP_STABILITY_ERR - phys_params.mu_plus(),
-                                 -physical_constants::POP_STABILITY_ERR - phys_params.mu_plus()},
-            witness_partitioning_max_cluster_size{max_cluster_size_for_witness_partitioning},
-            available_threads{number_of_threads}
+                                 -physical_constants::POP_STABILITY_ERR - phys_params.mu_plus()}
     {}
 
     constexpr inline bool fail_onto_negative_charge(const double pot_bound) const noexcept
@@ -222,29 +218,6 @@ class ground_state_space
                 num_pos{pst.get_count<sidb_charge_state::POSITIVE>()},
                 num_neut{pst.get_count<sidb_charge_state::NEUTRAL>()}
         {}
-
-        void omit_free_witnesses() noexcept
-        {
-            // find free witnesses to reduce the problem, leaving only witnesses to partition that overlap
-            for (auto& [this_set, competing_sets] :
-                 std::array{std::make_pair(std::make_pair(neg_w, num_neg), std::make_pair(pos_w, neut_w)),
-                            std::make_pair(std::make_pair(pos_w, num_pos), std::make_pair(neg_w, neut_w)),
-                            std::make_pair(std::make_pair(neut_w, num_neut), std::make_pair(neg_w, pos_w))})
-            {
-                for (std::set<uint64_t>::const_iterator it = this_set.first.cbegin(); it != this_set.first.cend();)
-                {
-                    if (competing_sets.first.find(*it) == competing_sets.first.cend() &&
-                        competing_sets.second.find(*it) == competing_sets.second.cend())
-                    {
-                        it = this_set.first.erase(it);
-                        this_set.second--;
-                        continue;
-                    }
-
-                    ++it;
-                }
-            }
-        }
     };
 
     template <sidb_charge_state current_fill_cs>
@@ -346,18 +319,6 @@ class ground_state_space
             return false;
         }
 
-        if (pst.cluster->size() > witness_partitioning_max_cluster_size)
-        {
-            return true;
-        }
-
-        st.omit_free_witnesses();
-
-        if (!find_valid_witness_partitioning<sidb_charge_state::NEGATIVE>(st, st.num_neg))
-        {
-            return false;
-        }
-
         return true;
     }
 
@@ -376,96 +337,34 @@ class ground_state_space
 
         for (const sidb_cluster_charge_state& m : c->charge_space)
         {
-            for (const sidb_cluster_charge_state_composition& composition : m.compositions)
+            std::vector<uint64_t> removed_comps{};
+            removed_comps.reserve(m.compositions.size());
+
+            for (uint64_t ix = m.compositions.size() - 1; ix >= 0; --ix)
             {
-                for (const auto& [pst, sibling_pot_bounds] : composition)
+                for (const auto& [pst, sibling_pot_bounds] : m.compositions[ix])
                 {
                     if (!perform_potential_bound_analysis(pst, sibling_pot_bounds))
                     {
                         handle_invalid_state(pst);
-                        removed_ms.emplace_back(pst.multiset_conf);  // this looks wrong -- remove the composition?
+                        removed_comps.emplace_back(ix);  // this looks wrong -- remove the composition?
                         fixpoint = false;                            // no counterexample found thus far, however...
-                    }                                                // this goes beyond me for the moment;
+                        break;
+                    }  // this goes beyond me for the moment
                 }
             }
-        }
 
-        for (const uint64_t m : removed_ms)
-        {
-            c->charge_space.erase(sidb_cluster_charge_state{m});
-        }
+            if (removed_comps.size() == m.compositions.size())
+            {
+                //                handle_invalid_state(sidb_cluster_projector_state{c, static_cast<uint64_t>(m)});
+                removed_ms.emplace_back(static_cast<uint64_t>(m));
+                continue;
+            }
 
-        return fixpoint;
-    }
-
-    bool check_charge_space_multithreaded(const sidb_cluster_ptr& c) noexcept
-    {
-        // skip if |charge space| = 1?
-        if (c->charge_space.size() == 1)
-        {
-            return true;
-        }
-
-        bool fixpoint = true;
-
-        // multithreading setup
-        const uint64_t threads_to_use = std::min(std::max(available_threads, 1ul), c->charge_space.size());
-
-        std::vector<std::pair<uint64_t, uint64_t>> ranges;
-        const uint64_t                             chunk_size = std::max(c->charge_space.size() / threads_to_use, 1ul);
-        uint64_t                                   start      = 0;
-        uint64_t                                   end        = chunk_size - 1;
-
-        for (uint64_t i = 0; i < threads_to_use; ++i)
-        {
-            ranges.emplace_back(start, end);
-            start = end + 1;
-            end   = i == threads_to_use - 2 ? c->charge_space.size() - 1 : start + chunk_size - 1;
-        }
-
-        std::vector<std::thread> threads_vec{};
-        threads_vec.reserve(threads_to_use);
-
-        std::vector<uint64_t> removed_ms{};
-        removed_ms.reserve(c->charge_space.size());
-
-        std::mutex mutex{};
-
-        for (const std::pair<uint64_t, uint64_t>& range : ranges)
-        {
-            threads_vec.emplace_back(
-                [&]
-                {
-                    for (uint64_t ix = range.first; ix <= range.second; ++ix)
-                    {
-                        // charge space check
-                        for (const sidb_cluster_charge_state_composition& composition :
-                             std::next(c->charge_space.cbegin(), static_cast<int64_t>(ix))->compositions)
-                        {
-                            for (const auto& [pst, sibling_pot_bounds] : composition)
-                            {
-                                if (perform_potential_bound_analysis(pst, sibling_pot_bounds))
-                                {
-                                    continue;
-                                }
-
-                                {
-                                    const std::lock_guard lock{mutex};
-
-                                    handle_invalid_state(pst);
-                                    removed_ms.emplace_back(
-                                        pst.multiset_conf);  // this looks wrong -- remove the composition?
-                                    fixpoint = false;        // no counterexample found thus far, however...
-                                }                            // this goes beyond me for the moment
-                            }
-                        }
-                    }
-                });
-        }
-
-        for (std::thread& t : threads_vec)
-        {
-            t.join();
+            for (const uint64_t ix : removed_ms)
+            {
+                m.compositions.erase(std::next(m.compositions.begin(), static_cast<int64_t>(ix)));
+            }
         }
 
         for (const uint64_t m : removed_ms)
@@ -485,8 +384,7 @@ class ground_state_space
         {
             if (!skip_cluster.has_value() || c->uid != skip_cluster.value())
             {
-                fixpoint &= (available_threads >= c->charge_space.size() ? check_charge_space_multithreaded(c) :
-                                                                           check_charge_space(c));
+                fixpoint &= check_charge_space(c);
             }
         }
 
@@ -765,11 +663,7 @@ class ground_state_space
 
     const std::array<double, 4> mu_bounds_with_error;
 
-    const uint64_t witness_partitioning_max_cluster_size;
-
     bool terminate = false;
-
-    const uint64_t available_threads;
 };
 
 }  // namespace fiction
