@@ -68,7 +68,7 @@ class write_location_and_ground_state_impl
             auto       sidbs        = ground_state.get_sidb_order();
 
             std::sort(sidbs.begin(), sidbs.end());
-            if constexpr (is_sidb_lattice_v<Lyt, typename Lyt::orientation>)
+            if constexpr (is_sidb_lattice_v<Lyt>)
             {
                 for (const auto& sidb : sidbs)
                 {

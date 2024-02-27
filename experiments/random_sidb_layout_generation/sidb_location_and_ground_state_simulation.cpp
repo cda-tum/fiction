@@ -71,7 +71,7 @@ int main(int argc, const char* argv[])  // NOLINT
     const std::string folder_name = options["--folder_name"];
     // µ-value used for the simulation.
     const double mu = std::stod(options["--mu_minus"]);
-    // µ-value used for the simulation.
+    // Lattice orientation of H-Si.
     const std::string orientation = options["--orientation"];
 
     // Print the parsed values

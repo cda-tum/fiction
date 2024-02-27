@@ -132,13 +132,14 @@ TEMPLATE_TEST_CASE("Convert offset::ucoord_t layout to SiQAD coordinate layout",
 
 TEST_CASE("Convert cds/sidb_surface in offset::ucoord_t layout to SiQAD coordinate layout", "[layout-utils]")
 {
-    using TestType = sidb_surface<cds_sidb_cell_clk_lyt>;
+    cds_sidb_cell_clk_lyt               cds{};
+    sidb_surface<cds_sidb_cell_clk_lyt> sidb_surface_cds{cds};
 
-    TestType lyt{};
+    sidb_surface<cds_sidb_cell_clk_lyt> lyt{};
 
-    lyt.assign_cell_type({0, 0, 0}, TestType::technology::cell_type::NORMAL);
-    lyt.assign_cell_type({1, 0, 0}, TestType::technology::cell_type::INPUT);
-    lyt.assign_cell_type({0, 3, 0}, TestType::technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({0, 0, 0}, sidb_surface<cds_sidb_cell_clk_lyt>::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({1, 0, 0}, sidb_surface<cds_sidb_cell_clk_lyt>::technology::cell_type::INPUT);
+    lyt.assign_cell_type({0, 3, 0}, sidb_surface<cds_sidb_cell_clk_lyt>::technology::cell_type::OUTPUT);
 
     lyt.assign_charge_state({0, 0, 0}, sidb_charge_state::NEUTRAL);
     lyt.assign_charge_state({1, 0, 0}, sidb_charge_state::POSITIVE);
@@ -147,11 +148,14 @@ TEST_CASE("Convert cds/sidb_surface in offset::ucoord_t layout to SiQAD coordina
     lyt.assign_sidb_defect({5, 5, 0}, sidb_defect{sidb_defect_type::UNKNOWN});
     lyt.assign_sidb_defect({1, 1, 0}, sidb_defect{sidb_defect_type::UNKNOWN});
 
-    auto lyt_transformed = convert_to_siqad_coordinates<TestType>(lyt);
+    auto lyt_transformed = convert_to_siqad_coordinates<sidb_surface<cds_sidb_cell_clk_lyt>>(lyt);
 
-    CHECK(lyt_transformed.get_cell_type({0, 0, 0}) == TestType::technology::cell_type::NORMAL);
-    CHECK(lyt_transformed.get_cell_type({1, 0, 0}) == TestType::technology::cell_type::INPUT);
-    CHECK(lyt_transformed.get_cell_type({0, 1, 1}) == TestType::technology::cell_type::OUTPUT);
+    CHECK(lyt_transformed.get_cell_type({0, 0, 0}) ==
+          sidb_surface<cds_sidb_cell_clk_lyt>::technology::cell_type::NORMAL);
+    CHECK(lyt_transformed.get_cell_type({1, 0, 0}) ==
+          sidb_surface<cds_sidb_cell_clk_lyt>::technology::cell_type::INPUT);
+    CHECK(lyt_transformed.get_cell_type({0, 1, 1}) ==
+          sidb_surface<cds_sidb_cell_clk_lyt>::technology::cell_type::OUTPUT);
 
     CHECK(lyt_transformed.get_charge_state({0, 0, 0}) == sidb_charge_state::NEUTRAL);
     CHECK(lyt_transformed.get_charge_state({1, 0, 0}) == sidb_charge_state::POSITIVE);

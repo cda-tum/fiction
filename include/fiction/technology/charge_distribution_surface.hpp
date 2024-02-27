@@ -264,7 +264,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     {
         static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
         static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-        static_assert(is_sidb_lattice_v<Lyt, typename Lyt::orientation>, "Lyt is not an SiDB layout");
+        static_assert(is_sidb_lattice_v<Lyt>, "Lyt is not an SiDB lattice layout");
 
         initialize(cs);
     }
@@ -322,7 +322,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         std::vector<std::pair<double, double>> positions{};
         positions.reserve(strg->sidb_order.size());
 
-        if constexpr (is_sidb_lattice_v<Lyt, typename Lyt::orientation>)
+        if constexpr (is_sidb_lattice_v<Lyt>)
         {
             for (const auto& c : strg->sidb_order)
             {

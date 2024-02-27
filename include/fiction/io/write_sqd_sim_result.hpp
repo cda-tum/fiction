@@ -220,7 +220,7 @@ class write_sqd_sim_result_impl
     {
         os << siqad::OPEN_PHYSLOC;
 
-        if constexpr (is_sidb_lattice_v<Lyt, typename Lyt::orientation>)
+        if constexpr (is_sidb_lattice_v<Lyt>)
         {
             std::for_each(ordered_cells.cbegin(), ordered_cells.cend(),
                           [this](const auto& c)

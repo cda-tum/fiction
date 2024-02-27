@@ -198,7 +198,7 @@ class write_sqd_layout_impl
 
         std::vector<const char*> active_layers{};
 
-        if constexpr (is_sidb_lattice_v<Lyt, typename Lyt::orientation>)
+        if constexpr (is_sidb_lattice_v<Lyt>)
         {
             if (has_same_lattice_orientation_v<Lyt, sidb_100_lattice>)
             {
@@ -381,7 +381,7 @@ void write_sqd_layout(const Lyt& lyt, std::ostream& os)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_qca_technology_v<Lyt> || has_sidb_technology_v<Lyt>, "Lyt must be a QCA or SiDB layout");
-    static_assert(is_sidb_lattice_v<Lyt, typename Lyt::orientation>, "Lyt must be a sidb lattice layout");
+    static_assert(is_sidb_lattice_v<Lyt>, "Lyt must be a sidb lattice layout");
 
     detail::write_sqd_layout_impl p{lyt, os};
 

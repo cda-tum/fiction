@@ -438,7 +438,7 @@ Lyt read_sqd_layout(std::istream& is, const std::string_view& name = "")
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
-    static_assert(is_sidb_lattice_v<Lyt, typename Lyt::orientation>, "Lyt must be a lattice layout");
+    static_assert(is_sidb_lattice_v<Lyt>, "Lyt must be a lattice layout");
 
     detail::read_sqd_layout_impl<Lyt> p{is, name};
 
@@ -467,7 +467,7 @@ void read_sqd_layout(Lyt& lyt, std::istream& is)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
-    static_assert(is_sidb_lattice_v<Lyt, typename Lyt::orientation>, "Lyt must be a lattice layout");
+    static_assert(is_sidb_lattice_v<Lyt>, "Lyt must be a lattice layout");
 
     detail::read_sqd_layout_impl<Lyt> p{lyt, is};
 
@@ -492,7 +492,7 @@ Lyt read_sqd_layout(const std::string_view& filename, const std::string_view& na
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
-    static_assert(is_sidb_lattice_v<Lyt, typename Lyt::orientation>, "Lyt must be a lattice layout");
+    static_assert(is_sidb_lattice_v<Lyt>, "Lyt must be a lattice layout");
 
     std::ifstream is{filename.data(), std::ifstream::in};
 
@@ -527,7 +527,7 @@ void read_sqd_layout(Lyt& lyt, const std::string_view& filename)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
-    static_assert(is_sidb_lattice_v<Lyt, typename Lyt::orientation>, "Lyt must be a lattice layout");
+    static_assert(is_sidb_lattice_v<Lyt>, "Lyt must be a lattice layout");
 
     std::ifstream is{filename.data(), std::ifstream::in};
 

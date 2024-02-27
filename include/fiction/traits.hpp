@@ -678,31 +678,20 @@ inline constexpr bool has_get_layout_name_v = has_get_layout_name<Ntk>::value;
  * SiDB lattice surfaces
  */
 
-template <class Lyt, class LatticeOrientation, class = void>
-struct is_sidb_lattice : std::false_type
-{};
-
-template <class Lyt, class LatticeOrientation>
-struct is_sidb_lattice<Lyt, LatticeOrientation> : std::true_type
-{};
-
-template <class Lyt, class LatticeOrientation>
-inline constexpr bool is_sidb_lattice_v = is_sidb_lattice<Lyt, typename Lyt::orientation>::value;
-
 template <typename Lyt, typename LatticeOrientation>
 inline constexpr const bool has_same_lattice_orientation_v =
     std::is_same_v<typename Lyt::orientation, LatticeOrientation>;
 
 template <typename Lyt, typename = void>
-struct has_orientation : std::false_type
+struct is_sidb_lattice : std::false_type
 {};
 
 template <typename Lyt>
-struct has_orientation<Lyt, std::void_t<typename Lyt::orientation>> : std::true_type
+struct is_sidb_lattice<Lyt, std::void_t<typename Lyt::orientation>> : std::true_type
 {};
 
 template <typename Lyt>
-constexpr bool has_orientation_v = has_orientation<Lyt>::value;
+constexpr bool is_sidb_lattice_v = is_sidb_lattice<Lyt>::value;
 
 /**
  * SiDB surfaces

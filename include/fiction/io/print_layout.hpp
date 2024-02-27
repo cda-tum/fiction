@@ -357,7 +357,7 @@ void print_sidb_layout(std::ostream& os, const Lyt& lyt, const bool cs_color = t
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
-    static_assert(has_orientation_v<Lyt>, "Lyt is not an SiDB lattice");
+    static_assert(is_sidb_lattice_v<Lyt>, "Lyt is not an SiDB lattice");
 
     // empty layout
     if (lyt.is_empty())
@@ -544,7 +544,7 @@ void print_layout(const Lyt& lyt, std::ostream& os = std::cout)
     }
     else if constexpr (is_cell_level_layout_v<Lyt>)
     {
-        if constexpr (has_sidb_technology_v<Lyt> && has_orientation_v<Lyt>)
+        if constexpr (has_sidb_technology_v<Lyt> && is_sidb_lattice_v<Lyt>)
         {
             if constexpr (has_siqad_coord_v<Lyt>)
             {

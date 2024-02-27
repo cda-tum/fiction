@@ -31,7 +31,7 @@ template <typename Lyt>
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(is_sidb_lattice_v<Lyt, typename Lyt::cell>, "Lyt is not an SiDB layout");
+    static_assert(is_sidb_lattice_v<Lyt>, "Lyt is not an SiDB lattice layout");
 
     if constexpr (has_siqad_coord_v<Lyt>)
     {

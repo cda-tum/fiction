@@ -3,6 +3,7 @@
 //
 
 #include "catch2/catch_template_test_macros.hpp"
+#include "catch2/catch_test_macros.hpp"
 
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
@@ -14,11 +15,11 @@ using namespace fiction;
 TEMPLATE_TEST_CASE("layout traits", "[sidb-lattice]", (sidb_cell_clk_lyt), (cds_sidb_cell_clk_lyt))
 {
     using lattice_layout_100 = sidb_lattice<TestType, sidb_100_lattice>;
-    CHECK(is_sidb_lattice_v<lattice_layout_100, sidb_100_lattice>);
+    CHECK(is_sidb_lattice_v<lattice_layout_100>);
     CHECK(is_cell_level_layout_v<lattice_layout_100>);
 
     using lattice_layout_111 = sidb_lattice<TestType, sidb_111_lattice>;
-    CHECK(is_sidb_lattice_v<lattice_layout_111, sidb_111_lattice>);
+    CHECK(is_sidb_lattice_v<lattice_layout_111>);
     CHECK(is_cell_level_layout_v<lattice_layout_111>);
 }
 
