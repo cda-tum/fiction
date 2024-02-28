@@ -17,6 +17,7 @@
 #include <chrono>
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <set>
 #include <utility>
 #include <vector>
@@ -29,13 +30,15 @@ class ground_state_space
 {
   public:
     explicit ground_state_space(const Lyt&                        lyt,
-                                const sidb_simulation_parameters& phys_params = sidb_simulation_parameters{}) noexcept :
+                                const sidb_simulation_parameters& phys_params            = sidb_simulation_parameters{},
+                                const uint64_t max_cluster_size_for_witness_partitioning = 12) noexcept :
             clustering{
                 get_initial_clustering(to_sidb_cluster(sidb_cluster_hierarchy(lyt)), get_local_potential_bounds(lyt))},
             mu_bounds_with_error{physical_constants::POP_STABILITY_ERR - phys_params.mu_minus,
                                  -physical_constants::POP_STABILITY_ERR - phys_params.mu_minus,
                                  physical_constants::POP_STABILITY_ERR - phys_params.mu_plus(),
-                                 -physical_constants::POP_STABILITY_ERR - phys_params.mu_plus()}
+                                 -physical_constants::POP_STABILITY_ERR - phys_params.mu_plus()},
+            witness_partitioning_max_cluster_size{max_cluster_size_for_witness_partitioning}
     {}
 
     std::pair<sidb_cluster_ptr, std::chrono::duration<double>> compute_ground_state_space() noexcept
@@ -44,7 +47,13 @@ class ground_state_space
         {
             const mockturtle::stopwatch stop{time_counter};
 
-            move_up_hierarchy();
+            while (!terminate)
+            {
+                while (!update_charge_spaces())
+                    ;
+
+                move_up_hierarchy();
+            }
         }
 
         return {*clustering.cbegin(), time_counter};
@@ -99,7 +108,7 @@ class ground_state_space
 
         if (c->size() == 1)
         {
-            const uint64_t i = *c->sidbs.cbegin();
+            const uint64_t i = get_singleton_sidb(c);
 
             c->initialize_singleton_cluster_charge_space(
                 i, -local_potential_bound_containers.first.get_local_potential_by_index(i).value(),
@@ -131,6 +140,13 @@ class ground_state_space
     }
 
     template <bound_direction bound>
+    static constexpr inline double get_next_proj_pot_bound(const sidb_cluster_ptr&            c,
+                                                           const sidb_cluster_receptor_state& rst) noexcept
+    {
+        return c->pot_projs.at(rst.cluster->uid).get_next<bound>(rst.sidb_ix).V;
+    }
+
+    template <bound_direction bound>
     static constexpr inline potential_projection get_proj_state_bound(const sidb_cluster_projector_state& pst,
                                                                       const sidb_cluster_receptor_state&  rst) noexcept
     {
@@ -144,96 +160,268 @@ class ground_state_space
         c->pot_projs[rst.cluster->uid].add(pp, rst.sidb_ix);
     }
 
-    bool perform_potential_bound_analysis(const sidb_cluster_projector_state& pst,
-                                          const intra_cluster_pot_bounds&     sibling_pot_bounds) const noexcept
+    static constexpr inline void
+    remove_all_cluster_charge_state_occurrences(const sidb_cluster_projector_state& rm_pst,
+                                                const sidb_cluster_receptor_state&  rst) noexcept
     {
-        uint64_t required_negative_witnesses = pst.get_count<sidb_charge_state::NEGATIVE>();
-        uint64_t required_positive_witnesses = pst.get_count<sidb_charge_state::POSITIVE>();
-        uint64_t required_neutral_witnesses  = pst.get_count<sidb_charge_state::NEUTRAL>();
+        rm_pst.cluster->pot_projs[rst.cluster->uid].remove_m_conf(rm_pst.multiset_conf, rst.sidb_ix);
+    }
 
-        const auto& test_if_sidb_is_negative_witness = [&](const double recv_pot_lb, const uint64_t sidbs_to_check)
+    template <bound_direction bound>
+    static constexpr void update_external_pot_proj_if_bound_removed(const sidb_cluster_projector_state& pst,
+                                                                    const sidb_cluster_receptor_state&  rst) noexcept
+    {
+        const potential_projection& cur_bound = get_proj_bound<bound>(pst.cluster, rst);
+
+        if (cur_bound.M == pst.multiset_conf)
         {
-            if (required_negative_witnesses != 0)
-            {
-                if (required_negative_witnesses > sidbs_to_check)
-                {
-                    return false;
-                }
-                else if (!fail_onto_negative_charge(recv_pot_lb))
-                {
-                    required_negative_witnesses--;
-                }
-            }
-            return true;
-        };
+            rst.cluster->update_recv_ext_pot_bound<bound>(
+                rst.sidb_ix, get_next_proj_pot_bound<bound>(pst.cluster, rst) - cur_bound.V);
+        }
+    }
 
-        const auto& test_if_sidb_is_positive_witness = [&](const double recv_pot_ub, const uint64_t sidbs_to_check)
+    constexpr void update_external_potential_projection(const sidb_cluster_projector_state& pst,
+                                                        const sidb_cluster_receptor_state&  rst) const noexcept
+    {
+        update_external_pot_proj_if_bound_removed<bound_direction::LOWER>(pst, rst);
+        update_external_pot_proj_if_bound_removed<bound_direction::UPPER>(pst, rst);
+
+        remove_all_cluster_charge_state_occurrences(pst, rst);
+    }
+
+    void handle_invalid_state(const sidb_cluster_projector_state& pst) noexcept
+    {
+        for (const sidb_cluster_ptr& other_c : clustering)
         {
-            if (required_positive_witnesses != 0)
+            if (other_c == pst.cluster)
             {
-                if (required_positive_witnesses > sidbs_to_check)
-                {
-                    return false;
-                }
-                else if (!fail_onto_positive_charge(recv_pot_ub))
-                {
-                    required_positive_witnesses--;
-                }
-            }
-            return true;
-        };
-
-        for (uint64_t sidbs_to_check = pst.cluster->size(); sidbs_to_check != 0; --sidbs_to_check)
-        {
-            const uint64_t sidb_ix = *std::next(pst.cluster->sidbs.cbegin(), static_cast<int64_t>(sidbs_to_check - 1));
-
-            if (required_neutral_witnesses != 0)
-            {
-                if (required_neutral_witnesses > sidbs_to_check)
-                {
-                    return false;
-                }
-
-                const double recv_pot_lb =
-                    sibling_pot_bounds.at(sidb_ix)[static_cast<uint8_t>(bound_direction::LOWER)] +
-                    pst.cluster->get_recv_ext_pot_bound<bound_direction::LOWER>(sidb_ix);
-
-                const double recv_pot_ub =
-                    sibling_pot_bounds.at(sidb_ix)[static_cast<uint8_t>(bound_direction::UPPER)] +
-                    pst.cluster->get_recv_ext_pot_bound<bound_direction::UPPER>(sidb_ix);
-
-                if (!ub_fail_onto_neutral_charge(recv_pot_ub) && !lb_fail_onto_neutral_charge(recv_pot_lb))
-                {
-                    required_neutral_witnesses--;
-                }
-
-                if (!test_if_sidb_is_negative_witness(recv_pot_lb, sidbs_to_check) ||
-                    !test_if_sidb_is_positive_witness(recv_pot_ub, sidbs_to_check))
-                {
-                    return false;
-                }
                 continue;
             }
 
-            if (!test_if_sidb_is_negative_witness(
-                    sibling_pot_bounds.at(sidb_ix)[static_cast<uint8_t>(bound_direction::LOWER)] +
-                        pst.cluster->get_recv_ext_pot_bound<bound_direction::LOWER>(sidb_ix),
-                    sidbs_to_check) ||
-                !test_if_sidb_is_positive_witness(
-                    sibling_pot_bounds.at(sidb_ix)[static_cast<uint8_t>(bound_direction::UPPER)] +
-                        pst.cluster->get_recv_ext_pot_bound<bound_direction::UPPER>(sidb_ix),
-                    sidbs_to_check))
+            for (const uint64_t sidb_ix : other_c->sidbs)
             {
-                return false;
+                update_external_potential_projection(pst, sidb_cluster_receptor_state{other_c, sidb_ix});
+            }
+        }
+    }
+
+    struct witness_partitioning_state
+    {
+        std::set<uint64_t> neg_w{}, pos_w{}, neut_w{};
+        uint64_t           num_neg, num_pos, num_neut;
+
+        explicit witness_partitioning_state(const sidb_cluster_projector_state& pst) noexcept :
+                num_neg{pst.get_count<sidb_charge_state::NEGATIVE>()},
+                num_pos{pst.get_count<sidb_charge_state::POSITIVE>()},
+                num_neut{pst.get_count<sidb_charge_state::NEUTRAL>()}
+        {}
+
+        void omit_free_witnesses() noexcept
+        {
+            // find free witnesses to reduce the problem, leaving only witnesses to partition that overlap
+            for (auto& [this_set, competing_sets] :
+                 std::array{std::make_pair(std::make_pair(neg_w, num_neg), std::make_pair(pos_w, neut_w)),
+                            std::make_pair(std::make_pair(pos_w, num_pos), std::make_pair(neg_w, neut_w)),
+                            std::make_pair(std::make_pair(neut_w, num_neut), std::make_pair(neg_w, pos_w))})
+            {
+                for (std::set<uint64_t>::const_iterator it = this_set.first.cbegin(); it != this_set.first.cend();)
+                {
+                    if (competing_sets.first.find(*it) == competing_sets.first.cend() &&
+                        competing_sets.second.find(*it) == competing_sets.second.cend())
+                    {
+                        it = this_set.first.erase(it);
+                        this_set.second--;
+                        continue;
+                    }
+
+                    ++it;
+                }
+            }
+        }
+    };
+
+    template <sidb_charge_state current_fill_cs>
+    static bool find_valid_witness_partitioning(witness_partitioning_state& st,
+                                                const uint64_t              num_witnesses_for_current_cs) noexcept
+    {
+        if constexpr (current_fill_cs == sidb_charge_state::NEUTRAL)
+        {
+            return st.neut_w.size() >= num_witnesses_for_current_cs;
+        }
+        else if constexpr (current_fill_cs == sidb_charge_state::POSITIVE)
+        {
+            if (num_witnesses_for_current_cs == 0)
+            {
+                return find_valid_witness_partitioning<sidb_charge_state::NEUTRAL>(st, st.num_neut);
+            }
+
+            for (std::set<uint64_t>::const_iterator it = st.pos_w.cbegin(); it != st.pos_w.cend();)
+            {
+                const uint64_t take_witness = *st.pos_w.cbegin();
+
+                st.pos_w.erase(it);
+
+                st.neut_w.erase(take_witness);
+
+                if (find_valid_witness_partitioning<sidb_charge_state::POSITIVE>(st, num_witnesses_for_current_cs - 1))
+                {
+                    return true;
+                }
+
+                it = ++st.pos_w.emplace(take_witness).first;
+
+                st.neut_w.emplace(take_witness);
+            }
+
+            return false;
+        }
+
+        if (num_witnesses_for_current_cs == 0)
+        {
+            return find_valid_witness_partitioning<sidb_charge_state::POSITIVE>(st, st.num_pos);
+        }
+
+        for (std::set<uint64_t>::const_iterator it = st.neg_w.cbegin(); it != st.neg_w.cend();)
+        {
+            const uint64_t take_witness = *it;
+
+            st.neg_w.erase(it);
+
+            st.pos_w.erase(take_witness);
+            st.neut_w.erase(take_witness);
+
+            if (find_valid_witness_partitioning<sidb_charge_state::NEGATIVE>(st, num_witnesses_for_current_cs - 1))
+            {
+                return true;
+            }
+
+            it = ++st.neg_w.emplace(take_witness).first;
+
+            st.pos_w.emplace(take_witness);
+            st.neut_w.emplace(take_witness);
+        }
+
+        return false;
+    }
+
+    enum class potential_bound_analysis_mode
+    {
+        ANALYZE_MULTISET,
+        ANALYZE_COMPOSITION
+    };
+
+    template <potential_bound_analysis_mode mode>
+    static inline std::pair<double, double>
+    get_received_potential_bounds(const sidb_cluster_projector_state& pst, const uint64_t sidb_ix,
+                                  const std::optional<intra_cluster_pot_bounds>& sibling_pot_bounds) noexcept
+    {
+        if constexpr (mode == potential_bound_analysis_mode::ANALYZE_MULTISET)
+        {
+            return {get_proj_state_bound<bound_direction::LOWER>(pst, pst.to_receptor_state(sidb_ix)).V +
+                        pst.cluster->get_recv_ext_pot_bound<bound_direction::LOWER>(sidb_ix),
+                    get_proj_state_bound<bound_direction::UPPER>(pst, pst.to_receptor_state(sidb_ix)).V +
+                        pst.cluster->get_recv_ext_pot_bound<bound_direction::UPPER>(sidb_ix)};
+        }
+        else
+        {
+            return {sibling_pot_bounds.value().at(sidb_ix)[static_cast<uint8_t>(bound_direction::LOWER)] +
+                        pst.cluster->get_recv_ext_pot_bound<bound_direction::LOWER>(sidb_ix),
+                    sibling_pot_bounds.value().at(sidb_ix)[static_cast<uint8_t>(bound_direction::UPPER)] +
+                        pst.cluster->get_recv_ext_pot_bound<bound_direction::UPPER>(sidb_ix)};
+        }
+    }
+
+    template <potential_bound_analysis_mode mode>
+    bool perform_potential_bound_analysis(
+        const sidb_cluster_projector_state&            pst,
+        const std::optional<intra_cluster_pot_bounds>& sibling_pot_bounds = std::nullopt) const noexcept
+    {
+        witness_partitioning_state st{pst};
+
+        for (const uint64_t sidb_ix : pst.cluster->sidbs)
+        {
+            const auto& [recv_pot_lb, recv_pot_ub] =
+                get_received_potential_bounds<mode>(pst, sidb_ix, sibling_pot_bounds);
+
+            if (st.num_neg != 0 && !fail_onto_negative_charge(recv_pot_lb))
+            {
+                st.neg_w.emplace(sidb_ix);
+            }
+
+            if (st.num_pos != 0 && !fail_onto_positive_charge(recv_pot_ub))
+            {
+                st.pos_w.emplace(sidb_ix);
+            }
+
+            if (st.num_neut != 0 && !ub_fail_onto_neutral_charge(recv_pot_ub) &&
+                !lb_fail_onto_neutral_charge(recv_pot_lb))
+            {
+                st.neut_w.emplace(sidb_ix);
             }
         }
 
-        if (required_negative_witnesses != 0 || required_positive_witnesses != 0 || required_neutral_witnesses != 0)
+        if (st.neg_w.size() < st.num_neg || st.pos_w.size() < st.num_pos || st.neut_w.size() < st.num_neut)
         {
             return false;
         }
 
-        return true;
+        if (pst.cluster->size() > witness_partitioning_max_cluster_size)
+        {
+            return true;
+        }
+
+        st.omit_free_witnesses();
+
+        return find_valid_witness_partitioning<sidb_charge_state::NEGATIVE>(st, st.num_neg);
+    }
+
+    bool check_charge_space(const sidb_cluster_ptr& c) noexcept
+    {
+        // skip if |charge space| = 1?
+        if (c->charge_space.size() == 1)
+        {
+            return true;
+        }
+
+        bool fixpoint = true;
+
+        std::vector<uint64_t> removed_ms{};
+        removed_ms.reserve(c->charge_space.size());
+
+        for (const sidb_cluster_charge_state& m : c->charge_space)
+        {
+            const sidb_cluster_projector_state pst{c, static_cast<uint64_t>(m)};
+
+            if (!perform_potential_bound_analysis<potential_bound_analysis_mode::ANALYZE_MULTISET>(pst))
+            {
+                handle_invalid_state(pst);
+                removed_ms.emplace_back(pst.multiset_conf);
+                fixpoint = false;
+            }
+        }
+
+        for (const uint64_t m : removed_ms)
+        {
+            c->charge_space.erase(sidb_cluster_charge_state{m});
+        }
+
+        return fixpoint;
+    }
+
+    bool update_charge_spaces(const std::optional<uint64_t>& skip_cluster = std::nullopt) noexcept
+    {
+        bool fixpoint = true;
+
+        // make a pass over the clustering and see if the charge spaces contain invalid cluster charge states
+        for (const sidb_cluster_ptr& c : clustering)
+        {
+            if (!skip_cluster.has_value() || c->uid != skip_cluster.value())
+            {
+                fixpoint &= check_charge_space(c);
+            }
+        }
+
+        return fixpoint;
     }
 
     template <bound_direction bound>
@@ -288,7 +476,8 @@ class ground_state_space
                 sibling_pot_bounds[sidb_ix][static_cast<uint8_t>(bound_direction::UPPER)] = sibling_pot_ub;
             }
 
-            if (!perform_potential_bound_analysis(receiver_pst, sibling_pot_bounds))
+            if (!perform_potential_bound_analysis<potential_bound_analysis_mode::ANALYZE_COMPOSITION>(
+                    receiver_pst, sibling_pot_bounds))
             {
                 return false;
             }
@@ -455,6 +644,7 @@ class ground_state_space
     {
         if (clustering.size() == 1)
         {
+            terminate = true;
             return;
         }
 
@@ -480,12 +670,16 @@ class ground_state_space
 
         clustering.emplace(min_parent);
 
-        move_up_hierarchy();
+        update_charge_spaces(min_parent->uid);
     }
 
-    const std::array<double, 4> mu_bounds_with_error;
-
     sidb_clustering clustering{};
+
+    bool terminate = false;
+
+    const uint64_t witness_partitioning_max_cluster_size;
+
+    const std::array<double, 4> mu_bounds_with_error;
 };
 
 }  // namespace fiction
