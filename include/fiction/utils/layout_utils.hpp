@@ -319,9 +319,9 @@ auto convert_to_siqad_coordinates(const Lyt& lyt) noexcept
                 lyt_new.assign_cell_name(siqad::to_siqad_coord(c), lyt.get_cell_name(c));
             });
 
-        if constexpr (is_charge_distribution_surface_v<Lyt>)
+        if constexpr (is_charge_distribution_surface_v<Lyt> && has_get_sidb_defect_v<Lyt>)
         {
-            charge_distribution_surface lyt_new_cds{lyt_new};
+            charge_distribution_surface lyt_new_cds{sidb_surface{lyt_new}};
 
             lyt.foreach_cell(
                 [&lyt_new_cds, &lyt](const auto& c)
@@ -329,18 +329,9 @@ auto convert_to_siqad_coordinates(const Lyt& lyt) noexcept
 
             lyt_new_cds.assign_physical_parameters(lyt.get_phys_params());
 
-            if constexpr (has_get_sidb_defect_v<Lyt>)
-            {
-                sidb_surface lyt_surface{lyt_new_cds};
-                lyt.foreach_sidb_defect(
-                    [&lyt_surface](const auto& cd)
-                    { lyt_surface.assign_sidb_defect(siqad::to_siqad_coord(cd.first), cd.second); });
-                return lyt_surface;
-            }
-            else
-            {
-                return lyt_new_cds;
-            }
+            lyt.foreach_sidb_defect([&lyt_new_cds](const auto& cd)
+                                    { lyt_new_cds.assign_sidb_defect(siqad::to_siqad_coord(cd.first), cd.second); });
+            return lyt_new_cds;
         }
         else if constexpr (has_get_sidb_defect_v<Lyt>)
         {
