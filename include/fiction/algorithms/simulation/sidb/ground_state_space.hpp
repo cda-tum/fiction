@@ -15,14 +15,11 @@
 #include <algorithm>
 #include <array>
 #include <chrono>
+#include <cmath>
 #include <cstdint>
-#include <functional>
-#include <limits>
 #include <memory>
-#include <mutex>
 #include <optional>
 #include <set>
-#include <thread>
 #include <utility>
 #include <vector>
 
@@ -58,7 +55,15 @@ class ground_state_space
                                  -physical_constants::POP_STABILITY_ERR - phys_params.mu_minus,
                                  physical_constants::POP_STABILITY_ERR - phys_params.mu_plus(),
                                  -physical_constants::POP_STABILITY_ERR - phys_params.mu_plus()}
-    {}
+    {
+        //        total_states = std::pow(3.0, static_cast<double>(cds.num_cells()));
+        //
+        //        charge_space_sizes_snapshot.reserve(clustering.size());
+        //        for (uint64_t i = 0; i < clustering.size(); ++i)
+        //        {
+        //            charge_space_sizes_snapshot.emplace_back(3);
+        //        }
+    }
 
     constexpr inline bool fail_onto_negative_charge(const double pot_bound) const noexcept
     {
@@ -284,8 +289,8 @@ class ground_state_space
         return false;
     }
 
-    bool perform_potential_bound_analysis(const sidb_cluster_projector_state& pst,
-                                          const intra_cluster_pot_bounds&     sibling_pot_bounds) const noexcept
+    bool perform_potential_bound_analysis1(const sidb_cluster_projector_state& pst,
+                                           const intra_cluster_pot_bounds&     sibling_pot_bounds) const noexcept
     {
         witness_partitioning_state st{pst};
 
@@ -296,6 +301,45 @@ class ground_state_space
 
             const double recv_pot_ub = sibling_pot_bounds.at(sidb_ix)[static_cast<uint8_t>(bound_direction::UPPER)] +
                                        pst.cluster->get_recv_ext_pot_bound<bound_direction::UPPER>(sidb_ix);
+
+            if (st.num_neg != 0 && !fail_onto_negative_charge(recv_pot_lb))
+            {
+                st.neg_w.emplace(sidb_ix);
+            }
+
+            if (st.num_pos != 0 && !fail_onto_positive_charge(recv_pot_ub))
+            {
+                st.pos_w.emplace(sidb_ix);
+            }
+
+            if (st.num_neut != 0 && !ub_fail_onto_neutral_charge(recv_pot_ub) &&
+                !lb_fail_onto_neutral_charge(recv_pot_lb))
+            {
+                st.neut_w.emplace(sidb_ix);
+            }
+        }
+
+        if (st.neg_w.size() < st.num_neg || st.pos_w.size() < st.num_pos || st.neut_w.size() < st.num_neut)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    bool perform_potential_bound_analysis(const sidb_cluster_projector_state& pst) const noexcept
+    {
+        witness_partitioning_state st{pst};
+
+        for (const uint64_t sidb_ix : pst.cluster->sidbs)
+        {
+            const double recv_pot_lb =
+                get_proj_state_bound<bound_direction::LOWER>(pst, pst.to_receptor_state(sidb_ix)).V +
+                pst.cluster->get_recv_ext_pot_bound<bound_direction::LOWER>(sidb_ix);
+
+            const double recv_pot_ub =
+                get_proj_state_bound<bound_direction::UPPER>(pst, pst.to_receptor_state(sidb_ix)).V +
+                pst.cluster->get_recv_ext_pot_bound<bound_direction::UPPER>(sidb_ix);
 
             if (st.num_neg != 0 && !fail_onto_negative_charge(recv_pot_lb))
             {
@@ -337,33 +381,13 @@ class ground_state_space
 
         for (const sidb_cluster_charge_state& m : c->charge_space)
         {
-            std::vector<uint64_t> removed_comps{};
-            removed_comps.reserve(m.compositions.size());
+            const sidb_cluster_projector_state pst{c, static_cast<uint64_t>(m)};
 
-            for (uint64_t ix = m.compositions.size() - 1; ix >= 0; --ix)
+            if (!perform_potential_bound_analysis(pst))
             {
-                for (const auto& [pst, sibling_pot_bounds] : m.compositions[ix])
-                {
-                    if (!perform_potential_bound_analysis(pst, sibling_pot_bounds))
-                    {
-                        handle_invalid_state(pst);
-                        removed_comps.emplace_back(ix);  // this looks wrong -- remove the composition?
-                        fixpoint = false;                            // no counterexample found thus far, however...
-                        break;
-                    }  // this goes beyond me for the moment
-                }
-            }
-
-            if (removed_comps.size() == m.compositions.size())
-            {
-                //                handle_invalid_state(sidb_cluster_projector_state{c, static_cast<uint64_t>(m)});
-                removed_ms.emplace_back(static_cast<uint64_t>(m));
-                continue;
-            }
-
-            for (const uint64_t ix : removed_ms)
-            {
-                m.compositions.erase(std::next(m.compositions.begin(), static_cast<int64_t>(ix)));
+                handle_invalid_state(pst);
+                removed_ms.emplace_back(pst.multiset_conf);
+                fixpoint = false;
             }
         }
 
@@ -443,7 +467,7 @@ class ground_state_space
                 sibling_pot_bounds[sidb_ix][static_cast<uint8_t>(bound_direction::UPPER)] = sibling_pot_ub;
             }
 
-            if (!perform_potential_bound_analysis(receiver_pst, sibling_pot_bounds))
+            if (!perform_potential_bound_analysis1(receiver_pst, sibling_pot_bounds))
             {
                 return false;
             }
@@ -457,10 +481,14 @@ class ground_state_space
     {
         if (cur_child_ix >= parent->children.size())
         {
+            //            full_merged_charge_space_size++;
+
             if (!verify_composition(m.compositions[0]))
             {
                 return;
             }
+
+            //            pruned_merged_charge_space_size++;
 
             // check if composition exists
             sidb_cluster_charge_state_space::iterator it = parent->charge_space.find(m);
@@ -614,7 +642,7 @@ class ground_state_space
             return;
         }
 
-        // Find the parent with the minimum cluster size
+        // find the parent with the minimum cluster size
         const sidb_cluster_ptr& min_parent =
             (*std::min_element(clustering.cbegin(), clustering.cend(),
                                [](const sidb_cluster_ptr& c1, const sidb_cluster_ptr& c2)
@@ -628,7 +656,14 @@ class ground_state_space
 
         derive_children_recv_bounds_without_siblings(min_parent);
 
+        //        full_merged_charge_space_size   = 0;
+        //        pruned_merged_charge_space_size = 0;
+
         construct_merged_charge_state_space(min_parent);
+
+        //        total_states *=
+        //            std::pow((static_cast<double>(pruned_merged_charge_space_size) /
+        //            static_cast<double>(full_merged_charge_space_size)),2);
 
         construct_merged_potential_projections(min_parent);
 
@@ -636,7 +671,23 @@ class ground_state_space
 
         clustering.emplace(min_parent);
 
+        //        charge_space_sizes_snapshot.clear();
+        //        for (uint64_t i = 0; i < clustering.size(); ++i)
+        //        {
+        //            charge_space_sizes_snapshot.emplace_back(
+        //                (*std::next(clustering.cbegin(), static_cast<int64_t>(i)))->charge_space.size());
+        //        }
+
         update_charge_spaces(min_parent->uid);
+
+        //        for (uint64_t i = 0; i < clustering.size(); ++i)
+        //        {
+        //            total_states *= static_cast<double>((*std::next(clustering.cbegin(),
+        //            static_cast<int64_t>(i)))->charge_space.size()) /
+        //                            static_cast<double>(charge_space_sizes_snapshot[i]);
+        //            charge_space_sizes_snapshot[i] = (*std::next(clustering.cbegin(),
+        //            static_cast<int64_t>(i)))->charge_space.size();
+        //        }
     }
 
     std::pair<sidb_cluster_ptr, std::chrono::duration<double>> compute_ground_state_space() noexcept
@@ -645,10 +696,30 @@ class ground_state_space
         {
             const mockturtle::stopwatch stop{time_counter};
 
+            //            update_charge_spaces();
+
             while (!terminate)
             {
                 while (!update_charge_spaces())
                     ;
+                //                {
+                //                    for (uint64_t i = 0; i < clustering.size(); ++i)
+                //                    {
+                //                        total_states *= static_cast<double>((*std::next(clustering.cbegin(),
+                //                        static_cast<int64_t>(i)))->charge_space.size()) /
+                //                                        static_cast<double>(charge_space_sizes_snapshot[i]);
+                //                        (*std::next(clustering.cbegin(),
+                //                        static_cast<int64_t>(i)))->charge_space.size();
+                //                    }
+                //                }
+
+                //                for (uint64_t i = 0; i < clustering.size(); ++i)
+                //                {
+                //                    total_states *= static_cast<double>((*std::next(clustering.cbegin(),
+                //                    static_cast<int64_t>(i)))->charge_space.size()) /
+                //                                    static_cast<double>(charge_space_sizes_snapshot[i]);
+                //                }
+
                 move_up_hierarchy();
             }
         }
@@ -656,7 +727,17 @@ class ground_state_space
         return {*clustering.cbegin(), time_counter};
     }
 
+    //    uint64_t get_total_states() const noexcept
+    //    {
+    //        return std::ceil(total_states);
+    //    }
+
     sidb_clustering clustering{};
+
+    //    double                total_states;
+    //    uint64_t              full_merged_charge_space_size;
+    //    uint64_t              pruned_merged_charge_space_size;
+    //    std::vector<uint64_t> charge_space_sizes_snapshot{};
 
   private:
     const charge_distribution_surface<Lyt> cds;

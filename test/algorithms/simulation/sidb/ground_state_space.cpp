@@ -21,6 +21,7 @@
 #include <fmt/format.h>
 
 #include <algorithm>
+#include <cmath>
 #include <limits>
 #include <unordered_set>
 
@@ -968,6 +969,70 @@ TEST_CASE("Ground State Space verification on random layouts with 20 SiDBs", "[g
     const std::vector<sidb_lyt>& lyts = generate_multiple_random_sidb_layouts(sidb_lyt{}, rlg_ps);
 
     verify_lyts(lyts);
+}
+
+uint64_t C(uint64_t n, uint64_t r)
+{
+    if (r > n - r)
+        r = n - r;  // because C(n, r) == C(n, n - r)
+    uint64_t ans = 1;
+    uint64_t i;
+
+    for (i = 1; i <= r; i++)
+    {
+        ans *= n - r + i;
+        ans /= i;
+    }
+
+    return ans;
+}
+
+void count_pruned_states(const uint64_t total_size, const sidb_cluster_ptr& c, uint64_t& open_states) noexcept
+{
+    const uint64_t max_combinations = C(c->size() + 2, 2);
+    open_states -= (max_combinations - c->charge_space.size()) * static_cast<uint64_t>(std::pow(c->size(), 2ull)) *
+                   static_cast<uint64_t>(std::pow(3ull, total_size - c->size()));
+    for (const sidb_cluster_ptr& child : c->children)
+    {
+        count_pruned_states(total_size, child, open_states);
+    }
+}
+
+TEST_CASE("Ground State Space state pruning comparison on random layouts with 40 SiDBs", "[ground-state-space-bench]")
+{
+    const std::pair<cell<sidb_lyt>, cell<sidb_lyt>> layout_dimensions = {cell<sidb_lyt>{0, 0}, cell<sidb_lyt>{20, 10}};
+
+    const uint64_t N = 40;
+
+    generate_random_sidb_layout_params<sidb_lyt> rlg_ps{};
+    rlg_ps.coordinate_pair                    = layout_dimensions;
+    rlg_ps.number_of_sidbs                    = N;
+    rlg_ps.number_of_unique_generated_layouts = 1000;
+
+    const std::vector<sidb_lyt>& lyts = generate_multiple_random_sidb_layouts(sidb_lyt{}, rlg_ps);
+
+    const auto total_states = static_cast<uint64_t>(std::pow(3ull, N));
+
+    for (uint64_t i = 0; i < lyts.size(); ++i)
+    {
+        ground_state_space gss{lyts[i]};
+        const auto& [top, time] = gss.compute_ground_state_space();
+        std::cout << "RUNTIME: " << time.count() << " s" << std::endl;
+        std::cout << "TOP CLUSTER CHARGE SPACE SIZE: " << top->charge_space.size() << std::endl;
+        //        uint64_t open_states = gss.get_total_states();
+        //        std::cout << "STATES PRUNED: "
+        //                  << total_states - open_states << std::endl;
+        //        std::cout << "OPEN STATES: " << open_states << std::endl;
+
+        charge_distribution_surface<sidb_lyt> cds{lyts[i]};
+        const uint64_t                        preassigned_neg_count = cds.negative_sidb_detection().size();
+        cds.is_three_state_simulation_required();
+        const uint64_t possibly_three_state_count = cds.get_positive_candidates().size();
+        const uint64_t classical_open_states = std::pow(3ull, N - preassigned_neg_count - possibly_three_state_count) *
+                                               std::pow(2ull, possibly_three_state_count);
+
+        std::cout << "CLASSICAL SPACE PRUNING LEAVES " << classical_open_states << " STATES\n" << std::endl;
+    }
 }
 
 // TEST_CASE("Compare modes 5", "[ground-state-space]")
