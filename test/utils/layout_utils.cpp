@@ -133,28 +133,26 @@ TEMPLATE_TEST_CASE("Convert offset::ucoord_t layout to SiQAD coordinate layout",
 
 TEST_CASE("Convert cds/sidb_surface in offset::ucoord_t layout to SiQAD coordinate layout", "[layout-utils]")
 {
-    const cds_sidb_cell_clk_lyt         cds{};
-    sidb_surface<cds_sidb_cell_clk_lyt> sidb_surface_cds{cds};
+    sidb_surface<sidb_cell_clk_lyt> sidb_surface{};
 
-    sidb_surface_cds.assign_cell_type({0, 0, 0}, cds_sidb_cell_clk_lyt::technology::cell_type::NORMAL);
-    sidb_surface_cds.assign_cell_type({1, 0, 0}, cds_sidb_cell_clk_lyt::technology::cell_type::INPUT);
-    sidb_surface_cds.assign_cell_type({0, 3, 0}, cds_sidb_cell_clk_lyt::technology::cell_type::OUTPUT);
+    sidb_surface.assign_cell_type({0, 0, 0}, cds_sidb_cell_clk_lyt::technology::cell_type::NORMAL);
+    sidb_surface.assign_cell_type({1, 0, 0}, cds_sidb_cell_clk_lyt::technology::cell_type::INPUT);
+    sidb_surface.assign_cell_type({0, 3, 0}, cds_sidb_cell_clk_lyt::technology::cell_type::OUTPUT);
 
-    sidb_surface_cds.assign_charge_state({0, 0, 0}, sidb_charge_state::NEUTRAL);
-    sidb_surface_cds.assign_charge_state({1, 0, 0}, sidb_charge_state::POSITIVE);
-    sidb_surface_cds.assign_charge_state({0, 3, 0}, sidb_charge_state::NEGATIVE);
+    charge_distribution_surface cds{sidb_surface};
 
-    sidb_surface_cds.assign_sidb_defect({5, 5, 0}, sidb_defect{sidb_defect_type::UNKNOWN});
-    sidb_surface_cds.assign_sidb_defect({1, 1, 0}, sidb_defect{sidb_defect_type::UNKNOWN});
+    cds.assign_charge_state({0, 0, 0}, sidb_charge_state::NEUTRAL);
+    cds.assign_charge_state({1, 0, 0}, sidb_charge_state::POSITIVE);
+    cds.assign_charge_state({0, 3, 0}, sidb_charge_state::NEGATIVE);
 
-    auto lyt_transformed = convert_to_siqad_coordinates<sidb_surface<cds_sidb_cell_clk_lyt>>(sidb_surface_cds);
+    cds.assign_sidb_defect({5, 5, 0}, sidb_defect{sidb_defect_type::UNKNOWN});
+    cds.assign_sidb_defect({1, 1, 0}, sidb_defect{sidb_defect_type::UNKNOWN});
 
-    CHECK(lyt_transformed.get_cell_type({0, 0, 0}) ==
-          sidb_surface<cds_sidb_cell_clk_lyt>::technology::cell_type::NORMAL);
-    CHECK(lyt_transformed.get_cell_type({1, 0, 0}) ==
-          sidb_surface<cds_sidb_cell_clk_lyt>::technology::cell_type::INPUT);
-    CHECK(lyt_transformed.get_cell_type({0, 1, 1}) ==
-          sidb_surface<cds_sidb_cell_clk_lyt>::technology::cell_type::OUTPUT);
+    auto lyt_transformed = convert_to_siqad_coordinates(cds);
+
+    CHECK(lyt_transformed.get_cell_type({0, 0, 0}) == sidb_cell_clk_lyt::technology::cell_type::NORMAL);
+    CHECK(lyt_transformed.get_cell_type({1, 0, 0}) == sidb_cell_clk_lyt::technology::cell_type::INPUT);
+    CHECK(lyt_transformed.get_cell_type({0, 1, 1}) == sidb_cell_clk_lyt::technology::cell_type::OUTPUT);
 
     CHECK(lyt_transformed.get_charge_state({0, 0, 0}) == sidb_charge_state::NEUTRAL);
     CHECK(lyt_transformed.get_charge_state({1, 0, 0}) == sidb_charge_state::POSITIVE);
@@ -274,58 +272,58 @@ TEST_CASE("Convert SiQAD layout (sidb lattice layout) to offset::ucoord_t coordi
     }
 }
 
-//TEMPLATE_TEST_CASE("Convert SiQAD layout to cube::coord_t coordinate layout", "[layout-utils]",
-//                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>))
-//{
-//    SECTION("empty layout")
-//    {
-//        const sidb_cell_clk_lyt_siqad lyt{{}, "layout based on siqad coordinates"};
-//
-//        auto lyt_transformed = convert_to_fiction_coordinates<TestType>(lyt);
-//
-//        CHECK(lyt_transformed.is_empty());
-//        CHECK(lyt_transformed.area() == lyt.area());
-//        CHECK(lyt_transformed.get_layout_name() == lyt.get_layout_name());
-//    }
-//
-//    SECTION("layout with one normal and one input cell")
-//    {
-//        sidb_cell_clk_lyt_siqad lyt{{5, 1}};
-//
-//        lyt.assign_cell_type({5, -1, 1}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
-//        lyt.assign_cell_type({5, 1, 0}, sidb_cell_clk_lyt_siqad::cell_type::INPUT);
-//
-//        auto lyt_transformed = convert_to_fiction_coordinates<TestType>(lyt);
-//
-//        CHECK(lyt_transformed.num_cells() == 2);
-//        CHECK(lyt_transformed.area() == lyt.area());
-//        CHECK(lyt_transformed.get_cell_type({5, -1}) == TestType::cell_type::NORMAL);
-//        CHECK(lyt_transformed.get_cell_type({5, 2, 0}) == TestType::cell_type::INPUT);
-//    }
-//
-//    SECTION("layout with three cells")
-//    {
-//        sidb_cell_clk_lyt_siqad lyt{{5, 3}};
-//
-//        lyt.assign_cell_type({5, -3}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
-//        lyt.assign_cell_type({0, 0}, sidb_cell_clk_lyt_siqad::cell_type::INPUT);
-//        lyt.assign_cell_type({5, 3}, sidb_cell_clk_lyt_siqad::cell_type::OUTPUT);
-//        lyt.assign_cell_name({5, -3}, "normal cell");
-//        lyt.assign_cell_name({0, 0}, "input cell");
-//        lyt.assign_cell_name({5, 3}, "output cell");
-//
-//        auto lyt_transformed = convert_to_fiction_coordinates<TestType>(lyt);
-//
-//        CHECK(lyt_transformed.num_cells() == 3);
-//        CHECK(lyt_transformed.area() == lyt.area());
-//        CHECK(lyt_transformed.get_cell_type({5, -6}) == TestType::cell_type::NORMAL);
-//        CHECK(lyt_transformed.get_cell_type({0, 0}) == TestType::cell_type::INPUT);
-//        CHECK(lyt_transformed.get_cell_type({5, 6}) == TestType::cell_type::OUTPUT);
-//        CHECK(lyt_transformed.get_cell_name({5, -6}) == "normal cell");
-//        CHECK(lyt_transformed.get_cell_name({0, 0}) == "input cell");
-//        CHECK(lyt_transformed.get_cell_name({5, 6}) == "output cell");
-//    }
-//}
+TEMPLATE_TEST_CASE("Convert SiQAD layout to cube::coord_t coordinate layout", "[layout-utils]",
+                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>))
+{
+    SECTION("empty layout")
+    {
+        const sidb_cell_clk_lyt_siqad lyt{{}, "layout based on siqad coordinates"};
+
+        auto lyt_transformed = convert_to_fiction_coordinates<TestType>(lyt);
+
+        CHECK(lyt_transformed.is_empty());
+        CHECK(lyt_transformed.area() == lyt.area());
+        CHECK(lyt_transformed.get_layout_name() == lyt.get_layout_name());
+    }
+
+    SECTION("layout with one normal and one input cell")
+    {
+        sidb_cell_clk_lyt_siqad lyt{{5, 1}};
+
+        lyt.assign_cell_type({5, -1, 1}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+        lyt.assign_cell_type({5, 1, 0}, sidb_cell_clk_lyt_siqad::cell_type::INPUT);
+
+        auto lyt_transformed = convert_to_fiction_coordinates<TestType>(lyt);
+
+        CHECK(lyt_transformed.num_cells() == 2);
+        CHECK(lyt_transformed.area() == lyt.area());
+        CHECK(lyt_transformed.get_cell_type({5, -1}) == TestType::cell_type::NORMAL);
+        CHECK(lyt_transformed.get_cell_type({5, 2, 0}) == TestType::cell_type::INPUT);
+    }
+
+    SECTION("layout with three cells")
+    {
+        sidb_cell_clk_lyt_siqad lyt{{5, 3}};
+
+        lyt.assign_cell_type({5, -3}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+        lyt.assign_cell_type({0, 0}, sidb_cell_clk_lyt_siqad::cell_type::INPUT);
+        lyt.assign_cell_type({5, 3}, sidb_cell_clk_lyt_siqad::cell_type::OUTPUT);
+        lyt.assign_cell_name({5, -3}, "normal cell");
+        lyt.assign_cell_name({0, 0}, "input cell");
+        lyt.assign_cell_name({5, 3}, "output cell");
+
+        auto lyt_transformed = convert_to_fiction_coordinates<TestType>(lyt);
+
+        CHECK(lyt_transformed.num_cells() == 3);
+        CHECK(lyt_transformed.area() == lyt.area());
+        CHECK(lyt_transformed.get_cell_type({5, -6}) == TestType::cell_type::NORMAL);
+        CHECK(lyt_transformed.get_cell_type({0, 0}) == TestType::cell_type::INPUT);
+        CHECK(lyt_transformed.get_cell_type({5, 6}) == TestType::cell_type::OUTPUT);
+        CHECK(lyt_transformed.get_cell_name({5, -6}) == "normal cell");
+        CHECK(lyt_transformed.get_cell_name({0, 0}) == "input cell");
+        CHECK(lyt_transformed.get_cell_name({5, 6}) == "output cell");
+    }
+}
 
 TEST_CASE("Generate random offset::ucoord_t coordinate", "[layout-utils]")
 {
