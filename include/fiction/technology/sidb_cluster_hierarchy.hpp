@@ -337,23 +337,6 @@ struct potential_projection_orders
     }
 
     template <bound_direction bound>
-    inline potential_projection get_next(const uint64_t sidb_ix) const noexcept
-    {
-        const uint64_t bound_m = get<bound>(sidb_ix).M;
-
-        if constexpr (bound == bound_direction::LOWER)
-        {
-            return *std::find_if(order.at(sidb_ix).cbegin(), order.at(sidb_ix).cend(),
-                                 [&](const potential_projection& pp) { return pp.M != bound_m; });
-        }
-        else
-        {
-            return *std::find_if(order.at(sidb_ix).crbegin(), order.at(sidb_ix).crend(),
-                                 [&](const potential_projection& pp) { return pp.M != bound_m; });
-        }
-    }
-
-    template <bound_direction bound>
     potential_projection get_pot_proj_for_m_conf(const uint64_t m_conf, const uint64_t sidb_ix) const noexcept
     {
         if constexpr (bound == bound_direction::LOWER)
@@ -367,15 +350,6 @@ struct potential_projection_orders
                                            [&](const potential_projection& pp) { return pp.M == m_conf; })
                                   .base(),
                               1);
-        }
-    }
-
-    void remove_m_conf(const uint64_t m_conf, const uint64_t sidb_ix) noexcept
-    {
-
-        for (pot_proj_order::const_iterator it = order.at(sidb_ix).cbegin(); it != order.at(sidb_ix).cend();)
-        {
-            it->M == m_conf ? it = order[sidb_ix].erase(it) : ++it;
         }
     }
 

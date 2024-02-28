@@ -870,7 +870,7 @@ static void verify_lyts(const std::vector<sidb_lyt>& lyts)
     {
         std::cout << "LAYOUT NUMBER: " << i << std::endl;
 
-        lyts[i].foreach_cell([](const cell<sidb_lyt>& c) { std::cout << fmt::format("{}", c) << std::endl; });
+        //        lyts[i].foreach_cell([](const cell<sidb_lyt>& c) { std::cout << fmt::format("{}", c) << std::endl; });
 
         try
         {
