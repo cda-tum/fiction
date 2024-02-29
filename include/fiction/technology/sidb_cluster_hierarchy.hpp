@@ -324,7 +324,7 @@ struct potential_projection_orders
     {}
 
     template <bound_direction bound>
-    constexpr inline potential_projection get(const uint64_t sidb_ix) const noexcept
+    constexpr inline const potential_projection& get(const uint64_t sidb_ix) const noexcept
     {
         if constexpr (bound == bound_direction::LOWER)
         {
@@ -337,7 +337,7 @@ struct potential_projection_orders
     }
 
     template <bound_direction bound>
-    inline potential_projection get_next(const uint64_t sidb_ix) const noexcept
+    inline const potential_projection& get_next(const uint64_t sidb_ix) const noexcept
     {
         const uint64_t bound_m = get<bound>(sidb_ix).M;
 
@@ -354,7 +354,7 @@ struct potential_projection_orders
     }
 
     template <bound_direction bound>
-    potential_projection get_pot_proj_for_m_conf(const uint64_t m_conf, const uint64_t sidb_ix) const noexcept
+    const potential_projection& get_pot_proj_for_m_conf(const uint64_t m_conf, const uint64_t sidb_ix) const noexcept
     {
         if constexpr (bound == bound_direction::LOWER)
         {
@@ -408,7 +408,7 @@ struct sidb_cluster
 
     std::unordered_set<sidb_ix> sidbs;
     sidb_clustering             children;
-    sidb_cluster_ptr            parent{};
+    std::weak_ptr<sidb_cluster> parent{};
 
     std::unordered_map<uid_t, potential_projection_orders> pot_projs{};
     std::unordered_map<sidb_ix, std::array<double, 2>>     recv_ext_pot_bounds{};
@@ -438,6 +438,11 @@ struct sidb_cluster
         children = v;
     };
 
+    inline sidb_cluster_ptr get_parent() const
+    {
+        return parent.lock();
+    }
+
     void initialize_singleton_cluster_charge_space(const sidb_ix i, const double loc_pot_min,
                                                    const double loc_pot_max) noexcept
     {
@@ -445,7 +450,7 @@ struct sidb_cluster
         for (const sidb_charge_state cs : sidb_charge_state_iterator{})
         {
             charge_space.emplace(sidb_cluster_charge_state{
-                cs, *std::find_if(parent->children.cbegin(), parent->children.cend(),
+                cs, *std::find_if(get_parent()->children.cbegin(), get_parent()->children.cend(),
                                   [&](const sidb_cluster_ptr& c) { return *c->sidbs.cbegin() == i; })});
         }
 
@@ -522,7 +527,8 @@ static sidb_cluster_ptr to_unique_sidb_cluster(const sidb_binary_cluster_hierarc
         return parent;
     }
 
-    for (uint8_t c = 0; c < 2; (*std::next(parent->children.begin(), c++))->parent = parent)
+    for (uint8_t c                                           = 0; c < 2;
+         (*std::next(parent->children.begin(), c++))->parent = std::weak_ptr<sidb_cluster>(parent))
         ;
 
     return parent;

@@ -815,7 +815,7 @@ TEST_CASE("Small fail", "[ground-state-space]")
 
     const sidb_simulation_result<sidb_lyt>& qe_res   = quickexact(lyt);
     const sidb_simulation_result<sidb_lyt>& exgs_res = exhaustive_ground_state_simulation(lyt);
-    const auto& [top, time]                          = ground_state_space2{lyt}.compute_ground_state_space();
+    const auto& [top, time]                          = ground_state_space{lyt}.compute_ground_state_space();
 
     for (const charge_distribution_surface<sidb_lyt>& cl : qe_res.charge_distributions)
     {
@@ -1106,21 +1106,27 @@ TEST_CASE("bench20x10", "[gss]")
 {
     const std::pair<cell<sidb_lyt>, cell<sidb_lyt>> layout_dimensions = {cell<sidb_lyt>{0, 0}, cell<sidb_lyt>{20, 10}};
 
-    for (uint64_t N = 10; N <= 70; N += 5)
+    for (uint64_t N = 10; N <= 30; N += 5)
     {
         generate_random_sidb_layout_params<sidb_lyt> rlg_ps{};
         rlg_ps.coordinate_pair                    = layout_dimensions;
         rlg_ps.number_of_sidbs                    = N;
-        rlg_ps.number_of_unique_generated_layouts = 100;
+        rlg_ps.number_of_unique_generated_layouts = 50;
 
         const std::vector<sidb_lyt>& lyts = generate_multiple_random_sidb_layouts(sidb_lyt{}, rlg_ps);
 
         for (uint64_t i = 0; i < lyts.size(); ++i)
         {
-            ground_state_space gss{lyts[i]};
-            const auto& [top, time] = gss.compute_ground_state_space();
-            std::cout << "RUNTIME: " << time.count() << " s" << std::endl;
-            std::cout << "TOP CLUSTER CHARGE SPACE SIZE: " << top->charge_space.size() << std::endl;
+            for (uint64_t lim = 6; lim <= 12; lim += 3)
+            {
+                ground_state_space gss{lyts[i], 9};
+                const auto& [top, time] = gss.compute_ground_state_space();
+                std::cout << "LAYOUT " << i << "  (N = " << N << ", LIM = " << lim << ")  |  RUNTIME: " << time.count()
+                          << " s" << std::endl;
+                std::cout << "TOP CLUSTER CHARGE SPACE SIZE: " << top->charge_space.size() << std::endl << std::endl;
+            }
+
+            std::cout << std::endl;
         }
     }
 }

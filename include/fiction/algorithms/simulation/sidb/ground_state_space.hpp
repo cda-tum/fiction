@@ -29,16 +29,15 @@ template <typename Lyt>
 class ground_state_space
 {
   public:
-    explicit ground_state_space(const Lyt&                        lyt,
-                                const sidb_simulation_parameters& phys_params            = sidb_simulation_parameters{},
-                                const uint64_t max_cluster_size_for_witness_partitioning = 12) noexcept :
-            clustering{
-                get_initial_clustering(to_sidb_cluster(sidb_cluster_hierarchy(lyt)), get_local_potential_bounds(lyt))},
+    explicit ground_state_space(const Lyt& lyt, const uint64_t max_cluster_size_for_witness_partitioning = 6,
+                                const sidb_simulation_parameters& phys_params = sidb_simulation_parameters{}) noexcept :
+            top_cluster{to_sidb_cluster(sidb_cluster_hierarchy(lyt))},
+            clustering{get_initial_clustering(top_cluster, get_local_potential_bounds(lyt))},
+            witness_partitioning_max_cluster_size{max_cluster_size_for_witness_partitioning},
             mu_bounds_with_error{physical_constants::POP_STABILITY_ERR - phys_params.mu_minus,
                                  -physical_constants::POP_STABILITY_ERR - phys_params.mu_minus,
                                  physical_constants::POP_STABILITY_ERR - phys_params.mu_plus(),
-                                 -physical_constants::POP_STABILITY_ERR - phys_params.mu_plus()},
-            witness_partitioning_max_cluster_size{max_cluster_size_for_witness_partitioning}
+                                 -physical_constants::POP_STABILITY_ERR - phys_params.mu_plus()}
     {}
 
     std::pair<sidb_cluster_ptr, std::chrono::duration<double>> compute_ground_state_space() noexcept
@@ -56,7 +55,7 @@ class ground_state_space
             }
         }
 
-        return {*clustering.cbegin(), time_counter};
+        return {top_cluster, time_counter};
     }
 
   private:
@@ -652,8 +651,8 @@ class ground_state_space
         const sidb_cluster_ptr& min_parent =
             (*std::min_element(clustering.cbegin(), clustering.cend(),
                                [](const sidb_cluster_ptr& c1, const sidb_cluster_ptr& c2)
-                               { return c1->parent->size() < c2->parent->size(); }))
-                ->parent;
+                               { return c1->get_parent()->size() < c2->get_parent()->size(); }))
+                ->get_parent();
 
         for (const sidb_cluster_ptr& c : min_parent->children)
         {
@@ -672,6 +671,8 @@ class ground_state_space
 
         update_charge_spaces(min_parent->uid);
     }
+
+    const sidb_cluster_ptr top_cluster;
 
     sidb_clustering clustering{};
 
