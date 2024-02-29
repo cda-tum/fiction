@@ -54,6 +54,41 @@ static bool verify_flitsim_result(const charge_distribution_surface<sidb_lyt>&  
     return false;
 }
 
+static void print_test_case(const std::vector<charge_distribution_surface<sidb_lyt>>& fs_cls) noexcept
+{
+    std::cout << "using sidb_lyt = sidb_cell_clk_lyt_siqad;\nsidb_lyt lyt{};\n\n";
+    for (const cell<sidb_lyt>& c : fs_cls[0].get_sidb_order())
+    {
+        std::cout << "lyt.assign_cell_type({" << c.x << ", " << c.y << ", " << c.z
+                  << "}, sidb_lyt::cell_type::NORMAL);\n";
+    }
+
+    std::cout << "\n\nconst sidb_simulation_parameters params{3, -0.32, 5.6, 5.0, 3.84, 7.68, 2.25};  // not needed, "
+                 "but I'm giving all default parameters explicitly for the sake of the test\n";
+
+    for (const charge_distribution_surface<sidb_lyt>& cl : fs_cls)
+    {
+        std::cout << "\ncharge_distribution_layout charge_lyt{lyt};\ncharge_lyt.assign_physical_params(params);\n\n";
+
+        for (const cell<sidb_lyt>& c : cl.get_sidb_order())
+        {
+            std::cout << "charge_lyt.assign_charge_state({" << c.x << ", " << c.y << ", " << c.z
+                      << "}, sidb_charge_state::"
+                      << (cl.get_charge_state(c) == sidb_charge_state::NEGATIVE ? "NEGATIVE" :
+                          cl.get_charge_state(c) == sidb_charge_state::POSITIVE ? "POSITIVE" :
+                                                                                  "NEUTRAL")
+                      << ");\n";
+        }
+
+        std::cout << "\ncharge_lyt.update_after_charge_change();\n\nCHECK(charge_lyt.is_physically_valid());\n\n";
+    }
+
+    std::cout << "\n\n\nCHECK(quickexact(lyt, quickexact_params{params, "
+                 "quickexact_params<sidb_lyt>::automatic_base_number_detection::ON, {}, "
+                 "0}).charge_distributions.size() == 0);"
+              << std::endl;
+}
+
 static void verify_lyts(const std::vector<sidb_lyt>& lyts)
 {
     for (uint64_t i = 0; i < lyts.size(); ++i)
@@ -76,8 +111,13 @@ static void verify_lyts(const std::vector<sidb_lyt>& lyts)
 
             for (const charge_distribution_surface<sidb_lyt>& cl : qe_res.charge_distributions)
             {
-                const bool verification = verify_flitsim_result(cl, fs_res.charge_distributions);
-                CHECK(verification);
+                CHECK(verify_flitsim_result(cl, fs_res.charge_distributions));
+            }
+
+            if (fs_res.charge_distributions.size() > 20 && qe_res.charge_distributions.size() == 0)
+            {
+                print_test_case(fs_res.charge_distributions);
+                REQUIRE(false);
             }
         }
         catch (std::exception& e)
