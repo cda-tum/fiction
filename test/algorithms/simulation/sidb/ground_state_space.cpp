@@ -1106,7 +1106,7 @@ TEST_CASE("bench20x10", "[gss]")
 {
     const std::pair<cell<sidb_lyt>, cell<sidb_lyt>> layout_dimensions = {cell<sidb_lyt>{0, 0}, cell<sidb_lyt>{20, 10}};
 
-    for (uint64_t N = 10; N <= 30; N += 5)
+    for (uint64_t N = 10; N <= 70; N += 5)
     {
         generate_random_sidb_layout_params<sidb_lyt> rlg_ps{};
         rlg_ps.coordinate_pair                    = layout_dimensions;
@@ -1117,9 +1117,9 @@ TEST_CASE("bench20x10", "[gss]")
 
         for (uint64_t i = 0; i < lyts.size(); ++i)
         {
-            for (uint64_t lim = 6; lim <= 12; lim += 3)
+            for (uint64_t lim = 2; lim <= 12; lim += 2)
             {
-                ground_state_space gss{lyts[i], 9};
+                ground_state_space gss{lyts[i], lim};
                 const auto& [top, time] = gss.compute_ground_state_space();
                 std::cout << "LAYOUT " << i << "  (N = " << N << ", LIM = " << lim << ")  |  RUNTIME: " << time.count()
                           << " s" << std::endl;

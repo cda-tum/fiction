@@ -169,7 +169,7 @@ struct sidb_cluster_projector_state
     }
 };
 
-static inline uint64_t get_singleton_sidb(const sidb_cluster_ptr& c) noexcept;
+static inline uint64_t get_singleton_sidb_ix(const sidb_cluster_ptr& c) noexcept;
 
 using intra_cluster_pot_bounds = std::unordered_map<uint64_t, std::array<double, 2>>;
 using sidb_cluster_charge_state_composition =
@@ -188,7 +188,7 @@ struct sidb_cluster_charge_state
             neg_count{cs == sidb_charge_state::NEGATIVE},
             pos_count{cs == sidb_charge_state::POSITIVE},
             compositions{{{sidb_cluster_projector_state{singleton, static_cast<uint64_t>(*this)},
-                           intra_cluster_pot_bounds{{get_singleton_sidb(singleton), std::array{0.0, 0.0}}}}}}
+                           intra_cluster_pot_bounds{{get_singleton_sidb_ix(singleton), std::array{0.0, 0.0}}}}}}
     {}
 
     explicit sidb_cluster_charge_state(const uint64_t m) noexcept :
@@ -246,6 +246,14 @@ struct sidb_cluster_charge_state
         return *this;
     }
 };
+
+static constexpr inline const uint64_t SINGLETON_NEGATIVE_MULTISET_CHARGE_CONF = 1ull << 32ull;
+static constexpr inline const uint64_t SINGLETON_POSITIVE_MULTISET_CHARGE_CONF = 1ull;
+
+static constexpr inline int8_t trinary_multiset_conf_to_sign(const uint64_t m) noexcept
+{
+    return static_cast<int8_t>(static_cast<uint32_t>(m) - (static_cast<uint32_t>(m) < m));
+}
 
 enum class bound_direction : uint8_t
 {
@@ -502,9 +510,15 @@ static constexpr inline uint64_t get_cluster_size(const sidb_cluster_ptr& c) noe
     return c->sidbs.size();
 }
 
-static inline uint64_t get_singleton_sidb(const sidb_cluster_ptr& c) noexcept
+static inline uint64_t get_singleton_sidb_ix(const sidb_cluster_ptr& c) noexcept
 {
     return *c->sidbs.cbegin();
+}
+
+static inline std::vector<sidb_cluster_charge_state_composition>
+get_projector_state_compositions(const sidb_cluster_projector_state& pst) noexcept
+{
+    return pst.cluster->charge_space.find(sidb_cluster_charge_state{pst.multiset_conf})->compositions;
 }
 
 static sidb_cluster_ptr to_unique_sidb_cluster(const sidb_binary_cluster_hierarchy_node& n, uint64_t& uid)

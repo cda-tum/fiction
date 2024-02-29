@@ -7,6 +7,7 @@
 
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
+#include "fiction/technology/physical_constants.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/technology/sidb_cluster_hierarchy.hpp"
 
@@ -25,14 +26,25 @@
 namespace fiction
 {
 
+struct ground_state_space_result
+{
+    const sidb_cluster_ptr              top_cluster;
+    const std::chrono::duration<double> runtime;
+    const uint64_t                      pruned_top_level_multisets;
+    const uint64_t                      maximum_top_level_multisets;
+};
+
+namespace detail
+{
+
 template <typename Lyt>
 class ground_state_space
 {
   public:
-    explicit ground_state_space(const Lyt& lyt, const uint64_t max_cluster_size_for_witness_partitioning = 6,
-                                const sidb_simulation_parameters& phys_params = sidb_simulation_parameters{}) noexcept :
+    explicit ground_state_space(const Lyt& lyt, const uint64_t max_cluster_size_for_witness_partitioning,
+                                const sidb_simulation_parameters& phys_params) noexcept :
             top_cluster{to_sidb_cluster(sidb_cluster_hierarchy(lyt))},
-            clustering{get_initial_clustering(top_cluster, get_local_potential_bounds(lyt))},
+            clustering{get_initial_clustering(top_cluster, get_local_potential_bounds(lyt, phys_params))},
             witness_partitioning_max_cluster_size{max_cluster_size_for_witness_partitioning},
             mu_bounds_with_error{physical_constants::POP_STABILITY_ERR - phys_params.mu_minus,
                                  -physical_constants::POP_STABILITY_ERR - phys_params.mu_minus,
@@ -40,7 +52,7 @@ class ground_state_space
                                  -physical_constants::POP_STABILITY_ERR - phys_params.mu_plus()}
     {}
 
-    std::pair<sidb_cluster_ptr, std::chrono::duration<double>> compute_ground_state_space() noexcept
+    ground_state_space_result run() noexcept
     {
         mockturtle::stopwatch<>::duration time_counter{};
         {
@@ -55,7 +67,10 @@ class ground_state_space
             }
         }
 
-        return {top_cluster, time_counter};
+        const uint64_t max_multisets = maximum_top_level_multisets(top_cluster->size());
+
+        return ground_state_space_result{top_cluster, time_counter, max_multisets - top_cluster->charge_space.size(),
+                                         max_multisets};
     }
 
   private:
@@ -84,10 +99,13 @@ class ground_state_space
     }
 
     static std::pair<charge_distribution_surface<Lyt>, charge_distribution_surface<Lyt>>
-    get_local_potential_bounds(const Lyt& lyt) noexcept
+    get_local_potential_bounds(const Lyt& lyt, const sidb_simulation_parameters& phys_params) noexcept
     {
         charge_distribution_surface<Lyt> cl_min{lyt};
         charge_distribution_surface<Lyt> cl_max{lyt};
+
+        cl_min.assign_physical_parameters(phys_params);
+        cl_max.assign_physical_parameters(phys_params);
 
         cl_min.assign_all_charge_states(sidb_charge_state::POSITIVE);
         cl_max.assign_all_charge_states(sidb_charge_state::NEGATIVE);
@@ -107,7 +125,7 @@ class ground_state_space
 
         if (c->size() == 1)
         {
-            const uint64_t i = get_singleton_sidb(c);
+            const uint64_t i = get_singleton_sidb_ix(c);
 
             c->initialize_singleton_cluster_charge_space(
                 i, -local_potential_bound_containers.first.get_local_potential_by_index(i).value(),
@@ -672,6 +690,12 @@ class ground_state_space
         update_charge_spaces(min_parent->uid);
     }
 
+    static constexpr inline uint64_t maximum_top_level_multisets(const uint64_t number_of_sidbs) noexcept
+    {
+        // computes nCr(N + 2, 2)
+        return ((number_of_sidbs + 1) * (number_of_sidbs + 2)) / 2;
+    }
+
     const sidb_cluster_ptr top_cluster;
 
     sidb_clustering clustering{};
@@ -682,6 +706,16 @@ class ground_state_space
 
     const std::array<double, 4> mu_bounds_with_error;
 };
+
+}  // namespace detail
+
+template <typename Lyt>
+ground_state_space_result
+ground_state_space(const Lyt& lyt, const uint64_t max_cluster_size_for_witness_partitioning = 6,
+                   const sidb_simulation_parameters& phys_params = sidb_simulation_parameters{}) noexcept
+{
+    return detail::ground_state_space(lyt, max_cluster_size_for_witness_partitioning, phys_params).run();
+}
 
 }  // namespace fiction
 
