@@ -2,8 +2,8 @@
 // Created by Willem Lambooy on 29/02/2024.
 //
 
-#ifndef FICTION_FLITSIM_HPP
-#define FICTION_FLITSIM_HPP
+#ifndef FICTION_clustercomplete_HPP
+#define FICTION_clustercomplete_HPP
 
 #include "fiction/algorithms/simulation/sidb/ground_state_space.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
@@ -30,11 +30,11 @@ namespace detail
 {
 
 template <typename Lyt>
-class flitsim
+class clustercomplete
 {
   public:
-    explicit flitsim(const Lyt& lyt, const sidb_simulation_parameters& physical_parameters,
-                     const uint64_t available_threads) noexcept :
+    explicit clustercomplete(const Lyt& lyt, const sidb_simulation_parameters& physical_parameters,
+                             const uint64_t available_threads) noexcept :
             charge_layout{initialize_charge_layout(lyt, physical_parameters)},
             mu_bounds_with_error{physical_constants::POP_STABILITY_ERR - physical_parameters.mu_minus,
                                  -physical_constants::POP_STABILITY_ERR - physical_parameters.mu_minus,
@@ -46,7 +46,7 @@ class flitsim
     sidb_simulation_result<Lyt> run(const uint64_t validity_witness_partitioning_limit) noexcept
     {
         res.physical_parameters = charge_layout.get_phys_params();
-        res.algorithm_name      = "flitsim";
+        res.algorithm_name      = "clustercomplete";
 
         mockturtle::stopwatch<>::duration time_counter{};
         {
@@ -104,8 +104,8 @@ class flitsim
             for (const auto& [pst, _] : cluster_charge_assignment)
             {
                 charge_layout_copy.assign_charge_state_by_cell_index(
-                    get_singleton_sidb_ix(pst.cluster),
-                    sign_to_charge_state(trinary_multiset_conf_to_sign(pst.multiset_conf)), false);
+                    get_singleton_sidb_ix(pst.cluster), singleton_multiset_conf_to_charge_state(pst.multiset_conf),
+                    false);
             }
 
             charge_layout_copy.update_after_charge_change();
@@ -210,13 +210,15 @@ class flitsim
 }  // namespace detail
 
 template <typename Lyt>
-sidb_simulation_result<Lyt> flitsim(const Lyt& lyt, const uint64_t gss_witness_partitioning_maximum_cluster_size = 6,
-                                    const sidb_simulation_parameters& phys_params = sidb_simulation_parameters{},
+sidb_simulation_result<Lyt>
+clustercomplete(const Lyt& lyt, const uint64_t gss_witness_partitioning_maximum_cluster_size = 6,
+                const sidb_simulation_parameters& phys_params = sidb_simulation_parameters{},
                                     const uint64_t available_threads = std::thread::hardware_concurrency()) noexcept
 {
-    return detail::flitsim(lyt, phys_params, available_threads).run(gss_witness_partitioning_maximum_cluster_size);
+    return detail::clustercomplete(lyt, phys_params, available_threads)
+        .run(gss_witness_partitioning_maximum_cluster_size);
 }
 
 }  // namespace fiction
 
-#endif  // FICTION_FLITSIM_HPP
+#endif  // FICTION_clustercomplete_HPP
