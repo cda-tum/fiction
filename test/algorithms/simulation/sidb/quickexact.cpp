@@ -1803,7 +1803,6 @@ TEMPLATE_TEST_CASE(
         std::sort(qe_res.charge_distributions.begin(), qe_res.charge_distributions.end(),
                   [](const auto& lhs, const auto& rhs) { return lhs.get_system_energy() < rhs.get_system_energy(); });
 
-        // QuickExact returns 4 physically valid charge layout
         REQUIRE(qe_res.charge_distributions.size() == 2);
 
         const auto groundstate  = qe_res.charge_distributions[0];
