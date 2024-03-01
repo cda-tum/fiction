@@ -192,54 +192,63 @@ TEMPLATE_TEST_CASE(
     //        }
     //    }
 
-    const auto& [top, time] = ground_state_space{lyt}.compute_ground_state_space();
+    const ground_state_space_result& gss_res = ground_state_space(lyt);
 
-    std::cout << "RUNTIME: " << (time.count() * 1000) << " ms" << std::endl;
+    std::cout << "RUNTIME: " << (gss_res.runtime.count() * 1000) << " ms" << std::endl;
 
-    CHECK(top->sidbs.size() == 7);
+    CHECK(gss_res.top_cluster->sidbs.size() == 7);
 
-    //    CHECK_THAT(top->local_pot_bounds[0], Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
-    //    CHECK_THAT(top->local_pot_bounds[1], Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+    //    CHECK_THAT(gss_res.top_cluster->local_pot_bounds[0], Catch::Matchers::WithinAbs(0,
+    //    physical_constants::POP_STABILITY_ERR)); CHECK_THAT(gss_res.top_cluster->local_pot_bounds[1],
+    //    Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
 
-    REQUIRE(top->charge_space.size() == 1);
+    REQUIRE(gss_res.top_cluster->charge_space.size() == 1);
 
-    CHECK(top->charge_space.cbegin()->neg_count == 5);
-    CHECK(top->charge_space.cbegin()->pos_count == 0);
+    CHECK(gss_res.top_cluster->charge_space.cbegin()->neg_count == 5);
+    CHECK(gss_res.top_cluster->charge_space.cbegin()->pos_count == 0);
 
-    REQUIRE(top->charge_space.cbegin()->compositions.size() == 1);
-    REQUIRE(top->charge_space.cbegin()->compositions.cbegin()->size() == 2);
+    REQUIRE(gss_res.top_cluster->charge_space.cbegin()->compositions.size() == 1);
+    REQUIRE(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->size() == 2);
 
-    if (top->charge_space.cbegin()->compositions.cbegin()->cbegin()->first.cluster->sidbs.size() == 3)
+    if (gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin()->first.cluster->sidbs.size() == 3)
     {
-        CHECK(top->charge_space.cbegin()->compositions.cbegin()->cbegin()->first.cluster->sidbs ==
+        CHECK(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin()->first.cluster->sidbs ==
               std::unordered_set{0ul, 1ul, 2ul});
-        CHECK((top->charge_space.cbegin()->compositions.cbegin()->cbegin()->first.multiset_conf >> 32ull) == 2);
-        CHECK(((top->charge_space.cbegin()->compositions.cbegin()->cbegin()->first.multiset_conf << 32ull) >> 32ull) ==
-              0);
+        CHECK((gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin()->first.multiset_conf >>
+               32ull) == 2);
+        CHECK(((gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin()->first.multiset_conf
+                << 32ull) >>
+               32ull) == 0);
 
-        CHECK(std::next(top->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)->first.cluster->sidbs ==
-              std::unordered_set{3ul, 4ul, 5ul, 6ul});
-        CHECK((std::next(top->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)->first.multiset_conf >>
+        CHECK(std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)
+                  ->first.cluster->sidbs == std::unordered_set{3ul, 4ul, 5ul, 6ul});
+        CHECK((std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)
+                   ->first.multiset_conf >>
                32ull) == 3);
-        CHECK(((std::next(top->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)->first.multiset_conf
+        CHECK(((std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)
+                    ->first.multiset_conf
                 << 32ull) >>
                32ull) == 0);
     }
     else
     {
-        CHECK(std::next(top->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)->first.cluster->sidbs ==
-              std::unordered_set{0ul, 1ul, 2ul});
-        CHECK((std::next(top->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)->first.multiset_conf >>
+        CHECK(std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)
+                  ->first.cluster->sidbs == std::unordered_set{0ul, 1ul, 2ul});
+        CHECK((std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)
+                   ->first.multiset_conf >>
                32ull) == 2);
-        CHECK(((std::next(top->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)->first.multiset_conf
+        CHECK(((std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)
+                    ->first.multiset_conf
                 << 32ull) >>
                32ull) == 0);
 
-        CHECK(top->charge_space.cbegin()->compositions.cbegin()->cbegin()->first.cluster->sidbs ==
+        CHECK(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin()->first.cluster->sidbs ==
               std::unordered_set{3ul, 4ul, 5ul, 6ul});
-        CHECK((top->charge_space.cbegin()->compositions.cbegin()->cbegin()->first.multiset_conf >> 32ull) == 3);
-        CHECK(((top->charge_space.cbegin()->compositions.cbegin()->cbegin()->first.multiset_conf << 32ull) >> 32ull) ==
-              0);
+        CHECK((gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin()->first.multiset_conf >>
+               32ull) == 3);
+        CHECK(((gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin()->first.multiset_conf
+                << 32ull) >>
+               32ull) == 0);
     }
     //
     //    const charge_distribution_surface<TestType> cds{lyt};
@@ -263,12 +272,12 @@ TEMPLATE_TEST_CASE(
     //
     //    //    CHECK(min_neg_recv <=
     //    //          gss.template internal_pot_bound_value<bound_calculation_mode::LOWER,
-    //    // sidb_charge_state::NEGATIVE>((*top->children.cbegin())->parent,
-    //    //                                                                             *top->charge_space.cbegin()));
+    //    // sidb_charge_state::NEGATIVE>((*gss_res.top_cluster->children.cbegin())->parent,
+    //    // *gss_res.top_cluster->charge_space.cbegin()));
     //    //    CHECK(max_neg_recv >=
     //    //          gss.template internal_pot_bound_value<bound_calculation_mode::UPPER,
-    //    // sidb_charge_state::NEGATIVE>((*top->children.cbegin())->parent,
-    //    //                                                                             *top->charge_space.cbegin()));
+    //    // sidb_charge_state::NEGATIVE>((*gss_res.top_cluster->children.cbegin())->parent,
+    //    // *gss_res.top_cluster->charge_space.cbegin()));
     //
     //    double min_neut_recv = -std::numeric_limits<double>::infinity();
     //    double max_neut_recv = std::numeric_limits<double>::infinity();
@@ -286,10 +295,12 @@ TEMPLATE_TEST_CASE(
     //
     //    //    CHECK(min_neut_recv <=
     //    //          gss.template internal_pot_bound_value<bound_calculation_mode::LOWER>(
-    //    //              (*top->children.cbegin())->parent, *top->charge_space.cbegin()));
+    //    //              (*gss_res.top_cluster->children.cbegin())->parent,
+    //    *gss_res.top_cluster->charge_space.cbegin()));
     //    //    CHECK(max_neut_recv >=
     //    //          gss.template internal_pot_bound_value<bound_calculation_mode::UPPER>(
-    //    //              (*top->children.cbegin())->parent, *top->charge_space.cbegin()));
+    //    //              (*gss_res.top_cluster->children.cbegin())->parent,
+    //    *gss_res.top_cluster->charge_space.cbegin()));
 }
 
 TEMPLATE_TEST_CASE(
@@ -343,17 +354,16 @@ TEMPLATE_TEST_CASE(
     //        }
     //    }
 
-    ground_state_space gss{lyt};
+    const ground_state_space_result& gss_res = ground_state_space(lyt);
 
-    const auto& [top, time] = gss.compute_ground_state_space();
+    std::cout << "RUNTIME: " << (gss_res.runtime.count() * 1000) << " ms" << std::endl;
+    std::cout << "TOP CLUSTER CHARGE SPACE SIZE: " << gss_res.top_cluster->charge_space.size() << std::endl;
 
-    std::cout << "RUNTIME: " << (time.count() * 1000) << " ms" << std::endl;
-    std::cout << "TOP CLUSTER CHARGE SPACE SIZE: " << top->charge_space.size() << std::endl;
+    CHECK(gss_res.top_cluster->sidbs.size() == 14);
 
-    CHECK(top->sidbs.size() == 14);
-
-    //    CHECK_THAT(top->local_pot_bounds[0], Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
-    //    CHECK_THAT(top->local_pot_bounds[1], Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+    //    CHECK_THAT(gss_res.top_cluster->local_pot_bounds[0], Catch::Matchers::WithinAbs(0,
+    //    physical_constants::POP_STABILITY_ERR)); CHECK_THAT(gss_res.top_cluster->local_pot_bounds[1],
+    //    Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
 }
 
 TEMPLATE_TEST_CASE(
@@ -401,14 +411,12 @@ TEMPLATE_TEST_CASE(
 
     //     const auto res = quickexact(lyt);
 
-    ground_state_space gss{lyt};
+    const ground_state_space_result& gss_res = ground_state_space(lyt);
 
-    const auto& [top, time] = gss.compute_ground_state_space();
+    std::cout << "RUNTIME: " << (gss_res.runtime.count() * 1000) << " ms" << std::endl;
+    std::cout << "TOP CLUSTER CHARGE SPACE SIZE: " << gss_res.top_cluster->charge_space.size() << std::endl;
 
-    std::cout << "RUNTIME: " << (time.count() * 1000) << " ms" << std::endl;
-    std::cout << "TOP CLUSTER CHARGE SPACE SIZE: " << top->charge_space.size() << std::endl;
-
-    CHECK(top->sidbs.size() == 28);
+    CHECK(gss_res.top_cluster->sidbs.size() == 28);
 }
 
 TEMPLATE_TEST_CASE(
@@ -490,14 +498,12 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type({34, 5, 1}, TestType::cell_type::NORMAL);  //  -    -       7
     lyt.assign_cell_type({32, 8, 1}, TestType::cell_type::NORMAL);  //  -    -       13
 
-    ground_state_space gss{lyt};
+    const ground_state_space_result& gss_res = ground_state_space(lyt);
 
-    const auto& [top, time] = gss.compute_ground_state_space();
+    std::cout << "RUNTIME: " << gss_res.runtime.count() << " s" << std::endl;
+    std::cout << "TOP CLUSTER CHARGE SPACE SIZE: " << gss_res.top_cluster->charge_space.size() << std::endl;
 
-    std::cout << "RUNTIME: " << time.count() << " s" << std::endl;
-    std::cout << "TOP CLUSTER CHARGE SPACE SIZE: " << top->charge_space.size() << std::endl;
-
-    CHECK(top->sidbs.size() == 56);
+    CHECK(gss_res.top_cluster->sidbs.size() == 56);
 }
 
 TEMPLATE_TEST_CASE(
@@ -652,14 +658,12 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type({34 + 32, 5, 1}, TestType::cell_type::NORMAL);  //  -    -       7
     lyt.assign_cell_type({32 + 32, 8, 1}, TestType::cell_type::NORMAL);  //  -    -       13
 
-    ground_state_space gss{lyt};
+    const ground_state_space_result& gss_res = ground_state_space(lyt);
 
-    const auto& [top, time] = gss.compute_ground_state_space();
+    std::cout << "RUNTIME: " << gss_res.runtime.count() << " s" << std::endl;
+    std::cout << "TOP CLUSTER CHARGE SPACE SIZE: " << gss_res.top_cluster->charge_space.size() << std::endl;
 
-    std::cout << "RUNTIME: " << time.count() << " s" << std::endl;
-    std::cout << "TOP CLUSTER CHARGE SPACE SIZE: " << top->charge_space.size() << std::endl;
-
-    CHECK(top->sidbs.size() == 112);
+    CHECK(gss_res.top_cluster->sidbs.size() == 112);
 }
 
 using sidb_lyt = sidb_cell_clk_lyt_siqad;
@@ -712,17 +716,17 @@ TEST_CASE("Tiny fail 1", "[ground-state-space]")
 
     const sidb_simulation_result<sidb_lyt>& qe_res   = quickexact(lyt);
     const sidb_simulation_result<sidb_lyt>& exgs_res = exhaustive_ground_state_simulation(lyt);
-    const auto& [top, time]                          = ground_state_space{lyt}.compute_ground_state_space();
+    const ground_state_space_result&        gss_res  = ground_state_space(lyt);
 
     for (const charge_distribution_surface<sidb_lyt>& cl : qe_res.charge_distributions)
     {
-        const bool verification = verify_ground_state_space_result(cl, top);
+        const bool verification = verify_ground_state_space_result(cl, gss_res.top_cluster);
         CHECK(verification);
     }
 
     for (const charge_distribution_surface<sidb_lyt>& cl : exgs_res.charge_distributions)
     {
-        const bool verification = verify_ground_state_space_result(cl, top);
+        const bool verification = verify_ground_state_space_result(cl, gss_res.top_cluster);
         CHECK(verification);
     }
 }
@@ -737,17 +741,17 @@ TEST_CASE("Tiny fail 2", "[ground-state-space]")
 
     const sidb_simulation_result<sidb_lyt>& qe_res   = quickexact(lyt);
     const sidb_simulation_result<sidb_lyt>& exgs_res = exhaustive_ground_state_simulation(lyt);
-    const auto& [top, time]                          = ground_state_space{lyt}.compute_ground_state_space();
+    const ground_state_space_result&        gss_res  = ground_state_space(lyt);
 
     for (const charge_distribution_surface<sidb_lyt>& cl : qe_res.charge_distributions)
     {
-        const bool verification = verify_ground_state_space_result(cl, top);
+        const bool verification = verify_ground_state_space_result(cl, gss_res.top_cluster);
         CHECK(verification);
     }
 
     for (const charge_distribution_surface<sidb_lyt>& cl : exgs_res.charge_distributions)
     {
-        const bool verification = verify_ground_state_space_result(cl, top);
+        const bool verification = verify_ground_state_space_result(cl, gss_res.top_cluster);
         CHECK(verification);
     }
 }
@@ -762,17 +766,17 @@ TEST_CASE("Tiny fail 3", "[ground-state-space]")
 
     const sidb_simulation_result<sidb_lyt>& qe_res   = quickexact(lyt);
     const sidb_simulation_result<sidb_lyt>& exgs_res = exhaustive_ground_state_simulation(lyt);
-    const auto& [top, time]                          = ground_state_space{lyt}.compute_ground_state_space();
+    const ground_state_space_result&        gss_res  = ground_state_space(lyt);
 
     for (const charge_distribution_surface<sidb_lyt>& cl : qe_res.charge_distributions)
     {
-        const bool verification = verify_ground_state_space_result(cl, top);
+        const bool verification = verify_ground_state_space_result(cl, gss_res.top_cluster);
         CHECK(verification);
     }
 
     for (const charge_distribution_surface<sidb_lyt>& cl : exgs_res.charge_distributions)
     {
-        const bool verification = verify_ground_state_space_result(cl, top);
+        const bool verification = verify_ground_state_space_result(cl, gss_res.top_cluster);
         CHECK(verification);
     }
 }
@@ -787,17 +791,17 @@ TEST_CASE("Tiny fail 4", "[ground-state-space]")
 
     const sidb_simulation_result<sidb_lyt>& qe_res   = quickexact(lyt);
     const sidb_simulation_result<sidb_lyt>& exgs_res = exhaustive_ground_state_simulation(lyt);
-    const auto& [top, time]                          = ground_state_space{lyt}.compute_ground_state_space();
+    const ground_state_space_result&        gss_res  = ground_state_space(lyt);
 
     for (const charge_distribution_surface<sidb_lyt>& cl : qe_res.charge_distributions)
     {
-        const bool verification = verify_ground_state_space_result(cl, top);
+        const bool verification = verify_ground_state_space_result(cl, gss_res.top_cluster);
         CHECK(verification);
     }
 
     for (const charge_distribution_surface<sidb_lyt>& cl : exgs_res.charge_distributions)
     {
-        const bool verification = verify_ground_state_space_result(cl, top);
+        const bool verification = verify_ground_state_space_result(cl, gss_res.top_cluster);
         CHECK(verification);
     }
 }
@@ -815,17 +819,17 @@ TEST_CASE("Small fail", "[ground-state-space]")
 
     const sidb_simulation_result<sidb_lyt>& qe_res   = quickexact(lyt);
     const sidb_simulation_result<sidb_lyt>& exgs_res = exhaustive_ground_state_simulation(lyt);
-    const auto& [top, time]                          = ground_state_space{lyt}.compute_ground_state_space();
+    const ground_state_space_result&        gss_res  = ground_state_space(lyt);
 
     for (const charge_distribution_surface<sidb_lyt>& cl : qe_res.charge_distributions)
     {
-        const bool verification = verify_ground_state_space_result(cl, top);
+        const bool verification = verify_ground_state_space_result(cl, gss_res.top_cluster);
         CHECK(verification);
     }
 
     for (const charge_distribution_surface<sidb_lyt>& cl : exgs_res.charge_distributions)
     {
-        const bool verification = verify_ground_state_space_result(cl, top);
+        const bool verification = verify_ground_state_space_result(cl, gss_res.top_cluster);
         CHECK(verification);
     }
 }
@@ -855,11 +859,11 @@ TEST_CASE("Big fail", "[ground-state-space]")
     lyt.assign_cell_type({24, 12, 0}, sidb_lyt::cell_type::NORMAL);  //  -    -   -   -       6     -
 
     const sidb_simulation_result<sidb_lyt>& qe_res = quickexact(lyt);
-    const auto& [top, time]                        = ground_state_space{lyt}.compute_ground_state_space();
+    const ground_state_space_result&        gss_res = ground_state_space(lyt);
 
     for (const charge_distribution_surface<sidb_lyt>& cl : qe_res.charge_distributions)
     {
-        const bool verification = verify_ground_state_space_result(cl, top);
+        const bool verification = verify_ground_state_space_result(cl, gss_res.top_cluster);
         CHECK(verification);
     }
 }
@@ -881,14 +885,14 @@ static void verify_lyts(const std::vector<sidb_lyt>& lyts)
 
             try
             {
-                const auto& [top, time] = ground_state_space{lyts[i]}.compute_ground_state_space();
+                const ground_state_space_result& gss_res = ground_state_space(lyts[i]);
 
-                std::cout << "RUNTIME: " << (time.count() * 1000) << " ms" << std::endl;
-                std::cout << "TOP CLUSTER CHARGE SPACE SIZE: " << top->charge_space.size() << std::endl;
+                std::cout << "RUNTIME: " << (gss_res.runtime.count() * 1000) << " ms" << std::endl;
+                std::cout << "TOP CLUSTER CHARGE SPACE SIZE: " << gss_res.top_cluster->charge_space.size() << std::endl;
 
                 for (const charge_distribution_surface<sidb_lyt>& cl : qe_res.charge_distributions)
                 {
-                    const bool verification = verify_ground_state_space_result(cl, top);
+                    const bool verification = verify_ground_state_space_result(cl, gss_res.top_cluster);
                     CHECK(verification);
                     if (!verification)
                     {
@@ -900,7 +904,8 @@ static void verify_lyts(const std::vector<sidb_lyt>& lyts)
                         const sidb_simulation_result<sidb_lyt>& exgs_res = exhaustive_ground_state_simulation(lyts[i]);
                         for (const charge_distribution_surface<sidb_lyt>& cl_exgs : exgs_res.charge_distributions)
                         {
-                            const bool exgs_verification = verify_ground_state_space_result(cl_exgs, top);
+                            const bool exgs_verification =
+                                verify_ground_state_space_result(cl_exgs, gss_res.top_cluster);
                             CHECK(exgs_verification);
                             if (!exgs_verification)
                             {
@@ -1015,10 +1020,9 @@ TEST_CASE("Ground State Space state pruning comparison on random layouts with 40
 
     for (uint64_t i = 0; i < lyts.size(); ++i)
     {
-        ground_state_space gss{lyts[i]};
-        const auto& [top, time] = gss.compute_ground_state_space();
-        std::cout << "RUNTIME: " << time.count() << " s" << std::endl;
-        std::cout << "TOP CLUSTER CHARGE SPACE SIZE: " << top->charge_space.size() << std::endl;
+        const ground_state_space_result& gss_res = ground_state_space(lyts[i]);
+        std::cout << "RUNTIME: " << gss_res.runtime.count() << " s" << std::endl;
+        std::cout << "TOP CLUSTER CHARGE SPACE SIZE: " << gss_res.top_cluster->charge_space.size() << std::endl;
         //        uint64_t open_states = gss.get_total_states();
         //        std::cout << "STATES PRUNED: "
         //                  << total_states - open_states << std::endl;
@@ -1048,26 +1052,26 @@ TEST_CASE("Ground State Space state pruning comparison on random layouts with 40
 //     for (const sidb_lyt& lyt : lyts)
 //     {
 //         std::cout << "NO MODE" << std::endl;
-//         const auto& [top, time] = ground_state_space{lyt}.compute_ground_state_space();
-//         std::cout << "RUNTIME: " << (time.count() * 1000) << " ms" << std::endl;
-//         std::cout << "TOP CLUSTER CHARGE SPACE SIZE: " << top->charge_space.size() << std::endl;
+//         const ground_state_space_result& gss_res = ground_state_space(lyt);
+//         std::cout << "RUNTIME: " << (gss_res.runtime.count() * 1000) << " ms" << std::endl;
+//         std::cout << "TOP CLUSTER CHARGE SPACE SIZE: " << gss_res.top_cluster->charge_space.size() << std::endl;
 //
 //
 //         std::cout << "\nMODE 0" << std::endl;
 //         ground_state_space gss{lyt};
 //         gss.mode = false;
-//         const auto& [top0, time0] = gss.compute_ground_state_space();
+//         const auto& [gss_res.top_cluster0, time0] = gss.compute_ground_state_space();
 //         std::cout << "RUNTIME: " << (time0.count() * 1000) << " ms" << std::endl;
-//         std::cout << "TOP CLUSTER CHARGE SPACE SIZE: " << top0->charge_space.size() << std::endl;
+//         std::cout << "TOP CLUSTER CHARGE SPACE SIZE: " << gss_res.top_cluster0->charge_space.size() << std::endl;
 //
 //         std::cout << "\nMODE 1" << std::endl;
 //         ground_state_space gss1{lyt};
 //         gss.mode = true;
-//         const auto& [top1, time1] = gss1.compute_ground_state_space();
+//         const auto& [gss_res.top_cluster1, time1] = gss1.compute_ground_state_space();
 //         std::cout << "RUNTIME: " << (time1.count() * 1000) << " ms" << std::endl;
-//         std::cout << "TOP CLUSTER CHARGE SPACE SIZE: " << top1->charge_space.size() << std::endl;
+//         std::cout << "TOP CLUSTER CHARGE SPACE SIZE: " << gss_res.top_cluster1->charge_space.size() << std::endl;
 //
-//         if (top->charge_space.size() < top0->charge_space.size())
+//         if (gss_res.top_cluster->charge_space.size() < gss_res.top_cluster0->charge_space.size())
 //         {
 //             const sidb_simulation_result<sidb_lyt>& qe_res = quickexact(lyt);
 //             for (const cell<sidb_lyt>& c : qe_res.charge_distributions.cbegin()->get_sidb_order())
@@ -1119,11 +1123,11 @@ TEST_CASE("bench20x10", "[gss]")
         {
             for (uint64_t lim = 2; lim <= 12; lim += 2)
             {
-                ground_state_space gss{lyts[i], lim};
-                const auto& [top, time] = gss.compute_ground_state_space();
-                std::cout << "LAYOUT " << i << "  (N = " << N << ", LIM = " << lim << ")  |  RUNTIME: " << time.count()
-                          << " s" << std::endl;
-                std::cout << "TOP CLUSTER CHARGE SPACE SIZE: " << top->charge_space.size() << std::endl << std::endl;
+                const ground_state_space_result& gss_res = ground_state_space(lyts[i], lim);
+                std::cout << "LAYOUT " << i << "  (N = " << N << ", LIM = " << lim
+                          << ")  |  RUNTIME: " << gss_res.runtime.count() << " s" << std::endl;
+                std::cout << "TOP CLUSTER CHARGE SPACE SIZE: " << gss_res.top_cluster->charge_space.size() << std::endl
+                          << std::endl;
             }
 
             std::cout << std::endl;

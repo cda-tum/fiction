@@ -247,12 +247,12 @@ struct sidb_cluster_charge_state
     }
 };
 
-static constexpr inline const uint64_t SINGLETON_NEGATIVE_MULTISET_CHARGE_CONF = 1ull << 32ull;
-static constexpr inline const uint64_t SINGLETON_POSITIVE_MULTISET_CHARGE_CONF = 1ull;
+// static constexpr inline const uint64_t SINGLETON_NEGATIVE_MULTISET_CHARGE_CONF = 1ull << 32ull;
+// static constexpr inline const uint64_t SINGLETON_POSITIVE_MULTISET_CHARGE_CONF = 1ull;
 
-static constexpr inline int8_t singleton_multiset_conf_to_sign(const uint64_t m) noexcept
+static constexpr inline sidb_charge_state singleton_multiset_conf_to_charge_state(const uint64_t m) noexcept
 {
-    return static_cast<int8_t>(static_cast<uint32_t>(m) - (static_cast<uint32_t>(m) < m));
+    return sign_to_charge_state(static_cast<int8_t>(static_cast<uint32_t>(m) - (static_cast<uint32_t>(m) < m)));
 }
 
 enum class bound_direction : uint8_t
@@ -268,7 +268,7 @@ static constexpr inline double potential_bound_top() noexcept
     {
         return std::numeric_limits<double>::infinity();
     }
-    else
+    else if constexpr (bound == bound_direction::UPPER)
     {
         return -std::numeric_limits<double>::infinity();
     }
@@ -281,7 +281,7 @@ static constexpr inline void take_meet_of_potential_bounds(double& a, const doub
     {
         a = std::min(a, b);
     }
-    else
+    else if constexpr (bound == bound_direction::UPPER)
     {
         a = std::max(a, b);
     }
@@ -338,7 +338,7 @@ struct potential_projection_orders
         {
             return *order.at(sidb_ix).cbegin();
         }
-        else
+        else if constexpr (bound == bound_direction::UPPER)
         {
             return *order.at(sidb_ix).crbegin();
         }
@@ -354,7 +354,7 @@ struct potential_projection_orders
             return *std::find_if(order.at(sidb_ix).cbegin(), order.at(sidb_ix).cend(),
                                  [&](const potential_projection& pp) { return pp.M != bound_m; });
         }
-        else
+        else if constexpr (bound == bound_direction::UPPER)
         {
             return *std::find_if(order.at(sidb_ix).crbegin(), order.at(sidb_ix).crend(),
                                  [&](const potential_projection& pp) { return pp.M != bound_m; });
@@ -369,7 +369,7 @@ struct potential_projection_orders
             return *std::find_if(order.at(sidb_ix).cbegin(), order.at(sidb_ix).cend(),
                                  [&](const potential_projection& pp) { return pp.M == m_conf; });
         }
-        else
+        else if constexpr (bound == bound_direction::UPPER)
         {
             return *std::prev(std::find_if(order.at(sidb_ix).crbegin(), order.at(sidb_ix).crend(),
                                            [&](const potential_projection& pp) { return pp.M == m_conf; })

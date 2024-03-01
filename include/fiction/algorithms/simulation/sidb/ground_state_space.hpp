@@ -224,22 +224,25 @@ class ground_state_space
 
     struct witness_partitioning_state
     {
-        std::set<uint64_t> neg_w{}, pos_w{}, neut_w{};
-        uint64_t           num_neg, num_pos, num_neut;
+        std::set<uint64_t> negative_witnesses{}, positive_witnesses{}, neutral_witnesses{};
+        uint64_t           required_neg_count, required_pos_count, required_neut_count;
 
         explicit witness_partitioning_state(const sidb_cluster_projector_state& pst) noexcept :
-                num_neg{pst.get_count<sidb_charge_state::NEGATIVE>()},
-                num_pos{pst.get_count<sidb_charge_state::POSITIVE>()},
-                num_neut{pst.get_count<sidb_charge_state::NEUTRAL>()}
+                required_neg_count{pst.get_count<sidb_charge_state::NEGATIVE>()},
+                required_pos_count{pst.get_count<sidb_charge_state::POSITIVE>()},
+                required_neut_count{pst.get_count<sidb_charge_state::NEUTRAL>()}
         {}
 
         void omit_free_witnesses() noexcept
         {
             // find free witnesses to reduce the problem, leaving only witnesses to partition that overlap
-            for (auto& [this_set, competing_sets] :
-                 std::array{std::make_pair(std::make_pair(neg_w, num_neg), std::make_pair(pos_w, neut_w)),
-                            std::make_pair(std::make_pair(pos_w, num_pos), std::make_pair(neg_w, neut_w)),
-                            std::make_pair(std::make_pair(neut_w, num_neut), std::make_pair(neg_w, pos_w))})
+            for (const auto& [this_set, competing_sets] :
+                 std::array{std::make_pair(std::make_pair(std::ref(negative_witnesses), std::ref(required_neg_count)),
+                                           std::make_pair(std::ref(positive_witnesses), std::ref(neutral_witnesses))),
+                            std::make_pair(std::make_pair(std::ref(positive_witnesses), std::ref(required_pos_count)),
+                                           std::make_pair(std::ref(negative_witnesses), std::ref(neutral_witnesses))),
+                            std::make_pair(std::make_pair(std::ref(neutral_witnesses), std::ref(required_neut_count)),
+                                           std::make_pair(std::ref(negative_witnesses), std::ref(positive_witnesses)))})
             {
                 for (std::set<uint64_t>::const_iterator it = this_set.first.cbegin(); it != this_set.first.cend();)
                 {
@@ -263,62 +266,66 @@ class ground_state_space
     {
         if constexpr (current_fill_cs == sidb_charge_state::NEUTRAL)
         {
-            return st.neut_w.size() >= num_witnesses_for_current_cs;
+            return st.neutral_witnesses.size() >= num_witnesses_for_current_cs;
         }
         else if constexpr (current_fill_cs == sidb_charge_state::POSITIVE)
         {
             if (num_witnesses_for_current_cs == 0)
             {
-                return find_valid_witness_partitioning<sidb_charge_state::NEUTRAL>(st, st.num_neut);
+                return find_valid_witness_partitioning<sidb_charge_state::NEUTRAL>(st, st.required_neut_count);
             }
 
-            for (std::set<uint64_t>::const_iterator it = st.pos_w.cbegin(); it != st.pos_w.cend();)
+            for (std::set<uint64_t>::const_iterator it = st.positive_witnesses.cbegin();
+                 it != st.positive_witnesses.cend();)
             {
-                const uint64_t take_witness = *st.pos_w.cbegin();
+                const uint64_t take_witness = *st.positive_witnesses.cbegin();
 
-                st.pos_w.erase(it);
+                st.positive_witnesses.erase(it);
 
-                st.neut_w.erase(take_witness);
+                st.neutral_witnesses.erase(take_witness);
 
                 if (find_valid_witness_partitioning<sidb_charge_state::POSITIVE>(st, num_witnesses_for_current_cs - 1))
                 {
                     return true;
                 }
 
-                it = ++st.pos_w.emplace(take_witness).first;
+                it = ++st.positive_witnesses.emplace(take_witness).first;
 
-                st.neut_w.emplace(take_witness);
+                st.neutral_witnesses.emplace(take_witness);
             }
 
             return false;
         }
-
-        if (num_witnesses_for_current_cs == 0)
+        else if constexpr (current_fill_cs == sidb_charge_state::NEGATIVE)
         {
-            return find_valid_witness_partitioning<sidb_charge_state::POSITIVE>(st, st.num_pos);
-        }
-
-        for (std::set<uint64_t>::const_iterator it = st.neg_w.cbegin(); it != st.neg_w.cend();)
-        {
-            const uint64_t take_witness = *it;
-
-            st.neg_w.erase(it);
-
-            st.pos_w.erase(take_witness);
-            st.neut_w.erase(take_witness);
-
-            if (find_valid_witness_partitioning<sidb_charge_state::NEGATIVE>(st, num_witnesses_for_current_cs - 1))
+            if (num_witnesses_for_current_cs == 0)
             {
-                return true;
+                return find_valid_witness_partitioning<sidb_charge_state::POSITIVE>(st, st.required_pos_count);
             }
 
-            it = ++st.neg_w.emplace(take_witness).first;
+            for (std::set<uint64_t>::const_iterator it = st.negative_witnesses.cbegin();
+                 it != st.negative_witnesses.cend();)
+            {
+                const uint64_t take_witness = *it;
 
-            st.pos_w.emplace(take_witness);
-            st.neut_w.emplace(take_witness);
+                st.negative_witnesses.erase(it);
+
+                st.positive_witnesses.erase(take_witness);
+                st.neutral_witnesses.erase(take_witness);
+
+                if (find_valid_witness_partitioning<sidb_charge_state::NEGATIVE>(st, num_witnesses_for_current_cs - 1))
+                {
+                    return true;
+                }
+
+                it = ++st.negative_witnesses.emplace(take_witness).first;
+
+                st.positive_witnesses.emplace(take_witness);
+                st.neutral_witnesses.emplace(take_witness);
+            }
+
+            return false;
         }
-
-        return false;
     }
 
     enum class potential_bound_analysis_mode
@@ -339,7 +346,7 @@ class ground_state_space
                     get_proj_state_bound<bound_direction::UPPER>(pst, pst.to_receptor_state(sidb_ix)).V +
                         pst.cluster->get_recv_ext_pot_bound<bound_direction::UPPER>(sidb_ix)};
         }
-        else
+        else if constexpr (mode == potential_bound_analysis_mode::ANALYZE_COMPOSITION)
         {
             return {sibling_pot_bounds.value().at(sidb_ix)[static_cast<uint8_t>(bound_direction::LOWER)] +
                         pst.cluster->get_recv_ext_pot_bound<bound_direction::LOWER>(sidb_ix),
@@ -360,24 +367,26 @@ class ground_state_space
             const auto& [recv_pot_lb, recv_pot_ub] =
                 get_received_potential_bounds<mode>(pst, sidb_ix, sibling_pot_bounds);
 
-            if (st.num_neg != 0 && !fail_onto_negative_charge(recv_pot_lb))
+            if (st.required_neg_count != 0 && !fail_onto_negative_charge(recv_pot_lb))
             {
-                st.neg_w.emplace(sidb_ix);
+                st.negative_witnesses.emplace(sidb_ix);
             }
 
-            if (st.num_pos != 0 && !fail_onto_positive_charge(recv_pot_ub))
+            if (st.required_pos_count != 0 && !fail_onto_positive_charge(recv_pot_ub))
             {
-                st.pos_w.emplace(sidb_ix);
+                st.positive_witnesses.emplace(sidb_ix);
             }
 
-            if (st.num_neut != 0 && !ub_fail_onto_neutral_charge(recv_pot_ub) &&
+            if (st.required_neut_count != 0 && !ub_fail_onto_neutral_charge(recv_pot_ub) &&
                 !lb_fail_onto_neutral_charge(recv_pot_lb))
             {
-                st.neut_w.emplace(sidb_ix);
+                st.neutral_witnesses.emplace(sidb_ix);
             }
         }
 
-        if (st.neg_w.size() < st.num_neg || st.pos_w.size() < st.num_pos || st.neut_w.size() < st.num_neut)
+        if (st.negative_witnesses.size() < st.required_neg_count ||
+            st.positive_witnesses.size() < st.required_pos_count ||
+            st.neutral_witnesses.size() < st.required_neut_count)
         {
             return false;
         }
@@ -389,7 +398,7 @@ class ground_state_space
 
         st.omit_free_witnesses();
 
-        return find_valid_witness_partitioning<sidb_charge_state::NEGATIVE>(st, st.num_neg);
+        return find_valid_witness_partitioning<sidb_charge_state::NEGATIVE>(st, st.required_neg_count);
     }
 
     bool check_charge_space(const sidb_cluster_ptr& c) noexcept
