@@ -5,6 +5,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp>
+#include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/types.hpp>
 
@@ -16,7 +17,7 @@ TEST_CASE("Empty layout BDL detection", "[detect-bdl-pairs]")
 {
     const lattice lyt{};
 
-    const auto result = detect_bdl_pairs(lyt, sidb_technology::cell_type::NORMAL);
+    const auto result = detect_bdl_pairs(lyt, lattice::cell_type::NORMAL);
 
     CHECK(result.empty());
 }

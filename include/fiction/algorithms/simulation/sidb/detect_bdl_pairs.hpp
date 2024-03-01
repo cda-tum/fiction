@@ -144,7 +144,7 @@ std::vector<bdl_pair<Lyt>> detect_bdl_pairs(const Lyt& lyt, const typename techn
         /**
          * Computes the pairwise distances between all dots in the input vector.
          */
-        const auto compute_pairwise_dot_distances = [&lyt, &dots]() noexcept -> std::vector<pairwise_dot_distance>
+        const auto compute_pairwise_dot_distances = [&dots]() noexcept -> std::vector<pairwise_dot_distance>
         {
             std::vector<pairwise_dot_distance> pairwise_distances{};
             pairwise_distances.reserve((dots.size() * (dots.size() - 1)) / 2);
