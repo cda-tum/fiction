@@ -426,7 +426,7 @@ class quickexact_impl
 
             charge_layout.increase_charge_index_by_one(
                 dependent_cell_mode::VARIABLE, energy_calculation::KEEP_OLD_ENERGY_VALUE,
-                charge_distribution_history::CONSIDER,
+                charge_distribution_history::NEGLECT,
                 exhaustive_sidb_simulation_engine::QUICKEXACT);  // "false" allows that the charge state of the
                                                                  // dependent cell is automatically changed based on the
                                                                  // new charge distribution.
