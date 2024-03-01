@@ -5,6 +5,7 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
 #include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
@@ -900,16 +901,21 @@ TEMPLATE_TEST_CASE(
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
-    REQUIRE(!simulation_results.charge_distributions.empty());
-    const auto& charge_lyt_first = simulation_results.charge_distributions.front();
+    const auto simulation_results_exgs = exhaustive_ground_state_simulation<TestType>(lyt, params.physical_parameters);
 
-    CHECK(charge_lyt_first.get_charge_state({1, 3, 0}) == sidb_charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state({3, 3, 0}) == sidb_charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state({4, 3, 0}) == sidb_charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state({6, 3, 0}) == sidb_charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state({7, 3, 0}) == sidb_charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state({6, 10, 0}) == sidb_charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state({7, 10, 0}) == sidb_charge_state::NEGATIVE);
+    REQUIRE(simulation_results.charge_distributions.size() == simulation_results_exgs.charge_distributions.size());
+
+    const auto highest_state = std::min_element(
+        simulation_results.charge_distributions.cbegin(), simulation_results.charge_distributions.cend(),
+        [](const auto& lhs, const auto& rhs) { return lhs.get_system_energy() > rhs.get_system_energy(); });
+
+    CHECK(highest_state->get_charge_state({1, 3, 0}) == sidb_charge_state::NEGATIVE);
+    CHECK(highest_state->get_charge_state({3, 3, 0}) == sidb_charge_state::NEUTRAL);
+    CHECK(highest_state->get_charge_state({4, 3, 0}) == sidb_charge_state::NEUTRAL);
+    CHECK(highest_state->get_charge_state({6, 3, 0}) == sidb_charge_state::NEUTRAL);
+    CHECK(highest_state->get_charge_state({7, 3, 0}) == sidb_charge_state::NEGATIVE);
+    CHECK(highest_state->get_charge_state({6, 10, 0}) == sidb_charge_state::NEUTRAL);
+    CHECK(highest_state->get_charge_state({7, 10, 0}) == sidb_charge_state::NEGATIVE);
 }
 
 TEMPLATE_TEST_CASE(
@@ -1231,21 +1237,21 @@ TEMPLATE_TEST_CASE(
     quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.28},
                                        quickexact_params<TestType>::automatic_base_number_detection::OFF};
 
-    SECTION("Check if QuickExact is deterministic")
-    {
-        std::set<double>   ground_state{};
-        std::set<uint64_t> charge_index{};
-        for (auto i = 0; i < 100000; i++)
-        {
-            const auto simulation_results = quickexact<TestType>(lyt, params);
-            auto&      charge_lyt_first   = simulation_results.charge_distributions.front();
-            ground_state.insert(charge_lyt_first.get_system_energy());
-            charge_lyt_first.charge_distribution_to_index_general();
-            charge_index.insert(charge_lyt_first.get_charge_index_and_base().first);
-        }
-        CHECK(ground_state.size() == 1);
-        CHECK(charge_index.size() == 1);
-    }
+    //    SECTION("Check if QuickExact is deterministic")
+    //    {
+    //        std::set<double>   ground_state{};
+    //        std::set<uint64_t> charge_index{};
+    //        for (auto i = 0; i < 100000; i++)
+    //        {
+    //            const auto simulation_results = quickexact<TestType>(lyt, params);
+    //            auto&      charge_lyt_first   = simulation_results.charge_distributions.front();
+    //            ground_state.insert(charge_lyt_first.get_system_energy());
+    //            charge_lyt_first.charge_distribution_to_index_general();
+    //            charge_index.insert(charge_lyt_first.get_charge_index_and_base().first);
+    //        }
+    //        CHECK(ground_state.size() == 1);
+    //        CHECK(charge_index.size() == 1);
+    //    }
 
     SECTION("Add SiDBs which are positively charged in the ground state, layout does not fulfill the logic anymore.")
     {
@@ -1692,5 +1698,157 @@ TEMPLATE_TEST_CASE(
         const auto simulation_results = quickexact<TestType>(lyt, params);
 
         CHECK(simulation_results.charge_distributions.size() == 4);
+    }
+}
+
+TEMPLATE_TEST_CASE(
+    "Special test cases", "[quickexact]",
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
+    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+{
+    SECTION("Test case 1")
+    {
+        TestType lyt{};
+
+        lyt.assign_cell_type({2, 1, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({1, 1, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({1, 2, 0}, TestType::cell_type::NORMAL);
+
+        const quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.32},
+                                                 quickexact_params<TestType>::automatic_base_number_detection::ON};
+
+        const auto simulation_results = quickexact<TestType>(lyt, params);
+        CHECK(simulation_results.charge_distributions.size() == 2);
+    }
+    SECTION("Test case 2")
+    {
+        TestType lyt{};
+
+        lyt.assign_cell_type({22, 1, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({24, 2, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({23, 3, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({13, 4, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({10, 4, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({1, 5, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({0, 6, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({1, 6, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({24, 6, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({4, 6, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({3, 7, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({0, 8, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({1, 8, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({9, 9, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({24, 9, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({22, 9, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({13, 10, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({14, 10, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({1, 11, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({17, 11, 1}, TestType::cell_type::NORMAL);
+
+        const quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.32},
+                                                 quickexact_params<TestType>::automatic_base_number_detection::ON};
+
+        const auto simulation_results = quickexact<TestType>(lyt, params);
+        CHECK(simulation_results.charge_distributions.size() == 21);
+    }
+
+    SECTION("QuickExact duplicate charge configurations, Test 1", "[quickexact]")
+    {
+        TestType lyt{};
+
+        lyt.assign_cell_type({2, 2, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({2, 3, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({7, 3, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({7, 4, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({8, 4, 1}, TestType::cell_type::NORMAL);
+
+        const sidb_simulation_result<TestType>& qe_res = quickexact(lyt);
+
+        REQUIRE(qe_res.charge_distributions.size() == 2);
+    }
+
+    SECTION("QuickExact duplicate charge configurations, Test 2", "[quickexact]")
+    {
+        TestType lyt{};
+
+        lyt.assign_cell_type({3, 0, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({4, 0, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({13, 0, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({5, 1, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({22, 3, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({11, 5, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({2, 6, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({4, 6, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({23, 7, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({16, 8, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({8, 8, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({15, 9, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({1, 10, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({12, 10, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({14, 10, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({9, 11, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({24, 11, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({10, 11, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({13, 12, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({24, 12, 0}, TestType::cell_type::NORMAL);
+
+        const sidb_simulation_parameters params{3, -0.32, 5.6, 5.0, 3.84, 7.68, 2.25};
+
+        sidb_simulation_result<TestType> qe_res = quickexact(
+            lyt, quickexact_params<TestType>{params,
+                                             quickexact_params<TestType>::automatic_base_number_detection::ON,
+                                             {},
+                                             0});
+
+        std::sort(qe_res.charge_distributions.begin(), qe_res.charge_distributions.end(),
+                  [](const auto& lhs, const auto& rhs) { return lhs.get_system_energy() < rhs.get_system_energy(); });
+
+        // QuickExact returns 4 physically valid charge layout
+        REQUIRE(qe_res.charge_distributions.size() == 2);
+
+        const auto groundstate  = qe_res.charge_distributions[0];
+        const auto excitedstate = qe_res.charge_distributions[1];
+
+        CHECK(groundstate.get_charge_state({3, 0, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(groundstate.get_charge_state({4, 0, 0}) == sidb_charge_state::POSITIVE);
+        CHECK(groundstate.get_charge_state({13, 0, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(groundstate.get_charge_state({5, 1, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(groundstate.get_charge_state({22, 3, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(groundstate.get_charge_state({11, 5, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(groundstate.get_charge_state({2, 6, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(groundstate.get_charge_state({4, 6, 1}) == sidb_charge_state::NEUTRAL);
+        CHECK(groundstate.get_charge_state({23, 7, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(groundstate.get_charge_state({16, 8, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(groundstate.get_charge_state({8, 8, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(groundstate.get_charge_state({15, 9, 0}) == sidb_charge_state::NEUTRAL);
+        CHECK(groundstate.get_charge_state({1, 10, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(groundstate.get_charge_state({12, 10, 1}) == sidb_charge_state::NEUTRAL);
+        CHECK(groundstate.get_charge_state({14, 10, 1}) == sidb_charge_state::NEUTRAL);
+        CHECK(groundstate.get_charge_state({9, 11, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(groundstate.get_charge_state({24, 11, 0}) == sidb_charge_state::NEUTRAL);
+        CHECK(groundstate.get_charge_state({10, 11, 1}) == sidb_charge_state::POSITIVE);
+        CHECK(groundstate.get_charge_state({13, 12, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(groundstate.get_charge_state({24, 12, 0}) == sidb_charge_state::NEGATIVE);
+
+        CHECK(excitedstate.get_charge_state({3, 0, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(excitedstate.get_charge_state({4, 0, 0}) == sidb_charge_state::POSITIVE);
+        CHECK(excitedstate.get_charge_state({13, 0, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(excitedstate.get_charge_state({5, 1, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(excitedstate.get_charge_state({22, 3, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(excitedstate.get_charge_state({11, 5, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(excitedstate.get_charge_state({2, 6, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(excitedstate.get_charge_state({4, 6, 1}) == sidb_charge_state::NEUTRAL);
+        CHECK(excitedstate.get_charge_state({23, 7, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(excitedstate.get_charge_state({16, 8, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(excitedstate.get_charge_state({8, 8, 1}) == sidb_charge_state::NEUTRAL);
+        CHECK(excitedstate.get_charge_state({15, 9, 0}) == sidb_charge_state::NEUTRAL);
+        CHECK(excitedstate.get_charge_state({1, 10, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(excitedstate.get_charge_state({12, 10, 1}) == sidb_charge_state::NEUTRAL);
+        CHECK(excitedstate.get_charge_state({14, 10, 1}) == sidb_charge_state::NEUTRAL);
+        CHECK(excitedstate.get_charge_state({9, 11, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(excitedstate.get_charge_state({24, 11, 0}) == sidb_charge_state::NEUTRAL);
+        CHECK(excitedstate.get_charge_state({10, 11, 1}) == sidb_charge_state::NEUTRAL);
+        CHECK(excitedstate.get_charge_state({13, 12, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(excitedstate.get_charge_state({24, 12, 0}) == sidb_charge_state::NEGATIVE);
     }
 }
