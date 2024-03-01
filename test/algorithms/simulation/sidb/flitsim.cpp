@@ -2,19 +2,20 @@
 // Created by Willem Lambooy on 29/02/2024.
 //
 
-#include "fiction/algorithms/simulation/sidb/flitsim.hpp"
-
 #include <catch2/catch_template_test_macros.hpp>
+#include <catch2/catch_test_macros.hpp>
 
-#include "fiction/algorithms/simulation/sidb/quickexact.hpp"
-#include "fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp"
-#include "fiction/layouts/cartesian_layout.hpp"
-#include "fiction/layouts/cell_level_layout.hpp"
-#include "fiction/layouts/clocked_layout.hpp"
-#include "fiction/layouts/coordinates.hpp"
-#include "fiction/technology/cell_technologies.hpp"
-#include "fiction/technology/charge_distribution_surface.hpp"
-#include "fiction/types.hpp"
+#include <fiction/algorithms/simulation/sidb/flitsim.hpp>
+#include <fiction/algorithms/simulation/sidb/quickexact.hpp>
+#incldue < fiction / algorithms / simulation / sidb / sidb_simulation_parameters>
+#include <fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp>
+#include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/layouts/cell_level_layout.hpp>
+#include <fiction/layouts/clocked_layout.hpp>
+#include <fiction/layouts/coordinates.hpp>
+#include <fiction/technology/cell_technologies.hpp>
+#include <fiction/technology/charge_distribution_surface.hpp>
+#include <fiction/types.hpp>
 
 using namespace fiction;
 
@@ -59,7 +60,7 @@ static void print_test_case(const std::vector<charge_distribution_surface<sidb_l
     std::cout << "using sidb_lyt = sidb_cell_clk_lyt_siqad;\nsidb_lyt lyt{};\n\n";
     for (const cell<sidb_lyt>& c : fs_cls[0].get_sidb_order())
     {
-        std::cout << "lyt.assign_cell_type({" << c.x << ", " << c.y << ", " << c.z
+        std::cout << "lyt.assign_cell_type({" << c.x << ", " << c.y << ", " << static_cast<uint64_t>(c.z)
                   << "}, sidb_lyt::cell_type::NORMAL);\n";
     }
 
@@ -72,7 +73,7 @@ static void print_test_case(const std::vector<charge_distribution_surface<sidb_l
 
         for (const cell<sidb_lyt>& c : cl.get_sidb_order())
         {
-            std::cout << "charge_lyt.assign_charge_state({" << c.x << ", " << c.y << ", " << c.z
+            std::cout << "charge_lyt.assign_charge_state({" << c.x << ", " << c.y << ", " << static_cast<uint64_t>(c.z)
                       << "}, sidb_charge_state::"
                       << (cl.get_charge_state(c) == sidb_charge_state::NEGATIVE ? "NEGATIVE" :
                           cl.get_charge_state(c) == sidb_charge_state::POSITIVE ? "POSITIVE" :
@@ -168,4 +169,574 @@ TEST_CASE("Tiny fail 3", "[ground-state-space]")
     //        const bool verification = verify_ground_state_space_result(cl, top);
     //        CHECK(verification);
     //    }
+}
+
+#include <fiction/algorithms/simulation/sidb/quickexact.hpp>
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters>
+#include <fiction/technology/charge_distribution_surface.hpp>
+#include <fiction/types.hpp>
+
+TEST_CASE("21 Physically valid charge distributions for the same layout not detected by QuickExact", "[quickexact]")
+{
+    using sidb_lyt = sidb_cell_clk_lyt_siqad;
+    sidb_lyt lyt{};
+
+    lyt.assign_cell_type({22, 1, 0}, sidb_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 2, 1}, sidb_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({23, 3, 1}, sidb_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({13, 4, 0}, sidb_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({10, 4, 1}, sidb_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({1, 5, 1}, sidb_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({0, 6, 0}, sidb_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({1, 6, 0}, sidb_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 6, 0}, sidb_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({4, 6, 1}, sidb_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({3, 7, 1}, sidb_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({0, 8, 1}, sidb_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({1, 8, 1}, sidb_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({9, 9, 0}, sidb_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 9, 0}, sidb_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({22, 9, 1}, sidb_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({13, 10, 0}, sidb_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 10, 0}, sidb_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({1, 11, 1}, sidb_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({17, 11, 1}, sidb_lyt::cell_type::NORMAL);
+
+    // not needed, but I'm giving all default parameters explicitly for the sake of the test
+    const sidb_simulation_parameters params{3, -0.32, 5.6, 5.0, 3.84, 7.68, 2.25};
+
+    charge_distribution_surface charge_lyt{lyt};
+    charge_lyt.assign_physical_parameters(params);
+
+    charge_lyt.assign_charge_state({22, 1, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 2, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({23, 3, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({13, 4, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({10, 4, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({1, 5, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({0, 6, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({1, 6, 0}, sidb_charge_state::POSITIVE);
+    charge_lyt.assign_charge_state({24, 6, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({4, 6, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({3, 7, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({0, 8, 1}, sidb_charge_state::POSITIVE);
+    charge_lyt.assign_charge_state({1, 8, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({9, 9, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 9, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({22, 9, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({13, 10, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({14, 10, 0}, sidb_charge_state::POSITIVE);
+    charge_lyt.assign_charge_state({1, 11, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({17, 11, 1}, sidb_charge_state::NEGATIVE);
+
+    charge_lyt.update_after_charge_change();
+
+    CHECK(charge_lyt.is_physically_valid());
+
+    charge_lyt.assign_charge_state({22, 1, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 2, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({23, 3, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({13, 4, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({10, 4, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({1, 5, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({0, 6, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({1, 6, 0}, sidb_charge_state::POSITIVE);
+    charge_lyt.assign_charge_state({24, 6, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({4, 6, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({3, 7, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({0, 8, 1}, sidb_charge_state::POSITIVE);
+    charge_lyt.assign_charge_state({1, 8, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({9, 9, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 9, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({22, 9, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({13, 10, 0}, sidb_charge_state::POSITIVE);
+    charge_lyt.assign_charge_state({14, 10, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({1, 11, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({17, 11, 1}, sidb_charge_state::NEGATIVE);
+
+    charge_lyt.update_after_charge_change();
+
+    CHECK(charge_lyt.is_physically_valid());
+
+    charge_lyt.assign_charge_state({22, 1, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 2, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({23, 3, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({13, 4, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({10, 4, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({1, 5, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({0, 6, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({1, 6, 0}, sidb_charge_state::POSITIVE);
+    charge_lyt.assign_charge_state({24, 6, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({4, 6, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({3, 7, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({0, 8, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({1, 8, 1}, sidb_charge_state::POSITIVE);
+    charge_lyt.assign_charge_state({9, 9, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 9, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({22, 9, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({13, 10, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({14, 10, 0}, sidb_charge_state::POSITIVE);
+    charge_lyt.assign_charge_state({1, 11, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({17, 11, 1}, sidb_charge_state::NEGATIVE);
+
+    charge_lyt.update_after_charge_change();
+
+    CHECK(charge_lyt.is_physically_valid());
+
+    charge_lyt.assign_charge_state({22, 1, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 2, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({23, 3, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({13, 4, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({10, 4, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({1, 5, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({0, 6, 0}, sidb_charge_state::POSITIVE);
+    charge_lyt.assign_charge_state({1, 6, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 6, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({4, 6, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({3, 7, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({0, 8, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({1, 8, 1}, sidb_charge_state::POSITIVE);
+    charge_lyt.assign_charge_state({9, 9, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 9, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({22, 9, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({13, 10, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({14, 10, 0}, sidb_charge_state::POSITIVE);
+    charge_lyt.assign_charge_state({1, 11, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({17, 11, 1}, sidb_charge_state::NEGATIVE);
+
+    charge_lyt.update_after_charge_change();
+
+    CHECK(charge_lyt.is_physically_valid());
+
+    charge_lyt.assign_charge_state({22, 1, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 2, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({23, 3, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({13, 4, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({10, 4, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({1, 5, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({0, 6, 0}, sidb_charge_state::POSITIVE);
+    charge_lyt.assign_charge_state({1, 6, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 6, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({4, 6, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({3, 7, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({0, 8, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({1, 8, 1}, sidb_charge_state::POSITIVE);
+    charge_lyt.assign_charge_state({9, 9, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 9, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({22, 9, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({13, 10, 0}, sidb_charge_state::POSITIVE);
+    charge_lyt.assign_charge_state({14, 10, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({1, 11, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({17, 11, 1}, sidb_charge_state::NEGATIVE);
+
+    charge_lyt.update_after_charge_change();
+
+    CHECK(charge_lyt.is_physically_valid());
+
+    charge_lyt.assign_charge_state({22, 1, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 2, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({23, 3, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({13, 4, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({10, 4, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({1, 5, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({0, 6, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({1, 6, 0}, sidb_charge_state::POSITIVE);
+    charge_lyt.assign_charge_state({24, 6, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({4, 6, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({3, 7, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({0, 8, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({1, 8, 1}, sidb_charge_state::POSITIVE);
+    charge_lyt.assign_charge_state({9, 9, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 9, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({22, 9, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({13, 10, 0}, sidb_charge_state::POSITIVE);
+    charge_lyt.assign_charge_state({14, 10, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({1, 11, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({17, 11, 1}, sidb_charge_state::NEGATIVE);
+
+    charge_lyt.update_after_charge_change();
+
+    CHECK(charge_lyt.is_physically_valid());
+
+    charge_lyt.assign_charge_state({22, 1, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 2, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({23, 3, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({13, 4, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({10, 4, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({1, 5, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({0, 6, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({1, 6, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({24, 6, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({4, 6, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({3, 7, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({0, 8, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({1, 8, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({9, 9, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 9, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({22, 9, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({13, 10, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({14, 10, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({1, 11, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({17, 11, 1}, sidb_charge_state::NEGATIVE);
+
+    charge_lyt.update_after_charge_change();
+
+    CHECK(charge_lyt.is_physically_valid());
+
+    charge_lyt.assign_charge_state({22, 1, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 2, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({23, 3, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({13, 4, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({10, 4, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({1, 5, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({0, 6, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({1, 6, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({24, 6, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({4, 6, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({3, 7, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({0, 8, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({1, 8, 1}, sidb_charge_state::POSITIVE);
+    charge_lyt.assign_charge_state({9, 9, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 9, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({22, 9, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({13, 10, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({14, 10, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({1, 11, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({17, 11, 1}, sidb_charge_state::NEGATIVE);
+
+    charge_lyt.update_after_charge_change();
+
+    CHECK(charge_lyt.is_physically_valid());
+
+    charge_lyt.assign_charge_state({22, 1, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 2, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({23, 3, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({13, 4, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({10, 4, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({1, 5, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({0, 6, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({1, 6, 0}, sidb_charge_state::POSITIVE);
+    charge_lyt.assign_charge_state({24, 6, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({4, 6, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({3, 7, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({0, 8, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({1, 8, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({9, 9, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 9, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({22, 9, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({13, 10, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({14, 10, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({1, 11, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({17, 11, 1}, sidb_charge_state::NEGATIVE);
+
+    charge_lyt.update_after_charge_change();
+
+    CHECK(charge_lyt.is_physically_valid());
+
+    charge_lyt.assign_charge_state({22, 1, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 2, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({23, 3, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({13, 4, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({10, 4, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({1, 5, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({0, 6, 0}, sidb_charge_state::POSITIVE);
+    charge_lyt.assign_charge_state({1, 6, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 6, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({4, 6, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({3, 7, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({0, 8, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({1, 8, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({9, 9, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 9, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({22, 9, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({13, 10, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({14, 10, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({1, 11, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({17, 11, 1}, sidb_charge_state::NEGATIVE);
+
+    charge_lyt.update_after_charge_change();
+
+    CHECK(charge_lyt.is_physically_valid());
+
+    charge_lyt.assign_charge_state({22, 1, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 2, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({23, 3, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({13, 4, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({10, 4, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({1, 5, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({0, 6, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({1, 6, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({24, 6, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({4, 6, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({3, 7, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({0, 8, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({1, 8, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({9, 9, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 9, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({22, 9, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({13, 10, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({14, 10, 0}, sidb_charge_state::POSITIVE);
+    charge_lyt.assign_charge_state({1, 11, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({17, 11, 1}, sidb_charge_state::NEGATIVE);
+
+    charge_lyt.update_after_charge_change();
+
+    CHECK(charge_lyt.is_physically_valid());
+
+    charge_lyt.assign_charge_state({22, 1, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 2, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({23, 3, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({13, 4, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({10, 4, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({1, 5, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({0, 6, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({1, 6, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({24, 6, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({4, 6, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({3, 7, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({0, 8, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({1, 8, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({9, 9, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 9, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({22, 9, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({13, 10, 0}, sidb_charge_state::POSITIVE);
+    charge_lyt.assign_charge_state({14, 10, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({1, 11, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({17, 11, 1}, sidb_charge_state::NEGATIVE);
+
+    charge_lyt.update_after_charge_change();
+
+    CHECK(charge_lyt.is_physically_valid());
+
+    charge_lyt.assign_charge_state({22, 1, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 2, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({23, 3, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({13, 4, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({10, 4, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({1, 5, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({0, 6, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({1, 6, 0}, sidb_charge_state::POSITIVE);
+    charge_lyt.assign_charge_state({24, 6, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({4, 6, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({3, 7, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({0, 8, 1}, sidb_charge_state::POSITIVE);
+    charge_lyt.assign_charge_state({1, 8, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({9, 9, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 9, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({22, 9, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({13, 10, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({14, 10, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({1, 11, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({17, 11, 1}, sidb_charge_state::NEGATIVE);
+
+    charge_lyt.update_after_charge_change();
+
+    CHECK(charge_lyt.is_physically_valid());
+
+    charge_lyt.assign_charge_state({22, 1, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 2, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({23, 3, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({13, 4, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({10, 4, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({1, 5, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({0, 6, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({1, 6, 0}, sidb_charge_state::POSITIVE);
+    charge_lyt.assign_charge_state({24, 6, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({4, 6, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({3, 7, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({0, 8, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({1, 8, 1}, sidb_charge_state::POSITIVE);
+    charge_lyt.assign_charge_state({9, 9, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 9, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({22, 9, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({13, 10, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({14, 10, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({1, 11, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({17, 11, 1}, sidb_charge_state::NEGATIVE);
+
+    charge_lyt.update_after_charge_change();
+
+    CHECK(charge_lyt.is_physically_valid());
+
+    charge_lyt.assign_charge_state({22, 1, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 2, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({23, 3, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({13, 4, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({10, 4, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({1, 5, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({0, 6, 0}, sidb_charge_state::POSITIVE);
+    charge_lyt.assign_charge_state({1, 6, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 6, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({4, 6, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({3, 7, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({0, 8, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({1, 8, 1}, sidb_charge_state::POSITIVE);
+    charge_lyt.assign_charge_state({9, 9, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 9, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({22, 9, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({13, 10, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({14, 10, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({1, 11, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({17, 11, 1}, sidb_charge_state::NEGATIVE);
+
+    charge_lyt.update_after_charge_change();
+
+    CHECK(charge_lyt.is_physically_valid());
+
+    charge_lyt.assign_charge_state({22, 1, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 2, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({23, 3, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({13, 4, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({10, 4, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({1, 5, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({0, 6, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({1, 6, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({24, 6, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({4, 6, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({3, 7, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({0, 8, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({1, 8, 1}, sidb_charge_state::POSITIVE);
+    charge_lyt.assign_charge_state({9, 9, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 9, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({22, 9, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({13, 10, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({14, 10, 0}, sidb_charge_state::POSITIVE);
+    charge_lyt.assign_charge_state({1, 11, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({17, 11, 1}, sidb_charge_state::NEGATIVE);
+
+    charge_lyt.update_after_charge_change();
+
+    CHECK(charge_lyt.is_physically_valid());
+
+    charge_lyt.assign_charge_state({22, 1, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 2, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({23, 3, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({13, 4, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({10, 4, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({1, 5, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({0, 6, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({1, 6, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({24, 6, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({4, 6, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({3, 7, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({0, 8, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({1, 8, 1}, sidb_charge_state::POSITIVE);
+    charge_lyt.assign_charge_state({9, 9, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 9, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({22, 9, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({13, 10, 0}, sidb_charge_state::POSITIVE);
+    charge_lyt.assign_charge_state({14, 10, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({1, 11, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({17, 11, 1}, sidb_charge_state::NEGATIVE);
+
+    charge_lyt.update_after_charge_change();
+
+    CHECK(charge_lyt.is_physically_valid());
+
+    charge_lyt.assign_charge_state({22, 1, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 2, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({23, 3, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({13, 4, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({10, 4, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({1, 5, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({0, 6, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({1, 6, 0}, sidb_charge_state::POSITIVE);
+    charge_lyt.assign_charge_state({24, 6, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({4, 6, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({3, 7, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({0, 8, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({1, 8, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({9, 9, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 9, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({22, 9, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({13, 10, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({14, 10, 0}, sidb_charge_state::POSITIVE);
+    charge_lyt.assign_charge_state({1, 11, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({17, 11, 1}, sidb_charge_state::NEGATIVE);
+
+    charge_lyt.update_after_charge_change();
+
+    CHECK(charge_lyt.is_physically_valid());
+
+    charge_lyt.assign_charge_state({22, 1, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 2, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({23, 3, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({13, 4, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({10, 4, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({1, 5, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({0, 6, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({1, 6, 0}, sidb_charge_state::POSITIVE);
+    charge_lyt.assign_charge_state({24, 6, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({4, 6, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({3, 7, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({0, 8, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({1, 8, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({9, 9, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 9, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({22, 9, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({13, 10, 0}, sidb_charge_state::POSITIVE);
+    charge_lyt.assign_charge_state({14, 10, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({1, 11, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({17, 11, 1}, sidb_charge_state::NEGATIVE);
+
+    charge_lyt.update_after_charge_change();
+
+    CHECK(charge_lyt.is_physically_valid());
+
+    charge_lyt.assign_charge_state({22, 1, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 2, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({23, 3, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({13, 4, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({10, 4, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({1, 5, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({0, 6, 0}, sidb_charge_state::POSITIVE);
+    charge_lyt.assign_charge_state({1, 6, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 6, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({4, 6, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({3, 7, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({0, 8, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({1, 8, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({9, 9, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 9, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({22, 9, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({13, 10, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({14, 10, 0}, sidb_charge_state::POSITIVE);
+    charge_lyt.assign_charge_state({1, 11, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({17, 11, 1}, sidb_charge_state::NEGATIVE);
+
+    charge_lyt.update_after_charge_change();
+
+    CHECK(charge_lyt.is_physically_valid());
+
+    charge_lyt.assign_charge_state({22, 1, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 2, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({23, 3, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({13, 4, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({10, 4, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({1, 5, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({0, 6, 0}, sidb_charge_state::POSITIVE);
+    charge_lyt.assign_charge_state({1, 6, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 6, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({4, 6, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({3, 7, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({0, 8, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({1, 8, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({9, 9, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({24, 9, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({22, 9, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({13, 10, 0}, sidb_charge_state::POSITIVE);
+    charge_lyt.assign_charge_state({14, 10, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({1, 11, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({17, 11, 1}, sidb_charge_state::NEGATIVE);
+
+    charge_lyt.update_after_charge_change();
+
+    CHECK(charge_lyt.is_physically_valid());
+
+    // QuickExact finds 0 physically valid charge distributions for this layout
+    CHECK(quickexact(lyt, quickexact_params<sidb_lyt>{params,
+                                                      quickexact_params<sidb_lyt>::automatic_base_number_detection::ON,
+                                                      {},
+                                                      0})
+              .charge_distributions.size() == 0);
 }
