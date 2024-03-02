@@ -9,15 +9,15 @@
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/utils/hash.hpp"
 
+#include <btree.h>
+#include <phmap.h>
+
 #include <algorithm>
 #include <array>
 #include <cstdint>
 #include <initializer_list>
-#include <map>
+#include <limits>
 #include <memory>
-#include <set>
-#include <unordered_map>
-#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -60,23 +60,34 @@ enum class sidb_cluster_hierarchy_linkage_method
 struct sidb_binary_cluster_hierarchy_node;
 using sidb_binary_cluster_hierarchy_node_ptr = std::unique_ptr<sidb_binary_cluster_hierarchy_node>;
 
+/*
+ * The struct used to store a binary cluster hierarchy that may be used to store the result of the hierarchical
+ * clustering returned by ALGLIB functionality.
+ */
 struct sidb_binary_cluster_hierarchy_node
 {
-    std::unordered_set<uint64_t>                          c;
+    phmap::flat_hash_set<uint64_t>                        c;
     std::array<sidb_binary_cluster_hierarchy_node_ptr, 2> sub;
 
-    sidb_binary_cluster_hierarchy_node(const std::unordered_set<uint64_t>&                   c_,
+    sidb_binary_cluster_hierarchy_node(const phmap::flat_hash_set<uint64_t>&                 c_,
                                        std::array<sidb_binary_cluster_hierarchy_node_ptr, 2> sub_) noexcept :
             c{c_},
             sub{std::move(sub_)}
     {}
 };
 
+/*
+ * This function performs the ALGLIB agglomerative clustering algorithm for a given SiDB layout. By default, the cluster
+ * are created by a minimal positional variance heuristic, also known as Ward's method.
+ */
 template <typename Lyt>
 static sidb_binary_cluster_hierarchy_node
 sidb_cluster_hierarchy(Lyt& lyt, sidb_cluster_hierarchy_linkage_method linkage_method =
                                      sidb_cluster_hierarchy_linkage_method::MINIMUM_VARIANCE) noexcept
 {
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+
     if (lyt.num_cells() == 0)
     {
         return sidb_binary_cluster_hierarchy_node{{}, {nullptr, nullptr}};
@@ -101,7 +112,7 @@ sidb_cluster_hierarchy(Lyt& lyt, sidb_cluster_hierarchy_linkage_method linkage_m
     alglib::ahcreport rep;
     clusterizerrunahc(s, rep);
 
-    std::map<uint64_t, std::unique_ptr<sidb_binary_cluster_hierarchy_node>> nodes{};
+    phmap::flat_hash_map<uint64_t, std::unique_ptr<sidb_binary_cluster_hierarchy_node>> nodes{};
 
     // build hierarchy from N - 1 merges represented in rep.z
     for (int i = 0; i < rep.npoints - 1; ++i)
@@ -113,14 +124,15 @@ sidb_cluster_hierarchy(Lyt& lyt, sidb_cluster_hierarchy_linkage_method linkage_m
             if (cs[c] < charge_lyt.num_cells())
             {
                 nodes[cs[c]] = std::make_unique<sidb_binary_cluster_hierarchy_node>(
-                    std::unordered_set{cs[c]}, std::array<sidb_binary_cluster_hierarchy_node_ptr, 2>{nullptr, nullptr});
+                    phmap::flat_hash_set<uint64_t>{cs[c]},
+                    std::array<sidb_binary_cluster_hierarchy_node_ptr, 2>{nullptr, nullptr});
             }
         }
 
         // rep.z assigns each new cluster to N + i
         const uint64_t new_n = charge_lyt.num_cells() + static_cast<uint64_t>(i);
 
-        std::unordered_set<uint64_t> set_union{};
+        phmap::flat_hash_set<uint64_t> set_union{};
         std::set_union(nodes.at(cs[0])->c.cbegin(), nodes.at(cs[0])->c.cend(), nodes.at(cs[1])->c.cbegin(),
                        nodes.at(cs[1])->c.cend(), std::inserter(set_union, set_union.begin()));
 
@@ -137,16 +149,20 @@ sidb_cluster_hierarchy(Lyt& lyt, sidb_cluster_hierarchy_linkage_method linkage_m
 struct sidb_cluster;
 using sidb_cluster_ptr = std::shared_ptr<sidb_cluster>;
 
-struct sidb_cluster_charge_state;
-
-static constexpr inline uint64_t get_cluster_size(const sidb_cluster_ptr& c) noexcept;
-
+/*
+ * A receptor state pairs the potential recepting cluster with the identifier of the SiDB
+ */
 struct sidb_cluster_receptor_state
 {
     const sidb_cluster_ptr& cluster;
     const uint64_t          sidb_ix;
 };
 
+static constexpr inline uint64_t get_cluster_size(const sidb_cluster_ptr& c) noexcept;
+
+/*
+ * A projector state pairs the potential projecting cluster with the associated multiset charge configuration.
+ */
 struct sidb_cluster_projector_state
 {
     const sidb_cluster_ptr& cluster;
@@ -162,33 +178,81 @@ struct sidb_cluster_projector_state
             default: return get_cluster_size(cluster) - (multiset_conf >> 32) - (multiset_conf & 0xFFFFFFFF);
         }
     }
-
-    constexpr inline sidb_cluster_receptor_state to_receptor_state(const uint64_t sidb_ix) const noexcept
-    {
-        return sidb_cluster_receptor_state{cluster, sidb_ix};
-    }
 };
+
+enum class bound_direction : uint8_t
+{
+    LOWER = 0,
+    UPPER
+};
+
+template <bound_direction bound>
+static constexpr inline double potential_bound_top() noexcept
+{
+    if constexpr (bound == bound_direction::LOWER)
+    {
+        return std::numeric_limits<double>::infinity();
+    }
+    else if constexpr (bound == bound_direction::UPPER)
+    {
+        return -std::numeric_limits<double>::infinity();
+    }
+}
+
+template <bound_direction bound>
+static constexpr inline void take_meet_of_potential_bounds(double& a, const double b) noexcept
+{
+    if constexpr (bound == bound_direction::LOWER)
+    {
+        a = std::min(a, b);
+    }
+    else if constexpr (bound == bound_direction::UPPER)
+    {
+        a = std::max(a, b);
+    }
+}
 
 static inline uint64_t get_singleton_sidb_ix(const sidb_cluster_ptr& c) noexcept;
 
-using intra_cluster_pot_bounds = std::unordered_map<uint64_t, std::array<double, 2>>;
-using sidb_cluster_charge_state_composition =
-    std::vector<std::pair<sidb_cluster_projector_state, intra_cluster_pot_bounds>>;
+using intra_cluster_potential_bounds = phmap::flat_hash_map<uint64_t, std::array<double, 2>>;
+
+struct sidb_cluster_state
+{
+    const sidb_cluster_projector_state proj_st;
+    intra_cluster_potential_bounds     internal_pot_bounds{};
+
+    explicit sidb_cluster_state(const sidb_cluster_ptr& singleton, const uint64_t multiset_conf,
+                                [[maybe_unused]] bool is_singleton) noexcept :
+            proj_st{singleton, multiset_conf},
+            internal_pot_bounds{{get_singleton_sidb_ix(singleton), std::array{0.0, 0.0}}}
+    {}
+
+    explicit sidb_cluster_state(const sidb_cluster_ptr& c, const uint64_t multiset_conf) noexcept :
+            proj_st{c, multiset_conf}
+    {}
+
+    constexpr inline void set_pot_bounds(const uint64_t sidb_ix, const double min, const double max) noexcept
+    {
+        internal_pot_bounds[sidb_ix][static_cast<uint8_t>(bound_direction::LOWER)] = min;
+        internal_pot_bounds[sidb_ix][static_cast<uint8_t>(bound_direction::UPPER)] = max;
+    }
+};
+
+using sidb_cluster_state_composition = std::vector<sidb_cluster_state>;
 
 struct sidb_cluster_charge_state
 {
     uint64_t neg_count : 32;
     uint64_t pos_count : 32;
 
-    mutable std::vector<sidb_cluster_charge_state_composition> compositions{};
+    mutable std::vector<sidb_cluster_state_composition> compositions{};
 
     explicit sidb_cluster_charge_state() noexcept : neg_count{0}, pos_count{0} {}
 
     explicit sidb_cluster_charge_state(const sidb_charge_state cs, const sidb_cluster_ptr& singleton) noexcept :
             neg_count{cs == sidb_charge_state::NEGATIVE},
             pos_count{cs == sidb_charge_state::POSITIVE},
-            compositions{{{sidb_cluster_projector_state{singleton, static_cast<uint64_t>(*this)},
-                           intra_cluster_pot_bounds{{get_singleton_sidb_ix(singleton), std::array{0.0, 0.0}}}}}}
+            compositions{{sidb_cluster_state{singleton, static_cast<uint64_t>(*this), true}}}
     {}
 
     explicit sidb_cluster_charge_state(const uint64_t m) noexcept :
@@ -255,38 +319,6 @@ static constexpr inline sidb_charge_state singleton_multiset_conf_to_charge_stat
     return sign_to_charge_state(static_cast<int8_t>(static_cast<uint32_t>(m) - (static_cast<uint32_t>(m) < m)));
 }
 
-enum class bound_direction : uint8_t
-{
-    LOWER = 0,
-    UPPER
-};
-
-template <bound_direction bound>
-static constexpr inline double potential_bound_top() noexcept
-{
-    if constexpr (bound == bound_direction::LOWER)
-    {
-        return std::numeric_limits<double>::infinity();
-    }
-    else if constexpr (bound == bound_direction::UPPER)
-    {
-        return -std::numeric_limits<double>::infinity();
-    }
-}
-
-template <bound_direction bound>
-static constexpr inline void take_meet_of_potential_bounds(double& a, const double b) noexcept
-{
-    if constexpr (bound == bound_direction::LOWER)
-    {
-        a = std::min(a, b);
-    }
-    else if constexpr (bound == bound_direction::UPPER)
-    {
-        a = std::max(a, b);
-    }
-}
-
 struct potential_projection
 {
     double   V{0.0};
@@ -314,86 +346,84 @@ struct potential_projection
     }
 };
 
-struct potential_projection_orders
+struct potential_projection_order
 {
-    using pot_proj_order           = std::set<potential_projection>;
-    using pot_proj_order_onto_sidb = std::unordered_map<uint64_t, std::set<potential_projection>>;
+    using pot_proj_order = phmap::btree_set<potential_projection>;
 
     // 0 : NEG ; 1 : NEUT ; 2 : POS
-    pot_proj_order_onto_sidb order{};
+    pot_proj_order order{};
 
-    explicit potential_projection_orders() noexcept = default;
+    explicit potential_projection_order() noexcept = default;
 
-    explicit potential_projection_orders(const double inter_sidb_pot, const uint64_t onto_sidb_ix) noexcept :
-            order{pot_proj_order_onto_sidb{
-                {onto_sidb_ix, pot_proj_order{potential_projection{-inter_sidb_pot, sidb_charge_state::POSITIVE},
-                                              potential_projection{0.0, sidb_charge_state::NEUTRAL},
-                                              potential_projection{inter_sidb_pot, sidb_charge_state::NEGATIVE}}}}}
+    explicit potential_projection_order(const double inter_sidb_pot) noexcept :
+            order{pot_proj_order{potential_projection{-inter_sidb_pot, sidb_charge_state::POSITIVE},
+                                 potential_projection{0.0, sidb_charge_state::NEUTRAL},
+                                 potential_projection{inter_sidb_pot, sidb_charge_state::NEGATIVE}}}
     {}
 
     template <bound_direction bound>
-    constexpr inline const potential_projection& get(const uint64_t sidb_ix) const noexcept
+    constexpr inline const potential_projection& get() const noexcept
     {
         if constexpr (bound == bound_direction::LOWER)
         {
-            return *order.at(sidb_ix).cbegin();
+            return *order.cbegin();
         }
         else if constexpr (bound == bound_direction::UPPER)
         {
-            return *order.at(sidb_ix).crbegin();
+            return *order.crbegin();
         }
     }
 
     template <bound_direction bound>
-    inline const potential_projection& get_next(const uint64_t sidb_ix) const noexcept
+    inline const potential_projection& get_next() const noexcept
     {
-        const uint64_t bound_m = get<bound>(sidb_ix).M;
+        const uint64_t bound_m = get<bound>().M;
 
         if constexpr (bound == bound_direction::LOWER)
         {
-            return *std::find_if(order.at(sidb_ix).cbegin(), order.at(sidb_ix).cend(),
+            return *std::find_if(order.cbegin(), order.cend(),
                                  [&](const potential_projection& pp) { return pp.M != bound_m; });
         }
         else if constexpr (bound == bound_direction::UPPER)
         {
-            return *std::find_if(order.at(sidb_ix).crbegin(), order.at(sidb_ix).crend(),
+            return *std::find_if(order.crbegin(), order.crend(),
                                  [&](const potential_projection& pp) { return pp.M != bound_m; });
         }
     }
 
     template <bound_direction bound>
-    const potential_projection& get_pot_proj_for_m_conf(const uint64_t m_conf, const uint64_t sidb_ix) const noexcept
+    const potential_projection& get_pot_proj_for_m_conf(const uint64_t m_conf) const noexcept
     {
         if constexpr (bound == bound_direction::LOWER)
         {
-            return *std::find_if(order.at(sidb_ix).cbegin(), order.at(sidb_ix).cend(),
+            return *std::find_if(order.cbegin(), order.cend(),
                                  [&](const potential_projection& pp) { return pp.M == m_conf; });
         }
         else if constexpr (bound == bound_direction::UPPER)
         {
-            return *std::prev(std::find_if(order.at(sidb_ix).crbegin(), order.at(sidb_ix).crend(),
+            return *std::prev(std::find_if(order.crbegin(), order.crend(),
                                            [&](const potential_projection& pp) { return pp.M == m_conf; })
                                   .base(),
                               1);
         }
     }
 
-    void remove_m_conf(const uint64_t m_conf, const uint64_t sidb_ix) noexcept
+    void remove_m_conf(const uint64_t m_conf) noexcept
     {
 
-        for (pot_proj_order::const_iterator it = order.at(sidb_ix).cbegin(); it != order.at(sidb_ix).cend();)
+        for (pot_proj_order::const_iterator it = order.cbegin(); it != order.cend();)
         {
-            it->M == m_conf ? it = order[sidb_ix].erase(it) : ++it;
+            it->M == m_conf ? it = order.erase(it) : ++it;
         }
     }
 
-    constexpr inline void add(const potential_projection& pp, const uint64_t sidb_ix) noexcept
+    constexpr inline void add(const potential_projection& pp) noexcept
     {
-        order[sidb_ix].emplace(pp);
+        order.emplace(pp);
     }
 };
 
-using sidb_cluster_charge_state_space = std::unordered_set<sidb_cluster_charge_state, sidb_cluster_charge_state>;
+using sidb_cluster_charge_state_space = phmap::flat_hash_set<sidb_cluster_charge_state, sidb_cluster_charge_state>;
 
 static constexpr inline uint64_t get_unique_cluster_id(const sidb_cluster_ptr& c) noexcept;
 
@@ -405,7 +435,7 @@ struct sidb_cluster_ptr_hash
     }
 };
 
-using sidb_clustering = std::unordered_set<sidb_cluster_ptr, sidb_cluster_ptr_hash>;
+using sidb_clustering = phmap::flat_hash_set<sidb_cluster_ptr, sidb_cluster_ptr_hash>;
 
 struct sidb_cluster
 {
@@ -414,17 +444,17 @@ struct sidb_cluster
 
     const uid_t uid{0};
 
-    std::unordered_set<sidb_ix> sidbs;
+    phmap::flat_hash_set<sidb_ix> sidbs;
     sidb_clustering             children;
     std::weak_ptr<sidb_cluster> parent{};
 
-    std::unordered_map<uid_t, potential_projection_orders> pot_projs{};
-    std::unordered_map<sidb_ix, std::array<double, 2>>     recv_ext_pot_bounds{};
+    phmap::flat_hash_map<sidb_ix, potential_projection_order> pot_projs{};
+    phmap::flat_hash_map<sidb_ix, std::array<double, 2>>      recv_ext_pot_bounds{};
 
     sidb_cluster_charge_state_space charge_space{};
 
-    explicit sidb_cluster(std::unordered_set<sidb_ix> c, sidb_clustering v, uid_t uid_) noexcept :
-            uid{c.size() == 1 ? *c.cbegin() : std::move(uid_)},
+    explicit sidb_cluster(phmap::flat_hash_set<sidb_ix> c, sidb_clustering v, uid_t uid_) noexcept :
+            uid{c.size() == 1 ? *c.cbegin() : uid_},
             sidbs{std::move(c)},
             children{std::move(v)}
     {}
@@ -515,7 +545,7 @@ static inline uint64_t get_singleton_sidb_ix(const sidb_cluster_ptr& c) noexcept
     return *c->sidbs.cbegin();
 }
 
-static inline std::vector<sidb_cluster_charge_state_composition>
+static inline std::vector<sidb_cluster_state_composition>
 get_projector_state_compositions(const sidb_cluster_projector_state& pst) noexcept
 {
     return pst.cluster->charge_space.find(sidb_cluster_charge_state{pst.multiset_conf})->compositions;

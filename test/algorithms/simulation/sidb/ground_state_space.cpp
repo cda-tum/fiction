@@ -19,11 +19,11 @@
 #include <fiction/types.hpp>
 
 #include <fmt/format.h>
+#include <phmap.h>
 
 #include <algorithm>
 #include <cmath>
 #include <limits>
-#include <unordered_set>
 
 using namespace fiction;
 
@@ -210,43 +210,43 @@ TEMPLATE_TEST_CASE(
     REQUIRE(gss_res.top_cluster->charge_space.cbegin()->compositions.size() == 1);
     REQUIRE(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->size() == 2);
 
-    if (gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin()->first.cluster->sidbs.size() == 3)
+    if (gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin()->proj_st.cluster->sidbs.size() == 3)
     {
-        CHECK(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin()->first.cluster->sidbs ==
-              std::unordered_set{0ul, 1ul, 2ul});
-        CHECK((gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin()->first.multiset_conf >>
+        CHECK(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin()->proj_st.cluster->sidbs ==
+              phmap::flat_hash_set<uint64_t>{0ul, 1ul, 2ul});
+        CHECK((gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin()->proj_st.multiset_conf >>
                32ull) == 2);
-        CHECK(((gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin()->first.multiset_conf
+        CHECK(((gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin()->proj_st.multiset_conf
                 << 32ull) >>
                32ull) == 0);
 
         CHECK(std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)
-                  ->first.cluster->sidbs == std::unordered_set{3ul, 4ul, 5ul, 6ul});
+                  ->proj_st.cluster->sidbs == phmap::flat_hash_set<uint64_t>{3ul, 4ul, 5ul, 6ul});
         CHECK((std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)
-                   ->first.multiset_conf >>
+                   ->proj_st.multiset_conf >>
                32ull) == 3);
         CHECK(((std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)
-                    ->first.multiset_conf
+                    ->proj_st.multiset_conf
                 << 32ull) >>
                32ull) == 0);
     }
     else
     {
         CHECK(std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)
-                  ->first.cluster->sidbs == std::unordered_set{0ul, 1ul, 2ul});
+                  ->proj_st.cluster->sidbs == phmap::flat_hash_set<uint64_t>{0ul, 1ul, 2ul});
         CHECK((std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)
-                   ->first.multiset_conf >>
+                   ->proj_st.multiset_conf >>
                32ull) == 2);
         CHECK(((std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)
-                    ->first.multiset_conf
+                    ->proj_st.multiset_conf
                 << 32ull) >>
                32ull) == 0);
 
-        CHECK(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin()->first.cluster->sidbs ==
-              std::unordered_set{3ul, 4ul, 5ul, 6ul});
-        CHECK((gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin()->first.multiset_conf >>
+        CHECK(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin()->proj_st.cluster->sidbs ==
+              phmap::flat_hash_set<uint64_t>{3ul, 4ul, 5ul, 6ul});
+        CHECK((gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin()->proj_st.multiset_conf >>
                32ull) == 3);
-        CHECK(((gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin()->first.multiset_conf
+        CHECK(((gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin()->proj_st.multiset_conf
                 << 32ull) >>
                32ull) == 0);
     }
@@ -691,7 +691,7 @@ static bool verify_ground_state_space_result(const charge_distribution_surface<s
 
     bool found_charge_conf = false;
 
-    for (const sidb_cluster_charge_state_composition& composition : found_m_conf->compositions)
+    for (const sidb_cluster_state_composition& composition : found_m_conf->compositions)
     {
         bool composition_has_correct_charge_conf = true;
 

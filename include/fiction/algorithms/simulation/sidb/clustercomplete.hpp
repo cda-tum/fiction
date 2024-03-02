@@ -46,7 +46,7 @@ class clustercomplete
     sidb_simulation_result<Lyt> run(const uint64_t validity_witness_partitioning_limit) noexcept
     {
         res.physical_parameters = charge_layout.get_phys_params();
-        res.algorithm_name      = "clustercomplete";
+        res.algorithm_name      = "ClusterComplete";
 
         mockturtle::stopwatch<>::duration time_counter{};
         {
@@ -91,21 +91,19 @@ class clustercomplete
         }
     }
 
-    void
-    add_physically_valid_charge_confs(const sidb_cluster_charge_state_composition& cluster_charge_assignment) noexcept
+    void add_physically_valid_charge_confs(const sidb_cluster_state_composition& cluster_charge_assignment) noexcept
     {
         // check if all clusters are singletons
         if (std::all_of(cluster_charge_assignment.cbegin(), cluster_charge_assignment.cend(),
-                        [](const std::pair<sidb_cluster_projector_state, intra_cluster_pot_bounds>& pst_and_sibling_pot)
-                        { return pst_and_sibling_pot.first.cluster->children.empty(); }))
+                        [](const sidb_cluster_state& cst) { return cst.proj_st.cluster->children.empty(); }))
         {
             charge_distribution_surface charge_layout_copy{charge_layout};
 
-            for (const auto& [pst, _] : cluster_charge_assignment)
+            for (const sidb_cluster_state& cst : cluster_charge_assignment)
             {
                 charge_layout_copy.assign_charge_state_by_cell_index(
-                    get_singleton_sidb_ix(pst.cluster), singleton_multiset_conf_to_charge_state(pst.multiset_conf),
-                    false);
+                    get_singleton_sidb_ix(cst.proj_st.cluster),
+                    singleton_multiset_conf_to_charge_state(cst.proj_st.multiset_conf), false);
             }
 
             charge_layout_copy.update_after_charge_change();
@@ -123,30 +121,31 @@ class clustercomplete
         const sidb_cluster_projector_state max_pst =
             std::max_element(
                 cluster_charge_assignment.cbegin(), cluster_charge_assignment.cend(),
-                [](const auto& pst_and_sibling_pot1, const auto& pst_and_sibling_pot2)
-                { return pst_and_sibling_pot1.first.cluster->size() < pst_and_sibling_pot2.first.cluster->size(); })
-                ->first;
+                             [](const sidb_cluster_state& cst1, const sidb_cluster_state& cst2)
+                             { return cst1.proj_st.cluster->size() < cst2.proj_st.cluster->size(); })
+                ->proj_st;
 
-        sidb_cluster_charge_state_composition cluster_charge_assignment_without_max_cluster{};
-        for (const auto& [pst, _] : cluster_charge_assignment)
+        sidb_cluster_state_composition cluster_charge_assignment_without_max_cluster{};
+        for (const sidb_cluster_state& cst : cluster_charge_assignment)
         {
-            if (pst.cluster != max_pst.cluster)
+            if (cst.proj_st.cluster != max_pst.cluster)
             {
-                cluster_charge_assignment_without_max_cluster.emplace_back(std::make_pair(
-                    sidb_cluster_projector_state{pst.cluster, pst.multiset_conf}, intra_cluster_pot_bounds{}));
+                // do this differently
+                cluster_charge_assignment_without_max_cluster.emplace_back(
+                    sidb_cluster_state{cst.proj_st.cluster, cst.proj_st.multiset_conf});
             }
         }
 
-        for (const sidb_cluster_charge_state_composition& cluster_charge_sub_assignment :
+        for (const sidb_cluster_state_composition& cluster_charge_sub_assignment :
              get_projector_state_compositions(max_pst))
         {
             // do this more efficiently
-            sidb_cluster_charge_state_composition cluster_charge_assignment_unfolded{
+            sidb_cluster_state_composition cluster_charge_assignment_unfolded{
                 cluster_charge_assignment_without_max_cluster};
 
-            for (const auto& sub_pst_and_sibling_pot : cluster_charge_sub_assignment)
+            for (const sidb_cluster_state& sub_cst : cluster_charge_sub_assignment)
             {
-                cluster_charge_assignment_unfolded.emplace_back(std::move(sub_pst_and_sibling_pot));
+                cluster_charge_assignment_unfolded.emplace_back(std::move(sub_cst));
             }
 
             add_physically_valid_charge_confs(cluster_charge_assignment_unfolded);
@@ -184,7 +183,7 @@ class clustercomplete
                     for (uint64_t ix = range.first; ix <= range.second; ++ix)
                     {
                         // iterate over all cluster charge assignments in the multiset charge configuration
-                        for (const sidb_cluster_charge_state_composition& cluster_charge_assignment :
+                        for (const sidb_cluster_state_composition& cluster_charge_assignment :
                              std::next(top_cluster->charge_space.cbegin(), static_cast<int64_t>(ix))->compositions)
                         {
                             add_physically_valid_charge_confs(cluster_charge_assignment);
@@ -212,8 +211,8 @@ class clustercomplete
 template <typename Lyt>
 sidb_simulation_result<Lyt>
 clustercomplete(const Lyt& lyt, const uint64_t gss_witness_partitioning_maximum_cluster_size = 6,
-                const sidb_simulation_parameters& phys_params = sidb_simulation_parameters{},
-                                    const uint64_t available_threads = std::thread::hardware_concurrency()) noexcept
+                const sidb_simulation_parameters& phys_params       = sidb_simulation_parameters{},
+                const uint64_t                    available_threads = std::thread::hardware_concurrency()) noexcept
 {
     return detail::clustercomplete(lyt, phys_params, available_threads)
         .run(gss_witness_partitioning_maximum_cluster_size);

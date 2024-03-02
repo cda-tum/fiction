@@ -8,6 +8,7 @@
 #include <fiction/algorithms/simulation/sidb/clustercomplete.hpp>
 #include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp>
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
@@ -63,9 +64,9 @@ static void print_test_case(const std::vector<charge_distribution_surface<sidb_l
                   << "}, sidb_lyt::cell_type::NORMAL);\n";
     }
 
-    std::cout << "\n\n// not needed, \"\n"
-                 "                 \"but I'm giving all default parameters explicitly for the sake of the test\nconst "
-                 "sidb_simulation_parameters params{3, -0.32, 5.6, 5.0, 3.84, 7.68, 2.25};\n";
+    //    std::cout << "\n\n// not needed, \"\n"
+    //                 "                 \"but I'm giving all default parameters explicitly for the sake of the
+    //                 test\nconst " "sidb_simulation_parameters params{3, -0.32, 5.6, 5.0, 3.84, 7.68, 2.25};\n";
 
     std::cout << "\ncharge_distribution_surface charge_lyt{lyt};\ncharge_lyt.assign_physical_params(params);\n\n";
 
@@ -137,16 +138,47 @@ static void verify_lyts(const std::vector<sidb_lyt>& lyts)
 TEST_CASE("ClusterComplete verification on random layouts with 20 SiDBs", "[clustercomplete]")
 {
 
+    //    const std::pair<cell<sidb_lyt>, cell<sidb_lyt>> layout_dimensions = {cell<sidb_lyt>{0, 0}, cell<sidb_lyt>{10,
+    //    5}};
     const std::pair<cell<sidb_lyt>, cell<sidb_lyt>> layout_dimensions = {cell<sidb_lyt>{0, 0}, cell<sidb_lyt>{24, 12}};
 
     generate_random_sidb_layout_params<sidb_lyt> rlg_ps{};
     rlg_ps.coordinate_pair                    = layout_dimensions;
     rlg_ps.number_of_sidbs                    = 20;
-    rlg_ps.number_of_unique_generated_layouts = 1000;
+    rlg_ps.number_of_unique_generated_layouts = 3000;
 
     const std::vector<sidb_lyt>& lyts = generate_multiple_random_sidb_layouts(sidb_lyt{}, rlg_ps);
 
     verify_lyts(lyts);
+}
+
+TEST_CASE("ClusterComplete runtime tests on random layouts with 40 SiDBs", "[clustercomplete]")
+{
+
+    const std::pair<cell<sidb_lyt>, cell<sidb_lyt>> layout_dimensions = {cell<sidb_lyt>{0, 0}, cell<sidb_lyt>{24, 12}};
+
+    generate_random_sidb_layout_params<sidb_lyt> rlg_ps{};
+    rlg_ps.coordinate_pair                    = layout_dimensions;
+    rlg_ps.number_of_sidbs                    = 40;
+    rlg_ps.number_of_unique_generated_layouts = 100;
+
+    const std::vector<sidb_lyt>& lyts = generate_multiple_random_sidb_layouts(sidb_lyt{}, rlg_ps);
+
+    for (uint64_t i = 0; i < lyts.size(); ++i)
+    {
+        std::cout << "LAYOUT NUMBER: " << i << std::endl;
+
+        const sidb_simulation_result<sidb_lyt> cc_res = clustercomplete(lyts[i], 8, sidb_simulation_parameters{}, 6);
+
+        std::cout << "CLUSTERCOMPLETE LIM=8 RUNTIME: " << cc_res.simulation_runtime.count() << " s" << std::endl;
+        std::cout << "PHYSICALLY VALID CHARGE DISTRIBUTIONS: " << cc_res.charge_distributions.size() << std::endl;
+
+        const sidb_simulation_result<sidb_lyt> cc_res2 = clustercomplete(lyts[i], 12, sidb_simulation_parameters{}, 6);
+
+        std::cout << "CLUSTERCOMPLETE LIM=12 RUNTIME: " << cc_res2.simulation_runtime.count() << " s" << std::endl;
+        std::cout << "PHYSICALLY VALID CHARGE DISTRIBUTIONS: " << cc_res2.charge_distributions.size() << '\n'
+                  << std::endl;
+    }
 }
 
 TEST_CASE("Tiny fail 3", "[clustercomplete]")
@@ -216,5 +248,30 @@ TEST_CASE("valid?", "[clustercomplete]")
     for (const charge_distribution_surface<sidb_lyt>& cl : qe_res2.charge_distributions)
     {
         CHECK(verify_clustercomplete_result(cl, cc_res2.charge_distributions));
+    }
+}
+
+TEST_CASE("QuickExact duplicate charge configurations", "[quickexact]")
+{
+    using sidb_lyt = sidb_cell_clk_lyt_siqad;
+    sidb_lyt lyt{};
+
+    lyt.assign_cell_type({2, 2, 1}, sidb_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({2, 3, 0}, sidb_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({7, 3, 1}, sidb_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({7, 4, 0}, sidb_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 4, 1}, sidb_lyt::cell_type::NORMAL);
+
+    const sidb_simulation_result<sidb_lyt>& qe_res = quickexact(lyt);
+
+    REQUIRE(qe_res.charge_distributions.size() == 3);
+
+    for (uint64_t i = 0; i < 2; ++i)
+    {
+        CHECK(qe_res.charge_distributions[i].get_charge_state({2, 2, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(qe_res.charge_distributions[i].get_charge_state({2, 3, 0}) == sidb_charge_state::NEUTRAL);
+        CHECK(qe_res.charge_distributions[i].get_charge_state({7, 3, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(qe_res.charge_distributions[i].get_charge_state({7, 4, 0}) == sidb_charge_state::POSITIVE);
+        CHECK(qe_res.charge_distributions[i].get_charge_state({8, 4, 1}) == sidb_charge_state::NEGATIVE);
     }
 }
