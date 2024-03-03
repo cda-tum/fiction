@@ -28,6 +28,7 @@
 #include <random>
 #include <type_traits>
 #include <utility>
+#include <vector>
 
 namespace fiction
 {
@@ -966,7 +967,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                           ((strg->cell_charge[for_loop_counter] == sidb_charge_state::POSITIVE) &&
                            (-it + mu_p > -physical_constants::POP_STABILITY_ERR)) ||
                           ((strg->cell_charge[for_loop_counter] == sidb_charge_state::NEUTRAL) &&
-                           (-it + strg->phys_params.mu_minus > -physical_constants::POP_STABILITY_ERR) &&
+                           (-it + strg->phys_params.mu_minus > physical_constants::POP_STABILITY_ERR) &&
                            (-it + mu_p < physical_constants::POP_STABILITY_ERR)));
             for_loop_counter += 1;
             if (!valid)
@@ -1604,7 +1605,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             else if ((loc_pot_cell + strg->phys_params.mu_plus()) > -physical_constants::POP_STABILITY_ERR)
             {
                 // dependent-cell can only be positively charged when the base number is set to three state simulation.
-                if (strg->charge_index_and_base.second == 3)
+                if (strg->charge_index_and_base.second == 3 || strg->three_state_cells.size() != 0)
                 {
                     if (strg->cell_charge[strg->dependent_cell_index] != sidb_charge_state::POSITIVE)
                     {
