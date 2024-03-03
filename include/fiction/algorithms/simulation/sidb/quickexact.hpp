@@ -395,6 +395,7 @@ class quickexact_impl
 
                     charge_lyt_copy.update_after_charge_change();
                     charge_lyt_copy.recompute_system_energy();
+                    charge_lyt_copy.charge_distribution_to_index_general();
                     result.charge_distributions.push_back(charge_lyt_copy);
                 }
 
@@ -416,6 +417,7 @@ class quickexact_impl
 
                 charge_lyt_copy.update_after_charge_change();
                 charge_lyt_copy.recompute_system_energy();
+                charge_lyt_copy.charge_distribution_to_index_general();
                 result.charge_distributions.push_back(charge_lyt_copy);
             }
 
