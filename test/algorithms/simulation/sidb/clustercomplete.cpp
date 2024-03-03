@@ -17,6 +17,8 @@
 #include <fiction/technology/charge_distribution_surface.hpp>
 #include <fiction/types.hpp>
 
+#include <mockturtle/utils/stopwatch.hpp>
+
 using namespace fiction;
 
 // TEMPLATE_TEST_CASE(
@@ -57,6 +59,12 @@ static bool verify_clustercomplete_result(const charge_distribution_surface<sidb
 
 static void print_test_case(const std::vector<charge_distribution_surface<sidb_lyt>>& cc_cls) noexcept
 {
+    if (cc_cls.empty())
+    {
+        std::cout << "no physically valid charge distributions for the given base" << std::endl;
+        return;
+    }
+
     std::cout << "using sidb_lyt = sidb_cell_clk_lyt_siqad;\nsidb_lyt lyt{};\n\n";
     for (const cell<sidb_lyt>& c : cc_cls[0].get_sidb_order())
     {
@@ -98,19 +106,23 @@ static void verify_lyts(const std::vector<sidb_lyt>& lyts)
     {
         std::cout << "LAYOUT NUMBER: " << i << std::endl;
 
-        //        lyts[i].foreach_cell([](const cell<sidb_lyt>& c) { std::cout << fmt::format("{}", c) << std::endl; });
+        //                lyts[i].foreach_cell([](const cell<sidb_lyt>& c) { std::cout << fmt::format("{}", c) <<
+        //                std::endl; });
 
-        const sidb_simulation_result<sidb_lyt>& qe_res = quickexact(lyts[i]);
+        const sidb_simulation_result<sidb_lyt>& qe_res = quickexact(
+            lyts[i], quickexact_params<sidb_lyt>{sidb_simulation_parameters{2},
+                                                 quickexact_params<sidb_lyt>::automatic_base_number_detection::OFF});
 
-        std::cout << "QUICKEXACT RUNTIME: " << (qe_res.simulation_runtime.count() * 1000) << " ms" << std::endl;
+        std::cout << "QUICKEXACT RUNTIME: " << (mockturtle::to_seconds(qe_res.simulation_runtime) * 1000) << " ms"
+                  << std::endl;
         std::cout << "PHYSICALLY VALID CHARGE DISTRIBUTIONS: " << qe_res.charge_distributions.size() << std::endl;
 
         try
         {
-            const sidb_simulation_result<sidb_lyt> cc_res = clustercomplete(lyts[i], 6);
+            const sidb_simulation_result<sidb_lyt> cc_res = clustercomplete(lyts[i], 6, sidb_simulation_parameters{2});
 
-            std::cout << "CLUSTERCOMPLETE RUNTIME: " << (cc_res.simulation_runtime.count() * 1000) << " ms"
-                      << std::endl;
+            std::cout << "CLUSTERCOMPLETE RUNTIME: " << (mockturtle::to_seconds(cc_res.simulation_runtime) * 1000)
+                      << " ms" << std::endl;
             std::cout << "PHYSICALLY VALID CHARGE DISTRIBUTIONS: " << cc_res.charge_distributions.size() << std::endl;
 
             for (const charge_distribution_surface<sidb_lyt>& cl : qe_res.charge_distributions)
@@ -138,8 +150,8 @@ static void verify_lyts(const std::vector<sidb_lyt>& lyts)
 TEST_CASE("ClusterComplete verification on random layouts with 20 SiDBs", "[clustercomplete]")
 {
 
-    //    const std::pair<cell<sidb_lyt>, cell<sidb_lyt>> layout_dimensions = {cell<sidb_lyt>{0, 0}, cell<sidb_lyt>{10,
-    //    5}};
+    //        const std::pair<cell<sidb_lyt>, cell<sidb_lyt>> layout_dimensions = {cell<sidb_lyt>{0, 0},
+    //        cell<sidb_lyt>{10, 5}};
     const std::pair<cell<sidb_lyt>, cell<sidb_lyt>> layout_dimensions = {cell<sidb_lyt>{0, 0}, cell<sidb_lyt>{24, 12}};
 
     generate_random_sidb_layout_params<sidb_lyt> rlg_ps{};
@@ -191,6 +203,28 @@ TEST_CASE("Tiny fail 3", "[clustercomplete]")
 
     const sidb_simulation_result<sidb_lyt>& qe_res  = quickexact(lyt);
     const sidb_simulation_result<sidb_lyt>& cc_res  = clustercomplete(lyt);
+
+    for (const charge_distribution_surface<sidb_lyt>& cl : qe_res.charge_distributions)
+    {
+        CHECK(verify_clustercomplete_result(cl, cc_res.charge_distributions));
+    }
+
+    print_test_case(qe_res.charge_distributions);
+    print_test_case(cc_res.charge_distributions);
+}
+
+TEST_CASE("Base 2 fail", "[clustercomplete]")
+{
+    sidb_lyt lyt{};
+    lyt.assign_cell_type({0, 1, 1}, sidb_lyt::cell_type::NORMAL);  //  0    -       0
+    lyt.assign_cell_type({2, 3, 0}, sidb_lyt::cell_type::NORMAL);  //  -    -       1
+    lyt.assign_cell_type({2, 3, 1}, sidb_lyt::cell_type::NORMAL);  //  -    +       2
+    lyt.assign_cell_type({6, 3, 1}, sidb_lyt::cell_type::NORMAL);  //  0    -       3
+
+    const sidb_simulation_result<sidb_lyt>& qe_res =
+        quickexact(lyt, quickexact_params<sidb_lyt>{sidb_simulation_parameters{2},
+                                                    quickexact_params<sidb_lyt>::automatic_base_number_detection::OFF});
+    const sidb_simulation_result<sidb_lyt>& cc_res = clustercomplete(lyt, 6, sidb_simulation_parameters{2});
 
     for (const charge_distribution_surface<sidb_lyt>& cl : qe_res.charge_distributions)
     {

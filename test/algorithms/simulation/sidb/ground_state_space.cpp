@@ -193,7 +193,7 @@ TEMPLATE_TEST_CASE(
     //        }
     //    }
 
-    const ground_state_space_result& gss_res = ground_state_space(lyt);
+    const ground_state_space_result& gss_res = ground_state_space(lyt, 6, sidb_simulation_parameters{2});
 
     std::cout << "RUNTIME: " << (gss_res.runtime.count() * 1000) << " ms" << std::endl;
 

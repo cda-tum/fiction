@@ -43,6 +43,7 @@ class ground_state_space
   public:
     explicit ground_state_space(const Lyt& lyt, const uint64_t max_cluster_size_for_witness_partitioning,
                                 const sidb_simulation_parameters& phys_params) noexcept :
+            base{phys_params.base},
             top_cluster{to_sidb_cluster(sidb_cluster_hierarchy(lyt))},
             clustering{get_initial_clustering(top_cluster, get_local_potential_bounds(lyt, phys_params))},
             witness_partitioning_max_cluster_size{max_cluster_size_for_witness_partitioning},
@@ -107,7 +108,8 @@ class ground_state_space
         cl_min.assign_physical_parameters(phys_params);
         cl_max.assign_physical_parameters(phys_params);
 
-        cl_min.assign_all_charge_states(sidb_charge_state::POSITIVE);
+        cl_min.assign_all_charge_states(phys_params.base == 3 ? sidb_charge_state::POSITIVE :
+                                                                sidb_charge_state::NEUTRAL);
         cl_max.assign_all_charge_states(sidb_charge_state::NEGATIVE);
 
         cl_min.update_after_charge_change();
@@ -130,11 +132,13 @@ class ground_state_space
             const uint64_t i = get_singleton_sidb_ix(c);
 
             c->initialize_singleton_cluster_charge_space(i, -min_loc_pot_cds.get_local_potential_by_index(i).value(),
-                                                         -max_loc_pot_cds.get_local_potential_by_index(i).value());
+                                                         -max_loc_pot_cds.get_local_potential_by_index(i).value(),
+                                                         min_loc_pot_cds.get_phys_params().base);
 
             for (uint64_t j = 0; j < min_loc_pot_cds.num_cells(); ++j)
             {
-                c->pot_projs[j] = potential_projection_order{min_loc_pot_cds.get_potential_by_indices(i, j)};
+                c->pot_projs[j] = potential_projection_order{min_loc_pot_cds.get_chargeless_potential_by_indices(i, j),
+                                                             min_loc_pot_cds.get_phys_params().base};
             }
 
             clustering.emplace(c);
@@ -681,6 +685,12 @@ class ground_state_space
 
         construct_merged_charge_state_space(min_parent);
 
+        if (min_parent->charge_space.empty())
+        {
+            terminate = true;
+            return;
+        }
+
         construct_merged_potential_projections(min_parent);
 
         compute_meets_for_internal_pot_bounds(min_parent);
@@ -690,11 +700,13 @@ class ground_state_space
         update_charge_spaces(min_parent->uid);
     }
 
-    static constexpr inline uint64_t maximum_top_level_multisets(const uint64_t number_of_sidbs) noexcept
+    constexpr inline uint64_t maximum_top_level_multisets(const uint64_t number_of_sidbs) const noexcept
     {
-        // computes nCr(N + 2, 2)
-        return ((number_of_sidbs + 1) * (number_of_sidbs + 2)) / 2;
+        // computes nCr(N + 2, 2)                             // computes nCr(N + 1, 1)
+        return base == 3 ? ((number_of_sidbs + 1) * (number_of_sidbs + 2)) / 2 : number_of_sidbs + 1;
     }
+
+    const uint8_t base;
 
     const sidb_cluster_ptr top_cluster;
 

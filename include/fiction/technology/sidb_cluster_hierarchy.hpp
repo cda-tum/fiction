@@ -24,7 +24,9 @@
 
 #include <dataanalysis.h>
 #include <linalg.h>
-
+// #include <unordered_set>
+// #include <set>
+// #include <unordered_map>
 namespace fiction
 {
 
@@ -218,6 +220,7 @@ static constexpr inline uint64_t get_singleton_sidb_ix(const sidb_cluster_ptr& c
 static constexpr inline uint64_t get_unique_cluster_id(const sidb_cluster_ptr& c) noexcept;
 
 using intra_cluster_potential_bounds = phmap::flat_hash_map<uint64_t, std::array<double, 2>>;
+// using intra_cluster_potential_bounds = std::unordered_map<uint64_t, std::array<double, 2>>;
 
 struct sidb_cluster_state
 {
@@ -246,20 +249,10 @@ struct sidb_cluster_state
     }
 };
 
-// struct sidb_cluster_state_hash
-//{
-//     constexpr inline std::size_t operator()(const sidb_cluster_state& cst) const noexcept
-//     {
-//         return std::hash<uint64_t>{}(get_unique_cluster_id(cst.proj_st.cluster));
-//     }
-// };
-
 using sidb_cluster_state_composition = std::vector<sidb_cluster_state>;
 
 using sidb_cluster_state_ptr = std::unique_ptr<const sidb_cluster_state>;
-using sidb_clustering_state =
-    std::vector<sidb_cluster_state_ptr>;  // phmap::flat_hash_set<sidb_cluster_state, sidb_cluster_state_hash>;
-
+using sidb_clustering_state  = std::vector<sidb_cluster_state_ptr>;
 struct sidb_cluster_charge_state
 {
     uint64_t neg_count : 32;
@@ -369,16 +362,19 @@ struct potential_projection
 struct potential_projection_order
 {
     using pot_proj_order = phmap::btree_set<potential_projection>;
+    //    using pot_proj_order = std::set<potential_projection>;
 
     // 0 : NEG ; 1 : NEUT ; 2 : POS
     pot_proj_order order{};
 
     explicit potential_projection_order() noexcept = default;
 
-    explicit potential_projection_order(const double inter_sidb_pot) noexcept :
-            order{pot_proj_order{potential_projection{-inter_sidb_pot, sidb_charge_state::POSITIVE},
-                                 potential_projection{0.0, sidb_charge_state::NEUTRAL},
-                                 potential_projection{inter_sidb_pot, sidb_charge_state::NEGATIVE}}}
+    explicit potential_projection_order(const double inter_sidb_pot, const uint8_t base) noexcept :
+            order{base == 3 ? pot_proj_order{potential_projection{-inter_sidb_pot, sidb_charge_state::POSITIVE},
+                                             potential_projection{0.0, sidb_charge_state::NEUTRAL},
+                                             potential_projection{inter_sidb_pot, sidb_charge_state::NEGATIVE}} :
+                              pot_proj_order{potential_projection{0.0, sidb_charge_state::NEUTRAL},
+                                             potential_projection{inter_sidb_pot, sidb_charge_state::NEGATIVE}}}
     {}
 
     template <bound_direction bound>
@@ -444,6 +440,7 @@ struct potential_projection_order
 };
 
 using sidb_cluster_charge_state_space = phmap::flat_hash_set<sidb_cluster_charge_state, sidb_cluster_charge_state>;
+// using sidb_cluster_charge_state_space = std::unordered_set<sidb_cluster_charge_state, sidb_cluster_charge_state>;
 
 struct sidb_cluster_ptr_hash
 {
@@ -454,6 +451,7 @@ struct sidb_cluster_ptr_hash
 };
 
 using sidb_clustering = phmap::flat_hash_set<sidb_cluster_ptr, sidb_cluster_ptr_hash>;
+// using sidb_clustering = std::unordered_set<sidb_cluster_ptr, sidb_cluster_ptr_hash>;
 
 struct sidb_cluster
 {
@@ -467,7 +465,9 @@ struct sidb_cluster
     std::weak_ptr<sidb_cluster>   parent{};
 
     phmap::flat_hash_map<sidb_ix, potential_projection_order> pot_projs{};
+    //    std::unordered_map<sidb_ix, potential_projection_order> pot_projs{};
     phmap::flat_hash_map<sidb_ix, std::array<double, 2>>      recv_ext_pot_bounds{};
+    //    std::unordered_map<sidb_ix, std::array<double, 2>>      recv_ext_pot_bounds{};
 
     sidb_cluster_charge_state_space charge_space{};
 
@@ -499,15 +499,19 @@ struct sidb_cluster
         return parent.lock();
     }
 
-    void initialize_singleton_cluster_charge_space(const sidb_ix i, const double loc_pot_min,
-                                                   const double loc_pot_max) noexcept
+    void initialize_singleton_cluster_charge_space(const sidb_ix i, const double loc_pot_min, const double loc_pot_max,
+                                                   const uint8_t base) noexcept
     {
         assert(sidbs.size() == 1);
-        for (const sidb_charge_state cs : sidb_charge_state_iterator{})
+
+        const sidb_cluster_ptr& this_ptr =
+            *std::find_if(get_parent()->children.cbegin(), get_parent()->children.cend(),
+                          [&](const sidb_cluster_ptr& c) { return *c->sidbs.cbegin() == i; });
+
+        for (const sidb_charge_state cs :
+             sidb_charge_state_reversed_iterator{base == 3 ? sidb_charge_state::POSITIVE : sidb_charge_state::NEUTRAL})
         {
-            charge_space.emplace(sidb_cluster_charge_state{
-                cs, *std::find_if(get_parent()->children.cbegin(), get_parent()->children.cend(),
-                                  [&](const sidb_cluster_ptr& c) { return *c->sidbs.cbegin() == i; })});
+            charge_space.emplace(sidb_cluster_charge_state{cs, this_ptr});
         }
 
         recv_ext_pot_bounds[i][static_cast<uint8_t>(bound_direction::LOWER)] = loc_pot_min;
