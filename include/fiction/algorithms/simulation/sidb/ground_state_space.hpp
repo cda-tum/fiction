@@ -484,9 +484,9 @@ class ground_state_space
 
     bool verify_composition(sidb_cluster_state_composition& composition) const noexcept
     {
-        for (sidb_cluster_state& receiving_st : composition)
+        for (sidb_cluster_state& receiving_cst : composition)
         {
-            for (const uint64_t sidb_ix : receiving_st.proj_st.cluster->sidbs)
+            for (const uint64_t sidb_ix : receiving_cst.proj_st.cluster->sidbs)
             {
                 double internal_pot_lb{};
                 double internal_pot_ub{};
@@ -497,11 +497,11 @@ class ground_state_space
                     internal_pot_ub += get_proj_state_bound<bound_direction::UPPER>(cst.proj_st, sidb_ix).V;
                 }
 
-                receiving_st.set_pot_bounds(sidb_ix, internal_pot_lb, internal_pot_ub);
+                receiving_cst.set_pot_bounds(sidb_ix, internal_pot_lb, internal_pot_ub);
             }
 
             if (!perform_potential_bound_analysis<potential_bound_analysis_mode::ANALYZE_COMPOSITION>(
-                    receiving_st.proj_st, receiving_st.internal_pot_bounds))
+                    receiving_cst.proj_st, receiving_cst.internal_pot_bounds))
             {
                 return false;
             }
@@ -565,9 +565,9 @@ class ground_state_space
             {
                 potential_projection pot_proj_onto_other_c{};
 
-                for (const auto& [child_pst, _] : composition)
+                for (const sidb_cluster_state& cst : composition)
                 {
-                    pot_proj_onto_other_c += get_proj_state_bound<bound>(child_pst, rst.sidb_ix);
+                    pot_proj_onto_other_c += get_proj_state_bound<bound>(cst.proj_st, rst.sidb_ix);
                 }
 
                 add_pot_proj(parent, rst.sidb_ix, pot_proj_onto_other_c);
@@ -593,9 +593,9 @@ class ground_state_space
         {
             for (const sidb_cluster_state_composition& composition : m.compositions)
             {
-                for (const auto& [child_pst, _] : composition)
+                for (const sidb_cluster_state& child_cst : composition)
                 {
-                    for (const uint64_t child_sidb_ix : child_pst.cluster->sidbs)
+                    for (const uint64_t child_sidb_ix : child_cst.proj_st.cluster->sidbs)
                     {
                         add_pot_proj(pst.cluster, child_sidb_ix, get_proj_state_bound<bound>(pst, child_sidb_ix));
                     }
@@ -637,14 +637,16 @@ class ground_state_space
 
                 for (const sidb_cluster_state_composition& composition : m.compositions)
                 {
-                    for (const auto& [pst, sibling_pot_bounds] : composition)
+                    for (const sidb_cluster_state& cst : composition)
                     {
-                        if (sibling_pot_bounds.count(sidb_ix) != 0)
+                        if (cst.internal_pot_bounds.count(sidb_ix) != 0)
                         {
                             take_meet_of_potential_bounds<bound_direction::LOWER>(
-                                lb_meet, sibling_pot_bounds.at(sidb_ix)[static_cast<uint8_t>(bound_direction::LOWER)]);
+                                lb_meet,
+                                cst.internal_pot_bounds.at(sidb_ix)[static_cast<uint8_t>(bound_direction::LOWER)]);
                             take_meet_of_potential_bounds<bound_direction::UPPER>(
-                                ub_meet, sibling_pot_bounds.at(sidb_ix)[static_cast<uint8_t>(bound_direction::UPPER)]);
+                                ub_meet,
+                                cst.internal_pot_bounds.at(sidb_ix)[static_cast<uint8_t>(bound_direction::UPPER)]);
                         }
                     }
                 }

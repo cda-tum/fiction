@@ -196,6 +196,9 @@ TEST_CASE("Tiny fail 3", "[clustercomplete]")
     {
         CHECK(verify_clustercomplete_result(cl, cc_res.charge_distributions));
     }
+
+    print_test_case(qe_res.charge_distributions);
+    print_test_case(cc_res.charge_distributions);
 }
 
 TEST_CASE("valid?", "[clustercomplete]")

@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <array>
 #include <cstdint>
+#include <iterator>
 #include <mutex>
 #include <thread>
 #include <utility>
@@ -91,23 +92,19 @@ class clustercomplete
         }
     }
 
-    //    uint64_t clustering_indent = 0;
-
     void add_physically_valid_charge_confs(sidb_clustering_state& clustering_state) noexcept
     {
-        //        print_clustering_state(clustering_state, clustering_indent++);
-
         // check if all clusters are singletons
         if (std::all_of(clustering_state.cbegin(), clustering_state.cend(),
-                        [](const sidb_cluster_state& cst) { return cst.proj_st.cluster->children.empty(); }))
+                        [](const sidb_cluster_state_ptr& cst) { return cst->proj_st.cluster->children.empty(); }))
         {
             charge_distribution_surface charge_layout_copy{charge_layout};
 
-            for (const sidb_cluster_state& cst : clustering_state)
+            for (const sidb_cluster_state_ptr& cst : clustering_state)
             {
                 charge_layout_copy.assign_charge_state_by_cell_index(
-                    get_singleton_sidb_ix(cst.proj_st.cluster),
-                    singleton_multiset_conf_to_charge_state(cst.proj_st.multiset_conf), false);
+                    get_singleton_sidb_ix(cst->proj_st.cluster),
+                    singleton_multiset_conf_to_charge_state(cst->proj_st.multiset_conf), false);
             }
 
             charge_layout_copy.update_after_charge_change();
@@ -118,58 +115,47 @@ class clustercomplete
                 res.charge_distributions.emplace_back(charge_layout_copy);
             }
 
-            //            clustering_indent--;
             return;
         }
 
         // find the cluster of maximum size
-        const sidb_clustering_state::const_iterator max_cst_it =
-            std::max_element(clustering_state.cbegin(), clustering_state.cend(),
-                             [](const sidb_cluster_state& cst1, const sidb_cluster_state& cst2)
-                             { return cst1.proj_st.cluster->size() < cst2.proj_st.cluster->size(); });
+        uint64_t max_cluster_size = clustering_state[0]->proj_st.cluster->size();
+        uint64_t max_cst_ix       = 0;
+        for (uint64_t ix = 1; ix < clustering_state.size(); ++ix)
+        {
+            if (const uint64_t cluster_size = clustering_state[ix]->proj_st.cluster->size();
+                cluster_size > max_cluster_size)
+            {
+                max_cluster_size = cluster_size;
+                max_cst_ix       = ix;
+            }
+        }
 
-        sidb_cluster_state max_cst = std::move(*max_cst_it);
+        std::swap(clustering_state[max_cst_ix], clustering_state.back());
 
-        clustering_state.erase(max_cst_it);
+        sidb_cluster_state_ptr max_cst = std::move(clustering_state.back());
 
-        //        for (const sidb_cluster_state_composition& max_cst_composition :
-        //             get_projector_state_compositions(max_cst.proj_st))
-        //        {
-        //            print_clustering_state(sidb_clustering_state{max_cst_composition.cbegin(),
-        //                                                         max_cst_composition.cend()},
-        //                                   clustering_indent, "to unfold");
-        //        }
-
-        //        std::cout << " ";
+        clustering_state.pop_back();
 
         for (const sidb_cluster_state_composition& max_cst_composition :
-             get_projector_state_compositions(max_cst.proj_st))
+             get_projector_state_compositions(max_cst->proj_st))
         {
-            //            print_clustering_state(sidb_clustering_state{max_cst_composition.cbegin(),
-            //                                                         max_cst_composition.cend()},
-            //                                   clustering_indent, "unfold");
-
-            std::vector<sidb_cluster_state> sub_csts_to_remove{};
-            sub_csts_to_remove.reserve(max_cst_composition.size());
-
             for (const sidb_cluster_state& sub_cst : max_cst_composition)
             {
-                sub_csts_to_remove.emplace_back(
-                    sidb_cluster_state{sub_cst.proj_st.cluster, sub_cst.proj_st.multiset_conf});
-                clustering_state.emplace(std::move(sub_cst));
+                clustering_state.emplace_back(std::make_unique<const sidb_cluster_state>(std::move(sub_cst)));
             }
 
             add_physically_valid_charge_confs(clustering_state);
 
-            for (const sidb_cluster_state& sub_cst : sub_csts_to_remove)
+            for (uint64_t i = 0; i < max_cst_composition.size(); ++i)
             {
-                //                print_clustering_state(sidb_clustering_state{{sub_cst}}, clustering_indent, "remove");
-                clustering_state.erase(sub_cst);
+                clustering_state.pop_back();
             }
         }
 
-        clustering_state.emplace(max_cst);
-        //        clustering_indent--;
+        clustering_state.emplace_back(std::move(max_cst));
+
+        std::swap(clustering_state.back(), clustering_state[max_cst_ix]);
     }
 
     void collect_physically_valid_charge_distributions(const sidb_cluster_ptr& top_cluster) noexcept
@@ -206,9 +192,14 @@ class clustercomplete
                         for (sidb_cluster_state_composition& composition :
                              std::next(top_cluster->charge_space.cbegin(), static_cast<int64_t>(ix))->compositions)
                         {
-                            sidb_clustering_state clustering_state{composition.cbegin(), composition.cend()};
+                            sidb_clustering_state clustering_state{};
+                            clustering_state.reserve(charge_layout.num_cells());
 
-                            //                            print_clustering_state(clustering_state);
+                            for (const sidb_cluster_state& cst : composition)
+                            {
+                                clustering_state.emplace_back(
+                                    std::make_unique<const sidb_cluster_state>(std::move(cst)));
+                            }
 
                             add_physically_valid_charge_confs(clustering_state);
                         }
@@ -235,8 +226,8 @@ class clustercomplete
 template <typename Lyt>
 sidb_simulation_result<Lyt>
 clustercomplete(const Lyt& lyt, const uint64_t gss_witness_partitioning_maximum_cluster_size = 6,
-                const sidb_simulation_parameters& phys_params       = sidb_simulation_parameters{},
-                const uint64_t                    available_threads = std::thread::hardware_concurrency()) noexcept
+                const sidb_simulation_parameters& phys_params = sidb_simulation_parameters{},
+                const uint64_t available_threads              = 1)  // std::thread::hardware_concurrency()) noexcept
 {
     return detail::clustercomplete(lyt, phys_params, available_threads)
         .run(gss_witness_partitioning_maximum_cluster_size);

@@ -23,6 +23,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <iterator>
 #include <limits>
 
 using namespace fiction;
@@ -695,9 +696,9 @@ static bool verify_ground_state_space_result(const charge_distribution_surface<s
     {
         bool composition_has_correct_charge_conf = true;
 
-        for (const auto& [pst, _] : composition)
+        for (const sidb_cluster_state& cst : composition)
         {
-            composition_has_correct_charge_conf &= verify_ground_state_space_result(valid_cl, pst.cluster);
+            composition_has_correct_charge_conf &= verify_ground_state_space_result(valid_cl, cst.proj_st.cluster);
         }
 
         found_charge_conf |= composition_has_correct_charge_conf;
