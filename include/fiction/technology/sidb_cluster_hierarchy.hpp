@@ -212,7 +212,9 @@ static constexpr inline void take_meet_of_potential_bounds(double& a, const doub
     }
 }
 
-static inline uint64_t get_singleton_sidb_ix(const sidb_cluster_ptr& c) noexcept;
+static constexpr inline uint64_t get_singleton_sidb_ix(const sidb_cluster_ptr& c) noexcept;
+
+static constexpr inline uint64_t get_unique_cluster_id(const sidb_cluster_ptr& c) noexcept;
 
 using intra_cluster_potential_bounds = phmap::flat_hash_map<uint64_t, std::array<double, 2>>;
 
@@ -236,9 +238,24 @@ struct sidb_cluster_state
         internal_pot_bounds[sidb_ix][static_cast<uint8_t>(bound_direction::LOWER)] = min;
         internal_pot_bounds[sidb_ix][static_cast<uint8_t>(bound_direction::UPPER)] = max;
     }
+
+    constexpr inline bool operator==(const sidb_cluster_state& other) const noexcept
+    {
+        return get_unique_cluster_id(proj_st.cluster) == get_unique_cluster_id(other.proj_st.cluster);
+    }
+};
+
+struct sidb_cluster_state_hash
+{
+    constexpr inline std::size_t operator()(const sidb_cluster_state& cst) const noexcept
+    {
+        return std::hash<uint64_t>{}(get_unique_cluster_id(cst.proj_st.cluster));
+    }
 };
 
 using sidb_cluster_state_composition = std::vector<sidb_cluster_state>;
+
+using sidb_clustering_state = phmap::flat_hash_set<sidb_cluster_state, sidb_cluster_state_hash>;
 
 struct sidb_cluster_charge_state
 {
@@ -425,8 +442,6 @@ struct potential_projection_order
 
 using sidb_cluster_charge_state_space = phmap::flat_hash_set<sidb_cluster_charge_state, sidb_cluster_charge_state>;
 
-static constexpr inline uint64_t get_unique_cluster_id(const sidb_cluster_ptr& c) noexcept;
-
 struct sidb_cluster_ptr_hash
 {
     constexpr inline std::size_t operator()(const sidb_cluster_ptr& c) const noexcept
@@ -445,8 +460,8 @@ struct sidb_cluster
     const uid_t uid{0};
 
     phmap::flat_hash_set<sidb_ix> sidbs;
-    sidb_clustering             children;
-    std::weak_ptr<sidb_cluster> parent{};
+    sidb_clustering               children;
+    std::weak_ptr<sidb_cluster>   parent{};
 
     phmap::flat_hash_map<sidb_ix, potential_projection_order> pot_projs{};
     phmap::flat_hash_map<sidb_ix, std::array<double, 2>>      recv_ext_pot_bounds{};
@@ -530,19 +545,44 @@ struct sidb_cluster
     }
 };
 
-static constexpr inline uint64_t get_unique_cluster_id(const sidb_cluster_ptr& c) noexcept
-{
-    return c->uid;
-}
-
 static constexpr inline uint64_t get_cluster_size(const sidb_cluster_ptr& c) noexcept
 {
     return c->sidbs.size();
 }
 
-static inline uint64_t get_singleton_sidb_ix(const sidb_cluster_ptr& c) noexcept
+static constexpr inline uint64_t get_unique_cluster_id(const sidb_cluster_ptr& c) noexcept
 {
-    return *c->sidbs.cbegin();
+    return c->uid;
+}
+
+static constexpr inline uint64_t get_singleton_sidb_ix(const sidb_cluster_ptr& c) noexcept
+{
+    return get_unique_cluster_id(c);
+}
+
+static void print_clustering_state(const sidb_clustering_state& clustering_state, const uint64_t indent = 0,
+                                   const std::string& prefix = "") noexcept
+{
+    for (const sidb_cluster_state& cst : clustering_state)
+    {
+        for (uint64_t i = 0; i < indent; ++i)
+        {
+            std::cout << '\t';
+        }
+
+        std::cout << prefix << ' ';
+
+        std::cout << "SiDBs: ";
+        for (const uint64_t sidb_ix : cst.proj_st.cluster->sidbs)
+        {
+            std::cout << sidb_ix << " ";
+        }
+
+        std::cout << "\t" << (cst.proj_st.cluster->size() > 4 ? "|" : "\t|")
+                  << "\t●: " << cst.proj_st.get_count<sidb_charge_state::NEGATIVE>()
+                  << "   ◯: " << cst.proj_st.get_count<sidb_charge_state::NEUTRAL>()
+                  << "   ⨁: " << cst.proj_st.get_count<sidb_charge_state::POSITIVE>() << std::endl;
+    }
 }
 
 static inline std::vector<sidb_cluster_state_composition>

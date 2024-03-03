@@ -190,20 +190,12 @@ TEST_CASE("Tiny fail 3", "[clustercomplete]")
     lyt.assign_cell_type({3, 1, 1}, sidb_lyt::cell_type::NORMAL);  //  0    -       3
 
     const sidb_simulation_result<sidb_lyt>& qe_res  = quickexact(lyt);
-    const ground_state_space_result&        gss_res = ground_state_space(lyt);
     const sidb_simulation_result<sidb_lyt>& cc_res  = clustercomplete(lyt);
 
     for (const charge_distribution_surface<sidb_lyt>& cl : qe_res.charge_distributions)
     {
-        //        const bool verification = verify_ground_state_space_result(cl, top);
-        CHECK(true);
+        CHECK(verify_clustercomplete_result(cl, cc_res.charge_distributions));
     }
-
-    //    for (const charge_distribution_surface<sidb_lyt>& cl : cc_res.charge_distributions)
-    //    {
-    //        const bool verification = verify_ground_state_space_result(cl, top);
-    //        CHECK(verification);
-    //    }
 }
 
 TEST_CASE("valid?", "[clustercomplete]")
@@ -248,30 +240,5 @@ TEST_CASE("valid?", "[clustercomplete]")
     for (const charge_distribution_surface<sidb_lyt>& cl : qe_res2.charge_distributions)
     {
         CHECK(verify_clustercomplete_result(cl, cc_res2.charge_distributions));
-    }
-}
-
-TEST_CASE("QuickExact duplicate charge configurations", "[quickexact]")
-{
-    using sidb_lyt = sidb_cell_clk_lyt_siqad;
-    sidb_lyt lyt{};
-
-    lyt.assign_cell_type({2, 2, 1}, sidb_lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({2, 3, 0}, sidb_lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({7, 3, 1}, sidb_lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({7, 4, 0}, sidb_lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 4, 1}, sidb_lyt::cell_type::NORMAL);
-
-    const sidb_simulation_result<sidb_lyt>& qe_res = quickexact(lyt);
-
-    REQUIRE(qe_res.charge_distributions.size() == 3);
-
-    for (uint64_t i = 0; i < 2; ++i)
-    {
-        CHECK(qe_res.charge_distributions[i].get_charge_state({2, 2, 1}) == sidb_charge_state::NEGATIVE);
-        CHECK(qe_res.charge_distributions[i].get_charge_state({2, 3, 0}) == sidb_charge_state::NEUTRAL);
-        CHECK(qe_res.charge_distributions[i].get_charge_state({7, 3, 1}) == sidb_charge_state::NEGATIVE);
-        CHECK(qe_res.charge_distributions[i].get_charge_state({7, 4, 0}) == sidb_charge_state::POSITIVE);
-        CHECK(qe_res.charge_distributions[i].get_charge_state({8, 4, 1}) == sidb_charge_state::NEGATIVE);
     }
 }

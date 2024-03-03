@@ -91,15 +91,19 @@ class clustercomplete
         }
     }
 
-    void add_physically_valid_charge_confs(const sidb_cluster_state_composition& cluster_charge_assignment) noexcept
+    //    uint64_t clustering_indent = 0;
+
+    void add_physically_valid_charge_confs(sidb_clustering_state& clustering_state) noexcept
     {
+        //        print_clustering_state(clustering_state, clustering_indent++);
+
         // check if all clusters are singletons
-        if (std::all_of(cluster_charge_assignment.cbegin(), cluster_charge_assignment.cend(),
+        if (std::all_of(clustering_state.cbegin(), clustering_state.cend(),
                         [](const sidb_cluster_state& cst) { return cst.proj_st.cluster->children.empty(); }))
         {
             charge_distribution_surface charge_layout_copy{charge_layout};
 
-            for (const sidb_cluster_state& cst : cluster_charge_assignment)
+            for (const sidb_cluster_state& cst : clustering_state)
             {
                 charge_layout_copy.assign_charge_state_by_cell_index(
                     get_singleton_sidb_ix(cst.proj_st.cluster),
@@ -114,42 +118,58 @@ class clustercomplete
                 res.charge_distributions.emplace_back(charge_layout_copy);
             }
 
+            //            clustering_indent--;
             return;
         }
 
         // find the cluster of maximum size
-        const sidb_cluster_projector_state max_pst =
-            std::max_element(
-                cluster_charge_assignment.cbegin(), cluster_charge_assignment.cend(),
+        const sidb_clustering_state::const_iterator max_cst_it =
+            std::max_element(clustering_state.cbegin(), clustering_state.cend(),
                              [](const sidb_cluster_state& cst1, const sidb_cluster_state& cst2)
-                             { return cst1.proj_st.cluster->size() < cst2.proj_st.cluster->size(); })
-                ->proj_st;
+                             { return cst1.proj_st.cluster->size() < cst2.proj_st.cluster->size(); });
 
-        sidb_cluster_state_composition cluster_charge_assignment_without_max_cluster{};
-        for (const sidb_cluster_state& cst : cluster_charge_assignment)
+        sidb_cluster_state max_cst = std::move(*max_cst_it);
+
+        clustering_state.erase(max_cst_it);
+
+        //        for (const sidb_cluster_state_composition& max_cst_composition :
+        //             get_projector_state_compositions(max_cst.proj_st))
+        //        {
+        //            print_clustering_state(sidb_clustering_state{max_cst_composition.cbegin(),
+        //                                                         max_cst_composition.cend()},
+        //                                   clustering_indent, "to unfold");
+        //        }
+
+        //        std::cout << " ";
+
+        for (const sidb_cluster_state_composition& max_cst_composition :
+             get_projector_state_compositions(max_cst.proj_st))
         {
-            if (cst.proj_st.cluster != max_pst.cluster)
+            //            print_clustering_state(sidb_clustering_state{max_cst_composition.cbegin(),
+            //                                                         max_cst_composition.cend()},
+            //                                   clustering_indent, "unfold");
+
+            std::vector<sidb_cluster_state> sub_csts_to_remove{};
+            sub_csts_to_remove.reserve(max_cst_composition.size());
+
+            for (const sidb_cluster_state& sub_cst : max_cst_composition)
             {
-                // do this differently
-                cluster_charge_assignment_without_max_cluster.emplace_back(
-                    sidb_cluster_state{cst.proj_st.cluster, cst.proj_st.multiset_conf});
+                sub_csts_to_remove.emplace_back(
+                    sidb_cluster_state{sub_cst.proj_st.cluster, sub_cst.proj_st.multiset_conf});
+                clustering_state.emplace(std::move(sub_cst));
+            }
+
+            add_physically_valid_charge_confs(clustering_state);
+
+            for (const sidb_cluster_state& sub_cst : sub_csts_to_remove)
+            {
+                //                print_clustering_state(sidb_clustering_state{{sub_cst}}, clustering_indent, "remove");
+                clustering_state.erase(sub_cst);
             }
         }
 
-        for (const sidb_cluster_state_composition& cluster_charge_sub_assignment :
-             get_projector_state_compositions(max_pst))
-        {
-            // do this more efficiently
-            sidb_cluster_state_composition cluster_charge_assignment_unfolded{
-                cluster_charge_assignment_without_max_cluster};
-
-            for (const sidb_cluster_state& sub_cst : cluster_charge_sub_assignment)
-            {
-                cluster_charge_assignment_unfolded.emplace_back(std::move(sub_cst));
-            }
-
-            add_physically_valid_charge_confs(cluster_charge_assignment_unfolded);
-        }
+        clustering_state.emplace(max_cst);
+        //        clustering_indent--;
     }
 
     void collect_physically_valid_charge_distributions(const sidb_cluster_ptr& top_cluster) noexcept
@@ -183,10 +203,14 @@ class clustercomplete
                     for (uint64_t ix = range.first; ix <= range.second; ++ix)
                     {
                         // iterate over all cluster charge assignments in the multiset charge configuration
-                        for (const sidb_cluster_state_composition& cluster_charge_assignment :
+                        for (sidb_cluster_state_composition& composition :
                              std::next(top_cluster->charge_space.cbegin(), static_cast<int64_t>(ix))->compositions)
                         {
-                            add_physically_valid_charge_confs(cluster_charge_assignment);
+                            sidb_clustering_state clustering_state{composition.cbegin(), composition.cend()};
+
+                            //                            print_clustering_state(clustering_state);
+
+                            add_physically_valid_charge_confs(clustering_state);
                         }
                     }
                 });
