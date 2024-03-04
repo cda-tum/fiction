@@ -1768,11 +1768,22 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({3, 0, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({0, 1, 0}, TestType::cell_type::NORMAL);
 
-        const quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.32},
-                                                 quickexact_params<TestType>::automatic_base_number_detection::ON};
+        SECTION("automatic base number detection on")
+        {
+            const quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.32},
+                                                     quickexact_params<TestType>::automatic_base_number_detection::ON};
 
-        const auto simulation_results = quickexact<TestType>(lyt, params);
-        CHECK(simulation_results.charge_distributions.size() == 3);
+            const auto simulation_results = quickexact<TestType>(lyt, params);
+            CHECK(simulation_results.charge_distributions.size() == 3);
+        }
+        SECTION("automatic base number detection off")
+        {
+            const quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.32},
+                                                     quickexact_params<TestType>::automatic_base_number_detection::OFF};
+
+            const auto simulation_results = quickexact<TestType>(lyt, params);
+            CHECK(simulation_results.charge_distributions.size() == 3);
+        }
     }
 
     SECTION("Test case 4")
