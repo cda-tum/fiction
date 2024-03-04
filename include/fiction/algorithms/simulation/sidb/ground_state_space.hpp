@@ -646,11 +646,9 @@ class ground_state_space
                         if (cst.internal_pot_bounds.count(sidb_ix) != 0)
                         {
                             take_meet_of_potential_bounds<bound_direction::LOWER>(
-                                lb_meet,
-                                cst.internal_pot_bounds.at(sidb_ix)[static_cast<uint8_t>(bound_direction::LOWER)]);
+                                lb_meet, cst.get_pot_bound<bound_direction::LOWER>(sidb_ix));
                             take_meet_of_potential_bounds<bound_direction::UPPER>(
-                                ub_meet,
-                                cst.internal_pot_bounds.at(sidb_ix)[static_cast<uint8_t>(bound_direction::UPPER)]);
+                                ub_meet, cst.get_pot_bound<bound_direction::UPPER>(sidb_ix));
                         }
                     }
                 }

@@ -100,7 +100,7 @@ static void print_test_case(const std::vector<charge_distribution_surface<sidb_l
               << std::endl;
 }
 
-static void verify_lyts(const std::vector<sidb_lyt>& lyts)
+static void verify_lyts(const std::vector<sidb_lyt>& lyts, const bool three_state = true)
 {
     for (uint64_t i = 0; i < lyts.size(); ++i)
     {
@@ -109,9 +109,11 @@ static void verify_lyts(const std::vector<sidb_lyt>& lyts)
         //                lyts[i].foreach_cell([](const cell<sidb_lyt>& c) { std::cout << fmt::format("{}", c) <<
         //                std::endl; });
 
-        const sidb_simulation_result<sidb_lyt>& qe_res = quickexact(
-            lyts[i], quickexact_params<sidb_lyt>{sidb_simulation_parameters{2},
-                                                 quickexact_params<sidb_lyt>::automatic_base_number_detection::OFF});
+        const sidb_simulation_result<sidb_lyt>& qe_res =
+            three_state ? quickexact(lyts[i]) :
+                          quickexact(lyts[i], quickexact_params<sidb_lyt>{
+                                                  sidb_simulation_parameters{2},
+                                                  quickexact_params<sidb_lyt>::automatic_base_number_detection::OFF});
 
         std::cout << "QUICKEXACT RUNTIME: " << (mockturtle::to_seconds(qe_res.simulation_runtime) * 1000) << " ms"
                   << std::endl;
@@ -119,7 +121,8 @@ static void verify_lyts(const std::vector<sidb_lyt>& lyts)
 
         try
         {
-            const sidb_simulation_result<sidb_lyt> cc_res = clustercomplete(lyts[i], 6, sidb_simulation_parameters{2});
+            const sidb_simulation_result<sidb_lyt> cc_res =
+                three_state ? clustercomplete(lyts[i], 6) : clustercomplete(lyts[i], 6, sidb_simulation_parameters{2});
 
             std::cout << "CLUSTERCOMPLETE RUNTIME: " << (mockturtle::to_seconds(cc_res.simulation_runtime) * 1000)
                       << " ms" << std::endl;
@@ -130,7 +133,7 @@ static void verify_lyts(const std::vector<sidb_lyt>& lyts)
                 CHECK(verify_clustercomplete_result(cl, cc_res.charge_distributions));
             }
 
-            if (cc_res.charge_distributions.size() < qe_res.charge_distributions.size())
+            if (cc_res.charge_distributions.size() != qe_res.charge_distributions.size())
             {
                 print_test_case(qe_res.charge_distributions);
                 print_test_case(cc_res.charge_distributions);
@@ -152,7 +155,7 @@ TEST_CASE("ClusterComplete verification on random layouts with 20 SiDBs", "[clus
 
     //        const std::pair<cell<sidb_lyt>, cell<sidb_lyt>> layout_dimensions = {cell<sidb_lyt>{0, 0},
     //        cell<sidb_lyt>{10, 5}};
-    const std::pair<cell<sidb_lyt>, cell<sidb_lyt>> layout_dimensions = {cell<sidb_lyt>{0, 0}, cell<sidb_lyt>{24, 12}};
+    const std::pair<cell<sidb_lyt>, cell<sidb_lyt>> layout_dimensions = {cell<sidb_lyt>{0, 0}, cell<sidb_lyt>{10, 5}};
 
     generate_random_sidb_layout_params<sidb_lyt> rlg_ps{};
     rlg_ps.coordinate_pair                    = layout_dimensions;
@@ -201,8 +204,44 @@ TEST_CASE("Tiny fail 3", "[clustercomplete]")
     lyt.assign_cell_type({2, 1, 0}, sidb_lyt::cell_type::NORMAL);  //  -    +       2
     lyt.assign_cell_type({3, 1, 1}, sidb_lyt::cell_type::NORMAL);  //  0    -       3
 
-    const sidb_simulation_result<sidb_lyt>& qe_res  = quickexact(lyt);
-    const sidb_simulation_result<sidb_lyt>& cc_res  = clustercomplete(lyt);
+    // . . . . .
+    // . . x . x
+    //
+    // . . x . .
+    // . . . x .
+
+    // . . . . .
+    // . . O . -
+    //
+    // . . - . .
+    // . . . O .
+
+    // . . . . .
+    // . . - . -
+    //
+    // . . + . .
+    // . . . - .
+
+    //      0       1       2       3
+    // 0    0
+    // 1    0.2871  0
+    // 2    0.4248  0.2265  0
+    // 3    0.2522  0.2522  0.5285  0
+
+    // 0.1228 on 2 is 0, 1 neg, 3 pos
+    // 1.1798 on 2 is 0, 1, 3 neg
+
+    // -0.024 on 3 is 0, 1 neg, 3 pos
+    // 1.0330 on 3 is 0, 1, 2 neg
+
+    // 0.1145 on 0 is 1, 3 neg, 2 pos
+    // 0.4597 on 0 is 1, 2 neg, 3 pos
+
+    // 0.2614 on 1 is 0, 2 neg, 3 pos
+    // 0.3128 on 1 is 0, 3 neg, 2 pos
+
+    const sidb_simulation_result<sidb_lyt>& qe_res = quickexact(lyt);
+    const sidb_simulation_result<sidb_lyt>& cc_res = clustercomplete(lyt);
 
     for (const charge_distribution_surface<sidb_lyt>& cl : qe_res.charge_distributions)
     {
@@ -230,9 +269,6 @@ TEST_CASE("Base 2 fail", "[clustercomplete]")
     {
         CHECK(verify_clustercomplete_result(cl, cc_res.charge_distributions));
     }
-
-    print_test_case(qe_res.charge_distributions);
-    print_test_case(cc_res.charge_distributions);
 }
 
 TEST_CASE("valid?", "[clustercomplete]")
@@ -278,4 +314,121 @@ TEST_CASE("valid?", "[clustercomplete]")
     {
         CHECK(verify_clustercomplete_result(cl, cc_res2.charge_distributions));
     }
+}
+
+TEST_CASE("Base 2 clash")
+{
+    using sidb_lyt = sidb_cell_clk_lyt_siqad;
+    sidb_lyt lyt{};
+
+    sidb_simulation_parameters params{2};
+
+    lyt.assign_cell_type({11, 1, 1}, sidb_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({15, 1, 1}, sidb_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({5, 2, 1}, sidb_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({17, 2, 1}, sidb_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({20, 3, 0}, sidb_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({13, 3, 1}, sidb_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({9, 4, 1}, sidb_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({2, 5, 1}, sidb_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({17, 5, 1}, sidb_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({2, 6, 1}, sidb_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({9, 6, 1}, sidb_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({10, 7, 0}, sidb_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 7, 1}, sidb_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({17, 9, 0}, sidb_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({11, 9, 1}, sidb_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 9, 1}, sidb_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({5, 10, 0}, sidb_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({5, 10, 1}, sidb_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({7, 11, 1}, sidb_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({13, 11, 1}, sidb_lyt::cell_type::NORMAL);
+
+    charge_distribution_surface charge_lyt{lyt};
+    charge_lyt.assign_physical_parameters(params);
+
+    charge_lyt.assign_charge_state({11, 1, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({15, 1, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({5, 2, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({17, 2, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({20, 3, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({13, 3, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({9, 4, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({2, 5, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({17, 5, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({2, 6, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({9, 6, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({10, 7, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({8, 7, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({17, 9, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({11, 9, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({12, 9, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({5, 10, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({5, 10, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({7, 11, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({13, 11, 1}, sidb_charge_state::NEGATIVE);
+
+    charge_lyt.update_after_charge_change();
+
+    CHECK(charge_lyt.is_physically_valid());
+
+    CHECK(quickexact(lyt, quickexact_params<sidb_lyt>{params,
+                                                      quickexact_params<sidb_lyt>::automatic_base_number_detection::OFF,
+                                                      {},
+                                                      0})
+              .charge_distributions.size() == 2);
+
+    charge_lyt.assign_charge_state({11, 1, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({15, 1, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({5, 2, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({17, 2, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({20, 3, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({13, 3, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({9, 4, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({2, 5, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({17, 5, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({2, 6, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({9, 6, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({10, 7, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({8, 7, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({17, 9, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({11, 9, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({12, 9, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({5, 10, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({5, 10, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({7, 11, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({13, 11, 1}, sidb_charge_state::NEGATIVE);
+
+    charge_lyt.update_after_charge_change();
+
+    CHECK(charge_lyt.is_physically_valid());
+
+    charge_lyt.assign_charge_state({11, 1, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({15, 1, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({5, 2, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({17, 2, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({20, 3, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({13, 3, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({9, 4, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({2, 5, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({17, 5, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({2, 6, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({9, 6, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({10, 7, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({8, 7, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({17, 9, 0}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({11, 9, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({12, 9, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({5, 10, 0}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({5, 10, 1}, sidb_charge_state::NEUTRAL);
+    charge_lyt.assign_charge_state({7, 11, 1}, sidb_charge_state::NEGATIVE);
+    charge_lyt.assign_charge_state({13, 11, 1}, sidb_charge_state::NEGATIVE);
+
+    charge_lyt.update_after_charge_change();
+
+    CHECK(charge_lyt.is_physically_valid());
+
+    const sidb_simulation_result<sidb_lyt>& res = clustercomplete(lyt, 6, params);
+
+    CHECK(res.charge_distributions.size() == 2);
 }

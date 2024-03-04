@@ -5,7 +5,7 @@
 #ifndef FICTION_SIDB_CLUSTER_HIERARCHY_HPP
 #define FICTION_SIDB_CLUSTER_HIERARCHY_HPP
 
-#define DEBUG_MODE
+// #define DEBUG_MODE
 
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
@@ -250,7 +250,7 @@ static constexpr inline uint64_t get_singleton_sidb_ix(const sidb_cluster_ptr& c
 
 static constexpr inline uint64_t get_unique_cluster_id(const sidb_cluster_ptr& c) noexcept;
 
-#if defined(DEBUG_MODE)
+#ifdef DEBUG_MODE
 using intra_cluster_potential_bounds = std::map<uint64_t, std::array<double, 2>>;
 #else
 using intra_cluster_potential_bounds = phmap::flat_hash_map<uint64_t, std::array<double, 2>>;
@@ -271,22 +271,41 @@ struct sidb_cluster_state
             proj_st{c, multiset_conf}
     {}
 
+    template <bound_direction bound>
+    constexpr inline double get_pot_bound(const uint64_t sidb_ix) const noexcept
+    {
+        return internal_pot_bounds.at(sidb_ix)[static_cast<uint8_t>(bound)];
+    }
+
     constexpr inline void set_pot_bounds(const uint64_t sidb_ix, const double min, const double max) noexcept
     {
         internal_pot_bounds[sidb_ix][static_cast<uint8_t>(bound_direction::LOWER)] = min;
         internal_pot_bounds[sidb_ix][static_cast<uint8_t>(bound_direction::UPPER)] = max;
     }
 
+    constexpr inline void update_pot_bounds(const uint64_t sidb_ix, const double min_diff,
+                                            const double max_diff) noexcept
+    {
+        internal_pot_bounds[sidb_ix][static_cast<uint8_t>(bound_direction::LOWER)] += min_diff;
+        internal_pot_bounds[sidb_ix][static_cast<uint8_t>(bound_direction::UPPER)] += max_diff;
+    }
+
     constexpr inline bool operator==(const sidb_cluster_state& other) const noexcept
     {
         return get_unique_cluster_id(proj_st.cluster) == get_unique_cluster_id(other.proj_st.cluster);
+    }
+
+    constexpr inline bool operator!=(const sidb_cluster_state& other) const noexcept
+    {
+        return !(*this == other);
     }
 };
 
 using sidb_cluster_state_composition = std::vector<sidb_cluster_state>;
 
-using sidb_cluster_state_ptr = std::unique_ptr<const sidb_cluster_state>;
+using sidb_cluster_state_ptr = std::unique_ptr<sidb_cluster_state>;
 using sidb_clustering_state  = std::vector<sidb_cluster_state_ptr>;
+
 struct sidb_cluster_charge_state
 {
     uint64_t neg_count : 32;
@@ -525,8 +544,8 @@ struct sidb_cluster
     explicit sidb_cluster(phmap::flat_hash_set<sidb_ix> c, sidb_clustering v, uid_t uid_) noexcept :
 #endif
             uid{c.size() == 1 ? *c.cbegin() : uid_},
-            sidbs{std::move(c)},
-            children{std::move(v)}
+            children{std::move(v)},
+            sidbs{std::move(c)}
     {}
 
     explicit sidb_cluster(const sidb_clustering& v) noexcept

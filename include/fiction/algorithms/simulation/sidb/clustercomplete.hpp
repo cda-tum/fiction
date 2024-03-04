@@ -49,14 +49,14 @@ class clustercomplete
         res.physical_parameters = charge_layout.get_phys_params();
         res.algorithm_name      = "ClusterComplete";
 
+        const ground_state_space_result& gss_res = fiction::ground_state_space(
+            charge_layout, validity_witness_partitioning_limit, charge_layout.get_phys_params());
+
+        report_ground_state_space_statistics(gss_res);
+
         mockturtle::stopwatch<>::duration time_counter{};
         {
             const mockturtle::stopwatch stop{time_counter};
-
-            const ground_state_space_result& gss_res = fiction::ground_state_space(
-                charge_layout, validity_witness_partitioning_limit, charge_layout.get_phys_params());
-
-            report_ground_state_space_statistics(gss_res);
 
             if (!gss_res.top_cluster->charge_space.empty())
             {
@@ -64,7 +64,7 @@ class clustercomplete
             }
         }
 
-        res.simulation_runtime = time_counter;
+        res.simulation_runtime = time_counter + gss_res.runtime;
 
         return res;
     }
@@ -119,27 +119,6 @@ class clustercomplete
         return pot_bound > mu_bounds_with_error[2];
     }
 
-    //    template <potential_bound_analysis_mode mode>
-    static inline std::pair<double, double>
-    get_received_potential_bounds(const sidb_cluster_projector_state& pst, const uint64_t sidb_ix,
-                                  const std::optional<intra_cluster_potential_bounds>& internal_pot_bounds) noexcept
-    {
-        //        if constexpr (mode == potential_bound_analysis_mode::ANALYZE_MULTISET)
-        //        {
-        //            return {get_proj_state_bound<bound_direction::LOWER>(pst, sidb_ix).V +
-        //                        pst.cluster->get_recv_ext_pot_bound<bound_direction::LOWER>(sidb_ix),
-        //                    get_proj_state_bound<bound_direction::UPPER>(pst, sidb_ix).V +
-        //                        pst.cluster->get_recv_ext_pot_bound<bound_direction::UPPER>(sidb_ix)};
-        //        }
-        //        else if constexpr (mode == potential_bound_analysis_mode::ANALYZE_COMPOSITION)
-        //        {
-        //            return {internal_pot_bounds.value().at(sidb_ix)[static_cast<uint8_t>(bound_direction::LOWER)] +
-        //                        pst.cluster->get_recv_ext_pot_bound<bound_direction::LOWER>(sidb_ix),
-        //                    internal_pot_bounds.value().at(sidb_ix)[static_cast<uint8_t>(bound_direction::UPPER)] +
-        //                        pst.cluster->get_recv_ext_pot_bound<bound_direction::UPPER>(sidb_ix)};
-        //        }
-    }
-
     bool perform_potential_bound_analysis(const sidb_cluster_state& cst) const noexcept
     {
         uint64_t required_neg_count  = cst.proj_st.get_count<sidb_charge_state::NEGATIVE>(),
@@ -148,8 +127,8 @@ class clustercomplete
 
         for (const uint64_t sidb_ix : cst.proj_st.cluster->sidbs)
         {
-            const auto& [recv_pot_lb, recv_pot_ub] =
-                get_received_potential_bounds(cst.proj_st, sidb_ix, cst.internal_pot_bounds);
+            const double recv_pot_lb = cst.get_pot_bound<bound_direction::LOWER>(sidb_ix);
+            const double recv_pot_ub = cst.get_pot_bound<bound_direction::UPPER>(sidb_ix);
 
             if (required_neg_count != 0 && !fail_onto_negative_charge(recv_pot_lb))
             {
@@ -168,7 +147,7 @@ class clustercomplete
             }
         }
 
-        return required_neg_count == 0 && required_pos_count != 0 && required_neut_count != 0;
+        return required_neg_count == 0 && required_pos_count == 0 && required_neut_count == 0;
     }
 
     bool meets_population_stability_criterion(const sidb_clustering_state& clustering_state) const noexcept
@@ -184,34 +163,123 @@ class clustercomplete
         return true;
     }
 
+    void add_if_configuration_stability_is_met(const sidb_clustering_state& clustering_state) noexcept
+    {
+        charge_distribution_surface charge_layout_copy{charge_layout};
+
+        for (const sidb_cluster_state_ptr& cst : clustering_state)
+        {
+            const uint64_t sidb_ix = get_singleton_sidb_ix(cst->proj_st.cluster);
+            charge_layout_copy.assign_charge_state_by_cell_index(
+                sidb_ix, singleton_multiset_conf_to_charge_state(cst->proj_st.multiset_conf), false);
+
+            charge_layout_copy.set_local_potential_by_index(sidb_ix,
+                                                            -cst->get_pot_bound<bound_direction::LOWER>(sidb_ix));
+        }
+
+        charge_layout_copy.recompute_system_energy();
+
+        if (!charge_layout_copy.is_configuration_stable())
+        {
+            return;
+        }
+
+        charge_layout_copy.declare_physically_valid();
+
+        {
+            const std::lock_guard lock{res_mutex};
+            res.charge_distributions.emplace_back(charge_layout_copy);
+        }
+    }
+
+    template <bound_direction bound>
+    static constexpr inline double get_proj_state_bound_val(const sidb_cluster_projector_state& pst,
+                                                            const uint64_t                      sidb_ix) noexcept
+    {
+        return pst.cluster->pot_projs.at(sidb_ix).get_pot_proj_for_m_conf<bound>(pst.multiset_conf).V;
+    }
+
+    enum class potential_bound_update_operation
+    {
+        ADD,
+        SUBTRACT
+    };
+
+    template <potential_bound_update_operation op>
+    static constexpr inline void update_cluster_state(sidb_cluster_state& recv_cst, const uint64_t sidb_ix,
+                                                      const sidb_cluster_projector_state& pst) noexcept
+    {
+        if constexpr (op == potential_bound_update_operation::ADD)
+        {
+            recv_cst.update_pot_bounds(sidb_ix, get_proj_state_bound_val<bound_direction::LOWER>(pst, sidb_ix),
+                                       get_proj_state_bound_val<bound_direction::UPPER>(pst, sidb_ix));
+        }
+        else if constexpr (op == potential_bound_update_operation::SUBTRACT)
+        {
+            recv_cst.update_pot_bounds(sidb_ix, -get_proj_state_bound_val<bound_direction::LOWER>(pst, sidb_ix),
+                                       -get_proj_state_bound_val<bound_direction::UPPER>(pst, sidb_ix));
+        }
+    }
+
+    static void apply_inter_cluster_potential(const sidb_cluster_state&       parent_cst,
+                                              sidb_cluster_state_composition& parent_composition,
+                                              sidb_clustering_state&          clustering_state) noexcept
+    {
+        for (sidb_cluster_state& child_cst : parent_composition)
+        {
+            for (const uint64_t sidb_ix : child_cst.proj_st.cluster->sidbs)
+            {
+                for (const sidb_cluster_state_ptr& cst : clustering_state)
+                {
+                    update_cluster_state<potential_bound_update_operation::ADD>(child_cst, sidb_ix, cst->proj_st);
+                }
+            }
+        }
+
+        for (sidb_cluster_state_ptr& cst : clustering_state)
+        {
+            for (const uint64_t sidb_ix : cst->proj_st.cluster->sidbs)
+            {
+                update_cluster_state<potential_bound_update_operation::SUBTRACT>(*cst, sidb_ix, parent_cst.proj_st);
+
+                for (sidb_cluster_state& child_cst : parent_composition)
+                {
+                    update_cluster_state<potential_bound_update_operation::ADD>(*cst, sidb_ix, child_cst.proj_st);
+                }
+            }
+        }
+    }
+
+    static void undo_apply_inter_cluster_potential(const sidb_cluster_state&       parent_cst,
+                                                   sidb_cluster_state_composition& parent_composition,
+                                                   sidb_clustering_state&          clustering_state) noexcept
+    {
+        for (sidb_cluster_state_ptr& cst : clustering_state)
+        {
+            for (const uint64_t sidb_ix : cst->proj_st.cluster->sidbs)
+            {
+                for (sidb_cluster_state& child_cst : parent_composition)
+                {
+                    update_cluster_state<potential_bound_update_operation::SUBTRACT>(*cst, sidb_ix, child_cst.proj_st);
+                }
+
+                update_cluster_state<potential_bound_update_operation::ADD>(*cst, sidb_ix, parent_cst.proj_st);
+            }
+        }
+    }
+
     void add_physically_valid_charge_confs(sidb_clustering_state& clustering_state) noexcept
     {
-        //        if (!meets_population_stability_criterion(clustering_state))
-        //        {
-        //            return;
-        //        }
+        if (!meets_population_stability_criterion(clustering_state))
+        {
+            return;
+        }
 
         // check if all clusters are singletons
         if (std::all_of(clustering_state.cbegin(), clustering_state.cend(),
                         [](const sidb_cluster_state_ptr& cst) { return cst->proj_st.cluster->children.empty(); }))
         {
-            charge_distribution_surface charge_layout_copy{charge_layout};
-
-            for (const sidb_cluster_state_ptr& cst : clustering_state)
-            {
-                charge_layout_copy.assign_charge_state_by_cell_index(
-                    get_singleton_sidb_ix(cst->proj_st.cluster),
-                    singleton_multiset_conf_to_charge_state(cst->proj_st.multiset_conf), false);
-            }
-
-            charge_layout_copy.update_after_charge_change();
-
-            if (charge_layout_copy.is_physically_valid())
-            {
-                const std::lock_guard lock{res_mutex};
-                res.charge_distributions.emplace_back(charge_layout_copy);
-            }
-
+            add_if_configuration_stability_is_met(clustering_state);
             return;
         }
 
@@ -238,13 +306,14 @@ class clustercomplete
         clustering_state.pop_back();
 
         // for all compositions of max_cst
-        for (const sidb_cluster_state_composition& max_cst_composition :
-             get_projector_state_compositions(max_cst->proj_st))
+        for (sidb_cluster_state_composition& max_cst_composition : get_projector_state_compositions(max_cst->proj_st))
         {
-            for (const sidb_cluster_state& sub_cst : max_cst_composition)
+            apply_inter_cluster_potential(*max_cst, max_cst_composition, clustering_state);
+
+            for (sidb_cluster_state& sub_cst : max_cst_composition)
             {
                 // move in
-                clustering_state.emplace_back(std::make_unique<const sidb_cluster_state>(std::move(sub_cst)));
+                clustering_state.emplace_back(std::make_unique<sidb_cluster_state>(std::move(sub_cst)));
             }
 
             // recurse
@@ -255,6 +324,8 @@ class clustercomplete
                 // handled
                 clustering_state.pop_back();
             }
+
+            undo_apply_inter_cluster_potential(*max_cst, max_cst_composition, clustering_state);
         }
 
         // move back
@@ -301,10 +372,9 @@ class clustercomplete
                             sidb_clustering_state clustering_state{};
                             clustering_state.reserve(charge_layout.num_cells());
 
-                            for (const sidb_cluster_state& cst : composition)
+                            for (sidb_cluster_state& cst : composition)
                             {
-                                clustering_state.emplace_back(
-                                    std::make_unique<const sidb_cluster_state>(std::move(cst)));
+                                clustering_state.emplace_back(std::make_unique<sidb_cluster_state>(std::move(cst)));
                             }
 
                             add_physically_valid_charge_confs(clustering_state);
@@ -332,7 +402,7 @@ class clustercomplete
 template <typename Lyt>
 sidb_simulation_result<Lyt>
 clustercomplete(const Lyt& lyt, const uint64_t gss_witness_partitioning_maximum_cluster_size = 6,
-                const sidb_simulation_parameters& phys_params = sidb_simulation_parameters{},
+                const sidb_simulation_parameters& phys_params       = sidb_simulation_parameters{},
                 const uint64_t                    available_threads = std::thread::hardware_concurrency()) noexcept
 {
     return detail::clustercomplete(lyt, phys_params, available_threads)
