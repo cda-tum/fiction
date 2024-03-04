@@ -7,14 +7,21 @@
 
 #include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
 #include <fiction/algorithms/simulation/sidb/quickexact.hpp>
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
+#include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/cell_technologies.hpp>
+#include <fiction/technology/charge_distribution_surface.hpp>
 #include <fiction/technology/physical_constants.hpp>
+#include <fiction/technology/sidb_charge_state.hpp>
 #include <fiction/technology/sidb_defects.hpp>
 #include <fiction/technology/sidb_surface.hpp>
 #include <fiction/utils/math_utils.hpp>
+
+#include <cstdint>
 
 using namespace fiction;
 
@@ -1752,7 +1759,50 @@ TEMPLATE_TEST_CASE(
         CHECK(simulation_results.charge_distributions.size() == 21);
     }
 
-    SECTION("QuickExact duplicate charge configurations, Test 1", "[quickexact]")
+    SECTION("Test case 3")
+    {
+        TestType lyt{};
+
+        lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({1, 0, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({3, 0, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({0, 1, 0}, TestType::cell_type::NORMAL);
+
+        SECTION("automatic base number detection on")
+        {
+            const quickexact_params<TestType> params{sidb_simulation_parameters{2, -0.32},
+                                                     quickexact_params<TestType>::automatic_base_number_detection::ON};
+
+            const auto simulation_results = quickexact<TestType>(lyt, params);
+            CHECK(simulation_results.charge_distributions.size() == 3);
+        }
+        SECTION("automatic base number detection off")
+        {
+            const quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.32},
+                                                     quickexact_params<TestType>::automatic_base_number_detection::OFF};
+
+            const auto simulation_results = quickexact<TestType>(lyt, params);
+            CHECK(simulation_results.charge_distributions.size() == 3);
+        }
+    }
+
+    SECTION("Test case 4")
+    {
+        TestType lyt{};
+
+        lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({0, 1, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({9, 3, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({2, 4, 0}, TestType::cell_type::NORMAL);
+
+        const quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.32},
+                                                 quickexact_params<TestType>::automatic_base_number_detection::ON};
+
+        const auto simulation_results = quickexact<TestType>(lyt, params);
+        CHECK(simulation_results.charge_distributions.size() == 1);
+    }
+
+    SECTION("Test case 4")
     {
         TestType lyt{};
 
@@ -1767,7 +1817,7 @@ TEMPLATE_TEST_CASE(
         REQUIRE(qe_res.charge_distributions.size() == 2);
     }
 
-    SECTION("QuickExact duplicate charge configurations, Test 2", "[quickexact]")
+    SECTION("Test case 5")
     {
         TestType lyt{};
 
@@ -1803,7 +1853,6 @@ TEMPLATE_TEST_CASE(
         std::sort(qe_res.charge_distributions.begin(), qe_res.charge_distributions.end(),
                   [](const auto& lhs, const auto& rhs) { return lhs.get_system_energy() < rhs.get_system_energy(); });
 
-        // QuickExact returns 4 physically valid charge layout
         REQUIRE(qe_res.charge_distributions.size() == 2);
 
         const auto groundstate  = qe_res.charge_distributions[0];
