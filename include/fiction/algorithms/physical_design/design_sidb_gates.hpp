@@ -113,7 +113,7 @@ class design_sidb_gates_impl
         const is_operational_params params_is_operational{params.phys_params, params.sim_engine};
 
         const auto all_combinations = determine_all_combinations_of_distributing_k_entities_on_n_positions(
-            params.number_of_sidbs, all_sidbs_in_canvas.size());
+            params.number_of_sidbs, static_cast<std::size_t>(all_sidbs_in_canvas.size()));
 
         std::vector<Lyt> designed_gate_layouts = {};
 

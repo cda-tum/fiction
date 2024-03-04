@@ -2,7 +2,7 @@
 // Created by Jan Drewniok on 03.03.24.
 //
 
-#include <fiction/algorithms/simulation/sidb/check_equivalence_simulation_result.hpp>
+#include <fiction/algorithms/simulation/sidb/check_simulation_results_for_equivalence.hpp>
 #include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
 #include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
@@ -45,10 +45,12 @@ int main()  // NOLINT
         auto result_quickexact =
             quickexact(lyt, quickexact_params<sidb_cell_clk_lyt>{
                                 params, quickexact_params<sidb_cell_clk_lyt>::automatic_base_number_detection::OFF});
-        if (!check_equivalence_simulation_result(result_exgs, result_quickexact))
+        if (!check_simulation_results_for_equivalence(result_exgs, result_quickexact))
         {
             non_equivalence_counter++;
         }
     }
     std::cout << fmt::format("non equivalent layouts = {}", non_equivalence_counter) << '\n';
+
+    EXIT_SUCCESS;
 }
