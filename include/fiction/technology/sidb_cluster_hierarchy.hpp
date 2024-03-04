@@ -5,12 +5,16 @@
 #ifndef FICTION_SIDB_CLUSTER_HIERARCHY_HPP
 #define FICTION_SIDB_CLUSTER_HIERARCHY_HPP
 
+#define DEBUG_MODE
+
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/utils/hash.hpp"
 
+#ifndef DEBUG_MODE
 #include <btree.h>
 #include <phmap.h>
+#endif
 
 #include <algorithm>
 #include <array>
@@ -24,9 +28,13 @@
 
 #include <dataanalysis.h>
 #include <linalg.h>
-// #include <unordered_set>
-// #include <set>
-// #include <unordered_map>
+
+#ifdef DEBUG_MODE
+#include <set>
+#include <unordered_map>
+#include <unordered_set>
+#endif
+
 namespace fiction
 {
 
@@ -69,10 +77,20 @@ using sidb_binary_cluster_hierarchy_node_ptr = std::unique_ptr<sidb_binary_clust
  */
 struct sidb_binary_cluster_hierarchy_node
 {
-    phmap::flat_hash_set<uint64_t>                        c;
+
+#ifdef DEBUG_MODE
+    std::set<uint64_t> c;
+#else
+    phmap::flat_hash_set<uint64_t> c;
+#endif
+
     std::array<sidb_binary_cluster_hierarchy_node_ptr, 2> sub;
 
-    sidb_binary_cluster_hierarchy_node(const phmap::flat_hash_set<uint64_t>&                 c_,
+#ifdef DEBUG_MODE
+    sidb_binary_cluster_hierarchy_node(const std::set<uint64_t>& c_,
+#else
+    sidb_binary_cluster_hierarchy_node(const phmap::flat_hash_set<uint64_t>& c_,
+#endif
                                        std::array<sidb_binary_cluster_hierarchy_node_ptr, 2> sub_) noexcept :
             c{c_},
             sub{std::move(sub_)}
@@ -115,7 +133,11 @@ sidb_cluster_hierarchy(Lyt& lyt, sidb_cluster_hierarchy_linkage_method linkage_m
     alglib::ahcreport rep;
     clusterizerrunahc(s, rep);
 
+#ifdef DEBUG_MODE
+    std::unordered_map<uint64_t, std::unique_ptr<sidb_binary_cluster_hierarchy_node>> nodes{};
+#else
     phmap::flat_hash_map<uint64_t, std::unique_ptr<sidb_binary_cluster_hierarchy_node>> nodes{};
+#endif
 
     // build hierarchy from N - 1 merges represented in rep.z
     for (int i = 0; i < rep.npoints - 1; ++i)
@@ -127,7 +149,11 @@ sidb_cluster_hierarchy(Lyt& lyt, sidb_cluster_hierarchy_linkage_method linkage_m
             if (cs[c] < charge_lyt.num_cells())
             {
                 nodes[cs[c]] = std::make_unique<sidb_binary_cluster_hierarchy_node>(
+#ifdef DEBUG_MODE
+                    std::set<uint64_t>{cs[c]},
+#else
                     phmap::flat_hash_set<uint64_t>{cs[c]},
+#endif
                     std::array<sidb_binary_cluster_hierarchy_node_ptr, 2>{nullptr, nullptr});
             }
         }
@@ -135,7 +161,12 @@ sidb_cluster_hierarchy(Lyt& lyt, sidb_cluster_hierarchy_linkage_method linkage_m
         // rep.z assigns each new cluster to N + i
         const uint64_t new_n = charge_lyt.num_cells() + static_cast<uint64_t>(i);
 
+#ifdef DEBUG_MODE
+        std::set<uint64_t> set_union{};
+#else
         phmap::flat_hash_set<uint64_t> set_union{};
+#endif
+
         std::set_union(nodes.at(cs[0])->c.cbegin(), nodes.at(cs[0])->c.cend(), nodes.at(cs[1])->c.cbegin(),
                        nodes.at(cs[1])->c.cend(), std::inserter(set_union, set_union.begin()));
 
@@ -219,8 +250,11 @@ static constexpr inline uint64_t get_singleton_sidb_ix(const sidb_cluster_ptr& c
 
 static constexpr inline uint64_t get_unique_cluster_id(const sidb_cluster_ptr& c) noexcept;
 
+#if defined(DEBUG_MODE)
+using intra_cluster_potential_bounds = std::map<uint64_t, std::array<double, 2>>;
+#else
 using intra_cluster_potential_bounds = phmap::flat_hash_map<uint64_t, std::array<double, 2>>;
-// using intra_cluster_potential_bounds = std::unordered_map<uint64_t, std::array<double, 2>>;
+#endif
 
 struct sidb_cluster_state
 {
@@ -361,8 +395,12 @@ struct potential_projection
 
 struct potential_projection_order
 {
+
+#ifdef DEBUG_MODE
+    using pot_proj_order = std::set<potential_projection>;
+#else
     using pot_proj_order = phmap::btree_set<potential_projection>;
-    //    using pot_proj_order = std::set<potential_projection>;
+#endif
 
     // 0 : NEG ; 1 : NEUT ; 2 : POS
     pot_proj_order order{};
@@ -439,8 +477,11 @@ struct potential_projection_order
     }
 };
 
+#ifdef DEBUG_MODE
+using sidb_cluster_charge_state_space = std::unordered_set<sidb_cluster_charge_state, sidb_cluster_charge_state>;
+#else
 using sidb_cluster_charge_state_space = phmap::flat_hash_set<sidb_cluster_charge_state, sidb_cluster_charge_state>;
-// using sidb_cluster_charge_state_space = std::unordered_set<sidb_cluster_charge_state, sidb_cluster_charge_state>;
+#endif
 
 struct sidb_cluster_ptr_hash
 {
@@ -450,8 +491,11 @@ struct sidb_cluster_ptr_hash
     }
 };
 
+#ifdef DEBUG_MODE
+using sidb_clustering = std::set<sidb_cluster_ptr>;
+#else
 using sidb_clustering = phmap::flat_hash_set<sidb_cluster_ptr, sidb_cluster_ptr_hash>;
-// using sidb_clustering = std::unordered_set<sidb_cluster_ptr, sidb_cluster_ptr_hash>;
+#endif
 
 struct sidb_cluster
 {
@@ -460,18 +504,26 @@ struct sidb_cluster
 
     const uid_t uid{0};
 
-    phmap::flat_hash_set<sidb_ix> sidbs;
-    sidb_clustering               children;
-    std::weak_ptr<sidb_cluster>   parent{};
+    sidb_clustering             children;
+    std::weak_ptr<sidb_cluster> parent{};
 
+#ifdef DEBUG_MODE
+    std::set<sidb_ix>                             sidbs;
+    std::map<sidb_ix, std::array<double, 2>>      recv_ext_pot_bounds{};
+    std::map<sidb_ix, potential_projection_order> pot_projs{};
+#else
+    phmap::flat_hash_set<sidb_ix> sidbs;
+    phmap::flat_hash_map<sidb_ix, std::array<double, 2>> recv_ext_pot_bounds{};
     phmap::flat_hash_map<sidb_ix, potential_projection_order> pot_projs{};
-    //    std::unordered_map<sidb_ix, potential_projection_order> pot_projs{};
-    phmap::flat_hash_map<sidb_ix, std::array<double, 2>>      recv_ext_pot_bounds{};
-    //    std::unordered_map<sidb_ix, std::array<double, 2>>      recv_ext_pot_bounds{};
+#endif
 
     sidb_cluster_charge_state_space charge_space{};
 
+#ifdef DEBUG_MODE
+    explicit sidb_cluster(std::set<sidb_ix> c, sidb_clustering v, uid_t uid_) noexcept :
+#else
     explicit sidb_cluster(phmap::flat_hash_set<sidb_ix> c, sidb_clustering v, uid_t uid_) noexcept :
+#endif
             uid{c.size() == 1 ? *c.cbegin() : uid_},
             sidbs{std::move(c)},
             children{std::move(v)}
