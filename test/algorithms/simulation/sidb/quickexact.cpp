@@ -1802,7 +1802,7 @@ TEMPLATE_TEST_CASE(
         CHECK(simulation_results.charge_distributions.size() == 1);
     }
 
-    SECTION("QuickExact duplicate charge configurations, Test 1", "[quickexact]")
+    SECTION("Test case 4")
     {
         TestType lyt{};
 
@@ -1817,7 +1817,7 @@ TEMPLATE_TEST_CASE(
         REQUIRE(qe_res.charge_distributions.size() == 2);
     }
 
-    SECTION("QuickExact duplicate charge configurations, Test 2", "[quickexact]")
+    SECTION("Test case 5")
     {
         TestType lyt{};
 
