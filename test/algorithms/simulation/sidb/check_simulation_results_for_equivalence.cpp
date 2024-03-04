@@ -14,7 +14,7 @@
 
 using namespace fiction;
 
-TEST_CASE("Conversion of potential to distance", "[check-equivalence-simulation-result]")
+TEST_CASE("Several tests", "[check-equivalence-simulation-result]")
 {
     sidb_cell_clk_lyt lyt1{};
     lyt1.assign_cell_type({0, 0}, sidb_cell_clk_lyt::cell_type::NORMAL);
@@ -48,6 +48,23 @@ TEST_CASE("Conversion of potential to distance", "[check-equivalence-simulation-
     {
         cds1.assign_system_energy_to_zero();
         results1.charge_distributions = {cds1, cds2};
+        CHECK(!check_simulation_results_for_equivalence(results1, results2));
+    }
+
+    SECTION("inequality due to different number of solutions")
+    {
+        results1.charge_distributions = {cds1};
+        CHECK(!check_simulation_results_for_equivalence(results1, results2));
+    }
+
+    SECTION("inequality due to different number of SiDBs")
+    {
+        auto lyt2{lyt1.clone()};
+        lyt2.assign_cell_type({4, 2}, sidb_cell_clk_lyt::cell_type::NORMAL);
+        lyt2.assign_cell_type({4, 3}, sidb_cell_clk_lyt::cell_type::NORMAL);
+        results2.charge_distributions = {
+            charge_distribution_surface{lyt2, sidb_simulation_parameters{}, sidb_charge_state::NEUTRAL},
+            charge_distribution_surface{lyt2}};
         CHECK(!check_simulation_results_for_equivalence(results1, results2));
     }
 }
