@@ -2,21 +2,26 @@
 // Created by Jan Drewniok on 03.03.24.
 //
 
-#include <fiction/algorithms/simulation/sidb/check_equivalence_simulation_result.hpp>
-#include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
-#include <fiction/algorithms/simulation/sidb/quickexact.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
-#include <fiction/layouts/coordinates.hpp>
-#include <fiction/technology/cell_technologies.hpp>
-#include <fiction/types.hpp>
-#include <fiction/utils/layout_utils.hpp>
-#include <fiction/utils/math_utils.hpp>
+#include "fiction/algorithms/simulation/sidb/check_equivalence_simulation_result.hpp"
+#include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
+#include "fiction/algorithms/simulation/sidb/quickexact.hpp"
+#include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
+#include "fiction/layouts/coordinates.hpp"
+#include "fiction/technology/cell_technologies.hpp"
+#include "fiction/types.hpp"
+#include "fiction/utils/layout_utils.hpp"
+#include "fiction/utils/math_utils.hpp"
 
 #include <fmt/format.h>
 
 #include <cstdint>
+#include <iostream>
 
 using namespace fiction;
+
+// This script verifies the equivalence between ExGS and QuickExact. It generates all layouts consisting of
+// 4 SiDBs within an 11x11 spanned area. The simulation is then executed using both simulators, and the results
+// are compared.
 
 int main()  // NOLINT
 {
@@ -45,5 +50,5 @@ int main()  // NOLINT
             non_equivalence_counter++;
         }
     }
-    std::cout << fmt::format("non equivalent layouts = {}", non_equivalence_counter) << std::endl;
+    std::cout << fmt::format("non equivalent layouts = {}", non_equivalence_counter) << '\n';
 }
