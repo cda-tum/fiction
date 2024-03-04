@@ -22,6 +22,7 @@
 #include <random>
 #include <type_traits>
 #include <utility>
+#include <vector>
 
 namespace fiction
 {
@@ -321,7 +322,7 @@ auto convert_to_siqad_coordinates(const Lyt& lyt) noexcept
 
         if constexpr (is_charge_distribution_surface_v<Lyt> && has_get_sidb_defect_v<Lyt>)
         {
-            charge_distribution_surface lyt_new_cds{sidb_surface{lyt_new}};
+            charge_distribution_surface<decltype(sidb_surface{lyt_new})> lyt_new_cds{sidb_surface{lyt_new}};
 
             lyt.foreach_cell(
                 [&lyt_new_cds, &lyt](const auto& c)
