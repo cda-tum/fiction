@@ -38,6 +38,15 @@ template <typename Lyt>
         return false;
     }
 
+    if (!result1_copy.charge_distributions.empty() && !result2_copy.charge_distributions.empty())
+    {
+        if (result1_copy.charge_distributions.front().num_cells() !=
+            result2_copy.charge_distributions.front().num_cells())
+        {
+            return false;
+        }
+    }
+
     std::set<uint64_t> unique_charge_indices1;
     for (const auto& cds1 : result1_copy.charge_distributions)
     {
@@ -72,7 +81,7 @@ template <typename Lyt>
 
     for (auto i = 0u; i < result1_copy.charge_distributions.size(); i++)
     {
-        const auto& cds1 = result1.charge_distributions.at(i);
+        const auto& cds1 = result1_copy.charge_distributions.at(i);
         const auto& cds2 = result2_copy.charge_distributions.at(i);
         if (std::abs(cds1.get_system_energy() - cds2.get_system_energy()) > std::numeric_limits<double>::epsilon())
         {
