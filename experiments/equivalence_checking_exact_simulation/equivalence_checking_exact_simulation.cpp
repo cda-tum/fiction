@@ -2,15 +2,15 @@
 // Created by Jan Drewniok on 03.03.24.
 //
 
-#include "fiction/algorithms/simulation/sidb/check_equivalence_simulation_result.hpp"
-#include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
-#include "fiction/algorithms/simulation/sidb/quickexact.hpp"
-#include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
-#include "fiction/layouts/coordinates.hpp"
-#include "fiction/technology/cell_technologies.hpp"
-#include "fiction/types.hpp"
-#include "fiction/utils/layout_utils.hpp"
-#include "fiction/utils/math_utils.hpp"
+#include <fiction/algorithms/simulation/sidb/check_equivalence_simulation_result.hpp>
+#include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
+#include <fiction/algorithms/simulation/sidb/quickexact.hpp>
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
+#include <fiction/layouts/coordinates.hpp>
+#include <fiction/technology/cell_technologies.hpp>
+#include <fiction/types.hpp>
+#include <fiction/utils/layout_utils.hpp>
+#include <fiction/utils/math_utils.hpp>
 
 #include <fmt/format.h>
 
