@@ -71,7 +71,7 @@ TEST_CASE("Benchmark simulators", "[benchmark]")
 }
 //  Mac M1, Ventura 13.0, Apple clang version 14.0.0 (22.11.23)
 
-//    old:
+//    Before PR #388:
 //    benchmark name    samples          iterations          est run time
 //                      mean             low mean            high mean
 //                      std dev          low std dev         high std dev
@@ -84,7 +84,7 @@ TEST_CASE("Benchmark simulators", "[benchmark]")
 //                      4.49349 ms      4.47125 ms           4.51652 ms
 //                      115.682 us      101.563 us           135.051 us
 
-//    new:
+//    PR #388:
 //    benchmark name    samples          iterations          est run time
 //                      mean             low mean            high mean
 //                      std dev          low std dev         high std dev

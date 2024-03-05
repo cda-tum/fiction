@@ -2,8 +2,8 @@
 // Created by Jan Drewniok on 03.03.24.
 //
 
-#ifndef FICTION_CHECK_EQUAL_CDS_RESULT_HPP
-#define FICTION_CHECK_EQUAL_CDS_RESULT_HPP
+#ifndef FICTION_CHECK_SIMULATION_RESULTS_FOR_EQUIVALENCE_HPP
+#define FICTION_CHECK_SIMULATION_RESULTS_FOR_EQUIVALENCE_HPP
 
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 
@@ -24,7 +24,7 @@ namespace fiction
  * @tparam Lyt The SiDB cell-level layout type used in the simulation results.
  * @param result1 The first SiDB simulation result to compare.
  * @param result2 The second SiDB simulation result to compare.
- * @return `true` if the two simulation results are equivalent, `false otherwise.
+ * @return `true` if the two simulation results are equivalent, `false` otherwise.
  */
 template <typename Lyt>
 [[nodiscard]] bool check_simulation_results_for_equivalence(const sidb_simulation_result<Lyt>& result1,
@@ -102,21 +102,6 @@ template <typename Lyt>
         {
             return false;
         }
-
-        charge_states_equal = true;
-        cds2.foreach_cell(
-            [&cds1, &cds2, &charge_states_equal](const auto& c)
-            {
-                if (cds1.get_charge_state(c) != cds2.get_charge_state(c))
-                {
-                    charge_states_equal = false;
-                }
-            });
-
-        if (!charge_states_equal)
-        {
-            return false;
-        }
     }
 
     return true;
@@ -124,4 +109,4 @@ template <typename Lyt>
 
 }  // namespace fiction
 
-#endif  // FICTION_CHECK_EQUAL_CDS_RESULT_HPP
+#endif  // FICTION_CHECK_SIMULATION_RESULTS_FOR_EQUIVALENCE_HPP

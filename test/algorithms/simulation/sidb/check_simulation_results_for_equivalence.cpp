@@ -78,4 +78,13 @@ TEST_CASE("Several tests", "[check-equivalence-simulation-result]")
         results2.charge_distributions = {charge_distribution_surface{lyt1}, charge_distribution_surface{lyt1}};
         CHECK(!check_simulation_results_for_equivalence(results1, results2));
     }
+    SECTION("inequality due to different charge states of the first and the second solution")
+    {
+        results1.charge_distributions = {charge_distribution_surface{lyt1}};
+        results2.charge_distributions = {charge_distribution_surface{lyt1}};
+        results2.charge_distributions.at(0).assign_charge_state({0, 0}, sidb_charge_state::POSITIVE);
+        results2.charge_distributions.at(0).assign_system_energy_to_zero();
+        results1.charge_distributions.at(0).assign_system_energy_to_zero();
+        CHECK(!check_simulation_results_for_equivalence(results1, results2));
+    }
 }

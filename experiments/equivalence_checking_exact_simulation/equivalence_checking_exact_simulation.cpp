@@ -52,5 +52,5 @@ int main()  // NOLINT
     }
     std::cout << fmt::format("non equivalent layouts = {}", non_equivalence_counter) << '\n';
 
-    EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }
