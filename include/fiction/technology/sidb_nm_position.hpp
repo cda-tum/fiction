@@ -35,47 +35,41 @@ template <typename Lyt>
 
     if constexpr (has_siqad_coord_v<Lyt>)
     {
-        if (has_same_lattice_orientation_v<Lyt, sidb_100_lattice>)
+        if constexpr (has_same_lattice_orientation_v<Lyt, sidb_100_lattice>)
         {
             const auto x = (c.x * sidb_100_lattice::LAT_A + c.z * sidb_100_lattice::LAT_C.first) * 0.1;
             const auto y = (c.y * sidb_100_lattice::LAT_B + c.z * sidb_100_lattice::LAT_C.second) * 0.1;
             return {x, y};
         }
-        else if (has_same_lattice_orientation_v<Lyt, sidb_111_lattice>)
+        if constexpr (has_same_lattice_orientation_v<Lyt, sidb_111_lattice>)
         {
             const auto x = (c.x * sidb_111_lattice::LAT_A + c.z * sidb_111_lattice::LAT_C.first) * 0.1;
             const auto y = (c.y * sidb_111_lattice::LAT_B + c.z * sidb_111_lattice::LAT_C.second) * 0.1;
             return {x, y};
         }
-        else
-        {
-            assert(false && "Unknown lattice orientation");
-            return {};
-        }
+        assert(false && "Unknown lattice orientation");
+        return {};
     }
     else
     {
         const auto cell_in_siqad = siqad::to_siqad_coord(c);
 
-        if (has_same_lattice_orientation_v<Lyt, sidb_100_lattice>)
+        if constexpr (has_same_lattice_orientation_v<Lyt, sidb_100_lattice>)
         {
             const auto x = (cell_in_siqad.x * sidb_100_lattice::LAT_A + c.z * sidb_100_lattice::LAT_C.first) * 0.1;
             const auto y =
                 (cell_in_siqad.y * sidb_100_lattice::LAT_B + cell_in_siqad.z * sidb_100_lattice::LAT_C.second) * 0.1;
             return {x, y};
         }
-        else if (has_same_lattice_orientation_v<Lyt, sidb_111_lattice>)
+        if constexpr (has_same_lattice_orientation_v<Lyt, sidb_111_lattice>)
         {
             const auto x = (cell_in_siqad.x * sidb_111_lattice::LAT_A + c.z * sidb_111_lattice::LAT_C.first) * 0.1;
             const auto y =
                 (cell_in_siqad.y * sidb_111_lattice::LAT_B + cell_in_siqad.z * sidb_111_lattice::LAT_C.second) * 0.1;
             return {x, y};
         }
-        else
-        {
-            assert(false && "Unknown lattice orientation");
-            return {};
-        }
+        assert(false && "Unknown lattice orientation");
+        return {};
     }
 }
 
