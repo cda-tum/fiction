@@ -30,8 +30,8 @@ template <typename Lyt>
 [[nodiscard]] bool check_simulation_results_for_equivalence(const sidb_simulation_result<Lyt>& result1,
                                                             const sidb_simulation_result<Lyt>& result2)
 {
-    auto result1_copy = result1;
-    auto result2_copy = result2;
+    auto result1_copy = sidb_simulation_result{result1};
+    auto result2_copy = sidb_simulation_result{result2};
 
     if (result1_copy.charge_distributions.size() != result2_copy.charge_distributions.size())
     {
@@ -40,8 +40,8 @@ template <typename Lyt>
 
     if (!result1_copy.charge_distributions.empty() && !result2_copy.charge_distributions.empty())
     {
-        if (result1_copy.charge_distributions.front().num_cells() !=
-            result2_copy.charge_distributions.front().num_cells())
+        if (result1_copy.charge_distributions.front().get_sidb_order().size() !=
+            result2_copy.charge_distributions.front().get_sidb_order().size())
         {
             return false;
         }
@@ -60,7 +60,7 @@ template <typename Lyt>
     }
 
     std::set<uint64_t> unique_charge_indices2;
-    for (const auto& cds2 : result1_copy.charge_distributions)
+    for (const auto& cds2 : result2_copy.charge_distributions)
     {
         unique_charge_indices2.insert(cds2.get_charge_index_and_base().first);
     }

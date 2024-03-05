@@ -67,4 +67,15 @@ TEST_CASE("Several tests", "[check-equivalence-simulation-result]")
             charge_distribution_surface{lyt2}};
         CHECK(!check_simulation_results_for_equivalence(results1, results2));
     }
+
+    SECTION("inequality due to duplication in first solution")
+    {
+        results1.charge_distributions = {charge_distribution_surface{lyt1}, charge_distribution_surface{lyt1}};
+        CHECK(!check_simulation_results_for_equivalence(results1, results2));
+    }
+    SECTION("inequality due to duplication in second solution")
+    {
+        results2.charge_distributions = {charge_distribution_surface{lyt1}, charge_distribution_surface{lyt1}};
+        CHECK(!check_simulation_results_for_equivalence(results1, results2));
+    }
 }
