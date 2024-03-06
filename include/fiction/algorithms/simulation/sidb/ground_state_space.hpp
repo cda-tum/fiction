@@ -408,7 +408,7 @@ class ground_state_space
 
     bool check_charge_space(const sidb_cluster_ptr& c) noexcept
     {
-        // skip if |charge space| = 1?
+        // skip if |charge space| = 1
         if (c->charge_space.size() == 1)
         {
             return true;
@@ -524,7 +524,7 @@ class ground_state_space
                 return;
             }
 
-            // check if composition exists
+            // check if cluster charge state exists
             sidb_cluster_charge_state_space::iterator it = parent->charge_space.find(m);
             if (it != parent->charge_space.cend())
             {

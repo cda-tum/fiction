@@ -183,12 +183,12 @@ TEST_CASE("ClusterComplete runtime tests on random layouts with 40 SiDBs", "[clu
     {
         std::cout << "LAYOUT NUMBER: " << i << std::endl;
 
-        const sidb_simulation_result<sidb_lyt> cc_res = clustercomplete(lyts[i], 8, sidb_simulation_parameters{}, 6);
+        const sidb_simulation_result<sidb_lyt> cc_res = clustercomplete(lyts[i], 8, sidb_simulation_parameters{});
 
         std::cout << "CLUSTERCOMPLETE LIM=8 RUNTIME: " << cc_res.simulation_runtime.count() << " s" << std::endl;
         std::cout << "PHYSICALLY VALID CHARGE DISTRIBUTIONS: " << cc_res.charge_distributions.size() << std::endl;
 
-        const sidb_simulation_result<sidb_lyt> cc_res2 = clustercomplete(lyts[i], 12, sidb_simulation_parameters{}, 6);
+        const sidb_simulation_result<sidb_lyt> cc_res2 = clustercomplete(lyts[i], 12, sidb_simulation_parameters{});
 
         std::cout << "CLUSTERCOMPLETE LIM=12 RUNTIME: " << cc_res2.simulation_runtime.count() << " s" << std::endl;
         std::cout << "PHYSICALLY VALID CHARGE DISTRIBUTIONS: " << cc_res2.charge_distributions.size() << '\n'

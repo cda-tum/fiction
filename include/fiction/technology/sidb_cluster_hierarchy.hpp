@@ -377,9 +377,6 @@ struct sidb_cluster_charge_state
     }
 };
 
-// static constexpr inline const uint64_t SINGLETON_NEGATIVE_MULTISET_CHARGE_CONF = 1ull << 32ull;
-// static constexpr inline const uint64_t SINGLETON_POSITIVE_MULTISET_CHARGE_CONF = 1ull;
-
 static constexpr inline sidb_charge_state singleton_multiset_conf_to_charge_state(const uint64_t m) noexcept
 {
     return sign_to_charge_state(static_cast<int8_t>(static_cast<uint32_t>(m) - (static_cast<uint32_t>(m) < m)));
