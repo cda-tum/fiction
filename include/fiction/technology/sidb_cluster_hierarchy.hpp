@@ -377,7 +377,7 @@ struct sidb_cluster_state
      * associated clusters throughout operation, it suffices to compare the respective unique identifiers.
      *
      * @param other Other cluster state to compare.
-     * @return Returns true if and only if the cluster states contain the same cluster.
+     * @return `true` if and only if the cluster states contain the same cluster.
      */
     constexpr inline bool operator==(const sidb_cluster_state& other) const noexcept
     {
@@ -388,7 +388,7 @@ struct sidb_cluster_state
      * Defines the inequality operation on cluster states, inverse to the former.
      *
      * @param other Other cluster state to compare.
-     * @return Returns true if and only if the cluster states do not contain the same cluster.
+     * @return `true` if and only if the cluster states do not contain the same cluster.
      */
     constexpr inline bool operator!=(const sidb_cluster_state& other) const noexcept
     {
@@ -494,7 +494,7 @@ struct sidb_cluster_charge_state
      * Defines the equality operation of cluster charge states, which disregards the compositions.
      *
      * @param other Other cluster charge state to test for equality with the current.
-     * @return Returns true if and only if the compressed forms are equal.
+     * @return `true` if and only if the compressed forms are equal.
      */
     constexpr inline bool operator==(const sidb_cluster_charge_state& other) const noexcept
     {
@@ -594,9 +594,9 @@ struct potential_projection
      * equal, a comparison of the latter is used as a "fail-safe".
      *
      * @param other Other potential projection to compare with the current.
-     * @return Returns true if and only if the potential value of the current is lower than that of the other, or if the
+     * @return `true` if and only if the potential value of the current is lower than that of `other`, or if the
      * potential values are equal and the compressed form of the multiset charge configuration is strictly less than
-     * that of the other.
+     * that of `other`.
      */
     constexpr inline bool operator<(const potential_projection& other) const noexcept
     {
@@ -609,7 +609,7 @@ struct potential_projection
      * forms.
      *
      * @param other Other potential projection to sum with the current.
-     * @return Returns the current potential projection to which the other potential projection is now added.
+     * @return The current potential projection to which the other potential projection is now added.
      */
     constexpr inline potential_projection& operator+=(const potential_projection& other) noexcept
     {
@@ -771,7 +771,7 @@ struct sidb_cluster_ptr_hash
      * The hashing operation is defined.
      *
      * @param c Shared pointer to a cluster to take the has of.
-     * @return Returns the hash computed over the the unique id associated with the cluster.
+     * @return The hash computed over the the unique id associated with the cluster.
      */
     constexpr inline std::size_t operator()(const sidb_cluster_ptr& c) const noexcept
     {
@@ -916,7 +916,7 @@ struct sidb_cluster
     /**
      * Function to return the number of SiDBs contained in the cluster.
      *
-     * @return the number of SiDBs contained in the cluster.
+     * @return The number of SiDBs contained in the cluster.
      */
     constexpr inline uint64_t size() const noexcept
     {
@@ -927,7 +927,7 @@ struct sidb_cluster
      * Equality operation on cluster hierarchies. Checks the respective unique identifiers for equality.
      *
      * @param other Cluster (hierarchy) to compare to.
-     * @return True if and only if the unique identifiers match.
+     * @return `true` if and only if the unique identifiers match.
      */
     constexpr inline bool operator==(const sidb_cluster& other) const noexcept
     {
