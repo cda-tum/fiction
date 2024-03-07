@@ -212,8 +212,10 @@ struct sidb_cluster_receptor_state
      */
     const uint64_t          sidb_ix;
 };
-
-static constexpr inline uint64_t get_cluster_size(const sidb_cluster_ptr& c) noexcept;
+/**
+ * Forward declaration. Required for compilation due to the mutually recursive structure in this file.
+ */
+static inline uint64_t get_cluster_size(const sidb_cluster_ptr& c) noexcept;
 /**
  * A projector state pairs the potential projecting cluster with the associated multiset charge configuration.
  */
@@ -304,11 +306,11 @@ static constexpr inline void take_meet_of_potential_bounds(double& a, const doub
 /**
  * Forward declaration. Required for compilation due to the mutually recursive structure in this file.
  */
-static constexpr inline uint64_t get_singleton_sidb_ix(const sidb_cluster_ptr& c) noexcept;
+static inline uint64_t get_singleton_sidb_ix(const sidb_cluster_ptr& c) noexcept;
 /**
  * Forward declaration. Required for compilation due to the mutually recursive structure in this file.
  */
-static constexpr inline uint64_t get_unique_cluster_id(const sidb_cluster_ptr& c) noexcept;
+static inline uint64_t get_unique_cluster_id(const sidb_cluster_ptr& c) noexcept;
 /**
  * This defines the type for a store in which the bounds on the local potential for an SiDB (index) may be stored. For
  * the *Ground State Space* algorithm, this is used to keep track of the bounds on the fraction of local potential that
@@ -964,7 +966,7 @@ static inline uint64_t get_unique_cluster_id(const sidb_cluster_ptr& c) noexcept
  * @param c Singleton cluster of which the single SiDB (index) it contains is requested.
  * @return The SiDB index contained in the given cluster. It is equal to the unique identifier of the cluster.
  */
-static constexpr inline uint64_t get_singleton_sidb_ix(const sidb_cluster_ptr& c) noexcept
+static inline uint64_t get_singleton_sidb_ix(const sidb_cluster_ptr& c) noexcept
 {
     assert(get_cluster_size(c) == 1);
     return get_unique_cluster_id(c);
