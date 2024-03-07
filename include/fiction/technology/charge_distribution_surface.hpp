@@ -998,7 +998,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                           ((strg->cell_charge[for_loop_counter] == sidb_charge_state::POSITIVE) &&
                            (-it + mu_p > -physical_constants::POP_STABILITY_ERR)) ||
                           ((strg->cell_charge[for_loop_counter] == sidb_charge_state::NEUTRAL) &&
-                           (-it + strg->phys_params.mu_minus > -physical_constants::POP_STABILITY_ERR) &&
+                           (-it + strg->phys_params.mu_minus > physical_constants::POP_STABILITY_ERR) &&
                            (-it + mu_p < physical_constants::POP_STABILITY_ERR)));
             for_loop_counter += 1;
             if (!valid)
