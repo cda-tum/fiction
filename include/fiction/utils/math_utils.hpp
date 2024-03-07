@@ -90,7 +90,7 @@ T integral_abs(const T n) noexcept
  *         distributing k entities on n positions.
  */
 [[nodiscard]] inline std::vector<std::vector<std::size_t>>
-determine_all_combinations_of_distributing_k_entities_on_n_positions(const uint64_t k, const uint64_t n) noexcept
+determine_all_combinations_of_distributing_k_entities_on_n_positions(const std::size_t k, const std::size_t n) noexcept
 {
     std::vector<std::vector<std::size_t>> all_combinations{};
     all_combinations.reserve(binomial_coefficient(n, k));
@@ -107,7 +107,7 @@ determine_all_combinations_of_distributing_k_entities_on_n_positions(const uint6
 
             for (auto it = begin; it != end; ++it)
             {
-                combination.push_back(static_cast<std::size_t>(*it));
+                combination.push_back(*it);
             }
 
             all_combinations.push_back(combination);
