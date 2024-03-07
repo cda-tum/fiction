@@ -405,7 +405,7 @@ struct sidb_cluster_state
      * @param other Other cluster state to compare.
      * @return `true` if and only if the cluster states do not contain the same cluster.
      */
-    constexpr inline bool operator!=(const sidb_cluster_state& other) const noexcept
+    inline bool operator!=(const sidb_cluster_state& other) const noexcept
     {
         return !(*this == other);
     }
@@ -823,8 +823,8 @@ struct sidb_cluster
     std::map<sidb_ix, std::array<double, 2>>      recv_ext_pot_bounds{};
     std::map<sidb_ix, potential_projection_order> pot_projs{};
 #else
-    phmap::flat_hash_set<sidb_ix> sidbs;
-    phmap::flat_hash_map<sidb_ix, std::array<double, 2>> recv_ext_pot_bounds{};
+    phmap::flat_hash_set<sidb_ix>                             sidbs;
+    phmap::flat_hash_map<sidb_ix, std::array<double, 2>>      recv_ext_pot_bounds{};
     phmap::flat_hash_map<sidb_ix, potential_projection_order> pot_projs{};
 #endif
     /**
