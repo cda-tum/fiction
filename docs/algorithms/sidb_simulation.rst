@@ -81,6 +81,11 @@ Energy Calculation
 .. doxygenfunction:: fiction::is_ground_state
 
 
+**Header:** ``fiction/algorithms/simulation/sidb/check_simulation_results_for_equivalence.hpp``
+
+.. doxygenfunction:: fiction::check_simulation_results_for_equivalence
+
+
 **Header:** ``fiction/algorithms/simulation/sidb/determine_groundstate_from_simulation_results.hpp``
 
 .. doxygenfunction:: fiction::determine_groundstate_from_simulation_results
