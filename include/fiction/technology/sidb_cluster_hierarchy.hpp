@@ -369,7 +369,7 @@ struct sidb_cluster_state
      * @param min New lower bound to set.
      * @param max New upper bound to set.
      */
-    constexpr inline void set_pot_bounds(const uint64_t sidb_ix, const double min, const double max) noexcept
+    inline void set_pot_bounds(const uint64_t sidb_ix, const double min, const double max) noexcept
     {
         internal_pot_bounds[sidb_ix][static_cast<uint8_t>(bound_direction::LOWER)] = min;
         internal_pot_bounds[sidb_ix][static_cast<uint8_t>(bound_direction::UPPER)] = max;
@@ -381,8 +381,7 @@ struct sidb_cluster_state
      * @param min Difference in lower bound potential to apply.
      * @param max Difference in upper bound potential to apply.
      */
-    constexpr inline void update_pot_bounds(const uint64_t sidb_ix, const double min_diff,
-                                            const double max_diff) noexcept
+    inline void update_pot_bounds(const uint64_t sidb_ix, const double min_diff, const double max_diff) noexcept
     {
         internal_pot_bounds[sidb_ix][static_cast<uint8_t>(bound_direction::LOWER)] += min_diff;
         internal_pot_bounds[sidb_ix][static_cast<uint8_t>(bound_direction::UPPER)] += max_diff;
@@ -523,7 +522,7 @@ struct sidb_cluster_charge_state
      * @param m Cluster charge state to compute the hash of.
      * @return The hash of the given cluster charge state.
      */
-    constexpr inline std::size_t operator()(const sidb_cluster_charge_state& m) const noexcept
+    inline std::size_t operator()(const sidb_cluster_charge_state& m) const noexcept
     {
         return std::hash<uint64_t>{}(static_cast<uint64_t>(m));
     }
@@ -755,7 +754,7 @@ struct potential_projection_order
      *
      * @param pp Potential projection to add.
      */
-    constexpr inline void add(const potential_projection& pp) noexcept
+    inline void add(const potential_projection& pp) noexcept
     {
         order.emplace(pp);
     }
@@ -779,7 +778,7 @@ struct sidb_cluster_ptr_hash
      * @param c Shared pointer to a cluster to take the has of.
      * @return The hash computed over the the unique id associated with the cluster.
      */
-    constexpr inline std::size_t operator()(const sidb_cluster_ptr& c) const noexcept
+    inline std::size_t operator()(const sidb_cluster_ptr& c) const noexcept
     {
         return std::hash<uint64_t>{}(get_unique_cluster_id(c));
     }
@@ -924,7 +923,7 @@ struct sidb_cluster
      *
      * @return The number of SiDBs contained in the cluster.
      */
-    constexpr inline uint64_t size() const noexcept
+    inline uint64_t size() const noexcept
     {
         return sidbs.size();
     }
@@ -945,7 +944,7 @@ struct sidb_cluster
  * @param c Cluster of which the number of SiDBs it contains is requested.
  * @return The number of SiDBs in the given cluster.
  */
-static constexpr inline uint64_t get_cluster_size(const sidb_cluster_ptr& c) noexcept
+static inline uint64_t get_cluster_size(const sidb_cluster_ptr& c) noexcept
 {
     return c->sidbs.size();
 }
@@ -955,7 +954,7 @@ static constexpr inline uint64_t get_cluster_size(const sidb_cluster_ptr& c) noe
  * @param c Cluster of which its unique identifier is requested.
  * @return The unique identifier of the given.
  */
-static constexpr inline uint64_t get_unique_cluster_id(const sidb_cluster_ptr& c) noexcept
+static inline uint64_t get_unique_cluster_id(const sidb_cluster_ptr& c) noexcept
 {
     return c->uid;
 }
