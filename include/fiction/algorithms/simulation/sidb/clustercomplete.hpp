@@ -27,16 +27,16 @@
 namespace fiction
 {
 
-/*
+/**
  * The struct containing the parameters both passed on to pre-simulator Ground State Space, and used during simulation.
  */
 struct clustercomplete_params
 {
-    /*
+    /**
      * Physical simulation parameters.
      */
-    sidb_simulation_parameters phys_params{};
-    /*
+    sidb_simulation_parameters physical_parameters{};
+    /**
      * This specifies the maximum cluster size for which Ground State Space will solve an NP-complete sub-problem
      * exhaustively. The sets of SiDBs that witness local population stability for each respective charge state may be
      * partitioned into disjoint sets such that the number of required witnesses for each respective charge state is
@@ -44,10 +44,14 @@ struct clustercomplete_params
      * rejected.
      */
     uint64_t validity_witness_partitioning_max_cluster_size_gss = 6;
-    /*
+    /**
      * Number of threads to make available to ClusterComplete for the simulation stage.
      */
     uint64_t available_threads = std::thread::hardware_concurrency();
+    /**
+     * Report the *Ground State Space* statistics to standard output.
+     */
+    bool report_gss_stats = false;
 };
 
 namespace detail
@@ -67,7 +71,7 @@ class clustercomplete
             num_threads{available_threads}
     {}
 
-    sidb_simulation_result<Lyt> run(const uint64_t validity_witness_partitioning_limit) noexcept
+    sidb_simulation_result<Lyt> run(const uint64_t validity_witness_partitioning_limit, const bool rep_stats) noexcept
     {
         res.physical_parameters = charge_layout.get_phys_params();
         res.algorithm_name      = "ClusterComplete";
@@ -75,7 +79,15 @@ class clustercomplete
         const ground_state_space_result& gss_res = fiction::ground_state_space(
             charge_layout, validity_witness_partitioning_limit, charge_layout.get_phys_params());
 
-        report_ground_state_space_statistics(gss_res);
+        if (!gss_res.top_cluster)
+        {
+            return res;
+        }
+
+        if (rep_stats)
+        {
+            report_ground_state_space_statistics(gss_res);
+        }
 
         mockturtle::stopwatch<>::duration time_counter{};
         {
@@ -96,7 +108,7 @@ class clustercomplete
     static charge_distribution_surface<Lyt>
     initialize_charge_layout(const Lyt& lyt, const sidb_simulation_parameters& phys_params) noexcept
     {
-        charge_distribution_surface cl{lyt};
+        charge_distribution_surface<Lyt> cl{lyt};
         cl.assign_physical_parameters(phys_params);
         return cl;
     }
@@ -430,11 +442,11 @@ class clustercomplete
  * pre-simulation and simulation in practice, breaking the rapid exponential growth in problem complexity for SiDB
  * simulation problems in application.
  *
- * The key ingredient is the *Ground State Space* algorithm, which constructs a
- * minimal search space of charge configurations that adhere to the critical population stability criterion. In
- * particular, it generalizes Jan Drewniok's physically informed space pruning concept employed in his game-changing
- * *QuickExact* simulator to apply to all charge states equally, and, most importantly, it lifts the associated
- * potential equations to higher order, allowing us to reason over potential bounds in a cluster hierarchy.
+ * The key ingredient is the *Ground State Space* algorithm, which constructs a minimal search space of charge
+ * configurations that adhere to the critical population stability criterion. In particular, it generalizes Jan
+ * Drewniok's physically informed space pruning concept employed in his game-changing *QuickExact* simulator to apply to
+ * all charge states equally, and, most importantly, it lifts the associated potential equations to higher order,
+ * allowing us to reason over potential bounds in a cluster hierarchy.
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @param lyt Layout to simulate.
@@ -448,8 +460,8 @@ template <typename Lyt>
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-    return detail::clustercomplete(lyt, cc_params.phys_params, cc_params.available_threads)
-        .run(cc_params.validity_witness_partitioning_max_cluster_size_gss);
+    return detail::clustercomplete(lyt, cc_params.physical_parameters, cc_params.available_threads)
+        .run(cc_params.validity_witness_partitioning_max_cluster_size_gss, cc_params.report_gss_stats);
 }
 
 }  // namespace fiction

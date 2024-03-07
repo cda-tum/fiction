@@ -35,18 +35,18 @@ struct ground_state_space_result
      * The top cluster is the root of the cluster hierarchy. It therefore allows access to the entire cluster hierarchy,
      * including the charge spaces of each cluster.
      */
-    const sidb_cluster_ptr top_cluster;
+    const sidb_cluster_ptr top_cluster{nullptr};
     /**
      * The runtime of the construction is stored.
      */
-    const std::chrono::duration<double> runtime;
+    const std::chrono::duration<double> runtime{};
     /**
      * A quick heuristic to assess the quality of the pruning is captured by the size of the charge space of the top
      * cluster, which depends on the charge spaces of all clusters below it. The number of pruned elements is stored
      * here, which is computed by subtracting the size of the charge space of the top cluster from the maximum size it
      * can have for the given simulation base.
      */
-    const uint64_t pruned_top_level_multisets;
+    const uint64_t pruned_top_level_multisets{};
     /**
      * The maximum size of the charge space of the top cluster, given the simulation base, can be inferred by the "stars
      * and bars" combinatorial idea, the solution to which determines the maximum amount of multisets of size N (where N
@@ -57,7 +57,7 @@ struct ground_state_space_result
      * the top cluster as the number of combinations of N stars and b - 1 bars. Hence this is computed with the
      * following combinatorial formula: nCr(N + b - 1, b - 1).
      */
-    const uint64_t maximum_top_level_multisets;
+    const uint64_t maximum_top_level_multisets{};
 };
 
 namespace detail
@@ -779,6 +779,14 @@ ground_state_space_result
 ground_state_space(const Lyt& lyt, const uint64_t max_cluster_size_for_witness_partitioning = 6,
                    const sidb_simulation_parameters& phys_params = sidb_simulation_parameters{}) noexcept
 {
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+
+    if (lyt.num_cells() == 0)
+    {
+        return ground_state_space_result{};
+    }
+
     return detail::ground_state_space(lyt, max_cluster_size_for_witness_partitioning, phys_params).run();
 }
 
