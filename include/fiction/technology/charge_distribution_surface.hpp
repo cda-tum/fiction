@@ -859,10 +859,15 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
         return std::nullopt;
     }
-
-    void set_local_potential_by_index(const uint64_t i, const double loc_pot) noexcept
+    /**
+     * This function allows the local electrostatic potential for some given index position to be set externally.
+     *
+     * @param index The index defining the SiDB position.
+     * @param loc_pot The local electrostatic potential to assign to the given index position (unit: V).
+     */
+    void assign_local_potential_by_index(const uint64_t index, const double loc_pot) noexcept
     {
-        strg->local_pot[i] = loc_pot;
+        strg->local_pot[index] = loc_pot;
     }
     /**
      * This function returns the local electrostatic potential at a given index position in Volt (unit: V).
@@ -957,7 +962,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         this->validity_check();
     }
     /*
-     * The configuration stability of the current charge distribution is evaluated.
+     * The configuration stability of the current charge distribution is evaluated. It is performed as the last check
+     * towards a judgement of physical validity of the present charge distribution layout.
      */
     bool is_configuration_stable() noexcept
     {
@@ -988,7 +994,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         // distribution satisfies metastability.
         return true;
     }
-
     /**
      * The physically validity of the current charge distribution is evaluated and stored in the storage struct. A
      * charge distribution is valid if the *Population Stability* and the *Configuration Stability* is fulfilled.
@@ -1035,9 +1040,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return strg->validity;
     }
     /**
-     * This function returns the currently stored validity of the present charge distribution layout.
-     *
-     * @returns The validity of the present charge distribution.
+     * This function declares present charge distribution layout as physically valid by external judgement.
      */
     void declare_physically_valid() noexcept
     {

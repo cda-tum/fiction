@@ -26,12 +26,38 @@
 namespace fiction
 {
 
+/*
+ * This struct is used to store the results of the *Ground State Space* construction.
+ */
 struct ground_state_space_result
 {
-    const sidb_cluster_ptr              top_cluster;
+    /**
+     * The top cluster is the root of the cluster hierarchy. It therefore allows access to the entire cluster hierarchy,
+     * including the charge spaces of each cluster.
+     */
+    const sidb_cluster_ptr top_cluster;
+    /**
+     * The runtime of the construction is stored.
+     */
     const std::chrono::duration<double> runtime;
-    const uint64_t                      pruned_top_level_multisets;
-    const uint64_t                      maximum_top_level_multisets;
+    /**
+     * A quick heuristic to assess the quality of the pruning is captured by the size of the charge space of the top
+     * cluster, which depends on the charge spaces of all clusters below it. The number of pruned elements is stored
+     * here, which is computed by subtracting the size of the charge space of the top cluster from the maximum size it
+     * can have for the given simulation base.
+     */
+    const uint64_t pruned_top_level_multisets;
+    /**
+     * The maximum size of the charge space of the top cluster, given the simulation base, can be inferred by the "stars
+     * and bars" combinatorial idea, the solution to which determines the maximum amount of multisets of size N (where N
+     * is the number of SiDBs in the layout, and therefore in the top cluster) for the given base b. In particular, any
+     * such multiset can be seen as N stars and b - 1 bars separating those stars. Then, the b partitions forming from
+     * these b - 1 separators each have a respective size, adding up to N. Therefore each partition is associated with
+     * an amount of one of the charge states of the multiset. Now we may compute total number of possible multisets for
+     * the top cluster as the number of combinations of N stars and b - 1 bars. Hence this is computed with the
+     * following combinatorial formula: nCr(N + b - 1, b - 1).
+     */
+    const uint64_t maximum_top_level_multisets;
 };
 
 namespace detail
@@ -131,7 +157,7 @@ class ground_state_space
         {
             const uint64_t i = get_singleton_sidb_ix(c);
 
-            c->initialize_singleton_cluster_charge_space(i, -min_loc_pot_cds.get_local_potential_by_index(i).value(),
+            c->initialize_singleton_cluster_charge_space(-min_loc_pot_cds.get_local_potential_by_index(i).value(),
                                                          -max_loc_pot_cds.get_local_potential_by_index(i).value(),
                                                          min_loc_pot_cds.get_phys_params().base);
 
@@ -719,6 +745,35 @@ class ground_state_space
 
 }  // namespace detail
 
+/**
+ * The purely constructive *Ground State Space* algorithm is the key ingredient of the *ClusterComplete* exact SiDB
+ * simulator that revolutionizes the domain of exact SiDB simulation. It uses iterative "loop until fixpoint" concepts
+ * to prune the simulation search space for not only a flat layout of SiDBs, but rather generalizes, and lifts Jan
+ * Drewniok's game-changing physically informed space pruning technique introduced with *QuickExact* to higher order,
+ * allowing *Ground State Space* to prune multiset charge state configurations at any level in a cluster hierarchy.
+ *
+ * Starting at a clustering of all singleton clusters, the charge spaces, ie. a set of multiset charge configurations
+ * (initially { {{-}}, {{0}}, {{+}} } or omitting the singleton multiset {{+}} in the case of base 2 pre-simulation),
+ * are pruned iteratively through potential bound analysis. Through merges, ie., replacing a set of children in the
+ * clustering with their parent, we may inspect the most crucially dependant interactions in the layout separately. This
+ * is an effect of the defaulted minimal variance cluster linking heuristic, which clusters precisely that which is most
+ * prominently related. The procedure finishes when the charge spaces have been folded all the way up to the top
+ * cluster, parent of all, which then contains all information resulting from the construction. *ClusterComplete*,
+ * without much trickery, now simply unfolds this result, allowing us to simulate problems that were previously seen as
+ * astronomical in size.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @param lyt Layout to construct the ground state space of.
+ * @param max_cluster_size_for_witness_partitioning This specifies the maximum cluster size for which Ground State Space
+ * will solve an NP-complete sub-problem exhaustively. The sets of SiDBs that witness local population stability for
+ * each respective charge state may be partitioned into disjoint sets such that the number of required witnesses for
+ * each respective charge state is satisfied. If no such partition exists, the multiset charge configuration associated
+ * with the requirements may be rejected.
+ * @param phys_params The physical parameter that *Ground State Space* will use in order to prune the search space for
+ * simulation.
+ * @return The results of the construction, which include the top cluster which parents all other clusters, and thereby
+ * contains the charge spaces of each cluster.
+ */
 template <typename Lyt>
 ground_state_space_result
 ground_state_space(const Lyt& lyt, const uint64_t max_cluster_size_for_witness_partitioning = 6,
