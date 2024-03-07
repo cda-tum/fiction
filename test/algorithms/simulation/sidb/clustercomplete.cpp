@@ -22,10 +22,13 @@
 #include <fiction/types.hpp>
 #include <fiction/utils/layout_utils.hpp>
 
+#include <algorithm>
+#include <cstdint>
+
 using namespace fiction;
 
 TEMPLATE_TEST_CASE(
-    "Empty layout QuickExact simulation", "[quickexact]",
+    "Empty layout ClusterComplete simulation", "[clustercomplete]",
     (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
     (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
@@ -147,7 +150,7 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "ClusterComplete simulation of a Y-shape SiDB OR gate with input 01 under varying physical parameters",
-    "[quickexact]", (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
+    "[clustercomplete]", (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
     (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
     TestType lyt{};
