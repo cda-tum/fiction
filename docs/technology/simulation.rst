@@ -14,7 +14,10 @@ Possible charge states of SiDBs.
 .. doxygenfunction:: fiction::charge_state_to_sign(const sidb_charge_state& cs) noexcept
 .. doxygenfunction:: fiction::sign_to_charge_state(const int8_t sg) noexcept
 .. doxygenfunction:: fiction::charge_configuration_to_string(const std::vector<sidb_charge_state>& charge_distribution) noexcept
-
+.. doxygenclass:: fiction::sidb_charge_state_iterator
+   :members:
+.. doxygenclass:: fiction::sidb_charge_state_reversed_iterator
+   :members:
 
 SiDB Charge Distribution Surface
 --------------------------------
@@ -42,3 +45,40 @@ Physical Constants
 .. doxygenvariable:: K_E
 .. doxygenvariable:: POP_STABILITY_ERR
 .. doxygenvariable:: PI
+
+SiDB Cluster Hierarchy
+
+**Header:** ``fiction/technology/sidb_cluster_hierarchy.hpp``
+
+A cluster hierarchy can be computed over any SiDB layout, resulting in a useful structure for simulation of possible
+charge distributions. The this header provides the structures used for *Ground State Space* construction.
+
+.. doxygenenum:: fiction::sidb_cluster_hierarchy_linkage_method
+.. doxygenstruct:: fiction::sidb_binary_cluster_hierarchy_node
+   :members:
+.. doxygenfunction:: fiction::sidb_binary_cluster_hierarchy_node
+.. doxygenstruct:: fiction::sidb_cluster_receptor_state
+   :members:
+.. doxygenstruct:: fiction::sidb_cluster_projector_state
+   :members:
+.. doxygenenum:: fiction::bound_direction
+.. doxygenfunction:: fiction::potential_bound_top
+.. doxygenfunction:: fiction::take_meet_of_potential_bounds
+.. doxygentypedef:: fiction::intra_cluster_potential_bounds
+.. doxygenstruct:: fiction::sidb_cluster_state
+   :members:
+.. doxygentypedef:: fiction::sidb_clustering_state
+.. doxygenstruct:: fiction::sidb_cluster_charge_state
+   :members:
+.. doxygenfunction:: fiction::singleton_multiset_conf_to_charge_state
+.. doxygenstruct:: fiction::potential_projection
+   :members:
+.. doxygenstruct:: fiction::potential_projection_order
+   :members:
+.. doxygentypedef:: fiction::sidb_cluster_charge_state_space
+.. doxygentypedef:: fiction::sidb_clustering
+.. doxygenstruct:: fiction::sidb_cluster
+   :members:
+.. doxygenfunction:: fiction::get_projector_state_compositions
+.. doxygenfunction:: fiction::to_unique_sidb_cluster
+.. doxygenfunction:: fiction::to_sidb_cluster

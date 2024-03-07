@@ -72,33 +72,40 @@ enum class sidb_cluster_hierarchy_linkage_method
 
 struct sidb_binary_cluster_hierarchy_node;
 using sidb_binary_cluster_hierarchy_node_ptr = std::unique_ptr<sidb_binary_cluster_hierarchy_node>;
-
 /**
  * The struct used to store a binary cluster hierarchy that may be used to store the result of the hierarchical
  * clustering returned by ALGLIB functionality.
  */
 struct sidb_binary_cluster_hierarchy_node
 {
-
+    /**
+     * The set of SiDB indices contained in the node
+     */
 #ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
     std::set<uint64_t> c;
 #else
     phmap::flat_hash_set<uint64_t> c;
 #endif
-
+    /**
+     * The two children of the node.
+     */
     std::array<sidb_binary_cluster_hierarchy_node_ptr, 2> sub;
-
+    /**
+     * Binary cluster hierarchy node constructor.
+     *
+     * @param sidbs The set of SiDBs to contain in this node.
+     * @param children The pair of binary cluster hierarchy node pointers that become the children of this node.
+     */
 #ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
     sidb_binary_cluster_hierarchy_node(const std::set<uint64_t>& c_,
 #else
-    sidb_binary_cluster_hierarchy_node(const phmap::flat_hash_set<uint64_t>& c_,
+    sidb_binary_cluster_hierarchy_node(phmap::flat_hash_set<uint64_t> sidbs,
 #endif
-                                       std::array<sidb_binary_cluster_hierarchy_node_ptr, 2> sub_) noexcept :
-            c{c_},
-            sub{std::move(sub_)}
+                                       std::array<sidb_binary_cluster_hierarchy_node_ptr, 2> children) noexcept :
+            c{std::move(sidbs)},
+            sub{std::move(children)}
     {}
 };
-
 /**
  * This function performs the ALGLIB agglomerative clustering algorithm for a given SiDB layout. By default, the cluster
  * are created by a minimal positional variance heuristic, also known as Ward's method.
@@ -185,33 +192,41 @@ sidb_cluster_hierarchy(Lyt& lyt, sidb_cluster_hierarchy_linkage_method linkage_m
 
     return std::move(*nodes.cbegin()->second);
 };
-
 /**
  * Forward declaration of the SiDB cluster hierarchy required for the mutual recursive structure in this file.
  * Here we define a pointer to a SiDB cluster to be a shared pointer, which enables us to also have pointers to parents.
  */
 struct sidb_cluster;
 using sidb_cluster_ptr = std::shared_ptr<sidb_cluster>;
-
 /**
  * A receptor state pairs the potential recepting cluster with the identifier of the SiDB.
  */
 struct sidb_cluster_receptor_state
 {
+    /**
+     * Receptor cluster.
+     */
     const sidb_cluster_ptr& cluster;
+    /**
+     * SiDB index. It is contained in the receptor cluster.
+     */
     const uint64_t          sidb_ix;
 };
 
 static constexpr inline uint64_t get_cluster_size(const sidb_cluster_ptr& c) noexcept;
-
 /**
  * A projector state pairs the potential projecting cluster with the associated multiset charge configuration.
  */
 struct sidb_cluster_projector_state
 {
+    /**
+     * Projector cluster.
+     */
     const sidb_cluster_ptr& cluster;
+    /**
+     * Multiset charge configuration. It is an element of the charge space of the projector cluster.
+     */
     const uint64_t          multiset_conf;
-
     /**
      * Getter for the number of a given charge state in the multiset configuration.
      *
@@ -230,7 +245,6 @@ struct sidb_cluster_projector_state
         }
     }
 };
-
 /**
  * The two types of potential bounds required for the *Ground State Space* algorithm. As the domain in which our
  * potential bounds live are simply the real numbers, we may think of the lower bound and upper bound domains to be
@@ -246,7 +260,6 @@ enum class bound_direction : uint8_t
     LOWER = 0,
     UPPER
 };
-
 /**
  * The respective *top* elements of the lower semi-lattices in which our potential bounds live, ie., the respective
  * elements of *most* information. This means that any meet with a top element (weakly) reduces the information, and
@@ -267,7 +280,6 @@ static constexpr inline double potential_bound_top() noexcept
         return -std::numeric_limits<double>::infinity();
     }
 }
-
 /**
  * This function computes a binary meet, overwriting the first argument with the result. It takes the minimum in case of
  * a lower bound, and a maximum in case of an upper bound, each corresponding to the minimal information common to the
@@ -289,11 +301,14 @@ static constexpr inline void take_meet_of_potential_bounds(double& a, const doub
         a = std::max(a, b);
     }
 }
-
+/**
+ * Forward declaration. Required for compilation due to the mutually recursive structure in this file.
+ */
 static constexpr inline uint64_t get_singleton_sidb_ix(const sidb_cluster_ptr& c) noexcept;
-
+/**
+ * Forward declaration. Required for compilation due to the mutually recursive structure in this file.
+ */
 static constexpr inline uint64_t get_unique_cluster_id(const sidb_cluster_ptr& c) noexcept;
-
 /**
  * This defines the type for a store in which the bounds on the local potential for an SiDB (index) may be stored. For
  * the *Ground State Space* algorithm, this is used to keep track of the bounds on the fraction of local potential that
@@ -305,7 +320,6 @@ using intra_cluster_potential_bounds = std::map<uint64_t, std::array<double, 2>>
 #else
 using intra_cluster_potential_bounds = phmap::flat_hash_map<uint64_t, std::array<double, 2>>;
 #endif
-
 /**
  * A cluster state is a projector state paired with a potential bound store in which local potentials are stored for
  * each SiDB in the cluster in the projector state. Throughout the *Ground State Space* algorithm, these are internal
@@ -317,9 +331,14 @@ using intra_cluster_potential_bounds = phmap::flat_hash_map<uint64_t, std::array
  */
 struct sidb_cluster_state
 {
+    /**
+     * Projector state.
+     */
     const sidb_cluster_projector_state proj_st;
+    /**
+     * Internal potential bounds.
+     */
     intra_cluster_potential_bounds     internal_pot_bounds{};
-
     /**
      * Constructor for the creation of cluster state. Simply creates the contained projector state while leaving the
      * internal potential store defaulted.
@@ -330,7 +349,6 @@ struct sidb_cluster_state
     explicit sidb_cluster_state(const sidb_cluster_ptr& c, const uint64_t multiset_conf) noexcept :
             proj_st{c, multiset_conf}
     {}
-
     /**
      * Getter for the internal potential bound for an SiDB in the cluster, corresponding to the meet on the potential
      * bounds under each composition of the multiset charge configuration in the cluster state's projector state.
@@ -344,7 +362,6 @@ struct sidb_cluster_state
     {
         return internal_pot_bounds.at(sidb_ix)[static_cast<uint8_t>(bound)];
     }
-
     /**
      * Setter for internal potential bound for an SiDB in the cluster.
      *
@@ -357,7 +374,6 @@ struct sidb_cluster_state
         internal_pot_bounds[sidb_ix][static_cast<uint8_t>(bound_direction::LOWER)] = min;
         internal_pot_bounds[sidb_ix][static_cast<uint8_t>(bound_direction::UPPER)] = max;
     }
-
     /**
      * Relative setter for internal potential bound for an SiDB in the cluster.
      *
@@ -371,7 +387,6 @@ struct sidb_cluster_state
         internal_pot_bounds[sidb_ix][static_cast<uint8_t>(bound_direction::LOWER)] += min_diff;
         internal_pot_bounds[sidb_ix][static_cast<uint8_t>(bound_direction::UPPER)] += max_diff;
     }
-
     /**
      * Defines the equality operation on cluster states. Since only cluster states need only be separated by the
      * associated clusters throughout operation, it suffices to compare the respective unique identifiers.
@@ -383,7 +398,6 @@ struct sidb_cluster_state
     {
         return get_unique_cluster_id(proj_st.cluster) == get_unique_cluster_id(other.proj_st.cluster);
     }
-
     /**
      * Defines the inequality operation on cluster states, inverse to the former.
      *
@@ -395,21 +409,21 @@ struct sidb_cluster_state
         return !(*this == other);
     }
 };
-
 /**
  * A cluster state composition holds a number of cluster states of sibling clusters. Summing the multiset charge
  * configuration associated with each, we obtain an element of the charge space of their parent.
  */
 using sidb_cluster_state_composition = std::vector<sidb_cluster_state>;
-
+/**
+ * Cluster state pointers are unique.
+ */
+using sidb_cluster_state_ptr = std::unique_ptr<sidb_cluster_state>;
 /**
  * A clustering state is very similar to a cluster state composition, though it uses unique pointers to the cluster
  * states that may be moved. Thereby, this is the essential type of the dynamic objects in *ClusterComplete*'s
  * operation.
  */
-using sidb_cluster_state_ptr = std::unique_ptr<sidb_cluster_state>;
 using sidb_clustering_state  = std::vector<sidb_cluster_state_ptr>;
-
 /**
  * A cluster charge state is a multiset charge configuration. We may compress it into a 64 bit unsigned integer by
  * putting the number of negative and positive charges in the upper and lower 32 bits respectively. The number of
@@ -419,13 +433,20 @@ using sidb_clustering_state  = std::vector<sidb_cluster_state_ptr>;
  */
 struct sidb_cluster_charge_state
 {
+    /**
+     * Number of negative charges in the cluster charge state (32 available bits).
+     */
     uint64_t neg_count : 32;
+    /**
+     * Number of positive charges in the cluster charge state (32 available bits).
+     */
     uint64_t pos_count : 32;
 
     mutable std::vector<sidb_cluster_state_composition> compositions{};
-
+    /**
+     * Default constructor, creates a cluster charge state without any negative and positive charges.
+     */
     explicit sidb_cluster_charge_state() noexcept : neg_count{0}, pos_count{0} {}
-
     /**
      * Constructor for a charge space element of a singleton cluster. It has a single composition, which is a cluster
      * state of the singleton cluster and the singleton multiset charge configuration itself.
@@ -438,7 +459,6 @@ struct sidb_cluster_charge_state
             pos_count{cs == sidb_charge_state::POSITIVE},
             compositions{{sidb_cluster_state{singleton, static_cast<uint64_t>(*this)}}}
     {}
-
     /**
      * Constructor for cluster charge state given a multiset charge configuration represented in its compressed form. It
      * allows the compressed form to be lifted to the full type to facilitate equality checks.
@@ -449,7 +469,6 @@ struct sidb_cluster_charge_state
             neg_count{m >> 32ull},
             pos_count{(m << 32ull) >> 32ull}
     {}
-
     /**
      * Explicit instructions for the compiler on how to cast a cluster charge state to an 64 bit unsigned integer.
      *
@@ -459,7 +478,6 @@ struct sidb_cluster_charge_state
     {
         return (static_cast<uint64_t>(neg_count) << 32ull) | pos_count;
     }
-
     /**
      * Modifier of the cluster charge state, adding a single charge state.
      *
@@ -474,7 +492,6 @@ struct sidb_cluster_charge_state
             default: break;
         }
     }
-
     /**
      * Constructor of a cluster charge state allowing initializer list construction.
      *
@@ -489,7 +506,6 @@ struct sidb_cluster_charge_state
             add_charge(cs);
         }
     }
-
     /**
      * Defines the equality operation of cluster charge states, which disregards the compositions.
      *
@@ -500,7 +516,6 @@ struct sidb_cluster_charge_state
     {
         return static_cast<uint64_t>(*this) == static_cast<uint64_t>(other);
     }
-
     /**
      * Defined a hashing of a cluster charge state. Since we need only separate cluster charge states by their
      * compressed form, we may compute a hash over this for optimal performance when used in a hash set.
@@ -512,7 +527,6 @@ struct sidb_cluster_charge_state
     {
         return std::hash<uint64_t>{}(static_cast<uint64_t>(m));
     }
-
     /**
      * Defines addition of cluster charge states through multiset concatenation. Disregards compositions.
      *
@@ -525,7 +539,6 @@ struct sidb_cluster_charge_state
         pos_count += other.pos_count;
         return *this;
     }
-
     /**
      * Defines subtraction of cluster charge states through multiset difference. Disregards compositions.
      *
@@ -540,7 +553,6 @@ struct sidb_cluster_charge_state
         return *this;
     }
 };
-
 /**
  * Function to convert a singleton cluster charge state in its compressed form to a charge state.
  *
@@ -551,7 +563,6 @@ static constexpr inline sidb_charge_state singleton_multiset_conf_to_charge_stat
 {
     return sign_to_charge_state(static_cast<int8_t>(static_cast<uint32_t>(m) - (static_cast<uint32_t>(m) < m)));
 }
-
 /**
  * This struct defines the type of a potential projection, which pairs a multiset charge configuration with the
  * potential value (in eV) associated with the potential projection in the given context. The context is given by
@@ -560,14 +571,18 @@ static constexpr inline sidb_charge_state singleton_multiset_conf_to_charge_stat
  */
 struct potential_projection
 {
+    /**
+     * Potential projection value (unit: eV).
+     */
     double   V{0.0};
+    /**
+     * Associated multiset charge configuration.
+     */
     uint64_t M{0};
-
     /**
      * Default constructor, used as a starting point for an accumulation of potential projections.
      */
     explicit potential_projection() noexcept = default;
-
     /**
      * Trivial copy constructor.
      *
@@ -575,7 +590,6 @@ struct potential_projection
      * @param m Multiset charge configuration to copy.
      */
     explicit potential_projection(const double v, const uint64_t m) noexcept : V{v}, M{m} {}
-
     /**
      * Constructor for a potential projection from a singleton cluster, thereby lifting a value in the potential matrix
      * to a potential projection.
@@ -587,7 +601,6 @@ struct potential_projection
             V{inter_sidb_pot},
             M{static_cast<uint64_t>(sidb_cluster_charge_state{cs})}
     {}
-
     /**
      * Defines an ordering of potential projections through comparison of the potential value. To prevent potential
      * projections of equal potential value but different associated multiset charge configurations to be regarded as
@@ -602,7 +615,6 @@ struct potential_projection
     {
         return V < other.V || (V == other.V && M < other.M);
     }
-
     /**
      * Defines summation of potential projections through addition of the potential values and concatenation of the
      * associated multiset charge configurations. The latter may simply be implemented by addition of the compressed
@@ -618,7 +630,6 @@ struct potential_projection
         return *this;
     }
 };
-
 /**
  * This struct defines the type of potential projection order, along with getter and setter operations. Essentially, a
  * potential projection order is an ordered collection of potential projections, which allow rapid access and
@@ -628,20 +639,22 @@ struct potential_projection
  */
 struct potential_projection_order
 {
-
+    /**
+     * A potential projection order is an ordered set.
+     */
 #ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
     using pot_proj_order = std::set<potential_projection>;
 #else
     using pot_proj_order = phmap::btree_set<potential_projection>;
 #endif
-
+    /**
+     * The potential projection ordering.
+     */
     pot_proj_order order{};
-
     /**
      * Default constructor, creating the empty potential projection order.
      */
     explicit potential_projection_order() noexcept = default;
-
     /**
      * Constructor for a potential projection from a singleton cluster onto an SiDB.
      *
@@ -656,7 +669,6 @@ struct potential_projection_order
                               pot_proj_order{potential_projection{0.0, sidb_charge_state::NEUTRAL},
                                              potential_projection{inter_sidb_pot, sidb_charge_state::NEGATIVE}}}
     {}
-
     /**
      * A getter for a potential projection bound, which is the first or last item in the ordered set.
      *
@@ -675,7 +687,6 @@ struct potential_projection_order
             return *order.crbegin();
         }
     }
-
     /**
      * A getter for the next potential projection bound, which is the first potential projection when traversing the
      * ordering either from below or from above, that differs in its multiset charge configuration from the relevant
@@ -701,7 +712,6 @@ struct potential_projection_order
                                  [&](const potential_projection& pp) { return pp.M != bound_m; });
         }
     }
-
     /**
      * A getter for the potential projection bound given a multiset charge configuration specification, which is the
      * first potential projection in the ordering when traversing either from below or from above, that matches its
@@ -728,7 +738,6 @@ struct potential_projection_order
                               1);
         }
     }
-
     /**
      * Removes all occurrences of potential projections that match their multiset charge configuration to the argument.
      *
@@ -741,7 +750,6 @@ struct potential_projection_order
             it->M == m_conf ? it = order.erase(it) : ++it;
         }
     }
-
     /**
      * Adds a potential projection to the ordering, automatically placing it appropriately.
      *
@@ -752,7 +760,6 @@ struct potential_projection_order
         order.emplace(pp);
     }
 };
-
 /**
  * The type of a charge space is defined. It is a set of cluster charge states, forming the state space in our setting.
  */
@@ -761,7 +768,6 @@ using sidb_cluster_charge_state_space = std::unordered_set<sidb_cluster_charge_s
 #else
 using sidb_cluster_charge_state_space = phmap::flat_hash_set<sidb_cluster_charge_state, sidb_cluster_charge_state>;
 #endif
-
 /**
  * This struct defines a hashing of shared pointers to clusters, used to facilitate quick access in a clustering.
  */
@@ -778,7 +784,6 @@ struct sidb_cluster_ptr_hash
         return std::hash<uint64_t>{}(get_unique_cluster_id(c));
     }
 };
-
 /**
  * A clustering is a set of disjoint clusters, ie., none share an SiDB.
  */
@@ -787,7 +792,6 @@ using sidb_clustering = std::set<sidb_cluster_ptr>;
 #else
 using sidb_clustering = phmap::flat_hash_set<sidb_cluster_ptr, sidb_cluster_ptr_hash>;
 #endif
-
 /**
  * This struct defined the fully decorated cluster hierarchy type which follows the structure of a "general tree". It
  * contains multiple stores:
@@ -800,10 +804,17 @@ struct sidb_cluster
 {
     using uid_t   = uint64_t;
     using sidb_ix = uint64_t;
-
+    /**
+     *
+     */
     const uid_t uid;
-
+    /**
+     * The set of children of a cluster is a clustering.
+     */
     sidb_clustering             children;
+    /**
+     * Every cluster carries a pointer to its parent. For the top cluster, this is `nullptr`.
+     */
     std::weak_ptr<sidb_cluster> parent{};
 
 #ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
@@ -815,9 +826,10 @@ struct sidb_cluster
     phmap::flat_hash_map<sidb_ix, std::array<double, 2>> recv_ext_pot_bounds{};
     phmap::flat_hash_map<sidb_ix, potential_projection_order> pot_projs{};
 #endif
-
+    /**
+     * The charge state space of the cluster.
+     */
     sidb_cluster_charge_state_space charge_space{};
-
     /**
      * SiDB cluster hierarchy constructor.
      *
@@ -835,7 +847,6 @@ struct sidb_cluster
             children{std::move(v)},
             sidbs{std::move(c)}
     {}
-
     /**
      * This function returns a shared pointer to the parent of this cluster.
      *
@@ -845,7 +856,6 @@ struct sidb_cluster
     {
         return parent.lock();
     }
-
     /**
      * This function initializes the charge space of a singleton cluster corresponding with the given simulation base,
      * and sets the initial bounds on the potential received from outside the cluster as the local potential bounds.
@@ -873,7 +883,6 @@ struct sidb_cluster
         recv_ext_pot_bounds[sidb_ix][static_cast<uint8_t>(bound_direction::LOWER)] = loc_pot_min;
         recv_ext_pot_bounds[sidb_ix][static_cast<uint8_t>(bound_direction::UPPER)] = loc_pot_max;
     }
-
     /**
      * The bound on the potential an SiDB receives from outside this cluster is returned.
      *
@@ -886,7 +895,6 @@ struct sidb_cluster
     {
         return recv_ext_pot_bounds.at(i)[static_cast<uint8_t>(bound)];
     }
-
     /**
      * The bound on the potential an SiDB receives from outside this cluster is set.
      *
@@ -899,7 +907,6 @@ struct sidb_cluster
     {
         recv_ext_pot_bounds[i][static_cast<uint8_t>(bound)] = new_bound;
     }
-
     /**
      * The bound on the potential an SiDB receives from outside this cluster is updated.
      *
@@ -912,7 +919,6 @@ struct sidb_cluster
     {
         recv_ext_pot_bounds[i][static_cast<uint8_t>(bound)] += diff;
     }
-
     /**
      * Function to return the number of SiDBs contained in the cluster.
      *
@@ -922,7 +928,6 @@ struct sidb_cluster
     {
         return sidbs.size();
     }
-
     /**
      * Equality operation on cluster hierarchies. Checks the respective unique identifiers for equality.
      *
@@ -934,7 +939,6 @@ struct sidb_cluster
         return uid == other.uid;
     }
 };
-
 /**
  * Function to obtain the amount of SiDBs in the given cluster. Required for compilation due to mutual recursion.
  *
@@ -945,7 +949,6 @@ static constexpr inline uint64_t get_cluster_size(const sidb_cluster_ptr& c) noe
 {
     return c->sidbs.size();
 }
-
 /**
  * Function to obtain the unique identifier of the given cluster. Required for compilation due to mutual recursion.
  *
@@ -956,7 +959,6 @@ static constexpr inline uint64_t get_unique_cluster_id(const sidb_cluster_ptr& c
 {
     return c->uid;
 }
-
 /**
  * Function to obtain the SiDB index contained in a singleton cluster. Required for compilation due to mutual recursion.
  *
@@ -968,7 +970,6 @@ static constexpr inline uint64_t get_singleton_sidb_ix(const sidb_cluster_ptr& c
     assert(get_cluster_size(c) == 1);
     return get_unique_cluster_id(c);
 }
-
 /**
  * This function is used to obtain the cluster charge state compositions of the multiset charge configuration in a
  * projector state. The corresponding charge space element of the projector is found and its compositions are returned.
@@ -981,7 +982,6 @@ get_projector_state_compositions(const sidb_cluster_projector_state& pst) noexce
 {
     return pst.cluster->charge_space.find(sidb_cluster_charge_state{pst.multiset_conf})->compositions;
 }
-
 /**
  * This recursive function is used to convert a binary cluster hierarchy, as for instance returned by
  * `sidb_cluster_hierarchy` function that uses ALGLIB's `clusterizer`. The returned structure includes parent pointers.
@@ -1016,7 +1016,6 @@ static sidb_cluster_ptr to_unique_sidb_cluster(const sidb_binary_cluster_hierarc
 
     return parent;
 }
-
 /**
  * This function initiates the recursive procedure of converting a binary cluster hierarchy to our bespoke version.
  *

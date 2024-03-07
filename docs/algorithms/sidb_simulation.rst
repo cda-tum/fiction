@@ -51,6 +51,11 @@ Exhaustive Ground State Simulation
 
 .. doxygenfunction:: fiction::exhaustive_ground_state_simulation
 
+**Header:** ``fiction/algorithms/simulation/sidb/clustercomplete.hpp``
+
+.. doxygenstruct:: fiction::clustercomplete_params
+   :members:
+.. doxygenfunction:: fiction::clustercomplete
 
 Engine Selectors
 ################
@@ -59,7 +64,6 @@ Engine Selectors
 
 .. doxygenenum:: fiction::sidb_simulation_engine
 .. doxygenenum:: fiction::exhaustive_sidb_simulation_engine
-
 
 Energy Calculation
 ##################
@@ -168,6 +172,15 @@ Operational Domain Computation
 .. doxygenfunction:: fiction::operational_domain_random_sampling
 .. doxygenfunction:: fiction::operational_domain_flood_fill
 .. doxygenfunction:: fiction::operational_domain_contour_tracing
+
+Ground State Space Construction
+###############################
+
+.. _ground_state_space:
+
+**Header:** ``fiction/algorithms/simulation/sidb/ground_state_space.hpp
+
+.. doxygenfunction:: fiction::ground_state_space
 
 
 Utility Functions
