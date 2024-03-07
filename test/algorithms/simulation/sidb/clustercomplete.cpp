@@ -23,6 +23,7 @@
 #include <fiction/utils/layout_utils.hpp>
 
 #include <algorithm>
+#include <any>
 #include <cstdint>
 
 using namespace fiction;
@@ -34,12 +35,14 @@ TEMPLATE_TEST_CASE(
 {
     TestType lyt{};
 
-    const clustercomplete_params params{sidb_simulation_parameters{2, -0.32}};
+    const clustercomplete_params params{sidb_simulation_parameters{2, -0.32}, 3};
 
     const auto simulation_results = clustercomplete(lyt, params);
 
     CHECK(simulation_results.charge_distributions.empty());
     CHECK(simulation_results.algorithm_name == "ClusterComplete");
+    CHECK(std::any_cast<uint64_t>(
+              simulation_results.additional_simulation_parameters.at("validity_witness_partitioning_limit")) == 3);
 }
 
 template <typename Lyt>

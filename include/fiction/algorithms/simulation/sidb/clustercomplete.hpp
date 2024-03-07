@@ -75,6 +75,8 @@ class clustercomplete
     {
         res.physical_parameters = charge_layout.get_phys_params();
         res.algorithm_name      = "ClusterComplete";
+        res.additional_simulation_parameters.emplace("validity_witness_partitioning_limit",
+                                                     validity_witness_partitioning_limit);
 
         const ground_state_space_result& gss_res = fiction::ground_state_space(
             charge_layout, validity_witness_partitioning_limit, charge_layout.get_phys_params());
