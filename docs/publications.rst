@@ -121,7 +121,7 @@ Furthermore, if you use any of the design automation algorithms, please consider
           year={2023}
         }
 
-* :ref:`Operational Domain computation <operational_domain_flood_fill / operational_domain_contour_tracing>` (``opdom``):
+* :ref:`Operational Domain computation <opdom>` (``opdom``):
 
     .. code-block:: tex
 
@@ -132,7 +132,7 @@ Furthermore, if you use any of the design automation algorithms, please consider
           year={2024}
         }
 
-* :ref:`SiDB Gate Design <design_sidb_gates>` (``gate_design``):
+* :ref:`SiDB Gate Design <gate_design>` (``gate_design``):
 
     .. code-block:: tex
 
