@@ -27,62 +27,59 @@ namespace fiction
  * @return `true` if the two simulation results are equivalent, `false` otherwise.
  */
 template <typename Lyt>
-[[nodiscard]] bool check_simulation_results_for_equivalence(const sidb_simulation_result<Lyt>& result1,
-                                                            const sidb_simulation_result<Lyt>& result2)
+[[nodiscard]] bool check_simulation_results_for_equivalence(sidb_simulation_result<Lyt> result1,
+                                                            sidb_simulation_result<Lyt> result2)
 {
-    auto result1_copy = sidb_simulation_result{result1};
-    auto result2_copy = sidb_simulation_result{result2};
-
-    if (result1_copy.charge_distributions.size() != result2_copy.charge_distributions.size())
+    if (result1.charge_distributions.size() != result2.charge_distributions.size())
     {
         return false;
     }
 
-    if (!result1_copy.charge_distributions.empty() && !result2_copy.charge_distributions.empty())
+    if (!result1.charge_distributions.empty() && !result2.charge_distributions.empty())
     {
-        if (result1_copy.charge_distributions.front().get_sidb_order().size() !=
-            result2_copy.charge_distributions.front().get_sidb_order().size())
+        if (result1.charge_distributions.front().get_sidb_order().size() !=
+            result2.charge_distributions.front().get_sidb_order().size())
         {
             return false;
         }
     }
 
     std::set<uint64_t> unique_charge_indices1;
-    for (const auto& cds1 : result1_copy.charge_distributions)
+    for (const auto& cds1 : result1.charge_distributions)
     {
         unique_charge_indices1.insert(cds1.get_charge_index_and_base().first);
     }
 
     // check if all charge indices are unique
-    if (unique_charge_indices1.size() != result1_copy.charge_distributions.size())
+    if (unique_charge_indices1.size() != result1.charge_distributions.size())
     {
         return false;
     }
 
     std::set<uint64_t> unique_charge_indices2;
-    for (const auto& cds2 : result2_copy.charge_distributions)
+    for (const auto& cds2 : result2.charge_distributions)
     {
         unique_charge_indices2.insert(cds2.get_charge_index_and_base().first);
     }
 
     // check if all charge indices are unique
-    if (unique_charge_indices2.size() != result2_copy.charge_distributions.size())
+    if (unique_charge_indices2.size() != result2.charge_distributions.size())
     {
         return false;
     }
 
-    std::sort(result1_copy.charge_distributions.begin(), result1_copy.charge_distributions.end(),
+    std::sort(result1.charge_distributions.begin(), result1.charge_distributions.end(),
               [](const auto& lhs, const auto& rhs)
               { return lhs.get_charge_index_and_base().first < rhs.get_charge_index_and_base().first; });
 
-    std::sort(result2_copy.charge_distributions.begin(), result2_copy.charge_distributions.end(),
+    std::sort(result2.charge_distributions.begin(), result2.charge_distributions.end(),
               [](const auto& lhs, const auto& rhs)
               { return lhs.get_charge_index_and_base().first < rhs.get_charge_index_and_base().first; });
 
-    for (auto i = 0u; i < result1_copy.charge_distributions.size(); i++)
+    for (auto i = 0u; i < result1.charge_distributions.size(); i++)
     {
-        const auto& cds1 = result1_copy.charge_distributions.at(i);
-        const auto& cds2 = result2_copy.charge_distributions.at(i);
+        const auto& cds1 = result1.charge_distributions.at(i);
+        const auto& cds2 = result2.charge_distributions.at(i);
         if (std::abs(cds1.get_system_energy() - cds2.get_system_energy()) > std::numeric_limits<double>::epsilon())
         {
             return false;
