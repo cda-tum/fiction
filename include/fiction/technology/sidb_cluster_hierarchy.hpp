@@ -395,7 +395,7 @@ struct sidb_cluster_state
      * @param other Other cluster state to compare.
      * @return `true` if and only if the cluster states contain the same cluster.
      */
-    constexpr inline bool operator==(const sidb_cluster_state& other) const noexcept
+    inline bool operator==(const sidb_cluster_state& other) const noexcept
     {
         return get_unique_cluster_id(proj_st.cluster) == get_unique_cluster_id(other.proj_st.cluster);
     }
