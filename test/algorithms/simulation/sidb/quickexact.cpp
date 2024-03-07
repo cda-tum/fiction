@@ -5,7 +5,7 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
-#include <fiction/algorithms/simulation/sidb/check_simulation_results_for_equivalence.hpp>
+#include <fiction/algorithms/simulation/sidb/determine_the_groundstate_from_simulation_results.hpp>
 #include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
 #include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
@@ -1758,8 +1758,9 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "Special test cases", "[quickexact]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (charge_distribution_surface<
+        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     SECTION("Test case 1")
     {
@@ -1890,7 +1891,7 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({13, 12, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({24, 12, 0}, TestType::cell_type::NORMAL);
 
-        const sidb_simulation_parameters params{3, -0.32, 5.6, 5.0, 3.84, 7.68, 2.25};
+        const sidb_simulation_parameters params{3, -0.32, 5.6, 5.0};
 
         sidb_simulation_result<TestType> qe_res = quickexact(
             lyt, quickexact_params<TestType>{params,
