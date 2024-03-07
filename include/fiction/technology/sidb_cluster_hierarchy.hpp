@@ -210,7 +210,7 @@ struct sidb_cluster_receptor_state
     /**
      * SiDB index. It is contained in the receptor cluster.
      */
-    const uint64_t          sidb_ix;
+    const uint64_t sidb_ix;
 };
 /**
  * Forward declaration. Required for compilation due to the mutually recursive structure in this file.
@@ -228,7 +228,7 @@ struct sidb_cluster_projector_state
     /**
      * Multiset charge configuration. It is an element of the charge space of the projector cluster.
      */
-    const uint64_t          multiset_conf;
+    const uint64_t multiset_conf;
     /**
      * Getter for the number of a given charge state in the multiset configuration.
      *
@@ -340,7 +340,7 @@ struct sidb_cluster_state
     /**
      * Internal potential bounds.
      */
-    intra_cluster_potential_bounds     internal_pot_bounds{};
+    intra_cluster_potential_bounds internal_pot_bounds{};
     /**
      * Constructor for the creation of cluster state. Simply creates the contained projector state while leaving the
      * internal potential store defaulted.
@@ -424,7 +424,7 @@ using sidb_cluster_state_ptr = std::unique_ptr<sidb_cluster_state>;
  * states that may be moved. Thereby, this is the essential type of the dynamic objects in *ClusterComplete*'s
  * operation.
  */
-using sidb_clustering_state  = std::vector<sidb_cluster_state_ptr>;
+using sidb_clustering_state = std::vector<sidb_cluster_state_ptr>;
 /**
  * A cluster charge state is a multiset charge configuration. We may compress it into a 64 bit unsigned integer by
  * putting the number of negative and positive charges in the upper and lower 32 bits respectively. The number of
@@ -575,7 +575,7 @@ struct potential_projection
     /**
      * Potential projection value (unit: eV).
      */
-    double   V{0.0};
+    double V{0.0};
     /**
      * Associated multiset charge configuration.
      */
@@ -812,7 +812,7 @@ struct sidb_cluster
     /**
      * The set of children of a cluster is a clustering.
      */
-    sidb_clustering             children;
+    sidb_clustering children;
     /**
      * Every cluster carries a pointer to its parent. For the top cluster, this is `nullptr`.
      */

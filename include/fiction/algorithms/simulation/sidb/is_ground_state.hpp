@@ -38,8 +38,8 @@ template <typename Lyt>
         return false;
     }
 
-    const auto min_energy_exact  = minimum_energy(exhaustive_results.charge_distributions.cbegin(),
-                                                  exhaustive_results.charge_distributions.cend());
+    const auto min_energy_exact = minimum_energy(exhaustive_results.charge_distributions.cbegin(),
+                                                 exhaustive_results.charge_distributions.cend());
     const auto min_energy_new_ap =
         minimum_energy(quicksim_results.charge_distributions.cbegin(), quicksim_results.charge_distributions.cend());
 
