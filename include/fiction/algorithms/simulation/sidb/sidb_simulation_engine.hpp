@@ -25,7 +25,13 @@ enum class sidb_simulation_engine
      * *QuickExact* is also an exact simulation engine that requires exponential runtime, but it scales a lot better
      * than *ExGS* due to its effective search-space pruning.
      */
-    QUICKEXACT
+    QUICKEXACT,
+    /**
+     * *ClusterComplete* is a novel exact simulation engine that requires sub-exponential exponential runtime, for
+     * simulation problems in practice like SiDB logic. It handles base 3 simulation very effectively, since the engine
+     * makes no distinction in the simulation methodology for a different base number.
+     */
+    CLUSTERCOMPLETE
 };
 
 /**
@@ -41,7 +47,13 @@ enum class exhaustive_sidb_simulation_engine
      * *QuickExact* is also an exact simulation engine that requires exponential runtime, but it scales a lot better
      * than ExGS due to its effective search-space pruning.
      */
-    QUICKEXACT
+    QUICKEXACT,
+    /**
+     * *ClusterComplete* is a novel exact simulation engine that requires sub-exponential exponential runtime, for
+     * simulation problems in practice like SiDB logic. It handles base 3 simulation very effectively, since the engine
+     * makes no distinction in the simulation methodology for a different base number.
+     */
+    CLUSTERCOMPLETE
 };
 
 }  // namespace fiction

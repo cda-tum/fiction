@@ -5,6 +5,7 @@
 #ifndef FICTION_TIME_TO_SOLUTION_HPP
 #define FICTION_TIME_TO_SOLUTION_HPP
 
+#include "fiction/algorithms/simulation/sidb/clustercomplete.hpp"
 #include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
 #include "fiction/algorithms/simulation/sidb/is_ground_state.hpp"
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
@@ -107,6 +108,12 @@ void time_to_solution(Lyt& lyt, const quicksim_params& quicksim_params, const ti
         const quickexact_params<Lyt> params{quicksim_params.phys_params};
         st.algorithm      = "QuickExact";
         simulation_result = quickexact(lyt, params);
+    }
+    else if (tts_params.engine == exhaustive_sidb_simulation_engine::CLUSTERCOMPLETE)
+    {
+        const clustercomplete_params params{quicksim_params.phys_params};
+        st.algorithm      = "ClusterComplete";
+        simulation_result = clustercomplete(lyt, params);
     }
     else
     {
