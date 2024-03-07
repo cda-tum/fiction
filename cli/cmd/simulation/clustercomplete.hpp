@@ -40,9 +40,9 @@ class clustercomplete_command : public command
     explicit clustercomplete_command(const environment::ptr& e) :
             command(
                 e,
-                "ClusterComplete is an proof of concept of the more general idea of state space pruning in a cluster "
+                "ClusterComplete is a proof of concept of the more general idea of state space pruning in a cluster "
                 "hierarchy. In the application on SiDB layouts, it is able to simulate SiDB logic in base 3 for well "
-                "over 50 DBs, thereby redefining what is thought to be possible in the exact SiDB simulation domain.")
+                "over 50 DBs, thereby redefining what was thought to be possible in the exact SiDB simulation domain.")
     {
         add_option("--epsilon_r,-e", physical_params.epsilon_r, "Electric permittivity of the substrate (unit-less)",
                    true);
