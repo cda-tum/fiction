@@ -467,8 +467,8 @@ struct sidb_cluster_charge_state
      * @param m The multiset charge configuration to create a cluster charge state of.
      */
     explicit sidb_cluster_charge_state(const uint64_t m) noexcept :
-            neg_count{m >> uint64_t{32}},
-            pos_count{(m << uint64_t{32}) >> uint64_t{32}}
+            neg_count{static_cast<decltype(neg_count)>(m >> 32ull)},
+            pos_count{static_cast<decltype(pos_count)>((m << 32ull) >> 32ull)}
     {}
     /**
      * Explicit instructions for the compiler on how to cast a cluster charge state to an 64 bit unsigned integer.
@@ -477,7 +477,7 @@ struct sidb_cluster_charge_state
      */
     explicit constexpr operator uint64_t() const noexcept
     {
-        return (static_cast<uint64_t>(neg_count) << uint64_t{32}) | pos_count;
+        return (static_cast<uint64_t>(neg_count) << 32ull) | pos_count;
     }
     /**
      * Modifier of the cluster charge state, adding a single charge state.
