@@ -870,7 +870,7 @@ struct sidb_cluster
     {
         assert(sidbs.size() == 1);
 
-        const uint64_t sidb_ix = *sidbs.cbegin();
+        const uint64_t ix = *sidbs.cbegin();
 
         const sidb_cluster_ptr& this_ptr = *std::find_if(get_parent()->children.cbegin(), get_parent()->children.cend(),
                                                          [&](const sidb_cluster_ptr& c) { return *c == *this; });
@@ -881,8 +881,8 @@ struct sidb_cluster
             charge_space.emplace(sidb_cluster_charge_state{this_ptr, cs});
         }
 
-        recv_ext_pot_bounds[sidb_ix][static_cast<uint8_t>(bound_direction::LOWER)] = loc_pot_min;
-        recv_ext_pot_bounds[sidb_ix][static_cast<uint8_t>(bound_direction::UPPER)] = loc_pot_max;
+        recv_ext_pot_bounds[ix][static_cast<uint8_t>(bound_direction::LOWER)] = loc_pot_min;
+        recv_ext_pot_bounds[ix][static_cast<uint8_t>(bound_direction::UPPER)] = loc_pot_max;
     }
     /**
      * The bound on the potential an SiDB receives from outside this cluster is returned.
