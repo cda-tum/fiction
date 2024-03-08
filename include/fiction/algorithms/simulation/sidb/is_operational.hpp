@@ -245,12 +245,15 @@ class is_operational_impl
                 parameters.simulation_parameter, fiction::quickexact_params<Lyt>::automatic_base_number_detection::OFF};
             return quickexact(*bdl_iterator, quickexact_params);
         }
+
+#if (FICTION_ALGLIB_ENABLED)
         if (parameters.sim_engine == sidb_simulation_engine::CLUSTERCOMPLETE)
         {
             // perform ClusterComplete exact simulation
             const clustercomplete_params cc_params{parameters.simulation_parameter};
             return clustercomplete(*bdl_iterator, cc_params);
         }
+#endif  // FICTION_ALGLIB_ENABLED
 
         assert(false && "unsupported simulation engine");
 
