@@ -46,7 +46,9 @@ Physical Constants
 .. doxygenvariable:: POP_STABILITY_ERR
 .. doxygenvariable:: PI
 
+
 SiDB Cluster Hierarchy
+----------------------
 
 **Header:** ``fiction/technology/sidb_cluster_hierarchy.hpp``
 
@@ -54,9 +56,10 @@ A cluster hierarchy can be computed over any SiDB layout, resulting in a useful 
 charge distributions. The this header provides the structures used for *Ground State Space* construction.
 
 .. doxygenenum:: fiction::sidb_cluster_hierarchy_linkage_method
+   :members:
 .. doxygenstruct:: fiction::sidb_binary_cluster_hierarchy_node
    :members:
-.. doxygenfunction:: fiction::sidb_binary_cluster_hierarchy_node
+.. doxygenfunction:: fiction::sidb_cluster_hierarchy
 .. doxygenstruct:: fiction::sidb_cluster_receptor_state
    :members:
 .. doxygenstruct:: fiction::sidb_cluster_projector_state

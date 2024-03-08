@@ -125,6 +125,16 @@ Maximum Defect Influence Distance
 .. doxygenfunction:: fiction::maximum_defect_influence_position_and_distance
 
 
+Ground State Space Construction
+###############################
+
+.. _ground_state_space:
+
+**Header:** ``fiction/algorithms/simulation/sidb/ground_state_space.hpp``
+
+.. doxygenfunction:: fiction::ground_state_space
+
+
 Time-to-Solution (TTS) Statistics
 #################################
 
@@ -174,15 +184,6 @@ Operational Domain Computation
 .. doxygenfunction:: fiction::operational_domain_random_sampling
 .. doxygenfunction:: fiction::operational_domain_flood_fill
 .. doxygenfunction:: fiction::operational_domain_contour_tracing
-
-Ground State Space Construction
-###############################
-
-.. _ground_state_space:
-
-**Header:** ``fiction/algorithms/simulation/sidb/ground_state_space.hpp
-
-.. doxygenfunction:: fiction::ground_state_space
 
 
 Utility Functions

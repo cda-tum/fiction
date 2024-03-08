@@ -29,7 +29,7 @@ enum class sidb_simulation_engine
     /**
      * *ClusterComplete* is a novel exact simulation engine that requires sub-exponential runtime, for
      * simulation problems in practice like SiDB logic. It handles base 3 simulation very effectively, since the engine
-     * makes no distinction in the simulation methodology for a different base number.
+     * makes no distinction in the simulation methodology for different base numbers.
      */
     CLUSTERCOMPLETE
 };

@@ -49,25 +49,25 @@ namespace fiction
  */
 enum class sidb_cluster_hierarchy_linkage_method
 {
-    /*
+    /**
      * Complete linkage takes the maximum distance between nodes in a cluster.
      */
     COMPLETE = 0,
-    /*
+    /**
      * Single linkage takes the minimum distance between nodes in a cluster.
      */
     SINGLE,
-    /*
+    /**
      * Unweighted average linkage takes the average distance between nodes in a cluster, disregarding the number of
      * elements in a node.
      */
     UNWEIGHTED_AVERAGE,
-    /*
+    /**
      * Weighted average linkage takes the average distance between nodes in a cluster, weighing in the number of
      * elements in a node.
      */
     WEIGHTED_AVERAGE,
-    /*
+    /**
      * Known as Ward's method, this type of linkage merges clusters based on a minimum variance measure.
      */
     MINIMUM_VARIANCE
