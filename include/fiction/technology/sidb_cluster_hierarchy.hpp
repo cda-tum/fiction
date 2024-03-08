@@ -191,7 +191,7 @@ sidb_cluster_hierarchy(Lyt& lyt, sidb_cluster_hierarchy_linkage_method linkage_m
     }
 
     return std::move(*nodes.cbegin()->second);
-};
+}
 /**
  * Forward declaration of the SiDB cluster hierarchy required for the mutual recursive structure in this file.
  * Here we define a pointer to a SiDB cluster to be a shared pointer, which enables us to also have pointers to parents.
