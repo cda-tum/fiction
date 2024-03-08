@@ -127,13 +127,12 @@ TEMPLATE_TEST_CASE(
     gate_lyt.create_nand({}, {}, {0, 0});
     gate_lyt.create_nand({}, {}, {2, 2});
 
-    const TestType& cell_lyt(
-        convert_to_siqad_coordinates(apply_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library>(gate_lyt)));
+    const auto& cell_lyt{
+        convert_to_siqad_coordinates(apply_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library>(gate_lyt))};
 
     SECTION("Base 2")
     {
-        const sidb_simulation_result<TestType>& res =
-            clustercomplete(cell_lyt, clustercomplete_params{sidb_simulation_parameters{2}});
+        const auto& res = clustercomplete(cell_lyt, clustercomplete_params{sidb_simulation_parameters{2}});
 
         CHECK(res.charge_distributions.size() == 81);
         CHECK_THAT(minimum_energy(res.charge_distributions.cbegin(), res.charge_distributions.cend()),
@@ -142,8 +141,7 @@ TEMPLATE_TEST_CASE(
 
     SECTION("Base 3")
     {
-        const sidb_simulation_result<TestType>& res =
-            clustercomplete(cell_lyt, clustercomplete_params{sidb_simulation_parameters{3}});
+        const auto& res = clustercomplete(cell_lyt, clustercomplete_params{sidb_simulation_parameters{3}});
 
         CHECK(res.charge_distributions.size() == 81);
         CHECK_THAT(minimum_energy(res.charge_distributions.cbegin(), res.charge_distributions.cend()),
