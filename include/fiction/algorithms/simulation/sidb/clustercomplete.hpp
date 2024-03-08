@@ -62,7 +62,7 @@ class clustercomplete_impl
 {
   public:
     explicit clustercomplete_impl(const Lyt& lyt, const sidb_simulation_parameters& physical_parameters,
-                             const uint64_t available_threads) noexcept :
+                                  const uint64_t available_threads) noexcept :
             charge_layout{initialize_charge_layout(lyt, physical_parameters)},
             mu_bounds_with_error{physical_constants::POP_STABILITY_ERR - physical_parameters.mu_minus,
                                  -physical_constants::POP_STABILITY_ERR - physical_parameters.mu_minus,
@@ -462,8 +462,9 @@ template <typename Lyt>
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-    return detail::clustercomplete_impl{lyt, cc_params.physical_parameters, cc_params.available_threads}
-        .run(cc_params.validity_witness_partitioning_max_cluster_size_gss, cc_params.report_gss_stats);
+    detail::clustercomplete_impl<Lyt> p{lyt, cc_params.physical_parameters, cc_params.available_threads};
+
+    return p.run(cc_params.validity_witness_partitioning_max_cluster_size_gss, cc_params.report_gss_stats);
 }
 
 }  // namespace fiction
