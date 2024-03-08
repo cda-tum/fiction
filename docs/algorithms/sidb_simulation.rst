@@ -47,10 +47,6 @@ Exhaustive Ground State Simulation
    :members:
 .. doxygenfunction:: fiction::quickexact
 
-**Header:** ``fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp``
-
-.. doxygenfunction:: fiction::exhaustive_ground_state_simulation
-
 .. _clustercomplete:
 
 **Header:** ``fiction/algorithms/simulation/sidb/clustercomplete.hpp``
@@ -58,6 +54,11 @@ Exhaustive Ground State Simulation
 .. doxygenstruct:: fiction::clustercomplete_params
    :members:
 .. doxygenfunction:: fiction::clustercomplete
+
+**Header:** ``fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp``
+
+.. doxygenfunction:: fiction::exhaustive_ground_state_simulation
+
 
 Engine Selectors
 ################
@@ -132,6 +133,8 @@ Ground State Space Construction
 
 **Header:** ``fiction/algorithms/simulation/sidb/ground_state_space.hpp``
 
+.. doxygenstruct:: fiction::ground_state_space_result
+   :members:
 .. doxygenfunction:: fiction::ground_state_space
 
 
