@@ -10,6 +10,16 @@ RUN apt-get -y update && apt-get -y upgrade && apt-get -y install \
 # Setup Z3
 RUN pip3 install z3-solver==4.10.0
 
+# Setup ALGLIB
+RUN git clone https://github.com/S-Dafarra/alglib-cmake.git && \
+    cd alglib-cmake && \
+    mkdir build && \
+    cd build && \
+    cmake .. && \
+    make && \
+    make install && \
+    cd ../..
+
 # Clone fiction's repository including submodules
 # RUN git clone --recursive https://github.com/cda-tum/fiction.git
 COPY . fiction/
