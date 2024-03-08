@@ -111,7 +111,7 @@ jobs:
           cd alglib-cmake
           mkdir build && cd build
           cmake ..
-          make
+          make -j4
           sudo make install
 
       - name: Create Build Environment
