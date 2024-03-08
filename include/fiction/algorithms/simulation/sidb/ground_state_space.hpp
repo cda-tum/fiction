@@ -191,7 +191,7 @@ class ground_state_space_impl
     template <bound_direction bound>
     static constexpr inline double get_next_proj_pot_bound(const sidb_cluster_ptr& c, const uint64_t sidb_ix) noexcept
     {
-        return c->pot_projs.at(sidb_ix).get_next<bound>().V;
+        return c->pot_projs.at(sidb_ix).get_next<bound>().v;
     }
 
     template <bound_direction bound>
@@ -219,10 +219,10 @@ class ground_state_space_impl
     {
         const potential_projection& cur_bound = get_proj_bound<bound>(pst.cluster, rst.sidb_ix);
 
-        if (cur_bound.M == pst.multiset_conf)
+        if (cur_bound.m == pst.multiset_conf)
         {
             rst.cluster->update_recv_ext_pot_bound<bound>(
-                rst.sidb_ix, get_next_proj_pot_bound<bound>(pst.cluster, rst.sidb_ix) - cur_bound.V);
+                rst.sidb_ix, get_next_proj_pot_bound<bound>(pst.cluster, rst.sidb_ix) - cur_bound.v);
         }
     }
 
@@ -374,9 +374,9 @@ class ground_state_space_impl
     {
         if constexpr (mode == potential_bound_analysis_mode::ANALYZE_MULTISET)
         {
-            return {get_proj_state_bound<bound_direction::LOWER>(pst, sidb_ix).V +
+            return {get_proj_state_bound<bound_direction::LOWER>(pst, sidb_ix).v +
                         pst.cluster->get_recv_ext_pot_bound<bound_direction::LOWER>(sidb_ix),
-                    get_proj_state_bound<bound_direction::UPPER>(pst, sidb_ix).V +
+                    get_proj_state_bound<bound_direction::UPPER>(pst, sidb_ix).v +
                         pst.cluster->get_recv_ext_pot_bound<bound_direction::UPPER>(sidb_ix)};
         }
         else if constexpr (mode == potential_bound_analysis_mode::ANALYZE_COMPOSITION)
@@ -493,7 +493,7 @@ class ground_state_space_impl
         {
             if (sibling != child_rst.cluster)
             {
-                recv_pot_without_siblings -= get_proj_bound<bound>(sibling, child_rst.sidb_ix).V;
+                recv_pot_without_siblings -= get_proj_bound<bound>(sibling, child_rst.sidb_ix).v;
             }
         }
 
@@ -525,8 +525,8 @@ class ground_state_space_impl
 
                 for (const sidb_cluster_state& cst : composition)
                 {
-                    internal_pot_lb += get_proj_state_bound<bound_direction::LOWER>(cst.proj_st, sidb_ix).V;
-                    internal_pot_ub += get_proj_state_bound<bound_direction::UPPER>(cst.proj_st, sidb_ix).V;
+                    internal_pot_lb += get_proj_state_bound<bound_direction::LOWER>(cst.proj_st, sidb_ix).v;
+                    internal_pot_ub += get_proj_state_bound<bound_direction::UPPER>(cst.proj_st, sidb_ix).v;
                 }
 
                 receiving_cst.set_pot_bounds(sidb_ix, internal_pot_lb, internal_pot_ub);
@@ -607,11 +607,11 @@ class ground_state_space_impl
         }
 
         // update the received external potential bound for the subject
-        double diff = get_proj_bound<bound>(parent, rst.sidb_ix).V;
+        double diff = get_proj_bound<bound>(parent, rst.sidb_ix).v;
 
         for (const sidb_cluster_ptr& child : parent->children)
         {
-            diff -= get_proj_bound<bound>(child, rst.sidb_ix).V;
+            diff -= get_proj_bound<bound>(child, rst.sidb_ix).v;
         }
 
         rst.cluster->update_recv_ext_pot_bound<bound>(rst.sidb_ix, diff);

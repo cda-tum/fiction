@@ -578,11 +578,11 @@ struct potential_projection
     /**
      * Potential projection value (unit: eV).
      */
-    double V{0.0};
+    double v{0.0};
     /**
      * Associated multiset charge configuration.
      */
-    uint64_t M{0};
+    uint64_t m{0};
     /**
      * Default constructor, used as a starting point for an accumulation of potential projections.
      */
@@ -590,10 +590,10 @@ struct potential_projection
     /**
      * Trivial copy constructor.
      *
-     * @param v Potential value to copy.
-     * @param m Multiset charge configuration to copy.
+     * @param pot Potential value to copy.
+     * @param mul Multiset charge configuration to copy.
      */
-    explicit potential_projection(const double v, const uint64_t m) noexcept : V{v}, M{m} {}
+    explicit potential_projection(const double pot, const uint64_t mul) noexcept : v{pot}, m{mul} {}
     /**
      * Constructor for a potential projection from a singleton cluster, thereby lifting a value in the potential matrix
      * to a potential projection.
@@ -602,8 +602,8 @@ struct potential_projection
      * @param cs Charge state associated with the singleton cluster projector for this potential projection.
      */
     explicit potential_projection(const double inter_sidb_pot, const sidb_charge_state cs) noexcept :
-            V{inter_sidb_pot},
-            M{static_cast<uint64_t>(sidb_cluster_charge_state{cs})}
+            v{inter_sidb_pot},
+            m{static_cast<uint64_t>(sidb_cluster_charge_state{cs})}
     {}
     /**
      * Defines an ordering of potential projections through comparison of the potential value. To prevent potential
@@ -617,7 +617,7 @@ struct potential_projection
      */
     constexpr inline bool operator<(const potential_projection& other) const noexcept
     {
-        return V < other.V || (V == other.V && M < other.M);
+        return v < other.v || (v == other.v && m < other.m);
     }
     /**
      * Defines summation of potential projections through addition of the potential values and concatenation of the
@@ -629,8 +629,8 @@ struct potential_projection
      */
     constexpr inline potential_projection& operator+=(const potential_projection& other) noexcept
     {
-        V += other.V;
-        M += other.M;
+        v += other.v;
+        m += other.m;
         return *this;
     }
 };
@@ -703,17 +703,17 @@ struct potential_projection_order
     template <bound_direction bound>
     inline const potential_projection& get_next() const noexcept
     {
-        const uint64_t bound_m = get<bound>().M;
+        const uint64_t bound_m = get<bound>().m;
 
         if constexpr (bound == bound_direction::LOWER)
         {
             return *std::find_if(order.cbegin(), order.cend(),
-                                 [&](const potential_projection& pp) { return pp.M != bound_m; });
+                                 [&](const potential_projection& pp) { return pp.m != bound_m; });
         }
         else if constexpr (bound == bound_direction::UPPER)
         {
             return *std::find_if(order.crbegin(), order.crend(),
-                                 [&](const potential_projection& pp) { return pp.M != bound_m; });
+                                 [&](const potential_projection& pp) { return pp.m != bound_m; });
         }
     }
     /**
@@ -732,12 +732,12 @@ struct potential_projection_order
         if constexpr (bound == bound_direction::LOWER)
         {
             return *std::find_if(order.cbegin(), order.cend(),
-                                 [&](const potential_projection& pp) { return pp.M == m_conf; });
+                                 [&](const potential_projection& pp) { return pp.m == m_conf; });
         }
         else if constexpr (bound == bound_direction::UPPER)
         {
             return *std::prev(std::find_if(order.crbegin(), order.crend(),
-                                           [&](const potential_projection& pp) { return pp.M == m_conf; })
+                                           [&](const potential_projection& pp) { return pp.m == m_conf; })
                                   .base(),
                               1);
         }
@@ -751,7 +751,7 @@ struct potential_projection_order
     {
         for (pot_proj_order::const_iterator it = order.cbegin(); it != order.cend();)
         {
-            it->M == m_conf ? it = order.erase(it) : ++it;
+            it->m == m_conf ? it = order.erase(it) : ++it;
         }
     }
     /**

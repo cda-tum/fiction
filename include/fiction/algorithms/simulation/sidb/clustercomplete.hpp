@@ -235,7 +235,7 @@ class clustercomplete_impl
     static constexpr inline double get_proj_state_bound_val(const sidb_cluster_projector_state& pst,
                                                             const uint64_t                      sidb_ix) noexcept
     {
-        return pst.cluster->pot_projs.at(sidb_ix).get_pot_proj_for_m_conf<bound>(pst.multiset_conf).V;
+        return pst.cluster->pot_projs.at(sidb_ix).get_pot_proj_for_m_conf<bound>(pst.multiset_conf).v;
     }
 
     enum class potential_bound_update_operation
