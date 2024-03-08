@@ -12,12 +12,7 @@
 #include <fiction/algorithms/simulation/sidb/minimum_energy.hpp>
 #include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
-#include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/cell_level_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
-#include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
-#include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/charge_distribution_surface.hpp>
 #include <fiction/technology/physical_constants.hpp>
 #include <fiction/technology/sidb_bestagon_library.hpp>
@@ -30,10 +25,8 @@
 
 using namespace fiction;
 
-TEMPLATE_TEST_CASE(
-    "Empty layout ClusterComplete simulation", "[clustercomplete]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+TEMPLATE_TEST_CASE("Empty layout ClusterComplete simulation", "[clustercomplete]", sidb_cell_clk_lyt_siqad,
+                   charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
 {
     TestType lyt{};
 
@@ -73,10 +66,8 @@ static bool verify_clustercomplete_result(const charge_distribution_surface<Lyt>
     return false;
 }
 
-TEMPLATE_TEST_CASE(
-    "ClusterComplete simulation of a 4 DB layout with a positive charge", "[clustercomplete]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+TEMPLATE_TEST_CASE("ClusterComplete simulation of a 4 DB layout with a positive charge", "[clustercomplete]",
+                   sidb_cell_clk_lyt_siqad, charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
 
 {
     TestType lyt{};
@@ -120,10 +111,8 @@ TEMPLATE_TEST_CASE(
     }
 }
 
-TEMPLATE_TEST_CASE(
-    "Exact Cluster Simulation of 2 Bestagon NAND gates", "[clustercomplete]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+TEMPLATE_TEST_CASE("Exact Cluster Simulation of 2 Bestagon NAND gates", "[clustercomplete]", sidb_cell_clk_lyt_siqad,
+                   charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
 {
     gate_level_layout<hex_even_row_gate_clk_lyt> gate_lyt{{2, 2}};
     gate_lyt.create_nand({}, {}, {0, 0});
@@ -153,8 +142,7 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "ClusterComplete simulation of a Y-shape SiDB OR gate with input 01 under varying physical parameters",
-    "[clustercomplete]", (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+    "[clustercomplete]", sidb_cell_clk_lyt_siqad, charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
 {
     TestType lyt{};
 
