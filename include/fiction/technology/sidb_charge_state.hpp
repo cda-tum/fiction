@@ -124,12 +124,18 @@ charge_configuration_to_string(const std::vector<sidb_charge_state>& charge_dist
     return config_str.str();
 }
 /**
- * The iteration direction over the SiDB states. To the valance band iterates "\f$-\to 0\to +\f$", and in reverse to the
+ * The iteration direction over the SiDB states. , and in reverse to the
  * conductance band.
  */
 enum class sidb_state_iter_dir
 {
+    /**
+     * To the valance band iterates "\f$-\to 0\to +\f$".
+     */
     TO_VALENCE_BAND,
+    /**
+     * To the conductance band iterates "\f$+\to 0\to -\f$".
+     */
     TO_CONDUCTANCE_BAND
 };
 /**
