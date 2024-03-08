@@ -15,6 +15,8 @@
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/physical_constants.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
+#include <fiction/technology/charge_distribution_surface.hpp>
+#include <fiction/types.hpp>
 
 #include <cmath>
 #include <limits>

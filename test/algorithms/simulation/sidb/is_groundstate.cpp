@@ -9,6 +9,7 @@
 #include <fiction/algorithms/simulation/sidb/quicksim.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/types.hpp>
@@ -44,8 +45,8 @@ TEMPLATE_TEST_CASE("check if ground state is found", "[is-ground-state]", (sidb_
         lyt.assign_cell_type({6, 10, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({7, 10, 0}, TestType::cell_type::NORMAL);
 
-        charge_distribution_surface      charge_layout{lyt};
-        const sidb_simulation_parameters params{2, -0.32};
+        const charge_distribution_surface charge_layout{lyt};
+        const sidb_simulation_parameters  params{2, -0.32};
 
         const auto simulation_results_exgs = exhaustive_ground_state_simulation<TestType>(charge_layout, params);
 
