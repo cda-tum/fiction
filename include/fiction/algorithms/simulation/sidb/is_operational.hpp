@@ -7,6 +7,7 @@
 
 #include "fiction/algorithms/iter/bdl_input_iterator.hpp"
 #include "fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp"
+#include "fiction/algorithms/simulation/sidb/clustercomplete.hpp"
 #include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
 #include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
@@ -223,24 +224,32 @@ class is_operational_impl
     [[nodiscard]] sidb_simulation_result<Lyt>
     physical_simulation_of_layout(const bdl_input_iterator<Lyt>& bdl_iterator) noexcept
     {
-        assert(parameters.simulation_parameter.base == 2 && "base number is set to 3");
         if (parameters.sim_engine == sidb_simulation_engine::EXGS)
         {
+            assert(parameters.simulation_parameter.base == 2 && "base number is set to 3");
             // perform an exhaustive ground state simulation
             return exhaustive_ground_state_simulation(*bdl_iterator, parameters.simulation_parameter);
         }
         if (parameters.sim_engine == sidb_simulation_engine::QUICKSIM)
         {
+            assert(parameters.simulation_parameter.base == 2 && "base number is set to 3");
             // perform a heuristic simulation
             const quicksim_params qs_params{parameters.simulation_parameter, 500, 0.6};
             return quicksim(*bdl_iterator, qs_params);
         }
         if (parameters.sim_engine == sidb_simulation_engine::QUICKEXACT)
         {
-            // perform exact simulation
+            assert(parameters.simulation_parameter.base == 2 && "base number is set to 3");
+            // perform QuickExact exact simulation
             const quickexact_params<Lyt> quickexact_params{
                 parameters.simulation_parameter, fiction::quickexact_params<Lyt>::automatic_base_number_detection::OFF};
             return quickexact(*bdl_iterator, quickexact_params);
+        }
+        if (parameters.sim_engine == sidb_simulation_engine::CLUSTERCOMPLETE)
+        {
+            // perform ClusterComplete exact simulation
+            const clustercomplete_params cc_params{parameters.simulation_parameter};
+            return clustercomplete(*bdl_iterator, cc_params);
         }
 
         assert(false && "unsupported simulation engine");
