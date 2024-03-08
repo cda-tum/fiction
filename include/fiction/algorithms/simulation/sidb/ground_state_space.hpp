@@ -53,12 +53,12 @@ struct ground_state_space_result
      * The maximum size of the charge space of the top cluster, given the simulation base, can be inferred by the
      * \"stars and bars\" combinatorial idea: the solution to this analogous problem determines the maximum amount of
      * multisets of size \f$N\f$ (where \f$N\f$ is the number of SiDBs in the layout, and therefore in the top cluster)
-     * for the given base \f$b\f$. In particular, the analogy is as follows: any such multiset can be seen as N stars
-     * and \f$b - 1\f$ bars separating those stars. Then, the \f$b\f$ partitions forming from these \f$b - 1\f$
+     * for the given base \f$b\f$. In particular, the analogy is as follows: any such multiset can be seen as \f$N\f$
+     * stars and \f$b - 1\f$ bars separating those stars. Then, the \f$b\f$ partitions forming from these \f$b - 1\f$
      * separators each have a respective size, adding up to \f$N\f$. Therefore each partition is associated with an
      * amount of one of the charge states of the multiset. Now we may compute total number of possible multisets for the
      * top cluster as the number of combinations of \f$N\f$ stars and \f$b - 1\f$ bars. Hence this is computed with the
-     * following combinatorial formula: nCr(\f$N + b - 1\f$, \f$b - 1\f$).
+     * following combinatorial formula: \f$\binom{N + b - 1}{b - 1}\f$.
      */
     const uint64_t maximum_top_level_multisets{};
 };
