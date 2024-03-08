@@ -82,8 +82,9 @@ jobs:
           git clone https://github.com/S-Dafarra/alglib-cmake.git
           cd alglib-cmake
           mkdir build && cd build
-          cmake ..
-          cmake --build . --config Release
+          cmake ${{github.workspace}} -G "${{matrix.env}}" -A x64 -T ${{matrix.toolset}}
+          -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
+          cmake --build . --config ${{matrix.build_type}} -j4
           cmake --install .
 
       - name: Create Build Environment
