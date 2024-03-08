@@ -787,7 +787,7 @@ ground_state_space(const Lyt& lyt, const uint64_t max_cluster_size_for_witness_p
         return ground_state_space_result{};
     }
 
-    return detail::ground_state_space_impl(lyt, max_cluster_size_for_witness_partitioning, phys_params).run();
+    return detail::ground_state_space_impl{lyt, max_cluster_size_for_witness_partitioning, phys_params}.run();
 }
 
 }  // namespace fiction

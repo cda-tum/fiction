@@ -462,7 +462,7 @@ template <typename Lyt>
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-    return detail::clustercomplete_impl(lyt, cc_params.physical_parameters, cc_params.available_threads)
+    return detail::clustercomplete_impl{lyt, cc_params.physical_parameters, cc_params.available_threads}
         .run(cc_params.validity_witness_partitioning_max_cluster_size_gss, cc_params.report_gss_stats);
 }
 
