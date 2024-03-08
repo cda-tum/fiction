@@ -76,16 +76,17 @@ jobs:
           architecture: x64
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-
-      - name: Setup ALGLIB
-        run: |
-          git clone https://github.com/S-Dafarra/alglib-cmake.git
-          cd alglib-cmake
-          (Get-Content CMakeLists.txt) -replace '/Ox', '' | Set-Content CMakeLists.txt
-          mkdir build && cd build
-          cmake .. -G "${{matrix.env}}" -A x64 -T ${{matrix.toolset}}
-          cmake --build . --target ALL_BUILD --config ${{matrix.build_type}} -j4
-          cmake --build . --target INSTALL --config ${{matrix.build_type}}
+      #
+      #      - name: Setup ALGLIB
+      #        run: |
+      #          git clone https://github.com/S-Dafarra/alglib-cmake.git
+      #          cp alglib-cmake ${{github.workspace}}/libs/
+      #          cd ${{github.workspace}}/libs/alglib-cmake
+      #          (Get-Content CMakeLists.txt) -replace '/Ox', '' | Set-Content CMakeLists.txt
+      #          mkdir build && cd build
+      #          cmake .. -G "${{matrix.env}}" -A x64 -T ${{matrix.toolset}}
+      #          cmake --build . --target ALL_BUILD --config ${{matrix.build_type}} -j4
+      #          cmake --build . --target INSTALL --config ${{matrix.build_type}}
 
       - name: Create Build Environment
         run: cmake -E make_directory ${{github.workspace}}\build
@@ -102,7 +103,7 @@ jobs:
           -DFICTION_BENCHMARK=OFF
           -DFICTION_EXPERIMENTS=ON
           -DFICTION_Z3=ON
-          -DFICTION_ALGLIB=ON
+          #          -DFICTION_ALGLIB=ON
           -DFICTION_WARNINGS_AS_ERRORS=OFF
           -DMOCKTURTLE_EXAMPLES=OFF
 

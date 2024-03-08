@@ -170,8 +170,6 @@ if (FICTION_ALGLIB)
 
         # Compile definition to guard include files
         target_compile_definitions(libfiction INTERFACE FICTION_ALGLIB_ENABLED)
-        # Include ALGLIB library
-        target_include_directories(libfiction INTERFACE SYSTEM ${ALGLIB_CXX_INCLUDE_DIRS})
         # Link ALGLIB
         target_link_libraries(libfiction INTERFACE ALGLIB)
 
