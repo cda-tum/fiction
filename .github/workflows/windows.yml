@@ -81,6 +81,7 @@ jobs:
         run: |
           git clone https://github.com/S-Dafarra/alglib-cmake.git
           cd alglib-cmake
+          (Get-Content CMakeLists.txt) -replace '/Ox', '' | Set-Content CMakeLists.txt
           mkdir build && cd build
           cmake .. -G "${{matrix.env}}" -A x64 -T ${{matrix.toolset}}
           cmake --build . --target ALL_BUILD --config ${{matrix.build_type}} -j4
