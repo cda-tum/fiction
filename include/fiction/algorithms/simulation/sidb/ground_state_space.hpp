@@ -64,11 +64,11 @@ namespace detail
 {
 
 template <typename Lyt>
-class ground_state_space
+class ground_state_space_impl
 {
   public:
-    explicit ground_state_space(const Lyt& lyt, const uint64_t max_cluster_size_for_witness_partitioning,
-                                const sidb_simulation_parameters& phys_params) noexcept :
+    explicit ground_state_space_impl(const Lyt& lyt, const uint64_t max_cluster_size_for_witness_partitioning,
+                                     const sidb_simulation_parameters& phys_params) noexcept :
             base{phys_params.base},
             top_cluster{to_sidb_cluster(sidb_cluster_hierarchy(lyt))},
             clustering{get_initial_clustering(top_cluster, get_local_potential_bounds(lyt, phys_params))},
@@ -787,7 +787,7 @@ ground_state_space(const Lyt& lyt, const uint64_t max_cluster_size_for_witness_p
         return ground_state_space_result{};
     }
 
-    return detail::ground_state_space(lyt, max_cluster_size_for_witness_partitioning, phys_params).run();
+    return detail::ground_state_space_impl(lyt, max_cluster_size_for_witness_partitioning, phys_params).run();
 }
 
 }  // namespace fiction
