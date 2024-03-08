@@ -43,7 +43,30 @@ TEMPLATE_TEST_CASE(
 }
 
 TEMPLATE_TEST_CASE(
-    "Ground state space of a 7 DB layout", "[ground-state-space]",
+    "Ground State Space construction of two SiDBs directly next to each other", "[ground-state-space]",
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
+    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+{
+    TestType lyt{};
+
+    lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({0, 0, 1}, TestType::cell_type::NORMAL);
+
+    SECTION("Base 2")
+    {
+        const ground_state_space_result& res = ground_state_space(lyt, 6, sidb_simulation_parameters{2});
+        CHECK(res.pruned_top_level_multisets == res.maximum_top_level_multisets);
+    }
+
+    SECTION("Base 3")
+    {
+        const ground_state_space_result& res = ground_state_space(lyt, 6, sidb_simulation_parameters{3});
+        CHECK(res.pruned_top_level_multisets != res.maximum_top_level_multisets);
+    }
+}
+
+TEMPLATE_TEST_CASE(
+    "Ground State Space construction of a 7 DB layout", "[ground-state-space]",
     (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
     (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
@@ -128,7 +151,7 @@ TEMPLATE_TEST_CASE(
 }
 
 TEMPLATE_TEST_CASE(
-    "Ground state space of a 14 DB layout", "[ground-state-space]",
+    "Ground state space construction of a 14 DB layout", "[ground-state-space]",
     (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
     (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
