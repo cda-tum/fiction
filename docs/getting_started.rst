@@ -132,7 +132,8 @@ Finally, before building *fiction*, pass ``-DFICTION_ENABLE_MUGEN=ON`` to the ``
 ALGLIB-dependent ``ClusterComplete`` exact SiDB simulation
 ##########################################################
 
-The :ref:`ClusterComplete <clustercomplete>` exact SiDB simulation algorithm relies on functionality offered by `ALGLIB <https://www.alglib.net>`_ by the ALGLIB Project.
+The :ref:`ClusterComplete <clustercomplete>` exact SiDB simulation algorithm relies on functionality offered by
+`ALGLIB <https://www.alglib.net>`_ by the ALGLIB Project.
 On Unix based systems, it can be installed by building and installing ALGLIB independently::
 
     $ git clone https://github.com/S-Dafarra/alglib-cmake.git

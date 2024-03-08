@@ -5,6 +5,8 @@
 #ifndef FICTION_CMD_CLUSTERCOMPLETE_HPP
 #define FICTION_CMD_CLUSTERCOMPLETE_HPP
 
+#if (FICTION_ALGLIB_ENABLED)
+
 #include <fiction/algorithms/simulation/sidb/clustercomplete.hpp>
 #include <fiction/algorithms/simulation/sidb/minimum_energy.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
@@ -50,7 +52,7 @@ class clustercomplete_command : public command
         add_option("--mu_minus,-m", physical_params.mu_minus, "Energy transition level (0/-) (unit: eV)", true);
         add_option("--witness_partitioning_limit,-w", params.validity_witness_partitioning_max_cluster_size_gss,
                    "The limit on the cluster size before Ground State Space omits the check for which it solves the "
-                   "validity witness partitioning NP-complete sub-problem",
+                   "validity witness partitioning NP-complete sub-problem; values above 15 severely impact the runtime",
                    true);
     }
 
@@ -194,5 +196,7 @@ class clustercomplete_command : public command
 ALICE_ADD_COMMAND(clustercomplete, "Simulation")
 
 }  // namespace alice
+
+#endif  // FICTION_ALGLIB_ENABLED
 
 #endif  // FICTION_CMD_CLUSTERCOMPLETE_HPP
