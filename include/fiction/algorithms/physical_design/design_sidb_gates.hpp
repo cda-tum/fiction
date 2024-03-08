@@ -11,6 +11,7 @@
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/layouts/coordinates.hpp"
+#include "fiction/technology/cell_technologies.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 #include "fiction/utils/layout_utils.hpp"
@@ -18,6 +19,7 @@
 #include "fiction/utils/truth_table_utils.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>
+#include <kitty/traits.hpp>
 
 #include <algorithm>
 #include <atomic>
@@ -25,7 +27,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <mutex>
-#include <numeric>
+#include <random>
 #include <thread>
 #include <unordered_set>
 #include <utility>
@@ -133,7 +135,7 @@ class design_sidb_gates_impl
     {
         const is_operational_params params_is_operational{params.phys_params, params.sim_engine};
 
-        const auto all_combinations = determine_all_combinations_of_distributing_k_entities_on_n_positions(
+        auto all_combinations = determine_all_combinations_of_distributing_k_entities_on_n_positions(
             params.number_of_sidbs, static_cast<std::size_t>(all_sidbs_in_canvas.size()));
         std::unordered_set<typename Lyt::coordinate> sidbs_affected_by_defects = {};
 
