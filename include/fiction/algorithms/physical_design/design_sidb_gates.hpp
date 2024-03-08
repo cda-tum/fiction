@@ -24,13 +24,12 @@
 #include <cassert>
 #include <cstdint>
 #include <cstdlib>
+#include <mutex>
 #include <numeric>
 #include <thread>
 #include <unordered_set>
 #include <utility>
 #include <vector>
-
-#include <combinations.h>
 
 namespace fiction
 {
@@ -133,8 +132,9 @@ class design_sidb_gates_impl
     [[nodiscard]] std::vector<Lyt> run_exhaustive_design() noexcept
     {
         const is_operational_params params_is_operational{params.phys_params, params.sim_engine};
-        auto                        all_combinations = determine_all_combinations_of_given_sidbs_in_canvas();
 
+        const auto all_combinations = determine_all_combinations_of_distributing_k_entities_on_n_positions(
+            params.number_of_sidbs, static_cast<std::size_t>(all_sidbs_in_canvas.size()));
         std::unordered_set<typename Lyt::coordinate> sidbs_affected_by_defects = {};
 
         if constexpr (has_get_sidb_defect_v<Lyt>)
@@ -298,44 +298,6 @@ class design_sidb_gates_impl
      * All cells within the canvas.
      */
     std::vector<typename Lyt::cell> all_sidbs_in_canvas;
-    /**
-     * Calculates all possible combinations of distributing the given number of SiDBs within a canvas
-     * based on the provided parameters. It generates combinations of SiDB indices (representing the cell position in
-     * the canvas from top to bottom and left to right) and stores them in the `all_combinations` vector. The number of
-     * SiDBs in each combination is determined by `parameter.number_of_sidbs`.
-     *
-     * @return All possible combinations as a vector of vectors of indices.
-     */
-    [[nodiscard]] std::vector<std::vector<std::size_t>>
-    determine_all_combinations_of_given_sidbs_in_canvas() const noexcept
-    {
-        std::vector<std::vector<std::size_t>> all_combinations{};
-        all_combinations.reserve(binomial_coefficient(all_sidbs_in_canvas.size(), params.number_of_sidbs));
-
-        std::vector<std::size_t> numbers(all_sidbs_in_canvas.size());
-        std::iota(numbers.begin(), numbers.end(), 0);
-
-        combinations::for_each_combination(
-            numbers.begin(),
-            numbers.begin() + static_cast<std::vector<std::size_t>::difference_type>(params.number_of_sidbs),
-            numbers.end(),
-            [this, &all_combinations](const auto begin, const auto end)
-            {
-                std::vector<std::size_t> combination{};
-                combination.reserve(params.number_of_sidbs);
-
-                for (auto it = begin; it != end; ++it)
-                {
-                    combination.push_back(static_cast<std::size_t>(*it));
-                }
-
-                all_combinations.push_back(combination);
-
-                return false;  // keep looping
-            });
-
-        return all_combinations;
-    }
     /**
      * Checks if any SiDBs within the specified cell indices are located too closely together, with a distance of less
      * than 0.5 nanometers.

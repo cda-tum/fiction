@@ -395,6 +395,7 @@ class quickexact_impl
 
                     charge_lyt_copy.update_after_charge_change();
                     charge_lyt_copy.recompute_system_energy();
+                    charge_lyt_copy.charge_distribution_to_index_general();
                     result.charge_distributions.push_back(charge_lyt_copy);
                 }
 
@@ -416,6 +417,7 @@ class quickexact_impl
 
                 charge_lyt_copy.update_after_charge_change();
                 charge_lyt_copy.recompute_system_energy();
+                charge_lyt_copy.charge_distribution_to_index_general();
                 result.charge_distributions.push_back(charge_lyt_copy);
             }
 
@@ -426,7 +428,7 @@ class quickexact_impl
 
             charge_layout.increase_charge_index_by_one(
                 dependent_cell_mode::VARIABLE, energy_calculation::KEEP_OLD_ENERGY_VALUE,
-                charge_distribution_history::CONSIDER,
+                charge_distribution_history::NEGLECT,
                 exhaustive_sidb_simulation_engine::QUICKEXACT);  // "false" allows that the charge state of the
                                                                  // dependent cell is automatically changed based on the
                                                                  // new charge distribution.

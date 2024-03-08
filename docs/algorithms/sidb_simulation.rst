@@ -81,6 +81,11 @@ Energy Calculation
 .. doxygenfunction:: fiction::is_ground_state
 
 
+**Header:** ``fiction/algorithms/simulation/sidb/check_simulation_results_for_equivalence.hpp``
+
+.. doxygenfunction:: fiction::check_simulation_results_for_equivalence
+
+
 Temperature Behavior
 ####################
 
@@ -192,6 +197,14 @@ Assess Population Stability
 .. doxygenstruct:: fiction::assess_physical_population_stability_params
    :members:
 .. doxygenfunction:: fiction::assess_physical_population_stability
+
+
+Positive Charge Detection
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Header:** ``fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp``
+
+.. doxygenfunction:: fiction::can_positive_charges_occur
 
 
 Convert Potential to Distance

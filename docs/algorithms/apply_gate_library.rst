@@ -3,7 +3,7 @@
 Apply Gate Library
 ------------------
 
-**Header:** ``fiction/layouts/apply_gate_library.hpp``
+**Header:** ``fiction/algorithms/physical_design/apply_gate_library.hpp``
 
 Applies an FCN :ref:`gate library <fcn-gate-libraries>` to a ``gate_level_layout`` to obtain a ``cell_level_layout`` implemented
 in the same :ref:`technology <fcn-cell-technologies>` as the provided gate library. Thereby, this function creates cell-accurate
