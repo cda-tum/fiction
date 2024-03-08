@@ -141,7 +141,7 @@ enum class sidb_state_iter_dir
 /**
  * Iterator for SiDB charge states. Iterates `-1 -> 0 -> +1 -> NONE`.
  */
-template<sidb_state_iter_dir dir = sidb_state_iter_dir::TO_VALENCE_BAND>
+template <sidb_state_iter_dir dir = sidb_state_iter_dir::TO_VALENCE_BAND>
 class sidb_charge_state_iterator
 {
   public:
