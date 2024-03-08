@@ -227,12 +227,14 @@ class is_operational_impl
         if (parameters.sim_engine == sidb_simulation_engine::EXGS)
         {
             assert(parameters.simulation_parameter.base == 2 && "base number is set to 3");
+
             // perform an exhaustive ground state simulation
             return exhaustive_ground_state_simulation(*bdl_iterator, parameters.simulation_parameter);
         }
         if (parameters.sim_engine == sidb_simulation_engine::QUICKSIM)
         {
             assert(parameters.simulation_parameter.base == 2 && "base number is set to 3");
+
             // perform a heuristic simulation
             const quicksim_params qs_params{parameters.simulation_parameter, 500, 0.6};
             return quicksim(*bdl_iterator, qs_params);
@@ -240,6 +242,7 @@ class is_operational_impl
         if (parameters.sim_engine == sidb_simulation_engine::QUICKEXACT)
         {
             assert(parameters.simulation_parameter.base == 2 && "base number is set to 3");
+
             // perform QuickExact exact simulation
             const quickexact_params<Lyt> quickexact_params{
                 parameters.simulation_parameter, fiction::quickexact_params<Lyt>::automatic_base_number_detection::OFF};
@@ -247,12 +250,14 @@ class is_operational_impl
         }
 
 #if (FICTION_ALGLIB_ENABLED)
+
         if (parameters.sim_engine == sidb_simulation_engine::CLUSTERCOMPLETE)
         {
             // perform ClusterComplete exact simulation
             const clustercomplete_params cc_params{parameters.simulation_parameter};
             return clustercomplete(*bdl_iterator, cc_params);
         }
+
 #endif  // FICTION_ALGLIB_ENABLED
 
         assert(false && "unsupported simulation engine");

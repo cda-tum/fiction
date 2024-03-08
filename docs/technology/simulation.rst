@@ -14,9 +14,8 @@ Possible charge states of SiDBs.
 .. doxygenfunction:: fiction::charge_state_to_sign(const sidb_charge_state& cs) noexcept
 .. doxygenfunction:: fiction::sign_to_charge_state(const int8_t sg) noexcept
 .. doxygenfunction:: fiction::charge_configuration_to_string(const std::vector<sidb_charge_state>& charge_distribution) noexcept
+.. doxygenenum:: fiction::sidb_state_iter_dir
 .. doxygenclass:: fiction::sidb_charge_state_iterator
-   :members:
-.. doxygenclass:: fiction::sidb_charge_state_reversed_iterator
    :members:
 
 SiDB Charge Distribution Surface

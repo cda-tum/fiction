@@ -878,8 +878,8 @@ struct sidb_cluster
         const sidb_cluster_ptr& this_ptr = *std::find_if(get_parent()->children.cbegin(), get_parent()->children.cend(),
                                                          [&](const sidb_cluster_ptr& c) { return *c == *this; });
 
-        for (const sidb_charge_state cs :
-             sidb_charge_state_reversed_iterator{base == 3 ? sidb_charge_state::POSITIVE : sidb_charge_state::NEUTRAL})
+        for (const sidb_charge_state cs : sidb_charge_state_iterator<sidb_state_iter_dir::TO_CONDUCTANCE_BAND>{
+                 base == 3 ? sidb_charge_state::POSITIVE : sidb_charge_state::NEUTRAL})
         {
             charge_space.emplace(sidb_cluster_charge_state{this_ptr, cs});
         }

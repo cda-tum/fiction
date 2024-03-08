@@ -124,11 +124,27 @@ charge_configuration_to_string(const std::vector<sidb_charge_state>& charge_dist
     return config_str.str();
 }
 /**
+ * The iteration direction over the SiDB states. To the valance band iterates "\f$-\to 0\to +\f$", and in reverse to the
+ * conductance band.
+ */
+enum class sidb_state_iter_dir
+{
+    TO_VALENCE_BAND,
+    TO_CONDUCTANCE_BAND
+};
+/**
  * Iterator for SiDB charge states. Iterates `-1 -> 0 -> +1 -> NONE`.
  */
-class sidb_charge_state_iterator : public std::iterator<std::input_iterator_tag, sidb_charge_state>
+template<sidb_state_iter_dir dir = sidb_state_iter_dir::TO_VALENCE_BAND>
+class sidb_charge_state_iterator
 {
   public:
+    // Iterator typedefs
+    using iterator_category = std::input_iterator_tag;
+    using value_type        = sidb_charge_state;
+    using difference_type   = std::ptrdiff_t;
+    using pointer           = sidb_charge_state*;
+    using reference         = sidb_charge_state&;
     /**
      * Constructor of the non-reversed charge state iterator.
      *
@@ -162,7 +178,7 @@ class sidb_charge_state_iterator : public std::iterator<std::input_iterator_tag,
      *
      * @return An iterator to the charge state that this iterator was initialized with.
      */
-    sidb_charge_state_iterator begin() const noexcept
+    [[nodiscard]] sidb_charge_state_iterator begin() const noexcept
     {
         return sidb_charge_state_iterator(cs);
     }
@@ -171,7 +187,7 @@ class sidb_charge_state_iterator : public std::iterator<std::input_iterator_tag,
      *
      * @return An iterator to the `NONE` charge state.
      */
-    sidb_charge_state_iterator end() const noexcept
+    [[nodiscard]] static sidb_charge_state_iterator end() noexcept
     {
         return sidb_charge_state_iterator{sidb_charge_state::NONE};
     }
@@ -191,7 +207,14 @@ class sidb_charge_state_iterator : public std::iterator<std::input_iterator_tag,
      */
     sidb_charge_state_iterator& operator++() noexcept
     {
-        cs = sign_to_charge_state(charge_state_to_sign(cs) + 1);
+        if constexpr (dir == sidb_state_iter_dir::TO_VALENCE_BAND)
+        {
+            cs = sign_to_charge_state(charge_state_to_sign(cs) + int8_t{1});
+        }
+        else if constexpr (dir == sidb_state_iter_dir::TO_CONDUCTANCE_BAND)
+        {
+            cs = sign_to_charge_state(charge_state_to_sign(cs) - int8_t{1});
+        }
         return *this;
     }
     /**
@@ -207,94 +230,8 @@ class sidb_charge_state_iterator : public std::iterator<std::input_iterator_tag,
     }
 
   private:
-    sidb_charge_state cs;
-};
-/**
- * Reverse iterator for SiDB charge states. Iterates `+1 -> 0 -> -1 -> NONE`.
- */
-class sidb_charge_state_reversed_iterator : public std::iterator<std::input_iterator_tag, sidb_charge_state>
-{
-  public:
     /**
-     * Constructor of the reversed charge state iterator.
-     *
-     * @param charge_state The charge state to start iterating at.
-     */
-    explicit sidb_charge_state_reversed_iterator(const sidb_charge_state charge_state = sidb_charge_state::POSITIVE) :
-            cs{charge_state}
-    {}
-    /**
-     * Check for equality.
-     *
-     * @param other Other iterator to compare with.
-     * @return `true` if and only if the current charge state is equal to the charge state of the other iterator.
-     */
-    bool operator==(const sidb_charge_state_reversed_iterator& other) const noexcept
-    {
-        return cs == other.cs;
-    }
-    /**
-     * Check for inequality.
-     *
-     * @param other Other iterator to compare with.
-     * @return `true` if and only if the current charge state differs from the charge state of the other iterator.
-     */
-    bool operator!=(const sidb_charge_state_reversed_iterator& other) const noexcept
-    {
-        return cs != other.cs;
-    }
-    /**
-     * Iterator to the initial charge state for the reversed charge state iteration.
-     *
-     * @return An iterator to the charge state that this iterator was initialized with.
-     */
-    sidb_charge_state_reversed_iterator begin() const noexcept
-    {
-        return sidb_charge_state_reversed_iterator(cs);
-    }
-    /**
-     * Iterator to the final charge state for the non-reversed charge state iteration.
-     *
-     * @return An iterator to the `NONE` charge state.
-     */
-    sidb_charge_state_reversed_iterator end() const noexcept
-    {
-        return sidb_charge_state_reversed_iterator{sidb_charge_state::NONE};
-    }
-    /**
-     * Dereference operator.
-     *
-     * @return The current charge state at the iterator.
-     */
-    sidb_charge_state operator*() const noexcept
-    {
-        return cs;
-    }
-    /**
-     * Pre-increment operator. Advances in the order `+1 -> 0 -> -1 -> NONE`.
-     *
-     * @return The resulting iterator.
-     */
-    sidb_charge_state_reversed_iterator& operator++() noexcept
-    {
-        cs = sign_to_charge_state(charge_state_to_sign(cs) - 1);
-        return *this;
-    }
-    /**
-     * Post-increment operator. Advances in the order `+1 -> 0 -> -1 -> NONE`.
-     *
-     * @return A copy of `this` before incrementing.
-     */
-    sidb_charge_state_reversed_iterator operator++(int) noexcept
-    {
-        sidb_charge_state_reversed_iterator temp(*this);
-        ++(*this);
-        return temp;
-    }
-
-  private:
-    /**
-     * The current charge state at the iterator.
+     * Current charge state.
      */
     sidb_charge_state cs;
 };
