@@ -127,8 +127,8 @@ TEMPLATE_TEST_CASE(
     gate_lyt.create_nand({}, {}, {0, 0});
     gate_lyt.create_nand({}, {}, {2, 2});
 
-    const TestType& cell_lyt{
-        convert_to_siqad_coordinates(apply_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library>(gate_lyt))};
+    const TestType& cell_lyt(
+        convert_to_siqad_coordinates(apply_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library>(gate_lyt)));
 
     SECTION("Base 2")
     {
