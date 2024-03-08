@@ -2,8 +2,10 @@
 // Created by Willem Lambooy on 29/02/2024.
 //
 
-#ifndef FICTION_clustercomplete_HPP
-#define FICTION_clustercomplete_HPP
+#ifndef FICTION_CLUSTERCOMPLETE_HPP
+#define FICTION_CLUSTERCOMPLETE_HPP
+
+#if (FICTION_ALGLIB_ENABLED)
 
 #include "fiction/algorithms/simulation/sidb/ground_state_space.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
@@ -469,4 +471,6 @@ template <typename Lyt>
 
 }  // namespace fiction
 
-#endif  // FICTION_clustercomplete_HPP
+#endif  // FICTION_ALGLIB_ENABLED
+
+#endif  // FICTION_CLUSTERCOMPLETE_HPP

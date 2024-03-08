@@ -51,6 +51,8 @@ Exhaustive Ground State Simulation
 
 .. doxygenfunction:: fiction::exhaustive_ground_state_simulation
 
+.. _clustercomplete:
+
 **Header:** ``fiction/algorithms/simulation/sidb/clustercomplete.hpp``
 
 .. doxygenstruct:: fiction::clustercomplete_params

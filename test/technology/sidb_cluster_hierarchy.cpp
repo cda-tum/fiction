@@ -2,6 +2,8 @@
 // Created by Willem Lambooy on 04/02/2024.
 //
 
+#if (FICTION_ALGLIB_ENABLED)
+
 #include <catch2/catch_template_test_macros.hpp>
 
 #include <fiction/layouts/cartesian_layout.hpp>
@@ -99,3 +101,14 @@ TEMPLATE_TEST_CASE(
     CHECK(h.sub[1]->sub[0]->c == phmap::flat_hash_set<uint64_t>{0, 1});
     CHECK(h.sub[1]->sub[1]->c == phmap::flat_hash_set<uint64_t>{6, 7});
 }
+
+#else  // FICTION_ALGLIB_ENABLED
+
+#include <catch2/catch_test_macros.hpp>
+
+TEST_CASE("SiDB Cluster Hierarchy", "[sidb-cluster-hierarchy]")
+{
+    CHECK(true);  // workaround for empty test case
+}
+
+#endif  // FICTION_ALGLIB_ENABLED

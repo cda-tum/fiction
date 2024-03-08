@@ -156,5 +156,25 @@ check_if_present(tinyxml2)
 add_subdirectory(tinyxml2 EXCLUDE_FROM_ALL)
 target_link_system_libraries(libfiction INTERFACE tinyxml2::tinyxml2)
 
-find_package(ALGLIB REQUIRED)
-target_link_libraries(libfiction INTERFACE ALGLIB)
+# Enable the usage of ALGLIB
+option(FICTION_ALGLIB "Find, include, and utilize ALGLIB by the ALGLIB project. It needs to be installed manually.")
+if (FICTION_ALGLIB)
+    message(STATUS "Usage of ALGLIB was enabled. Make sure that it is installed on your system!")
+
+    # Try to locate ALGLIB
+    find_package(ALGLIB)
+
+    if (ALGLIB_FOUND)
+        # Status update
+        message(STATUS "Found ALGLIB")
+
+        # Compile definition to guard include files
+        target_compile_definitions(libfiction INTERFACE FICTION_ALGLIB_ENABLED)
+        # Link ALGLIB
+        target_link_libraries(libfiction INTERFACE ALGLIB)
+
+    else ()
+        message(SEND_ERROR "ALGLIB could not be detected")
+    endif ()
+
+endif ()

@@ -2,6 +2,8 @@
 // Created by Willem Lambooy on 29/02/2024.
 //
 
+#if (FICTION_ALGLIB_ENABLED)
+
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
@@ -330,3 +332,14 @@ TEMPLATE_TEST_CASE(
                    Catch::Matchers::WithinAbs(0.505173434, physical_constants::POP_STABILITY_ERR));
     }
 }
+
+#else  // FICTION_ALGLIB_ENABLED
+
+#include <catch2/catch_test_macros.hpp>
+
+TEST_CASE("ClusterComplete", "[clustercomplete]")
+{
+    CHECK(true);  // workaround for empty test case
+}
+
+#endif  // FICTION_ALGLIB_ENABLED
