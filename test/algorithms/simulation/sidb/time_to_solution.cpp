@@ -42,6 +42,8 @@ TEMPLATE_TEST_CASE("time to solution test", "[time-to-solution]", sidb_cell_clk_
                    Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.00001));
         CHECK(tts_stat_quickexact.mean_single_runtime > 0.0);
 
+#if (FICTION_ALGLIB_ENABLED)
+
         time_to_solution_stats        tts_stat_clustercomplete{};
         const time_to_solution_params tts_params_clustercomplete{exhaustive_sidb_simulation_engine::CLUSTERCOMPLETE};
         time_to_solution<TestType>(lyt, quicksim_params, tts_params_clustercomplete, &tts_stat_clustercomplete);
@@ -51,6 +53,8 @@ TEMPLATE_TEST_CASE("time to solution test", "[time-to-solution]", sidb_cell_clk_
         CHECK_THAT(tts_stat_clustercomplete.time_to_solution,
                    Catch::Matchers::WithinAbs(std::numeric_limits<double>::max(), 0.00001));
         CHECK(tts_stat_clustercomplete.mean_single_runtime > 0.0);
+
+#endif  // FICTION_ALGLIB_ENABLED
 
         time_to_solution_stats        tts_stat_exgs{};
         const time_to_solution_params tts_params_exgs{exhaustive_sidb_simulation_engine::EXGS};
@@ -106,6 +110,8 @@ TEMPLATE_TEST_CASE("time to solution test", "[time-to-solution]", sidb_cell_clk_
         CHECK_THAT(tts_stat_quickexact.time_to_solution - tts_calculated,
                    Catch::Matchers::WithinAbs(0.0, physical_constants::POP_STABILITY_ERR));
 
+#if (FICTION_ALGLIB_ENABLED)
+
         time_to_solution_stats        tts_stat_clustercomplete{};
         const time_to_solution_params tts_params_clustercomplete{exhaustive_sidb_simulation_engine::CLUSTERCOMPLETE};
         time_to_solution<TestType>(lyt, quicksim_params, tts_params_clustercomplete, &tts_stat_clustercomplete);
@@ -126,5 +132,7 @@ TEMPLATE_TEST_CASE("time to solution test", "[time-to-solution]", sidb_cell_clk_
         }
         CHECK_THAT(tts_stat_clustercomplete.time_to_solution - tts_calculated,
                    Catch::Matchers::WithinAbs(0.0, physical_constants::POP_STABILITY_ERR));
+
+#endif  // FICTION_ALGLIB_ENABLED
     }
 }
