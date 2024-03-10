@@ -7,7 +7,6 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/algorithms/physical_design/apply_gate_library.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/io/read_sqd_layout.hpp>
 #include <fiction/io/write_sqd_layout.hpp>
 #include <fiction/layouts/bounding_box.hpp>
@@ -22,7 +21,6 @@
 #include <fiction/technology/sidb_bestagon_library.hpp>
 #include <fiction/technology/sidb_defects.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
-#include <fiction/technology/sidb_lattice_types.hpp>
 #include <fiction/technology/sidb_surface.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
