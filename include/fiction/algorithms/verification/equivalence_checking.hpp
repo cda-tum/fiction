@@ -89,7 +89,7 @@ class equivalence_checking_impl
             pst{st}
     {}
 
-    void run() noexcept
+    eq_type run() noexcept
     {
         mockturtle::stopwatch stop{pst.runtime};
 
@@ -97,14 +97,14 @@ class equivalence_checking_impl
         {
             if (has_drvs(spec, &pst.spec_drv_stats))
             {
-                return;
+                return eq_type::NO;
             }
         }
         if constexpr (is_gate_level_layout_v<Impl>)
         {
             if (has_drvs(impl, &pst.impl_drv_stats))
             {
-                return;
+                return eq_type::NO;
             }
         }
 
@@ -155,13 +155,19 @@ class equivalence_checking_impl
             else
             {
                 std::cout << "[e] resource limit exceeded" << std::endl;
+
+                return eq_type::NO;
             }
         }
         else
         {
             std::cout << "[w] both networks/layouts must have the same number of primary inputs and outputs"
                       << std::endl;
+
+            return eq_type::NO;
         }
+
+        return pst.eq;
     }
 
   private:
@@ -221,7 +227,7 @@ class equivalence_checking_impl
  * @param pst Statistics.
  */
 template <typename Spec, typename Impl>
-void equivalence_checking(const Spec& spec, const Impl& impl, equivalence_checking_stats* pst = nullptr)
+eq_type equivalence_checking(const Spec& spec, const Impl& impl, equivalence_checking_stats* pst = nullptr)
 {
     static_assert(mockturtle::is_network_type_v<Spec>, "Spec is not a network type");
     static_assert(mockturtle::is_network_type_v<Impl>, "Impl is not a network type");
@@ -229,12 +235,14 @@ void equivalence_checking(const Spec& spec, const Impl& impl, equivalence_checki
     equivalence_checking_stats        st{};
     detail::equivalence_checking_impl p{spec, impl, st};
 
-    p.run();
+    const auto result = p.run();
 
     if (pst)
     {
         *pst = st;
     }
+
+    return result;
 }
 
 }  // namespace fiction
