@@ -25,6 +25,8 @@ void remove_clocking(Lyt& lyt) noexcept
 
 int main()  // NOLINT
 {
+    // NOTE: you have to download the respective files from MNTBench. Select Fontes18 and Trindade16, all clocking
+    // schemes, obtained with NanoPlaceR
     const std::string layout_folder =
         fmt::format("{}/clock_number_assignment/versatility_benchmarks/", EXPERIMENTS_PATH).c_str();
 
