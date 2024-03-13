@@ -1,5 +1,5 @@
 //
-// Created by Willem Lambooy on 04/02/2024.
+// Created by Willem Lambooy on 04.02.2024.
 //
 
 #ifndef FICTION_SIDB_CLUSTER_HIERARCHY_HPP

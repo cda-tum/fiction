@@ -1,5 +1,5 @@
 //
-// Created by Willem Lambooy on 07/03/2024.
+// Created by Willem Lambooy on 07.03.2024.
 //
 
 #ifndef FICTION_CMD_CLUSTERCOMPLETE_HPP

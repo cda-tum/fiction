@@ -1,5 +1,5 @@
 //
-// Created by Willem Lambooy on 06/02/2024.
+// Created by Willem Lambooy on 06.02.2024.
 //
 
 #ifndef FICTION_GROUND_STATE_SPACE_HPP
