@@ -131,20 +131,20 @@ class ground_state_space_impl
     static std::pair<charge_distribution_surface<Lyt>, charge_distribution_surface<Lyt>>
     get_local_potential_bounds(const Lyt& lyt, const sidb_simulation_parameters& phys_params) noexcept
     {
-        charge_distribution_surface<Lyt> cl_min{lyt};
-        charge_distribution_surface<Lyt> cl_max{lyt};
+        charge_distribution_surface<Lyt> cds_min{lyt};
+        charge_distribution_surface<Lyt> cds_max{lyt};
 
-        cl_min.assign_physical_parameters(phys_params);
-        cl_max.assign_physical_parameters(phys_params);
+        cds_min.assign_physical_parameters(phys_params);
+        cds_max.assign_physical_parameters(phys_params);
 
-        cl_min.assign_all_charge_states(phys_params.base == 3 ? sidb_charge_state::POSITIVE :
+        cds_min.assign_all_charge_states(phys_params.base == 3 ? sidb_charge_state::POSITIVE :
                                                                 sidb_charge_state::NEUTRAL);
-        cl_max.assign_all_charge_states(sidb_charge_state::NEGATIVE);
+        cds_max.assign_all_charge_states(sidb_charge_state::NEGATIVE);
 
-        cl_min.update_after_charge_change();
-        cl_max.update_after_charge_change();
+        cds_min.update_after_charge_change();
+        cds_max.update_after_charge_change();
 
-        return {cl_min, cl_max};
+        return {cds_min, cds_max};
     }
 
     static sidb_clustering
