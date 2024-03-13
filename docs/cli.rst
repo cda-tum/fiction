@@ -293,7 +293,7 @@ See ``quickexact -h`` for a full list.
 The simulated ground state charge distribution can be printed with ``print -c``.
 
 ClusterComplete (``clustercomplete``)
-###########################
+#####################################
 
 *ClusterComplete* too serves as an exact simulator in much the same way as *QuickExact*, yet it introduces a new
 dimension of scalability for the purpose of SiDB logic simulation. For the first time, it enables exact simulation of
