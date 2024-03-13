@@ -41,16 +41,16 @@ TEMPLATE_TEST_CASE("Empty layout ClusterComplete simulation", "[clustercomplete]
 }
 
 template <typename Lyt>
-static bool verify_clustercomplete_result(const charge_distribution_surface<Lyt>&              qe_cl,
-                                          const std::vector<charge_distribution_surface<Lyt>>& cc_cls) noexcept
+static bool verify_clustercomplete_result(const charge_distribution_surface<Lyt>&              qe_cds,
+                                          const std::vector<charge_distribution_surface<Lyt>>& cc_cdss) noexcept
 {
-    for (const charge_distribution_surface<Lyt>& cc_cl : cc_cls)
+    for (const charge_distribution_surface<Lyt>& cc_cds : cc_cdss)
     {
         bool is_same = true;
 
-        for (const cell<Lyt>& c : qe_cl.get_sidb_order())
+        for (const cell<Lyt>& c : qe_cds.get_sidb_order())
         {
-            if (qe_cl.get_charge_state(c) != cc_cl.get_charge_state(c))
+            if (qe_cds.get_charge_state(c) != cc_cds.get_charge_state(c))
             {
                 is_same = false;
                 break;

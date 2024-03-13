@@ -134,31 +134,31 @@ class clustercomplete_impl
         }
     }
 
-    constexpr inline bool fail_onto_negative_charge(const double pot_bound) const noexcept
+    [[nodiscard]] constexpr inline bool fail_onto_negative_charge(const double pot_bound) const noexcept
     {
         // V > e - mu-
         return pot_bound > mu_bounds_with_error[0];
     }
 
-    constexpr inline bool fail_onto_positive_charge(const double pot_bound) const noexcept
+    [[nodiscard]] constexpr inline bool fail_onto_positive_charge(const double pot_bound) const noexcept
     {
         // V < -e - mu+
         return pot_bound < mu_bounds_with_error[3];
     }
 
-    constexpr inline bool ub_fail_onto_neutral_charge(const double pot_bound) const noexcept
+    [[nodiscard]] constexpr inline bool ub_fail_onto_neutral_charge(const double pot_bound) const noexcept
     {
         // V < -e - mu-
         return pot_bound < mu_bounds_with_error[1];
     }
 
-    constexpr inline bool lb_fail_onto_neutral_charge(const double pot_bound) const noexcept
+    [[nodiscard]] constexpr inline bool lb_fail_onto_neutral_charge(const double pot_bound) const noexcept
     {
         // V > e - mu+
         return pot_bound > mu_bounds_with_error[2];
     }
 
-    bool perform_potential_bound_analysis(const sidb_cluster_state& cst) const noexcept
+    [[nodiscard]] bool perform_potential_bound_analysis(const sidb_cluster_state& cst) const noexcept
     {
         uint64_t required_neg_count  = cst.proj_st.get_count<sidb_charge_state::NEGATIVE>(),
                  required_pos_count  = cst.proj_st.get_count<sidb_charge_state::POSITIVE>(),
@@ -189,7 +189,7 @@ class clustercomplete_impl
         return required_neg_count == 0 && required_pos_count == 0 && required_neut_count == 0;
     }
 
-    bool meets_population_stability_criterion(const sidb_clustering_state& clustering_state) const noexcept
+    [[nodiscard]] bool meets_population_stability_criterion(const sidb_clustering_state& clustering_state) const noexcept
     {
         for (const sidb_cluster_state_ptr& cst : clustering_state)
         {

@@ -91,7 +91,7 @@ class ground_state_space_impl
             while (!terminate)
             {
                 while (!update_charge_spaces())
-                    ;
+                {}
 
                 move_up_hierarchy();
             }
@@ -104,25 +104,25 @@ class ground_state_space_impl
     }
 
   private:
-    constexpr inline bool fail_onto_negative_charge(const double pot_bound) const noexcept
+    [[nodiscard]] constexpr inline bool fail_onto_negative_charge(const double pot_bound) const noexcept
     {
         // V > e - mu-
         return pot_bound > mu_bounds_with_error[0];
     }
 
-    constexpr inline bool fail_onto_positive_charge(const double pot_bound) const noexcept
+    [[nodiscard]] constexpr inline bool fail_onto_positive_charge(const double pot_bound) const noexcept
     {
         // V < -e - mu+
         return pot_bound < mu_bounds_with_error[3];
     }
 
-    constexpr inline bool ub_fail_onto_neutral_charge(const double pot_bound) const noexcept
+    [[nodiscard]] constexpr inline bool ub_fail_onto_neutral_charge(const double pot_bound) const noexcept
     {
         // V < -e - mu-
         return pot_bound < mu_bounds_with_error[1];
     }
 
-    constexpr inline bool lb_fail_onto_neutral_charge(const double pot_bound) const noexcept
+    [[nodiscard]] constexpr inline bool lb_fail_onto_neutral_charge(const double pot_bound) const noexcept
     {
         // V > e - mu+
         return pot_bound > mu_bounds_with_error[2];
@@ -138,7 +138,7 @@ class ground_state_space_impl
         cds_max.assign_physical_parameters(phys_params);
 
         cds_min.assign_all_charge_states(phys_params.base == 3 ? sidb_charge_state::POSITIVE :
-                                                                sidb_charge_state::NEUTRAL);
+                                                                 sidb_charge_state::NEUTRAL);
         cds_max.assign_all_charge_states(sidb_charge_state::NEGATIVE);
 
         cds_min.update_after_charge_change();
@@ -390,7 +390,7 @@ class ground_state_space_impl
     }
 
     template <potential_bound_analysis_mode mode>
-    bool perform_potential_bound_analysis(
+    [[nodiscard]] bool perform_potential_bound_analysis(
         const sidb_cluster_projector_state&                  pst,
         const std::optional<intra_cluster_potential_bounds>& internal_potential_bounds = std::nullopt) const noexcept
     {
@@ -554,7 +554,7 @@ class ground_state_space_impl
             }
 
             // check if cluster charge state exists
-            sidb_cluster_charge_state_space::iterator it = parent->charge_space.find(m);
+            const sidb_cluster_charge_state_space::iterator it = parent->charge_space.find(m);
             if (it != parent->charge_space.cend())
             {
                 it->compositions.emplace_back(m.compositions[0]);
@@ -571,7 +571,7 @@ class ground_state_space_impl
 
         for (const sidb_cluster_charge_state& m_part : cur_child->charge_space)
         {
-            m.compositions[0].emplace_back(sidb_cluster_state{cur_child, static_cast<uint64_t>(m_part)});
+            m.compositions[0].emplace_back(cur_child, static_cast<uint64_t>(m_part));
             m += m_part;
 
             fill_merged_charge_state_space(parent, cur_child_ix + 1, m);
@@ -584,7 +584,7 @@ class ground_state_space_impl
     void construct_merged_charge_state_space(const sidb_cluster_ptr& parent) const noexcept
     {
         sidb_cluster_charge_state m{};
-        m.compositions.emplace_back(sidb_cluster_state_composition{});
+        m.compositions.emplace_back();
         fill_merged_charge_state_space(parent, 0, m);
     }
 
@@ -727,7 +727,7 @@ class ground_state_space_impl
         update_charge_spaces(min_parent->uid);
     }
 
-    constexpr inline uint64_t maximum_top_level_multisets(const uint64_t number_of_sidbs) const noexcept
+    [[nodiscard]] constexpr inline uint64_t maximum_top_level_multisets(const uint64_t number_of_sidbs) const noexcept
     {
         // computes nCr(N + 2, 2)                             // computes nCr(N + 1, 1)
         return base == 3 ? ((number_of_sidbs + 1) * (number_of_sidbs + 2)) / 2 : number_of_sidbs + 1;

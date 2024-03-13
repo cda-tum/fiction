@@ -38,24 +38,24 @@ TEMPLATE_TEST_CASE("SiDB cluster hierarchy of a Y-shape SiDB OR gate with input 
         const sidb_binary_cluster_hierarchy_node& h = sidb_cluster_hierarchy(lyt);
 
         REQUIRE(h.c.size() == 8);
-        REQUIRE(h.sub[0] != nullptr);
-        REQUIRE(h.sub[1] != nullptr);
-        REQUIRE(h.sub[0]->c.size() == 3);
-        REQUIRE(h.sub[1]->c.size() == 5);
-        CHECK(h.sub[0]->c == phmap::flat_hash_set<uint64_t>{5, 6, 7});
-        CHECK(h.sub[1]->c == phmap::flat_hash_set<uint64_t>{0, 1, 2, 3, 4});
-        REQUIRE(h.sub[0]->sub[0] != nullptr);
-        REQUIRE(h.sub[0]->sub[1] != nullptr);
-        REQUIRE(h.sub[1]->sub[0] != nullptr);
-        REQUIRE(h.sub[1]->sub[1] != nullptr);
-        CHECK(h.sub[0]->sub[0]->c == phmap::flat_hash_set<uint64_t>{7});
-        CHECK(h.sub[0]->sub[1]->c == phmap::flat_hash_set<uint64_t>{5, 6});
-        CHECK(h.sub[1]->sub[0]->c == phmap::flat_hash_set<uint64_t>{1, 3});
-        CHECK(h.sub[1]->sub[1]->c == phmap::flat_hash_set<uint64_t>{0, 2, 4});
-        REQUIRE(h.sub[1]->sub[1]->sub[0] != nullptr);
-        REQUIRE(h.sub[1]->sub[1]->sub[1] != nullptr);
-        CHECK(h.sub[1]->sub[1]->sub[0]->c == phmap::flat_hash_set<uint64_t>{4});
-        CHECK(h.sub[1]->sub[1]->sub[1]->c == phmap::flat_hash_set<uint64_t>{0, 2});
+        REQUIRE(h.sub.at(0) != nullptr);
+        REQUIRE(h.sub.at(1) != nullptr);
+        REQUIRE(h.sub.at(0)->c.size() == 3);
+        REQUIRE(h.sub.at(1)->c.size() == 5);
+        CHECK(h.sub.at(0)->c == phmap::flat_hash_set<uint64_t>{5, 6, 7});
+        CHECK(h.sub.at(1)->c == phmap::flat_hash_set<uint64_t>{0, 1, 2, 3, 4});
+        REQUIRE(h.sub.at(0)->sub.at(0) != nullptr);
+        REQUIRE(h.sub.at(0)->sub.at(1) != nullptr);
+        REQUIRE(h.sub.at(1)->sub.at(0) != nullptr);
+        REQUIRE(h.sub.at(1)->sub.at(1) != nullptr);
+        CHECK(h.sub.at(0)->sub.at(0)->c == phmap::flat_hash_set<uint64_t>{7});
+        CHECK(h.sub.at(0)->sub.at(1)->c == phmap::flat_hash_set<uint64_t>{5, 6});
+        CHECK(h.sub.at(1)->sub.at(0)->c == phmap::flat_hash_set<uint64_t>{1, 3});
+        CHECK(h.sub.at(1)->sub.at(1)->c == phmap::flat_hash_set<uint64_t>{0, 2, 4});
+        REQUIRE(h.sub.at(1)->sub.at(1)->sub.at(0) != nullptr);
+        REQUIRE(h.sub.at(1)->sub.at(1)->sub.at(1) != nullptr);
+        CHECK(h.sub.at(1)->sub.at(1)->sub.at(0)->c == phmap::flat_hash_set<uint64_t>{4});
+        CHECK(h.sub.at(1)->sub.at(1)->sub.at(1)->c == phmap::flat_hash_set<uint64_t>{0, 2});
     }
 }
 
@@ -79,20 +79,20 @@ TEMPLATE_TEST_CASE("SiDB cluster hierarchy of an 8 DB layout with separated grou
 
     const sidb_binary_cluster_hierarchy_node& h = sidb_cluster_hierarchy(lyt);
     REQUIRE(h.c.size() == 8);
-    REQUIRE(h.sub[0] != nullptr);
-    REQUIRE(h.sub[1] != nullptr);
-    REQUIRE(h.sub[0]->c.size() == 4);
-    REQUIRE(h.sub[1]->c.size() == 4);
-    CHECK(h.sub[0]->c == phmap::flat_hash_set<uint64_t>{2, 3, 4, 5});
-    CHECK(h.sub[1]->c == phmap::flat_hash_set<uint64_t>{0, 1, 6, 7});
-    REQUIRE(h.sub[0]->sub[0] != nullptr);
-    REQUIRE(h.sub[0]->sub[1] != nullptr);
-    REQUIRE(h.sub[1]->sub[0] != nullptr);
-    REQUIRE(h.sub[1]->sub[1] != nullptr);
-    CHECK(h.sub[0]->sub[0]->c == phmap::flat_hash_set<uint64_t>{4, 5});
-    CHECK(h.sub[0]->sub[1]->c == phmap::flat_hash_set<uint64_t>{2, 3});
-    CHECK(h.sub[1]->sub[0]->c == phmap::flat_hash_set<uint64_t>{0, 1});
-    CHECK(h.sub[1]->sub[1]->c == phmap::flat_hash_set<uint64_t>{6, 7});
+    REQUIRE(h.sub.at(0) != nullptr);
+    REQUIRE(h.sub.at(1) != nullptr);
+    REQUIRE(h.sub.at(0)->c.size() == 4);
+    REQUIRE(h.sub.at(1)->c.size() == 4);
+    CHECK(h.sub.at(0)->c == phmap::flat_hash_set<uint64_t>{2, 3, 4, 5});
+    CHECK(h.sub.at(1)->c == phmap::flat_hash_set<uint64_t>{0, 1, 6, 7});
+    REQUIRE(h.sub.at(0)->sub.at(0) != nullptr);
+    REQUIRE(h.sub.at(0)->sub.at(1) != nullptr);
+    REQUIRE(h.sub.at(1)->sub.at(0) != nullptr);
+    REQUIRE(h.sub.at(1)->sub.at(1) != nullptr);
+    CHECK(h.sub.at(0)->sub.at(0)->c == phmap::flat_hash_set<uint64_t>{4, 5});
+    CHECK(h.sub.at(0)->sub.at(1)->c == phmap::flat_hash_set<uint64_t>{2, 3});
+    CHECK(h.sub.at(1)->sub.at(0)->c == phmap::flat_hash_set<uint64_t>{0, 1});
+    CHECK(h.sub.at(1)->sub.at(1)->c == phmap::flat_hash_set<uint64_t>{6, 7});
 }
 
 #else  // FICTION_ALGLIB_ENABLED

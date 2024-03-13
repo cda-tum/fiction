@@ -138,8 +138,8 @@ sidb_cluster_hierarchy(Lyt& lyt, sidb_cluster_hierarchy_linkage_method linkage_m
     {
         const auto [x, y] = charge_lyt.get_all_sidb_locations_in_nm()[i];
 
-        d[static_cast<int>(i)][0] = x;
-        d[static_cast<int>(i)][1] = y;
+        d(static_cast<int>(i), 0) = x;
+        d(static_cast<int>(i), 1) = y;
     }
 
     alglib::clusterizerstate s;
@@ -158,17 +158,17 @@ sidb_cluster_hierarchy(Lyt& lyt, sidb_cluster_hierarchy_linkage_method linkage_m
     // build hierarchy from N - 1 merges represented in rep.z
     for (int i = 0; i < rep.npoints - 1; ++i)
     {
-        const std::array<uint64_t, 2> cs = {static_cast<uint64_t>(rep.z[i][0]), static_cast<uint64_t>(rep.z[i][1])};
+        const std::array<uint64_t, 2> cs = {static_cast<uint64_t>(rep.z(i, 0)), static_cast<uint64_t>(rep.z(i, 1))};
         for (uint8_t c = 0; c < 2; ++c)
         {
             // create leaf nodes
-            if (cs[c] < charge_lyt.num_cells())
+            if (cs.at(c) < charge_lyt.num_cells())
             {
-                nodes[cs[c]] = std::make_unique<sidb_binary_cluster_hierarchy_node>(
+                nodes[cs.at(c)] = std::make_unique<sidb_binary_cluster_hierarchy_node>(
 #ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
                     std::set<uint64_t>{cs[c]},
 #else
-                    phmap::flat_hash_set<uint64_t>{cs[c]},
+                    phmap::flat_hash_set<uint64_t>{cs.at(c)},
 #endif
                     std::array<sidb_binary_cluster_hierarchy_node_ptr, 2>{nullptr, nullptr});
             }
@@ -183,14 +183,14 @@ sidb_cluster_hierarchy(Lyt& lyt, sidb_cluster_hierarchy_linkage_method linkage_m
         phmap::flat_hash_set<uint64_t> set_union{};
 #endif
 
-        std::set_union(nodes.at(cs[0])->c.cbegin(), nodes.at(cs[0])->c.cend(), nodes.at(cs[1])->c.cbegin(),
-                       nodes.at(cs[1])->c.cend(), std::inserter(set_union, set_union.begin()));
+        std::set_union(nodes.at(cs.at(0))->c.cbegin(), nodes.at(cs.at(0))->c.cend(), nodes.at(cs.at(1))->c.cbegin(),
+                       nodes.at(cs.at(1))->c.cend(), std::inserter(set_union, set_union.begin()));
 
         nodes[new_n] = std::make_unique<sidb_binary_cluster_hierarchy_node>(
-            set_union, std::array<sidb_binary_cluster_hierarchy_node_ptr, 2>{std::move(nodes.at(cs[0])),
-                                                                             std::move(nodes.at(cs[1]))});
-        nodes.erase(cs[0]);
-        nodes.erase(cs[1]);
+            set_union, std::array<sidb_binary_cluster_hierarchy_node_ptr, 2>{std::move(nodes.at(cs.at(0))),
+                                                                             std::move(nodes.at(cs.at(1)))});
+        nodes.erase(cs.at(0));
+        nodes.erase(cs.at(1));
     }
 
     return std::move(*nodes.cbegin()->second);
@@ -240,13 +240,13 @@ struct sidb_cluster_projector_state
      * charge, the number of occurrences is inferred by considering the size of the cluster in the projector state.
      */
     template <sidb_charge_state cs>
-    constexpr inline uint64_t get_count() const noexcept
+    [[nodiscard]] constexpr inline uint64_t get_count() const noexcept
     {
         switch (cs)
         {
-            case sidb_charge_state::NEGATIVE: return multiset_conf >> 32;
+            case sidb_charge_state::NEGATIVE: return multiset_conf >> 32ull;
             case sidb_charge_state::POSITIVE: return multiset_conf & 0xFFFFFFFF;
-            default: return get_cluster_size(cluster) - (multiset_conf >> 32) - (multiset_conf & 0xFFFFFFFF);
+            default: return get_cluster_size(cluster) - (multiset_conf >> 32ull) - (multiset_conf & 0xFFFFFFFF);
         }
     }
 };
@@ -363,7 +363,7 @@ struct sidb_cluster_state
      * @return The internal potential bound for this SiDB.
      */
     template <bound_direction bound>
-    constexpr inline double get_pot_bound(const uint64_t sidb_ix) const noexcept
+    [[nodiscard]] constexpr inline double get_pot_bound(const uint64_t sidb_ix) const noexcept
     {
         return internal_pot_bounds.at(sidb_ix)[static_cast<uint8_t>(bound)];
     }
@@ -459,8 +459,8 @@ struct sidb_cluster_charge_state
      * @param cs Charge state to lift to a singleton multiset charge configuration.
      */
     explicit sidb_cluster_charge_state(const sidb_cluster_ptr& singleton, const sidb_charge_state cs) noexcept :
-            neg_count{cs == sidb_charge_state::NEGATIVE},
-            pos_count{cs == sidb_charge_state::POSITIVE},
+            neg_count{static_cast<decltype(neg_count)>(cs == sidb_charge_state::NEGATIVE)},
+            pos_count{static_cast<decltype(pos_count)>(cs == sidb_charge_state::POSITIVE)},
             compositions{{sidb_cluster_state{singleton, static_cast<uint64_t>(*this)}}}
     {}
     /**
@@ -501,7 +501,7 @@ struct sidb_cluster_charge_state
      *
      * @param charge_states initializer list of charge states to form into a cluster charge state.
      */
-    explicit sidb_cluster_charge_state(const std::initializer_list<sidb_charge_state>& charge_states) noexcept :
+    sidb_cluster_charge_state(const std::initializer_list<sidb_charge_state>& charge_states) noexcept :
             neg_count{0},
             pos_count{0}
     {
@@ -565,7 +565,8 @@ struct sidb_cluster_charge_state
  */
 static constexpr inline sidb_charge_state singleton_multiset_conf_to_charge_state(const uint64_t m) noexcept
 {
-    return sign_to_charge_state(static_cast<int8_t>(static_cast<uint32_t>(m) - (static_cast<uint32_t>(m) < m)));
+    return sign_to_charge_state(
+        static_cast<int8_t>(static_cast<uint32_t>(m) - static_cast<uint32_t>(static_cast<uint32_t>(m) < m)));
 }
 /**
  * This struct defines the type of a potential projection, which pairs a multiset charge configuration with the
@@ -680,7 +681,7 @@ struct potential_projection_order
      * @return The potential projection that forms the requested bound on the potential projection order.
      */
     template <bound_direction bound>
-    constexpr inline const potential_projection& get() const noexcept
+    [[nodiscard]] constexpr inline const potential_projection& get() const noexcept
     {
         if constexpr (bound == bound_direction::LOWER)
         {
@@ -701,7 +702,7 @@ struct potential_projection_order
      * current relevant bound would be erased.
      */
     template <bound_direction bound>
-    inline const potential_projection& get_next() const noexcept
+    [[nodiscard]] inline const potential_projection& get_next() const noexcept
     {
         const uint64_t bound_m = get<bound>().m;
 
@@ -727,7 +728,7 @@ struct potential_projection_order
      * of potential projections that match their multiset charge configuration to the argument.
      */
     template <bound_direction bound>
-    const potential_projection& get_pot_proj_for_m_conf(const uint64_t m_conf) const noexcept
+    [[nodiscard]] const potential_projection& get_pot_proj_for_m_conf(const uint64_t m_conf) const noexcept
     {
         if constexpr (bound == bound_direction::LOWER)
         {
@@ -1000,9 +1001,9 @@ static sidb_cluster_ptr to_unique_sidb_cluster(const sidb_binary_cluster_hierarc
 
     for (uint8_t c = 0; c < 2; ++c)
     {
-        if (n.sub[c])
+        if (n.sub.at(c))
         {
-            children.insert(to_unique_sidb_cluster(*n.sub[c], uid));
+            children.insert(to_unique_sidb_cluster(*n.sub.at(c), uid));
         }
     }
 
@@ -1016,7 +1017,7 @@ static sidb_cluster_ptr to_unique_sidb_cluster(const sidb_binary_cluster_hierarc
 
     for (uint8_t c                                           = 0; c < 2;
          (*std::next(parent->children.begin(), c++))->parent = std::weak_ptr<sidb_cluster>(parent))
-        ;
+    {}
 
     return parent;
 }
@@ -1026,7 +1027,7 @@ static sidb_cluster_ptr to_unique_sidb_cluster(const sidb_binary_cluster_hierarc
  * @param n A node from a binary cluster hierarchy, as for instance returned by parsing ALGLIB's result.
  * @return A uniquely identified node in a decorated cluster hierarchy that follows the "general tree" structure.
  */
-sidb_cluster_ptr to_sidb_cluster(const sidb_binary_cluster_hierarchy_node& n)
+inline sidb_cluster_ptr to_sidb_cluster(const sidb_binary_cluster_hierarchy_node& n)
 {
     uint64_t uid = n.c.size();
     return to_unique_sidb_cluster(n, uid);
