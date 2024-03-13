@@ -183,27 +183,28 @@ class ground_state_space_impl
     }
 
     template <bound_direction bound>
-    static constexpr inline potential_projection get_proj_bound(const sidb_cluster_ptr& c,
-                                                                const uint64_t          sidb_ix) noexcept
+    static constexpr inline potential_projection get_projection_bound(const sidb_cluster_ptr& c,
+                                                                      const uint64_t          sidb_ix) noexcept
     {
         return c->pot_projs.at(sidb_ix).get<bound>();
     }
 
     template <bound_direction bound>
-    static constexpr inline double get_next_proj_pot_bound(const sidb_cluster_ptr& c, const uint64_t sidb_ix) noexcept
+    static constexpr inline double get_next_projected_pot_bound(const sidb_cluster_ptr& c,
+                                                                const uint64_t          sidb_ix) noexcept
     {
         return c->pot_projs.at(sidb_ix).get_next<bound>().v;
     }
 
     template <bound_direction bound>
-    static constexpr inline potential_projection get_proj_state_bound(const sidb_cluster_projector_state& pst,
-                                                                      const uint64_t sidb_ix) noexcept
+    static constexpr inline potential_projection get_projector_state_bound(const sidb_cluster_projector_state& pst,
+                                                                           const uint64_t sidb_ix) noexcept
     {
         return pst.cluster->pot_projs.at(sidb_ix).get_pot_proj_for_m_conf<bound>(pst.multiset_conf);
     }
 
-    static constexpr inline void add_pot_proj(const sidb_cluster_ptr& c, const uint64_t sidb_ix,
-                                              const potential_projection& pp) noexcept
+    static constexpr inline void add_pot_projection(const sidb_cluster_ptr& c, const uint64_t sidb_ix,
+                                                    const potential_projection& pp) noexcept
     {
         c->pot_projs[sidb_ix].add(pp);
     }
@@ -215,31 +216,30 @@ class ground_state_space_impl
     }
 
     template <bound_direction bound>
-    static constexpr void update_external_pot_proj_if_bound_removed(const sidb_cluster_projector_state& pst,
-                                                                    const sidb_cluster_receptor_state&  rst) noexcept
+    static constexpr void
+    update_external_pot_projection_if_bound_removed(const sidb_cluster_projector_state& pst,
+                                                    const sidb_cluster_receptor_state&  rst) noexcept
     {
-        const potential_projection& cur_bound = get_proj_bound<bound>(pst.cluster, rst.sidb_ix);
+        const potential_projection& cur_bound = get_projection_bound<bound>(pst.cluster, rst.sidb_ix);
 
         if (cur_bound.m == pst.multiset_conf)
         {
             rst.cluster->update_recv_ext_pot_bound<bound>(
-                rst.sidb_ix, get_next_proj_pot_bound<bound>(pst.cluster, rst.sidb_ix) - cur_bound.v);
+                rst.sidb_ix, get_next_projected_pot_bound<bound>(pst.cluster, rst.sidb_ix) - cur_bound.v);
         }
     }
 
     constexpr void update_external_potential_projection(const sidb_cluster_projector_state& pst,
                                                         const sidb_cluster_receptor_state&  rst) const noexcept
     {
-        update_external_pot_proj_if_bound_removed<bound_direction::LOWER>(pst, rst);
-        update_external_pot_proj_if_bound_removed<bound_direction::UPPER>(pst, rst);
+        update_external_pot_projection_if_bound_removed<bound_direction::LOWER>(pst, rst);
+        update_external_pot_projection_if_bound_removed<bound_direction::UPPER>(pst, rst);
 
         remove_all_cluster_charge_state_occurrences(pst, rst.sidb_ix);
     }
 
     void handle_invalid_state(const sidb_cluster_projector_state& pst) noexcept
     {
-        // may need to remove the multiset charge configuration from the internal potential projection order too
-
         for (const sidb_cluster_ptr& other_c : clustering)
         {
             if (other_c == pst.cluster)
@@ -375,9 +375,9 @@ class ground_state_space_impl
     {
         if constexpr (mode == potential_bound_analysis_mode::ANALYZE_MULTISET)
         {
-            return {get_proj_state_bound<bound_direction::LOWER>(pst, sidb_ix).v +
+            return {get_projector_state_bound<bound_direction::LOWER>(pst, sidb_ix).v +
                         pst.cluster->get_recv_ext_pot_bound<bound_direction::LOWER>(sidb_ix),
-                    get_proj_state_bound<bound_direction::UPPER>(pst, sidb_ix).v +
+                    get_projector_state_bound<bound_direction::UPPER>(pst, sidb_ix).v +
                         pst.cluster->get_recv_ext_pot_bound<bound_direction::UPPER>(sidb_ix)};
         }
         else if constexpr (mode == potential_bound_analysis_mode::ANALYZE_COMPOSITION)
@@ -494,7 +494,7 @@ class ground_state_space_impl
         {
             if (sibling != child_rst.cluster)
             {
-                recv_pot_without_siblings -= get_proj_bound<bound>(sibling, child_rst.sidb_ix).v;
+                recv_pot_without_siblings -= get_projection_bound<bound>(sibling, child_rst.sidb_ix).v;
             }
         }
 
@@ -526,8 +526,8 @@ class ground_state_space_impl
 
                 for (const sidb_cluster_state& cst : composition)
                 {
-                    internal_pot_lb += get_proj_state_bound<bound_direction::LOWER>(cst.proj_st, sidb_ix).v;
-                    internal_pot_ub += get_proj_state_bound<bound_direction::UPPER>(cst.proj_st, sidb_ix).v;
+                    internal_pot_lb += get_projector_state_bound<bound_direction::LOWER>(cst.proj_st, sidb_ix).v;
+                    internal_pot_ub += get_projector_state_bound<bound_direction::UPPER>(cst.proj_st, sidb_ix).v;
                 }
 
                 receiving_cst.set_pot_bounds(sidb_ix, internal_pot_lb, internal_pot_ub);
@@ -589,7 +589,8 @@ class ground_state_space_impl
     }
 
     template <bound_direction bound>
-    void merge_pot_proj_bounds(const sidb_cluster_ptr& parent, const sidb_cluster_receptor_state& rst) const noexcept
+    void merge_pot_projection_bounds(const sidb_cluster_ptr&            parent,
+                                     const sidb_cluster_receptor_state& rst) const noexcept
     {
         // construct external projected potential bounds for every composition of every element in the charge space
         for (const sidb_cluster_charge_state& m : parent->charge_space)
@@ -600,27 +601,27 @@ class ground_state_space_impl
 
                 for (const sidb_cluster_state& cst : composition)
                 {
-                    pot_proj_onto_other_c += get_proj_state_bound<bound>(cst.proj_st, rst.sidb_ix);
+                    pot_proj_onto_other_c += get_projector_state_bound<bound>(cst.proj_st, rst.sidb_ix);
                 }
 
-                add_pot_proj(parent, rst.sidb_ix, pot_proj_onto_other_c);
+                add_pot_projection(parent, rst.sidb_ix, pot_proj_onto_other_c);
             }
         }
 
         // update the received external potential bound for the subject
-        double diff = get_proj_bound<bound>(parent, rst.sidb_ix).v;
+        double diff = get_projection_bound<bound>(parent, rst.sidb_ix).v;
 
         for (const sidb_cluster_ptr& child : parent->children)
         {
-            diff -= get_proj_bound<bound>(child, rst.sidb_ix).v;
+            diff -= get_projection_bound<bound>(child, rst.sidb_ix).v;
         }
 
         rst.cluster->update_recv_ext_pot_bound<bound>(rst.sidb_ix, diff);
     }
 
     template <bound_direction bound>
-    void merge_recv_pot_proj_bounds(const sidb_cluster_projector_state& pst,
-                                    const sidb_cluster_ptr&             parent) const noexcept
+    void merge_received_pot_projection_bounds(const sidb_cluster_projector_state& pst,
+                                              const sidb_cluster_ptr&             parent) const noexcept
     {
         for (const sidb_cluster_charge_state& m : parent->charge_space)
         {
@@ -630,7 +631,8 @@ class ground_state_space_impl
                 {
                     for (const uint64_t child_sidb_ix : child_cst.proj_st.cluster->sidbs)
                     {
-                        add_pot_proj(pst.cluster, child_sidb_ix, get_proj_state_bound<bound>(pst, child_sidb_ix));
+                        add_pot_projection(pst.cluster, child_sidb_ix,
+                                           get_projector_state_bound<bound>(pst, child_sidb_ix));
                     }
                 }
             }
@@ -645,16 +647,16 @@ class ground_state_space_impl
             {
                 const sidb_cluster_receptor_state rst{non_child, sidb_ix};
 
-                merge_pot_proj_bounds<bound_direction::LOWER>(parent, rst);
-                merge_pot_proj_bounds<bound_direction::UPPER>(parent, rst);
+                merge_pot_projection_bounds<bound_direction::LOWER>(parent, rst);
+                merge_pot_projection_bounds<bound_direction::UPPER>(parent, rst);
             }
 
             for (const sidb_cluster_charge_state& m : non_child->charge_space)
             {
                 const sidb_cluster_projector_state pst{non_child, static_cast<uint64_t>(m)};
 
-                merge_recv_pot_proj_bounds<bound_direction::LOWER>(pst, parent);
-                merge_recv_pot_proj_bounds<bound_direction::UPPER>(pst, parent);
+                merge_received_pot_projection_bounds<bound_direction::LOWER>(pst, parent);
+                merge_received_pot_projection_bounds<bound_direction::UPPER>(pst, parent);
             }
         }
     }
@@ -682,8 +684,8 @@ class ground_state_space_impl
                     }
                 }
 
-                add_pot_proj(parent, sidb_ix, potential_projection{lb_meet, static_cast<uint64_t>(m)});
-                add_pot_proj(parent, sidb_ix, potential_projection{ub_meet, static_cast<uint64_t>(m)});
+                add_pot_projection(parent, sidb_ix, potential_projection{lb_meet, static_cast<uint64_t>(m)});
+                add_pot_projection(parent, sidb_ix, potential_projection{ub_meet, static_cast<uint64_t>(m)});
             }
         }
     }

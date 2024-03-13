@@ -189,7 +189,8 @@ class clustercomplete_impl
         return required_neg_count == 0 && required_pos_count == 0 && required_neut_count == 0;
     }
 
-    [[nodiscard]] bool meets_population_stability_criterion(const sidb_clustering_state& clustering_state) const noexcept
+    [[nodiscard]] bool
+    meets_population_stability_criterion(const sidb_clustering_state& clustering_state) const noexcept
     {
         for (const sidb_cluster_state_ptr& cst : clustering_state)
         {
@@ -232,8 +233,8 @@ class clustercomplete_impl
     }
 
     template <bound_direction bound>
-    static constexpr inline double get_proj_state_bound_val(const sidb_cluster_projector_state& pst,
-                                                            const uint64_t                      sidb_ix) noexcept
+    static constexpr inline double get_projector_state_bound_pot(const sidb_cluster_projector_state& pst,
+                                                                  const uint64_t                      sidb_ix) noexcept
     {
         return pst.cluster->pot_projs.at(sidb_ix).get_pot_proj_for_m_conf<bound>(pst.multiset_conf).v;
     }
@@ -250,13 +251,13 @@ class clustercomplete_impl
     {
         if constexpr (op == potential_bound_update_operation::ADD)
         {
-            recv_cst.update_pot_bounds(sidb_ix, get_proj_state_bound_val<bound_direction::LOWER>(pst, sidb_ix),
-                                       get_proj_state_bound_val<bound_direction::UPPER>(pst, sidb_ix));
+            recv_cst.update_pot_bounds(sidb_ix, get_projector_state_bound_pot<bound_direction::LOWER>(pst, sidb_ix),
+                                       get_projector_state_bound_pot<bound_direction::UPPER>(pst, sidb_ix));
         }
         else if constexpr (op == potential_bound_update_operation::SUBTRACT)
         {
-            recv_cst.update_pot_bounds(sidb_ix, -get_proj_state_bound_val<bound_direction::LOWER>(pst, sidb_ix),
-                                       -get_proj_state_bound_val<bound_direction::UPPER>(pst, sidb_ix));
+            recv_cst.update_pot_bounds(sidb_ix, -get_projector_state_bound_pot<bound_direction::LOWER>(pst, sidb_ix),
+                                       -get_projector_state_bound_pot<bound_direction::UPPER>(pst, sidb_ix));
         }
     }
 
