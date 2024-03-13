@@ -136,7 +136,7 @@ sidb_cluster_hierarchy(Lyt& lyt, sidb_cluster_hierarchy_linkage_method linkage_m
     d.setlength(static_cast<alglib::ae_int_t>(charge_lyt.num_cells()), 2);
     for (uint64_t i = 0; i < charge_lyt.num_cells(); ++i)
     {
-        const auto [x, y] = charge_lyt.get_all_sidb_locations_in_nm()[i];
+        const auto [x, y] = charge_lyt.get_all_sidb_locations_in_nm().at(i);
 
         d(static_cast<int>(i), 0) = x;
         d(static_cast<int>(i), 1) = y;
@@ -365,7 +365,7 @@ struct sidb_cluster_state
     template <bound_direction bound>
     [[nodiscard]] constexpr inline double get_pot_bound(const uint64_t sidb_ix) const noexcept
     {
-        return internal_pot_bounds.at(sidb_ix)[static_cast<uint8_t>(bound)];
+        return internal_pot_bounds.at(sidb_ix).at(static_cast<uint8_t>(bound));
     }
     /**
      * Setter for internal potential bound for an SiDB in the cluster.
@@ -898,7 +898,7 @@ struct sidb_cluster
     template <bound_direction bound>
     constexpr inline double get_recv_ext_pot_bound(const sidb_ix i) noexcept
     {
-        return recv_ext_pot_bounds.at(i)[static_cast<uint8_t>(bound)];
+        return recv_ext_pot_bounds.at(i).at(static_cast<uint8_t>(bound));
     }
     /**
      * The bound on the potential an SiDB receives from outside this cluster is set.

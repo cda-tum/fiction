@@ -84,9 +84,9 @@ TEMPLATE_TEST_CASE("Ground State Space construction of a 7 DB layout", "[ground-
 
     for (uint64_t i = 0; i < 7; ++i)
     {
-        CHECK_THAT(gss_res.top_cluster->recv_ext_pot_bounds[i][0],
+        CHECK_THAT(gss_res.top_cluster->recv_ext_pot_bounds.at(i).at(0),
                    Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
-        CHECK_THAT(gss_res.top_cluster->recv_ext_pot_bounds[i][1],
+        CHECK_THAT(gss_res.top_cluster->recv_ext_pot_bounds.at(i).at(1),
                    Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
     }
 
@@ -170,9 +170,9 @@ TEMPLATE_TEST_CASE("Ground state space construction of a 14 DB layout", "[ground
 
     for (uint64_t i = 0; i < 14; ++i)
     {
-        CHECK_THAT(gss_res.top_cluster->recv_ext_pot_bounds[i][0],
+        CHECK_THAT(gss_res.top_cluster->recv_ext_pot_bounds.at(i).at(0),
                    Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
-        CHECK_THAT(gss_res.top_cluster->recv_ext_pot_bounds[i][1],
+        CHECK_THAT(gss_res.top_cluster->recv_ext_pot_bounds.at(i).at(1),
                    Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
     }
 }

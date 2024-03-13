@@ -107,25 +107,25 @@ class ground_state_space_impl
     [[nodiscard]] constexpr inline bool fail_onto_negative_charge(const double pot_bound) const noexcept
     {
         // V > e - mu-
-        return pot_bound > mu_bounds_with_error[0];
+        return pot_bound > mu_bounds_with_error.at(0);
     }
 
     [[nodiscard]] constexpr inline bool fail_onto_positive_charge(const double pot_bound) const noexcept
     {
         // V < -e - mu+
-        return pot_bound < mu_bounds_with_error[3];
+        return pot_bound < mu_bounds_with_error.at(3);
     }
 
     [[nodiscard]] constexpr inline bool ub_fail_onto_neutral_charge(const double pot_bound) const noexcept
     {
         // V < -e - mu-
-        return pot_bound < mu_bounds_with_error[1];
+        return pot_bound < mu_bounds_with_error.at(1);
     }
 
     [[nodiscard]] constexpr inline bool lb_fail_onto_neutral_charge(const double pot_bound) const noexcept
     {
         // V > e - mu+
-        return pot_bound > mu_bounds_with_error[2];
+        return pot_bound > mu_bounds_with_error.at(2);
     }
 
     static std::pair<charge_distribution_surface<Lyt>, charge_distribution_surface<Lyt>>
@@ -382,9 +382,9 @@ class ground_state_space_impl
         }
         else if constexpr (mode == potential_bound_analysis_mode::ANALYZE_COMPOSITION)
         {
-            return {internal_pot_bounds.value().at(sidb_ix)[static_cast<uint8_t>(bound_direction::LOWER)] +
+            return {internal_pot_bounds.value().at(sidb_ix).at(static_cast<uint8_t>(bound_direction::LOWER)) +
                         pst.cluster->get_recv_ext_pot_bound<bound_direction::LOWER>(sidb_ix),
-                    internal_pot_bounds.value().at(sidb_ix)[static_cast<uint8_t>(bound_direction::UPPER)] +
+                    internal_pot_bounds.value().at(sidb_ix).at(static_cast<uint8_t>(bound_direction::UPPER)) +
                         pst.cluster->get_recv_ext_pot_bound<bound_direction::UPPER>(sidb_ix)};
         }
     }
@@ -548,7 +548,7 @@ class ground_state_space_impl
     {
         if (cur_child_ix >= parent->children.size())
         {
-            if (!verify_composition(m.compositions[0]))
+            if (!verify_composition(m.compositions.front()))
             {
                 return;
             }
@@ -557,7 +557,7 @@ class ground_state_space_impl
             const sidb_cluster_charge_state_space::iterator it = parent->charge_space.find(m);
             if (it != parent->charge_space.cend())
             {
-                it->compositions.emplace_back(m.compositions[0]);
+                it->compositions.emplace_back(m.compositions.front());
             }
             else
             {
@@ -571,12 +571,12 @@ class ground_state_space_impl
 
         for (const sidb_cluster_charge_state& m_part : cur_child->charge_space)
         {
-            m.compositions[0].emplace_back(cur_child, static_cast<uint64_t>(m_part));
+            m.compositions.front().emplace_back(cur_child, static_cast<uint64_t>(m_part));
             m += m_part;
 
             fill_merged_charge_state_space(parent, cur_child_ix + 1, m);
 
-            m.compositions[0].pop_back();
+            m.compositions.front().pop_back();
             m -= m_part;
         }
     }

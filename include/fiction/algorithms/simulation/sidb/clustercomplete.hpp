@@ -126,36 +126,36 @@ class clustercomplete_impl
 
         if (const double gss_runtime = mockturtle::to_seconds(gss_res.runtime); gss_runtime > 1.0)
         {
-            std::cout << gss_runtime << " seconds" << std::endl;
+            std::cout << gss_runtime << " seconds\n";
         }
         else
         {
-            std::cout << (gss_runtime * 1000) << " milliseconds" << std::endl;
+            std::cout << (gss_runtime * 1000) << " milliseconds\n";
         }
     }
 
     [[nodiscard]] constexpr inline bool fail_onto_negative_charge(const double pot_bound) const noexcept
     {
         // V > e - mu-
-        return pot_bound > mu_bounds_with_error[0];
+        return pot_bound > mu_bounds_with_error.at(0);
     }
 
     [[nodiscard]] constexpr inline bool fail_onto_positive_charge(const double pot_bound) const noexcept
     {
         // V < -e - mu+
-        return pot_bound < mu_bounds_with_error[3];
+        return pot_bound < mu_bounds_with_error.at(3);
     }
 
     [[nodiscard]] constexpr inline bool ub_fail_onto_neutral_charge(const double pot_bound) const noexcept
     {
         // V < -e - mu-
-        return pot_bound < mu_bounds_with_error[1];
+        return pot_bound < mu_bounds_with_error.at(1);
     }
 
     [[nodiscard]] constexpr inline bool lb_fail_onto_neutral_charge(const double pot_bound) const noexcept
     {
         // V > e - mu+
-        return pot_bound > mu_bounds_with_error[2];
+        return pot_bound > mu_bounds_with_error.at(2);
     }
 
     [[nodiscard]] bool perform_potential_bound_analysis(const sidb_cluster_state& cst) const noexcept
@@ -323,11 +323,11 @@ class clustercomplete_impl
         }
 
         // max_cst <- find the cluster of maximum size
-        uint64_t max_cluster_size = clustering_state[0]->proj_st.cluster->size();
+        uint64_t max_cluster_size = clustering_state.front()->proj_st.cluster->size();
         uint64_t max_cst_ix       = 0;
         for (uint64_t ix = 1; ix < clustering_state.size(); ++ix)
         {
-            if (const uint64_t cluster_size = clustering_state[ix]->proj_st.cluster->size();
+            if (const uint64_t cluster_size = clustering_state.at(ix)->proj_st.cluster->size();
                 cluster_size > max_cluster_size)
             {
                 max_cluster_size = cluster_size;

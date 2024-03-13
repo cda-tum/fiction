@@ -87,9 +87,9 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a 4 DB layout with a positive 
         REQUIRE(qe_res.charge_distributions.size() == 1);
         CHECK(cc_res.charge_distributions.size() == 1);
 
-        for (const charge_distribution_surface<TestType>& cl : qe_res.charge_distributions)
+        for (const charge_distribution_surface<TestType>& cds : qe_res.charge_distributions)
         {
-            CHECK(verify_clustercomplete_result<TestType>(cl, cc_res.charge_distributions));
+            CHECK(verify_clustercomplete_result<TestType>(cds, cc_res.charge_distributions));
         }
     }
 
@@ -104,9 +104,9 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a 4 DB layout with a positive 
         REQUIRE(qe_res.charge_distributions.size() == 2);
         CHECK(cc_res.charge_distributions.size() == 2);
 
-        for (const charge_distribution_surface<TestType>& cl : qe_res.charge_distributions)
+        for (const charge_distribution_surface<TestType>& cds : qe_res.charge_distributions)
         {
-            CHECK(verify_clustercomplete_result(cl, cc_res.charge_distributions));
+            CHECK(verify_clustercomplete_result(cds, cc_res.charge_distributions));
         }
     }
 }
