@@ -380,8 +380,10 @@ class clustercomplete_impl
 
         const uint64_t num_threads_to_use = std::min(std::max(num_threads, uint64_t{1}), top_level_multisets);
 
-        // define the bit string ranges per thread
+        // define the top cluster charge space ranges per thread
         std::vector<std::pair<uint64_t, uint64_t>> ranges;
+        ranges.reserve(num_threads_to_use);
+
         const uint64_t chunk_size = std::max(top_level_multisets / num_threads_to_use, uint64_t{1});
         uint64_t       start      = 0;
         uint64_t       end        = chunk_size - 1;
