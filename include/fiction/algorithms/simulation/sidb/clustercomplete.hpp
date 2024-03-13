@@ -234,7 +234,7 @@ class clustercomplete_impl
 
     template <bound_direction bound>
     static constexpr inline double get_projector_state_bound_pot(const sidb_cluster_projector_state& pst,
-                                                                  const uint64_t                      sidb_ix) noexcept
+                                                                 const uint64_t                      sidb_ix) noexcept
     {
         return pst.cluster->pot_projs.at(sidb_ix).get_pot_proj_for_m_conf<bound>(pst.multiset_conf).v;
     }
@@ -308,7 +308,7 @@ class clustercomplete_impl
         }
     }
 
-    void add_physically_valid_charge_confs(sidb_clustering_state& clustering_state) noexcept
+    void add_physically_valid_charge_configurations(sidb_clustering_state& clustering_state) noexcept
     {
         if (!meets_population_stability_criterion(clustering_state))
         {
@@ -357,7 +357,7 @@ class clustercomplete_impl
             }
 
             // recurse
-            add_physically_valid_charge_confs(clustering_state);
+            add_physically_valid_charge_configurations(clustering_state);
 
             for (uint64_t i = 0; i < max_cst_composition.size(); ++i)
             {
@@ -419,7 +419,7 @@ class clustercomplete_impl
                                 clustering_state.emplace_back(std::make_unique<sidb_cluster_state>(std::move(cst)));
                             }
 
-                            add_physically_valid_charge_confs(clustering_state);
+                            add_physically_valid_charge_configurations(clustering_state);
                         }
                     }
                 });
@@ -457,7 +457,7 @@ class clustercomplete_impl
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @param lyt Layout to simulate.
- * @param params Parameters required for both the invocation of *Ground State Space*, and the simulation following.
+ * @param cc_params Parameters required for both the invocation of *Ground State Space*, and the simulation following.
  * @return All physically valid layouts for the given physical parameters and base are returned.
  */
 template <typename Lyt>
