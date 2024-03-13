@@ -52,7 +52,7 @@ SiDB Cluster Hierarchy
 **Header:** ``fiction/technology/sidb_cluster_hierarchy.hpp``
 
 A cluster hierarchy can be computed over any SiDB layout, resulting in a useful structure for simulation of possible
-charge distributions. The this header provides the structures used for :ref:`*Ground State Space* <ground_state_space>`
+charge distributions. This header provides the structures used for :ref:`*Ground State Space* <ground_state_space>`
 construction, which enables the :ref:`*ClusterComplete* <clustercomplete>` exact SiDB simulator.
 
 .. doxygenenum:: fiction::sidb_cluster_hierarchy_linkage_method
