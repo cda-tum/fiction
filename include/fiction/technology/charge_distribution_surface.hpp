@@ -854,7 +854,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     void assign_local_potential_by_index(const uint64_t index, const double loc_pot) noexcept
     {
-        assert(index < local_pot.size());
+        assert(index < strg->local_pot.size());
         strg->local_pot[index] = loc_pot;
     }
     /**
