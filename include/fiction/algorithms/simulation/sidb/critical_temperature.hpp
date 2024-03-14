@@ -8,6 +8,7 @@
 #include "fiction/algorithms/iter/bdl_input_iterator.hpp"
 #include "fiction/algorithms/simulation/sidb/calculate_energy_and_state_type.hpp"
 #include "fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp"
+#include "fiction/algorithms/simulation/sidb/clustercomplete.hpp"
 #include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
 #include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "fiction/algorithms/simulation/sidb/occupation_probability_of_excited_states.hpp"
@@ -49,12 +50,19 @@ struct critical_temperature_params
     enum class simulation_engine : uint8_t
     {
         /**
-         * This simulation engine computes *Critical Temperature* values with 100 % accuracy.
+         * This simulation engine computes *Critical Temperature* values with 100 % accuracy using *QuickExact*.
          */
-        EXACT,
+        EXACT_QUICKEXACT,
+        /**
+         * This simulation engine computes *Critical Temperature* values with 100 % accuracy using *ClusterComplete*.
+         * This enables base 3 *Critical Temperature* Simulation and may be used for SiDB logic layouts up to ~70 SiDBs.
+         */
+        EXACT_CLUSTERCOMPLETE,
         /**
          * This simulation engine quickly calculates the *Critical Temperature*. However, there may be deviations from
-         * the exact *Critical Temperature*. This mode is recommended for larger layouts (> 40 SiDBs).
+         * the exact *Critical Temperature*. This mode is recommended for larger layouts (> 40 SiDBs) if
+         * *ClusterComplete* is not available, or for layout sizes for which *ClusterComplete* takes longer to
+         * terminate than feasible for the user (65-80+ SiDBs).
          */
         APPROXIMATE
     };
@@ -65,7 +73,7 @@ struct critical_temperature_params
     /**
      * Simulation mode to determine the *Critical Temperature*.
      */
-    simulation_engine engine = simulation_engine::EXACT;
+    simulation_engine engine = simulation_engine::EXACT_QUICKEXACT;
     /**
      * Probability threshold for ground state population. The temperature at which the simulation finds the ground state
      * to be populated with a probability of less than the given percentage, is determined to be the critical
@@ -159,7 +167,10 @@ class critical_temperature_impl
     {
         stats.physical_parameters = params.physical_parameters;
         stats.algorithm_name =
-            (params.engine == critical_temperature_params::simulation_engine::EXACT) ? "QuickExact" : "QuickSim";
+            (params.engine == critical_temperature_params::simulation_engine::EXACT_QUICKEXACT) ? "QuickExact" :
+            (params.engine == critical_temperature_params::simulation_engine::EXACT_CLUSTERCOMPLETE) ?
+                                                                                                  "ClusterComplete" :
+                                                                                                  "QuickSim";
         stats.critical_temperature = params.max_temperature;
     }
 
@@ -236,7 +247,7 @@ class critical_temperature_impl
     {
         sidb_simulation_result<Lyt> simulation_results{};
 
-        if (params.engine == critical_temperature_params::simulation_engine::EXACT)
+        if (params.engine == critical_temperature_params::simulation_engine::EXACT_QUICKEXACT)
         {
             const quickexact_params<Lyt> qe_params{params.physical_parameters,
                                                    quickexact_params<Lyt>::automatic_base_number_detection::OFF};
@@ -245,6 +256,16 @@ class critical_temperature_impl
             // is used to provide 100 % accuracy for the Critical Temperature).
             simulation_results = quickexact(layout, qe_params);
         }
+#if (FICTION_ALGLIB_ENABLED)
+        else if (params.engine == critical_temperature_params::simulation_engine::EXACT_CLUSTERCOMPLETE)
+        {
+            const clustercomplete_params cc_params{params.physical_parameters};
+
+            // All physically valid charge configurations are determined for the given layout (`CLusterComplete`
+            // simulation is used to provide 100 % accuracy for the Critical Temperature).
+            simulation_results = clustercomplete(layout, cc_params);
+        }
+#endif  // FICTION_ALGLIB_ENABLED
         else
         {
             const quicksim_params qs_params{params.physical_parameters, params.iteration_steps, params.alpha};
@@ -410,18 +431,28 @@ class critical_temperature_impl
     [[nodiscard]] sidb_simulation_result<Lyt>
     physical_simulation_of_layout(const bdl_input_iterator<Lyt>& bdl_iterator) noexcept
     {
-        assert(params.physical_parameters.base == 2 && "base number has to be 2");
-
-        if (params.engine == critical_temperature_params::simulation_engine::EXACT)
+        if (params.engine == critical_temperature_params::simulation_engine::EXACT_QUICKEXACT)
         {
-            // perform exact simulation
+            assert(params.physical_parameters.base == 2 && "base number has to be 2");
+
+            // perform QuickExact simulation
             const quickexact_params<Lyt> qe_params{
                 params.physical_parameters, fiction::quickexact_params<Lyt>::automatic_base_number_detection::OFF};
             return quickexact(*bdl_iterator, qe_params);
         }
 
+#if (FICTION_ALGLIB_ENABLED)
+        if (params.engine == critical_temperature_params::simulation_engine::EXACT_CLUSTERCOMPLETE)
+        {
+            // perform ClusterComplete simulation -- base 3 simulation is allowed
+            const clustercomplete_params cc_params{params.physical_parameters};
+            return clustercomplete(*bdl_iterator, cc_params);
+        }
+#endif  // FICTION_ALGLIB_ENABLED
         if (params.engine == critical_temperature_params::simulation_engine::APPROXIMATE)
         {
+            assert(params.physical_parameters.base == 2 && "base number has to be 2");
+
             const quicksim_params qs_params{params.physical_parameters, params.iteration_steps, params.alpha};
             return quicksim(*bdl_iterator, qs_params);
         }
