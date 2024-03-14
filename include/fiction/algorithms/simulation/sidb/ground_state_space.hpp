@@ -156,13 +156,13 @@ class ground_state_space_impl
 
         sidb_clustering clustering{};
 
-        if (c->size() == 1)
+        if (c->children.empty())
         {
             const uint64_t i = get_singleton_sidb_ix(c);
 
             c->initialize_singleton_cluster_charge_space(-min_loc_pot_cds.get_local_potential_by_index(i).value(),
                                                          -max_loc_pot_cds.get_local_potential_by_index(i).value(),
-                                                         min_loc_pot_cds.get_phys_params().base);
+                                                         min_loc_pot_cds.get_phys_params().base, c);
 
             for (uint64_t j = 0; j < min_loc_pot_cds.num_cells(); ++j)
             {
@@ -692,7 +692,7 @@ class ground_state_space_impl
 
     void move_up_hierarchy() noexcept
     {
-        if (clustering.size() == 1)
+        if (clustering.size() == 1 && *clustering.cbegin() == top_cluster)
         {
             terminate = true;
             return;

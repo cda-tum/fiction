@@ -11,7 +11,7 @@
  * Uncomment this line to switch to STL containers, which are slower than their respective analogues from the
  * Parallel-Hashmap library by Gregory Popovitch, but may be inspected with ease in a debugger.
  */
-// #define DEBUG_SIDB_CLUSTER_HIERARCHY
+//#define DEBUG_SIDB_CLUSTER_HIERARCHY
 
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
@@ -100,7 +100,7 @@ struct sidb_binary_cluster_hierarchy_node
      * @param children The pair of binary cluster hierarchy node pointers that become the children of this node.
      */
 #ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
-    sidb_binary_cluster_hierarchy_node(const std::set<uint64_t>& c_,
+    sidb_binary_cluster_hierarchy_node(const std::set<uint64_t>& sidbs,
 #else
     sidb_binary_cluster_hierarchy_node(phmap::flat_hash_set<uint64_t> sidbs,
 #endif
@@ -125,9 +125,14 @@ sidb_cluster_hierarchy(Lyt& lyt, sidb_cluster_hierarchy_linkage_method linkage_m
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
+    // no clusterizer call required for <= 1 SiDBs
     if (lyt.num_cells() == 0)
     {
         return sidb_binary_cluster_hierarchy_node{{}, {nullptr, nullptr}};
+    }
+    else if (lyt.num_cells() == 1)
+    {
+        return sidb_binary_cluster_hierarchy_node{{0}, {nullptr, nullptr}};
     }
 
     charge_distribution_surface<Lyt> charge_lyt{lyt};
@@ -144,8 +149,8 @@ sidb_cluster_hierarchy(Lyt& lyt, sidb_cluster_hierarchy_linkage_method linkage_m
 
     alglib::clusterizerstate s;
     clusterizercreate(s);
-    clusterizersetpoints(s, d, 2);                               // Assign data and specify L2 norm (Euclidean metric)
-    clusterizersetahcalgo(s, static_cast<int>(linkage_method));  // Set the linkage method (default: Ward's method)
+    clusterizersetpoints(s, d, 2);                               // assign data and specify L2 norm (Euclidean metric)
+    clusterizersetahcalgo(s, static_cast<int>(linkage_method));  // set the linkage method (default: Ward's method)
     alglib::ahcreport rep;
     clusterizerrunahc(s, rep);
 
@@ -462,7 +467,9 @@ struct sidb_cluster_charge_state
             neg_count{static_cast<decltype(neg_count)>(cs == sidb_charge_state::NEGATIVE)},
             pos_count{static_cast<decltype(pos_count)>(cs == sidb_charge_state::POSITIVE)},
             compositions{{sidb_cluster_state{singleton, static_cast<uint64_t>(*this)}}}
-    {}
+    {
+        compositions.front().front().set_pot_bounds(get_singleton_sidb_ix(singleton), 0, 0);
+    }
     /**
      * Constructor for cluster charge state given a multiset charge configuration represented in its compressed form. It
      * allows the compressed form to be lifted to the full type to facilitate equality checks.
@@ -844,11 +851,11 @@ struct sidb_cluster
      * singleton cluster, the unique identifier is set to be the index of the single SiDB it contains.
      */
 #ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
-    explicit sidb_cluster(std::set<sidb_ix> c, sidb_clustering v, uid_t uid_) noexcept :
+    explicit sidb_cluster(std::set<sidb_ix> c, sidb_clustering v, uid_t unique_id) noexcept :
 #else
     explicit sidb_cluster(phmap::flat_hash_set<sidb_ix> c, sidb_clustering v, uid_t unique_id) noexcept :
 #endif
-            uid{c.size() == 1 ? *c.cbegin() : unique_id},
+            uid{v.empty() ? *c.cbegin() : unique_id},
             children{std::move(v)},
             sidbs{std::move(c)}
     {}
@@ -868,21 +875,19 @@ struct sidb_cluster
      * @param loc_pot_min The minimum local potential for the SiDB in the singleton cluster.
      * @param loc_pot_max The maximum local potential for the SiDB in the singleton cluster.
      * @param base The simulation base.
+     * @param self_ptr Shared pointer to itself.
      */
     void initialize_singleton_cluster_charge_space(const double loc_pot_min, const double loc_pot_max,
-                                                   const uint8_t base) noexcept
+                                                   const uint8_t base, const sidb_cluster_ptr& self_ptr) noexcept
     {
         assert(sidbs.size() == 1);
 
         const uint64_t ix = *sidbs.cbegin();
 
-        const sidb_cluster_ptr& this_ptr = *std::find_if(get_parent()->children.cbegin(), get_parent()->children.cend(),
-                                                         [&](const sidb_cluster_ptr& c) { return *c == *this; });
-
         for (const sidb_charge_state cs : sidb_charge_state_iterator<sidb_state_iter_dir::TO_CONDUCTANCE_BAND>{
                  base == 3 ? sidb_charge_state::POSITIVE : sidb_charge_state::NEUTRAL})
         {
-            charge_space.emplace(sidb_cluster_charge_state{this_ptr, cs});
+            charge_space.emplace(sidb_cluster_charge_state{self_ptr, cs});
         }
 
         recv_ext_pot_bounds[ix][static_cast<uint8_t>(bound_direction::LOWER)] = loc_pot_min;
@@ -1030,7 +1035,18 @@ static sidb_cluster_ptr to_unique_sidb_cluster(const sidb_binary_cluster_hierarc
 inline sidb_cluster_ptr to_sidb_cluster(const sidb_binary_cluster_hierarchy_node& n)
 {
     uint64_t uid = n.c.size();
-    return to_unique_sidb_cluster(n, uid);
+
+    if (uid != 1)
+    {
+        return to_unique_sidb_cluster(n, uid);
+    }
+
+    // to avoid weird shared pointer deallocation behaviour, give a parent to a singleton cluster hierarchy
+    const sidb_cluster_ptr parent = std::make_shared<sidb_cluster>(
+        n.c, sidb_clustering{std::make_shared<sidb_cluster>(n.c, sidb_clustering{}, 0)}, 1);
+    (*parent->children.cbegin())->parent = std::weak_ptr<sidb_cluster>(parent);
+
+    return parent;
 }
 
 }  // namespace fiction

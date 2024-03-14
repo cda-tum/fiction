@@ -40,6 +40,21 @@ TEMPLATE_TEST_CASE("Empty layout ClusterComplete simulation", "[clustercomplete]
               simulation_results.additional_simulation_parameters.at("validity_witness_partitioning_limit")) == 3);
 }
 
+TEMPLATE_TEST_CASE("ClusterComplete simulation of a single SiDB", "[clustercomplete]", sidb_cell_clk_lyt_siqad,
+                   charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
+{
+    TestType lyt{};
+    lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
+
+    const clustercomplete_params params{sidb_simulation_parameters{2, -0.32}, 3};
+
+    const auto simulation_results = clustercomplete(lyt, params);
+
+    REQUIRE(simulation_results.charge_distributions.size() == 1);
+    REQUIRE(simulation_results.charge_distributions.front().num_cells() == 1);
+    CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) == sidb_charge_state::NEGATIVE);
+}
+
 template <typename Lyt>
 static bool verify_clustercomplete_result(const charge_distribution_surface<Lyt>&              qe_cds,
                                           const std::vector<charge_distribution_surface<Lyt>>& cc_cdss) noexcept
