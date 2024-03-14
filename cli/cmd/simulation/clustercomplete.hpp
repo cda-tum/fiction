@@ -148,7 +148,7 @@ class clustercomplete_command : public command
     /**
      * ClusterComplete parameters.
      */
-    fiction::clustercomplete_params params{};
+    fiction::clustercomplete_params<fiction::sidb_cell_clk_lyt> params{};
     /**
      * Simulation result.
      */

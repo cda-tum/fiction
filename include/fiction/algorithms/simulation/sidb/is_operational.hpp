@@ -254,7 +254,7 @@ class is_operational_impl
         if (parameters.sim_engine == sidb_simulation_engine::CLUSTERCOMPLETE)
         {
             // perform ClusterComplete exact simulation
-            const clustercomplete_params cc_params{parameters.simulation_parameter};
+            const clustercomplete_params<Lyt> cc_params{parameters.simulation_parameter};
             return clustercomplete(*bdl_iterator, cc_params);
         }
 

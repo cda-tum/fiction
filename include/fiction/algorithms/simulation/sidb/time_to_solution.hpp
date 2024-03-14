@@ -112,7 +112,7 @@ void time_to_solution(Lyt& lyt, const quicksim_params& quicksim_params, const ti
 #if (FICTION_ALGLIB_ENABLED)
     else if (tts_params.engine == exhaustive_sidb_simulation_engine::CLUSTERCOMPLETE)
     {
-        const clustercomplete_params params{quicksim_params.phys_params};
+        const clustercomplete_params<Lyt> params{quicksim_params.phys_params};
         st.algorithm      = "ClusterComplete";
         simulation_result = clustercomplete(lyt, params);
     }

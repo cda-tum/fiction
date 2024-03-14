@@ -259,7 +259,7 @@ class critical_temperature_impl
 #if (FICTION_ALGLIB_ENABLED)
         else if (params.engine == critical_temperature_params::simulation_engine::EXACT_CLUSTERCOMPLETE)
         {
-            const clustercomplete_params cc_params{params.physical_parameters};
+            const clustercomplete_params<Lyt> cc_params{params.physical_parameters};
 
             // All physically valid charge configurations are determined for the given layout (`CLusterComplete`
             // simulation is used to provide 100 % accuracy for the Critical Temperature).
@@ -445,7 +445,7 @@ class critical_temperature_impl
         if (params.engine == critical_temperature_params::simulation_engine::EXACT_CLUSTERCOMPLETE)
         {
             // perform ClusterComplete simulation -- base 3 simulation is allowed
-            const clustercomplete_params cc_params{params.physical_parameters};
+            const clustercomplete_params<Lyt> cc_params{params.physical_parameters};
             return clustercomplete(*bdl_iterator, cc_params);
         }
 #endif  // FICTION_ALGLIB_ENABLED
