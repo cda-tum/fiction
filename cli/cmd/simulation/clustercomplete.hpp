@@ -50,6 +50,8 @@ class clustercomplete_command : public command
                    true);
         add_option("--lambda_tf,-l", physical_params.lambda_tf, "Thomas-Fermi screening distance (unit: nm)", true);
         add_option("--mu_minus,-m", physical_params.mu_minus, "Energy transition level (0/-) (unit: eV)", true);
+        add_option("--global_potential,-g", params.global_potential,
+                   "Global potential applied to the entire layout (unit: V)", true);
         add_option("--witness_partitioning_limit,-w", params.validity_witness_partitioning_max_cluster_size_gss,
                    "The limit on the cluster size before Ground State Space omits the check for which it solves the "
                    "validity witness partitioning NP-complete sub-problem; values above 15 severely impact the runtime",
@@ -164,19 +166,22 @@ class clustercomplete_command : public command
     {
         try
         {
-            return nlohmann::json{{"Algorithm name", sim_result.algorithm_name},
-                                  {"Simulation runtime", sim_result.simulation_runtime.count()},
-                                  {{"Simulation parameters",
-                                    {"Physical parameters",
-                                     {{"base", sim_result.physical_parameters.base},
-                                      {"epsilon_r", sim_result.physical_parameters.epsilon_r},
-                                      {"lambda_tf", sim_result.physical_parameters.lambda_tf},
-                                      {"mu_minus", sim_result.physical_parameters.mu_minus}}},
-                                    {"validity witness partitioning limit",
-                                     std::any_cast<uint64_t>(sim_result.additional_simulation_parameters.at(
-                                         "validity_witness_partitioning_limit"))}}},
-                                  {"Ground state energy (eV)", min_energy},
-                                  {"Number of stable states", sim_result.charge_distributions.size()}};
+            return nlohmann::json{
+                {"Algorithm name", sim_result.algorithm_name},
+                {"Simulation runtime", sim_result.simulation_runtime.count()},
+                {{"Simulation parameters",
+                  {"Physical parameters",
+                   {{"base", sim_result.physical_parameters.base},
+                    {"epsilon_r", sim_result.physical_parameters.epsilon_r},
+                    {"lambda_tf", sim_result.physical_parameters.lambda_tf},
+                    {"mu_minus", sim_result.physical_parameters.mu_minus},
+                    {"global_potential",
+                     std::any_cast<double>(sim_result.additional_simulation_parameters.at("global_potential"))}}},
+                  {"validity witness partitioning limit",
+                   std::any_cast<uint64_t>(
+                       sim_result.additional_simulation_parameters.at("validity_witness_partitioning_limit"))}}},
+                {"Ground state energy (eV)", min_energy},
+                {"Number of stable states", sim_result.charge_distributions.size()}};
         }
         catch (...)
         {

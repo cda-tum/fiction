@@ -31,7 +31,7 @@ namespace fiction
 /*
  * This struct is used to store the results of the *Ground State Space* construction.
  */
-struct ground_state_space_result
+struct ground_state_space_stats
 {
     /**
      * The top cluster is the root of the cluster hierarchy. It therefore allows access to the entire cluster hierarchy,
@@ -61,6 +61,27 @@ struct ground_state_space_result
      * following combinatorial formula: \f$\binom{N + b - 1}{b - 1}\f$.
      */
     const uint64_t maximum_top_level_multisets{};
+    /**
+     * Report *Ground State Space* statistics.
+     *
+     * @return Prints the runtime and the number of pruned top level multisets versus the total amount possible.
+     */
+    void report() const noexcept
+    {
+        std::cout << "Pruned " << pruned_top_level_multisets << " out of " << maximum_top_level_multisets
+                  << " top level multiset charge configurations\n";
+
+        std::cout << "Ground State Space took ";
+
+        if (const double gss_runtime = mockturtle::to_seconds(runtime); gss_runtime > 1.0)
+        {
+            std::cout << gss_runtime << " seconds\n";
+        }
+        else
+        {
+            std::cout << (gss_runtime * 1000) << " milliseconds\n";
+        }
+    }
 };
 
 namespace detail
@@ -82,7 +103,7 @@ class ground_state_space_impl
                                  -physical_constants::POP_STABILITY_ERR - phys_params.mu_plus()}
     {}
 
-    ground_state_space_result run() noexcept
+    ground_state_space_stats run() noexcept
     {
         mockturtle::stopwatch<>::duration time_counter{};
         {
@@ -99,8 +120,8 @@ class ground_state_space_impl
 
         const uint64_t max_multisets = maximum_top_level_multisets(top_cluster->size());
 
-        return ground_state_space_result{top_cluster, time_counter, max_multisets - top_cluster->charge_space.size(),
-                                         max_multisets};
+        return ground_state_space_stats{top_cluster, time_counter, max_multisets - top_cluster->charge_space.size(),
+                                        max_multisets};
     }
 
   private:
@@ -160,14 +181,28 @@ class ground_state_space_impl
         {
             const uint64_t i = get_singleton_sidb_ix(c);
 
-            c->initialize_singleton_cluster_charge_space(-min_loc_pot_cds.get_local_potential_by_index(i).value(),
-                                                         -max_loc_pot_cds.get_local_potential_by_index(i).value(),
+            const cell<Lyt>& sidb = min_loc_pot_cds.index_to_cell(i);
+
+            // separate the local potential into potential from SiDBs and external sources
+            const double loc_ext_pot = min_loc_pot_cds.get_local_defect_potentials()[sidb] +
+                                       min_loc_pot_cds.get_local_external_potentials()[sidb];
+
+            const double min_loc_pot = min_loc_pot_cds.get_local_potential_by_index(i).value() - loc_ext_pot;
+            const double max_loc_pot = max_loc_pot_cds.get_local_potential_by_index(i).value() - loc_ext_pot;
+
+            c->initialize_singleton_cluster_charge_space(-min_loc_pot, -max_loc_pot, -loc_ext_pot,
                                                          min_loc_pot_cds.get_phys_params().base, c);
+
+            c->pot_projs[i] = potential_projection_order{-loc_ext_pot, min_loc_pot_cds.get_phys_params().base, true};
 
             for (uint64_t j = 0; j < min_loc_pot_cds.num_cells(); ++j)
             {
-                c->pot_projs[j] = potential_projection_order{min_loc_pot_cds.get_chargeless_potential_by_indices(i, j),
-                                                             min_loc_pot_cds.get_phys_params().base};
+                if (j != i)
+                {
+                    c->pot_projs[j] =
+                        potential_projection_order{min_loc_pot_cds.get_chargeless_potential_by_indices(i, j),
+                                                   min_loc_pot_cds.get_phys_params().base};
+                }
             }
 
             clustering.emplace(c);
@@ -769,9 +804,9 @@ class ground_state_space_impl
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @param lyt Layout to construct the ground state space of.
- * @param max_cluster_size_for_witness_partitioning This specifies the maximum cluster size for which Ground State Space
- * will solve an NP-complete sub-problem exhaustively. The sets of SiDBs that witness local population stability for
- * each respective charge state may be partitioned into disjoint sets such that the number of required witnesses for
+ * @param max_cluster_size_for_witness_partitioning This specifies the maximum cluster size for which *Ground State
+ * Space* will solve an NP-complete sub-problem exhaustively. The sets of SiDBs that witness local population stability
+ * for each respective charge state may be partitioned into disjoint sets such that the number of required witnesses for
  * each respective charge state is satisfied. If no such partition exists, the multiset charge configuration associated
  * with the requirements may be rejected.
  * @param phys_params The physical parameter that *Ground State Space* will use in order to prune the search space for
@@ -780,7 +815,7 @@ class ground_state_space_impl
  * contains the charge spaces of each cluster.
  */
 template <typename Lyt>
-ground_state_space_result
+ground_state_space_stats
 ground_state_space(const Lyt& lyt, const uint64_t max_cluster_size_for_witness_partitioning = 6,
                    const sidb_simulation_parameters& phys_params = sidb_simulation_parameters{}) noexcept
 {
@@ -789,7 +824,7 @@ ground_state_space(const Lyt& lyt, const uint64_t max_cluster_size_for_witness_p
 
     if (lyt.num_cells() == 0)
     {
-        return ground_state_space_result{};
+        return ground_state_space_stats{};
     }
 
     detail::ground_state_space_impl<Lyt> p{lyt, max_cluster_size_for_witness_partitioning, phys_params};

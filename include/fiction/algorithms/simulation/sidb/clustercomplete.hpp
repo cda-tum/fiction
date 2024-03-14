@@ -13,6 +13,9 @@
 #include "fiction/technology/physical_constants.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/technology/sidb_cluster_hierarchy.hpp"
+#include "fiction/technology/sidb_defects.hpp"
+#include "fiction/technology/sidb_surface.hpp"
+#include "fiction/traits.hpp"
 #include "fiction/utils/hash.hpp"
 
 #include <mockturtle/utils/stopwatch.hpp>
@@ -23,6 +26,7 @@
 #include <iterator>
 #include <mutex>
 #include <thread>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -32,12 +36,21 @@ namespace fiction
 /**
  * The struct containing the parameters both passed on to pre-simulator Ground State Space, and used during simulation.
  */
+template <typename Lyt>
 struct clustercomplete_params
 {
     /**
      * Physical simulation parameters.
      */
     sidb_simulation_parameters physical_parameters{};
+    /**
+     * Local external electrostatic potentials (e.g locally applied electrodes).
+     */
+    std::unordered_map<cell<Lyt>, double> local_external_potential = {};
+    /**
+     * Global external electrostatic potential. Value is applied on each cell in the layout.
+     */
+    double global_potential = 0;
     /**
      * This specifies the maximum cluster size for which Ground State Space will solve an NP-complete sub-problem
      * exhaustively. The sets of SiDBs that witness local population stability for each respective charge state may be
@@ -63,75 +76,78 @@ template <typename Lyt>
 class clustercomplete_impl
 {
   public:
-    explicit clustercomplete_impl(const Lyt& lyt, const sidb_simulation_parameters& physical_parameters,
-                                  const uint64_t available_threads) noexcept :
-            charge_layout{initialize_charge_layout(lyt, physical_parameters)},
-            mu_bounds_with_error{physical_constants::POP_STABILITY_ERR - physical_parameters.mu_minus,
-                                 -physical_constants::POP_STABILITY_ERR - physical_parameters.mu_minus,
-                                 physical_constants::POP_STABILITY_ERR - physical_parameters.mu_plus(),
-                                 -physical_constants::POP_STABILITY_ERR - physical_parameters.mu_plus()},
-            num_threads{available_threads}
+    explicit clustercomplete_impl(const Lyt& lyt, const clustercomplete_params<Lyt>& params) noexcept :
+            charge_layout{initialize_charge_layout(lyt, params)},
+            real_placed_defects{charge_layout.get_defects()},
+            mu_bounds_with_error{physical_constants::POP_STABILITY_ERR - params.physical_parameters.mu_minus,
+                                 -physical_constants::POP_STABILITY_ERR - params.physical_parameters.mu_minus,
+                                 physical_constants::POP_STABILITY_ERR - params.physical_parameters.mu_plus(),
+                                 -physical_constants::POP_STABILITY_ERR - params.physical_parameters.mu_plus()},
+            num_threads{params.available_threads}
     {}
 
-    sidb_simulation_result<Lyt> run(const uint64_t validity_witness_partitioning_limit, const bool rep_stats) noexcept
+    sidb_simulation_result<Lyt> run(const clustercomplete_params<Lyt>& params) noexcept
     {
         res.physical_parameters = charge_layout.get_phys_params();
         res.algorithm_name      = "ClusterComplete";
+        res.additional_simulation_parameters.emplace("global_potential", params.global_potential);
         res.additional_simulation_parameters.emplace("validity_witness_partitioning_limit",
-                                                     validity_witness_partitioning_limit);
+                                                     params.validity_witness_partitioning_max_cluster_size_gss);
 
-        const ground_state_space_result& gss_res = fiction::ground_state_space(
-            charge_layout, validity_witness_partitioning_limit, charge_layout.get_phys_params());
+        const ground_state_space_stats& gss_stats = fiction::ground_state_space(
+            charge_layout, params.validity_witness_partitioning_max_cluster_size_gss, charge_layout.get_phys_params());
 
-        if (!gss_res.top_cluster)
+        if (!gss_stats.top_cluster)
         {
             return res;
         }
 
-        if (rep_stats)
+        if (params.report_gss_stats)
         {
-            report_ground_state_space_statistics(gss_res);
+            gss_stats.report();
         }
 
         mockturtle::stopwatch<>::duration time_counter{};
         {
             const mockturtle::stopwatch stop{time_counter};
 
-            if (!gss_res.top_cluster->charge_space.empty())
+            if (!gss_stats.top_cluster->charge_space.empty())
             {
-                collect_physically_valid_charge_distributions(gss_res.top_cluster);
+                collect_physically_valid_charge_distributions(gss_stats.top_cluster);
             }
         }
 
-        res.simulation_runtime = time_counter + gss_res.runtime;
+        res.simulation_runtime = time_counter + gss_stats.runtime;
 
         return res;
     }
 
   private:
-    static charge_distribution_surface<Lyt>
-    initialize_charge_layout(const Lyt& lyt, const sidb_simulation_parameters& phys_params) noexcept
+    static charge_distribution_surface<Lyt> initialize_charge_layout(const Lyt&                         lyt,
+                                                                     const clustercomplete_params<Lyt>& params) noexcept
     {
-        charge_distribution_surface<Lyt> cl{lyt};
-        cl.assign_physical_parameters(phys_params);
-        return cl;
-    }
+        charge_distribution_surface<Lyt> cds{lyt};
+        cds.assign_physical_parameters(params.physical_parameters);
 
-    static void report_ground_state_space_statistics(const ground_state_space_result& gss_res) noexcept
-    {
-        std::cout << "Pruned " << gss_res.pruned_top_level_multisets << " out of "
-                  << gss_res.maximum_top_level_multisets << " top level multiset charge configurations\n";
-
-        std::cout << "Ground State Space took ";
-
-        if (const double gss_runtime = mockturtle::to_seconds(gss_res.runtime); gss_runtime > 1.0)
+        // assign defects if applicable
+        if constexpr (has_foreach_sidb_defect_v<Lyt>)
         {
-            std::cout << gss_runtime << " seconds\n";
+            lyt.foreach_sidb_defect(
+                [&](const auto& cd)
+                {
+                    const auto& [cell, defect] = cd;
+
+                    if (defect.type != sidb_defect_type::NONE)
+                    {
+                        cds.add_sidb_defect_to_potential_landscape(cell, lyt.get_sidb_defect(cell));
+                    }
+                });
         }
-        else
-        {
-            std::cout << (gss_runtime * 1000) << " milliseconds\n";
-        }
+
+        cds.assign_local_external_potential(params.local_external_potential);
+        cds.assign_global_external_potential(params.global_potential);
+
+        return cds;
     }
 
     [[nodiscard]] constexpr inline bool fail_onto_negative_charge(const double pot_bound) const noexcept
@@ -225,6 +241,14 @@ class clustercomplete_impl
         }
 
         charge_layout_copy.declare_physically_valid();
+
+        if constexpr (has_get_sidb_defect_v<Lyt>)
+        {
+            for (const auto& [cell, defect] : real_placed_defects)
+            {
+                charge_layout_copy.assign_sidb_defect(cell, defect);
+            }
+        }
 
         {
             const std::lock_guard lock{res_mutex};
@@ -434,9 +458,11 @@ class clustercomplete_impl
     sidb_simulation_result<Lyt> res{};
     std::mutex                  res_mutex{};
 
-    const charge_distribution_surface<Lyt> charge_layout;
-    const std::array<double, 4>            mu_bounds_with_error;
-    const uint64_t                         num_threads;
+    const charge_distribution_surface<Lyt>                          charge_layout;
+    const std::unordered_map<typename Lyt::cell, const sidb_defect> real_placed_defects;
+
+    const std::array<double, 4> mu_bounds_with_error;
+    const uint64_t              num_threads;
 };
 
 }  // namespace detail
@@ -461,15 +487,15 @@ class clustercomplete_impl
  * @return All physically valid layouts for the given physical parameters and base are returned.
  */
 template <typename Lyt>
-[[nodiscard]] sidb_simulation_result<Lyt> clustercomplete(const Lyt&                    lyt,
-                                                          const clustercomplete_params& cc_params = {}) noexcept
+[[nodiscard]] sidb_simulation_result<Lyt> clustercomplete(const Lyt&                         lyt,
+                                                          const clustercomplete_params<Lyt>& cc_params = {}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-    detail::clustercomplete_impl<Lyt> p{lyt, cc_params.physical_parameters, cc_params.available_threads};
+    detail::clustercomplete_impl<Lyt> p{lyt, cc_params};
 
-    return p.run(cc_params.validity_witness_partitioning_max_cluster_size_gss, cc_params.report_gss_stats);
+    return p.run(cc_params);
 }
 
 }  // namespace fiction
