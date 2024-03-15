@@ -6,6 +6,7 @@
 #define FICTION_PRINT_LAYOUT_HPP
 
 #include "fiction/layouts/bounding_box.hpp"
+#include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/technology/sidb_surface.hpp"
@@ -33,7 +34,7 @@ namespace detail
 static const auto INP_COLOR = fmt::fg(fmt::color::green);
 // Escape color sequence for output colors (red).
 static const auto OUT_COLOR = fmt::fg(fmt::color::red);
-//// Escape color sequence for latch colors (yellow on black).
+// Escape color sequence for latch colors (yellow on black).
 static const auto SE_COLOR = fmt::fg(fmt::color::yellow) | fmt::bg(fmt::color::black);
 // Escape color sequences for clock background colors (white to dark grey).
 static const std::array<fmt::text_style, 4> CLOCK_COLOR{{fmt::fg(fmt::color::black) | fmt::bg(fmt::color::white),
@@ -472,7 +473,7 @@ void print_sidb_layout(std::ostream& os, const Lyt& lyt, const bool cs_color = t
 
         if (!already_printed && lyt.get_cell_type(loop_coordinate) != sidb_technology::cell_type::EMPTY)
         {
-            os << fmt::format(cs_color ? detail::SIDB_DEF_NEU_COLOR : detail::NO_COLOR, " o ");
+            os << fmt::format(cs_color ? detail::SIDB_DEF_NEU_COLOR : detail::NO_COLOR, " ◯ ");
             already_printed = true;
         }
 
