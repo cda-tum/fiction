@@ -124,24 +124,23 @@ charge_configuration_to_string(const std::vector<sidb_charge_state>& charge_dist
     return config_str.str();
 }
 /**
- * The iteration direction over the SiDB states. , and in reverse to the
- * conductance band.
+ * The iteration direction over the SiDB states.
  */
 enum class sidb_state_iter_dir
 {
     /**
-     * To the valance band iterates "\f$-\to 0\to +\f$".
+     * To positive iterates "\f$-\to 0\to +\f$".
      */
-    TO_VALENCE_BAND,
+    TO_POSITIVE,
     /**
-     * To the conductance band iterates "\f$+\to 0\to -\f$".
+     * To negative iterates "\f$+\to 0\to -\f$".
      */
-    TO_CONDUCTANCE_BAND
+    TO_NEGATIVE
 };
 /**
  * Iterator for SiDB charge states. Iterates `-1 -> 0 -> +1 -> NONE`.
  */
-template <sidb_state_iter_dir dir = sidb_state_iter_dir::TO_VALENCE_BAND>
+template <sidb_state_iter_dir dir = sidb_state_iter_dir::TO_POSITIVE>
 class sidb_charge_state_iterator
 {
   public:
@@ -213,11 +212,11 @@ class sidb_charge_state_iterator
      */
     sidb_charge_state_iterator& operator++() noexcept
     {
-        if constexpr (dir == sidb_state_iter_dir::TO_VALENCE_BAND)
+        if constexpr (dir == sidb_state_iter_dir::TO_POSITIVE)
         {
             cs = sign_to_charge_state(charge_state_to_sign(cs) + int8_t{1});
         }
-        else if constexpr (dir == sidb_state_iter_dir::TO_CONDUCTANCE_BAND)
+        else if constexpr (dir == sidb_state_iter_dir::TO_NEGATIVE)
         {
             cs = sign_to_charge_state(charge_state_to_sign(cs) - int8_t{1});
         }

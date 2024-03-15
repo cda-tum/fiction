@@ -11,7 +11,7 @@
  * Uncomment this line to switch to STL containers, which are slower than their respective analogues from the
  * Parallel-Hashmap library by Gregory Popovitch, but may be inspected with ease in a debugger.
  */
-//#define DEBUG_SIDB_CLUSTER_HIERARCHY
+// #define DEBUG_SIDB_CLUSTER_HIERARCHY
 
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
@@ -908,7 +908,7 @@ struct sidb_cluster
 
         const uint64_t ix = *sidbs.cbegin();
 
-        for (const sidb_charge_state cs : sidb_charge_state_iterator<sidb_state_iter_dir::TO_CONDUCTANCE_BAND>{
+        for (const sidb_charge_state cs : sidb_charge_state_iterator<sidb_state_iter_dir::TO_NEGATIVE>{
                  base == 3 ? sidb_charge_state::POSITIVE : sidb_charge_state::NEUTRAL})
         {
             charge_space.emplace(sidb_cluster_charge_state{self_ptr, cs, loc_ext_pot});
