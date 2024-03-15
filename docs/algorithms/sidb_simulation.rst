@@ -67,6 +67,8 @@ Engine Selectors
 
 .. doxygenenum:: fiction::sidb_simulation_engine
 .. doxygenenum:: fiction::exhaustive_sidb_simulation_engine
+.. doxygenenum:: fiction::heuristic_sidb_simulation_engine
+.. doxygenfunction:: fiction::sidb_simulation_engine_name
 
 Energy Calculation
 ##################

@@ -106,20 +106,20 @@ void time_to_solution(Lyt& lyt, const quicksim_params& quicksim_params, const ti
     if (tts_params.engine == exhaustive_sidb_simulation_engine::QUICKEXACT)
     {
         const quickexact_params<Lyt> params{quicksim_params.phys_params};
-        st.algorithm      = "QuickExact";
+        st.algorithm      = sidb_simulation_engine_name(exhaustive_sidb_simulation_engine::QUICKEXACT);
         simulation_result = quickexact(lyt, params);
     }
 #if (FICTION_ALGLIB_ENABLED)
     else if (tts_params.engine == exhaustive_sidb_simulation_engine::CLUSTERCOMPLETE)
     {
         const clustercomplete_params<Lyt> params{quicksim_params.phys_params};
-        st.algorithm      = "ClusterComplete";
+        st.algorithm      = sidb_simulation_engine_name(exhaustive_sidb_simulation_engine::CLUSTERCOMPLETE);
         simulation_result = clustercomplete(lyt, params);
     }
 #endif  // FICTION_ALGLIB_ENABLED
     else
     {
-        st.algorithm      = "ExGS";
+        st.algorithm      = sidb_simulation_engine_name(exhaustive_sidb_simulation_engine::EXGS);
         simulation_result = exhaustive_ground_state_simulation(lyt, quicksim_params.phys_params);
     }
 

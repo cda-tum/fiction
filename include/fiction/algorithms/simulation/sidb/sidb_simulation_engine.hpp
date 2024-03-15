@@ -5,6 +5,9 @@
 #ifndef FICTION_SIDB_SIMULATION_ENGINE_HPP
 #define FICTION_SIDB_SIMULATION_ENGINE_HPP
 
+#include <string>
+#include <type_traits>
+
 namespace fiction
 {
 
@@ -33,7 +36,6 @@ enum class sidb_simulation_engine
      */
     CLUSTERCOMPLETE
 };
-
 /**
  * Selector exclusively for exhaustive SiDB simulation engines.
  */
@@ -49,12 +51,57 @@ enum class exhaustive_sidb_simulation_engine
      */
     QUICKEXACT,
     /**
-     * *ClusterComplete* is a novel exact simulation engine that requires sub-exponential exponential runtime, for
-     * simulation problems in practice like SiDB logic. It handles base 3 simulation very effectively, since the engine
-     * makes no distinction in the simulation methodology for a different base number.
+     * *ClusterComplete* is a novel exact simulation engine that requires sub-exponential runtime, for simulation
+     * problems in practice like SiDB logic. It handles base 3 simulation very effectively, since the engine makes no
+     * distinction in the simulation methodology for a different base number.
      */
     CLUSTERCOMPLETE
 };
+/**
+ * Selector exclusively for heuristic SiDB simulation engines.
+ */
+enum class heuristic_sidb_simulation_engine
+{
+    /**
+     * *QuickSim* is a heuristic simulation engine that only requires polynomial runtime.
+     */
+    QUICKSIM
+};
+/**
+ * Returns the name of the given simulation engine.
+ *
+ * @tparam EngineType The type of the sidb engine (exhaustive/heuristic/general).
+ * @param sidb_simulation_engine A SiDBs simulation engine.
+ * @return The name of the simulation engine as a string.
+ */
+template <typename EngineType>
+[[nodiscard]] inline std::string sidb_simulation_engine_name(const EngineType& engine) noexcept
+{
+    static_assert(std::is_same_v<EngineType, sidb_simulation_engine> ||
+                      std::is_same_v<EngineType, exhaustive_sidb_simulation_engine> ||
+                      std::is_same_v<EngineType, heuristic_sidb_simulation_engine>,
+                  "EngineType must be a SiDB simulation engine type");
+
+    switch (engine)
+    {
+        case EngineType::EXGS:
+        {
+            return "ExGS";
+        }
+        case EngineType::QUICKSIM:
+        {
+            return "QuickSim";
+        }
+        case EngineType::QUICKEXACT:
+        {
+            return "QuickExact";
+        }
+        case EngineType::CLUSTERCOMPLETE:
+        {
+            return "ClusterComplete";
+        }
+    }
+}
 
 }  // namespace fiction
 
