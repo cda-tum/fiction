@@ -113,6 +113,8 @@ template <typename EngineType>
             }
         }
     }
+
+    return "Not implemented";
 }
 
 }  // namespace fiction
