@@ -110,13 +110,12 @@ TEMPLATE_TEST_CASE("time to solution test, using offset coordinates", "[time-to-
     {
         lyt.assign_cell_type({1, 6, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({3, 6, 0}, TestType::cell_type::NORMAL);
-        lyt.assign_cell_type({4, 6, 0}, TestType::cell_type::NORMAL);
-        lyt.assign_cell_type({2, 6, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({5, 6, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({7, 6, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({10, 6, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({12, 6, 0}, TestType::cell_type::NORMAL);
 
-        const sidb_simulation_parameters params{3, -0.30};
+        const sidb_simulation_parameters params{3, -0.32};
         const quicksim_params            quicksim_params{params};
 
         const time_to_solution_params tts_params_exgs{exhaustive_sidb_simulation_engine::EXGS};
