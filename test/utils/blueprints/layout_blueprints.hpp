@@ -462,6 +462,21 @@ GateLyt row_clocked_and_xor_gate_layout() noexcept
 }
 
 template <typename GateLyt>
+GateLyt unclockable_gate_layout() noexcept
+{
+    GateLyt layout{typename GateLyt::aspect_ratio{2, 2, 0}, fiction::open_clocking<GateLyt>()};
+
+    const auto x0  = layout.create_pi("x0", {0, 0});
+    const auto fo  = layout.create_buf(x0, {0, 1});
+    const auto inv = layout.create_not(fo, {0, 2});
+    const auto w   = layout.create_buf(inv, {1, 2});
+    const auto a   = layout.create_and(fo, w, {1, 1});
+    layout.create_po(a, "f", {2, 1});
+
+    return layout;
+}
+
+template <typename GateLyt>
 GateLyt optimization_layout() noexcept
 {
     GateLyt layout{{2, 3, 1}, fiction::twoddwave_clocking<GateLyt>()};

@@ -16,6 +16,8 @@ to the layout.
 
         .. doxygenstruct:: fiction::color_routing_params
            :members:
+        .. doxygenstruct:: fiction::color_routing_stats
+           :members:
         .. doxygenfunction:: fiction::color_routing(Lyt& lyt, const std::vector<routing_objective<Lyt>>& objectives, color_routing_params ps = {}, color_routing_stats* pst = nullptr)
 
     .. tab:: Python

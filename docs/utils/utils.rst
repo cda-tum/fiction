@@ -251,7 +251,7 @@ Math Utils
 .. doxygenfunction:: fiction::round_to_n_decimal_places
 .. doxygenfunction:: fiction::integral_abs
 .. doxygenfunction:: fiction::binomial_coefficient
-
+.. doxygenfunction:: fiction::determine_all_combinations_of_distributing_k_entities_on_n_positions
 
 ``phmap``
 ---------

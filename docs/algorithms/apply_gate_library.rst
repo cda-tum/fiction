@@ -9,7 +9,7 @@ implementations for each gate present in the passed ``gate_level_layout``.
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/layouts/apply_gate_library.hpp``
+        **Header:** ``fiction/algorithms/physical_design/apply_gate_library.hpp``
 
         .. doxygenfunction:: fiction::apply_gate_library(const GateLyt& lyt)
 

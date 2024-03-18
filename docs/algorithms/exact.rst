@@ -12,8 +12,9 @@ network specifications under constraints. This approach finds exact results but 
 
         .. doxygenstruct:: fiction::exact_physical_design_params
            :members:
-        .. doxygenfunction:: fiction::exact
-        .. doxygenfunction:: fiction::exact_with_blacklist
+        .. doxygenstruct:: fiction::exact_physical_design_stats
+           :members:
+        .. doxygenfunction:: fiction::exact(const Ntk& ntk, const exact_physical_design_params<Lyt>& ps = {}, exact_physical_design_stats* pst = nullptr)
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.exact_params

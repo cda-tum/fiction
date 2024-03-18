@@ -58,6 +58,8 @@ Heuristic Ground State Simulation
 Exhaustive Ground State Simulation
 ##################################
 
+.. _quickexact:
+
 .. tabs::
     .. tab:: C++
         **Header:** ``fiction/algorithms/simulation/sidb/quickexact.hpp``
@@ -209,6 +211,8 @@ Random SiDB Layout Generator
 Operational Domain Computation
 ##############################
 
+.. _opdom:
+
 .. tabs::
     .. tab:: C++
         **Header:** ``fiction/algorithms/simulation/sidb/is_operational.hpp``
@@ -259,6 +263,14 @@ Operational Domain Computation
 
 Utility Functions
 #################
+
+Simulation Equivalence Checking
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Header:** ``fiction/algorithms/simulation/sidb/check_simulation_results_for_equivalence.hpp``
+
+.. doxygenfunction:: fiction::check_simulation_results_for_equivalence
+
 
 Charge Detection
 ^^^^^^^^^^^^^^^^
@@ -315,6 +327,14 @@ Assess Population Stability
         .. autoclass:: mnt.pyfiction.assess_physical_population_stability_params
             :members:
         .. autofunction:: mnt.pyfiction.assess_physical_population_stability
+
+
+Positive Charge Detection
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Header:** ``fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp``
+
+.. doxygenfunction:: fiction::can_positive_charges_occur
 
 
 Convert Potential to Distance
