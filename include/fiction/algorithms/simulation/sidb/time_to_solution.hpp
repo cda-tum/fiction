@@ -11,16 +11,18 @@
 #include "fiction/algorithms/simulation/sidb/quicksim.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
-#include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/traits.hpp"
 
 #include <fmt/format.h>
 
-#include <algorithm>
 #include <chrono>
 #include <cmath>
 #include <cstdint>
+#include <cstdlib>
 #include <iostream>
+#include <limits>
+#include <numeric>
+#include <string>
 #include <vector>
 
 namespace fiction
@@ -45,8 +47,8 @@ struct time_to_solution_params
 
 /**
  * This struct stores the time-to-solution, the simulation accuracy and the average single simulation runtime of
- * *QuickSim*, the single runtime of the exact simulator used, and the number of valid charge configurations found by
- * the exact algorithm.
+ * *QuickSim*, the single runtime of the exact simulator used, and the number of valid charge
+ * configurations found by the exact algorithm.
  */
 struct time_to_solution_stats
 {

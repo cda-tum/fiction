@@ -12,11 +12,11 @@
 #include <fiction/technology/charge_distribution_surface.hpp>
 #include <fiction/technology/sidb_charge_state.hpp>
 
-#include <cstdint>
-#include <vector>
-
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+
+#include <cstdint>
+#include <vector>
 
 namespace pyfiction
 {
@@ -109,12 +109,10 @@ inline void charge_distribution_surface(pybind11::module& m)
              &py_charge_distribution_surface::calculate_chargeless_potential_between_sidbs, "c1"_a, "c2"_a)
         .def("get_chargeless_potential_between_sidbs",
              &py_charge_distribution_surface::get_chargeless_potential_between_sidbs, "c1"_a, "c2"_a)
-        .def("get_chargless_potential_by_indices", &py_charge_distribution_surface::get_chargless_potential_by_indices,
+        .def("get_chargless_potential_by_indices", &py_charge_distribution_surface::get_chargeless_potential_by_indices,
              "index1"_a, "index2"_a)
         .def("get_potential_between_sidbs", &py_charge_distribution_surface::get_potential_between_sidbs, "c1"_a,
              "c2"_a)
-        .def("get_potential_by_indices", &py_charge_distribution_surface::get_potential_by_indices, "index1"_a,
-             "index2"_a)
         .def("update_local_potential", &py_charge_distribution_surface::update_local_potential)
         .def("get_local_potential", &py_charge_distribution_surface::get_local_potential, "c"_a)
         .def("get_local_potential_by_index", &py_charge_distribution_surface::get_local_potential_by_index, "index"_a)
@@ -213,8 +211,7 @@ inline void charge_distribution_surface(pybind11::module& m)
         .def(
             "is_within_bounds",
             [](const py_charge_distribution_surface& lyt, const fiction::coordinate<py_charge_distribution_surface>& c)
-            { return lyt.is_within_bounds(c); },
-            "c"_a, DOC(fiction_cartesian_layout_is_within_bounds))
+            { return lyt.is_within_bounds(c); }, "c"_a, DOC(fiction_cartesian_layout_is_within_bounds))
 
         .def(
             "bounding_box_2d",

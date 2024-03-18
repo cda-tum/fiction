@@ -75,8 +75,9 @@ one_pass_synthesis_params&& maj(one_pass_synthesis_params&& ps) noexcept
 
 one_pass_synthesis_params&& async(const std::size_t t, one_pass_synthesis_params&& ps) noexcept
 {
+#if !defined(__APPLE__)
     ps.num_threads = t;
-
+#endif
     return std::move(ps);
 }
 
