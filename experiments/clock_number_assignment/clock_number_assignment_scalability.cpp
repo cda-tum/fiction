@@ -33,7 +33,7 @@ void remove_clocking(Lyt& lyt) noexcept
 
 int main()  // NOLINT
 {
-    const std::string network_folder = fmt::format("{}/../benchmarks/IWLS93/", EXPERIMENTS_PATH).c_str();
+    const std::string network_folder = fmt::format("{}/../benchmarks/IWLS93/", EXPERIMENTS_PATH);
 
     using gate_lyt =
         fiction::gate_level_layout<fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<>>>>;
