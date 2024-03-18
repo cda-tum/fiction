@@ -125,18 +125,16 @@ class equivalence_checking_impl
                     // compute TP of specification
                     if constexpr (fiction::is_gate_level_layout_v<Spec>)
                     {
-                        fiction::critical_path_length_and_throughput_stats cplt_st{};
-                        fiction::critical_path_length_and_throughput(spec, &cplt_st);
+                        const auto cp_tp = fiction::critical_path_length_and_throughput(spec);
 
-                        pst.tp_spec = static_cast<int64_t>(cplt_st.throughput);
+                        pst.tp_spec = static_cast<int64_t>(cp_tp.throughput);
                     }
                     // compute TP of implementation
                     if constexpr (fiction::is_gate_level_layout_v<Impl>)
                     {
-                        fiction::critical_path_length_and_throughput_stats cplt_st{};
-                        fiction::critical_path_length_and_throughput(impl, &cplt_st);
+                        const auto cp_tp = fiction::critical_path_length_and_throughput(impl);
 
-                        pst.tp_impl = static_cast<int64_t>(cplt_st.throughput);
+                        pst.tp_impl = static_cast<int64_t>(cp_tp.throughput);
                     }
 
                     pst.tp_diff = std::abs(pst.tp_spec - pst.tp_impl);

@@ -12,13 +12,25 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <cstdlib>
+#include <vector>
 
 namespace fiction
 {
 
-struct critical_path_length_and_throughput_stats
+/**
+ * Critical path length and throughput storage struct.
+ */
+struct cp_and_tp
 {
-    uint64_t critical_path_length{0ull}, throughput{0ull};
+    /**
+     * Length of the critical path in tiles.
+     */
+    uint64_t critical_path_length{0ull};
+    /**
+     * Throughput of the layout in clock cycles as \f$\frac{1}{x}\f$ where only \f$x\f$ is stored.
+     */
+    uint64_t throughput{0ull};
 };
 
 namespace detail
@@ -28,17 +40,15 @@ template <typename Lyt>
 class critical_path_length_and_throughput_impl
 {
   public:
-    critical_path_length_and_throughput_impl(const Lyt& src, critical_path_length_and_throughput_stats& st) :
-            lyt{src},
-            pst{st}
-    {}
+    critical_path_length_and_throughput_impl(const Lyt& src) : lyt{src} {}
 
-    void run()
+    cp_and_tp run()
     {
         lyt.foreach_po(
-            [this](const auto& po) {
-                pst.critical_path_length =
-                    std::max(signal_delay(static_cast<tile<Lyt>>(po)).length, pst.critical_path_length);
+            [this](const auto& po)
+            {
+                result.critical_path_length =
+                    std::max(signal_delay(static_cast<tile<Lyt>>(po)).length, result.critical_path_length);
             });
 
         const auto max_diff =
@@ -47,20 +57,27 @@ class critical_path_length_and_throughput_impl
 
         if (max_diff != delay_cache.cend())
         {
-            pst.throughput = max_diff->second.diff;
+            result.throughput = max_diff->second.diff;
         }
 
         // give throughput in cycles, not in phases
-        pst.throughput /= lyt.num_clocks();
+        result.throughput /= lyt.num_clocks();
 
         // convert cycle difference to throughput, i.e., x where throughput == 1/x
-        pst.throughput++;
+        result.throughput++;
+
+        return result;
     }
 
   private:
+    /**
+     * Gate-level layout.
+     */
     Lyt lyt;
-
-    critical_path_length_and_throughput_stats& pst;
+    /**
+     * Result storage.
+     */
+    cp_and_tp result;
 
     struct path_info
     {
@@ -159,22 +176,16 @@ class critical_path_length_and_throughput_impl
  *
  * @tparam Lyt Gate-level layout type.
  * @param lyt The gate-level layout whose CP and TP are desired.
- * @param pst Statistics.
+ * @return A struct containing the CP and TP.
  */
 template <typename Lyt>
-void critical_path_length_and_throughput(const Lyt& lyt, critical_path_length_and_throughput_stats* pst = nullptr)
+cp_and_tp critical_path_length_and_throughput(const Lyt& lyt)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate layout type");
 
-    critical_path_length_and_throughput_stats        st{};
-    detail::critical_path_length_and_throughput_impl p{lyt, st};
+    detail::critical_path_length_and_throughput_impl p{lyt};
 
-    p.run();
-
-    if (pst)
-    {
-        *pst = st;
-    }
+    return p.run();
 }
 
 }  // namespace fiction
