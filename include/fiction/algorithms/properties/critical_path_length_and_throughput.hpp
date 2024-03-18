@@ -40,7 +40,7 @@ template <typename Lyt>
 class critical_path_length_and_throughput_impl
 {
   public:
-    critical_path_length_and_throughput_impl(const Lyt& src) : lyt{src} {}
+    explicit critical_path_length_and_throughput_impl(const Lyt& src) : lyt{src} {}
 
     cp_and_tp run()
     {
