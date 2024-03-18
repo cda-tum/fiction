@@ -225,6 +225,7 @@ class equivalence_checking_impl
  * @param spec The specification.
  * @param impl The implementation.
  * @param pst Statistics.
+ * @return The equivalence type of `spec` and `impl`.
  */
 template <typename Spec, typename Impl>
 eq_type equivalence_checking(const Spec& spec, const Impl& impl, equivalence_checking_stats* pst = nullptr)
