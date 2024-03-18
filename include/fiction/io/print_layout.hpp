@@ -37,7 +37,7 @@ namespace detail
 static const auto INP_COLOR = fmt::fg(fmt::color::green);
 // Escape color sequence for output colors (red).
 static const auto OUT_COLOR = fmt::fg(fmt::color::red);
-//// Escape color sequence for latch colors (yellow on black).
+// Escape color sequence for latch colors (yellow on black).
 static const auto SE_COLOR = fmt::fg(fmt::color::yellow) | fmt::bg(fmt::color::black);
 // Escape color sequences for clock background colors (white to dark grey).
 static const std::array<fmt::text_style, 4> CLOCK_COLOR{{fmt::fg(fmt::color::black) | fmt::bg(fmt::color::white),
@@ -345,13 +345,13 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
  * `charge_distribution_surface` or `sidb_surface`.
  * @param os Output stream to write into.
  * @param lyt The layout of which the information is to be printed.
- * @param cs_color Flag to utilize color escapes for charge states.
+ * @param lat_color Flag to utilize color escapes for the lattice, charge states, and atomic defects.
  * @param crop_layout Flag to print the 2D bounding box of the layout, while leaving a maximum padding of one dimer row
  * and two columns.
  * @param draw_lattice Flag to enable lattice background drawing.
  */
 template <typename Lyt>
-void print_sidb_layout(std::ostream& os, const Lyt& lyt, const bool cs_color = true, const bool crop_layout = false,
+void print_sidb_layout(std::ostream& os, const Lyt& lyt, const bool lat_color = true, const bool crop_layout = false,
                        const bool draw_lattice = true)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
@@ -430,19 +430,19 @@ void print_sidb_layout(std::ostream& os, const Lyt& lyt, const bool cs_color = t
             {
                 case sidb_charge_state::NEGATIVE:
                 {
-                    os << fmt::format(cs_color ? detail::SIDB_NEG_COLOR : detail::NO_COLOR, " ● ");
+                    os << fmt::format(lat_color ? detail::SIDB_NEG_COLOR : detail::NO_COLOR, " ● ");
                     already_printed = true;
                     break;
                 }
                 case sidb_charge_state::POSITIVE:
                 {
-                    os << fmt::format(cs_color ? detail::SIDB_POS_COLOR : detail::NO_COLOR, " ⨁ ");
+                    os << fmt::format(lat_color ? detail::SIDB_POS_COLOR : detail::NO_COLOR, " ⨁ ");
                     already_printed = true;
                     break;
                 }
                 case sidb_charge_state::NEUTRAL:
                 {
-                    os << fmt::format(cs_color ? detail::SIDB_NEUT_COLOR : detail::NO_COLOR, " ◯ ");
+                    os << fmt::format(lat_color ? detail::SIDB_NEUT_COLOR : detail::NO_COLOR, " ◯ ");
                     already_printed = true;
                     break;
                 }
@@ -459,17 +459,17 @@ void print_sidb_layout(std::ostream& os, const Lyt& lyt, const bool cs_color = t
             {
                 if (is_negatively_charged_defect(lyt.get_sidb_defect(loop_coordinate)))
                 {
-                    os << fmt::format(cs_color ? detail::SIDB_DEF_NEG_COLOR : detail::NO_COLOR, " ⊟ ");
+                    os << fmt::format(lat_color ? detail::SIDB_DEF_NEG_COLOR : detail::NO_COLOR, " ⊟ ");
                     already_printed = true;
                 }
                 else if (is_positively_charged_defect(lyt.get_sidb_defect(loop_coordinate)))
                 {
-                    os << fmt::format(cs_color ? detail::SIDB_DEF_POS_COLOR : detail::NO_COLOR, " ⊞ ");
+                    os << fmt::format(lat_color ? detail::SIDB_DEF_POS_COLOR : detail::NO_COLOR, " ⊞ ");
                     already_printed = true;
                 }
                 else if (is_neutrally_charged_defect(lyt.get_sidb_defect(loop_coordinate)))
                 {
-                    os << fmt::format(cs_color ? detail::SIDB_DEF_NEU_COLOR : detail::NO_COLOR, " ⊡ ");
+                    os << fmt::format(lat_color ? detail::SIDB_DEF_NEU_COLOR : detail::NO_COLOR, " ⊡ ");
                     already_printed = true;
                 }
             }
@@ -477,13 +477,13 @@ void print_sidb_layout(std::ostream& os, const Lyt& lyt, const bool cs_color = t
 
         if (!already_printed && lyt.get_cell_type(loop_coordinate) != sidb_technology::cell_type::EMPTY)
         {
-            os << fmt::format(cs_color ? detail::SIDB_DEF_NEU_COLOR : detail::NO_COLOR, " o ");
+            os << fmt::format(lat_color ? detail::SIDB_DEF_NEU_COLOR : detail::NO_COLOR, " ◯ ");
             already_printed = true;
         }
 
         if (!already_printed)
         {
-            os << (draw_lattice ? fmt::format(cs_color ? detail::SIDB_LAT_COLOR : detail::NO_COLOR, " · ") : "  ");
+            os << (draw_lattice ? fmt::format(lat_color ? detail::SIDB_LAT_COLOR : detail::NO_COLOR, " · ") : "  ");
         }
 
         // if the x-coordinate of loop_coordinate is still less than the x-coordinate of the south-west cell, the
