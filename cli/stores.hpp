@@ -10,7 +10,6 @@
 #include <fiction/io/print_layout.hpp>
 #include <fiction/io/write_svg_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
-#include <fiction/technology/cell_technologies.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -19,6 +18,8 @@
 #include <kitty/print.hpp>
 #include <mockturtle/views/depth_view.hpp>
 
+#include <cstdint>
+#include <stdexcept>
 #include <type_traits>
 #include <variant>
 
@@ -74,7 +75,7 @@ ALICE_DESCRIBE_STORE(fiction::logic_network_t, ln)
     {
         using Ntk = typename std::decay_t<decltype(ntk_ptr)>::element_type;
 
-        mockturtle::depth_view depth_ntk{*ntk_ptr};
+        const mockturtle::depth_view depth_ntk{*ntk_ptr};
 
         return fmt::format("{} ({}) - I/O: {}/{}, gates: {}, level: {}", ntk_ptr->get_network_name(),
                            fiction::ntk_type_name<Ntk>, ntk_ptr->num_pis(), ntk_ptr->num_pos(), ntk_ptr->num_gates(),
@@ -90,7 +91,7 @@ ALICE_PRINT_STORE_STATISTICS(fiction::logic_network_t, os, ln)
     {
         using Ntk = typename std::decay_t<decltype(ntk_ptr)>::element_type;
 
-        mockturtle::depth_view depth_ntk{*ntk_ptr};
+        const mockturtle::depth_view depth_ntk{*ntk_ptr};
 
         os << fmt::format("[i] {} ({}) - I/O: {}/{}, gates: {}, level: {}\n", ntk_ptr->get_network_name(),
                           fiction::ntk_type_name<Ntk>, ntk_ptr->num_pis(), ntk_ptr->num_pos(), ntk_ptr->num_gates(),
@@ -106,7 +107,7 @@ ALICE_LOG_STORE_STATISTICS(fiction::logic_network_t, ln)
     {
         using Ntk = typename std::decay_t<decltype(ntk_ptr)>::element_type;
 
-        mockturtle::depth_view depth_ntk{*ntk_ptr};
+        const mockturtle::depth_view depth_ntk{*ntk_ptr};
 
         return nlohmann::json{{"name", ntk_ptr->get_network_name()}, {"type", fiction::ntk_type_name<Ntk>},
                               {"inputs", ntk_ptr->num_pis()},        {"outputs", ntk_ptr->num_pos()},
@@ -135,7 +136,7 @@ void show<fiction::logic_network_t>(std::ostream& os, const fiction::logic_netwo
     {
         try
         {
-            mockturtle::depth_view depth_ntk{*ntk_ptr};
+            const mockturtle::depth_view depth_ntk{*ntk_ptr};
 
             using Ntk = typename std::decay_t<decltype(depth_ntk)>;
 
@@ -182,13 +183,12 @@ ALICE_DESCRIBE_STORE(fiction::gate_layout_t, layout)
             num_se = lyt_ptr->num_se();
         }
 
-        fiction::critical_path_length_and_throughput_stats st{};
-        fiction::critical_path_length_and_throughput(*lyt_ptr, &st);
+        const auto cp_tp = fiction::critical_path_length_and_throughput(*lyt_ptr);
 
         return fmt::format("{} ({}) - {} × {}, I/O: {}/{}, gates: {}, wires: {}, CP: {}, TP: 1/{}, sync. elems.: {}",
                            lyt_ptr->get_layout_name(), lyt_ptr->get_clocking_scheme().name, lyt_ptr->x() + 1,
                            lyt_ptr->y() + 1, lyt_ptr->num_pis(), lyt_ptr->num_pos(), lyt_ptr->num_gates(),
-                           lyt_ptr->num_wires(), st.critical_path_length, st.throughput, num_se);
+                           lyt_ptr->num_wires(), cp_tp.critical_path_length, cp_tp.throughput, num_se);
     };
 
     return std::visit(describe, layout);
@@ -208,14 +208,13 @@ ALICE_PRINT_STORE_STATISTICS(fiction::gate_layout_t, os, layout)
             num_se = lyt_ptr->num_se();
         }
 
-        fiction::critical_path_length_and_throughput_stats st{};
-        fiction::critical_path_length_and_throughput(*lyt_ptr, &st);
+        const auto cp_tp = fiction::critical_path_length_and_throughput(*lyt_ptr);
 
         os << fmt::format(
             "[i] {} ({}) - {} × {}, I/O: {}/{}, gates: {}, wires: {}, CP: {}, TP: 1/{}, sync. elems.: {}\n",
             lyt_ptr->get_layout_name(), lyt_ptr->get_clocking_scheme().name, lyt_ptr->x() + 1, lyt_ptr->y() + 1,
-            lyt_ptr->num_pis(), lyt_ptr->num_pos(), lyt_ptr->num_gates(), lyt_ptr->num_wires(), st.critical_path_length,
-            st.throughput, num_se);
+            lyt_ptr->num_pis(), lyt_ptr->num_pos(), lyt_ptr->num_gates(), lyt_ptr->num_wires(),
+            cp_tp.critical_path_length, cp_tp.throughput, num_se);
     };
 
     std::visit(print_statistics, layout);
@@ -234,8 +233,7 @@ ALICE_LOG_STORE_STATISTICS(fiction::gate_layout_t, layout)
             num_se = lyt_ptr->num_se();
         }
 
-        fiction::critical_path_length_and_throughput_stats st{};
-        fiction::critical_path_length_and_throughput(*lyt_ptr, &st);
+        const auto cp_tp = fiction::critical_path_length_and_throughput(*lyt_ptr);
 
         return nlohmann::json{
             {"name", lyt_ptr->get_layout_name()},
@@ -248,8 +246,8 @@ ALICE_LOG_STORE_STATISTICS(fiction::gate_layout_t, layout)
             // {"free tiles", area - (gate_tiles + wire_tiles - crossings)},  // free tiles in ground layer
             // {"crossings", crossings},
             {"synchronization elements", num_se},
-            {"critical path", st.critical_path_length},
-            {"throughput", fmt::format("1/{}", st.throughput)}};
+            {"critical path", cp_tp.critical_path_length},
+            {"throughput", fmt::format("1/{}", cp_tp.throughput)}};
     };
 
     return std::visit(log_statistics, layout);
