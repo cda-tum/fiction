@@ -97,10 +97,8 @@ int main()  // NOLINT
         fiction::determine_clocking(newly_clocked_layout, params, &stats);
 
         // check equivalence of the original and the newly clocked layout
-        fiction::equivalence_checking_stats eq_stats{};
-        fiction::equivalence_checking(original_layout, newly_clocked_layout, &eq_stats);
-
-        const auto eq_result = eq_stats.eq != fiction::eq_type::NO;
+        const auto eq_result =
+            fiction::equivalence_checking(original_layout, newly_clocked_layout) != fiction::eq_type::NO;
 
         // log results
         clock_number_assignment_exp(network.get_network_name(), original_layout.num_pis(), original_layout.num_pos(),
