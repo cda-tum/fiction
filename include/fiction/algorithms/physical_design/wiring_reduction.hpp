@@ -367,8 +367,7 @@ using wiring_reduction_lyt = obstruction_layout<wiring_reduction_layout<>>;
  * @return A new layout with wiring reduction features.
  */
 template <typename Lyt>
-wiring_reduction_lyt
-create_shifted_layout(const Lyt& lyt, const uint64_t x_offset = 0, const uint64_t y_offset = 0,
+wiring_reduction_lyt create_shifted_layout(const Lyt& lyt, const uint64_t x_offset = 0, const uint64_t y_offset = 0,
                                            search_direction direction = search_direction::HORIZONTAL) noexcept
 {
     // Create a wiring_reduction_layout with specified offsets
