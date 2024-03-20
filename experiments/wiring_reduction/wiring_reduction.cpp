@@ -7,6 +7,7 @@
 #include <fiction/io/network_reader.hpp>                                          // read networks from files
 
 #include <fmt/format.h>  // output formatting
+#include <mockturtle/utils/stopwatch.hpp>
 
 #include <cstdint>
 #include <cstdlib>
@@ -77,8 +78,7 @@ int main()  // NOLINT
 
         auto num_wires = gate_level_layout.num_wires() - gate_level_layout.num_pis() - gate_level_layout.num_pos();
         //  compute critical path and throughput
-        fiction::critical_path_length_and_throughput_stats cp_tp_stats{};
-        fiction::critical_path_length_and_throughput(gate_level_layout, &cp_tp_stats);
+        const auto cp_tp_stats = fiction::critical_path_length_and_throughput(gate_level_layout);
 
         // calculate bounding box
         const auto bounding_box_before_wiring_reduction = fiction::bounding_box_2d(gate_level_layout);
@@ -91,8 +91,7 @@ int main()  // NOLINT
         fiction::wiring_reduction<gate_lyt>(gate_level_layout, &wiring_reduction_stats);
 
         //  compute critical path and throughput
-        fiction::critical_path_length_and_throughput_stats cp_tp_stats_after{};
-        fiction::critical_path_length_and_throughput(gate_level_layout, &cp_tp_stats_after);
+        const auto cp_tp_stats_after = fiction::critical_path_length_and_throughput(gate_level_layout);
 
         auto num_wires_after =
             gate_level_layout.num_wires() - gate_level_layout.num_pis() - gate_level_layout.num_pos();
