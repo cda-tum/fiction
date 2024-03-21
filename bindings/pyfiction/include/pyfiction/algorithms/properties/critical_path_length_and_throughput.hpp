@@ -12,6 +12,8 @@
 
 #include <pybind11/pybind11.h>
 
+#include <utility>
+
 namespace pyfiction
 {
 
@@ -27,10 +29,9 @@ void critical_path_length_and_throughput(pybind11::module& m)
         "critical_path_length_and_throughput",
         [](const Lyt& lyt) -> std::pair<uint64_t, uint64_t>
         {
-            fiction::critical_path_length_and_throughput_stats stats{};
-            fiction::critical_path_length_and_throughput(lyt, &stats);
+            const auto result = fiction::critical_path_length_and_throughput(lyt);
 
-            return {stats.critical_path_length, stats.throughput};
+            return {result.critical_path_length, result.throughput};
         },
         "layout"_a, DOC(fiction_critical_path_length_and_throughput));
 }
