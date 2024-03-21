@@ -203,15 +203,9 @@ void check_stats(const exact_physical_design_stats& st)
 template <typename Lyt>
 void check_tp(const Lyt& lyt, const uint64_t tp)
 {
-    critical_path_length_and_throughput_stats st{};
-    critical_path_length_and_throughput(lyt, &st);
+    const auto cp_tp = critical_path_length_and_throughput(lyt);
 
-    if (st.throughput != tp)
-    {
-        std::cout << lyt.get_clocking_scheme().name << std::endl;
-    }
-
-    CHECK(st.throughput >= tp);  // >= because Z3 might behave differently on different operating systems
+    CHECK(cp_tp.throughput >= tp);  // >= because Z3 might behave differently on different operating systems
 }
 
 template <typename Lyt>
