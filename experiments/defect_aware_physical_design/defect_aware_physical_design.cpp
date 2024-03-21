@@ -181,8 +181,7 @@ int main()  // NOLINT
             assert(eq.has_value());
 
             // compute critical path and throughput
-            fiction::critical_path_length_and_throughput_stats cp_tp_stats{};
-            fiction::critical_path_length_and_throughput(*gate_level_layout, &cp_tp_stats);
+            const auto cp_tp = fiction::critical_path_length_and_throughput(*gate_level_layout);
 
             // apply gate library
             const auto cell_level_layout =
@@ -206,7 +205,7 @@ int main()  // NOLINT
                        depth_cut_xag.depth(), mapped_network.num_gates(), depth_mapped_network.depth(),
                        gate_level_layout->x() + 1, gate_level_layout->y() + 1,
                        (gate_level_layout->x() + 1) * (gate_level_layout->y() + 1), gate_level_layout->num_gates(),
-                       gate_level_layout->num_wires(), cp_tp_stats.critical_path_length, cp_tp_stats.throughput,
+                       gate_level_layout->num_wires(), cp_tp.critical_path_length, cp_tp.throughput,
                        mockturtle::to_seconds(exact_stats.time_total), *eq, cell_level_layout.num_cells(),
                        area_stats.area);
         }

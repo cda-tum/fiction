@@ -57,9 +57,15 @@ namespace fiction
 /**
  * Target technologies.
  */
-enum class technology_constraints
+enum class technology_constraints : uint8_t
 {
-    NONE,
+    /**
+     * No technology-specific constraints.
+     */
+    NONE = 0,
+    /**
+     * ToPoLiNano technology-specific constraints.
+     */
     TOPOLINANO
 };
 /**
