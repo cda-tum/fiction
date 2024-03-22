@@ -5,23 +5,25 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
-#include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
 #include <fiction/algorithms/simulation/sidb/quicksim.hpp>
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/algorithms/simulation/sidb/time_to_solution.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
-#include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
+#include <fiction/technology/charge_distribution_surface.hpp>
+#include <fiction/technology/physical_constants.hpp>
+#include <fiction/types.hpp>
 
 #include <cmath>
+#include <limits>
 
 using namespace fiction;
 
-TEMPLATE_TEST_CASE(
-    "time to solution test", "[time-to-solution]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+TEMPLATE_TEST_CASE("time to solution test", "[time-to-solution]", sidb_cell_clk_lyt_siqad,
+                   charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
 {
 
     TestType lyt{};
@@ -53,22 +55,21 @@ TEMPLATE_TEST_CASE(
 
     SECTION("layout with seven SiDBs placed")
     {
+        // layout should not have positively charged SiDBs since QuickSim is a two-state simulator at the moment.
         lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({3, 3, 0}, TestType::cell_type::NORMAL);
-        lyt.assign_cell_type({4, 3, 0}, TestType::cell_type::NORMAL);
-        lyt.assign_cell_type({2, 3, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({5, 3, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({10, 3, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({12, 3, 0}, TestType::cell_type::NORMAL);
 
-        const sidb_simulation_parameters params{3, -0.30};
+        const sidb_simulation_parameters params{2, -0.30};
         const quicksim_params            quicksim_params{params};
 
         const time_to_solution_params tts_params_exgs{exhaustive_sidb_simulation_engine::EXGS};
         time_to_solution_stats        tts_stat_exgs{};
         time_to_solution<TestType>(lyt, quicksim_params, tts_params_exgs, &tts_stat_exgs);
 
-        CHECK(tts_stat_exgs.acc == 100);
+        CHECK(tts_stat_exgs.acc == 100.0);
         CHECK(tts_stat_exgs.time_to_solution > 0.0);
         CHECK(tts_stat_exgs.mean_single_runtime > 0.0);
 
@@ -76,7 +77,7 @@ TEMPLATE_TEST_CASE(
         const time_to_solution_params tts_params{exhaustive_sidb_simulation_engine::QUICKEXACT};
         time_to_solution<TestType>(lyt, quicksim_params, tts_params, &tts_stat_quickexact);
 
-        REQUIRE(tts_stat_quickexact.acc == 100);
+        REQUIRE(tts_stat_quickexact.acc == 100.0);
         CHECK(tts_stat_quickexact.time_to_solution > 0.0);
         CHECK(tts_stat_quickexact.mean_single_runtime > 0.0);
 

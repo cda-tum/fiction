@@ -10,6 +10,7 @@
 
 #include <alice/alice.hpp>
 
+#include <type_traits>
 #include <variant>
 
 namespace alice
