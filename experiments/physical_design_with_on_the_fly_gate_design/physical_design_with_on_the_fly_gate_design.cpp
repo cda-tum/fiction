@@ -227,8 +227,7 @@ int main()  // NOLINT
         assert(eq.has_value());
 
         // compute critical path and throughput
-        fiction::critical_path_length_and_throughput_stats cp_tp_stats{};
-        fiction::critical_path_length_and_throughput(*gate_level_layout, &cp_tp_stats);
+        const auto cp_tp_stats = fiction::critical_path_length_and_throughput(*gate_level_layout);
 
         // apply dynamic gate library
 
