@@ -125,22 +125,22 @@ Furthermore, if you use any of the design automation algorithms, please consider
 
     .. code-block:: tex
 
-        @inproceedings{walter2024opdom,
+        @inproceedings{walter2023opdom,
           title={{Reducing the Complexity of Operational Domain Computation in Silicon Dangling Bond Logic}},
           author={Walter, Marcel and Drewniok, Jan and Ng, Samuel Sze Hang and Walus, Konrad and Wille, Robert},
           booktitle={International Symposium on Nanoscale Architectures (NANOARCH)},
-          year={2024}
+          year={2023}
         }
 
 * :ref:`SiDB Gate Design <gate_design>` (``gate_design``):
 
     .. code-block:: tex
 
-        @inproceedings{drewniok2024gatedesigner,
+        @inproceedings{drewniok2023gatedesigner,
           title={{Minimal Design of SiDB Gates: An Optimal Basis for Circuits Based on Silicon Dangling Bonds.}},
           author={Drewniok, Jan and Walter, Marcel and Wille, Robert},
           booktitle={International Symposium on Nanoscale Architectures (NANOARCH)},
-          year={2024}
+          year={2023}
         }
 
 * :ref:`Mapping Cartesian to hexagonal layouts <hexagonalization>` (``hexagonalization``):
@@ -160,11 +160,11 @@ Furthermore, if you use any of the design automation algorithms, please consider
 
     .. code-block:: tex
 
-        @inproceedings{hofmann2024postlayout,
+        @inproceedings{hofmann2023postlayout,
           title={{Post-Layout Optimization for Field-coupled Nanotechnologies}},
           author={Hofmann, Simon and Walter, Marcel and Wille, Robert},
           booktitle={International Symposium on Nanoscale Architectures (NANOARCH)},
-          year={2024}
+          year={2023}
         }
 
 * :ref:`SiDB Bestagon library <bestagon>`:
