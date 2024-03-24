@@ -5,20 +5,18 @@
 #ifndef FICTION_WRITE_LOCATION_AND_GROUND_STATE_HPP
 #define FICTION_WRITE_LOCATION_AND_GROUND_STATE_HPP
 
-#include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
 #include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
-#include "fiction/io/read_sqd_layout.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
-#include "fiction/types.hpp"
 #include "fiction/utils/math_utils.hpp"
 
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <fstream>
 #include <limits>
 #include <ostream>
-#include <string>
+#include <string_view>
 #include <vector>
 
 namespace fiction

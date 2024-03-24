@@ -1,6 +1,6 @@
-from mnt.pyfiction import *
 import unittest
-import os
+
+from mnt.pyfiction import *
 
 
 class TestDesignSiDBGates(unittest.TestCase):

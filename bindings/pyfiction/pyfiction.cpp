@@ -183,7 +183,7 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::write_qll_layout(m);
     pyfiction::write_fqca_layout(m);
     pyfiction::write_sqd_sim_result(m);
-    //    pyfiction::write_location_and_ground_state(m);
+    // pyfiction::write_location_and_ground_state(m);
     pyfiction::write_operational_domain(m);
     pyfiction::read_fgl_layout(m);
     pyfiction::read_fqca_layout(m);

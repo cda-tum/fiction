@@ -8,11 +8,12 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 #include <fiction/io/write_sqd_sim_result.hpp>
 
-#include <string_view>
-
 #include <pybind11/pybind11.h>
+
+#include <string_view>
 
 namespace pyfiction
 {
