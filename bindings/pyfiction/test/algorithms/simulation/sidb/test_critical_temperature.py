@@ -42,7 +42,8 @@ class TestCriticalTemperature(unittest.TestCase):
         self.assertEqual(stats.algorithm_name, "QuickExact")
 
     def test_bestagon_inv(self):
-        layout = read_sqd_layout(dir_path + "/../../../resources/hex_inv_diag_0.sqd", "inverter_input_0")
+        layout = read_sqd_layout(dir_path + "/../../../resources/hex_11_inputsdbp_inv_straight_v0_manual.sqd",
+                                 "inverter_input_0")
 
         params = critical_temperature_params()
         params.engine = simulation_engine.APPROXIMATE
@@ -56,6 +57,25 @@ class TestCriticalTemperature(unittest.TestCase):
 
         self.assertEqual(stats.algorithm_name, "QuickSim")
         self.assertGreater(stats.num_valid_lyt, 1)
+
+    def test_bestagon_inv_with_different_mu(self):
+        layout = read_sqd_layout(dir_path + "/../../../resources/hex_11_inputsdbp_inv_straight_v0_manual.sqd",
+                                 "inverter_input_0")
+
+        params = critical_temperature_params()
+        params.simulation_parameters.base = 2
+        params.simulation_parameters.mu_minus = -0.2
+
+        params.engine = simulation_engine.EXACT
+
+        stats = critical_temperature_stats()
+
+        cds = charge_distribution_surface(layout)
+        spec = [create_not_tt()]
+
+        self.assertLessEqual(critical_temperature_gate_based(cds, spec, params, stats), 0)
+
+        self.assertEqual(stats.algorithm_name, "QuickExact")
 
 
 if __name__ == '__main__':
