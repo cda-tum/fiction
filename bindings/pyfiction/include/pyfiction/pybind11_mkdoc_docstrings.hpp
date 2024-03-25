@@ -54,13 +54,13 @@ paths even if the layout implements a clocking interface. This can be
 achieved by static-casting the layout to a coordinate layout when
 calling this function:
 
-``
+```
 {.cpp}
 using clk_lyt = clocked_layout<cartesian_layout<>>;
 using path = layout_coordinate_path<cartesian_layout<>>;
 clk_lyt layout = ...;
 auto shortest_path = a_star<path>(static_cast<cartesian_layout<>>(layout), {source, target});
-``
+```
 
 A* was introduced in \"A Formal Basis for the Heuristic Determination
 of Minimum Cost Paths\" by Peter E. Hart, Nils J. Nilsson, and Bertram
@@ -2827,13 +2827,13 @@ performed.
 
 Example usage:
 
-``
+```
 {.cpp}
   std::ofstream file("output.csv");
   csv_writer writer(file);
   writer.write_line("Name", "Age", "City");
   writer.write_line("Alice", 20, "New York");
-``)doc";
+```)doc";
 
 static const char* __doc_fiction_csv_writer_csv_writer =
     R"doc(Standard constructor.
@@ -6801,13 +6801,13 @@ paths even if the layout implements a clocking interface. This can be
 achieved by static-casting the layout to a coordinate layout when
 calling this function:
 
-``
+```
 {.cpp}
 using clk_lyt = clocked_layout<cartesian_layout<>>;
 using path = layout_coordinate_path<cartesian_layout<>>;
 clk_lyt layout = ...;
 auto all_paths = enumerate_all_paths<path>(static_cast<cartesian_layout<>>(layout), {source, target});
-``
+```
 
 Template parameter ``Path``:
     Type of the returned individual paths.
@@ -10541,13 +10541,13 @@ paths even if the layout implements a clocking interface. This can be
 achieved by static-casting the layout to a coordinate layout when
 calling this function:
 
-``
+```
 {.cpp}
 using clk_lyt = clocked_layout<cartesian_layout<>>;
 using path = layout_coordinate_path<cartesian_layout<>>;
 clk_lyt layout = ...;
 auto shortest_path = jump_point_search<path>(static_cast<cartesian_layout<>>(layout), {source, target});
-``
+```
 
 JPS was introduced in \"Online Graph Pruning for Pathfinding on Grid
 Maps\" by Daniel Harabor and Alban Grastien in AAAI 2011.
@@ -14920,13 +14920,13 @@ paths even if the layout implements a clocking interface. This can be
 achieved by static-casting the layout to a coordinate layout when
 calling this function:
 
-``
+```
 {.cpp}
 using clk_lyt = clocked_layout<cartesian_layout<>>;
 using path = layout_coordinate_path<cartesian_layout<>>;
 clk_lyt layout = ...;
 auto k_paths = yen_k_shortest_paths<path>(static_cast<cartesian_layout<>>(layout), {source, target}, k);
-``
+```
 
 The algorithm was originally described in \"An algorithm for finding
 shortest routes from all source nodes to a given destination in
