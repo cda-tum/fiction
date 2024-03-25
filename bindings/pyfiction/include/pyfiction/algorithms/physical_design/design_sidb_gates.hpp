@@ -6,12 +6,11 @@
 #define PYFICTION_DESIGN_SIDB_GATES_HPP
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/physical_design/design_sidb_gates.hpp>
+#include <fiction/types.hpp>
 
 #include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
 
 namespace pyfiction
 {

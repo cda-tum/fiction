@@ -2736,7 +2736,7 @@ Parameter ``pst``:
     Statistics.)doc";
 
 static const char* __doc_fiction_critical_temperature_params =
-    R"doc(This struct stores the parameters for the *Critical Temperature*``
+    R"doc(This struct stores the parameters for the *Critical Temperature*
 algorithm.)doc";
 
 static const char* __doc_fiction_critical_temperature_params_bdl_params =
@@ -2775,13 +2775,12 @@ the *Critical Temperature* Simulation.)doc";
 
 static const char* __doc_fiction_critical_temperature_params_simulation_engine_APPROXIMATE =
     R"doc(This simulation engine quickly calculates the *Critical Temperature*.
-However, there may be deviations from the exact *Critical
-Temperature*. This mode is recommended for larger layouts (> 40
+However, there may be deviations from the exact *Critical Temperature*.
+This mode is recommended for larger layouts (> 40
 SiDBs).)doc";
 
 static const char* __doc_fiction_critical_temperature_params_simulation_engine_EXACT =
-    R"doc(This simulation engine computes *Critical Temperature* values with 100
-% accuracy.)doc";
+    R"doc(This simulation engine computes *Critical Temperature* values with 100 % accuracy.)doc";
 
 static const char* __doc_fiction_critical_temperature_params_simulation_params =
     R"doc(All Parameters for physical SiDB simulations.)doc";
