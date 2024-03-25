@@ -9,7 +9,7 @@ node is considered a fanout node (or splitter in some contexts) that copies an i
 .. tabs::
     .. tab:: C++
         **Header:** ``fiction/networks/technology_network.hpp``
-        .. autoclass:: fiction::technology_network
+        .. doxygenclass:: fiction::technology_network
            :members:
 
     .. tab:: Python

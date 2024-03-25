@@ -108,7 +108,7 @@ Returns:
 static const char* __doc_fiction_a_star_distance =
     R"doc(A distance function that does not approximate but compute the actual
 minimum path length on the given layout via A* traversal. Naturally,
-this function cannot be evaluated in :math:``\mathcal{O}(1)``, but has
+this function cannot be evaluated in :math:`\mathcal{O}(1)`, but has
 the polynomial complexity of A*.
 
 If no path between ``source`` and ``target`` exists in ``layout``, the
@@ -213,9 +213,9 @@ Returns:
 
 static const char* __doc_fiction_area =
     R"doc(Computes the area of a given coordinate assuming its origin is (0, 0,
-0). Calculates :math:``(|x| + 1) \cdot (|y| + 1)`` by default. The
-exception is SiQAD coordinates, for which it computes :math:``(|x| + 1)
-\cdot (2 \cdot |y| + |z| + 1)``.
+0). Calculates :math:`(|x| + 1) \cdot (|y| + 1)` by default. The
+exception is SiQAD coordinates, for which it computes :math:`(|x| + 1)
+\cdot (2 \cdot |y| + |z| + 1)`.
 
 Template parameter ``CoordinateType``:
     Coordinate type.
@@ -275,12 +275,12 @@ static const char* __doc_fiction_area_stats_report = R"doc()doc";
 
 static const char* __doc_fiction_aspect_ratio_iterator =
     R"doc(An iterator type that iterates over increasingly larger 2D aspect
-ratios via factorization, starting from a number of faces :math:``n``.
+ratios via factorization, starting from a number of faces :math:`n`.
 After iterating over all possible factorizations of n, the next step
-increases :math:``n`` and continues with the factorization. Thereby, a
-sequence of aspect ratios starting from :math:``n = 4`` faces looks like
-this: :math:``1 \times 4, 4 \times 1, 2 \times 2, 1 \times 5, 5 \times
-1, 1 \times 6, 6 \times 1, 2 \times 3, 3 \times 2, \dots``
+increases :math:`n` and continues with the factorization. Thereby, a
+sequence of aspect ratios starting from :math:`n = 4` faces looks like
+this: :math:`1 \times 4, 4 \times 1, 2 \times 2, 1 \times 5, 5 \times
+1, 1 \times 6, 6 \times 1, 2 \times 3, 3 \times 2, \dots`
 
 Template parameter ``AspectRatio``:
     Aspect ratio type.)doc";
@@ -288,10 +288,10 @@ Template parameter ``AspectRatio``:
 static const char* __doc_fiction_aspect_ratio_iterator_aspect_ratio_iterator =
     R"doc(Standard constructor. Takes a starting value and computes an initial
 factorization. The value ``n`` represents the amount of faces in the
-desired aspect ratios. For example, :math:``n = 1`` will yield aspect
-ratios with exactly :math:``1`` face, i.e. :math:``1 \times 1`` which is
-equal to ``ucoord_t{0, 0}``. If :math:``n = 2``, the aspect ratios
-:math:``1 \times 2`` and :math:``2 \times 1`` will result, which are equal
+desired aspect ratios. For example, :math:`n = 1` will yield aspect
+ratios with exactly :math:`1` face, i.e. :math:`1 \times 1` which is
+equal to ``ucoord_t{0, 0}``. If :math:`n = 2`, the aspect ratios
+:math:`1 \times 2` and :math:`2 \times 1` will result, which are equal
 to ``ucoord_t{0, 1}`` and ``ucoord_t{1, 0}``. Both examples with
 ``AspectRatio == offset::ucoord_t``.
 
@@ -299,8 +299,8 @@ Parameter ``n``:
     Starting value of the aspect ratio iteration.)doc";
 
 static const char* __doc_fiction_aspect_ratio_iterator_factorize =
-    R"doc(Factorizes the current ``num`` into all possible factors :math:``(x, y)``
-with :math:``x \cdot y = num``. The result is stored as a vector of
+    R"doc(Factorizes the current ``num`` into all possible factors :math:`(x, y)`
+with :math:`x \cdot y = num`. The result is stored as a vector of
 ``AspectRatio`` objects in the attribute factors.)doc";
 
 static const char* __doc_fiction_aspect_ratio_iterator_factors = R"doc(Factors of num.)doc";
@@ -308,8 +308,8 @@ static const char* __doc_fiction_aspect_ratio_iterator_factors = R"doc(Factors o
 static const char* __doc_fiction_aspect_ratio_iterator_it = R"doc(Iterator pointing to current factor.)doc";
 
 static const char* __doc_fiction_aspect_ratio_iterator_next =
-    R"doc(Computes the next possible ``num`` where a factorization :math:``(x, y)``
-with :math:``x \cdot y = num`` exists.)doc";
+    R"doc(Computes the next possible ``num`` where a factorization :math:`(x, y)`
+with :math:`x \cdot y = num` exists.)doc";
 
 static const char* __doc_fiction_aspect_ratio_iterator_num = R"doc(Number to factorize into dimensions.)doc";
 
@@ -399,10 +399,10 @@ Returns:
 
 static const char* __doc_fiction_bdl_input_iterator =
     R"doc(Iterator that iterates over all possible input states of a BDL layout.
-There are :math:``2^n`` possible input states for an :math:``n``-input BDL
+There are :math:`2^n` possible input states for an :math:`n`-input BDL
 layout, each with a unique input index. The input index is interpreted
-as a binary number, where the :math:``i``-th bit represents the input
-state of the :math:``i``-th input BDL pair. If the bit is ``1``, the lower
+as a binary number, where the :math:`i`-th bit represents the input
+state of the :math:`i`-th input BDL pair. If the bit is ``1``, the lower
 BDL dot is set and the upper BDL dot removed. If the bit is ``0``, the
 upper BDL dot is removed and the lower BDL dot set. The iterator
 creates and stores a deep-copy of the given layout. The state
@@ -427,8 +427,8 @@ Parameter ``params``:
     Parameters for the BDL pair detection.)doc";
 
 static const char* __doc_fiction_bdl_input_iterator_current_input_index =
-    R"doc(The current input index. There are :math:``2^n`` possible input states
-for an :math:``n``-input BDL layout.)doc";
+    R"doc(The current input index. There are :math:`2^n` possible input states
+for an :math:`n`-input BDL layout.)doc";
 
 static const char* __doc_fiction_bdl_input_iterator_get_number_of_inputs =
     R"doc(Returns the total number of input BDL pairs of the given SiDB gate
@@ -608,7 +608,7 @@ Returns:
 static const char* __doc_fiction_bdl_input_iterator_set_all_inputs =
     R"doc(Sets all input cells of the layout according to the current input
 index. The input index is interpreted as a binary number, where the
-:math:``i``-th bit represents the input state of the :math:``i``-th input
+:math:`i`-th bit represents the input state of the :math:`i`-th input
 BDL pair. If the bit is ``1``, the lower BDL dot is set and the upper
 BDL dot removed. If the bit is ``0``, the upper BDL dot is removed and
 the lower BDL dot set.)doc";
@@ -647,7 +647,7 @@ static const char* __doc_fiction_bdl_pair_upper =
 each other via the ``operator<`` overload.)doc";
 
 static const char* __doc_fiction_binomial_coefficient =
-    R"doc(Calculates the binomial coefficient :math:``\binom{n}{k}``.
+    R"doc(Calculates the binomial coefficient :math:`\binom{n}{k}`.
 
 Parameter ``n``:
     The total number of items.
@@ -656,7 +656,7 @@ Parameter ``k``:
     The number of items to choose from n.
 
 Returns:
-    The binomial coefficient :math:``\binom{n}{k}``.)doc";
+    The binomial coefficient :math:`\binom{n}{k}`.)doc";
 
 static const char* __doc_fiction_bounding_box_2d =
     R"doc(A 2D bounding box object that computes a minimum-sized box around all
@@ -1428,14 +1428,14 @@ ToPoliNano & MagCAD, SiQAD, etc.
 
 In this layout, each coordinate, i.e., clock zone has the dimensions
 of a single cell. Clock numbers can, however, be assigned in a way,
-that they form larger zones, e.g., of :math:``5 \times 5`` cells. These
+that they form larger zones, e.g., of :math:`5 \times 5` cells. These
 dimensions can be specified in the constructor. They affect the way,
 clock numbers are fetched from the underlying clocked layout.
 
 The de-facto standard of cell-level FCN design is to group multiple
 cells into tiles large enough to be addressable by individual clocking
 electrodes buried in the layout substrate. Cell-based clocking, i.e.,
-clock zones of size :math:``1 \times 1`` cells are not recommended as
+clock zones of size :math:`1 \times 1` cells are not recommended as
 they are most likely not fabricable in reality.
 
 On the implementation side, this layout distinguishes between ``cell``,
@@ -2148,7 +2148,7 @@ could be fulfilled. Furthermore, the path enumeration and the coloring
 can be parameterized in the first place. By default, all paths are
 enumerated for each objective. While this guarantees completeness on
 small layouts, it quickly becomes intractable. Therefore, a path limit
-can be set that restricts the number of paths to the :math:``k``
+can be set that restricts the number of paths to the :math:`k`
 shortest. Additionally, for the coloring process, SAT solving is used
 by default, which, again, guarantees completeness, but becomes
 infeasible rather quickly. However, powerful symmetry breaking is
@@ -2647,17 +2647,17 @@ of a gate-level layout.
 The critical path length is defined as the longest path from any PI to
 any PO in tiles.
 
-The throughput is defined as :math:``\frac{1}{x}`` where :math:``x`` is
+The throughput is defined as :math:`\frac{1}{x}` where :math:`x` is
 the highest path length difference between any sets of paths that lead
 to the same gate. This function provides only the denominator
-:math:``x``, as the numerator is always :math:``1``. Furthermore,
-:math:``x`` is given in clock cycles rather than clock phases because it
+:math:`x`, as the numerator is always :math:`1`. Furthermore,
+:math:`x` is given in clock cycles rather than clock phases because it
 is assumed that a path length difference smaller than
 ``lyt.num_clocks()`` does not lead to any delay. Contrary, for any
-throughput value :math:``\frac{1}{x}`` with :math:``x > 1``, the layout
-computes its represented Boolean function only every :math:``x`` full
+throughput value :math:`\frac{1}{x}` with :math:`x > 1`, the layout
+computes its represented Boolean function only every :math:`x` full
 clock cycles after the first inputs have been propagated through the
-design. Thereby, all PIs need to be held constant for :math:``x`` clock
+design. Thereby, all PIs need to be held constant for :math:`x` clock
 phases to ensure proper computation.
 
 For more information on the concept of throughput and delay see
@@ -2667,8 +2667,8 @@ Torres, M. Walter, R. Wille, D. Große, and R. Drechsler in IEEE NANO
 M. Walter, R. Wille, F. Sill Torres, and R. Drechsler published by
 Springer Nature in 2022.
 
-The complexity of this function is :math:``\mathcal{O}(|T|)`` where
-:math:``T`` is the set of all occupied tiles in ``lyt``.
+The complexity of this function is :math:`\mathcal{O}(|T|)` where
+:math:`T` is the set of all occupied tiles in ``lyt``.
 
 Template parameter ``Lyt``:
     Gate-level layout type.
@@ -2694,8 +2694,8 @@ flavors: gate-based and non-gate based.
 
 For *Gate-based Critical Temperature* Simulation, the Critical
 Temperature is defined as follows: The temperature at which the
-erroneous charge distributions are populated by more than :math:``1 -
-\eta``, where :math:``\eta \in [0,1]``.
+erroneous charge distributions are populated by more than :math:`1 -
+\eta`, where :math:`\eta \in [0,1]`.
 
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
@@ -2719,8 +2719,8 @@ Parameter ``pst``:
 static const char* __doc_fiction_critical_temperature_non_gate_based =
     R"doc(For *Non-gate-based Critical Temperature* simulation, the Critical
 Temperature is defined as follows: The temperature at which the
-excited charge distributions are populated by more than :math:``1 -
-\eta``, where :math:``\eta \in [0,1]`` is the confidence level for the
+excited charge distributions are populated by more than :math:`1 -
+\eta`, where :math:`\eta \in [0,1]` is the confidence level for the
 presence of a working gate.
 
 Template parameter ``Lyt``:
@@ -5480,8 +5480,8 @@ y)``. If the point has already been sampled, it returns the cached
 value. Otherwise, a ground state simulation is performed for all input
 combinations of the stored layout using the given simulation
 parameters. It terminates as soon as a non-operational state is found.
-In the worst case, the function performs :math:``2^n`` simulations,
-where :math:``n`` is the number of inputs of the layout. This function
+In the worst case, the function performs :math:`2^n` simulations,
+where :math:`n` is the number of inputs of the layout. This function
 is used by all operational domain computation techniques.
 
 Any investigated point is added to the stored ``op_domain``, regardless
@@ -6529,10 +6529,10 @@ static const char* __doc_fiction_determine_vertex_coloring =
     R"doc(This function provides an interface to call various vertex coloring
 algorithms on the given graph. A vertex coloring is the assignment of
 colors to graph vertices such that no two vertices that share an edge
-receive the same color. If a graph is colorable with :math:``k`` colors,
-the graph is said to be :math:``k``-colorable. The minimum value of
-:math:``k`` for a graph is called its chromatic number. To determine the
-chromatic number of a graph is :math:``NP``-complete in general. The
+receive the same color. If a graph is colorable with :math:`k` colors,
+the graph is said to be :math:`k`-colorable. The minimum value of
+:math:`k` for a graph is called its chromatic number. To determine the
+chromatic number of a graph is :math:`NP`-complete in general. The
 provided algorithms attempt to get as close to the optimum coloring as
 possible. However, no heuristic can give an optimality guarantee. If
 the exact chromatic number is required, the SAT-based engine must be
@@ -6570,7 +6570,7 @@ static const char* __doc_fiction_determine_vertex_coloring_heuristic_params =
     R"doc(Parameters for heuristic graph coloring.)doc";
 
 static const char* __doc_fiction_determine_vertex_coloring_heuristic_params_k_color_value =
-    R"doc(:math:``k``-color value for :math:``k``-coloring algorithms, e.g.,
+    R"doc(:math:`k`-color value for :math:`k`-coloring algorithms, e.g.,
 TABUCOL.)doc";
 
 static const char* __doc_fiction_determine_vertex_coloring_params =
@@ -6843,11 +6843,11 @@ static const char* __doc_fiction_eq_type_NO =
 
 static const char* __doc_fiction_eq_type_STRONG =
     R"doc(``Spec`` and ``Impl`` are logically equivalent AND ``Impl`` has a throughput
-of :math:``\frac{1}{1}``.)doc";
+of :math:`\frac{1}{1}`.)doc";
 
 static const char* __doc_fiction_eq_type_WEAK =
     R"doc(``Spec`` and ``Impl`` are logically equivalent BUT ``Impl`` has a throughput
-of :math:``\frac{1}{x}`` with :math:``x > 1``.)doc";
+of :math:`\frac{1}{x}` with :math:`x > 1`.)doc";
 
 static const char* __doc_fiction_equivalence_checking =
     R"doc(Performs SAT-based equivalence checking between a specification of
@@ -6867,11 +6867,11 @@ Thereby, three different types of equivalences arise:
 of them is a gate-level layout that contains DRVs and, thus, cannot be
 checked for equivalence. - ``WEAK`` equivalence: Spec and Impl are
 logically equivalent but either one of them is a gate-level layout
-with TP of :math:``\frac{1}{x}`` with :math:``x > 1`` or both of them are
-gate-level layouts with TP of :math:``\frac{1}{x}`` and
-:math:``\frac{1}{y}``, respectively, where :math:``x \neq y``. - ``STRONG``
+with TP of :math:`\frac{1}{x}` with :math:`x > 1` or both of them are
+gate-level layouts with TP of :math:`\frac{1}{x}` and
+:math:`\frac{1}{y}`, respectively, where :math:`x \neq y`. - ``STRONG``
 equivalence: Spec and Impl are logically equivalent and all involved
-gate-level layouts have TP of :math:``\frac{1}{1}``.
+gate-level layouts have TP of :math:`\frac{1}{1}`.
 
 This approach was first proposed in \"Verification for Field-coupled
 Nanocomputing Circuits\" by M. Walter, R. Wille, F. Sill Torres, D.
@@ -6928,10 +6928,10 @@ Returns:
     ESR clocking scheme.)doc";
 
 static const char* __doc_fiction_euclidean_distance =
-    R"doc(The Euclidean distance :math:``D`` between two layout coordinates
-:math:``(x_1, y_1)`` and :math:``(x_2, y_2)`` given by
+    R"doc(The Euclidean distance :math:`D` between two layout coordinates
+:math:`(x_1, y_1)` and :math:`(x_2, y_2)` given by
 
-:math:``D = \sqrt{(x_1 - x_2)^2 + (y_1 - y_2)^2}``
+:math:`D = \sqrt{(x_1 - x_2)^2 + (y_1 - y_2)^2}`
 
 Template parameter ``Lyt``:
     Coordinate layout type.
@@ -6997,8 +6997,8 @@ M. Walter, R. Wille, F. Sill Torres, and R. Drechsler published by
 Springer Nature in 2022.
 
 Via incremental SMT calls, an optimal gate-level layout for a given
-logic network will be found under constraints. Starting with :math:``n``
-tiles, where :math:``n`` is the number of logic network nodes, each
+logic network will be found under constraints. Starting with :math:`n`
+tiles, where :math:`n` is the number of logic network nodes, each
 possible layout aspect ratio will be examined by factorization and
 tested for routability with the SMT solver Z3. When no upper bound is
 given, this approach will run until it finds a solution to the
@@ -8774,7 +8774,7 @@ layout with no positively charged SiDBs.)doc";
 
 static const char* __doc_fiction_generate_random_sidb_layout_params_maximal_attempts_for_multiple_layouts =
     R"doc(The maximum number of attempts allowed to generate the given number of
-unique layouts (default: :math:``10^{6}``). Example: If the area, where
+unique layouts (default: :math:`10^{6}`). Example: If the area, where
 SiDBs can be placed, is small and many SiDBs are to be placed, it may
 be difficult or even impossible to find several unique (given by
 number_of_unique_generated_layouts) layouts. Therefore, this parameter
@@ -8814,7 +8814,7 @@ Parameter ``t``:
     The current temperature.
 
 Returns:
-    The next temperature, i.e. :math:``\texttt{t} \cdot 0.99``.)doc";
+    The next temperature, i.e. :math:`\texttt{t} \cdot 0.99`.)doc";
 
 static const char* __doc_fiction_get_clocking_scheme =
     R"doc(Returns a clocking scheme by name.
@@ -8867,11 +8867,11 @@ static const char* __doc_fiction_graph_coloring_engine_SAT =
     R"doc(Custom iterative SAT-based encoding that finds optimal colorings.)doc";
 
 static const char* __doc_fiction_graph_coloring_engine_TABUCOL =
-    R"doc(A :math:``k``-coloring algorithm using tabu search proposed in \"Using
+    R"doc(A :math:`k`-coloring algorithm using tabu search proposed in \"Using
 Tabu Search Techniques for Graph Coloring\" by A. Hertz and D. de
 Werra in Computing 1987. The authors claim that it significantly
 outperforms simulated annealing. However, since it is a
-:math:``k``-coloring algorithm, it is required to set ``k_color_value`` in
+:math:`k`-coloring algorithm, it is required to set ``k_color_value`` in
 ``determine_vertex_coloring_params`` to the chromatic number that is to
 be checked for.)doc";
 
@@ -8880,22 +8880,22 @@ static const char* __doc_fiction_graph_coloring_sat_search_tactic =
 coloring to determine a min-coloring.)doc";
 
 static const char* __doc_fiction_graph_coloring_sat_search_tactic_BINARY_SEARCH =
-    R"doc(First ascend exponentially by checking for :math:``k = 2^0, 2^1, 2^2,
-\dots`` until SAT, then perform binary search in the window
-:math:``[2^{h-1}, 2^h]``, where :math:``2^h`` was the first SAT. If at
-least one clique is passed, :math:``k`` starts at the largest clique
-size :math:``|C|`` instead with :math:``k = 2^0 \cdot |C|, 2^1 \cdot |C|,
-2^2 \cdot |C|, \dots``)doc";
+    R"doc(First ascend exponentially by checking for :math:`k = 2^0, 2^1, 2^2,
+\dots` until SAT, then perform binary search in the window
+:math:`[2^{h-1}, 2^h]`, where :math:`2^h` was the first SAT. If at
+least one clique is passed, :math:`k` starts at the largest clique
+size :math:`|C|` instead with :math:`k = 2^0 \cdot |C|, 2^1 \cdot |C|,
+2^2 \cdot |C|, \dots`)doc";
 
 static const char* __doc_fiction_graph_coloring_sat_search_tactic_LINEARLY_ASCENDING =
-    R"doc(Ascend linearly by checking for :math:``k = 1, 2, 3, \dots`` until SAT.
-If at least one clique is passed, :math:``k`` starts at the largest
-clique size :math:``|C|`` instead with :math:``k = |C|, |C| + 1, |C| + 2,
+    R"doc(Ascend linearly by checking for :math:`k = 1, 2, 3, \dots` until SAT.
+If at least one clique is passed, :math:`k` starts at the largest
+clique size :math:`|C|` instead with :math:`k = |C|, |C| + 1, |C| + 2,
 \dots``)doc";
 
 static const char* __doc_fiction_graph_coloring_sat_search_tactic_LINEARLY_DESCENDING =
-    R"doc(Descend linearly by checking for :math:``k = |G|, |G| - 1, |G| - 2,
-\dots`` until UNSAT.)doc";
+    R"doc(Descend linearly by checking for :math:`k = |G|, |G| - 1, |G| - 2,
+\dots` until UNSAT.)doc";
 
 static const char* __doc_fiction_gray_code_iterator =
     R"doc(An iterator type that iterates over Gray code representations for
@@ -10088,8 +10088,8 @@ and distance functor. It computes the distances between all pairs of
 coordinates in the layout and stores them in the distance map for
 quick subsequent access.
 
-This function performs :math:``\mathcal{O}(|L|^2)`` distance
-computations, where :math:``|L|`` is the number of coordinates in the
+This function performs :math:`\mathcal{O}(|L|^2)` distance
+computations, where :math:`|L|` is the number of coordinates in the
 layout.
 
 Template parameter ``Lyt``:
@@ -10113,8 +10113,8 @@ layout and distance functor. It computes the distances between all
 pairs of coordinates in the layout and stores them in the distance map
 for quick subsequent access.
 
-This function performs :math:``\mathcal{O}(|L|^2)`` distance
-computations, where :math:``|L|`` is the number of coordinates in the
+This function performs :math:`\mathcal{O}(|L|^2)` distance
+computations, where :math:`|L|` is the number of coordinates in the
 layout.
 
 Template parameter ``Lyt``:
@@ -10198,7 +10198,7 @@ static const char* __doc_fiction_inml_topolinano_library =
     R"doc(A concrete FCN gate library as used in \"ToPoliNano\"
 (https://topolinano.polito.it/) for the iNML technology. In fiction,
 this is emulated by using vertically shifted layouts and implementing
-the ToPoliNano library with :math:``4 \times 4`` magnet positions with
+the ToPoliNano library with :math:`4 \times 4` magnet positions with
 one empty row in most tiles (except for MAJ which needs to be handled
 differently as this library is not uniform otherwise). Theoretically,
 it allows for multiple wires in the same tile.)doc";
@@ -10407,7 +10407,7 @@ Parameter ``exhaustive_results``:
 
 Returns:
     Returns ``true`` if the relative difference between the lowest
-    energies of the two sets is less than :math:``0.00001``, ``false``
+    energies of the two sets is less than :math:`0.00001`, ``false``
     otherwise.)doc";
 
 static const char* __doc_fiction_is_hexagonal_layout = R"doc()doc";
@@ -10467,7 +10467,7 @@ static const char* __doc_fiction_is_operational =
 This function checks the operational status of a given gate layout
 using the ``is_operational`` algorithm. It determines whether the gate
 layout is operational and returns the correct result for all
-:math:``2^n`` input combinations.
+:math:`2^n` input combinations.
 
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
@@ -10609,7 +10609,7 @@ Parameter ``t``:
     The current temperature.
 
 Returns:
-    The next temperature, i.e. :math:``\texttt{t} - 10``.)doc";
+    The next temperature, i.e. :math:`\texttt{t} - 10`.)doc";
 
 static const char* __doc_fiction_magcad_magnet_count =
     R"doc(Calculates the number of magnets for an iNML layout the way MagCAD
@@ -10626,10 +10626,10 @@ Returns:
     Number of magnets as counted by MagCAD.)doc";
 
 static const char* __doc_fiction_manhattan_distance =
-    R"doc(The Manhattan distance :math:``D`` between two layout coordinates
-:math:``(x_1, y_1)`` and :math:``(x_2, y_2)`` given by
+    R"doc(The Manhattan distance :math:`D` between two layout coordinates
+:math:`(x_1, y_1)` and :math:`(x_2, y_2)` given by
 
-:math:``D = |x_1 - x_2| + |y_1 - y_2|``
+:math:`D = |x_1 - x_2| + |y_1 - y_2|`
 
 Template parameter ``Lyt``:
     Coordinate layout type.
@@ -10917,8 +10917,8 @@ static const char* __doc_fiction_offset_ucoord_t =
     R"doc(Unsigned offset coordinates.
 
 The implementation is optimized for memory-efficiency and fits within
-64 bits. Coordinates span from :math:``(0, 0, 0)`` to :math:``(2^{31} -
-1, 2^{31} - 1, 1)``. Each coordinate has a dead indicator ``d`` that can
+64 bits. Coordinates span from :math:`(0, 0, 0)` to :math:`(2^{31} -
+1, 2^{31} - 1, 1)`. Each coordinate has a dead indicator ``d`` that can
 be used to represent that it is not in use.)doc";
 
 static const char* __doc_fiction_offset_ucoord_t_d = R"doc(MSB acts as dead indicator.)doc";
@@ -11110,10 +11110,10 @@ static const char* __doc_fiction_operational_domain =
 which a given SiDB layout is logically operational. This means that a
 layout is deemed operational if the layout's ground state corresponds
 with a given Boolean function at the layout's outputs for all possible
-input combinations. In this implementation, :math:``n`` BDL input wires
+input combinations. In this implementation, :math:`n` BDL input wires
 and a single BDL output wire are assumed for a given layout. Any
 operational domain computation algorithm toggles through all
-:math:``2^n`` input combinations and evaluates the layout's output
+:math:`2^n` input combinations and evaluates the layout's output
 behavior in accordance with the given Boolean function. The layout is
 only considered operational for a certain parameter combination, if
 the output behavior is correct for all input combinations. The
@@ -11148,7 +11148,7 @@ an edge of the operational area. Finally, it performs up to 8 samples
 for each contour point (however, the actual number is usually much
 lower). For each sample, the algorithm performs one operational check
 on the layout, where each operational check consists of up to
-:math:``2^n`` exact ground state simulations, where :math:``n`` is the
+:math:`2^n` exact ground state simulations, where :math:`n` is the
 number of inputs of the layout. Each exact ground state simulation has
 exponential complexity in of itself. Therefore, the algorithm is only
 feasible for small layouts with few inputs.
@@ -11199,8 +11199,8 @@ parameter range. From there, it performs another number of samples
 equal to the number of points within the operational domain plus the
 first non-operational point in each direction. For each sample, the
 algorithm performs one operational check on the layout, where each
-operational check consists of up to :math:``2^n`` exact ground state
-simulations, where :math:``n`` is the number of inputs of the layout.
+operational check consists of up to :math:`2^n` exact ground state
+simulations, where :math:`n` is the number of inputs of the layout.
 Each exact ground state simulation has exponential complexity in of
 itself. Therefore, the algorithm is only feasible for small layouts
 with few inputs.
@@ -11244,8 +11244,8 @@ in the x and y dimensions. Since grid search is exhaustive, the
 algorithm is guaranteed to find the operational domain, if it exists
 within the parameter range. However, the algorithm performs a
 quadratic number of operational checks on the layout, where each
-operational check consists of up to :math:``2^n`` exact ground state
-simulations, where :math:``n`` is the number of inputs of the layout.
+operational check consists of up to :math:`2^n` exact ground state
+simulations, where :math:`n` is the number of inputs of the layout.
 Each exact ground state simulation has exponential complexity in of
 itself. Therefore, the algorithm is only feasible for small layouts
 with few inputs.
@@ -11378,8 +11378,8 @@ This algorithm uses random sampling to find a part of the operational
 domain that might not be complete. It performs a total of ``samples``
 uniformly-distributed random samples within the parameter range. For
 each sample, the algorithm performs one operational check on the
-layout, where each operational check consists of up to :math:``2^n``
-exact ground state simulations, where :math:``n`` is the number of
+layout, where each operational check consists of up to :math:`2^n`
+exact ground state simulations, where :math:`n` is the number of
 inputs of the layout. Each exact ground state simulation has
 exponential complexity in of itself. Therefore, the algorithm is only
 feasible for small layouts with few inputs.
@@ -11480,10 +11480,10 @@ according to its DFS tree, ordering the vertices using topological
 sorting instead of DFS, and adding an extra placement rule for nodes
 without predecessors.
 
-The algorithm works in polynomial time :math:``\mathcal{O}(3|N| + |L|)``
-where :math:``|N|`` is the number of nodes the given network and
-:math:``|L|`` is the resulting layout size given by :math:``x \cdot y``,
-which approaches :math:``(\frac{|N|}{2})^2`` asymptotically.
+The algorithm works in polynomial time :math:`\mathcal{O}(3|N| + |L|)`
+where :math:`|N|` is the number of nodes the given network and
+:math:`|L|` is the resulting layout size given by :math:`x \cdot y`,
+which approaches :math:`(\frac{|N|}{2})^2` asymptotically.
 
 May throw a high_degree_fanin_exception if ``ntk`` contains any node
 with a fan-in larger than 2.
@@ -12003,7 +12003,7 @@ Circuits and Systems, 2016. QCA ONE was originally proposed for the
 USE clocking scheme. The version used here is an extension to the
 original QCA ONE by also theoretically allowing multiple wires in the
 same tile. Furthermore, it can be used for a range of clocking
-schemes. Tiles in QCA ONE are :math:``5 \times 5`` QCA cells.)doc";
+schemes. Tiles in QCA ONE are :math:`5 \times 5` QCA cells.)doc";
 
 static const char* __doc_fiction_qca_one_library_determine_port_routing = R"doc()doc";
 
@@ -12116,7 +12116,7 @@ incorporation of three key ideas:
 1. Advanced Negative SiDB Detection: *QuickExact* efficiently
 identifies SiDBs that require negative charges in a physically valid
 charge distribution. By pre-assigned them in advance, the search space
-is pruned by a factor of :math:``2^k``, where k is the number of found
+is pruned by a factor of :math:`2^k`, where k is the number of found
 SiDBs.
 
 2. Dependent SiDB Selection: The algorithm selects a dependent SiDB,
@@ -13141,7 +13141,7 @@ number (unit-less).)doc";
 
 static const char* __doc_fiction_sidb_simulation_parameters_k =
     R"doc(``k`` is the Coulomb constant ``K_E`` divided by ``epsilon_r`` (unit:
-:math:``N \cdot m^{2} \cdot C^{-2}``).)doc";
+:math:`N \cdot m^{2} \cdot C^{-2}`).)doc";
 
 static const char* __doc_fiction_sidb_simulation_parameters_lambda_tf =
     R"doc(``lambda_tf`` is the Thomas-Fermi screening distance (unit: nm).)doc";
@@ -13340,8 +13340,8 @@ static const char* __doc_fiction_simple_gate_layout_tile_drawer_tile_label = R"d
 static const char* __doc_fiction_siqad_coord_t =
     R"doc(SiQAD coordinates.
 
-Coordinates span from :math:``(-2^{31}, -2^{31}, 0)`` to :math:``(2^{31}
-- 1 , 2^{31} - 1, 1)``. ``x`` is the SiDB's x-coordinate, ``y`` is the
+Coordinates span from :math:`(-2^{31}, -2^{31}, 0)` to :math:`(2^{31}
+- 1 , 2^{31} - 1, 1)`. ``x`` is the SiDB's x-coordinate, ``y`` is the
 dimer pair's row number, and ``z`` represents the two possible SiDB
 positions in one SiDB dimer pair. Each coordinate has a dead indicator
 ``d`` that can be used to represent that it is not in use.)doc";
@@ -14216,16 +14216,16 @@ Returns:
     2DDWave clocking scheme.)doc";
 
 static const char* __doc_fiction_twoddwave_distance =
-    R"doc(The 2DDWave distance :math:``D`` between two layout coordinates :math:``s
-= (x_1, y_1)`` and :math:``t = (x_2, y_2)`` given by
+    R"doc(The 2DDWave distance :math:`D` between two layout coordinates :math:`s
+= (x_1, y_1)` and :math:`t = (x_2, y_2)` given by
 
-:math:``D = |x_1 - x_2| + |y_1 - y_2|`` iff :math:``s \leq t`` and
-:math:``\infty``, otherwise.
+:math:`D = |x_1 - x_2| + |y_1 - y_2|` iff :math:`s \leq t` and
+:math:`\infty`, otherwise.
 
-Thereby, :math:``s \leq t`` iff :math:``x_1 \leq x_2`` and :math:``y_1 \leq
-y_2``.
+Thereby, :math:`s \leq t` iff :math:`x_1 \leq x_2` and :math:`y_1 \leq
+y_2`.
 
-@note To represent :math:``\infty``,
+@note To represent :math:`\infty`,
 ``std::numeric_limits<uint32_t>::max()`` is returned for distances of
 infinite length. We are using ``uint32_t`` to prevent overflows when
 adding distances in the default ``uint64_t`` number range.
@@ -14416,7 +14416,7 @@ static const char* __doc_fiction_vertical_shift_cartesian =
 
 static const char* __doc_fiction_volume =
     R"doc(Computes the volume of a given coordinate assuming its origin is (0,
-0, 0). Calculates :math:``(|x| + 1) \cdot (|y| + 1) \cdot (|z| + 1)`` by
+0, 0). Calculates :math:`(|x| + 1) \cdot (|y| + 1) \cdot (|z| + 1)` by
 default. For SiQAD coordinates, which are planar by definition, the
 area is returned.
 
@@ -14678,7 +14678,7 @@ static const char* __doc_fiction_write_qca_layout_params_create_inter_layer_via_
 static const char* __doc_fiction_write_qca_layout_svg =
     R"doc(Writes an SVG representation of a cell-level QCA layout into an output
 stream. Both tile- and cell-based layouts are supported. For tile-
-based layouts, QCA layouts of tile size :math:``5 \times 5`` are
+based layouts, QCA layouts of tile size :math:`5 \times 5` are
 supported exclusively so far.
 
 The utilized color scheme is based on the standard scheme used in
@@ -14701,7 +14701,7 @@ Parameter ``ps``:
 static const char* __doc_fiction_write_qca_layout_svg_2 =
     R"doc(Writes an SVG representation of a cell-level QCA layout into a file.
 Both tile- and cell-based layouts are supported. For tile-based
-layouts, QCA layouts of tile size :math:``5 \times 5`` are supported
+layouts, QCA layouts of tile size :math:`5 \times 5` are supported
 exclusively so far.
 
 The utilized color scheme is based on the standard scheme used in
@@ -14889,10 +14889,10 @@ Parameter ``filename``:
     ``.xml`` extension.)doc";
 
 static const char* __doc_fiction_yen_k_shortest_paths =
-    R"doc(Yen's algorithm for finding up to :math:``k`` shortest paths without
-loops from a source to a target coordinate. If :math:``k`` is larger
+    R"doc(Yen's algorithm for finding up to :math:`k` shortest paths without
+loops from a source to a target coordinate. If :math:`k` is larger
 than the number of possible paths from source to target, the size of
-the returned path collection will be smaller than :math:``k``.
+the returned path collection will be smaller than :math:`k`.
 
 This implementation uses the A* algorithm with the Manhattan distance
 function internally.
@@ -14941,7 +14941,7 @@ Template parameter ``Lyt``:
     Type of the layout to perform path finding on.
 
 Parameter ``layout``:
-    The layout in which the :math:``k`` shortest paths are to be found.
+    The layout in which the :math:`k` shortest paths are to be found.
 
 Parameter ``objective``:
     Source-target coordinate pair.
@@ -14953,11 +14953,11 @@ Parameter ``params``:
     Parameters.
 
 Returns:
-    A collection of up to :math:``k`` shortest loop-less paths in
+    A collection of up to :math:`k` shortest loop-less paths in
     ``layout`` from ``objective.source`` to ``objective.target``.)doc";
 
 static const char* __doc_fiction_yen_k_shortest_paths_params =
-    R"doc(Parameters for Yen's :math:``k``-shortest paths algorithm.)doc";
+    R"doc(Parameters for Yen's :math:`k`-shortest paths algorithm.)doc";
 
 static const char* __doc_fiction_yen_k_shortest_paths_params_astar_params =
     R"doc(Parameters for the internal A* algorithm.)doc";
