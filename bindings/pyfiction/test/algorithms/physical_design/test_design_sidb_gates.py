@@ -1,11 +1,9 @@
 import unittest
-
 from mnt.pyfiction import *
-
 
 class TestDesignSiDBGates(unittest.TestCase):
 
-    def siqad_and_gate_skeleton(self):
+    def test_siqad_and_gate_skeleton(self):
         layout = sidb_layout((2, 1))
         layout.assign_cell_type((0, 0, 1), sidb_technology.cell_type.INPUT)
         layout.assign_cell_type((2, 1, 1), sidb_technology.cell_type.INPUT)

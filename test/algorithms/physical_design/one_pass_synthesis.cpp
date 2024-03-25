@@ -13,15 +13,17 @@
 #include <fiction/algorithms/physical_design/one_pass_synthesis.hpp>
 #include <fiction/io/print_layout.hpp>
 #include <fiction/technology/qca_one_library.hpp>
+#include <fiction/types.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
+#include <mockturtle/views/names_view.hpp>
 
 #include <chrono>
+#include <cstddef>
 #include <iostream>
-#include <memory>
 #include <type_traits>
-#include <vector>
+#include <utility>
 
 using namespace fiction;
 
