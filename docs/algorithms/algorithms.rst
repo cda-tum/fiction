@@ -53,6 +53,7 @@ Physical Design
    color_routing.rst
    hexagonalization.rst
    post_layout_optimization.rst
+   wiring_reduction.rst
    determine_clocking.rst
    apply_gate_library.rst
    design_sidb_gates.rst

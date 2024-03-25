@@ -6,6 +6,7 @@
 #define FICTION_CMD_OPTIMIZE_HPP
 
 #include <fiction/algorithms/physical_design/post_layout_optimization.hpp>
+#include <fiction/algorithms/physical_design/wiring_reduction.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/traits.hpp>
@@ -34,13 +35,19 @@ class optimize_command : public command
             command(e, "Optimizes a 2DDWave-clocked Cartesian layout with respect to area. It achieves this objective "
                        "by strategically repositioning gates within the layout, removing excess wiring, and "
                        "effectively relocating outputs to more favorable positions.")
-    {}
+    {
+        add_flag("--wiring_reduction_only,-w",
+                 "Do not attempt gate repositioning, but apply wiring reduction "
+                 "exclusively (recommended for logic functions with >200 gates due to scalability reasons).");
+        add_flag("--verbose,-v", "Be verbose");
+    }
 
   protected:
     /**
      * Statistics.
      */
     fiction::post_layout_optimization_stats st{};
+    fiction::wiring_reduction_stats         stw{};
 
     /**
      * Optimizes a 2DDWave-clocked Cartesian layout.
@@ -52,48 +59,58 @@ class optimize_command : public command
         // error case: empty gate-level layout store
         if (gls.empty())
         {
-            env->out() << "[w] no gate layout in store" << std::endl;
+            env->out() << "[w] no gate layout in store\n";
             return;
         }
 
         const auto& lyt = gls.current();
 
-        const auto check_clocking_scheme = [](auto&& lyt_ptr)
+        const auto is_twoddwave_clocked = [](auto&& lyt_ptr) -> bool
         { return lyt_ptr->is_clocking_scheme(fiction::clock_name::TWODDWAVE); };
 
         // error case: layout is not 2DDWave-clocked
-        if (const auto is_twoddwave_clocked = std::visit(check_clocking_scheme, lyt); !is_twoddwave_clocked)
+        if (!std::visit(is_twoddwave_clocked, lyt))
         {
-            env->out() << "[e] layout has to be 2DDWave-clocked" << std::endl;
+            env->out() << "[e] layout has to be 2DDWave-clocked\n";
             return;
         }
 
         const auto apply_optimization = [&](auto&& lyt_ptr)
         {
-            using Lyt               = typename std::decay_t<decltype(lyt_ptr)>::element_type;
-            auto       lyt_copy     = lyt_ptr->clone();
-            const auto lyt_copy_ptr = std::make_shared<Lyt>(lyt_copy);
+            using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
+
+            auto lyt_copy = lyt_ptr->clone();
 
             if constexpr (fiction::is_cartesian_layout_v<Lyt>)
             {
-                fiction::post_layout_optimization(*lyt_copy_ptr, &st);
-                fiction::restore_names(*lyt_ptr, *lyt_copy_ptr);
-                gls.extend() = lyt_copy_ptr;
+                if (is_set("wiring_reduction_only"))
+                {
+                    fiction::wiring_reduction(lyt_copy, &stw);
+                    if (is_set("verbose"))
+                    {
+                        stw.report(env->out());
+                    }
+                }
+                else
+                {
+                    fiction::post_layout_optimization(lyt_copy, &st);
+                    if (is_set("verbose"))
+                    {
+                        st.report(env->out());
+                    }
+                }
+
+                fiction::restore_names(*lyt_ptr, lyt_copy);
+
+                gls.extend() = std::make_shared<Lyt>(lyt_copy);
             }
             else
             {
-                std::cout << "[e] layout has to be Cartesian" << std::endl;
+                std::cout << "[e] layout has to be Cartesian\n";
             }
         };
 
-        try
-        {
-            std::visit(apply_optimization, lyt);
-        }
-        catch (...)
-        {
-            env->out() << "[e] an error occurred while optimizing" << std::endl;
-        }
+        std::visit(apply_optimization, lyt);
     }
 };
 

@@ -1,18 +1,31 @@
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/physical_design/orthogonal.hpp>  // scalable heuristic for physical design of FCN layouts
-#include <fiction/algorithms/physical_design/post_layout_optimization.hpp>  // scalable heuristic for physical design of FCN layouts
+#include <fiction/algorithms/physical_design/orthogonal.hpp>                // scalable heuristic for physical design
+#include <fiction/algorithms/physical_design/post_layout_optimization.hpp>  // post-layout optimization
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/algorithms/verification/equivalence_checking.hpp>               // SAT-based equivalence checking
+#include <fiction/io/network_reader.hpp>                                          // read networks from files
 
-#include <fmt/format.h>                      // output formatting
-#include <lorina/lorina.hpp>                 // Verilog/BLIF/AIGER/... file parsing
-#include <mockturtle/io/verilog_reader.hpp>  // call-backs to read Verilog files into networks
+#include <fmt/format.h>  // output formatting
 
-#include <cassert>
-#include <chrono>
+#include <cstdint>
 #include <cstdlib>
+#include <sstream>
 #include <string>
+
+template <typename Ntk>
+Ntk read_ntk(const std::string& name)
+{
+    fmt::print("[i] processing {}\n", name);
+
+    std::ostringstream os{};
+
+    fiction::network_reader<fiction::tec_ptr> reader{fiction_experiments::benchmark_path(name), os};
+
+    const auto nets = reader.get_networks();
+
+    return *nets.front();
+}
 
 int main()  // NOLINT
 {
@@ -50,16 +63,10 @@ int main()  // NOLINT
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
-        fmt::print("[i] processing {}\n", benchmark);
-
-        fiction::technology_network network{};
-
-        const auto read_verilog_result =
-            lorina::read_verilog(fiction_experiments::benchmark_path(benchmark), mockturtle::verilog_reader(network));
-        assert(read_verilog_result == lorina::return_code::success);
+        const auto benchmark_network = read_ntk<fiction::tec_nt>(benchmark);
 
         // perform layout generation with an OGD-based heuristic algorithm
-        auto gate_level_layout = fiction::orthogonal<gate_lyt>(network, {}, &orthogonal_stats);
+        auto gate_level_layout = fiction::orthogonal<gate_lyt>(benchmark_network, {}, &orthogonal_stats);
 
         //  compute critical path and throughput
         const auto cp_tp = fiction::critical_path_length_and_throughput(gate_level_layout);
@@ -76,7 +83,8 @@ int main()  // NOLINT
 
         // check equivalence
         fiction::equivalence_checking_stats eq_stats{};
-        fiction::equivalence_checking<fiction::technology_network, gate_lyt>(network, gate_level_layout, &eq_stats);
+        fiction::equivalence_checking<fiction::technology_network, gate_lyt>(benchmark_network, gate_level_layout,
+                                                                             &eq_stats);
 
         const std::string eq_result = eq_stats.eq == fiction::eq_type::STRONG ? "STRONG" :
                                       eq_stats.eq == fiction::eq_type::WEAK   ? "WEAK" :
@@ -92,11 +100,12 @@ int main()  // NOLINT
         const float improv = 100 * static_cast<float>((area_before_optimization - area_after_optimization)) /
                              static_cast<float>(area_before_optimization);
         // log results
-        optimization_exp(benchmark, network.num_pis(), network.num_pos(), network.num_gates(),
-                         width_before_optimization, height_before_optimization, area_before_optimization,
-                         width_after_optimization, height_after_optimization, area_after_optimization,
-                         gate_level_layout.num_gates(), gate_level_layout.num_wires(), cp_tp.critical_path_length,
-                         cp_tp.throughput, mockturtle::to_seconds(orthogonal_stats.time_total),
+        optimization_exp(benchmark, benchmark_network.num_pis(), benchmark_network.num_pos(),
+                         benchmark_network.num_gates(), width_before_optimization, height_before_optimization,
+                         area_before_optimization, width_after_optimization, height_after_optimization,
+                         area_after_optimization, gate_level_layout.num_gates(), gate_level_layout.num_wires(),
+                         cp_tp.critical_path_length, cp_tp.throughput,
+                         mockturtle::to_seconds(orthogonal_stats.time_total),
                          mockturtle::to_seconds(post_layout_optimization_stats.time_total), improv, eq_result);
 
         optimization_exp.save();
