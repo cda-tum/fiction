@@ -192,7 +192,7 @@ class color_routing_impl
  * enabled and whether a partial routing should be conducted if not all objectives could be fulfilled. Furthermore, the
  * path enumeration and the coloring can be parameterized in the first place. By default, all paths are enumerated for
  * each objective. While this guarantees completeness on small layouts, it quickly becomes intractable. Therefore, a
- * path limit can be set that restricts the number of paths to the \f$ k \f$ shortest. Additionally, for the coloring
+ * path limit can be set that restricts the number of paths to the \f$k\f$ shortest. Additionally, for the coloring
  * process, SAT solving is used by default, which, again, guarantees completeness, but becomes infeasible rather
  * quickly. However, powerful symmetry breaking is applied that assists the solving process, e.g., it is known that all
  * vertices that are belonging to the same objective are forming a clique, which can be pre-colored. Additionally,

@@ -407,7 +407,6 @@ CoordinateType random_coordinate(CoordinateType coordinate1, CoordinateType coor
     {
         std::swap(coordinate1, coordinate2);
     }
-
     if constexpr (std::is_same_v<CoordinateType, siqad::coord_t>)
     {
         std::uniform_int_distribution<> dist_x(coordinate1.x, coordinate2.x);
@@ -417,7 +416,6 @@ CoordinateType random_coordinate(CoordinateType coordinate1, CoordinateType coor
         return std::clamp(siqad::coord_t{dist_x(generator), dist_y(generator), dist_z(generator)}, coordinate1,
                           coordinate2);
     }
-
     else
     {
         std::uniform_int_distribution<> dist_x(coordinate1.x, coordinate2.x);

@@ -158,21 +158,20 @@ class critical_path_length_and_throughput_impl
  *
  * The critical path length is defined as the longest path from any PI to any PO in tiles.
  *
- * The throughput is defined as \f$ \frac{1}{x} \f$ where \f$ x \f$ is the highest path length difference between any
- * sets of paths that lead to the same gate. This function provides only the denominator \f$ x \f$, as the numerator is
- * always \f$ 1 \f$. Furthermore, \f$ x \f$ is given in clock cycles rather than clock phases because it is assumed that
+ * The throughput is defined as \f$\frac{1}{x}\f$ where \f$x\f$ is the highest path length difference between any
+ * sets of paths that lead to the same gate. This function provides only the denominator \f$x\f$, as the numerator is
+ * always \f$1\f$. Furthermore, \f$x\f$ is given in clock cycles rather than clock phases because it is assumed that
  * a path length difference smaller than `lyt.num_clocks()` does not lead to any delay. Contrary, for any throughput
- * value \f$ \frac{1}{x} \f$ with \f$ x > 1 \f$, the layout computes its represented Boolean function only every \f$ x
- * \f$ full clock cycles after the first inputs have been propagated through the design. Thereby, all PIs need to be
- * held constant for \f$ x \f$ clock phases to ensure proper computation.
+ * value \f$\frac{1}{x}\f$ with \f$x > 1\f$, the layout computes its represented Boolean function only every \f$x\f$
+ * full clock cycles after the first inputs have been propagated through the design. Thereby, all PIs need to be
+ * held constant for \f$x\f$ clock phases to ensure proper computation.
  *
  * For more information on the concept of throughput and delay see \"Synchronization of Clocked Field-Coupled Circuits\"
  * by F. Sill Torres, M. Walter, R. Wille, D. Große, and R. Drechsler in IEEE NANO 2018; or \"Design Automation for
  * Field-coupled Nanotechnologies\" by M. Walter, R. Wille, F. Sill Torres, and R. Drechsler published by Springer
  * Nature in 2022.
  *
- * The complexity of this function is \f$ \mathcal{O}(|T|) \f$ where \f$ T \f$ is the set of all occupied tiles in
- * `lyt`.
+ * The complexity of this function is \f$\mathcal{O}(|T|)\f$ where \f$T\f$ is the set of all occupied tiles in `lyt`.
  *
  * @tparam Lyt Gate-level layout type.
  * @param lyt The gate-level layout whose CP and TP are desired.

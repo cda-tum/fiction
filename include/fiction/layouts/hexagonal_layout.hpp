@@ -210,6 +210,24 @@ class hexagonal_layout
     {
         return hexagonal_layout(std::make_shared<hexagonal_layout_storage>(*strg));
     }
+    /**
+     * Creates and returns a coordinate in the layout from the given x-, y-, and z-values.
+     *
+     * @note This function is equivalent to calling `OffsetCoordinateType(x, y, z)`.
+     *
+     * @tparam X x-type.
+     * @tparam Y y-type.
+     * @tparam Z z-type.
+     * @param x x-value.
+     * @param y y-value.
+     * @param z z-value.
+     * @return A coordinate in the layout of type `OffsetCoordinateType`.
+     */
+    template <typename X, typename Y, typename Z = uint64_t>
+    constexpr OffsetCoordinateType coord(const X x, const Y y, const Z z = 0ul) const noexcept
+    {
+        return OffsetCoordinateType(x, y, z);
+    }
 
 #pragma endregion
 

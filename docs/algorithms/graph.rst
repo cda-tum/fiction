@@ -13,16 +13,22 @@ Generate Edge Intersection Graph
 Graph Coloring
 --------------
 
-**Header:** ``fiction/algorithms/graph/graph_coloring.hpp``
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/algorithms/graph/graph_coloring.hpp``
 
-.. doxygenenum:: fiction::graph_coloring_engine
-.. doxygenenum:: fiction::graph_coloring_sat_search_tactic
-.. doxygenstruct:: fiction::determine_vertex_coloring_sat_params
-   :members:
-.. doxygenstruct:: fiction::determine_vertex_coloring_heuristic_params
-   :members:
-.. doxygenstruct:: fiction::determine_vertex_coloring_params
-   :members:
-.. doxygenstruct:: fiction::determine_vertex_coloring_stats
-   :members:
-.. doxygenfunction:: fiction::determine_vertex_coloring
+        .. doxygenenum:: fiction::graph_coloring_engine
+        .. doxygenenum:: fiction::graph_coloring_sat_search_tactic
+        .. doxygenstruct:: fiction::determine_vertex_coloring_sat_params
+           :members:
+        .. doxygenstruct:: fiction::determine_vertex_coloring_heuristic_params
+           :members:
+        .. doxygenstruct:: fiction::determine_vertex_coloring_params
+           :members:
+        .. doxygenstruct:: fiction::determine_vertex_coloring_stats
+           :members:
+        .. doxygenfunction:: fiction::determine_vertex_coloring
+
+    .. tab:: Python
+        .. autoclass:: mnt.pyfiction.graph_coloring_engine
+            :members:

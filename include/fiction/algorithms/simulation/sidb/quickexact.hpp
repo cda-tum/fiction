@@ -23,20 +23,7 @@
 
 namespace fiction
 {
-/**
- * Base number required for the correct physical simulation.
- */
-enum class required_simulation_base_number
-{
-    /**
-     * Two state simulation (i.e., negative and neutral) is sufficient.
-     */
-    TWO,
-    /**
-     * Three state simulation (i.e., negative, neutral, and positive) is required.
-     */
-    THREE
-};
+
 /**
  * This struct stores the parameters for the *QuickExact* algorithm.
  */
@@ -49,7 +36,7 @@ struct quickexact_params
     enum class automatic_base_number_detection
     {
         /**
-         * Simulation is conducted with the required base number (i.e, if positively charged SiDBs can occur, three
+         * Simulation is conducted with the required base number (i.e., if positively charged SiDBs can occur, three
          * state simulation is conducted).
          */
         ON,
@@ -61,14 +48,14 @@ struct quickexact_params
     /**
      * All parameters for physical SiDB simulations.
      */
-    sidb_simulation_parameters physical_parameters{};
+    sidb_simulation_parameters simulation_parameters{};
     /**
      * If `ON`, *QuickExact* checks which base number is required for the simulation, i.e., whether 3-state is
      * necessary or 2-state simulation is sufficient.
      */
     automatic_base_number_detection base_number_detection = automatic_base_number_detection::ON;
     /**
-     * Local external electrostatic potentials (e.g locally applied electrodes).
+     * Local external electrostatic potentials (e.g., locally applied electrodes).
      */
     std::unordered_map<cell<Lyt>, double> local_external_potential = {};
     /**
@@ -90,13 +77,13 @@ class quickexact_impl
             params{parameter}
     {
         charge_lyt.assign_all_charge_states(sidb_charge_state::NEGATIVE);
-        charge_lyt.assign_physical_parameters(parameter.physical_parameters);
+        charge_lyt.assign_physical_parameters(parameter.simulation_parameters);
     }
 
     sidb_simulation_result<Lyt> run() noexcept
     {
-        result.algorithm_name      = "QuickExact";
-        result.physical_parameters = params.physical_parameters;
+        result.algorithm_name        = "QuickExact";
+        result.simulation_parameters = params.simulation_parameters;
         result.additional_simulation_parameters.emplace("global_potential", params.global_potential);
 
         mockturtle::stopwatch<>::duration time_counter{};
@@ -110,7 +97,7 @@ class quickexact_impl
                 (params.base_number_detection == quickexact_params<Lyt>::automatic_base_number_detection::ON &&
                  charge_lyt.is_three_state_simulation_required()) ||
                         (params.base_number_detection == quickexact_params<Lyt>::automatic_base_number_detection::OFF &&
-                         params.physical_parameters.base == 3) ?
+                         params.simulation_parameters.base == 3) ?
                     required_simulation_base_number::THREE :
                     required_simulation_base_number::TWO;
 
@@ -249,6 +236,20 @@ class quickexact_impl
      */
     sidb_simulation_result<Lyt> result{};
     /**
+     * Base number required for the correct physical simulation.
+     */
+    enum class required_simulation_base_number
+    {
+        /**
+         * Two state simulation (i.e., negative and neutral) is sufficient.
+         */
+        TWO,
+        /**
+         * Three state simulation (i.e., negative, neutral, and positive) is required.
+         */
+        THREE
+    };
+    /**
      * This function initializes the charge layout with necessary parameters, and conducts
      * the physical simulation based on whether a three-state simulation is required.
      *
@@ -271,7 +272,7 @@ class quickexact_impl
         {
             charge_lyt.assign_base_number(2);
         }
-        charge_layout.assign_physical_parameters(params.physical_parameters);
+        charge_layout.assign_physical_parameters(params.simulation_parameters);
         charge_layout.assign_all_charge_states(sidb_charge_state::NEUTRAL);
         charge_layout.assign_dependent_cell(all_sidbs_in_lyt_without_negative_preassigned_ones[0]);
 

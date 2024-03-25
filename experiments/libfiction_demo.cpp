@@ -248,9 +248,8 @@ int main(int argc, char* argv[])  // NOLINT
         std::cout << "[i] SMT-based physical design" << std::endl;
 
         // set up parameters for SMT-based physical design
-        fiction::exact_physical_design_params<fcn_gate_level_layout> exact_params{};
-        exact_params.scheme = fiction::ptr<fcn_gate_level_layout>(
-            fiction::twoddwave_clocking<fcn_gate_level_layout>(fiction::num_clks::FOUR));
+        fiction::exact_physical_design_params exact_params{};
+        exact_params.scheme    = "2DDWave";
         exact_params.crossings = true;
         exact_params.border_io = true;
         exact_params.timeout   = 180000;  // 3min in ms

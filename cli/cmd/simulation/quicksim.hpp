@@ -47,7 +47,7 @@ class quicksim_command : public command
                    true);
         add_option("--lambda_tf,-l", physical_params.lambda_tf, "Thomas-Fermi screening distance (unit: nm)", true);
         add_option("--mu_minus,-m", physical_params.mu_minus, "Energy transition level (0/-) (unit: eV)", true);
-        add_option("--iterations,-i", params.interation_steps, "Number of iterations to run the simulation for", true);
+        add_option("--iterations,-i", params.iteration_steps, "Number of iterations to run the simulation for", true);
         add_option("--alpha,-a", params.alpha,
                    "alpha parameter (should be reduced if not charge distribution can be determined)", true);
     }
@@ -108,7 +108,7 @@ class quicksim_command : public command
                 }
                 else
                 {
-                    params.phys_params = physical_params;
+                    params.simulation_parameters = physical_params;
 
                     sim_result = fiction::quicksim(*lyt_ptr, params);
 
@@ -172,9 +172,9 @@ class quicksim_command : public command
                 {"Algorithm name", sim_result.algorithm_name},
                 {"Simulation runtime", sim_result.simulation_runtime.count()},
                 {"Physical parameters",
-                 {{"epsilon_r", sim_result.physical_parameters.epsilon_r},
-                  {"lambda_tf", sim_result.physical_parameters.lambda_tf},
-                  {"mu_minus", sim_result.physical_parameters.mu_minus}}},
+                 {{"epsilon_r", sim_result.simulation_parameters.epsilon_r},
+                  {"lambda_tf", sim_result.simulation_parameters.lambda_tf},
+                  {"mu_minus", sim_result.simulation_parameters.mu_minus}}},
                 {"Lowest state energy (eV)", min_energy},
                 {"Number of stable states", sim_result.charge_distributions.size()},
                 {"Iteration steps",

@@ -79,7 +79,7 @@ struct generate_random_sidb_layout_params
      */
     uint64_t number_of_unique_generated_layouts = 1;
     /**
-     * The maximum number of attempts allowed to generate the given number of unique layouts (default: \f$ 10^{6} \f$).
+     * The maximum number of attempts allowed to generate the given number of unique layouts (default: \f$10^{6}\f$).
      * Example: If the area, where SiDBs can be placed, is small and many SiDBs are to be placed, it may be difficult or
      * even impossible to find several unique (given by number_of_unique_generated_layouts) layouts. Therefore, this
      * parameter sets a limit for the maximum number of tries.

@@ -71,9 +71,9 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
     sim_params.base = 2;
 
     operational_domain_params op_domain_params{};
-    op_domain_params.sim_params  = sim_params;
-    op_domain_params.x_dimension = operational_domain::sweep_parameter::EPSILON_R;
-    op_domain_params.y_dimension = operational_domain::sweep_parameter::LAMBDA_TF;
+    op_domain_params.simulation_parameters = sim_params;
+    op_domain_params.x_dimension           = operational_domain::sweep_parameter::EPSILON_R;
+    op_domain_params.y_dimension           = operational_domain::sweep_parameter::LAMBDA_TF;
 
     operational_domain_stats op_domain_stats{};
 
@@ -454,15 +454,15 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
     sim_params.mu_minus = -0.28;
 
     operational_domain_params op_domain_params{};
-    op_domain_params.sim_params  = sim_params;
-    op_domain_params.x_dimension = operational_domain::sweep_parameter::EPSILON_R;
-    op_domain_params.x_min       = 5.1;
-    op_domain_params.x_max       = 6.1;
-    op_domain_params.x_step      = 0.1;
-    op_domain_params.y_dimension = operational_domain::sweep_parameter::LAMBDA_TF;
-    op_domain_params.y_min       = 4.5;
-    op_domain_params.y_max       = 5.5;
-    op_domain_params.y_step      = 0.1;
+    op_domain_params.simulation_parameters = sim_params;
+    op_domain_params.x_dimension           = operational_domain::sweep_parameter::EPSILON_R;
+    op_domain_params.x_min                 = 5.1;
+    op_domain_params.x_max                 = 6.1;
+    op_domain_params.x_step                = 0.1;
+    op_domain_params.y_dimension           = operational_domain::sweep_parameter::LAMBDA_TF;
+    op_domain_params.y_min                 = 4.5;
+    op_domain_params.y_max                 = 5.5;
+    op_domain_params.y_step                = 0.1;
 
     operational_domain_stats op_domain_stats{};
 
@@ -575,15 +575,15 @@ TEST_CASE("SiQAD's AND gate operational domain computation, using cube coordinat
     sim_params.mu_minus = -0.28;
 
     operational_domain_params op_domain_params{};
-    op_domain_params.sim_params  = sim_params;
-    op_domain_params.x_dimension = operational_domain::sweep_parameter::EPSILON_R;
-    op_domain_params.x_min       = 5.1;
-    op_domain_params.x_max       = 6.1;
-    op_domain_params.x_step      = 0.1;
-    op_domain_params.y_dimension = operational_domain::sweep_parameter::LAMBDA_TF;
-    op_domain_params.y_min       = 4.5;
-    op_domain_params.y_max       = 5.5;
-    op_domain_params.y_step      = 0.1;
+    op_domain_params.simulation_parameters = sim_params;
+    op_domain_params.x_dimension           = operational_domain::sweep_parameter::EPSILON_R;
+    op_domain_params.x_min                 = 5.1;
+    op_domain_params.x_max                 = 6.1;
+    op_domain_params.x_step                = 0.1;
+    op_domain_params.y_dimension           = operational_domain::sweep_parameter::LAMBDA_TF;
+    op_domain_params.y_min                 = 4.5;
+    op_domain_params.y_max                 = 5.5;
+    op_domain_params.y_step                = 0.1;
 
     operational_domain_stats op_domain_stats{};
 

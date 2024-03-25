@@ -60,7 +60,7 @@ struct design_sidb_gates_params
     /**
      * All Parameters for physical SiDB simulations.
      */
-    sidb_simulation_parameters phys_params{};
+    sidb_simulation_parameters simulation_parameters{};
     /**
      * Gate design mode.
      */
@@ -110,7 +110,7 @@ class design_sidb_gates_impl
      */
     [[nodiscard]] std::vector<Lyt> run_exhaustive_design() noexcept
     {
-        const is_operational_params params_is_operational{params.phys_params, params.sim_engine};
+        const is_operational_params params_is_operational{params.simulation_parameters, params.sim_engine};
 
         const auto all_combinations = determine_all_combinations_of_distributing_k_entities_on_n_positions(
             params.number_of_sidbs, static_cast<std::size_t>(all_sidbs_in_canvas.size()));
@@ -167,7 +167,7 @@ class design_sidb_gates_impl
     {
         std::vector<Lyt> randomly_designed_gate_layouts = {};
 
-        const is_operational_params params_is_operational{params.phys_params, params.sim_engine};
+        const is_operational_params params_is_operational{params.simulation_parameters, params.sim_engine};
 
         const generate_random_sidb_layout_params<Lyt> parameter{
             params.canvas, params.number_of_sidbs,

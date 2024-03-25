@@ -55,7 +55,7 @@ IncludeCategories:
     Priority: 2
   - Regex: '<fiction\/[a-zA-Z0-9_]+.+>$'
     Priority: 3
-  - Regex: '<(alice|lorina|mockturtle|kitty|bill|nlohmann|fmt|z3|phmap|btree|tinyxml2|units)(\/[a-zA-Z0-9_])*.+>$'
+  - Regex: '<(alice|lorina|mockturtle|kitty|bill|nlohmann|fmt|z3|phmap|btree|tinyxml2|pybind11)(\/[a-zA-Z0-9_])*.+>$'
     Priority: 4
   - Regex: '<z3[a-zA-Z0-9_\+]+.+>$'
     Priority: 5

@@ -47,6 +47,7 @@ template <typename Lyt>
         return {x, y};
     }
 }
+
 }  // namespace fiction
 
 #endif  // FICTION_NM_POSITION_HPP

@@ -29,12 +29,12 @@ namespace fiction
  * like QCADesigner, ToPoliNano & MagCAD, SiQAD, etc.
  *
  * In this layout, each coordinate, i.e., clock zone has the dimensions of a single cell. Clock numbers can, however, be
- * assigned in a way, that they form larger zones, e.g., of \f$ 5 \times 5 \f$ cells. These dimensions can be specified
+ * assigned in a way, that they form larger zones, e.g., of \f$5 \times 5\f$ cells. These dimensions can be specified
  * in the constructor. They affect the way, clock numbers are fetched from the underlying clocked layout.
  *
  * The de-facto standard of cell-level FCN design is to group multiple cells into tiles large enough to be addressable
- * by individual clocking electrodes buried in the layout substrate. Cell-based clocking, i.e., clock zones of size \f$
- * 1 \times 1 \f$ cells are not recommended as they are most likely not fabricable in reality.
+ * by individual clocking electrodes buried in the layout substrate. Cell-based clocking, i.e., clock zones of size
+ * \f$1 \times 1\f$ cells are not recommended as they are most likely not fabricable in reality.
  *
  * On the implementation side, this layout distinguishes between `cell`, `cell_type`, and `cell_mode`. A `cell` is a
  * coordinate, i.e., a position on the layout where a `cell_type` can be assigned. A `cell_type` is a concrete variation

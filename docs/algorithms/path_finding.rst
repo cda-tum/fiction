@@ -3,17 +3,24 @@ Distance Functions
 
 Distance functions compute (an approximation for) the distance between two coordinates.
 
-**Header:** ``fiction/algorithms/path_finding/distance.hpp``
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/algorithms/path_finding/distance.hpp``
 
-.. doxygenfunction:: fiction::manhattan_distance
-.. doxygenfunction:: fiction::euclidean_distance
-.. doxygenfunction:: fiction::twoddwave_distance
+        .. doxygenfunction:: fiction::manhattan_distance
+        .. doxygenfunction:: fiction::euclidean_distance
+        .. doxygenfunction:: fiction::twoddwave_distance
 
-.. doxygenclass:: fiction::distance_functor
-   :members:
-.. doxygenclass:: fiction::manhattan_distance_functor
-.. doxygenclass:: fiction::euclidean_distance_functor
-.. doxygenclass:: fiction::twoddwave_distance_functor
+        .. doxygenclass:: fiction::distance_functor
+           :members:
+        .. doxygenclass:: fiction::manhattan_distance_functor
+        .. doxygenclass:: fiction::euclidean_distance_functor
+        .. doxygenclass:: fiction::twoddwave_distance_functor
+
+    .. tab:: Python
+        .. autofunction:: mnt.pyfiction.manhattan_distance
+        .. autofunction:: mnt.pyfiction.euclidean_distance
+        .. autofunction:: mnt.pyfiction.twoddwave_distance
 
 Distance Maps
 -------------
@@ -55,13 +62,21 @@ Cost functions compute the cost to move from one coordinate to another (adjacent
 A* Shortest Path
 ----------------
 
-**Header:** ``fiction/algorithms/path_finding/a_star.hpp``
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/algorithms/path_finding/a_star.hpp``
 
-.. doxygenstruct:: fiction::a_star_params
-   :members:
-.. doxygenfunction:: fiction::a_star
-.. doxygenfunction:: fiction::a_star_distance
-.. doxygenclass:: fiction::a_star_distance_functor
+        .. doxygenstruct:: fiction::a_star_params
+           :members:
+        .. doxygenfunction:: fiction::a_star
+        .. doxygenfunction:: fiction::a_star_distance
+        .. doxygenclass:: fiction::a_star_distance_functor
+
+    .. tab:: Python
+        .. autoclass:: mnt.pyfiction.a_star_params
+            :members:
+        .. autofunction:: mnt.pyfiction.a_star
+        .. autofunction:: mnt.pyfiction.a_star_distance
 
 Jump Point Search Shortest Path in a Cartesian Grid
 ---------------------------------------------------
@@ -73,17 +88,31 @@ Jump Point Search Shortest Path in a Cartesian Grid
 k Shortest Paths
 ----------------
 
-**Header:** ``fiction/algorithms/path_finding/k_shortest_paths.hpp``
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/algorithms/path_finding/k_shortest_paths.hpp``
 
-.. doxygenstruct:: fiction::yen_k_shortest_paths_params
-   :members:
-.. doxygenfunction:: fiction::yen_k_shortest_paths
+        .. doxygenstruct:: fiction::yen_k_shortest_paths_params
+           :members:
+        .. doxygenfunction:: fiction::yen_k_shortest_paths
+
+    .. tab:: Python
+        .. autoclass:: mnt.pyfiction.yen_k_shortest_paths_params
+            :members:
+        .. autofunction:: mnt.pyfiction.yen_k_shortest_paths
 
 Enumerate All Paths
 -------------------
 
-**Header:** ``fiction/algorithms/path_finding/enumerate_all_paths.hpp``
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/algorithms/path_finding/enumerate_all_paths.hpp``
 
-.. doxygenstruct:: fiction::enumerate_all_paths_params
-   :members:
-.. doxygenfunction:: fiction::enumerate_all_paths
+        .. doxygenstruct:: fiction::enumerate_all_paths_params
+           :members:
+        .. doxygenfunction:: fiction::enumerate_all_paths
+
+    .. tab:: Python
+        .. autoclass:: mnt.pyfiction.enumerate_all_paths_params
+            :members:
+        .. autofunction:: mnt.pyfiction.enumerate_all_paths

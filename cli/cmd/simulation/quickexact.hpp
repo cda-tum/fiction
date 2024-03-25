@@ -100,7 +100,7 @@ class quickexact_command : public command
                 }
                 else
                 {
-                    params.physical_parameters = physical_params;
+                    params.simulation_parameters = physical_params;
 
                     sim_result = fiction::quickexact(*lyt_ptr, params);
 
@@ -165,9 +165,9 @@ class quickexact_command : public command
                 {"Physical parameters",
                  {{"base", std::any_cast<uint64_t>(sim_result.additional_simulation_parameters.at(
                                "base_number"))},  // fetch the automatically inferred base number
-                  {"epsilon_r", sim_result.physical_parameters.epsilon_r},
-                  {"lambda_tf", sim_result.physical_parameters.lambda_tf},
-                  {"mu_minus", sim_result.physical_parameters.mu_minus},
+                  {"epsilon_r", sim_result.simulation_parameters.epsilon_r},
+                  {"lambda_tf", sim_result.simulation_parameters.lambda_tf},
+                  {"mu_minus", sim_result.simulation_parameters.mu_minus},
                   {"global_potential",
                    std::any_cast<double>(sim_result.additional_simulation_parameters.at("global_potential"))}}},
                 {"Ground state energy (eV)", min_energy},

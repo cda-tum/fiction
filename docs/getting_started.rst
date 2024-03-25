@@ -1,9 +1,12 @@
 Getting started
 ===============
 
-The *fiction* framework provides a stand-alone CLI tool as well as a header-only library that can be used in external projects.
-Both are written in C++17 and are continuously tested on Ubuntu, macOS, and Windows with multiple compilers.
-See the build badges in the README file for more information.
+The *fiction* framework provides a stand-alone CLI tool as well as a C++17 header-only library and a Python module which
+can be used in external projects. Additionally, we provide an experimentation playground that can be used to quickly
+prototype new ideas or script evaluations.
+
+We are continuously testing on Ubuntu, macOS, and Windows with multiple compilers and various Python versions.
+See the badges in the README file for more information.
 
 
 Compilation requirements
@@ -24,6 +27,8 @@ At the time of writing, for parallel STL algorithms to work when using GCC, the 
 needed. It is an optional dependency that can be installed for a performance boost in certain scenarios. For your
 preferred compiler, see the current implementation state of `P0024R2 <https://en.cppreference.com/w/cpp/compiler_support/17>`_.
 
+
+.. _cli:
 
 Using *fiction* as a stand-alone CLI tool
 -----------------------------------------
@@ -94,6 +99,33 @@ for each used header file to include *fiction*'s data types and algorithms. Ever
 directly located inside the ``fiction`` namespace.
 
 
+Python Bindings
+---------------
+
+The Python bindings can be installed via ``pip`` from `PyPI <https://pypi.org/project/mnt.pyfiction/>`_ where we publish
+wheels for every new release::
+
+  pip install mnt.pyfiction
+
+You can then import the bindings in your Python project:
+
+.. code-block:: python
+
+  from mnt import pyfiction
+
+The Python synopsis is modeled after the C++ API to make it feel as familiar as possible. However, all available Python
+bindings are additionally documented together with the C++ code on this site to make it easier to get started. For each
+module, you can toggle between the two languages using the tabs.
+
+.. note::
+
+    The *fiction* framework is primarily developed for C++ as a header-only library. The Python bindings are a thin
+    wrapper around the C++ code. We try our best to keep the bindings in sync with the C++ code, and to expose most of
+    *fiction*'s functionality in both C++ and Python. This is, unfortunately, not always possible. Should you encounter
+    features that are not (yet) available in *pyfiction*, please open
+    an `issue on GitHub <https://github.com/cda-tum/fiction/issues>`_.
+
+
 Enabling dependent functions
 ----------------------------
 
@@ -122,12 +154,41 @@ The :ref:`one-pass synthesis algorithm <onepass>` is embedded via the Python3 sc
 `Mugen <https://github.com/whaaswijk/mugen>`_ by Winston Haaswijk using `pybind11 <https://github.com/pybind/pybind11>`_.
 It has some further Python dependencies that can be installed via ``pip3``::
 
-    pip3 install -r libs/mugen/requirements.txt
+    pip install -r libs/mugen/requirements.txt
 
-The Python3 integration is experimental and may cause issues on some systems. It is currently not available on Windows
+The Python integration is experimental and may cause issues on some systems. It is currently not available on Windows
 and some macOS versions due to issues with ``python-sat``. Mugen requires at least Python 3.7!
 
 Finally, before building *fiction*, pass ``-DFICTION_ENABLE_MUGEN=ON`` to the ``cmake`` call.
+
+
+Building experiments
+--------------------
+
+The ``experiments`` folder provides a playground for quickly scripting some ideas by plugging algorithms together.
+A ``fictionlib_demo.cpp`` demonstrates the usage. Any ``*.cpp`` file that is placed in on of its sub-folders is
+automatically linked against ``libfiction`` and compiled as a stand-alone binary. Simply add a ``main`` function and
+include the desired header files to get started:
+
+.. code-block:: c++
+
+   #include <fiction/layouts/cell_level_layout.hpp>
+   #include <fiction/layouts/clocking_scheme.hpp>
+   #include <fiction/technology/qca_one_library.hpp>
+   #include <fiction/io/write_qca_layout.hpp>
+   #include <fiction/...>
+
+   int main(int argc, char* argv[])
+   {
+     // your code goes here
+   }
+
+
+Each file can be built individually via CMake::
+
+  cmake . -B build -DFICTION_EXPERIMENTS=ON
+  cd build
+  cmake --build . -j4
 
 
 Building tests

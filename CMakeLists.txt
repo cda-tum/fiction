@@ -76,6 +76,13 @@ if(FICTION_EXPERIMENTS)
   add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/experiments)
 endif()
 
+# Python Bindings
+option(FICTION_PYTHON_BINDINGS "Build fiction Python bindings" OFF)
+if(FICTION_PYTHON_BINDINGS)
+  message(STATUS "Building fiction Python bindings")
+  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/bindings/)
+endif()
+
 # Testing
 option(FICTION_TEST "Build fiction tests" OFF)
 if(FICTION_TEST)

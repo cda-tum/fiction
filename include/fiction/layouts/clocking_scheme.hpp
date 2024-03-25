@@ -737,6 +737,19 @@ bool is_linear_scheme(const clocking_scheme<clock_zone<Lyt>>& scheme) noexcept
                        [&scheme](const auto& name) { return scheme == name; });
 }
 /**
+ * Exception to be thrown when an unsupported clocking scheme is requested.
+ */
+class unsupported_clocking_scheme_exception : public std::exception
+{
+  public:
+    explicit unsupported_clocking_scheme_exception() noexcept : std::exception() {}
+
+    [[nodiscard]] const char* what() const noexcept
+    {
+        return "given clocking scheme is unsupported";
+    }
+};
+/**
  * Returns a clocking scheme by name.
  *
  * @tparam Lyt Layout type.

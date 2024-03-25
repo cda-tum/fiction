@@ -22,7 +22,7 @@ namespace fiction
 {
 
 /**
- * Parameters for Yen's \f$ k \f$-shortest paths algorithm.
+ * Parameters for Yen's \f$k\f$-shortest paths algorithm.
  */
 struct yen_k_shortest_paths_params
 {
@@ -224,9 +224,9 @@ class yen_k_shortest_paths_impl
 }  // namespace detail
 
 /**
- * Yen's algorithm for finding up to \f$ k \f$ shortest paths without loops from a source to a target coordinate. If
+ * Yen's algorithm for finding up to \f$k\f$ shortest paths without loops from a source to a target coordinate. If
  * \f$k\f$ is larger than the number of possible paths from source to target, the size of the returned path collection
- * will be smaller than \f$ k \f$.
+ * will be smaller than \f$k\f$.
  *
  * This implementation uses the A* algorithm with the Manhattan distance function internally.
  *
@@ -257,11 +257,11 @@ class yen_k_shortest_paths_impl
  *
  * @tparam Path Type of the returned individual paths.
  * @tparam Lyt Type of the layout to perform path finding on.
- * @param layout The layout in which the \f$ k \f$ shortest paths are to be found.
+ * @param layout The layout in which the \f$k\f$ shortest paths are to be found.
  * @param objective Source-target coordinate pair.
  * @param k Maximum number of shortest paths to find.
  * @param params Parameters.
- * @return A collection of up to \f$ k \f$ shortest loop-less paths in `layout` from `objective.source` to
+ * @return A collection of up to \f$k\f$ shortest loop-less paths in `layout` from `objective.source` to
  * `objective.target`.
  */
 template <typename Path, typename Lyt>
