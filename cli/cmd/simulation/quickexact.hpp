@@ -102,12 +102,12 @@ class quickexact_command : public command
                 }
                 else
                 {
-                    if constexpr (fiction::has_same_lattice_orientation_v<Lyt, fiction::sidb_100_lattice>)
+                    if constexpr (fiction::is_sidb_lattice_100_v<Lyt>)
                     {
                         params.physical_parameters = physical_params;
                         sim_result                 = fiction::quickexact(*lyt_ptr, params);
                     }
-                    else if constexpr (fiction::has_same_lattice_orientation_v<Lyt, fiction::sidb_111_lattice>)
+                    else if constexpr (fiction::is_sidb_lattice_111_v<Lyt>)
                     {
                         params.physical_parameters = physical_params;
                         auto cps                   = convert_params<Lyt>(params);
@@ -127,7 +127,7 @@ class quickexact_command : public command
                     }
                     else
                     {
-                        if constexpr (fiction::has_same_lattice_orientation_v<Lyt, fiction::sidb_100_lattice>)
+                        if constexpr (fiction::is_sidb_lattice_100_v<Lyt>)
                         {
                             const auto min_energy_distr = fiction::minimum_energy_distribution(
                                 sim_result.charge_distributions.cbegin(), sim_result.charge_distributions.cend());
@@ -136,7 +136,7 @@ class quickexact_command : public command
                             store<fiction::cell_layout_t>().extend() =
                                 std::make_shared<fiction::cds_sidb_100_cell_clk_lyt>(*min_energy_distr);
                         }
-                        else if constexpr (fiction::has_same_lattice_orientation_v<Lyt, fiction::sidb_111_lattice>)
+                        else if constexpr (fiction::is_sidb_lattice_111_v<Lyt>)
                         {
                             const auto min_energy_distr =
                                 fiction::minimum_energy_distribution(sim_result_111.charge_distributions.cbegin(),
