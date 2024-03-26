@@ -158,6 +158,7 @@ Operational Domain Computation
 .. doxygenstruct:: fiction::is_operational_params
    :members:
 .. doxygenfunction:: fiction::is_operational
+.. doxygenfunction:: fiction::number_of_operational_input_combinations
 
 **Header:** ``fiction/algorithms/simulation/sidb/operational_domain.hpp``
 

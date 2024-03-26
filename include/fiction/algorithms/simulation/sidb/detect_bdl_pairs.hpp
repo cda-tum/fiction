@@ -256,7 +256,6 @@ std::vector<bdl_pair<Lyt>> detect_bdl_pairs(const Lyt& lyt, const typename techn
         }
     }
 
-    std::sort(dots_of_given_type.begin(), dots_of_given_type.end());
     // pair up dots and return the detected BDL pairs
     return pair_up_dots(dots_of_given_type);
 }
