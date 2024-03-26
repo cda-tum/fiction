@@ -2,8 +2,8 @@
 // Created by Jan Drewniok on 12.02.24.
 //
 
-#ifndef FICTION_DETERMINE_THE_GROUNDSTATE_FROM_CDS_HPP
-#define FICTION_DETERMINE_THE_GROUNDSTATE_FROM_CDS_HPP
+#ifndef FICTION_DETERMINE_GROUNDSTATE_FROM_CDS_HPP
+#define FICTION_DETERMINE_GROUNDSTATE_FROM_CDS_HPP
 
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
@@ -22,11 +22,12 @@ namespace fiction
  * The ground state charge distributions are those with energy closest to the minimum energy found in the simulation
  * results.
  *
+ * @note When degenerate states exist, there are multiple ground states with the same energy.
+ *
  * @tparam Lyt The layout type used in the simulation results.
  * @param simulation_results The simulation results containing charge distributions.
  * @return A vector of charge distributions with the minimal energy.
  *
- * @note The size of the return vector is only greater than one if degenerate states exist.
  */
 template <typename Lyt>
 [[nodiscard]] std::vector<charge_distribution_surface<Lyt>>
@@ -52,14 +53,14 @@ determine_groundstate_from_simulation_results(const sidb_simulation_result<Lyt>&
     for (const auto charge_index : charge_indices)
     {
         auto cds_it = std::find_if(
-            simulation_results.charge_distributions.begin(), simulation_results.charge_distributions.end(),
+            simulation_results.charge_distributions.cbegin(), simulation_results.charge_distributions.cend(),
             [&](const auto& cds)
             {
                 return cds.get_charge_index_and_base().first == charge_index &&
                        std::abs(cds.get_system_energy() - min_energy) < std::numeric_limits<double>::epsilon();
             });
 
-        if (cds_it != simulation_results.charge_distributions.end())
+        if (cds_it != simulation_results.charge_distributions.cend())
         {
             groundstate_charge_distributions.push_back(*cds_it);
         }
@@ -70,4 +71,4 @@ determine_groundstate_from_simulation_results(const sidb_simulation_result<Lyt>&
 
 }  // namespace fiction
 
-#endif  // FICTION_DETERMINE_THE_GROUNDSTATE_FROM_CDS_HPP
+#endif  // FICTION_DETERMINE_GROUNDSTATE_FROM_CDS_HPP

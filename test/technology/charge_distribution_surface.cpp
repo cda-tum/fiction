@@ -24,6 +24,7 @@
 using namespace fiction;
 
 TEMPLATE_TEST_CASE("Charge distribution surface traits and construction", "[charge-distribution-surface]",
+                   (sidb_cell_clk_lyt_siqad), (sidb_cell_clk_lyt_cube),
                    (sidb_lattice<sidb_100_lattice, sidb_cell_clk_lyt_siqad>),
                    (sidb_lattice<sidb_100_lattice, sidb_defect_surface<sidb_cell_clk_lyt_cube>>))
 {

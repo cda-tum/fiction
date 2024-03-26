@@ -691,17 +691,36 @@ struct is_sidb_lattice : std::false_type
 {};
 
 template <typename Lyt>
-struct is_sidb_lattice<Lyt, std::void_t<typename Lyt::orientation>> : std::true_type
+struct is_sidb_lattice<Lyt, std::enable_if_t<is_cell_level_layout_v<Lyt>, std::void_t<typename Lyt::orientation>>>
+        : std::true_type
 {};
 
 template <typename Lyt>
 constexpr bool is_sidb_lattice_v = is_sidb_lattice<Lyt>::value;
 
-template <typename Lyt>
-constexpr bool is_sidb_lattice_100_v = has_same_lattice_orientation_v<Lyt, sidb_100_lattice>;
+template <typename Lyt, typename = void>
+struct is_sidb_lattice_100 : std::false_type
+{};
 
 template <typename Lyt>
-constexpr bool is_sidb_lattice_111_v = has_same_lattice_orientation_v<Lyt, sidb_111_lattice>;
+struct is_sidb_lattice_100<Lyt, std::enable_if_t<is_sidb_lattice_v<Lyt>>>
+        : std::conditional_t<has_same_lattice_orientation_v<Lyt, sidb_100_lattice>, std::true_type, std::false_type>
+{};
+
+template <typename Lyt>
+constexpr bool is_sidb_lattice_100_v = is_sidb_lattice_100<Lyt>::value;
+
+template <typename Lyt, typename = void>
+struct is_sidb_lattice_111 : std::false_type
+{};
+
+template <typename Lyt>
+struct is_sidb_lattice_111<Lyt, std::enable_if_t<is_sidb_lattice_v<Lyt>>>
+        : std::conditional_t<has_same_lattice_orientation_v<Lyt, sidb_111_lattice>, std::true_type, std::false_type>
+{};
+
+template <typename Lyt>
+constexpr bool is_sidb_lattice_111_v = is_sidb_lattice_111<Lyt>::value;
 
 /**
  * SiDB defect surface

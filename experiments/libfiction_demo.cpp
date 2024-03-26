@@ -234,9 +234,7 @@ int main(int argc, char* argv[])  // NOLINT
     // write a QCADesigner simulation file
     fiction::write_qca_layout(ortho_cell_layout, designs + "ortho_qca.qca");
     // write a SiQAD simulation file
-
-    // TODO: Is it meaningful to save a QCA layout as a .sqd file?
-    // fiction::write_sqd_layout(ortho_cell_layout, designs + "ortho_qca.sqd");
+    fiction::write_sqd_layout(ortho_cell_layout, designs + "ortho_qca.sqd");
 
     std::cout << std::endl;
 
@@ -283,8 +281,7 @@ int main(int argc, char* argv[])  // NOLINT
             // write a QCADesigner simulation file
             fiction::write_qca_layout(exact_cell_layout, designs + "exact_qca.qca");
             // write a SiQAD simulation file
-            // TODO: Is it meaningful to save a QCA layout as a .sqd file?
-            // fiction::write_sqd_layout(exact_cell_layout, designs + "exact_qca.sqd");
+            fiction::write_sqd_layout(exact_cell_layout, designs + "exact_qca.sqd");
         }
         // not successful
         else

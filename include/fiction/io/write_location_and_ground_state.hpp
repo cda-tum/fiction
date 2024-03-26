@@ -5,13 +5,12 @@
 #ifndef FICTION_WRITE_LOCATION_AND_GROUND_STATE_HPP
 #define FICTION_WRITE_LOCATION_AND_GROUND_STATE_HPP
 
-#include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
 #include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
-#include "fiction/technology/sidb_lattice_orientations.hpp"
 #include "fiction/types.hpp"
 #include "fiction/utils/math_utils.hpp"
+#include "fmt/format.h"
 
 #include <algorithm>
 #include <cmath>
@@ -19,7 +18,7 @@
 #include <fstream>
 #include <limits>
 #include <ostream>
-#include <string>
+#include <string_view>
 #include <vector>
 
 namespace fiction
@@ -68,18 +67,16 @@ class write_location_and_ground_state_impl
             auto       sidbs        = ground_state.get_sidb_order();
 
             std::sort(sidbs.begin(), sidbs.end());
-            if constexpr (is_sidb_lattice_v<Lyt>)
+
+            for (const auto& sidb : sidbs)
             {
-                for (const auto& sidb : sidbs)
+                const auto pos = sidb_nm_position<Lyt>(sidb);
+                os << fmt::format("{:.3f};{:.3f};", pos.first, pos.second);
+                for (const auto& valid_layout : ground_state_layouts)
                 {
-                    const auto pos = sidb_nm_position<Lyt>(sidb);
-                    os << fmt::format("{:.3f};{:.3f};", pos.first, pos.second);
-                    for (const auto& valid_layout : ground_state_layouts)
-                    {
-                        os << fmt::format("{};", charge_state_to_sign(valid_layout.get_charge_state(sidb)));
-                    }
-                    os << "\n";
+                    os << fmt::format("{};", charge_state_to_sign(valid_layout.get_charge_state(sidb)));
                 }
+                os << "\n";
             }
         }
     };

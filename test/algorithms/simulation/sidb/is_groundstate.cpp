@@ -12,13 +12,11 @@
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
-#include <fiction/technology/sidb_lattice_orientations.hpp>
 #include <fiction/types.hpp>
 
 using namespace fiction;
 
-TEMPLATE_TEST_CASE("check if ground state is found", "[is-ground-state]",
-                   (sidb_100_cell_clk_lyt_siqad),
+TEMPLATE_TEST_CASE("check if ground state is found", "[is-ground-state]", (sidb_100_cell_clk_lyt_siqad),
                    (cds_sidb_100_cell_clk_lyt_siqad))
 {
     SECTION("layout with no SiDB placed")

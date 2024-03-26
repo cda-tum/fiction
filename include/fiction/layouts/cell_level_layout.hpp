@@ -368,7 +368,7 @@ class cell_level_layout : public ClockedLayout
     /**
      * Sets the underlying clock zone x-dimension size.
      *
-     * @param tile_size_x Tile size in the x-dimension.
+     * @param tile_size_x Tile size in the x-dimension in number of cells.
      */
     void set_tile_size_x(const uint64_t tile_size_x) noexcept
     {
@@ -387,7 +387,7 @@ class cell_level_layout : public ClockedLayout
     /**
      * Sets the underlying clock zone y-dimension size.
      *
-     * @param tile_size_y Tile size in the y-dimension.
+     * @param tile_size_y Tile size in the y-dimension in number of cells.
      */
     void set_tile_size_y(const uint64_t tile_size_y) noexcept
     {

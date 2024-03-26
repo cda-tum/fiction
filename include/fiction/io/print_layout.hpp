@@ -494,7 +494,7 @@ void print_sidb_layout(std::ostream& os, const Lyt& lyt, const bool lat_color = 
         }
         else if (loop_coordinate.x == max_se.x && loop_coordinate != max_se)
         {
-            if (loop_coordinate.z == 1 && has_same_lattice_orientation_v<Lyt, sidb_100_lattice>)
+            if (loop_coordinate.z == 1 && is_sidb_lattice_100_v<Lyt>)
             {
                 os << "\n\n";  // gap between two dimers
             }
@@ -505,17 +505,16 @@ void print_sidb_layout(std::ostream& os, const Lyt& lyt, const bool lat_color = 
             loop_coordinate.x = min_nw.x;
             loop_coordinate.y += (loop_coordinate.z == 1) ? 1 : 0;
             loop_coordinate.z = (loop_coordinate.z == 0) ? 1 : 0;
-            if (has_same_lattice_orientation_v<Lyt, sidb_111_lattice> && loop_coordinate.z == 1)
+            if (is_sidb_lattice_111_v<Lyt> && loop_coordinate.z == 1)
             {
                 os << " ";
             }
         }
         else if (loop_coordinate == max_se)
         {
-            if (has_same_lattice_orientation_v<Lyt, sidb_100_lattice>)
+            if (is_sidb_lattice_111_v<Lyt>)
             {
                 os << "\n\n";  // add a gap between two dimers
-                break;
             }
             break;
         }

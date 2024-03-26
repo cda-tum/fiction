@@ -215,7 +215,6 @@ class read_sqd_layout_impl
      */
     void parse_lat_type(const std::string& name)
     {
-
         if (name == "Si(111) 1x1")
         {
             if (!has_same_lattice_orientation_v<Lyt, sidb_111_lattice>)
@@ -425,11 +424,8 @@ class read_sqd_layout_impl
  * May throw an `sqd_parsing_exception` if the sqd file is malformed.
  *
  * @tparam Lyt The layout type to be created from an input. Must be a cell-level SiDB layout.
- * @tparam LatticeOrientation The type of the lattice orientation.
  * @param is The input stream to read from.
- * @param orientation The lattice orientation.
  * @param name The name to give to the generated layout.
- *
  * @return The cell-level SiDB layout read from the sqd file.
  */
 template <typename Lyt>
@@ -437,7 +433,6 @@ Lyt read_sqd_layout(std::istream& is, const std::string_view& name = "")
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
-    static_assert(is_sidb_lattice_v<Lyt>, "Lyt must be a lattice layout");
 
     detail::read_sqd_layout_impl<Lyt> p{is, name};
 
@@ -456,10 +451,8 @@ Lyt read_sqd_layout(std::istream& is, const std::string_view& name = "")
  * This is an in-place version of read_sqd_layout that utilizes the given layout as a target to write to.
  *
  * @tparam Lyt The layout type to be used as input. Must be a cell-level SiDB layout.
- * @tparam LatticeOrientation The type of the lattice orientation.
  * @param lyt The layout to write to.
  * @param is The input stream to read from.
- * @param orientation The lattice orientation.
  */
 template <typename Lyt>
 void read_sqd_layout(Lyt& lyt, std::istream& is)
@@ -481,9 +474,7 @@ void read_sqd_layout(Lyt& lyt, std::istream& is)
  * May throw an `sqd_parsing_exception` if the sqd file is malformed.
  *
  * @tparam Lyt The layout type to be created from an input. Must be a cell-level SiDB layout.
- * @tparam LatticeOrientation The type of the lattice orientation.
  * @param filename The file name to open and read from.
- * @param orientation The lattice orientation.
  * @param name The name to give to the generated layout.
  */
 template <typename Lyt>
@@ -516,10 +507,8 @@ Lyt read_sqd_layout(const std::string_view& filename, const std::string_view& na
  * This is an in-place version of `read_sqd_layout` that utilizes the given layout as a target to write to.
  *
  * @tparam Lyt The layout type to be used as input. Must be a cell-level SiDB layout.
- * @tparam LatticeOrientation The type of the lattice orientation.
  * @param lyt The layout to write to.
  * @param filename The file name to open and read from.
- * @param orientation The lattice orientation.
  */
 template <typename Lyt>
 void read_sqd_layout(Lyt& lyt, const std::string_view& filename)

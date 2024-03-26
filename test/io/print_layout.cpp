@@ -362,9 +362,7 @@ TEST_CASE("Print Bestagon OR-gate without defect", "[print-charge-layout]")
             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
             "\n"
             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
-            " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
-            "\n"
-            "\n";
+            " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n";
 
         CHECK(layout_print == print_stream.str());
     }
@@ -424,9 +422,7 @@ TEST_CASE("Print Bestagon OR-gate without defect", "[print-charge-layout]")
             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ●  ·  · \n"
             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
             "\n"
-            " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ● \n"
-            "\n"
-            "\n";
+            " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ● \n";
         CHECK(layout_print == print_stream.str());
     }
 }
@@ -531,9 +527,7 @@ TEST_CASE("Print Bestagon OR-gate with defect", "[print-charge-layout]")
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
         "\n"
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
-        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
-        "\n"
-        "\n";
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n";
 
     CHECK(layout_print == print_stream.str());
 }
@@ -567,9 +561,7 @@ TEST_CASE("Print layout without charges but defects", "[print-charge-layout]")
                                              " ·  ·  ·  ⊡  ·  ·  ⊟  ·  · \n"
                                              "\n"
                                              " ·  ·  ·  ·  ·  ·  ·  ·  · \n"
-                                             " ·  ·  ·  ·  ·  ·  ·  ·  · \n"
-                                             "\n"
-                                             "\n";
+                                             " ·  ·  ·  ·  ·  ·  ·  ·  · \n";
 
         CHECK(layout_print == print_stream.str());
     }
@@ -581,9 +573,7 @@ TEST_CASE("Print layout without charges but defects", "[print-charge-layout]")
                           false, true);
 
         constexpr const char* layout_print = " ⊞  ·  ·  ·  · \n"
-                                             " ·  ⊡  ·  ·  ⊟ \n"
-                                             "\n"
-                                             "\n";
+                                             " ·  ⊡  ·  ·  ⊟ \n";
 
         CHECK(layout_print == print_stream.str());
     }
@@ -660,9 +650,7 @@ TEST_CASE("Print Bestagon OR-gate", "[print-charge-layout]")
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
         "\n"
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
-        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
-        "\n"
-        "\n";
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n";
 
     CHECK(layout_print == print_stream.str());
 }
@@ -694,7 +682,9 @@ TEST_CASE("Print H-Si 111 surface with six cells", "[print-charge-layout]")
                                          " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
                                          "  ·  ·  ·  ·  ◯  ·  ·  ◯  ·  ·  ·  ·  · \n"
                                          " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
-                                         "  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n";
+                                         "  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                         "\n"
+                                         "\n";
 
     CHECK(layout_print == print_stream.str());
 }

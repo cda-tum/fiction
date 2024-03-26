@@ -196,8 +196,7 @@ int main()  // NOLINT
             fiction::area(bb, area_ps, &area_stats);
 
             // write a SiQAD simulation file
-            fiction::write_sqd_layout(fiction::sidb_lattice{cell_level_layout},
-                                      fmt::format("{}/{}.sqd", layouts_folder, benchmark));
+            fiction::write_sqd_layout(cell_level_layout, fmt::format("{}/{}.sqd", layouts_folder, benchmark));
             // TODO integrate defects into the cell layout before writing
 
             // log results

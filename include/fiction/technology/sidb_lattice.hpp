@@ -68,6 +68,7 @@ class sidb_lattice : public Lyt
 
 template <class T, class U>
 sidb_lattice(const T&, const U&) -> sidb_lattice<T, U>;
+
 }  // namespace fiction
 
 #endif  // FICTION_SIDB_LATTICE_HPP

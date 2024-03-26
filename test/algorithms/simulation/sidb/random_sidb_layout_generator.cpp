@@ -2,8 +2,7 @@
 // Created by Jan Drewniok on 04.05.23.
 //
 
-#include <catch2/catch_template_test_macros.hpp>
-#include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include <fiction/algorithms/path_finding/distance.hpp>
 #include <fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp>
@@ -14,6 +13,9 @@
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/sidb_defect_surface.hpp>
 #include <fiction/technology/sidb_defects.hpp>
+#include <fiction/types.hpp>
+
+#include <cstdint>
 
 using namespace fiction;
 
@@ -200,6 +202,40 @@ TEST_CASE("Random cube::coord_t layout generation", "[generate-random-sidb-layou
                     });
             });
         CHECK(counter_different_cell != 0);
+    }
+
+    SECTION("Check all pairwise distances")
+    {
+        const generate_random_sidb_layout_params<sidb_cell_clk_lyt_cube> params{
+            {{0, 0}, {30, 30}},
+            10,
+            generate_random_sidb_layout_params<sidb_cell_clk_lyt_cube>::positive_charges::FORBIDDEN,
+            2,
+            static_cast<uint64_t>(10E6),
+            10};
+        const auto result_lyts = generate_multiple_random_sidb_layouts(sidb_cell_clk_lyt_cube{}, params);
+        REQUIRE(result_lyts.size() == 10);
+
+        for (const auto& lyt : result_lyts)
+        {
+            bool all_cells_fulfill_distance = true;
+            lyt.foreach_cell(
+                [&lyt, &params, &all_cells_fulfill_distance](const auto& cell_first)
+                {
+                    lyt.foreach_cell(
+                        [&lyt, &cell_first, &params, &all_cells_fulfill_distance](const auto& cell_second)
+                        {
+                            if (cell_first != cell_second)
+                            {
+                                if (euclidean_distance(lyt, cell_first, cell_second) < params.minimal_spacing)
+                                {
+                                    all_cells_fulfill_distance = false;
+                                };
+                            }
+                        });
+                });
+            CHECK(all_cells_fulfill_distance);
+        }
     }
 }
 

@@ -110,11 +110,11 @@ int main(int argc, const char* argv[])  // NOLINT
 
                         if (orientation == "100")
                         {
-                            auto lyt = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(ark.string());
+                            auto lyt = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(benchmark.string());
 
-                            const quickexact_params<sidb_100_cell_clk_lyt_siqad> params{arams};
+                            const quickexact_params<sidb_100_cell_clk_lyt_siqad> params{phys_params};
 
-                            const auto simulation_results = xact<sidb_100_cell_clk_lyt_siqad>(lyt, params);
+                            const auto simulation_results = quickexact<sidb_100_cell_clk_lyt_siqad>(lyt, params);
 
                             // Some SiDB layouts where positively charged SiDBs may occur cannot be simulated (i.e., no
                             // physically valid charge distribution is found) because the physical model currently works
@@ -126,11 +126,11 @@ int main(int argc, const char* argv[])  // NOLINT
                         }
                         else if (orientation == "111")
                         {
-                            auto lyt = read_sqd_layout<sidb_111_cell_clk_lyt_siqad>(ark.string());
+                            auto lyt = read_sqd_layout<sidb_111_cell_clk_lyt_siqad>(benchmark.string());
 
-                            const quickexact_params<sidb_111_cell_clk_lyt_siqad> params{arams};
+                            const quickexact_params<sidb_111_cell_clk_lyt_siqad> params{phys_params};
 
-                            const auto simulation_results = xact<sidb_111_cell_clk_lyt_siqad>(lyt, params);
+                            const auto simulation_results = quickexact<sidb_111_cell_clk_lyt_siqad>(lyt, params);
 
                             // Some SiDB layouts where positively charged SiDBs may occur cannot be simulated (i.e., no
                             // physically valid charge distribution is found) because the physical model currently works

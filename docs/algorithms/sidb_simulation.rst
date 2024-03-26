@@ -218,3 +218,11 @@ Convert Potential to Distance
 **Header:** ``fiction/algorithms/simulation/sidb/convert_potential_to_distance.hpp``
 
 .. doxygenfunction:: fiction::convert_potential_to_distance
+
+
+Distance between two SiDBs in Nanometer
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Header:** ``fiction/algorithms/simulation/sidb/sidb_nanometer_distance.hpp``
+
+.. doxygenfunction:: fiction::sidb_nanometer_distance

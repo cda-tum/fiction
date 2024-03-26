@@ -5,8 +5,6 @@
 #ifndef FICTION_DISTANCE_HPP
 #define FICTION_DISTANCE_HPP
 
-#include "fiction/technology/sidb_lattice_orientations.hpp"
-#include "fiction/technology/sidb_nm_position.hpp"
 #include "fiction/traits.hpp"
 
 #include <cmath>
@@ -91,38 +89,6 @@ template <typename Lyt, typename Dist = uint64_t>
 
     return source.x <= target.x && source.y <= target.y ? manhattan_distance<Lyt, Dist>(lyt, source, target) :
                                                           static_cast<Dist>(std::numeric_limits<uint32_t>::max());
-}
-/**
- * Computes the distance between two SiDB cells in nanometers (unit: nm).
- *
- * @tparam Lyt SiDB cell-level layout type.
- * @tparam LatticeOrientation Type of the Si lattice orientation.
- * @param source The source cell.
- * @param target The target cell.
- * @return The distance between the two cells in nanometers (unit: nm).
- */
-template <typename Lyt>
-[[nodiscard]] constexpr double sidb_nanometer_distance(const coordinate<Lyt>& source,
-                                                       const coordinate<Lyt>& target) noexcept
-{
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not based on SiDB technology");
-    static_assert(is_sidb_lattice_v<Lyt>, "Lyt is not an SiDB lattice layout");
-
-    if constexpr (is_sidb_lattice_v<Lyt>)
-    {
-        const auto pos_c1 = sidb_nm_position<Lyt>(source);
-        const auto pos_c2 = sidb_nm_position<Lyt>(target);
-
-        const auto x = pos_c1.first - pos_c2.first;
-        const auto y = pos_c1.second - pos_c2.second;
-
-        return std::hypot(x, y);
-    }
-    else
-    {
-        return {};
-    }
 }
 
 // NOLINTBEGIN(*-special-member-functions): virtual destructor is prudent

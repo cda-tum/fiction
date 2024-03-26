@@ -303,8 +303,6 @@ auto convert_to_siqad_coordinates(const Lyt& lyt) noexcept
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(is_sidb_lattice_v<Lyt>, "Lyt is not a SiDB lattice layout");
-    static_assert(is_sidb_lattice_100_v<Lyt> || is_sidb_lattice_111_v<Lyt>, "Unsupported lattice orientation");
 
     auto process_layout = [&lyt](auto lyt_new)
     {
