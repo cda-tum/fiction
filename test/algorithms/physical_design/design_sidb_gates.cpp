@@ -12,9 +12,10 @@
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/cell_technologies.hpp>
+#include <fiction/technology/sidb_defect_surface.hpp>
 #include <fiction/technology/sidb_defects.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
-#include <fiction/technology/sidb_surface.hpp>
+#include <fiction/technology/sidb_lattice_orientations.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/layout_utils.hpp>
@@ -26,12 +27,9 @@ using namespace fiction;
 
 TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[design-sidb-gates]")
 {
-
-    using layout = sidb_lattice<sidb_cell_clk_lyt_siqad>;
-    using layout_cube =
-        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>>;
-    using layout_offset =
-        sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
+    using layout_offset = sidb_100_cell_clk_lyt;
+    using layout        = sidb_100_cell_clk_lyt_siqad;
+    using layout_cube   = sidb_100_cell_clk_lyt_cube;
 
     layout lyt{};
 
@@ -108,9 +106,7 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
 
 TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[design-sidb-gates]")
 {
-    using layout = sidb_lattice<sidb_cell_clk_lyt_siqad>;
-
-    layout lyt{};
+    sidb_100_cell_clk_lyt_siqad lyt{};
 
     lyt.assign_cell_type({0, 0, 1}, sidb_technology::cell_type::INPUT);
     lyt.assign_cell_type({2, 1, 1}, sidb_technology::cell_type::INPUT);
@@ -129,11 +125,12 @@ TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[
 
     lyt.assign_cell_type({10, 9, 1}, sidb_technology::cell_type::NORMAL);
 
-    design_sidb_gates_params<layout> params{sidb_simulation_parameters{2, -0.28},
-                                            design_sidb_gates_params<layout>::design_sidb_gates_mode::EXHAUSTIVE,
-                                            {{4, 4, 0}, {14, 5, 1}},
-                                            1,
-                                            sidb_simulation_engine::EXGS};
+    design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad> params{
+        sidb_simulation_parameters{2, -0.28},
+        design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::EXHAUSTIVE,
+        {{4, 4, 0}, {14, 5, 1}},
+        1,
+        sidb_simulation_engine::EXGS};
 
     SECTION("Exhaustive Generation")
     {
@@ -143,7 +140,7 @@ TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[
 
     SECTION("Random Generation")
     {
-        params.design_mode            = design_sidb_gates_params<layout>::design_sidb_gates_mode::RANDOM;
+        params.design_mode = design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::RANDOM;
         const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_and_tt()}, params);
         CHECK(!found_gate_layouts.empty());
     }
@@ -151,9 +148,7 @@ TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[
 
 TEST_CASE("Use FO2 Bestagon gate without SiDB at {17, 11, 0} and generate original one", "[design-sidb-gates]")
 {
-    using layout = sidb_lattice<sidb_cell_clk_lyt_siqad>;
-
-    layout lyt{};
+    sidb_100_cell_clk_lyt_siqad lyt{};
 
     lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
     lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::INPUT);
@@ -187,14 +182,14 @@ TEST_CASE("Use FO2 Bestagon gate without SiDB at {17, 11, 0} and generate origin
 
     SECTION("generate original FO2")
     {
-        const design_sidb_gates_params<layout> params{
+        const design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad> params{
             sidb_simulation_parameters{2, -0.32},
-            design_sidb_gates_params<layout>::design_sidb_gates_mode::EXHAUSTIVE,
+            design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::EXHAUSTIVE,
             {{17, 11, 0}, {17, 11, 0}},
             1,
             sidb_simulation_engine::QUICKEXACT};
 
-        CHECK(lyt.get_cell_type({17, 11, 0}) == layout::technology::EMPTY);
+        CHECK(lyt.get_cell_type({17, 11, 0}) == sidb_100_cell_clk_lyt_siqad::technology::EMPTY);
 
         // generate gate by placing one SiDB
 
@@ -202,23 +197,24 @@ TEST_CASE("Use FO2 Bestagon gate without SiDB at {17, 11, 0} and generate origin
 
         REQUIRE(found_gate_layouts.size() == 1);
         CHECK(found_gate_layouts[0].num_cells() == 21);
-        CHECK(found_gate_layouts[0].get_cell_type({17, 11, 0}) == layout::technology::NORMAL);
+        CHECK(found_gate_layouts[0].get_cell_type({17, 11, 0}) == sidb_100_cell_clk_lyt_siqad::technology::NORMAL);
     }
 
     SECTION("replace the output perturbers by equivalent negatively charged defects")
     {
-        const design_sidb_gates_params<sidb_surface<layout>> params{
+        const design_sidb_gates_params<sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>> params{
             sidb_simulation_parameters{2, -0.32},
-            design_sidb_gates_params<sidb_surface<layout>>::design_sidb_gates_mode::EXHAUSTIVE,
+            design_sidb_gates_params<
+                sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::EXHAUSTIVE,
             {{17, 11, 0}, {17, 11, 0}},
             1,
             sidb_simulation_engine::QUICKEXACT};
 
-        sidb_surface defect_layout{lyt};
-        defect_layout.assign_cell_type({36, 19, 0}, technology<sidb_surface<layout>>::cell_type::EMPTY);
-        defect_layout.assign_cell_type({2, 19, 0}, technology<sidb_surface<layout>>::cell_type::EMPTY);
-        CHECK(defect_layout.get_cell_type({36, 19, 0}) == technology<sidb_surface<layout>>::cell_type::EMPTY);
-        CHECK(defect_layout.get_cell_type({2, 19, 0}) == technology<sidb_surface<layout>>::cell_type::EMPTY);
+        sidb_defect_surface defect_layout{lyt};
+        defect_layout.assign_cell_type({36, 19, 0}, sidb_100_cell_clk_lyt_siqad::cell_type::EMPTY);
+        defect_layout.assign_cell_type({2, 19, 0}, sidb_100_cell_clk_lyt_siqad::cell_type::EMPTY);
+        CHECK(defect_layout.get_cell_type({36, 19, 0}) == sidb_100_cell_clk_lyt_siqad::cell_type::EMPTY);
+        CHECK(defect_layout.get_cell_type({2, 19, 0}) == sidb_100_cell_clk_lyt_siqad::cell_type::EMPTY);
 
         defect_layout.assign_sidb_defect(
             {36, 19, 0},
@@ -230,15 +226,13 @@ TEST_CASE("Use FO2 Bestagon gate without SiDB at {17, 11, 0} and generate origin
 
         REQUIRE(found_gate_layouts.size() == 1);
         CHECK(found_gate_layouts[0].num_cells() == 19);
-        CHECK(found_gate_layouts[0].get_cell_type({17, 11, 0}) == technology<layout>::cell_type::NORMAL);
+        CHECK(found_gate_layouts[0].get_cell_type({17, 11, 0}) == sidb_100_cell_clk_lyt_siqad::cell_type::NORMAL);
     }
 }
 
 TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
 {
-    using lattice = sidb_lattice<sidb_cell_clk_lyt_siqad>;
-
-    lattice lyt{};
+    sidb_100_cell_clk_lyt_siqad lyt{};
 
     lyt.assign_cell_type({38, 0, 0}, sidb_technology::cell_type::INPUT);
     lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
@@ -267,9 +261,9 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
 
     SECTION("Random Generation")
     {
-        const design_sidb_gates_params<lattice> params{
+        const design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad> params{
             sidb_simulation_parameters{2, -0.32},
-            design_sidb_gates_params<lattice>::design_sidb_gates_mode::RANDOM,
+            design_sidb_gates_params<sidb_100_cell_clk_lyt_siqad>::design_sidb_gates_mode::RANDOM,
             {{14, 6, 0}, {24, 12, 0}},
             3,
             sidb_simulation_engine::QUICKEXACT};
@@ -281,11 +275,11 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
 
     SECTION("Random Generation with defects")
     {
-        sidb_surface defect_layout{lyt};
+        sidb_defect_surface defect_layout{lyt};
 
-        const design_sidb_gates_params<sidb_surface<lattice>> params{
+        const design_sidb_gates_params<sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>> params{
             sidb_simulation_parameters{2, -0.32},
-            design_sidb_gates_params<sidb_surface<lattice>>::design_sidb_gates_mode::RANDOM,
+            design_sidb_gates_params<sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::RANDOM,
             {{14, 6, 0}, {24, 12, 0}},
             3,
             sidb_simulation_engine::QUICKEXACT};
@@ -313,9 +307,7 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
 
 TEST_CASE("Design AND Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
 {
-    using lattice = sidb_lattice<sidb_cell_clk_lyt_siqad, sidb_111_lattice>;
-
-    lattice lyt{};
+    sidb_111_cell_clk_lyt_siqad lyt{};
 
     lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
     lyt.assign_cell_type({25, 0, 0}, sidb_technology::cell_type::INPUT);
@@ -345,9 +337,9 @@ TEST_CASE("Design AND Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
 
     SECTION("Random Generation")
     {
-        const design_sidb_gates_params<lattice> params{
+        const design_sidb_gates_params<sidb_111_cell_clk_lyt_siqad> params{
             sidb_simulation_parameters{2, -0.32},
-            design_sidb_gates_params<lattice>::design_sidb_gates_mode::RANDOM,
+            design_sidb_gates_params<sidb_111_cell_clk_lyt_siqad>::design_sidb_gates_mode::RANDOM,
             {{10, 11, 0}, {14, 17, 0}},
             3,
             sidb_simulation_engine::QUICKEXACT};
@@ -359,9 +351,9 @@ TEST_CASE("Design AND Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
 
     SECTION("Random Generation")
     {
-        const design_sidb_gates_params<lattice> params{
+        const design_sidb_gates_params<sidb_111_cell_clk_lyt_siqad> params{
             sidb_simulation_parameters{2, -0.32},
-            design_sidb_gates_params<lattice>::design_sidb_gates_mode::EXHAUSTIVE,
+            design_sidb_gates_params<sidb_111_cell_clk_lyt_siqad>::design_sidb_gates_mode::EXHAUSTIVE,
             {{10, 11, 0}, {14, 17, 0}},
             3,
             sidb_simulation_engine::QUICKEXACT};

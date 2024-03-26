@@ -6,30 +6,26 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
-#include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/cell_level_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
-#include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/charge_distribution_surface.hpp>
 #include <fiction/technology/physical_constants.hpp>
 #include <fiction/technology/sidb_charge_state.hpp>
+#include <fiction/technology/sidb_defect_surface.hpp>
 #include <fiction/technology/sidb_defects.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
-#include <fiction/technology/sidb_lattice_types.hpp>
-#include <fiction/technology/sidb_surface.hpp>
+#include <fiction/technology/sidb_lattice_orientations.hpp>
 #include <fiction/traits.hpp>
+#include <fiction/types.hpp>
 
 #include <cmath>
 #include <cstdint>
 
 using namespace fiction;
 
-TEMPLATE_TEST_CASE(
-    "Charge distribution surface traits and construction", "[charge-distribution-surface]",
-    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
-    (sidb_lattice<sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+TEMPLATE_TEST_CASE("Charge distribution surface traits and construction", "[charge-distribution-surface]",
+                   (sidb_lattice<sidb_100_lattice, sidb_cell_clk_lyt_siqad>),
+                   (sidb_lattice<sidb_100_lattice, sidb_defect_surface<sidb_cell_clk_lyt_cube>>))
 {
     REQUIRE(is_cell_level_layout_v<TestType>);
     CHECK(!has_assign_charge_state_v<TestType>);
@@ -53,10 +49,9 @@ TEMPLATE_TEST_CASE(
     CHECK(has_get_charge_state_v<charge_charge_layout>);
 }
 
-TEMPLATE_TEST_CASE(
-    "Assign and delete charge states without defects", "[charge-distribution-surface]",
-    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
-    (sidb_lattice<sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-distribution-surface]",
+                   (sidb_lattice<sidb_100_lattice, sidb_cell_clk_lyt_siqad>),
+                   (sidb_lattice<sidb_100_lattice, sidb_defect_surface<sidb_cell_clk_lyt_siqad>>))
 {
     TestType lyt{};
 
@@ -1314,9 +1309,8 @@ TEMPLATE_TEST_CASE(
     }
 }
 
-TEMPLATE_TEST_CASE(
-    "Assign and delete charge states without defects, part one", "[charge-distribution-surface]",
-    (sidb_lattice<sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+TEMPLATE_TEST_CASE("Assign and delete charge states without defects, part one", "[charge-distribution-surface]",
+                   (sidb_lattice<sidb_100_lattice, sidb_defect_surface<sidb_cell_clk_lyt_siqad>>))
 
 {
     TestType lyt{};
@@ -1558,9 +1552,8 @@ TEMPLATE_TEST_CASE(
     }
 }
 
-TEMPLATE_TEST_CASE(
-    "Assign and delete charge states without defects, part two", "[charge-distribution-surface]",
-    (sidb_lattice<sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+TEMPLATE_TEST_CASE("Assign and delete charge states without defects, part two", "[charge-distribution-surface]",
+                   (sidb_lattice<sidb_100_lattice, sidb_defect_surface<sidb_cell_clk_lyt_siqad>>))
 
 {
     TestType lyt{};
@@ -2127,17 +2120,9 @@ TEMPLATE_TEST_CASE(
     }
 }
 
-TEMPLATE_TEST_CASE(
-    "Assign charge index", "[charge-distribution-surface]",
-    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
-    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, odd_row_hex>>>>),
-    (sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, even_row_hex>>>>),
-    (sidb_lattice<
-        cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, odd_column_hex>>>>),
-    (sidb_lattice<
-        cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, even_column_hex>>>>))
-
+TEST_CASE("Assign charge index", "[charge-distribution-surface]")
 {
+    using TestType = sidb_lattice<sidb_100_lattice, sidb_cell_clk_lyt_siqad>;
     TestType lyt{};
 
     lyt.assign_cell_type({0, 0}, TestType::cell_type::NORMAL);

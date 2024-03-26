@@ -9,12 +9,11 @@
 #include <fiction/algorithms/simulation/sidb/quicksim.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
-#include <fiction/technology/sidb_lattice_types.hpp>
 #include <fiction/types.hpp>
 
 using namespace fiction;
 
-using lattice = sidb_lattice<sidb_cell_clk_lyt_siqad, sidb_100_lattice>;
+using lattice = sidb_111_cell_clk_lyt_siqad;
 
 TEST_CASE("Benchmark simulators", "[benchmark]")
 {

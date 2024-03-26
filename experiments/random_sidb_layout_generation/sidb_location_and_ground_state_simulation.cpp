@@ -7,7 +7,7 @@
 #include "fiction/io/read_sqd_layout.hpp"
 #include "fiction/io/write_location_and_ground_state.hpp"
 #include "fiction/technology/sidb_lattice.hpp"
-#include "fiction/technology/sidb_lattice_types.hpp"
+#include "fiction/technology/sidb_lattice_orientations.hpp"
 #include "fiction/types.hpp"
 
 #include <cstdint>

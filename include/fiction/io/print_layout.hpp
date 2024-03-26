@@ -9,10 +9,10 @@
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
+#include "fiction/technology/sidb_defect_surface.hpp"
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/technology/sidb_lattice.hpp"
-#include "fiction/technology/sidb_lattice_types.hpp"
-#include "fiction/technology/sidb_surface.hpp"
+#include "fiction/technology/sidb_lattice_orientations.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 #include "fiction/utils/layout_utils.hpp"
@@ -342,7 +342,7 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
  * Writes a simplified 2D representation of an SiDB layout (SiDB and defect charges are supported) to an output stream.
  *
  * @tparam Lyt SiDB cell-level layout with charge-information based on SiQAD coordinates or defect-information, e.g., a
- * `charge_distribution_surface` or `sidb_surface`.
+ * `charge_distribution_surface` or `sidb_defect_surface`.
  * @param os Output stream to write into.
  * @param lyt The layout of which the information is to be printed.
  * @param lat_color Flag to utilize color escapes for the lattice, charge states, and atomic defects.
@@ -553,7 +553,7 @@ void print_layout(const Lyt& lyt, std::ostream& os = std::cout)
             else
             {
                 const auto converted_lyt = convert_to_siqad_coordinates(lyt);
-                sidb_lattice<decltype(converted_lyt), typename Lyt::orientation> converted_lyt_lattice{converted_lyt};
+                sidb_lattice<typename Lyt::orientation, decltype(converted_lyt)> converted_lyt_lattice{converted_lyt};
                 print_sidb_layout(os, converted_lyt_lattice);
             }
         }

@@ -2,13 +2,12 @@
 // Created by Jan Drewniok on 25.07.23.
 //
 
-#include <catch2/catch_template_test_macros.hpp>
+#include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
-#include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
-#include <fiction/technology/sidb_lattice_types.hpp>
+#include <fiction/technology/sidb_lattice_orientations.hpp>
 #include <fiction/technology/sidb_nm_position.hpp>
 #include <fiction/types.hpp>
 
@@ -18,7 +17,7 @@ TEST_CASE("SiDB position in nanometer for siqad coordinates", "[sidb-nm-position
 {
     using namespace Catch::Matchers;
 
-    using lattice = sidb_lattice<sidb_cell_clk_lyt_siqad>;
+    using lattice = sidb_lattice<sidb_100_lattice, sidb_cell_clk_lyt_siqad>;
 
     SECTION("Default lattice constants, positive cell coordinates")
     {
@@ -74,7 +73,7 @@ TEST_CASE("SiDB position in nanometer for siqad coordinates", "[sidb-nm-position
 
     SECTION("Si-111 lattice constants")
     {
-        using lattice_111 = sidb_lattice<sidb_cell_clk_lyt_siqad, sidb_111_lattice>;
+        using lattice_111 = sidb_lattice<sidb_111_lattice, sidb_cell_clk_lyt_siqad>;
 
         const auto [pos0_x, pos0_y] = sidb_nm_position<lattice_111>({0, 0, 0});
         CHECK_THAT(pos0_x, WithinAbs(0, 1E-5));
@@ -106,7 +105,7 @@ TEST_CASE("SiDB position in nanometer for fiction coordinates", "[sidb-nm-positi
 {
     using namespace Catch::Matchers;
 
-    using lattice = sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>>;
+    using lattice = sidb_lattice<sidb_100_lattice, sidb_cell_clk_lyt_cube>;
 
     SECTION("Default lattice constants, positive cell coordinates")
     {

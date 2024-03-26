@@ -27,13 +27,13 @@ SiDB Defect Types
 SiDB Defect Surface
 -------------------
 
-**Header:** ``fiction/technology/sidb_surface.hpp``
+**Header:** ``fiction/technology/sidb_defect_surface.hpp``
 
-.. doxygenclass:: fiction::sidb_surface
+.. doxygenclass:: fiction::sidb_defect_surface
    :members:
-.. doxygenclass:: fiction::sidb_surface< Lyt, true >
+.. doxygenclass:: fiction::sidb_defect_surface< Lyt, true >
    :members:
-.. doxygenclass:: fiction::sidb_surface< Lyt, false >
+.. doxygenclass:: fiction::sidb_defect_surface< Lyt, false >
    :members:
 
 

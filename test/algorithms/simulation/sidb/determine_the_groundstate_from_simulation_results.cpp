@@ -11,11 +11,12 @@
 #include <fiction/technology/charge_distribution_surface.hpp>
 #include <fiction/technology/sidb_charge_state.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
+#include <fiction/technology/sidb_lattice_orientations.hpp>
 #include <fiction/types.hpp>
 
 using namespace fiction;
 
-using lattice = sidb_lattice<sidb_cell_clk_lyt>;
+using lattice = sidb_100_cell_clk_lyt;
 
 TEST_CASE("Determine the groundstate from simulation results", "[determine-the-groundstate-from-simulation-results]")
 {
@@ -52,8 +53,8 @@ TEST_CASE("Determine the groundstate from simulation results", "[determine-the-g
     {
         lattice lyt{};
 
-        lyt.assign_cell_type({5, 4}, sidb_cell_clk_lyt::cell_type::NORMAL);
-        lyt.assign_cell_type({6, 4}, sidb_cell_clk_lyt::cell_type::NORMAL);
+        lyt.assign_cell_type({5, 4}, lattice::cell_type::NORMAL);
+        lyt.assign_cell_type({6, 4}, lattice::cell_type::NORMAL);
 
         charge_distribution_surface cds1{lyt};
         cds1.assign_charge_state({5, 4}, sidb_charge_state::NEUTRAL);

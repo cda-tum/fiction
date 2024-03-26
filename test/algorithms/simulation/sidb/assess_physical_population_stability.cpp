@@ -7,9 +7,6 @@
 
 #include <fiction/algorithms/simulation/sidb/assess_physical_population_stability.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
-#include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/cell_level_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
@@ -17,14 +14,12 @@
 
 using namespace fiction;
 
-using layout = sidb_cell_clk_lyt_siqad;
-
 TEST_CASE("Single SiDB", "[assess-physical-population-stability]")
 {
-    layout lyt{};
+    sidb_cell_clk_lyt_siqad lyt{};
     lyt.assign_cell_type({1, 1, 0}, sidb_technology::cell_type::NORMAL);
 
-    const sidb_lattice lat{lyt};
+    const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
     SECTION("Precision of distance_corresponding_to_potential is two")
     {
@@ -55,13 +50,13 @@ TEST_CASE("Single SiDB", "[assess-physical-population-stability]")
 
 TEST_CASE("Three SiDBs with positive charge states", "[assess-physical-population-stability]")
 {
-    layout     lyt{};
-    const auto params = assess_physical_population_stability_params{};
+    sidb_cell_clk_lyt_siqad lyt{};
+    const auto              params = assess_physical_population_stability_params{};
     lyt.assign_cell_type({1, 1, 0}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({1, 1, 1}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::NORMAL);
 
-    const sidb_lattice lat{lyt};
+    const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
     const auto result = assess_physical_population_stability(lat, params);
     REQUIRE(result.size() == 3);
@@ -104,8 +99,8 @@ TEST_CASE("Three SiDBs with positive charge states", "[assess-physical-populatio
 
 TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]")
 {
-    layout     lyt{};
-    const auto params = assess_physical_population_stability_params{};
+    sidb_cell_clk_lyt_siqad lyt{};
+    const auto              params = assess_physical_population_stability_params{};
     lyt.assign_cell_type({36, 1, 0}, sidb_technology::cell_type::INPUT);
     lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::INPUT);
 
@@ -135,7 +130,7 @@ TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]")
 
     lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
 
-    sidb_lattice lat{lyt};
+    sidb_100_cell_clk_lyt_siqad lat{lyt};
 
     SECTION("no input specified")
     {
@@ -211,8 +206,8 @@ TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]")
 
 TEST_CASE("Bestagon CROSSING gate input 11, using siqad coordinates", "[assess-physical-population-stability]")
 {
-    layout     lyt{};
-    const auto params = assess_physical_population_stability_params{};
+    sidb_cell_clk_lyt_siqad lyt{};
+    const auto              params = assess_physical_population_stability_params{};
     lyt.assign_cell_type({36, 1, 0}, sidb_technology::cell_type::INPUT);
     lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::INPUT);
 
@@ -250,7 +245,7 @@ TEST_CASE("Bestagon CROSSING gate input 11, using siqad coordinates", "[assess-p
     lyt.assign_cell_type({2, 19, 0}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
 
-    const sidb_lattice lat{lyt};
+    const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
     CHECK(lyt.num_cells() == 27);
 
@@ -266,7 +261,7 @@ TEST_CASE("Bestagon CROSSING gate input 11, using siqad coordinates", "[assess-p
 
 TEST_CASE("Bestagon CROSSING gate input 11, using cube coordinates", "[assess-physical-population-stability]")
 {
-    cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>> lyt{};
+    sidb_cell_clk_lyt_cube lyt{};
 
     const auto params = assess_physical_population_stability_params{};
     lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{36, 1, 0}),
@@ -335,7 +330,7 @@ TEST_CASE("Bestagon CROSSING gate input 11, using cube coordinates", "[assess-ph
 
     CHECK(lyt.num_cells() == 27);
 
-    const sidb_lattice lat{lyt};
+    const sidb_lattice<sidb_100_lattice, sidb_cell_clk_lyt_cube> lat{lyt};
 
     const auto result = assess_physical_population_stability(lat, params);
     REQUIRE(result.size() == 20);
@@ -349,7 +344,7 @@ TEST_CASE("Bestagon CROSSING gate input 11, using cube coordinates", "[assess-ph
 
 TEST_CASE("Bestagon CROSSING gate input 11, using offset coordinates", "[assess-physical-population-stability]")
 {
-    sidb_cell_clk_lyt lyt{};
+    sidb_100_cell_clk_lyt lyt{};
 
     const auto params = assess_physical_population_stability_params{};
     lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{36, 1, 0}),
@@ -418,7 +413,7 @@ TEST_CASE("Bestagon CROSSING gate input 11, using offset coordinates", "[assess-
 
     CHECK(lyt.num_cells() == 27);
 
-    const sidb_lattice lat{lyt};
+    const sidb_lattice<sidb_100_lattice, sidb_100_cell_clk_lyt> lat{lyt};
 
     const auto result = assess_physical_population_stability(lat, params);
     REQUIRE(result.size() == 20);

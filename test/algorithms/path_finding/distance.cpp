@@ -463,7 +463,7 @@ TEST_CASE("a_star distance functor", "[distance]")
 TEST_CASE("SiDB nanometer distance", "[distance]")
 {
     using namespace Catch::Matchers;
-    using lattice = sidb_lattice<sidb_cell_clk_lyt_siqad>;
+    using lattice = sidb_100_cell_clk_lyt_siqad;
     const lattice layout{};
 
     CHECK_THAT(sidb_nanometer_distance<lattice>({0, 0}, {0, 0}), WithinAbs(0.0, 0.00001));

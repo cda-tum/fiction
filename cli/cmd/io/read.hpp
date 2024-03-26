@@ -49,7 +49,7 @@ class read_command : public command
         add_option("topology", topology,
                    "Topology for gate-level layouts. Can be 'cartesian' or of the form "
                    "'<odd|even>_<row|column>_<cartesian|hex>'");
-        add_option("--lattice_orientation,-o", orientation, "Lattice orientation to use {100, 111}");
+        add_option("--lattice_orientation,-o", orientation, "Lattice orientation for SQD files to use {100, 111}");
         add_flag("--aig,-a", "Parse Verilog file as AIG");
         add_flag("--xag,-x", "Parse Verilog file as XAG");
         add_flag("--mig,-m", "Parse Verilog file as MIG");
@@ -219,17 +219,17 @@ class read_command : public command
 
                                     if (orientation == "100")
                                     {
-                                        const auto layout =
-                                            fiction::read_sqd_layout<fiction::sidb_cell_clk_lyt>(filename, layout_name);
+                                        const auto layout = fiction::read_sqd_layout<fiction::sidb_100_cell_clk_lyt>(
+                                            filename, layout_name);
                                         store<fiction::cell_layout_t>().extend() =
-                                            std::make_shared<fiction::sidb_cell_clk_lyt>(layout);
+                                            std::make_shared<fiction::sidb_100_cell_clk_lyt>(layout);
                                     }
                                     else if (orientation == "111")
                                     {
-                                        const auto layout = fiction::read_sqd_layout<fiction::sidb_cell_clk_lyt_111>(
+                                        const auto layout = fiction::read_sqd_layout<fiction::sidb_111_cell_clk_lyt>(
                                             filename, layout_name);
                                         store<fiction::cell_layout_t>().extend() =
-                                            std::make_shared<fiction::sidb_cell_clk_lyt_111>(layout);
+                                            std::make_shared<fiction::sidb_111_cell_clk_lyt>(layout);
                                     }
                                 }
                                 catch (const fiction::sqd_parsing_error& e)

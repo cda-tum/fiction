@@ -5,7 +5,7 @@
 #ifndef FICTION_DISTANCE_HPP
 #define FICTION_DISTANCE_HPP
 
-#include "fiction/technology/sidb_lattice_types.hpp"
+#include "fiction/technology/sidb_lattice_orientations.hpp"
 #include "fiction/technology/sidb_nm_position.hpp"
 #include "fiction/traits.hpp"
 

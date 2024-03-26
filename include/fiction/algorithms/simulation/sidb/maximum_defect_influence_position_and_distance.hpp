@@ -9,8 +9,8 @@
 #include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
 #include "fiction/layouts/bounding_box.hpp"
+#include "fiction/technology/sidb_defect_surface.hpp"
 #include "fiction/technology/sidb_defects.hpp"
-#include "fiction/technology/sidb_surface.hpp"
 #include "fiction/types.hpp"
 #include "fiction/utils/execution_utils.hpp"
 #include "fiction/utils/layout_utils.hpp"
@@ -72,8 +72,8 @@ class maximum_defect_influence_position_and_distance_impl
 
     std::pair<typename Lyt::cell, double> run() noexcept
     {
-        const quickexact_params<sidb_surface<Lyt>> params_defect{
-            params.physical_params, quickexact_params<sidb_surface<Lyt>>::automatic_base_number_detection::OFF};
+        const quickexact_params<sidb_defect_surface<Lyt>> params_defect{
+            params.physical_params, quickexact_params<sidb_defect_surface<Lyt>>::automatic_base_number_detection::OFF};
 
         double          avoidance_distance{0};
         coordinate<Lyt> max_defect_position{};
@@ -102,7 +102,7 @@ class maximum_defect_influence_position_and_distance_impl
         {
             if (layout.get_cell_type(defect) == Lyt::technology::cell_type::EMPTY)
             {
-                sidb_surface<Lyt> lyt_defect{};
+                sidb_defect_surface<Lyt> lyt_defect{};
 
                 layout.foreach_cell([this, &lyt_defect](const auto& cell)
                                     { lyt_defect.assign_cell_type(cell, layout.get_cell_type(cell)); });

@@ -9,7 +9,7 @@
 #include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
-#include "fiction/technology/sidb_lattice_types.hpp"
+#include "fiction/technology/sidb_lattice_orientations.hpp"
 #include "fiction/types.hpp"
 #include "fiction/utils/math_utils.hpp"
 

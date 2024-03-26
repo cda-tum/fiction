@@ -9,7 +9,7 @@
 #include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
-#include <fiction/technology/sidb_lattice_types.hpp>
+#include <fiction/technology/sidb_lattice_orientations.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/name_utils.hpp>
@@ -134,7 +134,7 @@ class quickexact_command : public command
 
                             min_energy = min_energy_distr->get_system_energy();
                             store<fiction::cell_layout_t>().extend() =
-                                std::make_shared<fiction::cds_sidb_cell_clk_lyt>(*min_energy_distr);
+                                std::make_shared<fiction::cds_sidb_100_cell_clk_lyt>(*min_energy_distr);
                         }
                         else if constexpr (fiction::has_same_lattice_orientation_v<Lyt, fiction::sidb_111_lattice>)
                         {
@@ -144,7 +144,7 @@ class quickexact_command : public command
 
                             min_energy = min_energy_distr->get_system_energy();
                             store<fiction::cell_layout_t>().extend() =
-                                std::make_shared<fiction::cds_sidb_cell_clk_lyt_111>(*min_energy_distr);
+                                std::make_shared<fiction::cds_sidb_111_cell_clk_lyt>(*min_energy_distr);
                         }
                     }
                 }
@@ -168,15 +168,15 @@ class quickexact_command : public command
     /**
      * QuickExact parameters.
      */
-    fiction::quickexact_params<fiction::sidb_cell_clk_lyt> params{};
+    fiction::quickexact_params<fiction::sidb_100_cell_clk_lyt> params{};
     /**
      * Simulation result for H-Si 100.
      */
-    fiction::sidb_simulation_result<fiction::sidb_cell_clk_lyt> sim_result{};
+    fiction::sidb_simulation_result<fiction::sidb_100_cell_clk_lyt> sim_result{};
     /**
      * Simulation result for H-Si 111.
      */
-    fiction::sidb_simulation_result<fiction::sidb_cell_clk_lyt_111> sim_result_111{};
+    fiction::sidb_simulation_result<fiction::sidb_111_cell_clk_lyt> sim_result_111{};
     /**
      * Minimum energy.
      */

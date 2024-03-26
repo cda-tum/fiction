@@ -10,7 +10,7 @@
 #include <fiction/io/read_sqd_layout.hpp>           // reader for SiDB layouts
 #include <fiction/io/write_operational_domain.hpp>  // writer for operational domains
 #include <fiction/technology/sidb_lattice.hpp>
-#include <fiction/technology/sidb_lattice_types.hpp>
+#include <fiction/technology/sidb_lattice_orientations.hpp>
 #include <fiction/types.hpp>                    // pre-defined types suitable for the FCN domain
 #include <fiction/utils/truth_table_utils.hpp>  // truth tables helper functions
 
@@ -88,8 +88,7 @@ int main()  // NOLINT
 
             std::cout << benchmark << std::endl;
 
-            const auto lyt =
-                read_sqd_layout<sidb_lattice<sidb_cell_clk_lyt_siqad, sidb_100_lattice>>(benchmark.string(), gate);
+            const auto lyt = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(benchmark.string(), gate);
 
             // operational domain stats
             operational_domain_stats op_domain_stats_gs{};

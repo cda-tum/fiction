@@ -16,9 +16,9 @@
 #include <fiction/technology/area.hpp>                   // area requirement calculations
 #include <fiction/technology/cell_technologies.hpp>      // cell implementations
 #include <fiction/technology/sidb_bestagon_library.hpp>  // a pre-defined SiDB gate library
+#include <fiction/technology/sidb_defect_surface.hpp>    // H-Si(100) 2x1 surface model
 #include <fiction/technology/sidb_defects.hpp>           // SiDB defect classes
 #include <fiction/technology/sidb_lattice.hpp>
-#include <fiction/technology/sidb_surface.hpp>                // H-Si(100) 2x1 surface model
 #include <fiction/technology/sidb_surface_analysis.hpp>       // SiDB surface analysis
 #include <fiction/technology/technology_mapping_library.hpp>  // pre-defined gate types for technology mapping
 #include <fiction/types.hpp>                                  // pre-defined types suitable for the FCN domain
@@ -51,7 +51,7 @@
 int main()  // NOLINT
 {
     using gate_lyt = fiction::hex_even_row_gate_clk_lyt;
-    using cell_lyt = fiction::sidb_cell_clk_lyt;
+    using cell_lyt = fiction::sidb_100_cell_clk_lyt;
 
     static const std::string layouts_folder = fmt::format("{}/defect_aware_physical_design/layouts", EXPERIMENTS_PATH);
 
@@ -117,7 +117,7 @@ int main()  // NOLINT
     const fiction::sidb_surface_params surface_params{
         std::unordered_set<fiction::sidb_defect_type>{fiction::sidb_defect_type::DB}};
 
-    // fiction::sidb_surface<cell_lyt> surface_lattice{surface_params};
+    // fiction::sidb_defect_surface<cell_lyt> surface_lattice{surface_params};
 
     // read surface scan lattice data
     const auto surface_lattice = fiction::read_sidb_surface_defects<cell_lyt>(

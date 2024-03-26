@@ -8,12 +8,10 @@
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 #include <fiction/io/write_sqd_sim_result.hpp>
-#include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/cell_level_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
+#include <fiction/types.hpp>
 
 #include <any>
 #include <chrono>
@@ -158,7 +156,7 @@ TEST_CASE("Write empty simulation result", "[sqd-sim-result]")
 {
     using namespace std::chrono_literals;
 
-    using lattice = sidb_lattice<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>;
+    using lattice = sidb_lattice<sidb_100_lattice, sidb_cell_clk_lyt_siqad>;
 
     sidb_simulation_result<lattice> sim_result{};
 
@@ -273,7 +271,7 @@ TEST_CASE("Write simulation result with ExGS simulation", "[sqd-sim-result]")
 {
     using namespace std::chrono_literals;
 
-    using sidb_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>;
+    using sidb_layout = sidb_cell_clk_lyt;
 
     sidb_layout lyt{{20, 10}};
 
@@ -289,7 +287,7 @@ TEST_CASE("Write simulation result with ExGS simulation", "[sqd-sim-result]")
 
     const sidb_simulation_parameters params{2, -0.32};
 
-    const sidb_lattice lat{lyt};
+    const sidb_lattice<sidb_100_lattice, sidb_layout> lat{lyt};
 
     auto sim_result = exhaustive_ground_state_simulation(lat, params);
 
@@ -340,7 +338,7 @@ TEST_CASE("Write simulation result with ExGS simulation and positive DBs", "[sqd
 {
     using namespace std::chrono_literals;
 
-    using sidb_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>;
+    using sidb_layout = sidb_cell_clk_lyt_siqad;
 
     sidb_layout lyt{{20, 10}};
 
@@ -350,7 +348,7 @@ TEST_CASE("Write simulation result with ExGS simulation and positive DBs", "[sqd
 
     const sidb_simulation_parameters params{3, -0.32};
 
-    const sidb_lattice lat{lyt};
+    const sidb_lattice<sidb_100_lattice, sidb_layout> lat{lyt};
 
     auto sim_result = exhaustive_ground_state_simulation(lat, params);
 

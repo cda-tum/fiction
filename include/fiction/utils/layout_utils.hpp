@@ -9,9 +9,9 @@
 #include "fiction/layouts/coordinates.hpp"
 #include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
+#include "fiction/technology/sidb_defect_surface.hpp"
 #include "fiction/technology/sidb_lattice.hpp"
-#include "fiction/technology/sidb_lattice_types.hpp"
-#include "fiction/technology/sidb_surface.hpp"
+#include "fiction/technology/sidb_lattice_orientations.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 
@@ -304,6 +304,7 @@ auto convert_to_siqad_coordinates(const Lyt& lyt) noexcept
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(is_sidb_lattice_v<Lyt>, "Lyt is not a SiDB lattice layout");
+    static_assert(is_sidb_lattice_100_v<Lyt> || is_sidb_lattice_111_v<Lyt>, "Unsupported lattice orientation");
 
     auto process_layout = [&lyt](auto lyt_new)
     {
@@ -322,7 +323,8 @@ auto convert_to_siqad_coordinates(const Lyt& lyt) noexcept
 
         if constexpr (is_charge_distribution_surface_v<Lyt> && has_get_sidb_defect_v<Lyt>)
         {
-            charge_distribution_surface<decltype(sidb_surface{lyt_new})> lyt_new_cds{sidb_surface{lyt_new}};
+            charge_distribution_surface<decltype(sidb_defect_surface{lyt_new})> lyt_new_cds{
+                sidb_defect_surface{lyt_new}};
 
             lyt.foreach_cell(
                 [&lyt_new_cds, &lyt](const auto& c)
@@ -336,7 +338,7 @@ auto convert_to_siqad_coordinates(const Lyt& lyt) noexcept
         }
         else if constexpr (has_get_sidb_defect_v<Lyt>)
         {
-            sidb_surface lyt_surface{lyt_new};
+            sidb_defect_surface lyt_surface{lyt_new};
             lyt.foreach_defect([&lyt_surface, &lyt](const auto& c)
                                { lyt_surface.assign_defect(siqad::to_siqad_coord(c), lyt.get_defect(c)); });
             return lyt_surface;
@@ -347,37 +349,32 @@ auto convert_to_siqad_coordinates(const Lyt& lyt) noexcept
         }
     };
 
-    if constexpr (has_same_lattice_orientation_v<Lyt, sidb_100_lattice>)
+    if constexpr (is_sidb_lattice_100_v<Lyt>)
     {
-        sidb_lattice<sidb_cell_clk_lyt_siqad, sidb_100_lattice> lyt_new{};
-        return process_layout(lyt_new);
-    }
-    else if constexpr (has_same_lattice_orientation_v<Lyt, sidb_111_lattice>)
-    {
-        sidb_lattice<sidb_cell_clk_lyt_siqad, sidb_111_lattice> lyt_new{};
-        return process_layout(lyt_new);
+        return process_layout(sidb_lattice<sidb_100_lattice, sidb_cell_clk_lyt_siqad>{});
     }
     else
     {
-        assert(false && "No valid lattice orientation!");
+        return process_layout(sidb_lattice<sidb_111_lattice, sidb_cell_clk_lyt_siqad>{});
     }
 }
 
 /**
- * Converts the coordinates of a given cell-level layout to fiction coordinates, e.g., `offset::ucoord_t` or
- * `cube::coord_t`. A new equivalent layout based on fiction coordinates is returned.
+ * Converts the coordinates of a given cell-level layout to alternative coordinates,
+ * such as `offset::ucoord_t` or `cube::coord_t`. Returns a new layout equivalent to the original
+ * layout but based on the specified coordinate system.
  *
- * @tparam Lyt Cell-level layout type based on fiction coordinates.
- * @tparam TargetLyt Cell-level layout type based on fiction coordinates.
+ * @tparam LytDest Source cell-level layout type.
+ * @tparam LytSrc Target cell-level layout type.
  * @param lyt The layout that is to be converted to a new layout based on fiction coordinates.
  * @return A new equivalent layout based on fiction coordinates.
  */
-template <typename LytTarget, typename LytSource>
-LytTarget convert_to_fiction_coordinates(const LytSource& lyt) noexcept
+template <typename LytDest, typename LytSrc>
+LytDest convert_to_fiction_coordinates(const LytSrc& lyt) noexcept
 {
-    static_assert(is_cartesian_layout_v<LytSource>, "Lyt is not a Cartesian layout");
-    static_assert(is_cell_level_layout_v<LytSource>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<LytSource>, "Lyt is not an SiDB layout");
+    static_assert(is_cartesian_layout_v<LytSrc>, "Lyt is not a Cartesian layout");
+    static_assert(is_cell_level_layout_v<LytSrc>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<LytSrc>, "Lyt is not an SiDB layout");
 
     bool are_cells_assigned_to_negative_coordinates = false;
 
@@ -395,7 +392,7 @@ LytTarget convert_to_fiction_coordinates(const LytSource& lyt) noexcept
             return true;  // keep looping
         });
 
-    LytTarget lyt_new{};
+    LytDest lyt_new{};
 
     lyt_new.resize({lyt.x(), 2 * lyt.y() + 1});
     lyt_new.set_layout_name(lyt.get_layout_name());
@@ -407,15 +404,15 @@ LytTarget convert_to_fiction_coordinates(const LytSource& lyt) noexcept
         base_lyt.foreach_cell(
             [&lyt_new, &base_lyt](const auto& c)
             {
-                lyt_new.assign_cell_type(siqad::to_fiction_coord<cell<LytTarget>>(c), base_lyt.get_cell_type(c));
-                lyt_new.assign_cell_mode(siqad::to_fiction_coord<cell<LytTarget>>(c), base_lyt.get_cell_mode(c));
-                lyt_new.assign_cell_name(siqad::to_fiction_coord<cell<LytTarget>>(c), base_lyt.get_cell_name(c));
+                lyt_new.assign_cell_type(siqad::to_fiction_coord<cell<LytDest>>(c), base_lyt.get_cell_type(c));
+                lyt_new.assign_cell_mode(siqad::to_fiction_coord<cell<LytDest>>(c), base_lyt.get_cell_mode(c));
+                lyt_new.assign_cell_name(siqad::to_fiction_coord<cell<LytDest>>(c), base_lyt.get_cell_name(c));
             });
     };
 
-    if (has_offset_ucoord_v<LytTarget> && !lyt.is_empty() && are_cells_assigned_to_negative_coordinates)
+    if (has_offset_ucoord_v<LytDest> && !lyt.is_empty() && are_cells_assigned_to_negative_coordinates)
     {
-        auto lyt_normalized = normalize_layout_coordinates<LytSource>(lyt);
+        auto lyt_normalized = normalize_layout_coordinates<LytSrc>(lyt);
         assign_coordinates(lyt_normalized);
         lyt_new.resize({lyt_normalized.x(), 2 * lyt_normalized.y() + 1});
     }

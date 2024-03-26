@@ -3,7 +3,7 @@ H-Si Lattice Orientations
 
 A collection of two supported H-Si lattice orientations.
 
-**Header:** ``fiction/technology/sidb_lattice_types.hpp``
+**Header:** ``fiction/technology/sidb_lattice_orientations.hpp``
 
 .. doxygenstruct:: fiction::sidb_100_lattice
    :members:

@@ -2,8 +2,8 @@
 // Created by marcel on 07.03.22.
 //
 
-#ifndef FICTION_SIDB_SURFACE_HPP
-#define FICTION_SIDB_SURFACE_HPP
+#ifndef FICTION_SIDB_DEFECT_SURFACE_HPP
+#define FICTION_SIDB_DEFECT_SURFACE_HPP
 
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/sidb_defects.hpp"
@@ -36,22 +36,22 @@ struct sidb_surface_params
  * fabrication defects on the H-Si(100) 2x1 surface.
  *
  * @tparam Lyt SiDB cell-level layout.
- * @tparam has_sidb_defect_interface Automatically determines whether a defect interface is already present.
+ * @tparam has_sidb_defect_surface Automatically determines whether a defect interface is already present.
  */
 template <typename Lyt,
-          bool has_sidb_defect_interface = std::conjunction_v<has_assign_sidb_defect<Lyt>, has_get_sidb_defect<Lyt>>>
-class sidb_surface : public Lyt
+          bool has_sidb_defect_surface = std::conjunction_v<has_assign_sidb_defect<Lyt>, has_get_sidb_defect<Lyt>>>
+class sidb_defect_surface : public Lyt
 {};
 
 template <typename Lyt>
-class sidb_surface<Lyt, true> : public Lyt
+class sidb_defect_surface<Lyt, true> : public Lyt
 {
   public:
-    explicit sidb_surface(const Lyt& lyt, [[maybe_unused]] const sidb_surface_params& ps = {}) : Lyt(lyt) {}
+    explicit sidb_defect_surface(const Lyt& lyt, [[maybe_unused]] const sidb_surface_params& ps = {}) : Lyt(lyt) {}
 };
 
 template <typename Lyt>
-class sidb_surface<Lyt, false> : public Lyt
+class sidb_defect_surface<Lyt, false> : public Lyt
 {
   public:
     struct sidb_surface_storage
@@ -68,7 +68,9 @@ class sidb_surface<Lyt, false> : public Lyt
     /**
      * Standard constructor for empty layouts.
      */
-    explicit sidb_surface(const sidb_surface_params& ps = {}) : Lyt(), strg{std::make_shared<sidb_surface_storage>(ps)}
+    explicit sidb_defect_surface(const sidb_surface_params& ps = {}) :
+            Lyt(),
+            strg{std::make_shared<sidb_surface_storage>(ps)}
     {
         static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
         static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -81,7 +83,7 @@ class sidb_surface<Lyt, false> : public Lyt
      *
      * @param ar aspect ratio of the layout.
      */
-    explicit sidb_surface(const typename Lyt::aspect_ratio& ar, const sidb_surface_params& ps = {}) :
+    explicit sidb_defect_surface(const typename Lyt::aspect_ratio& ar, const sidb_surface_params& ps = {}) :
             Lyt(ar),
             strg{std::make_shared<sidb_surface_storage>(ps)}
     {
@@ -96,7 +98,7 @@ class sidb_surface<Lyt, false> : public Lyt
      *
      * @param lyt Existing layout that is to be extended by an SiDB defect interface.
      */
-    explicit sidb_surface(const Lyt& lyt, const sidb_surface_params& ps = {}) :
+    explicit sidb_defect_surface(const Lyt& lyt, const sidb_surface_params& ps = {}) :
             Lyt(lyt),
             strg{std::make_shared<sidb_surface_storage>(ps)}
     {
@@ -110,9 +112,9 @@ class sidb_surface<Lyt, false> : public Lyt
      *
      * @return Deep copy of the layout.
      */
-    [[nodiscard]] sidb_surface clone() const noexcept
+    [[nodiscard]] sidb_defect_surface clone() const noexcept
     {
-        sidb_surface copy{Lyt::clone()};
+        sidb_defect_surface copy{Lyt::clone()};
         copy.strg = std::make_shared<sidb_surface_storage>(*strg);
 
         return copy;
@@ -228,8 +230,8 @@ class sidb_surface<Lyt, false> : public Lyt
 };
 
 template <class T>
-sidb_surface(const T&) -> sidb_surface<T>;
+sidb_defect_surface(const T&) -> sidb_defect_surface<T>;
 
 }  // namespace fiction
 
-#endif  // FICTION_SIDB_SURFACE_HPP
+#endif  // FICTION_SIDB_DEFECT_SURFACE_HPP

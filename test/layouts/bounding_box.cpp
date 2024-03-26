@@ -9,6 +9,7 @@
 #include <fiction/layouts/bounding_box.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
+#include <fiction/technology/sidb_lattice_orientations.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -28,7 +29,7 @@ TEST_CASE("Initialize 2D gate-level bounding box", "[bounding-box]")
 {
     const auto lyt_xor_maj = blueprints::xor_maj_gate_layout<cart_gate_clk_lyt>();
 
-    bounding_box_2d bb_xor_maj{lyt_xor_maj};
+    const bounding_box_2d bb_xor_maj{lyt_xor_maj};
 
     CHECK(bb_xor_maj.get_min() == tile<cart_gate_clk_lyt>{0, 0});
     CHECK(bb_xor_maj.get_max() == tile<cart_gate_clk_lyt>{3, 2});
@@ -46,7 +47,7 @@ TEST_CASE("Initialize 2D gate-level bounding box", "[bounding-box]")
 
     const auto lyt_crossing = blueprints::crossing_layout<cart_gate_clk_lyt>();
 
-    bounding_box_2d bb_crossing{lyt_crossing};
+    const bounding_box_2d bb_crossing{lyt_crossing};
 
     CHECK(bb_crossing.get_min() == tile<cart_gate_clk_lyt>{0, 0});
     CHECK(bb_crossing.get_max() == tile<cart_gate_clk_lyt>{3, 2});
@@ -231,7 +232,7 @@ TEST_CASE("2D bounding box for siqad layout", "[bounding-box]")
         lyt.assign_cell_type({-2, 4, 0}, sidb_cell_clk_lyt_siqad::technology::NORMAL);
         lyt.assign_cell_type({2, 4, 1}, sidb_cell_clk_lyt_siqad::technology::NORMAL);
 
-        const bounding_box_2d bb{sidb_lattice{lyt}};
+        const bounding_box_2d bb{sidb_100_cell_clk_lyt_siqad{lyt}};
         const auto            nw = bb.get_min();
         const auto            se = bb.get_max();
 

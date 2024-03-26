@@ -12,6 +12,7 @@
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/technology/sidb_defects.hpp"
+#include "fiction/technology/sidb_lattice_orientations.hpp"
 
 #include <mockturtle/traits.hpp>
 
@@ -675,8 +676,11 @@ inline constexpr bool has_get_layout_name_v = has_get_layout_name<Ntk>::value;
 #pragma endregion
 
 /**
- * SiDB lattice surfaces
+ * SiDB lattice orientations
  */
+
+template <typename Lyt>
+using lattice_orientation = typename Lyt::orientation;
 
 template <typename Lyt, typename LatticeOrientation>
 inline constexpr const bool has_same_lattice_orientation_v =
@@ -693,8 +697,14 @@ struct is_sidb_lattice<Lyt, std::void_t<typename Lyt::orientation>> : std::true_
 template <typename Lyt>
 constexpr bool is_sidb_lattice_v = is_sidb_lattice<Lyt>::value;
 
+template <typename Lyt>
+constexpr bool is_sidb_lattice_100_v = has_same_lattice_orientation_v<Lyt, sidb_100_lattice>;
+
+template <typename Lyt>
+constexpr bool is_sidb_lattice_111_v = has_same_lattice_orientation_v<Lyt, sidb_111_lattice>;
+
 /**
- * SiDB surfaces
+ * SiDB defect surface
  */
 
 #pragma region has_assign_sidb_defect

@@ -5,10 +5,9 @@
 #ifndef FICTION_READ_SQD_LAYOUT_HPP
 #define FICTION_READ_SQD_LAYOUT_HPP
 
-#include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/sidb_defects.hpp"
-#include "fiction/technology/sidb_lattice_types.hpp"
+#include "fiction/technology/sidb_lattice_orientations.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/name_utils.hpp"
 

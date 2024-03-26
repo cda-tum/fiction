@@ -8,6 +8,7 @@
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
+#include <fiction/technology/sidb_lattice_orientations.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/layout_utils.hpp>
 
@@ -19,7 +20,7 @@ using namespace fiction;
 
 TEST_CASE("Traits", "[bdl-input-iterator]")
 {
-    using layout = sidb_lattice<sidb_cell_clk_lyt_siqad>;
+    using layout = sidb_100_cell_clk_lyt_siqad;
 
     CHECK(std::is_same_v<std::iterator_traits<bdl_input_iterator<layout>>::iterator_category,
                          std::random_access_iterator_tag>);
@@ -31,7 +32,7 @@ TEST_CASE("Traits", "[bdl-input-iterator]")
 
 TEST_CASE("Operators", "[bdl-input-iterators]")
 {
-    using layout = sidb_lattice<sidb_cell_clk_lyt_siqad>;
+    using layout = sidb_100_cell_clk_lyt_siqad;
 
     const layout lyt{};
 
@@ -106,7 +107,7 @@ TEST_CASE("Operators", "[bdl-input-iterators]")
 
 TEST_CASE("Empty layout iteration", "[bdl-input-iterator]")
 {
-    using layout = sidb_lattice<sidb_cell_clk_lyt_siqad>;
+    using layout = sidb_100_cell_clk_lyt_siqad;
 
     const layout lyt{};
 
@@ -156,9 +157,9 @@ TEST_CASE("BDL wire iteration", "[bdl-input-iterator]")
     lyt.assign_cell_type({18, 0, 0}, sidb_technology::cell_type::OUTPUT);
     lyt.assign_cell_type({20, 0, 0}, sidb_technology::cell_type::OUTPUT);
 
-    const sidb_lattice lat{lyt};
+    const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
-    bdl_input_iterator<sidb_lattice<layout>> bii{lat};
+    bdl_input_iterator<sidb_100_cell_clk_lyt_siqad> bii{lat};
 
     CHECK(bii == 0ull);
 
@@ -232,11 +233,11 @@ TEST_CASE("SiQAD's AND gate iteration", "[bdl-input-iterator]")
 
     lyt.assign_cell_type({10, 9, 1}, sidb_technology::cell_type::NORMAL);
 
-    const sidb_lattice lat{lyt};
+    const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
     SECTION("siqad coordinates")
     {
-        bdl_input_iterator<sidb_lattice<layout>> bii{lat};
+        bdl_input_iterator<sidb_100_cell_clk_lyt_siqad> bii{lat};
 
         for (auto i = 0; bii < 4; ++bii, ++i)
         {
@@ -300,9 +301,8 @@ TEST_CASE("SiQAD's AND gate iteration", "[bdl-input-iterator]")
 
     SECTION("cube coordinates")
     {
-        const auto layout_cube = convert_to_fiction_coordinates<
-            cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>>(lyt);
-        bdl_input_iterator bii{sidb_lattice{layout_cube}};
+        const auto         layout_cube = convert_to_fiction_coordinates<sidb_cell_clk_lyt_cube>(lyt);
+        bdl_input_iterator bii{sidb_100_cell_clk_lyt_cube{layout_cube}};
 
         for (auto i = 0; bii < 4; ++bii, ++i)
         {
@@ -366,9 +366,8 @@ TEST_CASE("SiQAD's AND gate iteration", "[bdl-input-iterator]")
 
     SECTION("offset coordinates")
     {
-        const auto layout_offset = convert_to_fiction_coordinates<
-            cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>(lyt);
-        bdl_input_iterator bii{sidb_lattice{layout_offset}};
+        const auto         layout_offset = convert_to_fiction_coordinates<sidb_cell_clk_lyt_cube>(lyt);
+        bdl_input_iterator bii{sidb_100_cell_clk_lyt_cube{layout_offset}};
 
         for (auto i = 0; bii < 4; ++bii, ++i)
         {

@@ -9,8 +9,8 @@
 #include <fiction/io/write_location_and_ground_state.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
-#include <fiction/technology/charge_distribution_surface.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
+#include <fiction/technology/sidb_lattice_orientations.hpp>
 #include <fiction/types.hpp>
 
 #include <algorithm>
@@ -19,7 +19,7 @@
 
 using namespace fiction;
 
-using lattice = sidb_lattice<sidb_cell_clk_lyt_siqad>;
+using lattice = sidb_100_cell_clk_lyt_siqad;
 
 // Helper function to compare string output with expected string
 bool compare_output(const std::string& output, const std::string& expected)

@@ -44,7 +44,7 @@
 int main()  // NOLINT
 {
     using gate_lyt = fiction::hex_even_row_gate_clk_lyt;
-    using cell_lyt = fiction::sidb_cell_clk_lyt;
+    using cell_lyt = fiction::sidb_100_cell_clk_lyt;
 
     const std::string layouts_folder = fmt::format("{}/bestagon/layouts", EXPERIMENTS_PATH);
 

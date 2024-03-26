@@ -9,9 +9,7 @@
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/algorithms/simulation/sidb/time_to_solution.hpp>
-#include <fiction/technology/charge_distribution_surface.hpp>
 #include <fiction/technology/physical_constants.hpp>
-#include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/types.hpp>
 
 #include <cmath>
@@ -19,8 +17,8 @@
 
 using namespace fiction;
 
-TEMPLATE_TEST_CASE("time to solution test", "[time-to-solution]", (sidb_lattice<sidb_cell_clk_lyt_siqad>),
-                   (charge_distribution_surface<sidb_lattice<sidb_cell_clk_lyt_siqad>>))
+TEMPLATE_TEST_CASE("time to solution test", "[time-to-solution]", (sidb_100_cell_clk_lyt_siqad),
+                   (cds_sidb_100_cell_clk_lyt_siqad))
 {
     TestType lyt{};
 

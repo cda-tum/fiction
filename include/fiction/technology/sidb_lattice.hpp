@@ -5,8 +5,6 @@
 #ifndef FICTION_SIDB_LATTICE_HPP
 #define FICTION_SIDB_LATTICE_HPP
 
-#include "fiction/layouts/cell_level_layout.hpp"
-#include "fiction/technology/sidb_lattice_types.hpp"
 #include "fiction/traits.hpp"
 
 #include <string>
@@ -14,16 +12,19 @@
 namespace fiction
 {
 /**
- * A layout type to layer on top of any SiDB cell-level layout. It implements an interface to store and access the
- * lattice orientation of the H-Si.
+ * A layout type to layer on top of any SiDB cell-level layout. It implements an interface for different lattice
+ * orientations of the H-Si crystal.
  *
  * @tparam Lyt SiDB cell-level layout.
  * @tparam LatticeOrientation Si-H lattice orientation.
  */
-template <typename Lyt, typename LatticeOrientation = sidb_100_lattice>
+template <typename LatticeOrientation, typename Lyt>
 class sidb_lattice : public Lyt
 {
   public:
+    /**
+     * This type alias defines the orientation of the lattice using the LatticeOrientation enumeration.
+     */
     using orientation = LatticeOrientation;
 
     explicit sidb_lattice() : Lyt()
@@ -53,7 +54,7 @@ class sidb_lattice : public Lyt
         static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     }
     /**
-     * Clones the layout returning a deep copy.
+     * Clones the layout, returning a deep copy.
      *
      * @return Deep copy of the layout.
      */
@@ -65,12 +66,8 @@ class sidb_lattice : public Lyt
     }
 };
 
-template <class T>
-sidb_lattice(const T&) -> sidb_lattice<T, typename T::orientation>;
-
 template <class T, class U>
 sidb_lattice(const T&, const U&) -> sidb_lattice<T, U>;
-
 }  // namespace fiction
 
 #endif  // FICTION_SIDB_LATTICE_HPP
