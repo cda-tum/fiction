@@ -5,7 +5,6 @@
 #ifndef FICTION_SIDB_DEFECT_SURFACE_HPP
 #define FICTION_SIDB_DEFECT_SURFACE_HPP
 
-#include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/traits.hpp"
 
@@ -35,7 +34,7 @@ struct sidb_surface_params
  * A layout type to layer on top of any SiDB cell-level layout. It implements an interface to store and access
  * fabrication defects on the H-Si(100) 2x1 surface.
  *
- * @tparam Lyt SiDB cell-level layout.
+ * @tparam Lyt SiDB cell-level layout type.
  * @tparam has_sidb_defect_surface Automatically determines whether a defect interface is already present.
  */
 template <typename Lyt,
