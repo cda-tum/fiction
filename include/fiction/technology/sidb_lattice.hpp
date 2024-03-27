@@ -12,14 +12,26 @@
 namespace fiction
 {
 /**
- * A layout type to layer on top of any SiDB cell-level layout. It implements an interface for different lattice
+ * A layout type to layer on top of an SiDB cell-level layout. It implements an interface for different lattice
  * orientations of the H-Si crystal.
  *
- * @tparam Lyt SiDB cell-level layout.
- * @tparam LatticeOrientation Si-H lattice orientation.
+ * @tparam LatticeOrientation Type of the lattice orientation.
+ * @tparam Lyt SiDB cell-level layout type.
+ * @tparam has_sidb_lattice_interface Automatically determines whether a sidb lattice interface is already present.
  */
-template <typename LatticeOrientation, typename Lyt>
+template <typename LatticeOrientation, typename Lyt, bool has_sidb_lattice_interface = is_sidb_lattice_v<Lyt>>
 class sidb_lattice : public Lyt
+{};
+
+template <typename LatticeOrientation, typename Lyt>
+class sidb_lattice<LatticeOrientation, Lyt, true> : public Lyt
+{
+  public:
+    explicit sidb_lattice(const Lyt& lyt) : Lyt(lyt) {}
+};
+
+template <typename LatticeOrientation, typename Lyt>
+class sidb_lattice<LatticeOrientation, Lyt, false> : public Lyt
 {
   public:
     /**
@@ -35,7 +47,7 @@ class sidb_lattice : public Lyt
     /**
      * Constructor. Creates a named sidb lattice layout of the given cell-level layout.
      *
-     * @param layout Cell-level layout.
+     * @param layout SiDB Cell-level layout.
      */
     explicit sidb_lattice(const Lyt& layout) : Lyt(layout)
     {
