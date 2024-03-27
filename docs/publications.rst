@@ -94,7 +94,7 @@ Furthermore, if you use any of the design automation algorithms, please consider
           title={{\emph{QuickSim}: Efficient \emph{and} Accurate Physical Simulation of Silicon Dangling Bond Logic}},
           author={Drewniok, Jan and Walter, Marcel and Ng, Samuel Sze Hang and Walus, Konrad and Wille, Robert},
           booktitle={IEEE International Conference on Nanotechnology (IEEE NANO)},
-          pages={817-822},
+          pages={817--822},
           year={2023}
         }
 
@@ -105,8 +105,8 @@ Furthermore, if you use any of the design automation algorithms, please consider
         @inproceedings{drewniok2024quickexact,
           title={{The Need for Speed: Efficient Exact Simulation of Silicon Dangling Bond Logic}},
           author={Drewniok, Jan and Walter, Marcel and Wille, Robert},
-          booktitle={2024 29th Asia and South Pacific Design Automation Conference (ASP-DAC)},
-          pages={576-581},
+          booktitle={Asia and South Pacific Design Automation Conference (ASP-DAC)},
+          pages={576--581},
           year={2024}
         }
 
@@ -118,7 +118,7 @@ Furthermore, if you use any of the design automation algorithms, please consider
           title={{Temperature Behavior of Silicon Dangling Bond Logic}},
           author={Drewniok, Jan and Walter, Marcel and Wille, Robert},
           booktitle={IEEE International Conference on Nanotechnology (IEEE NANO)},
-          pages={925-930},
+          pages={925--930},
           year={2023}
         }
 
@@ -152,7 +152,7 @@ Furthermore, if you use any of the design automation algorithms, please consider
           title={{Scalable Physical Design for Silicon Dangling Bond Logic: How a 45\textdegree~Turn Prevents the Reinvention of the Wheel}},
           author={Hofmann, Simon and Walter, Marcel and Wille, Robert},
           booktitle={IEEE International Conference on Nanotechnology (IEEE NANO)},
-          pages={872-877},
+          pages={872--877},
           year={2023}
         }
 
