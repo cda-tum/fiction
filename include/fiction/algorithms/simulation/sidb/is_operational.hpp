@@ -13,6 +13,8 @@
 #include "fiction/algorithms/simulation/sidb/quicksim.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
+#include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
+#include "fiction/io/print_layout.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
@@ -235,7 +237,6 @@ class is_operational_impl
                     break;
                 }
 
-                const auto num = truth_table.front().num_bits();
                 // if the expected output is 1, the expected charge states are (upper, lower) = (0, -1)
                 if (kitty::get_bit(truth_table[output], i))
                 {
@@ -262,7 +263,7 @@ class is_operational_impl
         }
 
         // if we made it here, the layout is operational
-        return (truth_table.front().num_bits() - operational_input_combinations);
+        return operational_input_combinations;
     }
     /**
      * Returns the total number of simulator invocations.
