@@ -27,7 +27,7 @@ struct sidb_100_lattice
     sidb_100_lattice() = delete;
 };
 /**
- * H-Si(111)-2x1 surface.
+ * H-Si(111)-1x1 surface.
  */
 struct sidb_111_lattice
 {

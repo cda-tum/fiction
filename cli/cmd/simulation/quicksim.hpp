@@ -180,7 +180,7 @@ class quicksim_command : public command
      */
     fiction::sidb_simulation_result<fiction::sidb_100_cell_clk_lyt> sim_result{};
     /**
-     * Simulation result for H-Si(111)-2x1 surface.
+     * Simulation result for H-Si(111)-1x1 surface.
      */
     fiction::sidb_simulation_result<fiction::sidb_111_cell_clk_lyt> sim_result_111{};
     /**
