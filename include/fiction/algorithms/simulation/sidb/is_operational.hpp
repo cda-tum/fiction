@@ -64,12 +64,12 @@ struct is_operational_params
 };
 
 /**
- * This struct stores additional results of the number_of_operational_inputs.
+ * This struct stores additional results of the number_of_operational_inputs simulation.
  */
 struct number_of_operational_inputs_stats
 {
     /**
-     * All inputs (e.g. AND: 0 ^= 00; 2 ^= 10) for which the correct output is computed.
+     * All inputs (e.g. 2-input Boolean function: 00 ^= 0; 10 ^= 2) for which the correct output is computed.
      */
     std::set<uint64_t> operational_inputs{};
 };
