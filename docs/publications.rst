@@ -105,7 +105,8 @@ Furthermore, if you use any of the design automation algorithms, please consider
         @inproceedings{drewniok2024quickexact,
           title={{The Need for Speed: Efficient Exact Simulation of Silicon Dangling Bond Logic}},
           author={Drewniok, Jan and Walter, Marcel and Wille, Robert},
-          booktitle={Asia and South Pacific Design Automation Conference (ASP-DAC)},
+          booktitle={2024 29th Asia and South Pacific Design Automation Conference (ASP-DAC)},
+          pages={576-581},
           year={2024}
         }
 
