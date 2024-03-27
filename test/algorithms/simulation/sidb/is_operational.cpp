@@ -10,6 +10,8 @@
 #include <fiction/types.hpp>
 #include <fiction/utils/truth_table_utils.hpp>
 
+#include <cstdint>
+#include <set>
 #include <vector>
 
 using namespace fiction;
@@ -218,9 +220,12 @@ TEST_CASE("Bestagon AND gate", "[is-operational]")
     }
     SECTION("Count the number of non-operational input combinations")
     {
-        CHECK(number_of_operational_input_combinations(lyt, std::vector<tt>{create_and_tt()},
-                                                       is_operational_params{sidb_simulation_parameters{2, -0.30},
-                                                                             sidb_simulation_engine::QUICKEXACT}) == 1);
+        number_of_operational_inputs_stats st{};
+        CHECK(number_of_operational_inputs(
+                  lyt, std::vector<tt>{create_and_tt()},
+                  is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT},
+                  &st) == 1);
+        CHECK(st.operational_inputs == std::set<uint64_t>{3});
     }
 }
 
@@ -303,8 +308,11 @@ TEST_CASE("AND gate from the paper: Unlocking Flexible Silicon Dangling Bond Log
     }
     SECTION("Count the number of non-operational input combinations")
     {
-        CHECK(number_of_operational_input_combinations(lyt, std::vector<tt>{create_and_tt()},
-                                                       is_operational_params{sidb_simulation_parameters{2, -0.30},
-                                                                             sidb_simulation_engine::QUICKEXACT}) == 1);
+        number_of_operational_inputs_stats st{};
+        CHECK(number_of_operational_inputs(
+                  lyt, std::vector<tt>{create_and_tt()},
+                  is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT},
+                  &st) == 1);
+        CHECK(st.operational_inputs == std::set<uint64_t>{3});
     }
 }
