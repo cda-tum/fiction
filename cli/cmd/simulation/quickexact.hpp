@@ -8,8 +8,6 @@
 #include <fiction/algorithms/simulation/sidb/minimum_energy.hpp>
 #include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
-#include <fiction/technology/sidb_lattice.hpp>
-#include <fiction/technology/sidb_lattice_orientations.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/name_utils.hpp>
@@ -170,11 +168,11 @@ class quickexact_command : public command
      */
     fiction::quickexact_params<fiction::sidb_100_cell_clk_lyt> params{};
     /**
-     * Simulation result for H-Si 100.
+     * Simulation result for H-Si(100)-2x1 surface.
      */
     fiction::sidb_simulation_result<fiction::sidb_100_cell_clk_lyt> sim_result{};
     /**
-     * Simulation result for H-Si 111.
+     * Simulation result for H-Si(111)-2x1 surface.
      */
     fiction::sidb_simulation_result<fiction::sidb_111_cell_clk_lyt> sim_result_111{};
     /**

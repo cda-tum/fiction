@@ -176,11 +176,11 @@ class quicksim_command : public command
      */
     fiction::quicksim_params params{};
     /**
-     * Simulation result for H-Si 100.
+     * Simulation result for H-Si(100)-2x1 surface.
      */
     fiction::sidb_simulation_result<fiction::sidb_100_cell_clk_lyt> sim_result{};
     /**
-     * Simulation result for H-Si 111.
+     * Simulation result for H-Si(111)-2x1 surface.
      */
     fiction::sidb_simulation_result<fiction::sidb_111_cell_clk_lyt> sim_result_111{};
     /**

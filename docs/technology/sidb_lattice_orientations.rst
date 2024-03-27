@@ -1,7 +1,7 @@
 H-Si Lattice Orientations
 =========================
 
-A collection of two supported H-Si lattice orientations.
+A collection of the two supported H-Si(100)-2x1 surface and H-Si(1111)-2x1 surface lattice orientations.
 
 **Header:** ``fiction/technology/sidb_lattice_orientations.hpp``
 
