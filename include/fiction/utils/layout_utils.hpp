@@ -321,8 +321,7 @@ auto convert_to_siqad_coordinates(const Lyt& lyt) noexcept
 
         if constexpr (is_charge_distribution_surface_v<Lyt> && has_get_sidb_defect_v<Lyt>)
         {
-            charge_distribution_surface<decltype(sidb_defect_surface{lyt_new})> lyt_new_cds{
-                sidb_defect_surface{lyt_new}};
+            charge_distribution_surface lyt_new_cds{sidb_defect_surface{lyt_new}};
 
             lyt.foreach_cell(
                 [&lyt_new_cds, &lyt](const auto& c)
@@ -336,10 +335,23 @@ auto convert_to_siqad_coordinates(const Lyt& lyt) noexcept
         }
         else if constexpr (has_get_sidb_defect_v<Lyt>)
         {
-            sidb_defect_surface lyt_surface{lyt_new};
+            sidb_defect_surface<sidb_lattice<lattice_orientation<Lyt>, Lyt>> lyt_surface{lyt_new};
             lyt.foreach_defect([&lyt_surface, &lyt](const auto& c)
                                { lyt_surface.assign_defect(siqad::to_siqad_coord(c), lyt.get_defect(c)); });
             return lyt_surface;
+        }
+        else if constexpr (is_charge_distribution_surface_v<Lyt>)
+        {
+            charge_distribution_surface<decltype(sidb_defect_surface{lyt_new})> lyt_new_cds{
+                sidb_defect_surface{lyt_new}};
+
+            lyt.foreach_cell(
+                [&lyt_new_cds, &lyt](const auto& c)
+                { lyt_new_cds.assign_charge_state(siqad::to_siqad_coord(c), lyt.get_charge_state(c), false); });
+
+            lyt_new_cds.assign_physical_parameters(lyt.get_phys_params());
+
+            return lyt_new_cds;
         }
         else
         {
@@ -347,13 +359,14 @@ auto convert_to_siqad_coordinates(const Lyt& lyt) noexcept
         }
     };
 
-    if constexpr (is_sidb_lattice_100_v<Lyt>)
+    if constexpr (!is_sidb_lattice_v<Lyt>)
     {
-        return process_layout(sidb_lattice<sidb_100_lattice, sidb_cell_clk_lyt_siqad>{});
+        return convert_to_siqad_coordinates<sidb_lattice<sidb_100_lattice, Lyt>>(
+            sidb_lattice<sidb_100_lattice, Lyt>{lyt});
     }
     else
     {
-        return process_layout(sidb_lattice<sidb_111_lattice, sidb_cell_clk_lyt_siqad>{});
+        return process_layout(sidb_lattice<lattice_orientation<Lyt>, sidb_cell_clk_lyt_siqad>{});
     }
 }
 
@@ -408,7 +421,8 @@ LytDest convert_to_fiction_coordinates(const LytSrc& lyt) noexcept
             });
     };
 
-    if (has_offset_ucoord_v<LytDest> && !lyt.is_empty() && are_cells_assigned_to_negative_coordinates)
+    if ((has_offset_ucoord_v<LytDest> || has_siqad_coord_v<LytDest>)&&!lyt.is_empty() &&
+        are_cells_assigned_to_negative_coordinates)
     {
         auto lyt_normalized = normalize_layout_coordinates<LytSrc>(lyt);
         assign_coordinates(lyt_normalized);

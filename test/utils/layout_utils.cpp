@@ -14,7 +14,7 @@
 #include <fiction/technology/sidb_defect_surface.hpp>
 #include <fiction/technology/sidb_defects.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
-#include <fiction/technology/sidb_lattice_orientations.hpp>
+#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/layout_utils.hpp>
 
@@ -89,6 +89,7 @@ TEMPLATE_TEST_CASE("Convert offset::ucoord_t layout to SiQAD coordinate layout",
         CHECK(lyt_transformed.is_empty());
         CHECK(lyt_transformed.area() == area_with_padding(lyt.area(), x, y));
         CHECK(lyt_transformed.get_layout_name() == lyt.get_layout_name());
+        CHECK(is_sidb_lattice_100_v<decltype(lyt_transformed)>);
     }
 
     SECTION("layout with one normal and one input cell")
@@ -152,6 +153,9 @@ TEST_CASE("Convert cds/sidb_defect_surface in offset::ucoord_t layout to SiQAD c
     cds.assign_sidb_defect({1, 1, 0}, sidb_defect{sidb_defect_type::UNKNOWN});
 
     auto lyt_transformed = convert_to_siqad_coordinates(cds);
+    CHECK(is_sidb_lattice_100_v<decltype(lyt_transformed)>);
+    CHECK(has_assign_sidb_defect_v<decltype(lyt_transformed)>);
+    CHECK(is_charge_distribution_surface_v<decltype(lyt_transformed)>);
 
     CHECK(lyt_transformed.get_cell_type({0, 0, 0}) == sidb_100_cell_clk_lyt::technology::cell_type::NORMAL);
     CHECK(lyt_transformed.get_cell_type({1, 0, 0}) == sidb_100_cell_clk_lyt::technology::cell_type::INPUT);
@@ -220,11 +224,11 @@ TEST_CASE("Convert SiQAD layout to offset::ucoord_t coordinate layout", "[layout
     }
 }
 
-TEST_CASE("Convert SiQAD layout (sidb lattice layout) to offset::ucoord_t coordinate layout", "[layout-utils]")
+TEST_CASE("Convert SiQAD layout (with sidb lattice layout) to offset::ucoord_t coordinate layout", "[layout-utils]")
 {
     SECTION("empty layout")
     {
-        const sidb_lattice<sidb_100_lattice, sidb_cell_clk_lyt_siqad> lyt{};
+        const sidb_100_cell_clk_lyt_siqad lyt{};
 
         auto lyt_transformed = convert_to_fiction_coordinates<sidb_100_cell_clk_lyt>(lyt);
 
@@ -275,8 +279,61 @@ TEST_CASE("Convert SiQAD layout (sidb lattice layout) to offset::ucoord_t coordi
     }
 }
 
+TEST_CASE("Convert SiQAD layout (without sidb lattice layout) to offset::ucoord_t coordinate layout", "[layout-utils]")
+{
+    SECTION("empty layout")
+    {
+        const sidb_cell_clk_lyt_siqad lyt{};
+
+        auto lyt_transformed = convert_to_fiction_coordinates<sidb_cell_clk_lyt_siqad>(lyt);
+
+        CHECK(lyt_transformed.is_empty());
+        CHECK(lyt_transformed.get_layout_name() == lyt.get_layout_name());
+    }
+
+    SECTION("layout with one normal and one input cell")
+    {
+        sidb_cell_clk_lyt_siqad lyt{{5, 3}};
+
+        lyt.assign_cell_type({5, 3}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+        lyt.assign_cell_type({-5, -1}, sidb_cell_clk_lyt_siqad::cell_type::INPUT);
+        CHECK(lyt.x() == 5);
+        CHECK(lyt.y() == 3);
+
+        auto lyt_transformed = convert_to_fiction_coordinates<sidb_cell_clk_lyt_siqad>(lyt);
+
+        CHECK(lyt_transformed.x() == 10);
+        CHECK(lyt_transformed.y() == 9);
+        CHECK(lyt_transformed.num_cells() == 2);
+        CHECK(lyt_transformed.get_cell_type({10, 8}) == sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+        CHECK(lyt_transformed.get_cell_type({0, 0}) == sidb_cell_clk_lyt_siqad::cell_type::INPUT);
+    }
+
+    SECTION("layout with three cells")
+    {
+        sidb_cell_clk_lyt_siqad lyt{{5, 3}};
+
+        lyt.assign_cell_type({5, 3}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+        lyt.assign_cell_type({0, 0}, sidb_cell_clk_lyt_siqad::cell_type::INPUT);
+        lyt.assign_cell_type({5, 1}, sidb_cell_clk_lyt_siqad::cell_type::OUTPUT);
+        lyt.assign_cell_name({5, 3}, "normal cell");
+        lyt.assign_cell_name({0, 0}, "input cell");
+        lyt.assign_cell_name({5, 1}, "output cell");
+
+        auto lyt_transformed = convert_to_fiction_coordinates<sidb_cell_clk_lyt_siqad>(lyt);
+
+        CHECK(lyt_transformed.num_cells() == 3);
+        CHECK(lyt_transformed.get_cell_type({5, 6}) == sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+        CHECK(lyt_transformed.get_cell_type({0, 0}) == sidb_cell_clk_lyt_siqad::cell_type::INPUT);
+        CHECK(lyt_transformed.get_cell_type({5, 2}) == sidb_cell_clk_lyt_siqad::cell_type::OUTPUT);
+        CHECK(lyt_transformed.get_cell_name({5, 6}) == "normal cell");
+        CHECK(lyt_transformed.get_cell_name({0, 0}) == "input cell");
+        CHECK(lyt_transformed.get_cell_name({5, 2}) == "output cell");
+    }
+}
+
 TEMPLATE_TEST_CASE("Convert SiQAD layout to cube::coord_t coordinate layout", "[layout-utils]",
-                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>))
+                   (sidb_cell_clk_lyt_cube))
 {
     SECTION("empty layout")
     {

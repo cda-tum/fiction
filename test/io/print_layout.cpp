@@ -223,8 +223,8 @@ TEST_CASE("Print wire crossing cell-level layout", "[print-cell-level-layout]")
 
 TEST_CASE("Print empty charge layout", "[print-charge-layout]")
 {
-    sidb_cell_clk_lyt_siqad                                 lyt{{2, 2}, "Empty"};
-    sidb_lattice<sidb_100_lattice, sidb_cell_clk_lyt_siqad> lat{lyt};
+    const sidb_cell_clk_lyt_siqad     lyt{{2, 2}, "Empty"};
+    const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
     const charge_distribution_surface layout{lat};
 
@@ -277,9 +277,7 @@ TEST_CASE("Print Bestagon OR-gate without defect", "[print-charge-layout]")
     const auto lyt =
         convert_to_siqad_coordinates(apply_gate_library<sidb_100_cell_clk_lyt, sidb_bestagon_library>(layout));
 
-    const auto lat = sidb_lattice{lyt};
-
-    charge_distribution_surface cl{lat, sidb_simulation_parameters{3, -0.32}, sidb_charge_state::NEGATIVE};
+    charge_distribution_surface cl{lyt, sidb_simulation_parameters{3, -0.32}, sidb_charge_state::NEGATIVE};
 
     cl.assign_charge_state({16, 3, 0}, sidb_charge_state::NEUTRAL);
     cl.assign_charge_state({42, 3, 0}, sidb_charge_state::NEGATIVE);
@@ -438,9 +436,7 @@ TEST_CASE("Print Bestagon OR-gate with defect", "[print-charge-layout]")
     const auto lyt = sidb_defect_surface{
         convert_to_siqad_coordinates(apply_gate_library<sidb_100_cell_clk_lyt, sidb_bestagon_library>(layout))};
 
-    const sidb_lattice<sidb_100_lattice, decltype(lyt)> lat{lyt};
-
-    charge_distribution_surface cl{lat, sidb_simulation_parameters{3, -0.32}, sidb_charge_state::NEGATIVE};
+    charge_distribution_surface cl{lyt, sidb_simulation_parameters{3, -0.32}, sidb_charge_state::NEGATIVE};
 
     cl.assign_sidb_defect({18, 3, 0}, sidb_defect{sidb_defect_type::UNKNOWN, 1});
     cl.assign_sidb_defect({40, 3, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1});
@@ -585,15 +581,6 @@ TEST_CASE("Print Bestagon OR-gate", "[print-charge-layout]")
 
     hex_gate_lyt layout{aspect_ratio<hex_gate_lyt>{0, 0}};
 
-    layout.create_or({}, {}, {0, 0});
-
-    const auto cell_layout_or       = apply_gate_library<sidb_100_cell_clk_lyt, sidb_bestagon_library>(layout);
-    const auto cell_layout_or_siqad = convert_to_siqad_coordinates(cell_layout_or);
-
-    std::stringstream print_stream{};
-
-    print_sidb_layout(print_stream, sidb_lattice{cell_layout_or_siqad}, false, true, true);
-
     constexpr const char* layout_print =
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
@@ -652,10 +639,34 @@ TEST_CASE("Print Bestagon OR-gate", "[print-charge-layout]")
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n";
 
-    CHECK(layout_print == print_stream.str());
+    SECTION("No lattice orientation is provided, SiDB cell-level layout is used as input")
+    {
+        layout.create_or({}, {}, {0, 0});
+
+        const auto cell_layout_or       = apply_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library>(layout);
+        const auto cell_layout_or_siqad = convert_to_siqad_coordinates(cell_layout_or);
+
+        std::stringstream print_stream{};
+
+        print_sidb_layout(print_stream, cell_layout_or_siqad, false, true, true);
+        CHECK(layout_print == print_stream.str());
+    }
+
+    SECTION("Lattice orientation is provided, sidb lattice is used as input")
+    {
+        layout.create_or({}, {}, {0, 0});
+
+        const auto cell_layout_or       = apply_gate_library<sidb_100_cell_clk_lyt, sidb_bestagon_library>(layout);
+        const auto cell_layout_or_siqad = convert_to_siqad_coordinates(cell_layout_or);
+
+        std::stringstream print_stream{};
+
+        print_sidb_layout(print_stream, cell_layout_or_siqad, false, true, true);
+        CHECK(layout_print == print_stream.str());
+    }
 }
 
-TEST_CASE("Print H-Si 111 surface with six cells", "[print-charge-layout]")
+TEST_CASE("Print H-Si 111 surface with six cells, defined with siqad::coord_t", "[print-charge-layout]")
 {
     sidb_cell_clk_lyt_siqad lyt{};
 
@@ -667,24 +678,112 @@ TEST_CASE("Print H-Si 111 surface with six cells", "[print-charge-layout]")
     lyt.assign_cell_type({6, 1, 1}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
     lyt.assign_cell_type({5, 2, 1}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
 
-    const sidb_lattice<sidb_111_lattice, decltype(lyt)> lattice_lyt{lyt};
+    SECTION("Print the cell-level layout")
+    {
+        constexpr const char* layout_print = " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             "  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             " ·  ·  ◯  ·  ·  ·  ·  ·  ·  ·  ◯  ·  · \n"
+                                             "  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             "  ·  ·  ·  ◯  ·  ·  ·  ·  ◯  ·  ·  ·  · \n"
+                                             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             "  ·  ·  ·  ·  ◯  ·  ·  ◯  ·  ·  ·  ·  · \n"
+                                             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             "  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             "\n"
+                                             "\n";
 
-    std::stringstream print_stream{};
+        const sidb_lattice<sidb_111_lattice, decltype(lyt)> lattice_lyt{lyt};
 
-    print_sidb_layout(print_stream, lattice_lyt, false, true, true);
+        std::stringstream print_stream{};
 
-    constexpr const char* layout_print = " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
-                                         "  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
-                                         " ·  ·  ◯  ·  ·  ·  ·  ·  ·  ·  ◯  ·  · \n"
-                                         "  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
-                                         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
-                                         "  ·  ·  ·  ◯  ·  ·  ·  ·  ◯  ·  ·  ·  · \n"
-                                         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
-                                         "  ·  ·  ·  ·  ◯  ·  ·  ◯  ·  ·  ·  ·  · \n"
-                                         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
-                                         "  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
-                                         "\n"
-                                         "\n";
+        print_sidb_layout(print_stream, lattice_lyt, false, true, true);
+        CHECK(layout_print == print_stream.str());
+    }
 
-    CHECK(layout_print == print_stream.str());
+    SECTION("Print charge distribution cell-level layout")
+    {
+        constexpr const char* layout_print = " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             "  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             " ·  ·  ●  ·  ·  ·  ·  ·  ·  ·  ●  ·  · \n"
+                                             "  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             "  ·  ·  ·  ●  ·  ·  ·  ·  ●  ·  ·  ·  · \n"
+                                             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             "  ·  ·  ·  ·  ●  ·  ·  ●  ·  ·  ·  ·  · \n"
+                                             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             "  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             "\n"
+                                             "\n";
+
+        const sidb_lattice<sidb_111_lattice, decltype(lyt)> lattice_lyt{lyt};
+
+        std::stringstream print_stream{};
+
+        const auto cds = charge_distribution_surface{lattice_lyt};
+
+        print_sidb_layout(print_stream, cds, false, true, true);
+        CHECK(layout_print == print_stream.str());
+    }
+}
+
+TEST_CASE("Print H-Si 111 surface with six cells, defined with offset::ucoord_t coordinates", "[print-charge-layout]")
+{
+    sidb_cell_clk_lyt lyt{};
+
+    lyt.assign_cell_type({0, 0}, sidb_cell_clk_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({1, 3}, sidb_cell_clk_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({2, 5}, sidb_cell_clk_lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({8, 0}, sidb_cell_clk_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 3}, sidb_cell_clk_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({5, 5}, sidb_cell_clk_lyt::cell_type::NORMAL);
+
+    SECTION("Print the cell-level layout")
+    {
+        constexpr const char* layout_print = " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             "  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             " ·  ·  ◯  ·  ·  ·  ·  ·  ·  ·  ◯  ·  · \n"
+                                             "  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             "  ·  ·  ·  ◯  ·  ·  ·  ·  ◯  ·  ·  ·  · \n"
+                                             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             "  ·  ·  ·  ·  ◯  ·  ·  ◯  ·  ·  ·  ·  · \n"
+                                             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             "  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             "\n"
+                                             "\n";
+
+        const sidb_lattice<sidb_111_lattice, decltype(lyt)> lattice_lyt{lyt};
+
+        std::stringstream print_stream{};
+
+        print_sidb_layout(print_stream, lattice_lyt, false, true);
+        CHECK(layout_print == print_stream.str());
+    }
+
+    SECTION("Print charge distribution cell-level layout")
+    {
+        constexpr const char* layout_print = " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             "  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             " ·  ·  ●  ·  ·  ·  ·  ·  ·  ·  ●  ·  · \n"
+                                             "  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             "  ·  ·  ·  ●  ·  ·  ·  ·  ●  ·  ·  ·  · \n"
+                                             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             "  ·  ·  ·  ·  ●  ·  ·  ●  ·  ·  ·  ·  · \n"
+                                             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             "  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             "\n"
+                                             "\n";
+
+        const sidb_lattice<sidb_111_lattice, decltype(lyt)> lattice_lyt{lyt};
+
+        std::stringstream print_stream{};
+
+        const auto cds = charge_distribution_surface{lattice_lyt};
+
+        print_sidb_layout(print_stream, cds, false, true);
+        CHECK(layout_print == print_stream.str());
+    }
 }

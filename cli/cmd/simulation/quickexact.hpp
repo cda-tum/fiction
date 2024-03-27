@@ -64,13 +64,13 @@ class quickexact_command : public command
 
         if (physical_params.epsilon_r <= 0)
         {
-            env->out() << "[e] epsilon_r must be positive" << std::endl;
+            env->out() << "[e] epsilon_r must be positive" << '\n';
             reset_params();
             return;
         }
         if (physical_params.lambda_tf <= 0)
         {
-            env->out() << "[e] lambda_tf must be positive" << std::endl;
+            env->out() << "[e] lambda_tf must be positive" << '\n';
             reset_params();
             return;
         }
@@ -80,7 +80,7 @@ class quickexact_command : public command
         // error case: empty cell layout store
         if (s.empty())
         {
-            env->out() << "[w] no cell layout in store" << std::endl;
+            env->out() << "[w] no cell layout in store" << '\n';
             reset_params();
             return;
         }
@@ -116,7 +116,7 @@ class quickexact_command : public command
 
                     else
                     {
-                        env->out() << "[e] no valid lattice orientation" << std::endl;
+                        env->out() << "[e] no valid lattice orientation" << '\n';
                         return;
                     }
 
