@@ -8,6 +8,7 @@
 #include "fiction/layouts/cell_level_layout.hpp"
 #include "fiction/layouts/coordinates.hpp"
 #include "fiction/technology/cell_ports.hpp"
+#include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 
@@ -18,6 +19,7 @@
 #include <random>
 #include <type_traits>
 #include <utility>
+#include <vector>
 
 namespace fiction
 {

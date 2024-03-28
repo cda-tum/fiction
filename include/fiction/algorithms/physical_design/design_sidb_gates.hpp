@@ -28,13 +28,12 @@
 #include <cstdint>
 #include <cstdlib>
 #include <future>
+#include <mutex>
 #include <numeric>
 #include <random>
 #include <thread>
 #include <utility>
 #include <vector>
-
-#include <combinations.h>
 
 namespace fiction
 {
@@ -172,7 +171,8 @@ class design_sidb_gates_impl
         mockturtle::stopwatch       stop{stats.time_total};
         const is_operational_params params_is_operational{params.phys_params, params.sim_engine};
 
-        const auto all_combinations = determine_all_combinations_of_given_sidbs_in_canvas();
+        const auto all_combinations = determine_all_combinations_of_distributing_k_entities_on_n_positions(
+            params.number_of_sidbs, static_cast<std::size_t>(all_sidbs_in_canvas.size()));
 
         std::vector<Lyt> designed_gate_layouts = {};
 
@@ -454,44 +454,6 @@ class design_sidb_gates_impl
     {
         lyt.assign_cell_type(swaped_pair.firsr, Lyt::technology::cell_type::NORMAL);
         lyt.assign_cell_type(swaped_pair.second, Lyt::technology::cell_type::NORMAL);
-    }
-
-    /**
-     * Calculates all possible combinations of distributing the given number of SiDBs within a canvas
-     * based on the provided parameters. It generates combinations of SiDB indices (representing the cell position in
-     * the canvas from top to bottom and left to right) and stores them in the `all_combinations` vector. The number of
-     * SiDBs in each combination is determined by `parameter.number_of_sidbs`.
-     *
-     * @return All possible combinations as a vector of vectors of indices.
-     */
-    [[nodiscard]] std::vector<std::vector<std::size_t>> determine_all_combinations_of_given_sidbs_in_canvas() noexcept
-    {
-        std::vector<std::vector<std::size_t>> all_combinations{};
-        all_combinations.reserve(binomial_coefficient(all_cells_in_canvas.size(), params.number_of_sidbs));
-
-        std::vector<std::size_t> numbers(all_cells_in_canvas.size());
-        std::iota(numbers.begin(), numbers.end(), 0);
-
-        combinations::for_each_combination(
-            numbers.begin(),
-            numbers.begin() + static_cast<std::vector<std::size_t>::difference_type>(params.number_of_sidbs),
-            numbers.end(),
-            [this, &all_combinations](const auto begin, const auto end)
-            {
-                std::vector<std::size_t> combination{};
-                combination.reserve(params.number_of_sidbs);
-
-                for (auto it = begin; it != end; ++it)
-                {
-                    combination.push_back(static_cast<std::size_t>(*it));
-                }
-
-                all_combinations.push_back(combination);
-
-                return false;  // keep looping
-            });
-
-        return all_combinations;
     }
 
     /**

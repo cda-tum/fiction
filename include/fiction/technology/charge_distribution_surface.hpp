@@ -28,6 +28,7 @@
 #include <random>
 #include <type_traits>
 #include <utility>
+#include <vector>
 
 namespace fiction
 {
@@ -623,7 +624,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @return Vector of indices describing which SiDBs must be negatively charged.
      */
-    std::vector<int64_t> negative_sidb_detection() noexcept
+    [[nodiscard]] std::vector<int64_t> negative_sidb_detection() const noexcept
     {
         std::vector<int64_t> negative_sidbs{};
         negative_sidbs.reserve(this->num_cells());
@@ -731,14 +732,14 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return 0.0;
     }
     /**
-     * This function calculates and returns the chargeless potential of two indices (representing two SiDBs) in Volt
-     * (unit: V).
+     * This function calculates and returns the chargeless potential of two indices (representing two SiDBs) in Volt.
      *
      * @param index1 The first index.
      * @param index2 The second index.
-     * @return The potential between `index1` and `index2` (unit: V).
+     * @return The potential between `index1` and `index2`.
      */
-    [[nodiscard]] double get_chargless_potential_by_indices(const uint64_t index1, const uint64_t index2) const noexcept
+    [[nodiscard]] double get_chargeless_potential_by_indices(const uint64_t index1,
+                                                             const uint64_t index2) const noexcept
     {
         return strg->pot_mat[index1][index2];
     }
@@ -763,18 +764,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         }
 
         return 0.0;
-    }
-    /**
-     * This function calculates and returns the electrostatic potential of two indices (representing two SiDBs) in Volt
-     * (unit: V).
-     *
-     * @param index1 The first index.
-     * @param index2 The second index.
-     * @return The potential between `index1` and `index2` (unit: V).
-     */
-    [[nodiscard]] double get_potential_by_indices(const uint64_t index1, const uint64_t index2) const noexcept
-    {
-        return strg->pot_mat[index1][index2];
     }
     /**
      * This function calculates the local electrostatic potential in Volt for each SiDB position, including external
@@ -966,7 +955,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                           ((strg->cell_charge[for_loop_counter] == sidb_charge_state::POSITIVE) &&
                            (-it + mu_p > -physical_constants::POP_STABILITY_ERR)) ||
                           ((strg->cell_charge[for_loop_counter] == sidb_charge_state::NEUTRAL) &&
-                           (-it + strg->phys_params.mu_minus > -physical_constants::POP_STABILITY_ERR) &&
+                           (-it + strg->phys_params.mu_minus > physical_constants::POP_STABILITY_ERR) &&
                            (-it + mu_p < physical_constants::POP_STABILITY_ERR)));
             for_loop_counter += 1;
             if (!valid)
@@ -1275,7 +1264,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
             for (uint64_t i = 0u; i < strg->pot_mat.size(); ++i)
             {
-                strg->local_pot[i] += -(this->get_chargless_potential_by_indices(i, random_element));
+                strg->local_pot[i] += -(this->get_chargeless_potential_by_indices(i, random_element));
             }
         }
     }
@@ -1595,7 +1584,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                         if (i != strg->dependent_cell_index)
                         {
                             strg->local_pot[i] +=
-                                (this->get_potential_by_indices(i, strg->dependent_cell_index)) * charge_diff;
+                                (this->get_chargeless_potential_by_indices(i, strg->dependent_cell_index)) *
+                                charge_diff;
                         }
                     }
                     strg->cell_charge[strg->dependent_cell_index] = sidb_charge_state::NEGATIVE;
@@ -1604,7 +1594,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             else if ((loc_pot_cell + strg->phys_params.mu_plus()) > -physical_constants::POP_STABILITY_ERR)
             {
                 // dependent-cell can only be positively charged when the base number is set to three state simulation.
-                if (strg->charge_index_and_base.second == 3)
+                if (strg->charge_index_and_base.second == 3 || strg->three_state_cells.size() != 0)
                 {
                     if (strg->cell_charge[strg->dependent_cell_index] != sidb_charge_state::POSITIVE)
                     {
@@ -1616,7 +1606,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                             if (i != strg->dependent_cell_index)
                             {
                                 strg->local_pot[i] +=
-                                    (this->get_potential_by_indices(i, strg->dependent_cell_index)) * charge_diff;
+                                    (this->get_chargeless_potential_by_indices(i, strg->dependent_cell_index)) *
+                                    charge_diff;
                             }
                         }
                     }
@@ -1633,7 +1624,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                         if (i != strg->dependent_cell_index)
                         {
                             strg->local_pot[i] +=
-                                (this->get_potential_by_indices(i, strg->dependent_cell_index)) * charge_diff;
+                                (this->get_chargeless_potential_by_indices(i, strg->dependent_cell_index)) *
+                                charge_diff;
                         }
                     }
                     strg->cell_charge[strg->dependent_cell_index] = sidb_charge_state::NEUTRAL;
@@ -1802,7 +1794,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @return Vector with all cells.
      */
-    std::vector<typename Lyt::cell> get_sidb_order() noexcept
+    [[nodiscard]] std::vector<typename Lyt::cell> get_sidb_order() const noexcept
     {
         return strg->sidb_order;
     }
@@ -1945,6 +1937,22 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         // Cell_history collects the cells (SiDBs) that have changed their charge state.
         strg->cell_history = {};
         strg->cell_history.reserve(this->num_cells());
+
+        if (strg->charge_index_sublayout == 0)
+        {
+            for (const auto& cell : strg->three_state_cells)
+            {
+                this->assign_charge_state(cell, sidb_charge_state::NEGATIVE, false);
+            }
+        }
+
+        if (strg->charge_index_and_base.first == 0)
+        {
+            for (const auto& cell : strg->sidb_order_without_three_state_cells)
+            {
+                this->assign_charge_state(cell, sidb_charge_state::NEGATIVE, false);
+            }
+        }
 
         auto       charge_quot_positive = strg->charge_index_sublayout;
         const auto base_positive        = 3;
