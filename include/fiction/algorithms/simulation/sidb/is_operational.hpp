@@ -13,18 +13,18 @@
 #include "fiction/algorithms/simulation/sidb/quicksim.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
+#include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
+#include "fiction/technology/cell_technologies.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/types.hpp"
-#include "fiction/utils/truth_table_utils.hpp"
 
 #include <kitty/bit_operations.hpp>
 #include <kitty/traits.hpp>
 
 #include <algorithm>
 #include <cassert>
-#include <cmath>
 #include <cstddef>
 #include <cstdint>
+#include <set>
 #include <utility>
 #include <vector>
 
@@ -61,6 +61,17 @@ struct is_operational_params
      * Parameters for the BDL pair detection algorithms.
      */
     detect_bdl_pairs_params bdl_params{};
+};
+
+/**
+ * This struct stores additional results of the number_of_operational_inputs simulation.
+ */
+struct number_of_operational_inputs_stats
+{
+    /**
+     * All inputs (e.g. 2-input Boolean function: 00 ^= 0; 10 ^= 2) for which the correct output is computed.
+     */
+    std::set<uint64_t> operational_inputs{};
 };
 
 namespace detail
@@ -177,6 +188,95 @@ class is_operational_impl
         return operational_status::OPERATIONAL;
     }
     /**
+     * Counts the number of input combinations yielding the correct output.
+     *
+     * @param pst Statistics.
+     *
+     * @return The count of operational input combinations.
+     */
+    [[nodiscard]] std::size_t count_number_of_operational_inputs(number_of_operational_inputs_stats& st) noexcept
+    {
+        assert(!output_bdl_pairs.empty() && "No output cell provided.");
+        assert((truth_table.size() == output_bdl_pairs.size()) &&
+               "Number of truth tables and output BDL pairs does not match");
+
+        std::size_t operational_input_combinations = 0;
+
+        // number of different input combinations
+        for (auto i = 0u; i < truth_table.front().num_bits(); ++i, ++bii)
+        {
+            ++simulator_invocations;
+
+            // if positively charged SiDBs can occur, the SiDB layout is considered as non-operational
+            if (can_positive_charges_occur(*bii, parameters.simulation_parameter))
+            {
+                continue;
+            }
+
+            // performs physical simulation of a given SiDB layout at a given input combination
+            const auto simulation_results = physical_simulation_of_layout(bii);
+
+            // if no physically valid charge distributions were found, the layout is non-operational
+            if (simulation_results.charge_distributions.empty())
+            {
+                continue;
+            }
+
+            // find the ground state, which is the charge distribution with the lowest energy
+            const auto ground_state = std::min_element(
+                simulation_results.charge_distributions.cbegin(), simulation_results.charge_distributions.cend(),
+                [](const auto& lhs, const auto& rhs) { return lhs.get_system_energy() < rhs.get_system_energy(); });
+
+            // ground state is degenerate
+            if ((energy_distribution(simulation_results.charge_distributions).begin()->second) > 1)
+            {
+                continue;
+            }
+
+            bool correct_output = true;
+            // fetch the charge states of the output BDL pair
+            for (auto output = 0u; output < output_bdl_pairs.size(); output++)
+            {
+                auto charge_state_output_upper = ground_state->get_charge_state(output_bdl_pairs[output].upper);
+                auto charge_state_output_lower = ground_state->get_charge_state(output_bdl_pairs[output].lower);
+
+                // if the output charge states are equal, the layout is not operational
+                if (charge_state_output_lower == charge_state_output_upper)
+                {
+                    correct_output = false;
+                    break;
+                }
+
+                // if the expected output is 1, the expected charge states are (upper, lower) = (0, -1)
+                if (kitty::get_bit(truth_table[output], i))
+                {
+                    if (charge_state_output_lower != sidb_charge_state::NEGATIVE ||
+                        charge_state_output_upper != sidb_charge_state::NEUTRAL)
+                    {
+                        correct_output = false;
+                    }
+                }
+                // if the expected output is 0, the expected charge states are (upper, lower) = (-1, 0)
+                else
+                {
+                    if (charge_state_output_lower != sidb_charge_state::NEUTRAL ||
+                        charge_state_output_upper != sidb_charge_state::NEGATIVE)
+                    {
+                        correct_output = false;
+                    }
+                }
+            }
+            if (correct_output)
+            {
+                operational_input_combinations++;
+                st.operational_inputs.insert(i);
+            }
+        }
+
+        // if we made it here, the layout is operational
+        return operational_input_combinations;
+    }
+    /**
      * Returns the total number of simulator invocations.
      *
      * @return The number of simulator invocations.
@@ -285,6 +385,49 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
     detail::is_operational_impl<Lyt, TT> p{lyt, spec, params};
 
     return {p.run(), p.get_number_of_simulator_invocations()};
+}
+/**
+ * This function calculates the count of input combinations for which the SiDB-based logic, represented by the
+ * provided layout (`lyt`) and truth table specifications (`spec`), produces the correct output.
+ *
+ * @tparam Lyt Type of the cell-level layout.
+ * @tparam TT Type of the truth table.
+ * @param lyt The SiDB layout.
+ * @param spec Vector of truth table specifications.
+ * @param params Parameters to simualte if a input combination is operational.
+ * @param pst Statistics.
+ * @return The count of operational input combinations.
+ *
+ */
+template <typename Lyt, typename TT>
+[[nodiscard]] std::size_t number_of_operational_inputs(const Lyt& lyt, const std::vector<TT>& spec,
+                                                       const is_operational_params&        params = {},
+                                                       number_of_operational_inputs_stats* pst    = nullptr) noexcept
+{
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
+
+    assert(lyt.num_pis() > 0 && "skeleton needs input cells");
+    assert(lyt.num_pos() > 0 && "skeleton needs output cells");
+
+    assert(!spec.empty());
+    // all elements in tts must have the same number of variables
+    assert(std::adjacent_find(spec.begin(), spec.end(),
+                              [](const auto& a, const auto& b) { return a.num_vars() != b.num_vars(); }) == spec.end());
+
+    detail::is_operational_impl<Lyt, TT> p{lyt, spec, params};
+
+    number_of_operational_inputs_stats st{};
+
+    const auto result = p.count_number_of_operational_inputs(st);
+
+    if (pst)
+    {
+        *pst = st;
+    }
+
+    return result;
 }
 
 }  // namespace fiction

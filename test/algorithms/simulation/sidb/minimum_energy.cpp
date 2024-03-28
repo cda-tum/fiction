@@ -10,27 +10,29 @@
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
-#include <fiction/layouts/hexagonal_layout.hpp>
+#include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/cell_technologies.hpp>
+#include <fiction/technology/charge_distribution_surface.hpp>
+#include <fiction/technology/sidb_charge_state.hpp>
+#include <fiction/technology/sidb_lattice.hpp>
+#include <fiction/types.hpp>
 
 #include <cmath>
+#include <limits>
+#include <vector>
 
 using namespace fiction;
 
-TEMPLATE_TEST_CASE(
-    "Test minimum energy function", "[minimum-energy]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, odd_row_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, even_row_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, odd_column_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<siqad::coord_t, even_column_hex>>>))
+using lattice = sidb_100_cell_clk_lyt_siqad;
+
+TEST_CASE("Test minimum energy function", "[minimum-energy]")
 {
-    TestType lyt{{10, 10}};
+    lattice lyt{};
 
     SECTION("layout with no SiDB placed")
     {
-        const charge_distribution_surface                  charge_layout{lyt};
-        std::vector<charge_distribution_surface<TestType>> all_lyts{};
+        const charge_distribution_surface                 charge_layout{lyt};
+        std::vector<charge_distribution_surface<lattice>> all_lyts{};
 
         CHECK_THAT(minimum_energy(all_lyts.begin(), all_lyts.end()),
                    Catch::Matchers::WithinAbs(std::numeric_limits<double>::infinity(), 0.00001));
@@ -42,10 +44,10 @@ TEMPLATE_TEST_CASE(
 
     SECTION("layout with one SiDB placed")
     {
-        lyt.assign_cell_type({0, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({0, 0}, lattice::cell_type::NORMAL);
 
-        const charge_distribution_surface                  charge_layout{lyt};
-        std::vector<charge_distribution_surface<TestType>> all_lyts{};
+        const charge_distribution_surface                 charge_layout{lyt};
+        std::vector<charge_distribution_surface<lattice>> all_lyts{};
 
         CHECK_THAT(minimum_energy(all_lyts.cbegin(), all_lyts.cend()),
                    Catch::Matchers::WithinAbs(std::numeric_limits<double>::infinity(), 0.00001));
@@ -57,12 +59,12 @@ TEMPLATE_TEST_CASE(
 
     SECTION("layout with three SiDBs placed")
     {
-        lyt.assign_cell_type({0, 0}, TestType::cell_type::NORMAL);
-        lyt.assign_cell_type({10, 10}, TestType::cell_type::NORMAL);
-        lyt.assign_cell_type({9, 9}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({0, 0}, lattice::cell_type::NORMAL);
+        lyt.assign_cell_type({10, 10}, lattice::cell_type::NORMAL);
+        lyt.assign_cell_type({9, 9}, lattice::cell_type::NORMAL);
 
-        charge_distribution_surface                        charge_layout_first{lyt};
-        std::vector<charge_distribution_surface<TestType>> all_lyts{};
+        charge_distribution_surface                       charge_layout_first{lyt};
+        std::vector<charge_distribution_surface<lattice>> all_lyts{};
 
         CHECK_THAT(minimum_energy(all_lyts.cbegin(), all_lyts.cend()),
                    Catch::Matchers::WithinAbs(std::numeric_limits<double>::infinity(), 0.00001));

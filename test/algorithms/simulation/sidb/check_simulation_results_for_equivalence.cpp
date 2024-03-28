@@ -16,18 +16,17 @@ using namespace fiction;
 
 TEST_CASE("Several tests", "[check-equivalence-simulation-result]")
 {
-    sidb_cell_clk_lyt lyt1{};
-    lyt1.assign_cell_type({0, 0}, sidb_cell_clk_lyt::cell_type::NORMAL);
-    lyt1.assign_cell_type({0, 1}, sidb_cell_clk_lyt::cell_type::NORMAL);
-    lyt1.assign_cell_type({0, 2}, sidb_cell_clk_lyt::cell_type::NORMAL);
-    lyt1.assign_cell_type({0, 3}, sidb_cell_clk_lyt::cell_type::NORMAL);
+    sidb_100_cell_clk_lyt lyt1{};
+    lyt1.assign_cell_type({0, 0}, sidb_100_cell_clk_lyt::cell_type::NORMAL);
+    lyt1.assign_cell_type({0, 1}, sidb_100_cell_clk_lyt::cell_type::NORMAL);
+    lyt1.assign_cell_type({0, 2}, sidb_100_cell_clk_lyt::cell_type::NORMAL);
+    lyt1.assign_cell_type({0, 3}, sidb_100_cell_clk_lyt::cell_type::NORMAL);
 
-    charge_distribution_surface<sidb_cell_clk_lyt>       cds1{lyt1};
-    const charge_distribution_surface<sidb_cell_clk_lyt> cds2{lyt1, sidb_simulation_parameters{},
-                                                              sidb_charge_state::NEUTRAL};
+    cds_sidb_100_cell_clk_lyt       cds1{lyt1};
+    const cds_sidb_100_cell_clk_lyt cds2{lyt1, sidb_simulation_parameters{}, sidb_charge_state::NEUTRAL};
 
-    sidb_simulation_result<sidb_cell_clk_lyt> results1{};
-    sidb_simulation_result<sidb_cell_clk_lyt> results2{};
+    sidb_simulation_result<sidb_100_cell_clk_lyt> results1{};
+    sidb_simulation_result<sidb_100_cell_clk_lyt> results2{};
 
     results1.charge_distributions = {cds1, cds2};
     results2.charge_distributions = {cds2, cds1};
@@ -60,8 +59,8 @@ TEST_CASE("Several tests", "[check-equivalence-simulation-result]")
     SECTION("inequality due to different number of SiDBs")
     {
         auto lyt2{lyt1.clone()};
-        lyt2.assign_cell_type({4, 2}, sidb_cell_clk_lyt::cell_type::NORMAL);
-        lyt2.assign_cell_type({4, 3}, sidb_cell_clk_lyt::cell_type::NORMAL);
+        lyt2.assign_cell_type({4, 2}, sidb_100_cell_clk_lyt::cell_type::NORMAL);
+        lyt2.assign_cell_type({4, 3}, sidb_100_cell_clk_lyt::cell_type::NORMAL);
         results2.charge_distributions = {
             charge_distribution_surface{lyt2, sidb_simulation_parameters{}, sidb_charge_state::NEUTRAL},
             charge_distribution_surface{lyt2}};

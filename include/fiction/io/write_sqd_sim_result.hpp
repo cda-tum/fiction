@@ -9,6 +9,7 @@
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
+#include "fiction/technology/sidb_lattice_orientations.hpp"
 #include "fiction/technology/sidb_nm_position.hpp"
 #include "fiction/traits.hpp"
 #include "utils/version_info.hpp"
@@ -19,6 +20,7 @@
 #include <algorithm>
 #include <any>
 #include <chrono>
+#include <cstdint>
 #include <ctime>
 #include <fstream>
 #include <functional>
@@ -221,8 +223,7 @@ class write_sqd_sim_result_impl
         std::for_each(ordered_cells.cbegin(), ordered_cells.cend(),
                       [this](const auto& c)
                       {
-                          const auto [nm_x, nm_y] = sidb_nm_position<Lyt>(sim_result.physical_parameters, c);
-
+                          const auto [nm_x, nm_y] = sidb_nm_position<Lyt>(c);
                           os << fmt::format(siqad::DBDOT, nm_x * 10,
                                             nm_y * 10);  // convert nm to Angstrom
                       });

@@ -7,23 +7,24 @@
 
 #include <fiction/algorithms/simulation/sidb/assess_physical_population_stability.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
-#include <fiction/layouts/cell_level_layout.hpp>
+#include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/cell_technologies.hpp>
+#include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/types.hpp>
 
 using namespace fiction;
 
-using layout = sidb_cell_clk_lyt_siqad;
-
 TEST_CASE("Single SiDB", "[assess-physical-population-stability]")
 {
-    layout lyt{};
+    sidb_cell_clk_lyt_siqad lyt{};
     lyt.assign_cell_type({1, 1, 0}, sidb_technology::cell_type::NORMAL);
+
+    const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
     SECTION("Precision of distance_corresponding_to_potential is two")
     {
         const auto params = assess_physical_population_stability_params{sidb_simulation_parameters{2, -0.29}, 2};
-        const auto result = assess_physical_population_stability(lyt, params);
+        const auto result = assess_physical_population_stability(lat, params);
         REQUIRE(result.size() == 1);
         const auto& population_stability_detail = result[0];
         CHECK(population_stability_detail.critical_cell == siqad::coord_t{1, 1, 0});
@@ -36,7 +37,7 @@ TEST_CASE("Single SiDB", "[assess-physical-population-stability]")
     SECTION("Precision of distance_corresponding_to_potential is three")
     {
         const auto params = assess_physical_population_stability_params{sidb_simulation_parameters{2, -0.29}, 3};
-        const auto result = assess_physical_population_stability(lyt, params);
+        const auto result = assess_physical_population_stability(lat, params);
         REQUIRE(result.size() == 1);
         const auto& population_stability_detail = result[0];
         CHECK(population_stability_detail.critical_cell == siqad::coord_t{1, 1, 0});
@@ -49,13 +50,15 @@ TEST_CASE("Single SiDB", "[assess-physical-population-stability]")
 
 TEST_CASE("Three SiDBs with positive charge states", "[assess-physical-population-stability]")
 {
-    layout     lyt{};
-    const auto params = assess_physical_population_stability_params{};
+    sidb_cell_clk_lyt_siqad lyt{};
+    const auto              params = assess_physical_population_stability_params{};
     lyt.assign_cell_type({1, 1, 0}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({1, 1, 1}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::NORMAL);
 
-    const auto result = assess_physical_population_stability(lyt, params);
+    const sidb_100_cell_clk_lyt_siqad lat{lyt};
+
+    const auto result = assess_physical_population_stability(lat, params);
     REQUIRE(result.size() == 3);
 
     SECTION("Check correct energy order")
@@ -96,8 +99,8 @@ TEST_CASE("Three SiDBs with positive charge states", "[assess-physical-populatio
 
 TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]")
 {
-    layout     lyt{};
-    const auto params = assess_physical_population_stability_params{};
+    sidb_cell_clk_lyt_siqad lyt{};
+    const auto              params = assess_physical_population_stability_params{};
     lyt.assign_cell_type({36, 1, 0}, sidb_technology::cell_type::INPUT);
     lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::INPUT);
 
@@ -127,9 +130,11 @@ TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]")
 
     lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
 
+    sidb_100_cell_clk_lyt_siqad lat{lyt};
+
     SECTION("no input specified")
     {
-        const auto result = assess_physical_population_stability(lyt, params);
+        const auto result = assess_physical_population_stability(lat, params);
         REQUIRE(result.size() == 8);
         const auto& population_stability_detail = result[0];
         CHECK(population_stability_detail.critical_cell == siqad::coord_t{2, 1, 0});
@@ -141,9 +146,9 @@ TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]")
 
     SECTION("input 00")
     {
-        lyt.assign_cell_type({36, 1, 0}, sidb_technology::cell_type::EMPTY);
-        lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::EMPTY);
-        const auto result = assess_physical_population_stability(lyt, params);
+        lat.assign_cell_type({36, 1, 0}, sidb_technology::cell_type::EMPTY);
+        lat.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::EMPTY);
+        const auto result = assess_physical_population_stability(lat, params);
         REQUIRE(result.size() == 2);
         const auto& population_stability_detail = result[0];
         CHECK(population_stability_detail.critical_cell == siqad::coord_t{14, 5, 0});
@@ -155,10 +160,10 @@ TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]")
 
     SECTION("input 01")
     {
-        lyt.assign_cell_type({36, 1, 0}, sidb_technology::cell_type::EMPTY);
-        lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::EMPTY);
+        lat.assign_cell_type({36, 1, 0}, sidb_technology::cell_type::EMPTY);
+        lat.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::EMPTY);
 
-        const auto result = assess_physical_population_stability(lyt, params);
+        const auto result = assess_physical_population_stability(lat, params);
         REQUIRE(result.size() == 4);
         const auto& population_stability_detail = result[0];
         CHECK(population_stability_detail.critical_cell == siqad::coord_t{32, 18, 0});
@@ -170,10 +175,10 @@ TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]")
 
     SECTION("input 10")
     {
-        lyt.assign_cell_type({38, 0, 0}, sidb_technology::cell_type::EMPTY);
-        lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::EMPTY);
+        lat.assign_cell_type({38, 0, 0}, sidb_technology::cell_type::EMPTY);
+        lat.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::EMPTY);
 
-        const auto result = assess_physical_population_stability(lyt, params);
+        const auto result = assess_physical_population_stability(lat, params);
         REQUIRE(result.size() == 8);
         const auto& population_stability_detail = result[0];
         CHECK(population_stability_detail.critical_cell == siqad::coord_t{19, 8, 0});
@@ -185,10 +190,10 @@ TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]")
 
     SECTION("input 11")
     {
-        lyt.assign_cell_type({36, 1, 0}, sidb_technology::cell_type::EMPTY);
-        lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::EMPTY);
+        lat.assign_cell_type({36, 1, 0}, sidb_technology::cell_type::EMPTY);
+        lat.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::EMPTY);
 
-        const auto result = assess_physical_population_stability(lyt, params);
+        const auto result = assess_physical_population_stability(lat, params);
         REQUIRE(result.size() == 2);
         const auto& population_stability_detail = result[0];
         CHECK(population_stability_detail.critical_cell == siqad::coord_t{14, 5, 0});
@@ -201,8 +206,8 @@ TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]")
 
 TEST_CASE("Bestagon CROSSING gate input 11, using siqad coordinates", "[assess-physical-population-stability]")
 {
-    layout     lyt{};
-    const auto params = assess_physical_population_stability_params{};
+    sidb_cell_clk_lyt_siqad lyt{};
+    const auto              params = assess_physical_population_stability_params{};
     lyt.assign_cell_type({36, 1, 0}, sidb_technology::cell_type::INPUT);
     lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::INPUT);
 
@@ -240,9 +245,11 @@ TEST_CASE("Bestagon CROSSING gate input 11, using siqad coordinates", "[assess-p
     lyt.assign_cell_type({2, 19, 0}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
 
+    const sidb_100_cell_clk_lyt_siqad lat{lyt};
+
     CHECK(lyt.num_cells() == 27);
 
-    const auto result = assess_physical_population_stability(lyt, params);
+    const auto result = assess_physical_population_stability(lat, params);
     REQUIRE(result.size() == 20);
     const auto& population_stability_detail = result[0];
     CHECK(population_stability_detail.critical_cell == siqad::coord_t{14, 9, 0});
@@ -254,7 +261,7 @@ TEST_CASE("Bestagon CROSSING gate input 11, using siqad coordinates", "[assess-p
 
 TEST_CASE("Bestagon CROSSING gate input 11, using cube coordinates", "[assess-physical-population-stability]")
 {
-    cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>> lyt{};
+    sidb_cell_clk_lyt_cube lyt{};
 
     const auto params = assess_physical_population_stability_params{};
     lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{36, 1, 0}),
@@ -323,7 +330,9 @@ TEST_CASE("Bestagon CROSSING gate input 11, using cube coordinates", "[assess-ph
 
     CHECK(lyt.num_cells() == 27);
 
-    const auto result = assess_physical_population_stability(lyt, params);
+    const sidb_lattice<sidb_100_lattice, sidb_cell_clk_lyt_cube> lat{lyt};
+
+    const auto result = assess_physical_population_stability(lat, params);
     REQUIRE(result.size() == 20);
     const auto& population_stability_detail = result[0];
     CHECK(population_stability_detail.critical_cell == cube::coord_t{14, 18, 0});
@@ -335,7 +344,7 @@ TEST_CASE("Bestagon CROSSING gate input 11, using cube coordinates", "[assess-ph
 
 TEST_CASE("Bestagon CROSSING gate input 11, using offset coordinates", "[assess-physical-population-stability]")
 {
-    cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>> lyt{};
+    sidb_100_cell_clk_lyt lyt{};
 
     const auto params = assess_physical_population_stability_params{};
     lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{36, 1, 0}),
@@ -404,7 +413,9 @@ TEST_CASE("Bestagon CROSSING gate input 11, using offset coordinates", "[assess-
 
     CHECK(lyt.num_cells() == 27);
 
-    const auto result = assess_physical_population_stability(lyt, params);
+    const sidb_lattice<sidb_100_lattice, sidb_100_cell_clk_lyt> lat{lyt};
+
+    const auto result = assess_physical_population_stability(lat, params);
     REQUIRE(result.size() == 20);
     const auto& population_stability_detail = result[0];
     CHECK(population_stability_detail.critical_cell == offset::ucoord_t{14, 18, 0});

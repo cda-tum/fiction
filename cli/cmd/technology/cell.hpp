@@ -129,7 +129,7 @@ class cell_command : public command
         }
         else if (library == "BESTAGON")
         {
-            const auto apply_sidb_bestagon = [](auto&& lyt_ptr) -> std::optional<fiction::sidb_cell_clk_lyt_ptr>
+            const auto apply_sidb_bestagon = [](auto&& lyt_ptr) -> std::optional<fiction::sidb_100_cell_clk_lyt_ptr>
             {
                 using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
 
@@ -137,8 +137,8 @@ class cell_command : public command
                 {
                     if constexpr (fiction::has_pointy_top_hex_orientation_v<Lyt>)
                     {
-                        return std::make_shared<fiction::sidb_cell_clk_lyt>(
-                            fiction::apply_gate_library<fiction::sidb_cell_clk_lyt, fiction::sidb_bestagon_library>(
+                        return std::make_shared<fiction::sidb_100_cell_clk_lyt>(
+                            fiction::apply_gate_library<fiction::sidb_100_cell_clk_lyt, fiction::sidb_bestagon_library>(
                                 *lyt_ptr));
                     }
                     else

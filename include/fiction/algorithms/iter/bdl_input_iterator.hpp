@@ -6,6 +6,7 @@
 #define FICTION_BDL_INPUT_ITERATOR_HPP
 
 #include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
+#include "fiction/technology/cell_technologies.hpp"
 #include "fiction/types.hpp"
 
 #include <cstdint>

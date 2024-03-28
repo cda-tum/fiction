@@ -542,7 +542,7 @@ TEST_CASE("Exact hexagonal physical design", "[exact]")
         }
         SECTION("Row clocking")
         {
-            check_with_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library>(
+            check_with_gate_library<sidb_100_cell_clk_lyt, sidb_bestagon_library>(
                 blueprints::unbalanced_and_inv_network<mockturtle::mig_network>(),
                 row(crossings(border_io(configuration<hex_lyt>()))));
         }

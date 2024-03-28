@@ -7,7 +7,12 @@
 
 #include <fiction/algorithms/path_finding/distance.hpp>
 #include <fiction/algorithms/simulation/sidb/maximum_defect_influence_position_and_distance.hpp>
+#include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/physical_constants.hpp>
+#include <fiction/technology/sidb_defects.hpp>
+#include <fiction/technology/sidb_lattice.hpp>
+#include <fiction/technology/sidb_lattice_orientations.hpp>
+#include <fiction/types.hpp>
 #include <fiction/utils/math_utils.hpp>
 
 using namespace fiction;
@@ -20,7 +25,9 @@ TEST_CASE("Test influence distance function", "[maximum-defect-influence-positio
         const maximum_defect_influence_distance_params sim_params{defect, sidb_simulation_parameters{}};
         const sidb_cell_clk_lyt_siqad                  lyt{};
 
-        const auto [defect_pos, distance] = maximum_defect_influence_position_and_distance(lyt, sim_params);
+        const sidb_100_cell_clk_lyt_siqad lat{lyt};
+
+        const auto [defect_pos, distance] = maximum_defect_influence_position_and_distance(lat, sim_params);
         CHECK(distance == 0);
         CHECK(defect_pos == coordinate<sidb_cell_clk_lyt_siqad>());
     }
@@ -34,7 +41,9 @@ TEST_CASE("Test influence distance function", "[maximum-defect-influence-positio
         sidb_cell_clk_lyt_siqad lyt{};
         lyt.assign_cell_type({0, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
 
-        const auto [defect_pos, distance] = maximum_defect_influence_position_and_distance(lyt, sim_params);
+        const sidb_lattice<sidb_100_lattice, sidb_cell_clk_lyt_siqad> lat{lyt};
+
+        const auto [defect_pos, distance] = maximum_defect_influence_position_and_distance(lat, sim_params);
         CHECK_THAT(round_to_n_decimal_places(distance, 6),
                    Catch::Matchers::WithinAbs(0.665060, physical_constants::POP_STABILITY_ERR));
         CHECK((((defect_pos.x == -1) && (defect_pos.y == -1) && (defect_pos.z == 1)) ||
@@ -47,9 +56,12 @@ TEST_CASE("Test influence distance function", "[maximum-defect-influence-positio
         const maximum_defect_influence_distance_params sim_params{defect, sidb_simulation_parameters{}};
         sidb_cell_clk_lyt_siqad                        lyt{};
         lyt.assign_cell_type({0, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
-        const auto [defect_pos, distance] = maximum_defect_influence_position_and_distance(lyt, sim_params);
+
+        const sidb_100_cell_clk_lyt_siqad lat{lyt};
+
+        const auto [defect_pos, distance] = maximum_defect_influence_position_and_distance(lat, sim_params);
         CHECK_THAT(round_to_n_decimal_places(distance, 4) -
-                       round_to_n_decimal_places(sidb_nanometer_distance(lyt, {0, 0, 0}, {-1, 0, 1}), 4),
+                       round_to_n_decimal_places(sidb_nanometer_distance<decltype(lat)>({0, 0, 0}, {-1, 0, 1}), 4),
                    Catch::Matchers::WithinAbs(0.0, physical_constants::POP_STABILITY_ERR));
     }
 
@@ -59,9 +71,12 @@ TEST_CASE("Test influence distance function", "[maximum-defect-influence-positio
         const maximum_defect_influence_distance_params sim_params{defect, sidb_simulation_parameters{}, {2, 2}};
         sidb_cell_clk_lyt_siqad                        lyt{};
         lyt.assign_cell_type({0, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
-        const auto [defect_pos, distance] = maximum_defect_influence_position_and_distance(lyt, sim_params);
+
+        const sidb_100_cell_clk_lyt_siqad lat{lyt};
+
+        const auto [defect_pos, distance] = maximum_defect_influence_position_and_distance(lat, sim_params);
         CHECK_THAT(round_to_n_decimal_places(distance, 4) -
-                       round_to_n_decimal_places(sidb_nanometer_distance(lyt, {0, 0, 0}, {0, 1, 0}), 4),
+                       round_to_n_decimal_places(sidb_nanometer_distance<decltype(lat)>({0, 0, 0}, {0, 1, 0}), 4),
                    Catch::Matchers::WithinAbs(0.0, physical_constants::POP_STABILITY_ERR));
     }
 
@@ -75,9 +90,11 @@ TEST_CASE("Test influence distance function", "[maximum-defect-influence-positio
         lyt.assign_cell_type({4, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
         lyt.assign_cell_type({6, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
 
-        const auto [defect_pos, distance] = maximum_defect_influence_position_and_distance(lyt, sim_params);
+        const sidb_100_cell_clk_lyt_siqad lat{lyt};
+
+        const auto [defect_pos, distance] = maximum_defect_influence_position_and_distance(lat, sim_params);
         CHECK_THAT(round_to_n_decimal_places(distance, 4) -
-                       round_to_n_decimal_places(sidb_nanometer_distance(lyt, {6, 0, 0}, {10, 0, 0}), 4),
+                       round_to_n_decimal_places(sidb_nanometer_distance<decltype(lat)>({6, 0, 0}, {10, 0, 0}), 4),
                    Catch::Matchers::WithinAbs(0.0, physical_constants::POP_STABILITY_ERR));
     }
 
@@ -98,7 +115,9 @@ TEST_CASE("Test influence distance function", "[maximum-defect-influence-positio
         lyt.assign_cell_type({4, 5, 1}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
         lyt.assign_cell_type({4, 7, 1}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
 
-        const auto [defect_pos, distance] = maximum_defect_influence_position_and_distance(lyt, sim_params);
+        const sidb_100_cell_clk_lyt_siqad lat{lyt};
+
+        const auto [defect_pos, distance] = maximum_defect_influence_position_and_distance(lat, sim_params);
         CHECK(defect_pos.x == 12);
         CHECK(defect_pos.y == 4);
         CHECK(defect_pos.z == 1);
@@ -110,10 +129,10 @@ TEST_CASE("Test influence distance function", "[maximum-defect-influence-positio
         const maximum_defect_influence_distance_params sim_params_high_screening{high_screening,
                                                                                  sidb_simulation_parameters{}};
 
-        const auto [defect_pos_high_screeing, distance_high_screeing] =
-            maximum_defect_influence_position_and_distance(lyt, sim_params_high_screening);
+        const auto [defect_pos_high_screening, distance_high_screening] =
+            maximum_defect_influence_position_and_distance(lat, sim_params_high_screening);
 
-        CHECK(distance_high_screeing < distance);
+        CHECK(distance_high_screening < distance);
     }
 
     SECTION("QuickExact simulation of a Y-shape SiDB OR gate with input 01, using cube coordinate")
@@ -121,7 +140,7 @@ TEST_CASE("Test influence distance function", "[maximum-defect-influence-positio
         const sidb_defect defect{sidb_defect_type::UNKNOWN, -1, sidb_simulation_parameters{}.epsilon_r,
                                  sidb_simulation_parameters{}.lambda_tf};
         const maximum_defect_influence_distance_params sim_params{defect, sidb_simulation_parameters{}};
-        cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>> lyt{{30, 30}};
+        sidb_cell_clk_lyt_cube                         lyt{{30, 30}};
 
         lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{10, 0, 0}),
                              sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
@@ -141,7 +160,9 @@ TEST_CASE("Test influence distance function", "[maximum-defect-influence-positio
         lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{4, 7, 1}),
                              sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
 
-        const auto [defect_pos, distance] = maximum_defect_influence_position_and_distance(lyt, sim_params);
+        const sidb_100_cell_clk_lyt_cube lat{lyt};
+
+        const auto [defect_pos, distance] = maximum_defect_influence_position_and_distance(lat, sim_params);
         CHECK(defect_pos.x == 12);
         CHECK(defect_pos.y == 9);
         CHECK(defect_pos.z == 0);

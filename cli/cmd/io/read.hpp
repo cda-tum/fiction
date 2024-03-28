@@ -9,6 +9,7 @@
 #include <fiction/io/read_fgl_layout.hpp>
 #include <fiction/io/read_fqca_layout.hpp>
 #include <fiction/io/read_sqd_layout.hpp>
+#include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
@@ -48,6 +49,7 @@ class read_command : public command
         add_option("topology", topology,
                    "Topology for gate-level layouts. Can be 'cartesian' or of the form "
                    "'<odd|even>_<row|column>_<cartesian|hex>'");
+        add_option("--lattice_orientation,-o", orientation, "Lattice orientation for SQD files to use {100, 111}");
         add_flag("--aig,-a", "Parse Verilog file as AIG");
         add_flag("--xag,-x", "Parse Verilog file as XAG");
         add_flag("--mig,-m", "Parse Verilog file as MIG");
@@ -215,10 +217,20 @@ class read_command : public command
                                 {
                                     const auto layout_name = std::filesystem::path{filename}.stem().string();
 
-                                    store<fiction::cell_layout_t>().extend() =
-                                        std::make_shared<fiction::sidb_cell_clk_lyt>(
-                                            fiction::read_sqd_layout<fiction::sidb_cell_clk_lyt>(filename,
-                                                                                                 layout_name));
+                                    if (orientation == "100")
+                                    {
+                                        const auto layout = fiction::read_sqd_layout<fiction::sidb_100_cell_clk_lyt>(
+                                            filename, layout_name);
+                                        store<fiction::cell_layout_t>().extend() =
+                                            std::make_shared<fiction::sidb_100_cell_clk_lyt>(layout);
+                                    }
+                                    else if (orientation == "111")
+                                    {
+                                        const auto layout = fiction::read_sqd_layout<fiction::sidb_111_cell_clk_lyt>(
+                                            filename, layout_name);
+                                        store<fiction::cell_layout_t>().extend() =
+                                            std::make_shared<fiction::sidb_111_cell_clk_lyt>(layout);
+                                    }
                                 }
                                 catch (const fiction::sqd_parsing_error& e)
                                 {
@@ -291,6 +303,10 @@ class read_command : public command
      * Flag to indicate that files should be sorted by file size.
      */
     bool sort = false;
+    /**
+     * Identifier of H-Si lattice orientation.
+     */
+    std::string orientation{"100"};
 };
 
 ALICE_ADD_COMMAND(read, "I/O")

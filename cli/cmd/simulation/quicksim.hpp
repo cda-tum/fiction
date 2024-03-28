@@ -110,9 +110,22 @@ class quicksim_command : public command
                 {
                     params.phys_params = physical_params;
 
-                    sim_result = fiction::quicksim(*lyt_ptr, params);
+                    if constexpr (fiction::is_sidb_lattice_100_v<Lyt>)
+                    {
+                        sim_result = fiction::quicksim(*lyt_ptr, params);
+                    }
+                    else if constexpr (fiction::is_sidb_lattice_111_v<Lyt>)
+                    {
+                        sim_result_111 = fiction::quicksim(*lyt_ptr, params);
+                    }
 
-                    if (sim_result.charge_distributions.empty())
+                    else
+                    {
+                        env->out() << "[e] no valid lattice orientation" << std::endl;
+                        return;
+                    }
+
+                    if (sim_result.charge_distributions.empty() && sim_result_111.charge_distributions.empty())
                     {
                         env->out() << fmt::format("[e] no stable charge distribution could be determined for {}",
                                                   get_name(lyt_ptr))
@@ -120,13 +133,25 @@ class quicksim_command : public command
                     }
                     else
                     {
-                        const auto min_energy_distr = fiction::minimum_energy_distribution(
-                            sim_result.charge_distributions.cbegin(), sim_result.charge_distributions.cend());
+                        if constexpr (fiction::is_sidb_lattice_100_v<Lyt>)
+                        {
+                            const auto min_energy_distr = fiction::minimum_energy_distribution(
+                                sim_result.charge_distributions.cbegin(), sim_result.charge_distributions.cend());
 
-                        min_energy = min_energy_distr->get_system_energy();
+                            min_energy = min_energy_distr->get_system_energy();
+                            store<fiction::cell_layout_t>().extend() =
+                                std::make_shared<fiction::cds_sidb_100_cell_clk_lyt>(*min_energy_distr);
+                        }
+                        else if constexpr (fiction::is_sidb_lattice_111_v<Lyt>)
+                        {
+                            const auto min_energy_distr =
+                                fiction::minimum_energy_distribution(sim_result_111.charge_distributions.cbegin(),
+                                                                     sim_result_111.charge_distributions.cend());
 
-                        store<fiction::cell_layout_t>().extend() =
-                            std::make_shared<fiction::cds_sidb_cell_clk_lyt>(*min_energy_distr);
+                            min_energy = min_energy_distr->get_system_energy();
+                            store<fiction::cell_layout_t>().extend() =
+                                std::make_shared<fiction::cds_sidb_111_cell_clk_lyt>(*min_energy_distr);
+                        }
                     }
                 }
             }
@@ -151,9 +176,13 @@ class quicksim_command : public command
      */
     fiction::quicksim_params params{};
     /**
-     * Simulation result.
+     * Simulation result for H-Si(100)-2x1 surface.
      */
-    fiction::sidb_simulation_result<fiction::sidb_cell_clk_lyt> sim_result{};
+    fiction::sidb_simulation_result<fiction::sidb_100_cell_clk_lyt> sim_result{};
+    /**
+     * Simulation result for H-Si(111)-1x1 surface.
+     */
+    fiction::sidb_simulation_result<fiction::sidb_111_cell_clk_lyt> sim_result_111{};
     /**
      * Minimum energy.
      */

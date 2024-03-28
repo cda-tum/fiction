@@ -5,12 +5,14 @@
 #ifndef FICTION_TRAITS_HPP
 #define FICTION_TRAITS_HPP
 
+#include "fiction/layouts/coordinates.hpp"
 #include "fiction/layouts/hexagonal_layout.hpp"
 #include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/technology/sidb_defects.hpp"
+#include "fiction/technology/sidb_lattice_orientations.hpp"
 
 #include <mockturtle/traits.hpp>
 
@@ -674,7 +676,54 @@ inline constexpr bool has_get_layout_name_v = has_get_layout_name<Ntk>::value;
 #pragma endregion
 
 /**
- * SiDB surfaces
+ * SiDB lattice orientations
+ */
+
+template <typename Lyt>
+using lattice_orientation = typename Lyt::orientation;
+
+template <typename Lyt, typename LatticeOrientation>
+inline constexpr const bool has_same_lattice_orientation_v =
+    std::is_same_v<typename Lyt::orientation, LatticeOrientation>;
+
+template <typename Lyt, typename = void>
+struct is_sidb_lattice : std::false_type
+{};
+
+template <typename Lyt>
+struct is_sidb_lattice<Lyt, std::enable_if_t<is_cell_level_layout_v<Lyt>, std::void_t<typename Lyt::orientation>>>
+        : std::true_type
+{};
+
+template <typename Lyt>
+constexpr bool is_sidb_lattice_v = is_sidb_lattice<Lyt>::value;
+
+template <typename Lyt, typename = void>
+struct is_sidb_lattice_100 : std::false_type
+{};
+
+template <typename Lyt>
+struct is_sidb_lattice_100<Lyt, std::enable_if_t<is_sidb_lattice_v<Lyt>>>
+        : std::conditional_t<has_same_lattice_orientation_v<Lyt, sidb_100_lattice>, std::true_type, std::false_type>
+{};
+
+template <typename Lyt>
+constexpr bool is_sidb_lattice_100_v = is_sidb_lattice_100<Lyt>::value;
+
+template <typename Lyt, typename = void>
+struct is_sidb_lattice_111 : std::false_type
+{};
+
+template <typename Lyt>
+struct is_sidb_lattice_111<Lyt, std::enable_if_t<is_sidb_lattice_v<Lyt>>>
+        : std::conditional_t<has_same_lattice_orientation_v<Lyt, sidb_111_lattice>, std::true_type, std::false_type>
+{};
+
+template <typename Lyt>
+constexpr bool is_sidb_lattice_111_v = is_sidb_lattice_111<Lyt>::value;
+
+/**
+ * SiDB defect surface
  */
 
 #pragma region has_assign_sidb_defect

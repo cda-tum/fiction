@@ -5,20 +5,20 @@
 #ifndef FICTION_WRITE_LOCATION_AND_GROUND_STATE_HPP
 #define FICTION_WRITE_LOCATION_AND_GROUND_STATE_HPP
 
-#include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
 #include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
-#include "fiction/io/read_sqd_layout.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/types.hpp"
 #include "fiction/utils/math_utils.hpp"
+#include "fmt/format.h"
 
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <fstream>
 #include <limits>
 #include <ostream>
-#include <string>
+#include <string_view>
 #include <vector>
 
 namespace fiction
@@ -42,13 +42,13 @@ class write_location_and_ground_state_impl
         const auto min_energy = round_to_n_decimal_places(
             minimum_energy(sim_result.charge_distributions.cbegin(), sim_result.charge_distributions.cend()), 6);
 
-        std::vector<charge_distribution_surface<sidb_cell_clk_lyt_siqad>> ground_state_layouts{};
+        std::vector<charge_distribution_surface<Lyt>> ground_state_layouts{};
         for (const auto& valid_layout : sim_result.charge_distributions)
         {
             if (std::fabs(round_to_n_decimal_places(valid_layout.get_system_energy(), 6) - min_energy) <
                 std::numeric_limits<double>::epsilon())
             {
-                ground_state_layouts.emplace_back(charge_distribution_surface<sidb_cell_clk_lyt_siqad>{valid_layout});
+                ground_state_layouts.emplace_back(charge_distribution_surface<Lyt>{valid_layout});
             }
         }
 
@@ -63,13 +63,14 @@ class write_location_and_ground_state_impl
             }
             os << '\n';
 
-            auto       sidbs              = ground_state_layouts.front().get_sidb_order();
-            const auto physical_parameter = ground_state_layouts.front().get_phys_params();
+            const auto ground_state = ground_state_layouts.front();
+            auto       sidbs        = ground_state.get_sidb_order();
 
             std::sort(sidbs.begin(), sidbs.end());
+
             for (const auto& sidb : sidbs)
             {
-                const auto pos = sidb_nm_position<sidb_cell_clk_lyt_siqad>(physical_parameter, sidb);
+                const auto pos = sidb_nm_position<Lyt>(sidb);
                 os << fmt::format("{:.3f};{:.3f};", pos.first, pos.second);
                 for (const auto& valid_layout : ground_state_layouts)
                 {

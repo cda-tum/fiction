@@ -86,6 +86,11 @@ Energy Calculation
 .. doxygenfunction:: fiction::check_simulation_results_for_equivalence
 
 
+**Header:** ``fiction/algorithms/simulation/sidb/determine_groundstate_from_simulation_results.hpp``
+
+.. doxygenfunction:: fiction::determine_groundstate_from_simulation_results
+
+
 Temperature Behavior
 ####################
 
@@ -152,7 +157,10 @@ Operational Domain Computation
 .. doxygenenum:: fiction::operational_status
 .. doxygenstruct:: fiction::is_operational_params
    :members:
+.. doxygenstruct:: fiction::number_of_operational_inputs_stats
+   :members:
 .. doxygenfunction:: fiction::is_operational
+.. doxygenfunction:: fiction::number_of_operational_inputs
 
 **Header:** ``fiction/algorithms/simulation/sidb/operational_domain.hpp``
 
@@ -213,3 +221,11 @@ Convert Potential to Distance
 **Header:** ``fiction/algorithms/simulation/sidb/convert_potential_to_distance.hpp``
 
 .. doxygenfunction:: fiction::convert_potential_to_distance
+
+
+Euclidean distance between two SiDBs in nanometer
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Header:** ``fiction/algorithms/simulation/sidb/sidb_nanometer_distance.hpp``
+
+.. doxygenfunction:: fiction::sidb_nanometer_distance
