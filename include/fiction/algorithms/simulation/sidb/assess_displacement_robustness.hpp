@@ -163,4 +163,30 @@ assess_displacement_robustness(const Lyt& layout, const displacement_robustness_
 
 }  // namespace fiction
 
+namespace std
+{
+template <typename Technology, typename ClockedLayout>
+struct hash<fiction::cell_level_layout<Technology, ClockedLayout>>
+{
+        std::size_t operator()(const fiction::cell_level_layout<Technology, ClockedLayout>& layout) const
+        {
+            std::size_t seed = 0;
+
+            // Combine hash values of member variables
+            fiction::hash_combine(seed, layout.get_layout_name());
+            fiction::hash_combine(seed, layout.num_cells());
+            fiction::hash_combine(seed, layout.num_pis());
+            fiction::hash_combine(seed, layout.num_pos());
+            fiction::hash_combine(seed, layout.get_tile_size_x());
+            fiction::hash_combine(seed, layout.get_tile_size_y());
+            fiction::hash_combine(seed, layout.is_empty());
+
+            // Combine hash values of cell types, modes, and names
+            fiction::hash_combine(seed, layout.get_cell_type_map());
+
+            return seed;
+    };
+};
+}  // namespace std
+
 #endif  // FICTION_ASSESS_DISPLACEMENT_ROBUSTNESS_HPP
