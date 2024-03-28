@@ -43,6 +43,10 @@ Truth Table Utils
 .. doxygenfunction:: fiction::create_nor_tt
 .. doxygenfunction:: fiction::create_xor_tt
 .. doxygenfunction:: fiction::create_xnor_tt
+.. doxygenfunction:: fiction::create_lt_tt
+.. doxygenfunction:: fiction::create_gt_tt
+.. doxygenfunction:: fiction::create_le_tt
+.. doxygenfunction:: fiction::create_ge_tt
 .. doxygenfunction:: fiction::create_maj_tt
 .. doxygenfunction:: fiction::create_double_wire_tt
 .. doxygenfunction:: fiction::create_crossing_wire_tt

@@ -29,6 +29,8 @@ SiDB Defect Surface
 
 **Header:** ``fiction/technology/sidb_surface.hpp``
 
+.. doxygenstruct:: fiction::sidb_surface_params
+   :members:
 .. doxygenclass:: fiction::sidb_surface
    :members:
 .. doxygenclass:: fiction::sidb_surface< Lyt, true >
