@@ -6,6 +6,7 @@
 #define FICTION_CMD_OPDOM_HPP
 
 #include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/io/write_operational_domain.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
@@ -18,6 +19,7 @@
 #include <algorithm>
 #include <array>
 #include <cctype>
+#include <cstdint>
 #include <cstdlib>
 #include <exception>
 #include <iostream>
@@ -40,9 +42,8 @@ class opdom_command : public command
      * @param e alice::environment that specifies stores etc.
      */
     explicit opdom_command(const environment::ptr& e) :
-            command(e, "Opdom is a quick and exact electrostatic ground state simulation algorithm designed "
-                       "specifically for SiDB layouts. It provides a significant performance advantage of more than "
-                       "three orders of magnitude over ExGS from SiQAD.")
+            command(e, "Opdom is a tool designed for operation domain calculation, doing so in a variety of flavors "
+                       "that reduce the complexity of the parameter space search.")
     {
         add_option("--random_sampling,-r", num_random_samples,
                    "Use random sampling instead of grid search with this many random samples");
@@ -68,6 +69,12 @@ class opdom_command : public command
         add_option("--y_min", params.y_min, "Minimum value of the y dimension sweep", true);
         add_option("--y_max", params.y_max, "Maximum value of the y dimension sweep", true);
         add_option("--y_step", params.y_step, "Step size of the y dimension sweep", true);
+        add_option("--base", physical_params.base,
+                   "The simulation base, can be 2 or 3. Only ClusterComplete supports base 3 simulation.", true);
+        add_option("--engine", sim_engine_id,
+                   "The simulation engine as identified by a number: QuickExact (0) [default], ClusterComplete (1), "
+                   "QuickSim (2), ExGS (3).",
+                   true);
     }
 
   protected:
@@ -221,6 +228,8 @@ class opdom_command : public command
                     return;
                 }
 
+                params.sim_engine = get_sim_engine();
+
                 params.sim_params = physical_params;
 
                 if (is_set("random_sampling"))
@@ -283,6 +292,10 @@ class opdom_command : public command
      */
     std::string y_sweep{};
     /**
+     * The identifier for the simulation engine to use.
+     */
+    uint8_t sim_engine_id{0};
+    /**
      * CSV filename to write the operational domain to.
      */
     std::string filename{};
@@ -307,6 +320,34 @@ class opdom_command : public command
         }
     }
     /**
+     * Convert the simulation identifier to the appropriate engine enum member:
+     * QuickExact (0) [default] | ClusterComplete (1) | QuickSim (2) | ExGS (3).
+     *
+     * @return The `sidb_simulation_engine` member associated with the identifier.
+     */
+    [[nodiscard]] inline constexpr fiction::sidb_simulation_engine get_sim_engine() const noexcept
+    {
+        switch (sim_engine_id)
+        {
+            case 1:
+            {
+                return fiction::sidb_simulation_engine::CLUSTERCOMPLETE;
+            }
+            case 2:
+            {
+                return fiction::sidb_simulation_engine::QUICKSIM;
+            }
+            case 3:
+            {
+                return fiction::sidb_simulation_engine::EXGS;
+            }
+            default:
+            {
+                return fiction::sidb_simulation_engine::QUICKEXACT;
+            }
+        }
+    }
+    /**
      * Logs the resulting information in a log file.
      *
      * @return JSON object containing details about the operational domain.
@@ -314,7 +355,7 @@ class opdom_command : public command
     [[nodiscard]] nlohmann::json log() const override
     {
         return nlohmann::json{
-            {"Algorithm name", "QuickExact"},
+            {"Algorithm name", sidb_simulation_engine_name(params.sim_engine)},
             {"Runtime in seconds", mockturtle::to_seconds(stats.time_total)},
             {"Number of simulator invocations", stats.num_simulator_invocations},
             {"Number of evaluated parameter combinations", stats.num_evaluated_parameter_combinations},
