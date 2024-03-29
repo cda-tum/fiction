@@ -51,9 +51,13 @@ struct area_stats
  * @tparam Lyt Cell-level layout type.
  * @tparam AreaType Type for area representation.
  * @param lyt The cell-level layout whose area is desired.
+ * @param ps Area parameters.
+ * @param pst Area statistics.
+ * @return Area requirements in nm².
  */
 template <typename Lyt, typename AreaType = double>
-void area(const Lyt& lyt, area_params<technology<Lyt>, AreaType>& ps = {}, area_stats<AreaType>* pst = nullptr)
+AreaType area(const Lyt& lyt, area_params<technology<Lyt>, AreaType>& ps = {},
+              area_stats<AreaType>* pst = nullptr) noexcept
 {
     static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
 
@@ -66,6 +70,8 @@ void area(const Lyt& lyt, area_params<technology<Lyt>, AreaType>& ps = {}, area_
     {
         *pst = st;
     }
+
+    return st.area;
 }
 /**
  * Computes real-world area requirements in nm² of the bounding box of a given cell-level layout. For this purpose, each
@@ -74,11 +80,14 @@ void area(const Lyt& lyt, area_params<technology<Lyt>, AreaType>& ps = {}, area_
  *
  * @tparam Lyt Cell-level layout type.
  * @tparam AreaType Type for area representation.
- * @param lyt The cell-level layout whose area is desired.
+ * @param bb The bounding box of the cell-level layout whose area is desired.
+ * @param ps Area parameters.
+ * @param pst Area statistics.
+ * @return Area requirements in nm².
  */
 template <typename Lyt, typename AreaType = double>
-void area(const bounding_box_2d<Lyt>& bb, area_params<technology<Lyt>, AreaType>& ps = {},
-          area_stats<AreaType>* pst = nullptr)
+AreaType area(const bounding_box_2d<Lyt>& bb, area_params<technology<Lyt>, AreaType>& ps = {},
+              area_stats<AreaType>* pst = nullptr) noexcept
 {
     static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
 
@@ -92,6 +101,8 @@ void area(const bounding_box_2d<Lyt>& bb, area_params<technology<Lyt>, AreaType>
     {
         *pst = st;
     }
+
+    return st.area;
 }
 
 }  // namespace fiction

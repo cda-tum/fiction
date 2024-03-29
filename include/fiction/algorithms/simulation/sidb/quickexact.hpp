@@ -547,8 +547,9 @@ class quickexact_impl
 /**
  * *QuickExact* is a quick and exact physical simulation algorithm designed specifically for SiDB layouts. It was
  * proposed in \"The Need for Speed: Efficient Exact Simulation of Silicon Dangling Bond Logic\" by J. Drewniok, M.
- * Walter, and R. Wille in ASP-DAC 2024. It determines all physically valid charge configurations of a given SiDB
- * layout, providing a significant performance advantage of more than three orders of magnitude over *ExGS*
+ * Walter, and R. Wille in ASP-DAC 2024 (https://ieeexplore.ieee.org/document/10473946). It determines all physically
+ * valid charge configurations of a given SiDB layout, providing a significant performance advantage of more than three
+ * orders of magnitude over *ExGS*
  * (`exhaustive_ground_state_simulation`).
  *
  * The performance improvement of *QuickExact* can be attributed to the incorporation of three key ideas:
