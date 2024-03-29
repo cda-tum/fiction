@@ -111,6 +111,10 @@ template <typename EngineType>
             {
                 return "QuickSim";
             }
+            default:
+            {
+                return "Not implemented";
+            }
         }
     }
 
