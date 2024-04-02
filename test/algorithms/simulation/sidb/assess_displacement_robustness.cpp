@@ -33,7 +33,7 @@ TEST_CASE("assess_displacement_robustness for Y-shape SiDB AND gate", "[assess-d
 
     SECTION("only ")
     {
-        displacement_robustness_params<tt, sidb_cell_clk_lyt_siqad> params{};
+        displacement_robustness_params<tt> params{};
         params.displacement_variations                        = {1, 0};
         params.tt                                             = std::vector<tt>{create_and_tt()};
         params.operational_params.simulation_parameter        = sidb_simulation_parameters{2, -0.28};

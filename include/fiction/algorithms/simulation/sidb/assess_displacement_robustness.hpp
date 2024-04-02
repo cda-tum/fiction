@@ -98,10 +98,10 @@ class displacement_robustness_domain_impl
             {
                 auto new_pos_se = c;
                 auto new_pos_nw = c;
-                new_pos_se.x -= params.displacement_variations.x;
-                new_pos_se.y -= params.displacement_variations.y;
-                new_pos_nw.x += params.displacement_variations.x;
-                new_pos_nw.y += params.displacement_variations.y;
+                new_pos_se.x -= params.displacement_variations.first;
+                new_pos_se.y -= params.displacement_variations.second;
+                new_pos_nw.x += params.displacement_variations.first;
+                new_pos_nw.y += params.displacement_variations.second;
 
                 const auto all_coord = all_coordinates_in_spanned_area<cell<Lyt>>(new_pos_se, new_pos_nw);
                 all_displacements_for_all_coordinates.push_back(all_coord);
@@ -199,14 +199,9 @@ assess_displacement_robustness(const Lyt& layout, const displacement_robustness_
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-    if (has_siqad_coord_v<Lyt>)
-    {
-        return assess_displacement_robustness(convert_to_fiction_coordinates<cub>(), params, stats);
-    }
-
     displacement_robustness_stats                        st{};
     detail::displacement_robustness_domain_impl<Lyt, TT> p{layout, params, st};
-    // return p.run(p.generate_combinations(0));
+
     const auto result = p.run();
 
     if (stats)
