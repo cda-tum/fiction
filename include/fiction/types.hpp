@@ -226,6 +226,15 @@ using sidb_defect_cell_clk_lyt_siqad_ptr = std::shared_ptr<sidb_defect_cell_clk_
 using sidb_defect_cell_clk_lyt_cube     = sidb_defect_surface<sidb_cell_clk_lyt_cube>;
 using sidb_defect_cell_clk_lyt_cube_ptr = std::shared_ptr<sidb_defect_cell_clk_lyt_cube>;
 
+using sidb_defect_100_cell_clk_lyt     = sidb_defect_surface<sidb_100_cell_clk_lyt>;
+using sidb_defect_100_cell_clk_lyt_ptr = std::shared_ptr<sidb_defect_100_cell_clk_lyt>;
+
+using sidb_defect_100_cell_clk_lyt_siqad     = sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>;
+using sidb_defect_100_cell_clk_lyt_siqad_ptr = std::shared_ptr<sidb_defect_100_cell_clk_lyt_siqad>;
+
+using sidb_defect_100_cell_clk_lyt_cube     = sidb_defect_surface<sidb_100_cell_clk_lyt_cube>;
+using sidb_defect_100_cell_clk_lyt_cube_ptr = std::shared_ptr<sidb_defect_100_cell_clk_lyt_cube>;
+
 using cds_sidb_defect_100_cell_clk_lyt     = charge_distribution_surface<sidb_defect_surface<sidb_100_cell_clk_lyt>>;
 using cds_sidb_defect_100_cell_clk_lyt_ptr = std::shared_ptr<cds_sidb_defect_100_cell_clk_lyt>;
 
