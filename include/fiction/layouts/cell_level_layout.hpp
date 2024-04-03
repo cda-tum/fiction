@@ -361,7 +361,7 @@ class cell_level_layout : public ClockedLayout
      *
      * @return The clock zone size in cells in the x-dimension.
      */
-    [[nodiscard]] uint16_t get_tile_size_x() const noexcept
+    [[nodiscard]] auto get_tile_size_x() const noexcept
     {
         return strg->tile_size_x;
     }
@@ -380,7 +380,7 @@ class cell_level_layout : public ClockedLayout
      *
      * @return The clock zone size in cells in the y-dimension.
      */
-    [[nodiscard]] uint16_t get_tile_size_y() const noexcept
+    [[nodiscard]] auto get_tile_size_y() const noexcept
     {
         return strg->tile_size_y;
     }

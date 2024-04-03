@@ -568,6 +568,13 @@ using cell = typename Lyt::cell;
 template <typename Lyt>
 using technology = typename Lyt::technology;
 
+template <typename CoordinateType>
+inline constexpr const bool is_offset_ucoord_v = std::is_same_v<CoordinateType, offset::ucoord_t>;
+template <typename CoordinateType>
+inline constexpr const bool is_cube_coord_v = std::is_same_v<CoordinateType, cube::coord_t>;
+template <typename CoordinateType>
+inline constexpr const bool is_siqad_coord_v = std::is_same_v<CoordinateType, siqad::coord_t>;
+
 template <typename Lyt>
 inline constexpr const bool has_qca_technology_v = std::is_same_v<technology<Lyt>, qca_technology>;
 template <typename Lyt>
@@ -575,11 +582,11 @@ inline constexpr const bool has_inml_technology_v = std::is_same_v<technology<Ly
 template <typename Lyt>
 inline constexpr const bool has_sidb_technology_v = std::is_same_v<technology<Lyt>, sidb_technology>;
 template <typename Lyt>
-inline constexpr const bool has_offset_ucoord_v = std::is_same_v<coordinate<Lyt>, offset::ucoord_t>;
+inline constexpr const bool has_offset_ucoord_v = is_offset_ucoord_v<coordinate<Lyt>>;
 template <typename Lyt>
-inline constexpr const bool has_cube_coord_v = std::is_same_v<coordinate<Lyt>, cube::coord_t>;
+inline constexpr const bool has_cube_coord_v = is_cube_coord_v<coordinate<Lyt>>;
 template <typename Lyt>
-inline constexpr const bool has_siqad_coord_v = std::is_same_v<coordinate<Lyt>, siqad::coord_t>;
+inline constexpr const bool has_siqad_coord_v = is_siqad_coord_v<coordinate<Lyt>>;
 
 #pragma region is_cell_level_layout
 template <class Lyt, class = void>
@@ -725,6 +732,23 @@ constexpr bool is_sidb_lattice_111_v = is_sidb_lattice_111<Lyt>::value;
 /**
  * SiDB defect surface
  */
+
+#pragma region is_cell_level_layout
+template <class Lyt, class = void>
+struct is_sidb_defect_surface : std::false_type
+{};
+
+template <class Lyt>
+struct is_sidb_defect_surface<
+    Lyt, std::enable_if_t<is_cell_level_layout_v<Lyt>,
+                          std::void_t<typename Lyt::storage,
+                                      decltype(std::declval<Lyt>().assign_sidb_defect(cell<Lyt>(), sidb_defect())),
+                                      decltype(std::declval<Lyt>().get_sidb_defect(cell<Lyt>()))>>> : std::true_type
+{};
+
+template <class Lyt>
+inline constexpr bool is_sidb_defect_surface_v = is_sidb_defect_surface<Lyt>::value;
+#pragma endregion
 
 #pragma region has_assign_sidb_defect
 template <class Lyt, class = void>

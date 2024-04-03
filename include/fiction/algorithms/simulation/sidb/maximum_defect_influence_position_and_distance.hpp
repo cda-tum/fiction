@@ -5,9 +5,9 @@
 #ifndef FICTION_MAXIMUM_DEFECT_INFLUENCE_POSITION_AND_DISTANCE_HPP
 #define FICTION_MAXIMUM_DEFECT_INFLUENCE_POSITION_AND_DISTANCE_HPP
 
-#include "fiction/algorithms/simulation/sidb/critical_temperature.hpp"
 #include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
+#include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/technology/sidb_defect_surface.hpp"
 #include "fiction/technology/sidb_defects.hpp"
@@ -17,6 +17,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <limits>
 #include <utility>
 #include <vector>

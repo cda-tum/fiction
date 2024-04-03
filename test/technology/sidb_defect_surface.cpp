@@ -7,10 +7,14 @@
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
+#include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/sidb_defect_surface.hpp>
+#include <fiction/technology/sidb_defects.hpp>
+#include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/traits.hpp>
+#include <fiction/types.hpp>
 
 #include <unordered_set>
 
@@ -24,27 +28,56 @@ TEMPLATE_TEST_CASE(
     (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, odd_column_hex>>>),
     (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, even_column_hex>>>))
 {
-    REQUIRE(is_cell_level_layout_v<TestType>);
-    CHECK(!has_assign_sidb_defect_v<TestType>);
-    CHECK(!has_get_sidb_defect_v<TestType>);
-    CHECK(!has_foreach_sidb_defect_v<TestType>);
+    SECTION("Without SiDB lattice")
+    {
+        REQUIRE(is_cell_level_layout_v<TestType>);
+        CHECK(!has_assign_sidb_defect_v<TestType>);
+        CHECK(!has_get_sidb_defect_v<TestType>);
+        CHECK(!has_foreach_sidb_defect_v<TestType>);
+        CHECK(!is_sidb_defect_surface_v<TestType>);
 
-    TestType lyt{};
+        TestType lyt{};
 
-    using defect_layout = sidb_defect_surface<TestType>;
-    CHECK(is_cell_level_layout_v<defect_layout>);
-    CHECK(has_assign_sidb_defect_v<defect_layout>);
-    CHECK(has_get_sidb_defect_v<defect_layout>);
-    CHECK(has_foreach_sidb_defect_v<defect_layout>);
+        using defect_layout = sidb_defect_surface<TestType>;
+        CHECK(is_cell_level_layout_v<defect_layout>);
+        CHECK(has_assign_sidb_defect_v<defect_layout>);
+        CHECK(has_get_sidb_defect_v<defect_layout>);
+        CHECK(has_foreach_sidb_defect_v<defect_layout>);
+        CHECK(is_sidb_defect_surface_v<defect_layout>);
 
-    const defect_layout defect_lyt{};
-    const defect_layout defect_lyt_from_lyt{lyt};
+        const defect_layout defect_lyt{};
+        const defect_layout defect_lyt_from_lyt{defect_lyt};
 
-    using defect_defect_layout = sidb_defect_surface<defect_layout>;
-    CHECK(is_cell_level_layout_v<defect_defect_layout>);
-    CHECK(has_assign_sidb_defect_v<defect_defect_layout>);
-    CHECK(has_get_sidb_defect_v<defect_defect_layout>);
-    CHECK(has_foreach_sidb_defect_v<defect_defect_layout>);
+        using defect_defect_layout = sidb_defect_surface<defect_layout>;
+        CHECK(is_cell_level_layout_v<defect_defect_layout>);
+        CHECK(has_assign_sidb_defect_v<defect_defect_layout>);
+        CHECK(has_get_sidb_defect_v<defect_defect_layout>);
+        CHECK(has_foreach_sidb_defect_v<defect_defect_layout>);
+        CHECK(is_sidb_defect_surface_v<defect_layout>);
+    }
+    SECTION("With SiDB lattice")
+    {
+        using lattice = sidb_lattice<sidb_100_lattice, TestType>;
+        REQUIRE(is_cell_level_layout_v<lattice>);
+        CHECK(!has_assign_sidb_defect_v<lattice>);
+        CHECK(!has_get_sidb_defect_v<lattice>);
+        CHECK(!has_foreach_sidb_defect_v<lattice>);
+        CHECK(!is_sidb_defect_surface_v<lattice>);
+
+        using defect_layout = sidb_defect_surface<lattice>;
+        CHECK(is_cell_level_layout_v<defect_layout>);
+        CHECK(has_assign_sidb_defect_v<defect_layout>);
+        CHECK(has_get_sidb_defect_v<defect_layout>);
+        CHECK(has_foreach_sidb_defect_v<defect_layout>);
+        CHECK(is_sidb_defect_surface_v<defect_layout>);
+
+        using defect_defect_layout = sidb_defect_surface<defect_layout>;
+        CHECK(is_cell_level_layout_v<defect_defect_layout>);
+        CHECK(has_assign_sidb_defect_v<defect_defect_layout>);
+        CHECK(has_get_sidb_defect_v<defect_defect_layout>);
+        CHECK(has_foreach_sidb_defect_v<defect_defect_layout>);
+        CHECK(is_sidb_defect_surface_v<defect_layout>);
+    }
 }
 
 TEMPLATE_TEST_CASE(

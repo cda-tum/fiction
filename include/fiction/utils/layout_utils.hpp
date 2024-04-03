@@ -319,7 +319,7 @@ auto convert_to_siqad_coordinates(const Lyt& lyt) noexcept
                 lyt_new.assign_cell_name(siqad::to_siqad_coord(c), lyt.get_cell_name(c));
             });
 
-        if constexpr (is_charge_distribution_surface_v<Lyt> && has_get_sidb_defect_v<Lyt>)
+        if constexpr (is_charge_distribution_surface_v<Lyt> && is_sidb_defect_surface_v<Lyt>)
         {
             charge_distribution_surface<decltype(sidb_defect_surface{lyt_new})> lyt_new_cds{
                 sidb_defect_surface{lyt_new}};
@@ -334,14 +334,14 @@ auto convert_to_siqad_coordinates(const Lyt& lyt) noexcept
                                     { lyt_new_cds.assign_sidb_defect(siqad::to_siqad_coord(cd.first), cd.second); });
             return lyt_new_cds;
         }
-        else if constexpr (has_get_sidb_defect_v<Lyt>)
+        else if constexpr (is_sidb_defect_surface_v<Lyt> && !is_charge_distribution_surface_v<Lyt>)
         {
             sidb_defect_surface<sidb_lattice<lattice_orientation<Lyt>, Lyt>> lyt_surface{lyt_new};
-            lyt.foreach_defect([&lyt_surface, &lyt](const auto& c)
-                               { lyt_surface.assign_defect(siqad::to_siqad_coord(c), lyt.get_defect(c)); });
+            lyt.foreach_sidb_defect([&lyt_surface, &lyt](const auto& c)
+                                    { lyt_surface.assign_defect(siqad::to_siqad_coord(c), lyt.get_defect(c)); });
             return lyt_surface;
         }
-        else if constexpr (is_charge_distribution_surface_v<Lyt>)
+        else if constexpr (is_charge_distribution_surface_v<Lyt> && !is_sidb_defect_surface_v<Lyt>)
         {
             charge_distribution_surface<decltype(sidb_defect_surface{lyt_new})> lyt_new_cds{
                 sidb_defect_surface{lyt_new}};
@@ -372,9 +372,9 @@ auto convert_to_siqad_coordinates(const Lyt& lyt) noexcept
 }
 
 /**
- * Converts the coordinates of a given cell-level layout to alternative coordinates,
- * such as `offset::ucoord_t` or `cube::coord_t`. Returns a new layout equivalent to the original
- * layout but based on the specified coordinate system.
+ * Converts the coordinates of a given SiDB cell-level layout (cds and defect surface can be layered on top) to
+ * alternative coordinates, such as `offset::ucoord_t` or `cube::coord_t`. Returns a new layout equivalent to the
+ * original layout but based on the specified coordinate system.
  *
  * @tparam LytDest Source cell-level layout type.
  * @tparam LytSrc Target cell-level layout type.
@@ -384,9 +384,22 @@ auto convert_to_siqad_coordinates(const Lyt& lyt) noexcept
 template <typename LytDest, typename LytSrc>
 LytDest convert_to_fiction_coordinates(const LytSrc& lyt) noexcept
 {
-    static_assert(is_cartesian_layout_v<LytSrc>, "Lyt is not a Cartesian layout");
-    static_assert(is_cell_level_layout_v<LytSrc>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<LytSrc>, "Lyt is not an SiDB layout");
+    static_assert(is_cartesian_layout_v<LytSrc>, "LytSrc is not a Cartesian layout");
+    static_assert(is_cell_level_layout_v<LytSrc>, "LytSrc is not a cell-level layout");
+    static_assert(has_sidb_technology_v<LytSrc>, "LytSrc is not an SiDB layout");
+    static_assert(has_siqad_coord_v<LytSrc>, "LytSrc is not based on SiQAD coordinates");
+    static_assert(is_cartesian_layout_v<LytDest>, "LytDest is not a Cartesian layout");
+    static_assert(is_cell_level_layout_v<LytDest>, "LytDest is not a cell-level layout");
+    static_assert(has_sidb_technology_v<LytDest>, "LytDest is not an SiDB layout");
+
+    static_assert(is_sidb_defect_surface_v<LytDest> == is_sidb_defect_surface_v<LytSrc>,
+                  "Only one layout type supports defects");
+    static_assert(is_charge_distribution_surface_v<LytDest> == is_charge_distribution_surface_v<LytSrc>,
+                  "Only one layout type supports charge distributions");
+
+    static_assert((is_sidb_lattice_111_v<LytDest> == is_sidb_lattice_111_v<LytSrc>) ||
+                      (is_sidb_lattice_100_v<LytDest> == is_sidb_lattice_100_v<LytSrc>),
+                  "Different lattice orientations");
 
     bool are_cells_assigned_to_negative_coordinates = false;
 
@@ -404,37 +417,134 @@ LytDest convert_to_fiction_coordinates(const LytSrc& lyt) noexcept
             return true;  // keep looping
         });
 
-    LytDest lyt_new{};
-
-    lyt_new.resize({lyt.x(), 2 * lyt.y() + 1});
-    lyt_new.set_layout_name(lyt.get_layout_name());
-    lyt_new.set_tile_size_x(lyt.get_tile_size_x());
-    lyt_new.set_tile_size_y(lyt.get_tile_size_y());
-
-    const auto assign_coordinates = [&lyt_new](const auto& base_lyt) noexcept
+    if (are_cells_assigned_to_negative_coordinates && has_offset_ucoord_v<LytDest>)
     {
-        base_lyt.foreach_cell(
-            [&lyt_new, &base_lyt](const auto& c)
+        return convert_to_fiction_coordinates<LytDest>(normalize_layout_coordinates(lyt));
+    }
+
+    auto process_layout = [&lyt](auto lyt_new)
+    {
+        if constexpr (is_sidb_lattice_v<LytSrc>)
+        {
+            lyt_new.resize({lyt.x(), lyt.y() * 2 + 1});
+            lyt_new.set_layout_name(lyt.get_layout_name());
+            lyt_new.set_tile_size_x(lyt.get_tile_size_x());
+            lyt_new.set_tile_size_y(lyt.get_tile_size_y());
+
+            lyt.foreach_cell(
+                [&lyt_new, &lyt](const auto& c)
+                {
+                    lyt_new.assign_cell_type(siqad::to_fiction_coord<coordinate<LytDest>>(c), lyt.get_cell_type(c));
+                    lyt_new.assign_cell_mode(siqad::to_fiction_coord<coordinate<LytDest>>(c), lyt.get_cell_mode(c));
+                    lyt_new.assign_cell_name(siqad::to_fiction_coord<coordinate<LytDest>>(c), lyt.get_cell_name(c));
+                });
+
+            if constexpr (is_charge_distribution_surface_v<LytSrc> && is_sidb_defect_surface_v<LytSrc>)
             {
-                lyt_new.assign_cell_type(siqad::to_fiction_coord<cell<LytDest>>(c), base_lyt.get_cell_type(c));
-                lyt_new.assign_cell_mode(siqad::to_fiction_coord<cell<LytDest>>(c), base_lyt.get_cell_mode(c));
-                lyt_new.assign_cell_name(siqad::to_fiction_coord<cell<LytDest>>(c), base_lyt.get_cell_name(c));
-            });
+                LytDest lyt_new_cds{sidb_defect_surface{lyt_new}};
+
+                lyt.foreach_cell(
+                    [&lyt_new_cds, &lyt](const auto& c) {
+                        lyt_new_cds.assign_charge_state(siqad::to_fiction_coord<coordinate<LytDest>>(c),
+                                                        lyt.get_charge_state(c), false);
+                    });
+
+                lyt_new_cds.assign_physical_parameters(lyt.get_phys_params());
+
+                lyt.foreach_sidb_defect(
+                    [&lyt_new_cds](const auto& cd) {
+                        lyt_new_cds.assign_sidb_defect(siqad::to_fiction_coord<coordinate<LytDest>>(cd.first),
+                                                       cd.second);
+                    });
+                return lyt_new_cds;
+            }
+            else if constexpr (has_assign_sidb_defect_v<LytSrc> && !is_charge_distribution_surface_v<LytSrc>)
+            {
+                LytDest lyt_surface{lyt_new};
+                lyt.foreach_sidb_defect(
+                    [&lyt_surface, &lyt](const auto& cd)
+                    {
+                        lyt_surface.assign_sidb_defect(siqad::to_fiction_coord<coordinate<LytDest>>(cd.first),
+                                                       lyt.get_sidb_defect(cd.first));
+                    });
+                return lyt_surface;
+            }
+            else if constexpr (is_charge_distribution_surface_v<LytSrc> && !has_assign_sidb_defect_v<LytSrc>)
+            {
+                LytDest lyt_new_cds{sidb_defect_surface{lyt_new}};
+
+                lyt.foreach_cell(
+                    [&lyt_new_cds, &lyt](const auto& c) {
+                        lyt_new_cds.assign_charge_state(siqad::to_fiction_coord<coordinate<LytDest>>(c),
+                                                        lyt.get_charge_state(c), false);
+                    });
+
+                lyt_new_cds.assign_physical_parameters(lyt.get_phys_params());
+
+                return lyt_new_cds;
+            }
+            else
+            {
+                return lyt_new;
+            }
+        }
     };
 
-    if ((has_offset_ucoord_v<LytDest> || has_siqad_coord_v<LytDest>)&&!lyt.is_empty() &&
-        are_cells_assigned_to_negative_coordinates)
+    if constexpr (!is_sidb_lattice_v<LytSrc>)
     {
-        auto lyt_normalized = normalize_layout_coordinates<LytSrc>(lyt);
-        assign_coordinates(lyt_normalized);
-        lyt_new.resize({lyt_normalized.x(), 2 * lyt_normalized.y() + 1});
-    }
-    else
-    {
-        assign_coordinates(lyt);
+        if constexpr (is_charge_distribution_surface_v<LytSrc> && is_sidb_defect_surface_v<LytSrc>)
+        {
+            cds_sidb_defect_100_cell_clk_lyt_siqad lyt_100{lyt};
+
+            lyt.foreach_cell([&lyt_100, &lyt](const auto& c)
+                             { lyt_100.assign_charge_state(c, lyt.get_charge_state(c), false); });
+
+            lyt_100.assign_physical_parameters(lyt.get_phys_params());
+
+            lyt.foreach_sidb_defect([&lyt_100](const auto& cd) { lyt_100.assign_sidb_defect(cd.first, cd.second); });
+            return convert_to_fiction_coordinates<LytDest, cds_sidb_defect_100_cell_clk_lyt_siqad>(lyt_100);
+        }
+        else if constexpr (is_charge_distribution_surface_v<LytSrc> && !is_sidb_defect_surface_v<LytSrc>)
+        {
+            const sidb_100_cell_clk_lyt_siqad lyt_100{lyt};
+            cds_sidb_100_cell_clk_lyt_siqad   cds_lyt_100{lyt_100};
+            lyt.foreach_cell([&cds_lyt_100, &lyt](const auto& c)
+                             { cds_lyt_100.assign_charge_state(c, lyt.get_charge_state(c), false); });
+
+            cds_lyt_100.assign_physical_parameters(lyt.get_phys_params());
+
+            return convert_to_fiction_coordinates<LytDest, cds_sidb_100_cell_clk_lyt_siqad>(cds_lyt_100);
+        }
+        else if constexpr (is_sidb_defect_surface_v<LytSrc> && !is_charge_distribution_surface_v<LytSrc>)
+        {
+            const sidb_100_cell_clk_lyt_siqad lyt_100{lyt};
+            sidb_defect_surface               lyt_100_defect{lyt_100};
+            lyt.foreach_sidb_defect([&lyt_100_defect, &lyt](const auto& cd)
+                                    { lyt_100_defect.assign_sidb_defect(cd.first, lyt.get_sidb_defect(cd.first)); });
+            return convert_to_fiction_coordinates<LytDest>(lyt_100_defect);
+        }
+        else
+        {
+            return convert_to_fiction_coordinates<LytDest, sidb_100_cell_clk_lyt_siqad>(
+                sidb_100_cell_clk_lyt_siqad{lyt});
+        }
     }
 
-    return lyt_new;
+    else
+    {
+        if constexpr (has_offset_ucoord_v<LytDest>)
+        {
+            return process_layout(sidb_lattice<lattice_orientation<LytSrc>, sidb_cell_clk_lyt>{});
+        }
+        else if constexpr (has_cube_coord_v<LytDest>)
+        {
+            return process_layout(sidb_lattice<lattice_orientation<LytSrc>, sidb_cell_clk_lyt_cube>{});
+        }
+        else
+        {
+            return process_layout(sidb_lattice<lattice_orientation<LytSrc>, sidb_cell_clk_lyt_siqad>{});
+        }
+    }
 }
 /**
  * Generates a random coordinate within the region spanned by two given coordinates. The two given coordinates form the
@@ -456,7 +566,7 @@ CoordinateType random_coordinate(CoordinateType coordinate1, CoordinateType coor
         std::swap(coordinate1, coordinate2);
     }
 
-    if constexpr (std::is_same_v<CoordinateType, siqad::coord_t>)
+    if constexpr (is_siqad_coord_v<CoordinateType>)
     {
         std::uniform_int_distribution<> dist_x(coordinate1.x, coordinate2.x);
         std::uniform_int_distribution<> dist_y(coordinate1.y, coordinate2.y);
