@@ -305,7 +305,7 @@ auto convert_layout_to_lattice_layout(const Lyt& lyt) noexcept -> decltype(auto)
     static_assert(!is_sidb_lattice_100_v<LatticeOrientation> && !is_sidb_lattice_111_v<LatticeOrientation>,
                   "LatticeOrientation is not a valid SiDB lattice orientation");
 
-    if constexpr (is_charge_distribution_surface_v<Lyt> && is_sidb_defect_surface_v<Lyt>)
+    if constexpr (is_charge_distribution_surface_v<Lyt> && has_get_sidb_defect_v<Lyt>)
     {
         auto process_lyt = [](const Lyt& lyt, auto& lyt_100) -> decltype(auto)
         {
@@ -320,7 +320,7 @@ auto convert_layout_to_lattice_layout(const Lyt& lyt) noexcept -> decltype(auto)
         process_lyt(lyt, cds_lyt_100);
         return cds_lyt_100;
     }
-    else if constexpr (is_charge_distribution_surface_v<Lyt> && !is_sidb_defect_surface_v<Lyt>)
+    else if constexpr (is_charge_distribution_surface_v<Lyt> && !has_get_sidb_defect_v<Lyt>)
     {
         auto process_lyt = [](auto& lyt, auto& lyt_100)
         {
