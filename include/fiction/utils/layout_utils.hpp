@@ -381,7 +381,8 @@ auto convert_to_siqad_coordinates(const LytSrc& lyt) noexcept -> decltype(auto)
 
         if constexpr (is_charge_distribution_surface_v<LytSrc> && is_sidb_defect_surface_v<LytSrc>)
         {
-            charge_distribution_surface lyt_new_cds{sidb_defect_surface{lyt_new}};
+            charge_distribution_surface<decltype(sidb_defect_surface{lyt_new})> lyt_new_cds{
+                sidb_defect_surface{lyt_new}};
 
             lyt.foreach_cell(
                 [&lyt_new_cds, &lyt](const auto& c)
@@ -403,7 +404,7 @@ auto convert_to_siqad_coordinates(const LytSrc& lyt) noexcept -> decltype(auto)
         }
         else if constexpr (is_charge_distribution_surface_v<LytSrc> && !has_assign_sidb_defect_v<LytSrc>)
         {
-            charge_distribution_surface lyt_new_cds{lyt_new};
+            charge_distribution_surface<decltype(lyt_new)> lyt_new_cds{lyt_new};
 
             lyt.foreach_cell(
                 [&lyt_new_cds, &lyt](const auto& c)
@@ -422,78 +423,6 @@ auto convert_to_siqad_coordinates(const LytSrc& lyt) noexcept -> decltype(auto)
     if constexpr (!is_sidb_lattice_v<LytSrc>)
     {
         return convert_to_siqad_coordinates(convert_layout_to_lattice_layout<sidb_100_lattice>(lyt));
-        //        if constexpr (is_charge_distribution_surface_v<LytSrc> && is_sidb_defect_surface_v<LytSrc>)
-        //        {
-        //            auto process_lyt = [](auto& lyt, auto& lyt_100) -> decltype(auto)
-        //            {
-        //                lyt.foreach_cell([&lyt_100, &lyt](const auto& c)
-        //                                 { lyt_100.assign_charge_state(c, lyt.get_charge_state(c), false); });
-        //                lyt_100.assign_physical_parameters(lyt.get_phys_params());
-        //                lyt.foreach_sidb_defect([&lyt_100](const auto& cd)
-        //                                        { lyt_100.assign_sidb_defect(cd.first, cd.second); });
-        //            };
-        //            if constexpr (has_offset_ucoord_v<LytSrc>)
-        //            {
-        //                const sidb_defect_cell_clk_lyt lyt_100{lyt};
-        //                charge_distribution_surface    cds_lyt_100{lyt_100};
-        //                process_lyt(lyt, cds_lyt_100);
-        //                return convert_to_siqad_coordinates<decltype(cds_lyt_100)>(cds_lyt_100);
-        //            }
-        //
-        //            if constexpr (has_cube_coord_v<LytSrc>)
-        //            {
-        //                const sidb_defect_cell_clk_lyt_cube lyt_100{lyt};
-        //                const charge_distribution_surface   cds_lyt_100{lyt_100};
-        //                process_lyt(lyt, lyt_100);
-        //                return convert_to_siqad_coordinates(cds_lyt_100);
-        //            }
-        //        }
-        //        else if constexpr (is_charge_distribution_surface_v<LytSrc> && !is_sidb_defect_surface_v<LytSrc>)
-        //        {
-        //            auto process_lyt = [](auto& lyt, auto& lyt_100)
-        //            {
-        //                lyt.foreach_cell([&lyt_100, &lyt](const auto& c)
-        //                                 { lyt_100.assign_charge_state(c, lyt.get_charge_state(c)); });
-        //
-        //                lyt_100.assign_physical_parameters(lyt.get_phys_params());
-        //            };
-        //            if constexpr (has_offset_ucoord_v<LytSrc>)
-        //            {
-        //                charge_distribution_surface lyt_100{lyt};
-        //                process_lyt(lyt, lyt_100);
-        //                return convert_to_siqad_coordinates(lyt_100);
-        //            }
-        //
-        //            if constexpr (has_cube_coord_v<LytSrc>)
-        //            {
-        //                charge_distribution_surface lyt_100{lyt};
-        //                process_lyt(lyt, lyt_100);
-        //                return convert_to_siqad_coordinates(lyt_100);
-        //            }
-        //        }
-        //        else if constexpr (is_sidb_defect_surface_v<LytSrc> && !is_charge_distribution_surface_v<LytSrc>)
-        //        {
-        //            auto process_lyt = [](auto& lyt, auto& lyt_100) {
-        //                lyt.foreach_sidb_defect([&lyt_100](const auto& cd)
-        //                                        { lyt_100.assign_sidb_defect(cd.first, cd.second); });
-        //            };
-        //            if constexpr (has_offset_ucoord_v<LytSrc>)
-        //            {
-        //                const sidb_defect_surface sidb_defect{lyt};
-        //                process_lyt(lyt, sidb_defect);
-        //                return convert_to_siqad_coordinates(sidb_defect);
-        //            }
-        //            else
-        //            {
-        //                sidb_defect_cell_clk_lyt_cube lyt_100{lyt};
-        //                process_lyt(lyt, lyt_100);
-        //                return convert_to_siqad_coordinates(lyt_100);
-        //            }
-        //        }
-        //        else
-        //        {
-        //            return convert_to_siqad_coordinates<sidb_cell_clk_lyt_siqad>(lyt);
-        //        }
     }
     else
     {
