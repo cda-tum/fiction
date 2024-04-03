@@ -9,7 +9,6 @@
 
 #include <cassert>
 #include <cstdint>
-#include <utility>
 
 namespace fiction
 {

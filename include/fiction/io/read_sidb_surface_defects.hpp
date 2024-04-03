@@ -7,17 +7,20 @@
 
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/sidb_defect_surface.hpp"
+#include "fiction/technology/sidb_defects.hpp"
 #include "fiction/traits.hpp"
 
-#include <algorithm>
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include <exception>
 #include <fstream>
 #include <istream>
 #include <regex>
+#include <stdexcept>
 #include <string>
 #include <string_view>
+#include <vector>
 
 namespace fiction
 {

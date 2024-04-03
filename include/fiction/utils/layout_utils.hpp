@@ -5,7 +5,6 @@
 #ifndef FICTION_LAYOUT_UTILS_HPP
 #define FICTION_LAYOUT_UTILS_HPP
 
-#include "fiction/layouts/cell_level_layout.hpp"
 #include "fiction/layouts/coordinates.hpp"
 #include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
