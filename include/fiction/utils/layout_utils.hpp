@@ -307,16 +307,16 @@ auto convert_layout_to_lattice_layout(const Lyt& lyt) noexcept -> decltype(auto)
 
     if constexpr (is_charge_distribution_surface_v<Lyt> && is_sidb_defect_surface_v<Lyt>)
     {
-        auto process_lyt = [](auto& lyt, auto& lyt_100) -> decltype(auto)
+        auto process_lyt = [](const Lyt& lyt, auto& lyt_100) -> decltype(auto)
         {
             lyt.foreach_cell([&lyt_100, &lyt](const auto& c)
                              { lyt_100.assign_charge_state(c, lyt.get_charge_state(c), false); });
             lyt_100.assign_physical_parameters(lyt.get_phys_params());
             lyt.foreach_sidb_defect([&lyt_100](const auto& cd) { lyt_100.assign_sidb_defect(cd.first, cd.second); });
         };
-        sidb_lattice<LatticeOrientation, Lyt> lattice{lyt};
-        const sidb_defect_surface             lyt_100{lattice};
-        charge_distribution_surface           cds_lyt_100{lyt_100};
+        sidb_lattice<LatticeOrientation, Lyt>          lattice{lyt};
+        const sidb_defect_surface<decltype(lattice)>   lyt_100{lattice};
+        charge_distribution_surface<decltype(lyt_100)> cds_lyt_100{lyt_100};
         process_lyt(lyt, cds_lyt_100);
         return cds_lyt_100;
     }
@@ -396,7 +396,7 @@ auto convert_to_siqad_coordinates(const LytSrc& lyt) noexcept -> decltype(auto)
         }
         else if constexpr (has_assign_sidb_defect_v<LytSrc> && !is_charge_distribution_surface_v<LytSrc>)
         {
-            sidb_defect_surface lyt_surface{lyt_new};
+            sidb_defect_surface<decltype(lyt_new)> lyt_surface{lyt_new};
             lyt.foreach_sidb_defect(
                 [&lyt_surface, &lyt](const auto& cd)
                 { lyt_surface.assign_sidb_defect(siqad::to_siqad_coord(cd.first), lyt.get_sidb_defect(cd.first)); });
