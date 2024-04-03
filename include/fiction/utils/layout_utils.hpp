@@ -334,7 +334,7 @@ auto convert_layout_to_lattice_layout(const Lyt& lyt) noexcept -> decltype(auto)
         process_lyt(lyt, lyt_100);
         return lyt_100;
     }
-    else if constexpr (is_sidb_defect_surface_v<Lyt> && !is_charge_distribution_surface_v<Lyt>)
+    else if constexpr (has_get_sidb_defect_v<Lyt> && !is_charge_distribution_surface_v<Lyt>)
     {
         auto process_lyt = [](auto& lyt, auto& lyt_100)
         { lyt.foreach_sidb_defect([&lyt_100](const auto& cd) { lyt_100.assign_sidb_defect(cd.first, cd.second); }); };
@@ -562,7 +562,7 @@ LytDest convert_to_fiction_coordinates(const LytSrc& lyt) noexcept
             lyt.foreach_sidb_defect([&lyt_100](const auto& cd) { lyt_100.assign_sidb_defect(cd.first, cd.second); });
             return convert_to_fiction_coordinates<LytDest, cds_sidb_defect_100_cell_clk_lyt_siqad>(lyt_100);
         }
-        else if constexpr (is_charge_distribution_surface_v<LytSrc> && !is_sidb_defect_surface_v<LytSrc>)
+        else if constexpr (is_charge_distribution_surface_v<LytSrc> && !has_get_sidb_defect_v<LytSrc>)
         {
             const sidb_100_cell_clk_lyt_siqad lyt_100{lyt};
             cds_sidb_100_cell_clk_lyt_siqad   cds_lyt_100{lyt_100};
