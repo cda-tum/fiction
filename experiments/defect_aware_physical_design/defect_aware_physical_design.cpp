@@ -10,15 +10,14 @@
 #include <fiction/algorithms/physical_design/exact.hpp>               // SMT-based physical design of FCN layouts
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/io/read_sidb_surface_defects.hpp>                               // reader for simulated SiDB surfaces
-#include <fiction/io/read_sqd_layout.hpp>                // reader for SiDB layouts including surface scan data
-#include <fiction/io/write_sqd_layout.hpp>               // writer for SiQAD files (physical simulation)
-#include <fiction/layouts/bounding_box.hpp>              // bounding box
-#include <fiction/technology/area.hpp>                   // area requirement calculations
-#include <fiction/technology/cell_technologies.hpp>      // cell implementations
-#include <fiction/technology/sidb_bestagon_library.hpp>  // a pre-defined SiDB gate library
-#include <fiction/technology/sidb_defect_surface.hpp>    // H-Si(100) 2x1 surface model
-#include <fiction/technology/sidb_defects.hpp>           // SiDB defect classes
-#include <fiction/technology/sidb_lattice.hpp>
+#include <fiction/io/read_sqd_layout.hpp>                     // reader for SiDB layouts including surface scan data
+#include <fiction/io/write_sqd_layout.hpp>                    // writer for SiQAD files (physical simulation)
+#include <fiction/layouts/bounding_box.hpp>                   // bounding box
+#include <fiction/technology/area.hpp>                        // area requirement calculations
+#include <fiction/technology/cell_technologies.hpp>           // cell implementations
+#include <fiction/technology/sidb_bestagon_library.hpp>       // a pre-defined SiDB gate library
+#include <fiction/technology/sidb_defect_surface.hpp>         // H-Si(100) 2x1 surface model
+#include <fiction/technology/sidb_defects.hpp>                // SiDB defect classes
 #include <fiction/technology/sidb_surface_analysis.hpp>       // SiDB surface analysis
 #include <fiction/technology/technology_mapping_library.hpp>  // pre-defined gate types for technology mapping
 #include <fiction/types.hpp>                                  // pre-defined types suitable for the FCN domain
@@ -51,7 +50,7 @@
 int main()  // NOLINT
 {
     using gate_lyt = fiction::hex_even_row_gate_clk_lyt;
-    using cell_lyt = fiction::sidb_100_cell_clk_lyt;
+    using cell_lyt = fiction::sidb_cell_clk_lyt;
 
     static const std::string layouts_folder = fmt::format("{}/defect_aware_physical_design/layouts", EXPERIMENTS_PATH);
 
