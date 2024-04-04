@@ -7,15 +7,16 @@
 
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
-#include "fiction/io/print_layout.hpp"
 #include "fiction/layouts/coordinates.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/layout_utils.hpp"
 
 #include <mockturtle/utils/stopwatch.hpp>
 
+#include <cassert>
 #include <cstdint>
 #include <cstdlib>
+#include <set>
 #include <utility>
 #include <vector>
 
@@ -91,6 +92,10 @@ class displacement_robustness_domain_impl
             params{ps},
             stats{st}
     {
+        for (const auto& c : params.fixed_cells)
+        {
+            assert(!layout.is_empty_cell(c) && "Not all fixed cells are part of the layout");
+        }
         all_displacements_for_all_coordinates.reserve(layout.num_cells());
         layout.foreach_cell(
             [&](const auto& c)
@@ -99,11 +104,15 @@ class displacement_robustness_domain_impl
                 {
                     auto new_pos_se = siqad::to_fiction_coord<cube::coord_t>(c);
                     auto new_pos_nw = siqad::to_fiction_coord<cube::coord_t>(c);
-                    new_pos_se.x -= static_cast<decltype(new_pos_se.x)>(params.displacement_variations.first);
-                    new_pos_se.y -= static_cast<decltype(new_pos_se.y)>(params.displacement_variations.second);
-                    new_pos_nw.x += static_cast<decltype(new_pos_nw.x)>(params.displacement_variations.first);
-                    new_pos_nw.y += static_cast<decltype(new_pos_nw.y)>(params.displacement_variations.second);
 
+                    // the cell c is a fixed cell, i.e., no displacement is considered.
+                    if (params.fixed_cells.find(c) == params.fixed_cells.end())
+                    {
+                        new_pos_se.x -= static_cast<decltype(new_pos_se.x)>(params.displacement_variations.first);
+                        new_pos_se.y -= static_cast<decltype(new_pos_se.y)>(params.displacement_variations.second);
+                        new_pos_nw.x += static_cast<decltype(new_pos_nw.x)>(params.displacement_variations.first);
+                        new_pos_nw.y += static_cast<decltype(new_pos_nw.y)>(params.displacement_variations.second);
+                    }
                     const auto all_coord = all_coordinates_in_spanned_area<cell<Lyt>>(
                         siqad::to_siqad_coord(new_pos_se), siqad::to_siqad_coord(new_pos_nw));
                     all_displacements_for_all_coordinates.push_back(all_coord);
@@ -113,10 +122,13 @@ class displacement_robustness_domain_impl
                 {
                     auto new_pos_se = c;
                     auto new_pos_nw = c;
-                    new_pos_se.x -= params.displacement_variations.first;
-                    new_pos_se.y -= params.displacement_variations.second;
-                    new_pos_nw.x += params.displacement_variations.first;
-                    new_pos_nw.y += params.displacement_variations.second;
+                    if (params.fixed_cells.find(c) == params.fixed_cells.end())
+                    {
+                        new_pos_se.x -= params.displacement_variations.first;
+                        new_pos_se.y -= params.displacement_variations.second;
+                        new_pos_nw.x += params.displacement_variations.first;
+                        new_pos_nw.y += params.displacement_variations.second;
+                    }
 
                     const auto all_coord = all_coordinates_in_spanned_area<cell<Lyt>>(new_pos_se, new_pos_nw);
                     all_displacements_for_all_coordinates.push_back(all_coord);
@@ -169,6 +181,7 @@ class displacement_robustness_domain_impl
 
             Lyt         lyt{};
             std::size_t i = 0;
+
             // Iterate over each cell in the combination
             for (const auto& cell : combination)
             {
@@ -185,7 +198,6 @@ class displacement_robustness_domain_impl
             if (op_status.first == operational_status::OPERATIONAL)
             {
                 stats.num_operational_sidb_displacements++;
-                // print_layout(lyt, std::cout);
             }
             else
             {
@@ -197,9 +209,9 @@ class displacement_robustness_domain_impl
     }
 
   private:
-    const Lyt&                                layout;
-    const displacement_robustness_params<TT>& params;
-    displacement_robustness_stats&            stats;
+    const Lyt&                                     layout;
+    const displacement_robustness_params<TT, Lyt>& params;
+    displacement_robustness_stats&                 stats;
     // displacement_robustness_stats&                            stats;
     std::vector<std::vector<cell<Lyt>>> all_displacements_for_all_coordinates{};
     std::vector<cell<Lyt>>              cells{};
@@ -209,7 +221,7 @@ class displacement_robustness_domain_impl
 
 template <typename Lyt, typename TT>
 [[nodiscard]] displacement_robustness_domain<Lyt>
-assess_displacement_robustness(const Lyt& layout, const displacement_robustness_params<TT>& params,
+assess_displacement_robustness(const Lyt& layout, const displacement_robustness_params<TT, Lyt>& params,
                                displacement_robustness_stats* stats = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
