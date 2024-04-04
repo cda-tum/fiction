@@ -1456,16 +1456,16 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects, part one", 
         CHECK_THAT(charge_layout.get_nm_distance_between_sidbs({0, 0, 0}, {0, 0, 0}),
                    Catch::Matchers::WithinAbs(0.0, 0.00001));
         CHECK_THAT(charge_layout.get_nm_distance_between_sidbs({0, 0, 0}, {1, 0, 0}),
-                   Catch::Matchers::WithinAbs((sidb_simulation_parameters{}.lat_a * 0.1), 0.00001));
+                   Catch::Matchers::WithinAbs((sidb_100_lattice::LAT_A * 0.1), 0.00001));
         CHECK_THAT(charge_layout.get_nm_distance_between_sidbs({1, 0, 0}, {0, 0, 0}),
-                   Catch::Matchers::WithinAbs((sidb_simulation_parameters{}.lat_a * 0.1), 0.00001));
+                   Catch::Matchers::WithinAbs((sidb_100_lattice::LAT_A * 0.1), 0.00001));
         CHECK_THAT(charge_layout.get_nm_distance_between_sidbs({1, 0, 0}, {1, 0, 0}),
                    Catch::Matchers::WithinAbs(0.0, 0.00001));
-        CHECK_THAT(charge_layout.get_nm_distance_between_sidbs({0, 0, 0}, {1, 1, 1}),
-                   Catch::Matchers::WithinAbs(std::hypot(sidb_simulation_parameters{}.lat_a * 0.1,
-                                                         sidb_simulation_parameters{}.lat_b * 0.1 +
-                                                             sidb_simulation_parameters{}.lat_c.second * 0.1),
-                                              0.00001));
+        CHECK_THAT(
+            charge_layout.get_nm_distance_between_sidbs({0, 0, 0}, {1, 1, 1}),
+            Catch::Matchers::WithinAbs(std::hypot(sidb_100_lattice::LAT_A * 0.1,
+                                                  sidb_100_lattice::LAT_B * 0.1 + sidb_100_lattice::LAT_C.second * 0.1),
+                                       0.00001));
         CHECK_THAT(charge_layout.get_nm_distance_between_sidbs({1, 1, 1}, {1, 1, 1}),
                    Catch::Matchers::WithinAbs(0.0, 0.00001));
     }

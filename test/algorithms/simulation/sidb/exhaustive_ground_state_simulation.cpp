@@ -419,7 +419,7 @@ TEMPLATE_TEST_CASE("ExGS simulation of positively charged SiDBs", "[exhaustive-g
 }
 
 TEMPLATE_TEST_CASE("ExGS gate simulation of Si-111 surface", "[exhaustive-ground-state-simulation]",
-                   (sidb_111_cell_clk_lyt_siqad), sidb_111_cell_clk_lyt_siqad, cds_sidb_111_cell_clk_lyt_siqad)
+                   sidb_111_cell_clk_lyt_siqad, cds_sidb_111_cell_clk_lyt_siqad)
 {
     TestType lyt{};
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);

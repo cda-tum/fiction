@@ -188,8 +188,6 @@ class is_operational_impl
         assert((truth_table.size() == output_bdl_pairs.size()) &&
                "Number of truth tables and output BDL pairs does not match");
 
-        std::size_t operational_input_combinations = 0;
-
         std::set<uint64_t> operational_inputs{};
 
         // number of different input combinations
@@ -258,7 +256,6 @@ class is_operational_impl
             }
             if (correct_output)
             {
-                operational_input_combinations++;
                 operational_inputs.insert(i);
             }
         }
@@ -405,7 +402,7 @@ template <typename Lyt, typename TT>
 
     detail::is_operational_impl<Lyt, TT> p{lyt, spec, params};
 
-    const auto result = p.count_number_of_operational_inputs();
+    return p.count_number_of_operational_inputs();
 }
 
 }  // namespace fiction

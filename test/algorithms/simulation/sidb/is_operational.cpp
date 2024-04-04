@@ -271,17 +271,18 @@ TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[is-operational]", 
 
     SECTION("Check operation for different values of mu")
     {
-        CHECK(is_operational(
-                  lyt, std::vector<tt>{create_and_tt()},
-                  is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT})
-                  .first == operational_status::NON_OPERATIONAL);
+        const auto op_inputs = number_of_operational_inputs(
+            lyt, std::vector<tt>{create_and_tt()},
+            is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT});
+        CHECK(op_inputs.size() == 4);
+        CHECK(op_inputs == std::set<uint64_t>{0, 1, 2, 3});
     }
     SECTION("Count the number of non-operational input combinations")
     {
         const auto op_inputs = number_of_operational_inputs(
             lyt, std::vector<tt>{create_and_tt()},
             is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT});
-        CHECK(op_inputs.size() == 1);
-        CHECK(op_inputs == std::set<uint64_t>{3});
+        CHECK(op_inputs.size() == 2);
+        CHECK(op_inputs == std::set<uint64_t>{0, 3});
     }
 }
