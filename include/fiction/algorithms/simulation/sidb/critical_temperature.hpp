@@ -135,7 +135,7 @@ struct critical_temperature_stats
             out << "no state found | if two-state simulation was used, try re-running with three states\n";
         }
 
-        out << "_____________________________________________________" << '\n';
+        out << "_____________________________________________________\n";
     }
 };
 

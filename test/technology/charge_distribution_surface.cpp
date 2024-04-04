@@ -1227,9 +1227,8 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
         CHECK(charge_layout.get_charge_index_and_base().first == 3);
     }
 
-    SECTION("Y-shape SiDB OR gate with input 01 and global external potential (high)")
+    SECTION("Y-shaped SiDB OR gate with input 01 and global external potential (high)")
     {
-
         lyt.assign_cell_type({6, 2, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({8, 3, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({12, 3, 0}, TestType::cell_type::NORMAL);
@@ -1443,33 +1442,33 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects, part one", 
         CHECK(charge_layout.get_phys_params().lambda_tf == 5.5);
     }
 
-    //    SECTION("Distance matrix")
-    //    {
-    //        lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
-    //        lyt.assign_cell_type({1, 0, 0}, TestType::cell_type::NORMAL);
-    //        lyt.assign_cell_type({1, 1, 1}, TestType::cell_type::NORMAL);
-    //
-    //        charge_distribution_surface charge_layout{lyt, sidb_simulation_parameters{}};
-    //
-    //        // Take cells that are not part of the layout
-    //        CHECK(charge_layout.get_nm_distance_between_sidbs({3, 0, 0}, {3, 0, 0}) == 0.0);
-    //
-    //        CHECK_THAT(charge_layout.get_nm_distance_between_sidbs({0, 0, 0}, {0, 0, 0}),
-    //                   Catch::Matchers::WithinAbs(0.0, 0.00001));
-    //        CHECK_THAT(charge_layout.get_nm_distance_between_sidbs({0, 0, 0}, {1, 0, 0}),
-    //                   Catch::Matchers::WithinAbs((sidb_simulation_parameters{}.lat_a * 0.1), 0.00001));
-    //        CHECK_THAT(charge_layout.get_nm_distance_between_sidbs({1, 0, 0}, {0, 0, 0}),
-    //                   Catch::Matchers::WithinAbs((sidb_simulation_parameters{}.lat_a * 0.1), 0.00001));
-    //        CHECK_THAT(charge_layout.get_nm_distance_between_sidbs({1, 0, 0}, {1, 0, 0}),
-    //                   Catch::Matchers::WithinAbs(0.0, 0.00001));
-    //        CHECK_THAT(charge_layout.get_nm_distance_between_sidbs({0, 0, 0}, {1, 1, 1}),
-    //                   Catch::Matchers::WithinAbs(std::hypot(sidb_simulation_parameters{}.lat_a * 0.1,
-    //                                                         sidb_simulation_parameters{}.lat_b * 0.1 +
-    //                                                             sidb_simulation_parameters{}.lat_c.second * 0.1),
-    //                                              0.00001));
-    //        CHECK_THAT(charge_layout.get_nm_distance_between_sidbs({1, 1, 1}, {1, 1, 1}),
-    //                   Catch::Matchers::WithinAbs(0.0, 0.00001));
-    //    }
+    SECTION("Distance matrix")
+    {
+        lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({1, 0, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({1, 1, 1}, TestType::cell_type::NORMAL);
+
+        charge_distribution_surface charge_layout{lyt, sidb_simulation_parameters{}};
+
+        // Take cells that are not part of the layout
+        CHECK(charge_layout.get_nm_distance_between_sidbs({3, 0, 0}, {3, 0, 0}) == 0.0);
+
+        CHECK_THAT(charge_layout.get_nm_distance_between_sidbs({0, 0, 0}, {0, 0, 0}),
+                   Catch::Matchers::WithinAbs(0.0, 0.00001));
+        CHECK_THAT(charge_layout.get_nm_distance_between_sidbs({0, 0, 0}, {1, 0, 0}),
+                   Catch::Matchers::WithinAbs((sidb_simulation_parameters{}.lat_a * 0.1), 0.00001));
+        CHECK_THAT(charge_layout.get_nm_distance_between_sidbs({1, 0, 0}, {0, 0, 0}),
+                   Catch::Matchers::WithinAbs((sidb_simulation_parameters{}.lat_a * 0.1), 0.00001));
+        CHECK_THAT(charge_layout.get_nm_distance_between_sidbs({1, 0, 0}, {1, 0, 0}),
+                   Catch::Matchers::WithinAbs(0.0, 0.00001));
+        CHECK_THAT(charge_layout.get_nm_distance_between_sidbs({0, 0, 0}, {1, 1, 1}),
+                   Catch::Matchers::WithinAbs(std::hypot(sidb_simulation_parameters{}.lat_a * 0.1,
+                                                         sidb_simulation_parameters{}.lat_b * 0.1 +
+                                                             sidb_simulation_parameters{}.lat_c.second * 0.1),
+                                              0.00001));
+        CHECK_THAT(charge_layout.get_nm_distance_between_sidbs({1, 1, 1}, {1, 1, 1}),
+                   Catch::Matchers::WithinAbs(0.0, 0.00001));
+    }
 
     SECTION("Potential matrix")
     {

@@ -76,7 +76,7 @@ int main(int argc, const char* argv[])  // NOLINT
             }
             else
             {
-                std::cerr << fmt::format("Error: Argument {} is missing a value", arg) << '\n';
+                std::cerr << fmt::format("Error: Argument {} is missing a value\n", arg);
                 return EXIT_FAILURE;
             }
         }
@@ -109,14 +109,14 @@ int main(int argc, const char* argv[])  // NOLINT
     const uint64_t step = std::stoull(options["--step"]);
 
     // print the parsed values
-    std::cout << fmt::format("Folder name: ", folder_name) << '\n';
-    std::cout << fmt::format("NW: {} | {}", nw_x, nw_y) << '\n';
-    std::cout << fmt::format("SE: {} | {}", se_x, se_y) << '\n';
-    std::cout << fmt::format("positive_charges: {}", charges_str) << '\n';
-    std::cout << fmt::format("lower_limit: {}", lower_limit) << '\n';
-    std::cout << fmt::format("upper_limit: {}", upper_limit) << '\n';
-    std::cout << fmt::format("number_of_layouts: {}", number_of_layouts) << '\n';
-    std::cout << fmt::format("step: ", step) << '\n';
+    std::cout << fmt::format("Folder name: {}\n", folder_name);
+    std::cout << fmt::format("NW: {} | {}\n", nw_x, nw_y);
+    std::cout << fmt::format("SE: {} | {}\n", se_x, se_y);
+    std::cout << fmt::format("positive_charges: {}\n", charges_str);
+    std::cout << fmt::format("lower_limit: {}\n", lower_limit);
+    std::cout << fmt::format("upper_limit: {}\n", upper_limit);
+    std::cout << fmt::format("number_of_layouts: {}\n", number_of_layouts);
+    std::cout << fmt::format("step: {}\n", step);
 
     // generates random SiDB layouts as .sqd file
     try
@@ -127,17 +127,17 @@ int main(int argc, const char* argv[])  // NOLINT
 
         if (std::filesystem::exists(folder_path))
         {
-            std::cout << fmt::format("Folder * {} * exists!", folder_path.string()) << '\n';
+            std::cout << fmt::format("Folder * {} * exists!\n", folder_path.string());
         }
         else
         {
             if (std::filesystem::create_directory(folder_path))
             {
-                std::cout << fmt::format("Folder {} created successfully", folder_name) << '\n';
+                std::cout << fmt::format("Folder {} created successfully\n", folder_name);
             }
             else
             {
-                std::cout << "Failed to create folder" << '\n';
+                std::cout << "Failed to create folder\n";
             }
         }
 
@@ -155,13 +155,13 @@ int main(int argc, const char* argv[])  // NOLINT
                 if (!std::filesystem::exists(dir_path))
                 {
                     std::filesystem::create_directory(dir_path);
-                    std::cout << "Folder created." << '\n';
+                    std::cout << "Folder created.\n";
                     std::filesystem::create_directory(dir_path_sqd);
                     std::filesystem::create_directory(dir_path_loc);
                 }
                 else
                 {
-                    std::cout << "Folder already exists." << '\n';
+                    std::cout << "Folder already exists.\n";
                 }
 
                 const generate_random_sidb_layout_params<sidb_100_cell_clk_lyt> params{
@@ -177,14 +177,14 @@ int main(int argc, const char* argv[])  // NOLINT
             catch (const std::filesystem::filesystem_error& ex)
             {
                 // exception is handled
-                std::cerr << fmt::format("Filesystem error: {}", ex.what()) << '\n';
+                std::cerr << fmt::format("Filesystem error: {}\n", ex.what());
             }
         }
     }
     catch (const std::filesystem::filesystem_error& ex)
     {
         // exception occurred, handle it here
-        std::cerr << fmt::format("Filesystem error: {}", ex.what()) << '\n';
+        std::cerr << fmt::format("Filesystem error: {}\n", ex.what());
     }
 
     return EXIT_SUCCESS;

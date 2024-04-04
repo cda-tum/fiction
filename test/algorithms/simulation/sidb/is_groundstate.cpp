@@ -8,22 +8,20 @@
 #include <fiction/algorithms/simulation/sidb/is_ground_state.hpp>
 #include <fiction/algorithms/simulation/sidb/quicksim.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
-#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
-#include <fiction/technology/sidb_lattice.hpp>
+#include <fiction/technology/charge_distribution_surface.hpp>
 #include <fiction/types.hpp>
 
 using namespace fiction;
 
-TEMPLATE_TEST_CASE("check if ground state is found", "[is-ground-state]", (sidb_100_cell_clk_lyt_siqad),
-                   (cds_sidb_100_cell_clk_lyt_siqad))
+TEMPLATE_TEST_CASE("check if ground state is found", "[is-ground-state]", sidb_100_cell_clk_lyt_siqad,
+                   cds_sidb_100_cell_clk_lyt_siqad)
 {
     SECTION("layout with no SiDB placed")
     {
-        TestType                         lyt{};
-        charge_distribution_surface      charge_layout{lyt};
-        const sidb_simulation_parameters params{2, -0.32};
+        TestType                          lyt{};
+        const charge_distribution_surface charge_layout{lyt};
+        const sidb_simulation_parameters  params{2, -0.32};
         const auto simulation_results_exgs = exhaustive_ground_state_simulation<TestType>(charge_layout, params);
         const quicksim_params quicksim_params{params};
         const auto            simulation_results_quicksim = quicksim<TestType>(charge_layout, quicksim_params);

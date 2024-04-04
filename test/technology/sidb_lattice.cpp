@@ -28,11 +28,6 @@ TEST_CASE("layout traits", "[sidb-lattice]")
     CHECK(is_sidb_lattice_v<lattice_layout_111>);
     CHECK(is_cell_level_layout_v<lattice_layout_111>);
     CHECK(is_sidb_lattice_111_v<lattice_layout_111>);
-
-    using lattice_on_lattice = sidb_lattice<sidb_100_lattice, lattice_layout_111>;
-    CHECK(is_sidb_lattice_v<lattice_on_lattice>);
-    CHECK(is_cell_level_layout_v<lattice_on_lattice>);
-    CHECK(is_sidb_lattice_111_v<lattice_on_lattice>);
 }
 
 TEST_CASE("use different lattice orientations", "[sidb-lattice]")

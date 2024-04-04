@@ -15,6 +15,7 @@
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/cell_technologies.hpp"
+#include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/traits.hpp"
 
 #include <kitty/bit_operations.hpp>
@@ -61,17 +62,6 @@ struct is_operational_params
      * Parameters for the BDL pair detection algorithms.
      */
     detect_bdl_pairs_params bdl_params{};
-};
-
-/**
- * This struct stores additional results of the number_of_operational_inputs simulation.
- */
-struct number_of_operational_inputs_stats
-{
-    /**
-     * All inputs (e.g. 2-input Boolean function: 00 ^= 0; 10 ^= 2) for which the correct output is computed.
-     */
-    std::set<uint64_t> operational_inputs{};
 };
 
 namespace detail
@@ -188,19 +178,19 @@ class is_operational_impl
         return operational_status::OPERATIONAL;
     }
     /**
-     * Counts the number of input combinations yielding the correct output.
+     * Determines the input combinations yielding the correct output.
      *
-     * @param pst Statistics.
-     *
-     * @return The count of operational input combinations.
+     * @return All inputs (e.g. 2-input Boolean function: 00 ^= 0; 10 ^= 2) for which the correct output is computed.
      */
-    [[nodiscard]] std::size_t count_number_of_operational_inputs(number_of_operational_inputs_stats& st) noexcept
+    [[nodiscard]] std::set<uint64_t> count_number_of_operational_inputs() noexcept
     {
         assert(!output_bdl_pairs.empty() && "No output cell provided.");
         assert((truth_table.size() == output_bdl_pairs.size()) &&
                "Number of truth tables and output BDL pairs does not match");
 
         std::size_t operational_input_combinations = 0;
+
+        std::set<uint64_t> operational_inputs{};
 
         // number of different input combinations
         for (auto i = 0u; i < truth_table.front().num_bits(); ++i, ++bii)
@@ -269,12 +259,12 @@ class is_operational_impl
             if (correct_output)
             {
                 operational_input_combinations++;
-                st.operational_inputs.insert(i);
+                operational_inputs.insert(i);
             }
         }
 
         // if we made it here, the layout is operational
-        return operational_input_combinations;
+        return operational_inputs;
     }
     /**
      * Returns the total number of simulator invocations.
@@ -395,14 +385,11 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
  * @param lyt The SiDB layout.
  * @param spec Vector of truth table specifications.
  * @param params Parameters to simualte if a input combination is operational.
- * @param pst Statistics.
  * @return The count of operational input combinations.
- *
  */
 template <typename Lyt, typename TT>
-[[nodiscard]] std::size_t number_of_operational_inputs(const Lyt& lyt, const std::vector<TT>& spec,
-                                                       const is_operational_params&        params = {},
-                                                       number_of_operational_inputs_stats* pst    = nullptr) noexcept
+[[nodiscard]] std::set<uint64_t> number_of_operational_inputs(const Lyt& lyt, const std::vector<TT>& spec,
+                                                              const is_operational_params& params = {}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -418,16 +405,7 @@ template <typename Lyt, typename TT>
 
     detail::is_operational_impl<Lyt, TT> p{lyt, spec, params};
 
-    number_of_operational_inputs_stats st{};
-
-    const auto result = p.count_number_of_operational_inputs(st);
-
-    if (pst)
-    {
-        *pst = st;
-    }
-
-    return result;
+    const auto result = p.count_number_of_operational_inputs();
 }
 
 }  // namespace fiction

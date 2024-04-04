@@ -5,6 +5,8 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#include "utils/blueprints/layout_blueprints.hpp"
+
 #include <fiction/algorithms/simulation/sidb/determine_groundstate_from_simulation_results.hpp>
 #include <fiction/algorithms/simulation/sidb/energy_distribution.hpp>
 #include <fiction/algorithms/simulation/sidb/quicksim.hpp>
@@ -259,7 +261,7 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an SiDB layout comprising of 10 SiDBs
     }
 }
 
-TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shape SiDB arrangement with varying thread counts", "[quicksim]",
+TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB arrangement with varying thread counts", "[quicksim]",
                    (sidb_100_cell_clk_lyt_siqad), (cds_sidb_100_cell_clk_lyt_siqad))
 {
     TestType lyt{};
@@ -348,7 +350,7 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shape SiDB arrangement with varyi
     }
 }
 
-TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shape SiDB OR gate with input 01 and varying thread counts",
+TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB OR gate with input 01 and varying thread counts",
                    "[quicksim]", (sidb_100_cell_clk_lyt_siqad), (cds_sidb_100_cell_clk_lyt_siqad))
 {
     TestType lyt{};
@@ -720,7 +722,7 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs, all
     }
 }
 
-TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shape SiDB OR gate with input 01", "[ExGS]",
+TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB OR gate with input 01", "[ExGS]",
                    (sidb_100_cell_clk_lyt_siqad), (charge_distribution_surface<sidb_100_cell_clk_lyt_siqad>))
 {
     TestType lyt{};
@@ -881,7 +883,7 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shape SiDB OR gate with input 01"
     }
 }
 
-TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shape SiDB arrangement with varying thread counts, cube coordinates",
+TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB arrangement with varying thread counts, cube coordinates",
                    "[quicksim]", (sidb_100_cell_clk_lyt_cube), (cds_sidb_100_cell_clk_lyt_cube))
 {
     TestType lyt{};
@@ -981,7 +983,7 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shape SiDB arrangement with varyi
     }
 }
 
-TEMPLATE_TEST_CASE("QuickSim gate simulation of Si-111 surface", "[quickexact]", (sidb_111_cell_clk_lyt_siqad),
+TEMPLATE_TEST_CASE("QuickSim gate simulation of Si-111 surface", "[quicksim]", (sidb_111_cell_clk_lyt_siqad),
                    (cds_sidb_111_cell_clk_lyt_siqad))
 {
     TestType lyt{};
@@ -1014,4 +1016,85 @@ TEMPLATE_TEST_CASE("QuickSim gate simulation of Si-111 surface", "[quickexact]",
     CHECK(ground_state.front().get_charge_state({4, 8, 0}) == sidb_charge_state::NEUTRAL);
     CHECK(ground_state.front().get_charge_state({4, 10, 0}) == sidb_charge_state::NEGATIVE);
     CHECK(ground_state.front().get_charge_state({4, 14, 0}) == sidb_charge_state::NEGATIVE);
+}
+
+TEMPLATE_TEST_CASE("QuickSim AND gate simulation of Si-111 surface", "[quicksim]", sidb_111_cell_clk_lyt_siqad,
+                   cds_sidb_111_cell_clk_lyt_siqad)
+{
+    SECTION("no input applied")
+    {
+        const auto            lyt = blueprints::and_gate_111<TestType>();
+        const quicksim_params params{sidb_simulation_parameters{2, -0.32, 5.6, 5}, 3000, 0.5};
+
+        const auto simulation_results = quicksim<TestType>(lyt, params);
+
+        const auto ground_state = determine_groundstate_from_simulation_results(simulation_results);
+        REQUIRE(ground_state.size() == 1);
+
+        CHECK(ground_state.front().get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({1, 1, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({25, 0, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({23, 1, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({4, 4, 0}) == sidb_charge_state::NEUTRAL);
+        CHECK(ground_state.front().get_charge_state({21, 4, 0}) == sidb_charge_state::NEUTRAL);
+        CHECK(ground_state.front().get_charge_state({5, 5, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({19, 5, 1}) == sidb_charge_state::NEGATIVE);
+
+        CHECK(ground_state.front().get_charge_state({17, 8, 0}) == sidb_charge_state::NEUTRAL);
+        CHECK(ground_state.front().get_charge_state({8, 8, 0}) == sidb_charge_state::NEUTRAL);
+        CHECK(ground_state.front().get_charge_state({9, 9, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({15, 9, 1}) == sidb_charge_state::NEGATIVE);
+
+        CHECK(ground_state.front().get_charge_state({10, 18, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({13, 17, 0}) == sidb_charge_state::NEUTRAL);
+        CHECK(ground_state.front().get_charge_state({16, 18, 0}) == sidb_charge_state::NEGATIVE);
+
+        CHECK(ground_state.front().get_charge_state({15, 21, 1}) == sidb_charge_state::NEUTRAL);
+        CHECK(ground_state.front().get_charge_state({17, 23, 0}) == sidb_charge_state::NEGATIVE);
+
+        CHECK(ground_state.front().get_charge_state({19, 25, 1}) == sidb_charge_state::NEUTRAL);
+        CHECK(ground_state.front().get_charge_state({21, 27, 0}) == sidb_charge_state::NEGATIVE);
+
+        CHECK(ground_state.front().get_charge_state({23, 29, 1}) == sidb_charge_state::NEGATIVE);
+    }
+
+    SECTION("10 input applied")
+    {
+        auto lyt = blueprints::and_gate_111<TestType>();
+        lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::EMPTY);
+        lyt.assign_cell_type({23, 1, 1}, TestType::cell_type::EMPTY);
+
+        const quicksim_params params{sidb_simulation_parameters{2, -0.32, 5.6, 5}, 3000, 0.5};
+
+        const auto simulation_results = quicksim<TestType>(lyt, params);
+
+        const auto ground_state = determine_groundstate_from_simulation_results(simulation_results);
+
+        REQUIRE(ground_state.size() == 1);
+
+        CHECK(ground_state.front().get_charge_state({1, 1, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({25, 0, 0}) == sidb_charge_state::NEGATIVE);
+
+        CHECK(ground_state.front().get_charge_state({4, 4, 0}) == sidb_charge_state::NEUTRAL);
+        CHECK(ground_state.front().get_charge_state({21, 4, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({5, 5, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({19, 5, 1}) == sidb_charge_state::NEUTRAL);
+
+        CHECK(ground_state.front().get_charge_state({8, 8, 0}) == sidb_charge_state::NEUTRAL);
+        CHECK(ground_state.front().get_charge_state({17, 8, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({9, 9, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({15, 9, 1}) == sidb_charge_state::NEUTRAL);
+
+        CHECK(ground_state.front().get_charge_state({10, 18, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({13, 17, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({16, 18, 0}) == sidb_charge_state::NEUTRAL);
+
+        CHECK(ground_state.front().get_charge_state({15, 21, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({17, 23, 0}) == sidb_charge_state::NEUTRAL);
+
+        CHECK(ground_state.front().get_charge_state({19, 25, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({21, 27, 0}) == sidb_charge_state::NEUTRAL);
+
+        CHECK(ground_state.front().get_charge_state({23, 29, 1}) == sidb_charge_state::NEGATIVE);
+    }
 }

@@ -19,8 +19,10 @@
 
 namespace fiction
 {
-
-struct sidb_surface_params
+/**
+ * This struct stores parameters for the `sidb_defect_surface`
+ */
+struct sidb_defect_surface_params
 {
     /**
      * Specifies which defects are to be ignored, e.g., when they are not relevant for the current analysis.
@@ -46,7 +48,8 @@ template <typename Lyt>
 class sidb_defect_surface<Lyt, true> : public Lyt
 {
   public:
-    explicit sidb_defect_surface(const Lyt& lyt, [[maybe_unused]] const sidb_surface_params& ps = {}) : Lyt(lyt) {}
+    explicit sidb_defect_surface(const Lyt& lyt, [[maybe_unused]] const sidb_defect_surface_params& ps = {}) : Lyt(lyt)
+    {}
 };
 
 template <typename Lyt>
@@ -55,9 +58,9 @@ class sidb_defect_surface<Lyt, false> : public Lyt
   public:
     struct sidb_surface_storage
     {
-        explicit sidb_surface_storage(sidb_surface_params ps = {}) : params(std::move(ps)) {}
+        explicit sidb_surface_storage(sidb_defect_surface_params ps = {}) : params(std::move(ps)) {}
 
-        sidb_surface_params params{};
+        sidb_defect_surface_params params{};
 
         phmap::parallel_flat_hash_map<typename Lyt::coordinate, sidb_defect> defective_coordinates{};
     };
@@ -66,8 +69,10 @@ class sidb_defect_surface<Lyt, false> : public Lyt
 
     /**
      * Standard constructor for empty layouts.
+     *
+     * @param ps SiDB defect surface parameters.
      */
-    explicit sidb_defect_surface(const sidb_surface_params& ps = {}) :
+    explicit sidb_defect_surface(const sidb_defect_surface_params& ps = {}) :
             Lyt(),
             strg{std::make_shared<sidb_surface_storage>(ps)}
     {
@@ -81,8 +86,9 @@ class sidb_defect_surface<Lyt, false> : public Lyt
      * Standard constructor that layers the SiDB defect interface onto a layout with aspect ratio ar as input.
      *
      * @param ar aspect ratio of the layout.
+     * @param ps SiDB defect surface parameters.
      */
-    explicit sidb_defect_surface(const typename Lyt::aspect_ratio& ar, const sidb_surface_params& ps = {}) :
+    explicit sidb_defect_surface(const typename Lyt::aspect_ratio& ar, const sidb_defect_surface_params& ps = {}) :
             Lyt(ar),
             strg{std::make_shared<sidb_surface_storage>(ps)}
     {
@@ -96,8 +102,9 @@ class sidb_defect_surface<Lyt, false> : public Lyt
      * Standard constructor that layers the SiDB defect interface onto an existing layout.
      *
      * @param lyt Existing layout that is to be extended by an SiDB defect interface.
+     * @param ps SiDB defect surface parameters.
      */
-    explicit sidb_defect_surface(const Lyt& lyt, const sidb_surface_params& ps = {}) :
+    explicit sidb_defect_surface(const Lyt& lyt, const sidb_defect_surface_params& ps = {}) :
             Lyt(lyt),
             strg{std::make_shared<sidb_surface_storage>(ps)}
     {

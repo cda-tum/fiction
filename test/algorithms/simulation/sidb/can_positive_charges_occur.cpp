@@ -38,7 +38,7 @@ TEST_CASE("One BDL pair with one perturber", "[can-positive-charges-occur]")
     }
 }
 
-TEST_CASE("Y-shape SiDB OR gate with input 01, using siqad coordinates", "[can-positive-charges-occur]")
+TEST_CASE("Y-shaped SiDB OR gate with input 01, using siqad coordinates", "[can-positive-charges-occur]")
 {
     sidb_100_cell_clk_lyt_siqad lyt{};
 
@@ -72,7 +72,7 @@ TEST_CASE("Y-shape SiDB OR gate with input 01, using siqad coordinates", "[can-p
     }
 }
 
-TEST_CASE("Y-shape SiDB OR gate with input 01, using cube coordinates", "[can-positive-charges-occur]")
+TEST_CASE("Y-shapedd SiDB OR gate with input 01, using cube coordinates", "[can-positive-charges-occur]")
 {
     sidb_100_cell_clk_lyt_cube lyt{};
 
@@ -114,7 +114,7 @@ TEST_CASE("Y-shape SiDB OR gate with input 01, using cube coordinates", "[can-po
     }
 }
 
-TEST_CASE("Y-shape SiDB OR gate with input 01, using offset coordinates", "[can-positive-charges-occur]")
+TEST_CASE("Y-shapedd SiDB OR gate with input 01, using offset coordinates", "[can-positive-charges-occur]")
 {
     sidb_100_cell_clk_lyt lyt{};
 

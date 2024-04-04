@@ -2,7 +2,10 @@
 // Created by Jan Drewniok on 11.09.23.
 //
 
+#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
+
+#include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
@@ -220,12 +223,11 @@ TEST_CASE("Bestagon AND gate", "[is-operational]")
     }
     SECTION("Count the number of non-operational input combinations")
     {
-        number_of_operational_inputs_stats st{};
-        CHECK(number_of_operational_inputs(
-                  lyt, std::vector<tt>{create_and_tt()},
-                  is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT},
-                  &st) == 1);
-        CHECK(st.operational_inputs == std::set<uint64_t>{3});
+        const auto op_inputs = number_of_operational_inputs(
+            lyt, std::vector<tt>{create_and_tt()},
+            is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT});
+        CHECK(op_inputs.size() == 1);
+        CHECK(op_inputs == std::set<uint64_t>{3});
     }
 }
 
@@ -262,42 +264,10 @@ TEST_CASE("Not working diagonal Wire", "[is-operational]")
             .first == operational_status::NON_OPERATIONAL);
 }
 
-TEST_CASE("AND gate from the paper: Unlocking Flexible Silicon Dangling Bond Logic Designs on Alternative Silicon "
-          "Orientations",
-          "[is-operational]")
+TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[is-operational]", sidb_111_cell_clk_lyt_siqad,
+                   cds_sidb_111_cell_clk_lyt_siqad)
 {
-    using layout = sidb_111_cell_clk_lyt_siqad;
-
-    layout lyt{};
-
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({1, 1, 1}, sidb_technology::cell_type::INPUT);
-
-    lyt.assign_cell_type({25, 0, 0}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({23, 1, 1}, sidb_technology::cell_type::INPUT);
-
-    lyt.assign_cell_type({4, 4, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({21, 4, 0}, sidb_technology::cell_type::NORMAL);
-
-    lyt.assign_cell_type({5, 5, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({19, 5, 1}, sidb_technology::cell_type::NORMAL);
-
-    lyt.assign_cell_type({17, 8, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 8, 0}, sidb_technology::cell_type::NORMAL);
-
-    lyt.assign_cell_type({9, 9, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({15, 9, 1}, sidb_technology::cell_type::NORMAL);
-
-    lyt.assign_cell_type({13, 17, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({16, 18, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({10, 18, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({15, 21, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({17, 23, 0}, sidb_technology::cell_type::NORMAL);
-
-    lyt.assign_cell_type({19, 25, 1}, sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({21, 27, 0}, sidb_technology::cell_type::OUTPUT);
-
-    lyt.assign_cell_type({23, 29, 1}, sidb_technology::cell_type::NORMAL);
+    const auto lyt = blueprints::and_gate_111<TestType>();
 
     SECTION("Check operation for different values of mu")
     {
@@ -308,11 +278,10 @@ TEST_CASE("AND gate from the paper: Unlocking Flexible Silicon Dangling Bond Log
     }
     SECTION("Count the number of non-operational input combinations")
     {
-        number_of_operational_inputs_stats st{};
-        CHECK(number_of_operational_inputs(
-                  lyt, std::vector<tt>{create_and_tt()},
-                  is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT},
-                  &st) == 1);
-        CHECK(st.operational_inputs == std::set<uint64_t>{3});
+        const auto op_inputs = number_of_operational_inputs(
+            lyt, std::vector<tt>{create_and_tt()},
+            is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT});
+        CHECK(op_inputs.size() == 1);
+        CHECK(op_inputs == std::set<uint64_t>{3});
     }
 }

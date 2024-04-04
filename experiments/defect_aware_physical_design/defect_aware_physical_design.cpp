@@ -113,7 +113,7 @@ int main()  // NOLINT
     const mockturtle::tech_library<2> gate_lib{gates};
 
     // parameterize the H-Si(100) 2x1 surface to ignore certain defect types
-    const fiction::sidb_surface_params surface_params{
+    const fiction::sidb_defect_surface_params surface_params{
         std::unordered_set<fiction::sidb_defect_type>{fiction::sidb_defect_type::DB}};
 
     // fiction::sidb_defect_surface<cell_lyt> surface_lattice{surface_params};

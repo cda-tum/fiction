@@ -601,7 +601,7 @@ TEST_CASE("In-place SQD reader with ignored defects", "[sqd]")
     using sidb_layout =
         sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
 
-    const sidb_surface_params                   params{std::unordered_set<sidb_defect_type>{sidb_defect_type::DB}};
+    const sidb_defect_surface_params            params{std::unordered_set<sidb_defect_type>{sidb_defect_type::DB}};
     const sidb_layout                           layout{params};
     sidb_lattice<sidb_111_lattice, sidb_layout> lattice_layout{layout};
 

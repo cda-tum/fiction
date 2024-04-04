@@ -5,14 +5,12 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#include <fiction/algorithms/simulation/sidb/determine_groundstate_from_simulation_results.hpp>
 #include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/layouts/coordinates.hpp>
-#include <fiction/technology/charge_distribution_surface.hpp>
 #include <fiction/technology/physical_constants.hpp>
 #include <fiction/technology/sidb_charge_state.hpp>
-#include <fiction/technology/sidb_lattice.hpp>
-#include <fiction/technology/sidb_lattice_orientations.hpp>
 #include <fiction/types.hpp>
 
 using namespace fiction;
@@ -213,7 +211,7 @@ TEMPLATE_TEST_CASE("ExGS simulation of a two-pair BDL wire with one perturber, u
                Catch::Matchers::WithinAbs(0.2460493219, physical_constants::POP_STABILITY_ERR));
 }
 
-TEMPLATE_TEST_CASE("ExGS simulation of a Y-shape SiDB arrangement", "[exhaustive-ground-state-simulation]",
+TEMPLATE_TEST_CASE("ExGS simulation of a Y-shaped SiDB arrangement", "[exhaustive-ground-state-simulation]",
                    (sidb_100_cell_clk_lyt_siqad), (cds_sidb_100_cell_clk_lyt_siqad))
 {
     TestType lyt{};
@@ -248,7 +246,7 @@ TEMPLATE_TEST_CASE("ExGS simulation of a Y-shape SiDB arrangement", "[exhaustive
                Catch::Matchers::WithinAbs(0.3191788254, physical_constants::POP_STABILITY_ERR));
 }
 
-TEMPLATE_TEST_CASE("ExGS simulation of a Y-shape SiDB OR gate with input 01", "[exhaustive-ground-state-simulation]",
+TEMPLATE_TEST_CASE("ExGS simulation of a Y-shaped SiDB OR gate with input 01", "[exhaustive-ground-state-simulation]",
                    (sidb_100_cell_clk_lyt_siqad), (cds_sidb_100_cell_clk_lyt_siqad))
 {
     TestType lyt{};
@@ -398,8 +396,7 @@ TEMPLATE_TEST_CASE("ExGS simulation of a Y-shape SiDB OR gate with input 01", "[
 }
 
 TEMPLATE_TEST_CASE("ExGS simulation of positively charged SiDBs", "[exhaustive-ground-state-simulation]",
-                   (sidb_lattice<sidb_100_lattice, sidb_cell_clk_lyt_siqad>),
-                   (charge_distribution_surface<sidb_lattice<sidb_100_lattice, sidb_cell_clk_lyt_siqad>>))
+                   sidb_cell_clk_lyt_siqad, sidb_100_cell_clk_lyt_siqad, cds_sidb_100_cell_clk_lyt_siqad)
 {
     TestType lyt{};
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
@@ -419,4 +416,39 @@ TEMPLATE_TEST_CASE("ExGS simulation of positively charged SiDBs", "[exhaustive-g
     const auto simulation_results = exhaustive_ground_state_simulation<TestType>(lyt, params);
 
     CHECK(simulation_results.charge_distributions.size() == 4);
+}
+
+TEMPLATE_TEST_CASE("ExGS gate simulation of Si-111 surface", "[exhaustive-ground-state-simulation]",
+                   (sidb_111_cell_clk_lyt_siqad), sidb_111_cell_clk_lyt_siqad, cds_sidb_111_cell_clk_lyt_siqad)
+{
+    TestType lyt{};
+    lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({1, 1, 1}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({2, 2, 1}, TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type({8, 0, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 1, 1}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({5, 2, 1}, TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type({4, 8, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({4, 10, 0}, TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type({4, 14, 0}, TestType::cell_type::NORMAL);
+
+    const sidb_simulation_parameters params{2, -0.32};
+
+    const auto simulation_results = exhaustive_ground_state_simulation<TestType>(lyt, params);
+
+    const auto ground_state = determine_groundstate_from_simulation_results(simulation_results);
+    REQUIRE(ground_state.size() == 1);
+
+    CHECK(ground_state.front().get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
+    CHECK(ground_state.front().get_charge_state({1, 1, 1}) == sidb_charge_state::NEUTRAL);
+    CHECK(ground_state.front().get_charge_state({2, 2, 1}) == sidb_charge_state::NEGATIVE);
+    CHECK(ground_state.front().get_charge_state({8, 0, 0}) == sidb_charge_state::NEGATIVE);
+    CHECK(ground_state.front().get_charge_state({6, 1, 1}) == sidb_charge_state::NEUTRAL);
+    CHECK(ground_state.front().get_charge_state({5, 2, 1}) == sidb_charge_state::NEGATIVE);
+    CHECK(ground_state.front().get_charge_state({4, 8, 0}) == sidb_charge_state::NEUTRAL);
+    CHECK(ground_state.front().get_charge_state({4, 10, 0}) == sidb_charge_state::NEGATIVE);
+    CHECK(ground_state.front().get_charge_state({4, 14, 0}) == sidb_charge_state::NEGATIVE);
 }

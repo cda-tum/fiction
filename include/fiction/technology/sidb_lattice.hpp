@@ -17,7 +17,7 @@ namespace fiction
  *
  * @tparam LatticeOrientation Type of the lattice orientation.
  * @tparam Lyt SiDB cell-level layout type.
- * @tparam has_sidb_lattice_interface Automatically determines whether a sidb lattice interface is already present.
+ * @tparam has_sidb_lattice_interface Automatically determines whether an SiDB lattice interface is already present.
  */
 template <typename LatticeOrientation, typename Lyt, bool has_sidb_lattice_interface = is_sidb_lattice_v<Lyt>>
 class sidb_lattice : public Lyt
@@ -27,7 +27,11 @@ template <typename LatticeOrientation, typename Lyt>
 class sidb_lattice<LatticeOrientation, Lyt, true> : public Lyt
 {
   public:
-    explicit sidb_lattice(const Lyt& lyt) : Lyt(lyt) {}
+    explicit sidb_lattice(const Lyt& lyt) : Lyt(lyt)
+    {
+        static_assert(has_given_lattice_orientation_v<Lyt, LatticeOrientation>,
+                      "Lyt has a different lattice orientation.");
+    }
 };
 
 template <typename LatticeOrientation, typename Lyt>
@@ -35,7 +39,7 @@ class sidb_lattice<LatticeOrientation, Lyt, false> : public Lyt
 {
   public:
     /**
-     * This type alias defines the orientation of the lattice using the LatticeOrientation enumeration.
+     * This type alias defines the orientation of the lattice using the LatticeOrientation template parameter.
      */
     using orientation = LatticeOrientation;
 

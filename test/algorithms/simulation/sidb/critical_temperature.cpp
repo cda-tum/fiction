@@ -122,7 +122,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         CHECK(critical_stats.critical_temperature == 350);
     }
 
-    SECTION("Y-shape SiDB AND gate")
+    SECTION("Y-shaped SiDB AND gate")
     {
         lyt.assign_cell_type({0, 0, 1}, sidb_technology::cell_type::INPUT);
         lyt.assign_cell_type({2, 1, 1}, sidb_technology::cell_type::INPUT);

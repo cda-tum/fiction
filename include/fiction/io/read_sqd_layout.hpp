@@ -217,14 +217,14 @@ class read_sqd_layout_impl
     {
         if (name == "Si(111) 1x1")
         {
-            if (!has_same_lattice_orientation_v<Lyt, sidb_111_lattice>)
+            if (!has_given_lattice_orientation_v<Lyt, sidb_111_lattice>)
             {
                 throw sqd_parsing_error("Error parsing SQD file: mismatch in lattice orientations");
             }
         }
         else if (name == "Si(100) 2x1")
         {
-            if (!has_same_lattice_orientation_v<Lyt, sidb_100_lattice>)
+            if (!has_given_lattice_orientation_v<Lyt, sidb_100_lattice>)
             {
                 throw sqd_parsing_error("Error parsing SQD file: mismatch in lattice orientations");
             }
@@ -423,7 +423,7 @@ class read_sqd_layout_impl
  *
  * May throw an `sqd_parsing_exception` if the sqd file is malformed.
  *
- * @tparam Lyt The layout type to be created from an input. Must be a cell-level SiDB layout.
+ * @tparam Lyt The layout type to be created from an input. Must be an SiDB lattice cell-level SiDB layout.
  * @param is The input stream to read from.
  * @param name The name to give to the generated layout.
  * @return The cell-level SiDB layout read from the sqd file.
@@ -433,6 +433,7 @@ Lyt read_sqd_layout(std::istream& is, const std::string_view& name = "")
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
+    static_assert(is_sidb_lattice_v<Lyt>, "Lyt must be a lattice layout");
 
     detail::read_sqd_layout_impl<Lyt> p{is, name};
 
@@ -450,7 +451,7 @@ Lyt read_sqd_layout(std::istream& is, const std::string_view& name = "")
  *
  * This is an in-place version of read_sqd_layout that utilizes the given layout as a target to write to.
  *
- * @tparam Lyt The layout type to be used as input. Must be a cell-level SiDB layout.
+ * @tparam Lyt The layout type to be created from an input. Must be an SiDB lattice cell-level SiDB layout.
  * @param lyt The layout to write to.
  * @param is The input stream to read from.
  */
@@ -473,7 +474,7 @@ void read_sqd_layout(Lyt& lyt, std::istream& is)
  *
  * May throw an `sqd_parsing_exception` if the sqd file is malformed.
  *
- * @tparam Lyt The layout type to be created from an input. Must be a cell-level SiDB layout.
+ * @tparam Lyt The layout type to be created from an input. Must be an SiDB lattice cell-level SiDB layout.
  * @param filename The file name to open and read from.
  * @param name The name to give to the generated layout.
  */
@@ -506,7 +507,7 @@ Lyt read_sqd_layout(const std::string_view& filename, const std::string_view& na
  *
  * This is an in-place version of `read_sqd_layout` that utilizes the given layout as a target to write to.
  *
- * @tparam Lyt The layout type to be used as input. Must be a cell-level SiDB layout.
+ * @tparam Lyt The layout type to be created from an input. Must be an SiDB lattice cell-level SiDB layout.
  * @param lyt The layout to write to.
  * @param filename The file name to open and read from.
  */

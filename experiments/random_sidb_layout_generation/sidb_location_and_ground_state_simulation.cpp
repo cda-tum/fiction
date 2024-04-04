@@ -61,7 +61,7 @@ int main(int argc, const char* argv[])  // NOLINT
             }
             else
             {
-                std::cerr << "Error: Argument " << arg << " is missing a value." << '\n';
+                std::cerr << fmt::format("Error: Argument {} is missing a value.\n", arg);
                 return EXIT_FAILURE;
             }
         }
@@ -75,8 +75,8 @@ int main(int argc, const char* argv[])  // NOLINT
     const std::string orientation = options["--orientation"];
 
     // Print the parsed values
-    std::cout << "Folder name: " << folder_name << '\n';
-    std::cout << fmt::format("µ_minus: {}", mu) << '\n';
+    std::cout << fmt::format("Folder name: {}\n", folder_name);
+    std::cout << fmt::format("µ_minus: {}\n", mu);
 
     try
     {
@@ -142,24 +142,24 @@ int main(int argc, const char* argv[])  // NOLINT
                         }
                         else
                         {
-                            std::cout << "unsupported lattice orientation" << '\n';
+                            std::cout << "unsupported lattice orientation.\n";
                         }
                     }
                 }
                 else
                 {
-                    std::cout << "Folder */sqd* does not exist." << '\n';
+                    std::cout << "Folder */sqd* does not exist.\n";
                 }
             }
         }
         else
         {
-            std::cout << fmt::format("Folder {} does not exist", folder_name) << '\n';
+            std::cout << fmt::format("Folder {} does not exist.\n", folder_name);
         }
     }
     catch (const std::filesystem::filesystem_error& ex)
     {
-        std::cerr << "Error accessing folder: " << ex.what() << '\n';
+        std::cerr << fmt::format("Error accessing folder: {}.\n", ex.what());
     }
 
     return EXIT_SUCCESS;

@@ -403,8 +403,8 @@ TEMPLATE_TEST_CASE(
 
     SECTION("DB")
     {
-        const sidb_surface_params     params{std::unordered_set<sidb_defect_type>{sidb_defect_type::DB}};
-        sidb_defect_surface<TestType> defect_layout{lyt, params};
+        const sidb_defect_surface_params params{std::unordered_set<sidb_defect_type>{sidb_defect_type::DB}};
+        sidb_defect_surface<TestType>    defect_layout{lyt, params};
 
         defect_layout.assign_sidb_defect({2, 2}, sidb_defect{sidb_defect_type::DB});
 
@@ -413,7 +413,7 @@ TEMPLATE_TEST_CASE(
     }
     SECTION("Siloxane + Silicon Vacancy")
     {
-        const sidb_surface_params params{
+        const sidb_defect_surface_params params{
             std::unordered_set<sidb_defect_type>{{sidb_defect_type::SILOXANE, sidb_defect_type::SI_VACANCY}}};
         sidb_defect_surface<TestType> defect_layout{lyt, params};
 

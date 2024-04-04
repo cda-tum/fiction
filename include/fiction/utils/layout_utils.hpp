@@ -297,17 +297,17 @@ Lyt normalize_layout_coordinates(const Lyt& lyt) noexcept
  * @return The converted lattice layout.
  */
 template <typename LatticeOrientation, typename Lyt>
-auto convert_layout_to_lattice_layout(const Lyt& lyt) noexcept -> decltype(auto)
+auto convert_layout_to_lattice_layout(const Lyt& lyt) noexcept
 {
-    static_assert(is_cartesian_layout_v<Lyt>, "LytSrc is not a Cartesian layout");
-    static_assert(is_cell_level_layout_v<Lyt>, "LytSrc is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "LytSrc is not an SiDB layout");
+    static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(!is_sidb_lattice_100_v<LatticeOrientation> && !is_sidb_lattice_111_v<LatticeOrientation>,
                   "LatticeOrientation is not a valid SiDB lattice orientation");
 
     if constexpr (is_charge_distribution_surface_v<Lyt> && is_sidb_defect_surface_v<Lyt>)
     {
-        auto process_lyt = [](const Lyt& lyt, auto& lyt_100) -> decltype(auto)
+        auto process_lyt = [](const Lyt& lyt, auto& lyt_100)
         {
             lyt.foreach_cell([&lyt_100, &lyt](const auto& c)
                              { lyt_100.assign_charge_state(c, lyt.get_charge_state(c), false); });
@@ -358,7 +358,7 @@ auto convert_layout_to_lattice_layout(const Lyt& lyt) noexcept -> decltype(auto)
  * @return A new equivalent layout based on SiQAD coordinates.
  */
 template <typename LytSrc>
-auto convert_to_siqad_coordinates(const LytSrc& lyt) noexcept -> decltype(auto)
+auto convert_to_siqad_coordinates(const LytSrc& lyt) noexcept
 {
     static_assert(is_cartesian_layout_v<LytSrc>, "LytSrc is not a Cartesian layout");
     static_assert(is_cell_level_layout_v<LytSrc>, "LytSrc is not a cell-level layout");
