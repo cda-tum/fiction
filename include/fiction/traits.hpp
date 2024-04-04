@@ -690,9 +690,10 @@ template <typename Lyt>
 using lattice_orientation = typename Lyt::orientation;
 
 template <typename Lyt, typename LatticeOrientation>
-inline constexpr const bool has_same_lattice_orientation_v =
+inline constexpr const bool has_given_lattice_orientation_v =
     std::is_same_v<typename Lyt::orientation, LatticeOrientation>;
 
+#pragma region is_sidb_lattice
 template <typename Lyt, typename = void>
 struct is_sidb_lattice : std::false_type
 {};
@@ -704,35 +705,41 @@ struct is_sidb_lattice<Lyt, std::enable_if_t<is_cell_level_layout_v<Lyt>, std::v
 
 template <typename Lyt>
 constexpr bool is_sidb_lattice_v = is_sidb_lattice<Lyt>::value;
+#pragma endregion
 
+#pragma region is_sidb_lattice_100
 template <typename Lyt, typename = void>
 struct is_sidb_lattice_100 : std::false_type
 {};
 
 template <typename Lyt>
 struct is_sidb_lattice_100<Lyt, std::enable_if_t<is_sidb_lattice_v<Lyt>>>
-        : std::conditional_t<has_same_lattice_orientation_v<Lyt, sidb_100_lattice>, std::true_type, std::false_type>
+        : std::conditional_t<has_given_lattice_orientation_v<Lyt, sidb_100_lattice>, std::true_type, std::false_type>
 {};
 
 template <typename Lyt>
 constexpr bool is_sidb_lattice_100_v = is_sidb_lattice_100<Lyt>::value;
+#pragma endregion
 
+#pragma region is_sidb_lattice_111
 template <typename Lyt, typename = void>
 struct is_sidb_lattice_111 : std::false_type
 {};
 
 template <typename Lyt>
 struct is_sidb_lattice_111<Lyt, std::enable_if_t<is_sidb_lattice_v<Lyt>>>
-        : std::conditional_t<has_same_lattice_orientation_v<Lyt, sidb_111_lattice>, std::true_type, std::false_type>
+        : std::conditional_t<has_given_lattice_orientation_v<Lyt, sidb_111_lattice>, std::true_type, std::false_type>
 {};
 
 template <typename Lyt>
 constexpr bool is_sidb_lattice_111_v = is_sidb_lattice_111<Lyt>::value;
+#pragma endregion
 
 /**
  * SiDB defect surface
  */
 
+#pragma region is_sidb_defect_surface
 template <class Lyt, class = void>
 struct is_sidb_defect_surface : std::false_type
 {};
@@ -751,6 +758,7 @@ struct is_sidb_defect_surface<
 // Helper variable template for easy access to the trait value
 template <class Lyt>
 inline constexpr bool is_sidb_defect_surface_v = is_sidb_defect_surface<Lyt>::value;
+#pragma endregion
 
 #pragma region has_assign_sidb_defect
 template <class Lyt, class = void>
