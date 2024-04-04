@@ -31,7 +31,7 @@ TEST_CASE("assess_displacement_robustness for Y-shape SiDB AND gate", "[assess-d
 
     lyt.assign_cell_type({10, 9, 1}, sidb_technology::cell_type::NORMAL);
 
-    SECTION("only ")
+    SECTION("only one displacement variation")
     {
         displacement_robustness_params<tt> params{};
         params.displacement_variations                        = {1, 0};

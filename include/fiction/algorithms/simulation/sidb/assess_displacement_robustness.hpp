@@ -8,13 +8,11 @@
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/io/print_layout.hpp"
+#include "fiction/layouts/coordinates.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/hash.hpp"
 #include "fiction/utils/layout_utils.hpp"
-#include "fiction/utils/phmap_utils.hpp"
 
 #include <mockturtle/utils/stopwatch.hpp>
-#include <phmap.h>
 
 #include <cstdint>
 #include <cstdlib>
@@ -30,13 +28,14 @@ struct displacement_robustness_domain
     std::vector<std::pair<Lyt, operational_status>> operational_values{};
 };
 
-template <typename TT>
+template <typename TT, typename Lyt>
 struct displacement_robustness_params
 {
-    std::pair<uint64_t, uint64_t>              displacement_variations = {1, 1};
-    sidb_simulation_engine sim_engine{sidb_simulation_engine::QUICKEXACT};
-    is_operational_params  operational_params{};
-    std::vector<TT>        tt{};
+    std::pair<uint64_t, uint64_t> displacement_variations = {1, 1};
+    sidb_simulation_engine        sim_engine{sidb_simulation_engine::QUICKEXACT};
+    is_operational_params         operational_params{};
+    std::vector<TT>               tt{};
+    std::set<cell<Lyt>>           fixed_cells{};
 };
 
 struct displacement_robustness_stats
@@ -86,7 +85,7 @@ template <typename Lyt, typename TT>
 class displacement_robustness_domain_impl
 {
   public:
-    displacement_robustness_domain_impl(const Lyt& lyt, const displacement_robustness_params<TT>& ps,
+    displacement_robustness_domain_impl(const Lyt& lyt, const displacement_robustness_params<TT, Lyt>& ps,
                                         displacement_robustness_stats& st) noexcept :
             layout{lyt},
             params{ps},
@@ -96,16 +95,33 @@ class displacement_robustness_domain_impl
         layout.foreach_cell(
             [&](const auto& c)
             {
-                auto new_pos_se = c;
-                auto new_pos_nw = c;
-                new_pos_se.x -= params.displacement_variations.first;
-                new_pos_se.y -= params.displacement_variations.second;
-                new_pos_nw.x += params.displacement_variations.first;
-                new_pos_nw.y += params.displacement_variations.second;
+                if constexpr (has_siqad_coord_v<Lyt>)
+                {
+                    auto new_pos_se = siqad::to_fiction_coord<cube::coord_t>(c);
+                    auto new_pos_nw = siqad::to_fiction_coord<cube::coord_t>(c);
+                    new_pos_se.x -= static_cast<decltype(new_pos_se.x)>(params.displacement_variations.first);
+                    new_pos_se.y -= static_cast<decltype(new_pos_se.y)>(params.displacement_variations.second);
+                    new_pos_nw.x += static_cast<decltype(new_pos_nw.x)>(params.displacement_variations.first);
+                    new_pos_nw.y += static_cast<decltype(new_pos_nw.y)>(params.displacement_variations.second);
 
-                const auto all_coord = all_coordinates_in_spanned_area<cell<Lyt>>(new_pos_se, new_pos_nw);
-                all_displacements_for_all_coordinates.push_back(all_coord);
-                cells.push_back(c);
+                    const auto all_coord = all_coordinates_in_spanned_area<cell<Lyt>>(
+                        siqad::to_siqad_coord(new_pos_se), siqad::to_siqad_coord(new_pos_nw));
+                    all_displacements_for_all_coordinates.push_back(all_coord);
+                    cells.push_back(c);
+                }
+                else
+                {
+                    auto new_pos_se = c;
+                    auto new_pos_nw = c;
+                    new_pos_se.x -= params.displacement_variations.first;
+                    new_pos_se.y -= params.displacement_variations.second;
+                    new_pos_nw.x += params.displacement_variations.first;
+                    new_pos_nw.y += params.displacement_variations.second;
+
+                    const auto all_coord = all_coordinates_in_spanned_area<cell<Lyt>>(new_pos_se, new_pos_nw);
+                    all_displacements_for_all_coordinates.push_back(all_coord);
+                    cells.push_back(c);
+                }
             });
     };
 
@@ -151,8 +167,8 @@ class displacement_robustness_domain_impl
                 continue;
             }
 
-            Lyt    lyt{};
-            size_t i = 0;
+            Lyt         lyt{};
+            std::size_t i = 0;
             // Iterate over each cell in the combination
             for (const auto& cell : combination)
             {
@@ -181,9 +197,9 @@ class displacement_robustness_domain_impl
     }
 
   private:
-    const Lyt&                                     layout;
+    const Lyt&                                layout;
     const displacement_robustness_params<TT>& params;
-    displacement_robustness_stats&                 stats;
+    displacement_robustness_stats&            stats;
     // displacement_robustness_stats&                            stats;
     std::vector<std::vector<cell<Lyt>>> all_displacements_for_all_coordinates{};
     std::vector<cell<Lyt>>              cells{};
