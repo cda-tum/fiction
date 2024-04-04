@@ -733,22 +733,24 @@ constexpr bool is_sidb_lattice_111_v = is_sidb_lattice_111<Lyt>::value;
  * SiDB defect surface
  */
 
-#pragma region is_cell_level_layout
 template <class Lyt, class = void>
 struct is_sidb_defect_surface : std::false_type
 {};
 
+// SFINAE-enabled specialization for Lyt satisfying certain conditions
 template <class Lyt>
 struct is_sidb_defect_surface<
-    Lyt, std::enable_if_t<is_cell_level_layout_v<Lyt>,
-                          std::void_t<typename Lyt::storage,
-                                      decltype(std::declval<Lyt>().assign_sidb_defect(cell<Lyt>(), sidb_defect())),
-                                      decltype(std::declval<Lyt>().get_sidb_defect(cell<Lyt>()))>>> : std::true_type
+    Lyt, std::void_t<typename Lyt::storage,  // Check if Lyt has a nested type 'storage'
+                     decltype(std::declval<Lyt>().assign_sidb_defect(
+                         std::declval<cell<Lyt>>(), std::declval<sidb_defect>())),  // Check if calling
+                                                                                    // 'assign_sidb_defect' is valid
+                     decltype(std::declval<Lyt>().get_sidb_defect(std::declval<cell<Lyt>>()))>>
+        : std::true_type  // Check if calling 'get_sidb_defect' is valid
 {};
 
+// Helper variable template for easy access to the trait value
 template <class Lyt>
 inline constexpr bool is_sidb_defect_surface_v = is_sidb_defect_surface<Lyt>::value;
-#pragma endregion
 
 #pragma region has_assign_sidb_defect
 template <class Lyt, class = void>
