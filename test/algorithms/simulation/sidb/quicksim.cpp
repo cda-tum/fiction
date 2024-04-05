@@ -983,7 +983,7 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB arrangement with vary
     }
 }
 
-TEMPLATE_TEST_CASE("QuickSim gate simulation of Si-111 surface", "[quicksim]", (sidb_111_cell_clk_lyt_siqad),
+TEMPLATE_TEST_CASE("QuickSim gate simulation on the Si-111 surface", "[quicksim]", (sidb_111_cell_clk_lyt_siqad),
                    (cds_sidb_111_cell_clk_lyt_siqad))
 {
     TestType lyt{};
@@ -1018,7 +1018,7 @@ TEMPLATE_TEST_CASE("QuickSim gate simulation of Si-111 surface", "[quicksim]", (
     CHECK(ground_state.front().get_charge_state({4, 14, 0}) == sidb_charge_state::NEGATIVE);
 }
 
-TEMPLATE_TEST_CASE("QuickSim AND gate simulation of Si-111 surface", "[quicksim]", sidb_111_cell_clk_lyt_siqad,
+TEMPLATE_TEST_CASE("QuickSim AND gate simulation on the Si-111 surface", "[quicksim]", sidb_111_cell_clk_lyt_siqad,
                    cds_sidb_111_cell_clk_lyt_siqad)
 {
     SECTION("no input applied")

@@ -287,14 +287,15 @@ Lyt normalize_layout_coordinates(const Lyt& lyt) noexcept
 
     return lyt_new;
 }
-
 /**
- * Converts the given layout to a lattice layout based on the specified lattice orientation.
+ * This function converts an SiDB cell-level layout into a lattice layout according to the provided orientation. It
+ * transfers charge states and physical parameters from the input layout to the lattice counterpart and handles the
+ * migration of SiDB defects if they exist.
  *
- * @tparam LatticeOrientation The lattice orientation type.
+ * @tparam LatticeOrientation The lattice orientation of the lattice layout.
  * @tparam Lyt SiDB cell-level layout type.
- * @param lyt The SiDB cell-level layout to convert.
- * @return The converted lattice layout.
+ * @param lyt The SiDB cell-level layout to be converted.
+ * @return A SiDB lattice layout based on the specified lattice orientation.
  */
 template <typename LatticeOrientation, typename Lyt>
 auto convert_layout_to_lattice_layout(const Lyt& lyt) noexcept
@@ -434,8 +435,8 @@ auto convert_to_siqad_coordinates(const LytSrc& lyt) noexcept
  * alternative coordinates, such as `offset::ucoord_t` or `cube::coord_t`. Returns a new layout equivalent to the
  * original layout but based on the specified coordinate system.
  *
- * @tparam LytDest Source cell-level layout type.
- * @tparam LytSrc Target cell-level layout type.
+ * @tparam LytDest Source SiDB cell-level layout type.
+ * @tparam LytSrc Target SiDB cell-level layout type.
  * @param lyt The layout that is to be converted to a new layout based on fiction coordinates.
  * @return A new equivalent layout based on fiction coordinates.
  */

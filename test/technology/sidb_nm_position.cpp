@@ -97,7 +97,7 @@ TEST_CASE("SiDB position in nanometer for siqad coordinates", "[sidb-nm-position
 
     SECTION("Si-111 lattice constants")
     {
-        using lattice_111 = sidb_lattice<sidb_111_lattice, sidb_cell_clk_lyt_siqad>;
+        using lattice_111 = sidb_111_cell_clk_lyt_siqad;
 
         const auto [pos0_x, pos0_y] = sidb_nm_position<lattice_111>({0, 0, 0});
         CHECK_THAT(pos0_x, WithinAbs(0, 1E-5));

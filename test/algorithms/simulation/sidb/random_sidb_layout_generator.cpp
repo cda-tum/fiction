@@ -2,13 +2,11 @@
 // Created by Jan Drewniok on 04.05.23.
 //
 
-#include <catch2/catch_test_macros.hpp>
+#include <catch2/catch_template_test_macros.hpp>
 
 #include <fiction/algorithms/path_finding/distance.hpp>
 #include <fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp>
-#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/sidb_defect_surface.hpp>
@@ -579,14 +577,14 @@ TEST_CASE("Random siqad::coord_t layout generation", "[generate-random-sidb-layo
     }
 }
 
-TEST_CASE("Random siqad::coord_t layout generation with defects", "[generate-random-sidb-layout]")
+TEMPLATE_TEST_CASE("Random siqad::coord_t layout generation with defects", "[generate-random-sidb-layout]",
+                   sidb_defect_cell_clk_lyt_siqad, sidb_defect_surface<sidb_111_cell_clk_lyt_siqad>)
 {
-
     SECTION("given two identical coordinates")
     {
-        const generate_random_sidb_layout_params<sidb_defect_cell_clk_lyt_siqad> params{{{5, 5, 1}, {5, 5, 1}}, 1};
+        const generate_random_sidb_layout_params<TestType> params{{{5, 5, 1}, {5, 5, 1}}, 1};
 
-        const auto result_lyt = generate_random_sidb_layout(sidb_defect_cell_clk_lyt_siqad{}, params);
+        const auto result_lyt = generate_random_sidb_layout(TestType{}, params);
 
         CHECK(result_lyt.num_cells() == 1);
         result_lyt.foreach_cell(
@@ -602,14 +600,14 @@ TEST_CASE("Random siqad::coord_t layout generation with defects", "[generate-ran
     {
         // it is not possible to generate a random layout since the position where a SiDB could be placed is occupied by
         // a defect.
-        const generate_random_sidb_layout_params<sidb_defect_cell_clk_lyt_siqad> params{
+        const generate_random_sidb_layout_params<TestType> params{
             {{2, 1, 1}, {2, 1, 1}},
             1,
-            generate_random_sidb_layout_params<sidb_defect_cell_clk_lyt_siqad>::positive_charges::FORBIDDEN,
+            generate_random_sidb_layout_params<TestType>::positive_charges::FORBIDDEN,
             2,
             5u};
 
-        auto defect_layout = sidb_defect_cell_clk_lyt_siqad{};
+        auto defect_layout = TestType{};
         defect_layout.assign_sidb_defect({2, 1, 1}, sidb_defect{sidb_defect_type::DB, -1, 5.6, 5});
 
         const auto result_lyt = generate_random_sidb_layout(defect_layout, params);
@@ -622,14 +620,14 @@ TEST_CASE("Random siqad::coord_t layout generation with defects", "[generate-ran
     {
         // it is not possible to generate a random layout since the position where a SiDB could be placed is occupied by
         // a defect.
-        const generate_random_sidb_layout_params<sidb_defect_cell_clk_lyt_siqad> params{
+        const generate_random_sidb_layout_params<TestType> params{
             {{2, 1, 1}, {2, 1, 1}},
             1,
-            generate_random_sidb_layout_params<sidb_defect_cell_clk_lyt_siqad>::positive_charges::FORBIDDEN,
+            generate_random_sidb_layout_params<TestType>::positive_charges::FORBIDDEN,
             2,
             5u};
 
-        auto defect_layout = sidb_defect_cell_clk_lyt_siqad{};
+        auto defect_layout = TestType{};
         defect_layout.assign_sidb_defect({3, 1, 1}, sidb_defect{sidb_defect_type::DB, -1, 5.6, 5});
         defect_layout.assign_sidb_defect({4, 1, 1}, sidb_defect{sidb_defect_type::SINGLE_DIHYDRIDE, 1, 7.6, 7});
 
@@ -638,20 +636,20 @@ TEST_CASE("Random siqad::coord_t layout generation with defects", "[generate-ran
         CHECK(result_lyt.num_cells() == 1);
         CHECK(result_lyt.num_defects() == 2);
 
-        CHECK(result_lyt.get_cell_type({2, 1, 1}) == sidb_defect_cell_clk_lyt_siqad::technology::cell_type::NORMAL);
+        CHECK(result_lyt.get_cell_type({2, 1, 1}) == TestType::technology::cell_type::NORMAL);
         CHECK(result_lyt.get_sidb_defect({3, 1, 1}) == sidb_defect{sidb_defect_type::DB, -1, 5.6, 5});
         CHECK(result_lyt.get_sidb_defect({4, 1, 1}) == sidb_defect{sidb_defect_type::SINGLE_DIHYDRIDE, 1, 7.6, 7});
     }
 
     SECTION("given corner coordinates and number of placed SiDBs, and allow positive charges")
     {
-        const generate_random_sidb_layout_params<sidb_defect_cell_clk_lyt_siqad> params{
+        const generate_random_sidb_layout_params<TestType> params{
             {{0, 0, 0}, {10, 2, 0}},
             10,
-            generate_random_sidb_layout_params<sidb_defect_cell_clk_lyt_siqad>::positive_charges::ALLOWED,
+            generate_random_sidb_layout_params<TestType>::positive_charges::ALLOWED,
             2};
 
-        auto defect_layout = sidb_defect_cell_clk_lyt_siqad{};
+        auto defect_layout = TestType{};
         defect_layout.assign_sidb_defect({2, 2, 0}, sidb_defect{sidb_defect_type::DB, -1, 5.6, 5});
         defect_layout.assign_sidb_defect({4, 1, 0}, sidb_defect{sidb_defect_type::SINGLE_DIHYDRIDE, 1, 7.6, 7});
         defect_layout.assign_sidb_defect({5, 1, 0}, sidb_defect{sidb_defect_type::SINGLE_DIHYDRIDE, 1, 7.6, 9});
@@ -678,8 +676,7 @@ TEST_CASE("Random siqad::coord_t layout generation with defects", "[generate-ran
 
 TEST_CASE("Random cube::coord_t layout generation with defects", "[generate-random-sidb-layout]")
 {
-    using lyt =
-        sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>>;
+    using lyt = sidb_defect_cell_clk_lyt_cube;
 
     const generate_random_sidb_layout_params<lyt> params{
         {siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{0, 0, 0}),

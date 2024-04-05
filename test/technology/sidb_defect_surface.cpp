@@ -13,6 +13,7 @@
 #include <fiction/technology/sidb_defect_surface.hpp>
 #include <fiction/technology/sidb_defects.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
+#include <fiction/technology/sidb_lattice_orientations.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -63,6 +64,7 @@ TEMPLATE_TEST_CASE(
         CHECK(!has_get_sidb_defect_v<lattice>);
         CHECK(!has_foreach_sidb_defect_v<lattice>);
         CHECK(!is_sidb_defect_surface_v<lattice>);
+        CHECK(is_sidb_lattice_100_v<lattice>);
 
         using defect_layout = sidb_defect_surface<lattice>;
         CHECK(is_cell_level_layout_v<defect_layout>);
@@ -70,6 +72,7 @@ TEMPLATE_TEST_CASE(
         CHECK(has_get_sidb_defect_v<defect_layout>);
         CHECK(has_foreach_sidb_defect_v<defect_layout>);
         CHECK(is_sidb_defect_surface_v<defect_layout>);
+        CHECK(is_sidb_lattice_100_v<lattice>);
 
         using defect_defect_layout = sidb_defect_surface<defect_layout>;
         CHECK(is_cell_level_layout_v<defect_defect_layout>);
@@ -77,6 +80,34 @@ TEMPLATE_TEST_CASE(
         CHECK(has_get_sidb_defect_v<defect_defect_layout>);
         CHECK(has_foreach_sidb_defect_v<defect_defect_layout>);
         CHECK(is_sidb_defect_surface_v<defect_layout>);
+        CHECK(is_sidb_lattice_100_v<lattice>);
+    }
+
+    SECTION("With SiDB lattice, Si-111")
+    {
+        using lattice = sidb_lattice<sidb_111_lattice, TestType>;
+        REQUIRE(is_cell_level_layout_v<lattice>);
+        CHECK(!has_assign_sidb_defect_v<lattice>);
+        CHECK(!has_get_sidb_defect_v<lattice>);
+        CHECK(!has_foreach_sidb_defect_v<lattice>);
+        CHECK(!is_sidb_defect_surface_v<lattice>);
+        CHECK(is_sidb_lattice_100_v<lattice>);
+
+        using defect_layout = sidb_defect_surface<lattice>;
+        CHECK(is_cell_level_layout_v<defect_layout>);
+        CHECK(has_assign_sidb_defect_v<defect_layout>);
+        CHECK(has_get_sidb_defect_v<defect_layout>);
+        CHECK(has_foreach_sidb_defect_v<defect_layout>);
+        CHECK(is_sidb_defect_surface_v<defect_layout>);
+        CHECK(is_sidb_lattice_111_v<lattice>);
+
+        using defect_defect_layout = sidb_defect_surface<defect_layout>;
+        CHECK(is_cell_level_layout_v<defect_defect_layout>);
+        CHECK(has_assign_sidb_defect_v<defect_defect_layout>);
+        CHECK(has_get_sidb_defect_v<defect_defect_layout>);
+        CHECK(has_foreach_sidb_defect_v<defect_defect_layout>);
+        CHECK(is_sidb_defect_surface_v<defect_layout>);
+        CHECK(is_sidb_lattice_111_v<lattice>);
     }
 }
 

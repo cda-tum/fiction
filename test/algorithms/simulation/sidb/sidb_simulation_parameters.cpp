@@ -12,7 +12,7 @@ using namespace fiction;
 
 TEST_CASE("Test sidb_simulation_parameters", "[sidb-simulation-parameters]")
 {
-    SECTION("Test constructor, parameter values and overwrite values, Si-100")
+    SECTION("Test constructor, parameter values and overwrite values")
     {
         const sidb_simulation_parameters params{};
 

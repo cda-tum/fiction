@@ -15,6 +15,7 @@
 #include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/technology/sidb_lattice_orientations.hpp>
 #include <fiction/traits.hpp>
+#include <fiction/types.hpp>
 
 #include <sstream>
 #include <unordered_set>
@@ -243,6 +244,70 @@ TEST_CASE("Read multi-dot SQD layout with cell type definitions", "[sqd]")
 
     using sidb_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
     const auto layout = read_sqd_layout<sidb_lattice<sidb_100_lattice, sidb_layout>>(layout_stream);
+
+    CHECK(layout.x() == 2);
+    CHECK(layout.y() == 5);
+
+    CHECK(layout.get_cell_type({0, 0}) == sidb_technology::cell_type::INPUT);
+    CHECK(layout.get_cell_type({0, 1}) == sidb_technology::cell_type::OUTPUT);
+    CHECK(layout.get_cell_type({2, 4}) == sidb_technology::cell_type::NORMAL);
+    CHECK(layout.get_cell_type({2, 5}) == sidb_technology::cell_type::NORMAL);
+}
+
+TEST_CASE("Read multi-dot SQD layout with cell type definitions, Si-111", "[sqd]")
+{
+    static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<siqad>\n"
+                                              "    <layers>\n"
+                                              "        <layer_prop>\n"
+                                              "            <name>Lattice</name>\n"
+                                              "            <type>Lattice</type>\n"
+                                              "            <role>Design</role>\n"
+                                              "            <zoffset>0</zoffset>\n"
+                                              "            <zheight>0</zheight>\n"
+                                              "            <visible>1</visible>\n"
+                                              "            <active>0</active>\n"
+                                              "            <lat_vec>\n"
+                                              "                <name>Si(111) 1x1</name>\n"
+                                              "                <a1 x=\"6.65\" y=\"0\"/>\n"
+                                              "                <a2 x=\"0\" y=\"3.84\"/>\n"
+                                              "                <N>2</N>\n"
+                                              "                <b1 x=\"0\" y=\"0\"/>\n"
+                                              "              <b2 x=\"3.3255\" y=\"1.92\"/>\n"
+                                              "            </lat_vec>\n"
+                                              "        </layer_prop>\n"
+                                              "    </layers>\n"
+                                              "  <design>\n"
+                                              "    <layer type=\"Lattice\"/>\n"
+                                              "    <layer type=\"Misc\"/>\n"
+                                              "    <layer type=\"Electrode\"/>\n"
+                                              "    <layer type=\"DB\">\n"
+                                              "      <dbdot>\n"
+                                              "          <layer_id>2</layer_id>\n"
+                                              "          <latcoord n=\"0\" m=\"0\" l=\"0\"/>\n"
+                                              "          <type>input</type>\n"
+                                              "      </dbdot>\n"
+                                              "      <dbdot>\n"
+                                              "          <layer_id>2</layer_id>\n"
+                                              "          <latcoord n=\"0\" m=\"0\" l=\"1\"/>\n"
+                                              "          <type>output</type>\n"
+                                              "      </dbdot>\n"
+                                              "      <dbdot>\n"
+                                              "          <layer_id>2</layer_id>\n"
+                                              "          <latcoord n=\"2\" m=\"2\" l=\"0\"/>\n"
+                                              "          <type>normal</type>\n"
+                                              "      </dbdot>\n"
+                                              "      <dbdot>\n"
+                                              "          <layer_id>2</layer_id>\n"
+                                              "          <latcoord n=\"2\" m=\"2\" l=\"1\"/>\n"
+                                              "      </dbdot>\n"
+                                              "    </layer>\n"
+                                              "  </design>\n"
+                                              "</siqad>\n";
+
+    std::istringstream layout_stream{sqd_layout};
+
+    const auto layout = read_sqd_layout<sidb_111_cell_clk_lyt>(layout_stream);
 
     CHECK(layout.x() == 2);
     CHECK(layout.y() == 5);

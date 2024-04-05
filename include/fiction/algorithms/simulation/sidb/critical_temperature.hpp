@@ -397,7 +397,7 @@ class critical_temperature_impl
     bdl_input_iterator<Lyt> bii;
     /**
      * This function conducts physical simulation of the given layout (gate layout with certain input combination). The
-     * simulation results are stored in the `sim_result` variable.
+     * simulation results are stored in the `sim_result_100` variable.
      *
      * @param bdl_iterator A reference to a BDL input iterator representing the gate layout at a given input
      * combination. The simulation is performed based on the configuration represented by the iterator.

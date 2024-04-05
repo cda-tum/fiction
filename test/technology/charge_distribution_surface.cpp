@@ -24,9 +24,8 @@
 using namespace fiction;
 
 TEMPLATE_TEST_CASE("Charge distribution surface traits and construction", "[charge-distribution-surface]",
-                   (sidb_cell_clk_lyt_siqad), (sidb_cell_clk_lyt_cube),
-                   (sidb_lattice<sidb_100_lattice, sidb_cell_clk_lyt_siqad>),
-                   (sidb_lattice<sidb_100_lattice, sidb_defect_surface<sidb_cell_clk_lyt_cube>>))
+                   sidb_cell_clk_lyt_siqad, sidb_cell_clk_lyt_cube, sidb_100_cell_clk_lyt_siqad,
+                   sidb_100_cell_clk_lyt_cube, sidb_111_cell_clk_lyt_siqad, sidb_111_cell_clk_lyt_cube)
 {
     REQUIRE(is_cell_level_layout_v<TestType>);
     CHECK(!has_assign_charge_state_v<TestType>);
@@ -62,7 +61,7 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
         lyt.assign_cell_type({5, 4}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({5, 5}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({5, 6}, TestType::cell_type::NORMAL);
-        charge_distribution_surface charge_layout{lyt, sidb_simulation_parameters{}};
+        const charge_distribution_surface charge_layout{lyt, sidb_simulation_parameters{}};
         CHECK(charge_layout.cell_to_index({5, 4}) != charge_layout.cell_to_index({5, 5}));
         CHECK(charge_layout.cell_to_index({5, 6}) != charge_layout.cell_to_index({5, 5}));
         CHECK(charge_layout.index_to_cell(4) == (siqad::coord_t()));
@@ -536,7 +535,7 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
         lyt.assign_cell_type({1, 0, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({1, 1, 1}, TestType::cell_type::NORMAL);
 
-        charge_distribution_surface charge_layout{lyt, sidb_simulation_parameters{}};
+        const charge_distribution_surface charge_layout{lyt, sidb_simulation_parameters{}};
 
         // Take cells that are not part of the layout
         CHECK_THAT(charge_layout.get_nm_distance_between_sidbs({3, 0, 0}, {3, 0, 0}),
@@ -666,7 +665,7 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
         CHECK(charge_layout.get_system_energy() > 0.0);
     }
 
-    SECTION("Physical validity check, far distance of SIDBs, all NEGATIVE")
+    SECTION("Physical validity check, far distance of SiDBs, all NEGATIVE")
     {
         TestType layout{};
         layout.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
@@ -2172,5 +2171,41 @@ TEST_CASE("Assign charge index", "[charge-distribution-surface]")
         charge_lyt.assign_charge_index(2);
         CHECK(charge_lyt.get_charge_state({0, 0}) == sidb_charge_state::NEGATIVE);
         CHECK(charge_lyt.get_charge_state({0, 1}) == sidb_charge_state::POSITIVE);
+    }
+}
+
+TEST_CASE("Tests for Si-111 lattice orientation", "[charge-distribution-surface]")
+{
+    sidb_111_cell_clk_lyt_siqad lyt{};
+
+    SECTION("Electrostatic potential energy of the charge configuration")
+    {
+        lyt.assign_cell_type({0, 0, 0}, sidb_111_cell_clk_lyt_siqad::cell_type::NORMAL);
+        lyt.assign_cell_type({2, 0, 0}, sidb_111_cell_clk_lyt_siqad::cell_type::NORMAL);
+
+        charge_distribution_surface charge_layout{lyt, sidb_simulation_parameters{}};
+
+        CHECK_THAT(charge_layout.get_nm_distance_between_sidbs({0, 0, 0}, {2, 0, 0}),
+                   Catch::Matchers::WithinAbs(1.33, 0.00001));
+
+        charge_layout.assign_charge_state({0, 0, 0}, sidb_charge_state::NEGATIVE);
+        charge_layout.assign_charge_state({2, 0, 0}, sidb_charge_state::NEGATIVE);
+
+        // system energy is zero when all SiDBs are positively charged.
+        charge_layout.update_local_potential();
+        charge_layout.recompute_system_energy();
+        CHECK_THAT(charge_layout.get_system_energy(), Catch::Matchers::WithinAbs(0.14818, 0.00001));
+
+        // system energy is zero when all SiDBs are neutrally charged.
+        charge_layout.assign_all_charge_states(sidb_charge_state::NEUTRAL);
+        charge_layout.update_local_potential();
+        charge_layout.recompute_system_energy();
+        CHECK_THAT(charge_layout.get_system_energy(), Catch::Matchers::WithinAbs(0.0, 0.00001));
+
+        // system energy is zero when all SiDBs are positively charged.
+        charge_layout.assign_all_charge_states(sidb_charge_state::POSITIVE);
+        charge_layout.update_local_potential();
+        charge_layout.recompute_system_energy();
+        CHECK_THAT(charge_layout.get_system_energy(), Catch::Matchers::WithinAbs(0.14818, 0.00001));
     }
 }
