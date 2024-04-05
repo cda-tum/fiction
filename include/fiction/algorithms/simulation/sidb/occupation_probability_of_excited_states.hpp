@@ -12,11 +12,9 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
-#include <limits>
 #include <map>
 #include <numeric>
 #include <utility>
-#include <vector>
 
 namespace fiction
 {

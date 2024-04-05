@@ -86,6 +86,11 @@ Energy Calculation
 .. doxygenfunction:: fiction::check_simulation_results_for_equivalence
 
 
+**Header:** ``fiction/algorithms/simulation/sidb/determine_groundstate_from_simulation_results.hpp``
+
+.. doxygenfunction:: fiction::determine_groundstate_from_simulation_results
+
+
 Temperature Behavior
 ####################
 
@@ -153,6 +158,7 @@ Operational Domain Computation
 .. doxygenstruct:: fiction::is_operational_params
    :members:
 .. doxygenfunction:: fiction::is_operational
+.. doxygenfunction:: fiction::operational_input_patterns
 
 **Header:** ``fiction/algorithms/simulation/sidb/operational_domain.hpp``
 

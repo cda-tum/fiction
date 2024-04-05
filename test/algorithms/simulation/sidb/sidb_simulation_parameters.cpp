@@ -7,7 +7,6 @@
 
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/technology/physical_constants.hpp>
-#include <fiction/utils/math_utils.hpp>
 
 using namespace fiction;
 
@@ -22,20 +21,14 @@ TEST_CASE("Test sidb_simulation_parameters", "[sidb-simulation-parameters]")
         REQUIRE(params.mu_minus == -0.32);
         REQUIRE(params.epsilon_r == 5.6);
         REQUIRE(params.lambda_tf == 5.0);
-        REQUIRE(params.lat_a == 3.84);
-        REQUIRE(params.lat_b == 7.68);
-        REQUIRE(params.lat_c == 2.25);
         REQUIRE(params.base == 3);
 
         // Constructor
-        sidb_simulation_parameters custom_params(2, -0.25, 4.2, 6.0, 2.0, 4.0, 1.5);
+        sidb_simulation_parameters custom_params(2, -0.25, 4.2, 6.0);
         REQUIRE(custom_params.base == 2);
         REQUIRE(custom_params.mu_minus == -0.25);
         REQUIRE(custom_params.epsilon_r == 4.2);
         REQUIRE(custom_params.lambda_tf == 6.0);
-        REQUIRE(custom_params.lat_a == 2.0);
-        REQUIRE(custom_params.lat_b == 4.0);
-        REQUIRE(custom_params.lat_c == 1.5);
         REQUIRE(custom_params.base == 2);
 
         // Change values
@@ -43,17 +36,11 @@ TEST_CASE("Test sidb_simulation_parameters", "[sidb-simulation-parameters]")
         custom_params.mu_minus  = -0.1;
         custom_params.epsilon_r = 10.2;
         custom_params.lambda_tf = 1.0;
-        custom_params.lat_a     = 1.0;
-        custom_params.lat_b     = 2.0;
-        custom_params.lat_c     = 3.5;
 
         REQUIRE(custom_params.base == 3);
         REQUIRE(custom_params.mu_minus == -0.1);
         REQUIRE(custom_params.epsilon_r == 10.2);
         REQUIRE(custom_params.lambda_tf == 1.0);
-        REQUIRE(custom_params.lat_a == 1.0);
-        REQUIRE(custom_params.lat_b == 2.0);
-        REQUIRE(custom_params.lat_c == 3.5);
     }
 
     SECTION("Test calculated values")

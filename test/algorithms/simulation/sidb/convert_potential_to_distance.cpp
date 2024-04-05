@@ -8,6 +8,7 @@
 #include <fiction/algorithms/simulation/sidb/convert_potential_to_distance.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 
+#include <cstdint>
 #include <limits>
 
 using namespace fiction;

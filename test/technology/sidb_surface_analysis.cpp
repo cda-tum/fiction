@@ -7,7 +7,7 @@
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/fcn_gate_library.hpp>
 #include <fiction/technology/sidb_bestagon_library.hpp>
-#include <fiction/technology/sidb_surface.hpp>
+#include <fiction/technology/sidb_defect_surface.hpp>
 #include <fiction/technology/sidb_surface_analysis.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
@@ -69,13 +69,13 @@ TEST_CASE("Dummy gate library traits", "[sidb-surface-analysis]")
 
 TEST_CASE("Dummy gate library simple defects", "[sidb-surface-analysis]")
 {
-    static const cart_gate_clk_lyt gate_lyt{{3, 2}};   // 4 x 3 tiles of size 3 x 3 cells each
-    static const sidb_cell_clk_lyt cell_lyt{{11, 8}};  // makes for 12 x 9 cells
+    static const cart_gate_clk_lyt     gate_lyt{{3, 2}};   // 4 x 3 tiles of size 3 x 3 cells each
+    static const sidb_100_cell_clk_lyt cell_lyt{{11, 8}};  // makes for 12 x 9 cells
 
     static const port_list<port_position> line_ports{{port_position(0, 1)}, {port_position(2, 1)}};
     static const port_list<port_position> y_ports{{port_position(0, 0), port_position(0, 2)}, {port_position(2, 1)}};
 
-    sidb_surface defect_layout{cell_lyt};
+    sidb_defect_surface defect_layout{cell_lyt};
 
     SECTION("defect-free")
     {
@@ -198,10 +198,10 @@ TEST_CASE("Dummy gate library simple defects", "[sidb-surface-analysis]")
 TEST_CASE("SiDB Bestagon gate library with simple defects", "[sidb-surface-analysis]")
 {
     static const hex_even_col_gate_clk_lyt gate_lyt{
-        aspect_ratio<hex_even_col_gate_clk_lyt>{0, 0}};  // 1 x 1 tiles of size 60 x 46 cells each
-    static const sidb_cell_clk_lyt cell_lyt{{59, 45}};   // makes for exactly one gate of the Bestagon library
+        aspect_ratio<hex_even_col_gate_clk_lyt>{0, 0}};     // 1 x 1 tiles of size 60 x 46 cells each
+    static const sidb_100_cell_clk_lyt cell_lyt{{59, 45}};  // makes for exactly one gate of the Bestagon library
 
-    sidb_surface defect_layout{cell_lyt};
+    sidb_defect_surface defect_layout{cell_lyt};
 
     SECTION("defect-free")
     {
