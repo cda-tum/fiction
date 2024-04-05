@@ -91,7 +91,7 @@ TEMPLATE_TEST_CASE(
         CHECK(!has_get_sidb_defect_v<lattice>);
         CHECK(!has_foreach_sidb_defect_v<lattice>);
         CHECK(!is_sidb_defect_surface_v<lattice>);
-        CHECK(is_sidb_lattice_100_v<lattice>);
+        CHECK(is_sidb_lattice_111_v<lattice>);
 
         using defect_layout = sidb_defect_surface<lattice>;
         CHECK(is_cell_level_layout_v<defect_layout>);
