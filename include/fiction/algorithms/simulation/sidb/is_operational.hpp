@@ -375,7 +375,7 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
     return {p.run(), p.get_number_of_simulator_invocations()};
 }
 /**
- * This function calculates the count of input combinations for which the SiDB-based logic, represented by the
+ * This function determines the input combinations for which the SiDB-based logic, represented by the
  * provided layout (`lyt`) and truth table specifications (`spec`), produces the correct output.
  *
  * @tparam Lyt Type of the cell-level layout.
