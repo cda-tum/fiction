@@ -59,7 +59,6 @@ Layout Utils
 .. doxygenfunction:: fiction::relative_to_absolute_cell_position
 .. doxygenfunction:: fiction::port_direction_to_coordinate
 .. doxygenfunction:: fiction::normalize_layout_coordinates
-.. doxygenfunction:: fiction::convert_layout_to_lattice_layout
 .. doxygenfunction:: fiction::convert_to_siqad_coordinates
 .. doxygenfunction:: fiction::convert_to_fiction_coordinates
 .. doxygenfunction:: fiction::random_coordinate

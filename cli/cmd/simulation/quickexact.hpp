@@ -58,6 +58,7 @@ class quickexact_command : public command
     {
         // reset sim result
         sim_result_100 = {};
+        sim_result_111 = {};
         min_energy     = std::numeric_limits<double>::infinity();
 
         if (physical_params.epsilon_r <= 0)

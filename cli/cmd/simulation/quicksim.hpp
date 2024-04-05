@@ -60,6 +60,7 @@ class quicksim_command : public command
     {
         // reset sim result
         sim_result_100 = {};
+        sim_result_111 = {};
         min_energy     = std::numeric_limits<double>::infinity();
 
         if (physical_params.epsilon_r <= 0)
@@ -223,8 +224,6 @@ class quicksim_command : public command
     {
         physical_params = fiction::sidb_simulation_parameters{2, -0.32, 5.6, 5.0};
         params          = {};
-        sim_result_100  = {};
-        sim_result_111  = {};
     }
 };
 

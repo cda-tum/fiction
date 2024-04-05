@@ -40,7 +40,7 @@ determine_groundstate_from_simulation_results(const sidb_simulation_result<Lyt>&
 
     // Find all unique charge indices. This is done because simulation results can have multiple identical charge
     // distributions.
-    for (auto& cds : charge_configurations_copy)
+    for (const auto& cds : charge_configurations_copy)
     {
         cds.charge_distribution_to_index();
         charge_indices.insert(cds.get_charge_index_and_base().first);
@@ -48,9 +48,12 @@ determine_groundstate_from_simulation_results(const sidb_simulation_result<Lyt>&
 
     // Find the minimum energy
     double min_energy = std::numeric_limits<double>::infinity();
-    for (const auto& cds : charge_configurations_copy)
+    if (!charge_configurations_copy.empty())
     {
-        min_energy = std::min(min_energy, cds.get_system_energy());
+        min_energy = std::min_element(charge_configurations_copy.begin(), charge_configurations_copy.end(),
+                                      [](const auto& lhs, const auto& rhs)
+                                      { return lhs.get_system_energy() < rhs.get_system_energy(); })
+                         ->get_system_energy();
     }
 
     for (const auto charge_index : charge_indices)

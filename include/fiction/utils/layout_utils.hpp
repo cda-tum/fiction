@@ -288,69 +288,6 @@ Lyt normalize_layout_coordinates(const Lyt& lyt) noexcept
     return lyt_new;
 }
 /**
- * This function converts an SiDB cell-level layout into a lattice layout according to the provided orientation. It
- * transfers charge states and physical parameters from the input layout to the lattice counterpart and handles the
- * migration of SiDB defects if they exist.
- *
- * @tparam LatticeOrientation The lattice orientation of the lattice layout.
- * @tparam Lyt SiDB cell-level layout type.
- * @param lyt The SiDB cell-level layout to be converted.
- * @return A SiDB lattice layout based on the specified lattice orientation.
- */
-template <typename LatticeOrientation, typename Lyt>
-auto convert_layout_to_lattice_layout(const Lyt& lyt) noexcept
-{
-    static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(!is_sidb_lattice_100_v<LatticeOrientation> && !is_sidb_lattice_111_v<LatticeOrientation>,
-                  "LatticeOrientation is not a valid SiDB lattice orientation");
-
-    if constexpr (is_charge_distribution_surface_v<Lyt> && is_sidb_defect_surface_v<Lyt>)
-    {
-        auto process_lyt = [](const Lyt& lyt, auto& lyt_100)
-        {
-            lyt.foreach_cell([&lyt_100, &lyt](const auto& c)
-                             { lyt_100.assign_charge_state(c, lyt.get_charge_state(c), false); });
-            lyt_100.assign_physical_parameters(lyt.get_phys_params());
-            lyt.foreach_sidb_defect([&lyt_100](const auto& cd) { lyt_100.assign_sidb_defect(cd.first, cd.second); });
-        };
-        sidb_lattice<LatticeOrientation, Lyt>          lattice{lyt};
-        const sidb_defect_surface<decltype(lattice)>   lyt_100{lattice};
-        charge_distribution_surface<decltype(lyt_100)> cds_lyt_100{lyt_100};
-        process_lyt(lyt, cds_lyt_100);
-        return cds_lyt_100;
-    }
-    else if constexpr (is_charge_distribution_surface_v<Lyt> && !is_sidb_defect_surface_v<Lyt>)
-    {
-        auto process_lyt = [](auto& lyt, auto& lyt_100)
-        {
-            lyt.foreach_cell([&lyt_100, &lyt](const auto& c)
-                             { lyt_100.assign_charge_state(c, lyt.get_charge_state(c)); });
-
-            lyt_100.assign_physical_parameters(lyt.get_phys_params());
-        };
-        sidb_lattice<LatticeOrientation, Lyt> lattice{lyt};
-        charge_distribution_surface           lyt_100{lattice};
-        process_lyt(lyt, lyt_100);
-        return lyt_100;
-    }
-    else if constexpr (is_sidb_defect_surface_v<Lyt> && !is_charge_distribution_surface_v<Lyt>)
-    {
-        auto process_lyt = [](auto& lyt, auto& lyt_100)
-        { lyt.foreach_sidb_defect([&lyt_100](const auto& cd) { lyt_100.assign_sidb_defect(cd.first, cd.second); }); };
-
-        sidb_lattice<LatticeOrientation, Lyt> sidb_lattice{lyt};
-        sidb_defect_surface                   sidb_defect{sidb_lattice};
-        process_lyt(lyt, sidb_defect);
-        return sidb_defect;
-    }
-    else
-    {
-        return sidb_lattice<LatticeOrientation, Lyt>{lyt};
-    }
-}
-/**
  * Converts the coordinates of a given cell-level layout (cds and defect surface can be layered on top) to SiQAD
  * coordinates. A new equivalent layout based on SiQAD coordinates is returned.
  *
@@ -423,7 +360,7 @@ auto convert_to_siqad_coordinates(const LytSrc& lyt) noexcept
 
     if constexpr (!is_sidb_lattice_v<LytSrc>)
     {
-        return convert_to_siqad_coordinates(convert_layout_to_lattice_layout<sidb_100_lattice>(lyt));
+        return process_layout(lyt, sidb_cell_clk_lyt_siqad{});
     }
     else
     {

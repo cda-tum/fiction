@@ -183,7 +183,7 @@ class is_operational_impl
      *
      * @return All inputs (e.g. 2-input Boolean function: 00 ^= 0; 10 ^= 2) for which the correct output is computed.
      */
-    [[nodiscard]] std::set<uint64_t> count_number_of_operational_inputs() noexcept
+    [[nodiscard]] std::set<uint64_t> determine_operational_input_pattern() noexcept
     {
         assert(!output_bdl_pairs.empty() && "No output cell provided.");
         assert((truth_table.size() == output_bdl_pairs.size()) &&
@@ -302,7 +302,7 @@ class is_operational_impl
     std::size_t simulator_invocations{0};
     /**
      * This function conducts physical simulation of the given layout (gate layout with certain input combination). The
-     * simulation results are stored in the `sim_result_100` variable.
+     * simulation results are stored in the `sim_result` variable.
      *
      * @param bdl_iterator A reference to a BDL input iterator representing the gate layout at a given input
      * combination. The simulation is performed based on the configuration represented by the iterator.
@@ -386,8 +386,8 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
  * @return The count of operational input combinations.
  */
 template <typename Lyt, typename TT>
-[[nodiscard]] std::set<uint64_t> number_of_operational_inputs(const Lyt& lyt, const std::vector<TT>& spec,
-                                                              const is_operational_params& params = {}) noexcept
+[[nodiscard]] std::set<uint64_t> operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec,
+                                                            const is_operational_params& params = {}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -403,7 +403,7 @@ template <typename Lyt, typename TT>
 
     detail::is_operational_impl<Lyt, TT> p{lyt, spec, params};
 
-    return p.count_number_of_operational_inputs();
+    return p.determine_operational_input_pattern();
 }
 
 }  // namespace fiction

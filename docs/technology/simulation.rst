@@ -44,8 +44,8 @@ Physical Constants
 .. doxygenvariable:: PI
 
 
-Euclidean distance between two SiDBs in nanometer
--------------------------------------------------
+Euclidean distance between two SiDBs in nanometers
+--------------------------------------------------
 
 **Header:** ``fiction/algorithms/simulation/sidb/sidb_nanometer_distance.hpp``
 

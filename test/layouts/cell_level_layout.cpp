@@ -114,6 +114,7 @@ TEST_CASE("Cell technology", "[cell-level-layout]")
         CHECK(tech_impl_name<sidb_technology> == std::string{"SiDB"});
 
         CHECK(has_sidb_technology_v<sidb_100_cell_clk_lyt>);
+        CHECK(has_sidb_technology_v<sidb_111_cell_clk_lyt>);
     }
 }
 

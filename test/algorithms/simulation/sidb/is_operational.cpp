@@ -223,7 +223,7 @@ TEST_CASE("Bestagon AND gate", "[is-operational]")
     }
     SECTION("Count the number of non-operational input combinations")
     {
-        const auto op_inputs = number_of_operational_inputs(
+        const auto op_inputs = operational_input_patterns(
             lyt, std::vector<tt>{create_and_tt()},
             is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT});
         CHECK(op_inputs.size() == 1);
@@ -271,7 +271,7 @@ TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[is-operational]", 
 
     SECTION("Check operation for different values of mu")
     {
-        const auto op_inputs = number_of_operational_inputs(
+        const auto op_inputs = operational_input_patterns(
             lyt, std::vector<tt>{create_and_tt()},
             is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT});
         CHECK(op_inputs.size() == 4);
@@ -279,7 +279,7 @@ TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[is-operational]", 
     }
     SECTION("Count the number of non-operational input combinations")
     {
-        const auto op_inputs = number_of_operational_inputs(
+        const auto op_inputs = operational_input_patterns(
             lyt, std::vector<tt>{create_and_tt()},
             is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT});
         CHECK(op_inputs.size() == 2);

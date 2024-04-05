@@ -148,7 +148,6 @@ TEST_CASE("Convert offset::ucoord_t layout (without lattice orientation) to SiQA
         CHECK(lyt_transformed.is_empty());
         CHECK(lyt_transformed.area() == area_with_padding(lyt.area(), x, y));
         CHECK(lyt_transformed.get_layout_name() == lyt.get_layout_name());
-        CHECK(is_sidb_lattice_100_v<decltype(lyt_transformed)>);
     }
 
     SECTION("layout with one normal and one input cell")
@@ -214,7 +213,6 @@ TEST_CASE("Convert cds/sidb_defect_surface (without lattice information) in offs
     cds.assign_sidb_defect({1, 1, 0}, sidb_defect{sidb_defect_type::UNKNOWN});
 
     auto lyt_transformed = convert_to_siqad_coordinates(cds);
-    CHECK(is_sidb_lattice_100_v<decltype(lyt_transformed)>);
     CHECK(has_assign_sidb_defect_v<decltype(lyt_transformed)>);
     CHECK(is_charge_distribution_surface_v<decltype(lyt_transformed)>);
 
@@ -244,7 +242,6 @@ TEST_CASE("Convert sidb_defect_surface (without lattice information) in offset::
     sidb_surface.assign_sidb_defect({1, 1, 0}, sidb_defect{sidb_defect_type::UNKNOWN});
 
     auto lyt_transformed = convert_to_siqad_coordinates(sidb_surface);
-    CHECK(is_sidb_lattice_100_v<decltype(lyt_transformed)>);
     CHECK(has_assign_sidb_defect_v<decltype(lyt_transformed)>);
 
     CHECK(lyt_transformed.get_cell_type({0, 0, 0}) == sidb_cell_clk_lyt::technology::cell_type::NORMAL);
@@ -272,7 +269,6 @@ TEST_CASE("Convert cds (without lattice information) in offset::ucoord_t layout 
     cds.assign_charge_state({0, 3, 0}, sidb_charge_state::NEGATIVE);
 
     auto lyt_transformed = convert_to_siqad_coordinates(cds);
-    CHECK(is_sidb_lattice_100_v<decltype(lyt_transformed)>);
     CHECK(is_charge_distribution_surface_v<decltype(lyt_transformed)>);
 
     CHECK(lyt_transformed.get_cell_type({0, 0, 0}) == sidb_cell_clk_lyt::technology::cell_type::NORMAL);
