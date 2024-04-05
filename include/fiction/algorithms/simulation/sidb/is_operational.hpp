@@ -183,7 +183,7 @@ class is_operational_impl
      *
      * @return All inputs (e.g. 2-input Boolean function: 00 ^= 0; 10 ^= 2) for which the correct output is computed.
      */
-    [[nodiscard]] std::set<uint64_t> determine_operational_input_pattern() noexcept
+    [[nodiscard]] std::set<uint64_t> determine_operational_input_patterns() noexcept
     {
         assert(!output_bdl_pairs.empty() && "No output cell provided.");
         assert((truth_table.size() == output_bdl_pairs.size()) &&
@@ -403,7 +403,7 @@ template <typename Lyt, typename TT>
 
     detail::is_operational_impl<Lyt, TT> p{lyt, spec, params};
 
-    return p.determine_operational_input_pattern();
+    return p.determine_operational_input_patterns();
 }
 
 }  // namespace fiction
