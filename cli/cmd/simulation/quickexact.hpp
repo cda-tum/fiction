@@ -62,13 +62,13 @@ class quickexact_command : public command
 
         if (physical_params.epsilon_r <= 0)
         {
-            env->out() << "[e] epsilon_r must be positive" << '\n';
+            env->out() << "[e] epsilon_r must be positive\n";
             reset_params();
             return;
         }
         if (physical_params.lambda_tf <= 0)
         {
-            env->out() << "[e] lambda_tf must be positive" << '\n';
+            env->out() << "[e] lambda_tf must be positive\n";
             reset_params();
             return;
         }
@@ -78,7 +78,7 @@ class quickexact_command : public command
         // error case: empty cell layout store
         if (s.empty())
         {
-            env->out() << "[w] no cell layout in store" << '\n';
+            env->out() << "[w] no cell layout in store\n";
             reset_params();
             return;
         }
@@ -94,9 +94,8 @@ class quickexact_command : public command
                 if constexpr (fiction::is_charge_distribution_surface_v<Lyt>)
                 {
                     env->out() << fmt::format(
-                                      "[w] {} already possesses a charge distribution; no simulation is conducted",
-                                      get_name(lyt_ptr))
-                               << std::endl;
+                        "[w] {} already possesses a charge distribution; no simulation is conducted\n",
+                        get_name(lyt_ptr));
                 }
                 else
                 {
@@ -114,7 +113,7 @@ class quickexact_command : public command
 
                     else
                     {
-                        env->out() << "[e] no valid lattice orientation" << '\n';
+                        env->out() << "[e] no valid lattice orientation\n";
                         return;
                     }
 
@@ -150,7 +149,7 @@ class quickexact_command : public command
             }
             else
             {
-                env->out() << fmt::format("[e] {} is not an SiDB layout", get_name(lyt_ptr)) << std::endl;
+                env->out() << fmt::format("[e] {} is not an SiDB layout\n", get_name(lyt_ptr));
             }
         };
 
