@@ -16,8 +16,8 @@
 #include <fiction/technology/area.hpp>                        // area requirement calculations
 #include <fiction/technology/cell_technologies.hpp>           // cell implementations
 #include <fiction/technology/sidb_bestagon_library.hpp>       // a pre-defined SiDB gate library
+#include <fiction/technology/sidb_defect_surface.hpp>         // H-Si(100) 2x1 surface model
 #include <fiction/technology/sidb_defects.hpp>                // SiDB defect classes
-#include <fiction/technology/sidb_surface.hpp>                // H-Si(100) 2x1 surface model
 #include <fiction/technology/sidb_surface_analysis.hpp>       // SiDB surface analysis
 #include <fiction/technology/technology_mapping_library.hpp>  // pre-defined gate types for technology mapping
 #include <fiction/types.hpp>                                  // pre-defined types suitable for the FCN domain
@@ -113,10 +113,10 @@ int main()  // NOLINT
     const mockturtle::tech_library<2> gate_lib{gates};
 
     // parameterize the H-Si(100) 2x1 surface to ignore certain defect types
-    const fiction::sidb_surface_params surface_params{
+    const fiction::sidb_defect_surface_params surface_params{
         std::unordered_set<fiction::sidb_defect_type>{fiction::sidb_defect_type::DB}};
 
-    // fiction::sidb_surface<cell_lyt> surface_lattice{surface_params};
+    // fiction::sidb_defect_surface<cell_lyt> surface_lattice{surface_params};
 
     // read surface scan lattice data
     const auto surface_lattice = fiction::read_sidb_surface_defects<cell_lyt>(

@@ -34,11 +34,7 @@ struct sidb_simulation_parameters
      */
     constexpr explicit sidb_simulation_parameters(const uint8_t base_number = 3, const double mu = -0.32,
                                                   const double relative_permittivity = 5.6,
-                                                  const double screening_distance = 5.0, const double a = 3.84,
-                                                  const double b = 7.68, const double c = 2.25) :
-            lat_a{a},
-            lat_b{b},
-            lat_c{c},
+                                                  const double screening_distance    = 5.0) :
             epsilon_r{relative_permittivity},
             lambda_tf{screening_distance},
             mu_minus{mu},
@@ -48,18 +44,6 @@ struct sidb_simulation_parameters
         assert((base == 2 || base == 3) && "base must be 2 or 3");
     }
 
-    /**
-     * lat_a is the lattice vector in x-direction (unit: Å).
-     */
-    double lat_a;
-    /**
-     * lat_b is the lattice vector in y-direction (unit: Å).
-     */
-    double lat_b;
-    /**
-     * lat_c is the dimer pair separation (unit: Å).
-     */
-    double lat_c;
     /**
      * epsilon_r is the electric permittivity. It is a material specific number (unit-less).
      */

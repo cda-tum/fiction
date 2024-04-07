@@ -13,13 +13,12 @@
 #include "fiction/layouts/coordinates.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/types.hpp"
 #include "fiction/utils/layout_utils.hpp"
 #include "fiction/utils/math_utils.hpp"
-#include "fiction/utils/truth_table_utils.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>
 #include <kitty/traits.hpp>
+
 
 #include <algorithm>
 #include <atomic>
@@ -316,7 +315,7 @@ class design_sidb_gates_impl
     are_sidbs_too_close(const std::vector<typename Lyt::cell>&        cells,
                         const std::unordered_set<typename Lyt::cell>& affected_cells = {}) const noexcept
     {
-        for (std::size_t i = 0; i < cells.size(); i++)
+        for (std::size_t i = 0; i < cell_indices.size(); i++)
         {
             if constexpr (has_get_sidb_defect_v<Lyt>)
             {

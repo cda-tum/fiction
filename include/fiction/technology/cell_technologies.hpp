@@ -135,6 +135,9 @@ struct qca_technology
      * Default vertical spacing between two QCA cells in QCADesigner.
      */
     static constexpr uint64_t CELL_VSPACE = 2ul;
+
+    // Deleted constructors to prevent instantiation
+    qca_technology() = delete;
 };
 
 /**
@@ -271,6 +274,9 @@ struct inml_technology
      * Default vertical spacing between two iNML cells in NMLSim.
      */
     static constexpr uint64_t CELL_VSPACE = 25ul;
+
+    // Deleted constructors to prevent instantiation
+    inml_technology() = delete;
 };
 
 /**
@@ -360,6 +366,9 @@ struct sidb_technology
      * Depending on whether they are on the same or different dimer rows, SiDBs can be closer together or further apart.
      */
     static constexpr double CELL_VSPACE = 0.384;
+
+    // Deleted constructors to prevent instantiation
+    sidb_technology() = delete;
 };
 
 }  // namespace fiction
