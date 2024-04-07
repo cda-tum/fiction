@@ -5,8 +5,8 @@
 #ifndef FICTION_DETECT_BDL_PAIRS_HPP
 #define FICTION_DETECT_BDL_PAIRS_HPP
 
-#include "fiction/algorithms/path_finding/distance.hpp"
 #include "fiction/technology/cell_technologies.hpp"
+#include "fiction/technology/sidb_nanometer_distance.hpp"
 #include "fiction/traits.hpp"
 
 #include <algorithm>
@@ -144,7 +144,7 @@ std::vector<bdl_pair<Lyt>> detect_bdl_pairs(const Lyt& lyt, const typename techn
         /**
          * Computes the pairwise distances between all dots in the input vector.
          */
-        const auto compute_pairwise_dot_distances = [&lyt, &dots]() noexcept -> std::vector<pairwise_dot_distance>
+        const auto compute_pairwise_dot_distances = [&dots]() noexcept -> std::vector<pairwise_dot_distance>
         {
             std::vector<pairwise_dot_distance> pairwise_distances{};
             pairwise_distances.reserve((dots.size() * (dots.size() - 1)) / 2);
@@ -153,7 +153,7 @@ std::vector<bdl_pair<Lyt>> detect_bdl_pairs(const Lyt& lyt, const typename techn
             {
                 for (auto j = i + 1; j < dots.size(); ++j)
                 {
-                    pairwise_distances.emplace_back(dots[i], dots[j], sidb_nanometer_distance(lyt, dots[i], dots[j]));
+                    pairwise_distances.emplace_back(dots[i], dots[j], sidb_nanometer_distance<Lyt>(dots[i], dots[j]));
                 }
             }
 

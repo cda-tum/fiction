@@ -3,18 +3,17 @@
 //
 
 #include <fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp>
-#include <fiction/io/read_sqd_layout.hpp>
+#include <fiction/io/write_sqd_layout.hpp>
 #include <fiction/types.hpp>
 
 #include <fmt/format.h>
 
-#include <cstdint>
 #include <cstdlib>
 #include <filesystem>
-#include <iomanip>
 #include <iostream>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 using namespace fiction;
 
@@ -77,7 +76,7 @@ int main(int argc, const char* argv[])  // NOLINT
             }
             else
             {
-                std::cerr << "Error: Argument " << arg << " is missing a value." << std::endl;
+                std::cerr << fmt::format("Error: Argument {} is missing a value\n", arg);
                 return EXIT_FAILURE;
             }
         }
@@ -96,9 +95,10 @@ int main(int argc, const char* argv[])  // NOLINT
     // specifies whether positively charged SiDBs are allowed ("ALLOWED") or forbidden ("FORBIDDEN")
     const std::string charges_str = options["--positive_charges"];
     // specifies whether positively charged SiDBs are allowed ("ALLOWED") or forbidden ("FORBIDDEN")
-    const generate_random_sidb_layout_params<sidb_cell_clk_lyt>::positive_charges charges =
-        (charges_str == "ALLOWED") ? generate_random_sidb_layout_params<sidb_cell_clk_lyt>::positive_charges::ALLOWED :
-                                     generate_random_sidb_layout_params<sidb_cell_clk_lyt>::positive_charges::FORBIDDEN;
+    const generate_random_sidb_layout_params<sidb_100_cell_clk_lyt>::positive_charges charges =
+        (charges_str == "ALLOWED") ?
+            generate_random_sidb_layout_params<sidb_100_cell_clk_lyt>::positive_charges::ALLOWED :
+            generate_random_sidb_layout_params<sidb_100_cell_clk_lyt>::positive_charges::FORBIDDEN;
     // sets the number of SiDBs for the first bunch of layouts
     const uint64_t lower_limit = std::stoull(options["--lower"]);
     // sets the number of SiDBs for the last bunch of layouts
@@ -109,14 +109,14 @@ int main(int argc, const char* argv[])  // NOLINT
     const uint64_t step = std::stoull(options["--step"]);
 
     // print the parsed values
-    std::cout << "Folder name: " << folder_name << std::endl;
-    std::cout << fmt::format("NW: {} | {}", nw_x, nw_y) << std::endl;
-    std::cout << fmt::format("SE: {} | {}", se_x, se_y) << std::endl;
-    std::cout << fmt::format("positive_charges: {}", charges_str) << std::endl;
-    std::cout << "lower_limit: " << lower_limit << std::endl;
-    std::cout << "upper_limit: " << upper_limit << std::endl;
-    std::cout << "number_of_layouts: " << number_of_layouts << std::endl;
-    std::cout << "step: " << step << std::endl;
+    std::cout << fmt::format("Folder name: {}\n", folder_name);
+    std::cout << fmt::format("NW: {} | {}\n", nw_x, nw_y);
+    std::cout << fmt::format("SE: {} | {}\n", se_x, se_y);
+    std::cout << fmt::format("positive_charges: {}\n", charges_str);
+    std::cout << fmt::format("lower_limit: {}\n", lower_limit);
+    std::cout << fmt::format("upper_limit: {}\n", upper_limit);
+    std::cout << fmt::format("number_of_layouts: {}\n", number_of_layouts);
+    std::cout << fmt::format("step: {}\n", step);
 
     // generates random SiDB layouts as .sqd file
     try
@@ -127,17 +127,17 @@ int main(int argc, const char* argv[])  // NOLINT
 
         if (std::filesystem::exists(folder_path))
         {
-            std::cout << "Folder *" << folder_path << "* exists!" << std::endl;
+            std::cout << fmt::format("Folder * {} * exists!\n", folder_path.string());
         }
         else
         {
             if (std::filesystem::create_directory(folder_path))
             {
-                std::cout << fmt::format("Folder {} created successfully", folder_name) << std::endl;
+                std::cout << fmt::format("Folder {} created successfully\n", folder_name);
             }
             else
             {
-                std::cout << "Failed to create folder" << std::endl;
+                std::cout << "Failed to create folder\n";
             }
         }
 
@@ -155,20 +155,20 @@ int main(int argc, const char* argv[])  // NOLINT
                 if (!std::filesystem::exists(dir_path))
                 {
                     std::filesystem::create_directory(dir_path);
-                    std::cout << "Folder created." << std::endl;
+                    std::cout << "Folder created.\n";
                     std::filesystem::create_directory(dir_path_sqd);
                     std::filesystem::create_directory(dir_path_loc);
                 }
                 else
                 {
-                    std::cout << "Folder already exists." << std::endl;
+                    std::cout << "Folder already exists.\n";
                 }
 
-                const generate_random_sidb_layout_params<sidb_cell_clk_lyt> params{
+                const generate_random_sidb_layout_params<sidb_100_cell_clk_lyt> params{
                     {{nw_x, nw_y}, {se_x, se_y}}, number_of_placed_sidbs, charges, 2,
                     static_cast<uint64_t>(10E6),  number_of_layouts};
                 const auto unique_lyts =
-                    generate_multiple_random_sidb_layouts<sidb_cell_clk_lyt>(sidb_cell_clk_lyt{}, params);
+                    generate_multiple_random_sidb_layouts<sidb_100_cell_clk_lyt>(sidb_100_cell_clk_lyt{}, params);
                 for (auto i = 0u; i < unique_lyts.size(); i++)
                 {
                     write_sqd_layout(unique_lyts[i], fmt::format("{}/layout_{}.sqd", dir_path_sqd.string(), i));
@@ -177,14 +177,14 @@ int main(int argc, const char* argv[])  // NOLINT
             catch (const std::filesystem::filesystem_error& ex)
             {
                 // exception is handled
-                std::cerr << "Filesystem error: " << ex.what() << std::endl;
+                std::cerr << fmt::format("Filesystem error: {}\n", ex.what());
             }
         }
     }
     catch (const std::filesystem::filesystem_error& ex)
     {
         // exception occurred, handle it here
-        std::cerr << "Filesystem error: " << ex.what() << std::endl;
+        std::cerr << fmt::format("Filesystem error: {}\n", ex.what());
     }
 
     return EXIT_SUCCESS;

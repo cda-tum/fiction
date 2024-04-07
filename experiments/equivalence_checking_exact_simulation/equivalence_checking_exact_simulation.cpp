@@ -36,15 +36,15 @@ int main()  // NOLINT
 
     for (const auto& distribution : all_distributions)
     {
-        sidb_cell_clk_lyt lyt{};
+        sidb_100_cell_clk_lyt lyt{};
         for (const auto idx : distribution)
         {
             lyt.assign_cell_type(all_cells_in_region[idx], sidb_technology::cell_type::NORMAL);
         }
-        auto result_exgs = exhaustive_ground_state_simulation(lyt, params);
-        auto result_quickexact =
-            quickexact(lyt, quickexact_params<sidb_cell_clk_lyt>{
-                                params, quickexact_params<sidb_cell_clk_lyt>::automatic_base_number_detection::OFF});
+        auto result_exgs       = exhaustive_ground_state_simulation(lyt, params);
+        auto result_quickexact = quickexact(
+            lyt, quickexact_params<sidb_100_cell_clk_lyt>{
+                     params, quickexact_params<sidb_100_cell_clk_lyt>::automatic_base_number_detection::OFF});
         if (!check_simulation_results_for_equivalence(result_exgs, result_quickexact))
         {
             non_equivalence_counter++;

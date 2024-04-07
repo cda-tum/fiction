@@ -126,6 +126,11 @@ Energy Calculation
         .. autofunction:: mnt.pyfiction.is_ground_state
 
 
+**Header:** ``fiction/algorithms/simulation/sidb/determine_groundstate_from_simulation_results.hpp``
+
+.. doxygenfunction:: fiction::determine_groundstate_from_simulation_results
+
+
 Temperature Behavior
 ####################
 
@@ -217,10 +222,11 @@ Operational Domain Computation
     .. tab:: C++
         **Header:** ``fiction/algorithms/simulation/sidb/is_operational.hpp``
 
-        .. doxygenenum:: fiction::operational_status
-        .. doxygenstruct:: fiction::is_operational_params
-           :members:
-        .. doxygenfunction:: fiction::is_operational
+.. doxygenenum:: fiction::operational_status
+.. doxygenstruct:: fiction::is_operational_params
+   :members:
+.. doxygenfunction:: fiction::is_operational
+.. doxygenfunction:: fiction::operational_input_patterns
 
         **Header:** ``fiction/algorithms/simulation/sidb/operational_domain.hpp``
 

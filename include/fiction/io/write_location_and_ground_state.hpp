@@ -9,6 +9,7 @@
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/utils/math_utils.hpp"
+#include "fmt/format.h"
 
 #include <algorithm>
 #include <cmath>
@@ -61,13 +62,14 @@ class write_location_and_ground_state_impl
             }
             os << '\n';
 
-            auto       sidbs              = ground_state_layouts.front().get_sidb_order();
-            const auto physical_parameter = ground_state_layouts.front().get_phys_params();
+            const auto ground_state = ground_state_layouts.front();
+            auto       sidbs        = ground_state.get_sidb_order();
 
             std::sort(sidbs.begin(), sidbs.end());
+
             for (const auto& sidb : sidbs)
             {
-                const auto pos = sidb_nm_position<Lyt>(physical_parameter, sidb);
+                const auto pos = sidb_nm_position<Lyt>(sidb);
                 os << fmt::format("{:.3f};{:.3f};", pos.first, pos.second);
                 for (const auto& valid_layout : ground_state_layouts)
                 {
