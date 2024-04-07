@@ -15,6 +15,7 @@
 #include <kitty/hash.hpp>
 
 #include <cstdint>
+#include <optional>
 #include <type_traits>
 #include <unordered_map>
 #include <utility>
@@ -49,7 +50,7 @@ using surface_black_list =
  * @tparam GateLyt Gate-level layout type that specifies the tiling of the SiDB surface.
  * @tparam CellLyt Cell-level layout type that is underlying to the SiDB surface.
  * @param gate_lyt Gate-level layout instance that specifies the aspect ratio.
- * @param surface SiDB surface that instantiates the defects.
+ * @param sidb_defect_surface SiDB surface that instantiates the defects.
  * @param charged_defect_spacing_overwrite Override the default influence distance of charged atomic defects on SiDBs
  * with an optional pair of horizontal and vertical distances.
  * @param neutral_defect_spacing_overwrite Override the default influence distance of neutral atomic defects on SiDBs
@@ -58,7 +59,7 @@ using surface_black_list =
  */
 template <typename GateLibrary, typename GateLyt, typename CellLyt>
 [[nodiscard]] auto sidb_surface_analysis(
-    const GateLyt& gate_lyt, const sidb_surface<CellLyt>& surface,
+    const GateLyt& gate_lyt, const sidb_defect_surface<CellLyt>& surface,
     const std::optional<std::pair<uint64_t, uint64_t>>& charged_defect_spacing_overwrite = std::nullopt,
     const std::optional<std::pair<uint64_t, uint64_t>>& neutral_defect_spacing_overwrite = std::nullopt) noexcept
 {

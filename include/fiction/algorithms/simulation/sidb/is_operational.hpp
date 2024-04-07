@@ -197,7 +197,7 @@ class is_operational_impl
             ++simulator_invocations;
 
             // if positively charged SiDBs can occur, the SiDB layout is considered as non-operational
-            if (can_positive_charges_occur(*bii, parameters.simulation_parameter))
+            if (can_positive_charges_occur(*bii, parameters.phys_params))
             {
                 continue;
             }

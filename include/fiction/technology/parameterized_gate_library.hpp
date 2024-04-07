@@ -13,7 +13,7 @@
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/fcn_gate_library.hpp"
 #include "fiction/technology/is_sidb_gate_design_impossible.hpp"
-#include "fiction/technology/sidb_surface.hpp"
+#include "fiction/technology/sidb_defect_surface.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 #include "fiction/utils/layout_utils.hpp"
@@ -105,7 +105,7 @@ struct parameterized_gate_library_params
     /**
      * This layout stores all atomic defects.
      */
-    sidb_surface<Lyt> defect_surface{};
+    sidb_defect_surface<Lyt> defect_surface{};
     /**
      * This struct holds parameters to design SiDB gates on-the-fly.
      */
@@ -174,7 +174,7 @@ class parameterized_gate_library : public fcn_gate_library<sidb_technology, 60, 
                             add_defect_to_skeleton(cell_list_to_cell_level_layout<CellLyt>(ONE_IN_TWO_OUT_MAP.at(p)),
                                                    center_cell, absolute_cell, parameters);
 
-                        return design_gate<sidb_surface<sidb_cell_clk_lyt_cube>, tt, CellLyt, GateLyt>(
+                        return design_gate<sidb_defect_surface<sidb_cell_clk_lyt_cube>, tt, CellLyt, GateLyt>(
                             layout, create_fan_out_tt(), parameters, p, t);
                     }
                 }
@@ -207,7 +207,7 @@ class parameterized_gate_library : public fcn_gate_library<sidb_technology, 60, 
                                 complex_gate_param.design_gate_params.number_of_sidbs =
                                     parameters.canvas_sidb_complex_gates;
 
-                                return design_gate<sidb_surface<sidb_cell_clk_lyt_cube>, tt, CellLyt, GateLyt>(
+                                return design_gate<sidb_defect_surface<sidb_cell_clk_lyt_cube>, tt, CellLyt, GateLyt>(
                                     layout, create_double_wire_tt(), complex_gate_param, p, t);
                             }
 
@@ -225,7 +225,7 @@ class parameterized_gate_library : public fcn_gate_library<sidb_technology, 60, 
                             complex_gate_param.design_gate_params.number_of_sidbs =
                                 parameters.canvas_sidb_complex_gates;
 
-                            return design_gate<sidb_surface<sidb_cell_clk_lyt_cube>, tt, CellLyt, GateLyt>(
+                            return design_gate<sidb_defect_surface<sidb_cell_clk_lyt_cube>, tt, CellLyt, GateLyt>(
                                 layout, create_crossing_wire_tt(), complex_gate_param, p, t);
                         }
 
@@ -237,7 +237,7 @@ class parameterized_gate_library : public fcn_gate_library<sidb_technology, 60, 
                         const auto layout = add_defect_to_skeleton(cell_list_to_cell_level_layout<CellLyt>(cell_list),
                                                                    center_cell, absolute_cell, parameters);
 
-                        return design_gate<sidb_surface<sidb_cell_clk_lyt_cube>, tt, CellLyt, GateLyt>(
+                        return design_gate<sidb_defect_surface<sidb_cell_clk_lyt_cube>, tt, CellLyt, GateLyt>(
                             layout, std::vector<tt>{f}, parameters, p, t);
                     }
                     return EMPTY_GATE;
@@ -251,7 +251,7 @@ class parameterized_gate_library : public fcn_gate_library<sidb_technology, 60, 
                         add_defect_to_skeleton(cell_list_to_cell_level_layout<CellLyt>(ONE_IN_ONE_OUT_MAP.at(p)),
                                                center_cell, absolute_cell, parameters);
 
-                    return design_gate<sidb_surface<sidb_cell_clk_lyt_cube>, tt, CellLyt, GateLyt>(
+                    return design_gate<sidb_defect_surface<sidb_cell_clk_lyt_cube>, tt, CellLyt, GateLyt>(
                         layout, std::vector<tt>{f}, parameters, p, t);
                 }
             }
@@ -263,7 +263,7 @@ class parameterized_gate_library : public fcn_gate_library<sidb_technology, 60, 
                         add_defect_to_skeleton(cell_list_to_cell_level_layout<CellLyt>(TWO_IN_ONE_OUT_MAP.at(p)),
                                                center_cell, absolute_cell, parameters);
 
-                    return design_gate<sidb_surface<sidb_cell_clk_lyt_cube>, tt, CellLyt, GateLyt>(
+                    return design_gate<sidb_defect_surface<sidb_cell_clk_lyt_cube>, tt, CellLyt, GateLyt>(
                         layout, std::vector<tt>{f}, parameters, p, t);
                 }
             }
@@ -275,7 +275,7 @@ class parameterized_gate_library : public fcn_gate_library<sidb_technology, 60, 
                         add_defect_to_skeleton(cell_list_to_cell_level_layout<CellLyt>(TWO_IN_ONE_OUT_MAP.at(p)),
                                                center_cell, absolute_cell, parameters);
 
-                    return design_gate<sidb_surface<sidb_cell_clk_lyt_cube>, tt, CellLyt, GateLyt>(
+                    return design_gate<sidb_defect_surface<sidb_cell_clk_lyt_cube>, tt, CellLyt, GateLyt>(
                         layout, std::vector<tt>{f}, parameters, p, t);
                 }
             }
@@ -287,7 +287,7 @@ class parameterized_gate_library : public fcn_gate_library<sidb_technology, 60, 
                         add_defect_to_skeleton(cell_list_to_cell_level_layout<CellLyt>(TWO_IN_ONE_OUT_MAP.at(p)),
                                                center_cell, absolute_cell, parameters);
 
-                    return design_gate<sidb_surface<sidb_cell_clk_lyt_cube>, tt, CellLyt, GateLyt>(
+                    return design_gate<sidb_defect_surface<sidb_cell_clk_lyt_cube>, tt, CellLyt, GateLyt>(
                         layout, std::vector<tt>{f}, parameters, p, t);
                 }
             }
@@ -299,7 +299,7 @@ class parameterized_gate_library : public fcn_gate_library<sidb_technology, 60, 
                         add_defect_to_skeleton(cell_list_to_cell_level_layout<CellLyt>(TWO_IN_ONE_OUT_MAP.at(p)),
                                                center_cell, absolute_cell, parameters);
 
-                    return design_gate<sidb_surface<sidb_cell_clk_lyt_cube>, tt, CellLyt, GateLyt>(
+                    return design_gate<sidb_defect_surface<sidb_cell_clk_lyt_cube>, tt, CellLyt, GateLyt>(
                         layout, std::vector<tt>{f}, parameters, p, t);
                 }
             }
@@ -311,7 +311,7 @@ class parameterized_gate_library : public fcn_gate_library<sidb_technology, 60, 
                         add_defect_to_skeleton(cell_list_to_cell_level_layout<CellLyt>(TWO_IN_ONE_OUT_MAP.at(p)),
                                                center_cell, absolute_cell, parameters);
 
-                    return design_gate<sidb_surface<sidb_cell_clk_lyt_cube>, tt, CellLyt, GateLyt>(
+                    return design_gate<sidb_defect_surface<sidb_cell_clk_lyt_cube>, tt, CellLyt, GateLyt>(
                         layout, std::vector<tt>{f}, parameters, p, t);
                 }
             }
@@ -323,7 +323,7 @@ class parameterized_gate_library : public fcn_gate_library<sidb_technology, 60, 
                         add_defect_to_skeleton(cell_list_to_cell_level_layout<CellLyt>(TWO_IN_ONE_OUT_MAP.at(p)),
                                                center_cell, absolute_cell, parameters);
 
-                    return design_gate<sidb_surface<sidb_cell_clk_lyt_cube>, tt, CellLyt, GateLyt>(
+                    return design_gate<sidb_defect_surface<sidb_cell_clk_lyt_cube>, tt, CellLyt, GateLyt>(
                         layout, std::vector<tt>{f}, parameters, p, t);
                 }
             }
@@ -335,7 +335,7 @@ class parameterized_gate_library : public fcn_gate_library<sidb_technology, 60, 
                         add_defect_to_skeleton(cell_list_to_cell_level_layout<CellLyt>(TWO_IN_ONE_OUT_MAP.at(p)),
                                                center_cell, absolute_cell, parameters);
 
-                    return design_gate<sidb_surface<sidb_cell_clk_lyt_cube>, tt, CellLyt, GateLyt>(
+                    return design_gate<sidb_defect_surface<sidb_cell_clk_lyt_cube>, tt, CellLyt, GateLyt>(
                         layout, std::vector<tt>{f}, parameters, p, t);
                 }
             }
@@ -347,7 +347,7 @@ class parameterized_gate_library : public fcn_gate_library<sidb_technology, 60, 
                         add_defect_to_skeleton(cell_list_to_cell_level_layout<CellLyt>(TWO_IN_ONE_OUT_MAP.at(p)),
                                                center_cell, absolute_cell, parameters);
 
-                    return design_gate<sidb_surface<sidb_cell_clk_lyt_cube>, tt, CellLyt, GateLyt>(
+                    return design_gate<sidb_defect_surface<sidb_cell_clk_lyt_cube>, tt, CellLyt, GateLyt>(
                         layout, std::vector<tt>{f}, parameters, p, t);
                 }
             }
@@ -359,7 +359,7 @@ class parameterized_gate_library : public fcn_gate_library<sidb_technology, 60, 
                         add_defect_to_skeleton(cell_list_to_cell_level_layout<CellLyt>(TWO_IN_ONE_OUT_MAP.at(p)),
                                                center_cell, absolute_cell, parameters);
 
-                    return design_gate<sidb_surface<sidb_cell_clk_lyt_cube>, tt, CellLyt, GateLyt>(
+                    return design_gate<sidb_defect_surface<sidb_cell_clk_lyt_cube>, tt, CellLyt, GateLyt>(
                         layout, std::vector<tt>{f}, parameters, p, t);
                 }
             }
@@ -371,7 +371,7 @@ class parameterized_gate_library : public fcn_gate_library<sidb_technology, 60, 
                         add_defect_to_skeleton(cell_list_to_cell_level_layout<CellLyt>(TWO_IN_ONE_OUT_MAP.at(p)),
                                                center_cell, absolute_cell, parameters);
 
-                    return design_gate<sidb_surface<sidb_cell_clk_lyt_cube>, tt, CellLyt, GateLyt>(
+                    return design_gate<sidb_defect_surface<sidb_cell_clk_lyt_cube>, tt, CellLyt, GateLyt>(
                         layout, std::vector<tt>{f}, parameters, p, t);
                 }
             }
@@ -587,7 +587,7 @@ class parameterized_gate_library : public fcn_gate_library<sidb_technology, 60, 
      * @return The updated skeleton with added defects from the surrounding area.
      */
     template <typename CellLyt, typename Params>
-    [[nodiscard]] static sidb_surface<sidb_cell_clk_lyt_cube>
+    [[nodiscard]] static sidb_defect_surface<sidb_cell_clk_lyt_cube>
     add_defect_to_skeleton(const CellLyt& skeleton, const cell<CellLyt>& center_cell,
                            const cell<CellLyt>& absolute_cell, const Params& parameters)
     {
@@ -596,7 +596,7 @@ class parameterized_gate_library : public fcn_gate_library<sidb_technology, 60, 
 
         if constexpr (has_cube_coord_v<CellLyt>)
         {
-            auto skeleton_with_defect = sidb_surface{skeleton};
+            auto skeleton_with_defect = sidb_defect_surface{skeleton};
 
             parameters.defect_surface.foreach_sidb_defect(
                 [&skeleton_with_defect, &center_cell, &absolute_cell, &parameters](const auto& cd)

@@ -19,7 +19,6 @@
 #include <kitty/dynamic_truth_table.hpp>
 #include <kitty/traits.hpp>
 
-
 #include <algorithm>
 #include <atomic>
 #include <cassert>
@@ -315,7 +314,7 @@ class design_sidb_gates_impl
     are_sidbs_too_close(const std::vector<typename Lyt::cell>&        cells,
                         const std::unordered_set<typename Lyt::cell>& affected_cells = {}) const noexcept
     {
-        for (std::size_t i = 0; i < cell_indices.size(); i++)
+        for (std::size_t i = 0; i < cells.size(); i++)
         {
             if constexpr (has_get_sidb_defect_v<Lyt>)
             {
@@ -330,7 +329,7 @@ class design_sidb_gates_impl
             }
             for (std::size_t j = i + 1; j < cells.size(); j++)
             {
-                if (sidb_nanometer_distance<Lyt>(skeleton_layout, cells[i], cells[j]) < 0.5)
+                if (sidb_nanometer_distance<Lyt>(cells[i], cells[j]) < 0.5)
                 {
                     return true;
                 }

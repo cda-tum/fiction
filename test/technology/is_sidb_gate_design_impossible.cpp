@@ -6,8 +6,8 @@
 
 #include "catch2/catch_template_test_macros.hpp"
 
+#include <fiction/technology/sidb_defect_surface.hpp>
 #include <fiction/technology/sidb_defects.hpp>
-#include <fiction/technology/sidb_surface.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/utils/truth_table_utils.hpp>
 
