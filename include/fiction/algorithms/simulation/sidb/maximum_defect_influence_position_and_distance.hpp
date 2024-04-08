@@ -140,9 +140,10 @@ class maximum_defect_influence_position_and_distance_impl
                     layout.foreach_cell(
                         [this, &defect, &distance](const auto& cell)
                         {
-                            if (sidb_nanometer_distance<Lyt>(cell, defect) < distance)
+                            const auto current_distance = sidb_nanometer_distance(layout, cell, defect);
+                            if (current_distance < distance)
                             {
-                                distance = sidb_nanometer_distance<Lyt>(cell, defect);
+                                distance = current_distance;
                             }
                         });
 

@@ -24,7 +24,7 @@ void sidb_nm_position(pybind11::module& m)
 {
     using namespace pybind11::literals;
 
-    m.def("sidb_nm_position", &fiction::sidb_nm_position<Lyt>, "sp"_a, "c"_a, DOC(fiction_sidb_nm_position));
+    m.def("sidb_nm_position", &fiction::sidb_nm_position<Lyt>, "lyt"_a, "c"_a, DOC(fiction_sidb_nm_position));
 }
 
 }  // namespace detail
@@ -32,6 +32,9 @@ void sidb_nm_position(pybind11::module& m)
 inline void sidb_nm_position(pybind11::module& m)
 {
     detail::sidb_nm_position<py_charge_distribution_surface>(m);
+    detail::sidb_nm_position<py_sidb_layout>(m);
+    detail::sidb_nm_position<py_sidb_100_lattice>(m);
+    detail::sidb_nm_position<py_sidb_111_lattice>(m);
 }
 
 }  // namespace pyfiction

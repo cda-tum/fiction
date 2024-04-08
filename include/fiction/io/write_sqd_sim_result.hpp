@@ -223,7 +223,7 @@ class write_sqd_sim_result_impl
         std::for_each(ordered_cells.cbegin(), ordered_cells.cend(),
                       [this](const auto& c)
                       {
-                          const auto [nm_x, nm_y] = sidb_nm_position<Lyt>(c);
+                          const auto [nm_x, nm_y] = sidb_nm_position<Lyt>(Lyt{}, c);
                           os << fmt::format(siqad::DBDOT, nm_x * 10,
                                             nm_y * 10);  // convert nm to Angstrom
                       });

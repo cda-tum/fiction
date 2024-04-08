@@ -10,10 +10,10 @@
 
 #include <fiction/utils/layout_utils.hpp>
 
-#include <vector>
-
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+
+#include <vector>
 
 namespace pyfiction
 {
@@ -48,14 +48,15 @@ void convert_to_siqad_coordinates(pybind11::module& m)
           DOC(fiction_convert_to_siqad_coordinates));
 }
 
-template <typename Lyt>
-void convert_to_fiction_coordinates(pybind11::module& m)
-{
-    using namespace pybind11::literals;
-
-    m.def("convert_to_fiction_coordinates", &fiction::convert_to_fiction_coordinates<Lyt>, "lyt"_a,
-          DOC(fiction_convert_to_fiction_coordinates));
-}
+// TODO fix this function
+// template <typename Lyt>
+// void convert_to_fiction_coordinates(pybind11::module& m)
+//{
+//    using namespace pybind11::literals;
+//
+//    m.def("convert_to_fiction_coordinates", &fiction::convert_to_fiction_coordinates<Lyt>, "lyt"_a,
+//          DOC(fiction_convert_to_fiction_coordinates));
+//}
 
 template <typename Lyt>
 void random_coordinate(pybind11::module& m)
@@ -85,7 +86,7 @@ inline void layout_utils(pybind11::module& m)
 
     detail::convert_to_siqad_coordinates<py_sidb_layout>(m);
 
-    detail::convert_to_fiction_coordinates<py_sidb_layout>(m);
+    // detail::convert_to_fiction_coordinates<py_sidb_layout>(m);
 
     detail::random_coordinate<py_cartesian_obstruction_layout>(m);
     detail::random_coordinate<py_cartesian_gate_layout>(m);

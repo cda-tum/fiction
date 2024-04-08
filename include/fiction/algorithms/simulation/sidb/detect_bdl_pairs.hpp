@@ -104,8 +104,8 @@ std::vector<bdl_pair<Lyt>> detect_bdl_pairs(const Lyt& lyt, const typename techn
      * then sorting them. The smallest distances are then used to pair up the dots. The function takes a vector of dots
      * as input.
      */
-    const auto pair_up_dots = [&lyt, &type,
-                               &params](const std::vector<cell<Lyt>>& dots) noexcept -> std::vector<bdl_pair<Lyt>>
+    const auto pair_up_dots = [&params, &type,
+                               &lyt](const std::vector<cell<Lyt>>& dots) noexcept -> std::vector<bdl_pair<Lyt>>
     {
         /**
          * Container for pairwise dot distances used in the pairing algorithm.
@@ -144,7 +144,7 @@ std::vector<bdl_pair<Lyt>> detect_bdl_pairs(const Lyt& lyt, const typename techn
         /**
          * Computes the pairwise distances between all dots in the input vector.
          */
-        const auto compute_pairwise_dot_distances = [&dots]() noexcept -> std::vector<pairwise_dot_distance>
+        const auto compute_pairwise_dot_distances = [&dots, &lyt]() noexcept -> std::vector<pairwise_dot_distance>
         {
             std::vector<pairwise_dot_distance> pairwise_distances{};
             pairwise_distances.reserve((dots.size() * (dots.size() - 1)) / 2);
@@ -153,7 +153,8 @@ std::vector<bdl_pair<Lyt>> detect_bdl_pairs(const Lyt& lyt, const typename techn
             {
                 for (auto j = i + 1; j < dots.size(); ++j)
                 {
-                    pairwise_distances.emplace_back(dots[i], dots[j], sidb_nanometer_distance<Lyt>(dots[i], dots[j]));
+                    pairwise_distances.emplace_back(dots[i], dots[j],
+                                                    sidb_nanometer_distance<Lyt>(lyt, dots[i], dots[j]));
                 }
             }
 

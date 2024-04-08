@@ -24,14 +24,15 @@ namespace fiction
  * @return A pair representing the `(x,y)` position of `c` in nanometers from the layout origin.
  */
 template <typename Lyt>
-[[nodiscard]] constexpr std::pair<double, double> sidb_nm_position(const cell<Lyt>& c) noexcept
+[[nodiscard]] constexpr std::pair<double, double> sidb_nm_position(const Lyt& lyt, const cell<Lyt>& c) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
     if constexpr (!is_sidb_lattice_v<Lyt>)
     {
-        return sidb_nm_position<sidb_lattice<sidb_100_lattice, Lyt>>(cell<sidb_lattice<sidb_100_lattice, Lyt>>(c));
+        return sidb_nm_position<sidb_lattice<sidb_100_lattice, Lyt>>(sidb_lattice<sidb_100_lattice, Lyt>(lyt),
+                                                                     cell<sidb_lattice<sidb_100_lattice, Lyt>>(c));
     }
     else
     {

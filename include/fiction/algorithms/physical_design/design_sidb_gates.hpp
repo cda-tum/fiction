@@ -241,7 +241,7 @@ class design_sidb_gates_impl
         {
             for (std::size_t j = i + 1; j < cell_indices.size(); j++)
             {
-                if (sidb_nanometer_distance<Lyt>(all_sidbs_in_canvas[cell_indices[i]],
+                if (sidb_nanometer_distance<Lyt>(Lyt{}, all_sidbs_in_canvas[cell_indices[i]],
                                                  all_sidbs_in_canvas[cell_indices[j]]) < 0.5)
                 {
                     return true;

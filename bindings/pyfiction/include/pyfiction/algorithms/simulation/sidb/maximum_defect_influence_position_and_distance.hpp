@@ -41,7 +41,7 @@ inline void maximum_defect_influence_distance(pybind11::module& m)
         .def(py::init<>())
         .def_readwrite("defect", &fiction::maximum_defect_influence_distance_params::defect,
                        DOC(fiction_maximum_defect_influence_distance_params_defect))
-        .def_readwrite("sim_params", &fiction::maximum_defect_influence_distance_params::sim_params,
+        .def_readwrite("sim_params", &fiction::maximum_defect_influence_distance_params::simulation_parameters,
                        DOC(fiction_maximum_defect_influence_distance_params_sim_params))
         .def_readwrite("additional_scanning_area",
                        &fiction::maximum_defect_influence_distance_params::additional_scanning_area,

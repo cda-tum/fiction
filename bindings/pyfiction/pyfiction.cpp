@@ -30,6 +30,7 @@
 // #include "pyfiction/algorithms/simulation/sidb/maximum_defect_influence_position_and_distance.hpp"
 #include "pyfiction/algorithms/simulation/sidb/assess_physical_population_stability.hpp"
 #include "pyfiction/algorithms/simulation/sidb/convert_potential_to_distance.hpp"
+#include "pyfiction/algorithms/simulation/sidb/determine_groundstate_from_simulation_results.hpp"
 #include "pyfiction/algorithms/simulation/sidb/minimum_energy.hpp"
 #include "pyfiction/algorithms/simulation/sidb/occupation_probability_of_excited_states.hpp"
 #include "pyfiction/algorithms/simulation/sidb/operational_domain.hpp"
@@ -64,6 +65,7 @@
 #include "pyfiction/layouts/hexagonal_layout.hpp"
 #include "pyfiction/layouts/obstruction_layout.hpp"
 #include "pyfiction/layouts/shifted_cartesian_layout.hpp"
+#include "pyfiction/layouts/sidb_lattice.hpp"
 #include "pyfiction/networks/logic_networks.hpp"
 #include "pyfiction/networks/truth_tables.hpp"
 #include "pyfiction/technology/area.hpp"
@@ -102,6 +104,7 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::gate_level_layouts(m);
     pyfiction::cell_level_layouts(m);
     pyfiction::obstruction_layouts(m);
+    pyfiction::sidb_lattice_cell_level_layouts(m);
     /**
      * Algorithms: Simulation
      */
@@ -127,6 +130,7 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::critical_temperature(m);
     pyfiction::random_sidb_layout_generator(m);
     pyfiction::time_to_solution(m);
+    pyfiction::determine_groundstate_from_simulation_results(m);
     /**
      * Logic
      */
@@ -187,7 +191,8 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::write_operational_domain(m);
     pyfiction::read_fgl_layout(m);
     pyfiction::read_fqca_layout(m);
-    pyfiction::read_sqd_layout(m);
+    pyfiction::read_sqd_layout_100(m);
+    pyfiction::read_sqd_layout_111(m);
     /**
      * Utils
      */

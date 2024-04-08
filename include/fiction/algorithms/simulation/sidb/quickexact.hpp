@@ -286,8 +286,8 @@ class quickexact_impl
         for (const auto& cell : preassigned_negative_sidbs)
         {
             charge_layout.add_sidb_defect_to_potential_landscape(
-                cell, sidb_defect{sidb_defect_type::UNKNOWN, -1, charge_layout.get_phys_params().epsilon_r,
-                                  charge_layout.get_phys_params().lambda_tf});
+                cell, sidb_defect{sidb_defect_type::UNKNOWN, -1, charge_layout.get_simulation_params().epsilon_r,
+                                  charge_layout.get_simulation_params().lambda_tf});
         }
 
         // Update all local potentials, system energy, and physical validity. The flag is set to

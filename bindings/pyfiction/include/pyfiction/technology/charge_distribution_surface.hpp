@@ -2,8 +2,8 @@
 // Created by marcel on 02.06.22.
 //
 
-#ifndef PYFICTION_SIQAD_LAYOUT_HPP
-#define PYFICTION_SIQAD_LAYOUT_HPP
+#ifndef PYFICTION_CHARGE_DISTRIBUTION_SURFACE_HPP
+#define PYFICTION_CHARGE_DISTRIBUTION_SURFACE_HPP
 
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
@@ -80,7 +80,7 @@ inline void charge_distribution_surface(pybind11::module& m)
         .def("get_all_sidb_locations_in_nm", &py_charge_distribution_surface::get_all_sidb_locations_in_nm)
         .def("assign_cell_type", &py_charge_distribution_surface::assign_cell_type, "c"_a, "ct"_a)
         .def("assign_physical_parameters", &py_charge_distribution_surface::assign_physical_parameters, "params"_a)
-        .def("get_phys_params", &py_charge_distribution_surface::get_phys_params)
+        .def("get_phys_params", &py_charge_distribution_surface::get_simulation_params)
         .def("charge_exists", &py_charge_distribution_surface::charge_exists, "cs"_a)
         .def("cell_to_index", &py_charge_distribution_surface::cell_to_index, "c"_a)
         .def("assign_charge_state", &py_charge_distribution_surface::assign_charge_state, "c"_a, "cs"_a,
@@ -235,4 +235,4 @@ inline void charge_distribution_surface(pybind11::module& m)
 
 }  // namespace pyfiction
 
-#endif  // PYFICTION_SIQAD_LAYOUT_HPP
+#endif  // PYFICTION_CHARGE_DISTRIBUTION_SURFACE_HPP

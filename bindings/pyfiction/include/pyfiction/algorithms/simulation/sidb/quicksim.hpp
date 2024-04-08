@@ -49,6 +49,8 @@ inline void quicksim(pybind11::module& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
+    detail::quicksim<py_sidb_100_lattice>(m);
+    detail::quicksim<py_sidb_111_lattice>(m);
     detail::quicksim<py_sidb_layout>(m);
 }
 

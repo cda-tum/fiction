@@ -7,23 +7,25 @@ import datetime
 
 class TestSiDBSimulationResult(unittest.TestCase):
 
-    def test_sidb_simulation_result(self):
+    def test_negative_and_neutral_layout(self):
         # Use standard constructor.
         result = sidb_simulation_result()
 
-        params = sidb_simulation_parameters(
-            2, -0.4, 7.1, 10.0, 6.84, 7.68, 2.8)
+        layout = sidb_layout((2, 3))
+        layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
+        layout.assign_cell_type((0, 3), sidb_technology.cell_type.NORMAL)
 
-        # Assign values
-        result.algorithm_name = "exgs"
-        result.simulation_runtime = datetime.timedelta(seconds=100)
-        result.simulation_parameters = params
+        cds_negative = charge_distribution_surface(layout)
 
-        self.assertEqual(result.algorithm_name, "exgs")
-        self.assertEqual(result.simulation_parameters.lat_a, params.lat_a)
-        self.assertEqual(result.simulation_parameters.lat_b, params.lat_b)
-        self.assertEqual(result.simulation_parameters.lat_c, params.lat_c)
+        cds_neutral = charge_distribution_surface(layout, sidb_simulation_parameters(), sidb_charge_state.NEUTRAL)
 
+        result.charge_distributions = [cds_negative, cds_neutral]
+
+        groundstate = determine_groundstate_from_simulation_results(result)
+
+        self.assertEqual(len(groundstate), 1)
+        self.assertEqual(groundstate[0].get_charge_state((0, 1)), sidb_charge_state.NEUTRAL)
+        self.assertEqual(groundstate[0].get_charge_state((0, 3)), sidb_charge_state.NEUTRAL)
 
 if __name__ == '__main__':
     unittest.main()

@@ -17,6 +17,8 @@
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/charge_distribution_surface.hpp>
+#include <fiction/technology/sidb_lattice.hpp>
+#include <fiction/technology/sidb_lattice_orientations.hpp>
 
 #include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/views/names_view.hpp>
@@ -105,6 +107,21 @@ using py_inml_layout = py_cartesian_cell_layout<fiction::inml_technology>;
  * SiDB cell layout.
  */
 using py_sidb_layout = py_cartesian_cell_layout<fiction::sidb_technology>;
+
+/**
+ * SiDB lattice layout.
+ */
+template <typename LatticeOrientation>
+using py_sidb_lattice = fiction::sidb_lattice<LatticeOrientation, py_sidb_layout>;
+/**
+ * SiDB cell layout (with specified H-Si(100)-2x1 lattice orientation).
+ */
+using py_sidb_100_lattice = py_sidb_lattice<fiction::sidb_100_lattice>;
+/**
+ * SiDB cell layout (with specified H-Si(111)-2x1 lattice orientation).
+ */
+using py_sidb_111_lattice = py_sidb_lattice<fiction::sidb_111_lattice>;
+
 /**
  * Charge distribution surface. This is a special SiDB cell-level layout that is used for the SiDB simulation
  * algorithms.

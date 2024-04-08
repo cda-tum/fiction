@@ -42,7 +42,7 @@ class TestCriticalTemperature(unittest.TestCase):
         self.assertEqual(stats.algorithm_name, "QuickExact")
 
     def test_bestagon_inv(self):
-        layout = read_sqd_layout(dir_path + "/../../../resources/hex_11_inputsdbp_inv_straight_v0_manual.sqd",
+        layout = read_sqd_layout_100(dir_path + "/../../../resources/hex_11_inputsdbp_inv_straight_v0_manual.sqd",
                                  "inverter_input_0")
 
         params = critical_temperature_params()
@@ -59,7 +59,7 @@ class TestCriticalTemperature(unittest.TestCase):
         self.assertGreater(stats.num_valid_lyt, 1)
 
     def test_bestagon_inv_with_different_mu(self):
-        layout = read_sqd_layout(dir_path + "/../../../resources/hex_11_inputsdbp_inv_straight_v0_manual.sqd",
+        layout = read_sqd_layout_100(dir_path + "/../../../resources/hex_11_inputsdbp_inv_straight_v0_manual.sqd",
                                  "inverter_input_0")
 
         params = critical_temperature_params()

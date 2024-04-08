@@ -8,13 +8,13 @@
 #include "pyfiction/documentation.hpp"
 
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
+#include <fiction/technology/sidb_lattice_orientations.hpp>
 
 #include <fmt/format.h>
-
-#include <cstdint>
-
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+
+#include <cstdint>
 
 namespace pyfiction
 {
@@ -26,18 +26,9 @@ inline void sidb_simulation_parameters(pybind11::module& m)
 
     py::class_<fiction::sidb_simulation_parameters>(m, "sidb_simulation_parameters",
                                                     DOC(fiction_sidb_simulation_parameters))
-        .def(py::init<const uint8_t, const double, const double, const double, const double, const double,
-                      const double>(),
-             "base_number"_a = 3, "mu_minus"_a = -0.32, "relative_permittivity"_a = 5.6, "screening_distance"_a = 5.0,
-             "a"_a = 3.84, "b"_a = 7.68, "c"_a = 2.25,
+        .def(py::init<const uint8_t, const double, const double, const double>(), "base_number"_a = 3, "mu_minus"_a = -0.32, "relative_permittivity"_a = 5.6, "screening_distance"_a = 5.0,
              DOC(fiction_sidb_simulation_parameters_sidb_simulation_parameters))
         .def(py::init<>())
-        .def_readwrite("lat_a", &fiction::sidb_simulation_parameters::lat_a,
-                       DOC(fiction_sidb_simulation_parameters_lat_a))
-        .def_readwrite("lat_b", &fiction::sidb_simulation_parameters::lat_b,
-                       DOC(fiction_sidb_simulation_parameters_lat_b))
-        .def_readwrite("lat_c", &fiction::sidb_simulation_parameters::lat_c,
-                       DOC(fiction_sidb_simulation_parameters_lat_c))
         .def_readwrite("epsilon_r", &fiction::sidb_simulation_parameters::epsilon_r,
                        DOC(fiction_sidb_simulation_parameters_epsilon_r))
         .def_readwrite("lambda_tf", &fiction::sidb_simulation_parameters::lambda_tf,

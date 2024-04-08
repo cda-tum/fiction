@@ -69,7 +69,7 @@ class write_location_and_ground_state_impl
 
             for (const auto& sidb : sidbs)
             {
-                const auto pos = sidb_nm_position<Lyt>(sidb);
+                const auto pos = sidb_nm_position<Lyt>(Lyt{}, sidb);
                 os << fmt::format("{:.3f};{:.3f};", pos.first, pos.second);
                 for (const auto& valid_layout : ground_state_layouts)
                 {

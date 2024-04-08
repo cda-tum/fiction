@@ -28,20 +28,19 @@ void critical_temperature(pybind11::module& m)
     /**
      * Critical temperature statistics.
      */
-    py::class_<fiction::critical_temperature_stats<Lyt>>(m, "critical_temperature_stats",
-                                                         DOC(fiction_critical_temperature_stats))
+    py::class_<fiction::critical_temperature_stats>(m, "critical_temperature_stats",
+                                                    DOC(fiction_critical_temperature_stats))
         .def(py::init<>())
-        .def_readwrite("algorithm_name", &fiction::critical_temperature_stats<Lyt>::algorithm_name,
+        .def_readwrite("algorithm_name", &fiction::critical_temperature_stats::algorithm_name,
                        DOC(fiction_critical_temperature_stats_algorithm_name))
-        .def_readwrite("critical_temperature", &fiction::critical_temperature_stats<Lyt>::critical_temperature,
+        .def_readwrite("critical_temperature", &fiction::critical_temperature_stats::critical_temperature,
                        DOC(fiction_critical_temperature_stats_critical_temperature))
-        .def_readwrite("num_valid_lyt", &fiction::critical_temperature_stats<Lyt>::num_valid_lyt,
+        .def_readwrite("num_valid_lyt", &fiction::critical_temperature_stats::num_valid_lyt,
                        DOC(fiction_critical_temperature_stats_num_valid_lyt))
         .def_readwrite("energy_between_ground_state_and_first_erroneous",
-                       &fiction::critical_temperature_stats<Lyt>::energy_between_ground_state_and_first_erroneous,
+                       &fiction::critical_temperature_stats::energy_between_ground_state_and_first_erroneous,
                        DOC(fiction_critical_temperature_stats_energy_between_ground_state_and_first_erroneous))
-        .def("report", &fiction::critical_temperature_stats<Lyt>::report,
-             DOC(fiction_critical_temperature_stats_report))
+        .def("report", &fiction::critical_temperature_stats::report, DOC(fiction_critical_temperature_stats_report))
 
         ;
 
@@ -94,6 +93,8 @@ inline void critical_temperature(pybind11::module& m)
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
     detail::critical_temperature<py_charge_distribution_surface>(m);
+    //    detail::critical_temperature<py_sidb_100_lattice>(m);
+    //    detail::critical_temperature<py_sidb_100_lattice>(m);
 }
 
 }  // namespace pyfiction

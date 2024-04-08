@@ -37,9 +37,14 @@ void read_sqd_layout(pybind11::module& m)
 
 }  // namespace detail
 
-inline void read_sqd_layout(pybind11::module& m)
+inline void read_sqd_layout_100(pybind11::module& m)
 {
-    detail::read_sqd_layout<py_sidb_layout>(m);
+    detail::read_sqd_layout<py_sidb_100_lattice>(m);
+}
+
+inline void read_sqd_layout_111(pybind11::module& m)
+{
+    detail::read_sqd_layout<py_sidb_111_lattice>(m);
 }
 
 }  // namespace pyfiction

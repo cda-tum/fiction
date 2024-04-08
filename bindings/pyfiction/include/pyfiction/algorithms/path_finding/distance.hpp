@@ -41,8 +41,8 @@ inline void distance(pybind11::module& m)
 
     using namespace pybind11::literals;
 
-    m.def("sidb_nanometer_distance", &fiction::sidb_nanometer_distance<py_charge_distribution_surface>, "layout"_a,
-          "source"_a, "target"_a, "sp"_a = fiction::sidb_simulation_parameters{});
+    m.def("sidb_nanometer_distance", &fiction::sidb_nanometer_distance<py_charge_distribution_surface>, "lyt"_a,
+          "source"_a, "target"_a);
 }
 
 }  // namespace pyfiction
