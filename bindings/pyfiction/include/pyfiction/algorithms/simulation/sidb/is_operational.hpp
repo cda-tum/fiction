@@ -28,6 +28,10 @@ void is_operational(pybind11::module& m, const std::string lattice = "")
 
     m.def(fmt::format("is_operational{}", lattice).c_str(), &fiction::is_operational<Lyt, py_tt>, "lyt"_a, "spec"_a,
           "params"_a = fiction::is_operational_params{}, DOC(fiction_is_operational));
+
+    m.def(fmt::format("operational_input_patterns{}", lattice).c_str(),
+          &fiction::operational_input_patterns<Lyt, py_tt>, "lyt"_a, "spec"_a,
+          "params"_a = fiction::is_operational_params{}, DOC(fiction_is_operational));
 }
 
 }  // namespace detail
@@ -39,9 +43,7 @@ inline void is_operational(pybind11::module& m)
     py::enum_<fiction::operational_status>(m, "operational_status", DOC(fiction_operational_status))
         .value("OPERATIONAL", fiction::operational_status::OPERATIONAL, DOC(fiction_operational_status_OPERATIONAL))
         .value("NON_OPERATIONAL", fiction::operational_status::NON_OPERATIONAL,
-               DOC(fiction_operational_status_NON_OPERATIONAL))
-
-        ;
+               DOC(fiction_operational_status_NON_OPERATIONAL));
 
     py::class_<fiction::is_operational_params>(m, "is_operational_params", DOC(fiction_is_operational_params))
         .def(py::init<>())
@@ -50,9 +52,7 @@ inline void is_operational(pybind11::module& m)
         .def_readwrite("sim_engine", &fiction::is_operational_params::sim_engine,
                        DOC(fiction_is_operational_params_sim_engine))
         .def_readwrite("bdl_params", &fiction::is_operational_params::bdl_params,
-                       DOC(fiction_is_operational_params_bdl_params))
-
-        ;
+                       DOC(fiction_is_operational_params_bdl_params));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 

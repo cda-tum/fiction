@@ -13,6 +13,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include <string>
+
 namespace pyfiction
 {
 
@@ -20,35 +22,18 @@ namespace detail
 {
 
 template <typename Lyt>
-void critical_temperature(pybind11::module& m)
+void critical_temperature(pybind11::module& m, std::string lattice = "")
 {
     namespace py = pybind11;
     using namespace pybind11::literals;
 
-    /**
-     * Critical temperature statistics.
-     */
-    py::class_<fiction::critical_temperature_stats>(m, "critical_temperature_stats",
-                                                    DOC(fiction_critical_temperature_stats))
-        .def(py::init<>())
-        .def_readwrite("algorithm_name", &fiction::critical_temperature_stats::algorithm_name,
-                       DOC(fiction_critical_temperature_stats_algorithm_name))
-        .def_readwrite("critical_temperature", &fiction::critical_temperature_stats::critical_temperature,
-                       DOC(fiction_critical_temperature_stats_critical_temperature))
-        .def_readwrite("num_valid_lyt", &fiction::critical_temperature_stats::num_valid_lyt,
-                       DOC(fiction_critical_temperature_stats_num_valid_lyt))
-        .def_readwrite("energy_between_ground_state_and_first_erroneous",
-                       &fiction::critical_temperature_stats::energy_between_ground_state_and_first_erroneous,
-                       DOC(fiction_critical_temperature_stats_energy_between_ground_state_and_first_erroneous))
-        .def("report", &fiction::critical_temperature_stats::report, DOC(fiction_critical_temperature_stats_report))
-
-        ;
-
-    m.def("critical_temperature_gate_based", &fiction::critical_temperature_gate_based<Lyt, py_tt>, "lyt"_a, "spec"_a,
+    m.def(fmt::format("critical_temperature_gate_based{}", lattice).c_str(),
+          &fiction::critical_temperature_gate_based<Lyt, py_tt>, "lyt"_a, "spec"_a,
           "params"_a = fiction::critical_temperature_params{}, "stats"_a = nullptr,
           DOC(fiction_critical_temperature_gate_based));
 
-    m.def("critical_temperature_non_gate_based", &fiction::critical_temperature_non_gate_based<Lyt>, "lyt"_a,
+    m.def(fmt::format("critical_temperature_non_gate_based{}", lattice).c_str(),
+          &fiction::critical_temperature_non_gate_based<Lyt>, "lyt"_a,
           "params"_a = fiction::critical_temperature_params{}, "stats"_a = nullptr,
           DOC(fiction_critical_temperature_non_gate_based));
 }
@@ -67,9 +52,24 @@ inline void critical_temperature(pybind11::module& m)
         .value("EXACT", fiction::critical_temperature_params::simulation_engine::EXACT,
                DOC(fiction_critical_temperature_params_simulation_engine_EXACT))
         .value("APPROXIMATE", fiction::critical_temperature_params::simulation_engine::APPROXIMATE,
-               DOC(fiction_critical_temperature_params_simulation_engine_APPROXIMATE))
+               DOC(fiction_critical_temperature_params_simulation_engine_APPROXIMATE));
 
-        ;
+    /**
+     * Critical temperature statistics.
+     */
+    py::class_<fiction::critical_temperature_stats>(m, "critical_temperature_stats",
+                                                    DOC(fiction_critical_temperature_stats))
+        .def(py::init<>())
+        .def_readwrite("algorithm_name", &fiction::critical_temperature_stats::algorithm_name,
+                       DOC(fiction_critical_temperature_stats_algorithm_name))
+        .def_readwrite("critical_temperature", &fiction::critical_temperature_stats::critical_temperature,
+                       DOC(fiction_critical_temperature_stats_critical_temperature))
+        .def_readwrite("num_valid_lyt", &fiction::critical_temperature_stats::num_valid_lyt,
+                       DOC(fiction_critical_temperature_stats_num_valid_lyt))
+        .def_readwrite("energy_between_ground_state_and_first_erroneous",
+                       &fiction::critical_temperature_stats::energy_between_ground_state_and_first_erroneous,
+                       DOC(fiction_critical_temperature_stats_energy_between_ground_state_and_first_erroneous))
+        .def("report", &fiction::critical_temperature_stats::report, DOC(fiction_critical_temperature_stats_report));
 
     /**
      * Critical temperature parameters.
@@ -86,15 +86,13 @@ inline void critical_temperature(pybind11::module& m)
         .def_readwrite("max_temperature", &fiction::critical_temperature_params::max_temperature,
                        DOC(fiction_critical_temperature_params_max_temperature))
         .def_readwrite("bdl_params", &fiction::critical_temperature_params::bdl_params,
-                       DOC(fiction_critical_temperature_params_bdl_params))
-
-        ;
+                       DOC(fiction_critical_temperature_params_bdl_params));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::critical_temperature<py_charge_distribution_surface>(m);
-    //    detail::critical_temperature<py_sidb_100_lattice>(m);
-    //    detail::critical_temperature<py_sidb_100_lattice>(m);
+    detail::critical_temperature<py_sidb_100_lattice>(m, "_100");
+    detail::critical_temperature<py_sidb_100_lattice>(m, "_111");
+    detail::critical_temperature<py_sidb_layout>(m);
 }
 
 }  // namespace pyfiction

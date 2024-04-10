@@ -40,7 +40,7 @@ class TestIsOperational(unittest.TestCase):
 
         self.assertEqual(op_status, operational_status.NON_OPERATIONAL)
 
-    def test_and_gate_111_lattice_00_11_input_pattern(self):
+    def test_and_gate_111_lattice_11_input_pattern(self):
         lyt = read_sqd_layout_111(dir_path + "/../../../resources/AND_mu_032_0.sqd")
 
         lyt.assign_cell_type((0, 0), sidb_technology.cell_type.EMPTY)
@@ -55,10 +55,24 @@ class TestIsOperational(unittest.TestCase):
 
         params.simulation_parameters = sidb_simulation_parameters(2, -0.1)
 
-        [op_status, evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], params)
+        self.assertEqual(params.simulation_parameters.mu_minus, -0.1)
 
-        self.assertEqual(op_status, operational_status.OPERATIONAL)
+        [op_status, evaluated_input_combinations] = is_operational_111(lyt, [create_and_tt()], params)
 
+        self.assertEqual(op_status, operational_status.NON_OPERATIONAL)
+
+    def test_and_gate_111_lattice_operational_input_pattern(self):
+        lyt = read_sqd_layout_111(dir_path + "/../../../resources/AND_mu_032_0.sqd")
+
+        params = is_operational_params()
+        params.simulation_parameters = sidb_simulation_parameters(2, -0.30)
+
+        operational_patterns = operational_input_patterns_111(lyt, [create_and_tt()], params)
+
+        print(operational_patterns)
+        self.assertEqual(len(operational_patterns), 2)
+
+        self.assertEqual(operational_patterns, {0, 3})
 
 if __name__ == '__main__':
     unittest.main()
