@@ -6,6 +6,7 @@
 #include <fiction/algorithms/verification/equivalence_checking.hpp>               // SAT-based equivalence checking
 #include <fiction/io/network_reader.hpp>                                          // read networks from files
 
+#include <fmt/core.h>
 #include <fmt/format.h>  // output formatting
 #include <mockturtle/utils/stopwatch.hpp>
 
@@ -97,13 +98,12 @@ int main()  // NOLINT
             gate_level_layout.num_wires() - gate_level_layout.num_pis() - gate_level_layout.num_pos();
 
         // check equivalence
-        fiction::equivalence_checking_stats eq_stats{};
-        fiction::equivalence_checking<fiction::technology_network, gate_lyt>(benchmark_network, gate_level_layout,
-                                                                             &eq_stats);
+        const auto eq_stats =
+            fiction::equivalence_checking<fiction::technology_network, gate_lyt>(benchmark_network, gate_level_layout);
 
-        const std::string eq_result = eq_stats.eq == fiction::eq_type::STRONG ? "STRONG" :
-                                      eq_stats.eq == fiction::eq_type::WEAK   ? "WEAK" :
-                                                                                "NO";
+        const std::string eq_result = eq_stats == fiction::eq_type::STRONG ? "STRONG" :
+                                      eq_stats == fiction::eq_type::WEAK   ? "WEAK" :
+                                                                             "NO";
 
         // calculate bounding box
         const auto bounding_box_after_wiring_reduction = fiction::bounding_box_2d(gate_level_layout);
