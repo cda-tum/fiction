@@ -8,6 +8,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/io/print_layout.hpp>
 #include <fiction/technology/charge_distribution_surface.hpp>
@@ -19,6 +20,7 @@
 #include <pybind11/stl.h>
 
 #include <cstdint>
+#include <string>
 #include <vector>
 
 namespace pyfiction
@@ -50,7 +52,6 @@ void charge_distribution_surface_layout(pybind11::module& m, const std::string& 
      * Charge distribution surface.
      */
 
-    std::cout << "Lattice: " << fmt::format("charge_distribution_surface{}", lattice).c_str() << std::endl;
     py::class_<py_cds, Lyt>(m, fmt::format("charge_distribution_surface{}", lattice).c_str(),
                             DOC(fiction_charge_distribution_surface), py::module_local())
         .def(py::init<const fiction::sidb_simulation_parameters&, const fiction::sidb_charge_state&>(),

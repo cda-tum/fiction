@@ -41,7 +41,7 @@ class TestExhaustiveGroundStateSimulation(unittest.TestCase):
 
         cds = charge_distribution_surface_111(layout)
 
-        result = exhaustive_ground_state_simulation(layout, params)
+        result = exhaustive_ground_state_simulation(cds, params)
 
         self.assertEqual(result.algorithm_name, "ExGS")
 
