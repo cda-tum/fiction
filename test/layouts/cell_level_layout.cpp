@@ -3,7 +3,6 @@
 //
 
 #include <catch2/catch_template_test_macros.hpp>
-#include <catch2/catch_test_macros.hpp>
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
@@ -17,7 +16,7 @@
 using namespace fiction;
 
 TEMPLATE_TEST_CASE("Cell-level layout traits", "[cell-level-layout]", qca_cell_clk_lyt, stacked_qca_cell_clk_lyt,
-                   inml_cell_clk_lyt, sidb_cell_clk_lyt)
+                   inml_cell_clk_lyt, sidb_100_cell_clk_lyt, sidb_111_cell_clk_lyt)
 {
     CHECK(is_cell_level_layout_v<TestType>);
     CHECK(has_foreach_cell_v<TestType>);
@@ -114,7 +113,8 @@ TEST_CASE("Cell technology", "[cell-level-layout]")
 
         CHECK(tech_impl_name<sidb_technology> == std::string{"SiDB"});
 
-        CHECK(has_sidb_technology_v<sidb_cell_clk_lyt>);
+        CHECK(has_sidb_technology_v<sidb_100_cell_clk_lyt>);
+        CHECK(has_sidb_technology_v<sidb_111_cell_clk_lyt>);
     }
 }
 

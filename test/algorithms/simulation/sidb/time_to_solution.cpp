@@ -9,11 +9,6 @@
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/algorithms/simulation/sidb/time_to_solution.hpp>
-#include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/cell_level_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
-#include <fiction/technology/cell_technologies.hpp>
-#include <fiction/technology/charge_distribution_surface.hpp>
 #include <fiction/technology/physical_constants.hpp>
 #include <fiction/types.hpp>
 
@@ -22,10 +17,9 @@
 
 using namespace fiction;
 
-TEMPLATE_TEST_CASE("time to solution test", "[time-to-solution]", sidb_cell_clk_lyt_siqad,
-                   charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
+TEMPLATE_TEST_CASE("time to solution test", "[time-to-solution]", (sidb_100_cell_clk_lyt_siqad),
+                   (cds_sidb_100_cell_clk_lyt_siqad))
 {
-
     TestType lyt{};
 
     SECTION("layout with no SiDB placed")

@@ -7,6 +7,7 @@
 
 #include <fiction/io/write_sqd_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
+#include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/name_utils.hpp>
