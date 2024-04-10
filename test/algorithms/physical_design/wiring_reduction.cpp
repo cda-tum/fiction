@@ -18,7 +18,6 @@
 #include <fiction/networks/technology_network.hpp>
 
 #include <mockturtle/networks/aig.hpp>
-#include <mockturtle/views/names_view.hpp>
 
 using namespace fiction;
 
@@ -141,12 +140,9 @@ TEST_CASE("Search Direction", "[wiring_reduction]")
     const auto layout    = blueprints::straight_wire_gate_layout<gate_layout>();
     auto       obstr_lyt = obstruction_layout<gate_layout>(layout);
 
-    SECTION("Set and Get")
+    SECTION("Get")
     {
         auto lyt = detail::create_shifted_layout(obstr_lyt, 1, 1, detail::search_direction::HORIZONTAL);
         CHECK(lyt.get_search_direction() == detail::search_direction::HORIZONTAL);
-
-        lyt.set_search_direction(detail::search_direction::VERTICAL);
-        CHECK(lyt.get_search_direction() == detail::search_direction::VERTICAL);
     }
 }
