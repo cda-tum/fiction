@@ -21,7 +21,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void sidb_simulation_result(pybind11::module& m)
+void sidb_simulation_result(pybind11::module& m, const std::string = "")
 {
     namespace py = pybind11;
     using namespace pybind11::literals;
@@ -48,7 +48,6 @@ void sidb_simulation_result(pybind11::module& m)
 inline void sidb_simulation_result(pybind11::module& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
-
     detail::sidb_simulation_result<py_sidb_layout>(m);
 }
 

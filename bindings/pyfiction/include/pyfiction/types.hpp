@@ -118,7 +118,7 @@ using py_sidb_lattice = fiction::sidb_lattice<LatticeOrientation, py_sidb_layout
  */
 using py_sidb_100_lattice = py_sidb_lattice<fiction::sidb_100_lattice>;
 /**
- * SiDB cell layout (with specified H-Si(111)-2x1 lattice orientation).
+ * SiDB cell layout (with specified H-Si(111)-1x1 lattice orientation).
  */
 using py_sidb_111_lattice = py_sidb_lattice<fiction::sidb_111_lattice>;
 
@@ -126,7 +126,20 @@ using py_sidb_111_lattice = py_sidb_lattice<fiction::sidb_111_lattice>;
  * Charge distribution surface. This is a special SiDB cell-level layout that is used for the SiDB simulation
  * algorithms.
  */
+
+template <typename Lyt>
+using py_charge_distribution_surface_layout = fiction::charge_distribution_surface<Lyt>;
+
 using py_charge_distribution_surface = fiction::charge_distribution_surface<py_sidb_layout>;
+
+/**
+ * Charge distribution surface with underlying H-Si(100)-2x1 lattice.
+ */
+using py_charge_distribution_surface_100 = py_charge_distribution_surface_layout<py_sidb_100_lattice>;
+/**
+ * Charge distribution surface with underlying H-Si(111)-1x1 lattice.
+ */
+using py_charge_distribution_surface_111 = py_charge_distribution_surface_layout<py_sidb_111_lattice>;
 
 }  // namespace pyfiction
 

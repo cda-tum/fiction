@@ -34,8 +34,8 @@ inline void exhaustive_ground_state_simulation(pybind11::module& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::exhaustive_ground_state_simulation<py_sidb_100_lattice>(m);
-    detail::exhaustive_ground_state_simulation<py_sidb_111_lattice>(m);
+    // detail::exhaustive_ground_state_simulation<py_sidb_100_lattice>(m);
+    // detail::exhaustive_ground_state_simulation<py_sidb_111_lattice>(m);
     detail::exhaustive_ground_state_simulation<py_sidb_layout>(m);
 }
 

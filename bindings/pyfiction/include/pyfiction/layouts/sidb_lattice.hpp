@@ -32,25 +32,16 @@ void sidb_lattice_cell_level_layout(pybind11::module& m)
     // fetch technology name
     auto orientation = std::string{fiction::sidb_lattice_name<LatticeOrientation>};
     std::transform(orientation.begin(), orientation.end(), orientation.begin(), ::tolower);
-    std::cout << orientation << std::endl;
-
-    /**
-     * FCN cell technology.
-     */
-    // const py::class_<LatticeOrientation> tech(m, fmt::format("{}_technology", orientation).c_str());
 
     using py_sidb_lattice = py_sidb_lattice<LatticeOrientation>;
 
     /**
      * SiDB lattice.
      */
-    py::class_<py_sidb_lattice, fiction::cell_level_layout<fiction::sidb_technology,
-                                                           fiction::clocked_layout<fiction::tile_based_layout<
-                                                               fiction::cartesian_layout<fiction::offset::ucoord_t>>>>>(
-        m, fmt::format("{}_lattice", orientation).c_str(), DOC(fiction_cell_level_layout))
+    py::class_<py_sidb_lattice, py_sidb_layout>(m, fmt::format("sidb_lattice{}", orientation).c_str(),
+                                                DOC(fiction_cell_level_layout), py::module_local())
         .def(py::init<>())
-        .def(py::init<const fiction::aspect_ratio<py_sidb_lattice>&, const std::string&>(), "dimension"_a,
-             "name"_a = "", DOC(fiction_cell_level_layout_cell_level_layout))
+        .def(py::init<const fiction::aspect_ratio<py_sidb_layout>&, const std::string&>(), "dimension"_a, "name"_a = "", DOC(fiction_cell_level_layout_cell_level_layout))
 
         ;
 }

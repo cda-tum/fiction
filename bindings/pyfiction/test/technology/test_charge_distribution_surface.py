@@ -13,7 +13,7 @@ class TestChargeDistributionSurface(unittest.TestCase):
 
         charge_lyt = charge_distribution_surface(layout_one)
 
-        self.assertEqual(charge_lyt.get_charge_state((0, 1)), sidb_charge_state.NEGATIVE)
+        self.assertEqual(charge_lyt.get_charge_state(offset_coordinate(0, 1)), sidb_charge_state.NEGATIVE)
         self.assertEqual(charge_lyt.get_charge_state((4, 1)), sidb_charge_state.NEGATIVE)
         self.assertEqual(charge_lyt.get_charge_state((6, 1)), sidb_charge_state.NEGATIVE)
 
@@ -39,29 +39,29 @@ class TestChargeDistributionSurface(unittest.TestCase):
         self.assertEqual(charge_lyt.get_system_energy(), 0)
 
     def test_initialization_111_lattice(self):
-        layout_one = sidb_111_lattice((10, 10))
+        layout_one = sidb_lattice_111((10, 10))
         layout_one.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
-        layout_one.assign_cell_type((4, 1), sidb_technology.cell_type.NORMAL)
-        layout_one.assign_cell_type((6, 1), sidb_technology.cell_type.NORMAL)
+        layout_one.assign_cell_type((1, 1), sidb_technology.cell_type.NORMAL)
+        layout_one.assign_cell_type((2, 1), sidb_technology.cell_type.NORMAL)
 
-        charge_lyt = charge_distribution_surface(layout_one)
+        charge_lyt = charge_distribution_surface_111(layout_one)
 
         self.assertEqual(charge_lyt.get_charge_state((0, 1)), sidb_charge_state.NEGATIVE)
-        self.assertEqual(charge_lyt.get_charge_state((4, 1)), sidb_charge_state.NEGATIVE)
-        self.assertEqual(charge_lyt.get_charge_state((6, 1)), sidb_charge_state.NEGATIVE)
+        self.assertEqual(charge_lyt.get_charge_state((1, 1)), sidb_charge_state.NEGATIVE)
+        self.assertEqual(charge_lyt.get_charge_state((2, 1)), sidb_charge_state.NEGATIVE)
 
         charge_lyt.assign_charge_state((0, 1), sidb_charge_state.NEUTRAL)
-        charge_lyt.assign_charge_state((4, 1), sidb_charge_state.NEGATIVE)
-        charge_lyt.assign_charge_state((6, 1), sidb_charge_state.NEGATIVE)
+        charge_lyt.assign_charge_state((1, 1), sidb_charge_state.NEGATIVE)
+        charge_lyt.assign_charge_state((2, 1), sidb_charge_state.NEUTRAL)
         self.assertEqual(charge_lyt.get_charge_state((0, 1)), sidb_charge_state.NEUTRAL)
-        self.assertEqual(charge_lyt.get_charge_state((4, 1)), sidb_charge_state.NEGATIVE)
-        self.assertEqual(charge_lyt.get_charge_state((6, 1)), sidb_charge_state.NEGATIVE)
+        self.assertEqual(charge_lyt.get_charge_state((1, 1)), sidb_charge_state.NEGATIVE)
+        self.assertEqual(charge_lyt.get_charge_state((2, 1)), sidb_charge_state.NEUTRAL)
         charge_lyt.update_after_charge_change()
-        self.assertFalse(charge_lyt.is_physically_valid())
+        self.assertTrue(charge_lyt.is_physically_valid())
 
         charge_lyt.assign_charge_state((0, 1), sidb_charge_state.NEGATIVE)
-        charge_lyt.assign_charge_state((4, 1), sidb_charge_state.NEUTRAL)
-        charge_lyt.assign_charge_state((6, 1), sidb_charge_state.NEGATIVE)
+        charge_lyt.assign_charge_state((1, 1), sidb_charge_state.NEUTRAL)
+        charge_lyt.assign_charge_state((2, 1), sidb_charge_state.NEGATIVE)
         charge_lyt.update_after_charge_change()
         self.assertTrue(charge_lyt.is_physically_valid())
 

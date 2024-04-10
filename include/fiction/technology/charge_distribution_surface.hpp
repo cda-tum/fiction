@@ -10,9 +10,9 @@
 #include "fiction/technology/physical_constants.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/technology/sidb_defects.hpp"
+#include "fiction/technology/sidb_nanometer_distance.hpp"
 #include "fiction/technology/sidb_nm_position.hpp"
 #include "fiction/traits.hpp"
-#include "sidb_nanometer_distance.hpp"
 
 #include <algorithm>
 #include <bitset>
@@ -454,14 +454,14 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * This function assigns the dependent cell (i.e., cell which charge state is set based on the neighbor cells
      * and the population stability).
      *
-     * @param dependent_cell cell which is set as the dependent cell.
+     * @param c cell which is set as the dependent cell.
      *
-     * @note dependent_cell has to be part of the initialized charge distribution surface layout.
+     * @note c has to be part of the initialized charge distribution surface layout.
      */
-    void assign_dependent_cell(const typename Lyt::cell& dependent_cell) noexcept
+    void assign_dependent_cell(const typename Lyt::cell& c) noexcept
     {
-        assert(cell_to_index(dependent_cell) != -1 && "dependent cell is not part of the layout");
-        strg->dependent_cell   = dependent_cell;
+        assert(cell_to_index(c) != -1 && "dependent cell is not part of the layout");
+        strg->dependent_cell   = c;
         strg->max_charge_index = static_cast<uint64_t>(
             std::pow(static_cast<double>(strg->simulation_parameters.base), this->num_cells() - 1) - 1);
         strg->dependent_cell_index = static_cast<uint64_t>(cell_to_index(strg->dependent_cell));
@@ -916,7 +916,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     /**
      * The function updates the local potential (unit: Volt) and the system energy (unit: eV) after a charge change.
      *
-     * @param dependent_cell dependent_cell_mode::FIXED if the state of the dependent cell should not change,
+     * @param dep_cell dependent_cell_mode::FIXED if the state of the dependent cell should not change,
      * dependent_cell_mode::VARIABLE if it should.
      * @param energy_calculation_mode energy_calculation::UPDATE_ENERGY if the electrostatic potential energy should be
      * updated, energy_calculation::KEEP_ENERGY otherwise.
@@ -925,12 +925,12 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * otherwise.
      */
     void update_after_charge_change(
-        const dependent_cell_mode         dependent_cell          = dependent_cell_mode::FIXED,
+        const dependent_cell_mode         dep_cell                = dependent_cell_mode::FIXED,
         const energy_calculation          energy_calculation_mode = energy_calculation::UPDATE_ENERGY,
         const charge_distribution_history history_mode            = charge_distribution_history::NEGLECT) noexcept
     {
         this->update_local_potential(history_mode);
-        if (dependent_cell == dependent_cell_mode::VARIABLE)
+        if (dep_cell == dependent_cell_mode::VARIABLE)
         {
             this->update_charge_state_of_dependent_cell();
         }
@@ -1152,7 +1152,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * If that's the case, it is increased by one and afterward, the charge configuration is updated by invoking the
      * `index_to_charge_distribution()` function.
      *
-     * @param dependent_cell dependent_cell_mode::FIXED if the state of the dependent cell should not change,
+     * @param dep_cell dependent_cell_mode::FIXED if the state of the dependent cell should not change,
      * dependent_cell_mode::VARIABLE if it should.
      * @param energy_calculation_mode energy_calculation::UPDATE_ENERGY if the electrostatic potential energy should be
      * updated, energy_calculation::KEEP_ENERGY otherwise.
@@ -1163,7 +1163,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * exhaustive_sidb_simulation_engine::QUICKEXACT for *QuickExact*.
      */
     void increase_charge_index_by_one(
-        const dependent_cell_mode               dependent_cell          = dependent_cell_mode::FIXED,
+        const dependent_cell_mode               dep_cell                = dependent_cell_mode::FIXED,
         const energy_calculation                energy_calculation_mode = energy_calculation::UPDATE_ENERGY,
         const charge_distribution_history       history_mode            = charge_distribution_history::NEGLECT,
         const exhaustive_sidb_simulation_engine engine = exhaustive_sidb_simulation_engine::EXGS) noexcept
@@ -1179,7 +1179,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             {
                 this->index_to_charge_distribution(charge_index_recomputation::IGNORE_LEADING_ZEROES);
             }
-            this->update_after_charge_change(dependent_cell, energy_calculation_mode, history_mode);
+            this->update_after_charge_change(dep_cell, energy_calculation_mode, history_mode);
         }
     }
     /**
@@ -1276,11 +1276,11 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @param potential_value Value of the global external electrostatic potential in Volt (e.g. -0.3).
      * Charge-transition levels are shifted by this value.
-     * @param dependent_cell dependent_cell_mode::FIXED if the state of the dependent cell should not change,
+     * @param dep_cell dependent_cell_mode::FIXED if the state of the dependent cell should not change,
      * dependent_cell_mode::VARIABLE if it should.
      */
     void assign_global_external_potential(const double        potential_value,
-                                          dependent_cell_mode dependent_cell = dependent_cell_mode::FIXED) noexcept
+                                          dependent_cell_mode dep_cell = dependent_cell_mode::FIXED) noexcept
     {
         if (potential_value != 0.0)
         {
@@ -1288,7 +1288,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 [this, &potential_value](const auto& c) {
                     strg->local_external_pot.insert({c, potential_value});
                 });
-            this->update_after_charge_change(dependent_cell);
+            this->update_after_charge_change(dep_cell);
         }
     }
     /**
@@ -1733,7 +1733,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @param current_gray_code Gray code in decimal representing the new charge distribution.
      * @param previous_gray_code Gray code in decimal representing the old charge distribution.
-     * @param dependent_cell dependent_cell_mode::FIXED if the state of the dependent cell should not change,
+     * @param dep_cell dependent_cell_mode::FIXED if the state of the dependent cell should not change,
      * dependent_cell_mode::VARIABLE if it should.
      * @param energy_calculation_mode energy_calculation::UPDATE_ENERGY if the electrostatic potential energy should be
      * updated, energy_calculation::KEEP_ENERGY otherwise.
@@ -1743,14 +1743,14 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     void assign_charge_index_by_gray_code(
         const uint64_t current_gray_code, const uint64_t previous_gray_code,
-        const dependent_cell_mode         dependent_cell   = dependent_cell_mode::FIXED,
+        const dependent_cell_mode         dep_cell         = dependent_cell_mode::FIXED,
         const energy_calculation          energy_calc_mode = energy_calculation::UPDATE_ENERGY,
         const charge_distribution_history history_mode     = charge_distribution_history::NEGLECT) noexcept
     {
         if (current_gray_code <= strg->max_charge_index)
         {
             this->assign_charge_index_by_two_gray_codes(current_gray_code, previous_gray_code);
-            this->update_after_charge_change(dependent_cell, energy_calc_mode, history_mode);
+            this->update_after_charge_change(dep_cell, energy_calc_mode, history_mode);
         }
     }
     /**

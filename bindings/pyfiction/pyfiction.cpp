@@ -174,7 +174,7 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::sidb_defects(m);
     pyfiction::sidb_charge_state(m);
     pyfiction::sidb_nm_position(m);
-    pyfiction::charge_distribution_surface(m);
+    pyfiction::charge_distribution_surfaces(m);
     /**
      * Input/Output
      */

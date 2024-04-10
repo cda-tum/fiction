@@ -13,6 +13,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include <string>
+
 namespace pyfiction
 {
 
@@ -20,11 +22,11 @@ namespace detail
 {
 
 template <typename Lyt>
-void is_operational(pybind11::module& m)
+void is_operational(pybind11::module& m, const std::string lattice = "")
 {
     using namespace pybind11::literals;
 
-    m.def("is_operational", &fiction::is_operational<Lyt, py_tt>, "lyt"_a, "spec"_a,
+    m.def(fmt::format("is_operational{}", lattice).c_str(), &fiction::is_operational<Lyt, py_tt>, "lyt"_a, "spec"_a,
           "params"_a = fiction::is_operational_params{}, DOC(fiction_is_operational));
 }
 
@@ -54,7 +56,9 @@ inline void is_operational(pybind11::module& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::is_operational<py_charge_distribution_surface>(m);
+    detail::is_operational<py_sidb_100_lattice>(m, "_100");
+    detail::is_operational<py_sidb_111_lattice>(m, "_111");
+    detail::is_operational<py_sidb_layout>(m);
 }
 
 }  // namespace pyfiction

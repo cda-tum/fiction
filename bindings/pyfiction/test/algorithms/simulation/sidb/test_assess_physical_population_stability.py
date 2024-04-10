@@ -13,7 +13,7 @@ class TestAssessPhysicalPopulationStability(unittest.TestCase):
         params = assess_physical_population_stability_params()
         params.simulation_parameters.mu_minus = -0.25
         cds = charge_distribution_surface(layout)
-        result = assess_physical_population_stability(cds, params)
+        result = assess_physical_population_stability(layout, params)
         self.assertEqual(len(result), 5)
         self.assertLessEqual(result[0].system_energy, result[1].system_energy)
         self.assertLessEqual(result[1].system_energy, result[2].system_energy)

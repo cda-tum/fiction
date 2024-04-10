@@ -27,7 +27,7 @@ class TestCriticalTemperature(unittest.TestCase):
         self.assertEqual(stats.num_valid_lyt, 1)
 
     def test_gate_based_simulation(self):
-        layout = read_sqd_layout(dir_path + "/../../../resources/hex_21_inputsdbp_xor_v1.sqd", "xor_gate")
+        layout = read_sqd_layout_100(dir_path + "/../../../resources/hex_21_inputsdbp_xor_v1.sqd", "xor_gate")
         params = critical_temperature_params()
         params.simulation_parameters.base = 2
         params.engine = simulation_engine.EXACT
