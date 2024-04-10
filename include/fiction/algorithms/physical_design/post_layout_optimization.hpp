@@ -10,10 +10,9 @@
 #include "fiction/algorithms/path_finding/distance.hpp"
 #include "fiction/algorithms/physical_design/wiring_reduction.hpp"
 #include "fiction/layouts/bounding_box.hpp"
+#include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/layouts/obstruction_layout.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/name_utils.hpp"
-#include "fiction/utils/placement_utils.hpp"
 
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
@@ -23,8 +22,6 @@
 #include <cstdint>
 #include <optional>
 #include <ostream>
-#include <tuple>
-#include <unordered_map>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -728,43 +725,20 @@ bool compare_gates(const tile<Lyt>& a, const tile<Lyt>& b)
     return static_cast<bool>(std::make_pair(a.x + a.y, a.x) < std::make_pair(b.x + b.y, b.x));
 }
 
-}  // namespace detail
-
-/**
- * A post-layout optimization algorithm as originally proposed in \"Post-Layout Optimization for Field-coupled
- * Nanotechnologies\" by S. Hofmann, M. Walter, and R. Wille in NANOARCH 2023. It can be used to reduce the area of a
- * given sub-optimal Cartesian gate-level layout created by heuristics or machine learning. This optimization utilizes
- * the distinct characteristics of the 2DDWave clocking scheme, which only allows information flow from top to bottom
- * and left to right, therefore only aforementioned clocking scheme is supported.
- *
- * To reduce the layout area, first, gates are moved up and to the left as far as possible, including rerouting. This
- * creates more compact layouts by freeing up space to the right and bottom, as all gates were moved to the top left
- * corner.
- *
- * After moving all gates, this algorithm also checks if excess wiring exists on the layout using the `wiring_reduction`
- * algorithm (cf. `wiring_reduction.hpp`)
- *
- * As outputs have to lay on the border of a layout for better accessibility, they are also moved to new borders
- * determined based on the location of all other gates.
- *
- * @note This function requires the gate-level layout to be 2DDWave-clocked!
- *
- * @tparam Lyt Cartesian gate-level layout type.
- * @param lyt 2DDWave-clocked Cartesian gate-level layout to optimize.
- */
 template <typename Lyt>
-void post_layout_optimization(const Lyt& lyt, post_layout_optimization_stats* pst = nullptr) noexcept
+class post_layout_optimization_impl
 {
-    post_layout_optimization_stats stats{};
+  public:
+    post_layout_optimization_impl(const Lyt& lyt, post_layout_optimization_stats& st) : plyt{lyt}, pst{st} {}
 
-    // measure run time
+    void run()
     {
-        const mockturtle::stopwatch stop{stats.time_total};
-        stats.x_size_before = lyt.x() + 1;
-        stats.y_size_before = lyt.y() + 1;
+        const mockturtle::stopwatch stop{pst.time_total};
+        pst.x_size_before = plyt.x() + 1;
+        pst.y_size_before = plyt.y() + 1;
 
         // Optimization
-        auto layout = obstruction_layout<Lyt>(lyt);
+        auto layout = obstruction_layout<Lyt>(plyt);
 
         std::vector<tile<Lyt>> gate_tiles{};
         gate_tiles.reserve(layout.num_gates() + layout.num_pis() - layout.num_pos());
@@ -826,19 +800,66 @@ void post_layout_optimization(const Lyt& lyt, post_layout_optimization_stats* ps
         bounding_box.update_bounding_box();
         layout.resize({bounding_box.get_x_size(), bounding_box.get_y_size(), layout.z()});
 
-        stats.x_size_after         = layout.x() + 1;
-        stats.y_size_after         = layout.y() + 1;
-        const uint64_t area_before = stats.x_size_before * stats.y_size_before;
-        const uint64_t area_after  = stats.x_size_after * stats.y_size_after;
+        pst.x_size_after           = layout.x() + 1;
+        pst.y_size_after           = layout.y() + 1;
+        const uint64_t area_before = pst.x_size_before * pst.y_size_before;
+        const uint64_t area_after  = pst.x_size_after * pst.y_size_after;
         double_t       area_percentage_difference =
             static_cast<double_t>(area_before - area_after) / static_cast<double_t>(area_before) * 100.0;
         area_percentage_difference = round(area_percentage_difference * 100) / 100;
-        stats.area_improvement     = area_percentage_difference;
+        pst.area_improvement       = area_percentage_difference;
     }
+
+  private:
+    const Lyt&                      plyt;
+    post_layout_optimization_stats& pst;
+};
+}  // namespace detail
+
+/**
+ * A post-layout optimization algorithm as originally proposed in \"Post-Layout Optimization for Field-coupled
+ * Nanotechnologies\" by S. Hofmann, M. Walter, and R. Wille in NANOARCH 2023. It can be used to reduce the area of a
+ * given sub-optimal Cartesian gate-level layout created by heuristics or machine learning. This optimization utilizes
+ * the distinct characteristics of the 2DDWave clocking scheme, which only allows information flow from top to bottom
+ * and left to right, therefore only aforementioned clocking scheme is supported.
+ *
+ * To reduce the layout area, first, gates are moved up and to the left as far as possible, including rerouting. This
+ * creates more compact layouts by freeing up space to the right and bottom, as all gates were moved to the top left
+ * corner.
+ *
+ * After moving all gates, this algorithm also checks if excess wiring exists on the layout using the `wiring_reduction`
+ * algorithm (cf. `wiring_reduction.hpp`)
+ *
+ * As outputs have to lay on the border of a layout for better accessibility, they are also moved to new borders
+ * determined based on the location of all other gates.
+ *
+ * @note This function requires the gate-level layout to be 2DDWave-clocked!
+ *
+ * @tparam Lyt Cartesian gate-level layout type.
+ * @param lyt 2DDWave-clocked Cartesian gate-level layout to optimize.
+ */
+template <typename Lyt>
+void post_layout_optimization(const Lyt& lyt, post_layout_optimization_stats* pst = nullptr) noexcept
+{
+    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+    static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
+
+    // Check if the clocking scheme is 2DDWave
+    if (!lyt.is_clocking_scheme(clock_name::TWODDWAVE))
+    {
+        std::cout << "[e] the given layout has to be 2DDWave-clocked\n";
+        return;
+    }
+
+    // Initialize stats for runtime measurement
+    post_layout_optimization_stats             st{};
+    detail::post_layout_optimization_impl<Lyt> p{lyt, st};
+
+    p.run();
 
     if (pst != nullptr)
     {
-        *pst = stats;
+        *pst = st;
     }
 }
 
