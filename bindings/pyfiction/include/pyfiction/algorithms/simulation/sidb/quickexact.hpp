@@ -45,7 +45,7 @@ void quickexact(pybind11::module& m, const std::string& lattice = "")
         .def(py::init<>())
         .def_readwrite(fmt::format("simulation_parameters{}", lattice).c_str(),
                        &fiction::quickexact_params<Lyt>::simulation_parameters,
-                       DOC(fiction_quickexact_params_physical_parameters))
+                       DOC(fiction_quickexact_params))
         .def_readwrite(fmt::format("base_number_detection{}", lattice).c_str(),
                        &fiction::quickexact_params<Lyt>::base_number_detection,
                        DOC(fiction_quickexact_params_base_number_detection))

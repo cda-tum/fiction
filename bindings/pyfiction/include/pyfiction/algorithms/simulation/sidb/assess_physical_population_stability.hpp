@@ -70,7 +70,7 @@ inline void assess_physical_population_stability(pybind11::module& m)
         .def(py::init<>())
         .def_readwrite("simulation_parameters",
                        &fiction::assess_physical_population_stability_params::simulation_parameters,
-                       DOC(fiction_assess_physical_population_stability_params_physical_parameters))
+                       DOC(fiction_assess_physical_population_stability_params))
         .def_readwrite(
             "precision_for_distance_corresponding_to_potential",
             &fiction::assess_physical_population_stability_params::precision_for_distance_corresponding_to_potential,

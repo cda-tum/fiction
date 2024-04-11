@@ -77,7 +77,7 @@ inline void critical_temperature(pybind11::module& m)
                                                      DOC(fiction_critical_temperature_params))
         .def(py::init<>())
         .def_readwrite("simulation_parameters", &fiction::critical_temperature_params::simulation_parameters,
-                       DOC(fiction_critical_temperature_params_simulation_params))
+                       DOC(fiction_critical_temperature_params))
         .def_readwrite("engine", &fiction::critical_temperature_params::engine,
                        DOC(fiction_critical_temperature_params_engine))
         .def_readwrite("confidence_level", &fiction::critical_temperature_params::confidence_level,
