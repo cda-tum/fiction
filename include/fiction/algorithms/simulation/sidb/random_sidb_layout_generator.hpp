@@ -150,7 +150,8 @@ Lyt generate_random_sidb_layout(const Lyt&                                      
  * @return A vector containing the unique randomly generated SiDB layouts.
  */
 template <typename Lyt>
-std::vector<Lyt> generate_multiple_random_sidb_layouts(const Lyt&                                     lyt_skeleton,
+std::vector<Lyt>
+generate_multiple_random_sidb_layouts(const Lyt&                                                 lyt_skeleton,
                                       const generate_random_sidb_layout_params<coordinate<Lyt>>& params)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
