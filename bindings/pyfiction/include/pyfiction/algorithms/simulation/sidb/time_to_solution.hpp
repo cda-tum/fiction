@@ -20,7 +20,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void time_to_solution(pybind11::module& m, const std::string lattice = "")
+void time_to_solution(pybind11::module& m, const std::string& lattice = "")
 {
     using namespace pybind11::literals;
 
@@ -61,9 +61,7 @@ inline void time_to_solution(pybind11::module& m)
                        DOC(fiction_time_to_solution_stats_single_runtime_exhaustive))
         .def_readwrite("algorithm", &fiction::time_to_solution_stats::algorithm,
                        DOC(fiction_time_to_solution_stats_algorithm))
-        .def("report", &fiction::time_to_solution_stats::report, DOC(fiction_time_to_solution_stats_report))
-
-        ;
+        .def("report", &fiction::time_to_solution_stats::report, DOC(fiction_time_to_solution_stats_report));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 

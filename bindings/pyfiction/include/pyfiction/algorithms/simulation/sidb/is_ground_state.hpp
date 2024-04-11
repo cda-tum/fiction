@@ -20,12 +20,12 @@ namespace detail
 {
 
 template <typename Lyt>
-void is_ground_state(pybind11::module& m)
+void is_ground_state(pybind11::module& m, const std::string& lattice = "")
 {
     using namespace pybind11::literals;
 
-    m.def("is_ground_state", &fiction::is_ground_state<Lyt>, "quicksim_results"_a, "exhaustive_results"_a,
-          DOC(fiction_is_ground_state));
+    m.def(fmt::format("is_ground_state{}", lattice).c_str(), &fiction::is_ground_state<Lyt>, "quicksim_results"_a,
+          "exhaustive_results"_a, DOC(fiction_is_ground_state));
 }
 
 }  // namespace detail
@@ -34,7 +34,8 @@ inline void is_ground_state(pybind11::module& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::is_ground_state<py_charge_distribution_surface>(m);
+    detail::is_ground_state<py_charge_distribution_surface>(m, "_100");
+    detail::is_ground_state<py_charge_distribution_surface>(m, "_111");
 }
 
 }  // namespace pyfiction

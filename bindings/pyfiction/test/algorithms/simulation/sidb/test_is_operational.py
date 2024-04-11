@@ -8,7 +8,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 class TestIsOperational(unittest.TestCase):
 
     def test_is_operational(self):
-        lyt = sidb_layout()
+        lyt = sidb_lattice_100()
 
         lyt.assign_cell_type((0, 1), sidb_technology.cell_type.INPUT)
         lyt.assign_cell_type((2, 3), sidb_technology.cell_type.INPUT)
@@ -30,26 +30,23 @@ class TestIsOperational(unittest.TestCase):
         params = is_operational_params()
         params.simulation_parameters = sidb_simulation_parameters(2, -0.28)
 
-        [op_status, evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], params)
+        [op_status, evaluated_input_combinations] = is_operational_100(lyt, [create_and_tt()], params)
 
         self.assertEqual(op_status, operational_status.OPERATIONAL)
 
         params.simulation_parameters = sidb_simulation_parameters(2, -0.1)
 
-        [op_status, evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], params)
+        [op_status, evaluated_input_combinations] = is_operational_100(lyt, [create_and_tt()], params)
 
         self.assertEqual(op_status, operational_status.NON_OPERATIONAL)
 
     def test_and_gate_111_lattice_11_input_pattern(self):
         lyt = read_sqd_layout_111(dir_path + "/../../../resources/AND_mu_032_0.sqd")
 
-        lyt.assign_cell_type((0, 0), sidb_technology.cell_type.EMPTY)
-        lyt.assign_cell_type((25, 0), sidb_technology.cell_type.EMPTY)
-
         params = is_operational_params()
         params.simulation_parameters = sidb_simulation_parameters(2, -0.32)
 
-        [op_status, evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], params)
+        [op_status, evaluated_input_combinations] = is_operational_111(lyt, [create_and_tt()], params)
 
         self.assertEqual(op_status, operational_status.OPERATIONAL)
 

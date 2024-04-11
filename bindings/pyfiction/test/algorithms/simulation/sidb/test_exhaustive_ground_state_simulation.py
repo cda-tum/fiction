@@ -5,17 +5,17 @@ import os
 
 class TestExhaustiveGroundStateSimulation(unittest.TestCase):
 
-    def test_perturber_and_DB_pair(self):
-        layout = sidb_layout((10, 10))
+    def test_perturber_and_sidb_pair(self):
+        layout = sidb_lattice_100((10, 10))
         layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((4, 1), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((6, 1), sidb_technology.cell_type.NORMAL)
 
         params = sidb_simulation_parameters()
 
-        cds = charge_distribution_surface(layout)
+        cds = charge_distribution_surface_100(layout)
 
-        result = exhaustive_ground_state_simulation(layout, params)
+        result = exhaustive_ground_state_simulation_100(layout, params)
 
         self.assertEqual(result.algorithm_name, "ExGS")
         self.assertEqual(len(result.charge_distributions), 1)
@@ -26,7 +26,7 @@ class TestExhaustiveGroundStateSimulation(unittest.TestCase):
         self.assertEqual(groundstate.get_charge_state((4, 1)), sidb_charge_state.NEUTRAL)
         self.assertEqual(groundstate.get_charge_state((6, 1)), sidb_charge_state.NEGATIVE)
 
-    def test_perturber_and_DB_pair_111(self):
+    def test_perturber_and_sidb_pair_111(self):
         layout = sidb_lattice_111((4, 1))
         layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((1, 0), sidb_technology.cell_type.NORMAL)
@@ -41,11 +41,11 @@ class TestExhaustiveGroundStateSimulation(unittest.TestCase):
 
         cds = charge_distribution_surface_111(layout)
 
-        result = exhaustive_ground_state_simulation(cds, params)
+        result = exhaustive_ground_state_simulation_111(cds, params)
 
         self.assertEqual(result.algorithm_name, "ExGS")
 
-        groundstate = determine_groundstate_from_simulation_results(result)
+        groundstate = determine_groundstate_from_simulation_results_111(result)
 
         self.assertEqual(len(groundstate), 1)
 

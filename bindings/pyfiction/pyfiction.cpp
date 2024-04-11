@@ -29,6 +29,7 @@
 #include "pyfiction/algorithms/simulation/sidb/is_operational.hpp"
 // #include "pyfiction/algorithms/simulation/sidb/maximum_defect_influence_position_and_distance.hpp"
 #include "pyfiction/algorithms/simulation/sidb/assess_physical_population_stability.hpp"
+#include "pyfiction/algorithms/simulation/sidb/check_simulation_results_for_equivalence.hpp"
 #include "pyfiction/algorithms/simulation/sidb/convert_potential_to_distance.hpp"
 #include "pyfiction/algorithms/simulation/sidb/determine_groundstate_from_simulation_results.hpp"
 #include "pyfiction/algorithms/simulation/sidb/minimum_energy.hpp"
@@ -131,6 +132,7 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::random_sidb_layout_generator(m);
     pyfiction::time_to_solution(m);
     pyfiction::determine_groundstate_from_simulation_results(m);
+    pyfiction::check_simulation_results_for_equivalence(m);
     /**
      * Logic
      */

@@ -165,9 +165,9 @@ class design_sidb_gates_impl
 
         const is_operational_params params_is_operational{params.simulation_parameters, params.sim_engine};
 
-        const generate_random_sidb_layout_params<Lyt> parameter{
+        const generate_random_sidb_layout_params<cell<Lyt>> parameter{
             params.canvas, params.number_of_sidbs,
-            generate_random_sidb_layout_params<Lyt>::positive_charges::FORBIDDEN};
+            generate_random_sidb_layout_params<cell<Lyt>>::positive_charges::FORBIDDEN};
 
         const std::size_t        num_threads = std::thread::hardware_concurrency();
         std::vector<std::thread> threads{};

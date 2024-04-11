@@ -70,7 +70,6 @@ inline void quickexact(pybind11::module& m)
 
     detail::quickexact<py_sidb_100_lattice>(m, "_100");
     detail::quickexact<py_sidb_111_lattice>(m, "_111");
-    detail::quickexact<py_sidb_layout>(m);
 }
 
 }  // namespace pyfiction

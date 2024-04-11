@@ -19,7 +19,6 @@ namespace pyfiction
 namespace detail
 {
 
-template <typename Lyt>
 void occupation_probability_of_excited_states(pybind11::module& m)
 {
     using namespace pybind11::literals;
@@ -28,7 +27,8 @@ void occupation_probability_of_excited_states(pybind11::module& m)
           "temperature"_a, DOC(fiction_occupation_probability_gate_based));
 
     m.def("occupation_probability_non_gate_based", &fiction::occupation_probability_non_gate_based,
-          "energy_distribution"_a, "temperature"_a);  // TODO DOC(fiction_occupation_probability_non_gate_based)
+          "energy_distribution"_a,
+          "temperature"_a);  // TODO DOC(fiction_occupation_probability_non_gate_based)
 }
 
 }  // namespace detail
@@ -37,7 +37,7 @@ inline void occupation_probability_of_excited_states(pybind11::module& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::occupation_probability_of_excited_states<py_charge_distribution_surface>(m);
+    detail::occupation_probability_of_excited_states(m);
 }
 
 }  // namespace pyfiction

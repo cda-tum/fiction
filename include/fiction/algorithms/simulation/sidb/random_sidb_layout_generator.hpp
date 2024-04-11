@@ -22,7 +22,7 @@ namespace fiction
 /**
  * This struct stores the parameters for the `generate_random_sidb_layout` algorithm.
  */
-template <typename Lyt>
+template <typename CoordinateType>
 struct generate_random_sidb_layout_params
 {
     /**
@@ -44,7 +44,7 @@ struct generate_random_sidb_layout_params
      * Two coordinates that span the region where SiDBs may be placed (order is not important). The first coordinate is
      * the upper left corner and the second coordinate is the lower right corner of the area.
      */
-    std::pair<typename Lyt::cell, typename Lyt::cell> coordinate_pair;
+    std::pair<CoordinateType, CoordinateType> coordinate_pair;
     /**
      * Number of SiDBs that are placed on the layout.
      */
@@ -87,7 +87,8 @@ struct generate_random_sidb_layout_params
  * @return A randomly-generated layout of SiDBs.
  */
 template <typename Lyt>
-Lyt generate_random_sidb_layout(const Lyt& lyt_skeleton, const generate_random_sidb_layout_params<Lyt>& params)
+Lyt generate_random_sidb_layout(const Lyt&                                                 lyt_skeleton,
+                                const generate_random_sidb_layout_params<coordinate<Lyt>>& params)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -106,7 +107,7 @@ Lyt generate_random_sidb_layout(const Lyt& lyt_skeleton, const generate_random_s
 
         bool constraint_violation_positive_sidbs = false;
 
-        if (params.positive_sidbs == generate_random_sidb_layout_params<Lyt>::positive_charges::FORBIDDEN)
+        if (params.positive_sidbs == generate_random_sidb_layout_params<coordinate<Lyt>>::positive_charges::FORBIDDEN)
         {
             // checks if the new coordinate is not closer than 2 cells (Euclidean distance) to an already
             // placed SiDB
@@ -150,7 +151,7 @@ Lyt generate_random_sidb_layout(const Lyt& lyt_skeleton, const generate_random_s
  */
 template <typename Lyt>
 std::vector<Lyt> generate_multiple_random_sidb_layouts(const Lyt&                                     lyt_skeleton,
-                                                       const generate_random_sidb_layout_params<Lyt>& params)
+                                      const generate_random_sidb_layout_params<coordinate<Lyt>>& params)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");

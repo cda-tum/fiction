@@ -21,12 +21,13 @@ namespace detail
 {
 
 template <typename Lyt>
-void sidb_simulation_result(pybind11::module& m, const std::string = "")
+void sidb_simulation_result(pybind11::module& m, const std::string& lattice = "")
 {
     namespace py = pybind11;
     using namespace pybind11::literals;
 
-    py::class_<fiction::sidb_simulation_result<Lyt>>(m, "sidb_simulation_result", DOC(fiction_sidb_simulation_result))
+    py::class_<fiction::sidb_simulation_result<Lyt>>(m, fmt::format("sidb_simulation_result{}", lattice).c_str(),
+                                                     DOC(fiction_sidb_simulation_result))
         .def(py::init<>())
         .def_readwrite("algorithm_name", &fiction::sidb_simulation_result<Lyt>::algorithm_name,
                        DOC(fiction_sidb_simulation_result_algorithm_name))
@@ -38,9 +39,7 @@ void sidb_simulation_result(pybind11::module& m, const std::string = "")
                        DOC(fiction_sidb_simulation_result_physical_parameters))
         .def_readwrite("additional_simulation_parameters",
                        &fiction::sidb_simulation_result<Lyt>::additional_simulation_parameters,
-                       DOC(fiction_sidb_simulation_result_additional_simulation_parameters))
-
-        ;
+                       DOC(fiction_sidb_simulation_result_additional_simulation_parameters));
 }
 
 }  // namespace detail
@@ -48,7 +47,8 @@ void sidb_simulation_result(pybind11::module& m, const std::string = "")
 inline void sidb_simulation_result(pybind11::module& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
-    detail::sidb_simulation_result<py_sidb_layout>(m);
+    detail::sidb_simulation_result<py_sidb_100_lattice>(m, "_100");
+    detail::sidb_simulation_result<py_sidb_111_lattice>(m, "_111");
 }
 
 }  // namespace pyfiction

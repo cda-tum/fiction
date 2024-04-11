@@ -5,58 +5,58 @@ import os
 
 class TestQuickExact(unittest.TestCase):
 
-    def test_three_DBs(self):
-        layout = sidb_layout((2, 1))
+    def test_three_sidbs(self):
+        layout = sidb_lattice_100((2, 1))
         layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((1, 0), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((2, 0), sidb_technology.cell_type.NORMAL)
 
-        params = quickexact_params()
-        params.simulation_parameters.base = 2
-        params.simulation_parameters.mu_minus = -0.25
-        params.base_number_detection = automatic_base_number_detection.OFF
-        self.assertEqual(params.simulation_parameters.mu_minus, -0.25)
-        self.assertEqual(params.base_number_detection, automatic_base_number_detection.OFF)
+        params = quickexact_params_100()
+        params.simulation_parameters_100.base = 2
+        params.simulation_parameters_100.mu_minus = -0.25
+        params.base_number_detection_100 = automatic_base_number_detection_100.OFF
+        self.assertEqual(params.simulation_parameters_100.mu_minus, -0.25)
+        self.assertEqual(params.base_number_detection_100, automatic_base_number_detection_100.OFF)
 
-        cds = charge_distribution_surface(layout)
+        cds = charge_distribution_surface_100(layout)
 
-        result = quickexact(cds, params)
+        result = quickexact_100(cds, params)
 
         self.assertEqual(result.algorithm_name, "QuickExact")
         self.assertLessEqual(len(result.charge_distributions), 3)
 
-        params.base_number_detection = automatic_base_number_detection.ON
-        self.assertEqual(params.base_number_detection, automatic_base_number_detection.ON)
+        params.base_number_detection_100 = automatic_base_number_detection_100.ON
+        self.assertEqual(params.base_number_detection_100, automatic_base_number_detection_100.ON)
 
-        result = quickexact(cds, params)
+        result = quickexact_100(cds, params)
         self.assertLessEqual(len(result.charge_distributions), 4)
 
-        params.simulation_parameters.epsilon_r = 2
-        params.simulation_parameters.lambda_tf = 2
-        result = quickexact(cds, params)
+        params.simulation_parameters_100.epsilon_r = 2
+        params.simulation_parameters_100.lambda_tf = 2
+        result = quickexact_100(cds, params)
         self.assertLessEqual(len(result.charge_distributions), 2)
 
-    def test_perturber_and_DB_pair_111(self):
+    def test_perturber_and_sidb_pair_111(self):
         layout = sidb_lattice_111((4, 1))
         layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((1, 0), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((2, 0), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((3, 0), sidb_technology.cell_type.NORMAL)
 
-        params = quickexact_params()
-        params.simulation_parameters.base = 2
-        params.simulation_parameters.mu_minus = -0.32
-        params.base_number_detection = automatic_base_number_detection.OFF
-        self.assertEqual(params.simulation_parameters.mu_minus, -0.32)
-        self.assertEqual(params.base_number_detection, automatic_base_number_detection.OFF)
+        params = quickexact_params_111()
+        params.simulation_parameters_111.base = 2
+        params.simulation_parameters_111.mu_minus = -0.32
+        params.base_number_detection_111 = automatic_base_number_detection_111.OFF
+        self.assertEqual(params.simulation_parameters_111.mu_minus, -0.32)
+        self.assertEqual(params.base_number_detection_111, automatic_base_number_detection_111.OFF)
 
         cds = charge_distribution_surface_111(layout)
 
-        result = quickexact(cds, params)
+        result = quickexact_111(cds, params)
 
         self.assertEqual(result.algorithm_name, "QuickExact")
 
-        groundstate = determine_groundstate_from_simulation_results(result)
+        groundstate = determine_groundstate_from_simulation_results_111(result)
 
         self.assertEqual(len(groundstate), 1)
 

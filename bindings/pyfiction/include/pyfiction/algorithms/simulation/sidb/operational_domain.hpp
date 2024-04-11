@@ -21,24 +21,28 @@ namespace detail
 {
 
 template <typename Lyt>
-void operational_domain(pybind11::module& m)
+void operational_domain(pybind11::module& m, const std::string& lattice = "")
 {
     using namespace pybind11::literals;
 
-    m.def("operational_domain_grid_search", &fiction::operational_domain_grid_search<Lyt, py_tt>, "lyt"_a, "spec"_a,
+    m.def(fmt::format("operational_domain_grid_search{}", lattice).c_str(),
+          &fiction::operational_domain_grid_search<Lyt, py_tt>, "lyt"_a, "spec"_a,
           "params"_a = fiction::operational_domain_params{}, "stats"_a = nullptr,
           DOC(fiction_operational_domain_grid_search));
 
-    m.def("operational_domain_random_sampling", &fiction::operational_domain_random_sampling<Lyt, py_tt>, "lyt"_a,
-          "spec"_a, "samples"_a, "params"_a = fiction::operational_domain_params{}, "stats"_a = nullptr,
+    m.def(fmt::format("operational_domain_random_sampling{}", lattice).c_str(),
+          &fiction::operational_domain_random_sampling<Lyt, py_tt>, "lyt"_a, "spec"_a, "samples"_a,
+          "params"_a = fiction::operational_domain_params{}, "stats"_a = nullptr,
           DOC(fiction_operational_domain_random_sampling));
 
-    m.def("operational_domain_flood_fill", &fiction::operational_domain_flood_fill<Lyt, py_tt>, "lyt"_a, "spec"_a,
-          "samples"_a, "params"_a = fiction::operational_domain_params{}, "stats"_a = nullptr,
+    m.def(fmt::format("operational_domain_flood_fill{}", lattice).c_str(),
+          &fiction::operational_domain_flood_fill<Lyt, py_tt>, "lyt"_a, "spec"_a, "samples"_a,
+          "params"_a = fiction::operational_domain_params{}, "stats"_a = nullptr,
           DOC(fiction_operational_domain_flood_fill));
 
-    m.def("operational_domain_contour_tracing", &fiction::operational_domain_contour_tracing<Lyt, py_tt>, "lyt"_a,
-          "spec"_a, "samples"_a, "params"_a = fiction::operational_domain_params{}, "stats"_a = nullptr,
+    m.def(fmt::format("operational_domain_contour_tracing{}", lattice).c_str(),
+          &fiction::operational_domain_contour_tracing<Lyt, py_tt>, "lyt"_a, "spec"_a, "samples"_a,
+          "params"_a = fiction::operational_domain_params{}, "stats"_a = nullptr,
           DOC(fiction_operational_domain_contour_tracing));
 }
 
@@ -136,7 +140,8 @@ inline void operational_domain(pybind11::module& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::operational_domain<py_charge_distribution_surface>(m);
+    detail::operational_domain<py_sidb_100_lattice>(m, "_100");
+    detail::operational_domain<py_sidb_111_lattice>(m, "_111");
 }
 
 }  // namespace pyfiction

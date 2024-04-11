@@ -20,12 +20,12 @@ namespace detail
 {
 
 template <typename Lyt>
-void detect_bdl_pairs(pybind11::module& m)
+void detect_bdl_pairs(pybind11::module& m, const std::string& lattice = "")
 {
     namespace py = pybind11;
     using namespace pybind11::literals;
 
-    py::class_<fiction::bdl_pair<Lyt>>(m, "bdl_pair", DOC(fiction_bdl_pair))
+    py::class_<fiction::bdl_pair<Lyt>>(m, fmt::format("bdl_pair{}", lattice).c_str(), DOC(fiction_bdl_pair))
         .def(py::init<>(), DOC(fiction_bdl_pair_bdl_pair))
         .def(py::init<fiction::sidb_technology::cell_type, fiction::cell<Lyt>, fiction::cell<Lyt>>(), "t"_a, "u"_a,
              "l"_a, DOC(fiction_bdl_pair_bdl_pair_2))
@@ -35,7 +35,7 @@ void detect_bdl_pairs(pybind11::module& m)
 
         ;
 
-    m.def("detect_bdl_pairs", &fiction::detect_bdl_pairs<Lyt>, "lyt"_a, "type"_a,
+    m.def(fmt::format("detect_bdl_pairs{}", lattice).c_str(), &fiction::detect_bdl_pairs<Lyt>, "lyt"_a, "type"_a,
           "params"_a = fiction::detect_bdl_pairs_params{}, DOC(fiction_detect_bdl_pairs));
 }
 
@@ -54,7 +54,8 @@ inline void detect_bdl_pairs(pybind11::module& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::detect_bdl_pairs<py_charge_distribution_surface>(m);
+    detail::detect_bdl_pairs<py_sidb_100_lattice>(m, "_100");
+    detail::detect_bdl_pairs<py_sidb_111_lattice>(m, "_111");
 }
 
 }  // namespace pyfiction
