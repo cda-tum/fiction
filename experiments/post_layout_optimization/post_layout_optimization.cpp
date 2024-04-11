@@ -82,11 +82,12 @@ int main()  // NOLINT
         fiction::post_layout_optimization<gate_lyt>(gate_level_layout, &post_layout_optimization_stats);
 
         // check equivalence
-        const auto eq_stats = fiction::equivalence_checking<fiction::technology_network, gate_lyt>(benchmark_network, gate_level_layout);
+        const auto eq_stats =
+            fiction::equivalence_checking<fiction::technology_network, gate_lyt>(benchmark_network, gate_level_layout);
 
         const std::string eq_result = eq_stats == fiction::eq_type::STRONG ? "STRONG" :
                                       eq_stats == fiction::eq_type::WEAK   ? "WEAK" :
-                                                                                "NO";
+                                                                             "NO";
 
         // calculate bounding box
         const auto bounding_box_after_optimization = fiction::bounding_box_2d(gate_level_layout);

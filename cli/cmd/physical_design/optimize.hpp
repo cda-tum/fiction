@@ -11,6 +11,7 @@
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
+#include <fiction/utils/name_utils.hpp>
 
 #include <alice/alice.hpp>
 
