@@ -73,6 +73,7 @@
 #include "pyfiction/technology/charge_distribution_surface.hpp"
 #include "pyfiction/technology/sidb_charge_state.hpp"
 #include "pyfiction/technology/sidb_defects.hpp"
+#include "pyfiction/technology/sidb_nm_distance.hpp"
 #include "pyfiction/technology/sidb_nm_position.hpp"
 #include "pyfiction/utils/layout_utils.hpp"
 #include "pyfiction/utils/name_utils.hpp"
@@ -176,6 +177,7 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::sidb_defects(m);
     pyfiction::sidb_charge_state(m);
     pyfiction::sidb_nm_position(m);
+    pyfiction::sidb_nm_distance(m);
     pyfiction::charge_distribution_surfaces(m);
     /**
      * Input/Output

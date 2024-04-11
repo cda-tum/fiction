@@ -62,6 +62,11 @@ Physical Constants
 Euclidean distance between two SiDBs in nanometers
 --------------------------------------------------
 
-**Header:** ``fiction/algorithms/simulation/sidb/sidb_nanometer_distance.hpp``
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/technology/sidb_nm_distance.hpp``
 
-.. doxygenfunction:: fiction::sidb_nanometer_distance
+        .. doxygenfunction:: fiction::sidb_nanometer_distance
+
+    .. tab:: Python
+        .. autoclass:: mnt.pyfiction.sidb_nanometer_distance

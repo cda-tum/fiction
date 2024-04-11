@@ -6,7 +6,7 @@
 #define FICTION_DETECT_BDL_PAIRS_HPP
 
 #include "fiction/technology/cell_technologies.hpp"
-#include "fiction/technology/sidb_nanometer_distance.hpp"
+#include "fiction/technology/sidb_nm_distance.hpp"
 #include "fiction/traits.hpp"
 
 #include <algorithm>

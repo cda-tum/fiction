@@ -2,8 +2,8 @@
 // Created by Jan Drewniok on 26.03.24.
 //
 
-#ifndef FICTION_SIDB_NANOMETER_DISTANCE_HPP
-#define FICTION_SIDB_NANOMETER_DISTANCE_HPP
+#ifndef FICTION_SIDB_NM_DISTANCE_HPP
+#define FICTION_SIDB_NM_DISTANCE_HPP
 
 #include "fiction/technology/sidb_nm_position.hpp"
 #include "fiction/traits.hpp"
@@ -38,4 +38,4 @@ template <typename Lyt>
 
 }  // namespace fiction
 
-#endif  // FICTION_SIDB_NANOMETER_DISTANCE_HPP
+#endif  // FICTION_SIDB_NM_DISTANCE_HPP

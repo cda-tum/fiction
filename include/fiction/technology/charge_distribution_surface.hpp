@@ -10,7 +10,7 @@
 #include "fiction/technology/physical_constants.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/technology/sidb_defects.hpp"
-#include "fiction/technology/sidb_nanometer_distance.hpp"
+#include "fiction/technology/sidb_nm_distance.hpp"
 #include "fiction/technology/sidb_nm_position.hpp"
 #include "fiction/traits.hpp"
 

@@ -38,13 +38,6 @@ inline void distance(pybind11::module& m)
     detail::distance<py_cartesian_layout>(m);
     detail::distance<py_shifted_cartesian_layout>(m);
     detail::distance<py_hexagonal_layout>(m);
-
-    using namespace pybind11::literals;
-
-    m.def("sidb_nanometer_distance", &fiction::sidb_nanometer_distance<py_charge_distribution_surface>, "lyt"_a,
-          "source"_a, "target"_a);
-
-    // TODO add other types
 }
 
 }  // namespace pyfiction
