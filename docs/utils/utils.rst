@@ -81,14 +81,14 @@ Layout Utils
     .. tab:: C++
         **Header:** ``fiction/utils/layout_utils.hpp``
 
-.. doxygenfunction:: fiction::num_adjacent_coordinates
-.. doxygenfunction:: fiction::relative_to_absolute_cell_position
-.. doxygenfunction:: fiction::port_direction_to_coordinate
-.. doxygenfunction:: fiction::normalize_layout_coordinates
-.. doxygenfunction:: fiction::convert_to_siqad_coordinates
-.. doxygenfunction:: fiction::convert_to_fiction_coordinates
-.. doxygenfunction:: fiction::random_coordinate
-.. doxygenfunction:: fiction::all_coordinates_in_spanned_area
+        .. doxygenfunction:: fiction::num_adjacent_coordinates
+        .. doxygenfunction:: fiction::relative_to_absolute_cell_position
+        .. doxygenfunction:: fiction::port_direction_to_coordinate
+        .. doxygenfunction:: fiction::normalize_layout_coordinates
+        .. doxygenfunction:: fiction::convert_to_siqad_coordinates
+        .. doxygenfunction:: fiction::convert_to_fiction_coordinates
+        .. doxygenfunction:: fiction::random_coordinate
+        .. doxygenfunction:: fiction::all_coordinates_in_spanned_area
 
     .. tab:: Python
         .. autofunction:: mnt.pyfiction.num_adjacent_coordinates

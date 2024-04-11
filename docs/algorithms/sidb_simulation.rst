@@ -205,12 +205,20 @@ Time-to-Solution (TTS) Statistics
 Random SiDB Layout Generator
 ############################
 
-**Header:** ``fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp``
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp``
 
-.. doxygenstruct:: fiction::generate_random_sidb_layout_params
-   :members:
-.. doxygenfunction:: fiction::generate_random_sidb_layout
-.. doxygenfunction:: fiction::generate_multiple_random_sidb_layouts
+        .. doxygenstruct:: fiction::generate_random_sidb_layout_params
+           :members:
+        .. doxygenfunction:: fiction::generate_random_sidb_layout
+        .. doxygenfunction:: fiction::generate_multiple_random_sidb_layouts
+
+    .. tab:: Python
+        .. autoclass:: mnt.pyfiction.generate_random_sidb_layout_params
+            :members:
+        .. autofunction:: mnt.pyfiction.generate_random_sidb_layout
+       .. autofunction:: mnt.pyfiction.generate_multiple_random_sidb_layouts
 
 
 Operational Domain Computation
@@ -222,11 +230,11 @@ Operational Domain Computation
     .. tab:: C++
         **Header:** ``fiction/algorithms/simulation/sidb/is_operational.hpp``
 
-.. doxygenenum:: fiction::operational_status
-.. doxygenstruct:: fiction::is_operational_params
-   :members:
-.. doxygenfunction:: fiction::is_operational
-.. doxygenfunction:: fiction::operational_input_patterns
+        .. doxygenenum:: fiction::operational_status
+        .. doxygenstruct:: fiction::is_operational_params
+           :members:
+        .. doxygenfunction:: fiction::is_operational
+        .. doxygenfunction:: fiction::operational_input_patterns
 
         **Header:** ``fiction/algorithms/simulation/sidb/operational_domain.hpp``
 
@@ -273,9 +281,14 @@ Utility Functions
 Simulation Equivalence Checking
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**Header:** ``fiction/algorithms/simulation/sidb/check_simulation_results_for_equivalence.hpp``
+.. tabs::
+    .. tab:: C++
+       **Header:** ``fiction/algorithms/simulation/sidb/check_simulation_results_for_equivalence.hpp``
 
-.. doxygenfunction:: fiction::check_simulation_results_for_equivalence
+        .. doxygenfunction:: fiction::check_simulation_results_for_equivalence
+
+    .. tab:: Python
+        .. autofunction:: fiction::check_simulation_results_for_equivalence
 
 
 Charge Detection
@@ -338,9 +351,14 @@ Assess Population Stability
 Positive Charge Detection
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**Header:** ``fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp``
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp``
 
-.. doxygenfunction:: fiction::can_positive_charges_occur
+        .. doxygenfunction:: fiction::can_positive_charges_occur
+
+    .. tab:: Python
+        .. autofunction:: fiction::can_positive_charges_occur
 
 
 Convert Potential to Distance
