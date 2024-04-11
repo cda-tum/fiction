@@ -43,7 +43,7 @@ void design_sidb_gates(pybind11::module& m)
                                                        DOC(fiction_design_sidb_gates_params))
         .def(py::init<>())
         .def_readwrite("simulation_parameters", &fiction::design_sidb_gates_params<Lyt>::simulation_parameters,
-                       DOC(fiction_design_sidb_gates_params_phys_params))
+                       DOC(fiction_design_sidb_gates_params))
         .def_readwrite("design_mode", &fiction::design_sidb_gates_params<Lyt>::design_mode,
                        DOC(fiction_design_sidb_gates_params_design_mode))
         .def_readwrite("canvas", &fiction::design_sidb_gates_params<Lyt>::canvas,

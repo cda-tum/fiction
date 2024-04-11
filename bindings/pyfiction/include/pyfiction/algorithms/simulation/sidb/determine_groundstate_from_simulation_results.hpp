@@ -13,6 +13,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include <string>
+
 namespace pyfiction
 {
 
@@ -25,7 +27,8 @@ void determine_groundstate_from_simulation_results(pybind11::module& m, const st
     using namespace pybind11::literals;
 
     m.def(fmt::format("determine_groundstate_from_simulation_results{}", lattice).c_str(),
-          &fiction::determine_groundstate_from_simulation_results<Lyt>, "simulation_results"_a, DOC(fiction_calculate_energy_and_state_type));
+          &fiction::determine_groundstate_from_simulation_results<Lyt>, "simulation_results"_a,
+          DOC(fiction_determine_groundstate_from_simulation_results));
 }
 
 }  // namespace detail

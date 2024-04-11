@@ -41,7 +41,8 @@ void sidb_lattice_cell_level_layout(pybind11::module& m)
     py::class_<py_sidb_lattice, py_sidb_layout>(m, fmt::format("sidb_lattice{}", orientation).c_str(),
                                                 DOC(fiction_cell_level_layout), py::module_local())
         .def(py::init<>())
-        .def(py::init<const fiction::aspect_ratio<py_sidb_layout>&, const std::string&>(), "dimension"_a, "name"_a = "", DOC(fiction_cell_level_layout_cell_level_layout))
+        .def(py::init<const fiction::aspect_ratio<py_sidb_layout>&, const std::string&>(), "dimension"_a, "name"_a = "",
+             DOC(fiction_sidb_lattice))
 
         ;
 }

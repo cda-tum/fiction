@@ -10,6 +10,7 @@
 
 #include <fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp>
 #include <fiction/layouts/coordinates.hpp>
+#include <fiction/traits.hpp>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -25,7 +26,6 @@ namespace detail
 template <typename Lyt>
 void random_layout_generator(pybind11::module& m, const std::string& lattice = "")
 {
-    namespace py = pybind11;
     using namespace pybind11::literals;
 
     m.def(fmt::format("generate_random_sidb_layout{}", lattice).c_str(), &fiction::generate_random_sidb_layout<Lyt>,
@@ -72,7 +72,8 @@ inline void random_sidb_layout_generator(pybind11::module& m)
         .def_readwrite("maximal_attempts",
                        &fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::maximal_attempts,
                        DOC(fiction_generate_random_sidb_layout_params_maximal_attempts))
-        .def_readwrite("number_of_unique_generated_layouts",
+        .def_readwrite(
+            "number_of_unique_generated_layouts",
             &fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::number_of_unique_generated_layouts,
             DOC(fiction_generate_random_sidb_layout_params_number_of_unique_generated_layouts))
         .def_readwrite("maximal_attempts_for_multiple_layouts",

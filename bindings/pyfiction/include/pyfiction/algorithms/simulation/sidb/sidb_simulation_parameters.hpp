@@ -36,6 +36,7 @@ inline void sidb_simulation_parameters(pybind11::module& m)
                        DOC(fiction_sidb_simulation_parameters_lambda_tf))
         .def_readwrite("mu_minus", &fiction::sidb_simulation_parameters::mu_minus)
         // , DOC(fiction_sidb_simulation_parameters_mu_minus))
+        // TODO
         .def_readwrite("base", &fiction::sidb_simulation_parameters::base, DOC(fiction_sidb_simulation_parameters_base))
         .def("k", &fiction::sidb_simulation_parameters::k, DOC(fiction_sidb_simulation_parameters_k))
         .def("mu_plus", &fiction::sidb_simulation_parameters::mu_plus)

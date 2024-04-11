@@ -26,7 +26,7 @@ void check_for_equivalence(pybind11::module& m, const std::string& lattice = "")
 
     m.def(fmt::format("check_simulation_results_for_equivalence{}", lattice).c_str(),
           &fiction::check_simulation_results_for_equivalence<Lyt>, "result1"_a = fiction::sidb_simulation_result<Lyt>{},
-          "result2"_a = fiction::sidb_simulation_result<Lyt>{}, DOC(fiction_calculate_energy_and_state_type));
+          "result2"_a = fiction::sidb_simulation_result<Lyt>{}, DOC(fiction_check_simulation_results_for_equivalence));
 }
 
 }  // namespace detail

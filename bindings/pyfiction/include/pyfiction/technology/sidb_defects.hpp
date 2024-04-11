@@ -12,6 +12,8 @@
 #include <pybind11/operators.h>
 #include <pybind11/pybind11.h>
 
+#include <cstdint>
+
 namespace pyfiction
 {
 
@@ -55,8 +57,8 @@ inline void sidb_defects(pybind11::module& m)
 
         ;
 
-    m.def("is_charged_defect_type", &fiction::is_charged_defect_type, "defect"_a, DOC(fiction_is_charged_defect));
-    m.def("is_neutral_defect_type", &fiction::is_neutral_defect_type, "defect"_a, DOC(fiction_is_neutral_defect));
+    m.def("is_charged_defect_type", &fiction::is_charged_defect_type, "defect"_a, DOC(fiction_is_charged_defect_type));
+    m.def("is_neutral_defect_type", &fiction::is_neutral_defect_type, "defect"_a, DOC(fiction_is_neutral_defect_type));
 
     m.def("is_positively_charged_defect", &fiction::is_positively_charged_defect, "defect"_a,
           DOC(fiction_is_positively_charged_defect));
