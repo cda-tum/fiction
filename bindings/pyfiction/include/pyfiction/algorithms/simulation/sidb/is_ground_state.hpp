@@ -34,8 +34,8 @@ inline void is_ground_state(pybind11::module& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::is_ground_state<py_charge_distribution_surface_100>(m, "_100");
-    detail::is_ground_state<py_charge_distribution_surface_100>(m, "_111");
+    detail::is_ground_state<py_sidb_100_lattice>(m, "_100");
+    detail::is_ground_state<py_sidb_111_lattice>(m, "_111");
 }
 
 }  // namespace pyfiction

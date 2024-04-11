@@ -4,7 +4,6 @@ import os
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
-
 class TestIsOperational(unittest.TestCase):
 
     def test_is_operational(self):

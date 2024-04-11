@@ -2,7 +2,6 @@ from mnt.pyfiction import *
 import unittest
 import os
 
-
 class TestTimeToSolution(unittest.TestCase):
 
     def test_one_sidb(self):

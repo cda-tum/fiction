@@ -1,26 +1,35 @@
-from mnt.pyfiction import *
 import unittest
-import os
+
+from mnt.pyfiction import *
 
 
 class TestCanPositiveChargesOccur(unittest.TestCase):
 
-    def test_three_DBs(self):
-        layout = sidb_layout((2, 3))
-        layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
-        layout.assign_cell_type((0, 3), sidb_technology.cell_type.NORMAL)
-        layout.assign_cell_type((1, 1), sidb_technology.cell_type.NORMAL)
-        params = assess_physical_population_stability_params()
-        params.simulation_parameters.mu_minus = -0.25
-        cds = charge_distribution_surface(layout)
-        result = assess_physical_population_stability(layout, params)
-        self.assertEqual(len(result), 5)
-        self.assertLessEqual(result[0].system_energy, result[1].system_energy)
-        self.assertLessEqual(result[1].system_energy, result[2].system_energy)
+    def test_three_DBs_100_lattice(self):
+        layout = sidb_lattice_100((2, 3))
+        layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
+        layout.assign_cell_type((1, 0), sidb_technology.cell_type.NORMAL)
+        layout.assign_cell_type((2, 0), sidb_technology.cell_type.NORMAL)
 
-        params.simulation_parameters.mu_minus = -0.32
-        result = assess_physical_population_stability(cds, params)
-        self.assertEqual(len(result), 1)
+        self.assertTrue(can_positive_charges_occur_100(layout, sidb_simulation_parameters()))
+
+        params = sidb_simulation_parameters()
+        params.mu_minus = -0.8
+        self.assertFalse(can_positive_charges_occur_100(layout, params))
+
+    def test_three_DBs_111_lattice(self):
+        layout = sidb_lattice_111((2, 3))
+        layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
+        layout.assign_cell_type((1, 0), sidb_technology.cell_type.NORMAL)
+        layout.assign_cell_type((2, 0), sidb_technology.cell_type.NORMAL)
+
+        params = sidb_simulation_parameters()
+        params.mu_minus = -0.05
+
+        self.assertTrue(can_positive_charges_occur_111(layout, params))
+
+        params.mu_minus = -0.8
+        self.assertFalse(can_positive_charges_occur_111(layout, params))
 
 
 if __name__ == '__main__':
