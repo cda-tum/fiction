@@ -13,6 +13,7 @@
 
 #include <mockturtle/utils/stopwatch.hpp>
 
+#include <algorithm>
 #include <cassert>
 #include <cstdint>
 #include <cstdlib>
@@ -26,6 +27,10 @@ namespace fiction
 template <typename Lyt>
 struct displacement_robustness_domain
 {
+    /**
+     * Represents a domain of displacement robustness for layouts resulting from applying a displacement to a given gate
+     * layout.
+     */
     std::vector<std::pair<Lyt, operational_status>> operational_values{};
 };
 
@@ -54,29 +59,17 @@ struct displacement_robustness_stats
 template <typename Lyt>
 std::size_t num_operational_layouts(const displacement_robustness_domain<Lyt>& domain)
 {
-    std::size_t operational_counter = 0;
-    for (const auto& robust : domain.operational_values)
-    {
-        if (robust.second == operational_status::OPERATIONAL)
-        {
-            operational_counter++;
-        }
-    }
-    return operational_counter;
+    return static_cast<std::size_t>(std::count_if(domain.operational_values.begin(), domain.operational_values.end(),
+                                                  [](const auto& robust)
+                                                  { return robust.second == operational_status::OPERATIONAL; }));
 }
 
 template <typename Lyt>
 std::size_t num_non_operational_layouts(const displacement_robustness_domain<Lyt>& domain)
 {
-    std::size_t non_operational_counter = 0;
-    for (const auto& robust : domain.operational_values)
-    {
-        if (robust.second == operational_status::NON_OPERATIONAL)
-        {
-            non_operational_counter++;
-        }
-    }
-    return non_operational_counter;
+    return static_cast<std::size_t>(std::count_if(domain.operational_values.begin(), domain.operational_values.end(),
+                                                  [](const auto& robust)
+                                                  { return robust.second == operational_status::NON_OPERATIONAL; }));
 }
 
 namespace detail
@@ -185,12 +178,17 @@ class displacement_robustness_domain_impl
             // Iterate over each cell in the combination
             for (const auto& cell : combination)
             {
-                // Assign cell type from the layout to the new layout
+                // Assign a cell type from the layout to the new layout
                 lyt.assign_cell_type(cell, layout.get_cell_type(cells[i]));
                 i++;
             }
 
-            // Assess operational status of the new layout
+            if (lyt.num_cells() != layout.num_cells())
+            {
+                continue;
+            }
+
+            // Assess the operational status of the new layout
             const auto op_status = is_operational(lyt, params.tt, params.operational_params);
 
             // Store the operational status in the domain
