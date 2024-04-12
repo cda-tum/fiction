@@ -16,8 +16,8 @@
 #include <fiction/technology/charge_distribution_surface.hpp>
 #include <fiction/technology/physical_constants.hpp>
 #include <fiction/technology/sidb_bestagon_library.hpp>
+#include <fiction/technology/sidb_defect_surface.hpp>
 #include <fiction/technology/sidb_defects.hpp>
-#include <fiction/technology/sidb_surface.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/layout_utils.hpp>
 
@@ -344,9 +344,9 @@ TEMPLATE_TEST_CASE(
 TEMPLATE_TEST_CASE(
     "Single SiDB ClusterComplete simulation with one negatively charge defect (default initialization) in proximity",
     "[clustercomplete]",
-    (sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
@@ -363,9 +363,9 @@ TEMPLATE_TEST_CASE(
 TEMPLATE_TEST_CASE(
     "Single SiDB ClusterComplete simulation with one negatively charge defect (changed lambda_tf) in proximity",
     "[clustercomplete]",
-    (sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
@@ -383,9 +383,9 @@ TEMPLATE_TEST_CASE(
 TEMPLATE_TEST_CASE(
     "Single SiDB ClusterComplete simulation with one negatively charge defect (changed epsilon_r) in proximity",
     "[clustercomplete]",
-    (sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
@@ -405,9 +405,9 @@ TEMPLATE_TEST_CASE(
 TEMPLATE_TEST_CASE(
     "four SiDBs ClusterComplete simulation with one negatively charge defect (changed epsilon_r) in proximity",
     "[clustercomplete]",
-    (sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
     lyt.assign_cell_type({-2, 0, 1}, TestType::cell_type::NORMAL);
@@ -432,9 +432,9 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "Single SiDB ClusterComplete simulation with one highly negatively charge defect in proximity", "[clustercomplete]",
-    (sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
@@ -454,9 +454,9 @@ TEMPLATE_TEST_CASE(
     "Single SiDB ClusterComplete simulation with one highly negatively charge defect in proximity but with high "
     "screening",
     "[clustercomplete]",
-    (sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
@@ -475,9 +475,9 @@ TEMPLATE_TEST_CASE(
 TEMPLATE_TEST_CASE(
     "Single SiDB ClusterComplete simulation with two highly negatively and oppositely charged defects in proximity",
     "[clustercomplete]",
-    (sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
@@ -1065,9 +1065,9 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "ClusterComplete with one SiDB and one negatively charged defect in proximity", "[clustercomplete]",
-    (sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
 
@@ -1087,9 +1087,9 @@ TEMPLATE_TEST_CASE(
 TEMPLATE_TEST_CASE(
     "ClusterComplete simulation  of four SiDBs (far away) with one negatively charged defects in proximity",
     "[clustercomplete]",
-    (sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
 
@@ -1115,9 +1115,9 @@ TEMPLATE_TEST_CASE(
 TEMPLATE_TEST_CASE(
     "ClusterComplete simulation of four SiDBs (far away) with two negatively charged defects in proximity",
     "[clustercomplete]",
-    (sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
 
@@ -1149,9 +1149,9 @@ TEMPLATE_TEST_CASE(
     "ClusterComplete simulation of four SiDBs (far away) with one negatively and positively charged defect in "
     "proximity",
     "[clustercomplete]",
-    (sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
     (charge_distribution_surface<
-        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+        sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
 {
     TestType lyt{};
 
@@ -1864,7 +1864,7 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({13, 12, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({24, 12, 0}, TestType::cell_type::NORMAL);
 
-        const sidb_simulation_parameters params{3, -0.32, 5.6, 5.0, 3.84, 7.68, 2.25};
+        const sidb_simulation_parameters params{3, -0.32, 5.6, 5.0};
 
         sidb_simulation_result<TestType> cc_res = clustercomplete(lyt, clustercomplete_params<TestType>{params});
 

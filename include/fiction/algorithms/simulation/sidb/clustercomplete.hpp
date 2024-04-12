@@ -14,7 +14,7 @@
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/technology/sidb_cluster_hierarchy.hpp"
 #include "fiction/technology/sidb_defects.hpp"
-#include "fiction/technology/sidb_surface.hpp"
+#include "fiction/technology/sidb_defect_surface.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/hash.hpp"
 
