@@ -418,9 +418,9 @@ class ground_state_space_impl
         else if constexpr (mode == potential_bound_analysis_mode::ANALYZE_COMPOSITION)
         {
             return {internal_pot_bounds.value().at(sidb_ix).at(static_cast<uint8_t>(bound_direction::LOWER)) +
-                        pst.cluster->get_recv_ext_pot_bound<bound_direction::LOWER>(sidb_ix),
+                        pst.cluster->parent.lock()->get_recv_ext_pot_bound<bound_direction::LOWER>(sidb_ix),
                     internal_pot_bounds.value().at(sidb_ix).at(static_cast<uint8_t>(bound_direction::UPPER)) +
-                        pst.cluster->get_recv_ext_pot_bound<bound_direction::UPPER>(sidb_ix)};
+                        pst.cluster->parent.lock()->get_recv_ext_pot_bound<bound_direction::UPPER>(sidb_ix)};
         }
     }
 
@@ -533,7 +533,6 @@ class ground_state_space_impl
             }
         }
 
-        child_rst.cluster->set_recv_ext_pot_bound<bound>(child_rst.sidb_ix, recv_pot_without_siblings);
         parent->set_recv_ext_pot_bound<bound>(child_rst.sidb_ix, recv_pot_without_siblings);
     }
 
@@ -654,26 +653,6 @@ class ground_state_space_impl
         rst.cluster->update_recv_ext_pot_bound<bound>(rst.sidb_ix, diff);
     }
 
-    template <bound_direction bound>
-    void merge_received_pot_projection_bounds(const sidb_cluster_projector_state& pst,
-                                              const sidb_cluster_ptr&             parent) const noexcept
-    {
-        for (const sidb_cluster_charge_state& m : parent->charge_space)
-        {
-            for (const sidb_cluster_state_composition& composition : m.compositions)
-            {
-                for (const sidb_cluster_state& child_cst : composition)
-                {
-                    for (const uint64_t child_sidb_ix : child_cst.proj_st.cluster->sidbs)
-                    {
-                        add_pot_projection(pst.cluster, child_sidb_ix,
-                                           get_projector_state_bound<bound>(pst, child_sidb_ix));
-                    }
-                }
-            }
-        }
-    }
-
     void construct_merged_potential_projections(const sidb_cluster_ptr& parent) const noexcept
     {
         for (const sidb_cluster_ptr& non_child : clustering)
@@ -684,14 +663,6 @@ class ground_state_space_impl
 
                 merge_pot_projection_bounds<bound_direction::LOWER>(parent, rst);
                 merge_pot_projection_bounds<bound_direction::UPPER>(parent, rst);
-            }
-
-            for (const sidb_cluster_charge_state& m : non_child->charge_space)
-            {
-                const sidb_cluster_projector_state pst{non_child, static_cast<uint64_t>(m)};
-
-                merge_received_pot_projection_bounds<bound_direction::LOWER>(pst, parent);
-                merge_received_pot_projection_bounds<bound_direction::UPPER>(pst, parent);
             }
         }
     }
