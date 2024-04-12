@@ -6553,9 +6553,8 @@ first collecting all dots of the given type and then uniquely pairing
 them up based on their distance. Lower and upper distance thresholds
 can be defined (defaults = 0.75 nm and 1.5 nm, respectively) to narrow
 down the range in which SiDBs could be considered a BDL pair. The
-distance between two dots is computed using the
-`sidb_nm_distance` function. The algorithm returns a vector of
-BDL pairs.
+distance between two dots is computed using the `sidb_nm_distance`
+function. The algorithm returns a vector of BDL pairs.
 
 Template parameter ``Lyt``:
   SiDB cell-level layout type.
@@ -13377,8 +13376,8 @@ Template parameter ``has_sidb_lattice_interface``:
 
 static const char *__doc_fiction_sidb_lattice_2 = R"doc()doc";
 
-static const char *__doc_fiction_sidb_nanometer_distance =
-  R"doc(Computes the distance between two SiDB cells in nanometers (unit: nm).
+static const char* __doc_fiction_sidb_nm_distance =
+    R"doc(Computes the distance between two SiDB cells in nanometers (unit: nm).
 
 Template parameter ``Lyt``:
   SiDB cell-level layout type.
