@@ -5,19 +5,28 @@
 #if (FICTION_ALGLIB_ENABLED)
 
 #include <catch2/catch_template_test_macros.hpp>
+#include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
+
+#include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/algorithms/physical_design/apply_gate_library.hpp>
 #include <fiction/algorithms/simulation/sidb/clustercomplete.hpp>
+#include <fiction/algorithms/simulation/sidb/determine_groundstate_from_simulation_results.hpp>
 #include <fiction/algorithms/simulation/sidb/minimum_energy.hpp>
 #include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
+#include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/charge_distribution_surface.hpp>
 #include <fiction/technology/physical_constants.hpp>
 #include <fiction/technology/sidb_bestagon_library.hpp>
+#include <fiction/technology/sidb_charge_state.hpp>
 #include <fiction/technology/sidb_defect_surface.hpp>
 #include <fiction/technology/sidb_defects.hpp>
+#include <fiction/technology/sidb_lattice.hpp>
+#include <fiction/technology/sidb_lattice_orientations.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/layout_utils.hpp>
 
@@ -343,10 +352,8 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "Single SiDB ClusterComplete simulation with one negatively charge defect (default initialization) in proximity",
-    "[clustercomplete]",
-    (sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
-    (charge_distribution_surface<
-        sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+    "[clustercomplete]", (sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>),
+    (charge_distribution_surface<sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>>))
 {
     TestType lyt{};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
@@ -362,10 +369,8 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "Single SiDB ClusterComplete simulation with one negatively charge defect (changed lambda_tf) in proximity",
-    "[clustercomplete]",
-    (sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
-    (charge_distribution_surface<
-        sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+    "[clustercomplete]", (sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>),
+    (charge_distribution_surface<sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>>))
 {
     TestType lyt{};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
@@ -382,10 +387,8 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "Single SiDB ClusterComplete simulation with one negatively charge defect (changed epsilon_r) in proximity",
-    "[clustercomplete]",
-    (sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
-    (charge_distribution_surface<
-        sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+    "[clustercomplete]", (sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>),
+    (charge_distribution_surface<sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>>))
 {
     TestType lyt{};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
@@ -404,10 +407,8 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "four SiDBs ClusterComplete simulation with one negatively charge defect (changed epsilon_r) in proximity",
-    "[clustercomplete]",
-    (sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
-    (charge_distribution_surface<
-        sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+    "[clustercomplete]", (sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>),
+    (charge_distribution_surface<sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>>))
 {
     TestType lyt{};
     lyt.assign_cell_type({-2, 0, 1}, TestType::cell_type::NORMAL);
@@ -430,11 +431,9 @@ TEMPLATE_TEST_CASE(
     CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(3) == sidb_charge_state::NEUTRAL);
 }
 
-TEMPLATE_TEST_CASE(
-    "Single SiDB ClusterComplete simulation with one highly negatively charge defect in proximity", "[clustercomplete]",
-    (sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
-    (charge_distribution_surface<
-        sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+TEMPLATE_TEST_CASE("Single SiDB ClusterComplete simulation with one highly negatively charge defect in proximity",
+                   "[clustercomplete]", (sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>),
+                   (charge_distribution_surface<sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>>))
 {
     TestType lyt{};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
@@ -453,10 +452,8 @@ TEMPLATE_TEST_CASE(
 TEMPLATE_TEST_CASE(
     "Single SiDB ClusterComplete simulation with one highly negatively charge defect in proximity but with high "
     "screening",
-    "[clustercomplete]",
-    (sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
-    (charge_distribution_surface<
-        sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+    "[clustercomplete]", (sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>),
+    (charge_distribution_surface<sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>>))
 {
     TestType lyt{};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
@@ -474,10 +471,8 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "Single SiDB ClusterComplete simulation with two highly negatively and oppositely charged defects in proximity",
-    "[clustercomplete]",
-    (sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
-    (charge_distribution_surface<
-        sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+    "[clustercomplete]", (sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>),
+    (charge_distribution_surface<sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>>))
 {
     TestType lyt{};
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
@@ -496,10 +491,8 @@ TEMPLATE_TEST_CASE(
     CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) == sidb_charge_state::NEGATIVE);
 }
 
-TEMPLATE_TEST_CASE(
-    "Single SiDB ClusterComplete simulation with local external potential", "[clustercomplete]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+TEMPLATE_TEST_CASE("Single SiDB ClusterComplete simulation with local external potential", "[clustercomplete]",
+                   (sidb_100_cell_clk_lyt_siqad), (cds_sidb_100_cell_clk_lyt_siqad))
 {
     TestType lyt{};
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
@@ -514,10 +507,8 @@ TEMPLATE_TEST_CASE(
     CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) == sidb_charge_state::NEUTRAL);
 }
 
-TEMPLATE_TEST_CASE(
-    "Single SiDB ClusterComplete simulation with local external potential (high)", "[clustercomplete]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+TEMPLATE_TEST_CASE("Single SiDB ClusterComplete simulation with local external potential (high)", "[clustercomplete]",
+                   (sidb_100_cell_clk_lyt_siqad), (cds_sidb_100_cell_clk_lyt_siqad))
 {
     TestType lyt{};
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
@@ -531,10 +522,8 @@ TEMPLATE_TEST_CASE(
     CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) == sidb_charge_state::POSITIVE);
 }
 
-TEMPLATE_TEST_CASE(
-    "Single SiDB ClusterComplete simulation with global external potential", "[clustercomplete]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+TEMPLATE_TEST_CASE("Single SiDB ClusterComplete simulation with global external potential", "[clustercomplete]",
+                   (sidb_100_cell_clk_lyt_siqad), (cds_sidb_100_cell_clk_lyt_siqad))
 {
     TestType lyt{};
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
@@ -549,10 +538,8 @@ TEMPLATE_TEST_CASE(
     CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) == sidb_charge_state::NEUTRAL);
 }
 
-TEMPLATE_TEST_CASE(
-    "Single SiDB ClusterComplete simulation with global external potential (high)", "[clustercomplete]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+TEMPLATE_TEST_CASE("Single SiDB ClusterComplete simulation with global external potential (high)", "[clustercomplete]",
+                   (sidb_100_cell_clk_lyt_siqad), (cds_sidb_100_cell_clk_lyt_siqad))
 {
     TestType lyt{};
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
@@ -565,10 +552,8 @@ TEMPLATE_TEST_CASE(
     CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) == sidb_charge_state::POSITIVE);
 }
 
-TEMPLATE_TEST_CASE(
-    "Single SiDB ClusterComplete simulation with global external potential (high, positive)", "[clustercomplete]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+TEMPLATE_TEST_CASE("Single SiDB ClusterComplete simulation with global external potential (high, positive)",
+                   "[clustercomplete]", (sidb_100_cell_clk_lyt_siqad), (cds_sidb_100_cell_clk_lyt_siqad))
 {
     TestType lyt{};
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
@@ -581,10 +566,8 @@ TEMPLATE_TEST_CASE(
     CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) == sidb_charge_state::NEGATIVE);
 }
 
-TEMPLATE_TEST_CASE(
-    "ClusterComplete simulation of a BDL pair", "[clustercomplete]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+TEMPLATE_TEST_CASE("ClusterComplete simulation of a BDL pair", "[clustercomplete]", (sidb_100_cell_clk_lyt_siqad),
+                   (cds_sidb_100_cell_clk_lyt_siqad))
 {
     TestType lyt{};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
@@ -615,10 +598,8 @@ TEMPLATE_TEST_CASE(
     }
 }
 
-TEMPLATE_TEST_CASE(
-    "ClusterComplete simulation of a two-pair BDL wire with one perturber", "[clustercomplete]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+TEMPLATE_TEST_CASE("ClusterComplete simulation of a two-pair BDL wire with one perturber", "[clustercomplete]",
+                   (sidb_100_cell_clk_lyt_siqad), (cds_sidb_100_cell_clk_lyt_siqad))
 {
     TestType lyt{};
 
@@ -659,15 +640,14 @@ TEMPLATE_TEST_CASE(
                Catch::Matchers::WithinAbs(0.2460493219, physical_constants::POP_STABILITY_ERR));
 }
 
-TEMPLATE_TEST_CASE("ClusterComplete simulation of a one-pair BDL wire with two perturbers", "[clustercomplete]",
-                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>))
+TEST_CASE("ClusterComplete simulation of a one-pair BDL wire with two perturbers", "[clustercomplete]")
 {
-    TestType lyt{};
+    sidb_100_cell_clk_lyt_siqad lyt{};
 
-    lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({5, 0, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({7, 0, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({15, 0, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({0, 0, 0}, sidb_100_cell_clk_lyt_siqad::cell_type::NORMAL);
+    lyt.assign_cell_type({5, 0, 0}, sidb_100_cell_clk_lyt_siqad::cell_type::NORMAL);
+    lyt.assign_cell_type({7, 0, 0}, sidb_100_cell_clk_lyt_siqad::cell_type::NORMAL);
+    lyt.assign_cell_type({15, 0, 0}, sidb_100_cell_clk_lyt_siqad::cell_type::NORMAL);
 
     const sidb_simulation_parameters params{2, -0.32};
 
@@ -680,9 +660,9 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a one-pair BDL wire with two p
 
     charge_layout_kon.update_after_charge_change();
 
-    const clustercomplete_params<TestType> sim_params{sidb_simulation_parameters{3, -0.32}};
+    const clustercomplete_params<sidb_100_cell_clk_lyt_siqad> sim_params{sidb_simulation_parameters{3, -0.32}};
 
-    const auto simulation_results = clustercomplete<TestType>(lyt, sim_params);
+    const auto simulation_results = clustercomplete<sidb_100_cell_clk_lyt_siqad>(lyt, sim_params);
 
     REQUIRE(!simulation_results.charge_distributions.empty());
 
@@ -697,10 +677,8 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a one-pair BDL wire with two p
                Catch::Matchers::WithinAbs(0.1152677452, physical_constants::POP_STABILITY_ERR));
 }
 
-TEMPLATE_TEST_CASE(
-    "ClusterComplete simulation of a Y-shape SiDB arrangement", "[clustercomplete]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+TEMPLATE_TEST_CASE("ClusterComplete simulation of a Y-shape SiDB arrangement", "[clustercomplete]",
+                   (sidb_100_cell_clk_lyt_siqad), (cds_sidb_100_cell_clk_lyt_siqad))
 {
     TestType lyt{};
 
@@ -734,10 +712,9 @@ TEMPLATE_TEST_CASE(
                Catch::Matchers::WithinAbs(0.3191788254, physical_constants::POP_STABILITY_ERR));
 }
 
-TEMPLATE_TEST_CASE(
-    "ClusterComplete simulation of a Y-shape SiDB OR gate with input 01, check energy and charge distribution",
-    "[clustercomplete]", (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+TEMPLATE_TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with input 01, check energy and charge "
+                   "distribution, using siqad coordinates",
+                   "[clustercomplete]", (sidb_100_cell_clk_lyt_siqad), (cds_sidb_100_cell_clk_lyt_siqad))
 {
     TestType lyt{};
 
@@ -776,10 +753,7 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with input 01, check energy and charge "
                    "distribution, using offset coordinates",
-                   "[clustercomplete]",
-                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>),
-                   (charge_distribution_surface<
-                       cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>))
+                   "[clustercomplete]", (sidb_100_cell_clk_lyt), (cds_sidb_100_cell_clk_lyt))
 {
     TestType lyt{};
 
@@ -833,11 +807,9 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with in
                Catch::Matchers::WithinAbs(0.4662582096, physical_constants::POP_STABILITY_ERR));
 }
 
-TEMPLATE_TEST_CASE(
-    "ClusterComplete simulation of a Y-shape SiDB OR gate with input 01, check energy and charge "
-    "distribution, using offset coordinates",
-    "[clustercomplete]", (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>),
-    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>>))
+TEMPLATE_TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with input 01, check energy and charge "
+                   "distribution, using cube coordinates",
+                   "[clustercomplete]", (sidb_100_cell_clk_lyt_cube), (cds_sidb_100_cell_clk_lyt_cube))
 {
     TestType lyt{};
 
@@ -883,12 +855,9 @@ TEMPLATE_TEST_CASE(
                Catch::Matchers::WithinAbs(0.4662582096, physical_constants::POP_STABILITY_ERR));
 }
 
-TEMPLATE_TEST_CASE(
-    "ClusterComplete simulation of a Y-shape SiDB OR gate with input 01 and local external potential at perturber, "
-    "using "
-    "siqad coordinates",
-    "[clustercomplete]", (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+TEMPLATE_TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with input 01 and local external potential at "
+                   "perturber, using siqad coordinates",
+                   "[clustercomplete]", (sidb_100_cell_clk_lyt_siqad), (cds_sidb_100_cell_clk_lyt_siqad))
 {
     TestType lyt{};
 
@@ -921,12 +890,61 @@ TEMPLATE_TEST_CASE(
     CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::NEGATIVE);
 }
 
+TEMPLATE_TEST_CASE("ClusterComplete simulation of a Y-shaped SiDB OR gate with input 01 and local external potential "
+                   "at perturber, using offset coordinates",
+                   "[clustercomplete]", (sidb_100_cell_clk_lyt), (cds_sidb_100_cell_clk_lyt))
+{
+    TestType lyt{};
+    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{6, 2, 0}),
+                         TestType::cell_type::NORMAL);
+    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{8, 3, 0}),
+                         TestType::cell_type::NORMAL);
+    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{12, 3, 0}),
+                         TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{14, 2, 0}),
+                         TestType::cell_type::NORMAL);
+    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{10, 5, 0}),
+                         TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{10, 6, 1}),
+                         TestType::cell_type::NORMAL);
+    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{10, 8, 1}),
+                         TestType::cell_type::NORMAL);
+    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{16, 1, 0}),
+                         TestType::cell_type::NORMAL);
+
+    clustercomplete_params<TestType> params{sidb_simulation_parameters{3, -0.28}};
+    params.local_external_potential.insert(
+        {{siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{6, 2, 0}), -0.5}});
+
+    const auto simulation_results = clustercomplete<TestType>(lyt, params);
+
+    REQUIRE(!simulation_results.charge_distributions.empty());
+    const auto& charge_lyt_first = simulation_results.charge_distributions.front();
+
+    CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{6, 2, 0})) ==
+          sidb_charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{12, 3, 0})) ==
+          sidb_charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{10, 8, 1})) ==
+          sidb_charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{10, 6, 1})) ==
+          sidb_charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{16, 1, 0})) ==
+          sidb_charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{10, 5, 0})) ==
+          sidb_charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{14, 2, 0})) ==
+          sidb_charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{8, 3, 0})) ==
+          sidb_charge_state::NEGATIVE);
+}
+
 TEMPLATE_TEST_CASE(
     "ClusterComplete simulation of a Y-shape SiDB OR gate with input 01 and local external potential at perturber, "
-    "using "
-    "cube coordinates",
-    "[clustercomplete]", (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>),
-    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>>))
+    "using cube coordinates",
+    "[clustercomplete]", (sidb_100_cell_clk_lyt_cube), (cds_sidb_100_cell_clk_lyt_cube))
 {
     TestType lyt{};
     lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{6, 2, 0}), TestType::cell_type::NORMAL);
@@ -966,10 +984,8 @@ TEMPLATE_TEST_CASE(
           sidb_charge_state::NEGATIVE);
 }
 
-TEMPLATE_TEST_CASE(
-    "ClusterComplete simulation  of a Y-shape SiDB OR gate with input 01 and global external potential",
-    "[clustercomplete]", (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+TEMPLATE_TEST_CASE("ClusterComplete simulation  of a Y-shape SiDB OR gate with input 01 and global external potential",
+                   "[clustercomplete]", (sidb_100_cell_clk_lyt_siqad), (cds_sidb_100_cell_clk_lyt_siqad))
 {
     TestType lyt{};
 
@@ -1004,8 +1020,7 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "ClusterComplete simulation of a Y-shape SiDB OR gate with input 01 and global external potential (high)",
-    "[clustercomplete]", (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+    "[clustercomplete]", (sidb_100_cell_clk_lyt_siqad), (cds_sidb_100_cell_clk_lyt_siqad))
 {
     TestType lyt{};
 
@@ -1038,10 +1053,8 @@ TEMPLATE_TEST_CASE(
     CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::POSITIVE);
 }
 
-TEMPLATE_TEST_CASE(
-    "ClusterComplete simulation of four SiDBs (far away)", "[clustercomplete]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+TEMPLATE_TEST_CASE("ClusterComplete simulation of four SiDBs (far away)", "[clustercomplete]",
+                   (sidb_100_cell_clk_lyt_siqad), (cds_sidb_100_cell_clk_lyt_siqad))
 {
     TestType lyt{};
 
@@ -1063,11 +1076,9 @@ TEMPLATE_TEST_CASE(
     CHECK(charge_lyt_first.get_charge_state({30, 0, 0}) == sidb_charge_state::NEGATIVE);
 }
 
-TEMPLATE_TEST_CASE(
-    "ClusterComplete with one SiDB and one negatively charged defect in proximity", "[clustercomplete]",
-    (sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
-    (charge_distribution_surface<
-        sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+TEMPLATE_TEST_CASE("ClusterComplete with one SiDB and one negatively charged defect in proximity", "[clustercomplete]",
+                   (sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>),
+                   (charge_distribution_surface<sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>>))
 {
     TestType lyt{};
 
@@ -1086,10 +1097,8 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "ClusterComplete simulation  of four SiDBs (far away) with one negatively charged defects in proximity",
-    "[clustercomplete]",
-    (sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
-    (charge_distribution_surface<
-        sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+    "[clustercomplete]", (sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>),
+    (charge_distribution_surface<sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>>))
 {
     TestType lyt{};
 
@@ -1114,10 +1123,8 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "ClusterComplete simulation of four SiDBs (far away) with two negatively charged defects in proximity",
-    "[clustercomplete]",
-    (sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
-    (charge_distribution_surface<
-        sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+    "[clustercomplete]", (sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>),
+    (charge_distribution_surface<sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>>))
 {
     TestType lyt{};
 
@@ -1145,13 +1152,10 @@ TEMPLATE_TEST_CASE(
     CHECK(charge_lyt_first.get_charge_state({30, 0, 0}) == sidb_charge_state::NEUTRAL);
 }
 
-TEMPLATE_TEST_CASE(
-    "ClusterComplete simulation of four SiDBs (far away) with one negatively and positively charged defect in "
-    "proximity",
-    "[clustercomplete]",
-    (sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
-    (charge_distribution_surface<
-        sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>>))
+TEMPLATE_TEST_CASE("ClusterComplete simulation of four SiDBs (far away) with one negatively and positively charged "
+                   "defect in proximity",
+                   "[clustercomplete]", (sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>),
+                   (charge_distribution_surface<sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>>))
 {
     TestType lyt{};
 
@@ -1178,10 +1182,8 @@ TEMPLATE_TEST_CASE(
     CHECK(charge_lyt_first.get_charge_state({30, 0, 0}) == sidb_charge_state::NEUTRAL);
 }
 
-TEMPLATE_TEST_CASE(
-    "three DBs next to each other", "[clustercomplete]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+TEMPLATE_TEST_CASE("three DBs next to each other", "[clustercomplete]", (sidb_100_cell_clk_lyt_siqad),
+                   (cds_sidb_100_cell_clk_lyt_siqad))
 {
     TestType lyt{};
 
@@ -1206,10 +1208,8 @@ TEMPLATE_TEST_CASE(
     CHECK(ground_state->get_charge_state({3, 3, 0}) == sidb_charge_state::NEUTRAL);
 }
 
-TEMPLATE_TEST_CASE(
-    "three DBs next to each other, small mu-", "[clustercomplete]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+TEMPLATE_TEST_CASE("three DBs next to each other, small mu-", "[clustercomplete]", (sidb_100_cell_clk_lyt_siqad),
+                   (cds_sidb_100_cell_clk_lyt_siqad))
 {
     TestType lyt{};
 
@@ -1230,10 +1230,8 @@ TEMPLATE_TEST_CASE(
     CHECK(charge_lyt_first.get_charge_state({3, 3, 0}) == sidb_charge_state::NEGATIVE);
 }
 
-TEMPLATE_TEST_CASE(
-    "four DBs next to each other, small mu-", "[clustercomplete]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+TEMPLATE_TEST_CASE("four DBs next to each other, small mu-", "[clustercomplete]", (sidb_100_cell_clk_lyt_siqad),
+                   (cds_sidb_100_cell_clk_lyt_siqad))
 {
     TestType lyt{};
 
@@ -1254,10 +1252,8 @@ TEMPLATE_TEST_CASE(
     CHECK_THAT(excited_state.get_system_energy(), Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
 }
 
-TEMPLATE_TEST_CASE(
-    "seven DBs next to each other, small mu-", "[clustercomplete]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+TEMPLATE_TEST_CASE("seven DBs next to each other, small mu-", "[clustercomplete]", (sidb_100_cell_clk_lyt_siqad),
+                   (cds_sidb_100_cell_clk_lyt_siqad))
 {
     TestType lyt{};
 
@@ -1279,10 +1275,8 @@ TEMPLATE_TEST_CASE(
     CHECK(charge_lyt_first.get_system_energy() > -2.74);
 }
 
-TEMPLATE_TEST_CASE(
-    "7 DBs next to each other (positively charged DBs occur)", "[clustercomplete]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+TEMPLATE_TEST_CASE("7 DBs next to each other (positively charged DBs occur)", "[clustercomplete]",
+                   (sidb_100_cell_clk_lyt_siqad), (cds_sidb_100_cell_clk_lyt_siqad))
 {
     TestType lyt{};
 
@@ -1305,8 +1299,7 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "7 DBs next to each other | only one physically valid charge distribution with only one neutrally charged DB",
-    "[clustercomplete]", (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+    "[clustercomplete]", (sidb_100_cell_clk_lyt_siqad), (cds_sidb_100_cell_clk_lyt_siqad))
 {
     TestType lyt{};
 
@@ -1327,10 +1320,8 @@ TEMPLATE_TEST_CASE(
     CHECK(simulation_results.charge_distributions.size() == 1);
 }
 
-TEMPLATE_TEST_CASE(
-    "4 DBs next to each other (positively charged DBs occur)", "[clustercomplete]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+TEMPLATE_TEST_CASE("4 DBs next to each other (positively charged DBs occur)", "[clustercomplete]",
+                   (sidb_100_cell_clk_lyt_siqad), (cds_sidb_100_cell_clk_lyt_siqad))
 {
     TestType lyt{};
 
@@ -1346,10 +1337,8 @@ TEMPLATE_TEST_CASE(
     CHECK(simulation_results.charge_distributions.size() == 2);
 }
 
-TEMPLATE_TEST_CASE(
-    "5 DBs next to each other (positively charged DBs occur)", "[clustercomplete]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+TEMPLATE_TEST_CASE("5 DBs next to each other (positively charged DBs occur)", "[clustercomplete]",
+                   (sidb_100_cell_clk_lyt_siqad), (cds_sidb_100_cell_clk_lyt_siqad))
 {
     TestType lyt{};
 
@@ -1369,10 +1358,8 @@ TEMPLATE_TEST_CASE(
     CHECK(simulation_results.charge_distributions.size() == 3);
 }
 
-TEMPLATE_TEST_CASE(
-    "4 DBs close to each other", "[clustercomplete]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+TEMPLATE_TEST_CASE("4 DBs close to each other", "[clustercomplete]", (sidb_100_cell_clk_lyt_siqad),
+                   (cds_sidb_100_cell_clk_lyt_siqad))
 {
     TestType lyt{};
 
@@ -1388,10 +1375,8 @@ TEMPLATE_TEST_CASE(
     CHECK(simulation_results.charge_distributions.size() > 0);
 }
 
-TEMPLATE_TEST_CASE(
-    "3 DBs next to each other (positively charged DBs occur)", "[clustercomplete]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+TEMPLATE_TEST_CASE("3 DBs next to each other (positively charged DBs occur)", "[clustercomplete]",
+                   (sidb_100_cell_clk_lyt_siqad), (cds_sidb_100_cell_clk_lyt_siqad))
 {
 
     TestType lyt{};
@@ -1410,10 +1395,8 @@ TEMPLATE_TEST_CASE(
     }
 }
 
-TEMPLATE_TEST_CASE(
-    "13 DBs which are all negatively charged", "[clustercomplete]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+TEMPLATE_TEST_CASE("13 DBs which are all negatively charged", "[clustercomplete]", (sidb_100_cell_clk_lyt_siqad),
+                   (cds_sidb_100_cell_clk_lyt_siqad))
 {
     TestType lyt{};
 
@@ -1451,10 +1434,9 @@ TEMPLATE_TEST_CASE(
     CHECK(lyt.num_cells() == 13);
 }
 
-TEMPLATE_TEST_CASE(
-    "ClusterComplete simulation of a 3 DB Wire", "[clustercomplete]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+TEMPLATE_TEST_CASE("ClusterComplete simulation of a 3 DB Wire", "[clustercomplete]",
+                   (sidb_lattice<sidb_100_lattice, sidb_cell_clk_lyt_siqad>),
+                   (charge_distribution_surface<sidb_lattice<sidb_100_lattice, sidb_cell_clk_lyt_siqad>>))
 {
     TestType lyt{};
 
@@ -1686,8 +1668,8 @@ TEMPLATE_TEST_CASE(
 TEMPLATE_TEST_CASE(
     "ClusterComplete simulation of two SiDBs placed directly next to each other with non-realistic relative "
     "permittivity",
-    "[clustercomplete]", (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+    "[clustercomplete]", (sidb_lattice<sidb_100_lattice, sidb_cell_clk_lyt_siqad>),
+    (charge_distribution_surface<sidb_lattice<sidb_100_lattice, sidb_cell_clk_lyt_siqad>>))
 {
     TestType lyt{};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
@@ -1712,10 +1694,8 @@ TEMPLATE_TEST_CASE(
     }
 }
 
-TEMPLATE_TEST_CASE(
-    "ClusterComplete simulation of positively charged SiDBs", "[clustercomplete]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+TEMPLATE_TEST_CASE("ClusterComplete simulation of positively charged SiDBs", "[clustercomplete]",
+                   (sidb_100_cell_clk_lyt_siqad), (cds_sidb_100_cell_clk_lyt_siqad))
 {
     TestType lyt{};
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
@@ -1737,10 +1717,8 @@ TEMPLATE_TEST_CASE(
     CHECK(simulation_results.charge_distributions.size() == 4);
 }
 
-TEMPLATE_TEST_CASE(
-    "Special test cases", "[clustercomplete]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+TEMPLATE_TEST_CASE("Special test cases", "[clustercomplete]", (sidb_100_cell_clk_lyt_siqad),
+                   (cds_sidb_100_cell_clk_lyt_siqad))
 {
     SECTION("Test case 1")
     {
@@ -1955,6 +1933,123 @@ TEMPLATE_TEST_CASE(
     //
     //        REQUIRE(cc_res.charge_distributions.size() == 1);
     //    }
+}
+
+TEMPLATE_TEST_CASE("ClusterComplete gate simulation of Si-111 surface", "[clustercomplete]",
+                   (sidb_111_cell_clk_lyt_siqad), (cds_sidb_111_cell_clk_lyt_siqad))
+{
+    TestType lyt{};
+    lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({1, 1, 1}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({2, 2, 1}, TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type({8, 0, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 1, 1}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({5, 2, 1}, TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type({4, 8, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({4, 10, 0}, TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type({4, 14, 0}, TestType::cell_type::NORMAL);
+
+    const clustercomplete_params<TestType> params{sidb_simulation_parameters{2, -0.32, 5.6, 5}};
+
+    const auto simulation_results = clustercomplete<TestType>(lyt, params);
+
+    const auto ground_state = determine_groundstate_from_simulation_results(simulation_results);
+    REQUIRE(ground_state.size() == 1);
+
+    CHECK(ground_state.front().get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
+    CHECK(ground_state.front().get_charge_state({1, 1, 1}) == sidb_charge_state::NEUTRAL);
+    CHECK(ground_state.front().get_charge_state({2, 2, 1}) == sidb_charge_state::NEGATIVE);
+    CHECK(ground_state.front().get_charge_state({8, 0, 0}) == sidb_charge_state::NEGATIVE);
+    CHECK(ground_state.front().get_charge_state({6, 1, 1}) == sidb_charge_state::NEUTRAL);
+    CHECK(ground_state.front().get_charge_state({5, 2, 1}) == sidb_charge_state::NEGATIVE);
+    CHECK(ground_state.front().get_charge_state({4, 8, 0}) == sidb_charge_state::NEUTRAL);
+    CHECK(ground_state.front().get_charge_state({4, 10, 0}) == sidb_charge_state::NEGATIVE);
+    CHECK(ground_state.front().get_charge_state({4, 14, 0}) == sidb_charge_state::NEGATIVE);
+}
+
+TEMPLATE_TEST_CASE("ClusterComplete AND gate simulation of Si-111 surface", "[clustercomplete]",
+                   sidb_111_cell_clk_lyt_siqad, cds_sidb_111_cell_clk_lyt_siqad)
+{
+    SECTION("no input applied")
+    {
+        const auto                             lyt = blueprints::and_gate_111<TestType>();
+        const clustercomplete_params<TestType> params{sidb_simulation_parameters{2, -0.32, 5.6, 5}};
+
+        const auto simulation_results = clustercomplete<TestType>(lyt, params);
+
+        const auto ground_state = determine_groundstate_from_simulation_results(simulation_results);
+        REQUIRE(ground_state.size() == 1);
+
+        CHECK(ground_state.front().get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({1, 1, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({25, 0, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({23, 1, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({4, 4, 0}) == sidb_charge_state::NEUTRAL);
+        CHECK(ground_state.front().get_charge_state({21, 4, 0}) == sidb_charge_state::NEUTRAL);
+        CHECK(ground_state.front().get_charge_state({5, 5, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({19, 5, 1}) == sidb_charge_state::NEGATIVE);
+
+        CHECK(ground_state.front().get_charge_state({17, 8, 0}) == sidb_charge_state::NEUTRAL);
+        CHECK(ground_state.front().get_charge_state({8, 8, 0}) == sidb_charge_state::NEUTRAL);
+        CHECK(ground_state.front().get_charge_state({9, 9, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({15, 9, 1}) == sidb_charge_state::NEGATIVE);
+
+        CHECK(ground_state.front().get_charge_state({10, 18, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({13, 17, 0}) == sidb_charge_state::NEUTRAL);
+        CHECK(ground_state.front().get_charge_state({16, 18, 0}) == sidb_charge_state::NEGATIVE);
+
+        CHECK(ground_state.front().get_charge_state({15, 21, 1}) == sidb_charge_state::NEUTRAL);
+        CHECK(ground_state.front().get_charge_state({17, 23, 0}) == sidb_charge_state::NEGATIVE);
+
+        CHECK(ground_state.front().get_charge_state({19, 25, 1}) == sidb_charge_state::NEUTRAL);
+        CHECK(ground_state.front().get_charge_state({21, 27, 0}) == sidb_charge_state::NEGATIVE);
+
+        CHECK(ground_state.front().get_charge_state({23, 29, 1}) == sidb_charge_state::NEGATIVE);
+    }
+
+    SECTION("10 input applied")
+    {
+        auto lyt = blueprints::and_gate_111<TestType>();
+        lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::EMPTY);
+        lyt.assign_cell_type({23, 1, 1}, TestType::cell_type::EMPTY);
+
+        const clustercomplete_params<TestType> params{sidb_simulation_parameters{2, -0.32, 5.6, 5}};
+
+        const auto simulation_results = clustercomplete<TestType>(lyt, params);
+        CHECK(simulation_results.charge_distributions.size() == 7);
+
+        const auto ground_state = determine_groundstate_from_simulation_results(simulation_results);
+
+        REQUIRE(ground_state.size() == 1);
+
+        CHECK(ground_state.front().get_charge_state({1, 1, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({25, 0, 0}) == sidb_charge_state::NEGATIVE);
+
+        CHECK(ground_state.front().get_charge_state({4, 4, 0}) == sidb_charge_state::NEUTRAL);
+        CHECK(ground_state.front().get_charge_state({21, 4, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({5, 5, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({19, 5, 1}) == sidb_charge_state::NEUTRAL);
+
+        CHECK(ground_state.front().get_charge_state({8, 8, 0}) == sidb_charge_state::NEUTRAL);
+        CHECK(ground_state.front().get_charge_state({17, 8, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({9, 9, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({15, 9, 1}) == sidb_charge_state::NEUTRAL);
+
+        CHECK(ground_state.front().get_charge_state({10, 18, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({13, 17, 0}) == sidb_charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({16, 18, 0}) == sidb_charge_state::NEUTRAL);
+
+        CHECK(ground_state.front().get_charge_state({15, 21, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({17, 23, 0}) == sidb_charge_state::NEUTRAL);
+
+        CHECK(ground_state.front().get_charge_state({19, 25, 1}) == sidb_charge_state::NEGATIVE);
+        CHECK(ground_state.front().get_charge_state({21, 27, 0}) == sidb_charge_state::NEUTRAL);
+
+        CHECK(ground_state.front().get_charge_state({23, 29, 1}) == sidb_charge_state::NEGATIVE);
+    }
 }
 
 #else  // FICTION_ALGLIB_ENABLED

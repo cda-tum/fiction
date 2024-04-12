@@ -418,9 +418,9 @@ TEMPLATE_TEST_CASE("QuickExact simulation of a Y-shaped SiDB arrangement", "[qui
                Catch::Matchers::WithinAbs(0.3191788254, physical_constants::POP_STABILITY_ERR));
 }
 
-TEMPLATE_TEST_CASE(
-    "QuickExact simulation of a Y-shaped SiDB OR gate with input 01, check energy and charge distribution",
-    "[quickexact]", (sidb_100_cell_clk_lyt_siqad), (cds_sidb_100_cell_clk_lyt_siqad))
+TEMPLATE_TEST_CASE("QuickExact simulation of a Y-shaped SiDB OR gate with input 01, check energy and charge "
+                   "distribution, using siqad coordinates",
+                   "[quickexact]", (sidb_100_cell_clk_lyt_siqad), (cds_sidb_100_cell_clk_lyt_siqad))
 {
     TestType lyt{};
 
@@ -514,7 +514,7 @@ TEMPLATE_TEST_CASE("QuickExact simulation of a Y-shaped SiDB OR gate with input 
 }
 
 TEMPLATE_TEST_CASE("QuickExact simulation of a Y-shaped SiDB OR gate with input 01, check energy and charge "
-                   "distribution, using offset coordinates",
+                   "distribution, using cube coordinates",
                    "[quickexact]", (sidb_100_cell_clk_lyt_cube), (cds_sidb_100_cell_clk_lyt_cube))
 {
     TestType lyt{};
@@ -595,6 +595,58 @@ TEMPLATE_TEST_CASE(
     CHECK(charge_lyt_first.get_charge_state({10, 5, 0}) == sidb_charge_state::NEGATIVE);
     CHECK(charge_lyt_first.get_charge_state({14, 2, 0}) == sidb_charge_state::NEUTRAL);
     CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb_charge_state::NEGATIVE);
+}
+
+TEMPLATE_TEST_CASE(
+    "QuickExact simulation of a Y-shaped SiDB OR gate with input 01 and local external potential at perturber, using "
+    "offset coordinates",
+    "[quickexact]", (sidb_100_cell_clk_lyt), (cds_sidb_100_cell_clk_lyt))
+{
+    TestType lyt{};
+    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{6, 2, 0}),
+                         TestType::cell_type::NORMAL);
+    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{8, 3, 0}),
+                         TestType::cell_type::NORMAL);
+    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{12, 3, 0}),
+                         TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{14, 2, 0}),
+                         TestType::cell_type::NORMAL);
+    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{10, 5, 0}),
+                         TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{10, 6, 1}),
+                         TestType::cell_type::NORMAL);
+    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{10, 8, 1}),
+                         TestType::cell_type::NORMAL);
+    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{16, 1, 0}),
+                         TestType::cell_type::NORMAL);
+
+    quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.28}};
+    params.local_external_potential.insert(
+        {{siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{6, 2, 0}), -0.5}});
+
+    const auto simulation_results = quickexact<TestType>(lyt, params);
+
+    REQUIRE(!simulation_results.charge_distributions.empty());
+    const auto& charge_lyt_first = simulation_results.charge_distributions.front();
+
+    CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{6, 2, 0})) ==
+          sidb_charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{12, 3, 0})) ==
+          sidb_charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{10, 8, 1})) ==
+          sidb_charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{10, 6, 1})) ==
+          sidb_charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{16, 1, 0})) ==
+          sidb_charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{10, 5, 0})) ==
+          sidb_charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{14, 2, 0})) ==
+          sidb_charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{8, 3, 0})) ==
+          sidb_charge_state::NEGATIVE);
 }
 
 TEMPLATE_TEST_CASE(
