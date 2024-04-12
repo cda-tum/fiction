@@ -28,9 +28,6 @@ struct sidb_simulation_parameters
      * @param relative_permittivity it describes the electric field reduction due to polarization.
      * @param screening_distance also known as "Thomas-Fermi screening" and it describes the electric field screening
      * due to free charges in nm.
-     * @param a lattice constant in Å (Ångström).
-     * @param b lattice constant in Å.
-     * @param c lattice constant in Å.
      */
     constexpr explicit sidb_simulation_parameters(const uint8_t base_number = 3, const double mu = -0.32,
                                                   const double relative_permittivity = 5.6,
