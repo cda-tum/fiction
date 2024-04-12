@@ -54,6 +54,8 @@ Let there be a *fiction*
    technology/simulation.rst
    technology/gate_libraries.rst
    technology/properties.rst
+   technology/sidb_lattice.rst
+   technology/sidb_lattice_orientations.rst
 
 .. toctree::
    :maxdepth: 2
