@@ -23,8 +23,8 @@ void nanometer_distance(pybind11::module& m, const std::string& lattice = "")
 {
     using namespace pybind11::literals;
 
-    m.def(fmt::format("sidb_nanometer_distance{}", lattice).c_str(), &fiction::sidb_nanometer_distance<Lyt>, "lyt"_a,
-          "source"_a, "target"_a);
+    m.def(fmt::format("sidb_nm_distance{}", lattice).c_str(), &fiction::sidb_nm_distance<Lyt>, "lyt"_a, "source"_a,
+          "target"_a, DOC(fiction_sidb_nanometer_distance));
 }
 
 }  // namespace detail

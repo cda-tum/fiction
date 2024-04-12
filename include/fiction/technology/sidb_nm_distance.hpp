@@ -21,8 +21,8 @@ namespace fiction
  * @return The distance between the two cells in nanometers (unit: nm).
  */
 template <typename Lyt>
-[[nodiscard]] constexpr double sidb_nanometer_distance(const Lyt& lyt, const coordinate<Lyt>& source,
-                                                       const coordinate<Lyt>& target) noexcept
+[[nodiscard]] constexpr double sidb_nm_distance(const Lyt& lyt, const coordinate<Lyt>& source,
+                                                const coordinate<Lyt>& target) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not based on SiDB technology");

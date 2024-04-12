@@ -20,13 +20,14 @@ namespace detail
 {
 
 template <typename Lyt>
-void assess_physical_population_stability(pybind11::module& m)
+void assess_physical_population_stability(pybind11::module& m, const std::string& lattice = "")
 {
     namespace py = pybind11;
     using namespace pybind11::literals;
 
-    py::class_<fiction::population_stability_information<Lyt>>(m, "population_stability_information",
-                                                               DOC(fiction_population_stability_information))
+    py::class_<fiction::population_stability_information<Lyt>>(
+        m, fmt::format("population_stability_information{}", lattice).c_str(),
+        DOC(fiction_population_stability_information))
         .def(py::init<>())
         .def_readwrite("critical_cell", &fiction::population_stability_information<Lyt>::critical_cell,
                        DOC(fiction_population_stability_information_critical_cell))
@@ -41,7 +42,8 @@ void assess_physical_population_stability(pybind11::module& m)
         .def_readwrite("system_energy", &fiction::population_stability_information<Lyt>::system_energy,
                        DOC(fiction_population_stability_information_system_energy));
 
-    m.def("assess_physical_population_stability", &fiction::assess_physical_population_stability<Lyt>, "lyt"_a,
+    m.def(fmt::format("assess_physical_population_stability{}", lattice).c_str(),
+          &fiction::assess_physical_population_stability<Lyt>, "lyt"_a,
           "params"_a = fiction::assess_physical_population_stability_params{},
           DOC(fiction_assess_physical_population_stability));
 }
@@ -78,9 +80,8 @@ inline void assess_physical_population_stability(pybind11::module& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::assess_physical_population_stability<py_sidb_layout>(m);
-    //    detail::assess_physical_population_stability<py_sidb_100_lattice>(m);
-    //    detail::assess_physical_population_stability<py_sidb_111_lattice>(m);
+    detail::assess_physical_population_stability<py_sidb_100_lattice>(m, "_100");
+    detail::assess_physical_population_stability<py_sidb_111_lattice>(m, "_111");
 }
 
 }  // namespace pyfiction

@@ -30,7 +30,9 @@ Simulation Result
            :members:
 
     .. tab:: Python
-        .. autoclass:: mnt.pyfiction.sidb_simulation_result
+        .. autoclass:: mnt.pyfiction.sidb_simulation_result_100
+            :members:
+        .. autoclass:: mnt.pyfiction.sidb_simulation_result_111
             :members:
 
 
@@ -52,7 +54,8 @@ Heuristic Ground State Simulation
         .. autoclass:: mnt.pyfiction.quicksim_params
             :members:
 
-        .. autofunction:: mnt.pyfiction.quicksim
+        .. autofunction:: mnt.pyfiction.quicksim_100
+        .. autofunction:: mnt.pyfiction.quicksim_111
 
 
 Exhaustive Ground State Simulation
@@ -73,11 +76,15 @@ Exhaustive Ground State Simulation
         .. doxygenfunction:: fiction::exhaustive_ground_state_simulation
 
     .. tab:: Python
-        .. autoclass:: mnt.pyfiction.quickexact_params
+        .. autoclass:: mnt.pyfiction.quickexact_params_100
             :members:
-        .. autofunction:: mnt.pyfiction.quickexact
+        .. autoclass:: mnt.pyfiction.quickexact_params_111
+            :members:
+        .. autofunction:: mnt.pyfiction.quickexact_100
+        .. autofunction:: mnt.pyfiction.quickexact_111
 
-        .. autofunction:: mnt.pyfiction.exhaustive_ground_state_simulation
+        .. autofunction:: mnt.pyfiction.exhaustive_ground_state_simulation_100
+        .. autofunction:: mnt.pyfiction.exhaustive_ground_state_simulation_111
 
 
 Engine Selectors
@@ -121,14 +128,11 @@ Energy Calculation
     .. tab:: Python
         .. autofunction:: mnt.pyfiction.energy_distribution
 
-        .. autofunction:: mnt.pyfiction.minimum_energy
+        .. autofunction:: mnt.pyfiction.minimum_energy_100
+        .. autofunction:: mnt.pyfiction.minimum_energy_111
 
-        .. autofunction:: mnt.pyfiction.is_ground_state
-
-
-**Header:** ``fiction/algorithms/simulation/sidb/determine_groundstate_from_simulation_results.hpp``
-
-.. doxygenfunction:: fiction::determine_groundstate_from_simulation_results
+        .. autofunction:: mnt.pyfiction.is_ground_state_100
+        .. autofunction:: mnt.pyfiction.is_ground_state_111
 
 
 Temperature Behavior
@@ -162,8 +166,10 @@ Temperature Behavior
             :members:
         .. autoclass:: mnt.pyfiction.critical_temperature_params
             :members:
-        .. autofunction:: mnt.pyfiction.critical_temperature_gate_based
-        .. autofunction:: mnt.pyfiction.critical_temperature_non_gate_based
+        .. autofunction:: mnt.pyfiction.critical_temperature_gate_based_100
+        .. autofunction:: mnt.pyfiction.critical_temperature_non_gate_based_100
+        .. autofunction:: mnt.pyfiction.critical_temperature_gate_based_111
+        .. autofunction:: mnt.pyfiction.critical_temperature_non_gate_based_111
 
         .. autofunction:: mnt.pyfiction.occupation_probability_gate_based
         .. autofunction:: mnt.pyfiction.occupation_probability_non_gate_based
@@ -199,7 +205,8 @@ Time-to-Solution (TTS) Statistics
             :members:
         .. autoclass:: mnt.pyfiction.time_to_solution_stats
             :members:
-        .. autofunction:: mnt.pyfiction.time_to_solution
+        .. autofunction:: mnt.pyfiction.time_to_solution_100
+        .. autofunction:: mnt.pyfiction.time_to_solution_111
 
 
 Random SiDB Layout Generator
@@ -233,7 +240,7 @@ Operational Domain Computation
         .. doxygenenum:: fiction::operational_status
         .. doxygenstruct:: fiction::is_operational_params
            :members:
-        .. doxygenfunction:: fiction::is_operational
+        .. doxygenfunction:: fiction::is_operational_100
         .. doxygenfunction:: fiction::operational_input_patterns
 
         **Header:** ``fiction/algorithms/simulation/sidb/operational_domain.hpp``
@@ -256,7 +263,10 @@ Operational Domain Computation
             :members:
         .. autoclass:: mnt.pyfiction.is_operational_params
             :members:
-        .. autofunction:: mnt.pyfiction.is_operational
+        .. autofunction:: mnt.pyfiction.is_operational_100
+        .. autofunction:: mnt.pyfiction.is_operational_111
+        .. autofunction:: mnt.pyfiction.operational_input_patterns_100
+        .. autofunction:: mnt.pyfiction.operational_input_patterns_111
 
         .. autoclass:: mnt.pyfiction.sweep_parameter
             :members:
@@ -269,10 +279,14 @@ Operational Domain Computation
         .. autoclass:: mnt.pyfiction.operational_domain_stats
             :members:
 
-        .. autofunction:: mnt.pyfiction.operational_domain_grid_search
-        .. autofunction:: mnt.pyfiction.operational_domain_random_sampling
-        .. autofunction:: mnt.pyfiction.operational_domain_flood_fill
-        .. autofunction:: mnt.pyfiction.operational_domain_contour_tracing
+        .. autofunction:: mnt.pyfiction.operational_domain_grid_search_100
+        .. autofunction:: mnt.pyfiction.operational_domain_grid_search_111
+        .. autofunction:: mnt.pyfiction.operational_domain_random_sampling_100
+        .. autofunction:: mnt.pyfiction.operational_domain_random_sampling_111
+        .. autofunction:: mnt.pyfiction.operational_domain_flood_fill_100
+        .. autofunction:: mnt.pyfiction.operational_domain_flood_fill_111
+        .. autofunction:: mnt.pyfiction.operational_domain_contour_tracing_100
+        .. autofunction:: mnt.pyfiction.operational_domain_contour_tracing_111
 
 
 Utility Functions
@@ -291,6 +305,20 @@ Simulation Equivalence Checking
         .. autofunction:: fiction::check_simulation_results_for_equivalence
 
 
+Determine the Ground State from Simulation Results
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/algorithms/simulation/sidb/determine_groundstate_from_simulation_results.hpp``
+
+        .. doxygenfunction:: fiction::determine_groundstate_from_simulation_results
+
+    .. tab:: Python
+        .. doxygenfunction:: fiction::determine_groundstate_from_simulation_results_100
+        .. doxygenfunction:: fiction::determine_groundstate_from_simulation_results_111
+
+
 Charge Detection
 ^^^^^^^^^^^^^^^^
 
@@ -301,7 +329,8 @@ Charge Detection
         .. doxygenfunction:: fiction::can_positive_charges_occur
 
     .. tab:: Python
-        .. autofunction:: mnt.pyfiction.can_positive_charges_occur
+        .. autofunction:: mnt.pyfiction.can_positive_charges_occur_100
+        .. autofunction:: mnt.pyfiction.can_positive_charges_occur_111
 
 Binary-dot Logic (BDL) Pair Detection
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -317,11 +346,14 @@ Binary-dot Logic (BDL) Pair Detection
         .. doxygenfunction:: fiction::detect_bdl_pairs
 
     .. tab:: Python
-        .. autoclass:: mnt.pyfiction.bdl_pair
+        .. autoclass:: mnt.pyfiction.bdl_pair_100
+            :members:
+        .. autoclass:: mnt.pyfiction.bdl_pair_111
             :members:
         .. autoclass:: mnt.pyfiction.detect_bdl_pairs_params
             :members:
-        .. autofunction:: mnt.pyfiction.detect_bdl_pairs
+        .. autofunction:: mnt.pyfiction.detect_bdl_pairs_100
+        .. autofunction:: mnt.pyfiction.detect_bdl_pairs_111
 
 
 Assess Population Stability
@@ -343,9 +375,12 @@ Assess Population Stability
             :members:
         .. autoclass:: mnt.pyfiction.population_stability_information
             :members:
-        .. autoclass:: mnt.pyfiction.assess_physical_population_stability_params
+        .. autoclass:: mnt.pyfiction.assess_physical_population_stability_params_100
             :members:
-        .. autofunction:: mnt.pyfiction.assess_physical_population_stability
+        .. autoclass:: mnt.pyfiction.assess_physical_population_stability_params_111
+            :members:
+        .. autofunction:: mnt.pyfiction.assess_physical_population_stability_100
+        .. autofunction:: mnt.pyfiction.assess_physical_population_stability_111
 
 
 Positive Charge Detection
@@ -358,7 +393,8 @@ Positive Charge Detection
         .. doxygenfunction:: fiction::can_positive_charges_occur
 
     .. tab:: Python
-        .. autofunction:: fiction::can_positive_charges_occur
+        .. autofunction:: fiction::can_positive_charges_occur_100
+        .. autofunction:: fiction::can_positive_charges_occur_111
 
 
 Convert Potential to Distance

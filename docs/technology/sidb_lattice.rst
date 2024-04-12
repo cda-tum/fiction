@@ -11,5 +11,7 @@ The SiDB lattice layout can be layered on top of an SiDB cell-level layout. It i
            :members:
 
     .. tab:: Python
-        .. autoclass:: mnt.pyfiction.sidb_lattice
+        .. autoclass:: mnt.pyfiction.sidb_lattice_100
+            :members:
+        .. autoclass:: mnt.pyfiction.sidb_lattice_111
             :members:

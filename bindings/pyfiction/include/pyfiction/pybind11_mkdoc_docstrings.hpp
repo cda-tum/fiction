@@ -6548,13 +6548,13 @@ algorithm.)doc";
 static const char *__doc_fiction_detail_yen_k_shortest_paths_impl_yen_k_shortest_paths_impl = R"doc()doc";
 
 static const char *__doc_fiction_detect_bdl_pairs =
-  R"doc(This algorithm detects BDL pairs in an SiDB layout. It does so by
+    R"doc(This algorithm detects BDL pairs in an SiDB layout. It does so by
 first collecting all dots of the given type and then uniquely pairing
 them up based on their distance. Lower and upper distance thresholds
 can be defined (defaults = 0.75 nm and 1.5 nm, respectively) to narrow
 down the range in which SiDBs could be considered a BDL pair. The
 distance between two dots is computed using the
-`sidb_nanometer_distance` function. The algorithm returns a vector of
+`sidb_nm_distance` function. The algorithm returns a vector of
 BDL pairs.
 
 Template parameter ``Lyt``:

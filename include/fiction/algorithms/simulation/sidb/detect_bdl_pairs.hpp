@@ -80,7 +80,7 @@ struct detect_bdl_pairs_params
  * This algorithm detects BDL pairs in an SiDB layout. It does so by first collecting all dots of the given type and
  * then uniquely pairing them up based on their distance. Lower and upper distance thresholds can be defined (defaults =
  * 0.75 nm and 1.5 nm, respectively) to narrow down the range in which SiDBs could be considered a BDL pair. The
- * distance between two dots is computed using the `sidb_nanometer_distance` function. The algorithm returns a vector of
+ * distance between two dots is computed using the `sidb_nm_distance` function. The algorithm returns a vector of
  * BDL pairs.
  *
  * @tparam Lyt SiDB cell-level layout type.
@@ -153,8 +153,7 @@ std::vector<bdl_pair<Lyt>> detect_bdl_pairs(const Lyt& lyt, const typename techn
             {
                 for (auto j = i + 1; j < dots.size(); ++j)
                 {
-                    pairwise_distances.emplace_back(dots[i], dots[j],
-                                                    sidb_nanometer_distance<Lyt>(lyt, dots[i], dots[j]));
+                    pairwise_distances.emplace_back(dots[i], dots[j], sidb_nm_distance<Lyt>(lyt, dots[i], dots[j]));
                 }
             }
 
