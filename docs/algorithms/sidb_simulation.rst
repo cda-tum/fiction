@@ -224,8 +224,10 @@ Random SiDB Layout Generator
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.generate_random_sidb_layout_params
             :members:
-        .. autofunction:: mnt.pyfiction.generate_random_sidb_layout
-       .. autofunction:: mnt.pyfiction.generate_multiple_random_sidb_layouts
+        .. autofunction:: mnt.pyfiction.generate_random_sidb_layout_100
+        .. autofunction:: mnt.pyfiction.generate_random_sidb_layout_111
+        .. autofunction:: mnt.pyfiction.generate_multiple_random_sidb_layouts_100
+        .. autofunction:: mnt.pyfiction.generate_multiple_random_sidb_layouts_111
 
 
 Operational Domain Computation
@@ -240,7 +242,7 @@ Operational Domain Computation
         .. doxygenenum:: fiction::operational_status
         .. doxygenstruct:: fiction::is_operational_params
            :members:
-        .. doxygenfunction:: fiction::is_operational_100
+        .. doxygenfunction:: fiction::is_operational
         .. doxygenfunction:: fiction::operational_input_patterns
 
         **Header:** ``fiction/algorithms/simulation/sidb/operational_domain.hpp``
@@ -302,7 +304,8 @@ Simulation Equivalence Checking
         .. doxygenfunction:: fiction::check_simulation_results_for_equivalence
 
     .. tab:: Python
-        .. autofunction:: fiction::check_simulation_results_for_equivalence
+        .. autofunction:: mnt.pyfiction.check_simulation_results_for_equivalence_100
+        .. autofunction:: mnt.pyfiction.check_simulation_results_for_equivalence_111
 
 
 Determine the Ground State from Simulation Results
@@ -315,8 +318,8 @@ Determine the Ground State from Simulation Results
         .. doxygenfunction:: fiction::determine_groundstate_from_simulation_results
 
     .. tab:: Python
-        .. doxygenfunction:: fiction::determine_groundstate_from_simulation_results_100
-        .. doxygenfunction:: fiction::determine_groundstate_from_simulation_results_111
+        .. autofunction:: mnt.pyfiction.determine_groundstate_from_simulation_results_100
+        .. autofunction:: mnt.pyfiction.determine_groundstate_from_simulation_results_111
 
 
 Charge Detection
@@ -393,8 +396,8 @@ Positive Charge Detection
         .. doxygenfunction:: fiction::can_positive_charges_occur
 
     .. tab:: Python
-        .. autofunction:: fiction::can_positive_charges_occur_100
-        .. autofunction:: fiction::can_positive_charges_occur_111
+        .. autofunction:: mnt.pyfiction.can_positive_charges_occur_100
+        .. autofunction:: mnt.pyfiction.can_positive_charges_occur_111
 
 
 Convert Potential to Distance

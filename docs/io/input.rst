@@ -68,7 +68,8 @@ Cell-level Layouts
         .. doxygenclass:: fiction::sqd_parsing_error
 
     .. tab:: Python
-        .. autofunction:: mnt.pyfiction.read_sqd_layout
+        .. autofunction:: mnt.pyfiction.read_sqd_layout_100
+        .. autofunction:: mnt.pyfiction.read_sqd_layout_111
 
         .. autoclass:: mnt.pyfiction.sqd_parsing_error
             :members:

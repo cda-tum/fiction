@@ -5,11 +5,11 @@ Design Rule Violations (DRVs)
     .. tab:: C++
         **Header:** ``fiction/algorithms/verification/design_rule_violations.hpp``
 
-    .. doxygenstruct:: fiction::gate_level_drv_params
-       :members:
-    .. doxygenstruct:: fiction::gate_level_drv_stats
-       :members:
-    .. doxygenfunction:: fiction::gate_level_drvs
+        .. doxygenstruct:: fiction::gate_level_drv_params
+           :members:
+        .. doxygenstruct:: fiction::gate_level_drv_stats
+           :members:
+        .. doxygenfunction:: fiction::gate_level_drvs
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.gate_level_drv_params

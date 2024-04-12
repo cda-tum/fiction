@@ -66,7 +66,8 @@ Euclidean distance between two SiDBs in nanometers
     .. tab:: C++
         **Header:** ``fiction/technology/sidb_nm_distance.hpp``
 
-        .. doxygenfunction:: fiction::sidb_nm_distance_100
+        .. doxygenfunction:: fiction::sidb_nm_distance
 
     .. tab:: Python
+        .. autoclass:: mnt.pyfiction.sidb_nm_distance_100
         .. autoclass:: mnt.pyfiction.sidb_nm_distance_111
