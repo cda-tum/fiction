@@ -464,9 +464,20 @@ class operational_domain_impl
                                          step_point{current_contour_point.x - 1, current_contour_point.y};
 
         auto current_neighborhood = moore_neighborhood(current_contour_point);
-        auto next_point           = current_contour_point == backtrack_point ?
-                                        current_neighborhood.front() :
-                                        next_clockwise_point(current_neighborhood, backtrack_point);
+        if (current_neighborhood.empty())
+        {
+            assert(true && "The neighborhood should not be empty");
+        }
+
+        step_point front_neighborhood{};
+        auto       next_point = contour_starting_point;
+
+        if (!current_neighborhood.empty())
+        {
+            next_point = current_contour_point == backtrack_point ?
+                             current_neighborhood.front() :
+                             next_clockwise_point(current_neighborhood, backtrack_point);
+        }
 
         while (next_point != contour_starting_point)
         {

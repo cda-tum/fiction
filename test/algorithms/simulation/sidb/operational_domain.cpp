@@ -40,10 +40,10 @@ void check_op_domain_params_and_operational_status(const operational_domain&    
 
     for (const auto& [coord, op_value] : op_domain.operational_values)
     {
-        CHECK(std::abs(coord.x - params.x_min) > -physical_constants::POP_STABILITY_ERR);
-        CHECK(std::abs(params.x_max - coord.x) > -physical_constants::POP_STABILITY_ERR);
-        CHECK(std::abs(coord.y - params.y_min) > -physical_constants::POP_STABILITY_ERR);
-        CHECK(std::abs(params.y_max - coord.y) > -physical_constants::POP_STABILITY_ERR);
+        CHECK(coord.x - params.x_min > -physical_constants::POP_STABILITY_ERR);
+        CHECK(params.x_max - coord.x > -physical_constants::POP_STABILITY_ERR);
+        CHECK(coord.y - params.y_min > -physical_constants::POP_STABILITY_ERR);
+        CHECK(params.y_max - coord.y > -physical_constants::POP_STABILITY_ERR);
 
         if (status)
         {
@@ -100,7 +100,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             const auto op_domain = operational_domain_grid_search(lat, std::vector<tt>{create_id_tt()},
                                                                   op_domain_params, &op_domain_stats);
 
-            // check if the operational domain has the correct size (10 steps in each dimension)
+            // check if the operational domain has the correct size
             CHECK(op_domain.operational_values.size() == 1);
 
             // for the selected range, all samples should be within the parameters and operational
@@ -117,7 +117,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             const auto op_domain = operational_domain_random_sampling(lat, std::vector<tt>{create_id_tt()}, 100,
                                                                       op_domain_params, &op_domain_stats);
 
-            // check if the operational domain has the correct size (max 10 steps in each dimension)
+            // check if the operational domain has the correct size
             CHECK(op_domain.operational_values.size() == 1);
 
             // for the selected range, all samples should be within the parameters and operational
@@ -135,7 +135,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             const auto op_domain = operational_domain_flood_fill(lat, std::vector<tt>{create_id_tt()}, 1,
                                                                  op_domain_params, &op_domain_stats);
 
-            // check if the operational domain has the correct size (max 10 steps in each dimension)
+            // check if the operational domain has the correct size
             CHECK(op_domain.operational_values.size() == 1);
 
             // for the selected range, all samples should be within the parameters and operational
@@ -152,7 +152,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             const auto op_domain = operational_domain_contour_tracing(lat, std::vector<tt>{create_id_tt()}, 1,
                                                                       op_domain_params, &op_domain_stats);
 
-            // check if the operational domain has the correct size (max 10 steps in each dimension)
+            // check if the operational domain has the correct size
             CHECK(op_domain.operational_values.size() == 1);
 
             // for the selected range, all samples should be within the parameters and operational
@@ -181,7 +181,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             const auto op_domain = operational_domain_grid_search(lat, std::vector<tt>{create_id_tt()},
                                                                   op_domain_params, &op_domain_stats);
 
-            // check if the operational domain has the correct size (10 steps in each dimension)
+            // check if the operational domain has the correct size
             CHECK(op_domain.operational_values.size() == 100);
 
             // for the selected range, all samples should be within the parameters and operational
@@ -198,7 +198,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             const auto op_domain = operational_domain_random_sampling(lat, std::vector<tt>{create_id_tt()}, 100,
                                                                       op_domain_params, &op_domain_stats);
 
-            // check if the operational domain has the correct size (max 10 steps in each dimension)
+            // check if the operational domain has the correct size
             CHECK(op_domain.operational_values.size() <= 100);
 
             // for the selected range, all samples should be within the parameters and operational
@@ -216,7 +216,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             const auto op_domain = operational_domain_flood_fill(lat, std::vector<tt>{create_id_tt()}, 1,
                                                                  op_domain_params, &op_domain_stats);
 
-            // check if the operational domain has the correct size (max 10 steps in each dimension)
+            // check if the operational domain has the correct size
             CHECK(op_domain.operational_values.size() == 100);
 
             // for the selected range, all samples should be within the parameters and operational
@@ -233,7 +233,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             const auto op_domain = operational_domain_contour_tracing(lat, std::vector<tt>{create_id_tt()}, 1,
                                                                       op_domain_params, &op_domain_stats);
 
-            // check if the operational domain has the correct size (max 10 steps in each dimension)
+            // check if the operational domain has the correct size
             CHECK(op_domain.operational_values.size() <= 100);
 
             // for the selected range, all samples should be within the parameters and operational
