@@ -303,7 +303,7 @@ class opdom_command : public command
      *
      * @return The `sidb_simulation_engine` member associated with the identifier.
      */
-    [[nodiscard]] inline constexpr fiction::sidb_simulation_engine get_sim_engine() const noexcept
+    [[nodiscard]] inline fiction::sidb_simulation_engine get_sim_engine() const noexcept
     {
         if (sim_engine_str == "ClusterComplete")
         {
