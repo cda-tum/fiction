@@ -13,8 +13,8 @@
 #include "fiction/technology/physical_constants.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/technology/sidb_cluster_hierarchy.hpp"
-#include "fiction/technology/sidb_defects.hpp"
 #include "fiction/technology/sidb_defect_surface.hpp"
+#include "fiction/technology/sidb_defects.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/hash.hpp"
 
@@ -94,6 +94,7 @@ class clustercomplete_impl
         res.additional_simulation_parameters.emplace("validity_witness_partitioning_limit",
                                                      params.validity_witness_partitioning_max_cluster_size_gss);
 
+        // run Ground State Space to obtain the complete hierarchical charge space
         const ground_state_space_stats& gss_stats = fiction::ground_state_space(
             charge_layout, params.validity_witness_partitioning_max_cluster_size_gss, charge_layout.get_phys_params());
 
@@ -117,6 +118,7 @@ class clustercomplete_impl
             }
         }
 
+        // The ClusterComplete runtime includes the runtime for the Ground State Space procedure
         res.simulation_runtime = time_counter + gss_stats.runtime;
 
         return res;
@@ -176,6 +178,7 @@ class clustercomplete_impl
 
     [[nodiscard]] bool perform_potential_bound_analysis(const sidb_cluster_state& cst) const noexcept
     {
+        // number of respective witnesses to count
         uint64_t required_neg_count  = cst.proj_st.get_count<sidb_charge_state::NEGATIVE>(),
                  required_pos_count  = cst.proj_st.get_count<sidb_charge_state::POSITIVE>(),
                  required_neut_count = cst.proj_st.get_count<sidb_charge_state::NEUTRAL>();
@@ -202,6 +205,7 @@ class clustercomplete_impl
             }
         }
 
+        // SAT iff all witness counts are satisfied
         return required_neg_count == 0 && required_pos_count == 0 && required_neut_count == 0;
     }
 
@@ -223,6 +227,7 @@ class clustercomplete_impl
     {
         charge_distribution_surface charge_layout_copy{charge_layout};
 
+        // convert bottom clustering state to charge distribution
         for (const sidb_cluster_state_ptr& cst : clustering_state)
         {
             const uint64_t sidb_ix = get_singleton_sidb_ix(cst->proj_st.cluster);
@@ -240,6 +245,8 @@ class clustercomplete_impl
             return;
         }
 
+        // population stability is a given when this function is called; hence the charge distribution is physically
+        // valid when configuration stability is met
         charge_layout_copy.declare_physically_valid();
 
         if constexpr (has_get_sidb_defect_v<Lyt>)
@@ -260,7 +267,7 @@ class clustercomplete_impl
     static constexpr inline double get_projector_state_bound_pot(const sidb_cluster_projector_state& pst,
                                                                  const uint64_t                      sidb_ix) noexcept
     {
-        return pst.cluster->pot_projs.at(sidb_ix).get_pot_proj_for_m_conf<bound>(pst.multiset_conf).v;
+        return pst.cluster->pot_projs.at(sidb_ix).get_pot_proj_for_m_conf<bound>(pst.multiset_conf).pot_val;
     }
 
     enum class potential_bound_update_operation
@@ -289,6 +296,8 @@ class clustercomplete_impl
                                               sidb_cluster_state_composition& parent_composition,
                                               sidb_clustering_state&          clustering_state) noexcept
     {
+        // the parent is specialised to a specific composition of its children; first the non-parent cluster states are
+        // applied to children
         for (sidb_cluster_state& child_cst : parent_composition)
         {
             for (const uint64_t sidb_ix : child_cst.proj_st.cluster->sidbs)
@@ -300,6 +309,8 @@ class clustercomplete_impl
             }
         }
 
+        // now the parent cluster state is un-applied from the non-parent cluster states (not the children); this makes
+        // room for the specialisation, which is then performed by adding the children to the non-parent cluster states
         for (sidb_cluster_state_ptr& cst : clustering_state)
         {
             for (const uint64_t sidb_ix : cst->proj_st.cluster->sidbs)
@@ -318,6 +329,8 @@ class clustercomplete_impl
                                                    sidb_cluster_state_composition& parent_composition,
                                                    sidb_clustering_state&          clustering_state) noexcept
     {
+        // this inverts the operation of the function above, first un-applying the (old, already considered) children,
+        // then the parent is applied again, which thus reverts to the non-specialised state
         for (sidb_cluster_state_ptr& cst : clustering_state)
         {
             for (const uint64_t sidb_ix : cst->proj_st.cluster->sidbs)
@@ -348,11 +361,11 @@ class clustercomplete_impl
         }
 
         // max_cst <- find the cluster of maximum size
-        uint64_t max_cluster_size = clustering_state.front()->proj_st.cluster->size();
+        uint64_t max_cluster_size = clustering_state.front()->proj_st.cluster->num_sidbs();
         uint64_t max_cst_ix       = 0;
         for (uint64_t ix = 1; ix < clustering_state.size(); ++ix)
         {
-            if (const uint64_t cluster_size = clustering_state.at(ix)->proj_st.cluster->size();
+            if (const uint64_t cluster_size = clustering_state.at(ix)->proj_st.cluster->num_sidbs();
                 cluster_size > max_cluster_size)
             {
                 max_cluster_size = cluster_size;
@@ -372,6 +385,7 @@ class clustercomplete_impl
         // for all compositions of max_cst
         for (sidb_cluster_state_composition& max_cst_composition : get_projector_state_compositions(max_cst->proj_st))
         {
+            // specialise parent to a specific children composition
             apply_inter_cluster_potential(*max_cst, max_cst_composition, clustering_state);
 
             for (sidb_cluster_state& sub_cst : max_cst_composition)
@@ -380,7 +394,7 @@ class clustercomplete_impl
                 clustering_state.emplace_back(std::make_unique<sidb_cluster_state>(std::move(sub_cst)));
             }
 
-            // recurse
+            // recurse with specialised children composition
             add_physically_valid_charge_configurations(clustering_state);
 
             for (uint64_t i = 0; i < max_cst_composition.size(); ++i)
@@ -389,6 +403,7 @@ class clustercomplete_impl
                 clustering_state.pop_back();
             }
 
+            // undo specialisation such that the specialisation may consider a different children composition
             undo_apply_inter_cluster_potential(*max_cst, max_cst_composition, clustering_state);
         }
 
@@ -423,6 +438,7 @@ class clustercomplete_impl
         std::vector<std::thread> threads_vec{};
         threads_vec.reserve(num_threads_to_use);
 
+        // the threads each consider a range of the top cluster charge space
         for (const std::pair<uint64_t, uint64_t>& range : ranges)
         {
             threads_vec.emplace_back(
@@ -438,6 +454,7 @@ class clustercomplete_impl
                             sidb_clustering_state clustering_state{};
                             clustering_state.reserve(charge_layout.num_cells());
 
+                            // convert charge space composition to clustering state
                             for (sidb_cluster_state& cst : composition)
                             {
                                 clustering_state.emplace_back(std::make_unique<sidb_cluster_state>(std::move(cst)));

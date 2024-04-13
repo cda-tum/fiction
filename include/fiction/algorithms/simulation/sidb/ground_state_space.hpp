@@ -91,6 +91,7 @@ template <typename Lyt>
 class ground_state_space_impl
 {
   public:
+    // The documentation for the constructor parameters is found at the bottom of the file.
     explicit ground_state_space_impl(const Lyt& lyt, const uint64_t max_cluster_size_for_witness_partitioning,
                                      const sidb_simulation_parameters& phys_params) noexcept :
             base{phys_params.base},
@@ -118,7 +119,7 @@ class ground_state_space_impl
             }
         }
 
-        const uint64_t max_multisets = maximum_top_level_multisets(top_cluster->size());
+        const uint64_t max_multisets = maximum_top_level_multisets(top_cluster->num_sidbs());
 
         return ground_state_space_stats{top_cluster, time_counter, max_multisets - top_cluster->charge_space.size(),
                                         max_multisets};
@@ -221,14 +222,14 @@ class ground_state_space_impl
     static constexpr inline potential_projection get_projection_bound(const sidb_cluster_ptr& c,
                                                                       const uint64_t          sidb_ix) noexcept
     {
-        return c->pot_projs.at(sidb_ix).get<bound>();
+        return c->pot_projs.at(sidb_ix).get_bound<bound>();
     }
 
     template <bound_direction bound>
     static constexpr inline double get_next_projected_pot_bound(const sidb_cluster_ptr& c,
                                                                 const uint64_t          sidb_ix) noexcept
     {
-        return c->pot_projs.at(sidb_ix).get_next<bound>().v;
+        return c->pot_projs.at(sidb_ix).get_next_bound<bound>().pot_val;
     }
 
     template <bound_direction bound>
@@ -257,10 +258,10 @@ class ground_state_space_impl
     {
         const potential_projection& cur_bound = get_projection_bound<bound>(pst.cluster, rst.sidb_ix);
 
-        if (cur_bound.m == pst.multiset_conf)
+        if (cur_bound.multiset == pst.multiset_conf)
         {
-            rst.cluster->update_recv_ext_pot_bound<bound>(
-                rst.sidb_ix, get_next_projected_pot_bound<bound>(pst.cluster, rst.sidb_ix) - cur_bound.v);
+            rst.cluster->update_received_ext_pot_bound<bound>(
+                rst.sidb_ix, get_next_projected_pot_bound<bound>(pst.cluster, rst.sidb_ix) - cur_bound.pot_val);
         }
     }
 
@@ -410,17 +411,17 @@ class ground_state_space_impl
     {
         if constexpr (mode == potential_bound_analysis_mode::ANALYZE_MULTISET)
         {
-            return {get_projector_state_bound<bound_direction::LOWER>(pst, sidb_ix).v +
-                        pst.cluster->get_recv_ext_pot_bound<bound_direction::LOWER>(sidb_ix),
-                    get_projector_state_bound<bound_direction::UPPER>(pst, sidb_ix).v +
-                        pst.cluster->get_recv_ext_pot_bound<bound_direction::UPPER>(sidb_ix)};
+            return {get_projector_state_bound<bound_direction::LOWER>(pst, sidb_ix).pot_val +
+                        pst.cluster->get_received_ext_pot_bound<bound_direction::LOWER>(sidb_ix),
+                    get_projector_state_bound<bound_direction::UPPER>(pst, sidb_ix).pot_val +
+                        pst.cluster->get_received_ext_pot_bound<bound_direction::UPPER>(sidb_ix)};
         }
         else if constexpr (mode == potential_bound_analysis_mode::ANALYZE_COMPOSITION)
         {
             return {internal_pot_bounds.value().at(sidb_ix).at(static_cast<uint8_t>(bound_direction::LOWER)) +
-                        pst.cluster->parent.lock()->get_recv_ext_pot_bound<bound_direction::LOWER>(sidb_ix),
+                        pst.cluster->parent.lock()->get_received_ext_pot_bound<bound_direction::LOWER>(sidb_ix),
                     internal_pot_bounds.value().at(sidb_ix).at(static_cast<uint8_t>(bound_direction::UPPER)) +
-                        pst.cluster->parent.lock()->get_recv_ext_pot_bound<bound_direction::UPPER>(sidb_ix)};
+                        pst.cluster->parent.lock()->get_received_ext_pot_bound<bound_direction::UPPER>(sidb_ix)};
         }
     }
 
@@ -460,7 +461,7 @@ class ground_state_space_impl
             return false;
         }
 
-        if (pst.cluster->size() > witness_partitioning_max_cluster_size)
+        if (pst.cluster->num_sidbs() > witness_partitioning_max_cluster_size)
         {
             return true;
         }
@@ -520,31 +521,31 @@ class ground_state_space_impl
     }
 
     template <bound_direction bound>
-    void subtract_sibling_pot_from_recv_ext_pot_bound(const sidb_cluster_ptr&            parent,
-                                                      const sidb_cluster_receptor_state& child_rst) const noexcept
+    void subtract_sibling_pot_from_received_ext_pot_bound(const sidb_cluster_ptr&            parent,
+                                                          const sidb_cluster_receptor_state& child_rst) const noexcept
     {
-        double recv_pot_without_siblings = child_rst.cluster->get_recv_ext_pot_bound<bound>(child_rst.sidb_ix);
+        double recv_pot_without_siblings = child_rst.cluster->get_received_ext_pot_bound<bound>(child_rst.sidb_ix);
 
         for (const sidb_cluster_ptr& sibling : parent->children)
         {
             if (sibling != child_rst.cluster)
             {
-                recv_pot_without_siblings -= get_projection_bound<bound>(sibling, child_rst.sidb_ix).v;
+                recv_pot_without_siblings -= get_projection_bound<bound>(sibling, child_rst.sidb_ix).pot_val;
             }
         }
 
-        parent->set_recv_ext_pot_bound<bound>(child_rst.sidb_ix, recv_pot_without_siblings);
+        parent->set_received_ext_pot_bound<bound>(child_rst.sidb_ix, recv_pot_without_siblings);
     }
 
-    void derive_children_recv_bounds_without_siblings(const sidb_cluster_ptr& parent) const noexcept
+    void derive_children_received_bounds_without_siblings(const sidb_cluster_ptr& parent) const noexcept
     {
         for (const sidb_cluster_ptr& child : parent->children)
         {
             for (const uint64_t sidb_ix : child->sidbs)
             {
                 const sidb_cluster_receptor_state child_rst{child, sidb_ix};
-                subtract_sibling_pot_from_recv_ext_pot_bound<bound_direction::LOWER>(parent, child_rst);
-                subtract_sibling_pot_from_recv_ext_pot_bound<bound_direction::UPPER>(parent, child_rst);
+                subtract_sibling_pot_from_received_ext_pot_bound<bound_direction::LOWER>(parent, child_rst);
+                subtract_sibling_pot_from_received_ext_pot_bound<bound_direction::UPPER>(parent, child_rst);
             }
         }
     }
@@ -560,8 +561,8 @@ class ground_state_space_impl
 
                 for (const sidb_cluster_state& cst : composition)
                 {
-                    internal_pot_lb += get_projector_state_bound<bound_direction::LOWER>(cst.proj_st, sidb_ix).v;
-                    internal_pot_ub += get_projector_state_bound<bound_direction::UPPER>(cst.proj_st, sidb_ix).v;
+                    internal_pot_lb += get_projector_state_bound<bound_direction::LOWER>(cst.proj_st, sidb_ix).pot_val;
+                    internal_pot_ub += get_projector_state_bound<bound_direction::UPPER>(cst.proj_st, sidb_ix).pot_val;
                 }
 
                 receiving_cst.set_pot_bounds(sidb_ix, internal_pot_lb, internal_pot_ub);
@@ -643,14 +644,14 @@ class ground_state_space_impl
         }
 
         // update the received external potential bound for the subject
-        double diff = get_projection_bound<bound>(parent, rst.sidb_ix).v;
+        double diff = get_projection_bound<bound>(parent, rst.sidb_ix).pot_val;
 
         for (const sidb_cluster_ptr& child : parent->children)
         {
-            diff -= get_projection_bound<bound>(child, rst.sidb_ix).v;
+            diff -= get_projection_bound<bound>(child, rst.sidb_ix).pot_val;
         }
 
-        rst.cluster->update_recv_ext_pot_bound<bound>(rst.sidb_ix, diff);
+        rst.cluster->update_received_ext_pot_bound<bound>(rst.sidb_ix, diff);
     }
 
     void construct_merged_potential_projections(const sidb_cluster_ptr& parent) const noexcept
@@ -708,7 +709,7 @@ class ground_state_space_impl
         const sidb_cluster_ptr& min_parent =
             (*std::min_element(clustering.cbegin(), clustering.cend(),
                                [](const sidb_cluster_ptr& c1, const sidb_cluster_ptr& c2)
-                               { return c1->get_parent()->size() < c2->get_parent()->size(); }))
+                               { return c1->get_parent()->num_sidbs() < c2->get_parent()->num_sidbs(); }))
                 ->get_parent();
 
         for (const sidb_cluster_ptr& c : min_parent->children)
@@ -716,7 +717,7 @@ class ground_state_space_impl
             clustering.erase(c);
         }
 
-        derive_children_recv_bounds_without_siblings(min_parent);
+        derive_children_received_bounds_without_siblings(min_parent);
 
         construct_merged_charge_state_space(min_parent);
 
@@ -779,9 +780,8 @@ class ground_state_space_impl
  * Space* will solve an NP-complete sub-problem exhaustively. The sets of SiDBs that witness local population stability
  * for each respective charge state may be partitioned into disjoint sets such that the number of required witnesses for
  * each respective charge state is satisfied. If no such partition exists, the multiset charge configuration associated
- * with the requirements may be rejected.
- * @param phys_params The physical parameter that *Ground State Space* will use in order to prune the search space for
- * simulation.
+ * with the requirements may be rejected. Defaulted to `6` to avoid impairing runtimes, while allowing some pruning.
+ * @param phys_params The physical parameters that *Ground State Space* will use to prune simulation search space.
  * @return The results of the construction, which include the top cluster which parents all other clusters, and thereby
  * contains the charge spaces of each cluster.
  */

@@ -45,7 +45,8 @@ namespace fiction
 
 /**
  * An enumeration of cluster linkage methods. The chosen method defines how clusters are merged in the agglomerative
- * clustering procedure, by, e.g., defining an inter-cluster distance to minimize for the cluster to merge.
+ * clustering procedure, by, e.g., defining an inter-cluster distance to minimize for the cluster to merge. For more
+ * information, visit: https://docs.tibco.com/pub/spotfire/6.5.1/doc/html/hc/hc_clustering_methods_overview.htm.
  */
 enum class sidb_cluster_hierarchy_linkage_method
 {
@@ -113,8 +114,8 @@ struct sidb_binary_cluster_hierarchy_node
  * This function performs the ALGLIB agglomerative clustering algorithm for a given SiDB layout. By default, the cluster
  * are created by a minimal positional variance heuristic, also known as Ward's method.
  *
- * @tparam Lyt The type of the layout to create a cluster hierarchy of. It must be a cell-level SiDB layout.
- * @param The The layout to create a cluster hierarchy of.
+ * @tparam Lyt SiDB cell-level layout type.
+ * @param lyt The layout to create a cluster hierarchy of.
  * @param linkage_method The agglomerative clustering linking heuristic that is used by ALGLIB.
  */
 template <typename Lyt>
@@ -256,10 +257,10 @@ struct sidb_cluster_projector_state
     }
 };
 /**
- * The two types of potential bounds required for the *Ground State Space* algorithm. As the domain in which our
- * potential bounds live are simply the real numbers, we may think of the lower bound and upper bound domains to be
- * separate partial order structures on the real number line, inverse to each other. The *Ground State Space* algorithm
- * requires the properties of a lower semi-lattice for these domains, ie. all finite meets must exist. This is
+ * The two types of electrostatic potential bounds required for the *Ground State Space* algorithm. As the domain in
+ * which our potential bounds live are simply the real numbers, we may think of the lower bound and upper bound domains
+ * to be separate partial order structures on the real number line, inverse to each other. The *Ground State Space*
+ * algorithm requires the properties of a lower semi-lattice for these domains, ie. all finite meets must exist. This is
  * implemented for the lower and upper bound respectively simply by taking a minimum or a maximum. One may think of
  * meets as follows, which is very relevant to intention of their application: a meet, or greatest lower bound, is the
  * *minimal information* common to a set (of potential bounds). This semantic operation is essential to the *Ground
@@ -320,10 +321,10 @@ static inline uint64_t get_singleton_sidb_ix(const sidb_cluster_ptr& c) noexcept
  */
 static inline uint64_t get_unique_cluster_id(const sidb_cluster_ptr& c) noexcept;
 /**
- * This defines the type for a store in which the bounds on the local potential for an SiDB (index) may be stored. For
- * the *Ground State Space* algorithm, this is used to keep track of the bounds on the fraction of local potential that
- * is projected on the SiDB from within a cluster, though during *ClusterComplete* simulation, this is used as a dynamic
- * store in which also external potentials are accumulated.
+ * This defines the type for a store in which the bounds on the local electrostatic potential for an SiDB (index) may be
+ * stored. For the *Ground State Space* algorithm, this is used to keep track of the bounds on the fraction of local
+ * potential that is projected on the SiDB from within a cluster, though during *ClusterComplete* simulation, this is
+ * used as a dynamic store in which also external potentials are accumulated.
  */
 #ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
 using intra_cluster_potential_bounds = std::map<uint64_t, std::array<double, 2>>;
@@ -331,13 +332,13 @@ using intra_cluster_potential_bounds = std::map<uint64_t, std::array<double, 2>>
 using intra_cluster_potential_bounds = phmap::flat_hash_map<uint64_t, std::array<double, 2>>;
 #endif
 /**
- * A cluster state is a projector state paired with a potential bound store in which local potentials are stored for
- * each SiDB in the cluster in the projector state. Throughout the *Ground State Space* algorithm, these are internal
- * potential bounds for each SiDB, corresponding to the meet on the potential bounds for each composition of the cluster
- * charge state associated with the multiset charge configuration of the projector state. To clarify, each composition
- * gives information of a multiset charge state assignment of all children of this cluster. Thereby, we have bounds on
- * the fraction of the local potential for an SiDB in the parent cluster under such a composition. These bounds are then
- * merged into a single bound without loss of accuracy through a meet.
+ * A cluster state is a projector state (see `sidb_cluster_projector_state`) paired with a potential bound store in
+ * which local potentials are stored for each SiDB in the cluster in the projector state. Throughout the *Ground State
+ * Space* algorithm, these are internal potential bounds for each SiDB, corresponding to the meet on the potential
+ * bounds for each composition of the cluster charge state associated with the multiset charge configuration of the
+ * projector state. To clarify, each composition gives information of a multiset charge state assignment of all children
+ * of this cluster. Thereby, we have bounds on the fraction of the local potential for an SiDB in the parent cluster
+ * under such a composition. These bounds are then merged into a single bound without loss of accuracy through a meet.
  */
 struct sidb_cluster_state
 {
@@ -388,8 +389,8 @@ struct sidb_cluster_state
      * Relative setter for internal potential bound for an SiDB in the cluster.
      *
      * @param sidb_ix SiDB (index) to update the internal potential bound of.
-     * @param min Difference in lower bound potential to apply.
-     * @param max Difference in upper bound potential to apply.
+     * @param min_diff Difference in lower bound potential to apply.
+     * @param max_diff Difference in upper bound potential to apply.
      */
     inline void update_pot_bounds(const uint64_t sidb_ix, const double min_diff, const double max_diff) noexcept
     {
@@ -501,9 +502,20 @@ struct sidb_cluster_charge_state
     {
         switch (cs)
         {
-            case sidb_charge_state::NEGATIVE: neg_count++; break;
-            case sidb_charge_state::POSITIVE: pos_count++; break;
-            default: break;
+            case sidb_charge_state::NEGATIVE:
+            {
+                neg_count++;
+                return;
+            }
+            case sidb_charge_state::POSITIVE:
+            {
+                pos_count++;
+                return;
+            }
+            default:
+            {
+                return;
+            }
         }
     }
     /**
@@ -579,21 +591,21 @@ static constexpr inline sidb_charge_state singleton_multiset_conf_to_charge_stat
         static_cast<int8_t>(static_cast<uint32_t>(m) - static_cast<uint32_t>(static_cast<uint32_t>(m) < m)));
 }
 /**
- * This struct defines the type of a potential projection, which pairs a multiset charge configuration with the
- * potential value (in eV) associated with the potential projection in the given context. The context is given by
- * potential projection stores in the decorated cluster hierarchies, which links the projecting cluster with SiDB that
- * receives this potential projection.
+ * This struct defines the type of an electrostatic potential projection, which pairs a multiset charge configuration
+ * with the potential value (in eV) associated with the potential projection in the given context. The context is given
+ * by potential projection stores in the decorated cluster hierarchies, which links the projecting cluster with SiDB
+ * that receives this potential projection.
  */
 struct potential_projection
 {
     /**
      * Potential projection value (unit: eV).
      */
-    double v{0.0};
+    double pot_val{0.0};
     /**
      * Associated multiset charge configuration.
      */
-    uint64_t m{0};
+    uint64_t multiset{0};
     /**
      * Default constructor, used as a starting point for an accumulation of potential projections.
      */
@@ -604,7 +616,7 @@ struct potential_projection
      * @param pot Potential value to copy.
      * @param mul Multiset charge configuration to copy.
      */
-    explicit potential_projection(const double pot, const uint64_t mul) noexcept : v{pot}, m{mul} {}
+    explicit potential_projection(const double pot, const uint64_t mul) noexcept : pot_val{pot}, multiset{mul} {}
     /**
      * Constructor for a potential projection from a singleton cluster, thereby lifting a value in the potential matrix
      * to a potential projection.
@@ -613,8 +625,8 @@ struct potential_projection
      * @param cs Charge state associated with the singleton cluster projector for this potential projection.
      */
     explicit potential_projection(const double inter_sidb_pot, const sidb_charge_state cs) noexcept :
-            v{inter_sidb_pot},
-            m{static_cast<uint64_t>(sidb_cluster_charge_state{cs})}
+            pot_val{inter_sidb_pot},
+            multiset{static_cast<uint64_t>(sidb_cluster_charge_state{cs})}
     {}
     /**
      * Defines an ordering of potential projections through comparison of the potential value. To prevent potential
@@ -628,7 +640,7 @@ struct potential_projection
      */
     constexpr inline bool operator<(const potential_projection& other) const noexcept
     {
-        return v < other.v || (v == other.v && m < other.m);
+        return pot_val < other.pot_val || (pot_val == other.pot_val && multiset < other.multiset);
     }
     /**
      * Defines summation of potential projections through addition of the potential values and concatenation of the
@@ -640,8 +652,8 @@ struct potential_projection
      */
     constexpr inline potential_projection& operator+=(const potential_projection& other) noexcept
     {
-        v += other.v;
-        m += other.m;
+        pot_val += other.pot_val;
+        multiset += other.multiset;
         return *this;
     }
 };
@@ -707,7 +719,7 @@ struct potential_projection_order
      * @return The potential projection that forms the requested bound on the potential projection order.
      */
     template <bound_direction bound>
-    [[nodiscard]] constexpr inline const potential_projection& get() const noexcept
+    [[nodiscard]] constexpr inline const potential_projection& get_bound() const noexcept
     {
         if constexpr (bound == bound_direction::LOWER)
         {
@@ -728,19 +740,19 @@ struct potential_projection_order
      * current relevant bound would be erased.
      */
     template <bound_direction bound>
-    [[nodiscard]] inline const potential_projection& get_next() const noexcept
+    [[nodiscard]] inline const potential_projection& get_next_bound() const noexcept
     {
-        const uint64_t bound_m = get<bound>().m;
+        const uint64_t bound_m = get_bound<bound>().multiset;
 
         if constexpr (bound == bound_direction::LOWER)
         {
             return *std::find_if(order.cbegin(), order.cend(),
-                                 [&](const potential_projection& pp) { return pp.m != bound_m; });
+                                 [&](const potential_projection& pp) { return pp.multiset != bound_m; });
         }
         else if constexpr (bound == bound_direction::UPPER)
         {
             return *std::find_if(order.crbegin(), order.crend(),
-                                 [&](const potential_projection& pp) { return pp.m != bound_m; });
+                                 [&](const potential_projection& pp) { return pp.multiset != bound_m; });
         }
     }
     /**
@@ -759,12 +771,12 @@ struct potential_projection_order
         if constexpr (bound == bound_direction::LOWER)
         {
             return *std::find_if(order.cbegin(), order.cend(),
-                                 [&](const potential_projection& pp) { return pp.m == m_conf; });
+                                 [&](const potential_projection& pp) { return pp.multiset == m_conf; });
         }
         else if constexpr (bound == bound_direction::UPPER)
         {
             return *std::prev(std::find_if(order.crbegin(), order.crend(),
-                                           [&](const potential_projection& pp) { return pp.m == m_conf; })
+                                           [&](const potential_projection& pp) { return pp.multiset == m_conf; })
                                   .base(),
                               1);
         }
@@ -778,7 +790,7 @@ struct potential_projection_order
     {
         for (pot_proj_order::const_iterator it = order.cbegin(); it != order.cend();)
         {
-            it->m == m_conf ? it = order.erase(it) : ++it;
+            it->multiset == m_conf ? it = order.erase(it) : ++it;
         }
     }
     /**
@@ -827,8 +839,8 @@ using sidb_clustering = phmap::flat_hash_set<sidb_cluster_ptr, sidb_cluster_ptr_
  * This struct defined the fully decorated cluster hierarchy type which follows the structure of a "general tree". It
  * contains multiple stores:
  * - a set of indices that correspond to the SiDBs as stored in a `charge_distribution_surface` object,
- * - a store of potential bounds for each SiDB in the cluster that give the fraction of the local potential that is
- * received from outside the cluster, and
+ * - a store of potential bounds for each SiDB in the cluster that give the fraction of the local electrostatic
+ * potential that is received from outside the cluster, and
  * - a store containing the potential projection orders onto each SiDB, inside and outside the cluster.
  */
 struct sidb_cluster
@@ -854,7 +866,7 @@ struct sidb_cluster
     std::map<sidb_ix, potential_projection_order> pot_projs{};
 #else
     phmap::flat_hash_set<sidb_ix>                             sidbs;
-    phmap::flat_hash_map<sidb_ix, std::array<double, 2>>      recv_ext_pot_bounds{};
+    phmap::flat_hash_map<sidb_ix, std::array<double, 2>> received_ext_pot_bounds{};
     phmap::flat_hash_map<sidb_ix, potential_projection_order> pot_projs{};
 #endif
     /**
@@ -870,12 +882,12 @@ struct sidb_cluster
      * singleton cluster, the unique identifier is set to be the index of the single SiDB it contains.
      */
 #ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
-    explicit sidb_cluster(std::set<sidb_ix> c, sidb_clustering v, uid_t unique_id) noexcept :
+    explicit sidb_cluster(std::set<sidb_ix> c, sidb_clustering x, uid_t unique_id) noexcept :
 #else
-    explicit sidb_cluster(phmap::flat_hash_set<sidb_ix> c, sidb_clustering v, uid_t unique_id) noexcept :
+    explicit sidb_cluster(phmap::flat_hash_set<sidb_ix> c, sidb_clustering x, uid_t unique_id) noexcept :
 #endif
-            uid{v.empty() ? *c.cbegin() : unique_id},
-            children{std::move(v)},
+            uid{x.empty() ? *c.cbegin() : unique_id},
+            children{std::move(x)},
             sidbs{std::move(c)}
     {}
     /**
@@ -913,8 +925,8 @@ struct sidb_cluster
             charge_space.emplace(sidb_cluster_charge_state{self_ptr, cs, loc_ext_pot});
         }
 
-        recv_ext_pot_bounds[ix][static_cast<uint8_t>(bound_direction::LOWER)] = loc_pot_min;
-        recv_ext_pot_bounds[ix][static_cast<uint8_t>(bound_direction::UPPER)] = loc_pot_max;
+        received_ext_pot_bounds[ix][static_cast<uint8_t>(bound_direction::LOWER)] = loc_pot_min;
+        received_ext_pot_bounds[ix][static_cast<uint8_t>(bound_direction::UPPER)] = loc_pot_max;
     }
     /**
      * The bound on the potential an SiDB receives from outside this cluster is returned.
@@ -924,9 +936,9 @@ struct sidb_cluster
      * @return The potential bound that is stored.
      */
     template <bound_direction bound>
-    constexpr inline double get_recv_ext_pot_bound(const sidb_ix i) noexcept
+    constexpr inline double get_received_ext_pot_bound(const sidb_ix i) noexcept
     {
-        return recv_ext_pot_bounds.at(i).at(static_cast<uint8_t>(bound));
+        return received_ext_pot_bounds.at(i).at(static_cast<uint8_t>(bound));
     }
     /**
      * The bound on the potential an SiDB receives from outside this cluster is set.
@@ -936,9 +948,9 @@ struct sidb_cluster
      * @param new_bound The new potential bound that is set.
      */
     template <bound_direction bound>
-    constexpr inline void set_recv_ext_pot_bound(const sidb_ix i, const double new_bound) noexcept
+    constexpr inline void set_received_ext_pot_bound(const sidb_ix i, const double new_bound) noexcept
     {
-        recv_ext_pot_bounds[i][static_cast<uint8_t>(bound)] = new_bound;
+        received_ext_pot_bounds[i][static_cast<uint8_t>(bound)] = new_bound;
     }
     /**
      * The bound on the potential an SiDB receives from outside this cluster is updated.
@@ -948,16 +960,16 @@ struct sidb_cluster
      * @param diff The difference with which the potential bound is updated.
      */
     template <bound_direction bound>
-    constexpr inline void update_recv_ext_pot_bound(const sidb_ix i, const double diff) noexcept
+    constexpr inline void update_received_ext_pot_bound(const sidb_ix i, const double diff) noexcept
     {
-        recv_ext_pot_bounds[i][static_cast<uint8_t>(bound)] += diff;
+        received_ext_pot_bounds[i][static_cast<uint8_t>(bound)] += diff;
     }
     /**
      * Function to return the number of SiDBs contained in the cluster.
      *
      * @return The number of SiDBs contained in the cluster.
      */
-    inline uint64_t size() const noexcept
+    inline uint64_t num_sidbs() const noexcept
     {
         return sidbs.size();
     }
@@ -986,7 +998,7 @@ static inline uint64_t get_cluster_size(const sidb_cluster_ptr& c) noexcept
  * Function to obtain the unique identifier of the given cluster. Required for compilation due to mutual recursion.
  *
  * @param c Cluster of which its unique identifier is requested.
- * @return The unique identifier of the given.
+ * @return The unique identifier of the given cluster.
  */
 static inline uint64_t get_unique_cluster_id(const sidb_cluster_ptr& c) noexcept
 {
