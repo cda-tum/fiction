@@ -292,8 +292,21 @@ class clustercomplete_impl
         }
     }
 
-    static void apply_inter_cluster_potential(const sidb_cluster_state&       parent_cst,
-                                              sidb_cluster_state_composition& parent_composition,
+    template <potential_bound_update_operation op>
+    static void add_or_subtract_parent_potential(const sidb_cluster_state& parent_cst,
+                                                 sidb_clustering_state&    clustering_state) noexcept
+    {
+        // the parent is specialised to a specific composition of its children
+        for (sidb_cluster_state_ptr& cst : clustering_state)
+        {
+            for (const uint64_t sidb_ix : cst->proj_st.cluster->sidbs)
+            {
+                update_cluster_state<op>(*cst, sidb_ix, parent_cst.proj_st);
+            }
+        }
+    }
+
+    static void apply_inter_cluster_potential(sidb_cluster_state_composition& parent_composition,
                                               sidb_clustering_state&          clustering_state) noexcept
     {
         // the parent is specialised to a specific composition of its children; first the non-parent cluster states are
@@ -309,14 +322,11 @@ class clustercomplete_impl
             }
         }
 
-        // now the parent cluster state is un-applied from the non-parent cluster states (not the children); this makes
-        // room for the specialisation, which is then performed by adding the children to the non-parent cluster states
+        // the specialisation is now performed by adding the children to the non-parent cluster states
         for (sidb_cluster_state_ptr& cst : clustering_state)
         {
             for (const uint64_t sidb_ix : cst->proj_st.cluster->sidbs)
             {
-                update_cluster_state<potential_bound_update_operation::SUBTRACT>(*cst, sidb_ix, parent_cst.proj_st);
-
                 for (sidb_cluster_state& child_cst : parent_composition)
                 {
                     update_cluster_state<potential_bound_update_operation::ADD>(*cst, sidb_ix, child_cst.proj_st);
@@ -325,12 +335,11 @@ class clustercomplete_impl
         }
     }
 
-    static void undo_apply_inter_cluster_potential(const sidb_cluster_state&       parent_cst,
-                                                   sidb_cluster_state_composition& parent_composition,
+    static void undo_apply_inter_cluster_potential(sidb_cluster_state_composition& parent_composition,
                                                    sidb_clustering_state&          clustering_state) noexcept
     {
-        // this inverts the operation of the function above, first un-applying the (old, already considered) children,
-        // then the parent is applied again, which thus reverts to the non-specialised state
+        // this inverts the operation of the function above with respect to the non-parent cluster states, un-applying
+        // the (old, already considered) children, which thus allows the next specialisation to fill the gap
         for (sidb_cluster_state_ptr& cst : clustering_state)
         {
             for (const uint64_t sidb_ix : cst->proj_st.cluster->sidbs)
@@ -339,8 +348,6 @@ class clustercomplete_impl
                 {
                     update_cluster_state<potential_bound_update_operation::SUBTRACT>(*cst, sidb_ix, child_cst.proj_st);
                 }
-
-                update_cluster_state<potential_bound_update_operation::ADD>(*cst, sidb_ix, parent_cst.proj_st);
             }
         }
     }
@@ -382,11 +389,14 @@ class clustercomplete_impl
         // pop
         clustering_state.pop_back();
 
-        // for all compositions of max_cst
+        // un-apply max_cst from the other cluster states, thereby making space for specialisation
+        add_or_subtract_parent_potential<potential_bound_update_operation::SUBTRACT>(*max_cst, clustering_state);
+
+        // specialise for all compositions of max_cst
         for (sidb_cluster_state_composition& max_cst_composition : get_projector_state_compositions(max_cst->proj_st))
         {
             // specialise parent to a specific children composition
-            apply_inter_cluster_potential(*max_cst, max_cst_composition, clustering_state);
+            apply_inter_cluster_potential(max_cst_composition, clustering_state);
 
             for (sidb_cluster_state& sub_cst : max_cst_composition)
             {
@@ -404,8 +414,11 @@ class clustercomplete_impl
             }
 
             // undo specialisation such that the specialisation may consider a different children composition
-            undo_apply_inter_cluster_potential(*max_cst, max_cst_composition, clustering_state);
+            undo_apply_inter_cluster_potential(max_cst_composition, clustering_state);
         }
+
+        // apply max_cst back to the other cluster states
+        add_or_subtract_parent_potential<potential_bound_update_operation::ADD>(*max_cst, clustering_state);
 
         // move back
         clustering_state.emplace_back(std::move(max_cst));
