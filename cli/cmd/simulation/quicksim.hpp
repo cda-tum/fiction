@@ -113,13 +113,14 @@ class quicksim_command : public command
 
                     if constexpr (fiction::is_sidb_lattice_100_v<Lyt>)
                     {
+                        sidb_111_used  = false;
                         sim_result_100 = fiction::quicksim(*lyt_ptr, params);
                     }
                     else if constexpr (fiction::is_sidb_lattice_111_v<Lyt>)
                     {
+                        sidb_111_used  = true;
                         sim_result_111 = fiction::quicksim(*lyt_ptr, params);
                     }
-
                     else
                     {
                         env->out() << "[e] no valid lattice orientation" << std::endl;
@@ -189,7 +190,10 @@ class quicksim_command : public command
      * Minimum energy.
      */
     double min_energy{std::numeric_limits<double>::infinity()};
-
+    /**
+     * Flag to determine the SiDB lattice used for the simulation when logging.
+     */
+    bool sidb_111_used = false;
     /**
      * Logs the resulting information in a log file.
      *
@@ -199,6 +203,22 @@ class quicksim_command : public command
     {
         try
         {
+            if (sidb_111_used)
+            {
+                return nlohmann::json{
+                    {"Algorithm name", sim_result_111.algorithm_name},
+                    {"Simulation runtime", sim_result_111.simulation_runtime.count()},
+                    {"Physical parameters",
+                     {{"epsilon_r", sim_result_111.physical_parameters.epsilon_r},
+                      {"lambda_tf", sim_result_111.physical_parameters.lambda_tf},
+                      {"mu_minus", sim_result_111.physical_parameters.mu_minus}}},
+                    {"Lowest state energy (eV)", min_energy},
+                    {"Number of stable states", sim_result_111.charge_distributions.size()},
+                    {"Iteration steps",
+                     std::any_cast<uint64_t>(sim_result_111.additional_simulation_parameters.at("iteration_steps"))},
+                    {"alpha", std::any_cast<double>(sim_result_111.additional_simulation_parameters.at("alpha"))}};
+            }
+
             return nlohmann::json{
                 {"Algorithm name", sim_result_100.algorithm_name},
                 {"Simulation runtime", sim_result_100.simulation_runtime.count()},
