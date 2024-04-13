@@ -908,8 +908,14 @@ struct sidb_cluster
 
         const uint64_t ix = *sidbs.cbegin();
 
-        for (const sidb_charge_state cs : sidb_charge_state_iterator<sidb_state_iter_dir::TO_NEGATIVE>{
-                 base == 3 ? sidb_charge_state::POSITIVE : sidb_charge_state::NEUTRAL})
+        std::vector<sidb_charge_state> charge_states = {sidb_charge_state::NEGATIVE, sidb_charge_state::NEUTRAL};
+
+        if (base == 3)
+        {
+            charge_states.emplace_back(sidb_charge_state::POSITIVE);
+        }
+
+        for (const sidb_charge_state cs : charge_states)
         {
             charge_space.emplace(sidb_cluster_charge_state{self_ptr, cs, loc_ext_pot});
         }
