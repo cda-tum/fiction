@@ -67,6 +67,10 @@ enum class heuristic_sidb_simulation_engine
      */
     QUICKSIM
 };
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wswitch"
+// @ql:off
 /**
  * Returns the name of the given simulation engine.
  *
@@ -111,15 +115,11 @@ template <typename EngineType>
             {
                 return "QuickSim";
             }
-            default:
-            {
-                return "Not implemented";
-            }
         }
     }
-
-    return "Not implemented";
 }
+// @ql:on
+#pragma clang diagnostic pop
 
 }  // namespace fiction
 
