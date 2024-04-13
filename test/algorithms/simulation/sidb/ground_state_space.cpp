@@ -185,7 +185,7 @@ TEMPLATE_TEST_CASE("Ground state space construction of a 14 DB layout", "[ground
                    charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
 {
     TestType lyt{};
-    // V1   V2      num
+
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({2, 2, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({4, 1, 0}, TestType::cell_type::NORMAL);
