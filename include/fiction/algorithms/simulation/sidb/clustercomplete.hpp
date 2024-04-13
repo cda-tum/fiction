@@ -306,8 +306,9 @@ class clustercomplete_impl
         }
     }
 
-    static void apply_inter_cluster_potential(sidb_cluster_state_composition& parent_composition,
-                                              sidb_clustering_state&          clustering_state) noexcept
+    std::vector<std::pair<double, double>>
+    apply_inter_cluster_potential(sidb_cluster_state_composition& parent_composition,
+                                  sidb_clustering_state&          clustering_state) const noexcept
     {
         // the parent is specialised to a specific composition of its children; first the non-parent cluster states are
         // applied to children
@@ -322,32 +323,46 @@ class clustercomplete_impl
             }
         }
 
+        std::vector<std::pair<double, double>> composition_bounds{};
+        composition_bounds.reserve(charge_layout.num_cells());
+
         // the specialisation is now performed by adding the children to the non-parent cluster states
         for (sidb_cluster_state_ptr& cst : clustering_state)
         {
             for (const uint64_t sidb_ix : cst->proj_st.cluster->sidbs)
             {
+                double comp_pot_lb = 0;
+                double comp_pot_ub = 0;
+
                 for (sidb_cluster_state& child_cst : parent_composition)
                 {
-                    update_cluster_state<potential_bound_update_operation::ADD>(*cst, sidb_ix, child_cst.proj_st);
+                    comp_pot_lb += get_projector_state_bound_pot<bound_direction::LOWER>(child_cst.proj_st, sidb_ix);
+                    comp_pot_ub += get_projector_state_bound_pot<bound_direction::UPPER>(child_cst.proj_st, sidb_ix);
                 }
+
+                cst->update_pot_bounds(sidb_ix, comp_pot_lb, comp_pot_ub);
+
+                composition_bounds.emplace_back(-comp_pot_lb, -comp_pot_ub);
             }
         }
+
+        return composition_bounds;
     }
 
-    static void undo_apply_inter_cluster_potential(sidb_cluster_state_composition& parent_composition,
-                                                   sidb_clustering_state&          clustering_state) noexcept
+    static void undo_apply_inter_cluster_potential(const std::vector<std::pair<double, double>>& composition_bounds,
+                                                   sidb_clustering_state& clustering_state) noexcept
     {
         // this inverts the operation of the function above with respect to the non-parent cluster states, un-applying
         // the (old, already considered) children, which thus allows the next specialisation to fill the gap
+        uint64_t counter = 0;
+
         for (sidb_cluster_state_ptr& cst : clustering_state)
         {
             for (const uint64_t sidb_ix : cst->proj_st.cluster->sidbs)
             {
-                for (sidb_cluster_state& child_cst : parent_composition)
-                {
-                    update_cluster_state<potential_bound_update_operation::SUBTRACT>(*cst, sidb_ix, child_cst.proj_st);
-                }
+                cst->update_pot_bounds(sidb_ix, composition_bounds[counter].first, composition_bounds[counter].second);
+
+                counter++;
             }
         }
     }
@@ -396,7 +411,8 @@ class clustercomplete_impl
         for (sidb_cluster_state_composition& max_cst_composition : get_projector_state_compositions(max_cst->proj_st))
         {
             // specialise parent to a specific children composition
-            apply_inter_cluster_potential(max_cst_composition, clustering_state);
+            const std::vector<std::pair<double, double>>& composition_bounds =
+                apply_inter_cluster_potential(max_cst_composition, clustering_state);
 
             for (sidb_cluster_state& sub_cst : max_cst_composition)
             {
@@ -414,7 +430,7 @@ class clustercomplete_impl
             }
 
             // undo specialisation such that the specialisation may consider a different children composition
-            undo_apply_inter_cluster_potential(max_cst_composition, clustering_state);
+            undo_apply_inter_cluster_potential(composition_bounds, clustering_state);
         }
 
         // apply max_cst back to the other cluster states
