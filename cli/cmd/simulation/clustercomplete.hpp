@@ -12,6 +12,7 @@
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
+#include <fiction/utils/layout_utils.hpp>
 #include <fiction/utils/name_utils.hpp>
 
 #include <alice/alice.hpp>
@@ -43,9 +44,11 @@ class clustercomplete_command : public command
             command(
                 e,
                 "ClusterComplete is a proof of concept of the more general idea of state space pruning in a cluster "
-                "hierarchy. In the application on SiDB layouts, it is able to simulate SiDB logic in base 3 for well "
-                "over 50 DBs, thereby redefining what was thought to be possible in the exact SiDB simulation domain.")
+                "hierarchy. In the application on SiDB layouts, it is able to simulate SiDB logic in base 3 for 50 DBs "
+                "and more, depending on the layout that determines base of the exponential growth in simulation "
+                "complexity with added SiDBs. The shorter alias command is 'ccsim'.")
     {
+        add_option("--base,-b", physical_params.base, "The simulation base, can be 2 or 3", true);
         add_option("--epsilon_r,-e", physical_params.epsilon_r, "Electric permittivity of the substrate (unit-less)",
                    true);
         add_option("--lambda_tf,-l", physical_params.lambda_tf, "Thomas-Fermi screening distance (unit: nm)", true);
@@ -65,8 +68,9 @@ class clustercomplete_command : public command
     void execute() override
     {
         // reset sim result
-        sim_result = {};
-        min_energy = std::numeric_limits<double>::infinity();
+        sim_result_100 = {};
+        sim_result_111 = {};
+        min_energy     = std::numeric_limits<double>::infinity();
 
         if (physical_params.epsilon_r <= 0)
         {
@@ -97,7 +101,7 @@ class clustercomplete_command : public command
         {
             using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
 
-            if constexpr (fiction::has_sidb_technology_v<Lyt>)
+            if constexpr (!fiction::has_sidb_technology_v<Lyt>)
             {
                 if constexpr (fiction::is_charge_distribution_surface_v<Lyt>)
                 {
@@ -108,24 +112,52 @@ class clustercomplete_command : public command
                 }
                 else
                 {
-                    params.physical_parameters = physical_params;
+                    if constexpr (fiction::is_sidb_lattice_100_v<Lyt>)
+                    {
+                        sidb_111_used              = false;
+                        params.physical_parameters = physical_params;
+                        sim_result_100             = fiction::clustercomplete(*lyt_ptr, params);
+                    }
+                    else if constexpr (fiction::is_sidb_lattice_111_v<Lyt>)
+                    {
+                        sidb_111_used              = true;
+                        params.physical_parameters = physical_params;
+                        auto cps                   = convert_params<Lyt>(params);
+                        sim_result_111             = fiction::clustercomplete(*lyt_ptr, cps);
+                    }
+                    else
+                    {
+                        env->out() << "[e] no valid lattice orientation\n";
+                        return;
+                    }
 
-                    sim_result = fiction::clustercomplete(*lyt_ptr, params);
-
-                    if (sim_result.charge_distributions.empty())
+                    if (sim_result_100.charge_distributions.empty() && sim_result_111.charge_distributions.empty())
                     {
                         env->out() << fmt::format("[e] ground state of {} could not be determined", get_name(lyt_ptr))
                                    << std::endl;
                     }
                     else
                     {
-                        const auto min_energy_distr = fiction::minimum_energy_distribution(
-                            sim_result.charge_distributions.cbegin(), sim_result.charge_distributions.cend());
+                        if constexpr (fiction::is_sidb_lattice_100_v<Lyt>)
+                        {
+                            const auto min_energy_distr =
+                                fiction::minimum_energy_distribution(sim_result_100.charge_distributions.cbegin(),
+                                                                     sim_result_100.charge_distributions.cend());
 
-                        min_energy = min_energy_distr->get_system_energy();
+                            min_energy = min_energy_distr->get_system_energy();
+                            store<fiction::cell_layout_t>().extend() =
+                                std::make_shared<fiction::cds_sidb_100_cell_clk_lyt>(*min_energy_distr);
+                        }
+                        else if constexpr (fiction::is_sidb_lattice_111_v<Lyt>)
+                        {
+                            const auto min_energy_distr =
+                                fiction::minimum_energy_distribution(sim_result_111.charge_distributions.cbegin(),
+                                                                     sim_result_111.charge_distributions.cend());
 
-                        store<fiction::cell_layout_t>().extend() =
-                            std::make_shared<fiction::cds_sidb_cell_clk_lyt>(*min_energy_distr);
+                            min_energy = min_energy_distr->get_system_energy();
+                            store<fiction::cell_layout_t>().extend() =
+                                std::make_shared<fiction::cds_sidb_111_cell_clk_lyt>(*min_energy_distr);
+                        }
                     }
                 }
             }
@@ -144,19 +176,27 @@ class clustercomplete_command : public command
     /**
      * Physical parameters for the simulation.
      */
-    fiction::sidb_simulation_parameters physical_params{2, -0.32, 5.6, 5.0};
+    fiction::sidb_simulation_parameters physical_params{3, -0.32, 5.6, 5.0};
     /**
      * ClusterComplete parameters.
      */
-    fiction::clustercomplete_params<fiction::sidb_cell_clk_lyt> params{};
+    fiction::clustercomplete_params<fiction::sidb_100_cell_clk_lyt> params{};
     /**
-     * Simulation result.
+     * Simulation result for H-Si(100)-2x1 surface.
      */
-    fiction::sidb_simulation_result<fiction::sidb_cell_clk_lyt> sim_result{};
+    fiction::sidb_simulation_result<fiction::sidb_100_cell_clk_lyt> sim_result_100{};
+    /**
+     * Simulation result for H-Si(111)-1x1 surface.
+     */
+    fiction::sidb_simulation_result<fiction::sidb_111_cell_clk_lyt> sim_result_111{};
     /**
      * Minimum energy.
      */
     double min_energy{std::numeric_limits<double>::infinity()};
+    /**
+     * Flag to determine the SiDB lattice used for the simulation when logging
+     */
+    bool sidb_111_used = false;
     /**
      * Logs the resulting information in a log file.
      *
@@ -166,22 +206,42 @@ class clustercomplete_command : public command
     {
         try
         {
+            if (sidb_111_used)
+            {
+                return nlohmann::json{
+                    {"Algorithm name", sim_result_111.algorithm_name},
+                    {"Simulation runtime", sim_result_111.simulation_runtime.count()},
+                    {{"Simulation parameters",
+                      {"Physical parameters",
+                       {{"base", sim_result_111.physical_parameters.base},
+                        {"epsilon_r", sim_result_111.physical_parameters.epsilon_r},
+                        {"lambda_tf", sim_result_111.physical_parameters.lambda_tf},
+                        {"mu_minus", sim_result_111.physical_parameters.mu_minus},
+                        {"global_potential", std::any_cast<double>(sim_result_111.additional_simulation_parameters.at(
+                                                 "global_potential"))}}},
+                      {"validity witness partitioning limit",
+                       std::any_cast<uint64_t>(sim_result_111.additional_simulation_parameters.at(
+                           "validity_witness_partitioning_limit"))}}},
+                    {"Ground state energy (eV)", min_energy},
+                    {"Number of stable states", sim_result_111.charge_distributions.size()}};
+            }
+
             return nlohmann::json{
-                {"Algorithm name", sim_result.algorithm_name},
-                {"Simulation runtime", sim_result.simulation_runtime.count()},
+                {"Algorithm name", sim_result_100.algorithm_name},
+                {"Simulation runtime", sim_result_100.simulation_runtime.count()},
                 {{"Simulation parameters",
                   {"Physical parameters",
-                   {{"base", sim_result.physical_parameters.base},
-                    {"epsilon_r", sim_result.physical_parameters.epsilon_r},
-                    {"lambda_tf", sim_result.physical_parameters.lambda_tf},
-                    {"mu_minus", sim_result.physical_parameters.mu_minus},
+                   {{"base", sim_result_100.physical_parameters.base},
+                    {"epsilon_r", sim_result_100.physical_parameters.epsilon_r},
+                    {"lambda_tf", sim_result_100.physical_parameters.lambda_tf},
+                    {"mu_minus", sim_result_100.physical_parameters.mu_minus},
                     {"global_potential",
-                     std::any_cast<double>(sim_result.additional_simulation_parameters.at("global_potential"))}}},
+                     std::any_cast<double>(sim_result_100.additional_simulation_parameters.at("global_potential"))}}},
                   {"validity witness partitioning limit",
                    std::any_cast<uint64_t>(
-                       sim_result.additional_simulation_parameters.at("validity_witness_partitioning_limit"))}}},
+                       sim_result_100.additional_simulation_parameters.at("validity_witness_partitioning_limit"))}}},
                 {"Ground state energy (eV)", min_energy},
-                {"Number of stable states", sim_result.charge_distributions.size()}};
+                {"Number of stable states", sim_result_100.charge_distributions.size()}};
         }
         catch (...)
         {
@@ -195,10 +255,27 @@ class clustercomplete_command : public command
     {
         physical_params = fiction::sidb_simulation_parameters{3, -0.32, 5.6, 5.0};
         params          = {};
+        sim_result_100  = {};
+        sim_result_111  = {};
+    }
+
+    template <typename LytDest, typename LytSrc>
+    [[nodiscard]] fiction::clustercomplete_params<LytDest>
+    convert_params(const fiction::clustercomplete_params<LytSrc>& ps_src) const noexcept
+    {
+        fiction::clustercomplete_params<LytDest> ps_dest{};
+
+        ps_dest.physical_parameters = ps_src.physical_parameters;
+        ps_dest.global_potential    = ps_src.global_potential;
+
+        return ps_dest;
     }
 };
 
+using ccsim_command = clustercomplete_command;
+
 ALICE_ADD_COMMAND(clustercomplete, "Simulation")
+ALICE_ADD_COMMAND(ccsim, "Simulation")
 
 }  // namespace alice
 
