@@ -50,7 +50,8 @@ struct critical_temperature_params
      */
     sidb_simulation_parameters physical_parameters{};
     /**
-     * Simulation mode to determine the *Critical Temperature*.
+     * Simulation mode to determine the *Critical Temperature*. Base 3 critical temperature simulation is experimental,
+     * and only supported with *ClusterComplete*.
      */
     sidb_simulation_engine engine = sidb_simulation_engine::QUICKEXACT;
     /**
@@ -68,11 +69,11 @@ struct critical_temperature_params
      */
     detect_bdl_pairs_params bdl_params{};
     /**
-     * Number of iteration steps for the *QuickSim* algorithm (only applicable if engine == APPROXIMATE).
+     * Number of iteration steps for the *QuickSim* algorithm (only applicable if engine == QUICKSIM).
      */
     uint64_t iteration_steps{80};
     /**
-     * Alpha parameter for the *QuickSim* algorithm (only applicable if engine == APPROXIMATE).
+     * Alpha parameter for the *QuickSim* algorithm (only applicable if engine == QUICKSIM).
      */
     double alpha{0.7};
 };

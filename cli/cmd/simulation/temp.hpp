@@ -58,6 +58,12 @@ class temp_command : public command
                    true);
         add_option("--lambda_tf,-l", physical_params.lambda_tf, "Thomas-Fermi screening distance (unit: nm)", true);
         add_option("--mu_minus,-m", physical_params.mu_minus, "Energy transition level (0/-) (unit: eV)", true);
+        add_option("--base", physical_params.base,
+                   "The simulation base, can be 2 or 3, though base 3 critical temperature simulation is experimental "
+                   "(only ClusterComplete supports base 3 simulation)",
+                   true);
+        add_option("--engine", sim_engine_str,
+                   "The simulation engine to use {QuickExact [default], ClusterComplete, QuickSim}", true);
     }
 
   protected:
@@ -128,6 +134,8 @@ class temp_command : public command
                 }
                 else
                 {
+                    params.engine = get_sim_engine();
+
                     params.physical_parameters = physical_params;
 
                     if (is_set("gate_based"))
@@ -198,7 +206,30 @@ class temp_command : public command
      * Critical temperature statistics.
      */
     fiction::critical_temperature_stats stats{};
-
+    /**
+     * The simulation engine to use.
+     */
+    std::string sim_engine_str{"QuickExact"};
+    /**
+     * Convert the simulation engine string to the appropriate engine enum member. QuickExact is set as default.
+     *
+     * @return The `sidb_simulation_engine` member associated with the identifier.
+     */
+    [[nodiscard]] inline constexpr fiction::sidb_simulation_engine get_sim_engine() const noexcept
+    {
+        if (sim_engine_str == "ClusterComplete")
+        {
+            return fiction::sidb_simulation_engine::CLUSTERCOMPLETE;
+        }
+        else if (sim_engine_str == "QuickSim")
+        {
+            return fiction::sidb_simulation_engine::QUICKSIM;
+        }
+        else
+        {
+            return fiction::sidb_simulation_engine::QUICKEXACT;
+        }
+    }
     /**
      * Logs the resulting information in a log file.
      *
