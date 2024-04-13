@@ -112,22 +112,39 @@ TEST_CASE("Benchmark simulators", "[benchmark]")
 
 //  Intel Core i6700HQ (8 cores @ 2.60 GHz), Ubuntu 22.04.2 LTS, Ubuntu clang version 14.0.0 (13.04.24)
 
-//
+//    before "Add and subtract parent potential only once"
 //    benchmark name          samples       iterations    est run time
 //                            mean          low mean      high mean
 //                            std dev       low std dev   high std dev
 //    -------------------------------------------------------------------------------
-//    QuickExact              100           1             3.95783 m
-//                            2.3555 s      2.33626 s     2.37767 s
-//                            106.153 ms    90.4958 ms    135.246 ms
+//    QuickExact              100           1             3.20383 m
+//                            1.87035 s     1.85331 s     1.89046 s
+//                            94.185 ms     79.5784 ms    114.325 ms
 //
-//    QuickSim                100           1             1.49393 s
-//                            29.9329 ms    28.5082 ms    31.3671 ms
-//                            7.31298 ms    6.70416 ms    8.12608 ms
+//    QuickSim                100           1             1.01174 s
+//                            10.3755 ms    10.2221 ms    10.5144 ms
+//                            742.128 us    579.253 us    977.237 us
 //
-//    ClusterComplete         100           1             17.9353 s
-//                            151.302 ms     145.56 ms    157.719 ms
-//                            30.9984 ms    27.1551 ms    35.8004 ms
+//    ClusterComplete         100           1             6.36677 s
+//                            68.1879 ms    66.8025 ms    69.7052 ms
+//                            7.4455 ms     6.55368 ms    8.6877 ms
+
+//    after "Add and subtract parent potential only once"
+//    benchmark name          samples       iterations    est run time
+//                            mean          low mean      high mean
+//                            std dev       low std dev   high std dev
+//    -------------------------------------------------------------------------------
+//    QuickExact              100           1             3.05071 m
+//                            1.86217 s     1.84601 s     1.88107 s
+//                            88.7133 ms    77.0255 ms    114.574 ms
+//
+//    QuickSim                100           1             966.661 ms
+//                            9.82326 ms    9.69725 ms    9.95392 ms
+//                            655.91 us     533.255 us    871.692 us
+//
+//    ClusterComplete         100           1             5.99807 s
+//                            62.7459 ms    61.3404 ms    64.3648 ms
+//                            7.71925 ms    6.65408 ms    9.13036 ms
 
 TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
 {
@@ -156,10 +173,20 @@ TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
 }
 //  Intel Core i6700HQ (8 cores @ 2.60 GHz), Ubuntu 22.04.2 LTS, Ubuntu clang version 14.0.0 (13.04.24)
 
-//      benchmark name                          samples       iterations    est run time
-//                                              mean          low mean      high mean
-//                                              std dev       low std dev   high std dev
-//      -------------------------------------------------------------------------------
-//      3 Segment Diagonal Bestagon Wire        100           1             3.99949 m
-//                                              1.77163 s     1.75544 s     1.78914 s
-//                                              85.8704 ms    71.0768 ms    111.453 ms
+//    before "Add and subtract parent potential only once"
+//    benchmark name                          samples       iterations    est run time
+//                                            mean          low mean      high mean
+//                                            std dev       low std dev   high std dev
+//    -------------------------------------------------------------------------------
+//    3 Segment Diagonal Bestagon Wire        100           1             2.86089 m
+//                                            1.57859 s     1.56147 s     1.60054 s
+//                                            98.2992 ms    79.0445 ms    133.074 ms
+
+//    after "Add and subtract parent potential only once"
+//    benchmark name                          samples       iterations    est run time
+//                                            mean          low mean      high mean
+//                                            std dev       low std dev   high std dev
+//    -------------------------------------------------------------------------------
+//    3 Segment Diagonal Bestagon Wire        100           1             2.43878 m
+//                                            1.43439 s     1.42121 s     1.44845 s
+//                                            69.1732 ms    60.7787 ms    80.0373 ms
