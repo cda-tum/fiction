@@ -87,13 +87,13 @@ class opdom_command : public command
 
         if (physical_params.epsilon_r <= 0)
         {
-            env->out() << "[e] epsilon_r must be positive" << std::endl;
+            env->out() << "[e] epsilon_r must be positive\n";
             reset_params();
             return;
         }
         if (physical_params.lambda_tf <= 0)
         {
-            env->out() << "[e] lambda_tf must be positive" << std::endl;
+            env->out() << "[e] lambda_tf must be positive\n";
             reset_params();
             return;
         }
@@ -101,13 +101,13 @@ class opdom_command : public command
         // check for valid x and y parameter bounds
         if (params.x_min >= params.x_max)
         {
-            env->out() << "[e] x_min must be smaller than x_max" << std::endl;
+            env->out() << "[e] x_min must be smaller than x_max\n";
             reset_params();
             return;
         }
         if (params.y_min >= params.y_max)
         {
-            env->out() << "[e] y_min must be smaller than y_max" << std::endl;
+            env->out() << "[e] y_min must be smaller than y_max\n";
             reset_params();
             return;
         }
@@ -117,7 +117,7 @@ class opdom_command : public command
                                                  is_set("contour_tracing")};
         if (std::count(algorithm_selections.cbegin(), algorithm_selections.cend(), true) > 1)
         {
-            env->out() << "[e] only one algorithm can be selected at a time" << std::endl;
+            env->out() << "[e] only one algorithm can be selected at a time\n";
             reset_params();
             return;
         }
@@ -127,7 +127,7 @@ class opdom_command : public command
         // error case: empty cell layout store
         if (cs.empty())
         {
-            env->out() << "[w] no cell layout in store" << std::endl;
+            env->out() << "[w] no cell layout in store\n";
             reset_params();
             return;
         }
@@ -137,7 +137,7 @@ class opdom_command : public command
         // error case: empty truth table store
         if (ts.empty())
         {
-            env->out() << "[w] no truth table in store" << std::endl;
+            env->out() << "[w] no truth table in store\n";
             reset_params();
             return;
         }
@@ -161,8 +161,7 @@ class opdom_command : public command
             {
                 env->out() << "[e] invalid x sweep parameter \"" << x_sweep
                            << "\". Has to be one of [epsilon_r, lambda_tf, "
-                              "mu_minus]"
-                           << std::endl;
+                              "mu_minus]\n";
                 reset_params();
                 return;
             }
@@ -172,8 +171,7 @@ class opdom_command : public command
             {
                 env->out() << "[e] invalid y sweep parameter \"" << y_sweep
                            << "\". Has to be one of [epsilon_r, lambda_tf, "
-                              "mu_minus]"
-                           << std::endl;
+                              "mu_minus]\n";
                 reset_params();
                 return;
             }
@@ -220,9 +218,8 @@ class opdom_command : public command
                 if (lyt_ptr->num_pis() == 0 || lyt_ptr->num_pos() == 0)
                 {
                     env->out() << fmt::format("[e] {} requires primary input and output cells to simulate its "
-                                              "Boolean function",
-                                              get_name(lyt_ptr))
-                               << std::endl;
+                                              "Boolean function\n",
+                                              get_name(lyt_ptr));
                     return;
                 }
 
@@ -253,7 +250,7 @@ class opdom_command : public command
             }
             else
             {
-                env->out() << fmt::format("[e] {} is not an SiDB layout", get_name(lyt_ptr)) << std::endl;
+                env->out() << fmt::format("[e] {} is not an SiDB layout\n", get_name(lyt_ptr));
             }
         };
 

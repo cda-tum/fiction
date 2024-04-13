@@ -74,13 +74,13 @@ class clustercomplete_command : public command
 
         if (physical_params.epsilon_r <= 0)
         {
-            env->out() << "[e] epsilon_r must be positive" << std::endl;
+            env->out() << "[e] epsilon_r must be positive\n";
             reset_params();
             return;
         }
         if (physical_params.lambda_tf <= 0)
         {
-            env->out() << "[e] lambda_tf must be positive" << std::endl;
+            env->out() << "[e] lambda_tf must be positive\n";
             reset_params();
             return;
         }
@@ -90,7 +90,7 @@ class clustercomplete_command : public command
         // error case: empty cell layout store
         if (s.empty())
         {
-            env->out() << "[w] no cell layout in store" << std::endl;
+            env->out() << "[w] no cell layout in store\n";
             reset_params();
             return;
         }
@@ -106,9 +106,8 @@ class clustercomplete_command : public command
                 if constexpr (fiction::is_charge_distribution_surface_v<Lyt>)
                 {
                     env->out() << fmt::format(
-                                      "[w] {} already possesses a charge distribution; no simulation is conducted",
-                                      get_name(lyt_ptr))
-                               << std::endl;
+                        "[w] {} already possesses a charge distribution; no simulation is conducted\n",
+                        get_name(lyt_ptr));
                 }
                 else
                 {
@@ -133,8 +132,8 @@ class clustercomplete_command : public command
 
                     if (sim_result_100.charge_distributions.empty() && sim_result_111.charge_distributions.empty())
                     {
-                        env->out() << fmt::format("[e] ground state of {} could not be determined", get_name(lyt_ptr))
-                                   << std::endl;
+                        env->out() << fmt::format("[e] ground state of {} could not be determined\n",
+                                                  get_name(lyt_ptr));
                     }
                     else
                     {
@@ -163,7 +162,7 @@ class clustercomplete_command : public command
             }
             else
             {
-                env->out() << fmt::format("[e] {} is not an SiDB layout", get_name(lyt_ptr)) << std::endl;
+                env->out() << fmt::format("[e] {} is not an SiDB layout\n", get_name(lyt_ptr));
             }
         };
 
