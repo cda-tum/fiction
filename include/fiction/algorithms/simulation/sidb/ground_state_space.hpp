@@ -260,6 +260,7 @@ class ground_state_space_impl
 
         if (cur_bound.multiset == pst.multiset_conf)
         {
+            // update the received potential with the difference between the removed bound and the next bound
             rst.cluster->update_received_ext_pot_bound<bound>(
                 rst.sidb_ix, get_next_projected_pot_bound<bound>(pst.cluster, rst.sidb_ix) - cur_bound.pot_val);
         }
@@ -271,11 +272,13 @@ class ground_state_space_impl
         update_external_pot_projection_if_bound_removed<bound_direction::LOWER>(pst, rst);
         update_external_pot_projection_if_bound_removed<bound_direction::UPPER>(pst, rst);
 
+        // remove projection
         remove_all_cluster_charge_state_occurrences(pst, rst.sidb_ix);
     }
 
     void handle_invalid_state(const sidb_cluster_projector_state& pst) noexcept
     {
+        // pruned multiset---update projections onto each other cluster (which respectively update their received store)
         for (const sidb_cluster_ptr& other_c : clustering)
         {
             if (other_c == pst.cluster)
@@ -411,6 +414,7 @@ class ground_state_space_impl
     {
         if constexpr (mode == potential_bound_analysis_mode::ANALYZE_MULTISET)
         {
+            // this considers the flattened self-projection (defined below---CTRL+F)
             return {get_projector_state_bound<bound_direction::LOWER>(pst, sidb_ix).pot_val +
                         pst.cluster->get_received_ext_pot_bound<bound_direction::LOWER>(sidb_ix),
                     get_projector_state_bound<bound_direction::UPPER>(pst, sidb_ix).pot_val +
@@ -418,6 +422,7 @@ class ground_state_space_impl
         }
         else if constexpr (mode == potential_bound_analysis_mode::ANALYZE_COMPOSITION)
         {
+            // this considers the flattened self-projection of the previous level
             return {internal_pot_bounds.value().at(sidb_ix).at(static_cast<uint8_t>(bound_direction::LOWER)) +
                         pst.cluster->parent.lock()->get_received_ext_pot_bound<bound_direction::LOWER>(sidb_ix),
                     internal_pot_bounds.value().at(sidb_ix).at(static_cast<uint8_t>(bound_direction::UPPER)) +
@@ -432,6 +437,7 @@ class ground_state_space_impl
     {
         witness_partitioning_state st{pst};
 
+        // count witnesses for each charge state
         for (const uint64_t sidb_ix : pst.cluster->sidbs)
         {
             const auto& [recv_pot_lb, recv_pot_ub] =
@@ -466,8 +472,10 @@ class ground_state_space_impl
             return true;
         }
 
+        // reduce problem to overlapping witnesses only
         st.omit_free_witnesses();
 
+        // look for UNSAT (factorial)
         return find_valid_witness_partitioning<sidb_charge_state::NEGATIVE>(st, st.required_neg_count);
     }
 
@@ -484,6 +492,7 @@ class ground_state_space_impl
         std::vector<uint64_t> removed_ms{};
         removed_ms.reserve(c->charge_space.size());
 
+        // perform potential bound analysis on every multiset in the charge space
         for (const sidb_cluster_charge_state& m : c->charge_space)
         {
             const sidb_cluster_projector_state pst{c, static_cast<uint64_t>(m)};
@@ -524,6 +533,8 @@ class ground_state_space_impl
     void subtract_sibling_pot_from_received_ext_pot_bound(const sidb_cluster_ptr&            parent,
                                                           const sidb_cluster_receptor_state& child_rst) const noexcept
     {
+        // derive the new externally received partial sums of electrostatic potential local to SiDB contained by the
+        // child through subtracting the projections of its sibling
         double recv_pot_without_siblings = child_rst.cluster->get_received_ext_pot_bound<bound>(child_rst.sidb_ix);
 
         for (const sidb_cluster_ptr& sibling : parent->children)
@@ -539,6 +550,8 @@ class ground_state_space_impl
 
     void derive_children_received_bounds_without_siblings(const sidb_cluster_ptr& parent) const noexcept
     {
+        // dynamically update the externally received partial sums (of local electrostatic potential) of the children,
+        // and set that of the parent; what the new parent determines what interactions are external
         for (const sidb_cluster_ptr& child : parent->children)
         {
             for (const uint64_t sidb_ix : child->sidbs)
@@ -552,6 +565,7 @@ class ground_state_space_impl
 
     bool verify_composition(sidb_cluster_state_composition& composition) const noexcept
     {
+        // perform physically informed space pruning for a multiset composition
         for (sidb_cluster_state& receiving_cst : composition)
         {
             for (const uint64_t sidb_ix : receiving_cst.proj_st.cluster->sidbs)
@@ -620,6 +634,7 @@ class ground_state_space_impl
     {
         sidb_cluster_charge_state m{};
         m.compositions.emplace_back();
+
         fill_merged_charge_state_space(parent, 0, m);
     }
 
@@ -656,6 +671,7 @@ class ground_state_space_impl
 
     void construct_merged_potential_projections(const sidb_cluster_ptr& parent) const noexcept
     {
+        // merge the projections of the children to projections of the parent
         for (const sidb_cluster_ptr& non_child : clustering)
         {
             for (const uint64_t sidb_ix : non_child->sidbs)
@@ -670,6 +686,13 @@ class ground_state_space_impl
 
     static void compute_meets_for_internal_pot_bounds(const sidb_cluster_ptr& parent) noexcept
     {
+        // this is the flatten operation; the partial sum of the electrostatic potential local to all contained SiDBs as
+        // received from within the cluster is, for each multiset in the new charge space, flattened, with respect to
+        // all compositions of the multiset, to the self-projection of the parent cluster
+
+        // the above, and the fact that the self-projection for singletons is their respective local external
+        // electrostatic potential,  thus defines "self-projections" inductively
+
         for (const sidb_cluster_charge_state& m : parent->charge_space)
         {
             for (const uint64_t sidb_ix : parent->sidbs)
@@ -759,20 +782,25 @@ class ground_state_space_impl
 
 /**
  * The purely constructive *Ground State Space* algorithm is the key ingredient of the *ClusterComplete* exact SiDB
- * simulator that revolutionizes the domain of exact SiDB simulation. It uses iterative "loop until fixpoint" concepts
- * to prune the simulation search space for not only a flat layout of SiDBs, but rather generalizes, and lifts Jan
- * Drewniok's game-changing physically informed space pruning technique introduced with *QuickExact* to higher order,
- * allowing *Ground State Space* to prune multiset charge state configurations at any level in a cluster hierarchy.
+ * simulator that lifts exact SiDB simulation to permit multiple gates in connection. It uses iterative "loop until
+ * fixpoint" concepts to prune the simulation search space for not only a flat layout of SiDBs, but rather generalizes,
+ * and lifts the physically informed space pruning technique introduced with *QuickExact* to higher order, allowing
+ * *Ground State Space* to prune multiset charge state configurations at any level in a cluster hierarchy.
+ *
+ * The role of the cluster hierarchy is to rank interactions between groups, or clusters of SiDBs that together make up
+ * the whole layout, such that the variation in electrostatic potential under different charge state assignments is
+ * highest between the children clusters of clusters that low in the hierarchy. Thereby, the structure allows us to
+ * consider the most charge state assignment-dependent interaction in a more detailed physically informed space pruning
+ * analysis, enabling high pruning efficacy for the few pruning tests (with respect to the exponential search space).
  *
  * Starting at a clustering of all singleton clusters, the charge spaces, ie. a set of multiset charge configurations
  * (initially { {{-}}, {{0}}, {{+}} } or omitting the singleton multiset {{+}} in the case of base 2 pre-simulation),
  * are pruned iteratively through potential bound analysis. Through merges, ie., replacing a set of children in the
- * clustering with their parent, we may inspect the most crucially dependant interactions in the layout separately. This
- * is an effect of the defaulted minimal variance cluster linking heuristic, which clusters precisely that which is most
- * prominently related. The procedure finishes when the charge spaces have been folded all the way up to the top
- * cluster, parent of all, which then contains all information resulting from the construction. *ClusterComplete*,
- * without much trickery, now simply unfolds this result, allowing us to simulate problems that were previously seen as
- * astronomical in size.
+ * clustering with their parent, we may inspect the most crucially dependant interactions in the layout separately. The
+ * procedure finishes when the charge spaces have been folded all the way up to the top cluster, parent of all, which
+ * then contains all information resulting from the construction. *ClusterComplete*, without much trickery, now simply
+ * unfolds this result, allowing simulation of problems that were previously seen as astronomical, due to the
+ * (base 2 or 3) exponential growth in the number of SiDBs.
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @param lyt Layout to construct the ground state space of.
