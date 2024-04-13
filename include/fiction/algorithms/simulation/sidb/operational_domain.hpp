@@ -290,19 +290,15 @@ class operational_domain_impl
         }
 
         // generate the x dimension values
-        auto x_val = params.x_min;
         for (size_t i = 0; i <= x_indices.size(); ++i)
         {
-            x_values.push_back(x_val);
-            x_val += params.x_step;
+            x_values.push_back(params.x_min + i * params.x_step);
         }
 
         // generate the y dimension values
-        auto y_val = params.y_min;
         for (size_t i = 0; i <= y_indices.size(); ++i)
         {
-            y_values.push_back(y_val);
-            y_val += params.y_step;
+            y_values.push_back(params.y_min + i * params.y_step);
         }
     }
     /**
