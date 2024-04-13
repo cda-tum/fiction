@@ -468,34 +468,38 @@ class clustercomplete_impl
 }  // namespace detail
 
 /**
- * *ClusterComplete* is an *exact* simulator that radicalizes the SiDB simulation domain with its potential. SiDB logic
- * simulation in *base 3* with a 100% certainty of accuracy is made available to the domain for well over 50 SiDBs. It
- * was created by Willem Lambooy for his Master's Thesis in Theoretical Computing Science at Radboud University,
- * Nijmegen, and employs the dual concepts of construction and destruction, ie. abstraction and computation, ie.
- * pre-simulation and simulation in practice, breaking the rapid exponential growth in problem complexity for SiDB
- * simulation problems in application.
+ * *ClusterComplete* is an instantiation of a general solution to exhaustive state assignment searching for which all
+ * local predicates hold, given respective local evaluations that may be aggregated from individual inter-variable
+ * interactions. Applied to the problem of exact physical simulation of SiDBs, it is able to efficiently consider
+ * positive charges that are rare to occur, but drastically blow up exact simulation runtimes when hierarchical pruning
+ * methods are not applied. In fact, the exponential growth in problem complexity for added SiDBs is tamed by
+ * *ClusterComplete*, as SiDB layouts to simulate in practise amount to a high pruning efficacy, resulting in a
+ * layout-dependent reduction of the simulation base. This amounts to an effective simulation base in the real number
+ * range \f$[1,b]\f$, where \f$b\in\{2,3\}\f$ is the given simulation base.
  *
- * The key ingredient is the *Ground State Space* algorithm, which constructs a minimal search space of charge
- * configurations that adhere to the critical population stability criterion. In particular, it generalizes Jan
- * Drewniok's physically informed space pruning concept employed in his game-changing *QuickExact* simulator to apply to
- * all charge states equally, and, most importantly, it lifts the associated potential equations to higher order,
- * allowing us to reason over potential bounds in a cluster hierarchy.
+ * The part of the *ClusterComplete* algorithm that is implemented in this file is the destructive phase of the
+ * procedure that employs the duality of construction and destruction, folding and unfolding. The phase preceding it is
+ * the key ingredient to the achieved efficiency: the *Ground State Space* algorithm, which constructs a minimised
+ * hierarchical search space of charge configurations that adhere to the critical population stability criterion. In
+ * particular, it generalizes physically informed space pruning that contributes to the capabilities of the *QuickExact*
+ * simulator, now applying to all charge states equally, and, most importantly, it lifts the associated potential
+ * equations to higher order, allowing us to reason over potential bounds in a cluster hierarchy.
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @param lyt Layout to simulate.
- * @param cc_params Parameters required for both the invocation of *Ground State Space*, and the simulation following.
- * @return All physically valid layouts for the given physical parameters and base are returned.
+ * @param params Parameter required for both the invocation of *Ground State Space*, and the simulation following.
+ * @return Simulation results.
  */
 template <typename Lyt>
 [[nodiscard]] sidb_simulation_result<Lyt> clustercomplete(const Lyt&                         lyt,
-                                                          const clustercomplete_params<Lyt>& cc_params = {}) noexcept
+                                                          const clustercomplete_params<Lyt>& params = {}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-    detail::clustercomplete_impl<Lyt> p{lyt, cc_params};
+    detail::clustercomplete_impl<Lyt> p{lyt, params};
 
-    return p.run(cc_params);
+    return p.run(params);
 }
 
 }  // namespace fiction
