@@ -6,7 +6,6 @@
 #define FICTION_SIDB_CHARGE_STATE_HPP
 
 #include <cstdint>
-#include <iterator>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -24,6 +23,16 @@ enum class sidb_charge_state : int8_t
     POSITIVE = 1,
     NONE     = 127  // assigned when layout cell is empty
 };
+/**
+ * Charge states of SiDBs for the context of base 2 simulation.
+ */
+static const std::vector<sidb_charge_state> SIDB_CHARGE_STATES_BASE_2{sidb_charge_state::NEGATIVE,
+                                                                      sidb_charge_state::NEUTRAL};
+/**
+ * Charge states of SiDBs for the context of base 3 (full base) simulation.
+ */
+static const std::vector<sidb_charge_state> SIDB_CHARGE_STATES_BASE_3{
+    sidb_charge_state::NEGATIVE, sidb_charge_state::NEUTRAL, sidb_charge_state::POSITIVE};
 /**
  * Converts the charge state into an integer (`-1`, `0`, `1`).
  *
