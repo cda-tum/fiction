@@ -70,11 +70,9 @@ class opdom_command : public command
         add_option("--y_max", params.y_max, "Maximum value of the y dimension sweep", true);
         add_option("--y_step", params.y_step, "Step size of the y dimension sweep", true);
         add_option("--base", physical_params.base,
-                   "The simulation base, can be 2 or 3. Only ClusterComplete supports base 3 simulation.", true);
-        add_option("--engine", sim_engine_id,
-                   "The simulation engine as identified by a number: QuickExact (0) [default], ClusterComplete (1), "
-                   "QuickSim (2), ExGS (3).",
-                   true);
+                   "The simulation base, can be 2 or 3 (only ClusterComplete supports base 3 simulation)", true);
+        add_option("--engine", sim_engine_str,
+                   "The simulation engine to use {QuickExact [default], ClusterComplete, QuickSim, ExGS}", true);
     }
 
   protected:
@@ -292,9 +290,9 @@ class opdom_command : public command
      */
     std::string y_sweep{};
     /**
-     * The identifier for the simulation engine to use.
+     * The simulation engine to use.
      */
-    uint8_t sim_engine_id{0};
+    std::string sim_engine_str{"QuickExact"};
     /**
      * CSV filename to write the operational domain to.
      */
@@ -303,7 +301,30 @@ class opdom_command : public command
      * The operational domain.
      */
     fiction::operational_domain op_domain{};
-
+    /**
+     * Convert the simulation engine string to the appropriate engine enum member. QuickExact is set as default.
+     *
+     * @return The `sidb_simulation_engine` member associated with the identifier.
+     */
+    [[nodiscard]] inline constexpr fiction::sidb_simulation_engine get_sim_engine() const noexcept
+    {
+        if (sim_engine_str == "ClusterComplete")
+        {
+            return fiction::sidb_simulation_engine::CLUSTERCOMPLETE;
+        }
+        else if (sim_engine_str == "QuickSim")
+        {
+            return fiction::sidb_simulation_engine::QUICKSIM;
+        }
+        else if (sim_engine_str == "ExGS")
+        {
+            return fiction::sidb_simulation_engine::EXGS;
+        }
+        else
+        {
+            return fiction::sidb_simulation_engine::QUICKEXACT;
+        }
+    }
     /**
      * Writes the operational domain to the specified CSV file.
      */
@@ -317,34 +338,6 @@ class opdom_command : public command
         catch (const std::exception& e)
         {
             env->out() << fmt::format("[e] {}", e.what()) << std::endl;
-        }
-    }
-    /**
-     * Convert the simulation identifier to the appropriate engine enum member:
-     * QuickExact (0) [default] | ClusterComplete (1) | QuickSim (2) | ExGS (3).
-     *
-     * @return The `sidb_simulation_engine` member associated with the identifier.
-     */
-    [[nodiscard]] inline constexpr fiction::sidb_simulation_engine get_sim_engine() const noexcept
-    {
-        switch (sim_engine_id)
-        {
-            case 1:
-            {
-                return fiction::sidb_simulation_engine::CLUSTERCOMPLETE;
-            }
-            case 2:
-            {
-                return fiction::sidb_simulation_engine::QUICKSIM;
-            }
-            case 3:
-            {
-                return fiction::sidb_simulation_engine::EXGS;
-            }
-            default:
-            {
-                return fiction::sidb_simulation_engine::QUICKEXACT;
-            }
         }
     }
     /**
