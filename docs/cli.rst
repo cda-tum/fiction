@@ -349,7 +349,7 @@ Most important parameters:
 - Relative permittivity :math:`\epsilon_r` (``-e``)
 - Thomas-Fermi screening :math:`\lambda_{tf}` (``-l``)
 - Energy transition level (0/-) :math:`\mu_-` (``-m``)
-
+- SiDB simulation engine to use (``--engine``)
 
 Operational Domain (``opdom``)
 ##############################
@@ -384,6 +384,9 @@ the following options:
 - ``--flood_fill``/``-f``
 - ``--contour_tracing``/``-c``
 each of which start from a set of random samples, whose number has to be passed as an argument to the flag.
+
+Operational domain calculation may be powered by *QuickExact*, *ClusterComplete*, *ExGS* or *QuickSim*. The simulation
+engine to use can be set with ``--engine``.
 
 See ``opdom -h`` for a full list of arguments.
 
