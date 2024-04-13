@@ -274,14 +274,14 @@ class operational_domain_impl
         std::iota(x_indices.begin(), x_indices.end(), 0ul);
         std::iota(y_indices.begin(), y_indices.end(), 0ul);
 
-        // If the value of the x-parameter is not less than params.x_max after num_x_steps() steps, this value is
+        // If the value of the x-parameter is greater than params.x_max after num_x_steps() steps, this value is
         // ignored in the operational domain calculation.
         if ((params.x_min + (x_indices.size() - 1) * params.x_step) - params.x_max >
             physical_constants::POP_STABILITY_ERR)
         {
             x_indices.pop_back();
         }
-        // If the value of the y-parameter is not less than params.y_max after num_y_steps() steps, this value is
+        // If the value of the y-parameter is greater than params.y_max after num_y_steps() steps, this value is
         // ignored in the operational domain calculation.
         if (((params.y_min + (y_indices.size() - 1) * params.y_step) - params.y_max) >
             physical_constants::POP_STABILITY_ERR)
