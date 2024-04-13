@@ -274,11 +274,15 @@ class operational_domain_impl
         std::iota(x_indices.begin(), x_indices.end(), 0ul);
         std::iota(y_indices.begin(), y_indices.end(), 0ul);
 
+        // If the value of the x-parameter is not less than params.x_max after num_x_steps() steps, this value is
+        // ignored in the operational domain calculation.
         if ((params.x_min + (x_indices.size() - 1) * params.x_step) - params.x_max >
             physical_constants::POP_STABILITY_ERR)
         {
             x_indices.pop_back();
         }
+        // If the value of the y-parameter is not less than params.y_max after num_y_steps() steps, this value is
+        // ignored in the operational domain calculation.
         if (((params.y_min + (y_indices.size() - 1) * params.y_step) - params.y_max) >
             physical_constants::POP_STABILITY_ERR)
         {
@@ -287,14 +291,15 @@ class operational_domain_impl
 
         // generate the x dimension values
         auto x_val = params.x_min;
-        for (size_t y = 0; y < x_indices.size() && x_val < params.x_max + physical_constants::POP_STABILITY_ERR; ++y)
+        for (size_t i = 0; i <= x_indices.size(); ++i)
         {
             x_values.push_back(x_val);
             x_val += params.x_step;
         }
 
+        // generate the y dimension values
         auto y_val = params.y_min;
-        for (size_t y = 0; y < y_indices.size() && y_val < params.y_max + physical_constants::POP_STABILITY_ERR; ++y)
+        for (size_t i = 0; i <= y_indices.size(); ++i)
         {
             y_values.push_back(y_val);
             y_val += params.y_step;
@@ -465,8 +470,7 @@ class operational_domain_impl
 
         auto current_neighborhood = moore_neighborhood(current_contour_point);
 
-        step_point front_neighborhood{};
-        auto       next_point = contour_starting_point;
+        auto next_point = contour_starting_point;
 
         if (!current_neighborhood.empty())
         {
