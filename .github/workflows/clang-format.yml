@@ -35,7 +35,7 @@ jobs:
           submodules: recursive
 
       - name: Run ClangFormat
-        uses: DoozyX/clang-format-lint-action@v0.16.2
+        uses: DoozyX/clang-format-lint-action@v0.17
         with:
           source: 'include test experiments'
           extensions: 'hpp,cpp'
