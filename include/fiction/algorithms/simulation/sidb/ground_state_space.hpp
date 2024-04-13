@@ -75,11 +75,11 @@ struct ground_state_space_stats
 
         if (const double gss_runtime = mockturtle::to_seconds(runtime); gss_runtime > 1.0)
         {
-            std::cout << gss_runtime << " seconds\n";
+            std::cout << gss_runtime << " seconds" << std::endl;
         }
         else
         {
-            std::cout << (gss_runtime * 1000) << " milliseconds\n";
+            std::cout << (gss_runtime * 1000) << " milliseconds" << std::endl;
         }
     }
 };
