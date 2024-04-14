@@ -125,9 +125,9 @@ TEMPLATE_TEST_CASE("Ground State Space construction of a 7 DB layout", "[ground-
 
     for (uint64_t i = 0; i < 7; ++i)
     {
-        CHECK_THAT(gss_res.top_cluster->received_ext_pot_bounds.at(i).at(0),
+        CHECK_THAT(gss_res.top_cluster->received_ext_pot_bounds.get<bound_direction::LOWER>(i),
                    Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
-        CHECK_THAT(gss_res.top_cluster->received_ext_pot_bounds.at(i).at(1),
+        CHECK_THAT(gss_res.top_cluster->received_ext_pot_bounds.get<bound_direction::UPPER>(i),
                    Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
     }
 
@@ -214,9 +214,9 @@ TEMPLATE_TEST_CASE("Ground state space construction of a 14 DB layout", "[ground
 
     for (uint64_t i = 0; i < 14; ++i)
     {
-        CHECK_THAT(gss_res.top_cluster->received_ext_pot_bounds.at(i).at(0),
+        CHECK_THAT(gss_res.top_cluster->received_ext_pot_bounds.get<bound_direction::LOWER>(i),
                    Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
-        CHECK_THAT(gss_res.top_cluster->received_ext_pot_bounds.at(i).at(1),
+        CHECK_THAT(gss_res.top_cluster->received_ext_pot_bounds.get<bound_direction::UPPER>(i),
                    Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
     }
 }
@@ -246,7 +246,7 @@ static bool verify_ground_state_space_stats(const charge_distribution_surface<Ly
 
     bool found_charge_conf = false;
 
-    for (const sidb_cluster_state_composition& composition : found_m_conf->compositions)
+    for (const sidb_charge_space_composition& composition : found_m_conf->compositions)
     {
         bool composition_has_correct_charge_conf = true;
 

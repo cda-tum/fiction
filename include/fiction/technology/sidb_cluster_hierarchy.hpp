@@ -11,7 +11,7 @@
  * Uncomment this line to switch to STL containers, which are slower than their respective analogues from the
  * Parallel-Hashmap library by Gregory Popovitch, but may be inspected with ease in a debugger.
  */
-// #define DEBUG_SIDB_CLUSTER_HIERARCHY
+#define DEBUG_SIDB_CLUSTER_HIERARCHY
 
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
@@ -131,7 +131,8 @@ sidb_cluster_hierarchy(Lyt& lyt, sidb_cluster_hierarchy_linkage_method linkage_m
     {
         return sidb_binary_cluster_hierarchy_node{{}, {nullptr, nullptr}};
     }
-    else if (lyt.num_cells() == 1)
+
+    if (lyt.num_cells() == 1)
     {
         return sidb_binary_cluster_hierarchy_node{{0}, {nullptr, nullptr}};
     }
@@ -261,14 +262,14 @@ struct sidb_cluster_projector_state
  */
 using sidb_cluster_projector_state_ptr = std::unique_ptr<sidb_cluster_projector_state>;
 /**
- * The two types of electrostatic potential bounds required for the *Ground State Space* algorithm. As the domain in
+ * The electrostatic potential bounds required for the *Ground State Space* algorithm. As the domain in
  * which our potential bounds live are simply the real numbers, we may think of the lower bound and upper bound domains
  * to be separate partial order structures on the real number line, inverse to each other. The *Ground State Space*
  * algorithm requires the properties of a lower semi-lattice for these domains, ie. all finite meets must exist. This is
  * implemented for the lower and upper bound respectively simply by taking a minimum or a maximum. One may think of
  * meets as follows, which is very relevant to intention of their application: a meet, or greatest lower bound, is the
- * *minimal information* common to a set (of potential bounds). This semantic operation is essential to the *Ground
- * State Space* algorithm, which envelops without loss of accuracy.
+ * *maximal information* common to a set (of potential bounds). This semantic operation is essential to the *Ground
+ * State Space* algorithm, which thus envelops without loss of accuracy.
  */
 enum class bound_direction : uint8_t
 {
@@ -325,27 +326,22 @@ static inline uint64_t get_singleton_sidb_ix(const sidb_cluster_ptr& c) noexcept
  */
 static inline uint64_t get_unique_cluster_id(const sidb_cluster_ptr& c) noexcept;
 /**
- * This defines the type for a store in which the bounds on the local electrostatic potential for an SiDB (index) may be
- * stored. For the *Ground State Space* algorithm, this is used to keep track of the bounds on the fraction of local
- * potential that is projected on the SiDB from within a cluster, though during *ClusterComplete* simulation, this is
- * used as a dynamic store in which also external potentials are accumulated.
+ * This defines a store in which the bounds on the local electrostatic potential for an SiDB (index) may be
+ * stored. For the *Ground State Space* algorithm, this is used to keep track of the respective lower and upper bounds
+ * on the partial sum of the potential projected from SiDBs in a subhierarchy that is local to SiDBs that are also in
+ * the subhierarchy. During *ClusterComplete* simulation, the stored potential bounds represent information of the
+ * complete hierarchy, thus all SiDB interactions.
  */
-#ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
-using potential_bounds = std::map<uint64_t, std::array<double, 2>>;
-#else
-using potential_bounds = phmap::flat_hash_map<uint64_t, std::array<double, 2>>;
-#endif
-
+template <typename PotentialBoundsType>
 struct potential_bounds_store
 {
   public:
     /**
-     * Getter for the internal potential bound for an SiDB in the cluster, corresponding to the meet on the potential
-     * bounds under each composition of the multiset charge configuration in the cluster state's projector state.
+     * Getter for a (partial) potential sum bound local to an SiDB.
      *
-     * @tparam bound Internal potential bound type to obtain.
-     * @param sidb_ix SiDB (index) to obtain the internal potential bound of.
-     * @return The internal potential bound for this SiDB.
+     * @tparam bound The potential bound to obtain.
+     * @param sidb_ix SiDB (index) to obtain the potential bound of.
+     * @return The potential bound for this SiDB.
      */
     template <bound_direction bound>
     [[nodiscard]] constexpr inline double get(const uint64_t sidb_ix) const noexcept
@@ -353,9 +349,21 @@ struct potential_bounds_store
         return store.at(sidb_ix).at(static_cast<uint8_t>(bound));
     }
     /**
-     * Setter for internal potential bound for an SiDB in the cluster.
+     * Setter for a (partial) potential sum bound local to an SiDB.
      *
-     * @param sidb_ix SiDB (index) to set the internal potential bound for.
+     * @tparam bound The potential bound to obtain.
+     * @param sidb_ix SiDB (index) to set the potential bound for.
+     * @param bound_value New bound to set.
+     */
+    template <bound_direction bound>
+    inline void set(const uint64_t sidb_ix, const double bound_value) noexcept
+    {
+        store[sidb_ix][static_cast<uint8_t>(bound)] = bound_value;
+    }
+    /**
+     * Setter for (partial) potential sum bounds local to an SiDB.
+     *
+     * @param sidb_ix SiDB (index) to set the potential bounds for.
      * @param min New lower bound to set.
      * @param max New upper bound to set.
      */
@@ -365,9 +373,21 @@ struct potential_bounds_store
         store[sidb_ix][static_cast<uint8_t>(bound_direction::UPPER)] = max;
     }
     /**
-     * Relative setter for internal potential bound for an SiDB in the cluster.
+     * Relative setter for a (partial) potential sum bound local to an SiDB.
      *
-     * @param sidb_ix SiDB (index) to update the internal potential bound of.
+     * @tparam bound The potential bound to update.
+     * @param sidb_ix SiDB (index) to update the potential bound of.
+     * @param bound_diff Bound difference to apply.
+     */
+    template <bound_direction bound>
+    inline void update(const uint64_t sidb_ix, const double bound_diff) noexcept
+    {
+        store[sidb_ix][static_cast<uint8_t>(bound)] += bound_diff;
+    }
+    /**
+     * Relative setter for (partial) potential sum bounds local to an SiDB.
+     *
+     * @param sidb_ix SiDB (index) to update the potential bounds of.
      * @param min_diff Difference in lower bound potential to apply.
      * @param max_diff Difference in upper bound potential to apply.
      */
@@ -376,28 +396,68 @@ struct potential_bounds_store
         store[sidb_ix][static_cast<uint8_t>(bound_direction::LOWER)] += min_diff;
         store[sidb_ix][static_cast<uint8_t>(bound_direction::UPPER)] += max_diff;
     }
+    /**
+     * Initialise potential bounds for the given number of SiDBs (applicable to a complete potential bounds store only).
+     *
+     * @param num_sidbs The number of SiDBs in the layout that is simulated.
+     */
+    inline void initialise_complete_potential_bounds(const uint64_t num_sidbs) noexcept
+    {
+        store.assign(num_sidbs, std::array<double, 2>{});
+    }
 
-    //  private:
-    potential_bounds store{};
+  private:
+    /**
+     * Potential bounds are a map from SiDB indices to two values respectively representing the lower and upper bound.
+     */
+    PotentialBoundsType store{};
 };
 /**
- * A cluster state composition holds a number of cluster states of sibling clusters. Summing the multiset charge
- * configuration associated with each, we obtain an element of the charge space of their parent.
+ * The aggregates are used in the construction; they represents information of a subhierarchy.
  */
-struct sidb_cluster_state_composition
+#ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
+using partial_potential_bounds_store = potential_bounds_store<std::map<uint64_t, std::array<double, 2>>>;
+#else
+using partial_potential_bounds_store = potential_bounds_store<phmap::flat_hash_map<uint64_t, std::array<double, 2>>>;
+#endif
+/**
+ * The aggregates represent information for a clustering of the complete layout; they are used in the destruction.
+ */
+using complete_potential_bounds_store = potential_bounds_store<std::vector<std::array<double, 2>>>;
+/**
+ * A charge space composition holds a number of projector states of sibling clusters. Summing the multiset charge
+ * configuration associated with each, we obtain an element of the charge space of their parent. Additionally, we have a
+ * store for the bounds on the partial potential sum local to each SiDB contained by the parent, i.e., partial in the
+ * sense that SiDBs not contained by the parent are not taken into account. The potential bounds for each SiDB
+ * correspond to the meet on the potential bounds for each (sub-)composition of the respective cluster charge states
+ * associated with the multiset charge configuration of each projector state in this composition of siblings.
+ */
+struct sidb_charge_space_composition
 {
+    /**
+     * Projector states associated with charge space elements that make up the composition.
+     */
     std::vector<sidb_cluster_projector_state> proj_states;
-    potential_bounds_store                    pot_bounds{};
+    /**
+     * Flattened (hierarchical) potential bounds specific to this composition.
+     */
+    partial_potential_bounds_store pot_bounds{};
 };
 /**
  * A clustering state is very similar to a cluster state composition, though it uses unique pointers to the cluster
  * states that may be moved. Thereby, this is the essential type of the dynamic objects in *ClusterComplete*'s
- * operation.
+ * operation, which always represent information of the complete layout.
  */
 struct sidb_clustering_state
 {
+    /**
+     * Projector states associated with charge space elements that make up the clustering state.
+     */
     std::vector<std::unique_ptr<sidb_cluster_projector_state>> proj_states;
-    potential_bounds_store                                     pot_bounds;
+    /**
+     * Flattened (hierarchical) potential bounds specific to this clustering state.
+     */
+    complete_potential_bounds_store pot_bounds;
 };
 /**
  * A cluster charge state is a multiset charge configuration. We may compress it into a 64 bit unsigned integer by
@@ -416,8 +476,10 @@ struct sidb_cluster_charge_state
      * Number of positive charges in the cluster charge state (32 available bits).
      */
     uint64_t pos_count : 32;
-
-    mutable std::vector<sidb_cluster_state_composition> compositions{};
+    /**
+     *  Stored compositions of this cluster charge state.
+     */
+    mutable std::vector<sidb_charge_space_composition> compositions{};
     /**
      * Default constructor, creates a cluster charge state without any negative and positive charges.
      */
@@ -680,7 +742,7 @@ struct potential_projection_order
     /**
      * A getter for a potential projection bound, which is the first or last item in the ordered set.
      *
-     * @tparam bound The type of bound to obtain.
+     * @tparam bound The bound to obtain.
      * @return The potential projection that forms the requested bound on the potential projection order.
      */
     template <bound_direction bound>
@@ -700,7 +762,7 @@ struct potential_projection_order
      * ordering either from below or from above, that differs in its multiset charge configuration from the relevant
      * potential projection bound.
      *
-     * @tparam bound The type of bound to obtain.
+     * @tparam bound The bound to obtain.
      * @return The potential projection that would be the requested bound on the potential projection order if the
      * current relevant bound would be erased.
      */
@@ -725,7 +787,7 @@ struct potential_projection_order
      * first potential projection in the ordering when traversing either from below or from above, that matches its
      * multiset charge configuration to the argument.
      *
-     * @tparam bound The type of bound to obtain.
+     * @tparam bound The bound to obtain.
      * @param m_conf The multiset charge configuration to match.
      * @return The potential projection that forms the requested bound on the subset of the potential projection order
      * of potential projections that match their multiset charge configuration to the argument.
@@ -824,14 +886,16 @@ struct sidb_cluster
      * Every cluster carries a pointer to its parent. For the top cluster, this is `nullptr`.
      */
     std::weak_ptr<sidb_cluster> parent{};
+    /**
+     * The bounds on the electrostatic potential sum of SiDBs external to this cluster, local to an SiDB in the cluster.
+     */
+    partial_potential_bounds_store received_ext_pot_bounds{};
 
 #ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
     std::set<sidb_ix>                             sidbs;
-    std::map<sidb_ix, std::array<double, 2>>      recv_ext_pot_bounds{};
     std::map<sidb_ix, potential_projection_order> pot_projs{};
 #else
     phmap::flat_hash_set<sidb_ix>                             sidbs;
-    phmap::flat_hash_map<sidb_ix, std::array<double, 2>> received_ext_pot_bounds{};
     phmap::flat_hash_map<sidb_ix, potential_projection_order> pot_projs{};
 #endif
     /**
@@ -885,49 +949,12 @@ struct sidb_cluster
 
         const uint64_t ix = *sidbs.cbegin();
 
-        for (const sidb_charge_state cs : base == 2 ? SIDB_CHARGE_STATES_BASE_2 : SIDB_CHARGE_STATES_BASE_3)
+        for (const sidb_charge_state cs : SIDB_CHARGE_STATES(base))
         {
-            charge_space.emplace(sidb_cluster_charge_state{self_ptr, cs, loc_ext_pot});
+            charge_space.emplace(self_ptr, cs, loc_ext_pot);
         }
 
-        received_ext_pot_bounds[ix][static_cast<uint8_t>(bound_direction::LOWER)] = loc_pot_min;
-        received_ext_pot_bounds[ix][static_cast<uint8_t>(bound_direction::UPPER)] = loc_pot_max;
-    }
-    /**
-     * The bound on the potential an SiDB receives from outside this cluster is returned.
-     *
-     * @tparam bound The potential bound that is requested.
-     * @param i The SiDB index for which the potential bound is requested.
-     * @return The potential bound that is stored.
-     */
-    template <bound_direction bound>
-    constexpr inline double get_received_ext_pot_bound(const sidb_ix i) noexcept
-    {
-        return received_ext_pot_bounds.at(i).at(static_cast<uint8_t>(bound));
-    }
-    /**
-     * The bound on the potential an SiDB receives from outside this cluster is set.
-     *
-     * @tparam bound The potential bound that is set.
-     * @param i The SiDB index for which the potential bound is set.
-     * @param new_bound The new potential bound that is set.
-     */
-    template <bound_direction bound>
-    constexpr inline void set_received_ext_pot_bound(const sidb_ix i, const double new_bound) noexcept
-    {
-        received_ext_pot_bounds[i][static_cast<uint8_t>(bound)] = new_bound;
-    }
-    /**
-     * The bound on the potential an SiDB receives from outside this cluster is updated.
-     *
-     * @tparam bound The potential bound that is updated.
-     * @param i The SiDB index for which the potential bound is updated.
-     * @param diff The difference with which the potential bound is updated.
-     */
-    template <bound_direction bound>
-    constexpr inline void update_received_ext_pot_bound(const sidb_ix i, const double diff) noexcept
-    {
-        received_ext_pot_bounds[i][static_cast<uint8_t>(bound)] += diff;
+        received_ext_pot_bounds.set(ix, loc_pot_min, loc_pot_max);
     }
     /**
      * Function to return the number of SiDBs contained in the cluster.
@@ -987,7 +1014,7 @@ static inline uint64_t get_singleton_sidb_ix(const sidb_cluster_ptr& c) noexcept
  * @param pst Projector state of which the corresponding compositions are requested.
  * @return The compositions associated with the multiset charge configuration of the projecting cluster.
  */
-static inline std::vector<sidb_cluster_state_composition>
+static inline std::vector<sidb_charge_space_composition>
 get_projector_state_compositions(const sidb_cluster_projector_state& pst) noexcept
 {
     return pst.cluster->charge_space.find(sidb_cluster_charge_state{pst.multiset_conf})->compositions;

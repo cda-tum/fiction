@@ -261,7 +261,7 @@ class ground_state_space_impl
         if (cur_bound.multiset == pst.multiset_conf)
         {
             // update the received potential with the difference between the removed bound and the next bound
-            rst.cluster->update_received_ext_pot_bound<bound>(
+            rst.cluster->received_ext_pot_bounds.update<bound>(
                 rst.sidb_ix, get_next_projected_pot_bound<bound>(pst.cluster, rst.sidb_ix) - cur_bound.pot_val);
         }
     }
@@ -410,30 +410,30 @@ class ground_state_space_impl
     template <potential_bound_analysis_mode mode>
     static inline std::pair<double, double>
     get_received_potential_bounds(const sidb_cluster_projector_state& pst, const uint64_t sidb_ix,
-                                  const std::optional<potential_bounds_store>& composition_pot_bounds) noexcept
+                                  const std::optional<partial_potential_bounds_store>& composition_pot_bounds) noexcept
     {
         if constexpr (mode == potential_bound_analysis_mode::ANALYZE_MULTISET)
         {
             // this considers the flattened self-projection (defined below---CTRL+F)
             return {get_projector_state_bound<bound_direction::LOWER>(pst, sidb_ix).pot_val +
-                        pst.cluster->get_received_ext_pot_bound<bound_direction::LOWER>(sidb_ix),
+                        pst.cluster->received_ext_pot_bounds.get<bound_direction::LOWER>(sidb_ix),
                     get_projector_state_bound<bound_direction::UPPER>(pst, sidb_ix).pot_val +
-                        pst.cluster->get_received_ext_pot_bound<bound_direction::UPPER>(sidb_ix)};
+                        pst.cluster->received_ext_pot_bounds.get<bound_direction::UPPER>(sidb_ix)};
         }
         else if constexpr (mode == potential_bound_analysis_mode::ANALYZE_COMPOSITION)
         {
             // this considers the flattened self-projection of the previous level
             return {composition_pot_bounds.value().get<bound_direction::LOWER>(sidb_ix) +
-                        pst.cluster->parent.lock()->get_received_ext_pot_bound<bound_direction::LOWER>(sidb_ix),
+                        pst.cluster->parent.lock()->received_ext_pot_bounds.get<bound_direction::LOWER>(sidb_ix),
                     composition_pot_bounds.value().get<bound_direction::UPPER>(sidb_ix) +
-                        pst.cluster->parent.lock()->get_received_ext_pot_bound<bound_direction::UPPER>(sidb_ix)};
+                        pst.cluster->parent.lock()->received_ext_pot_bounds.get<bound_direction::UPPER>(sidb_ix)};
         }
     }
 
     template <potential_bound_analysis_mode mode>
     [[nodiscard]] bool perform_potential_bound_analysis(
         const sidb_cluster_projector_state&          pst,
-        const std::optional<potential_bounds_store>& composition_potential_bounds = std::nullopt) const noexcept
+        const std::optional<partial_potential_bounds_store>& composition_potential_bounds = std::nullopt) const noexcept
     {
         witness_partitioning_state st{pst};
 
@@ -535,7 +535,7 @@ class ground_state_space_impl
     {
         // derive the new externally received partial sums of electrostatic potential local to SiDB contained by the
         // child through subtracting the projections of its sibling
-        double recv_pot_without_siblings = child_rst.cluster->get_received_ext_pot_bound<bound>(child_rst.sidb_ix);
+        double recv_pot_without_siblings = child_rst.cluster->received_ext_pot_bounds.get<bound>(child_rst.sidb_ix);
 
         for (const sidb_cluster_ptr& sibling : parent->children)
         {
@@ -545,7 +545,7 @@ class ground_state_space_impl
             }
         }
 
-        parent->set_received_ext_pot_bound<bound>(child_rst.sidb_ix, recv_pot_without_siblings);
+        parent->received_ext_pot_bounds.set<bound>(child_rst.sidb_ix, recv_pot_without_siblings);
     }
 
     void derive_children_received_bounds_without_siblings(const sidb_cluster_ptr& parent) const noexcept
@@ -563,7 +563,7 @@ class ground_state_space_impl
         }
     }
 
-    bool verify_composition(sidb_cluster_state_composition& composition) const noexcept
+    bool verify_composition(sidb_charge_space_composition& composition) const noexcept
     {
         // perform physically informed space pruning for a multiset composition
         for (sidb_cluster_projector_state& receiving_pst : composition.proj_states)
@@ -646,7 +646,7 @@ class ground_state_space_impl
         // construct external projected potential bounds for every composition of every element in the charge space
         for (const sidb_cluster_charge_state& m : parent->charge_space)
         {
-            for (const sidb_cluster_state_composition& composition : m.compositions)
+            for (const sidb_charge_space_composition& composition : m.compositions)
             {
                 potential_projection pot_proj_onto_other_c{};
 
@@ -667,7 +667,7 @@ class ground_state_space_impl
             diff -= get_projection_bound<bound>(child, rst.sidb_ix).pot_val;
         }
 
-        rst.cluster->update_received_ext_pot_bound<bound>(rst.sidb_ix, diff);
+        rst.cluster->received_ext_pot_bounds.update<bound>(rst.sidb_ix, diff);
     }
 
     void construct_merged_potential_projections(const sidb_cluster_ptr& parent) const noexcept
@@ -701,7 +701,7 @@ class ground_state_space_impl
                 double lb_meet = potential_bound_top<bound_direction::LOWER>();
                 double ub_meet = potential_bound_top<bound_direction::UPPER>();
 
-                for (const sidb_cluster_state_composition& composition : m.compositions)
+                for (const sidb_charge_space_composition& composition : m.compositions)
                 {
                     take_meet_of_potential_bounds<bound_direction::LOWER>(
                         lb_meet, composition.pot_bounds.get<bound_direction::LOWER>(sidb_ix));

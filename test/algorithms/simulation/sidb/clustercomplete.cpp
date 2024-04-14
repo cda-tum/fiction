@@ -29,6 +29,7 @@
 #include <fiction/technology/sidb_lattice_orientations.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/layout_utils.hpp>
+#include <fiction/utils/math_utils.hpp>
 
 #include <algorithm>
 #include <any>
@@ -196,7 +197,7 @@ TEMPLATE_TEST_CASE(
         {
             const auto simulation_results = clustercomplete<TestType>(lyt, params);
             auto&      charge_lyt_first   = simulation_results.charge_distributions.front();
-            ground_state.insert(charge_lyt_first.get_system_energy());
+            ground_state.insert(round_to_n_decimal_places(charge_lyt_first.get_system_energy(), 6));
             charge_lyt_first.charge_distribution_to_index_general();
             charge_index.insert(charge_lyt_first.get_charge_index_and_base().first);
         }

@@ -70,14 +70,19 @@ construction, which enables the :ref:`*ClusterComplete* <clustercomplete>` exact
 .. doxygenstruct:: fiction::sidb_cluster_receptor_state
    :members:
 .. doxygenstruct:: fiction::sidb_cluster_projector_state
+.. doxygentypedef:: fiction::sidb_cluster_projector_state_ptr
    :members:
 .. doxygenenum:: fiction::bound_direction
 .. doxygenfunction:: fiction::potential_bound_top
 .. doxygenfunction:: fiction::take_meet_of_potential_bounds
-.. doxygentypedef:: fiction::intra_cluster_potential_bounds
-.. doxygenstruct:: fiction::sidb_cluster_state
+.. doxygenstruct:: fiction::potential_bounds_store
    :members:
-.. doxygentypedef:: fiction::sidb_clustering_state
+.. doxygentypedef:: fiction::partial_potential_bounds_store
+.. doxygentypedef:: fiction::complete_potential_bounds_store
+.. doxygenstruct:: fiction::sidb_charge_space_composition
+   :members:
+.. doxygenstruct:: fiction::sidb_clustering_state
+   :members:
 .. doxygenstruct:: fiction::sidb_cluster_charge_state
    :members:
 .. doxygenfunction:: fiction::singleton_multiset_conf_to_charge_state
