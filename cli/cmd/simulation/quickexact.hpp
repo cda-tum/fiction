@@ -101,16 +101,16 @@ class quickexact_command : public command
                 }
                 else
                 {
+                    params.physical_parameters = physical_params;
+
                     if constexpr (fiction::is_sidb_lattice_100_v<Lyt>)
                     {
                         sidb_111_used              = false;
-                        params.physical_parameters = physical_params;
                         sim_result_100             = fiction::quickexact(*lyt_ptr, params);
                     }
                     else if constexpr (fiction::is_sidb_lattice_111_v<Lyt>)
                     {
                         sidb_111_used              = true;
-                        params.physical_parameters = physical_params;
                         auto cps                   = convert_params<Lyt>(params);
                         sim_result_111             = fiction::quickexact(*lyt_ptr, cps);
                     }

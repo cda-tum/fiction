@@ -80,13 +80,15 @@ TEMPLATE_TEST_CASE("Ground State Space construction of two SiDBs directly next t
 
     SECTION("Base 2")
     {
-        const ground_state_space_stats& res = ground_state_space(lyt, 6, sidb_simulation_parameters{2});
+        const ground_state_space_stats& res =
+            ground_state_space(lyt, ground_state_space_params{sidb_simulation_parameters{2}});
         CHECK(res.pruned_top_level_multisets == res.maximum_top_level_multisets);
     }
 
     SECTION("Base 3")
     {
-        const ground_state_space_stats& res = ground_state_space(lyt, 6, sidb_simulation_parameters{3});
+        const ground_state_space_stats& res =
+            ground_state_space(lyt, ground_state_space_params{sidb_simulation_parameters{3}});
         CHECK(res.pruned_top_level_multisets != res.maximum_top_level_multisets);
     }
 }
@@ -111,7 +113,8 @@ TEMPLATE_TEST_CASE("Ground State Space construction of a 7 DB layout", "[ground-
     lyt.assign_cell_type({6, 5, 1}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({4, 8, 1}, TestType::cell_type::NORMAL);
 
-    const ground_state_space_stats& gss_res = ground_state_space(lyt, 6, sidb_simulation_parameters{2});
+    const ground_state_space_stats& gss_res =
+        ground_state_space(lyt, ground_state_space_params{sidb_simulation_parameters{2}});
 
     CHECK(mockturtle::to_seconds(gss_res.runtime) > 0.0);
 
@@ -212,6 +215,63 @@ TEMPLATE_TEST_CASE("Ground state space construction of a 14 DB layout", "[ground
     CHECK(gss_res.top_cluster->charge_space.size() == 5);
 
     for (uint64_t i = 0; i < 14; ++i)
+    {
+        CHECK_THAT(gss_res.top_cluster->received_ext_pot_bounds.get<bound_direction::LOWER>(i),
+                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+        CHECK_THAT(gss_res.top_cluster->received_ext_pot_bounds.get<bound_direction::UPPER>(i),
+                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
+    }
+}
+
+TEMPLATE_TEST_CASE("Ground state space construction of a 28 DB layout", "[ground-state-space]", sidb_cell_clk_lyt_siqad,
+                   charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
+{
+    TestType lyt{};
+
+    lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({2, 2, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({4, 1, 0}, TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type({0, 7, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({1, 6, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 5, 1}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({4, 8, 1}, TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type({4, 0, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 2, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 1, 0}, TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type({4, 7, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({5, 6, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({10, 5, 1}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 8, 1}, TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type({0 + 8, 0, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({2 + 8, 2, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({4 + 8, 1, 0}, TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type({0 + 8, 7, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({1 + 8, 6, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({6 + 8, 5, 1}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({4 + 8, 8, 1}, TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type({4 + 8, 0, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({6 + 8, 2, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({8 + 8, 1, 0}, TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type({4 + 8, 7, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({5 + 8, 6, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({10 + 8, 5, 1}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({8 + 8, 8, 1}, TestType::cell_type::NORMAL);
+
+    const ground_state_space_stats& gss_res = ground_state_space(lyt);
+
+    gss_res.report();
+
+    CHECK(gss_res.top_cluster->sidbs.size() == 28);
+    CHECK(gss_res.top_cluster->charge_space.size() <= 95);
+
+    for (uint64_t i = 0; i < 28; ++i)
     {
         CHECK_THAT(gss_res.top_cluster->received_ext_pot_bounds.get<bound_direction::LOWER>(i),
                    Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));

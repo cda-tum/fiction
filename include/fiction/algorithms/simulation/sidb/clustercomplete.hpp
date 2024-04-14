@@ -18,13 +18,19 @@
 #include "fiction/traits.hpp"
 #include "fiction/utils/hash.hpp"
 
+#if (PROGRESS_BARS)
+#include <mockturtle/utils/progress_bar.hpp>
+#endif
+
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
 #include <array>
+#include <cmath>
 #include <cstdint>
 #include <iterator>
 #include <mutex>
+#include <optional>
 #include <thread>
 #include <unordered_map>
 #include <utility>
@@ -52,6 +58,12 @@ struct clustercomplete_params
      */
     double global_potential = 0;
     /**
+     * Toggle to enable/disable the progress bar. Could impair runtimes slightly, so best used for long simulations.
+     *
+     * @note `FICTION_PROGRESS_BARS` CMake flag must be enabled for the progress bar to appear.
+     */
+    bool enable_progress_bar = false;
+    /**
      * This specifies the maximum cluster size for which Ground State Space will solve an NP-complete sub-problem
      * exhaustively. The sets of SiDBs that witness local population stability for each respective charge state may be
      * partitioned into disjoint sets such that the number of required witnesses for each respective charge state is
@@ -59,6 +71,13 @@ struct clustercomplete_params
      * rejected.
      */
     uint64_t validity_witness_partitioning_max_cluster_size_gss = 6;
+    /**
+     * The complexity is of validity witness partitioning bounded by a factorial in the number of overlapping witnesses.
+     * This parameter thus allows the validity witness partitioning procedure to perform the reduction to overlapping
+     * witnesses for larger cluster sizes that could be runtime-impairing, then limiting specifically the length of the
+     * input to the factorial call.
+     */
+    uint64_t num_overlapping_witnesses_limit_gss = 6;
     /**
      * Number of threads to make available to ClusterComplete for the simulation stage.
      */
@@ -93,10 +112,15 @@ class clustercomplete_impl
         res.additional_simulation_parameters.emplace("global_potential", params.global_potential);
         res.additional_simulation_parameters.emplace("validity_witness_partitioning_limit",
                                                      params.validity_witness_partitioning_max_cluster_size_gss);
+        res.additional_simulation_parameters.emplace("num_overlapping_witnesses_limit",
+                                                     params.num_overlapping_witnesses_limit_gss);
 
         // run Ground State Space to obtain the complete hierarchical charge space
         const ground_state_space_stats& gss_stats = fiction::ground_state_space(
-            charge_layout, params.validity_witness_partitioning_max_cluster_size_gss, charge_layout.get_phys_params());
+            charge_layout,
+            ground_state_space_params{charge_layout.get_phys_params(),
+                                      params.validity_witness_partitioning_max_cluster_size_gss,
+                                      params.num_overlapping_witnesses_limit_gss, params.enable_progress_bar});
 
         if (!gss_stats.top_cluster)
         {
@@ -114,7 +138,7 @@ class clustercomplete_impl
 
             if (!gss_stats.top_cluster->charge_space.empty())
             {
-                collect_physically_valid_charge_distributions(gss_stats.top_cluster);
+                collect_physically_valid_charge_distributions(gss_stats.top_cluster, gss_stats.num_projector_states);
             }
         }
 
@@ -151,6 +175,28 @@ class clustercomplete_impl
 
         return cds;
     }
+
+#if (PROGRESS_BARS)
+    void initialize_progress_bar(const uint64_t num_projector_states) noexcept
+    {
+        if (num_projector_states * num_projector_states + 1 !=
+            static_cast<uint32_t>(pow(static_cast<double>(num_projector_states), 2.0) + 1))
+        {
+            std::cout << "[w] More than sqrt(2^32-2) projector states are not supported for the progress bar feature."
+                      << std::endl;
+        }
+        else
+        {
+            // initialize a progress bar
+            bar = std::make_unique<mockturtle::progress_bar>(
+                static_cast<uint32_t>(pow(static_cast<double>(num_projector_states), 2.0) + 1),
+                "[i] performing ClusterComplete simulation: |{0}|");
+
+            // zero handled projector states acts as "no progress bar enabled"
+            handled_projector_states++;
+        }
+    }
+#endif
 
     [[nodiscard]] constexpr inline bool fail_onto_negative_charge(const double pot_bound) const noexcept
     {
@@ -276,7 +322,8 @@ class clustercomplete_impl
                                           sidb_clustering_state&              clustering_state) const noexcept
     {
         // before the parent projector state may be specialised to a specific composition of its children; first the
-        // projections of the parent must be subtracted, then they are added back after all compositions were handled
+        // projections of the parent must be subtracted, then they are added back after all compositions were
+        // handled
         for (uint64_t sidb_ix = 0; sidb_ix < charge_layout.num_cells(); ++sidb_ix)
         {
             if constexpr (op == potential_bound_update_operation::ADD)
@@ -298,12 +345,13 @@ class clustercomplete_impl
     apply_inter_cluster_potential(sidb_charge_space_composition& parent_composition,
                                   sidb_clustering_state&         clustering_state) const noexcept
     {
-        // create a complete potential bounds store that stores the effect of the specialisation, to be removed later
+        // create a complete potential bounds store that stores the effect of the specialisation, to be removed
+        // later
         complete_potential_bounds_store composition_bounds{};
         composition_bounds.initialise_complete_potential_bounds(charge_layout.num_cells());
 
-        // the parent is now specialised to a specific composition of its children; the children are applied by adding
-        // their respective projections for this composition to all SiDBs
+        // the parent is now specialised to a specific composition of its children; the children are applied by
+        // adding their respective projections for this composition to all SiDBs
         for (uint64_t sidb_ix = 0; sidb_ix < charge_layout.num_cells(); ++sidb_ix)
         {
             double comp_pot_lb = 0;
@@ -326,8 +374,8 @@ class clustercomplete_impl
     void undo_apply_inter_cluster_potential(const complete_potential_bounds_store& composition_bounds,
                                             sidb_clustering_state&                 clustering_state) const noexcept
     {
-        // this inverts the operation of the function above, un-applying the (old, already considered) children, thus
-        // allowing the next specialisation to be applied
+        // this inverts the operation of the function above, un-applying the (old, already considered) children,
+        // thus allowing the next specialisation to be applied
         for (uint64_t sidb_ix = 0; sidb_ix < charge_layout.num_cells(); ++sidb_ix)
         {
             clustering_state.pot_bounds.update(sidb_ix, composition_bounds.get<bound_direction::LOWER>(sidb_ix),
@@ -401,6 +449,17 @@ class clustercomplete_impl
             undo_apply_inter_cluster_potential(composition_bounds, clustering_state);
         }
 
+#if (PROGRESS_BARS)
+        if (handled_projector_states > 0)
+        {
+            const std::lock_guard lock{progress_bar_mutex};
+
+            handled_projector_states += 1;
+
+            (*bar)(handled_projector_states);
+        }
+#endif
+
         // apply max_cst back
         add_or_subtract_parent_potential<potential_bound_update_operation::ADD>(*max_pst, clustering_state);
 
@@ -436,8 +495,16 @@ class clustercomplete_impl
         return clustering_state;
     }
 
-    void collect_physically_valid_charge_distributions(const sidb_cluster_ptr& top_cluster) noexcept
+    void collect_physically_valid_charge_distributions(const sidb_cluster_ptr&        top_cluster,
+                                                       const std::optional<uint64_t>& num_projector_states) noexcept
     {
+#if (PROGRESS_BARS)
+        if (num_projector_states.has_value())
+        {
+            initialize_progress_bar(num_projector_states.value());
+        }
+#endif
+
         const uint64_t top_level_multisets = top_cluster->charge_space.size();
 
         const uint64_t num_threads_to_use = std::min(std::max(num_threads, uint64_t{1}), top_level_multisets);
@@ -492,6 +559,12 @@ class clustercomplete_impl
 
     sidb_simulation_result<Lyt> res{};
     std::mutex                  res_mutex{};
+
+#if (PROGRESS_BARS)
+    std::unique_ptr<mockturtle::progress_bar> bar;
+    uint64_t                                  handled_projector_states = 0;
+    std::mutex                                progress_bar_mutex{};
+#endif
 
     const charge_distribution_surface<Lyt>                          charge_layout;
     const std::unordered_map<typename Lyt::cell, const sidb_defect> real_placed_defects;
