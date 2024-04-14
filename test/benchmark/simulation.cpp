@@ -130,6 +130,7 @@ TEST_CASE("Benchmark simulators", "[benchmark]")
 //                            7.4455 ms     6.55368 ms    8.6877 ms
 
 //    after "Add and subtract parent potential only once"
+//    before "Store composition bounds to subtract after recursion"
 //    benchmark name          samples       iterations    est run time
 //                            mean          low mean      high mean
 //                            std dev       low std dev   high std dev
@@ -145,6 +146,23 @@ TEST_CASE("Benchmark simulators", "[benchmark]")
 //    ClusterComplete         100           1             5.99807 s
 //                            62.7459 ms    61.3404 ms    64.3648 ms
 //                            7.71925 ms    6.65408 ms    9.13036 ms
+
+//    after "Store composition bounds to subtract after recursion"
+//    benchmark name          samples       iterations    est run time
+//                            mean          low mean      high mean
+//                            std dev       low std dev   high std dev
+//    -------------------------------------------------------------------------------
+//    QuickExact              100           1             3.09518 m
+//                            1.86457 s     1.84747 s     1.88346 s
+//                            91.8324 ms    82.2694 ms    102.996 ms
+//
+//    QuickSim                100           1             941.808 ms
+//                            9.84096 ms    9.75242 ms    9.94587 ms
+//                            491.07 us     387.717 us    673.361 us
+//
+//    ClusterComplete         100           1             4.60825 s
+//                            45.0607 ms    44.2967 ms    45.9833 ms
+//                            4.25241 ms    3.59799 ms    5.09686 ms
 
 TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
 {
@@ -183,6 +201,7 @@ TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
 //                                            98.2992 ms    79.0445 ms    133.074 ms
 
 //    after "Add and subtract parent potential only once"
+//    before "Store composition bounds to subtract after recursion"
 //    benchmark name                          samples       iterations    est run time
 //                                            mean          low mean      high mean
 //                                            std dev       low std dev   high std dev
@@ -190,3 +209,12 @@ TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
 //    3 Segment Diagonal Bestagon Wire        100           1             2.43878 m
 //                                            1.43439 s     1.42121 s     1.44845 s
 //                                            69.1732 ms    60.7787 ms    80.0373 ms
+
+//    after "Store composition bounds to subtract after recursion"
+//    benchmark name                          samples       iterations    est run time
+//                                            mean          low mean      high mean
+//                                            std dev       low std dev   high std dev
+//    -------------------------------------------------------------------------------
+//    3 Segment Diagonal Bestagon Wire        100           1             1.88129 m
+//                                            1.12828 s     1.11773 s     1.14043 s
+//                                            57.5402 ms    48.6612 ms    71.5112 ms
