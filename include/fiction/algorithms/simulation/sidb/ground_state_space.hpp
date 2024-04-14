@@ -410,7 +410,7 @@ class ground_state_space_impl
     template <potential_bound_analysis_mode mode>
     static inline std::pair<double, double>
     get_received_potential_bounds(const sidb_cluster_projector_state& pst, const uint64_t sidb_ix,
-                                  const std::optional<intra_cluster_potential_bounds>& internal_pot_bounds) noexcept
+                                  const std::optional<potential_bounds_store>& composition_pot_bounds) noexcept
     {
         if constexpr (mode == potential_bound_analysis_mode::ANALYZE_MULTISET)
         {
@@ -423,9 +423,9 @@ class ground_state_space_impl
         else if constexpr (mode == potential_bound_analysis_mode::ANALYZE_COMPOSITION)
         {
             // this considers the flattened self-projection of the previous level
-            return {internal_pot_bounds.value().at(sidb_ix).at(static_cast<uint8_t>(bound_direction::LOWER)) +
+            return {composition_pot_bounds.value().get<bound_direction::LOWER>(sidb_ix) +
                         pst.cluster->parent.lock()->get_received_ext_pot_bound<bound_direction::LOWER>(sidb_ix),
-                    internal_pot_bounds.value().at(sidb_ix).at(static_cast<uint8_t>(bound_direction::UPPER)) +
+                    composition_pot_bounds.value().get<bound_direction::UPPER>(sidb_ix) +
                         pst.cluster->parent.lock()->get_received_ext_pot_bound<bound_direction::UPPER>(sidb_ix)};
         }
     }
@@ -433,7 +433,7 @@ class ground_state_space_impl
     template <potential_bound_analysis_mode mode>
     [[nodiscard]] bool perform_potential_bound_analysis(
         const sidb_cluster_projector_state&                  pst,
-        const std::optional<intra_cluster_potential_bounds>& internal_potential_bounds = std::nullopt) const noexcept
+        const std::optional<potential_bounds_store>& composition_potential_bounds = std::nullopt) const noexcept
     {
         witness_partitioning_state st{pst};
 
@@ -441,7 +441,7 @@ class ground_state_space_impl
         for (const uint64_t sidb_ix : pst.cluster->sidbs)
         {
             const auto& [recv_pot_lb, recv_pot_ub] =
-                get_received_potential_bounds<mode>(pst, sidb_ix, internal_potential_bounds);
+                get_received_potential_bounds<mode>(pst, sidb_ix, composition_potential_bounds);
 
             if (st.required_neg_count != 0 && !fail_onto_negative_charge(recv_pot_lb))
             {
@@ -579,11 +579,11 @@ class ground_state_space_impl
                     internal_pot_ub += get_projector_state_bound<bound_direction::UPPER>(cst.proj_st, sidb_ix).pot_val;
                 }
 
-                receiving_cst.set_pot_bounds(sidb_ix, internal_pot_lb, internal_pot_ub);
+                receiving_cst.composition_pot_bounds.set(sidb_ix, internal_pot_lb, internal_pot_ub);
             }
 
             if (!perform_potential_bound_analysis<potential_bound_analysis_mode::ANALYZE_COMPOSITION>(
-                    receiving_cst.proj_st, receiving_cst.internal_pot_bounds))
+                    receiving_cst.proj_st, receiving_cst.composition_pot_bounds))
             {
                 return false;
             }
@@ -704,12 +704,12 @@ class ground_state_space_impl
                 {
                     for (const sidb_cluster_state& cst : composition)
                     {
-                        if (cst.internal_pot_bounds.count(sidb_ix) != 0)
+                        if (cst.composition_pot_bounds.store.contains(sidb_ix))
                         {
                             take_meet_of_potential_bounds<bound_direction::LOWER>(
-                                lb_meet, cst.get_pot_bound<bound_direction::LOWER>(sidb_ix));
+                                lb_meet, cst.composition_pot_bounds.get<bound_direction::LOWER>(sidb_ix));
                             take_meet_of_potential_bounds<bound_direction::UPPER>(
-                                ub_meet, cst.get_pot_bound<bound_direction::UPPER>(sidb_ix));
+                                ub_meet, cst.composition_pot_bounds.get<bound_direction::UPPER>(sidb_ix));
                         }
                     }
                 }

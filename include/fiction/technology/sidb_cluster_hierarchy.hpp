@@ -257,6 +257,10 @@ struct sidb_cluster_projector_state
     }
 };
 /**
+ * Projector state pointers are unique.
+ */
+using sidb_cluster_projector_state_ptr = std::unique_ptr<sidb_cluster_projector_state>;
+/**
  * The two types of electrostatic potential bounds required for the *Ground State Space* algorithm. As the domain in
  * which our potential bounds live are simply the real numbers, we may think of the lower bound and upper bound domains
  * to be separate partial order structures on the real number line, inverse to each other. The *Ground State Space*
@@ -327,10 +331,55 @@ static inline uint64_t get_unique_cluster_id(const sidb_cluster_ptr& c) noexcept
  * used as a dynamic store in which also external potentials are accumulated.
  */
 #ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
-using intra_cluster_potential_bounds = std::map<uint64_t, std::array<double, 2>>;
+using potential_bounds = std::map<uint64_t, std::array<double, 2>>;
 #else
-using intra_cluster_potential_bounds = phmap::flat_hash_map<uint64_t, std::array<double, 2>>;
+using potential_bounds = phmap::flat_hash_map<uint64_t, std::array<double, 2>>;
 #endif
+
+struct potential_bounds_store
+{
+  public:
+    /**
+     * Getter for the internal potential bound for an SiDB in the cluster, corresponding to the meet on the potential
+     * bounds under each composition of the multiset charge configuration in the cluster state's projector state.
+     *
+     * @tparam bound Internal potential bound type to obtain.
+     * @param sidb_ix SiDB (index) to obtain the internal potential bound of.
+     * @return The internal potential bound for this SiDB.
+     */
+    template <bound_direction bound>
+    [[nodiscard]] constexpr inline double get(const uint64_t sidb_ix) const noexcept
+    {
+        return store.at(sidb_ix).at(static_cast<uint8_t>(bound));
+    }
+    /**
+     * Setter for internal potential bound for an SiDB in the cluster.
+     *
+     * @param sidb_ix SiDB (index) to set the internal potential bound for.
+     * @param min New lower bound to set.
+     * @param max New upper bound to set.
+     */
+    inline void set(const uint64_t sidb_ix, const double min, const double max) noexcept
+    {
+        store[sidb_ix][static_cast<uint8_t>(bound_direction::LOWER)] = min;
+        store[sidb_ix][static_cast<uint8_t>(bound_direction::UPPER)] = max;
+    }
+    /**
+     * Relative setter for internal potential bound for an SiDB in the cluster.
+     *
+     * @param sidb_ix SiDB (index) to update the internal potential bound of.
+     * @param min_diff Difference in lower bound potential to apply.
+     * @param max_diff Difference in upper bound potential to apply.
+     */
+    inline void update(const uint64_t sidb_ix, const double min_diff, const double max_diff) noexcept
+    {
+        store[sidb_ix][static_cast<uint8_t>(bound_direction::LOWER)] += min_diff;
+        store[sidb_ix][static_cast<uint8_t>(bound_direction::UPPER)] += max_diff;
+    }
+
+    //  private:
+    potential_bounds store{};
+};
 /**
  * A cluster state is a projector state (see `sidb_cluster_projector_state`) paired with a potential bound store in
  * which local potentials are stored for each SiDB in the cluster in the projector state. Throughout the *Ground State
@@ -347,9 +396,9 @@ struct sidb_cluster_state
      */
     const sidb_cluster_projector_state proj_st;
     /**
-     * Internal potential bounds.
+     * Composition potential bounds.
      */
-    intra_cluster_potential_bounds internal_pot_bounds{};
+    potential_bounds_store composition_pot_bounds{};
     /**
      * Constructor for the creation of cluster state. Simply creates the contained projector state while leaving the
      * internal potential store defaulted.
@@ -360,43 +409,6 @@ struct sidb_cluster_state
     explicit sidb_cluster_state(const sidb_cluster_ptr& c, const uint64_t multiset_conf) noexcept :
             proj_st{c, multiset_conf}
     {}
-    /**
-     * Getter for the internal potential bound for an SiDB in the cluster, corresponding to the meet on the potential
-     * bounds under each composition of the multiset charge configuration in the cluster state's projector state.
-     *
-     * @tparam bound Internal potential bound type to obtain.
-     * @param sidb_ix SiDB (index) to obtain the internal potential bound of.
-     * @return The internal potential bound for this SiDB.
-     */
-    template <bound_direction bound>
-    [[nodiscard]] constexpr inline double get_pot_bound(const uint64_t sidb_ix) const noexcept
-    {
-        return internal_pot_bounds.at(sidb_ix).at(static_cast<uint8_t>(bound));
-    }
-    /**
-     * Setter for internal potential bound for an SiDB in the cluster.
-     *
-     * @param sidb_ix SiDB (index) to set the internal potential bound for.
-     * @param min New lower bound to set.
-     * @param max New upper bound to set.
-     */
-    inline void set_pot_bounds(const uint64_t sidb_ix, const double min, const double max) noexcept
-    {
-        internal_pot_bounds[sidb_ix][static_cast<uint8_t>(bound_direction::LOWER)] = min;
-        internal_pot_bounds[sidb_ix][static_cast<uint8_t>(bound_direction::UPPER)] = max;
-    }
-    /**
-     * Relative setter for internal potential bound for an SiDB in the cluster.
-     *
-     * @param sidb_ix SiDB (index) to update the internal potential bound of.
-     * @param min_diff Difference in lower bound potential to apply.
-     * @param max_diff Difference in upper bound potential to apply.
-     */
-    inline void update_pot_bounds(const uint64_t sidb_ix, const double min_diff, const double max_diff) noexcept
-    {
-        internal_pot_bounds[sidb_ix][static_cast<uint8_t>(bound_direction::LOWER)] += min_diff;
-        internal_pot_bounds[sidb_ix][static_cast<uint8_t>(bound_direction::UPPER)] += max_diff;
-    }
     /**
      * Defines the equality operation on cluster states. Since only cluster states need only be separated by the
      * associated clusters throughout operation, it suffices to compare the respective unique identifiers.
@@ -425,15 +437,15 @@ struct sidb_cluster_state
  */
 using sidb_cluster_state_composition = std::vector<sidb_cluster_state>;
 /**
- * Cluster state pointers are unique.
- */
-using sidb_cluster_state_ptr = std::unique_ptr<sidb_cluster_state>;
-/**
  * A clustering state is very similar to a cluster state composition, though it uses unique pointers to the cluster
  * states that may be moved. Thereby, this is the essential type of the dynamic objects in *ClusterComplete*'s
  * operation.
  */
-using sidb_clustering_state = std::vector<sidb_cluster_state_ptr>;
+struct sidb_clustering_state
+{
+    std::vector<std::unique_ptr<sidb_cluster_projector_state>> psts;
+    potential_bounds_store                                     pot_bounds;
+};
 /**
  * A cluster charge state is a multiset charge configuration. We may compress it into a 64 bit unsigned integer by
  * putting the number of negative and positive charges in the upper and lower 32 bits respectively. The number of
@@ -472,7 +484,8 @@ struct sidb_cluster_charge_state
             pos_count{static_cast<decltype(pos_count)>(cs == sidb_charge_state::POSITIVE)},
             compositions{{sidb_cluster_state{singleton, static_cast<uint64_t>(*this)}}}
     {
-        compositions.front().front().set_pot_bounds(get_singleton_sidb_ix(singleton), loc_ext_pot, loc_ext_pot);
+        compositions.front().front().composition_pot_bounds.set(get_singleton_sidb_ix(singleton), loc_ext_pot,
+                                                                loc_ext_pot);
     }
     /**
      * Constructor for cluster charge state given a multiset charge configuration represented in its compressed form. It
