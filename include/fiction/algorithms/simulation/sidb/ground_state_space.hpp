@@ -432,7 +432,7 @@ class ground_state_space_impl
 
     template <potential_bound_analysis_mode mode>
     [[nodiscard]] bool perform_potential_bound_analysis(
-        const sidb_cluster_projector_state&                  pst,
+        const sidb_cluster_projector_state&          pst,
         const std::optional<potential_bounds_store>& composition_potential_bounds = std::nullopt) const noexcept
     {
         witness_partitioning_state st{pst};
@@ -566,24 +566,24 @@ class ground_state_space_impl
     bool verify_composition(sidb_cluster_state_composition& composition) const noexcept
     {
         // perform physically informed space pruning for a multiset composition
-        for (sidb_cluster_state& receiving_cst : composition)
+        for (sidb_cluster_projector_state& receiving_pst : composition.proj_states)
         {
-            for (const uint64_t sidb_ix : receiving_cst.proj_st.cluster->sidbs)
+            for (const uint64_t sidb_ix : receiving_pst.cluster->sidbs)
             {
                 double internal_pot_lb{};
                 double internal_pot_ub{};
 
-                for (const sidb_cluster_state& cst : composition)
+                for (const sidb_cluster_projector_state& pst : composition.proj_states)
                 {
-                    internal_pot_lb += get_projector_state_bound<bound_direction::LOWER>(cst.proj_st, sidb_ix).pot_val;
-                    internal_pot_ub += get_projector_state_bound<bound_direction::UPPER>(cst.proj_st, sidb_ix).pot_val;
+                    internal_pot_lb += get_projector_state_bound<bound_direction::LOWER>(pst, sidb_ix).pot_val;
+                    internal_pot_ub += get_projector_state_bound<bound_direction::UPPER>(pst, sidb_ix).pot_val;
                 }
 
-                receiving_cst.composition_pot_bounds.set(sidb_ix, internal_pot_lb, internal_pot_ub);
+                composition.pot_bounds.set(sidb_ix, internal_pot_lb, internal_pot_ub);
             }
 
             if (!perform_potential_bound_analysis<potential_bound_analysis_mode::ANALYZE_COMPOSITION>(
-                    receiving_cst.proj_st, receiving_cst.composition_pot_bounds))
+                    receiving_pst, composition.pot_bounds))
             {
                 return false;
             }
@@ -620,12 +620,13 @@ class ground_state_space_impl
 
         for (const sidb_cluster_charge_state& m_part : cur_child->charge_space)
         {
-            m.compositions.front().emplace_back(cur_child, static_cast<uint64_t>(m_part));
+            m.compositions.front().proj_states.emplace_back(
+                sidb_cluster_projector_state{cur_child, static_cast<uint64_t>(m_part)});
             m += m_part;
 
             fill_merged_charge_state_space(parent, cur_child_ix + 1, m);
 
-            m.compositions.front().pop_back();
+            m.compositions.front().proj_states.pop_back();  // ????????
             m -= m_part;
         }
     }
@@ -649,9 +650,9 @@ class ground_state_space_impl
             {
                 potential_projection pot_proj_onto_other_c{};
 
-                for (const sidb_cluster_state& cst : composition)
+                for (const sidb_cluster_projector_state& pst : composition.proj_states)
                 {
-                    pot_proj_onto_other_c += get_projector_state_bound<bound>(cst.proj_st, rst.sidb_ix);
+                    pot_proj_onto_other_c += get_projector_state_bound<bound>(pst, rst.sidb_ix);
                 }
 
                 add_pot_projection(parent, rst.sidb_ix, pot_proj_onto_other_c);
@@ -702,16 +703,10 @@ class ground_state_space_impl
 
                 for (const sidb_cluster_state_composition& composition : m.compositions)
                 {
-                    for (const sidb_cluster_state& cst : composition)
-                    {
-                        if (cst.composition_pot_bounds.store.contains(sidb_ix))
-                        {
-                            take_meet_of_potential_bounds<bound_direction::LOWER>(
-                                lb_meet, cst.composition_pot_bounds.get<bound_direction::LOWER>(sidb_ix));
-                            take_meet_of_potential_bounds<bound_direction::UPPER>(
-                                ub_meet, cst.composition_pot_bounds.get<bound_direction::UPPER>(sidb_ix));
-                        }
-                    }
+                    take_meet_of_potential_bounds<bound_direction::LOWER>(
+                        lb_meet, composition.pot_bounds.get<bound_direction::LOWER>(sidb_ix));
+                    take_meet_of_potential_bounds<bound_direction::UPPER>(
+                        ub_meet, composition.pot_bounds.get<bound_direction::UPPER>(sidb_ix));
                 }
 
                 add_pot_projection(parent, sidb_ix, potential_projection{lb_meet, static_cast<uint64_t>(m)});

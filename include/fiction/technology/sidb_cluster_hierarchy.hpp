@@ -381,61 +381,14 @@ struct potential_bounds_store
     potential_bounds store{};
 };
 /**
- * A cluster state is a projector state (see `sidb_cluster_projector_state`) paired with a potential bound store in
- * which local potentials are stored for each SiDB in the cluster in the projector state. Throughout the *Ground State
- * Space* algorithm, these are internal potential bounds for each SiDB, corresponding to the meet on the potential
- * bounds for each composition of the cluster charge state associated with the multiset charge configuration of the
- * projector state. To clarify, each composition gives information of a multiset charge state assignment of all children
- * of this cluster. Thereby, we have bounds on the fraction of the local potential for an SiDB in the parent cluster
- * under such a composition. These bounds are then merged into a single bound without loss of accuracy through a meet.
- */
-struct sidb_cluster_state
-{
-    /**
-     * Projector state.
-     */
-    const sidb_cluster_projector_state proj_st;
-    /**
-     * Composition potential bounds.
-     */
-    potential_bounds_store composition_pot_bounds{};
-    /**
-     * Constructor for the creation of cluster state. Simply creates the contained projector state while leaving the
-     * internal potential store defaulted.
-     *
-     * @param singleton Cluster to form into a cluster state.
-     * @param multiset_conf Multiset charge configuration for this cluster state.
-     */
-    explicit sidb_cluster_state(const sidb_cluster_ptr& c, const uint64_t multiset_conf) noexcept :
-            proj_st{c, multiset_conf}
-    {}
-    /**
-     * Defines the equality operation on cluster states. Since only cluster states need only be separated by the
-     * associated clusters throughout operation, it suffices to compare the respective unique identifiers.
-     *
-     * @param other Other cluster state to compare.
-     * @return `true` if and only if the cluster states contain the same cluster.
-     */
-    inline bool operator==(const sidb_cluster_state& other) const noexcept
-    {
-        return get_unique_cluster_id(proj_st.cluster) == get_unique_cluster_id(other.proj_st.cluster);
-    }
-    /**
-     * Defines the inequality operation on cluster states, inverse to the former.
-     *
-     * @param other Other cluster state to compare.
-     * @return `true` if and only if the cluster states do not contain the same cluster.
-     */
-    inline bool operator!=(const sidb_cluster_state& other) const noexcept
-    {
-        return !(*this == other);
-    }
-};
-/**
  * A cluster state composition holds a number of cluster states of sibling clusters. Summing the multiset charge
  * configuration associated with each, we obtain an element of the charge space of their parent.
  */
-using sidb_cluster_state_composition = std::vector<sidb_cluster_state>;
+struct sidb_cluster_state_composition
+{
+    std::vector<sidb_cluster_projector_state> proj_states;
+    potential_bounds_store                    pot_bounds{};
+};
 /**
  * A clustering state is very similar to a cluster state composition, though it uses unique pointers to the cluster
  * states that may be moved. Thereby, this is the essential type of the dynamic objects in *ClusterComplete*'s
@@ -443,7 +396,7 @@ using sidb_cluster_state_composition = std::vector<sidb_cluster_state>;
  */
 struct sidb_clustering_state
 {
-    std::vector<std::unique_ptr<sidb_cluster_projector_state>> psts;
+    std::vector<std::unique_ptr<sidb_cluster_projector_state>> proj_states;
     potential_bounds_store                                     pot_bounds;
 };
 /**
@@ -482,10 +435,9 @@ struct sidb_cluster_charge_state
                                        const double loc_ext_pot) noexcept :
             neg_count{static_cast<decltype(neg_count)>(cs == sidb_charge_state::NEGATIVE)},
             pos_count{static_cast<decltype(pos_count)>(cs == sidb_charge_state::POSITIVE)},
-            compositions{{sidb_cluster_state{singleton, static_cast<uint64_t>(*this)}}}
+            compositions{{{{singleton, static_cast<uint64_t>(*this)}}}}
     {
-        compositions.front().front().composition_pot_bounds.set(get_singleton_sidb_ix(singleton), loc_ext_pot,
-                                                                loc_ext_pot);
+        compositions.front().pot_bounds.set(get_singleton_sidb_ix(singleton), loc_ext_pot, loc_ext_pot);
     }
     /**
      * Constructor for cluster charge state given a multiset charge configuration represented in its compressed form. It

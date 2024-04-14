@@ -61,14 +61,14 @@ TEMPLATE_TEST_CASE("Ground State Space construction of a single SiDB", "[ground-
     CHECK(res.maximum_top_level_multisets == 3);
     CHECK(*res.top_cluster->charge_space.cbegin() == sidb_cluster_charge_state{sidb_charge_state::NEGATIVE});
     REQUIRE(res.top_cluster->charge_space.cbegin()->compositions.size() == 1);
-    REQUIRE(res.top_cluster->charge_space.cbegin()->compositions.front().size() == 1);
-    REQUIRE(res.top_cluster->charge_space.cbegin()->compositions.front().front().proj_st.cluster ==
+    REQUIRE(res.top_cluster->charge_space.cbegin()->compositions.front().proj_states.size() == 1);
+    REQUIRE(res.top_cluster->charge_space.cbegin()->compositions.front().proj_states.front().cluster ==
             *res.top_cluster->children.cbegin());
-    REQUIRE(res.top_cluster->charge_space.cbegin()->compositions.front().front().internal_pot_bounds.count(0) != 0);
-    CHECK(res.top_cluster->charge_space.cbegin()->compositions.front().front().get_pot_bound<bound_direction::LOWER>(
-              0) == 0.0);
-    CHECK(res.top_cluster->charge_space.cbegin()->compositions.front().front().get_pot_bound<bound_direction::UPPER>(
-              0) == 0.0);
+    REQUIRE(res.top_cluster->charge_space.cbegin()->compositions.front().pot_bounds.store.count(0) != 0);
+    CHECK(res.top_cluster->charge_space.cbegin()->compositions.front().pot_bounds.get<bound_direction::LOWER>(0) ==
+          0.0);
+    CHECK(res.top_cluster->charge_space.cbegin()->compositions.front().pot_bounds.get<bound_direction::UPPER>(0) ==
+          0.0);
 }
 
 TEMPLATE_TEST_CASE("Ground State Space construction of two SiDBs directly next to each other", "[ground-state-space]",
@@ -137,45 +137,48 @@ TEMPLATE_TEST_CASE("Ground State Space construction of a 7 DB layout", "[ground-
     CHECK(gss_res.top_cluster->charge_space.cbegin()->pos_count == 0);
 
     REQUIRE(gss_res.top_cluster->charge_space.cbegin()->compositions.size() == 1);
-    REQUIRE(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->size() == 2);
+    REQUIRE(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.size() == 2);
 
-    if (gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin()->proj_st.cluster->sidbs.size() == 3)
+    if (gss_res.top_cluster->charge_space.cbegin()
+            ->compositions.cbegin()
+            ->proj_states.cbegin()
+            ->cluster->sidbs.size() == 3)
     {
-        CHECK(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin()->proj_st.cluster->sidbs ==
+        CHECK(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin()->cluster->sidbs ==
               set_type{0ul, 1ul, 2ul});
-        CHECK((gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin()->proj_st.multiset_conf >>
+        CHECK((gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin()->multiset_conf >>
                32ull) == 2);
-        CHECK(((gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin()->proj_st.multiset_conf
+        CHECK(((gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin()->multiset_conf
                 << 32ull) >>
                32ull) == 0);
 
-        CHECK(std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)
-                  ->proj_st.cluster->sidbs == set_type{3ul, 4ul, 5ul, 6ul});
-        CHECK((std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)
-                   ->proj_st.multiset_conf >>
+        CHECK(std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin(), 1)
+                  ->cluster->sidbs == set_type{3ul, 4ul, 5ul, 6ul});
+        CHECK((std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin(), 1)
+                   ->multiset_conf >>
                32ull) == 3);
-        CHECK(((std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)
-                    ->proj_st.multiset_conf
+        CHECK(((std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin(), 1)
+                    ->multiset_conf
                 << 32ull) >>
                32ull) == 0);
     }
     else
     {
-        CHECK(std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)
-                  ->proj_st.cluster->sidbs == set_type{0ul, 1ul, 2ul});
-        CHECK((std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)
-                   ->proj_st.multiset_conf >>
+        CHECK(std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin(), 1)
+                  ->cluster->sidbs == set_type{0ul, 1ul, 2ul});
+        CHECK((std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin(), 1)
+                   ->multiset_conf >>
                32ull) == 2);
-        CHECK(((std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin(), 1)
-                    ->proj_st.multiset_conf
+        CHECK(((std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin(), 1)
+                    ->multiset_conf
                 << 32ull) >>
                32ull) == 0);
 
-        CHECK(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin()->proj_st.cluster->sidbs ==
+        CHECK(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin()->cluster->sidbs ==
               set_type{3ul, 4ul, 5ul, 6ul});
-        CHECK((gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin()->proj_st.multiset_conf >>
+        CHECK((gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin()->multiset_conf >>
                32ull) == 3);
-        CHECK(((gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->cbegin()->proj_st.multiset_conf
+        CHECK(((gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin()->multiset_conf
                 << 32ull) >>
                32ull) == 0);
     }
@@ -235,7 +238,8 @@ static bool verify_ground_state_space_stats(const charge_distribution_surface<Ly
     {
         return false;
     }
-    else if (gss_node->sidbs.size() == 1)
+
+    if (gss_node->sidbs.size() == 1)
     {
         return true;
     }
@@ -246,9 +250,9 @@ static bool verify_ground_state_space_stats(const charge_distribution_surface<Ly
     {
         bool composition_has_correct_charge_conf = true;
 
-        for (const sidb_cluster_state& cst : composition)
+        for (const sidb_cluster_projector_state& pst : composition.proj_states)
         {
-            composition_has_correct_charge_conf &= verify_ground_state_space_stats(valid_cl, cst.proj_st.cluster);
+            composition_has_correct_charge_conf &= verify_ground_state_space_stats(valid_cl, pst.cluster);
         }
 
         found_charge_conf |= composition_has_correct_charge_conf;
