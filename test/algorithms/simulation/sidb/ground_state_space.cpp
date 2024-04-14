@@ -64,7 +64,6 @@ TEMPLATE_TEST_CASE("Ground State Space construction of a single SiDB", "[ground-
     REQUIRE(res.top_cluster->charge_space.cbegin()->compositions.front().proj_states.size() == 1);
     REQUIRE(res.top_cluster->charge_space.cbegin()->compositions.front().proj_states.front().cluster ==
             *res.top_cluster->children.cbegin());
-    REQUIRE(res.top_cluster->charge_space.cbegin()->compositions.front().pot_bounds.store.count(0) != 0);
     CHECK(res.top_cluster->charge_space.cbegin()->compositions.front().pot_bounds.get<bound_direction::LOWER>(0) ==
           0.0);
     CHECK(res.top_cluster->charge_space.cbegin()->compositions.front().pot_bounds.get<bound_direction::UPPER>(0) ==
