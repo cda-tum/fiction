@@ -148,6 +148,7 @@ TEST_CASE("Benchmark simulators", "[benchmark]")
 //                            7.71925 ms    6.65408 ms    9.13036 ms
 
 //    after "Store composition bounds to subtract after recursion"
+//    before "Restructured stores of potential bounds"
 //    benchmark name          samples       iterations    est run time
 //                            mean          low mean      high mean
 //                            std dev       low std dev   high std dev
@@ -163,6 +164,23 @@ TEST_CASE("Benchmark simulators", "[benchmark]")
 //    ClusterComplete         100           1             4.60825 s
 //                            45.0607 ms    44.2967 ms    45.9833 ms
 //                            4.25241 ms    3.59799 ms    5.09686 ms
+
+//    after "Restructured stores of potential bounds"
+//    benchmark name          samples       iterations    est run time
+//                            mean          low mean      high mean
+//                            std dev       low std dev   high std dev
+//    -------------------------------------------------------------------------------
+//    QuickExact              100           1             3.16303 m
+//                            1.8573 s      1.83863 s     1.87994 s
+//                            104.263 ms    86.6128 ms    131.582 ms
+//
+//    QuickSim                100           1             928.817 ms
+//                            9.50481 ms    9.38153 ms    9.67599 ms
+//                            731.198 us    519.946 us    1.15811 ms
+//
+//    ClusterComplete         100           1             2.29913 s
+//                            22.6208 ms    22.2895 ms    23.0093 ms
+//                            1.82446 ms    1.58868 ms    2.0759 ms
 
 TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
 {
@@ -211,6 +229,7 @@ TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
 //                                            69.1732 ms    60.7787 ms    80.0373 ms
 
 //    after "Store composition bounds to subtract after recursion"
+//    before "Restructured stores of potential bounds"
 //    benchmark name                          samples       iterations    est run time
 //                                            mean          low mean      high mean
 //                                            std dev       low std dev   high std dev
@@ -218,3 +237,12 @@ TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
 //    3 Segment Diagonal Bestagon Wire        100           1             1.88129 m
 //                                            1.12828 s     1.11773 s     1.14043 s
 //                                            57.5402 ms    48.6612 ms    71.5112 ms
+
+//    after "Restructured stores of potential bounds"
+//    benchmark name                          samples       iterations    est run time
+//                                            mean          low mean      high mean
+//                                            std dev       low std dev   high std dev
+//    -------------------------------------------------------------------------------
+//    3 Segment Diagonal Bestagon Wire        100           1             51.5535 s
+//                                            579.269 ms    571.672 ms    588.093 ms
+//                                            41.8846 ms    35.4194 ms    51.1304 ms
