@@ -147,8 +147,8 @@ class ground_state_space_impl
 
         const uint64_t max_multisets = maximum_top_level_multisets(top_cluster->num_sidbs());
 
-        return ground_state_space_stats{
-            top_cluster, time_counter, max_multisets - top_cluster->charge_space.size(), max_multisets};
+        return ground_state_space_stats{top_cluster, time_counter, max_multisets - top_cluster->charge_space.size(),
+                                        max_multisets};
     }
 
   private:

@@ -105,14 +105,14 @@ class quickexact_command : public command
 
                     if constexpr (fiction::is_sidb_lattice_100_v<Lyt>)
                     {
-                        sidb_111_used              = false;
-                        sim_result_100             = fiction::quickexact(*lyt_ptr, params);
+                        sidb_111_used  = false;
+                        sim_result_100 = fiction::quickexact(*lyt_ptr, params);
                     }
                     else if constexpr (fiction::is_sidb_lattice_111_v<Lyt>)
                     {
-                        sidb_111_used              = true;
-                        auto cps                   = convert_params<Lyt>(params);
-                        sim_result_111             = fiction::quickexact(*lyt_ptr, cps);
+                        sidb_111_used  = true;
+                        auto cps       = convert_params<Lyt>(params);
+                        sim_result_111 = fiction::quickexact(*lyt_ptr, cps);
                     }
                     else
                     {
