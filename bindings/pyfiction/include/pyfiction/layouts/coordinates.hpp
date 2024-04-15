@@ -10,11 +10,11 @@
 
 #include <fiction/layouts/coordinates.hpp>
 
-#include <cstdint>
-#include <exception>
-
 #include <pybind11/operators.h>
 #include <pybind11/pybind11.h>
+
+#include <cstdint>
+#include <exception>
 
 namespace pyfiction
 {

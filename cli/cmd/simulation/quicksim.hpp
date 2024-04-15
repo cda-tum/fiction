@@ -59,9 +59,9 @@ class quicksim_command : public command
     void execute() override
     {
         // reset sim result
-        sim_result_100 = {};
-        sim_result_111 = {};
-        min_energy     = std::numeric_limits<double>::infinity();
+        sim_result_100      = {};
+        sim_result_111      = {};
+        min_energy          = std::numeric_limits<double>::infinity();
         is_sidb_100_lattice = true;
 
         if (physical_params.epsilon_r <= 0)
@@ -115,12 +115,12 @@ class quicksim_command : public command
                     if constexpr (fiction::is_sidb_lattice_100_v<Lyt>)
                     {
                         is_sidb_100_lattice = true;
-                        sim_result_100 = fiction::quicksim(*lyt_ptr, params);
+                        sim_result_100      = fiction::quicksim(*lyt_ptr, params);
                     }
                     else if constexpr (fiction::is_sidb_lattice_111_v<Lyt>)
                     {
                         is_sidb_100_lattice = false;
-                        sim_result_111 = fiction::quicksim(*lyt_ptr, params);
+                        sim_result_111      = fiction::quicksim(*lyt_ptr, params);
                     }
 
                     else

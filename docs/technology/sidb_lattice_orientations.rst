@@ -17,4 +17,3 @@ A collection of the two supported H-Si(100)-2x1 surface and H-Si(111)-1x1 surfac
             :members:
         .. autoclass:: mnt.pyfiction.sidb_111_lattice
             :members:
-

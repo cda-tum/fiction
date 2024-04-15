@@ -10,9 +10,9 @@
 
 #include <fiction/io/read_sqd_layout.hpp>
 
-#include <string_view>
-
 #include <pybind11/pybind11.h>
+
+#include <string_view>
 
 namespace pyfiction
 {

@@ -13,15 +13,14 @@
 #include <fiction/utils/layout_utils.hpp>
 
 #include <fmt/format.h>
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 #include <algorithm>
 #include <cctype>
-#include <vector>
 #include <string>
 #include <type_traits>
-
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
+#include <vector>
 
 namespace pyfiction
 {

@@ -10,12 +10,12 @@
 
 #include <fiction/traits.hpp>
 
-#include <cstdint>
-#include <vector>
-#include <string>
-
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+
+#include <cstdint>
+#include <string>
+#include <vector>
 
 namespace pyfiction
 {

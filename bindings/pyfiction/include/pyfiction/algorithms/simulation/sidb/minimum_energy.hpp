@@ -13,8 +13,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace pyfiction
 {
@@ -28,7 +28,8 @@ void minimum_energy(pybind11::module& m)
     using namespace pybind11::literals;
 
     m.def(
-        "minimum_energy", [](const std::vector<Lyt>& layouts) -> double
+        "minimum_energy",
+        [](const std::vector<Lyt>& layouts) -> double
         { return fiction::minimum_energy(layouts.cbegin(), layouts.cend()); },
         "layouts"_a, DOC(fiction_minimum_energy));
 }

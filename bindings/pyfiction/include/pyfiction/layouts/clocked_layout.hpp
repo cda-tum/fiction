@@ -12,12 +12,11 @@
 #include <fiction/traits.hpp>
 
 #include <fmt/format.h>
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 #include <set>
 #include <string>
-
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
 
 namespace pyfiction
 {

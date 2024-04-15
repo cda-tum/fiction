@@ -11,9 +11,9 @@
 #include <fiction/io/write_fgl_layout.hpp>
 #include <fiction/traits.hpp>
 
-#include <string_view>
-
 #include <pybind11/pybind11.h>
+
+#include <string_view>
 
 namespace pyfiction
 {

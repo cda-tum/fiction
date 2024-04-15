@@ -11,10 +11,10 @@
 #include <fiction/traits.hpp>
 #include <fiction/utils/placement_utils.hpp>
 
-#include <optional>
-
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+
+#include <optional>
 
 namespace pyfiction
 {

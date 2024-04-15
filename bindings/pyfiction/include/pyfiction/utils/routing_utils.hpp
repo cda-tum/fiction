@@ -11,11 +11,11 @@
 #include <fiction/traits.hpp>
 #include <fiction/utils/routing_utils.hpp>
 
-#include <utility>
-#include <vector>
-
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+
+#include <utility>
+#include <vector>
 
 namespace pyfiction
 {

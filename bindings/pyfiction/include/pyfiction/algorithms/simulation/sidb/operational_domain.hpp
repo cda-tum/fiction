@@ -31,16 +31,16 @@ void operational_domain(pybind11::module& m)
           "params"_a = fiction::operational_domain_params{}, "stats"_a = nullptr,
           DOC(fiction_operational_domain_grid_search));
 
-    m.def("operational_domain_random_sampling", &fiction::operational_domain_random_sampling<Lyt, py_tt>, "lyt"_a, "spec"_a, "samples"_a,
-          "params"_a = fiction::operational_domain_params{}, "stats"_a = nullptr,
+    m.def("operational_domain_random_sampling", &fiction::operational_domain_random_sampling<Lyt, py_tt>, "lyt"_a,
+          "spec"_a, "samples"_a, "params"_a = fiction::operational_domain_params{}, "stats"_a = nullptr,
           DOC(fiction_operational_domain_random_sampling));
 
-    m.def("operational_domain_flood_fill", &fiction::operational_domain_flood_fill<Lyt, py_tt>, "lyt"_a, "spec"_a, "samples"_a,
-          "params"_a = fiction::operational_domain_params{}, "stats"_a = nullptr,
+    m.def("operational_domain_flood_fill", &fiction::operational_domain_flood_fill<Lyt, py_tt>, "lyt"_a, "spec"_a,
+          "samples"_a, "params"_a = fiction::operational_domain_params{}, "stats"_a = nullptr,
           DOC(fiction_operational_domain_flood_fill));
 
-    m.def("operational_domain_contour_tracing", &fiction::operational_domain_contour_tracing<Lyt, py_tt>, "lyt"_a, "spec"_a, "samples"_a,
-          "params"_a = fiction::operational_domain_params{}, "stats"_a = nullptr,
+    m.def("operational_domain_contour_tracing", &fiction::operational_domain_contour_tracing<Lyt, py_tt>, "lyt"_a,
+          "spec"_a, "samples"_a, "params"_a = fiction::operational_domain_params{}, "stats"_a = nullptr,
           DOC(fiction_operational_domain_contour_tracing));
 }
 

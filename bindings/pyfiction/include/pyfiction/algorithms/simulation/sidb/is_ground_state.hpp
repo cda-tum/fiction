@@ -13,7 +13,6 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-
 namespace pyfiction
 {
 
@@ -25,7 +24,8 @@ void is_ground_state(pybind11::module& m)
 {
     using namespace pybind11::literals;
 
-    m.def("is_ground_state", &fiction::is_ground_state<Lyt>, "heuristic_results"_a, "exhaustive_results"_a, DOC(fiction_is_ground_state));
+    m.def("is_ground_state", &fiction::is_ground_state<Lyt>, "heuristic_results"_a, "exhaustive_results"_a,
+          DOC(fiction_is_ground_state));
 }
 
 }  // namespace detail

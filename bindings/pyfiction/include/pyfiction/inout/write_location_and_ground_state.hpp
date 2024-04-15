@@ -11,10 +11,10 @@
 #include <fiction/io/write_location_and_ground_state.hpp>
 #include <fiction/utils/layout_utils.hpp>
 
-#include <string_view>
-
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+
+#include <string_view>
 
 namespace pyfiction
 {

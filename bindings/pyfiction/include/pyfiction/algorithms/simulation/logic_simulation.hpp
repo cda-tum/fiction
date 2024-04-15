@@ -13,13 +13,12 @@
 #include <fmt/format.h>
 #include <kitty/print.hpp>
 #include <mockturtle/algorithms/simulation.hpp>
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 #include <string>
 #include <unordered_map>
 #include <vector>
-
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
 
 namespace pyfiction
 {

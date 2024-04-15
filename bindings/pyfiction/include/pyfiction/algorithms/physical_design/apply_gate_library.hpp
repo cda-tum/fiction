@@ -16,11 +16,10 @@
 #include <fiction/types.hpp>
 
 #include <fmt/format.h>
-
-#include <string>
-
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+
+#include <string>
 
 namespace pyfiction
 {
