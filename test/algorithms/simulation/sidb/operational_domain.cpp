@@ -359,21 +359,21 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
         }
         SECTION("random_sampling")
         {
-            const auto op_domain = operational_domain_random_sampling(lat, std::vector<tt>{create_id_tt()}, 50,
+            const auto op_domain = operational_domain_random_sampling(lat, std::vector<tt>{create_id_tt()}, 5000,
                                                                       op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct maximum size
-            CHECK(op_domain.operational_values.size() <= 50);
+            CHECK(op_domain.operational_values.size() <= 5000);
 
             // for the selected range, all samples should be within the parameters and non-operational
             check_op_domain_params_and_operational_status(op_domain, op_domain_params,
                                                           operational_status::NON_OPERATIONAL);
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
-            CHECK(op_domain_stats.num_simulator_invocations <= 100);
-            CHECK(op_domain_stats.num_evaluated_parameter_combinations <= 50);
+            CHECK(op_domain_stats.num_simulator_invocations <= 10000);
+            CHECK(op_domain_stats.num_evaluated_parameter_combinations <= 5000);
             CHECK(op_domain_stats.num_operational_parameter_combinations == 0);
-            CHECK(op_domain_stats.num_non_operational_parameter_combinations <= 50);
+            CHECK(op_domain_stats.num_non_operational_parameter_combinations <= 5000);
         }
         SECTION("flood_fill")
         {

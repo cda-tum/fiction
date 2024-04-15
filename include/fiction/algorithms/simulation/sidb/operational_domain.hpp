@@ -340,7 +340,7 @@ class operational_domain_impl
         const auto step_point_samples = generate_random_step_points(samples);
 
         // for each sample point in parallel
-        std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ step_point_samples.cbegin(), step_point_samples.cend(),
+        std::for_each(FICTION_EXECUTION_POLICY_SEQ step_point_samples.cbegin(), step_point_samples.cend(),
                       [this](const auto& sp) { is_step_point_operational(sp); });
 
         log_stats();
