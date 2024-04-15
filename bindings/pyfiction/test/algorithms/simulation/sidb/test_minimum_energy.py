@@ -23,7 +23,7 @@ class TestMinimumEnergy(unittest.TestCase):
         cds4.assign_charge_state((4, 1), sidb_charge_state.POSITIVE)
         cds4.assign_charge_state((6, 1), sidb_charge_state.NEGATIVE)
 
-        result = minimum_energy_100([cds1, cds2, cds3, cds4])
+        result = minimum_energy([cds1, cds2, cds3, cds4])
         self.assertLessEqual(result, 0)
 
     def test_three_DBs_111_lattice(self):
@@ -44,7 +44,7 @@ class TestMinimumEnergy(unittest.TestCase):
         cds4.assign_charge_state((4, 1), sidb_charge_state.POSITIVE)
         cds4.assign_charge_state((6, 1), sidb_charge_state.NEGATIVE)
 
-        result = minimum_energy_111([cds1, cds2, cds3, cds4])
+        result = minimum_energy([cds1, cds2, cds3, cds4])
         self.assertLessEqual(result, 0)
 
 

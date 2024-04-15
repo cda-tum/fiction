@@ -22,7 +22,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void critical_temperature(pybind11::module& m, const std::string& lattice = "")
+void critical_temperature(pybind11::module& m)
 {
     using namespace pybind11::literals;
 

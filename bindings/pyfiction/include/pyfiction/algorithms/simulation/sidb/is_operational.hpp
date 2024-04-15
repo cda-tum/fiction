@@ -22,15 +22,14 @@ namespace detail
 {
 
 template <typename Lyt>
-void is_operational(pybind11::module& m, const std::string& lattice = "")
+void is_operational(pybind11::module& m)
 {
     using namespace pybind11::literals;
 
-    m.def(fmt::format("is_operational{}", lattice).c_str(), &fiction::is_operational<Lyt, py_tt>, "lyt"_a, "spec"_a,
+    m.def("is_operational", &fiction::is_operational<Lyt, py_tt>, "lyt"_a, "spec"_a,
           "params"_a = fiction::is_operational_params{}, DOC(fiction_is_operational));
 
-    m.def(fmt::format("operational_input_patterns{}", lattice).c_str(),
-          &fiction::operational_input_patterns<Lyt, py_tt>, "lyt"_a, "spec"_a,
+    m.def("operational_input_patterns", &fiction::operational_input_patterns<Lyt, py_tt>, "lyt"_a, "spec"_a,
           "params"_a = fiction::is_operational_params{}, DOC(fiction_is_operational));
 }
 

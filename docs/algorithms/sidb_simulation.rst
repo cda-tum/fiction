@@ -30,9 +30,7 @@ Simulation Result
            :members:
 
     .. tab:: Python
-        .. autoclass:: mnt.pyfiction.sidb_simulation_result_100
-            :members:
-        .. autoclass:: mnt.pyfiction.sidb_simulation_result_111
+        .. autoclass:: mnt.pyfiction.sidb_simulation_result
             :members:
 
 
@@ -54,8 +52,7 @@ Heuristic Ground State Simulation
         .. autoclass:: mnt.pyfiction.quicksim_params
             :members:
 
-        .. autofunction:: mnt.pyfiction.quicksim_100
-        .. autofunction:: mnt.pyfiction.quicksim_111
+        .. autofunction:: mnt.pyfiction.quicksim
 
 
 Exhaustive Ground State Simulation
@@ -76,15 +73,10 @@ Exhaustive Ground State Simulation
         .. doxygenfunction:: fiction::exhaustive_ground_state_simulation
 
     .. tab:: Python
-        .. autoclass:: mnt.pyfiction.quickexact_params_100
+        .. autoclass:: mnt.pyfiction.quickexact_params
             :members:
-        .. autoclass:: mnt.pyfiction.quickexact_params_111
-            :members:
-        .. autofunction:: mnt.pyfiction.quickexact_100
-        .. autofunction:: mnt.pyfiction.quickexact_111
-
-        .. autofunction:: mnt.pyfiction.exhaustive_ground_state_simulation_100
-        .. autofunction:: mnt.pyfiction.exhaustive_ground_state_simulation_111
+        .. autofunction:: mnt.pyfiction.quickexact
+        .. autofunction:: mnt.pyfiction.exhaustive_ground_state_simulation
 
 
 Engine Selectors
@@ -128,11 +120,9 @@ Energy Calculation
     .. tab:: Python
         .. autofunction:: mnt.pyfiction.energy_distribution
 
-        .. autofunction:: mnt.pyfiction.minimum_energy_100
-        .. autofunction:: mnt.pyfiction.minimum_energy_111
+        .. autofunction:: mnt.pyfiction.minimum_energy
 
-        .. autofunction:: mnt.pyfiction.is_ground_state_100
-        .. autofunction:: mnt.pyfiction.is_ground_state_111
+        .. autofunction:: mnt.pyfiction.is_ground_state
 
 
 Temperature Behavior
@@ -166,10 +156,8 @@ Temperature Behavior
             :members:
         .. autoclass:: mnt.pyfiction.critical_temperature_params
             :members:
-        .. autofunction:: mnt.pyfiction.critical_temperature_gate_based_100
-        .. autofunction:: mnt.pyfiction.critical_temperature_non_gate_based_100
-        .. autofunction:: mnt.pyfiction.critical_temperature_gate_based_111
-        .. autofunction:: mnt.pyfiction.critical_temperature_non_gate_based_111
+        .. autofunction:: mnt.pyfiction.critical_temperature_gate_based
+        .. autofunction:: mnt.pyfiction.critical_temperature_non_gate_based
 
         .. autofunction:: mnt.pyfiction.occupation_probability_gate_based
         .. autofunction:: mnt.pyfiction.occupation_probability_non_gate_based
@@ -205,8 +193,7 @@ Time-to-Solution (TTS) Statistics
             :members:
         .. autoclass:: mnt.pyfiction.time_to_solution_stats
             :members:
-        .. autofunction:: mnt.pyfiction.time_to_solution_100
-        .. autofunction:: mnt.pyfiction.time_to_solution_111
+        .. autofunction:: mnt.pyfiction.time_to_solution
 
 
 Random SiDB Layout Generator
@@ -224,10 +211,9 @@ Random SiDB Layout Generator
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.generate_random_sidb_layout_params
             :members:
-        .. autofunction:: mnt.pyfiction.generate_random_sidb_layout_100
-        .. autofunction:: mnt.pyfiction.generate_random_sidb_layout_111
-        .. autofunction:: mnt.pyfiction.generate_multiple_random_sidb_layouts_100
-        .. autofunction:: mnt.pyfiction.generate_multiple_random_sidb_layouts_111
+        .. autofunction:: mnt.pyfiction.generate_random_sidb_layout
+        .. autofunction:: mnt.pyfiction.generate_multiple_random_sidb_layouts
+
 
 
 Operational Domain Computation
@@ -265,10 +251,8 @@ Operational Domain Computation
             :members:
         .. autoclass:: mnt.pyfiction.is_operational_params
             :members:
-        .. autofunction:: mnt.pyfiction.is_operational_100
-        .. autofunction:: mnt.pyfiction.is_operational_111
-        .. autofunction:: mnt.pyfiction.operational_input_patterns_100
-        .. autofunction:: mnt.pyfiction.operational_input_patterns_111
+        .. autofunction:: mnt.pyfiction.is_operational
+        .. autofunction:: mnt.pyfiction.operational_input_patterns
 
         .. autoclass:: mnt.pyfiction.sweep_parameter
             :members:
@@ -281,14 +265,11 @@ Operational Domain Computation
         .. autoclass:: mnt.pyfiction.operational_domain_stats
             :members:
 
-        .. autofunction:: mnt.pyfiction.operational_domain_grid_search_100
-        .. autofunction:: mnt.pyfiction.operational_domain_grid_search_111
-        .. autofunction:: mnt.pyfiction.operational_domain_random_sampling_100
-        .. autofunction:: mnt.pyfiction.operational_domain_random_sampling_111
-        .. autofunction:: mnt.pyfiction.operational_domain_flood_fill_100
-        .. autofunction:: mnt.pyfiction.operational_domain_flood_fill_111
-        .. autofunction:: mnt.pyfiction.operational_domain_contour_tracing_100
-        .. autofunction:: mnt.pyfiction.operational_domain_contour_tracing_111
+        .. autofunction:: mnt.pyfiction.operational_domain_grid_search
+        .. autofunction:: mnt.pyfiction.operational_domain_random_sampling
+        .. autofunction:: mnt.pyfiction.operational_domain_flood_fill
+        .. autofunction:: mnt.pyfiction.operational_domain_contour_tracing
+
 
 
 Utility Functions
@@ -318,8 +299,7 @@ Determine the Ground State from Simulation Results
         .. doxygenfunction:: fiction::determine_groundstate_from_simulation_results
 
     .. tab:: Python
-        .. autofunction:: mnt.pyfiction.determine_groundstate_from_simulation_results_100
-        .. autofunction:: mnt.pyfiction.determine_groundstate_from_simulation_results_111
+        .. autofunction:: mnt.pyfiction.determine_groundstate_from_simulation_results
 
 
 Charge Detection

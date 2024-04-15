@@ -111,8 +111,7 @@ class quickexact_command : public command
                     {
                         is_sidb_100_lattice          = false;
                         params.simulation_parameters = physical_params;
-                        auto cps                     = convert_params<Lyt>(params);
-                        sim_result_111               = fiction::quickexact(*lyt_ptr, cps);
+                        sim_result_111               = fiction::quickexact(*lyt_ptr, params);
                     }
 
                     else
@@ -170,7 +169,7 @@ class quickexact_command : public command
     /**
      * QuickExact parameters.
      */
-    fiction::quickexact_params<fiction::sidb_100_cell_clk_lyt> params{};
+    fiction::quickexact_params<fiction::offset::ucoord_t> params{};
     /**
      * Simulation result for H-Si(100)-2x1 surface.
      */
@@ -238,18 +237,6 @@ class quickexact_command : public command
         params          = {};
         sim_result_100  = {};
         sim_result_111  = {};
-    }
-
-    template <typename LytDest, typename LytSrc>
-    [[nodiscard]] fiction::quickexact_params<LytDest>
-    convert_params(const fiction::quickexact_params<LytSrc>& ps_src) const noexcept
-    {
-        fiction::quickexact_params<LytDest> ps_dest{};
-
-        ps_dest.simulation_parameters = ps_src.simulation_parameters;
-        ps_dest.global_potential      = ps_src.global_potential;
-
-        return ps_dest;
     }
 };
 

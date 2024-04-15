@@ -10,29 +10,29 @@ class TestQuickExact(unittest.TestCase):
         layout.assign_cell_type((1, 0), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((2, 0), sidb_technology.cell_type.NORMAL)
 
-        params = quickexact_params_100()
-        params.simulation_parameters_100.base = 2
-        params.simulation_parameters_100.mu_minus = -0.25
-        params.base_number_detection_100 = automatic_base_number_detection_100.OFF
-        self.assertEqual(params.simulation_parameters_100.mu_minus, -0.25)
-        self.assertEqual(params.base_number_detection_100, automatic_base_number_detection_100.OFF)
+        params = quickexact_params()
+        params.simulation_parameters.base = 2
+        params.simulation_parameters.mu_minus = -0.25
+        params.base_number_detection = automatic_base_number_detection.OFF
+        self.assertEqual(params.simulation_parameters.mu_minus, -0.25)
+        self.assertEqual(params.base_number_detection, automatic_base_number_detection.OFF)
 
         cds = charge_distribution_surface_100(layout)
 
-        result = quickexact_100(cds, params)
+        result = quickexact(cds, params)
 
         self.assertEqual(result.algorithm_name, "QuickExact")
         self.assertLessEqual(len(result.charge_distributions), 3)
 
-        params.base_number_detection_100 = automatic_base_number_detection_100.ON
-        self.assertEqual(params.base_number_detection_100, automatic_base_number_detection_100.ON)
+        params.base_number_detection = automatic_base_number_detection.ON
+        self.assertEqual(params.base_number_detection, automatic_base_number_detection.ON)
 
-        result = quickexact_100(cds, params)
+        result = quickexact(cds, params)
         self.assertLessEqual(len(result.charge_distributions), 4)
 
-        params.simulation_parameters_100.epsilon_r = 2
-        params.simulation_parameters_100.lambda_tf = 2
-        result = quickexact_100(cds, params)
+        params.simulation_parameters.epsilon_r = 2
+        params.simulation_parameters.lambda_tf = 2
+        result = quickexact(cds, params)
         self.assertLessEqual(len(result.charge_distributions), 2)
 
     def test_perturber_and_sidb_pair_111(self):
@@ -42,16 +42,16 @@ class TestQuickExact(unittest.TestCase):
         layout.assign_cell_type((2, 0), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((3, 0), sidb_technology.cell_type.NORMAL)
 
-        params = quickexact_params_111()
-        params.simulation_parameters_111.base = 2
-        params.simulation_parameters_111.mu_minus = -0.32
-        params.base_number_detection_111 = automatic_base_number_detection_111.OFF
-        self.assertEqual(params.simulation_parameters_111.mu_minus, -0.32)
-        self.assertEqual(params.base_number_detection_111, automatic_base_number_detection_111.OFF)
+        params = quickexact_params()
+        params.simulation_parameters.base = 2
+        params.simulation_parameters.mu_minus = -0.32
+        params.base_number_detection = automatic_base_number_detection.OFF
+        self.assertEqual(params.simulation_parameters.mu_minus, -0.32)
+        self.assertEqual(params.base_number_detection, automatic_base_number_detection.OFF)
 
         cds = charge_distribution_surface_111(layout)
 
-        result = quickexact_111(cds, params)
+        result = quickexact(cds, params)
 
         self.assertEqual(result.algorithm_name, "QuickExact")
 

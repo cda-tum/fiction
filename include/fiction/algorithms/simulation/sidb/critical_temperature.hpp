@@ -234,8 +234,8 @@ class critical_temperature_impl
 
         if (params.engine == critical_temperature_params::simulation_engine::EXACT)
         {
-            const quickexact_params<Lyt> qe_params{params.simulation_parameters,
-                                                   quickexact_params<Lyt>::automatic_base_number_detection::OFF};
+            const quickexact_params<cell<Lyt>> qe_params{
+                params.simulation_parameters, quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
 
             // All physically valid charge configurations are determined for the given layout (`QuickExact` simulation
             // is used to provide 100 % accuracy for the Critical Temperature).
@@ -411,8 +411,9 @@ class critical_temperature_impl
         if (params.engine == critical_temperature_params::simulation_engine::EXACT)
         {
             // perform exact simulation
-            const quickexact_params<Lyt> qe_params{
-                params.simulation_parameters, fiction::quickexact_params<Lyt>::automatic_base_number_detection::OFF};
+            const quickexact_params<cell<Lyt>> qe_params{
+                params.simulation_parameters,
+                fiction::quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
             return quickexact(*bdl_iterator, qe_params);
         }
 

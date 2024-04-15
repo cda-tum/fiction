@@ -27,7 +27,7 @@ namespace fiction
 /**
  * This struct stores the parameters for the *QuickExact* algorithm.
  */
-template <typename Lyt>
+template <typename CellType>
 struct quickexact_params
 {
     /**
@@ -57,7 +57,7 @@ struct quickexact_params
     /**
      * Local external electrostatic potentials (e.g., locally applied electrodes).
      */
-    std::unordered_map<cell<Lyt>, double> local_external_potential = {};
+    std::unordered_map<CellType, double> local_external_potential = {};
     /**
      * Global external electrostatic potential. Value is applied on each cell in the layout.
      */
@@ -71,7 +71,7 @@ template <typename Lyt>
 class quickexact_impl
 {
   public:
-    quickexact_impl(const Lyt& lyt, const quickexact_params<Lyt>& parameter) :
+    quickexact_impl(const Lyt& lyt, const quickexact_params<cell<Lyt>>& parameter) :
             layout{lyt.clone()},
             charge_lyt{lyt},
             params{parameter}
@@ -94,9 +94,10 @@ class quickexact_impl
 
             // Determine if three state simulation (i.e., positively charged SiDBs can occur) is required.
             required_simulation_base_number base_number =
-                (params.base_number_detection == quickexact_params<Lyt>::automatic_base_number_detection::ON &&
+                (params.base_number_detection == quickexact_params<cell<Lyt>>::automatic_base_number_detection::ON &&
                  charge_lyt.is_three_state_simulation_required()) ||
-                        (params.base_number_detection == quickexact_params<Lyt>::automatic_base_number_detection::OFF &&
+                        (params.base_number_detection ==
+                             quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF &&
                          params.simulation_parameters.base == 3) ?
                     required_simulation_base_number::THREE :
                     required_simulation_base_number::TWO;
@@ -210,7 +211,7 @@ class quickexact_impl
     /**
      * Parameters used for the simulation.
      */
-    quickexact_params<Lyt> params{};
+    quickexact_params<cell<Lyt>> params{};
     /**
      * Indices of all SiDBs that are pre-assigned to be negatively charged in a physically valid layout.
      */
@@ -580,7 +581,8 @@ class quickexact_impl
  * @return Simulation Results.
  */
 template <typename Lyt>
-[[nodiscard]] sidb_simulation_result<Lyt> quickexact(const Lyt& lyt, const quickexact_params<Lyt>& params = {}) noexcept
+[[nodiscard]] sidb_simulation_result<Lyt> quickexact(const Lyt&                          lyt,
+                                                     const quickexact_params<cell<Lyt>>& params = {}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");

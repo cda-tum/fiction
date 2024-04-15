@@ -128,7 +128,7 @@ class assess_physical_population_stability_impl
      */
     [[nodiscard]] std::vector<population_stability_information<Lyt>> run() noexcept
     {
-        const quickexact_params<Lyt> quickexact_parameters{params.simulation_parameters};
+        const quickexact_params<cell<Lyt>> quickexact_parameters{params.simulation_parameters};
         const auto                   simulation_results = quickexact(layout, quickexact_parameters);
         const auto energy_and_unique_charge_index       = collect_energy_and_charge_index(simulation_results);
 

@@ -23,12 +23,12 @@ namespace detail
 {
 
 template <typename Lyt>
-void minimum_energy(pybind11::module& m, const std::string lattice = "")
+void minimum_energy(pybind11::module& m)
 {
     using namespace pybind11::literals;
 
     m.def(
-        fmt::format("minimum_energy{}", lattice).c_str(), [](const std::vector<Lyt>& layouts) -> double
+        "minimum_energy", [](const std::vector<Lyt>& layouts) -> double
         { return fiction::minimum_energy(layouts.cbegin(), layouts.cend()); },
         "layouts"_a, DOC(fiction_minimum_energy));
 }
@@ -39,8 +39,8 @@ inline void minimum_energy(pybind11::module& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::minimum_energy<py_charge_distribution_surface_100>(m, "_100");
-    detail::minimum_energy<py_charge_distribution_surface_111>(m, "_111");
+    detail::minimum_energy<py_charge_distribution_surface_100>(m);
+    detail::minimum_energy<py_charge_distribution_surface_111>(m);
 }
 
 }  // namespace pyfiction

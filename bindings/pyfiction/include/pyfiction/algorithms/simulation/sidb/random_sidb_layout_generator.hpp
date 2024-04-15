@@ -24,16 +24,14 @@ namespace detail
 {
 
 template <typename Lyt>
-void random_layout_generator(pybind11::module& m, const std::string& lattice = "")
+void random_layout_generator(pybind11::module& m)
 {
     using namespace pybind11::literals;
 
-    m.def(fmt::format("generate_random_sidb_layout{}", lattice).c_str(), &fiction::generate_random_sidb_layout<Lyt>,
-          "lyt_skeleton"_a, "params"_a = fiction::generate_random_sidb_layout_params<fiction::cell<Lyt>>{},
+    m.def("generate_random_sidb_layout", &fiction::generate_random_sidb_layout<Lyt>, "lyt_skeleton"_a, "params"_a = fiction::generate_random_sidb_layout_params<fiction::cell<Lyt>>{},
           DOC(fiction_generate_random_sidb_layout));
 
-    m.def(fmt::format("generate_multiple_random_sidb_layouts{}", lattice).c_str(),
-          &fiction::generate_multiple_random_sidb_layouts<Lyt>, "lyt_skeleton"_a,
+    m.def("generate_multiple_random_sidb_layouts", &fiction::generate_multiple_random_sidb_layouts<Lyt>, "lyt_skeleton"_a,
           "params"_a = fiction::generate_random_sidb_layout_params<fiction::cell<Lyt>>{},
           DOC(fiction_generate_multiple_random_sidb_layouts));
 }
@@ -82,8 +80,8 @@ inline void random_sidb_layout_generator(pybind11::module& m)
                        DOC(fiction_generate_random_sidb_layout_params_maximal_attempts_for_multiple_layouts));
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::random_layout_generator<py_sidb_100_lattice>(m, "_100");
-    detail::random_layout_generator<py_sidb_111_lattice>(m, "_111");
+    detail::random_layout_generator<py_sidb_100_lattice>(m);
+    detail::random_layout_generator<py_sidb_111_lattice>(m);
 }
 
 }  // namespace pyfiction

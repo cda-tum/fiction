@@ -13,7 +13,6 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include <string>
 
 namespace pyfiction
 {
@@ -22,12 +21,11 @@ namespace detail
 {
 
 template <typename Lyt>
-void is_ground_state(pybind11::module& m, const std::string& lattice = "")
+void is_ground_state(pybind11::module& m)
 {
     using namespace pybind11::literals;
 
-    m.def(fmt::format("is_ground_state{}", lattice).c_str(), &fiction::is_ground_state<Lyt>, "heuristic_results"_a,
-          "exhaustive_results"_a, DOC(fiction_is_ground_state));
+    m.def("is_ground_state", &fiction::is_ground_state<Lyt>, "heuristic_results"_a, "exhaustive_results"_a, DOC(fiction_is_ground_state));
 }
 
 }  // namespace detail
@@ -36,8 +34,8 @@ inline void is_ground_state(pybind11::module& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::is_ground_state<py_sidb_100_lattice>(m, "_100");
-    detail::is_ground_state<py_sidb_111_lattice>(m, "_111");
+    detail::is_ground_state<py_sidb_100_lattice>(m);
+    detail::is_ground_state<py_sidb_111_lattice>(m);
 }
 
 }  // namespace pyfiction

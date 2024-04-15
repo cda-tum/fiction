@@ -31,7 +31,7 @@ class TestIsGroundState(unittest.TestCase):
         heuristic_results = sidb_simulation_result_100()
         heuristic_results.charge_distributions = [cds4]
 
-        self.assertTrue(is_ground_state_100(heuristic_results, exact_results))
+        self.assertTrue(is_ground_state(heuristic_results, exact_results))
 
     def test_three_DBs_111_lattice(self):
         layout = sidb_lattice_111((10, 10))
@@ -59,7 +59,7 @@ class TestIsGroundState(unittest.TestCase):
         heuristic_results = sidb_simulation_result_111()
         heuristic_results.charge_distributions = [cds4]
 
-        self.assertTrue(is_ground_state_111(heuristic_results, exact_results))
+        self.assertTrue(is_ground_state(heuristic_results, exact_results))
 
 
 if __name__ == '__main__':

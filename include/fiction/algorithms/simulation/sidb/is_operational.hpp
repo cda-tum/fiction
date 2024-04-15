@@ -326,9 +326,9 @@ class is_operational_impl
         if (parameters.sim_engine == sidb_simulation_engine::QUICKEXACT)
         {
             // perform exact simulation
-            const quickexact_params<Lyt> quickexact_params{
+            const quickexact_params<cell<Lyt>> quickexact_params{
                 parameters.simulation_parameters,
-                fiction::quickexact_params<Lyt>::automatic_base_number_detection::OFF};
+                fiction::quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
             return quickexact(*bdl_iterator, quickexact_params);
         }
 
