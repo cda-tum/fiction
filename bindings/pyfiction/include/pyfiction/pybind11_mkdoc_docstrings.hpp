@@ -13446,7 +13446,7 @@ static const char *__doc_fiction_sidb_simulation_parameters_mu_minus = R"doc(`mu
 static const char *__doc_fiction_sidb_simulation_parameters_mu_plus = R"doc(`mu_plus` (µ+) is the energy transition level (+/0) (unit: eV).)doc";
 
 static const char *__doc_fiction_sidb_simulation_parameters_sidb_simulation_parameters =
-  R"doc(Default constructor.
+    R"doc(Default constructor.
 
 Parameter ``base_number``:
   simulation can be conducted with 2 and 3 charge states. 2 =
@@ -13460,16 +13460,7 @@ Parameter ``relative_permittivity``:
 
 Parameter ``screening_distance``:
   also known as "Thomas-Fermi screening" and it describes the
-  electric field screening due to free charges in nm.
-
-Parameter ``a``:
-  lattice constant in Å (Ångström).
-
-Parameter ``b``:
-  lattice constant in Å.
-
-Parameter ``c``:
-  lattice constant in Å.)doc";
+  electric field screening due to free charges in nm.)doc";
 
 static const char *__doc_fiction_sidb_simulation_result =
   R"doc(This struct defines a unified return type for all SiDB simulation
