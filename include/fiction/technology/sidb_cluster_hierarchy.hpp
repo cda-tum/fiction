@@ -907,7 +907,7 @@ struct sidb_cluster
     using uid_t   = uint64_t;
     using sidb_ix = uint64_t;
     /**
-     *
+     * Unique identifier. Equal to the SiDB index for singleton clusters.
      */
     const uid_t uid;
     /**
