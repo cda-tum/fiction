@@ -8,6 +8,7 @@
 #include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/technology/cell_technologies.hpp>
+#include <fiction/technology/physical_constants.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/technology/sidb_lattice_orientations.hpp>
 #include <fiction/types.hpp>
@@ -47,6 +48,7 @@ void check_op_domain_params_and_operational_status(const operational_domain&    
 
         if (status)
         {
+            std::cout << fmt::format("point: {}, {}, status: {}\n", coord.x, coord.y, *status);
             CHECK(op_value == *status);
         }
     }
