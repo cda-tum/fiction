@@ -21,7 +21,7 @@ class TestCriticalTemperature(unittest.TestCase):
 
         cds = charge_distribution_surface_100(layout)
 
-        self.assertEqual(critical_temperature_non_gate_based_100(cds, params, stats), 400)
+        self.assertEqual(critical_temperature_non_gate_based(cds, params, stats), 400)
 
         self.assertEqual(stats.algorithm_name, "QuickExact")
         self.assertEqual(stats.num_valid_lyt, 1)
@@ -37,7 +37,7 @@ class TestCriticalTemperature(unittest.TestCase):
         cds = charge_distribution_surface_100(layout)
         spec = [create_xor_tt()]
 
-        self.assertLessEqual(critical_temperature_gate_based_100(cds, spec, params, stats), 200)
+        self.assertLessEqual(critical_temperature_gate_based(cds, spec, params, stats), 200)
 
         self.assertEqual(stats.algorithm_name, "QuickExact")
 
@@ -53,7 +53,7 @@ class TestCriticalTemperature(unittest.TestCase):
         cds = charge_distribution_surface_100(layout)
         spec = [create_not_tt()]
 
-        self.assertLessEqual(critical_temperature_gate_based_100(cds, spec, params, stats), 400)
+        self.assertLessEqual(critical_temperature_gate_based(cds, spec, params, stats), 400)
 
         self.assertEqual(stats.algorithm_name, "QuickSim")
         self.assertGreater(stats.num_valid_lyt, 1)
@@ -73,7 +73,7 @@ class TestCriticalTemperature(unittest.TestCase):
         cds = charge_distribution_surface_100(layout)
         spec = [create_not_tt()]
 
-        self.assertLessEqual(critical_temperature_gate_based_100(cds, spec, params, stats), 0)
+        self.assertLessEqual(critical_temperature_gate_based(cds, spec, params, stats), 0)
 
         self.assertEqual(stats.algorithm_name, "QuickExact")
 

@@ -56,8 +56,8 @@ inline void is_operational(pybind11::module& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::is_operational<py_sidb_100_lattice>(m, "_100");
-    detail::is_operational<py_sidb_111_lattice>(m, "_111");
+    detail::is_operational<py_sidb_100_lattice>(m);
+    detail::is_operational<py_sidb_111_lattice>(m);
 }
 
 }  // namespace pyfiction

@@ -29,13 +29,13 @@ class TestIsOperational(unittest.TestCase):
         params = is_operational_params()
         params.simulation_parameters = sidb_simulation_parameters(2, -0.28)
 
-        [op_status, evaluated_input_combinations] = is_operational_100(lyt, [create_and_tt()], params)
+        [op_status, evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], params)
 
         self.assertEqual(op_status, operational_status.OPERATIONAL)
 
         params.simulation_parameters = sidb_simulation_parameters(2, -0.1)
 
-        [op_status, evaluated_input_combinations] = is_operational_100(lyt, [create_and_tt()], params)
+        [op_status, evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], params)
 
         self.assertEqual(op_status, operational_status.NON_OPERATIONAL)
 
@@ -45,7 +45,7 @@ class TestIsOperational(unittest.TestCase):
         params = is_operational_params()
         params.simulation_parameters = sidb_simulation_parameters(2, -0.32)
 
-        [op_status, evaluated_input_combinations] = is_operational_111(lyt, [create_and_tt()], params)
+        [op_status, evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], params)
 
         self.assertEqual(op_status, operational_status.OPERATIONAL)
 
@@ -53,7 +53,7 @@ class TestIsOperational(unittest.TestCase):
 
         self.assertEqual(params.simulation_parameters.mu_minus, -0.1)
 
-        [op_status, evaluated_input_combinations] = is_operational_111(lyt, [create_and_tt()], params)
+        [op_status, evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], params)
 
         self.assertEqual(op_status, operational_status.NON_OPERATIONAL)
 
@@ -63,7 +63,7 @@ class TestIsOperational(unittest.TestCase):
         params = is_operational_params()
         params.simulation_parameters = sidb_simulation_parameters(2, -0.30)
 
-        operational_patterns = operational_input_patterns_111(lyt, [create_and_tt()], params)
+        operational_patterns = operational_input_patterns(lyt, [create_and_tt()], params)
 
         print(operational_patterns)
         self.assertEqual(len(operational_patterns), 2)

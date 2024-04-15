@@ -13,6 +13,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include <string>
+
 namespace pyfiction
 {
 
@@ -35,7 +37,8 @@ inline void calculate_energy_and_state_type(pybind11::module& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::calculate_energy_and_state_type<py_charge_distribution_surface>(m);
+    detail::calculate_energy_and_state_type<py_sidb_100_lattice>(m);
+    detail::calculate_energy_and_state_type<py_sidb_111_lattice>(m);
 }
 
 }  // namespace pyfiction

@@ -19,7 +19,7 @@ class TestSiDBSimulationResult(unittest.TestCase):
 
         result.charge_distributions = [cds_negative, cds_neutral]
 
-        groundstate = determine_groundstate_from_simulation_results_100(result)
+        groundstate = determine_groundstate_from_simulation_results(result)
 
         self.assertEqual(len(groundstate), 1)
         self.assertEqual(groundstate[0].get_charge_state((0, 1)), sidb_charge_state.NEUTRAL)
@@ -39,7 +39,7 @@ class TestSiDBSimulationResult(unittest.TestCase):
 
         result.charge_distributions = [cds_negative, cds_neutral]
 
-        groundstate = determine_groundstate_from_simulation_results_111(result)
+        groundstate = determine_groundstate_from_simulation_results(result)
 
         self.assertEqual(len(groundstate), 1)
         self.assertEqual(groundstate[0].get_charge_state((0, 1)), sidb_charge_state.NEUTRAL)

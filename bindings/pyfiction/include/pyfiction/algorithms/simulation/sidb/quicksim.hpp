@@ -22,12 +22,11 @@ namespace detail
 {
 
 template <typename Lyt>
-void quicksim(pybind11::module& m, const std::string& lattice = "")
+void quicksim(pybind11::module& m)
 {
     using namespace pybind11::literals;
 
-    m.def(fmt::format("quicksim{}", lattice).c_str(), &fiction::quicksim<Lyt>, "lyt"_a,
-          "params"_a = fiction::quicksim_params{}, DOC(fiction_quicksim));
+    m.def("quicksim", &fiction::quicksim<Lyt>, "lyt"_a, "params"_a = fiction::quicksim_params{}, DOC(fiction_quicksim));
 }
 
 }  // namespace detail
@@ -52,8 +51,8 @@ inline void quicksim(pybind11::module& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::quicksim<py_sidb_111_lattice>(m, "_111");
-    detail::quicksim<py_sidb_100_lattice>(m, "_100");
+    detail::quicksim<py_sidb_100_lattice>(m);
+    detail::quicksim<py_sidb_111_lattice>(m);
 }
 
 }  // namespace pyfiction

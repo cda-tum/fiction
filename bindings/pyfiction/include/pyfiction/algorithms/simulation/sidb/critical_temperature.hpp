@@ -26,13 +26,11 @@ void critical_temperature(pybind11::module& m, const std::string& lattice = "")
 {
     using namespace pybind11::literals;
 
-    m.def(fmt::format("critical_temperature_gate_based{}", lattice).c_str(),
-          &fiction::critical_temperature_gate_based<Lyt, py_tt>, "lyt"_a, "spec"_a,
+    m.def("critical_temperature_gate_based", &fiction::critical_temperature_gate_based<Lyt, py_tt>, "lyt"_a, "spec"_a,
           "params"_a = fiction::critical_temperature_params{}, "stats"_a = nullptr,
           DOC(fiction_critical_temperature_gate_based));
 
-    m.def(fmt::format("critical_temperature_non_gate_based{}", lattice).c_str(),
-          &fiction::critical_temperature_non_gate_based<Lyt>, "lyt"_a,
+    m.def("critical_temperature_non_gate_based", &fiction::critical_temperature_non_gate_based<Lyt>, "lyt"_a,
           "params"_a = fiction::critical_temperature_params{}, "stats"_a = nullptr,
           DOC(fiction_critical_temperature_non_gate_based));
 }
@@ -89,8 +87,8 @@ inline void critical_temperature(pybind11::module& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::critical_temperature<py_sidb_100_lattice>(m, "_100");
-    detail::critical_temperature<py_sidb_100_lattice>(m, "_111");
+    detail::critical_temperature<py_sidb_100_lattice>(m);
+    detail::critical_temperature<py_sidb_100_lattice>(m);
 }
 
 }  // namespace pyfiction

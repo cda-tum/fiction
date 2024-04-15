@@ -21,7 +21,7 @@ class TestDetermineGroundstateFromSimulationResults(unittest.TestCase):
         results = sidb_simulation_result_100()
         results.charge_distributions = [cds1, cds2, cds3]
 
-        result = determine_groundstate_from_simulation_results_100(results)
+        result = determine_groundstate_from_simulation_results(results)
         self.assertEqual(len(result), 1)
 
         groundstate = result[0]
@@ -45,7 +45,7 @@ class TestDetermineGroundstateFromSimulationResults(unittest.TestCase):
         results = sidb_simulation_result_111()
         results.charge_distributions = [cds1, cds2, cds3]
 
-        result = determine_groundstate_from_simulation_results_111(results)
+        result = determine_groundstate_from_simulation_results(results)
         self.assertEqual(len(result), 1)
 
         groundstate = result[0]

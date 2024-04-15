@@ -22,12 +22,11 @@ namespace detail
 {
 
 template <typename Lyt>
-void determine_groundstate_from_simulation_results(pybind11::module& m, const std::string& lattice = "")
+void determine_groundstate_from_simulation_results(pybind11::module& m)
 {
     using namespace pybind11::literals;
 
-    m.def(fmt::format("determine_groundstate_from_simulation_results{}", lattice).c_str(),
-          &fiction::determine_groundstate_from_simulation_results<Lyt>, "simulation_results"_a,
+    m.def("determine_groundstate_from_simulation_results", &fiction::determine_groundstate_from_simulation_results<Lyt>, "simulation_results"_a,
           DOC(fiction_determine_groundstate_from_simulation_results));
 }
 
@@ -37,8 +36,8 @@ inline void determine_groundstate_from_simulation_results(pybind11::module& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::determine_groundstate_from_simulation_results<py_sidb_100_lattice>(m, "_100");
-    detail::determine_groundstate_from_simulation_results<py_sidb_111_lattice>(m, "_111");
+    detail::determine_groundstate_from_simulation_results<py_sidb_100_lattice>(m);
+    detail::determine_groundstate_from_simulation_results<py_sidb_111_lattice>(m);
 }
 
 }  // namespace pyfiction

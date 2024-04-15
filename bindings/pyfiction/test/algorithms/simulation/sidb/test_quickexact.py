@@ -55,7 +55,7 @@ class TestQuickExact(unittest.TestCase):
 
         self.assertEqual(result.algorithm_name, "QuickExact")
 
-        groundstate = determine_groundstate_from_simulation_results_111(result)
+        groundstate = determine_groundstate_from_simulation_results(result)
 
         self.assertEqual(len(groundstate), 1)
 

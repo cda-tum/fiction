@@ -22,12 +22,11 @@ namespace detail
 {
 
 template <typename Lyt>
-void exhaustive_ground_state_simulation(pybind11::module& m, const std::string& lattice = "")
+void exhaustive_ground_state_simulation(pybind11::module& m)
 {
     using namespace pybind11::literals;
 
-    m.def(fmt::format("exhaustive_ground_state_simulation{}", lattice).c_str(),
-          &fiction::exhaustive_ground_state_simulation<Lyt>, "lyt"_a,
+    m.def("exhaustive_ground_state_simulation", &fiction::exhaustive_ground_state_simulation<Lyt>, "lyt"_a,
           "params"_a = fiction::sidb_simulation_parameters{}, DOC(fiction_exhaustive_ground_state_simulation));
 }
 
@@ -37,8 +36,8 @@ inline void exhaustive_ground_state_simulation(pybind11::module& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::exhaustive_ground_state_simulation<py_sidb_100_lattice>(m, "_100");
-    detail::exhaustive_ground_state_simulation<py_sidb_111_lattice>(m, "_111");
+    detail::exhaustive_ground_state_simulation<py_sidb_100_lattice>(m);
+    detail::exhaustive_ground_state_simulation<py_sidb_111_lattice>(m);
 }
 
 }  // namespace pyfiction
