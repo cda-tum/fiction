@@ -61,7 +61,7 @@ class clustercomplete_command : public command
                    true);
         add_option("--overlapping_witnesses_limit,-o", params.num_overlapping_witnesses_limit_gss,
                    "The limit on the number of overlapping witnesses (that determines the factorial scaling of the "
-                   "sub-procedure) before Ground State Space skips valiidty witness partitioning",
+                   "sub-procedure) before Ground State Space skips validity witness partitioning",
                    true);
         add_option("--report_gss_stats,-r", params.report_gss_stats,
                    "When set to true, statistics like the number of pruned top level multisets (out of the maximum "
