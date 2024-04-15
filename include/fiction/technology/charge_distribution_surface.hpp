@@ -1298,10 +1298,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     {
         if (potential_value != 0.0)
         {
-            this->foreach_cell(
-                [this, &potential_value](const auto& c) {
-                    strg->local_external_pot[c] += potential_value;
-                });
+            this->foreach_cell([this, &potential_value](const auto& c)
+                               { strg->local_external_pot[c] += potential_value; });
             this->update_after_charge_change(dependent_cell);
         }
     }
