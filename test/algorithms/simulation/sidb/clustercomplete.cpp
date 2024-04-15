@@ -1338,7 +1338,7 @@ TEMPLATE_TEST_CASE("4 DBs next to each other (positively charged DBs occur)", "[
     CHECK(simulation_results.charge_distributions.size() == 2);
 }
 
-TEMPLATE_TEST_CASE("5 DBs next to each other (positively charged DBs occur)", "[clustercomplete]",
+TEMPLATE_TEST_CASE("6 DBs next to each other (positively charged DBs occur)", "[clustercomplete]",
                    (sidb_100_cell_clk_lyt_siqad), (cds_sidb_100_cell_clk_lyt_siqad))
 {
     TestType lyt{};
