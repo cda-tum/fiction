@@ -160,6 +160,54 @@ TEMPLATE_TEST_CASE("Ground State Space construction of a 7 DB layout", "[ground-
                     ->multiset_conf
                 << 32ull) >>
                32ull) == 0);
+
+        for (uint64_t sidb_ix = 0; sidb_ix < 7; ++sidb_ix)
+        {
+            CHECK(
+                gss_res.top_cluster->charge_space.cbegin()
+                    ->compositions.cbegin()
+                    ->pot_bounds.get<bound_direction::LOWER>(sidb_ix) ==
+                gss_res.top_cluster->charge_space.cbegin()
+                        ->compositions.cbegin()
+                        ->proj_states.cbegin()
+                        ->cluster->pot_projs.at(sidb_ix)
+                        .get_pot_proj_for_m_conf<bound_direction::LOWER>(gss_res.top_cluster->charge_space.cbegin()
+                                                                             ->compositions.cbegin()
+                                                                             ->proj_states.cbegin()
+                                                                             ->multiset_conf)
+                        .pot_val +
+                    std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin(),
+                              1)
+                        ->cluster->pot_projs.at(sidb_ix)
+                        .get_pot_proj_for_m_conf<bound_direction::LOWER>(
+                            std::next(
+                                gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin(),
+                                1)
+                                ->multiset_conf)
+                        .pot_val);
+            CHECK(
+                gss_res.top_cluster->charge_space.cbegin()
+                    ->compositions.cbegin()
+                    ->pot_bounds.get<bound_direction::UPPER>(sidb_ix) ==
+                gss_res.top_cluster->charge_space.cbegin()
+                        ->compositions.cbegin()
+                        ->proj_states.cbegin()
+                        ->cluster->pot_projs.at(sidb_ix)
+                        .get_pot_proj_for_m_conf<bound_direction::UPPER>(gss_res.top_cluster->charge_space.cbegin()
+                                                                             ->compositions.cbegin()
+                                                                             ->proj_states.cbegin()
+                                                                             ->multiset_conf)
+                        .pot_val +
+                    std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin(),
+                              1)
+                        ->cluster->pot_projs.at(sidb_ix)
+                        .get_pot_proj_for_m_conf<bound_direction::UPPER>(
+                            std::next(
+                                gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin(),
+                                1)
+                                ->multiset_conf)
+                        .pot_val);
+        }
     }
     else
     {
@@ -180,6 +228,54 @@ TEMPLATE_TEST_CASE("Ground State Space construction of a 7 DB layout", "[ground-
         CHECK(((gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin()->multiset_conf
                 << 32ull) >>
                32ull) == 0);
+
+        for (uint64_t sidb_ix = 0; sidb_ix < 7; ++sidb_ix)
+        {
+            CHECK(
+                gss_res.top_cluster->charge_space.cbegin()
+                    ->compositions.cbegin()
+                    ->pot_bounds.get<bound_direction::LOWER>(sidb_ix) ==
+                gss_res.top_cluster->charge_space.cbegin()
+                        ->compositions.cbegin()
+                        ->proj_states.cbegin()
+                        ->cluster->pot_projs.at(sidb_ix)
+                        .get_pot_proj_for_m_conf<bound_direction::LOWER>(gss_res.top_cluster->charge_space.cbegin()
+                                                                             ->compositions.cbegin()
+                                                                             ->proj_states.cbegin()
+                                                                             ->multiset_conf)
+                        .pot_val +
+                    std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin(),
+                              1)
+                        ->cluster->pot_projs.at(sidb_ix)
+                        .get_pot_proj_for_m_conf<bound_direction::LOWER>(
+                            std::next(
+                                gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin(),
+                                1)
+                                ->multiset_conf)
+                        .pot_val);
+            CHECK(
+                gss_res.top_cluster->charge_space.cbegin()
+                    ->compositions.cbegin()
+                    ->pot_bounds.get<bound_direction::UPPER>(sidb_ix) ==
+                gss_res.top_cluster->charge_space.cbegin()
+                        ->compositions.cbegin()
+                        ->proj_states.cbegin()
+                        ->cluster->pot_projs.at(sidb_ix)
+                        .get_pot_proj_for_m_conf<bound_direction::UPPER>(gss_res.top_cluster->charge_space.cbegin()
+                                                                             ->compositions.cbegin()
+                                                                             ->proj_states.cbegin()
+                                                                             ->multiset_conf)
+                        .pot_val +
+                    std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin(),
+                              1)
+                        ->cluster->pot_projs.at(sidb_ix)
+                        .get_pot_proj_for_m_conf<bound_direction::UPPER>(
+                            std::next(
+                                gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin(),
+                                1)
+                                ->multiset_conf)
+                        .pot_val);
+        }
     }
 }
 

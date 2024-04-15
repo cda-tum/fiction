@@ -294,47 +294,6 @@ class clustercomplete_impl
         }
     }
 
-    complete_potential_bounds_store
-    apply_inter_cluster_potential(sidb_charge_space_composition& parent_composition,
-                                  sidb_clustering_state&         clustering_state) const noexcept
-    {
-        // create a complete potential bounds store that stores the effect of the specialisation, to be removed later
-        complete_potential_bounds_store composition_bounds{};
-        composition_bounds.initialise_complete_potential_bounds(charge_layout.num_cells());
-
-        // the parent is now specialised to a specific composition of its children; the children are applied by adding
-        // their respective projections for this composition to all SiDBs
-        for (uint64_t sidb_ix = 0; sidb_ix < charge_layout.num_cells(); ++sidb_ix)
-        {
-            double comp_pot_lb = 0;
-            double comp_pot_ub = 0;
-
-            for (sidb_cluster_projector_state& child_pst : parent_composition.proj_states)
-            {
-                comp_pot_lb += get_projector_state_bound_pot<bound_direction::LOWER>(child_pst, sidb_ix);
-                comp_pot_ub += get_projector_state_bound_pot<bound_direction::UPPER>(child_pst, sidb_ix);
-            }
-
-            clustering_state.pot_bounds.update(sidb_ix, comp_pot_lb, comp_pot_ub);
-
-            composition_bounds.set(sidb_ix, -comp_pot_lb, -comp_pot_ub);
-        }
-
-        return composition_bounds;
-    }
-
-    void undo_apply_inter_cluster_potential(const complete_potential_bounds_store& composition_bounds,
-                                            sidb_clustering_state&                 clustering_state) const noexcept
-    {
-        // this inverts the operation of the function above, un-applying the (old, already considered) children, thus
-        // allowing the next specialisation to be applied
-        for (uint64_t sidb_ix = 0; sidb_ix < charge_layout.num_cells(); ++sidb_ix)
-        {
-            clustering_state.pot_bounds.update(sidb_ix, composition_bounds.get<bound_direction::LOWER>(sidb_ix),
-                                               composition_bounds.get<bound_direction::UPPER>(sidb_ix));
-        }
-    }
-
     void add_physically_valid_charge_configurations(sidb_clustering_state& clustering_state) noexcept
     {
         // check for pruning
@@ -350,7 +309,7 @@ class clustercomplete_impl
             return;
         }
 
-        // max_cst <- find the cluster of maximum size
+        // max_pst <- find the cluster of maximum size
         uint64_t max_cluster_size = clustering_state.proj_states.front()->cluster->num_sidbs();
         uint64_t max_pst_ix       = 0;
         for (uint64_t ix = 1; ix < clustering_state.proj_states.size(); ++ix)
@@ -372,36 +331,35 @@ class clustercomplete_impl
         // pop
         clustering_state.proj_states.pop_back();
 
-        // un-apply max_cst, thereby making space for specialisation
+        // un-apply max_pst, thereby making space for specialisation
         add_or_subtract_parent_potential<potential_bound_update_operation::SUBTRACT>(*max_pst, clustering_state);
 
-        // specialise for all compositions of max_cst
-        for (sidb_charge_space_composition& max_cst_composition : get_projector_state_compositions(*max_pst))
+        // specialise for all compositions of max_pst
+        for (const sidb_charge_space_composition& max_pst_composition : get_projector_state_compositions(*max_pst))
         {
             // specialise parent to a specific composition of its children
-            const complete_potential_bounds_store& composition_bounds =
-                apply_inter_cluster_potential(max_cst_composition, clustering_state);
+            clustering_state.pot_bounds += max_pst_composition.pot_bounds;
 
-            for (const sidb_cluster_projector_state& child_pst : max_cst_composition.proj_states)
+            for (const sidb_cluster_projector_state& child_pst : max_pst_composition.proj_states)
             {
-                // move child projector state in
+                // move child projector state in clustering state
                 clustering_state.proj_states.emplace_back(std::make_unique<sidb_cluster_projector_state>(child_pst));
             }
 
             // recurse with specialised composition
             add_physically_valid_charge_configurations(clustering_state);
 
-            for (uint64_t i = 0; i < max_cst_composition.proj_states.size(); ++i)
+            for (uint64_t i = 0; i < max_pst_composition.proj_states.size(); ++i)
             {
                 // handled child projector state --- remove
                 clustering_state.proj_states.pop_back();
             }
 
             // undo specialisation such that the specialisation may consider a different children composition
-            undo_apply_inter_cluster_potential(composition_bounds, clustering_state);
+            clustering_state.pot_bounds -= max_pst_composition.pot_bounds;
         }
 
-        // apply max_cst back
+        // apply max_pst back
         add_or_subtract_parent_potential<potential_bound_update_operation::ADD>(*max_pst, clustering_state);
 
         // move back

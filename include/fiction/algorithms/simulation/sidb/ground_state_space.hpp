@@ -410,7 +410,7 @@ class ground_state_space_impl
     template <potential_bound_analysis_mode mode>
     static inline std::pair<double, double>
     get_received_potential_bounds(const sidb_cluster_projector_state& pst, const uint64_t sidb_ix,
-                                  const std::optional<partial_potential_bounds_store>& composition_pot_bounds) noexcept
+                                  const std::optional<complete_potential_bounds_store>& composition_pot_bounds) noexcept
     {
         if constexpr (mode == potential_bound_analysis_mode::ANALYZE_MULTISET)
         {
@@ -431,9 +431,9 @@ class ground_state_space_impl
     }
 
     template <potential_bound_analysis_mode mode>
-    [[nodiscard]] bool perform_potential_bound_analysis(
-        const sidb_cluster_projector_state&          pst,
-        const std::optional<partial_potential_bounds_store>& composition_potential_bounds = std::nullopt) const noexcept
+    [[nodiscard]] bool perform_potential_bound_analysis(const sidb_cluster_projector_state& pst,
+                                                        const std::optional<complete_potential_bounds_store>&
+                                                            composition_potential_bounds = std::nullopt) const noexcept
     {
         witness_partitioning_state st{pst};
 
@@ -529,6 +529,33 @@ class ground_state_space_impl
         return fixpoint;
     }
 
+    static void compute_external_pot_bounds_for_saved_compositions(const sidb_cluster_ptr& parent) noexcept
+    {
+        // when clusters are merged, their respective charge spaces have reached a fixed point in the construction;
+        // thereby, the projections specific to each stored composition in the respective charge spaces, for which
+        // previously only the receiving SiDBs in the respective child cluster were considered, are now composed to
+        // potential bounds onto each SiDB outside the respective cluster, thus making a complete potential bounds store
+        for (const sidb_cluster_ptr& child : parent->children)
+        {
+            for (const sidb_cluster_charge_state& m : child->charge_space)
+            {
+                for (sidb_charge_space_composition& composition : m.compositions)
+                {
+                    for (const uint64_t sidb_ix : child->external_sidbs)
+                    {
+                        for (const sidb_cluster_projector_state& child_pst_of_child : composition.proj_states)
+                        {
+                            composition.pot_bounds.update(
+                                sidb_ix,
+                                get_projector_state_bound<bound_direction::LOWER>(child_pst_of_child, sidb_ix).pot_val,
+                                get_projector_state_bound<bound_direction::UPPER>(child_pst_of_child, sidb_ix).pot_val);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     template <bound_direction bound>
     void subtract_sibling_pot_from_received_ext_pot_bound(const sidb_cluster_ptr&            parent,
                                                           const sidb_cluster_receptor_state& child_rst) const noexcept
@@ -565,6 +592,9 @@ class ground_state_space_impl
 
     bool verify_composition(sidb_charge_space_composition& composition) const noexcept
     {
+        // initialize the composition potential bounds to (0.0, 0.0) for all SiDBs
+        composition.pot_bounds.initialise_complete_potential_bounds(top_cluster->num_sidbs());
+
         // perform physically informed space pruning for a multiset composition
         for (sidb_cluster_projector_state& receiving_pst : composition.proj_states)
         {
@@ -603,7 +633,7 @@ class ground_state_space_impl
             }
 
             // check if cluster charge state exists
-            const sidb_cluster_charge_state_space::iterator it = parent->charge_space.find(m);
+            const auto it = parent->charge_space.find(m);
             if (it != parent->charge_space.cend())
             {
                 it->compositions.emplace_back(m.compositions.front());
@@ -626,7 +656,7 @@ class ground_state_space_impl
 
             fill_merged_charge_state_space(parent, cur_child_ix + 1, m);
 
-            m.compositions.front().proj_states.pop_back();  // ????????
+            m.compositions.front().proj_states.pop_back();
             m -= m_part;
         }
     }
@@ -734,6 +764,8 @@ class ground_state_space_impl
         {
             clustering.erase(c);
         }
+
+        compute_external_pot_bounds_for_saved_compositions(min_parent);
 
         derive_children_received_bounds_without_siblings(min_parent);
 
