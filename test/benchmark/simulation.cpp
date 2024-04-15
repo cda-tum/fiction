@@ -166,6 +166,7 @@ TEST_CASE("Benchmark simulators", "[benchmark]")
 //                            4.25241 ms    3.59799 ms    5.09686 ms
 
 //    after "Restructured stores of potential bounds"
+//    before "Compute external projections for each composition in GSS"
 //    benchmark name          samples       iterations    est run time
 //                            mean          low mean      high mean
 //                            std dev       low std dev   high std dev
@@ -181,6 +182,23 @@ TEST_CASE("Benchmark simulators", "[benchmark]")
 //    ClusterComplete         100           1             2.29913 s
 //                            22.6208 ms    22.2895 ms    23.0093 ms
 //                            1.82446 ms    1.58868 ms    2.0759 ms
+
+//    after "Compute external projections for each composition in GSS"
+//    benchmark name          samples       iterations    est run time
+//                            mean          low mean      high mean
+//                            std dev       low std dev   high std dev
+//    -------------------------------------------------------------------------------
+//    QuickExact              100           1             2.97074 m
+//                            1.85809 s     1.84034 s     1.87889 s
+//                            97.8108 ms    83.4107 ms    117.583 ms
+//
+//    QuickSim                100           1             1.00106 s
+//                            10.1342 ms    10.0005 ms    10.2843 ms
+//                            723.433 us    565.239 us    1.07378 ms
+//
+//    ClusterComplete         100           1             1.66618 s
+//                            17.6172 ms    17.3069 ms    17.9576 ms
+//                            1.66116 ms    1.47645 ms    1.94783 ms
 
 TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
 {
@@ -239,6 +257,7 @@ TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
 //                                            57.5402 ms    48.6612 ms    71.5112 ms
 
 //    after "Restructured stores of potential bounds"
+//    before "Compute external projections for each composition in GSS"
 //    benchmark name                          samples       iterations    est run time
 //                                            mean          low mean      high mean
 //                                            std dev       low std dev   high std dev
@@ -246,3 +265,12 @@ TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
 //    3 Segment Diagonal Bestagon Wire        100           1             51.5535 s
 //                                            579.269 ms    571.672 ms    588.093 ms
 //                                            41.8846 ms    35.4194 ms    51.1304 ms
+
+//    after "Compute external projections for each composition in GSS"
+//    benchmark name                          samples       iterations    est run time
+//                                            mean          low mean      high mean
+//                                            std dev       low std dev   high std dev
+//    -------------------------------------------------------------------------------
+//    3 Segment Diagonal Bestagon Wire        100           1             49.5118 s
+//                                            471.564 ms    463.893 ms    479.81 ms
+//                                            40.5787 ms    35.545 ms    46.8499 ms
