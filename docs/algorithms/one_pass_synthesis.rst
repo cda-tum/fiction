@@ -14,5 +14,5 @@ opportunity to generate even smaller layouts than ``exact``. Consequently, this 
    :members:
 .. doxygenstruct:: fiction::one_pass_synthesis_stats
    :members:
-.. doxygenfunction:: fiction::one_pass_synthesis(const std::vector<TT>& tts, one_pass_synthesis_params& ps = {}, one_pass_synthesis_stats* pst = nullptr)
+.. doxygenfunction:: fiction::one_pass_synthesis(const std::vector<TT>& tts, one_pass_synthesis_params ps = {}, one_pass_synthesis_stats* pst = nullptr)
 .. doxygenfunction:: fiction::one_pass_synthesis(const Ntk& ntk, const one_pass_synthesis_params& ps = {}, one_pass_synthesis_stats* pst = nullptr)
