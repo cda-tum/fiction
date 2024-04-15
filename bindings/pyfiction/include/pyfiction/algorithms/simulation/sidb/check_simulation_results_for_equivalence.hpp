@@ -24,8 +24,9 @@ void check_for_equivalence(pybind11::module& m)
 {
     using namespace pybind11::literals;
 
-    m.def("check_simulation_results_for_equivalence", &fiction::check_simulation_results_for_equivalence<Lyt>, "result1"_a = fiction::sidb_simulation_result<Lyt>{},
-          "result2"_a = fiction::sidb_simulation_result<Lyt>{}, DOC(fiction_check_simulation_results_for_equivalence));
+    m.def("check_simulation_results_for_equivalence", &fiction::check_simulation_results_for_equivalence<Lyt>,
+          "result1"_a = fiction::sidb_simulation_result<Lyt>{}, "result2"_a = fiction::sidb_simulation_result<Lyt>{},
+          DOC(fiction_check_simulation_results_for_equivalence));
 }
 
 }  // namespace detail

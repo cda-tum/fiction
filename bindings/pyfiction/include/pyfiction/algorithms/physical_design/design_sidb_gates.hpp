@@ -32,9 +32,7 @@ void design_sidb_gates(pybind11::module& m)
         .value("EXHAUSTIVE", fiction::design_sidb_gates_params<Lyt>::design_sidb_gates_mode::EXHAUSTIVE,
                DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_EXHAUSTIVE))
         .value("RANDOM", fiction::design_sidb_gates_params<Lyt>::design_sidb_gates_mode::RANDOM,
-               DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_RANDOM))
-
-        ;
+               DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_RANDOM));
 
     /**
      * Parameters.
@@ -51,9 +49,7 @@ void design_sidb_gates(pybind11::module& m)
         .def_readwrite("number_of_sidbs", &fiction::design_sidb_gates_params<Lyt>::number_of_sidbs,
                        DOC(fiction_design_sidb_gates_params_number_of_sidbs))
         .def_readwrite("sim_engine", &fiction::design_sidb_gates_params<Lyt>::sim_engine,
-                       DOC(fiction_design_sidb_gates_params_sim_engine))
-
-        ;
+                       DOC(fiction_design_sidb_gates_params_sim_engine));
 
     m.def("design_sidb_gates", &fiction::design_sidb_gates<Lyt, py_tt>, "skeleton"_a, "spec"_a,
           "params"_a = fiction::design_sidb_gates_params<Lyt>{}, DOC(fiction_design_sidb_gates));

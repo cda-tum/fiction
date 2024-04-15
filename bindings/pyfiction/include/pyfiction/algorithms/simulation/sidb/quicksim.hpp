@@ -13,8 +13,6 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include <string>
-
 namespace pyfiction
 {
 
@@ -40,7 +38,8 @@ inline void quicksim(pybind11::module& m)
      */
     py::class_<fiction::quicksim_params>(m, "quicksim_params", DOC(fiction_quicksim_params))
         .def(py::init<>())
-        .def_readwrite("simulation_parameters", &fiction::quicksim_params::simulation_parameters, DOC(fiction_quicksim_params_simulation_parameters))
+        .def_readwrite("simulation_parameters", &fiction::quicksim_params::simulation_parameters,
+                       DOC(fiction_quicksim_params_simulation_parameters))
         .def_readwrite("iteration_steps", &fiction::quicksim_params::iteration_steps,
                        DOC(fiction_quicksim_params_iteration_steps))
         .def_readwrite("alpha", &fiction::quicksim_params::alpha, DOC(fiction_quicksim_params_alpha))

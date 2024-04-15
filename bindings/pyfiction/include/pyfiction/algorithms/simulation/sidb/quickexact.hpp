@@ -13,8 +13,6 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include <string>
-
 namespace pyfiction
 {
 
@@ -24,7 +22,6 @@ namespace detail
 template <typename Lyt>
 void quickexact(pybind11::module& m)
 {
-    namespace py = pybind11;
     using namespace pybind11::literals;
 
     m.def("quickexact", &fiction::quickexact<Lyt>, "lyt"_a,
