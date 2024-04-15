@@ -44,6 +44,7 @@ TEMPLATE_TEST_CASE("Empty layout ClusterComplete simulation", "[clustercomplete]
 
     clustercomplete_params<TestType> params{sidb_simulation_parameters{2, -0.32}};
     params.validity_witness_partitioning_max_cluster_size_gss = 3;
+    params.num_overlapping_witnesses_limit_gss                = 8;
 
     const auto simulation_results = clustercomplete(lyt, params);
 
@@ -51,6 +52,8 @@ TEMPLATE_TEST_CASE("Empty layout ClusterComplete simulation", "[clustercomplete]
     CHECK(simulation_results.algorithm_name == "ClusterComplete");
     CHECK(std::any_cast<uint64_t>(
               simulation_results.additional_simulation_parameters.at("validity_witness_partitioning_limit")) == 3);
+    CHECK(std::any_cast<uint64_t>(
+              simulation_results.additional_simulation_parameters.at("validity_witness_partitioning_limit")) == 8);
 }
 
 TEMPLATE_TEST_CASE("ClusterComplete simulation of a single SiDB", "[clustercomplete]", sidb_cell_clk_lyt_siqad,

@@ -59,6 +59,14 @@ class clustercomplete_command : public command
                    "The limit on the cluster size before Ground State Space omits the check for which it solves the "
                    "validity witness partitioning NP-complete sub-problem; values above 15 severely impact the runtime",
                    true);
+        add_option("--overlapping_witnesses_limit,-o", params.num_overlapping_witnesses_limit_gss,
+                   "The limit on the number of overlapping witnesses (that determines the factorial scaling of the "
+                   "sub-procedure) before Ground State Space skips valiidty witness partitioning",
+                   true);
+        add_option("--report_gss_stats,-r", params.report_gss_stats,
+                   "When set to true, statistics like the number of pruned top level multisets (out of the maximum "
+                   "number) and the Ground State Space runtime are shown",
+                   true);
     }
 
   protected:
@@ -101,7 +109,7 @@ class clustercomplete_command : public command
         {
             using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
 
-            if constexpr (!fiction::has_sidb_technology_v<Lyt>)
+            if constexpr (fiction::has_sidb_technology_v<Lyt>)
             {
                 if constexpr (fiction::is_charge_distribution_surface_v<Lyt>)
                 {
@@ -111,18 +119,18 @@ class clustercomplete_command : public command
                 }
                 else
                 {
+                    params.physical_parameters = physical_params;
+
                     if constexpr (fiction::is_sidb_lattice_100_v<Lyt>)
                     {
-                        sidb_111_used              = false;
-                        params.physical_parameters = physical_params;
-                        sim_result_100             = fiction::clustercomplete(*lyt_ptr, params);
+                        sidb_111_used  = false;
+                        sim_result_100 = fiction::clustercomplete(*lyt_ptr, params);
                     }
                     else if constexpr (fiction::is_sidb_lattice_111_v<Lyt>)
                     {
-                        sidb_111_used              = true;
-                        params.physical_parameters = physical_params;
-                        auto cps                   = convert_params<Lyt>(params);
-                        sim_result_111             = fiction::clustercomplete(*lyt_ptr, cps);
+                        sidb_111_used  = true;
+                        auto cps       = convert_params<Lyt>(params);
+                        sim_result_111 = fiction::clustercomplete(*lyt_ptr, cps);
                     }
                     else
                     {
@@ -219,8 +227,11 @@ class clustercomplete_command : public command
                         {"global_potential", std::any_cast<double>(sim_result_111.additional_simulation_parameters.at(
                                                  "global_potential"))}}},
                       {"validity witness partitioning limit",
-                       std::any_cast<uint64_t>(sim_result_111.additional_simulation_parameters.at(
-                           "validity_witness_partitioning_limit"))}}},
+                       std::any_cast<uint64_t>(
+                           sim_result_111.additional_simulation_parameters.at("validity_witness_partitioning_limit"))},
+                      {"number of overlapping witnesses limit",
+                       std::any_cast<uint64_t>(
+                           sim_result_111.additional_simulation_parameters.at("num_overlapping_witnesses_limit"))}}},
                     {"Ground state energy (eV)", min_energy},
                     {"Number of stable states", sim_result_111.charge_distributions.size()}};
             }
@@ -238,7 +249,10 @@ class clustercomplete_command : public command
                      std::any_cast<double>(sim_result_100.additional_simulation_parameters.at("global_potential"))}}},
                   {"validity witness partitioning limit",
                    std::any_cast<uint64_t>(
-                       sim_result_100.additional_simulation_parameters.at("validity_witness_partitioning_limit"))}}},
+                       sim_result_100.additional_simulation_parameters.at("validity_witness_partitioning_limit"))},
+                  {"number of overlapping witnesses limit",
+                   std::any_cast<uint64_t>(
+                       sim_result_100.additional_simulation_parameters.at("num_overlapping_witnesses_limit"))}}},
                 {"Ground state energy (eV)", min_energy},
                 {"Number of stable states", sim_result_100.charge_distributions.size()}};
         }

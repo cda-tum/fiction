@@ -60,6 +60,13 @@ struct clustercomplete_params
      */
     uint64_t validity_witness_partitioning_max_cluster_size_gss = 6;
     /**
+     * The complexity is of validity witness partitioning bounded by a factorial in the number of overlapping witnesses.
+     * This parameter thus allows the validity witness partitioning procedure to perform the reduction to overlapping
+     * witnesses for larger cluster sizes that could be runtime-impairing, then limiting specifically the length of the
+     * input to the factorial call.
+     */
+    uint64_t num_overlapping_witnesses_limit_gss = 6;
+    /**
      * Number of threads to make available to ClusterComplete for the simulation stage.
      */
     uint64_t available_threads = std::thread::hardware_concurrency();
@@ -93,10 +100,15 @@ class clustercomplete_impl
         res.additional_simulation_parameters.emplace("global_potential", params.global_potential);
         res.additional_simulation_parameters.emplace("validity_witness_partitioning_limit",
                                                      params.validity_witness_partitioning_max_cluster_size_gss);
+        res.additional_simulation_parameters.emplace("num_overlapping_witnesses_limit",
+                                                     params.num_overlapping_witnesses_limit_gss);
 
         // run Ground State Space to obtain the complete hierarchical charge space
         const ground_state_space_stats& gss_stats = fiction::ground_state_space(
-            charge_layout, params.validity_witness_partitioning_max_cluster_size_gss, charge_layout.get_phys_params());
+            charge_layout,
+            ground_state_space_params{charge_layout.get_phys_params(),
+                                      params.validity_witness_partitioning_max_cluster_size_gss,
+                                      params.num_overlapping_witnesses_limit_gss});
 
         if (!gss_stats.top_cluster)
         {

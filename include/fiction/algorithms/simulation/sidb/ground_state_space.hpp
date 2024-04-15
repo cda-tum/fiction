@@ -14,12 +14,14 @@
 #include "fiction/technology/sidb_cluster_hierarchy.hpp"
 
 #include <btree.h>
+#include <fmt/format.h>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
 #include <array>
 #include <chrono>
 #include <cstdint>
+#include <iostream>
 #include <memory>
 #include <optional>
 #include <utility>
@@ -28,7 +30,32 @@
 namespace fiction
 {
 
-/*
+/**
+ * The set of parameters used in the *Ground State Space* construction.
+ */
+struct ground_state_space_params
+{
+    /**
+     * The physical parameters that *Ground State Space* will use to prune simulation search space.
+     */
+    const sidb_simulation_parameters phys_params{};
+    /**
+     * This specifies the maximum cluster size for which Ground State Space will solve an NP-complete sub-problem
+     * exhaustively. The sets of SiDBs that witness local population stability for each respective charge state may be
+     * partitioned into disjoint sets such that the number of required witnesses for each respective charge state is
+     * satisfied. If no such partition exists, the multiset charge configuration associated with the requirements may be
+     * rejected.
+     */
+    uint64_t witness_partitioning_cluster_size_limit = 6;
+    /**
+     * The complexity is of validity witness partitioning bounded by a factorial in the number of overlapping witnesses.
+     * This parameter thus allows the validity witness partitioning procedure to perform the reduction to overlapping
+     * witnesses for larger cluster sizes that could be runtime-impairing, then limiting specifically the length of the
+     * input to the factorial call.
+     */
+    uint64_t num_overlapping_witnesses_limit_gss = 6;
+};
+/**
  * This struct is used to store the results of the *Ground State Space* construction.
  */
 struct ground_state_space_stats
@@ -64,22 +91,23 @@ struct ground_state_space_stats
     /**
      * Report *Ground State Space* statistics.
      *
+     * @param out The output stream to write to (default: standard output).
      * @return Prints the runtime and the number of pruned top level multisets versus the total amount possible.
      */
-    void report() const noexcept
+    void report(std::ostream& os = std::cout) const noexcept
     {
-        std::cout << "Pruned " << pruned_top_level_multisets << " out of " << maximum_top_level_multisets
-                  << " top level multiset charge configurations\n";
+        os << fmt::format("[i] Pruned {} out of {} top level multiset charge configurations\n",
+                          pruned_top_level_multisets, maximum_top_level_multisets);
 
-        std::cout << "Ground State Space took ";
+        os << "[i] Ground State Space took ";
 
         if (const double gss_runtime = mockturtle::to_seconds(runtime); gss_runtime > 1.0)
         {
-            std::cout << gss_runtime << " seconds" << std::endl;
+            os << gss_runtime << " seconds" << std::endl;
         }
         else
         {
-            std::cout << (gss_runtime * 1000) << " milliseconds" << std::endl;
+            os << (gss_runtime * 1000) << " milliseconds" << std::endl;
         }
     }
 };
@@ -92,16 +120,14 @@ class ground_state_space_impl
 {
   public:
     // The documentation for the constructor parameters is found at the bottom of the file.
-    explicit ground_state_space_impl(const Lyt& lyt, const uint64_t max_cluster_size_for_witness_partitioning,
-                                     const sidb_simulation_parameters& phys_params) noexcept :
-            base{phys_params.base},
+    explicit ground_state_space_impl(const Lyt& lyt, const ground_state_space_params parameters) noexcept :
+            params{parameters},
             top_cluster{to_sidb_cluster(sidb_cluster_hierarchy(lyt))},
-            clustering{get_initial_clustering(top_cluster, get_local_potential_bounds(lyt, phys_params))},
-            witness_partitioning_max_cluster_size{max_cluster_size_for_witness_partitioning},
-            mu_bounds_with_error{physical_constants::POP_STABILITY_ERR - phys_params.mu_minus,
-                                 -physical_constants::POP_STABILITY_ERR - phys_params.mu_minus,
-                                 physical_constants::POP_STABILITY_ERR - phys_params.mu_plus(),
-                                 -physical_constants::POP_STABILITY_ERR - phys_params.mu_plus()}
+            clustering{get_initial_clustering(top_cluster, get_local_potential_bounds(lyt, params.phys_params))},
+            mu_bounds_with_error{physical_constants::POP_STABILITY_ERR - params.phys_params.mu_minus,
+                                 -physical_constants::POP_STABILITY_ERR - params.phys_params.mu_minus,
+                                 physical_constants::POP_STABILITY_ERR - params.phys_params.mu_plus(),
+                                 -physical_constants::POP_STABILITY_ERR - params.phys_params.mu_plus()}
     {}
 
     ground_state_space_stats run() noexcept
@@ -121,8 +147,8 @@ class ground_state_space_impl
 
         const uint64_t max_multisets = maximum_top_level_multisets(top_cluster->num_sidbs());
 
-        return ground_state_space_stats{top_cluster, time_counter, max_multisets - top_cluster->charge_space.size(),
-                                        max_multisets};
+        return ground_state_space_stats{
+            top_cluster, time_counter, max_multisets - top_cluster->charge_space.size(), max_multisets};
     }
 
   private:
@@ -306,8 +332,10 @@ class ground_state_space_impl
                 required_neut_count{pst.get_count<sidb_charge_state::NEUTRAL>()}
         {}
 
-        void omit_free_witnesses() noexcept
+        uint64_t omit_free_witnesses_and_count_overlap() noexcept
         {
+            witness_set overlap{};
+
             // find free witnesses to reduce the problem, leaving only witnesses to partition that overlap
             for (const auto& [this_set, competing_sets] :
                  std::array{std::make_pair(std::make_pair(std::ref(negative_witnesses), std::ref(required_neg_count)),
@@ -327,9 +355,13 @@ class ground_state_space_impl
                         continue;
                     }
 
+                    overlap.emplace(*it);
+
                     ++it;
                 }
             }
+
+            return overlap.size();
         }
     };
 
@@ -467,13 +499,16 @@ class ground_state_space_impl
             return false;
         }
 
-        if (pst.cluster->num_sidbs() > witness_partitioning_max_cluster_size)
+        if (pst.cluster->num_sidbs() > params.witness_partitioning_cluster_size_limit)
         {
             return true;
         }
 
-        // reduce problem to overlapping witnesses only
-        st.omit_free_witnesses();
+        // reduce problem to overlapping witnesses only and see if it exceeds the limit
+        if (st.omit_free_witnesses_and_count_overlap() > params.num_overlapping_witnesses_limit_gss)
+        {
+            return true;
+        }
 
         // look for UNSAT (factorial)
         return find_valid_witness_partitioning<sidb_charge_state::NEGATIVE>(st, st.required_neg_count);
@@ -789,18 +824,16 @@ class ground_state_space_impl
     [[nodiscard]] constexpr inline uint64_t maximum_top_level_multisets(const uint64_t number_of_sidbs) const noexcept
     {
         // computes nCr(N + 2, 2)                             // computes nCr(N + 1, 1)
-        return base == 3 ? ((number_of_sidbs + 1) * (number_of_sidbs + 2)) / 2 : number_of_sidbs + 1;
+        return params.phys_params.base == 3 ? ((number_of_sidbs + 1) * (number_of_sidbs + 2)) / 2 : number_of_sidbs + 1;
     }
 
-    const uint8_t base;
+    const ground_state_space_params params;
 
     const sidb_cluster_ptr top_cluster;
 
     sidb_clustering clustering{};
 
     bool terminate = false;
-
-    const uint64_t witness_partitioning_max_cluster_size;
 
     const std::array<double, 4> mu_bounds_with_error;
 };
@@ -841,9 +874,7 @@ class ground_state_space_impl
  * contains the charge spaces of each cluster.
  */
 template <typename Lyt>
-ground_state_space_stats
-ground_state_space(const Lyt& lyt, const uint64_t max_cluster_size_for_witness_partitioning = 6,
-                   const sidb_simulation_parameters& phys_params = sidb_simulation_parameters{}) noexcept
+ground_state_space_stats ground_state_space(const Lyt& lyt, const ground_state_space_params& params = {}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -853,7 +884,7 @@ ground_state_space(const Lyt& lyt, const uint64_t max_cluster_size_for_witness_p
         return ground_state_space_stats{};
     }
 
-    detail::ground_state_space_impl<Lyt> p{lyt, max_cluster_size_for_witness_partitioning, phys_params};
+    detail::ground_state_space_impl<Lyt> p{lyt, params};
 
     return p.run();
 }
