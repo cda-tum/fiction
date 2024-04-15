@@ -188,17 +188,17 @@ TEST_CASE("Benchmark simulators", "[benchmark]")
 //                            mean          low mean      high mean
 //                            std dev       low std dev   high std dev
 //    -------------------------------------------------------------------------------
-//    QuickExact              100           1             2.97074 m
-//                            1.85809 s     1.84034 s     1.87889 s
-//                            97.8108 ms    83.4107 ms    117.583 ms
+//    QuickExact              100           1             3.07802 m
+//                            1.82677 s     1.81125 s     1.84519 s
+//                            85.8776 ms    73.6874 ms    102.415 ms
 //
-//    QuickSim                100           1             1.00106 s
-//                            10.1342 ms    10.0005 ms    10.2843 ms
-//                            723.433 us    565.239 us    1.07378 ms
+//    QuickSim                100           1             949.075 ms
+//                            9.6784 ms     9.55572 ms    9.81532 ms
+//                            659.103 us    529.837 us    908.398 us
 //
-//    ClusterComplete         100           1             1.66618 s
-//                            17.6172 ms    17.3069 ms    17.9576 ms
-//                            1.66116 ms    1.47645 ms    1.94783 ms
+//    ClusterComplete         100           1             1.78456 s
+//                            17.2877 ms    17.0146 ms    17.5923 ms
+//                            1.46908 ms    1.29383 ms    1.70859 ms
 
 TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
 {
@@ -271,6 +271,6 @@ TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
 //                                            mean          low mean      high mean
 //                                            std dev       low std dev   high std dev
 //    -------------------------------------------------------------------------------
-//    3 Segment Diagonal Bestagon Wire        100           1             49.5118 s
-//                                            471.564 ms    463.893 ms    479.81 ms
-//                                            40.5787 ms    35.545 ms    46.8499 ms
+//    3 Segment Diagonal Bestagon Wire        100           1             44.3262 s
+//                                            454.74 ms     448.366 ms    461.915 ms
+//

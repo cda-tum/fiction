@@ -911,6 +911,14 @@ struct sidb_cluster
      */
     const uid_t uid;
     /**
+     * The SiDBs contained by the cluster.
+     */
+    std::vector<sidb_ix> sidbs{};
+    /**
+     * The SiDBs in the layout that are not contained by the cluster.
+     */
+    std::vector<sidb_ix> external_sidbs{};
+    /**
      * The set of children of a cluster is a clustering.
      */
     sidb_clustering children;
@@ -922,15 +930,15 @@ struct sidb_cluster
      * The bounds on the electrostatic potential sum of SiDBs external to this cluster, local to an SiDB in the cluster.
      */
     partial_potential_bounds_store received_ext_pot_bounds{};
-
+    /**
+     * The bounds on the electrostatic potential that is projected from this cluster for the different multiset charge
+     * configurations in the charge space.
+     */
 #ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
-    std::set<sidb_ix>                             sidbs;
     std::map<sidb_ix, potential_projection_order> pot_projs{};
 #else
-    phmap::flat_hash_set<sidb_ix>                             sidbs;
     phmap::flat_hash_map<sidb_ix, potential_projection_order> pot_projs{};
 #endif
-    std::vector<sidb_ix> external_sidbs{};
     /**
      * The charge state space of the cluster.
      */
@@ -939,21 +947,17 @@ struct sidb_cluster
      * SiDB cluster hierarchy constructor.
      *
      * @param c Set of SiDB indices for the cluster to contain.
+     * @param other_c Set of SiDB indices in the layout that the cluster will not contain.
      * @param v A set of cluster hierarchies to set as the children of this cluster.
      * @param unique_id The unsigned integer to identify the cluster hierarchy uniquely with. For the case of a
      * singleton cluster, the unique identifier is set to be the index of the single SiDB it contains.
      */
-#ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
-    explicit sidb_cluster(std::set<sidb_ix> c, std::vector<sidb_ix> other_c, sidb_clustering x,
+    explicit sidb_cluster(std::vector<sidb_ix> c, std::vector<sidb_ix> other_c, sidb_clustering x,
                           uid_t unique_id) noexcept :
-#else
-    explicit sidb_cluster(phmap::flat_hash_set<sidb_ix> c, std::vector<sidb_ix> other_c, sidb_clustering x,
-                          uid_t unique_id) noexcept :
-#endif
             uid{x.empty() ? *c.cbegin() : unique_id},
-            children{std::move(x)},
             sidbs{std::move(c)},
-            external_sidbs{std::move(other_c)}
+            external_sidbs{std::move(other_c)},
+            children{std::move(x)}
     {}
     /**
      * This function returns a shared pointer to the parent of this cluster.
@@ -1076,18 +1080,25 @@ static sidb_cluster_ptr to_unique_sidb_cluster(const uint64_t total_sidbs, const
         }
     }
 
-    std::vector<uint64_t> external_sidbs{};
-    external_sidbs.reserve(total_sidbs);
+    std::vector<uint64_t> internal_sidbs{}, external_sidbs{};
+    internal_sidbs.reserve(n.c.size());
+    external_sidbs.reserve(total_sidbs - n.c.size());
+
     for (uint64_t sidb_ix = 0; sidb_ix < total_sidbs; ++sidb_ix)
     {
         if (n.c.count(sidb_ix) == 0)
         {
             external_sidbs.emplace_back(sidb_ix);
         }
+        else
+        {
+            internal_sidbs.emplace_back(sidb_ix);
+        }
     }
 
     const sidb_cluster_ptr parent =
-        std::make_shared<sidb_cluster>(n.c, std::move(external_sidbs), std::move(children), uid);
+        std::make_shared<sidb_cluster>(std::move(internal_sidbs), std::move(external_sidbs), std::move(children), uid);
+
     uid++;
 
     if (parent->children.empty())
@@ -1117,9 +1128,11 @@ inline sidb_cluster_ptr to_sidb_cluster(const sidb_binary_cluster_hierarchy_node
     }
 
     // to avoid weird shared pointer deallocation behaviour, give a parent to a singleton cluster hierarchy
-    const sidb_cluster_ptr parent = std::make_shared<sidb_cluster>(
-        n.c, std::vector<uint64_t>{},
-        sidb_clustering{std::make_shared<sidb_cluster>(n.c, std::vector<uint64_t>{}, sidb_clustering{}, 0)}, 1);
+    const sidb_cluster_ptr parent =
+        std::make_shared<sidb_cluster>(std::vector{*n.c.cbegin()}, std::vector<uint64_t>{},
+                                       sidb_clustering{std::make_shared<sidb_cluster>(
+                                           std::vector{*n.c.cbegin()}, std::vector<uint64_t>{}, sidb_clustering{}, 0)},
+                                       1);
     (*parent->children.cbegin())->parent = std::weak_ptr<sidb_cluster>(parent);
 
     return parent;
