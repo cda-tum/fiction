@@ -274,14 +274,14 @@ class operational_domain_impl
         std::iota(x_indices.begin(), x_indices.end(), 0ul);
         std::iota(y_indices.begin(), y_indices.end(), 0ul);
 
-        // If the value of the x-parameter is greater than params.x_max after num_x_steps() steps, this value is
+        // if the value of the x-parameter is greater than params.x_max after num_x_steps() steps, this value is
         // ignored in the operational domain calculation.
         if ((params.x_min + (x_indices.size() - 1) * params.x_step) - params.x_max >
             physical_constants::POP_STABILITY_ERR)
         {
             x_indices.pop_back();
         }
-        // If the value of the y-parameter is greater than params.y_max after num_y_steps() steps, this value is
+        // if the value of the y-parameter is greater than params.y_max after num_y_steps() steps, this value is
         // ignored in the operational domain calculation.
         if (((params.y_min + (y_indices.size() - 1) * params.y_step) - params.y_max) >
             physical_constants::POP_STABILITY_ERR)
@@ -290,13 +290,13 @@ class operational_domain_impl
         }
 
         // generate the x dimension values
-        for (size_t i = 0; i <= x_indices.size(); ++i)
+        for (std::size_t i = 0; i <= x_indices.size(); ++i)
         {
             x_values.push_back(params.x_min + i * params.x_step);
         }
 
         // generate the y dimension values
-        for (size_t i = 0; i <= y_indices.size(); ++i)
+        for (std::size_t i = 0; i <= y_indices.size(); ++i)
         {
             y_values.push_back(params.y_min + i * params.y_step);
         }
