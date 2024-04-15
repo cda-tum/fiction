@@ -285,8 +285,7 @@ Simulation Equivalence Checking
         .. doxygenfunction:: fiction::check_simulation_results_for_equivalence
 
     .. tab:: Python
-        .. autofunction:: mnt.pyfiction.check_simulation_results_for_equivalence_100
-        .. autofunction:: mnt.pyfiction.check_simulation_results_for_equivalence_111
+        .. autofunction:: mnt.pyfiction.check_simulation_results_for_equivalence
 
 
 Determine the Ground State from Simulation Results
@@ -312,8 +311,7 @@ Charge Detection
         .. doxygenfunction:: fiction::can_positive_charges_occur
 
     .. tab:: Python
-        .. autofunction:: mnt.pyfiction.can_positive_charges_occur_100
-        .. autofunction:: mnt.pyfiction.can_positive_charges_occur_111
+        .. autofunction:: mnt.pyfiction.can_positive_charges_occur
 
 Binary-dot Logic (BDL) Pair Detection
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -358,27 +356,9 @@ Assess Population Stability
             :members:
         .. autoclass:: mnt.pyfiction.population_stability_information
             :members:
-        .. autoclass:: mnt.pyfiction.assess_physical_population_stability_params_100
+        .. autoclass:: mnt.pyfiction.assess_physical_population_stability_params
             :members:
-        .. autoclass:: mnt.pyfiction.assess_physical_population_stability_params_111
-            :members:
-        .. autofunction:: mnt.pyfiction.assess_physical_population_stability_100
-        .. autofunction:: mnt.pyfiction.assess_physical_population_stability_111
-
-
-Positive Charge Detection
-^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. tabs::
-    .. tab:: C++
-        **Header:** ``fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp``
-
-        .. doxygenfunction:: fiction::can_positive_charges_occur
-
-    .. tab:: Python
-        .. autofunction:: mnt.pyfiction.can_positive_charges_occur_100
-        .. autofunction:: mnt.pyfiction.can_positive_charges_occur_111
-
+        .. autofunction:: mnt.pyfiction.assess_physical_population_stability
 
 Convert Potential to Distance
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

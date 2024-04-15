@@ -17,7 +17,7 @@ class TestCheckSimulationResultsForEquivalence(unittest.TestCase):
         first_result_100.charge_distributions = [charge_distribution_surface_100(lattice_100)]
         second_result_100.charge_distributions = [charge_distribution_surface_100(lattice_100)]
 
-        equivalent = check_simulation_results_for_equivalence_100(first_result_100, second_result_100)
+        equivalent = check_simulation_results_for_equivalence(first_result_100, second_result_100)
 
         self.assertTrue(equivalent)
 
@@ -33,7 +33,7 @@ class TestCheckSimulationResultsForEquivalence(unittest.TestCase):
         first_result_111.charge_distributions = [charge_distribution_surface_111(lattice_111)]
         second_result_111.charge_distributions = [charge_distribution_surface_111(lattice_111)]
 
-        equivalent = check_simulation_results_for_equivalence_111(first_result_111, second_result_111)
+        equivalent = check_simulation_results_for_equivalence(first_result_111, second_result_111)
 
         self.assertTrue(equivalent)
 

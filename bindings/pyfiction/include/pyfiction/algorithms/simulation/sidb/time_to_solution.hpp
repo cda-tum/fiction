@@ -24,8 +24,7 @@ void time_to_solution(pybind11::module& m, const std::string& lattice = "")
 {
     using namespace pybind11::literals;
 
-    m.def(fmt::format("time_to_solution{}", lattice).c_str(), &fiction::time_to_solution<Lyt>, "lyt"_a,
-          "quickim_params"_a, "tts_params"_a = fiction::time_to_solution_params{}, "ps"_a = nullptr, DOC(fiction_time_to_solution));
+    m.def("time_to_solution", &fiction::time_to_solution<Lyt>, "lyt"_a, "quickim_params"_a, "tts_params"_a = fiction::time_to_solution_params{}, "ps"_a = nullptr, DOC(fiction_time_to_solution));
 }
 
 }  // namespace detail
@@ -43,10 +42,7 @@ inline void time_to_solution(pybind11::module& m)
         .def_readwrite("repetitions", &fiction::time_to_solution_params::repetitions,
                        DOC(fiction_time_to_solution_params_repetitions))
         .def_readwrite("confidence_level", &fiction::time_to_solution_params::confidence_level,
-                       DOC(fiction_time_to_solution_params_confidence_level))
-
-        ;
-
+                       DOC(fiction_time_to_solution_params_confidence_level));
     /**
      * Statistics.
      */
@@ -65,9 +61,8 @@ inline void time_to_solution(pybind11::module& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::time_to_solution<py_sidb_100_lattice>(m, "_100");
-    detail::time_to_solution<py_sidb_111_lattice>(m, "_111");
-    detail::time_to_solution<py_sidb_layout>(m);
+    detail::time_to_solution<py_sidb_100_lattice>(m);
+    detail::time_to_solution<py_sidb_111_lattice>(m);
 }
 
 }  // namespace pyfiction

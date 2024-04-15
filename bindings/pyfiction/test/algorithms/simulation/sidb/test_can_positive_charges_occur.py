@@ -11,11 +11,11 @@ class TestCanPositiveChargesOccur(unittest.TestCase):
         layout.assign_cell_type((1, 0), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((2, 0), sidb_technology.cell_type.NORMAL)
 
-        self.assertTrue(can_positive_charges_occur_100(layout, sidb_simulation_parameters()))
+        self.assertTrue(can_positive_charges_occur(layout, sidb_simulation_parameters()))
 
         params = sidb_simulation_parameters()
         params.mu_minus = -0.8
-        self.assertFalse(can_positive_charges_occur_100(layout, params))
+        self.assertFalse(can_positive_charges_occur(layout, params))
 
     def test_three_DBs_111_lattice(self):
         layout = sidb_lattice_111((2, 3))
@@ -26,10 +26,10 @@ class TestCanPositiveChargesOccur(unittest.TestCase):
         params = sidb_simulation_parameters()
         params.mu_minus = -0.05
 
-        self.assertTrue(can_positive_charges_occur_111(layout, params))
+        self.assertTrue(can_positive_charges_occur(layout, params))
 
         params.mu_minus = -0.8
-        self.assertFalse(can_positive_charges_occur_111(layout, params))
+        self.assertFalse(can_positive_charges_occur(layout, params))
 
 
 if __name__ == '__main__':
