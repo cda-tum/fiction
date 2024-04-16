@@ -1938,17 +1938,17 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
         if (strg->charge_index_sublayout == 0)
         {
-            for (const auto& cell : strg->three_state_cells)
+            for (const auto& c : strg->three_state_cells)
             {
-                this->assign_charge_state(cell, sidb_charge_state::NEGATIVE, false);
+                this->assign_charge_state(c, sidb_charge_state::NEGATIVE, false);
             }
         }
 
         if (strg->charge_index_and_base.first == 0)
         {
-            for (const auto& cell : strg->sidb_order_without_three_state_cells)
+            for (const auto& c : strg->sidb_order_without_three_state_cells)
             {
-                this->assign_charge_state(cell, sidb_charge_state::NEGATIVE, false);
+                this->assign_charge_state(c, sidb_charge_state::NEGATIVE, false);
             }
         }
 
