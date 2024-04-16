@@ -15,6 +15,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 #include <cstdint>
 #include <cstdlib>
 #include <set>
@@ -25,7 +26,7 @@ namespace fiction
 {
 
 template <typename Lyt>
-struct displacement_robustness_domain
+struct sidb_gate_displacement_robustness_domain
 {
     /**
      * Represents a domain of displacement robustness for layouts resulting from applying a displacement to a given gate
@@ -44,36 +45,57 @@ struct displacement_robustness_params
     /**
      * The simulation engine used.
      */
-    sidb_simulation_engine        sim_engine{sidb_simulation_engine::QUICKEXACT};
+    sidb_simulation_engine sim_engine{sidb_simulation_engine::QUICKEXACT};
     /**
      * Parameters to check the operation status.
      */
-    is_operational_params         operational_params{};
-    std::set<cell<Lyt>>           fixed_cells{};
+    is_operational_params operational_params{};
+    /**
+     * Cells/SiDBs of the layout which are not affected by variations.
+     */
+    std::set<cell<Lyt>> fixed_cells{};
 };
 
 struct displacement_robustness_stats
 {
     /**
-     *
+     * Total runtime in sec. to determine the robustness of the SiDB gate.
      */
     mockturtle::stopwatch<>::duration time_total{0};
-
+    /**
+     * The number of operational SiDB gates resulting from the given layout by displacements.
+     */
     std::size_t num_operational_sidb_displacements{0};
-
+    /**
+     * The number of non-operational SiDB gates resulting from the given layout by displacements.
+     */
     std::size_t num_non_operational_sidb_displacements{0};
 };
 
+/**
+ * Counts the number of operational SiDB gates in the given displacement robustness domain.
+ *
+ * @tparam Lyt The SiDB cell-level layout type.
+ * @param domain The displacement robustness domain to analyze.
+ * @return The number of operational layouts within the domain.
+ */
 template <typename Lyt>
-std::size_t num_operational_layouts(const displacement_robustness_domain<Lyt>& domain)
+std::size_t num_operational_layouts(const sidb_gate_displacement_robustness_domain<Lyt>& domain)
 {
     return static_cast<std::size_t>(std::count_if(domain.operational_values.begin(), domain.operational_values.end(),
                                                   [](const auto& robust)
                                                   { return robust.second == operational_status::OPERATIONAL; }));
 }
 
+/**
+ * Counts the number of non-operational SiDB gates in the given displacement robustness domain.
+ *
+ * @tparam Lyt The SiDB cell-level layout type.
+ * @param domain The displacement robustness domain to analyze.
+ * @return The number of non-operational layouts within the domain.
+ */
 template <typename Lyt>
-std::size_t num_non_operational_layouts(const displacement_robustness_domain<Lyt>& domain)
+std::size_t num_non_operational_layouts(const sidb_gate_displacement_robustness_domain<Lyt>& domain)
 {
     return static_cast<std::size_t>(std::count_if(domain.operational_values.begin(), domain.operational_values.end(),
                                                   [](const auto& robust)
@@ -87,18 +109,23 @@ template <typename Lyt, typename TT>
 class displacement_robustness_domain_impl
 {
   public:
-    displacement_robustness_domain_impl(const Lyt& lyt, const std::vector<TT>& spec, const displacement_robustness_params<TT, Lyt>& ps,
-                                        displacement_robustness_stats& st) noexcept :
+    displacement_robustness_domain_impl(const Lyt& lyt, const std::vector<TT>& spec,
+                                        const displacement_robustness_params<Lyt>& ps,
+                                        displacement_robustness_stats&             st) noexcept :
             layout{lyt},
             params{ps},
             stats{st},
-            tt{spec}
+            truth_table{spec}
     {
         for (const auto& c : params.fixed_cells)
         {
             assert(!layout.is_empty_cell(c) && "Not all fixed cells are part of the layout");
         }
         all_displacements_for_all_coordinates.reserve(layout.num_cells());
+        all_displacements_layouts.reserve((layout.num_cells() - params.fixed_cells.size() + 1) *
+                                          (params.displacement_variations.first + 1) *
+                                          (params.displacement_variations.second + 1));
+
         layout.foreach_cell(
             [&](const auto& c)
             {
@@ -169,10 +196,10 @@ class displacement_robustness_domain_impl
         return result;
     }
 
-    [[nodiscard]] displacement_robustness_domain<Lyt> run()
+    [[nodiscard]] sidb_gate_displacement_robustness_domain<Lyt> run()
     {
-        const auto                          all_combinations = generate_all_combinations();
-        displacement_robustness_domain<Lyt> domain{};
+        const auto                                    all_combinations = generate_all_combinations();
+        sidb_gate_displacement_robustness_domain<Lyt> domain{};
         for (const auto& combination : all_combinations)
         {
             if (combination.size() != layout.num_cells())
@@ -198,7 +225,7 @@ class displacement_robustness_domain_impl
             }
 
             // Assess the operational status of the new layout
-            const auto op_status = is_operational(lyt, params.tt, params.operational_params);
+            const auto op_status = is_operational(lyt, truth_table, params.operational_params);
 
             // Store the operational status in the domain
             domain.operational_values.emplace_back(lyt, op_status.first);
@@ -216,21 +243,44 @@ class displacement_robustness_domain_impl
     }
 
   private:
-    const Lyt&                                     layout;
-    const displacement_robustness_params<TT, Lyt>& params;
-    displacement_robustness_stats&                 stats;
-    // displacement_robustness_stats&                            stats;
+    /**
+     * The SiDB cell-level layout/SiDB gate for which the displacement robustness calculation is performed.
+     */
+    const Lyt& layout;
+    /**
+     * The parameters for the displacement robustness computation.
+     */
+    const displacement_robustness_params<Lyt>& params;
+    /**
+     * The statistics of the displacement robustness computation.
+     */
+    displacement_robustness_stats&      stats;
     std::vector<std::vector<cell<Lyt>>> all_displacements_for_all_coordinates{};
+    std::vector<Lyt>                    all_displacements_layouts{};
     std::vector<cell<Lyt>>              cells{};
-    std::vector<TT> tt{};
+    /**
+     * The specification of the layout.
+     */
+    const std::vector<TT>& truth_table;
 };
 
 }  // namespace detail
 
+/**
+ * This function analyzes the operational status of all possible displacements of the SiDBs in the SiDB gate,
+ * based on the provided truth table specification and displacement robustness computation parameters.
+ *
+ * @tparam Lyt The type of SiDB cell-level layout.
+ * @param spec The truth table specification of the gate.
+ * @param params The parameters for the displacement robustness computation.
+ * @param stats Statistics related to the displacement robustness computation.
+ * @return The displacement robustness of the SiDB gate.
+ */
 template <typename Lyt, typename TT>
-[[nodiscard]] displacement_robustness_domain<Lyt>
-assess_displacement_robustness(const Lyt& layout, const std::vector<TT> &spec, const displacement_robustness_params<Lyt>& params,
-                               displacement_robustness_stats* stats = nullptr)
+[[nodiscard]] sidb_gate_displacement_robustness_domain<Lyt>
+assess_sidb_gate_displacement_robustness(const Lyt& layout, const std::vector<TT>& spec,
+                                         const displacement_robustness_params<Lyt>& params,
+                                         displacement_robustness_stats*             stats = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
