@@ -34,13 +34,21 @@ struct displacement_robustness_domain
     std::vector<std::pair<Lyt, operational_status>> operational_values{};
 };
 
-template <typename TT, typename Lyt>
+template <typename Lyt>
 struct displacement_robustness_params
 {
+    /**
+     * The atomic displacement in x- and y-direction, respectively. The default value is (1, 1).
+     */
     std::pair<uint64_t, uint64_t> displacement_variations = {1, 1};
+    /**
+     * The simulation engine used.
+     */
     sidb_simulation_engine        sim_engine{sidb_simulation_engine::QUICKEXACT};
+    /**
+     * Parameters to check the operation status.
+     */
     is_operational_params         operational_params{};
-    std::vector<TT>               tt{};
     std::set<cell<Lyt>>           fixed_cells{};
 };
 
@@ -79,11 +87,12 @@ template <typename Lyt, typename TT>
 class displacement_robustness_domain_impl
 {
   public:
-    displacement_robustness_domain_impl(const Lyt& lyt, const displacement_robustness_params<TT, Lyt>& ps,
+    displacement_robustness_domain_impl(const Lyt& lyt, const std::vector<TT>& spec, const displacement_robustness_params<TT, Lyt>& ps,
                                         displacement_robustness_stats& st) noexcept :
             layout{lyt},
             params{ps},
-            stats{st}
+            stats{st},
+            tt{spec}
     {
         for (const auto& c : params.fixed_cells)
         {
@@ -213,20 +222,21 @@ class displacement_robustness_domain_impl
     // displacement_robustness_stats&                            stats;
     std::vector<std::vector<cell<Lyt>>> all_displacements_for_all_coordinates{};
     std::vector<cell<Lyt>>              cells{};
+    std::vector<TT> tt{};
 };
 
 }  // namespace detail
 
 template <typename Lyt, typename TT>
 [[nodiscard]] displacement_robustness_domain<Lyt>
-assess_displacement_robustness(const Lyt& layout, const displacement_robustness_params<TT, Lyt>& params,
+assess_displacement_robustness(const Lyt& layout, const std::vector<TT> &spec, const displacement_robustness_params<Lyt>& params,
                                displacement_robustness_stats* stats = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
     displacement_robustness_stats                        st{};
-    detail::displacement_robustness_domain_impl<Lyt, TT> p{layout, params, st};
+    detail::displacement_robustness_domain_impl<Lyt, TT> p{layout, spec, params, st};
 
     const auto result = p.run();
 
