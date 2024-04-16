@@ -8,12 +8,16 @@
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
+#include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/cell_technologies.hpp>
-#include <fiction/technology/sidb_surface.hpp>
+#include <fiction/technology/sidb_defect_surface.hpp>
+#include <fiction/technology/sidb_defects.hpp>
+#include <fiction/technology/sidb_lattice.hpp>
+#include <fiction/technology/sidb_lattice_orientations.hpp>
+#include <fiction/traits.hpp>
+#include <fiction/types.hpp>
 
 #include <sstream>
-#include <string>
-#include <type_traits>
 #include <unordered_set>
 
 using namespace fiction;
@@ -22,6 +26,17 @@ TEST_CASE("Read empty SQD layout", "[sqd]")
 {
     static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<siqad>\n"
+                                              "    <layers>\n"
+                                              "        <layer_prop>\n"
+                                              "            <lat_vec>\n"
+                                              "                <a1 x=\"3.84\" y=\"0\"/>\n"
+                                              "                <a2 x=\"0\" y=\"7.68\"/>\n"
+                                              "                <N>2</N>\n"
+                                              "                <b1 x=\"0\" y=\"0\"/>\n"
+                                              "                <b2 x=\"0\" y=\"2.25\"/>\n"
+                                              "            </lat_vec>\n"
+                                              "        </layer_prop>\n"
+                                              "    </layers>\n"
                                               "  <design>\n"
                                               "    <layer type=\"Lattice\"/>\n"
                                               "    <layer type=\"Misc\"/>\n"
@@ -41,13 +56,32 @@ TEST_CASE("Read empty SQD layout", "[sqd]")
     };
 
     using sidb_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
-    check(read_sqd_layout<sidb_layout>(layout_stream));
+    check(read_sqd_layout<sidb_lattice<sidb_100_lattice, sidb_layout>>(layout_stream));
 }
 
 TEST_CASE("Read single-dot SQD layout", "[sqd]")
 {
     static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<siqad>\n"
+                                              "    <layers>\n"
+                                              "        <layer_prop>\n"
+                                              "            <name>Lattice</name>\n"
+                                              "            <type>Lattice</type>\n"
+                                              "            <role>Design</role>\n"
+                                              "            <zoffset>0</zoffset>\n"
+                                              "            <zheight>0</zheight>\n"
+                                              "            <visible>1</visible>\n"
+                                              "            <active>0</active>\n"
+                                              "            <lat_vec>\n"
+                                              "                <name>Si(111) 1x1</name>\n"
+                                              "                <a1 x=\"3.84\" y=\"0\"/>\n"
+                                              "                <a2 x=\"0\" y=\"7.68\"/>\n"
+                                              "                <N>2</N>\n"
+                                              "                <b1 x=\"0\" y=\"0\"/>\n"
+                                              "                <b2 x=\"0\" y=\"2.25\"/>\n"
+                                              "            </lat_vec>\n"
+                                              "        </layer_prop>\n"
+                                              "    </layers>\n"
                                               "  <design>\n"
                                               "    <layer type=\"Lattice\"/>\n"
                                               "    <layer type=\"Misc\"/>\n"
@@ -74,13 +108,31 @@ TEST_CASE("Read single-dot SQD layout", "[sqd]")
     };
 
     using sidb_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
-    check(read_sqd_layout<sidb_layout>(layout_stream));
+    check(read_sqd_layout<sidb_lattice<sidb_111_lattice, sidb_layout>>(layout_stream));
 }
 
 TEST_CASE("Read multi-dot SQD layout", "[sqd]")
 {
     static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<siqad>\n"
+                                              "    <layers>\n"
+                                              "        <layer_prop>\n"
+                                              "            <name>Lattice</name>\n"
+                                              "            <type>Lattice</type>\n"
+                                              "            <role>Design</role>\n"
+                                              "            <zoffset>0</zoffset>\n"
+                                              "            <zheight>0</zheight>\n"
+                                              "            <visible>1</visible>\n"
+                                              "            <active>0</active>\n"
+                                              "            <lat_vec>\n"
+                                              "                <a1 x=\"3.84\" y=\"0\"/>\n"
+                                              "                <a2 x=\"0\" y=\"7.68\"/>\n"
+                                              "                <N>2</N>\n"
+                                              "                <b1 x=\"0\" y=\"0\"/>\n"
+                                              "                <b2 x=\"0\" y=\"2.25\"/>\n"
+                                              "            </lat_vec>\n"
+                                              "        </layer_prop>\n"
+                                              "    </layers>\n"
                                               "  <design>\n"
                                               "    <layer type=\"Lattice\"/>\n"
                                               "    <layer type=\"Misc\"/>\n"
@@ -111,7 +163,7 @@ TEST_CASE("Read multi-dot SQD layout", "[sqd]")
     SECTION("Fiction coordinates")
     {
         using sidb_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
-        const auto layout = read_sqd_layout<sidb_layout>(layout_stream);
+        const auto layout = read_sqd_layout<sidb_lattice<sidb_100_lattice, sidb_layout>>(layout_stream);
 
         CHECK(layout.x() == 2);
         CHECK(layout.y() == 5);
@@ -125,7 +177,7 @@ TEST_CASE("Read multi-dot SQD layout", "[sqd]")
     SECTION("SiQAD coordinates")
     {
         using sqd_layout  = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>;
-        const auto layout = read_sqd_layout<sqd_layout>(layout_stream);
+        const auto layout = read_sqd_layout<sidb_lattice<sidb_100_lattice, sqd_layout>>(layout_stream);
 
         CHECK(layout.x() == 2);
         CHECK(layout.y() == 2);
@@ -142,6 +194,24 @@ TEST_CASE("Read multi-dot SQD layout with cell type definitions", "[sqd]")
 {
     static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<siqad>\n"
+                                              "    <layers>\n"
+                                              "        <layer_prop>\n"
+                                              "            <name>Lattice</name>\n"
+                                              "            <type>Lattice</type>\n"
+                                              "            <role>Design</role>\n"
+                                              "            <zoffset>0</zoffset>\n"
+                                              "            <zheight>0</zheight>\n"
+                                              "            <visible>1</visible>\n"
+                                              "            <active>0</active>\n"
+                                              "            <lat_vec>\n"
+                                              "                <a1 x=\"3.84\" y=\"0\"/>\n"
+                                              "                <a2 x=\"0\" y=\"7.68\"/>\n"
+                                              "                <N>2</N>\n"
+                                              "                <b1 x=\"0\" y=\"0\"/>\n"
+                                              "                <b2 x=\"0\" y=\"2.25\"/>\n"
+                                              "            </lat_vec>\n"
+                                              "        </layer_prop>\n"
+                                              "    </layers>\n"
                                               "  <design>\n"
                                               "    <layer type=\"Lattice\"/>\n"
                                               "    <layer type=\"Misc\"/>\n"
@@ -173,7 +243,71 @@ TEST_CASE("Read multi-dot SQD layout with cell type definitions", "[sqd]")
     std::istringstream layout_stream{sqd_layout};
 
     using sidb_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
-    const auto layout = read_sqd_layout<sidb_layout>(layout_stream);
+    const auto layout = read_sqd_layout<sidb_lattice<sidb_100_lattice, sidb_layout>>(layout_stream);
+
+    CHECK(layout.x() == 2);
+    CHECK(layout.y() == 5);
+
+    CHECK(layout.get_cell_type({0, 0}) == sidb_technology::cell_type::INPUT);
+    CHECK(layout.get_cell_type({0, 1}) == sidb_technology::cell_type::OUTPUT);
+    CHECK(layout.get_cell_type({2, 4}) == sidb_technology::cell_type::NORMAL);
+    CHECK(layout.get_cell_type({2, 5}) == sidb_technology::cell_type::NORMAL);
+}
+
+TEST_CASE("Read multi-dot SQD layout with cell type definitions, Si-111", "[sqd]")
+{
+    static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                                              "<siqad>\n"
+                                              "    <layers>\n"
+                                              "        <layer_prop>\n"
+                                              "            <name>Lattice</name>\n"
+                                              "            <type>Lattice</type>\n"
+                                              "            <role>Design</role>\n"
+                                              "            <zoffset>0</zoffset>\n"
+                                              "            <zheight>0</zheight>\n"
+                                              "            <visible>1</visible>\n"
+                                              "            <active>0</active>\n"
+                                              "            <lat_vec>\n"
+                                              "                <name>Si(111) 1x1</name>\n"
+                                              "                <a1 x=\"6.65\" y=\"0\"/>\n"
+                                              "                <a2 x=\"0\" y=\"3.84\"/>\n"
+                                              "                <N>2</N>\n"
+                                              "                <b1 x=\"0\" y=\"0\"/>\n"
+                                              "              <b2 x=\"3.3255\" y=\"1.92\"/>\n"
+                                              "            </lat_vec>\n"
+                                              "        </layer_prop>\n"
+                                              "    </layers>\n"
+                                              "  <design>\n"
+                                              "    <layer type=\"Lattice\"/>\n"
+                                              "    <layer type=\"Misc\"/>\n"
+                                              "    <layer type=\"Electrode\"/>\n"
+                                              "    <layer type=\"DB\">\n"
+                                              "      <dbdot>\n"
+                                              "          <layer_id>2</layer_id>\n"
+                                              "          <latcoord n=\"0\" m=\"0\" l=\"0\"/>\n"
+                                              "          <type>input</type>\n"
+                                              "      </dbdot>\n"
+                                              "      <dbdot>\n"
+                                              "          <layer_id>2</layer_id>\n"
+                                              "          <latcoord n=\"0\" m=\"0\" l=\"1\"/>\n"
+                                              "          <type>output</type>\n"
+                                              "      </dbdot>\n"
+                                              "      <dbdot>\n"
+                                              "          <layer_id>2</layer_id>\n"
+                                              "          <latcoord n=\"2\" m=\"2\" l=\"0\"/>\n"
+                                              "          <type>normal</type>\n"
+                                              "      </dbdot>\n"
+                                              "      <dbdot>\n"
+                                              "          <layer_id>2</layer_id>\n"
+                                              "          <latcoord n=\"2\" m=\"2\" l=\"1\"/>\n"
+                                              "      </dbdot>\n"
+                                              "    </layer>\n"
+                                              "  </design>\n"
+                                              "</siqad>\n";
+
+    std::istringstream layout_stream{sqd_layout};
+
+    const auto layout = read_sqd_layout<sidb_111_cell_clk_lyt>(layout_stream);
 
     CHECK(layout.x() == 2);
     CHECK(layout.y() == 5);
@@ -188,6 +322,24 @@ TEST_CASE("Read single defect SQD layout", "[sqd]")
 {
     static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<siqad>\n"
+                                              "    <layers>\n"
+                                              "        <layer_prop>\n"
+                                              "            <name>Lattice</name>\n"
+                                              "            <type>Lattice</type>\n"
+                                              "            <role>Design</role>\n"
+                                              "            <zoffset>0</zoffset>\n"
+                                              "            <zheight>0</zheight>\n"
+                                              "            <visible>1</visible>\n"
+                                              "            <active>0</active>\n"
+                                              "            <lat_vec>\n"
+                                              "                <a1 x=\"3.84\" y=\"0\"/>\n"
+                                              "                <a2 x=\"0\" y=\"7.68\"/>\n"
+                                              "                <N>2</N>\n"
+                                              "                <b1 x=\"0\" y=\"0\"/>\n"
+                                              "                <b2 x=\"0\" y=\"2.25\"/>\n"
+                                              "            </lat_vec>\n"
+                                              "        </layer_prop>\n"
+                                              "    </layers>\n"
                                               "  <design>\n"
                                               "    <layer type=\"Lattice\"/>\n"
                                               "    <layer type=\"Misc\"/>\n"
@@ -209,8 +361,8 @@ TEST_CASE("Read single defect SQD layout", "[sqd]")
     std::istringstream layout_stream{sqd_layout};
 
     using sidb_layout =
-        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
-    const auto layout = read_sqd_layout<sidb_layout>(layout_stream);
+        sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
+    const auto layout = read_sqd_layout<sidb_lattice<sidb_100_lattice, sidb_layout>>(layout_stream);
 
     CHECK(layout.x() == 5);
     CHECK(layout.y() == 4);
@@ -227,6 +379,24 @@ TEST_CASE("Read multiple defects SQD layout", "[sqd]")
 {
     static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<siqad>\n"
+                                              "    <layers>\n"
+                                              "        <layer_prop>\n"
+                                              "            <name>Lattice</name>\n"
+                                              "            <type>Lattice</type>\n"
+                                              "            <role>Design</role>\n"
+                                              "            <zoffset>0</zoffset>\n"
+                                              "            <zheight>0</zheight>\n"
+                                              "            <visible>1</visible>\n"
+                                              "            <active>0</active>\n"
+                                              "            <lat_vec>\n"
+                                              "                <a1 x=\"3.84\" y=\"0\"/>\n"
+                                              "                <a2 x=\"0\" y=\"7.68\"/>\n"
+                                              "                <N>2</N>\n"
+                                              "                <b1 x=\"0\" y=\"0\"/>\n"
+                                              "                <b2 x=\"0\" y=\"2.25\"/>\n"
+                                              "            </lat_vec>\n"
+                                              "        </layer_prop>\n"
+                                              "    </layers>\n"
                                               "  <design>\n"
                                               "    <layer type=\"Lattice\"/>\n"
                                               "    <layer type=\"Misc\"/>\n"
@@ -281,8 +451,8 @@ TEST_CASE("Read multiple defects SQD layout", "[sqd]")
     std::istringstream layout_stream{sqd_layout};
 
     using sidb_layout =
-        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
-    const auto layout = read_sqd_layout<sidb_layout>(layout_stream);
+        sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
+    const auto layout = read_sqd_layout<sidb_lattice<sidb_100_lattice, sidb_layout>>(layout_stream);
 
     CHECK(layout.x() == 5);
     CHECK(layout.y() == 5);
@@ -334,6 +504,24 @@ TEST_CASE("Read multi-dot SQD layout with multi-cell defect", "[sqd]")
 {
     static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<siqad>\n"
+                                              "    <layers>\n"
+                                              "        <layer_prop>\n"
+                                              "            <name>Lattice</name>\n"
+                                              "            <type>Lattice</type>\n"
+                                              "            <role>Design</role>\n"
+                                              "            <zoffset>0</zoffset>\n"
+                                              "            <zheight>0</zheight>\n"
+                                              "            <visible>1</visible>\n"
+                                              "            <active>0</active>\n"
+                                              "            <lat_vec>\n"
+                                              "                <a1 x=\"3.84\" y=\"0\"/>\n"
+                                              "                <a2 x=\"0\" y=\"7.68\"/>\n"
+                                              "                <N>2</N>\n"
+                                              "                <b1 x=\"0\" y=\"0\"/>\n"
+                                              "                <b2 x=\"0\" y=\"2.25\"/>\n"
+                                              "            </lat_vec>\n"
+                                              "        </layer_prop>\n"
+                                              "    </layers>\n"
                                               "  <design>\n"
                                               "    <layer type=\"Lattice\"/>\n"
                                               "    <layer type=\"Misc\"/>\n"
@@ -379,8 +567,8 @@ TEST_CASE("Read multi-dot SQD layout with multi-cell defect", "[sqd]")
     std::istringstream layout_stream{sqd_layout};
 
     using sidb_layout =
-        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
-    const auto layout = read_sqd_layout<sidb_layout>(layout_stream);
+        sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
+    const auto layout = read_sqd_layout<sidb_lattice<sidb_100_lattice, sidb_layout>>(layout_stream);
 
     CHECK(layout.x() == 5);
     CHECK(layout.y() == 5);
@@ -412,6 +600,25 @@ TEST_CASE("In-place SQD reader with ignored defects", "[sqd]")
 {
     static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<siqad>\n"
+                                              "  <layers>\n"
+                                              "        <layer_prop>\n"
+                                              "            <name>Lattice</name>\n"
+                                              "            <type>Lattice</type>\n"
+                                              "            <role>Design</role>\n"
+                                              "            <zoffset>0</zoffset>\n"
+                                              "            <zheight>0</zheight>\n"
+                                              "            <visible>1</visible>\n"
+                                              "            <active>0</active>\n"
+                                              "            <lat_vec>\n"
+                                              "                <name>Si(111) 1x1</name>\n"
+                                              "                <a1 x=\"6.65\" y=\"0\"/>\n"
+                                              "                <a2 x=\"0\" y=\"3.84\"/>\n"
+                                              "                <N>2</N>\n"
+                                              "                <b1 x=\"0\" y=\"0\"/>\n"
+                                              "              <b2 x=\"3.3255\" y=\"1.92\"/>\n"
+                                              "            </lat_vec>\n"
+                                              "        </layer_prop>\n"
+                                              "    </layers>\n"
                                               "  <design>\n"
                                               "    <layer type=\"Lattice\"/>\n"
                                               "    <layer type=\"Misc\"/>\n"
@@ -457,12 +664,13 @@ TEST_CASE("In-place SQD reader with ignored defects", "[sqd]")
     std::istringstream layout_stream{sqd_layout};
 
     using sidb_layout =
-        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
+        sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
 
-    const sidb_surface_params params{std::unordered_set<sidb_defect_type>{sidb_defect_type::DB}};
-    sidb_layout               layout{params};
+    const sidb_defect_surface_params            params{std::unordered_set<sidb_defect_type>{sidb_defect_type::DB}};
+    const sidb_layout                           layout{params};
+    sidb_lattice<sidb_111_lattice, sidb_layout> lattice_layout{layout};
 
-    read_sqd_layout(layout, layout_stream);
+    read_sqd_layout(lattice_layout, layout_stream);
 
     CHECK(layout.x() == 5);
     CHECK(layout.y() == 5);
@@ -480,6 +688,24 @@ TEST_CASE("Read SQD defect despite missing <coulomb> element", "[sqd]")
 {
     static constexpr const char* sqd_layout = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
                                               "<siqad>\n"
+                                              "    <layers>\n"
+                                              "        <layer_prop>\n"
+                                              "            <name>Lattice</name>\n"
+                                              "            <type>Lattice</type>\n"
+                                              "            <role>Design</role>\n"
+                                              "            <zoffset>0</zoffset>\n"
+                                              "            <zheight>0</zheight>\n"
+                                              "            <visible>1</visible>\n"
+                                              "            <active>0</active>\n"
+                                              "            <lat_vec>\n"
+                                              "                <a1 x=\"3.84\" y=\"0\"/>\n"
+                                              "                <a2 x=\"0\" y=\"7.68\"/>\n"
+                                              "                <N>2</N>\n"
+                                              "                <b1 x=\"0\" y=\"0\"/>\n"
+                                              "                <b2 x=\"0\" y=\"2.25\"/>\n"
+                                              "            </lat_vec>\n"
+                                              "        </layer_prop>\n"
+                                              "    </layers>\n"
                                               "  <design>\n"
                                               "    <layer type=\"Lattice\"/>\n"
                                               "    <layer type=\"Misc\"/>\n"
@@ -498,9 +724,9 @@ TEST_CASE("Read SQD defect despite missing <coulomb> element", "[sqd]")
     std::istringstream layout_stream{sqd_layout};
 
     using sidb_layout =
-        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
+        sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
 
-    const auto layout = read_sqd_layout<sidb_layout>(layout_stream);
+    const auto layout = read_sqd_layout<sidb_lattice<sidb_100_lattice, sidb_layout>>(layout_stream);
 
     const auto defect = layout.get_sidb_defect({0, 0});
 
@@ -517,9 +743,9 @@ TEST_CASE("SQD parsing error: missing <siqad> element", "[sqd]")
 
     std::istringstream layout_stream{sqd_layout};
 
-    using sidb_layout =
-        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
-
+    using sidb_layout = sidb_lattice<
+        sidb_100_lattice,
+        sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
 
@@ -531,9 +757,9 @@ TEST_CASE("SQD parsing error: missing <design> element", "[sqd]")
 
     std::istringstream layout_stream{sqd_layout};
 
-    using sidb_layout =
-        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
-
+    using sidb_layout = sidb_lattice<
+        sidb_100_lattice,
+        sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
 
@@ -550,9 +776,9 @@ TEST_CASE("SQD parsing error: missing 'type' attribute in <layer> element", "[sq
 
     std::istringstream layout_stream{sqd_layout};
 
-    using sidb_layout =
-        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
-
+    using sidb_layout = sidb_lattice<
+        sidb_100_lattice,
+        sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
 
@@ -575,9 +801,9 @@ TEST_CASE("SQD parsing error: missing <latcoord> element in <dbdot> element", "[
 
     std::istringstream layout_stream{sqd_layout};
 
-    using sidb_layout =
-        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
-
+    using sidb_layout = sidb_lattice<
+        sidb_100_lattice,
+        sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
 
@@ -600,9 +826,9 @@ TEST_CASE("SQD parsing error: missing 'n' attribute in <latcoord> element", "[sq
 
     std::istringstream layout_stream{sqd_layout};
 
-    using sidb_layout =
-        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
-
+    using sidb_layout = sidb_lattice<
+        sidb_100_lattice,
+        sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
 
@@ -625,9 +851,9 @@ TEST_CASE("SQD parsing error: missing 'm' attribute in <latcoord> element", "[sq
 
     std::istringstream layout_stream{sqd_layout};
 
-    using sidb_layout =
-        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
-
+    using sidb_layout = sidb_lattice<
+        sidb_100_lattice,
+        sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
 
@@ -650,10 +876,11 @@ TEST_CASE("SQD parsing error: missing 'l' attribute in <latcoord> element", "[sq
 
     std::istringstream layout_stream{sqd_layout};
 
-    using sidb_layout =
-        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
-
+    using sidb_layout = sidb_lattice<
+        sidb_100_lattice,
+        sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
+    ;
 }
 
 TEST_CASE("SQD parsing error: negative 'n' attribute in <latcoord> element", "[sqd]")
@@ -675,9 +902,9 @@ TEST_CASE("SQD parsing error: negative 'n' attribute in <latcoord> element", "[s
 
     std::istringstream layout_stream{sqd_layout};
 
-    using sidb_layout =
-        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
-
+    using sidb_layout = sidb_lattice<
+        sidb_100_lattice,
+        sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
 
@@ -700,9 +927,9 @@ TEST_CASE("SQD parsing error: negative 'm' attribute in <latcoord> element", "[s
 
     std::istringstream layout_stream{sqd_layout};
 
-    using sidb_layout =
-        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
-
+    using sidb_layout = sidb_lattice<
+        sidb_100_lattice,
+        sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
 
@@ -725,9 +952,9 @@ TEST_CASE("SQD parsing error: negative 'l' attribute in <latcoord> element", "[s
 
     std::istringstream layout_stream{sqd_layout};
 
-    using sidb_layout =
-        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
-
+    using sidb_layout = sidb_lattice<
+        sidb_100_lattice,
+        sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
 
@@ -750,9 +977,9 @@ TEST_CASE("SQD parsing error: out-of-bounds 'l' attribute in <latcoord> element"
 
     std::istringstream layout_stream{sqd_layout};
 
-    using sidb_layout =
-        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
-
+    using sidb_layout = sidb_lattice<
+        sidb_100_lattice,
+        sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
 
@@ -777,9 +1004,9 @@ TEST_CASE("SQD parsing error: missing <latcoord> element in <incl_coords> elemen
 
     std::istringstream layout_stream{sqd_layout};
 
-    using sidb_layout =
-        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
-
+    using sidb_layout = sidb_lattice<
+        sidb_100_lattice,
+        sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
 
@@ -803,9 +1030,9 @@ TEST_CASE("SQD parsing error: missing <type> element in <dbdot> element")
 
     std::istringstream layout_stream{sqd_layout};
 
-    using sidb_layout =
-        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
-
+    using sidb_layout = sidb_lattice<
+        sidb_100_lattice,
+        sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
 
@@ -829,9 +1056,9 @@ TEST_CASE("SQD parsing error: invalid <type> element in <dbdot> element")
 
     std::istringstream layout_stream{sqd_layout};
 
-    using sidb_layout =
-        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
-
+    using sidb_layout = sidb_lattice<
+        sidb_100_lattice,
+        sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
 
@@ -857,9 +1084,9 @@ TEST_CASE("SQD parsing error: missing 'charge' attribute in <coulomb> element", 
 
     std::istringstream layout_stream{sqd_layout};
 
-    using sidb_layout =
-        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
-
+    using sidb_layout = sidb_lattice<
+        sidb_100_lattice,
+        sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
 
@@ -885,9 +1112,9 @@ TEST_CASE("SQD parsing error: missing 'eps_r' attribute in <coulomb> element", "
 
     std::istringstream layout_stream{sqd_layout};
 
-    using sidb_layout =
-        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
-
+    using sidb_layout = sidb_lattice<
+        sidb_100_lattice,
+        sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
 
@@ -913,8 +1140,8 @@ TEST_CASE("SQD parsing error: missing 'lambda_tf' attribute in <coulomb> element
 
     std::istringstream layout_stream{sqd_layout};
 
-    using sidb_layout =
-        sidb_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
-
+    using sidb_layout = sidb_lattice<
+        sidb_100_lattice,
+        sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }

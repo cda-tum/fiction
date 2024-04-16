@@ -14,7 +14,6 @@
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
-#include <cmath>
 #include <cstdint>
 #include <mutex>
 #include <thread>

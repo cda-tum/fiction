@@ -9,6 +9,7 @@
 #include "fiction/traits.hpp"
 
 #include <cctype>
+#include <cstdint>
 #include <exception>
 #include <fstream>
 #include <istream>

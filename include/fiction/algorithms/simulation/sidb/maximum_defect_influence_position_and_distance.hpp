@@ -5,18 +5,19 @@
 #ifndef FICTION_MAXIMUM_DEFECT_INFLUENCE_POSITION_AND_DISTANCE_HPP
 #define FICTION_MAXIMUM_DEFECT_INFLUENCE_POSITION_AND_DISTANCE_HPP
 
-#include "fiction/algorithms/simulation/sidb/critical_temperature.hpp"
 #include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
+#include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/layouts/bounding_box.hpp"
+#include "fiction/technology/sidb_defect_surface.hpp"
 #include "fiction/technology/sidb_defects.hpp"
-#include "fiction/technology/sidb_surface.hpp"
 #include "fiction/types.hpp"
 #include "fiction/utils/execution_utils.hpp"
 #include "fiction/utils/layout_utils.hpp"
 
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <limits>
 #include <utility>
 #include <vector>
@@ -72,8 +73,8 @@ class maximum_defect_influence_position_and_distance_impl
 
     std::pair<typename Lyt::cell, double> run() noexcept
     {
-        const quickexact_params<sidb_surface<Lyt>> params_defect{
-            params.physical_params, quickexact_params<sidb_surface<Lyt>>::automatic_base_number_detection::OFF};
+        const quickexact_params<sidb_defect_surface<Lyt>> params_defect{
+            params.physical_params, quickexact_params<sidb_defect_surface<Lyt>>::automatic_base_number_detection::OFF};
 
         double          avoidance_distance{0};
         coordinate<Lyt> max_defect_position{};
@@ -102,7 +103,7 @@ class maximum_defect_influence_position_and_distance_impl
         {
             if (layout.get_cell_type(defect) == Lyt::technology::cell_type::EMPTY)
             {
-                sidb_surface<Lyt> lyt_defect{};
+                sidb_defect_surface<Lyt> lyt_defect{};
 
                 layout.foreach_cell([this, &lyt_defect](const auto& cell)
                                     { lyt_defect.assign_cell_type(cell, layout.get_cell_type(cell)); });
@@ -133,13 +134,13 @@ class maximum_defect_influence_position_and_distance_impl
                 // distribution without placed defect.
                 if (charge_index_defect_layout != charge_index_layout)
                 {
-                    auto distance = std::numeric_limits<double>::max();
+                    auto distance = std::numeric_limits<double>::infinity();
                     layout.foreach_cell(
                         [this, &defect, &distance](const auto& cell)
                         {
-                            if (sidb_nanometer_distance<Lyt>(layout, cell, defect) < distance)
+                            if (sidb_nanometer_distance<Lyt>(cell, defect) < distance)
                             {
-                                distance = sidb_nanometer_distance<Lyt>(layout, cell, defect);
+                                distance = sidb_nanometer_distance<Lyt>(cell, defect);
                             }
                         });
 

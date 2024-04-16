@@ -2,12 +2,17 @@
 // Created by marcel on 08.08.23.
 //
 
-#include "fiction/algorithms/simulation/sidb/operational_domain.hpp"  // operational domain computation algorithms
-#include "fiction/io/read_sqd_layout.hpp"                             // reader for SiDB layouts
-#include "fiction/io/write_operational_domain.hpp"                    // writer for operational domains
-#include "fiction/types.hpp"                                          // pre-defined types suitable for the FCN domain
-#include "fiction/utils/truth_table_utils.hpp"                        // truth tables helper functions
-#include "fiction_experiments.hpp"                                    // experiment class
+#include "fiction_experiments.hpp"  // experiment class
+
+#include <fiction/algorithms/simulation/sidb/operational_domain.hpp>  // operational domain computation algorithms
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
+#include <fiction/io/read_sqd_layout.hpp>           // reader for SiDB layouts
+#include <fiction/io/write_operational_domain.hpp>  // writer for operational domains
+#include <fiction/technology/sidb_lattice.hpp>
+#include <fiction/technology/sidb_lattice_orientations.hpp>
+#include <fiction/types.hpp>                    // pre-defined types suitable for the FCN domain
+#include <fiction/utils/truth_table_utils.hpp>  // truth tables helper functions
 
 #include <fmt/format.h>                   // string formatting
 #include <kitty/dynamic_truth_table.hpp>  // truth tables
@@ -19,6 +24,7 @@
 #include <iostream>
 #include <string>
 #include <utility>
+#include <vector>
 
 using namespace fiction;
 
@@ -82,7 +88,7 @@ int main()  // NOLINT
 
             std::cout << benchmark << std::endl;
 
-            const auto lyt = read_sqd_layout<sidb_cell_clk_lyt_siqad>(benchmark.string(), gate);
+            const auto lyt = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(benchmark.string(), gate);
 
             // operational domain stats
             operational_domain_stats op_domain_stats_gs{};

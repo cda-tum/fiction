@@ -7,12 +7,9 @@
 
 #include <fiction/algorithms/simulation/sidb/critical_temperature.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
-#include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/cell_level_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
-#include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/charge_distribution_surface.hpp>
+#include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/truth_table_utils.hpp>
 
@@ -22,17 +19,15 @@
 
 using namespace fiction;
 
-TEMPLATE_TEST_CASE(
-    "Test critical_temperature function", "[critical-temperature]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
+TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]", (sidb_100_cell_clk_lyt_siqad),
+                   (cds_sidb_100_cell_clk_lyt_siqad))
 {
     TestType lyt{};
 
     critical_temperature_params params{};
     sidb_simulation_parameters  physical_params{2, -0.32, 5.6, 5.0};
 
-    critical_temperature_stats<TestType> critical_stats{};
+    critical_temperature_stats critical_stats{};
 
     SECTION("No physically valid charge distribution could be found")
     {
@@ -127,7 +122,7 @@ TEMPLATE_TEST_CASE(
         CHECK(critical_stats.critical_temperature == 350);
     }
 
-    SECTION("Y-shape SiDB AND gate")
+    SECTION("Y-shaped SiDB AND gate")
     {
         lyt.assign_cell_type({0, 0, 1}, sidb_technology::cell_type::INPUT);
         lyt.assign_cell_type({2, 1, 1}, sidb_technology::cell_type::INPUT);

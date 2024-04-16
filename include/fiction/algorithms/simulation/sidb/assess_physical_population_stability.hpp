@@ -8,18 +8,18 @@
 #include "fiction/algorithms/simulation/sidb/convert_potential_to_distance.hpp"
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
-#include "fiction/layouts/cell_level_layout.hpp"
+#include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
+#include "fiction/technology/charge_distribution_surface.hpp"
+#include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/types.hpp"
 
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <cstdlib>
 #include <iterator>
 #include <limits>
-#include <tuple>
-#include <unordered_map>
-#include <utility>
+#include <vector>
 
 namespace fiction
 {

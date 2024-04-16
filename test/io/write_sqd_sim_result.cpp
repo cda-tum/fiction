@@ -5,15 +5,20 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 #include <fiction/io/write_sqd_sim_result.hpp>
-#include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/cell_level_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
+#include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/cell_technologies.hpp>
+#include <fiction/technology/sidb_lattice.hpp>
+#include <fiction/types.hpp>
 
+#include <any>
 #include <chrono>
+#include <cstdint>
 #include <sstream>
 #include <string>
+#include <vector>
 
 using namespace fiction;
 
@@ -151,9 +156,9 @@ TEST_CASE("Write empty simulation result", "[sqd-sim-result]")
 {
     using namespace std::chrono_literals;
 
-    using sidb_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>;
+    using lattice = sidb_lattice<sidb_100_lattice, sidb_cell_clk_lyt_siqad>;
 
-    sidb_simulation_result<sidb_layout> sim_result{};
+    sidb_simulation_result<lattice> sim_result{};
 
     sim_result.algorithm_name     = "TestSim";
     sim_result.simulation_runtime = 42s;
@@ -266,7 +271,7 @@ TEST_CASE("Write simulation result with ExGS simulation", "[sqd-sim-result]")
 {
     using namespace std::chrono_literals;
 
-    using sidb_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>;
+    using sidb_layout = sidb_cell_clk_lyt;
 
     sidb_layout lyt{{20, 10}};
 
@@ -282,7 +287,9 @@ TEST_CASE("Write simulation result with ExGS simulation", "[sqd-sim-result]")
 
     const sidb_simulation_parameters params{2, -0.32};
 
-    auto sim_result = exhaustive_ground_state_simulation<sidb_layout>(lyt, params);
+    const sidb_lattice<sidb_100_lattice, sidb_layout> lat{lyt};
+
+    auto sim_result = exhaustive_ground_state_simulation(lat, params);
 
     sim_result.algorithm_name = "ExGS";
 
@@ -331,7 +338,7 @@ TEST_CASE("Write simulation result with ExGS simulation and positive DBs", "[sqd
 {
     using namespace std::chrono_literals;
 
-    using sidb_layout = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>;
+    using sidb_layout = sidb_cell_clk_lyt_siqad;
 
     sidb_layout lyt{{20, 10}};
 
@@ -341,7 +348,9 @@ TEST_CASE("Write simulation result with ExGS simulation and positive DBs", "[sqd
 
     const sidb_simulation_parameters params{3, -0.32};
 
-    auto sim_result = exhaustive_ground_state_simulation<sidb_layout>(lyt, params);
+    const sidb_lattice<sidb_100_lattice, sidb_layout> lat{lyt};
+
+    auto sim_result = exhaustive_ground_state_simulation(lat, params);
 
     sim_result.algorithm_name = "ExGS";
     std::stringstream simulation_stream{};

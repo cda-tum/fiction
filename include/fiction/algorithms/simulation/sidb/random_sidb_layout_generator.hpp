@@ -6,21 +6,13 @@
 #define FICTION_RANDOM_SIDB_LAYOUT_GENERATOR_HPP
 
 #include "fiction/algorithms/path_finding/distance.hpp"
-#include "fiction/io/write_sqd_layout.hpp"
-#include "fiction/layouts/cell_level_layout.hpp"
-#include "fiction/technology/cell_technologies.hpp"
-#include "fiction/technology/charge_distribution_surface.hpp"
-#include "fiction/technology/sidb_nm_position.hpp"
+#include "fiction/technology/sidb_defects.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/types.hpp"
-#include "fiction/utils/hash.hpp"
 #include "fiction/utils/layout_utils.hpp"
 
 #include <cstdint>
 #include <iostream>
-#include <random>
 #include <string_view>
-#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -33,7 +25,6 @@ namespace fiction
 template <typename Lyt>
 struct generate_random_sidb_layout_params
 {
-
     /**
      * An enumeration of modes to use for the generation of random SiDB layouts to control control the appearance of
      * positive charges.
@@ -49,7 +40,6 @@ struct generate_random_sidb_layout_params
          */
         FORBIDDEN
     };
-
     /**
      * Two coordinates that span the region where SiDBs may be placed (order is not important). The first coordinate is
      * the upper left corner and the second coordinate is the lower right corner of the area.

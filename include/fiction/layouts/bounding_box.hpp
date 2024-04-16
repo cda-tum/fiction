@@ -12,6 +12,9 @@
 #include "fiction/types.hpp"
 #include "fiction/utils/layout_utils.hpp"
 
+#include <cstdint>
+#include <limits>
+
 // data types cannot properly be converted to bit field types
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wconversion"

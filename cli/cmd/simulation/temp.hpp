@@ -197,7 +197,7 @@ class temp_command : public command
     /**
      * Critical temperature statistics.
      */
-    fiction::critical_temperature_stats<fiction::sidb_cell_clk_lyt> stats{};
+    fiction::critical_temperature_stats stats{};
 
     /**
      * Logs the resulting information in a log file.

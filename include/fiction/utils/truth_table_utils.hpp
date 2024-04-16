@@ -128,6 +128,62 @@ namespace fiction
     return table;
 }
 /**
+ * Creates and returns a truth table that implements the less-than function in two variables.
+ *
+ * @return Less-than function in two variables.
+ */
+[[nodiscard]] inline kitty::dynamic_truth_table create_lt_tt() noexcept
+{
+    constexpr const uint64_t lit = 0x2;
+
+    kitty::dynamic_truth_table table{2};
+    kitty::create_from_words(table, &lit, &lit + 1);
+
+    return table;
+}
+/**
+ * Creates and returns a truth table that implements the greater-than function in two variables.
+ *
+ * @return Greater-than function in two variables.
+ */
+[[nodiscard]] inline kitty::dynamic_truth_table create_gt_tt() noexcept
+{
+    constexpr const uint64_t lit = 0x4;
+
+    kitty::dynamic_truth_table table{2};
+    kitty::create_from_words(table, &lit, &lit + 1);
+
+    return table;
+}
+/**
+ * Creates and returns a truth table that implements the less-than-or-equal function in two variables.
+ *
+ * @return Less-than-or-equal function in two variables.
+ */
+[[nodiscard]] inline kitty::dynamic_truth_table create_le_tt() noexcept
+{
+    constexpr const uint64_t lit = 0x11;
+
+    kitty::dynamic_truth_table table{2};
+    kitty::create_from_words(table, &lit, &lit + 1);
+
+    return table;
+}
+/**
+ * Creates and returns a truth table that implements the greater-than-or-equal function in two variables.
+ *
+ * @return Greater-than-or-equal function in two variables.
+ */
+[[nodiscard]] inline kitty::dynamic_truth_table create_ge_tt() noexcept
+{
+    constexpr const uint64_t lit = 0x13;
+
+    kitty::dynamic_truth_table table{2};
+    kitty::create_from_words(table, &lit, &lit + 1);
+
+    return table;
+}
+/**
  * Creates and returns a truth table that implements the majority function in three variables.
  *
  * @return Majority function in three variables.

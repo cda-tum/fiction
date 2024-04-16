@@ -6,18 +6,15 @@
 #define FICTION_DESIGN_SIDB_GATES_HPP
 
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
-#include "fiction/algorithms/simulation/sidb/operational_domain.hpp"
 #include "fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
-#include "fiction/layouts/coordinates.hpp"
+#include "fiction/technology/cell_technologies.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/types.hpp"
 #include "fiction/utils/layout_utils.hpp"
 #include "fiction/utils/math_utils.hpp"
-#include "fiction/utils/truth_table_utils.hpp"
 
-#include <kitty/dynamic_truth_table.hpp>
+#include <kitty/traits.hpp>
 
 #include <algorithm>
 #include <atomic>
@@ -26,7 +23,6 @@
 #include <cstdlib>
 #include <future>
 #include <mutex>
-#include <numeric>
 #include <thread>
 #include <utility>
 #include <vector>
@@ -245,7 +241,7 @@ class design_sidb_gates_impl
         {
             for (std::size_t j = i + 1; j < cell_indices.size(); j++)
             {
-                if (sidb_nanometer_distance<Lyt>(skeleton_layout, all_sidbs_in_canvas[cell_indices[i]],
+                if (sidb_nanometer_distance<Lyt>(all_sidbs_in_canvas[cell_indices[i]],
                                                  all_sidbs_in_canvas[cell_indices[j]]) < 0.5)
                 {
                     return true;

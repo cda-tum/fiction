@@ -5,16 +5,21 @@
 #include <catch2/catch_template_test_macros.hpp>
 
 #include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/io/write_location_and_ground_state.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
-#include <fiction/technology/charge_distribution_surface.hpp>
+#include <fiction/technology/sidb_lattice.hpp>
+#include <fiction/technology/sidb_lattice_orientations.hpp>
+#include <fiction/types.hpp>
 
 #include <algorithm>
 #include <sstream>
 #include <string>
 
 using namespace fiction;
+
+using lattice = sidb_100_cell_clk_lyt_siqad;
 
 // Helper function to compare string output with expected string
 bool compare_output(const std::string& output, const std::string& expected)
@@ -30,17 +35,17 @@ bool compare_output(const std::string& output, const std::string& expected)
 
 TEST_CASE("writes expected output", "[write_txt_sim_result]")
 {
-    sidb_cell_clk_lyt_siqad lyt{};
+    lattice lyt{};
 
     SECTION("Output is written to ostream correctly, degenerated GS")
     {
-        lyt.assign_cell_type({0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
-        lyt.assign_cell_type({3, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
-        lyt.assign_cell_type({5, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
-        lyt.assign_cell_type({8, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+        lyt.assign_cell_type({0, 0}, lattice::cell_type::NORMAL);
+        lyt.assign_cell_type({3, 0}, lattice::cell_type::NORMAL);
+        lyt.assign_cell_type({5, 0}, lattice::cell_type::NORMAL);
+        lyt.assign_cell_type({8, 0}, lattice::cell_type::NORMAL);
 
         const sidb_simulation_parameters params{2, -0.32};
-        const auto simulation_results = exhaustive_ground_state_simulation<sidb_cell_clk_lyt_siqad>(lyt, params);
+        const auto                       simulation_results = exhaustive_ground_state_simulation<lattice>(lyt, params);
 
         std::stringstream ss;
         write_location_and_ground_state(simulation_results, ss);
@@ -67,7 +72,7 @@ TEST_CASE("writes expected output", "[write_txt_sim_result]")
         lyt.assign_cell_type({5, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
 
         const sidb_simulation_parameters params{2, -0.32};
-        const auto simulation_results = exhaustive_ground_state_simulation<sidb_cell_clk_lyt_siqad>(lyt, params);
+        const auto                       simulation_results = exhaustive_ground_state_simulation<lattice>(lyt, params);
 
         std::stringstream ss;
         write_location_and_ground_state(simulation_results, ss);

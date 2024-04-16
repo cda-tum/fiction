@@ -14,8 +14,8 @@
 
 using namespace fiction;
 
-TEMPLATE_TEST_CASE("check if ground state is found", "[is-ground-state]", (sidb_cell_clk_lyt_siqad),
-                   (charge_distribution_surface<sidb_cell_clk_lyt_siqad>))
+TEMPLATE_TEST_CASE("check if ground state is found", "[is-ground-state]", sidb_100_cell_clk_lyt_siqad,
+                   cds_sidb_100_cell_clk_lyt_siqad)
 {
     SECTION("layout with no SiDB placed")
     {
