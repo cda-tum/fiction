@@ -48,18 +48,9 @@ void check_op_domain_params_and_operational_status(const operational_domain&    
 
         if (status)
         {
-            if (*status == operational_status::OPERATIONAL)
-            {
-                std::cout << fmt::format("point: {}, {}, status: {}\n", coord.x, coord.y, "operational");
-            }
-            else
-            {
-                std::cout << fmt::format("point: {}, {}, status: {}\n", coord.x, coord.y, *status);
-            }
             CHECK(op_value == *status);
         }
     }
-    std::cout << "___________________________________________________\n";
 }
 
 TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
