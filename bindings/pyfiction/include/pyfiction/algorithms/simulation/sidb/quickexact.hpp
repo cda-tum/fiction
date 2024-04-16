@@ -9,6 +9,7 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/simulation/sidb/quickexact.hpp>
+#include <fiction/layouts/coordinates.hpp>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>

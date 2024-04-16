@@ -551,11 +551,11 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
     op_domain_params.simulation_parameters = sim_params;
     op_domain_params.x_dimension           = operational_domain::sweep_parameter::EPSILON_R;
     op_domain_params.x_min                 = 5.1;
-    op_domain_params.x_max                 = 6.1;
+    op_domain_params.x_max                 = 6.0;
     op_domain_params.x_step                = 0.1;
     op_domain_params.y_dimension           = operational_domain::sweep_parameter::LAMBDA_TF;
     op_domain_params.y_min                 = 4.5;
-    op_domain_params.y_max                 = 5.5;
+    op_domain_params.y_max                 = 5.4;
     op_domain_params.y_step                = 0.1;
 
     operational_domain_stats op_domain_stats{};
@@ -674,11 +674,11 @@ TEST_CASE("SiQAD's AND gate operational domain computation, using cube coordinat
     op_domain_params.simulation_parameters = sim_params;
     op_domain_params.x_dimension           = operational_domain::sweep_parameter::EPSILON_R;
     op_domain_params.x_min                 = 5.1;
-    op_domain_params.x_max                 = 6.1;
+    op_domain_params.x_max                 = 6.0;
     op_domain_params.x_step                = 0.1;
     op_domain_params.y_dimension           = operational_domain::sweep_parameter::LAMBDA_TF;
     op_domain_params.y_min                 = 4.5;
-    op_domain_params.y_max                 = 5.5;
+    op_domain_params.y_max                 = 5.4;
     op_domain_params.y_step                = 0.1;
 
     operational_domain_stats op_domain_stats{};
@@ -766,7 +766,7 @@ TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[operational-domain
     op_domain_params.simulation_parameters = sim_params;
     op_domain_params.x_dimension           = operational_domain::sweep_parameter::EPSILON_R;
     op_domain_params.x_min                 = 5.60;
-    op_domain_params.x_max                 = 5.64;
+    op_domain_params.x_max                 = 5.61;
     op_domain_params.x_step                = 0.01;
     op_domain_params.y_dimension           = operational_domain::sweep_parameter::LAMBDA_TF;
     op_domain_params.y_min                 = 5.0;
