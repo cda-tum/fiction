@@ -96,12 +96,6 @@ TEMPLATE_TEST_CASE("Ground State Space construction of two SiDBs directly next t
 TEMPLATE_TEST_CASE("Ground State Space construction of a 7 DB layout", "[ground-state-space]", sidb_cell_clk_lyt_siqad,
                    charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
 {
-#ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
-    using set_type = std::set<uint64_t>;
-#else
-    using set_type = phmap::flat_hash_set<uint64_t>;
-#endif
-
     TestType lyt{};
 
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
@@ -147,7 +141,7 @@ TEMPLATE_TEST_CASE("Ground State Space construction of a 7 DB layout", "[ground-
             ->cluster->sidbs.size() == 3)
     {
         CHECK(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin()->cluster->sidbs ==
-              set_type{0ul, 1ul, 2ul});
+              std::vector<uint64_t>{0ul, 1ul, 2ul});
         CHECK((gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin()->multiset_conf >>
                32ull) == 2);
         CHECK(((gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin()->multiset_conf
@@ -155,7 +149,7 @@ TEMPLATE_TEST_CASE("Ground State Space construction of a 7 DB layout", "[ground-
                32ull) == 0);
 
         CHECK(std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin(), 1)
-                  ->cluster->sidbs == set_type{3ul, 4ul, 5ul, 6ul});
+                  ->cluster->sidbs == std::vector<uint64_t>{3ul, 4ul, 5ul, 6ul});
         CHECK((std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin(), 1)
                    ->multiset_conf >>
                32ull) == 3);
@@ -215,7 +209,7 @@ TEMPLATE_TEST_CASE("Ground State Space construction of a 7 DB layout", "[ground-
     else
     {
         CHECK(std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin(), 1)
-                  ->cluster->sidbs == set_type{0ul, 1ul, 2ul});
+                  ->cluster->sidbs == std::vector<uint64_t>{0ul, 1ul, 2ul});
         CHECK((std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin(), 1)
                    ->multiset_conf >>
                32ull) == 2);
@@ -225,7 +219,7 @@ TEMPLATE_TEST_CASE("Ground State Space construction of a 7 DB layout", "[ground-
                32ull) == 0);
 
         CHECK(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin()->cluster->sidbs ==
-              set_type{3ul, 4ul, 5ul, 6ul});
+              std::vector<uint64_t>{3ul, 4ul, 5ul, 6ul});
         CHECK((gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin()->multiset_conf >>
                32ull) == 3);
         CHECK(((gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin()->multiset_conf
