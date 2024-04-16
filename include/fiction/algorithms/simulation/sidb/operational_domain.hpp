@@ -290,13 +290,13 @@ class operational_domain_impl
         }
 
         // generate the x dimension values
-        for (std::size_t i = 0; i <= x_indices.size(); ++i)
+        for (std::size_t i = 0; i < x_indices.size(); ++i)
         {
             x_values.push_back(params.x_min + i * params.x_step);
         }
 
         // generate the y dimension values
-        for (std::size_t i = 0; i <= y_indices.size(); ++i)
+        for (std::size_t i = 0; i < y_indices.size(); ++i)
         {
             y_values.push_back(params.y_min + i * params.y_step);
         }
