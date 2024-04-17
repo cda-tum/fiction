@@ -438,10 +438,10 @@ class clustercomplete_impl
         for (const auto& [range_start, range_end] : ranges)
         {
             threads_vec.emplace_back(
-                [&]
+                [&, start = range_start, end = range_end]
                 {
                     // iterate over all multiset charge configurations in the assigned range
-                    for (uint64_t ix = range_start; ix <= range_end; ++ix)
+                    for (uint64_t ix = start; ix <= end; ++ix)
                     {
                         // iterate over all cluster charge assignments in the multiset charge configuration
                         for (const sidb_charge_space_composition& composition :
