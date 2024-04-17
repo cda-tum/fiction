@@ -90,7 +90,7 @@ TEST_CASE("Unsigned offset coordinates", "[coordinates]")
     CHECK(os.str() == "(3,2,1)");
 }
 
-TEST_CASE("Convert cube to SiQAD coordinates", "[coordinates]")
+TEST_CASE("SiQAD coordinate conversion", "[coordinates]")
 {
     using coordinate         = siqad::coord_t;
     using coordinate_fiction = cube::coord_t;
