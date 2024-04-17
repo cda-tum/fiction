@@ -262,34 +262,44 @@ class operational_domain_impl
             params{ps},
             stats{st},
             output_bdl_pairs{detect_bdl_pairs<Lyt>(layout, sidb_technology::cell_type::OUTPUT, params.bdl_params)},
-            x_indices(num_x_steps()),  // pre-allocate the x dimension indices
-            y_indices(num_y_steps()),  // pre-allocate the y dimension indices
-            x_values(num_x_steps()),   // pre-allocate the x dimension values
-            y_values(num_y_steps())    // pre-allocate the y dimension values
+            x_indices(num_x_steps() + 1),  // pre-allocate the x dimension indices
+            y_indices(num_y_steps() + 1)   // pre-allocate the y dimension indices
     {
+        x_values.reserve(num_x_steps() + 1);
+        y_values.reserve(num_y_steps() + 1);
+
         op_domain.x_dimension = params.x_dimension;
         op_domain.y_dimension = params.y_dimension;
 
         std::iota(x_indices.begin(), x_indices.end(), 0ul);
         std::iota(y_indices.begin(), y_indices.end(), 0ul);
 
+        // if the value of the x-parameter is greater than params.x_max after num_x_steps() steps, this value is
+        // ignored in the operational domain calculation.
+        if ((params.x_min + (x_indices.size() - 1) * params.x_step) - params.x_max >
+            physical_constants::POP_STABILITY_ERR)
+        {
+            x_indices.pop_back();
+        }
+        // if the value of the y-parameter is greater than params.y_max after num_y_steps() steps, this value is
+        // ignored in the operational domain calculation.
+        if (((params.y_min + (y_indices.size() - 1) * params.y_step) - params.y_max) >
+            physical_constants::POP_STABILITY_ERR)
+        {
+            y_indices.pop_back();
+        }
+
         // generate the x dimension values
-        std::generate(x_values.begin(), x_values.end(),
-                      [x = 0, this]() mutable
-                      {
-                          const double x_val = params.x_min + x * params.x_step;
-                          ++x;
-                          return x_val;
-                      });
+        for (std::size_t i = 0; i <= x_indices.size(); ++i)
+        {
+            x_values.push_back(params.x_min + i * params.x_step);
+        }
 
         // generate the y dimension values
-        std::generate(y_values.begin(), y_values.end(),
-                      [y = 0, this]() mutable
-                      {
-                          const double y_val = params.y_min + y * params.y_step;
-                          ++y;
-                          return y_val;
-                      });
+        for (std::size_t i = 0; i <= y_indices.size(); ++i)
+        {
+            y_values.push_back(params.y_min + i * params.y_step);
+        }
     }
     /**
      * Performs a grid search over the specified parameter ranges with the specified step sizes. The grid search always
@@ -455,9 +465,15 @@ class operational_domain_impl
                                          step_point{current_contour_point.x - 1, current_contour_point.y};
 
         auto current_neighborhood = moore_neighborhood(current_contour_point);
-        auto next_point           = current_contour_point == backtrack_point ?
-                                        current_neighborhood.front() :
-                                        next_clockwise_point(current_neighborhood, backtrack_point);
+
+        auto next_point = contour_starting_point;
+
+        if (!current_neighborhood.empty())
+        {
+            next_point = current_contour_point == backtrack_point ?
+                             current_neighborhood.front() :
+                             next_clockwise_point(current_neighborhood, backtrack_point);
+        }
 
         while (next_point != contour_starting_point)
         {
