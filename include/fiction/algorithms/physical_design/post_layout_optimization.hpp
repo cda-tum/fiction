@@ -381,7 +381,7 @@ layout_coordinate_path<Lyt> get_path_and_obstruct(Lyt& lyt, const tile<Lyt>& sta
  */
 template <typename Lyt>
 [[nodiscard]] bool improve_gate_location(Lyt& lyt, const tile<Lyt>& old_pos, const tile<Lyt>& max_non_po,
-                                         const uint64_t   max_gate_relocations) noexcept
+                                         const uint64_t max_gate_relocations) noexcept
 {
     const auto& [fanins, fanouts, to_clear, old_path_from_fanin_1_to_gate, old_path_from_fanin_2_to_gate,
                  old_path_from_gate_to_fanout_1, old_path_from_gate_to_fanout_2] = get_fanin_and_fanouts(lyt, old_pos);
@@ -757,7 +757,7 @@ class post_layout_optimization_impl
         uint64_t max_gate_relocations = ps.max_gate_relocations.value_or((plyt.x() + 1) * (plyt.y() + 1));
 
         // Optimization
-        auto layout = obstruction_layout<Lyt>(plyt);
+        auto layout                  = obstruction_layout<Lyt>(plyt);
         bool moved_at_least_one_gate = true;
 
         while (moved_at_least_one_gate)
