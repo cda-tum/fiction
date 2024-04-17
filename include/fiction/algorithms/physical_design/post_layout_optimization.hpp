@@ -35,7 +35,7 @@ namespace fiction
 struct post_layout_optimization_params
 {
     /**
-     * Maximum number of relocations to try for each gate. Defaults the number of tiles in a layout if not specified.
+     * Maximum number of relocations to try for each gate. Defaults to the number of tiles in a layout if not specified.
      */
     std::optional<uint64_t> max_gate_relocations;
 };
@@ -468,8 +468,8 @@ template <typename Lyt>
     // fix wires that cross over empty tiles
     fix_wires(lyt, to_clear);
 
-    bool moved_gate  = false;
-    auto current_pos = old_pos;
+    bool     moved_gate           = false;
+    auto     current_pos          = old_pos;
     uint64_t num_gate_relocations = 0;
     // iterate over layout diagonally
     for (uint64_t k = 0; k < lyt.x() + lyt.y() + 1; ++k)
@@ -753,8 +753,8 @@ class post_layout_optimization_impl
     void run()
     {
         const mockturtle::stopwatch stop{pst.time_total};
-        pst.x_size_before = plyt.x() + 1;
-        pst.y_size_before = plyt.y() + 1;
+        pst.x_size_before             = plyt.x() + 1;
+        pst.y_size_before             = plyt.y() + 1;
         uint64_t max_gate_relocations = ps.max_gate_relocations.value_or((plyt.x() + 1) * (plyt.y() + 1));
 
         // Optimization
