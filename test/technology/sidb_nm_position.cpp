@@ -5,7 +5,6 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
-#include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/technology/sidb_lattice_orientations.hpp>
 #include <fiction/technology/sidb_nm_position.hpp>
 #include <fiction/types.hpp>
@@ -20,27 +19,27 @@ TEST_CASE("SiDB position in nanometer for siqad coordinates", "[sidb-nm-position
 
     SECTION("Cell-level layout without lattice layout")
     {
-        const auto [pos_x, pos_y] = sidb_nm_position<sidb_cell_clk_lyt_siqad>({1, 0, 0});
+        const auto [pos_x, pos_y] = sidb_nm_position<lattice>({1, 0, 0});
         CHECK_THAT(pos_x, WithinAbs(sidb_100_lattice::LAT_A * 0.1, 1E-5));
         CHECK_THAT(pos_x, WithinAbs(sidb_100_lattice::LAT_A * 0.1, 1E-5));
 
-        const auto [pos2_x, pos2_y] = sidb_nm_position<sidb_cell_clk_lyt_siqad>({0, 1, 0});
+        const auto [pos2_x, pos2_y] = sidb_nm_position<lattice>({0, 1, 0});
         CHECK_THAT(pos2_x, WithinAbs(0.0, 1E-5));
         CHECK_THAT(pos2_y, WithinAbs(sidb_100_lattice::LAT_B * 0.1, 1E-5));
 
-        const auto [pos3_x, pos3_y] = sidb_nm_position<sidb_cell_clk_lyt_siqad>({0, 8, 1});
+        const auto [pos3_x, pos3_y] = sidb_nm_position<lattice>({0, 8, 1});
         CHECK_THAT(pos3_x, WithinAbs(0.0, 1E-5));
         CHECK_THAT(pos3_y, WithinAbs(sidb_100_lattice::LAT_B * 0.8 + sidb_100_lattice::LAT_C.second * 0.1, 1E-5));
 
-        const auto [pos4_x, pos4_y] = sidb_nm_position<sidb_cell_clk_lyt_siqad>({1, 1});
+        const auto [pos4_x, pos4_y] = sidb_nm_position<lattice>({1, 1});
         CHECK_THAT(pos4_x, WithinAbs(sidb_100_lattice::LAT_A * 0.1, 1E-5));
         CHECK_THAT(pos4_y, WithinAbs(sidb_100_lattice::LAT_B * 0.1, 1E-5));
 
-        const auto [pos5_x, pos5_y] = sidb_nm_position<sidb_cell_clk_lyt_siqad>({1, 1, 1});
+        const auto [pos5_x, pos5_y] = sidb_nm_position<lattice>({1, 1, 1});
         CHECK_THAT(pos5_x, WithinAbs(sidb_100_lattice::LAT_A * 0.1, 1E-5));
         CHECK_THAT(pos5_y, WithinAbs(sidb_100_lattice::LAT_B * 0.1 + sidb_100_lattice::LAT_C.second * 0.1, 1E-5));
 
-        const auto [pos6_x, pos6_y] = sidb_nm_position<sidb_cell_clk_lyt_siqad>({1, 10, 1});
+        const auto [pos6_x, pos6_y] = sidb_nm_position<lattice>({1, 10, 1});
         CHECK_THAT(pos6_x, WithinAbs(sidb_100_lattice::LAT_A * 0.1, 1E-5));
         CHECK_THAT(pos6_y, WithinAbs(sidb_100_lattice::LAT_B + sidb_100_lattice::LAT_C.second * 0.1, 1E-5));
     }
@@ -174,10 +173,18 @@ TEST_CASE("SiDB position in nanometer for fiction coordinates", "[sidb-nm-positi
 
         const auto [pos4_x, pos4_y] = sidb_nm_position<lattice>({-1, -3});
         CHECK_THAT(pos4_x, WithinAbs(-sidb_100_lattice::LAT_A * 0.1, 1E-5));
-        CHECK_THAT(pos4_y, WithinAbs(-sidb_100_lattice::LAT_B * 0.1 + sidb_100_lattice::LAT_C.second * 0.1, 1E-5));
+        CHECK_THAT(pos4_y, WithinAbs(-2 * sidb_100_lattice::LAT_B * 0.1 + sidb_100_lattice::LAT_C.second * 0.1, 1E-5));
 
         const auto [pos5_x, pos5_y] = sidb_nm_position<lattice>({-1, -21});
         CHECK_THAT(pos5_x, WithinAbs(-sidb_100_lattice::LAT_A * 0.1, 1E-5));
-        CHECK_THAT(pos5_y, WithinAbs(-sidb_100_lattice::LAT_B + sidb_100_lattice::LAT_C.second * 0.1, 1E-5));
+        CHECK_THAT(pos5_y, WithinAbs(-11 * sidb_100_lattice::LAT_B * 0.1 + sidb_100_lattice::LAT_C.second * 0.1, 1E-5));
+
+        const auto [pos6_x, pos6_y] = sidb_nm_position<lattice>({-1, -2});
+        CHECK_THAT(pos6_x, WithinAbs(-sidb_100_lattice::LAT_A * 0.1, 1E-5));
+        CHECK_THAT(pos6_y, WithinAbs(-sidb_100_lattice::LAT_B * 0.1, 1E-5));
+
+        const auto [pos7_x, pos7_y] = sidb_nm_position<lattice>({-2, -4});
+        CHECK_THAT(pos7_x, WithinAbs(-2 * sidb_100_lattice::LAT_A * 0.1, 1E-5));
+        CHECK_THAT(pos7_y, WithinAbs(-2 * sidb_100_lattice::LAT_B * 0.1, 1E-5));
     }
 }

@@ -90,7 +90,7 @@ TEST_CASE("Unsigned offset coordinates", "[coordinates]")
     CHECK(os.str() == "(3,2,1)");
 }
 
-TEST_CASE("SiQAD coordinate conversion", "[coordinates]")
+TEST_CASE("Convert cube to SiQAD coordinates", "[coordinates]")
 {
     using coordinate         = siqad::coord_t;
     using coordinate_fiction = cube::coord_t;
@@ -116,17 +116,41 @@ TEST_CASE("SiQAD coordinate conversion", "[coordinates]")
     CHECK(t3_siqad.x == t3_fiction.x);
     CHECK(t3_siqad.y == 1);
     CHECK(t3_siqad.z == 0);
+    CHECK(t3_fiction == siqad::to_fiction_coord<coordinate_fiction>(t3_siqad));
 
     auto t4_fiction = coordinate_fiction{-1, -2};
     auto t4_siqad   = siqad::to_siqad_coord<coordinate_fiction>(t4_fiction);
     CHECK(t4_siqad.x == t4_fiction.x);
     CHECK(t4_siqad.y == -1);
     CHECK(t4_siqad.z == 0);
+    CHECK(t4_fiction == siqad::to_fiction_coord<coordinate_fiction>(t4_siqad));
 
     auto t5_siqad   = coordinate{-1, -2, 1};
     auto t5_fiction = siqad::to_fiction_coord<coordinate_fiction>(t5_siqad);
     CHECK(t5_fiction.x == -1);
     CHECK(t5_fiction.y == -3);
+    CHECK(t5_fiction == siqad::to_fiction_coord<coordinate_fiction>(t5_siqad));
+
+    auto t6_fiction = coordinate_fiction{-1, -1};
+    auto t6_siqad   = siqad::to_siqad_coord<coordinate_fiction>(t6_fiction);
+    CHECK(t6_siqad.x == t6_fiction.x);
+    CHECK(t6_siqad.y == -1);
+    CHECK(t6_siqad.z == 1);
+    CHECK(t6_fiction == siqad::to_fiction_coord<coordinate_fiction>(t6_siqad));
+
+    auto t7_fiction = coordinate_fiction{-1, -3};
+    auto t7_siqad   = siqad::to_siqad_coord<coordinate_fiction>(t7_fiction);
+    CHECK(t7_siqad.x == t7_fiction.x);
+    CHECK(t7_siqad.y == -2);
+    CHECK(t7_siqad.z == 1);
+    CHECK(t7_fiction == siqad::to_fiction_coord<coordinate_fiction>(t7_siqad));
+
+    auto t8_fiction = coordinate_fiction{-1, -4};
+    auto t8_siqad   = siqad::to_siqad_coord<coordinate_fiction>(t8_fiction);
+    CHECK(t8_siqad.x == t8_fiction.x);
+    CHECK(t8_siqad.y == -2);
+    CHECK(t8_siqad.z == 0);
+    CHECK(t8_fiction == siqad::to_fiction_coord<coordinate_fiction>(t8_siqad));
 }
 
 TEMPLATE_TEST_CASE("Coordinate iteration", "[coordinates]", offset::ucoord_t, cube::coord_t, siqad::coord_t)
