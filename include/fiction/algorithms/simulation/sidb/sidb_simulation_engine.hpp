@@ -112,6 +112,10 @@ template <typename EngineType>
             {
                 return "QuickSim";
             }
+            default:
+            {
+                return "unsupported simulation engine";
+            }
         }
     }
 
