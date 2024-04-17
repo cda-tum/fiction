@@ -7,11 +7,11 @@
 
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
+#include "fiction/io/print_layout.hpp"
 #include "fiction/layouts/coordinates.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/layout_utils.hpp"
 #include "fiction/utils/math_utils.hpp"
-#include "fiction/io/print_layout.hpp"
 
 #include <mockturtle/utils/stopwatch.hpp>
 
@@ -70,7 +70,7 @@ struct sidb_gate_displacement_robustness_params
     /**
      * The atomic displacement in x- and y-direction, respectively. The default value is (1, 1).
      */
-    std::pair<uint64_t, uint64_t> displacement_variations = {1, 1};
+    std::pair<uint64_t, uint64_t> displacement_variations = {0, 0};
     /**
      * The simulation engine used.
      */
@@ -180,10 +180,11 @@ class displacement_robustness_domain_impl
                "Percentage of layouts must be between 0.0 and 1.0");
 
         displacement_robustness_domain<Lyt> domain{};
-        for (auto i = 0u; i < layouts.size() * percentage_of_layouts; i++)
+        for (auto i = 0u; i < static_cast<uint64_t>(layouts.size() * percentage_of_layouts); i++)
         {
             // Assess the operational status of the new layout
-            print_sidb_layout(std::cout, layouts[i]);
+            //            print_sidb_layout(std::cout, layouts[i]);
+            //            std::cout << "----------------------------------------------\n";
             const auto op_status = is_operational(layouts[i], truth_table, params.operational_params);
 
             // Store the operational status in the domain
@@ -209,8 +210,14 @@ class displacement_robustness_domain_impl
         std::size_t num_non_operational_combinations = 0;
 
         uint64_t counter = 0;
+        std::cout << fmt::format("All combination: {}", all_combinations.size()) << std::endl;
+
         for (const auto& fixed_c_indices : all_combinations)
         {
+            if (counter >= all_combinations.size() * 0.1)
+            {
+                break;
+            }
             for (const auto& c : original_layout_cells)
             {
                 params.fixed_cells.insert(c);
@@ -228,7 +235,7 @@ class displacement_robustness_domain_impl
                 std::cout << counter << std::endl;
             }
             const auto robustness_domain = determine_robustness_domain();
-            std::cout << mockturtle::to_seconds(stats.time_total) << std::endl;
+            // std::cout << mockturtle::to_seconds(stats.time_total) << std::endl;
             num_non_operational_combinations += num_non_operational_layouts(robustness_domain);
             num_operational_combinations += num_operational_layouts(robustness_domain);
         }
@@ -329,12 +336,17 @@ class displacement_robustness_domain_impl
 
         for (const auto& cell_displacements : result)
         {
-            Lyt lyt{};
+            Lyt         lyt{};
+            std::size_t identical_cells_to_original_layout = 0;
             for (std::size_t i = 0; i < cell_displacements.size(); ++i)
             {
                 lyt.assign_cell_type(cell_displacements[i], layout.get_cell_type(original_layout_cells[i]));
+                if (!layout.is_empty_cell(cell_displacements[i]))
+                {
+                    identical_cells_to_original_layout++;
+                }
             }
-            if (lyt.num_cells() == layout.num_cells())
+            if (lyt.num_cells() == layout.num_cells() && identical_cells_to_original_layout != layout.num_cells())
             {
                 layouts.push_back(lyt);
             }
@@ -385,8 +397,8 @@ class displacement_robustness_domain_impl
 template <typename Lyt, typename TT>
 [[nodiscard]] displacement_robustness_domain<Lyt>
 determine_sidb_gate_robustness_domain(const Lyt& layout, const std::vector<TT>& spec,
-                                      const sidb_gate_displacement_robustness_params<Lyt>& params,
-                                      displacement_robustness_stats*                       stats = nullptr)
+                                      sidb_gate_displacement_robustness_params<Lyt>& params,
+                                      displacement_robustness_stats*                 stats = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
