@@ -359,7 +359,9 @@ TEMPLATE_TEST_CASE("Ground state space construction of a 28 DB layout", "[ground
     gss_res.report();
 
     CHECK(gss_res.top_cluster->sidbs.size() == 28);
-    CHECK(gss_res.top_cluster->charge_space.size() <= 95);
+
+    // STL containers return 96, while phmap containers typically give 95
+    CHECK((gss_res.top_cluster->charge_space.size() == 95 || gss_res.top_cluster->charge_space.size() == 96));
 
     for (uint64_t i = 0; i < 28; ++i)
     {
