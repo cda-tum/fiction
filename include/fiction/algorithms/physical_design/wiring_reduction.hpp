@@ -1021,7 +1021,7 @@ class wiring_reduction_impl
  * The core concept revolves around the selective removal of excess wiring by cutting them from a layout, contingent
  * upon the ability to restore functional correctness by realigning the remaining layout fragments. Given the complexity
  * of identifying these cuts, obstructions are strategically inserted into the layout to safeguard against the
- * inadvertent deletion of standard gates or wire segments essential for the layout’s integrity. Leveraging the
+ * inadvertent deletion of standard gates or wire segments essential for the layout's integrity. Leveraging the
  * obstructed layout as a basis, A* Search is employed to systematically identify feasible cuts either from left to
  * right or top to bottom. Subsequently, these identified cuts are removed from the layout to minimize not only the
  * number of wire segments, but also the area and critical path length.
