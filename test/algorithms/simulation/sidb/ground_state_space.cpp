@@ -33,7 +33,7 @@ TEMPLATE_TEST_CASE("Empty layout Ground State Space construction", "[ground-stat
 {
     TestType lyt{};
 
-    const ground_state_space_stats& res = ground_state_space(lyt);
+    const ground_state_space_results& res = ground_state_space(lyt);
 
     res.report();  // sneaky coverage
 
@@ -49,7 +49,7 @@ TEMPLATE_TEST_CASE("Ground State Space construction of a single SiDB", "[ground-
     TestType lyt{};
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
 
-    const ground_state_space_stats& res = ground_state_space(lyt);
+    const ground_state_space_results& res = ground_state_space(lyt);
 
     CHECK(res.top_cluster->num_sidbs() == 1);
     CHECK(res.top_cluster->uid == 1);
@@ -80,14 +80,14 @@ TEMPLATE_TEST_CASE("Ground State Space construction of two SiDBs directly next t
 
     SECTION("Base 2")
     {
-        const ground_state_space_stats& res =
+        const ground_state_space_results& res =
             ground_state_space(lyt, ground_state_space_params{sidb_simulation_parameters{2}});
         CHECK(res.pruned_top_level_multisets == res.maximum_top_level_multisets);
     }
 
     SECTION("Base 3")
     {
-        const ground_state_space_stats& res =
+        const ground_state_space_results& res =
             ground_state_space(lyt, ground_state_space_params{sidb_simulation_parameters{3}});
         CHECK(res.pruned_top_level_multisets != res.maximum_top_level_multisets);
     }
@@ -107,7 +107,7 @@ TEMPLATE_TEST_CASE("Ground State Space construction of a 7 DB layout", "[ground-
     lyt.assign_cell_type({6, 5, 1}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({4, 8, 1}, TestType::cell_type::NORMAL);
 
-    const ground_state_space_stats& gss_res =
+    const ground_state_space_results& gss_res =
         ground_state_space(lyt, ground_state_space_params{sidb_simulation_parameters{2}});
 
     CHECK(mockturtle::to_seconds(gss_res.runtime) > 0.0);
@@ -299,7 +299,7 @@ TEMPLATE_TEST_CASE("Ground state space construction of a 14 DB layout", "[ground
     lyt.assign_cell_type({10, 5, 1}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({8, 8, 1}, TestType::cell_type::NORMAL);
 
-    const ground_state_space_stats& gss_res = ground_state_space(lyt);
+    const ground_state_space_results& gss_res = ground_state_space(lyt);
 
     CHECK(gss_res.top_cluster->sidbs.size() == 14);
     CHECK(gss_res.top_cluster->charge_space.size() == 5);
@@ -354,7 +354,7 @@ TEMPLATE_TEST_CASE("Ground state space construction of a 28 DB layout", "[ground
     lyt.assign_cell_type({10 + 8, 5, 1}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({8 + 8, 8, 1}, TestType::cell_type::NORMAL);
 
-    const ground_state_space_stats& gss_res = ground_state_space(lyt);
+    const ground_state_space_results& gss_res = ground_state_space(lyt);
 
     gss_res.report();
 
@@ -417,7 +417,7 @@ TEMPLATE_TEST_CASE("Ground State Space construction of sub-10 DB layouts", "[gro
     {
         const sidb_simulation_result<TestType>& qe_res   = quickexact(lyt);
         const sidb_simulation_result<TestType>& exgs_res = exhaustive_ground_state_simulation(lyt);
-        const ground_state_space_stats&         gss_res  = ground_state_space(lyt);
+        const ground_state_space_results&       gss_res  = ground_state_space(lyt);
 
         for (const charge_distribution_surface<TestType>& cl : qe_res.charge_distributions)
         {

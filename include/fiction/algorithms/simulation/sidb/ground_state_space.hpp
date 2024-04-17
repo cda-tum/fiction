@@ -59,7 +59,7 @@ struct ground_state_space_params
 /**
  * This struct is used to store the results of the *Ground State Space* construction.
  */
-struct ground_state_space_stats
+struct ground_state_space_results
 {
     /**
      * The top cluster is the root of the cluster hierarchy. It therefore allows access to the entire cluster hierarchy,
@@ -134,7 +134,7 @@ class ground_state_space_impl
                                  -physical_constants::POP_STABILITY_ERR - params.physical_parameters.mu_plus()}
     {}
 
-    ground_state_space_stats run() noexcept
+    ground_state_space_results run() noexcept
     {
         mockturtle::stopwatch<>::duration time_counter{};
         {
@@ -151,8 +151,8 @@ class ground_state_space_impl
 
         const uint64_t max_multisets = maximum_top_level_multisets(top_cluster->num_sidbs());
 
-        return ground_state_space_stats{top_cluster, time_counter, max_multisets - top_cluster->charge_space.size(),
-                                        max_multisets, projector_state_count};
+        return ground_state_space_results{top_cluster, time_counter, max_multisets - top_cluster->charge_space.size(),
+                                          max_multisets, projector_state_count};
     }
 
   private:
@@ -893,15 +893,15 @@ class ground_state_space_impl
  * contains the charge spaces of each cluster.
  */
 template <typename Lyt>
-[[nodiscard]] ground_state_space_stats ground_state_space(const Lyt&                       lyt,
-                                                          const ground_state_space_params& params = {}) noexcept
+[[nodiscard]] ground_state_space_results ground_state_space(const Lyt&                       lyt,
+                                                            const ground_state_space_params& params = {}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
     if (lyt.num_cells() == 0)
     {
-        return ground_state_space_stats{};
+        return ground_state_space_results{};
     }
 
     detail::ground_state_space_impl<Lyt> p{lyt, params};
