@@ -186,5 +186,9 @@ TEST_CASE("SiDB position in nanometer for fiction coordinates", "[sidb-nm-positi
         const auto [pos7_x, pos7_y] = sidb_nm_position<lattice>({-2, -4});
         CHECK_THAT(pos7_x, WithinAbs(-2 * sidb_100_lattice::LAT_A * 0.1, 1E-5));
         CHECK_THAT(pos7_y, WithinAbs(-2 * sidb_100_lattice::LAT_B * 0.1, 1E-5));
+
+        const auto [pos8_x, pos8_y] = sidb_nm_position<lattice>({-2, -1});
+        CHECK_THAT(pos8_x, WithinAbs(-2 * sidb_100_lattice::LAT_A * 0.1, 1E-5));
+        CHECK_THAT(pos8_y, WithinAbs(-sidb_100_lattice::LAT_B * 0.1 + sidb_100_lattice::LAT_C.second * 0.1, 1E-5));
     }
 }
