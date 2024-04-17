@@ -985,10 +985,11 @@ struct sidb_cluster
                                                    const double loc_ext_pot, const uint8_t base,
                                                    const sidb_cluster_ptr& self_ptr) noexcept
     {
-        assert(sidbs.size() == 1);
+        assert(sidbs.size() == 1 && "Not a singleton cluster");
 
         const uint64_t ix = *sidbs.cbegin();
 
+        // fill the initial charge space as determined by the simulation base
         for (const sidb_charge_state cs : SIDB_CHARGE_STATES(base))
         {
             charge_space.emplace(self_ptr, cs, loc_ext_pot, external_sidbs.size() + 1);
@@ -1044,7 +1045,7 @@ static inline uint64_t get_unique_cluster_id(const sidb_cluster_ptr& c) noexcept
  */
 static inline uint64_t get_singleton_sidb_ix(const sidb_cluster_ptr& c) noexcept
 {
-    assert(get_cluster_size(c) == 1);
+    assert(get_cluster_size(c) == 1 && "Not a singleton cluster");
     return get_unique_cluster_id(c);
 }
 /**

@@ -68,14 +68,11 @@ enum class heuristic_sidb_simulation_engine
     QUICKSIM
 };
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wswitch"
-// @ql:off
 /**
  * Returns the name of the given simulation engine.
  *
- * @tparam EngineType The type of the sidb engine (exhaustive/heuristic/general).
- * @param sidb_simulation_engine A SiDBs simulation engine.
+ * @tparam EngineType The type of the SiDB engine (exhaustive/heuristic/general).
+ * @param engine An SiDB simulation engine.
  * @return The name of the simulation engine as a string.
  */
 template <typename EngineType>
@@ -117,9 +114,9 @@ template <typename EngineType>
             }
         }
     }
+
+    return "unsupported simulation engine";
 }
-// @ql:on
-#pragma clang diagnostic pop
 
 }  // namespace fiction
 

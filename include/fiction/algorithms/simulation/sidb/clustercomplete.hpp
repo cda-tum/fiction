@@ -52,7 +52,7 @@ struct clustercomplete_params
      */
     double global_potential = 0;
     /**
-     * This specifies the maximum cluster size for which Ground State Space will solve an NP-complete sub-problem
+     * This specifies the maximum cluster size for which *Ground State Space* will solve an NP-complete sub-problem
      * exhaustively. The sets of SiDBs that witness local population stability for each respective charge state may be
      * partitioned into disjoint sets such that the number of required witnesses for each respective charge state is
      * satisfied. If no such partition exists, the multiset charge configuration associated with the requirements may be
@@ -67,11 +67,14 @@ struct clustercomplete_params
      */
     uint64_t num_overlapping_witnesses_limit_gss = 6;
     /**
-     * Number of threads to make available to ClusterComplete for the simulation stage.
+     * Number of threads to make available to *ClusterComplete* for the unfolding stage.
      */
     uint64_t available_threads = std::thread::hardware_concurrency();
     /**
-     * Report the *Ground State Space* statistics to standard output.
+     * Report the *Ground State Space* statistics to standard output. These statistic may be used especially to
+     * configure the validity witness partitioning options for *Ground State Space*, that may impair runtimes when set
+     * too high, but could provide a large benefit to the complexity of the unfolding process of large simulation
+     * problems by performing more involved pruning procedures in the construction stage.
      */
     bool report_gss_stats = false;
 };
@@ -89,8 +92,7 @@ class clustercomplete_impl
             mu_bounds_with_error{physical_constants::POP_STABILITY_ERR - params.physical_parameters.mu_minus,
                                  -physical_constants::POP_STABILITY_ERR - params.physical_parameters.mu_minus,
                                  physical_constants::POP_STABILITY_ERR - params.physical_parameters.mu_plus(),
-                                 -physical_constants::POP_STABILITY_ERR - params.physical_parameters.mu_plus()},
-            num_threads{params.available_threads}
+                                 -physical_constants::POP_STABILITY_ERR - params.physical_parameters.mu_plus()}
     {}
 
     sidb_simulation_result<Lyt> run(const clustercomplete_params<Lyt>& params) noexcept
@@ -104,7 +106,7 @@ class clustercomplete_impl
                                                      params.num_overlapping_witnesses_limit_gss);
 
         // run Ground State Space to obtain the complete hierarchical charge space
-        const ground_state_space_stats& gss_stats = fiction::ground_state_space(
+        const ground_state_space_stats& gss_stats = ground_state_space(
             charge_layout, ground_state_space_params{charge_layout.get_phys_params(),
                                                      params.validity_witness_partitioning_max_cluster_size_gss,
                                                      params.num_overlapping_witnesses_limit_gss});
@@ -125,7 +127,7 @@ class clustercomplete_impl
 
             if (!gss_stats.top_cluster->charge_space.empty())
             {
-                collect_physically_valid_charge_distributions(gss_stats.top_cluster);
+                collect_physically_valid_charge_distributions(gss_stats.top_cluster, params.available_threads);
             }
         }
 
@@ -278,7 +280,9 @@ class clustercomplete_impl
 
     enum class potential_bound_update_operation
     {
+        // potential bounds (of the parent) are added
         ADD,
+        // potential bounds (of the parent) are subtracted
         SUBTRACT
     };
 
@@ -405,7 +409,8 @@ class clustercomplete_impl
         return clustering_state;
     }
 
-    void collect_physically_valid_charge_distributions(const sidb_cluster_ptr& top_cluster) noexcept
+    void collect_physically_valid_charge_distributions(const sidb_cluster_ptr& top_cluster,
+                                                       const uint64_t          num_threads) noexcept
     {
         const uint64_t top_level_multisets = top_cluster->charge_space.size();
 
@@ -459,14 +464,16 @@ class clustercomplete_impl
         }
     }
 
+    // simulation results that the physically valid charge distributions are stored in
     sidb_simulation_result<Lyt> res{};
     std::mutex                  res_mutex{};
 
+    // the base layout, along with the map of placed defects, that are used to create charge distribution surface copies
     const charge_distribution_surface<Lyt>                          charge_layout;
     const std::unordered_map<typename Lyt::cell, const sidb_defect> real_placed_defects;
 
+    // globally available array of bounds that section the band gap, used for pruning
     const std::array<double, 4> mu_bounds_with_error;
-    const uint64_t              num_threads;
 };
 
 }  // namespace detail

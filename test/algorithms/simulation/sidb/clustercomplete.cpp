@@ -53,7 +53,7 @@ TEMPLATE_TEST_CASE("Empty layout ClusterComplete simulation", "[clustercomplete]
     CHECK(std::any_cast<uint64_t>(
               simulation_results.additional_simulation_parameters.at("validity_witness_partitioning_limit")) == 3);
     CHECK(std::any_cast<uint64_t>(
-              simulation_results.additional_simulation_parameters.at("validity_witness_partitioning_limit")) == 8);
+              simulation_results.additional_simulation_parameters.at("num_overlapping_witnesses_limit")) == 8);
 }
 
 TEMPLATE_TEST_CASE("ClusterComplete simulation of a single SiDB", "[clustercomplete]", sidb_cell_clk_lyt_siqad,

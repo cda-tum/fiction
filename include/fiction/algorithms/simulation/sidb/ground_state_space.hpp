@@ -38,20 +38,21 @@ struct ground_state_space_params
     /**
      * The physical parameters that *Ground State Space* will use to prune simulation search space.
      */
-    const sidb_simulation_parameters phys_params{};
+    const sidb_simulation_parameters physical_parameters{};
     /**
      * This specifies the maximum cluster size for which Ground State Space will solve an NP-complete sub-problem
      * exhaustively. The sets of SiDBs that witness local population stability for each respective charge state may be
      * partitioned into disjoint sets such that the number of required witnesses for each respective charge state is
      * satisfied. If no such partition exists, the multiset charge configuration associated with the requirements may be
-     * rejected.
+     * rejected. The defaulted value is chosen such that some extra pruning may be performed, while the impact on the
+     * runtime remains negligible. Validity witness partitioning parameters are relevant for large simulation problems.
      */
-    uint64_t witness_partitioning_cluster_size_limit = 6;
+    uint64_t witness_partitioning_cluster_size_limit = 12;
     /**
      * The complexity is of validity witness partitioning bounded by a factorial in the number of overlapping witnesses.
      * This parameter thus allows the validity witness partitioning procedure to perform the reduction to overlapping
      * witnesses for larger cluster sizes that could be runtime-impairing, then limiting specifically the length of the
-     * input to the factorial call.
+     * input to the factorial call. As above, the defaulted value ensures no hindrance in runtimes.
      */
     uint64_t num_overlapping_witnesses_limit_gss = 6;
 };
@@ -89,6 +90,12 @@ struct ground_state_space_stats
      */
     const uint64_t maximum_top_level_multisets{};
     /**
+     * The total number of distinct projector states is counted. At each merge, the projector states in charge space
+     * compositions in the charge spaces of the clusters to merge are locked in the final construct, and can therefore
+     * be counted. This may be used to estimate the time it would take *ClusterComplete* to unfold the hierarchy.
+     */
+    const uint64_t projector_state_count{};
+    /**
      * Report *Ground State Space* statistics.
      *
      * @param out The output stream to write to (default: standard output).
@@ -99,16 +106,12 @@ struct ground_state_space_stats
         os << fmt::format("[i] Pruned {} out of {} top level multiset charge configurations\n",
                           pruned_top_level_multisets, maximum_top_level_multisets);
 
-        os << "[i] Ground State Space took ";
+        os << fmt::format("[i] There are {} projector states in the constructed hierarchy\n", projector_state_count);
 
-        if (const double gss_runtime = mockturtle::to_seconds(runtime); gss_runtime > 1.0)
-        {
-            os << gss_runtime << " seconds" << std::endl;
-        }
-        else
-        {
-            os << (gss_runtime * 1000) << " milliseconds" << std::endl;
-        }
+        const double gss_runtime = mockturtle::to_seconds(runtime);
+        os << fmt::format("[i] Ground State Space took {} {}seconds",
+                          gss_runtime > 1.0 ? gss_runtime : gss_runtime * 1000, gss_runtime > 1.0 ? "" : "milli")
+           << std::endl;
     }
 };
 
@@ -123,11 +126,12 @@ class ground_state_space_impl
     explicit ground_state_space_impl(const Lyt& lyt, const ground_state_space_params parameters) noexcept :
             params{parameters},
             top_cluster{to_sidb_cluster(sidb_cluster_hierarchy(lyt))},
-            clustering{get_initial_clustering(top_cluster, get_local_potential_bounds(lyt, params.phys_params))},
-            mu_bounds_with_error{physical_constants::POP_STABILITY_ERR - params.phys_params.mu_minus,
-                                 -physical_constants::POP_STABILITY_ERR - params.phys_params.mu_minus,
-                                 physical_constants::POP_STABILITY_ERR - params.phys_params.mu_plus(),
-                                 -physical_constants::POP_STABILITY_ERR - params.phys_params.mu_plus()}
+            clustering{
+                get_initial_clustering(top_cluster, get_local_potential_bounds(lyt, params.physical_parameters))},
+            mu_bounds_with_error{physical_constants::POP_STABILITY_ERR - params.physical_parameters.mu_minus,
+                                 -physical_constants::POP_STABILITY_ERR - params.physical_parameters.mu_minus,
+                                 physical_constants::POP_STABILITY_ERR - params.physical_parameters.mu_plus(),
+                                 -physical_constants::POP_STABILITY_ERR - params.physical_parameters.mu_plus()}
     {}
 
     ground_state_space_stats run() noexcept
@@ -148,7 +152,7 @@ class ground_state_space_impl
         const uint64_t max_multisets = maximum_top_level_multisets(top_cluster->num_sidbs());
 
         return ground_state_space_stats{top_cluster, time_counter, max_multisets - top_cluster->charge_space.size(),
-                                        max_multisets};
+                                        max_multisets, projector_state_count};
     }
 
   private:
@@ -177,16 +181,16 @@ class ground_state_space_impl
     }
 
     static std::pair<charge_distribution_surface<Lyt>, charge_distribution_surface<Lyt>>
-    get_local_potential_bounds(const Lyt& lyt, const sidb_simulation_parameters& phys_params) noexcept
+    get_local_potential_bounds(const Lyt& lyt, const sidb_simulation_parameters& physical_parameters) noexcept
     {
         charge_distribution_surface<Lyt> cds_min{lyt};
         charge_distribution_surface<Lyt> cds_max{lyt};
 
-        cds_min.assign_physical_parameters(phys_params);
-        cds_max.assign_physical_parameters(phys_params);
+        cds_min.assign_physical_parameters(physical_parameters);
+        cds_max.assign_physical_parameters(physical_parameters);
 
-        cds_min.assign_all_charge_states(phys_params.base == 3 ? sidb_charge_state::POSITIVE :
-                                                                 sidb_charge_state::NEUTRAL);
+        cds_min.assign_all_charge_states(physical_parameters.base == 3 ? sidb_charge_state::POSITIVE :
+                                                                         sidb_charge_state::NEUTRAL);
         cds_max.assign_all_charge_states(sidb_charge_state::NEGATIVE);
 
         cds_min.update_after_charge_change();
@@ -564,8 +568,10 @@ class ground_state_space_impl
         return fixpoint;
     }
 
-    static void compute_external_pot_bounds_for_saved_compositions(const sidb_cluster_ptr& parent) noexcept
+    static uint64_t compute_external_pot_bounds_for_saved_compositions(const sidb_cluster_ptr& parent) noexcept
     {
+        uint64_t saved_projector_states = 0;
+
         // when clusters are merged, their respective charge spaces have reached a fixed point in the construction;
         // thereby, the projections specific to each stored composition in the respective charge spaces, for which
         // previously only the receiving SiDBs in the respective child cluster were considered, are now composed to
@@ -586,9 +592,13 @@ class ground_state_space_impl
                                 get_projector_state_bound<bound_direction::UPPER>(child_pst_of_child, sidb_ix).pot_val);
                         }
                     }
+
+                    saved_projector_states += composition.proj_states.size();
                 }
             }
         }
+
+        return saved_projector_states;
     }
 
     template <bound_direction bound>
@@ -597,17 +607,17 @@ class ground_state_space_impl
     {
         // derive the new externally received partial sums of electrostatic potential local to SiDB contained by the
         // child through subtracting the projections of its sibling
-        double recv_pot_without_siblings = child_rst.cluster->received_ext_pot_bounds.get<bound>(child_rst.sidb_ix);
+        double received_pot_without_siblings = child_rst.cluster->received_ext_pot_bounds.get<bound>(child_rst.sidb_ix);
 
         for (const sidb_cluster_ptr& sibling : parent->children)
         {
             if (sibling != child_rst.cluster)
             {
-                recv_pot_without_siblings -= get_projection_bound<bound>(sibling, child_rst.sidb_ix).pot_val;
+                received_pot_without_siblings -= get_projection_bound<bound>(sibling, child_rst.sidb_ix).pot_val;
             }
         }
 
-        parent->received_ext_pot_bounds.set<bound>(child_rst.sidb_ix, recv_pot_without_siblings);
+        parent->received_ext_pot_bounds.set<bound>(child_rst.sidb_ix, received_pot_without_siblings);
     }
 
     void derive_children_received_bounds_without_siblings(const sidb_cluster_ptr& parent) const noexcept
@@ -800,7 +810,7 @@ class ground_state_space_impl
             clustering.erase(c);
         }
 
-        compute_external_pot_bounds_for_saved_compositions(min_parent);
+        projector_state_count += compute_external_pot_bounds_for_saved_compositions(min_parent);
 
         derive_children_received_bounds_without_siblings(min_parent);
 
@@ -823,18 +833,27 @@ class ground_state_space_impl
 
     [[nodiscard]] constexpr inline uint64_t maximum_top_level_multisets(const uint64_t number_of_sidbs) const noexcept
     {
-        // computes nCr(N + 2, 2)                             // computes nCr(N + 1, 1)
-        return params.phys_params.base == 3 ? ((number_of_sidbs + 1) * (number_of_sidbs + 2)) / 2 : number_of_sidbs + 1;
+        // computes nCr(N + 2, 2) if base = 3, or otherwise nCr(N + 1, 1) when the base is 2
+        return params.physical_parameters.base == 3 ? ((number_of_sidbs + 1) * (number_of_sidbs + 2)) / 2 :
+                                                      number_of_sidbs + 1;
     }
 
+    // parameters used during the construction
     const ground_state_space_params params;
 
+    // the top cluster, the cluster that contains all SiDBs, is returned as the result of the construction
     const sidb_cluster_ptr top_cluster;
 
+    // the clustering starts at all singletons, then moves up through merges until only the top cluster remains
     sidb_clustering clustering{};
 
+    // count the total number of projector states that are stored in the constructed hierarchy
+    uint64_t projector_state_count;
+
+    // true iff the construction is to be terminated
     bool terminate = false;
 
+    // globally available array of bounds that section the band gap, used for pruning
     const std::array<double, 4> mu_bounds_with_error;
 };
 
@@ -864,17 +883,18 @@ class ground_state_space_impl
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @param lyt Layout to construct the ground state space of.
- * @param max_cluster_size_for_witness_partitioning This specifies the maximum cluster size for which *Ground State
- * Space* will solve an NP-complete sub-problem exhaustively. The sets of SiDBs that witness local population stability
- * for each respective charge state may be partitioned into disjoint sets such that the number of required witnesses for
- * each respective charge state is satisfied. If no such partition exists, the multiset charge configuration associated
- * with the requirements may be rejected. Defaulted to `6` to avoid impairing runtimes, while allowing some pruning.
- * @param phys_params The physical parameters that *Ground State Space* will use to prune simulation search space.
+ * @param params The parameters that *Ground State Space* will use throughout the construction. The physical parameters
+ * that *Ground State Space* will use to prune simulation search space are stored in there. In particular, the user may
+ * configure parameters that decide limits on the problem sizes of pruning by validity witness partitioning. By default,
+ * these are set to avoid runtimes from being affected, as these sub-problems may scale factorially. Thereby, these
+ * parameters are especially useful for large simulation problems that could benefit from extra intensive pruning before
+ * *ClusterComplete* unfolds the constructed hierarchical charge space.
  * @return The results of the construction, which include the top cluster which parents all other clusters, and thereby
  * contains the charge spaces of each cluster.
  */
 template <typename Lyt>
-ground_state_space_stats ground_state_space(const Lyt& lyt, const ground_state_space_params& params = {}) noexcept
+[[nodiscard]] ground_state_space_stats ground_state_space(const Lyt&                       lyt,
+                                                          const ground_state_space_params& params = {}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");

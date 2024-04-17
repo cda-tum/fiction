@@ -57,16 +57,17 @@ class clustercomplete_command : public command
                    "Global potential applied to the entire layout (unit: V)", true);
         add_option("--witness_partitioning_limit,-w", params.validity_witness_partitioning_max_cluster_size_gss,
                    "The limit on the cluster size before Ground State Space omits the check for which it solves the "
-                   "validity witness partitioning NP-complete sub-problem; values above 15 severely impact the runtime",
+                   "validity witness partitioning NP-complete sub-problem",
                    true);
         add_option("--overlapping_witnesses_limit,-o", params.num_overlapping_witnesses_limit_gss,
                    "The limit on the number of overlapping witnesses (that determines the factorial scaling of the "
                    "sub-procedure) before Ground State Space skips validity witness partitioning",
                    true);
-        add_option("--report_gss_stats,-r", params.report_gss_stats,
-                   "When set to true, statistics like the number of pruned top level multisets (out of the maximum "
-                   "number) and the Ground State Space runtime are shown",
-                   true);
+        add_flag("--report_gss_stats,-r", params.report_gss_stats,
+                 "When set, Ground State Space statistics are shown, which give an estimate for the ClusterComplete "
+                 "runtimes, and thus allow the user to configure the validity witness partitioning parameters that "
+                 "could benefit large simulation problems through more intensive pruning before starting a lengthy "
+                 "unfolding process");
     }
 
   protected:
