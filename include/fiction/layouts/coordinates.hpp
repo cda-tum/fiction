@@ -800,7 +800,11 @@ constexpr CoordinateType to_fiction_coord(const siqad::coord_t& coord) noexcept
 template <typename CoordinateType>
 constexpr coord_t to_siqad_coord(const CoordinateType& coord) noexcept
 {
-    return {coord.x, (coord.y - coord.y % 2) / 2, coord.y % 2};
+    if (coord.y >= 0)
+    {
+        return {coord.x, (coord.y - coord.y % 2) / 2, coord.y % 2};
+    }
+    return {coord.x, (coord.y + coord.y % 2) / 2, (-coord.y - 1) % 2 + 1};
 }
 
 }  // namespace siqad
