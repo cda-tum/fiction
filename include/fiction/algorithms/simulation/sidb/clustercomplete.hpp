@@ -435,13 +435,13 @@ class clustercomplete_impl
         threads_vec.reserve(num_threads_to_use);
 
         // the threads each consider a range of the top cluster charge space
-        for (const std::pair<uint64_t, uint64_t>& range : ranges)
+        for (const auto& [range_start, range_end] : ranges)
         {
             threads_vec.emplace_back(
                 [&]
                 {
                     // iterate over all multiset charge configurations in the assigned range
-                    for (uint64_t ix = range.first; ix <= range.second; ++ix)
+                    for (uint64_t ix = range_start; ix <= range_end; ++ix)
                     {
                         // iterate over all cluster charge assignments in the multiset charge configuration
                         for (const sidb_charge_space_composition& composition :
