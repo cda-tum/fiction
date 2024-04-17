@@ -30,6 +30,17 @@ namespace fiction
 {
 
 /**
+ * Parameters for the post-layout optimization algorithm.
+ */
+struct post_layout_optimization_params
+{
+    /**
+     * Maximum number of relocations to try for each gate. Defaults the number of tiles in a layout if not specified.
+     */
+    std::optional<uint64_t> max_gate_relocations;
+};
+
+/**
  * This struct stores statistics about the post-layout optimization process.
  */
 struct post_layout_optimization_stats
@@ -370,7 +381,8 @@ layout_coordinate_path<Lyt> get_path_and_obstruct(Lyt& lyt, const tile<Lyt>& sta
  */
 template <typename Lyt>
 [[nodiscard]] std::optional<tile<Lyt>> improve_gate_location(Lyt& lyt, const tile<Lyt>& old_pos,
-                                                             const tile<Lyt>& max_non_po) noexcept
+                                                             const tile<Lyt>& max_non_po,
+                                                             const uint64_t   max_gate_relocations) noexcept
 {
     const auto& [fanins, fanouts, to_clear, old_path_from_fanin_1_to_gate, old_path_from_fanin_2_to_gate,
                  old_path_from_gate_to_fanout_1, old_path_from_gate_to_fanout_2] = get_fanin_and_fanouts(lyt, old_pos);
@@ -458,6 +470,7 @@ template <typename Lyt>
 
     bool moved_gate  = false;
     auto current_pos = old_pos;
+    uint64_t num_gate_relocations = 0;
     // iterate over layout diagonally
     for (uint64_t k = 0; k < lyt.x() + lyt.y() + 1; ++k)
     {
@@ -465,7 +478,7 @@ template <typename Lyt>
         {
             const uint64_t y = k - x;
 
-            if (moved_gate)
+            if (moved_gate || (num_gate_relocations >= max_gate_relocations))
             {
                 break;
             }
@@ -479,6 +492,7 @@ template <typename Lyt>
                 new_pos = tile<Lyt>{x, y};
                 if (lyt.is_empty_tile(new_pos) && lyt.is_empty_tile({new_pos.x, new_pos.y, 1}))
                 {
+                    num_gate_relocations++;
                     // move gate to new positions and update obstructions
                     lyt.move_node(lyt.get_node(current_pos), new_pos, {});
                     lyt.obstruct_coordinate(new_pos);
@@ -585,7 +599,7 @@ template <typename Lyt>
             }
         }
 
-        if (moved_gate)
+        if (moved_gate || (num_gate_relocations >= max_gate_relocations))
         {
             break;
         }
@@ -729,13 +743,19 @@ template <typename Lyt>
 class post_layout_optimization_impl
 {
   public:
-    post_layout_optimization_impl(const Lyt& lyt, post_layout_optimization_stats& st) : plyt{lyt}, pst{st} {}
+    post_layout_optimization_impl(const Lyt& lyt, const post_layout_optimization_params& p,
+                                  post_layout_optimization_stats& st) :
+            plyt{lyt},
+            ps{p},
+            pst{st}
+    {}
 
     void run()
     {
         const mockturtle::stopwatch stop{pst.time_total};
         pst.x_size_before = plyt.x() + 1;
         pst.y_size_before = plyt.y() + 1;
+        uint64_t max_gate_relocations = ps.max_gate_relocations.value_or((plyt.x() + 1) * (plyt.y() + 1));
 
         // Optimization
         auto layout = obstruction_layout<Lyt>(plyt);
@@ -779,7 +799,8 @@ class post_layout_optimization_impl
             }
             for (auto& gate_tile : gate_tiles)
             {
-                if (const auto new_gate_position = detail::improve_gate_location(layout, gate_tile, max_non_po))
+                if (const auto new_gate_position =
+                        detail::improve_gate_location(layout, gate_tile, max_non_po, max_gate_relocations))
                 {
                     moved_at_least_one_gate = true;
                     gate_tile               = *new_gate_position;  // update gate location
@@ -812,6 +833,7 @@ class post_layout_optimization_impl
 
   private:
     const Lyt&                      plyt;
+    post_layout_optimization_params ps;
     post_layout_optimization_stats& pst;
 };
 }  // namespace detail
@@ -837,9 +859,12 @@ class post_layout_optimization_impl
  *
  * @tparam Lyt Cartesian gate-level layout type.
  * @param lyt 2DDWave-clocked Cartesian gate-level layout to optimize.
+ * @param ps Parameters.
+ * @param pst Statistics.
  */
 template <typename Lyt>
-void post_layout_optimization(const Lyt& lyt, post_layout_optimization_stats* pst = nullptr) noexcept
+void post_layout_optimization(const Lyt& lyt, post_layout_optimization_params ps = {},
+                              post_layout_optimization_stats* pst = nullptr) noexcept
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
@@ -853,7 +878,7 @@ void post_layout_optimization(const Lyt& lyt, post_layout_optimization_stats* ps
 
     // Initialize stats for runtime measurement
     post_layout_optimization_stats             st{};
-    detail::post_layout_optimization_impl<Lyt> p{lyt, st};
+    detail::post_layout_optimization_impl<Lyt> p{lyt, ps, st};
 
     p.run();
 

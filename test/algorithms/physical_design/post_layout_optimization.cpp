@@ -14,12 +14,15 @@
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/obstruction_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
+#include <fiction/utils/routing_utils.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/views/names_view.hpp>
 
+#include <cstdint>
 #include <vector>
 
 using namespace fiction;
@@ -30,7 +33,7 @@ void check_layout_equiv(const Ntk& ntk)
     const auto layout = orthogonal<Lyt>(ntk, {});
 
     post_layout_optimization_stats stats{};
-    post_layout_optimization<Lyt>(layout, &stats);
+    post_layout_optimization<Lyt>(layout, {}, &stats);
 
     check_eq(ntk, layout);
 
@@ -111,7 +114,7 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
         {
             const auto layout_corner_case_1 = blueprints::optimization_layout_corner_case_outputs_1<gate_layout>();
             post_layout_optimization_stats stats_corner_case_1{};
-            post_layout_optimization<gate_layout>(layout_corner_case_1, &stats_corner_case_1);
+            post_layout_optimization<gate_layout>(layout_corner_case_1, {}, &stats_corner_case_1);
             check_eq(blueprints::optimization_layout_corner_case_outputs_1<gate_layout>(), layout_corner_case_1);
         }
 
@@ -119,8 +122,25 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
         {
             const auto layout_corner_case_2 = blueprints::optimization_layout_corner_case_outputs_2<gate_layout>();
             post_layout_optimization_stats stats_corner_case_2{};
-            post_layout_optimization<gate_layout>(layout_corner_case_2, &stats_corner_case_2);
+            post_layout_optimization<gate_layout>(layout_corner_case_2, {}, &stats_corner_case_2);
             check_eq(blueprints::optimization_layout_corner_case_outputs_2<gate_layout>(), layout_corner_case_2);
+        }
+    }
+
+    SECTION("Maximum Gate Relocations")
+    {
+        using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
+
+        for (int64_t max_gate_relocations = 0; max_gate_relocations < 10; max_gate_relocations++)
+        {
+            const auto layout = orthogonal<gate_layout>(blueprints::mux21_network<technology_network>(), {});
+
+            post_layout_optimization_stats  stats{};
+            post_layout_optimization_params params{};
+            params.max_gate_relocations = max_gate_relocations;
+            post_layout_optimization<gate_layout>(layout, params, &stats);
+
+            check_eq(blueprints::mux21_network<technology_network>(), layout);
         }
     }
 }
@@ -174,7 +194,8 @@ TEST_CASE("Optimization steps", "[post_layout_optimization]")
     const coordinate<gate_layout> old_pos_1 = {2, 0};
     const coordinate<gate_layout> new_pos_1 = {1, 0};
 
-    const auto moved_gate_1 = detail::improve_gate_location(obstr_lyt, old_pos_1, {2, 2});
+    const auto moved_gate_1 =
+        detail::improve_gate_location(obstr_lyt, old_pos_1, {2, 2}, (obstr_lyt.x() + 1) * (obstr_lyt.y() + 1));
     // I I→=
     // ↓   ↓
     // = ▢ =
@@ -192,7 +213,8 @@ TEST_CASE("Optimization steps", "[post_layout_optimization]")
     const coordinate<gate_layout> old_pos_2 = {0, 2};
     const coordinate<gate_layout> new_pos_2 = {0, 1};
 
-    const auto moved_gate_2 = detail::improve_gate_location(obstr_lyt, old_pos_2, {2, 2});
+    const auto moved_gate_2 =
+        detail::improve_gate_location(obstr_lyt, old_pos_2, {2, 2}, (obstr_lyt.x() + 1) * (obstr_lyt.y() + 1));
     // I I→=
     // ↓   ↓
     // F→= =
@@ -210,7 +232,8 @@ TEST_CASE("Optimization steps", "[post_layout_optimization]")
     const coordinate<gate_layout> old_pos_3 = {2, 2};
     const coordinate<gate_layout> new_pos_3 = {1, 1};
 
-    const auto moved_gate_3 = detail::improve_gate_location(obstr_lyt, old_pos_3, {2, 2});
+    const auto moved_gate_3 =
+        detail::improve_gate_location(obstr_lyt, old_pos_3, {2, 2}, (obstr_lyt.x() + 1) * (obstr_lyt.y() + 1));
     // I I ▢
     // ↓ ↓
     // F→&→=
@@ -228,7 +251,8 @@ TEST_CASE("Optimization steps", "[post_layout_optimization]")
     const coordinate<gate_layout> old_pos_4 = {0, 3};
     const coordinate<gate_layout> new_pos_4 = {0, 2};
 
-    const auto moved_gate_4 = detail::improve_gate_location(obstr_lyt, old_pos_4, {1, 1});
+    const auto moved_gate_4 =
+        detail::improve_gate_location(obstr_lyt, old_pos_4, {1, 1}, (obstr_lyt.x() + 1) * (obstr_lyt.y() + 1));
     // I I ▢
     // ↓ ↓
     // F→&→=
@@ -246,7 +270,8 @@ TEST_CASE("Optimization steps", "[post_layout_optimization]")
     const coordinate<gate_layout> old_pos_5 = {2, 3};
     const coordinate<gate_layout> new_pos_5 = {1, 2};
 
-    const auto moved_gate_5 = detail::improve_gate_location(obstr_lyt, old_pos_5, {1, 1});
+    const auto moved_gate_5 =
+        detail::improve_gate_location(obstr_lyt, old_pos_5, {1, 1}, (obstr_lyt.x() + 1) * (obstr_lyt.y() + 1));
     // I I ▢
     // ↓ ↓
     // F→& ▢
@@ -283,12 +308,13 @@ TEST_CASE("Wrong clocking scheme", "[post_layout_optimization]")
     {
         const coordinate<gate_layout> old_pos_1 = {2, 0};
 
-        const auto moved_gate_1 = detail::improve_gate_location(obstr_lyt, old_pos_1, {0, 0});
+        const auto moved_gate_1 =
+            detail::improve_gate_location(obstr_lyt, old_pos_1, {0, 0}, (obstr_lyt.x() + 1) * (obstr_lyt.y() + 1));
 
         CHECK_FALSE(moved_gate_1);
 
         post_layout_optimization_stats stats_wrong_clocking_scheme{};
 
-        CHECK_NOTHROW(post_layout_optimization<gate_layout>(obstr_lyt, &stats_wrong_clocking_scheme));
+        CHECK_NOTHROW(post_layout_optimization<gate_layout>(obstr_lyt, {}, &stats_wrong_clocking_scheme));
     }
 }

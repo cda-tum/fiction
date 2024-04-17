@@ -15,6 +15,7 @@
 
 #include <alice/alice.hpp>
 
+#include <cstdint>
 #include <iostream>
 #include <optional>
 #include <variant>
@@ -40,10 +41,21 @@ class optimize_command : public command
         add_flag("--wiring_reduction_only,-w",
                  "Do not attempt gate repositioning, but apply wiring reduction "
                  "exclusively (recommended for logic functions with >200 gates due to scalability reasons).");
+        add_option("--max_gate_relocations,-m", max_gate_relocations,
+                   "Specify the maximum number of locations to try for each gate (Defaults "
+                   "to the number of tiles in the layout).");
         add_flag("--verbose,-v", "Be verbose");
     }
 
   protected:
+    /**
+     * Maximum number of gate relocations.
+     */
+    uint64_t max_gate_relocations;
+    /**
+     * Parameters.
+     */
+    fiction::post_layout_optimization_params ps{};
     /**
      * Statistics.
      */
@@ -61,6 +73,7 @@ class optimize_command : public command
         if (gls.empty())
         {
             env->out() << "[w] no gate layout in store\n";
+            ps = {};
             return;
         }
 
@@ -73,6 +86,7 @@ class optimize_command : public command
         if (!std::visit(is_twoddwave_clocked, lyt))
         {
             env->out() << "[e] layout has to be 2DDWave-clocked\n";
+            ps = {};
             return;
         }
 
@@ -94,7 +108,7 @@ class optimize_command : public command
                 }
                 else
                 {
-                    fiction::post_layout_optimization(lyt_copy, &st);
+                    fiction::post_layout_optimization(lyt_copy, ps, &st);
                     if (is_set("verbose"))
                     {
                         st.report(env->out());
@@ -111,7 +125,12 @@ class optimize_command : public command
             }
         };
 
+        if (is_set("max_gate_relocations"))
+        {
+            ps.max_gate_relocations = max_gate_relocations;
+        }
         std::visit(apply_optimization, lyt);
+        ps = {};
     }
 };
 

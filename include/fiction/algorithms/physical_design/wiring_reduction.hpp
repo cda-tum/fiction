@@ -414,6 +414,30 @@ create_shifted_layout(const Lyt& lyt, const uint64_t x_offset = 0, const uint64_
                     {
                         shifted_layout.obstruct_coordinate({new_coord.x, new_coord.y, 0});
                         shifted_layout.obstruct_coordinate({new_coord.x, new_coord.y, 1});
+
+                        if (old_coord.z == 1)
+                        {
+                            // special case:
+                            // +→=
+                            // ↓ ↓
+                            // =→+
+                            //
+                            // -> No crossing between coordinate to the left and coordinate above the gate
+                            if (lyt.has_northern_incoming_signal({old_coord.x - 1, old_coord.y, 0}) &&
+                                lyt.has_western_incoming_signal({old_coord.x, old_coord.y - 1, 0}))
+                            {
+                                if (shifted_layout.get_search_direction() == search_direction::HORIZONTAL)
+                                {
+                                    shifted_layout.obstruct_connection({new_coord.x - 1, new_coord.y, 0},
+                                                                       {new_coord.x, new_coord.y - 1, 0});
+                                }
+                                else
+                                {
+                                    shifted_layout.obstruct_connection({new_coord.x, new_coord.y - 1, 0},
+                                                                       {new_coord.x - 1, new_coord.y, 0});
+                                }
+                            }
+                        }
                     }
 
                     // For bent wires from north to east, obstruct the connection between the wire and the
@@ -425,6 +449,18 @@ create_shifted_layout(const Lyt& lyt, const uint64_t x_offset = 0, const uint64_
                         {
                             shifted_layout.obstruct_connection(new_coord,
                                                                {new_coord.x + 1, new_coord.y + 1, new_coord.z});
+                            // special case:
+                            // →=
+                            //  ↓
+                            //  =→
+                            //
+                            // -> Only one wire can be deleted
+                            if (lyt.has_western_incoming_signal({old_coord.x, old_coord.y - 1, old_coord.z}) &&
+                                lyt.is_wire(lyt.get_node({old_coord.x, old_coord.y - 1, old_coord.z})))
+                            {
+                                shifted_layout.obstruct_coordinate({new_coord.x, new_coord.y - 1, 0});
+                                shifted_layout.obstruct_coordinate({new_coord.x, new_coord.y - 1, 1});
+                            }
                         }
                         else
                         {
@@ -447,6 +483,18 @@ create_shifted_layout(const Lyt& lyt, const uint64_t x_offset = 0, const uint64_
                         {
                             shifted_layout.obstruct_connection(new_coord,
                                                                {new_coord.x + 1, new_coord.y + 1, new_coord.z});
+                            // special case:
+                            // ↓
+                            // =→=
+                            //   ↓
+                            //
+                            // -> Only one wire can be deleted
+                            if (lyt.has_northern_incoming_signal({old_coord.x - 1, old_coord.y, old_coord.z}) &&
+                                lyt.is_wire(lyt.get_node({old_coord.x - 1, old_coord.y, old_coord.z})))
+                            {
+                                shifted_layout.obstruct_coordinate({new_coord.x - 1, new_coord.y, 0});
+                                shifted_layout.obstruct_coordinate({new_coord.x - 1, new_coord.y, 1});
+                            }
                         }
                     }
                 }
@@ -939,11 +987,10 @@ class wiring_reduction_impl
                     possible_path = get_path(shifted_layout, {0, 0}, {shifted_layout.x(), shifted_layout.y()});
                 }
 
-                // Calculate offset matrix and delete wires based on to-delete list
-                delete_wires(layout, shifted_layout, to_delete);
-
                 if (!to_delete.empty())
                 {
+                    // Calculate offset matrix and delete wires based on to-delete list
+                    delete_wires(layout, shifted_layout, to_delete);
                     found_wires = true;
                 }
             }
