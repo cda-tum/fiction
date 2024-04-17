@@ -109,7 +109,7 @@ struct ground_state_space_stats
         os << fmt::format("[i] There are {} projector states in the constructed hierarchy\n", projector_state_count);
 
         const double gss_runtime = mockturtle::to_seconds(runtime);
-        os << fmt::format("[i] Ground State Space took {} {}seconds",
+        os << fmt::format("[i] Ground State Space took {:.4f} {}seconds",
                           gss_runtime > 1.0 ? gss_runtime : gss_runtime * 1000, gss_runtime > 1.0 ? "" : "milli")
            << std::endl;
     }
