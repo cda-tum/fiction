@@ -377,12 +377,11 @@ layout_coordinate_path<Lyt> get_path_and_obstruct(Lyt& lyt, const tile<Lyt>& sta
  * @tparam Lyt Cartesian obstruction gate-level layout type.
  * @param lyt 2DDWave-clocked cartesian obstruction gate-level layout.
  * @param old_pos Old position of the gate to be moved.
- * @return Flag that indicates if gate was moved successfully and the new coordinate of the moved gate.
+ * @return Flag that indicates if gate was moved successfully.
  */
 template <typename Lyt>
-[[nodiscard]] std::optional<tile<Lyt>> improve_gate_location(Lyt& lyt, const tile<Lyt>& old_pos,
-                                                             const tile<Lyt>& max_non_po,
-                                                             const uint64_t   max_gate_relocations) noexcept
+[[nodiscard]] bool improve_gate_location(Lyt& lyt, const tile<Lyt>& old_pos, const tile<Lyt>& max_non_po,
+                                         const uint64_t   max_gate_relocations) noexcept
 {
     const auto& [fanins, fanouts, to_clear, old_path_from_fanin_1_to_gate, old_path_from_fanin_2_to_gate,
                  old_path_from_gate_to_fanout_1, old_path_from_gate_to_fanout_2] = get_fanin_and_fanouts(lyt, old_pos);
@@ -412,7 +411,7 @@ template <typename Lyt>
         {
             if (i == fanin)
             {
-                return std::nullopt;
+                return false;
             }
         }
     }
@@ -426,7 +425,7 @@ template <typename Lyt>
             {
                 if (outgoing_tile == fanout)
                 {
-                    return std::nullopt;
+                    return false;
                 }
             }
         }
@@ -578,7 +577,7 @@ template <typename Lyt>
 
                         if (new_pos == old_pos)
                         {
-                            return std::nullopt;
+                            return false;
                         }
                     }
                     // if no routing was found, remove added obstructions
@@ -657,10 +656,10 @@ template <typename Lyt>
 
             lyt.move_node(lyt.get_node(fanout), fanout, fout_signals);
         }
-        return std::nullopt;
+        return false;
     }
 
-    return new_pos;
+    return true;
 }
 /**
  * Utility function that moves outputs from the last row to the previous row, and from the last column to the previous
@@ -759,32 +758,34 @@ class post_layout_optimization_impl
 
         // Optimization
         auto layout = obstruction_layout<Lyt>(plyt);
-
-        std::vector<tile<Lyt>> gate_tiles{};
-        gate_tiles.reserve(layout.num_gates() + layout.num_pis() - layout.num_pos());
-
-        fiction::wiring_reduction_stats wiring_reduction_stats{};
-        fiction::wiring_reduction(layout, &wiring_reduction_stats);
-
-        layout.foreach_node(
-            [&layout, &gate_tiles](const auto& node)
-            {
-                if (const tile<Lyt> tile = layout.get_tile(node);
-                    layout.is_inv(node) || layout.is_and(node) || layout.is_xor(node) || layout.is_fanout(node) ||
-                    layout.is_or(node) || layout.is_pi_tile(tile) || layout.is_po_tile(tile))
-                {
-                    layout.obstruct_coordinate({tile.x, tile.y, 1});
-                    gate_tiles.emplace_back(tile);
-                }
-            });
-
-        std::sort(gate_tiles.begin(), gate_tiles.end(), detail::compare_gates<Lyt>);
-
         bool moved_at_least_one_gate = true;
 
         while (moved_at_least_one_gate)
         {
             moved_at_least_one_gate = false;
+            fiction::wiring_reduction_stats wiring_reduction_stats{};
+            fiction::wiring_reduction(layout, &wiring_reduction_stats);
+            if ((wiring_reduction_stats.area_improvement != 0ull) ||
+                (wiring_reduction_stats.wiring_improvement != 0ull))
+            {
+                moved_at_least_one_gate = true;
+            }
+
+            std::vector<tile<Lyt>> gate_tiles{};
+            gate_tiles.reserve(layout.num_gates() + layout.num_pis() - layout.num_pos());
+            layout.foreach_node(
+                [&layout, &gate_tiles](const auto& node)
+                {
+                    if (const tile<Lyt> tile = layout.get_tile(node);
+                        layout.is_inv(node) || layout.is_and(node) || layout.is_xor(node) || layout.is_fanout(node) ||
+                        layout.is_or(node) || layout.is_pi_tile(tile) || layout.is_po_tile(tile))
+                    {
+                        layout.obstruct_coordinate({tile.x, tile.y, 1});
+                        gate_tiles.emplace_back(tile);
+                    }
+                });
+
+            std::sort(gate_tiles.begin(), gate_tiles.end(), detail::compare_gates<Lyt>);
 
             tile<Lyt> max_non_po;
             // Iterate through the vector in reverse
@@ -799,22 +800,17 @@ class post_layout_optimization_impl
             }
             for (auto& gate_tile : gate_tiles)
             {
-                if (const auto new_gate_position =
-                        detail::improve_gate_location(layout, gate_tile, max_non_po, max_gate_relocations))
+                if (detail::improve_gate_location(layout, gate_tile, max_non_po, max_gate_relocations))
                 {
                     moved_at_least_one_gate = true;
-                    gate_tile               = *new_gate_position;  // update gate location
                 }
             }
-
-            std::sort(gate_tiles.begin(), gate_tiles.end(), detail::compare_gates<Lyt>);
         }
 
         // calculate bounding box
         auto bounding_box = bounding_box_2d(layout);
         layout.resize({bounding_box.get_x_size(), bounding_box.get_y_size(), layout.z()});
 
-        fiction::wiring_reduction(layout, &wiring_reduction_stats);
         detail::optimize_output_positions(layout);
 
         // calculate bounding box

@@ -205,9 +205,9 @@ TEST_CASE("Optimization steps", "[post_layout_optimization]")
     // O ▢ O
     SECTION("Move gates 1")
     {
-        CHECK(moved_gate_1 == new_pos_1);
-        CHECK(obstr_lyt.is_pi_tile(new_pos_1) == true);
-        CHECK(obstr_lyt.is_pi_tile(old_pos_1) == false);
+        CHECK(moved_gate_1);
+        CHECK(obstr_lyt.is_pi_tile(new_pos_1));
+        CHECK_FALSE(obstr_lyt.is_pi_tile(old_pos_1));
     }
 
     const coordinate<gate_layout> old_pos_2 = {0, 2};
@@ -224,7 +224,7 @@ TEST_CASE("Optimization steps", "[post_layout_optimization]")
     // O ▢ O
     SECTION("Move gates 2")
     {
-        CHECK(moved_gate_2 == new_pos_2);
+        CHECK(moved_gate_2);
         CHECK(obstr_lyt.fanout_size(obstr_lyt.get_node(old_pos_2)) == 1);
         CHECK(obstr_lyt.fanout_size(obstr_lyt.get_node(new_pos_2)) == 2);
     }
@@ -243,9 +243,9 @@ TEST_CASE("Optimization steps", "[post_layout_optimization]")
     // O ▢ O
     SECTION("Move gates 3")
     {
-        CHECK(moved_gate_3 == new_pos_3);
-        CHECK(obstr_lyt.is_and(obstr_lyt.get_node(new_pos_3)) == true);
-        CHECK(obstr_lyt.is_and(obstr_lyt.get_node(old_pos_3)) == false);
+        CHECK(moved_gate_3);
+        CHECK(obstr_lyt.is_and(obstr_lyt.get_node(new_pos_3)));
+        CHECK_FALSE(obstr_lyt.is_and(obstr_lyt.get_node(old_pos_3)));
     }
 
     const coordinate<gate_layout> old_pos_4 = {0, 3};
@@ -262,9 +262,9 @@ TEST_CASE("Optimization steps", "[post_layout_optimization]")
     // ▢ ▢ O
     SECTION("Move gates 4")
     {
-        CHECK(moved_gate_4 == new_pos_4);
-        CHECK(obstr_lyt.is_po(obstr_lyt.get_node(new_pos_4)) == true);
-        CHECK(obstr_lyt.is_po(obstr_lyt.get_node(old_pos_4)) == false);
+        CHECK(moved_gate_4);
+        CHECK(obstr_lyt.is_po(obstr_lyt.get_node(new_pos_4)));
+        CHECK_FALSE(obstr_lyt.is_po(obstr_lyt.get_node(old_pos_4)));
     }
 
     const coordinate<gate_layout> old_pos_5 = {2, 3};
@@ -281,19 +281,19 @@ TEST_CASE("Optimization steps", "[post_layout_optimization]")
     // ▢ ▢ ▢
     SECTION("Move gates 5")
     {
-        CHECK(moved_gate_5 == new_pos_5);
-        CHECK(obstr_lyt.is_po(obstr_lyt.get_node(new_pos_5)) == true);
-        CHECK(obstr_lyt.is_po(obstr_lyt.get_node(old_pos_5)) == false);
+        CHECK(moved_gate_5);
+        CHECK(obstr_lyt.is_po(obstr_lyt.get_node(new_pos_5)));
+        CHECK_FALSE(obstr_lyt.is_po(obstr_lyt.get_node(old_pos_5)));
     }
 
     SECTION("Optimized layout")
     {
-        CHECK(obstr_lyt.is_pi_tile(coordinate<gate_layout>{0, 0}) == true);
-        CHECK(obstr_lyt.is_pi_tile(coordinate<gate_layout>{1, 0}) == true);
-        CHECK(obstr_lyt.is_buf(obstr_lyt.get_node(coordinate<gate_layout>{0, 1})) == true);
-        CHECK(obstr_lyt.is_and(obstr_lyt.get_node(coordinate<gate_layout>{1, 1})) == true);
-        CHECK(obstr_lyt.is_po_tile(coordinate<gate_layout>{0, 2}) == true);
-        CHECK(obstr_lyt.is_po_tile(coordinate<gate_layout>{1, 2}) == true);
+        CHECK(obstr_lyt.is_pi_tile(coordinate<gate_layout>{0, 0}));
+        CHECK(obstr_lyt.is_pi_tile(coordinate<gate_layout>{1, 0}));
+        CHECK(obstr_lyt.is_buf(obstr_lyt.get_node(coordinate<gate_layout>{0, 1})));
+        CHECK(obstr_lyt.is_and(obstr_lyt.get_node(coordinate<gate_layout>{1, 1})));
+        CHECK(obstr_lyt.is_po_tile(coordinate<gate_layout>{0, 2}));
+        CHECK(obstr_lyt.is_po_tile(coordinate<gate_layout>{1, 2}));
     }
 }
 
