@@ -24,7 +24,7 @@ jobs:
           submodules: recursive
 
       - name: Review code with Clang-Tidy
-        uses: ZedThree/clang-tidy-review@v0.17.0
+        uses: ZedThree/clang-tidy-review@v0.18.0
         id: review
         with:
           cmake_command: >
@@ -41,7 +41,7 @@ jobs:
 
       - name: Make sure that the review file exists
         id: check-review-output
-        uses: andstor/file-existence-action@v2.0.0
+        uses: andstor/file-existence-action@v3.0.0
         with:
           files: 'clang-tidy-review-output.json'
           ignore_case: true

@@ -889,8 +889,6 @@ void adjust_tile(Lyt& lyt, const LytCpy& layout_copy, const ShiftedLyt& shifted_
     }
 }
 /**
- * Delete wires from a `wiring_reduction_layout` based on specified coordinates and offset matrix.
- *
  * This function deletes wires from the provided `wiring_reduction_layout` based on the specified coordinates
  * and offset matrix. It clears the tiles in the to-delete list, shifts all gates to fill the empty coordinates, and
  * resizes the layout to an optimized size by calculating the bounding box.
