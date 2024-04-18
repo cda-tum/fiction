@@ -13,6 +13,7 @@
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/layouts/obstruction_layout.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/utils/routing_utils.hpp"
 
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
@@ -49,8 +50,17 @@ struct post_layout_optimization_stats
      * Runtime of the post-layout optimization process.
      */
     mockturtle::stopwatch<>::duration time_total{0};
+    /**
+     * Layout dimensions before the post-layout optimization process.
+     */
     uint64_t                          x_size_before{0ull}, y_size_before{0ull};
+    /**
+     * Layout dimensions after the post-layout optimization process.
+     */
     uint64_t                          x_size_after{0ull}, y_size_after{0ull};
+    /**
+     * Area reduction (in %) after the post-layout optimization process.
+     */
     double_t                          area_improvement{0ull};
     /**
      * Reports the statistics to the given output stream.
@@ -80,6 +90,9 @@ namespace detail
 template <typename Lyt>
 void fix_wires(Lyt& lyt, const std::vector<tile<Lyt>>& deleted_coords) noexcept
 {
+    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+    static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
+
     std::unordered_set<tile<Lyt>> moved_tiles{};
     moved_tiles.reserve(deleted_coords.size());
     for (const auto& tile : deleted_coords)
@@ -231,6 +244,9 @@ void add_fanout_to_route(const tile<Lyt>& fanout, bool is_first_fanout, fanin_fa
 template <typename Lyt>
 [[nodiscard]] fanin_fanout_data<Lyt> get_fanin_and_fanouts(const Lyt& lyt, const tile<Lyt>& op) noexcept
 {
+    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+    static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
+
     fanin_fanout_data<Lyt> ffd{};
 
     auto fanin1  = tile<Lyt>{};
@@ -349,6 +365,9 @@ template <typename Lyt>
 template <typename Lyt>
 layout_coordinate_path<Lyt> get_path_and_obstruct(Lyt& lyt, const tile<Lyt>& start, const tile<Lyt>& end)
 {
+    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+    static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
+
     using dist = twoddwave_distance_functor<Lyt, uint64_t>;
     using cost = unit_cost_functor<Lyt, uint8_t>;
     static const a_star_params params{true};
@@ -383,6 +402,16 @@ template <typename Lyt>
 [[nodiscard]] bool improve_gate_location(Lyt& lyt, const tile<Lyt>& old_pos, const tile<Lyt>& max_non_po,
                                          const uint64_t max_gate_relocations) noexcept
 {
+    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+    static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
+
+    // Check if the clocking scheme is 2DDWave
+    if (!lyt.is_clocking_scheme(clock_name::TWODDWAVE))
+    {
+        std::cout << "[e] the given layout has to be 2DDWave-clocked\n";
+        return false;
+    }
+
     const auto& [fanins, fanouts, to_clear, old_path_from_fanin_1_to_gate, old_path_from_fanin_2_to_gate,
                  old_path_from_gate_to_fanout_1, old_path_from_gate_to_fanout_2] = get_fanin_and_fanouts(lyt, old_pos);
 
@@ -671,6 +700,16 @@ template <typename Lyt>
 template <typename Lyt>
 void optimize_output_positions(Lyt& lyt) noexcept
 {
+    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+    static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
+
+    // Check if the clocking scheme is 2DDWave
+    if (!lyt.is_clocking_scheme(clock_name::TWODDWAVE))
+    {
+        std::cout << "[e] the given layout has to be 2DDWave-clocked\n";
+        return;
+    }
+
     bool optimizable = true;
 
     for (uint64_t x = 0; x <= lyt.x(); ++x)
@@ -735,6 +774,9 @@ void optimize_output_positions(Lyt& lyt) noexcept
 template <typename Lyt>
 bool compare_gate_tiles(const tile<Lyt>& a, const tile<Lyt>& b)
 {
+    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+    static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
+
     return static_cast<bool>(std::make_pair(a.x + a.y, a.x) < std::make_pair(b.x + b.y, b.x));
 }
 
@@ -751,6 +793,15 @@ class post_layout_optimization_impl
 
     void run()
     {
+        static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+        static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
+
+        // Check if the clocking scheme is 2DDWave
+        if (!plyt.is_clocking_scheme(clock_name::TWODDWAVE))
+        {
+            std::cout << "[e] the given layout has to be 2DDWave-clocked\n";
+            return;
+        }
         const mockturtle::stopwatch stop{pst.time_total};
         pst.x_size_before             = plyt.x() + 1;
         pst.y_size_before             = plyt.y() + 1;
@@ -785,7 +836,7 @@ class post_layout_optimization_impl
                     }
                 });
 
-            std::sort(gate_tiles.begin(), gate_tiles.end(), detail::compare_gates<Lyt>);
+            std::sort(gate_tiles.begin(), gate_tiles.end(), detail::compare_gate_tiles<Lyt>);
 
             tile<Lyt> max_non_po;
             // Iterate through the vector in reverse
@@ -828,8 +879,17 @@ class post_layout_optimization_impl
     }
 
   private:
+    /**
+     * 2DDWave-clocked Cartesian gate-level layout to optimize.
+     */
     const Lyt&                      plyt;
+    /**
+     * Post-layout optimization parameters.
+     */
     post_layout_optimization_params ps;
+    /**
+     * Statistics about the post-layout optimization process.
+     */
     post_layout_optimization_stats& pst;
 };
 }  // namespace detail

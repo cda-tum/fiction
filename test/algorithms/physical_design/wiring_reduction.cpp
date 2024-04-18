@@ -125,7 +125,7 @@ TEST_CASE("Wrong clocking scheme", "[wiring_reduction]")
 
     SECTION("Call functions")
     {
-        CHECK_NOTHROW(detail::create_shifted_layout(obstr_lyt, 1, 1, detail::search_direction::HORIZONTAL));
+        CHECK_NOTHROW(detail::create_wiring_reduction_layout(obstr_lyt, 1, 1, detail::search_direction::HORIZONTAL));
 
         wiring_reduction_stats stats_wrong_clocking_scheme{};
 
@@ -142,7 +142,7 @@ TEST_CASE("Search Direction", "[wiring_reduction]")
 
     SECTION("Get")
     {
-        auto lyt = detail::create_shifted_layout(obstr_lyt, 1, 1, detail::search_direction::HORIZONTAL);
+        auto lyt = detail::create_wiring_reduction_layout(obstr_lyt, 1, 1, detail::search_direction::HORIZONTAL);
         CHECK(lyt.get_search_direction() == detail::search_direction::HORIZONTAL);
     }
 }
