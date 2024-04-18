@@ -30,7 +30,7 @@ jobs:
           mkdir alglib_build && cd alglib_build
           cmake ..
           make -j4
-          make install
+          sudo make install
 
       - name: Review code with Clang-Tidy
         uses: ZedThree/clang-tidy-review@v0.18.0
@@ -43,6 +43,7 @@ jobs:
             -DFICTION_TEST=ON
             -DFICTION_EXPERIMENTS=ON
             -DFICTION_ALGLIB=ON
+            -DALGLIB_DIR=/usr/local/lib/cmake/ALGLIB
             -DMOCKTURTLE_EXAMPLES=OFF
           build_dir: build
           config_file: '.clang-tidy'
