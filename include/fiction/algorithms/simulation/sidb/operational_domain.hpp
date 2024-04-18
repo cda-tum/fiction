@@ -5,17 +5,10 @@
 #ifndef FICTION_OPERATIONAL_DOMAIN_HPP
 #define FICTION_OPERATIONAL_DOMAIN_HPP
 
-#include "fiction/algorithms/iter/bdl_input_iterator.hpp"
-#include "fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp"
 #include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
-#include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
-#include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
-#include "fiction/algorithms/simulation/sidb/quickexact.hpp"
-#include "fiction/algorithms/simulation/sidb/quicksim.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
-#include "fiction/layouts/cell_level_layout.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/execution_utils.hpp"
@@ -37,6 +30,7 @@
 #include <optional>
 #include <queue>
 #include <random>
+#include <set>
 #include <tuple>
 #include <type_traits>
 #include <vector>
@@ -292,13 +286,13 @@ class operational_domain_impl
         // generate the x dimension values
         for (std::size_t i = 0; i < x_indices.size(); ++i)
         {
-            x_values.push_back(params.x_min + i * params.x_step);
+            x_values.push_back(params.x_min + static_cast<double>(i) * params.x_step);
         }
 
         // generate the y dimension values
         for (std::size_t i = 0; i < y_indices.size(); ++i)
         {
-            y_values.push_back(params.y_min + i * params.y_step);
+            y_values.push_back(params.y_min + static_cast<double>(i) * params.y_step);
         }
     }
     /**
@@ -594,6 +588,30 @@ class operational_domain_impl
         {
             return !(*this == other);
         }
+        /**
+         * Less than operator.
+         *
+         * @param other Other step point to compare with.
+         * @return `true` if this step point is less than to the other.
+         */
+        [[nodiscard]] bool operator<(const step_point& other) const noexcept
+        {
+            if (y != other.y)
+            {
+                return y < other.y;
+            }
+            return x < other.x;
+        }
+        // Define the hash function for step_point using hash_combine
+        struct hash
+        {
+            std::size_t operator()(const step_point& point) const noexcept
+            {
+                std::size_t hash = 0;
+                hash_combine(hash, point.x, point.y);
+                return hash;
+            }
+        };
     };
     /**
      * Converts a step point to a parameter point.
@@ -794,7 +812,7 @@ class operational_domain_impl
      * @param samples Number of random `step_point`s to generate.
      * @return A vector of random `step_point`s in the stored parameter range.
      */
-    [[nodiscard]] std::vector<step_point> generate_random_step_points(const std::size_t samples) noexcept
+    [[nodiscard]] std::set<step_point> generate_random_step_points(const std::size_t samples) noexcept
     {
         static std::mt19937_64 generator{std::random_device{}()};
 
@@ -803,13 +821,12 @@ class operational_domain_impl
         std::uniform_int_distribution<std::size_t> y_distribution{0, y_indices.size() - 1};
 
         // container for the random samples
-        std::vector<step_point> step_point_samples{};
-        step_point_samples.reserve(samples);
+        std::set<step_point> step_point_samples{};
 
         for (std::size_t i = 0; i < samples; ++i)
         {
             // sample x and y dimension
-            step_point_samples.emplace_back(x_distribution(generator), y_distribution(generator));
+            step_point_samples.insert(step_point{x_distribution(generator), y_distribution(generator)});
         }
 
         return step_point_samples;

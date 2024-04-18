@@ -804,9 +804,9 @@ TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[operational-domain
         check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
 
         CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
-        CHECK(op_domain_stats.num_simulator_invocations <= 100);
-        CHECK(op_domain_stats.num_evaluated_parameter_combinations <= 100);
-        CHECK(op_domain_stats.num_operational_parameter_combinations <= 100);
+        CHECK(op_domain_stats.num_simulator_invocations == 16);
+        CHECK(op_domain_stats.num_evaluated_parameter_combinations == 4);
+        CHECK(op_domain_stats.num_operational_parameter_combinations == 4);
         CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
     }
     SECTION("flood_fill")
