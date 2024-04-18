@@ -173,7 +173,7 @@ sidb_cluster_hierarchy(Lyt& lyt, sidb_cluster_hierarchy_linkage_method linkage_m
             {
                 nodes[cs.at(c)] = std::make_unique<sidb_binary_cluster_hierarchy_node>(
 #if (DEBUG_SIDB_CLUSTER_HIERARCHY)
-                    std::set<uint64_t>{cs[c]},
+                    std::set<uint64_t>{cs.at(c)},
 #else
                     phmap::flat_hash_set<uint64_t>{cs.at(c)},
 #endif
@@ -194,8 +194,8 @@ sidb_cluster_hierarchy(Lyt& lyt, sidb_cluster_hierarchy_linkage_method linkage_m
                        nodes.at(cs.at(1))->c.cend(), std::inserter(set_union, set_union.begin()));
 
         nodes[new_n] = std::make_unique<sidb_binary_cluster_hierarchy_node>(
-            set_union, std::array<sidb_binary_cluster_hierarchy_node_ptr, 2>{std::move(nodes.at(cs.at(0))),
-                                                                             std::move(nodes.at(cs.at(1)))});
+            std::move(set_union), std::array<sidb_binary_cluster_hierarchy_node_ptr, 2>{std::move(nodes.at(cs.at(0))),
+                                                                                        std::move(nodes.at(cs.at(1)))});
         nodes.erase(cs.at(0));
         nodes.erase(cs.at(1));
     }
