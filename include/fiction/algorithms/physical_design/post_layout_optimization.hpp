@@ -413,13 +413,6 @@ template <typename Lyt>
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
 
-    // Check if the clocking scheme is 2DDWave
-    if (!lyt.is_clocking_scheme(clock_name::TWODDWAVE))
-    {
-        std::cout << "[e] the given layout has to be 2DDWave-clocked\n";
-        return false;
-    }
-
     const auto& [fanins, fanouts, to_clear, old_path_from_fanin_1_to_gate, old_path_from_fanin_2_to_gate,
                  old_path_from_gate_to_fanout_1, old_path_from_gate_to_fanout_2] = get_fanin_and_fanouts(lyt, old_pos);
 
@@ -711,13 +704,6 @@ void optimize_output_positions(Lyt& lyt) noexcept
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
 
-    // Check if the clocking scheme is 2DDWave
-    if (!lyt.is_clocking_scheme(clock_name::TWODDWAVE))
-    {
-        std::cout << "[e] the given layout has to be 2DDWave-clocked\n";
-        return;
-    }
-
     bool optimizable = true;
 
     for (uint64_t x = 0; x <= lyt.x(); ++x)
@@ -804,12 +790,6 @@ class post_layout_optimization_impl
         static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
         static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
 
-        // Check if the clocking scheme is 2DDWave
-        if (!plyt.is_clocking_scheme(clock_name::TWODDWAVE))
-        {
-            std::cout << "[e] the given layout has to be 2DDWave-clocked\n";
-            return;
-        }
         const mockturtle::stopwatch stop{pst.time_total};
         pst.x_size_before             = plyt.x() + 1;
         pst.y_size_before             = plyt.y() + 1;

@@ -746,13 +746,6 @@ void adjust_tile_horizontal_search_dir(Lyt& lyt, const LytCpy& layout_copy, tile
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
 
-    // Check if the clocking scheme is 2DDWave
-    if (!lyt.is_clocking_scheme(clock_name::TWODDWAVE))
-    {
-        std::cout << "[e] the given layout has to be 2DDWave-clocked\n";
-        return;
-    }
-
     if (fanin.y == old_coord.y)
     {
         signals.push_back(lyt.make_signal(lyt.get_node({fanin.x, fanin.y - offset, fanin.z})));
@@ -814,13 +807,6 @@ void adjust_tile_vertical_search_dir(Lyt& lyt, const LytCpy& layout_copy, tile<L
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
-
-    // Check if the clocking scheme is 2DDWave
-    if (!lyt.is_clocking_scheme(clock_name::TWODDWAVE))
-    {
-        std::cout << "[e] the given layout has to be 2DDWave-clocked\n";
-        return;
-    }
 
     if (fanin.x == old_coord.x)
     {
@@ -884,13 +870,6 @@ void adjust_tile(Lyt& lyt, const LytCpy& layout_copy, const WiringReductionLyt& 
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
 
-    // Check if the clocking scheme is 2DDWave
-    if (!lyt.is_clocking_scheme(clock_name::TWODDWAVE))
-    {
-        std::cout << "[e] the given layout has to be 2DDWave-clocked\n";
-        return;
-    }
-
     const auto      offset    = offset_mtrx[y][x];
     const tile<Lyt> old_coord = {x, y, z};
 
@@ -941,13 +920,6 @@ void delete_wires(Lyt& lyt, WiringReductionLyt& wiring_reduction_layout,
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
 
-    // Check if the clocking scheme is 2DDWave
-    if (!lyt.is_clocking_scheme(clock_name::TWODDWAVE))
-    {
-        std::cout << "[e] the given layout has to be 2DDWave-clocked\n";
-        return;
-    }
-
     const auto offset_matrix = calculate_offset_matrix<WiringReductionLyt>(wiring_reduction_layout, to_delete);
 
     // Create a copy of the original layout for reference
@@ -994,13 +966,6 @@ class wiring_reduction_impl
     {
         static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
         static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
-
-        // Check if the clocking scheme is 2DDWave
-        if (!plyt.is_clocking_scheme(clock_name::TWODDWAVE))
-        {
-            std::cout << "[e] the given layout has to be 2DDWave-clocked\n";
-            return;
-        }
 
         // measure run time
         mockturtle::stopwatch stop{pst.time_total};
