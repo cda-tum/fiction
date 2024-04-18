@@ -23,6 +23,15 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Setup ALGLIB
+        run: |
+          git clone https://github.com/S-Dafarra/alglib-cmake.git
+          cd alglib-cmake
+          mkdir build && cd build
+          cmake ..
+          make -j4
+          sudo make install
+
       - name: Review code with Clang-Tidy
         uses: ZedThree/clang-tidy-review@v0.18.0
         id: review
@@ -33,6 +42,7 @@ jobs:
             -DFICTION_CLI=ON
             -DFICTION_TEST=ON
             -DFICTION_EXPERIMENTS=ON
+            -DFICTION_ALGLIB=ON
             -DMOCKTURTLE_EXAMPLES=OFF
           build_dir: build
           config_file: '.clang-tidy'
