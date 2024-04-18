@@ -27,7 +27,7 @@ jobs:
         run: |
           git clone https://github.com/S-Dafarra/alglib-cmake.git
           cd alglib-cmake
-          mkdir build && cd build
+          mkdir alglib_build && cd alglib_build
           cmake ..
           make -j4
           sudo make install
