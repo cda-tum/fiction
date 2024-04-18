@@ -51,13 +51,21 @@ struct post_layout_optimization_stats
      */
     mockturtle::stopwatch<>::duration time_total{0};
     /**
-     * Layout dimensions before the post-layout optimization process.
+     * Layout width before the post-layout optimization process.
      */
-    uint64_t                          x_size_before{0ull}, y_size_before{0ull};
+    uint64_t x_size_before{0ull};
     /**
-     * Layout dimensions after the post-layout optimization process.
+     * Layout height before the post-layout optimization process.
      */
-    uint64_t                          x_size_after{0ull}, y_size_after{0ull};
+    uint64_t y_size_before{0ull};
+    /**
+     * Layout width after the post-layout optimization process.
+     */
+    uint64_t x_size_after{0ull};
+    /**
+     * Layout height after the post-layout optimization process.
+     */
+    uint64_t y_size_after{0ull};
     /**
      * Area reduction (in %) after the post-layout optimization process.
      */
