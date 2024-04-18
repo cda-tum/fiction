@@ -69,7 +69,7 @@ struct post_layout_optimization_stats
     /**
      * Area reduction (in %) after the post-layout optimization process.
      */
-    double_t                          area_improvement{0ull};
+    double_t area_improvement{0ull};
     /**
      * Reports the statistics to the given output stream.
      *
@@ -890,7 +890,7 @@ class post_layout_optimization_impl
     /**
      * 2DDWave-clocked Cartesian gate-level layout to optimize.
      */
-    const Lyt&                      plyt;
+    const Lyt& plyt;
     /**
      * Post-layout optimization parameters.
      */
