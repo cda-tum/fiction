@@ -1009,7 +1009,7 @@ class wiring_reduction_impl
         pst.x_size_before    = plyt.x() + 1;
         pst.y_size_before    = plyt.y() + 1;
 
-        auto                                                          layout    = obstruction_layout<Lyt>(plyt);
+        auto                                                                  layout    = obstruction_layout<Lyt>(plyt);
         layout_coordinate_path<wiring_reduction_layout_type<coordinate<Lyt>>> to_delete = {};
 
         bool found_wires = true;
@@ -1069,7 +1069,7 @@ class wiring_reduction_impl
     /**
      * The 2DDWave-clocked layout whose wiring is to be reduced.
      */
-    const Lyt&              plyt;
+    const Lyt& plyt;
     /**
      * Statistics about the wiring_reduction process.
      */
