@@ -1000,11 +1000,11 @@ class wiring_reduction_impl
         const uint64_t area_after  = pst.x_size_after * pst.y_size_after;
         double_t       wiring_percentage_difference =
             static_cast<double>(area_before - area_after) / static_cast<double>(area_before) * 100.0;
-        wiring_percentage_difference        = std::round(wiring_percentage_difference * 100) / 100;
-        pst.wiring_improvement              = wiring_percentage_difference;
-        pst.num_wires_after                 = plyt.num_wires() - plyt.num_pis() - plyt.num_pos();
+        wiring_percentage_difference      = std::round(wiring_percentage_difference * 100) / 100;
+        pst.wiring_improvement            = wiring_percentage_difference;
+        pst.num_wires_after               = plyt.num_wires() - plyt.num_pis() - plyt.num_pos();
         double area_percentage_difference = static_cast<double>(pst.num_wires_before - pst.num_wires_after) /
-                                              static_cast<double>(pst.num_wires_before) * 100.0;
+                                            static_cast<double>(pst.num_wires_before) * 100.0;
         area_percentage_difference = std::round(area_percentage_difference * 100) / 100;
         pst.area_improvement       = area_percentage_difference;
     }
