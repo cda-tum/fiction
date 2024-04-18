@@ -37,14 +37,14 @@ jobs:
         id: review
         with:
           cmake_command: >
-            (git clone https://github.com/S-Dafarra/alglib-cmake.git && cd alglib-cmake && mkdir alglib_build && cd alglib_build && cmake .. && make -j4 && sudo make install && cd ../..);
+            (git clone https://github.com/S-Dafarra/alglib-cmake.git && cd alglib-cmake && mkdir build && cd build && cmake .. && make -j4 && sudo make install && cd ../..);
             cmake . -B build
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
             -DFICTION_CLI=ON
             -DFICTION_TEST=ON
             -DFICTION_EXPERIMENTS=ON
             -DFICTION_ALGLIB=ON
-            -DALGLIB_DIR=/usr/local/lib/cmake/ALGLIB
+            -DCMAKE_INSTALL_PREFIX=../alglib-cmake/build
             -DMOCKTURTLE_EXAMPLES=OFF
           build_dir: build
           config_file: '.clang-tidy'
