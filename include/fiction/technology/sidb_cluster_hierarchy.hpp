@@ -17,7 +17,7 @@
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/utils/hash.hpp"
 
-#ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
+#if (DEBUG_SIDB_CLUSTER_HIERARCHY)
 #include <set>
 #include <unordered_map>
 #include <unordered_set>
@@ -85,7 +85,7 @@ struct sidb_binary_cluster_hierarchy_node
     /**
      * The set of SiDB indices contained in the node
      */
-#ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
+#if (DEBUG_SIDB_CLUSTER_HIERARCHY)
     std::set<uint64_t> c;
 #else
     phmap::flat_hash_set<uint64_t> c;
@@ -100,7 +100,7 @@ struct sidb_binary_cluster_hierarchy_node
      * @param sidbs The set of SiDBs to contain in this node.
      * @param children The pair of binary cluster hierarchy node pointers that become the children of this node.
      */
-#ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
+#if (DEBUG_SIDB_CLUSTER_HIERARCHY)
     sidb_binary_cluster_hierarchy_node(std::set<uint64_t>&& sidbs,
 #else
     sidb_binary_cluster_hierarchy_node(phmap::flat_hash_set<uint64_t>&& sidbs,
@@ -156,7 +156,7 @@ sidb_cluster_hierarchy(Lyt& lyt, sidb_cluster_hierarchy_linkage_method linkage_m
     alglib::ahcreport rep;
     clusterizerrunahc(s, rep);
 
-#ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
+#if (DEBUG_SIDB_CLUSTER_HIERARCHY)
     std::unordered_map<uint64_t, std::unique_ptr<sidb_binary_cluster_hierarchy_node>> nodes{};
 #else
     phmap::flat_hash_map<uint64_t, std::unique_ptr<sidb_binary_cluster_hierarchy_node>> nodes{};
@@ -172,7 +172,7 @@ sidb_cluster_hierarchy(Lyt& lyt, sidb_cluster_hierarchy_linkage_method linkage_m
             if (cs.at(c) < charge_lyt.num_cells())
             {
                 nodes[cs.at(c)] = std::make_unique<sidb_binary_cluster_hierarchy_node>(
-#ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
+#if (DEBUG_SIDB_CLUSTER_HIERARCHY)
                     std::set<uint64_t>{cs[c]},
 #else
                     phmap::flat_hash_set<uint64_t>{cs.at(c)},
@@ -184,7 +184,7 @@ sidb_cluster_hierarchy(Lyt& lyt, sidb_cluster_hierarchy_linkage_method linkage_m
         // rep.z assigns each new cluster to N + i
         const uint64_t new_n = charge_lyt.num_cells() + static_cast<uint64_t>(i);
 
-#ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
+#if (DEBUG_SIDB_CLUSTER_HIERARCHY)
         std::set<uint64_t> set_union{};
 #else
         phmap::flat_hash_set<uint64_t> set_union{};
@@ -445,7 +445,7 @@ struct potential_bounds_store
 /**
  * The aggregates are used in the construction; they represent information of a subhierarchy.
  */
-#ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
+#if (DEBUG_SIDB_CLUSTER_HIERARCHY)
 using partial_potential_bounds_store = potential_bounds_store<std::map<uint64_t, std::array<double, 2>>>;
 #else
 using partial_potential_bounds_store = potential_bounds_store<phmap::flat_hash_map<uint64_t, std::array<double, 2>>>;
@@ -728,7 +728,7 @@ struct potential_projection_order
     /**
      * A potential projection order is an ordered set.
      */
-#ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
+#if (DEBUG_SIDB_CLUSTER_HIERARCHY)
     using pot_proj_order = std::set<potential_projection>;
 #else
     using pot_proj_order = phmap::btree_set<potential_projection>;
@@ -865,7 +865,7 @@ struct potential_projection_order
 /**
  * The type of a charge space is defined. It is a set of cluster charge states, forming the state space in our setting.
  */
-#ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
+#if (DEBUG_SIDB_CLUSTER_HIERARCHY)
 using sidb_cluster_charge_state_space = std::unordered_set<sidb_cluster_charge_state, sidb_cluster_charge_state>;
 #else
 using sidb_cluster_charge_state_space = phmap::flat_hash_set<sidb_cluster_charge_state, sidb_cluster_charge_state>;
@@ -889,7 +889,7 @@ struct sidb_cluster_ptr_hash
 /**
  * A clustering is a set of disjoint clusters, ie., none share an SiDB.
  */
-#ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
+#if (DEBUG_SIDB_CLUSTER_HIERARCHY)
 using sidb_clustering = std::set<sidb_cluster_ptr>;
 #else
 using sidb_clustering = phmap::flat_hash_set<sidb_cluster_ptr, sidb_cluster_ptr_hash>;
@@ -934,7 +934,7 @@ struct sidb_cluster
      * The bounds on the electrostatic potential that is projected from this cluster for the different multiset charge
      * configurations in the charge space.
      */
-#ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
+#if (DEBUG_SIDB_CLUSTER_HIERARCHY)
     std::map<sidb_ix, potential_projection_order> pot_projs{};
 #else
     phmap::flat_hash_map<sidb_ix, potential_projection_order> pot_projs{};
