@@ -28,7 +28,9 @@ jobs:
         id: review
         with:
           cmake_command: >
-            (git clone https://github.com/S-Dafarra/alglib-cmake.git && cd alglib-cmake && mkdir build && cd build && cmake .. && make -j4 && make install);
+            ( `# Setup ALGLIB` && git clone https://github.com/S-Dafarra/alglib-cmake.git 
+            && cd alglib-cmake && mkdir build && cd build 
+            && cmake .. && make -j4 && make install );
             cmake . -B build
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
             -DFICTION_CLI=ON
