@@ -498,6 +498,32 @@ class operational_domain_impl
         return op_domain;
     }
 
+    /**
+     * Performs a grid search over the specified parameter ranges with the specified step sizes. The grid search always
+     * has quadratic complexity. The operational status is computed for each parameter combination.
+     *
+     * @return The operational domain of the layout.
+     */
+    [[nodiscard]] operational_domain grid_search_to_determine_parameter_for_given_cds(Lyt& lyt) noexcept
+    {
+        mockturtle::stopwatch stop{stats.time_total};
+
+        // for each x value in parallel
+        std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ x_indices.cbegin(), x_indices.cend(),
+                      [this, &lyt](const auto x)
+                      {
+                          // for each y value in parallel
+                          std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ y_indices.cbegin(), y_indices.cend(),
+                                        [this, &lyt, x](const auto y) {
+                                            is_step_point_suitable_for_given_cds({x, y}, lyt);
+                                        });
+                      });
+
+        log_stats();
+
+        return op_domain;
+    }
+
   private:
     /**
      * The SiDB cell-level layout to investigate.
@@ -786,6 +812,61 @@ class operational_domain_impl
 
         // if we made it here, the layout is operational
         return operational();
+    }
+    /**
+     * Logs and returns the operational status at the given point `sp = (x, y)`. If the point has already been sampled,
+     * it returns the cached value. Otherwise, a ground state simulation is performed for all input combinations of the
+     * stored layout using the given simulation parameters. It terminates as soon as a non-operational state is found.
+     * In the worst case, the function performs \f$ 2^n \f$ simulations, where \f$ n \f$ is the number of inputs of the
+     * layout. This function is used by all operational domain computation techniques.
+     *
+     * Any investigated point is added to the stored `op_domain`, regardless of its operational status.
+     *
+     * @param sp Step point to be investigated.
+     * @return The operational status of the layout under the given simulation parameters.
+     */
+    operational_status is_step_point_suitable_for_given_cds(const step_point& sp, Lyt& lyt) noexcept
+    {
+        // if the point has already been sampled, return the stored operational status
+        if (const auto op_value = has_already_been_sampled(sp); op_value.has_value())
+        {
+            return *op_value;
+        }
+
+        // fetch the x and y dimension values
+        const auto param_point = to_parameter_point(sp);
+
+        const auto operational = [this, &param_point]()
+        {
+            op_domain.operational_values[param_point] = operational_status::OPERATIONAL;
+
+            return operational_status::OPERATIONAL;
+        };
+
+        const auto non_operational = [this, &param_point]()
+        {
+            op_domain.operational_values[param_point] = operational_status::NON_OPERATIONAL;
+
+            return operational_status::NON_OPERATIONAL;
+        };
+
+        // increment the number of evaluated parameter combinations
+        ++num_evaluated_parameter_combinations;
+
+        sidb_simulation_parameters sim_params = params.sim_params;
+        set_x_dimension_value(sim_params, param_point.x);
+        set_y_dimension_value(sim_params, param_point.y);
+
+        lyt.assign_physical_parameters(sim_params);
+
+        if (lyt.is_physically_valid())
+        {
+            std::cout << fmt::format("{}, {}, {}", sim_params.epsilon_r, sim_params.lambda_tf, sim_params.mu_minus) << std::endl;
+            return operational();
+        }
+
+        // if we made it here, the layout is operational
+        return non_operational();
     }
     /**
      * Generates (potentially repeating) random `step_points` in the stored parameter range. The number of generated
@@ -1159,6 +1240,24 @@ operational_domain operational_domain_contour_tracing(const Lyt& lyt, const std:
     {
         *stats = st;
     }
+
+    return result;
+}
+
+template <typename Lyt, typename TT>
+operational_domain
+determine_physical_parameters_for_given_charge_distribution(Lyt&                       lyt, const std::vector<TT>& spec,
+                                                            const operational_domain_params& params = {})
+{
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
+    static_assert(is_charge_distribution_surface_v<Lyt>, "Lyt is not a charge distribution surface");
+
+    operational_domain_stats st{};
+    detail::operational_domain_impl<Lyt, TT> p{lyt, spec, params, st};
+
+    const auto result = p.grid_search_to_determine_parameter_for_given_cds(lyt);
 
     return result;
 }
