@@ -71,13 +71,6 @@ struct ground_state_space_results
      */
     const std::chrono::duration<double> runtime{};
     /**
-     * A quick heuristic to assess the quality of the pruning is captured by the size of the charge space of the top
-     * cluster, which depends on the charge spaces of all clusters below it. The number of pruned elements is stored
-     * here, which is computed by subtracting the size of the charge space of the top cluster from the maximum size it
-     * can have for the given simulation base.
-     */
-    const uint64_t pruned_top_level_multisets{};
-    /**
      * The maximum size of the charge space of the top cluster, given the simulation base, can be inferred by the
      * \"stars and bars\" combinatorial idea: the solution to this analogous problem determines the maximum amount of
      * multisets of size \f$N\f$ (where \f$N\f$ is the number of SiDBs in the layout, and therefore in the top cluster)
@@ -96,15 +89,16 @@ struct ground_state_space_results
      */
     const uint64_t projector_state_count{};
     /**
-     * Report *Ground State Space* statistics.
+     * Report *Ground State Space* statistics. A quick heuristic to assess the quality of the pruning is captured by the
+     * size of the charge space of the top cluster, which depends on the charge spaces of all clusters below it.
      *
      * @param out The output stream to write to (default: standard output).
      * @return Prints the runtime and the number of pruned top level multisets versus the total amount possible.
      */
     void report(std::ostream& os = std::cout) const noexcept
     {
-        os << fmt::format("[i] Pruned {} out of {} top level multiset charge configurations\n",
-                          pruned_top_level_multisets, maximum_top_level_multisets);
+        os << fmt::format("[i] Leaving {} out of {} top level multiset charge configurations\n",
+                          top_cluster ? top_cluster->charge_space.size() : 0, maximum_top_level_multisets);
 
         os << fmt::format("[i] There are {} projector states in the constructed hierarchy\n", projector_state_count);
 
@@ -151,8 +145,7 @@ class ground_state_space_impl
 
         const uint64_t max_multisets = maximum_top_level_multisets(top_cluster->num_sidbs());
 
-        return ground_state_space_results{top_cluster, time_counter, max_multisets - top_cluster->charge_space.size(),
-                                          max_multisets, projector_state_count};
+        return ground_state_space_results{top_cluster, time_counter, max_multisets, projector_state_count};
     }
 
   private:

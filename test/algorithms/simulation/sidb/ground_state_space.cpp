@@ -39,7 +39,6 @@ TEMPLATE_TEST_CASE("Empty layout Ground State Space construction", "[ground-stat
 
     CHECK(!res.top_cluster);
     CHECK(mockturtle::to_seconds(res.runtime) == 0.0);
-    CHECK(res.pruned_top_level_multisets == 0);
     CHECK(res.maximum_top_level_multisets == 0);
 }
 
@@ -57,7 +56,7 @@ TEMPLATE_TEST_CASE("Ground State Space construction of a single SiDB", "[ground-
     CHECK(*res.top_cluster->sidbs.cbegin() == 0);
     REQUIRE(res.top_cluster->children.size() == 1);
     CHECK((*res.top_cluster->children.cbegin())->uid == 0);
-    CHECK(res.pruned_top_level_multisets == 2);
+    CHECK(res.top_cluster->charge_space.size() == 1);
     CHECK(res.maximum_top_level_multisets == 3);
     CHECK(*res.top_cluster->charge_space.cbegin() == sidb_cluster_charge_state{sidb_charge_state::NEGATIVE});
     REQUIRE(res.top_cluster->charge_space.cbegin()->compositions.size() == 1);
@@ -82,14 +81,14 @@ TEMPLATE_TEST_CASE("Ground State Space construction of two SiDBs directly next t
     {
         const ground_state_space_results& res =
             ground_state_space(lyt, ground_state_space_params{sidb_simulation_parameters{2}});
-        CHECK(res.pruned_top_level_multisets == res.maximum_top_level_multisets);
+        CHECK(res.top_cluster->charge_space.size() == 0);
     }
 
     SECTION("Base 3")
     {
         const ground_state_space_results& res =
             ground_state_space(lyt, ground_state_space_params{sidb_simulation_parameters{3}});
-        CHECK(res.pruned_top_level_multisets != res.maximum_top_level_multisets);
+        CHECK(res.top_cluster->charge_space.size() != 0);
     }
 }
 
@@ -112,12 +111,9 @@ TEMPLATE_TEST_CASE("Ground State Space construction of a 7 DB layout", "[ground-
 
     CHECK(mockturtle::to_seconds(gss_res.runtime) > 0.0);
 
-    CHECK(gss_res.pruned_top_level_multisets == 7);
+    CHECK(gss_res.maximum_top_level_multisets - gss_res.top_cluster->sidbs.size() == 7);
 
     CHECK(gss_res.top_cluster->sidbs.size() == 7);
-
-    CHECK(gss_res.top_cluster->charge_space.size() ==
-          gss_res.maximum_top_level_multisets - gss_res.pruned_top_level_multisets);
 
     for (uint64_t i = 0; i < 7; ++i)
     {
