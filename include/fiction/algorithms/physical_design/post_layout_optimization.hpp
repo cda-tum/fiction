@@ -37,7 +37,7 @@ struct post_layout_optimization_params
     /**
      * Maximum number of relocations to try for each gate. Defaults to the number of tiles in a layout if not specified.
      */
-    std::optional<uint64_t> max_gate_relocations;
+    std::optional<uint64_t> max_gate_relocations = std::nullopt;
 };
 
 /**
@@ -377,7 +377,7 @@ layout_coordinate_path<Lyt> get_path_and_obstruct(Lyt& lyt, const tile<Lyt>& sta
  * @tparam Lyt Cartesian obstruction gate-level layout type.
  * @param lyt 2DDWave-clocked cartesian obstruction gate-level layout.
  * @param old_pos Old position of the gate to be moved.
- * @return Flag that indicates if gate was moved successfully.
+ * @return `true` if the gate was moved successfully, `false` otherwise.
  */
 template <typename Lyt>
 [[nodiscard]] bool improve_gate_location(Lyt& lyt, const tile<Lyt>& old_pos, const tile<Lyt>& max_non_po,
@@ -467,7 +467,7 @@ template <typename Lyt>
     // fix wires that cross over empty tiles
     fix_wires(lyt, to_clear);
 
-    bool     moved_gate           = false;
+    auto     moved_gate           = false;
     auto     current_pos          = old_pos;
     uint64_t num_gate_relocations = 0;
     // iterate over layout diagonally
@@ -733,7 +733,7 @@ void optimize_output_positions(Lyt& lyt) noexcept
  * @return `true` iff `a < b` based on the aforementioned rule.
  */
 template <typename Lyt>
-bool compare_gates(const tile<Lyt>& a, const tile<Lyt>& b)
+bool compare_gate_tiles(const tile<Lyt>& a, const tile<Lyt>& b)
 {
     return static_cast<bool>(std::make_pair(a.x + a.y, a.x) < std::make_pair(b.x + b.y, b.x));
 }
@@ -823,7 +823,7 @@ class post_layout_optimization_impl
         const uint64_t area_after  = pst.x_size_after * pst.y_size_after;
         double_t       area_percentage_difference =
             static_cast<double_t>(area_before - area_after) / static_cast<double_t>(area_before) * 100.0;
-        area_percentage_difference = round(area_percentage_difference * 100) / 100;
+        area_percentage_difference = std::round(area_percentage_difference * 100) / 100;
         pst.area_improvement       = area_percentage_difference;
     }
 

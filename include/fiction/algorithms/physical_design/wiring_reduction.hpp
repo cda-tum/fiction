@@ -796,7 +796,7 @@ void adjust_tile_horizontal_search_dir(Lyt& lyt, const LytCpy& layout_copy, tile
 template <typename Lyt, typename LytCpy>
 void adjust_tile_vertical_search_dir(Lyt& lyt, const LytCpy& layout_copy, tile<Lyt>& fanin,
                                      const offset_matrix& offset_mtrx, const tile<Lyt>& old_coord,
-                                     const uint64_t& offset, std::vector<mockturtle::signal<Lyt>>& signals) noexcept
+                                     const uint64_t offset, std::vector<mockturtle::signal<Lyt>>& signals) noexcept
 {
     if (fanin.x == old_coord.x)
     {
@@ -854,8 +854,8 @@ void adjust_tile_vertical_search_dir(Lyt& lyt, const LytCpy& layout_copy, tile<L
  * @param offset_mtrx The offset matrix used for adjusting the layout.
  */
 template <typename Lyt, typename LytCpy, typename ShiftedLyt>
-void adjust_tile(Lyt& lyt, const LytCpy& layout_copy, const ShiftedLyt& shifted_lyt, uint64_t& x, const uint64_t& y,
-                 uint64_t& z, const offset_matrix& offset_mtrx) noexcept
+void adjust_tile(Lyt& lyt, const LytCpy& layout_copy, const ShiftedLyt& shifted_lyt, uint64_t x, const uint64_t y,
+                 uint64_t z, const offset_matrix& offset_mtrx) noexcept
 {
     const auto      offset    = offset_mtrx[y][x];
     const tile<Lyt> old_coord = {x, y, z};
@@ -966,7 +966,7 @@ class wiring_reduction_impl
             // Continue until no further wires can be deleted
             found_wires = false;
 
-            for (const auto left_to_right : {search_direction::HORIZONTAL, search_direction::VERTICAL})
+            for (const auto direction : {search_direction::HORIZONTAL, search_direction::VERTICAL})
             {
                 auto shifted_layout = create_shifted_layout<Lyt>(layout, 1, 1, left_to_right);
                 add_obstructions(shifted_layout);
@@ -999,13 +999,13 @@ class wiring_reduction_impl
         const uint64_t area_before = pst.x_size_before * pst.y_size_before;
         const uint64_t area_after  = pst.x_size_after * pst.y_size_after;
         double_t       wiring_percentage_difference =
-            static_cast<double_t>(area_before - area_after) / static_cast<double_t>(area_before) * 100.0;
-        wiring_percentage_difference        = round(wiring_percentage_difference * 100) / 100;
+            static_cast<double>(area_before - area_after) / static_cast<double>(area_before) * 100.0;
+        wiring_percentage_difference        = std::round(wiring_percentage_difference * 100) / 100;
         pst.wiring_improvement              = wiring_percentage_difference;
         pst.num_wires_after                 = plyt.num_wires() - plyt.num_pis() - plyt.num_pos();
-        double_t area_percentage_difference = static_cast<double_t>(pst.num_wires_before - pst.num_wires_after) /
-                                              static_cast<double_t>(pst.num_wires_before) * 100.0;
-        area_percentage_difference = round(area_percentage_difference * 100) / 100;
+        double area_percentage_difference = static_cast<double>(pst.num_wires_before - pst.num_wires_after) /
+                                              static_cast<double>(pst.num_wires_before) * 100.0;
+        area_percentage_difference = std::round(area_percentage_difference * 100) / 100;
         pst.area_improvement       = area_percentage_difference;
     }
 
