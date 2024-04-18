@@ -892,7 +892,7 @@ struct sidb_cluster_ptr_hash
 #ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
 using sidb_clustering = std::set<sidb_cluster_ptr>;
 #else
-using sidb_clustering = phmap::flat_hash_set<sidb_cluster_ptr, sidb_cluster_ptr_hash>;
+using sidb_clustering                 = phmap::flat_hash_set<sidb_cluster_ptr, sidb_cluster_ptr_hash>;
 #endif
 /**
  * This struct defined the fully decorated cluster hierarchy type which follows the structure of a "general tree". It
