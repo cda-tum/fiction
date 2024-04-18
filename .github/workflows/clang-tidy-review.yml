@@ -22,29 +22,19 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
-      #
-      #      - name: Setup ALGLIB
-      #        run: |
-      #          git clone https://github.com/S-Dafarra/alglib-cmake.git
-      #          cd alglib-cmake
-      #          mkdir alglib_build && cd alglib_build
-      #          cmake ..
-      #          make -j4
-      #          sudo make install
 
       - name: Review code with Clang-Tidy
         uses: ZedThree/clang-tidy-review@v0.18.0
         id: review
         with:
           cmake_command: >
-            (git clone https://github.com/S-Dafarra/alglib-cmake.git && cd alglib-cmake && mkdir build && cd build && cmake .. && make -j4 && make install && cd ../..);
+            (git clone https://github.com/S-Dafarra/alglib-cmake.git && cd alglib-cmake && mkdir build && cd build && cmake .. && make -j4 && make install);
             cmake . -B build
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
             -DFICTION_CLI=ON
             -DFICTION_TEST=ON
             -DFICTION_EXPERIMENTS=ON
             -DFICTION_ALGLIB=ON
-            -DCMAKE_INSTALL_PREFIX=../alglib-cmake/build:/usr/local/lib/cmake/ALGLIB
             -DMOCKTURTLE_EXAMPLES=OFF
           build_dir: build
           config_file: '.clang-tidy'
