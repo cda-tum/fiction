@@ -841,7 +841,7 @@ class ground_state_space_impl
     sidb_clustering clustering{};
 
     // count the total number of projector states that are stored in the constructed hierarchy
-    uint64_t projector_state_count;
+    uint64_t projector_state_count{};
 
     // true iff the construction is to be terminated
     bool terminate = false;

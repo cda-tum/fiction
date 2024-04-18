@@ -111,7 +111,7 @@ TEMPLATE_TEST_CASE("Ground State Space construction of a 7 DB layout", "[ground-
 
     CHECK(mockturtle::to_seconds(gss_res.runtime) > 0.0);
 
-    CHECK(gss_res.maximum_top_level_multisets - gss_res.top_cluster->sidbs.size() == 7);
+    CHECK(gss_res.maximum_top_level_multisets - gss_res.top_cluster->charge_space.size() == 7);
 
     CHECK(gss_res.top_cluster->sidbs.size() == 7);
 
