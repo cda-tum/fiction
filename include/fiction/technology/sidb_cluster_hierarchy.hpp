@@ -886,6 +886,7 @@ struct sidb_cluster_ptr_hash
         return std::hash<uint64_t>{}(get_unique_cluster_id(c));
     }
 };
+// clang-format off
 /**
  * A clustering is a set of disjoint clusters, ie., none share an SiDB.
  */
@@ -894,6 +895,7 @@ using sidb_clustering = std::set<sidb_cluster_ptr>;
 #else
 using sidb_clustering = phmap::flat_hash_set<sidb_cluster_ptr, sidb_cluster_ptr_hash>;
 #endif
+// clang-format on
 /**
  * This struct defined the fully decorated cluster hierarchy type which follows the structure of a "general tree". It
  * contains multiple stores:
