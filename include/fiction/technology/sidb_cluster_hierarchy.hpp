@@ -101,11 +101,11 @@ struct sidb_binary_cluster_hierarchy_node
      * @param children The pair of binary cluster hierarchy node pointers that become the children of this node.
      */
 #ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
-    sidb_binary_cluster_hierarchy_node(const std::set<uint64_t>& sidbs,
+    sidb_binary_cluster_hierarchy_node(std::set<uint64_t>&& sidbs,
 #else
-    sidb_binary_cluster_hierarchy_node(phmap::flat_hash_set<uint64_t> sidbs,
+    sidb_binary_cluster_hierarchy_node(phmap::flat_hash_set<uint64_t>&& sidbs,
 #endif
-                                       std::array<sidb_binary_cluster_hierarchy_node_ptr, 2> children) noexcept :
+                                       std::array<sidb_binary_cluster_hierarchy_node_ptr, 2>&& children) noexcept :
             c{std::move(sidbs)},
             sub{std::move(children)}
     {}
@@ -952,7 +952,7 @@ struct sidb_cluster
      * @param unique_id The unsigned integer to identify the cluster hierarchy uniquely with. For the case of a
      * singleton cluster, the unique identifier is set to be the index of the single SiDB it contains.
      */
-    explicit sidb_cluster(std::vector<sidb_ix> c, std::vector<sidb_ix> other_c, sidb_clustering x,
+    explicit sidb_cluster(std::vector<sidb_ix>&& c, std::vector<sidb_ix>&& other_c, sidb_clustering&& x,
                           uid_t unique_id) noexcept :
             uid{x.empty() ? *c.cbegin() : unique_id},
             sidbs{std::move(c)},
