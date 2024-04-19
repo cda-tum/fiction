@@ -16,3 +16,6 @@
 [submodule "libs/json"]
 	path = libs/json
 	url = https://github.com/nlohmann/json.git
+[submodule "libs/mockturtle"]
+	path = libs/mockturtle
+	url = https://github.com/lsils/mockturtle.git
