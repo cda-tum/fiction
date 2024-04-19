@@ -60,7 +60,7 @@ int main()  // NOLINT
         fiction::design_sidb_gates_params<fiction::cube::coord_t>::termination_condition::AFTER_FIRST_SOLUTION;
 
     // save atomic defects which their respective phyiscal parameters as exerimentally determined by T. R. Huff, T.
-    // Dienel, M. Rashidi, R. Achal, L. Livadaru, J. Croshaw, and R. A. Wolkow, “Electrostatic landscape of a
+    // Dienel, M. Rashidi, R. Achal, L. Livadaru, J. Croshaw, and R. A. Wolkow, "Electrostatic landscape of a
     // Hydrogen-terminated Silicon Surface Probed by a Moveable Quantum Dot."
     const auto stray_db   = fiction::sidb_defect{fiction::sidb_defect_type::DB, -1, 4.1, 1.8};
     const auto si_vacancy = fiction::sidb_defect{fiction::sidb_defect_type::SI_VACANCY, -1, 10.6, 5.9};
