@@ -602,16 +602,6 @@ class operational_domain_impl
             }
             return x < other.x;
         }
-        // Define the hash function for step_point using hash_combine
-        struct hash
-        {
-            std::size_t operator()(const step_point& point) const noexcept
-            {
-                std::size_t hash = 0;
-                hash_combine(hash, point.x, point.y);
-                return hash;
-            }
-        };
     };
     /**
      * Converts a step point to a parameter point.
