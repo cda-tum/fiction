@@ -801,7 +801,7 @@ class operational_domain_impl
      * points is exactly equal to `samples`.
      *
      * @param samples Number of random `step_point`s to generate.
-     * @return A vector of random `step_point`s in the stored parameter range.
+     * @return A set of random `step_point`s in the stored parameter range.
      */
     [[nodiscard]] std::set<step_point> generate_random_step_points(const std::size_t samples) noexcept
     {

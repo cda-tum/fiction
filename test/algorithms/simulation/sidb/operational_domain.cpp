@@ -537,7 +537,7 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
 
     lyt.assign_cell_type({10, 9, 1}, sidb_technology::cell_type::NORMAL);
 
-    const sidb_lattice<sidb_100_lattice, layout> lat{lyt};
+    const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
     sidb_simulation_parameters sim_params{};
     sim_params.base     = 2;
@@ -660,7 +660,7 @@ TEST_CASE("SiQAD's AND gate operational domain computation, using cube coordinat
     lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{10, 9, 1}),
                          sidb_technology::cell_type::NORMAL);
 
-    const sidb_lattice<sidb_100_lattice, layout> lat{lyt};
+    const sidb_100_cell_clk_lyt_cube lat{lyt};
 
     sidb_simulation_parameters sim_params{};
     sim_params.base     = 2;
