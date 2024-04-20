@@ -257,9 +257,10 @@ class displacement_robustness_domain_impl
             determine_all_combinations_of_distributing_k_entities_on_n_positions(number_of_displaced_sidbs,
                                                                                  sidbs_of_the_original_layout.size());
 
-        const auto number_of_maximal_tested_misplaced_cell_combinations = std::max(
-            2ull, static_cast<uint64_t>(static_cast<double>(all_combinations_of_fabricating_misplaced_sidbs.size()) *
-                                        params.percentage_of_displaced_sidb_combinations));
+        const auto number_of_maximal_tested_misplaced_cell_combinations =
+            std::max(uint64_t{2},
+                     static_cast<uint64_t>(static_cast<double>(all_combinations_of_fabricating_misplaced_sidbs.size()) *
+                                           params.percentage_of_displaced_sidb_combinations));
         // the "2" is used so that at least one further displaced layout is analyzed in addition to the original SiDB
         // layout.
 
