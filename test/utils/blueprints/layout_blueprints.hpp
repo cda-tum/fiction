@@ -711,6 +711,37 @@ Lyt bdl_wire() noexcept
 };
 /**
  * This layout represents the AND Gate, as proposed in the paper
+ * titled \"SiQAD: A Design and Simulation Tool for Atomic Silicon Quantum Dot Circuits\".
+ */
+template <typename Lyt>
+Lyt siqad_and_gate() noexcept
+{
+    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+
+    Lyt lyt{};
+
+    lyt.assign_cell_type({0, 0, 1}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({2, 1, 1}, Lyt::cell_type::INPUT);
+
+    lyt.assign_cell_type({20, 0, 1}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({18, 1, 1}, Lyt::cell_type::INPUT);
+
+    lyt.assign_cell_type({4, 2, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 3, 1}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({14, 3, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({16, 2, 1}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({10, 6, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({10, 7, 0}, Lyt::cell_type::OUTPUT);
+
+    lyt.assign_cell_type({10, 9, 1}, Lyt::cell_type::NORMAL);
+
+    return lyt;
+};
+/**
+ * This layout represents the AND Gate, as proposed in the paper
  * titled \"Hexagons are the Bestagons: Design Automation for Silicon Dangling Bond Logic\" authored by
  * Marcel Walter, Samuel Sze Hang Ng, Konrad Walus, and Robert Wille.
  *
