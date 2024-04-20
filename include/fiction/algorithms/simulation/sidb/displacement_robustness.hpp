@@ -42,7 +42,7 @@ struct displacement_robustness_domain
      * Represents a domain of displacement robustness for layouts resulting from applying a displacement to a given gate
      * layout.
      *
-     * @Note The original layout is not stored.
+     * @note The original layout is not stored.
      */
     std::vector<std::pair<Lyt, operational_status>> operational_values{};
 };
