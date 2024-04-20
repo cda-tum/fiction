@@ -388,155 +388,171 @@ create_wiring_reduction_layout(const Lyt& lyt, const uint64_t x_offset = 0, cons
             const tile<Lyt> new_coord{old_coord.x + x_offset, old_coord.y + y_offset, old_coord.z};
 
             // Skip if the tile is empty
-            if (!lyt.is_empty_tile(old_coord))
+            if (lyt.is_empty_tile(old_coord))
             {
-                // Handle Primary Inputs (PI) and Primary Outputs (PO)
-                if (lyt.is_pi(node) || lyt.is_po(node))
+                return;
+            }
+            // Handle Primary Inputs (PI) and Primary Outputs (PO)
+            if (lyt.is_pi(node) || lyt.is_po(node))
+            {
+                wiring_reduction_lyt.obstruct_coordinate(new_coord);
+                wiring_reduction_lyt.obstruct_coordinate({new_coord.x, new_coord.y, 1});
+            }
+
+            // Handle single input gates and wires
+            if (const auto signals = lyt.incoming_data_flow(old_coord); signals.size() == 1)
+            {
+                const auto      incoming_signal = signals[0];
+                const tile<Lyt> shifted_tile{incoming_signal.x + x_offset, incoming_signal.y + y_offset,
+                                             incoming_signal.z};
+
+                // Obstruct the connection between the gate and its incoming signal
+                wiring_reduction_lyt.obstruct_connection(shifted_tile, new_coord);
+
+                // Obstruct horizontal/vertical wires, non-wire gates (inv) and fanouts
+                if (!lyt.is_wire(node) || (lyt.fanout_size(node) != 1) || (old_coord.z != 0) ||
+                    (lyt.has_western_incoming_signal({old_coord}) && lyt.has_eastern_outgoing_signal({old_coord}) &&
+                     (wiring_reduction_lyt.get_search_direction() == search_direction::HORIZONTAL)) ||
+                    (lyt.has_northern_incoming_signal({old_coord}) && lyt.has_southern_outgoing_signal({old_coord}) &&
+                     (wiring_reduction_lyt.get_search_direction() == search_direction::VERTICAL)))
                 {
-                    wiring_reduction_lyt.obstruct_coordinate(new_coord);
-                    wiring_reduction_lyt.obstruct_coordinate({new_coord.x, new_coord.y, 1});
-                }
-
-                // Handle single input gates and wires
-                if (const auto signals = lyt.incoming_data_flow(old_coord); signals.size() == 1)
-                {
-                    const auto      incoming_signal = signals[0];
-                    const tile<Lyt> shifted_tile{incoming_signal.x + x_offset, incoming_signal.y + y_offset,
-                                                 incoming_signal.z};
-
-                    // Obstruct the connection between the gate and its incoming signal
-                    wiring_reduction_lyt.obstruct_connection(shifted_tile, new_coord);
-
-                    // Obstruct horizontal/vertical wires, non-wire gates (inv) and fanouts
-                    if (!lyt.is_wire(node) || (lyt.fanout_size(node) != 1) || (old_coord.z != 0) ||
-                        (lyt.has_western_incoming_signal({old_coord}) && lyt.has_eastern_outgoing_signal({old_coord}) &&
-                         (wiring_reduction_lyt.get_search_direction() == search_direction::HORIZONTAL)) ||
-                        (lyt.has_northern_incoming_signal({old_coord}) &&
-                         lyt.has_southern_outgoing_signal({old_coord}) &&
-                         (wiring_reduction_lyt.get_search_direction() == search_direction::VERTICAL)))
-                    {
-                        wiring_reduction_lyt.obstruct_coordinate({new_coord.x, new_coord.y, 0});
-                        wiring_reduction_lyt.obstruct_coordinate({new_coord.x, new_coord.y, 1});
-
-                        if (old_coord.z == 1)
-                        {
-                            // special case:
-                            // +→=
-                            // ↓ ↓
-                            // =→+
-                            //
-                            // -> No crossing between coordinate to the left and coordinate above the gate
-                            if (lyt.has_northern_incoming_signal({old_coord.x - 1, old_coord.y, 0}) &&
-                                lyt.has_western_incoming_signal({old_coord.x, old_coord.y - 1, 0}))
-                            {
-                                if (wiring_reduction_lyt.get_search_direction() == search_direction::HORIZONTAL)
-                                {
-                                    wiring_reduction_lyt.obstruct_connection({new_coord.x - 1, new_coord.y, 0},
-                                                                             {new_coord.x, new_coord.y - 1, 0});
-                                }
-                                else
-                                {
-                                    wiring_reduction_lyt.obstruct_connection({new_coord.x, new_coord.y - 1, 0},
-                                                                             {new_coord.x - 1, new_coord.y, 0});
-                                }
-                            }
-                        }
-                    }
-
-                    // For bent wires from north to east, obstruct the connection between the wire and the
-                    // coordinate to the bottom right/ top left
-                    else if (lyt.has_northern_incoming_signal({old_coord}) &&
-                             lyt.has_eastern_outgoing_signal({old_coord}))
-                    {
-                        if (wiring_reduction_lyt.get_search_direction() == search_direction::HORIZONTAL)
-                        {
-                            wiring_reduction_lyt.obstruct_connection(new_coord,
-                                                                     {new_coord.x + 1, new_coord.y + 1, new_coord.z});
-                            // special case:
-                            // →=
-                            //  ↓
-                            //  =→
-                            //
-                            // -> Only one wire can be deleted
-                            if (lyt.has_western_incoming_signal({old_coord.x, old_coord.y - 1, old_coord.z}) &&
-                                lyt.is_wire(lyt.get_node({old_coord.x, old_coord.y - 1, old_coord.z})))
-                            {
-                                wiring_reduction_lyt.obstruct_coordinate({new_coord.x, new_coord.y - 1, 0});
-                                wiring_reduction_lyt.obstruct_coordinate({new_coord.x, new_coord.y - 1, 1});
-                            }
-                        }
-                        else
-                        {
-                            wiring_reduction_lyt.obstruct_connection({new_coord.x - 1, new_coord.y - 1, new_coord.z},
-                                                                     new_coord);
-                        }
-                    }
-
-                    // For bent wires from west to south, obstruct the connection between the wire and the
-                    // coordinate to the top left/ bottom right
-                    else if (lyt.has_western_incoming_signal({old_coord}) &&
-                             lyt.has_southern_outgoing_signal({old_coord}))
-                    {
-                        if (wiring_reduction_lyt.get_search_direction() == search_direction::HORIZONTAL)
-                        {
-                            wiring_reduction_lyt.obstruct_connection({new_coord.x - 1, new_coord.y - 1, new_coord.z},
-                                                                     new_coord);
-                        }
-                        else
-                        {
-                            wiring_reduction_lyt.obstruct_connection(new_coord,
-                                                                     {new_coord.x + 1, new_coord.y + 1, new_coord.z});
-                            // special case:
-                            // ↓
-                            // =→=
-                            //   ↓
-                            //
-                            // -> Only one wire can be deleted
-                            if (lyt.has_northern_incoming_signal({old_coord.x - 1, old_coord.y, old_coord.z}) &&
-                                lyt.is_wire(lyt.get_node({old_coord.x - 1, old_coord.y, old_coord.z})))
-                            {
-                                wiring_reduction_lyt.obstruct_coordinate({new_coord.x - 1, new_coord.y, 0});
-                                wiring_reduction_lyt.obstruct_coordinate({new_coord.x - 1, new_coord.y, 1});
-                            }
-                        }
-                    }
-                }
-
-                // Handle double input gates (AND, OR, ...)
-                else if (signals.size() == 2)
-                {
-                    const auto signal_a = signals[0];
-                    const auto signal_b = signals[1];
-
-                    const auto shifted_tile_a = tile<Lyt>{signal_a.x + x_offset, signal_a.y + y_offset, signal_a.z};
-                    const auto shifted_tile_b = tile<Lyt>{signal_b.x + x_offset, signal_b.y + y_offset, signal_b.z};
-
-                    wiring_reduction_lyt.obstruct_connection(shifted_tile_a, new_coord);
-                    wiring_reduction_lyt.obstruct_connection(shifted_tile_b, new_coord);
-
-                    wiring_reduction_lyt.obstruct_coordinate(new_coord);
+                    wiring_reduction_lyt.obstruct_coordinate({new_coord.x, new_coord.y, 0});
                     wiring_reduction_lyt.obstruct_coordinate({new_coord.x, new_coord.y, 1});
 
-                    // special case:
+                    if (old_coord.z == 0)
+                    {
+                        return;
+                    }
+
+                    // special case 1:
                     // +→=
                     // ↓ ↓
-                    // =→&
+                    // =→+
                     //
-                    // -> No crossing between coordinate to the left and coordinate above the gate
-                    if (lyt.has_northern_incoming_signal({old_coord.x - 1, old_coord.y, old_coord.z}) &&
-                        lyt.has_western_incoming_signal({old_coord.x, old_coord.y - 1, old_coord.z}))
+                    // special case 2:
+                    //   =
+                    //   ↓
+                    // = =
+                    // ↓ ↓
+                    // =→+
+                    const auto special_case_1 = lyt.has_northern_incoming_signal({old_coord.x - 1, old_coord.y, 0}) &&
+                                                lyt.has_western_incoming_signal({old_coord.x, old_coord.y - 1, 0});
+                    const auto special_case_2 =
+                        lyt.has_northern_incoming_signal({old_coord.x - 1, old_coord.y, 0}) &&
+                        lyt.has_northern_incoming_signal({old_coord.x - 1, old_coord.y - 1, 0}) &&
+                        lyt.has_northern_incoming_signal({old_coord.x, old_coord.y - 1, 0}) &&
+                        lyt.is_wire_tile({old_coord.x, old_coord.y - 2, 0}) &&
+                        lyt.is_wire_tile({old_coord.x - 1, old_coord.y - 1, 0});
+                    if (!(special_case_1 || special_case_2))
                     {
-                        if (wiring_reduction_lyt.get_search_direction() == search_direction::HORIZONTAL)
+                        return;
+                    }
+
+                    // -> No crossing between coordinate to the left and coordinate above the gate
+                    if (wiring_reduction_lyt.get_search_direction() == search_direction::HORIZONTAL)
+                    {
+                        wiring_reduction_lyt.obstruct_connection({new_coord.x - 1, new_coord.y, 0},
+                                                                 {new_coord.x, new_coord.y - 1, 0});
+                    }
+                    else
+                    {
+                        wiring_reduction_lyt.obstruct_connection({new_coord.x, new_coord.y - 1, 0},
+                                                                 {new_coord.x - 1, new_coord.y, 0});
+                    }
+                }
+
+                // For bent wires from north to east, obstruct the connection between the wire and the
+                // coordinate to the bottom right/ top left
+                else if (lyt.has_northern_incoming_signal({old_coord}) && lyt.has_eastern_outgoing_signal({old_coord}))
+                {
+                    if (wiring_reduction_lyt.get_search_direction() == search_direction::HORIZONTAL)
+                    {
+                        wiring_reduction_lyt.obstruct_connection(new_coord,
+                                                                 {new_coord.x + 1, new_coord.y + 1, new_coord.z});
+                        // special case:
+                        // →=
+                        //  ↓
+                        //  =→
+                        //
+                        // -> Only one wire can be deleted
+                        if (lyt.has_western_incoming_signal({old_coord.x, old_coord.y - 1, old_coord.z}) &&
+                            lyt.is_wire(lyt.get_node({old_coord.x, old_coord.y - 1, old_coord.z})))
                         {
-                            wiring_reduction_lyt.obstruct_connection({new_coord.x - 1, new_coord.y, new_coord.z},
-                                                                     {new_coord.x, new_coord.y - 1, new_coord.z});
-                        }
-                        else
-                        {
-                            wiring_reduction_lyt.obstruct_connection({new_coord.x, new_coord.y - 1, new_coord.z},
-                                                                     {new_coord.x - 1, new_coord.y, new_coord.z});
+                            wiring_reduction_lyt.obstruct_coordinate({new_coord.x, new_coord.y - 1, 0});
+                            wiring_reduction_lyt.obstruct_coordinate({new_coord.x, new_coord.y - 1, 1});
                         }
                     }
+                    else
+                    {
+                        wiring_reduction_lyt.obstruct_connection({new_coord.x - 1, new_coord.y - 1, new_coord.z},
+                                                                 new_coord);
+                    }
+                }
+
+                // For bent wires from west to south, obstruct the connection between the wire and the
+                // coordinate to the top left/ bottom right
+                else if (lyt.has_western_incoming_signal({old_coord}) && lyt.has_southern_outgoing_signal({old_coord}))
+                {
+                    if (wiring_reduction_lyt.get_search_direction() == search_direction::HORIZONTAL)
+                    {
+                        wiring_reduction_lyt.obstruct_connection({new_coord.x - 1, new_coord.y - 1, new_coord.z},
+                                                                 new_coord);
+                    }
+                    else
+                    {
+                        wiring_reduction_lyt.obstruct_connection(new_coord,
+                                                                 {new_coord.x + 1, new_coord.y + 1, new_coord.z});
+                        // special case:
+                        // ↓
+                        // =→=
+                        //   ↓
+                        //
+                        // -> Only one wire can be deleted
+                        if (lyt.has_northern_incoming_signal({old_coord.x - 1, old_coord.y, old_coord.z}) &&
+                            lyt.is_wire(lyt.get_node({old_coord.x - 1, old_coord.y, old_coord.z})))
+                        {
+                            wiring_reduction_lyt.obstruct_coordinate({new_coord.x - 1, new_coord.y, 0});
+                            wiring_reduction_lyt.obstruct_coordinate({new_coord.x - 1, new_coord.y, 1});
+                        }
+                    }
+                }
+            }
+
+            // Handle double input gates (AND, OR, ...)
+            else if (signals.size() == 2)
+            {
+                const auto signal_a = signals[0];
+                const auto signal_b = signals[1];
+
+                const auto shifted_tile_a = tile<Lyt>{signal_a.x + x_offset, signal_a.y + y_offset, signal_a.z};
+                const auto shifted_tile_b = tile<Lyt>{signal_b.x + x_offset, signal_b.y + y_offset, signal_b.z};
+
+                wiring_reduction_lyt.obstruct_connection(shifted_tile_a, new_coord);
+                wiring_reduction_lyt.obstruct_connection(shifted_tile_b, new_coord);
+
+                wiring_reduction_lyt.obstruct_coordinate(new_coord);
+                wiring_reduction_lyt.obstruct_coordinate({new_coord.x, new_coord.y, 1});
+
+                // special case:
+                // +→=
+                // ↓ ↓
+                // =→&
+                //
+                // -> No crossing between coordinate to the left and coordinate above the gate
+                if (!(lyt.has_northern_incoming_signal({old_coord.x - 1, old_coord.y, old_coord.z}) &&
+                      lyt.has_western_incoming_signal({old_coord.x, old_coord.y - 1, old_coord.z})))
+                {
+                    return;
+                }
+                if (wiring_reduction_lyt.get_search_direction() == search_direction::HORIZONTAL)
+                {
+                    wiring_reduction_lyt.obstruct_connection({new_coord.x - 1, new_coord.y, new_coord.z},
+                                                             {new_coord.x, new_coord.y - 1, new_coord.z});
+                }
+                else
+                {
+                    wiring_reduction_lyt.obstruct_connection({new_coord.x, new_coord.y - 1, new_coord.z},
+                                                             {new_coord.x - 1, new_coord.y, new_coord.z});
                 }
             }
         });
