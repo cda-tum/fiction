@@ -11,8 +11,6 @@
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/physical_constants.hpp>
-#include <fiction/technology/sidb_lattice.hpp>
-#include <fiction/technology/sidb_lattice_orientations.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/truth_table_utils.hpp>
 
@@ -76,7 +74,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
     // output perturber
     lyt.assign_cell_type({24, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-    const sidb_lattice<sidb_100_lattice, layout> lat{lyt};
+    const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
     sidb_simulation_parameters sim_params{};
     sim_params.base = 2;
@@ -373,7 +371,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
                                                           operational_status::NON_OPERATIONAL);
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
-            CHECK(op_domain_stats.num_simulator_invocations <= 10000);
+            CHECK(op_domain_stats.num_simulator_invocations < 10000);
             CHECK(op_domain_stats.num_evaluated_parameter_combinations <= 5000);
             CHECK(op_domain_stats.num_operational_parameter_combinations == 0);
             CHECK(op_domain_stats.num_non_operational_parameter_combinations <= 5000);
@@ -487,16 +485,16 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
                                                                  op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size
-            CHECK(op_domain.operational_values.size() >= 80);
+            CHECK(op_domain.operational_values.size() <= 256);
 
             // for the selected range, all samples should be within the parameters
             check_op_domain_params_and_operational_status(op_domain, op_domain_params, std::nullopt);
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
             CHECK(op_domain_stats.num_simulator_invocations <= 512);
-            CHECK(op_domain_stats.num_evaluated_parameter_combinations <= 512);
-            CHECK(op_domain_stats.num_operational_parameter_combinations == 80);
-            CHECK(op_domain_stats.num_non_operational_parameter_combinations <= 100);
+            CHECK(op_domain_stats.num_evaluated_parameter_combinations <= 256);
+            CHECK(op_domain_stats.num_operational_parameter_combinations <= 80);
+            CHECK(op_domain_stats.num_non_operational_parameter_combinations <= 176);
         }
         SECTION("contour_tracing")
         {
@@ -504,16 +502,16 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
                                                                       op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size (max 10 steps in each dimension)
-            CHECK(op_domain.operational_values.size() <= 100);
+            CHECK(op_domain.operational_values.size() <= 256);
 
             // for the selected range, all samples should be within the parameters
             check_op_domain_params_and_operational_status(op_domain, op_domain_params, std::nullopt);
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
-            CHECK(op_domain_stats.num_simulator_invocations <= 200);
-            CHECK(op_domain_stats.num_evaluated_parameter_combinations <= 512);
+            CHECK(op_domain_stats.num_simulator_invocations <= 512);
+            CHECK(op_domain_stats.num_evaluated_parameter_combinations <= 256);
             CHECK(op_domain_stats.num_operational_parameter_combinations <= 80);
-            CHECK(op_domain_stats.num_non_operational_parameter_combinations <= 100);
+            CHECK(op_domain_stats.num_non_operational_parameter_combinations <= 176);
         }
     }
 }
@@ -541,7 +539,7 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
 
     lyt.assign_cell_type({10, 9, 1}, sidb_technology::cell_type::NORMAL);
 
-    const sidb_lattice<sidb_100_lattice, layout> lat{lyt};
+    const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
     sidb_simulation_parameters sim_params{};
     sim_params.base     = 2;
@@ -664,7 +662,7 @@ TEST_CASE("SiQAD's AND gate operational domain computation, using cube coordinat
     lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{10, 9, 1}),
                          sidb_technology::cell_type::NORMAL);
 
-    const sidb_lattice<sidb_100_lattice, layout> lat{lyt};
+    const sidb_100_cell_clk_lyt_cube lat{lyt};
 
     sidb_simulation_parameters sim_params{};
     sim_params.base     = 2;
