@@ -799,53 +799,61 @@ class post_layout_optimization_impl
         auto layout                  = obstruction_layout<Lyt>(plyt);
         bool moved_at_least_one_gate = true;
 
-        while (moved_at_least_one_gate)
+        if (max_gate_relocations == 0)
         {
-            moved_at_least_one_gate = false;
             fiction::wiring_reduction_stats wiring_reduction_stats{};
             fiction::wiring_reduction(layout, &wiring_reduction_stats);
-            if ((wiring_reduction_stats.area_improvement != 0ull) ||
-                (wiring_reduction_stats.wiring_improvement != 0ull))
+        }
+        else
+        {
+            while (moved_at_least_one_gate)
             {
-                moved_at_least_one_gate = true;
-            }
-
-            std::vector<tile<Lyt>> gate_tiles{};
-            gate_tiles.reserve(layout.num_gates() + layout.num_pis() - layout.num_pos());
-            layout.foreach_node(
-                [&layout, &gate_tiles](const auto& node)
-                {
-                    if (const tile<Lyt> tile = layout.get_tile(node);
-                        layout.is_inv(node) || layout.is_and(node) || layout.is_xor(node) || layout.is_fanout(node) ||
-                        layout.is_or(node) || layout.is_pi_tile(tile) || layout.is_po_tile(tile))
-                    {
-                        layout.obstruct_coordinate({tile.x, tile.y, 1});
-                        gate_tiles.emplace_back(tile);
-                    }
-                });
-
-            std::sort(gate_tiles.begin(), gate_tiles.end(), detail::compare_gate_tiles<Lyt>);
-
-            tile<Lyt> max_non_po;
-            // Iterate through the vector in reverse
-            for (auto it = gate_tiles.rbegin(); it != gate_tiles.rend(); ++it)
-            {
-                // Stop if a condition based on the element is met
-                if (!layout.is_po_tile(*it))
-                {
-                    max_non_po = *it;
-                    break;
-                }
-            }
-            for (auto& gate_tile : gate_tiles)
-            {
-                if (detail::improve_gate_location(layout, gate_tile, max_non_po, max_gate_relocations))
+                moved_at_least_one_gate = false;
+                fiction::wiring_reduction_stats wiring_reduction_stats{};
+                fiction::wiring_reduction(layout, &wiring_reduction_stats);
+                if ((wiring_reduction_stats.area_improvement != 0ull) ||
+                    (wiring_reduction_stats.wiring_improvement != 0ull))
                 {
                     moved_at_least_one_gate = true;
                 }
+
+                std::vector<tile<Lyt>> gate_tiles{};
+                gate_tiles.reserve(layout.num_gates() + layout.num_pis() - layout.num_pos());
+                layout.foreach_node(
+                    [&layout, &gate_tiles](const auto& node)
+                    {
+                        if (const tile<Lyt> tile = layout.get_tile(node);
+                            layout.is_inv(node) || layout.is_and(node) || layout.is_xor(node) ||
+                            layout.is_fanout(node) || layout.is_or(node) || layout.is_pi_tile(tile) ||
+                            layout.is_po_tile(tile))
+                        {
+                            layout.obstruct_coordinate({tile.x, tile.y, 1});
+                            gate_tiles.emplace_back(tile);
+                        }
+                    });
+
+                std::sort(gate_tiles.begin(), gate_tiles.end(), detail::compare_gate_tiles<Lyt>);
+
+                tile<Lyt> max_non_po;
+                // Iterate through the vector in reverse
+                for (auto it = gate_tiles.rbegin(); it != gate_tiles.rend(); ++it)
+                {
+                    // Stop if a condition based on the element is met
+                    if (!layout.is_po_tile(*it))
+                    {
+                        max_non_po = *it;
+                        break;
+                    }
+                }
+                for (auto& gate_tile : gate_tiles)
+                {
+                    if (detail::improve_gate_location(layout, gate_tile, max_non_po, max_gate_relocations))
+                    {
+                        moved_at_least_one_gate = true;
+                    }
+                }
             }
         }
-
         // calculate bounding box
         auto bounding_box = bounding_box_2d(layout);
         layout.resize({bounding_box.get_x_size(), bounding_box.get_y_size(), layout.z()});
