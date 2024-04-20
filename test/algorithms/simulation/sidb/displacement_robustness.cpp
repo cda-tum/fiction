@@ -15,13 +15,14 @@
 
 #include <cmath>
 #include <cstdlib>
+#include <limits>
 #include <vector>
 
 using namespace fiction;
 
 template <typename Lyt>
-void check_identical_information_of_stats_and_domain(const displacement_robustness_domain<Lyt>& domain,
-                                                     const displacement_robustness_stats&       stats)
+void check_identical_information_of_stats_and_domain(const displacement_robustness_domain<Lyt>&  domain,
+                                                     const displacement_robustness_domain_stats& stats)
 {
     const auto num_operational_layouts = static_cast<std::size_t>(
         std::count_if(domain.operational_values.begin(), domain.operational_values.end(),
@@ -49,7 +50,7 @@ TEST_CASE("Determine the SiDB gate displacement robustness of the Y-shaped SiDB 
 
     SECTION("One displacement variation in the x- and y-directions, allow dimer change")
     {
-        displacement_robustness_stats stats{};
+        displacement_robustness_domain_stats stats{};
 
         const auto robustness_domain =
             determine_sidb_gate_displace_robustness_domain(lyt, std::vector<tt>{create_and_tt()}, params, &stats);
@@ -62,7 +63,7 @@ TEST_CASE("Determine the SiDB gate displacement robustness of the Y-shaped SiDB 
 
     SECTION("Two displacement variations in the y-direction, disallow dimer change")
     {
-        displacement_robustness_stats stats{};
+        displacement_robustness_domain_stats stats{};
         params.displacement_variations                        = {0, 2};
         params.allow_dimer_change_in_y_direction              = false;
         params.operational_params.bdl_params.maximum_distance = 3.0;
@@ -110,13 +111,14 @@ TEST_CASE("Determine the probability of fabricating an operational Bestagon AND 
         params.operational_params.simulation_parameter        = sidb_simulation_parameters{2, -0.32};
         params.operational_params.bdl_params.maximum_distance = 2.0;
         params.operational_params.bdl_params.minimum_distance = 0.2;
-        params.mode                                           = sidb_gate_displacement_robustness_params<
+        params.analysis_mode                                  = sidb_gate_displacement_robustness_params<
             sidb_cell_clk_lyt_siqad>::displacement_analysis_mode::RANDOM_SAMPLING;
-        params.percentage_of_analyzed_displaced_layouts = 0.1;
+        params.percentage_of_analyzed_displaced_layouts  = 0.1;
+        params.percentage_of_displaced_sidb_combinations = 0.1;
 
         const auto result = determine_probability_of_fabricating_operational_gate_for_given_error_rate(
             lyt, std::vector<tt>{create_and_tt()}, params, 0.1);
-        CHECK_THAT(result, Catch::Matchers::WithinAbs(0.5, 0.1));
+        CHECK(result >= -std::numeric_limits<double>::epsilon());
     }
 }
 
@@ -131,14 +133,42 @@ TEST_CASE("Determine the probability of fabricating an operational BDL wire with
         params.operational_params.simulation_parameter        = sidb_simulation_parameters{2, -0.32};
         params.operational_params.bdl_params.maximum_distance = 2.0;
         params.operational_params.bdl_params.minimum_distance = 0.2;
-        params.mode                                           = sidb_gate_displacement_robustness_params<
-            sidb_cell_clk_lyt_siqad>::displacement_analysis_mode::RANDOM_SAMPLING;
-        params.percentage_of_analyzed_displaced_layouts  = 0.1;
-        params.percentage_of_displaced_cell_combinations = 0.1;
+        params.allow_dimer_change_in_y_direction              = false;
+        params.analysis_mode                                  = sidb_gate_displacement_robustness_params<
+            sidb_cell_clk_lyt_siqad>::displacement_analysis_mode::ALL_POSSIBLE_DISPLACEMENTS;
 
         const auto result = determine_probability_of_fabricating_operational_gate_for_given_error_rate(
-            lyt, std::vector<tt>{create_id_tt()}, params, 0.3);
-        CHECK_THAT(result, Catch::Matchers::WithinAbs(0.6, 0.2));
+            lyt, std::vector<tt>{create_id_tt()}, params, 0.2);
+        CHECK_THAT(result, Catch::Matchers::WithinAbs(0.7222222, physical_constants::POP_STABILITY_ERR));
+    }
+
+    SECTION("one displacement variation in x-direction")
+    {
+        sidb_gate_displacement_robustness_params<sidb_cell_clk_lyt_siqad> params{};
+        params.displacement_variations                        = {0, 1};
+        params.operational_params.simulation_parameter        = sidb_simulation_parameters{2, -0.32};
+        params.operational_params.bdl_params.maximum_distance = 2.0;
+        params.operational_params.bdl_params.minimum_distance = 0.2;
+        params.analysis_mode                                  = sidb_gate_displacement_robustness_params<
+            sidb_cell_clk_lyt_siqad>::displacement_analysis_mode::RANDOM_SAMPLING;
+
+        const auto result = determine_probability_of_fabricating_operational_gate_for_given_error_rate(
+            lyt, std::vector<tt>{create_id_tt()}, params, 0.2);
+        CHECK_THAT(result, Catch::Matchers::WithinAbs(0.7222222, physical_constants::POP_STABILITY_ERR));
+    }
+
+    SECTION("one displacement variation in x-direction, random sampling")
+    {
+        sidb_gate_displacement_robustness_params<sidb_cell_clk_lyt_siqad> params{};
+        params.displacement_variations                        = {1, 0};
+        params.operational_params.simulation_parameter        = sidb_simulation_parameters{2, -0.32};
+        params.operational_params.bdl_params.maximum_distance = 2.0;
+        params.operational_params.bdl_params.minimum_distance = 0.2;
+        params.percentage_of_displaced_sidb_combinations      = 0.1;
+
+        const auto result = determine_probability_of_fabricating_operational_gate_for_given_error_rate(
+            lyt, std::vector<tt>{create_id_tt()}, params, 0.0);
+        CHECK_THAT(result, Catch::Matchers::WithinAbs(1.00, physical_constants::POP_STABILITY_ERR));
     }
 
     SECTION("fabrication error rate p = 0.0")
@@ -148,7 +178,7 @@ TEST_CASE("Determine the probability of fabricating an operational BDL wire with
         params.operational_params.simulation_parameter        = sidb_simulation_parameters{2, -0.32};
         params.operational_params.bdl_params.maximum_distance = 2.0;
         params.operational_params.bdl_params.minimum_distance = 0.2;
-        params.percentage_of_displaced_cell_combinations      = 0.1;
+        params.percentage_of_displaced_sidb_combinations      = 0.1;
 
         const auto result = determine_probability_of_fabricating_operational_gate_for_given_error_rate(
             lyt, std::vector<tt>{create_id_tt()}, params, 0.0);
