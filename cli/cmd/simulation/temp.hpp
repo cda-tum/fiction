@@ -217,14 +217,13 @@ class temp_command : public command
         {
             return fiction::sidb_simulation_engine::CLUSTERCOMPLETE;
         }
-        else if (sim_engine_str == "QuickSim")
+
+        if (sim_engine_str == "QuickSim")
         {
             return fiction::sidb_simulation_engine::QUICKSIM;
         }
-        else
-        {
-            return fiction::sidb_simulation_engine::QUICKEXACT;
-        }
+
+        return fiction::sidb_simulation_engine::QUICKEXACT;
     }
     /**
      * Logs the resulting information in a log file.
