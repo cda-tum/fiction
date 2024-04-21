@@ -1527,7 +1527,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     void reset_local_external_potentials() noexcept
     {
-//        strg->local_external_pot = {};
+        //        strg->local_external_pot = {};
         this->update_after_charge_change();
     }
     /**
