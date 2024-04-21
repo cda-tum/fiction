@@ -10,7 +10,6 @@
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/layout_utils.hpp>
 #include <fiction/utils/name_utils.hpp>
 
 #include <alice/alice.hpp>
