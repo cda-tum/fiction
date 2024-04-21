@@ -309,18 +309,18 @@ class opdom_command : public command
         {
             return fiction::sidb_simulation_engine::CLUSTERCOMPLETE;
         }
-        else if (sim_engine_str == "QuickSim")
+
+        if (sim_engine_str == "QuickSim")
         {
             return fiction::sidb_simulation_engine::QUICKSIM;
         }
-        else if (sim_engine_str == "ExGS")
+
+        if (sim_engine_str == "ExGS")
         {
             return fiction::sidb_simulation_engine::EXGS;
         }
-        else
-        {
-            return fiction::sidb_simulation_engine::QUICKEXACT;
-        }
+
+        return fiction::sidb_simulation_engine::QUICKEXACT;
     }
     /**
      * Writes the operational domain to the specified CSV file.
