@@ -1099,7 +1099,7 @@ static sidb_cluster_ptr to_unique_sidb_cluster(const uint64_t total_sidbs, const
         }
     }
 
-    const sidb_cluster_ptr parent =
+    sidb_cluster_ptr parent =
         std::make_shared<sidb_cluster>(std::move(internal_sidbs), std::move(external_sidbs), std::move(children), uid);
 
     uid++;
@@ -1131,7 +1131,7 @@ inline sidb_cluster_ptr to_sidb_cluster(const sidb_binary_cluster_hierarchy_node
     }
 
     // to avoid weird shared pointer deallocation behaviour, give a parent to a singleton cluster hierarchy
-    const sidb_cluster_ptr parent =
+    sidb_cluster_ptr parent =
         std::make_shared<sidb_cluster>(std::vector{*n.c.cbegin()}, std::vector<uint64_t>{},
                                        sidb_clustering{std::make_shared<sidb_cluster>(
                                            std::vector{*n.c.cbegin()}, std::vector<uint64_t>{}, sidb_clustering{}, 0)},
