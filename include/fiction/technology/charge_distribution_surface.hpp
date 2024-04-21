@@ -1521,10 +1521,10 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return strg->phys_params.k() * strg->phys_params.epsilon_r / defect.epsilon_r / (distance * 1e-9) *
                std::exp(-distance / defect.lambda_tf) * physical_constants::ELEMENTARY_CHARGE;
     }
-//    /**
-//     * This function can be used to reset all external local electrostatic potentials to 0 Volt. All important
-//     * attributes of the charge layout are updated automatically.
-//     */
+    //    /**
+    //     * This function can be used to reset all external local electrostatic potentials to 0 Volt. All important
+    //     * attributes of the charge layout are updated automatically.
+    //     */
     void reset_local_external_potentials() noexcept
     {
         //        strg->local_external_pot = {};
