@@ -948,7 +948,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         }
         this->validity_check();
     }
-    /*
+    /**
      * The configuration stability of the current charge distribution is evaluated. It is performed as the last check
      * towards a judgement of physical validity of the present charge distribution layout.
      */
