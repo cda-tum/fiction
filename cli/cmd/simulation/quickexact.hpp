@@ -10,7 +10,6 @@
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/layout_utils.hpp>
 #include <fiction/utils/name_utils.hpp>
 
 #include <alice/alice.hpp>
@@ -101,19 +100,18 @@ class quickexact_command : public command
                 }
                 else
                 {
-                    params.physical_parameters = physical_params;
-
                     if constexpr (fiction::is_sidb_lattice_100_v<Lyt>)
                     {
-                        sidb_111_used  = false;
-                        sim_result_100 = fiction::quickexact(*lyt_ptr, params);
+                        params.physical_parameters = physical_params;
+                        sim_result_100             = fiction::quickexact(*lyt_ptr, params);
                     }
                     else if constexpr (fiction::is_sidb_lattice_111_v<Lyt>)
                     {
-                        sidb_111_used  = true;
-                        auto cps       = convert_params<Lyt>(params);
-                        sim_result_111 = fiction::quickexact(*lyt_ptr, cps);
+                        params.physical_parameters = physical_params;
+                        auto cps                   = convert_params<Lyt>(params);
+                        sim_result_111             = fiction::quickexact(*lyt_ptr, cps);
                     }
+
                     else
                     {
                         env->out() << "[e] no valid lattice orientation\n";
@@ -122,8 +120,8 @@ class quickexact_command : public command
 
                     if (sim_result_100.charge_distributions.empty() && sim_result_111.charge_distributions.empty())
                     {
-                        env->out() << fmt::format("[e] ground state of {} could not be determined\n",
-                                                  get_name(lyt_ptr));
+                        env->out() << fmt::format("[e] ground state of {} could not be determined", get_name(lyt_ptr))
+                                   << std::endl;
                     }
                     else
                     {
@@ -182,10 +180,7 @@ class quickexact_command : public command
      * Minimum energy.
      */
     double min_energy{std::numeric_limits<double>::infinity()};
-    /**
-     * Flag to determine the SiDB lattice used for the simulation when logging.
-     */
-    bool sidb_111_used = false;
+
     /**
      * Logs the resulting information in a log file.
      *
@@ -195,23 +190,6 @@ class quickexact_command : public command
     {
         try
         {
-            if (sidb_111_used)
-            {
-                return nlohmann::json{
-                    {"Algorithm name", sim_result_111.algorithm_name},
-                    {"Simulation runtime", sim_result_111.simulation_runtime.count()},
-                    {"Physical parameters",
-                     {{"base", std::any_cast<uint64_t>(sim_result_111.additional_simulation_parameters.at(
-                                   "base_number"))},  // fetch the automatically inferred base number
-                      {"epsilon_r", sim_result_111.physical_parameters.epsilon_r},
-                      {"lambda_tf", sim_result_111.physical_parameters.lambda_tf},
-                      {"mu_minus", sim_result_111.physical_parameters.mu_minus},
-                      {"global_potential",
-                       std::any_cast<double>(sim_result_111.additional_simulation_parameters.at("global_potential"))}}},
-                    {"Ground state energy (eV)", min_energy},
-                    {"Number of stable states", sim_result_111.charge_distributions.size()}};
-            }
-
             return nlohmann::json{
                 {"Algorithm name", sim_result_100.algorithm_name},
                 {"Simulation runtime", sim_result_100.simulation_runtime.count()},
