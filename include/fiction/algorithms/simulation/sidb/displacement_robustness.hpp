@@ -405,7 +405,8 @@ class displacement_robustness_domain_impl
 
         const auto max_number_of_layouts_with_displaced_sidbs =
             std::max(static_cast<std::size_t>(2),
-                     static_cast<std::size_t>(percentage_of_layouts * all_possible_sidb_displacement.size()));
+                     static_cast<std::size_t>(percentage_of_layouts *
+                                              static_cast<double>(all_possible_sidb_displacement.size())));
         // the "2" is used so that at least one further displaced layout is analyzed in addition to the original SiDB
         // layout.
 
