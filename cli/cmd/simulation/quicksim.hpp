@@ -65,19 +65,19 @@ class quicksim_command : public command
 
         if (physical_params.epsilon_r <= 0)
         {
-            env->out() << "[e] epsilon_r must be positive" << std::endl;
+            env->out() << "[e] epsilon_r must be positive\n";
             reset_params();
             return;
         }
         if (physical_params.lambda_tf <= 0)
         {
-            env->out() << "[e] lambda_tf must be positive" << std::endl;
+            env->out() << "[e] lambda_tf must be positive\n";
             reset_params();
             return;
         }
         if (params.alpha <= 0)
         {
-            env->out() << "[e] alpha must be positive" << std::endl;
+            env->out() << "[e] alpha must be positive\n";
             reset_params();
             return;
         }
@@ -87,7 +87,7 @@ class quicksim_command : public command
         // error case: empty cell layout store
         if (s.empty())
         {
-            env->out() << "[w] no cell layout in store" << std::endl;
+            env->out() << "[w] no cell layout in store\n";
             reset_params();
             return;
         }
@@ -103,9 +103,8 @@ class quicksim_command : public command
                 if constexpr (fiction::is_charge_distribution_surface_v<Lyt>)
                 {
                     env->out() << fmt::format(
-                                      "[w] {} already possesses a charge distribution; no simulation is conducted",
-                                      get_name(lyt_ptr))
-                               << std::endl;
+                        "[w] {} already possesses a charge distribution; no simulation is conducted\n",
+                        get_name(lyt_ptr));
                 }
                 else
                 {
@@ -113,24 +112,24 @@ class quicksim_command : public command
 
                     if constexpr (fiction::is_sidb_lattice_100_v<Lyt>)
                     {
+                        sidb_111_used  = false;
                         sim_result_100 = fiction::quicksim(*lyt_ptr, params);
                     }
                     else if constexpr (fiction::is_sidb_lattice_111_v<Lyt>)
                     {
+                        sidb_111_used  = true;
                         sim_result_111 = fiction::quicksim(*lyt_ptr, params);
                     }
-
                     else
                     {
-                        env->out() << "[e] no valid lattice orientation" << std::endl;
+                        env->out() << "[e] no valid lattice orientation\n";
                         return;
                     }
 
                     if (sim_result_100.charge_distributions.empty() && sim_result_111.charge_distributions.empty())
                     {
-                        env->out() << fmt::format("[e] no stable charge distribution could be determined for {}",
-                                                  get_name(lyt_ptr))
-                                   << std::endl;
+                        env->out() << fmt::format("[e] no stable charge distribution could be determined for {}\n",
+                                                  get_name(lyt_ptr));
                     }
                     else
                     {
@@ -159,7 +158,7 @@ class quicksim_command : public command
             }
             else
             {
-                env->out() << fmt::format("[e] {} is not an SiDB layout", get_name(lyt_ptr)) << std::endl;
+                env->out() << fmt::format("[e] {} is not an SiDB layout\n", get_name(lyt_ptr));
             }
         };
 
@@ -189,7 +188,10 @@ class quicksim_command : public command
      * Minimum energy.
      */
     double min_energy{std::numeric_limits<double>::infinity()};
-
+    /**
+     * Flag to determine the SiDB lattice used for the simulation when logging.
+     */
+    bool sidb_111_used = false;
     /**
      * Logs the resulting information in a log file.
      *
@@ -199,6 +201,22 @@ class quicksim_command : public command
     {
         try
         {
+            if (sidb_111_used)
+            {
+                return nlohmann::json{
+                    {"Algorithm name", sim_result_111.algorithm_name},
+                    {"Simulation runtime", sim_result_111.simulation_runtime.count()},
+                    {"Physical parameters",
+                     {{"epsilon_r", sim_result_111.physical_parameters.epsilon_r},
+                      {"lambda_tf", sim_result_111.physical_parameters.lambda_tf},
+                      {"mu_minus", sim_result_111.physical_parameters.mu_minus}}},
+                    {"Lowest state energy (eV)", min_energy},
+                    {"Number of stable states", sim_result_111.charge_distributions.size()},
+                    {"Iteration steps",
+                     std::any_cast<uint64_t>(sim_result_111.additional_simulation_parameters.at("iteration_steps"))},
+                    {"alpha", std::any_cast<double>(sim_result_111.additional_simulation_parameters.at("alpha"))}};
+            }
+
             return nlohmann::json{
                 {"Algorithm name", sim_result_100.algorithm_name},
                 {"Simulation runtime", sim_result_100.simulation_runtime.count()},
