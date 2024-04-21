@@ -36,8 +36,8 @@ static inline const std::vector<sidb_charge_state> SIDB_CHARGE_STATES_BASE_3{
 /**
  * Charge states of SiDBs for a given simulation base. The full base states are returned for an invalid simulation base.
  */
-static inline auto SIDB_CHARGE_STATES = [b2 = SIDB_CHARGE_STATES_BASE_2, b3 = SIDB_CHARGE_STATES_BASE_3](
-                                            const uint8_t base) { return base == 2 ? b2 : b3; };
+static inline const auto SIDB_CHARGE_STATES = [b2 = SIDB_CHARGE_STATES_BASE_2, b3 = SIDB_CHARGE_STATES_BASE_3](
+                                                  const uint8_t base) { return base == 2 ? b2 : b3; };
 /**
  * Converts the charge state into an integer (`-1`, `0`, `1`).
  *
