@@ -81,14 +81,14 @@ TEMPLATE_TEST_CASE("Ground State Space construction of two SiDBs directly next t
     {
         const ground_state_space_results& res =
             ground_state_space(lyt, ground_state_space_params{sidb_simulation_parameters{2}});
-        CHECK(res.top_cluster->charge_space.size() == 0);
+        CHECK(res.top_cluster->charge_space.empty());
     }
 
     SECTION("Base 3")
     {
         const ground_state_space_results& res =
             ground_state_space(lyt, ground_state_space_params{sidb_simulation_parameters{3}});
-        CHECK(res.top_cluster->charge_space.size() != 0);
+        CHECK(!res.top_cluster->charge_space.empty());
     }
 }
 
