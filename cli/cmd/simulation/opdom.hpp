@@ -6,6 +6,7 @@
 #define FICTION_CMD_OPDOM_HPP
 
 #include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/io/write_operational_domain.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
@@ -18,6 +19,7 @@
 #include <algorithm>
 #include <array>
 #include <cctype>
+#include <cstdint>
 #include <cstdlib>
 #include <exception>
 #include <iostream>
@@ -40,9 +42,8 @@ class opdom_command : public command
      * @param e alice::environment that specifies stores etc.
      */
     explicit opdom_command(const environment::ptr& e) :
-            command(e, "Opdom is a quick and exact electrostatic ground state simulation algorithm designed "
-                       "specifically for SiDB layouts. It provides a significant performance advantage of more than "
-                       "three orders of magnitude over ExGS from SiQAD.")
+            command(e, "Opdom is a tool designed for operation domain calculation, doing so in a variety of flavors "
+                       "that reduce the complexity of the parameter space search.")
     {
         add_option("--random_sampling,-r", num_random_samples,
                    "Use random sampling instead of grid search with this many random samples");
@@ -68,6 +69,10 @@ class opdom_command : public command
         add_option("--y_min", params.y_min, "Minimum value of the y dimension sweep", true);
         add_option("--y_max", params.y_max, "Maximum value of the y dimension sweep", true);
         add_option("--y_step", params.y_step, "Step size of the y dimension sweep", true);
+        add_option("--base", physical_params.base,
+                   "The simulation base, can be 2 or 3 (only ClusterComplete supports base 3 simulation)", true);
+        add_option("--engine", sim_engine_str,
+                   "The simulation engine to use {QuickExact [default], ClusterComplete, QuickSim, ExGS}", true);
     }
 
   protected:
@@ -82,13 +87,13 @@ class opdom_command : public command
 
         if (physical_params.epsilon_r <= 0)
         {
-            env->out() << "[e] epsilon_r must be positive" << std::endl;
+            env->out() << "[e] epsilon_r must be positive\n";
             reset_params();
             return;
         }
         if (physical_params.lambda_tf <= 0)
         {
-            env->out() << "[e] lambda_tf must be positive" << std::endl;
+            env->out() << "[e] lambda_tf must be positive\n";
             reset_params();
             return;
         }
@@ -96,13 +101,13 @@ class opdom_command : public command
         // check for valid x and y parameter bounds
         if (params.x_min >= params.x_max)
         {
-            env->out() << "[e] x_min must be smaller than x_max" << std::endl;
+            env->out() << "[e] x_min must be smaller than x_max\n";
             reset_params();
             return;
         }
         if (params.y_min >= params.y_max)
         {
-            env->out() << "[e] y_min must be smaller than y_max" << std::endl;
+            env->out() << "[e] y_min must be smaller than y_max\n";
             reset_params();
             return;
         }
@@ -112,7 +117,7 @@ class opdom_command : public command
                                                  is_set("contour_tracing")};
         if (std::count(algorithm_selections.cbegin(), algorithm_selections.cend(), true) > 1)
         {
-            env->out() << "[e] only one algorithm can be selected at a time" << std::endl;
+            env->out() << "[e] only one algorithm can be selected at a time\n";
             reset_params();
             return;
         }
@@ -122,7 +127,7 @@ class opdom_command : public command
         // error case: empty cell layout store
         if (cs.empty())
         {
-            env->out() << "[w] no cell layout in store" << std::endl;
+            env->out() << "[w] no cell layout in store\n";
             reset_params();
             return;
         }
@@ -132,7 +137,7 @@ class opdom_command : public command
         // error case: empty truth table store
         if (ts.empty())
         {
-            env->out() << "[w] no truth table in store" << std::endl;
+            env->out() << "[w] no truth table in store\n";
             reset_params();
             return;
         }
@@ -156,8 +161,7 @@ class opdom_command : public command
             {
                 env->out() << "[e] invalid x sweep parameter \"" << x_sweep
                            << "\". Has to be one of [epsilon_r, lambda_tf, "
-                              "mu_minus]"
-                           << std::endl;
+                              "mu_minus]\n";
                 reset_params();
                 return;
             }
@@ -167,8 +171,7 @@ class opdom_command : public command
             {
                 env->out() << "[e] invalid y sweep parameter \"" << y_sweep
                            << "\". Has to be one of [epsilon_r, lambda_tf, "
-                              "mu_minus]"
-                           << std::endl;
+                              "mu_minus]\n";
                 reset_params();
                 return;
             }
@@ -215,11 +218,12 @@ class opdom_command : public command
                 if (lyt_ptr->num_pis() == 0 || lyt_ptr->num_pos() == 0)
                 {
                     env->out() << fmt::format("[e] {} requires primary input and output cells to simulate its "
-                                              "Boolean function",
-                                              get_name(lyt_ptr))
-                               << std::endl;
+                                              "Boolean function\n",
+                                              get_name(lyt_ptr));
                     return;
                 }
+
+                params.sim_engine = get_sim_engine();
 
                 params.sim_params = physical_params;
 
@@ -246,7 +250,7 @@ class opdom_command : public command
             }
             else
             {
-                env->out() << fmt::format("[e] {} is not an SiDB layout", get_name(lyt_ptr)) << std::endl;
+                env->out() << fmt::format("[e] {} is not an SiDB layout\n", get_name(lyt_ptr));
             }
         };
 
@@ -283,6 +287,10 @@ class opdom_command : public command
      */
     std::string y_sweep{};
     /**
+     * The simulation engine to use.
+     */
+    std::string sim_engine_str{"QuickExact"};
+    /**
      * CSV filename to write the operational domain to.
      */
     std::string filename{};
@@ -290,7 +298,30 @@ class opdom_command : public command
      * The operational domain.
      */
     fiction::operational_domain op_domain{};
-
+    /**
+     * Convert the simulation engine string to the appropriate engine enum member. QuickExact is set as default.
+     *
+     * @return The `sidb_simulation_engine` member associated with the identifier.
+     */
+    [[nodiscard]] inline fiction::sidb_simulation_engine get_sim_engine() const noexcept
+    {
+        if (sim_engine_str == "ClusterComplete")
+        {
+            return fiction::sidb_simulation_engine::CLUSTERCOMPLETE;
+        }
+        else if (sim_engine_str == "QuickSim")
+        {
+            return fiction::sidb_simulation_engine::QUICKSIM;
+        }
+        else if (sim_engine_str == "ExGS")
+        {
+            return fiction::sidb_simulation_engine::EXGS;
+        }
+        else
+        {
+            return fiction::sidb_simulation_engine::QUICKEXACT;
+        }
+    }
     /**
      * Writes the operational domain to the specified CSV file.
      */
@@ -314,7 +345,7 @@ class opdom_command : public command
     [[nodiscard]] nlohmann::json log() const override
     {
         return nlohmann::json{
-            {"Algorithm name", "QuickExact"},
+            {"Algorithm name", sidb_simulation_engine_name(params.sim_engine)},
             {"Runtime in seconds", mockturtle::to_seconds(stats.time_total)},
             {"Number of simulator invocations", stats.num_simulator_invocations},
             {"Number of evaluated parameter combinations", stats.num_evaluated_parameter_combinations},
