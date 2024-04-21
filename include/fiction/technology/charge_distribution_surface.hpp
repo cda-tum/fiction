@@ -846,17 +846,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return std::nullopt;
     }
     /**
-     * This function allows the local electrostatic potential for some given index position to be set externally.
-     *
-     * @param index The index defining the SiDB position.
-     * @param loc_pot The local electrostatic potential to assign to the given index position (unit: V).
-     */
-    void assign_local_potential_by_index(const uint64_t index, const double loc_pot) noexcept
-    {
-        assert(index < strg->local_pot.size());
-        strg->local_pot[index] = loc_pot;
-    }
-    /**
      * This function returns the local electrostatic potential at a given index position in Volt (unit: V).
      *
      * @param index The index defining the SiDB position.
@@ -948,39 +937,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         }
         this->validity_check();
     }
-    /*
-     * The configuration stability of the current charge distribution is evaluated. It is performed as the last check
-     * towards a judgement of physical validity of the present charge distribution layout.
-     */
-    bool is_configuration_stable() noexcept
-    {
-        const auto hop_del =
-            [this](const uint64_t c1, const uint64_t c2)  // energy change when charge hops between two SiDBs.
-        { return strg->local_pot[c1] - strg->local_pot[c2] - strg->pot_mat[c1][c2]; };
-
-        for (uint64_t i = 0u; i < strg->local_pot.size(); ++i)
-        {
-            if (strg->cell_charge[i] == sidb_charge_state::POSITIVE)  // we do nothing with SiDB+
-            {
-                continue;
-            }
-
-            for (uint64_t j = 0u; j < strg->local_pot.size(); j++)
-            {
-                if (const auto e_del = hop_del(i, j);
-                    (charge_state_to_sign(strg->cell_charge[j]) > charge_state_to_sign(strg->cell_charge[i])) &&
-                    (e_del < -physical_constants::POP_STABILITY_ERR))  // Checks if energetically favored
-                                                                       // hops exist between two SiDBs.
-                {
-                    return false;
-                }
-            }
-        }
-
-        // If there is no jump that leads to a decrease in the potential energy of the system, the given charge
-        // distribution satisfies metastability.
-        return true;
-    }
     /**
      * The physically validity of the current charge distribution is evaluated and stored in the storage struct. A
      * charge distribution is valid if the *Population Stability* and the *Configuration Stability* is fulfilled.
@@ -1014,7 +970,40 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             (for_loop_counter >
              0))  // if population stability is fulfilled for all SiDBs, the "configuration stability" is checked.
         {
-            strg->validity = is_configuration_stable();
+            const auto hop_del =
+                [this](const uint64_t c1, const uint64_t c2)  // energy change when charge hops between two SiDBs.
+            { return strg->local_pot[c1] - strg->local_pot[c2] - strg->pot_mat[c1][c2]; };
+
+            uint64_t hop_counter = 0;
+            for (uint64_t i = 0u; i < strg->local_pot.size(); ++i)
+            {
+                if (strg->cell_charge[i] == sidb_charge_state::POSITIVE)  // we do nothing with SiDB+
+                {
+                    continue;
+                }
+
+                for (uint64_t j = 0u; j < strg->local_pot.size(); j++)
+                {
+                    if (hop_counter == 1)
+                    {
+                        break;
+                    }
+
+                    if (const auto e_del = hop_del(i, j);
+                        (charge_state_to_sign(strg->cell_charge[j]) > charge_state_to_sign(strg->cell_charge[i])) &&
+                        (e_del < -physical_constants::POP_STABILITY_ERR))  // Checks if energetically favored
+                                                                           // hops exist between two SiDBs.
+                    {
+                        hop_counter = 1;
+
+                        break;
+                    }
+                }
+            }
+
+            // If there is no jump that leads to a decrease in the potential energy of the system, the given charge
+            // distribution satisfies metastability.
+            strg->validity = hop_counter == 0;
         }
     }
     /**
@@ -1026,13 +1015,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     {
         return strg->validity;
     }
-    /**
-     * This function declares present charge distribution layout as physically valid by external judgement.
-     */
-    void declare_physically_valid() noexcept
-    {
-        strg->validity = true;
-    }
+
     /**
      * The charge distribution of the charge distribution surface is converted to a unique index. It is used to map
      * every possible charge distribution of an SiDB layout to a unique index.
@@ -1286,7 +1269,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     }
     /**
      * This function can be used to assign a global external electrostatic potential in Volt (unit: V) to the layout
-     * (e.g this could be a planar external electrode). It is added to previously stored values.
+     * (e.g this could be a planar external electrode).
      *
      * @param potential_value Value of the global external electrostatic potential in Volt (e.g. -0.3).
      * Charge-transition levels are shifted by this value.
@@ -1298,8 +1281,10 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     {
         if (potential_value != 0.0)
         {
-            this->foreach_cell([this, &potential_value](const auto& c)
-                               { strg->local_external_pot[c] += potential_value; });
+            this->foreach_cell(
+                [this, &potential_value](const auto& c) {
+                    strg->local_external_pot.insert({c, potential_value});
+                });
             this->update_after_charge_change(dependent_cell);
         }
     }
@@ -1539,17 +1524,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                std::exp(-distance / defect.lambda_tf) * physical_constants::ELEMENTARY_CHARGE;
     }
     /**
-     * This function can be used to reset all external local electrostatic potentials to 0 Volt. All important
-     * attributes of the charge layout are updated automatically.
-     */
-    void reset_local_external_potentials() noexcept
-    {
-        strg->local_external_pot = {};
-        this->update_after_charge_change();
-    }
-    /**
-     * This function can be used to assign an external local electrostatic potential in Volt to the layout, which is
-     * added to previously stored values. All important attributes of the charge layout are updated automatically.
+     * This function can be used to assign an external local electrostatic potential in Volt to the layout. All
+     * important attributes of the charge layout are updated automatically.
      *
      * @param cell Cell to which the local external potential is applied.
      * @param external_voltage External electrostatic potential in Volt applied to different cells.
@@ -1557,15 +1533,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     void
     assign_local_external_potential(const std::unordered_map<typename Lyt::cell, double>& external_potential) noexcept
     {
-        for (const auto& [c, pot] : external_potential)
-        {
-            strg->local_external_pot[c] += external_potential.at(c);
-        }
-
-        if (!external_potential.empty())
-        {
-            this->update_after_charge_change();
-        }
+        strg->local_external_pot = external_potential;
+        this->update_after_charge_change();
     }
     /**
      * This function returns the local external electrostatic potential in Volt applied to the layout.
@@ -1573,7 +1542,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @return External electrostatic potential as unordered map. The cell is used as key and the external electrostatic
      * potential in Volt (unit: V) at its position as value.
      */
-    std::unordered_map<typename Lyt::cell, double> get_local_external_potentials() const noexcept
+    std::unordered_map<typename Lyt::cell, double> get_local_external_potentials() noexcept
     {
         return strg->local_external_pot;
     }
@@ -1582,7 +1551,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @return Local electrostatic potential in Volt generated by the defects at each each cell.
      */
-    std::unordered_map<typename Lyt::cell, double> get_local_defect_potentials() const noexcept
+    std::unordered_map<typename Lyt::cell, double> get_local_defect_potentials() noexcept
     {
         return strg->defect_local_pot;
     }
@@ -1591,7 +1560,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @return Placed defects with cell position and type.
      */
-    std::unordered_map<typename Lyt::cell, const sidb_defect> get_defects() const noexcept
+    std::unordered_map<typename Lyt::cell, const sidb_defect> get_defects() noexcept
     {
         return strg->defects;
     }
