@@ -38,7 +38,7 @@ struct ground_state_space_params
     /**
      * The physical parameters that *Ground State Space* will use to prune simulation search space.
      */
-    const sidb_simulation_parameters physical_parameters{};
+    const sidb_simulation_parameters simulation_parameters{};
     /**
      * This specifies the maximum cluster size for which Ground State Space will solve an NP-complete sub-problem
      * exhaustively. The sets of SiDBs that witness local population stability for each respective charge state may be
@@ -121,11 +121,11 @@ class ground_state_space_impl
             params{parameters},
             top_cluster{to_sidb_cluster(sidb_cluster_hierarchy(lyt))},
             clustering{
-                get_initial_clustering(top_cluster, get_local_potential_bounds(lyt, params.physical_parameters))},
-            mu_bounds_with_error{physical_constants::POP_STABILITY_ERR - params.physical_parameters.mu_minus,
-                                 -physical_constants::POP_STABILITY_ERR - params.physical_parameters.mu_minus,
-                                 physical_constants::POP_STABILITY_ERR - params.physical_parameters.mu_plus(),
-                                 -physical_constants::POP_STABILITY_ERR - params.physical_parameters.mu_plus()}
+                get_initial_clustering(top_cluster, get_local_potential_bounds(lyt, params.simulation_parameters))},
+            mu_bounds_with_error{physical_constants::POP_STABILITY_ERR - params.simulation_parameters.mu_minus,
+                                 -physical_constants::POP_STABILITY_ERR - params.simulation_parameters.mu_minus,
+                                 physical_constants::POP_STABILITY_ERR - params.simulation_parameters.mu_plus(),
+                                 -physical_constants::POP_STABILITY_ERR - params.simulation_parameters.mu_plus()}
     {}
 
     ground_state_space_results run() noexcept
@@ -174,16 +174,16 @@ class ground_state_space_impl
     }
 
     static std::pair<charge_distribution_surface<Lyt>, charge_distribution_surface<Lyt>>
-    get_local_potential_bounds(const Lyt& lyt, const sidb_simulation_parameters& physical_parameters) noexcept
+    get_local_potential_bounds(const Lyt& lyt, const sidb_simulation_parameters& simulation_parameters) noexcept
     {
         charge_distribution_surface<Lyt> cds_min{lyt};
         charge_distribution_surface<Lyt> cds_max{lyt};
 
-        cds_min.assign_physical_parameters(physical_parameters);
-        cds_max.assign_physical_parameters(physical_parameters);
+        cds_min.assign_simulation_parameters(simulation_parameters);
+        cds_max.assign_simulation_parameters(simulation_parameters);
 
-        cds_min.assign_all_charge_states(physical_parameters.base == 3 ? sidb_charge_state::POSITIVE :
-                                                                         sidb_charge_state::NEUTRAL);
+        cds_min.assign_all_charge_states(simulation_parameters.base == 3 ? sidb_charge_state::POSITIVE :
+                                                                           sidb_charge_state::NEUTRAL);
         cds_max.assign_all_charge_states(sidb_charge_state::NEGATIVE);
 
         cds_min.update_after_charge_change();
@@ -215,9 +215,10 @@ class ground_state_space_impl
             const double max_loc_pot = max_loc_pot_cds.get_local_potential_by_index(i).value() - loc_ext_pot;
 
             c->initialize_singleton_cluster_charge_space(-min_loc_pot, -max_loc_pot, -loc_ext_pot,
-                                                         min_loc_pot_cds.get_phys_params().base, c);
+                                                         min_loc_pot_cds.get_simulation_params().base, c);
 
-            c->pot_projs[i] = potential_projection_order{-loc_ext_pot, min_loc_pot_cds.get_phys_params().base, true};
+            c->pot_projs[i] =
+                potential_projection_order{-loc_ext_pot, min_loc_pot_cds.get_simulation_params().base, true};
 
             for (uint64_t j = 0; j < min_loc_pot_cds.num_cells(); ++j)
             {
@@ -225,7 +226,7 @@ class ground_state_space_impl
                 {
                     c->pot_projs[j] =
                         potential_projection_order{min_loc_pot_cds.get_chargeless_potential_by_indices(i, j),
-                                                   min_loc_pot_cds.get_phys_params().base};
+                                                   min_loc_pot_cds.get_simulation_params().base};
                 }
             }
 
@@ -827,8 +828,8 @@ class ground_state_space_impl
     [[nodiscard]] constexpr inline uint64_t maximum_top_level_multisets(const uint64_t number_of_sidbs) const noexcept
     {
         // computes nCr(N + 2, 2) if base = 3, or otherwise nCr(N + 1, 1) when the base is 2
-        return params.physical_parameters.base == 3 ? ((number_of_sidbs + 1) * (number_of_sidbs + 2)) / 2 :
-                                                      number_of_sidbs + 1;
+        return params.simulation_parameters.base == 3 ? ((number_of_sidbs + 1) * (number_of_sidbs + 2)) / 2 :
+                                                        number_of_sidbs + 1;
     }
 
     // parameters used during the construction

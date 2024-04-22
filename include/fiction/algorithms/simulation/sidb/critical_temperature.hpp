@@ -232,9 +232,9 @@ class critical_temperature_impl
 #if (FICTION_ALGLIB_ENABLED)
         else if (params.engine == sidb_simulation_engine::CLUSTERCOMPLETE)
         {
-            const clustercomplete_params<Lyt> cc_params{params.simulation_parameters};
+            const clustercomplete_params<cell<Lyt>> cc_params{params.simulation_parameters};
 
-            // All physically valid charge configurations are determined for the given layout (`CLusterComplete`
+            // All physically valid charge configurations are determined for the given layout (`ClusterComplete`
             // simulation is used to provide 100 % accuracy for the Critical Temperature).
             simulation_results = clustercomplete(layout, cc_params);
         }

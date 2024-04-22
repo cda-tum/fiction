@@ -36,17 +36,17 @@ namespace fiction
 /**
  * The struct containing the parameters both passed on to pre-simulator Ground State Space, and used during simulation.
  */
-template <typename Lyt>
+template <typename CellType>
 struct clustercomplete_params
 {
     /**
      * Physical simulation parameters.
      */
-    sidb_simulation_parameters physical_parameters{};
+    sidb_simulation_parameters simulation_parameters{};
     /**
      * Local external electrostatic potentials (e.g locally applied electrodes).
      */
-    std::unordered_map<cell<Lyt>, double> local_external_potential = {};
+    std::unordered_map<CellType, double> local_external_potential = {};
     /**
      * Global external electrostatic potential. Value is applied on each cell in the layout.
      */
@@ -86,19 +86,19 @@ template <typename Lyt>
 class clustercomplete_impl
 {
   public:
-    explicit clustercomplete_impl(const Lyt& lyt, const clustercomplete_params<Lyt>& params) noexcept :
+    explicit clustercomplete_impl(const Lyt& lyt, const clustercomplete_params<cell<Lyt>>& params) noexcept :
             charge_layout{initialize_charge_layout(lyt, params)},
             real_placed_defects{charge_layout.get_defects()},
-            mu_bounds_with_error{physical_constants::POP_STABILITY_ERR - params.physical_parameters.mu_minus,
-                                 -physical_constants::POP_STABILITY_ERR - params.physical_parameters.mu_minus,
-                                 physical_constants::POP_STABILITY_ERR - params.physical_parameters.mu_plus(),
-                                 -physical_constants::POP_STABILITY_ERR - params.physical_parameters.mu_plus()}
+            mu_bounds_with_error{physical_constants::POP_STABILITY_ERR - params.simulation_parameters.mu_minus,
+                                 -physical_constants::POP_STABILITY_ERR - params.simulation_parameters.mu_minus,
+                                 physical_constants::POP_STABILITY_ERR - params.simulation_parameters.mu_plus(),
+                                 -physical_constants::POP_STABILITY_ERR - params.simulation_parameters.mu_plus()}
     {}
 
-    sidb_simulation_result<Lyt> run(const clustercomplete_params<Lyt>& params) noexcept
+    sidb_simulation_result<Lyt> run(const clustercomplete_params<cell<Lyt>>& params) noexcept
     {
-        res.physical_parameters = charge_layout.get_phys_params();
-        res.algorithm_name      = "ClusterComplete";
+        res.simulation_parameters = params.simulation_parameters;
+        res.algorithm_name        = "ClusterComplete";
         res.additional_simulation_parameters.emplace("global_potential", params.global_potential);
         res.additional_simulation_parameters.emplace("validity_witness_partitioning_limit",
                                                      params.validity_witness_partitioning_max_cluster_size_gss);
@@ -107,7 +107,7 @@ class clustercomplete_impl
 
         // run Ground State Space to obtain the complete hierarchical charge space
         const ground_state_space_results& gss_stats = ground_state_space(
-            charge_layout, ground_state_space_params{charge_layout.get_phys_params(),
+            charge_layout, ground_state_space_params{params.simulation_parameters,
                                                      params.validity_witness_partitioning_max_cluster_size_gss,
                                                      params.num_overlapping_witnesses_limit_gss});
 
@@ -138,11 +138,11 @@ class clustercomplete_impl
     }
 
   private:
-    static charge_distribution_surface<Lyt> initialize_charge_layout(const Lyt&                         lyt,
-                                                                     const clustercomplete_params<Lyt>& params) noexcept
+    static charge_distribution_surface<Lyt>
+    initialize_charge_layout(const Lyt& lyt, const clustercomplete_params<cell<Lyt>>& params) noexcept
     {
         charge_distribution_surface<Lyt> cds{lyt};
-        cds.assign_physical_parameters(params.physical_parameters);
+        cds.assign_simulation_parameters(params.simulation_parameters);
 
         // assign defects if applicable
         if constexpr (has_foreach_sidb_defect_v<Lyt>)
@@ -502,8 +502,8 @@ class clustercomplete_impl
  * @return Simulation results.
  */
 template <typename Lyt>
-[[nodiscard]] sidb_simulation_result<Lyt> clustercomplete(const Lyt&                         lyt,
-                                                          const clustercomplete_params<Lyt>& params = {}) noexcept
+[[nodiscard]] sidb_simulation_result<Lyt> clustercomplete(const Lyt&                               lyt,
+                                                          const clustercomplete_params<cell<Lyt>>& params = {}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");

@@ -333,7 +333,8 @@ class is_operational_impl
 
             // perform QuickExact exact simulation
             const quickexact_params<cell<Lyt>> quickexact_params{
-                parameters.simulation_parameters, fiction::quickexact_params<Lyt>::automatic_base_number_detection::OFF};
+                parameters.simulation_parameters,
+                fiction::quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
             return quickexact(*bdl_iterator, quickexact_params);
         }
 
@@ -342,7 +343,7 @@ class is_operational_impl
         if (parameters.sim_engine == sidb_simulation_engine::CLUSTERCOMPLETE)
         {
             // perform ClusterComplete exact simulation
-            const clustercomplete_params<Lyt> cc_params{parameters.simulation_parameters};
+            const clustercomplete_params<cell<Lyt>> cc_params{parameters.simulation_parameters};
             return clustercomplete(*bdl_iterator, cc_params);
         }
 

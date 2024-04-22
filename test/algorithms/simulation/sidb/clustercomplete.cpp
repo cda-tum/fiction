@@ -42,7 +42,7 @@ TEMPLATE_TEST_CASE("Empty layout ClusterComplete simulation", "[clustercomplete]
 {
     TestType lyt{};
 
-    clustercomplete_params<TestType> params{sidb_simulation_parameters{2, -0.32}};
+    clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{2, -0.32}};
     params.validity_witness_partitioning_max_cluster_size_gss = 3;
     params.num_overlapping_witnesses_limit_gss                = 8;
 
@@ -62,7 +62,7 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a single SiDB", "[clustercompl
     TestType lyt{};
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
 
-    const clustercomplete_params<TestType> params{sidb_simulation_parameters{2, -0.32}};
+    const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{2, -0.32}};
 
     const auto simulation_results = clustercomplete(lyt, params);
 
@@ -113,7 +113,7 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a 4 DB layout with a positive 
             lyt, quickexact_params<TestType>{sidb_simulation_parameters{2},
                                              quickexact_params<TestType>::automatic_base_number_detection::OFF});
         const sidb_simulation_result<TestType>& cc_res =
-            clustercomplete(lyt, clustercomplete_params<TestType>{sidb_simulation_parameters{2}});
+            clustercomplete(lyt, clustercomplete_params<cell<TestType>>{sidb_simulation_parameters{2}});
 
         REQUIRE(qe_res.charge_distributions.size() == 1);
         CHECK(cc_res.charge_distributions.size() == 1);
@@ -130,7 +130,7 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a 4 DB layout with a positive 
             lyt, quickexact_params<TestType>{sidb_simulation_parameters{3},
                                              quickexact_params<TestType>::automatic_base_number_detection::OFF});
         const sidb_simulation_result<TestType>& cc_res =
-            clustercomplete(lyt, clustercomplete_params<TestType>{sidb_simulation_parameters{3}});
+            clustercomplete(lyt, clustercomplete_params<cell<TestType>>{sidb_simulation_parameters{3}});
 
         REQUIRE(qe_res.charge_distributions.size() == 2);
         CHECK(cc_res.charge_distributions.size() == 2);
@@ -190,7 +190,7 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type({10, 8, 1}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({16, 1, 0}, TestType::cell_type::NORMAL);
 
-    clustercomplete_params<TestType> params{sidb_simulation_parameters{2, -0.28}};
+    clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{2, -0.28}};
 
     SECTION("Check if ClusterComplete is deterministic")
     {
@@ -361,7 +361,7 @@ TEMPLATE_TEST_CASE(
 {
     TestType lyt{};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
-    const clustercomplete_params<TestType> params{sidb_simulation_parameters{2, -0.25}};
+    const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{2, -0.25}};
     lyt.assign_sidb_defect({1, 2, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1, params.physical_parameters.epsilon_r,
                                                   params.physical_parameters.lambda_tf});
 
@@ -379,7 +379,7 @@ TEMPLATE_TEST_CASE(
     TestType lyt{};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
 
-    const clustercomplete_params<TestType> params{sidb_simulation_parameters{2, -0.25}};
+    const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{2, -0.25}};
 
     lyt.assign_sidb_defect({1, 2, 0},
                            sidb_defect{sidb_defect_type::UNKNOWN, -1, params.physical_parameters.epsilon_r, 2});
@@ -397,7 +397,7 @@ TEMPLATE_TEST_CASE(
     TestType lyt{};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
 
-    const clustercomplete_params<TestType> params{sidb_simulation_parameters{3, -0.25}};
+    const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.25}};
 
     lyt.assign_sidb_defect({1, 6, 0},
                            sidb_defect{sidb_defect_type::UNKNOWN, -1, 0.3, params.physical_parameters.lambda_tf});
@@ -420,7 +420,7 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type({0, 1, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({2, 1, 0}, TestType::cell_type::NORMAL);
 
-    const clustercomplete_params<TestType> params{sidb_simulation_parameters{2, -0.15}};
+    const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{2, -0.15}};
 
     lyt.assign_sidb_defect({0, 0, 1}, sidb_defect{sidb_defect_type::UNKNOWN, -1, params.physical_parameters.epsilon_r,
                                                   params.physical_parameters.lambda_tf});
@@ -442,7 +442,7 @@ TEMPLATE_TEST_CASE("Single SiDB ClusterComplete simulation with one highly negat
     TestType lyt{};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
 
-    const clustercomplete_params<TestType> params{sidb_simulation_parameters{3, -0.1}};
+    const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.1}};
 
     lyt.assign_sidb_defect({1, 2, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -10, params.physical_parameters.epsilon_r,
                                                   params.physical_parameters.lambda_tf});
@@ -462,7 +462,7 @@ TEMPLATE_TEST_CASE(
     TestType lyt{};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
 
-    const clustercomplete_params<TestType> params{sidb_simulation_parameters{2, -0.1}};
+    const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{2, -0.1}};
 
     lyt.assign_sidb_defect({1, 2, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -10, params.physical_parameters.epsilon_r,
                                                   params.physical_parameters.lambda_tf * 10E-5});
@@ -481,7 +481,7 @@ TEMPLATE_TEST_CASE(
     TestType lyt{};
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
 
-    const clustercomplete_params<TestType> params{sidb_simulation_parameters{2, -0.1}};
+    const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{2, -0.1}};
 
     lyt.assign_sidb_defect({2, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -10, params.physical_parameters.epsilon_r,
                                                   params.physical_parameters.lambda_tf});
@@ -501,7 +501,7 @@ TEMPLATE_TEST_CASE("Single SiDB ClusterComplete simulation with local external p
     TestType lyt{};
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
 
-    clustercomplete_params<TestType> params{sidb_simulation_parameters{2, -0.25}};
+    clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{2, -0.25}};
 
     params.local_external_potential.insert({{0, 0, 0}, -0.5});
 
@@ -517,7 +517,7 @@ TEMPLATE_TEST_CASE("Single SiDB ClusterComplete simulation with local external p
     TestType lyt{};
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
 
-    clustercomplete_params<TestType> params{sidb_simulation_parameters{3, -0.25}};
+    clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.25}};
 
     params.local_external_potential.insert({{{0, 0, 0}, -1}});
     const auto simulation_results = clustercomplete<TestType>(lyt, params);
@@ -532,7 +532,7 @@ TEMPLATE_TEST_CASE("Single SiDB ClusterComplete simulation with global external 
     TestType lyt{};
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
 
-    clustercomplete_params<TestType> params{sidb_simulation_parameters{2, -0.25}};
+    clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{2, -0.25}};
     params.global_potential = -0.26;
 
     const auto simulation_results = clustercomplete<TestType>(lyt, params);
@@ -548,7 +548,7 @@ TEMPLATE_TEST_CASE("Single SiDB ClusterComplete simulation with global external 
     TestType lyt{};
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
 
-    clustercomplete_params<TestType> params{sidb_simulation_parameters{3, -0.25}};
+    clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.25}};
     params.global_potential = -1;
 
     const auto simulation_results = clustercomplete<TestType>(lyt, params);
@@ -562,7 +562,7 @@ TEMPLATE_TEST_CASE("Single SiDB ClusterComplete simulation with global external 
     TestType lyt{};
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
 
-    clustercomplete_params<TestType> params{sidb_simulation_parameters{3, -0.25}};
+    clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.25}};
     params.global_potential = 1;
 
     const auto simulation_results = clustercomplete<TestType>(lyt, params);
@@ -577,7 +577,7 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a BDL pair", "[clustercomplete
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({3, 3, 0}, TestType::cell_type::NORMAL);
 
-    const clustercomplete_params<TestType> params{sidb_simulation_parameters{3, -0.25}};
+    const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.25}};
 
     const auto simulation_results = clustercomplete<TestType>(lyt, params);
 
@@ -617,7 +617,7 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a two-pair BDL wire with one p
     lyt.assign_cell_type({17, 0, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({19, 0, 0}, TestType::cell_type::NORMAL);
 
-    const clustercomplete_params<TestType> params{sidb_simulation_parameters{3, -0.32}};
+    const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.32}};
 
     const auto simulation_results = clustercomplete<TestType>(lyt, params);
     auto       size_before        = simulation_results.charge_distributions.size();
@@ -696,7 +696,7 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a Y-shape SiDB arrangement", "
     lyt.assign_cell_type({-7, 1, 1}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({-7, 3, 0}, TestType::cell_type::NORMAL);
 
-    const clustercomplete_params<TestType> sim_params{sidb_simulation_parameters{3, -0.32}};
+    const clustercomplete_params<cell<TestType>> sim_params{sidb_simulation_parameters{3, -0.32}};
 
     const auto simulation_results = clustercomplete<TestType>(lyt, sim_params);
 
@@ -734,7 +734,7 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with in
 
     lyt.assign_cell_type({10, 8, 1}, TestType::cell_type::NORMAL);
 
-    const clustercomplete_params<TestType> sim_params{sidb_simulation_parameters{2, -0.28}};
+    const clustercomplete_params<cell<TestType>> sim_params{sidb_simulation_parameters{2, -0.28}};
 
     const auto simulation_results = clustercomplete<TestType>(lyt, sim_params);
 
@@ -781,7 +781,7 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with in
     lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{10, 8, 1}),
                          TestType::cell_type::NORMAL);
 
-    const clustercomplete_params<TestType> sim_params{sidb_simulation_parameters{2, -0.28}};
+    const clustercomplete_params<cell<TestType>> sim_params{sidb_simulation_parameters{2, -0.28}};
 
     const auto simulation_results = clustercomplete<TestType>(lyt, sim_params);
 
@@ -829,7 +829,7 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with in
 
     lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{10, 8, 1}), TestType::cell_type::NORMAL);
 
-    const clustercomplete_params<TestType> sim_params{sidb_simulation_parameters{2, -0.28}};
+    const clustercomplete_params<cell<TestType>> sim_params{sidb_simulation_parameters{2, -0.28}};
 
     const auto simulation_results = clustercomplete<TestType>(lyt, sim_params);
 
@@ -876,7 +876,7 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with in
     lyt.assign_cell_type({10, 8, 1}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({16, 1, 0}, TestType::cell_type::NORMAL);
 
-    clustercomplete_params<TestType> params{sidb_simulation_parameters{3, -0.28}};
+    clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.28}};
     params.local_external_potential.insert({{{6, 2, 0}, -0.5}});
 
     const auto simulation_results = clustercomplete<TestType>(lyt, params);
@@ -918,7 +918,7 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a Y-shaped SiDB OR gate with i
     lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{16, 1, 0}),
                          TestType::cell_type::NORMAL);
 
-    clustercomplete_params<TestType> params{sidb_simulation_parameters{3, -0.28}};
+    clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.28}};
     params.local_external_potential.insert(
         {{siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{6, 2, 0}), -0.5}});
 
@@ -962,7 +962,7 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{10, 8, 1}), TestType::cell_type::NORMAL);
     lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{16, 1, 0}), TestType::cell_type::NORMAL);
 
-    clustercomplete_params<TestType> params{sidb_simulation_parameters{3, -0.28}};
+    clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.28}};
     params.local_external_potential.insert({{siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{6, 2, 0}), -0.5}});
 
     const auto simulation_results = clustercomplete<TestType>(lyt, params);
@@ -1004,7 +1004,7 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation  of a Y-shape SiDB OR gate with i
     lyt.assign_cell_type({10, 8, 1}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({16, 1, 0}, TestType::cell_type::NORMAL);
 
-    clustercomplete_params<TestType> params{sidb_simulation_parameters{3, -0.28}};
+    clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.28}};
     params.global_potential = -0.5;
 
     const auto simulation_results = clustercomplete<TestType>(lyt, params);
@@ -1039,7 +1039,7 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type({10, 8, 1}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({16, 1, 0}, TestType::cell_type::NORMAL);
 
-    clustercomplete_params<TestType> params{sidb_simulation_parameters{3, -0.28}};
+    clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.28}};
     params.global_potential = -2;
 
     const auto simulation_results = clustercomplete<TestType>(lyt, params);
@@ -1067,7 +1067,7 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of four SiDBs (far away)", "[clus
     lyt.assign_cell_type({20, 0, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({30, 0, 0}, TestType::cell_type::NORMAL);
 
-    const clustercomplete_params<TestType> params{sidb_simulation_parameters{3, -0.28}};
+    const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.28}};
 
     const auto simulation_results = clustercomplete<TestType>(lyt, params);
 
@@ -1088,7 +1088,7 @@ TEMPLATE_TEST_CASE("ClusterComplete with one SiDB and one negatively charged def
 
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
 
-    const clustercomplete_params<TestType> params{sidb_simulation_parameters{3, -0.32}};
+    const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.32}};
     lyt.assign_sidb_defect({-1, -1, 1}, sidb_defect{sidb_defect_type::UNKNOWN, -1, params.physical_parameters.epsilon_r,
                                                     params.physical_parameters.lambda_tf});
     const auto simulation_results = clustercomplete<TestType>(lyt, params);
@@ -1111,7 +1111,7 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type({20, 0, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({30, 0, 0}, TestType::cell_type::NORMAL);
 
-    const clustercomplete_params<TestType> params{sidb_simulation_parameters{3, -0.28}};
+    const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.28}};
     lyt.assign_sidb_defect({1, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1, params.physical_parameters.epsilon_r,
                                                   params.physical_parameters.lambda_tf});
     const auto simulation_results = clustercomplete<TestType>(lyt, params);
@@ -1137,7 +1137,7 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type({20, 0, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({30, 0, 0}, TestType::cell_type::NORMAL);
 
-    const clustercomplete_params<TestType> params{sidb_simulation_parameters{3, -0.28}};
+    const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.28}};
 
     lyt.assign_sidb_defect({1, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1, params.physical_parameters.epsilon_r,
                                                   params.physical_parameters.lambda_tf});
@@ -1168,7 +1168,7 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of four SiDBs (far away) with one
     lyt.assign_cell_type({20, 0, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({30, 0, 0}, TestType::cell_type::NORMAL);
 
-    const clustercomplete_params<TestType> params{sidb_simulation_parameters{3, -0.28}};
+    const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.28}};
 
     lyt.assign_sidb_defect({1, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, 1, params.physical_parameters.epsilon_r,
                                                   params.physical_parameters.lambda_tf});
@@ -1196,7 +1196,7 @@ TEMPLATE_TEST_CASE("three DBs next to each other", "[clustercomplete]", (sidb_10
     lyt.assign_cell_type({2, 3, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({3, 3, 0}, TestType::cell_type::NORMAL);
 
-    const clustercomplete_params<TestType> params{sidb_simulation_parameters{3, -0.25}};
+    const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.25}};
 
     const auto simulation_results = clustercomplete<TestType>(lyt, params);
 
@@ -1222,7 +1222,7 @@ TEMPLATE_TEST_CASE("three DBs next to each other, small mu-", "[clustercomplete]
     lyt.assign_cell_type({2, 3, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({3, 3, 0}, TestType::cell_type::NORMAL);
 
-    const clustercomplete_params<TestType> params{sidb_simulation_parameters{3, -0.8}};
+    const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.8}};
 
     const auto simulation_results = clustercomplete<TestType>(lyt, params);
 
@@ -1244,7 +1244,7 @@ TEMPLATE_TEST_CASE("four DBs next to each other, small mu-", "[clustercomplete]"
     lyt.assign_cell_type({2, 3, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({3, 3, 0}, TestType::cell_type::NORMAL);
 
-    const clustercomplete_params<TestType> params{sidb_simulation_parameters{3, -0.25}};
+    const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.25}};
 
     const auto simulation_results = clustercomplete<TestType>(lyt, params);
 
@@ -1269,7 +1269,7 @@ TEMPLATE_TEST_CASE("seven DBs next to each other, small mu-", "[clustercomplete]
     lyt.assign_cell_type({5, 3, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({6, 3, 0}, TestType::cell_type::NORMAL);
 
-    const clustercomplete_params<TestType> params{sidb_simulation_parameters{3, -0.25}};
+    const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.25}};
 
     const auto simulation_results = clustercomplete<TestType>(lyt, params);
 
@@ -1294,7 +1294,7 @@ TEMPLATE_TEST_CASE("7 DBs next to each other (positively charged DBs occur)", "[
     lyt.assign_cell_type({6, 0, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({7, 0, 0}, TestType::cell_type::NORMAL);
 
-    const clustercomplete_params<TestType> params{sidb_simulation_parameters{3, -0.25}};
+    const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.25}};
 
     const auto simulation_results = clustercomplete<TestType>(lyt, params);
 
@@ -1317,7 +1317,7 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type({-1, -1, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({0, 2, 0}, TestType::cell_type::NORMAL);
 
-    const clustercomplete_params<TestType> params{sidb_simulation_parameters{3, -0.25}};
+    const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.25}};
 
     const auto simulation_results = clustercomplete<TestType>(lyt, params);
 
@@ -1334,7 +1334,7 @@ TEMPLATE_TEST_CASE("4 DBs next to each other (positively charged DBs occur)", "[
     lyt.assign_cell_type({2, 0, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({10, 0, 0}, TestType::cell_type::NORMAL);
 
-    const clustercomplete_params<TestType> params{sidb_simulation_parameters{3, -0.1}};
+    const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.1}};
 
     const auto simulation_results = clustercomplete<TestType>(lyt, params);
 
@@ -1353,7 +1353,7 @@ TEMPLATE_TEST_CASE("6 DBs next to each other (positively charged DBs occur)", "[
     lyt.assign_cell_type({7, 0, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({10, 0, 0}, TestType::cell_type::NORMAL);
 
-    const clustercomplete_params<TestType> params{sidb_simulation_parameters{3, -0.25}};
+    const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.25}};
 
     const auto simulation_results = clustercomplete<TestType>(lyt, params);
 
@@ -1372,7 +1372,7 @@ TEMPLATE_TEST_CASE("4 DBs close to each other", "[clustercomplete]", (sidb_100_c
     lyt.assign_cell_type({3, 0, 1}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({5, 0, 1}, TestType::cell_type::NORMAL);
 
-    const clustercomplete_params<TestType> params{sidb_simulation_parameters{3, -0.25}};
+    const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.25}};
 
     const auto simulation_results = clustercomplete<TestType>(lyt, params);
 
@@ -1389,7 +1389,7 @@ TEMPLATE_TEST_CASE("3 DBs next to each other (positively charged DBs occur)", "[
     lyt.assign_cell_type({6, 0, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({7, 0, 0}, TestType::cell_type::NORMAL);
 
-    const clustercomplete_params<TestType> params{sidb_simulation_parameters{3, -0.32}};
+    const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.32}};
 
     const auto simulation_results = clustercomplete<TestType>(lyt, params);
 
@@ -1424,7 +1424,7 @@ TEMPLATE_TEST_CASE("13 DBs which are all negatively charged", "[clustercomplete]
 
     lyt.assign_cell_type({30, 15, 0}, TestType::cell_type::NORMAL);
 
-    const clustercomplete_params<TestType> params{sidb_simulation_parameters{3, -0.32}};
+    const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.32}};
 
     const auto simulation_results = clustercomplete<TestType>(lyt, params);
 
@@ -1460,7 +1460,7 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a 3 DB Wire", "[clustercomplet
     lyt.assign_cell_type({29, 0, 0}, TestType::cell_type::NORMAL);
 
     // clustercomplete parameters are initialized
-    clustercomplete_params<TestType> params{sidb_simulation_parameters{3, -0.28}};
+    clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.28}};
 
     SECTION("Standard Physical Parameters")
     {
@@ -1681,7 +1681,7 @@ TEMPLATE_TEST_CASE(
 
     SECTION("Base 2")
     {
-        const clustercomplete_params<TestType> params{sidb_simulation_parameters{2, -0.32, 1.0e-3}};
+        const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{2, -0.32, 1.0e-3}};
 
         const auto simulation_results = clustercomplete<TestType>(lyt, params);
 
@@ -1690,7 +1690,7 @@ TEMPLATE_TEST_CASE(
 
     SECTION("Base 3")
     {
-        const clustercomplete_params<TestType> params{sidb_simulation_parameters{3, -0.32, 1.0e-3}};
+        const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.32, 1.0e-3}};
 
         const auto simulation_results = clustercomplete<TestType>(lyt, params);
 
@@ -1714,7 +1714,7 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of positively charged SiDBs", "[c
     lyt.assign_cell_type({18, 0, 0}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({20, 0, 0}, TestType::cell_type::NORMAL);
 
-    const clustercomplete_params<TestType> params{sidb_simulation_parameters{3, -0.32}};
+    const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.32}};
 
     const auto simulation_results = clustercomplete<TestType>(lyt, params);
 
@@ -1732,7 +1732,7 @@ TEMPLATE_TEST_CASE("Special test cases", "[clustercomplete]", (sidb_100_cell_clk
         lyt.assign_cell_type({1, 1, 1}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({1, 2, 0}, TestType::cell_type::NORMAL);
 
-        const clustercomplete_params<TestType> params{sidb_simulation_parameters{3, -0.32}};
+        const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.32}};
 
         const auto simulation_results = clustercomplete<TestType>(lyt, params);
         CHECK(simulation_results.charge_distributions.size() == 2);
@@ -1762,7 +1762,7 @@ TEMPLATE_TEST_CASE("Special test cases", "[clustercomplete]", (sidb_100_cell_clk
         lyt.assign_cell_type({1, 11, 1}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({17, 11, 1}, TestType::cell_type::NORMAL);
 
-        const clustercomplete_params<TestType> params{sidb_simulation_parameters{3, -0.32}};
+        const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.32}};
 
         const auto simulation_results = clustercomplete<TestType>(lyt, params);
         CHECK(simulation_results.charge_distributions.size() == 21);
@@ -1777,7 +1777,7 @@ TEMPLATE_TEST_CASE("Special test cases", "[clustercomplete]", (sidb_100_cell_clk
         lyt.assign_cell_type({3, 0, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({0, 1, 0}, TestType::cell_type::NORMAL);
 
-        const clustercomplete_params<TestType> params{sidb_simulation_parameters{3, -0.32}};
+        const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.32}};
 
         const auto simulation_results = clustercomplete<TestType>(lyt, params);
         CHECK(simulation_results.charge_distributions.size() == 3);
@@ -1797,7 +1797,7 @@ TEMPLATE_TEST_CASE("Special test cases", "[clustercomplete]", (sidb_100_cell_clk
     //        lyt.assign_cell_type({9, 3, 0}, TestType::cell_type::NORMAL);
     //        lyt.assign_cell_type({2, 4, 0}, TestType::cell_type::NORMAL);
     //
-    //        const clustercomplete_params<TestType> params{sidb_simulation_parameters{3, -0.32}};
+    //        const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.32}};
     //        const quickexact_params<TestType>      paramsqe{sidb_simulation_parameters{3, -0.32}};
     //
     //        const auto simulation_results  = clustercomplete<TestType>(lyt, params);
@@ -1848,7 +1848,7 @@ TEMPLATE_TEST_CASE("Special test cases", "[clustercomplete]", (sidb_100_cell_clk
 
         const sidb_simulation_parameters params{3, -0.32, 5.6, 5.0};
 
-        sidb_simulation_result<TestType> cc_res = clustercomplete(lyt, clustercomplete_params<TestType>{params});
+        sidb_simulation_result<TestType> cc_res = clustercomplete(lyt, clustercomplete_params<cell<TestType>>{params});
 
         std::sort(cc_res.charge_distributions.begin(), cc_res.charge_distributions.end(),
                   [](const auto& lhs, const auto& rhs) { return lhs.get_system_energy() < rhs.get_system_energy(); });
@@ -1929,7 +1929,8 @@ TEMPLATE_TEST_CASE("Special test cases", "[clustercomplete]", (sidb_100_cell_clk
     //
     //        const sidb_simulation_parameters params{2, -0.32};
     //
-    //        sidb_simulation_result<TestType> cc_res = clustercomplete(lyt, clustercomplete_params<TestType>{params});
+    //        sidb_simulation_result<TestType> cc_res = clustercomplete(lyt,
+    //        clustercomplete_params<cell<TestType>>{params});
     //
     //        std::sort(cc_res.charge_distributions.begin(), cc_res.charge_distributions.end(),
     //                  [](const auto& lhs, const auto& rhs) { return lhs.get_system_energy() < rhs.get_system_energy();
@@ -1956,7 +1957,7 @@ TEMPLATE_TEST_CASE("ClusterComplete gate simulation of Si-111 surface", "[cluste
 
     lyt.assign_cell_type({4, 14, 0}, TestType::cell_type::NORMAL);
 
-    const clustercomplete_params<TestType> params{sidb_simulation_parameters{2, -0.32, 5.6, 5}};
+    const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{2, -0.32, 5.6, 5}};
 
     const auto simulation_results = clustercomplete<TestType>(lyt, params);
 
@@ -1980,7 +1981,7 @@ TEMPLATE_TEST_CASE("ClusterComplete AND gate simulation of Si-111 surface", "[cl
     SECTION("no input applied")
     {
         const auto                             lyt = blueprints::and_gate_111<TestType>();
-        const clustercomplete_params<TestType> params{sidb_simulation_parameters{2, -0.32, 5.6, 5}};
+        const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{2, -0.32, 5.6, 5}};
 
         const auto simulation_results = clustercomplete<TestType>(lyt, params);
 
@@ -2020,7 +2021,7 @@ TEMPLATE_TEST_CASE("ClusterComplete AND gate simulation of Si-111 surface", "[cl
         lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::EMPTY);
         lyt.assign_cell_type({23, 1, 1}, TestType::cell_type::EMPTY);
 
-        const clustercomplete_params<TestType> params{sidb_simulation_parameters{2, -0.32, 5.6, 5}};
+        const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{2, -0.32, 5.6, 5}};
 
         const auto simulation_results = clustercomplete<TestType>(lyt, params);
         CHECK(simulation_results.charge_distributions.size() == 7);

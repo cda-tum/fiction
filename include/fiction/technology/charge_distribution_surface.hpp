@@ -321,7 +321,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
         for (const auto& c : strg->sidb_order)
         {
-            auto pos = sidb_nm_position<Lyt>(Lyt{}, c);
+            auto pos = sidb_nm_position<Lyt>(*this, c);
             positions.push_back(std::make_pair(pos.first, pos.second));
         }
 
@@ -343,7 +343,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @param params Physical parameters to be assigned.
      */
-    void assign_physical_parameters(const sidb_simulation_parameters& params) noexcept
+    void assign_simulation_parameters(const sidb_simulation_parameters& params) noexcept
     {
         if ((strg->simulation_parameters.base == params.base) &&
             (strg->simulation_parameters.epsilon_r == params.epsilon_r) &&

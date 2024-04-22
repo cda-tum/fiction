@@ -65,7 +65,8 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         CHECK(critical_stats.critical_temperature == 0.0);
 
 #if (FICTION_ALGLIB_ENABLED)
-        params.engine = sidb_simulation_engine::CLUSTERCOMPLETE;
+        params.simulation_parameters = sim_params;
+        params.engine                = sidb_simulation_engine::CLUSTERCOMPLETE;
 
         critical_temperature_gate_based<TestType>(lyt, std::vector<tt>{tt{}}, params, &critical_stats);
 

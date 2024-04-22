@@ -70,7 +70,7 @@ void charge_distribution_surface_layout(pybind11::module& m, const std::string& 
             { return cds.assign_cell_type(c, ct); },
             "c"_a, "ct"_a)
         .def(
-            "assign_physical_parameters",
+            "assign_simulation_parameters",
             [](py_cds& cds, fiction::sidb_simulation_parameters params)
             { return cds.assign_physical_parameters(params); },
             "params"_a)
