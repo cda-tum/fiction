@@ -332,7 +332,7 @@ class write_sqd_layout_impl
 
                         design << fmt::format(
                             siqad::DEFECT_BLOCK, fmt::format(siqad::LATTICE_COORDINATE, cell.x, cell.y, cell.z),
-                            is_charged_defect(defect) ?
+                            is_charged_defect_type(defect) ?
                                 fmt::format(siqad::COULOMB, defect.charge, defect.epsilon_r, defect.lambda_tf) :
                                 "",
                             get_defect_type_name(defect.type));
@@ -343,7 +343,7 @@ class write_sqd_layout_impl
 
                         design << fmt::format(
                             siqad::DEFECT_BLOCK, fmt::format(siqad::LATTICE_COORDINATE, cell.x, cell.y, cell.z),
-                            is_charged_defect(defect) ?
+                            is_charged_defect_type(defect) ?
                                 fmt::format(siqad::COULOMB, defect.charge, defect.epsilon_r, defect.lambda_tf) :
                                 "",
                             get_defect_type_name(defect.type));

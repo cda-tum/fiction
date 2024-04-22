@@ -24,6 +24,7 @@
 
 namespace fiction
 {
+
 /**
  * This struct stores the parameters for the maximum_defect_influence_position_and_distance algorithm.
  */
@@ -36,7 +37,7 @@ struct maximum_defect_influence_distance_params
     /**
      * Physical simulation parameters.
      */
-    sidb_simulation_parameters physical_params{};
+    sidb_simulation_parameters simulation_parameters{};
     /**
      * The pair describes the width and height of the area around the gate, which is
      * also used to place defects.
@@ -48,6 +49,7 @@ struct maximum_defect_influence_distance_params
 
 namespace detail
 {
+
 /**
  * A class for simulating the maximum influence distance of defects within an SiDB layout.
  *
@@ -73,15 +75,15 @@ class maximum_defect_influence_position_and_distance_impl
 
     std::pair<typename Lyt::cell, double> run() noexcept
     {
-        const quickexact_params<sidb_defect_surface<Lyt>> params_defect{
-            params.physical_params, quickexact_params<sidb_defect_surface<Lyt>>::automatic_base_number_detection::OFF};
+        const quickexact_params<cell<Lyt>> params_defect{
+            params.simulation_parameters, quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
 
         double          avoidance_distance{0};
         coordinate<Lyt> max_defect_position{};
 
-        const auto simulation_results =
-            quickexact(layout, quickexact_params<Lyt>{params.physical_params,
-                                                      quickexact_params<Lyt>::automatic_base_number_detection::OFF});
+        const auto simulation_results = quickexact(
+            layout, quickexact_params<cell<Lyt>>{params.simulation_parameters,
+                                                 quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF});
 
         const auto min_energy = minimum_energy(simulation_results.charge_distributions.cbegin(),
                                                simulation_results.charge_distributions.cend());
@@ -138,9 +140,10 @@ class maximum_defect_influence_position_and_distance_impl
                     layout.foreach_cell(
                         [this, &defect, &distance](const auto& cell)
                         {
-                            if (sidb_nanometer_distance<Lyt>(cell, defect) < distance)
+                            const auto current_distance = sidb_nm_distance(layout, cell, defect);
+                            if (current_distance < distance)
                             {
-                                distance = sidb_nanometer_distance<Lyt>(cell, defect);
+                                distance = current_distance;
                             }
                         });
 
@@ -210,7 +213,7 @@ class maximum_defect_influence_position_and_distance_impl
  * defect can still affect the layout's ground state, potentially altering its behavior, such as gate functionality.
  *
  * @param lyt The SiDB cell-level layout for which the influence distance is being determined.
- * @param sim_params Parameters used to calculate the defect's maximum influence distance.
+ * @param params Parameters used to calculate the defect's maximum influence distance.
  * @return Pair with the first element describing the position with maximum distance to the layout where a placed defect
  * can still affect the ground state of the layout. The second entry describes the distance of the defect from the
  * layout.
@@ -218,14 +221,14 @@ class maximum_defect_influence_position_and_distance_impl
 template <typename Lyt>
 std::pair<typename Lyt::cell, double>
 maximum_defect_influence_position_and_distance(const Lyt&                                      lyt,
-                                               const maximum_defect_influence_distance_params& sim_params = {})
+                                               const maximum_defect_influence_distance_params& params = {})
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(!has_offset_ucoord_v<Lyt>, "Lyt cannot be based on offset coordinates");
     static_assert(!is_charge_distribution_surface_v<Lyt>, "Lyt cannot be a charge distribution surface");
 
-    detail::maximum_defect_influence_position_and_distance_impl<Lyt> p{lyt, sim_params};
+    detail::maximum_defect_influence_position_and_distance_impl<Lyt> p{lyt, params};
 
     return p.run();
 }

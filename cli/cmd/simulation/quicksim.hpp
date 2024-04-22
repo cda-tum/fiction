@@ -47,7 +47,7 @@ class quicksim_command : public command
                    true);
         add_option("--lambda_tf,-l", physical_params.lambda_tf, "Thomas-Fermi screening distance (unit: nm)", true);
         add_option("--mu_minus,-m", physical_params.mu_minus, "Energy transition level (0/-) (unit: eV)", true);
-        add_option("--iterations,-i", params.interation_steps, "Number of iterations to run the simulation for", true);
+        add_option("--iterations,-i", params.iteration_steps, "Number of iterations to run the simulation for", true);
         add_option("--alpha,-a", params.alpha,
                    "alpha parameter (should be reduced if not charge distribution can be determined)", true);
     }
@@ -59,9 +59,10 @@ class quicksim_command : public command
     void execute() override
     {
         // reset sim result
-        sim_result_100 = {};
-        sim_result_111 = {};
-        min_energy     = std::numeric_limits<double>::infinity();
+        sim_result_100      = {};
+        sim_result_111      = {};
+        min_energy          = std::numeric_limits<double>::infinity();
+        is_sidb_100_lattice = true;
 
         if (physical_params.epsilon_r <= 0)
         {
@@ -109,15 +110,17 @@ class quicksim_command : public command
                 }
                 else
                 {
-                    params.phys_params = physical_params;
+                    params.simulation_parameters = physical_params;
 
                     if constexpr (fiction::is_sidb_lattice_100_v<Lyt>)
                     {
-                        sim_result_100 = fiction::quicksim(*lyt_ptr, params);
+                        is_sidb_100_lattice = true;
+                        sim_result_100      = fiction::quicksim(*lyt_ptr, params);
                     }
                     else if constexpr (fiction::is_sidb_lattice_111_v<Lyt>)
                     {
-                        sim_result_111 = fiction::quicksim(*lyt_ptr, params);
+                        is_sidb_100_lattice = false;
+                        sim_result_111      = fiction::quicksim(*lyt_ptr, params);
                     }
 
                     else
@@ -190,6 +193,8 @@ class quicksim_command : public command
      */
     double min_energy{std::numeric_limits<double>::infinity()};
 
+    bool is_sidb_100_lattice = true;
+
     /**
      * Logs the resulting information in a log file.
      *
@@ -199,18 +204,33 @@ class quicksim_command : public command
     {
         try
         {
+            if (is_sidb_100_lattice)
+            {
+                return nlohmann::json{
+                    {"Algorithm name", sim_result_100.algorithm_name},
+                    {"Simulation runtime", sim_result_100.simulation_runtime.count()},
+                    {"Physical parameters",
+                     {{"epsilon_r", sim_result_100.simulation_parameters.epsilon_r},
+                      {"lambda_tf", sim_result_100.simulation_parameters.lambda_tf},
+                      {"mu_minus", sim_result_100.simulation_parameters.mu_minus}}},
+                    {"Lowest state energy (eV)", min_energy},
+                    {"Number of stable states", sim_result_100.charge_distributions.size()},
+                    {"Iteration steps",
+                     std::any_cast<uint64_t>(sim_result_100.additional_simulation_parameters.at("iteration_steps"))},
+                    {"alpha", std::any_cast<double>(sim_result_100.additional_simulation_parameters.at("alpha"))}};
+            }
             return nlohmann::json{
-                {"Algorithm name", sim_result_100.algorithm_name},
-                {"Simulation runtime", sim_result_100.simulation_runtime.count()},
+                {"Algorithm name", sim_result_111.algorithm_name},
+                {"Simulation runtime", sim_result_111.simulation_runtime.count()},
                 {"Physical parameters",
-                 {{"epsilon_r", sim_result_100.physical_parameters.epsilon_r},
-                  {"lambda_tf", sim_result_100.physical_parameters.lambda_tf},
-                  {"mu_minus", sim_result_100.physical_parameters.mu_minus}}},
+                 {{"epsilon_r", sim_result_111.simulation_parameters.epsilon_r},
+                  {"lambda_tf", sim_result_111.simulation_parameters.lambda_tf},
+                  {"mu_minus", sim_result_111.simulation_parameters.mu_minus}}},
                 {"Lowest state energy (eV)", min_energy},
-                {"Number of stable states", sim_result_100.charge_distributions.size()},
+                {"Number of stable states", sim_result_111.charge_distributions.size()},
                 {"Iteration steps",
-                 std::any_cast<uint64_t>(sim_result_100.additional_simulation_parameters.at("iteration_steps"))},
-                {"alpha", std::any_cast<double>(sim_result_100.additional_simulation_parameters.at("alpha"))}};
+                 std::any_cast<uint64_t>(sim_result_111.additional_simulation_parameters.at("iteration_steps"))},
+                {"alpha", std::any_cast<double>(sim_result_111.additional_simulation_parameters.at("alpha"))}};
         }
         catch (...)
         {

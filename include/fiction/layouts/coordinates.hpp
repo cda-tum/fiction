@@ -35,8 +35,8 @@ namespace offset
 /**
  * Unsigned offset coordinates.
  *
- * The implementation is optimized for memory-efficiency and fits within 64 bits. Coordinates span from \f$ (0, 0, 0)
- * \f$ to \f$ (2^{31} - 1, 2^{31} - 1, 1) \f$. Each coordinate has a dead indicator `d` that can be used to represent
+ * This implementation is optimized for memory-efficiency and fits within 64 bits. Coordinates span from \f$(0, 0, 0)\f$
+ * to \f$(2^{31} - 1, 2^{31} - 1, 1)\f$. Each coordinate has a dead indicator `d` that can be used to represent
  * that it is not in use.
  */
 struct ucoord_t
@@ -307,7 +307,9 @@ namespace cube
 /**
  * Signed cube coordinates.
  *
- * Each coordinate has a dead indicator that can be used to represent that it is not in use.
+ * This implementation allows for negative coordinate values and offers a balance between memory consumption and range
+ * of values. Coordinates span from \f$(-2^{31}, -2^{31}, -2^{31})\f$ to \f$(2^{31} - 1, 2^{31} - 1, 2^{31} - 1)\f$.
+ * Each coordinate has a dead indicator `d` that can be used to represent that it is not in use.
  */
 struct coord_t
 {
@@ -550,7 +552,7 @@ namespace siqad
 /**
  * SiQAD coordinates.
  *
- * Coordinates span from \f$ (-2^{31}, -2^{31}, 0) \f$ to \f$ (2^{31} - 1 , 2^{31} - 1, 1) \f$. `x` is the SiDB's
+ * Coordinates span from \f$(-2^{31}, -2^{31}, 0)\f$ to \f$(2^{31} - 1 , 2^{31} - 1, 1)\f$. `x` is the SiDB's
  * x-coordinate, `y` is the dimer pair's row number, and `z` represents the two possible SiDB positions in one SiDB
  * dimer pair. Each coordinate has a dead indicator `d` that can be used to represent that it is not in use.
  */
@@ -810,9 +812,8 @@ constexpr coord_t to_siqad_coord(const CoordinateType& coord) noexcept
 }  // namespace siqad
 
 /**
- * Computes the area of a given coordinate assuming its origin is (0, 0, 0). Calculates \f$ (|x| + 1) \cdot (|y| + 1)
- * \f$ by default. The exception is SiQAD coordinates, for which it computes \f$ (|x| + 1) \cdot (2 \cdot |y| + |z| + 1)
- * \f$.
+ * Computes the area of a given coordinate assuming its origin is (0, 0, 0). Calculates \f$(|x| + 1) \cdot (|y| + 1)\f$
+ * by default. The exception is SiQAD coordinates, for which it computes \f$(|x| + 1) \cdot (2 \cdot |y| + |z| + 1)\f$.
  *
  * @tparam CoordinateType Coordinate type.
  * @param coord Coordinate.
@@ -830,8 +831,8 @@ uint64_t area(const CoordinateType& coord) noexcept
     return (static_cast<uint64_t>(integral_abs(coord.x)) + 1) * (static_cast<uint64_t>(integral_abs(coord.y)) + 1);
 }
 /**
- * Computes the volume of a given coordinate assuming its origin is (0, 0, 0). Calculates \f$ (|x| + 1) \cdot (|y| + 1)
- * \cdot (|z| + 1) \f$ by default. For SiQAD coordinates, which are planar by definition, the area is returned.
+ * Computes the volume of a given coordinate assuming its origin is (0, 0, 0). Calculates \f$(|x| + 1) \cdot (|y| + 1)
+ * \cdot (|z| + 1)\f$ by default. For SiQAD coordinates, which are planar by definition, the area is returned.
  *
  * @tparam CoordinateType Coordinate type.
  * @param coord Coordinate.
