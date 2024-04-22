@@ -47,7 +47,8 @@ struct displacement_robustness_domain
     std::vector<std::pair<Lyt, operational_status>> operational_values{};
 };
 /**
- * Parameters for the `assess_sidb_gate_displacement_robustness` algorithm.
+ * Parameters for the `determine_sidb_gate_displace_robustness_domain` and
+ * `determine_probability_of_fabricating_operational_gate_for_given_error_rate` algorithm.
  *
  * @param Lyt SiDB cell-level layout Type.
  */
@@ -70,11 +71,13 @@ struct sidb_gate_displacement_robustness_params
     };
     displacement_analysis_mode analysis_mode{displacement_analysis_mode::ALL_POSSIBLE_DISPLACEMENTS};
     /**
-     * This parameter defines the percentage of all possible displaced SiDB layouts that are analyzed.
+     * This parameter defines the percentage of all possible displaced SiDB layouts that are analyzed. The default value
+     * is 1.0.
      */
     double percentage_of_analyzed_displaced_layouts{1.0};
     /**
-     * This parameter defines the percentage of all possible misplaced cell combinations that are analyzed.
+     * This parameter defines the percentage of all possible misplaced SiDB combinations that are analyzed. The default
+     * value is 1.0.
      */
     double percentage_of_displaced_sidb_combinations{1.0};
     /**
@@ -153,7 +156,6 @@ class displacement_robustness_domain_impl
         layout.foreach_cell([&](const auto& c) { sidbs_of_the_original_layout.push_back(c); });
         calculate_allowed_displacements_for_each_sidb();
     };
-
     /**
      * This function calculates the robustness domain of the SiDB gate based on the provided truth table specification
      * and displacement robustness computation parameters.
