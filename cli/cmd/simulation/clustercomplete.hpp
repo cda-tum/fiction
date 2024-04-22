@@ -131,7 +131,7 @@ class clustercomplete_command : public command
                     else if constexpr (fiction::is_sidb_lattice_111_v<Lyt>)
                     {
                         is_sidb_100_lattice = false;
-                        sim_result_111      = fiction::clustercomplete(*lyt_ptr, cps);
+                        sim_result_111      = fiction::clustercomplete(*lyt_ptr, params);
                     }
                     else
                     {
