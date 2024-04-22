@@ -966,7 +966,7 @@ struct sidb_cluster
      *
      * @return A shared pointer to the parent of this cluster
      */
-    inline sidb_cluster_ptr get_parent() const
+    inline sidb_cluster_ptr get_parent() const noexcept
     {
         return parent.lock();
     }
@@ -1071,7 +1071,7 @@ get_projector_state_compositions(const sidb_cluster_projector_state& pst) noexce
  * @return A uniquely identified node in a decorated cluster hierarchy that follows the "general tree" structure.
  */
 static sidb_cluster_ptr to_unique_sidb_cluster(const uint64_t total_sidbs, const sidb_binary_cluster_hierarchy_node& n,
-                                               uint64_t& uid)
+                                               uint64_t& uid) noexcept
 {
     sidb_clustering children;
 
@@ -1121,7 +1121,7 @@ static sidb_cluster_ptr to_unique_sidb_cluster(const uint64_t total_sidbs, const
  * @param n A node from a binary cluster hierarchy, as for instance returned by parsing ALGLIB's result.
  * @return A uniquely identified node in a decorated cluster hierarchy that follows the "general tree" structure.
  */
-inline sidb_cluster_ptr to_sidb_cluster(const sidb_binary_cluster_hierarchy_node& n)
+static sidb_cluster_ptr to_sidb_cluster(const sidb_binary_cluster_hierarchy_node& n) noexcept
 {
     uint64_t uid = n.c.size();
 
