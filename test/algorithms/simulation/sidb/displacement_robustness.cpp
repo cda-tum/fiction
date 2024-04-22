@@ -73,8 +73,8 @@ TEST_CASE("Determine the SiDB gate displacement robustness of the Y-shaped SiDB 
             determine_sidb_gate_displace_robustness_domain(lyt, std::vector<tt>{create_and_tt()}, params, &stats);
         CHECK((stats.num_non_operational_sidb_displacements + stats.num_operational_sidb_displacements) <
               static_cast<std::size_t>(std::pow(9, lyt.num_cells() - params.fixed_cells.size())));
-        CHECK(static_cast<double>(robustness_domain.operational_values.size()) <
-              std::pow(9, lyt.num_cells() - params.fixed_cells.size()));
+        CHECK(static_cast<std::size_t>(robustness_domain.operational_values.size()) <
+              static_cast<std::size_t>(std::pow(9, lyt.num_cells() - params.fixed_cells.size())));
         check_identical_information_of_stats_and_domain(robustness_domain, stats);
     }
 }
