@@ -124,13 +124,12 @@ class clustercomplete_command : public command
 
                     if constexpr (fiction::is_sidb_lattice_100_v<Lyt>)
                     {
-                        sidb_111_used  = false;
+                        is_sidb_100_lattice = true;
                         sim_result_100 = fiction::clustercomplete(*lyt_ptr, params);
                     }
                     else if constexpr (fiction::is_sidb_lattice_111_v<Lyt>)
                     {
-                        sidb_111_used  = true;
-                        auto cps       = convert_params<Lyt>(params);
+                        is_sidb_100_lattice = false;
                         sim_result_111 = fiction::clustercomplete(*lyt_ptr, cps);
                     }
                     else
@@ -204,7 +203,7 @@ class clustercomplete_command : public command
     /**
      * Flag to determine the SiDB lattice used for the simulation when logging
      */
-    bool sidb_111_used = false;
+    bool is_sidb_100_lattice = true;
     /**
      * Logs the resulting information in a log file.
      *
@@ -214,48 +213,33 @@ class clustercomplete_command : public command
     {
         try
         {
-            if (sidb_111_used)
+            if (is_sidb_100_lattice)
             {
                 return nlohmann::json{
-                    {"Algorithm name", sim_result_111.algorithm_name},
-                    {"Simulation runtime", sim_result_111.simulation_runtime.count()},
-                    {{"Simulation parameters",
-                      {"Physical parameters",
-                       {{"base", sim_result_111.physical_parameters.base},
-                        {"epsilon_r", sim_result_111.physical_parameters.epsilon_r},
-                        {"lambda_tf", sim_result_111.physical_parameters.lambda_tf},
-                        {"mu_minus", sim_result_111.physical_parameters.mu_minus},
-                        {"global_potential", std::any_cast<double>(sim_result_111.additional_simulation_parameters.at(
-                                                 "global_potential"))}}},
-                      {"validity witness partitioning limit",
-                       std::any_cast<uint64_t>(
-                           sim_result_111.additional_simulation_parameters.at("validity_witness_partitioning_limit"))},
-                      {"number of overlapping witnesses limit",
-                       std::any_cast<uint64_t>(
-                           sim_result_111.additional_simulation_parameters.at("num_overlapping_witnesses_limit"))}}},
-                    {"Ground state energy (eV)", min_energy},
-                    {"Number of stable states", sim_result_111.charge_distributions.size()}};
+                    {"Algorithm name", sim_result_100.algorithm_name},
+                    {"Simulation runtime", sim_result_100.simulation_runtime.count()},
+                    {"Physical parameters",
+                     {{"epsilon_r", sim_result_100.simulation_parameters.epsilon_r},
+                      {"lambda_tf", sim_result_100.simulation_parameters.lambda_tf},
+                      {"mu_minus", sim_result_100.simulation_parameters.mu_minus}}},
+                    {"Lowest state energy (eV)", min_energy},
+                    {"Number of stable states", sim_result_100.charge_distributions.size()},
+                    {"Iteration steps",
+                     std::any_cast<uint64_t>(sim_result_100.additional_simulation_parameters.at("iteration_steps"))},
+                    {"alpha", std::any_cast<double>(sim_result_100.additional_simulation_parameters.at("alpha"))}};
             }
-
             return nlohmann::json{
-                {"Algorithm name", sim_result_100.algorithm_name},
-                {"Simulation runtime", sim_result_100.simulation_runtime.count()},
-                {{"Simulation parameters",
-                  {"Physical parameters",
-                   {{"base", sim_result_100.physical_parameters.base},
-                    {"epsilon_r", sim_result_100.physical_parameters.epsilon_r},
-                    {"lambda_tf", sim_result_100.physical_parameters.lambda_tf},
-                    {"mu_minus", sim_result_100.physical_parameters.mu_minus},
-                    {"global_potential",
-                     std::any_cast<double>(sim_result_100.additional_simulation_parameters.at("global_potential"))}}},
-                  {"validity witness partitioning limit",
-                   std::any_cast<uint64_t>(
-                       sim_result_100.additional_simulation_parameters.at("validity_witness_partitioning_limit"))},
-                  {"number of overlapping witnesses limit",
-                   std::any_cast<uint64_t>(
-                       sim_result_100.additional_simulation_parameters.at("num_overlapping_witnesses_limit"))}}},
-                {"Ground state energy (eV)", min_energy},
-                {"Number of stable states", sim_result_100.charge_distributions.size()}};
+                {"Algorithm name", sim_result_111.algorithm_name},
+                {"Simulation runtime", sim_result_111.simulation_runtime.count()},
+                {"Physical parameters",
+                 {{"epsilon_r", sim_result_111.simulation_parameters.epsilon_r},
+                  {"lambda_tf", sim_result_111.simulation_parameters.lambda_tf},
+                  {"mu_minus", sim_result_111.simulation_parameters.mu_minus}}},
+                {"Lowest state energy (eV)", min_energy},
+                {"Number of stable states", sim_result_111.charge_distributions.size()},
+                {"Iteration steps",
+                 std::any_cast<uint64_t>(sim_result_111.additional_simulation_parameters.at("iteration_steps"))},
+                {"alpha", std::any_cast<double>(sim_result_111.additional_simulation_parameters.at("alpha"))}};
         }
         catch (...)
         {
@@ -271,18 +255,6 @@ class clustercomplete_command : public command
         params          = {};
         sim_result_100  = {};
         sim_result_111  = {};
-    }
-
-    template <typename LytDest, typename LytSrc>
-    [[nodiscard]] fiction::clustercomplete_params<LytDest>
-    convert_params(const fiction::clustercomplete_params<LytSrc>& ps_src) const noexcept
-    {
-        fiction::clustercomplete_params<LytDest> ps_dest{};
-
-        ps_dest.physical_parameters = ps_src.physical_parameters;
-        ps_dest.global_potential    = ps_src.global_potential;
-
-        return ps_dest;
     }
 };
 
