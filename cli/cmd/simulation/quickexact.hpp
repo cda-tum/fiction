@@ -101,16 +101,16 @@ class quickexact_command : public command
                 }
                 else
                 {
+                    params.simulation_parameters = physical_params;
+                  
                     if constexpr (fiction::is_sidb_lattice_100_v<Lyt>)
                     {
                         is_sidb_100_lattice          = true;
-                        params.simulation_parameters = physical_params;
                         sim_result_100               = fiction::quickexact(*lyt_ptr, params);
                     }
                     else if constexpr (fiction::is_sidb_lattice_111_v<Lyt>)
                     {
                         is_sidb_100_lattice          = false;
-                        params.simulation_parameters = physical_params;
                         sim_result_111               = fiction::quickexact(*lyt_ptr, params);
                     }
                     else
@@ -181,9 +181,10 @@ class quickexact_command : public command
      * Minimum energy.
      */
     double min_energy{std::numeric_limits<double>::infinity()};
-
+    /**
+     * Flag to determine the SiDB lattice used for the simulation when logging.
+     */
     bool is_sidb_100_lattice = true;
-
     /**
      * Logs the resulting information in a log file.
      *
