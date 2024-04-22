@@ -36,7 +36,7 @@ TEST_CASE("Several tests", "[check-equivalence-simulation-result]")
         CHECK(check_simulation_results_for_equivalence(results1, results2));
     }
 
-    SECTION("non-equivalence of cds with different charge states")
+    SECTION("non-equivalence with respect to cds with different charge states")
     {
         cds1.assign_charge_state({0, 0}, sidb_charge_state::POSITIVE);
         results1.charge_distributions = {cds1, cds2};
