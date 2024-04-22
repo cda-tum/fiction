@@ -16,7 +16,7 @@ exclude: "^libs/|^benchmarks/"
 repos:
   # Standard hooks
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v4.6.0
     hooks:
       - id: check-added-large-files
       - id: check-case-conflict
@@ -31,7 +31,7 @@ repos:
 
   # Handle unwanted unicode characters
   - repo: https://github.com/sirosen/texthooks
-    rev: 0.6.2
+    rev: 0.6.6
     hooks:
       - id: fix-ligatures
       - id: fix-smartquotes
@@ -46,7 +46,7 @@ repos:
 
   # clang-format the C++ part of the code base
   - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v17.0.4
+    rev: v18.1.4
     hooks:
       - id: clang-format
         types_or: [ c++, c ]
