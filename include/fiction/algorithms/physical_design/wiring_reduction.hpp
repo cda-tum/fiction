@@ -1039,7 +1039,7 @@ class wiring_reduction_impl
             static_cast<double>(area_before - area_after) / static_cast<double>(area_before) * 100.0;
         area_percentage_difference          = std::round(area_percentage_difference * 100) / 100;
         pst.area_improvement                = area_percentage_difference;
-        pst.num_wires_after               = plyt.num_wires() - plyt.num_pis() - plyt.num_pos();
+        pst.num_wires_after                 = plyt.num_wires() - plyt.num_pis() - plyt.num_pos();
         double wiring_percentage_difference = static_cast<double>(pst.num_wires_before - pst.num_wires_after) /
                                               static_cast<double>(pst.num_wires_before) * 100.0;
         wiring_percentage_difference = std::round(wiring_percentage_difference * 100) / 100;
