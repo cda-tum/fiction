@@ -1035,15 +1035,15 @@ class wiring_reduction_impl
         pst.y_size_after           = plyt.y() + 1;
         const uint64_t area_before = pst.x_size_before * pst.y_size_before;
         const uint64_t area_after  = pst.x_size_after * pst.y_size_after;
-        double_t       wiring_percentage_difference =
+        double_t       area_percentage_difference =
             static_cast<double>(area_before - area_after) / static_cast<double>(area_before) * 100.0;
-        wiring_percentage_difference      = std::round(wiring_percentage_difference * 100) / 100;
-        pst.wiring_improvement            = wiring_percentage_difference;
+        area_percentage_difference          = std::round(area_percentage_difference * 100) / 100;
+        pst.area_improvement                = area_percentage_difference;
         pst.num_wires_after               = plyt.num_wires() - plyt.num_pis() - plyt.num_pos();
-        double area_percentage_difference = static_cast<double>(pst.num_wires_before - pst.num_wires_after) /
-                                            static_cast<double>(pst.num_wires_before) * 100.0;
-        area_percentage_difference = std::round(area_percentage_difference * 100) / 100;
-        pst.area_improvement       = area_percentage_difference;
+        double wiring_percentage_difference = static_cast<double>(pst.num_wires_before - pst.num_wires_after) /
+                                              static_cast<double>(pst.num_wires_before) * 100.0;
+        wiring_percentage_difference = std::round(wiring_percentage_difference * 100) / 100;
+        pst.wiring_improvement       = wiring_percentage_difference;
     }
 
   private:
