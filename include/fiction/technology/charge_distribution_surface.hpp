@@ -1740,9 +1740,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * exhaustive_sidb_simulation_engine::QUICKEXACT for `QuickExact`.
      */
     void increase_charge_index_of_sub_layout_by_one(
-        const dependent_cell_mode               dep_cell    = dependent_cell_mode::FIXED,
+        const dependent_cell_mode               dep_cell         = dependent_cell_mode::FIXED,
         const energy_calculation                energy_calc_mode = energy_calculation::UPDATE_ENERGY,
-        const charge_distribution_history       history_mode        = charge_distribution_history::NEGLECT,
+        const charge_distribution_history       history_mode     = charge_distribution_history::NEGLECT,
         const exhaustive_sidb_simulation_engine engine = exhaustive_sidb_simulation_engine::QUICKEXACT) noexcept
     {
         if (strg->charge_index_sublayout < strg->max_charge_index_sulayout)

@@ -143,8 +143,8 @@ class critical_temperature_impl
 
     {
         stats.simulation_parameters = params.simulation_parameters;
-        stats.algorithm_name       = sidb_simulation_engine_name(params.engine);
-        stats.critical_temperature = params.max_temperature;
+        stats.algorithm_name        = sidb_simulation_engine_name(params.engine);
+        stats.critical_temperature  = params.max_temperature;
     }
 
     /**
@@ -414,7 +414,8 @@ class critical_temperature_impl
 
             // perform QuickExact simulation
             const quickexact_params<cell<Lyt>> qe_params{
-                params.simulation_parameters, fiction::quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
+                params.simulation_parameters,
+                fiction::quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
             return quickexact(*bdl_iterator, qe_params);
         }
 

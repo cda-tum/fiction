@@ -1980,7 +1980,7 @@ TEMPLATE_TEST_CASE("ClusterComplete AND gate simulation of Si-111 surface", "[cl
 {
     SECTION("no input applied")
     {
-        const auto                             lyt = blueprints::and_gate_111<TestType>();
+        const auto                                   lyt = blueprints::and_gate_111<TestType>();
         const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{2, -0.32, 5.6, 5}};
 
         const auto simulation_results = clustercomplete<TestType>(lyt, params);
