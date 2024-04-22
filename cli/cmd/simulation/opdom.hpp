@@ -229,7 +229,7 @@ class opdom_command : public command
 
                 params.sim_engine = get_sim_engine();
 
-                params.sim_params = simulation_params;
+                params.simulation_parameters = simulation_params;
 
                 if (is_set("random_sampling"))
                 {
