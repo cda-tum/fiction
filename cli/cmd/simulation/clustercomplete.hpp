@@ -10,6 +10,7 @@
 #include <fiction/algorithms/simulation/sidb/clustercomplete.hpp>
 #include <fiction/algorithms/simulation/sidb/minimum_energy.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
+#include <fiction/layouts/coordinates.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/layout_utils.hpp>
@@ -187,7 +188,7 @@ class clustercomplete_command : public command
     /**
      * ClusterComplete parameters.
      */
-    fiction::clustercomplete_params<fiction::sidb_100_cell_clk_lyt> params{};
+    fiction::clustercomplete_params<fiction::offset::ucoord_t> params{};
     /**
      * Simulation result for H-Si(100)-2x1 surface.
      */
