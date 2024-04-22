@@ -201,7 +201,7 @@ class clustercomplete_command : public command
      */
     double min_energy{std::numeric_limits<double>::infinity()};
     /**
-     * Flag to determine the SiDB lattice used for the simulation when logging
+     * Flag to determine the SiDB lattice used for the simulation when logging.
      */
     bool is_sidb_100_lattice = true;
     /**
