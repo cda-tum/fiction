@@ -3,11 +3,13 @@
 [![Ubuntu CI](https://img.shields.io/github/actions/workflow/status/cda-tum/fiction/ubuntu.yml?label=Ubuntu&logo=ubuntu&style=flat-square)](https://github.com/cda-tum/fiction/actions/workflows/ubuntu.yml)
 [![macOS CI](https://img.shields.io/github/actions/workflow/status/cda-tum/fiction/macos.yml?label=macOS&logo=apple&style=flat-square)](https://github.com/cda-tum/fiction/actions/workflows/macos.yml)
 [![Windows CI](https://img.shields.io/github/actions/workflow/status/cda-tum/fiction/windows.yml?label=Windows&logo=windows&style=flat-square)](https://github.com/cda-tum/fiction/actions/workflows/windows.yml)
-[![CodeQL](https://img.shields.io/github/actions/workflow/status/cda-tum/fiction/codeql-analysis.yml?label=CodeQL&logo=github&style=flat-square)](https://github.com/cda-tum/fiction/actions/workflows/codeql-analysis.yml)
+[![Python Bindings](https://img.shields.io/github/actions/workflow/status/cda-tum/fiction/python-bindings.yml?label=Bindings&logo=python&style=flat-square)](https://github.com/cda-tum/fiction/actions/workflows/python-bindings.yml)
 [![Docker Image](https://img.shields.io/github/actions/workflow/status/cda-tum/fiction/docker-image.yml?label=Docker&logo=docker&style=flat-square)](https://github.com/cda-tum/fiction/actions/workflows/docker-image.yml)
+[![CodeQL](https://img.shields.io/github/actions/workflow/status/cda-tum/fiction/codeql-analysis.yml?label=CodeQL&logo=github&style=flat-square)](https://github.com/cda-tum/fiction/actions/workflows/codeql-analysis.yml)
 [![Documentation Status](https://img.shields.io/readthedocs/fiction?label=Docs&logo=readthedocs&style=flat-square)](https://fiction.readthedocs.io/)
 [![codecov](https://img.shields.io/codecov/c/github/cda-tum/fiction?label=Coverage&logo=codecov&style=flat-square)](https://codecov.io/gh/cda-tum/fiction)
 [![License](https://img.shields.io/github/license/cda-tum/fiction?label=License&style=flat-square)](https://github.com/cda-tum/fiction/blob/main/LICENSE.txt)
+[![PyPI](https://img.shields.io/static/v1?label=PyPI&message=mnt.pyfiction&logo=pypi&color=informational&style=flat-square)](https://pypi.org/project/mnt.pyfiction/)
 [![Release](https://img.shields.io/github/v/release/cda-tum/fiction?label=fiction&style=flat-square)](https://github.com/cda-tum/fiction/releases)
 [![arXiv](https://img.shields.io/static/v1?label=arXiv&message=1905.02477&color=informational&style=flat-square)](https://arxiv.org/abs/1905.02477)
 
@@ -29,8 +31,9 @@ technology or cell design. Using an extensible set of gate libraries, technologi
 be compiled down to any desired FCN technology for physical simulation.
 
 For these use cases, *fiction* provides
-a [header-only library](https://fiction.readthedocs.io/en/latest/getting_started.html#using-fiction-as-a-header-only-library)
-that provides data types and algorithms for recurring tasks, e.g., logic network and layout types on different
+a [C++ header-only library](https://fiction.readthedocs.io/en/latest/getting_started.html#using-fiction-as-a-header-only-library)
+as well as [Python bindings](https://fiction.readthedocs.io/en/latest/getting_started.html#python-bindings)
+that provide data types and algorithms for recurring tasks, e.g., logic network and layout types on different
 abstraction levels, clocking schemes, gate libraries, design automation algorithms, etc. Additionally, *fiction* comes
 with an ABC-like
 [CLI tool](https://fiction.readthedocs.io/en/latest/getting_started.html#using-fiction-as-a-stand-alone-cli-tool)
@@ -46,7 +49,7 @@ that allows quick access to its core functionality.
 If you have any questions, feel free to contact us via [nanotech.cda@xcit.tum.de](mailto:nanotech.cda@xcit.tum.de) or by
 creating an [issue on GitHub](https://github.com/cda-tum/fiction/issues).
 
-## Quick Start
+## Quick Start (C++)
 
 > Clone the repository and its submodules:
 
@@ -93,6 +96,20 @@ target_link_libraries(fanfiction libfiction)
 #include <fiction/technology/qca_one_library.hpp>
 #include <fiction/io/write_qca_layout.hpp>
 #include <fiction/...>
+```
+
+## Quick Start (Python)
+
+> Install the Python bindings from [PyPI](https://pypi.org/project/mnt.pyfiction/):
+
+```bash
+pip install mnt.pyfiction
+```
+
+> Import the bindings:
+
+```python
+from mnt import pyfiction
 ```
 
 For a full getting started guide, please refer to

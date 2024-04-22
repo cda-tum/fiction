@@ -130,3 +130,56 @@ TEMPLATE_TEST_CASE("time to solution test", "[time-to-solution]", (sidb_100_cell
 #endif  // FICTION_ALGLIB_ENABLED
     }
 }
+
+TEMPLATE_TEST_CASE("time to solution test, using offset coordinates", "[time-to-solution]",
+                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>),
+                   (charge_distribution_surface<
+                       cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>))
+{
+
+    TestType lyt{};
+
+    SECTION("layout with seven SiDBs placed")
+    {
+        lyt.assign_cell_type({1, 6, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({3, 6, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({5, 6, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({7, 6, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({10, 6, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({12, 6, 0}, TestType::cell_type::NORMAL);
+
+        const sidb_simulation_parameters params{3, -0.32};
+        const quicksim_params            quicksim_params{params};
+
+        const time_to_solution_params tts_params_exgs{exhaustive_sidb_simulation_engine::EXGS};
+        time_to_solution_stats        tts_stat_exgs{};
+        time_to_solution<TestType>(lyt, quicksim_params, tts_params_exgs, &tts_stat_exgs);
+
+        CHECK(tts_stat_exgs.acc == 100);
+        CHECK(tts_stat_exgs.time_to_solution > 0.0);
+        CHECK(tts_stat_exgs.mean_single_runtime > 0.0);
+
+        time_to_solution_stats        tts_stat_quickexact{};
+        const time_to_solution_params tts_params{exhaustive_sidb_simulation_engine::QUICKEXACT};
+        time_to_solution<TestType>(lyt, quicksim_params, tts_params, &tts_stat_quickexact);
+
+        REQUIRE(tts_stat_quickexact.acc == 100);
+        CHECK(tts_stat_quickexact.time_to_solution > 0.0);
+        CHECK(tts_stat_quickexact.mean_single_runtime > 0.0);
+
+        // calculate tts manually.
+        double tts_calculated = 0.0;
+
+        if (tts_stat_quickexact.acc == 100)
+        {
+            tts_calculated = tts_stat_quickexact.mean_single_runtime;
+        }
+        else
+        {
+            tts_calculated = (tts_stat_quickexact.mean_single_runtime * std::log(1.0 - tts_params.confidence_level) /
+                              std::log(1.0 - tts_stat_quickexact.acc));
+        }
+        CHECK_THAT(tts_stat_quickexact.time_to_solution - tts_calculated,
+                   Catch::Matchers::WithinAbs(0.0, physical_constants::POP_STABILITY_ERR));
+    }
+}

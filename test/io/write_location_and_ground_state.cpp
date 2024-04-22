@@ -7,6 +7,7 @@
 #include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/io/write_location_and_ground_state.hpp>
+#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
@@ -33,7 +34,13 @@ bool compare_output(const std::string& output, const std::string& expected)
     return clean_output == clean_expected;
 }
 
-TEST_CASE("writes expected output", "[write_txt_sim_result]")
+TEMPLATE_TEST_CASE(
+    "writes expected output", "[write_txt_sim_result]",
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
+    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
+    (charge_distribution_surface<
+        cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>))
 {
     lattice lyt{};
 

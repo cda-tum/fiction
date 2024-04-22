@@ -154,6 +154,7 @@ target_link_system_libraries(libfiction INTERFACE graph-coloring)
 set(tinyxml2_BUILD_TESTING OFF)
 check_if_present(tinyxml2)
 add_subdirectory(tinyxml2 EXCLUDE_FROM_ALL)
+set_property(TARGET tinyxml2 PROPERTY POSITION_INDEPENDENT_CODE ON)
 target_link_system_libraries(libfiction INTERFACE tinyxml2::tinyxml2)
 
 # Enable the usage of ALGLIB

@@ -16,6 +16,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -717,7 +718,7 @@ class write_qca_layout_svg_impl
 
 /**
  * Writes an SVG representation of a cell-level QCA layout into an output stream. Both tile- and cell-based layouts are
- * supported. For tile-based layouts, QCA layouts of tile size \f$ 5 \times 5 \f$ are supported exclusively so far.
+ * supported. For tile-based layouts, QCA layouts of tile size \f$5 \times 5\f$ are supported exclusively so far.
  *
  * The utilized color scheme is based on the standard scheme used in QCADesigner
  * (https://waluslab.ece.ubc.ca/qcadesigner/).
@@ -742,7 +743,7 @@ void write_qca_layout_svg(const Lyt& lyt, std::ostream& os, write_qca_layout_svg
 }
 /**
  * Writes an SVG representation of a cell-level QCA layout into a file. Both tile- and cell-based layouts are supported.
- * For tile-based layouts, QCA layouts of tile size \f$ 5 \times 5 \f$ are supported exclusively so far.
+ * For tile-based layouts, QCA layouts of tile size \f$5 \times 5\f$ are supported exclusively so far.
  *
  * The utilized color scheme is based on the standard scheme used in QCADesigner
  * (https://waluslab.ece.ubc.ca/qcadesigner/).
@@ -755,9 +756,15 @@ void write_qca_layout_svg(const Lyt& lyt, std::ostream& os, write_qca_layout_svg
  * @param ps Parameters.
  */
 template <typename Lyt>
-void write_qca_layout_svg(const Lyt& lyt, const std::string& filename, write_qca_layout_svg_params ps = {})
+void write_qca_layout_svg(const Lyt& lyt, const std::string_view& filename, write_qca_layout_svg_params ps = {})
 {
-    std::ofstream os{filename.c_str(), std::ofstream::out};
+    std::ofstream os{filename.data(), std::ofstream::out};
+
+    if (!os.is_open())
+    {
+        throw std::ofstream::failure("could not open file");
+    }
+
     write_qca_layout_svg(lyt, os, ps);
     os.close();
 }

@@ -57,9 +57,10 @@ class quickexact_command : public command
     void execute() override
     {
         // reset sim result
-        sim_result_100 = {};
-        sim_result_111 = {};
-        min_energy     = std::numeric_limits<double>::infinity();
+        sim_result_100      = {};
+        sim_result_111      = {};
+        min_energy          = std::numeric_limits<double>::infinity();
+        is_sidb_100_lattice = true;
 
         if (physical_params.epsilon_r <= 0)
         {
@@ -100,18 +101,17 @@ class quickexact_command : public command
                 }
                 else
                 {
-                    params.physical_parameters = physical_params;
-
                     if constexpr (fiction::is_sidb_lattice_100_v<Lyt>)
                     {
-                        sidb_111_used  = false;
-                        sim_result_100 = fiction::quickexact(*lyt_ptr, params);
+                        is_sidb_100_lattice          = true;
+                        params.simulation_parameters = physical_params;
+                        sim_result_100               = fiction::quickexact(*lyt_ptr, params);
                     }
                     else if constexpr (fiction::is_sidb_lattice_111_v<Lyt>)
                     {
-                        sidb_111_used  = true;
-                        auto cps       = convert_params<Lyt>(params);
-                        sim_result_111 = fiction::quickexact(*lyt_ptr, cps);
+                        is_sidb_100_lattice          = false;
+                        params.simulation_parameters = physical_params;
+                        sim_result_111               = fiction::quickexact(*lyt_ptr, params);
                     }
                     else
                     {
@@ -168,7 +168,7 @@ class quickexact_command : public command
     /**
      * QuickExact parameters.
      */
-    fiction::quickexact_params<fiction::sidb_100_cell_clk_lyt> params{};
+    fiction::quickexact_params<fiction::offset::ucoord_t> params{};
     /**
      * Simulation result for H-Si(100)-2x1 surface.
      */
@@ -181,10 +181,9 @@ class quickexact_command : public command
      * Minimum energy.
      */
     double min_energy{std::numeric_limits<double>::infinity()};
-    /**
-     * Flag to determine the SiDB lattice used for the simulation when logging.
-     */
-    bool sidb_111_used = false;
+
+    bool is_sidb_100_lattice = true;
+
     /**
      * Logs the resulting information in a log file.
      *
@@ -194,42 +193,40 @@ class quickexact_command : public command
     {
         try
         {
-            if (sidb_111_used)
+            if (is_sidb_100_lattice)
             {
                 return nlohmann::json{
-                    {"Algorithm name", sim_result_111.algorithm_name},
-                    {"Simulation runtime", sim_result_111.simulation_runtime.count()},
+                    {"Algorithm name", sim_result_100.algorithm_name},
+                    {"Simulation runtime", sim_result_100.simulation_runtime.count()},
                     {"Physical parameters",
-                     {{"base", std::any_cast<uint64_t>(sim_result_111.additional_simulation_parameters.at(
-                                   "base_number"))},  // fetch the automatically inferred base number
-                      {"epsilon_r", sim_result_111.physical_parameters.epsilon_r},
-                      {"lambda_tf", sim_result_111.physical_parameters.lambda_tf},
-                      {"mu_minus", sim_result_111.physical_parameters.mu_minus},
-                      {"global_potential",
-                       std::any_cast<double>(sim_result_111.additional_simulation_parameters.at("global_potential"))}}},
-                    {"Ground state energy (eV)", min_energy},
-                    {"Number of stable states", sim_result_111.charge_distributions.size()}};
+                     {{"epsilon_r", sim_result_100.simulation_parameters.epsilon_r},
+                      {"lambda_tf", sim_result_100.simulation_parameters.lambda_tf},
+                      {"mu_minus", sim_result_100.simulation_parameters.mu_minus}}},
+                    {"Lowest state energy (eV)", min_energy},
+                    {"Number of stable states", sim_result_100.charge_distributions.size()},
+                    {"Iteration steps",
+                     std::any_cast<uint64_t>(sim_result_100.additional_simulation_parameters.at("iteration_steps"))},
+                    {"alpha", std::any_cast<double>(sim_result_100.additional_simulation_parameters.at("alpha"))}};
             }
-
             return nlohmann::json{
-                {"Algorithm name", sim_result_100.algorithm_name},
-                {"Simulation runtime", sim_result_100.simulation_runtime.count()},
+                {"Algorithm name", sim_result_111.algorithm_name},
+                {"Simulation runtime", sim_result_111.simulation_runtime.count()},
                 {"Physical parameters",
-                 {{"base", std::any_cast<uint64_t>(sim_result_100.additional_simulation_parameters.at(
-                               "base_number"))},  // fetch the automatically inferred base number
-                  {"epsilon_r", sim_result_100.physical_parameters.epsilon_r},
-                  {"lambda_tf", sim_result_100.physical_parameters.lambda_tf},
-                  {"mu_minus", sim_result_100.physical_parameters.mu_minus},
-                  {"global_potential",
-                   std::any_cast<double>(sim_result_100.additional_simulation_parameters.at("global_potential"))}}},
-                {"Ground state energy (eV)", min_energy},
-                {"Number of stable states", sim_result_100.charge_distributions.size()}};
+                 {{"epsilon_r", sim_result_111.simulation_parameters.epsilon_r},
+                  {"lambda_tf", sim_result_111.simulation_parameters.lambda_tf},
+                  {"mu_minus", sim_result_111.simulation_parameters.mu_minus}}},
+                {"Lowest state energy (eV)", min_energy},
+                {"Number of stable states", sim_result_111.charge_distributions.size()},
+                {"Iteration steps",
+                 std::any_cast<uint64_t>(sim_result_111.additional_simulation_parameters.at("iteration_steps"))},
+                {"alpha", std::any_cast<double>(sim_result_111.additional_simulation_parameters.at("alpha"))}};
         }
         catch (...)
         {
             return nlohmann::json{};
         }
     }
+
     /**
      * Resets the parameters to their default values.
      */
@@ -239,18 +236,6 @@ class quickexact_command : public command
         params          = {};
         sim_result_100  = {};
         sim_result_111  = {};
-    }
-
-    template <typename LytDest, typename LytSrc>
-    [[nodiscard]] fiction::quickexact_params<LytDest>
-    convert_params(const fiction::quickexact_params<LytSrc>& ps_src) const noexcept
-    {
-        fiction::quickexact_params<LytDest> ps_dest{};
-
-        ps_dest.physical_parameters = ps_src.physical_parameters;
-        ps_dest.global_potential    = ps_src.global_potential;
-
-        return ps_dest;
     }
 };
 

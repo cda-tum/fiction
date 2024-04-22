@@ -55,7 +55,7 @@ struct is_operational_params
     /**
      * The simulation parameters for the physical simulation of the ground state.
      */
-    sidb_simulation_parameters simulation_parameter{};
+    sidb_simulation_parameters simulation_parameters{};
     /**
      * The simulation engine to be used for the operational domain computation.
      */
@@ -118,7 +118,7 @@ class is_operational_impl
             ++simulator_invocations;
 
             // if positively charged SiDBs can occur, the SiDB layout is considered as non-operational
-            if (can_positive_charges_occur(*bii, parameters.simulation_parameter))
+            if (can_positive_charges_occur(*bii, parameters.simulation_parameters))
             {
                 return operational_status::NON_OPERATIONAL;
             }
@@ -198,7 +198,7 @@ class is_operational_impl
             ++simulator_invocations;
 
             // if positively charged SiDBs can occur, the SiDB layout is considered as non-operational
-            if (can_positive_charges_occur(*bii, parameters.simulation_parameter))
+            if (can_positive_charges_occur(*bii, parameters.simulation_parameters))
             {
                 continue;
             }
@@ -317,14 +317,14 @@ class is_operational_impl
             assert(parameters.simulation_parameter.base == 2 && "base number is set to 3");
 
             // perform an exhaustive ground state simulation
-            return exhaustive_ground_state_simulation(*bdl_iterator, parameters.simulation_parameter);
+            return exhaustive_ground_state_simulation(*bdl_iterator, parameters.simulation_parameters);
         }
         if (parameters.sim_engine == sidb_simulation_engine::QUICKSIM)
         {
             assert(parameters.simulation_parameter.base == 2 && "base number is set to 3");
 
             // perform a heuristic simulation
-            const quicksim_params qs_params{parameters.simulation_parameter, 500, 0.6};
+            const quicksim_params qs_params{parameters.simulation_parameters, 500, 0.6};
             return quicksim(*bdl_iterator, qs_params);
         }
         if (parameters.sim_engine == sidb_simulation_engine::QUICKEXACT)
@@ -332,8 +332,8 @@ class is_operational_impl
             assert(parameters.simulation_parameter.base == 2 && "base number is set to 3");
 
             // perform QuickExact exact simulation
-            const quickexact_params<Lyt> quickexact_params{
-                parameters.simulation_parameter, fiction::quickexact_params<Lyt>::automatic_base_number_detection::OFF};
+            const quickexact_params<cell<Lyt>> quickexact_params{
+                parameters.simulation_parameters, fiction::quickexact_params<Lyt>::automatic_base_number_detection::OFF};
             return quickexact(*bdl_iterator, quickexact_params);
         }
 
@@ -342,7 +342,7 @@ class is_operational_impl
         if (parameters.sim_engine == sidb_simulation_engine::CLUSTERCOMPLETE)
         {
             // perform ClusterComplete exact simulation
-            const clustercomplete_params<Lyt> cc_params{parameters.simulation_parameter};
+            const clustercomplete_params<Lyt> cc_params{parameters.simulation_parameters};
             return clustercomplete(*bdl_iterator, cc_params);
         }
 
@@ -360,7 +360,7 @@ class is_operational_impl
  * Determine the operational status of an SiDB layout.
  *
  * This function checks the operational status of a given gate layout using the `is_operational` algorithm. It
- * determines whether the gate layout is operational and returns the correct result for all \f$ 2^n \f$ input
+ * determines whether the gate layout is operational and returns the correct result for all \f$2^n\f$ input
  * combinations.
  *
  * @tparam Lyt SiDB cell-level layout type.
@@ -379,13 +379,14 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
-    assert(lyt.num_pis() > 0 && "skeleton needs input cells");
-    assert(lyt.num_pos() > 0 && "skeleton needs output cells");
+    assert(lyt.num_pis() > 0 && "lyt needs input cells");
+    assert(lyt.num_pos() > 0 && "lyt needs output cells");
 
     assert(!spec.empty());
     // all elements in tts must have the same number of variables
-    assert(std::adjacent_find(spec.begin(), spec.end(),
-                              [](const auto& a, const auto& b) { return a.num_vars() != b.num_vars(); }) == spec.end());
+    assert(std::adjacent_find(spec.cbegin(), spec.cend(),
+                              [](const auto& a, const auto& b)
+                              { return a.num_vars() != b.num_vars(); }) == spec.cend());
 
     detail::is_operational_impl<Lyt, TT> p{lyt, spec, params};
 

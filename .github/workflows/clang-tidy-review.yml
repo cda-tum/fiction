@@ -41,7 +41,7 @@ jobs:
             -DMOCKTURTLE_EXAMPLES=OFF
           build_dir: build
           config_file: '.clang-tidy'
-          exclude: 'libs/*, docs/*, benchmarks/*, bib/*'
+          exclude: 'libs/*, docs/*, benchmarks/*, bib/*, */pyfiction/pybind11_mkdoc_docstrings.hpp, */pyfiction/documentation.hpp'
           split_workflow: true
 
       - name: Make sure that the review file exists
