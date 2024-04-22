@@ -121,7 +121,7 @@ class clustercomplete_command : public command
                 }
                 else
                 {
-                    params.physical_parameters = physical_params;
+                    params.simulation_parameters = physical_params;
 
                     if constexpr (fiction::is_sidb_lattice_100_v<Lyt>)
                     {
