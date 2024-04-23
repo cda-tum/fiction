@@ -314,14 +314,14 @@ class is_operational_impl
     {
         if (parameters.sim_engine == sidb_simulation_engine::EXGS)
         {
-            assert(parameters.simulation_parameter.base == 2 && "base number is set to 3");
+            assert(parameters.simulation_parameters.base == 2 && "base number is set to 3");
 
             // perform an exhaustive ground state simulation
             return exhaustive_ground_state_simulation(*bdl_iterator, parameters.simulation_parameters);
         }
         if (parameters.sim_engine == sidb_simulation_engine::QUICKSIM)
         {
-            assert(parameters.simulation_parameter.base == 2 && "base number is set to 3");
+            assert(parameters.simulation_parameters.base == 2 && "base number is set to 3");
 
             // perform a heuristic simulation
             const quicksim_params qs_params{parameters.simulation_parameters, 500, 0.6};
@@ -329,7 +329,7 @@ class is_operational_impl
         }
         if (parameters.sim_engine == sidb_simulation_engine::QUICKEXACT)
         {
-            assert(parameters.simulation_parameter.base == 2 && "base number is set to 3");
+            assert(parameters.simulation_parameters.base == 2 && "base number is set to 3");
 
             // perform QuickExact exact simulation
             const quickexact_params<cell<Lyt>> quickexact_params{
