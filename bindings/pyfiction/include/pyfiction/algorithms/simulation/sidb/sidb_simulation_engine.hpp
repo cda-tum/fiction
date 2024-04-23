@@ -17,6 +17,7 @@ namespace pyfiction
 inline void sidb_simulation_engine(pybind11::module& m)
 {
     namespace py = pybind11;
+    using namespace pybind11::literals;
 
     py::enum_<fiction::sidb_simulation_engine>(m, "sidb_simulation_engine", DOC(fiction_sidb_simulation_engine))
         .value("EXGS", fiction::sidb_simulation_engine::EXGS, DOC(fiction_sidb_simulation_engine_EXGS))
