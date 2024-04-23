@@ -29,10 +29,10 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - { os: ubuntu-latest, arch: x64, alglib: '${{env.ENABLE_ALGLIB}}' }
-          - { os: macos-latest, arch: x64, alglib: '${{env.ENABLE_ALGLIB}}' }
-          - { os: macos-latest, arch: arm64, alglib: '${{env.ENABLE_ALGLIB}}' }
-          - { os: windows-latest, arch: x64, alglib: 'OFF' }
+          - { os: ubuntu-latest, arch: x64 }
+          - { os: macos-latest, arch: x64 }
+          - { os: macos-latest, arch: arm64 }
+          - { os: windows-latest, arch: x64 }
     steps:
       - uses: actions/checkout@v3
         with:
@@ -57,8 +57,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - if: ${{ matrix.config.alglib == 'ON'}}
-        name: ${{matrix.config.alglib}}Setup ALGLIB${{ matrix.config.alglib == 'ON'}}
+      - if: ${{ runner.os != 'Windows' && env.ENABLE_ALGLIB == 'ON'}}
+        name: Setup ALGLIB
         run: |
           git clone https://github.com/S-Dafarra/alglib-cmake.git
           cd alglib-cmake
