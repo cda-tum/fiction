@@ -19,6 +19,7 @@ concurrency:
 env:
   Z3_VERSION: 4.10.0
   ENABLE_Z3: 'ON'
+  ENABLE_ALGLIB: 'ON'
 
 jobs:
   build_wheels:
@@ -28,10 +29,10 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - { os: ubuntu-latest, arch: x64 }
-          - { os: macos-latest, arch: x64 }
-          - { os: macos-latest, arch: arm64 }
-          - { os: windows-latest, arch: x64 }
+          - { os: ubuntu-latest, arch: x64, alglib: env.ENABLE_ALGLIB }
+          - { os: macos-latest, arch: x64, alglib: env.ENABLE_ALGLIB }
+          - { os: macos-latest, arch: arm64, alglib: env.ENABLE_ALGLIB }
+          - { os: windows-latest, arch: x64, alglib: 'OFF' }
     steps:
       - uses: actions/checkout@v3
         with:
@@ -55,6 +56,16 @@ jobs:
           architecture: ${{ matrix.config.arch }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - if: ${{ matrix.config.alglib == 'ON'}}
+        name: Setup ALGLIB
+        run: |
+          git clone https://github.com/S-Dafarra/alglib-cmake.git
+          cd alglib-cmake
+          mkdir build && cd build
+          cmake ..
+          make -j4
+          sudo make install
 
       - if: runner.os == 'Linux'
         name: Setup mold
@@ -107,11 +118,21 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - if: ${{ matrix.config.alglib == 'ON' }}
+        name: Setup ALGLIB
+        run: |
+          git clone https://github.com/S-Dafarra/alglib-cmake.git
+          cd alglib-cmake
+          mkdir build && cd build
+          cmake ..
+          make -j4
+          sudo make install
+
       - name: Build sdist
         run: pipx run build --sdist
 
       - name: Test sdist
-        run: z3=${{env.ENABLE_Z3}} pip install dist/*.tar.gz --verbose
+        run: z3=${{env.ENABLE_Z3}} alglib=${{matrix.config.alglib}} pip install dist/*.tar.gz --verbose
 
       - name: Upload sdist as an artifact
         uses: actions/upload-artifact@v3

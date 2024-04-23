@@ -23,6 +23,7 @@ defaults:
 env:
   Z3_VERSION: 4.10.0
   ENABLE_Z3: 'ON'
+  ENABLE_ALGLIB: 'ON'
 
 jobs:
   build_and_test:
@@ -33,10 +34,13 @@ jobs:
         include:
           - os: ubuntu-latest
             z3_platform: linux
+            alglib: ${{ env.ENABLE_ALGLIB }}
           - os: macos-latest
             z3_platform: macOS
+            alglib: ${{ env.ENABLE_ALGLIB }}
           - os: windows-latest
             z3_platform: windows
+            alglib: 'OFF'
       fail-fast: false  # allow other jobs to finish even if one fails
 
     name: pyfiction on ${{matrix.os}} with Python ${{matrix.python_version}}
@@ -76,9 +80,19 @@ jobs:
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
+      - if: ${{ matrix.alglib == 'ON'}}
+        name: Setup ALGLIB
+        run: |
+          git clone https://github.com/S-Dafarra/alglib-cmake.git
+          cd alglib-cmake
+          mkdir build && cd build
+          cmake ..
+          make -j4
+          sudo make install
+
       - name: Build pyfiction
         working-directory: ${{github.workspace}}
-        run: z3=${{env.ENABLE_Z3}} pip install '.[test]'
+        run: z3=${{env.ENABLE_Z3}} alglib=${{matrix.alglib}} pip install '.[test]'
 
       - name: Test
         working-directory: ${{github.workspace}}
