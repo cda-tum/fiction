@@ -5,7 +5,7 @@ import os
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 load_dotenv()
-z3 = os.environ.get("alglib", "OFF")
+alglib = os.environ.get("alglib", "OFF")
 
 
 class TestClusterComplete(unittest.TestCase):
