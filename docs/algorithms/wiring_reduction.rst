@@ -15,6 +15,15 @@ Subsequently, it employs A* path-finding to identify cuts through the layout tha
 The removal of these wire tiles creates gaps, which are then filled by shifting all gates located beneath the emptied
 spaces upward and subsequently reconnecting them. This iterative process continues until convergence is achieved.
 
-.. doxygenstruct:: fiction::wiring_reduction_stats
-   :members:
-.. doxygenfunction:: fiction::wiring_reduction
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/algorithms/physical_design/wiring_reduction.hpp``
+
+        .. doxygenstruct:: fiction::wiring_reduction_stats
+           :members:
+        .. doxygenfunction:: fiction::wiring_reduction(const Lyt& lyt, wiring_reduction_stats* pst = nullptr)
+
+    .. tab:: Python
+        .. autoclass:: mnt.pyfiction.wiring_reduction_stats
+            :members:
+        .. autofunction:: mnt.pyfiction.wiring_reduction
