@@ -124,6 +124,7 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::exhaustive_ground_state_simulation(m);
     pyfiction::quicksim(m);
     pyfiction::quickexact(m);
+    pyfiction::clustercomplete(m);
     pyfiction::is_ground_state(m);
     pyfiction::minimum_energy(m);
     pyfiction::energy_distribution(m);
