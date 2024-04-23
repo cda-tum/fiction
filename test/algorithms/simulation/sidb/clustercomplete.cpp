@@ -110,8 +110,9 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a 4 DB layout with a positive 
     SECTION("Base 2")
     {
         const sidb_simulation_result<TestType>& qe_res = quickexact(
-            lyt, quickexact_params<cell<TestType>>{sidb_simulation_parameters{2},
-                                             quickexact_params<cell<TestType>>::automatic_base_number_detection::OFF});
+            lyt,
+            quickexact_params<cell<TestType>>{sidb_simulation_parameters{2},
+                                              quickexact_params<cell<TestType>>::automatic_base_number_detection::OFF});
         const sidb_simulation_result<TestType>& cc_res =
             clustercomplete(lyt, clustercomplete_params<cell<TestType>>{sidb_simulation_parameters{2}});
 
@@ -127,8 +128,9 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a 4 DB layout with a positive 
     SECTION("Base 3")
     {
         const sidb_simulation_result<TestType>& qe_res = quickexact(
-            lyt, quickexact_params<cell<TestType>>{sidb_simulation_parameters{3},
-                                             quickexact_params<cell<TestType>>::automatic_base_number_detection::OFF});
+            lyt,
+            quickexact_params<cell<TestType>>{sidb_simulation_parameters{3},
+                                              quickexact_params<cell<TestType>>::automatic_base_number_detection::OFF});
         const sidb_simulation_result<TestType>& cc_res =
             clustercomplete(lyt, clustercomplete_params<cell<TestType>>{sidb_simulation_parameters{3}});
 
