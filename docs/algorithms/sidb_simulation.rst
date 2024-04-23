@@ -108,6 +108,9 @@ Engine Selectors
             :members:
         .. autoclass:: mnt.pyfiction.exhaustive_sidb_simulation_engine
             :members:
+        .. autoclass:: mnt.pyfiction.heuristic_sidb_simulation_engine
+            :members:
+        .. autofunction:: mnt.pyfiction.sidb_simulation_engine_name
 
 Energy Calculation
 ##################
