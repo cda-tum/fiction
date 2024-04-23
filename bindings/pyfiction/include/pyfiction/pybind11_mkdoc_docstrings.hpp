@@ -7474,18 +7474,6 @@ Parameter ``ps``:
 Returns:
   sidb_simulation_result is returned with all results.)doc";
 
-static const char* __doc_fiction_exhaustive_sidb_simulation_engine =
-    R"doc(Selector exclusively for exhaustive SiDB simulation engines.)doc";
-
-static const char* __doc_fiction_exhaustive_sidb_simulation_engine_EXGS =
-    R"doc(*Exhaustive Ground State Search* (EXGS) is an exact simulation engine
-that always has exponential runtime.)doc";
-
-static const char* __doc_fiction_exhaustive_sidb_simulation_engine_QUICKEXACT =
-    R"doc(*QuickExact* is also an exact simulation engine that requires
-exponential runtime, but it scales a lot better than ExGS due to its
-effective search-space pruning.)doc";
-
 static const char* __doc_fiction_extract_routing_objectives =
     R"doc(Extracts all routing objectives from the given layout. To this end,
 all routing paths in the layout are traversed, starting at each PI.
@@ -12552,6 +12540,70 @@ static const char* __doc_fiction_qca_technology_is_vertical_cell_mode = R"doc()d
 
 static const char* __doc_fiction_qca_technology_qca_technology = R"doc()doc";
 
+static const char* __doc_fiction_clustercomplete =
+    R"doc(*ClusterComplete* is an instantiation of a general solution to exhaustive state assignment searching for which
+all local predicates hold, given respective local evaluations that may be aggregated from individual inter-variable
+interactions. Applied to the problem of exact physical simulation of SiDBs, it is able to efficiently consider positive
+charges that are rare to occur, but drastically blow up exact simulation runtimes when hierarchical pruning methods are
+not applied. In fact, the exponential growth in problem complexity for added SiDBs is tamed by *ClusterComplete*, as
+SiDB layouts to simulate in practise amount to a high pruning efficacy, resulting in a layout-dependent reduction of the
+ simulation base. This amounts to an effective simulation base in the real number range \f$[1,b]\f$, where
+\f$b\in\{2,3\}\f$ is the given simulation base.
+
+The part of the *ClusterComplete* algorithm that is implemented in this file is the destructive phase of the procedure
+that employs the duality of construction and destruction, folding and unfolding. The phase preceding it is the key
+ingredient to the achieved efficiency: the *Ground State Space* algorithm, which constructs a minimised hierarchical
+search space of charge configurations that adhere to the critical population stability criterion. In particular, it
+generalizes physically informed space pruning that contributes to the capabilities of the *QuickExact* simulator, now
+applying to all charge states equally, and, most importantly, it lifts the associated potential equations to higher
+order, allowing us to reason over potential bounds in a cluster hierarchy.
+
+Template parameter ``Lyt``:
+  SiDB cell-level layout type.
+
+Parameter ``lyt``:
+  Layout to simulate.
+
+Parameter ``params``:
+  Parameter required for both the invocation of *Ground State Space*, and the simulation following.
+
+Returns:
+  Simulation Results.)doc";
+
+static const char* __doc_fiction_clustercomplete_params =
+    R"doc(The struct containing the parameters both passed on to pre-simulator *Ground State Space*, and used during
+simulation.)doc";
+
+static const char* __doc_fiction_clustercomplete_params_simulation_parameters =
+    R"doc(Physical simulation parameters.)doc";
+
+static const char* __doc_fiction_clustercomplete_params_local_external_potential =
+    R"doc(Local external electrostatic potentials (e.g., locally applied electrodes).)doc";
+
+static const char* __doc_fiction_clustercomplete_params_global_potential =
+    R"doc(Global external electrostatic potential. Value is applied on each cell in the layout.)doc";
+
+static const char* __doc_fiction_clustercomplete_params_validity_witness_partitioning_max_cluster_size_gss =
+    R"doc(This specifies the maximum cluster size for which *Ground State Space* will solve an NP-complete sub-problem
+exhaustively. The sets of SiDBs that witness local population stability for each respective charge state may be
+partitioned into disjoint sets such that the number of required witnesses for each respective charge state is satisfied.
+ If no such partition exists, the multiset charge configuration associated with the requirements may be rejected.)doc";
+
+static const char* __doc_fiction_clustercomplete_params_num_overlapping_witnesses_limit_gss =
+    R"doc(The complexity is of validity witness partitioning bounded by a factorial in the number of overlapping
+witnesses. This parameter thus allows the validity witness partitioning procedure to perform the reduction to
+overlapping witnesses for larger cluster sizes that could be runtime-impairing, then limiting specifically the length of
+ the input to the factorial call.)doc";
+
+static const char* __doc_fiction_clustercomplete_params_available_threads =
+    R"doc(Number of threads to make available to *ClusterComplete* for the unfolding stage.)doc";
+
+static const char* __doc_fiction_clustercomplete_params_report_gss_stats =
+    R"doc(Report the *Ground State Space* statistics to standard output. These statistic may be used especially to
+configure the validity witness partitioning options for *Ground State Space*, that may impair runtimes when set too
+high, but could provide a large benefit to the complexity of the unfolding process of large simulation problems by
+performing more involved pruning procedures in the construction stage.)doc";
+
 static const char* __doc_fiction_quickexact =
     R"doc(*QuickExact* is a quick and exact physical simulation algorithm
 designed specifically for SiDB layouts. It was proposed in \"The Need
@@ -13629,8 +13681,49 @@ exponential runtime, but it scales a lot better than *ExGS* due to its
 effective search-space pruning.)doc";
 
 static const char* __doc_fiction_sidb_simulation_engine_QUICKSIM =
-    R"doc(*QuickSim* is a heuristic simulation engine that only requires
-polynomial runtime.)doc";
+    R"doc(*QuickSim* is a heuristic simulation engine that only requires polynomial runtime.)doc";
+
+static const char* __doc_fiction_sidb_simulation_engine_CLUSTERCOMPLETE =
+    R"doc(*ClusterComplete* is a novel exact simulation engine that requires exponential runtime, though, depending on
+the simulation problem, it effectively reduces the base number by a real number, thus allowing problem sizes that
+were previously considered astronomical in size. Inherent to the simulation methodology that does not depend on the
+simulation base, it simulates very effectively for either base number (2 or 3).)doc";
+
+static const char* __doc_fiction_exhaustive_sidb_simulation_engine =
+    R"doc(Selector exclusively for exhaustive SiDB simulation engines.)doc";
+
+static const char* __doc_fiction_exhaustive_sidb_simulation_engine_EXGS =
+    R"doc(*Exhaustive Ground State Search (EXGS)* is an exact simulation engine
+that always has exponential runtime.)doc";
+
+static const char* __doc_fiction_exhaustive_sidb_simulation_engine_QUICKEXACT =
+    R"doc(*QuickExact* is also an exact simulation engine that requires
+exponential runtime, but it scales a lot better than *ExGS* due to its
+effective search-space pruning.)doc";
+
+static const char* __doc_fiction_exhaustive_sidb_simulation_engine_CLUSTERCOMPLETE =
+    R"doc(*ClusterComplete* is a novel exact simulation engine that requires exponential runtime, though, depending on
+the simulation problem, it effectively reduces the base number by a real number, thus allowing problem sizes that
+were previously considered astronomical in size. Inherent to the simulation methodology that does not depend on the
+simulation base, it simulates very effectively for either base number (2 or 3).)doc";
+
+static const char* __doc_fiction_heuristic_sidb_simulation_engine =
+    R"doc(Selector exclusively for heuristic SiDB simulation engines.)doc";
+
+static const char* __doc_fiction_heuristic_sidb_simulation_engine_QUICKSIM =
+    R"doc(*QuickSim* is a heuristic simulation engine that only requires polynomial runtime.)doc";
+
+static const char* __doc_fiction_sidb_simulation_engine_name =
+    R"doc(Returns the name of the given simulation engine.
+
+Template parameter ``EngineType``:
+  The type of the SiDB engine (exhaustive/heuristic/general).
+
+Parameter ``engine``:
+  An SiDB simulation engine.
+
+Returns:
+  The name of the simulation engine as a string.)doc";
 
 static const char* __doc_fiction_sidb_simulation_parameters =
     R"doc(This struct collects all physical parameters for physical SiDB

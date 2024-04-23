@@ -45,7 +45,7 @@ struct clustercomplete_params
      */
     sidb_simulation_parameters simulation_parameters{};
     /**
-     * Local external electrostatic potentials (e.g locally applied electrodes).
+     * Local external electrostatic potentials (e.g., locally applied electrodes).
      */
     std::unordered_map<CellType, double> local_external_potential = {};
     /**
