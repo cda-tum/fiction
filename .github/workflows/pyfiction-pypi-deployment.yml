@@ -29,9 +29,9 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - { os: ubuntu-latest, arch: x64, alglib: ${ { env.ENABLE_ALGLIB } } }
-          - { os: macos-latest, arch: x64, alglib: ${ { env.ENABLE_ALGLIB } } }
-          - { os: macos-latest, arch: arm64, alglib: ${ { env.ENABLE_ALGLIB } } }
+          - { os: ubuntu-latest, arch: x64, alglib: env.ENABLE_ALGLIB }
+          - { os: macos-latest, arch: x64, alglib: env.ENABLE_ALGLIB }
+          - { os: macos-latest, arch: arm64, alglib: env.ENABLE_ALGLIB }
           - { os: windows-latest, arch: x64, alglib: 'OFF' }
     steps:
       - uses: actions/checkout@v3
