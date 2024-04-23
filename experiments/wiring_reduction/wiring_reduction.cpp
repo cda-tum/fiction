@@ -75,7 +75,7 @@ int main()  // NOLINT
         const auto benchmark_network = read_ntk<fiction::tec_nt>(benchmark);
 
         // perform layout generation with an OGD-based heuristic algorithm
-        auto gate_level_layout = fiction::orthogonal<gate_lyt>(benchmark_network, {}, &orthogonal_stats);
+        auto       gate_level_layout = fiction::orthogonal<gate_lyt>(benchmark_network, {}, &orthogonal_stats);
         const auto layout_copy       = gate_level_layout.clone();
 
         auto num_wires = gate_level_layout.num_wires() - gate_level_layout.num_pis() - gate_level_layout.num_pos();

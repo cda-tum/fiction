@@ -443,11 +443,10 @@ create_wiring_reduction_layout(const Lyt& lyt, const uint64_t x_offset = 0, cons
                     // =→=→+
                     const auto special_case_1 = lyt.has_northern_incoming_signal({old_coord.x - 1, old_coord.y, 0}) &&
                                                 lyt.has_western_incoming_signal({old_coord.x, old_coord.y - 1, 0});
-                    const auto special_case_2 =
-                        lyt.has_northern_incoming_signal({old_coord.x - 1, old_coord.y, 0}) &&
-                        lyt.has_northern_incoming_signal({old_coord.x, old_coord.y - 1, 0}) &&
-                        lyt.is_wire_tile({old_coord.x, old_coord.y - 2, 0}) &&
-                        lyt.is_wire_tile({old_coord.x - 1, old_coord.y - 1, 0});
+                    const auto special_case_2 = lyt.has_northern_incoming_signal({old_coord.x - 1, old_coord.y, 0}) &&
+                                                lyt.has_northern_incoming_signal({old_coord.x, old_coord.y - 1, 0}) &&
+                                                lyt.is_wire_tile({old_coord.x, old_coord.y - 2, 0}) &&
+                                                lyt.is_wire_tile({old_coord.x - 1, old_coord.y - 1, 0});
                     const auto special_case_3 = lyt.has_western_incoming_signal({old_coord.x - 1, old_coord.y, 0}) &&
                                                 lyt.has_western_incoming_signal({old_coord.x, old_coord.y - 1, 0}) &&
                                                 lyt.is_wire_tile({old_coord.x - 2, old_coord.y, 0}) &&
