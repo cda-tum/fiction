@@ -210,7 +210,7 @@ TEMPLATE_TEST_CASE(
 
     SECTION("Add SiDBs which are positively charged in the ground state, layout does not fulfill the logic anymore.")
     {
-        params.physical_parameters.base = 3;
+        params.simulation_parameters.base = 3;
         lyt.assign_cell_type({15, 2, 1}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({15, 2, 0}, TestType::cell_type::NORMAL);
 
@@ -245,7 +245,7 @@ TEMPLATE_TEST_CASE(
 
     SECTION("Increased mu_minus")
     {
-        params.physical_parameters.mu_minus = -0.1;
+        params.simulation_parameters.mu_minus = -0.1;
 
         const auto simulation_results = clustercomplete<TestType>(lyt, params);
 
@@ -267,7 +267,7 @@ TEMPLATE_TEST_CASE(
 
     SECTION("Decreased mu_minus")
     {
-        params.physical_parameters.mu_minus = -0.7;
+        params.simulation_parameters.mu_minus = -0.7;
 
         const auto simulation_results = clustercomplete<TestType>(lyt, params);
 
@@ -289,7 +289,7 @@ TEMPLATE_TEST_CASE(
 
     SECTION("Decreased lambda_tf")
     {
-        params.physical_parameters.lambda_tf = 1;
+        params.simulation_parameters.lambda_tf = 1;
 
         const auto simulation_results = clustercomplete<TestType>(lyt, params);
 
@@ -311,7 +311,7 @@ TEMPLATE_TEST_CASE(
 
     SECTION("Increased lambda_tf")
     {
-        params.physical_parameters.lambda_tf = 10;
+        params.simulation_parameters.lambda_tf = 10;
 
         const auto simulation_results = clustercomplete<TestType>(lyt, params);
 
@@ -333,7 +333,7 @@ TEMPLATE_TEST_CASE(
 
     SECTION("Increased epsilon_r")
     {
-        params.physical_parameters.epsilon_r = 10;
+        params.simulation_parameters.epsilon_r = 10;
 
         const auto simulation_results = clustercomplete<TestType>(lyt, params);
 
@@ -362,8 +362,8 @@ TEMPLATE_TEST_CASE(
     TestType lyt{};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
     const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{2, -0.25}};
-    lyt.assign_sidb_defect({1, 2, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1, params.physical_parameters.epsilon_r,
-                                                  params.physical_parameters.lambda_tf});
+    lyt.assign_sidb_defect({1, 2, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1, params.simulation_parameters.epsilon_r,
+                                                  params.simulation_parameters.lambda_tf});
 
     const auto simulation_results = clustercomplete<TestType>(lyt, params);
 
@@ -382,7 +382,7 @@ TEMPLATE_TEST_CASE(
     const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{2, -0.25}};
 
     lyt.assign_sidb_defect({1, 2, 0},
-                           sidb_defect{sidb_defect_type::UNKNOWN, -1, params.physical_parameters.epsilon_r, 2});
+                           sidb_defect{sidb_defect_type::UNKNOWN, -1, params.simulation_parameters.epsilon_r, 2});
     const auto simulation_results = clustercomplete<TestType>(lyt, params);
 
     REQUIRE(simulation_results.charge_distributions.size() == 1);
@@ -400,7 +400,7 @@ TEMPLATE_TEST_CASE(
     const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.25}};
 
     lyt.assign_sidb_defect({1, 6, 0},
-                           sidb_defect{sidb_defect_type::UNKNOWN, -1, 0.3, params.physical_parameters.lambda_tf});
+                           sidb_defect{sidb_defect_type::UNKNOWN, -1, 0.3, params.simulation_parameters.lambda_tf});
 
     const auto simulation_results = clustercomplete<TestType>(lyt, params);
 
@@ -422,8 +422,8 @@ TEMPLATE_TEST_CASE(
 
     const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{2, -0.15}};
 
-    lyt.assign_sidb_defect({0, 0, 1}, sidb_defect{sidb_defect_type::UNKNOWN, -1, params.physical_parameters.epsilon_r,
-                                                  params.physical_parameters.lambda_tf});
+    lyt.assign_sidb_defect({0, 0, 1}, sidb_defect{sidb_defect_type::UNKNOWN, -1, params.simulation_parameters.epsilon_r,
+                                                  params.simulation_parameters.lambda_tf});
 
     const auto simulation_results = clustercomplete<TestType>(lyt, params);
 
@@ -444,8 +444,8 @@ TEMPLATE_TEST_CASE("Single SiDB ClusterComplete simulation with one highly negat
 
     const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.1}};
 
-    lyt.assign_sidb_defect({1, 2, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -10, params.physical_parameters.epsilon_r,
-                                                  params.physical_parameters.lambda_tf});
+    lyt.assign_sidb_defect({1, 2, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -10, params.simulation_parameters.epsilon_r,
+                                                  params.simulation_parameters.lambda_tf});
     const auto simulation_results = clustercomplete<TestType>(lyt, params);
 
     REQUIRE(simulation_results.charge_distributions.size() == 1);
@@ -464,8 +464,8 @@ TEMPLATE_TEST_CASE(
 
     const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{2, -0.1}};
 
-    lyt.assign_sidb_defect({1, 2, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -10, params.physical_parameters.epsilon_r,
-                                                  params.physical_parameters.lambda_tf * 10E-5});
+    lyt.assign_sidb_defect({1, 2, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -10, params.simulation_parameters.epsilon_r,
+                                                  params.simulation_parameters.lambda_tf * 10E-5});
 
     const auto simulation_results = clustercomplete<TestType>(lyt, params);
 
@@ -483,10 +483,10 @@ TEMPLATE_TEST_CASE(
 
     const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{2, -0.1}};
 
-    lyt.assign_sidb_defect({2, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -10, params.physical_parameters.epsilon_r,
-                                                  params.physical_parameters.lambda_tf});
-    lyt.assign_sidb_defect({-2, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, 10, params.physical_parameters.epsilon_r,
-                                                   params.physical_parameters.lambda_tf});
+    lyt.assign_sidb_defect({2, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -10, params.simulation_parameters.epsilon_r,
+                                                  params.simulation_parameters.lambda_tf});
+    lyt.assign_sidb_defect({-2, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, 10, params.simulation_parameters.epsilon_r,
+                                                   params.simulation_parameters.lambda_tf});
 
     const auto simulation_results = clustercomplete<TestType>(lyt, params);
 
@@ -1089,8 +1089,8 @@ TEMPLATE_TEST_CASE("ClusterComplete with one SiDB and one negatively charged def
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
 
     const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.32}};
-    lyt.assign_sidb_defect({-1, -1, 1}, sidb_defect{sidb_defect_type::UNKNOWN, -1, params.physical_parameters.epsilon_r,
-                                                    params.physical_parameters.lambda_tf});
+    lyt.assign_sidb_defect({-1, -1, 1}, sidb_defect{sidb_defect_type::UNKNOWN, -1, params.simulation_parameters.epsilon_r,
+                                                    params.simulation_parameters.lambda_tf});
     const auto simulation_results = clustercomplete<TestType>(lyt, params);
 
     REQUIRE(!simulation_results.charge_distributions.empty());
@@ -1112,8 +1112,8 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type({30, 0, 0}, TestType::cell_type::NORMAL);
 
     const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.28}};
-    lyt.assign_sidb_defect({1, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1, params.physical_parameters.epsilon_r,
-                                                  params.physical_parameters.lambda_tf});
+    lyt.assign_sidb_defect({1, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1, params.simulation_parameters.epsilon_r,
+                                                  params.simulation_parameters.lambda_tf});
     const auto simulation_results = clustercomplete<TestType>(lyt, params);
 
     REQUIRE(!simulation_results.charge_distributions.empty());
@@ -1139,10 +1139,10 @@ TEMPLATE_TEST_CASE(
 
     const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.28}};
 
-    lyt.assign_sidb_defect({1, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1, params.physical_parameters.epsilon_r,
-                                                  params.physical_parameters.lambda_tf});
-    lyt.assign_sidb_defect({31, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1, params.physical_parameters.epsilon_r,
-                                                   params.physical_parameters.lambda_tf});
+    lyt.assign_sidb_defect({1, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1, params.simulation_parameters.epsilon_r,
+                                                  params.simulation_parameters.lambda_tf});
+    lyt.assign_sidb_defect({31, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1, params.simulation_parameters.epsilon_r,
+                                                   params.simulation_parameters.lambda_tf});
 
     const auto simulation_results = clustercomplete<TestType>(lyt, params);
 
@@ -1170,10 +1170,10 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of four SiDBs (far away) with one
 
     const clustercomplete_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.28}};
 
-    lyt.assign_sidb_defect({1, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, 1, params.physical_parameters.epsilon_r,
-                                                  params.physical_parameters.lambda_tf});
-    lyt.assign_sidb_defect({31, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1, params.physical_parameters.epsilon_r,
-                                                   params.physical_parameters.lambda_tf});
+    lyt.assign_sidb_defect({1, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, 1, params.simulation_parameters.epsilon_r,
+                                                  params.simulation_parameters.lambda_tf});
+    lyt.assign_sidb_defect({31, 0, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1, params.simulation_parameters.epsilon_r,
+                                                   params.simulation_parameters.lambda_tf});
     const auto simulation_results = clustercomplete<TestType>(lyt, params);
 
     REQUIRE(!simulation_results.charge_distributions.empty());
@@ -1496,7 +1496,7 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a 3 DB Wire", "[clustercomplet
     SECTION("Increased mu_minus")
     {
         // set small absolute value for µ
-        params.physical_parameters.mu_minus = -0.1;
+        params.simulation_parameters.mu_minus = -0.1;
 
         const auto simulation_results = clustercomplete<TestType>(lyt, params);
 
@@ -1525,7 +1525,7 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a 3 DB Wire", "[clustercomplet
     SECTION("Decreased mu_minus")
     {
         // set large absolute value for µ
-        params.physical_parameters.mu_minus = -0.7;
+        params.simulation_parameters.mu_minus = -0.7;
 
         const auto simulation_results = clustercomplete<TestType>(lyt, params);
 
@@ -1555,7 +1555,7 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a 3 DB Wire", "[clustercomplet
     SECTION("Decreased lambda_tf")
     {
         // set small lambda value, i.e., electrostatic screening is significant.
-        params.physical_parameters.lambda_tf = 1;
+        params.simulation_parameters.lambda_tf = 1;
 
         const auto simulation_results = clustercomplete<TestType>(lyt, params);
 
@@ -1584,7 +1584,7 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a 3 DB Wire", "[clustercomplet
     SECTION("Increased lambda_tf")
     {
         // set large lambda value, i.e., electrostatic screening is small.
-        params.physical_parameters.lambda_tf = 10;
+        params.simulation_parameters.lambda_tf = 10;
 
         const auto simulation_results = clustercomplete<TestType>(lyt, params);
 
@@ -1613,7 +1613,7 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a 3 DB Wire", "[clustercomplet
     SECTION("Increased epsilon_r")
     {
         // set large relative permittivity
-        params.physical_parameters.epsilon_r = 10;
+        params.simulation_parameters.epsilon_r = 10;
 
         const auto simulation_results = clustercomplete<TestType>(lyt, params);
 
@@ -1642,7 +1642,7 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a 3 DB Wire", "[clustercomplet
     SECTION("Decrease epsilon_r, positively charged SiDBs can occur")
     {
         // set small relative permittivity
-        params.physical_parameters.epsilon_r = 1;
+        params.simulation_parameters.epsilon_r = 1;
 
         const auto simulation_results = clustercomplete<TestType>(lyt, params);
 
