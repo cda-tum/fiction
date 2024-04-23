@@ -11,13 +11,30 @@
 
 #include <pybind11/pybind11.h>
 
+#include <string>
+
 namespace pyfiction
 {
+
+namespace detail
+{
+
+template <typename EngineType>
+void sidb_simulation_engine_name(pybind11::module& m)
+{
+    using namespace pybind11::literals;
+
+    m.def(
+        "sidb_simulation_engine_name",
+        [](const EngineType& engine) -> std::string { return fiction::sidb_simulation_engine_name(engine); },
+        "engine"_a, DOC(fiction_sidb_simulation_engine_name));
+}
+
+}  // namespace detail
 
 inline void sidb_simulation_engine(pybind11::module& m)
 {
     namespace py = pybind11;
-    using namespace pybind11::literals;
 
     py::enum_<fiction::sidb_simulation_engine>(m, "sidb_simulation_engine", DOC(fiction_sidb_simulation_engine))
         .value("EXGS", fiction::sidb_simulation_engine::EXGS, DOC(fiction_sidb_simulation_engine_EXGS))
@@ -47,8 +64,9 @@ inline void sidb_simulation_engine(pybind11::module& m)
 
         ;
 
-    m.def("sidb_simulation_engine_name", &fiction::sidb_simulation_engine_name, "engine"_a,
-          DOC(fiction_sidb_simulation_engine_name));
+    detail::sidb_simulation_engine_name<fiction::sidb_simulation_engine>(m);
+    detail::sidb_simulation_engine_name<fiction::exhaustive_sidb_simulation_engine>(m);
+    detail::sidb_simulation_engine_name<fiction::heuristic_sidb_simulation_engine>(m);
 }
 
 }  // namespace pyfiction
