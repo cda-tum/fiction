@@ -41,7 +41,7 @@ TEST_CASE("Determine the SiDB gate displacement robustness of the Y-shaped SiDB 
 
     sidb_gate_displacement_robustness_params<sidb_cell_clk_lyt_siqad> params{};
     params.displacement_variations                        = {1, 1};
-    params.operational_params.simulation_parameter        = sidb_simulation_parameters{2, -0.28};
+    params.operational_params.simulation_parameters       = sidb_simulation_parameters{2, -0.28};
     params.operational_params.bdl_params.maximum_distance = 2.0;
     params.operational_params.bdl_params.minimum_distance = 0.2;
     params.fixed_cells = {{0, 0, 1}, {2, 1, 1}, {20, 0, 1}, {18, 1, 1}, {14, 3, 1}, {16, 2, 1}, {10, 7, 0}, {10, 9, 1}};
@@ -89,7 +89,7 @@ TEST_CASE("Determine the probability of fabricating an operational SiQAD Y-shape
     {
         sidb_gate_displacement_robustness_params<sidb_cell_clk_lyt_siqad> params{};
         params.displacement_variations                        = {1, 0};
-        params.operational_params.simulation_parameter        = sidb_simulation_parameters{2, -0.28};
+        params.operational_params.simulation_parameters       = sidb_simulation_parameters{2, -0.28};
         params.operational_params.bdl_params.maximum_distance = 2.0;
         params.operational_params.bdl_params.minimum_distance = 0.2;
 
@@ -108,7 +108,7 @@ TEST_CASE("Determine the probability of fabricating an operational Bestagon AND 
     {
         sidb_gate_displacement_robustness_params<sidb_cell_clk_lyt_siqad> params{};
         params.displacement_variations                        = {1, 0};
-        params.operational_params.simulation_parameter        = sidb_simulation_parameters{2, -0.32};
+        params.operational_params.simulation_parameters       = sidb_simulation_parameters{2, -0.32};
         params.operational_params.bdl_params.maximum_distance = 2.0;
         params.operational_params.bdl_params.minimum_distance = 0.2;
         params.analysis_mode                                  = sidb_gate_displacement_robustness_params<
@@ -130,7 +130,7 @@ TEST_CASE("Determine the probability of fabricating an operational BDL wire with
     {
         sidb_gate_displacement_robustness_params<sidb_cell_clk_lyt_siqad> params{};
         params.displacement_variations                        = {0, 1};
-        params.operational_params.simulation_parameter        = sidb_simulation_parameters{2, -0.32};
+        params.operational_params.simulation_parameters       = sidb_simulation_parameters{2, -0.32};
         params.operational_params.bdl_params.maximum_distance = 2.0;
         params.operational_params.bdl_params.minimum_distance = 0.2;
         params.allow_dimer_change_in_y_direction              = false;
@@ -146,7 +146,7 @@ TEST_CASE("Determine the probability of fabricating an operational BDL wire with
     {
         sidb_gate_displacement_robustness_params<sidb_cell_clk_lyt_siqad> params{};
         params.displacement_variations                        = {0, 1};
-        params.operational_params.simulation_parameter        = sidb_simulation_parameters{2, -0.32};
+        params.operational_params.simulation_parameters       = sidb_simulation_parameters{2, -0.32};
         params.operational_params.bdl_params.maximum_distance = 2.0;
         params.operational_params.bdl_params.minimum_distance = 0.2;
         params.analysis_mode                                  = sidb_gate_displacement_robustness_params<
@@ -161,7 +161,7 @@ TEST_CASE("Determine the probability of fabricating an operational BDL wire with
     {
         sidb_gate_displacement_robustness_params<sidb_cell_clk_lyt_siqad> params{};
         params.displacement_variations                        = {1, 0};
-        params.operational_params.simulation_parameter        = sidb_simulation_parameters{2, -0.32};
+        params.operational_params.simulation_parameters       = sidb_simulation_parameters{2, -0.32};
         params.operational_params.bdl_params.maximum_distance = 2.0;
         params.operational_params.bdl_params.minimum_distance = 0.2;
         params.percentage_of_displaced_sidb_combinations      = 0.1;
@@ -175,7 +175,7 @@ TEST_CASE("Determine the probability of fabricating an operational BDL wire with
     {
         sidb_gate_displacement_robustness_params<sidb_cell_clk_lyt_siqad> params{};
         params.displacement_variations                        = {0, 1};
-        params.operational_params.simulation_parameter        = sidb_simulation_parameters{2, -0.32};
+        params.operational_params.simulation_parameters       = sidb_simulation_parameters{2, -0.32};
         params.operational_params.bdl_params.maximum_distance = 2.0;
         params.operational_params.bdl_params.minimum_distance = 0.2;
         params.percentage_of_displaced_sidb_combinations      = 0.1;
