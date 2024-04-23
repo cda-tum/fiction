@@ -19,6 +19,9 @@ If you want to include the functions dependent on the Z3 solver, set `z3=ON` bef
 z3=ON pip install .
 ```
 
+Similarly, ALGLIB, which SiDB simulator *ClusterComplete* depends on, may be enabled with `alglib=ON`. This may be
+enabled alongside `z3=ON` by separating them with a space before `pip`.
+
 ### Building the bindings with CMake
 
 ```bash
@@ -103,7 +106,7 @@ pip install pybind11_mkdoc clang==14
 To generate the docstrings call
 
 ```bash
-python3 -m pybind11_mkdoc -o pybind11_mkdoc_docstrings.hpp -D FICTION_Z3_SOLVER `find ./include/fiction -name "*.hpp" -print`
+python3 -m pybind11_mkdoc -o pybind11_mkdoc_docstrings.hpp -D FICTION_Z3_SOLVER -D FICTION_ALGLIB_ENABLED `find ./include/fiction -name "*.hpp" -print`
 ```
 
 in *fiction*'s base directory.
