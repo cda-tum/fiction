@@ -15,7 +15,7 @@ class TestCriticalTemperature(unittest.TestCase):
         layout.assign_cell_type((6, 1), sidb_technology.cell_type.NORMAL)
 
         params = critical_temperature_params()
-        params.engine = simulation_engine.EXACT
+        params.engine = sidb_simulation_engine.QUICKEXACT
 
         stats = critical_temperature_stats()
 
@@ -30,7 +30,7 @@ class TestCriticalTemperature(unittest.TestCase):
         layout = read_sqd_layout_100(dir_path + "/../../../resources/hex_21_inputsdbp_xor_v1.sqd", "xor_gate")
         params = critical_temperature_params()
         params.simulation_parameters.base = 2
-        params.engine = simulation_engine.EXACT
+        params.engine = sidb_simulation_engine.QUICKEXACT
 
         stats = critical_temperature_stats()
 
@@ -46,7 +46,7 @@ class TestCriticalTemperature(unittest.TestCase):
                                  "inverter_input_0")
 
         params = critical_temperature_params()
-        params.engine = simulation_engine.APPROXIMATE
+        params.engine = sidb_simulation_engine.QUICKSIM
 
         stats = critical_temperature_stats()
 
@@ -66,7 +66,7 @@ class TestCriticalTemperature(unittest.TestCase):
         params.simulation_parameters.base = 2
         params.simulation_parameters.mu_minus = -0.2
 
-        params.engine = simulation_engine.EXACT
+        params.engine = sidb_simulation_engine.QUICKEXACT
 
         stats = critical_temperature_stats()
 
