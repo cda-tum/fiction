@@ -58,7 +58,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - if: ${{ matrix.config.alglib == 'ON'}}
-        name: Setup ALGLIB
+        name: ${{matrix.config.alglib}}Setup ALGLIB${{ matrix.config.alglib == 'ON'}}
         run: |
           git clone https://github.com/S-Dafarra/alglib-cmake.git
           cd alglib-cmake
