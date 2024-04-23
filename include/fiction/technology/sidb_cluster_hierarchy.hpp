@@ -992,7 +992,7 @@ struct sidb_cluster
         const uint64_t ix = *sidbs.cbegin();
 
         // fill the initial charge space as determined by the simulation base
-        for (const sidb_charge_state cs : SIDB_CHARGE_STATES(base))
+        for (const sidb_charge_state cs : sidb_charge_states_for_base_number(base))
         {
             charge_space.emplace(self_ptr, cs, loc_ext_pot, external_sidbs.size() + 1);
         }

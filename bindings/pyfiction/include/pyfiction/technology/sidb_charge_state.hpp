@@ -27,11 +27,11 @@ inline void sidb_charge_state(pybind11::module& m)
 
         ;
 
-    m.def("charge_state_to_sign", &fiction::charge_state_to_sign, "cs"_a, DOC(fiction_charge_state_to_sign));
     m.attr("SIDB_CHARGE_STATES_BASE_2") = py::cast(fiction::SIDB_CHARGE_STATES_BASE_2);
     m.attr("SIDB_CHARGE_STATES_BASE_3") = py::cast(fiction::SIDB_CHARGE_STATES_BASE_2);
-    m.attr("SIDB_CHARGE_STATES")        = py::cast(fiction::SIDB_CHARGE_STATES);
 
+    m.def("sidb_charge_states_for_base_number", &fiction::sidb_charge_states_for_base_number, "base"_a,
+          DOC(fiction_sidb_charge_states_for_base_number));
     m.def("charge_state_to_sign", &fiction::charge_state_to_sign, "cs"_a, DOC(fiction_charge_state_to_sign));
     m.def("sign_to_charge_state", &fiction::sign_to_charge_state, "sg"_a, DOC(fiction_sign_to_charge_state));
     m.def("charge_configuration_to_string", &fiction::charge_configuration_to_string, "cc"_a,

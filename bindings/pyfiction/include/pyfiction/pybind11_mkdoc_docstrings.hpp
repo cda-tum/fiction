@@ -13868,6 +13868,16 @@ static const char* __doc_fiction_sidb_technology_is_output_cell = R"doc()doc";
 
 static const char* __doc_fiction_sidb_technology_sidb_technology = R"doc()doc";
 
+static const char* __doc_fiction_sidb_charge_states_for_base_number =
+    R"doc(Charge states of SiDBs for a given simulation base number. The full base states are returned for an invalid
+simulation base.
+
+Parameter ``base``:
+  The simulation base number to get the associated SiDB charge states for.
+
+Returns:
+  NEG, NEUT, POS for base 3 (full base), and NEG, NEUT otherwise, associated with base 2 simulation)doc";
+
 static const char* __doc_fiction_sign_to_charge_state =
     R"doc(Converts an integer (`-1`, `0`, `1`) into a charge state.
 

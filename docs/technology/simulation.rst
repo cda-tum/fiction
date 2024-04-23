@@ -13,9 +13,9 @@ Possible charge states of SiDBs.
         **Header:** ``fiction/technology/sidb_charge_state.hpp``
 
         .. doxygenenum:: fiction::sidb_charge_state
-        .. doxygenvariable:: SIDB_CHARGE_STATES_BASE_2
-        .. doxygenvariable:: SIDB_CHARGE_STATES_BASE_3
-        .. doxygenvariable:: SIDB_CHARGE_STATES
+        .. doxygenvariable:: fiction::SIDB_CHARGE_STATES_BASE_2
+        .. doxygenvariable:: fiction::SIDB_CHARGE_STATES_BASE_3
+        .. doxygenfunction:: fiction::sidb_charge_states_for_base
         .. doxygenfunction:: fiction::charge_state_to_sign
         .. doxygenfunction:: fiction::sign_to_charge_state
         .. doxygenfunction:: fiction::charge_configuration_to_string
@@ -23,6 +23,7 @@ Possible charge states of SiDBs.
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.sidb_charge_state
             :members:
+        .. autofunction:: mnt.pyfiction.sidb_charge_states_for_base_number
         .. autofunction:: mnt.pyfiction.charge_state_to_sign
         .. autofunction:: mnt.pyfiction.sign_to_charge_state
         .. autofunction:: mnt.pyfiction.charge_configuration_to_string
