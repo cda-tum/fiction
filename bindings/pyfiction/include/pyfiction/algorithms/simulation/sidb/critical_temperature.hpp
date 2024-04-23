@@ -42,16 +42,6 @@ inline void critical_temperature(pybind11::module& m)
     namespace py = pybind11;
 
     /**
-     * Simulation engine.
-     */
-    py::enum_<fiction::critical_temperature_params::simulation_engine>(
-        m, "simulation_engine", DOC(fiction_critical_temperature_params_simulation_engine))
-        .value("EXACT", fiction::critical_temperature_params::simulation_engine::EXACT,
-               DOC(fiction_critical_temperature_params_simulation_engine_EXACT))
-        .value("APPROXIMATE", fiction::critical_temperature_params::simulation_engine::APPROXIMATE,
-               DOC(fiction_critical_temperature_params_simulation_engine_APPROXIMATE));
-
-    /**
      * Critical temperature statistics.
      */
     py::class_<fiction::critical_temperature_stats>(m, "critical_temperature_stats",
