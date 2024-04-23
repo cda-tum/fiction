@@ -26,7 +26,6 @@ jobs:
     name: Wheels for ${{ matrix.config.os }} (${{ matrix.config.arch }})
     runs-on: ${{ matrix.config.os }}
     strategy:
-      fail-fast: false
       matrix:
         config:
           - { os: ubuntu-latest, arch: x64 }
