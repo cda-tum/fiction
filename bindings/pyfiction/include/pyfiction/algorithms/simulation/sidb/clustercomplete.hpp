@@ -74,6 +74,20 @@ inline void clustercomplete(pybind11::module& m)
 
 }  // namespace pyfiction
 
+#else  // FICTION_ALGLIB_ENABLED
+
+#include <pybind11/pybind11.h>
+
+namespace pyfiction
+{
+
+/**
+ * Disable ClusterComplete.
+ */
+inline void clustercomplete([[maybe_unused]] pybind11::module& m) {}
+
+}  // namespace pyfiction
+
 #endif  // FICTION_ALGLIB_ENABLED
 
-#endif  // PYFICTION_QUICKEXACT_HPP
+#endif  // PYFICTION_CLUSTERCOMPLETE_HPP
