@@ -72,7 +72,7 @@ void charge_distribution_surface_layout(pybind11::module& m, const std::string& 
         .def(
             "assign_simulation_parameters",
             [](py_cds& cds, fiction::sidb_simulation_parameters params)
-            { return cds.assign_physical_parameters(params); },
+            { return cds.assign_simulation_parameters(params); },
             "params"_a)
         .def("get_phys_params", [](py_cds& cds) { return cds.get_simulation_params(); })
         .def(
