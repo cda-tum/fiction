@@ -118,8 +118,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - if: ${{ matrix.config.alglib == 'ON' }}
-        name: Setup ALGLIB
+      - name: Setup ALGLIB
         run: |
           git clone https://github.com/S-Dafarra/alglib-cmake.git
           cd alglib-cmake
@@ -132,7 +131,7 @@ jobs:
         run: pipx run build --sdist
 
       - name: Test sdist
-        run: z3=${{env.ENABLE_Z3}} alglib=${{matrix.config.alglib}} pip install dist/*.tar.gz --verbose
+        run: z3=${{env.ENABLE_Z3}} alglib=${{env.ENABLE_ALGLIB}} pip install dist/*.tar.gz --verbose
 
       - name: Upload sdist as an artifact
         uses: actions/upload-artifact@v3
