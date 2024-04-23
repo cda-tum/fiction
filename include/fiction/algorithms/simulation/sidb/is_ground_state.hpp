@@ -23,8 +23,8 @@ namespace fiction
  * @tparam Lyt Cell-level layout type.
  * @param heuristic_results All found physically valid charge distribution surfaces obtained by a heuristic algorithm.
  * @param exhaustive_results All valid charge distribution surfaces determined by ExGS.
- * @return Returns `true` if the relative difference between the lowest energies of the two sets is less than \f$
- * 0.00001 \f$, `false` otherwise.
+ * @return Returns `true` if the relative difference between the lowest energies of the two sets is less than
+ * \f$0.00001\f$, `false` otherwise.
  */
 template <typename Lyt>
 [[nodiscard]] bool is_ground_state(const sidb_simulation_result<Lyt>& heuristic_results,

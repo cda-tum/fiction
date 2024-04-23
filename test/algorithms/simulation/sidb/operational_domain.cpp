@@ -2,7 +2,9 @@
 // Created by marcel on 27.07.23.
 //
 
-#include <catch2/catch_test_macros.hpp>
+#include <catch2/catch_template_test_macros.hpp>
+
+#include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
@@ -78,9 +80,9 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
     sim_params.base = 2;
 
     operational_domain_params op_domain_params{};
-    op_domain_params.sim_params  = sim_params;
-    op_domain_params.x_dimension = operational_domain::sweep_parameter::EPSILON_R;
-    op_domain_params.y_dimension = operational_domain::sweep_parameter::LAMBDA_TF;
+    op_domain_params.simulation_parameters = sim_params;
+    op_domain_params.x_dimension           = operational_domain::sweep_parameter::EPSILON_R;
+    op_domain_params.y_dimension           = operational_domain::sweep_parameter::LAMBDA_TF;
 
     operational_domain_stats op_domain_stats{};
 
@@ -544,15 +546,15 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
     sim_params.mu_minus = -0.28;
 
     operational_domain_params op_domain_params{};
-    op_domain_params.sim_params  = sim_params;
-    op_domain_params.x_dimension = operational_domain::sweep_parameter::EPSILON_R;
-    op_domain_params.x_min       = 5.1;
-    op_domain_params.x_max       = 6.0;
-    op_domain_params.x_step      = 0.1;
-    op_domain_params.y_dimension = operational_domain::sweep_parameter::LAMBDA_TF;
-    op_domain_params.y_min       = 4.5;
-    op_domain_params.y_max       = 5.4;
-    op_domain_params.y_step      = 0.1;
+    op_domain_params.simulation_parameters = sim_params;
+    op_domain_params.x_dimension           = operational_domain::sweep_parameter::EPSILON_R;
+    op_domain_params.x_min                 = 5.1;
+    op_domain_params.x_max                 = 6.0;
+    op_domain_params.x_step                = 0.1;
+    op_domain_params.y_dimension           = operational_domain::sweep_parameter::LAMBDA_TF;
+    op_domain_params.y_min                 = 4.5;
+    op_domain_params.y_max                 = 5.4;
+    op_domain_params.y_step                = 0.1;
 
     operational_domain_stats op_domain_stats{};
 
@@ -667,15 +669,15 @@ TEST_CASE("SiQAD's AND gate operational domain computation, using cube coordinat
     sim_params.mu_minus = -0.28;
 
     operational_domain_params op_domain_params{};
-    op_domain_params.sim_params  = sim_params;
-    op_domain_params.x_dimension = operational_domain::sweep_parameter::EPSILON_R;
-    op_domain_params.x_min       = 5.1;
-    op_domain_params.x_max       = 6.0;
-    op_domain_params.x_step      = 0.1;
-    op_domain_params.y_dimension = operational_domain::sweep_parameter::LAMBDA_TF;
-    op_domain_params.y_min       = 4.5;
-    op_domain_params.y_max       = 5.4;
-    op_domain_params.y_step      = 0.1;
+    op_domain_params.simulation_parameters = sim_params;
+    op_domain_params.x_dimension           = operational_domain::sweep_parameter::EPSILON_R;
+    op_domain_params.x_min                 = 5.1;
+    op_domain_params.x_max                 = 6.0;
+    op_domain_params.x_step                = 0.1;
+    op_domain_params.y_dimension           = operational_domain::sweep_parameter::LAMBDA_TF;
+    op_domain_params.y_min                 = 4.5;
+    op_domain_params.y_max                 = 5.4;
+    op_domain_params.y_step                = 0.1;
 
     operational_domain_stats op_domain_stats{};
 
@@ -745,6 +747,98 @@ TEST_CASE("SiQAD's AND gate operational domain computation, using cube coordinat
         CHECK(op_domain_stats.num_simulator_invocations <= 400);
         CHECK(op_domain_stats.num_evaluated_parameter_combinations <= 100);
         CHECK(op_domain_stats.num_operational_parameter_combinations <= 100);
+        CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
+    }
+}
+
+TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[operational-domain]", sidb_111_cell_clk_lyt_siqad,
+                   cds_sidb_111_cell_clk_lyt_siqad)
+{
+    const auto layout = blueprints::and_gate_111<TestType>();
+
+    sidb_simulation_parameters sim_params{};
+    sim_params.base     = 2;
+    sim_params.mu_minus = -0.32;
+
+    operational_domain_params op_domain_params{};
+    op_domain_params.simulation_parameters = sim_params;
+    op_domain_params.x_dimension           = operational_domain::sweep_parameter::EPSILON_R;
+    op_domain_params.x_min                 = 5.60;
+    op_domain_params.x_max                 = 5.61;
+    op_domain_params.x_step                = 0.01;
+    op_domain_params.y_dimension           = operational_domain::sweep_parameter::LAMBDA_TF;
+    op_domain_params.y_min                 = 5.0;
+    op_domain_params.y_max                 = 5.01;
+    op_domain_params.y_step                = 0.01;
+
+    operational_domain_stats op_domain_stats{};
+
+    SECTION("grid_search")
+    {
+        const auto op_domain = operational_domain_grid_search(layout, std::vector<tt>{create_and_tt()},
+                                                              op_domain_params, &op_domain_stats);
+
+        // check if the operational domain has the correct size (10 steps in each dimension)
+        CHECK(op_domain.operational_values.size() == 4);
+
+        // for the selected range, all samples should be within the parameters and operational
+        check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
+
+        CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
+        CHECK(op_domain_stats.num_simulator_invocations == 16);
+        CHECK(op_domain_stats.num_evaluated_parameter_combinations == 4);
+        CHECK(op_domain_stats.num_operational_parameter_combinations == 4);
+        CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
+    }
+    SECTION("random_sampling")
+    {
+        const auto op_domain = operational_domain_random_sampling(layout, std::vector<tt>{create_and_tt()}, 100,
+                                                                  op_domain_params, &op_domain_stats);
+
+        // check if the operational domain has the correct size (max 10 steps in each dimension)
+        CHECK(op_domain.operational_values.size() <= 100);
+
+        // for the selected range, all samples should be within the parameters and operational
+        check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
+
+        CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
+        CHECK(op_domain_stats.num_simulator_invocations == 16);
+        CHECK(op_domain_stats.num_evaluated_parameter_combinations == 4);
+        CHECK(op_domain_stats.num_operational_parameter_combinations == 4);
+        CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
+    }
+    SECTION("flood_fill")
+    {
+        const auto op_domain = operational_domain_flood_fill(layout, std::vector<tt>{create_and_tt()}, 1,
+                                                             op_domain_params, &op_domain_stats);
+
+        // check if the operational domain has the correct size (10 steps in each dimension)
+        CHECK(op_domain.operational_values.size() == 4);
+
+        // for the selected range, all samples should be within the parameters and operational
+        check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
+
+        CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
+        CHECK(op_domain_stats.num_simulator_invocations == 16);
+        CHECK(op_domain_stats.num_evaluated_parameter_combinations == 4);
+        CHECK(op_domain_stats.num_operational_parameter_combinations == 4);
+        CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
+    }
+    SECTION("contour_tracing")
+    {
+        const auto op_domain = operational_domain_contour_tracing(layout, std::vector<tt>{create_and_tt()}, 1,
+                                                                  op_domain_params, &op_domain_stats);
+
+        // check if the operational domain has the correct size (max 10 steps in each dimension)
+        CHECK(op_domain.operational_values.size() <= 4);
+
+        // for the selected range, all samples should be within the parameters and operational
+        check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
+
+        CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
+        CHECK(op_domain_stats.num_simulator_invocations <= 16);
+        CHECK(op_domain_stats.num_evaluated_parameter_combinations <= 4);
+        CHECK(op_domain_stats.num_operational_parameter_combinations <= 4);
         CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
     }
 }

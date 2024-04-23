@@ -76,11 +76,6 @@ jobs:
       - name: Install libraries and the respective compiler
         run: sudo apt-get update && sudo apt-get install -yq libtbb-dev ${{matrix.compiler}}
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.9.x'
-
       - name: Clone Repository
         uses: actions/checkout@v4
         with:
@@ -94,13 +89,19 @@ jobs:
           save: true
           max-size: 10G
 
-      - name: Setup mold
-        uses: rui314/setup-mold@v1
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9.x'
+          cache: 'pip'
 
       - name: Install pip packages
         uses: BSFishy/pip-action@v1
         with:
           requirements: ${{github.workspace}}/libs/mugen/requirements.txt
+
+      - name: Setup mold
+        uses: rui314/setup-mold@v1
 
       - name: Setup Z3 Solver
         id: z3
