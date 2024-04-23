@@ -852,16 +852,15 @@ class post_layout_optimization_impl
                         moved_at_least_one_gate = true;
                     }
                 }
+                // calculate bounding box
+                const auto bounding_box = bounding_box_2d(layout);
+                layout.resize({bounding_box.get_x_size(), bounding_box.get_y_size(), layout.z()});
             }
         }
-        // calculate bounding box
-        auto bounding_box = bounding_box_2d(layout);
-        layout.resize({bounding_box.get_x_size(), bounding_box.get_y_size(), layout.z()});
-
         detail::optimize_output_positions(layout);
 
         // calculate bounding box
-        bounding_box.update_bounding_box();
+        const auto bounding_box = bounding_box_2d(layout);
         layout.resize({bounding_box.get_x_size(), bounding_box.get_y_size(), layout.z()});
 
         pst.x_size_after           = layout.x() + 1;

@@ -76,6 +76,7 @@ int main()  // NOLINT
 
         // perform layout generation with an OGD-based heuristic algorithm
         auto gate_level_layout = fiction::orthogonal<gate_lyt>(benchmark_network, {}, &orthogonal_stats);
+        const auto layout_copy       = gate_level_layout.clone();
 
         auto num_wires = gate_level_layout.num_wires() - gate_level_layout.num_pis() - gate_level_layout.num_pos();
         //  compute critical path and throughput
@@ -98,8 +99,7 @@ int main()  // NOLINT
             gate_level_layout.num_wires() - gate_level_layout.num_pis() - gate_level_layout.num_pos();
 
         // check equivalence
-        const auto eq_stats =
-            fiction::equivalence_checking<fiction::technology_network, gate_lyt>(benchmark_network, gate_level_layout);
+        const auto eq_stats = fiction::equivalence_checking<gate_lyt, gate_lyt>(layout_copy, gate_level_layout);
 
         const std::string eq_result = eq_stats == fiction::eq_type::STRONG ? "STRONG" :
                                       eq_stats == fiction::eq_type::WEAK   ? "WEAK" :
