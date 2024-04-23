@@ -9,6 +9,7 @@
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
+#include "fiction/layouts/coordinates.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/technology/sidb_defects.hpp"
@@ -27,7 +28,7 @@ namespace fiction
 /**
  * This struct stores the parameters for the *QuickExact* algorithm.
  */
-template <typename CellType>
+template <typename CellType = siqad::coord_t>
 struct quickexact_params
 {
     /**

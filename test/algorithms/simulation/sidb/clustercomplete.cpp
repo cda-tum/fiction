@@ -110,8 +110,8 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a 4 DB layout with a positive 
     SECTION("Base 2")
     {
         const sidb_simulation_result<TestType>& qe_res = quickexact(
-            lyt, quickexact_params<TestType>{sidb_simulation_parameters{2},
-                                             quickexact_params<TestType>::automatic_base_number_detection::OFF});
+            lyt, quickexact_params<cell<TestType>>{sidb_simulation_parameters{2},
+                                             quickexact_params<cell<TestType>>::automatic_base_number_detection::OFF});
         const sidb_simulation_result<TestType>& cc_res =
             clustercomplete(lyt, clustercomplete_params<cell<TestType>>{sidb_simulation_parameters{2}});
 
@@ -127,8 +127,8 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a 4 DB layout with a positive 
     SECTION("Base 3")
     {
         const sidb_simulation_result<TestType>& qe_res = quickexact(
-            lyt, quickexact_params<TestType>{sidb_simulation_parameters{3},
-                                             quickexact_params<TestType>::automatic_base_number_detection::OFF});
+            lyt, quickexact_params<cell<TestType>>{sidb_simulation_parameters{3},
+                                             quickexact_params<cell<TestType>>::automatic_base_number_detection::OFF});
         const sidb_simulation_result<TestType>& cc_res =
             clustercomplete(lyt, clustercomplete_params<cell<TestType>>{sidb_simulation_parameters{3}});
 
@@ -142,8 +142,7 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a 4 DB layout with a positive 
     }
 }
 
-TEMPLATE_TEST_CASE("Exact Cluster Simulation of 2 Bestagon NAND gates", "[clustercomplete]", sidb_cell_clk_lyt_siqad,
-                   charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
+TEST_CASE("Exact Cluster Simulation of 2 Bestagon NAND gates", "[clustercomplete]")
 {
     gate_level_layout<hex_even_row_gate_clk_lyt> gate_lyt{{2, 2}};
     gate_lyt.create_nand({}, {}, {0, 0});
@@ -155,7 +154,7 @@ TEMPLATE_TEST_CASE("Exact Cluster Simulation of 2 Bestagon NAND gates", "[cluste
     SECTION("Base 2")
     {
         const sidb_simulation_result<sidb_cell_clk_lyt_siqad>& res =
-            clustercomplete(cell_lyt, clustercomplete_params<sidb_cell_clk_lyt_siqad>{sidb_simulation_parameters{2}});
+            clustercomplete(cell_lyt, clustercomplete_params<>{sidb_simulation_parameters{2}});
 
         CHECK(res.charge_distributions.size() == 81);
         CHECK_THAT(minimum_energy(res.charge_distributions.cbegin(), res.charge_distributions.cend()),
@@ -165,7 +164,7 @@ TEMPLATE_TEST_CASE("Exact Cluster Simulation of 2 Bestagon NAND gates", "[cluste
     SECTION("Base 3")
     {
         const sidb_simulation_result<sidb_cell_clk_lyt_siqad>& res =
-            clustercomplete(cell_lyt, clustercomplete_params<sidb_cell_clk_lyt_siqad>{sidb_simulation_parameters{3}});
+            clustercomplete(cell_lyt, clustercomplete_params<>{sidb_simulation_parameters{3}});
 
         CHECK(res.charge_distributions.size() == 81);
         CHECK_THAT(minimum_energy(res.charge_distributions.cbegin(), res.charge_distributions.cend()),
@@ -668,7 +667,7 @@ TEST_CASE("ClusterComplete simulation of a one-pair BDL wire with two perturbers
 
     charge_layout_kon.update_after_charge_change();
 
-    const clustercomplete_params<sidb_100_cell_clk_lyt_siqad> sim_params{sidb_simulation_parameters{3, -0.32}};
+    const clustercomplete_params<> sim_params{sidb_simulation_parameters{3, -0.32}};
 
     const auto simulation_results = clustercomplete<sidb_100_cell_clk_lyt_siqad>(lyt, sim_params);
 

@@ -9,6 +9,7 @@
 
 #include "fiction/algorithms/simulation/sidb/ground_state_space.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
+#include "fiction/layouts/coordinates.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/physical_constants.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
@@ -36,7 +37,7 @@ namespace fiction
 /**
  * The struct containing the parameters both passed on to pre-simulator Ground State Space, and used during simulation.
  */
-template <typename CellType>
+template <typename CellType = siqad::coord_t>
 struct clustercomplete_params
 {
     /**

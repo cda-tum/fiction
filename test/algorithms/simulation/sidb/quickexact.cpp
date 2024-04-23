@@ -369,7 +369,7 @@ TEST_CASE("QuickExact simulation of a one-pair BDL wire with two perturbers", "[
 
     charge_layout_kon.update_after_charge_change();
 
-    const quickexact_params<cell<sidb_100_cell_clk_lyt_siqad>> sim_params{sidb_simulation_parameters{3, -0.32}};
+    const quickexact_params<> sim_params{sidb_simulation_parameters{3, -0.32}};
 
     const auto simulation_results = quickexact<sidb_100_cell_clk_lyt_siqad>(lyt, sim_params);
 
