@@ -625,7 +625,7 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{16, 1, 0}),
                          TestType::cell_type::NORMAL);
 
-    quickexact_params<TestType> params{sidb_simulation_parameters{3, -0.28}};
+    quickexact_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.28}};
     params.local_external_potential.insert(
         {{siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{6, 2, 0}), -0.5}});
 
