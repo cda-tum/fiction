@@ -35,18 +35,6 @@ void charge_distribution_surface_layout(pybind11::module& m, const std::string& 
     namespace py = pybind11;
     using namespace pybind11::literals;
 
-    m.def(
-        "charge_state_to_sign", [](fiction::sidb_charge_state& cs) { return fiction::charge_state_to_sign(cs); },
-        "cs"_a, DOC(fiction_charge_state_to_sign));
-    m.def(
-        "sign_to_charge_state", [](int8_t sg) { return fiction::sign_to_charge_state(sg); }, "sg"_a,
-        DOC(fiction_sign_to_charge_state));
-    m.def(
-        "charge_configuration_to_string",
-        [](std::vector<fiction::sidb_charge_state> charge_distribution)
-        { return fiction::charge_configuration_to_string(charge_distribution); },
-        "charge_distribution"_a, DOC(fiction_charge_configuration_to_string));
-
     using py_cds = py_charge_distribution_surface_layout<Lyt>;
 
     /**
