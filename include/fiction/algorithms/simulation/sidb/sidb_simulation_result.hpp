@@ -51,7 +51,7 @@ struct sidb_simulation_result
     /**
      * Physical parameters used in the simulation.
      */
-    sidb_simulation_parameters physical_parameters{};
+    sidb_simulation_parameters simulation_parameters{};
     /**
      * Additional named simulation parameters. This is used to store algorithm-dependent parameters that are not part of
      * the `sidb_simulation_parameters` struct.

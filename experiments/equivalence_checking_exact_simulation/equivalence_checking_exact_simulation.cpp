@@ -43,8 +43,9 @@ int main()  // NOLINT
         }
         auto result_exgs       = exhaustive_ground_state_simulation(lyt, params);
         auto result_quickexact = quickexact(
-            lyt, quickexact_params<sidb_100_cell_clk_lyt>{
-                     params, quickexact_params<sidb_100_cell_clk_lyt>::automatic_base_number_detection::OFF});
+            lyt,
+            quickexact_params<fiction::cell<sidb_100_cell_clk_lyt>>{
+                params, quickexact_params<fiction::cell<sidb_100_cell_clk_lyt>>::automatic_base_number_detection::OFF});
         if (!check_simulation_results_for_equivalence(result_exgs, result_quickexact))
         {
             non_equivalence_counter++;
