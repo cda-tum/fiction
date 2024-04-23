@@ -30,9 +30,10 @@ enum class sidb_simulation_engine
      */
     QUICKEXACT,
     /**
-     * *ClusterComplete* is a novel exact simulation engine that requires sub-exponential runtime, for
-     * simulation problems in practice like SiDB logic. It handles base 3 simulation very effectively, since the engine
-     * makes no distinction in the simulation methodology for different base numbers.
+     * *ClusterComplete* is a novel exact simulation engine that requires exponential runtime, though, depending on the
+     * simulation problem, it effectively reduces the base number by a real number, thus allowing problem sizes that
+     * were previously considered astronomical in size. Inherent to the simulation methodology that does not depend on
+     * the simulation base, it simulates very effectively for either base number (2 or 3).
      */
     CLUSTERCOMPLETE
 };
@@ -51,9 +52,10 @@ enum class exhaustive_sidb_simulation_engine
      */
     QUICKEXACT,
     /**
-     * *ClusterComplete* is a novel exact simulation engine that requires sub-exponential runtime, for simulation
-     * problems in practice like SiDB logic. It handles base 3 simulation very effectively, since the engine makes no
-     * distinction in the simulation methodology for a different base number.
+     * *ClusterComplete* is a novel exact simulation engine that requires exponential runtime, though, depending on the
+     * simulation problem, it effectively reduces the base number by a real number, thus allowing problem sizes that
+     * were previously considered astronomical in size. Inherent to the simulation methodology that does not depend on
+     * the simulation base, it simulates very effectively for either base number (2 or 3).
      */
     CLUSTERCOMPLETE
 };
