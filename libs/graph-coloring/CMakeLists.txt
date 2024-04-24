@@ -14,6 +14,8 @@ ADD_LIBRARY(graph-coloring STATIC
         Source/hybrid_lmxrlf.cpp
         )
 
+set_target_properties(graph-coloring PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
+
 include(GenerateExportHeader)
 
 GENERATE_EXPORT_HEADER(graph-coloring

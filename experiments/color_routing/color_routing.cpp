@@ -91,10 +91,7 @@ void smt_sat_complete()
 {
     exact_stats = {};
 
-    const std::array<std::shared_ptr<fiction::clocking_scheme<fiction::tile<gate_lyt>>>, 3> clocking_schemes{
-        {{fiction::ptr<gate_lyt>(fiction::twoddwave_clocking<gate_lyt>())},
-         {fiction::ptr<gate_lyt>(fiction::use_clocking<gate_lyt>())},
-         {fiction::ptr<gate_lyt>(fiction::res_clocking<gate_lyt>())}}};
+    const std::array<std::string, 3> clocking_schemes{"2DDWave", "USE", "RES"};
 
     static color_routing_experiment color_routing_exp{"color_routing_smt_sat_complete",
                                                       "benchmark",
@@ -132,7 +129,7 @@ void smt_sat_complete()
         for (const auto& clock : clocking_schemes)
         {
             // parameters for SMT-based physical design
-            fiction::exact_physical_design_params<gate_lyt> exact_params{};
+            fiction::exact_physical_design_params exact_params{};
             exact_params.scheme        = clock;
             exact_params.crossings     = true;
             exact_params.border_io     = true;

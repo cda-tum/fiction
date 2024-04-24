@@ -25,8 +25,8 @@ namespace fiction
  * Alfenas Reis, Caio Araújo T. Campos, Thiago Rodrigues B. S. Soares, Omar Paranaiba V. Neto, and Frank Sill Torres in
  * IEEE International Symposium on Circuits and Systems, 2016. QCA ONE was originally proposed for the USE clocking
  * scheme. The version used here is an extension to the original QCA ONE by also theoretically allowing multiple wires
- * in the same tile. Furthermore, it can be used for a range of clocking schemes. Tiles in QCA ONE are \f$ 5 \times 5
- * \f$ QCA cells.
+ * in the same tile. Furthermore, it can be used for a range of clocking schemes. Tiles in QCA ONE are \f$5 \times 5\f$
+ * QCA cells.
  */
 class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
 {

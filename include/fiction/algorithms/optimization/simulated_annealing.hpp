@@ -22,7 +22,7 @@ namespace fiction
  * A linearly decreasing temperature schedule. The temperature is altered in decrements of `10`.
  *
  * @param t The current temperature.
- * @return The next temperature, i.e. \f$ \texttt{t} - 10 \f$.
+ * @return The next temperature, i.e. \f$\texttt{t} - 10\f$.
  */
 constexpr auto linear_temperature_schedule(const double t) noexcept
 {
@@ -32,7 +32,7 @@ constexpr auto linear_temperature_schedule(const double t) noexcept
  * A logarithmically decreasing temperature schedule. The temperature is altered by multiplying it with `0.99`.
  *
  * @param t The current temperature.
- * @return The next temperature, i.e. \f$ \texttt{t} \cdot 0.99 \f$.
+ * @return The next temperature, i.e. \f$\texttt{t} \cdot 0.99\f$.
  */
 constexpr auto geometric_temperature_schedule(const double t) noexcept
 {
