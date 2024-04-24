@@ -69,7 +69,8 @@ jobs:
         env:
           CIBW_BEFORE_ALL_LINUX: ( `# Setup ALGLIB` && git clone https://github.com/S-Dafarra/alglib-cmake.git
             && cd alglib-cmake && mkdir build && cd build
-            && cmake .. && make -j4 && make install ); /opt/python/cp39-cp39/bin/pip install z3-solver==${{ env.Z3_VERSION }}
+            && cmake .. && make -j4 && make install ); (
+            `# Setup Z3` && /opt/python/cp39-cp39/bin/pip install z3-solver==${{ env.Z3_VERSION }})
           CIBW_TEST_EXTRAS: test
           CIBW_TEST_COMMAND: 'python -m unittest discover --start-directory {project} --verbose'
 
@@ -102,14 +103,16 @@ jobs:
           python-version: '3.10'
           cache: 'pip'
 
-      - name: Setup Z3 Solver
+      - if: ${{env.ENABLE_Z3 == 'ON'}}
+        name: Setup Z3 Solver
         uses: cda-tum/setup-z3@v1
         with:
           version: ${{ env.Z3_VERSION }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Setup ALGLIB
+      - if: ${{env.ENABLE_ALGLIB == 'ON'}}
+        name: Setup ALGLIB
         run: |
           git clone https://github.com/S-Dafarra/alglib-cmake.git
           cd alglib-cmake
