@@ -56,15 +56,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - if: ${{ runner.os != 'Windows' && env.ENABLE_ALGLIB == 'ON'}}
-        name: Setup ALGLIB
-        run: |
-          git clone https://github.com/S-Dafarra/alglib-cmake.git
-          cd alglib-cmake
-          mkdir build && cd build
-          cmake ..
-          make -j4
-          sudo make install
+      #      - if: ${{ runner.os != 'Windows' && env.ENABLE_ALGLIB == 'ON'}}
+      #        name: Setup ALGLIB
+      #        run: |
+      #          git clone https://github.com/S-Dafarra/alglib-cmake.git
+      #          cd alglib-cmake
+      #          mkdir build && cd build
+      #          cmake ..
+      #          make -j4
+      #          sudo make install
 
       - if: runner.os == 'Linux'
         name: Setup mold
