@@ -68,7 +68,7 @@ jobs:
         uses: pypa/cibuildwheel@v2.17.0
         env:
           CIBW_BEFORE_ALL_MACOS: >
-            echo "Setup ALGLIB" &&
+            echo "Setup ALGLIB" && 
             git clone https://github.com/S-Dafarra/alglib-cmake.git &&
             cd alglib-cmake && mkdir build && cd build &&
             cmake .. && make -j4 && sudo make install
