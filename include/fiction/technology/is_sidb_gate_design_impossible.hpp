@@ -9,14 +9,13 @@
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
-#include "fiction/layouts/cell_level_layout.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/physical_constants.hpp"
+#include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
-#include "fiction/utils/truth_table_utils.hpp"
 
 #include <cassert>
 #include <vector>
@@ -78,7 +77,7 @@ bool is_gate_design_impossible(const Lyt& layout, const std::vector<TT>& spec,
             layout.foreach_sidb_defect(
                 [&charge_lyt](const auto& cd)
                 {
-                    if (is_charged_defect(cd.second))
+                    if (is_charged_defect_type(cd.second))
                     {
                         charge_lyt.add_sidb_defect_to_potential_landscape(cd.first, cd.second);
                     }

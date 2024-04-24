@@ -6,12 +6,11 @@
 #define FICTION_DESIGN_SIDB_GATES_HPP
 
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
-#include "fiction/algorithms/simulation/sidb/operational_domain.hpp"
 #include "fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
-#include "fiction/layouts/coordinates.hpp"
 #include "fiction/technology/cell_technologies.hpp"
+#include "fiction/technology/sidb_nm_distance.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/layout_utils.hpp"
 #include "fiction/utils/math_utils.hpp"
@@ -329,7 +328,7 @@ class design_sidb_gates_impl
             }
             for (std::size_t j = i + 1; j < cells.size(); j++)
             {
-                if (sidb_nanometer_distance<Lyt>(cells[i], cells[j]) < 0.5)
+                if (sidb_nm_distance<Lyt>(Lyt{}, cells[i], cells[j]) < 0.5)
                 {
                     return true;
                 }
