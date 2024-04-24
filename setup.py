@@ -57,8 +57,6 @@ class CMakeBuild(build_ext):
             cmake_args += ['-DZ3_ROOT={}'.format(os.environ.get("Z3_ROOT"))]
 
         if "ALGLIB_DIR" in os.environ:
-            cmake_args += ['-DALGLIB_DIR={}'.format(os.environ.get("ALGLIB_DIR"))]
-            cmake_args += ['-DCMAKE_MODULE_PATH={}'.format(os.environ.get("ALGLIB_DIR"))]
             cmake_args += ['-DCMAKE_PREFIX_PATH={}'.format(os.environ.get("ALGLIB_DIR"))]
 
         if self.compiler.compiler_type != "msvc":
