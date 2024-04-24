@@ -58,6 +58,8 @@ class CMakeBuild(build_ext):
 
         if "ALGLIB_DIR" in os.environ:
             cmake_args += ['-DALGLIB_DIR={}'.format(os.environ.get("ALGLIB_DIR"))]
+            cmake_args += ['-DCMAKE_MODULE_PATH={}'.format(os.environ.get("ALGLIB_DIR"))]
+            cmake_args += ['-DCMAKE_PREFIX_PATH={}'.format(os.environ.get("ALGLIB_DIR"))]
 
         if self.compiler.compiler_type != "msvc":
             # Using Ninja-build since it a) is available as a wheel and b)

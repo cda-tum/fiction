@@ -20,7 +20,7 @@ build:
       - echo "Reinstall pyfiction with Z3 and ALGLIB enabled"
       - echo $PWD
       - ls ./alglib-cmake/build
-      - z3="ON" alglib="ON" ALGLIB_DIR=./alglib-cmake/build python -m pip install --upgrade --upgrade-strategy eager --no-cache-dir .[docs]
+      - z3="ON" alglib="ON" ALGLIB_DIR=$PWD/alglib-cmake/build python -m pip install --upgrade --upgrade-strategy eager --no-cache-dir .[docs]
 
 sphinx:
   configuration: docs/conf.py
