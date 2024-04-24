@@ -15,7 +15,7 @@ build:
       - echo "Setup ALGLIB"
       - git clone https://github.com/S-Dafarra/alglib-cmake.git
         && cd alglib-cmake && mkdir build && cd build
-        && cmake .. && make -j4 && export DESTDIR="$PWD" make install && cd ../..
+        && cmake .. && make -j4 && export DESTDIR="$PWD" && make install && cd ../..
     pre_build:
       - echo "Reinstall pyfiction with Z3 and ALGLIB enabled"
       - echo $PWD
