@@ -19,9 +19,9 @@
 #include <fiction/technology/area.hpp>                        // area requirement calculations
 #include <fiction/technology/cell_technologies.hpp>           // cell implementations
 #include <fiction/technology/parameterized_gate_library.hpp>  // a dynamic SiDB gate library
+#include <fiction/technology/sidb_defect_surface.hpp>         // SiDB surface with support for atomic defects
 #include <fiction/technology/sidb_defects.hpp>                // Atomic defects
 #include <fiction/technology/sidb_skeleton_bestagon_library.hpp>  // a static skeleton SiDB gate library defining the input/output wires
-#include <fiction/technology/sidb_surface.hpp>                    // SiDB surface with support for atomic defects
 #include <fiction/technology/sidb_surface_analysis.hpp>  // Analyzes a given defective SiDB surface and matches it against gate tiles provided by a library
 #include <fiction/types.hpp>  // pre-defined types suitable for the FCN domain
 
@@ -39,7 +39,9 @@
 #include <cassert>
 #include <cstdint>
 #include <cstdlib>
+#include <exception>
 #include <limits>
+#include <optional>
 #include <string>
 #include <utility>
 
@@ -71,7 +73,7 @@ int main()  // NOLINT
     auto surface_lattice_initial = fiction::read_sidb_surface_defects<cell_lyt>(
         "../../experiments/defect_aware_physical_design/1_percent_with_charged_surface.txt");
 
-    fiction::sidb_surface<cell_lyt> surface_lattice{
+    fiction::sidb_defect_surface<cell_lyt> surface_lattice{
         {std::numeric_limits<uint64_t>::max(), std::numeric_limits<uint64_t>::max()}};
 
     surface_lattice_initial.foreach_sidb_defect(
@@ -235,7 +237,7 @@ int main()  // NOLINT
         fiction::area_stats                            area_stats{};
         fiction::area_params<fiction::sidb_technology> area_ps{};
         fiction::area(cell_level_layout, area_ps, &area_stats);
-        fiction::sidb_surface<cell_lyt> defect_surface{cell_level_layout};
+        fiction::sidb_defect_surface<cell_lyt> defect_surface{cell_level_layout};
 
         // add defects to the file
         surface_lattice.foreach_sidb_defect([&defect_surface](const auto& defect)
