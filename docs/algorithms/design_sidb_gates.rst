@@ -22,4 +22,5 @@ Utility Functions
 
 **Header:** ``fiction/algorithms/physical_design/is_gate_design_impossible.hpp``
 
+.. doxygenstruct:: fiction::is_gate_design_impossible_params
 .. doxygenfunction:: fiction::is_gate_design_impossible
