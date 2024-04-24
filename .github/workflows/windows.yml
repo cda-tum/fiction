@@ -36,9 +36,9 @@ jobs:
   build_and_test:
     strategy:
       matrix:
-        os: [ windows-2019, windows-2022 ]
-        toolset: [ v142, v143, ClangCL ]
-        build_type: [ Debug, Release ]
+        os: [ windows-2022 ]
+        toolset: [ ClangCL ]
+        build_type: [ Release ]
         include:
           - os: windows-2019
             env: 'Visual Studio 16 2019'

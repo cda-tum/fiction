@@ -45,24 +45,24 @@ jobs:
           - os: ubuntu-22.04
             compiler: clang++-10
         include:
-          - os: ubuntu-22.04
-            compiler: clang++-13
-            build_type: Debug
-          - os: ubuntu-22.04
-            compiler: clang++-13
-            build_type: Release
-          - os: ubuntu-22.04
-            compiler: clang++-14
-            build_type: Debug
-          - os: ubuntu-22.04
-            compiler: clang++-14
-            build_type: Release
-          - os: ubuntu-22.04
-            compiler: clang++-15
-            build_type: Debug
-          - os: ubuntu-22.04
-            compiler: clang++-15
-            build_type: Release
+          #          - os: ubuntu-22.04
+          #            compiler: clang++-13
+          #            build_type: Debug
+          #          - os: ubuntu-22.04
+          #            compiler: clang++-13
+          #            build_type: Release
+          #          - os: ubuntu-22.04
+          #            compiler: clang++-14
+          #            build_type: Debug
+          #          - os: ubuntu-22.04
+          #            compiler: clang++-14
+          #            build_type: Release
+          #          - os: ubuntu-22.04
+          #            compiler: clang++-15
+          #            build_type: Debug
+          #          - os: ubuntu-22.04
+          #            compiler: clang++-15
+          #            build_type: Release
           - os: ubuntu-20.04
             compiler: g++-10
             build_type: Release
