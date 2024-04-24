@@ -56,6 +56,9 @@ class CMakeBuild(build_ext):
         if "Z3_ROOT" in os.environ:
             cmake_args += ['-DZ3_ROOT={}'.format(os.environ.get("Z3_ROOT"))]
 
+        if "ALGLIB_DIR" in os.environ:
+            cmake_args += ['-DALGLIB_DIR={}'.format(os.environ.get("ALGLIB_DIR"))]
+
         if self.compiler.compiler_type != "msvc":
             # Using Ninja-build since it a) is available as a wheel and b)
             # multithreads automatically. MSVC would require all variables be
