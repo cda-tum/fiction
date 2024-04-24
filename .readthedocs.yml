@@ -18,8 +18,6 @@ build:
         && cmake .. && make -j4 && export DESTDIR="$PWD" && make install && cd ../..
     pre_build:
       - echo "Reinstall pyfiction with Z3 and ALGLIB enabled"
-      - echo $PWD
-      - ls ./alglib-cmake/build
       - z3="ON" alglib="ON" ALGLIB_DIR=$PWD/alglib-cmake/build/usr/local/lib/cmake/ALGLIB/ python -m pip install --upgrade --upgrade-strategy eager --no-cache-dir .[docs]
 
 sphinx:
