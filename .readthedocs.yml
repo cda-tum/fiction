@@ -11,10 +11,12 @@ build:
   apt_packages:
     - cmake
   jobs:
-    pre_build:
-      - echo "Setup ALGLIB" && git clone https://github.com/S-Dafarra/alglib-cmake.git
+    pre_create_environment:
+      - echo "Setup ALGLIB"
+      - git clone https://github.com/S-Dafarra/alglib-cmake.git
         && cd alglib-cmake && mkdir build && cd build
-        && cmake .. && make -j4 && sudo make install
+        && cmake .. && make -j4 && make install
+    pre_build:
       - echo "Reinstall pyfiction with Z3 and ALGLIB enabled"
       - z3="ON" alglib="ON" python -m pip install --upgrade --upgrade-strategy eager --no-cache-dir .[docs]
 
