@@ -69,13 +69,13 @@ jobs:
         env:
           CIBW_BEFORE_ALL_MACOS: >
             echo "Setup ALGLIB"
-            git clone https://github.com/S-Dafarra/alglib-cmake.git
-            cd alglib-cmake && mkdir build && cd build
+            git clone https://github.com/S-Dafarra/alglib-cmake.git &&
+            cd alglib-cmake && mkdir build && cd build &&
             cmake .. && make -j4 && make install
           CIBW_BEFORE_ALL_LINUX: >
             echo "Setup ALGLIB" 
-            git clone https://github.com/S-Dafarra/alglib-cmake.git
-            cd alglib-cmake && mkdir build && cd build
+            git clone https://github.com/S-Dafarra/alglib-cmake.git &&
+            cd alglib-cmake && mkdir build && cd build &&
             cmake .. && make -j4 && make install
             echo "Setup Z3"
             /opt/python/cp39-cp39/bin/pip install z3-solver==${{ env.Z3_VERSION }}
