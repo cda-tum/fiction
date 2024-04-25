@@ -73,4 +73,4 @@ environment = { MACOSX_DEPLOYMENT_TARGET = "10.15", z3 = "ON", alglib = "OFF" }
 [tool.cibuildwheel.windows]
 before-build = "pip install delvewheel"
 repair-wheel-command = "delvewheel repair -v -w {dest_dir} {wheel}"
-environment = { MACOSX_DEPLOYMENT_TARGET = "10.15", z3 = "ON", alglib = "OFF" }
+environment = { z3 = "ON", alglib = "OFF" }
