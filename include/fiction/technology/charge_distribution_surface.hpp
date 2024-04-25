@@ -1807,7 +1807,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         const exhaustive_sidb_simulation_engine engine = exhaustive_sidb_simulation_engine::QUICKEXACT) noexcept
     {
         strg->charge_index_sublayout = 0;
-        if (engine == exhaustive_sidb_simulation_engine::QUICKEXACT)
+        if (engine == exhaustive_siddb_simulation_engine::QUICKEXACT)
         {
             this->index_to_charge_distribution_for_quickexact_simulation();
         }
