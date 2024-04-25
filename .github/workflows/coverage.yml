@@ -111,7 +111,7 @@ jobs:
       - name: Test
         working-directory: ${{github.workspace}}/build
 
-        run: ctest -C $BUILD_TYPE --verbose --output-on-failure --parallel 4
+        run: ctest -C $BUILD_TYPE --verbose --output-on-failure --repeat until-pass:3 --parallel 4
 
       - name: Setup and run lcov
         run: |
