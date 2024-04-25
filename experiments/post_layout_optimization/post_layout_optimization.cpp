@@ -57,16 +57,18 @@ int main()  // NOLINT
     // stats
     fiction::orthogonal_physical_design_stats orthogonal_stats{};
     fiction::post_layout_optimization_stats   post_layout_optimization_stats{};
+    fiction::post_layout_optimization_params  post_layout_optimization_params{};
+    // post_layout_optimization_params.max_gate_relocations = 1;
 
-    static constexpr const uint64_t bench_select =
-        fiction_experiments::all & ~fiction_experiments::epfl & ~fiction_experiments::iscas85;
+    static constexpr const uint64_t bench_select = fiction_experiments::c5315;
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
         const auto benchmark_network = read_ntk<fiction::tec_nt>(benchmark);
 
         // perform layout generation with an OGD-based heuristic algorithm
-        auto gate_level_layout = fiction::orthogonal<gate_lyt>(benchmark_network, {}, &orthogonal_stats);
+        auto       gate_level_layout = fiction::orthogonal<gate_lyt>(benchmark_network, {}, &orthogonal_stats);
+        const auto layout_copy       = gate_level_layout.clone();
 
         //  compute critical path and throughput
         const auto cp_tp = fiction::critical_path_length_and_throughput(gate_level_layout);
@@ -79,11 +81,11 @@ int main()  // NOLINT
         const auto area_before_optimization   = width_before_optimization * height_before_optimization;
 
         // perform post-layout optimization
-        fiction::post_layout_optimization<gate_lyt>(gate_level_layout, {}, &post_layout_optimization_stats);
+        fiction::post_layout_optimization<gate_lyt>(gate_level_layout, post_layout_optimization_params,
+                                                    &post_layout_optimization_stats);
 
         // check equivalence
-        const auto eq_stats =
-            fiction::equivalence_checking<fiction::technology_network, gate_lyt>(benchmark_network, gate_level_layout);
+        const auto eq_stats = fiction::equivalence_checking<gate_lyt, gate_lyt>(layout_copy, gate_level_layout);
 
         const std::string eq_result = eq_stats == fiction::eq_type::STRONG ? "STRONG" :
                                       eq_stats == fiction::eq_type::WEAK   ? "WEAK" :

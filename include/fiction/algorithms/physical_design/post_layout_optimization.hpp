@@ -514,6 +514,7 @@ template <typename Lyt>
 
             // only check better positions
             if (lyt.y() >= y && y >= min_y && lyt.x() >= x && x >= min_x && ((x + y) <= max_diagonal) &&
+                (((x + y) < max_diagonal) || (y <= max_y)) &&
                 ((!lyt.is_pi_tile(current_pos)) || (lyt.is_pi_tile(current_pos) && (x == 0 || y == 0))) &&
                 !(lyt.is_po_tile(current_pos) &&
                   (((x <= max_non_po.x) && (y <= max_non_po.y)) || ((x + y) == (old_pos.x + old_pos.y)))))
@@ -798,6 +799,7 @@ class post_layout_optimization_impl
         // Optimization
         auto layout                  = obstruction_layout<Lyt>(plyt);
         bool moved_at_least_one_gate = true;
+        bool reduced_wiring          = true;
 
         if (max_gate_relocations == 0)
         {
@@ -806,15 +808,18 @@ class post_layout_optimization_impl
         }
         else
         {
-            while (moved_at_least_one_gate)
+            while (moved_at_least_one_gate || reduced_wiring)
             {
-                moved_at_least_one_gate = false;
+                reduced_wiring = false;
                 fiction::wiring_reduction_stats wiring_reduction_stats{};
-                fiction::wiring_reduction(layout, &wiring_reduction_stats);
-                if ((wiring_reduction_stats.area_improvement != 0ull) ||
-                    (wiring_reduction_stats.wiring_improvement != 0ull))
+                if (moved_at_least_one_gate)
                 {
-                    moved_at_least_one_gate = true;
+                    fiction::wiring_reduction(layout, &wiring_reduction_stats);
+                    if ((wiring_reduction_stats.area_improvement != 0ull) ||
+                        (wiring_reduction_stats.wiring_improvement != 0ull))
+                    {
+                        reduced_wiring = true;
+                    }
                 }
 
                 std::vector<tile<Lyt>> gate_tiles{};
@@ -845,6 +850,7 @@ class post_layout_optimization_impl
                         break;
                     }
                 }
+                moved_at_least_one_gate = false;
                 for (auto& gate_tile : gate_tiles)
                 {
                     if (detail::improve_gate_location(layout, gate_tile, max_non_po, max_gate_relocations))

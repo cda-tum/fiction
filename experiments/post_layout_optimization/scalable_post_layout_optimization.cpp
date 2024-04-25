@@ -72,7 +72,8 @@ int main()  // NOLINT
             const auto benchmark_network = read_ntk<fiction::tec_nt>(benchmark);
 
             // perform layout generation with an OGD-based heuristic algorithm
-            auto gate_level_layout = fiction::orthogonal<gate_lyt>(benchmark_network, {}, &orthogonal_stats);
+            auto       gate_level_layout = fiction::orthogonal<gate_lyt>(benchmark_network, {}, &orthogonal_stats);
+            const auto layout_copy       = gate_level_layout.clone();
 
             // calculate bounding box
             const auto bounding_box_before_optimization = fiction::bounding_box_2d(gate_level_layout);
@@ -94,8 +95,7 @@ int main()  // NOLINT
                                                         &post_layout_optimization_stats);
 
             // check equivalence
-            const auto eq_stats = fiction::equivalence_checking<fiction::technology_network, gate_lyt>(
-                benchmark_network, gate_level_layout);
+            const auto eq_stats = fiction::equivalence_checking<gate_lyt, gate_lyt>(layout_copy, gate_level_layout);
 
             const std::string eq_result = eq_stats == fiction::eq_type::STRONG ? "STRONG" :
                                           eq_stats == fiction::eq_type::WEAK   ? "WEAK" :
