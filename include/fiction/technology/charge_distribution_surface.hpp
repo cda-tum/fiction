@@ -1802,6 +1802,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     }
     /**
      * Resets the charge index of the sublayout (cells of the layout that can also be positively charged).
+     *
+     * @param engine exhaustive_sidb_simulation_engine::EXGS if `ExGS``should be used,
+     * exhaustive_sidb_simulation_engine::QUICKEXACT for `QuickExact`.
      */
     void reset_charge_index_sub_layout(
         const exhaustive_sidb_simulation_engine engine = exhaustive_sidb_simulation_engine::QUICKEXACT) noexcept
