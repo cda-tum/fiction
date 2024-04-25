@@ -1543,16 +1543,29 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                (distance * 1e-9) * std::exp(-distance / defect.lambda_tf) * physical_constants::ELEMENTARY_CHARGE;
     }
     /**
-     * This function can be used to reset all external local electrostatic potentials to 0 Volt. All important
+     * This function can be used to reset external local electrostatic potentials to 0 Volt. All important
      * attributes of the charge layout are updated automatically.
+     *
+     * @param c The cell to reset the external local electrostatic potential of. The reset is performed for all cells
+     * when no cell is passed.
      */
-    void reset_local_external_potentials() noexcept
+    void reset_local_external_potential(const std::optional<typename Lyt::cell> c = std::nullopt) noexcept
     {
-        if (!strg->local_external_pot.empty())
+        if (strg->local_external_pot.empty() || (c.has_value() && strg->local_external_pot.count(c.value()) == 0))
+        {
+            return;
+        }
+
+        if (c.has_value())
+        {
+            strg->local_external_pot.erase(c.value());
+        }
+        else
         {
             strg->local_external_pot.clear();
-            this->update_after_charge_change();
         }
+
+        update_after_charge_change();
     }
     /**
      * This function can be used to assign an external local electrostatic potential in Volt to the layout, which is
