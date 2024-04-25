@@ -60,7 +60,7 @@ int main()  // NOLINT
     fiction::post_layout_optimization_params  post_layout_optimization_params{};
     // post_layout_optimization_params.max_gate_relocations = 1;
 
-    static constexpr const uint64_t bench_select = fiction_experiments::c5315;
+    static constexpr const uint64_t bench_select = fiction_experiments::trindade16 | fiction_experiments::fontes18;
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
