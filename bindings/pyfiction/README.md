@@ -83,7 +83,7 @@ file `include/documentation.hpp`, which acts as a wrapper around the aforementio
 
 To extend the docstrings, use the GitHub Action `pyfiction-docstring-generator`, which will regenerate `pybind11_mkdoc_docstrings.hpp` and override the existing one
 by commiting any changes to your branch. If a pull request is already openend for your branch, `pyfiction-docstring-generator` will be triggered everytime
-a new commit is pushed and `pybind11_mkdoc_docstrings.hpp` is updated automatically. 
+a new commit is pushed and `pybind11_mkdoc_docstrings.hpp` is updated automatically.
 Alternatively, you can also run `pybind11_mkdoc` locally.
 
 #### Use the GitHub Action (preferred)
