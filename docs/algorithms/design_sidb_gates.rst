@@ -20,7 +20,7 @@ SiDB Gate Designer
 Utility Functions
 #################
 
-**Header:** ``fiction/algorithms/physical_design/is_sidb_gate_design_impossible.hpp``
+**Header:** ``fiction/technology/is_sidb_gate_design_impossible.hpp``
 
 .. doxygenstruct:: fiction::is_gate_design_impossible_params
    :members:
