@@ -19,8 +19,12 @@ If you want to include the functions dependent on the Z3 solver, set `z3=ON` bef
 z3=ON pip install .
 ```
 
-Similarly, ALGLIB, which SiDB simulator *ClusterComplete* depends on, may be enabled with `alglib=ON`. This may be
-enabled alongside `z3=ON` by separating them with a space before `pip`.
+#### Bindings for *ClusterComplete*
+
+On Linux, the bindings can be installed from the PyPI repository which includes all dependent functionality, including
+*ClusterComplete*, which depends on ALGLIB. On Windows and macOS, these bindings can be enabled through a local
+installation using `alglib=ON`, similar as above. This may be enabled alongside `z3=ON` by separating the definitions
+with a space before the `pip` call.
 
 ### Building the bindings with CMake
 
