@@ -1144,6 +1144,7 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
         charge_distribution_surface charge_layout{lyt, sidb_simulation_parameters{}, sidb_charge_state::NEGATIVE};
         charge_layout.assign_local_external_potential({{{0, 0, 0}, -0.2}});
         charge_layout.trying_a_different_name();
+        charge_layout.assign_local_external_potential({{{0, 0, 0}, -0.2}});
         charge_layout.assign_dependent_cell({3, 0, 0});
         CHECK(charge_layout.get_charge_state({0, 0, 0}) == sidb_charge_state::NEGATIVE);
         CHECK(charge_layout.get_charge_state({3, 0, 0}) == sidb_charge_state::NEGATIVE);
