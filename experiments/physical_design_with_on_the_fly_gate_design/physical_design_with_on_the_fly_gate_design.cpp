@@ -54,10 +54,10 @@ int main()  // NOLINT
     using cell_lyt = fiction::sidb_cell_clk_lyt;
 
     fiction::design_sidb_gates_params<fiction::cube::coord_t> design_gate_params{};
-    design_gate_params.phys_params     = fiction::sidb_simulation_parameters{2, -0.32};
-    design_gate_params.canvas          = {{24, 17}, {34, 28}};
-    design_gate_params.number_of_sidbs = 3;
-    design_gate_params.sim_engine      = fiction::sidb_simulation_engine::QUICKEXACT;
+    design_gate_params.simulation_parameters = fiction::sidb_simulation_parameters{2, -0.32};
+    design_gate_params.canvas                = {{24, 17}, {34, 28}};
+    design_gate_params.number_of_sidbs       = 3;
+    design_gate_params.sim_engine            = fiction::sidb_simulation_engine::QUICKEXACT;
     design_gate_params.termination_cond =
         fiction::design_sidb_gates_params<fiction::cube::coord_t>::termination_condition::AFTER_FIRST_SOLUTION;
 
@@ -118,8 +118,8 @@ int main()  // NOLINT
                                    "layout area in nm²"};
 
     // parameters for SMT-based physical design
-    fiction::exact_physical_design_params<gate_lyt> exact_params{};
-    exact_params.scheme        = fiction::ptr<gate_lyt>(fiction::row_clocking<gate_lyt>(fiction::num_clks::FOUR));
+    fiction::exact_physical_design_params exact_params{};
+    exact_params.scheme        = "ROW4";
     exact_params.crossings     = false;
     exact_params.border_io     = false;
     exact_params.desynchronize = true;
@@ -182,14 +182,14 @@ int main()  // NOLINT
 
             while (!gate_level_layout.has_value() || gate_design_failed)
             {
-                exact_params.black_list = black_list;
                 fiction::exact_physical_design_stats exact_stats{};
                 if (!gate_level_layout.has_value() && attempts > 0)
                 {
                     break;
                 }
                 std::cout << black_list.size() << '\n';
-                gate_level_layout = fiction::exact<gate_lyt>(mapped_network, exact_params, &exact_stats);
+                gate_level_layout =
+                    fiction::exact_with_blacklist<gate_lyt>(mapped_network, black_list, exact_params, &exact_stats);
                 if (gate_level_layout.has_value())
                 {
                     try
