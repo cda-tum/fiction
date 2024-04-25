@@ -1703,7 +1703,7 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects, part two", 
         CHECK_THAT(charge_layout_new.get_local_potential({10, 5, 1}).value(),
                    Catch::Matchers::WithinAbs(0.000000, 0.000001));
 
-        charge_layout_new.trying_a_different_name();
+        //        charge_layout_new.trying_a_different_name();
         charge_layout_new.assign_local_external_potential({{{0, 0, 1}, -0.5}, {{10, 5, 1}, -0.1}});
         charge_layout_new.assign_all_charge_states(sidb_charge_state::NEGATIVE);
         charge_layout_new.update_after_charge_change();
