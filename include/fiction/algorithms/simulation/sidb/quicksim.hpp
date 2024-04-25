@@ -149,7 +149,6 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
                         for (uint64_t i = 0ul; i < charge_lyt.num_cells(); ++i)
                         {
                             {
-                                const std::lock_guard lock{mutex};
                                 if (std::find(negative_sidb_indices.cbegin(), negative_sidb_indices.cend(), i) !=
                                     negative_sidb_indices.cend())
                                 {
