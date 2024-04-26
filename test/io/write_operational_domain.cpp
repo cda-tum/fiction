@@ -50,8 +50,7 @@ TEST_CASE("Write simple operational domain", "[write-operational-domain]")
 
     SECTION("default operational tags")
     {
-        std::set<std::string> expected{"epsilon_r,lambda_tf,operational status", "0,0,operational",
-                                       "0,1,non-operational"};
+        std::set<std::string> expected{"epsilon_r,lambda_tf,operational status", "0,0,1", "0,1,0"};
 
         write_operational_domain(opdom, os);
         const auto os_str = os.str();
@@ -94,8 +93,8 @@ TEST_CASE("Write operational domain with floating-point parameter values", "[wri
 
     SECTION("default operational tags")
     {
-        std::set<std::string> expected{"epsilon_r,lambda_tf,operational status", "0.1,0.2,operational",
-                                       "0.3,0.4,non-operational", "1.2,1.4,operational", "2.4,5.75,non-operational"};
+        std::set<std::string> expected{"epsilon_r,lambda_tf,operational status", "0.1,0.2,1", "0.3,0.4,0", "1.2,1.4,1",
+                                       "2.4,5.75,0"};
 
         write_operational_domain(opdom, os);
         const auto os_str = os.str();
@@ -109,10 +108,10 @@ TEST_CASE("Write operational domain with floating-point parameter values", "[wri
     }
     SECTION("custom operational tags")
     {
-        const write_operational_domain_params params = {"1", "0"};
+        const write_operational_domain_params params = {"operational", "non-operational"};
 
-        std::set<std::string> expected{"epsilon_r,lambda_tf,operational status", "0.1,0.2,1", "0.3,0.4,0", "1.2,1.4,1",
-                                       "2.4,5.75,0"};
+        std::set<std::string> expected{"epsilon_r,lambda_tf,operational status", "0.1,0.2,operational",
+                                       "0.3,0.4,non-operational", "1.2,1.4,operational", "2.4,5.75,non-operational"};
 
         write_operational_domain(opdom, os, params);
         const auto os_str = os.str();

@@ -25,11 +25,11 @@ struct write_operational_domain_params
     /**
      * The tag used to represent the operational value of a parameter set.
      */
-    std::string_view operational_tag = "operational";
+    std::string_view operational_tag = "1";
     /**
      * The tag used to represent the non-operational value of a parameter set.
      */
-    std::string_view non_operational_tag = "non-operational";
+    std::string_view non_operational_tag = "0";
 };
 
 namespace detail
@@ -69,9 +69,15 @@ sweep_parameter_to_string(const operational_domain::sweep_parameter& param) noex
  * Writes a CSV representation of an operational domain to the specified output stream. The data are written
  * as rows, each corresponding to one set of simulation parameters and their corresponding operational status.
  *
- * The output CSV format is as follows:
- * X_DIMENSION, Y_DIMENSION, OPERATIONAL STATUS
- * ... subsequent rows for each set of simulation parameters.
+ * The output CSV format is e.g. as follows:
+    \verbatim embed:rst
+    .. code-block:: RST
+
+     epsilon_r, lambda_tf, operational status
+     0.0, 0.0, 0
+     0.1, 0.0, 1
+     ... subsequent rows for each set of simulation parameters
+    \endverbatim
  *
  * The operational status is a binary value represented by specified tags in `params` indicating whether the simulation
  * parameters are within the operational domain or not.
@@ -101,9 +107,15 @@ inline void write_operational_domain(const operational_domain& opdom, std::ostre
  * Writes a CSV representation of an operational domain to the specified file. The data are written as rows, each
  * corresponding to one set of simulation parameters and their corresponding operational status.
  *
- * The output CSV format is as follows:
- * X_DIMENSION, Y_DIMENSION, OPERATIONAL STATUS
- * ... subsequent rows for each set of simulation parameters.
+ * The output CSV format is e.g. as follows:
+    \verbatim embed:rst
+    .. code-block:: RST
+
+     epsilon_r, lambda_tf, operational status
+     0.0, 0.0, 0
+     0.1, 0.0, 1
+     ... subsequent rows for each set of simulation parameters
+    \endverbatim
  *
  * The operational status is a binary value represented by specified tags in `params` indicating whether the simulation
  * parameters are within the operational domain or not.
