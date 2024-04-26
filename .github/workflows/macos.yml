@@ -93,6 +93,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
+
       # Build and test pipeline for Debug mode
 
       - name: Create Build Environment (Debug)
@@ -117,11 +118,12 @@ jobs:
 
       - name: Build (Debug)
         working-directory: ${{github.workspace}}/build_debug
-        run: cmake --build . -j4  # all macOS runners provide at least 3 cores
+        run: cmake --build . --config Debug -j4  # all macOS runners provide at least 3 cores
 
       - name: Test (Debug)
         working-directory: ${{github.workspace}}/build_debug
         run: ctest -C Debug --verbose --output-on-failure --repeat until-pass:3 --parallel 4
+
 
       # Build and test pipeline for Release mode
 
@@ -147,7 +149,7 @@ jobs:
 
       - name: Build (Release)
         working-directory: ${{github.workspace}}/build_release
-        run: cmake --build . -j4  # all macOS runners provide at least 3 cores
+        run: cmake --build . --config Release -j4  # all macOS runners provide at least 3 cores
 
       - name: Test (Release)
         working-directory: ${{github.workspace}}/build_release
