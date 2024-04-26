@@ -252,6 +252,7 @@ Math Utils
 .. doxygenfunction:: fiction::integral_abs
 .. doxygenfunction:: fiction::binomial_coefficient
 .. doxygenfunction:: fiction::determine_all_combinations_of_distributing_k_entities_on_n_positions
+.. doxygenfunction:: fiction::cost_function_chi
 
 ``phmap``
 ---------

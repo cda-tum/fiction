@@ -271,6 +271,21 @@ Operational Domain Computation
         .. autofunction:: mnt.pyfiction.operational_domain_contour_tracing
 
 
+Defect Influence Operational Domain
+###################################
+
+**Header:** ``fiction/algorithms/simulation/sidb/defect_influence_operational_domain.hpp``
+
+.. doxygenstruct:: fiction::defect_operational_domain_params
+   :members:
+.. doxygenstruct:: fiction::defect_influence_operational_domain
+   :members:
+.. doxygenstruct:: fiction::defect_influence_operational_stats
+   :members:
+.. doxygenfunction:: fiction::defect_influence_operational_domain_grid_search
+.. doxygenfunction:: fiction::defect_influence_operational_domain_random_sampling
+.. doxygenfunction:: fiction::defect_influence_operational_domain_contour_tracing
+
 
 Utility Functions
 #################

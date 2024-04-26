@@ -581,47 +581,6 @@ class defect_influence_impl
  * operation is defined as the layout implementing the given truth table. The input BDL pairs of the layout are assumed
  * to be in the same order as the inputs of the truth table.
  *
- * // TODO
- *
- * @tparam Lyt SiDB cell-level layout type.
- * @tparam TT Truth table type.
- * @param lyt Layout to compute the defect influence operational domain for.
- * @param spec Expected Boolean function of the layout given as a multi-output truth table.
- * @param samples Number of samples to perform.
- * @param params Defect influence operational domain computation parameters.
- * @param stats Operational domain computation statistics.
- * @return The (partial) defect influence operational domain of the layout.
- */
-template <typename Lyt, typename TT>
-defect_influence_operational_domain<Lyt>
-defect_influence_operational_domain_contour_tracing(const Lyt& lyt, const std::vector<TT>& spec, std::size_t samples,
-                                                    const defect_operational_domain_params& params = {},
-                                                    defect_influence_operational_stats*     stats  = nullptr)
-{
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
-    static_assert(has_cube_coord_v<Lyt> || has_siqad_coord_v<Lyt>, "Lyt is not based on cube coordinates");
-
-    defect_influence_operational_stats     st{};
-    detail::defect_influence_impl<Lyt, TT> p{lyt, spec, params, st};
-
-    const auto result = p.contour_tracing(samples);
-
-    if (stats)
-    {
-        *stats = st;
-    }
-
-    return result;
-}
-
-/**
- * Computes the defect influence operational domain of the given SiDB cell-level layout. The defect influence
- * operational domain is the set of all defect positions for which the layout is logically operational. Logical
- * operation is defined as the layout implementing the given truth table. The input BDL pairs of the layout are assumed
- * to be in the same order as the inputs of the truth table.
- *
  * This algorithm uses a grid search to determine the defect influence operational domain. The grid search is performed
  * by exhaustively sweeping all possible atomic defect positions in x and y dimensions.
  *
@@ -690,6 +649,47 @@ defect_influence_operational_domain_random_sampling(const Lyt& lyt, const std::v
     detail::defect_influence_impl<Lyt, TT> p{lyt, spec, params, st};
 
     const auto result = p.random_sampling(samples);
+
+    if (stats)
+    {
+        *stats = st;
+    }
+
+    return result;
+}
+
+/**
+ * Computes the defect influence operational domain of the given SiDB cell-level layout. The defect influence
+ * operational domain is the set of all defect positions for which the layout is logically operational. Logical
+ * operation is defined as the layout implementing the given truth table. The input BDL pairs of the layout are assumed
+ * to be in the same order as the inputs of the truth table.
+ *
+ * // TODO
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @tparam TT Truth table type.
+ * @param lyt Layout to compute the defect influence operational domain for.
+ * @param spec Expected Boolean function of the layout given as a multi-output truth table.
+ * @param samples Number of samples to perform.
+ * @param params Defect influence operational domain computation parameters.
+ * @param stats Operational domain computation statistics.
+ * @return The (partial) defect influence operational domain of the layout.
+ */
+template <typename Lyt, typename TT>
+defect_influence_operational_domain<Lyt>
+defect_influence_operational_domain_contour_tracing(const Lyt& lyt, const std::vector<TT>& spec, std::size_t samples,
+                                                    const defect_operational_domain_params& params = {},
+                                                    defect_influence_operational_stats*     stats  = nullptr)
+{
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
+    static_assert(has_cube_coord_v<Lyt> || has_siqad_coord_v<Lyt>, "Lyt is not based on cube coordinates");
+
+    defect_influence_operational_stats     st{};
+    detail::defect_influence_impl<Lyt, TT> p{lyt, spec, params, st};
+
+    const auto result = p.contour_tracing(samples);
 
     if (stats)
     {
