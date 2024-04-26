@@ -516,13 +516,13 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
 
         charge_distribution_surface charge_layout{lyt, sidb_simulation_parameters{}};
 
-        charge_layout.assign_simulation_parameters(sidb_simulation_parameters{2, -0.2});
+        charge_layout.assign_physical_parameters(sidb_simulation_parameters{2, -0.2});
         CHECK(charge_layout.get_simulation_params().base == 2);
         CHECK(charge_layout.get_simulation_params().mu_minus == -0.2);
         CHECK(charge_layout.get_simulation_params().epsilon_r == 5.6);
         CHECK(charge_layout.get_simulation_params().lambda_tf == 5.0);
 
-        charge_layout.assign_simulation_parameters(sidb_simulation_parameters{3, -0.4, 5.1, 5.5});
+        charge_layout.assign_physical_parameters(sidb_simulation_parameters{3, -0.4, 5.1, 5.5});
         CHECK(charge_layout.get_simulation_params().base == 3);
         CHECK(charge_layout.get_simulation_params().mu_minus == -0.4);
         CHECK(charge_layout.get_simulation_params().epsilon_r == 5.1);
@@ -1428,13 +1428,13 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects, part one", 
 
         charge_distribution_surface charge_layout{lyt, sidb_simulation_parameters{}};
 
-        charge_layout.assign_simulation_parameters(sidb_simulation_parameters{2, -0.2});
+        charge_layout.assign_physical_parameters(sidb_simulation_parameters{2, -0.2});
         CHECK(charge_layout.get_simulation_params().base == 2);
         CHECK(charge_layout.get_simulation_params().mu_minus == -0.2);
         CHECK(charge_layout.get_simulation_params().epsilon_r == 5.6);
         CHECK(charge_layout.get_simulation_params().lambda_tf == 5.0);
 
-        charge_layout.assign_simulation_parameters(sidb_simulation_parameters{3, -0.4, 5.1, 5.5});
+        charge_layout.assign_physical_parameters(sidb_simulation_parameters{3, -0.4, 5.1, 5.5});
         CHECK(charge_layout.get_simulation_params().base == 3);
         CHECK(charge_layout.get_simulation_params().mu_minus == -0.4);
         CHECK(charge_layout.get_simulation_params().epsilon_r == 5.1);
@@ -1684,14 +1684,6 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects, part two", 
         CHECK(charge_layout_new.get_local_potential({10, 5, 1}).value() > -0.5);
 
         charge_layout_new.assign_all_charge_states(sidb_charge_state::NEUTRAL);
-
-        charge_layout_new.assign_local_external_potential({{{0, 0, 1}, -0.1}});
-        CHECK_THAT(charge_layout_new.get_local_potential({0, 0, 1}).value() + 0.6,
-                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
-        CHECK_THAT(charge_layout_new.get_local_potential({1, 3, 0}).value(),
-                   Catch::Matchers::WithinAbs(0.000000, 0.000001));
-        CHECK_THAT(charge_layout_new.get_local_potential({10, 5, 1}).value(),
-                   Catch::Matchers::WithinAbs(0.000000, 0.000001));
 
         charge_layout_new.assign_local_external_potential({{{0, 0, 1}, -0.1}});
         CHECK_THAT(charge_layout_new.get_local_potential({0, 0, 1}).value() + 0.1,

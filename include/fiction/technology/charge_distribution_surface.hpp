@@ -343,7 +343,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @param params Physical parameters to be assigned.
      */
-    void assign_simulation_parameters(const sidb_simulation_parameters& params) noexcept
+    void assign_physical_parameters(const sidb_simulation_parameters& params) noexcept
     {
         if ((strg->simulation_parameters.base == params.base) &&
             (strg->simulation_parameters.epsilon_r == params.epsilon_r) &&
