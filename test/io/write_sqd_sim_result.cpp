@@ -189,8 +189,8 @@ TEST_CASE("Write empty simulation result", "[sqd-sim-result]")
             "    </elec_dist>\n"
             "</sim_out>\n",
             FICTION_VERSION, FICTION_REPO, fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(std::time(nullptr))),
-            sim_result.physical_parameters.lambda_tf, sim_result.physical_parameters.epsilon_r,
-            sim_result.physical_parameters.mu_minus);
+            sim_result.simulation_parameters.lambda_tf, sim_result.simulation_parameters.epsilon_r,
+            sim_result.simulation_parameters.mu_minus);
 
         write_sqd_sim_result(sim_result, simulation_stream);
 
@@ -221,8 +221,8 @@ TEST_CASE("Write empty simulation result", "[sqd-sim-result]")
             "    </elec_dist>\n"
             "</sim_out>\n",
             FICTION_VERSION, FICTION_REPO, fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(std::time(nullptr))),
-            sim_result.physical_parameters.lambda_tf, sim_result.physical_parameters.epsilon_r,
-            sim_result.physical_parameters.mu_minus);
+            sim_result.simulation_parameters.lambda_tf, sim_result.simulation_parameters.epsilon_r,
+            sim_result.simulation_parameters.mu_minus);
 
         sim_result.additional_simulation_parameters.emplace("param1", "value1");
 
@@ -256,8 +256,8 @@ TEST_CASE("Write empty simulation result", "[sqd-sim-result]")
             "    </elec_dist>\n"
             "</sim_out>\n",
             FICTION_VERSION, FICTION_REPO, fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(std::time(nullptr))),
-            sim_result.physical_parameters.lambda_tf, sim_result.physical_parameters.epsilon_r,
-            sim_result.physical_parameters.mu_minus);
+            sim_result.simulation_parameters.lambda_tf, sim_result.simulation_parameters.epsilon_r,
+            sim_result.simulation_parameters.mu_minus);
 
         sim_result.additional_simulation_parameters.emplace("param3", 3.14);
 
@@ -326,8 +326,8 @@ TEST_CASE("Write simulation result with ExGS simulation", "[sqd-sim-result]")
         "    </elec_dist>\n"
         "</sim_out>\n",
         FICTION_VERSION, FICTION_REPO, fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(std::time(nullptr))),
-        sim_result.simulation_runtime.count(), sim_result.physical_parameters.lambda_tf,
-        sim_result.physical_parameters.epsilon_r, sim_result.physical_parameters.mu_minus);
+        sim_result.simulation_runtime.count(), sim_result.simulation_parameters.lambda_tf,
+        sim_result.simulation_parameters.epsilon_r, sim_result.simulation_parameters.mu_minus);
 
     write_sqd_sim_result(sim_result, simulation_stream);
 
@@ -382,8 +382,8 @@ TEST_CASE("Write simulation result with ExGS simulation and positive DBs", "[sqd
         "    </elec_dist>\n"
         "</sim_out>\n",
         FICTION_VERSION, FICTION_REPO, fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(std::time(nullptr))),
-        sim_result.simulation_runtime.count(), sim_result.physical_parameters.lambda_tf,
-        sim_result.physical_parameters.epsilon_r, sim_result.physical_parameters.mu_minus);
+        sim_result.simulation_runtime.count(), sim_result.simulation_parameters.lambda_tf,
+        sim_result.simulation_parameters.epsilon_r, sim_result.simulation_parameters.mu_minus);
 
     write_sqd_sim_result(sim_result, simulation_stream);
 

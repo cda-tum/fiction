@@ -17,11 +17,11 @@ namespace fiction
 {
 
 /**
- * Iterator that iterates over all possible input states of a BDL layout. There are \f$ 2^n \f$ possible input states
+ * Iterator that iterates over all possible input states of a BDL layout. There are \f$2^n\f$ possible input states
  * for an \f$n\f$-input BDL layout, each with a unique input index. The input index is interpreted as a binary number,
  * where the \f$i\f$-th bit represents the input state of the \f$i\f$-th input BDL pair. If the bit is `1`, the lower
  * BDL dot is set and the upper BDL dot removed. If the bit is `0`, the upper BDL dot is removed and the lower BDL dot
- * set. The iterator creates and stores a deep-copy of the given layout. The state enumeration wraps around, i.e. after
+ * set. The iterator creates and stores a deep-copy of the given layout. The state enumeration wraps around, i.e., after
  * the last possible input state, the first input state is set again.
  *
  * The iterator satisfies the requirements of `LegacyRandomAccessIterator` and can be used in iterator-based `for`
@@ -290,7 +290,7 @@ class bdl_input_iterator
      */
     const uint8_t num_inputs;
     /**
-     * The current input index. There are \f$ 2^n \f$ possible input states for an \f$n\f$-input BDL layout.
+     * The current input index. There are \f$2^n\f$ possible input states for an \f$n\f$-input BDL layout.
      */
     uint64_t current_input_index{0ull};
 

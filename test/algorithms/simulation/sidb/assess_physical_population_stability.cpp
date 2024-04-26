@@ -26,7 +26,7 @@ TEST_CASE("Single SiDB", "[assess-physical-population-stability]")
         const auto params = assess_physical_population_stability_params{sidb_simulation_parameters{2, -0.29}, 2};
         const auto result = assess_physical_population_stability(lat, params);
         REQUIRE(result.size() == 1);
-        const auto& population_stability_detail = result[0];
+        const auto& population_stability_detail = result.front();
         CHECK(population_stability_detail.critical_cell == siqad::coord_t{1, 1, 0});
         CHECK(population_stability_detail.transition_from_to == transition_type::NEGATIVE_TO_NEUTRAL);
         CHECK(population_stability_detail.minimum_potential_difference_to_transition == 0.29);
@@ -48,7 +48,10 @@ TEST_CASE("Single SiDB", "[assess-physical-population-stability]")
     }
 }
 
-TEST_CASE("Three SiDBs with positive charge states", "[assess-physical-population-stability]")
+TEMPLATE_TEST_CASE(
+    "Three SiDBs with positive charge states", "[assess-physical-population-stability]",
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
+    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
     sidb_cell_clk_lyt_siqad lyt{};
     const auto              params = assess_physical_population_stability_params{};
@@ -97,7 +100,10 @@ TEST_CASE("Three SiDBs with positive charge states", "[assess-physical-populatio
     }
 }
 
-TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]")
+TEMPLATE_TEST_CASE(
+    "Bestagon AND gate", "[assess-physical-population-stability]",
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
+    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
     sidb_cell_clk_lyt_siqad lyt{};
     const auto              params = assess_physical_population_stability_params{};
@@ -204,7 +210,10 @@ TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]")
     }
 }
 
-TEST_CASE("Bestagon CROSSING gate input 11, using siqad coordinates", "[assess-physical-population-stability]")
+TEMPLATE_TEST_CASE(
+    "Bestagon CROSSING gate input 11, using siqad coordinates", "[assess-physical-population-stability]",
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
+    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>))
 {
     sidb_cell_clk_lyt_siqad lyt{};
     const auto              params = assess_physical_population_stability_params{};
