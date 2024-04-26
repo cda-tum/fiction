@@ -41,3 +41,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           path: ${{ github.workspace }}/pybind11_mkdoc_docstrings.hpp
+          overwrite: true
