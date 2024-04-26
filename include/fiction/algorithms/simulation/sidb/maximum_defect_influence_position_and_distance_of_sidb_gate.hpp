@@ -13,12 +13,33 @@
 namespace fiction
 {
 
+/**
+ * Parameters for the `maximum_defect_influence_position_and_distance_of_sidb_gate` algorithm.
+ */
 struct maximum_defect_influence_position_and_distance_of_sidb_gate_params
 {
+    /**
+     * Parameters for the defect influence simulation.
+     */
     maximum_defect_influence_distance_params defect_influence_params{};
-    detect_bdl_pairs_params                  bdl_pairs_params{};
+    /**
+     * Parameters for the detection of BDL pairs.
+     */
+    detect_bdl_pairs_params bdl_pairs_params{};
 };
 
+/**
+ * This function calculates the maximum influence position and distance of a defect on the ground state
+ * of an SiDB gate layout. It iterates over all input combinations and finds the defect position at maximum position
+ * that affects the gate's behavior.
+ *
+ * @tparam Lyt Lyt SiDB cell-level layout type.
+ * @tparam TT  Truth table type.
+ * @param lyt  Layout to compute the maximum defect influence position and distance for.
+ * @param spec  Expected Boolean function of the layout given as a multi-output truth table.
+ * @param params Parameters for the defect influence simulation and BDL pair detection.
+ * @return A pair containing the maximum influence defect position and its distance from the layout/gate.
+ */
 template <typename Lyt, typename TT>
 [[nodiscard]] std::pair<typename Lyt::cell, double> maximum_defect_influence_position_and_distance_of_sidb_gate(
     const Lyt& lyt, const std::vector<TT>& spec,

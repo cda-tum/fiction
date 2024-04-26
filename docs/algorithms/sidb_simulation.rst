@@ -378,4 +378,12 @@ Maximum Minimum Defect Influence Distance
 
 **Header:** ``fiction/algorithms/simulation/sidb/maximum_minimum_defect_influence_distance.hpp``
 
+.. doxygenstruct:: fiction::maximum_minimum_defect_influence_distance_params
+   :members:
 .. doxygenfunction:: fiction::maximum_minimum_defect_influence_distance
+
+**Header:** ``fiction/algorithms/simulation/sidb/maximum_minimum_defect_influence_distance_of_sidb_gate.hpp``
+
+.. doxygenstruct:: fiction::maximum_defect_influence_position_and_distance_of_sidb_gate_params
+   :members:
+.. doxygenfunction:: fiction::maximum_defect_influence_position_and_distance_of_sidb_gate
