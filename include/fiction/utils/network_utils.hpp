@@ -13,6 +13,7 @@
 #include <cstdint>
 #include <functional>
 #include <optional>
+#include <stdexcept>
 #include <type_traits>
 #include <vector>
 
@@ -248,13 +249,11 @@ uint32_t num_constant_fanins(const Ntk& ntk, const mockturtle::node<Ntk>& n) noe
 /**
  * Exception class that can be thrown if some network exceeds a legal number of fanins.
  */
-class high_degree_fanin_exception : public std::exception
+class high_degree_fanin_exception : public std::invalid_argument
 {
   public:
-    [[nodiscard]] const char* what() const noexcept override
-    {
-        return "network contains nodes that exceed the supported non-constant fanin size";
-    }
+    high_degree_fanin_exception() : std::invalid_argument("network contains nodes that exceed the supported fanin size")
+    {}
 };
 /**
  * Checks if a given network exceeds a given fanin threshold in any of its nodes.

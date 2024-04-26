@@ -63,11 +63,6 @@ jobs:
       - name: Install libraries and the respective compiler
         run: sudo apt-get update && sudo apt-get install -yq libtbb-dev ${{matrix.compiler}}
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.9.x'
-
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -81,6 +76,12 @@ jobs:
           variant: ccache
           save: true
           max-size: 10G
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9.x'
+          cache: 'pip'
 
       - name: Setup mold
         uses: rui314/setup-mold@v1
