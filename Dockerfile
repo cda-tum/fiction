@@ -14,6 +14,7 @@ WORKDIR /app
 # Create a Python virtual environment and activate it
 RUN python3 -m venv venv && \
     . venv/bin/activate && \
+    pip install --upgrade pip setuptools && \
     pip install z3-solver==4.10.0
 
 # Set the path to include the virtual environment
