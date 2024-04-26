@@ -6,7 +6,7 @@
 #define FICTION_WRITE_OPERATIONAL_DOMAIN_HPP
 
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
-#include "fiction/algorithms/simulation/sidb/defect_influence_of_sidb_gate_contour_tracing.hpp"
+#include "fiction/algorithms/simulation/sidb/defect_influence_operational_domain.hpp"
 #include "fiction/io/csv_writer.hpp"
 
 #include <fstream>
@@ -50,7 +50,7 @@ struct write_operational_domain_params
  * empty `write_operational_domain_params` object, which provides standard tags.
  */
  template <typename Lyt>
-inline void write_operational_domain(const defect_operational_domain<Lyt>& opdom, std::ostream& os,
+inline void write_operational_domain(const defect_influence_operational_domain<Lyt>& opdom, std::ostream& os,
                                      const write_operational_domain_params& params = {})
 {
     csv_writer writer{os};
@@ -82,7 +82,7 @@ inline void write_operational_domain(const defect_operational_domain<Lyt>& opdom
  * empty `write_operational_domain_params` object, which provides standard tags.
  */
  template <typename Lyt>
-inline void write_operational_domain(const defect_operational_domain<Lyt>& opdom, const std::string_view& filename,
+inline void write_operational_domain(const defect_influence_operational_domain<Lyt>& opdom, const std::string_view& filename,
                                      const write_operational_domain_params& params = {})
 {
     std::ofstream os{filename.data(), std::ofstream::out};

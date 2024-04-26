@@ -53,6 +53,7 @@ enum class temperature_schedule
      */
     GEOMETRIC
 };
+
 /**
  * Simulated Annealing (SA) is a probabilistic optimization algorithm that is used to find a local minimum of a given
  * function. SA was first proposed in \"Optimization by simulated annealing\" by S. Kirkpatrick, C. D. Gelatt Jr, and M.
@@ -106,42 +107,48 @@ simulated_annealing(const State& init_state, const double init_temp, const doubl
     State best_state = current_state;
     auto  best_cost  = current_cost;
 
-        auto temp = init_temp;
+    auto temp = init_temp;
 
-        while (temp > final_temp) {
-            for (std::size_t c = 0; c < cycles; ++c) {
-                State new_state = next(current_state);
-                auto new_cost = cost(new_state);
+    while (temp > final_temp)
+    {
+        for (std::size_t c = 0; c < cycles; ++c)
+        {
+            State new_state = next(current_state);
+            auto  new_cost  = cost(new_state);
 
-                if (new_cost < best_cost) {
-                    best_state = new_state;
-                    best_cost = new_cost;
-                    current_state = std::move(new_state);
-                    current_cost = std::move(new_cost);
+            if (new_cost < best_cost)
+            {
+                best_state    = new_state;
+                best_cost     = new_cost;
+                current_state = std::move(new_state);
+                current_cost  = std::move(new_cost);
 
-                    continue;
-                }
-
-                const auto cost_delta = static_cast<double>(new_cost - current_cost);
-
-                // shortcut to skip the expensive std::exp call
-                if (cost_delta > 10.0 * temp) {
-                    continue;  // as std::exp(-10.0) is a very small number
-                }
-
-                // if the new state is worse, accept it with a probability of exp(-energy_delta/temp)
-                if (cost_delta <= 0.0 || std::exp(-cost_delta / temp) > random_functor(generator)) {
-                    current_state = std::move(new_state);
-                    current_cost = std::move(new_cost);
-                }
+                continue;
             }
 
-            // update temperature
-            temp = std::clamp(schedule(temp), final_temp, init_temp);
+            const auto cost_delta = static_cast<double>(new_cost - current_cost);
+
+            // shortcut to skip the expensive std::exp call
+            if (cost_delta > 10.0 * temp)
+            {
+                continue;  // as std::exp(-10.0) is a very small number
+            }
+
+            // if the new state is worse, accept it with a probability of exp(-energy_delta/temp)
+            if (cost_delta <= 0.0 || std::exp(-cost_delta / temp) > random_functor(generator))
+            {
+                current_state = std::move(new_state);
+                current_cost  = std::move(new_cost);
+            }
         }
+
+        // update temperature
+        temp = std::clamp(schedule(temp), final_temp, init_temp);
+    }
 
     return {best_state, best_cost};
 }
+
 /**
  * This variation of Simulated Annealing (SA) does not start from just one provided initial state, but generates a
  * number of random initial states using a provided random state generator. SA as specified above is then run on all

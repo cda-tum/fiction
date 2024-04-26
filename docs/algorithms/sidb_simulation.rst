@@ -213,3 +213,11 @@ Convert Potential to Distance
 **Header:** ``fiction/algorithms/simulation/sidb/convert_potential_to_distance.hpp``
 
 .. doxygenfunction:: fiction::convert_potential_to_distance
+
+
+Maximum Minimum Defect Influence Distance
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Header:** ``fiction/algorithms/simulation/sidb/maximum_minimum_defect_influence_distance.hpp``
+
+.. doxygenfunction:: fiction::maximum_minimum_defect_influence_distance

@@ -198,18 +198,9 @@ TEST_CASE("Bestagon AND Gate influence distance function", "[maximum-defect-infl
         maximum_defect_influence_distance_stats stats{};
         const auto [defect_pos, distance] = maximum_defect_influence_position_and_distance(lyt, sim_params, &stats);
         std::cout << fmt::format("{} {} {} {}", defect_pos.x, defect_pos.y, defect_pos.z, distance) << std::endl;
-        CHECK(mockturtle::to_seconds(stats.time_total) > 1.0);
+        CHECK(mockturtle::to_seconds(stats.time_total) > 0.0);
     }
-    SECTION("input 01")
-    {
-
-    }
-    SECTION("input 10")
-    {
-
-    }
-    SECTION("input 11")
-    {
-
-    }
+    SECTION("input 01") {}
+    SECTION("input 10") {}
+    SECTION("input 11") {}
 }

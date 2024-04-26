@@ -112,10 +112,14 @@ struct design_sidb_gates_params
      * The simulation engine to be used for the operational domain computation.
      */
     sidb_simulation_engine sim_engine{sidb_simulation_engine::QUICKEXACT};
-
+    /**
+     * The design parameters used when designing with Simulated Annealing.
+     */
     design_sidb_gates_sa_params simanneal_params{};
-
-    std::size_t maximal_random_solutions{};
+    /**
+     * The number of gate implementations found before the random design process is stopped.
+     */
+    std::size_t maximal_random_solutions = 1;
 };
 /**
  * Statistics for the design of SiDB gates.
@@ -123,7 +127,7 @@ struct design_sidb_gates_params
 struct design_sidb_gates_stats
 {
     /**
-     * The total runtime of SiDb gate design process.
+     * The total runtime of SiDB gate design process.
      */
     mockturtle::stopwatch<>::duration time_total{0};
 
@@ -172,7 +176,7 @@ class design_sidb_gates_impl
         const is_operational_params params_is_operational{params.phys_params, params.sim_engine};
 
         const auto all_combinations = determine_all_combinations_of_distributing_k_entities_on_n_positions(
-            params.number_of_sidbs, static_cast<std::size_t>(all_sidbs_in_canvas.size()));
+            params.number_of_sidbs, static_cast<std::size_t>(all_cells_in_canvas.size()));
 
         std::vector<Lyt> designed_gate_layouts = {};
 
@@ -204,11 +208,6 @@ class design_sidb_gates_impl
             futures.emplace_back(
                 std::async(std::launch::async, add_combination_to_layout_and_check_operation, combination));
         }
-
-        //        for (const auto& combination : all_combinations)
-        //        {
-        //            add_combination_to_layout_and_check_operation(combination);
-        //        }
 
         // Wait for all tasks to finish
         for (auto& future : futures)
@@ -351,20 +350,6 @@ class design_sidb_gates_impl
             });
 
         std::cout << fmt::format("final cost: {}", optimized_net_cost) << std::endl;
-        //        std::cout << fmt::format("cost logic: {}",
-        //        static_cast<double>(number_of_operational_input_combinations(
-        //                                                       optimized_placement, truth_table,
-        //                                                       params_is_operational)))
-        //                  << std::endl;
-        //        std::cout << fmt::format("cost temp: {}", static_cast<double>(critical_temperature_gate_based(
-        //                                                      optimized_placement, truth_table, ct_params)))
-        //                  << std::endl;
-        //        operational_domain_stats stats{};
-        //        const auto op_domain = operational_domain_flood_fill(optimized_placement, truth_table, 1,
-        //        op_domain_params,
-        //                                                             operational_domain::parameter_point{5.6, 5},
-        //                                                             &stats);
-        //        std::cout << fmt::format("cost opdomain: {}", stats.percentual_operational_area) << std::endl;
         stats.cost_of_gate = optimized_net_cost;
         return {optimized_placement};
     }

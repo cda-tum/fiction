@@ -44,7 +44,7 @@ assess_physical_population_stability_sidb_gate(const Lyt& lyt, const std::vector
                               [](const auto& a, const auto& b) { return a.num_vars() != b.num_vars(); }) == spec.end());
 
     bdl_input_iterator<Lyt> bii{lyt, params.detect_pair_params};
-    double                  maximal_pop_stability_for_all_inputs = 0;
+    double                  maximal_pop_stability_for_all_inputs = std::numeric_limits<double>::infinity();
     // number of different input combinations
     for (auto i = 0u; i < spec.front().num_bits(); ++i, ++bii)
     {
@@ -52,24 +52,22 @@ assess_physical_population_stability_sidb_gate(const Lyt& lyt, const std::vector
             assess_physical_population_stability<Lyt>(lyt, params.assess_population_stability_params);
         if (!pop_stability.empty())
         {
-            const auto stability_for_given_input           = pop_stability.front().distance_corresponding_to_potential;
-            double     distance_corresponding_to_potential = 0.0;
+            const auto stability_for_given_input = pop_stability.front().minimum_potential_difference_to_transition;
+            double     potential                 = 0.0;
 
             if (charge_state_change == 1)
             {
-                distance_corresponding_to_potential =
-                    stability_for_given_input.at(transition_type::NEGATIVE_TO_NEUTRAL);
+                potential = std::abs(stability_for_given_input.at(transition_type::NEGATIVE_TO_NEUTRAL));
             }
 
             if (charge_state_change == -1)
             {
-                distance_corresponding_to_potential =
-                    stability_for_given_input.at(transition_type::NEUTRAL_TO_NEGATIVE);
+                potential = std::abs(stability_for_given_input.at(transition_type::NEUTRAL_TO_NEGATIVE));
             }
 
-            if (distance_corresponding_to_potential > maximal_pop_stability_for_all_inputs)
+            if (potential < maximal_pop_stability_for_all_inputs)
             {
-                maximal_pop_stability_for_all_inputs = distance_corresponding_to_potential;
+                maximal_pop_stability_for_all_inputs = potential;
             }
         }
     }
