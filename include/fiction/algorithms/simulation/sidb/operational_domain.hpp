@@ -56,7 +56,7 @@ struct operational_domain
     /**
      * Possible sweep parameters for the operational domain computation.
      */
-    enum class sweep_parameter
+    enum class sweep_parameter : uint8_t
     {
         /**
          * The relative permittivity of the dielectric material.
