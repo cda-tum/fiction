@@ -5,6 +5,7 @@
 #ifndef FICTION_SIMULATED_ANNEALING_HPP
 #define FICTION_SIMULATED_ANNEALING_HPP
 
+#include "fiction/traits.hpp"
 #include "fiction/utils/execution_utils.hpp"
 
 #include <algorithm>
@@ -118,7 +119,14 @@ simulated_annealing(const State& init_state, const double init_temp, const doubl
 
             if (new_cost < best_cost)
             {
-                best_state    = new_state;
+                if constexpr (is_cell_level_layout_v<State>)
+                {
+                    best_state = new_state.clone();
+                }
+                else
+                {
+                    best_state = new_state;
+                }
                 best_cost     = new_cost;
                 current_state = std::move(new_state);
                 current_cost  = std::move(new_cost);

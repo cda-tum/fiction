@@ -3,6 +3,7 @@
 //
 
 #include <catch2/catch_template_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include <fiction/utils/math_utils.hpp>
 
@@ -110,5 +111,26 @@ TEST_CASE("Binomial Coefficient Tests")
     {
         const uint64_t result = binomial_coefficient(50, 25);
         REQUIRE(result == 126410606437752);  // C(50, 25) = 126,410,606,437,752
+    }
+}
+
+using namespace fiction;
+
+TEST_CASE("Cost function chi calculation", "[cost_function_chi]")
+{
+    SECTION("Valid input")
+    {
+        std::vector<double> chis         = {0.2, 0.3, 0.5};
+        std::vector<double> weights      = {0.1, 0.5, 0.4};
+        double              expected_chi = 0.2 * 0.1 + 0.3 * 0.5 + 0.5 * 0.4;  // Expected result: 0.39
+        REQUIRE_THAT(cost_function_chi(chis, weights), Catch::Matchers::WithinAbs(expected_chi, 1e-5));
+    }
+
+    SECTION("Invalid input: Different sizes")
+    {
+        std::vector<double> chis    = {0.2, 0.3, 0.5};
+        std::vector<double> weights = {0.1, 0.5};  // Different size than chis
+
+        REQUIRE_THROWS_AS(cost_function_chi(chis, weights), std::invalid_argument);
     }
 }

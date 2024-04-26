@@ -364,11 +364,11 @@ class operational_domain_impl
     {
         mockturtle::stopwatch stop{stats.time_total};
 
-        std::vector<step_point> step_point_samples = {};
+        std::set<step_point> step_point_samples = {};
 
         if (initial_parameter.has_value())
         {
-            step_point_samples.emplace_back(to_step_point(initial_parameter.value()));
+            step_point_samples.insert(to_step_point(initial_parameter.value()));
         }
         else
         {

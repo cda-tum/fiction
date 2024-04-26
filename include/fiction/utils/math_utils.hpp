@@ -118,6 +118,30 @@ determine_all_combinations_of_distributing_k_entities_on_n_positions(const std::
     return all_combinations;
 }
 
+/**
+ * Calculates the cost function \f$ \chi \f$ by summing the product of chi values and weights.
+ *
+ * @param chis The vector containing the chi values.
+ * @param weights The vector containing the weights.
+ * @return The calculated cost function \f$ \chi(L) \f$.
+ *
+ * @throws std::invalid_argument If the sizes of chis and weights vectors are different.
+ */
+double cost_function_chi(const std::vector<double>& chis, const std::vector<double>& weights)
+{
+    if (chis.size() != weights.size())
+    {
+        throw std::invalid_argument("chis and weights must have the same size.");
+    }
+
+    double chi = 0.0;
+    for (std::size_t i = 0; i < chis.size(); ++i)
+    {
+        chi += weights.at(i) * chis.at(i);
+    }
+    return chi;
+}
+
 }  // namespace fiction
 
 #endif  // FICTION_MATH_UTILS_HPP

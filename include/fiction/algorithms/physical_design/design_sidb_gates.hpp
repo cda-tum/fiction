@@ -8,6 +8,7 @@
 #include "fiction/algorithms/optimization/simulated_annealing.hpp"
 #include "fiction/algorithms/simulation/sidb/critical_temperature.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
+#include "fiction/algorithms/simulation/sidb/operational_domain.hpp"
 #include "fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
@@ -17,8 +18,8 @@
 #include "fiction/utils/math_utils.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>
-#include <mockturtle/utils/stopwatch.hpp>
 #include <kitty/traits.hpp>
+#include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
 #include <atomic>
@@ -36,32 +37,65 @@
 namespace fiction
 {
 
+/**
+ * Parameters for Simulated Annealing-based gate design.
+ */
 struct design_sidb_gates_sa_params
 {
     /**
-     * Temperature schedule type.
+     * Type of temperature schedule used in Simulated Annealing.
+     * Possible values are GEOMETRIC or LINEAR.
      */
     temperature_schedule schedule{temperature_schedule::GEOMETRIC};
     /**
-     * Initial temperature.
+     * Initial temperature for Simulated Annealing.
      */
-    double initial_temperature{10000};
+    double initial_temperature{1000};
     /**
-     * Final temperature.
+     * Final temperature for Simulated Annealing.
      */
-    double final_temperature{0.001};
+    double final_temperature{0.1};
     /**
-     * Number of iterations per temperature.
+     * Number of iterations per temperature in Simulated Annealing.
      */
     std::size_t number_of_cycles{10};
     /**
-     * Number of parallel runs to pick the overall best result from.
+     * Parameters for simulating the critical temperature.
      */
-    std::size_t number_of_instances{100};
-
     critical_temperature_params ct_params{};
-
+    /**
+     * Parameters for simulating the operational domain.
+     */
     operational_domain_params op_params{};
+    /**
+     * Weight assigned to the critical temperature in the overall cost function.
+     * A negative value indicates that this weight is not used.
+     */
+    double weight_temperature = -1.0;
+    /**
+     * Weight assigned to the operational domain in the overall cost function.
+     * A negative value indicates that this weight is not used.
+     */
+    double weight_operational_domain = -1.0;
+    /**
+     * Weight assigned to the non-operational behavior in the overall cost function.
+     * This weight affects the cost function when the design is non-operational.
+     */
+    double weight_non_operational = 10;
+};
+/**
+ * Selector for the available design approaches.
+ */
+enum class design_sidb_gates_mode
+{
+    /**
+     * All gate layouts are designed exhaustively.
+     */
+    EXHAUSTIVE,
+    /**
+     * Gate layouts are designed randomly.
+     */
+    RANDOM
 };
 /**
  * This struct contains parameters and settings to design SiDB gates.
@@ -73,35 +107,13 @@ template <typename Lyt>
 struct design_sidb_gates_params
 {
     /**
-     * Selector for the available design approaches.
-     */
-    enum class design_sidb_gates_mode
-    {
-        /**
-         * All gate layouts are designed exhaustively.
-         */
-        EXHAUSTIVE,
-        /**
-         * Gate layouts are designed randomly.
-         */
-        RANDOM,
-        /**
-         * Gate layouts are designed with Simulated Annealing.
-         */
-        SIMANNEAL
-    };
-    /**
      * All Parameters for physical SiDB simulations.
      */
     sidb_simulation_parameters simulation_parameters{};
     /**
-     * Gate design mode.
-     */
-    design_sidb_gates_mode design_mode = design_sidb_gates_mode::SIMANNEAL;
-    /**
      * Canvas spanned by the northwest and southeast cell.
      */
-    std::pair<typename Lyt::cell, typename Lyt::cell> canvas{};
+    std::pair<cell<Lyt>, cell<Lyt>> canvas{};
     /**
      * Number of SiDBs placed in the canvas to create a working gate.
      */
@@ -110,10 +122,6 @@ struct design_sidb_gates_params
      * The simulation engine to be used for the operational domain computation.
      */
     sidb_simulation_engine sim_engine{sidb_simulation_engine::QUICKEXACT};
-    /**
-     * The design parameters used when designing with Simulated Annealing.
-     */
-    design_sidb_gates_sa_params simanneal_params{};
     /**
      * The number of gate implementations found before the random design process is stopped.
      */
@@ -153,10 +161,10 @@ class design_sidb_gates_impl
             truth_table{tt},
             params{ps},
             stats{st},
-            all_cells_in_canvas{all_coordinates_in_spanned_area(params.canvas.first, params.canvas.second)}
+            all_sidbs_in_canvas{all_coordinates_in_spanned_area(params.canvas.first, params.canvas.second)}
     {
         // Use std::uniform_int_distribution to generate a random index
-        random_canvas_cell_functor = std::uniform_int_distribution<uint64_t>(0, all_cells_in_canvas.size() - 1);
+        random_canvas_cell_functor = std::uniform_int_distribution<uint64_t>(0, all_sidbs_in_canvas.size() - 1);
         random_canvas_sidb_functor = std::uniform_int_distribution<uint64_t>(0, params.number_of_sidbs - 1);
     }
 
@@ -174,7 +182,7 @@ class design_sidb_gates_impl
         const is_operational_params params_is_operational{params.simulation_parameters, params.sim_engine};
 
         const auto all_combinations = determine_all_combinations_of_distributing_k_entities_on_n_positions(
-            params.number_of_sidbs, static_cast<std::size_t>(all_cells_in_canvas.size()));
+            params.number_of_sidbs, static_cast<std::size_t>(all_sidbs_in_canvas.size()));
 
         std::vector<Lyt> designed_gate_layouts = {};
 
@@ -279,77 +287,63 @@ class design_sidb_gates_impl
      *
      * @return A vector of designed SiDB gate layouts.
      */
-    [[nodiscard]] std::vector<Lyt> run_sa_design() noexcept
+    [[nodiscard]] Lyt run_sa_design(const design_sidb_gates_sa_params& sa_params) noexcept
     {
-        mockturtle::stopwatch                   stop{stats.time_total};
-        generate_random_sidb_layout_params<Lyt> parameter{
+        mockturtle::stopwatch                         stop{stats.time_total};
+        generate_random_sidb_layout_params<cell<Lyt>> parameter{
             params.canvas, params.number_of_sidbs,
-            generate_random_sidb_layout_params<Lyt>::positive_charges::FORBIDDEN};
-        const is_operational_params params_is_operational{params.phys_params, params.sim_engine};
+            generate_random_sidb_layout_params<cell<Lyt>>::positive_charges::FORBIDDEN};
+        const is_operational_params params_is_operational{params.simulation_parameters, params.sim_engine};
         auto                        initial_lyt = generate_random_sidb_layout<Lyt>(skeleton_layout, parameter);
 
-        const auto temperature_schedule = params.simanneal_params.schedule == temperature_schedule::LINEAR ?
+        const auto temperature_schedule = sa_params.schedule == temperature_schedule::LINEAR ?
                                               linear_temperature_schedule :
                                               geometric_temperature_schedule;
 
         canvas_sidbs = determine_canvas_sidbs(initial_lyt);
 
-        auto [optimized_placement, optimized_net_cost] = simulated_annealing<decltype(initial_lyt)>(
-            initial_lyt, params.simanneal_params.initial_temperature, params.simanneal_params.final_temperature,
-            params.simanneal_params.number_of_cycles,
+        auto [optimized_gate_design, optimized_net_cost] = simulated_annealing<decltype(initial_lyt)>(
+            initial_lyt, sa_params.initial_temperature, sa_params.final_temperature, sa_params.number_of_cycles,
             [&, this](const auto& lyt)
             {
                 const auto logic_cost =
                     (is_operational(lyt, truth_table, params_is_operational).first == operational_status::OPERATIONAL) ?
                         0 :
-                        10;
+                        sa_params.weight_non_operational;
 
                 double temp_cost = 0;
                 double opo_cost  = 0;
                 if (logic_cost == 0)
                 {
-                    temp_cost =
-                        -((critical_temperature_gate_based(lyt, truth_table, params.simanneal_params.ct_params)) /
-                          params.simanneal_params.ct_params.max_temperature);
-                    operational_domain_stats stats_op{};
-                    const auto               op_domain = operational_domain_flood_fill(
-                        lyt, truth_table, 0, params.simanneal_params.op_params,
-                        operational_domain::parameter_point{params.phys_params.epsilon_r, params.phys_params.lambda_tf},
-                        &stats_op);
-                    opo_cost = -stats_op.percentual_operational_area;
+                    if (sa_params.weight_temperature != 0.0)
+                    {
+                        temp_cost = ((critical_temperature_gate_based(lyt, truth_table, sa_params.ct_params)) /
+                                     sa_params.ct_params.max_temperature);
+                    }
+                    if (sa_params.weight_operational_domain != 0.0)
+                    {
+                        operational_domain_stats stats_op{};
+                        const auto               op_domain = operational_domain_flood_fill(
+                            lyt, truth_table, 0, sa_params.op_params,
+                            operational_domain::parameter_point{params.simulation_parameters.epsilon_r,
+                                                                params.simulation_parameters.lambda_tf},
+                            &stats_op);
+                        opo_cost = stats_op.percentual_operational_area;
+                    }
                 }
-                //                            if (logic_cost + temp_cost + opo_cost < -0.5) {
-                //                                std::cout << fmt::format("cost: {}",
-                //                                                         static_cast<double>(logic_cost + temp_cost +
-                //                                                         opo_cost))
-                //                                          << std::endl;
-                //                            }
-                return static_cast<double>(logic_cost + temp_cost + opo_cost);
+                return cost_function_chi({logic_cost, temp_cost, opo_cost},
+                                         {sa_params.weight_non_operational, sa_params.weight_temperature,
+                                          sa_params.weight_operational_domain});
             },
             temperature_schedule,
             [&](auto lyt)
             {
-                // print_layout(lyt);
                 const auto lyt_swap = move_sidb(lyt);
-                //                                const auto cost_logic =
-                //                                static_cast<double>(number_of_operational_input_combinations(
-                //                                    lyt_swap, truth_table, skeleton_layout, params_is_operational,
-                //                                    params.canvas));
-                //                                std::cout << fmt::format("cost logic: {}",
-                //                                                         cost_logic)
-                //                                          << std::endl;
-                //                std::cout << fmt::format(
-                //                                 "cost temp: {}",
-                //                                 static_cast<double>(
-                //                                     (400 - critical_temperature_gate_based(lyt_swap, truth_table,
-                //                                     ct_params)) / 400))
-                //                          << std::endl;
                 return lyt_swap;
             });
-
         std::cout << fmt::format("final cost: {}", optimized_net_cost) << std::endl;
         stats.cost_of_gate = optimized_net_cost;
-        return {optimized_placement};
+        return optimized_gate_design;
     }
 
   private:
@@ -373,7 +367,7 @@ class design_sidb_gates_impl
     /**
      * All cells within the canvas.
      */
-    const std::vector<typename Lyt::cell> all_cells_in_canvas;
+    const std::vector<typename Lyt::cell> all_sidbs_in_canvas;
     /**
      * All SiDBs within the canvas.
      */
@@ -404,8 +398,8 @@ class design_sidb_gates_impl
         lyt.foreach_cell(
             [&](const auto& cell)
             {
-                if (std::find(all_cells_in_canvas.begin(), all_cells_in_canvas.end(), cell) !=
-                    all_cells_in_canvas.end())
+                if (std::find(all_sidbs_in_canvas.begin(), all_sidbs_in_canvas.end(), cell) !=
+                    all_sidbs_in_canvas.end())
                 {
                     placed_canvas_sidbs.emplace_back(cell);
                 }
@@ -417,7 +411,7 @@ class design_sidb_gates_impl
     {
         const auto random_index         = random_canvas_cell_functor(generator);
         const auto random_index_replace = random_canvas_sidb_functor(generator);
-        const auto random_cell          = all_cells_in_canvas[random_index];
+        const auto random_cell          = all_sidbs_in_canvas[random_index];
         const auto replace_sidb         = canvas_sidbs[random_index_replace];
 
         // cell has to be empty
@@ -478,11 +472,11 @@ class design_sidb_gates_impl
 
         for (const auto i : cell_indices)
         {
-            assert(i < all_cells_in_canvas.size() && "cell indices are out-of-range");
+            assert(i < all_sidbs_in_canvas.size() && "cell indices are out-of-range");
 
-            if (lyt_copy.get_cell_type(all_cells_in_canvas[i]) == sidb_technology::cell_type::EMPTY)
+            if (lyt_copy.get_cell_type(all_sidbs_in_canvas[i]) == sidb_technology::cell_type::EMPTY)
             {
-                lyt_copy.assign_cell_type(all_cells_in_canvas[i], sidb_technology::cell_type::NORMAL);
+                lyt_copy.assign_cell_type(all_sidbs_in_canvas[i], sidb_technology::cell_type::NORMAL);
             }
         }
 
@@ -520,9 +514,10 @@ class design_sidb_gates_impl
  * @return A vector of designed SiDB gate layouts.
  */
 template <typename Lyt, typename TT>
-[[nodiscard]] std::vector<Lyt> design_sidb_gates(const Lyt& skeleton, const std::vector<TT>& spec,
-                                                 const design_sidb_gates_params<Lyt>& params = {},
-                                                 design_sidb_gates_stats*             pst    = nullptr) noexcept
+[[nodiscard]] std::vector<Lyt>
+design_sidb_gates(const Lyt& skeleton, const std::vector<TT>& spec, const design_sidb_gates_params<Lyt>& params = {},
+                  design_sidb_gates_mode   design_mode = design_sidb_gates_mode::EXHAUSTIVE,
+                  design_sidb_gates_stats* pst         = nullptr) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -542,18 +537,61 @@ template <typename Lyt, typename TT>
 
     std::vector<Lyt> result{};
 
-    if (params.design_mode == design_sidb_gates_params<Lyt>::design_sidb_gates_mode::EXHAUSTIVE)
+    if (design_mode == design_sidb_gates_mode::EXHAUSTIVE)
     {
         result = p.run_exhaustive_design();
     }
-    else if (params.design_mode == design_sidb_gates_params<Lyt>::design_sidb_gates_mode::RANDOM)
+    else
     {
         result = p.run_random_design(params.maximal_random_solutions);
     }
-    else
+    if (pst)
     {
-        result = p.run_sa_design();
+        *pst = st;
     }
+    return result;
+}
+
+/**
+ * Designs SiDB gates using metric-driven simulated annealing.
+ *
+ * This function designs SiDB gates based on a given layout skeleton, a set of truth tables, and specified parameters
+ * for gate design and simulated annealing. The function employs a metric-driven approach to optimize gate placement
+ * and configuration, utilizing simulated annealing to explore the solution space.
+ *
+ * * @tparam Lyt SiDB cell-level layout type.
+ * @tparam TT The type of the truth table specifying the gate behavior.
+ * @param skeleton The skeleton layout used as a starting point for gate design.
+ * @param spec Expected Boolean function of the layout given as a multi-output truth table.
+ * @param params The parameters for SiDB gate design.
+ * @param sa_params The parameters for simulated annealing.
+ * @param pst Pointer to a statistics object to store the design statistics.
+ * @return The designed layout with SiDB gates.
+ */
+template <typename Lyt, typename TT>
+[[nodiscard]] Lyt design_sidb_gates_metric_driven_simulated_annealing(const Lyt& skeleton, const std::vector<TT>& spec,
+                                                                      const design_sidb_gates_params<Lyt>& params,
+                                                                      const design_sidb_gates_sa_params&   sa_params,
+                                                                      design_sidb_gates_stats* pst = nullptr) noexcept
+{
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
+    static_assert(!is_charge_distribution_surface_v<Lyt>, "Lyt cannot be a charge distribution surface");
+
+    assert(skeleton.num_pis() > 0 && "skeleton needs input cells");
+    assert(skeleton.num_pos() > 0 && "skeleton needs output cells");
+
+    assert(!spec.empty());
+    // all elements in tts must have the same number of variables
+    assert(std::adjacent_find(spec.begin(), spec.end(),
+                              [](const auto& a, const auto& b) { return a.num_vars() != b.num_vars(); }) == spec.end());
+
+    design_sidb_gates_stats                 st{};
+    detail::design_sidb_gates_impl<Lyt, TT> p{skeleton, spec, params, st};
+
+    const auto result = p.run_sa_design(sa_params);
+
     if (pst)
     {
         *pst = st;

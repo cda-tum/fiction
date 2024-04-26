@@ -730,6 +730,55 @@ Lyt and_gate_111() noexcept
     return lyt;
 };
 
+template <typename Lyt>
+Lyt bestagon_crossing_gate() noexcept
+{
+    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(fiction::is_sidb_lattice_100_v<Lyt>, "Lyt should have 111 as lattice orientation");
+
+    Lyt lyt{};
+
+    lyt.assign_cell_type({36, 1, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({2, 1, 0}, Lyt::cell_type::INPUT);
+
+    lyt.assign_cell_type({6, 2, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({20, 12, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 3, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 5, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 11, 1}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({12, 4, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 15, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 4, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({14, 9, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 15, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 16, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({18, 9, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 16, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 13, 1}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({24, 5, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({30, 3, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({16, 13, 1}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({32, 2, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({20, 8, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({30, 17, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({6, 18, 0}, Lyt::cell_type::OUTPUT);
+
+    lyt.assign_cell_type({32, 18, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({8, 17, 0}, Lyt::cell_type::OUTPUT);
+
+    lyt.assign_cell_type({2, 19, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({36, 19, 0}, Lyt::cell_type::NORMAL);
+
+    return lyt;
+};
+
 }  // namespace blueprints
 
 #endif  // FICTION_LAYOUT_BLUEPRINTS_HPP

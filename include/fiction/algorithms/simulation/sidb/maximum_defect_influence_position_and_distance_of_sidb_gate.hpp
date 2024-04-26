@@ -5,6 +5,8 @@
 #ifndef FICTION_MAXIMUM_DEFECT_INFLUENCE_POSITION_AND_DISTANCE_OF_SIDB_GATE_HPP
 #define FICTION_MAXIMUM_DEFECT_INFLUENCE_POSITION_AND_DISTANCE_OF_SIDB_GATE_HPP
 
+#include "fiction/algorithms/iter/bdl_input_iterator.hpp"
+#include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
 #include "fiction/algorithms/simulation/sidb/maximum_defect_influence_position_and_distance.hpp"
 #include "fiction/utils/layout_utils.hpp"
 
@@ -14,7 +16,7 @@ namespace fiction
 struct maximum_defect_influence_position_and_distance_of_sidb_gate_params
 {
     maximum_defect_influence_distance_params defect_influence_params{};
-    detect_bdl_pairs_params bdl_pairs_params{};
+    detect_bdl_pairs_params                  bdl_pairs_params{};
 };
 
 template <typename Lyt, typename TT>
@@ -37,18 +39,18 @@ template <typename Lyt, typename TT>
 
     bdl_input_iterator<Lyt> bii{lyt, params.bdl_pairs_params};
     double                  maximum_defect_influence_distance = 0.0;
-    cell<Lyt> defect_cell{};
+    cell<Lyt>               defect_cell{};
     // number of different input combinations
     for (auto i = 0u; i < spec.front().num_bits(); ++i, ++bii)
     {
         maximum_defect_influence_distance_stats stats_defect{};
-        const auto influence_cell_distance =
+        const auto                              influence_cell_distance =
             maximum_defect_influence_position_and_distance(lyt, params.defect_influence_params, &stats_defect);
         std::cout << mockturtle::to_seconds(stats_defect.time_total) << std::endl;
         if (influence_cell_distance.second > maximum_defect_influence_distance)
         {
             maximum_defect_influence_distance = influence_cell_distance.second;
-            defect_cell = influence_cell_distance.first;
+            defect_cell                       = influence_cell_distance.first;
         }
     }
     return {defect_cell, maximum_defect_influence_distance};

@@ -25,7 +25,7 @@ namespace fiction
  */
 template <typename Lyt>
 [[nodiscard]] double
-maximum_minimum_defect_influence_distance(const Lyt&                            lyt,
+maximum_minimum_defect_influence_distance(const Lyt&                                      lyt,
                                           const defect_influence_operational_domain<Lyt>& defect_opdomain) noexcept
 {
     double max_distance = 0;
@@ -39,9 +39,9 @@ maximum_minimum_defect_influence_distance(const Lyt&                            
         lyt.foreach_cell(
             [&val, &min_distance, &lyt](const auto& c)
             {
-                if (sidb_nanometer_distance<Lyt>(lyt, c, val.first) < min_distance)
+                if (sidb_nm_distance<Lyt>(lyt, c, val.first) < min_distance)
                 {
-                    min_distance = sidb_nanometer_distance<Lyt>(lyt, c, val.first);
+                    min_distance = sidb_nm_distance<Lyt>(lyt, c, val.first);
                 }
             });
         if (min_distance > max_distance)

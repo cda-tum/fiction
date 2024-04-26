@@ -9,7 +9,7 @@
 #include "fiction/algorithms/simulation/sidb/maximum_defect_influence_position_and_distance.hpp"
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/coordinates.hpp"
-#include "fiction/technology/sidb_surface.hpp"
+#include "fiction/technology/sidb_defect_surface.hpp"
 #include "fiction/types.hpp"
 #include "fiction/utils/hash.hpp"
 #include "fiction/utils/layout_utils.hpp"
@@ -523,7 +523,7 @@ class defect_influence_impl
     /**
      * The SiDB cell-level layout to investigate.
      */
-    sidb_surface<Lyt> layout{};
+    sidb_defect_surface<Lyt> layout{};
     /**
      * The specification of the layout.
      */
