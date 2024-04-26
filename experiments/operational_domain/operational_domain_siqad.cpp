@@ -2,12 +2,17 @@
 // Created by marcel on 08.08.23.
 //
 
-#include "fiction/algorithms/simulation/sidb/operational_domain.hpp"  // operational domain computation algorithms
-#include "fiction/io/read_sqd_layout.hpp"                             // reader for SiDB layouts
-#include "fiction/io/write_operational_domain.hpp"                    // writer for operational domains
-#include "fiction/types.hpp"                                          // pre-defined types suitable for the FCN domain
-#include "fiction/utils/truth_table_utils.hpp"                        // truth tables helper functions
-#include "fiction_experiments.hpp"                                    // experiment class
+#include "fiction_experiments.hpp"  // experiment class
+
+#include <fiction/algorithms/simulation/sidb/operational_domain.hpp>  // operational domain computation algorithms
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
+#include <fiction/io/read_sqd_layout.hpp>           // reader for SiDB layouts
+#include <fiction/io/write_operational_domain.hpp>  // writer for operational domains
+#include <fiction/technology/sidb_lattice.hpp>
+#include <fiction/technology/sidb_lattice_orientations.hpp>
+#include <fiction/types.hpp>                    // pre-defined types suitable for the FCN domain
+#include <fiction/utils/truth_table_utils.hpp>  // truth tables helper functions
 
 #include <fmt/format.h>                   // string formatting
 #include <kitty/dynamic_truth_table.hpp>  // truth tables
@@ -19,6 +24,7 @@
 #include <iostream>
 #include <string>
 #include <utility>
+#include <vector>
 
 using namespace fiction;
 
@@ -40,16 +46,16 @@ int main()  // NOLINT
 
     // operational domain parameters
     operational_domain_params op_domain_params{};
-    op_domain_params.sim_params  = sim_params;
-    op_domain_params.sim_engine  = sidb_simulation_engine::QUICKEXACT;
-    op_domain_params.x_dimension = operational_domain::sweep_parameter::EPSILON_R;
-    op_domain_params.x_min       = 1.0;
-    op_domain_params.x_max       = 10.0;
-    op_domain_params.x_step      = 0.05;
-    op_domain_params.y_dimension = operational_domain::sweep_parameter::LAMBDA_TF;
-    op_domain_params.y_min       = 1.0;
-    op_domain_params.y_max       = 10.0;
-    op_domain_params.y_step      = 0.05;
+    op_domain_params.simulation_parameters = sim_params;
+    op_domain_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
+    op_domain_params.x_dimension           = operational_domain::sweep_parameter::EPSILON_R;
+    op_domain_params.x_min                 = 1.0;
+    op_domain_params.x_max                 = 10.0;
+    op_domain_params.x_step                = 0.05;
+    op_domain_params.y_dimension           = operational_domain::sweep_parameter::LAMBDA_TF;
+    op_domain_params.y_min                 = 1.0;
+    op_domain_params.y_max                 = 10.0;
+    op_domain_params.y_step                = 0.05;
 
     // write operational domain parameters
     static const write_operational_domain_params write_op_domain_params{"1", "0"};
@@ -82,7 +88,7 @@ int main()  // NOLINT
 
             std::cout << benchmark << std::endl;
 
-            const auto lyt = read_sqd_layout<sidb_cell_clk_lyt_siqad>(benchmark.string(), gate);
+            const auto lyt = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(benchmark.string(), gate);
 
             // operational domain stats
             operational_domain_stats op_domain_stats_gs{};

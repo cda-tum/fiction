@@ -5,12 +5,12 @@
 #ifndef FICTION_MAXIMUM_DEFECT_INFLUENCE_POSITION_AND_DISTANCE_HPP
 #define FICTION_MAXIMUM_DEFECT_INFLUENCE_POSITION_AND_DISTANCE_HPP
 
-#include "fiction/algorithms/simulation/sidb/critical_temperature.hpp"
 #include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
+#include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/layouts/bounding_box.hpp"
+#include "fiction/technology/sidb_defect_surface.hpp"
 #include "fiction/technology/sidb_defects.hpp"
-#include "fiction/technology/sidb_surface.hpp"
 #include "fiction/types.hpp"
 #include "fiction/utils/execution_utils.hpp"
 #include "fiction/utils/layout_utils.hpp"
@@ -19,32 +19,36 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <future>
 #include <limits>
 #include <utility>
 #include <vector>
 
-namespace fiction {
+namespace fiction
+{
+
 /**
  * This struct stores the parameters for the maximum_defect_influence_position_and_distance algorithm.
  */
-    struct maximum_defect_influence_distance_params {
-        /**
-         * The defect to calculate the maximum defect influence distance for.
-         */
-        sidb_defect defect{};
-        /**
-         * Physical simulation parameters.
-         */
-        sidb_simulation_parameters simulation_parameters{};
-        /**
-         * The pair describes the width and height of the area around the gate, which is
-         * also used to place defects.
-         *
-         * @note If SiQAD coordinates are used, the second entry describes the number of dimer rows.
-         */
-        std::pair<int32_t, int32_t> additional_scanning_area{50, 6};
-    };
+struct maximum_defect_influence_distance_params
+{
+    /**
+     * The defect to calculate the maximum defect influence distance for.
+     */
+    sidb_defect defect{};
+    /**
+     * Physical simulation parameters.
+     */
+    sidb_simulation_parameters simulation_parameters{};
+    /**
+     * The pair describes the width and height of the area around the gate, which is
+     * also used to place defects.
+     *
+     * @note If SiQAD coordinates are used, the second entry describes the number of dimer rows.
+     */
+    std::pair<int32_t, int32_t> additional_scanning_area{50, 6};
+};
 
 /**
  * Statistics for the maximum defect influence simulation.
@@ -79,6 +83,10 @@ namespace fiction {
                     stats{st} {
             }
 
+    std::pair<typename Lyt::cell, double> run() noexcept
+    {
+        const quickexact_params<cell<Lyt>> params_defect{
+            params.simulation_parameters, quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
             std::pair<typename Lyt::cell, double> run() noexcept {
                 mockturtle::stopwatch stop{stats.time_total};
 
@@ -241,7 +249,7 @@ namespace fiction {
  * defect can still affect the layout's ground state, potentially altering its behavior, such as gate functionality.
  *
  * @param lyt The SiDB cell-level layout for which the influence distance is being determined.
- * @param sim_params Parameters used to calculate the defect's maximum influence distance.
+ * @param params Parameters used to calculate the defect's maximum influence distance.
  * @return Pair with the first element describing the position with maximum distance to the layout where a placed defect
  * can still affect the ground state of the layout. The second entry describes the distance of the defect from the
  * layout.

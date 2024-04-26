@@ -47,7 +47,7 @@ class quicksim_command : public command
                    true);
         add_option("--lambda_tf,-l", physical_params.lambda_tf, "Thomas-Fermi screening distance (unit: nm)", true);
         add_option("--mu_minus,-m", physical_params.mu_minus, "Energy transition level (0/-) (unit: eV)", true);
-        add_option("--iterations,-i", params.interation_steps, "Number of iterations to run the simulation for", true);
+        add_option("--iterations,-i", params.iteration_steps, "Number of iterations to run the simulation for", true);
         add_option("--alpha,-a", params.alpha,
                    "alpha parameter (should be reduced if not charge distribution can be determined)", true);
     }
@@ -59,8 +59,10 @@ class quicksim_command : public command
     void execute() override
     {
         // reset sim result
-        sim_result = {};
-        min_energy = std::numeric_limits<double>::infinity();
+        sim_result_100      = {};
+        sim_result_111      = {};
+        min_energy          = std::numeric_limits<double>::infinity();
+        is_sidb_100_lattice = true;
 
         if (physical_params.epsilon_r <= 0)
         {
@@ -108,11 +110,26 @@ class quicksim_command : public command
                 }
                 else
                 {
-                    params.phys_params = physical_params;
+                    params.simulation_parameters = physical_params;
 
-                    sim_result = fiction::quicksim(*lyt_ptr, params);
+                    if constexpr (fiction::is_sidb_lattice_100_v<Lyt>)
+                    {
+                        is_sidb_100_lattice = true;
+                        sim_result_100      = fiction::quicksim(*lyt_ptr, params);
+                    }
+                    else if constexpr (fiction::is_sidb_lattice_111_v<Lyt>)
+                    {
+                        is_sidb_100_lattice = false;
+                        sim_result_111      = fiction::quicksim(*lyt_ptr, params);
+                    }
 
-                    if (sim_result.charge_distributions.empty())
+                    else
+                    {
+                        env->out() << "[e] no valid lattice orientation" << std::endl;
+                        return;
+                    }
+
+                    if (sim_result_100.charge_distributions.empty() && sim_result_111.charge_distributions.empty())
                     {
                         env->out() << fmt::format("[e] no stable charge distribution could be determined for {}",
                                                   get_name(lyt_ptr))
@@ -120,13 +137,26 @@ class quicksim_command : public command
                     }
                     else
                     {
-                        const auto min_energy_distr = fiction::minimum_energy_distribution(
-                            sim_result.charge_distributions.cbegin(), sim_result.charge_distributions.cend());
+                        if constexpr (fiction::is_sidb_lattice_100_v<Lyt>)
+                        {
+                            const auto min_energy_distr =
+                                fiction::minimum_energy_distribution(sim_result_100.charge_distributions.cbegin(),
+                                                                     sim_result_100.charge_distributions.cend());
 
-                        min_energy = min_energy_distr->get_system_energy();
+                            min_energy = min_energy_distr->get_system_energy();
+                            store<fiction::cell_layout_t>().extend() =
+                                std::make_shared<fiction::cds_sidb_100_cell_clk_lyt>(*min_energy_distr);
+                        }
+                        else if constexpr (fiction::is_sidb_lattice_111_v<Lyt>)
+                        {
+                            const auto min_energy_distr =
+                                fiction::minimum_energy_distribution(sim_result_111.charge_distributions.cbegin(),
+                                                                     sim_result_111.charge_distributions.cend());
 
-                        store<fiction::cell_layout_t>().extend() =
-                            std::make_shared<fiction::cds_sidb_cell_clk_lyt>(*min_energy_distr);
+                            min_energy = min_energy_distr->get_system_energy();
+                            store<fiction::cell_layout_t>().extend() =
+                                std::make_shared<fiction::cds_sidb_111_cell_clk_lyt>(*min_energy_distr);
+                        }
                     }
                 }
             }
@@ -151,13 +181,19 @@ class quicksim_command : public command
      */
     fiction::quicksim_params params{};
     /**
-     * Simulation result.
+     * Simulation result for H-Si(100)-2x1 surface.
      */
-    fiction::sidb_simulation_result<fiction::sidb_cell_clk_lyt> sim_result{};
+    fiction::sidb_simulation_result<fiction::sidb_100_cell_clk_lyt> sim_result_100{};
+    /**
+     * Simulation result for H-Si(111)-1x1 surface.
+     */
+    fiction::sidb_simulation_result<fiction::sidb_111_cell_clk_lyt> sim_result_111{};
     /**
      * Minimum energy.
      */
     double min_energy{std::numeric_limits<double>::infinity()};
+
+    bool is_sidb_100_lattice = true;
 
     /**
      * Logs the resulting information in a log file.
@@ -168,18 +204,33 @@ class quicksim_command : public command
     {
         try
         {
+            if (is_sidb_100_lattice)
+            {
+                return nlohmann::json{
+                    {"Algorithm name", sim_result_100.algorithm_name},
+                    {"Simulation runtime", sim_result_100.simulation_runtime.count()},
+                    {"Physical parameters",
+                     {{"epsilon_r", sim_result_100.simulation_parameters.epsilon_r},
+                      {"lambda_tf", sim_result_100.simulation_parameters.lambda_tf},
+                      {"mu_minus", sim_result_100.simulation_parameters.mu_minus}}},
+                    {"Lowest state energy (eV)", min_energy},
+                    {"Number of stable states", sim_result_100.charge_distributions.size()},
+                    {"Iteration steps",
+                     std::any_cast<uint64_t>(sim_result_100.additional_simulation_parameters.at("iteration_steps"))},
+                    {"alpha", std::any_cast<double>(sim_result_100.additional_simulation_parameters.at("alpha"))}};
+            }
             return nlohmann::json{
-                {"Algorithm name", sim_result.algorithm_name},
-                {"Simulation runtime", sim_result.simulation_runtime.count()},
+                {"Algorithm name", sim_result_111.algorithm_name},
+                {"Simulation runtime", sim_result_111.simulation_runtime.count()},
                 {"Physical parameters",
-                 {{"epsilon_r", sim_result.physical_parameters.epsilon_r},
-                  {"lambda_tf", sim_result.physical_parameters.lambda_tf},
-                  {"mu_minus", sim_result.physical_parameters.mu_minus}}},
+                 {{"epsilon_r", sim_result_111.simulation_parameters.epsilon_r},
+                  {"lambda_tf", sim_result_111.simulation_parameters.lambda_tf},
+                  {"mu_minus", sim_result_111.simulation_parameters.mu_minus}}},
                 {"Lowest state energy (eV)", min_energy},
-                {"Number of stable states", sim_result.charge_distributions.size()},
+                {"Number of stable states", sim_result_111.charge_distributions.size()},
                 {"Iteration steps",
-                 std::any_cast<uint64_t>(sim_result.additional_simulation_parameters.at("iteration_steps"))},
-                {"alpha", std::any_cast<double>(sim_result.additional_simulation_parameters.at("alpha"))}};
+                 std::any_cast<uint64_t>(sim_result_111.additional_simulation_parameters.at("iteration_steps"))},
+                {"alpha", std::any_cast<double>(sim_result_111.additional_simulation_parameters.at("alpha"))}};
         }
         catch (...)
         {

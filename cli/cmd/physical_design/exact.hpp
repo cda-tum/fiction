@@ -36,7 +36,7 @@ class exact_command : public command
             command(e, "Performs exact placement and routing of the current logic network in store. "
                        "A minimum FCN layout will be found that meets all given constraints.")
     {
-        add_option("--clk_scheme,-s", clocking,
+        add_option("--clk_scheme,-s", ps.scheme,
                    "Clocking scheme to use {OPEN[3|4], COLUMNAR[3|4], ROW[3|4] 2DDWAVE[3|4], 2DDWAVEHEX[3|4], USE, "
                    "RES, ESR, CFE, RIPPLE, BANCS}",
                    true);
@@ -163,7 +163,7 @@ class exact_command : public command
     /**
      * Parameters.
      */
-    fiction::exact_physical_design_params<fiction::cart_gate_clk_lyt> ps{};
+    fiction::exact_physical_design_params ps{};
     /**
      * Statistics.
      */
@@ -172,51 +172,21 @@ class exact_command : public command
      * Tile shift for hexagonal layouts.
      */
     std::string hexagonal_tile_shift{};
-    /**
-     * Identifier of clocking scheme to use.
-     */
-    std::string clocking{"2DDWave"};
 
     /**
      * Reset all flags. Necessary for some reason... alice bug?
      */
     void reset_flags()
     {
-        ps                   = fiction::exact_physical_design_params<fiction::cart_gate_clk_lyt>{};
+        ps                   = fiction::exact_physical_design_params{};
         hexagonal_tile_shift = {};
-        clocking             = "2DDWave";
-    }
-
-    template <typename LytDest, typename LytSrc>
-    fiction::exact_physical_design_params<LytDest>
-    convert_params(const fiction::exact_physical_design_params<LytSrc>& ps_src) const noexcept
-    {
-        fiction::exact_physical_design_params<LytDest> ps_dest{};
-
-        ps_dest.upper_bound_area         = ps_src.upper_bound_area;
-        ps_dest.upper_bound_x            = ps_src.upper_bound_x;
-        ps_dest.upper_bound_y            = ps_src.upper_bound_y;
-        ps_dest.fixed_size               = ps_src.fixed_size;
-        ps_dest.num_threads              = ps_src.num_threads;
-        ps_dest.crossings                = ps_src.crossings;
-        ps_dest.io_pins                  = ps_src.io_pins;
-        ps_dest.border_io                = ps_src.border_io;
-        ps_dest.synchronization_elements = ps_src.synchronization_elements;
-        ps_dest.straight_inverters       = ps_src.straight_inverters;
-        ps_dest.desynchronize            = ps_src.desynchronize;
-        ps_dest.minimize_wires           = ps_src.minimize_wires;
-        ps_dest.minimize_crossings       = ps_src.minimize_crossings;
-        ps_dest.timeout                  = ps_src.timeout;
-        ps_dest.technology_specifics     = ps_src.technology_specifics;
-
-        return ps_dest;
     }
 
     template <typename Lyt>
     std::shared_ptr<fiction::clocking_scheme<fiction::clock_zone<Lyt>>> fetch_clocking_scheme()
     {
         // fetch clocking scheme
-        if (auto clk = fiction::get_clocking_scheme<Lyt>(clocking); clk.has_value())
+        if (auto clk = fiction::get_clocking_scheme<Lyt>(ps.scheme); clk.has_value())
         {
             return fiction::ptr<Lyt>(std::move(*clk));
         }
@@ -227,24 +197,9 @@ class exact_command : public command
     template <typename Lyt>
     void exact_physical_design()
     {
-        auto clk_scheme_ptr = fetch_clocking_scheme<Lyt>();
-
-        if (clk_scheme_ptr == nullptr)
-        {
-            env->out() << fmt::format("[e] \"{}\" does not refer to a supported clocking scheme", clocking)
-                       << std::endl;
-            reset_flags();
-            return;
-        }
-
         const auto get_name = [](auto&& ntk_ptr) -> std::string { return ntk_ptr->get_network_name(); };
 
-        const auto perform_physical_design = [this, &clk_scheme_ptr](auto&& ntk_ptr)
-        {
-            auto cps   = convert_params<Lyt>(ps);
-            cps.scheme = clk_scheme_ptr;
-            return fiction::exact<Lyt>(*ntk_ptr, cps, &st);
-        };
+        const auto perform_physical_design = [this](auto&& ntk_ptr) { return fiction::exact<Lyt>(*ntk_ptr, ps, &st); };
 
         const auto& ntk_ptr = store<fiction::logic_network_t>().current();
 
@@ -263,6 +218,10 @@ class exact_command : public command
                                           std::visit(get_name, ntk_ptr))
                            << std::endl;
             }
+        }
+        catch (const fiction::unsupported_clocking_scheme_exception&)
+        {
+            env->out() << fmt::format("\"{}\" does not refer to a supported clocking scheme", ps.scheme) << std::endl;
         }
         catch (const fiction::high_degree_fanin_exception& e)
         {

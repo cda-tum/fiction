@@ -5,12 +5,14 @@
 #ifndef FICTION_TRAITS_HPP
 #define FICTION_TRAITS_HPP
 
+#include "fiction/layouts/coordinates.hpp"
 #include "fiction/layouts/hexagonal_layout.hpp"
 #include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/technology/sidb_defects.hpp"
+#include "fiction/technology/sidb_lattice_orientations.hpp"
 
 #include <mockturtle/traits.hpp>
 
@@ -566,6 +568,13 @@ using cell = typename Lyt::cell;
 template <typename Lyt>
 using technology = typename Lyt::technology;
 
+template <typename CoordinateType>
+inline constexpr const bool is_offset_ucoord_v = std::is_same_v<CoordinateType, offset::ucoord_t>;
+template <typename CoordinateType>
+inline constexpr const bool is_cube_coord_v = std::is_same_v<CoordinateType, cube::coord_t>;
+template <typename CoordinateType>
+inline constexpr const bool is_siqad_coord_v = std::is_same_v<CoordinateType, siqad::coord_t>;
+
 template <typename Lyt>
 inline constexpr const bool has_qca_technology_v = std::is_same_v<technology<Lyt>, qca_technology>;
 template <typename Lyt>
@@ -573,11 +582,11 @@ inline constexpr const bool has_inml_technology_v = std::is_same_v<technology<Ly
 template <typename Lyt>
 inline constexpr const bool has_sidb_technology_v = std::is_same_v<technology<Lyt>, sidb_technology>;
 template <typename Lyt>
-inline constexpr const bool has_offset_ucoord_v = std::is_same_v<coordinate<Lyt>, offset::ucoord_t>;
+inline constexpr const bool has_offset_ucoord_v = is_offset_ucoord_v<coordinate<Lyt>>;
 template <typename Lyt>
-inline constexpr const bool has_cube_coord_v = std::is_same_v<coordinate<Lyt>, cube::coord_t>;
+inline constexpr const bool has_cube_coord_v = is_cube_coord_v<coordinate<Lyt>>;
 template <typename Lyt>
-inline constexpr const bool has_siqad_coord_v = std::is_same_v<coordinate<Lyt>, siqad::coord_t>;
+inline constexpr const bool has_siqad_coord_v = is_siqad_coord_v<coordinate<Lyt>>;
 
 #pragma region is_cell_level_layout
 template <class Lyt, class = void>
@@ -674,8 +683,82 @@ inline constexpr bool has_get_layout_name_v = has_get_layout_name<Ntk>::value;
 #pragma endregion
 
 /**
- * SiDB surfaces
+ * SiDB lattice orientations
  */
+
+template <typename Lyt>
+using lattice_orientation = typename Lyt::orientation;
+
+template <typename Lyt, typename LatticeOrientation>
+inline constexpr const bool has_given_lattice_orientation_v =
+    std::is_same_v<typename Lyt::orientation, LatticeOrientation>;
+
+#pragma region is_sidb_lattice
+template <typename Lyt, typename = void>
+struct is_sidb_lattice : std::false_type
+{};
+
+template <typename Lyt>
+struct is_sidb_lattice<Lyt, std::enable_if_t<is_cell_level_layout_v<Lyt>, std::void_t<typename Lyt::orientation>>>
+        : std::true_type
+{};
+
+template <typename Lyt>
+constexpr bool is_sidb_lattice_v = is_sidb_lattice<Lyt>::value;
+#pragma endregion
+
+#pragma region is_sidb_lattice_100
+template <typename Lyt, typename = void>
+struct is_sidb_lattice_100 : std::false_type
+{};
+
+template <typename Lyt>
+struct is_sidb_lattice_100<Lyt, std::enable_if_t<is_sidb_lattice_v<Lyt>>>
+        : std::conditional_t<has_given_lattice_orientation_v<Lyt, sidb_100_lattice>, std::true_type, std::false_type>
+{};
+
+template <typename Lyt>
+constexpr bool is_sidb_lattice_100_v = is_sidb_lattice_100<Lyt>::value;
+#pragma endregion
+
+#pragma region is_sidb_lattice_111
+template <typename Lyt, typename = void>
+struct is_sidb_lattice_111 : std::false_type
+{};
+
+template <typename Lyt>
+struct is_sidb_lattice_111<Lyt, std::enable_if_t<is_sidb_lattice_v<Lyt>>>
+        : std::conditional_t<has_given_lattice_orientation_v<Lyt, sidb_111_lattice>, std::true_type, std::false_type>
+{};
+
+template <typename Lyt>
+constexpr bool is_sidb_lattice_111_v = is_sidb_lattice_111<Lyt>::value;
+#pragma endregion
+
+/**
+ * SiDB defect surface
+ */
+
+#pragma region is_sidb_defect_surface
+template <class Lyt, class = void>
+struct is_sidb_defect_surface : std::false_type
+{};
+
+// SFINAE-enabled specialization for Lyt satisfying certain conditions
+template <class Lyt>
+struct is_sidb_defect_surface<
+    Lyt, std::void_t<typename Lyt::storage,  // Check if Lyt has a nested type 'storage'
+                     decltype(std::declval<Lyt>().assign_sidb_defect(
+                         std::declval<cell<Lyt>>(), std::declval<sidb_defect>())),  // Check if calling
+                                                                                    // 'assign_sidb_defect' is valid
+                     decltype(std::declval<Lyt>().get_sidb_defect(std::declval<cell<Lyt>>()))>>
+        : std::true_type  // Check if calling 'get_sidb_defect' is valid
+{};
+
+// Helper variable template for easy access to the trait value
+template <class Lyt>
+inline constexpr bool is_sidb_defect_surface_v = is_sidb_defect_surface<Lyt>::value;
+#pragma endregion
 
 #pragma region has_assign_sidb_defect
 template <class Lyt, class = void>

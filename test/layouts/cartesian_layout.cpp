@@ -38,6 +38,21 @@ TEST_CASE("Cartesian layout traits", "[cartesian-layout]")
     CHECK(has_foreach_adjacent_opposite_coordinates_v<layout>);
 }
 
+TEST_CASE("Coordinate creation", "[cartesian-layout]")
+{
+    using layout = cartesian_layout<offset::ucoord_t>;
+
+    const layout lyt{{3, 3}};
+
+    CHECK(lyt.coord(0, 0, 0) == offset::ucoord_t{0, 0, 0});
+    CHECK(lyt.coord(0, 0, 1) == offset::ucoord_t{0, 0, 1});
+    CHECK(lyt.coord(1, 0) == offset::ucoord_t{1, 0});
+    CHECK(lyt.coord(2, 0) == offset::ucoord_t{2, 0});
+    CHECK(lyt.coord(0, 1) == offset::ucoord_t{0, 1});
+    CHECK(lyt.coord(1, 1) == offset::ucoord_t{1, 1});
+    CHECK(lyt.coord(2, 1) == offset::ucoord_t{2, 1});
+}
+
 TEST_CASE("Deep copy Cartesian layout", "[cartesian-layout]")
 {
     const cartesian_layout original{{5, 5, 0}};

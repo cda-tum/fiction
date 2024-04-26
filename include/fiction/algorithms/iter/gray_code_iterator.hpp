@@ -5,9 +5,9 @@
 #ifndef FICTION_GRAY_CODE_ITERATOR_HPP
 #define FICTION_GRAY_CODE_ITERATOR_HPP
 
+#include <cstddef>
 #include <cstdint>
 #include <iterator>
-#include <vector>
 
 namespace fiction
 {
@@ -228,7 +228,7 @@ class gray_code_iterator
      * @param index The position in the iteration range.
      * @return The Gray code at the specified position.
      */
-    constexpr uint64_t operator[](size_t index) const noexcept
+    constexpr uint64_t operator[](std::size_t index) const noexcept
     {
         // Calculate the Gray code at the specified position
         uint64_t result = start_number + index;

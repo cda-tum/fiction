@@ -8,18 +8,18 @@
 #include "fiction/algorithms/simulation/sidb/convert_potential_to_distance.hpp"
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
-#include "fiction/layouts/cell_level_layout.hpp"
+#include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
+#include "fiction/technology/charge_distribution_surface.hpp"
+#include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/types.hpp"
 
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <cstdlib>
 #include <iterator>
 #include <limits>
-#include <tuple>
-#include <unordered_map>
-#include <utility>
+#include <vector>
 
 namespace fiction
 {
@@ -91,7 +91,7 @@ struct assess_physical_population_stability_params
     /**
      * Parameters for the electrostatic potential.
      */
-    sidb_simulation_parameters physical_parameters{};
+    sidb_simulation_parameters simulation_parameters{};
     /**
      * The precision level for the conversion from the minimum potential difference to the corresponding
      * distance.
@@ -129,9 +129,9 @@ class assess_physical_population_stability_impl
      */
     [[nodiscard]] std::vector<population_stability_information<Lyt>> run() noexcept
     {
-        const quickexact_params<Lyt> quickexact_parameters{params.physical_parameters};
-        const auto                   simulation_results = quickexact(layout, quickexact_parameters);
-        const auto energy_and_unique_charge_index       = collect_energy_and_charge_index(simulation_results);
+        const quickexact_params<cell<Lyt>> quickexact_parameters{params.simulation_parameters};
+        const auto                         simulation_results = quickexact(layout, quickexact_parameters);
+        const auto energy_and_unique_charge_index             = collect_energy_and_charge_index(simulation_results);
 
         std::vector<population_stability_information<Lyt>> popstability_information{};
         popstability_information.reserve(simulation_results.charge_distributions.size());
@@ -288,8 +288,8 @@ class assess_physical_population_stability_impl
                            const population_stability_information<Lyt>& pop_stability_information) noexcept
     {
         auto updated_pop_stability_information = pop_stability_information;
-        if (std::abs(-local_potential + params.physical_parameters.mu_minus) <
-            std::abs(-local_potential + params.physical_parameters.mu_plus()))
+        if (std::abs(-local_potential + params.simulation_parameters.mu_minus) <
+            std::abs(-local_potential + params.simulation_parameters.mu_plus()))
         {
             if (std::abs(-local_potential + params.physical_parameters.mu_minus) <
                 updated_pop_stability_information
@@ -341,8 +341,7 @@ class assess_physical_population_stability_impl
     {
         auto updated_pop_stability_information = pop_stability_information;
         if (std::abs(-local_potential + params.physical_parameters.mu_plus()) <
-            updated_pop_stability_information
-                .minimum_potential_difference_to_transition[transition_type::POSITIVE_TO_NEUTRAL])
+            updated_pop_stability_information.minimum_potential_difference_to_transition)
         {
             updated_pop_stability_information
                 .minimum_potential_difference_to_transition[transition_type::POSITIVE_TO_NEUTRAL] =
@@ -405,7 +404,6 @@ assess_physical_population_stability(const Lyt& lyt, const assess_physical_popul
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(!is_charge_distribution_surface_v<Lyt>, "Lyt cannot be a charge distribution surface");
 
     detail::assess_physical_population_stability_impl<Lyt> p{lyt, params};
     return p.run();

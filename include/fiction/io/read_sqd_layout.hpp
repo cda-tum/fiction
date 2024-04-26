@@ -7,6 +7,7 @@
 
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/sidb_defects.hpp"
+#include "fiction/technology/sidb_lattice_orientations.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/name_utils.hpp"
 
@@ -14,13 +15,16 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cstdint>
 #include <exception>
 #include <fstream>
 #include <istream>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <unordered_map>
+#include <vector>
 
 namespace fiction
 {
@@ -69,6 +73,39 @@ class read_sqd_layout_impl
         {
             throw sqd_parsing_error("Error parsing SQD file: no root element 'siqad'");
         }
+
+        const auto* const layers_element = siqad_root->FirstChildElement("layers");
+
+        if (layers_element == nullptr)
+        {
+            throw sqd_parsing_error("Error parsing SQD file: no element 'layers'");
+        }
+
+        const auto* const layer_prop_element = layers_element->FirstChildElement("layer_prop");
+
+        if (layer_prop_element == nullptr)
+        {
+            throw sqd_parsing_error("Error parsing SQD file: no element 'layer_prop'");
+        }
+
+        const auto* const lat_vec_element = layer_prop_element->FirstChildElement("lat_vec");
+
+        if (lat_vec_element == nullptr)
+        {
+            throw sqd_parsing_error("Error parsing SQD file: no element 'lat_vec'");
+        }
+
+        const auto* const name = lat_vec_element->FirstChildElement("name");
+
+        std::string lattice_orientation = "Si(100) 2x1";
+
+        if (name != nullptr)
+        {
+            const auto* const text = name->GetText();
+            lattice_orientation    = std::string{text};
+        }
+
+        parse_lat_type(lattice_orientation);
 
         const auto* const design_element = siqad_root->FirstChildElement("design");
 
@@ -170,6 +207,33 @@ class read_sqd_layout_impl
         update_bounding_box(cell);
 
         return cell;
+    }
+    /**
+     * Parses a <latcoord> element from the SQD file and returns its specified cell position.
+     *
+     * @param latcoord The <latcoord> element.
+     * @return The cell position specified by the <latcoord> element.
+     */
+    void parse_lat_type(const std::string& name)
+    {
+        if (name == "Si(111) 1x1")
+        {
+            if (!has_given_lattice_orientation_v<Lyt, sidb_111_lattice>)
+            {
+                throw sqd_parsing_error("Error parsing SQD file: mismatch in lattice orientations");
+            }
+        }
+        else if (name == "Si(100) 2x1")
+        {
+            if (!has_given_lattice_orientation_v<Lyt, sidb_100_lattice>)
+            {
+                throw sqd_parsing_error("Error parsing SQD file: mismatch in lattice orientations");
+            }
+        }
+        else
+        {
+            throw sqd_parsing_error("Error parsing SQD file: unknown lattice orientation");
+        }
     }
     /**
      * Parses a <latcoord> element from the SQD file and returns its specified cell position.
@@ -360,15 +424,17 @@ class read_sqd_layout_impl
  *
  * May throw an `sqd_parsing_exception` if the sqd file is malformed.
  *
- * @tparam Lyt The layout type to be created from an input. Must be a cell-level SiDB layout.
+ * @tparam Lyt The layout type to be created from an input. Must be an SiDB lattice cell-level SiDB layout.
  * @param is The input stream to read from.
  * @param name The name to give to the generated layout.
+ * @return The cell-level SiDB layout read from the sqd file.
  */
 template <typename Lyt>
 Lyt read_sqd_layout(std::istream& is, const std::string_view& name = "")
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
+    static_assert(is_sidb_lattice_v<Lyt>, "Lyt must be a lattice layout");
 
     detail::read_sqd_layout_impl<Lyt> p{is, name};
 
@@ -386,7 +452,7 @@ Lyt read_sqd_layout(std::istream& is, const std::string_view& name = "")
  *
  * This is an in-place version of read_sqd_layout that utilizes the given layout as a target to write to.
  *
- * @tparam Lyt The layout type to be used as input. Must be a cell-level SiDB layout.
+ * @tparam Lyt The layout type to be created from an input. Must be an SiDB lattice cell-level SiDB layout.
  * @param lyt The layout to write to.
  * @param is The input stream to read from.
  */
@@ -395,6 +461,7 @@ void read_sqd_layout(Lyt& lyt, std::istream& is)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
+    static_assert(is_sidb_lattice_v<Lyt>, "Lyt must be a lattice layout");
 
     detail::read_sqd_layout_impl<Lyt> p{lyt, is};
 
@@ -408,13 +475,17 @@ void read_sqd_layout(Lyt& lyt, std::istream& is)
  *
  * May throw an `sqd_parsing_exception` if the sqd file is malformed.
  *
- * @tparam Lyt The layout type to be created from an input. Must be a cell-level SiDB layout.
+ * @tparam Lyt The layout type to be created from an input. Must be an SiDB lattice cell-level SiDB layout.
  * @param filename The file name to open and read from.
  * @param name The name to give to the generated layout.
  */
 template <typename Lyt>
 Lyt read_sqd_layout(const std::string_view& filename, const std::string_view& name = "")
 {
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
+    static_assert(is_sidb_lattice_v<Lyt>, "Lyt must be a lattice layout");
+
     std::ifstream is{filename.data(), std::ifstream::in};
 
     if (!is.is_open())
@@ -437,13 +508,17 @@ Lyt read_sqd_layout(const std::string_view& filename, const std::string_view& na
  *
  * This is an in-place version of `read_sqd_layout` that utilizes the given layout as a target to write to.
  *
- * @tparam Lyt The layout type to be used as input. Must be a cell-level SiDB layout.
+ * @tparam Lyt The layout type to be created from an input. Must be an SiDB lattice cell-level SiDB layout.
  * @param lyt The layout to write to.
  * @param filename The file name to open and read from.
  */
 template <typename Lyt>
 void read_sqd_layout(Lyt& lyt, const std::string_view& filename)
 {
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
+    static_assert(is_sidb_lattice_v<Lyt>, "Lyt must be a lattice layout");
+
     std::ifstream is{filename.data(), std::ifstream::in};
 
     if (!is.is_open())

@@ -13,5 +13,6 @@ This checklist serves as a reminder of a couple of things that ensure your pull 
 
 - [ ] The pull request only contains commits that are related to it.
 - [ ] I have added appropriate tests and documentation.
+- [ ] I have created/adjusted the Python bindings for any new or updated functionality.
 - [ ] I have made sure that all CI jobs on GitHub pass.
 - [ ] The pull request introduces no new warnings and follows the project's style guidelines.

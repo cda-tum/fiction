@@ -29,12 +29,12 @@ namespace fiction
  * like QCADesigner, ToPoliNano & MagCAD, SiQAD, etc.
  *
  * In this layout, each coordinate, i.e., clock zone has the dimensions of a single cell. Clock numbers can, however, be
- * assigned in a way, that they form larger zones, e.g., of \f$ 5 \times 5 \f$ cells. These dimensions can be specified
+ * assigned in a way, that they form larger zones, e.g., of \f$5 \times 5\f$ cells. These dimensions can be specified
  * in the constructor. They affect the way, clock numbers are fetched from the underlying clocked layout.
  *
  * The de-facto standard of cell-level FCN design is to group multiple cells into tiles large enough to be addressable
- * by individual clocking electrodes buried in the layout substrate. Cell-based clocking, i.e., clock zones of size \f$
- * 1 \times 1 \f$ cells are not recommended as they are most likely not fabricable in reality.
+ * by individual clocking electrodes buried in the layout substrate. Cell-based clocking, i.e., clock zones of size
+ * \f$1 \times 1\f$ cells are not recommended as they are most likely not fabricable in reality.
  *
  * On the implementation side, this layout distinguishes between `cell`, `cell_type`, and `cell_mode`. A `cell` is a
  * coordinate, i.e., a position on the layout where a `cell_type` can be assigned. A `cell_type` is a concrete variation
@@ -67,8 +67,8 @@ class cell_level_layout : public ClockedLayout
 
         std::string layout_name;
 
-        const uint16_t tile_size_x;
-        const uint16_t tile_size_y;
+        uint16_t tile_size_x;
+        uint16_t tile_size_y;
 
         phmap::parallel_flat_hash_map<Cell, cell_type> cell_type_map{};
         phmap::parallel_flat_hash_map<Cell, cell_mode> cell_mode_map{};
@@ -361,9 +361,18 @@ class cell_level_layout : public ClockedLayout
      *
      * @return The clock zone size in cells in the x-dimension.
      */
-    [[nodiscard]] uint16_t get_tile_size_x() const noexcept
+    [[nodiscard]] auto get_tile_size_x() const noexcept
     {
         return strg->tile_size_x;
+    }
+    /**
+     * Sets the underlying clock zone x-dimension size.
+     *
+     * @param tile_size_x Tile size in the x-dimension in number of cells.
+     */
+    void set_tile_size_x(const uint64_t tile_size_x) noexcept
+    {
+        strg->tile_size_x = tile_size_x;
     }
     /**
      * Returns the underlying clock zone y-dimension size. That is, if this cell-level layout was obtained from the
@@ -371,9 +380,18 @@ class cell_level_layout : public ClockedLayout
      *
      * @return The clock zone size in cells in the y-dimension.
      */
-    [[nodiscard]] uint16_t get_tile_size_y() const noexcept
+    [[nodiscard]] auto get_tile_size_y() const noexcept
     {
         return strg->tile_size_y;
+    }
+    /**
+     * Sets the underlying clock zone y-dimension size.
+     *
+     * @param tile_size_y Tile size in the y-dimension in number of cells.
+     */
+    void set_tile_size_y(const uint64_t tile_size_y) noexcept
+    {
+        strg->tile_size_y = tile_size_y;
     }
 
 #pragma endregion

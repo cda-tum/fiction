@@ -1,13 +1,19 @@
 version: 2
 
+submodules:
+  include: all
+  recursive: true
+
 build:
   os: ubuntu-22.04
   tools:
     python: "3.9"
-
-submodules:
-  exclude: all
-  recursive: false
+  apt_packages:
+    - cmake
+  jobs:
+    pre_build:
+      - echo "Reinstall pyfiction with Z3 enabled"
+      - z3="ON" python -m pip install --upgrade --upgrade-strategy eager --no-cache-dir .[docs]
 
 sphinx:
   configuration: docs/conf.py
@@ -16,4 +22,8 @@ formats: [ ]
 
 python:
   install:
+    - method: pip
+      path: .
+      extra_requirements:
+        - docs
     - requirements: docs/requirements.txt

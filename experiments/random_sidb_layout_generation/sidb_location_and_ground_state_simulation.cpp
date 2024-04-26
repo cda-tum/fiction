@@ -2,18 +2,22 @@
 // Created by Jan Drewniok on 04.05.23.
 //
 
-#include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
+#include "fiction/algorithms/simulation/sidb/quickexact.hpp"
+#include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/io/read_sqd_layout.hpp"
 #include "fiction/io/write_location_and_ground_state.hpp"
-#include "fiction/technology/charge_distribution_surface.hpp"
+#include "fiction/technology/sidb_lattice.hpp"
+#include "fiction/technology/sidb_lattice_orientations.hpp"
 #include "fiction/types.hpp"
 
+#include <cstdint>
 #include <cstdlib>
 #include <filesystem>
 #include <iomanip>
 #include <iostream>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 using namespace fiction;
 
@@ -38,8 +42,9 @@ using namespace fiction;
 int main(int argc, const char* argv[])  // NOLINT
 {
 
-    std::unordered_map<std::string, std::string> options{{"--folder_name", "layout_random_cli/"},
-                                                         {"--mu_minus", "-0.32"}};
+    std::unordered_map<std::string, std::string> options{{"--folder_name", "layout_random/"},
+                                                         {"--mu_minus", "-0.32"},
+                                                         {"--orientation", "100"}};
 
     std::vector<std::string> arguments(argv + 1, argv + argc);  // Convert argv to a vector of strings
 
@@ -56,7 +61,7 @@ int main(int argc, const char* argv[])  // NOLINT
             }
             else
             {
-                std::cerr << "Error: Argument " << arg << " is missing a value." << std::endl;
+                std::cerr << fmt::format("Error: Argument {} is missing a value.\n", arg);
                 return EXIT_FAILURE;
             }
         }
@@ -66,10 +71,12 @@ int main(int argc, const char* argv[])  // NOLINT
     const std::string folder_name = options["--folder_name"];
     // µ-value used for the simulation.
     const double mu = std::stod(options["--mu_minus"]);
+    // Lattice orientation of H-Si.
+    const std::string orientation = options["--orientation"];
 
     // Print the parsed values
-    std::cout << "Folder name: " << folder_name << std::endl;
-    std::cout << fmt::format("µ_minus: {}", mu) << std::endl;
+    std::cout << fmt::format("Folder name: {}\n", folder_name);
+    std::cout << fmt::format("µ_minus: {}\n", mu);
 
     try
     {
@@ -94,39 +101,65 @@ int main(int argc, const char* argv[])  // NOLINT
                         const uint64_t    end   = path.rfind(".sqd") - 1;
                         const std::string name  = path.substr(start, end - start + 1);
 
-                        std::cout << benchmark << std::endl;
+                        std::cout << benchmark << '\n';
 
-                        auto lyt = read_sqd_layout<sidb_cell_clk_lyt_siqad>(benchmark.string());
+                        const sidb_simulation_parameters phys_params{2, mu};
 
-                        const sidb_simulation_parameters params{2, mu};
-                        const auto                       simulation_results =
-                            exhaustive_ground_state_simulation<sidb_cell_clk_lyt_siqad>(lyt, params);
                         const std::string file_path = fmt::format("{}/loc/{}_sim_µ_minus_{:.3f}.txt",
-                                                                  folder.path().string(), name, -params.mu_minus);
+                                                                  folder.path().string(), name, -phys_params.mu_minus);
 
-                        // Some SiDB layouts where positively charged SiDBs may occur cannot be simulated (i.e., no
-                        // physically valid charge distribution is found) because the physical model currently works
-                        // reliably only for layouts with neutrally and negatively charged SiDBs.
-                        if (!simulation_results.charge_distributions.empty())
+                        if (orientation == "100")
                         {
-                            write_location_and_ground_state(simulation_results, file_path);
+                            auto lyt = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(benchmark.string());
+
+                            const quickexact_params<cell<sidb_100_cell_clk_lyt_siqad>> params{phys_params};
+
+                            const auto simulation_results = quickexact<sidb_100_cell_clk_lyt_siqad>(lyt, params);
+
+                            // Some SiDB layouts where positively charged SiDBs may occur cannot be simulated (i.e., no
+                            // physically valid charge distribution is found) because the physical model currently works
+                            // reliably only for layouts with neutrally and negatively charged SiDBs.
+                            if (!simulation_results.charge_distributions.empty())
+                            {
+                                write_location_and_ground_state(simulation_results, file_path);
+                            }
+                        }
+                        else if (orientation == "111")
+                        {
+                            auto lyt = read_sqd_layout<sidb_111_cell_clk_lyt_siqad>(benchmark.string());
+
+                            const quickexact_params<cell<sidb_111_cell_clk_lyt_siqad>> params{phys_params};
+
+                            const auto simulation_results = quickexact<sidb_111_cell_clk_lyt_siqad>(lyt, params);
+
+                            // Some SiDB layouts where positively charged SiDBs may occur cannot be simulated (i.e., no
+                            // physically valid charge distribution is found) because the physical model currently works
+                            // reliably only for layouts with neutrally and negatively charged SiDBs.
+                            if (!simulation_results.charge_distributions.empty())
+                            {
+                                write_location_and_ground_state(simulation_results, file_path);
+                            }
+                        }
+                        else
+                        {
+                            std::cout << "unsupported lattice orientation.\n";
                         }
                     }
                 }
                 else
                 {
-                    std::cout << "Folder */sqd* does not exist." << std::endl;
+                    std::cout << "Folder */sqd* does not exist.\n";
                 }
             }
         }
         else
         {
-            std::cout << fmt::format("Folder {} does not exist", folder_name) << std::endl;
+            std::cout << fmt::format("Folder {} does not exist.\n", folder_name);
         }
     }
     catch (const std::filesystem::filesystem_error& ex)
     {
-        std::cerr << "Error accessing folder: " << ex.what() << std::endl;
+        std::cerr << fmt::format("Error accessing folder: {}.\n", ex.what());
     }
 
     return EXIT_SUCCESS;
