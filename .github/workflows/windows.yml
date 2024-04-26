@@ -10,6 +10,7 @@ on:
       - '**/CMakeLists.txt'
       - 'libs/**'
       - '.github/workflows/windows.yml'
+      - '!bindings/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp'
   pull_request:
     branches: [ 'main' ]
     paths:
@@ -19,6 +20,7 @@ on:
       - '**/CMakeLists.txt'
       - 'libs/**'
       - '.github/workflows/windows.yml'
+      - '!bindings/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp'
   merge_group:
 
 concurrency:

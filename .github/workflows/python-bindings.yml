@@ -11,6 +11,11 @@ on:
       - '**/CMakeLists.txt'
       - 'libs/**'
       - '.github/workflows/python-bindings.yml'
+  workflow_run:
+    workflows: [ "pyfiction Docstring Generator" ]
+    branches: [ main ]
+    types:
+      - completed
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
