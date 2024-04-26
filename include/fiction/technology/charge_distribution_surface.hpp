@@ -864,17 +864,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return std::nullopt;
     }
     /**
-     * This function allows the local electrostatic potential for some given index position to be set externally.
-     *
-     * @param index The index defining the SiDB position.
-     * @param loc_pot The local electrostatic potential to assign to the given index position (unit: V).
-     */
-    void assign_local_potential_by_index(const uint64_t index, const double loc_pot) noexcept
-    {
-        assert(index < strg->local_pot.size());
-        strg->local_pot[index] = loc_pot;
-    }
-    /**
      * This function assign the electrostatic system energy to zero (unit: eV). It can be used if only one SiDB is
      * charged.
      */
@@ -1028,13 +1017,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     [[nodiscard]] bool is_physically_valid() const noexcept
     {
         return strg->validity;
-    }
-    /**
-     * This function declares present charge distribution layout as physically valid by external judgement.
-     */
-    void declare_physically_valid() noexcept
-    {
-        strg->validity = true;
     }
     /**
      * The charge distribution of the charge distribution surface is converted to a unique index. It is used to map
