@@ -375,9 +375,6 @@ class design_sidb_gates_impl
 
     std::vector<typename Lyt::cell>                   old_canvas_sidbs;
     std::pair<typename Lyt::cell, typename Lyt::cell> swaped_pair{};
-
-    double logical_cost{};
-
     /**
      * A random-number generator.
      */
@@ -492,7 +489,7 @@ class design_sidb_gates_impl
  *
  * The `exhaustive design` is composed of three steps:
  * 1. In the initial step, all possible distributions of `number_of_sidbs` SiDBs within a given canvas are
- * exhaustively determined. This ensures exhaustive coverage of every potential arrangement of ``number_of_sidbs`` SiDBs
+ * exhaustively determined. This ensures exhaustive coverage of every potential arrangement of `number_of_sidbs` SiDBs
  * across the canvas.
  * 2. The calculated SiDB distributions are then incorporated into the skeleton, resulting in the generation of distinct
  * SiDB layouts.
