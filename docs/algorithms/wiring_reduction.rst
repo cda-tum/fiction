@@ -21,7 +21,7 @@ spaces upward and subsequently reconnecting them. This iterative process continu
 
         .. doxygenstruct:: fiction::wiring_reduction_stats
            :members:
-        .. doxygenfunction:: fiction::wiring_reduction(const Lyt& lyt, wiring_reduction_stats* pst = nullptr)
+        .. doxygenfunction:: fiction::wiring_reduction
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.wiring_reduction_stats

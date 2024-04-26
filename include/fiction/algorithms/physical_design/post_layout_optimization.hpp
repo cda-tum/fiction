@@ -36,7 +36,8 @@ namespace fiction
 struct post_layout_optimization_params
 {
     /**
-     * Maximum number of relocations to try for each gate. Defaults to the number of tiles in a layout if not specified.
+     * Maximum number of relocations to try for each gate. Defaults to the number of tiles in the given layout if not
+     * specified.
      */
     std::optional<uint64_t> max_gate_relocations = std::nullopt;
 };
@@ -77,10 +78,10 @@ struct post_layout_optimization_stats
      */
     void report(std::ostream& out = std::cout) const
     {
-        out << fmt::format("[i] total time  = {:.2f} secs\n", mockturtle::to_seconds(time_total));
+        out << fmt::format("[i] total time                      = {:.2f} secs\n", mockturtle::to_seconds(time_total));
         out << fmt::format("[i] layout size before optimization = {} × {}\n", x_size_before, y_size_before);
-        out << fmt::format("[i] layout size after optimization = {} × {}\n", x_size_after, y_size_after);
-        out << fmt::format("[i] area reduction = {}%\n", area_improvement);
+        out << fmt::format("[i] layout size after optimization  = {} × {}\n", x_size_after, y_size_after);
+        out << fmt::format("[i] area reduction                  = {}%\n", area_improvement);
     }
 };
 
@@ -407,8 +408,8 @@ layout_coordinate_path<Lyt> get_path_and_obstruct(Lyt& lyt, const tile<Lyt>& sta
  * @return `true` if the gate was moved successfully, `false` otherwise.
  */
 template <typename Lyt>
-[[nodiscard]] bool improve_gate_location(Lyt& lyt, const tile<Lyt>& old_pos, const tile<Lyt>& max_non_po,
-                                         const uint64_t max_gate_relocations) noexcept
+bool improve_gate_location(Lyt& lyt, const tile<Lyt>& old_pos, const tile<Lyt>& max_non_po,
+                           const uint64_t max_gate_relocations) noexcept
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");

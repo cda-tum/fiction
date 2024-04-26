@@ -18,7 +18,7 @@ relocating outputs to more favorable positions.
            :members:
         .. doxygenstruct:: fiction::post_layout_optimization_stats
            :members:
-        .. doxygenfunction:: fiction::post_layout_optimization(const Lyt& lyt, post_layout_optimization_params ps = {}, post_layout_optimization_stats* pst = nullptr)
+        .. doxygenfunction:: fiction::post_layout_optimization
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.post_layout_optimization_params
