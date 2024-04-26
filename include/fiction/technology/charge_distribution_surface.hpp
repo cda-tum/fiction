@@ -1284,8 +1284,10 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     {
         if (potential_value != 0.0)
         {
-            this->foreach_cell([this, &potential_value](const auto& c)
-                               { strg->local_external_pot.insert({c, potential_value}); });
+            this->foreach_cell(
+                [this, &potential_value](const auto& c) {
+                    strg->local_external_pot.insert({c, potential_value});
+                });
             this->update_after_charge_change(dep_cell);
         }
     }
@@ -2084,8 +2086,8 @@ template <class T>
 charge_distribution_surface(const T&, const sidb_simulation_parameters&) -> charge_distribution_surface<T>;
 
 template <class T>
-charge_distribution_surface(const T&, const sidb_simulation_parameters&,
-                            sidb_charge_state cs) -> charge_distribution_surface<T>;
+charge_distribution_surface(const T&, const sidb_simulation_parameters&, sidb_charge_state cs)
+    -> charge_distribution_surface<T>;
 
 }  // namespace fiction
 

@@ -164,10 +164,11 @@ coloring_container<Ntk> east_south_edge_coloring(const Ntk& ntk) noexcept
             const auto finc = fanin_edges(ctn.color_ntk, n);
 
             // if any incoming edge is colored east, color them all east, and south otherwise
-            const auto color = std::any_of(finc.fanin_edges.cbegin(), finc.fanin_edges.cend(), [&ctn](const auto& fe)
-                                           { return ctn.color_ntk.edge_color(fe) == ctn.color_east; }) ?
-                                   ctn.color_east :
-                                   ctn.color_south;
+            const auto color =
+                std::any_of(finc.fanin_edges.cbegin(), finc.fanin_edges.cend(),
+                            [&ctn](const auto& fe) { return ctn.color_ntk.edge_color(fe) == ctn.color_east; }) ?
+                    ctn.color_east :
+                    ctn.color_south;
 
             std::for_each(finc.fanin_edges.cbegin(), finc.fanin_edges.cend(),
                           [&ctn, &color](const auto& fe) { recursively_paint_edges(ctn, fe, color); });

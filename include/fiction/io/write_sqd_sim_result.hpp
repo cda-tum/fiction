@@ -260,7 +260,8 @@ class write_sqd_sim_result_impl
                 std::vector<sidb_charge_state> ordered_charges{};
                 ordered_charges.reserve(ordered_cells.size());
 
-                std::for_each(ordered_cells.cbegin(), ordered_cells.cend(), [&ordered_charges, &surface](const auto& c)
+                std::for_each(ordered_cells.cbegin(), ordered_cells.cend(),
+                              [&ordered_charges, &surface](const auto& c)
                               { ordered_charges.push_back(surface->get_charge_state(c)); });
 
                 os << fmt::format(

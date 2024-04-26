@@ -1977,7 +1977,8 @@ class exact_impl
                                             solver->add(!(get_tn(t, n)));
 
                                             // same for the outgoing edges
-                                            foreach_outgoing_edge(network, n, [this, &t](const auto& e)
+                                            foreach_outgoing_edge(network, n,
+                                                                  [this, &t](const auto& e)
                                                                   { solver->add(!(get_te(t, e))); });
                                         }
                                         // cannot be placed with too little distance to south-east corner
@@ -1989,7 +1990,8 @@ class exact_impl
 
                                             // same for the incoming edges
                                             foreach_incoming_edge(
-                                                network, n, [this, &t](const auto& e)
+                                                network, n,
+                                                [this, &t](const auto& e)
                                                 { check_point->assumptions.push_back(!(get_te(t, e))); });
                                         }
                                     });

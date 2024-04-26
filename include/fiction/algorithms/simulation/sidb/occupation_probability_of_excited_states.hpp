@@ -44,9 +44,10 @@ namespace fiction
     const auto min_energy           = energy;
 
     // The partition function is obtained by summing up all the Boltzmann factors.
-    const double partition_function = std::accumulate(
-        energy_and_state_type.cbegin(), energy_and_state_type.cend(), 0.0, [&](const double sum, const auto& it)
-        { return sum + std::exp(-((it.first - min_energy) * 12'000 / temperature)); });
+    const double partition_function =
+        std::accumulate(energy_and_state_type.cbegin(), energy_and_state_type.cend(), 0.0,
+                        [&](const double sum, const auto& it)
+                        { return sum + std::exp(-((it.first - min_energy) * 12'000 / temperature)); });
 
     // All Boltzmann factors of the erroneous states are summed.
     double p = 0;
@@ -85,9 +86,10 @@ namespace fiction
     const auto min_energy            = energy;  // unit: eV
 
     // The partition function is obtained by summing up all the Boltzmann factors.
-    const double partition_function = std::accumulate(
-        energy_distribution.cbegin(), energy_distribution.cend(), 0.0, [&](const double sum, const auto& it)
-        { return sum + std::exp(-((it.first - min_energy) * 12'000 / temperature)); });
+    const double partition_function =
+        std::accumulate(energy_distribution.cbegin(), energy_distribution.cend(), 0.0,
+                        [&](const double sum, const auto& it)
+                        { return sum + std::exp(-((it.first - min_energy) * 12'000 / temperature)); });
 
     // All Boltzmann factors of the excited states are summed.
     const double p = std::accumulate(

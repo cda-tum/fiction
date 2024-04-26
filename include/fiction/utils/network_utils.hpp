@@ -454,8 +454,9 @@ std::vector<uint32_t> inverse_levels(const Ntk& ntk) noexcept
             set_discovered(n);
 
             // determine successor's maximum level
-            const auto post_l = std::max_element(fos.cbegin(), fos.cend(), [&](const auto& n1, const auto& n2)
-                                                 { return get_inv_level(n1) < get_inv_level(n2); });
+            const auto post_l =
+                std::max_element(fos.cbegin(), fos.cend(),
+                                 [&](const auto& n1, const auto& n2) { return get_inv_level(n1) < get_inv_level(n2); });
 
             // if there are no successors, the level of current node is 0, else it is 1 higher than theirs
             set_inv_level(n, post_l != fos.cend() ? std::max(get_inv_level(n), get_inv_level(*post_l) + 1u) : 0u);

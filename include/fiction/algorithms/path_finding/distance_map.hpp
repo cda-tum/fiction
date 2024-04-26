@@ -97,8 +97,10 @@ initialize_sparse_distance_map(const Lyt& lyt, const distance_functor<Lyt, Dist>
     lyt.foreach_coordinate(
         [&lyt, &dist_fn, &dist_map](const auto& c1)
         {
-            lyt.foreach_coordinate([&lyt, &dist_fn, &dist_map, &c1](const auto& c2)
-                                   { dist_map[{c1, c2}] = dist_fn(lyt, c1, c2); });
+            lyt.foreach_coordinate(
+                [&lyt, &dist_fn, &dist_map, &c1](const auto& c2) {
+                    dist_map[{c1, c2}] = dist_fn(lyt, c1, c2);
+                });
         });
 
     return dist_map;
