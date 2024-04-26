@@ -6,7 +6,7 @@ ARG NUMBER_OF_JOBS=4
 # Configure apt and install packages
 RUN apt-get -y update && \
     apt-get -y upgrade && \
-    apt-get -y install make cmake gcc g++ mold git python3 python3-dev python3-pip python3-venv libreadline-dev xdg-utils
+    apt-get -y install make cmake gcc g++ mold git python3 python3-dev python3-pip python3-venv libreadline-dev xdg-utils libtbb-dev
 
 # Set up a working directory
 WORKDIR /app
@@ -14,11 +14,11 @@ WORKDIR /app
 # Create a Python virtual environment and activate it
 RUN python3 -m venv venv
 
-# Use the virtual environment's pip to install z3-solver
-RUN ./venv/bin/pip install z3-solver==4.10.0
-
 # Set the path to include the virtual environment
 ENV PATH="/app/venv/bin:$PATH"
+
+# Use the virtual environment's pip to install z3-solver
+RUN ./venv/bin/pip install z3-solver==4.10.0
 
 # Clone fiction's repository including submodules
 # RUN git clone --recursive https://github.com/cda-tum/fiction.git
