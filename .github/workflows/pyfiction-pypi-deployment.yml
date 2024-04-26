@@ -33,7 +33,7 @@ jobs:
           - { os: macos-latest, arch: arm64 }
           - { os: windows-latest, arch: x64 }
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
           fetch-depth: 0
@@ -72,16 +72,17 @@ jobs:
           CIBW_TEST_COMMAND: 'python -m unittest discover --start-directory {project} --verbose'
 
       - name: Upload wheel as an artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           path: ./wheelhouse/*.whl
+          overwrite: true
 
   build_sdist:
     name: Build Source Distribution
     runs-on: ubuntu-latest
     steps:
       - name: Clone respository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
           fetch-depth: 0
@@ -95,7 +96,7 @@ jobs:
           max-size: 10G
 
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
           cache: 'pip'
@@ -114,9 +115,10 @@ jobs:
         run: z3=${{env.ENABLE_Z3}} pip install dist/*.tar.gz --verbose
 
       - name: Upload sdist as an artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           path: dist/*.tar.gz
+          overwrite: true
 
   publish_to_pypi:
     needs: [ build_wheels, build_sdist ]
@@ -125,7 +127,7 @@ jobs:
     if: github.event_name == 'release' && github.event.action == 'published'
     steps:
       - name: Download the previously stored artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: artifact
           path: dist
