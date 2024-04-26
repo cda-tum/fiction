@@ -46,7 +46,6 @@ template <typename Lyt, typename TT>
         maximum_defect_influence_distance_stats stats_defect{};
         const auto                              influence_cell_distance =
             maximum_defect_influence_position_and_distance(lyt, params.defect_influence_params, &stats_defect);
-        std::cout << mockturtle::to_seconds(stats_defect.time_total) << std::endl;
         if (influence_cell_distance.second > maximum_defect_influence_distance)
         {
             maximum_defect_influence_distance = influence_cell_distance.second;
