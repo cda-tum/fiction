@@ -46,7 +46,7 @@ TEMPLATE_TEST_CASE("Charge distribution surface traits and construction", "[char
 
     using charge_charge_layout = charge_distribution_surface<charge_layout>;
     CHECK(is_charge_distribution_surface_v<charge_charge_layout>);
-    CHECK(is_celdl_level_layout_v<charge_charge_layout>);
+    CHECK(is_cell_level_layout_v<charge_charge_layout>);
     CHECK(has_assign_charge_state_v<charge_charge_layout>);
     CHECK(has_get_charge_state_v<charge_charge_layout>);
 }
