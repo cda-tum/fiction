@@ -42,7 +42,7 @@ TEMPLATE_TEST_CASE("Charge distribution surface traits and construction", "[char
     charge_layout       charge_lyt{};
     const charge_layout charge_lyt_from_lyt{lyt};
 
-    std::cout << charge_lyt.f();
+    CHECK(charge_lyt.f() == 3);
 
     using charge_charge_layout = charge_distribution_surface<charge_layout>;
     CHECK(is_charge_distribution_surface_v<charge_charge_layout>);
