@@ -309,7 +309,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
         return *this;
     }
-    [[nodiscard]] uint64_t f()
+    [[nodiscard]] constexpr uint64_t f() const noexcept
     {
         return 3ul;
     }
