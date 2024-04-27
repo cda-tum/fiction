@@ -309,6 +309,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
         return *this;
     }
+    void f() noexcept {}
     /**
      * This function returns the locations of all SiDBs in nm of the form `(x,y)`.
      *
@@ -1524,11 +1525,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return strg->simulation_parameters.k() * strg->simulation_parameters.epsilon_r / defect.epsilon_r /
                (distance * 1e-9) * std::exp(-distance / defect.lambda_tf) * physical_constants::ELEMENTARY_CHARGE;
     }
-    /**
-     * This function can be used to reset all external local electrostatic potentials to 0 Volt. All important
-     * attributes of the charge layout are updated automatically.
-     */
-    void reset_local_external_potentials() noexcept {}
     /**
      * This function can be used to assign an external local electrostatic potential in Volt to the layout, which is
      * added to previously stored values. All important attributes of the charge layout are updated automatically.
