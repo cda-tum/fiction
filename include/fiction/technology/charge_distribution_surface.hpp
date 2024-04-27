@@ -1528,7 +1528,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * This function can be used to reset all external local electrostatic potentials to 0 Volt. All important
      * attributes of the charge layout are updated automatically.
      */
-    void reset_local_external_potentials() const noexcept
+    inline void reset_local_external_potentials() noexcept
     {
         strg->local_external_pot.clear();
         this->update_after_charge_change();
