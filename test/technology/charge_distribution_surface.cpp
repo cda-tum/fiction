@@ -761,7 +761,6 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
 
         charge_layout_new.assign_all_charge_states(sidb_charge_state::NEUTRAL);
 
-        charge_layout_new.reset_local_external_potentials();
         charge_layout_new.assign_local_external_potential({{{0, 0, 1}, -0.1}});
         REQUIRE(charge_layout_new.get_local_potential({0, 0, 1}).has_value());
         CHECK_THAT(charge_layout_new.get_local_potential({0, 0, 1}).value() + 0.1,
@@ -1687,15 +1686,6 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects, part two", 
         charge_layout_new.assign_all_charge_states(sidb_charge_state::NEUTRAL);
 
         charge_layout_new.assign_local_external_potential({{{0, 0, 1}, -0.1}});
-        CHECK_THAT(charge_layout_new.get_local_potential({0, 0, 1}).value() + 0.6,
-                   Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
-        CHECK_THAT(charge_layout_new.get_local_potential({1, 3, 0}).value(),
-                   Catch::Matchers::WithinAbs(0.000000, 0.000001));
-        CHECK_THAT(charge_layout_new.get_local_potential({10, 5, 1}).value(),
-                   Catch::Matchers::WithinAbs(0.000000, 0.000001));
-
-        charge_layout_new.reset_local_external_potentials();
-        charge_layout_new.assign_local_external_potential({{{0, 0, 1}, -0.1}});
         CHECK_THAT(charge_layout_new.get_local_potential({0, 0, 1}).value() + 0.1,
                    Catch::Matchers::WithinAbs(0, physical_constants::POP_STABILITY_ERR));
         CHECK_THAT(charge_layout_new.get_local_potential({1, 3, 0}).value(),
@@ -1703,7 +1693,6 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects, part two", 
         CHECK_THAT(charge_layout_new.get_local_potential({10, 5, 1}).value(),
                    Catch::Matchers::WithinAbs(0.000000, 0.000001));
 
-        charge_layout_new.reset_local_external_potentials();
         charge_layout_new.assign_local_external_potential({{{0, 0, 1}, -0.5}, {{10, 5, 1}, -0.1}});
         charge_layout_new.assign_all_charge_states(sidb_charge_state::NEGATIVE);
         charge_layout_new.update_after_charge_change();
