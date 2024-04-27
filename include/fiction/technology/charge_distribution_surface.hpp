@@ -309,7 +309,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
         return *this;
     }
-    void f() noexcept {}
+    void f() {}
     /**
      * This function returns the locations of all SiDBs in nm of the form `(x,y)`.
      *
