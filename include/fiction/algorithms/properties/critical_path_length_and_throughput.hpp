@@ -12,13 +12,25 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <cstdlib>
+#include <vector>
 
 namespace fiction
 {
 
-struct critical_path_length_and_throughput_stats
+/**
+ * Critical path length and throughput storage struct.
+ */
+struct cp_and_tp
 {
-    uint64_t critical_path_length{0ull}, throughput{0ull};
+    /**
+     * Length of the critical path in tiles.
+     */
+    uint64_t critical_path_length{0ull};
+    /**
+     * Throughput of the layout in clock cycles as \f$\frac{1}{x}\f$ where only \f$x\f$ is stored.
+     */
+    uint64_t throughput{0ull};
 };
 
 namespace detail
@@ -28,17 +40,15 @@ template <typename Lyt>
 class critical_path_length_and_throughput_impl
 {
   public:
-    critical_path_length_and_throughput_impl(const Lyt& src, critical_path_length_and_throughput_stats& st) :
-            lyt{src},
-            pst{st}
-    {}
+    explicit critical_path_length_and_throughput_impl(const Lyt& src) : lyt{src} {}
 
-    void run()
+    cp_and_tp run()
     {
         lyt.foreach_po(
-            [this](const auto& po) {
-                pst.critical_path_length =
-                    std::max(signal_delay(static_cast<tile<Lyt>>(po)).length, pst.critical_path_length);
+            [this](const auto& po)
+            {
+                result.critical_path_length =
+                    std::max(signal_delay(static_cast<tile<Lyt>>(po)).length, result.critical_path_length);
             });
 
         const auto max_diff =
@@ -47,20 +57,27 @@ class critical_path_length_and_throughput_impl
 
         if (max_diff != delay_cache.cend())
         {
-            pst.throughput = max_diff->second.diff;
+            result.throughput = max_diff->second.diff;
         }
 
         // give throughput in cycles, not in phases
-        pst.throughput /= lyt.num_clocks();
+        result.throughput /= lyt.num_clocks();
 
         // convert cycle difference to throughput, i.e., x where throughput == 1/x
-        pst.throughput++;
+        result.throughput++;
+
+        return result;
     }
 
   private:
+    /**
+     * Gate-level layout.
+     */
     Lyt lyt;
-
-    critical_path_length_and_throughput_stats& pst;
+    /**
+     * Result storage.
+     */
+    cp_and_tp result;
 
     struct path_info
     {
@@ -141,40 +158,33 @@ class critical_path_length_and_throughput_impl
  *
  * The critical path length is defined as the longest path from any PI to any PO in tiles.
  *
- * The throughput is defined as \f$ \frac{1}{x} \f$ where \f$ x \f$ is the highest path length difference between any
- * sets of paths that lead to the same gate. This function provides only the denominator \f$ x \f$, as the numerator is
- * always \f$ 1 \f$. Furthermore, \f$ x \f$ is given in clock cycles rather than clock phases because it is assumed that
+ * The throughput is defined as \f$\frac{1}{x}\f$ where \f$x\f$ is the highest path length difference between any
+ * sets of paths that lead to the same gate. This function provides only the denominator \f$x\f$, as the numerator is
+ * always \f$1\f$. Furthermore, \f$x\f$ is given in clock cycles rather than clock phases because it is assumed that
  * a path length difference smaller than `lyt.num_clocks()` does not lead to any delay. Contrary, for any throughput
- * value \f$ \frac{1}{x} \f$ with \f$ x > 1 \f$, the layout computes its represented Boolean function only every \f$ x
- * \f$ full clock cycles after the first inputs have been propagated through the design. Thereby, all PIs need to be
- * held constant for \f$ x \f$ clock phases to ensure proper computation.
+ * value \f$\frac{1}{x}\f$ with \f$x > 1\f$, the layout computes its represented Boolean function only every \f$x\f$
+ * full clock cycles after the first inputs have been propagated through the design. Thereby, all PIs need to be
+ * held constant for \f$x\f$ clock phases to ensure proper computation.
  *
  * For more information on the concept of throughput and delay see \"Synchronization of Clocked Field-Coupled Circuits\"
  * by F. Sill Torres, M. Walter, R. Wille, D. Große, and R. Drechsler in IEEE NANO 2018; or \"Design Automation for
  * Field-coupled Nanotechnologies\" by M. Walter, R. Wille, F. Sill Torres, and R. Drechsler published by Springer
  * Nature in 2022.
  *
- * The complexity of this function is \f$ \mathcal{O}(|T|) \f$ where \f$ T \f$ is the set of all occupied tiles in
- * `lyt`.
+ * The complexity of this function is \f$\mathcal{O}(|T|)\f$ where \f$T\f$ is the set of all occupied tiles in `lyt`.
  *
  * @tparam Lyt Gate-level layout type.
  * @param lyt The gate-level layout whose CP and TP are desired.
- * @param pst Statistics.
+ * @return A struct containing the CP and TP.
  */
 template <typename Lyt>
-void critical_path_length_and_throughput(const Lyt& lyt, critical_path_length_and_throughput_stats* pst = nullptr)
+cp_and_tp critical_path_length_and_throughput(const Lyt& lyt)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate layout type");
 
-    critical_path_length_and_throughput_stats        st{};
-    detail::critical_path_length_and_throughput_impl p{lyt, st};
+    detail::critical_path_length_and_throughput_impl p{lyt};
 
-    p.run();
-
-    if (pst)
-    {
-        *pst = st;
-    }
+    return p.run();
 }
 
 }  // namespace fiction

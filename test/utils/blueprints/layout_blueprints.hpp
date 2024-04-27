@@ -462,6 +462,21 @@ GateLyt row_clocked_and_xor_gate_layout() noexcept
 }
 
 template <typename GateLyt>
+GateLyt unclockable_gate_layout() noexcept
+{
+    GateLyt layout{typename GateLyt::aspect_ratio{2, 2, 0}, fiction::open_clocking<GateLyt>()};
+
+    const auto x0  = layout.create_pi("x0", {0, 0});
+    const auto fo  = layout.create_buf(x0, {0, 1});
+    const auto inv = layout.create_not(fo, {0, 2});
+    const auto w   = layout.create_buf(inv, {1, 2});
+    const auto a   = layout.create_and(fo, w, {1, 1});
+    layout.create_po(a, "f", {2, 1});
+
+    return layout;
+}
+
+template <typename GateLyt>
 GateLyt optimization_layout() noexcept
 {
     GateLyt layout{{2, 3, 1}, fiction::twoddwave_clocking<GateLyt>()};
@@ -665,6 +680,55 @@ CellLyt single_layer_inml_crosswire() noexcept
 
     return layout;
 }
+/**
+ * This layout represents the AND Gate implemented on the H-Si(111)-1x1 surface, as proposed in the paper
+ * titled \"Unlocking Flexible Silicon Dangling Bond Logic Designs on Alternative Silicon Orientations\" authored by
+ * Samuel Sze Hang Ng, Jan Drewniok, Marcel Walter, Jacob Retallick, Robert Wille, and Konrad Walus.
+ *
+ * (https://github.com/samuelngsh/si-111-paper-supplementary/blob/main/bestagon-111-gates/gates/AND_mu_032_0.sqd)
+ */
+template <typename Lyt>
+Lyt and_gate_111() noexcept
+{
+    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(fiction::is_sidb_lattice_111_v<Lyt>, "Lyt should have 111 as lattice orientation");
+
+    Lyt lyt{};
+
+    lyt.assign_cell_type({0, 0, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({1, 1, 1}, Lyt::cell_type::INPUT);
+
+    lyt.assign_cell_type({25, 0, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({23, 1, 1}, Lyt::cell_type::INPUT);
+
+    lyt.assign_cell_type({4, 4, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({21, 4, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({5, 5, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({19, 5, 1}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({17, 8, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 8, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({9, 9, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({15, 9, 1}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({13, 17, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({16, 18, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({10, 18, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({15, 21, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({17, 23, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({19, 25, 1}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({21, 27, 0}, Lyt::cell_type::OUTPUT);
+
+    lyt.assign_cell_type({23, 29, 1}, Lyt::cell_type::NORMAL);
+
+    return lyt;
+};
 
 }  // namespace blueprints
 

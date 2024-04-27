@@ -6,16 +6,15 @@
 #define FICTION_OCCUPATION_PROBABILITY_OF_EXCITED_STATES_HPP
 
 #include "fiction/algorithms/simulation/sidb/calculate_energy_and_state_type.hpp"
+#include "fiction/technology/physical_constants.hpp"
 #include "fiction/utils/math_utils.hpp"
 
 #include <algorithm>
 #include <cassert>
 #include <cmath>
-#include <limits>
 #include <map>
 #include <numeric>
 #include <utility>
-#include <vector>
 
 namespace fiction
 {
@@ -93,18 +92,18 @@ namespace fiction
                         { return sum + std::exp(-((it.first - min_energy) * 12'000 / temperature)); });
 
     // All Boltzmann factors of the excited states are summed.
-    const double p =
-        std::accumulate(energy_distribution.cbegin(), energy_distribution.cend(), 0.0,
-                        [&](const double sum, const auto& it)
-                        {
-                            // round the energy value of the given valid_layout to six decimal places to overcome
-                            // possible rounding errors and for comparability with the min_energy.
-                            if (round_to_n_decimal_places(it.first, 6) != round_to_n_decimal_places(min_energy, 6))
-                            {
-                                return sum + std::exp(-((it.first - min_energy) * 12'000 / temperature));
-                            }
-                            return sum;
-                        });
+    const double p = std::accumulate(
+        energy_distribution.cbegin(), energy_distribution.cend(), 0.0,
+        [&](const double sum, const auto& it)
+        {
+            // round the energy value of the given valid_layout to six decimal places and check if they are different
+            if (std::abs(round_to_n_decimal_places(it.first, 6) - round_to_n_decimal_places(min_energy, 6)) >
+                physical_constants::POP_STABILITY_ERR)
+            {
+                return sum + std::exp(-((it.first - min_energy) * 12'000 / temperature));
+            }
+            return sum;
+        });
 
     return p / partition_function;  // Occupation probability of the excited states.
 }

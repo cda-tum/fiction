@@ -7,14 +7,12 @@
 
 #include <fiction/algorithms/path_finding/a_star.hpp>
 #include <fiction/algorithms/path_finding/distance.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
-#include <fiction/types.hpp>
 
 #include <cmath>
+#include <cstdint>
 #include <limits>
 
 using namespace fiction;
@@ -457,36 +455,4 @@ TEST_CASE("a_star distance functor", "[distance]")
             }
         }
     }
-}
-
-TEST_CASE("SiDB nanometer distance", "[distance]")
-{
-    const sidb_cell_clk_lyt_siqad layout{};
-
-    CHECK(sidb_nanometer_distance(layout, {0, 0}, {0, 0}) == 0);
-    CHECK(sidb_nanometer_distance(layout, {1, 0}, {1, 0}) == 0);
-    CHECK(sidb_nanometer_distance(layout, {0, 1}, {0, 1}) == 0);
-
-    CHECK(sidb_nanometer_distance(layout, {-3, 0}, {-3, 0}) == 0);
-    CHECK(sidb_nanometer_distance(layout, {0, -5}, {0, -5}) == 0);
-
-    CHECK(sidb_nanometer_distance(layout, {0, 1, 1}, {0, 1, 1}) == 0);
-    CHECK(sidb_nanometer_distance(layout, {0, 0}, {1, 0}) == sidb_simulation_parameters{}.lat_a * 0.1);
-    CHECK(sidb_nanometer_distance(layout, {0, 0}, {0, 1}) == sidb_simulation_parameters{}.lat_b * 0.1);
-    CHECK(sidb_nanometer_distance(layout, {0, 0}, {0, 0, 1}) == sidb_simulation_parameters{}.lat_c * 0.1);
-
-    CHECK(sidb_nanometer_distance(layout, {0, 0}, {-1, 0}) == sidb_simulation_parameters{}.lat_a * 0.1);
-    CHECK(sidb_nanometer_distance(layout, {0, 0}, {0, -1}) == sidb_simulation_parameters{}.lat_b * 0.1);
-    CHECK(sidb_nanometer_distance(layout, {0, 0}, {0, 0, -1}) == sidb_simulation_parameters{}.lat_c * 0.1);
-
-    CHECK(sidb_nanometer_distance(layout, {0, 0}, {0, 2, 1}) ==
-          sidb_simulation_parameters{}.lat_b * 0.2 + sidb_simulation_parameters{}.lat_c * 0.1);
-    CHECK(sidb_nanometer_distance(layout, {0, 0}, {0, -2, 1}) ==
-          sidb_simulation_parameters{}.lat_b * 0.2 - sidb_simulation_parameters{}.lat_c * 0.1);
-    CHECK(sidb_nanometer_distance(layout, {0, -2, 1}, {0, 0}) ==
-          sidb_simulation_parameters{}.lat_b * 0.2 - sidb_simulation_parameters{}.lat_c * 0.1);
-
-    CHECK(sidb_nanometer_distance(layout, {0, 2, 1}, {-5, 1, 0}) ==
-          std::hypot(sidb_simulation_parameters{}.lat_a * 0.5,
-                     sidb_simulation_parameters{}.lat_b * 0.1 + sidb_simulation_parameters{}.lat_c * 0.1));
 }

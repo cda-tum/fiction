@@ -96,12 +96,12 @@ static constexpr const std::array benchmarks {
     "fontes18/majority", "fontes18/majority_5_r1", "fontes18/newtag", "fontes18/clpl", "fontes18/xor5_r1",
     "fontes18/1bitAdderMaj", "fontes18/cm82a_5", "fontes18/2bitAdderMaj", "fontes18/xor5Maj", "fontes18/parity",
 
-    "iscas85/c17", "iscas85/c432", "iscas85/c499", "iscas85/c880", "iscas85/c1355", "iscas85/c1908", "iscas85/c2670",
-    "iscas85/c3540", "iscas85/c5315", "iscas85/c6288", "iscas85/c7552",
+    "ISCAS85/c17", "ISCAS85/c432", "ISCAS85/c499", "ISCAS85/c880", "ISCAS85/c1355", "ISCAS85/c1908", "ISCAS85/c2670",
+    "ISCAS85/c3540", "ISCAS85/c5315", "ISCAS85/c6288", "ISCAS85/c7552",
 
-    "epfl/adder", "epfl/bar", "epfl/max", "epfl/sin", "epfl/cavlc", "epfl/ctrl", "epfl/dec", "epfl/i2c",
-    "epfl/int2float", "epfl/priority", "epfl/router", "epfl/arbiter", "epfl/voter", "epfl/square", "epfl/log2",
-    "epfl/sqrt", "epfl/multiplier",
+    "EPFL/adder", "EPFL/bar", "EPFL/max", "EPFL/sin", "EPFL/cavlc", "EPFL/ctrl", "EPFL/dec", "EPFL/i2c",
+    "EPFL/int2float", "EPFL/priority", "EPFL/router", "EPFL/arbiter", "EPFL/voter", "EPFL/square", "EPFL/log2",
+    "EPFL/sqrt", "EPFL/multiplier",
     };
 
 // clang-format on

@@ -34,11 +34,11 @@ enum class eq_type
      */
     NO,
     /**
-     * `Spec` and `Impl` are logically equivalent BUT `Impl` has a throughput of \f$ \frac{1}{x} \f$ with \f$ x > 1 \f$.
+     * `Spec` and `Impl` are logically equivalent BUT `Impl` has a throughput of \f$\frac{1}{x}\f$ with \f$x > 1\f$.
      */
     WEAK,
     /**
-     * `Spec` and `Impl` are logically equivalent AND `Impl` has a throughput of \f$ \frac{1}{1} \f$.
+     * `Spec` and `Impl` are logically equivalent AND `Impl` has a throughput of \f$\frac{1}{1}\f$.
      */
     STRONG
 };
@@ -89,7 +89,7 @@ class equivalence_checking_impl
             pst{st}
     {}
 
-    void run() noexcept
+    eq_type run() noexcept
     {
         mockturtle::stopwatch stop{pst.runtime};
 
@@ -97,14 +97,14 @@ class equivalence_checking_impl
         {
             if (has_drvs(spec, &pst.spec_drv_stats))
             {
-                return;
+                return eq_type::NO;
             }
         }
         if constexpr (is_gate_level_layout_v<Impl>)
         {
             if (has_drvs(impl, &pst.impl_drv_stats))
             {
-                return;
+                return eq_type::NO;
             }
         }
 
@@ -125,18 +125,16 @@ class equivalence_checking_impl
                     // compute TP of specification
                     if constexpr (fiction::is_gate_level_layout_v<Spec>)
                     {
-                        fiction::critical_path_length_and_throughput_stats cplt_st{};
-                        fiction::critical_path_length_and_throughput(spec, &cplt_st);
+                        const auto cp_tp = fiction::critical_path_length_and_throughput(spec);
 
-                        pst.tp_spec = static_cast<int64_t>(cplt_st.throughput);
+                        pst.tp_spec = static_cast<int64_t>(cp_tp.throughput);
                     }
                     // compute TP of implementation
                     if constexpr (fiction::is_gate_level_layout_v<Impl>)
                     {
-                        fiction::critical_path_length_and_throughput_stats cplt_st{};
-                        fiction::critical_path_length_and_throughput(impl, &cplt_st);
+                        const auto cp_tp = fiction::critical_path_length_and_throughput(impl);
 
-                        pst.tp_impl = static_cast<int64_t>(cplt_st.throughput);
+                        pst.tp_impl = static_cast<int64_t>(cp_tp.throughput);
                     }
 
                     pst.tp_diff = std::abs(pst.tp_spec - pst.tp_impl);
@@ -155,13 +153,19 @@ class equivalence_checking_impl
             else
             {
                 std::cout << "[e] resource limit exceeded" << std::endl;
+
+                return eq_type::NO;
             }
         }
         else
         {
             std::cout << "[w] both networks/layouts must have the same number of primary inputs and outputs"
                       << std::endl;
+
+            return eq_type::NO;
         }
+
+        return pst.eq;
     }
 
   private:
@@ -206,10 +210,10 @@ class equivalence_checking_impl
  * - `NO` equivalence: Spec and Impl are not logically equivalent or one of them is a gate-level layout that contains
  * DRVs and, thus, cannot be checked for equivalence.
  * - `WEAK` equivalence: Spec and Impl are logically equivalent but either one of them is a gate-level layout with TP of
- * \f$ \frac{1}{x} \f$ with \f$ x > 1 \f$ or both of them are gate-level layouts with TP of \f$ \frac{1}{x} \f$ and \f$
- * \frac{1}{y} \f$, respectively, where \f$ x \neq y \f$.
- * - `STRONG` equivalence: Spec and Impl are logically equivalent and all involved gate-level layouts have TP of \f$
- * \frac{1}{1} \f$.
+ * \f$\frac{1}{x}\f$ with \f$x > 1\f$ or both of them are gate-level layouts with TP of \f$\frac{1}{x}\f$ and
+ * \f$\frac{1}{y}\f$, respectively, where \f$x \neq y\f$.
+ * - `STRONG` equivalence: Spec and Impl are logically equivalent and all involved gate-level layouts have TP of
+ * \f$\frac{1}{1}\f$.
  *
  * This approach was first proposed in \"Verification for Field-coupled Nanocomputing Circuits\" by M. Walter, R. Wille,
  * F. Sill Torres, D. Große, and R. Drechsler in DAC 2020.
@@ -219,9 +223,10 @@ class equivalence_checking_impl
  * @param spec The specification.
  * @param impl The implementation.
  * @param pst Statistics.
+ * @return The equivalence type of `spec` and `impl`.
  */
 template <typename Spec, typename Impl>
-void equivalence_checking(const Spec& spec, const Impl& impl, equivalence_checking_stats* pst = nullptr)
+eq_type equivalence_checking(const Spec& spec, const Impl& impl, equivalence_checking_stats* pst = nullptr)
 {
     static_assert(mockturtle::is_network_type_v<Spec>, "Spec is not a network type");
     static_assert(mockturtle::is_network_type_v<Impl>, "Impl is not a network type");
@@ -229,12 +234,14 @@ void equivalence_checking(const Spec& spec, const Impl& impl, equivalence_checki
     equivalence_checking_stats        st{};
     detail::equivalence_checking_impl p{spec, impl, st};
 
-    p.run();
+    const auto result = p.run();
 
     if (pst)
     {
         *pst = st;
     }
+
+    return result;
 }
 
 }  // namespace fiction

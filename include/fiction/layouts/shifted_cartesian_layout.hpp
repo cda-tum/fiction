@@ -124,7 +124,7 @@ struct even_column_cartesian : vertical_shift_cartesian
 {};
 
 /**
- * A layout type that utilizes offset coordinates to represent a cartesian layout with shifted coordinates. Its faces
+ * A layout type that utilizes offset coordinates to represent a Cartesian layout with shifted coordinates. Its faces
  * are organizes in an offset coordinate system as provided. These can either be the horizontal_shift_cartesian or
  * vertical_shift_cartesian orientation. Based on that, two respectively possible coordinate systems emerge accordingly:
  * odd_row_cartesian and even_row_cartesian for horizontal shifts and odd_column_cartesian and even_column_cartesian for

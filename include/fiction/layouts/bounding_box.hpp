@@ -12,6 +12,9 @@
 #include "fiction/types.hpp"
 #include "fiction/utils/layout_utils.hpp"
 
+#include <cstdint>
+#include <limits>
+
 // data types cannot properly be converted to bit field types
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wconversion"
@@ -67,7 +70,7 @@ class bounding_box_2d
             int32_t min_y = std::numeric_limits<int32_t>::max();
             int32_t max_y = std::numeric_limits<int32_t>::min();
 
-            uint8_t min_z = 0;
+            uint8_t min_z = 1;
             uint8_t max_z = 0;
 
             layout.foreach_cell(
@@ -133,10 +136,10 @@ class bounding_box_2d
                         }
                     }
                 });
-
-            x_size = max.x - min.x;
-            y_size = max.y - min.y;
         }
+
+        x_size = max.x - min.x;
+        y_size = max.y - min.y;
     }
     /**
      * Returns the minimum corner of the bounding box.

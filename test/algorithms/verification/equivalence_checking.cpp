@@ -24,8 +24,9 @@ void check_for_strong_equiv(const Spec& spec, const Impl& impl)
 {
     equivalence_checking_stats st{};
 
-    equivalence_checking(spec, impl, &st);
+    const auto equiv = equivalence_checking(spec, impl, &st);
 
+    CHECK(equiv == eq_type::STRONG);
     CHECK(st.eq == eq_type::STRONG);
     CHECK(st.counter_example.empty());
     CHECK(st.spec_drv_stats.drvs == 0);
@@ -38,8 +39,9 @@ void check_for_weak_equiv(const Spec& spec, const Impl& impl)
 {
     equivalence_checking_stats st{};
 
-    equivalence_checking(spec, impl, &st);
+    const auto equiv = equivalence_checking(spec, impl, &st);
 
+    CHECK(equiv == eq_type::WEAK);
     CHECK(st.eq == eq_type::WEAK);
     CHECK(st.counter_example.empty());
     CHECK(st.spec_drv_stats.drvs == 0);
@@ -52,9 +54,9 @@ void check_for_no_equiv(const Spec& spec, const Impl& impl)
 {
     equivalence_checking_stats st{};
 
-    equivalence_checking(spec, impl, &st);
+    const auto equiv = equivalence_checking(spec, impl, &st);
 
-    CHECK(st.eq == eq_type::NO);
+    CHECK(equiv == eq_type::NO);
     CHECK(((!st.counter_example.empty()) || (st.spec_drv_stats.drvs != 0) || (st.impl_drv_stats.drvs != 0)));
 }
 

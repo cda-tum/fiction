@@ -9,6 +9,7 @@
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
+#include "fiction/technology/sidb_lattice_orientations.hpp"
 #include "fiction/technology/sidb_nm_position.hpp"
 #include "fiction/traits.hpp"
 #include "utils/version_info.hpp"
@@ -19,6 +20,7 @@
 #include <algorithm>
 #include <any>
 #include <chrono>
+#include <cstdint>
 #include <ctime>
 #include <fstream>
 #include <functional>
@@ -184,7 +186,7 @@ class write_sqd_sim_result_impl
     }
 
     /**
-     * Writes both the `physical_parameters` as well as the `additional_simulation_parameters` to the output stream in
+     * Writes both the `simulation_parameters` as well as the `additional_simulation_parameters` to the output stream in
      * XML format.
      */
     void write_simulation_parameters()
@@ -192,8 +194,8 @@ class write_sqd_sim_result_impl
         os << siqad::OPEN_SIM_PARAMS;
 
         // physical parameters
-        os << fmt::format(siqad::PHYS_SIM_PARAMS, sim_result.physical_parameters.lambda_tf,
-                          sim_result.physical_parameters.epsilon_r, sim_result.physical_parameters.mu_minus);
+        os << fmt::format(siqad::PHYS_SIM_PARAMS, sim_result.simulation_parameters.lambda_tf,
+                          sim_result.simulation_parameters.epsilon_r, sim_result.simulation_parameters.mu_minus);
 
         // additional simulation parameters
         std::for_each(sim_result.additional_simulation_parameters.cbegin(),
@@ -221,8 +223,7 @@ class write_sqd_sim_result_impl
         std::for_each(ordered_cells.cbegin(), ordered_cells.cend(),
                       [this](const auto& c)
                       {
-                          const auto [nm_x, nm_y] = sidb_nm_position<Lyt>(sim_result.physical_parameters, c);
-
+                          const auto [nm_x, nm_y] = sidb_nm_position<Lyt>(Lyt{}, c);
                           os << fmt::format(siqad::DBDOT, nm_x * 10,
                                             nm_y * 10);  // convert nm to Angstrom
                       });

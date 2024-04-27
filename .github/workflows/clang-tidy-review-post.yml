@@ -14,7 +14,7 @@ jobs:
     steps:
       # Download the artifact uploaded by the lint action
       - name: Download Clang-Tidy artifact
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             const artifacts = await github.rest.actions.listWorkflowRunArtifacts({
@@ -41,7 +41,7 @@ jobs:
       # Posts the comments
       - name: Post review comments
         id: post-review
-        uses: ZedThree/clang-tidy-review/post@v0.14.0
+        uses: ZedThree/clang-tidy-review/post@v0.18.0
 
       # If there are any comments, fail the check
       - if: steps.post-review.outputs.total_comments > 0

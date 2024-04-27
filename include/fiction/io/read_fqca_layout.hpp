@@ -9,6 +9,7 @@
 #include "fiction/traits.hpp"
 
 #include <cctype>
+#include <cstdint>
 #include <exception>
 #include <fstream>
 #include <istream>
@@ -335,15 +336,15 @@ class read_fqca_layout_impl
  *
  * @tparam Lyt The layout type to be created from an input. Must be a clocked cell-level QCA layout.
  * @param is The input stream to read from.
- * @param name The name to give to the generated layout.
+ * @param layout_name The name to give to the generated layout.
  */
 template <typename Lyt>
-Lyt read_fqca_layout(std::istream& is, const std::string_view& name = "")
+Lyt read_fqca_layout(std::istream& is, const std::string_view& layout_name = "")
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_qca_technology_v<Lyt>, "Lyt must be a QCA layout");
 
-    detail::read_fqca_layout_impl<Lyt> p{is, name};
+    detail::read_fqca_layout_impl<Lyt> p{is, layout_name};
 
     const auto lyt = p.run();
 
@@ -358,10 +359,10 @@ Lyt read_fqca_layout(std::istream& is, const std::string_view& name = "")
  *
  * @tparam Lyt The layout type to be created from an input. Must be a clocked cell-level QCA layout.
  * @param filename The file name to open and read from.
- * @param name The name to give to the generated layout.
+ * @param layout_name The name to give to the generated layout.
  */
 template <typename Lyt>
-Lyt read_fqca_layout(const std::string_view& filename, const std::string_view& name = "")
+Lyt read_fqca_layout(const std::string_view& filename, const std::string_view& layout_name = "")
 {
     std::ifstream is{filename.data(), std::ifstream::in};
 
@@ -370,7 +371,7 @@ Lyt read_fqca_layout(const std::string_view& filename, const std::string_view& n
         throw std::ifstream::failure("could not open file");
     }
 
-    const auto lyt = read_fqca_layout<Lyt>(is, name);
+    const auto lyt = read_fqca_layout<Lyt>(is, layout_name);
     is.close();
 
     return lyt;

@@ -8,6 +8,8 @@
 #include <fiction/io/network_reader.hpp>
 #include <fiction/io/read_fgl_layout.hpp>
 #include <fiction/io/read_fqca_layout.hpp>
+#include <fiction/io/read_sqd_layout.hpp>
+#include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
@@ -23,9 +25,9 @@ namespace alice
  *
  * Currently parses Verilog, AIGER, and BLIF using the lorina parsers.
  *
- * Parses FGL and FQCA via custom reader functions.
- *
  * For more information see: https://github.com/hriener/lorina
+ *
+ * Parses FGL, SQD, and FQCA via custom reader functions.
  */
 class read_command : public command
 {
@@ -40,54 +42,58 @@ class read_command : public command
                        "which will be put into the respective store. Current supported file types are:\n"
                        "Logic networks: Verilog, AIGER, BLIF.\n"
                        "Gate-level layouts: FGL.\n"
-                       "Cell-level layouts: FQCA.\n"
+                       "Cell-level layouts: SQD, FQCA.\n"
                        "In a directory, only files with extension '.v', '.aig', '.blif' are considered.")
     {
         add_option("filename", filename, "Filename or directory")->required();
         add_option("topology", topology,
                    "Topology for gate-level layouts. Can be 'cartesian' or of the form "
                    "'<odd|even>_<row|column>_<cartesian|hex>'");
-        add_flag("--aig,-a", "Parse file as AIG");
-        add_flag("--xag,-x", "Parse file as XAG");
-        add_flag("--mig,-m", "Parse file as MIG");
-        add_flag("--tec,-t", "Parse file as technology network");
-        add_flag("--fgl,-f", "Parse file as fiction gate-level layout");
-        add_flag("--qca,-q", "Parse file as QCA cell-level layout");
-        add_flag("--sort,-s", sort, "Sort networks in given directory by vertex count prior to storing them");
+        add_option("--lattice_orientation,-o", orientation, "Lattice orientation for SQD files to use {100, 111}");
+        add_flag("--aig,-a", "Parse Verilog file as AIG");
+        add_flag("--xag,-x", "Parse Verilog file as XAG");
+        add_flag("--mig,-m", "Parse Verilog file as MIG");
+        add_flag("--tec,-t", "Parse Verilog file as technology network");
+        add_flag("--fgl,-f", "Parse FGL file as fiction gate-level layout");
+        add_flag("--sqd,-s", "Parse SQD file as SiDB cell-level layout");
+        add_flag("--fqca,-q", "Parse FQCA file as QCA cell-level layout");
+        add_flag("--sort", sort, "Sort networks in given directory by node count prior to storing them");
     }
 
   protected:
     /**
-     * Function to perform the read call. Reads Verilog and creates a logic_network.
+     * Function to perform the read call. Reads a network or layout from a file.
      */
     void execute() override
     {
-        const auto store_ntks = [&](auto&& reader)
-        {
-            for (const auto& ln : reader.get_networks(sort))
-            {
-                store<fiction::logic_network_t>().extend() = ln;
-            }
-        };
-
-        if (!is_set("aig") && !is_set("xag") && !is_set("mig") && !is_set("tec") && !is_set("fgl") && !is_set("qca"))
+        if (!is_set("aig") && !is_set("xag") && !is_set("mig") && !is_set("tec") && !is_set("fgl") && !is_set("sqd") &&
+            !is_set("fqca"))
         {
             env->out() << "[e] at least one network or layout type must be specified" << std::endl;
         }
-        else if ((is_set("aig") || is_set("xag") || is_set("mig") || is_set("tec")) && is_set("fql"))
+        else if ((is_set("aig") || is_set("xag") || is_set("mig") || is_set("tec")) && is_set("fgl"))
         {
             env->out() << "[e] cannot parse files as both logic networks and gate-level layouts" << std::endl;
         }
-        else if ((is_set("aig") || is_set("xag") || is_set("mig") || is_set("tec")) && is_set("qca"))
+        else if ((is_set("aig") || is_set("xag") || is_set("mig") || is_set("tec")) &&
+                 (is_set("sqd") || is_set("fqca")))
         {
             env->out() << "[e] cannot parse files as both logic networks and cell-level layouts" << std::endl;
         }
-        else if (is_set("fql") && is_set("qca"))
+        else if (is_set("fgl") && (is_set("sqd") || is_set("fqca")))
         {
             env->out() << "[e] cannot parse files as both gate-level and cell-level layouts" << std::endl;
         }
         else
         {
+            const auto store_ntks = [&](auto&& reader)
+            {
+                for (const auto& ln : reader.get_networks(sort))
+                {
+                    store<fiction::logic_network_t>().extend() = ln;
+                }
+            };
+
             try
             {
                 if (is_set("aig"))
@@ -114,7 +120,7 @@ class read_command : public command
 
                     store_ntks(reader);
                 }
-                if (is_set("fgl") || is_set("qca"))
+                if (is_set("fgl") || is_set("sqd") || is_set("fqca"))
                 {
                     if (std::filesystem::exists(filename))
                     {
@@ -205,7 +211,33 @@ class read_command : public command
                                                << std::endl;
                                 }
                             }
-                            if (is_set("qca"))
+                            else if (is_set("sqd"))
+                            {
+                                try
+                                {
+                                    const auto layout_name = std::filesystem::path{filename}.stem().string();
+
+                                    if (orientation == "100")
+                                    {
+                                        const auto layout = fiction::read_sqd_layout<fiction::sidb_100_cell_clk_lyt>(
+                                            filename, layout_name);
+                                        store<fiction::cell_layout_t>().extend() =
+                                            std::make_shared<fiction::sidb_100_cell_clk_lyt>(layout);
+                                    }
+                                    else if (orientation == "111")
+                                    {
+                                        const auto layout = fiction::read_sqd_layout<fiction::sidb_111_cell_clk_lyt>(
+                                            filename, layout_name);
+                                        store<fiction::cell_layout_t>().extend() =
+                                            std::make_shared<fiction::sidb_111_cell_clk_lyt>(layout);
+                                    }
+                                }
+                                catch (const fiction::sqd_parsing_error& e)
+                                {
+                                    env->out() << e.what() << std::endl;
+                                }
+                            }
+                            else if (is_set("fqca"))
                             {
                                 try
                                 {
@@ -250,7 +282,7 @@ class read_command : public command
             }
             catch (...)
             {
-                env->out() << "[e] no networks or layouts were read" << std::endl;
+                env->out() << "[e] I/O error: no file could be read" << std::endl;
             }
         }
 
@@ -271,6 +303,10 @@ class read_command : public command
      * Flag to indicate that files should be sorted by file size.
      */
     bool sort = false;
+    /**
+     * Identifier of H-Si lattice orientation.
+     */
+    std::string orientation{"100"};
 };
 
 ALICE_ADD_COMMAND(read, "I/O")

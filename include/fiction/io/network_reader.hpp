@@ -6,6 +6,7 @@
 #define FICTION_NETWORK_READER_HPP
 
 #include <lorina/aiger.hpp>
+#include <lorina/blif.hpp>
 #include <lorina/common.hpp>
 #include <lorina/diagnostics.hpp>
 #include <lorina/verilog.hpp>
@@ -57,7 +58,7 @@ class network_reader
                                [&p](const auto& valid) { return std::filesystem::path(p).extension() == valid; });
         };
 
-        std::vector<std::string_view> paths{};
+        std::vector<std::string> paths{};
 
         // check for given file's properties
         if (std::filesystem::exists(filename))
@@ -67,7 +68,7 @@ class network_reader
                 // collect valid files only
                 if (is_valid_extension(filename))
                 {
-                    paths.push_back(filename);
+                    paths.emplace_back(filename.data());
                 }
             }
 
@@ -106,14 +107,14 @@ class network_reader
                      lorina::return_code(const std::string&, const lorina::verilog_reader&,
                                          lorina::diagnostic_engine*)>(p, lorina::read_verilog);
             }
-            // parse Aiger
+            // parse AIGER
             else if (std::filesystem::path(p).extension() == aig_ext)
             {
                 read<mockturtle::aiger_reader<Ntk>,
                      lorina::return_code(const std::string&, const lorina::aiger_reader&, lorina::diagnostic_engine*)>(
                     p, lorina::read_aiger);
             }
-            // parse Blif
+            // parse BLIF
             else if (std::filesystem::path(p).extension() == blif_ext)
             {
                 if constexpr (std::is_same_v<typename Ntk::base_type, mockturtle::aig_network>)
@@ -151,7 +152,7 @@ class network_reader
         if (sorted)
         {
             std::sort(networks.begin(), networks.end(),
-                      [](const auto& n1, const auto& n2) { return n1->num_gates() >= n2->num_gates(); });
+                      [](const auto& n1, const auto& n2) { return n1->num_gates() < n2->num_gates(); });
         }
 
         return networks;

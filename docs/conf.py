@@ -27,7 +27,7 @@
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx.ext.mathjax', 'sphinx.ext.viewcode', 'breathe']
+extensions = ['sphinx.ext.mathjax', 'sphinx.ext.viewcode', 'sphinx_tabs.tabs', 'sphinx.ext.autodoc', 'breathe']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -43,7 +43,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'fiction'
-copyright = '2018-2023, Marcel Walter. 2023-present Chair for Design Automation, Technical University of Munich'
+copyright = '2018-2023: Marcel Walter. 2023-present: Chair for Design Automation, Technical University of Munich'
 author = 'Marcel Walter, Jan Drewniok, Simon Hofmann, Benjamin Hien'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -223,3 +223,6 @@ class DocOverviewTableDirective(Directive):
 
 def setup(app):
     app.add_directive('doc_overview_table', DocOverviewTableDirective)
+
+
+autodoc_member_order = 'bysource'

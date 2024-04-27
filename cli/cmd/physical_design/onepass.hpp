@@ -48,7 +48,7 @@ class onepass_command : public command
                        "resulting from this approach might be desynchronized. I/Os are always located at the "
                        "layout's borders.")
     {
-        add_option("--clk_scheme,-s", clocking, "Clocking scheme to use {2DDWAVE[3|4], USE, RES, ESR, CFE, BANCS}",
+        add_option("--clk_scheme,-s", ps.scheme, "Clocking scheme to use {2DDWAVE[3|4], USE, RES, ESR, CFE, BANCS}",
                    true);
         add_option("--upper_x", ps.upper_bound_x, "Number of FCN gate tiles to use at maximum in x-direction");
         add_option("--upper_y", ps.upper_bound_y, "Number of FCN gate tiles to use at maximum in y-direction");
@@ -85,35 +85,6 @@ class onepass_command : public command
             ps.enable_not   = true;
             ps.enable_maj   = true;
             ps.enable_wires = true;
-        }
-
-        // choose clocking
-        if (auto clk = fiction::get_clocking_scheme<fiction::cart_gate_clk_lyt>(clocking); clk.has_value())
-        {
-            if (auto name = clk->name; name == fiction::clock_name::OPEN || name == fiction::clock_name::COLUMNAR)
-            {
-                env->out() << fmt::format("[e] the \"{}\" clocking scheme is not supported by this approach", name)
-                           << std::endl;
-
-                reset_flags();
-                return;
-            }
-
-            ps.scheme = fiction::ptr<fiction::cart_gate_clk_lyt>(std::move(*clk));
-            if (clk->max_out_degree < 3 && ps.enable_maj)
-            {
-                ps.enable_maj = false;
-                env->out() << "[w] disabling MAJ gates as they are not supported by the " << ps.scheme->name
-                           << " clocking scheme" << std::endl;
-            }
-        }
-        else
-        {
-            env->out() << fmt::format("[e] \"{}\" does not refer to a supported clocking scheme", clocking)
-                       << std::endl;
-
-            reset_flags();
-            return;
         }
 
 #if !defined(__APPLE__)
@@ -165,6 +136,16 @@ class onepass_command : public command
                     env->out() << fmt::format("[e] impossible to synthesize {} within the given parameters", ps.name)
                                << std::endl;
                 }
+            }
+            catch (const fiction::unsupported_clocking_scheme_exception&)
+            {
+                env->out() << fmt::format("[e] \"{}\" does not refer to a supported clocking scheme or the selected "
+                                          "clocking scheme is not supported by this approach",
+                                          ps.scheme)
+                           << std::endl;
+
+                reset_flags();
+                return;
             }
             catch (const std::bad_alloc&)
             {
@@ -224,22 +205,17 @@ class onepass_command : public command
     /**
      * Parameters.
      */
-    fiction::one_pass_synthesis_params<fiction::cart_gate_clk_lyt> ps{};
+    fiction::one_pass_synthesis_params ps{};
     /**
      * Statistics.
      */
     fiction::one_pass_synthesis_stats st{};
     /**
-     * Identifier of clocking scheme to use.
-     */
-    std::string clocking{"2DDWave"};
-    /**
      * Reset flags. Necessary due to an alice bug.
      */
     void reset_flags() noexcept
     {
-        ps       = {};
-        clocking = "2DDWave";
+        ps = {};
     }
 };
 

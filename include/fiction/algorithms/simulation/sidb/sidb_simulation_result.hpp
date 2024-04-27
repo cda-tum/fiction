@@ -10,9 +10,8 @@
 
 #include <any>
 #include <chrono>
-#include <cstdint>
 #include <string>
-#include <utility>
+#include <unordered_map>
 #include <vector>
 
 namespace fiction
@@ -52,14 +51,14 @@ struct sidb_simulation_result
     /**
      * Physical parameters used in the simulation.
      */
-    sidb_simulation_parameters physical_parameters{};
+    sidb_simulation_parameters simulation_parameters{};
     /**
      * Additional named simulation parameters. This is used to store algorithm-dependent parameters that are not part of
      * the `sidb_simulation_parameters` struct.
      *
-     * The first element of the pair is the name of the parameter, the second element is the value of the parameter.
+     * The key of the map is the name of the parameter, the element is the value of the parameter.
      */
-    std::vector<std::pair<std::string, std::any>> additional_simulation_parameters{};
+    std::unordered_map<std::string, std::any> additional_simulation_parameters{};
 };
 
 }  // namespace fiction

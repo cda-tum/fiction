@@ -7,16 +7,14 @@
 
 #include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/cell_technologies.hpp"
-#include "fiction/technology/sidb_surface.hpp"
+#include "fiction/technology/sidb_defect_surface.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/layout_utils.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>
 #include <kitty/hash.hpp>
 
-#include <algorithm>
 #include <cstdint>
-#include <functional>
 #include <type_traits>
 #include <unordered_map>
 #include <vector>
@@ -54,7 +52,7 @@ using surface_black_list =
  * @return A black list of gate functions associated with tiles.
  */
 template <typename GateLibrary, typename GateLyt, typename CellLyt>
-[[nodiscard]] auto sidb_surface_analysis(const GateLyt& gate_lyt, const sidb_surface<CellLyt>& surface) noexcept
+[[nodiscard]] auto sidb_surface_analysis(const GateLyt& gate_lyt, const sidb_defect_surface<CellLyt>& surface) noexcept
 {
     static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
     static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
@@ -86,6 +84,9 @@ template <typename GateLibrary, typename GateLyt, typename CellLyt>
         // for each gate in the list of possible implementations
         for (const auto& gate : impls)
         {
+            // flag to indicate that the current gate is exhaustively checked and can be skipped
+            auto continue_with_next_gate = false;
+
             // for each cell position in the gate
             for (uint16_t y = 0u; y < GateLibrary::gate_y_size(); ++y)
             {
@@ -104,16 +105,23 @@ template <typename GateLibrary, typename GateLyt, typename CellLyt>
                         // if any SiDB position of the current gate is compromised
                         if (sidbs_affected_by_defects.count(sidb_pos) > 0)
                         {
-                            // add this gate's function to the black list of tile t using the ports
-                            // specified by get_gate_ports in GateLibrary
+                            // add this gate's function to the black list of tile t using the ports specified by
+                            // get_gate_ports in GateLibrary
                             for (const auto& port : gate_ports.at(gate))
                             {
                                 black_list[t][fun].push_back(port);
                             }
 
-                            return;  // skip to next gate
+                            continue_with_next_gate = true;
+
+                            break;
                         }
                     }
+                }
+                // break if any SiDB position of the current gate is found compromised in the inner loop
+                if (continue_with_next_gate)
+                {
+                    break;
                 }
             }
         }
@@ -121,12 +129,14 @@ template <typename GateLibrary, typename GateLyt, typename CellLyt>
 
     // for each tile in the layout
     gate_lyt.foreach_tile(
-        [&](const auto& t) constexpr
+        [&](const auto& t) noexcept
         {
             // for each gate in the library
-            std::for_each(gate_implementations.cbegin(), gate_implementations.cend(),
-                          // analyze the defect impact
-                          std::bind(analyze_gate, std::placeholders::_1, t));
+            for (const auto& impl : gate_implementations)
+            {
+                // analyze the gate by matching its cell positions against the affected SiDBs on the surface
+                analyze_gate(impl, t);
+            }
         });
 
     return black_list;

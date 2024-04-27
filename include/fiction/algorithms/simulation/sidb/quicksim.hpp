@@ -5,20 +5,16 @@
 #ifndef FICTION_QUICKSIM_HPP
 #define FICTION_QUICKSIM_HPP
 
-#include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
-#include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
+#include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
+#include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/traits.hpp"
 
-#include <fmt/format.h>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
-#include <cmath>
 #include <cstdint>
-#include <iostream>
-#include <limits>
 #include <mutex>
 #include <thread>
 #include <vector>
@@ -32,13 +28,13 @@ namespace fiction
 struct quicksim_params
 {
     /**
-     * General parameters for the simulation of the physical SiDB system.
+     * Simulation parameters for the simulation of the physical SiDB system.
      */
-    sidb_simulation_parameters phys_params{};
+    sidb_simulation_parameters simulation_parameters{};
     /**
      * Number of iterations to run the simulation for.
      */
-    uint64_t interation_steps{80};
+    uint64_t iteration_steps{80};
     /**
      * `alpha` parameter for the *QuickSim* algorithm (should be reduced if no result is found).
      */
@@ -57,7 +53,7 @@ struct quicksim_params
  * charge distribution layout. Depending on the simulation parameters, the ground state is found with a certain
  * probability after one run.
  *
- * @tparam Lyt Cell-level layout type.
+ * @tparam Lyt SiDB cell-level layout type.
  * @param lyt The layout to simulate.
  * @param ps Physical parameters. They are material-specific and may vary from experiment to experiment.
  * @return sidb_simulation_result is returned with all results.
@@ -68,17 +64,17 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
 
-    if (ps.interation_steps == 0)
+    if (ps.iteration_steps == 0)
     {
         return sidb_simulation_result<Lyt>{};
     }
 
     sidb_simulation_result<Lyt> st{};
     st.algorithm_name = "QuickSim";
-    st.additional_simulation_parameters.emplace_back("iteration_steps", ps.interation_steps);
-    st.additional_simulation_parameters.emplace_back("alpha", ps.alpha);
-    st.physical_parameters = ps.phys_params;
-    st.charge_distributions.reserve(ps.interation_steps);
+    st.additional_simulation_parameters.emplace("iteration_steps", ps.iteration_steps);
+    st.additional_simulation_parameters.emplace("alpha", ps.alpha);
+    st.simulation_parameters = ps.simulation_parameters;
+    st.charge_distributions.reserve(ps.iteration_steps);
 
     mockturtle::stopwatch<>::duration time_counter{};
 
@@ -89,7 +85,7 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
         charge_distribution_surface<Lyt> charge_lyt{lyt};
 
         // set the given physical parameters
-        charge_lyt.assign_physical_parameters(ps.phys_params);
+        charge_lyt.assign_physical_parameters(ps.simulation_parameters);
         charge_lyt.assign_base_number(2);
         charge_lyt.assign_all_charge_states(sidb_charge_state::NEGATIVE);
         charge_lyt.update_after_charge_change(dependent_cell_mode::VARIABLE);
@@ -133,7 +129,7 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
 
         // split the iterations among threads
         const auto iter_per_thread =
-            std::max(ps.interation_steps / num_threads,
+            std::max(ps.iteration_steps / num_threads,
                      uint64_t{1});  // If the number of set threads is greater than the number of iterations, the
                                     // number of threads defines how many times QuickSim is repeated
 

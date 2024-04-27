@@ -8,8 +8,10 @@
 #include "fiction/algorithms/iter/bdl_input_iterator.hpp"
 #include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
+#include "fiction/technology/physical_constants.hpp"
 #include "fiction/utils/math_utils.hpp"
 
+#include <cmath>
 #include <cstdint>
 #include <map>
 #include <string>
@@ -48,7 +50,6 @@ calculate_energy_and_state_type(const sidb_energy_distribution&                 
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
     assert(!output_bdl_pairs.empty() && "No output cell provided.");
@@ -64,7 +65,8 @@ calculate_energy_and_state_type(const sidb_energy_distribution&                 
         {
             // round the energy value of the given valid_layout to six decimal places to overcome possible rounding
             // errors and to provide comparability with the energy_value from before.
-            if (round_to_n_decimal_places(valid_layout.get_system_energy(), 6) == energy_value)
+            if (std::abs(round_to_n_decimal_places(valid_layout.get_system_energy(), 6) - energy_value) <
+                physical_constants::POP_STABILITY_ERR)
             {
                 bool correct_output = true;
                 for (auto i = 0u; i < output_bdl_pairs.size(); i++)

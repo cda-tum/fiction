@@ -7,21 +7,22 @@
 
 #include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
 #include "fiction/algorithms/simulation/sidb/is_ground_state.hpp"
-#include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
 #include "fiction/algorithms/simulation/sidb/quicksim.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
-#include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/traits.hpp"
 
 #include <fmt/format.h>
 
-#include <algorithm>
 #include <chrono>
 #include <cmath>
 #include <cstdint>
+#include <cstdlib>
 #include <iostream>
+#include <limits>
+#include <numeric>
+#include <string>
 #include <vector>
 
 namespace fiction
@@ -46,9 +47,8 @@ struct time_to_solution_params
 
 /**
  * This struct stores the time-to-solution, the simulation accuracy and the average single simulation runtime of
- * *QuickSim* quicksim, the single runtime of the exact simulator used, and the number of valid charge
+ * *QuickSim*, the single runtime of the exact simulator used, and the number of valid charge
  * configurations found by the exact algorithm.
- *
  */
 struct time_to_solution_stats
 {
@@ -98,21 +98,20 @@ void time_to_solution(Lyt& lyt, const quicksim_params& quicksim_params, const ti
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
     time_to_solution_stats st{};
 
     sidb_simulation_result<Lyt> simulation_result{};
     if (tts_params.engine == exhaustive_sidb_simulation_engine::QUICKEXACT)
     {
+        const quickexact_params<cell<Lyt>> params{quicksim_params.simulation_parameters};
         st.algorithm      = "QuickExact";
-        simulation_result = exhaustive_ground_state_simulation(lyt, quicksim_params.phys_params);
+        simulation_result = quickexact(lyt, params);
     }
     else
     {
-        const quickexact_params<Lyt> params{quicksim_params.phys_params};
-        st.algorithm      = "QuickExact";
-        simulation_result = quickexact(lyt, params);
+        st.algorithm      = "ExGS";
+        simulation_result = exhaustive_ground_state_simulation(lyt, quicksim_params.simulation_parameters);
     }
 
     st.single_runtime_exhaustive = mockturtle::to_seconds(simulation_result.simulation_runtime);

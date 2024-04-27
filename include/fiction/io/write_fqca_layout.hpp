@@ -14,6 +14,7 @@
 #include <fstream>
 #include <ostream>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -32,13 +33,10 @@ struct write_fqca_layout_params
     bool create_inter_layer_via_cells = false;
 };
 
-class out_of_cell_names_exception : public std::exception
+class out_of_cell_names_exception : public std::out_of_range
 {
   public:
-    [[nodiscard]] const char* what() const noexcept override
-    {
-        return "no more single-character cell designators available";
-    }
+    out_of_cell_names_exception() : std::out_of_range{"no more single-character cell designators available"} {}
 };
 
 namespace detail

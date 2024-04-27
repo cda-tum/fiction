@@ -5,17 +5,12 @@
 #ifndef FICTION_EXHAUSTIVE_GROUND_STATE_SIMULATION_HPP
 #define FICTION_EXHAUSTIVE_GROUND_STATE_SIMULATION_HPP
 
-#include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
-#include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
+#include "fiction/technology/sidb_charge_state.hpp"
 
-#include <fmt/format.h>
 #include <mockturtle/utils/stopwatch.hpp>
-
-#include <iostream>
-#include <vector>
 
 namespace fiction
 {
@@ -46,8 +41,8 @@ exhaustive_ground_state_simulation(const Lyt&                        lyt,
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
     sidb_simulation_result<Lyt> simulation_result{};
-    simulation_result.algorithm_name      = "ExGS";
-    simulation_result.physical_parameters = params;
+    simulation_result.algorithm_name        = "ExGS";
+    simulation_result.simulation_parameters = params;
     mockturtle::stopwatch<>::duration time_counter{};
     {
         const mockturtle::stopwatch stop{time_counter};
@@ -60,7 +55,6 @@ exhaustive_ground_state_simulation(const Lyt&                        lyt,
 
         while (charge_lyt.get_charge_index_and_base().first < charge_lyt.get_max_charge_index())
         {
-
             if (charge_lyt.is_physically_valid())
             {
                 simulation_result.charge_distributions.push_back(charge_distribution_surface<Lyt>{charge_lyt});

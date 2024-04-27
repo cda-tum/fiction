@@ -5,23 +5,17 @@
 #ifndef FICTION_OPERATIONAL_DOMAIN_HPP
 #define FICTION_OPERATIONAL_DOMAIN_HPP
 
-#include "fiction/algorithms/iter/bdl_input_iterator.hpp"
-#include "fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp"
 #include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
-#include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
-#include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
-#include "fiction/algorithms/simulation/sidb/quickexact.hpp"
-#include "fiction/algorithms/simulation/sidb/quicksim.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
-#include "fiction/layouts/cell_level_layout.hpp"
+#include "fiction/technology/cell_technologies.hpp"
+#include "fiction/technology/physical_constants.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/execution_utils.hpp"
 #include "fiction/utils/hash.hpp"
 #include "fiction/utils/phmap_utils.hpp"
 
-#include <kitty/bit_operations.hpp>
 #include <kitty/traits.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 #include <phmap.h>
@@ -33,9 +27,11 @@
 #include <cstdint>
 #include <cstdlib>
 #include <iterator>
+#include <numeric>
 #include <optional>
 #include <queue>
 #include <random>
+#include <set>
 #include <tuple>
 #include <type_traits>
 #include <vector>
@@ -46,9 +42,9 @@ namespace fiction
 /**
  * An operational domain is a set of simulation parameter values for which a given SiDB layout is logically operational.
  * This means that a layout is deemed operational if the layout's ground state corresponds with a given Boolean function
- * at the layout's outputs for all possible input combinations. In this implementation, \f$ n \f$ BDL input wires and a
+ * at the layout's outputs for all possible input combinations. In this implementation, \f$n\f$ BDL input wires and a
  * single BDL output wire are assumed for a given layout. Any operational domain computation algorithm toggles through
- * all \f$ 2^n \f$ input combinations and evaluates the layout's output behavior in accordance with the given Boolean
+ * all \f$2^n\f$ input combinations and evaluates the layout's output behavior in accordance with the given Boolean
  * function. The layout is only considered operational for a certain parameter combination, if the output behavior is
  * correct for all input combinations. The operational domain can be computed by sweeping over specified simulation
  * parameters and checking the operational status of the layout for each parameter combination. The operational domain
@@ -166,7 +162,7 @@ struct operational_domain_params
      * The simulation parameters for the operational domain computation. Most parameters will be kept constant across
      * sweeps, but the sweep parameters are adjusted in each simulation step and thus overwritten in this object.
      */
-    sidb_simulation_parameters sim_params{};
+    sidb_simulation_parameters simulation_parameters{};
     /**
      * The simulation engine to be used for the operational domain computation.
      */
@@ -245,9 +241,9 @@ class operational_domain_impl
 {
   public:
     /**
-     * Standard constructor. Initializes the layout, the truth table, the parameters and the statistics. Also detects
-     * the output BDL pair, which is necessary for the operational domain computation. The layout must have exactly
-     * one output BDL pair.
+     * Standard constructor. Initializes the layout, the truth table, the parameters and the statistics. Also
+     * detects the output BDL pair, which is necessary for the operational domain computation. The layout must
+     * have exactly one output BDL pair.
      *
      * @param lyt SiDB cell-level layout to be evaluated.
      * @param spec Expected Boolean function of the layout given as a multi-output truth table.
@@ -261,34 +257,44 @@ class operational_domain_impl
             params{ps},
             stats{st},
             output_bdl_pairs{detect_bdl_pairs<Lyt>(layout, sidb_technology::cell_type::OUTPUT, params.bdl_params)},
-            x_indices(num_x_steps()),  // pre-allocate the x dimension indices
-            y_indices(num_y_steps()),  // pre-allocate the y dimension indices
-            x_values(num_x_steps()),   // pre-allocate the x dimension values
-            y_values(num_y_steps())    // pre-allocate the y dimension values
+            x_indices(num_x_steps() + 1),  // pre-allocate the x dimension indices
+            y_indices(num_y_steps() + 1)   // pre-allocate the y dimension indices
     {
+        x_values.reserve(num_x_steps() + 1);
+        y_values.reserve(num_y_steps() + 1);
+
         op_domain.x_dimension = params.x_dimension;
         op_domain.y_dimension = params.y_dimension;
 
         std::iota(x_indices.begin(), x_indices.end(), 0ul);
         std::iota(y_indices.begin(), y_indices.end(), 0ul);
 
+        // if the value of the x-parameter is greater than params.x_max after num_x_steps() steps, this value is
+        // ignored in the operational domain calculation.
+        if ((params.x_min + (x_indices.size() - 1) * params.x_step) - params.x_max >
+            physical_constants::POP_STABILITY_ERR)
+        {
+            x_indices.pop_back();
+        }
+        // if the value of the y-parameter is greater than params.y_max after num_y_steps() steps, this value is
+        // ignored in the operational domain calculation.
+        if (((params.y_min + (y_indices.size() - 1) * params.y_step) - params.y_max) >
+            physical_constants::POP_STABILITY_ERR)
+        {
+            y_indices.pop_back();
+        }
+
         // generate the x dimension values
-        std::generate(x_values.begin(), x_values.end(),
-                      [x = 0, this]() mutable
-                      {
-                          const double x_val = params.x_min + x * params.x_step;
-                          ++x;
-                          return x_val;
-                      });
+        for (std::size_t i = 0; i < x_indices.size(); ++i)
+        {
+            x_values.push_back(params.x_min + static_cast<double>(i) * params.x_step);
+        }
 
         // generate the y dimension values
-        std::generate(y_values.begin(), y_values.end(),
-                      [y = 0, this]() mutable
-                      {
-                          const double y_val = params.y_min + y * params.y_step;
-                          ++y;
-                          return y_val;
-                      });
+        for (std::size_t i = 0; i < y_indices.size(); ++i)
+        {
+            y_values.push_back(params.y_min + static_cast<double>(i) * params.y_step);
+        }
     }
     /**
      * Performs a grid search over the specified parameter ranges with the specified step sizes. The grid search always
@@ -454,9 +460,15 @@ class operational_domain_impl
                                          step_point{current_contour_point.x - 1, current_contour_point.y};
 
         auto current_neighborhood = moore_neighborhood(current_contour_point);
-        auto next_point           = current_contour_point == backtrack_point ?
-                                        current_neighborhood.front() :
-                                        next_clockwise_point(current_neighborhood, backtrack_point);
+
+        auto next_point = contour_starting_point;
+
+        if (!current_neighborhood.empty())
+        {
+            next_point = current_contour_point == backtrack_point ?
+                             current_neighborhood.front() :
+                             next_clockwise_point(current_neighborhood, backtrack_point);
+        }
 
         while (next_point != contour_starting_point)
         {
@@ -577,6 +589,20 @@ class operational_domain_impl
         {
             return !(*this == other);
         }
+        /**
+         * Less than operator.
+         *
+         * @param other Other step point to compare with.
+         * @return `true` if this step point is less than to the other.
+         */
+        [[nodiscard]] bool operator<(const step_point& other) const noexcept
+        {
+            if (y != other.y)
+            {
+                return y < other.y;
+            }
+            return x < other.x;
+        }
     };
     /**
      * Converts a step point to a parameter point.
@@ -596,8 +622,16 @@ class operational_domain_impl
      */
     [[nodiscard]] step_point to_step_point(const operational_domain::parameter_point& pp) const noexcept
     {
-        return {static_cast<std::size_t>((pp.x - params.x_min) / params.x_step),
-                static_cast<std::size_t>((pp.y - params.y_min) / params.y_step)};
+        const auto it_x = std::lower_bound(x_values.cbegin(), x_values.cend(), pp.x);
+        const auto it_y = std::lower_bound(y_values.cbegin(), y_values.cend(), pp.y);
+
+        assert(it_x != x_values.cend() && "parameter point is outside of the x range");
+        assert(it_y != y_values.cend() && "parameter point is outside of the y range");
+
+        const auto x_dis = std::distance(x_values.cbegin(), it_x);
+        const auto y_dis = std::distance(y_values.cbegin(), it_y);
+
+        return {static_cast<std::size_t>(x_dis), static_cast<std::size_t>(y_dis)};
     }
     /**
      * Calculates the number of steps in the x dimension based on the provided parameters.
@@ -606,7 +640,7 @@ class operational_domain_impl
      */
     [[nodiscard]] inline std::size_t num_x_steps() const noexcept
     {
-        return static_cast<std::size_t>((params.x_max - params.x_min) / params.x_step);
+        return static_cast<std::size_t>(std::round((params.x_max - params.x_min) / params.x_step));
     }
     /**
      * Calculates the number of steps in the y dimension based on the provided parameters.
@@ -615,7 +649,7 @@ class operational_domain_impl
      */
     [[nodiscard]] inline std::size_t num_y_steps() const noexcept
     {
-        return static_cast<std::size_t>((params.y_max - params.y_min) / params.y_step);
+        return static_cast<std::size_t>(std::round((params.y_max - params.y_min) / params.y_step));
     }
     /**
      * Potential sweep dimensions.
@@ -710,7 +744,7 @@ class operational_domain_impl
      * Logs and returns the operational status at the given point `sp = (x, y)`. If the point has already been sampled,
      * it returns the cached value. Otherwise, a ground state simulation is performed for all input combinations of the
      * stored layout using the given simulation parameters. It terminates as soon as a non-operational state is found.
-     * In the worst case, the function performs \f$ 2^n \f$ simulations, where \f$ n \f$ is the number of inputs of the
+     * In the worst case, the function performs \f$2^n\f$ simulations, where \f$n\f$ is the number of inputs of the
      * layout. This function is used by all operational domain computation techniques.
      *
      * Any investigated point is added to the stored `op_domain`, regardless of its operational status.
@@ -746,7 +780,7 @@ class operational_domain_impl
         // increment the number of evaluated parameter combinations
         ++num_evaluated_parameter_combinations;
 
-        sidb_simulation_parameters sim_params = params.sim_params;
+        sidb_simulation_parameters sim_params = params.simulation_parameters;
         set_x_dimension_value(sim_params, param_point.x);
         set_y_dimension_value(sim_params, param_point.y);
 
@@ -767,9 +801,9 @@ class operational_domain_impl
      * points is exactly equal to `samples`.
      *
      * @param samples Number of random `step_point`s to generate.
-     * @return A vector of random `step_point`s in the stored parameter range.
+     * @return A set of random `step_point`s in the stored parameter range.
      */
-    [[nodiscard]] std::vector<step_point> generate_random_step_points(const std::size_t samples) noexcept
+    [[nodiscard]] std::set<step_point> generate_random_step_points(const std::size_t samples) noexcept
     {
         static std::mt19937_64 generator{std::random_device{}()};
 
@@ -778,13 +812,12 @@ class operational_domain_impl
         std::uniform_int_distribution<std::size_t> y_distribution{0, y_indices.size() - 1};
 
         // container for the random samples
-        std::vector<step_point> step_point_samples{};
-        step_point_samples.reserve(samples);
+        std::set<step_point> step_point_samples{};
 
         for (std::size_t i = 0; i < samples; ++i)
         {
             // sample x and y dimension
-            step_point_samples.emplace_back(x_distribution(generator), y_distribution(generator));
+            step_point_samples.insert(step_point{x_distribution(generator), y_distribution(generator)});
         }
 
         return step_point_samples;
@@ -871,7 +904,7 @@ class operational_domain_impl
         const auto decr_x = (x > 0) ? x - 1 : x;
         const auto incr_x = (x + 1 < x_indices.size()) ? x + 1 : x;
         const auto decr_y = (y > 0) ? y - 1 : y;
-        const auto incr_y = (y + 1 < x_indices.size()) ? y + 1 : y;
+        const auto incr_y = (y + 1 < y_indices.size()) ? y + 1 : y;
 
         // add neighbors in clockwise direction
 
@@ -953,8 +986,8 @@ class operational_domain_impl
  * This algorithm uses a grid search to find the operational domain. The grid search is performed by exhaustively
  * sweeping the parameter space in the x and y dimensions. Since grid search is exhaustive, the algorithm is guaranteed
  * to find the operational domain, if it exists within the parameter range. However, the algorithm performs a quadratic
- * number of operational checks on the layout, where each operational check consists of up to \f$ 2^n \f$ exact ground
- * state simulations, where \f$ n \f$ is the number of inputs of the layout. Each exact ground state simulation has
+ * number of operational checks on the layout, where each operational check consists of up to \f$2^n\f$ exact ground
+ * state simulations, where \f$n\f$ is the number of inputs of the layout. Each exact ground state simulation has
  * exponential complexity in of itself. Therefore, the algorithm is only feasible for small layouts with few inputs.
  *
  * @tparam Lyt SiDB cell-level layout type.
@@ -973,7 +1006,6 @@ operational_domain operational_domain_grid_search(const Lyt& lyt, const std::vec
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
     operational_domain_stats                 st{};
@@ -996,8 +1028,8 @@ operational_domain operational_domain_grid_search(const Lyt& lyt, const std::vec
  *
  * This algorithm uses random sampling to find a part of the operational domain that might not be complete. It performs
  * a total of `samples` uniformly-distributed random samples within the parameter range. For each sample, the algorithm
- * performs one operational check on the layout, where each operational check consists of up to \f$ 2^n \f$ exact
- * ground state simulations, where \f$ n \f$ is the number of inputs of the layout. Each exact ground state simulation
+ * performs one operational check on the layout, where each operational check consists of up to \f$2^n\f$ exact
+ * ground state simulations, where \f$n\f$ is the number of inputs of the layout. Each exact ground state simulation
  * has exponential complexity in of itself. Therefore, the algorithm is only feasible for small layouts with few inputs.
  *
  * @tparam Lyt SiDB cell-level layout type.
@@ -1017,7 +1049,6 @@ operational_domain operational_domain_random_sampling(const Lyt& lyt, const std:
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
     operational_domain_stats                 st{};
@@ -1046,9 +1077,13 @@ operational_domain operational_domain_random_sampling(const Lyt& lyt, const std:
  * It performs `samples` uniformly-distributed random samples within the parameter range. From there, it performs
  * another number of samples equal to the number of points within the operational domain plus the first non-operational
  * point in each direction. For each sample, the algorithm performs one operational check on the layout, where each
- * operational check consists of up to \f$ 2^n \f$ exact ground state simulations, where \f$ n \f$ is the number of
+ * operational check consists of up to \f$2^n\f$ exact ground state simulations, where \f$n\f$ is the number of
  * inputs of the layout. Each exact ground state simulation has exponential complexity in of itself. Therefore, the
  * algorithm is only feasible for small layouts with few inputs.
+ *
+ * This flavor of operational domain computation was proposed in \"Reducing the Complexity of Operational Domain
+ * Computation in Silicon Dangling Bond Logic\" by M. Walter, J. Drewniok, S. S. H. Ng, K. Walus, and R. Wille in
+ * NANOARCH 2023.
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
@@ -1066,7 +1101,6 @@ operational_domain operational_domain_flood_fill(const Lyt& lyt, const std::vect
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
     operational_domain_stats                 st{};
@@ -1097,9 +1131,13 @@ operational_domain operational_domain_flood_fill(const Lyt& lyt, const std::vect
  * point is found. From there, it performs another number of samples equal to the distance to an edge of the operational
  * area. Finally, it performs up to 8 samples for each contour point (however, the actual number is usually much lower).
  * For each sample, the algorithm performs one operational check on the layout, where each operational check consists of
- * up to \f$ 2^n \f$ exact ground state simulations, where \f$ n \f$ is the number of inputs of the layout. Each exact
+ * up to \f$2^n\f$ exact ground state simulations, where \f$n\f$ is the number of inputs of the layout. Each exact
  * ground state simulation has exponential complexity in of itself. Therefore, the algorithm is only feasible for small
  * layouts with few inputs.
+ *
+ * This flavor of operational domain computation was proposed in \"Reducing the Complexity of Operational Domain
+ * Computation in Silicon Dangling Bond Logic\" by M. Walter, J. Drewniok, S. S. H. Ng, K. Walus, and R. Wille in
+ * NANOARCH 2023.
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
@@ -1118,7 +1156,6 @@ operational_domain operational_domain_contour_tracing(const Lyt& lyt, const std:
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
     operational_domain_stats                 st{};
