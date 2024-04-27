@@ -39,7 +39,7 @@ TEMPLATE_TEST_CASE("Charge distribution surface traits and construction", "[char
     CHECK(has_assign_charge_state_v<charge_layout>);
     CHECK(has_get_charge_state_v<charge_layout>);
 
-    const charge_layout charge_lyt{};
+    charge_layout       charge_lyt{};
     const charge_layout charge_lyt_from_lyt{lyt};
 
     charge_lyt.reset_local_external_potentials();
