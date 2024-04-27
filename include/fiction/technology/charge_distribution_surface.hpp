@@ -1530,7 +1530,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     void reset_local_external_potentials() noexcept
     {
-        this->update_after_charge_change();
     }
     /**
      * This function can be used to assign an external local electrostatic potential in Volt to the layout, which is
