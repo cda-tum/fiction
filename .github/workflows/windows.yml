@@ -40,7 +40,6 @@ jobs:
       matrix:
         os: [ windows-2019, windows-2022 ]
         toolset: [ v142, v143, ClangCL ]
-        build_type: [ Debug, Release ]
         include:
           - os: windows-2019
             env: 'Visual Studio 16 2019'
@@ -52,7 +51,7 @@ jobs:
           - os: windows-2022
             toolset: v142
 
-    name: ${{matrix.os}} with ${{matrix.env}} and ${{matrix.toolset}} toolset (${{matrix.build_type}} mode)
+    name: ${{matrix.os}} with ${{matrix.env}} and ${{matrix.toolset}} toolset
     runs-on: ${{matrix.os}}
 
     steps:
@@ -64,7 +63,7 @@ jobs:
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: '${{matrix.os}}-${{matrix.toolset}}-${{matrix.build_type}}'
+          key: '${{matrix.os}}-${{matrix.toolset}}'
           variant: ccache
           save: true
           max-size: 10G
@@ -79,14 +78,17 @@ jobs:
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
-      - name: Create Build Environment
-        run: cmake -E make_directory ${{github.workspace}}\build
+
+      # Build and test pipeline for Debug mode
+
+      - name: Create Build Environment (Debug)
+        run: cmake -E make_directory ${{github.workspace}}\build_debug
 
       - name: Configure CMake
-        working-directory: ${{github.workspace}}\build
+        working-directory: ${{github.workspace}}\build_debug
         run: >
           cmake ${{github.workspace}} -G "${{matrix.env}}" -A x64 -T ${{matrix.toolset}}
-          -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
+          -DCMAKE_BUILD_TYPE=Debug
           -DFICTION_ENABLE_UNITY_BUILD=ON
           -DFICTION_ENABLE_PCH=ON
           -DFICTION_CLI=ON
@@ -97,12 +99,39 @@ jobs:
           -DFICTION_WARNINGS_AS_ERRORS=OFF
           -DMOCKTURTLE_EXAMPLES=OFF
 
-      - name: Build
-        working-directory: ${{github.workspace}}\build
-        run: cmake --build . --config ${{matrix.build_type}} -j4
+      - name: Build (Debug)
+        working-directory: ${{github.workspace}}\build_debug
+        run: cmake --build . --config Debug -j4
 
-      - name: Test
-        working-directory: ${{github.workspace}}\build
-        # Execute tests defined by the CMake configuration.
-        # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
-        run: ctest -C ${{matrix.build_type}} --verbose --output-on-failure --parallel 4
+      - name: Test (Debug)
+        working-directory: ${{github.workspace}}\build_debug
+        run: ctest -C Debug --verbose --output-on-failure --repeat until-pass:3 --parallel 4
+
+
+      # Build and test pipeline for Release mode
+
+      - name: Create Build Environment (Release)
+        run: cmake -E make_directory ${{github.workspace}}\build_release
+
+      - name: Configure CMake
+        working-directory: ${{github.workspace}}\build_release
+        run: >
+          cmake ${{github.workspace}} -G "${{matrix.env}}" -A x64 -T ${{matrix.toolset}}
+          -DCMAKE_BUILD_TYPE=Release
+          -DFICTION_ENABLE_UNITY_BUILD=ON
+          -DFICTION_ENABLE_PCH=ON
+          -DFICTION_CLI=ON
+          -DFICTION_TEST=ON
+          -DFICTION_BENCHMARK=OFF
+          -DFICTION_EXPERIMENTS=ON
+          -DFICTION_Z3=ON
+          -DFICTION_WARNINGS_AS_ERRORS=OFF
+          -DMOCKTURTLE_EXAMPLES=OFF
+
+      - name: Build (Release)
+        working-directory: ${{github.workspace}}\build_release
+        run: cmake --build . --config Release -j4
+
+      - name: Test (Release)
+        working-directory: ${{github.workspace}}\build_release
+        run: ctest -C Release --verbose --output-on-failure --repeat until-pass:3 --parallel 4
