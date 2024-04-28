@@ -42,7 +42,7 @@ jobs:
         with:
           path: ${{ github.workspace }}/bindings/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp
           overwrite: true
-          
+
       - uses: EndBug/add-and-commit@v9
         with:
           add: 'bindings/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp'
