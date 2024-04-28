@@ -3,24 +3,46 @@
 FCN Cell Technologies
 =====================
 
-**Header:** ``fiction/technology/cell_technologies.hpp``
-
 Supported technological implementations of the FCN concept. Each has its own set of cell types and properties.
 
 Quantum-dot Cellular Automata (QCA)
 -----------------------------------
 
-.. doxygenstruct:: fiction::qca_technology
-   :members:
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/technology/cell_technologies.hpp``
+
+        .. doxygenstruct:: fiction::qca_technology
+           :members:
+
+    .. tab:: Python
+        .. autoclass:: mnt.pyfiction.qca_technology
+            :members:
 
 in-plane Nanomagnet Logic (iNML)
 --------------------------------
 
-.. doxygenstruct:: fiction::inml_technology
-   :members:
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/technology/cell_technologies.hpp``
+
+        .. doxygenstruct:: fiction::inml_technology
+           :members:
+
+    .. tab:: Python
+        .. autoclass:: mnt.pyfiction.inml_technology
+            :members:
 
 Silicon Dangling Bonds (SiDB)
 -----------------------------
 
-.. doxygenstruct:: fiction::sidb_technology
-   :members:
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/technology/cell_technologies.hpp``
+
+        .. doxygenstruct:: fiction::sidb_technology
+           :members:
+
+    .. tab:: Python
+        .. autoclass:: mnt.pyfiction.sidb_technology
+            :members:

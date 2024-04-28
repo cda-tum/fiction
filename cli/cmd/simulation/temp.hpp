@@ -128,7 +128,7 @@ class temp_command : public command
                 }
                 else
                 {
-                    params.physical_parameters = physical_params;
+                    params.simulation_parameters = physical_params;
 
                     if (is_set("gate_based"))
                     {
@@ -208,10 +208,10 @@ class temp_command : public command
     {
         return nlohmann::json{{"Algorithm name", stats.algorithm_name},
                               {"Physical parameters",
-                               {{"base", stats.physical_parameters.base},
-                                {"epsilon_r", stats.physical_parameters.epsilon_r},
-                                {"lambda_tf", stats.physical_parameters.lambda_tf},
-                                {"mu_minus", stats.physical_parameters.mu_minus}}},
+                               {{"base", stats.simulation_parameters.base},
+                                {"epsilon_r", stats.simulation_parameters.epsilon_r},
+                                {"lambda_tf", stats.simulation_parameters.lambda_tf},
+                                {"mu_minus", stats.simulation_parameters.mu_minus}}},
                               {"Critical temperature", stats.critical_temperature},
                               {"Number of stable states", stats.num_valid_lyt},
                               {"Energy difference between ground state and first erroneous state",

@@ -217,11 +217,12 @@ TEST_CASE("Use FO2 Bestagon gate without SiDB at {17, 11, 0} and generate origin
         CHECK(defect_layout.get_cell_type({36, 19, 0}) == sidb_100_cell_clk_lyt_siqad::cell_type::EMPTY);
         CHECK(defect_layout.get_cell_type({2, 19, 0}) == sidb_100_cell_clk_lyt_siqad::cell_type::EMPTY);
 
-        defect_layout.assign_sidb_defect(
-            {36, 19, 0},
-            sidb_defect{sidb_defect_type::DB, -1, params.phys_params.epsilon_r, params.phys_params.lambda_tf});
-        defect_layout.assign_sidb_defect({2, 19, 0}, sidb_defect{sidb_defect_type::DB, -1, params.phys_params.epsilon_r,
-                                                                 params.phys_params.lambda_tf});
+        defect_layout.assign_sidb_defect({36, 19, 0},
+                                         sidb_defect{sidb_defect_type::DB, -1, params.simulation_parameters.epsilon_r,
+                                                     params.simulation_parameters.lambda_tf});
+        defect_layout.assign_sidb_defect({2, 19, 0},
+                                         sidb_defect{sidb_defect_type::DB, -1, params.simulation_parameters.epsilon_r,
+                                                     params.simulation_parameters.lambda_tf});
 
         const auto found_gate_layouts = design_sidb_gates(defect_layout, std::vector<tt>{create_fan_out_tt()}, params);
 
@@ -285,12 +286,12 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
             3,
             sidb_simulation_engine::QUICKEXACT};
 
-        defect_layout.assign_sidb_defect(
-            {15, 10, 0},
-            sidb_defect{sidb_defect_type::DB, -1, params.phys_params.epsilon_r, params.phys_params.lambda_tf});
-        defect_layout.assign_sidb_defect(
-            {20, 12, 0},
-            sidb_defect{sidb_defect_type::DB, -1, params.phys_params.epsilon_r, params.phys_params.lambda_tf});
+        defect_layout.assign_sidb_defect({15, 10, 0},
+                                         sidb_defect{sidb_defect_type::DB, -1, params.simulation_parameters.epsilon_r,
+                                                     params.simulation_parameters.lambda_tf});
+        defect_layout.assign_sidb_defect({20, 12, 0},
+                                         sidb_defect{sidb_defect_type::DB, -1, params.simulation_parameters.epsilon_r,
+                                                     params.simulation_parameters.lambda_tf});
 
         const auto found_gate_layouts = design_sidb_gates(defect_layout, std::vector<tt>{create_and_tt()}, params);
         REQUIRE(!found_gate_layouts.empty());

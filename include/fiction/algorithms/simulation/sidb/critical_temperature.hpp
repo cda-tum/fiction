@@ -61,7 +61,7 @@ struct critical_temperature_params
     /**
      * All parameters for physical SiDB simulations.
      */
-    sidb_simulation_parameters physical_parameters{};
+    sidb_simulation_parameters simulation_parameters{};
     /**
      * Simulation mode to determine the *Critical Temperature*.
      */
@@ -98,7 +98,7 @@ struct critical_temperature_stats
     /**
      * All parameters for physical SiDB simulations.
      */
-    sidb_simulation_parameters physical_parameters{};
+    sidb_simulation_parameters simulation_parameters{};
     /**
      * Name of the algorithm used to compute the physically valid charge distributions.
      */
@@ -153,7 +153,7 @@ class critical_temperature_impl
             bii(bdl_input_iterator<Lyt>{layout, params.bdl_params})
 
     {
-        stats.physical_parameters = params.physical_parameters;
+        stats.simulation_parameters = params.simulation_parameters;
         stats.algorithm_name =
             (params.engine == critical_temperature_params::simulation_engine::EXACT) ? "QuickExact" : "QuickSim";
         stats.critical_temperature = params.max_temperature;
@@ -183,7 +183,7 @@ class critical_temperature_impl
             for (auto i = 0u; i < spec.front().num_bits(); ++i, ++bii)
             {
                 // if positively charged SiDBs can occur, the SiDB layout is considered as non-operational
-                if (can_positive_charges_occur(*bii, params.physical_parameters))
+                if (can_positive_charges_occur(*bii, params.simulation_parameters))
                 {
                     stats.critical_temperature = 0.0;
                     return;
@@ -234,8 +234,8 @@ class critical_temperature_impl
 
         if (params.engine == critical_temperature_params::simulation_engine::EXACT)
         {
-            const quickexact_params<Lyt> qe_params{params.physical_parameters,
-                                                   quickexact_params<Lyt>::automatic_base_number_detection::OFF};
+            const quickexact_params<cell<Lyt>> qe_params{
+                params.simulation_parameters, quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
 
             // All physically valid charge configurations are determined for the given layout (`QuickExact` simulation
             // is used to provide 100 % accuracy for the Critical Temperature).
@@ -243,7 +243,7 @@ class critical_temperature_impl
         }
         else
         {
-            const quicksim_params qs_params{params.physical_parameters, params.iteration_steps, params.alpha};
+            const quicksim_params qs_params{params.simulation_parameters, params.iteration_steps, params.alpha};
 
             // All physically valid charge configurations are determined for the given layout (probabilistic ground
             // state simulation is used).
@@ -406,19 +406,20 @@ class critical_temperature_impl
     [[nodiscard]] sidb_simulation_result<Lyt>
     physical_simulation_of_layout(const bdl_input_iterator<Lyt>& bdl_iterator) noexcept
     {
-        assert(params.physical_parameters.base == 2 && "base number has to be 2");
+        assert(params.simulation_parameters.base == 2 && "base number has to be 2");
 
         if (params.engine == critical_temperature_params::simulation_engine::EXACT)
         {
             // perform exact simulation
-            const quickexact_params<Lyt> qe_params{
-                params.physical_parameters, fiction::quickexact_params<Lyt>::automatic_base_number_detection::OFF};
+            const quickexact_params<cell<Lyt>> qe_params{
+                params.simulation_parameters,
+                fiction::quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
             return quickexact(*bdl_iterator, qe_params);
         }
 
         if (params.engine == critical_temperature_params::simulation_engine::APPROXIMATE)
         {
-            const quicksim_params qs_params{params.physical_parameters, params.iteration_steps, params.alpha};
+            const quicksim_params qs_params{params.simulation_parameters, params.iteration_steps, params.alpha};
             return quicksim(*bdl_iterator, qs_params);
         }
 
@@ -436,8 +437,8 @@ class critical_temperature_impl
  * (https://ieeexplore.ieee.org/document/10231259). It comes in two flavors: gate-based and non-gate based.
  *
  * For *Gate-based Critical Temperature* Simulation, the Critical Temperature is defined as follows:
- * The temperature at which the erroneous charge distributions are populated by more than \f$ 1 - \eta \f$, where \f$
- * \eta \in [0,1] \f$.
+ * The temperature at which the erroneous charge distributions are populated by more than \f$1 - \eta\f$, where
+ * \f$\eta \in [0,1]\f$.
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT The type of the truth table specifying the gate behavior.
@@ -473,10 +474,9 @@ double critical_temperature_gate_based(const Lyt& lyt, const std::vector<TT>& sp
 
     return p.get_critical_temperature();
 }
-
 /**
  * For *Non-gate-based Critical Temperature* simulation, the Critical Temperature is defined as follows: The temperature
- * at which the excited charge distributions are populated by more than \f$ 1 - \eta \f$, where \f$ \eta \in [0,1] \f$
+ * at which the excited charge distributions are populated by more than \f$1 - \eta\f$, where \f$\eta \in [0,1]\f$
  * is the confidence level for the presence of a working gate.
  *
  * @tparam Lyt SiDB cell-level layout type.

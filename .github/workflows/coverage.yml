@@ -47,11 +47,6 @@ jobs:
       - name: Install the Compiler
         run: sudo apt-get update && sudo apt-get install -yq ${{matrix.compiler}}
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.9.x'
-
       - name: Clone Repository
         uses: actions/checkout@v4
         with:
@@ -64,6 +59,12 @@ jobs:
           variant: ccache
           save: true
           max-size: 10G
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.9.x'
+          cache: 'pip'
 
       - name: Setup mold
         uses: rui314/setup-mold@v1

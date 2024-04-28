@@ -132,7 +132,7 @@ class fcn_gate_library
     using technology = Technology;
 
     /**
-     * A `cell_list` is an array of size `GateSizeX` \f$ \times \f$ `GateSizeY` of type `T`.
+     * A `cell_list` is an array of size `GateSizeX` \f$\times\f$ `GateSizeY` of type `T`.
      */
     template <typename T>
     using cell_list = std::array<std::array<T, GateSizeX>, GateSizeY>;

@@ -8,7 +8,6 @@
 #include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
-#include "fiction/types.hpp"
 #include "fiction/utils/math_utils.hpp"
 #include "fmt/format.h"
 
@@ -70,7 +69,7 @@ class write_location_and_ground_state_impl
 
             for (const auto& sidb : sidbs)
             {
-                const auto pos = sidb_nm_position<Lyt>(sidb);
+                const auto pos = sidb_nm_position<Lyt>(Lyt{}, sidb);
                 os << fmt::format("{:.3f};{:.3f};", pos.first, pos.second);
                 for (const auto& valid_layout : ground_state_layouts)
                 {
@@ -109,7 +108,6 @@ void write_location_and_ground_state(const sidb_simulation_result<Lyt>& sim_resu
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
 
     detail::write_location_and_ground_state_impl p{sim_result, os};
 

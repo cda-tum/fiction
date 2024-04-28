@@ -56,7 +56,7 @@ struct design_sidb_gates_params
     /**
      * All Parameters for physical SiDB simulations.
      */
-    sidb_simulation_parameters phys_params{};
+    sidb_simulation_parameters simulation_parameters{};
     /**
      * Gate design mode.
      */
@@ -106,7 +106,7 @@ class design_sidb_gates_impl
      */
     [[nodiscard]] std::vector<Lyt> run_exhaustive_design() noexcept
     {
-        const is_operational_params params_is_operational{params.phys_params, params.sim_engine};
+        const is_operational_params params_is_operational{params.simulation_parameters, params.sim_engine};
 
         const auto all_combinations = determine_all_combinations_of_distributing_k_entities_on_n_positions(
             params.number_of_sidbs, static_cast<std::size_t>(all_sidbs_in_canvas.size()));
@@ -163,11 +163,11 @@ class design_sidb_gates_impl
     {
         std::vector<Lyt> randomly_designed_gate_layouts = {};
 
-        const is_operational_params params_is_operational{params.phys_params, params.sim_engine};
+        const is_operational_params params_is_operational{params.simulation_parameters, params.sim_engine};
 
-        const generate_random_sidb_layout_params<Lyt> parameter{
+        const generate_random_sidb_layout_params<cell<Lyt>> parameter{
             params.canvas, params.number_of_sidbs,
-            generate_random_sidb_layout_params<Lyt>::positive_charges::FORBIDDEN};
+            generate_random_sidb_layout_params<cell<Lyt>>::positive_charges::FORBIDDEN};
 
         const std::size_t        num_threads = std::thread::hardware_concurrency();
         std::vector<std::thread> threads{};
@@ -241,8 +241,8 @@ class design_sidb_gates_impl
         {
             for (std::size_t j = i + 1; j < cell_indices.size(); j++)
             {
-                if (sidb_nanometer_distance<Lyt>(all_sidbs_in_canvas[cell_indices[i]],
-                                                 all_sidbs_in_canvas[cell_indices[j]]) < 0.5)
+                if (sidb_nm_distance<Lyt>(Lyt{}, all_sidbs_in_canvas[cell_indices[i]],
+                                          all_sidbs_in_canvas[cell_indices[j]]) < 0.5)
                 {
                     return true;
                 }
