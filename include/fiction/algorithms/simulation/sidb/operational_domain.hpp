@@ -7,6 +7,7 @@
 
 #include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
+#include "fiction/algorithms/simulation/sidb/quickexact.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/technology/cell_technologies.hpp"
@@ -570,18 +571,20 @@ class operational_domain_impl
                                         });
                       });
 
+        sidb_simulation_parameters simulation_parameters = params.simulation_parameters;
+
         for (const auto& [param_point, status] : op_domain.operational_values)
         {
             if (status == operational_status::OPERATIONAL)
             {
-                sidb_simulation_parameters sim_params = params.sim_params;
-                set_x_dimension_value(sim_params, param_point.x);
-                set_y_dimension_value(sim_params, param_point.y);
+                set_x_dimension_value(simulation_parameters, param_point.x);
+                set_y_dimension_value(simulation_parameters, param_point.y);
                 const auto simulation_results = quickexact(
                     lyt,
-                    quickexact_params<Lyt>{sim_params, quickexact_params<Lyt>::automatic_base_number_detection::OFF});
+                    quickexact_params<cell<Lyt>>{simulation_parameters,
+                                                 quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF});
                 const auto energy_dist = energy_distribution(simulation_results.charge_distributions);
-                lyt.assign_physical_parameters(sim_params);
+                lyt.assign_physical_parameters(simulation_parameters);
                 const auto position = energy_dist.find(lyt.get_system_energy());
                 if (position != energy_dist.cend())
                 {
@@ -937,7 +940,7 @@ class operational_domain_impl
         // increment the number of evaluated parameter combinations
         ++num_evaluated_parameter_combinations;
 
-        sidb_simulation_parameters sim_params = params.sim_params;
+        sidb_simulation_parameters sim_params = params.simulation_parameters;
         set_x_dimension_value(sim_params, param_point.x);
         set_y_dimension_value(sim_params, param_point.y);
 
