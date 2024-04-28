@@ -890,7 +890,7 @@ TEST_CASE("Determine physical parameters for cds of SiQAD Y-shaped AND gate, 10 
         cds.assign_charge_state({6, 7, 1}, sidb_charge_state::NEGATIVE);
         cds.update_after_charge_change();
 
-        const auto valid_parameters = find_valid_physical_parameters(cds, op_domain_params);
+        const auto valid_parameters = find_valid_physical_parameters_and_excited_state_number(cds, op_domain_params);
         CHECK(valid_parameters.suitable_physical_parameters.size() == 356);
     }
 
@@ -906,7 +906,7 @@ TEST_CASE("Determine physical parameters for cds of SiQAD Y-shaped AND gate, 10 
         cds.assign_charge_state({6, 7, 1}, sidb_charge_state::NEGATIVE);
         cds.update_after_charge_change();
 
-        const auto valid_parameters = find_valid_physical_parameters(cds, op_domain_params);
+        const auto valid_parameters = find_valid_physical_parameters_and_excited_state_number(cds, op_domain_params);
         CHECK(valid_parameters.suitable_physical_parameters.size() == 98);
         CHECK(find_parameter_point_with_tolerance(valid_parameters.suitable_physical_parameters,
                                                   operational_domain::parameter_point{5.9, 5.5})
@@ -981,7 +981,7 @@ TEST_CASE(
 
         cds.update_after_charge_change();
 
-        const auto valid_parameters = find_valid_physical_parameters(cds, op_domain_params);
+        const auto valid_parameters = find_valid_physical_parameters_and_excited_state_number(cds, op_domain_params);
         CHECK(valid_parameters.suitable_physical_parameters.size() == 100);
         CHECK(find_parameter_point_with_tolerance(valid_parameters.suitable_physical_parameters,
                                                   operational_domain::parameter_point{5.6, 5.0})

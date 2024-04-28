@@ -1345,7 +1345,7 @@ operational_domain operational_domain_contour_tracing(const Lyt& lyt, const std:
  */
 template <typename Lyt>
 [[nodiscard]] valid_physical_parameters_with_excited_state_number
-find_valid_physical_parameters(Lyt& cds, const operational_domain_params& params = {})
+find_valid_physical_parameters_and_excited_state_number(Lyt& cds, const operational_domain_params& params = {})
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
