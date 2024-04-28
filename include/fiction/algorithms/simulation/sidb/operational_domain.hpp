@@ -148,6 +148,14 @@ struct operational_domain
                 return y;
             }
         }
+        // Custom comparison function for parameter_point
+        bool compare_parameter_point(const parameter_point& p1, const parameter_point& p2)
+        {
+            constexpr double tolerance = std::numeric_limits<double>::epsilon();  // Tolerance for comparison
+
+            // Compare each coordinate with a tolerance
+            return std::abs(p1.x - p2.x) < tolerance && std::abs(p1.y - p2.y) < tolerance;
+        }
     };
     /**
      * The operational status of the layout for each specified parameter combination. This constitutes the operational
@@ -156,6 +164,49 @@ struct operational_domain
      */
     locked_parallel_flat_hash_map<parameter_point, operational_status> operational_values{};
 };
+/**
+ * This struct represents a collection of parameter points along with their associated excited state numbers
+ * for a specific charge distribution.
+ */
+struct valid_physical_parameters_with_excited_state_number
+{
+    /**
+     * This map collects parameter points along with their corresponding excited state numbers for a specific
+     * charge distribution. For example, an entry may look like ((5.0, 5.2), 1), indicating that the charge distribution
+     * at the parameter point (5.0, 5.2) corresponds to the 1st excited state.
+     */
+    locked_parallel_flat_hash_map<operational_domain::parameter_point, uint64_t> suitable_physical_parameters{};
+};
+/**
+ * This function compares two parameter points, `p1` and `p2`, for equality with tolerance.
+ * It checks if the difference between each coordinate of the parameter points is within a specified tolerance.
+ *
+ * @param p1 The first parameter point to compare.
+ * @param p2 The second parameter point to compare.
+ * @return true if the parameter points are considered equal within the specified tolerance, false otherwise.
+ */
+static bool compare_parameter_point(const operational_domain::parameter_point& p1,
+                                    const operational_domain::parameter_point& p2)
+{
+    constexpr double tolerance = fiction::physical_constants::POP_STABILITY_ERR;
+    return std::abs(p1.x - p2.x) < tolerance && std::abs(p1.y - p2.y) < tolerance;
+}
+/**
+ * This function searches for a parameter point, specified by the `parameter`,
+ * in the provided locked_parallel_flat_hash_map `suitable_parameters` with tolerance.
+ *
+ * @param suitable_parameters The map containing parameter points as keys and associated values.
+ * @param pp The parameter point to search for in the map.
+ * @return An iterator to the found parameter point in the map, or end() if not found.
+ */
+static locked_parallel_flat_hash_map<operational_domain::parameter_point, uint64_t>::const_iterator
+find_parameter_point_with_tolerance(
+    const locked_parallel_flat_hash_map<operational_domain::parameter_point, uint64_t>& suitable_parameters,
+    const operational_domain::parameter_point&                                          pp)
+{
+    auto compare_keys = [&pp](const auto& pair) { return compare_parameter_point(pair.first, pp); };
+    return std::find_if(suitable_parameters.begin(), suitable_parameters.end(), compare_keys);
+}
 
 /**
  * Parameters for the operational domain computation. The parameters are used across the different operational domain
@@ -256,12 +307,14 @@ class operational_domain_impl
      * @param st Statistics of the process.
      */
     operational_domain_impl(const Lyt& lyt, const std::vector<TT>& tt, const operational_domain_params& ps,
-                            operational_domain_stats& st) noexcept :
+                            operational_domain_stats& st, bool consider_logic = true) noexcept :
             layout{lyt},
             truth_table{tt},
             params{ps},
             stats{st},
-            output_bdl_pairs{detect_bdl_pairs<Lyt>(layout, sidb_technology::cell_type::OUTPUT, params.bdl_params)},
+            output_bdl_pairs{consider_logic ?
+                                 detect_bdl_pairs<Lyt>(lyt, sidb_technology::cell_type::OUTPUT, ps.bdl_params) :
+                                 std::vector<bdl_pair<Lyt>>{}},
             x_indices(num_x_steps() + 1),  // pre-allocate the x dimension indices
             y_indices(num_y_steps() + 1)   // pre-allocate the y dimension indices
     {
@@ -504,8 +557,11 @@ class operational_domain_impl
      *
      * @return The operational domain of the layout.
      */
-    [[nodiscard]] operational_domain grid_search_to_determine_parameter_for_given_cds(Lyt& lyt) noexcept
+    [[nodiscard]] valid_physical_parameters_with_excited_state_number
+    grid_search_to_determine_parameter_for_given_cds(Lyt& lyt) noexcept
     {
+        valid_physical_parameters_with_excited_state_number suitable_params_domain{};
+
         mockturtle::stopwatch stop{stats.time_total};
 
         // for each x value in parallel
@@ -519,9 +575,28 @@ class operational_domain_impl
                                         });
                       });
 
-        log_stats();
+        for (const auto& [param_point, status] : op_domain.operational_values)
+        {
+            if (status == operational_status::OPERATIONAL)
+            {
+                sidb_simulation_parameters sim_params = params.sim_params;
+                set_x_dimension_value(sim_params, param_point.x);
+                set_y_dimension_value(sim_params, param_point.y);
+                const auto simulation_results = quickexact(
+                    lyt,
+                    quickexact_params<Lyt>{sim_params, quickexact_params<Lyt>::automatic_base_number_detection::OFF});
+                const auto energy_dist = energy_distribution(simulation_results.charge_distributions);
+                lyt.assign_physical_parameters(sim_params);
+                const auto position = energy_dist.find(lyt.get_system_energy());
+                if (position != energy_dist.cend())
+                {
+                    uint64_t excited_state_number = std::distance(energy_dist.begin(), position);
+                    suitable_params_domain.suitable_physical_parameters.emplace(param_point, excited_state_number);
+                }
+            }
+        }
 
-        return op_domain;
+        return suitable_params_domain;
     }
 
   private:
@@ -861,7 +936,9 @@ class operational_domain_impl
 
         if (lyt.is_physically_valid())
         {
-            std::cout << fmt::format("{}, {}, {}", sim_params.epsilon_r, sim_params.lambda_tf, sim_params.mu_minus) << std::endl;
+            //                        std::cout << fmt::format("{}, {}, {}", sim_params.epsilon_r, sim_params.lambda_tf,
+            //                        sim_params.mu_minus)
+            //                                  << std::endl;
             return operational();
         }
 
@@ -1243,21 +1320,30 @@ operational_domain operational_domain_contour_tracing(const Lyt& lyt, const std:
 
     return result;
 }
-
-template <typename Lyt, typename TT>
-operational_domain
-determine_physical_parameters_for_given_charge_distribution(Lyt&                       lyt, const std::vector<TT>& spec,
-                                                            const operational_domain_params& params = {})
+/**
+ * This function computes the physical parameters necessary for ensuring the physical validity of the charge
+ * distribution surface `cds`. It not only identifies the physical parameters that render the charge
+ * distribution physically valid but also determines the excited state number. The ground state corresponds to zero,
+ * and each subsequent excited state is numbered accordingly.
+ *
+ * @tparam Lyt The charge distribution surface type.
+ * @param cds The charge distribution surface for which physical parameters are to be determined.
+ * @param params Operational domain parameters.
+ * @return An instance of valid_physical_parameters_with_excited_state_number containing the determined physical
+ * parameters.
+ */
+template <typename Lyt>
+valid_physical_parameters_with_excited_state_number
+find_valid_physical_parameters(Lyt& cds, const operational_domain_params& params = {})
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
     static_assert(is_charge_distribution_surface_v<Lyt>, "Lyt is not a charge distribution surface");
 
-    operational_domain_stats st{};
-    detail::operational_domain_impl<Lyt, TT> p{lyt, spec, params, st};
+    operational_domain_stats                 st{};
+    detail::operational_domain_impl<Lyt, tt> p{cds, std::vector<tt>{}, params, st, false};
 
-    const auto result = p.grid_search_to_determine_parameter_for_given_cds(lyt);
+    const auto result = p.grid_search_to_determine_parameter_for_given_cds(cds);
 
     return result;
 }

@@ -164,6 +164,8 @@ Operational Domain Computation
 
 .. doxygenstruct:: fiction::operational_domain
    :members:
+.. doxygenstruct:: fiction::valid_physical_parameters_with_excited_state_number
+   :members:
 
 .. doxygenstruct:: fiction::operational_domain_params
    :members:
@@ -174,6 +176,7 @@ Operational Domain Computation
 .. doxygenfunction:: fiction::operational_domain_random_sampling
 .. doxygenfunction:: fiction::operational_domain_flood_fill
 .. doxygenfunction:: fiction::operational_domain_contour_tracing
+.. doxygenfunction:: fiction::find_valid_physical_parameters
 
 
 Utility Functions
