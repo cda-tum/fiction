@@ -948,9 +948,6 @@ class operational_domain_impl
 
         if (lyt.is_physically_valid())
         {
-            //                        std::cout << fmt::format("{}, {}, {}", sim_params.epsilon_r, sim_params.lambda_tf,
-            //                        sim_params.mu_minus)
-            //                                  << std::endl;
             return operational();
         }
 
