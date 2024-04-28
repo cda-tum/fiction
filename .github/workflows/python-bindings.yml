@@ -13,7 +13,6 @@ on:
       - '.github/workflows/python-bindings.yml'
   workflow_run:
     workflows: [ "pyfiction Docstring Generator" ]
-    branches: [ main ]
     types:
       - completed
 
