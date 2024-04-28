@@ -585,7 +585,7 @@ class operational_domain_impl
                 const auto position = energy_dist.find(lyt.get_system_energy());
                 if (position != energy_dist.cend())
                 {
-                    uint64_t excited_state_number = std::distance(energy_dist.begin(), position);
+                    const auto excited_state_number = std::distance(energy_dist.begin(), position);
                     suitable_params_domain.suitable_physical_parameters.emplace(param_point, excited_state_number);
                 }
             }
@@ -1329,7 +1329,7 @@ operational_domain operational_domain_contour_tracing(const Lyt& lyt, const std:
     return result;
 }
 /**
- * This function computes the physical parameters necessary for ensuring the physical validity of the charge
+ * This function computes the physical parameters necessary for ensuring the physical validity of the given charge
  * distribution surface `cds`. It not only identifies the physical parameters that render the charge
  * distribution physically valid but also determines the excited state number. The ground state corresponds to zero,
  * and each subsequent excited state is numbered accordingly.
@@ -1341,7 +1341,7 @@ operational_domain operational_domain_contour_tracing(const Lyt& lyt, const std:
  * parameters.
  */
 template <typename Lyt>
-valid_physical_parameters_with_excited_state_number
+[[nodiscard]] valid_physical_parameters_with_excited_state_number
 find_valid_physical_parameters(Lyt& cds, const operational_domain_params& params = {})
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");

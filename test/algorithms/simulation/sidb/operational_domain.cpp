@@ -6,8 +6,6 @@
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
-#include "utils/blueprints/layout_blueprints.hpp"
-
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
@@ -870,15 +868,15 @@ TEST_CASE("Determine physical parameters for cds of SiQAD Y-shaped AND gate, 10 
     charge_distribution_surface cds{lyt, sim_params};
 
     operational_domain_params op_domain_params{};
-    op_domain_params.sim_params  = sim_params;
-    op_domain_params.x_dimension = operational_domain::sweep_parameter::EPSILON_R;
-    op_domain_params.x_min       = 4.1;
-    op_domain_params.x_max       = 6.0;
-    op_domain_params.x_step      = 0.1;
-    op_domain_params.y_dimension = operational_domain::sweep_parameter::LAMBDA_TF;
-    op_domain_params.y_min       = 4.1;
-    op_domain_params.y_max       = 6.0;
-    op_domain_params.y_step      = 0.1;
+    op_domain_params.simulation_parameters = sim_params;
+    op_domain_params.x_dimension           = operational_domain::sweep_parameter::EPSILON_R;
+    op_domain_params.x_min                 = 4.1;
+    op_domain_params.x_max                 = 6.0;
+    op_domain_params.x_step                = 0.1;
+    op_domain_params.y_dimension           = operational_domain::sweep_parameter::LAMBDA_TF;
+    op_domain_params.y_min                 = 4.1;
+    op_domain_params.y_max                 = 6.0;
+    op_domain_params.y_step                = 0.1;
 
     SECTION("Using the typical groundstate as given cds")
     {
@@ -925,7 +923,9 @@ TEST_CASE("Determine physical parameters for cds of SiQAD Y-shaped AND gate, 10 
     }
 }
 
-TEST_CASE("Determine physical parameters for cds of Bestagon AND gate, 10 input combination", "[operational-domain]")
+TEST_CASE(
+    "Determine physical parameters for cds (default physical parameters) of Bestagon AND gate, 10 input combination",
+    "[operational-domain]")
 {
     auto lyt = blueprints::bestagon_and_gate<sidb_cell_clk_lyt_siqad>();
 
@@ -938,15 +938,15 @@ TEST_CASE("Determine physical parameters for cds of Bestagon AND gate, 10 input 
     charge_distribution_surface cds{lyt, sim_params};
 
     operational_domain_params op_domain_params{};
-    op_domain_params.sim_params  = sim_params;
-    op_domain_params.x_dimension = operational_domain::sweep_parameter::EPSILON_R;
-    op_domain_params.x_min       = 5.0;
-    op_domain_params.x_max       = 5.9;
-    op_domain_params.x_step      = 0.1;
-    op_domain_params.y_dimension = operational_domain::sweep_parameter::LAMBDA_TF;
-    op_domain_params.y_min       = 5.0;
-    op_domain_params.y_max       = 5.9;
-    op_domain_params.y_step      = 0.1;
+    op_domain_params.simulation_parameters = sim_params;
+    op_domain_params.x_dimension           = operational_domain::sweep_parameter::EPSILON_R;
+    op_domain_params.x_min                 = 5.0;
+    op_domain_params.x_max                 = 5.9;
+    op_domain_params.x_step                = 0.1;
+    op_domain_params.y_dimension           = operational_domain::sweep_parameter::LAMBDA_TF;
+    op_domain_params.y_min                 = 5.0;
+    op_domain_params.y_max                 = 5.9;
+    op_domain_params.y_step                = 0.1;
 
     SECTION("Using the ground state of default physical parameters as given cds")
     {
