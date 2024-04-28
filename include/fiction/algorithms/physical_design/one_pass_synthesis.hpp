@@ -2,10 +2,10 @@
 // Created by marcel on 09.04.20.
 //
 
-#if (MUGEN)
-
 #ifndef FICTION_ONE_PASS_SYNTHESIS_HPP
 #define FICTION_ONE_PASS_SYNTHESIS_HPP
+
+#if (MUGEN)
 
 #include "fiction/algorithms/iter/aspect_ratio_iterator.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
@@ -18,6 +18,10 @@
 #include <mockturtle/algorithms/simulation.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
+#if (PROGRESS_BARS)
+#include <mockturtle/utils/progress_bar.hpp>
+#endif
+
 #include <algorithm>
 #include <chrono>
 #include <exception>
@@ -28,13 +32,16 @@
 #include <map>
 #include <memory>
 #include <optional>
+#include <unordered_set>
 #include <vector>
 
 // pybind11 has quite some warnings in its code; let's silence them a little
 #pragma GCC diagnostic push  // GCC
 #pragma GCC diagnostic ignored "-Wshadow"
 #pragma GCC diagnostic ignored "-Wold-style-cast"
+#ifndef __clang__
 #pragma GCC diagnostic ignored "-Wuseless-cast"
+#endif
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #pragma GCC diagnostic ignored "-Wrange-loop-analysis"
 #pragma warning(push, 0)  // MSVC
@@ -42,29 +49,30 @@
 #pragma GCC diagnostic pop  // GCC
 #pragma warning(pop)        // MSVC
 
-#if (PROGRESS_BARS)
-#include <mockturtle/utils/progress_bar.hpp>
-#endif
-
 namespace fiction
 {
 
-template <typename Lyt>
+/**
+ * Parameters for the one-pass synthesis algorithm.
+ */
 struct one_pass_synthesis_params
 {
     /**
      * Clocking scheme to be used.
      */
-    std::shared_ptr<clocking_scheme<coordinate<Lyt>>> scheme =
-        std::make_shared<clocking_scheme<coordinate<Lyt>>>(twoddwave_clocking<Lyt>());
+    std::string scheme = "2DDWave";
     /**
-     * Number of tiles to use.
+     * Number of tiles to use as an upper bound in x direction.
      */
-    uint16_t upper_bound = std::numeric_limits<uint16_t>::max();
+    uint16_t upper_bound_x = std::numeric_limits<uint16_t>::max();
     /**
-     * Use just one fixed tile size.
+     * Number of tiles to use as an upper bound in y direction.
      */
-    uint16_t fixed_size = 0ul;
+    uint16_t upper_bound_y = std::numeric_limits<uint16_t>::max();
+    /**
+     * Investigate only aspect ratios with the number of tiles given as upper bound.
+     */
+    bool fixed_size = false;
     /**
      * Enable the use of wire elements.
      */
@@ -95,7 +103,9 @@ struct one_pass_synthesis_params
     bool io_pins = true;  // TODO thus far, io_ports have to be set to true
 #if !defined(__APPLE__)
     /**
-     * Number of threads to use for exploring the possible aspect ratios. NOTE: THIS IS AN UNSTABLE BETA FEATURE.
+     * Number of threads to use for exploring the possible aspect ratios.
+     *
+     * @note This is an unstable beta feature.
      */
     std::size_t num_threads = 1ul;
 #endif
@@ -132,7 +142,7 @@ namespace detail
  * scoped and only need to exist. No operations are to be performed on this object. It handles creation and proper
  * destruction of all Python objects used during this session and deals with the CPython API.
  */
-inline static const pybind11::scoped_interpreter instance{};
+inline static const pybind11::scoped_interpreter INSTANCE{};
 
 // suppress warning 'declared with greater visibility than the type of its field'
 #pragma GCC visibility push(hidden)
@@ -150,7 +160,7 @@ class mugen_handler
      * @param lyt Reference to an empty layout that serves as a floor plan for S&P&R by Mugen.
      * @param p The configurations to respect in the SAT instance generation process.
      */
-    mugen_handler(const std::vector<TT>& spec, Lyt& sketch, one_pass_synthesis_params<Lyt> p) noexcept :
+    mugen_handler(const std::vector<TT>& spec, Lyt& sketch, one_pass_synthesis_params p) :
             tts{spec},
             num_pis{spec[0].num_vars()},  // since all tts have to have the same number of variables
             lyt{sketch},
@@ -164,17 +174,24 @@ class mugen_handler
      * losing the optimality guarantee. This function should never be overly restrictive!
      *
      * @param ratio Aspect ratio to evaluate.
-     * @return True iff ratio can safely be skipped because it is UNSAT anyways.
+     * @return `true` iff ratio can safely be skipped because it is UNSAT anyways.
      */
     [[nodiscard]] bool skippable(const aspect_ratio<Lyt>& ratio) const noexcept
     {
+        // skip aspect ratios that extend beyond the specified upper bounds
+        if (ratio.x >= ps.upper_bound_x || ratio.y >= ps.upper_bound_y)
+        {
+            return true;
+        }
         // OPEN clocking optimization: rotated aspect ratios don't need to be explored
-        if (lyt.is_clocking_scheme(clock_name::open))
+        if (lyt.is_clocking_scheme(clock_name::OPEN))
         {
             if (ratio.x != ratio.y && ratio.x == lyt.y() && ratio.y == lyt.x())
+            {
                 return true;
+            }
         }
-        // TODO more conditions go here
+        // more conditions go here
 
         return false;
     }
@@ -200,7 +217,7 @@ class mugen_handler
      * Passes the current scheme_graph to Mugen and synthesizes it. If there is an implementation on this graph
      * realizing the specification, this function returns true.
      *
-     * @return true iff the instance generated for the current configuration is SAT.
+     * @return `true` iff the instance generated for the current configuration is SAT.
      */
     bool is_satisfiable()
     {
@@ -216,7 +233,9 @@ class mugen_handler
         for (auto net_it = nets.begin(); net_it != nets.end(); ++net_it)
         {
             if (net_it->is_none())
+            {
                 return false;
+            }
 
             to_gate_layout(*net_it);
 
@@ -242,7 +261,7 @@ class mugen_handler
     /**
      * Configurations specifying layout restrictions. Used in instance generation among other places.
      */
-    one_pass_synthesis_params<Lyt> ps;
+    one_pass_synthesis_params ps;
     /**
      * Pre-allocate PIs to preserve their order.
      */
@@ -543,7 +562,7 @@ class mugen_handler
                 continue;
             }
             // if node is a wire segment
-            else if (is_wire(node))
+            if (is_wire(node))
             {
                 // if it is a primary input pin
                 if (const auto pi = has_pi_fanin(node);
@@ -595,7 +614,7 @@ class mugen_handler
     void establish_connections(const pybind11::handle& net)
     {
         // nodes can be present multiple times in the 'nodes' list, this set makes sure to visit them exactly once
-        std::set<mockturtle::node<Lyt>> nodes_in_place{};
+        std::unordered_set<mockturtle::node<Lyt>> nodes_in_place{};
 
         // list of all nodes; first num_pi nodes are primary inputs
         const auto nodes = net.attr("nodes");
@@ -613,34 +632,32 @@ class mugen_handler
                 continue;
             }
             // POs are also skipped and only retrieved at the very end
-            else if (is_wire(py_node) && is_po(py_node))
+            if (is_wire(py_node) && is_po(py_node))
             {
                 continue;
             }
-            else
+
+            // its position on the layout
+            const auto node_pos = lyt.get_tile(lyt_node);
+
+            // skip empty tiles
+            if (lyt.is_empty_tile(node_pos))
             {
-                // its position on the layout
-                const auto node_pos = lyt.get_tile(lyt_node);
-
-                // skip empty tiles
-                if (lyt.is_empty_tile(node_pos))
-                {
-                    continue;
-                }
-                // skip nodes already in place
-                if (nodes_in_place.count(lyt_node) > 0)
-                {
-                    continue;
-                }
-
-                // children (incoming signals) of the layout node
-                const auto fanins = get_fanins(py_node);
-
-                // the node is not moved, but its children are updated
-                lyt.move_node(lyt_node, node_pos, fanins);
-
-                nodes_in_place.insert(lyt_node);
+                continue;
             }
+            // skip nodes already in place
+            if (nodes_in_place.count(lyt_node) > 0)
+            {
+                continue;
+            }
+
+            // children (incoming signals) of the layout node
+            const auto fanins = get_fanins(py_node);
+
+            // the node is not moved, but its children are updated
+            lyt.move_node(lyt_node, node_pos, fanins);
+
+            nodes_in_place.insert(lyt_node);
         }
     }
 
@@ -689,11 +706,12 @@ template <typename Lyt, typename TT>
 class one_pass_synthesis_impl
 {
   public:
-    one_pass_synthesis_impl(const std::vector<TT>& spec, const one_pass_synthesis_params<Lyt>& p,
+    one_pass_synthesis_impl(const std::vector<TT>& spec, const one_pass_synthesis_params& p,
                             one_pass_synthesis_stats& st) :
             tts{spec},
             ps{p},
-            pst{st}
+            pst{st},
+            ari{ps.fixed_size ? static_cast<uint64_t>(ps.upper_bound_x * ps.upper_bound_y) : 0u}
     {}
 
     std::optional<Lyt> run()
@@ -705,12 +723,13 @@ class one_pass_synthesis_impl
         }
 
         // empty layout with an initial size of 1 x 1 tiles
-        Lyt layout{{0, 0}, *ps.scheme};
+        Lyt layout{{0, 0}, *get_clocking_scheme<Lyt>(ps.scheme)};
 
         // handler for the Python interaction
         mugen_handler handler{tts, layout, ps};
 
-        for (; ari <= ps.upper_bound; ++ari)  // <= to prevent overflow
+        for (; ari <= static_cast<uint64_t>(ps.upper_bound_x) * static_cast<uint64_t>(ps.upper_bound_y);
+             ++ari)  // <= to prevent overflow
         {
 
 #if (PROGRESS_BARS)
@@ -720,7 +739,9 @@ class one_pass_synthesis_impl
             const auto aspect_ratio = typename Lyt::aspect_ratio{(*ari).x, (*ari).y, ps.crossings ? 1 : 0};
 
             if (handler.skippable(aspect_ratio))
+            {
                 continue;
+            }
 
 #if (PROGRESS_BARS)
             bar(aspect_ratio.x + 1, aspect_ratio.y + 1);
@@ -749,10 +770,10 @@ class one_pass_synthesis_impl
 
                     return layout;
                 }
-                else  // update timeout and retry
+                // update timeout and retry
+                if (ps.timeout)
                 {
-                    if (ps.timeout)
-                        update_timeout(handler, pst.time_total);
+                    update_timeout(handler, pst.time_total);
                 }
             }
             // timeout reached
@@ -768,8 +789,8 @@ class one_pass_synthesis_impl
   private:
     const std::vector<TT> tts;
 
-    one_pass_synthesis_params<Lyt> ps;
-    one_pass_synthesis_stats&      pst;
+    one_pass_synthesis_params ps;
+    one_pass_synthesis_stats& pst;
 
     /**
      * Factorizes a number of layout tiles into all possible aspect ratios for iteration.
@@ -793,7 +814,7 @@ class one_pass_synthesis_impl
     /**
      * Tests whether all needed dependencies have been installed and can be accessed via Python.
      *
-     * @return true iff all dependencies are met.
+     * @return `true` iff all dependencies are met.
      */
     [[nodiscard]] bool test_dependencies() const
     {
@@ -891,41 +912,57 @@ class one_pass_synthesis_impl
  * independent of prior logic network synthesis. Nevertheless, it does only find solutions for small specifications
  * because it does not scale.
  *
- * The algorithm was originally proposed in "One-pass Synthesis for Field-coupled Nanocomputing Technologies" by M.
+ * The algorithm was originally proposed in \"One-pass Synthesis for Field-coupled Nanocomputing Technologies\" by M.
  * Walter, W. Haaswijk, R. Wille, F. Sill Torres, and Rolf Drechsler in ASP-DAC 2021.
  *
  * Using iterative SAT calls, an optimal synthesis & placement & routing for a given specification will be found.
- * Starting with n, each possible layout aspect ratio in n tiles will be examined by factorization and tested for
- * realizability using the SAT solver glucose. When no upper bound is given, this approach will run until it finds a
- * solution to the synthesis & placement & routing problem instance under all given constraints. Note that there are
- * combinations of constraints for which no valid solution under the given parameters might exist. It is, thus, prudent
- * to always provide a timeout limit.
+ * Starting with \f$n\f$, each possible layout aspect ratio in \f$n\f$ tiles will be examined by factorization and
+ * tested for realizability using the SAT solver glucose. When no upper bound is given, this approach will run until it
+ * finds a solution to the synthesis & placement & routing problem instance under all given constraints. Note that there
+ * are combinations of constraints for which no valid solution under the given parameters might exist. It is, thus,
+ * prudent to always provide a timeout limit.
  *
  * This implementation relies on Mugen, a framework for one-pass synthesis of FCN circuit layouts developed by Winston
  * Haaswijk. It can be found on GitHub: https://github.com/whaaswijk/mugen
  *
  * Since Mugen is written in Python3, fiction uses pybind11 for interoperability. This can lead to performance and
  * integration issues. Mugen requires the following Python3 packages to be installed:
- * - graphviz
- * - python-sat
- * - wrapt_timeout_decorator
+ * - `graphviz`
+ * - `python-sat`
+ * - `wrapt_timeout_decorator`
  *
  * Due to the integration hassle, possible performance issues, and its experimental status this approach is excluded
- * from (CLI) compilation by default. To enable it, pass -DFICTION_ENABLE_MUGEN=ON to the cmake call.
+ * from (CLI) compilation by default. To enable it, pass `-DFICTION_ENABLE_MUGEN=ON` to the cmake call.
  *
  * @tparam Lyt Gate-level layout type to generate.
  * @tparam TT Truth table type used as specification.
- * @param tts A vector of truth tables where table at index i specifies the Boolean function for output i.
+ * @param tts A vector of truth tables where table at index `i` specifies the Boolean function for output `i`.
  * @param ps Parameters.
  * @param pst Statistics.
- * @return A gate-level layout of type TT implementing tts as an FCN circuit if one is found under the given parameters;
- * std::nullopt, otherwise.
+ * @return A gate-level layout of type `TT` implementing `tts` as an FCN circuit if one is found under the given
+ * parameters; `std::nullopt`, otherwise.
  */
 template <typename Lyt, typename TT>
-std::optional<Lyt> one_pass_synthesis(const std::vector<TT>& tts, one_pass_synthesis_params<Lyt> ps = {},
+std::optional<Lyt> one_pass_synthesis(const std::vector<TT>& tts, one_pass_synthesis_params ps = {},
                                       one_pass_synthesis_stats* pst = nullptr)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+
+    if (ps.scheme == clock_name::OPEN || ps.scheme == clock_name::COLUMNAR || ps.scheme == clock_name::ROW)
+    {
+        throw unsupported_clocking_scheme_exception();
+    }
+    if (const auto clocking_scheme = get_clocking_scheme<Lyt>(ps.scheme); !clocking_scheme.has_value())
+    {
+        throw unsupported_clocking_scheme_exception();
+    }
+    else if (clocking_scheme->max_out_degree < 3 && ps.enable_maj)
+    {
+        ps.enable_maj = false;
+        std::cout << fmt::format("[w] disabling MAJ gates as they are not supported by the {} clocking scheme",
+                                 ps.scheme)
+                  << std::endl;
+    }
 
     // tts cannot be empty
     assert(!tts.empty());
@@ -949,18 +986,18 @@ std::optional<Lyt> one_pass_synthesis(const std::vector<TT>& tts, one_pass_synth
  * An overload of one_pass_synthesis above that utilizes a logic network as specification instead of a vector of truth
  * tables. It first generates truth tables from the given network and then calls the function above.
  *
- * This function might throw an 'std::bad_alloc' exception if the provided logic network has too many inputs.
+ * This function might throw an `std::bad_alloc` exception if the provided logic network has too many inputs.
  *
  * @tparam Lyt Gate-level layout type to generate.
  * @tparam Ntk Logic network type used as specification.
  * @param ntk The network whose function is to be realized as an FCN circuit.
  * @param ps Parameters.
  * @param pst Statistics.
- * @return A gate-level layout of type TT implementing tts as an FCN circuit if one is found under the given parameters;
- * std::nullopt, otherwise.
+ * @return A gate-level layout of type `TT` implementing `tts` as an FCN circuit if one is found under the given
+ * parameters; `std::nullopt`, otherwise.
  */
 template <typename Lyt, typename Ntk>
-std::optional<Lyt> one_pass_synthesis(const Ntk& ntk, one_pass_synthesis_params<Lyt> ps = {},
+std::optional<Lyt> one_pass_synthesis(const Ntk& ntk, const one_pass_synthesis_params& ps = {},
                                       one_pass_synthesis_stats* pst = nullptr)
 {
     static_assert(
@@ -969,7 +1006,7 @@ std::optional<Lyt> one_pass_synthesis(const Ntk& ntk, one_pass_synthesis_params<
 
     // might throw an std::bad_alloc exception if ntk has too many inputs
     const auto tts = mockturtle::simulate<kitty::dynamic_truth_table>(
-        ntk, mockturtle::default_simulator<kitty::dynamic_truth_table>(static_cast<unsigned>(ntk.num_pis())));
+        ntk, mockturtle::default_simulator<kitty::dynamic_truth_table>{static_cast<unsigned>(ntk.num_pis())});
 
     auto lyt = one_pass_synthesis<Lyt>(tts, ps, pst);
 
@@ -986,6 +1023,6 @@ std::optional<Lyt> one_pass_synthesis(const Ntk& ntk, one_pass_synthesis_params<
 
 }  // namespace fiction
 
-#endif  // FICTION_ONE_PASS_SYNTHESIS_HPP
-
 #endif  // MUGEN
+
+#endif  // FICTION_ONE_PASS_SYNTHESIS_HPP

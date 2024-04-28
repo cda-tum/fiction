@@ -5,7 +5,15 @@
 #ifndef FICTION_BOUNDING_BOX_HPP
 #define FICTION_BOUNDING_BOX_HPP
 
+#include "fiction/layouts/cell_level_layout.hpp"
+#include "fiction/layouts/coordinates.hpp"
+#include "fiction/technology/cell_ports.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/types.hpp"
+#include "fiction/utils/layout_utils.hpp"
+
+#include <cstdint>
+#include <limits>
 
 // data types cannot properly be converted to bit field types
 #pragma GCC diagnostic push
@@ -20,7 +28,8 @@ namespace fiction
  * necessary to know exactly which space the associated layout internals occupy. A bounding box computes coordinates
  * that span a minimum-sized rectangle that encloses all non-empty layout coordinates.
  *
- * The bounding box does not automatically updated when the layout changes. Call update_bounding_box() to recompute it.
+ * The bounding box does not automatically updated when the layout changes. Call `update_bounding_box()` to recompute
+ * it.
  *
  * @tparam Lyt Gate-level or cell-level layout type.
  */
@@ -52,76 +61,81 @@ class bounding_box_2d
             return;
         }
 
-        // calculate min.x
-        for (decltype(min.x) x = 0; x <= layout.x(); ++x)
+        // the layout is based on SiQAD coordinates
+        if constexpr (has_siqad_coord_v<Lyt>)
         {
-            bool elem_found = false;
-            for (decltype(min.y) y = 0; y <= layout.y(); ++y)
-            {
-                if (!is_empty_coordinate({x, y}))
-                {
-                    elem_found = true;
-                    break;
-                }
-            }
+            int32_t min_x = std::numeric_limits<int32_t>::max();
+            int32_t max_x = std::numeric_limits<int32_t>::min();
 
-            min.x = x;
-            if (elem_found)
-                break;
+            int32_t min_y = std::numeric_limits<int32_t>::max();
+            int32_t max_y = std::numeric_limits<int32_t>::min();
+
+            uint8_t min_z = 1;
+            uint8_t max_z = 0;
+
+            layout.foreach_cell(
+                [&min_x, &max_x, &min_y, &max_y, &min_z, &max_z](const auto& c)
+                {
+                    if (c.x < min_x)
+                    {
+                        min_x = c.x;
+                    }
+                    if (c.x > max_x)
+                    {
+                        max_x = c.x;
+                    }
+
+                    if (c.y == min_y && c.z < min_z)
+                    {
+                        min_z = c.z;
+                    }
+                    if (c.y < min_y)
+                    {
+                        min_y = c.y;
+                        min_z = c.z;
+                    }
+
+                    if (c.y == max_y && c.z > max_z)
+                    {
+                        max_z = c.z;
+                    }
+                    if (c.y > max_y)
+                    {
+                        max_y = c.y;
+                        max_z = c.z;
+                    }
+                });
+            min = {min_x, min_y, min_z};
+            max = {max_x, max_y, max_z};
         }
-
-        // calculate min.y
-        for (decltype(min.y) y = 0; y <= layout.y(); ++y)
+        else
         {
-            bool elem_found = false;
-            for (decltype(min.x) x = 0; x <= layout.x(); ++x)
-            {
-                if (!is_empty_coordinate({x, y}))
+            // set min to max coordinate in the layout
+            min = {layout.x(), layout.y()};
+
+            layout.foreach_coordinate(
+                [this](const auto& c)
                 {
-                    elem_found = true;
-                    break;
-                }
-            }
-
-            min.y = y;
-            if (elem_found)
-                break;
-        }
-
-        // calculate max.x
-        for (auto x = layout.x(); x >= 0; --x)
-        {
-            bool elem_found = false;
-            for (decltype(max.y) y = 0; y <= layout.y(); ++y)
-            {
-                if (!is_empty_coordinate({x, y}))
-                {
-                    elem_found = true;
-                    break;
-                }
-            }
-
-            max.x = x;
-            if (elem_found)
-                break;
-        }
-
-        // calculate max.y
-        for (auto y = layout.y(); y >= 0; --y)
-        {
-            bool elem_found = false;
-            for (decltype(max.x) x = 0; x <= layout.x(); ++x)
-            {
-                if (!is_empty_coordinate({x, y}))
-                {
-                    elem_found = true;
-                    break;
-                }
-            }
-
-            max.y = y;
-            if (elem_found)
-                break;
+                    if (!is_empty_coordinate(c))
+                    {
+                        if (c.x < min.x)
+                        {
+                            min.x = c.x;
+                        }
+                        if (c.y < min.y)
+                        {
+                            min.y = c.y;
+                        }
+                        if (c.x > max.x)
+                        {
+                            max.x = c.x;
+                        }
+                        if (c.y > max.y)
+                        {
+                            max.y = c.y;
+                        }
+                    }
+                });
         }
 
         x_size = max.x - min.x;
@@ -130,8 +144,8 @@ class bounding_box_2d
     /**
      * Returns the minimum corner of the bounding box.
      *
-     * In a cartesian_layout<offset::ucoord_t> object, this location represents the most north-western coordinate of the
-     * bounding box enclosing every non-empty coordinate.
+     * In a `cartesian_layout<offset::ucoord_t>` object, this location represents the most north-western coordinate of
+     * the bounding box enclosing every non-empty coordinate.
      *
      * @return The minimum enclosing coordinate in the associated layout.
      */
@@ -142,8 +156,8 @@ class bounding_box_2d
     /**
      * Returns the maximum corner of the bounding box.
      *
-     * In a cartesian_layout<offset::ucoord_t> object, this location represents the most south-eastern coordinate of the
-     * bounding box enclosing every non-empty coordinate.
+     * In a `cartesian_layout<offset::ucoord_t>` object, this location represents the most south-eastern coordinate of
+     * the bounding box enclosing every non-empty coordinate.
      *
      * @return The maximum enclosing coordinate in the associated layout.
      */
@@ -198,6 +212,6 @@ class bounding_box_2d
 
 }  // namespace fiction
 
-#endif  // FICTION_BOUNDING_BOX_HPP
-
 #pragma GCC diagnostic pop
+
+#endif  // FICTION_BOUNDING_BOX_HPP

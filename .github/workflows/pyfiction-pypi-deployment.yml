@@ -1,0 +1,140 @@
+# this file is heavily based on https://github.com/cda-tum/qmap/blob/main/.github/workflows/deploy.yml
+
+name: pyfiction PyPI Deployment
+
+on:
+  release:
+    types: [ published ]
+  pull_request:
+  merge_group:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+env:
+  Z3_VERSION: 4.10.0
+  ENABLE_Z3: 'ON'
+
+jobs:
+  build_wheels:
+    name: Wheels for ${{ matrix.config.os }} (${{ matrix.config.arch }})
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - { os: ubuntu-latest, arch: x64 }
+          - { os: macos-latest, arch: x64 }
+          - { os: macos-latest, arch: arm64 }
+          - { os: windows-latest, arch: x64 }
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: '${{matrix.config.os}}-pyfiction'
+          variant: ccache
+          save: true
+          max-size: 10G
+
+      # on Linux, the action does not work because it can't install to the manylinux container
+      - if: runner.os != 'Linux'
+        name: Install Z3
+        uses: cda-tum/setup-z3@v1
+        with:
+          version: ${{ env.Z3_VERSION }}
+          architecture: ${{ matrix.config.arch }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - if: runner.os == 'Linux'
+        name: Setup mold
+        uses: rui314/setup-mold@v1
+
+      - if: ${{ matrix.config.arch == 'arm64' }}
+        name: Set Architecture to arm64 if necessary
+        run: echo "CIBW_ARCHS_MACOS=arm64" >> $GITHUB_ENV
+
+      - name: Build wheel
+        uses: pypa/cibuildwheel@v2.17.0
+        env:
+          CIBW_BEFORE_ALL_LINUX: /opt/python/cp39-cp39/bin/pip install z3-solver==${{ env.Z3_VERSION }}
+          CIBW_TEST_EXTRAS: test
+          CIBW_TEST_COMMAND: 'python -m unittest discover --start-directory {project} --verbose'
+
+      - name: Upload wheel as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          path: ./wheelhouse/*.whl
+          overwrite: true
+
+  build_sdist:
+    name: Build Source Distribution
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone respository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: 'ubuntu-latest-pyfiction'
+          variant: ccache
+          save: true
+          max-size: 10G
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Setup Z3 Solver
+        uses: cda-tum/setup-z3@v1
+        with:
+          version: ${{ env.Z3_VERSION }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build sdist
+        run: pipx run build --sdist
+
+      - name: Test sdist
+        run: z3=${{env.ENABLE_Z3}} pip install dist/*.tar.gz --verbose
+
+      - name: Upload sdist as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          path: dist/*.tar.gz
+          overwrite: true
+
+  publish_to_pypi:
+    needs: [ build_wheels, build_sdist ]
+    runs-on: ubuntu-latest
+    name: Publish to PyPI
+    if: github.event_name == 'release' && github.event.action == 'published'
+    steps:
+      - name: Download the previously stored artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: artifact
+          path: dist
+
+      - name: Deploy to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_DEPLOY_TOKEN }}
+          skip-existing: true
+          verbose: true

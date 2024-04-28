@@ -1,0 +1,44 @@
+name: pyfiction Docstring Generator
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  get_docstrings:
+    name: Auto-generate docstrings for pyfiction from C++ code
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone Repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11.x"
+          cache: 'pip'
+
+      - name: Install pybind11_mkdoc and clang
+        working-directory: ${{ github.workspace }}
+        run: pip install pybind11_mkdoc clang==15.0.7
+
+      - name: Create docstrings file
+        working-directory: ${{ github.workspace }}
+        run: touch ${{ github.workspace }}/pybind11_mkdoc_docstrings.hpp
+
+      - name: Run pybind11_mkdoc
+        working-directory: ${{ github.workspace }}
+        run: >
+          python3
+          -m pybind11_mkdoc
+          -o ${{ github.workspace }}/pybind11_mkdoc_docstrings.hpp
+          -D FICTION_Z3_SOLVER
+          `find ${{ github.workspace }}/include/fiction -name "*.hpp" -print`
+
+      - name: Upload docstrings as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          path: ${{ github.workspace }}/pybind11_mkdoc_docstrings.hpp
+          overwrite: true

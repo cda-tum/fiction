@@ -13,33 +13,34 @@
 
 #include <fmt/format.h>
 #include <mockturtle/traits.hpp>
+#include <phmap.h>
 
-#include <unordered_map>
 #include <vector>
 
 namespace fiction
 {
 
 /**
- * A concrete FCN gate library based on QCA ONE proposed in "A Methodology for Standard Cell Design for QCA" by Dayane
+ * A concrete FCN gate library based on QCA ONE proposed in \"A Methodology for Standard Cell Design for QCA\" by Dayane
  * Alfenas Reis, Caio Araújo T. Campos, Thiago Rodrigues B. S. Soares, Omar Paranaiba V. Neto, and Frank Sill Torres in
  * IEEE International Symposium on Circuits and Systems, 2016. QCA ONE was originally proposed for the USE clocking
  * scheme. The version used here is an extension to the original QCA ONE by also theoretically allowing multiple wires
- * in the same tile. Furthermore, it can be used for a range of clocking schemes. Tiles in QCA ONE are 5 x 5 QCA cells.
+ * in the same tile. Furthermore, it can be used for a range of clocking schemes. Tiles in QCA ONE are \f$5 \times 5\f$
+ * QCA cells.
  */
 class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
 {
   public:
     explicit qca_one_library() = delete;
     /**
-     * Given a tile t, this function takes all necessary information from the stored grid into account to choose the
-     * correct fcn_gate representation for that tile. May it be a gate or wires. Rotation and special marks like input
-     * and output, const cells etc. are computed additionally.
+     * Overrides the corresponding function in fcn_gate_library. Given a tile `t`, this function takes all necessary
+     * information from the stored grid into account to choose the correct fcn_gate representation for that tile. May it
+     * be a gate or wires. Rotation and special marks like input and output, const cells etc. are computed additionally.
      *
-     * @tparam GateLyt Gate-level layout type.
-     * @param lyt Gate-level layout that hosts tile t.
+     * @tparam GateLyt Cartesian gate-level layout type.
+     * @param lyt Layout that hosts tile `t`.
      * @param t Tile to be realized as a QCA ONE gate.
-     * @return QCA ONE gate representation of t including I/Os, rotation, const cells, etc.
+     * @return QCA ONE gate representation of `t` including I/Os, rotation, const cells, etc.
      */
     template <typename GateLyt>
     [[nodiscard]] static fcn_gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t)
@@ -56,35 +57,49 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
                 if (lyt.is_fanout(n))
                 {
                     if (lyt.fanout_size(n) == 2)
-                        return fanout_map.at(p);
-                    else if (lyt.fanout_size(n) == 3)
-                        return fan_out_1_3;
+                    {
+                        return FANOUT_MAP.at(p);
+                    }
+                    if (lyt.fanout_size(n) == 3)
+                    {
+                        return FAN_OUT_1_3;
+                    }
                 }
             }
             if constexpr (fiction::has_is_buf_v<GateLyt>)
             {
                 if (lyt.is_buf(n))
-                    return wire_map.at(p);
+                {
+                    return WIRE_MAP.at(p);
+                }
             }
             if constexpr (fiction::has_is_inv_v<GateLyt>)
             {
                 if (lyt.is_inv(n))
-                    return inverter_map.at(p);
+                {
+                    return INVERTER_MAP.at(p);
+                }
             }
             if constexpr (mockturtle::has_is_and_v<GateLyt>)
             {
                 if (lyt.is_and(n))
-                    return conjunction_map.at(p);
+                {
+                    return CONJUNCTION_MAP.at(p);
+                }
             }
             if constexpr (mockturtle::has_is_or_v<GateLyt>)
             {
                 if (lyt.is_or(n))
-                    return disjunction_map.at(p);
+                {
+                    return DISJUNCTION_MAP.at(p);
+                }
             }
             if constexpr (mockturtle::has_is_maj_v<GateLyt>)
             {
                 if (lyt.is_maj(n))
-                    return majority;
+                {
+                    return MAJORITY;
+                }
             }
         }
         catch (const std::out_of_range&)
@@ -94,12 +109,11 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
 
         throw unsupported_gate_type_exception(t);
     }
-
     /**
      * Post-layout optimization that assigns via cell mode to wire crossings.
      *
      * @tparam CellLyt Cell-level layout type.
-     * @param lyt The cell-level layout that has been created via application of set_up_gate.
+     * @param lyt The cell-level layout that has been created via application of `set_up_gate`.
      */
     template <typename CellLyt>
     static void post_layout_optimization(CellLyt& lyt) noexcept
@@ -112,7 +126,7 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
                     if (!lyt.is_empty_cell(c))
                     {
                         // gather adjacent cell positions
-                        auto adjacent_cells = lyt.template adjacent_coordinates<std::vector<cell<CellLyt>>>(c);
+                        auto adjacent_cells = lyt.adjacent_coordinates(c);
                         // remove all empty cells
                         adjacent_cells.erase(std::remove_if(adjacent_cells.begin(), adjacent_cells.end(),
                                                             [&lyt](const auto& ac) { return lyt.is_empty_cell(ac); }),
@@ -140,32 +154,52 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
 
         // determine incoming connector ports
         if (lyt.has_northern_incoming_signal(t))
+        {
             p.inp.emplace(2u, 0u);
+        }
         if (lyt.has_eastern_incoming_signal(t))
+        {
             p.inp.emplace(4u, 2u);
+        }
         if (lyt.has_southern_incoming_signal(t))
+        {
             p.inp.emplace(2u, 4u);
+        }
         if (lyt.has_western_incoming_signal(t))
+        {
             p.inp.emplace(0u, 2u);
+        }
 
         // determine outgoing connector ports
         if (lyt.has_northern_outgoing_signal(t))
+        {
             p.out.emplace(2u, 0u);
+        }
         if (lyt.has_eastern_outgoing_signal(t))
+        {
             p.out.emplace(4u, 2u);
+        }
         if (lyt.has_southern_outgoing_signal(t))
+        {
             p.out.emplace(2u, 4u);
+        }
         if (lyt.has_western_outgoing_signal(t))
+        {
             p.out.emplace(0u, 2u);
+        }
 
         // has no connector ports
         if (const auto n = lyt.get_node(t); !lyt.is_wire(n) && !lyt.is_inv(n))
         {
             if (lyt.has_no_incoming_signal(t))
+            {
                 p.inp.emplace(0u, 2u);
+            }
 
             if (lyt.has_no_outgoing_signal(t))
+            {
                 p.out.emplace(4u, 2u);
+            }
         }
 
         return p;
@@ -177,7 +211,7 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
     // ************************** Gates ***************************
     // ************************************************************
 
-    static constexpr const fcn_gate straight_inverter{cell_list_to_gate<char>(
+    static constexpr const fcn_gate STRAIGHT_INVERTER{cell_list_to_gate<char>(
     {{
         {' ', ' ', 'x', ' ', ' '},
         {' ', 'x', 'x', 'x', ' '},
@@ -186,7 +220,7 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
         {' ', ' ', 'x', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate bent_inverter{cell_list_to_gate<char>(
+    static constexpr const fcn_gate BENT_INVERTER{cell_list_to_gate<char>(
     {{
         {' ', ' ', 'x', ' ', ' '},
         {' ', ' ', 'x', ' ', ' '},
@@ -195,7 +229,7 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
         {' ', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate conjunction{cell_list_to_gate<char>(
+    static constexpr const fcn_gate CONJUNCTION{cell_list_to_gate<char>(
     {{
         {' ', ' ', '0', ' ', ' '},
         {' ', ' ', 'x', ' ', ' '},
@@ -204,7 +238,7 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
         {' ', ' ', 'x', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate disjunction{cell_list_to_gate<char>(
+    static constexpr const fcn_gate DISJUNCTION{cell_list_to_gate<char>(
     {{
         {' ', ' ', '1', ' ', ' '},
         {' ', ' ', 'x', ' ', ' '},
@@ -213,7 +247,7 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
         {' ', ' ', 'x', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate majority{cell_list_to_gate<char>(
+    static constexpr const fcn_gate MAJORITY{cell_list_to_gate<char>(
     {{
         {' ', ' ', 'x', ' ', ' '},
         {' ', ' ', 'x', ' ', ' '},
@@ -222,7 +256,7 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
         {' ', ' ', 'x', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate fan_out_1_2{cell_list_to_gate<char>(
+    static constexpr const fcn_gate FAN_OUT_1_2{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' '},
@@ -231,7 +265,7 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
         {' ', ' ', 'x', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate fan_out_1_3{cell_list_to_gate<char>(
+    static constexpr const fcn_gate FAN_OUT_1_3{cell_list_to_gate<char>(
     {{
         {' ', ' ', 'x', ' ', ' '},
         {' ', ' ', 'x', ' ', ' '},
@@ -244,7 +278,7 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
     // ************************** Wires ***************************
     // ************************************************************
 
-    static constexpr const fcn_gate primary_input_port{cell_list_to_gate<char>(
+    static constexpr const fcn_gate PRIMARY_INPUT_PORT{cell_list_to_gate<char>(
     {{
         {' ', ' ', 'x', ' ', ' '},
         {' ', ' ', 'x', ' ', ' '},
@@ -253,7 +287,7 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
         {' ', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate primary_output_port{cell_list_to_gate<char>(
+    static constexpr const fcn_gate PRIMARY_OUTPUT_PORT{cell_list_to_gate<char>(
     {{
         {' ', ' ', 'x', ' ', ' '},
         {' ', ' ', 'x', ' ', ' '},
@@ -262,7 +296,7 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
         {' ', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate center_wire{cell_list_to_gate<char>(
+    static constexpr const fcn_gate CENTER_WIRE{cell_list_to_gate<char>(
     {{
         {' ', ' ', 'x', ' ', ' '},
         {' ', ' ', 'x', ' ', ' '},
@@ -271,7 +305,7 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
         {' ', ' ', 'x', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate inner_side_wire{cell_list_to_gate<char>(
+    static constexpr const fcn_gate INNER_SIDE_WIRE{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', 'x', ' '},
         {' ', ' ', ' ', 'x', ' '},
@@ -280,7 +314,7 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
         {' ', ' ', ' ', 'x', ' '}
     }})};
 
-    static constexpr const fcn_gate outer_side_wire{cell_list_to_gate<char>(
+    static constexpr const fcn_gate OUTER_SIDE_WIRE{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'x'},
         {' ', ' ', ' ', ' ', 'x'},
@@ -289,7 +323,7 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
         {' ', ' ', ' ', ' ', 'x'}
     }})};
 
-    static constexpr const fcn_gate center_bent_wire{cell_list_to_gate<char>(
+    static constexpr const fcn_gate CENTER_BENT_WIRE{cell_list_to_gate<char>(
     {{
         {' ', ' ', 'x', ' ', ' '},
         {' ', ' ', 'x', ' ', ' '},
@@ -298,56 +332,56 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
         {' ', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate inner_center_to_inner_center_bent_wire{
+    static constexpr const fcn_gate INNER_CENTER_TO_INNER_CENTER_BENT_WIRE{
         cell_list_to_gate<char>({{{' ', ' ', ' ', 'x', ' '},
                                   {' ', ' ', ' ', 'x', 'x'},
                                   {' ', ' ', ' ', ' ', ' '},
                                   {' ', ' ', ' ', ' ', ' '},
                                   {' ', ' ', ' ', ' ', ' '}}})};
 
-    static constexpr const fcn_gate inner_center_to_center_bent_wire{
+    static constexpr const fcn_gate INNER_CENTER_TO_CENTER_BENT_WIRE{
         cell_list_to_gate<char>({{{' ', ' ', ' ', 'x', ' '},
                                   {' ', ' ', ' ', 'x', ' '},
                                   {' ', ' ', ' ', 'x', 'x'},
                                   {' ', ' ', ' ', ' ', ' '},
                                   {' ', ' ', ' ', ' ', ' '}}})};
 
-    static constexpr const fcn_gate inner_center_to_outer_center_bent_wire{
+    static constexpr const fcn_gate INNER_CENTER_TO_OUTER_CENTER_BENT_WIRE{
         cell_list_to_gate<char>({{{' ', ' ', ' ', 'x', ' '},
                                   {' ', ' ', ' ', 'x', ' '},
                                   {' ', ' ', ' ', 'x', ' '},
                                   {' ', ' ', ' ', 'x', 'x'},
                                   {' ', ' ', ' ', ' ', ' '}}})};
 
-    static constexpr const fcn_gate inner_center_to_outer_side_bent_wire{
+    static constexpr const fcn_gate INNER_CENTER_TO_OUTER_SIDE_BENT_WIRE{
         cell_list_to_gate<char>({{{' ', ' ', ' ', 'x', ' '},
                                   {' ', ' ', ' ', 'x', ' '},
                                   {' ', ' ', ' ', 'x', ' '},
                                   {' ', ' ', ' ', 'x', ' '},
                                   {' ', ' ', ' ', 'x', 'x'}}})};
 
-    static constexpr const fcn_gate center_to_inner_center_bent_wire{
+    static constexpr const fcn_gate CENTER_TO_INNER_CENTER_BENT_WIRE{
         cell_list_to_gate<char>({{{' ', ' ', 'x', ' ', ' '},
                                   {' ', ' ', 'x', 'x', 'x'},
                                   {' ', ' ', ' ', ' ', ' '},
                                   {' ', ' ', ' ', ' ', ' '},
                                   {' ', ' ', ' ', ' ', ' '}}})};
 
-    static constexpr const fcn_gate outer_center_to_center_bent_wire{
+    static constexpr const fcn_gate OUTER_CENTER_TO_CENTER_BENT_WIRE{
         cell_list_to_gate<char>({{{' ', 'x', ' ', ' ', ' '},
                                   {' ', 'x', ' ', ' ', ' '},
                                   {' ', 'x', 'x', 'x', 'x'},
                                   {' ', ' ', ' ', ' ', ' '},
                                   {' ', ' ', ' ', ' ', ' '}}})};
 
-    static constexpr const fcn_gate outer_center_to_outer_center_bent_wire{
+    static constexpr const fcn_gate OUTER_CENTER_TO_OUTER_CENTER_BENT_WIRE{
         cell_list_to_gate<char>({{{' ', 'x', ' ', ' ', ' '},
                                   {' ', 'x', ' ', ' ', ' '},
                                   {' ', 'x', ' ', ' ', ' '},
                                   {' ', 'x', 'x', 'x', 'x'},
                                   {' ', ' ', ' ', ' ', ' '}}})};
 
-    static constexpr const fcn_gate outer_side_to_outer_side_bent_wire{
+    static constexpr const fcn_gate OUTER_SIDE_TO_OUTER_SIDE_BENT_WIRE{
         cell_list_to_gate<char>({{{'x', ' ', ' ', ' ', ' '},
                                   {'x', ' ', ' ', ' ', ' '},
                                   {'x', ' ', ' ', ' ', ' '},
@@ -356,140 +390,140 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
 
     // clang-format on
 
-    using port_gate_map = std::unordered_map<port_list<port_position>, fcn_gate>;
+    using port_gate_map = phmap::flat_hash_map<port_list<port_position>, fcn_gate>;
     /**
      * Lookup table for wire rotations. Maps ports to corresponding wires.
      */
-    static inline const port_gate_map wire_map = {
+    static inline const port_gate_map WIRE_MAP = {
         // primary inputs
-        {{{}, {port_position(2, 0)}}, primary_input_port},
-        {{{}, {port_position(4, 2)}}, rotate_90(primary_input_port)},
-        {{{}, {port_position(2, 4)}}, rotate_180(primary_input_port)},
-        {{{}, {port_position(0, 2)}}, rotate_270(primary_input_port)},
+        {{{}, {port_position(2, 0)}}, PRIMARY_INPUT_PORT},
+        {{{}, {port_position(4, 2)}}, rotate_90(PRIMARY_INPUT_PORT)},
+        {{{}, {port_position(2, 4)}}, rotate_180(PRIMARY_INPUT_PORT)},
+        {{{}, {port_position(0, 2)}}, rotate_270(PRIMARY_INPUT_PORT)},
         // primary outputs
-        {{{port_position(2, 0)}, {}}, primary_output_port},
-        {{{port_position(4, 2)}, {}}, rotate_90(primary_output_port)},
-        {{{port_position(2, 4)}, {}}, rotate_180(primary_output_port)},
-        {{{port_position(0, 2)}, {}}, rotate_270(primary_output_port)},
+        {{{port_position(2, 0)}, {}}, PRIMARY_OUTPUT_PORT},
+        {{{port_position(4, 2)}, {}}, rotate_90(PRIMARY_OUTPUT_PORT)},
+        {{{port_position(2, 4)}, {}}, rotate_180(PRIMARY_OUTPUT_PORT)},
+        {{{port_position(0, 2)}, {}}, rotate_270(PRIMARY_OUTPUT_PORT)},
         // center wire
-        {{{port_position(2, 0)}, {port_position(2, 4)}}, center_wire},
-        {{{port_position(2, 4)}, {port_position(2, 0)}}, center_wire},
-        {{{port_position(0, 2)}, {port_position(4, 2)}}, rotate_90(center_wire)},
-        {{{port_position(4, 2)}, {port_position(0, 2)}}, rotate_90(center_wire)},
+        {{{port_position(2, 0)}, {port_position(2, 4)}}, CENTER_WIRE},
+        {{{port_position(2, 4)}, {port_position(2, 0)}}, CENTER_WIRE},
+        {{{port_position(0, 2)}, {port_position(4, 2)}}, rotate_90(CENTER_WIRE)},
+        {{{port_position(4, 2)}, {port_position(0, 2)}}, rotate_90(CENTER_WIRE)},
         // inner side wire
-        {{{port_position(3, 0)}, {port_position(3, 4)}}, inner_side_wire},
-        {{{port_position(3, 4)}, {port_position(3, 0)}}, inner_side_wire},
-        {{{port_position(0, 3)}, {port_position(4, 3)}}, rotate_90(inner_side_wire)},
-        {{{port_position(4, 3)}, {port_position(0, 3)}}, rotate_90(inner_side_wire)},
-        {{{port_position(1, 0)}, {port_position(1, 4)}}, rotate_180(inner_side_wire)},
-        {{{port_position(1, 4)}, {port_position(1, 0)}}, rotate_180(inner_side_wire)},
-        {{{port_position(0, 1)}, {port_position(4, 1)}}, rotate_270(inner_side_wire)},
-        {{{port_position(4, 1)}, {port_position(0, 1)}}, rotate_270(inner_side_wire)},
+        {{{port_position(3, 0)}, {port_position(3, 4)}}, INNER_SIDE_WIRE},
+        {{{port_position(3, 4)}, {port_position(3, 0)}}, INNER_SIDE_WIRE},
+        {{{port_position(0, 3)}, {port_position(4, 3)}}, rotate_90(INNER_SIDE_WIRE)},
+        {{{port_position(4, 3)}, {port_position(0, 3)}}, rotate_90(INNER_SIDE_WIRE)},
+        {{{port_position(1, 0)}, {port_position(1, 4)}}, rotate_180(INNER_SIDE_WIRE)},
+        {{{port_position(1, 4)}, {port_position(1, 0)}}, rotate_180(INNER_SIDE_WIRE)},
+        {{{port_position(0, 1)}, {port_position(4, 1)}}, rotate_270(INNER_SIDE_WIRE)},
+        {{{port_position(4, 1)}, {port_position(0, 1)}}, rotate_270(INNER_SIDE_WIRE)},
         // outer side wire
-        {{{port_position(4, 0)}, {port_position(4, 4)}}, outer_side_wire},
-        {{{port_position(4, 4)}, {port_position(4, 0)}}, outer_side_wire},
-        {{{port_position(0, 4)}, {port_position(4, 4)}}, rotate_90(outer_side_wire)},
-        {{{port_position(4, 4)}, {port_position(0, 4)}}, rotate_90(outer_side_wire)},
-        {{{port_position(0, 0)}, {port_position(0, 4)}}, rotate_180(outer_side_wire)},
-        {{{port_position(0, 4)}, {port_position(0, 0)}}, rotate_180(outer_side_wire)},
-        {{{port_position(0, 0)}, {port_position(4, 0)}}, rotate_270(outer_side_wire)},
-        {{{port_position(4, 0)}, {port_position(0, 0)}}, rotate_270(outer_side_wire)},
+        {{{port_position(4, 0)}, {port_position(4, 4)}}, OUTER_SIDE_WIRE},
+        {{{port_position(4, 4)}, {port_position(4, 0)}}, OUTER_SIDE_WIRE},
+        {{{port_position(0, 4)}, {port_position(4, 4)}}, rotate_90(OUTER_SIDE_WIRE)},
+        {{{port_position(4, 4)}, {port_position(0, 4)}}, rotate_90(OUTER_SIDE_WIRE)},
+        {{{port_position(0, 0)}, {port_position(0, 4)}}, rotate_180(OUTER_SIDE_WIRE)},
+        {{{port_position(0, 4)}, {port_position(0, 0)}}, rotate_180(OUTER_SIDE_WIRE)},
+        {{{port_position(0, 0)}, {port_position(4, 0)}}, rotate_270(OUTER_SIDE_WIRE)},
+        {{{port_position(4, 0)}, {port_position(0, 0)}}, rotate_270(OUTER_SIDE_WIRE)},
         // center bent wire
-        {{{port_position(2, 0)}, {port_position(4, 2)}}, center_bent_wire},
-        {{{port_position(4, 2)}, {port_position(2, 0)}}, center_bent_wire},
-        {{{port_position(4, 2)}, {port_position(2, 4)}}, rotate_90(center_bent_wire)},
-        {{{port_position(2, 4)}, {port_position(4, 2)}}, rotate_90(center_bent_wire)},
-        {{{port_position(0, 2)}, {port_position(2, 4)}}, rotate_180(center_bent_wire)},
-        {{{port_position(2, 4)}, {port_position(0, 2)}}, rotate_180(center_bent_wire)},
-        {{{port_position(2, 0)}, {port_position(0, 2)}}, rotate_270(center_bent_wire)},
-        {{{port_position(0, 2)}, {port_position(2, 0)}}, rotate_270(center_bent_wire)}
+        {{{port_position(2, 0)}, {port_position(4, 2)}}, CENTER_BENT_WIRE},
+        {{{port_position(4, 2)}, {port_position(2, 0)}}, CENTER_BENT_WIRE},
+        {{{port_position(4, 2)}, {port_position(2, 4)}}, rotate_90(CENTER_BENT_WIRE)},
+        {{{port_position(2, 4)}, {port_position(4, 2)}}, rotate_90(CENTER_BENT_WIRE)},
+        {{{port_position(0, 2)}, {port_position(2, 4)}}, rotate_180(CENTER_BENT_WIRE)},
+        {{{port_position(2, 4)}, {port_position(0, 2)}}, rotate_180(CENTER_BENT_WIRE)},
+        {{{port_position(2, 0)}, {port_position(0, 2)}}, rotate_270(CENTER_BENT_WIRE)},
+        {{{port_position(0, 2)}, {port_position(2, 0)}}, rotate_270(CENTER_BENT_WIRE)}
         // TODO more wires go here!
     };
     /**
      * Lookup table for inverter rotations. Maps ports to corresponding inverters.
      */
-    static inline const port_gate_map inverter_map = {
+    static inline const port_gate_map INVERTER_MAP = {
         // straight inverters
-        {{{port_position(2, 0)}, {port_position(2, 4)}}, straight_inverter},
-        {{{port_position(4, 2)}, {port_position(0, 2)}}, rotate_90(straight_inverter)},
-        {{{port_position(2, 4)}, {port_position(2, 0)}}, rotate_180(straight_inverter)},
-        {{{port_position(0, 2)}, {port_position(4, 2)}}, rotate_270(straight_inverter)},
+        {{{port_position(2, 0)}, {port_position(2, 4)}}, STRAIGHT_INVERTER},
+        {{{port_position(4, 2)}, {port_position(0, 2)}}, rotate_90(STRAIGHT_INVERTER)},
+        {{{port_position(2, 4)}, {port_position(2, 0)}}, rotate_180(STRAIGHT_INVERTER)},
+        {{{port_position(0, 2)}, {port_position(4, 2)}}, rotate_270(STRAIGHT_INVERTER)},
         // without outputs
-        {{{port_position(2, 0)}, {}}, straight_inverter},
-        {{{port_position(4, 2)}, {}}, rotate_90(straight_inverter)},
-        {{{port_position(2, 4)}, {}}, rotate_180(straight_inverter)},
-        {{{port_position(0, 2)}, {}}, rotate_270(straight_inverter)},
+        {{{port_position(2, 0)}, {}}, STRAIGHT_INVERTER},
+        {{{port_position(4, 2)}, {}}, rotate_90(STRAIGHT_INVERTER)},
+        {{{port_position(2, 4)}, {}}, rotate_180(STRAIGHT_INVERTER)},
+        {{{port_position(0, 2)}, {}}, rotate_270(STRAIGHT_INVERTER)},
         // without inputs
-        {{{}, {port_position(2, 4)}}, straight_inverter},
-        {{{}, {port_position(0, 2)}}, rotate_90(straight_inverter)},
-        {{{}, {port_position(2, 0)}}, rotate_180(straight_inverter)},
-        {{{}, {port_position(4, 2)}}, rotate_270(straight_inverter)},
+        {{{}, {port_position(2, 4)}}, STRAIGHT_INVERTER},
+        {{{}, {port_position(0, 2)}}, rotate_90(STRAIGHT_INVERTER)},
+        {{{}, {port_position(2, 0)}}, rotate_180(STRAIGHT_INVERTER)},
+        {{{}, {port_position(4, 2)}}, rotate_270(STRAIGHT_INVERTER)},
         // bent inverters
-        {{{port_position(2, 0)}, {port_position(4, 2)}}, bent_inverter},
-        {{{port_position(4, 2)}, {port_position(2, 0)}}, bent_inverter},
-        {{{port_position(4, 2)}, {port_position(2, 4)}}, rotate_90(bent_inverter)},
-        {{{port_position(2, 4)}, {port_position(4, 2)}}, rotate_90(bent_inverter)},
-        {{{port_position(0, 2)}, {port_position(2, 4)}}, rotate_180(bent_inverter)},
-        {{{port_position(2, 4)}, {port_position(0, 2)}}, rotate_180(bent_inverter)},
-        {{{port_position(2, 0)}, {port_position(0, 2)}}, rotate_270(bent_inverter)},
-        {{{port_position(0, 2)}, {port_position(2, 0)}}, rotate_270(bent_inverter)}};
+        {{{port_position(2, 0)}, {port_position(4, 2)}}, BENT_INVERTER},
+        {{{port_position(4, 2)}, {port_position(2, 0)}}, BENT_INVERTER},
+        {{{port_position(4, 2)}, {port_position(2, 4)}}, rotate_90(BENT_INVERTER)},
+        {{{port_position(2, 4)}, {port_position(4, 2)}}, rotate_90(BENT_INVERTER)},
+        {{{port_position(0, 2)}, {port_position(2, 4)}}, rotate_180(BENT_INVERTER)},
+        {{{port_position(2, 4)}, {port_position(0, 2)}}, rotate_180(BENT_INVERTER)},
+        {{{port_position(2, 0)}, {port_position(0, 2)}}, rotate_270(BENT_INVERTER)},
+        {{{port_position(0, 2)}, {port_position(2, 0)}}, rotate_270(BENT_INVERTER)}};
     /**
      * Lookup table for conjunction rotations. Maps ports to corresponding AND gates.
      */
-    static inline const port_gate_map conjunction_map = {
-        {{{port_position(0, 2), port_position(2, 4)}, {port_position(4, 2)}}, conjunction},
-        {{{port_position(0, 2), port_position(4, 2)}, {port_position(2, 4)}}, conjunction},
-        {{{port_position(2, 4), port_position(4, 2)}, {port_position(0, 2)}}, conjunction},
+    static inline const port_gate_map CONJUNCTION_MAP = {
+        {{{port_position(0, 2), port_position(2, 4)}, {port_position(4, 2)}}, CONJUNCTION},
+        {{{port_position(0, 2), port_position(4, 2)}, {port_position(2, 4)}}, CONJUNCTION},
+        {{{port_position(2, 4), port_position(4, 2)}, {port_position(0, 2)}}, CONJUNCTION},
 
-        {{{port_position(0, 2), port_position(2, 4)}, {port_position(2, 0)}}, rotate_90(conjunction)},
-        {{{port_position(0, 2), port_position(2, 0)}, {port_position(2, 4)}}, rotate_90(conjunction)},
-        {{{port_position(2, 4), port_position(2, 0)}, {port_position(0, 2)}}, rotate_90(conjunction)},
+        {{{port_position(0, 2), port_position(2, 4)}, {port_position(2, 0)}}, rotate_90(CONJUNCTION)},
+        {{{port_position(0, 2), port_position(2, 0)}, {port_position(2, 4)}}, rotate_90(CONJUNCTION)},
+        {{{port_position(2, 4), port_position(2, 0)}, {port_position(0, 2)}}, rotate_90(CONJUNCTION)},
 
-        {{{port_position(0, 2), port_position(4, 2)}, {port_position(2, 0)}}, rotate_180(conjunction)},
-        {{{port_position(0, 2), port_position(2, 0)}, {port_position(4, 2)}}, rotate_180(conjunction)},
-        {{{port_position(4, 2), port_position(2, 0)}, {port_position(0, 2)}}, rotate_180(conjunction)},
+        {{{port_position(0, 2), port_position(4, 2)}, {port_position(2, 0)}}, rotate_180(CONJUNCTION)},
+        {{{port_position(0, 2), port_position(2, 0)}, {port_position(4, 2)}}, rotate_180(CONJUNCTION)},
+        {{{port_position(4, 2), port_position(2, 0)}, {port_position(0, 2)}}, rotate_180(CONJUNCTION)},
 
-        {{{port_position(2, 4), port_position(4, 2)}, {port_position(2, 0)}}, rotate_270(conjunction)},
-        {{{port_position(2, 4), port_position(2, 0)}, {port_position(4, 2)}}, rotate_270(conjunction)},
-        {{{port_position(4, 2), port_position(2, 0)}, {port_position(2, 4)}}, rotate_270(conjunction)}};
+        {{{port_position(2, 4), port_position(4, 2)}, {port_position(2, 0)}}, rotate_270(CONJUNCTION)},
+        {{{port_position(2, 4), port_position(2, 0)}, {port_position(4, 2)}}, rotate_270(CONJUNCTION)},
+        {{{port_position(4, 2), port_position(2, 0)}, {port_position(2, 4)}}, rotate_270(CONJUNCTION)}};
     /**
      * Lookup table for disjunction rotations. Maps ports to corresponding OR gates.
      */
-    static inline const port_gate_map disjunction_map = {
-        {{{port_position(0, 2), port_position(2, 4)}, {port_position(4, 2)}}, disjunction},
-        {{{port_position(0, 2), port_position(4, 2)}, {port_position(2, 4)}}, disjunction},
-        {{{port_position(2, 4), port_position(4, 2)}, {port_position(0, 2)}}, disjunction},
+    static inline const port_gate_map DISJUNCTION_MAP = {
+        {{{port_position(0, 2), port_position(2, 4)}, {port_position(4, 2)}}, DISJUNCTION},
+        {{{port_position(0, 2), port_position(4, 2)}, {port_position(2, 4)}}, DISJUNCTION},
+        {{{port_position(2, 4), port_position(4, 2)}, {port_position(0, 2)}}, DISJUNCTION},
 
-        {{{port_position(0, 2), port_position(2, 4)}, {port_position(2, 0)}}, rotate_90(disjunction)},
-        {{{port_position(0, 2), port_position(2, 0)}, {port_position(2, 4)}}, rotate_90(disjunction)},
-        {{{port_position(2, 4), port_position(2, 0)}, {port_position(0, 2)}}, rotate_90(disjunction)},
+        {{{port_position(0, 2), port_position(2, 4)}, {port_position(2, 0)}}, rotate_90(DISJUNCTION)},
+        {{{port_position(0, 2), port_position(2, 0)}, {port_position(2, 4)}}, rotate_90(DISJUNCTION)},
+        {{{port_position(2, 4), port_position(2, 0)}, {port_position(0, 2)}}, rotate_90(DISJUNCTION)},
 
-        {{{port_position(0, 2), port_position(4, 2)}, {port_position(2, 0)}}, rotate_180(disjunction)},
-        {{{port_position(0, 2), port_position(2, 0)}, {port_position(4, 2)}}, rotate_180(disjunction)},
-        {{{port_position(4, 2), port_position(2, 0)}, {port_position(0, 2)}}, rotate_180(disjunction)},
+        {{{port_position(0, 2), port_position(4, 2)}, {port_position(2, 0)}}, rotate_180(DISJUNCTION)},
+        {{{port_position(0, 2), port_position(2, 0)}, {port_position(4, 2)}}, rotate_180(DISJUNCTION)},
+        {{{port_position(4, 2), port_position(2, 0)}, {port_position(0, 2)}}, rotate_180(DISJUNCTION)},
 
-        {{{port_position(2, 4), port_position(4, 2)}, {port_position(2, 0)}}, rotate_270(disjunction)},
-        {{{port_position(2, 4), port_position(2, 0)}, {port_position(4, 2)}}, rotate_270(disjunction)},
-        {{{port_position(4, 2), port_position(2, 0)}, {port_position(2, 4)}}, rotate_270(disjunction)}};
+        {{{port_position(2, 4), port_position(4, 2)}, {port_position(2, 0)}}, rotate_270(DISJUNCTION)},
+        {{{port_position(2, 4), port_position(2, 0)}, {port_position(4, 2)}}, rotate_270(DISJUNCTION)},
+        {{{port_position(4, 2), port_position(2, 0)}, {port_position(2, 4)}}, rotate_270(DISJUNCTION)}};
     /**
      * Lookup table for fan-out rotations. Maps ports to corresponding fan-out gates.
      */
-    static inline const port_gate_map fanout_map = {
-        {{{port_position(4, 2)}, {port_position(0, 2), port_position(2, 4)}}, fan_out_1_2},
-        {{{port_position(2, 4)}, {port_position(0, 2), port_position(4, 2)}}, fan_out_1_2},
-        {{{port_position(0, 2)}, {port_position(2, 4), port_position(4, 2)}}, fan_out_1_2},
+    static inline const port_gate_map FANOUT_MAP = {
+        {{{port_position(4, 2)}, {port_position(0, 2), port_position(2, 4)}}, FAN_OUT_1_2},
+        {{{port_position(2, 4)}, {port_position(0, 2), port_position(4, 2)}}, FAN_OUT_1_2},
+        {{{port_position(0, 2)}, {port_position(2, 4), port_position(4, 2)}}, FAN_OUT_1_2},
 
-        {{{port_position(2, 0)}, {port_position(0, 2), port_position(2, 4)}}, rotate_90(fan_out_1_2)},
-        {{{port_position(2, 4)}, {port_position(0, 2), port_position(2, 0)}}, rotate_90(fan_out_1_2)},
-        {{{port_position(0, 2)}, {port_position(2, 4), port_position(2, 0)}}, rotate_90(fan_out_1_2)},
+        {{{port_position(2, 0)}, {port_position(0, 2), port_position(2, 4)}}, rotate_90(FAN_OUT_1_2)},
+        {{{port_position(2, 4)}, {port_position(0, 2), port_position(2, 0)}}, rotate_90(FAN_OUT_1_2)},
+        {{{port_position(0, 2)}, {port_position(2, 4), port_position(2, 0)}}, rotate_90(FAN_OUT_1_2)},
 
-        {{{port_position(2, 0)}, {port_position(0, 2), port_position(4, 2)}}, rotate_180(fan_out_1_2)},
-        {{{port_position(4, 2)}, {port_position(0, 2), port_position(2, 0)}}, rotate_180(fan_out_1_2)},
-        {{{port_position(0, 2)}, {port_position(4, 2), port_position(2, 0)}}, rotate_180(fan_out_1_2)},
+        {{{port_position(2, 0)}, {port_position(0, 2), port_position(4, 2)}}, rotate_180(FAN_OUT_1_2)},
+        {{{port_position(4, 2)}, {port_position(0, 2), port_position(2, 0)}}, rotate_180(FAN_OUT_1_2)},
+        {{{port_position(0, 2)}, {port_position(4, 2), port_position(2, 0)}}, rotate_180(FAN_OUT_1_2)},
 
-        {{{port_position(2, 0)}, {port_position(2, 4), port_position(4, 2)}}, rotate_270(fan_out_1_2)},
-        {{{port_position(4, 2)}, {port_position(2, 4), port_position(2, 0)}}, rotate_270(fan_out_1_2)},
-        {{{port_position(2, 4)}, {port_position(4, 2), port_position(2, 0)}}, rotate_270(fan_out_1_2)}};
+        {{{port_position(2, 0)}, {port_position(2, 4), port_position(4, 2)}}, rotate_270(FAN_OUT_1_2)},
+        {{{port_position(4, 2)}, {port_position(2, 4), port_position(2, 0)}}, rotate_270(FAN_OUT_1_2)},
+        {{{port_position(2, 4)}, {port_position(4, 2), port_position(2, 0)}}, rotate_270(FAN_OUT_1_2)}};
 };
 
 }  // namespace fiction

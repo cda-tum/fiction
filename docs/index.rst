@@ -8,10 +8,12 @@ Let there be a *fiction*
 
    about.rst
    getting_started.rst
-   acknowledgments.rst
    cli.rst
    changelog.rst
    publications.rst
+   acknowledgments.rst
+   contributing.rst
+   support.rst
 
 .. toctree::
    :maxdepth: 2
@@ -34,6 +36,7 @@ Let there be a *fiction*
    layouts/synchronization_element_layout.rst
    layouts/gate_level_layout.rst
    layouts/cell_level_layout.rst
+   layouts/obstruction_layout.rst
    layouts/bounding_box.rst
 
 .. toctree::
@@ -47,8 +50,12 @@ Let there be a *fiction*
    :caption: Technology
 
    technology/cell_technologies.rst
+   technology/defects.rst
+   technology/simulation.rst
    technology/gate_libraries.rst
    technology/properties.rst
+   technology/sidb_lattice.rst
+   technology/sidb_lattice_orientations.rst
 
 .. toctree::
    :maxdepth: 2
@@ -57,6 +64,7 @@ Let there be a *fiction*
    io/input.rst
    io/visualization.rst
    io/physical_simulation.rst
+   io/utility.rst
 
 .. toctree::
    :maxdepth: 2

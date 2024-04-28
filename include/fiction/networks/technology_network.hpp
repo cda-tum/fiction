@@ -11,24 +11,25 @@ namespace fiction
 {
 
 /**
- * A mockturtle logic network type that extends klut_network. It reimplements all node creation functions to disable
- * structural hashing. Furthermore, create_buf is overwritten such that it creates real buffer nodes that count towards
- * the size of the network and compute the identity function. In the same way, a buffer with more than one fanout node
- * is considered a fanout node (or splitter in some contexts) that copies an incoming signal to two or more data paths.
+ * A `mockturtle` logic network type that extends `klut_network`. It reimplements all node creation functions to disable
+ * structural hashing. Furthermore, `create_buf` is overwritten such that it creates real buffer nodes that count
+ * towards the size of the network and compute the identity function. In the same way, a buffer with more than one
+ * fanout node is considered a fanout node (or splitter in some contexts) that copies an incoming signal to two or more
+ * data paths.
  *
- * This network is used internally for most implemented FCN physical design algorithms and extends klut_network by some
- * further convenience functions but is still fully compatible with the mockturtle network API. The function
+ * This network is used internally for most implemented FCN physical design algorithms and extends `klut_network` by
+ * some further convenience functions but is still fully compatible with the mockturtle network API. The function
  * convert_network can be used to convert any other mockturtle network to this type.
  *
- * Most functions in this class are borrowed and reimplemented directly from klut_network and are, therefore, only
- * sporadically documented where their behavior might differ. For information consider mockturtle/networks/klut.hpp.
+ * Most functions in this class are borrowed and reimplemented directly from `klut_network` and are, therefore, only
+ * sporadically documented where their behavior might differ. For information consider `mockturtle/networks/klut.hpp`.
  */
 class technology_network : public mockturtle::klut_network
 {
   public:
 #pragma region Types and constructors
 
-    technology_network() : mockturtle::klut_network()
+    technology_network()
     {
         add_additional_functions();
     }
@@ -36,6 +37,11 @@ class technology_network : public mockturtle::klut_network
     explicit technology_network(std::shared_ptr<mockturtle::klut_storage> s) : mockturtle::klut_network(std::move(s))
     {
         add_additional_functions();
+    }
+
+    [[nodiscard]] technology_network clone() const
+    {
+        return technology_network{std::make_shared<mockturtle::klut_storage>(*_storage)};
     }
 
 #pragma endregion
@@ -47,13 +53,11 @@ class technology_network : public mockturtle::klut_network
      * network does not use complemented signals.
      *
      * @param n Node to consider.
-     * @return True iff n's signal is primary output.
+     * @return `true` iff `n`'s signal is primary output.
      */
     [[nodiscard]] bool is_po(const node& n) const
     {
-        const auto end = _storage->outputs.cbegin() + _storage->data.num_pos;
-
-        return std::find_if(_storage->outputs.cbegin(), end,
+        return std::find_if(_storage->outputs.cbegin(), _storage->outputs.cend(),
                             [this, &n](const auto& p)
                             { return this->get_node(p.index) == n; }) != _storage->outputs.cend();
     }
@@ -183,11 +187,17 @@ class technology_network : public mockturtle::klut_network
         _storage->nodes.push_back(node_data);
 
         /* increase ref-count to children */
-        for (auto c : children) { _storage->nodes[c].data[0].h1++; }
+        for (auto c : children)
+        {
+            _storage->nodes[c].data[0].h1++;
+        }
 
         set_value(index, 0);
 
-        for (auto const& fn : _events->on_add) { (*fn)(index); }
+        for (auto const& fn : _events->on_add)
+        {
+            (*fn)(index);
+        }
 
         return index;
     }
@@ -216,32 +226,32 @@ class technology_network : public mockturtle::klut_network
 #pragma region Structural properties
 
     /**
-     * Returns whether the given node n is a buffer node, i.e., whether  n computes the identity function and is not a
-     * PI. This also returns true on fanout nodes.
+     * Returns whether the given node `n` is a buffer node, i.e., whether `n` computes the identity function and is not
+     * a PI. This also returns `true` on fanout nodes.
      *
      * @param n Node to consider.
-     * @return True iff n is a buffer node.
+     * @return `true` iff `n` is a buffer node.
      */
     [[nodiscard]] bool is_buf(const node& n) const noexcept
     {
         return _storage->nodes[n].data[1].h1 == 2 && !is_pi(n);
     }
     /**
-     * Returns whether the given node n is a fanout node, i.e., whether n is a buffer node and has more than one output
-     * signal.
+     * Returns whether the given node `n` is a fanout node, i.e., whether `n` is a buffer node and has more than one
+     * output signal.
      *
      * @param n Node to consider.
-     * @return True iff n is a fanout node.
+     * @return `true` iff `n` is a fanout node.
      */
     [[nodiscard]] bool is_fanout(const node& n) const noexcept
     {
         return is_buf(n) && fanout_size(n) > 1;
     }
     /**
-     * Returns whether the given node n is an inverter node.
+     * Returns whether the given node `n` is an inverter node.
      *
      * @param n Node to consider.
-     * @return True iff n is an inverter node.
+     * @return `true` iff `n` is an inverter node.
      */
     [[nodiscard]] bool is_inv(const node& n) const noexcept
     {
@@ -340,7 +350,7 @@ class technology_network : public mockturtle::klut_network
         foreach_po(
             [this](const auto& po, auto index)
             {
-                if (!is_buf(get_node(po)))
+                if (!is_buf(get_node(po)) || is_fanout(get_node(po)))
                 {
                     // decrease ref-count
                     _storage->nodes[po].data[0].h1--;
@@ -360,6 +370,8 @@ class technology_network : public mockturtle::klut_network
      */
     void add_additional_functions() noexcept
     {
+        // NOLINTBEGIN(*-pointer-arithmetic): mockturtle requirement
+
         // create dot function: a xor (c or a and b)
         static uint64_t dot = 0x52;
 
@@ -408,6 +420,8 @@ class technology_network : public mockturtle::klut_network
         kitty::dynamic_truth_table tt_and_xor(3);
         kitty::create_from_words(tt_and_xor, &and_xor, &and_xor + 1);
         _storage->data.cache.insert(tt_and_xor);
+
+        // NOLINTEND(*-pointer-arithmetic): mockturtle requirement
     }
 };
 

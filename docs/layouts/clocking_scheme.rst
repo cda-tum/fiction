@@ -64,13 +64,29 @@ RES
 
 .. doxygenfunction:: fiction::res_clocking
 
-ESP
+ESR
 ###
 
-.. figure:: /_static/esp.png
+.. figure:: /_static/esr.png
    :width: 200
 
-.. doxygenfunction:: fiction::esp_clocking
+.. doxygenfunction:: fiction::esr_clocking
+
+CFE
+###
+
+.. figure:: /_static/cfe.png
+   :width: 200
+
+.. doxygenfunction:: fiction::cfe_clocking
+
+Ripple
+######
+
+.. figure:: /_static/ripple.png
+   :width: 200
+
+.. doxygenfunction:: fiction::ripple_clocking
 
 BANCS
 #####
@@ -85,4 +101,4 @@ Utility functions
 
 .. doxygenfunction:: fiction::ptr(clocking_scheme<clock_zone<Lyt>>&& scheme) noexcept
 .. doxygenfunction:: fiction::is_linear_scheme(const clocking_scheme<clock_zone<Lyt>>& scheme) noexcept
-.. doxygenfunction:: fiction::get_clocking_scheme(const std::string& name) noexcept
+.. doxygenfunction:: fiction::get_clocking_scheme(const std::string_view& name) noexcept

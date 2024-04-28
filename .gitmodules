@@ -1,6 +1,21 @@
 [submodule "libs/alice"]
 	path = libs/alice
 	url = https://github.com/marcelwa/alice.git
+[submodule "libs/Catch2"]
+	path = libs/Catch2
+	url = https://github.com/catchorg/Catch2.git
+[submodule "libs/parallel-hashmap"]
+	path = libs/parallel-hashmap
+	url = https://github.com/greg7mdp/parallel-hashmap.git
+[submodule "libs/tinyxml2"]
+	path = libs/tinyxml2
+	url = https://github.com/leethomason/tinyxml2.git
+[submodule "libs/pybind11"]
+	path = libs/pybind11
+	url = https://github.com/pybind/pybind11.git
+[submodule "libs/json"]
+	path = libs/json
+	url = https://github.com/nlohmann/json.git
 [submodule "libs/mockturtle"]
 	path = libs/mockturtle
-	url = https://github.com/marcelwa/mockturtle.git
+	url = https://github.com/lsils/mockturtle.git

@@ -2,7 +2,8 @@
 // Created by marcel on 05.11.21.
 //
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
+
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>
@@ -21,21 +22,20 @@
 using namespace fiction;
 
 template <typename Lyt>
-void check_critical_path_length(const Lyt& lyt, const critical_path_length_and_throughput_stats& st) noexcept
+void check_critical_path_length(const Lyt& lyt, const cp_and_tp& cp_tp) noexcept
 {
     mockturtle::depth_view depth_lyt{lyt};
 
-    CHECK(st.critical_path_length == depth_lyt.depth() + 1);  // + 1 because depth_view does not count POs
+    CHECK(cp_tp.critical_path_length == depth_lyt.depth() + 1);  // + 1 because depth_view does not count POs
 }
 
 template <typename Lyt>
 void check(const Lyt& lyt, const uint64_t throughput) noexcept
 {
-    critical_path_length_and_throughput_stats st{};
-    critical_path_length_and_throughput(lyt, &st);
+    const auto cp_tp = critical_path_length_and_throughput(lyt);
 
-    check_critical_path_length(lyt, st);
-    CHECK(st.throughput == throughput);
+    check_critical_path_length(lyt, cp_tp);
+    CHECK(cp_tp.throughput == throughput);
 }
 
 TEST_CASE("Balanced layout", "[throughput]")

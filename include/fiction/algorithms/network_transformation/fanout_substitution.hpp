@@ -28,16 +28,28 @@
 namespace fiction
 {
 
+/**
+ * Parameters for the fanout substitution algorithm.
+ */
 struct fanout_substitution_params
 {
+    /**
+     * Breadth-first vs. depth-first fanout-tree substitution strategies.
+     */
     enum substitution_strategy
     {
+        /**
+         * Breadth-first substitution. Creates balanced fanout trees.
+         */
         BREADTH,
+        /**
+         * Depth-first substitution. Creates fanout trees with one deep branch.
+         */
         DEPTH
     };
 
     /**
-     * Decomposition strategy (DEPTH vs. BREADTH).
+     * Substitution strategy of high-degree fanout networks (depth-first vs. breadth-first).
      */
     substitution_strategy strategy = BREADTH;
     /**
@@ -149,7 +161,9 @@ class fanout_substitution_impl
         if constexpr (has_is_fanout_v<NtkDest>)
         {
             if (ntk_topo.is_fanout(n) && ntk_topo.fanout_size(n) <= ps.degree)
+            {
                 return;
+            }
         }
 
         auto num_fanouts = static_cast<uint32_t>(
@@ -160,7 +174,9 @@ class fanout_substitution_impl
         auto child = old2new[n];
 
         if (num_fanouts == 0)
+        {
             return;
+        }
 
         if (ps.strategy == fanout_substitution_params::substitution_strategy::DEPTH)
         {
@@ -182,7 +198,10 @@ class fanout_substitution_impl
                 q.pop();
                 child = substituted.create_buf(child);
 
-                for (auto i = 0u; i < ps.degree; ++i) q.push(child);
+                for (auto i = 0u; i < ps.degree; ++i)
+                {
+                    q.push(child);
+                }
             }
             available_fanouts[n] = q;
         }
@@ -199,9 +218,13 @@ class fanout_substitution_impl
                 do {
                     child = fanouts.front();
                     if (substituted.fanout_size(child) >= ps.degree)
+                    {
                         fanouts.pop();
+                    }
                     else
+                    {
                         break;
+                    }
                 } while (true);
             }
         }
@@ -223,7 +246,9 @@ class is_fanout_substituted_impl
             {
                 // skip constants
                 if (ntk.is_constant(n))
+                {
                     return substituted;
+                }
 
                 // check degree of fanout nodes
                 if constexpr (fiction::has_is_fanout_v<Ntk>)
@@ -262,24 +287,24 @@ class is_fanout_substituted_impl
 
 /**
  * Substitutes high-output degrees in a logic network with fanout nodes that compute the identity function. For this
- * purpose, create_buf is utilized. Therefore, NtkDest should support identity nodes. If it does not, no new nodes will
- * in fact be created. In either case, the returned network will be logically equivalent to the input one.
+ * purpose, `create_buf` is utilized. Therefore, `NtkDest` should support identity nodes. If it does not, no new nodes
+ * will in fact be created. In either case, the returned network will be logically equivalent to the input one.
  *
  * The process is rather naive with two possible strategies to pick from: breath-first and depth-first. The former
  * creates partially balanced fanout trees while the latter leads to fanout chains. Further parameterization includes
  * thresholds for the maximum number of output each node and fanout is allowed to have.
  *
- * The returned network is newly created from scratch because its type NtkDest may differ from NtkSrc.
+ * The returned network is newly created from scratch because its type `NtkDest` may differ from `NtkSrc`.
  *
- * NOTE: The physical design algorithms natively provided in fiction do not require their input networks to be
+ * @note The physical design algorithms natively provided in fiction do not require their input networks to be
  * fanout-substituted. If that is necessary, they will do it themselves. Providing already substituted networks does
- * however allows for the control over maximum output degrees.
+ * however allow for the control over maximum output degrees.
  *
  * @tparam NtkDest Type of the returned logic network.
  * @tparam NtkSrc Type of the input logic network.
  * @param ntk_src The input logic network.
  * @param ps Parameters.
- * @return A fanout-substituted logic network of type NtkDest that is logically equivalent to ntk_src.
+ * @return A fanout-substituted logic network of type `NtkDest` that is logically equivalent to `ntk_src`.
  */
 template <typename NtkDest, typename NtkSrc>
 NtkDest fanout_substitution(const NtkSrc& ntk_src, fanout_substitution_params ps = {})
@@ -311,7 +336,7 @@ NtkDest fanout_substitution(const NtkSrc& ntk_src, fanout_substitution_params ps
  * @tparam Ntk Logic network type.
  * @param ntk The logic network to check.
  * @param ps Parameters.
- * @return True iff ntk is properly fanout-substituted with regard to ps.
+ * @return `true` iff `ntk` is properly fanout-substituted with regard to `ps`.
  */
 template <typename Ntk>
 bool is_fanout_substituted(const Ntk& ntk, fanout_substitution_params ps = {}) noexcept

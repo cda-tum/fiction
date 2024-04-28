@@ -2,7 +2,8 @@
 // Created by marcel on 14.10.21.
 //
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
+
 #include "utils/blueprints/network_blueprints.hpp"
 
 #include <fiction/networks/technology_network.hpp>
@@ -41,10 +42,10 @@ TEST_CASE("High-degree fanin nodes", "[network-utils]")
     CHECK(!has_high_degree_fanin_nodes(and_inv, 3));
 
     CHECK(high_degree_fanin_exception{}.what() ==
-          std::string{"network contains nodes that exceed the supported non-constant fanin size"});
+          std::string{"network contains nodes that exceed the supported fanin size"});
 }
 
-TEST_CASE("Incoming primary input", "[network-utils")
+TEST_CASE("Incoming primary input", "[network-utils]")
 {
     const auto maj4 = blueprints::maj4_network<mockturtle::mig_network>();
 

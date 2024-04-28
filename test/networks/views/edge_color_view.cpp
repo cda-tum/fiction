@@ -6,7 +6,8 @@
 
 #include "fiction/networks/views/edge_color_view.hpp"
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
+
 #include "fiction/networks/technology_network.hpp"
 
 #include <mockturtle/networks/aig.hpp>

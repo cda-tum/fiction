@@ -184,15 +184,16 @@ class convert_network_impl<NtkDest, NtkSrc, false>
 
 /**
  * Converts a logic network into an equivalent one of another type. Thereby, this function is very similar to
- * mockturtle::cleanup_dangling. However, it supports real buffer nodes used for fanouts and path balancing in fiction.
+ * `mockturtle::cleanup_dangling`. However, it supports real buffer nodes used for fanouts and path balancing in
+ * fiction.
  *
- * NOTE: In contrast to mockturtle::cleanup_dangling, this function returns ntk if NtkDest and NtkSrc are of the same
- * type.
+ * @note In contrast to `mockturtle::cleanup_dangling`, this function returns `ntk` if `NtkDest` and `NtkSrc` are of the
+ * same type.
  *
  * @tparam NtkDest Type of the returned logic network.
  * @tparam NtkSrc Type of the input logic network.
  * @param ntk The input logic network.
- * @return A logic network of type NtkDest that is logically equivalent to ntk.
+ * @return A logic network of type `NtkDest` that is logically equivalent to `ntk`.
  */
 template <typename NtkDest, typename NtkSrc>
 NtkDest convert_network(const NtkSrc& ntk)

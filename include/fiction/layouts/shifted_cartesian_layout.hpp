@@ -124,17 +124,18 @@ struct even_column_cartesian : vertical_shift_cartesian
 {};
 
 /**
- * A layout type that utilizes offset coordinates to represent a cartesian layout with shifted coordinates. Its faces
- * are organizes in an offset coordinate system as provided. These can either be the 'horizontal shift' or 'vertical
- * shift' orientation. Based on that, two respectively possible coordinate systems emerge accordingly: 'odd row' and
- * 'even row' for horizontal shifts and 'odd column' and 'even column' for vertical shifts. All are sketched in ASCII
- * above.
+ * A layout type that utilizes offset coordinates to represent a Cartesian layout with shifted coordinates. Its faces
+ * are organizes in an offset coordinate system as provided. These can either be the horizontal_shift_cartesian or
+ * vertical_shift_cartesian orientation. Based on that, two respectively possible coordinate systems emerge accordingly:
+ * odd_row_cartesian and even_row_cartesian for horizontal shifts and odd_column_cartesian and even_column_cartesian for
+ * vertical shifts. All are sketched in ASCII above.
  *
  * @tparam OffsetCoordinateType The coordinate implementation to be used. Offset coordinates are required.
  * @tparam ShiftedCartesianCoordinateSystem One of the following: odd_row_cartesian, even_row_cartesian,
  * odd_column_cartesian, even_column_cartesian.
  */
-template <typename OffsetCoordinateType, typename ShiftedCartesianCoordinateSystem>
+template <typename OffsetCoordinateType             = offset::ucoord_t,
+          typename ShiftedCartesianCoordinateSystem = even_row_cartesian>
 class shifted_cartesian_layout
         : public hexagonal_layout<
               OffsetCoordinateType,
@@ -165,7 +166,7 @@ class shifted_cartesian_layout
     using cartesian_arrangement = ShiftedCartesianCoordinateSystem;
     /**
      * Standard constructor. The given aspect ratio points to the highest possible coordinate in the layout. That means
-     * in the even_column_cartesian ASCII layout representation above ar = (3,2). Consequently, with ar = (0,0), the
+     * in the even_column_cartesian ASCII layout representation above `ar = (3,2)`. Consequently, with `ar = (0,0)`, the
      * layout has exactly one coordinate.
      *
      * @param ar Highest possible position in the layout.
@@ -180,6 +181,9 @@ class shifted_cartesian_layout
             "ShiftedCartesianCoordinateSystem has to be one of the following: odd_row_cartesian, even_row_cartesian, "
             "odd_column_cartesian, even_column_cartesian");
     }
+
+    // NOLINTNEXTLINE(*-explicit-constructor, *-explicit-conversions)
+    shifted_cartesian_layout(const HexagonalLayout& lyt) : HexagonalLayout(lyt) {}
 
   private:
     // intentionally hide members of HexagonalLayout

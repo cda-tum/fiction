@@ -11,8 +11,8 @@ namespace fiction
 {
 
 /**
- * Defines a range type utilizing iterators. It implements begin() and end() as member functions to work for range based
- * for-loops.
+ * Defines a range type utilizing iterators. It implements `begin()` and `end()` as well as `cbegin()` and `cend()` as
+ * member functions to work for range based for-loops.
  *
  * @tparam Iterator type for which the range should be created.
  */
@@ -55,7 +55,7 @@ struct range_t
      *
      * @return const begin iterator.
      */
-    constexpr const I cbegin() const
+    constexpr I cbegin() const
     {
         return b;
     }
@@ -64,7 +64,7 @@ struct range_t
      *
      * @return const end iterator.
      */
-    constexpr const I cend() const
+    constexpr I cend() const
     {
         return e;
     }

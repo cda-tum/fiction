@@ -1,70 +1,135 @@
 name: Windows CI
 
-on: push
+on:
+  push:
+    branches: [ 'main' ]
+    paths:
+      - '**/*.hpp'
+      - '**/*.cpp'
+      - '**/*.cmake'
+      - '**/CMakeLists.txt'
+      - 'libs/**'
+      - '.github/workflows/windows.yml'
+  pull_request:
+    branches: [ 'main' ]
+    paths:
+      - '**/*.hpp'
+      - '**/*.cpp'
+      - '**/*.cmake'
+      - '**/CMakeLists.txt'
+      - 'libs/**'
+      - '.github/workflows/windows.yml'
+  merge_group:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
 
 defaults:
   run:
     shell: pwsh  # use pwsh as directory handling does not seem to work with bash
 
 env:
-  Z3_GIT_TAG: z3-4.8.12
+  Z3_VERSION: 4.10.0
 
 jobs:
   build_and_test:
     strategy:
       matrix:
-        os: [ windows-2019 ]
-        toolset: [ v142, ClangCL ]
-        build_type: [ Debug, Release ]
+        os: [ windows-2019, windows-2022 ]
+        toolset: [ v142, v143, ClangCL ]
         include:
           - os: windows-2019
-            env: "Visual Studio 16 2019"
+            env: 'Visual Studio 16 2019'
+          - os: windows-2022
+            env: 'Visual Studio 17 2022'
+        exclude:
+          - os: windows-2019
+            toolset: v143
+          - os: windows-2022
+            toolset: v142
 
-    name: ${{matrix.os}} with ${{matrix.env}} and ${{matrix.toolset}} toolset (${{matrix.build_type}} mode)
+    name: ${{matrix.os}} with ${{matrix.env}} and ${{matrix.toolset}} toolset
     runs-on: ${{matrix.os}}
 
     steps:
-      - name: Setup Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.9.x'
-
       - name: Clone Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           submodules: recursive
 
-      - name: Cache Z3 Solver
-        id: cache-z3-solver
-        uses: actions/cache@v2
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1.2
         with:
-          path: ${{github.workspace}}\z3lib
-          key: ${{matrix.os}}-${{matrix.toolset}}-z3lib-${{matrix.build_type}}-${{env.Z3_GIT_TAG}}  # use build_type in the key because linking z3 to fiction with different build types does not work under windows
+          key: '${{matrix.os}}-${{matrix.toolset}}'
+          variant: ccache
+          save: true
+          max-size: 10G
 
-      - name: Build Z3 Solver
-        if: steps.cache-z3-solver.outputs.cache-hit != 'true'
-        working-directory: ${{github.workspace}}
-        shell: bash
-        run: |
-          git clone --branch $Z3_GIT_TAG --depth 1 https://github.com/Z3Prover/z3.git
-          CC=clang CXX=clang++ cmake -S z3 -B z3\build -DCMAKE_INSTALL_PREFIX=z3lib -DZ3_BUILD_LIBZ3_SHARED=OFF -DZ3_BUILD_TEST_EXECUTABLES=OFF -DZ3_ENABLE_EXAMPLE_TARGETS=OFF
-          cmake --build z3\build --config ${{matrix.build_type}} -j2 --target install
+      - name: Setup Z3 Solver
+        id: z3
+        uses: cda-tum/setup-z3@v1
+        with:
+          version: ${{env.Z3_VERSION}}
+          platform: windows
+          architecture: x64
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
-      - name: Create Build Environment
-        run: cmake -E make_directory ${{github.workspace}}\build
+
+      # Build and test pipeline for Debug mode
+
+      - name: Create Build Environment (Debug)
+        run: cmake -E make_directory ${{github.workspace}}\build_debug
 
       - name: Configure CMake
-        working-directory: ${{github.workspace}}\build
+        working-directory: ${{github.workspace}}\build_debug
+        run: >
+          cmake ${{github.workspace}} -G "${{matrix.env}}" -A x64 -T ${{matrix.toolset}}
+          -DCMAKE_BUILD_TYPE=Debug
+          -DFICTION_ENABLE_UNITY_BUILD=ON
+          -DFICTION_ENABLE_PCH=ON
+          -DFICTION_CLI=ON
+          -DFICTION_TEST=ON
+          -DFICTION_BENCHMARK=OFF
+          -DFICTION_EXPERIMENTS=ON
+          -DFICTION_Z3=ON
+          -DFICTION_WARNINGS_AS_ERRORS=OFF
+          -DMOCKTURTLE_EXAMPLES=OFF
 
-        run: cmake ${{github.workspace}} -G "${{matrix.env}}" -A x64 -T ${{matrix.toolset}} -DCMAKE_BUILD_TYPE=${{matrix.build_type}} -DFICTION_CLI=ON -DFICTION_TEST=ON -DFICTION_Z3=ON -DFICTION_Z3_SEARCH_PATHS=${{github.workspace}}\z3lib -DMOCKTURTLE_EXAMPLES=OFF -DWARNINGS_AS_ERRORS=OFF
+      - name: Build (Debug)
+        working-directory: ${{github.workspace}}\build_debug
+        run: cmake --build . --config Debug -j4
 
-      - name: Build
-        working-directory: ${{github.workspace}}\build
+      - name: Test (Debug)
+        working-directory: ${{github.workspace}}\build_debug
+        run: ctest -C Debug --verbose --output-on-failure --repeat until-pass:3 --parallel 4
 
-        run: cmake --build . --config ${{matrix.build_type}} -j2
 
-      - name: Test
-        working-directory: ${{github.workspace}}\build
-        # Execute tests defined by the CMake configuration.
-        # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
-        run: ctest -C ${{matrix.build_type}} --verbose
+      # Build and test pipeline for Release mode
+
+      - name: Create Build Environment (Release)
+        run: cmake -E make_directory ${{github.workspace}}\build_release
+
+      - name: Configure CMake
+        working-directory: ${{github.workspace}}\build_release
+        run: >
+          cmake ${{github.workspace}} -G "${{matrix.env}}" -A x64 -T ${{matrix.toolset}}
+          -DCMAKE_BUILD_TYPE=Release
+          -DFICTION_ENABLE_UNITY_BUILD=ON
+          -DFICTION_ENABLE_PCH=ON
+          -DFICTION_CLI=ON
+          -DFICTION_TEST=ON
+          -DFICTION_BENCHMARK=OFF
+          -DFICTION_EXPERIMENTS=ON
+          -DFICTION_Z3=ON
+          -DFICTION_WARNINGS_AS_ERRORS=OFF
+          -DMOCKTURTLE_EXAMPLES=OFF
+
+      - name: Build (Release)
+        working-directory: ${{github.workspace}}\build_release
+        run: cmake --build . --config Release -j4
+
+      - name: Test (Release)
+        working-directory: ${{github.workspace}}\build_release
+        run: ctest -C Release --verbose --output-on-failure --repeat until-pass:3 --parallel 4

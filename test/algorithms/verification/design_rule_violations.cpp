@@ -2,7 +2,8 @@
 // Created by marcel on 14.10.21.
 //
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
+
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/algorithms/verification/design_rule_violations.hpp>
@@ -13,7 +14,7 @@
 using namespace fiction;
 
 template <typename Lyt>
-gate_level_drv_stats get_drvs(const Lyt& lyt) noexcept
+gate_level_drv_stats get_drvs(const Lyt& lyt)
 {
     gate_level_drv_params ps{};
     gate_level_drv_stats  st{};
@@ -28,7 +29,7 @@ gate_level_drv_stats get_drvs(const Lyt& lyt) noexcept
 }
 
 template <typename Lyt>
-void check_for_drvs(const Lyt& lyt, const std::size_t num_drvs, const std::size_t num_warnings) noexcept
+void check_for_drvs(const Lyt& lyt, const std::size_t num_drvs, const std::size_t num_warnings)
 {
     const auto st = get_drvs(lyt);
 
@@ -38,6 +39,14 @@ void check_for_drvs(const Lyt& lyt, const std::size_t num_drvs, const std::size_
 
 TEST_CASE("Intact layouts", "[drv]")
 {
+    // empty layouts
+    check_for_drvs(cart_gate_clk_lyt{}, 0, 0);
+    check_for_drvs(hex_even_col_gate_clk_lyt{}, 0, 0);
+    check_for_drvs(hex_odd_col_gate_clk_lyt{}, 0, 0);
+    check_for_drvs(hex_even_row_gate_clk_lyt{}, 0, 0);
+    check_for_drvs(hex_odd_row_gate_clk_lyt{}, 0, 0);
+
+    // Cartesian gate layouts
     check_for_drvs(blueprints::and_or_gate_layout<cart_gate_clk_lyt>(), 0, 0);
     check_for_drvs(blueprints::and_not_gate_layout<cart_gate_clk_lyt>(), 0, 0);
     check_for_drvs(blueprints::or_not_gate_layout<cart_gate_clk_lyt>(), 0, 0);

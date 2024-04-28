@@ -2,11 +2,13 @@
 // Created by marcel on 03.07.21.
 //
 
+#include <catch2/catch_test_macros.hpp>
+
 #include "../utils/blueprints/layout_blueprints.hpp"
-#include "catch.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
+#include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/technology/qca_one_library.hpp>
@@ -15,10 +17,14 @@
 
 using namespace fiction;
 
-TEST_CASE("Traits", "[qca-one-library]")
+TEST_CASE("QCA ONE library traits", "[qca-one-library]")
 {
     CHECK(has_post_layout_optimization_v<qca_one_library, qca_cell_clk_lyt>);
+    CHECK(!has_post_layout_optimization_v<qca_one_library, inml_cell_clk_lyt>);
+    CHECK(!has_post_layout_optimization_v<qca_one_library, sidb_cell_clk_lyt>);
     CHECK(!has_post_layout_optimization_v<qca_one_library, cart_gate_clk_lyt>);
+    CHECK(!has_get_functional_implementations_v<qca_one_library>);
+    CHECK(!has_get_gate_ports_v<qca_one_library>);
 }
 
 TEST_CASE("Setting up input ports and gates", "[qca-one-library]")

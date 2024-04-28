@@ -10,7 +10,6 @@
 #include <fiction/io/print_layout.hpp>
 #include <fiction/io/write_svg_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
-#include <fiction/technology/cell_technologies.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -19,11 +18,14 @@
 #include <kitty/print.hpp>
 #include <mockturtle/views/depth_view.hpp>
 
+#include <cstdint>
+#include <stdexcept>
 #include <type_traits>
 #include <variant>
 
 namespace alice
 {
+
 /**
  * Truth tables.
  *
@@ -34,17 +36,22 @@ ALICE_ADD_STORE(fiction::truth_table_t, "truth_table", "t", "truth table", "trut
 ALICE_DESCRIBE_STORE(fiction::truth_table_t, tt)
 {
     if (tt->num_vars() <= 6)
+    {
         return fmt::format("{} vars, hex: {}, bin: {}", tt->num_vars(), kitty::to_hex(*tt), kitty::to_binary(*tt));
-    else
-        return fmt::format("{} vars, (description omitted due to truth table size)", tt->num_vars());
+    }
+    return fmt::format("{} vars, (description omitted due to truth table size)", tt->num_vars());
 }
 
 ALICE_PRINT_STORE_STATISTICS(fiction::truth_table_t, os, tt)
 {
     if (tt->num_vars() <= 6)
+    {
         os << fmt::format("[i] {} vars, hex: {}, bin: {}\n", tt->num_vars(), kitty::to_hex(*tt), kitty::to_binary(*tt));
+    }
     else
+    {
         os << fmt::format("[i] {} vars, (description omitted due to truth table size)\n", tt->num_vars());
+    }
 }
 
 ALICE_LOG_STORE_STATISTICS(fiction::truth_table_t, tt)
@@ -68,7 +75,7 @@ ALICE_DESCRIBE_STORE(fiction::logic_network_t, ln)
     {
         using Ntk = typename std::decay_t<decltype(ntk_ptr)>::element_type;
 
-        mockturtle::depth_view depth_ntk{*ntk_ptr};
+        const mockturtle::depth_view depth_ntk{*ntk_ptr};
 
         return fmt::format("{} ({}) - I/O: {}/{}, gates: {}, level: {}", ntk_ptr->get_network_name(),
                            fiction::ntk_type_name<Ntk>, ntk_ptr->num_pis(), ntk_ptr->num_pos(), ntk_ptr->num_gates(),
@@ -84,7 +91,7 @@ ALICE_PRINT_STORE_STATISTICS(fiction::logic_network_t, os, ln)
     {
         using Ntk = typename std::decay_t<decltype(ntk_ptr)>::element_type;
 
-        mockturtle::depth_view depth_ntk{*ntk_ptr};
+        const mockturtle::depth_view depth_ntk{*ntk_ptr};
 
         os << fmt::format("[i] {} ({}) - I/O: {}/{}, gates: {}, level: {}\n", ntk_ptr->get_network_name(),
                           fiction::ntk_type_name<Ntk>, ntk_ptr->num_pis(), ntk_ptr->num_pos(), ntk_ptr->num_gates(),
@@ -100,7 +107,7 @@ ALICE_LOG_STORE_STATISTICS(fiction::logic_network_t, ln)
     {
         using Ntk = typename std::decay_t<decltype(ntk_ptr)>::element_type;
 
-        mockturtle::depth_view depth_ntk{*ntk_ptr};
+        const mockturtle::depth_view depth_ntk{*ntk_ptr};
 
         return nlohmann::json{{"name", ntk_ptr->get_network_name()}, {"type", fiction::ntk_type_name<Ntk>},
                               {"inputs", ntk_ptr->num_pis()},        {"outputs", ntk_ptr->num_pos()},
@@ -122,13 +129,14 @@ bool can_show<fiction::logic_network_t>(std::string& extension, [[maybe_unused]]
 }
 
 template <>
+// NOLINTNEXTLINE
 void show<fiction::logic_network_t>(std::ostream& os, const fiction::logic_network_t& element, const command& cmd)
 {
     const auto show_ntk = [&os, &cmd](auto&& ntk_ptr)
     {
         try
         {
-            mockturtle::depth_view depth_ntk{*ntk_ptr};
+            const mockturtle::depth_view depth_ntk{*ntk_ptr};
 
             using Ntk = typename std::decay_t<decltype(depth_ntk)>;
 
@@ -157,7 +165,7 @@ ALICE_ADD_STORE(fiction::gate_layout_t, "gate_layout", "g", "gate layout", "gate
 
 ALICE_PRINT_STORE(fiction::gate_layout_t, os, layout)
 {
-    const auto print = [&os](auto&& lyt_ptr) { fiction::print_gate_level_layout(os, *lyt_ptr); };
+    const auto print = [&os](auto&& lyt_ptr) { fiction::print_layout(*lyt_ptr, os); };
 
     std::visit(print, layout);
 }
@@ -175,13 +183,12 @@ ALICE_DESCRIBE_STORE(fiction::gate_layout_t, layout)
             num_se = lyt_ptr->num_se();
         }
 
-        fiction::critical_path_length_and_throughput_stats st{};
-        fiction::critical_path_length_and_throughput(*lyt_ptr, &st);
+        const auto cp_tp = fiction::critical_path_length_and_throughput(*lyt_ptr);
 
         return fmt::format("{} ({}) - {} × {}, I/O: {}/{}, gates: {}, wires: {}, CP: {}, TP: 1/{}, sync. elems.: {}",
                            lyt_ptr->get_layout_name(), lyt_ptr->get_clocking_scheme().name, lyt_ptr->x() + 1,
                            lyt_ptr->y() + 1, lyt_ptr->num_pis(), lyt_ptr->num_pos(), lyt_ptr->num_gates(),
-                           lyt_ptr->num_wires(), st.critical_path_length, st.throughput, num_se);
+                           lyt_ptr->num_wires(), cp_tp.critical_path_length, cp_tp.throughput, num_se);
     };
 
     return std::visit(describe, layout);
@@ -201,14 +208,13 @@ ALICE_PRINT_STORE_STATISTICS(fiction::gate_layout_t, os, layout)
             num_se = lyt_ptr->num_se();
         }
 
-        fiction::critical_path_length_and_throughput_stats st{};
-        fiction::critical_path_length_and_throughput(*lyt_ptr, &st);
+        const auto cp_tp = fiction::critical_path_length_and_throughput(*lyt_ptr);
 
         os << fmt::format(
             "[i] {} ({}) - {} × {}, I/O: {}/{}, gates: {}, wires: {}, CP: {}, TP: 1/{}, sync. elems.: {}\n",
             lyt_ptr->get_layout_name(), lyt_ptr->get_clocking_scheme().name, lyt_ptr->x() + 1, lyt_ptr->y() + 1,
-            lyt_ptr->num_pis(), lyt_ptr->num_pos(), lyt_ptr->num_gates(), lyt_ptr->num_wires(), st.critical_path_length,
-            st.throughput, num_se);
+            lyt_ptr->num_pis(), lyt_ptr->num_pos(), lyt_ptr->num_gates(), lyt_ptr->num_wires(),
+            cp_tp.critical_path_length, cp_tp.throughput, num_se);
     };
 
     std::visit(print_statistics, layout);
@@ -227,8 +233,7 @@ ALICE_LOG_STORE_STATISTICS(fiction::gate_layout_t, layout)
             num_se = lyt_ptr->num_se();
         }
 
-        fiction::critical_path_length_and_throughput_stats st{};
-        fiction::critical_path_length_and_throughput(*lyt_ptr, &st);
+        const auto cp_tp = fiction::critical_path_length_and_throughput(*lyt_ptr);
 
         return nlohmann::json{
             {"name", lyt_ptr->get_layout_name()},
@@ -241,8 +246,8 @@ ALICE_LOG_STORE_STATISTICS(fiction::gate_layout_t, layout)
             // {"free tiles", area - (gate_tiles + wire_tiles - crossings)},  // free tiles in ground layer
             // {"crossings", crossings},
             {"synchronization elements", num_se},
-            {"critical path", st.critical_path_length},
-            {"throughput", fmt::format("1/{}", st.throughput)}};
+            {"critical path", cp_tp.critical_path_length},
+            {"throughput", fmt::format("1/{}", cp_tp.throughput)}};
     };
 
     return std::visit(log_statistics, layout);
@@ -262,6 +267,7 @@ bool can_show<fiction::gate_layout_t>(std::string& extension, [[maybe_unused]] c
 }
 
 template <>
+// NOLINTNEXTLINE
 void show<fiction::gate_layout_t>(std::ostream& os, const fiction::gate_layout_t& element, const command& cmd)
 {
     const auto show_lyt = [&os, &cmd](auto&& lyt_ptr)
@@ -366,7 +372,7 @@ ALICE_ADD_STORE(fiction::cell_layout_t, "cell_layout", "c", "cell layout", "cell
 
 ALICE_PRINT_STORE(fiction::cell_layout_t, os, layout)
 {
-    const auto print = [&os](auto&& lyt_ptr) { fiction::print_cell_level_layout(os, *lyt_ptr); };
+    const auto print = [&os](auto&& lyt_ptr) { fiction::print_layout(*lyt_ptr, os); };
 
     std::visit(print, layout);
 }
@@ -384,10 +390,10 @@ ALICE_DESCRIBE_STORE(fiction::cell_layout_t, layout)
             z = lyt_ptr->z() + 1;
         }
 
-        return fmt::format("{} ({}) - {} × {}{}, I/O: {}/{}, cells: {}", lyt_ptr->get_layout_name(),
+        return fmt::format("{} ({}) - {} × {}{}, I/O: {}/{}, {}: {}", lyt_ptr->get_layout_name(),
                            fiction::tech_impl_name<fiction::technology<Lyt>>, lyt_ptr->x() + 1, lyt_ptr->y() + 1,
                            (z ? fmt::format(" × {}", z) : ""), lyt_ptr->num_pis(), lyt_ptr->num_pos(),
-                           lyt_ptr->num_cells());
+                           fiction::tech_cell_name<fiction::technology<Lyt>>, lyt_ptr->num_cells());
     };
 
     return std::visit(describe, layout);
@@ -406,10 +412,10 @@ ALICE_PRINT_STORE_STATISTICS(fiction::cell_layout_t, os, layout)
             z = lyt_ptr->z() + 1;
         }
 
-        os << fmt::format("[i] {} ({}) - {} × {}{}, I/O: {}/{}, cells: {}\n", lyt_ptr->get_layout_name(),
+        os << fmt::format("[i] {} ({}) - {} × {}{}, I/O: {}/{}, {}: {}\n", lyt_ptr->get_layout_name(),
                           fiction::tech_impl_name<fiction::technology<Lyt>>, lyt_ptr->x() + 1, lyt_ptr->y() + 1,
                           (z ? fmt::format(" × {}", z) : ""), lyt_ptr->num_pis(), lyt_ptr->num_pos(),
-                          lyt_ptr->num_cells());
+                          fiction::tech_cell_name<fiction::technology<Lyt>>, lyt_ptr->num_cells());
     };
 
     std::visit(print_statistics, layout);
@@ -425,7 +431,7 @@ ALICE_LOG_STORE_STATISTICS(fiction::cell_layout_t, layout)
                               {"technology", fiction::tech_impl_name<fiction::technology<Lyt>>},
                               {"inputs", lyt_ptr->num_pis()},
                               {"outputs", lyt_ptr->num_pos()},
-                              {"cells", lyt_ptr->num_cells()},
+                              {fiction::tech_cell_name<fiction::technology<Lyt>>, lyt_ptr->num_cells()},
                               {"layout",
                                {{"x-size", lyt_ptr->x() + 1},
                                 {"y-size", lyt_ptr->y() + 1},
@@ -447,6 +453,7 @@ bool can_show<fiction::cell_layout_t>(std::string& extension, [[maybe_unused]] c
 }
 
 template <>
+// NOLINTNEXTLINE
 void show<fiction::cell_layout_t>(std::ostream& os, const fiction::cell_layout_t& element,
                                   const command& cmd)  // const & for pointer because alice says so...
 {
@@ -454,7 +461,7 @@ void show<fiction::cell_layout_t>(std::ostream& os, const fiction::cell_layout_t
     {
         using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
 
-        if constexpr (!std::is_same_v<fiction::technology<Lyt>, fiction::qca_technology>)
+        if constexpr (!fiction::has_qca_technology_v<Lyt>)
         {
             cmd.env->out() << fmt::format("[e] {} is not a QCA layout", lyt_ptr->get_layout_name()) << std::endl;
         }

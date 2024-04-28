@@ -9,13 +9,13 @@
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
+#include <fiction/utils/name_utils.hpp>
 
 #include <alice/alice.hpp>
 
 #include <filesystem>
 #include <ostream>
 #include <string>
-#include <type_traits>
 #include <variant>
 
 namespace alice
@@ -58,19 +58,19 @@ class fqca_command : public command
             return;
         }
 
-        const auto get_name = [](auto&& lyt) -> std::string { return lyt->get_layout_name(); };
+        const auto get_name = [](auto&& lyt_ptr) -> std::string { return fiction::get_name(*lyt_ptr); };
 
-        const auto write_fqca = [this, &get_name](auto&& lyt)
+        const auto write_fqca = [this, &get_name](auto&& lyt_ptr)
         {
-            using Lyt = typename std::decay_t<decltype(lyt)>::element_type;
+            using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
 
-            if constexpr (std::is_same_v<fiction::technology<Lyt>, fiction::qca_technology>)
+            if constexpr (fiction::has_qca_technology_v<Lyt>)
             {
-                fiction::write_fqca_layout(*lyt, filename, ps);
+                fiction::write_fqca_layout(*lyt_ptr, filename, ps);
             }
             else
             {
-                env->out() << fmt::format("[e] {}'s cell technology is not QCA but {}", get_name(lyt),
+                env->out() << fmt::format("[e] {}'s cell technology is not QCA but {}", get_name(lyt_ptr),
                                           fiction::tech_impl_name<fiction::technology<Lyt>>)
                            << std::endl;
             }
@@ -87,7 +87,7 @@ class fqca_command : public command
             return;
         }
         // if filename was not given, use stored layout name
-        if (!is_set("filename"))
+        if (filename.empty())
         {
             filename = std::visit(get_name, lyt);
         }

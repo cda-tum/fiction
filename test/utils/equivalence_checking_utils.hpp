@@ -5,23 +5,14 @@
 #ifndef FICTION_EQUIVALENCE_CHECKING_UTILS_HPP
 #define FICTION_EQUIVALENCE_CHECKING_UTILS_HPP
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
 
-#include <mockturtle/algorithms/equivalence_checking.hpp>
-#include <mockturtle/algorithms/miter.hpp>
-#include <mockturtle/networks/klut.hpp>
+#include <fiction/algorithms/verification/equivalence_checking.hpp>
 
-template <typename Ntk1, typename Ntk2>
-void check_eq(const Ntk1& ntk1, const Ntk2& ntk2)
+template <typename Spec, typename Impl>
+void check_eq(const Spec& spec, const Impl& impl)
 {
-    auto miter = mockturtle::miter<mockturtle::klut_network>(ntk1, ntk2);
-
-    REQUIRE(miter.has_value());
-
-    auto eq = mockturtle::equivalence_checking(*miter);
-
-    REQUIRE(eq.has_value());
-    CHECK(*eq);
+    CHECK(fiction::equivalence_checking(spec, impl) != fiction::eq_type::NO);
 }
 
 #endif  // FICTION_EQUIVALENCE_CHECKING_UTILS_HPP

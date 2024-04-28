@@ -18,7 +18,11 @@
 
 #include <algorithm>
 #include <array>
+#include <iterator>
+#include <sstream>
 #include <string>
+#include <string_view>
+#include <vector>
 
 namespace fiction
 {
@@ -39,7 +43,9 @@ class technology_dot_drawer : public mockturtle::gate_dot_drawer<Ntk>
         if constexpr (DrawIndexes)
         {
             if (!ntk.is_constant(n) && !ntk.is_pi(n))
+            {
                 return fmt::format("{}: {}", ntk.node_to_index(n), node_label_callback(ntk, n));
+            }
         }
 
         return node_label_callback(ntk, n);
@@ -171,7 +177,7 @@ class technology_dot_drawer : public mockturtle::gate_dot_drawer<Ntk>
         return label;
     }
 
-    [[nodiscard]] bool is_node_number(const std::string& s) const noexcept
+    [[nodiscard]] bool is_node_number(const std::string_view& s) const noexcept
     {
         return !s.empty() && std::all_of(s.begin(), s.end(), ::isdigit);
     }
@@ -204,11 +210,11 @@ class color_view_drawer : public mockturtle::default_dot_drawer<Ntk>
 
         static constexpr const char* undef_color = "black, fontcolor=white";
 
-        return c < colors.size() ? colors[c] : undef_color;
+        return c < COLORS.size() ? COLORS[c] : undef_color;
     }
 
   protected:
-    static constexpr const std::array<const char*, 8> colors{{"ghostwhite", "deepskyblue1", "darkseagreen2", "crimson",
+    static constexpr const std::array<const char*, 8> COLORS{{"ghostwhite", "deepskyblue1", "darkseagreen2", "crimson",
                                                               "goldenrod1", "darkorchid2", "chocolate1", "gray28"}};
 };
 /**
@@ -353,10 +359,14 @@ class simple_gate_layout_tile_drawer : public technology_dot_drawer<Lyt, DrawInd
         else
         {
             if (lyt.is_empty_tile(t))
+            {
                 return "white";
+            }
 
             if (lyt.is_pi_tile(t) || lyt.is_po_tile(t))
+            {
                 return "snow2";
+            }
 
             return technology_dot_drawer<Lyt, DrawIndexes>::node_fillcolor(lyt, lyt.get_node(t));
         }
@@ -366,11 +376,18 @@ class simple_gate_layout_tile_drawer : public technology_dot_drawer<Lyt, DrawInd
     [[nodiscard]] std::vector<std::vector<std::string>> rows(const Lyt& lyt) const noexcept
     {
         std::vector<std::vector<std::string>> rows{};
+        rows.reserve(lyt.y() + 1);
 
         for (auto y = 0ul; y <= lyt.y(); ++y)
         {
             std::vector<std::string> row{};
-            for (auto x = 0ul; x <= lyt.x(); ++x) { row.emplace_back(tile_id({x, y})); }
+            row.reserve(lyt.x() + 1);
+
+            for (auto x = 0ul; x <= lyt.x(); ++x)
+            {
+                row.emplace_back(tile_id({x, y}));
+            }
+
             rows.push_back(row);
         }
 
@@ -380,11 +397,18 @@ class simple_gate_layout_tile_drawer : public technology_dot_drawer<Lyt, DrawInd
     [[nodiscard]] std::vector<std::vector<std::string>> columns(const Lyt& lyt) const noexcept
     {
         std::vector<std::vector<std::string>> columns{};
+        columns.reserve(lyt.x() + 1);
 
         for (auto x = 0ul; x <= lyt.x(); ++x)
         {
             std::vector<std::string> col{};
-            for (auto y = 0ul; y <= lyt.y(); ++y) { col.emplace_back(tile_id({x, y})); }
+            col.reserve(lyt.y() + 1);
+
+            for (auto y = 0ul; y <= lyt.y(); ++y)
+            {
+                col.emplace_back(tile_id({x, y}));
+            }
+
             columns.push_back(col);
         }
 
@@ -396,7 +420,7 @@ class simple_gate_layout_tile_drawer : public technology_dot_drawer<Lyt, DrawInd
         return fmt::format("rank = same {{ {} }};\n", fmt::join(rank, " -> "));
     }
 
-    [[nodiscard]] std::string edge(const std::string& src, const std::string& tgt) const noexcept
+    [[nodiscard]] std::string edge(const std::string_view& src, const std::string_view& tgt) const noexcept
     {
         return fmt::format("{} -> {};\n", src, tgt);
     }
@@ -455,7 +479,10 @@ class gate_layout_cartesian_drawer : public simple_gate_layout_tile_drawer<Lyt, 
 
         const auto enforce_same_cardinal_row = [this, &lyt, &topology]()
         {
-            for (const auto& row : base_drawer::rows(lyt)) { topology << base_drawer::same_rank(row); }
+            for (const auto& row : base_drawer::rows(lyt))
+            {
+                topology << base_drawer::same_rank(row);
+            }
         };
 
         enforce_same_cardinal_column();
@@ -535,28 +562,40 @@ class gate_layout_shifted_cartesian_drawer : public simple_gate_layout_tile_draw
             enforce_same_shifted_row(lyt, topology);
 
             // shift odd rows
-            for (auto i = 1ul; i <= lyt.y(); i += 2) { shift_row(lyt, i, topology); }
+            for (auto i = 1ul; i <= lyt.y(); i += 2)
+            {
+                shift_row(lyt, i, topology);
+            }
         }
         else if constexpr (has_even_row_cartesian_arrangement_v<Lyt>)
         {
             enforce_same_shifted_row(lyt, topology);
 
             // shift even rows
-            for (auto i = 0ul; i <= lyt.y(); i += 2) { shift_row(lyt, i, topology); }
+            for (auto i = 0ul; i <= lyt.y(); i += 2)
+            {
+                shift_row(lyt, i, topology);
+            }
         }
         else if constexpr (has_odd_column_cartesian_arrangement_v<Lyt>)
         {
             enforce_same_shifted_column(lyt, topology);
 
             // shift odd columns
-            for (auto i = 1ul; i <= lyt.x(); i += 2) { shift_column(lyt, i, topology); }
+            for (auto i = 1ul; i <= lyt.x(); i += 2)
+            {
+                shift_column(lyt, i, topology);
+            }
         }
         else if constexpr (has_even_column_cartesian_arrangement_v<Lyt>)
         {
             enforce_same_shifted_column(lyt, topology);
 
             // shift even columns
-            for (auto i = 0ul; i <= lyt.x(); i += 2) { shift_column(lyt, i, topology); }
+            for (auto i = 0ul; i <= lyt.x(); i += 2)
+            {
+                shift_column(lyt, i, topology);
+            }
         }
 
         // enforce connections other than those in direct row/column via edges
@@ -609,12 +648,18 @@ class gate_layout_shifted_cartesian_drawer : public simple_gate_layout_tile_draw
 
     void enforce_same_shifted_column(const Lyt& lyt, std::stringstream& stream) const noexcept
     {
-        for (const auto& col : base_drawer::columns(lyt)) { stream << base_drawer::same_rank(col); }
+        for (const auto& col : base_drawer::columns(lyt))
+        {
+            stream << base_drawer::same_rank(col);
+        }
     }
 
     void enforce_same_shifted_row(const Lyt& lyt, std::stringstream& stream) const noexcept
     {
-        for (const auto& row : base_drawer::rows(lyt)) { stream << base_drawer::same_rank(row); }
+        for (const auto& row : base_drawer::rows(lyt))
+        {
+            stream << base_drawer::same_rank(row);
+        }
     }
 
     void shift_column(const Lyt& lyt, const uint64_t col, std::stringstream& stream) const noexcept
@@ -730,28 +775,40 @@ class gate_layout_hexagonal_drawer : public simple_gate_layout_tile_drawer<Lyt, 
             enforce_same_hexagonal_row(lyt, topology);
 
             // shift odd rows
-            for (auto i = 1ul; i <= lyt.y(); i += 2) { shift_row(lyt, i, topology); }
+            for (auto i = 1ul; i <= lyt.y(); i += 2)
+            {
+                shift_row(lyt, i, topology);
+            }
         }
         else if constexpr (has_even_row_hex_arrangement_v<Lyt>)
         {
             enforce_same_hexagonal_row(lyt, topology);
 
             // shift even rows
-            for (auto i = 0ul; i <= lyt.y(); i += 2) { shift_row(lyt, i, topology); }
+            for (auto i = 0ul; i <= lyt.y(); i += 2)
+            {
+                shift_row(lyt, i, topology);
+            }
         }
         else if constexpr (has_odd_column_hex_arrangement_v<Lyt>)
         {
             enforce_same_hexagonal_column(lyt, topology);
 
             // shift odd columns
-            for (auto i = 1ul; i <= lyt.x(); i += 2) { shift_column(lyt, i, topology); }
+            for (auto i = 1ul; i <= lyt.x(); i += 2)
+            {
+                shift_column(lyt, i, topology);
+            }
         }
         else if constexpr (has_even_column_hex_arrangement_v<Lyt>)
         {
             enforce_same_hexagonal_column(lyt, topology);
 
             // shift even columns
-            for (auto i = 0ul; i <= lyt.x(); i += 2) { shift_column(lyt, i, topology); }
+            for (auto i = 0ul; i <= lyt.x(); i += 2)
+            {
+                shift_column(lyt, i, topology);
+            }
         }
 
         // enforce connections other than those in direct row/column via edges
@@ -804,12 +861,18 @@ class gate_layout_hexagonal_drawer : public simple_gate_layout_tile_drawer<Lyt, 
 
     void enforce_same_hexagonal_column(const Lyt& lyt, std::stringstream& stream) const noexcept
     {
-        for (const auto& col : base_drawer::columns(lyt)) { stream << base_drawer::same_rank(col); }
+        for (const auto& col : base_drawer::columns(lyt))
+        {
+            stream << base_drawer::same_rank(col);
+        }
     }
 
     void enforce_same_hexagonal_row(const Lyt& lyt, std::stringstream& stream) const noexcept
     {
-        for (const auto& row : base_drawer::rows(lyt)) { stream << base_drawer::same_rank(row); }
+        for (const auto& row : base_drawer::rows(lyt))
+        {
+            stream << base_drawer::same_rank(row);
+        }
     }
 
     void shift_column(const Lyt& lyt, const uint64_t col, std::stringstream& stream) const noexcept
@@ -921,10 +984,16 @@ void write_dot_layout(const Lyt& lyt, std::ostream& os, const Drawer& drawer = {
  * \param filename Filename
  */
 template <class Lyt, class Drawer>
-void write_dot_layout(const Lyt& lyt, const std::string& filename, const Drawer& drawer = {})
+void write_dot_layout(const Lyt& lyt, const std::string_view& filename, const Drawer& drawer = {})
 {
-    std::ofstream os{filename.c_str(), std::ofstream::out};
-    write_dot(lyt, os, drawer);
+    std::ofstream os{filename.data(), std::ofstream::out};
+
+    if (!os.is_open())
+    {
+        throw std::ofstream::failure("could not open file");
+    }
+
+    write_dot_layout(lyt, os, drawer);
     os.close();
 }
 

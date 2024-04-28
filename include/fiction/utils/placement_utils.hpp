@@ -23,16 +23,17 @@ namespace fiction
 
 /**
  * Reserve primary input nodes in a layout in the same order as they appear in a network. This is a useful function to
- * call first when a layout is to be created from a network. The primary input nodes then exist in the layout but are
+ * call first when a layout is to be created from a network. The primary input nodes then exist in the layout, but are
  * not placed anywhere and also do not have names. They are just registered to preserve their order.
  *
- * This function can be seen as an equivalent to mockturtle::initialize_copy_network but for layouts.
+ * This function can be seen as an equivalent to `mockturtle::initialize_copy_network`, but for layouts.
  *
  * @tparam Lyt Gate-level layout type.
  * @tparam Ntk Logic network type.
  * @param lyt Gate-level layout where primary input nodes are to be reserved.
- * @param ntk Network whose primary inputs are to be reserved in lyt.
- * @return A mockturtle::node_map that maps from network nodes to layout nodes to be able to address the created nodes.
+ * @param ntk Network whose primary inputs are to be reserved in `lyt`.
+ * @return A `mockturtle::node_map` that maps from network nodes to layout nodes to be able to address the created
+ * nodes.
  */
 template <typename Lyt, typename Ntk>
 [[nodiscard]] mockturtle::node_map<mockturtle::node<Lyt>, Ntk> reserve_input_nodes(Lyt& lyt, const Ntk& ntk) noexcept
@@ -72,10 +73,10 @@ template <typename Lyt, typename Ntk>
  * @tparam Lyt Gate-level layout type.
  * @tparam Ntk Logic network type.
  * @param lyt Gate-level layout in which to place a 0-input gate.
- * @param t Tile in lyt to place the gate onto.
+ * @param t Tile in `lyt` to place the gate onto.
  * @param ntk Network whose node is to be placed.
- * @param n Node in ntk to place onto t in lyt.
- * @return Signal pointing to the placed gate in lyt.
+ * @param n Node in `ntk` to place onto `t` in `lyt`.
+ * @return Signal pointing to the placed gate in `lyt`.
  */
 template <typename Lyt, typename Ntk>
 [[nodiscard]] mockturtle::signal<Lyt> place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk,
@@ -109,11 +110,11 @@ template <typename Lyt, typename Ntk>
  * @tparam Lyt Gate-level layout type.
  * @tparam Ntk Logic network type.
  * @param lyt Gate-level layout in which to place a 1-input gate.
- * @param t Tile in lyt to place the gate onto.
+ * @param t Tile in `lyt` to place the gate onto.
  * @param ntk Network whose node is to be placed.
- * @param n Node in ntk to place onto t in lyt.
- * @param a Incoming signal to the newly placed gate in lyt.
- * @return Signal pointing to the placed gate in lyt.
+ * @param n Node in `ntk` to place onto `t` in `lyt`.
+ * @param a Incoming signal to the newly placed gate in `lyt`.
+ * @return Signal pointing to the placed gate in `lyt`.
  */
 template <typename Lyt, typename Ntk>
 [[nodiscard]] mockturtle::signal<Lyt> place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk,
@@ -148,14 +149,14 @@ template <typename Lyt, typename Ntk>
  * @tparam Lyt Gate-level layout type.
  * @tparam Ntk Logic network type.
  * @param lyt Gate-level layout in which to place a 2-input gate.
- * @param t Tile in lyt to place the gate onto.
+ * @param t Tile in `lyt` to place the gate onto.
  * @param ntk Network whose node is to be placed.
- * @param n Node in ntk to place onto t in lyt.
- * @param a First incoming signal to the newly placed gate in lyt.
- * @param b Second incoming signal to the newly placed gate in lyt.
- * @param c Third optional incoming constant value signal to the newly placed gate in lyt. Might change the gate
- * function when set, e.g., from a MAJ to an AND when c == false.
- * @return Signal pointing to the placed gate in lyt.
+ * @param n Node in `ntk` to place onto `t` in `lyt`.
+ * @param a First incoming signal to the newly placed gate in `lyt`.
+ * @param b Second incoming signal to the newly placed gate in `lyt`.
+ * @param c Third optional incoming constant value signal to the newly placed gate in `lyt`. Might change the gate
+ * function when set, e.g., from a MAJ to an AND if `c == false`.
+ * @return Signal pointing to the placed gate in `lyt`.
  */
 template <typename Lyt, typename Ntk>
 [[nodiscard]] mockturtle::signal<Lyt>
@@ -210,10 +211,8 @@ place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>&
             {
                 return lyt.create_or(a, b, t);
             }
-            else  // constant signal c points to 0
-            {
-                return lyt.create_and(a, b, t);
-            }
+            // constant signal c points to 0
+            return lyt.create_and(a, b, t);
         }
     }
     // more gate types go here
@@ -225,10 +224,8 @@ place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>&
             {
                 return lyt.create_node({a, b, *c}, ntk.node_function(n), t);
             }
-            else
-            {
-                return lyt.create_node({a, b}, ntk.node_function(n), t);
-            }
+
+            return lyt.create_node({a, b}, ntk.node_function(n), t);
         }
     }
 
@@ -241,13 +238,13 @@ place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>&
  * @tparam Lyt Gate-level layout type.
  * @tparam Ntk Logic network type.
  * @param lyt Gate-level layout in which to place a 3-input gate.
- * @param t Tile in lyt to place the gate onto.
+ * @param t Tile in `lyt` to place the gate onto.
  * @param ntk Network whose node is to be placed.
- * @param n Node in ntk to place onto t in lyt.
- * @param a First incoming signal to the newly placed gate in lyt.
- * @param b Second incoming signal to the newly placed gate in lyt.
- * @param c Third incoming signal to the newly placed gate in lyt.
- * @return Signal pointing to the placed gate in lyt.
+ * @param n Node in `ntk` to place onto `t` in `lyt`.
+ * @param a First incoming signal to the newly placed gate in `lyt`.
+ * @param b Second incoming signal to the newly placed gate in `lyt`.
+ * @param c Third incoming signal to the newly placed gate in `lyt`.
+ * @return Signal pointing to the placed gate in `lyt`.
  */
 template <typename Lyt, typename Ntk>
 [[nodiscard]] mockturtle::signal<Lyt> place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk,
@@ -278,17 +275,18 @@ template <typename Lyt, typename Ntk>
 }
 /**
  * Place any gate from a network. This function automatically identifies the arity of the passed node and fetches its
- * incoming signals from the given network and a provided node_map. This function does not update the node_map.
+ * incoming signals from the given network and a provided `mockturtle::node_map`. This function does not update the
+ * `mockturtle::node_map`.
  *
  * @tparam Lyt Gate-level layout type.
  * @tparam Ntk Logic network type.
  * @param lyt Gate-level layout in which to place any gate.
- * @param t Tile in lyt to place the gate onto.
+ * @param t Tile in `lyt` to place the gate onto.
  * @param ntk Network whose node is to be placed.
- * @param n Node in ntk to place onto t in lyt.
+ * @param n Node in `ntk` to place onto `t` in `lyt`.
  * @param node2pos Mapping from network nodes to layout signals, i.e., a pointer to their position in the layout. The
- * map is used to fetch location of the fanins. The node_map is not updated by this function.
- * @return Signal to the newly placed gate in lyt.
+ * map is used to fetch location of the fanins. The `mockturtle::node_map` is not updated by this function.
+ * @return Signal to the newly placed gate in `lyt`.
  */
 template <typename Lyt, typename Ntk>
 [[nodiscard]] mockturtle::signal<Lyt> place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk,
@@ -299,6 +297,8 @@ template <typename Lyt, typename Ntk>
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
 
     const auto fc = fanins(ntk, n);
+
+    // NOLINTBEGIN(*-else-after-return)
 
     if (const auto num_fanins = fc.fanin_nodes.size(); num_fanins == 0)
     {
@@ -326,6 +326,8 @@ template <typename Lyt, typename Ntk>
         return place(lyt, t, ntk, n, node2pos[fanin_signal_a], node2pos[fanin_signal_b], node2pos[fanin_signal_c]);
     }
     // more fanin sizes go here
+
+    // NOLINTEND(*-else-after-return)
 
     assert(false);  // unsupported number of fanins
     return {};      // fix -Wreturn-type warning
@@ -357,11 +359,11 @@ struct branching_signal_container
         }
     };
     /**
-     * Accesses the branching container to find the location of a given node n. Returns the signal to that location if
+     * Accesses the branching container to find the location of a given node `n`. Returns the signal to that location if
      * it was already stored or the default signal, otherwise.
      *
      * @param n Node whose branching position is desired.
-     * @return Signal to n's layout location or the default signal if it wasn't found.
+     * @return Signal to `n`'s layout location or the default signal if it wasn't found.
      */
     [[nodiscard]] mockturtle::signal<Lyt> operator[](const mockturtle::node<Ntk>& n) const
     {
@@ -382,10 +384,8 @@ struct branching_signal_container
         {
             return (*branch)->lyt_signal;
         }
-        else
-        {
-            return {};
-        }
+
+        return {};
     }
     /**
      * Updates the given node's branch by another layout signal, thereby, creating a new branch or updating the position
@@ -425,18 +425,19 @@ struct branching_signal_container
 };
 /**
  * Place any gate from a network. This function automatically identifies the arity of the passed node and fetches its
- * incoming signals from the given network and a provided branching_signal_container node_map. This function does not
- * update the node_map.
+ * incoming signals from the given network and a provided branching_signal_container `mockturtle::node_map`. This
+ * function does not update the `mockturtle::node_map`.
  *
  * @tparam Lyt Gate-level layout type.
  * @tparam Ntk Logic network type.
  * @param lyt Gate-level layout in which to place any gate.
- * @param t Tile in lyt to place the gate onto.
+ * @param t Tile in `lyt` to place the gate onto.
  * @param ntk Network whose node is to be placed.
- * @param n Node in ntk to place onto t in lyt.
+ * @param n Node in `ntk` to place onto `t` in `lyt`.
  * @param node2pos Mapping from network nodes to layout signals, i.e., a pointer to their position in the layout via
- * branches. The map is used to fetch location of the fanins. The node_map is not updated by this function.
- * @return Signal to the newly placed gate in lyt.
+ * branches. The map is used to fetch location of the fanins. The `mockturtle::node_map` is not updated by this
+ * function.
+ * @return Signal to the newly placed gate in `lyt`.
  */
 template <typename Lyt, typename Ntk, uint16_t fanout_size = 2>
 [[nodiscard]] mockturtle::signal<Lyt>
@@ -447,6 +448,8 @@ place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>&
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
 
     const auto fc = fanins(ntk, n);
+
+    // NOLINTBEGIN(*-else-after-return)
 
     if (const auto num_fanins = fc.fanin_nodes.size(); num_fanins == 0)
     {
@@ -475,6 +478,8 @@ place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>&
                      node2pos[fanin_signal_c][n]);
     }
     // more fanin sizes go here
+
+    // NOLINTEND(*-else-after-return)
 
     assert(false);  // unsupported number of fanins
     return {};      // fix -Wreturn-type warning

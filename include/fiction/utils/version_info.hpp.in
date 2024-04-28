@@ -11,19 +11,19 @@ namespace fiction
 /**
  * Version string.
  */
-constexpr const char* FICTION_VERSION = "@CMAKE_PROJECT_NAME@ v@PROJECT_VERSION@";
+inline constexpr const char* FICTION_VERSION = "@CMAKE_PROJECT_NAME@ v@PROJECT_VERSION@";
 /**
  * Repository string.
  */
-constexpr const char* FICTION_REPO = "https://github.com/marcelwa/fiction";
+inline constexpr const char* FICTION_REPO = "https://github.com/cda-tum/fiction";
 /**
  * Compiled at the stored date.
  */
-constexpr const char* COMPILED_DATE = __DATE__;
+inline constexpr const char* COMPILED_DATE = __DATE__;
 /**
  * Compiled at the stored time.
  */
-constexpr const char* COMPILED_TIME = __TIME__;
+inline constexpr const char* COMPILED_TIME = __TIME__;
 
 }  // namespace fiction
 

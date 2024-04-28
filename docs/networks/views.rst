@@ -4,13 +4,6 @@ Views
 Views are wrappers around network types that add or change certain functionality. For more information, please refer to
 the `mockturtle documentation <https://mockturtle.readthedocs.io/en/latest/views.html>`_.
 
-Reverse Topological View
-------------------------
-
-**Header:** ``fiction/networks/views/reverse_topo_view.hpp``
-
-.. doxygenclass:: fiction::reverse_topo_view
-   :members:
 
 Edge Color View
 ---------------

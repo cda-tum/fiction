@@ -30,15 +30,28 @@ class tile_based_layout : public CoordinateLayout
 
     using base_type = tile_based_layout;
 
-    explicit tile_based_layout(const aspect_ratio<CoordinateLayout>& ar = {}) : CoordinateLayout(ar)
+    explicit tile_based_layout(const typename CoordinateLayout::aspect_ratio& ar = {}) : CoordinateLayout(ar)
     {
         static_assert(is_coordinate_layout_v<CoordinateLayout>, "CoordinateLayout is not a coordinate layout type");
+        static_assert(!is_clocked_layout_v<CoordinateLayout>, "CoordinateLayout cannot be a clocked layout type");
     }
 
     template <typename Storage>
     explicit tile_based_layout(std::shared_ptr<Storage> s) : CoordinateLayout(s)
     {
         static_assert(is_coordinate_layout_v<CoordinateLayout>, "CoordinateLayout is not a coordinate layout type");
+        static_assert(!is_clocked_layout_v<CoordinateLayout>, "CoordinateLayout cannot be a clocked layout type");
+    }
+
+    explicit tile_based_layout(const CoordinateLayout& lyt) : CoordinateLayout(lyt)
+    {
+        static_assert(is_coordinate_layout_v<CoordinateLayout>, "CoordinateLayout is not a coordinate layout type");
+        static_assert(!is_clocked_layout_v<CoordinateLayout>, "CoordinateLayout cannot be a clocked layout type");
+    }
+
+    [[nodiscard]] tile_based_layout clone() const noexcept
+    {
+        return tile_based_layout{CoordinateLayout::clone()};
     }
 
 #pragma endregion
@@ -53,7 +66,7 @@ class tile_based_layout : public CoordinateLayout
     template <typename Fn>
     void foreach_tile(Fn&& fn, const tile& start = {}, const tile& stop = {}) const
     {
-        CoordinateLayout::foreach_coordinate(fn, start, stop);
+        CoordinateLayout::foreach_coordinate(std::forward<Fn>(fn), start, stop);
     }
 
     [[nodiscard]] auto ground_tiles(const tile& start = {}, const tile& stop = {}) const
@@ -64,31 +77,29 @@ class tile_based_layout : public CoordinateLayout
     template <typename Fn>
     void foreach_ground_tile(Fn&& fn, const tile& start = {}, const tile& stop = {}) const
     {
-        CoordinateLayout::foreach_ground_coordinate(fn, start, stop);
+        CoordinateLayout::foreach_ground_coordinate(std::forward<Fn>(fn), start, stop);
     }
 
-    template <typename Container>
-    Container adjacent_tiles(const tile& t) const noexcept
+    std::vector<tile> adjacent_tiles(const tile& t) const noexcept
     {
-        return CoordinateLayout::template adjacent_coordinates<Container>(t);
+        return CoordinateLayout::adjacent_coordinates(t);
     }
 
     template <typename Fn>
     void foreach_adjacent_tile(const tile& t, Fn&& fn) const
     {
-        CoordinateLayout::foreach_adjacent_coordinate(t, fn);
+        CoordinateLayout::foreach_adjacent_coordinate(t, std::forward<Fn>(fn));
     }
 
-    template <typename Container>
-    Container adjacent_opposite_tiles(const tile& t) const noexcept
+    std::vector<std::pair<tile, tile>> adjacent_opposite_tiles(const tile& t) const noexcept
     {
-        return CoordinateLayout::template adjacent_opposite_coordinates<Container>(t);
+        return CoordinateLayout::adjacent_opposite_coordinates(t);
     }
 
     template <typename Fn>
     void foreach_adjacent_opposite_tiles(const tile& t, Fn&& fn) const
     {
-        CoordinateLayout::foreach_adjacent_opposite_coordinates(t, fn);
+        CoordinateLayout::foreach_adjacent_opposite_coordinates(t, std::forward<Fn>(fn));
     }
 
 #pragma endregion

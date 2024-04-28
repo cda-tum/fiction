@@ -48,9 +48,12 @@ class onepass_command : public command
                        "resulting from this approach might be desynchronized. I/Os are always located at the "
                        "layout's borders.")
     {
-        add_option("--clk_scheme,-s", clocking, "Clocking scheme to use {2DDWAVE[3|4], USE, RES, ESP, BANCS}", true);
-        add_option("--upper_bound,-u", ps.upper_bound, "Number of FCN gate tiles to use at maximum");
-        add_option("--fixed_size,-f", ps.fixed_size, "Execute only one iteration with the given number of tiles");
+        add_option("--clk_scheme,-s", ps.scheme, "Clocking scheme to use {2DDWAVE[3|4], USE, RES, ESR, CFE, BANCS}",
+                   true);
+        add_option("--upper_x", ps.upper_bound_x, "Number of FCN gate tiles to use at maximum in x-direction");
+        add_option("--upper_y", ps.upper_bound_y, "Number of FCN gate tiles to use at maximum in y-direction");
+        add_option("--fixed_size,-f", ps.fixed_size,
+                   "Execute only one iteration with the given number of upper bound tiles");
         add_option("--timeout,-t", ps.timeout, "Timeout in seconds");
 #if !defined(__APPLE__)
         add_option("--async,-a", ps.num_threads, "Number of threads to use for parallel solving (beta feature)");
@@ -74,19 +77,6 @@ class onepass_command : public command
      */
     void execute() override
     {
-        // error case: -f and -u are both set
-        if (this->is_set("fixed_size") && this->is_set("upper_bound"))
-        {
-            env->out() << "[e] -u and -f cannot be set together" << std::endl;
-            reset_flags();
-            return;
-        }
-        // set the value of fixed_size as the upper bound if set
-        else if (this->is_set("fixed_size"))
-        {
-            ps.upper_bound = ps.fixed_size;
-        }
-
         // if no gate types are specified, enable them all
         if (!ps.enable_and && !ps.enable_or && !ps.enable_not && !ps.enable_maj && !ps.enable_wires)
         {
@@ -95,35 +85,6 @@ class onepass_command : public command
             ps.enable_not   = true;
             ps.enable_maj   = true;
             ps.enable_wires = true;
-        }
-
-        // choose clocking
-        if (auto clk = fiction::get_clocking_scheme<fiction::cart_gate_clk_lyt>(clocking); clk.has_value())
-        {
-            if (auto name = clk->name; name == fiction::clock_name::open || name == fiction::clock_name::columnar)
-            {
-                env->out() << fmt::format("[e] the \"{}\" clocking scheme is not supported by this approach", name)
-                           << std::endl;
-
-                reset_flags();
-                return;
-            }
-
-            ps.scheme = fiction::ptr<fiction::cart_gate_clk_lyt>(std::move(*clk));
-            if (clk->max_out_degree < 3 && ps.enable_maj)
-            {
-                ps.enable_maj = false;
-                env->out() << "[w] disabling MAJ gates as they are not supported by the " << ps.scheme->name
-                           << " clocking scheme" << std::endl;
-            }
-        }
-        else
-        {
-            env->out() << fmt::format("[e] \"{}\" does not refer to a supported clocking scheme", clocking)
-                       << std::endl;
-
-            reset_flags();
-            return;
         }
 
 #if !defined(__APPLE__)
@@ -175,6 +136,16 @@ class onepass_command : public command
                     env->out() << fmt::format("[e] impossible to synthesize {} within the given parameters", ps.name)
                                << std::endl;
                 }
+            }
+            catch (const fiction::unsupported_clocking_scheme_exception&)
+            {
+                env->out() << fmt::format("[e] \"{}\" does not refer to a supported clocking scheme or the selected "
+                                          "clocking scheme is not supported by this approach",
+                                          ps.scheme)
+                           << std::endl;
+
+                reset_flags();
+                return;
             }
             catch (const std::bad_alloc&)
             {
@@ -234,22 +205,17 @@ class onepass_command : public command
     /**
      * Parameters.
      */
-    fiction::one_pass_synthesis_params<fiction::cart_gate_clk_lyt> ps{};
+    fiction::one_pass_synthesis_params ps{};
     /**
      * Statistics.
      */
     fiction::one_pass_synthesis_stats st{};
     /**
-     * Identifier of clocking scheme to use.
-     */
-    std::string clocking{"2DDWave"};
-    /**
      * Reset flags. Necessary due to an alice bug.
      */
     void reset_flags() noexcept
     {
-        ps       = {};
-        clocking = "2DDWave";
+        ps = {};
     }
 };
 

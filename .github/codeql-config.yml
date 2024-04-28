@@ -1,0 +1,14 @@
+name: GitHub CodeQL Config
+
+queries:
+  - uses: security-and-quality
+
+query-filters:
+  - exclude:
+      id: cpp/unused-static-function
+  - exclude:
+      id: cpp/unused-static-variable
+  - exclude:
+      id: cpp/unused-local-variable
+  - exclude:
+      id: cpp/commented-out-code

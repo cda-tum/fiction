@@ -59,7 +59,7 @@ FCN constraints.
 
 When in *fiction*'s interactive mode, one can enter ``read <filename>`` to read a logic network into a store or
 ``read <directory>`` to parse all parsable files within that given directory powered by the
-`lorina <https://github.com/hriener/lorina>`_ parser by Heinz Riener respectively. The flag ``-s`` allows prior sorting.
+`lorina <https://github.com/hriener/lorina>`_ parser by Heinz Riener. The flag ``-s`` allows prior sorting.
 The content of the logic network store can be briefly viewed by entering ``store -n``. A more detailed breakdown can be
 printed by command ``gates``. Command ``show -n`` writes a `Graphviz <https://www.graphviz.org/>`_ ``.dot`` file of the
 current network and opens it with the user's standard viewer (e.g. `xdot <https://github.com/jrfonseca/xdot.py>`_).
@@ -83,25 +83,25 @@ or be obtained by :ref:`simulating<command simulate>` a ``network`` or ``gate_la
 An expression ``E`` is a constant ``0`` or ``1``, or a variable ``a, b, ..., p``, the negation of an expression ``!E``, the
 conjunction of multiple expressions ``(E...E)``, the disjunction of multiple expressions ``{E...E}``, the exclusive OR of
 multiple expressions ``[E...E]``, or the majority of three expressions ``<EEE>``. Examples are ``[(ab)(!ac)]`` to describe
-if-then-else, or ``!{!a!b}`` to describe the application of De Morgan’s law to ``(ab)``. The size of the truth table must
+if-then-else, or ``!{!a!b}`` to describe the application of De Morgan's law to ``(ab)``. The size of the truth table must
 fit the largest variable in the expression, e.g., if ``c`` is the largest variable, then the truth table has at least
 three variables.
 
-Alternatively, ``tt 0110`` or ``tt 0xaffe`` generate ``truth_table``\ s from bit/hex strings.
+Alternatively, ``tt 0110`` or ``tt 0xaffe`` generate a ``truth_table`` from bit/hex strings.
 
 Logic synthesis
 ###############
 
 Having a ``truth_table`` in store, the command ``akers`` generates an equivalent Majority ``network`` using Akers' synthesis.
 
-Furthermore, it is possible to generate random ``network``\ s by using command ``random``. The desired number of primary
+Furthermore, it is possible to generate a random ``network`` by using command ``random``. The desired number of primary
 inputs can be specified (``-n``) as well as the gate count excluding inverters and fan-outs (``-g``). A random seed (``-s``)
-allows for reproducibility as it will also be used as the network``\ s name.
+allows for reproducibility as it will also be used as the network's name.
 
 However, most importantly, a technology mapping command ``map`` is available that rewrites any ``network`` type as a
 technology network that exclusively uses gates from a given set but computes the same Boolean function.
 For instance, ``map -oxi`` produces a logic network that only uses OR gates, XOR gates, and inverters. This is extremely
-helpful for gate libraries that do not support certain gate types.
+helpful for FCN gate libraries that do not support certain gate types.
 
 Structural manipulation
 #######################
@@ -119,17 +119,17 @@ Physical design
 
 Physical design is the task of generating a circuit layout from a specification (mostly a logic network). Currently, *fiction*
 offers placement and routing in the flavors exact (SMT-based) and scalable (OGD-based) as well as one-pass synthesis (SAT-based).
-The implementations can be called on the currently active ``network`` in store by ``exact`` and ``ortho`` respectively.
+The implementations can be called on the currently active ``network`` in store by ``exact`` and ``ortho``, respectively.
 Find some information and parameters about them below.
 
 Generated FCN gate layouts are also saved in stores. Entering ``store -g`` shows a list of all gate layouts available.
-Statistical information about store elements can be printed using command ``ps -g`` and could produce the following output::
+Statistical information about store elements can be printed using the command ``ps -g`` and could produce the following output::
 
     c17 (2DDWAVE) - 5 × 7, I/O: 5/2, gates: 8, wires: 28, CP: 11, TP: 1/1, sync. elems.: 0
 
 This displays (from left to right) the name of the layout, its clocking scheme, the aspect ratio in tiles, the number
 of primary inputs and outputs, the number of gate tiles, wire elements, the length of the critical path,
-the throughput of the design (where 1/1 is maximum throughput), and the number of
+the throughput of the design (where ``1/1`` is the maximum possible throughput), and the number of
 `synchronization elements <https://ieeexplore.ieee.org/document/8626294>`_.
 
 SMT-based (``exact``)
@@ -141,7 +141,7 @@ which is then translated back into a valid solution to the original physical des
 see `the paper <https://ieeexplore.ieee.org/document/8342060>`_.
 
 This exact approach generates minimal layouts in terms of circuit area. Since determining minimal FCN circuits for given
-specifications is an `NP-hard problem <https://dl.acm.org/citation.cfm?id=3312661>`_,
+specifications is an `NP-complete problem <https://dl.acm.org/doi/10.1145/3312661>`_,
 the process takes a while and is only suitable for rather small benchmarks with just a few gates.
 
 On the other hand, this approach is highly parameterizable and can produce results for a variety of settings.
@@ -157,13 +157,14 @@ See ``exact -h`` for a full list.
 
 Recommended settings include the use of I/O pins located at the layout borders for better integration (``-b``). Most
 networks are not realizable without crossings enabled (``-x``). Specifying a clocking scheme **significantly** speeds up
-the process. 2DDWave allows for the strictest constraints and thereby finds a solution the quickest (``-s 2ddwave``).
-However, for high input degree networks, no valid solution exists when border I/Os are to be used unless global
-synchronization is disabled (``-d``). Generally, solutions are found the fastest with the following settings: Crossings
-enabled, de-synchronization enabled, and 2DDWave clocking given (``-xds 2ddwave``). Multi-threading can sometimes speed up
-the process especially for large networks (``-a ...``). Note that the more threads are being used, the less information
-can be shared across the individual solver runs which destroys the benefits of incremental solving and thereby,
-comparatively, slows down each run. Parallelism is an unstable beta feature.
+the process. `2DDWave <https://ieeexplore.ieee.org/document/1717097>`_ allows for the strictest constraints and thereby
+finds a solution the quickest (``-s 2ddwave``). However, for high input degree networks, no valid solution exists when
+border I/Os are to be used unless global synchronization is disabled (``-d``). Generally, solutions are found the
+fastest with the following settings: Crossings enabled, de-synchronization enabled, and 2DDWave clocking given
+(``-xds 2ddwave``). Multi-threading can sometimes speed up the process especially for large networks (``-a ...``). Note
+that the more threads are being used, the less information can be shared across the individual solver runs which
+destroys the benefits of incremental solving and thereby, comparatively, slows down each run. Parallelism is an unstable
+beta feature.
 
 OGD-based (``ortho``)
 #####################
@@ -172,7 +173,7 @@ Orthogonal Graph Drawing (OGD) is a well known problem in graph theory that rema
 problem for tile-based FCN circuits. Even though the problem of determining minimal drawings is hard in general, there
 exist linear time approximations for 3-graphs. Luckily, AOIGs can be substituted until they are 3-graphs. Using a
 topological ordering and a certain direction assignment, even large circuits can be designed in reasonable runtime.
-For more information, see `the paper <https://dl.acm.org/citation.cfm?id=3287705>`_.
+For more information, see `the paper <https://dl.acm.org/doi/10.1145/3287624.3287705>`_.
 
 This scalable approach only works on logic networks which are AOIGs (MAJ gates do not work). The clocking scheme is fixed to
 `2DDWave <https://ieeexplore.ieee.org/document/1717097>`_ and the algorithm can only be slightly parameterized
@@ -214,6 +215,7 @@ throughput (TP) and thereby, the amount of clock cycles the PIs need to be stall
 
 A ``network`` can also be simulated for comparison by using ``simulate -n``.
 
+
 Equivalence checking (``equiv``)
 --------------------------------
 
@@ -231,10 +233,10 @@ Energy dissipation (``energy``)
 -------------------------------
 
 A `physical model <https://ieeexplore.ieee.org/document/8246526>`_ for calculating the energy dissipation on the gate-level
-abstraction using the `QCA-ONE library <https://ieeexplore.ieee.org/document/7538997/>`_ has been proposed. Thereby, information
+abstraction using the `QCA ONE library <https://ieeexplore.ieee.org/document/7538997/>`_ has been proposed. Thereby, information
 about the cells' function within a gate can be utilized to obtain switching energy consumption. The respective value can be
 printed using command ``energy``. Note that this assumes that the gate-level layout can be physically synthesized using the
-QCA-ONE gate library.
+QCA ONE gate library.
 
 Physical synthesis (``cell``)
 -----------------------------
@@ -243,8 +245,9 @@ As mentioned above, gate-level layouts can be compiled down to cell-level ones i
 is required to do so. The command ``cell`` does exactly this, where the ``-l`` option indicates the gate
 library to use. The following ones are currently supported:
 
-- ``-l QCAONE`` represents `QCA-ONE <https://ieeexplore.ieee.org/document/7538997/>`_ which is the default setting
+- ``-l QCAONE`` represents `QCA ONE <https://ieeexplore.ieee.org/document/7538997/>`_ which is the default setting
 - ``-l ToPoliNano`` refers to `ToPoliNano <https://topolinano.polito.it/>`_'s gate library for iNML circuits. Note that only ``exact`` can be used in the moment to create layouts mappable to iNML. Suggested parameters are ``exact -xnbds columnar --topolinano``.
+- ``-l Bestagon`` chooses the `Bestagon <https://dl.acm.org/doi/10.1145/3489517.3530525>`_ gate library for SiDB circuits. Note that only ``exact`` can be used in the moment to create layouts that are properly mappable. Suggested parameters are ``exact -xdbs row --hex even_row``.
 
 Cell-based layouts are also saved in stores which can be accessed by typing ``store -c``. Due to significantly larger size of
 cell layouts compared to gate layouts, the ``print -c`` command to write layouts to the terminal should be used
@@ -254,12 +257,115 @@ Cell-level layouts can be written to files parsable by various physical simulato
 simulators are currently supported:
 
 - ``qca <filename>`` creates a `QCADesigner <https://waluslab.ece.ubc.ca/qcadesigner/>`_ QCA file
-- ``qll <filename>`` creates a `ToPoliNano & MagCAD <https://topolinano.polito.it/>`_ QLL file
-- ``qcc <filename>`` creates a `ToPoliNano & MagCAD <https://topolinano.polito.it/>`_ QCC file
+- ``qcc <filename>`` creates a `ToPoliNano <https://topolinano.polito.it/>`_ design component QCC file
+- ``qll <filename>`` creates a `ToPoliNano & MagCAD <https://topolinano.polito.it/>`_ or `SCERPA <https://ieeexplore.ieee.org/document/8935211>`_ layout QLL file
 - ``sqd <filename>`` creates a `SiQAD <https://github.com/siqad/siqad>`_ SQD file
 - ``fqca <filename>`` creates a `QCA-STACK <https://github.com/wlambooy/QCA-STACK>`_ FQCA file
 
 If no filename is given, the stored layout name will be used and the file will be written to the current folder.
+
+Physical Simulation of SiDBs
+----------------------------
+
+Performing physical simulation of SiDB layouts is crucial for understanding layout behavior and
+facilitating rapid prototyping, eliminating the need for expensive and time-intensive fabrication processes.
+The command ``read --sqd`` (or ``read -s``) is used to import a SiDB layout from an sqd-file, a format compatible with `SiQAD <https://github.com/siqad/siqad>`_.
+The SiDB layout can be visualized using the ``print -c`` command. Currently, *fiction* provides two electrostatic physical simulators:
+the exact one *QuickExact* and the scalable one *QuickSim*.
+
+QuickExact (``quickexact``)
+###########################
+
+*QuickExact* serves as an exact simulator, meticulously determining all physically valid charge distributions.
+It enumerates all possible charge distributions. However, by incorporating three techniques, namely
+1.) Physically-informed Search Space Pruning, 2.) Partial Solution Caching, and 3.) Effective State Enumeration, it provides
+a significant performance advantage of more than three orders of magnitude over ExGS from SiQAD. For additional details,
+see `the paper <https://www.cda.cit.tum.de/files/eda/2024_aspdac_efficient_exact_simulation.pdf>`_.
+
+Most important parameters:
+
+- Relative permittivity :math:`\epsilon_r` (``-e``)
+- Thomas-Fermi screening length :math:`\lambda_{tf}` (``-l``)
+- Energy transition level (0/-) :math:`\mu_-` (``-m``)
+
+See ``quickexact -h`` for a full list.
+
+The simulated ground state charge distribution can be printed with ``print -c``.
+
+
+QuickSim (``quicksim``)
+#######################
+
+*QuickSim* serves as a scalable simulator designed to determine the ground state charge distribution
+for a given SiDB layout. To enhance efficiency, effective search space pruning techniques, such as
+(`max-min diversity distributions <https://onlinelibrary.wiley.com/doi/10.1002/net.20418>`_), are integrated.
+For more in-depth information, refer to `the paper <https://ieeexplore.ieee.org/document/10231266>`_.
+
+Most important parameters:
+
+- Relative permittivity :math:`\epsilon_r` (``-e``)
+- Thomas-Fermi screening :math:`\lambda_{tf}` (``-l``)
+- Energy transition level (0/-) :math:`\mu_-` (``-m``)
+- Number of iterations (``-i``)
+- :math:`\alpha` value (``-a``)
+
+The simulated ground state charge distribution can be printed with ``print -c``.
+
+Critical Temperature (``temp``)
+###############################
+
+The critical temperature of an SiDB layout is the temperature at which the layout's ground state is populated with a
+probability larger than a certain threshold. This threshold is specified as a confidence level :math:`1 - \eta`, where
+:math:`\eta \in [0,1]`. The simulation can be conducted for gate-based SiDB layouts as well, where the gate is
+simulated with respect to the stability of a given Boolean function in form of the current truth table in store.
+For more in-depth information, refer to `the paper <https://ieeexplore.ieee.org/document/10231259>`_.
+
+Most important parameters:
+
+- Confidence level :math:`1 - \eta` (``-c``)
+- Maximum temperature in K to explore (``-t``)
+- Gate-based simulation toggle (``-g``)
+- Relative permittivity :math:`\epsilon_r` (``-e``)
+- Thomas-Fermi screening :math:`\lambda_{tf}` (``-l``)
+- Energy transition level (0/-) :math:`\mu_-` (``-m``)
+
+
+Operational Domain (``opdom``)
+##############################
+
+Computes the operational domain of the current SiDB cell-level layout in store. The operational domain is the set of all
+parameter combinations for which the layout is logically operational. Logical operation is defined as the layout
+implementing the current truth table in store. The input BDL pairs of the layout are assumed to be in the same order as
+the inputs of the truth table.
+For more information, see `the paper <https://www.cda.cit.tum.de/files/eda/2023_nanoarch_reducing_the_complexity_of_operational_domain_computation_in_silicon_dangling_bond_logic.pdf>`_.
+
+The command ``opdom`` writes the operational domain to a CSV file with the given filename from where it can be further
+processed by other tools.
+
+The parameter space to sweep over can be specified by the user via the flags
+- ``--x_sweep``
+- ``--y_sweep``
+which have to be either ``epsilon_r``, ``lambda_tf``, or ``mu_minus``. The default is ``epsilon_r`` for ``--x_sweep`` and
+``lambda_tf`` for ``--y_sweep``.
+
+Additionally, min, max, and step size values can be specified for each parameter using the flags
+- ``--x_min``
+- ``--x_max``
+- ``--x_step``
+- ``--y_min``
+- ``--y_max``
+- ``--y_step``
+respectively. The default values are 1, 10, and 0.1 on both axis, for min, max, and step, respectively.
+
+By default, grid search is applied to explore the operational domain. The algorithm can be changed by specifying one of
+the following options:
+- ``--random_sampling``/``-r``
+- ``--flood_fill``/``-f``
+- ``--contour_tracing``/``-c``
+each of which start from a set of random samples, whose number has to be passed as an argument to the flag.
+
+See ``opdom -h`` for a full list of arguments.
+
 
 Area usage (``area``)
 ---------------------
@@ -270,8 +376,8 @@ width and height of a single cell as well as horizontal and vertical spacing (ea
 is printed in nm².
 
 If no information about such values is given, *fiction* uses default technology-depended lengths taken from
-`QCADesigner <https://waluslab.ece.ubc.ca/qcadesigner/>`_, `NMLSim <https://dl.acm.org/citation.cfm?doid=3338852.3339856>`_,
-or `SiQAD <https://github.com/siqad/siqad>`_ respectively. These are
+`QCADesigner <https://waluslab.ece.ubc.ca/qcadesigner/>`_, `NMLSim <https://dl.acm.org/doi/10.1145/3338852.3339856>`_,
+or `SiQAD <https://github.com/siqad/siqad>`_, respectively. These are
 
 QCA (default QCADesigner settings)
 ##################################
@@ -356,17 +462,17 @@ called ``c17_log.json``.  The following table presents possible results.
 These scripts can also be nested. One can use ``< script.fs`` within a *fiction script* to load ``script.fs`` in that very position.
 A script called ``shortcuts.fs`` has been placed in the top level folder. It can be loaded on start-up by calling
 ``./fiction -if ../shortcuts.fs`` in the build folder. This makes predefined commands and flows available as shortcuts.
-Try ``synth xibs use`` for instance to perform the whole flow of design (utilizing ``USE`` clocking) and physical
+Try ``synth -xibs use`` for instance to perform the whole flow of design (utilizing ``USE`` clocking) and physical
 synthesis down to cell-level including visual representation.
 
 Additionally, *fiction* itself can be part of a bash script. Consider the following snippet::
 
     for filepath in ../benchmarks/TOY/*.v; do
         f="${filepath##*/}"
-        ./fiction -c "read $filepath; ortho; cell; qca ${f%.*}.qca"
+       ./fiction -c "read $filepath; ortho; cell; qca ${f%.*}.qca"
     done
 
-where the for-loop iterates over all Verilog files in the ``../benchmarks/TOY/`` folder. Using the flag ``-c``, a
+where the for-loop iterates over all Verilog files in the ``../benchmarks/TOY/`` folder. By using the flag ``-c``, a
 semicolon-separated list of commands can be passed to *fiction*. In this case, the files are to be read in a store,
 designed using the ``ortho`` algorithm, synthesized to cell-level, and written as QCA using their original file
 name.

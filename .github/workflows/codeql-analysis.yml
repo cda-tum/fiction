@@ -1,0 +1,157 @@
+name: CodeQL
+
+on:
+  push:
+    branches: [ 'main' ]
+    paths:
+      - '**/*.hpp'
+      - '**/*.cpp'
+      - '**/*.cmake'
+      - '**/CMakeLists.txt'
+      - '**/*.py'
+      - 'libs/**'
+      - '.github/workflows/codeql-analysis.yml'
+  pull_request:
+    branches: [ 'main' ]
+    paths:
+      - '**/*.hpp'
+      - '**/*.cpp'
+      - '**/*.cmake'
+      - '**/CMakeLists.txt'
+      - '**/*.py'
+      - 'libs/**'
+      - '.github/workflows/codeql-analysis.yml'
+  merge_group:
+  schedule:
+    - cron: '30 5 * * 6'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+env:
+  Z3_VERSION: 4.10.0
+
+jobs:
+  analyze:
+    name: Analyze ${{ matrix.language }}
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'cpp', 'python' ]
+        compiler: [ clang++-11 ]
+        build_type: [ Debug ]
+
+    steps:
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: true
+          dotnet: false
+          haskell: false
+          large-packages: false
+          docker-images: false
+          swap-storage: false
+
+      - name: Install libraries and the respective compiler
+        run: sudo apt-get update && sudo apt-get install -yq libtbb-dev ${{matrix.compiler}}
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: '${{matrix.os}}-${{matrix.compiler}}'
+          variant: ccache
+          save: true
+          max-size: 10G
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10.x'
+          cache: 'pip'
+
+      - name: Setup mold
+        uses: rui314/setup-mold@v1
+
+      - name: Install pip packages
+        uses: BSFishy/pip-action@v1
+        with:
+          requirements: ${{github.workspace}}/libs/mugen/requirements.txt
+
+      - name: Setup Z3 Solver
+        id: z3
+        uses: cda-tum/setup-z3@v1
+        with:
+          version: ${{env.Z3_VERSION}}
+          platform: linux
+          architecture: x64
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+      # Initializes the CodeQL tools for scanning.
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          config-file: .github/codeql-config.yml
+
+      - if: matrix.language == 'cpp'
+        name: Create Build Environment
+        run: cmake -E make_directory ${{github.workspace}}/build
+
+      - if: matrix.language == 'cpp'
+        name: Configure CMake
+        working-directory: ${{github.workspace}}/build
+        run: >
+          cmake ${{github.workspace}}
+          -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
+          -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
+          -DFICTION_ENABLE_UNITY_BUILD=ON
+          -DFICTION_ENABLE_PCH=ON
+          -DFICTION_CLI=ON
+          -DFICTION_TEST=ON
+          -DFICTION_EXPERIMENTS=ON
+          -DFICTION_Z3=ON
+          -DFICTION_ENABLE_MUGEN=ON
+          -DFICTION_PROGRESS_BARS=OFF
+          -DFICTION_WARNINGS_AS_ERRORS=OFF
+          -DMOCKTURTLE_EXAMPLES=OFF
+
+      - if: matrix.language == 'cpp'
+        name: Build fiction
+        working-directory: ${{github.workspace}}/build
+        run: cmake --build . --config ${{matrix.build_type}} -j4
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          upload: false
+          output: sarif-results
+
+      - name: Filter SARIF file to exclude library warnings
+        uses: advanced-security/filter-sarif@main
+        with:
+          patterns: |
+            -**/libs/**
+            -**/docs/**
+            -**/experiments/**
+          input: sarif-results/${{ matrix.language }}.sarif
+          output: sarif-results/${{ matrix.language }}.sarif
+
+      - name: Upload SARIF to GitHub
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: sarif-results/${{ matrix.language }}.sarif

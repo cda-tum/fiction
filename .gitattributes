@@ -2,6 +2,12 @@ benchmarks/* linguist-vendored
 benchmarks/TOY/* linguist-vendored
 benchmarks/ISCAS89/* linguist-vendored
 benchmarks/EPFL/* linguist-vendored
-benchmarks/ITC99/* linguist-vendored
+benchmarks/fontes18/* linguist-vendored
+benchmarks/trindade16/* linguist-vendored
 *.v linguist-detectable=false
 *.fs linguist-detectable=false
+libs/* linguist-detectable=false
+libs/combinations/* linguist-detectable=false
+libs/graph-coloring/* linguist-detectable=false
+libs/mugen/* linguist-detectable=false
+libs/undirected_graph/* linguist-detectable=false

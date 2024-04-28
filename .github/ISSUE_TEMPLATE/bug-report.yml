@@ -1,0 +1,65 @@
+name: 🐛 Bug report
+description: Something is not working correctly.
+title: "🐛 <title>"
+labels: [ "bug" ]
+assignees:
+  - marcelwa
+body:
+  - type: markdown
+    attributes:
+      value: >-
+        **Thank you for wanting to report a bug for this project!**
+
+        ⚠
+        Verify first that your issue is not [already reported on GitHub](https://github.com/cda-tum/fiction/search?q=is%3Aissue&type=issues).
+
+        If you are having general questions, please consider [starting a discussion](https://github.com/cda-tum/fiction/discussions).
+  - type: markdown
+    attributes:
+      value: >-
+        **Environment**
+  - type: input
+    attributes:
+      label: fiction version
+      placeholder: For example, fiction===0.4.0
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: OS
+      placeholder: For example, Ubuntu 22.04, macOS Big Sur, Windows etc.
+    validations:
+      required: true
+  - type: input
+    attributes:
+      label: Python version
+      placeholder: For example, Python 3.10
+  - type: input
+    attributes:
+      label: C++ compiler
+      placeholder: For example, gcc-10
+  - type: textarea
+    attributes:
+      label: Additional environment information
+      description: Feel free to add more information about your environment here.
+  - type: textarea
+    attributes:
+      label: Description
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Expected behavior
+      description: A clear and concise description of what you expected to happen.
+  - type: textarea
+    attributes:
+      label: How to Reproduce
+      description: Please provide steps to reproduce this bug.
+      placeholder: |
+        1. Does the bug occur in the CLI, the library, an experiment, or a test?
+        2. When inputting the following file, ...
+        3. When executing the following code/command, ...
+        4. The error ... occurs.
+    validations:
+      required: true

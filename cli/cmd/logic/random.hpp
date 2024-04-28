@@ -5,10 +5,11 @@
 #ifndef FICTION_CMD_RANDOM_HPP
 #define FICTION_CMD_RANDOM_HPP
 
+#include <fiction/algorithms/network_transformation/network_conversion.hpp>
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
-#include <mockturtle/generators/random_logic_generator.hpp>
+#include <mockturtle/generators/random_network.hpp>
 #include <mockturtle/traits.hpp>
 
 #include <memory>
@@ -36,14 +37,14 @@ class random_command : public command
         add_flag("--xag,-x", "Create random XAG network");
         add_flag("--mig,-m", "Create random MIG network");
         add_flag("--tec,-t", "Create random technology network");
-        add_option("--rnd_num_inp,-n", num_inp, "Number of primary inputs", true);
-        add_option("--rnd_num_gates,-g", num_gates, "Number of gates (excluding inverters and fan-outs)", true);
-        add_option("--rnd_seed,-s", seed, "Random seed");
+        add_option("--rnd_num_inp,-n", ps.num_pis, "Number of primary inputs", true);
+        add_option("--rnd_num_gates,-g", ps.num_gates, "Number of gates (excluding inverters and fan-outs)", true);
+        add_option("--rnd_seed,-s", ps.seed, "Random seed");
     }
 
   protected:
     /**
-     * Function to perform the synth call. Generates a logic network from a truth table.
+     * Function to perform the synth call. Generates a random logic network.
      */
     void execute() override
     {
@@ -55,19 +56,19 @@ class random_command : public command
         {
             if (is_set("aig"))
             {
-                generate<fiction::aig_nt, false>();
+                generate<fiction::aig_nt>(mockturtle::random_aig_generator(ps));
             }
             if (is_set("xag"))
             {
-                generate<fiction::xag_nt, false>();
+                generate<fiction::xag_nt>(mockturtle::random_xag_generator(ps));
             }
             if (is_set("mig"))
             {
-                generate<fiction::mig_nt, true>();
+                generate<fiction::mig_nt>(mockturtle::random_mig_generator(ps));
             }
             if (is_set("tec"))
             {
-                generate<fiction::tec_nt, true>();
+                generate<fiction::tec_nt>(mockturtle::mixed_random_mig_generator(ps));
             }
         }
 
@@ -76,79 +77,28 @@ class random_command : public command
 
   private:
     /**
-     * Number of primary inputs to generate.
+     * Parameters.
      */
-    uint32_t num_inp = 4;
-    /**
-     * Number of gates to generate excluding inverters and fan-outs.
-     */
-    uint32_t num_gates = 8;
-    /**
-     * Random seed.
-     */
-    uint64_t seed = static_cast<uint64_t>(std::chrono::system_clock::now().time_since_epoch().count());
-
-    /**
-     * Generates rules for the logic generator. Can in- and exclude Majority gates.
-     *
-     * Parts of this code are originally from:
-     * https://github.com/lsils/mockturtle/blob/master/include/mockturtle/generators/random_logic_generator.hpp
-     *
-     * @tparam Ntk Network type to use.
-     * @tparam Maj Flag to indicate that Majority gates should be used.
-     * @return A random logic generator with a generated set of rules.
-     */
-    template <typename Ntk, bool Maj>
-    mockturtle::random_logic_generator<Ntk> random_fcn_logic_generator() const noexcept
-    {
-        using gen_t = mockturtle::random_logic_generator<Ntk>;
-
-        typename gen_t::rules_t gen_rules;
-        if constexpr (Maj)
-        {
-            gen_rules.emplace_back(typename gen_t::rule{[](Ntk& ntk, std::vector<mockturtle::signal<Ntk>> const& vs)
-                                                        {
-                                                            assert(vs.size() == 3u);
-                                                            return ntk.create_maj(vs[0], vs[1], vs[2]);
-                                                        },
-                                                        3u});
-        }
-        gen_rules.emplace_back(typename gen_t::rule{[](Ntk& ntk, std::vector<mockturtle::signal<Ntk>> const& vs)
-                                                    {
-                                                        assert(vs.size() == 2u);
-                                                        return ntk.create_and(vs[0], vs[1]);
-                                                    },
-                                                    2u});
-        gen_rules.emplace_back(typename gen_t::rule{[](Ntk& ntk, std::vector<mockturtle::signal<Ntk>> const& vs)
-                                                    {
-                                                        assert(vs.size() == 2u);
-                                                        return ntk.create_or(vs[0], vs[1]);
-                                                    },
-                                                    2u});
-
-        return mockturtle::random_logic_generator<Ntk>(gen_rules);
-    }
+    mockturtle::random_network_generator_params_size ps{static_cast<uint64_t>(
+        std::chrono::system_clock::now().time_since_epoch().count())};  // default random seed is current time
     /**
      * The actual network generator. Builds a logic_network from the generated random logic.
      *
      * @tparam Ntk Network type to generate.
      */
-    template <typename Ntk, bool Maj>
-    void generate() const noexcept
+    template <typename Ntk, typename Generator>
+    void generate(Generator gen) const
     {
         store<fiction::logic_network_t>().extend() =
-            std::make_shared<Ntk>(mockturtle::random_logic_generator<Ntk>(random_fcn_logic_generator<Ntk, Maj>())
-                                      .generate(num_inp, num_gates, seed),
-                                  std::to_string(seed));
+            std::make_shared<Ntk>(fiction::convert_network<Ntk>(gen.generate()), std::to_string(ps.seed));
     }
     /**
      * Reset all flags, necessary for some reason... alice bug?
      */
     void reset_flags()
     {
-        num_inp   = 4;
-        num_gates = 8;
-        seed      = static_cast<uint64_t>(std::chrono::system_clock::now().time_since_epoch().count());
+        ps      = {};
+        ps.seed = static_cast<uint64_t>(std::chrono::system_clock::now().time_since_epoch().count());
     }
 };
 

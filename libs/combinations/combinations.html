@@ -1,0 +1,2324 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN"
+        "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+    <title>Combinations and Permutations</title>
+    <style type="text/css">
+    p {text-align:justify}
+    li {text-align:justify}
+    blockquote.note
+    {
+        background-color:#E0E0E0;
+        padding-left: 15px;
+        padding-right: 15px;
+        padding-top: 1px;
+        padding-bottom: 1px;
+    }
+    ins {background-color:#A0FFA0}
+    del {background-color:#FFA0A0}
+    </style>
+</head>
+<body>
+
+<address align=right>
+Document number: Dxxxx=xx-xxxx<br>
+<br>
+<a href="mailto:howard.hinnant@gmail.com">Howard Hinnant</a><br>
+
+2011-07-02
+</address>
+<hr>
+<h1 align="center">Combinations and Permutations</h1>
+
+<h2>Contents</h2>
+
+<ul>
+<li><a href="#Introduction">Introduction</a></li>
+<li><a href="#Examples">Examples</a></li>
+<li><a href="#Performance">Performance Considerations</a></li>
+<li><a href="#Synopsis">Synopsis</a></li>
+<li><a href="#Specification">Specification</a></li>
+<li><a href="#Implementation">Implementation</a></li>
+</ul>
+
+<h2><a name="Introduction"></a>Introduction</h2>
+
+<p>
+It doesn't happen very often, but every once in awhile one needs to iterate over
+all of the combinations or permutations of a set of objects.  Or more
+specifically, given a set of <tt>N</tt> objects, you want to consider <tt>r</tt>
+of them at a time (for each combination or permutation).  The standard library
+offers <tt>next_permutation</tt>, but this offering alone has a few drawbacks:
+</p>
+
+<ul>
+<li>
+<tt>next_permutation</tt> only offers permutations of <tt>N</tt> objects taken
+<tt>N</tt> at a time.  If you only need to consider permutations of length
+<tt>r</tt> chosen from a list of length <tt>N</tt> then you can save a factor of
+<tt>(n-r)!</tt> by iterating over only the permutations you need. If <tt>r</tt>
+is small compared to <tt>N</tt> this can easily be several orders of magnitude
+faster than iterating over all <tt>N!</tt> permutations.
+</li>
+<li>
+If one only needs permutations, but not the reverse permutation, a factor
+of 2 can be saved by iterating only over reversible permutations.
+</li>
+<li>
+If your permutations are of a circular nature, you can save a factor of <tt>r</tt>
+by iterating over only distinct circular permutations.
+</li>
+<li>
+If your permutations are of a circular nature <em>and</em> it doesn't matter
+whether your permutation goes in a clockwise or counter-clockwise direction,
+then iterating only over distinct reversible, circular permutations can save
+a factor of <tt>2r</tt> iterations compared to iterating over all <tt>N!</tt>
+permutations.
+</li>
+<li>
+If you're examining permutations of length <tt>r</tt> out of a list of length
+<tt>N</tt> and order doesn't matter at all in each list of length <tt>r</tt>,
+then it is far cheaper to iterate only over combinations of the <tt>N</tt>
+items taken <tt>r</tt> at a time (by a factor of <tt>r!</tt>).
+</li>
+<li>
+The user interface of <tt>next_permutation</tt> is potentially expensive:
+for each iteration the algorithm must do a search for the next iteration.  When
+iterating <tt>N</tt> items taken <tt>r</tt> at a time, and when the number of
+iterations is far less than <tt>N!</tt> (as it will be for many practical
+problems), then the time spent finding the next iteration using a
+<tt>next_permutation</tt>-style interface can completely swamp the time you
+spend actually visiting each permutation.
+</li>
+<li>
+To use <tt>next_permutation</tt>, the sequence must be LessThanComparable
+and in sorted order.  These requirements can be inconvenient, even impractical,
+and are completely unnecessary.
+</li>
+</ul>
+
+<p>
+Below is a solution to each of these problems and more.  The following generic
+algorithms permit a client to visit every combination or permuation of a
+sequence of length <tt>N</tt>, <tt>r</tt> items at time.
+</p>
+
+<blockquote><pre>
+template &lt;class BidirIter, class Function&gt;
+Function
+<b>for_each_permutation</b>(BidirIter first,
+                     BidirIter mid,
+                     BidirIter last,
+                     Function f);
+
+template &lt;class BidirIter, class Function&gt;
+Function
+<b>for_each_reversible_permutation</b>(BidirIter first,
+                                BidirIter mid,
+                                BidirIter last,
+                                Function f);
+
+template &lt;class BidirIter, class Function&gt;
+Function
+<b>for_each_circular_permutation</b>(BidirIter first,
+                              BidirIter mid,
+                              BidirIter last,
+                              Function f);
+
+template &lt;class BidirIter, class Function&gt;
+Function
+<b>for_each_reversible_circular_permutation</b>(BidirIter first,
+                                         BidirIter mid,
+                                         BidirIter last,
+                                         Function f);
+
+template &lt;class BidirIter, class Function&gt;
+Function
+<b>for_each_combination</b>(BidirIter first,
+                     BidirIter mid,
+                     BidirIter last,
+                     Function f);
+</pre></blockquote>
+
+
+<p>
+These each follow a <tt>for_each</tt> style:  The algorithm calls a user
+supplied function object for each combination/permutation in the sequence:
+<tt>f(begin, end)</tt>.  That function object can of course maintain state.  The
+sequence need not be sorted, nor even contain unique objects.  The algorithms do
+not consider the value of the sequence elements at all.  That is, the element
+type need not support <tt>LessThanComparable</tt> nor
+<tt>EqualityComparable</tt>. Furthermore the algorithms follow three additional
+rules:
+</p>
+
+<ol>
+<li>
+On normal (non-exceptional) completion, the sequence is always left in the
+original order.
+</li>
+
+<li>
+<p>
+The functor is always called with <tt>[first, mid)</tt>.  This enables the
+functor to also access the elements not in the sequence if it is aware of the
+sequence: <tt>[mid, last)</tt>.  This can come in handy when dealing
+with nested combination/permutation problems where for each permutation you
+<em>also</em> need to compute combinations and/or permutations on those elements
+<em>not</em> selected.
+</p>
+</li>
+
+<li>
+<p>
+The functor should return <tt>true</tt> or <tt>false</tt>:
+</p>
+<ul>
+<li>
+<tt>true</tt> if the functor wishes to break out of the <tt>for_each_</tt> loop.
+</li>
+<li>
+Otherwise <tt>false</tt>.
+</li>
+</ul>
+</li>
+
+</ol>
+
+<p>
+The following generic algorithms take a (preferably unsigned) integral type and
+return the number of combinations or permutations that exist.  Traditionally
+these functions represent functions such as <tt><sub>n</sub>C<sub>r</sub></tt>
+and <tt><sub>n</sub>P<sub>r</sub></tt>.  This API breaks with tradition
+concerning the definition of <tt>n</tt>.  These functions compute:
+<tt><sub>d1+d2</sub>C<sub>d1</sub></tt>, and
+<tt><sub>d1+d2</sub>P<sub>d1</sub></tt>, and the related variations for
+reversible and circular permuations.  The rationale for this API is to avoid
+invalid inputs.  For example if we input <tt>n</tt> and <tt>r</tt> from
+<tt><sub>n</sub>C<sub>r</sub></tt>, then we would have to check to make sure
+that the precondition <tt>n &ge; r</tt> is true, and if not throw an
+<tt>invalid_argument</tt> exception.  But with the inputs <tt>d1</tt> and
+<tt>d2</tt>, which represent <tt>distance(first, mid)</tt> and
+<tt>distance(mid, last)</tt> respectively, there is no opportunity for invalid
+inputs as long as we stick to unsigned integral types.  However overflow is a
+very real possibility.  And if signed integral types are input (or a type
+emulating signed integral types), then negative arguments will result in an
+<tt>invalid_argument</tt> exception.
+</p>
+
+<blockquote><pre>
+template &lt;class UInt&gt;
+UInt
+<b>count_each_combination</b>(UInt d1, UInt d2);
+
+template &lt;class UInt&gt;
+UInt
+<b>count_each_permutation</b>(UInt d1, UInt d2);
+
+template &lt;class UInt&gt;
+UInt
+<b>count_each_circular_permutation</b>(UInt d1, UInt d2);
+
+template &lt;class UInt&gt;
+UInt
+<b>count_each_reversible_permutation</b>(UInt d1, UInt d2);
+
+template &lt;class UInt&gt;
+UInt
+<b>count_each_reversible_circular_permutation</b>(UInt d1, UInt d2);
+</pre></blockquote>
+
+<p>
+Each of the above algorithms avoids intermediate overflow.  That is, if the
+final answer is representable as a <tt>UInt</tt>, then they will return the
+correct answer.  Otherwise they will throw a <tt>std::overflow_error</tt>.  This
+noisy overflow protection is necessary as these functions can easily overflow.
+For example <tt>count_each_combination(33ull, 34ull)</tt> returns
+14,226,520,737,620,288,370.  But
+<tt>count_each_combination(33ull, 35ull)</tt> overflows for a 64 bit
+<tt>unsigned long long</tt>.  Without overflow protection, the returned result
+will look quite reasonable to the casual observer and overflow is likely to
+happen accidentally, go unnoticed, and cause further problems in program logic
+which will be more difficult to diagnose.
+</p>
+
+<p>
+Furthermore the following convenience functions are provided in order to more
+easily "preflight" ranges sent to the <tt>for_each_*</tt> algorithms.  The
+reason that the <tt>UInt</tt> overloads of these algorithms exist is so that you
+don't <em>have</em> to create a range to compute
+<tt><sub>3000</sub>C<sub>2</sub></tt>.  Instead you can simply call
+<tt>count_each_combination(2ull, 2998ull)</tt> (for example).
+</p>
+
+<blockquote><pre>
+template &lt;class BidirIter&gt;
+std::uintmax_t
+<b>count_each_combination</b>(BidirIter first,
+                       BidirIter mid,
+                       BidirIter last);
+
+
+template &lt;class BidirIter&gt;
+std::uintmax_t
+<b>count_each_permutation</b>(BidirIter first,
+                       BidirIter mid,
+                       BidirIter last);
+
+template &lt;class BidirIter&gt;
+std::uintmax_t
+<b>count_each_circular_permutation</b>(BidirIter first,
+                                BidirIter mid,
+                                BidirIter last);
+
+template &lt;class BidirIter&gt;
+std::uintmax_t
+<b>count_each_reversible_permutation</b>(BidirIter first,
+                                  BidirIter mid,
+                                  BidirIter last);
+
+template &lt;class BidirIter&gt;
+std::uintmax_t
+<b>count_each_reversible_circular_permutation</b>(BidirIter first,
+                                           BidirIter mid,
+                                           BidirIter last);
+</pre></blockquote>
+
+<h2><a name="Examples"></a>Examples</h2>
+
+<p>
+Below an example simply fills a vector with consecutive integers, and calls
+<tt>for_each_permutation</tt> on a functor that will print out the permutation.
+The functor will also print out items not in the permutation after a trailing
+<tt>'|'</tt>.  The functor also counts the number of permutations visited so
+that the client can query that amount after the call to
+<tt>for_each_permutation</tt>.
+</p>
+
+<blockquote><pre>
+#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;numeric&gt;
+#include &lt;cstdint&gt;
+#include &lt;cassert&gt;
+
+<font color="#C80000">// print out a range separated by commas,</font>
+<font color="#C80000">//    return number of values printed.</font>
+template &lt;class It&gt;
+unsigned
+display(It begin, It end)
+{
+    unsigned r = 0;
+    if (begin != end)
+    {
+        std::cout &lt;&lt; *begin;
+        ++r;
+        for (++begin; begin != end; ++begin)
+        {
+            std::cout &lt;&lt; ", " &lt;&lt; *begin;
+            ++r;
+        }
+    }
+    return r;
+}
+
+<font color="#C80000">// functor called for each permutation</font>
+class f
+{
+    unsigned len;
+    std::uint64_t count;
+public:
+    explicit f(unsigned l) : len(l), count(0) {}
+
+    template &lt;class It&gt;
+        <b>bool operator()(It first, It last)</b>  <font color="#C80000">// called for each permutation</font>
+        {
+            <font color="#C80000">// count the number of times this is called</font>
+            ++count;
+            <font color="#C80000">// print out [first, mid) surrounded with [ ... ]</font>
+            std::cout &lt;&lt; "[ ";
+            unsigned r = display(first, last);
+            <font color="#C80000">// If [mid, last) is not empty, then print it out too</font>
+            <font color="#C80000">//     prefixed by " | "</font>
+            if (r &lt; len)
+            {
+                std::cout &lt;&lt; " | ";
+                display(last, std::next(last, len - r));
+            }
+            std::cout &lt;&lt; " ]\n";
+            return false;  <font color="#C80000">// Don't break out of the loop</font>
+        }
+
+    operator std::uint64_t() const {return count;}
+};
+
+int main()
+{
+    const int r = 3;
+    const int n = 5;
+    std::vector&lt;int&gt; v(n);
+    std::iota(v.begin(), v.end(), 0);
+    std::uint64_t count = <b>for_each_permutation(v.begin(),
+                                               v.begin() + r,
+                                               v.end(),
+                                               f(v.size()));</b>
+    <font color="#C80000">// print out "---" to the correct length for the above output</font>
+    unsigned e = 3 * r + 2;
+    if (r &lt; v.size())
+        e += 1 + 3 * (v.size() - r);
+    for (unsigned i = 0; i &lt; e; ++i)
+        std::cout &lt;&lt; '-';
+    <font color="#C80000">// print out the permuted vector to show that it has the original order</font>
+    std::cout &lt;&lt; "\n[ ";
+    display(v.begin(), v.end());
+    std::cout &lt;&lt; " ]\n";
+    <font color="#C80000">// sanity check</font>
+    assert(count == <b>count_each_permutation(v.begin(), v.begin() + r, v.end()));</b>
+    <font color="#C80000">// print out summary of what has happened,</font>
+    <font color="#C80000">//   using 'count' from functor state returned from for_each_permutation algorithm.</font>
+    std::cout &lt;&lt; "Found " &lt;&lt; count &lt;&lt; " permutations of " &lt;&lt; v.size()
+              &lt;&lt; " objects taken " &lt;&lt; r &lt;&lt; " at a time.\n";
+}
+</pre></blockquote>
+
+<p>
+And this is the output of this program:
+</p>
+
+<blockquote><pre>
+[ 0, 1, 2 | 3, 4 ]
+[ 0, 2, 1 | 3, 4 ]
+[ 1, 0, 2 | 3, 4 ]
+[ 1, 2, 0 | 3, 4 ]
+[ 2, 0, 1 | 3, 4 ]
+[ 2, 1, 0 | 3, 4 ]
+[ 0, 1, 3 | 2, 4 ]
+[ 0, 3, 1 | 2, 4 ]
+[ 1, 0, 3 | 2, 4 ]
+[ 1, 3, 0 | 2, 4 ]
+[ 3, 0, 1 | 2, 4 ]
+[ 3, 1, 0 | 2, 4 ]
+[ 0, 1, 4 | 2, 3 ]
+[ 0, 4, 1 | 2, 3 ]
+[ 1, 0, 4 | 2, 3 ]
+[ 1, 4, 0 | 2, 3 ]
+[ 4, 0, 1 | 2, 3 ]
+[ 4, 1, 0 | 2, 3 ]
+[ 0, 2, 3 | 1, 4 ]
+[ 0, 3, 2 | 1, 4 ]
+[ 2, 0, 3 | 1, 4 ]
+[ 2, 3, 0 | 1, 4 ]
+[ 3, 0, 2 | 1, 4 ]
+[ 3, 2, 0 | 1, 4 ]
+[ 0, 2, 4 | 1, 3 ]
+[ 0, 4, 2 | 1, 3 ]
+[ 2, 0, 4 | 1, 3 ]
+[ 2, 4, 0 | 1, 3 ]
+[ 4, 0, 2 | 1, 3 ]
+[ 4, 2, 0 | 1, 3 ]
+[ 0, 3, 4 | 1, 2 ]
+[ 0, 4, 3 | 1, 2 ]
+[ 3, 0, 4 | 1, 2 ]
+[ 3, 4, 0 | 1, 2 ]
+[ 4, 0, 3 | 1, 2 ]
+[ 4, 3, 0 | 1, 2 ]
+[ 1, 2, 3 | 0, 4 ]
+[ 1, 3, 2 | 0, 4 ]
+[ 2, 1, 3 | 0, 4 ]
+[ 2, 3, 1 | 0, 4 ]
+[ 3, 1, 2 | 0, 4 ]
+[ 3, 2, 1 | 0, 4 ]
+[ 1, 2, 4 | 0, 3 ]
+[ 1, 4, 2 | 0, 3 ]
+[ 2, 1, 4 | 0, 3 ]
+[ 2, 4, 1 | 0, 3 ]
+[ 4, 1, 2 | 0, 3 ]
+[ 4, 2, 1 | 0, 3 ]
+[ 1, 3, 4 | 0, 2 ]
+[ 1, 4, 3 | 0, 2 ]
+[ 3, 1, 4 | 0, 2 ]
+[ 3, 4, 1 | 0, 2 ]
+[ 4, 1, 3 | 0, 2 ]
+[ 4, 3, 1 | 0, 2 ]
+[ 2, 3, 4 | 0, 1 ]
+[ 2, 4, 3 | 0, 1 ]
+[ 3, 2, 4 | 0, 1 ]
+[ 3, 4, 2 | 0, 1 ]
+[ 4, 2, 3 | 0, 1 ]
+[ 4, 3, 2 | 0, 1 ]
+------------------
+[ 0, 1, 2, 3, 4 ]
+Found 60 permutations of 5 objects taken 3 at a time.
+</pre></blockquote>
+
+<p>
+The above list can be cut in half by instead calling:
+</p>
+
+<blockquote><pre>
+for_each_reversible_permutation(v.begin(), v.begin() + r, v.end(), f(v.size()));
+
+[ 0, 1, 2 | 3, 4 ]
+[ 0, 2, 1 | 3, 4 ]
+[ 1, 0, 2 | 3, 4 ]
+[ 0, 1, 3 | 2, 4 ]
+[ 0, 3, 1 | 2, 4 ]
+[ 1, 0, 3 | 2, 4 ]
+[ 0, 1, 4 | 2, 3 ]
+[ 0, 4, 1 | 2, 3 ]
+[ 1, 0, 4 | 2, 3 ]
+[ 0, 2, 3 | 1, 4 ]
+[ 0, 3, 2 | 1, 4 ]
+[ 2, 0, 3 | 1, 4 ]
+[ 0, 2, 4 | 1, 3 ]
+[ 0, 4, 2 | 1, 3 ]
+[ 2, 0, 4 | 1, 3 ]
+[ 0, 3, 4 | 1, 2 ]
+[ 0, 4, 3 | 1, 2 ]
+[ 3, 0, 4 | 1, 2 ]
+[ 1, 2, 3 | 0, 4 ]
+[ 1, 3, 2 | 0, 4 ]
+[ 2, 1, 3 | 0, 4 ]
+[ 1, 2, 4 | 0, 3 ]
+[ 1, 4, 2 | 0, 3 ]
+[ 2, 1, 4 | 0, 3 ]
+[ 1, 3, 4 | 0, 2 ]
+[ 1, 4, 3 | 0, 2 ]
+[ 3, 1, 4 | 0, 2 ]
+[ 2, 3, 4 | 0, 1 ]
+[ 2, 4, 3 | 0, 1 ]
+[ 3, 2, 4 | 0, 1 ]
+------------------
+[ 0, 1, 2, 3, 4 ]
+Found 30 permutations of 5 objects taken 3 at a time.
+</pre></blockquote>
+
+<p>
+For example <tt>[ 2, 1, 0 ]</tt> is not found in the above list.
+</p>
+
+<p>
+By instead calling:
+</p>
+
+<blockquote><pre>
+for_each_circular_permutation(v.begin(), v.begin() + r, v.end(), f(v.size()));
+</pre></blockquote>
+
+<p>
+the original list can be cut by a third:
+</p>
+
+<blockquote><pre>
+[ 0, 1, 2 | 3, 4 ]
+[ 0, 2, 1 | 3, 4 ]
+[ 0, 1, 3 | 2, 4 ]
+[ 0, 3, 1 | 2, 4 ]
+[ 0, 1, 4 | 2, 3 ]
+[ 0, 4, 1 | 2, 3 ]
+[ 0, 2, 3 | 1, 4 ]
+[ 0, 3, 2 | 1, 4 ]
+[ 0, 2, 4 | 1, 3 ]
+[ 0, 4, 2 | 1, 3 ]
+[ 0, 3, 4 | 1, 2 ]
+[ 0, 4, 3 | 1, 2 ]
+[ 1, 2, 3 | 0, 4 ]
+[ 1, 3, 2 | 0, 4 ]
+[ 1, 2, 4 | 0, 3 ]
+[ 1, 4, 2 | 0, 3 ]
+[ 1, 3, 4 | 0, 2 ]
+[ 1, 4, 3 | 0, 2 ]
+[ 2, 3, 4 | 0, 1 ]
+[ 2, 4, 3 | 0, 1 ]
+------------------
+[ 0, 1, 2, 3, 4 ]
+Found 20 permutations of 5 objects taken 3 at a time.
+</pre></blockquote>
+
+<p>
+For example you will not find the following in the above list:
+</p>
+
+<blockquote><pre>
+[ 1, 2, 0 ]  // rotate(0, 1, 3) of permutation 1
+[ 2, 0, 1 ]  // rotate(0, 2, 3) of permutation 1
+</pre></blockquote>
+
+<p>
+And if your circular permutations are also reversible, your list (and time
+spent) can be halved again:
+</p>
+
+<blockquote><pre>
+for_each_reversible_circular_permutation(v.begin(), v.begin() + r, v.end(), f(v.size()));
+
+[ 0, 1, 2 | 3, 4 ]
+[ 0, 1, 3 | 2, 4 ]
+[ 0, 1, 4 | 2, 3 ]
+[ 0, 2, 3 | 1, 4 ]
+[ 0, 2, 4 | 1, 3 ]
+[ 0, 3, 4 | 1, 2 ]
+[ 1, 2, 3 | 0, 4 ]
+[ 1, 2, 4 | 0, 3 ]
+[ 1, 3, 4 | 0, 2 ]
+[ 2, 3, 4 | 0, 1 ]
+------------------
+[ 0, 1, 2, 3, 4 ]
+Found 10 permutations of 5 objects taken 3 at a time.
+</pre></blockquote>
+
+<p>
+For example you will not find the following in the above list:
+</p>
+
+<blockquote><pre>
+[ 2, 1, 0 ]  // reverse(0, 3) of permutation(1)
+[ 1, 2, 0 ]  // rotate(0, 1, 3) of permutation(1)
+[ 0, 2, 1 ]  // reverse of rotate(0, 1, 3) of permutation(1)
+[ 2, 0, 1 ]  // rotate(0, 2, 3) of permutation(1)
+[ 1, 0, 2 ]  // reverse of rotate(0, 2, 3) of permutation(1)
+</pre></blockquote>
+
+<p>
+When <tt>r</tt> is 3 or less, then reversible circular permutations are the
+exact same as combinations.  In this case use of <tt>for_each_combination</tt>
+should be preferred as it will be a little more efficient.  Additionally when
+<tt>r</tt> is 2 or less, <tt>for_each_combination</tt> produces the same result
+as <tt>for_each_circular_permutation</tt> and
+<tt>for_each_reversible_permutation</tt>.  When <tt>r == 1</tt>, all five
+algorithms produce the same <tt>N</tt> permutations.  When <tt>r == 0</tt>, all
+five algorithms call the functor once with the empty range <tt>[first,
+first)</tt>.
+</p>
+
+<p>
+<img align="right" hspace="10" vspace="10" height="800" src="fig1.tiff"/>
+</p>
+
+<h2><a name="Performance"></a>Performance Considerations</h2>
+
+<p>
+Herve&#769; Bro&#776;nnimann published
+<a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2008/n2639.pdf">N2639</a>
+proposing functionality somewhat similar as to what is outlined herein,
+including:
+</p>
+
+<blockquote><pre>
+template &lt;class BidirIter&gt;
+bool
+next_partial_permutation(BidirIter first,
+                         BidirIter mid,
+                         BidirIter last);
+
+template &lt;class BidirIter &gt;
+bool
+next_combination(BidirIter first,
+                 BidirIter mid,
+                 BidirIter last);
+</pre></blockquote>
+
+
+<p>
+This interface follows the style of the existing <tt>std::next_permutation</tt>
+algorithm.  It is the inverse of the <tt>for_each</tt> style:  The client calls
+the functor directly, and then calls the algorithm to find the next iteration.
+</p>
+
+<p>
+The problem with this interface is that it can get expensive to find the next
+iteration.  For example when calling <tt>for_each_permutation</tt> and
+<tt>next_partial_permutation</tt> with <tt>r == 4</tt> and varying <tt>N</tt>
+from 4 to 100, the time to iterate through the permutations skyrockets for
+<tt>next_partial_permutation</tt>, but not for <tt>for_each_permutation</tt>. By
+the time <tt>N == 100</tt>, <tt>for_each_permutation</tt> is running over 137
+times faster than <tt>next_partial_permutation</tt> which takes 20 seconds to do
+what <tt>for_each_permutation</tt> accomplishes in well under one sixth of a
+second. This trend rapidly gets worse as <tt>N</tt> grows.
+</p>
+
+<p>
+The same performance comparison can be made between <tt>next_combination</tt>
+and <tt>for_each_combination</tt>.  It should be stressed that this isn't a lack
+of quality or care put into the
+<a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2008/n2639.pdf">N2639</a>
+implementation.  I've studied that implementation carefully and consider it very
+high quality.  It is simply that the number of comparisons that need to be done
+to find out which swaps need to be done gets outrageously expensive.  The number
+of swaps actually performed in both algorithms is approximately the same.  At <tt>N ==
+100</tt> <tt>for_each_combination</tt> is running about 14 times faster
+than <tt>next_combination</tt>.  And that discrepancy only grows as the number
+of combinations increases.
+</p>
+
+<h2><a name="Synopsis"></a>Synopsis</h2>
+
+<blockquote><pre>
+<font color="#C80000">// Integral-based count_each_*</font>
+
+template &lt;class UInt&gt;
+UInt
+count_each_permutation(UInt d1, UInt d2);
+
+template &lt;class UInt&gt;
+UInt
+count_each_reversible_permutation(UInt d1, UInt d2);
+
+template &lt;class UInt&gt;
+UInt
+count_each_circular_permutation(UInt d1, UInt d2);
+
+template &lt;class UInt&gt;
+UInt
+count_each_reversible_circular_permutation(UInt d1, UInt d2);
+
+template &lt;class UInt&gt;
+UInt
+count_each_combination(UInt d1, UInt d2);
+
+<font color="#C80000">// Iterator-based count_each_*</font>
+
+template &lt;class BidirIter&gt;
+std::uintmax_t
+count_each_permutation(BidirIter first,
+                       BidirIter mid,
+                       BidirIter last);
+
+template &lt;class BidirIter&gt;
+std::uintmax_t
+count_each_reversible_permutation(BidirIter first,
+                                  BidirIter mid,
+                                  BidirIter last);
+
+template &lt;class BidirIter&gt;
+std::uintmax_t
+count_each_circular_permutation(BidirIter first,
+                                BidirIter mid,
+                                BidirIter last);
+
+template &lt;class BidirIter&gt;
+std::uintmax_t
+count_each_reversible_circular_permutation(BidirIter first,
+                                           BidirIter mid,
+                                           BidirIter last);
+
+template &lt;class BidirIter&gt;
+std::uintmax_t
+count_each_combination(BidirIter first,
+                       BidirIter mid,
+                       BidirIter last);
+
+<font color="#C80000">// Iterator-based for_each_* algorithms</font>
+
+template &lt;class BidirIter, class Function&gt;
+Function
+for_each_permutation(BidirIter first,
+                     BidirIter mid,
+                     BidirIter last,
+                     Function f);
+
+template &lt;class BidirIter, class Function&gt;
+Function
+for_each_reversible_permutation(BidirIter first,
+                                BidirIter mid,
+                                BidirIter last,
+                                Function f);
+
+template &lt;class BidirIter, class Function&gt;
+Function
+for_each_circular_permutation(BidirIter first,
+                              BidirIter mid,
+                              BidirIter last,
+                              Function f);
+
+template &lt;class BidirIter, class Function&gt;
+Function
+for_each_reversible_circular_permutation(BidirIter first,
+                                         BidirIter mid,
+                                         BidirIter last,
+                                         Function f);
+
+template &lt;class BidirIter, class Function&gt;
+Function
+for_each_combination(BidirIter first,
+                     BidirIter mid,
+                     BidirIter last,
+                     Function f);
+</pre></blockquote>
+
+<h2><a name="Specification"></a>Specification</h2>
+
+<p>
+<i>Remarks:</i> In this section a post-fix <tt>!</tt> indicates a
+<a href="http://en.wikipedia.org/wiki/Factorial">factorial operator</a> and has
+higher precedence than any other operator.
+</p>
+
+<blockquote><pre>
+template &lt;class UInt&gt;
+UInt
+count_each_permutation(UInt d1, UInt d2);
+</pre>
+<blockquote>
+<p>
+<i>Requires:</i> <tt>Uint</tt> is an integral type or a type emulating an
+integral type.
+</p>
+
+<p>
+<i>Returns:</i> <tt>(d1 + d2)!/d2!</tt>.
+</p>
+
+<p>
+<i>Throws:</i>  If the computed value is not representable in the type
+<tt>UInt</tt>, throws <tt>std::overflow_error</tt>.  If <tt>d1 &lt; UInt(0)</tt>
+or <tt>d2 &lt; UInt(0)</tt>, throws <tt>std::invalid_argument</tt>.
+</p>
+
+<p>
+<i>Remarks:</i>  If the computed value is representable in the type
+<tt>UInt</tt>, returns the correct value.  This algorithm avoids intermediate
+overflow.
+</p>
+
+</blockquote>
+</blockquote>
+
+<blockquote><pre>
+template &lt;class UInt&gt;
+UInt
+count_each_reversible_permutation(UInt d1, UInt d2);
+</pre>
+<blockquote>
+<p>
+<i>Requires:</i> <tt>Uint</tt> is an integral type or a type emulating an
+integral type.
+</p>
+
+<p>
+<i>Returns:</i> If <tt>d1 &lt;= 1</tt> returns <tt>(d1 + d2)!/d2!</tt>.  Else
+returns <tt>(d1 + d2)!/(2*d2!)</tt>.
+</p>
+
+<p>
+<i>Throws:</i>  If the computed value is not representable in the type
+<tt>UInt</tt>, throws <tt>std::overflow_error</tt>.  If <tt>d1 &lt; UInt(0)</tt>
+or <tt>d2 &lt; UInt(0)</tt>, throws <tt>std::invalid_argument</tt>.
+</p>
+
+<p>
+<i>Remarks:</i>  If the computed value is representable in the type
+<tt>UInt</tt>, returns the correct value.  This algorithm avoids intermediate
+overflow.
+</p>
+
+</blockquote>
+</blockquote>
+
+<blockquote><pre>
+template &lt;class UInt&gt;
+UInt
+count_each_circular_permutation(UInt d1, UInt d2);
+</pre>
+<blockquote>
+<p>
+<i>Requires:</i> <tt>Uint</tt> is an integral type or a type emulating an
+integral type.
+</p>
+
+<p>
+<i>Returns:</i> If <tt>d1 == 0</tt> returns 1.  Else returns <tt>(d1 +
+d2)!/(d1*d2!)</tt>.
+</p>
+
+<p>
+<i>Throws:</i>  If the computed value is not representable in the type
+<tt>UInt</tt>, throws <tt>std::overflow_error</tt>.  If <tt>d1 &lt; UInt(0)</tt>
+or <tt>d2 &lt; UInt(0)</tt>, throws <tt>std::invalid_argument</tt>.
+</p>
+
+<p>
+<i>Remarks:</i>  If the computed value is representable in the type
+<tt>UInt</tt>, returns the correct value.  This algorithm avoids intermediate
+overflow.
+</p>
+
+</blockquote>
+</blockquote>
+
+<blockquote><pre>
+template &lt;class UInt&gt;
+UInt
+count_each_reversible_circular_permutation(UInt d1, UInt d2);
+</pre>
+<blockquote>
+<p>
+<i>Requires:</i> <tt>Uint</tt> is an integral type or a type emulating an
+integral type.
+</p>
+
+<p>
+<i>Returns:</i> If <tt>d1 == 0</tt> returns 1.  Else if <tt>d1 &lt;= 2</tt>
+returns <tt>(d1 + d2)!/(d1*d2!)</tt>.  Else returns <tt>(d1 +
+d2)!/(2*d1*d2!)</tt>.
+</p>
+
+<p>
+<i>Throws:</i>  If the computed value is not representable in the type
+<tt>UInt</tt>, throws <tt>std::overflow_error</tt>.  If <tt>d1 &lt; UInt(0)</tt>
+or <tt>d2 &lt; UInt(0)</tt>, throws <tt>std::invalid_argument</tt>.
+</p>
+
+<p>
+<i>Remarks:</i>  If the computed value is representable in the type
+<tt>UInt</tt>, returns the correct value.  This algorithm avoids intermediate
+overflow.
+</p>
+
+</blockquote>
+</blockquote>
+
+<blockquote><pre>
+template &lt;class UInt&gt;
+UInt
+count_each_combination(UInt d1, UInt d2);
+</pre>
+<blockquote>
+<p>
+<i>Requires:</i> <tt>Uint</tt> is an integral type or a type emulating an
+integral type.
+</p>
+
+<p>
+<i>Returns:</i> <tt>(d1 + d2)!/(d1!*d2!)</tt>.
+</p>
+
+<p>
+<i>Throws:</i>  If the computed value is not representable in the type
+<tt>UInt</tt>, throws <tt>std::overflow_error</tt>.  If <tt>d1 &lt; UInt(0)</tt>
+or <tt>d2 &lt; UInt(0)</tt>, throws <tt>std::invalid_argument</tt>.
+</p>
+
+<p>
+<i>Remarks:</i>  If the computed value is representable in the type
+<tt>UInt</tt>, returns the correct value.  This algorithm avoids intermediate
+overflow.
+</p>
+
+</blockquote>
+</blockquote>
+
+<blockquote><pre>
+template &lt;class FwdIter&gt;
+std::uintmax_t
+count_each_permutation(FwdIter first,
+                           FwdIter mid,
+                           FwdIter last);
+</pre>
+<blockquote>
+<p>
+<i>Requires:</i> <tt>[first, mid)</tt> and <tt>[mid, last)</tt> are valid
+ranges.
+</p>
+
+<p>
+<i>Returns:</i>
+<tt>count_each_permutation&lt;std::uintmax_t&gt;(std::distance(first, mid),
+std::distance(mid, last))</tt>.
+</p>
+
+</blockquote>
+</blockquote>
+
+<blockquote><pre>
+template &lt;class FwdIter&gt;
+std::uintmax_t
+count_each_reversible_permutation(FwdIter first,
+                                      FwdIter mid,
+                                      FwdIter last);
+</pre>
+<blockquote>
+<p>
+<i>Requires:</i> <tt>[first, mid)</tt> and <tt>[mid, last)</tt> are valid
+ranges.
+</p>
+
+<p>
+<i>Returns:</i>
+<tt>count_each_reversible_permutation&lt;std::uintmax_t&gt;(std::distance(first, mid),
+std::distance(mid, last))</tt>.
+</p>
+
+</blockquote>
+</blockquote>
+
+<blockquote><pre>
+template &lt;class FwdIter&gt;
+std::uintmax_t
+count_each_circular_permutation(FwdIter first,
+                                    FwdIter mid,
+                                    FwdIter last);
+</pre>
+<blockquote>
+<p>
+<i>Requires:</i> <tt>[first, mid)</tt> and <tt>[mid, last)</tt> are valid
+ranges.
+</p>
+
+<p>
+<i>Returns:</i>
+<tt>count_each_circular_permutation&lt;std::uintmax_t&gt;(std::distance(first, mid),
+std::distance(mid, last))</tt>.
+</p>
+
+</blockquote>
+</blockquote>
+
+<blockquote><pre>
+template &lt;class FwdIter&gt;
+std::uintmax_t
+count_each_reversible_circular_permutation(FwdIter first,
+                                               FwdIter mid,
+                                               FwdIter last);
+</pre>
+<blockquote>
+<p>
+<i>Requires:</i> <tt>[first, mid)</tt> and <tt>[mid, last)</tt> are valid
+ranges.
+</p>
+
+<p>
+<i>Returns:</i>
+<tt>count_each_reversible_circular_permutation&lt;std::uintmax_t&gt;(std::distance(first, mid),
+std::distance(mid, last))</tt>.
+</p>
+
+</blockquote>
+</blockquote>
+
+<blockquote><pre>
+template &lt;class FwdIter&gt;
+std::uintmax_t
+count_each_combination(FwdIter first,
+                           FwdIter mid,
+                           FwdIter last);
+</pre>
+<blockquote>
+<p>
+<i>Requires:</i> <tt>[first, mid)</tt> and <tt>[mid, last)</tt> are valid
+ranges.
+</p>
+
+<p>
+<i>Returns:</i>
+<tt>count_each_combination&lt;std::uintmax_t&gt;(std::distance(first, mid),
+std::distance(mid, last))</tt>.
+</p>
+
+</blockquote>
+</blockquote>
+
+<blockquote><pre>
+template &lt;class BidirIter, class Function&gt;
+Function
+for_each_permutation(BidirIter first,
+                     BidirIter mid,
+                     BidirIter last,
+                     Function f);
+</pre>
+<blockquote>
+<p>
+<i>Requires:</i>
+</p>
+
+<ul>
+<li>
+The type of <tt>*first</tt> shall satisfy the requirements of
+<tt>Swappable</tt>, <tt>MoveConstructible</tt> and <tt>MoveAssignable</tt>.
+</li>
+<li>
+<tt>[first, mid)</tt> and <tt>[mid, last)</tt> are valid ranges.
+</li>
+<li>
+<tt>Function</tt> shall meet the requirements of <tt>MoveConstructible</tt> and
+<tt>MoveAssignable</tt>.
+</li>
+<li>
+<tt>f</tt> is callable as <tt>f(first, mid)</tt> and returns a type contextually
+convertible to <tt>bool</tt>.
+</li>
+</ul>
+
+<p>
+<i>Effects:</i>  Repeatedly permutes the range <tt>[first, last)</tt> such that
+the range <tt>[first, mid)</tt> represents each permutation of the values in
+<tt>[first, last)</tt> taken <tt>distance(first, mid)</tt> at a time.  For each
+permutation calls <tt>f(first, mid)</tt>.  On each call, the range <tt>[mid,
+last)</tt> holds the values not in the current permutation.  If <tt>f</tt>
+returns <tt>true</tt> then returns immediately without permuting the sequence
+any futher. Otherwise, after the last call to <tt>f</tt>, and prior to
+returning, the range <tt>[first, last)</tt> is restored to its original order.
+[<i>Note:</i> If <tt>f</tt> always returns <tt>false</tt> it is called
+<tt>count_each_permutation(first, mid, last)</tt> times. &mdash; <i>end
+note</i>]
+</p>
+
+<p>
+<i>Returns:</i> <tt>f</tt>.
+</p>
+
+<p>
+<i>Notes:</i>  The type referenced by <tt>*first</tt> need not be
+<tt>EqualityComparable</tt> nor <tt>LessThanComparable</tt>.  The input range
+need not be sorted.  The algorithm does not take the values in the range
+<tt>[first, last)</tt> into account in any way.
+</p>
+
+</blockquote>
+</blockquote>
+
+<blockquote><pre>
+template &lt;class BidirIter, class Function&gt;
+Function
+for_each_reversible_permutation(BidirIter first,
+                                BidirIter mid,
+                                BidirIter last,
+                                Function f);
+</pre>
+<blockquote>
+<p>
+<i>Requires:</i>
+</p>
+
+<ul>
+<li>
+The type of <tt>*first</tt> shall satisfy the requirements of
+<tt>Swappable</tt>, <tt>MoveConstructible</tt> and <tt>MoveAssignable</tt>.
+</li>
+<li>
+<tt>[first, mid)</tt> and <tt>[mid, last)</tt> are valid ranges.
+</li>
+<li>
+<tt>Function</tt> shall meet the requirements of <tt>MoveConstructible</tt> and
+<tt>MoveAssignable</tt>.
+</li>
+<li>
+<tt>f</tt> is callable as <tt>f(first, mid)</tt> and returns a type contextually
+convertible to <tt>bool</tt>.
+</li>
+</ul>
+
+<p>
+<i>Effects:</i>  Repeatedly permutes the range <tt>[first, last)</tt> such that
+the range <tt>[first, mid)</tt> represents each permutation of the values in
+<tt>[first, last)</tt> taken <tt>distance(first, mid)</tt> at a time, except
+that <tt>f</tt> is never called with the reverse of a permutation which has been
+previously called.  For each permutation calls <tt>f(first, mid)</tt>.  On each
+call, the range <tt>[mid, last)</tt> holds the values not in the current
+permutation.   If <tt>f</tt> returns <tt>true</tt> then returns immediately
+without permuting the sequence any futher. Otherwise, after the last call to
+<tt>f</tt>, and prior to returning, the range <tt>[first, last)</tt> is restored
+to its original order. [<i>Note:</i> If <tt>f</tt> always returns <tt>false</tt>
+it is called <tt>count_each_reversible_permutation(first, mid, last)</tt> times.
+&mdash; <i>end note</i>]
+</p>
+
+<p>
+<i>Returns:</i> <tt>f</tt>.
+</p>
+
+<p>
+<i>Notes:</i>  The type referenced by <tt>*first</tt> need not be
+<tt>EqualityComparable</tt> nor <tt>LessThanComparable</tt>.  The input range
+need not be sorted.  The algorithm does not take the values in the range
+<tt>[first, last)</tt> into account in any way.
+</p>
+
+</blockquote>
+</blockquote>
+
+<blockquote><pre>
+template &lt;class BidirIter, class Function&gt;
+Function
+for_each_circular_permutation(BidirIter first,
+                              BidirIter mid,
+                              BidirIter last,
+                              Function f);
+</pre>
+<blockquote>
+<p>
+<i>Requires:</i>
+</p>
+
+<ul>
+<li>
+The type of <tt>*first</tt> shall satisfy the requirements of
+<tt>Swappable</tt>, <tt>MoveConstructible</tt> and <tt>MoveAssignable</tt>.
+</li>
+<li>
+<tt>[first, mid)</tt> and <tt>[mid, last)</tt> are valid ranges.
+</li>
+<li>
+<tt>Function</tt> shall meet the requirements of <tt>MoveConstructible</tt> and
+<tt>MoveAssignable</tt>.
+</li>
+<li>
+<tt>f</tt> is callable as <tt>f(first, mid)</tt> and returns a type contextually
+convertible to <tt>bool</tt>.
+</li>
+</ul>
+
+<p>
+<i>Effects:</i>  Repeatedly permutes the range <tt>[first, last)</tt> such that
+the range <tt>[first, mid)</tt> represents each permutation of the values in
+<tt>[first, last)</tt> taken <tt>distance(first, mid)</tt> at a time, except
+that <tt>f</tt> is never called with a circular permutation which has been
+previously called.  For each permutation calls <tt>f(first, mid)</tt>.  On each
+call, the range <tt>[mid, last)</tt> holds the values not in the current
+permutation.  If <tt>f</tt> returns <tt>true</tt> then returns immediately
+without permuting the sequence any futher. Otherwise, after the last call to
+<tt>f</tt>, and prior to returning, the range <tt>[first, last)</tt> is restored
+to its original order. [<i>Note:</i> If <tt>f</tt> always returns <tt>false</tt>
+it is called <tt>count_each_circular_permutation(first, mid, last)</tt> times.
+&mdash; <i>end note</i>]
+</p>
+
+<p>
+<i>Returns:</i> <tt>f</tt>.
+</p>
+
+<p>
+<i>Notes:</i>  The type referenced by <tt>*first</tt> need not be
+<tt>EqualityComparable</tt> nor <tt>LessThanComparable</tt>.  The input range
+need not be sorted.  The algorithm does not take the values in the range
+<tt>[first, last)</tt> into account in any way.
+</p>
+
+</blockquote>
+</blockquote>
+
+
+<blockquote><pre>
+template &lt;class BidirIter, class Function&gt;
+Function
+for_each_reversible_circular_permutation(BidirIter first,
+                                         BidirIter mid,
+                                         BidirIter last,
+                                         Function f);
+</pre>
+<blockquote>
+<p>
+<i>Requires:</i>
+</p>
+
+<ul>
+<li>
+The type of <tt>*first</tt> shall satisfy the requirements of
+<tt>Swappable</tt>, <tt>MoveConstructible</tt> and <tt>MoveAssignable</tt>.
+</li>
+<li>
+<tt>[first, mid)</tt> and <tt>[mid, last)</tt> are valid ranges.
+</li>
+<li>
+<tt>Function</tt> shall meet the requirements of <tt>MoveConstructible</tt> and
+<tt>MoveAssignable</tt>.
+</li>
+<li>
+<tt>f</tt> is callable as <tt>f(first, mid)</tt> and returns a type contextually
+convertible to <tt>bool</tt>.
+</li>
+</ul>
+
+<p>
+<i>Effects:</i>  Repeatedly permutes the range <tt>[first, last)</tt> such that
+the range <tt>[first, mid)</tt> represents each permutation of the values in
+<tt>[first, last)</tt> taken <tt>distance(first, mid)</tt> at a time, except
+that <tt>f</tt> is never called with a circular permutation which has been
+previously called, or the reverse of that permutation.  For each permutation
+calls <tt>f(first, mid)</tt>.  On each call, the range <tt>[mid, last)</tt>
+holds the values not in the current permutation.  If <tt>f</tt> returns
+<tt>true</tt> then returns immediately without permuting the sequence any
+futher.  Otherwise, after the last call to <tt>f</tt>, and prior to returning,
+the range <tt>[first, last)</tt> is restored to its original order. 
+[<i>Note:</i> If <tt>f</tt> always returns <tt>false</tt> it is called
+<tt>count_each_reversible_circular_permutation(first, mid, last)</tt> times.
+&mdash; <i>end note</i>]
+</p>
+
+<p>
+<i>Returns:</i> <tt>f</tt>.
+</p>
+
+<p>
+<i>Notes:</i>  The type referenced by <tt>*first</tt> need not be
+<tt>EqualityComparable</tt> nor <tt>LessThanComparable</tt>.  The input range
+need not be sorted.  The algorithm does not take the values in the range
+<tt>[first, last)</tt> into account in any way.
+</p>
+
+</blockquote>
+</blockquote>
+
+
+<blockquote><pre>
+template &lt;class BidirIter, class Function&gt;
+Function
+for_each_combination(BidirIter first,
+                     BidirIter mid,
+                     BidirIter last,
+                     Function f);
+</pre>
+<blockquote>
+<p>
+<i>Requires:</i>
+</p>
+
+<ul>
+<li>
+The type of <tt>*first</tt> shall satisfy the requirements of
+<tt>Swappable</tt>, <tt>MoveConstructible</tt> and <tt>MoveAssignable</tt>.
+</li>
+<li>
+<tt>[first, mid)</tt> and <tt>[mid, last)</tt> are valid ranges.
+</li>
+<li>
+<tt>Function</tt> shall meet the requirements of <tt>MoveConstructible</tt> and
+<tt>MoveAssignable</tt>.
+</li>
+<li>
+<tt>f</tt> is callable as <tt>f(first, mid)</tt> and returns a type contextually
+convertible to <tt>bool</tt>.
+</li>
+</ul>
+
+<p>
+<i>Effects:</i>  Repeatedly permutes the range <tt>[first, last)</tt> such that
+the range <tt>[first, mid)</tt> represents each combination of the values in
+<tt>[first, last)</tt> taken <tt>distance(first, mid)</tt> at a time.  For each
+permutation calls <tt>f(first, mid)</tt>.  On each call, the range <tt>[mid,
+last)</tt> holds the values not in the current permutation.  If <tt>f</tt>
+returns <tt>true</tt> then returns immediately without permuting the sequence
+any futher.  Otherwise, after the last call to <tt>f</tt>, and prior to
+returning, the range <tt>[first, last)</tt> is restored to its original order.
+[<i>Note:</i> If <tt>f</tt> always returns <tt>false</tt> it is called
+<tt>count_each_combination(first, mid, last)</tt> times. &mdash; <i>end
+note</i>]
+</p>
+
+<p>
+<i>Returns:</i> <tt>f</tt>.
+</p>
+
+<p>
+<i>Notes:</i>  The type referenced by <tt>*first</tt> need not be
+<tt>EqualityComparable</tt> nor <tt>LessThanComparable</tt>.  The input range
+need not be sorted.  The algorithm does not take the values in the range
+<tt>[first, last)</tt> into account in any way.
+</p>
+
+</blockquote>
+</blockquote>
+
+<p>
+Oh, and <tt>gcd</tt>.  I'm tired of reinventing it.
+</p>
+
+
+<blockquote><pre>
+template <class UInt>
+UInt
+gcd(UInt x, UInt y) noexcept;
+</pre>
+<blockquote>
+
+<p>
+<i>Requires:</i> <tt>Uint</tt> is an integral type or a type emulating an
+integral type. <tt>x</tt> and <tt>y</tt> are positive.
+</p>
+
+<p>
+<i>Returns:</i> The greatest common divisor of <tt>x</tt> and <tt>y</tt>.
+</p>
+
+</blockquote>
+</blockquote>
+
+
+<h2><a name="Implementation"></a>Implementation</h2>
+
+<p>
+Here is the code.
+</p>
+
+<blockquote><pre>
+<font color="#C80000">//  (C) Copyright Howard Hinnant 2005-2011.</font>
+<font color="#C80000">//  Use, modification and distribution are subject to the Boost Software License,</font>
+<font color="#C80000">//  Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at</font>
+<font color="#C80000">//  http://www.boost.org/LICENSE_1_0.txt).</font>
+<font color="#C80000">//</font>
+<font color="#C80000">//  See http://www.boost.org/libs/type_traits for most recent version including documentation.</font>
+
+<font color="#C80000">//  Details are in namespace detail.  Every effort has been made to make</font>
+<font color="#C80000">//  combine_discontinuous and permute as fast as possible.  They minimize the number</font>
+<font color="#C80000">//  of swaps that are performed. Everything else builds on these two primitives. </font>
+<font color="#C80000">//  The most complicated algorithm is for_each_reversible_permutation.  But it</font>
+<font color="#C80000">//  builds on combine_discontinuous and permute and I believe represents a minimum</font>
+<font color="#C80000">//  number of swaps.  Without care, algorithms such as for_each_reversible_permutation</font>
+<font color="#C80000">//  will take longer than for_each_permutation instead of the intended half the time.</font>
+
+<font color="#C80000">//  Speed is everything.  Lest you could just use std::next_permutation and manually</font>
+<font color="#C80000">//  eliminate duplicate permutations.  If the implementation fails in being orders</font>
+<font color="#C80000">//  of magnitude faster than that, then it has failed miserably.</font>
+
+#include &lt;iterator&gt;
+#include &lt;algorithm&gt;
+#include &lt;cstdint&gt;
+#include &lt;limits&gt;
+#include &lt;stdexcept&gt;
+
+namespace detail
+{
+
+<font color="#C80000">// Rotates two discontinuous ranges to put *first2 where *first1 is.</font>
+<font color="#C80000">//     If last1 == first2 this would be equivalent to rotate(first1, first2, last2),</font>
+<font color="#C80000">//     but instead the rotate "jumps" over the discontinuity [last1, first2) -</font>
+<font color="#C80000">//     which need not be a valid range.</font>
+<font color="#C80000">//     In order to make it faster, the length of [first1, last1) is passed in as d1,</font>
+<font color="#C80000">//     and d2 must be the length of [first2, last2).</font>
+<font color="#C80000">//  In a perfect world the d1 &gt; d2 case would have used swap_ranges and</font>
+<font color="#C80000">//     reverse_iterator, but reverse_iterator is too inefficient.</font>
+template &lt;class BidirIter&gt;
+void
+rotate_discontinuous(BidirIter first1, BidirIter last1,
+                     typename std::iterator_traits&lt;BidirIter&gt;::difference_type d1,
+                     BidirIter first2, BidirIter last2,
+                     typename std::iterator_traits&lt;BidirIter&gt;::difference_type d2)
+{
+    using std::swap;
+    if (d1 &lt;= d2)
+        std::rotate(first2, std::swap_ranges(first1, last1, first2), last2);
+    else
+    {
+        BidirIter i1 = last1;
+        while (first2 != last2)
+            swap(*--i1, *--last2);
+        std::rotate(first1, i1, last1);
+    }
+}
+
+<font color="#C80000">// Rotates the three discontinuous ranges to put *first2 where *first1 is.</font>
+<font color="#C80000">// Just like rotate_discontinuous, except the second range is now represented by</font>
+<font color="#C80000">//    two discontinuous ranges: [first2, last2) + [first3, last3).</font>
+template &lt;class BidirIter&gt;
+void
+rotate_discontinuous3(BidirIter first1, BidirIter last1,
+                      typename std::iterator_traits&lt;BidirIter&gt;::difference_type d1,
+                      BidirIter first2, BidirIter last2,
+                      typename std::iterator_traits&lt;BidirIter&gt;::difference_type d2,
+                      BidirIter first3, BidirIter last3,
+                      typename std::iterator_traits&lt;BidirIter&gt;::difference_type d3)
+{
+    rotate_discontinuous(first1, last1, d1, first2, last2, d2);
+    if (d1 &lt;= d2)
+        rotate_discontinuous(std::next(first2, d2 - d1), last2, d1, first3, last3, d3);
+    else
+    {
+        rotate_discontinuous(std::next(first1, d2), last1, d1 - d2, first3, last3, d3);
+        rotate_discontinuous(first2, last2, d2, first3, last3, d3);
+    }
+}
+
+<font color="#C80000">// Call f() for each combination of the elements [first1, last1) + [first2, last2)</font>
+<font color="#C80000">//    swapped/rotated into the range [first1, last1).  As long as f() returns</font>
+<font color="#C80000">//    false, continue for every combination and then return [first1, last1) and</font>
+<font color="#C80000">//    [first2, last2) to their original state.  If f() returns true, return</font>
+<font color="#C80000">//    immediately.</font>
+<font color="#C80000">//  Does the absolute mininum amount of swapping to accomplish its task.</font>
+<font color="#C80000">//  If f() always returns false it will be called (d1+d2)!/(d1!*d2!) times.</font>
+template &lt;class BidirIter, class Function&gt;
+bool
+combine_discontinuous(BidirIter first1, BidirIter last1,
+                      typename std::iterator_traits&lt;BidirIter&gt;::difference_type d1,
+                      BidirIter first2, BidirIter last2,
+                      typename std::iterator_traits&lt;BidirIter&gt;::difference_type d2,
+                      Function&amp; f,
+                      typename std::iterator_traits&lt;BidirIter&gt;::difference_type d = 0)
+{
+    typedef typename std::iterator_traits&lt;BidirIter&gt;::difference_type D;
+    using std::swap;
+    if (d1 == 0 || d2 == 0)
+        return f();
+    if (d1 == 1)
+    {
+        for (BidirIter i2 = first2; i2 != last2; ++i2)
+        {
+            if (f())
+                return true;
+            swap(*first1, *i2);
+        }
+    }
+    else
+    {
+        BidirIter f1p = std::next(first1);
+        BidirIter i2 = first2;
+        for (D d22 = d2; i2 != last2; ++i2, --d22)
+        {
+            if (combine_discontinuous(f1p, last1, d1-1, i2, last2, d22, f, d+1))
+                return true;
+            swap(*first1, *i2);
+        }
+    }
+    if (f())
+        return true;
+    if (d != 0)
+        rotate_discontinuous(first1, last1, d1, std::next(first2), last2, d2-1);
+    else
+        rotate_discontinuous(first1, last1, d1, first2, last2, d2);
+    return false;
+}
+
+<font color="#C80000">// A binder for binding arguments to call combine_discontinuous</font>
+template &lt;class Function, class BidirIter&gt;
+class call_combine_discontinuous
+{
+    typedef typename std::iterator_traits&lt;BidirIter&gt;::difference_type D;
+    Function f_;
+    BidirIter first1_;
+    BidirIter last1_;
+    D d1_;
+    BidirIter first2_;
+    BidirIter last2_;
+    D d2_;
+
+public:
+    call_combine_discontinuous(
+                      BidirIter first1, BidirIter last1,
+                      D d1,
+                      BidirIter first2, BidirIter last2,
+                      D d2,
+                      Function&amp; f)
+        : f_(f), first1_(first1), last1_(last1), d1_(d1),
+                 first2_(first2), last2_(last2), d2_(d2) {}
+
+    bool operator()()
+    {
+        return combine_discontinuous(first1_, last1_, d1_, first2_, last2_, d2_, f_);
+    }
+};
+
+<font color="#C80000">// See combine_discontinuous3</font>
+template &lt;class BidirIter, class Function&gt;
+bool
+combine_discontinuous3_(BidirIter first1, BidirIter last1,
+                        typename std::iterator_traits&lt;BidirIter&gt;::difference_type d1,
+                        BidirIter first2, BidirIter last2,
+                        typename std::iterator_traits&lt;BidirIter&gt;::difference_type d2,
+                        BidirIter first3, BidirIter last3,
+                        typename std::iterator_traits&lt;BidirIter&gt;::difference_type d3,
+                        Function&amp; f,
+                        typename std::iterator_traits&lt;BidirIter&gt;::difference_type d = 0)
+{
+    typedef typename std::iterator_traits&lt;BidirIter&gt;::difference_type D;
+    using std::swap;
+    if (d1 == 1)
+    {
+        for (BidirIter i2 = first2; i2 != last2; ++i2)
+        {
+            if (f())
+                return true;
+            swap(*first1, *i2);
+        }
+        if (f())
+            return true;
+        swap(*first1, *std::prev(last2));
+        swap(*first1, *first3);
+        for (BidirIter i2 = std::next(first3); i2 != last3; ++i2)
+        {
+            if (f())
+                return true;
+            swap(*first1, *i2);
+        }
+    }
+    else
+    {
+        BidirIter f1p = std::next(first1);
+        BidirIter i2 = first2;
+        for (D d22 = d2; i2 != last2; ++i2, --d22)
+        {
+            if (combine_discontinuous3_(f1p, last1, d1-1, i2, last2, d22, first3,
+                                        last3, d3, f, d+1))
+                return true;
+            swap(*first1, *i2);
+        }
+        i2 = first3;
+        for (D d22 = d3; i2 != last3; ++i2, --d22)
+        {
+            if (combine_discontinuous(f1p, last1, d1-1, i2, last3, d22, f, d+1))
+                return true;
+            swap(*first1, *i2);
+        }
+    }
+    if (f())
+        return true;
+    if (d1 == 1)
+        swap(*std::prev(last2), *first3);
+    if (d != 0)
+    {
+        if (d2 &gt; 1)
+            rotate_discontinuous3(first1, last1, d1, std::next(first2), last2, d2-1, first3, last3, d3);
+        else
+            rotate_discontinuous(first1, last1, d1, first3, last3, d3);
+    }
+    else
+        rotate_discontinuous3(first1, last1, d1, first2, last2, d2, first3, last3, d3);
+    return false;
+}
+
+<font color="#C80000">// Like combine_discontinuous, but swaps/rotates each combination out of</font>
+<font color="#C80000">//    [first1, last1) + [first2, last2) + [first3, last3) into [first1, last1).</font>
+<font color="#C80000">//    If f() always returns false, it is called (d1+d2+d3)!/(d1!*(d2+d3)!) times.</font>
+template &lt;class BidirIter, class Function&gt;
+bool
+combine_discontinuous3(BidirIter first1, BidirIter last1,
+                       typename std::iterator_traits&lt;BidirIter&gt;::difference_type d1,
+                       BidirIter first2, BidirIter last2,
+                       typename std::iterator_traits&lt;BidirIter&gt;::difference_type d2,
+                       BidirIter first3, BidirIter last3,
+                       typename std::iterator_traits&lt;BidirIter&gt;::difference_type d3,
+                       Function&amp; f)
+{
+    typedef call_combine_discontinuous&lt;Function&amp;, BidirIter&gt; F;
+    F fbc(first2, last2, d2, first3, last3, d3, f);  <font color="#C80000">// BC</font>
+    return combine_discontinuous3_(first1, last1, d1, first2, last2, d2, first3, last3, d3, fbc);
+}
+
+<font color="#C80000">// See permute</font>
+template &lt;class BidirIter, class Function&gt;
+bool
+permute_(BidirIter first1, BidirIter last1,
+         typename std::iterator_traits&lt;BidirIter&gt;::difference_type d1,
+         Function&amp; f)
+{
+    using std::swap;
+    switch (d1)
+    {
+    case 0:
+    case 1:
+        return f();
+    case 2:
+        if (f())
+            return true;
+        swap(*first1, *std::next(first1));
+        return f();
+    case 3:
+        {
+        if (f())
+            return true;
+        BidirIter f2 = std::next(first1);
+        BidirIter f3 = std::next(f2);
+        swap(*f2, *f3);
+        if (f())
+            return true;
+        swap(*first1, *f3);
+        swap(*f2, *f3);
+        if (f())
+            return true;
+        swap(*f2, *f3);
+        if (f())
+            return true;
+        swap(*first1, *f2);
+        swap(*f2, *f3);
+        if (f())
+            return true;
+        swap(*f2, *f3);
+        return f();
+        }
+    }
+    BidirIter fp1 = std::next(first1);
+    for (BidirIter p = fp1; p != last1; ++p)
+    {
+        if (permute_(fp1, last1, d1-1, f))
+            return true;
+        std::reverse(fp1, last1);
+        swap(*first1, *p);
+    }
+    return permute_(fp1, last1, d1-1, f);
+}
+
+<font color="#C80000">// Calls f() for each permutation of [first1, last1)</font>
+<font color="#C80000">// Divided into permute and permute_ in a (perhaps futile) attempt to</font>
+<font color="#C80000">//    squeeze a little more performance out of it.</font>
+template &lt;class BidirIter, class Function&gt;
+bool
+permute(BidirIter first1, BidirIter last1,
+        typename std::iterator_traits&lt;BidirIter&gt;::difference_type d1,
+        Function&amp; f)
+{
+    using std::swap;
+    switch (d1)
+    {
+    case 0:
+    case 1:
+        return f();
+    case 2:
+        {
+        if (f())
+            return true;
+        BidirIter i = std::next(first1);
+        swap(*first1, *i);
+        if (f())
+            return true;
+        swap(*first1, *i);
+        }
+        break;
+    case 3:
+        {
+        if (f())
+            return true;
+        BidirIter f2 = std::next(first1);
+        BidirIter f3 = std::next(f2);
+        swap(*f2, *f3);
+        if (f())
+            return true;
+        swap(*first1, *f3);
+        swap(*f2, *f3);
+        if (f())
+            return true;
+        swap(*f2, *f3);
+        if (f())
+            return true;
+        swap(*first1, *f2);
+        swap(*f2, *f3);
+        if (f())
+            return true;
+        swap(*f2, *f3);
+        if (f())
+            return true;
+        swap(*first1, *f3);
+        }
+        break;
+    default:
+        BidirIter fp1 = std::next(first1);
+        for (BidirIter p = fp1; p != last1; ++p)
+        {
+            if (permute_(fp1, last1, d1-1, f))
+                return true;
+            std::reverse(fp1, last1);
+            swap(*first1, *p);
+        }
+        if (permute_(fp1, last1, d1-1, f))
+            return true;
+        std::reverse(first1, last1);
+        break;
+    }
+    return false;
+}
+
+<font color="#C80000">// Creates a functor with no arguments which calls f_(first_, last_).</font>
+<font color="#C80000">//   Also has a variant that takes two It and ignores them.</font>
+template &lt;class Function, class It&gt;
+class bound_range
+{
+    Function f_;
+    It first_;
+    It last_;
+public:
+    bound_range(Function f, It first, It last)
+        : f_(f), first_(first), last_(last) {}
+
+    bool
+    operator()()
+    {
+        return f_(first_, last_);
+    }
+
+    bool
+    operator()(It, It)
+    {
+        return f_(first_, last_);
+    }
+};
+
+<font color="#C80000">// A binder for binding arguments to call permute</font>
+template &lt;class Function, class It&gt;
+class call_permute
+{
+    typedef typename std::iterator_traits&lt;It&gt;::difference_type D;
+    Function f_;
+    It first_;
+    It last_;
+    D d_;
+public:
+    call_permute(Function f, It first, It last, D d)
+        : f_(f), first_(first), last_(last), d_(d) {}
+
+    bool
+    operator()()
+    {
+        return permute(first_, last_, d_, f_);
+    }
+};
+
+}  <font color="#C80000">// detail</font>
+
+template &lt;class BidirIter, class Function&gt;
+Function
+for_each_combination(BidirIter first, BidirIter mid,
+                     BidirIter last, Function f)
+{
+    detail::bound_range&lt;Function&amp;, BidirIter&gt; wfunc(f, first, mid);
+    detail::combine_discontinuous(first, mid, std::distance(first, mid),
+                                  mid, last, std::distance(mid, last),
+                                  wfunc);
+    return f;
+}
+
+template &lt;class UInt&gt;
+UInt
+gcd(UInt x, UInt y)
+{
+    while (y != 0)
+    {
+        UInt t = x % y;
+        x = y;
+        y = t;
+    }
+    return x;
+}
+
+template &lt;class Int&gt;
+inline
+typename std::enable_if
+&lt;
+    std::is_unsigned&lt;Int&gt;::value,
+    void
+&gt;::type
+check_non_negative(Int d1, Int d2)
+{
+}
+
+template &lt;class Int&gt;
+typename std::enable_if
+&lt;
+    !std::is_unsigned&lt;Int&gt;::value,
+    void
+&gt;::type
+check_non_negative(Int d1, Int d2)
+{
+    if (d1 &lt; Int(0) || d2 &lt; Int(0))
+        throw std::invalid_argument("expected non-negative argument");
+}
+
+template &lt;class UInt&gt;
+UInt
+count_each_combination(UInt d1, UInt d2)
+{
+    check_non_negative(d1, d2);
+    if (d2 &lt; d1)
+        std::swap(d1, d2);
+    if (d1 == UInt())
+        return 1;
+    if (d1 &gt; std::numeric_limits&lt;UInt&gt;::max() - d2)
+        throw std::overflow_error("overflow in count_each_combination");
+    UInt n = d1 + d2;
+    UInt r = n;
+    --n;
+    for (UInt k = UInt(2); k &lt;= d1; ++k, --n)
+    {
+        <font color="#C80000">// r = r * n / k, known to not not have truncation error</font>
+        UInt g = gcd(r, k);
+        r /= g;
+        UInt t = n / (k / g);
+        if (r &gt; std::numeric_limits&lt;UInt&gt;::max() / t)
+            throw std::overflow_error("overflow in count_each_combination");
+        r *= t;
+    }
+    return r;
+}
+
+template &lt;class BidirIter&gt;
+std::uintmax_t
+count_each_combination(BidirIter first, BidirIter mid, BidirIter last)
+{
+    return count_each_combination&lt;std::uintmax_t&gt;
+                          (std::distance(first, mid), std::distance(mid, last));
+}
+
+<font color="#C80000">// For each of the permutation algorithms, use for_each_combination (or</font>
+<font color="#C80000">//    combine_discontinuous) to handle the "r out of N" part of the algorithm.</font>
+<font color="#C80000">//    Thus each permutation algorithm has to deal only with an "N out of N"</font>
+<font color="#C80000">//    problem.  I.e. For each combination of r out of N items, permute it thusly.</font>
+template &lt;class BidirIter, class Function&gt;
+Function
+for_each_permutation(BidirIter first, BidirIter mid,
+                     BidirIter last, Function f)
+{
+    typedef typename std::iterator_traits&lt;BidirIter&gt;::difference_type D;
+    typedef detail::bound_range&lt;Function&amp;, BidirIter&gt; Wf;
+    typedef detail::call_permute&lt;Wf, BidirIter&gt; PF;
+    Wf wfunc(f, first, mid);
+    D d1 = std::distance(first, mid);
+    PF pf(wfunc, first, mid, d1);
+    detail::combine_discontinuous(first, mid, d1,
+                                  mid, last, std::distance(mid, last),
+                                  pf);
+    return f;
+}
+
+template &lt;class UInt&gt;
+UInt
+count_each_permutation(UInt d1, UInt d2)
+{
+    <font color="#C80000">// return (d1+d2)!/d2!</font>
+    check_non_negative(d1, d2);
+    if (d1 &gt; std::numeric_limits&lt;UInt&gt;::max() - d2)
+        throw std::overflow_error("overflow in count_each_permutation");
+    UInt n = d1 + d2;
+    UInt r(1);
+    for (; n &gt; d2; --n)
+    {
+        if (r &gt; std::numeric_limits&lt;UInt&gt;::max() / n)
+            throw std::overflow_error("overflow in count_each_permutation");
+        r *= n;
+    }
+    return r;
+}
+
+template &lt;class BidirIter&gt;
+std::uintmax_t
+count_each_permutation(BidirIter first, BidirIter mid, BidirIter last)
+{
+    return count_each_permutation&lt;std::uintmax_t&gt;
+                          (std::distance(first, mid), std::distance(mid, last));
+}
+
+namespace detail
+{
+
+<font color="#C80000">// Adapt functor to permute over [first+1, last)</font>
+<font color="#C80000">//   A circular permutation of N items is done by holding the first item and</font>
+<font color="#C80000">//   permuting [first+1, last).</font>
+template &lt;class Function, class BidirIter&gt;
+class circular_permutation
+{
+    typedef typename std::iterator_traits&lt;BidirIter&gt;::difference_type D;
+
+    Function f_;
+    D s_;
+
+public:
+    explicit circular_permutation(Function f, D s) : f_(f), s_(s) {}
+
+    bool
+    operator()(BidirIter first, BidirIter last)
+    {
+        if (s_ &lt;= 1)
+            return f_(first, last);
+        bound_range&lt;Function, BidirIter&gt; f(f_, first, last);
+        return permute(std::next(first), last, s_ - 1, f);
+    }
+};
+
+}  <font color="#C80000">// detail</font>
+
+template &lt;class BidirIter, class Function&gt;
+Function
+for_each_circular_permutation(BidirIter first,
+                              BidirIter mid,
+                              BidirIter last, Function f)
+{
+    for_each_combination(first, mid, last, detail::circular_permutation&lt;Function&amp;,
+                          BidirIter&gt;(f, std::distance(first, mid)));
+    return f;
+}    
+
+template &lt;class UInt&gt;
+UInt
+count_each_circular_permutation(UInt d1, UInt d2)
+{
+    <font color="#C80000">// return d1 &gt; 0 ? (d1+d2)!/(d1*d2!) : 1</font>
+    check_non_negative(d1, d2);
+    if (d1 == UInt())
+        return 1;
+    UInt r;
+    if (d1 &lt;= d2)
+    {
+        try
+        {
+            r = count_each_combination(d1, d2);
+        }
+        catch (const std::overflow_error&amp;)
+        {
+            throw std::overflow_error("overflow in count_each_circular_permutation");
+        }
+        for (--d1; d1 &gt; UInt(1); --d1)
+        {
+            if (r &gt; std::numeric_limits&lt;UInt&gt;::max()/d1)
+                throw std::overflow_error("overflow in count_each_circular_permutation");
+            r *= d1;
+        }
+    }
+    else
+    {   <font color="#C80000">// functionally equivalent but faster algorithm</font>
+        if (d1 &gt; std::numeric_limits&lt;UInt&gt;::max() - d2)
+            throw std::overflow_error("overflow in count_each_circular_permutation");
+        UInt n = d1 + d2;
+        r = 1;
+        for (; n &gt; d1; --n)
+        {
+            if (r &gt; std::numeric_limits&lt;UInt&gt;::max()/n)
+                throw std::overflow_error("overflow in count_each_circular_permutation");
+            r *= n;
+        }
+        for (--n; n &gt; d2; --n)
+        {
+            if (r &gt; std::numeric_limits&lt;UInt&gt;::max()/n)
+                throw std::overflow_error("overflow in count_each_circular_permutation");
+            r *= n;
+        }
+    }
+    return r;
+}
+
+template &lt;class BidirIter&gt;
+std::uintmax_t
+count_each_circular_permutation(BidirIter first, BidirIter mid, BidirIter last)
+{
+    return count_each_circular_permutation&lt;std::uintmax_t&gt;
+                          (std::distance(first, mid), std::distance(mid, last));
+}
+
+namespace detail
+{
+
+<font color="#C80000">// Difficult!!!  See notes for operator().</font>
+template &lt;class Function, class Size&gt;
+class reversible_permutation
+{
+    Function f_;
+    Size s_;
+
+public:
+    reversible_permutation(Function f, Size s) : f_(f), s_(s) {}
+
+    template &lt;class BidirIter&gt;
+    bool
+    operator()(BidirIter first, BidirIter last);
+};
+
+<font color="#C80000">// rev1 looks like call_permute</font>
+template &lt;class Function, class BidirIter&gt;
+class rev1
+{
+    typedef typename std::iterator_traits&lt;BidirIter&gt;::difference_type D;
+
+    Function f_;
+    BidirIter first1_;
+    BidirIter last1_;
+    D d1_;
+
+public:
+    rev1(Function f, BidirIter first, BidirIter last, D d)
+        : f_(f), first1_(first), last1_(last), d1_(d) {}
+
+    bool operator()()
+    {
+        return permute(first1_, last1_, d1_, f_);
+    }
+};
+
+<font color="#C80000">// For each permutation in [first1, last1),</font>
+<font color="#C80000">//     call f() for each permutation of [first2, last2).</font>
+template &lt;class Function, class BidirIter&gt;
+class rev2
+{
+    typedef typename std::iterator_traits&lt;BidirIter&gt;::difference_type D;
+
+    Function f_;
+    BidirIter first1_;
+    BidirIter last1_;
+    D d1_;
+    BidirIter first2_;
+    BidirIter last2_;
+    D d2_;
+
+public:
+    rev2(Function f, BidirIter first1, BidirIter last1, D d1,
+                     BidirIter first2, BidirIter last2, D d2)
+        : f_(f), first1_(first1), last1_(last1), d1_(d1),
+                 first2_(first2), last2_(last2), d2_(d2) {}
+
+    bool operator()()
+    {
+        call_permute&lt;Function, BidirIter&gt; f(f_, first2_, last2_, d2_);
+        return permute(first1_, last1_, d1_, f);
+    }
+};
+
+<font color="#C80000">// For each permutation in [first1, last1),</font>
+<font color="#C80000">//     and for each permutation of [first2, last2)</font>
+<font color="#C80000">//     call f() for each permutation of [first3, last3).</font>
+template &lt;class Function, class BidirIter&gt;
+class rev3
+{
+    typedef typename std::iterator_traits&lt;BidirIter&gt;::difference_type D;
+
+    Function f_;
+    BidirIter first1_;
+    BidirIter last1_;
+    D d1_;
+    BidirIter first2_;
+    BidirIter last2_;
+    D d2_;
+    BidirIter first3_;
+    BidirIter last3_;
+    D d3_;
+
+public:
+    rev3(Function f, BidirIter first1, BidirIter last1, D d1,
+                     BidirIter first2, BidirIter last2, D d2,
+                     BidirIter first3, BidirIter last3, D d3)
+        : f_(f), first1_(first1), last1_(last1), d1_(d1),
+                 first2_(first2), last2_(last2), d2_(d2),
+                 first3_(first3), last3_(last3), d3_(d3) {}
+
+    bool operator()()
+    {
+        rev2&lt;Function, BidirIter&gt; f(f_, first2_, last2_, d2_, first3_, last3_, d3_);
+        return permute(first1_, last1_, d1_, f);
+    }
+};
+
+<font color="#C80000">// There are simpler implementations.  I believe the simpler ones are far more</font>
+<font color="#C80000">//     expensive.</font>
+template &lt;class Function, class Size&gt;
+template &lt;class BidirIter&gt;
+bool
+reversible_permutation&lt;Function, Size&gt;::operator()(BidirIter first,
+                                                   BidirIter last)
+{
+    typedef typename std::iterator_traits&lt;BidirIter&gt;::difference_type difference_type;
+    typedef rev2&lt;bound_range&lt;Function&amp;, BidirIter&gt;, BidirIter&gt; F2;
+    typedef rev3&lt;bound_range&lt;Function&amp;, BidirIter&gt;, BidirIter&gt; F3;
+    <font color="#C80000">// When the range is 0 - 2, then this is just a combination of N out of N</font>
+    <font color="#C80000">//   elements.</font>
+    if (s_ &lt; 3)
+        return f_(first, last);
+    using std::swap;
+    <font color="#C80000">// Hold the first element steady and call f_(first, last) for each</font>
+    <font color="#C80000">//    permutation in [first+1, last).</font>
+    BidirIter a = std::next(first);
+    bound_range&lt;Function&amp;, BidirIter&gt; f(f_, first, last);
+    if (permute(a, last, s_-1, f))
+        return true;
+    <font color="#C80000">// Beginning with the first element, swap the previous element with the</font>
+    <font color="#C80000">//    next element.  For each swap, call f_(first, last) for each</font>
+    <font color="#C80000">//    permutation of the discontinuous range:</font>
+    <font color="#C80000">//    [prior to the orignal element] + [after the original element].</font>
+    Size s2 = s_ / 2;
+    BidirIter am1 = first;
+    BidirIter ap1 = std::next(a);
+    for (Size i = 1; i &lt; s2; ++i, ++am1, ++a, ++ap1)
+    {
+        swap(*am1, *a);
+        F2 f2(f, first, a, i, ap1, last, s_ - i - 1);
+        if (combine_discontinuous(first, a, i, ap1, last, s_ - i - 1, f2))
+            return true;
+    }
+    <font color="#C80000">// If [first, last) has an even number of elements, then fix it up to the</font>
+    <font color="#C80000">//     original permutation.</font>
+    if (2 * s2 == s_)
+    {
+        std::rotate(first, am1, a);
+    }
+    <font color="#C80000">// else if the range has length 3, we need one more call and the fix is easy.</font>
+    else if (s_ == 3)
+    {
+        swap(*am1, *a);
+        if (f_(first, last))
+            return true;
+        swap(*am1, *a);
+    }
+    <font color="#C80000">// else the range is an odd number greater than 3.  We need to permute</font>
+    <font color="#C80000">//     through exactly half of the permuations with the original element in</font>
+    <font color="#C80000">//     the middle.</font>
+    else
+    {
+        <font color="#C80000">// swap the original first element into the middle, and hold the current</font>
+        <font color="#C80000">//   first element steady.  This creates a discontinuous range:</font>
+        <font color="#C80000">//     [first+1, middle) + [middle+1, last).  Run through all permutations</font>
+        <font color="#C80000">//     of that discontinuous range.</font>
+        swap(*am1, *a);
+        BidirIter b = first;
+        BidirIter bp1 = std::next(b);
+        F2 f2(f, bp1, a, s2-1, ap1, last, s_ - s2 - 1);
+        if (combine_discontinuous(bp1, a, s2-1, ap1, last, s_ - s2 - 1, f2))
+            return true;
+        <font color="#C80000">// Swap the current first element into every place from first+1 to middle-1.</font>
+        <font color="#C80000">//   For each location, hold it steady to create the following discontinuous</font>
+        <font color="#C80000">//   range (made of 3 ranges): [first, b-1) + [b+1, middle) + [middle+1, last).</font>
+        <font color="#C80000">//   For each b in [first+1, middle-1), run through all permutations of</font>
+        <font color="#C80000">//      the discontinuous ranges.</font>
+        b = bp1;
+        ++bp1;
+        BidirIter bm1 = first;
+        for (Size i = 1; i &lt; s2-1; ++i, ++bm1, ++b, ++bp1)
+        {
+            swap(*bm1, *b);
+            F3 f3(f, first, b, i, bp1, a, s2-i-1, ap1, last, s_ - s2 - 1);
+            if (combine_discontinuous3(first, b, i, bp1, a, s2-i-1, ap1, last, s_-s2-1, f3))
+                return true;
+        }
+        <font color="#C80000">// swap b into into middle-1, creates a discontinuous range:</font>
+        <font color="#C80000">//     [first, middle-1) + [middle+1, last).  Run through all permutations</font>
+        <font color="#C80000">//     of that discontinuous range.</font>
+        swap(*bm1, *b);
+        F2 f21(f, first, b, s2-1, ap1, last, s_ - s2 - 1);
+        if (combine_discontinuous(first, b, s2-1, ap1, last, s_ - s2 - 1, f21))
+            return true;
+        <font color="#C80000">// Revert [first, last) to original order</font>
+        std::reverse(first, b);
+        std::reverse(first, ap1);
+    }
+    return false;
+}
+
+}  <font color="#C80000">// detail</font>
+
+template &lt;class BidirIter, class Function&gt;
+Function
+for_each_reversible_permutation(BidirIter first,
+                                BidirIter mid,
+                                BidirIter last, Function f)
+{
+    typedef typename std::iterator_traits&lt;BidirIter&gt;::difference_type D;
+    for_each_combination(first, mid, last,
+                  detail::reversible_permutation&lt;Function&amp;, D&gt;(f,
+                                              std::distance(first, mid)));
+    return f;
+}    
+
+template &lt;class UInt&gt;
+UInt
+count_each_reversible_permutation(UInt d1, UInt d2)
+{
+    <font color="#C80000">// return d1 &gt; 1 ? (d1+d2)!/(2*d2!) : (d1+d2)!/d2!</font>
+    check_non_negative(d1, d2);
+    if (d1 &gt; std::numeric_limits&lt;UInt&gt;::max() - d2)
+        throw std::overflow_error("overflow in count_each_reversible_permutation");
+    UInt n = d1 + d2;
+    UInt r(1);
+    if (d1 &gt; UInt(1))
+    {
+        r = n;
+        if ((n &amp; UInt(1)) == UInt(0))
+            r /= UInt(2);
+        --n;
+        UInt t = n;
+        if ((t &amp; UInt(1)) == UInt(0))
+            t /= UInt(2);
+        if (r &gt; std::numeric_limits&lt;UInt&gt;::max() / t)
+            throw std::overflow_error("overflow in count_each_reversible_permutation");
+        r *= t;
+        --n;
+    }
+    for (; n &gt; d2; --n)
+    {
+        if (r &gt; std::numeric_limits&lt;UInt&gt;::max() / n)
+            throw std::overflow_error("overflow in count_each_reversible_permutation");
+        r *= n;
+    }
+    return r;
+}
+
+template &lt;class BidirIter&gt;
+std::uintmax_t
+count_each_reversible_permutation(BidirIter first, BidirIter mid, BidirIter last)
+{
+    return count_each_reversible_permutation&lt;std::uintmax_t&gt;
+                          (std::distance(first, mid), std::distance(mid, last));
+}
+
+namespace detail
+{
+
+<font color="#C80000">// Adapt functor to permute over [first+1, last)</font>
+<font color="#C80000">//   A reversible circular permutation of N items is done by holding the first</font>
+<font color="#C80000">//   item and reverse-permuting [first+1, last).</font>
+template &lt;class Function, class BidirIter&gt;
+class reverse_circular_permutation
+{
+    typedef typename std::iterator_traits&lt;BidirIter&gt;::difference_type D;
+
+    Function f_;
+    D s_;
+
+public:
+    explicit reverse_circular_permutation(Function f, D s) : f_(f), s_(s) {}
+
+    bool
+    operator()(BidirIter first, BidirIter last)
+    {
+        if (s_ == 1)
+            return f_(first, last);
+        typedef typename std::iterator_traits&lt;BidirIter&gt;::difference_type D;
+        typedef bound_range&lt;Function, BidirIter&gt; BoundFunc;
+        BoundFunc f(f_, first, last);
+        BidirIter n = std::next(first);
+        return reversible_permutation&lt;BoundFunc, D&gt;(f, std::distance(n, last))(n, last);
+    }
+};
+
+}  <font color="#C80000">// detail</font>
+
+template &lt;class BidirIter, class Function&gt;
+Function
+for_each_reversible_circular_permutation(BidirIter first,
+                                         BidirIter mid,
+                                         BidirIter last, Function f)
+{
+    for_each_combination(first, mid, last, detail::reverse_circular_permutation&lt;Function&amp;,
+                          BidirIter&gt;(f, std::distance(first, mid)));
+    return f;
+}    
+
+template &lt;class UInt&gt;
+UInt
+count_each_reversible_circular_permutation(UInt d1, UInt d2)
+{
+    <font color="#C80000">// return d1 == 0 ? 1 : d1 &lt;= 2 ? (d1+d2)!/(d1*d2!) : (d1+d2)!/(2*d1*d2!)</font>
+    check_non_negative(d1, d2);
+    UInt r;
+    try
+    {
+        r = count_each_combination(d1, d2);
+    }
+    catch (const std::overflow_error&amp;)
+    {
+        throw std::overflow_error("overflow in count_each_reversible_circular_permutation");
+    }
+    if (d1 &gt; UInt(3))
+    {
+        for (--d1; d1 &gt; UInt(2); --d1)
+        {
+            if (r &gt; std::numeric_limits&lt;UInt&gt;::max()/d1)
+                throw std::overflow_error("overflow in count_each_reversible_circular_permutation");
+            r *= d1;
+        }
+    }
+    return r;
+}
+
+template &lt;class BidirIter&gt;
+std::uintmax_t
+count_each_reversible_circular_permutation(BidirIter first, BidirIter mid,
+                                               BidirIter last)
+{
+    return count_each_reversible_circular_permutation&lt;std::uintmax_t&gt;
+                          (std::distance(first, mid), std::distance(mid, last));
+}
+</pre></blockquote>
+
+
+</body>
+</html>

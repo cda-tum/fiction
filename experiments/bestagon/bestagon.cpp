@@ -10,10 +10,12 @@
 #include <fiction/algorithms/physical_design/exact.hpp>               // SMT-based physical design of FCN layouts
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/io/write_sqd_layout.hpp>                    // writer for SiQAD files (physical simulation)
+#include <fiction/networks/technology_network.hpp>            // technology-mapped network type
 #include <fiction/technology/area.hpp>                        // area requirement calculations
 #include <fiction/technology/cell_technologies.hpp>           // cell implementations
 #include <fiction/technology/sidb_bestagon_library.hpp>       // a pre-defined SiDB gate library
 #include <fiction/technology/technology_mapping_library.hpp>  // pre-defined gate types for technology mapping
+#include <fiction/traits.hpp>                                 // traits for type-checking
 #include <fiction/types.hpp>                                  // pre-defined types suitable for the FCN domain
 
 #include <fmt/format.h>                                        // output formatting
@@ -26,17 +28,19 @@
 #include <mockturtle/algorithms/node_resynthesis/xag_npn.hpp>  // NPN databases for cut rewriting of XAGs and AIGs
 #include <mockturtle/io/genlib_reader.hpp>                     // call-backs to read Genlib files into gate libraries
 #include <mockturtle/io/verilog_reader.hpp>                    // call-backs to read Verilog files into networks
-#include <mockturtle/networks/klut.hpp>                        // kLUT network
+#include <mockturtle/networks/klut.hpp>                        // k-LUT network
 #include <mockturtle/networks/xag.hpp>                         // XOR-AND-inverter graphs
 #include <mockturtle/utils/tech_library.hpp>                   // technology library utils
 #include <mockturtle/views/depth_view.hpp>                     // to determine network levels
 
+#include <cassert>
 #include <cstdint>
+#include <cstdlib>
 #include <sstream>
 #include <string>
 #include <vector>
 
-int main()
+int main()  // NOLINT
 {
     using gate_lyt = fiction::hex_even_row_gate_clk_lyt;
     using cell_lyt = fiction::sidb_cell_clk_lyt;
@@ -94,8 +98,8 @@ int main()
     mockturtle::tech_library<2> gate_lib{gates};
 
     // parameters for SMT-based physical design
-    fiction::exact_physical_design_params<gate_lyt> exact_params{};
-    exact_params.scheme        = fiction::ptr<gate_lyt>(fiction::row_clocking<gate_lyt>(fiction::num_clks::FOUR));
+    fiction::exact_physical_design_params exact_params{};
+    exact_params.scheme        = "Row";
     exact_params.crossings     = true;
     exact_params.border_io     = true;
     exact_params.desynchronize = true;
@@ -104,7 +108,8 @@ int main()
 
     static constexpr const uint64_t bench_select = fiction_experiments::all & ~fiction_experiments::b1_r2 &
                                                    ~fiction_experiments::clpl & ~fiction_experiments::two_bit_add_maj &
-                                                   ~fiction_experiments::parity;
+                                                   ~fiction_experiments::parity & ~fiction_experiments::iscas85 &
+                                                   ~fiction_experiments::epfl;
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
@@ -134,13 +139,12 @@ int main()
         if (gate_level_layout.has_value())
         {
             // check equivalence
-            const auto miter = mockturtle::miter<mockturtle::klut_network>(mapped_network, *gate_level_layout);
+            const auto miter = mockturtle::miter<fiction::technology_network>(mapped_network, *gate_level_layout);
             const auto eq    = mockturtle::equivalence_checking(*miter);
             assert(eq.has_value());
 
             // compute critical path and throughput
-            fiction::critical_path_length_and_throughput_stats cp_tp_stats{};
-            fiction::critical_path_length_and_throughput(*gate_level_layout, &cp_tp_stats);
+            const auto cp_tp = fiction::critical_path_length_and_throughput(*gate_level_layout);
 
             // apply gate library
             const auto cell_level_layout =
@@ -159,7 +163,7 @@ int main()
                          cut_xag.num_gates(), depth_cut_xag.depth(), mapped_network.num_gates(),
                          depth_mapped_network.depth(), gate_level_layout->x() + 1, gate_level_layout->y() + 1,
                          (gate_level_layout->x() + 1) * (gate_level_layout->y() + 1), gate_level_layout->num_gates(),
-                         gate_level_layout->num_wires(), cp_tp_stats.critical_path_length, cp_tp_stats.throughput,
+                         gate_level_layout->num_wires(), cp_tp.critical_path_length, cp_tp.throughput,
                          mockturtle::to_seconds(exact_stats.time_total), *eq, cell_level_layout.num_cells(),
                          area_stats.area);
         }
@@ -176,7 +180,19 @@ int main()
         bestagon_exp.table();
     }
 
-    return 0;
+    return EXIT_SUCCESS;
+}
+
+#else  // FICTION_Z3_SOLVER
+
+#include <cstdlib>
+#include <iostream>
+
+int main()  // NOLINT
+{
+    std::cerr << "[e] Z3 solver is not available, please install Z3 and recompile the code" << std::endl;
+
+    return EXIT_FAILURE;
 }
 
 #endif  // FICTION_Z3_SOLVER

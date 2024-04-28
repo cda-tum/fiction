@@ -1,6 +1,29 @@
 name: Coverage CI
 
-on: push
+on:
+  push:
+    branches: [ 'main' ]
+    paths:
+      - '**/*.hpp'
+      - '**/*.cpp'
+      - '**/*.cmake'
+      - '**/CMakeLists.txt'
+      - 'libs/**'
+      - '.github/workflows/coverage.yml'
+  pull_request:
+    branches: [ 'main' ]
+    paths:
+      - '**/*.hpp'
+      - '**/*.cpp'
+      - '**/*.cmake'
+      - '**/CMakeLists.txt'
+      - 'libs/**'
+      - '.github/workflows/coverage.yml'
+  merge_group:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
 
 defaults:
   run:
@@ -8,14 +31,14 @@ defaults:
 
 env:
   BUILD_TYPE: Debug
-  Z3_GIT_TAG: z3-4.8.12
+  Z3_VERSION: 4.10.0
 
 jobs:
   build_and_test:
     strategy:
       matrix:
-        os: [ ubuntu-20.04 ]
-        compiler: [ g++-10 ]
+        os: [ ubuntu-22.04 ]
+        compiler: [ g++-11 ]
 
     name: Coverage on ${{matrix.os}} with ${{matrix.compiler}}
     runs-on: ${{matrix.os}}
@@ -24,63 +47,71 @@ jobs:
       - name: Install the Compiler
         run: sudo apt-get update && sudo apt-get install -yq ${{matrix.compiler}}
 
-      - name: Setup Python
-        uses: actions/setup-python@v2
+      - name: Clone Repository
+        uses: actions/checkout@v4
         with:
-          python-version: '3.9.x'
+          submodules: recursive
+
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: '${{matrix.os}}-${{matrix.compiler}}'
+          variant: ccache
+          save: true
+          max-size: 10G
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10.x'
+          cache: 'pip'
+
+      - name: Setup mold
+        uses: rui314/setup-mold@v1
 
       - name: Install pip packages
         uses: BSFishy/pip-action@v1
         with:
-          packages: |
-            graphviz
-            python-sat==0.1.6.dev6
-            wrapt_timeout_decorator
+          requirements: ${{github.workspace}}/libs/mugen/requirements.txt
 
-      - name: Clone Repository
-        uses: actions/checkout@v2
+      - name: Setup Z3 Solver
+        id: z3
+        uses: cda-tum/setup-z3@v1
         with:
-          submodules: recursive
-
-      - name: Cache Z3 Solver
-        id: cache-z3-solver
-        uses: actions/cache@v2
-        with:
-          path: ${{github.workspace}}/z3lib
-          key: ${{matrix.os}}-${{matrix.compiler}}-z3lib-${{env.Z3_GIT_TAG}}
-
-      - name: Build Z3 Solver
-        if: steps.cache-z3-solver.outputs.cache-hit != 'true'
-        working-directory: ${{github.workspace}}
-        run: |
-          git clone --branch $Z3_GIT_TAG --depth 1 https://github.com/Z3Prover/z3.git
-          cmake -S z3 -B z3/build -DCMAKE_INSTALL_PREFIX=z3lib -DZ3_BUILD_LIBZ3_SHARED=OFF -DZ3_BUILD_TEST_EXECUTABLES=OFF -DZ3_ENABLE_EXAMPLE_TARGETS=OFF
-          cmake --build z3/build --config Release -j2 --target install
+          version: ${{env.Z3_VERSION}}
+          platform: linux
+          architecture: x64
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
       - name: Create Build Environment
         run: cmake -E make_directory ${{github.workspace}}/build
 
       - name: Configure CMake
         working-directory: ${{github.workspace}}/build
-
-        run: cmake ${{github.workspace}} -DCMAKE_CXX_COMPILER=${{matrix.compiler}} -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DFICTION_CLI=ON -DFICTION_TEST=ON -DFICTION_Z3=ON -DFICTION_Z3_SEARCH_PATHS=${{github.workspace}}/z3lib -DFICTION_ENABLE_MUGEN=ON -DFICTION_PROGRESS_BARS=OFF -DMOCKTURTLE_EXAMPLES=OFF -DWARNINGS_AS_ERRORS=OFF -DENABLE_COVERAGE=ON
+        run: >
+          cmake ${{github.workspace}}
+          -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
+          -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+          -DFICTION_ENABLE_UNITY_BUILD=ON
+          -DFICTION_ENABLE_PCH=ON
+          -DFICTION_CLI=OFF
+          -DFICTION_TEST=ON
+          -DFICTION_Z3=ON
+          -DFICTION_ENABLE_MUGEN=ON
+          -DFICTION_PROGRESS_BARS=OFF
+          -DFICTION_WARNINGS_AS_ERRORS=OFF
+          -DFICTION_ENABLE_COVERAGE=ON
+          -DMOCKTURTLE_EXAMPLES=OFF
 
       - name: Build
         working-directory: ${{github.workspace}}/build
-
-        run: cmake --build . --config $BUILD_TYPE -j2
+        run: cmake --build . --config $BUILD_TYPE -j4
 
       - name: Test
         working-directory: ${{github.workspace}}/build
 
-        run: ctest -C $BUILD_TYPE --verbose
-
-      #    - name: Coverage report
-      #      uses: codecov/codecov-action@v1
-      #      with:
-      #        env_vars: ${{matrix.os}}
-      #        verbose: true
-      #        gcov_path_exclude: ${{github.workspace}}/libs/
+        run: ctest -C $BUILD_TYPE --verbose --output-on-failure --repeat until-pass:3 --parallel 4
 
       - name: Setup and run lcov
         run: |
@@ -90,5 +121,9 @@ jobs:
           lcov -l lcov_filtered.info
 
       - name: Upload report to Codecov
-        run: |
-          bash <(curl -s https://codecov.io/bash) -f lcov_filtered.info || echo "Codecov did not collect coverage reports"
+        uses: codecov/codecov-action@v4
+        with:
+          files: ${{github.workspace}}/lcov_filtered.info
+          fail_ci_if_error: true
+          verbose: true
+          token: ${{ secrets.CODECOV_TOKEN }}

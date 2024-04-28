@@ -9,10 +9,12 @@
 
 #include <fmt/format.h>
 
+#include <cassert>
 #include <cstdint>
 #include <functional>
 #include <set>
 #include <unordered_map>
+#include <utility>
 
 namespace fiction
 {
@@ -25,6 +27,9 @@ struct port_position
      * Default constructor.
      */
     constexpr port_position() = default;
+
+    // NOLINTBEGIN(readability-identifier-naming)
+
     /**
      * Standard constructor.
      */
@@ -34,6 +39,9 @@ struct port_position
             pi{pi_},
             po{po_}
     {}
+
+    // NOLINTEND(readability-identifier-naming)
+
     /**
      * Positions.
      */
@@ -50,7 +58,7 @@ struct port_position
      * Comparator for set insertion.
      *
      * @param p Port to compare to.
-     * @return True iff this port goes before p in set.
+     * @return `true` iff this port goes before `p` in set.
      */
     constexpr bool operator<(const port_position& p) const
     {
@@ -60,7 +68,7 @@ struct port_position
      * Comparator for equality tests.
      *
      * @param p Port to compare to.
-     * @return True iff this port is equal to given port p.
+     * @return `true` iff this port is equal to given port `p`.
      */
     constexpr bool operator==(const port_position& p) const
     {
@@ -68,7 +76,7 @@ struct port_position
     }
 };
 /**
- * A port direction is a relative (cardinal) direction of a port within  a tile.
+ * A port direction is a relative (cardinal) direction of a port within a tile.
  * Useful, when no exact port locations within a tile are needed.
  */
 struct port_direction
@@ -91,6 +99,9 @@ struct port_direction
      * Default constructor.
      */
     constexpr port_direction() = default;
+
+    // NOLINTBEGIN(readability-identifier-naming)
+
     /**
      * Standard constructor.
      */
@@ -99,10 +110,13 @@ struct port_direction
             pi{pi_},
             po{po_}
     {}
+
+    // NOLINTEND(readability-identifier-naming)
+
     /**
      * Direction.
      */
-    uint16_t dir{};
+    uint8_t dir{};
     /**
      * Primary input port.
      */
@@ -115,7 +129,7 @@ struct port_direction
      * Comparator for set insertion.
      *
      * @param p Port to compare to.
-     * @return True iff this port goes before p in set.
+     * @return `true` iff this port goes before `p` in set.
      */
     constexpr bool operator<(const port_direction& p) const
     {
@@ -125,7 +139,7 @@ struct port_direction
      * Comparator for equality tests.
      *
      * @param p Port to compare to.
-     * @return True iff this port is equal to given port p.
+     * @return `true` iff this port is equal to given port `p`.
      */
     constexpr bool operator==(const port_direction& p) const
     {
@@ -141,13 +155,20 @@ template <typename PortType>
 struct port_list
 {
     /**
+     * Exposing the underlying port type.
+     */
+    using port_type = PortType;
+    /**
      * Default constructor.
      */
     constexpr port_list() = default;
     /**
      * Standard constructor.
      */
-    port_list(std::set<PortType> inp_, std::set<PortType> out_) : inp{std::move(inp_)}, out{std::move(out_)} {}
+    port_list(std::set<PortType> input_ports, std::set<PortType> output_ports) :
+            inp{std::move(input_ports)},
+            out{std::move(output_ports)}
+    {}
     /**
      * Input and output positions.
      */
@@ -156,7 +177,7 @@ struct port_list
      * Comparator for unordered_set/map.
      *
      * @param p Ports to compare to.
-     * @return True iff these ports are equal to p.
+     * @return `true` iff these ports are equal to `p`.
      */
     bool operator==(const port_list<PortType>& p) const
     {

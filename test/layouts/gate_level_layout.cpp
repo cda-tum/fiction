@@ -2,7 +2,8 @@
 // Created by marcel on 31.03.21.
 //
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
+
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
@@ -19,7 +20,7 @@
 
 using namespace fiction;
 
-TEST_CASE("Traits", "[gate-level-layout]")
+TEST_CASE("Gate-level layout traits", "[gate-level-layout]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
 
@@ -29,6 +30,39 @@ TEST_CASE("Traits", "[gate-level-layout]")
     CHECK(fiction::is_gate_level_layout_v<gate_layout>);
     CHECK(fiction::has_is_empty_tile_v<gate_layout>);
     CHECK(fiction::has_is_empty_v<gate_layout>);
+}
+
+TEST_CASE("Deep copy gate-level layout", "[gate-level-layout]")
+{
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+
+    gate_layout original{gate_layout::aspect_ratio{5, 5, 0}, twoddwave_clocking<gate_layout>(), "Original"};
+    original.create_pi("x1", {0, 2});
+    original.create_pi("x2", {2, 4});
+
+    auto copy = original.clone();
+
+    copy.resize({10, 10, 1});
+    copy.replace_clocking_scheme(use_clocking<gate_layout>());
+    copy.set_layout_name("Copy");
+    copy.move_node(copy.get_node({0, 2}), {0, 0});
+    copy.move_node(copy.get_node({2, 4}), {2, 0});
+
+    CHECK(original.x() == 5);
+    CHECK(original.y() == 5);
+    CHECK(original.z() == 0);
+    CHECK(original.is_clocking_scheme(clock_name::TWODDWAVE));
+    CHECK(original.get_layout_name() == "Original");
+    CHECK(original.is_pi_tile({0, 2}));
+    CHECK(original.is_pi_tile({2, 4}));
+
+    CHECK(copy.x() == 10);
+    CHECK(copy.y() == 10);
+    CHECK(copy.z() == 1);
+    CHECK(copy.is_clocking_scheme(clock_name::USE));
+    CHECK(copy.get_layout_name() == "Copy");
+    CHECK(copy.is_pi_tile({0, 0}));
+    CHECK(copy.is_pi_tile({2, 0}));
 }
 
 TEST_CASE("Creation and usage of constants", "[gate-level-layout]")
@@ -44,7 +78,7 @@ TEST_CASE("Creation and usage of constants", "[gate-level-layout]")
     REQUIRE(mockturtle::has_get_node_v<gate_layout>);
     REQUIRE(mockturtle::has_is_complemented_v<gate_layout>);
 
-    gate_layout layout{gate_layout::aspect_ratio{2, 2, 1}};
+    const gate_layout layout{gate_layout::aspect_ratio{2, 2, 1}};
 
     CHECK(layout.size() == 2);
 
@@ -113,7 +147,7 @@ TEST_CASE("Creation and usage of primary inputs", "[gate-level-layout]")
             {
                 auto t = layout.get_tile(pi);
                 CHECK(t == p);
-                auto n = layout.get_node(static_cast<gate_layout::signal>(t));
+                auto n = layout.get_node(static_cast<mockturtle::signal<gate_layout>>(t));
                 CHECK(n == layout.get_node(s));
                 auto tn = layout.get_tile(n);
                 CHECK(tn == t);
@@ -121,29 +155,33 @@ TEST_CASE("Creation and usage of primary inputs", "[gate-level-layout]")
 
             CHECK(layout.is_pi(pi));
             CHECK(layout.is_pi_tile(layout.get_tile(pi)));
-            CHECK(!layout.is_gate_tile(static_cast<gate_layout::tile>(pi)));
-            CHECK(!layout.is_gate(layout.get_node(static_cast<gate_layout::tile>(pi))));
+            CHECK(!layout.is_gate_tile(static_cast<tile<gate_layout>>(pi)));
+            CHECK(!layout.is_gate(layout.get_node(static_cast<tile<gate_layout>>(pi))));
 
             switch (i)
             {
                 case 0:
                 {
-                    check(gate_layout::tile{0, 0}, a);
+                    check(tile<gate_layout>{0, 0}, a);
 
                     break;
                 }
 
                 case 1:
                 {
-                    check(gate_layout::tile{1, 0}, b);
+                    check(tile<gate_layout>{1, 0}, b);
 
                     break;
                 }
                 case 2:
                 {
-                    check(gate_layout::tile{0, 1}, c);
+                    check(tile<gate_layout>{0, 1}, c);
 
                     break;
+                }
+                default:
+                {
+                    CHECK(false);
                 }
             }
         });
@@ -165,14 +203,14 @@ TEST_CASE("Creation and usage of primary outputs", "[gate-level-layout]")
 
     gate_layout layout{gate_layout::aspect_ratio{2, 2, 1}};
 
-    const auto x1 = layout.create_pi("x1", gate_layout::tile{0, 0});
+    const auto x1 = layout.create_pi("x1", tile<gate_layout>{0, 0});
 
     CHECK(layout.size() == 3);
     CHECK(layout.num_pis() == 1);
     CHECK(layout.num_pos() == 0);
 
-    const auto f1 = layout.create_po(x1, "f1", gate_layout::tile{0, 1});
-    const auto f2 = layout.create_po(!x1, "f2", gate_layout::tile{1, 1});
+    const auto f1 = layout.create_po(x1, "f1", tile<gate_layout>{0, 1});
+    const auto f2 = layout.create_po(x1, "f2", tile<gate_layout>{1, 1});
 
     CHECK(layout.is_po(layout.get_node(f1)));
     CHECK(layout.is_po(layout.get_node(f2)));
@@ -192,30 +230,34 @@ TEST_CASE("Creation and usage of primary outputs", "[gate-level-layout]")
         {
             const auto check = [&layout, &po](auto c)
             {
-                CHECK(static_cast<gate_layout::tile>(po) == c);
+                CHECK(static_cast<tile<gate_layout>>(po) == c);
                 auto n  = layout.get_node(po);
                 auto tn = layout.get_tile(n);
-                CHECK(tn == static_cast<gate_layout::tile>(po));
+                CHECK(tn == static_cast<tile<gate_layout>>(po));
             };
 
             CHECK(layout.is_po(layout.get_node(po)));
-            CHECK(layout.is_po_tile(static_cast<gate_layout::tile>(po)));
-            CHECK(layout.is_gate_tile(static_cast<gate_layout::tile>(po)));
-            CHECK(layout.is_gate(layout.get_node(static_cast<gate_layout::tile>(po))));
+            CHECK(layout.is_po_tile(static_cast<tile<gate_layout>>(po)));
+            CHECK(layout.is_gate_tile(static_cast<tile<gate_layout>>(po)));
+            CHECK(layout.is_gate(layout.get_node(static_cast<tile<gate_layout>>(po))));
 
             switch (i)
             {
                 case 0:
                 {
-                    check(gate_layout::tile{0, 1});
+                    check(tile<gate_layout>{0, 1});
 
                     break;
                 }
                 case 1:
                 {
-                    check(gate_layout::tile{1, 1});
+                    check(tile<gate_layout>{1, 1});
 
                     break;
+                }
+                default:
+                {
+                    CHECK(false);
                 }
             }
         });
@@ -294,11 +336,11 @@ TEST_CASE("Creation of unary operations", "[gate-level-layout]")
     CHECK(layout.is_pi(layout.get_node(x2)));
 
     auto f1n  = layout.get_node(f1);
-    auto t10n = layout.get_node(static_cast<gate_layout::signal>(gate_layout::tile{1, 0}));
+    auto t10n = layout.get_node(static_cast<mockturtle::signal<gate_layout>>(tile<gate_layout>{1, 0}));
     CHECK(f1n == t10n);
 
     auto f2n  = layout.get_node(f2);
-    auto t01n = layout.get_node(static_cast<gate_layout::signal>(gate_layout::tile{0, 1}));
+    auto t01n = layout.get_node(static_cast<mockturtle::signal<gate_layout>>(tile<gate_layout>{0, 1}));
     CHECK(f2n == t01n);
 
     CHECK(!layout.is_empty());
@@ -510,7 +552,7 @@ TEST_CASE("create nodes and compute their functions", "[gate-level-layout]")
 
     auto layout = blueprints::xor_maj_gate_layout<gate_layout>();
 
-    kitty::dynamic_truth_table tt_const0(0u);
+    const kitty::dynamic_truth_table tt_const0(0u);
 
     const auto const0 = layout.create_node({}, tt_const0);
     const auto const1 = layout.create_node({}, ~tt_const0);
@@ -548,8 +590,8 @@ TEST_CASE("node and signal iteration", "[gate-level-layout]")
 
     auto layout = blueprints::and_or_gate_layout<gate_layout>();
 
-    const auto a = gate_layout::tile{1, 0};
-    const auto o = gate_layout::tile{2, 1};
+    const auto a = tile<gate_layout>{1, 0};
+    const auto o = tile<gate_layout>{2, 1};
 
     CHECK(layout.size() == 8);
 
@@ -799,7 +841,47 @@ TEST_CASE("node and signal iteration", "[gate-level-layout]")
     CHECK(mask == 128);
 }
 
-TEST_CASE("Structural properties", "[gate-level-layout]")
+TEST_CASE("Iteration disrespecting clocking", "[gate-level-layout]")
+{
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+
+    auto layout = blueprints::and_not_gate_layout<gate_layout>();
+
+    // remove clocking
+    layout.foreach_tile([&layout](const auto& t) { layout.assign_clock_number(t, 0); });
+
+    CHECK(layout.fanin_size<true>(layout.get_node({2, 0})) == 0);
+    CHECK(layout.fanin_size<false>(layout.get_node({2, 0})) == 0);
+    CHECK(layout.fanout_size<true>(layout.get_node({2, 0})) == 0);
+    CHECK(layout.fanout_size<false>(layout.get_node({2, 0})) == 1);
+
+    CHECK(layout.fanin_size<true>(layout.get_node({1, 1})) == 0);
+    CHECK(layout.fanin_size<false>(layout.get_node({1, 1})) == 0);
+    CHECK(layout.fanout_size<true>(layout.get_node({1, 1})) == 0);
+    CHECK(layout.fanout_size<false>(layout.get_node({1, 1})) == 2);
+
+    CHECK(layout.fanin_size<true>(layout.get_node({1, 0})) == 0);
+    CHECK(layout.fanin_size<false>(layout.get_node({1, 0})) == 2);
+    CHECK(layout.fanout_size<true>(layout.get_node({1, 0})) == 0);
+    CHECK(layout.fanout_size<false>(layout.get_node({1, 0})) == 1);
+
+    CHECK(layout.fanin_size<true>(layout.get_node({2, 1})) == 0);
+    CHECK(layout.fanin_size<false>(layout.get_node({2, 1})) == 1);
+    CHECK(layout.fanout_size<true>(layout.get_node({2, 1})) == 0);
+    CHECK(layout.fanout_size<false>(layout.get_node({2, 1})) == 1);
+
+    CHECK(layout.fanin_size<true>(layout.get_node({0, 0})) == 0);
+    CHECK(layout.fanin_size<false>(layout.get_node({0, 0})) == 1);
+    CHECK(layout.fanout_size<true>(layout.get_node({0, 0})) == 0);
+    CHECK(layout.fanout_size<false>(layout.get_node({0, 0})) == 0);
+
+    CHECK(layout.fanin_size<true>(layout.get_node({3, 1})) == 0);
+    CHECK(layout.fanin_size<false>(layout.get_node({3, 1})) == 1);
+    CHECK(layout.fanout_size<true>(layout.get_node({3, 1})) == 0);
+    CHECK(layout.fanout_size<false>(layout.get_node({3, 1})) == 0);
+}
+
+TEST_CASE("Gate-level layout properties", "[gate-level-layout]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
 
@@ -814,12 +896,12 @@ TEST_CASE("Structural properties", "[gate-level-layout]")
 
     auto layout = blueprints::and_not_gate_layout<gate_layout>();
 
-    const auto x1 = gate_layout::tile{2, 0};
-    const auto x2 = gate_layout::tile{1, 1};
-    const auto a1 = gate_layout::tile{1, 0};
-    const auto n1 = gate_layout::tile{2, 1};
-    const auto f1 = gate_layout::tile{0, 0};
-    const auto f2 = gate_layout::tile{3, 1};
+    const auto x1 = tile<gate_layout>{2, 0};
+    const auto x2 = tile<gate_layout>{1, 1};
+    const auto a1 = tile<gate_layout>{1, 0};
+    const auto n1 = tile<gate_layout>{2, 1};
+    const auto f1 = tile<gate_layout>{0, 0};
+    const auto f2 = tile<gate_layout>{3, 1};
 
     CHECK(layout.size() == 8);
     CHECK(layout.num_pis() == 2);
@@ -853,23 +935,23 @@ TEST_CASE("Functional properties", "[gate-level-layout]")
 
     auto layout = blueprints::non_structural_all_function_gate_layout<gate_layout>();
 
-    const auto x1 = gate_layout::tile{0, 0};
-    const auto x2 = gate_layout::tile{1, 0};
-    const auto x3 = gate_layout::tile{2, 0};
+    const auto x1 = tile<gate_layout>{0, 0};
+    const auto x2 = tile<gate_layout>{1, 0};
+    const auto x3 = tile<gate_layout>{2, 0};
 
-    const auto a = gate_layout::tile{0, 1};
-    const auto o = gate_layout::tile{1, 1};
-    const auto x = gate_layout::tile{2, 1};
+    const auto a = tile<gate_layout>{0, 1};
+    const auto o = tile<gate_layout>{1, 1};
+    const auto x = tile<gate_layout>{2, 1};
 
-    const auto m = gate_layout::tile{0, 2};
-    const auto f = gate_layout::tile{1, 2};
-    const auto w = gate_layout::tile{2, 2};
+    const auto m = tile<gate_layout>{0, 2};
+    const auto f = tile<gate_layout>{1, 2};
+    const auto w = tile<gate_layout>{2, 2};
 
-    const auto n  = gate_layout::tile{2, 3};
-    const auto po = gate_layout::tile{1, 3};
+    const auto n  = tile<gate_layout>{2, 3};
+    const auto po = tile<gate_layout>{1, 3};
 
-    const auto na = gate_layout::tile{0, 4};
-    const auto no = gate_layout::tile{1, 4};
+    const auto na = tile<gate_layout>{0, 4};
+    const auto no = tile<gate_layout>{1, 4};
 
     CHECK(layout.is_pi(layout.get_node(x1)));
     CHECK(layout.is_pi(layout.get_node(x2)));
@@ -1017,16 +1099,16 @@ TEST_CASE("Move nodes", "[gate-level-layout]")
 
     // move AND where OR was
     layout.move_node(and_node, {2, 1},
-                     {{static_cast<mockturtle::signal<gate_layout>>(gate_layout::tile{2, 0}),
-                       static_cast<mockturtle::signal<gate_layout>>(gate_layout::tile{1, 1})}});
+                     {{static_cast<mockturtle::signal<gate_layout>>(tile<gate_layout>{2, 0}),
+                       static_cast<mockturtle::signal<gate_layout>>(tile<gate_layout>{1, 1})}});
 
     CHECK(layout.num_gates() == 2);
     CHECK(layout.num_wires() == 4);
 
     // move OR where AND was
     layout.move_node(or_node, {1, 0},
-                     {{static_cast<mockturtle::signal<gate_layout>>(gate_layout::tile{2, 0}),
-                       static_cast<mockturtle::signal<gate_layout>>(gate_layout::tile{1, 1})}});
+                     {{static_cast<mockturtle::signal<gate_layout>>(tile<gate_layout>{2, 0}),
+                       static_cast<mockturtle::signal<gate_layout>>(tile<gate_layout>{1, 1})}});
 
     CHECK(layout.num_gates() == 2);
     CHECK(layout.num_wires() == 4);
@@ -1042,25 +1124,25 @@ TEST_CASE("Move nodes", "[gate-level-layout]")
     layout.foreach_fanin(and_node,
                          [](const auto& f)
                          {
-                             CHECK(((static_cast<gate_layout::tile>(f) == gate_layout::tile{2, 0}) ||
-                                    (static_cast<gate_layout::tile>(f) == gate_layout::tile{1, 1})));
+                             CHECK(((static_cast<tile<gate_layout>>(f) == tile<gate_layout>{2, 0}) ||
+                                    (static_cast<tile<gate_layout>>(f) == tile<gate_layout>{1, 1})));
                          });
 
     layout.foreach_fanin(or_node,
                          [](const auto& f)
                          {
-                             CHECK(((static_cast<gate_layout::tile>(f) == gate_layout::tile{2, 0}) ||
-                                    (static_cast<gate_layout::tile>(f) == gate_layout::tile{1, 1})));
+                             CHECK(((static_cast<tile<gate_layout>>(f) == tile<gate_layout>{2, 0}) ||
+                                    (static_cast<tile<gate_layout>>(f) == tile<gate_layout>{1, 1})));
                          });
 
     layout.foreach_fanout(and_node,
                           [&layout](const auto& fon) {
-                              CHECK(layout.get_tile(fon) == gate_layout::tile{3, 1});
+                              CHECK(layout.get_tile(fon) == tile<gate_layout>{3, 1});
                           });
 
     layout.foreach_fanout(or_node,
                           [&layout](const auto& fon) {
-                              CHECK(layout.get_tile(fon) == gate_layout::tile{0, 0});
+                              CHECK(layout.get_tile(fon) == tile<gate_layout>{0, 0});
                           });
 
     // move PI
@@ -1082,7 +1164,7 @@ TEST_CASE("Move nodes", "[gate-level-layout]")
 
     CHECK(layout.is_po(po_node));
 
-    layout.move_node(po_node, {0, 1}, {static_cast<mockturtle::signal<gate_layout>>(gate_layout::tile{1, 0})});
+    layout.move_node(po_node, {0, 1}, {static_cast<mockturtle::signal<gate_layout>>(tile<gate_layout>{1, 0})});
 
     CHECK(layout.is_po(po_node));
 
@@ -1093,7 +1175,7 @@ TEST_CASE("Move nodes", "[gate-level-layout]")
 
     CHECK(layout.num_pos() == 2);
 
-    layout.move_node(po_node, {}, {static_cast<mockturtle::signal<gate_layout>>(gate_layout::tile{1, 0})});
+    layout.move_node(po_node, {}, {static_cast<mockturtle::signal<gate_layout>>(tile<gate_layout>{1, 0})});
 
     CHECK(layout.num_pos() == 1);
 
@@ -1101,7 +1183,53 @@ TEST_CASE("Move nodes", "[gate-level-layout]")
     CHECK(layout.num_wires() == 3);  // PO is gone now
 }
 
-TEST_CASE("Cardinal operations", "[gate-level-layout]")
+TEST_CASE("Clear tiles", "[gate-level-layout]")
+{
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+
+    auto layout = blueprints::and_or_gate_layout<gate_layout>();
+
+    REQUIRE(layout.num_gates() == 2);
+    REQUIRE(layout.num_wires() == 4);
+    REQUIRE(layout.num_pis() == 2);
+    REQUIRE(layout.num_pos() == 2);
+
+    layout.clear_tile({1, 0});
+
+    CHECK(!layout.is_gate_tile({1, 0}));
+    CHECK(layout.num_gates() == 1);
+    CHECK(layout.num_wires() == 4);
+    CHECK(layout.num_pis() == 2);
+    CHECK(layout.num_pos() == 2);
+
+    layout.clear_tile({2, 1});
+
+    CHECK(!layout.is_gate_tile({2, 1}));
+    CHECK(layout.num_gates() == 0);
+    CHECK(layout.num_wires() == 4);
+    CHECK(layout.num_pis() == 2);
+    CHECK(layout.num_pos() == 2);
+
+    layout.clear_tile({2, 0});
+
+    CHECK(!layout.is_wire_tile({2, 0}));
+    CHECK(!layout.is_pi_tile({2, 0}));
+    CHECK(layout.num_gates() == 0);
+    CHECK(layout.num_wires() == 3);
+    CHECK(layout.num_pis() == 2);
+    CHECK(layout.num_pos() == 2);
+
+    layout.clear_tile({0, 0});
+
+    CHECK(!layout.is_wire_tile({0, 0}));
+    CHECK(!layout.is_po_tile({0, 0}));
+    CHECK(layout.num_gates() == 0);
+    CHECK(layout.num_wires() == 2);
+    CHECK(layout.num_pis() == 2);
+    CHECK(layout.num_pos() == 1);
+}
+
+TEST_CASE("Gate-level cardinal operations", "[gate-level-layout]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
 

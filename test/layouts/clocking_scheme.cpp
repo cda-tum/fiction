@@ -2,7 +2,7 @@
 // Created by marcel on 12.05.21.
 //
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
@@ -1617,6 +1617,166 @@ TEST_CASE("4-phase RES", "[clocking-scheme]")
     CHECK(res4({3 + 4, 3 + 4}) == 1);
 }
 
+TEST_CASE("4-phase CFE", "[clocking-scheme]")
+{
+    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
+
+    const auto cfe4 = cfe_clocking<clk_lyt>();
+
+    CHECK(cfe4.num_clocks == 4u);
+    CHECK(cfe4.max_in_degree == 3u);
+    CHECK(cfe4.max_out_degree == 3u);
+    CHECK(cfe4.is_regular());
+
+    CHECK(cfe4({0, 0}) == 0);
+    CHECK(cfe4({0, 1}) == 3);
+    CHECK(cfe4({0, 2}) == 0);
+    CHECK(cfe4({0, 3}) == 3);
+    CHECK(cfe4({1, 0}) == 1);
+    CHECK(cfe4({1, 1}) == 2);
+    CHECK(cfe4({1, 2}) == 1);
+    CHECK(cfe4({1, 3}) == 2);
+    CHECK(cfe4({2, 0}) == 0);
+    CHECK(cfe4({2, 1}) == 3);
+    CHECK(cfe4({2, 2}) == 0);
+    CHECK(cfe4({2, 3}) == 3);
+    CHECK(cfe4({3, 0}) == 1);
+    CHECK(cfe4({3, 1}) == 2);
+    CHECK(cfe4({3, 2}) == 1);
+    CHECK(cfe4({3, 3}) == 2);
+
+    CHECK(cfe4({0 + 4, 0}) == 0);
+    CHECK(cfe4({0 + 4, 1}) == 3);
+    CHECK(cfe4({0 + 4, 2}) == 0);
+    CHECK(cfe4({0 + 4, 3}) == 3);
+    CHECK(cfe4({1 + 4, 0}) == 1);
+    CHECK(cfe4({1 + 4, 1}) == 2);
+    CHECK(cfe4({1 + 4, 2}) == 1);
+    CHECK(cfe4({1 + 4, 3}) == 2);
+    CHECK(cfe4({2 + 4, 0}) == 0);
+    CHECK(cfe4({2 + 4, 1}) == 3);
+    CHECK(cfe4({2 + 4, 2}) == 0);
+    CHECK(cfe4({2 + 4, 3}) == 3);
+    CHECK(cfe4({3 + 4, 0}) == 1);
+    CHECK(cfe4({3 + 4, 1}) == 2);
+    CHECK(cfe4({3 + 4, 2}) == 1);
+    CHECK(cfe4({3 + 4, 3}) == 2);
+
+    CHECK(cfe4({0, 0 + 4}) == 0);
+    CHECK(cfe4({0, 1 + 4}) == 3);
+    CHECK(cfe4({0, 2 + 4}) == 0);
+    CHECK(cfe4({0, 3 + 4}) == 3);
+    CHECK(cfe4({1, 0 + 4}) == 1);
+    CHECK(cfe4({1, 1 + 4}) == 2);
+    CHECK(cfe4({1, 2 + 4}) == 1);
+    CHECK(cfe4({1, 3 + 4}) == 2);
+    CHECK(cfe4({2, 0 + 4}) == 0);
+    CHECK(cfe4({2, 1 + 4}) == 3);
+    CHECK(cfe4({2, 2 + 4}) == 0);
+    CHECK(cfe4({2, 3 + 4}) == 3);
+    CHECK(cfe4({3, 0 + 4}) == 1);
+    CHECK(cfe4({3, 1 + 4}) == 2);
+    CHECK(cfe4({3, 2 + 4}) == 1);
+    CHECK(cfe4({3, 3 + 4}) == 2);
+
+    CHECK(cfe4({0 + 4, 0 + 4}) == 0);
+    CHECK(cfe4({0 + 4, 1 + 4}) == 3);
+    CHECK(cfe4({0 + 4, 2 + 4}) == 0);
+    CHECK(cfe4({0 + 4, 3 + 4}) == 3);
+    CHECK(cfe4({1 + 4, 0 + 4}) == 1);
+    CHECK(cfe4({1 + 4, 1 + 4}) == 2);
+    CHECK(cfe4({1 + 4, 2 + 4}) == 1);
+    CHECK(cfe4({1 + 4, 3 + 4}) == 2);
+    CHECK(cfe4({2 + 4, 0 + 4}) == 0);
+    CHECK(cfe4({2 + 4, 1 + 4}) == 3);
+    CHECK(cfe4({2 + 4, 2 + 4}) == 0);
+    CHECK(cfe4({2 + 4, 3 + 4}) == 3);
+    CHECK(cfe4({3 + 4, 0 + 4}) == 1);
+    CHECK(cfe4({3 + 4, 1 + 4}) == 2);
+    CHECK(cfe4({3 + 4, 2 + 4}) == 1);
+    CHECK(cfe4({3 + 4, 3 + 4}) == 2);
+}
+
+TEST_CASE("4-phase Ripple", "[clocking-scheme]")
+{
+    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
+
+    const auto ripple4 = ripple_clocking<clk_lyt>();
+
+    CHECK(ripple4.num_clocks == 4u);
+    CHECK(ripple4.max_in_degree == 3u);
+    CHECK(ripple4.max_out_degree == 3u);
+    CHECK(ripple4.is_regular());
+
+    CHECK(ripple4({0, 0}) == 0);
+    CHECK(ripple4({0, 1}) == 3);
+    CHECK(ripple4({0, 2}) == 0);
+    CHECK(ripple4({0, 3}) == 3);
+    CHECK(ripple4({1, 0}) == 1);
+    CHECK(ripple4({1, 1}) == 2);
+    CHECK(ripple4({1, 2}) == 1);
+    CHECK(ripple4({1, 3}) == 2);
+    CHECK(ripple4({2, 0}) == 2);
+    CHECK(ripple4({2, 1}) == 1);
+    CHECK(ripple4({2, 2}) == 2);
+    CHECK(ripple4({2, 3}) == 1);
+    CHECK(ripple4({3, 0}) == 3);
+    CHECK(ripple4({3, 1}) == 0);
+    CHECK(ripple4({3, 2}) == 3);
+    CHECK(ripple4({3, 3}) == 0);
+
+    CHECK(ripple4({0 + 4, 0}) == 0);
+    CHECK(ripple4({0 + 4, 1}) == 3);
+    CHECK(ripple4({0 + 4, 2}) == 0);
+    CHECK(ripple4({0 + 4, 3}) == 3);
+    CHECK(ripple4({1 + 4, 0}) == 1);
+    CHECK(ripple4({1 + 4, 1}) == 2);
+    CHECK(ripple4({1 + 4, 2}) == 1);
+    CHECK(ripple4({1 + 4, 3}) == 2);
+    CHECK(ripple4({2 + 4, 0}) == 2);
+    CHECK(ripple4({2 + 4, 1}) == 1);
+    CHECK(ripple4({2 + 4, 2}) == 2);
+    CHECK(ripple4({2 + 4, 3}) == 1);
+    CHECK(ripple4({3 + 4, 0}) == 3);
+    CHECK(ripple4({3 + 4, 1}) == 0);
+    CHECK(ripple4({3 + 4, 2}) == 3);
+    CHECK(ripple4({3 + 4, 3}) == 0);
+
+    CHECK(ripple4({0, 0 + 4}) == 0);
+    CHECK(ripple4({0, 1 + 4}) == 3);
+    CHECK(ripple4({0, 2 + 4}) == 0);
+    CHECK(ripple4({0, 3 + 4}) == 3);
+    CHECK(ripple4({1, 0 + 4}) == 1);
+    CHECK(ripple4({1, 1 + 4}) == 2);
+    CHECK(ripple4({1, 2 + 4}) == 1);
+    CHECK(ripple4({1, 3 + 4}) == 2);
+    CHECK(ripple4({2, 0 + 4}) == 2);
+    CHECK(ripple4({2, 1 + 4}) == 1);
+    CHECK(ripple4({2, 2 + 4}) == 2);
+    CHECK(ripple4({2, 3 + 4}) == 1);
+    CHECK(ripple4({3, 0 + 4}) == 3);
+    CHECK(ripple4({3, 1 + 4}) == 0);
+    CHECK(ripple4({3, 2 + 4}) == 3);
+    CHECK(ripple4({3, 3 + 4}) == 0);
+
+    CHECK(ripple4({0 + 4, 0 + 4}) == 0);
+    CHECK(ripple4({0 + 4, 1 + 4}) == 3);
+    CHECK(ripple4({0 + 4, 2 + 4}) == 0);
+    CHECK(ripple4({0 + 4, 3 + 4}) == 3);
+    CHECK(ripple4({1 + 4, 0 + 4}) == 1);
+    CHECK(ripple4({1 + 4, 1 + 4}) == 2);
+    CHECK(ripple4({1 + 4, 2 + 4}) == 1);
+    CHECK(ripple4({1 + 4, 3 + 4}) == 2);
+    CHECK(ripple4({2 + 4, 0 + 4}) == 2);
+    CHECK(ripple4({2 + 4, 1 + 4}) == 1);
+    CHECK(ripple4({2 + 4, 2 + 4}) == 2);
+    CHECK(ripple4({2 + 4, 3 + 4}) == 1);
+    CHECK(ripple4({3 + 4, 0 + 4}) == 3);
+    CHECK(ripple4({3 + 4, 1 + 4}) == 0);
+    CHECK(ripple4({3 + 4, 2 + 4}) == 3);
+    CHECK(ripple4({3 + 4, 3 + 4}) == 0);
+}
+
 TEST_CASE("3-phase BANCS", "[clocking-scheme]")
 {
     using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
@@ -1749,7 +1909,7 @@ TEST_CASE("4-phase ESP", "[clocking-scheme]")
 {
     using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
 
-    const auto esp4 = esp_clocking<clk_lyt>();
+    const auto esp4 = esr_clocking<clk_lyt>();
 
     CHECK(esp4.num_clocks == 4u);
     CHECK(esp4.max_in_degree == 3u);
@@ -1839,15 +1999,17 @@ TEST_CASE("Clocking lookup", "[clocking-scheme]")
         }
     };
 
-    check({"open", "OPEN", "oPeN", "OpEn"}, clock_name::open);
-    check({"columnar", "COLUMNAR", "CoLumNar", "COLUMnar"}, clock_name::columnar);
-    check({"row", "ROW", "RoW", "rOw"}, clock_name::row);
-    check({"2DDwave", "2DdWaVe", "2ddwave", "2DDWAVE", "2DDWave"}, clock_name::twoddwave);
-    check({"2DDwavehex", "2DdWaVeHeX", "2ddwavehex", "2DDWAVEHEX", "2DDWaveHex"}, clock_name::twoddwave);
-    check({"use", "USE", "uSe", "UsE"}, clock_name::use);
-    check({"res", "RES", "rEs", "ReS"}, clock_name::res);
-    check({"esp", "ESP", "eSp", "EsP"}, clock_name::esp);
-    check({"bancs", "BANCS", "BaNCs", "banCS"}, clock_name::bancs);
+    check({"open", "OPEN", "oPeN", "OpEn"}, clock_name::OPEN);
+    check({"columnar", "COLUMNAR", "CoLumNar", "COLUMnar"}, clock_name::COLUMNAR);
+    check({"row", "ROW", "RoW", "rOw"}, clock_name::ROW);
+    check({"2DDwave", "2DdWaVe", "2ddwave", "2DDWAVE", "2DDWave"}, clock_name::TWODDWAVE);
+    check({"2DDwavehex", "2DdWaVeHeX", "2ddwavehex", "2DDWAVEHEX", "2DDWaveHex"}, clock_name::TWODDWAVE);
+    check({"use", "USE", "uSe", "UsE"}, clock_name::USE);
+    check({"res", "RES", "rEs", "ReS"}, clock_name::RES);
+    check({"esr", "ESR", "eSr", "EsR"}, clock_name::ESR);
+    check({"cfe", "CFE", "cFe", "CfE"}, clock_name::CFE);
+    check({"ripple", "RIPPLE", "RiPpLe", "RIppLE"}, clock_name::RIPPLE);
+    check({"bancs", "BANCS", "BaNCs", "banCS"}, clock_name::BANCS);
 
     CHECK(!get_clocking_scheme<clk_lyt>("").has_value());
     CHECK(!get_clocking_scheme<clk_lyt>("Column").has_value());
@@ -1855,8 +2017,10 @@ TEST_CASE("Clocking lookup", "[clocking-scheme]")
     CHECK(!get_clocking_scheme<clk_lyt>("TwoDDWave").has_value());
     CHECK(!get_clocking_scheme<clk_lyt>("2DDWave6").has_value());
     CHECK(!get_clocking_scheme<clk_lyt>("SUE").has_value());
+    CHECK(!get_clocking_scheme<clk_lyt>("SER").has_value());
     CHECK(!get_clocking_scheme<clk_lyt>("ERS").has_value());
-    CHECK(!get_clocking_scheme<clk_lyt>("EPS").has_value());
+    CHECK(!get_clocking_scheme<clk_lyt>("CEF").has_value());
+    CHECK(!get_clocking_scheme<clk_lyt>("RPIPLE").has_value());
     CHECK(!get_clocking_scheme<clk_lyt>("BNCS").has_value());
 }
 
@@ -1864,14 +2028,16 @@ TEST_CASE("Linear schemes", "[clocking-scheme]")
 {
     using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
 
-    CHECK(is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::columnar)));
-    CHECK(is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::row)));
-    CHECK(is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::twoddwave)));
-    CHECK(is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::twoddwave_hex)));
+    CHECK(is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::COLUMNAR)));
+    CHECK(is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::ROW)));
+    CHECK(is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::TWODDWAVE)));
+    CHECK(is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::TWODDWAVE_HEX)));
 
-    CHECK(!is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::open)));
-    CHECK(!is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::use)));
-    CHECK(!is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::res)));
-    CHECK(!is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::bancs)));
-    CHECK(!is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::esp)));
+    CHECK(!is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::OPEN)));
+    CHECK(!is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::USE)));
+    CHECK(!is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::RES)));
+    CHECK(!is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::ESR)));
+    CHECK(!is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::CFE)));
+    CHECK(!is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::RIPPLE)));
+    CHECK(!is_linear_scheme<clk_lyt>(*get_clocking_scheme<clk_lyt>(clock_name::BANCS)));
 }

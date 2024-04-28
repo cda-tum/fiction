@@ -9,7 +9,6 @@
 #include "fiction/io/print_layout.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/networks/views/edge_color_view.hpp"
-#include "fiction/networks/views/reverse_topo_view.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/name_utils.hpp"
 #include "fiction/utils/network_utils.hpp"
@@ -34,6 +33,9 @@
 namespace fiction
 {
 
+/**
+ * Parameters for the orthogonal physical design algorithm.
+ */
 struct orthogonal_physical_design_params
 {
     /**
@@ -148,7 +150,7 @@ template <typename Ntk>
 coloring_container<Ntk> east_south_edge_coloring(const Ntk& ntk) noexcept
 {
     coloring_container<Ntk> ctn{ntk};
-    reverse_topo_view       rtv{ntk};  // reverse topological order of nodes
+    mockturtle::topo_view   rtv{ntk};
 
 #if (PROGRESS_BARS)
     // initialize a progress bar
@@ -156,7 +158,7 @@ coloring_container<Ntk> east_south_edge_coloring(const Ntk& ntk) noexcept
                                  "[i] determining relative positions: |{0}|"};
 #endif
 
-    rtv.foreach_gate(
+    rtv.foreach_gate_reverse(
         [&](const auto& n, [[maybe_unused]] const auto i)
         {
             const auto finc = fanin_edges(ctn.color_ntk, n);
@@ -268,7 +270,9 @@ aspect_ratio<Lyt> determine_layout_size(const coloring_container<Ntk>& ctn) noex
                                                  [&ctn, &x](const auto& fon)
                                                  {
                                                      if (ctn.color_ntk.color(fon) == ctn.color_south)
+                                                     {
                                                          ++x;
+                                                     }
                                                  });
                 }
                 else if (const auto clr = ctn.color_ntk.color(n); clr == ctn.color_east)
@@ -288,9 +292,13 @@ aspect_ratio<Lyt> determine_layout_size(const coloring_container<Ntk>& ctn) noex
                 if (ctn.color_ntk.is_po(n))
                 {
                     if (is_eastern_po_orientation_available(ctn, n))
+                    {
                         ++x;
+                    }
                     else
+                    {
                         ++y;
+                    }
                 }
             }
 
@@ -348,7 +356,9 @@ mockturtle::signal<Lyt> connect_and_place(Lyt& lyt, const tile<Lyt>& t, const Nt
 {
     // make sure pre1_t is the northwards tile and pre2_t is the westwards one
     if (pre2_t < pre1_t)
+    {
         std::swap(pre1_t, pre2_t);
+    }
 
     return place(lyt, t, ntk, n, wire_south(lyt, pre1_t, t), wire_east(lyt, pre2_t, t), c);
 }
@@ -361,7 +371,7 @@ mockturtle::signal<Lyt> connect_and_place(Lyt& lyt, const tile<Lyt>& t, const Nt
     {
         return place(lyt, t, ntk, n, wire_east(lyt, pre_t, t));
     }
-    else if (lyt.is_northwards_of(t, pre_t))
+    if (lyt.is_northwards_of(t, pre_t))
     {
         return place(lyt, t, ntk, n, wire_south(lyt, pre_t, t));
     }
@@ -400,7 +410,7 @@ class orthogonal_impl
 
 #if (PROGRESS_BARS)
         // initialize a progress bar
-        mockturtle::progress_bar bar{static_cast<uint32_t>(ctn.color_ntk.size()), "[i] arranging layout: |{0}|"};
+        mockturtle::progress_bar bar{ctn.color_ntk.size(), "[i] arranging layout: |{0}|"};
 #endif
 
         ctn.color_ntk.foreach_node(
@@ -473,7 +483,9 @@ class orthogonal_impl
                         {
                             // make sure pre1_t is the northwards tile and pre2_t is the westwards one
                             if (pre2_t.y < pre1_t.y)
+                            {
                                 std::swap(pre1_t, pre2_t);
+                            }
 
                             // use larger y position of predecessors
                             t = {latest_pos.x, pre2_t.y};
@@ -488,7 +500,9 @@ class orthogonal_impl
                         {
                             // make sure pre1_t is the northwards tile and pre2_t is the westwards one
                             if (pre2_t.x > pre1_t.x)
+                            {
                                 std::swap(pre1_t, pre2_t);
+                            }
 
                             // use larger x position of predecessors
                             t = {pre1_t.x, latest_pos.y};
@@ -504,7 +518,9 @@ class orthogonal_impl
                             // make sure pre1_t has an empty tile to its east and pre2_t to its south
                             if (!layout.is_empty_tile(layout.east(pre1_t)) ||
                                 !layout.is_empty_tile(layout.south(pre2_t)))
+                            {
                                 std::swap(pre1_t, pre2_t);
+                            }
 
                             t = latest_pos;
 
@@ -593,10 +609,10 @@ class orthogonal_impl
 }  // namespace detail
 
 /**
- * A scalable placement & routing approach based on orthogonal graph drawing as originally proposed in "Scalable Design
- * for Field-coupled Nanocomputing Circuits" by M. Walter, R. Wille, F. Sill Torres, D. Große, and R. Drechsler in
- * ASP-DAC 2019. A more extensive description can be found in "Design Automation for Field-coupled Nanotechnologies" by
- * M. Walter, R. Wille, F. Sill Torres, and R. Drechsler published by Springer Nature in 2022.
+ * A scalable placement & routing approach based on orthogonal graph drawing as originally proposed in \"Scalable Design
+ * for Field-coupled Nanocomputing Circuits\" by M. Walter, R. Wille, F. Sill Torres, D. Große, and R. Drechsler in
+ * ASP-DAC 2019. A more extensive description can be found in \"Design Automation for Field-coupled Nanotechnologies\"
+ * by M. Walter, R. Wille, F. Sill Torres, and R. Drechsler published by Springer Nature in 2022.
  *
  * Via certain restrictions to the degrees of freedom in FCN physical design, this algorithm achieves a polynomial time
  * complexity. However, these restrictions lead to an overall approximation of optimal layout quality within several
@@ -606,23 +622,24 @@ class orthogonal_impl
  * The imposed restrictions are that the input logic network has to be a 3-graph, i.e., cannot have any node exceeding
  * degree 3 (combined input and output), and that the resulting layout is always 2DDWave-clocked.
  *
- * This algorithm is based on a modification of "Improved orthogonal drawings of 3-graphs" by Therese C. Biedl in CCCG
- * 1996. The original one works for undirected graphs only while this modification respects information flow of directed
- * logic networks. To this end, the edge directions of the logic network directly used instead of relabeling the edges
- * according to its DFS tree, ordering the vertices using topological sorting instead of DFS, and adding an extra
- * placement rule for nodes without predecessors.
+ * This algorithm is based on a modification of \"Improved orthogonal drawings of 3-graphs\" by Therese C. Biedl in
+ * Canadian Conference on Computational Geometry 1996. Biedl's original algorithm works for undirected graphs only while
+ * this modification respects information flow of directed logic networks. To this end, the edge directions of the logic
+ * network directly used instead of relabeling the edges according to its DFS tree, ordering the vertices using
+ * topological sorting instead of DFS, and adding an extra placement rule for nodes without predecessors.
  *
- * The algorithm works in polynomial time O(3|N| + |L|) where |N| is the number of nodes in the given network and |L| is
- * the resulting layout size given by x * y, which approaches (|N|/2)^2 asymptotically.
+ * The algorithm works in polynomial time \f$\mathcal{O}(3|N| + |L|)\f$ where \f$|N|\f$ is the number of nodes the given
+ * network and \f$|L|\f$ is the resulting layout size given by \f$x \cdot y\f$, which approaches \f$(\frac{|N|}{2})^2\f$
+ * asymptotically.
  *
- * May throw an 'high_degree_fanin_exception'.
+ * May throw a high_degree_fanin_exception if `ntk` contains any node with a fan-in larger than 2.
  *
  * @tparam Lyt Desired gate-level layout type.
  * @tparam Ntk Network type that acts as specification.
  * @param ntk The network that is to place and route.
  * @param ps Parameters.
  * @param pst Statistics.
- * @return A gate-level layout of type Lyt that implements ntk as an FCN circuit.
+ * @return A gate-level layout of type `Lyt` that implements `ntk` as an FCN circuit.
  */
 template <typename Lyt, typename Ntk>
 Lyt orthogonal(const Ntk& ntk, orthogonal_physical_design_params ps = {},

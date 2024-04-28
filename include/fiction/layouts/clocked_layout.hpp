@@ -12,8 +12,12 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <functional>
 #include <iterator>
-#include <set>
+#include <memory>
+#include <string_view>
+#include <utility>
+#include <vector>
 
 namespace fiction
 {
@@ -60,7 +64,7 @@ class clocked_layout : public CoordinateLayout
      *
      * @param ar Highest possible position in the layout.
      */
-    explicit clocked_layout(const aspect_ratio<CoordinateLayout>& ar = {}) :
+    explicit clocked_layout(const typename CoordinateLayout::aspect_ratio& ar = {}) :
             CoordinateLayout(ar),
             strg{std::make_shared<clocked_layout_storage>(
                 open_clocking<clocked_layout<CoordinateLayout>>(num_clks::FOUR))}
@@ -74,7 +78,7 @@ class clocked_layout : public CoordinateLayout
      * @param ar Highest possible position in the layout.
      * @param scheme Clocking scheme to apply to this layout.
      */
-    clocked_layout(const aspect_ratio<CoordinateLayout>& ar, const clocking_scheme_t& scheme) :
+    clocked_layout(const typename CoordinateLayout::aspect_ratio& ar, const clocking_scheme_t& scheme) :
             CoordinateLayout(ar),
             strg{std::make_shared<clocked_layout_storage>(scheme)}
     {
@@ -88,6 +92,30 @@ class clocked_layout : public CoordinateLayout
     explicit clocked_layout(std::shared_ptr<clocked_layout_storage> s) : strg{std::move(s)}
     {
         static_assert(is_coordinate_layout_v<CoordinateLayout>, "CoordinateLayout is not a coordinate layout type");
+    }
+    /**
+     * Copy constructor from another `CoordinateLayout`.
+     *
+     * @param lyt Coordinate layout.
+     */
+    explicit clocked_layout(const CoordinateLayout& lyt) :
+            CoordinateLayout(lyt),
+            strg{std::make_shared<clocked_layout_storage>(
+                open_clocking<clocked_layout<CoordinateLayout>>(num_clks::FOUR))}
+    {
+        static_assert(is_coordinate_layout_v<CoordinateLayout>, "CoordinateLayout is not a coordinate layout type");
+    }
+    /**
+     * Clones the layout returning a deep copy.
+     *
+     * @return Deep copy of the layout.
+     */
+    [[nodiscard]] clocked_layout clone() const noexcept
+    {
+        auto copy = clocked_layout(CoordinateLayout::clone());
+        copy.strg = std::make_shared<clocked_layout_storage>(*strg);
+
+        return copy;
     }
 
 #pragma endregion
@@ -106,7 +134,7 @@ class clocked_layout : public CoordinateLayout
      * Overrides a clock number in the stored scheme with the provided one.
      *
      * @param cz Clock zone to override.
-     * @param cn New clock number for cz.
+     * @param cn New clock number for `cz`.
      */
     void assign_clock_number(const clock_zone& cz, const clock_number_t cn) noexcept
     {
@@ -116,7 +144,7 @@ class clocked_layout : public CoordinateLayout
      * Returns the clock number for the given clock zone.
      *
      * @param cz Clock zone.
-     * @return Clock number of cz.
+     * @return Clock number of `cz`.
      */
     [[nodiscard]] clock_number_t get_clock_number(const clock_zone& cz) const noexcept
     {
@@ -135,7 +163,7 @@ class clocked_layout : public CoordinateLayout
     /**
      * Returns whether the layout is clocked by a regular clocking scheme with no overwritten zones.
      *
-     * @return True iff the layout is clocked by a regular scheme and no zones have been overwritten.
+     * @return `true` iff the layout is clocked by a regular scheme and no zones have been overwritten.
      */
     [[nodiscard]] bool is_regularly_clocked() const noexcept
     {
@@ -143,14 +171,14 @@ class clocked_layout : public CoordinateLayout
     }
     /**
      * Compares the stored clocking scheme against the provided name. Names of pre-defined clocking schemes are given in
-     * the clock_name namespace.
+     * the `clock_name` namespace.
      *
      * @param name Clocking scheme name.
-     * @return True iff the layout is clocked by a clocking scheme of name name.
+     * @return `true` iff the layout is clocked by a clocking scheme of name `name`.
      */
-    [[nodiscard]] bool is_clocking_scheme(std::string&& name) const noexcept
+    [[nodiscard]] bool is_clocking_scheme(const std::string_view& name) const noexcept
     {
-        return *strg->clocking == name;
+        return *strg->clocking == name.data();
     }
     /**
      * Returns a copy of the stored clocking scheme object.
@@ -162,33 +190,37 @@ class clocked_layout : public CoordinateLayout
         return *strg->clocking;
     }
     /**
-     * Evaluates whether clock zone cz2 feeds information to clock zone cz1, i.e., whether cz2 is clocked with a
-     * clock number that is lower by 1 modulo num_clocks().
+     * Evaluates whether clock zone `cz2` feeds information to clock zone `cz1`, i.e., whether `cz2` is clocked with a
+     * clock number that is lower by 1 modulo `num_clocks()`.
      *
      * @param cz1 Base clock zone.
-     * @param cz2 Clock zone to check whether its clock number is 1 lower.
-     * @return True iff cz2 can feed information to cz1.
+     * @param cz2 Clock zone to check whether its clock number is lower by 1.
+     * @return `true` iff `cz2` can feed information to `cz1`.
      */
     [[nodiscard]] bool is_incoming_clocked(const clock_zone& cz1, const clock_zone& cz2) const noexcept
     {
         if (cz1 == cz2)
+        {
             return false;
+        }
 
         return static_cast<clock_number_t>((get_clock_number(cz2) + static_cast<clock_number_t>(1)) % num_clocks()) ==
                get_clock_number(cz1);
     }
     /**
-     * Evaluates whether clock zone cz2 accepts information from clock zone cz1, i.e., whether cz2 is clocked with a
-     * clock number that is higher by 1 modulo num_clocks().
+     * Evaluates whether clock zone `cz2` accepts information from clock zone `cz1`, i.e., whether `cz2` is clocked with
+     * a clock number that is higher by 1 modulo `num_clocks()`.
      *
      * @param cz1 Base clock zone.
-     * @param cz2 Clock zone to check whether its clock number is 1 higher.
-     * @return True iff cz2 can accept information from cz1.
+     * @param cz2 Clock zone to check whether its clock number is higher by 1.
+     * @return `true` iff `cz2` can accept information from `cz1`.
      */
     [[nodiscard]] bool is_outgoing_clocked(const clock_zone& cz1, const clock_zone& cz2) const noexcept
     {
         if (cz1 == cz2)
+        {
             return false;
+        }
 
         return static_cast<clock_number_t>((get_clock_number(cz1) + static_cast<clock_number_t>(1)) % num_clocks()) ==
                get_clock_number(cz2);
@@ -199,70 +231,72 @@ class clocked_layout : public CoordinateLayout
 #pragma region Iteration
 
     /**
-     * Returns a container of type Container with all clock zones that are incoming to the given one.
+     * Returns a container with all clock zones that are incoming to the given one.
      *
-     * @tparam Container Container type that holds clock zones.
      * @param cz Base clock zone.
-     * @return A container of type Container with all clock zones that are incoming to cz.
+     * @return A container with all clock zones that are incoming to `cz`.
      */
-    template <typename Container>
-    [[nodiscard]] Container incoming_clocked_zones(const clock_zone& cz) const noexcept
+    [[nodiscard]] auto incoming_clocked_zones(const clock_zone& cz) const noexcept
     {
-        const auto adj = CoordinateLayout::template adjacent_coordinates<Container>(cz);
+        std::vector<clock_zone> incoming{};
+        incoming.reserve(strg->clocking->max_in_degree);  // reserve memory
 
-        Container incoming{};
-
-        std::copy_if(std::cbegin(adj), std::cend(adj), std::inserter(incoming, std::cend(incoming)),
-                     [this, &cz](const auto& ct) { return is_incoming_clocked(cz, ct); });
+        foreach_incoming_clocked_zone(cz, [&incoming](const auto& ct) { incoming.push_back(ct); });
 
         return incoming;
     }
     /**
-     * Applies a function to all incoming clock zones of a given one in accordance with incoming_clocked_zones.
+     * Applies a function to all incoming clock zones of a given one.
      *
-     * @tparam Fn Functor type that has to comply with the restrictions imposed by mockturtle::foreach_element.
+     * @tparam Fn Functor type.
      * @param cz Base clock zone.
-     * @param fn Functor to apply to each of cz's incoming clock zones.
+     * @param fn Functor to apply to each of `cz`'s incoming clock zones.
      */
     template <typename Fn>
     void foreach_incoming_clocked_zone(const clock_zone& cz, Fn&& fn) const
     {
-        const auto incoming = incoming_clocked_zones<std::set<clock_zone>>(cz);
-
-        mockturtle::detail::foreach_element(incoming.cbegin(), incoming.cend(), fn);
+        CoordinateLayout::foreach_adjacent_coordinate(cz,
+                                                      [this, &cz, &fn](const auto& ct)
+                                                      {
+                                                          if (is_incoming_clocked(cz, ct))
+                                                          {
+                                                              std::invoke(std::forward<Fn>(fn), ct);
+                                                          }
+                                                      });
     }
     /**
-     * Returns a container of type Container with all clock zones that are outgoing from the given one.
+     * Returns a container with all clock zones that are outgoing from the given one.
      *
-     * @tparam Container Container type that holds clock zones.
      * @param cz Base clock zone.
-     * @return A container of type Container with all clock zones that are outgoing from cz.
+     * @return A container with all clock zones that are outgoing from `cz`.
      */
-    template <typename Container>
-    [[nodiscard]] Container outgoing_clocked_zones(const clock_zone& cz) const noexcept
+    [[nodiscard]] auto outgoing_clocked_zones(const clock_zone& cz) const noexcept
     {
-        const auto adj = CoordinateLayout::template adjacent_coordinates<Container>(cz);
+        std::vector<clock_zone> outgoing{};
+        outgoing.reserve(strg->clocking->max_out_degree);  // reserve memory
 
-        Container outgoing{};
-
-        std::copy_if(std::cbegin(adj), std::cend(adj), std::inserter(outgoing, std::cend(outgoing)),
-                     [this, &cz](const auto& ct) { return is_outgoing_clocked(cz, ct); });
+        foreach_outgoing_clocked_zone(cz, [&outgoing](const auto& ct) { outgoing.push_back(ct); });
 
         return outgoing;
     }
     /**
-     * Applies a function to all outgoing clock zones of a given one in accordance with outgoing_clocked_zones.
+     * Applies a function to all outgoing clock zones of a given one.
      *
-     * @tparam Fn Functor type that has to comply with the restrictions imposed by mockturtle::foreach_element.
+     * @tparam Fn Functor type.
      * @param cz Base clock zone.
-     * @param fn Functor to apply to each of cz's outgoing clock zones.
+     * @param fn Functor to apply to each of `cz`'s outgoing clock zones.
      */
     template <typename Fn>
     void foreach_outgoing_clocked_zone(const clock_zone& cz, Fn&& fn) const
     {
-        const auto outgoing = outgoing_clocked_zones<std::set<clock_zone>>(cz);
-
-        mockturtle::detail::foreach_element(outgoing.cbegin(), outgoing.cend(), fn);
+        CoordinateLayout::foreach_adjacent_coordinate(cz,
+                                                      [this, &cz, &fn](const auto& ct)
+                                                      {
+                                                          if (is_outgoing_clocked(cz, ct))
+                                                          {
+                                                              std::invoke(std::forward<Fn>(fn), ct);
+                                                          }
+                                                      });
     }
 
 #pragma endregion
@@ -272,27 +306,33 @@ class clocked_layout : public CoordinateLayout
      * Returns the number of incoming clock zones to the given one.
      *
      * @param cz Base clock zone.
-     * @return Number of cz's incoming clock zones.
+     * @return Number of `cz`'s incoming clock zones.
      */
     [[nodiscard]] degree_t in_degree(const clock_zone& cz) const noexcept
     {
-        return static_cast<degree_t>(incoming_clocked_zones<std::set<clock_zone>>(cz).size());
+        degree_t idg{0};
+        foreach_incoming_clocked_zone(cz, [&idg](const auto&) { ++idg; });
+
+        return idg;
     }
     /**
      * Returns the number of outgoing clock zones from the given one.
      *
      * @param cz Base clock zone.
-     * @return Number of cz's outgoing clock zones.
+     * @return Number of `cz`'s outgoing clock zones.
      */
     [[nodiscard]] degree_t out_degree(const clock_zone& cz) const noexcept
     {
-        return static_cast<degree_t>(outgoing_clocked_zones<std::set<clock_zone>>(cz).size());
+        degree_t odg{0};
+        foreach_outgoing_clocked_zone(cz, [&odg](const auto&) { ++odg; });
+
+        return odg;
     }
     /**
      * Returns the number of incoming plus outgoing clock zones of the given one.
      *
      * @param cz Base clock zone.
-     * @return Number of cz's incoming plus outgoing clock zones.
+     * @return Number of `cz`'s incoming plus outgoing clock zones.
      */
     [[nodiscard]] degree_t degree(const clock_zone& cz) const noexcept
     {

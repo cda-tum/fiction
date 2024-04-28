@@ -121,63 +121,81 @@ class map_command : public command
         if (is_set("maj") || is_set("all3") || is_set("all"))
         {
             if (!is_set("decay"))
+            {
                 library_stream << fiction::GATE_MAJ3;
+            }
 
             library_stream << fiction::DECAY_MAJ3;
         }
         if (is_set("dot") || is_set("all3") || is_set("all"))
         {
             if (!is_set("decay"))
+            {
                 library_stream << fiction::GATE_DOT;
+            }
 
             library_stream << fiction::DECAY_DOT;
         }
         if (is_set("and3") || is_set("all3") || is_set("all"))
         {
             if (!is_set("decay"))
+            {
                 library_stream << fiction::GATE_AND3;
+            }
 
             library_stream << fiction::DECAY_AND3;
         }
         if (is_set("xor_and") || is_set("all3") || is_set("all"))
         {
             if (!is_set("decay"))
+            {
                 library_stream << fiction::GATE_XOR_AND;
+            }
 
             library_stream << fiction::DECAY_XOR_AND;
         }
         if (is_set("or_and") || is_set("all3") || is_set("all"))
         {
             if (!is_set("decay"))
+            {
                 library_stream << fiction::GATE_OR_AND;
+            }
 
             library_stream << fiction::DECAY_OR_AND;
         }
         if (is_set("onehot") || is_set("all3") || is_set("all"))
         {
             if (!is_set("decay"))
+            {
                 library_stream << fiction::GATE_ONEHOT;
+            }
 
             library_stream << fiction::DECAY_ONEHOT;
         }
         if (is_set("gamble") || is_set("all3") || is_set("all"))
         {
             if (!is_set("decay"))
+            {
                 library_stream << fiction::GATE_GAMBLE;
+            }
 
             library_stream << fiction::DECAY_GAMBLE;
         }
         if (is_set("mux") || is_set("all3") || is_set("all"))
         {
             if (!is_set("decay"))
+            {
                 library_stream << fiction::GATE_MUX;
+            }
 
             library_stream << fiction::DECAY_MUX;
         }
         if (is_set("and_xor") || is_set("all3") || is_set("all"))
         {
             if (!is_set("decay"))
+            {
                 library_stream << fiction::GATE_AND_XOR;
+            }
 
             library_stream << fiction::DECAY_AND_XOR;
         }

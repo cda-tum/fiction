@@ -2,6 +2,8 @@
 // Created by marcel on 27.10.21.
 //
 
+#if (FICTION_Z3_SOLVER)
+
 #include <fiction/algorithms/network_transformation/fanout_substitution.hpp>  // substitute multi-output gates with fan-out cascades
 #include <fiction/algorithms/physical_design/apply_gate_library.hpp>  // layout conversion to cell-level
 #include <fiction/algorithms/physical_design/exact.hpp>               // SMT-based physical design of FCN layouts
@@ -31,6 +33,7 @@
 #include <mockturtle/views/depth_view.hpp>                     // to determine network levels
 #include <mockturtle/views/names_view.hpp>                     // to assign names to network signals
 
+#include <cstdlib>     // exit codes
 #include <filesystem>  // filesystem access
 #include <iostream>    // output
 #include <string>      // strings
@@ -79,13 +82,13 @@ void print_cell_layout_properties(const CellLyt& cell_lyt)
         << std::endl;
 }
 
-int main(int argc, char* argv[])
+int main(int argc, char* argv[])  // NOLINT
 {
     // check arguments
     if (argc == 1)
     {
         std::cout << "[e] file path to a Verilog network must be given" << std::endl;
-        return -1;
+        return EXIT_FAILURE;
     }
 
     /**************************************************************/
@@ -93,20 +96,20 @@ int main(int argc, char* argv[])
     /**************************************************************/
 
     // convert input to a file path
-    std::filesystem::path file_path{argv[1]};
+    std::filesystem::path file_path{argv[1]};  // NOLINT: pointer arithmetic is okay here
 
     // check if file path exists
     if (!std::filesystem::exists(file_path))
     {
-        std::cout << fmt::format("[e] given file path '{}' does not exist", file_path.c_str()) << std::endl;
-        return -1;
+        std::cout << fmt::format("[e] given file path '{}' does not exist", file_path.string()) << std::endl;
+        return EXIT_FAILURE;
     }
     // check if file path points to a regular file
     if (!std::filesystem::is_regular_file(file_path))
     {
-        std::cout << fmt::format("[e] given file path '{}' does not point to a regular file", file_path.c_str())
+        std::cout << fmt::format("[e] given file path '{}' does not point to a regular file", file_path.string())
                   << std::endl;
-        return -1;
+        return EXIT_FAILURE;
     }
 
     // defining the type of logic network to use (also already pre-defined in fiction/types.hpp as aig_nt
@@ -116,12 +119,12 @@ int main(int argc, char* argv[])
     logic_network ntk{};
 
     // parse input file into ntk
-    if (lorina::read_verilog(file_path, mockturtle::verilog_reader(ntk)) != lorina::return_code::success)
+    if (lorina::read_verilog(file_path.string(), mockturtle::verilog_reader(ntk)) != lorina::return_code::success)
     {
         std::cout << fmt::format("[e] given file '{}' could not be parsed as a valid Verilog network",
-                                 file_path.c_str())
+                                 file_path.string())
                   << std::endl;
-        return -1;
+        return EXIT_FAILURE;
     }
 
     // create a folder for the design files
@@ -245,9 +248,8 @@ int main(int argc, char* argv[])
         std::cout << "[i] SMT-based physical design" << std::endl;
 
         // set up parameters for SMT-based physical design
-        fiction::exact_physical_design_params<fcn_gate_level_layout> exact_params{};
-        exact_params.scheme = fiction::ptr<fcn_gate_level_layout>(
-            fiction::twoddwave_clocking<fcn_gate_level_layout>(fiction::num_clks::FOUR));
+        fiction::exact_physical_design_params exact_params{};
+        exact_params.scheme    = "2DDWave";
         exact_params.crossings = true;
         exact_params.border_io = true;
         exact_params.timeout   = 180000;  // 3min in ms
@@ -291,5 +293,19 @@ int main(int argc, char* argv[])
         std::cout << "[w] network is too large to attempt exact physical design" << std::endl;
     }
 
-    return 0;
+    return EXIT_SUCCESS;
 }
+
+#else  // FICTION_Z3_SOLVER
+
+#include <cstdlib>
+#include <iostream>
+
+int main()  // NOLINT
+{
+    std::cerr << "[e] Z3 solver is not available, please install Z3 and recompile the code" << std::endl;
+
+    return EXIT_FAILURE;
+}
+
+#endif  // FICTION_Z3_SOLVER

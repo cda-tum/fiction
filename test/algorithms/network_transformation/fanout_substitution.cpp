@@ -2,7 +2,8 @@
 // Created by marcel on 25.05.21.
 //
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
+
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
 
@@ -28,7 +29,7 @@ void substitute(const Ntk& ntk, const fanout_substitution_params ps, const uint3
     check_eq(ntk, substituted);
 }
 
-TEST_CASE("Name conservation", "[fanout-substitution]")
+TEST_CASE("Name conservation after fanout substitution", "[fanout-substitution]")
 {
     auto maj = blueprints::maj1_network<mockturtle::names_view<mockturtle::mig_network>>();
     maj.set_network_name("maj");

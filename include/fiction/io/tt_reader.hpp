@@ -59,7 +59,9 @@ class tt_reader
     std::optional<TT> next()
     {
         if (pos >= elements.size() - 1)
+        {
             return std::nullopt;
+        }
 
         // remove the 0x prefix
         auto table = elements[pos].substr(2u);

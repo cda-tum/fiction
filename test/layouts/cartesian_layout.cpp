@@ -2,7 +2,7 @@
 // Created by marcel on 31.03.21.
 //
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/traits.hpp>
@@ -11,7 +11,7 @@
 
 using namespace fiction;
 
-TEST_CASE("Traits", "[cartesian-layout]")
+TEST_CASE("Cartesian layout traits", "[cartesian-layout]")
 {
     using layout = cartesian_layout<offset::ucoord_t>;
 
@@ -38,7 +38,39 @@ TEST_CASE("Traits", "[cartesian-layout]")
     CHECK(has_foreach_adjacent_opposite_coordinates_v<layout>);
 }
 
-TEST_CASE("Coordinate iteration", "[cartesian-layout]")
+TEST_CASE("Coordinate creation", "[cartesian-layout]")
+{
+    using layout = cartesian_layout<offset::ucoord_t>;
+
+    const layout lyt{{3, 3}};
+
+    CHECK(lyt.coord(0, 0, 0) == offset::ucoord_t{0, 0, 0});
+    CHECK(lyt.coord(0, 0, 1) == offset::ucoord_t{0, 0, 1});
+    CHECK(lyt.coord(1, 0) == offset::ucoord_t{1, 0});
+    CHECK(lyt.coord(2, 0) == offset::ucoord_t{2, 0});
+    CHECK(lyt.coord(0, 1) == offset::ucoord_t{0, 1});
+    CHECK(lyt.coord(1, 1) == offset::ucoord_t{1, 1});
+    CHECK(lyt.coord(2, 1) == offset::ucoord_t{2, 1});
+}
+
+TEST_CASE("Deep copy Cartesian layout", "[cartesian-layout]")
+{
+    const cartesian_layout original{{5, 5, 0}};
+
+    auto copy = original.clone();
+
+    copy.resize({10, 10, 1});
+
+    CHECK(original.x() == 5);
+    CHECK(original.y() == 5);
+    CHECK(original.z() == 0);
+
+    CHECK(copy.x() == 10);
+    CHECK(copy.y() == 10);
+    CHECK(copy.z() == 1);
+}
+
+TEST_CASE("Cartesian coordinate iteration", "[cartesian-layout]")
 {
     cartesian_layout<offset::ucoord_t>::aspect_ratio ar{9, 9, 1};
 
@@ -58,7 +90,10 @@ TEST_CASE("Coordinate iteration", "[cartesian-layout]")
         visited.insert(t);
     };
 
-    for (auto&& t : layout.coordinates()) { check1(t); }
+    for (auto&& t : layout.coordinates())
+    {
+        check1(t);
+    }
     CHECK(visited.size() == 200);
 
     visited.clear();
@@ -84,7 +119,10 @@ TEST_CASE("Coordinate iteration", "[cartesian-layout]")
         visited.insert(t);
     };
 
-    for (auto&& t : layout.ground_coordinates()) { check2(t); }
+    for (auto&& t : layout.ground_coordinates())
+    {
+        check2(t);
+    }
     CHECK(visited.size() == 100);
 
     visited.clear();
@@ -111,7 +149,10 @@ TEST_CASE("Coordinate iteration", "[cartesian-layout]")
         visited.insert(t);
     };
 
-    for (auto&& t : layout.coordinates(start, stop)) { check3(t); }
+    for (auto&& t : layout.coordinates(start, stop))
+    {
+        check3(t);
+    }
     CHECK(visited.size() == 23);
 
     visited.clear();
@@ -120,9 +161,9 @@ TEST_CASE("Coordinate iteration", "[cartesian-layout]")
     CHECK(visited.size() == 23);
 }
 
-TEST_CASE("Cardinal operations", "[cartesian-layout]")
+TEST_CASE("Cartesian cardinal operations", "[cartesian-layout]")
 {
-    cartesian_layout<offset::ucoord_t>::aspect_ratio ar{10, 10, 1};
+    const cartesian_layout<offset::ucoord_t>::aspect_ratio ar{10, 10, 1};
 
     cartesian_layout layout{ar};
 
@@ -210,7 +251,7 @@ TEST_CASE("Cardinal operations", "[cartesian-layout]")
     CHECK(!layout.is_at_any_border(at));
 
     // cover corner case
-    cartesian_layout<offset::ucoord_t> planar_layout{{1, 1, 0}};
+    const cartesian_layout<offset::ucoord_t> planar_layout{{1, 1, 0}};
 
     auto dat = planar_layout.above({1, 1, 1});
     CHECK(dat.is_dead());
@@ -225,8 +266,11 @@ TEST_CASE("Cardinal operations", "[cartesian-layout]")
     CHECK(bt == bbt);
     CHECK(layout.is_ground_layer(bbt));
 
-    auto s1 = layout.adjacent_coordinates<std::set<cartesian_layout<offset::ucoord_t>::coordinate>>({5, 5});
-    auto s2 = std::set<cartesian_layout<offset::ucoord_t>::coordinate>{{{4, 5}, {5, 4}, {6, 5}, {5, 6}}};
+    const auto v1 = layout.adjacent_coordinates({5, 5});
+    const auto s1 = std::set<cartesian_layout<offset::ucoord_t>::coordinate>{v1.cbegin(), v1.cend()};
+    const auto s2 = std::set<cartesian_layout<offset::ucoord_t>::coordinate>{{{4, 5}, {5, 4}, {6, 5}, {5, 6}}};
+
+    CHECK(s1 == s2);
 
     layout.foreach_adjacent_coordinate(
         {5, 5},
@@ -234,6 +278,13 @@ TEST_CASE("Cardinal operations", "[cartesian-layout]")
             CHECK(
                 std::set<cartesian_layout<offset::ucoord_t>::coordinate>{{{4, 5}, {5, 4}, {6, 5}, {5, 6}}}.count(adj));
         });
+}
 
-    CHECK(s1 == s2);
+TEST_CASE("Cartesian layouts with SiQAD coordinates must have a z dimension of 1")
+{
+    using lyt = cartesian_layout<siqad::coord_t>;
+
+    CHECK(lyt{aspect_ratio<lyt>{0, 0}}.z() == 1);
+    CHECK(lyt{aspect_ratio<lyt>{9, 9}}.z() == 1);
+    CHECK(lyt{aspect_ratio<lyt>{42, 42, 1}}.z() == 1);
 }

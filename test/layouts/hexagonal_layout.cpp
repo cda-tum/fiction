@@ -2,13 +2,14 @@
 // Created by marcel on 15.09.21.
 //
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
 
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/traits.hpp>
 
 #include <iostream>
+#include <set>
 
 using namespace fiction;
 
@@ -38,7 +39,7 @@ void check_common_traits()
     CHECK(has_foreach_adjacent_opposite_coordinates_v<Lyt>);
 }
 
-TEST_CASE("Traits", "[hexagonal-layout]")
+TEST_CASE("Hexagonal layout traits", "[hexagonal-layout]")
 {
     SECTION("odd row")
     {
@@ -94,6 +95,23 @@ TEST_CASE("Traits", "[hexagonal-layout]")
     }
 }
 
+TEST_CASE("Deep copy hexagonal layout", "[hexagonal-layout]")
+{
+    const hexagonal_layout original{{5, 5, 0}};
+
+    auto copy = original.clone();
+
+    copy.resize({10, 10, 1});
+
+    CHECK(original.x() == 5);
+    CHECK(original.y() == 5);
+    CHECK(original.z() == 0);
+
+    CHECK(copy.x() == 10);
+    CHECK(copy.y() == 10);
+    CHECK(copy.z() == 1);
+}
+
 template <typename Lyt>
 void check_identity_conversion()
 {
@@ -103,6 +121,66 @@ void check_identity_conversion()
                               { CHECK(layout.to_offset_coordinate(layout.to_cube_coordinate(coord)) == coord); });
 }
 
+TEST_CASE("Coordinate creation", "[hexagonal-layout]")
+{
+    SECTION("odd row")
+    {
+        using layout = hexagonal_layout<offset::ucoord_t, odd_row_hex>;
+
+        const layout lyt{{3, 3}};
+
+        CHECK(lyt.coord(0, 0, 0) == offset::ucoord_t{0, 0, 0});
+        CHECK(lyt.coord(0, 0, 1) == offset::ucoord_t{0, 0, 1});
+        CHECK(lyt.coord(1, 0) == offset::ucoord_t{1, 0});
+        CHECK(lyt.coord(2, 0) == offset::ucoord_t{2, 0});
+        CHECK(lyt.coord(0, 1) == offset::ucoord_t{0, 1});
+        CHECK(lyt.coord(1, 1) == offset::ucoord_t{1, 1});
+        CHECK(lyt.coord(2, 1) == offset::ucoord_t{2, 1});
+    }
+    SECTION("even row")
+    {
+        using layout = hexagonal_layout<offset::ucoord_t, even_row_hex>;
+
+        const layout lyt{{3, 3}};
+
+        CHECK(lyt.coord(0, 0, 0) == offset::ucoord_t{0, 0, 0});
+        CHECK(lyt.coord(0, 0, 1) == offset::ucoord_t{0, 0, 1});
+        CHECK(lyt.coord(1, 0) == offset::ucoord_t{1, 0});
+        CHECK(lyt.coord(2, 0) == offset::ucoord_t{2, 0});
+        CHECK(lyt.coord(0, 1) == offset::ucoord_t{0, 1});
+        CHECK(lyt.coord(1, 1) == offset::ucoord_t{1, 1});
+        CHECK(lyt.coord(2, 1) == offset::ucoord_t{2, 1});
+    }
+    SECTION("odd column")
+    {
+        using layout = hexagonal_layout<offset::ucoord_t, odd_column_hex>;
+
+        const layout lyt{{3, 3}};
+
+        CHECK(lyt.coord(0, 0, 0) == offset::ucoord_t{0, 0, 0});
+        CHECK(lyt.coord(0, 0, 1) == offset::ucoord_t{0, 0, 1});
+        CHECK(lyt.coord(1, 0) == offset::ucoord_t{1, 0});
+        CHECK(lyt.coord(2, 0) == offset::ucoord_t{2, 0});
+        CHECK(lyt.coord(0, 1) == offset::ucoord_t{0, 1});
+        CHECK(lyt.coord(1, 1) == offset::ucoord_t{1, 1});
+        CHECK(lyt.coord(2, 1) == offset::ucoord_t{2, 1});
+    }
+    SECTION("even column")
+    {
+        using layout = hexagonal_layout<offset::ucoord_t, even_column_hex>;
+
+        const layout lyt{{3, 3}};
+
+        CHECK(lyt.coord(0, 0, 0) == offset::ucoord_t{0, 0, 0});
+        CHECK(lyt.coord(0, 0, 1) == offset::ucoord_t{0, 0, 1});
+        CHECK(lyt.coord(1, 0) == offset::ucoord_t{1, 0});
+        CHECK(lyt.coord(2, 0) == offset::ucoord_t{2, 0});
+        CHECK(lyt.coord(0, 1) == offset::ucoord_t{0, 1});
+        CHECK(lyt.coord(1, 1) == offset::ucoord_t{1, 1});
+        CHECK(lyt.coord(2, 1) == offset::ucoord_t{2, 1});
+    }
+}
+
 TEST_CASE("Coordinate conversions", "[hexagonal-layout]")
 {
     SECTION("odd row")
@@ -110,7 +188,7 @@ TEST_CASE("Coordinate conversions", "[hexagonal-layout]")
         using layout = hexagonal_layout<offset::ucoord_t, odd_row_hex>;
         check_identity_conversion<layout>();
 
-        layout lyt{{3, 3}};
+        const layout lyt{{3, 3}};
 
         CHECK(lyt.to_cube_coordinate({0, 0}) == typename layout::cube_coordinate{0, 0, 0});
         CHECK(lyt.to_cube_coordinate({1, 0}) == typename layout::cube_coordinate{+1, -1, 0});
@@ -124,7 +202,7 @@ TEST_CASE("Coordinate conversions", "[hexagonal-layout]")
         using layout = hexagonal_layout<offset::ucoord_t, even_row_hex>;
         check_identity_conversion<layout>();
 
-        layout lyt{{3, 3}};
+        const layout lyt{{3, 3}};
 
         CHECK(lyt.to_cube_coordinate({0, 0}) == typename layout::cube_coordinate{0, 0, 0});
         CHECK(lyt.to_cube_coordinate({1, 0}) == typename layout::cube_coordinate{+1, -1, 0});
@@ -138,7 +216,7 @@ TEST_CASE("Coordinate conversions", "[hexagonal-layout]")
         using layout = hexagonal_layout<offset::ucoord_t, odd_column_hex>;
         check_identity_conversion<layout>();
 
-        layout lyt{{3, 3}};
+        const layout lyt{{3, 3}};
 
         CHECK(lyt.to_cube_coordinate({0, 0}) == typename layout::cube_coordinate{0, 0, 0});
         CHECK(lyt.to_cube_coordinate({1, 0}) == typename layout::cube_coordinate{+1, -1, 0});
@@ -152,7 +230,7 @@ TEST_CASE("Coordinate conversions", "[hexagonal-layout]")
         using layout = hexagonal_layout<offset::ucoord_t, even_column_hex>;
         check_identity_conversion<layout>();
 
-        layout lyt{{3, 3}};
+        const layout lyt{{3, 3}};
 
         CHECK(lyt.to_cube_coordinate({0, 0}) == typename layout::cube_coordinate{0, 0, 0});
         CHECK(lyt.to_cube_coordinate({1, 0}) == typename layout::cube_coordinate{+1, 0, -1});
@@ -184,7 +262,10 @@ void check_visited_coordinates()
         visited.insert(c);
     };
 
-    for (auto&& t : layout.coordinates()) { check1(t); }
+    for (auto&& t : layout.coordinates())
+    {
+        check1(t);
+    }
     CHECK(visited.size() == 200);
 
     visited.clear();
@@ -211,7 +292,10 @@ void check_visited_coordinates()
         visited.insert(c);
     };
 
-    for (auto&& t : layout.ground_coordinates()) { check2(t); }
+    for (auto&& t : layout.ground_coordinates())
+    {
+        check2(t);
+    }
     CHECK(visited.size() == 100);
 
     visited.clear();
@@ -238,7 +322,10 @@ void check_visited_coordinates()
         visited.insert(c);
     };
 
-    for (auto&& t : layout.coordinates(start, stop)) { check3(t); }
+    for (auto&& t : layout.coordinates(start, stop))
+    {
+        check3(t);
+    }
     CHECK(visited.size() == 23);
 
     visited.clear();
@@ -247,7 +334,7 @@ void check_visited_coordinates()
     CHECK(visited.size() == 23);
 }
 
-TEST_CASE("Coordinate iteration", "[hexagonal-layout]")
+TEST_CASE("Hexagonal coordinate iteration", "[hexagonal-layout]")
 {
     using odd_row_layout     = hexagonal_layout<offset::ucoord_t, odd_row_hex>;
     using even_row_layout    = hexagonal_layout<offset::ucoord_t, even_row_hex>;
@@ -552,14 +639,20 @@ TEST_CASE("Coordinate adjacencies", "[hexagonal-layout]")
 
         layout lyt{{2, 2}};
 
-        const std::set<coordinate<layout>> adj_00{{{0, 1}, {1, 0}}};
-        CHECK(adj_00 == lyt.template adjacent_coordinates<std::set<coordinate<layout>>>({0, 0}));
+        const auto adj00_v = lyt.adjacent_coordinates({0, 0});
+        const auto adj00_s = std::set<coordinate<layout>>{adj00_v.cbegin(), adj00_v.cend()};
 
-        const std::set<coordinate<layout>> adj_01{{{0, 0}, {1, 0}, {1, 1}, {0, 2}, {1, 2}}};
-        CHECK(adj_01 == lyt.template adjacent_coordinates<std::set<coordinate<layout>>>({0, 1}));
+        CHECK(std::set<coordinate<layout>>{{{0, 1}, {1, 0}}} == adj00_s);
 
-        const std::set<coordinate<layout>> adj_22{{{1, 2}, {1, 1}, {2, 1}}};
-        CHECK(adj_22 == lyt.template adjacent_coordinates<std::set<coordinate<layout>>>({2, 2}));
+        const auto adj01_v = lyt.adjacent_coordinates({0, 1});
+        const auto adj01_s = std::set<coordinate<layout>>{adj01_v.cbegin(), adj01_v.cend()};
+
+        CHECK(std::set<coordinate<layout>>{{{0, 0}, {1, 0}, {1, 1}, {0, 2}, {1, 2}}} == adj01_s);
+
+        const auto adj22_v = lyt.adjacent_coordinates({2, 2});
+        const auto adj22_s = std::set<coordinate<layout>>{adj22_v.cbegin(), adj22_v.cend()};
+
+        CHECK(std::set<coordinate<layout>>{{{1, 2}, {1, 1}, {2, 1}}} == adj22_s);
     }
     SECTION("even row")
     {
@@ -567,14 +660,20 @@ TEST_CASE("Coordinate adjacencies", "[hexagonal-layout]")
 
         layout lyt{{2, 2}};
 
-        const std::set<coordinate<layout>> adj_00{{{0, 1}, {1, 0}, {1, 1}}};
-        CHECK(adj_00 == lyt.template adjacent_coordinates<std::set<coordinate<layout>>>({0, 0}));
+        const auto adj00_v = lyt.adjacent_coordinates({0, 0});
+        const auto adj00_s = std::set<coordinate<layout>>{adj00_v.cbegin(), adj00_v.cend()};
 
-        const std::set<coordinate<layout>> adj_01{{{0, 0}, {1, 1}, {0, 2}}};
-        CHECK(adj_01 == lyt.template adjacent_coordinates<std::set<coordinate<layout>>>({0, 1}));
+        CHECK(std::set<coordinate<layout>>{{{0, 1}, {1, 0}, {1, 1}}} == adj00_s);
 
-        const std::set<coordinate<layout>> adj_22{{{1, 2}, {2, 1}}};
-        CHECK(adj_22 == lyt.template adjacent_coordinates<std::set<coordinate<layout>>>({2, 2}));
+        const auto adj01_v = lyt.adjacent_coordinates({0, 1});
+        const auto adj01_s = std::set<coordinate<layout>>{adj01_v.cbegin(), adj01_v.cend()};
+
+        CHECK(std::set<coordinate<layout>>{{{0, 0}, {1, 1}, {0, 2}}} == adj01_s);
+
+        const auto adj22_v = lyt.adjacent_coordinates({2, 2});
+        const auto adj22_s = std::set<coordinate<layout>>{adj22_v.cbegin(), adj22_v.cend()};
+
+        CHECK(std::set<coordinate<layout>>{{{1, 2}, {2, 1}}} == adj22_s);
     }
     SECTION("odd column")
     {
@@ -582,14 +681,20 @@ TEST_CASE("Coordinate adjacencies", "[hexagonal-layout]")
 
         layout lyt{{2, 2}};
 
-        const std::set<coordinate<layout>> adj_00{{{0, 1}, {1, 0}}};
-        CHECK(adj_00 == lyt.template adjacent_coordinates<std::set<coordinate<layout>>>({0, 0}));
+        const auto adj00_v = lyt.adjacent_coordinates({0, 0});
+        const auto adj00_s = std::set<coordinate<layout>>{adj00_v.cbegin(), adj00_v.cend()};
 
-        const std::set<coordinate<layout>> adj_01{{{0, 0}, {1, 0}, {0, 2}, {1, 1}}};
-        CHECK(adj_01 == lyt.template adjacent_coordinates<std::set<coordinate<layout>>>({0, 1}));
+        CHECK(std::set<coordinate<layout>>{{{0, 1}, {1, 0}}} == adj00_s);
 
-        const std::set<coordinate<layout>> adj_22{{{1, 1}, {2, 1}, {1, 2}}};
-        CHECK(adj_22 == lyt.template adjacent_coordinates<std::set<coordinate<layout>>>({2, 2}));
+        const auto adj01_v = lyt.adjacent_coordinates({0, 1});
+        const auto adj01_s = std::set<coordinate<layout>>{adj01_v.cbegin(), adj01_v.cend()};
+
+        CHECK(std::set<coordinate<layout>>{{{0, 0}, {1, 0}, {1, 1}, {0, 2}}} == adj01_s);
+
+        const auto adj22_v = lyt.adjacent_coordinates({2, 2});
+        const auto adj22_s = std::set<coordinate<layout>>{adj22_v.cbegin(), adj22_v.cend()};
+
+        CHECK(std::set<coordinate<layout>>{{{1, 2}, {1, 1}, {2, 1}}} == adj22_s);
     }
     SECTION("even column")
     {
@@ -597,13 +702,19 @@ TEST_CASE("Coordinate adjacencies", "[hexagonal-layout]")
 
         layout lyt{{2, 2}};
 
-        const std::set<coordinate<layout>> adj_00{{{0, 1}, {1, 0}, {1, 1}}};
-        CHECK(adj_00 == lyt.template adjacent_coordinates<std::set<coordinate<layout>>>({0, 0}));
+        const auto adj00_v = lyt.adjacent_coordinates({0, 0});
+        const auto adj00_s = std::set<coordinate<layout>>{adj00_v.cbegin(), adj00_v.cend()};
 
-        const std::set<coordinate<layout>> adj_01{{{0, 0}, {1, 1}, {1, 2}, {0, 2}}};
-        CHECK(adj_01 == lyt.template adjacent_coordinates<std::set<coordinate<layout>>>({0, 1}));
+        CHECK(std::set<coordinate<layout>>{{{0, 1}, {1, 0}, {1, 1}}} == adj00_s);
 
-        const std::set<coordinate<layout>> adj_22{{{1, 2}, {2, 1}}};
-        CHECK(adj_22 == lyt.template adjacent_coordinates<std::set<coordinate<layout>>>({2, 2}));
+        const auto adj01_v = lyt.adjacent_coordinates({0, 1});
+        const auto adj01_s = std::set<coordinate<layout>>{adj01_v.cbegin(), adj01_v.cend()};
+
+        CHECK(std::set<coordinate<layout>>{{{0, 0}, {1, 1}, {0, 2}, {1, 2}}} == adj01_s);
+
+        const auto adj22_v = lyt.adjacent_coordinates({2, 2});
+        const auto adj22_s = std::set<coordinate<layout>>{adj22_v.cbegin(), adj22_v.cend()};
+
+        CHECK(std::set<coordinate<layout>>{{{1, 2}, {2, 1}}} == adj22_s);
     }
 }

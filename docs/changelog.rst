@@ -5,6 +5,108 @@ All notable changes to this project will be documented in this file.
 
 The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`_.
 
+v0.5.0 - 2023-03-30
+-------------------
+*Fiction is a way to challenge the status quo and to push the boundaries of conventional thinking.* --- unknown
+
+Added
+#####
+- Technology:
+    - Support for the SiDB *Bestagon* gate library, a standard-tile library for the SiDB technology based on hexagonal grids. Many thanks to Samuel Sze Hang Ng for the collaboration on `the paper <https://dl.acm.org/doi/abs/10.1145/3489517.3530525>`_!
+    - Support for charge states of SiDBs
+- Algorithms:
+    - Electrostatic ground state simulation for SiDB cell-level layouts
+        - Exhaustive simulation
+        - Heuristic simulation
+        - Energy calculations
+    - Four established path-finding algorithms on arbitrary layouts with arbitrary clocking schemes
+        - Recursive enumeration of all possible paths
+        - A* for the shortest path
+        - Jump Point Search (JPS) for the shortest path (proof-of-concept)
+        - `k` shortest paths via Yen's algorithm
+    - Distance functions and functors for layouts
+        - Manhattan distance
+        - Euclidean distance
+        - A* distance
+    - Cost functions and functors for layouts
+        - Unit cost
+        - Random cost
+    - Graph coloring with a selection of SAT solvers or heuristic algorithms
+    - Efficient multi-path signal routing on gate-level layouts (based on `this paper <https://www.cda.cit.tum.de/files/eda/2022_nanoarch_efficient_multi-path_signal_routing_for_fcn.pdf>`_)
+    - Specify a black list of tiles and gates to avoid in exact physical design
+    - Generic function optimizer based on simulated annealing
+- Data types:
+    - Obstruction layout to represent obstacles in a layout
+    - Edge intersection graphs from enumerated routing paths
+    - Charge distribution surface for SiDB layouts
+    - Coordinate type ``siqad::coord_t`` representing signed SiDB coordinates as represented in `SiQAD <https://github.com/siqad/siqad>`_
+- I/O:
+    - Molecular FCN support in the QLL writer for MagCAD and SCERPA (many thanks to Giuliana Beretta!)
+    - SQD reader for the SiDB technology
+- Clocking Schemes:
+    - CFE
+- Traits:
+    - ``has_*_technology`` traits to check for specific cell technologies of layouts and libraries
+- Utils:
+    - Routing utils
+    - STL extensions
+    - Truth table utils
+- Libraries:
+    - `phmap <https://github.com/greg7mdp/parallel-hashmap>`_ for faster hash maps (applied in many core data structures for performance reasons)
+    - `TinyXML2 <https://github.com/leethomason/tinyxml2>`_ for XML parsing
+- Continuous integration:
+    - `clang-tidy <https://clang.llvm.org/extra/clang-tidy/>`_ workflow for static code analysis
+    - `ClangFormat <https://clang.llvm.org/docs/ClangFormat.html>`_ workflow for automatic code formatting
+    - `Release Drafter <https://github.com/marketplace/actions/release-drafter>`_ workflow to keep an up-to-date changelog for the next release
+    - Docker image workflow to build Docker images for the latest release
+- Build and documentation:
+    - Automatic linking with TBB for parallel algorithms
+    - `Dependabot <https://github.com/dependabot>`_ to automatically keep the dependencies up-to-date
+    - `CodeQL <https://codeql.github.com/>`_ to automatically scan the code for security vulnerabilities
+    - GitHub templates for issues and pull requests
+
+Changed
+#######
+- CLI:
+    - Split ``exact``'s and ``onepass``' parameter ``upper_bound`` into ``upper_x`` and ``upper_y``
+- Clocking schemes:
+    - Renamed ESP to ESR
+- Libraries:
+    - Updated all libraries to the latest versions
+    - Moved to the upstream version of `Catch2 v3 <https://github.com/catchorg/Catch2>`_
+- Continuous integration:
+    - Updated CI runners to the latest versions
+    - Setup `Z3 <https://github.com/Z3Prover/z3>`_ via a designated action. Many thanks to Lukas Burgholzer for his support!
+    - Enabled `Ccache <https://ccache.dev/>`_ for faster compilation in CIs
+    - Activated experiments in CI builds to ensure that they are building correctly
+    - Run CI only when relevant files have changed
+    - Switched to single-threaded builds in CI to avoid out-of-memory issues
+- Build and documentation:
+    - Refactored the CMake buildsystem
+    - Improved the README and the documentation
+
+Fixed
+#####
+- Compilation issues when a certain header was included multiple times
+- Exclusion of experiment compilation if Z3 is not found
+- Wrong DOT drawer in ``write_dot_layout``
+- MSVC compilation issues
+- Performance issues with ``foreach_*`` functions on layout types
+- Performance issues with ``std::string`` where ``std::string_view`` was sufficient
+- Regex in the FQCA reader
+- Issue with ``clear_tile`` that would lose track of PI and PO count
+- Duplicate crossing cells in the iNML ToPoliNano library
+- Several I/O issues in the CLI
+- Excess template parameter in the ``restore_names`` utility function
+- Errors with the CMake build system if IPO was enabled through multiple sources
+- Linker errors and CMake name collisions
+- Warnings detected by CodeQL
+
+Removed
+#######
+- LGTM badge as the service is no longer available
+
+
 v0.4.0 - 2022-01-27
 -------------------
 *There are people who think that things that happen in fiction do not really happen. These people are wrong.* --- Neil Gaiman

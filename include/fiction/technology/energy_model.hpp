@@ -44,76 +44,76 @@ namespace detail
 {
 
 /**
- * Collection of energy values in meV for different QCA-ONE structures. The values are taken from 'An Energy-aware Model
- * for the Logic Synthesis of Quantum-Dot Cellular Automata' by Frank Sill Torres, Robert Wille, Philipp Niemann, and
- * Rolf Drechsler in TCAD 2018.
+ * Collection of energy values in meV for different QCA-ONE structures. The values are taken from \"An Energy-aware
+ * Model for the Logic Synthesis of Quantum-Dot Cellular Automata\" by Frank Sill Torres, Robert Wille, Philipp Niemann,
+ * and Rolf Drechsler in TCAD 2018.
  */
 namespace qca_energy
 {
 /**
  * Energy dissipation (slow) of a normal wire.
  */
-constexpr double WIRE_SLOW = 0.09;
+inline constexpr double WIRE_SLOW = 0.09;
 /**
  * Energy dissipation (fast) of a normal wire.
  */
-constexpr double WIRE_FAST = 0.82;
+inline constexpr double WIRE_FAST = 0.82;
 /**
  * Energy dissipation (slow) of a fan-out.
  */
-constexpr double FANOUT_SLOW = 0.12;
+inline constexpr double FANOUT_SLOW = 0.12;
 /**
  * Energy dissipation (fast) of a fan-out.
  */
-constexpr double FANOUT_FAST = 1.15;
+inline constexpr double FANOUT_FAST = 1.15;
 /**
  * Energy dissipation (slow) of a straight inverter.
  */
-constexpr double INVERTER_STRAIGHT_SLOW = 0.13;
+inline constexpr double INVERTER_STRAIGHT_SLOW = 0.13;
 /**
  * Energy dissipation (fast) of a straight inverter.
  */
-constexpr double INVERTER_STRAIGHT_FAST = 1.19;
+inline constexpr double INVERTER_STRAIGHT_FAST = 1.19;
 /**
  * Energy dissipation (slow) of a bent inverter.
  */
-constexpr double INVERTER_BENT_SLOW = 0.10;
+inline constexpr double INVERTER_BENT_SLOW = 0.10;
 /**
  * Energy dissipation (fast) of a bent inverter.
  */
-constexpr double INVERTER_BENT_FAST = 0.84;
+inline constexpr double INVERTER_BENT_FAST = 0.84;
 /**
  * Energy dissipation (slow) of a crossing.
  */
-constexpr double CROSSING_SLOW = 0.28;
+inline constexpr double CROSSING_SLOW = 0.28;
 /**
  * Energy dissipation (fast) of a crossing.
  */
-constexpr double CROSSING_FAST = 2.57;
+inline constexpr double CROSSING_FAST = 2.57;
 /**
  * Energy dissipation (slow) of an AND gate.
  */
-constexpr double AND_SLOW = 0.47;
+inline constexpr double AND_SLOW = 0.47;
 /**
  * Energy dissipation (fast) of an AND gate.
  */
-constexpr double AND_FAST = 1.39;
+inline constexpr double AND_FAST = 1.39;
 /**
  * Energy dissipation (slow) of an OR gate.
  */
-constexpr double OR_SLOW = 0.47;
+inline constexpr double OR_SLOW = 0.47;
 /**
  * Energy dissipation (fast) of an AND gate.
  */
-constexpr double OR_FAST = 1.39;
+inline constexpr double OR_FAST = 1.39;
 /**
  * Energy dissipation (slow) of a classic majority gate.
  */
-constexpr double MAJORITY_SLOW = 0.65;
+inline constexpr double MAJORITY_SLOW = 0.65;
 /**
  * Energy dissipation (fast) of a classic majority gate.
  */
-constexpr double MAJORITY_FAST = 1.68;
+inline constexpr double MAJORITY_FAST = 1.68;
 
 }  // namespace qca_energy
 
@@ -236,8 +236,8 @@ class qca_energy_dissipation_impl
 
 /**
  * Estimates the energy dissipation of a gate-level layout if it were to be converted to a QCA cell-level layout via the
- * QCA ONE gate library. This estimation was proposed in 'An Energy-aware Model for the Logic Synthesis of Quantum-Dot
- * Cellular Automata' by Frank Sill Torres, Robert Wille, Philipp Niemann, and Rolf Drechsler in TCAD 2018.
+ * QCA ONE gate library. This estimation was proposed in \"An Energy-aware Model for the Logic Synthesis of Quantum-Dot
+ * Cellular Automata\" by Frank Sill Torres, Robert Wille, Philipp Niemann, and Rolf Drechsler in TCAD 2018.
  *
  * As done in that publication, energy dissipation values are being given in meV for slow (25 GHz) and fast (100 GHz)
  * clocking.

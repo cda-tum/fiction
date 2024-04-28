@@ -49,16 +49,18 @@ DisableFormat: false
 FixNamespaceComments: true
 IncludeBlocks: Regroup
 IncludeCategories:
-  - Regex: '"[a-zA-Z0-9_\.]+.+"$'
+  - Regex: '<catch2\/[a-zA-Z0-9_]+.+>$'
     Priority: 1
-  - Regex: '<(:?fiction)\/[a-zA-Z0-9_]+.+>$'
+  - Regex: '"[a-zA-Z0-9_\.]+.+"$'
     Priority: 2
-  - Regex: '<(:?alice|lorina|mockturtle|kitty|bill|nlohmann|fmt|z3)\/[a-zA-Z0-9_]+.+>$'
+  - Regex: '<fiction\/[a-zA-Z0-9_]+.+>$'
     Priority: 3
-  - Regex: '<z3[a-zA-Z0-9_\+]+.+>$'
+  - Regex: '<(alice|lorina|mockturtle|kitty|bill|nlohmann|fmt|z3|phmap|btree|tinyxml2|pybind11)(\/[a-zA-Z0-9_])*.+>$'
     Priority: 4
-  - Regex: '<[a-zA-Z0-9_]+>$'
+  - Regex: '<z3[a-zA-Z0-9_\+]+.+>$'
     Priority: 5
+  - Regex: '<[a-zA-Z0-9_]+>$'
+    Priority: 6
 IndentCaseLabels: true
 IndentWidth: 4
 Language: Cpp
@@ -82,5 +84,6 @@ SpacesInParentheses: false
 SpacesInSquareBrackets: false
 Standard: c++17
 UseTab: Never
+LineEnding: LF
 
 ...

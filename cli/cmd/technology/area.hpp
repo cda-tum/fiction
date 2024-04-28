@@ -10,6 +10,7 @@
 
 #include <alice/alice.hpp>
 
+#include <type_traits>
 #include <variant>
 
 namespace alice
@@ -58,26 +59,26 @@ class area_command : public command
 
         const auto calculate_area = [this](auto&& lyt_ptr)
         {
-            using Tech = typename std::decay_t<decltype(lyt_ptr)>::element_type::technology;
+            using tech = typename std::decay_t<decltype(lyt_ptr)>::element_type::technology;
 
             if (!is_set("width"))
             {
-                width = Tech::cell_width;
+                width = tech::CELL_WIDTH;
             }
             if (!is_set("height"))
             {
-                height = Tech::cell_height;
+                height = tech::CELL_HEIGHT;
             }
             if (!is_set("hspace"))
             {
-                hspace = Tech::cell_hspace;
+                hspace = tech::CELL_HSPACE;
             }
             if (!is_set("vspace"))
             {
-                vspace = Tech::cell_vspace;
+                vspace = tech::CELL_VSPACE;
             }
 
-            fiction::area_params<Tech, double> ps{width, height, hspace, vspace};
+            fiction::area_params<tech, double> ps{width, height, hspace, vspace};
 
             fiction::area(*lyt_ptr, ps, &st);
         };

@@ -122,19 +122,22 @@ struct qca_technology
     /**
      * Default width of a QCA cell in QCADesigner (https://waluslab.ece.ubc.ca/qcadesigner/).
      */
-    static constexpr uint64_t cell_width = 18ul;
+    static constexpr uint64_t CELL_WIDTH = 18ul;
     /**
      * Default height of a QCA cell in QCADesigner.
      */
-    static constexpr uint64_t cell_height = 18ul;
+    static constexpr uint64_t CELL_HEIGHT = 18ul;
     /**
      * Default horizontal spacing between two QCA cells in QCADesigner.
      */
-    static constexpr uint64_t cell_hspace = 2ul;
+    static constexpr uint64_t CELL_HSPACE = 2ul;
     /**
      * Default vertical spacing between two QCA cells in QCADesigner.
      */
-    static constexpr uint64_t cell_vspace = 2ul;
+    static constexpr uint64_t CELL_VSPACE = 2ul;
+
+    // Deleted constructors to prevent instantiation
+    qca_technology() = delete;
 };
 
 /**
@@ -258,19 +261,22 @@ struct inml_technology
     /**
      * Default width of a iNML cell in NMLSim.
      */
-    static constexpr uint64_t cell_width = 50ul;
+    static constexpr uint64_t CELL_WIDTH = 50ul;
     /**
      * Default height of a iNML cell in NMLSim.
      */
-    static constexpr uint64_t cell_height = 100ul;
+    static constexpr uint64_t CELL_HEIGHT = 100ul;
     /**
      * Default horizontal spacing between two iNML cells in NMLSim.
      */
-    static constexpr uint64_t cell_hspace = 10ul;
+    static constexpr uint64_t CELL_HSPACE = 10ul;
     /**
      * Default vertical spacing between two iNML cells in NMLSim.
      */
-    static constexpr uint64_t cell_vspace = 25ul;
+    static constexpr uint64_t CELL_VSPACE = 25ul;
+
+    // Deleted constructors to prevent instantiation
+    inml_technology() = delete;
 };
 
 /**
@@ -345,21 +351,24 @@ struct sidb_technology
      * Default width of a SiDB in SiQAD (https://github.com/siqad/siqad).
      * Dots are considered to be 0-dimensional entities for simulation purposes.
      */
-    static constexpr double cell_width = 0.0;
+    static constexpr double CELL_WIDTH = 0.0;
     /**
      * Default height of a SiDB in SiQAD.
      * Dots are considered to be 0-dimensional entities for simulation purposes.
      */
-    static constexpr double cell_height = 0.0;
+    static constexpr double CELL_HEIGHT = 0.0;
     /**
      * Default horizontal spacing between two SiDBs in SiQAD.
      */
-    static constexpr double cell_hspace = 0.384;
+    static constexpr double CELL_HSPACE = 0.384;
     /**
      * Default average vertical spacing between two SiDBs in SiQAD.
-     * Depending on their lattice, they can be closer together or further apart.
+     * Depending on whether they are on the same or different dimer rows, SiDBs can be closer together or further apart.
      */
-    static constexpr double cell_vspace = 0.384;
+    static constexpr double CELL_VSPACE = 0.384;
+
+    // Deleted constructors to prevent instantiation
+    sidb_technology() = delete;
 };
 
 }  // namespace fiction

@@ -2,7 +2,8 @@
 // Created by marcel on 21.05.21.
 //
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
+
 #include "utils/blueprints/layout_blueprints.hpp"
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
@@ -27,7 +28,7 @@
 using namespace fiction;
 
 template <typename Ntk>
-void to_x(Ntk ntk)
+void to_x(const Ntk& ntk)
 {
     SECTION("MIG")
     {
@@ -58,7 +59,7 @@ void to_x(Ntk ntk)
     }
 }
 
-TEST_CASE("Name conservation", "[network-conversion]")
+TEST_CASE("Name conservation after network conversion", "[network-conversion]")
 {
     auto maj = blueprints::maj1_network<mockturtle::names_view<mockturtle::mig_network>>();
     maj.set_network_name("maj");

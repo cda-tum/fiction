@@ -14,14 +14,20 @@
 #include <fstream>
 #include <ostream>
 #include <string>
-#include <type_traits>
+#include <string_view>
 #include <vector>
 
 namespace fiction
 {
 
+/**
+ * Parameters for writing QCADesigner layouts.
+ */
 struct write_qca_layout_params
 {
+    /**
+     * Create via cells in between each layer.
+     */
     bool create_inter_layer_via_cells = true;
 };
 
@@ -31,7 +37,7 @@ namespace detail
 namespace qcad
 {
 
-static constexpr const char* VERSION_2_HEADER = "[VERSION]\n"
+inline constexpr const char* VERSION_2_HEADER = "[VERSION]\n"
                                                 "qcadesigner_version=2.000000\n"
                                                 "[#VERSION]\n"
                                                 "[LAYOUT]\n"
@@ -68,78 +74,78 @@ static constexpr const char* VERSION_2_HEADER = "[VERSION]\n"
                                                 "[#TYPE:QCADSubstrate]\n"
                                                 "[#TYPE:QCADLayer]\n";
 
-static constexpr const char* CLOSE_DESIGN               = "[#TYPE:DESIGN]\n";
-static constexpr const char* OPEN_QCAD_LAYER            = "[TYPE:QCADLayer]\n";
-static constexpr const char* CLOSE_QCAD_LAYER           = "[#TYPE:QCADLayer]\n";
-static constexpr const char* OPEN_QCAD_CELL             = "[TYPE:QCADCell]\n";
-static constexpr const char* CLOSE_QCAD_CELL            = "[#TYPE:QCADCell]\n";
-static constexpr const char* OPEN_QCAD_LABEL            = "[TYPE:QCADLabel]\n";
-static constexpr const char* CLOSE_QCAD_LABEL           = "[#TYPE:QCADLabel]\n";
-static constexpr const char* OPEN_QCAD_DESIGN_OBJECT    = "[TYPE:QCADDesignObject]\n";
-static constexpr const char* CLOSE_QCAD_DESIGN_OBJECT   = "[#TYPE:QCADDesignObject]\n";
-static constexpr const char* OPEN_QCAD_STRETCHY_OBJECT  = "[TYPE:QCADStretchyObject]\n";
-static constexpr const char* CLOSE_QCAD_STRETCHY_OBJECT = "[#TYPE:QCADStretchyObject]\n";
-static constexpr const char* OPEN_CELL_DOT              = "[TYPE:CELL_DOT]\n";
-static constexpr const char* CLOSE_CELL_DOT             = "[#TYPE:CELL_DOT]\n";
+inline constexpr const char* CLOSE_DESIGN               = "[#TYPE:DESIGN]\n";
+inline constexpr const char* OPEN_QCAD_LAYER            = "[TYPE:QCADLayer]\n";
+inline constexpr const char* CLOSE_QCAD_LAYER           = "[#TYPE:QCADLayer]\n";
+inline constexpr const char* OPEN_QCAD_CELL             = "[TYPE:QCADCell]\n";
+inline constexpr const char* CLOSE_QCAD_CELL            = "[#TYPE:QCADCell]\n";
+inline constexpr const char* OPEN_QCAD_LABEL            = "[TYPE:QCADLabel]\n";
+inline constexpr const char* CLOSE_QCAD_LABEL           = "[#TYPE:QCADLabel]\n";
+inline constexpr const char* OPEN_QCAD_DESIGN_OBJECT    = "[TYPE:QCADDesignObject]\n";
+inline constexpr const char* CLOSE_QCAD_DESIGN_OBJECT   = "[#TYPE:QCADDesignObject]\n";
+inline constexpr const char* OPEN_QCAD_STRETCHY_OBJECT  = "[TYPE:QCADStretchyObject]\n";
+inline constexpr const char* CLOSE_QCAD_STRETCHY_OBJECT = "[#TYPE:QCADStretchyObject]\n";
+inline constexpr const char* OPEN_CELL_DOT              = "[TYPE:CELL_DOT]\n";
+inline constexpr const char* CLOSE_CELL_DOT             = "[#TYPE:CELL_DOT]\n";
 
-static constexpr const char* TYPE            = "type=";
-static constexpr const char* STATUS          = "status=";
-static constexpr const char* PSZ_DESCRIPTION = "pszDescription=";
-static constexpr const char* PSZ             = "psz=";
-static constexpr const char* B_SELECTED      = "bSelected=";
+inline constexpr const char* TYPE            = "type=";
+inline constexpr const char* STATUS          = "status=";
+inline constexpr const char* PSZ_DESCRIPTION = "pszDescription=";
+inline constexpr const char* PSZ             = "psz=";
+inline constexpr const char* B_SELECTED      = "bSelected=";
 
-static constexpr const char* SELECTED_TRUE  = "TRUE";
-static constexpr const char* SELECTED_FALSE = "FALSE";
+inline constexpr const char* SELECTED_TRUE  = "TRUE";
+inline constexpr const char* SELECTED_FALSE = "FALSE";
 
-static constexpr const char* COLOR = "clr.red={}\nclr.green={}\nclr.blue={}\n";
+inline constexpr const char* COLOR = "clr.red={}\nclr.green={}\nclr.blue={}\n";
 
-static constexpr const char* BOUNDING_BOX_X  = "bounding_box.xWorld=";
-static constexpr const char* BOUNDING_BOX_Y  = "bounding_box.yWorld=";
-static constexpr const char* BOUNDING_BOX_CX = "bounding_box.cxWorld=";
-static constexpr const char* BOUNDING_BOX_CY = "bounding_box.cyWorld=";
+inline constexpr const char* BOUNDING_BOX_X  = "bounding_box.xWorld=";
+inline constexpr const char* BOUNDING_BOX_Y  = "bounding_box.yWorld=";
+inline constexpr const char* BOUNDING_BOX_CX = "bounding_box.cxWorld=";
+inline constexpr const char* BOUNDING_BOX_CY = "bounding_box.cyWorld=";
 
-static constexpr const char* CELL_OPTIONS_CX           = "cell_options.cxCell=";
-static constexpr const char* CELL_OPTIONS_CY           = "cell_options.cyCell=";
-static constexpr const char* CELL_OPTIONS_DOT_DIAMETER = "cell_options.dot_diameter=";
-static constexpr const char* CELL_OPTIONS_CLOCK        = "cell_options.clock=";
-static constexpr const char* CELL_OPTIONS_MODE         = "cell_options.mode=";
-static constexpr const char* CELL_FUNCTION             = "cell_function=";
-static constexpr const char* NUMBER_OF_DOTS_4          = "number_of_dots=4\n";
+inline constexpr const char* CELL_OPTIONS_CX           = "cell_options.cxCell=";
+inline constexpr const char* CELL_OPTIONS_CY           = "cell_options.cyCell=";
+inline constexpr const char* CELL_OPTIONS_DOT_DIAMETER = "cell_options.dot_diameter=";
+inline constexpr const char* CELL_OPTIONS_CLOCK        = "cell_options.clock=";
+inline constexpr const char* CELL_OPTIONS_MODE         = "cell_options.mode=";
+inline constexpr const char* CELL_FUNCTION             = "cell_function=";
+inline constexpr const char* NUMBER_OF_DOTS_4          = "number_of_dots=4\n";
 
-static constexpr const char* CELL_MODE_NORMAL     = "QCAD_CELL_MODE_NORMAL";
-static constexpr const char* CELL_MODE_VERTICAL   = "QCAD_CELL_MODE_VERTICAL";
-static constexpr const char* CELL_MODE_CROSSOVER  = "QCAD_CELL_MODE_CROSSOVER";
-static constexpr const char* CELL_MODE_ROTATED    = "QCAD_CELL_MODE_ROTATED";
-static constexpr const char* CELL_FUNCTION_NORMAL = "QCAD_CELL_NORMAL";
-static constexpr const char* CELL_FUNCTION_FIXED  = "QCAD_CELL_FIXED";
-static constexpr const char* CELL_FUNCTION_INPUT  = "QCAD_CELL_INPUT";
-static constexpr const char* CELL_FUNCTION_OUTPUT = "QCAD_CELL_OUTPUT";
+inline constexpr const char* CELL_MODE_NORMAL     = "QCAD_CELL_MODE_NORMAL";
+inline constexpr const char* CELL_MODE_VERTICAL   = "QCAD_CELL_MODE_VERTICAL";
+inline constexpr const char* CELL_MODE_CROSSOVER  = "QCAD_CELL_MODE_CROSSOVER";
+inline constexpr const char* CELL_MODE_ROTATED    = "QCAD_CELL_MODE_ROTATED";
+inline constexpr const char* CELL_FUNCTION_NORMAL = "QCAD_CELL_NORMAL";
+inline constexpr const char* CELL_FUNCTION_FIXED  = "QCAD_CELL_FIXED";
+inline constexpr const char* CELL_FUNCTION_INPUT  = "QCAD_CELL_INPUT";
+inline constexpr const char* CELL_FUNCTION_OUTPUT = "QCAD_CELL_OUTPUT";
 
-static constexpr const char* X_POS     = "x=";
-static constexpr const char* Y_POS     = "y=";
-static constexpr const char* DIAMETER  = "diameter=";
-static constexpr const char* CHARGE    = "charge=";
-static constexpr const char* SPIN      = "spin=";
-static constexpr const char* POTENTIAL = "potential=";
+inline constexpr const char* X_POS     = "x=";
+inline constexpr const char* Y_POS     = "y=";
+inline constexpr const char* DIAMETER  = "diameter=";
+inline constexpr const char* CHARGE    = "charge=";
+inline constexpr const char* SPIN      = "spin=";
+inline constexpr const char* POTENTIAL = "potential=";
 
-static constexpr const char* CHARGE_0      = "0.000000e+00";
-static constexpr const char* CHARGE_1      = "1.602176e-19";
-static constexpr const char* CHARGE_8      = "8.010882e-20";
-static constexpr const char* NEGATIVE_SPIN = "-319472243083548083355648.000000";
+inline constexpr const char* CHARGE_0      = "0.000000e+00";
+inline constexpr const char* CHARGE_1      = "1.602176e-19";
+inline constexpr const char* CHARGE_8      = "8.010882e-20";
+inline constexpr const char* NEGATIVE_SPIN = "-319472243083548083355648.000000";
 
-static constexpr const int   COLOR_MAX       = 65535;
-static constexpr const int   COLOR_HALF      = 32768;
-static constexpr const int   COLOR_MIN       = 0;
-static constexpr const int   CELL_DISTANCE   = 20;
-static constexpr const int   X_Y_OFFSET      = 100;
-static constexpr const float CELL_SIZE       = 18.0f;
-static constexpr const float DOT_SIZE        = 5.0f;
-static constexpr const float LABEL_Y_OFFSET  = 21.5f;
-static constexpr const float BB_X_OFFSET     = 9.0f;
-static constexpr const float BB_Y_OFFSET     = 33.0f;
-static constexpr const float BB_CX_OFFSET    = 4.0f;
-static constexpr const float BB_CY_OFFSET    = 23.0f;
-static constexpr const float CHARACTER_WIDTH = 10.0f;
+inline constexpr const int   COLOR_MAX       = 65535;
+inline constexpr const int   COLOR_HALF      = 32768;
+inline constexpr const int   COLOR_MIN       = 0;
+inline constexpr const int   CELL_DISTANCE   = 20;
+inline constexpr const int   X_Y_OFFSET      = 100;
+inline constexpr const float CELL_SIZE       = 18.0f;
+inline constexpr const float DOT_SIZE        = 5.0f;
+inline constexpr const float LABEL_Y_OFFSET  = 21.5f;
+inline constexpr const float BB_X_OFFSET     = 9.0f;
+inline constexpr const float BB_Y_OFFSET     = 33.0f;
+inline constexpr const float BB_CX_OFFSET    = 4.0f;
+inline constexpr const float BB_CY_OFFSET    = 23.0f;
+inline constexpr const float CHARACTER_WIDTH = 10.0f;
 
 struct cell_pos
 {
@@ -488,7 +494,9 @@ class write_qca_layout_impl
     void write_via_cells()
     {
         if (via_layer_cells.empty())
+        {
             return;
+        }
 
         // open via layer
         os << qcad::OPEN_QCAD_LAYER;
@@ -497,7 +505,10 @@ class write_qca_layout_impl
         os << qcad::STATUS << "0\n";
         os << qcad::PSZ_DESCRIPTION << "Via Layer " << std::to_string(via_counter++) << '\n';
 
-        for (auto& v : via_layer_cells) { write_cell(v, false); }
+        for (const auto& v : via_layer_cells)
+        {
+            write_cell(v, false);
+        }
 
         // close design layer
         os << qcad::CLOSE_QCAD_LAYER;
@@ -523,7 +534,7 @@ template <typename Lyt>
 void write_qca_layout(const Lyt& lyt, std::ostream& os, write_qca_layout_params ps = {})
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(std::is_same_v<technology<Lyt>, qca_technology>, "Lyt must be a QCA layout");
+    static_assert(has_qca_technology_v<Lyt>, "Lyt must be a QCA layout");
 
     detail::write_qca_layout_impl p{lyt, os, ps};
 
@@ -537,16 +548,18 @@ void write_qca_layout(const Lyt& lyt, std::ostream& os, write_qca_layout_params 
  *
  * @tparam Lyt Cell-level QCA layout type.
  * @param lyt The layout to be written.
- * @param filename The file name to create and write into. Should preferably use the ".qca" extension.
+ * @param filename The file name to create and write into. Should preferably use the `.qca` extension.
  * @param ps Parameters.
  */
 template <typename Lyt>
-void write_qca_layout(const Lyt& lyt, const std::string& filename, write_qca_layout_params ps = {})
+void write_qca_layout(const Lyt& lyt, const std::string_view& filename, write_qca_layout_params ps = {})
 {
-    std::ofstream os{filename.c_str(), std::ofstream::out};
+    std::ofstream os{filename.data(), std::ofstream::out};
 
     if (!os.is_open())
+    {
         throw std::ofstream::failure("could not open file");
+    }
 
     write_qca_layout(lyt, os, ps);
     os.close();

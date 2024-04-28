@@ -2,7 +2,7 @@
 // Created by marcel on 15.09.21.
 //
 
-#include "catch.hpp"
+#include <catch2/catch_test_macros.hpp>
 
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
 #include <fiction/traits.hpp>
@@ -40,7 +40,7 @@ void check_common_traits()
 
 // traits is the only thing that needs to be checked because for all other purposes,
 // shifted_cartesian_layout is a hexagonal_layout
-TEST_CASE("Traits", "[shifted-cartesian-layout]")
+TEST_CASE("Shifted Cartesian layout traits", "[shifted-cartesian-layout]")
 {
     SECTION("odd row")
     {
@@ -94,4 +94,21 @@ TEST_CASE("Traits", "[shifted-cartesian-layout]")
 
         check_common_traits<layout>();
     }
+}
+
+TEST_CASE("Deep copy shifted Cartesian layout", "[shifted-cartesian-layout]")
+{
+    const shifted_cartesian_layout original{{5, 5, 0}};
+
+    auto copy = original.clone();
+
+    copy.resize({10, 10, 1});
+
+    CHECK(original.x() == 5);
+    CHECK(original.y() == 5);
+    CHECK(original.z() == 0);
+
+    CHECK(copy.x() == 10);
+    CHECK(copy.y() == 10);
+    CHECK(copy.z() == 1);
 }
