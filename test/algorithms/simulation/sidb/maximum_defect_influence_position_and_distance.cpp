@@ -10,11 +10,11 @@
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/cell_technologies.hpp>
-#include <fiction/technology/sidb_nm_distance.hpp>
 #include <fiction/technology/physical_constants.hpp>
 #include <fiction/technology/sidb_defects.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/technology/sidb_lattice_orientations.hpp>
+#include <fiction/technology/sidb_nm_distance.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/math_utils.hpp>
 
@@ -73,8 +73,10 @@ TEST_CASE("Test influence distance function", "[maximum-defect-influence-positio
     SECTION("layout with one SiDB, negative defect, large lambda_tf")
     {
         const sidb_defect defect{sidb_defect_type::UNKNOWN, -1, sidb_simulation_parameters{}.epsilon_r, 20};
-        const maximum_defect_influence_position_and_distance_params sim_params{defect, sidb_simulation_parameters{}, {2, 2}};
-        sidb_cell_clk_lyt_siqad                        lyt{};
+        const maximum_defect_influence_position_and_distance_params sim_params{defect,
+                                                                               sidb_simulation_parameters{},
+                                                                               {2, 2}};
+        sidb_cell_clk_lyt_siqad                                     lyt{};
         lyt.assign_cell_type({0, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
 
         const sidb_100_cell_clk_lyt_siqad lat{lyt};
@@ -131,8 +133,8 @@ TEST_CASE("Test influence distance function", "[maximum-defect-influence-positio
 
         // number of threads given by the hardware
         const sidb_defect high_screening{sidb_defect_type::UNKNOWN, -1, sidb_simulation_parameters{}.epsilon_r, 1};
-        const maximum_defect_influence_position_and_distance_params sim_params_high_screening{high_screening,
-                                                                                 sidb_simulation_parameters{}};
+        const maximum_defect_influence_position_and_distance_params sim_params_high_screening{
+            high_screening, sidb_simulation_parameters{}};
 
         const auto [defect_pos_high_screening, distance_high_screening] =
             maximum_defect_influence_position_and_distance(lat, sim_params_high_screening);
