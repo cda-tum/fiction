@@ -2,8 +2,8 @@
 // Created by Jan Drewniok on 28.01.24.
 //
 
-#ifndef FICTION_ASSESS_PHYSICAL_POPULATION_STABILITY_SIDB_GATE_HPP
-#define FICTION_ASSESS_PHYSICAL_POPULATION_STABILITY_SIDB_GATE_HPP
+#ifndef FICTION_CALCULATE_MIN_POTENTIAL_FOR_CHARGE_CHANGE_FOR_ALL_INPUT_COMBINATIONS_HPP
+#define FICTION_CALCULATE_MIN_POTENTIAL_FOR_CHARGE_CHANGE_FOR_ALL_INPUT_COMBINATIONS_HPP
 
 #include "fiction/algorithms/iter/bdl_input_iterator.hpp"
 #include "fiction/algorithms/simulation/sidb/assess_physical_population_stability.hpp"
@@ -21,7 +21,7 @@ namespace fiction
 /**
  * This struct stores the parameters required to assess the population stability of an SiDB gate.
  */
-struct assess_physical_population_stability_params_sidb_gate
+struct calculate_min_potential_for_charge_change_for_all_input_combinations_params
 {
     /**
      * Parameter to as
@@ -29,12 +29,22 @@ struct assess_physical_population_stability_params_sidb_gate
     assess_physical_population_stability_params assess_population_stability_params{};
     detect_bdl_pairs_params                     detect_pair_params{};
 };
-
+/**
+ * Calculates the minimum potential required to induce charge changes in an SiDB layout for all input combinations.
+ *
+ * @tparam Lyt Type representing the SiDB cell-level layout.
+ * @tparam TT Type representing the truth table.
+ * @param lyt The SiDB layout object.
+ * @param spec Expected Boolean function of the layout, provided as a multi-output truth table.
+ * @param params Parameters for assessing physical population stability.
+ * @param charge_state_change Optional parameter indicating the direction of charge state change (default is 1).
+ * @return The minimum potential required for charge change across all input combinations.
+ */
 template <typename Lyt, typename TT>
 [[nodiscard]] double calculate_min_potential_for_charge_change_for_all_input_combinations(
     const Lyt& lyt, const std::vector<TT>& spec,
-    const assess_physical_population_stability_params_sidb_gate& params              = {},
-    const std::optional<int8_t>                                  charge_state_change = 1) noexcept
+    const calculate_min_potential_for_charge_change_for_all_input_combinations_params& params              = {},
+    const std::optional<int8_t>                                  charge_state_change = 1)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -98,4 +108,4 @@ template <typename Lyt, typename TT>
 
 }  // namespace fiction
 
-#endif  // FICTION_ASSESS_PHYSICAL_POPULATION_STABILITY_SIDB_GATE_HPP
+#endif  // FICTION_CALCULATE_MIN_POTENTIAL_FOR_CHARGE_CHANGE_FOR_ALL_INPUT_COMBINATIONS_HPP

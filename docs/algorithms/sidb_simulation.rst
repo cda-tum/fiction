@@ -366,6 +366,13 @@ Assess Population Stability
            :members:
         .. doxygenfunction:: fiction::assess_physical_population_stability
 
+        **Header:** ``fiction/algorithms/simulation/sidb/calculate_min_potential_for_charge_change_for_all_input_combinations.hpp``
+
+        .. doxygenstruct:: fiction::calculate_min_potential_for_charge_change_for_all_input_combinations_params
+           :members:
+        .. doxygenfunction:: fiction::calculate_min_potential_for_charge_change_for_all_input_combinations
+
+
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.transition_type
             :members:
