@@ -1,7 +1,7 @@
 /*
-This file contains docstrings for use in the Python bindings.
-Do not edit! They were automatically extracted by pybind11_mkdoc.
-*/
+  This file contains docstrings for use in the Python bindings.
+  Do not edit! They were automatically extracted by pybind11_mkdoc.
+ */
 
 #define __EXPAND(x)                                     x
 #define __COUNT(_1, _2, _3, _4, _5, _6, _7, COUNT, ...) COUNT
@@ -71,39 +71,39 @@ This implementation is based on the pseudocode from
 https://en.wikipedia.org/wiki/A_star_search_algorithm.
 
 Template parameter ``Path``:
-  Type of the returned path.
+    Type of the returned path.
 
 Template parameter ``Lyt``:
-  Type of the layout to perform path finding on.
+    Type of the layout to perform path finding on.
 
 Template parameter ``Dist``:
-  Distance value type to be used in the heuristic estimation
-  function.
+    Distance value type to be used in the heuristic estimation
+    function.
 
 Template parameter ``Cost``:
-  Cost value type to be used when determining moving cost between
-  coordinates.
+    Cost value type to be used when determining moving cost between
+    coordinates.
 
 Parameter ``layout``:
-  The layout in which the shortest path between a source and target
-  coordinate is to be found.
+    The layout in which the shortest path between a source and target
+    coordinate is to be found.
 
 Parameter ``objective``:
-  Source-target coordinate pair.
+    Source-target coordinate pair.
 
 Parameter ``dist_fn``:
-  A distance functor that implements the desired heuristic
-  estimation function.
+    A distance functor that implements the desired heuristic
+    estimation function.
 
 Parameter ``cost_fn``:
-  A cost functor that implements the desired cost function.
+    A cost functor that implements the desired cost function.
 
 Parameter ``params``:
-  Parameters.
+    Parameters.
 
 Returns:
-  The shortest loop-less path in `layout` from `objective.source` to
-  `objective.target`.)doc";
+    The shortest loop-less path in `layout` from `objective.source` to
+    `objective.target`.)doc";
 
 static const char* __doc_fiction_a_star_distance =
     R"doc(A distance function that does not approximate but compute the actual
@@ -117,32 +117,32 @@ value is supported by `Dist`, or `std::numeric_limits<Dist>::max()`,
 otherwise.
 
 Template parameter ``Lyt``:
-  Coordinate layout type.
+    Coordinate layout type.
 
 Template parameter ``Dist``:
-  Distance type.
+    Distance type.
 
 Parameter ``layout``:
-  The layout in which the distance between `source` and `target` is
-  to be determined.
+    The layout in which the distance between `source` and `target` is
+    to be determined.
 
 Parameter ``source``:
-  Source coordinate.
+    Source coordinate.
 
 Parameter ``target``:
-  Target coordinate.
+    Target coordinate.
 
 Returns:
-  Minimum path length between `source` and `target` in `layout`.)doc";
+    Minimum path length between `source` and `target` in `layout`.)doc";
 
 static const char* __doc_fiction_a_star_distance_functor =
     R"doc(A pre-defined distance functor that uses the A* distance.
 
 Template parameter ``Lyt``:
-  Coordinate layout type.
+    Coordinate layout type.
 
 Template parameter ``Dist``:
-  Distance type.)doc";
+    Distance type.)doc";
 
 static const char* __doc_fiction_a_star_distance_functor_a_star_distance_functor = R"doc()doc";
 
@@ -162,16 +162,16 @@ cells, inclusive. The cells are generated in a top-down, left-to-right
 fashion within the specified area.
 
 Template parameter ``CoordinateType``:
-  Coordinate Type.
+    Coordinate Type.
 
 Parameter ``cell_nw``:
-  The northwest cell defining the starting point of the area.
+    The northwest cell defining the starting point of the area.
 
 Parameter ``cell_se``:
-  The southeast cell defining the ending point of the area.
+    The southeast cell defining the ending point of the area.
 
 Returns:
-  A vector containing all cells within the specified area.)doc";
+    A vector containing all cells within the specified area.)doc";
 
 static const char* __doc_fiction_all_incoming_edge_paths =
     R"doc(Returns a vector of all possible paths to reach the given node from
@@ -181,10 +181,10 @@ Each node without predecessors is considered a terminal and a path is
 defined as a sequence of edges.
 
 Parameter ``n``:
-  Node whose paths are desired.
+    Node whose paths are desired.
 
 Returns:
-  A vector of all possible edge paths leading from terminals to `v`.)doc";
+    A vector of all possible edge paths leading from terminals to `v`.)doc";
 
 static const char* __doc_fiction_apply_gate_library =
     R"doc(Applies a gate library to a given gate-level layout and, thereby,
@@ -199,20 +199,20 @@ May pass through, and thereby throw, an
 `unsupported_gate_orientation_exception`.
 
 Template parameter ``CellLyt``:
-  Type of the returned cell-level layout.
+    Type of the returned cell-level layout.
 
 Template parameter ``GateLibrary``:
-  Type of the gate library to apply.
+    Type of the gate library to apply.
 
 Template parameter ``GateLyt``:
-  Type of the gate-level layout to apply the library to.
+    Type of the gate-level layout to apply the library to.
 
 Parameter ``lyt``:
-  The gate-level layout.
+    The gate-level layout.
 
 Returns:
-  A cell-level layout that implements `lyt`'s gate types with
-  building blocks defined in `GateLibrary`.)doc";
+    A cell-level layout that implements `lyt`'s gate types with
+    building blocks defined in `GateLibrary`.)doc";
 
 static const char* __doc_fiction_area =
     R"doc(Computes the area of a given coordinate assuming its origin is (0, 0,
@@ -221,13 +221,13 @@ exception is SiQAD coordinates, for which it computes :math:`(|x| + 1)
 \cdot (2 \cdot |y| + |z| + 1)`.
 
 Template parameter ``CoordinateType``:
-  Coordinate type.
+    Coordinate type.
 
 Parameter ``coord``:
-  Coordinate.
+    Coordinate.
 
 Returns:
-  Area of coord.)doc";
+    Area of coord.)doc";
 
 static const char* __doc_fiction_area_2 =
     R"doc(Computes real-world area requirements in nm² of a given cell-level
@@ -236,22 +236,22 @@ a vertical and horizontal size. Additionally, a spacing between cell
 positions in horizontal and vertical direction is taken into account.
 
 Template parameter ``Lyt``:
-  Cell-level layout type.
+    Cell-level layout type.
 
 Template parameter ``AreaType``:
-  Type for area representation.
+    Type for area representation.
 
 Parameter ``lyt``:
-  The cell-level layout whose area is desired.
+    The cell-level layout whose area is desired.
 
 Parameter ``ps``:
-  Area parameters.
+    Area parameters.
 
 Parameter ``pst``:
-  Area statistics.
+    Area statistics.
 
 Returns:
-  Area requirements in nm².)doc";
+    Area requirements in nm².)doc";
 
 static const char* __doc_fiction_area_3 =
     R"doc(Computes real-world area requirements in nm² of the bounding box of a
@@ -261,22 +261,22 @@ spacing between cell positions in horizontal and vertical direction is
 taken into account.
 
 Template parameter ``Lyt``:
-  Cell-level layout type.
+    Cell-level layout type.
 
 Template parameter ``AreaType``:
-  Type for area representation.
+    Type for area representation.
 
 Parameter ``bb``:
-  The bounding box of the cell-level layout whose area is desired.
+    The bounding box of the cell-level layout whose area is desired.
 
 Parameter ``ps``:
-  Area parameters.
+    Area parameters.
 
 Parameter ``pst``:
-  Area statistics.
+    Area statistics.
 
 Returns:
-  Area requirements in nm².)doc";
+    Area requirements in nm².)doc";
 
 static const char* __doc_fiction_area_params = R"doc()doc";
 
@@ -304,7 +304,7 @@ this: :math:`1 \times 4, 4 \times 1, 2 \times 2, 1 \times 5, 5 \times
 1, 1 \times 6, 6 \times 1, 2 \times 3, 3 \times 2, \dots`
 
 Template parameter ``AspectRatio``:
-  Aspect ratio type.)doc";
+    Aspect ratio type.)doc";
 
 static const char* __doc_fiction_aspect_ratio_iterator_aspect_ratio_iterator =
     R"doc(Standard constructor. Takes a starting value and computes an initial
@@ -317,7 +317,7 @@ to `ucoord_t{0, 1}` and `ucoord_t{1, 0}`. Both examples with
 `AspectRatio == offset::ucoord_t`.
 
 Parameter ``n``:
-  Starting value of the aspect ratio iteration.)doc";
+    Starting value of the aspect ratio iteration.)doc";
 
 static const char* __doc_fiction_aspect_ratio_iterator_factorize =
     R"doc(Factorizes the current `num` into all possible factors :math:`(x, y)`
@@ -346,7 +346,7 @@ the next factors are computed.
 Prefix version.
 
 Returns:
-  Reference to this.)doc";
+    Reference to this.)doc";
 
 static const char* __doc_fiction_aspect_ratio_iterator_operator_inc_2 =
     R"doc(Creates a new iterator that points to the next dimension of the
@@ -357,7 +357,7 @@ Postfix version. Less performance than the prefix version due to copy
 construction.
 
 Returns:
-  Resulting iterator.)doc";
+    Resulting iterator.)doc";
 
 static const char* __doc_fiction_aspect_ratio_iterator_operator_le = R"doc()doc";
 
@@ -382,17 +382,17 @@ which this is the case (critical SiDB) and the corresponding charge
 state transition (i.e., the change from one charge state to another).
 
 Template parameter ``Lyt``:
-  SiDB cell-level layout type.
+    SiDB cell-level layout type.
 
 Parameter ``lyt``:
-  The layout for which the population stability is assessed.
+    The layout for which the population stability is assessed.
 
 Parameter ``params``:
-  Parameters used to assess the population stability.
+    Parameters used to assess the population stability.
 
 Returns:
-  A vector of population stability information for all physically
-  valid charge distributions of the given SiDB layout.)doc";
+    A vector of population stability information for all physically
+    valid charge distributions of the given SiDB layout.)doc";
 
 static const char* __doc_fiction_assess_physical_population_stability_params =
     R"doc(This struct stores the parameters required to assess the population
@@ -413,10 +413,10 @@ Formigoni, Omar P. Vilela Neto, and Jose Augusto M. Nacif in SBCCI
 2018.
 
 Template parameter ``Lyt``:
-  Clocked layout type.
+    Clocked layout type.
 
 Returns:
-  BANCS clocking scheme.)doc";
+    BANCS clocking scheme.)doc";
 
 static const char* __doc_fiction_bdl_input_iterator =
     R"doc(Iterator that iterates over all possible input states of a BDL layout.
@@ -435,17 +435,17 @@ The iterator satisfies the requirements of
 loops.
 
 Template parameter ``Lyt``:
-  SiDB cell-level layout type.)doc";
+    SiDB cell-level layout type.)doc";
 
 static const char* __doc_fiction_bdl_input_iterator_bdl_input_iterator =
     R"doc(Standard constructor. It alters the layout to set the first input
 state, which assigns binary `0` to all input BDL pairs.
 
 Parameter ``lyt``:
-  The SiDB BDL layout to iterate over.
+    The SiDB BDL layout to iterate over.
 
 Parameter ``params``:
-  Parameters for the BDL pair detection.)doc";
+    Parameters for the BDL pair detection.)doc";
 
 static const char* __doc_fiction_bdl_input_iterator_current_input_index =
     R"doc(The current input index. There are :math:`2^n` possible input states
@@ -456,7 +456,7 @@ static const char* __doc_fiction_bdl_input_iterator_get_number_of_inputs =
 layout.
 
 Returns:
-  The number of input BDL pairs.)doc";
+    The number of input BDL pairs.)doc";
 
 static const char* __doc_fiction_bdl_input_iterator_input_pairs = R"doc(The detected input BDL pairs.)doc";
 
@@ -469,162 +469,162 @@ static const char* __doc_fiction_bdl_input_iterator_operator_add =
 plus the given integer.
 
 Parameter ``m``:
-  The amount of input states to skip.
+    The amount of input states to skip.
 
 Returns:
-  The input state of the current iterator plus the given integer.)doc";
+    The input state of the current iterator plus the given integer.)doc";
 
 static const char* __doc_fiction_bdl_input_iterator_operator_array =
     R"doc(Subscript operator. Computes the input state of the current iterator
 plus the given integer.
 
 Parameter ``m``:
-  The amount of input states to skip.
+    The amount of input states to skip.
 
 Returns:
-  The input state of the current iterator plus the given integer.)doc";
+    The input state of the current iterator plus the given integer.)doc";
 
 static const char* __doc_fiction_bdl_input_iterator_operator_assign =
     R"doc(Assignment operator. Sets the input state to the given integer.
 
 Parameter ``m``:
-  The input state to set.)doc";
+    The input state to set.)doc";
 
 static const char* __doc_fiction_bdl_input_iterator_operator_dec =
     R"doc(Prefix decrement operator. Sets the previous input state.
 
 Returns:
-  Reference to `this`.)doc";
+    Reference to `this`.)doc";
 
 static const char* __doc_fiction_bdl_input_iterator_operator_dec_2 =
     R"doc(Postfix decrement operator. Sets the previous input state.
 
 Returns:
-  Copy of `this` before decrementing.)doc";
+    Copy of `this` before decrementing.)doc";
 
 static const char* __doc_fiction_bdl_input_iterator_operator_eq =
     R"doc(Equality operator. Compares the current input index with the given
 integer.
 
 Parameter ``m``:
-  Integer to compare with.
+    Integer to compare with.
 
 Returns:
-  `true` if the current input index is equal to `m`, `false`
-  otherwise.)doc";
+    `true` if the current input index is equal to `m`, `false`
+    otherwise.)doc";
 
 static const char* __doc_fiction_bdl_input_iterator_operator_ge =
     R"doc(Greater-or-equal-than operator. Compares the current input index with
 the given integer.
 
 Parameter ``m``:
-  Integer to compare with.
+    Integer to compare with.
 
 Returns:
-  `true` if the current input index is greater than or equal to `m`,
-  `false` otherwise.)doc";
+    `true` if the current input index is greater than or equal to `m`,
+    `false` otherwise.)doc";
 
 static const char* __doc_fiction_bdl_input_iterator_operator_gt =
     R"doc(Greater-than operator. Compares the current input index with the given
 integer.
 
 Parameter ``m``:
-  Integer to compare with.
+    Integer to compare with.
 
 Returns:
-  `true` if the current input index is greater than `m`, `false`
-  otherwise.)doc";
+    `true` if the current input index is greater than `m`, `false`
+    otherwise.)doc";
 
 static const char* __doc_fiction_bdl_input_iterator_operator_iadd =
     R"doc(Addition assignment operator. Sets a next input state.
 
 Parameter ``m``:
-  The amount of input states to skip.
+    The amount of input states to skip.
 
 Returns:
-  Reference to `this`.)doc";
+    Reference to `this`.)doc";
 
 static const char* __doc_fiction_bdl_input_iterator_operator_inc =
     R"doc(Prefix increment operator. Sets the next input state.
 
 Returns:
-  Reference to `this`.)doc";
+    Reference to `this`.)doc";
 
 static const char* __doc_fiction_bdl_input_iterator_operator_inc_2 =
     R"doc(Postfix increment operator. Sets the next input state.
 
 Returns:
-  Copy of `this` before incrementing.)doc";
+    Copy of `this` before incrementing.)doc";
 
 static const char* __doc_fiction_bdl_input_iterator_operator_isub =
     R"doc(Subtraction assignment operator. Sets a previous input state.
 
 Parameter ``m``:
-  The amount of input states to skip.
+    The amount of input states to skip.
 
 Returns:
-  Reference to `this`.)doc";
+    Reference to `this`.)doc";
 
 static const char* __doc_fiction_bdl_input_iterator_operator_le =
     R"doc(Less-or-equal-than operator. Compares the current input index with the
 given integer.
 
 Parameter ``m``:
-  Integer to compare with.
+    Integer to compare with.
 
 Returns:
-  `true` if the current input index is less than or equal to `m`,
-  `false` otherwise.)doc";
+    `true` if the current input index is less than or equal to `m`,
+    `false` otherwise.)doc";
 
 static const char* __doc_fiction_bdl_input_iterator_operator_lt =
     R"doc(Less-than operator. Compares the current input index with the given
 integer.
 
 Parameter ``m``:
-  Integer to compare with.
+    Integer to compare with.
 
 Returns:
-  `true` if the current input index is less than `m`, `false`
-  otherwise.)doc";
+    `true` if the current input index is less than `m`, `false`
+    otherwise.)doc";
 
 static const char* __doc_fiction_bdl_input_iterator_operator_mul =
     R"doc(Dereference operator. Returns a reference to the layout with the
 current input state.
 
 Returns:
-  Reference to the current layout.)doc";
+    Reference to the current layout.)doc";
 
 static const char* __doc_fiction_bdl_input_iterator_operator_ne =
     R"doc(Inequality operator. Compares the current input index with the given
 integer.
 
 Parameter ``m``:
-  Integer to compare with.
+    Integer to compare with.
 
 Returns:
-  `true` if the current input index is not equal to `m`, `false`
-  otherwise.)doc";
+    `true` if the current input index is not equal to `m`, `false`
+    otherwise.)doc";
 
 static const char* __doc_fiction_bdl_input_iterator_operator_sub =
     R"doc(Subtraction operator. Computes the input state of the current iterator
 minus the given integer.
 
 Parameter ``m``:
-  The amount of input states to skip.
+    The amount of input states to skip.
 
 Returns:
-  The input state of the current iterator minus the given integer.)doc";
+    The input state of the current iterator minus the given integer.)doc";
 
 static const char* __doc_fiction_bdl_input_iterator_operator_sub_2 =
     R"doc(Subtraction operator. Computes the difference between the current
 input index and the given iterator ones.
 
 Parameter ``other``:
-  Iterator to compute the difference with.
+    Iterator to compute the difference with.
 
 Returns:
-  The difference between the current input index and the given
-  iterator ones.)doc";
+    The difference between the current input index and the given
+    iterator ones.)doc";
 
 static const char* __doc_fiction_bdl_input_iterator_set_all_inputs =
     R"doc(Sets all input cells of the layout according to the current input
@@ -639,7 +639,7 @@ static const char* __doc_fiction_bdl_pair =
 each other and, thus, most likely share a charge.
 
 Template parameter ``Lyt``:
-  SiDB cell-level layout type.)doc";
+    SiDB cell-level layout type.)doc";
 
 static const char* __doc_fiction_bdl_pair_bdl_pair = R"doc(Standard constructor for empty BDL pairs.)doc";
 
@@ -647,13 +647,13 @@ static const char* __doc_fiction_bdl_pair_bdl_pair_2 =
     R"doc(Constructor for BDL pairs.
 
 Parameter ``t``:
-  Type of the SiDBs in the pair.
+    Type of the SiDBs in the pair.
 
 Parameter ``u``:
-  The upper SiDB of the pair.
+    The upper SiDB of the pair.
 
 Parameter ``l``:
-  The lower SiDB of the pair.)doc";
+    The lower SiDB of the pair.)doc";
 
 static const char* __doc_fiction_bdl_pair_lower =
     R"doc(The lower SiDB of the pair. Upper and lower are defined relative to
@@ -671,13 +671,13 @@ static const char* __doc_fiction_binomial_coefficient =
     R"doc(Calculates the binomial coefficient :math:`\binom{n}{k}`.
 
 Parameter ``n``:
-  The total number of items.
+    The total number of items.
 
 Parameter ``k``:
-  The number of items to choose from n.
+    The number of items to choose from n.
 
 Returns:
-  The binomial coefficient :math:`\binom{n}{k}`.)doc";
+    The binomial coefficient :math:`\binom{n}{k}`.)doc";
 
 static const char* __doc_fiction_bounding_box_2d =
     R"doc(A 2D bounding box object that computes a minimum-sized box around all
@@ -692,13 +692,13 @@ The bounding box does not automatically updated when the layout
 changes. Call `update_bounding_box()` to recompute it.
 
 Template parameter ``Lyt``:
-  Gate-level or cell-level layout type.)doc";
+    Gate-level or cell-level layout type.)doc";
 
 static const char* __doc_fiction_bounding_box_2d_bounding_box_2d =
     R"doc(Standard constructor that computes an initial bounding box.
 
 Parameter ``lyt``:
-  Gate-level or cell-level layout whose bounding box is desired.)doc";
+    Gate-level or cell-level layout whose bounding box is desired.)doc";
 
 static const char* __doc_fiction_bounding_box_2d_get_max =
     R"doc(Returns the maximum corner of the bounding box.
@@ -708,7 +708,7 @@ represents the most south-eastern coordinate of the bounding box
 enclosing every non-empty coordinate.
 
 Returns:
-  The maximum enclosing coordinate in the associated layout.)doc";
+    The maximum enclosing coordinate in the associated layout.)doc";
 
 static const char* __doc_fiction_bounding_box_2d_get_min =
     R"doc(Returns the minimum corner of the bounding box.
@@ -718,19 +718,19 @@ represents the most north-western coordinate of the bounding box
 enclosing every non-empty coordinate.
 
 Returns:
-  The minimum enclosing coordinate in the associated layout.)doc";
+    The minimum enclosing coordinate in the associated layout.)doc";
 
 static const char* __doc_fiction_bounding_box_2d_get_x_size =
     R"doc(Returns the horizontal size of the bounding box in layout coordinates.
 
 Returns:
-  Bounding box size along the x-axis.)doc";
+    Bounding box size along the x-axis.)doc";
 
 static const char* __doc_fiction_bounding_box_2d_get_y_size =
     R"doc(Returns the vertical size of the bounding box in layout coordinates.
 
 Returns:
-  Bounding box size along the y-axis.)doc";
+    Bounding box size along the y-axis.)doc";
 
 static const char* __doc_fiction_bounding_box_2d_is_empty_coordinate = R"doc()doc";
 
@@ -754,44 +754,44 @@ distribution, the state type is determined (i.e. erroneous,
 transparent).
 
 Template parameter ``Lyt``:
-  SiDB cell-level layout type.
+    SiDB cell-level layout type.
 
 Template parameter ``TT``:
-  The type of the truth table specifying the gate behavior.
+    The type of the truth table specifying the gate behavior.
 
 Parameter ``energy_distribution``:
-  Energy distribution.
+    Energy distribution.
 
 Parameter ``valid_charge_distributions``:
-  Physically valid charge distributions.
+    Physically valid charge distributions.
 
 Parameter ``output_bdl_pairs``:
-  Output BDL pairs.
+    Output BDL pairs.
 
 Parameter ``spec``:
-  Expected Boolean function of the layout given as a multi-output
-  truth table.
+    Expected Boolean function of the layout given as a multi-output
+    truth table.
 
 Parameter ``input_index``:
-  The index of the current input configuration.
+    The index of the current input configuration.
 
 Returns:
-  Electrostatic potential energy of all charge distributions with
-  state type.)doc";
+    Electrostatic potential energy of all charge distributions with
+    state type.)doc";
 
 static const char* __doc_fiction_can_positive_charges_occur =
     R"doc(This algorithm determines if positively charged SiDBs can occur in a
 given SiDB cell-level layout due to strong electrostatic interaction.
 
 Template parameter ``Lyt``:
-  SiDB cell-level layout type.
+    SiDB cell-level layout type.
 
 Parameter ``lyt``:
-  The layout to be analyzed.
+    The layout to be analyzed.
 
 Parameter ``sim_params``:
-  Physical parameters used to determine whether positively charged
-  SiDBs can occur.)doc";
+    Physical parameters used to determine whether positively charged
+    SiDBs can occur.)doc";
 
 static const char* __doc_fiction_cartesian_layout =
     R"doc(A layout type that utilizes offset coordinates to represent a
@@ -804,7 +804,7 @@ Cartesian grid. Its faces are organized in the following way:
 (3,2) | | | | | | +-------+-------+-------+-------+ \endverbatim
 
 Template parameter ``OffsetCoordinateType``:
-  The coordinate implementation to be used.)doc";
+    The coordinate implementation to be used.)doc";
 
 static const char* __doc_fiction_cartesian_layout_above =
     R"doc(Returns the coordinate that is directly above a given coordinate `c`,
@@ -812,10 +812,10 @@ i.e., the face whose z-dimension is higher by 1. If `c`'s z-dimension
 is already at maximum, `c` is returned instead.
 
 Parameter ``c``:
-  Coordinate whose above counterpart is desired.
+    Coordinate whose above counterpart is desired.
 
 Returns:
-  Coordinate directly above `c`.)doc";
+    Coordinate directly above `c`.)doc";
 
 static const char* __doc_fiction_cartesian_layout_adjacent_coordinates =
     R"doc(Returns a container that contains all coordinates that are adjacent to
@@ -827,10 +827,10 @@ Coordinates that are outside of the layout bounds are not considered.
 Thereby, the size of the returned container is at most 4.
 
 Parameter ``c``:
-  Coordinate whose adjacent ones are desired.
+    Coordinate whose adjacent ones are desired.
 
 Returns:
-  A container that contains all of `c`'s adjacent coordinates.)doc";
+    A container that contains all of `c`'s adjacent coordinates.)doc";
 
 static const char* __doc_fiction_cartesian_layout_adjacent_opposite_coordinates =
     R"doc(Returns a container that contains all coordinates pairs of opposing
@@ -844,16 +844,16 @@ be examined.
 Coordinates outside of the layout bounds are not being considered.
 
 Parameter ``c``:
-  Coordinate whose opposite ones are desired.
+    Coordinate whose opposite ones are desired.
 
 Returns:
-  A container that contains pairs of `c`'s opposing coordinates.)doc";
+    A container that contains pairs of `c`'s opposing coordinates.)doc";
 
 static const char* __doc_fiction_cartesian_layout_area =
     R"doc(Returns the layout's number of faces depending on the coordinate type.
 
 Returns:
-  Area of layout.)doc";
+    Area of layout.)doc";
 
 static const char* __doc_fiction_cartesian_layout_below =
     R"doc(Returns the coordinate that is directly below a given coordinate `c`,
@@ -861,10 +861,10 @@ i.e., the face whose z-dimension is lower by 1. If `c`'s z-dimension
 is already at minimum, `c` is returned instead.
 
 Parameter ``c``:
-  Coordinate whose below counterpart is desired.
+    Coordinate whose below counterpart is desired.
 
 Returns:
-  Coordinate directly below `c`.)doc";
+    Coordinate directly below `c`.)doc";
 
 static const char* __doc_fiction_cartesian_layout_cartesian_layout =
     R"doc(Standard constructor. The given aspect ratio points to the highest
@@ -873,13 +873,13 @@ above `ar = (3,2)`. Consequently, with `ar = (0,0)`, the layout has
 exactly one coordinate.
 
 Parameter ``ar``:
-  Highest possible position in the layout.)doc";
+    Highest possible position in the layout.)doc";
 
 static const char* __doc_fiction_cartesian_layout_cartesian_layout_2 =
     R"doc(Copy constructor from another layout's storage.
 
 Parameter ``s``:
-  Storage of another cartesian_layout.)doc";
+    Storage of another cartesian_layout.)doc";
 
 static const char* __doc_fiction_cartesian_layout_cartesian_layout_storage = R"doc()doc";
 
@@ -891,7 +891,7 @@ static const char* __doc_fiction_cartesian_layout_clone =
     R"doc(Clones the layout returning a deep copy.
 
 Returns:
-  Deep copy of the layout.)doc";
+    Deep copy of the layout.)doc";
 
 static const char* __doc_fiction_cartesian_layout_coord =
     R"doc(Creates and returns a coordinate in the layout from the given x-, y-,
@@ -901,25 +901,25 @@ and z-values.
 y, z)`.
 
 Template parameter ``X``:
-  x-type.
+    x-type.
 
 Template parameter ``Y``:
-  y-type.
+    y-type.
 
 Template parameter ``Z``:
-  z-type.
+    z-type.
 
 Parameter ``x``:
-  x-value.
+    x-value.
 
 Parameter ``y``:
-  y-value.
+    y-value.
 
 Parameter ``z``:
-  z-value.
+    z-value.
 
 Returns:
-  A coordinate in the layout of type `OffsetCoordinateType`.)doc";
+    A coordinate in the layout of type `OffsetCoordinateType`.)doc";
 
 static const char* __doc_fiction_cartesian_layout_coordinates =
     R"doc(Returns a range of all coordinates accessible in the layout between
@@ -932,15 +932,15 @@ will happen inside out, i.e., x will be iterated first, then y, then
 z.
 
 Parameter ``start``:
-  First coordinate to include in the range of all coordinates.
+    First coordinate to include in the range of all coordinates.
 
 Parameter ``stop``:
-  Last coordinate (exclusive) to include in the range of all
-  coordinates.
+    Last coordinate (exclusive) to include in the range of all
+    coordinates.
 
 Returns:
-  An iterator range from `start` to `stop`. If they are not
-  provided, the first/last coordinate is used as a default.)doc";
+    An iterator range from `start` to `stop`. If they are not
+    provided, the first/last coordinate is used as a default.)doc";
 
 static const char* __doc_fiction_cartesian_layout_east =
     R"doc(Returns the coordinate that is directly adjacent in eastern direction
@@ -949,20 +949,20 @@ by 1. If `c`'s x-dimension is already at maximum, `c` is returned
 instead.
 
 Parameter ``c``:
-  Coordinate whose eastern counterpart is desired.
+    Coordinate whose eastern counterpart is desired.
 
 Returns:
-  Coordinate adjacent and east of `c`.)doc";
+    Coordinate adjacent and east of `c`.)doc";
 
 static const char* __doc_fiction_cartesian_layout_eastern_border_of =
     R"doc(Returns the coordinate with the same y and z values as a given
 coordinate but that is located at the layout's eastern border.
 
 Parameter ``c``:
-  Coordinate whose border counterpart is desired.
+    Coordinate whose border counterpart is desired.
 
 Returns:
-  The eastern border equivalent of `c`.)doc";
+    The eastern border equivalent of `c`.)doc";
 
 static const char* __doc_fiction_cartesian_layout_foreach_adjacent_coordinate =
     R"doc(Applies a function to all coordinates adjacent to a given one.
@@ -974,13 +974,13 @@ Coordinates that are outside of the layout bounds are not considered.
 Thereby, at most 4 coordinates are touched.
 
 Template parameter ``Fn``:
-  Functor type.
+    Functor type.
 
 Parameter ``c``:
-  Coordinate whose adjacent ones are desired.
+    Coordinate whose adjacent ones are desired.
 
 Parameter ``fn``:
-  Functor to apply to each of `c`'s adjacent coordinates.)doc";
+    Functor to apply to each of `c`'s adjacent coordinates.)doc";
 
 static const char* __doc_fiction_cartesian_layout_foreach_adjacent_opposite_coordinates =
     R"doc(Applies a function to all opposing coordinate pairs adjacent to a
@@ -988,14 +988,14 @@ given one. In this Cartesian layout, the function will be applied to
 (`north(c)`, `south(c)`) and (`east(c)`, `west(c)`).
 
 Template parameter ``Fn``:
-  Functor type.
+    Functor type.
 
 Parameter ``c``:
-  Coordinate whose opposite adjacent ones are desired.
+    Coordinate whose opposite adjacent ones are desired.
 
 Parameter ``fn``:
-  Functor to apply to each of `c`'s opposite adjacent coordinate
-  pairs.)doc";
+    Functor to apply to each of `c`'s opposite adjacent coordinate
+    pairs.)doc";
 
 static const char* __doc_fiction_cartesian_layout_foreach_coordinate =
     R"doc(Applies a function to all coordinates accessible in the layout between
@@ -1003,18 +1003,18 @@ static const char* __doc_fiction_cartesian_layout_foreach_coordinate =
 coordinates function.
 
 Template parameter ``Fn``:
-  Functor type that has to comply with the restrictions imposed by
-  `mockturtle::foreach_element`.
+    Functor type that has to comply with the restrictions imposed by
+    `mockturtle::foreach_element`.
 
 Parameter ``fn``:
-  Functor to apply to each coordinate in the range.
+    Functor to apply to each coordinate in the range.
 
 Parameter ``start``:
-  First coordinate to include in the range of all coordinates.
+    First coordinate to include in the range of all coordinates.
 
 Parameter ``stop``:
-  Last coordinate (exclusive) to include in the range of all
-  coordinates.)doc";
+    Last coordinate (exclusive) to include in the range of all
+    coordinates.)doc";
 
 static const char* __doc_fiction_cartesian_layout_foreach_ground_coordinate =
     R"doc(Applies a function to all coordinates accessible in the layout's
@@ -1022,19 +1022,19 @@ ground layer between `start` and `stop`. The iteration order is the
 same as for the ground_coordinates function.
 
 Template parameter ``Fn``:
-  Functor type that has to comply with the restrictions imposed by
-  `mockturtle::foreach_element`.
+    Functor type that has to comply with the restrictions imposed by
+    `mockturtle::foreach_element`.
 
 Parameter ``fn``:
-  Functor to apply to each coordinate in the range.
+    Functor to apply to each coordinate in the range.
 
 Parameter ``start``:
-  First coordinate to include in the range of all ground
-  coordinates.
+    First coordinate to include in the range of all ground
+    coordinates.
 
 Parameter ``stop``:
-  Last coordinate (exclusive) to include in the range of all ground
-  coordinates.)doc";
+    Last coordinate (exclusive) to include in the range of all ground
+    coordinates.)doc";
 
 static const char* __doc_fiction_cartesian_layout_ground_coordinates =
     R"doc(Returns a range of all coordinates accessible in the layout's ground
@@ -1042,17 +1042,17 @@ layer between `start` and `stop`. The iteration order is the same as
 for the coordinates function but without the z dimension.
 
 Parameter ``start``:
-  First coordinate to include in the range of all ground
-  coordinates.
+    First coordinate to include in the range of all ground
+    coordinates.
 
 Parameter ``stop``:
-  Last coordinate (exclusive) to include in the range of all ground
-  coordinates.
+    Last coordinate (exclusive) to include in the range of all ground
+    coordinates.
 
 Returns:
-  An iterator range from `start` to `stop`. If they are not
-  provided, the first/last coordinate in the ground layer is used as
-  a default.)doc";
+    An iterator range from `start` to `stop`. If they are not
+    provided, the first/last coordinate in the ground layer is used as
+    a default.)doc";
 
 static const char* __doc_fiction_cartesian_layout_initialize_dimension = R"doc()doc";
 
@@ -1060,237 +1060,237 @@ static const char* __doc_fiction_cartesian_layout_is_above =
     R"doc(Returns `true` iff coordinate `c2` is directly above coordinate `c1`.
 
 Parameter ``c1``:
-  Base coordinate.
+    Base coordinate.
 
 Parameter ``c2``:
-  Coordinate to test for its location in relation to `c1`.
+    Coordinate to test for its location in relation to `c1`.
 
 Returns:
-  `true` iff `c2` is directly above `c1`.)doc";
+    `true` iff `c2` is directly above `c1`.)doc";
 
 static const char* __doc_fiction_cartesian_layout_is_adjacent_elevation_of =
     R"doc(Similar to `is_adjacent_of` but also considers `c1`'s elevation, i.e.,
 if `c2` is adjacent to `above(c1)` or `below(c1)`.
 
 Parameter ``c1``:
-  Base coordinate.
+    Base coordinate.
 
 Parameter ``c2``:
-  Coordinate to test for its location in relation to `c1`.
+    Coordinate to test for its location in relation to `c1`.
 
 Returns:
-  `true` iff `c2` is either directly north, east, south, or west of
-  `c1` or `c1`'s elevations.)doc";
+    `true` iff `c2` is either directly north, east, south, or west of
+    `c1` or `c1`'s elevations.)doc";
 
 static const char* __doc_fiction_cartesian_layout_is_adjacent_of =
     R"doc(Returns `true` iff coordinate `c2` is either directly north, east,
 south, or west of coordinate `c1`.
 
 Parameter ``c1``:
-  Base coordinate.
+    Base coordinate.
 
 Parameter ``c2``:
-  Coordinate to test for its location in relation to `c1`.
+    Coordinate to test for its location in relation to `c1`.
 
 Returns:
-  `true` iff `c2` is either directly north, east, south, or west of
-  `c1`.)doc";
+    `true` iff `c2` is either directly north, east, south, or west of
+    `c1`.)doc";
 
 static const char* __doc_fiction_cartesian_layout_is_at_any_border =
     R"doc(Returns whether the given coordinate is located at any of the layout's
 borders where x or y are either minimal or maximal.
 
 Parameter ``c``:
-  Coordinate to check for border location.
+    Coordinate to check for border location.
 
 Returns:
-  `true` iff `c` is located at any of the layout's borders.)doc";
+    `true` iff `c` is located at any of the layout's borders.)doc";
 
 static const char* __doc_fiction_cartesian_layout_is_at_eastern_border =
     R"doc(Returns whether the given coordinate is located at the layout's
 eastern border where x is maximal.
 
 Parameter ``c``:
-  Coordinate to check for border location.
+    Coordinate to check for border location.
 
 Returns:
-  `true` iff `c` is located at the layout's northern border.)doc";
+    `true` iff `c` is located at the layout's northern border.)doc";
 
 static const char* __doc_fiction_cartesian_layout_is_at_northern_border =
     R"doc(Returns whether the given coordinate is located at the layout's
 northern border where y is minimal.
 
 Parameter ``c``:
-  Coordinate to check for border location.
+    Coordinate to check for border location.
 
 Returns:
-  `true` iff `c` is located at the layout's northern border.)doc";
+    `true` iff `c` is located at the layout's northern border.)doc";
 
 static const char* __doc_fiction_cartesian_layout_is_at_southern_border =
     R"doc(Returns whether the given coordinate is located at the layout's
 southern border where y is maximal.
 
 Parameter ``c``:
-  Coordinate to check for border location.
+    Coordinate to check for border location.
 
 Returns:
-  `true` iff `c` is located at the layout's southern border.)doc";
+    `true` iff `c` is located at the layout's southern border.)doc";
 
 static const char* __doc_fiction_cartesian_layout_is_at_western_border =
     R"doc(Returns whether the given coordinate is located at the layout's
 western border where x is minimal.
 
 Parameter ``c``:
-  Coordinate to check for border location.
+    Coordinate to check for border location.
 
 Returns:
-  `true` iff `c` is located at the layout's western border.)doc";
+    `true` iff `c` is located at the layout's western border.)doc";
 
 static const char* __doc_fiction_cartesian_layout_is_below =
     R"doc(Returns `true` iff coordinate `c2` is directly below coordinate `c1`.
 
 Parameter ``c1``:
-  Base coordinate.
+    Base coordinate.
 
 Parameter ``c2``:
-  Coordinate to test for its location in relation to `c1`.
+    Coordinate to test for its location in relation to `c1`.
 
 Returns:
-  `true` iff `c2` is directly below `c1`.)doc";
+    `true` iff `c2` is directly below `c1`.)doc";
 
 static const char* __doc_fiction_cartesian_layout_is_crossing_layer =
     R"doc(Returns whether the given coordinate is located in a crossing layer
 where z is not minimal.
 
 Parameter ``c``:
-  Coordinate to check for elevation.
+    Coordinate to check for elevation.
 
 Returns:
-  `true` iff `c` is in a crossing layer.)doc";
+    `true` iff `c` is in a crossing layer.)doc";
 
 static const char* __doc_fiction_cartesian_layout_is_east_of =
     R"doc(Returns `true` iff coordinate `c2` is directly east of coordinate
 `c1`.
 
 Parameter ``c1``:
-  Base coordinate.
+    Base coordinate.
 
 Parameter ``c2``:
-  Coordinate to test for its location in relation to `c1`.
+    Coordinate to test for its location in relation to `c1`.
 
 Returns:
-  `true` iff `c2` is directly east of `c1`.)doc";
+    `true` iff `c2` is directly east of `c1`.)doc";
 
 static const char* __doc_fiction_cartesian_layout_is_eastwards_of =
     R"doc(Returns `true` iff coordinate `c2` is somewhere east of coordinate
 `c1`.
 
 Parameter ``c1``:
-  Base coordinate.
+    Base coordinate.
 
 Parameter ``c2``:
-  Coordinate to test for its location in relation to `c1`.
+    Coordinate to test for its location in relation to `c1`.
 
 Returns:
-  `true` iff `c2` is somewhere east of `c1`.)doc";
+    `true` iff `c2` is somewhere east of `c1`.)doc";
 
 static const char* __doc_fiction_cartesian_layout_is_ground_layer =
     R"doc(Returns whether the given coordinate is located in the ground layer
 where z is minimal.
 
 Parameter ``c``:
-  Coordinate to check for elevation.
+    Coordinate to check for elevation.
 
 Returns:
-  `true` iff `c` is in ground layer.)doc";
+    `true` iff `c` is in ground layer.)doc";
 
 static const char* __doc_fiction_cartesian_layout_is_north_of =
     R"doc(Returns `true` iff coordinate `c2` is directly north of coordinate
 `c1`.
 
 Parameter ``c1``:
-  Base coordinate.
+    Base coordinate.
 
 Parameter ``c2``:
-  Coordinate to test for its location in relation to `c1`.
+    Coordinate to test for its location in relation to `c1`.
 
 Returns:
-  `true` iff `c2` is directly north of `c1`.)doc";
+    `true` iff `c2` is directly north of `c1`.)doc";
 
 static const char* __doc_fiction_cartesian_layout_is_northwards_of =
     R"doc(Returns `true` iff coordinate `c2` is somewhere north of coordinate
 `c1`.
 
 Parameter ``c1``:
-  Base coordinate.
+    Base coordinate.
 
 Parameter ``c2``:
-  Coordinate to test for its location in relation to `c1`.
+    Coordinate to test for its location in relation to `c1`.
 
 Returns:
-  `true` iff `c2` is somewhere north of `c1`.)doc";
+    `true` iff `c2` is somewhere north of `c1`.)doc";
 
 static const char* __doc_fiction_cartesian_layout_is_south_of =
     R"doc(Returns `true` iff coordinate `c2` is directly south of coordinate
 `c1`.
 
 Parameter ``c1``:
-  Base coordinate.
+    Base coordinate.
 
 Parameter ``c2``:
-  Coordinate to test for its location in relation to `c1`.
+    Coordinate to test for its location in relation to `c1`.
 
 Returns:
-  `true` iff `c2` is directly south of `c1`.)doc";
+    `true` iff `c2` is directly south of `c1`.)doc";
 
 static const char* __doc_fiction_cartesian_layout_is_southwards_of =
     R"doc(Returns `true` iff coordinate `c2` is somewhere south of coordinate
 `c1`.
 
 Parameter ``c1``:
-  Base coordinate.
+    Base coordinate.
 
 Parameter ``c2``:
-  Coordinate to test for its location in relation to `c1`.
+    Coordinate to test for its location in relation to `c1`.
 
 Returns:
-  `true` iff `c2` is somewhere south of `c1`.)doc";
+    `true` iff `c2` is somewhere south of `c1`.)doc";
 
 static const char* __doc_fiction_cartesian_layout_is_west_of =
     R"doc(Returns `true` iff coordinate `c2` is directly west of coordinate
 `c1`.
 
 Parameter ``c1``:
-  Base coordinate.
+    Base coordinate.
 
 Parameter ``c2``:
-  Coordinate to test for its location in relation to `c1`.
+    Coordinate to test for its location in relation to `c1`.
 
 Returns:
-  `true` iff `c2` is directly west of `c1`.)doc";
+    `true` iff `c2` is directly west of `c1`.)doc";
 
 static const char* __doc_fiction_cartesian_layout_is_westwards_of =
     R"doc(Returns `true` iff coordinate `c2` is somewhere west of coordinate
 `c1`.
 
 Parameter ``c1``:
-  Base coordinate.
+    Base coordinate.
 
 Parameter ``c2``:
-  Coordinate to test for its location in relation to `c1`.
+    Coordinate to test for its location in relation to `c1`.
 
 Returns:
-  `true` iff `c2` is somewhere west of `c1`.)doc";
+    `true` iff `c2` is somewhere west of `c1`.)doc";
 
 static const char* __doc_fiction_cartesian_layout_is_within_bounds =
     R"doc(Returns whether the given coordinate is located within the layout
 bounds.
 
 Parameter ``c``:
-  Coordinate to check for boundary.
+    Coordinate to check for boundary.
 
 Returns:
-  `true` iff `c` is located within the layout bounds.)doc";
+    `true` iff `c` is located within the layout bounds.)doc";
 
 static const char* __doc_fiction_cartesian_layout_north =
     R"doc(Returns the coordinate that is directly adjacent in northern direction
@@ -1299,10 +1299,10 @@ by 1. If `c`'s y-dimension is already at minimum, `c` is returned
 instead.
 
 Parameter ``c``:
-  Coordinate whose northern counterpart is desired.
+    Coordinate whose northern counterpart is desired.
 
 Returns:
-  Coordinate adjacent and north of `c`.)doc";
+    Coordinate adjacent and north of `c`.)doc";
 
 static const char* __doc_fiction_cartesian_layout_north_east =
     R"doc(Returns the coordinate that is located in north-eastern direction of a
@@ -1312,10 +1312,10 @@ at maximum or `c`'s y-dimension is already at minimum, `c` is returned
 instead.
 
 Parameter ``c``:
-  Coordinate whose north-eastern counterpart is desired.
+    Coordinate whose north-eastern counterpart is desired.
 
 Returns:
-  Coordinate directly north-eastern of `c`.)doc";
+    Coordinate directly north-eastern of `c`.)doc";
 
 static const char* __doc_fiction_cartesian_layout_north_west =
     R"doc(Returns the coordinate that is located in north-western direction of a
@@ -1324,26 +1324,26 @@ are lower by 1. If `c`'s x-dimension or y-dimension are already at
 minimum, `c` is returned instead.
 
 Parameter ``c``:
-  Coordinate whose north-western counterpart is desired.
+    Coordinate whose north-western counterpart is desired.
 
 Returns:
-  Coordinate directly north-western of `c`.)doc";
+    Coordinate directly north-western of `c`.)doc";
 
 static const char* __doc_fiction_cartesian_layout_northern_border_of =
     R"doc(Returns the coordinate with the same x and z values as a given
 coordinate but that is located at the layout's northern border.
 
 Parameter ``c``:
-  Coordinate whose border counterpart is desired.
+    Coordinate whose border counterpart is desired.
 
 Returns:
-  The northern border equivalent of `c`.)doc";
+    The northern border equivalent of `c`.)doc";
 
 static const char* __doc_fiction_cartesian_layout_resize =
     R"doc(Updates the layout's dimensions, effectively resizing it.
 
 Parameter ``ar``:
-  New aspect ratio.)doc";
+    New aspect ratio.)doc";
 
 static const char* __doc_fiction_cartesian_layout_south =
     R"doc(Returns the coordinate that is directly adjacent in southern direction
@@ -1352,10 +1352,10 @@ by 1. If `c`'s y-dimension is already at maximum, `c` is returned
 instead.
 
 Parameter ``c``:
-  Coordinate whose southern counterpart is desired.
+    Coordinate whose southern counterpart is desired.
 
 Returns:
-  Coordinate adjacent and south of `c`.)doc";
+    Coordinate adjacent and south of `c`.)doc";
 
 static const char* __doc_fiction_cartesian_layout_south_east =
     R"doc(Returns the coordinate that is located in south-eastern direction of a
@@ -1364,10 +1364,10 @@ are higher by 1. If `c`'s x-dimension or y-dimension are already at
 maximum, `c` is returned instead.
 
 Parameter ``c``:
-  Coordinate whose south-eastern counterpart is desired.
+    Coordinate whose south-eastern counterpart is desired.
 
 Returns:
-  Coordinate directly south-eastern of `c`.)doc";
+    Coordinate directly south-eastern of `c`.)doc";
 
 static const char* __doc_fiction_cartesian_layout_south_west =
     R"doc(Returns the coordinate that is located in south-western direction of a
@@ -1377,20 +1377,20 @@ at minimum or `c`'s y-dimension is already at maximum, `c` is returned
 instead.
 
 Parameter ``c``:
-  Coordinate whose south-western counterpart is desired.
+    Coordinate whose south-western counterpart is desired.
 
 Returns:
-  Coordinate directly south-western of `c`.)doc";
+    Coordinate directly south-western of `c`.)doc";
 
 static const char* __doc_fiction_cartesian_layout_southern_border_of =
     R"doc(Returns the coordinate with the same x and z values as a given
 coordinate but that is located at the layout's southern border.
 
 Parameter ``c``:
-  Coordinate whose border counterpart is desired.
+    Coordinate whose border counterpart is desired.
 
 Returns:
-  The southern border equivalent of `c`.)doc";
+    The southern border equivalent of `c`.)doc";
 
 static const char* __doc_fiction_cartesian_layout_strg = R"doc()doc";
 
@@ -1401,41 +1401,41 @@ by 1. If `c`'s x-dimension is already at minimum, `c` is returned
 instead.
 
 Parameter ``c``:
-  Coordinate whose western counterpart is desired.
+    Coordinate whose western counterpart is desired.
 
 Returns:
-  Coordinate adjacent and west of `c`.)doc";
+    Coordinate adjacent and west of `c`.)doc";
 
 static const char* __doc_fiction_cartesian_layout_western_border_of =
     R"doc(Returns the coordinate with the same y and z values as a given
 coordinate but that is located at the layout's western border.
 
 Parameter ``c``:
-  Coordinate whose border counterpart is desired.
+    Coordinate whose border counterpart is desired.
 
 Returns:
-  The western border equivalent of `c`.)doc";
+    The western border equivalent of `c`.)doc";
 
 static const char* __doc_fiction_cartesian_layout_x =
     R"doc(Returns the layout's x-dimension, i.e., returns the biggest x-value
 that still belongs to the layout.
 
 Returns:
-  x-dimension.)doc";
+    x-dimension.)doc";
 
 static const char* __doc_fiction_cartesian_layout_y =
     R"doc(Returns the layout's y-dimension, i.e., returns the biggest y-value
 that still belongs to the layout.
 
 Returns:
-  y-dimension.)doc";
+    y-dimension.)doc";
 
 static const char* __doc_fiction_cartesian_layout_z =
     R"doc(Returns the layout's z-dimension, i.e., returns the biggest z-value
 that still belongs to the layout.
 
 Returns:
-  z-dimension.)doc";
+    z-dimension.)doc";
 
 static const char* __doc_fiction_cell_level_layout =
     R"doc(A layout type to layer on top of a clocked layout that allows the
@@ -1472,10 +1472,10 @@ provides further attributes like its functionality as a crossing or
 via cell.
 
 Template parameter ``Technology``:
-  An FCN technology that provides notions of cell types.
+    An FCN technology that provides notions of cell types.
 
 Template parameter ``ClockedLayout``:
-  The clocked layout that is to be extended by cell positions.)doc";
+    The clocked layout that is to be extended by cell positions.)doc";
 
 static const char* __doc_fiction_cell_level_layout_assign_cell_mode =
     R"doc(Assigns a cell mode `m` to a cell position `c` in the layout. If `m`
@@ -1483,20 +1483,20 @@ is the normal cell mode, a potentially stored cell mode is being
 erased.
 
 Parameter ``c``:
-  Cell position to assign cell mode `m` to.
+    Cell position to assign cell mode `m` to.
 
 Parameter ``m``:
-  Cell mode to assign to cell position `c`.)doc";
+    Cell mode to assign to cell position `c`.)doc";
 
 static const char* __doc_fiction_cell_level_layout_assign_cell_name =
     R"doc(Assigns a cell name `n` to a cell position `c` in the layout. If `n`
 is the empty string, a potentially stored cell name is being erased.
 
 Parameter ``c``:
-  Cell position to assign cell name `n` to.
+    Cell position to assign cell name `n` to.
 
 Parameter ``n``:
-  Cell name to assign to cell position `c`.)doc";
+    Cell name to assign to cell position `c`.)doc";
 
 static const char* __doc_fiction_cell_level_layout_assign_cell_type =
     R"doc(Assigns a cell type `ct` to a cell position `c` in the layout. If `ct`
@@ -1505,10 +1505,10 @@ is the empty cell, a potentially stored cell type is being erased. If
 or outputs in the layout is increased respectively.
 
 Parameter ``c``:
-  Cell position.
+    Cell position.
 
 Parameter ``ct``:
-  Cell type to assign to `c`.)doc";
+    Cell type to assign to `c`.)doc";
 
 static const char* __doc_fiction_cell_level_layout_cell_level_layout =
     R"doc(Standard constructor. Creates a named cell-level layout of the given
@@ -1516,16 +1516,16 @@ aspect ratio. To this end, it calls `ClockedLayout`'s standard
 constructor.
 
 Parameter ``ar``:
-  Highest possible position in the layout.
+    Highest possible position in the layout.
 
 Parameter ``name``:
-  Layout name.
+    Layout name.
 
 Parameter ``tile_size_x``:
-  Clock zone size in x-dimension in cells.
+    Clock zone size in x-dimension in cells.
 
 Parameter ``tile_size_y``:
-  Clock zone size in y-dimension in cells.)doc";
+    Clock zone size in y-dimension in cells.)doc";
 
 static const char* __doc_fiction_cell_level_layout_cell_level_layout_2 =
     R"doc(Standard constructor. Creates a named cell-level layout of the given
@@ -1533,31 +1533,31 @@ aspect ratio and clocks it via the given clocking scheme. To this end,
 it calls `ClockedLayout`'s standard constructor.
 
 Parameter ``ar``:
-  Highest possible position in the layout.
+    Highest possible position in the layout.
 
 Parameter ``scheme``:
-  Clocking scheme to apply to this layout.
+    Clocking scheme to apply to this layout.
 
 Parameter ``name``:
-  Layout name.
+    Layout name.
 
 Parameter ``tile_size_x``:
-  Clock zone size in x-dimension in cells.
+    Clock zone size in x-dimension in cells.
 
 Parameter ``tile_size_y``:
-  Clock zone size in y-dimension in cells.)doc";
+    Clock zone size in y-dimension in cells.)doc";
 
 static const char* __doc_fiction_cell_level_layout_cell_level_layout_3 =
     R"doc(Copy constructor from another layout's storage.
 
 Parameter ``s``:
-  Storage of another cell_level_layout.)doc";
+    Storage of another cell_level_layout.)doc";
 
 static const char* __doc_fiction_cell_level_layout_cell_level_layout_4 =
     R"doc(Copy constructor from another `ClockedLayout`.
 
 Parameter ``lyt``:
-  Clocked layout.)doc";
+    Clocked layout.)doc";
 
 static const char* __doc_fiction_cell_level_layout_cell_level_layout_storage = R"doc()doc";
 
@@ -1583,18 +1583,18 @@ static const char* __doc_fiction_cell_level_layout_clone =
     R"doc(Clones the layout returning a deep copy.
 
 Returns:
-  Deep copy of the layout.)doc";
+    Deep copy of the layout.)doc";
 
 static const char* __doc_fiction_cell_level_layout_foreach_cell =
     R"doc(Applies a function to all cell positions in the layout that have non-
 empty cell types assigned.
 
 Template parameter ``Fn``:
-  Functor type that has to comply with the restrictions imposed by
-  `mockturtle::foreach_element_transform`.
+    Functor type that has to comply with the restrictions imposed by
+    `mockturtle::foreach_element_transform`.
 
 Parameter ``fn``:
-  Functor to apply to each non-empty cell position.)doc";
+    Functor to apply to each non-empty cell position.)doc";
 
 static const char* __doc_fiction_cell_level_layout_foreach_cell_position =
     R"doc(Applies a function to all cell positions in the layout, even empty
@@ -1602,60 +1602,60 @@ ones. This function, thereby, renames
 `ClockedLayout::foreach_coordinate`.
 
 Template parameter ``Fn``:
-  Functor type that has to comply with the restrictions imposed by
-  the functor type in `ClockedLayout::foreach_coordinate`.
+    Functor type that has to comply with the restrictions imposed by
+    the functor type in `ClockedLayout::foreach_coordinate`.
 
 Parameter ``fn``:
-  Functor to apply to each cell position.)doc";
+    Functor to apply to each cell position.)doc";
 
 static const char* __doc_fiction_cell_level_layout_foreach_pi =
     R"doc(Applies a function to all primary input cell positions in the layout.
 
 Template parameter ``Fn``:
-  Functor type that has to comply with the restrictions imposed by
-  `mockturtle::foreach_element_transform`.
+    Functor type that has to comply with the restrictions imposed by
+    `mockturtle::foreach_element_transform`.
 
 Parameter ``fn``:
-  Functor to apply to each primary input cell.)doc";
+    Functor to apply to each primary input cell.)doc";
 
 static const char* __doc_fiction_cell_level_layout_foreach_po =
     R"doc(Applies a function to all primary output cells in the layout.
 
 Template parameter ``Fn``:
-  Functor type that has to comply with the restrictions imposed by
-  `mockturtle::foreach_element_transform`.
+    Functor type that has to comply with the restrictions imposed by
+    `mockturtle::foreach_element_transform`.
 
 Parameter ``fn``:
-  Functor to apply to each primary output cell.)doc";
+    Functor to apply to each primary output cell.)doc";
 
 static const char* __doc_fiction_cell_level_layout_get_cell_mode =
     R"doc(Returns the cell mode assigned to cell position `c`. If no cell mode
 is assigned, the default mode is returned.
 
 Parameter ``c``:
-  Cell position whose assigned cell mode is desired.
+    Cell position whose assigned cell mode is desired.
 
 Returns:
-  Cell mode assigned to cell position `c`.)doc";
+    Cell mode assigned to cell position `c`.)doc";
 
 static const char* __doc_fiction_cell_level_layout_get_cell_name =
     R"doc(Returns the cell name assigned to cell position `c`. If no cell name
 is assigned, the empty string is returned.
 
 Parameter ``c``:
-  Cell position whose assigned cell name is desired.
+    Cell position whose assigned cell name is desired.
 
 Returns:
-  Cell name assigned to cell position `c`.)doc";
+    Cell name assigned to cell position `c`.)doc";
 
 static const char* __doc_fiction_cell_level_layout_get_cell_type =
     R"doc(Returns the cell type assigned to cell position `c`.
 
 Parameter ``c``:
-  Cell position whose assigned cell type is desired.
+    Cell position whose assigned cell type is desired.
 
 Returns:
-  Cell type assigned to cell position `c`.)doc";
+    Cell type assigned to cell position `c`.)doc";
 
 static const char* __doc_fiction_cell_level_layout_get_clock_number =
     R"doc(Returns the clock number of cell position `c` by accessing
@@ -1663,16 +1663,16 @@ static const char* __doc_fiction_cell_level_layout_get_clock_number =
 layout's clock zone size.
 
 Parameter ``c``:
-  Cell position whose clock number is desired.
+    Cell position whose clock number is desired.
 
 Returns:
-  Clock number of cell position `c`.)doc";
+    Clock number of cell position `c`.)doc";
 
 static const char* __doc_fiction_cell_level_layout_get_layout_name =
     R"doc(Returns the assigned layout name.
 
 Returns:
-  The layout name.)doc";
+    The layout name.)doc";
 
 static const char* __doc_fiction_cell_level_layout_get_tile_size_x =
     R"doc(Returns the underlying clock zone x-dimension size. That is, if this
@@ -1681,7 +1681,7 @@ this function returns the cell size in x-dimension of each gate in the
 library.
 
 Returns:
-  The clock zone size in cells in the x-dimension.)doc";
+    The clock zone size in cells in the x-dimension.)doc";
 
 static const char* __doc_fiction_cell_level_layout_get_tile_size_y =
     R"doc(Returns the underlying clock zone y-dimension size. That is, if this
@@ -1690,24 +1690,24 @@ this function returns the cell size in y-dimension of each gate in the
 library.
 
 Returns:
-  The clock zone size in cells in the y-dimension.)doc";
+    The clock zone size in cells in the y-dimension.)doc";
 
 static const char* __doc_fiction_cell_level_layout_is_empty =
     R"doc(Checks whether there are no cells assigned to the layout's
 coordinates.
 
 Returns:
-  `true` iff the layout is empty.)doc";
+    `true` iff the layout is empty.)doc";
 
 static const char* __doc_fiction_cell_level_layout_is_empty_cell =
     R"doc(Returns `true` if no cell type is assigned to cell position `c` or if
 the empty type was assigned.
 
 Parameter ``c``:
-  Cell position to check for emptiness.
+    Cell position to check for emptiness.
 
 Returns:
-  `true` iff no cell type was assigned to cell position `c`.)doc";
+    `true` iff no cell type was assigned to cell position `c`.)doc";
 
 static const char* __doc_fiction_cell_level_layout_is_incoming_clocked =
     R"doc(Function is deleted for cell-level layouts.)doc";
@@ -1722,10 +1722,10 @@ cell position is stored in the list of PIs. Assigning a cell position
 the primary input cell type automatically enlists it there.
 
 Parameter ``c``:
-  Cell position to check.
+    Cell position to check.
 
 Returns:
-  `true` iff cell position `c` is marked as primary input.)doc";
+    `true` iff cell position `c` is marked as primary input.)doc";
 
 static const char* __doc_fiction_cell_level_layout_is_po =
     R"doc(Checks whether a given cell position is marked as primary output. This
@@ -1734,47 +1734,47 @@ cell position is stored in the list of POs. Assigning a cell position
 the primary output cell type automatically enlists it there.
 
 Parameter ``c``:
-  Cell position to check.
+    Cell position to check.
 
 Returns:
-  `true` iff cell position `c` is marked as primary output.)doc";
+    `true` iff cell position `c` is marked as primary output.)doc";
 
 static const char* __doc_fiction_cell_level_layout_num_cells =
     R"doc(Returns the number of non-empty cell types that were assigned to the
 layout.
 
 Returns:
-  Number of non-empty cell types in the layout.)doc";
+    Number of non-empty cell types in the layout.)doc";
 
 static const char* __doc_fiction_cell_level_layout_num_pis =
     R"doc(Returns the number of primary input cells in the layout.
 
 Returns:
-  Number of primary input cells.)doc";
+    Number of primary input cells.)doc";
 
 static const char* __doc_fiction_cell_level_layout_num_pos =
     R"doc(Returns the number of primary output cells in the layout.
 
 Returns:
-  Number of primary output cells.)doc";
+    Number of primary output cells.)doc";
 
 static const char* __doc_fiction_cell_level_layout_set_layout_name =
     R"doc(Assigns or overrides the layout name.
 
 Parameter ``name``:
-  Layout name to assign.)doc";
+    Layout name to assign.)doc";
 
 static const char* __doc_fiction_cell_level_layout_set_tile_size_x =
     R"doc(Sets the underlying clock zone x-dimension size.
 
 Parameter ``tile_size_x``:
-  Tile size in the x-dimension in number of cells.)doc";
+    Tile size in the x-dimension in number of cells.)doc";
 
 static const char* __doc_fiction_cell_level_layout_set_tile_size_y =
     R"doc(Sets the underlying clock zone y-dimension size.
 
 Parameter ``tile_size_y``:
-  Tile size in the y-dimension in number of cells.)doc";
+    Tile size in the y-dimension in number of cells.)doc";
 
 static const char* __doc_fiction_cell_level_layout_strg = R"doc()doc";
 
@@ -1785,20 +1785,20 @@ Feifei Deng, Guang-Jun Xie, Xin Cheng, Zhang Zhang, and Yongqiang
 Zhang in IET Circuits, Devices & Systems 2020.
 
 Template parameter ``Lyt``:
-  Clocked layout type.
+    Clocked layout type.
 
 Returns:
-  CFE clocking scheme.)doc";
+    CFE clocking scheme.)doc";
 
 static const char* __doc_fiction_charge_configuration_to_string =
     R"doc(Converts a vector of charge states to a string representation
 (`"-101..."`).
 
 Parameter ``charge_distribution``:
-  A vector of SiDBs charge states.
+    A vector of SiDBs charge states.
 
 Returns:
-  A string representation of the charge states.)doc";
+    A string representation of the charge states.)doc";
 
 static const char* __doc_fiction_charge_distribution_history =
     R"doc(An enumeration of modes to decide if the previous charge distribution
@@ -1839,10 +1839,10 @@ static const char* __doc_fiction_charge_state_to_sign =
     R"doc(Converts the charge state into an integer (`-1`, `0`, `1`).
 
 Parameter ``cs``:
-  SiDB charge state.
+    SiDB charge state.
 
 Returns:
-  Integer representing the SiDB's charge state.)doc";
+    Integer representing the SiDB's charge state.)doc";
 
 static const char* __doc_fiction_check_simulation_results_for_equivalence =
     R"doc(This function compares two SiDB simulation results for equivalence.
@@ -1852,17 +1852,17 @@ the same electrostatic potential energy and charge states for all
 cells.
 
 Template parameter ``Lyt``:
-  The SiDB cell-level layout type used in the simulation results.
+    The SiDB cell-level layout type used in the simulation results.
 
 Parameter ``result1``:
-  The first SiDB simulation result to compare.
+    The first SiDB simulation result to compare.
 
 Parameter ``result2``:
-  The second SiDB simulation result to compare.
+    The second SiDB simulation result to compare.
 
 Returns:
-  `true` if the two simulation results are equivalent, `false`
-  otherwise.)doc";
+    `true` if the two simulation results are equivalent, `false`
+    otherwise.)doc";
 
 static const char* __doc_fiction_clear_routing =
     R"doc(Removes the entire wire routing from the passed layout. This involves
@@ -1870,10 +1870,10 @@ deleting all wire segments that have been placed on any tile as well
 as removing stored connections (children pointers) from all gates.
 
 Template parameter ``Lyt``:
-  Gate-level Layout type.
+    Gate-level Layout type.
 
 Parameter ``lyt``:
-  The layout whose routing is to be deleted.)doc";
+    The layout whose routing is to be deleted.)doc";
 
 static const char* __doc_fiction_clocked_layout =
     R"doc(A layout type to layer on top of a coordinate layout, e.g.,
@@ -1887,16 +1887,16 @@ In the context of this layout type, coordinates are renamed as clock
 zones.
 
 Template parameter ``CoordinateLayout``:
-  The coordinate layout type whose coordinates should be clocked.)doc";
+    The coordinate layout type whose coordinates should be clocked.)doc";
 
 static const char* __doc_fiction_clocked_layout_assign_clock_number =
     R"doc(Overrides a clock number in the stored scheme with the provided one.
 
 Parameter ``cz``:
-  Clock zone to override.
+    Clock zone to override.
 
 Parameter ``cn``:
-  New clock number for `cz`.)doc";
+    New clock number for `cz`.)doc";
 
 static const char* __doc_fiction_clocked_layout_clocked_layout =
     R"doc(Standard constructor. Creates a clocked layout of the given aspect
@@ -1905,29 +1905,29 @@ scheme is intended to be used if all clock zones are to be manually
 assigned.
 
 Parameter ``ar``:
-  Highest possible position in the layout.)doc";
+    Highest possible position in the layout.)doc";
 
 static const char* __doc_fiction_clocked_layout_clocked_layout_2 =
     R"doc(Standard constructor. Creates a clocked layout of the given aspect
 ratio and clocks it via the given clocking scheme.
 
 Parameter ``ar``:
-  Highest possible position in the layout.
+    Highest possible position in the layout.
 
 Parameter ``scheme``:
-  Clocking scheme to apply to this layout.)doc";
+    Clocking scheme to apply to this layout.)doc";
 
 static const char* __doc_fiction_clocked_layout_clocked_layout_3 =
     R"doc(Copy constructor from another layout's storage.
 
 Parameter ``s``:
-  Storage of another clocked_layout.)doc";
+    Storage of another clocked_layout.)doc";
 
 static const char* __doc_fiction_clocked_layout_clocked_layout_4 =
     R"doc(Copy constructor from another `CoordinateLayout`.
 
 Parameter ``lyt``:
-  Coordinate layout.)doc";
+    Coordinate layout.)doc";
 
 static const char* __doc_fiction_clocked_layout_clocked_layout_storage = R"doc()doc";
 
@@ -1939,75 +1939,75 @@ static const char* __doc_fiction_clocked_layout_clone =
     R"doc(Clones the layout returning a deep copy.
 
 Returns:
-  Deep copy of the layout.)doc";
+    Deep copy of the layout.)doc";
 
 static const char* __doc_fiction_clocked_layout_degree =
     R"doc(Returns the number of incoming plus outgoing clock zones of the given
 one.
 
 Parameter ``cz``:
-  Base clock zone.
+    Base clock zone.
 
 Returns:
-  Number of `cz`'s incoming plus outgoing clock zones.)doc";
+    Number of `cz`'s incoming plus outgoing clock zones.)doc";
 
 static const char* __doc_fiction_clocked_layout_foreach_incoming_clocked_zone =
     R"doc(Applies a function to all incoming clock zones of a given one.
 
 Template parameter ``Fn``:
-  Functor type.
+    Functor type.
 
 Parameter ``cz``:
-  Base clock zone.
+    Base clock zone.
 
 Parameter ``fn``:
-  Functor to apply to each of `cz`'s incoming clock zones.)doc";
+    Functor to apply to each of `cz`'s incoming clock zones.)doc";
 
 static const char* __doc_fiction_clocked_layout_foreach_outgoing_clocked_zone =
     R"doc(Applies a function to all outgoing clock zones of a given one.
 
 Template parameter ``Fn``:
-  Functor type.
+    Functor type.
 
 Parameter ``cz``:
-  Base clock zone.
+    Base clock zone.
 
 Parameter ``fn``:
-  Functor to apply to each of `cz`'s outgoing clock zones.)doc";
+    Functor to apply to each of `cz`'s outgoing clock zones.)doc";
 
 static const char* __doc_fiction_clocked_layout_get_clock_number =
     R"doc(Returns the clock number for the given clock zone.
 
 Parameter ``cz``:
-  Clock zone.
+    Clock zone.
 
 Returns:
-  Clock number of `cz`.)doc";
+    Clock number of `cz`.)doc";
 
 static const char* __doc_fiction_clocked_layout_get_clocking_scheme =
     R"doc(Returns a copy of the stored clocking scheme object.
 
 Returns:
-  A copy of the stored clocking scheme object.)doc";
+    A copy of the stored clocking scheme object.)doc";
 
 static const char* __doc_fiction_clocked_layout_in_degree =
     R"doc(Returns the number of incoming clock zones to the given one.
 
 Parameter ``cz``:
-  Base clock zone.
+    Base clock zone.
 
 Returns:
-  Number of `cz`'s incoming clock zones.)doc";
+    Number of `cz`'s incoming clock zones.)doc";
 
 static const char* __doc_fiction_clocked_layout_incoming_clocked_zones =
     R"doc(Returns a container with all clock zones that are incoming to the
 given one.
 
 Parameter ``cz``:
-  Base clock zone.
+    Base clock zone.
 
 Returns:
-  A container with all clock zones that are incoming to `cz`.)doc";
+    A container with all clock zones that are incoming to `cz`.)doc";
 
 static const char* __doc_fiction_clocked_layout_is_clocking_scheme =
     R"doc(Compares the stored clocking scheme against the provided name. Names
@@ -2015,11 +2015,11 @@ of pre-defined clocking schemes are given in the `clock_name`
 namespace.
 
 Parameter ``name``:
-  Clocking scheme name.
+    Clocking scheme name.
 
 Returns:
-  `true` iff the layout is clocked by a clocking scheme of name
-  `name`.)doc";
+    `true` iff the layout is clocked by a clocking scheme of name
+    `name`.)doc";
 
 static const char* __doc_fiction_clocked_layout_is_incoming_clocked =
     R"doc(Evaluates whether clock zone `cz2` feeds information to clock zone
@@ -2027,13 +2027,13 @@ static const char* __doc_fiction_clocked_layout_is_incoming_clocked =
 lower by 1 modulo `num_clocks()`.
 
 Parameter ``cz1``:
-  Base clock zone.
+    Base clock zone.
 
 Parameter ``cz2``:
-  Clock zone to check whether its clock number is lower by 1.
+    Clock zone to check whether its clock number is lower by 1.
 
 Returns:
-  `true` iff `cz2` can feed information to `cz1`.)doc";
+    `true` iff `cz2` can feed information to `cz1`.)doc";
 
 static const char* __doc_fiction_clocked_layout_is_outgoing_clocked =
     R"doc(Evaluates whether clock zone `cz2` accepts information from clock zone
@@ -2041,21 +2041,21 @@ static const char* __doc_fiction_clocked_layout_is_outgoing_clocked =
 higher by 1 modulo `num_clocks()`.
 
 Parameter ``cz1``:
-  Base clock zone.
+    Base clock zone.
 
 Parameter ``cz2``:
-  Clock zone to check whether its clock number is higher by 1.
+    Clock zone to check whether its clock number is higher by 1.
 
 Returns:
-  `true` iff `cz2` can accept information from `cz1`.)doc";
+    `true` iff `cz2` can accept information from `cz1`.)doc";
 
 static const char* __doc_fiction_clocked_layout_is_regularly_clocked =
     R"doc(Returns whether the layout is clocked by a regular clocking scheme
 with no overwritten zones.
 
 Returns:
-  `true` iff the layout is clocked by a regular scheme and no zones
-  have been overwritten.)doc";
+    `true` iff the layout is clocked by a regular scheme and no zones
+    have been overwritten.)doc";
 
 static const char* __doc_fiction_clocked_layout_num_clocks =
     R"doc(Returns the number of clock phases in the layout. Each clock cycle is
@@ -2063,32 +2063,32 @@ divided into n phases. In QCA, the number of phases is usually 4. In
 iNML it is 3. However, theoretically, any number >= 3 can be utilized.
 
 Returns:
-  The number of different clock signals in the layout.)doc";
+    The number of different clock signals in the layout.)doc";
 
 static const char* __doc_fiction_clocked_layout_out_degree =
     R"doc(Returns the number of outgoing clock zones from the given one.
 
 Parameter ``cz``:
-  Base clock zone.
+    Base clock zone.
 
 Returns:
-  Number of `cz`'s outgoing clock zones.)doc";
+    Number of `cz`'s outgoing clock zones.)doc";
 
 static const char* __doc_fiction_clocked_layout_outgoing_clocked_zones =
     R"doc(Returns a container with all clock zones that are outgoing from the
 given one.
 
 Parameter ``cz``:
-  Base clock zone.
+    Base clock zone.
 
 Returns:
-  A container with all clock zones that are outgoing from `cz`.)doc";
+    A container with all clock zones that are outgoing from `cz`.)doc";
 
 static const char* __doc_fiction_clocked_layout_replace_clocking_scheme =
     R"doc(Replaces the stored clocking scheme with the provided one.
 
 Parameter ``scheme``:
-  New clocking scheme.)doc";
+    New clocking scheme.)doc";
 
 static const char* __doc_fiction_clocked_layout_strg = R"doc()doc";
 
@@ -2107,30 +2107,30 @@ Some are pre-defined below.
 Clocking schemes are uniquely identified via their name.
 
 Template parameter ``ClockZone``:
-  Clock zone type. Usually, a coordinate type in a layout.)doc";
+    Clock zone type. Usually, a coordinate type in a layout.)doc";
 
 static const char* __doc_fiction_clocking_scheme_clocking_scheme =
     R"doc(Standard constructor.
 
 Parameter ``n``:
-  The clocking scheme's name. The name is utilized as the key to
-  uniquely identify a scheme.
+    The clocking scheme's name. The name is utilized as the key to
+    uniquely identify a scheme.
 
 Parameter ``f``:
-  A function that assigns a clock number to each clock zone.
+    A function that assigns a clock number to each clock zone.
 
 Parameter ``in_deg``:
-  Maximum possible in-degree in the provided scheme.
+    Maximum possible in-degree in the provided scheme.
 
 Parameter ``out_deg``:
-  Maximum possible out-degree in the provided scheme.
+    Maximum possible out-degree in the provided scheme.
 
 Parameter ``cn``:
-  Number of clock phases that make up one clock cycle, i.e., the
-  number of different clock numbers.
+    Number of clock phases that make up one clock cycle, i.e., the
+    number of different clock numbers.
 
 Parameter ``r``:
-  Flag to identify the scheme as regular.)doc";
+    Flag to identify the scheme as regular.)doc";
 
 static const char* __doc_fiction_clocking_scheme_fn =
     R"doc(A function that determines clock numbers for given zones.)doc";
@@ -2139,7 +2139,7 @@ static const char* __doc_fiction_clocking_scheme_is_regular =
     R"doc(Checks for the clocking scheme's regularity.
 
 Returns:
-  `true` iff the clocking scheme is regular.)doc";
+    `true` iff the clocking scheme is regular.)doc";
 
 static const char* __doc_fiction_clocking_scheme_max_in_degree =
     R"doc(Maximum number of inputs the clocking scheme supports per clock zone.)doc";
@@ -2158,19 +2158,19 @@ is accessed to look for a manually specified/overwritten clock number.
 If none is found, the default one, usually 0, is returned.
 
 Parameter ``cz``:
-  Clock zone whose clock number is desired.
+    Clock zone whose clock number is desired.
 
 Returns:
-  Clock number of cz.)doc";
+    Clock number of cz.)doc";
 
 static const char* __doc_fiction_clocking_scheme_operator_eq =
     R"doc(Compares the stored name against a given one.
 
 Parameter ``n``:
-  Name to compare.
+    Name to compare.
 
 Returns:
-  `true` iff the stored name is equal to n.)doc";
+    `true` iff the stored name is equal to n.)doc";
 
 static const char* __doc_fiction_clocking_scheme_override =
     R"doc(Stores mappings clock_zone -> clock_number to override clock zones.)doc";
@@ -2180,10 +2180,10 @@ static const char* __doc_fiction_clocking_scheme_override_clock_number =
 immediately labels the clocking scheme as irregular.
 
 Parameter ``cz``:
-  Clock zone to override.
+    Clock zone to override.
 
 Parameter ``cn``:
-  Clock number to assign to cz.)doc";
+    Clock number to assign to cz.)doc";
 
 static const char* __doc_fiction_clocking_scheme_regular =
     R"doc(Defines the clocking as regular and well-defined by the scheme.)doc";
@@ -2230,23 +2230,23 @@ being returned, all determined paths have been routed in the given
 layout.
 
 Template parameter ``Lyt``:
-  The gate-level layout type to route.
+    The gate-level layout type to route.
 
 Parameter ``lyt``:
-  A gate-level layout to route.
+    A gate-level layout to route.
 
 Parameter ``objectives``:
-  The routing objectives as source-target pairs to fulfill.
+    The routing objectives as source-target pairs to fulfill.
 
 Parameter ``ps``:
-  Parameters.
+    Parameters.
 
 Parameter ``pst``:
-  Statistics.
+    Statistics.
 
 Returns:
-  `true` iff routing was successful, i.e., iff all objectives could
-  be satisfied.)doc";
+    `true` iff routing was successful, i.e., iff all objectives could
+    be satisfied.)doc";
 
 static const char* __doc_fiction_color_routing_params = R"doc(Parameters for the color routing algorithm.)doc";
 
@@ -2284,10 +2284,10 @@ static const char* __doc_fiction_color_view_drawer =
 their painted color instead of their gate type.
 
 Template parameter ``Ntk``:
-  Logic network type.
+    Logic network type.
 
 Template parameter ``DrawIndexes``:
-  Flag to toggle the drawing of node indices.)doc";
+    Flag to toggle the drawing of node indices.)doc";
 
 static const char* __doc_fiction_color_view_drawer_node_fillcolor = R"doc()doc";
 
@@ -2299,56 +2299,56 @@ architecture for computing with quantum dots\" by C. S. Lent and P. D.
 Tougaw in the Proceedings of the IEEE 1997.
 
 Template parameter ``Lyt``:
-  Clocked layout type.
+    Clocked layout type.
 
 Parameter ``n``:
-  Number of clocks.
+    Number of clocks.
 
 Returns:
-  Columnar clocking scheme.)doc";
+    Columnar clocking scheme.)doc";
 
 static const char* __doc_fiction_convert_array =
     R"doc(Converts an array of size `N` and type `T` to an array of size `N` and
 type `ElementType` by applying `static_cast` at compile time.
 
 Template parameter ``ElementType``:
-  New type of each element in the returned array.
+    New type of each element in the returned array.
 
 Template parameter ``T``:
-  Element type of the input array.
+    Element type of the input array.
 
 Template parameter ``N``:
-  Size of both the input and the output array.
+    Size of both the input and the output array.
 
 Parameter ``a``:
-  The array to be converted.
+    The array to be converted.
 
 Returns:
-  An object of type `std::array<ElementType, N>` that was created by
-  casting each element in `a` to `ElementType`.)doc";
+    An object of type `std::array<ElementType, N>` that was created by
+    casting each element in `a` to `ElementType`.)doc";
 
 static const char* __doc_fiction_convert_array_of_arrays =
     R"doc(Same as `convert_array` but for 2D arrays.
 
 Template parameter ``ElementType``:
-  New type of each element in the returned array.
+    New type of each element in the returned array.
 
 Template parameter ``T``:
-  Element type of the input array.
+    Element type of the input array.
 
 Template parameter ``N``:
-  Outer size of both the input and the output array.
+    Outer size of both the input and the output array.
 
 Template parameter ``M``:
-  Inner size of both the input and the output array.
+    Inner size of both the input and the output array.
 
 Parameter ``a``:
-  The array to be converted.
+    The array to be converted.
 
 Returns:
-  An object of type `std::array<std::array<ElementType, M>, N>` that
-  was created by casting each element in `a` to `ElementType` using
-  `static_cast`.)doc";
+    An object of type `std::array<std::array<ElementType, M>, N>` that
+    was created by casting each element in `a` to `ElementType` using
+    `static_cast`.)doc";
 
 static const char* __doc_fiction_convert_network =
     R"doc(Converts a logic network into an equivalent one of another type.
@@ -2360,17 +2360,17 @@ used for fanouts and path balancing in fiction.
 returns `ntk` if `NtkDest` and `NtkSrc` are of the same type.
 
 Template parameter ``NtkDest``:
-  Type of the returned logic network.
+    Type of the returned logic network.
 
 Template parameter ``NtkSrc``:
-  Type of the input logic network.
+    Type of the input logic network.
 
 Parameter ``ntk``:
-  The input logic network.
+    The input logic network.
 
 Returns:
-  A logic network of type `NtkDest` that is logically equivalent to
-  `ntk`.)doc";
+    A logic network of type `NtkDest` that is logically equivalent to
+    `ntk`.)doc";
 
 static const char* __doc_fiction_convert_potential_to_distance =
     R"doc(The electrostatic potential on hydrogen-passivated silicon is
@@ -2384,20 +2384,20 @@ distance for a given potential and given physical parameters.
 @note Runtime depends exponentially on the provided precision.
 
 Parameter ``params``:
-  The physical parameters for a given hydrogen-passivated silicon
-  surface.
+    The physical parameters for a given hydrogen-passivated silicon
+    surface.
 
 Parameter ``potential``:
-  The electrostatic potential (unit: V) to be converted to a
-  distance.
+    The electrostatic potential (unit: V) to be converted to a
+    distance.
 
 Parameter ``precision``:
-  The precision level for the conversion, specifying the number of
-  decimal places.
+    The precision level for the conversion, specifying the number of
+    decimal places.
 
 Returns:
-  The distance (unit: nm) corresponding to the given electrostatic
-  potential.)doc";
+    The distance (unit: nm) corresponding to the given electrostatic
+    potential.)doc";
 
 static const char* __doc_fiction_convert_to_fiction_coordinates =
     R"doc(Converts the coordinates of a given SiDB cell-level layout (cds and
@@ -2407,17 +2407,17 @@ equivalent to the original layout but based on the specified
 coordinate system.
 
 Template parameter ``LytDest``:
-  Source SiDB cell-level layout type.
+    Source SiDB cell-level layout type.
 
 Template parameter ``LytSrc``:
-  Target SiDB cell-level layout type.
+    Target SiDB cell-level layout type.
 
 Parameter ``lyt``:
-  The layout that is to be converted to a new layout based on
-  fiction coordinates.
+    The layout that is to be converted to a new layout based on
+    fiction coordinates.
 
 Returns:
-  A new equivalent layout based on fiction coordinates.)doc";
+    A new equivalent layout based on fiction coordinates.)doc";
 
 static const char* __doc_fiction_convert_to_siqad_coordinates =
     R"doc(Converts the coordinates of a given cell-level layout (cds and defect
@@ -2425,22 +2425,22 @@ surface can be layered on top) to SiQAD coordinates. A new equivalent
 layout based on SiQAD coordinates is returned.
 
 Template parameter ``Lyt``:
-  Cell-level layout type based on fiction coordinates, e.g.,
-  `offset::ucoord_t` or `cube::coord_t`.
+    Cell-level layout type based on fiction coordinates, e.g.,
+    `offset::ucoord_t` or `cube::coord_t`.
 
 Parameter ``lyt``:
-  The layout that is to be converted to a new layout based on SiQAD
-  coordinates.
+    The layout that is to be converted to a new layout based on SiQAD
+    coordinates.
 
 Returns:
-  A new equivalent layout based on SiQAD coordinates.)doc";
+    A new equivalent layout based on SiQAD coordinates.)doc";
 
 static const char* __doc_fiction_coord_iterator =
     R"doc(An iterator type that allows to enumerate coordinates in order within
 a boundary.
 
 Template parameter ``CoordinateType``:
-  Type of coordinate to enumerate.)doc";
+    Type of coordinate to enumerate.)doc";
 
 static const char* __doc_fiction_coord_iterator_aspect_ratio = R"doc()doc";
 
@@ -2468,10 +2468,10 @@ coord_iterator is compatible with the STL forward_iterator category.
 Does not iterate over negative coordinates.
 
 Parameter ``dimension``:
-  Boundary within to enumerate. Iteration wraps at its limits.
+    Boundary within to enumerate. Iteration wraps at its limits.
 
 Parameter ``start``:
-  Starting coordinate to enumerate first.)doc";
+    Starting coordinate to enumerate first.)doc";
 
 static const char* __doc_fiction_coord_iterator_operator_eq = R"doc()doc";
 
@@ -2480,7 +2480,7 @@ static const char* __doc_fiction_coord_iterator_operator_inc =
 defined on iterators that are out of bounds.
 
 Returns:
-  Reference to the incremented iterator.)doc";
+    Reference to the incremented iterator.)doc";
 
 static const char* __doc_fiction_coord_iterator_operator_inc_2 = R"doc()doc";
 
@@ -2499,10 +2499,10 @@ signature. This class is intended to be instantiated with concrete
 cost functions passed to the constructor.
 
 Template parameter ``Lyt``:
-  Coordinate layout type.
+    Coordinate layout type.
 
 Template parameter ``Cost``:
-  Cost value type.)doc";
+    Cost value type.)doc";
 
 static const char* __doc_fiction_cost_functor_cost_function = R"doc(Cost function.)doc";
 
@@ -2510,19 +2510,19 @@ static const char* __doc_fiction_cost_functor_cost_functor =
     R"doc(Standard constructor that instantiates the cost function.
 
 Parameter ``cost_fn``:
-  A function that maps from layout coordinates to a cost value.)doc";
+    A function that maps from layout coordinates to a cost value.)doc";
 
 static const char* __doc_fiction_cost_functor_operator_call =
     R"doc(Operator to call the cost function.
 
 Parameter ``source``:
-  Source coordinate.
+    Source coordinate.
 
 Parameter ``target``:
-  Target coordinate.
+    Target coordinate.
 
 Returns:
-  Cost between source and target.)doc";
+    Cost between source and target.)doc";
 
 static const char* __doc_fiction_count_gate_types =
     R"doc(Gives a detailed listing of all gate types present in the provided
@@ -2533,13 +2533,13 @@ implement a function to test whether a node is of the respective gate
 type.
 
 Template parameter ``Ntk``:
-  Logic network (or layout) type.
+    Logic network (or layout) type.
 
 Parameter ``ntk``:
-  The network (or layout).
+    The network (or layout).
 
 Parameter ``pst``:
-  Statistics.)doc";
+    Statistics.)doc";
 
 static const char* __doc_fiction_count_gate_types_stats = R"doc()doc";
 
@@ -2596,24 +2596,24 @@ static const char* __doc_fiction_create_and_tt =
 two variables.
 
 Returns:
-  Conjunction in two variables.)doc";
+    Conjunction in two variables.)doc";
 
 static const char* __doc_fiction_create_array =
     R"doc(Creates an array of size `N` and initializes its fields with value of
 type `T` at compile time.
 
 Template parameter ``N``:
-  Array size.
+    Array size.
 
 Template parameter ``T``:
-  Type of array.
+    Type of array.
 
 Parameter ``value``:
-  Initial value to each field.
+    Initial value to each field.
 
 Returns:
-  An object of type `std::array<T, N>` that is initialized with `N`
-  copies of value.)doc";
+    An object of type `std::array<T, N>` that is initialized with `N`
+    copies of value.)doc";
 
 static const char* __doc_fiction_create_crossing_wire_tt =
     R"doc(Creates and returns a vector of truth tables for a crossing wire
@@ -2624,8 +2624,8 @@ one of the outputs of a crossing wire multi-output function in two
 variables. The function returns a vector containing two truth tables.
 
 Returns:
-  Vector of truth tables, each representing an output of the
-  crossing wire function.)doc";
+    Vector of truth tables, each representing an output of the
+    crossing wire function.)doc";
 
 static const char* __doc_fiction_create_double_wire_tt =
     R"doc(Creates and returns a vector of truth tables for a double wire multi-
@@ -2636,8 +2636,8 @@ one of the outputs of a double wire multi-output function in two
 variables. The function returns a vector containing two truth tables.
 
 Returns:
-  Vector of truth tables, each representing an output of the double
-  wire function.)doc";
+    Vector of truth tables, each representing an output of the double
+    wire function.)doc";
 
 static const char* __doc_fiction_create_fan_out_tt =
     R"doc(Creates and returns a vector of truth tables for a multi-output
@@ -2647,22 +2647,22 @@ This function generates a vector of truth tables, each representing
 one of the outputs of a multi-output function in two variables.
 
 Returns:
-  Vector of truth tables, each representing an output of the
-  identity function.)doc";
+    Vector of truth tables, each representing an output of the
+    identity function.)doc";
 
 static const char* __doc_fiction_create_ge_tt =
     R"doc(Creates and returns a truth table that implements the greater-than-or-
 equal function in two variables.
 
 Returns:
-  Greater-than-or-equal function in two variables.)doc";
+    Greater-than-or-equal function in two variables.)doc";
 
 static const char* __doc_fiction_create_gt_tt =
     R"doc(Creates and returns a truth table that implements the greater-than
 function in two variables.
 
 Returns:
-  Greater-than function in two variables.)doc";
+    Greater-than function in two variables.)doc";
 
 static const char* __doc_fiction_create_half_adder_tt =
     R"doc(Creates and returns a vector of truth tables for a half adder multi-
@@ -2673,78 +2673,78 @@ one of the outputs of a half adder multi-output function in two
 variables. The function returns a vector containing two truth tables.
 
 Returns:
-  Vector of truth tables, each representing an output of the half
-  adder function.)doc";
+    Vector of truth tables, each representing an output of the half
+    adder function.)doc";
 
 static const char* __doc_fiction_create_id_tt =
     R"doc(Creates and returns a truth table that implements the identity
 function in one variable.
 
 Returns:
-  Identity function in one variable.)doc";
+    Identity function in one variable.)doc";
 
 static const char* __doc_fiction_create_le_tt =
     R"doc(Creates and returns a truth table that implements the less-than-or-
 equal function in two variables.
 
 Returns:
-  Less-than-or-equal function in two variables.)doc";
+    Less-than-or-equal function in two variables.)doc";
 
 static const char* __doc_fiction_create_lt_tt =
     R"doc(Creates and returns a truth table that implements the less-than
 function in two variables.
 
 Returns:
-  Less-than function in two variables.)doc";
+    Less-than function in two variables.)doc";
 
 static const char* __doc_fiction_create_maj_tt =
     R"doc(Creates and returns a truth table that implements the majority
 function in three variables.
 
 Returns:
-  Majority function in three variables.)doc";
+    Majority function in three variables.)doc";
 
 static const char* __doc_fiction_create_nand_tt =
     R"doc(Creates and returns a truth table that implements the negated
 conjunction in two variables.
 
 Returns:
-  Negated conjunction in two variables.)doc";
+    Negated conjunction in two variables.)doc";
 
 static const char* __doc_fiction_create_nor_tt =
     R"doc(Creates and returns a truth table that implements the negated
 disjunction in two variables.
 
 Returns:
-  Negated disjunction in two variables.)doc";
+    Negated disjunction in two variables.)doc";
 
 static const char* __doc_fiction_create_not_tt =
     R"doc(Creates and returns a truth table that implements the negation in one
 variable.
 
 Returns:
-  Negation in one variable.)doc";
+    Negation in one variable.)doc";
 
 static const char* __doc_fiction_create_or_tt =
     R"doc(Creates and returns a truth table that implements the disjunction in
 two variables.
 
 Returns:
-  Disjunction in two variables.)doc";
+    Disjunction in two variables.)doc";
 
 static const char* __doc_fiction_create_xnor_tt =
     R"doc(Creates and returns a truth table that implements the negated
 exclusive disjunction in two variables.
 
 Returns:
-  Negated exclusive disjunction in two variables.)doc";
+    Negated exclusive disjunction in two variables.)doc";
 
 static const char* __doc_fiction_create_xor_tt =
     R"doc(Creates and returns a truth table that implements the exclusive
 disjunction in two variables.
 
 Returns:
-  Exclusive disjunction in two variables.)doc";
+    Exclusive disjunction in two variables.)doc";
 
 static const char* __doc_fiction_critical_path_length_and_throughput =
     R"doc(Computes the critical path length (CP) length and the throughput (TP)
@@ -2777,13 +2777,13 @@ The complexity of this function is :math:`\mathcal{O}(|T|)` where
 :math:`T` is the set of all occupied tiles in `lyt`.
 
 Template parameter ``Lyt``:
-  Gate-level layout type.
+    Gate-level layout type.
 
 Parameter ``lyt``:
-  The gate-level layout whose CP and TP are desired.
+    The gate-level layout whose CP and TP are desired.
 
 Returns:
-  A struct containing the CP and TP.)doc";
+    A struct containing the CP and TP.)doc";
 
 static const char* __doc_fiction_critical_temperature_gate_based =
     R"doc(This algorithm performs temperature-aware SiDB simulation as proposed
@@ -2798,26 +2798,26 @@ erroneous charge distributions are populated by more than :math:`1 -
 \eta`, where :math:`\eta \in [0,1]`.
 
 Template parameter ``Lyt``:
-  SiDB cell-level layout type.
+    SiDB cell-level layout type.
 
 Template parameter ``TT``:
-  The type of the truth table specifying the gate behavior.
+    The type of the truth table specifying the gate behavior.
 
 Parameter ``lyt``:
-  The layout to simulate.
+    The layout to simulate.
 
 Parameter ``spec``:
-  Expected Boolean function of the layout given as a multi-output
-  truth table.
+    Expected Boolean function of the layout given as a multi-output
+    truth table.
 
 Parameter ``params``:
-  Simulation and physical parameters.
+    Simulation and physical parameters.
 
 Parameter ``pst``:
-  Statistics.
+    Statistics.
 
 Returns:
-  The critical temperature (unit: K).)doc";
+    The critical temperature (unit: K).)doc";
 
 static const char* __doc_fiction_critical_temperature_non_gate_based =
     R"doc(For *Non-gate-based Critical Temperature* simulation, the Critical
@@ -2827,19 +2827,19 @@ excited charge distributions are populated by more than :math:`1 -
 presence of a working gate.
 
 Template parameter ``Lyt``:
-  SiDB cell-level layout type.
+    SiDB cell-level layout type.
 
 Parameter ``lyt``:
-  The layout to simulate.
+    The layout to simulate.
 
 Parameter ``params``:
-  Simulation and physical parameters.
+    Simulation and physical parameters.
 
 Parameter ``pst``:
-  Statistics.
+    Statistics.
 
 Returns:
-  The critical temperature (unit: K))doc";
+    The critical temperature (unit: K))doc";
 
 static const char* __doc_fiction_critical_temperature_params =
     R"doc(This struct stores the parameters for the *Critical Temperature*`
@@ -2908,7 +2908,7 @@ static const char* __doc_fiction_critical_temperature_stats_report =
     R"doc(Prints the simulation results to the given output stream.
 
 Parameter ``out``:
-  Output stream.)doc";
+    Output stream.)doc";
 
 static const char* __doc_fiction_critical_temperature_stats_simulation_parameters =
     R"doc(All parameters for physical SiDB simulations.)doc";
@@ -2931,17 +2931,17 @@ Example usage:
 
 ```
 {.cpp}
-std::ofstream file("output.csv");
-csv_writer writer(file);
-writer.write_line("Name", "Age", "City");
-writer.write_line("Alice", 20, "New York");
+  std::ofstream file("output.csv");
+  csv_writer writer(file);
+  writer.write_line("Name", "Age", "City");
+  writer.write_line("Alice", 20, "New York");
 ```)doc";
 
 static const char* __doc_fiction_csv_writer_csv_writer =
     R"doc(Standard constructor.
 
 Parameter ``os``:
-  Output stream to write CSV data into.)doc";
+    Output stream to write CSV data into.)doc";
 
 static const char* __doc_fiction_csv_writer_stream = R"doc(Output stream to write to.)doc";
 
@@ -2953,16 +2953,16 @@ newline is written. This function uses template recursion to process
 the variadic parameters.
 
 Template parameter ``T``:
-  The type of the first argument.
+    The type of the first argument.
 
 Template parameter ``Ts``:
-  Types of the rest of the variadic parameter pack.
+    Types of the rest of the variadic parameter pack.
 
 Parameter ``arg``:
-  First argument to write to the stream.
+    First argument to write to the stream.
 
 Parameter ``args``:
-  Rest of the arguments to write to the stream if any exist.)doc";
+    Rest of the arguments to write to the stream if any exist.)doc";
 
 static const char* __doc_fiction_csv_writer_write_line_2 =
     R"doc(Writes a newline to the output stream. This is the base case of the
@@ -2970,7 +2970,7 @@ variadic template function, and is invoked when there are no
 additional arguments to process.
 
 Template parameter ``Ts``:
-  An empty variadic template argument pack.)doc";
+    An empty variadic template argument pack.)doc";
 
 static const char* __doc_fiction_cube_coord_t =
     R"doc(Signed cube coordinates.
@@ -2988,37 +2988,37 @@ static const char* __doc_fiction_cube_coord_t_coord_t_2 =
     R"doc(Standard constructor. Creates a non-dead coordinate at (x_, y_, z_).
 
 Template parameter ``X``:
-  Type of x.
+    Type of x.
 
 Template parameter ``Y``:
-  Type of y.
+    Type of y.
 
 Template parameter ``Z``:
-  Type of z.
+    Type of z.
 
 Parameter ``x_``:
-  x position.
+    x position.
 
 Parameter ``y_``:
-  y position.
+    y position.
 
 Parameter ``z_``:
-  z position.)doc";
+    z position.)doc";
 
 static const char* __doc_fiction_cube_coord_t_coord_t_3 =
     R"doc(Standard constructor. Creates a non-dead coordinate at (x_, y_, 0).
 
 Template parameter ``X``:
-  Type of x.
+    Type of x.
 
 Template parameter ``Y``:
-  Type of y.
+    Type of y.
 
 Parameter ``x_``:
-  x position.
+    x position.
 
 Parameter ``y_``:
-  y position.)doc";
+    y position.)doc";
 
 static const char* __doc_fiction_cube_coord_t_d = R"doc(Dead indicator.)doc";
 
@@ -3026,33 +3026,33 @@ static const char* __doc_fiction_cube_coord_t_get_dead =
     R"doc(Returns a dead copy of the coordinate, i.e., (1, x, y, z).
 
 Returns:
-  A dead copy of the coordinate.)doc";
+    A dead copy of the coordinate.)doc";
 
 static const char* __doc_fiction_cube_coord_t_is_dead =
     R"doc(Returns whether the coordinate is dead.
 
 Returns:
-  `true` iff coordinate is dead.)doc";
+    `true` iff coordinate is dead.)doc";
 
 static const char* __doc_fiction_cube_coord_t_operator_add =
     R"doc(Adds another coordinate to this one and returns the result. Does not
 modify this coordinate.
 
 Parameter ``other``:
-  Coordinate to add.
+    Coordinate to add.
 
 Returns:
-  Sum of both coordinates.)doc";
+    Sum of both coordinates.)doc";
 
 static const char* __doc_fiction_cube_coord_t_operator_eq =
     R"doc(Compares against another coordinate for equality. Respects the dead
 indicator.
 
 Parameter ``other``:
-  Right-hand side coordinate.
+    Right-hand side coordinate.
 
 Returns:
-  `true` iff both coordinates are identical.)doc";
+    `true` iff both coordinates are identical.)doc";
 
 static const char* __doc_fiction_cube_coord_t_operator_ge =
     R"doc(Determine whether this coordinate is "greater than or equal to"
@@ -3060,32 +3060,32 @@ another one. This is the case if this one is not "less than" the
 other.
 
 Parameter ``other``:
-  Right-hand side coordinate.
+    Right-hand side coordinate.
 
 Returns:
-  `true` iff this coordinate is "greater than or equal to" the other
-  coordinate.)doc";
+    `true` iff this coordinate is "greater than or equal to" the other
+    coordinate.)doc";
 
 static const char* __doc_fiction_cube_coord_t_operator_gt =
     R"doc(Determine whether this coordinate is "greater than" another one. This
 is the case if the other one is "less than".
 
 Parameter ``other``:
-  Right-hand side coordinate.
+    Right-hand side coordinate.
 
 Returns:
-  `true` iff this coordinate is "greater than" the other coordinate.)doc";
+    `true` iff this coordinate is "greater than" the other coordinate.)doc";
 
 static const char* __doc_fiction_cube_coord_t_operator_le =
     R"doc(Determine whether this coordinate is "less than or equal to" another
 one. This is the case if this one is not "greater than" the other.
 
 Parameter ``other``:
-  Right-hand side coordinate.
+    Right-hand side coordinate.
 
 Returns:
-  `true` iff this coordinate is "less than or equal to" the other
-  coordinate.)doc";
+    `true` iff this coordinate is "less than or equal to" the other
+    coordinate.)doc";
 
 static const char* __doc_fiction_cube_coord_t_operator_lt =
     R"doc(Determine whether this coordinate is "less than" another one. This is
@@ -3093,37 +3093,37 @@ the case if z is smaller, or if z is equal but y is smaller, or if z
 and y are equal but x is smaller.
 
 Parameter ``other``:
-  Right-hand side coordinate.
+    Right-hand side coordinate.
 
 Returns:
-  `true` iff this coordinate is "less than" the other coordinate.)doc";
+    `true` iff this coordinate is "less than" the other coordinate.)doc";
 
 static const char* __doc_fiction_cube_coord_t_operator_ne =
     R"doc(Compares against another coordinate for inequality. Respects the dead
 indicator.
 
 Parameter ``other``:
-  Right-hand side coordinate.
+    Right-hand side coordinate.
 
 Returns:
-  `true` iff both coordinates are not identical.)doc";
+    `true` iff both coordinates are not identical.)doc";
 
 static const char* __doc_fiction_cube_coord_t_operator_sub =
     R"doc(Subtracts another coordinate from this one and returns the result.
 Does not modify this coordinate.
 
 Parameter ``other``:
-  Coordinate to subtract.
+    Coordinate to subtract.
 
 Returns:
-  Difference of both coordinates.)doc";
+    Difference of both coordinates.)doc";
 
 static const char* __doc_fiction_cube_coord_t_str =
     R"doc(Returns a string representation of the coordinate of the form `"(x, y,
 z)"` that does not respect the dead indicator.
 
 Returns:
-  String representation of the form `"(x, y, z)"`.)doc";
+    String representation of the form `"(x, y, z)"`.)doc";
 
 static const char* __doc_fiction_cube_coord_t_wrap =
     R"doc(Wraps the coordinate with respect to the given aspect ratio by
@@ -3138,7 +3138,7 @@ advancing by first incrementing the x dimension, then wrapping the
 coordinate to the boundary within to enumerate.
 
 Parameter ``aspect_ratio``:
-  Aspect ratio to wrap the coordinate to.)doc";
+    Aspect ratio to wrap the coordinate to.)doc";
 
 static const char* __doc_fiction_cube_coord_t_x = R"doc(x coordinate.)doc";
 
@@ -3160,11 +3160,11 @@ horizontal and vertical direction. If `defect` has the `NONE` defect
 type, `{0, 0}` is returned.
 
 Parameter ``defect``:
-  Defect to evaluate.
+    Defect to evaluate.
 
 Returns:
-  Number of horizontal and vertical SiDBs that are affected by the
-  given defect.)doc";
+    Number of horizontal and vertical SiDBs that are affected by the
+    given defect.)doc";
 
 static const char* __doc_fiction_dependent_cell_mode = R"doc(An enumeration of modes for the dependent cell.)doc";
 
@@ -3201,29 +3201,29 @@ the layout is `non-operational`, the process is repeated from the
 first step until an operational layout is found.
 
 Template parameter ``Lyt``:
-  SiDB cell-level layout type.
+    SiDB cell-level layout type.
 
 Template parameter ``TT``:
-  The type of the truth table specifying the gate behavior.
+    The type of the truth table specifying the gate behavior.
 
 Parameter ``skeleton``:
-  The skeleton layout used as a starting point for gate design.
+    The skeleton layout used as a starting point for gate design.
 
 Parameter ``spec``:
-  Expected Boolean function of the layout given as a multi-output
-  truth table.
+    Expected Boolean function of the layout given as a multi-output
+    truth table.
 
 Parameter ``params``:
-  Parameters for the *SiDB Gate Designer*.
+    Parameters for the *SiDB Gate Designer*.
 
 Returns:
-  A vector of designed SiDB gate layouts.)doc";
+    A vector of designed SiDB gate layouts.)doc";
 
 static const char* __doc_fiction_design_sidb_gates_params =
     R"doc(This struct contains parameters and settings to design SiDB gates.
 
 Template parameter ``Cell``:
-  -level layout type.)doc";
+    -level layout type.)doc";
 
 static const char* __doc_fiction_design_sidb_gates_params_canvas =
     R"doc(Canvas spanned by the northwest and southeast cell.)doc";
@@ -3267,19 +3267,19 @@ static const char* __doc_fiction_detail_a_star_impl_coordinate_f_operator_eq =
 allows for a convenient lookup in the priority queue.
 
 Parameter ``other``:
-  Other coordinate_f to compare with.
+    Other coordinate_f to compare with.
 
 Returns:
-  `true` iff this coord value is equal to the other's.)doc";
+    `true` iff this coord value is equal to the other's.)doc";
 
 static const char* __doc_fiction_detail_a_star_impl_coordinate_f_operator_gt =
     R"doc(Comparator for the priority queue. Compares only the f-values.
 
 Parameter ``other``:
-  Other coordinate_f to compare with.
+    Other coordinate_f to compare with.
 
 Returns:
-  `true` iff this f-value is greater than the other's.)doc";
+    `true` iff this f-value is greater than the other's.)doc";
 
 static const char* __doc_fiction_detail_a_star_impl_cost =
     R"doc(The cost functor that implements the cost function.)doc";
@@ -3293,17 +3293,17 @@ static const char* __doc_fiction_detail_a_star_impl_expand =
 the heuristic cost function.
 
 Parameter ``current``:
-  Coordinate that is currently examined.)doc";
+    Coordinate that is currently examined.)doc";
 
 static const char* __doc_fiction_detail_a_star_impl_g =
     R"doc(Returns the g-value of a coordinate by accessing the g_values map.
 Returns 0 if no entry exists.
 
 Parameter ``c``:
-  Coordinate whose g-value is desired.
+    Coordinate whose g-value is desired.
 
 Returns:
-  g-value of coordinate c or 0 if no value has been stored.)doc";
+    g-value of coordinate c or 0 if no value has been stored.)doc";
 
 static const char* __doc_fiction_detail_a_star_impl_g_values =
     R"doc(Stores the g-cost for each coordinate c, i.e., the length of the
@@ -3314,16 +3314,16 @@ static const char* __doc_fiction_detail_a_star_impl_get_lowest_f_coord =
 list priority queue.
 
 Returns:
-  Coordinate with the lowest f-value from the open list.)doc";
+    Coordinate with the lowest f-value from the open list.)doc";
 
 static const char* __doc_fiction_detail_a_star_impl_is_visited =
     R"doc(Checks if a coordinate has been visited already.
 
 Parameter ``c``:
-  Coordinate to check.
+    Coordinate to check.
 
 Returns:
-  `true` iff c has already been visited.)doc";
+    `true` iff c has already been visited.)doc";
 
 static const char* __doc_fiction_detail_a_star_impl_layout =
     R"doc(The layout in which the shortest path between `source` and `target` is
@@ -3335,14 +3335,14 @@ g-value of the given coordinate. If that is the case, the new g-value
 does not improve the path.
 
 Parameter ``c``:
-  Coordinate to whose g-value is to be checked.
+    Coordinate to whose g-value is to be checked.
 
 Parameter ``g_val``:
-  g-value to compare to c's.
+    g-value to compare to c's.
 
 Returns:
-  `true` iff the given g-value does not mean an improvement for the
-  given coordinate.)doc";
+    `true` iff the given g-value does not mean an improvement for the
+    given coordinate.)doc";
 
 static const char* __doc_fiction_detail_a_star_impl_objective = R"doc(The source-target coordinate pair.)doc";
 
@@ -3357,24 +3357,24 @@ static const char* __doc_fiction_detail_a_star_impl_reconstruct_path =
 the path finding algorithm.
 
 Returns:
-  The shortest path connecting source and target.)doc";
+    The shortest path connecting source and target.)doc";
 
 static const char* __doc_fiction_detail_a_star_impl_run =
     R"doc(Determine the shortest path in a layout that starts at
 `objective.source` and leads to `objective.target`.
 
 Returns:
-  The shortest path in `layout` from `objective.source` to
-  `objective.target`.)doc";
+    The shortest path in `layout` from `objective.source` to
+    `objective.target`.)doc";
 
 static const char* __doc_fiction_detail_a_star_impl_set_g =
     R"doc(Updates the g-value of the given coordinate to the given value.
 
 Parameter ``c``:
-  Coordinate whose g-value is to be updated to g_val.
+    Coordinate whose g-value is to be updated to g_val.
 
 Parameter ``g_val``:
-  New g-value for c.)doc";
+    New g-value for c.)doc";
 
 static const char* __doc_fiction_detail_add_fanin_to_route =
     R"doc(This helper function is used to add a fanin coordinate to the
@@ -3382,18 +3382,18 @@ appropriate route based on whether it belongs to the the route from
 the first or second fanin to the gate.
 
 Template parameter ``Lyt``:
-  Cartesian gate-level layout type.
+    Cartesian gate-level layout type.
 
 Parameter ``fanin``:
-  The fanin coordinate to be added to the route.
+    The fanin coordinate to be added to the route.
 
 Parameter ``is_first_fanin``:
-  A boolean indicating whether this is part of the route from the
-  first fanin to the gate.
+    A boolean indicating whether this is part of the route from the
+    first fanin to the gate.
 
 Parameter ``ffd``:
-  Reference to the fanin_fanout_data structure containing the
-  routes.)doc";
+    Reference to the fanin_fanout_data structure containing the
+    routes.)doc";
 
 static const char* __doc_fiction_detail_add_fanout_to_route =
     R"doc(This helper function is used to add a fanout coordinate to the
@@ -3401,28 +3401,143 @@ appropriate route based on whether it belongs to the the route from
 the gate to the first or second fanout.
 
 Template parameter ``Lyt``:
-  Cartesian gate-level layout type.
+    Cartesian gate-level layout type.
 
 Parameter ``fanout``:
-  The fanout coordinate to be added to the route.
+    The fanout coordinate to be added to the route.
 
 Parameter ``is_first_fanout``:
-  A boolean indicating whether it belongs to the route from the gate
-  to the first fanout.
+    A boolean indicating whether it belongs to the route from the gate
+    to the first fanout.
 
 Parameter ``ffd``:
-  Reference to the fanin_fanout_data structure containing the
-  routes.)doc";
+    Reference to the fanin_fanout_data structure containing the
+    routes.)doc";
+
+static const char* __doc_fiction_detail_add_obstructions =
+    R"doc(Add obstructions to the layout.
+
+This function adds obstructions to the provided
+wiring_reduction_layout. It obstructs coordinates along the top and
+bottom edges (for left to right) or along the left and right edges
+(for top to bottom) of the layout in both layers (0 and 1).
+
+Template parameter ``WiringReductionLyt``:
+    Type of the `wiring_reduction_layout`.
+
+Parameter ``lyt``:
+    The wiring_reduction_layout to which obstructions will be added.)doc";
+
+static const char* __doc_fiction_detail_adjust_tile =
+    R"doc(This function adjusts the tile and gates in the layout after deleting
+wires. It shifts gates to fill the empty coordinates and adjusts the
+layout according to the provided offset matrix.
+
+Template parameter ``Lyt``:
+    Type of the Cartesian gate-level layout.
+
+Template parameter ``LytCpy``:
+    Type of the copy of the original layout for reference.
+
+Template parameter ``WiringReductionLyt``:
+    Type of the `wiring_reduction_layout`.
+
+Parameter ``lyt``:
+    The 2DDWave-clocked layout whose wiring is to be reduced.
+
+Parameter ``layout_copy``:
+    Copy of the original layout for reference.
+
+Parameter ``wiring_reduction_lyt``:
+    The `wiring_reduction_layout`.
+
+Parameter ``x``:
+    X-index of the tile to adjust.
+
+Parameter ``y``:
+    Y-index of the tile to adjust.
+
+Parameter ``z``:
+    Z-index of the tile to adjust.
+
+Parameter ``offset_mtrx``:
+    The offset matrix used for adjusting the layout.)doc";
+
+static const char* __doc_fiction_detail_adjust_tile_horizontal_search_dir =
+    R"doc(This function adjusts the tile and gates in the layout after deleting
+wires, specifically when traversing in the horizontal search
+direction. It updates the signals and coordinates accordingly based on
+the offset matrix.
+
+Template parameter ``Lyt``:
+    Type of the Cartesian gate-level layout.
+
+Template parameter ``LytCpy``:
+    Type of the copy of the original layout for reference.
+
+Parameter ``lyt``:
+    The 2DDWave-clocked layout whose wiring is to be reduced.
+
+Parameter ``layout_copy``:
+    Copy of the original layout for reference.
+
+Parameter ``fanin``:
+    Reference to the tile representing the fanin signal.
+
+Parameter ``offset_mtrx``:
+    The offset matrix used for adjusting the layout.
+
+Parameter ``old_coord``:
+    The old coordinates before adjustment.
+
+Parameter ``offset``:
+    The offset value used for adjusting the layout.
+
+Parameter ``signals``:
+    Vector to store signals for the adjusted coordinates.)doc";
+
+static const char* __doc_fiction_detail_adjust_tile_vertical_search_dir =
+    R"doc(This function adjusts the tile and gates in the layout after deleting
+wires, specifically when traversing in the vertical search direction.
+It updates the signals and coordinates accordingly based on the offset
+matrix.
+
+Template parameter ``Lyt``:
+    Type of the Cartesian gate-level layout.
+
+Template parameter ``LytCpy``:
+    Type of the copy of the original layout for reference.
+
+Parameter ``lyt``:
+    The 2DDWave-clocked layout whose wiring is to be reduced.
+
+Parameter ``layout_copy``:
+    Copy of the original layout for reference.
+
+Parameter ``fanin``:
+    Reference to the tile representing the fanin signal.
+
+Parameter ``offset_mtrx``:
+    The offset matrix used for adjusting the layout.
+
+Parameter ``old_coord``:
+    The old coordinates before adjustment.
+
+Parameter ``offset``:
+    The offset value used for adjusting the layout.
+
+Parameter ``signals``:
+    Vector to store signals for the adjusted coordinates.)doc";
 
 static const char* __doc_fiction_detail_any_to_string =
     R"doc(Converts an `std::any` to a string if it contains an alpha-numerical
 standard data type.
 
 Parameter ``value``:
-  The value to convert.
+    The value to convert.
 
 Returns:
-  The string representation of the value.)doc";
+    The string representation of the value.)doc";
 
 static const char* __doc_fiction_detail_apply_gate_library_impl = R"doc()doc";
 
@@ -3443,10 +3558,10 @@ static const char*
         R"doc(Constructor for assess_physical_population_stability_impl.
 
 Parameter ``lyt``:
-  SiDB layout.
+    SiDB layout.
 
 Parameter ``parameters``:
-  The simulation parameters used for the assessment.)doc";
+    The simulation parameters used for the assessment.)doc";
 
 static const char* __doc_fiction_detail_assess_physical_population_stability_impl_collect_energy_and_charge_index =
     R"doc(Collects the system energy with the corresponding charge index
@@ -3454,14 +3569,14 @@ information of all physically valid charge distributions of a given
 SiDB layout.
 
 Parameter ``sim_results``:
-  The simulation results, including all physically valid charge
-  distributions.
+    The simulation results, including all physically valid charge
+    distributions.
 
 Returns:
-  A vector of energy_and_charge_index pairs, where each pair
-  consists of a double value representing the system energy and a
-  uint64_t representing the unique charge index. The vector is
-  sorted in ascending order of the energy values.)doc";
+    A vector of energy_and_charge_index pairs, where each pair
+    consists of a double value representing the system energy and a
+    uint64_t representing the unique charge index. The vector is
+    sorted in ascending order of the energy values.)doc";
 
 static const char* __doc_fiction_detail_assess_physical_population_stability_impl_energy_and_charge_index =
     R"doc(This struct represents the electrostatic energy and charge index of a
@@ -3481,18 +3596,18 @@ updates the population stability information with the new minimum
 difference and critical cell.
 
 Parameter ``local_potential``:
-  The local potential associated with the cell.
+    The local potential associated with the cell.
 
 Parameter ``c``:
-  The cell for which the charge state is being considered (SiDB is
-  negatively charged).
+    The cell for which the charge state is being considered (SiDB is
+    negatively charged).
 
 Parameter ``pop_stability_information``:
-  The current population stability information.
+    The current population stability information.
 
 Returns:
-  An updated population stability information with potential
-  transition details.)doc";
+    An updated population stability information with potential
+    transition details.)doc";
 
 static const char* __doc_fiction_detail_assess_physical_population_stability_impl_handle_neutral_charges =
     R"doc(This function checks if the absolute difference between the given
@@ -3501,18 +3616,18 @@ potential difference. If `true`, it updates the population stability
 information with the new minimum difference and critical cell.
 
 Parameter ``local_potential``:
-  The local potential associated with the cell.
+    The local potential associated with the cell.
 
 Parameter ``c``:
-  The cell for which the charge state is being considered (SiDB is
-  neutrally charged).
+    The cell for which the charge state is being considered (SiDB is
+    neutrally charged).
 
 Parameter ``pop_stability_information``:
-  The current population stability information.
+    The current population stability information.
 
 Returns:
-  An updated population stability information with potential
-  transition details.)doc";
+    An updated population stability information with potential
+    transition details.)doc";
 
 static const char* __doc_fiction_detail_assess_physical_population_stability_impl_handle_positive_charges =
     R"doc(This function checks if the absolute difference between the given
@@ -3521,18 +3636,18 @@ difference. If true`, it updates the population stability information
 with the new minimum difference and critical cell.
 
 Parameter ``local_potential``:
-  The local potential associated with the cell.
+    The local potential associated with the cell.
 
 Parameter ``c``:
-  The cell for which the charge state is being considered (SiDB is
-  positively charged).
+    The cell for which the charge state is being considered (SiDB is
+    positively charged).
 
 Parameter ``pop_stability_information``:
-  The current population stability information.
+    The current population stability information.
 
 Returns:
-  An updated population stability information with potential
-  transition details.)doc";
+    An updated population stability information with potential
+    transition details.)doc";
 
 static const char* __doc_fiction_detail_assess_physical_population_stability_impl_layout =
     R"doc(Layout to analyze.)doc";
@@ -3548,11 +3663,37 @@ within the layout and identifies the corresponding critical SiDB along
 with the type of charge state transition.
 
 Returns:
-  A vector of population stability information structures, where
-  each element represents a charge distribution in ascending energy
-  order. Each structure contains details about the critical SiDB,
-  the type of charge state transition, and the minimum electrostatic
-  potential required for the charge transition.)doc";
+    A vector of population stability information structures, where
+    each element represents a charge distribution in ascending energy
+    order. Each structure contains details about the critical SiDB,
+    the type of charge state transition, and the minimum electrostatic
+    potential required for the charge transition.)doc";
+
+static const char* __doc_fiction_detail_calculate_offset_matrix =
+    R"doc(Calculate an offset matrix based on a to-delete list in a
+`wiring_reduction_layout`.
+
+The offset matrix represents the number of deletable coordinates in
+the same column but above of each specific coordinate when searching
+from left to right. When searching from top to bottom, the offset
+matrix represents the number of deletable coordinates in the same row
+but to the left of each specific coordinate. The matrix is initialized
+with zeros and updated by incrementing the values for each deletable
+coordinate.
+
+Template parameter ``WiringReductionLyt``:
+    Type of the `wiring_reduction_layout`.
+
+Parameter ``lyt``:
+    The `wiring_reduction_layout` for which the offset matrix is
+    calculated.
+
+Parameter ``to_delete``:
+    The to-delete list representing coordinates to be considered for
+    the offset matrix.
+
+Returns:
+    A 2D vector representing the calculated offset matrix.)doc";
 
 static const char* __doc_fiction_detail_color_routing_impl = R"doc()doc";
 
@@ -3567,19 +3708,19 @@ This function logs the number of unsatisfied objectives in the
 statistics.
 
 Template parameter ``Graph``:
-  The type of the edge intersection graph.
+    The type of the edge intersection graph.
 
 Template parameter ``Color``:
-  The type of the vertex colors.
+    The type of the vertex colors.
 
 Parameter ``graph``:
-  The edge intersection graph.
+    The edge intersection graph.
 
 Parameter ``coloring``:
-  The vertex coloring.
+    The vertex coloring.
 
 Parameter ``color``:
-  The color to extract and route.)doc";
+    The color to extract and route.)doc";
 
 static const char* __doc_fiction_detail_color_routing_impl_layout = R"doc(The layout to route.)doc";
 
@@ -3591,21 +3732,21 @@ static const char* __doc_fiction_detail_color_routing_impl_pst = R"doc(Statistic
 
 static const char* __doc_fiction_detail_color_routing_impl_run = R"doc()doc";
 
-static const char* __doc_fiction_detail_compare_gates =
-    R"doc(Custom comparison function that sorts gates based on the sum of its
-coordinates and breaks ties based on the x-coordinate.
+static const char* __doc_fiction_detail_compare_gate_tiles =
+    R"doc(Custom comparison function for sorting tiles based on the sum of their
+coordinates that breaks ties based on the x-coordinate.
 
 Template parameter ``Lyt``:
-  Cartesian gate-level layout type.
+    Cartesian gate-level layout type.
 
 Parameter ``a``:
-  first gate
+    First tile to compare.
 
 Parameter ``b``:
-  second gate
+    Second tile to compare.
 
 Returns:
-  result of the comparison)doc";
+    `true` iff `a < b` based on the aforementioned rule.)doc";
 
 static const char* __doc_fiction_detail_connect_and_place = R"doc()doc";
 
@@ -3640,6 +3781,37 @@ static const char* __doc_fiction_detail_count_gate_types_impl_run = R"doc()doc";
 static const char* __doc_fiction_detail_create_array =
     R"doc(From https://stackoverflow.com/questions/57756557/initializing-a-
 stdarray-with-a-constant-value)doc";
+
+static const char* __doc_fiction_detail_create_wiring_reduction_layout =
+    R"doc(Create a wiring_reduction_layout suitable for finding excess wiring
+based on a Cartesian layout.
+
+This function generates a new layout suitable for finding excess
+wiring by shifting the input layout based on specified offsets. The
+generated layout is wrapped in an obstruction_layout. The shifted
+layout is constructed by iterating through the input Cartesian layout
+diagonally and obstructing connections and coordinates accordingly.
+
+Template parameter ``Lyt``:
+    Type of the input Cartesian gate-level layout.
+
+Parameter ``lyt``:
+    The input Cartesian gate-level layout to be shifted.
+
+Parameter ``x_offset``:
+    The offset for shifting in the x-direction. Defaults to 0 if not
+    specified.
+
+Parameter ``y_offset``:
+    The offset for shifting in the y-direction. Defaults to 0 if not
+    specified.
+
+Parameter ``search_direction``:
+    If set to horizontally, paths are searched from left to right,
+    otherwise from top to bottom.
+
+Returns:
+    wiring_reduction_layout suitable for finding excess wiring via A*.)doc";
 
 static const char* __doc_fiction_detail_critical_path_length_and_throughput_impl = R"doc()doc";
 
@@ -3680,8 +3852,8 @@ static const char* __doc_fiction_detail_critical_temperature_impl_determine_crit
     R"doc(The *Critical Temperature* is determined.
 
 Parameter ``energy_state_type``:
-  All energies of all physically valid charge distributions with the
-  corresponding state type (i.e. transparent, erroneous).)doc";
+    All energies of all physically valid charge distributions with the
+    corresponding state type (i.e. transparent, erroneous).)doc";
 
 static const char* __doc_fiction_detail_critical_temperature_impl_energy_between_ground_state_and_first_erroneous =
     R"doc(The energy difference between the ground state and the first erroneous
@@ -3689,33 +3861,33 @@ state is determined. Additionally, the state type of the ground state
 is determined and returned.
 
 Parameter ``energy_and_state_type``:
-  All energies of all physically valid charge distributions with the
-  corresponding state type (i.e. transparent, erroneous).
+    All energies of all physically valid charge distributions with the
+    corresponding state type (i.e. transparent, erroneous).
 
 Parameter ``min_energy``:
-  Minimal energy of all physically valid charge distributions of a
-  given layout (unit: eV).
+    Minimal energy of all physically valid charge distributions of a
+    given layout (unit: eV).
 
 Returns:
-  State type (i.e. transparent, erroneous) of the ground state is
-  returned.)doc";
+    State type (i.e. transparent, erroneous) of the ground state is
+    returned.)doc";
 
 static const char* __doc_fiction_detail_critical_temperature_impl_gate_based_simulation =
     R"doc(*Gate-based Critical Temperature* Simulation of a SiDB layout for a
 given Boolean function.
 
 Template parameter ``TT``:
-  The type of the truth table specifying the gate behavior.
+    The type of the truth table specifying the gate behavior.
 
 Parameter ``spec``:
-  Expected Boolean function of the layout given as a multi-output
-  truth table.)doc";
+    Expected Boolean function of the layout given as a multi-output
+    truth table.)doc";
 
 static const char* __doc_fiction_detail_critical_temperature_impl_get_critical_temperature =
     R"doc(Returns the critical temperature.
 
 Returns:
-  The critical temperature (unit: K).)doc";
+    The critical temperature (unit: K).)doc";
 
 static const char* __doc_fiction_detail_critical_temperature_impl_layout = R"doc(SiDB cell-level layout.)doc";
 
@@ -3732,42 +3904,37 @@ layout with certain input combination). The simulation results are
 stored in the `sim_result_100` variable.
 
 Parameter ``bdl_iterator``:
-  A reference to a BDL input iterator representing the gate layout
-  at a given input combination. The simulation is performed based on
-  the configuration represented by the iterator.
+    A reference to a BDL input iterator representing the gate layout
+    at a given input combination. The simulation is performed based on
+    the configuration represented by the iterator.
 
 Returns:
-  Simulation results.)doc";
+    Simulation results.)doc";
 
 static const char* __doc_fiction_detail_critical_temperature_impl_stats = R"doc(Statistics.)doc";
 
-static const char* __doc_fiction_detail_delete_rows_and_columns =
-    R"doc(Utility function that deletes all specified rows and columns.
-
-Template parameter ``Lyt``:
-  Cartesian gate-level layout type.
-
-Parameter ``lyt``:
-  Gate-level layout.
-
-Parameter ``rows_to_delete``:
-  Rows to be deleted.
-
-Parameter ``columns_to_delete``:
-  Columns to be deleted.
-
-@note This function requires the gate-level layout to be 2DDWave-
-clocked and Cartesian.)doc";
-
 static const char* __doc_fiction_detail_delete_wires =
-    R"doc(Utility function that deletes rows that only contain vertically
-connected wires.
+    R"doc(This function deletes wires from the provided
+`wiring_reduction_layout` based on the specified coordinates and
+offset matrix. It clears the tiles in the to-delete list, shifts all
+gates to fill the empty coordinates, and resizes the layout to an
+optimized size by calculating the bounding box.
 
 Template parameter ``Lyt``:
-  Cartesian gate-level layout type.
+    Cartesian gate-level layout type.
 
 Parameter ``lyt``:
-  Gate-level layout.)doc";
+    The 2DDWave-clocked layout whose wiring is to be reduced.
+
+Template parameter ``WiringReductionLyt``:
+    Type of the `wiring_reduction_layout`.
+
+Parameter ``wiring_reduction_layout``:
+    The `wiring_reduction_layout`.
+
+Parameter ``to_delete``:
+    The to-delete list representing coordinates of wires to be
+    deleted. each specific coordinate.)doc";
 
 static const char* __doc_fiction_detail_design_sidb_gates_impl = R"doc()doc";
 
@@ -3784,10 +3951,10 @@ distance of 0.5 nanometers, it returns `true` to indicate that SiDBs
 are too close; otherwise, it returns `false`.
 
 Parameter ``cell_indices``:
-  A vector of cell indices to check for SiDB proximity.
+    A vector of cell indices to check for SiDB proximity.
 
 Returns:
-  `true` if any SiDBs are too close; otherwise, `false`.)doc";
+    `true` if any SiDBs are too close; otherwise, `false`.)doc";
 
 static const char* __doc_fiction_detail_design_sidb_gates_impl_design_sidb_gates_impl =
     R"doc(This constructor initializes an instance of the *SiDB Gate Designer*
@@ -3795,14 +3962,14 @@ implementation with the provided skeleton layout and configuration
 parameters.
 
 Parameter ``skeleton``:
-  The skeleton layout used as a basis for gate design.
+    The skeleton layout used as a basis for gate design.
 
 Parameter ``tt``:
-  Expected Boolean function of the layout given as a multi-output
-  truth table.
+    Expected Boolean function of the layout given as a multi-output
+    truth table.
 
 Parameter ``ps``:
-  Parameters and settings for the gate designer.)doc";
+    Parameters and settings for the gate designer.)doc";
 
 static const char* __doc_fiction_detail_design_sidb_gates_impl_params =
     R"doc(Parameters for the *SiDB Gate Designer*.)doc";
@@ -3815,7 +3982,7 @@ determines whether the layout is operational based on the specified
 parameters. The design process is parallelized to improve performance.
 
 Returns:
-  A vector of designed SiDB gate layouts.)doc";
+    A vector of designed SiDB gate layouts.)doc";
 
 static const char* __doc_fiction_detail_design_sidb_gates_impl_run_random_design =
     R"doc(Design gates randomly and in parallel.
@@ -3825,7 +3992,7 @@ determines whether the layout is operational based on the specified
 parameters. The design process is parallelized to improve performance.
 
 Returns:
-  A vector of designed SiDB gate layouts.)doc";
+    A vector of designed SiDB gate layouts.)doc";
 
 static const char* __doc_fiction_detail_design_sidb_gates_impl_skeleton_layout =
     R"doc(The skeleton layout serves as a starting layout to which SiDBs are
@@ -3837,11 +4004,11 @@ static const char* __doc_fiction_detail_design_sidb_gates_impl_skeleton_layout_w
 that is returned afterwards.
 
 Parameter ``cell_indices``:
-  A vector of indices of cells to be added to the skeleton layout.
+    A vector of indices of cells to be added to the skeleton layout.
 
 Returns:
-  A copy of the original layout (`skeleton_layout`) with SiDB cells
-  added at specified indices.)doc";
+    A copy of the original layout (`skeleton_layout`) with SiDB cells
+    added at specified indices.)doc";
 
 static const char* __doc_fiction_detail_design_sidb_gates_impl_truth_table = R"doc(Truth table of the given gate.)doc";
 
@@ -3860,6 +4027,35 @@ static const char* __doc_fiction_detail_determine_clocking_impl_stats = R"doc(St
 
 static const char* __doc_fiction_detail_determine_layout_size = R"doc()doc";
 
+static const char* __doc_fiction_detail_determine_new_coord =
+    R"doc(This function calculates the new coordinates of a tile after adjusting
+for wire deletion based on the specified offset and search direction.
+
+Template parameter ``Lyt``:
+    Type of the Cartesian gate-level layout.
+
+Template parameter ``WiringReductionLyt``:
+    Type of the `wiring_reduction_layout`.
+
+Parameter ``wiring_reduction_lyt``:
+    The `wiring_reduction_layout` used to determine the search
+    direction.
+
+Parameter ``x``:
+    X-coordinate of the tile.
+
+Parameter ``y``:
+    Y-coordinate of the tile.
+
+Parameter ``z``:
+    Z-coordinate of the tile.
+
+Parameter ``offset``:
+    The offset value used for adjusting the layout.
+
+Returns:
+    The new coordinates of the tile after adjustment.)doc";
+
 static const char* __doc_fiction_detail_east_south_edge_coloring = R"doc()doc";
 
 static const char* __doc_fiction_detail_enumerate_all_paths_impl = R"doc()doc";
@@ -3873,10 +4069,10 @@ static const char* __doc_fiction_detail_enumerate_all_paths_impl_is_visited =
     R"doc(Check if a coordinate has been visited.
 
 Parameter ``c``:
-  Coordinate to check.
+    Coordinate to check.
 
 Returns:
-  `true` if the coordinate has been visited, `false` otherwise.)doc";
+    `true` if the coordinate has been visited, `false` otherwise.)doc";
 
 static const char* __doc_fiction_detail_enumerate_all_paths_impl_layout =
     R"doc(The layout whose paths are to be enumerated.)doc";
@@ -3885,13 +4081,13 @@ static const char* __doc_fiction_detail_enumerate_all_paths_impl_mark_unvisited 
     R"doc(Mark a coordinate as unvisited.
 
 Parameter ``c``:
-  Coordinate to mark as unvisited.)doc";
+    Coordinate to mark as unvisited.)doc";
 
 static const char* __doc_fiction_detail_enumerate_all_paths_impl_mark_visited =
     R"doc(Mark a coordinate as visited.
 
 Parameter ``c``:
-  Coordinate to mark as visited.)doc";
+    Coordinate to mark as visited.)doc";
 
 static const char* __doc_fiction_detail_enumerate_all_paths_impl_objective =
     R"doc(The source-target coordinate pair.)doc";
@@ -3914,21 +4110,21 @@ not run along another wire but cross only in a single point
 (orthogonal crossings + knock-knees/double wires).
 
 Parameter ``src``:
-  Source coordinate.
+    Source coordinate.
 
 Parameter ``tgt``:
-  Target coordinate.
+    Target coordinate.
 
 Parameter ``p``:
-  Current path to extend.)doc";
+    Current path to extend.)doc";
 
 static const char* __doc_fiction_detail_enumerate_all_paths_impl_run =
     R"doc(Enumerate all possible paths in a layout that start at
 `objective.source` and lead to `objective.target`.
 
 Returns:
-  A collection of all unique paths in `layout` from
-  `objective.source` to `objective.target`.)doc";
+    A collection of all unique paths in `layout` from
+    `objective.source` to `objective.target`.)doc";
 
 static const char* __doc_fiction_detail_enumerate_all_paths_impl_visited = R"doc(Set of visited coordinates.)doc";
 
@@ -3938,16 +4134,16 @@ static const char* __doc_fiction_detail_equivalence_checking_impl_equivalence_ch
     R"doc(Standard constructor.
 
 Parameter ``specification``:
-  Logical specification of intended functionality.
+    Logical specification of intended functionality.
 
 Parameter ``implementation``:
-  Implementation of specified functionality.
+    Implementation of specified functionality.
 
 Parameter ``p``:
-  Parameters.
+    Parameters.
 
 Parameter ``st``:
-  Statistics.)doc";
+    Statistics.)doc";
 
 static const char* __doc_fiction_detail_equivalence_checking_impl_has_drvs = R"doc()doc";
 
@@ -3984,14 +4180,14 @@ working on larger layout aspect ratios are interrupted while smaller
 ones may finish running.
 
 Parameter ``t_num``:
-  Thread's identifier.
+    Thread's identifier.
 
 Parameter ``ti_list``:
-  Pointer to a list of shared thread info that the threads use for
-  communication.
+    Pointer to a list of shared thread info that the threads use for
+    communication.
 
 Returns:
-  A found layout or nullptr if being interrupted.)doc";
+    A found layout or nullptr if being interrupted.)doc";
 
 static const char* __doc_fiction_detail_exact_impl_lower_bound = R"doc(Lower bound for the number of layout tiles.)doc";
 
@@ -4013,16 +4209,16 @@ static const char* __doc_fiction_detail_exact_impl_run_asynchronously =
 statements.
 
 Returns:
-  A placed and routed gate-level layout or std::nullopt in case a
-  timeout or an upper bound was reached.)doc";
+    A placed and routed gate-level layout or std::nullopt in case a
+    timeout or an upper bound was reached.)doc";
 
 static const char* __doc_fiction_detail_exact_impl_run_synchronously =
     R"doc(Does the same as explore_asynchronously but without thread
 synchronization overhead.
 
 Returns:
-  A placed and routed gate-level layout or std::nullopt in case a
-  timeout or an upper bound was reached.)doc";
+    A placed and routed gate-level layout or std::nullopt in case a
+    timeout or an upper bound was reached.)doc";
 
 static const char* __doc_fiction_detail_exact_impl_scheme = R"doc(The utilized clocking scheme.)doc";
 
@@ -4037,41 +4233,41 @@ static const char* __doc_fiction_detail_exact_impl_smt_handler_apply_to_added_an
 solver check point.
 
 Template parameter ``Fn``:
-  Functor type.
+    Functor type.
 
 Parameter ``fn``:
-  Unary function to apply to all added and updated tiles. Must
-  receive a tile as parameter.)doc";
+    Unary function to apply to all added and updated tiles. Must
+    receive a tile as parameter.)doc";
 
 static const char* __doc_fiction_detail_exact_impl_smt_handler_apply_to_added_tiles =
     R"doc(Applies a given function to all added tiles in the current solver
 check point.
 
 Template parameter ``Fn``:
-  Functor type.
+    Functor type.
 
 Parameter ``fn``:
-  Unary function to apply to all added tiles. Must receive a tile as
-  parameter.)doc";
+    Unary function to apply to all added tiles. Must receive a tile as
+    parameter.)doc";
 
 static const char* __doc_fiction_detail_exact_impl_smt_handler_apply_to_updated_tiles =
     R"doc(Applies a given function to all updated tiles in the current solver
 check point.
 
 Template parameter ``Fn``:
-  Functor type.
+    Functor type.
 
 Parameter ``fn``:
-  Unary function to apply to all updated tiles. Must receive a tile
-  as parameter.)doc";
+    Unary function to apply to all updated tiles. Must receive a tile
+    as parameter.)doc";
 
 static const char* __doc_fiction_detail_exact_impl_smt_handler_assign_layout =
     R"doc(Assigns vertices, edges and directions to the stored layout sketch
 with respect to the given model.
 
 Parameter ``model``:
-  A satisfying assignment to the created variables under all created
-  constraints that can be used to extract a layout description.)doc";
+    A satisfying assignment to the created variables under all created
+    constraints that can be used to extract a layout description.)doc";
 
 static const char* __doc_fiction_detail_exact_impl_smt_handler_assign_layout_clocking =
     R"doc(If an open clocking scheme was provided, this function extracts the
@@ -4079,7 +4275,7 @@ clocking information from the given model and assigns the respective
 clock zones to the stored layout.
 
 Parameter ``model``:
-  Satisfying model to the generated instance.)doc";
+    Satisfying model to the generated instance.)doc";
 
 static const char* __doc_fiction_detail_exact_impl_smt_handler_assign_pi_clockings =
     R"doc(Adds constraints to the solver to ensure that the cl variable of
@@ -4181,12 +4377,12 @@ If no such solver could be found, a new solver is created from the
 context given.
 
 Parameter ``ar``:
-  aspect ratio of size x * y.
+    aspect ratio of size x * y.
 
 Returns:
-  Solver state associated with an aspect ratio of size x - 1 * y or
-  x * y - 1 and, additionally, the tiles new to the solver. If no
-  such solver is available, a new one is created.)doc";
+    Solver state associated with an aspect ratio of size x - 1 * y or
+    x * y - 1 and, additionally, the tiles new to the solver. If no
+    such solver is available, a new one is created.)doc";
 
 static const char* __doc_fiction_detail_exact_impl_smt_handler_generate_smt_instance =
     R"doc(Generates the SMT instance by calling the constraint generating
@@ -4196,101 +4392,101 @@ static const char* __doc_fiction_detail_exact_impl_smt_handler_get_lit_e =
     R"doc(Returns the lc-th eastern assumption literal from the stored context.
 
 Returns:
-  Eastern literal.)doc";
+    Eastern literal.)doc";
 
 static const char* __doc_fiction_detail_exact_impl_smt_handler_get_lit_s =
     R"doc(Returns the lc-th southern assumption literal from the stored context.
 
 Returns:
-  Southern literal.)doc";
+    Southern literal.)doc";
 
 static const char* __doc_fiction_detail_exact_impl_smt_handler_get_ncl =
     R"doc(Returns an ncl variable from the stored context representing node n's
 (pi) clock number.
 
 Parameter ``n``:
-  Node to be considered.
+    Node to be considered.
 
 Returns:
-  ncl variable from ctx.)doc";
+    ncl variable from ctx.)doc";
 
 static const char* __doc_fiction_detail_exact_impl_smt_handler_get_solver_statistics =
     R"doc(Returns a statistics object from the current solver state.
 
 Returns:
-  Statistics.)doc";
+    Statistics.)doc";
 
 static const char* __doc_fiction_detail_exact_impl_smt_handler_get_tc =
     R"doc(Returns a tc variable from the stored context representing that
 information flows from tile t1 to tile t2.
 
 Parameter ``t1``:
-  Tile 1 to be considered.
+    Tile 1 to be considered.
 
 Parameter ``t2``:
-  Tile 2 to be considered that is adjacent to t1.
+    Tile 2 to be considered that is adjacent to t1.
 
 Returns:
-  tc variable from ctx.)doc";
+    tc variable from ctx.)doc";
 
 static const char* __doc_fiction_detail_exact_impl_smt_handler_get_tcl =
     R"doc(Returns a tcl variable from the stored context representing tile t's
 clock number.
 
 Parameter ``t``:
-  Tile to be considered.
+    Tile to be considered.
 
 Returns:
-  tcl variable from ctx.)doc";
+    tcl variable from ctx.)doc";
 
 static const char* __doc_fiction_detail_exact_impl_smt_handler_get_te =
     R"doc(Returns a te variable from the stored context representing that tile t
 has edge e assigned.
 
 Parameter ``t``:
-  Tile to be considered.
+    Tile to be considered.
 
 Parameter ``e``:
-  Edge to be considered.
+    Edge to be considered.
 
 Returns:
-  te variable from ctx.)doc";
+    te variable from ctx.)doc";
 
 static const char* __doc_fiction_detail_exact_impl_smt_handler_get_tn =
     R"doc(Returns a tn variable from the stored context representing that tile t
 has node n assigned.
 
 Parameter ``t``:
-  Tile to be considered.
+    Tile to be considered.
 
 Parameter ``n``:
-  Node to be considered.
+    Node to be considered.
 
 Returns:
-  tn variable from ctx.)doc";
+    tn variable from ctx.)doc";
 
 static const char* __doc_fiction_detail_exact_impl_smt_handler_get_tp =
     R"doc(Returns a tp variable from the stored context representing that a path
 from tile t1 to tile t2 exists.
 
 Parameter ``t1``:
-  Tile 1 to be considered.
+    Tile 1 to be considered.
 
 Parameter ``t2``:
-  Tile 2 to be considered.
+    Tile 2 to be considered.
 
 Returns:
-  tp variable from ctx.)doc";
+    tp variable from ctx.)doc";
 
 static const char* __doc_fiction_detail_exact_impl_smt_handler_get_tse =
     R"doc(Returns a tse variable from the stored context representing tile t's
 synchronization element delay in cycles.
 
 Parameter ``t``:
-  Tile to be considered.
+    Tile to be considered.
 
 Returns:
-  tse variable from ctx.)doc";
+    tse variable from ctx.)doc";
 
 static const char* __doc_fiction_detail_exact_impl_smt_handler_global_synchronization =
     R"doc(Adds constraints to the solver to ensure that fan-in paths to the same
@@ -4305,10 +4501,10 @@ static const char* __doc_fiction_detail_exact_impl_smt_handler_is_added_tile =
 solver check point.
 
 Parameter ``t``:
-  Tile to check.
+    Tile to check.
 
 Returns:
-  `true` iff t is contained in check_point->added_tiles.)doc";
+    `true` iff t is contained in check_point->added_tiles.)doc";
 
 static const char* __doc_fiction_detail_exact_impl_smt_handler_is_satisfiable =
     R"doc(Generates the SMT instance for the current solver check point and runs
@@ -4321,18 +4517,18 @@ If the instance was found SAT on both levels, a layout is extract from
 the model and stored. The function returns then true.
 
 Returns:
-  `true` iff the instance generated for the current configuration is
-  SAT.)doc";
+    `true` iff the instance generated for the current configuration is
+    SAT.)doc";
 
 static const char* __doc_fiction_detail_exact_impl_smt_handler_is_updated_tile =
     R"doc(Checks whether a given tile belongs to the updated tiles of the
 current solver check point.
 
 Parameter ``t``:
-  Tile to check.
+    Tile to check.
 
 Returns:
-  `true` iff t is contained in check_point->updated_tiles.)doc";
+    `true` iff t is contained in check_point->updated_tiles.)doc";
 
 static const char* __doc_fiction_detail_exact_impl_smt_handler_layout =
     R"doc(The sketch that later contains the layout generated from a model.)doc";
@@ -4343,41 +4539,41 @@ static const char* __doc_fiction_detail_exact_impl_smt_handler_lit =
     R"doc(Shortcut to the assumption literals.
 
 Returns:
-  Reference to check_point->state->lit.)doc";
+    Reference to check_point->state->lit.)doc";
 
 static const char* __doc_fiction_detail_exact_impl_smt_handler_minimize_crossings =
     R"doc(Adds constraints to the given optimize to minimize the number of
 crossing tiles to use.
 
 Parameter ``optimize``:
-  Pointer to an z3::optimize to add constraints to.)doc";
+    Pointer to an z3::optimize to add constraints to.)doc";
 
 static const char* __doc_fiction_detail_exact_impl_smt_handler_minimize_synchronization_elements =
     R"doc(Adds constraints to the given optimize to enforce that the overall sum
 of synchronization element values should be minimized.
 
 Parameter ``optimize``:
-  Pointer to an z3::optimize to add constraints to.)doc";
+    Pointer to an z3::optimize to add constraints to.)doc";
 
 static const char* __doc_fiction_detail_exact_impl_smt_handler_minimize_wires =
     R"doc(Adds constraints to the given optimize to minimize the number of
 crossing tiles to use.
 
 Parameter ``optimize``:
-  Pointer to an z3::optimize to add constraints to.)doc";
+    Pointer to an z3::optimize to add constraints to.)doc";
 
 static const char* __doc_fiction_detail_exact_impl_smt_handler_mk_as =
     R"doc(Helper function for generating an implication lit -> constraint where
 lit is the given assumption literal.
 
 Parameter ``constraint``:
-  Constraint to be implied.
+    Constraint to be implied.
 
 Parameter ``lit``:
-  Assumption literal.
+    Assumption literal.
 
 Returns:
-  lit -> constraint.)doc";
+    lit -> constraint.)doc";
 
 static const char* __doc_fiction_detail_exact_impl_smt_handler_mk_as_if_se =
     R"doc(Helper function for generating an implication lit -> constraint where
@@ -4386,13 +4582,13 @@ eastern border, s if t is at southern border, and (e and s) if t is
 the corner tile.
 
 Parameter ``constraint``:
-  Constraint to be implied.
+    Constraint to be implied.
 
 Parameter ``t``:
-  Tile to consider for literal picking.
+    Tile to consider for literal picking.
 
 Returns:
-  lit -> constraint.)doc";
+    lit -> constraint.)doc";
 
 static const char* __doc_fiction_detail_exact_impl_smt_handler_mk_clk_mod =
     R"doc(Helper function to create an expression that assigns a matching
@@ -4400,36 +4596,36 @@ clocking to a tile given its outgoing tile. This function is only
 needed for irregular clocking schemes.
 
 Parameter ``t1``:
-  Tile.
+    Tile.
 
 Parameter ``t2``:
-  Tile outgoing to t1 given its dataflow.
+    Tile outgoing to t1 given its dataflow.
 
 Returns:
-  An expression of the form tcl(t1, 0) --> tcl(t2, 1) and tcl(t1, 1)
-  --> tcl(t2, 2) and ... up to the number of clock phases in the
-  layout.)doc";
+    An expression of the form tcl(t1, 0) --> tcl(t2, 1) and tcl(t1, 1)
+    --> tcl(t2, 2) and ... up to the number of clock phases in the
+    layout.)doc";
 
 static const char* __doc_fiction_detail_exact_impl_smt_handler_mk_eq =
     R"doc(Helper function for generating an equality of an arbitrary number of
 expressions.
 
 Parameter ``v``:
-  Vector of expressions to equalize.
+    Vector of expressions to equalize.
 
 Returns:
-  Expression that represents the equality of all elements in v.)doc";
+    Expression that represents the equality of all elements in v.)doc";
 
 static const char* __doc_fiction_detail_exact_impl_smt_handler_ncl_to_real =
     R"doc(Helper function to create an expression that maps from an ncl variable
 to a real value during a solver call.
 
 Parameter ``n``:
-  Network node.
+    Network node.
 
 Returns:
-  An expression of the form ite(ncl == 0, 0, ite(ncl == 1, 1, ...))
-  up to the number of clock phases in the layout.)doc";
+    An expression of the form ite(ncl == 0, 0, ite(ncl == 1, 1, ...))
+    up to the number of clock phases in the layout.)doc";
 
 static const char* __doc_fiction_detail_exact_impl_smt_handler_network =
     R"doc(Logical specification for the layout.)doc";
@@ -4440,10 +4636,10 @@ stored logic network, not counting constants and not counting primary
 inputs if params.io_pins is not set.
 
 Parameter ``n``:
-  Node in the stored network.
+    Node in the stored network.
 
 Returns:
-  Number of incoming nodes to n.)doc";
+    Number of incoming nodes to n.)doc";
 
 static const char* __doc_fiction_detail_exact_impl_smt_handler_network_out_degree =
     R"doc(Determines the number of parent nodes to some given node n in the
@@ -4451,10 +4647,10 @@ stored logic network, not counting constants and not counting primary
 outputs if params.io_pins is not set.
 
 Parameter ``n``:
-  Node in the stored network.
+    Node in the stored network.
 
 Returns:
-  Number of outgoing nodes of n.)doc";
+    Number of outgoing nodes of n.)doc";
 
 static const char* __doc_fiction_detail_exact_impl_smt_handler_node2pos =
     R"doc(Maps nodes to tile positions when creating the layout from the SMT
@@ -4475,10 +4671,10 @@ static const char* __doc_fiction_detail_exact_impl_smt_handler_place_output =
 network onto tile t in the stored layout.
 
 Parameter ``t``:
-  Tile to place the PO pin.
+    Tile to place the PO pin.
 
 Parameter ``n``:
-  Node in the stored network representing a PO.)doc";
+    Node in the stored network representing a PO.)doc";
 
 static const char* __doc_fiction_detail_exact_impl_smt_handler_prevent_insufficiencies =
     R"doc(Adds constraints to the solver to prevent edges or vertices to be
@@ -4511,39 +4707,39 @@ and checked against the given model. Consequently, e is routed through
 all tiles with a match in model.
 
 Parameter ``t``:
-  Initial tile to start recursion from (not included in model
-  evaluations).
+    Initial tile to start recursion from (not included in model
+    evaluations).
 
 Parameter ``e``:
-  Edge to check for.)doc";
+    Edge to check for.)doc";
 
 static const char* __doc_fiction_detail_exact_impl_smt_handler_set_timeout =
     R"doc(Sets the given timeout for the current solver.
 
 Parameter ``t``:
-  Timeout in ms.)doc";
+    Timeout in ms.)doc";
 
 static const char* __doc_fiction_detail_exact_impl_smt_handler_skip_const_or_io_edge =
     R"doc(Returns true, iff skip_const_or_io_node returns true for either source
 or target of the given edge..
 
 Parameter ``e``:
-  Edge in network.
+    Edge in network.
 
 Returns:
-  `true` iff e is to be skipped in a loop due to it having constant
-  or I/O nodes while params.io_ports == false.)doc";
+    `true` iff e is to be skipped in a loop due to it having constant
+    or I/O nodes while params.io_ports == false.)doc";
 
 static const char* __doc_fiction_detail_exact_impl_smt_handler_skip_const_or_io_node =
     R"doc(Returns true, iff params.io_ports is set to false and n is either a
 constant or PI or PO node in network.
 
 Parameter ``n``:
-  Node in network.
+    Node in network.
 
 Returns:
-  `true` iff n is to be skipped in a loop due to it being a constant
-  or an I/O and params.io_ports == false.)doc";
+    `true` iff n is to be skipped in a loop due to it being a constant
+    or an I/O and params.io_ports == false.)doc";
 
 static const char* __doc_fiction_detail_exact_impl_smt_handler_skippable =
     R"doc(Evaluates a given aspect ratio regarding the stored configurations
@@ -4554,23 +4750,23 @@ optimality guarantee. This function should never be overly
 restrictive!
 
 Parameter ``ar``:
-  Aspect ratio to evaluate.
+    Aspect ratio to evaluate.
 
 Returns:
-  `true` if ar can safely be skipped because it is UNSAT anyway.)doc";
+    `true` if ar can safely be skipped because it is UNSAT anyway.)doc";
 
 static const char* __doc_fiction_detail_exact_impl_smt_handler_smt_handler =
     R"doc(Standard constructor.
 
 Parameter ``ctxp``:
-  The context that is used in all solvers.
+    The context that is used in all solvers.
 
 Parameter ``lyt``:
-  The empty gate-level layout that is going to contain the created
-  layout.
+    The empty gate-level layout that is going to contain the created
+    layout.
 
 Parameter ``ps``:
-  The parameters to respect in the SMT instance generation process.)doc";
+    The parameters to respect in the SMT instance generation process.)doc";
 
 static const char* __doc_fiction_detail_exact_impl_smt_handler_solver =
     R"doc(Shortcut to the solver stored in check_point.)doc";
@@ -4634,7 +4830,7 @@ static const char* __doc_fiction_detail_exact_impl_smt_handler_store_solver_stat
 ar as key.
 
 Parameter ``ar``:
-  Key to storing the current solver state.)doc";
+    Key to storing the current solver state.)doc";
 
 static const char* __doc_fiction_detail_exact_impl_smt_handler_technology_specific_constraints =
     R"doc(Adds constraints to the solver to enforce technology-specific
@@ -4648,17 +4844,17 @@ z3::sum to them. This is a work around because no such api function
 for pseudo boolean exists.
 
 Parameter ``e``:
-  Edge to consider.
+    Edge to consider.
 
 Parameter ``ve``:
-  Vector of expressions to extend.)doc";
+    Vector of expressions to extend.)doc";
 
 static const char* __doc_fiction_detail_exact_impl_smt_handler_update =
     R"doc(Resizes the layout and creates a new solver checkpoint from where on
 the next incremental instance can be generated.
 
 Parameter ``ar``:
-  Current aspect ratio to work on.)doc";
+    Current aspect ratio to work on.)doc";
 
 static const char* __doc_fiction_detail_exact_impl_smt_handler_utilize_hierarchical_information =
     R"doc(Adds constraints to the solver to prohibit certain node placements
@@ -4682,10 +4878,10 @@ static const char* __doc_fiction_detail_exact_impl_update_timeout =
 from the configured timeout and updates Z3's timeout accordingly.
 
 Parameter ``handler``:
-  Handler whose timeout is to be updated.
+    Handler whose timeout is to be updated.
 
 Parameter ``time``:
-  Time passed since beginning of the solving process.)doc";
+    Time passed since beginning of the solving process.)doc";
 
 static const char* __doc_fiction_detail_fanin_fanout_data =
     R"doc(This struct stores information about the fan-in and fan-out
@@ -4696,7 +4892,7 @@ before routing. Additionally, it includes layout coordinate paths for
 routing signals between the gate and its fan-in/fan-out connections.
 
 Template parameter ``Lyt``:
-  Cartesian gate-level layout type.)doc";
+    Cartesian gate-level layout type.)doc";
 
 static const char* __doc_fiction_detail_fanin_fanout_data_fanins =
     R"doc(This vector holds the layout coordinates of all fan-in connections to
@@ -4742,35 +4938,18 @@ static const char* __doc_fiction_detail_fanout_substitution_impl_ps = R"doc()doc
 
 static const char* __doc_fiction_detail_fanout_substitution_impl_run = R"doc()doc";
 
-static const char* __doc_fiction_detail_fix_dead_nodes =
-    R"doc(This function fixes dead nodes in the layout by moving them to
-available empty coordinates and back. A dead node is a node in the
-layout that is placed, but not alive, which can happen during the
-optimization process. The function finds an empty coordinate in the
-layout and moves the dead gates to that coordinate, before moving it
-back to its old location and connecting any fanin signals again.
-
-Template parameter ``Lyt``:
-  Cartesian gate-level layout type.
-
-Parameter ``lyt``:
-  Gate-level layout.
-
-Parameter ``gt``:
-  Vector containing the coordinates of all gates in the layout.)doc";
-
 static const char* __doc_fiction_detail_fix_wires =
     R"doc(Utility function to move wires that cross over empty tiles down one
 layer. This can happen if the wiring of a gate is deleted.
 
 Template parameter ``Lyt``:
-  Cartesian gate-level layout type.
+    Cartesian gate-level layout type.
 
 Parameter ``lyt``:
-  Gate-level layout.
+    Gate-level layout.
 
 Parameter ``deleted_coords``:
-  Tiles that got deleted.)doc";
+    Tiles that got deleted.)doc";
 
 static const char* __doc_fiction_detail_gate_level_drvs_impl = R"doc()doc";
 
@@ -4778,50 +4957,50 @@ static const char* __doc_fiction_detail_gate_level_drvs_impl_border_io_check =
     R"doc(Checks if all PI/POs are located at the layout's borders.
 
 Returns:
-  Check summary as a one liner.)doc";
+    Check summary as a one liner.)doc";
 
 static const char* __doc_fiction_detail_gate_level_drvs_impl_clocked_data_flow_check =
     R"doc(Checks for proper clocking of connected tiles based on their assigned
 nodes.
 
 Returns:
-  Check summary as a one liner.)doc";
+    Check summary as a one liner.)doc";
 
 static const char* __doc_fiction_detail_gate_level_drvs_impl_crossing_gates_check =
     R"doc(Check for wires crossing gates.
 
 Returns:
-  Check summary as a one liner.)doc";
+    Check summary as a one liner.)doc";
 
 static const char* __doc_fiction_detail_gate_level_drvs_impl_empty_io_check =
     R"doc(Checks if no PI/PO is assigned to an empty tile.
 
 Returns:
-  Check summary as a one liner.)doc";
+    Check summary as a one liner.)doc";
 
 static const char* __doc_fiction_detail_gate_level_drvs_impl_gate_level_drvs_impl =
     R"doc(Standard constructor.
 
 Parameter ``lyt``:
-  Gate layout to check for design rule flaws.
+    Gate layout to check for design rule flaws.
 
 Parameter ``p``:
-  Parameters.
+    Parameters.
 
 Parameter ``st``:
-  Statistics.)doc";
+    Statistics.)doc";
 
 static const char* __doc_fiction_detail_gate_level_drvs_impl_has_io_check =
     R"doc(Checks if PI/PO assignments are present.
 
 Returns:
-  Check summary as a one liner.)doc";
+    Check summary as a one liner.)doc";
 
 static const char* __doc_fiction_detail_gate_level_drvs_impl_io_pin_check =
     R"doc(Checks if all PI/POs are designated pins.
 
 Returns:
-  Check summary as a one liner.)doc";
+    Check summary as a one liner.)doc";
 
 static const char* __doc_fiction_detail_gate_level_drvs_impl_log_node = R"doc()doc";
 
@@ -4830,10 +5009,10 @@ static const char* __doc_fiction_detail_gate_level_drvs_impl_log_tile =
 logged in this process under the tile position.
 
 Parameter ``t``:
-  Tile whose attributes are to be logged.
+    Tile whose attributes are to be logged.
 
 Parameter ``report``:
-  Report to log into.)doc";
+    Report to log into.)doc";
 
 static const char* __doc_fiction_detail_gate_level_drvs_impl_lyt = R"doc(Layout to perform design rule checks on.)doc";
 
@@ -4842,20 +5021,20 @@ static const char* __doc_fiction_detail_gate_level_drvs_impl_missing_connections
 predecessors.
 
 Returns:
-  Check summary as a one liner.)doc";
+    Check summary as a one liner.)doc";
 
 static const char* __doc_fiction_detail_gate_level_drvs_impl_non_adjacent_connections_check =
     R"doc(Checks for proper clocking of connected tiles based on their assigned
 nodes.
 
 Returns:
-  Check summary as a one liner.)doc";
+    Check summary as a one liner.)doc";
 
 static const char* __doc_fiction_detail_gate_level_drvs_impl_placed_dead_nodes_check =
     R"doc(Checks for nodes that are placed but dead.
 
 Returns:
-  Check summary as a one liner.)doc";
+    Check summary as a one liner.)doc";
 
 static const char* __doc_fiction_detail_gate_level_drvs_impl_ps = R"doc(Parameters.)doc";
 
@@ -4875,24 +5054,24 @@ static const char* __doc_fiction_detail_gate_level_drvs_impl_summary =
     R"doc(Generates a summarizing one liner for a design rule check.
 
 Parameter ``msg``:
-  Message to output in success case. For failure, a "not" will be
-  added as a prefix.
+    Message to output in success case. For failure, a "not" will be
+    added as a prefix.
 
 Parameter ``chk``:
-  Result of the check.
+    Result of the check.
 
 Parameter ``brk``:
-  Flag to indicate that a failure is design breaking. If it's not,
-  msg is printed as a warning.
+    Flag to indicate that a failure is design breaking. If it's not,
+    msg is printed as a warning.
 
 Returns:
-  Formatted summary message.)doc";
+    Formatted summary message.)doc";
 
 static const char* __doc_fiction_detail_gate_level_drvs_impl_unplaced_nodes_check =
     R"doc(Checks for nodes that are not placed but still alive.
 
 Returns:
-  Check summary as a one liner.)doc";
+    Check summary as a one liner.)doc";
 
 static const char* __doc_fiction_detail_generate_edge_intersection_graph_impl = R"doc()doc";
 
@@ -4911,7 +5090,7 @@ pair of corresponding nodes, thus, forming a clique (complete sub-
 graph).
 
 Parameter ``objective_paths``:
-  Collection of paths belonging to the same objective.)doc";
+    Collection of paths belonging to the same objective.)doc";
 
 static const char* __doc_fiction_detail_generate_edge_intersection_graph_impl_create_intersection_edges =
     R"doc(Given a collection of paths belonging to the same objective, this
@@ -4921,7 +5100,7 @@ represent paths that intersect with it, i.e., that share at least one
 coordinate.
 
 Parameter ``objective_paths``:
-  Collection of paths belonging to the same objective.)doc";
+    Collection of paths belonging to the same objective.)doc";
 
 static const char* __doc_fiction_detail_generate_edge_intersection_graph_impl_edge_id = R"doc()doc";
 
@@ -4941,7 +5120,7 @@ the final graph, this function additionally stores their node IDs in
 the statistics.
 
 Parameter ``objective_paths``:
-  Collection of paths belonging to the same objective.)doc";
+    Collection of paths belonging to the same objective.)doc";
 
 static const char* __doc_fiction_detail_generate_edge_intersection_graph_impl_labeled_layout_coordinate_lookup_path =
     R"doc(Extends the layout_coordinate_path to additionally to the vector
@@ -4955,7 +5134,7 @@ static const char*
 coordinate in a set.
 
 Parameter ``c``:
-  Coordinate to append to the path.)doc";
+    Coordinate to append to the path.)doc";
 
 static const char*
     __doc_fiction_detail_generate_edge_intersection_graph_impl_labeled_layout_coordinate_lookup_path_has_intersection_with =
@@ -4966,14 +5145,14 @@ If, at some point, the set approach is not to be used anymore,
 std::find_first_of offers the same functionality on any kind of range.
 
 Template parameter ``Path``:
-  Type of other path.
+    Type of other path.
 
 Parameter ``other``:
-  The other path.
+    The other path.
 
 Returns:
-  `true` iff this path and the given one are not disjoint, i.e.,
-  share at least one coordinate.)doc";
+    `true` iff this path and the given one are not disjoint, i.e.,
+    share at least one coordinate.)doc";
 
 static const char*
     __doc_fiction_detail_generate_edge_intersection_graph_impl_labeled_layout_coordinate_lookup_path_has_overlap_with =
@@ -4984,14 +5163,14 @@ Similar to has_intersection_with, this function also returns `true` if
 source and target are matching in both paths.
 
 Template parameter ``Path``:
-  Type of other path.
+    Type of other path.
 
 Parameter ``other``:
-  The other path.
+    The other path.
 
 Returns:
-  `true` iff this path and the given one are overlapping, i.e.,
-  share at least one coordinate segment of size 2.)doc";
+    `true` iff this path and the given one are overlapping, i.e.,
+    share at least one coordinate segment of size 2.)doc";
 
 static const char*
     __doc_fiction_detail_generate_edge_intersection_graph_impl_labeled_layout_coordinate_lookup_path_label =
@@ -5025,16 +5204,16 @@ wire tiles between fanins and the gate, as well as between the gate
 and fanouts are collected for deletion.
 
 Template parameter ``Lyt``:
-  Cartesian gate-level layout type.
+    Cartesian gate-level layout type.
 
 Parameter ``lyt``:
-  Cartesian Gate-level layout.
+    Cartesian Gate-level layout.
 
 Parameter ``op``:
-  coordinate of the gate to be moved.
+    coordinate of the gate to be moved.
 
 Returns:
-  fanin and fanout gates, wires to be deleted and old routing paths.)doc";
+    fanin and fanout gates, wires to be deleted and old routing paths.)doc";
 
 static const char* __doc_fiction_detail_get_offset =
     R"doc(Utility function to calculate the offset that has to be subtracted
@@ -5049,22 +5228,41 @@ will be empty. This offset is based on the leftmost tile that will
 appear in the hexagonal layout.
 
 Template parameter ``HexLyt``:
-  Even-row hexagonal gate-level layout return type.
+    Even-row hexagonal gate-level layout return type.
 
 Template parameter ``CartLyt``:
-  Input Cartesian gate-level layout type.
+    Input Cartesian gate-level layout type.
 
 Parameter ``lyt``:
-  2DDWave-clocked Cartesian gate-level layout to hexagonalize.
+    2DDWave-clocked Cartesian gate-level layout to hexagonalize.
 
 Parameter ``cartesian_layout_width``:
-  Width of the Cartesian layout.
+    Width of the Cartesian layout.
 
 Parameter ``cartesian_layout_height``:
-  Height of the Cartesian layout.
+    Height of the Cartesian layout.
 
 Returns:
-  offset.)doc";
+    offset.)doc";
+
+static const char* __doc_fiction_detail_get_path =
+    R"doc(This helper function computes a path between two coordinates using the
+A* algorithm.
+
+Template parameter ``WiringReductionLyt``:
+    Type of the `wiring_reduction_layout`.
+
+Parameter ``lyt``:
+    Reference to the layout.
+
+Parameter ``start``:
+    The starting coordinate of the path.
+
+Parameter ``end``:
+    The ending coordinate of the path.
+
+Returns:
+    The computed path as a sequence of coordinates in the layout.)doc";
 
 static const char* __doc_fiction_detail_get_path_and_obstruct =
     R"doc(This helper function computes a path between two coordinates using the
@@ -5072,19 +5270,19 @@ A* algorithm. It then obstructs the tiles along the path in the given
 layout.
 
 Template parameter ``Lyt``:
-  Cartesian gate-level layout type.
+    Cartesian gate-level layout type.
 
 Parameter ``lyt``:
-  Reference to the layout.
+    Reference to the layout.
 
 Parameter ``start``:
-  The starting coordinate of the path.
+    The starting coordinate of the path.
 
 Parameter ``end``:
-  The ending coordinate of the path.
+    The ending coordinate of the path.
 
 Returns:
-  The computed path as a sequence of coordinates in the layout.)doc";
+    The computed path as a sequence of coordinates in the layout.)doc";
 
 static const char* __doc_fiction_detail_get_po_levels = R"doc()doc";
 
@@ -5095,10 +5293,10 @@ static const char* __doc_fiction_detail_graph_coloring_impl_convert_node_index =
 corresponding one used in Graph.
 
 Parameter ``node``:
-  Node ID to convert between graph structures.
+    Node ID to convert between graph structures.
 
 Returns:
-  Corresponding node ID in Graph.)doc";
+    Corresponding node ID in Graph.)doc";
 
 static const char* __doc_fiction_detail_graph_coloring_impl_graph = R"doc(The graph to be colored.)doc";
 
@@ -5109,10 +5307,10 @@ static const char* __doc_fiction_detail_graph_coloring_impl_is_brian_crites_engi
 algorithm from the graph-coloring library by Brian Crites.
 
 Parameter ``engine``:
-  Graph coloring engine to check.
+    Graph coloring engine to check.
 
 Returns:
-  `true` iff the given engine is DSATUR, MCS, LMXRLF, or TABUCOL.)doc";
+    `true` iff the given engine is DSATUR, MCS, LMXRLF, or TABUCOL.)doc";
 
 static const char* __doc_fiction_detail_graph_coloring_impl_ps = R"doc(Parameters.)doc";
 
@@ -5133,17 +5331,16 @@ signals are updated - if no better coordinate is found, the old wiring
 is restored
 
 Template parameter ``Lyt``:
-  Cartesian obstruction gate-level layout type.
+    Cartesian obstruction gate-level layout type.
 
 Parameter ``lyt``:
-  2DDWave-clocked cartesian obstruction gate-level layout.
+    2DDWave-clocked cartesian obstruction gate-level layout.
 
 Parameter ``old_pos``:
-  Old position of the gate to be moved.
+    Old position of the gate to be moved.
 
 Returns:
-  Flag that indicates if gate was moved successfully and the new
-  coordinate of the moved gate.)doc";
+    `true` if the gate was moved successfully, `false` otherwise.)doc";
 
 static const char* __doc_fiction_detail_is_balanced_impl = R"doc()doc";
 
@@ -5186,10 +5383,10 @@ different input combinations and comparing the results to expected
 outputs from a truth table.
 
 Template parameter ``Lyt``:
-  SiDB cell-level layout type.
+    SiDB cell-level layout type.
 
 Template parameter ``TT``:
-  The type of the truth table specifying the gate behavior.)doc";
+    The type of the truth table specifying the gate behavior.)doc";
 
 static const char* __doc_fiction_detail_is_operational_impl_bii =
     R"doc(Iterator that iterates over all possible input states.)doc";
@@ -5198,27 +5395,27 @@ static const char* __doc_fiction_detail_is_operational_impl_determine_operationa
     R"doc(Determines the input combinations yielding the correct output.
 
 Returns:
-  All inputs (e.g. 2-input Boolean function: 00 ^= 0; 10 ^= 2) for
-  which the correct output is computed.)doc";
+    All inputs (e.g. 2-input Boolean function: 00 ^= 0; 10 ^= 2) for
+    which the correct output is computed.)doc";
 
 static const char* __doc_fiction_detail_is_operational_impl_get_number_of_simulator_invocations =
     R"doc(Returns the total number of simulator invocations.
 
 Returns:
-  The number of simulator invocations.)doc";
+    The number of simulator invocations.)doc";
 
 static const char* __doc_fiction_detail_is_operational_impl_is_operational_impl =
     R"doc(Constructor to initialize the algorithm with a layout and parameters.
 
 Parameter ``lyt``:
-  The SiDB cell-level layout to be checked.
+    The SiDB cell-level layout to be checked.
 
 Parameter ``spec``:
-  Expected Boolean function of the layout given as a multi-output
-  truth table.
+    Expected Boolean function of the layout given as a multi-output
+    truth table.
 
 Parameter ``params``:
-  Parameters for the `is_operational` algorithm.)doc";
+    Parameters for the `is_operational` algorithm.)doc";
 
 static const char* __doc_fiction_detail_is_operational_impl_layout = R"doc(SiDB cell-level layout.)doc";
 
@@ -5233,12 +5430,12 @@ layout with certain input combination). The simulation results are
 stored in the `sim_result` variable.
 
 Parameter ``bdl_iterator``:
-  A reference to a BDL input iterator representing the gate layout
-  at a given input combination. The simulation is performed based on
-  the configuration represented by the iterator.
+    A reference to a BDL input iterator representing the gate layout
+    at a given input combination. The simulation is performed based on
+    the configuration represented by the iterator.
 
 Returns:
-  Simulation results.)doc";
+    Simulation results.)doc";
 
 static const char* __doc_fiction_detail_is_operational_impl_run =
     R"doc(Run the `is_operational` algorithm.
@@ -5247,8 +5444,8 @@ This function executes the operational status checking algorithm for
 the gate layout and parameters provided during initialization.
 
 Returns:
-  The operational status of the gate layout (either `OPERATIONAL` or
-  `NON_OPERATIONAL`).)doc";
+    The operational status of the gate layout (either `OPERATIONAL` or
+    `NON_OPERATIONAL`).)doc";
 
 static const char* __doc_fiction_detail_is_operational_impl_simulator_invocations =
     R"doc(Number of simulator invocations.)doc";
@@ -5272,19 +5469,19 @@ static const char* __doc_fiction_detail_jump_point_search_impl_coordinate_f_oper
 allows for a convenient lookup in the priority queue.
 
 Parameter ``other``:
-  Other coordinate_f to compare with.
+    Other coordinate_f to compare with.
 
 Returns:
-  `true` iff this coord value is equal to the other's.)doc";
+    `true` iff this coord value is equal to the other's.)doc";
 
 static const char* __doc_fiction_detail_jump_point_search_impl_coordinate_f_operator_gt =
     R"doc(Comparator for the priority queue. Compares only the f-values.
 
 Parameter ``other``:
-  Other coordinate_f to compare with.
+    Other coordinate_f to compare with.
 
 Returns:
-  `true` iff this f-value is greater than the other's.)doc";
+    `true` iff this f-value is greater than the other's.)doc";
 
 static const char* __doc_fiction_detail_jump_point_search_impl_distance =
     R"doc(The distance functor that implements the heuristic estimation
@@ -5295,27 +5492,27 @@ static const char* __doc_fiction_detail_jump_point_search_impl_expand =
 the heuristic cost function.
 
 Parameter ``current``:
-  Coordinate that is currently examined.)doc";
+    Coordinate that is currently examined.)doc";
 
 static const char* __doc_fiction_detail_jump_point_search_impl_fill_in_jumps =
     R"doc(Completes a reconstructed path by filling in the jumps that were made
 during JPS.
 
 Parameter ``p``:
-  Incomplete path with jump gaps.
+    Incomplete path with jump gaps.
 
 Returns:
-  Completed interpolated path.)doc";
+    Completed interpolated path.)doc";
 
 static const char* __doc_fiction_detail_jump_point_search_impl_g =
     R"doc(Returns the g-value of a coordinate by accessing the g_values map.
 Returns 0 if no entry exists.
 
 Parameter ``c``:
-  Coordinate whose g-value is desired.
+    Coordinate whose g-value is desired.
 
 Returns:
-  g-value of coordinate c or 0 if no value has been stored.)doc";
+    g-value of coordinate c or 0 if no value has been stored.)doc";
 
 static const char* __doc_fiction_detail_jump_point_search_impl_g_values =
     R"doc(Stores the g-cost for each coordinate c, i.e., the length of the
@@ -5326,7 +5523,7 @@ static const char* __doc_fiction_detail_jump_point_search_impl_get_lowest_f_coor
 list priority queue.
 
 Returns:
-  Coordinate with the lowest f-value from the open list.)doc";
+    Coordinate with the lowest f-value from the open list.)doc";
 
 static const char* __doc_fiction_detail_jump_point_search_impl_interpolate =
     R"doc(Interpolates a straight line between two given coordinates using
@@ -5337,13 +5534,13 @@ This function is repeatedly used in the fill_in_jumps function to
 interpolate the jump gaps.
 
 Parameter ``c1``:
-  Start coordinate.
+    Start coordinate.
 
 Parameter ``c2``:
-  Goal coordinate.
+    Goal coordinate.
 
 Returns:
-  A straight path between c1 and c2.)doc";
+    A straight path between c1 and c2.)doc";
 
 static const char* __doc_fiction_detail_jump_point_search_impl_is_traversable =
     R"doc(Checks if coordinate c2 is directly reachable from coordinate c1. That
@@ -5351,22 +5548,22 @@ is if the coordinates are not identical, if they are adjacent or if
 the clocking checks out, and if there is no obstacle in the way.
 
 Parameter ``c1``:
-  Start coordinate.
+    Start coordinate.
 
 Parameter ``c2``:
-  Goal coordinate.
+    Goal coordinate.
 
 Returns:
-  `true` iff c2 is directly reachable from c1.)doc";
+    `true` iff c2 is directly reachable from c1.)doc";
 
 static const char* __doc_fiction_detail_jump_point_search_impl_is_visited =
     R"doc(Checks if a coordinate has been visited already.
 
 Parameter ``c``:
-  Coordinate to check.
+    Coordinate to check.
 
 Returns:
-  `true` iff c has already been visited.)doc";
+    `true` iff c has already been visited.)doc";
 
 static const char* __doc_fiction_detail_jump_point_search_impl_jump =
     R"doc(Compute the next jump point starting from successor with current as
@@ -5376,14 +5573,14 @@ traversable from successor. That is, there must be a valid path
 through non-obstructed tiles.
 
 Parameter ``current``:
-  Parent coordinate.
+    Parent coordinate.
 
 Parameter ``successor``:
-  Coordinate from which to look for the next jump point.
+    Coordinate from which to look for the next jump point.
 
 Returns:
-  The next jump point or `std::nullopt` if no such coordinate is
-  available.)doc";
+    The next jump point or `std::nullopt` if no such coordinate is
+    available.)doc";
 
 static const char* __doc_fiction_detail_jump_point_search_impl_jump_point_search_impl = R"doc()doc";
 
@@ -5397,14 +5594,14 @@ g-value of the given coordinate. If that is the case, the new g-value
 does not improve the path.
 
 Parameter ``c``:
-  Coordinate to whose g-value is to be checked.
+    Coordinate to whose g-value is to be checked.
 
 Parameter ``g_val``:
-  g-value to compare to c's.
+    g-value to compare to c's.
 
 Returns:
-  `true` iff the given g-value does not mean an improvement for the
-  given coordinate.)doc";
+    `true` iff the given g-value does not mean an improvement for the
+    given coordinate.)doc";
 
 static const char* __doc_fiction_detail_jump_point_search_impl_objective =
     R"doc(The source-target coordinate pair.)doc";
@@ -5418,7 +5615,7 @@ static const char* __doc_fiction_detail_jump_point_search_impl_reconstruct_path 
 the path finding algorithm.
 
 Returns:
-  The shortest path connecting source and target.)doc";
+    The shortest path connecting source and target.)doc";
 
 static const char* __doc_fiction_detail_jump_point_search_impl_run = R"doc()doc";
 
@@ -5426,10 +5623,10 @@ static const char* __doc_fiction_detail_jump_point_search_impl_set_g =
     R"doc(Updates the g-value of the given coordinate to the given value.
 
 Parameter ``c``:
-  Coordinate whose g-value is to be updated to g_val.
+    Coordinate whose g-value is to be updated to g_val.
 
 Parameter ``g_val``:
-  New g-value for c.)doc";
+    New g-value for c.)doc";
 
 static const char* __doc_fiction_detail_maximum_defect_influence_position_and_distance_impl =
     R"doc(A class for simulating the maximum influence distance of defects
@@ -5500,11 +5697,11 @@ random non-operational points as well as the contour of the found
 operational domain plus a one pixel wide border around it.
 
 Parameter ``samples``:
-  Maximum number of random samples to be taken before contour
-  tracing.
+    Maximum number of random samples to be taken before contour
+    tracing.
 
 Returns:
-  The (partial) operational domain of the layout.)doc";
+    The (partial) operational domain of the layout.)doc";
 
 static const char* __doc_fiction_detail_operational_domain_impl_find_operational_contour_step_point =
     R"doc(Finds a boundary starting point for the contour tracing algorithm.
@@ -5516,11 +5713,11 @@ range and the function returns the last operational point that was
 investigated, i.e., a point at the border of the parameter range.
 
 Parameter ``starting_point``:
-  Starting step point for the boundary search.
+    Starting step point for the boundary search.
 
 Returns:
-  An operational step point at the edge of the operational domain
-  `starting_point` is located in.)doc";
+    An operational step point at the edge of the operational domain
+    `starting_point` is located in.)doc";
 
 static const char* __doc_fiction_detail_operational_domain_impl_find_operational_step_point_via_random_sampling =
     R"doc(Performs random sampling to find any operational parameter
@@ -5534,11 +5731,11 @@ This function adds any sampled points to the `op_domain` member
 variables.
 
 Parameter ``samples``:
-  Maximum number of samples to take. Works as a timeout.
+    Maximum number of samples to take. Works as a timeout.
 
 Returns:
-  The first operational step point, if any could be found,
-  `std::nullopt` otherwise.)doc";
+    The first operational step point, if any could be found,
+    `std::nullopt` otherwise.)doc";
 
 static const char* __doc_fiction_detail_operational_domain_impl_flood_fill =
     R"doc(Performs flood fill to determine the operational domain. The algorithm
@@ -5550,10 +5747,10 @@ are reachable via flood fill from the found operational points plus a
 one pixel wide border around the domain.
 
 Parameter ``samples``:
-  Maximum number of random samples to be taken before flood fill.
+    Maximum number of random samples to be taken before flood fill.
 
 Returns:
-  The (partial) operational domain of the layout.)doc";
+    The (partial) operational domain of the layout.)doc";
 
 static const char* __doc_fiction_detail_operational_domain_impl_generate_random_step_points =
     R"doc(Generates (potentially repeating) random `step_points` in the stored
@@ -5561,10 +5758,10 @@ parameter range. The number of generated points is exactly equal to
 `samples`.
 
 Parameter ``samples``:
-  Number of random `step_point`s to generate.
+    Number of random `step_point`s to generate.
 
 Returns:
-  A vector of random `step_point`s in the stored parameter range.)doc";
+    A set of random `step_point`s in the stored parameter range.)doc";
 
 static const char* __doc_fiction_detail_operational_domain_impl_grid_search =
     R"doc(Performs a grid search over the specified parameter ranges with the
@@ -5572,7 +5769,7 @@ specified step sizes. The grid search always has quadratic complexity.
 The operational status is computed for each parameter combination.
 
 Returns:
-  The operational domain of the layout.)doc";
+    The operational domain of the layout.)doc";
 
 static const char* __doc_fiction_detail_operational_domain_impl_has_already_been_sampled =
     R"doc(Determines whether the point at step position `(x, y)` has already
@@ -5581,11 +5778,11 @@ already exists. Here, `x` and `y` represent steps in the x and y
 dimension, respectively, not the actual values of the parameters.
 
 Parameter ``sp``:
-  Step point to check.
+    Step point to check.
 
 Returns:
-  The operational status of the point at step position `sp = (x, y)`
-  or `std::nullopt` if `(x, y)` has not been sampled yet.)doc";
+    The operational status of the point at step position `sp = (x, y)`
+    or `std::nullopt` if `(x, y)` has not been sampled yet.)doc";
 
 static const char* __doc_fiction_detail_operational_domain_impl_is_step_point_operational =
     R"doc(Logs and returns the operational status at the given point `sp = (x,
@@ -5601,11 +5798,11 @@ Any investigated point is added to the stored `op_domain`, regardless
 of its operational status.
 
 Parameter ``sp``:
-  Step point to be investigated.
+    Step point to be investigated.
 
 Returns:
-  The operational status of the layout under the given simulation
-  parameters.)doc";
+    The operational status of the layout under the given simulation
+    parameters.)doc";
 
 static const char* __doc_fiction_detail_operational_domain_impl_layout =
     R"doc(The SiDB cell-level layout to investigate.)doc";
@@ -5626,10 +5823,10 @@ gathered. The points are returned in clockwise order starting from the
 right neighbor.
 
 Parameter ``sp``:
-  Step point to get the Moore neighborhood of.
+    Step point to get the Moore neighborhood of.
 
 Returns:
-  The Moore neighborhood of the step point at `sp = (x, y)`.)doc";
+    The Moore neighborhood of the step point at `sp = (x, y)`.)doc";
 
 static const char* __doc_fiction_detail_operational_domain_impl_num_evaluated_parameter_combinations =
     R"doc(Number of evaluated parameter combinations.)doc";
@@ -5642,14 +5839,14 @@ static const char* __doc_fiction_detail_operational_domain_impl_num_x_steps =
 provided parameters.
 
 Returns:
-  The number of steps in the x dimension.)doc";
+    The number of steps in the x dimension.)doc";
 
 static const char* __doc_fiction_detail_operational_domain_impl_num_y_steps =
     R"doc(Calculates the number of steps in the y dimension based on the
 provided parameters.
 
 Returns:
-  The number of steps in the y dimension.)doc";
+    The number of steps in the y dimension.)doc";
 
 static const char* __doc_fiction_detail_operational_domain_impl_op_domain =
     R"doc(The operational domain of the layout.)doc";
@@ -5661,17 +5858,17 @@ is necessary for the operational domain computation. The layout must
 have exactly one output BDL pair.
 
 Parameter ``lyt``:
-  SiDB cell-level layout to be evaluated.
+    SiDB cell-level layout to be evaluated.
 
 Parameter ``spec``:
-  Expected Boolean function of the layout given as a multi-output
-  truth table.
+    Expected Boolean function of the layout given as a multi-output
+    truth table.
 
 Parameter ``ps``:
-  Parameters for the operational domain computation.
+    Parameters for the operational domain computation.
 
 Parameter ``st``:
-  Statistics of the process.)doc";
+    Statistics of the process.)doc";
 
 static const char* __doc_fiction_detail_operational_domain_impl_output_bdl_pairs =
     R"doc(The output BDL pair of the layout.)doc";
@@ -5685,44 +5882,44 @@ the specified parameter range. The operational status is computed for
 each sample point.
 
 Parameter ``samples``:
-  Number of random samples to be taken.
+    Number of random samples to be taken.
 
 Returns:
-  The (partial) operational domain of the layout.)doc";
+    The (partial) operational domain of the layout.)doc";
 
 static const char* __doc_fiction_detail_operational_domain_impl_set_dimension_value =
     R"doc(Helper function that sets the value of a sweep dimension in the
 simulation parameters.
 
 Parameter ``sim_parameters``:
-  Simulation parameter object to set the sweep dimension `dim` to
-  value `val`.
+    Simulation parameter object to set the sweep dimension `dim` to
+    value `val`.
 
 Parameter ``val``:
-  Value to set the dimension `dim` to.
+    Value to set the dimension `dim` to.
 
 Parameter ``dim``:
-  Sweep dimension to set the value `val` to.)doc";
+    Sweep dimension to set the value `val` to.)doc";
 
 static const char* __doc_fiction_detail_operational_domain_impl_set_x_dimension_value =
     R"doc(Helper function that sets the value of the x dimension in the
 simulation parameters.
 
 Parameter ``sim_params``:
-  Simulation parameter object to set the x dimension value of.
+    Simulation parameter object to set the x dimension value of.
 
 Parameter ``val``:
-  Value to set the x dimension to.)doc";
+    Value to set the x dimension to.)doc";
 
 static const char* __doc_fiction_detail_operational_domain_impl_set_y_dimension_value =
     R"doc(Helper function that sets the value of the y dimension in the
 simulation parameters.
 
 Parameter ``sim_params``:
-  Simulation parameter object to set the y dimension value of.
+    Simulation parameter object to set the y dimension value of.
 
 Parameter ``val``:
-  Value to set the y dimension to.)doc";
+    Value to set the y dimension to.)doc";
 
 static const char* __doc_fiction_detail_operational_domain_impl_stats =
     R"doc(The statistics of the operational domain computation.)doc";
@@ -5740,19 +5937,28 @@ static const char* __doc_fiction_detail_operational_domain_impl_step_point_opera
     R"doc(Equality operator.
 
 Parameter ``other``:
-  Other step point to compare with.
+    Other step point to compare with.
 
 Returns:
-  `true` iff the step points are equal.)doc";
+    `true` iff the step points are equal.)doc";
+
+static const char* __doc_fiction_detail_operational_domain_impl_step_point_operator_lt =
+    R"doc(Less than operator.
+
+Parameter ``other``:
+    Other step point to compare with.
+
+Returns:
+    `true` if this step point is less than to the other.)doc";
 
 static const char* __doc_fiction_detail_operational_domain_impl_step_point_operator_ne =
     R"doc(Inequality operator.
 
 Parameter ``other``:
-  Other step point to compare with.
+    Other step point to compare with.
 
 Returns:
-  `true` iff the step points are not equal.)doc";
+    `true` iff the step points are not equal.)doc";
 
 static const char* __doc_fiction_detail_operational_domain_impl_step_point_step_point =
     R"doc(Standard default constructor.)doc";
@@ -5761,10 +5967,10 @@ static const char* __doc_fiction_detail_operational_domain_impl_step_point_step_
     R"doc(Standard constructor.
 
 Parameter ``x_step``:
-  X dimension step value.
+    X dimension step value.
 
 Parameter ``y_step``:
-  Y dimension step value.)doc";
+    Y dimension step value.)doc";
 
 static const char* __doc_fiction_detail_operational_domain_impl_step_point_x = R"doc(X dimension step value.)doc";
 
@@ -5781,19 +5987,19 @@ static const char* __doc_fiction_detail_operational_domain_impl_to_parameter_poi
     R"doc(Converts a step point to a parameter point.
 
 Parameter ``sp``:
-  Step point to convert.
+    Step point to convert.
 
 Returns:
-  The parameter point corresponding to the step point `sp`.)doc";
+    The parameter point corresponding to the step point `sp`.)doc";
 
 static const char* __doc_fiction_detail_operational_domain_impl_to_step_point =
     R"doc(Converts a parameter point to a step point.
 
 Parameter ``pp``:
-  Parameter point to convert.
+    Parameter point to convert.
 
 Returns:
-  The step point corresponding to the parameter point `pp`.)doc";
+    The step point corresponding to the parameter point `pp`.)doc";
 
 static const char* __doc_fiction_detail_operational_domain_impl_truth_table =
     R"doc(The specification of the layout.)doc";
@@ -5807,14 +6013,14 @@ static const char* __doc_fiction_detail_operational_domain_impl_y_indices = R"do
 static const char* __doc_fiction_detail_operational_domain_impl_y_values = R"doc(All y dimension values.)doc";
 
 static const char* __doc_fiction_detail_optimize_output_positions =
-    R"doc(Utility function that traces back all output nodes and calculate
-optimal positions.
+    R"doc(Utility function that moves outputs from the last row to the previous
+row, and from the last column to the previous column, if possible.
 
 Template parameter ``Lyt``:
-  Cartesian gate-level layout type.
+    Cartesian gate-level layout type.
 
 Parameter ``lyt``:
-  Gate-level layout.)doc";
+    Gate-level layout.)doc";
 
 static const char* __doc_fiction_detail_orthogonal_impl = R"doc()doc";
 
@@ -5828,35 +6034,20 @@ static const char* __doc_fiction_detail_orthogonal_impl_pst = R"doc()doc";
 
 static const char* __doc_fiction_detail_orthogonal_impl_run = R"doc()doc";
 
-static const char* __doc_fiction_detail_output_update =
-    R"doc(This struct is used to hold information about an update to the layout,
-where a PO tile is moved from its old coordinate to a new coordinate
-and connected to its new child node.
+static const char* __doc_fiction_detail_post_layout_optimization_impl = R"doc()doc";
 
-Template parameter ``Lyt``:
-  Cartesian gate-level layout type.)doc";
+static const char* __doc_fiction_detail_post_layout_optimization_impl_plyt =
+    R"doc(2DDWave-clocked Cartesian gate-level layout to optimize.)doc";
 
-static const char* __doc_fiction_detail_output_update_child_coordinate =
-    R"doc(The coordinate of the child node (after the update).
+static const char* __doc_fiction_detail_post_layout_optimization_impl_post_layout_optimization_impl = R"doc()doc";
 
-This is the coordinate of the new child (i.e. incoming signal) after
-the update.)doc";
+static const char* __doc_fiction_detail_post_layout_optimization_impl_ps =
+    R"doc(Post-layout optimization parameters.)doc";
 
-static const char* __doc_fiction_detail_output_update_new_coordinate = R"doc(The new coordinate of the PO.)doc";
+static const char* __doc_fiction_detail_post_layout_optimization_impl_pst =
+    R"doc(Statistics about the post-layout optimization process.)doc";
 
-static const char* __doc_fiction_detail_output_update_old_coordinate = R"doc(The old coordinate of the PO.)doc";
-
-static const char* __doc_fiction_detail_output_update_output_update =
-    R"doc(Construct a new Update object.
-
-Parameter ``old_coord``:
-  The old coordinate of the PO.
-
-Parameter ``new_coord``:
-  The new coordinate of the PO.
-
-Parameter ``child_coord``:
-  The coordinate of the child node (after the update).)doc";
+static const char* __doc_fiction_detail_post_layout_optimization_impl_run = R"doc()doc";
 
 static const char* __doc_fiction_detail_qca_energy_dissipation_impl = R"doc()doc";
 
@@ -5895,13 +6086,13 @@ and conducts the physical simulation based on whether a three-state
 simulation is required.
 
 Template parameter ``ChargeLyt``:
-  The type of Charge Layout.
+    The type of Charge Layout.
 
 Template parameter ``ChargeLyt``:
-  The type representing the charge layout to simulate.
+    The type representing the charge layout to simulate.
 
 Parameter ``base_number``:
-  `THREE` if a three-state simulation is required, `TWO` otherwise.)doc";
+    `THREE` if a three-state simulation is required, `TWO` otherwise.)doc";
 
 static const char* __doc_fiction_detail_quickexact_impl_generate_layout_without_negative_sidbs =
     R"doc(This function is used to generate a layout without the SiDBs that are
@@ -5961,20 +6152,20 @@ static const char* __doc_fiction_detail_quickexact_impl_three_state_simulation =
 positive).
 
 Template parameter ``ChargeLyt``:
-  Type of the charge distribution surface.
+    Type of the charge distribution surface.
 
 Parameter ``charge_layout``:
-  Initialized charge layout.)doc";
+    Initialized charge layout.)doc";
 
 static const char* __doc_fiction_detail_quickexact_impl_two_state_simulation =
     R"doc(This function conducts 2-state physical simulation (negative,
 neutral).
 
 Template parameter ``ChargeLyt``:
-  Type of the charge distribution surface.
+    Type of the charge distribution surface.
 
 Parameter ``charge_layout``:
-  Initialized charge layout.)doc";
+    Initialized charge layout.)doc";
 
 static const char* __doc_fiction_detail_read_fgl_layout_impl = R"doc()doc";
 
@@ -5988,13 +6179,13 @@ static const char* __doc_fiction_detail_read_fgl_layout_impl_gate_storage_compar
     R"doc(Static member function to compare gate_storage objects by their IDs.
 
 Parameter ``gate1``:
-  First gate to be compared.
+    First gate to be compared.
 
 Parameter ``gate2``:
-  Second gate to be compared.
+    Second gate to be compared.
 
 Returns:
-  True if gate1's ID is less than gate2's ID, false otherwise.)doc";
+    True if gate1's ID is less than gate2's ID, false otherwise.)doc";
 
 static const char* __doc_fiction_detail_read_fgl_layout_impl_gate_storage_id =
     R"doc(Unique identifier for the gate.)doc";
@@ -6075,16 +6266,16 @@ static const char* __doc_fiction_detail_read_sqd_layout_impl_dimer_to_cell =
 maximum cell position parsed so far.
 
 Parameter ``n``:
-  The x-coordinate of the dimer.
+    The x-coordinate of the dimer.
 
 Parameter ``m``:
-  The y-coordinate of the dimer.
+    The y-coordinate of the dimer.
 
 Parameter ``l``:
-  0 for the upper dot, 1 for the lower dot.
+    0 for the upper dot, 1 for the lower dot.
 
 Returns:
-  The cell position converted from the dimer position.)doc";
+    The cell position converted from the dimer position.)doc";
 
 static const char* __doc_fiction_detail_read_sqd_layout_impl_is =
     R"doc(The input stream from which the SQD file is read.)doc";
@@ -6100,7 +6291,7 @@ static const char* __doc_fiction_detail_read_sqd_layout_impl_parse_db_dot =
 to the layout.
 
 Parameter ``db_dot``:
-  The <dbdot> element.)doc";
+    The <dbdot> element.)doc";
 
 static const char* __doc_fiction_detail_read_sqd_layout_impl_parse_defect =
     R"doc(Parses a <defect> element from the SQD file and adds the respective
@@ -6108,7 +6299,7 @@ defect to the layout if it implements the has_assign_sidb_defect
 function..
 
 Parameter ``label``:
-  The <defect> element.)doc";
+    The <defect> element.)doc";
 
 static const char* __doc_fiction_detail_read_sqd_layout_impl_parse_defect_label =
     R"doc(Parses a <val> attribute of a <type_label> element of a <property_map>
@@ -6116,41 +6307,41 @@ element from the SQD file and converts it to the respective SiDB
 defect type.
 
 Parameter ``label``:
-  The <type_label> element's <val> attribute.
+    The <type_label> element's <val> attribute.
 
 Returns:
-  The SiDB defect type corresponding to the given label.)doc";
+    The SiDB defect type corresponding to the given label.)doc";
 
 static const char* __doc_fiction_detail_read_sqd_layout_impl_parse_dot_type =
     R"doc(Parses the <type> attribute of a <dbdot> element from the SQD file and
 returns the corresponding cell type.
 
 Parameter ``db_dot``:
-  The <dbdot> element.
+    The <dbdot> element.
 
 Returns:
-  The cell type specified by the <dbdot> element. If non is
-  specified, the cell type is assumed to be normal.)doc";
+    The cell type specified by the <dbdot> element. If non is
+    specified, the cell type is assumed to be normal.)doc";
 
 static const char* __doc_fiction_detail_read_sqd_layout_impl_parse_lat_type =
     R"doc(Parses a <latcoord> element from the SQD file and returns its
 specified cell position.
 
 Parameter ``latcoord``:
-  The <latcoord> element.
+    The <latcoord> element.
 
 Returns:
-  The cell position specified by the <latcoord> element.)doc";
+    The cell position specified by the <latcoord> element.)doc";
 
 static const char* __doc_fiction_detail_read_sqd_layout_impl_parse_latcoord =
     R"doc(Parses a <latcoord> element from the SQD file and returns its
 specified cell position.
 
 Parameter ``latcoord``:
-  The <latcoord> element.
+    The <latcoord> element.
 
 Returns:
-  The cell position specified by the <latcoord> element.)doc";
+    The cell position specified by the <latcoord> element.)doc";
 
 static const char* __doc_fiction_detail_read_sqd_layout_impl_read_sqd_layout_impl = R"doc()doc";
 
@@ -6163,8 +6354,8 @@ static const char* __doc_fiction_detail_read_sqd_layout_impl_update_bounding_box
 the layout
 
 Parameter ``cell``:
-  The cell to challenge the stored maximum position of a cell in the
-  layout against.)doc";
+    The cell to challenge the stored maximum position of a cell in the
+    layout against.)doc";
 
 static const char* __doc_fiction_detail_recursively_paint_edges = R"doc()doc";
 
@@ -6174,7 +6365,7 @@ static const char* __doc_fiction_detail_sat_clocking_handler_assign_clock_number
     R"doc(Assigns clock numbers to the layout based on the provided model.
 
 Parameter ``model``:
-  The model to extract the clocking scheme from.)doc";
+    The model to extract the clocking scheme from.)doc";
 
 static const char* __doc_fiction_detail_sat_clocking_handler_at_least_one_clock_number_per_tile =
     R"doc(Adds constraints to the solver that enforce the assignment of at least
@@ -6191,7 +6382,7 @@ Constructs a SAT instance and passes it to a solver to find a valid
 clocking scheme.
 
 Returns:
-  `true` iff a valid clocking scheme could be found.)doc";
+    `true` iff a valid clocking scheme could be found.)doc";
 
 static const char* __doc_fiction_detail_sat_clocking_handler_ensure_same_clock_number_on_crossing_tiles =
     R"doc(Adds constraints to the solver that ensure the assignment of the same
@@ -6256,11 +6447,11 @@ in the provided clique gets a different color assigned from the
 beginning.
 
 Parameter ``instance``:
-  Pointer to the solver instance.
+    Pointer to the solver instance.
 
 Returns:
-  A clique-first ordering of the vertices that assigns the clique
-  vertices the lowest indices.)doc";
+    A clique-first ordering of the vertices that assigns the clique
+    vertices the lowest indices.)doc";
 
 static const char* __doc_fiction_detail_sat_coloring_handler_ps = R"doc(Parameters.)doc";
 
@@ -6283,10 +6474,10 @@ static const char* __doc_fiction_detail_sat_coloring_handler_solver_instance_sol
 pair.
 
 Parameter ``graph``:
-  The graph to color.
+    The graph to color.
 
 Parameter ``num_colors``:
-  Number of colors to attempt the coloring with.)doc";
+    Number of colors to attempt the coloring with.)doc";
 
 static const char* __doc_fiction_detail_sat_coloring_handler_solver_instance_solver_instance_2 =
     R"doc(Default constructor is not available.)doc";
@@ -6302,7 +6493,7 @@ implemented:
 transforming the coloring solution to be lexicographically minimal
 
 Parameter ``instance``:
-  Pointer to the solver instance.)doc";
+    Pointer to the solver instance.)doc";
 
 static const char* __doc_fiction_detail_sat_coloring_handler_transform_solution_to_lexicographical_minimum =
     R"doc(Reduce the search space by symmetry breaking. To this end, the
@@ -6311,33 +6502,241 @@ is assigned color c unless color c - 1 has been assigned to any vertex
 of lower index.
 
 Parameter ``instance``:
-  Pointer to the solver instance.)doc";
+    Pointer to the solver instance.)doc";
+
+static const char* __doc_fiction_detail_search_direction =
+    R"doc(The two search directions: horizontal (from left to right) and
+vertical (from top to bottom).)doc";
+
+static const char* __doc_fiction_detail_search_direction_HORIZONTAL = R"doc(Search from left to right.)doc";
+
+static const char* __doc_fiction_detail_search_direction_VERTICAL = R"doc(Search from top to bottom.)doc";
 
 static const char* __doc_fiction_detail_sweep_parameter_to_string =
     R"doc(Converts a sweep parameter to a string representation. This is used to
 write the parameter name to the CSV file.
 
 Parameter ``param``:
-  The sweep parameter to be converted.
+    The sweep parameter to be converted.
 
 Returns:
-  The string representation of the sweep parameter.)doc";
+    The string representation of the sweep parameter.)doc";
 
 static const char* __doc_fiction_detail_to_hex =
     R"doc(Utility function to transform a Cartesian tile into a hexagonal one.
 
 Parameter ``cartesian_tile``:
-  Tile on the Cartesian grid.
+    Tile on the Cartesian grid.
 
 Parameter ``cartesian_layout_height``:
-  Height of the Cartesian layout.
+    Height of the Cartesian layout.
 
 Returns:
-  corresponding tile on the hexagonal grid.)doc";
+    corresponding tile on the hexagonal grid.)doc";
+
+static const char* __doc_fiction_detail_update_to_delete_list =
+    R"doc(Update the to-delete list based on a possible path in a
+wiring_reduction_layout.
+
+This function updates the to-delete list by appending coordinates from
+the given possible path in a wiring_reduction_layout. It considers
+coordinates that are not at the leftmost (`x == 0`) or rightmost (`x
+== lyt.x()`) positions for left to right, or at the top (`y == 0`) or
+bottom (`y == lyt.y()`) positions for top to bottom and shifts them to
+get the corresponding coordinates on the original layout. The
+coordinates are then obstructed in both layers (0 and 1).
+
+Template parameter ``WiringReductionLyt``:
+    Type of the `wiring_reduction_layout`.
+
+Parameter ``lyt``:
+    The `wiring_reduction_layout` to be updated.
+
+Parameter ``possible_path``:
+    The path of coordinates to be considered for updating the to-
+    delete list.
+
+Parameter ``to_delete``:
+    Reference to the to-delete list to be updated with new
+    coordinates.)doc";
 
 static const char* __doc_fiction_detail_wire_east = R"doc()doc";
 
 static const char* __doc_fiction_detail_wire_south = R"doc()doc";
+
+static const char* __doc_fiction_detail_wiring_reduction_impl = R"doc()doc";
+
+static const char* __doc_fiction_detail_wiring_reduction_impl_plyt =
+    R"doc(The 2DDWave-clocked layout whose wiring is to be reduced.)doc";
+
+static const char* __doc_fiction_detail_wiring_reduction_impl_pst =
+    R"doc(Statistics about the wiring_reduction process.)doc";
+
+static const char* __doc_fiction_detail_wiring_reduction_impl_run = R"doc()doc";
+
+static const char* __doc_fiction_detail_wiring_reduction_impl_wiring_reduction_impl = R"doc()doc";
+
+static const char* __doc_fiction_detail_wiring_reduction_layout =
+    R"doc(Represents a layout used for wiring reduction derived from the
+`cartesian_layout` class.
+
+This class provides functionality for a wiring reduction layout based
+on a Cartesian coordinate system. It inherits from the
+`cartesian_layout` class and extends it with specific behavior for
+finding excess wiring.
+
+Template parameter ``OffsetCoordinateType``:
+    The type of coordinates used in the layout. Defaults to
+    `offset::ucoord_t` if not explicitly provided.)doc";
+
+static const char* __doc_fiction_detail_wiring_reduction_layout_foreach_adjacent_coordinate =
+    R"doc(Iterates over adjacent coordinates of a given coordinate and applies a
+given functor.
+
+This function iterates over adjacent coordinates of the given
+coordinate `c` and applies the provided functor `fn` to each valid
+adjacent coordinate. The behavior depends on the position of `c`
+within the layout.
+
+Template parameter ``Fn``:
+    Type of the functor to apply to each adjacent coordinate.
+
+Parameter ``c``:
+    The reference coordinate for which adjacent coordinates are
+    determined.
+
+Parameter ``fn``:
+    The functor to apply to each of `c`'s adjacent coordinates.)doc";
+
+static const char* __doc_fiction_detail_wiring_reduction_layout_foreach_adjacent_coordinate_first_column =
+    R"doc(Iterates over adjacent coordinates of a given coordinate in the first
+column.
+
+This function iterates over adjacent coordinates of the given
+coordinate `c` in the first column and applies the provided functor
+`fn` to each valid adjacent coordinate.
+
+Template parameter ``Fn``:
+    Type of the functor to apply to each adjacent coordinate.
+
+Parameter ``c``:
+    The reference coordinate for which adjacent coordinates are
+    determined.
+
+Parameter ``fn``:
+    The functor to apply to each adjacent coordinate.)doc";
+
+static const char* __doc_fiction_detail_wiring_reduction_layout_foreach_adjacent_coordinate_first_row =
+    R"doc(Iterates over adjacent coordinates of a given coordinate in the first
+row.
+
+This function iterates over adjacent coordinates of the given
+coordinate `c` in the first row and applies the provided functor `fn`
+to each valid adjacent coordinate.
+
+Template parameter ``Fn``:
+    Type of the functor to apply to each adjacent coordinate.
+
+Parameter ``c``:
+    The reference coordinate for which adjacent coordinates are
+    determined.
+
+Parameter ``fn``:
+    The functor to apply to each adjacent coordinate.)doc";
+
+static const char* __doc_fiction_detail_wiring_reduction_layout_foreach_adjacent_coordinate_last_column =
+    R"doc(Iterates over adjacent coordinates of a given coordinate in the last
+column.
+
+This function iterates over adjacent coordinates of the given
+coordinate `c` in the last column and applies the provided functor
+`fn` to each valid adjacent coordinate.
+
+Template parameter ``Fn``:
+    Type of the functor to apply to each adjacent coordinate.
+
+Parameter ``c``:
+    The reference coordinate for which adjacent coordinates are
+    determined.
+
+Parameter ``fn``:
+    The functor to apply to each adjacent coordinate.)doc";
+
+static const char* __doc_fiction_detail_wiring_reduction_layout_foreach_adjacent_coordinate_last_row =
+    R"doc(Iterates over adjacent coordinates of a given coordinate in the last
+row.
+
+This function iterates over adjacent coordinates of the given
+coordinate `c` in the last row and applies the provided functor `fn`
+to each valid adjacent coordinate.
+
+Template parameter ``Fn``:
+    Type of the functor to apply to each adjacent coordinate.
+
+Parameter ``c``:
+    The reference coordinate for which adjacent coordinates are
+    determined.
+
+Parameter ``fn``:
+    The functor to apply to each adjacent coordinate.)doc";
+
+static const char* __doc_fiction_detail_wiring_reduction_layout_foreach_adjacent_coordinate_middle_columns =
+    R"doc(Iterates over adjacent coordinates of a given coordinate in the middle
+columns.
+
+This function iterates over adjacent coordinates of the given
+coordinate `c` in the middle columns and applies the provided functor
+`fn` to each valid adjacent coordinate.
+
+Template parameter ``Fn``:
+    Type of the functor to apply to each adjacent coordinate.
+
+Parameter ``c``:
+    The reference coordinate for which adjacent coordinates are
+    determined.
+
+Parameter ``fn``:
+    The functor to apply to each adjacent coordinate.)doc";
+
+static const char* __doc_fiction_detail_wiring_reduction_layout_foreach_adjacent_coordinate_middle_rows =
+    R"doc(Iterates over adjacent coordinates of a given coordinate in the middle
+rows.
+
+This function iterates over adjacent coordinates of the given
+coordinate `c` in the middle rows and applies the provided functor
+`fn` to each valid adjacent coordinate.
+
+Template parameter ``Fn``:
+    Type of the functor to apply to each adjacent coordinate.
+
+Parameter ``c``:
+    The reference coordinate for which adjacent coordinates are
+    determined.
+
+Parameter ``fn``:
+    The functor to apply to each adjacent coordinate.)doc";
+
+static const char* __doc_fiction_detail_wiring_reduction_layout_get_search_direction =
+    R"doc(Getter for the search direction.
+
+Returns:
+    The current search direction.)doc";
+
+static const char* __doc_fiction_detail_wiring_reduction_layout_search_dir =
+    R"doc(The current search direction: horizontal (from left to right) and
+vertical (from top to bottom).)doc";
+
+static const char* __doc_fiction_detail_wiring_reduction_layout_wiring_reduction_layout =
+    R"doc(This constructor initializes the `wiring_reduction_layout` with an
+optional aspect ratio.
+
+Parameter ``ar``:
+    The aspect ratio for the layout. Defaults to an empty aspect ratio
+    if not provided.
+
+Parameter ``direction``:
+    The search direction to be used. Defaults to HORIZONTAL if not
+    provided.)doc";
 
 static const char* __doc_fiction_detail_write_fgl_layout_impl = R"doc()doc";
 
@@ -6370,7 +6769,7 @@ static const char* __doc_fiction_detail_write_fqca_layout_impl_next_cell_designa
     R"doc(Might throw an 'out_of_cell_names_exception'.
 
 Returns:
-  The next cell designator in the alphabet.)doc";
+    The next cell designator in the alphabet.)doc";
 
 static const char* __doc_fiction_detail_write_fqca_layout_impl_os = R"doc()doc";
 
@@ -6448,15 +6847,15 @@ static const char* __doc_fiction_detail_write_qca_layout_svg_impl_generate_cell_
 layout
 
 Parameter ``fcl``:
-  The cell layout to generate an SVG representation for.
+    The cell layout to generate an SVG representation for.
 
 Parameter ``simple``:
-  Flag to indicate that the SVG representation should be generated
-  with less details. Recommended for large layouts.
+    Flag to indicate that the SVG representation should be generated
+    with less details. Recommended for large layouts.
 
 Returns:
-  The SVG string containing a visual representation of the given
-  layout.)doc";
+    The SVG string containing a visual representation of the given
+    layout.)doc";
 
 static const char* __doc_fiction_detail_write_qca_layout_svg_impl_generate_description_color = R"doc()doc";
 
@@ -6465,15 +6864,15 @@ static const char* __doc_fiction_detail_write_qca_layout_svg_impl_generate_tile_
 layout.
 
 Parameter ``fcl``:
-  The cell layout to generate an SVG representation for.
+    The cell layout to generate an SVG representation for.
 
 Parameter ``simple``:
-  Flag to indicate that the SVG representation should be generated
-  with less details. Recommended for large layouts.
+    Flag to indicate that the SVG representation should be generated
+    with less details. Recommended for large layouts.
 
 Returns:
-  The SVG string containing a visual representation of the given
-  layout.)doc";
+    The SVG string containing a visual representation of the given
+    layout.)doc";
 
 static const char* __doc_fiction_detail_write_qca_layout_svg_impl_lyt = R"doc()doc";
 
@@ -6590,7 +6989,7 @@ static const char* __doc_fiction_detail_write_sqd_sim_result_impl_obtain_ordered
 achieve a reproducible output.
 
 Returns:
-  An ordering of cells.)doc";
+    An ordering of cells.)doc";
 
 static const char* __doc_fiction_detail_write_sqd_sim_result_impl_ordered_cells =
     R"doc(A reproducible ordering of cells in the surfaces.)doc";
@@ -6641,10 +7040,10 @@ paths of differing costs.
 Currently, the cost is equal to its length.
 
 Parameter ``p``:
-  Path whose costs are to be calculated.
+    Path whose costs are to be calculated.
 
 Returns:
-  Costs of path p.)doc";
+    Costs of path p.)doc";
 
 static const char* __doc_fiction_detail_yen_k_shortest_paths_impl_reset_temporary_obstructions =
     R"doc(Resets all temporary obstructions.)doc";
@@ -6654,8 +7053,8 @@ static const char* __doc_fiction_detail_yen_k_shortest_paths_impl_run =
 `objective.source` and lead to `objective.target`.
 
 Returns:
-  A collection of up to k shortest paths in `layout` from
-  `objective.source` to `objective.target`.)doc";
+    A collection of up to k shortest paths in `layout` from
+    `objective.source` to `objective.target`.)doc";
 
 static const char* __doc_fiction_detail_yen_k_shortest_paths_impl_shortest_path_candidates =
     R"doc(A set of potential shortest paths.)doc";
@@ -6676,20 +7075,20 @@ distance between two dots is computed using the `sidb_nm_distance`
 function. The algorithm returns a vector of BDL pairs.
 
 Template parameter ``Lyt``:
-  SiDB cell-level layout type.
+    SiDB cell-level layout type.
 
 Parameter ``lyt``:
-  The layout to detect BDL pairs in.
+    The layout to detect BDL pairs in.
 
 Parameter ``type``:
-  The type of the SiDBs to detect BDL pairs for, e.g., `INPUT`,
-  `OUTPUT`, `NORMAL`.
+    The type of the SiDBs to detect BDL pairs for, e.g., `INPUT`,
+    `OUTPUT`, `NORMAL`.
 
 Parameter ``params``:
-  Parameters for the BDL pair detection algorithm.
+    Parameters for the BDL pair detection algorithm.
 
 Returns:
-  A vector of BDL pairs.)doc";
+    A vector of BDL pairs.)doc";
 
 static const char* __doc_fiction_detect_bdl_pairs_params = R"doc(Parameters for the BDL pair detection algorithms.)doc";
 
@@ -6710,14 +7109,14 @@ entities onto n positions. Each combination is represented as a vector
 of indices, where each index indicates the position of an entity.
 
 Parameter ``k``:
-  The number of entities to distribute.
+    The number of entities to distribute.
 
 Parameter ``n``:
-  The number of positions available for distribution.
+    The number of positions available for distribution.
 
 Returns:
-  A vector of vectors representing all possible combinations of
-  distributing k entities on n positions.)doc";
+    A vector of vectors representing all possible combinations of
+    distributing k entities on n positions.)doc";
 
 static const char* __doc_fiction_determine_clocking =
     R"doc(Determines clock numbers for the given gate-level layout. This
@@ -6732,20 +7131,20 @@ If no valid clock number assignment exists for `lyt`, this function
 returns `false` and does not modify `lyt`.
 
 Template parameter ``Lyt``:
-  Gate-level layout type.
+    Gate-level layout type.
 
 Parameter ``lyt``:
-  The gate-level layout to assign clock numbers to.
+    The gate-level layout to assign clock numbers to.
 
 Parameter ``params``:
-  Parameters.
+    Parameters.
 
 Parameter ``stats``:
-  Statistics.
+    Statistics.
 
 Returns:
-  `true` iff `lyt` could be successfully clocked via a valid clock
-  number assignment.)doc";
+    `true` iff `lyt` could be successfully clocked via a valid clock
+    number assignment.)doc";
 
 static const char* __doc_fiction_determine_clocking_params =
     R"doc(Parameters for the `determine_clocking` algorithm.)doc";
@@ -6761,7 +7160,7 @@ static const char* __doc_fiction_determine_clocking_stats_report =
     R"doc(Reports the statistics to the given output stream.
 
 Parameter ``out``:
-  The output stream to report to.)doc";
+    The output stream to report to.)doc";
 
 static const char* __doc_fiction_determine_groundstate_from_simulation_results =
     R"doc(This function calculates the ground state charge distributions from
@@ -6773,13 +7172,13 @@ simulation results.
 with the same energy.
 
 Template parameter ``Lyt``:
-  The layout type used in the simulation results.
+    The layout type used in the simulation results.
 
 Parameter ``simulation_results``:
-  The simulation results containing charge distributions.
+    The simulation results containing charge distributions.
 
 Returns:
-  A vector of charge distributions with the minimal energy.)doc";
+    A vector of charge distributions with the minimal energy.)doc";
 
 static const char* __doc_fiction_determine_vertex_coloring =
     R"doc(This function provides an interface to call various vertex coloring
@@ -6804,23 +7203,23 @@ to find a valid coloring. In that case, this algorithm falls back to
 MCS.
 
 Template parameter ``Graph``:
-  Graph type to color.
+    Graph type to color.
 
 Template parameter ``Color``:
-  Color type to use.
+    Color type to use.
 
 Parameter ``graph``:
-  The graph whose vertices are to be colored.
+    The graph whose vertices are to be colored.
 
 Parameter ``ps``:
-  Parameters.
+    Parameters.
 
 Parameter ``pst``:
-  Statistics.
+    Statistics.
 
 Returns:
-  An assignment of graph vertices to colors such that no two
-  adjacent vertices share the same color.)doc";
+    An assignment of graph vertices to colors such that no two
+    adjacent vertices share the same color.)doc";
 
 static const char* __doc_fiction_determine_vertex_coloring_heuristic_params =
     R"doc(Parameters for heuristic graph coloring.)doc";
@@ -6833,7 +7232,7 @@ static const char* __doc_fiction_determine_vertex_coloring_params =
     R"doc(Common parameters for the graph coloring algorithm.
 
 Template parameter ``Graph``:
-  Type of the graph to color.)doc";
+    Type of the graph to color.)doc";
 
 static const char* __doc_fiction_determine_vertex_coloring_params_engine = R"doc(The engine to use.)doc";
 
@@ -6850,7 +7249,7 @@ static const char* __doc_fiction_determine_vertex_coloring_sat_params =
     R"doc(Parameters for SAT-based graph coloring.
 
 Template parameter ``Graph``:
-  Type of the graph to color.)doc";
+    Type of the graph to color.)doc";
 
 static const char* __doc_fiction_determine_vertex_coloring_sat_params_clique_size_color_frequency =
     R"doc(Tries to establish the color frequency of color 0 such that it equals
@@ -6891,10 +7290,10 @@ standardized signature. This class is intended to be instantiated with
 concrete distance functions passed to the constructor.
 
 Template parameter ``Lyt``:
-  Coordinate layout type.
+    Coordinate layout type.
 
 Template parameter ``Dist``:
-  Distance value type.)doc";
+    Distance value type.)doc";
 
 static const char* __doc_fiction_distance_functor_distance_function = R"doc(Distance function.)doc";
 
@@ -6902,22 +7301,22 @@ static const char* __doc_fiction_distance_functor_distance_functor =
     R"doc(Standard constructor that instantiates the distance function.
 
 Parameter ``dist_fn``:
-  A function that maps from layout coordinates to a distance value.)doc";
+    A function that maps from layout coordinates to a distance value.)doc";
 
 static const char* __doc_fiction_distance_functor_operator_call =
     R"doc(Operator to call the distance function.
 
 Parameter ``lyt``:
-  Layout.
+    Layout.
 
 Parameter ``source``:
-  Source coordinate.
+    Source coordinate.
 
 Parameter ``target``:
-  Target coordinate.
+    Target coordinate.
 
 Returns:
-  Distance between source and target.)doc";
+    Distance between source and target.)doc";
 
 static const char* __doc_fiction_distance_map_functor =
     R"doc(A distance functor that uses a fully precomputed `distance_map` to
@@ -6925,23 +7324,23 @@ determine distances between coordinates. It can be used as a drop-in
 replacement for any other distance functor in path-finding algorithms.
 
 Template parameter ``Lyt``:
-  Coordinate layout type.
+    Coordinate layout type.
 
 Template parameter ``Dist``:
-  Distance type.)doc";
+    Distance type.)doc";
 
 static const char* __doc_fiction_distance_map_functor_coordinate_index =
     R"doc(This function calculates the coordinate index of a given coordinate in
 a given layout.
 
 Parameter ``lyt``:
-  Layout.
+    Layout.
 
 Parameter ``c``:
-  Coordinate.
+    Coordinate.
 
 Returns:
-  Coordinate index.)doc";
+    Coordinate index.)doc";
 
 static const char* __doc_fiction_distance_map_functor_dist_map = R"doc(Distance map.)doc";
 
@@ -6949,7 +7348,7 @@ static const char* __doc_fiction_distance_map_functor_distance_map_functor =
     R"doc(Construct the distance functor from a `distance_map`.
 
 Parameter ``dm``:
-  Distance map.)doc";
+    Distance map.)doc";
 
 static const char* __doc_fiction_distance_map_functor_operator_call =
     R"doc(Override the call operator to query the distance map instead of the
@@ -6959,27 +7358,27 @@ distance function.
 not stored in the distance map.
 
 Parameter ``lyt``:
-  Layout.
+    Layout.
 
 Parameter ``source``:
-  Source coordinate.
+    Source coordinate.
 
 Parameter ``target``:
-  Target coordinate.
+    Target coordinate.
 
 Returns:
-  Distance between source and target according to the stored
-  distance map.)doc";
+    Distance between source and target according to the stored
+    distance map.)doc";
 
 static const char* __doc_fiction_edge_color_view_drawer =
     R"doc(A DOT drawer for networks with colored edges. Node colors represent
 their painted color instead of their gate type.
 
 Template parameter ``Ntk``:
-  Logic network type.
+    Logic network type.
 
 Template parameter ``DrawIndexes``:
-  Flag to toggle the drawing of node indices.)doc";
+    Flag to toggle the drawing of node indices.)doc";
 
 static const char* __doc_fiction_edge_color_view_drawer_last_accessed = R"doc()doc";
 
@@ -7021,15 +7420,15 @@ objects and returns a map containing the system energy and the number
 of occurrences of that energy in the input vector.
 
 Template parameter ``Lyt``:
-  Cell-level layout type.
+    Cell-level layout type.
 
 Parameter ``input_vec``:
-  A vector of `charge_distribution_surface` objects for which
-  statistics are to be computed.
+    A vector of `charge_distribution_surface` objects for which
+    statistics are to be computed.
 
 Returns:
-  A map containing the system energy as the key and the number of
-  occurrences of that energy in the input vector as the value.)doc";
+    A map containing the system energy as the key and the number of
+    occurrences of that energy in the input vector as the value.)doc";
 
 static const char* __doc_fiction_enumerate_all_paths =
     R"doc(Enumerates all possible paths in a layout that start at a given source
@@ -7067,23 +7466,23 @@ auto all_paths = enumerate_all_paths<path>(static_cast<cartesian_layout<>>(layou
 ```
 
 Template parameter ``Path``:
-  Type of the returned individual paths.
+    Type of the returned individual paths.
 
 Template parameter ``Lyt``:
-  Type of the layout to perform path finding on.
+    Type of the layout to perform path finding on.
 
 Parameter ``layout``:
-  The layout whose paths are to be enumerated.
+    The layout whose paths are to be enumerated.
 
 Parameter ``objective``:
-  Source-target coordinate pair.
+    Source-target coordinate pair.
 
 Parameter ``params``:
-  Parameters.
+    Parameters.
 
 Returns:
-  A collection of all unique paths in `layout` from
-  `objective.source` to `objective.target`.)doc";
+    A collection of all unique paths in `layout` from
+    `objective.source` to `objective.target`.)doc";
 
 static const char* __doc_fiction_enumerate_all_paths_params =
     R"doc(Parameters for the algorithm that enumerates all paths in a layout.)doc";
@@ -7134,22 +7533,22 @@ Nanocomputing Circuits\" by M. Walter, R. Wille, F. Sill Torres, D.
 Große, and R. Drechsler in DAC 2020.
 
 Template parameter ``Spec``:
-  Specification type.
+    Specification type.
 
 Template parameter ``Impl``:
-  Implementation type.
+    Implementation type.
 
 Parameter ``spec``:
-  The specification.
+    The specification.
 
 Parameter ``impl``:
-  The implementation.
+    The implementation.
 
 Parameter ``pst``:
-  Statistics.
+    Statistics.
 
 Returns:
-  The equivalence type of `spec` and `impl`.)doc";
+    The equivalence type of `spec` and `impl`.)doc";
 
 static const char* __doc_fiction_equivalence_checking_stats = R"doc()doc";
 
@@ -7181,10 +7580,10 @@ Saha, and Bibhash Sen in Analog Integrated Circuits and Signal
 Processing 2021.
 
 Template parameter ``Lyt``:
-  Clocked layout type.
+    Clocked layout type.
 
 Returns:
-  ESR clocking scheme.)doc";
+    ESR clocking scheme.)doc";
 
 static const char* __doc_fiction_euclidean_distance =
     R"doc(The Euclidean distance :math:`D` between two layout coordinates
@@ -7193,31 +7592,31 @@ static const char* __doc_fiction_euclidean_distance =
 :math:`D = \sqrt{(x_1 - x_2)^2 + (y_1 - y_2)^2}`
 
 Template parameter ``Lyt``:
-  Coordinate layout type.
+    Coordinate layout type.
 
 Template parameter ``Dist``:
-  Floating-point type for the distance.
+    Floating-point type for the distance.
 
 Parameter ``lyt``:
-  Layout.
+    Layout.
 
 Parameter ``source``:
-  Source coordinate.
+    Source coordinate.
 
 Parameter ``target``:
-  Target coordinate.
+    Target coordinate.
 
 Returns:
-  Euclidean distance between `source` and `target`.)doc";
+    Euclidean distance between `source` and `target`.)doc";
 
 static const char* __doc_fiction_euclidean_distance_functor =
     R"doc(A pre-defined distance functor that uses the Euclidean distance.
 
 Template parameter ``Lyt``:
-  Coordinate layout type.
+    Coordinate layout type.
 
 Template parameter ``Dist``:
-  Floating-point distance type.)doc";
+    Floating-point distance type.)doc";
 
 static const char* __doc_fiction_euclidean_distance_functor_euclidean_distance_functor = R"doc()doc";
 
@@ -7306,24 +7705,24 @@ with a fan-in too large to be handled by the specified clocking
 scheme.
 
 Template parameter ``Lyt``:
-  Desired gate-level layout type.
+    Desired gate-level layout type.
 
 Template parameter ``Ntk``:
-  Network type that acts as specification.
+    Network type that acts as specification.
 
 Parameter ``ntk``:
-  The network that is to place and route.
+    The network that is to place and route.
 
 Parameter ``ps``:
-  Parameters.
+    Parameters.
 
 Parameter ``pst``:
-  Statistics.
+    Statistics.
 
 Returns:
-  A gate-level layout of type `Lyt` that implements `ntk` as an FCN
-  circuit if one is found under the given parameters;
-  `std::nullopt`, otherwise.)doc";
+    A gate-level layout of type `Lyt` that implements `ntk` as an FCN
+    circuit if one is found under the given parameters;
+    `std::nullopt`, otherwise.)doc";
 
 static const char* __doc_fiction_exact_physical_design_params =
     R"doc(Parameters for the exact physical design algorithm.)doc";
@@ -7420,27 +7819,27 @@ other gates. This is useful if a tile is known to be faulty or if it
 is known to be used for a different purpose.
 
 Template parameter ``Lyt``:
-  Desired gate-level layout type.
+    Desired gate-level layout type.
 
 Template parameter ``Ntk``:
-  Network type that acts as specification.
+    Network type that acts as specification.
 
 Parameter ``ntk``:
-  The network that is to place and route.
+    The network that is to place and route.
 
 Parameter ``black_list``:
-  The black list of tiles and their gate orientations.
+    The black list of tiles and their gate orientations.
 
 Parameter ``ps``:
-  Parameters.
+    Parameters.
 
 Parameter ``pst``:
-  Statistics.
+    Statistics.
 
 Returns:
-  A gate-level layout of type `Lyt` that implements `ntk` as an FCN
-  circuit if one is found under the given parameters;
-  `std::nullopt`, otherwise.)doc";
+    A gate-level layout of type `Lyt` that implements `ntk` as an FCN
+    circuit if one is found under the given parameters;
+    `std::nullopt`, otherwise.)doc";
 
 static const char* __doc_fiction_exhaustive_ground_state_simulation =
     R"doc(*Exhaustive Ground State Simulation* (ExGS) which was proposed in
@@ -7460,19 +7859,19 @@ replaced by *QuickExact* due to the much better runtimes and more
 functionality.
 
 Template parameter ``Lyt``:
-  Cell-level layout type.
+    Cell-level layout type.
 
 Parameter ``lyt``:
-  The layout to simulate.
+    The layout to simulate.
 
 Parameter ``params``:
-  Simulation parameters.
+    Simulation parameters.
 
 Parameter ``ps``:
-  Simulation statistics.
+    Simulation statistics.
 
 Returns:
-  sidb_simulation_result is returned with all results.)doc";
+    sidb_simulation_result is returned with all results.)doc";
 
 static const char* __doc_fiction_exhaustive_sidb_simulation_engine =
     R"doc(Selector exclusively for exhaustive SiDB simulation engines.)doc";
@@ -7502,20 +7901,20 @@ connections ripped-up, an equivalent layout could be recreated from
 the list of routing objectives.
 
 Template parameter ``Lyt``:
-  Gate-level layout type.
+    Gate-level layout type.
 
 Parameter ``lyt``:
-  Layout whose routing objectives are to be extracted.
+    Layout whose routing objectives are to be extracted.
 
 Returns:
-  List of all routing objectives in the given layout.)doc";
+    List of all routing objectives in the given layout.)doc";
 
 static const char* __doc_fiction_fanin_edge_container =
     R"doc(Container that stores fanin edges of a node in a network, including
 whether one of them is a constant.
 
 Template parameter ``Ntk``:
-  `mockturtle` network type.)doc";
+    `mockturtle` network type.)doc";
 
 static const char* __doc_fiction_fanin_edge_container_fanin_edges =
     R"doc(A vector of all fanin edges excluding for constants.)doc";
@@ -7525,16 +7924,16 @@ static const char* __doc_fiction_fanin_edges =
 node)` of some given network node.
 
 Template parameter ``Ntk``:
-  `mockturtle` network type.
+    `mockturtle` network type.
 
 Parameter ``ntk``:
-  Network in which the fanin edges are to be gathered.
+    Network in which the fanin edges are to be gathered.
 
 Parameter ``n``:
-  Node whose fanins are desired.
+    Node whose fanins are desired.
 
 Returns:
-  A container of all incoming edges `(fanin, n)` in `ntk`.)doc";
+    A container of all incoming edges `(fanin, n)` in `ntk`.)doc";
 
 static const char* __doc_fiction_fanins =
     R"doc(Returns a fanin container filled with all fanin nodes of some given
@@ -7544,17 +7943,17 @@ Note that this function assumes that each node has a maximum of one
 constant fanin.
 
 Template parameter ``Ntk``:
-  `mockturtle` network type.
+    `mockturtle` network type.
 
 Parameter ``ntk``:
-  Network in which the fanins are to be gathered.
+    Network in which the fanins are to be gathered.
 
 Parameter ``n``:
-  Node whose fanins are desired.
+    Node whose fanins are desired.
 
 Returns:
-  A container of all incoming nodes directly adjacent to `n` in
-  `ntk`.)doc";
+    A container of all incoming nodes directly adjacent to `n` in
+    `ntk`.)doc";
 
 static const char* __doc_fiction_fanout_substitution =
     R"doc(Substitutes high-output degrees in a logic network with fanout nodes
@@ -7579,20 +7978,20 @@ networks does however allow for the control over maximum output
 degrees.
 
 Template parameter ``NtkDest``:
-  Type of the returned logic network.
+    Type of the returned logic network.
 
 Template parameter ``NtkSrc``:
-  Type of the input logic network.
+    Type of the input logic network.
 
 Parameter ``ntk_src``:
-  The input logic network.
+    The input logic network.
 
 Parameter ``ps``:
-  Parameters.
+    Parameters.
 
 Returns:
-  A fanout-substituted logic network of type `NtkDest` that is
-  logically equivalent to `ntk_src`.)doc";
+    A fanout-substituted logic network of type `NtkDest` that is
+    logically equivalent to `ntk_src`.)doc";
 
 static const char* __doc_fiction_fanout_substitution_params =
     R"doc(Parameters for the fanout substitution algorithm.)doc";
@@ -7662,13 +8061,13 @@ given a gate implementation. This interface is for example used in
 `sidb_surface_analysis` to determine which ports to blacklist.
 
 Template parameter ``Technology``:
-  FCN technology type of the implementing gate library.
+    FCN technology type of the implementing gate library.
 
 Template parameter ``GateSizeX``:
-  Tile size in x-dimension.
+    Tile size in x-dimension.
 
 Template parameter ``GateSizeY``:
-  Tile size in y-dimension.)doc";
+    Tile size in y-dimension.)doc";
 
 static const char* __doc_fiction_fcn_gate_library_cell_list_to_gate =
     R"doc(Converts a `cell_list` of type `T` to an `fcn_gate` at compile time.
@@ -7677,13 +8076,13 @@ semi-readable way in code. For examples usages see
 `qca_one_library.hpp`.
 
 Template parameter ``T``:
-  Element type of given `cell_list`.
+    Element type of given `cell_list`.
 
 Parameter ``c``:
-  Cell list to convert.
+    Cell list to convert.
 
 Returns:
-  An `fcn_gate` created from the representation provided in `c`.)doc";
+    An `fcn_gate` created from the representation provided in `c`.)doc";
 
 static const char* __doc_fiction_fcn_gate_library_fcn_gate_library =
     R"doc(Gate libraries should not be instantiated but used as static objects.)doc";
@@ -7692,29 +8091,29 @@ static const char* __doc_fiction_fcn_gate_library_gate_x_size =
     R"doc(Returns horizontal size of gate blocks.
 
 Returns:
-  `GateSizeX`.)doc";
+    `GateSizeX`.)doc";
 
 static const char* __doc_fiction_fcn_gate_library_gate_y_size =
     R"doc(Returns vertical size of gate blocks.
 
 Returns:
-  `GateSizeY`.)doc";
+    `GateSizeY`.)doc";
 
 static const char* __doc_fiction_fcn_gate_library_mark_cell =
     R"doc(Applies given mark to given `fcn_gate` `g` at given port `p` at
 compile time.
 
 Parameter ``g``:
-  Gate to apply mark to.
+    Gate to apply mark to.
 
 Parameter ``p``:
-  Port specifying where to apply the mark.
+    Port specifying where to apply the mark.
 
 Parameter ``mark``:
-  Mark to be applied
+    Mark to be applied
 
 Returns:
-  Marked `fcn_gate`.)doc";
+    Marked `fcn_gate`.)doc";
 
 static const char* __doc_fiction_fcn_gate_library_merge =
     R"doc(Merges multiple `fcn_gate`s into one at compile time. This is intended
@@ -7722,64 +8121,64 @@ to be used for wires. Unexpected behavior can be caused, if more than
 one `fcn_gate` has a cell at the same position.
 
 Parameter ``gates``:
-  Vector of gates to be merged.
+    Vector of gates to be merged.
 
 Returns:
-  Merged `fcn_gate`.)doc";
+    Merged `fcn_gate`.)doc";
 
 static const char* __doc_fiction_fcn_gate_library_reverse_columns =
     R"doc(Reverses the columns of the given `fcn_gate` at compile time.
 
 Parameter ``g``:
-  `fcn_gate` whose columns are to be reversed.
+    `fcn_gate` whose columns are to be reversed.
 
 Returns:
-  `fcn_gate` with reversed columns.)doc";
+    `fcn_gate` with reversed columns.)doc";
 
 static const char* __doc_fiction_fcn_gate_library_reverse_rows =
     R"doc(Reverses the rows of the given `fcn_gate` at compile time.
 
 Parameter ``g``:
-  `fcn_gate` whose rows are to be reversed.
+    `fcn_gate` whose rows are to be reversed.
 
 Returns:
-  `fcn_gate` with reversed rows.)doc";
+    `fcn_gate` with reversed rows.)doc";
 
 static const char* __doc_fiction_fcn_gate_library_rotate_180 =
     R"doc(Rotates the given `fcn_gate` by 180° at compile time.
 
 Parameter ``g``:
-  `fcn_gate` to rotate.
+    `fcn_gate` to rotate.
 
 Returns:
-  Rotated `fcn_gate`.)doc";
+    Rotated `fcn_gate`.)doc";
 
 static const char* __doc_fiction_fcn_gate_library_rotate_270 =
     R"doc(Rotates the given `fcn_gate` by 270° clockwise at compile time.
 
 Parameter ``g``:
-  `fcn_gate` to rotate.
+    `fcn_gate` to rotate.
 
 Returns:
-  Rotated `fcn_gate`.)doc";
+    Rotated `fcn_gate`.)doc";
 
 static const char* __doc_fiction_fcn_gate_library_rotate_90 =
     R"doc(Rotates the given `fcn_gate` by 90° clockwise at compile time.
 
 Parameter ``g``:
-  `fcn_gate` to rotate.
+    `fcn_gate` to rotate.
 
 Returns:
-  Rotated `fcn_gate`.)doc";
+    Rotated `fcn_gate`.)doc";
 
 static const char* __doc_fiction_fcn_gate_library_transpose =
     R"doc(Transposes the given `fcn_gate` at compile time.
 
 Parameter ``g``:
-  `fcn_gate` to transpose.
+    `fcn_gate` to transpose.
 
 Returns:
-  Transposed `fcn_gate`.)doc";
+    Transposed `fcn_gate`.)doc";
 
 static const char* __doc_fiction_fgl_parsing_error =
     R"doc(Exception thrown when an error occurs during parsing of a .fgl file
@@ -7789,7 +8188,7 @@ static const char* __doc_fiction_fgl_parsing_error_fgl_parsing_error =
     R"doc(Constructs a `fgl_parsing_error` object with the given error message.
 
 Parameter ``msg``:
-  The error message describing the parsing error.)doc";
+    The error message describing the parsing error.)doc";
 
 static const char* __doc_fiction_find_first_two_of =
     R"doc(A derivative of `std::find_first_of` that uses the example
@@ -7806,27 +8205,27 @@ the second `1` in the first list, because the 2-element sub-sequence
 `[1,2]` is shared between the two ranges.
 
 Template parameter ``InputIt``:
-  must meet the requirements of `LegacyInputIterator`.
+    must meet the requirements of `LegacyInputIterator`.
 
 Template parameter ``ForwardIt``:
-  must meet the requirements of `LegacyForwardIterator`.
+    must meet the requirements of `LegacyForwardIterator`.
 
 Parameter ``first``:
-  Begin of the range to examine.
+    Begin of the range to examine.
 
 Parameter ``last``:
-  End of the range to examine.
+    End of the range to examine.
 
 Parameter ``s_first``:
-  Begin of the range to search for.
+    Begin of the range to search for.
 
 Parameter ``s_last``:
-  End of the range to search for.
+    End of the range to search for.
 
 Returns:
-  Iterator in the range `[first, last)` to the first position of the
-  first 2-element sub-sequence shared between the two ranges, or
-  `last` if no such shared sub-sequence exists.)doc";
+    Iterator in the range `[first, last)` to the first position of the
+    first 2-element sub-sequence shared between the two ranges, or
+    `last` if no such shared sub-sequence exists.)doc";
 
 static const char* __doc_fiction_flat_top_hex = R"doc(\verbatim _____ / \ / \ \ / \_____/ \endverbatim)doc";
 
@@ -7834,68 +8233,68 @@ static const char* __doc_fiction_foreach_edge =
     R"doc(Applies a function to all edges in a `mockturtle` network.
 
 Template parameter ``Ntk``:
-  `mockturtle` network type.
+    `mockturtle` network type.
 
 Template parameter ``Fn``:
-  Unary function type that takes a `mockturtle::edge<Ntk>` object as
-  parameter.
+    Unary function type that takes a `mockturtle::edge<Ntk>` object as
+    parameter.
 
 Parameter ``ntk``:
-  Network to iterate over.
+    Network to iterate over.
 
 Parameter ``fn``:
-  Function object to apply to each edge in `ntk`.)doc";
+    Function object to apply to each edge in `ntk`.)doc";
 
 static const char* __doc_fiction_foreach_incoming_edge =
     R"doc(Applies a function to all incoming edges in a `mockturtle` network.
 
 Template parameter ``Ntk``:
-  `mockturtle` network type.
+    `mockturtle` network type.
 
 Template parameter ``Fn``:
-  Unary function type that takes a `mockturtle::edge<Ntk>` object as
-  parameter.
+    Unary function type that takes a `mockturtle::edge<Ntk>` object as
+    parameter.
 
 Parameter ``ntk``:
-  Network to iterate over.
+    Network to iterate over.
 
 Parameter ``n``:
-  Node of `ntk` whose incoming edges are to be considered.
+    Node of `ntk` whose incoming edges are to be considered.
 
 Parameter ``fn``:
-  Function object to apply to each incoming edge of `n` in `ntk`.)doc";
+    Function object to apply to each incoming edge of `n` in `ntk`.)doc";
 
 static const char* __doc_fiction_foreach_outgoing_edge =
     R"doc(Applies a function to all outgoing edges in a `mockturtle` network.
 
 Template parameter ``Ntk``:
-  `mockturtle` network type.
+    `mockturtle` network type.
 
 Template parameter ``Fn``:
-  Unary function type that takes a `mockturtle::edge<Ntk>` object as
-  parameter.
+    Unary function type that takes a `mockturtle::edge<Ntk>` object as
+    parameter.
 
 Parameter ``ntk``:
-  Network to iterate over.
+    Network to iterate over.
 
 Parameter ``n``:
-  Node of `ntk` whose outgoing edges are to be considered.
+    Node of `ntk` whose outgoing edges are to be considered.
 
 Parameter ``fn``:
-  Function object to apply to each outgoing edge of `n` in `ntk`.)doc";
+    Function object to apply to each outgoing edge of `n` in `ntk`.)doc";
 
 static const char* __doc_fiction_gate_layout_cartesian_drawer =
     R"doc(An extended gate-level layout DOT drawer for Cartesian layouts.
 
 Template parameter ``Lyt``:
-  Cartesian gate-level layout type.
+    Cartesian gate-level layout type.
 
 Template parameter ``ClockColors``:
-  Flag to toggle the drawing of clock colors instead of gate type
-  colors.
+    Flag to toggle the drawing of clock colors instead of gate type
+    colors.
 
 Template parameter ``DrawIndexes``:
-  Flag to toggle the drawing of node indices.)doc";
+    Flag to toggle the drawing of node indices.)doc";
 
 static const char* __doc_fiction_gate_layout_cartesian_drawer_additional_graph_attributes = R"doc()doc";
 
@@ -7907,14 +8306,14 @@ static const char* __doc_fiction_gate_layout_hexagonal_drawer =
     R"doc(An extended gate-level layout DOT drawer for hexagonal layouts.
 
 Template parameter ``Lyt``:
-  Hexagonal gate-level layout type.
+    Hexagonal gate-level layout type.
 
 Template parameter ``ClockColors``:
-  Flag to toggle the drawing of clock colors instead of gate type
-  colors.
+    Flag to toggle the drawing of clock colors instead of gate type
+    colors.
 
 Template parameter ``DrawIndexes``:
-  Flag to toggle the drawing of node indices.)doc";
+    Flag to toggle the drawing of node indices.)doc";
 
 static const char* __doc_fiction_gate_layout_hexagonal_drawer_additional_graph_attributes = R"doc()doc";
 
@@ -7937,14 +8336,14 @@ static const char* __doc_fiction_gate_layout_shifted_cartesian_drawer =
 layouts.
 
 Template parameter ``Lyt``:
-  Shifted Cartesian gate-level layout type.
+    Shifted Cartesian gate-level layout type.
 
 Template parameter ``ClockColors``:
-  Flag to toggle the drawing of clock colors instead of gate type
-  colors.
+    Flag to toggle the drawing of clock colors instead of gate type
+    colors.
 
 Template parameter ``DrawIndexes``:
-  Flag to toggle the drawing of node indices.)doc";
+    Flag to toggle the drawing of node indices.)doc";
 
 static const char* __doc_fiction_gate_layout_shifted_cartesian_drawer_additional_graph_attributes = R"doc()doc";
 
@@ -8021,17 +8420,17 @@ declared as a `friend class` to the layout type that is going to be
 examined.
 
 Template parameter ``Lyt``:
-  Gate-level layout type.
+    Gate-level layout type.
 
 Parameter ``lyt``:
-  The gate-level layout that is to be examined for DRVs and
-  warnings.
+    The gate-level layout that is to be examined for DRVs and
+    warnings.
 
 Parameter ``ps``:
-  Parameters.
+    Parameters.
 
 Parameter ``pst``:
-  Statistics.)doc";
+    Statistics.)doc";
 
 static const char* __doc_fiction_gate_level_layout =
     R"doc(A layout type to layer on top of a clocked layout that allows the
@@ -8091,7 +8490,7 @@ their behavior might differ. Information on their functionality can be
 found in `mockturtle`'s docs.
 
 Template parameter ``ClockedLayout``:
-  The clocked layout that is to be extended by gate functions.)doc";
+    The clocked layout that is to be extended by gate functions.)doc";
 
 static const char* __doc_fiction_gate_level_layout_assign_node = R"doc()doc";
 
@@ -8106,7 +8505,7 @@ this seems counter-intuitive and inconsistent, it is in line with
 mockturtle's understanding of nodes and primary outputs.
 
 Parameter ``t``:
-  Tile whose nodes are to be removed.)doc";
+    Tile whose nodes are to be removed.)doc";
 
 static const char* __doc_fiction_gate_level_layout_clear_values = R"doc()doc";
 
@@ -8116,7 +8515,7 @@ static const char* __doc_fiction_gate_level_layout_clone =
     R"doc(Clones the layout returning a deep copy.
 
 Returns:
-  Deep copy of the layout.)doc";
+    Deep copy of the layout.)doc";
 
 static const char* __doc_fiction_gate_level_layout_compute = R"doc()doc";
 
@@ -8130,13 +8529,13 @@ instead. Otherwise, this function has a smaller overhead and is to be
 preferred.
 
 Parameter ``s``:
-  New incoming signal to `n`.
+    New incoming signal to `n`.
 
 Parameter ``n``:
-  Node that should add `s` as its child.
+    Node that should add `s` as its child.
 
 Returns:
-  Signal pointing to `n`.)doc";
+    Signal pointing to `n`.)doc";
 
 static const char* __doc_fiction_gate_level_layout_constant_value = R"doc()doc";
 
@@ -8177,28 +8576,28 @@ static const char* __doc_fiction_gate_level_layout_fanin_size =
 clocked signals to the given node.
 
 Template parameter ``RespectClocking``:
-  Flag to indicate that the underlying clocking is to be respected
-  when evaluating fanins.
+    Flag to indicate that the underlying clocking is to be respected
+    when evaluating fanins.
 
 Parameter ``n``:
-  Node to check.
+    Node to check.
 
 Returns:
-  Number of fanins to `n`.)doc";
+    Number of fanins to `n`.)doc";
 
 static const char* __doc_fiction_gate_level_layout_fanout_size =
     R"doc(Returns the number of outgoing, adjacently placed, and properly
 clocked signals of the given node.
 
 Template parameter ``RespectClocking``:
-  Flag to indicate that the underlying clocking is to be respected
-  when evaluating fanouts.
+    Flag to indicate that the underlying clocking is to be respected
+    when evaluating fanouts.
 
 Parameter ``n``:
-  Node to check.
+    Node to check.
 
 Returns:
-  Number of fanouts to `n`.)doc";
+    Number of fanouts to `n`.)doc";
 
 static const char* __doc_fiction_gate_level_layout_foreach_ci = R"doc()doc";
 
@@ -8213,18 +8612,18 @@ all nodes that are connected to the one assigned to `t` as fanins on
 neighboring tiles.
 
 Template parameter ``Fn``:
-  Functor type that has to comply with the restrictions imposed by
-  `mockturtle::foreach_element_transform`.
+    Functor type that has to comply with the restrictions imposed by
+    `mockturtle::foreach_element_transform`.
 
 Template parameter ``RespectClocking``:
-  Flag to indicate that the underlying clocking is to be respected
-  when evaluating fanins.
+    Flag to indicate that the underlying clocking is to be respected
+    when evaluating fanins.
 
 Parameter ``n``:
-  Node whose fanins are desired.
+    Node whose fanins are desired.
 
 Parameter ``fn``:
-  Functor to apply to each of `n`'s fanins.)doc";
+    Functor to apply to each of `n`'s fanins.)doc";
 
 static const char* __doc_fiction_gate_level_layout_foreach_fanout =
     R"doc(Applies a function to all nodes that are outgoing from a given one.
@@ -8235,50 +8634,50 @@ all nodes that are connected to the one assigned to `t` as fanouts on
 neighboring tiles.
 
 Template parameter ``Fn``:
-  Functor type that has to comply with the restrictions imposed by
-  `mockturtle::foreach_element_transform`.
+    Functor type that has to comply with the restrictions imposed by
+    `mockturtle::foreach_element_transform`.
 
 Template parameter ``RespectClocking``:
-  Flag to indicate that the underlying clocking is to be respected
-  when evaluating fanouts.
+    Flag to indicate that the underlying clocking is to be respected
+    when evaluating fanouts.
 
 Parameter ``n``:
-  Node whose fanouts are desired.
+    Node whose fanouts are desired.
 
 Parameter ``fn``:
-  Functor to apply to each of `n`'s fanouts.)doc";
+    Functor to apply to each of `n`'s fanouts.)doc";
 
 static const char* __doc_fiction_gate_level_layout_foreach_gate =
     R"doc(Applies a function to all gates (excluding dead ones) in the layout.
 Uses `is_gate` to check whether a node is a gate.
 
 Template parameter ``Fn``:
-  Functor type that has to comply with the restrictions imposed by
-  `mockturtle::foreach_element_if`.
+    Functor type that has to comply with the restrictions imposed by
+    `mockturtle::foreach_element_if`.
 
 Parameter ``fn``:
-  Functor to apply to each gate that is not dead.)doc";
+    Functor to apply to each gate that is not dead.)doc";
 
 static const char* __doc_fiction_gate_level_layout_foreach_node =
     R"doc(Applies a function to all nodes (excluding dead ones) in the layout.
 
 Template parameter ``Fn``:
-  Functor type that has to comply with the restrictions imposed by
-  `mockturtle::foreach_element_if`.
+    Functor type that has to comply with the restrictions imposed by
+    `mockturtle::foreach_element_if`.
 
 Parameter ``fn``:
-  Functor to apply to each node that is not dead.)doc";
+    Functor to apply to each node that is not dead.)doc";
 
 static const char* __doc_fiction_gate_level_layout_foreach_pi =
     R"doc(Applies a function to all primary input nodes (including dead ones) in
 the layout.
 
 Template parameter ``Fn``:
-  Functor type that has to comply with the restrictions imposed by
-  `mockturtle::foreach_element_transform`.
+    Functor type that has to comply with the restrictions imposed by
+    `mockturtle::foreach_element_transform`.
 
 Parameter ``fn``:
-  Functor to apply to each primary input node.)doc";
+    Functor to apply to each primary input node.)doc";
 
 static const char* __doc_fiction_gate_level_layout_foreach_po =
     R"doc(Applies a function to all primary output signals (including those that
@@ -8288,22 +8687,22 @@ POs as signals whereas `foreach_pi` applies to all PIs as nodes. This
 is with respect to `mockturtle`'s API.
 
 Template parameter ``Fn``:
-  Functor type that has to comply with the restrictions imposed by
-  `mockturtle::foreach_element_transform`.
+    Functor type that has to comply with the restrictions imposed by
+    `mockturtle::foreach_element_transform`.
 
 Parameter ``fn``:
-  Functor to apply to each primary output signal.)doc";
+    Functor to apply to each primary output signal.)doc";
 
 static const char* __doc_fiction_gate_level_layout_foreach_wire =
     R"doc(Applies a function to all wires (excluding dead ones) in the layout.
 Uses `is_wire` to check whether a node is a wire.
 
 Template parameter ``Fn``:
-  Functor type that has to comply with the restrictions imposed by
-  `mockturtle::foreach_element_if`.
+    Functor type that has to comply with the restrictions imposed by
+    `mockturtle::foreach_element_if`.
 
 Parameter ``fn``:
-  Functor to apply to each wire that is not dead.)doc";
+    Functor to apply to each wire that is not dead.)doc";
 
 static const char* __doc_fiction_gate_level_layout_gate_level_layout =
     R"doc(Standard constructor. Creates a named gate-level layout of the given
@@ -8311,10 +8710,10 @@ aspect ratio. To this end, it calls `ClockedLayout`'s standard
 constructor.
 
 Parameter ``ar``:
-  Highest possible position in the layout.
+    Highest possible position in the layout.
 
 Parameter ``name``:
-  Layout name.)doc";
+    Layout name.)doc";
 
 static const char* __doc_fiction_gate_level_layout_gate_level_layout_2 =
     R"doc(Standard constructor. Creates a gate-level layout of the given aspect
@@ -8322,34 +8721,34 @@ ratio and clocks it via the given clocking scheme. To this end, it
 calls `ClockedLayout`'s standard constructor.
 
 Parameter ``ar``:
-  Highest possible position in the layout.
+    Highest possible position in the layout.
 
 Parameter ``scheme``:
-  Clocking scheme to apply to this layout.
+    Clocking scheme to apply to this layout.
 
 Parameter ``name``:
-  Layout name.)doc";
+    Layout name.)doc";
 
 static const char* __doc_fiction_gate_level_layout_gate_level_layout_3 =
     R"doc(Copy constructor from another layout's storage.
 
 Parameter ``s``:
-  Storage of another gate_level_layout.)doc";
+    Storage of another gate_level_layout.)doc";
 
 static const char* __doc_fiction_gate_level_layout_gate_level_layout_4 =
     R"doc(Copy constructor from another layout's storage.
 
 Parameter ``s``:
-  Storage of another gate_level_layout.
+    Storage of another gate_level_layout.
 
 Parameter ``e``:
-  Event storage of another gate_level_layout.)doc";
+    Event storage of another gate_level_layout.)doc";
 
 static const char* __doc_fiction_gate_level_layout_gate_level_layout_5 =
     R"doc(Copy constructor from another `ClockedLayout`.
 
 Parameter ``lyt``:
-  Clocked layout.)doc";
+    Clocked layout.)doc";
 
 static const char* __doc_fiction_gate_level_layout_gate_level_layout_storage_data = R"doc()doc";
 
@@ -8398,21 +8797,21 @@ static const char* __doc_fiction_gate_level_layout_get_node =
 signal. If no node is placed there, the `const0` node is returned.
 
 Parameter ``s``:
-  Pointer to a tile.
+    Pointer to a tile.
 
 Returns:
-  Node at position `t` where `s` points at `t`; or 0 if no node is
-  placed at `t`.)doc";
+    Node at position `t` where `s` points at `t`; or 0 if no node is
+    placed at `t`.)doc";
 
 static const char* __doc_fiction_gate_level_layout_get_node_2 =
     R"doc(Fetches the node that is placed onto the provided tile If no node is
 placed there, the `const0` node is returned.
 
 Parameter ``t``:
-  Tile in the layout.
+    Tile in the layout.
 
 Returns:
-  Node at position `t`; or 0 if no node is placed at `t`.)doc";
+    Node at position `t`; or 0 if no node is placed at `t`.)doc";
 
 static const char* __doc_fiction_gate_level_layout_get_output_name = R"doc()doc";
 
@@ -8422,39 +8821,39 @@ node is placed on. Returns a default dead tile if the node is not
 placed.
 
 Parameter ``n``:
-  Node whose location is desired.
+    Node whose location is desired.
 
 Returns:
-  Tile at which `n` is placed or a default dead tile if `n` is not
-  placed.)doc";
+    Tile at which `n` is placed or a default dead tile if `n` is not
+    placed.)doc";
 
 static const char* __doc_fiction_gate_level_layout_has_eastern_incoming_signal =
     R"doc(Checks whether the given tile has an incoming one in eastern
 direction.
 
 Template parameter ``RespectClocking``:
-  Flag to indicate that the underlying clocking is to be respected
-  when evaluating fanins.
+    Flag to indicate that the underlying clocking is to be respected
+    when evaluating fanins.
 
 Parameter ``t``:
-  Base tile.
+    Base tile.
 
 Returns:
-  `true` iff `east(t)` is incoming to `t`.)doc";
+    `true` iff `east(t)` is incoming to `t`.)doc";
 
 static const char* __doc_fiction_gate_level_layout_has_eastern_outgoing_signal =
     R"doc(Checks whether the given tile has an outgoing one in eastern
 direction.
 
 Template parameter ``RespectClocking``:
-  Flag to indicate that the underlying clocking is to be respected
-  when evaluating fanouts.
+    Flag to indicate that the underlying clocking is to be respected
+    when evaluating fanouts.
 
 Parameter ``t``:
-  Base tile.
+    Base tile.
 
 Returns:
-  `true` iff `east(t)` is outgoing from `t`.)doc";
+    `true` iff `east(t)` is outgoing from `t`.)doc";
 
 static const char* __doc_fiction_gate_level_layout_has_input_name = R"doc()doc";
 
@@ -8466,111 +8865,111 @@ static const char* __doc_fiction_gate_level_layout_has_no_incoming_signal =
     R"doc(Checks whether the given tile has no incoming tiles.
 
 Template parameter ``RespectClocking``:
-  Flag to indicate that the underlying clocking is to be respected
-  when evaluating fanins.
+    Flag to indicate that the underlying clocking is to be respected
+    when evaluating fanins.
 
 Parameter ``t``:
-  Base tile.
+    Base tile.
 
 Returns:
-  `true` iff `t` does not have incoming tiles.)doc";
+    `true` iff `t` does not have incoming tiles.)doc";
 
 static const char* __doc_fiction_gate_level_layout_has_no_outgoing_signal =
     R"doc(Checks whether the given tile has no outgoing tiles.
 
 Template parameter ``RespectClocking``:
-  Flag to indicate that the underlying clocking is to be respected
-  when evaluating fanouts.
+    Flag to indicate that the underlying clocking is to be respected
+    when evaluating fanouts.
 
 Parameter ``t``:
-  Base tile.
+    Base tile.
 
 Returns:
-  `true` iff `t` does not have outgoing tiles.)doc";
+    `true` iff `t` does not have outgoing tiles.)doc";
 
 static const char* __doc_fiction_gate_level_layout_has_north_eastern_incoming_signal =
     R"doc(Checks whether the given tile has an incoming one in north-eastern
 direction.
 
 Template parameter ``RespectClocking``:
-  Flag to indicate that the underlying clocking is to be respected
-  when evaluating fanins.
+    Flag to indicate that the underlying clocking is to be respected
+    when evaluating fanins.
 
 Parameter ``t``:
-  Base tile.
+    Base tile.
 
 Returns:
-  `true` iff `north_east(t)` is incoming to `t`.)doc";
+    `true` iff `north_east(t)` is incoming to `t`.)doc";
 
 static const char* __doc_fiction_gate_level_layout_has_north_eastern_outgoing_signal =
     R"doc(Checks whether the given tile has an outgoing one in north-eastern
 direction.
 
 Template parameter ``RespectClocking``:
-  Flag to indicate that the underlying clocking is to be respected
-  when evaluating fanouts.
+    Flag to indicate that the underlying clocking is to be respected
+    when evaluating fanouts.
 
 Parameter ``t``:
-  Base tile.
+    Base tile.
 
 Returns:
-  `true` iff `north_east(t)` is outgoing from `t`.)doc";
+    `true` iff `north_east(t)` is outgoing from `t`.)doc";
 
 static const char* __doc_fiction_gate_level_layout_has_north_western_incoming_signal =
     R"doc(Checks whether the given tile has an incoming one in north-western
 direction.
 
 Template parameter ``RespectClocking``:
-  Flag to indicate that the underlying clocking is to be respected
-  when evaluating fanins.
+    Flag to indicate that the underlying clocking is to be respected
+    when evaluating fanins.
 
 Parameter ``t``:
-  Base tile.
+    Base tile.
 
 Returns:
-  `true` iff `north_west(t)` is incoming to `t`.)doc";
+    `true` iff `north_west(t)` is incoming to `t`.)doc";
 
 static const char* __doc_fiction_gate_level_layout_has_north_western_outgoing_signal =
     R"doc(Checks whether the given tile has an outgoing one in north-western
 direction.
 
 Template parameter ``RespectClocking``:
-  Flag to indicate that the underlying clocking is to be respected
-  when evaluating fanouts.
+    Flag to indicate that the underlying clocking is to be respected
+    when evaluating fanouts.
 
 Parameter ``t``:
-  Base tile.
+    Base tile.
 
 Returns:
-  `true` iff `north_west(t)` is outgoing from `t`.)doc";
+    `true` iff `north_west(t)` is outgoing from `t`.)doc";
 
 static const char* __doc_fiction_gate_level_layout_has_northern_incoming_signal =
     R"doc(Checks whether the given tile has an incoming one in northern
 direction.
 
 Template parameter ``RespectClocking``:
-  Flag to indicate that the underlying clocking is to be respected
-  when evaluating fanins.
+    Flag to indicate that the underlying clocking is to be respected
+    when evaluating fanins.
 
 Parameter ``t``:
-  Base tile.
+    Base tile.
 
 Returns:
-  `true` iff `north(t)` is incoming to `t`.)doc";
+    `true` iff `north(t)` is incoming to `t`.)doc";
 
 static const char* __doc_fiction_gate_level_layout_has_northern_outgoing_signal =
     R"doc(Checks whether the given tile has an outgoing one in northern
 direction.
 
 Template parameter ``RespectClocking``:
-  Flag to indicate that the underlying clocking is to be respected
-  when evaluating fanouts.
+    Flag to indicate that the underlying clocking is to be respected
+    when evaluating fanouts.
 
 Parameter ``t``:
-  Base tile.
+    Base tile.
 
 Returns:
-  `true` iff `north(t)` is outgoing from `t`.)doc";
+    `true` iff `north(t)` is outgoing from `t`.)doc";
 
 static const char* __doc_fiction_gate_level_layout_has_opposite_incoming_and_outgoing_signals =
     R"doc(Checks whether the given tile `t` has its incoming and outgoing
@@ -8582,15 +8981,15 @@ This function is very helpful for many gate libraries to check for
 (non-)straight gates, which might look different.
 
 Template parameter ``RespectClocking``:
-  Flag to indicate that the underlying clocking is to be respected
-  when evaluating fanins and fanouts.
+    Flag to indicate that the underlying clocking is to be respected
+    when evaluating fanins and fanouts.
 
 Parameter ``t``:
-  Base tile.
+    Base tile.
 
 Returns:
-  `true` iff `t` has incoming and outgoing signals on opposite
-  sides.)doc";
+    `true` iff `t` has incoming and outgoing signals on opposite
+    sides.)doc";
 
 static const char* __doc_fiction_gate_level_layout_has_output_name = R"doc()doc";
 
@@ -8599,112 +8998,112 @@ static const char* __doc_fiction_gate_level_layout_has_south_eastern_incoming_si
 direction.
 
 Template parameter ``RespectClocking``:
-  Flag to indicate that the underlying clocking is to be respected
-  when evaluating fanins.
+    Flag to indicate that the underlying clocking is to be respected
+    when evaluating fanins.
 
 Parameter ``t``:
-  Base tile.
+    Base tile.
 
 Returns:
-  `true` iff `south_east(t)` is incoming to `t`.)doc";
+    `true` iff `south_east(t)` is incoming to `t`.)doc";
 
 static const char* __doc_fiction_gate_level_layout_has_south_eastern_outgoing_signal =
     R"doc(Checks whether the given tile has an outgoing one in south-eastern
 direction.
 
 Template parameter ``RespectClocking``:
-  Flag to indicate that the underlying clocking is to be respected
-  when evaluating fanouts.
+    Flag to indicate that the underlying clocking is to be respected
+    when evaluating fanouts.
 
 Parameter ``t``:
-  Base tile.
+    Base tile.
 
 Returns:
-  `true` iff `south_east(t)` is outgoing from `t`.)doc";
+    `true` iff `south_east(t)` is outgoing from `t`.)doc";
 
 static const char* __doc_fiction_gate_level_layout_has_south_western_incoming_signal =
     R"doc(Checks whether the given tile has an incoming one in south-western
 direction.
 
 Template parameter ``RespectClocking``:
-  Flag to indicate that the underlying clocking is to be respected
-  when evaluating fanins.
+    Flag to indicate that the underlying clocking is to be respected
+    when evaluating fanins.
 
 Parameter ``t``:
-  Base tile.
+    Base tile.
 
 Returns:
-  `true` iff `south_west(t)` is incoming to `t`.)doc";
+    `true` iff `south_west(t)` is incoming to `t`.)doc";
 
 static const char* __doc_fiction_gate_level_layout_has_south_western_outgoing_signal =
     R"doc(Checks whether the given tile has an outgoing one in south-western
 direction.
 
 Template parameter ``RespectClocking``:
-  Flag to indicate that the underlying clocking is to be respected
-  when evaluating fanouts.
+    Flag to indicate that the underlying clocking is to be respected
+    when evaluating fanouts.
 
 Parameter ``t``:
-  Base tile.
+    Base tile.
 
 Returns:
-  `true` iff `south_west(t)` is outgoing from `t`.)doc";
+    `true` iff `south_west(t)` is outgoing from `t`.)doc";
 
 static const char* __doc_fiction_gate_level_layout_has_southern_incoming_signal =
     R"doc(Checks whether the given tile has an incoming one in southern
 direction.
 
 Template parameter ``RespectClocking``:
-  Flag to indicate that the underlying clocking is to be respected
-  when evaluating fanins.
+    Flag to indicate that the underlying clocking is to be respected
+    when evaluating fanins.
 
 Parameter ``t``:
-  Base tile.
+    Base tile.
 
 Returns:
-  `true` iff `south(t)` is incoming to `t`.)doc";
+    `true` iff `south(t)` is incoming to `t`.)doc";
 
 static const char* __doc_fiction_gate_level_layout_has_southern_outgoing_signal =
     R"doc(Checks whether the given tile has an outgoing one in southern
 direction.
 
 Template parameter ``RespectClocking``:
-  Flag to indicate that the underlying clocking is to be respected
-  when evaluating fanouts.
+    Flag to indicate that the underlying clocking is to be respected
+    when evaluating fanouts.
 
 Parameter ``t``:
-  Base tile.
+    Base tile.
 
 Returns:
-  `true` iff `south(t)` is outgoing from `t`.)doc";
+    `true` iff `south(t)` is outgoing from `t`.)doc";
 
 static const char* __doc_fiction_gate_level_layout_has_western_incoming_signal =
     R"doc(Checks whether the given tile has an incoming one in western
 direction.
 
 Template parameter ``RespectClocking``:
-  Flag to indicate that the underlying clocking is to be respected
-  when evaluating fanins.
+    Flag to indicate that the underlying clocking is to be respected
+    when evaluating fanins.
 
 Parameter ``t``:
-  Base tile.
+    Base tile.
 
 Returns:
-  `true` iff `west(t)` is incoming to `t`.)doc";
+    `true` iff `west(t)` is incoming to `t`.)doc";
 
 static const char* __doc_fiction_gate_level_layout_has_western_outgoing_signal =
     R"doc(Checks whether the given tile has an outgoing one in western
 direction.
 
 Template parameter ``RespectClocking``:
-  Flag to indicate that the underlying clocking is to be respected
-  when evaluating fanouts.
+    Flag to indicate that the underlying clocking is to be respected
+    when evaluating fanouts.
 
 Parameter ``t``:
-  Base tile.
+    Base tile.
 
 Returns:
-  `true` iff `west(t)` is outgoing from `t`.)doc";
+    `true` iff `west(t)` is outgoing from `t`.)doc";
 
 static const char* __doc_fiction_gate_level_layout_incoming_data_flow =
     R"doc(Returns a container that contains all tiles that feed information to
@@ -8715,14 +9114,14 @@ all tiles that host nodes that are connected to the one assigned to
 `t` as fanins.
 
 Template parameter ``RespectClocking``:
-  Flag to indicate that the underlying clocking is to be respected
-  when evaluating fanins.
+    Flag to indicate that the underlying clocking is to be respected
+    when evaluating fanins.
 
 Parameter ``t``:
-  Tile whose incoming data flow ones are desired.
+    Tile whose incoming data flow ones are desired.
 
 Returns:
-  A container that contains all of `t`'s incoming data flow tiles.)doc";
+    A container that contains all of `t`'s incoming data flow tiles.)doc";
 
 static const char* __doc_fiction_gate_level_layout_incr_trav_id = R"doc()doc";
 
@@ -8738,10 +9137,10 @@ static const char* __doc_fiction_gate_level_layout_is_buf =
     R"doc(Returns whether `n` computes the identity function.
 
 Parameter ``n``:
-  Node to check.
+    Node to check.
 
 Returns:
-  `true` iff `n` computes the identity.)doc";
+    `true` iff `n` computes the identity.)doc";
 
 static const char* __doc_fiction_gate_level_layout_is_child = R"doc()doc";
 
@@ -8756,10 +9155,10 @@ static const char* __doc_fiction_gate_level_layout_is_complemented =
 type, signals cannot be complemented.
 
 Parameter ``s``:
-  Signal to check.
+    Signal to check.
 
 Returns:
-  `false`.)doc";
+    `false`.)doc";
 
 static const char* __doc_fiction_gate_level_layout_is_constant = R"doc()doc";
 
@@ -8771,26 +9170,26 @@ when they are not assigned to a tile (which is considered equivalent
 to dangling).
 
 Parameter ``n``:
-  Node to check for liveliness.
+    Node to check for liveliness.
 
 Returns:
-  `true` iff `n` is dead.)doc";
+    `true` iff `n` is dead.)doc";
 
 static const char* __doc_fiction_gate_level_layout_is_empty =
     R"doc(Checks whether there are no gates or wires assigned to the layout's
 coordinates.
 
 Returns:
-  `true` iff the layout is empty.)doc";
+    `true` iff the layout is empty.)doc";
 
 static const char* __doc_fiction_gate_level_layout_is_empty_tile =
     R"doc(Returns whether `t` does not have a node assigned to it.
 
 Parameter ``t``:
-  Tile to check.
+    Tile to check.
 
 Returns:
-  `true` iff `t` is an empty tile.)doc";
+    `true` iff `t` is an empty tile.)doc";
 
 static const char* __doc_fiction_gate_level_layout_is_fanout =
     R"doc(Returns whether `n` is a wire and has multiple outputs, thereby,
@@ -8798,20 +9197,20 @@ acting as a fanout gate. Note that a fanout will return `true` for
 both `is_wire` and `is_fanout`.
 
 Parameter ``n``:
-  Node to check.
+    Node to check.
 
 Returns:
-  `true` iff `n` is a fanout gate.)doc";
+    `true` iff `n` is a fanout gate.)doc";
 
 static const char* __doc_fiction_gate_level_layout_is_function =
     R"doc(Returns whether `n`ode `n` computes a function. That is, this function
 returns `true` iff `n` is not a constant.
 
 Parameter ``n``:
-  Node to check.
+    Node to check.
 
 Returns:
-  `true` iff `n` is not a constant.)doc";
+    `true` iff `n` is not a constant.)doc";
 
 static const char* __doc_fiction_gate_level_layout_is_gate =
     R"doc(Returns whether a given node is a gate in accordance with
@@ -8821,20 +9220,20 @@ function is used to check for it. This poses an inconsistency but is
 required to comply with certain `mockturtle` algorithms.
 
 Parameter ``n``:
-  Node to check.
+    Node to check.
 
 Returns:
-  `true` iff `n` is neither a constant nor a PI.)doc";
+    `true` iff `n` is neither a constant nor a PI.)doc";
 
 static const char* __doc_fiction_gate_level_layout_is_gate_tile =
     R"doc(Returns whether the node assigned to `t` fulfills `is_gate` (in
 accordance with `mockturtle`'s definition of gates).
 
 Parameter ``t``:
-  Tile to check.
+    Tile to check.
 
 Returns:
-  `true` iff `t` hosts a node that is a neither a constant nor a PI.)doc";
+    `true` iff `t` hosts a node that is a neither a constant nor a PI.)doc";
 
 static const char* __doc_fiction_gate_level_layout_is_incoming_signal =
     R"doc(Checks whether signal `s` is incoming to tile `t`. That is, whether
@@ -8842,26 +9241,26 @@ tile `t` hosts a node that has a fanin assigned to the tile that
 signal `s` points to.
 
 Template parameter ``RespectClocking``:
-  Flag to indicate that the underlying clocking is to be respected
-  when evaluating fanins.
+    Flag to indicate that the underlying clocking is to be respected
+    when evaluating fanins.
 
 Parameter ``t``:
-  Base tile.
+    Base tile.
 
 Parameter ``s``:
-  Signal pointing to a potential incoming tile to `t`.
+    Signal pointing to a potential incoming tile to `t`.
 
 Returns:
-  `true` iff `s` is incoming to `t`.)doc";
+    `true` iff `s` is incoming to `t`.)doc";
 
 static const char* __doc_fiction_gate_level_layout_is_inv =
     R"doc(Returns whether `n` computes the binary inversion (NOT gate).
 
 Parameter ``n``:
-  Node to check.
+    Node to check.
 
 Returns:
-  `true` iff `n` is a NOT gate.)doc";
+    `true` iff `n` is a NOT gate.)doc";
 
 static const char* __doc_fiction_gate_level_layout_is_maj = R"doc()doc";
 
@@ -8877,17 +9276,17 @@ tile `t` hosts a node that has a fanout assigned to the tile that
 signal `s` points to.
 
 Template parameter ``RespectClocking``:
-  Flag to indicate that the underlying clocking is to be respected
-  when evaluating fanouts.
+    Flag to indicate that the underlying clocking is to be respected
+    when evaluating fanouts.
 
 Parameter ``t``:
-  Base tile.
+    Base tile.
 
 Parameter ``s``:
-  Signal pointing to a potential outgoing tile of `t`.
+    Signal pointing to a potential outgoing tile of `t`.
 
 Returns:
-  `true` iff `s` is outgoing from `t`.)doc";
+    `true` iff `s` is outgoing from `t`.)doc";
 
 static const char* __doc_fiction_gate_level_layout_is_pi = R"doc()doc";
 
@@ -8895,10 +9294,10 @@ static const char* __doc_fiction_gate_level_layout_is_pi_tile =
     R"doc(Check whether tile `t` hosts a primary input.
 
 Parameter ``t``:
-  Tile to be checked.
+    Tile to be checked.
 
 Returns:
-  `true` iff the node located at tile `t` is a PI.)doc";
+    `true` iff the node located at tile `t` is a PI.)doc";
 
 static const char* __doc_fiction_gate_level_layout_is_po = R"doc()doc";
 
@@ -8906,10 +9305,10 @@ static const char* __doc_fiction_gate_level_layout_is_po_tile =
     R"doc(Check whether tile `t` hosts a primary output.
 
 Parameter ``t``:
-  Tile to be checked.
+    Tile to be checked.
 
 Returns:
-  `true` iff the node located at tile `t` is a PO.)doc";
+    `true` iff the node located at tile `t` is a PO.)doc";
 
 static const char* __doc_fiction_gate_level_layout_is_wire = R"doc(Equivalent to `is_buf`.)doc";
 
@@ -8917,10 +9316,10 @@ static const char* __doc_fiction_gate_level_layout_is_wire_tile =
     R"doc(Returns whether the node assigned to `t` fulfills `is_wire`.
 
 Parameter ``t``:
-  Tile to check.
+    Tile to check.
 
 Returns:
-  `true` iff `t` hosts a node that computes the identity.)doc";
+    `true` iff `t` hosts a node that computes the identity.)doc";
 
 static const char* __doc_fiction_gate_level_layout_is_xnor = R"doc()doc";
 
@@ -8934,26 +9333,26 @@ return value to a signal. That is, this function returns the signal
 representation of the tile that the node `n` is assigned to.
 
 Parameter ``n``:
-  Node whose signal is desired.
+    Node whose signal is desired.
 
 Returns:
-  Signal that points to `n`.)doc";
+    Signal that points to `n`.)doc";
 
 static const char* __doc_fiction_gate_level_layout_move_node =
     R"doc(Moves a given node to a new position and also updates its children,
 i.e., incoming signals.
 
 Parameter ``n``:
-  Node to move.
+    Node to move.
 
 Parameter ``t``:
-  Tile to move `n` to.
+    Tile to move `n` to.
 
 Parameter ``new_children``:
-  New incoming signals to `n`.
+    New incoming signals to `n`.
 
 Returns:
-  Signal pointing to `n`'s new tile.)doc";
+    Signal pointing to `n`'s new tile.)doc";
 
 static const char* __doc_fiction_gate_level_layout_node_function = R"doc()doc";
 
@@ -8968,7 +9367,7 @@ static const char* __doc_fiction_gate_level_layout_num_gates =
 the identity function.
 
 Returns:
-  Number of gates in the layout.)doc";
+    Number of gates in the layout.)doc";
 
 static const char* __doc_fiction_gate_level_layout_num_latches = R"doc()doc";
 
@@ -8983,7 +9382,7 @@ static const char* __doc_fiction_gate_level_layout_num_wires =
 identity function including PIs and POs.
 
 Returns:
-  Number of wires in the layout.)doc";
+    Number of wires in the layout.)doc";
 
 static const char* __doc_fiction_gate_level_layout_outgoing_data_flow =
     R"doc(Returns a container that contains all tiles that accept information
@@ -8994,14 +9393,14 @@ container contains all tiles that host nodes that are connected to the
 one assigned to `t` as fanouts.
 
 Template parameter ``RespectClocking``:
-  Flag to indicate that the underlying clocking is to be respected
-  when evaluating fanouts.
+    Flag to indicate that the underlying clocking is to be respected
+    when evaluating fanouts.
 
 Parameter ``t``:
-  Tile whose outgoing data flow ones are desired.
+    Tile whose outgoing data flow ones are desired.
 
 Returns:
-  A container that contains all of `t`'s outgoing data flow tiles.)doc";
+    A container that contains all of `t`'s outgoing data flow tiles.)doc";
 
 static const char* __doc_fiction_gate_level_layout_pi_at = R"doc()doc";
 
@@ -9029,7 +9428,7 @@ static const char* __doc_fiction_gate_level_layout_size =
 `mockturtle` API.
 
 Returns:
-  Number of all nodes.)doc";
+    Number of all nodes.)doc";
 
 static const char* __doc_fiction_gate_level_layout_strg = R"doc()doc";
 
@@ -9051,23 +9450,23 @@ while taking obstructions into consideration. The given layout must be
 clocked.
 
 Template parameter ``Lyt``:
-  Type of the clocked layout.
+    Type of the clocked layout.
 
 Parameter ``lyt``:
-  The layout to generate the edge intersection graph for.
+    The layout to generate the edge intersection graph for.
 
 Parameter ``objectives``:
-  A list of routing objectives given as source-target pairs.
+    A list of routing objectives given as source-target pairs.
 
 Parameter ``ps``:
-  Parameters.
+    Parameters.
 
 Parameter ``pst``:
-  Statistics.
+    Statistics.
 
 Returns:
-  An edge intersection graph of paths satisfying the given routing
-  objectives in `lyt`.)doc";
+    An edge intersection graph of paths satisfying the given routing
+    objectives in `lyt`.)doc";
 
 static const char* __doc_fiction_generate_edge_intersection_graph_params =
     R"doc(Parameters for the edge intersection graph generation algorithm.)doc";
@@ -9107,16 +9506,16 @@ provided layout skeleton. The layout skeleton serves as the starting
 layout to which SiDBs are added to create unique SiDB layouts.
 
 Template parameter ``Lyt``:
-  Cell-level SiDB layout type.
+    Cell-level SiDB layout type.
 
 Parameter ``lyt_skeleton``:
-  A layout to which random SiDBs are added to create unique layouts.
+    A layout to which random SiDBs are added to create unique layouts.
 
 Parameter ``params``:
-  The parameters for generating the random SiDB layouts.
+    The parameters for generating the random SiDB layouts.
 
 Returns:
-  A vector containing the unique randomly generated SiDB layouts.)doc";
+    A vector containing the unique randomly generated SiDB layouts.)doc";
 
 static const char* __doc_fiction_generate_random_sidb_layout =
     R"doc(Generates a random layout of SiDBs by adding them to the provided
@@ -9124,17 +9523,17 @@ layout skeleton. The layout skeleton serves as the starting layout to
 which SiDBs are added to create the final layout.
 
 Template parameter ``Lyt``:
-  Cell-level SiDB layout type.
+    Cell-level SiDB layout type.
 
 Parameter ``lyt_skeleton``:
-  A layout to which random cells are added to create the final
-  layout.
+    A layout to which random cells are added to create the final
+    layout.
 
 Parameter ``params``:
-  The parameters for generating the random layout.
+    The parameters for generating the random layout.
 
 Returns:
-  A randomly-generated layout of SiDBs.)doc";
+    A randomly-generated layout of SiDBs.)doc";
 
 static const char* __doc_fiction_generate_random_sidb_layout_params =
     R"doc(This struct stores the parameters for the
@@ -9190,36 +9589,36 @@ static const char* __doc_fiction_geometric_temperature_schedule =
 altered by multiplying it with `0.99`.
 
 Parameter ``t``:
-  The current temperature.
+    The current temperature.
 
 Returns:
-  The next temperature, i.e. :math:`\texttt{t} \cdot 0.99`.)doc";
+    The next temperature, i.e. :math:`\texttt{t} \cdot 0.99`.)doc";
 
 static const char* __doc_fiction_get_clocking_scheme =
     R"doc(Returns a clocking scheme by name.
 
 Template parameter ``Lyt``:
-  Layout type.
+    Layout type.
 
 Parameter ``name``:
-  Name of the desired clocking scheme.
+    Name of the desired clocking scheme.
 
 Returns:
-  Clocking scheme object that matches the given `name`, or
-  `std::nullopt` if no clocking scheme by the given `name` exists.)doc";
+    Clocking scheme object that matches the given `name`, or
+    `std::nullopt` if no clocking scheme by the given `name` exists.)doc";
 
 static const char* __doc_fiction_get_name =
     R"doc(Helper function to conveniently fetch the name from a layout or
 network as they use different function names for the same purpose.
 
 Template parameter ``NtkOrLyt``:
-  Network or layout type.
+    Network or layout type.
 
 Parameter ``ntk_or_lyt``:
-  Network or layout object.
+    Network or layout object.
 
 Returns:
-  Name of given network or layout.)doc";
+    Name of given network or layout.)doc";
 
 static const char* __doc_fiction_graph_coloring_engine =
     R"doc(An enumeration of coloring engines to use for the graph coloring. All
@@ -9308,190 +9707,190 @@ Constructs a `gray_code_iterator` that generates Gray codes for
 decimal numbers starting from the given `start` number.
 
 Parameter ``start``:
-  The starting decimal number for the iterator.)doc";
+    The starting decimal number for the iterator.)doc";
 
 static const char* __doc_fiction_gray_code_iterator_operator_add =
     R"doc(Addition operator. Computes the Gray code of the current iterator plus
 the given integer.
 
 Parameter ``m``:
-  The amount of Gray codes to skip.
+    The amount of Gray codes to skip.
 
 Returns:
-  Iterator of the current iterator plus the given integer.)doc";
+    Iterator of the current iterator plus the given integer.)doc";
 
 static const char* __doc_fiction_gray_code_iterator_operator_array =
     R"doc(Subscript operator. Returns the Gray code at a specific position in
 the iteration range.
 
 Parameter ``index``:
-  The position in the iteration range.
+    The position in the iteration range.
 
 Returns:
-  The Gray code at the specified position.)doc";
+    The Gray code at the specified position.)doc";
 
 static const char* __doc_fiction_gray_code_iterator_operator_assign =
     R"doc(Assignment operator. Sets the current number to the given integer.
 
 Parameter ``m``:
-  The number to set.)doc";
+    The number to set.)doc";
 
 static const char* __doc_fiction_gray_code_iterator_operator_dec =
     R"doc(Prefix decrement operator. Sets the previous Gray code.
 
 Returns:
-  Reference to `this`.)doc";
+    Reference to `this`.)doc";
 
 static const char* __doc_fiction_gray_code_iterator_operator_dec_2 =
     R"doc(Postfix decrement operator. Sets the previous Gray Code.
 
 Returns:
-  Copy of `this` before decrementing.)doc";
+    Copy of `this` before decrementing.)doc";
 
 static const char* __doc_fiction_gray_code_iterator_operator_eq =
     R"doc(Equality comparison operator. Compares the current iterator with
 another iterator.
 
 Parameter ``other``:
-  The iterator to compare with.
+    The iterator to compare with.
 
 Returns:
-  `true` if the current iterator is equal to the other iterator,
-  `false` otherwise.)doc";
+    `true` if the current iterator is equal to the other iterator,
+    `false` otherwise.)doc";
 
 static const char* __doc_fiction_gray_code_iterator_operator_eq_2 =
     R"doc(Equality operator. Compares the current number with the given integer.
 
 Parameter ``m``:
-  Integer to compare with.
+    Integer to compare with.
 
 Returns:
-  `true` if the current number is equal to `m`, `false` otherwise.)doc";
+    `true` if the current number is equal to `m`, `false` otherwise.)doc";
 
 static const char* __doc_fiction_gray_code_iterator_operator_ge =
     R"doc(Greater-or-equal-than operator. Compares the current number with the
 given integer.
 
 Parameter ``m``:
-  Integer to compare with.
+    Integer to compare with.
 
 Returns:
-  `true` if the current number is greater than or equal to `m`,
-  `false` otherwise.)doc";
+    `true` if the current number is greater than or equal to `m`,
+    `false` otherwise.)doc";
 
 static const char* __doc_fiction_gray_code_iterator_operator_gt =
     R"doc(Greater-than operator. Compares the current number with the given
 integer.
 
 Parameter ``m``:
-  Integer to compare with.
+    Integer to compare with.
 
 Returns:
-  `true` if the current number is greater than `m`, `false`
-  otherwise.)doc";
+    `true` if the current number is greater than `m`, `false`
+    otherwise.)doc";
 
 static const char* __doc_fiction_gray_code_iterator_operator_iadd =
     R"doc(Addition assignment operator. Iterator is increased by given number.
 
 Parameter ``m``:
-  The amount of Gray codes to skip.
+    The amount of Gray codes to skip.
 
 Returns:
-  Reference to `this`.)doc";
+    Reference to `this`.)doc";
 
 static const char* __doc_fiction_gray_code_iterator_operator_inc =
     R"doc(Prefix increment operator. Sets the number and the corresponding Gray
 code.
 
 Returns:
-  Reference to `this`.)doc";
+    Reference to `this`.)doc";
 
 static const char* __doc_fiction_gray_code_iterator_operator_inc_2 =
     R"doc(Postfix increment operator. Sets the next Gray Code.
 
 Returns:
-  Copy of `this` before incrementing.)doc";
+    Copy of `this` before incrementing.)doc";
 
 static const char* __doc_fiction_gray_code_iterator_operator_isub =
     R"doc(Subtraction assignment operator. Sets a previous Gray code.
 
 Parameter ``m``:
-  The amount of Gray codes to skip.
+    The amount of Gray codes to skip.
 
 Returns:
-  Reference to `this`.)doc";
+    Reference to `this`.)doc";
 
 static const char* __doc_fiction_gray_code_iterator_operator_le =
     R"doc(Less-than or equal-to comparison operator. Compares the current
 iterator with another iterator.
 
 Parameter ``other``:
-  The iterator to compare with.
+    The iterator to compare with.
 
 Returns:
-  `true` if the current iterator is less than or equal to the other
-  iterator, `false` otherwise.)doc";
+    `true` if the current iterator is less than or equal to the other
+    iterator, `false` otherwise.)doc";
 
 static const char* __doc_fiction_gray_code_iterator_operator_le_2 =
     R"doc(Less-or-equal-than operator. Compares the current number with the
 given integer.
 
 Parameter ``m``:
-  Integer to compare with.
+    Integer to compare with.
 
 Returns:
-  `true` if the current number is less than or equal to `m`, `false`
-  otherwise.)doc";
+    `true` if the current number is less than or equal to `m`, `false`
+    otherwise.)doc";
 
 static const char* __doc_fiction_gray_code_iterator_operator_lt =
     R"doc(Less-than comparison operator. Compares the current iterator with
 another iterator.
 
 Parameter ``other``:
-  The iterator to compare with.
+    The iterator to compare with.
 
 Returns:
-  `true` if the current iterator is less than the other iterator,
-  `false` otherwise.)doc";
+    `true` if the current iterator is less than the other iterator,
+    `false` otherwise.)doc";
 
 static const char* __doc_fiction_gray_code_iterator_operator_lt_2 =
     R"doc(Less-than operator. Compares the current number with the given
 integer.
 
 Parameter ``m``:
-  Integer to compare with.
+    Integer to compare with.
 
 Returns:
-  `true` if the current number is less than `m`, `false` otherwise.)doc";
+    `true` if the current number is less than `m`, `false` otherwise.)doc";
 
 static const char* __doc_fiction_gray_code_iterator_operator_mul =
     R"doc(Dereference operator. Returns a reference to the Gray code of the
 current iteration.
 
 Returns:
-  Reference to the current Gray code.)doc";
+    Reference to the current Gray code.)doc";
 
 static const char* __doc_fiction_gray_code_iterator_operator_ne =
     R"doc(Inequality comparison operator. Compares the current iterator with
 another iterator.
 
 Parameter ``other``:
-  The iterator to compare with.
+    The iterator to compare with.
 
 Returns:
-  `true` if the current iterator is not equal to the other iterator,
-  `false` otherwise.)doc";
+    `true` if the current iterator is not equal to the other iterator,
+    `false` otherwise.)doc";
 
 static const char* __doc_fiction_gray_code_iterator_operator_ne_2 =
     R"doc(Inequality operator. Compares the current number with the given
 integer.
 
 Parameter ``m``:
-  Integer to compare with.
+    Integer to compare with.
 
 Returns:
-  `true` if the current number is not equal to `m`, `false`
-  otherwise.)doc";
+    `true` if the current number is not equal to `m`, `false`
+    otherwise.)doc";
 
 static const char* __doc_fiction_gray_code_iterator_operator_sub =
     R"doc(Subtraction operator to calculate the difference between two
@@ -9503,21 +9902,21 @@ returned as an int64_t representing the number of positions between
 the iterators.
 
 Parameter ``other``:
-  The gray_code_iterator to subtract from the current iterator.
+    The gray_code_iterator to subtract from the current iterator.
 
 Returns:
-  The difference between the current iterator and the input iterator
-  as int64_t.)doc";
+    The difference between the current iterator and the input iterator
+    as int64_t.)doc";
 
 static const char* __doc_fiction_gray_code_iterator_operator_sub_2 =
     R"doc(Subtraction operator. Computes the Gray code of the current iterator
 minus the given integer.
 
 Parameter ``m``:
-  The amount of Gray codes to skip.
+    The amount of Gray codes to skip.
 
 Returns:
-  Iterator of the current iterator minus the given integer.)doc";
+    Iterator of the current iterator minus the given integer.)doc";
 
 static const char* __doc_fiction_gray_code_iterator_start_number = R"doc(Start number of the iteration.)doc";
 
@@ -9572,32 +9971,32 @@ static const char* __doc_fiction_has_high_degree_fanin_nodes =
 its nodes.
 
 Template parameter ``Ntk``:
-  `mockturtle` network type.
+    `mockturtle` network type.
 
 Parameter ``ntk``:
-  Network to check.
+    Network to check.
 
 Parameter ``threshold``:
-  Maximum number of legal fanins.
+    Maximum number of legal fanins.
 
 Returns:
-  `true` iff any node in `ntk` exceeds `threshold` fanins.)doc";
+    `true` iff any node in `ntk` exceeds `threshold` fanins.)doc";
 
 static const char* __doc_fiction_has_incoming_primary_input =
     R"doc(Checks if a given node in a given network has fanins that are primary
 inputs.
 
 Template parameter ``Ntk``:
-  `mockturtle` network type.
+    `mockturtle` network type.
 
 Parameter ``ntk``:
-  Network to check in.
+    Network to check in.
 
 Parameter ``n``:
-  Node to check.
+    Node to check.
 
 Returns:
-  `true` iff any of `n`'s fanins are primary inputs.)doc";
+    `true` iff any of `n`'s fanins are primary inputs.)doc";
 
 static const char* __doc_fiction_has_is_and3 = R"doc()doc";
 
@@ -9677,19 +10076,19 @@ values-in-c0x
 Overrides the passed seed.
 
 Template parameter ``T``:
-  Type to hash.
+    Type to hash.
 
 Template parameter ``Rest``:
-  Parameter pack.
+    Parameter pack.
 
 Parameter ``seed``:
-  Hashing seed. This value is overridden with the hash value.
+    Hashing seed. This value is overridden with the hash value.
 
 Parameter ``v``:
-  Value to hash next.
+    Value to hash next.
 
 Parameter ``rest``:
-  Remaining values to hash.)doc";
+    Remaining values to hash.)doc";
 
 static const char* __doc_fiction_hexagonal_layout =
     R"doc(A layout type that utilizes offset coordinates to represent a
@@ -9708,16 +10107,16 @@ https://www.redblobgames.com/grids/hexagons/ is a wonderful resource
 on the topic.
 
 Template parameter ``OffsetCoordinateType``:
-  The coordinate implementation to be used. Offset coordinates are
-  required.
+    The coordinate implementation to be used. Offset coordinates are
+    required.
 
 Template parameter ``HexagonalCoordinateSystem``:
-  One of the following: odd_row_hex, even_row_hex, odd_column_hex,
-  even_column_hex.
+    One of the following: odd_row_hex, even_row_hex, odd_column_hex,
+    even_column_hex.
 
 Template parameter ``CubeCoordinateType``:
-  Internally, cube coordinates are needed for certain algorithms or
-  calculations.)doc";
+    Internally, cube coordinates are needed for certain algorithms or
+    calculations.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_above =
     R"doc(Returns the coordinate that is directly above a given coordinate `c`,
@@ -9725,10 +10124,10 @@ i.e., the face whose z-dimension is higher by 1. If `c`'s z-dimension
 is already at maximum, `c` is returned instead.
 
 Parameter ``c``:
-  Coordinate whose above counterpart is desired.
+    Coordinate whose above counterpart is desired.
 
 Returns:
-  Coordinate directly above `c`.)doc";
+    Coordinate directly above `c`.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_adjacent_coordinates =
     R"doc(Returns a container that contains all coordinates that are adjacent to
@@ -9740,10 +10139,10 @@ Coordinates that are outside of the layout bounds are not considered.
 Thereby, the size of the returned container is at most 6.
 
 Parameter ``c``:
-  Coordinate whose adjacent ones are desired.
+    Coordinate whose adjacent ones are desired.
 
 Returns:
-  A container that contains all of `c`'s adjacent coordinates.)doc";
+    A container that contains all of `c`'s adjacent coordinates.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_adjacent_opposite_coordinates =
     R"doc(Returns a container that contains all coordinates pairs of opposing
@@ -9763,16 +10162,16 @@ be examined.
 Coordinates outside of the layout bounds are not being considered.
 
 Parameter ``c``:
-  Coordinate whose opposite ones are desired.
+    Coordinate whose opposite ones are desired.
 
 Returns:
-  A container that contains pairs of `c`'s opposing coordinates.)doc";
+    A container that contains pairs of `c`'s opposing coordinates.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_area =
     R"doc(Returns the layout's number of faces depending on the coordinate type.
 
 Returns:
-  Area of layout.)doc";
+    Area of layout.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_below =
     R"doc(Returns the coordinate that is directly below a given coordinate `c`,
@@ -9780,16 +10179,16 @@ i.e., the face whose z-dimension is lower by 1. If `c`'s z-dimension
 is already at minimum, `c` is returned instead.
 
 Parameter ``c``:
-  Coordinate whose below counterpart is desired.
+    Coordinate whose below counterpart is desired.
 
 Returns:
-  Coordinate directly below `c`.)doc";
+    Coordinate directly below `c`.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_clone =
     R"doc(Clones the layout returning a deep copy.
 
 Returns:
-  Deep copy of the layout.)doc";
+    Deep copy of the layout.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_coord =
     R"doc(Creates and returns a coordinate in the layout from the given x-, y-,
@@ -9799,25 +10198,25 @@ and z-values.
 y, z)`.
 
 Template parameter ``X``:
-  x-type.
+    x-type.
 
 Template parameter ``Y``:
-  y-type.
+    y-type.
 
 Template parameter ``Z``:
-  z-type.
+    z-type.
 
 Parameter ``x``:
-  x-value.
+    x-value.
 
 Parameter ``y``:
-  y-value.
+    y-value.
 
 Parameter ``z``:
-  z-value.
+    z-value.
 
 Returns:
-  A coordinate in the layout of type `OffsetCoordinateType`.)doc";
+    A coordinate in the layout of type `OffsetCoordinateType`.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_coordinates =
     R"doc(Returns a range of all coordinates accessible in the layout between
@@ -9830,15 +10229,15 @@ will happen inside out, i.e., x will be iterated first, then y, then
 z.
 
 Parameter ``start``:
-  First coordinate to include in the range of all coordinates.
+    First coordinate to include in the range of all coordinates.
 
 Parameter ``stop``:
-  Last coordinate (exclusive) to include in the range of all
-  coordinates.
+    Last coordinate (exclusive) to include in the range of all
+    coordinates.
 
 Returns:
-  An iterator range from `start` to `stop`. If they are not
-  provided, the first/last coordinate is used as a default.)doc";
+    An iterator range from `start` to `stop`. If they are not
+    provided, the first/last coordinate is used as a default.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_east =
     R"doc(Returns the coordinate that is directly adjacent in eastern direction
@@ -9847,20 +10246,20 @@ by 1. If `c`'s x-dimension is already at maximum, `c` is returned
 instead.
 
 Parameter ``c``:
-  Coordinate whose eastern counterpart is desired.
+    Coordinate whose eastern counterpart is desired.
 
 Returns:
-  Coordinate adjacent and east of `c`.)doc";
+    Coordinate adjacent and east of `c`.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_eastern_border_of =
     R"doc(Returns the coordinate with the same y and z values as a given
 coordinate but that is located at the layout's eastern border.
 
 Parameter ``c``:
-  Coordinate whose border counterpart is desired.
+    Coordinate whose border counterpart is desired.
 
 Returns:
-  The eastern border equivalent of `c`.)doc";
+    The eastern border equivalent of `c`.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_foreach_adjacent_coordinate =
     R"doc(Applies a function to all coordinates adjacent to a given one in
@@ -9872,13 +10271,13 @@ Coordinates that are outside of the layout bounds are not considered.
 Thereby, at most 6 coordinates are touched.
 
 Template parameter ``Fn``:
-  Functor type.
+    Functor type.
 
 Parameter ``c``:
-  Coordinate whose adjacent ones are desired.
+    Coordinate whose adjacent ones are desired.
 
 Parameter ``fn``:
-  Functor to apply to each of `c`'s adjacent coordinates.)doc";
+    Functor to apply to each of `c`'s adjacent coordinates.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_foreach_adjacent_opposite_coordinates =
     R"doc(Applies a function to all opposing coordinate pairs adjacent to a
@@ -9898,14 +10297,14 @@ be examined.
 Coordinates outside of the layout bounds are not being considered.
 
 Template parameter ``Fn``:
-  Functor type.
+    Functor type.
 
 Parameter ``c``:
-  Coordinate whose opposite adjacent ones are desired.
+    Coordinate whose opposite adjacent ones are desired.
 
 Parameter ``fn``:
-  Functor to apply to each of `c`'s opposite adjacent coordinate
-  pairs.)doc";
+    Functor to apply to each of `c`'s opposite adjacent coordinate
+    pairs.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_foreach_coordinate =
     R"doc(Applies a function to all coordinates accessible in the layout between
@@ -9913,18 +10312,18 @@ static const char* __doc_fiction_hexagonal_layout_foreach_coordinate =
 coordinates function.
 
 Template parameter ``Fn``:
-  Functor type that has to comply with the restrictions imposed by
-  `mockturtle::foreach_element`.
+    Functor type that has to comply with the restrictions imposed by
+    `mockturtle::foreach_element`.
 
 Parameter ``fn``:
-  Functor to apply to each coordinate in the range.
+    Functor to apply to each coordinate in the range.
 
 Parameter ``start``:
-  First coordinate to include in the range of all coordinates.
+    First coordinate to include in the range of all coordinates.
 
 Parameter ``stop``:
-  Last coordinate (exclusive) to include in the range of all
-  coordinates.)doc";
+    Last coordinate (exclusive) to include in the range of all
+    coordinates.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_foreach_ground_coordinate =
     R"doc(Applies a function to all coordinates accessible in the layout's
@@ -9932,19 +10331,19 @@ ground layer between `start` and `stop`. The iteration order is the
 same as for the ground_coordinates function.
 
 Template parameter ``Fn``:
-  Functor type that has to comply with the restrictions imposed by
-  `mockturtle::foreach_element`.
+    Functor type that has to comply with the restrictions imposed by
+    `mockturtle::foreach_element`.
 
 Parameter ``fn``:
-  Functor to apply to each coordinate in the range.
+    Functor to apply to each coordinate in the range.
 
 Parameter ``start``:
-  First coordinate to include in the range of all ground
-  coordinates.
+    First coordinate to include in the range of all ground
+    coordinates.
 
 Parameter ``stop``:
-  Last coordinate (exclusive) to include in the range of all ground
-  coordinates.)doc";
+    Last coordinate (exclusive) to include in the range of all ground
+    coordinates.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_ground_coordinates =
     R"doc(Returns a range of all coordinates accessible in the layout's ground
@@ -9952,17 +10351,17 @@ layer between `start` and `stop`. The iteration order is the same as
 for the coordinates function but without the z dimension.
 
 Parameter ``start``:
-  First coordinate to include in the range of all ground
-  coordinates.
+    First coordinate to include in the range of all ground
+    coordinates.
 
 Parameter ``stop``:
-  Last coordinate (exclusive) to include in the range of all ground
-  coordinates.
+    Last coordinate (exclusive) to include in the range of all ground
+    coordinates.
 
 Returns:
-  An iterator range from `start` to `stop`. If they are not
-  provided, the first/last coordinate in the ground layer is used as
-  a default.)doc";
+    An iterator range from `start` to `stop`. If they are not
+    provided, the first/last coordinate in the ground layer is used as
+    a default.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_hexagonal_layout =
     R"doc(Standard constructor. The given aspect ratio points to the highest
@@ -9971,7 +10370,7 @@ ASCII layout representation above `ar = (3,2)`. Consequently, with `ar
 = (0,0)`, the layout has exactly one coordinate.
 
 Parameter ``ar``:
-  Highest possible position in the layout.)doc";
+    Highest possible position in the layout.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_hexagonal_layout_2 = R"doc()doc";
 
@@ -9985,275 +10384,275 @@ static const char* __doc_fiction_hexagonal_layout_is_above =
     R"doc(Returns `true` iff coordinate `c2` is directly above coordinate `c1`.
 
 Parameter ``c1``:
-  Base coordinate.
+    Base coordinate.
 
 Parameter ``c2``:
-  Coordinate to test for its location in relation to `c1`.
+    Coordinate to test for its location in relation to `c1`.
 
 Returns:
-  `true` iff `c2` is directly above `c1`.)doc";
+    `true` iff `c2` is directly above `c1`.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_is_adjacent_elevation_of =
     R"doc(Similar to is_adjacent_of but also considers `c1`'s elevation, i.e.,
 if `c2` is adjacent to `above(c1)` or `below(c1)`.
 
 Parameter ``c1``:
-  Base coordinate.
+    Base coordinate.
 
 Parameter ``c2``:
-  Coordinate to test for its location in relation to `c1`.
+    Coordinate to test for its location in relation to `c1`.
 
 Returns:
-  `true` iff `c2` is either adjacent of `c1` or `c1`'s elevations.)doc";
+    `true` iff `c2` is either adjacent of `c1` or `c1`'s elevations.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_is_adjacent_of =
     R"doc(Returns `true` iff coordinate `c2` is either north, north-east, east,
 south-east, south, south-west, west, or north-west of coordinate `c1`.
 
 Parameter ``c1``:
-  Base coordinate.
+    Base coordinate.
 
 Parameter ``c2``:
-  Coordinate to test for its location in relation to `c1`.
+    Coordinate to test for its location in relation to `c1`.
 
 Returns:
-  `true` iff `c2` is directly adjacent to `c1` in one of the six
-  different ordinal directions possible for the layout's hexagonal
-  orientation.)doc";
+    `true` iff `c2` is directly adjacent to `c1` in one of the six
+    different ordinal directions possible for the layout's hexagonal
+    orientation.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_is_at_any_border =
     R"doc(Returns whether the given coordinate is located at any of the layout's
 borders where x or y are either minimal or maximal.
 
 Parameter ``c``:
-  Coordinate to check for border location.
+    Coordinate to check for border location.
 
 Returns:
-  `true` iff `c` is located at any of the layout's borders.)doc";
+    `true` iff `c` is located at any of the layout's borders.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_is_at_eastern_border =
     R"doc(Returns whether the given coordinate is located at the layout's
 eastern border where x is maximal.
 
 Parameter ``c``:
-  Coordinate to check for border location.
+    Coordinate to check for border location.
 
 Returns:
-  `true` iff `c` is located at the layout's northern border.)doc";
+    `true` iff `c` is located at the layout's northern border.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_is_at_northern_border =
     R"doc(Returns whether the given coordinate is located at the layout's
 northern border where y is minimal.
 
 Parameter ``c``:
-  Coordinate to check for border location.
+    Coordinate to check for border location.
 
 Returns:
-  `true` iff `c` is located at the layout's northern border.)doc";
+    `true` iff `c` is located at the layout's northern border.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_is_at_southern_border =
     R"doc(Returns whether the given coordinate is located at the layout's
 southern border where y is maximal.
 
 Parameter ``c``:
-  Coordinate to check for border location.
+    Coordinate to check for border location.
 
 Returns:
-  `true` iff `c` is located at the layout's southern border.)doc";
+    `true` iff `c` is located at the layout's southern border.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_is_at_western_border =
     R"doc(Returns whether the given coordinate is located at the layout's
 western border where x is minimal.
 
 Parameter ``c``:
-  Coordinate to check for border location.
+    Coordinate to check for border location.
 
 Returns:
-  `true` iff `c` is located at the layout's western border.)doc";
+    `true` iff `c` is located at the layout's western border.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_is_below =
     R"doc(Returns `true` iff coordinate `c2` is directly below coordinate `c1`.
 
 Parameter ``c1``:
-  Base coordinate.
+    Base coordinate.
 
 Parameter ``c2``:
-  Coordinate to test for its location in relation to `c1`.
+    Coordinate to test for its location in relation to `c1`.
 
 Returns:
-  `true` iff `c2` is directly below `c1`.)doc";
+    `true` iff `c2` is directly below `c1`.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_is_crossing_layer =
     R"doc(Returns whether the given coordinate is located in a crossing layer
 where z is not minimal.
 
 Parameter ``c``:
-  Coordinate to check for elevation.
+    Coordinate to check for elevation.
 
 Returns:
-  `true` iff `c` is in a crossing layer.)doc";
+    `true` iff `c` is in a crossing layer.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_is_east_of =
     R"doc(Returns `true` iff coordinate `c2` is directly east of coordinate
 `c1`.
 
 Parameter ``c1``:
-  Base coordinate.
+    Base coordinate.
 
 Parameter ``c2``:
-  Coordinate to test for its location in relation to `c1`.
+    Coordinate to test for its location in relation to `c1`.
 
 Returns:
-  `true` iff `c2` is directly east of `c1`.)doc";
+    `true` iff `c2` is directly east of `c1`.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_is_eastwards_of =
     R"doc(Returns `true` iff coordinate `c2` is somewhere east of coordinate
 `c1`.
 
 Parameter ``c1``:
-  Base coordinate.
+    Base coordinate.
 
 Parameter ``c2``:
-  Coordinate to test for its location in relation to `c1`.
+    Coordinate to test for its location in relation to `c1`.
 
 Returns:
-  `true` iff `c2` is somewhere east of `c1`.)doc";
+    `true` iff `c2` is somewhere east of `c1`.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_is_ground_layer =
     R"doc(Returns whether the given coordinate is located in the ground layer
 where z is minimal.
 
 Parameter ``c``:
-  Coordinate to check for elevation.
+    Coordinate to check for elevation.
 
 Returns:
-  `true` iff `c` is in ground layer.)doc";
+    `true` iff `c` is in ground layer.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_is_in_even_column =
     R"doc(Checks if the given coordinate is located in a column with an even
 index.
 
 Parameter ``c``:
-  Coordinate to check.
+    Coordinate to check.
 
 Returns:
-  `true` iff `c` is located in an even column.)doc";
+    `true` iff `c` is located in an even column.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_is_in_even_row =
     R"doc(Checks if the given coordinate is located in a row with an even index.
 
 Parameter ``c``:
-  Coordinate to check.
+    Coordinate to check.
 
 Returns:
-  `true` iff `c` is located in an even row.)doc";
+    `true` iff `c` is located in an even row.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_is_in_odd_column =
     R"doc(Checks if the given coordinate is located in a column with an odd
 index.
 
 Parameter ``c``:
-  Coordinate to check.
+    Coordinate to check.
 
 Returns:
-  `true` iff `c` is located in an odd column.)doc";
+    `true` iff `c` is located in an odd column.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_is_in_odd_row =
     R"doc(Checks if the given coordinate is located in a row with an odd index.
 
 Parameter ``c``:
-  Coordinate to check.
+    Coordinate to check.
 
 Returns:
-  `true` iff `c` is located in an odd row.)doc";
+    `true` iff `c` is located in an odd row.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_is_north_of =
     R"doc(Returns `true` iff coordinate `c2` is directly north of coordinate
 `c1`.
 
 Parameter ``c1``:
-  Base coordinate.
+    Base coordinate.
 
 Parameter ``c2``:
-  Coordinate to test for its location in relation to `c1`.
+    Coordinate to test for its location in relation to `c1`.
 
 Returns:
-  `true` iff `c2` is directly north of `c1`.)doc";
+    `true` iff `c2` is directly north of `c1`.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_is_northwards_of =
     R"doc(Returns `true` iff coordinate `c2` is somewhere north of coordinate
 `c1`.
 
 Parameter ``c1``:
-  Base coordinate.
+    Base coordinate.
 
 Parameter ``c2``:
-  Coordinate to test for its location in relation to `c1`.
+    Coordinate to test for its location in relation to `c1`.
 
 Returns:
-  `true` iff `c2` is somewhere north of `c1`.)doc";
+    `true` iff `c2` is somewhere north of `c1`.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_is_south_of =
     R"doc(Returns `true` iff coordinate `c2` is directly south of coordinate
 `c1`.
 
 Parameter ``c1``:
-  Base coordinate.
+    Base coordinate.
 
 Parameter ``c2``:
-  Coordinate to test for its location in relation to `c1`.
+    Coordinate to test for its location in relation to `c1`.
 
 Returns:
-  `true` iff `c2` is directly south of `c1`.)doc";
+    `true` iff `c2` is directly south of `c1`.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_is_southwards_of =
     R"doc(Returns `true` iff coordinate `c2` is somewhere south of coordinate
 `c1`.
 
 Parameter ``c1``:
-  Base coordinate.
+    Base coordinate.
 
 Parameter ``c2``:
-  Coordinate to test for its location in relation to `c1`.
+    Coordinate to test for its location in relation to `c1`.
 
 Returns:
-  `true` iff `c2` is somewhere south of `c1`.)doc";
+    `true` iff `c2` is somewhere south of `c1`.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_is_west_of =
     R"doc(Returns `true` iff coordinate `c2` is directly west of coordinate
 `c1`.
 
 Parameter ``c1``:
-  Base coordinate.
+    Base coordinate.
 
 Parameter ``c2``:
-  Coordinate to test for its location in relation to `c1`.
+    Coordinate to test for its location in relation to `c1`.
 
 Returns:
-  `true` iff `c2` is directly west of `c1`.)doc";
+    `true` iff `c2` is directly west of `c1`.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_is_westwards_of =
     R"doc(Returns `true` iff coordinate `c2` is somewhere west of coordinate
 `c1`.
 
 Parameter ``c1``:
-  Base coordinate.
+    Base coordinate.
 
 Parameter ``c2``:
-  Coordinate to test for its location in relation to `c1`.
+    Coordinate to test for its location in relation to `c1`.
 
 Returns:
-  `true` iff `c2` is somewhere west of `c1`.)doc";
+    `true` iff `c2` is somewhere west of `c1`.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_is_within_bounds =
     R"doc(Returns whether the given coordinate is located within the layout
 bounds.
 
 Parameter ``c``:
-  Coordinate to check for boundary.
+    Coordinate to check for boundary.
 
 Returns:
-  `true` iff `c` is located within the layout bounds.)doc";
+    `true` iff `c` is located within the layout bounds.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_north =
     R"doc(Returns the coordinate that is directly adjacent in northern direction
@@ -10262,10 +10661,10 @@ by 1. If `c`'s y-dimension is already at minimum, `c` is returned
 instead.
 
 Parameter ``c``:
-  Coordinate whose northern counterpart is desired.
+    Coordinate whose northern counterpart is desired.
 
 Returns:
-  Coordinate adjacent and north of `c`.)doc";
+    Coordinate adjacent and north of `c`.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_north_east =
     R"doc(Returns the coordinate that is located in north-eastern direction of a
@@ -10273,10 +10672,10 @@ given coordinate `c`. Depending on the hexagonal orientation of the
 layout, the dimension values of the returned coordinate may differ.
 
 Parameter ``c``:
-  Coordinate whose north-eastern counterpart is desired.
+    Coordinate whose north-eastern counterpart is desired.
 
 Returns:
-  Coordinate directly north-eastern of `c`.)doc";
+    Coordinate directly north-eastern of `c`.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_north_west =
     R"doc(Returns the coordinate that is located in north-western direction of a
@@ -10284,26 +10683,26 @@ given coordinate `c`. Depending on the hexagonal orientation of the
 layout, the dimension values of the returned coordinate may differ.
 
 Parameter ``c``:
-  Coordinate whose north-western counterpart is desired.
+    Coordinate whose north-western counterpart is desired.
 
 Returns:
-  Coordinate directly north-western of `c`.)doc";
+    Coordinate directly north-western of `c`.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_northern_border_of =
     R"doc(Returns the coordinate with the same x and z values as a given
 coordinate but that is located at the layout's northern border.
 
 Parameter ``c``:
-  Coordinate whose border counterpart is desired.
+    Coordinate whose border counterpart is desired.
 
 Returns:
-  The northern border equivalent of `c`.)doc";
+    The northern border equivalent of `c`.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_resize =
     R"doc(Updates the layout's dimensions, effectively resizing it.
 
 Parameter ``ar``:
-  New aspect ratio.)doc";
+    New aspect ratio.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_south =
     R"doc(Returns the coordinate that is directly adjacent in southern direction
@@ -10312,10 +10711,10 @@ by 1. If `c`'s y-dimension is already at maximum, `c` is returned
 instead.
 
 Parameter ``c``:
-  Coordinate whose southern counterpart is desired.
+    Coordinate whose southern counterpart is desired.
 
 Returns:
-  Coordinate adjacent and south of `c`.)doc";
+    Coordinate adjacent and south of `c`.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_south_east =
     R"doc(Returns the coordinate that is located in south-eastern direction of a
@@ -10323,10 +10722,10 @@ given coordinate `c`. Depending on the hexagonal orientation of the
 layout, the dimension values of the returned coordinate may differ.
 
 Parameter ``c``:
-  Coordinate whose south-eastern counterpart is desired.
+    Coordinate whose south-eastern counterpart is desired.
 
 Returns:
-  Coordinate directly south-eastern of `c`.)doc";
+    Coordinate directly south-eastern of `c`.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_south_west =
     R"doc(Returns the coordinate that is located in south-western direction of a
@@ -10334,20 +10733,20 @@ given coordinate `c`. Depending on the hexagonal orientation of the
 layout, the dimension values of the returned coordinate may differ.
 
 Parameter ``c``:
-  Coordinate whose south-western counterpart is desired.
+    Coordinate whose south-western counterpart is desired.
 
 Returns:
-  Coordinate directly south-western of `c`.)doc";
+    Coordinate directly south-western of `c`.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_southern_border_of =
     R"doc(Returns the coordinate with the same x and z values as a given
 coordinate but that is located at the layout's southern border.
 
 Parameter ``c``:
-  Coordinate whose border counterpart is desired.
+    Coordinate whose border counterpart is desired.
 
 Returns:
-  The southern border equivalent of `c`.)doc";
+    The southern border equivalent of `c`.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_strg = R"doc()doc";
 
@@ -10358,11 +10757,11 @@ This implementation is adapted from
 https://www.redblobgames.com/grids/hexagons/codegen/output/lib.cpp
 
 Parameter ``offset_coord``:
-  Offset coordinate to convert.
+    Offset coordinate to convert.
 
 Returns:
-  Cube coordinate representing `offset_coord` in the layout's
-  hexagonal orientation.)doc";
+    Cube coordinate representing `offset_coord` in the layout's
+    hexagonal orientation.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_to_offset_coordinate =
     R"doc(Converts a cube coordinate to an offset coordinate.
@@ -10371,11 +10770,11 @@ This implementation is adapted from
 https://www.redblobgames.com/grids/hexagons/codegen/output/lib.cpp
 
 Parameter ``cube_coord``:
-  Cube coordinate to convert.
+    Cube coordinate to convert.
 
 Returns:
-  Offset coordinate representing `cube_coord` in the layout's
-  hexagonal orientation.)doc";
+    Offset coordinate representing `cube_coord` in the layout's
+    hexagonal orientation.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_west =
     R"doc(Returns the coordinate that is directly adjacent in western direction
@@ -10384,41 +10783,41 @@ by 1. If `c`'s x-dimension is already at minimum, `c` is returned
 instead.
 
 Parameter ``c``:
-  Coordinate whose western counterpart is desired.
+    Coordinate whose western counterpart is desired.
 
 Returns:
-  Coordinate adjacent and west of `c`.)doc";
+    Coordinate adjacent and west of `c`.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_western_border_of =
     R"doc(Returns the coordinate with the same y and z values as a given
 coordinate but that is located at the layout's western border.
 
 Parameter ``c``:
-  Coordinate whose border counterpart is desired.
+    Coordinate whose border counterpart is desired.
 
 Returns:
-  The western border equivalent of `c`.)doc";
+    The western border equivalent of `c`.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_x =
     R"doc(Returns the layout's x-dimension, i.e., returns the biggest x-value
 that still belongs to the layout.
 
 Returns:
-  x-dimension.)doc";
+    x-dimension.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_y =
     R"doc(Returns the layout's y-dimension, i.e., returns the biggest y-value
 that still belongs to the layout.
 
 Returns:
-  y-dimension.)doc";
+    y-dimension.)doc";
 
 static const char* __doc_fiction_hexagonal_layout_z =
     R"doc(Returns the layout's z-dimension, i.e., returns the biggest z-value
 that still belongs to the layout.
 
 Returns:
-  z-dimension.)doc";
+    z-dimension.)doc";
 
 static const char* __doc_fiction_hexagonalization =
     R"doc(Transforms a 2DDWave-clocked Cartesian layout into a hexagonal even
@@ -10429,16 +10828,16 @@ Wheel\" by S. Hofmann, M. Walter, and R. Wille in IEEE NANO 2023
 (https://ieeexplore.ieee.org/document/10231278).
 
 Template parameter ``HexLyt``:
-  Even-row hexagonal gate-level layout return type.
+    Even-row hexagonal gate-level layout return type.
 
 Template parameter ``CartLyt``:
-  Input Cartesian gate-level layout type.
+    Input Cartesian gate-level layout type.
 
 Parameter ``lyt``:
-  2DDWave-clocked Cartesian gate-level layout to hexagonalize.
+    2DDWave-clocked Cartesian gate-level layout to hexagonalize.
 
 Returns:
-  Hexagonal representation of the Cartesian layout.)doc";
+    Hexagonal representation of the Cartesian layout.)doc";
 
 static const char* __doc_fiction_hexagonalization_stats =
     R"doc(This struct stores statistics about the hexagonalization process.)doc";
@@ -10449,7 +10848,7 @@ static const char* __doc_fiction_hexagonalization_stats_report =
     R"doc(Reports the statistics to the given output stream.
 
 Parameter ``out``:
-  Output stream.)doc";
+    Output stream.)doc";
 
 static const char* __doc_fiction_high_degree_fanin_exception =
     R"doc(Exception class that can be thrown if some network exceeds a legal
@@ -10472,19 +10871,19 @@ computations, where :math:`|L|` is the number of coordinates in the
 layout.
 
 Template parameter ``Lyt``:
-  Coordinate layout type.
+    Coordinate layout type.
 
 Template parameter ``Dist``:
-  Distance type.
+    Distance type.
 
 Parameter ``lyt``:
-  Layout to compute distances for.
+    Layout to compute distances for.
 
 Parameter ``dist_fn``:
-  Distance functor to apply to all pairs of coordinates in `lyt`.
+    Distance functor to apply to all pairs of coordinates in `lyt`.
 
 Returns:
-  Fully initialized `distance_map` for `lyt`.)doc";
+    Fully initialized `distance_map` for `lyt`.)doc";
 
 static const char* __doc_fiction_initialize_sparse_distance_map =
     R"doc(This function fully initializes a `sparse_distance_map` for a given
@@ -10497,19 +10896,19 @@ computations, where :math:`|L|` is the number of coordinates in the
 layout.
 
 Template parameter ``Lyt``:
-  Coordinate layout type.
+    Coordinate layout type.
 
 Template parameter ``Dist``:
-  Distance type.
+    Distance type.
 
 Parameter ``lyt``:
-  Layout to compute distances for.
+    Layout to compute distances for.
 
 Parameter ``dist_fn``:
-  Distance functor to apply to all pairs of coordinates in `lyt`.
+    Distance functor to apply to all pairs of coordinates in `lyt`.
 
 Returns:
-  Fully initialized `sparse_distance_map` for `lyt`.)doc";
+    Fully initialized `sparse_distance_map` for `lyt`.)doc";
 
 static const char* __doc_fiction_inml_technology =
     R"doc(in-plane Nanomagnet Logic (iNML) technology implementation of the FCN
@@ -10590,31 +10989,31 @@ static const char* __doc_fiction_inml_topolinano_library_has_and_or_maj_fanin =
     R"doc(Checks whether the given node has an AND, OR, or MAJ fanin node.
 
 Template parameter ``Lyt``:
-  Gate-level layout type.
+    Gate-level layout type.
 
 Parameter ``lyt``:
-  The layout to check.
+    The layout to check.
 
 Parameter ``n``:
-  Node whose fanins are to be considered.
+    Node whose fanins are to be considered.
 
 Returns:
-  `true` iff `n` has an AND, OR, or MAJ fanin node.)doc";
+    `true` iff `n` has an AND, OR, or MAJ fanin node.)doc";
 
 static const char* __doc_fiction_inml_topolinano_library_has_fanout_fanout =
     R"doc(Checks whether the given node has an fanout node as fanout.
 
 Template parameter ``Lyt``:
-  Gate-level layout type.
+    Gate-level layout type.
 
 Parameter ``lyt``:
-  The layout to check.
+    The layout to check.
 
 Parameter ``n``:
-  Node whose fanouts are to be considered.
+    Node whose fanouts are to be considered.
 
 Returns:
-  `true` iff `n` has a fanout node as fanout.)doc";
+    `true` iff `n` has a fanout node as fanout.)doc";
 
 static const char* __doc_fiction_inml_topolinano_library_inml_topolinano_library = R"doc()doc";
 
@@ -10625,11 +11024,11 @@ static const char* __doc_fiction_inml_topolinano_library_post_layout_optimizatio
 cells.
 
 Template parameter ``CellLyt``:
-  Cell-level layout type.
+    Cell-level layout type.
 
 Parameter ``lyt``:
-  The cell-level layout that has been created via application of
-  `set_up_gate`.)doc";
+    The cell-level layout that has been created via application of
+    `set_up_gate`.)doc";
 
 static const char* __doc_fiction_inml_topolinano_library_set_up_gate =
     R"doc(Overrides the corresponding function in fcn_gate_library. Given a tile
@@ -10639,17 +11038,17 @@ that tile. May it be a gate or wires. Rotation and special marks like
 input and output, const cells etc. are computed additionally.
 
 Template parameter ``GateLyt``:
-  Shifted Cartesian gate-level layout type.
+    Shifted Cartesian gate-level layout type.
 
 Parameter ``lyt``:
-  Layout that hosts tile `t`.
+    Layout that hosts tile `t`.
 
 Parameter ``t``:
-  Tile to be realized as a ToPoliNano gate.
+    Tile to be realized as a ToPoliNano gate.
 
 Returns:
-  ToPoliNano gate representation of `t` including I/Os, rotation,
-  etc.)doc";
+    ToPoliNano gate representation of `t` including I/Os, rotation,
+    etc.)doc";
 
 static const char* __doc_fiction_integral_abs =
     R"doc(Takes the absolute value of an integral number if it is signed, and
@@ -10657,14 +11056,14 @@ otherwise computes the identity. This avoids a compiler warning when
 taking the absolute value of an unsigned number.
 
 Template parameter ``T``:
-  The type of the number to take the absolute value of. Must be
-  integral.
+    The type of the number to take the absolute value of. Must be
+    integral.
 
 Parameter ``n``:
-  The number to take the absolute value of.
+    The number to take the absolute value of.
 
 Returns:
-  |n|.)doc";
+    |n|.)doc";
 
 static const char* __doc_fiction_inverse_levels =
     R"doc(A clumsy implementation that returns the inverse level of each node in
@@ -10676,31 +11075,31 @@ well so far. If anyone wants to build an `inv_depth_view`, please be
 my guest.
 
 Template parameter ``Ntk``:
-  `mockturtle` network type.
+    `mockturtle` network type.
 
 Parameter ``ntk``:
-  The network whose inverse levels are desired.
+    The network whose inverse levels are desired.
 
 Returns:
-  A vector of inverse levels for each node where
-  `ntk.node_to_index(n)` is the position where `n`'s inverse level
-  is stored.)doc";
+    A vector of inverse levels for each node where
+    `ntk.node_to_index(n)` is the position where `n`'s inverse level
+    is stored.)doc";
 
 static const char* __doc_fiction_is_balanced =
     R"doc(Checks if a logic network is properly path-balanced with regard to the
 provided parameters.
 
 Template parameter ``Ntk``:
-  Logic network type.
+    Logic network type.
 
 Parameter ``ntk``:
-  The logic network to check.
+    The logic network to check.
 
 Parameter ``ps``:
-  Parameters.
+    Parameters.
 
 Returns:
-  `true` iff `ntk` is properly path-balanced with regard to `ps`.)doc";
+    `true` iff `ntk` is properly path-balanced with regard to `ps`.)doc";
 
 static const char* __doc_fiction_is_cartesian_layout = R"doc()doc";
 
@@ -10714,10 +11113,10 @@ static const char* __doc_fiction_is_charged_defect_type =
 avoided by a larger distance.
 
 Parameter ``defect``:
-  Defect to check.
+    Defect to check.
 
 Returns:
-  `true` iff `defect` is of a charged type.)doc";
+    `true` iff `defect` is of a charged type.)doc";
 
 static const char* __doc_fiction_is_clocked_layout = R"doc()doc";
 
@@ -10739,19 +11138,19 @@ level layouts, but will then always return `false`. This is helpful
 for general routing in, e.g., clocked layouts.
 
 Template parameter ``Lyt``:
-  Layout type.
+    Layout type.
 
 Parameter ``lyt``:
-  The layout.
+    The layout.
 
 Parameter ``src``:
-  Source coordinate in `lyt`.
+    Source coordinate in `lyt`.
 
 Parameter ``successor``:
-  Successor coordinate in lyt reachable from `src`.
+    Successor coordinate in lyt reachable from `src`.
 
 Returns:
-  `true` iff `successor` hosts a wire that is crossable from `src`.)doc";
+    `true` iff `successor` hosts a wire that is crossable from `src`.)doc";
 
 static const char* __doc_fiction_is_fanout_substituted =
     R"doc(Checks if a logic network is properly fanout-substituted with regard
@@ -10759,17 +11158,17 @@ to the provided parameters, i.e., if no node exceeds the specified
 fanout limits.
 
 Template parameter ``Ntk``:
-  Logic network type.
+    Logic network type.
 
 Parameter ``ntk``:
-  The logic network to check.
+    The logic network to check.
 
 Parameter ``ps``:
-  Parameters.
+    Parameters.
 
 Returns:
-  `true` iff `ntk` is properly fanout-substituted with regard to
-  `ps`.)doc";
+    `true` iff `ntk` is properly fanout-substituted with regard to
+    `ps`.)doc";
 
 static const char* __doc_fiction_is_gate_level_layout = R"doc()doc";
 
@@ -10778,19 +11177,19 @@ static const char* __doc_fiction_is_ground_state =
 algorithm.
 
 Template parameter ``Lyt``:
-  Cell-level layout type.
+    Cell-level layout type.
 
 Parameter ``heuristic_results``:
-  All found physically valid charge distribution surfaces obtained
-  by a heuristic algorithm.
+    All found physically valid charge distribution surfaces obtained
+    by a heuristic algorithm.
 
 Parameter ``exhaustive_results``:
-  All valid charge distribution surfaces determined by ExGS.
+    All valid charge distribution surfaces determined by ExGS.
 
 Returns:
-  Returns `true` if the relative difference between the lowest
-  energies of the two sets is less than :math:`0.00001`, `false`
-  otherwise.)doc";
+    Returns `true` if the relative difference between the lowest
+    energies of the two sets is less than :math:`0.00001`, `false`
+    otherwise.)doc";
 
 static const char* __doc_fiction_is_hexagonal_layout = R"doc()doc";
 
@@ -10801,24 +11200,24 @@ one. These currently are
 - COLUMNAR - ROW - 2DDWAVE - 2DDWAVEHEX
 
 Template parameter ``Lyt``:
-  Layout type.
+    Layout type.
 
 Parameter ``scheme``:
-  Clocking scheme to check.
+    Clocking scheme to check.
 
 Returns:
-  `true` iff `scheme` is listed as one of the linear clocking
-  schemes.)doc";
+    `true` iff `scheme` is listed as one of the linear clocking
+    schemes.)doc";
 
 static const char* __doc_fiction_is_negatively_charged_defect =
     R"doc(Checks whether the given defect has a negative charge value assigned
 to it. This function is irrespective of the associated defect type.
 
 Parameter ``defect``:
-  Defect to check.
+    Defect to check.
 
 Returns:
-  `true` iff `defect` has a negative charge value.)doc";
+    `true` iff `defect` has a negative charge value.)doc";
 
 static const char* __doc_fiction_is_neutral_defect_type =
     R"doc(Checks whether the given defect type is not a charged one. Neutral
@@ -10828,10 +11227,10 @@ defect per se which is why this function returns false on the `NONE`
 defect input.
 
 Parameter ``defect``:
-  Defect to check.
+    Defect to check.
 
 Returns:
-  `true` iff `defect` is not of a charged type.)doc";
+    `true` iff `defect` is not of a charged type.)doc";
 
 static const char* __doc_fiction_is_neutrally_charged_defect =
     R"doc(Checks whether the given defect has a neutral charge value, i.e., `0`,
@@ -10839,10 +11238,10 @@ assigned to it. This function is irrespective of the associated defect
 type.
 
 Parameter ``defect``:
-  Defect to check.
+    Defect to check.
 
 Returns:
-  `true` iff `defect` has a neutral charge value.)doc";
+    `true` iff `defect` has a neutral charge value.)doc";
 
 static const char* __doc_fiction_is_operational =
     R"doc(Determine the operational status of an SiDB layout.
@@ -10853,25 +11252,25 @@ layout is operational and returns the correct result for all
 :math:`2^n` input combinations.
 
 Template parameter ``Lyt``:
-  SiDB cell-level layout type.
+    SiDB cell-level layout type.
 
 Template parameter ``TT``:
-  The type of the truth table specifying the layout behavior.
+    The type of the truth table specifying the layout behavior.
 
 Parameter ``lyt``:
-  The SiDB cell-level layout to be checked.
+    The SiDB cell-level layout to be checked.
 
 Parameter ``spec``:
-  Expected Boolean function of the layout given as a multi-output
-  truth table.
+    Expected Boolean function of the layout given as a multi-output
+    truth table.
 
 Parameter ``params``:
-  Parameters for the `is_operational` algorithm.
+    Parameters for the `is_operational` algorithm.
 
 Returns:
-  A pair containing the operational status of the gate layout
-  (either `OPERATIONAL` or `NON_OPERATIONAL`) and the number of
-  input combinations tested.)doc";
+    A pair containing the operational status of the gate layout
+    (either `OPERATIONAL` or `NON_OPERATIONAL`) and the number of
+    input combinations tested.)doc";
 
 static const char* __doc_fiction_is_operational_params = R"doc(Parameters for the `is_operational` algorithm.)doc";
 
@@ -10891,10 +11290,10 @@ static const char* __doc_fiction_is_positively_charged_defect =
 to it. This function is irrespective of the associated defect type.
 
 Parameter ``defect``:
-  Defect to check.
+    Defect to check.
 
 Returns:
-  `true` iff `defect` has a positive charge value.)doc";
+    `true` iff `defect` has a positive charge value.)doc";
 
 static const char* __doc_fiction_is_shifted_cartesian_layout = R"doc()doc";
 
@@ -10957,35 +11356,35 @@ A* in terms of runtime. It is recommended to use A* (see `a_star`).
 @note JPS does not support wire crossings.
 
 Template parameter ``Path``:
-  Type of the returned path.
+    Type of the returned path.
 
 Template parameter ``Lyt``:
-  Type of the layout to perform path finding on.
+    Type of the layout to perform path finding on.
 
 Template parameter ``Dist``:
-  Distance value type to be used in the heuristic estimation
-  function.
+    Distance value type to be used in the heuristic estimation
+    function.
 
 Parameter ``layout``:
-  The layout in which the shortest path between a source and target
-  is to be found.
+    The layout in which the shortest path between a source and target
+    is to be found.
 
 Parameter ``objective``:
-  Source-target coordinate pair.
+    Source-target coordinate pair.
 
 Parameter ``dist_fn``:
-  A distance functor that implements the desired heuristic
-  estimation function.
+    A distance functor that implements the desired heuristic
+    estimation function.
 
 Returns:
-  The shortest loop-less path in `layout` from `objective.source` to
-  `objective.target`.)doc";
+    The shortest loop-less path in `layout` from `objective.source` to
+    `objective.target`.)doc";
 
 static const char* __doc_fiction_layout_coordinate_path =
     R"doc(A path in a layout defined as an ordered sequence of coordinates.
 
 Template parameter ``Lyt``:
-  Coordinate layout type.)doc";
+    Coordinate layout type.)doc";
 
 static const char* __doc_fiction_layout_coordinate_path_append = R"doc()doc";
 
@@ -10998,10 +11397,10 @@ static const char* __doc_fiction_linear_temperature_schedule =
 in decrements of `10`.
 
 Parameter ``t``:
-  The current temperature.
+    The current temperature.
 
 Returns:
-  The next temperature, i.e. :math:`\texttt{t} - 10`.)doc";
+    The next temperature, i.e. :math:`\texttt{t} - 10`.)doc";
 
 static const char* __doc_fiction_magcad_magnet_count =
     R"doc(Calculates the number of magnets for an iNML layout the way MagCAD
@@ -11009,13 +11408,13 @@ static const char* __doc_fiction_magcad_magnet_count =
 of 4 inverters as a single entity.
 
 Template parameter ``Lyt``:
-  iNML cell-level layout type.
+    iNML cell-level layout type.
 
 Parameter ``lyt``:
-  The iNML cell-level layout whose area is desired.
+    The iNML cell-level layout whose area is desired.
 
 Returns:
-  Number of magnets as counted by MagCAD.)doc";
+    Number of magnets as counted by MagCAD.)doc";
 
 static const char* __doc_fiction_manhattan_distance =
     R"doc(The Manhattan distance :math:`D` between two layout coordinates
@@ -11024,31 +11423,31 @@ static const char* __doc_fiction_manhattan_distance =
 :math:`D = |x_1 - x_2| + |y_1 - y_2|`
 
 Template parameter ``Lyt``:
-  Coordinate layout type.
+    Coordinate layout type.
 
 Template parameter ``Dist``:
-  Integral type for the distance.
+    Integral type for the distance.
 
 Parameter ``lyt``:
-  Layout.
+    Layout.
 
 Parameter ``source``:
-  Source coordinate.
+    Source coordinate.
 
 Parameter ``target``:
-  Target coordinate.
+    Target coordinate.
 
 Returns:
-  Manhattan distance between `source` and `target`.)doc";
+    Manhattan distance between `source` and `target`.)doc";
 
 static const char* __doc_fiction_manhattan_distance_functor =
     R"doc(A pre-defined distance functor that uses the Manhattan distance.
 
 Template parameter ``Lyt``:
-  Coordinate layout type.
+    Coordinate layout type.
 
 Template parameter ``Dist``:
-  Integral distance type.)doc";
+    Integral distance type.)doc";
 
 static const char* __doc_fiction_manhattan_distance_functor_manhattan_distance_functor = R"doc()doc";
 
@@ -11080,18 +11479,18 @@ the defect can still affect the layout's ground state, potentially
 altering its behavior, such as gate functionality.
 
 Parameter ``lyt``:
-  The SiDB cell-level layout for which the influence distance is
-  being determined.
+    The SiDB cell-level layout for which the influence distance is
+    being determined.
 
 Parameter ``params``:
-  Parameters used to calculate the defect's maximum influence
-  distance.
+    Parameters used to calculate the defect's maximum influence
+    distance.
 
 Returns:
-  Pair with the first element describing the position with maximum
-  distance to the layout where a placed defect can still affect the
-  ground state of the layout. The second entry describes the
-  distance of the defect from the layout.)doc";
+    Pair with the first element describing the position with maximum
+    distance to the layout where a placed defect can still affect the
+    ground state of the layout. The second entry describes the
+    distance of the defect from the layout.)doc";
 
 static const char* __doc_fiction_minimum_energy =
     R"doc(Computes the minimum energy of a range of
@@ -11099,17 +11498,17 @@ static const char* __doc_fiction_minimum_energy =
 is returned.
 
 Template parameter ``InputIt``:
-  Must meet the requirements of `LegacyInputIterator`.
+    Must meet the requirements of `LegacyInputIterator`.
 
 Parameter ``first``:
-  Begin of the range to examime.
+    Begin of the range to examime.
 
 Parameter ``last``:
-  End of the range to examine.
+    End of the range to examine.
 
 Returns:
-  Value of the minimum energy found in the input range (unit: eV),
-  or infinity if the range is empty.)doc";
+    Value of the minimum energy found in the input range (unit: eV),
+    or infinity if the range is empty.)doc";
 
 static const char* __doc_fiction_minimum_energy_distribution =
     R"doc(Returns an iterator to the charge distribution of minimum energy
@@ -11117,17 +11516,17 @@ contained in a range of `charge_distribution_surface` objects. If the
 range is empty, `last` is returned.
 
 Template parameter ``InputIt``:
-  Must meet the requirements of `LegacyInputIterator`.
+    Must meet the requirements of `LegacyInputIterator`.
 
 Parameter ``first``:
-  Begin of the range to examime.
+    Begin of the range to examime.
 
 Parameter ``last``:
-  End of the range to examine.
+    End of the range to examine.
 
 Returns:
-  Iterator to the minimum energy charge distribution found in the
-  input range, or `last` if the range is empty.)doc";
+    Iterator to the minimum energy charge distribution found in the
+    input range, or `last` if the range is empty.)doc";
 
 static const char* __doc_fiction_missing_sidb_position_exception =
     R"doc(Exception thrown when a missing SiDB position is encountered in the
@@ -11158,20 +11557,20 @@ they will do it themselves. Providing already balanced networks may
 lead to substantial overhead.
 
 Template parameter ``NtkDest``:
-  Type of the returned logic network.
+    Type of the returned logic network.
 
 Template parameter ``NtkSrc``:
-  Type of the input logic network.
+    Type of the input logic network.
 
 Parameter ``ntk_src``:
-  The input logic network.
+    The input logic network.
 
 Parameter ``ps``:
-  Parameters.
+    Parameters.
 
 Returns:
-  A path-balanced logic network of type `NtkDest` that is logically
-  equivalent to `ntk_src`.)doc";
+    A path-balanced logic network of type `NtkDest` that is logically
+    equivalent to `ntk_src`.)doc";
 
 static const char* __doc_fiction_network_balancing_params = R"doc(Parameters for the network balancing algorithm.)doc";
 
@@ -11183,26 +11582,26 @@ static const char* __doc_fiction_network_reader =
 types.
 
 Template parameter ``NtkPtr``:
-  Pointer type to a logic network.)doc";
+    Pointer type to a logic network.)doc";
 
 static const char* __doc_fiction_network_reader_get_networks =
     R"doc(Getter for networks generated from given files.
 
 Parameter ``sorted``:
-  Flag to indicate that the networks are to be returned in ascending
-  order of their vertex count.
+    Flag to indicate that the networks are to be returned in ascending
+    order of their vertex count.
 
 Returns:
-  Vector of read and constructed logic networks.)doc";
+    Vector of read and constructed logic networks.)doc";
 
 static const char* __doc_fiction_network_reader_network_reader =
     R"doc(Standard constructor. Reads and constructs logic networks. May throw.
 
 Parameter ``filename``:
-  Path to the file or folder of files to read.
+    Path to the file or folder of files to read.
 
 Parameter ``out``:
-  Output stream to write status updates into.)doc";
+    Output stream to write status updates into.)doc";
 
 static const char* __doc_fiction_network_reader_networks =
     R"doc(Vector of logic networks read from files given at construction.)doc";
@@ -11214,17 +11613,17 @@ static const char* __doc_fiction_network_reader_read =
     R"doc(Actual read function that constructs the logic network from a file.
 
 Template parameter ``Reader``:
-  The functor type which constructs the network, i.e. handles the
-  callbacks.
+    The functor type which constructs the network, i.e. handles the
+    callbacks.
 
 Template parameter ``ReadFun``:
-  The file parser type.
+    The file parser type.
 
 Parameter ``file``:
-  The file name.
+    The file name.
 
 Parameter ``rfun``:
-  The actual parsing function.)doc";
+    The actual parsing function.)doc";
 
 static const char* __doc_fiction_normalize_layout_coordinates =
     R"doc(A new layout is constructed and returned that is equivalent to the
@@ -11233,29 +11632,29 @@ i.e., start at `(0, 0)` and are all positive. To this end, all
 existing coordinates are shifted by an x and y offset.
 
 Template parameter ``Lyt``:
-  Cell-level layout type.
+    Cell-level layout type.
 
 Parameter ``lyt``:
-  The layout which is to be normalized.
+    The layout which is to be normalized.
 
 Returns:
-  New normalized equivalent layout.)doc";
+    New normalized equivalent layout.)doc";
 
 static const char* __doc_fiction_num_adjacent_coordinates =
     R"doc(Returns the number of adjacent coordinates of a given one. This is not
 a constant value because `c` could be located at a layout border.
 
 Template parameter ``Lyt``:
-  Layout type.
+    Layout type.
 
 Parameter ``lyt``:
-  Layout.
+    Layout.
 
 Parameter ``c``:
-  Coordinate whose number of adjacencies are required.
+    Coordinate whose number of adjacencies are required.
 
 Returns:
-  Number of `c`'s adjacent coordinates.)doc";
+    Number of `c`'s adjacent coordinates.)doc";
 
 static const char* __doc_fiction_num_clks = R"doc()doc";
 
@@ -11267,16 +11666,16 @@ static const char* __doc_fiction_num_constant_fanins =
     R"doc(Computes the number of constant fanin nodes of some network node `n`.
 
 Template parameter ``Ntk``:
-  `mockturtle` network type.
+    `mockturtle` network type.
 
 Parameter ``ntk``:
-  Network in which the constant fanins are to be counted.
+    Network in which the constant fanins are to be counted.
 
 Parameter ``n``:
-  Node whose constant fanins are to be counted.
+    Node whose constant fanins are to be counted.
 
 Returns:
-  Number of constant fanins to `n` in `ntk`.)doc";
+    Number of constant fanins to `n` in `ntk`.)doc";
 
 static const char* __doc_fiction_obstruction_layout = R"doc()doc";
 
@@ -11290,15 +11689,15 @@ distributions (output charge does not match the expected output
 according the truth table) at a given temperature.
 
 Parameter ``energy_and_state_type``:
-  This contains the energies of all possible charge distributions
-  together with the information if the charge distribution (state)
-  is transparent or erroneous.
+    This contains the energies of all possible charge distributions
+    together with the information if the charge distribution (state)
+    is transparent or erroneous.
 
 Parameter ``temperature``:
-  System temperature to assume (unit: K).
+    System temperature to assume (unit: K).
 
 Returns:
-  The occupation probability of all erroneous states is returned.)doc";
+    The occupation probability of all erroneous states is returned.)doc";
 
 static const char* __doc_fiction_odd_column_cartesian =
     R"doc(\verbatim +-------+ +-------+ | | | | | (0,0) +-------+ (2,0)
@@ -11341,33 +11740,33 @@ static const char* __doc_fiction_offset_ucoord_t_get_dead =
     R"doc(Returns a dead copy of the coordinate, i.e., (1, x, y, z).
 
 Returns:
-  A dead copy of the coordinate.)doc";
+    A dead copy of the coordinate.)doc";
 
 static const char* __doc_fiction_offset_ucoord_t_is_dead =
     R"doc(Returns whether the coordinate is dead.
 
 Returns:
-  `true` iff coordinate is dead.)doc";
+    `true` iff coordinate is dead.)doc";
 
 static const char* __doc_fiction_offset_ucoord_t_operator_eq =
     R"doc(Compares against another coordinate for equality. Respects the dead
 indicator.
 
 Parameter ``other``:
-  Right-hand side coordinate.
+    Right-hand side coordinate.
 
 Returns:
-  `true` iff both coordinates are identical.)doc";
+    `true` iff both coordinates are identical.)doc";
 
 static const char* __doc_fiction_offset_ucoord_t_operator_eq_2 =
     R"doc(Compares against another coordinate's `uint64_t` representation for
 equality. Respects the dead indicator.
 
 Parameter ``other``:
-  Right-hand side coordinate representation in `uint64_t` format.
+    Right-hand side coordinate representation in `uint64_t` format.
 
 Returns:
-  `true` iff this coordinate is equal to the converted one.)doc";
+    `true` iff this coordinate is equal to the converted one.)doc";
 
 static const char* __doc_fiction_offset_ucoord_t_operator_ge =
     R"doc(Determine whether this coordinate is "greater than or equal to"
@@ -11375,32 +11774,32 @@ another one. This is the case if this one is not "less than" the
 other.
 
 Parameter ``other``:
-  Right-hand side coordinate.
+    Right-hand side coordinate.
 
 Returns:
-  `true` iff this coordinate is "greater than or equal to" the other
-  coordinate.)doc";
+    `true` iff this coordinate is "greater than or equal to" the other
+    coordinate.)doc";
 
 static const char* __doc_fiction_offset_ucoord_t_operator_gt =
     R"doc(Determine whether this coordinate is "greater than" another one. This
 is the case if the other one is "less than".
 
 Parameter ``other``:
-  Right-hand side coordinate.
+    Right-hand side coordinate.
 
 Returns:
-  `true` iff this coordinate is "greater than" the other coordinate.)doc";
+    `true` iff this coordinate is "greater than" the other coordinate.)doc";
 
 static const char* __doc_fiction_offset_ucoord_t_operator_le =
     R"doc(Determine whether this coordinate is "less than or equal to" another
 one. This is the case if this one is not "greater than" the other.
 
 Parameter ``other``:
-  Right-hand side coordinate.
+    Right-hand side coordinate.
 
 Returns:
-  `true` iff this coordinate is "less than or equal to" the other
-  coordinate.)doc";
+    `true` iff this coordinate is "less than or equal to" the other
+    coordinate.)doc";
 
 static const char* __doc_fiction_offset_ucoord_t_operator_lt =
     R"doc(Determine whether this coordinate is "less than" another one. This is
@@ -11408,20 +11807,20 @@ the case if z is smaller, or if z is equal but y is smaller, or if z
 and y are equal but x is smaller.
 
 Parameter ``other``:
-  Right-hand side coordinate.
+    Right-hand side coordinate.
 
 Returns:
-  `true` iff this coordinate is "less than" the other coordinate.)doc";
+    `true` iff this coordinate is "less than" the other coordinate.)doc";
 
 static const char* __doc_fiction_offset_ucoord_t_operator_ne =
     R"doc(Compares against another coordinate for inequality. Respects the dead
 indicator.
 
 Parameter ``other``:
-  Right-hand side coordinate.
+    Right-hand side coordinate.
 
 Returns:
-  `true` iff both coordinates are not identical.)doc";
+    `true` iff both coordinates are not identical.)doc";
 
 static const char* __doc_fiction_offset_ucoord_t_operator_unsigned_long =
     R"doc(Allows explicit conversion to `uint64_t`. Segments an unsigned 64-bit
@@ -11434,7 +11833,7 @@ static const char* __doc_fiction_offset_ucoord_t_str =
 z)"` that does not respect the dead indicator.
 
 Returns:
-  String representation of the form `"(x, y, z)"`.)doc";
+    String representation of the form `"(x, y, z)"`.)doc";
 
 static const char* __doc_fiction_offset_ucoord_t_ucoord_t =
     R"doc(Default constructor. Creates a dead coordinate at (0, 0, 0).)doc";
@@ -11443,37 +11842,37 @@ static const char* __doc_fiction_offset_ucoord_t_ucoord_t_2 =
     R"doc(Standard constructor. Creates a non-dead coordinate at (x_, y_, z_).
 
 Template parameter ``X``:
-  Type of x.
+    Type of x.
 
 Template parameter ``Y``:
-  Type of y.
+    Type of y.
 
 Template parameter ``Z``:
-  Type of z.
+    Type of z.
 
 Parameter ``x_``:
-  x position.
+    x position.
 
 Parameter ``y_``:
-  y position.
+    y position.
 
 Parameter ``z_``:
-  z position.)doc";
+    z position.)doc";
 
 static const char* __doc_fiction_offset_ucoord_t_ucoord_t_3 =
     R"doc(Standard constructor. Creates a non-dead coordinate at (x_, y_, 0).
 
 Template parameter ``X``:
-  Type of x.
+    Type of x.
 
 Template parameter ``Y``:
-  Type of y.
+    Type of y.
 
 Parameter ``x_``:
-  x position.
+    x position.
 
 Parameter ``y_``:
-  y position.)doc";
+    y position.)doc";
 
 static const char* __doc_fiction_offset_ucoord_t_ucoord_t_4 =
     R"doc(Standard constructor. Instantiates a coordinate from an uint64_t,
@@ -11483,7 +11882,7 @@ indicator - 1 bit for the z position - 31 bit for the y position - 31
 bit for the x position
 
 Parameter ``t``:
-  Unsigned 64-bit integer to instantiate the coordinate from.)doc";
+    Unsigned 64-bit integer to instantiate the coordinate from.)doc";
 
 static const char* __doc_fiction_offset_ucoord_t_wrap =
     R"doc(Wraps the coordinate with respect to the given aspect ratio by
@@ -11498,7 +11897,7 @@ advancing by first incrementing the x dimension, then wrapping the
 coordinate to the boundary within to enumerate.
 
 Parameter ``aspect_ratio``:
-  Aspect ratio to wrap the coordinate to.)doc";
+    Aspect ratio to wrap the coordinate to.)doc";
 
 static const char* __doc_fiction_offset_ucoord_t_x = R"doc(31 bit for the x coordinate.)doc";
 
@@ -11511,13 +11910,13 @@ static const char* __doc_fiction_open_clocking =
 standard clock. It is intended to be overridden.
 
 Template parameter ``Lyt``:
-  Clocked layout type.
+    Clocked layout type.
 
 Parameter ``n``:
-  Number of clocks.
+    Number of clocks.
 
 Returns:
-  Irregular clocking scheme.)doc";
+    Irregular clocking scheme.)doc";
 
 static const char* __doc_fiction_operational_domain =
     R"doc(An operational domain is a set of simulation parameter values for
@@ -11573,29 +11972,29 @@ Dangling Bond Logic\" by M. Walter, J. Drewniok, S. S. H. Ng, K.
 Walus, and R. Wille in NANOARCH 2023.
 
 Template parameter ``Lyt``:
-  SiDB cell-level layout type.
+    SiDB cell-level layout type.
 
 Template parameter ``TT``:
-  Truth table type.
+    Truth table type.
 
 Parameter ``lyt``:
-  Layout to compute the operational domain for.
+    Layout to compute the operational domain for.
 
 Parameter ``spec``:
-  Expected Boolean function of the layout given as a multi-output
-  truth table.
+    Expected Boolean function of the layout given as a multi-output
+    truth table.
 
 Parameter ``samples``:
-  Number of samples to perform.
+    Number of samples to perform.
 
 Parameter ``params``:
-  Operational domain computation parameters.
+    Operational domain computation parameters.
 
 Parameter ``stats``:
-  Operational domain computation statistics.
+    Operational domain computation statistics.
 
 Returns:
-  The (partial) operational domain of the layout.)doc";
+    The (partial) operational domain of the layout.)doc";
 
 static const char* __doc_fiction_operational_domain_flood_fill =
     R"doc(Computes the operational domain of the given SiDB cell-level layout.
@@ -11630,29 +12029,29 @@ Dangling Bond Logic\" by M. Walter, J. Drewniok, S. S. H. Ng, K.
 Walus, and R. Wille in NANOARCH 2023.
 
 Template parameter ``Lyt``:
-  SiDB cell-level layout type.
+    SiDB cell-level layout type.
 
 Template parameter ``TT``:
-  Truth table type.
+    Truth table type.
 
 Parameter ``lyt``:
-  Layout to compute the operational domain for.
+    Layout to compute the operational domain for.
 
 Parameter ``spec``:
-  Expected Boolean function of the layout given as a multi-output
-  truth table.
+    Expected Boolean function of the layout given as a multi-output
+    truth table.
 
 Parameter ``samples``:
-  Number of samples to perform.
+    Number of samples to perform.
 
 Parameter ``params``:
-  Operational domain computation parameters.
+    Operational domain computation parameters.
 
 Parameter ``stats``:
-  Operational domain computation statistics.
+    Operational domain computation statistics.
 
 Returns:
-  The (partial) operational domain of the layout.)doc";
+    The (partial) operational domain of the layout.)doc";
 
 static const char* __doc_fiction_operational_domain_grid_search =
     R"doc(Computes the operational domain of the given SiDB cell-level layout.
@@ -11675,26 +12074,26 @@ itself. Therefore, the algorithm is only feasible for small layouts
 with few inputs.
 
 Template parameter ``Lyt``:
-  SiDB cell-level layout type.
+    SiDB cell-level layout type.
 
 Template parameter ``TT``:
-  Truth table type.
+    Truth table type.
 
 Parameter ``lyt``:
-  Layout to compute the operational domain for.
+    Layout to compute the operational domain for.
 
 Parameter ``spec``:
-  Expected vector of truth tables of the layout. Each truth table
-  represents an output of the Boolean function.
+    Expected vector of truth tables of the layout. Each truth table
+    represents an output of the Boolean function.
 
 Parameter ``params``:
-  Operational domain computation parameters.
+    Operational domain computation parameters.
 
 Parameter ``stats``:
-  Operational domain computation statistics.
+    Operational domain computation statistics.
 
 Returns:
-  The operational domain of the layout.)doc";
+    The operational domain of the layout.)doc";
 
 static const char* __doc_fiction_operational_domain_operational_values =
     R"doc(The operational status of the layout for each specified parameter
@@ -11710,28 +12109,28 @@ static const char* __doc_fiction_operational_domain_parameter_point_get =
     R"doc(Support for structured bindings.
 
 Template parameter ``I``:
-  Index of the parameter value to be returned.
+    Index of the parameter value to be returned.
 
 Returns:
-  The parameter value at the specified index.)doc";
+    The parameter value at the specified index.)doc";
 
 static const char* __doc_fiction_operational_domain_parameter_point_operator_eq =
     R"doc(Equality operator.
 
 Parameter ``other``:
-  Other parameter point to compare with.
+    Other parameter point to compare with.
 
 Returns:
-  `true` iff the parameter points are equal.)doc";
+    `true` iff the parameter points are equal.)doc";
 
 static const char* __doc_fiction_operational_domain_parameter_point_operator_ne =
     R"doc(Inequality operator.
 
 Parameter ``other``:
-  Other parameter point to compare with.
+    Other parameter point to compare with.
 
 Returns:
-  `true` iff the parameter points are not equal.)doc";
+    `true` iff the parameter points are not equal.)doc";
 
 static const char* __doc_fiction_operational_domain_parameter_point_parameter_point =
     R"doc(Standard default constructor.)doc";
@@ -11740,10 +12139,10 @@ static const char* __doc_fiction_operational_domain_parameter_point_parameter_po
     R"doc(Standard constructor.
 
 Parameter ``x_val``:
-  X dimension parameter value.
+    X dimension parameter value.
 
 Parameter ``y_val``:
-  Y dimension parameter value.)doc";
+    Y dimension parameter value.)doc";
 
 static const char* __doc_fiction_operational_domain_parameter_point_x = R"doc(X dimension parameter value.)doc";
 
@@ -11809,29 +12208,29 @@ exponential complexity in of itself. Therefore, the algorithm is only
 feasible for small layouts with few inputs.
 
 Template parameter ``Lyt``:
-  SiDB cell-level layout type.
+    SiDB cell-level layout type.
 
 Template parameter ``TT``:
-  Truth table type.
+    Truth table type.
 
 Parameter ``lyt``:
-  Layout to compute the operational domain for.
+    Layout to compute the operational domain for.
 
 Parameter ``spec``:
-  Expected Boolean function of the layout given as a multi-output
-  truth table.
+    Expected Boolean function of the layout given as a multi-output
+    truth table.
 
 Parameter ``samples``:
-  Number of samples to perform.
+    Number of samples to perform.
 
 Parameter ``params``:
-  Operational domain computation parameters.
+    Operational domain computation parameters.
 
 Parameter ``stats``:
-  Operational domain computation statistics.
+    Operational domain computation statistics.
 
 Returns:
-  The (partial) operational domain of the layout.)doc";
+    The (partial) operational domain of the layout.)doc";
 
 static const char* __doc_fiction_operational_domain_stats =
     R"doc(Statistics for the operational domain computation. The statistics are
@@ -11874,22 +12273,22 @@ based logic, represented by the provided layout (`lyt`) and truth
 table specifications (`spec`), produces the correct output.
 
 Template parameter ``Lyt``:
-  Type of the cell-level layout.
+    Type of the cell-level layout.
 
 Template parameter ``TT``:
-  Type of the truth table.
+    Type of the truth table.
 
 Parameter ``lyt``:
-  The SiDB layout.
+    The SiDB layout.
 
 Parameter ``spec``:
-  Vector of truth table specifications.
+    Vector of truth table specifications.
 
 Parameter ``params``:
-  Parameters to simualte if a input combination is operational.
+    Parameters to simualte if a input combination is operational.
 
 Returns:
-  The count of operational input combinations.)doc";
+    The count of operational input combinations.)doc";
 
 static const char* __doc_fiction_operational_status = R"doc(Possible operational status of a layout.)doc";
 
@@ -11936,23 +12335,23 @@ May throw a high_degree_fanin_exception if `ntk` contains any node
 with a fan-in larger than 2.
 
 Template parameter ``Lyt``:
-  Desired gate-level layout type.
+    Desired gate-level layout type.
 
 Template parameter ``Ntk``:
-  Network type that acts as specification.
+    Network type that acts as specification.
 
 Parameter ``ntk``:
-  The network that is to place and route.
+    The network that is to place and route.
 
 Parameter ``ps``:
-  Parameters.
+    Parameters.
 
 Parameter ``pst``:
-  Statistics.
+    Statistics.
 
 Returns:
-  A gate-level layout of type `Lyt` that implements `ntk` as an FCN
-  circuit.)doc";
+    A gate-level layout of type `Lyt` that implements `ntk` as an FCN
+    circuit.)doc";
 
 static const char* __doc_fiction_orthogonal_physical_design_params =
     R"doc(Parameters for the orthogonal physical design algorithm.)doc";
@@ -11983,7 +12382,7 @@ static const char* __doc_fiction_out_of_place_edge_color_view =
 can color edges, i.e., tuples of nodes as well.
 
 Template parameter ``Ntk``:
-  mockturtle network type.)doc";
+    mockturtle network type.)doc";
 
 static const char* __doc_fiction_out_of_place_edge_color_view_clear_colors = R"doc(Remove all assigned colors.)doc";
 
@@ -11991,10 +12390,10 @@ static const char* __doc_fiction_out_of_place_edge_color_view_edge_color =
     R"doc(Returns the assigned color of a given edge.
 
 Parameter ``e``:
-  Edge whose color is desired.
+    Edge whose color is desired.
 
 Returns:
-  Color of edge `e`.)doc";
+    Color of edge `e`.)doc";
 
 static const char* __doc_fiction_out_of_place_edge_color_view_edge_colors =
     R"doc(Out-of-place storage for edge colors.)doc";
@@ -12003,70 +12402,70 @@ static const char* __doc_fiction_out_of_place_edge_color_view_eval_edge_color =
     R"doc(Evaluates a predicate on a given edge's color.
 
 Template parameter ``Pred``:
-  Predicate type.
+    Predicate type.
 
 Parameter ``e``:
-  Edge whose color is used as a parameter for `pred`.
+    Edge whose color is used as a parameter for `pred`.
 
 Parameter ``pred``:
-  Predicate to evaluate on `e`'s color.
+    Predicate to evaluate on `e`'s color.
 
 Returns:
-  Return value of `pred(color(e))`.)doc";
+    Return value of `pred(color(e))`.)doc";
 
 static const char* __doc_fiction_out_of_place_edge_color_view_eval_edge_color_2 =
     R"doc(Evaluates a predicate on two given edges' colors.
 
 Template parameter ``Pred``:
-  Predicate type.
+    Predicate type.
 
 Parameter ``a``:
-  Edge whose color is used as the first parameter for `pred`.
+    Edge whose color is used as the first parameter for `pred`.
 
 Parameter ``b``:
-  Edge whose color is used as the second parameter for `pred`.
+    Edge whose color is used as the second parameter for `pred`.
 
 Parameter ``pred``:
-  Predicate to evaluate on `a`'s and `b`'s colors.
+    Predicate to evaluate on `a`'s and `b`'s colors.
 
 Returns:
-  Return value of `pred(color(a), color(b))`.)doc";
+    Return value of `pred(color(a), color(b))`.)doc";
 
 static const char* __doc_fiction_out_of_place_edge_color_view_out_of_place_edge_color_view =
     R"doc(Standard constructor.
 
 Parameter ``ntk``:
-  Network to color.)doc";
+    Network to color.)doc";
 
 static const char* __doc_fiction_out_of_place_edge_color_view_paint_edge =
     R"doc(Paint a given edge with the current color.
 
 Parameter ``e``:
-  Edge to paint.)doc";
+    Edge to paint.)doc";
 
 static const char* __doc_fiction_out_of_place_edge_color_view_paint_edge_2 =
     R"doc(Paint a given edge with the given color.
 
 Parameter ``e``:
-  Edge to paint.
+    Edge to paint.
 
 Parameter ``clr``:
-  Color to paint `e` with.)doc";
+    Color to paint `e` with.)doc";
 
 static const char* __doc_fiction_out_of_place_edge_color_view_paint_edge_3 =
     R"doc(Paint a given edge with the color of another given edge.
 
 Parameter ``e``:
-  Edge to paint.
+    Edge to paint.
 
 Parameter ``other``:
-  Edge whose color is to be used to paint `e`.)doc";
+    Edge whose color is to be used to paint `e`.)doc";
 
 static const char* __doc_fiction_path_collection =
     R"doc(An ordered collection of multiple paths in a layout.
 
 Template parameter ``Path``:
-  Path type.)doc";
+    Path type.)doc";
 
 static const char* __doc_fiction_path_collection_add = R"doc()doc";
 
@@ -12076,7 +12475,7 @@ static const char* __doc_fiction_path_set =
     R"doc(A set of multiple paths in a layout.
 
 Template parameter ``Path``:
-  Path type.)doc";
+    Path type.)doc";
 
 static const char* __doc_fiction_path_set_add = R"doc()doc";
 
@@ -12090,31 +12489,31 @@ given network and a provided branching_signal_container
 `mockturtle::node_map`.
 
 Template parameter ``Lyt``:
-  Gate-level layout type.
+    Gate-level layout type.
 
 Template parameter ``Ntk``:
-  Logic network type.
+    Logic network type.
 
 Parameter ``lyt``:
-  Gate-level layout in which to place any gate.
+    Gate-level layout in which to place any gate.
 
 Parameter ``t``:
-  Tile in `lyt` to place the gate onto.
+    Tile in `lyt` to place the gate onto.
 
 Parameter ``ntk``:
-  Network whose node is to be placed.
+    Network whose node is to be placed.
 
 Parameter ``n``:
-  Node in `ntk` to place onto `t` in `lyt`.
+    Node in `ntk` to place onto `t` in `lyt`.
 
 Parameter ``node2pos``:
-  Mapping from network nodes to layout signals, i.e., a pointer to
-  their position in the layout via branches. The map is used to
-  fetch location of the fanins. The `mockturtle::node_map` is not
-  updated by this function.
+    Mapping from network nodes to layout signals, i.e., a pointer to
+    their position in the layout via branches. The map is used to
+    fetch location of the fanins. The `mockturtle::node_map` is not
+    updated by this function.
 
 Returns:
-  Signal to the newly placed gate in `lyt`.)doc";
+    Signal to the newly placed gate in `lyt`.)doc";
 
 static const char* __doc_fiction_pointy_top_hex = R"doc(\verbatim / \ / \ | | | | \ / \ / \endverbatim)doc";
 
@@ -12127,7 +12526,7 @@ the transition, the corresponding distance, and the total
 electrostatic energy of the given charge distribution.
 
 Template parameter ``Lyt``:
-  SiDB cell-level layout type.)doc";
+    SiDB cell-level layout type.)doc";
 
 static const char* __doc_fiction_population_stability_information_critical_cell =
     R"doc(SiDB cell which is closest to a charge transition.)doc";
@@ -12173,19 +12572,19 @@ static const char* __doc_fiction_port_direction_operator_eq =
     R"doc(Comparator for equality tests.
 
 Parameter ``p``:
-  Port to compare to.
+    Port to compare to.
 
 Returns:
-  `true` iff this port is equal to given port `p`.)doc";
+    `true` iff this port is equal to given port `p`.)doc";
 
 static const char* __doc_fiction_port_direction_operator_lt =
     R"doc(Comparator for set insertion.
 
 Parameter ``p``:
-  Port to compare to.
+    Port to compare to.
 
 Returns:
-  `true` iff this port goes before `p` in set.)doc";
+    `true` iff this port goes before `p` in set.)doc";
 
 static const char* __doc_fiction_port_direction_pi = R"doc(Primary input port.)doc";
 
@@ -12204,26 +12603,26 @@ coordinate therein to consider. That is, when presented with, e.g., a
 `NORTH_EAST` of the given coordinate `c` in the layout `lyt`.
 
 Template parameter ``Lyt``:
-  Coordinate layout type.
+    Coordinate layout type.
 
 Parameter ``lyt``:
-  Coordinate layout.
+    Coordinate layout.
 
 Parameter ``c``:
-  Coordinate to consider.
+    Coordinate to consider.
 
 Parameter ``port``:
-  Port direction.
+    Port direction.
 
 Returns:
-  Absolute coordinate specified by a coordinate `c` in layout `lyt`
-  and a port direction.)doc";
+    Absolute coordinate specified by a coordinate `c` in layout `lyt`
+    and a port direction.)doc";
 
 static const char* __doc_fiction_port_list =
     R"doc(Port lists are collections of input and output ports.
 
 Template parameter ``PortType``:
-  A port type, e.g., port_position or port_direction.)doc";
+    A port type, e.g., port_position or port_direction.)doc";
 
 static const char* __doc_fiction_port_list_inp = R"doc(Input and output positions.)doc";
 
@@ -12231,20 +12630,20 @@ static const char* __doc_fiction_port_list_operator_eq =
     R"doc(Comparator for unordered_set/map.
 
 Parameter ``p``:
-  Ports to compare to.
+    Ports to compare to.
 
 Returns:
-  `true` iff these ports are equal to `p`.)doc";
+    `true` iff these ports are equal to `p`.)doc";
 
 static const char* __doc_fiction_port_list_operator_iadd =
     R"doc(Merges two port_list objects together. The given port_list might be
 altered.
 
 Parameter ``p``:
-  Ports to merge.
+    Ports to merge.
 
 Returns:
-  Merged port lists.)doc";
+    Merged port lists.)doc";
 
 static const char* __doc_fiction_port_list_out = R"doc()doc";
 
@@ -12259,19 +12658,19 @@ static const char* __doc_fiction_port_position_operator_eq =
     R"doc(Comparator for equality tests.
 
 Parameter ``p``:
-  Port to compare to.
+    Port to compare to.
 
 Returns:
-  `true` iff this port is equal to given port `p`.)doc";
+    `true` iff this port is equal to given port `p`.)doc";
 
 static const char* __doc_fiction_port_position_operator_lt =
     R"doc(Comparator for set insertion.
 
 Parameter ``p``:
-  Port to compare to.
+    Port to compare to.
 
 Returns:
-  `true` iff this port goes before `p` in set.)doc";
+    `true` iff this port goes before `p` in set.)doc";
 
 static const char* __doc_fiction_port_position_pi = R"doc(Primary input port.)doc";
 
@@ -12301,8 +12700,8 @@ layouts by freeing up space to the right and bottom, as all gates were
 moved to the top left corner.
 
 After moving all gates, this algorithm also checks if excess wiring
-exists on the layout, i.e., rows that only contain vertical wires or
-columns that only contain horizontal wires and removes them.
+exists on the layout using the `wiring_reduction` algorithm (cf.
+`wiring_reduction.hpp`)
 
 As outputs have to lay on the border of a layout for better
 accessibility, they are also moved to new borders determined based on
@@ -12312,14 +12711,30 @@ the location of all other gates.
 clocked!
 
 Template parameter ``Lyt``:
-  Cartesian gate-level layout type.
+    Cartesian gate-level layout type.
 
 Parameter ``lyt``:
-  2DDWave-clocked Cartesian gate-level layout to optimize.)doc";
+    2DDWave-clocked Cartesian gate-level layout to optimize.
+
+Parameter ``ps``:
+    Parameters.
+
+Parameter ``pst``:
+    Statistics.)doc";
+
+static const char* __doc_fiction_post_layout_optimization_params =
+    R"doc(Parameters for the post-layout optimization algorithm.)doc";
+
+static const char* __doc_fiction_post_layout_optimization_params_max_gate_relocations =
+    R"doc(Maximum number of relocations to try for each gate. Defaults to the
+number of tiles in a layout if not specified.)doc";
 
 static const char* __doc_fiction_post_layout_optimization_stats =
     R"doc(This struct stores statistics about the post-layout optimization
 process.)doc";
+
+static const char* __doc_fiction_post_layout_optimization_stats_area_improvement =
+    R"doc(Area reduction (in %) after the post-layout optimization process.)doc";
 
 static const char* __doc_fiction_post_layout_optimization_stats_duration =
     R"doc(Runtime of the post-layout optimization process.)doc";
@@ -12328,45 +12743,57 @@ static const char* __doc_fiction_post_layout_optimization_stats_report =
     R"doc(Reports the statistics to the given output stream.
 
 Parameter ``out``:
-  Output stream.)doc";
+    Output stream.)doc";
+
+static const char* __doc_fiction_post_layout_optimization_stats_x_size_after =
+    R"doc(Layout width after the post-layout optimization process.)doc";
+
+static const char* __doc_fiction_post_layout_optimization_stats_x_size_before =
+    R"doc(Layout width before the post-layout optimization process.)doc";
+
+static const char* __doc_fiction_post_layout_optimization_stats_y_size_after =
+    R"doc(Layout height after the post-layout optimization process.)doc";
+
+static const char* __doc_fiction_post_layout_optimization_stats_y_size_before =
+    R"doc(Layout height before the post-layout optimization process.)doc";
 
 static const char* __doc_fiction_print_cell_level_layout =
     R"doc(Writes a simplified 2D representation of a cell-level layout to an
 output stream.
 
 Template parameter ``Lyt``:
-  Cell-level layout type.
+    Cell-level layout type.
 
 Parameter ``os``:
-  Output stream to write into.
+    Output stream to write into.
 
 Parameter ``layout``:
-  The cell-level layout to print.
+    The cell-level layout to print.
 
 Parameter ``io_color``:
-  Flag to utilize color escapes for inputs and outputs.
+    Flag to utilize color escapes for inputs and outputs.
 
 Parameter ``clk_color``:
-  Flag to utilize color escapes for clock zones.)doc";
+    Flag to utilize color escapes for clock zones.)doc";
 
 static const char* __doc_fiction_print_gate_level_layout =
     R"doc(Writes a simplified 2D representation of a gate-level layout to an
 output stream.
 
 Template parameter ``Lyt``:
-  Gate-level layout type.
+    Gate-level layout type.
 
 Parameter ``os``:
-  Output stream to write into.
+    Output stream to write into.
 
 Parameter ``layout``:
-  The gate-level layout to print.
+    The gate-level layout to print.
 
 Parameter ``io_color``:
-  Flag to utilize color escapes for inputs and outputs.
+    Flag to utilize color escapes for inputs and outputs.
 
 Parameter ``clk_color``:
-  Flag to utilize color escapes for clock zones.)doc";
+    Flag to utilize color escapes for clock zones.)doc";
 
 static const char* __doc_fiction_print_layout =
     R"doc(A unified printer of the versions above. Depending on the passed
@@ -12378,51 +12805,51 @@ printer to use. This simplifies printing by enabling the statement
 settings to print the layout.
 
 Template parameter ``Lyt``:
-  Any coordinate layout type.
+    Any coordinate layout type.
 
 Parameter ``lyt``:
-  The coordinate layout.
+    The coordinate layout.
 
 Parameter ``os``:
-  The output stream to write into.)doc";
+    The output stream to write into.)doc";
 
 static const char* __doc_fiction_print_sidb_layout =
     R"doc(Writes a simplified 2D representation of an SiDB layout (SiDB and
 defect charges are supported) to an output stream.
 
 Template parameter ``Lyt``:
-  SiDB cell-level layout with charge-information based on SiQAD
-  coordinates or defect-information, e.g., a
-  `charge_distribution_surface` or `sidb_defect_surface`.
+    SiDB cell-level layout with charge-information based on SiQAD
+    coordinates or defect-information, e.g., a
+    `charge_distribution_surface` or `sidb_defect_surface`.
 
 Parameter ``os``:
-  Output stream to write into.
+    Output stream to write into.
 
 Parameter ``lyt``:
-  The layout of which the information is to be printed.
+    The layout of which the information is to be printed.
 
 Parameter ``lat_color``:
-  Flag to utilize color escapes for the lattice, charge states, and
-  atomic defects.
+    Flag to utilize color escapes for the lattice, charge states, and
+    atomic defects.
 
 Parameter ``crop_layout``:
-  Flag to print the 2D bounding box of the layout, while leaving a
-  maximum padding of one dimer row and two columns.
+    Flag to print the 2D bounding box of the layout, while leaving a
+    maximum padding of one dimer row and two columns.
 
 Parameter ``draw_lattice``:
-  Flag to enable lattice background drawing.)doc";
+    Flag to enable lattice background drawing.)doc";
 
 static const char* __doc_fiction_ptr =
     R"doc(Returns a smart pointer to the given scheme.
 
 Template parameter ``Lyt``:
-  Layout type.
+    Layout type.
 
 Parameter ``scheme``:
-  Universal reference to a clocking scheme.
+    Universal reference to a clocking scheme.
 
 Returns:
-  A shared pointer to the given `scheme`.)doc";
+    A shared pointer to the given `scheme`.)doc";
 
 static const char* __doc_fiction_qca_energy_dissipation =
     R"doc(Estimates the energy dissipation of a gate-level layout if it were to
@@ -12435,14 +12862,14 @@ As done in that publication, energy dissipation values are being given
 in meV for slow (25 GHz) and fast (100 GHz) clocking.
 
 Template parameter ``Lyt``:
-  Gate-level layout type.
+    Gate-level layout type.
 
 Parameter ``lyt``:
-  The gate-level layout whose energy dissipation is to be
-  calculated.
+    The gate-level layout whose energy dissipation is to be
+    calculated.
 
 Parameter ``pst``:
-  Statistics.)doc";
+    Statistics.)doc";
 
 static const char* __doc_fiction_qca_one_library =
     R"doc(A concrete FCN gate library based on QCA ONE proposed in \"A
@@ -12461,11 +12888,11 @@ static const char* __doc_fiction_qca_one_library_post_layout_optimization =
     R"doc(Post-layout optimization that assigns via cell mode to wire crossings.
 
 Template parameter ``CellLyt``:
-  Cell-level layout type.
+    Cell-level layout type.
 
 Parameter ``lyt``:
-  The cell-level layout that has been created via application of
-  `set_up_gate`.)doc";
+    The cell-level layout that has been created via application of
+    `set_up_gate`.)doc";
 
 static const char* __doc_fiction_qca_one_library_qca_one_library = R"doc()doc";
 
@@ -12477,17 +12904,17 @@ that tile. May it be a gate or wires. Rotation and special marks like
 input and output, const cells etc. are computed additionally.
 
 Template parameter ``GateLyt``:
-  Cartesian gate-level layout type.
+    Cartesian gate-level layout type.
 
 Parameter ``lyt``:
-  Layout that hosts tile `t`.
+    Layout that hosts tile `t`.
 
 Parameter ``t``:
-  Tile to be realized as a QCA ONE gate.
+    Tile to be realized as a QCA ONE gate.
 
 Returns:
-  QCA ONE gate representation of `t` including I/Os, rotation, const
-  cells, etc.)doc";
+    QCA ONE gate representation of `t` including I/Os, rotation, const
+    cells, etc.)doc";
 
 static const char* __doc_fiction_qca_technology =
     R"doc(Quantum-dot Cellular Automata (QCA) technology implementation of the
@@ -12594,16 +13021,16 @@ layouts, even in scenarios where positively-charged SiDBs occur due to
 small spacing.
 
 Template parameter ``Lyt``:
-  SiDB cell-level layout type.
+    SiDB cell-level layout type.
 
 Parameter ``lyt``:
-  Layout to simulate.
+    Layout to simulate.
 
 Parameter ``params``:
-  Parameter required for the simulation.
+    Parameter required for the simulation.
 
 Returns:
-  Simulation Results.)doc";
+    Simulation Results.)doc";
 
 static const char* __doc_fiction_quickexact_params =
     R"doc(This struct stores the parameters for the *QuickExact* algorithm.)doc";
@@ -12648,17 +13075,17 @@ Depending on the simulation parameters, the ground state is found with
 a certain probability after one run.
 
 Template parameter ``Lyt``:
-  SiDB cell-level layout type.
+    SiDB cell-level layout type.
 
 Parameter ``lyt``:
-  The layout to simulate.
+    The layout to simulate.
 
 Parameter ``ps``:
-  Physical parameters. They are material-specific and may vary from
-  experiment to experiment.
+    Physical parameters. They are material-specific and may vary from
+    experiment to experiment.
 
 Returns:
-  sidb_simulation_result is returned with all results.)doc";
+    sidb_simulation_result is returned with all results.)doc";
 
 static const char* __doc_fiction_quicksim_params =
     R"doc(This struct stores the parameters for the *QuickSim* algorithm.)doc";
@@ -12683,46 +13110,46 @@ coordinates. The two given coordinates form the top left corner and
 the bottom right corner of the spanned region.
 
 Template parameter ``CoordinateType``:
-  The coordinate implementation to be used.
+    The coordinate implementation to be used.
 
 Parameter ``coordinate1``:
-  Top left Coordinate.
+    Top left Coordinate.
 
 Parameter ``coordinate2``:
-  Bottom right Coordinate (coordinate order is not important,
-  automatically swapped if necessary).
+    Bottom right Coordinate (coordinate order is not important,
+    automatically swapped if necessary).
 
 Returns:
-  Randomly generated coordinate.)doc";
+    Randomly generated coordinate.)doc";
 
 static const char* __doc_fiction_random_cost =
     R"doc(Random cost between two layout coordinates that returns a random value
 between 0 and 1.
 
 Template parameter ``Lyt``:
-  Coordinate layout type.
+    Coordinate layout type.
 
 Template parameter ``Cost``:
-  Floating-point type for the cost.
+    Floating-point type for the cost.
 
 Parameter ``source``:
-  Source coordinate.
+    Source coordinate.
 
 Parameter ``target``:
-  Target coordinate.
+    Target coordinate.
 
 Returns:
-  Random cost between `source` and `target`, i.e., a random number
-  between 0 and 1.)doc";
+    Random cost between `source` and `target`, i.e., a random number
+    between 0 and 1.)doc";
 
 static const char* __doc_fiction_random_cost_functor =
     R"doc(A pre-defined cost functor that uses random costs.
 
 Template parameter ``Lyt``:
-  Coordinate layout type.
+    Coordinate layout type.
 
 Template parameter ``Cost``:
-  Floating-point cost type.)doc";
+    Floating-point cost type.)doc";
 
 static const char* __doc_fiction_random_cost_functor_random_cost_functor = R"doc()doc";
 
@@ -12732,7 +13159,7 @@ static const char* __doc_fiction_range_t =
 for range based for-loops.
 
 Template parameter ``Iterator``:
-  type for which the range should be created.)doc";
+    type for which the range should be created.)doc";
 
 static const char* __doc_fiction_range_t_b =
     R"doc(Iterators pointing to the begin and the end of the represented range.)doc";
@@ -12741,20 +13168,20 @@ static const char* __doc_fiction_range_t_begin =
     R"doc(Returns the iterator pointing to the begin of the represented range.
 
 Returns:
-  Begin iterator.)doc";
+    Begin iterator.)doc";
 
 static const char* __doc_fiction_range_t_cbegin =
     R"doc(Returns a const iterator pointing to the begin of the represented
 range.
 
 Returns:
-  const begin iterator.)doc";
+    const begin iterator.)doc";
 
 static const char* __doc_fiction_range_t_cend =
     R"doc(Returns a const iterator pointing to the end of the represented range.
 
 Returns:
-  const end iterator.)doc";
+    const end iterator.)doc";
 
 static const char* __doc_fiction_range_t_e =
     R"doc(Iterators pointing to the begin and the end of the represented range.)doc";
@@ -12763,13 +13190,13 @@ static const char* __doc_fiction_range_t_end =
     R"doc(Returns the iterator pointing to the end of the represented range.
 
 Returns:
-  End iterator.)doc";
+    End iterator.)doc";
 
 static const char* __doc_fiction_range_t_range_t =
     R"doc(Standard constructor with forward reference.
 
 Parameter ``range``:
-  Begin and end iterator pair.)doc";
+    Begin and end iterator pair.)doc";
 
 static const char* __doc_fiction_read_fgl_layout =
     R"doc(Reads a gate-level layout from an FGL file provided as an input
@@ -12778,13 +13205,13 @@ stream.
 May throw an `fgl_parsing_error` if the FGL file is malformed.
 
 Template parameter ``Lyt``:
-  The layout type to be created from an input.
+    The layout type to be created from an input.
 
 Parameter ``is``:
-  The input stream to read from.
+    The input stream to read from.
 
 Parameter ``name``:
-  The name to give to the generated layout.)doc";
+    The name to give to the generated layout.)doc";
 
 static const char* __doc_fiction_read_fgl_layout_2 =
     R"doc(Reads a gate-level layout from an FGL file provided as an input
@@ -12796,13 +13223,13 @@ This is an in-place version of `read_fgl_layout` that utilizes the
 given layout as a target to write to.
 
 Template parameter ``Lyt``:
-  The layout type to be used as input.
+    The layout type to be used as input.
 
 Parameter ``lyt``:
-  The layout to write to.
+    The layout to write to.
 
 Parameter ``is``:
-  The input stream to read from.)doc";
+    The input stream to read from.)doc";
 
 static const char* __doc_fiction_read_fgl_layout_3 =
     R"doc(Reads a gate-level layout from an FGL file provided as a file name.
@@ -12810,13 +13237,13 @@ static const char* __doc_fiction_read_fgl_layout_3 =
 May throw an `fgl_parsing_error` if the FGL file is malformed.
 
 Template parameter ``Lyt``:
-  The layout type to be created from an input.
+    The layout type to be created from an input.
 
 Parameter ``filename``:
-  The file name to open and read from.
+    The file name to open and read from.
 
 Parameter ``name``:
-  The name to give to the generated layout.)doc";
+    The name to give to the generated layout.)doc";
 
 static const char* __doc_fiction_read_fgl_layout_4 =
     R"doc(Reads a gate-level layout from an FGL file provided as a file name.
@@ -12827,13 +13254,13 @@ This is an in-place version of `read_fgl_layout` that utilizes the
 given layout as a target to write to.
 
 Template parameter ``Lyt``:
-  The layout type to be used as input.
+    The layout type to be used as input.
 
 Parameter ``lyt``:
-  The layout to write to.
+    The layout to write to.
 
 Parameter ``filename``:
-  The file name to open and read from.)doc";
+    The file name to open and read from.)doc";
 
 static const char* __doc_fiction_read_fqca_layout =
     R"doc(Reads a cell-level QCA layout from an fqca file provided as an input
@@ -12845,14 +13272,14 @@ undefined_cell_label_exception, or
 unrecognized_cell_definition_exception.
 
 Template parameter ``Lyt``:
-  The layout type to be created from an input. Must be a clocked
-  cell-level QCA layout.
+    The layout type to be created from an input. Must be a clocked
+    cell-level QCA layout.
 
 Parameter ``is``:
-  The input stream to read from.
+    The input stream to read from.
 
 Parameter ``layout_name``:
-  The name to give to the generated layout.)doc";
+    The name to give to the generated layout.)doc";
 
 static const char* __doc_fiction_read_fqca_layout_2 =
     R"doc(Reads a cell-level QCA layout from an fqca file provided as a file
@@ -12864,14 +13291,14 @@ undefined_cell_label_exception, or
 unrecognized_cell_definition_exception.
 
 Template parameter ``Lyt``:
-  The layout type to be created from an input. Must be a clocked
-  cell-level QCA layout.
+    The layout type to be created from an input. Must be a clocked
+    cell-level QCA layout.
 
 Parameter ``filename``:
-  The file name to open and read from.
+    The file name to open and read from.
 
 Parameter ``layout_name``:
-  The name to give to the generated layout.)doc";
+    The name to give to the generated layout.)doc";
 
 static const char* __doc_fiction_read_sidb_surface_defects =
     R"doc(Reads a defective SiDB surface from a text file provided as an input
@@ -12886,14 +13313,14 @@ surfaces is provided in the `experiments/defect_aware_physical_design`
 directory.
 
 Template parameter ``Lyt``:
-  The layout type underlying the SiDB surface. Must be a cell-level
-  SiDB layout.
+    The layout type underlying the SiDB surface. Must be a cell-level
+    SiDB layout.
 
 Parameter ``is``:
-  The input stream to read from.
+    The input stream to read from.
 
 Parameter ``name``:
-  The name to give to the generated layout.)doc";
+    The name to give to the generated layout.)doc";
 
 static const char* __doc_fiction_read_sidb_surface_defects_2 =
     R"doc(Reads a defective SiDB surface from a text file provided as a file
@@ -12908,14 +13335,14 @@ surfaces is provided in the `experiments/defect_aware_physical_design`
 directory.
 
 Template parameter ``Lyt``:
-  The layout type underlying the SiDB surface. Must be a cell-level
-  SiDB layout.
+    The layout type underlying the SiDB surface. Must be a cell-level
+    SiDB layout.
 
 Parameter ``filename``:
-  The file name to open and read from.
+    The file name to open and read from.
 
 Parameter ``name``:
-  The name to give to the generated layout.)doc";
+    The name to give to the generated layout.)doc";
 
 static const char* __doc_fiction_read_sqd_layout =
     R"doc(Reads a cell-level SiDB layout from an sqd file provided as an input
@@ -12927,17 +13354,17 @@ they will be parsed from the sqd file as well.
 May throw an `sqd_parsing_exception` if the sqd file is malformed.
 
 Template parameter ``Lyt``:
-  The layout type to be created from an input. Must be an SiDB
-  lattice cell-level SiDB layout.
+    The layout type to be created from an input. Must be an SiDB
+    lattice cell-level SiDB layout.
 
 Parameter ``is``:
-  The input stream to read from.
+    The input stream to read from.
 
 Parameter ``name``:
-  The name to give to the generated layout.
+    The name to give to the generated layout.
 
 Returns:
-  The cell-level SiDB layout read from the sqd file.)doc";
+    The cell-level SiDB layout read from the sqd file.)doc";
 
 static const char* __doc_fiction_read_sqd_layout_2 =
     R"doc(Reads a cell-level SiDB layout from an sqd file provided as an input
@@ -12952,14 +13379,14 @@ This is an in-place version of read_sqd_layout that utilizes the given
 layout as a target to write to.
 
 Template parameter ``Lyt``:
-  The layout type to be created from an input. Must be an SiDB
-  lattice cell-level SiDB layout.
+    The layout type to be created from an input. Must be an SiDB
+    lattice cell-level SiDB layout.
 
 Parameter ``lyt``:
-  The layout to write to.
+    The layout to write to.
 
 Parameter ``is``:
-  The input stream to read from.)doc";
+    The input stream to read from.)doc";
 
 static const char* __doc_fiction_read_sqd_layout_3 =
     R"doc(Reads a cell-level SiDB layout from an sqd file provided as a file
@@ -12971,14 +13398,14 @@ they will be parsed from the sqd file as well.
 May throw an `sqd_parsing_exception` if the sqd file is malformed.
 
 Template parameter ``Lyt``:
-  The layout type to be created from an input. Must be an SiDB
-  lattice cell-level SiDB layout.
+    The layout type to be created from an input. Must be an SiDB
+    lattice cell-level SiDB layout.
 
 Parameter ``filename``:
-  The file name to open and read from.
+    The file name to open and read from.
 
 Parameter ``name``:
-  The name to give to the generated layout.)doc";
+    The name to give to the generated layout.)doc";
 
 static const char* __doc_fiction_read_sqd_layout_4 =
     R"doc(Reads a cell-level SiDB layout from an sqd file provided as a file
@@ -12993,14 +13420,14 @@ This is an in-place version of `read_sqd_layout` that utilizes the
 given layout as a target to write to.
 
 Template parameter ``Lyt``:
-  The layout type to be created from an input. Must be an SiDB
-  lattice cell-level SiDB layout.
+    The layout type to be created from an input. Must be an SiDB
+    lattice cell-level SiDB layout.
 
 Parameter ``lyt``:
-  The layout to write to.
+    The layout to write to.
 
 Parameter ``filename``:
-  The file name to open and read from.)doc";
+    The file name to open and read from.)doc";
 
 static const char* __doc_fiction_relative_to_absolute_cell_position =
     R"doc(Converts a relative cell position within a tile to an absolute cell
@@ -13008,28 +13435,28 @@ position within a layout. To compute the absolute position, the layout
 topology is taken into account.
 
 Template parameter ``GateSizeX``:
-  Horizontal tile size.
+    Horizontal tile size.
 
 Template parameter ``GateSizeY``:
-  Vertical tile size.
+    Vertical tile size.
 
 Template parameter ``GateLyt``:
-  Gate-level layout type.
+    Gate-level layout type.
 
 Template parameter ``CellLyt``:
-  Cell-level layout type.
+    Cell-level layout type.
 
 Parameter ``gate_lyt``:
-  The gate-level layout whose tiles are to be considered.
+    The gate-level layout whose tiles are to be considered.
 
 Parameter ``t``:
-  Tile within gate_lyt.
+    Tile within gate_lyt.
 
 Parameter ``relative_c``:
-  Relative cell position within t.
+    Relative cell position within t.
 
 Returns:
-  Absolute cell position in a layout.)doc";
+    Absolute cell position in a layout.)doc";
 
 static const char* __doc_fiction_res_clocking =
     R"doc(Returns the RES clocking as defined in \"An efficient clocking scheme
@@ -13038,10 +13465,10 @@ Mahabub Hasan Mahalat, Bibhash Sen, and Biplab K. Sikdar in
 International Journal of Electronics Letters 2019.
 
 Template parameter ``Lyt``:
-  Clocked layout type.
+    Clocked layout type.
 
 Returns:
-  RES clocking scheme.)doc";
+    RES clocking scheme.)doc";
 
 static const char* __doc_fiction_restore_input_names =
     R"doc(Assigns input names from one network to another. Matching inputs are
@@ -13049,18 +13476,18 @@ identified by their index. Since gate-level layout's are network types
 as well, this function naturally works for them, too.
 
 Template parameter ``NtkSrc``:
-  Source network type.
+    Source network type.
 
 Template parameter ``NtkDest``:
-  Target network type.
+    Target network type.
 
 Parameter ``ntk_src``:
-  Source logic network whose input names are to be transferred to
-  `ntk_dest`.
+    Source logic network whose input names are to be transferred to
+    `ntk_dest`.
 
 Parameter ``ntk_dest``:
-  Target logic network whose inputs are to be assigned `ntk_src`'s
-  names.)doc";
+    Target logic network whose inputs are to be assigned `ntk_src`'s
+    names.)doc";
 
 static const char* __doc_fiction_restore_names =
     R"doc(Transfers all input and output names as well as the network/layout
@@ -13069,18 +13496,18 @@ name from one network to another. This function calls
 `restore_output_names`.
 
 Template parameter ``NtkSrc``:
-  Source network type.
+    Source network type.
 
 Template parameter ``NtkDest``:
-  Target network type.
+    Target network type.
 
 Parameter ``ntk_src``:
-  Source logic network whose I/O names are to be transferred to
-  `ntk_dest`.
+    Source logic network whose I/O names are to be transferred to
+    `ntk_dest`.
 
 Parameter ``ntk_dest``:
-  Target logic network whose I/O names are to be assigned
-  `ntk_src`'s names.)doc";
+    Target logic network whose I/O names are to be assigned
+    `ntk_src`'s names.)doc";
 
 static const char* __doc_fiction_restore_names_2 =
     R"doc(Transfers all signal and output names as well as the network/layout
@@ -13089,28 +13516,28 @@ name from one network to another. This function calls
 `restore_output_names`.
 
 Template parameter ``NtkSrc``:
-  Source network type.
+    Source network type.
 
 Template parameter ``NtkDest``:
-  Target network type.
+    Target network type.
 
 Template parameter ``T``:
-  Mapping type to identify signals by. Currently,
-  `mockturtle::signal<NtkDest>` and
-  `branching_signal_container<NtkDest, NtkSrc, fanout_size>` are
-  supported.
+    Mapping type to identify signals by. Currently,
+    `mockturtle::signal<NtkDest>` and
+    `branching_signal_container<NtkDest, NtkSrc, fanout_size>` are
+    supported.
 
 Parameter ``ntk_src``:
-  Source logic network whose signal names are to be transferred to
-  `ntk_dest`.
+    Source logic network whose signal names are to be transferred to
+    `ntk_dest`.
 
 Parameter ``ntk_dest``:
-  Target logic network whose signal names are to be assigned
-  `ntk_src`'s names.
+    Target logic network whose signal names are to be assigned
+    `ntk_src`'s names.
 
 Parameter ``old2new``:
-  Mapping of signals from `ntk_src` to `ntk_dest` using a signal
-  identifier.)doc";
+    Mapping of signals from `ntk_src` to `ntk_dest` using a signal
+    identifier.)doc";
 
 static const char* __doc_fiction_restore_network_name =
     R"doc(Helper function to conveniently assign the name of a source network or
@@ -13120,18 +13547,18 @@ are translated or layouts are being created from networks that are
 supposed to have the same name.
 
 Template parameter ``NtkOrLytSrc``:
-  Source network or layout type.
+    Source network or layout type.
 
 Template parameter ``NtkOrLytDest``:
-  Target network or layout type.
+    Target network or layout type.
 
 Parameter ``ntk_or_lyt_src``:
-  Source network or layout whose name is to be assigned to
-  `ntk_or_lyt_dest`.
+    Source network or layout whose name is to be assigned to
+    `ntk_or_lyt_dest`.
 
 Parameter ``ntk_or_lyt_dest``:
-  Target network or layout that is to be assigned `ntk_or_lyt_src`'s
-  name.)doc";
+    Target network or layout that is to be assigned `ntk_or_lyt_src`'s
+    name.)doc";
 
 static const char* __doc_fiction_restore_output_names =
     R"doc(Assigns output names from one network to another. Matching outputs are
@@ -13139,18 +13566,18 @@ identified by their order. Since gate-level layout's are network types
 as well, this function naturally works for them, too.
 
 Template parameter ``NtkSrc``:
-  Source network type.
+    Source network type.
 
 Template parameter ``NtkDest``:
-  Target network type.
+    Target network type.
 
 Parameter ``ntk_src``:
-  Source logic network whose output names are to be transferred to
-  `ntk_dest`.
+    Source logic network whose output names are to be transferred to
+    `ntk_dest`.
 
 Parameter ``ntk_dest``:
-  Target logic network whose outputs are to be assigned `ntk_src`'s
-  names.)doc";
+    Target logic network whose outputs are to be assigned `ntk_src`'s
+    names.)doc";
 
 static const char* __doc_fiction_restore_signal_names =
     R"doc(Assigns all signal names from one network to another. For this
@@ -13159,21 +13586,21 @@ purpose, a mapping between signals is needed in terms of a
 well, this function naturally works for them, too.
 
 Template parameter ``NtkSrc``:
-  Source network type.
+    Source network type.
 
 Template parameter ``NtkDest``:
-  Target network type.
+    Target network type.
 
 Parameter ``ntk_src``:
-  Source logic network whose signal names are to be transferred to
-  `ntk_dest`.
+    Source logic network whose signal names are to be transferred to
+    `ntk_dest`.
 
 Parameter ``ntk_dest``:
-  Target logic network whose signal names are to be assigned
-  `ntk_src`'s names.
+    Target logic network whose signal names are to be assigned
+    `ntk_src`'s names.
 
 Parameter ``old2new``:
-  Mapping of signals from `ntk_src` to `ntk_dest`.)doc";
+    Mapping of signals from `ntk_src` to `ntk_dest`.)doc";
 
 static const char* __doc_fiction_restore_signal_names_2 =
     R"doc(Same as the other restore_signal_names function but this overload uses
@@ -13182,25 +13609,25 @@ specifically used for networks or layouts that allow branches to be
 distinct, e.g., by their position on the layout.
 
 Template parameter ``NtkSrc``:
-  Source network type.
+    Source network type.
 
 Template parameter ``NtkDest``:
-  Target network type.
+    Target network type.
 
 Template parameter ``fanout_size``:
-  Maximum fanout size in the network.
+    Maximum fanout size in the network.
 
 Parameter ``ntk_src``:
-  Source logic network whose signal names are to be transferred to
-  `ntk_dest`.
+    Source logic network whose signal names are to be transferred to
+    `ntk_dest`.
 
 Parameter ``ntk_dest``:
-  Target logic network whose signal names are to be assigned
-  `ntk_src`'s names.
+    Target logic network whose signal names are to be assigned
+    `ntk_src`'s names.
 
 Parameter ``old2new``:
-  Mapping of signals from `ntk_src` to `ntk_dest` using a
-  branching_signal_container.)doc";
+    Mapping of signals from `ntk_src` to `ntk_dest` using a
+    branching_signal_container.)doc";
 
 static const char* __doc_fiction_ripple_clocking =
     R"doc(Returns the Ripple clocking as defined in \"Ripple Clock Schemes for
@@ -13208,25 +13635,25 @@ Quantum-dot Cellular Automata Circuits\" by Prafull Purohit, Master
 Thesis, Rochester Institute of Technology, 2012.
 
 Template parameter ``Lyt``:
-  Clocked layout type.
+    Clocked layout type.
 
 Returns:
-  Ripple clocking scheme.)doc";
+    Ripple clocking scheme.)doc";
 
 static const char* __doc_fiction_round_to_n_decimal_places =
     R"doc(Rounds a number to a specified number of decimal places.
 
 Template parameter ``T``:
-  The type of the number to round.
+    The type of the number to round.
 
 Parameter ``number``:
-  The number to round.
+    The number to round.
 
 Parameter ``n``:
-  The number of decimal places to round to.
+    The number of decimal places to round to.
 
 Returns:
-  The number rounded to n decimal places.)doc";
+    The number rounded to n decimal places.)doc";
 
 static const char* __doc_fiction_route_path =
     R"doc(Establishes a wire routing along the given path in the given layout.
@@ -13239,34 +13666,34 @@ switch to the crossing layer. If path contains exactly source and
 target, no wires are created, but the source and target are connected.
 
 Template parameter ``Lyt``:
-  Gate-level layout type.
+    Gate-level layout type.
 
 Template parameter ``Path``:
-  Path type.
+    Path type.
 
 Parameter ``lyt``:
-  Gate-level layout in which a wire path is to be established.
+    Gate-level layout in which a wire path is to be established.
 
 Parameter ``path``:
-  Path to route wires along.)doc";
+    Path to route wires along.)doc";
 
 static const char* __doc_fiction_routing_objective =
     R"doc(Routing objectives are source-target pairs.
 
 Template parameter ``Lyt``:
-  Layout type whose coordinates are to be used.)doc";
+    Layout type whose coordinates are to be used.)doc";
 
 static const char* __doc_fiction_routing_objective_operator_eq =
     R"doc(Equality operator.
 
 Template parameter ``OtherLyt``:
-  Type of other layout.
+    Type of other layout.
 
 Parameter ``other``:
-  Routing objective to compare to.
+    Routing objective to compare to.
 
 Returns:
-  `true` iff the given objective is equal to this one.)doc";
+    `true` iff the given objective is equal to this one.)doc";
 
 static const char* __doc_fiction_routing_objective_source = R"doc()doc";
 
@@ -13279,13 +13706,13 @@ dots\" by C. S. Lent and P. D. Tougaw in the Proceedings of the IEEE
 1997.
 
 Template parameter ``Lyt``:
-  Clocked layout type.
+    Clocked layout type.
 
 Parameter ``n``:
-  Number of clocks.
+    Number of clocks.
 
 Returns:
-  Row-based clocking scheme.)doc";
+    Row-based clocking scheme.)doc";
 
 static const char* __doc_fiction_searchable_priority_queue =
     R"doc(An extension of `std::priority_queue` that allows searching the
@@ -13294,13 +13721,13 @@ https://stackoverflow.com/questions/16749723/how-i-can-find-value-in-
 priority-queue.
 
 Template parameter ``T``:
-  The type of the stored elements.
+    The type of the stored elements.
 
 Template parameter ``Container``:
-  The type of the underlying container.
+    The type of the underlying container.
 
 Template parameter ``Compare``:
-  A Compare type providing a strict weak ordering.)doc";
+    A Compare type providing a strict weak ordering.)doc";
 
 static const char* __doc_fiction_searchable_priority_queue_begin = R"doc()doc";
 
@@ -13315,10 +13742,10 @@ static const char* __doc_fiction_searchable_priority_queue_contains =
 `false` otherwise.
 
 Parameter ``val``:
-  Value to search for.
+    Value to search for.
 
 Returns:
-  `true` iff `val` is contained in the priority queue.)doc";
+    `true` iff `val` is contained in the priority queue.)doc";
 
 static const char* __doc_fiction_searchable_priority_queue_end = R"doc()doc";
 
@@ -13330,11 +13757,11 @@ priority queue. Returns an iterator to the end of the stored container
 otherwise.
 
 Parameter ``val``:
-  Value to search for.
+    Value to search for.
 
 Returns:
-  Iterator to the stored value or to the end of the container if
-  `val` is not contained.)doc";
+    Iterator to the stored value or to the end of the container if
+    `val` is not contained.)doc";
 
 static const char* __doc_fiction_searchable_priority_queue_find_2 =
     R"doc(Returns a `const_iterator` to the provided value if it is contained in
@@ -13342,24 +13769,24 @@ the priority queue. Returns an iterator to the end of the stored
 container otherwise.
 
 Parameter ``val``:
-  Value to search for.
+    Value to search for.
 
 Returns:
-  Iterator to the stored value or to the end of the container if
-  `val` is not contained.)doc";
+    Iterator to the stored value or to the end of the container if
+    `val` is not contained.)doc";
 
 static const char* __doc_fiction_set_name =
     R"doc(Helper function to conveniently assign a name to a layout or network
 as they use different function names for the same purpose.
 
 Template parameter ``NtkOrLyt``:
-  Network or layout type.
+    Network or layout type.
 
 Parameter ``ntk_or_lyt``:
-  Network or layout object.
+    Network or layout object.
 
 Parameter ``name``:
-  Name to assign to given network or layout.)doc";
+    Name to assign to given network or layout.)doc";
 
 static const char* __doc_fiction_shifted_cartesian_layout =
     R"doc(A layout type that utilizes offset coordinates to represent a
@@ -13372,12 +13799,12 @@ shifts and odd_column_cartesian and even_column_cartesian for vertical
 shifts. All are sketched in ASCII above.
 
 Template parameter ``OffsetCoordinateType``:
-  The coordinate implementation to be used. Offset coordinates are
-  required.
+    The coordinate implementation to be used. Offset coordinates are
+    required.
 
 Template parameter ``ShiftedCartesianCoordinateSystem``:
-  One of the following: odd_row_cartesian, even_row_cartesian,
-  odd_column_cartesian, even_column_cartesian.)doc";
+    One of the following: odd_row_cartesian, even_row_cartesian,
+    odd_column_cartesian, even_column_cartesian.)doc";
 
 static const char* __doc_fiction_shifted_cartesian_layout_conditional_t = R"doc()doc";
 
@@ -13391,7 +13818,7 @@ Consequently, with `ar = (0,0)`, the layout has exactly one
 coordinate.
 
 Parameter ``ar``:
-  Highest possible position in the layout.)doc";
+    Highest possible position in the layout.)doc";
 
 static const char* __doc_fiction_shifted_cartesian_layout_shifted_cartesian_layout_2 = R"doc()doc";
 
@@ -13432,8 +13859,8 @@ This is an optional interface function that is required by some
 algorithms.
 
 Returns:
-  Map of all gate functions supported by the library and their
-  respective implementations as Bestagon gates.)doc";
+    Map of all gate functions supported by the library and their
+    respective implementations as Bestagon gates.)doc";
 
 static const char* __doc_fiction_sidb_bestagon_library_get_gate_ports =
     R"doc(Returns a map of all different gate implementations and their
@@ -13443,8 +13870,8 @@ This is an optional interface function that is required by some
 algorithms.
 
 Returns:
-  Map of all different gate implementations and their respective
-  port information.)doc";
+    Map of all different gate implementations and their respective
+    port information.)doc";
 
 static const char* __doc_fiction_sidb_bestagon_library_set_up_gate =
     R"doc(Overrides the corresponding function in fcn_gate_library. Given a tile
@@ -13454,16 +13881,16 @@ that tile. May it be a gate or wires. Rotation and special marks like
 input and output, const cells etc. are computed additionally.
 
 Template parameter ``GateLyt``:
-  Pointy-top hexagonal gate-level layout type.
+    Pointy-top hexagonal gate-level layout type.
 
 Parameter ``lyt``:
-  Layout that hosts tile `t`.
+    Layout that hosts tile `t`.
 
 Parameter ``t``:
-  Tile to be realized as a Bestagon gate.
+    Tile to be realized as a Bestagon gate.
 
 Returns:
-  Bestagon gate representation of `t` including mirroring.)doc";
+    Bestagon gate representation of `t` including mirroring.)doc";
 
 static const char* __doc_fiction_sidb_bestagon_library_sidb_bestagon_library = R"doc()doc";
 
@@ -13503,7 +13930,7 @@ checks if the `type`, `charge`, `epsilon_r`, and `lambda_tf` members
 of the two instances are equal.
 
 Parameter ``rhs``:
-  `sidb_defect` instance to compare against.)doc";
+    `sidb_defect` instance to compare against.)doc";
 
 static const char* __doc_fiction_sidb_defect_operator_ne =
     R"doc(This operator compares two `sidb_defect` instances for inequality. It
@@ -13511,7 +13938,7 @@ uses the `operator==` to check if the two instances are equal and
 returns the negation of the result.
 
 Parameter ``rhs``:
-  `sidb_defect` instance to compare against.)doc";
+    `sidb_defect` instance to compare against.)doc";
 
 static const char* __doc_fiction_sidb_defect_sidb_defect = R"doc(Standard constructor.)doc";
 
@@ -13576,14 +14003,14 @@ implements an interface for different lattice orientations of the H-Si
 crystal.
 
 Template parameter ``LatticeOrientation``:
-  Type of the lattice orientation.
+    Type of the lattice orientation.
 
 Template parameter ``Lyt``:
-  SiDB cell-level layout type.
+    SiDB cell-level layout type.
 
 Template parameter ``has_sidb_lattice_interface``:
-  Automatically determines whether an SiDB lattice interface is
-  already present.)doc";
+    Automatically determines whether an SiDB lattice interface is
+    already present.)doc";
 
 static const char* __doc_fiction_sidb_lattice_2 = R"doc()doc";
 
@@ -13591,30 +14018,30 @@ static const char* __doc_fiction_sidb_nm_distance =
     R"doc(Computes the distance between two SiDB cells in nanometers (unit: nm).
 
 Template parameter ``Lyt``:
-  SiDB cell-level layout type.
+    SiDB cell-level layout type.
 
 Parameter ``source``:
-  The source cell.
+    The source cell.
 
 Parameter ``target``:
-  The target cell.
+    The target cell.
 
 Returns:
-  The distance between the two cells in nanometers (unit: nm).)doc";
+    The distance between the two cells in nanometers (unit: nm).)doc";
 
 static const char* __doc_fiction_sidb_nm_position =
     R"doc(Computes the position of a cell in nanometers from the layout origin
 in an SiDB layout (unit: nm).
 
 Template parameter ``Lyt``:
-  SiDB cell-level layout type.
+    SiDB cell-level layout type.
 
 Parameter ``c``:
-  The cell to compute the position for.
+    The cell to compute the position for.
 
 Returns:
-  A pair representing the `(x,y)` position of `c` in nanometers from
-  the layout origin.)doc";
+    A pair representing the `(x,y)` position of `c` in nanometers from
+    the layout origin.)doc";
 
 static const char* __doc_fiction_sidb_simulation_engine =
     R"doc(Selector for the available SiDB simulation engines.)doc";
@@ -13664,18 +14091,18 @@ static const char* __doc_fiction_sidb_simulation_parameters_sidb_simulation_para
     R"doc(Default constructor.
 
 Parameter ``base_number``:
-  simulation can be conducted with 2 and 3 charge states. 2 =
-  (Negative, Neutral), 3 = (Negative, Neutral, Positive).
+    simulation can be conducted with 2 and 3 charge states. 2 =
+    (Negative, Neutral), 3 = (Negative, Neutral, Positive).
 
 Parameter ``mu``:
-  (µ-) is the energy transition level (0/-) in eV.
+    (µ-) is the energy transition level (0/-) in eV.
 
 Parameter ``relative_permittivity``:
-  it describes the electric field reduction due to polarization.
+    it describes the electric field reduction due to polarization.
 
 Parameter ``screening_distance``:
-  also known as "Thomas-Fermi screening" and it describes the
-  electric field screening due to free charges in nm.)doc";
+    also known as "Thomas-Fermi screening" and it describes the
+    electric field screening due to free charges in nm.)doc";
 
 static const char* __doc_fiction_sidb_simulation_result =
     R"doc(This struct defines a unified return type for all SiDB simulation
@@ -13685,7 +14112,7 @@ algorithm, the physical parameters used in the simulation, and
 (optional) algorithm-specific named simulation parameters.
 
 Template parameter ``Lyt``:
-  Cell-level layout type.)doc";
+    Cell-level layout type.)doc";
 
 static const char* __doc_fiction_sidb_simulation_result_additional_simulation_parameters =
     R"doc(Additional named simulation parameters. This is used to store
@@ -13720,23 +14147,23 @@ on said tile. The black list is then returned by this function.
 `get_functional_implementations()` and `get_gate_ports()` functions.
 
 Template parameter ``GateLibrary``:
-  FCN gate library type to fetch the gate descriptions from.
+    FCN gate library type to fetch the gate descriptions from.
 
 Template parameter ``GateLyt``:
-  Gate-level layout type that specifies the tiling of the SiDB
-  surface.
+    Gate-level layout type that specifies the tiling of the SiDB
+    surface.
 
 Template parameter ``CellLyt``:
-  Cell-level layout type that is underlying to the SiDB surface.
+    Cell-level layout type that is underlying to the SiDB surface.
 
 Parameter ``gate_lyt``:
-  Gate-level layout instance that specifies the aspect ratio.
+    Gate-level layout instance that specifies the aspect ratio.
 
 Parameter ``surface``:
-  SiDB surface that instantiates the defects.
+    SiDB surface that instantiates the defects.
 
 Returns:
-  A black list of gate functions associated with tiles.)doc";
+    A black list of gate functions associated with tiles.)doc";
 
 static const char* __doc_fiction_sidb_technology =
     R"doc(Silicon Dangling Bond (SiDB) technology implementation of the FCN
@@ -13779,23 +14206,23 @@ static const char* __doc_fiction_sign_to_charge_state =
     R"doc(Converts an integer (`-1`, `0`, `1`) into a charge state.
 
 Parameter ``sg``:
-  Integer (`-1`, `0`, `1`) representing a charge state.
+    Integer (`-1`, `0`, `1`) representing a charge state.
 
 Returns:
-  sidb_charge_state representation of `sg`.)doc";
+    sidb_charge_state representation of `sg`.)doc";
 
 static const char* __doc_fiction_simple_gate_layout_tile_drawer =
     R"doc(Base class for a simple gate-level layout DOT drawer.
 
 Template parameter ``Lyt``:
-  Gate-level layout type.
+    Gate-level layout type.
 
 Template parameter ``ClockColors``:
-  Flag to toggle the drawing of clock colors instead of gate type
-  colors.
+    Flag to toggle the drawing of clock colors instead of gate type
+    colors.
 
 Template parameter ``DrawIndexes``:
-  Flag to toggle the drawing of node indices.)doc";
+    Flag to toggle the drawing of node indices.)doc";
 
 static const char* __doc_fiction_simple_gate_layout_tile_drawer_additional_graph_attributes = R"doc()doc";
 
@@ -13831,37 +14258,37 @@ static const char* __doc_fiction_siqad_coord_t_coord_t_2 =
     R"doc(Standard constructor. Creates a non-dead coordinate at (x_, y_, z_).
 
 Template parameter ``X``:
-  Type of x.
+    Type of x.
 
 Template parameter ``Y``:
-  Type of y.
+    Type of y.
 
 Template parameter ``Z``:
-  Type of z.
+    Type of z.
 
 Parameter ``x_``:
-  x position.
+    x position.
 
 Parameter ``y_``:
-  y position.
+    y position.
 
 Parameter ``z_``:
-  z position.)doc";
+    z position.)doc";
 
 static const char* __doc_fiction_siqad_coord_t_coord_t_3 =
     R"doc(Standard constructor. Creates a non-dead coordinate at (x_, y_, 0).
 
 Template parameter ``X``:
-  Type of x.
+    Type of x.
 
 Template parameter ``Y``:
-  Type of y.
+    Type of y.
 
 Parameter ``x_``:
-  x position.
+    x position.
 
 Parameter ``y_``:
-  y position.)doc";
+    y position.)doc";
 
 static const char* __doc_fiction_siqad_coord_t_d = R"doc(MSB acts as dead indicator.)doc";
 
@@ -13869,33 +14296,33 @@ static const char* __doc_fiction_siqad_coord_t_get_dead =
     R"doc(Returns a dead copy of the coordinate, i.e., (1, x, y, z).
 
 Returns:
-  A dead copy of the coordinate.)doc";
+    A dead copy of the coordinate.)doc";
 
 static const char* __doc_fiction_siqad_coord_t_is_dead =
     R"doc(Returns whether the coordinate is dead.
 
 Returns:
-  True iff coordinate is dead.)doc";
+    True iff coordinate is dead.)doc";
 
 static const char* __doc_fiction_siqad_coord_t_operator_add =
     R"doc(Adds another coordinate to this one and returns the result. Does not
 modify this coordinate.
 
 Parameter ``other``:
-  Coordinate to add.
+    Coordinate to add.
 
 Returns:
-  Sum of both coordinates.)doc";
+    Sum of both coordinates.)doc";
 
 static const char* __doc_fiction_siqad_coord_t_operator_eq =
     R"doc(Compares against another coordinate for equality. Respects the dead
 indicator.
 
 Parameter ``other``:
-  Right-hand side coordinate.
+    Right-hand side coordinate.
 
 Returns:
-  True iff both coordinates are identical.)doc";
+    True iff both coordinates are identical.)doc";
 
 static const char* __doc_fiction_siqad_coord_t_operator_ge =
     R"doc(Determine whether this coordinate is "greater than or equal to"
@@ -13903,32 +14330,32 @@ another one. This is the case if this one is not "less than" the
 other.
 
 Parameter ``other``:
-  Right-hand side coordinate.
+    Right-hand side coordinate.
 
 Returns:
-  True iff this coordinate is "greater than or equal to" the other
-  coordinate.)doc";
+    True iff this coordinate is "greater than or equal to" the other
+    coordinate.)doc";
 
 static const char* __doc_fiction_siqad_coord_t_operator_gt =
     R"doc(Determine whether this coordinate is "greater than" another one. This
 is the case if the other one is "less than".
 
 Parameter ``other``:
-  Right-hand side coordinate.
+    Right-hand side coordinate.
 
 Returns:
-  True iff this coordinate is "greater than" the other coordinate.)doc";
+    True iff this coordinate is "greater than" the other coordinate.)doc";
 
 static const char* __doc_fiction_siqad_coord_t_operator_le =
     R"doc(Determine whether this coordinate is "less than or equal to" another
 one. This is the case if this one is not "greater than" the other.
 
 Parameter ``other``:
-  Right-hand side coordinate.
+    Right-hand side coordinate.
 
 Returns:
-  True iff this coordinate is "less than or equal to" the other
-  coordinate.)doc";
+    True iff this coordinate is "less than or equal to" the other
+    coordinate.)doc";
 
 static const char* __doc_fiction_siqad_coord_t_operator_lt =
     R"doc(Determine whether this coordinate is "less than" another one. This is
@@ -13936,37 +14363,37 @@ the case if y is smaller, or if y is equal but z is smaller, or if z
 and y are equal but x is smaller.
 
 Parameter ``other``:
-  Right-hand side coordinate.
+    Right-hand side coordinate.
 
 Returns:
-  True iff this coordinate is "less than" the other coordinate.)doc";
+    True iff this coordinate is "less than" the other coordinate.)doc";
 
 static const char* __doc_fiction_siqad_coord_t_operator_ne =
     R"doc(Compares against another coordinate for inequality. Respects the dead
 indicator.
 
 Parameter ``other``:
-  Right-hand side coordinate.
+    Right-hand side coordinate.
 
 Returns:
-  True iff both coordinates are not identical.)doc";
+    True iff both coordinates are not identical.)doc";
 
 static const char* __doc_fiction_siqad_coord_t_operator_sub =
     R"doc(Subtracts another coordinate from this one and returns the result.
 Does not modify this coordinate.
 
 Parameter ``other``:
-  Coordinate to subtract.
+    Coordinate to subtract.
 
 Returns:
-  Difference of both coordinates.)doc";
+    Difference of both coordinates.)doc";
 
 static const char* __doc_fiction_siqad_coord_t_str =
     R"doc(Returns a string representation of the coordinate of the form "(x, y,
 z)" that does not respect the dead indicator.
 
 Returns:
-  String representation of the form "(x, y, z)".)doc";
+    String representation of the form "(x, y, z)".)doc";
 
 static const char* __doc_fiction_siqad_coord_t_wrap =
     R"doc(Wraps the coordinate with respect to the given aspect ratio by
@@ -13981,7 +14408,7 @@ advancing by first incrementing the x dimension, then wrapping the
 coordinate to the boundary within to enumerate.
 
 Parameter ``aspect_ratio``:
-  Aspect ratio to wrap the coordinate to.)doc";
+    Aspect ratio to wrap the coordinate to.)doc";
 
 static const char* __doc_fiction_siqad_coord_t_x = R"doc(31 bit for the x coordinate.)doc";
 
@@ -13993,25 +14420,25 @@ static const char* __doc_fiction_siqad_to_fiction_coord =
     R"doc(Converts SiQAD coordinates to other coordinates (offset, cube).
 
 Template parameter ``CoordinateType``:
-  The desired coordinate type.
+    The desired coordinate type.
 
 Parameter ``coord``:
-  SiQAD coordinate to convert.
+    SiQAD coordinate to convert.
 
 Returns:
-  Coordinate of type `CoordinateType`.)doc";
+    Coordinate of type `CoordinateType`.)doc";
 
 static const char* __doc_fiction_siqad_to_siqad_coord =
     R"doc(Converts any coordinate type to SiQAD coordinates.
 
 Template parameter ``CoordinateType``:
-  Coordinate type to convert.
+    Coordinate type to convert.
 
 Parameter ``coord``:
-  Coordinate to convert.
+    Coordinate to convert.
 
 Returns:
-  SiQAD coordinate representation of `coord`.)doc";
+    SiQAD coordinate representation of `coord`.)doc";
 
 static const char* __doc_fiction_smart_distance_cache_functor =
     R"doc(A distance functor that internally uses a `sparse_distance_map` as a
@@ -14024,10 +14451,10 @@ a drop-in replacement for any other distance functor in path-finding
 algorithms.
 
 Template parameter ``Lyt``:
-  Coordinate layout type.
+    Coordinate layout type.
 
 Template parameter ``Dist``:
-  Distance type.)doc";
+    Distance type.)doc";
 
 static const char* __doc_fiction_smart_distance_cache_functor_distance_cache =
     R"doc(Sparse distance map serving as a cache.)doc";
@@ -14038,17 +14465,17 @@ distance function. Only on a cache miss, the distance function will be
 called and the result will be stored in the cache.
 
 Parameter ``lyt``:
-  Layout.
+    Layout.
 
 Parameter ``source``:
-  Source coordinate.
+    Source coordinate.
 
 Parameter ``target``:
-  Target coordinate.
+    Target coordinate.
 
 Returns:
-  Distance between source and target according to the cache or the
-  distance function.)doc";
+    Distance between source and target according to the cache or the
+    distance function.)doc";
 
 static const char* __doc_fiction_smart_distance_cache_functor_smart_distance_cache_functor =
     R"doc(Construct a distance functor from a layout and a distance function.
@@ -14057,10 +14484,10 @@ The internal cache will be initialized empty. Distances will be
 computed on the fly and stored in the cache whenever they are queried.
 
 Parameter ``lyt``:
-  Layout.
+    Layout.
 
 Parameter ``dist_fn``:
-  Distance function.)doc";
+    Distance function.)doc";
 
 static const char* __doc_fiction_sparse_distance_map_functor =
     R"doc(A distance functor that uses a fully precomputed `sparse_distance_map`
@@ -14069,10 +14496,10 @@ in replacement for any other distance functor in path-finding
 algorithms.
 
 Template parameter ``Lyt``:
-  Coordinate layout type.
+    Coordinate layout type.
 
 Template parameter ``Dist``:
-  Distance type.)doc";
+    Distance type.)doc";
 
 static const char* __doc_fiction_sparse_distance_map_functor_operator_call =
     R"doc(Override the call operator to query the sparse distance map instead of
@@ -14082,17 +14509,17 @@ the distance function.
 not stored in the sparse distance map.
 
 Parameter ``lyt``:
-  Layout.
+    Layout.
 
 Parameter ``source``:
-  Source coordinate.
+    Source coordinate.
 
 Parameter ``target``:
-  Target coordinate.
+    Target coordinate.
 
 Returns:
-  Distance between source and target according to the stored sparse
-  distance map.)doc";
+    Distance between source and target according to the stored sparse
+    distance map.)doc";
 
 static const char* __doc_fiction_sparse_distance_map_functor_sparse_dist_map = R"doc(Sparse distance map.)doc";
 
@@ -14100,7 +14527,7 @@ static const char* __doc_fiction_sparse_distance_map_functor_sparse_distance_map
     R"doc(Construct the distance functor from a sparse distance map.
 
 Parameter ``sdm``:
-  Sparse distance map.)doc";
+    Sparse distance map.)doc";
 
 static const char* __doc_fiction_sqd_parsing_error =
     R"doc(Exception thrown when an error occurs during parsing of an SQD file.)doc";
@@ -14131,24 +14558,24 @@ these applications is limited. It is advised to use synchronization
 elements only on wire tiles.
 
 Template parameter ``ClockedLayout``:
-  The clocked layout type whose clocking system should be extended
-  by synchronization elements.)doc";
+    The clocked layout type whose clocking system should be extended
+    by synchronization elements.)doc";
 
 static const char* __doc_fiction_synchronization_element_layout_assign_synchronization_element =
     R"doc(Assigns a synchronization element to the provided clock zone.
 
 Parameter ``cz``:
-  Clock zone to turn into a synchronization element.
+    Clock zone to turn into a synchronization element.
 
 Parameter ``se``:
-  Number of full clock cycles to extend `cz`'s Hold phase by. If
-  this value is 0, `cz` is turned back into a normal clock zone.)doc";
+    Number of full clock cycles to extend `cz`'s Hold phase by. If
+    this value is 0, `cz` is turned back into a normal clock zone.)doc";
 
 static const char* __doc_fiction_synchronization_element_layout_clone =
     R"doc(Clones the layout returning a deep copy.
 
 Returns:
-  Deep copy of the layout.)doc";
+    Deep copy of the layout.)doc";
 
 static const char* __doc_fiction_synchronization_element_layout_degree =
     R"doc(Overwrites the function from `ClockedLayout` to account for
@@ -14156,10 +14583,10 @@ synchronization elements. Returns the number of incoming plus outgoing
 clock zones of the given one.
 
 Parameter ``cz``:
-  Base clock zone.
+    Base clock zone.
 
 Returns:
-  Number of `cz`'s incoming plus outgoing clock zones.)doc";
+    Number of `cz`'s incoming plus outgoing clock zones.)doc";
 
 static const char* __doc_fiction_synchronization_element_layout_foreach_incoming_clocked_zone =
     R"doc(Overwrites the function from `ClockedLayout` to account for
@@ -14167,14 +14594,14 @@ synchronization elements. Applies a function to all incoming clock
 zones of a given one in accordance with `incoming_clocked_zones`.
 
 Template parameter ``Fn``:
-  Functor type that has to comply with the restrictions imposed by
-  `mockturtle::foreach_element`.
+    Functor type that has to comply with the restrictions imposed by
+    `mockturtle::foreach_element`.
 
 Parameter ``cz``:
-  Base clock zone.
+    Base clock zone.
 
 Parameter ``fn``:
-  Functor to apply to each of `cz`'s incoming clock zones.)doc";
+    Functor to apply to each of `cz`'s incoming clock zones.)doc";
 
 static const char* __doc_fiction_synchronization_element_layout_foreach_outgoing_clocked_zone =
     R"doc(Overwrites the function from `ClockedLayout` to account for
@@ -14182,24 +14609,24 @@ synchronization elements. Applies a function to all outgoing clock
 zones of a given one in accordance with `outgoing_clocked_zones`.
 
 Template parameter ``Fn``:
-  Functor type that has to comply with the restrictions imposed by
-  `mockturtle::foreach_element`.
+    Functor type that has to comply with the restrictions imposed by
+    `mockturtle::foreach_element`.
 
 Parameter ``cz``:
-  Base clock zone.
+    Base clock zone.
 
 Parameter ``fn``:
-  Functor to apply to each of `cz`'s outgoing clock zones.)doc";
+    Functor to apply to each of `cz`'s outgoing clock zones.)doc";
 
 static const char* __doc_fiction_synchronization_element_layout_get_synchronization_element =
     R"doc(Returns the Hold phase extension in clock cycles of clock zone `cz`.
 
 Parameter ``cz``:
-  Clock zone to check.
+    Clock zone to check.
 
 Returns:
-  Synchronization element value, i.e., Hold phase extension, of
-  clock zone `cz`.)doc";
+    Synchronization element value, i.e., Hold phase extension, of
+    clock zone `cz`.)doc";
 
 static const char* __doc_fiction_synchronization_element_layout_in_degree =
     R"doc(Overwrites the function from `ClockedLayout` to account for
@@ -14207,10 +14634,10 @@ synchronization elements. Returns the number of incoming clock zones
 to the given one.
 
 Parameter ``cz``:
-  Base clock zone.
+    Base clock zone.
 
 Returns:
-  Number of `cz`'s incoming clock zones.)doc";
+    Number of `cz`'s incoming clock zones.)doc";
 
 static const char* __doc_fiction_synchronization_element_layout_incoming_clocked_zones =
     R"doc(Overwrites the function from `ClockedLayout` to account for
@@ -14218,10 +14645,10 @@ synchronization elements. Returns a container with all clock zones
 that are incoming to the given one.
 
 Parameter ``cz``:
-  Base clock zone.
+    Base clock zone.
 
 Returns:
-  A container with all clock zones that are incoming to `cz`.)doc";
+    A container with all clock zones that are incoming to `cz`.)doc";
 
 static const char* __doc_fiction_synchronization_element_layout_is_incoming_clocked =
     R"doc(Overwrites the function from `ClockedLayout` to account for
@@ -14232,14 +14659,14 @@ them is a synchronization element. Due to their extended Hold phase,
 they feed information to any clock number.
 
 Parameter ``cz1``:
-  Base clock zone.
+    Base clock zone.
 
 Parameter ``cz2``:
-  Clock zone to check whether it feeds information to `cz1`.
+    Clock zone to check whether it feeds information to `cz1`.
 
 Returns:
-  `true` iff `cz2`'s clock number is lower by 1 modulo
-  `num_clocks()` or if `cz1` or `cz2` are synchronization elements.)doc";
+    `true` iff `cz2`'s clock number is lower by 1 modulo
+    `num_clocks()` or if `cz1` or `cz2` are synchronization elements.)doc";
 
 static const char* __doc_fiction_synchronization_element_layout_is_outgoing_clocked =
     R"doc(Overwrites the function from `ClockedLayout` to account for
@@ -14250,30 +14677,30 @@ them is a synchronization element. Due to their extended Hold phase,
 they feed information to any clock number.
 
 Parameter ``cz1``:
-  Base clock zone.
+    Base clock zone.
 
 Parameter ``cz2``:
-  Clock zone to check whether it accepts information from `cz1`.
+    Clock zone to check whether it accepts information from `cz1`.
 
 Returns:
-  `true` iff `cz2`'s clock number is higher by 1 modulo
-  `num_clocks()` or if `cz1` or `cz2` are synchronization elements.)doc";
+    `true` iff `cz2`'s clock number is higher by 1 modulo
+    `num_clocks()` or if `cz1` or `cz2` are synchronization elements.)doc";
 
 static const char* __doc_fiction_synchronization_element_layout_is_synchronization_element =
     R"doc(Check whether the provided clock zone is a synchronization element.
 
 Parameter ``cz``:
-  Clock zone to check.
+    Clock zone to check.
 
 Returns:
-  `true` iff `cz` is a synchronization element.)doc";
+    `true` iff `cz` is a synchronization element.)doc";
 
 static const char* __doc_fiction_synchronization_element_layout_num_se =
     R"doc(Returns the number of clock zones acting as synchronization elements
 in the layout.
 
 Returns:
-  Number of synchronization elements in the layout.)doc";
+    Number of synchronization elements in the layout.)doc";
 
 static const char* __doc_fiction_synchronization_element_layout_out_degree =
     R"doc(Overwrites the function from `ClockedLayout` to account for
@@ -14281,10 +14708,10 @@ synchronization elements. Returns the number of outgoing clock zones
 from the given one.
 
 Parameter ``cz``:
-  Base clock zone.
+    Base clock zone.
 
 Returns:
-  Number of `cz`'s outgoing clock zones.)doc";
+    Number of `cz`'s outgoing clock zones.)doc";
 
 static const char* __doc_fiction_synchronization_element_layout_outgoing_clocked_zones =
     R"doc(Overwrites the function from `ClockedLayout` to account for
@@ -14292,10 +14719,10 @@ synchronization elements. Returns a container with all clock zones
 that are outgoing from the given one.
 
 Parameter ``cz``:
-  Base clock zone.
+    Base clock zone.
 
 Returns:
-  A container with all clock zones that are outgoing from `cz`.)doc";
+    A container with all clock zones that are outgoing from `cz`.)doc";
 
 static const char* __doc_fiction_synchronization_element_layout_strg = R"doc()doc";
 
@@ -14305,7 +14732,7 @@ of the given aspect ratio. To this end, it calls `ClockedLayout`'s
 standard constructor.
 
 Parameter ``ar``:
-  Highest possible position in the layout.)doc";
+    Highest possible position in the layout.)doc";
 
 static const char* __doc_fiction_synchronization_element_layout_synchronization_element_layout_2 =
     R"doc(Standard constructor. Creates a clocked synchronization element layout
@@ -14313,22 +14740,22 @@ of the given aspect ratio and clocks it via the given clocking scheme.
 To this end, it calls `ClockedLayout`'s standard constructor.
 
 Parameter ``ar``:
-  Highest possible position in the layout.
+    Highest possible position in the layout.
 
 Parameter ``scheme``:
-  Clocking scheme to apply to this layout.)doc";
+    Clocking scheme to apply to this layout.)doc";
 
 static const char* __doc_fiction_synchronization_element_layout_synchronization_element_layout_3 =
     R"doc(Copy constructor from another layout's storage.
 
 Parameter ``s``:
-  Storage of another synchronization_element_layout.)doc";
+    Storage of another synchronization_element_layout.)doc";
 
 static const char* __doc_fiction_synchronization_element_layout_synchronization_element_layout_4 =
     R"doc(Copy constructor from another `ClockedLayout`.
 
 Parameter ``lyt``:
-  Clocked layout.)doc";
+    Clocked layout.)doc";
 
 static const char* __doc_fiction_synchronization_element_layout_synchronization_element_layout_storage = R"doc()doc";
 
@@ -14351,14 +14778,14 @@ static const char* __doc_fiction_technology_dot_drawer =
 types.
 
 Template parameter ``Ntk``:
-  Logic network type.
+    Logic network type.
 
 Template parameter ``DrawIndexes``:
-  Flag to toggle the drawing of node indices.
+    Flag to toggle the drawing of node indices.
 
 Template parameter ``DrawHexTT``:
-  Flag to toggle the representation of truth tables for unknown
-  functions in hexadecimal notation.)doc";
+    Flag to toggle the representation of truth tables for unknown
+    functions in hexadecimal notation.)doc";
 
 static const char* __doc_fiction_technology_dot_drawer_is_node_number = R"doc()doc";
 
@@ -14404,10 +14831,10 @@ function and counts towards the network size and depth. A buffer node
 with more than one output is called a fanout.
 
 Parameter ``a``:
-  Incoming signal to the newly created buffer node.
+    Incoming signal to the newly created buffer node.
 
 Returns:
-  Outgoing signal of the newly created buffer node.)doc";
+    Outgoing signal of the newly created buffer node.)doc";
 
 static const char* __doc_fiction_technology_network_create_dot = R"doc()doc";
 
@@ -14455,10 +14882,10 @@ computes the identity function and is not a PI. This also returns
 `true` on fanout nodes.
 
 Parameter ``n``:
-  Node to consider.
+    Node to consider.
 
 Returns:
-  `true` iff `n` is a buffer node.)doc";
+    `true` iff `n` is a buffer node.)doc";
 
 static const char* __doc_fiction_technology_network_is_dot = R"doc()doc";
 
@@ -14467,10 +14894,10 @@ static const char* __doc_fiction_technology_network_is_fanout =
 is a buffer node and has more than one output signal.
 
 Parameter ``n``:
-  Node to consider.
+    Node to consider.
 
 Returns:
-  `true` iff `n` is a fanout node.)doc";
+    `true` iff `n` is a fanout node.)doc";
 
 static const char* __doc_fiction_technology_network_is_gamble = R"doc()doc";
 
@@ -14478,10 +14905,10 @@ static const char* __doc_fiction_technology_network_is_inv =
     R"doc(Returns whether the given node `n` is an inverter node.
 
 Parameter ``n``:
-  Node to consider.
+    Node to consider.
 
 Returns:
-  `true` iff `n` is an inverter node.)doc";
+    `true` iff `n` is an inverter node.)doc";
 
 static const char* __doc_fiction_technology_network_is_ite = R"doc()doc";
 
@@ -14503,10 +14930,10 @@ pointing to it. This is possible because this network does not use
 complemented signals.
 
 Parameter ``n``:
-  Node to consider.
+    Node to consider.
 
 Returns:
-  `true` iff `n`'s signal is primary output.)doc";
+    `true` iff `n`'s signal is primary output.)doc";
 
 static const char* __doc_fiction_technology_network_is_xnor = R"doc()doc";
 
@@ -14535,7 +14962,7 @@ helpful for a reader of the code to provide this abstraction level-
 dependent information.
 
 Template parameter ``CoordinateLayout``:
-  A coordinate layout type.)doc";
+    A coordinate layout type.)doc";
 
 static const char* __doc_fiction_tile_based_layout_adjacent_opposite_tiles = R"doc()doc";
 
@@ -14566,20 +14993,20 @@ static const char* __doc_fiction_time_to_solution =
 (acc) of the *QuickSim* algorithm.
 
 Template parameter ``Lyt``:
-  Cell-level layout type.
+    Cell-level layout type.
 
 Parameter ``lyt``:
-  Layout that is used for the simulation.
+    Layout that is used for the simulation.
 
 Parameter ``quicksim_params``:
-  Parameters required for the *QuickSim* algorithm.
+    Parameters required for the *QuickSim* algorithm.
 
 Parameter ``tts_params``:
-  Parameters used for the time-to-solution calculation.
+    Parameters used for the time-to-solution calculation.
 
 Parameter ``ps``:
-  Pointer to a struct where the results (time_to_solution, acc,
-  single runtime) are stored.)doc";
+    Pointer to a struct where the results (time_to_solution, acc,
+    single runtime) are stored.)doc";
 
 static const char* __doc_fiction_time_to_solution_params = R"doc()doc";
 
@@ -14613,7 +15040,7 @@ static const char* __doc_fiction_time_to_solution_stats_report =
     R"doc(Print the results to the given output stream.
 
 Parameter ``out``:
-  Output stream.)doc";
+    Output stream.)doc";
 
 static const char* __doc_fiction_time_to_solution_stats_single_runtime_exhaustive =
     R"doc(Single simulation runtime of the exhaustive ground state searcher in
@@ -14657,7 +15084,7 @@ static const char* __doc_fiction_tt_reader_next =
 no further truth tables are available.
 
 Returns:
-  Next truth table from the file.)doc";
+    Next truth table from the file.)doc";
 
 static const char* __doc_fiction_tt_reader_pos = R"doc(Current position in the vector.)doc";
 
@@ -14666,19 +15093,19 @@ static const char* __doc_fiction_tt_reader_read =
 expressions from the given stream.
 
 Parameter ``in_stream``:
-  Stream of truth table representations.)doc";
+    Stream of truth table representations.)doc";
 
 static const char* __doc_fiction_tt_reader_tt_reader =
     R"doc(Standard constructor. Reads the given stream into a vector of lines.
 
 Parameter ``stream``:
-  Stream to parse.)doc";
+    Stream to parse.)doc";
 
 static const char* __doc_fiction_tt_reader_tt_reader_2 =
     R"doc(Standard constructor. Reads the given file into a vector of lines.
 
 Parameter ``filename``:
-  File to parse.)doc";
+    File to parse.)doc";
 
 static const char* __doc_fiction_twoddwave_clocking =
     R"doc(Returns the 2DDWave clocking as defined in \"Clocking and Cell
@@ -14686,13 +15113,13 @@ Placement for QCA\" by V. Vankamamidi, M. Ottavi, and F. Lombardi in
 IEEE Conference on Nanotechnology 2006.
 
 Template parameter ``Lyt``:
-  Clocked layout type.
+    Clocked layout type.
 
 Parameter ``n``:
-  Number of clocks.
+    Number of clocks.
 
 Returns:
-  2DDWave clocking scheme.)doc";
+    2DDWave clocking scheme.)doc";
 
 static const char* __doc_fiction_twoddwave_distance =
     R"doc(The 2DDWave distance :math:`D` between two layout coordinates :math:`s
@@ -14710,31 +15137,31 @@ infinite length. We are using `uint32_t` to prevent overflows when
 adding distances in the default `uint64_t` number range.
 
 Template parameter ``Lyt``:
-  Coordinate layout type.
+    Coordinate layout type.
 
 Template parameter ``Dist``:
-  Integral type for the distance.
+    Integral type for the distance.
 
 Parameter ``lyt``:
-  Layout.
+    Layout.
 
 Parameter ``source``:
-  Source coordinate.
+    Source coordinate.
 
 Parameter ``target``:
-  Target coordinate.
+    Target coordinate.
 
 Returns:
-  2DDWave distance between `source` and `target`.)doc";
+    2DDWave distance between `source` and `target`.)doc";
 
 static const char* __doc_fiction_twoddwave_distance_functor =
     R"doc(A pre-defined distance functor that uses the 2DDWave distance.
 
 Template parameter ``Lyt``:
-  Coordinate layout type.
+    Coordinate layout type.
 
 Template parameter ``Dist``:
-  Integral distance type.)doc";
+    Integral distance type.)doc";
 
 static const char* __doc_fiction_twoddwave_distance_functor_twoddwave_distance_functor = R"doc()doc";
 
@@ -14744,13 +15171,13 @@ defined in \"Clocking and Cell Placement for QCA\" by V. Vankamamidi,
 M. Ottavi, and F. Lombardi in IEEE Conference on Nanotechnology 2006.
 
 Template parameter ``Lyt``:
-  Clocked layout type.
+    Clocked layout type.
 
 Parameter ``n``:
-  Number of clocks.
+    Number of clocks.
 
 Returns:
-  Hexagonal 2DDWave clocking scheme.)doc";
+    Hexagonal 2DDWave clocking scheme.)doc";
 
 static const char* __doc_fiction_undefined_cell_label_exception = R"doc()doc";
 
@@ -14764,28 +15191,28 @@ static const char* __doc_fiction_unit_cost =
     R"doc(Unit cost between two layout coordinates that always returns 1.
 
 Template parameter ``Lyt``:
-  Coordinate layout type.
+    Coordinate layout type.
 
 Template parameter ``Cost``:
-  Integral type for the cost.
+    Integral type for the cost.
 
 Parameter ``source``:
-  Source coordinate.
+    Source coordinate.
 
 Parameter ``target``:
-  Target coordinate.
+    Target coordinate.
 
 Returns:
-  Unit cost between `source` and `target`, i.e., 1.)doc";
+    Unit cost between `source` and `target`, i.e., 1.)doc";
 
 static const char* __doc_fiction_unit_cost_functor =
     R"doc(A pre-defined cost functor that uses unit costs.
 
 Template parameter ``Lyt``:
-  Coordinate layout type.
+    Coordinate layout type.
 
 Template parameter ``Cost``:
-  Integral cost type.)doc";
+    Integral cost type.)doc";
 
 static const char* __doc_fiction_unit_cost_functor_unit_cost_functor = R"doc()doc";
 
@@ -14838,10 +15265,10 @@ static const char* __doc_fiction_unsupported_gate_orientation_exception =
 that is unsupported by the applied gate library.
 
 Template parameter ``CoordinateType``:
-  Type of the layout coordinates.
+    Type of the layout coordinates.
 
 Template parameter ``PortType``:
-  Type of the library ports.)doc";
+    Type of the library ports.)doc";
 
 static const char* __doc_fiction_unsupported_gate_orientation_exception_coord = R"doc()doc";
 
@@ -14859,7 +15286,7 @@ static const char* __doc_fiction_unsupported_gate_type_exception =
 implemented in the applied gate library.
 
 Template parameter ``CoordinateType``:
-  Type of the layout coordinates.)doc";
+    Type of the layout coordinates.)doc";
 
 static const char* __doc_fiction_unsupported_gate_type_exception_coord = R"doc()doc";
 
@@ -14874,20 +15301,20 @@ Abner L. Marciano, Omar P. Vilela Neto, and Frank Sill Torres in TCAD
 2015.
 
 Template parameter ``Lyt``:
-  Clocked layout type.
+    Clocked layout type.
 
 Returns:
-  USE clocking scheme.)doc";
+    USE clocking scheme.)doc";
 
 static const char* __doc_fiction_vertex_coloring =
     R"doc(A vertex coloring is simply a hash map from vertex IDs to Color types
 where Color should be constructible/convertible from int.
 
 Template parameter ``Graph``:
-  Graph type to color.
+    Graph type to color.
 
 Template parameter ``Color``:
-  Color type to use. Must be convertible from int.)doc";
+    Color type to use. Must be convertible from int.)doc";
 
 static const char* __doc_fiction_vertical_shift_cartesian =
     R"doc(\verbatim +-------+ | | | +-------+ | | | +-------+ | | | +-------+
@@ -14900,13 +15327,73 @@ default. For SiQAD coordinates, which are planar by definition, the
 area is returned.
 
 Template parameter ``CoordinateType``:
-  Coordinate type.
+    Coordinate type.
 
 Parameter ``coord``:
-  Coordinate.
+    Coordinate.
 
 Returns:
-  Volume of coord.)doc";
+    Volume of coord.)doc";
+
+static const char* __doc_fiction_wiring_reduction =
+    R"doc(A scalable wiring reduction algorithm for 2DDWave-clocked layouts
+based on A* path finding.
+
+The core concept revolves around the selective removal of excess
+wiring by cutting them from a layout, contingent upon the ability to
+restore functional correctness by realigning the remaining layout
+fragments. Given the complexity of identifying these cuts,
+obstructions are strategically inserted into the layout to safeguard
+against the inadvertent deletion of standard gates or wire segments
+essential for the layout's integrity. Leveraging the obstructed layout
+as a basis, A* Search is employed to systematically identify feasible
+cuts either from left to right or top to bottom. Subsequently, these
+identified cuts are removed from the layout to minimize not only the
+number of wire segments, but also the area and critical path length.
+
+Template parameter ``Lyt``:
+    Cartesian gate-level layout type.
+
+Parameter ``lyt``:
+    The 2DDWave-clocked layout whose wiring is to be reduced.
+
+Parameter ``pst``:
+    Pointer to a `wiring_reduction_stats` object to record runtime
+    statistics.)doc";
+
+static const char* __doc_fiction_wiring_reduction_stats =
+    R"doc(This struct stores statistics about the wiring reduction process.)doc";
+
+static const char* __doc_fiction_wiring_reduction_stats_area_improvement = R"doc(Improvement in layout area.)doc";
+
+static const char* __doc_fiction_wiring_reduction_stats_duration = R"doc(Runtime of the wiring reduction process.)doc";
+
+static const char* __doc_fiction_wiring_reduction_stats_num_wires_after =
+    R"doc(Number of wire segments after the wiring reduction process.)doc";
+
+static const char* __doc_fiction_wiring_reduction_stats_num_wires_before =
+    R"doc(Number of wire segments before the wiring reduction process.)doc";
+
+static const char* __doc_fiction_wiring_reduction_stats_report =
+    R"doc(Reports the statistics to the given output stream.
+
+Parameter ``out``:
+    Output stream.)doc";
+
+static const char* __doc_fiction_wiring_reduction_stats_wiring_improvement =
+    R"doc(Improvement in the number wire segments.)doc";
+
+static const char* __doc_fiction_wiring_reduction_stats_x_size_after =
+    R"doc(Layout width after the wiring reduction process.)doc";
+
+static const char* __doc_fiction_wiring_reduction_stats_x_size_before =
+    R"doc(Layout width before the wiring reduction process.)doc";
+
+static const char* __doc_fiction_wiring_reduction_stats_y_size_after =
+    R"doc(Layout height before the wiring reduction process.)doc";
+
+static const char* __doc_fiction_wiring_reduction_stats_y_size_before =
+    R"doc(Layout height before the wiring reduction process.)doc";
 
 static const char* __doc_fiction_write_dot_layout =
     R"doc(! Writes layout in DOT format into output stream
@@ -14916,10 +15403,10 @@ An overloaded variant exists that writes the layout into a file.
 **Required network functions:** - is_pi - foreach_node - foreach_fanin
 
 Parameter ``lyt``:
-  Layout
+    Layout
 
 Parameter ``os``:
-  Output stream)doc";
+    Output stream)doc";
 
 static const char* __doc_fiction_write_dot_layout_2 =
     R"doc(! Writes layout in DOT format into a file
@@ -14927,10 +15414,10 @@ static const char* __doc_fiction_write_dot_layout_2 =
 **Required network functions:** - is_pi - foreach_node - foreach_fanin
 
 Parameter ``lyt``:
-  Layout
+    Layout
 
 Parameter ``filename``:
-  Filename)doc";
+    Filename)doc";
 
 static const char* __doc_fiction_write_fgl_layout =
     R"doc(Writes an FGL layout to a file.
@@ -14938,13 +15425,13 @@ static const char* __doc_fiction_write_fgl_layout =
 This overload uses an output stream to write into.
 
 Template parameter ``Lyt``:
-  Layout.
+    Layout.
 
 Parameter ``lyt``:
-  The layout to be written.
+    The layout to be written.
 
 Parameter ``os``:
-  The output stream to write into.)doc";
+    The output stream to write into.)doc";
 
 static const char* __doc_fiction_write_fgl_layout_2 =
     R"doc(Writes an FGL layout to a file.
@@ -14952,14 +15439,14 @@ static const char* __doc_fiction_write_fgl_layout_2 =
 This overload uses a file name to create and write into.
 
 Template parameter ``Lyt``:
-  Layout.
+    Layout.
 
 Parameter ``lyt``:
-  The layout to be written.
+    The layout to be written.
 
 Parameter ``filename``:
-  The file name to create and write into. Should preferably use the
-  .fgl extension.)doc";
+    The file name to create and write into. Should preferably use the
+    .fgl extension.)doc";
 
 static const char* __doc_fiction_write_fqca_layout =
     R"doc(Writes a cell-level QCA layout to an fqca file provided as an output
@@ -14971,17 +15458,17 @@ cells in the layout than lowercase + uppercase letters in the English
 alphabet.
 
 Template parameter ``Lyt``:
-  The layout type to be written. Must be a clocked cell-level QCA
-  layout.
+    The layout type to be written. Must be a clocked cell-level QCA
+    layout.
 
 Parameter ``lyt``:
-  The cell-level QCA layout.
+    The cell-level QCA layout.
 
 Parameter ``os``:
-  The output stream to write into.
+    The output stream to write into.
 
 Parameter ``ps``:
-  Parameters.)doc";
+    Parameters.)doc";
 
 static const char* __doc_fiction_write_fqca_layout_2 =
     R"doc(Writes a cell-level QCA layout to an fqca file provided as a file
@@ -14993,18 +15480,18 @@ cells in the layout than lowercase + uppercase letters in the English
 alphabet.
 
 Template parameter ``Lyt``:
-  The layout type to be written. Must be a clocked cell-level QCA
-  layout.
+    The layout type to be written. Must be a clocked cell-level QCA
+    layout.
 
 Parameter ``lyt``:
-  The cell-level QCA layout.
+    The cell-level QCA layout.
 
 Parameter ``filename``:
-  The file name to create and write into. Should preferably use the
-  `.fqca` extension.
+    The file name to create and write into. Should preferably use the
+    `.fqca` extension.
 
 Parameter ``ps``:
-  Parameters.)doc";
+    Parameters.)doc";
 
 static const char* __doc_fiction_write_fqca_layout_params = R"doc(Parameters for writing FQCA layouts.)doc";
 
@@ -15018,13 +15505,13 @@ charge distribution of the ground state(s) to a file.
 This overload uses an output stream to write into.
 
 Template parameter ``Lyt``:
-  Cell-level SiDB layout type.
+    Cell-level SiDB layout type.
 
 Parameter ``sim_result``:
-  The simulation result to write.
+    The simulation result to write.
 
 Parameter ``os``:
-  The output stream to write into.)doc";
+    The output stream to write into.)doc";
 
 static const char* __doc_fiction_write_location_and_ground_state_2 =
     R"doc(Writes the coordinates of all SiDBs of a layout together with the
@@ -15033,13 +15520,13 @@ charge distribution of the ground state(s) to a file.
 This overload uses a file name to create and write into.
 
 Template parameter ``Lyt``:
-  Cell-level SiDB layout type.
+    Cell-level SiDB layout type.
 
 Template parameter ``sim_result``:
-  The simulation result to write.
+    The simulation result to write.
 
 Parameter ``filename``:
-  The file name to create and write into.)doc";
+    The file name to create and write into.)doc";
 
 static const char* __doc_fiction_write_operational_domain =
     R"doc(Writes a CSV representation of an operational domain to the specified
@@ -15056,20 +15543,20 @@ in `params` indicating whether the simulation parameters are within
 the operational domain or not.
 
 Parameter ``opdom``:
-  The operational domain to be written. It contains a mapping from
-  sets of simulation parameters (represented as a pair of sweep
-  parameters for the X and Y dimensions) to their operational
-  status.
+    The operational domain to be written. It contains a mapping from
+    sets of simulation parameters (represented as a pair of sweep
+    parameters for the X and Y dimensions) to their operational
+    status.
 
 Parameter ``os``:
-  The output stream where the CSV representation of the operational
-  domain is written to.
+    The output stream where the CSV representation of the operational
+    domain is written to.
 
 Parameter ``params``:
-  The parameters used for writing, including the operational and
-  non-operational tags. Defaults to an empty
-  `write_operational_domain_params` object, which provides standard
-  tags.)doc";
+    The parameters used for writing, including the operational and
+    non-operational tags. Defaults to an empty
+    `write_operational_domain_params` object, which provides standard
+    tags.)doc";
 
 static const char* __doc_fiction_write_operational_domain_2 =
     R"doc(Writes a CSV representation of an operational domain to the specified
@@ -15085,20 +15572,20 @@ in `params` indicating whether the simulation parameters are within
 the operational domain or not.
 
 Parameter ``opdom``:
-  The operational domain to be written. It contains a mapping from
-  sets of simulation parameters (represented as a pair of sweep
-  parameters for the X and Y dimensions) to their operational
-  status.
+    The operational domain to be written. It contains a mapping from
+    sets of simulation parameters (represented as a pair of sweep
+    parameters for the X and Y dimensions) to their operational
+    status.
 
 Parameter ``filename``:
-  The filename where the CSV representation of the operational
-  domain is written to.
+    The filename where the CSV representation of the operational
+    domain is written to.
 
 Parameter ``params``:
-  The parameters used for writing, including the operational and
-  non-operational tags. Defaults to an empty
-  `write_operational_domain_params` object, which provides standard
-  tags.)doc";
+    The parameters used for writing, including the operational and
+    non-operational tags. Defaults to an empty
+    `write_operational_domain_params` object, which provides standard
+    tags.)doc";
 
 static const char* __doc_fiction_write_operational_domain_params =
     R"doc(Parameters for writing an operational domain to a CSV file.)doc";
@@ -15118,16 +15605,16 @@ simulator for the QCA technology platform.
 This overload uses an output stream to write into.
 
 Template parameter ``Lyt``:
-  Cell-level QCA layout type.
+    Cell-level QCA layout type.
 
 Parameter ``lyt``:
-  The layout to be written.
+    The layout to be written.
 
 Parameter ``os``:
-  The output stream to write into.
+    The output stream to write into.
 
 Parameter ``ps``:
-  Parameters.)doc";
+    Parameters.)doc";
 
 static const char* __doc_fiction_write_qca_layout_2 =
     R"doc(Writes a cell-level QCA layout to a qca file that is used by
@@ -15137,17 +15624,17 @@ simulator for the QCA technology platform.
 This overload uses a file name to create and write into.
 
 Template parameter ``Lyt``:
-  Cell-level QCA layout type.
+    Cell-level QCA layout type.
 
 Parameter ``lyt``:
-  The layout to be written.
+    The layout to be written.
 
 Parameter ``filename``:
-  The file name to create and write into. Should preferably use the
-  `.qca` extension.
+    The file name to create and write into. Should preferably use the
+    `.qca` extension.
 
 Parameter ``ps``:
-  Parameters.)doc";
+    Parameters.)doc";
 
 static const char* __doc_fiction_write_qca_layout_params = R"doc(Parameters for writing QCADesigner layouts.)doc";
 
@@ -15166,16 +15653,16 @@ QCADesigner (https://waluslab.ece.ubc.ca/qcadesigner/).
 May throw an unsupported_cell_type_exception.
 
 Template parameter ``Lyt``:
-  Cell-level QCA layout type.
+    Cell-level QCA layout type.
 
 Parameter ``lyt``:
-  The layout to be written.
+    The layout to be written.
 
 Parameter ``os``:
-  The output stream to write into.
+    The output stream to write into.
 
 Parameter ``ps``:
-  Parameters.)doc";
+    Parameters.)doc";
 
 static const char* __doc_fiction_write_qca_layout_svg_2 =
     R"doc(Writes an SVG representation of a cell-level QCA layout into a file.
@@ -15189,17 +15676,17 @@ QCADesigner (https://waluslab.ece.ubc.ca/qcadesigner/).
 May throw an unsupported_cell_type_exception.
 
 Template parameter ``Lyt``:
-  Cell-level QCA layout type.
+    Cell-level QCA layout type.
 
 Parameter ``lyt``:
-  The layout to be written.
+    The layout to be written.
 
 Parameter ``filename``:
-  The file name to create and write into. Should preferably use the
-  `.svg` extension.
+    The file name to create and write into. Should preferably use the
+    `.svg` extension.
 
 Parameter ``ps``:
-  Parameters.)doc";
+    Parameters.)doc";
 
 static const char* __doc_fiction_write_qca_layout_svg_params = R"doc(Parameters for writing SVG QCA layouts.)doc";
 
@@ -15214,16 +15701,16 @@ physical simulator for the iNML technology platform.
 This overload uses an output stream to write into.
 
 Template parameter ``Lyt``:
-  Cell-level iNML layout type.
+    Cell-level iNML layout type.
 
 Parameter ``lyt``:
-  The layout to be written.
+    The layout to be written.
 
 Parameter ``os``:
-  The output stream to write into.
+    The output stream to write into.
 
 Parameter ``ps``:
-  Parameters.)doc";
+    Parameters.)doc";
 
 static const char* __doc_fiction_write_qcc_layout_2 =
     R"doc(Writes a cell-level iNML layout to a qcc file that is used by
@@ -15233,17 +15720,17 @@ physical simulator for the iNML technology platform.
 This overload uses a file name to create and write into.
 
 Template parameter ``Lyt``:
-  Cell-level iNML layout type.
+    Cell-level iNML layout type.
 
 Parameter ``lyt``:
-  The layout to be written.
+    The layout to be written.
 
 Parameter ``filename``:
-  The file name to create and write into. Should preferably use the
-  `.qcc` extension.
+    The file name to create and write into. Should preferably use the
+    `.qcc` extension.
 
 Parameter ``ps``:
-  Parameters.)doc";
+    Parameters.)doc";
 
 static const char* __doc_fiction_write_qcc_layout_params = R"doc(Parameters for writing QCC layouts.)doc";
 
@@ -15262,16 +15749,16 @@ for the mQCA technology platform.
 This overload uses an output stream to write into.
 
 Template parameter ``Lyt``:
-  Cell-level QCA or iNML layout type.
+    Cell-level QCA or iNML layout type.
 
 Parameter ``lyt``:
-  The layout to be written.
+    The layout to be written.
 
 Parameter ``os``:
-  The output stream to write into.
+    The output stream to write into.
 
 Parameter ``ps``:
-  Parameters.)doc";
+    Parameters.)doc";
 
 static const char* __doc_fiction_write_qll_layout_2 =
     R"doc(Writes a cell-level QCA or iNML layout to a qll file that is used by
@@ -15283,17 +15770,17 @@ for the mQCA technology platform.
 This overload uses a file name to create and write into.
 
 Template parameter ``Lyt``:
-  Cell-level iNML layout type.
+    Cell-level iNML layout type.
 
 Parameter ``lyt``:
-  The layout to be written.
+    The layout to be written.
 
 Parameter ``filename``:
-  The file name to create and write into. Should preferably use the
-  `.qll` extension.
+    The file name to create and write into. Should preferably use the
+    `.qll` extension.
 
 Parameter ``ps``:
-  Parameters.)doc";
+    Parameters.)doc";
 
 static const char* __doc_fiction_write_sqd_layout =
     R"doc(Writes a cell-level SiDB or QCA layout to an sqd file that is used by
@@ -15306,13 +15793,13 @@ they will be written to the file as well.
 This overload uses an output stream to write into.
 
 Template parameter ``Lyt``:
-  Cell-level SiDB or QCA layout type.
+    Cell-level SiDB or QCA layout type.
 
 Parameter ``lyt``:
-  The layout to be written.
+    The layout to be written.
 
 Parameter ``os``:
-  The output stream to write into.)doc";
+    The output stream to write into.)doc";
 
 static const char* __doc_fiction_write_sqd_layout_2 =
     R"doc(Writes a cell-level SiDB or QCA layout to an sqd file that is used by
@@ -15325,14 +15812,14 @@ they will be written to the file as well.
 This overload uses a file name to create and write into.
 
 Template parameter ``Lyt``:
-  Cell-level SiDB or QCA layout type.
+    Cell-level SiDB or QCA layout type.
 
 Parameter ``lyt``:
-  The layout to be written.
+    The layout to be written.
 
 Parameter ``filename``:
-  The file name to create and write into. Should preferably use the
-  `.sqd` extension.)doc";
+    The file name to create and write into. Should preferably use the
+    `.sqd` extension.)doc";
 
 static const char* __doc_fiction_write_sqd_sim_result =
     R"doc(Writes an SiDB simulation result to an XML file that is used by SiQAD
@@ -15342,13 +15829,13 @@ technology platform.
 This overload uses an output stream to write into.
 
 Template parameter ``Lyt``:
-  Cell-level SiDB layout type.
+    Cell-level SiDB layout type.
 
 Parameter ``sim_result``:
-  The simulation result to write.
+    The simulation result to write.
 
 Parameter ``os``:
-  The output stream to write into.)doc";
+    The output stream to write into.)doc";
 
 static const char* __doc_fiction_write_sqd_sim_result_2 =
     R"doc(Writes an SiDB simulation result to an XML file that is used by SiQAD
@@ -15358,14 +15845,14 @@ technology platform.
 This overload uses a file name to create and write into.
 
 Template parameter ``Lyt``:
-  Cell-level SiDB layout type.
+    Cell-level SiDB layout type.
 
 Parameter ``sim_result``:
-  The simulation result to write.
+    The simulation result to write.
 
 Parameter ``filename``:
-  The file name to create and write into. Should preferably use the
-  `.xml` extension.)doc";
+    The file name to create and write into. Should preferably use the
+    `.xml` extension.)doc";
 
 static const char* __doc_fiction_yen_k_shortest_paths =
     R"doc(Yen's algorithm for finding up to :math:`k` shortest paths without
@@ -15414,26 +15901,26 @@ general networks\" by Jin Y. Yen in Quarterly of Applied Mathematics,
 1970.
 
 Template parameter ``Path``:
-  Type of the returned individual paths.
+    Type of the returned individual paths.
 
 Template parameter ``Lyt``:
-  Type of the layout to perform path finding on.
+    Type of the layout to perform path finding on.
 
 Parameter ``layout``:
-  The layout in which the :math:`k` shortest paths are to be found.
+    The layout in which the :math:`k` shortest paths are to be found.
 
 Parameter ``objective``:
-  Source-target coordinate pair.
+    Source-target coordinate pair.
 
 Parameter ``k``:
-  Maximum number of shortest paths to find.
+    Maximum number of shortest paths to find.
 
 Parameter ``params``:
-  Parameters.
+    Parameters.
 
 Returns:
-  A collection of up to :math:`k` shortest loop-less paths in
-  `layout` from `objective.source` to `objective.target`.)doc";
+    A collection of up to :math:`k` shortest loop-less paths in
+    `layout` from `objective.source` to `objective.target`.)doc";
 
 static const char* __doc_fiction_yen_k_shortest_paths_params =
     R"doc(Parameters for Yen's :math:`k`-shortest paths algorithm.)doc";
@@ -15459,25 +15946,25 @@ static const char* __doc_mockturtle_edge =
     R"doc(Representation of an edge between two network nodes.
 
 Template parameter ``Ntk``:
-  `mockturtle` network type.)doc";
+    `mockturtle` network type.)doc";
 
 static const char* __doc_mockturtle_edge_operator_eq =
     R"doc(Equality operator.
 
 Parameter ``other``:
-  Edge to compare to.
+    Edge to compare to.
 
 Returns:
-  `true` iff both sources and targets match.)doc";
+    `true` iff both sources and targets match.)doc";
 
 static const char* __doc_mockturtle_edge_operator_ne =
     R"doc(Inequality operator.
 
 Parameter ``other``:
-  Edge to compare to.
+    Edge to compare to.
 
 Returns:
-  `true` iff this edge is not equal to other.)doc";
+    `true` iff this edge is not equal to other.)doc";
 
 static const char* __doc_mockturtle_edge_source = R"doc()doc";
 

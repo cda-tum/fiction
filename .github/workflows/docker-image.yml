@@ -40,4 +40,4 @@ jobs:
           submodules: recursive
 
       - name: Build the Docker image
-        run: docker build --build-arg NUMBER_OF_JOBS=2 . --file Dockerfile --tag fiction:$(date +%s)
+        run: docker build --build-arg NUMBER_OF_JOBS=4 . --file Dockerfile --tag fiction:$(date +%s)
