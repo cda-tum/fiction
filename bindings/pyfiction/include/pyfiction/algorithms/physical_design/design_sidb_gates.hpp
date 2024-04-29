@@ -6,6 +6,7 @@
 #define PYFICTION_DESIGN_SIDB_GATES_HPP
 
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/physical_design/design_sidb_gates.hpp>
 #include <fiction/types.hpp>
@@ -27,11 +28,11 @@ void design_sidb_gates(pybind11::module& m)
     /**
      * Design approach selector type.
      */
-    pybind11::enum_<typename fiction::design_sidb_gates_params<Lyt>::design_sidb_gates_mode>(
-        m, "design_sidb_gates_mode", DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode))
-        .value("EXHAUSTIVE", fiction::design_sidb_gates_params<Lyt>::design_sidb_gates_mode::EXHAUSTIVE,
+    pybind11::enum_<fiction::design_sidb_gates_mode>(m, "design_sidb_gates_mode",
+                                                     DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode))
+        .value("EXHAUSTIVE", fiction::design_sidb_gates_mode::EXHAUSTIVE,
                DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_EXHAUSTIVE))
-        .value("RANDOM", fiction::design_sidb_gates_params<Lyt>::design_sidb_gates_mode::RANDOM,
+        .value("RANDOM", fiction::design_sidb_gates_mode::RANDOM,
                DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_RANDOM));
 
     /**
@@ -42,8 +43,6 @@ void design_sidb_gates(pybind11::module& m)
         .def(py::init<>())
         .def_readwrite("simulation_parameters", &fiction::design_sidb_gates_params<Lyt>::simulation_parameters,
                        DOC(fiction_design_sidb_gates_params))
-        .def_readwrite("design_mode", &fiction::design_sidb_gates_params<Lyt>::design_mode,
-                       DOC(fiction_design_sidb_gates_params_design_mode))
         .def_readwrite("canvas", &fiction::design_sidb_gates_params<Lyt>::canvas,
                        DOC(fiction_design_sidb_gates_params_canvas))
         .def_readwrite("number_of_sidbs", &fiction::design_sidb_gates_params<Lyt>::number_of_sidbs,
@@ -52,7 +51,8 @@ void design_sidb_gates(pybind11::module& m)
                        DOC(fiction_design_sidb_gates_params_sim_engine));
 
     m.def("design_sidb_gates", &fiction::design_sidb_gates<Lyt, py_tt>, "skeleton"_a, "spec"_a,
-          "params"_a = fiction::design_sidb_gates_params<Lyt>{}, DOC(fiction_design_sidb_gates));
+          "params"_a = fiction::design_sidb_gates_params<Lyt>{}, "design_mode"_a, "pstats"_a = nullptr,
+          DOC(fiction_design_sidb_gates));
 }
 
 }  // namespace detail

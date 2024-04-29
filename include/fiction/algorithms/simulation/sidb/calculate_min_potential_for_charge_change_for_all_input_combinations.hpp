@@ -24,7 +24,7 @@ namespace fiction
 struct calculate_min_potential_for_charge_change_for_all_input_combinations_params
 {
     /**
-     * Parameter to as
+     * TODO
      */
     assess_physical_population_stability_params assess_population_stability_params{};
     detect_bdl_pairs_params                     detect_pair_params{};
