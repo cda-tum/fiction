@@ -11,7 +11,7 @@
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/technology/sidb_defect_surface.hpp"
 #include "fiction/technology/sidb_defects.hpp"
-#include "fiction/types.hpp"
+#include "fiction/traits.hpp"
 #include "fiction/utils/execution_utils.hpp"
 #include "fiction/utils/layout_utils.hpp"
 
@@ -31,7 +31,7 @@ namespace fiction
 /**
  * This struct stores the parameters for the maximum_defect_influence_position_and_distance algorithm.
  */
-struct maximum_defect_influence_distance_params
+struct maximum_defect_influence_position_and_distance_params
 {
     /**
      * The defect to calculate the maximum defect influence distance for.
@@ -53,7 +53,7 @@ struct maximum_defect_influence_distance_params
 /**
  * Statistics for the maximum defect influence simulation.
  */
-struct maximum_defect_influence_distance_stats
+struct maximum_defect_influence_position_and_distance_stats
 {
     /**
      * The total runtime of the maximum defect influence simulation.
@@ -78,9 +78,9 @@ template <typename Lyt>
 class maximum_defect_influence_position_and_distance_impl
 {
   public:
-    maximum_defect_influence_position_and_distance_impl(const Lyt&                                      lyt,
-                                                        const maximum_defect_influence_distance_params& sim_params,
-                                                        maximum_defect_influence_distance_stats&        st) :
+    maximum_defect_influence_position_and_distance_impl(
+        const Lyt& lyt, const maximum_defect_influence_position_and_distance_params& sim_params,
+        maximum_defect_influence_position_and_distance_stats& st) :
             layout{lyt},
             params{sim_params},
             stats{st}
@@ -179,16 +179,13 @@ class maximum_defect_influence_position_and_distance_impl
             }
         };
 
-        const size_t num_threads = std::thread::hardware_concurrency();  // Anzahl der verfügbaren Threads
+        const size_t num_threads = std::thread::hardware_concurrency();
 
-        // Größe jedes Chunks berechnen
         const size_t chunk_size = (defect_cells.size() + num_threads - 1) / num_threads;
 
-        // Vektor für Threads
         std::vector<std::thread> threads;
         threads.reserve(num_threads);
 
-        // Aufteilen des Vektors in Chunks und Starten von Threads für jeden Chunk
         auto defect_it = defect_cells.begin();
         for (size_t i = 0; i < num_threads; ++i)
         {
@@ -201,7 +198,7 @@ class maximum_defect_influence_position_and_distance_impl
             defect_it = chunk_end;
             if (defect_it == defect_cells.end())
             {
-                break;  // Alle Defekte wurden aufgeteilt
+                break;
             }
         }
 
@@ -221,11 +218,11 @@ class maximum_defect_influence_position_and_distance_impl
     /**
      * Parameters used for the simulation.
      */
-    maximum_defect_influence_distance_params params{};
+    maximum_defect_influence_position_and_distance_params params{};
     /**
      * The statistics of the maximum defect influence position.
      */
-    maximum_defect_influence_distance_stats& stats;
+    maximum_defect_influence_position_and_distance_stats& stats;
     /**
      * All allowed defect positions.
      */
@@ -274,17 +271,16 @@ class maximum_defect_influence_position_and_distance_impl
  * layout.
  */
 template <typename Lyt>
-std::pair<typename Lyt::cell, double>
-maximum_defect_influence_position_and_distance(const Lyt&                                      lyt,
-                                               const maximum_defect_influence_distance_params& sim_params = {},
-                                               maximum_defect_influence_distance_stats*        pst        = nullptr)
+std::pair<typename Lyt::cell, double> maximum_defect_influence_position_and_distance(
+    const Lyt& lyt, const maximum_defect_influence_position_and_distance_params& sim_params = {},
+    maximum_defect_influence_position_and_distance_stats* pst = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(!has_offset_ucoord_v<Lyt>, "Lyt cannot be based on offset coordinates");
     static_assert(!is_charge_distribution_surface_v<Lyt>, "Lyt cannot be a charge distribution surface");
 
-    maximum_defect_influence_distance_stats st{};
+    maximum_defect_influence_position_and_distance_stats st{};
 
     detail::maximum_defect_influence_position_and_distance_impl<Lyt> p{lyt, sim_params, st};
 

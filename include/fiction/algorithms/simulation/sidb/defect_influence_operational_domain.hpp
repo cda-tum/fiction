@@ -27,13 +27,15 @@
 
 namespace fiction
 {
-
+/**
+ * Parameters to determine the defect influence operational domain.
+ */
 struct defect_influence_operational_domain_params
 {
     /**
      * Parameters to simulate the influence of the atomic defect.
      */
-    maximum_defect_influence_distance_params defect_influence_params{};
+    maximum_defect_influence_position_and_distance_params defect_influence_params{};
     /**
      * Parameters for the `is_operational` algorithm.
      */
@@ -57,7 +59,7 @@ struct defect_influence_operational_domain
 /**
  * Statistics.
  */
-struct defect_influence_operational_stats
+struct defect_influence_operational_domain_stats
 {
     /**
      * The total runtime of the operational domain computation.
@@ -89,7 +91,7 @@ class defect_influence_operational_domain_impl
   public:
     defect_influence_operational_domain_impl(const Lyt& lyt, const std::vector<TT>& tt,
                                              const defect_influence_operational_domain_params& ps,
-                                             defect_influence_operational_stats&               st) :
+                                             defect_influence_operational_domain_stats&        st) :
             layout{lyt},
             truth_table{tt},
             params{ps},
@@ -189,11 +191,9 @@ class defect_influence_operational_domain_impl
                                             current_neighborhood.front() :
                                             next_clockwise_point(current_neighborhood, backtrack_point);
 
-            uint64_t counter             = 0;
-            bool     contour_around_gate = false;
+            bool contour_around_gate = false;
             while (next_point != contour_starting_point)
             {
-                counter++;
                 const auto operational_status = is_defect_position_operational(next_point);
                 if (next_point.x >= se_bb_layout.x)
                 {
@@ -547,7 +547,7 @@ class defect_influence_operational_domain_impl
     /**
      * The statistics of the operational domain computation.
      */
-    defect_influence_operational_stats& stats;
+    defect_influence_operational_domain_stats& stats;
     /**
      * Number of simulator invocations.
      */
@@ -580,14 +580,14 @@ template <typename Lyt, typename TT>
 defect_influence_operational_domain<Lyt>
 defect_influence_operational_domain_grid_search(const Lyt& lyt, const std::vector<TT>& spec, std::size_t step_size = 1,
                                                 const defect_influence_operational_domain_params& params = {},
-                                                defect_influence_operational_stats*               stats  = nullptr)
+                                                defect_influence_operational_domain_stats*        stats  = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
     static_assert(has_cube_coord_v<Lyt> || has_siqad_coord_v<Lyt>, "Lyt is not based on cube coordinates");
 
-    defect_influence_operational_stats                        st{};
+    defect_influence_operational_domain_stats                 st{};
     detail::defect_influence_operational_domain_impl<Lyt, TT> p{lyt, spec, params, st};
 
     const auto result = p.grid_search(step_size);
@@ -621,14 +621,14 @@ template <typename Lyt, typename TT>
 defect_influence_operational_domain<Lyt>
 defect_influence_operational_domain_random_sampling(const Lyt& lyt, const std::vector<TT>& spec, std::size_t samples,
                                                     const defect_influence_operational_domain_params& params = {},
-                                                    defect_influence_operational_stats*               stats  = nullptr)
+                                                    defect_influence_operational_domain_stats*        stats  = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
     static_assert(has_cube_coord_v<Lyt>, "Lyt is not based on cube coordinates");
 
-    defect_influence_operational_stats                        st{};
+    defect_influence_operational_domain_stats                 st{};
     detail::defect_influence_operational_domain_impl<Lyt, TT> p{lyt, spec, params, st};
 
     const auto result = p.random_sampling(samples);
@@ -662,14 +662,14 @@ template <typename Lyt, typename TT>
 defect_influence_operational_domain<Lyt>
 defect_influence_operational_domain_contour_tracing(const Lyt& lyt, const std::vector<TT>& spec, std::size_t samples,
                                                     const defect_influence_operational_domain_params& params = {},
-                                                    defect_influence_operational_stats*               stats  = nullptr)
+                                                    defect_influence_operational_domain_stats*        stats  = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
     static_assert(has_cube_coord_v<Lyt> || has_siqad_coord_v<Lyt>, "Lyt is not based on cube coordinates");
 
-    defect_influence_operational_stats                        st{};
+    defect_influence_operational_domain_stats                 st{};
     detail::defect_influence_operational_domain_impl<Lyt, TT> p{lyt, spec, params, st};
 
     const auto result = p.contour_tracing(samples);

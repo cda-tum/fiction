@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <numeric>
+#include <stdexcept>
 #include <type_traits>
 #include <vector>
 
@@ -127,7 +128,7 @@ determine_all_combinations_of_distributing_k_entities_on_n_positions(const std::
  *
  * @throws std::invalid_argument If the sizes of chis and weights vectors are different.
  */
-double cost_function_chi(const std::vector<double>& chis, const std::vector<double>& weights)
+[[nodiscard]] inline double cost_function_chi(const std::vector<double>& chis, const std::vector<double>& weights)
 {
     if (chis.size() != weights.size())
     {

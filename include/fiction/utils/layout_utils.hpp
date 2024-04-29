@@ -418,7 +418,7 @@ LytDest convert_to_fiction_coordinates(const LytSrc& lyt) noexcept
         return convert_to_fiction_coordinates<LytDest>(normalize_layout_coordinates(lyt));
     }
 
-    auto process_layout = [&lyt](auto lyt_new)
+    auto process_layout = [&](auto lyt_new)
     {
         if constexpr (is_sidb_lattice_v<LytSrc>)
         {

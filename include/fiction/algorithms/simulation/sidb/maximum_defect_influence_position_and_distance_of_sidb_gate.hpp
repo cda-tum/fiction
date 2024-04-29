@@ -8,7 +8,11 @@
 #include "fiction/algorithms/iter/bdl_input_iterator.hpp"
 #include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
 #include "fiction/algorithms/simulation/sidb/maximum_defect_influence_position_and_distance.hpp"
-#include "fiction/utils/layout_utils.hpp"
+#include "fiction/traits.hpp"
+
+#include <cassert>
+#include <utility>
+#include <vector>
 
 namespace fiction
 {
@@ -21,7 +25,7 @@ struct maximum_defect_influence_position_and_distance_of_sidb_gate_params
     /**
      * Parameters for the defect influence simulation.
      */
-    maximum_defect_influence_distance_params defect_influence_params{};
+    maximum_defect_influence_position_and_distance_params defect_influence_params{};
     /**
      * Parameters for the detection of BDL pairs.
      */
@@ -68,8 +72,8 @@ template <typename Lyt, typename TT>
     // number of different input combinations
     for (auto i = 0u; i < spec.front().num_bits(); ++i, ++bii)
     {
-        maximum_defect_influence_distance_stats stats_defect{};
-        const auto                              influence_cell_distance =
+        maximum_defect_influence_position_and_distance_stats stats_defect{};
+        const auto                                           influence_cell_distance =
             maximum_defect_influence_position_and_distance(lyt, params.defect_influence_params, &stats_defect);
         if (influence_cell_distance.second > maximum_defect_influence_distance)
         {

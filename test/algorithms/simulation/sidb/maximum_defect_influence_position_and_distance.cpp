@@ -5,14 +5,12 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
-#include "mockturtle/utils/stopwatch.hpp"
-
-#include <fiction/algorithms/path_finding/distance.hpp>
 #include <fiction/algorithms/simulation/sidb/maximum_defect_influence_position_and_distance.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/cell_technologies.hpp>
+#include <fiction/technology/sidb_nm_distance.hpp>
 #include <fiction/technology/physical_constants.hpp>
 #include <fiction/technology/sidb_defects.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
@@ -26,9 +24,9 @@ TEST_CASE("Test influence distance function", "[maximum-defect-influence-positio
 {
     SECTION("empty layout")
     {
-        const sidb_defect                              defect{sidb_defect_type::UNKNOWN, -1, 10.6, 5.9};
-        const maximum_defect_influence_distance_params sim_params{defect, sidb_simulation_parameters{}};
-        const sidb_cell_clk_lyt_siqad                  lyt{};
+        const sidb_defect                                           defect{sidb_defect_type::UNKNOWN, -1, 10.6, 5.9};
+        const maximum_defect_influence_position_and_distance_params sim_params{defect, sidb_simulation_parameters{}};
+        const sidb_cell_clk_lyt_siqad                               lyt{};
 
         const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
@@ -41,7 +39,9 @@ TEST_CASE("Test influence distance function", "[maximum-defect-influence-positio
     {
         const sidb_defect defect{sidb_defect_type::UNKNOWN, -1, sidb_simulation_parameters{}.epsilon_r,
                                  sidb_simulation_parameters{}.lambda_tf};
-        const maximum_defect_influence_distance_params sim_params{defect, sidb_simulation_parameters{}, {2, 2}};
+        const maximum_defect_influence_position_and_distance_params sim_params{defect,
+                                                                               sidb_simulation_parameters{},
+                                                                               {2, 2}};
 
         sidb_cell_clk_lyt_siqad lyt{};
         lyt.assign_cell_type({0, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
@@ -58,8 +58,8 @@ TEST_CASE("Test influence distance function", "[maximum-defect-influence-positio
     SECTION("layout with one SiDB, negative defect, smaller lambda_tf")
     {
         const sidb_defect defect{sidb_defect_type::UNKNOWN, -1, sidb_simulation_parameters{}.epsilon_r, 1};
-        const maximum_defect_influence_distance_params sim_params{defect, sidb_simulation_parameters{}};
-        sidb_cell_clk_lyt_siqad                        lyt{};
+        const maximum_defect_influence_position_and_distance_params sim_params{defect, sidb_simulation_parameters{}};
+        sidb_cell_clk_lyt_siqad                                     lyt{};
         lyt.assign_cell_type({0, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
 
         const sidb_100_cell_clk_lyt_siqad lat{lyt};
@@ -73,7 +73,7 @@ TEST_CASE("Test influence distance function", "[maximum-defect-influence-positio
     SECTION("layout with one SiDB, negative defect, large lambda_tf")
     {
         const sidb_defect defect{sidb_defect_type::UNKNOWN, -1, sidb_simulation_parameters{}.epsilon_r, 20};
-        const maximum_defect_influence_distance_params sim_params{defect, sidb_simulation_parameters{}, {2, 2}};
+        const maximum_defect_influence_position_and_distance_params sim_params{defect, sidb_simulation_parameters{}, {2, 2}};
         sidb_cell_clk_lyt_siqad                        lyt{};
         lyt.assign_cell_type({0, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
 
@@ -89,8 +89,8 @@ TEST_CASE("Test influence distance function", "[maximum-defect-influence-positio
     {
         const sidb_defect defect{sidb_defect_type::UNKNOWN, -1, sidb_simulation_parameters{}.epsilon_r,
                                  sidb_simulation_parameters{}.lambda_tf};
-        const maximum_defect_influence_distance_params sim_params{defect, sidb_simulation_parameters{}};
-        sidb_cell_clk_lyt_siqad                        lyt{};
+        const maximum_defect_influence_position_and_distance_params sim_params{defect, sidb_simulation_parameters{}};
+        sidb_cell_clk_lyt_siqad                                     lyt{};
         lyt.assign_cell_type({0, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
         lyt.assign_cell_type({4, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
         lyt.assign_cell_type({6, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
@@ -107,8 +107,8 @@ TEST_CASE("Test influence distance function", "[maximum-defect-influence-positio
     {
         const sidb_defect defect{sidb_defect_type::UNKNOWN, -1, sidb_simulation_parameters{}.epsilon_r,
                                  sidb_simulation_parameters{}.lambda_tf};
-        const maximum_defect_influence_distance_params sim_params{defect, sidb_simulation_parameters{}};
-        sidb_cell_clk_lyt_siqad                        lyt{};
+        const maximum_defect_influence_position_and_distance_params sim_params{defect, sidb_simulation_parameters{}};
+        sidb_cell_clk_lyt_siqad                                     lyt{};
 
         lyt.assign_cell_type({10, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
         lyt.assign_cell_type({0, 1, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
@@ -131,7 +131,7 @@ TEST_CASE("Test influence distance function", "[maximum-defect-influence-positio
 
         // number of threads given by the hardware
         const sidb_defect high_screening{sidb_defect_type::UNKNOWN, -1, sidb_simulation_parameters{}.epsilon_r, 1};
-        const maximum_defect_influence_distance_params sim_params_high_screening{high_screening,
+        const maximum_defect_influence_position_and_distance_params sim_params_high_screening{high_screening,
                                                                                  sidb_simulation_parameters{}};
 
         const auto [defect_pos_high_screening, distance_high_screening] =
@@ -144,8 +144,8 @@ TEST_CASE("Test influence distance function", "[maximum-defect-influence-positio
     {
         const sidb_defect defect{sidb_defect_type::UNKNOWN, -1, sidb_simulation_parameters{}.epsilon_r,
                                  sidb_simulation_parameters{}.lambda_tf};
-        const maximum_defect_influence_distance_params sim_params{defect, sidb_simulation_parameters{}};
-        sidb_cell_clk_lyt_cube                         lyt{{30, 30}};
+        const maximum_defect_influence_position_and_distance_params sim_params{defect, sidb_simulation_parameters{}};
+        sidb_cell_clk_lyt_cube                                      lyt{{30, 30}};
 
         lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{10, 0, 0}),
                              sidb_cell_clk_lyt_siqad::cell_type::NORMAL);

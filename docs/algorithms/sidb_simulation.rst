@@ -170,7 +170,9 @@ Maximum Defect Influence Distance
 
 **Header:** ``fiction/algorithms/simulation/sidb/maximum_defect_influence_position_and_distance.hpp``
 
-.. doxygenstruct:: fiction::maximum_defect_influence_distance_params
+.. doxygenstruct:: fiction::maximum_defect_influence_position_and_distance_params
+   :members:
+.. doxygenstruct:: fiction::maximum_defect_influence_position_and_distance_stats
    :members:
 .. doxygenfunction:: fiction::maximum_defect_influence_position_and_distance
 
@@ -287,7 +289,7 @@ Defect Influence Operational Domain
    :members:
 .. doxygenstruct:: fiction::defect_influence_operational_domain
    :members:
-.. doxygenstruct:: fiction::defect_influence_operational_stats
+.. doxygenstruct:: fiction::defect_influence_operational_domain_stats
    :members:
 .. doxygenfunction:: fiction::defect_influence_operational_domain_grid_search
 .. doxygenfunction:: fiction::defect_influence_operational_domain_random_sampling

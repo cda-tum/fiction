@@ -6,9 +6,9 @@
 #define FICTION_MAXIMUM_MINIMUM_DEFECT_INFLUENCE_DISTANCE_HPP
 
 #include "fiction/algorithms/simulation/sidb/defect_influence_operational_domain.hpp"
-#include "fiction/algorithms/simulation/sidb/operational_domain.hpp"
-#include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
-#include "fiction/layouts/cell_level_layout.hpp"
+#include "fiction/algorithms/simulation/sidb/is_operational.hpp"
+
+#include <limits>
 
 namespace fiction
 {
