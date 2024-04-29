@@ -44,7 +44,7 @@ template <typename Lyt, typename TT>
 [[nodiscard]] double calculate_min_potential_for_charge_change_for_all_input_combinations(
     const Lyt& lyt, const std::vector<TT>& spec,
     const calculate_min_potential_for_charge_change_for_all_input_combinations_params& params              = {},
-    const std::optional<int8_t>                                  charge_state_change = 1)
+    const std::optional<int8_t>                                                        charge_state_change = 1)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
