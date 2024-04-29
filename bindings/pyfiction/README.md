@@ -88,20 +88,9 @@ file `include/documentation.hpp`, which acts as a wrapper around the aforementio
 > ⚠️ **Do not directly include the auto-generated file!** Due to the lack of header guards, it leads to compilation
 > errors. Instead, only include `documentation.hpp`.
 
-To extend the docstrings, regenerate `pybind11_mkdoc_docstrings.hpp` and override the existing one. The easiest way to
-do this is to use the GitHub Action `pyfiction-docstring-generator`. Alternatively, you can also run `pybind11_mkdoc`
-locally.
+The docstrings are extended  and updated automatically by the GitHub Action [pyfiction-docstring-generator](https://github.com/cda-tum/fiction/actions/workflows/pyfiction-docstring-generator.yml), which will regenerate `pybind11_mkdoc_docstrings.hpp` and override the existing one everytime new commits are pushed to a branch.
 
-#### Use the GitHub Action (preferred)
-
-Go to
-the [pyfiction-docstring-generator](https://github.com/cda-tum/fiction/actions/workflows/pyfiction-docstring-generator.yml)
-workflow on GitHub and run it. Upon completion, it will make the `pybind11_mkdoc_docstrings.hpp` file available as an
-artifact. Download the file and replace the existing one.
-
-#### Run locally
-
-Setup the `pybind11_mkdoc` tool:
+Alternatively, you can also run `pybind11_mkdoc` locally using the `pybind11_mkdoc` tool:
 
 ```bash
 pip install pybind11_mkdoc clang==14

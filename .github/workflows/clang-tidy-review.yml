@@ -7,6 +7,7 @@ on:
       - '**/*.cpp'
       - 'libs/**'
       - '.github/workflows/clang-tidy-review.yml'
+      - '!bindings/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -41,7 +42,7 @@ jobs:
             -DMOCKTURTLE_EXAMPLES=OFF
           build_dir: build
           config_file: '.clang-tidy'
-          exclude: 'libs/*, docs/*, benchmarks/*, bib/*, */pyfiction/pybind11_mkdoc_docstrings.hpp, */pyfiction/documentation.hpp'
+          exclude: 'libs/*,docs/*,benchmarks/*,bib/*,*/pyfiction/pybind11_mkdoc_docstrings.hpp,*/pyfiction/documentation.hpp'
           split_workflow: true
 
       - name: Make sure that the review file exists
