@@ -205,6 +205,24 @@ find_parameter_point_with_tolerance(const MapType& map, const typename MapType::
     return std::find_if(map.begin(), map.end(), compare_keys);
 }
 /**
+ * This function searches for a parameter point, specified by the `key`, in the provided map
+ * `map` with tolerance. It compares each key in the map to the specified key using the
+ * `compare_parameter_point` function.
+ *
+ * @tparam MapType The type of the map containing parameter points as keys.
+ * @param map The map containing parameter points as keys and associated values.
+ * @param key The parameter point to search for in the map.
+ * @return An iterator to the found parameter point in the map, or `map.end()` if not found.
+ */
+template <typename MapType>
+[[maybe_unused]] static typename MapType::const_iterator find_key_with_tolerance(const MapType&                    map,
+                                                                                 const typename MapType::key_type& key)
+{
+    constexpr double tolerance = fiction::physical_constants::POP_STABILITY_ERR;
+    auto compare_keys = [&key, &tolerance](const auto& pair) { return std::abs(pair.first - key) < tolerance; };
+    return std::find_if(map.begin(), map.end(), compare_keys);
+}
+/**
  * Parameters for the operational domain computation. The parameters are used across the different operational domain
  * computation algorithms.
  */
@@ -585,7 +603,7 @@ class operational_domain_impl
                                                  quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF});
                 const auto energy_dist = energy_distribution(simulation_results.charge_distributions);
                 lyt.assign_physical_parameters(simulation_parameters);
-                const auto position = energy_dist.find(lyt.get_system_energy());
+                const auto position = find_key_with_tolerance(energy_dist, lyt.get_system_energy());
                 if (position != energy_dist.cend())
                 {
                     const auto excited_state_number = std::distance(energy_dist.begin(), position);
