@@ -5,8 +5,8 @@
 #ifndef FICTION_WRITE_OPERATIONAL_DOMAIN_HPP
 #define FICTION_WRITE_OPERATIONAL_DOMAIN_HPP
 
-#include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/defect_influence_operational_domain.hpp"
+#include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/io/csv_writer.hpp"
 
 #include <fstream>
@@ -49,13 +49,14 @@ struct write_operational_domain_params
  * @param params The parameters used for writing, including the operational and non-operational tags. Defaults to an
  * empty `write_operational_domain_params` object, which provides standard tags.
  */
- template <typename Lyt>
-inline void write_operational_domain(const defect_influence_operational_domain<Lyt>& opdom, std::ostream& os,
-                                     const write_operational_domain_params& params = {})
+template <typename Lyt>
+inline void write_defect_influence_operational_domain(const defect_influence_operational_domain<Lyt>& opdom,
+                                                      std::ostream&                                   os,
+                                                      const write_operational_domain_params&          params = {})
 {
     csv_writer writer{os};
 
-    writer.write_line("x","y", "operational status");
+    writer.write_line("x", "y", "operational status");
 
     for (const auto& [sim_param, op_val] : opdom.operational_values)
     {
@@ -81,9 +82,10 @@ inline void write_operational_domain(const defect_influence_operational_domain<L
  * @param params The parameters used for writing, including the operational and non-operational tags. Defaults to an
  * empty `write_operational_domain_params` object, which provides standard tags.
  */
- template <typename Lyt>
-inline void write_operational_domain(const defect_influence_operational_domain<Lyt>& opdom, const std::string_view& filename,
-                                     const write_operational_domain_params& params = {})
+template <typename Lyt>
+inline void write_defect_influence_operational_domain(const defect_influence_operational_domain<Lyt>& opdom,
+                                                      const std::string_view&                         filename,
+                                                      const write_operational_domain_params&          params = {})
 {
     std::ofstream os{filename.data(), std::ofstream::out};
 
@@ -92,7 +94,7 @@ inline void write_operational_domain(const defect_influence_operational_domain<L
         throw std::ofstream::failure("could not open file");
     }
 
-    write_operational_domain(opdom, os, params);
+    write_defect_influence_operational_domain(opdom, os, params);
     os.close();
 }
 

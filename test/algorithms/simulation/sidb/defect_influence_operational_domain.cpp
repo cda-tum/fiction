@@ -9,7 +9,7 @@
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/algorithms/simulation/sidb/maximum_minimum_defect_influence_distance.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
-#include <fiction/io/write_defect_operational_domain.hpp>
+#include <fiction/io/write_defect_influence_operational_domain.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/sidb_defects.hpp>
@@ -22,8 +22,6 @@ using namespace fiction;
 TEST_CASE("novel designed AND Gate influence distance function which fails again",
           "[defect-influence-of-sidb-gate-contour-tracing]")
 {
-
-    // TODO Use SiQAD gate
     sidb_cell_clk_lyt_siqad lyt{};
 
     lyt.assign_cell_type({38, 0, 0}, sidb_technology::cell_type::INPUT);
@@ -79,9 +77,9 @@ TEST_CASE("novel designed AND Gate influence distance function which fails again
         write_operational_domain_params write_params{};
         write_params.operational_tag     = "1";
         write_params.non_operational_tag = "0";
-        write_operational_domain(defect_influence_domain,
-                                 "/Users/jandrewniok/CLionProjects/fiction_copy/fiction/experiments/test_defect_op.csv",
-                                 write_params);
+        write_defect_influence_operational_domain(
+            defect_influence_domain,
+            "/Users/jandrewniok/CLionProjects/fiction_copy/fiction/experiments/test_defect_op.csv", write_params);
     }
     SECTION("Random Sampling")
     {
@@ -95,9 +93,9 @@ TEST_CASE("novel designed AND Gate influence distance function which fails again
         write_operational_domain_params write_params{};
         write_params.operational_tag     = "1";
         write_params.non_operational_tag = "0";
-        write_operational_domain(defect_influence_domain,
-                                 "/Users/jandrewniok/CLionProjects/fiction_copy/fiction/experiments/test_defect_op.csv",
-                                 write_params);
+        write_defect_influence_operational_domain(
+            defect_influence_domain,
+            "/Users/jandrewniok/CLionProjects/fiction_copy/fiction/experiments/test_defect_op.csv", write_params);
     }
     SECTION("Contour Tracing")
     {
@@ -110,8 +108,8 @@ TEST_CASE("novel designed AND Gate influence distance function which fails again
         write_operational_domain_params write_params{};
         write_params.operational_tag     = "1";
         write_params.non_operational_tag = "0";
-        write_operational_domain(defect_influence_domain,
-                                 "/Users/jandrewniok/CLionProjects/fiction_copy/fiction/experiments/test_defect_op.csv",
-                                 write_params);
+        write_defect_influence_operational_domain(
+            defect_influence_domain,
+            "/Users/jandrewniok/CLionProjects/fiction_copy/fiction/experiments/test_defect_op.csv", write_params);
     }
 }
