@@ -908,18 +908,18 @@ TEST_CASE("Determine physical parameters for cds of SiQAD Y-shaped AND gate, 10 
 
         const auto valid_parameters = find_valid_physical_parameters_and_excited_state_number(cds, op_domain_params);
         CHECK(valid_parameters.suitable_physical_parameters.size() == 98);
-//        CHECK(find_parameter_point_with_tolerance(valid_parameters.suitable_physical_parameters,
-//                                                  operational_domain::parameter_point{5.9, 5.5})
-//                  ->second == 1);
-//        CHECK(find_parameter_point_with_tolerance(valid_parameters.suitable_physical_parameters,
-//                                                  operational_domain::parameter_point{5.8, 4.4})
-//                  ->second == 0);
-//        CHECK(find_parameter_point_with_tolerance(valid_parameters.suitable_physical_parameters,
-//                                                  operational_domain::parameter_point{5.8, 4.4})
-//                  ->second == 0);
-//        CHECK(find_parameter_point_with_tolerance(valid_parameters.suitable_physical_parameters,
-//                                                  operational_domain::parameter_point{6.0, 6.0})
-//                  ->second == 1);
+        //        CHECK(find_parameter_point_with_tolerance(valid_parameters.suitable_physical_parameters,
+        //                                                  operational_domain::parameter_point{5.9, 5.5})
+        //                  ->second == 1);
+        //        CHECK(find_parameter_point_with_tolerance(valid_parameters.suitable_physical_parameters,
+        //                                                  operational_domain::parameter_point{5.8, 4.4})
+        //                  ->second == 0);
+        //        CHECK(find_parameter_point_with_tolerance(valid_parameters.suitable_physical_parameters,
+        //                                                  operational_domain::parameter_point{5.8, 4.4})
+        //                  ->second == 0);
+        //        CHECK(find_parameter_point_with_tolerance(valid_parameters.suitable_physical_parameters,
+        //                                                  operational_domain::parameter_point{6.0, 6.0})
+        //                  ->second == 1);
     }
 }
 
@@ -983,17 +983,17 @@ TEST_CASE(
 
         const auto valid_parameters = find_valid_physical_parameters_and_excited_state_number(cds, op_domain_params);
         CHECK(valid_parameters.suitable_physical_parameters.size() == 100);
-//        CHECK(find_parameter_point_with_tolerance(valid_parameters.suitable_physical_parameters,
-//                                                  operational_domain::parameter_point{5.6, 5.0})
-//                  ->second == 0);
-//        CHECK(find_parameter_point_with_tolerance(valid_parameters.suitable_physical_parameters,
-//                                                  operational_domain::parameter_point{5.0, 5.9})
-//                  ->second == 2);
-//        CHECK(find_parameter_point_with_tolerance(valid_parameters.suitable_physical_parameters,
-//                                                  operational_domain::parameter_point{5.4, 5.3})
-//                  ->second == 1);
-//        CHECK(find_parameter_point_with_tolerance(valid_parameters.suitable_physical_parameters,
-//                                                  operational_domain::parameter_point{5.8, 5.3})
-//                  ->second == 0);
+        //        CHECK(find_parameter_point_with_tolerance(valid_parameters.suitable_physical_parameters,
+        //                                                  operational_domain::parameter_point{5.6, 5.0})
+        //                  ->second == 0);
+        //        CHECK(find_parameter_point_with_tolerance(valid_parameters.suitable_physical_parameters,
+        //                                                  operational_domain::parameter_point{5.0, 5.9})
+        //                  ->second == 2);
+        //        CHECK(find_parameter_point_with_tolerance(valid_parameters.suitable_physical_parameters,
+        //                                                  operational_domain::parameter_point{5.4, 5.3})
+        //                  ->second == 1);
+        //        CHECK(find_parameter_point_with_tolerance(valid_parameters.suitable_physical_parameters,
+        //                                                  operational_domain::parameter_point{5.8, 5.3})
+        //                  ->second == 0);
     }
 }
