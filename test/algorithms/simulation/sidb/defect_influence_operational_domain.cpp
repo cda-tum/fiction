@@ -60,10 +60,10 @@ TEST_CASE("novel designed AND Gate influence distance function which fails again
 
     const auto cube_lyt = convert_to_fiction_coordinates<sidb_cell_clk_lyt_cube>(lyt);
 
-    const sidb_defect sidb_defect{sidb_defect_type::SI_VACANCY, -1, 10.6, 5.9};
-    // const sidb_defect                               sidb_defect{sidb_defect_type::UNKNOWN, 1, 9.7, 2.1};
+    const sidb_defect                              sidb_defect{sidb_defect_type::SI_VACANCY, -1, 10.6, 5.9};
     const maximum_defect_influence_distance_params sim_params{sidb_defect, sidb_simulation_parameters{2, -0.32}};
-    defect_operational_domain_params params{sim_params, is_operational_params{sim_params.simulation_parameters}};
+    defect_influence_operational_domain_params     params{sim_params,
+                                                      is_operational_params{sim_params.simulation_parameters}};
 
     SECTION("Grid Search")
     {
