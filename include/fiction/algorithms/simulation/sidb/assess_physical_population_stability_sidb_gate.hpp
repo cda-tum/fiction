@@ -7,8 +7,14 @@
 
 #include "fiction/algorithms/iter/bdl_input_iterator.hpp"
 #include "fiction/algorithms/simulation/sidb/assess_physical_population_stability.hpp"
+#include "fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp"
 #include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
-#include "fiction/utils/layout_utils.hpp"
+
+#include <cassert>
+#include <cstdint>
+#include <limits>
+#include <optional>
+#include <vector>
 
 namespace fiction
 {
@@ -25,15 +31,20 @@ struct assess_physical_population_stability_params_sidb_gate
 };
 
 template <typename Lyt, typename TT>
-[[nodiscard]] double
-assess_physical_population_stability_sidb_gate(const Lyt& lyt, const std::vector<TT>& spec,
-                                               const assess_physical_population_stability_params_sidb_gate& params = {},
-                                               const int8_t charge_state_change = 1) noexcept
+[[nodiscard]] double calculate_min_potential_for_charge_change_for_all_input_combinations(
+    const Lyt& lyt, const std::vector<TT>& spec,
+    const assess_physical_population_stability_params_sidb_gate& params              = {},
+    const std::optional<int8_t>                                  charge_state_change = 1) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(!has_offset_ucoord_v<Lyt>, "Lyt should not be based on offset coordinates");
     static_assert(!is_charge_distribution_surface_v<Lyt>, "Lyt cannot be a charge distribution surface");
+
+    if (can_positive_charges_occur(lyt, params.assess_population_stability_params.simulation_parameters))
+    {
+        return 0.0;
+    }
 
     assert(lyt.num_pis() > 0 && "skeleton needs input cells");
     assert(lyt.num_pos() > 0 && "skeleton needs output cells");
@@ -44,7 +55,11 @@ assess_physical_population_stability_sidb_gate(const Lyt& lyt, const std::vector
                               [](const auto& a, const auto& b) { return a.num_vars() != b.num_vars(); }) == spec.end());
 
     bdl_input_iterator<Lyt> bii{lyt, params.detect_pair_params};
-    double                  maximal_pop_stability_for_all_inputs = std::numeric_limits<double>::infinity();
+
+    assert(bii.get_number_of_inputs() == spec.front().num_bits() / 2 &&
+           "Number of truth table dimensions and input BDL pairs does not match");
+
+    double minimal_pop_stability_for_all_inputs = std::numeric_limits<double>::infinity();
     // number of different input combinations
     for (auto i = 0u; i < spec.front().num_bits(); ++i, ++bii)
     {
@@ -53,25 +68,32 @@ assess_physical_population_stability_sidb_gate(const Lyt& lyt, const std::vector
         if (!pop_stability.empty())
         {
             const auto stability_for_given_input = pop_stability.front().minimum_potential_difference_to_transition;
-            double     potential                 = 0.0;
 
-            if (charge_state_change == 1)
+            if (charge_state_change.has_value())
             {
-                potential = std::abs(stability_for_given_input.at(transition_type::NEGATIVE_TO_NEUTRAL));
-            }
+                if (charge_state_change.value() == 1)
+                {
+                    const auto potential_negative_to_neutral =
+                        stability_for_given_input.at(transition_type::NEGATIVE_TO_NEUTRAL);
+                    if (potential_negative_to_neutral < minimal_pop_stability_for_all_inputs)
+                    {
+                        minimal_pop_stability_for_all_inputs = potential_negative_to_neutral;
+                    }
+                }
 
-            if (charge_state_change == -1)
-            {
-                potential = std::abs(stability_for_given_input.at(transition_type::NEUTRAL_TO_NEGATIVE));
-            }
-
-            if (potential < maximal_pop_stability_for_all_inputs)
-            {
-                maximal_pop_stability_for_all_inputs = potential;
+                if (charge_state_change.value() == -1)
+                {
+                    const auto potential_neutral_to_negative =
+                        stability_for_given_input.at(transition_type::NEUTRAL_TO_NEGATIVE);
+                    if (potential_neutral_to_negative < minimal_pop_stability_for_all_inputs)
+                    {
+                        minimal_pop_stability_for_all_inputs = potential_neutral_to_negative;
+                    }
+                }
             }
         }
     }
-    return maximal_pop_stability_for_all_inputs;
+    return minimal_pop_stability_for_all_inputs;
 }
 
 }  // namespace fiction

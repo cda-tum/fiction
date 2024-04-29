@@ -760,7 +760,60 @@ Lyt and_gate_111() noexcept
 
     return lyt;
 };
+/**
+ * This layout represents the AND Gate, as proposed in the paper
+ * titled \"Hexagons are the Bestagons: Design Automation for Silicon Dangling Bond Logic\" authored by
+ * Marcel Walter, Samuel Sze Hang Ng, Konrad Walus, and Robert Wille.
+ *
+ * (https://github.com/cda-tum/mnt-bestagon-library/blob/main/bestagon-gates/2i1o_and/21_hex_inputsdbp_and_v19.sqd)
+ */
+template <typename Lyt>
+Lyt bestagon_and_gate() noexcept
+{
+    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not an SiDB layout");
 
+    Lyt lyt{};
+
+    lyt.assign_cell_type({36, 1, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({2, 1, 0}, Lyt::cell_type::INPUT);
+
+    lyt.assign_cell_type({38, 0, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({0, 0, 0}, Lyt::cell_type::INPUT);
+
+    lyt.assign_cell_type({23, 9, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({18, 11, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({18, 9, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({19, 8, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({20, 14, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({19, 13, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 16, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 15, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({32, 2, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({30, 3, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 4, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 5, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 4, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 5, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 2, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 3, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({32, 18, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({30, 17, 0}, Lyt::cell_type::OUTPUT);
+
+    lyt.assign_cell_type({36, 19, 0}, Lyt::cell_type::NORMAL);
+
+    return lyt;
+};
+/**
+ * This layout represents the Crossing, as proposed in the paper
+ * titled \"Hexagons are the Bestagons: Design Automation for Silicon Dangling Bond Logic\" authored by
+ * Marcel Walter, Samuel Sze Hang Ng, Konrad Walus, and Robert Wille.
+ *
+ * (https://github.com/cda-tum/mnt-bestagon-library/blob/main/bestagon-gates/2i2o_cx/22_hex_inputsdbp_cx_try2_v0.sqd)
+ */
 template <typename Lyt>
 Lyt bestagon_crossing_gate() noexcept
 {
