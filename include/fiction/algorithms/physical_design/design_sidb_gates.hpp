@@ -44,7 +44,6 @@ struct design_sidb_gates_sa_params
 {
     /**
      * Type of temperature schedule used in Simulated Annealing.
-     * Possible values are GEOMETRIC or LINEAR.
      */
     temperature_schedule schedule{temperature_schedule::GEOMETRIC};
     /**
@@ -69,7 +68,7 @@ struct design_sidb_gates_sa_params
     operational_domain_params op_params{};
     /**
      * Weight assigned to the critical temperature in the overall cost function.
-     * A negative value indicates that this weight is not used.
+     * A negative value indicates that a high critical temperature is preferred.
      */
     double weight_temperature = -1.0;
     /**
@@ -136,8 +135,10 @@ struct design_sidb_gates_stats
      * The total runtime of SiDB gate design process.
      */
     mockturtle::stopwatch<>::duration time_total{0};
-
-    double cost_of_gate{};
+    /**
+     * The cost value of the final gate designed with Simulated Annealing.
+     */
+    double gate_cost{};
 };
 
 namespace detail
@@ -154,6 +155,7 @@ class design_sidb_gates_impl
      * @param skeleton The skeleton layout used as a basis for gate design.
      * @param tt Expected Boolean function of the layout given as a multi-output truth table.
      * @param ps Parameters and settings for the gate designer.
+     * @param st Statistics for the gate designer.
      */
     design_sidb_gates_impl(const Lyt& skeleton, const std::vector<TT>& tt, const design_sidb_gates_params<Lyt>& ps,
                            design_sidb_gates_stats& st) :
@@ -282,10 +284,10 @@ class design_sidb_gates_impl
     /**
      * Design gates with Simulated Annealing.
      *
-     * This function adds cells randomly to the given skeleton, and determines whether the layout is operational
-     * based on the specified parameters. The design process is parallelized to improve performance.
+     * This function designs gates with Simulated Annealing. The cost function involves the critical temperature and the
+     * operational domain. The importance of the individual figures of merit can be adjusted by the weights.
      *
-     * @return A vector of designed SiDB gate layouts.
+     * @return Designed SiDB gate with minimal cost.
      */
     [[nodiscard]] Lyt run_sa_design(const design_sidb_gates_sa_params& sa_params) noexcept
     {
@@ -342,7 +344,7 @@ class design_sidb_gates_impl
                 return lyt_swap;
             });
         std::cout << fmt::format("final cost: {}", optimized_net_cost) << std::endl;
-        stats.cost_of_gate = optimized_net_cost;
+        stats.gate_cost = optimized_net_cost;
         return optimized_gate_design;
     }
 

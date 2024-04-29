@@ -199,6 +199,7 @@ multi_simulated_annealing(const double init_temp, const double final_temp, const
 
     std::vector<std::pair<state_t, cost_t>> results(instances);
     std::vector<std::thread>                threads;
+    threads.reserve(instances);
 
     // Function to perform simulated annealing and store the result in the results vector
     auto perform_simulated_annealing =
@@ -218,7 +219,7 @@ multi_simulated_annealing(const double init_temp, const double final_temp, const
     }
 
     // Find the minimum result
-    return *std::min_element(results.cbegin(), results.cend(),
+    return *std::min_element(FICTION_EXECUTION_POLICY_PAR_UNSEQ results.cbegin(), results.cend(),
                              [](const auto& lhs, const auto& rhs) { return lhs.second < rhs.second; });
 }
 
