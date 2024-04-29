@@ -12,6 +12,7 @@ on:
       - '.github/workflows/docker-image.yml'
       - 'Dockerfile'
       - '.dockerignore'
+      - '!bindings/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp'
   pull_request:
     branches: [ 'main' ]
     paths:
@@ -23,6 +24,7 @@ on:
       - '.github/workflows/docker-image.yml'
       - 'Dockerfile'
       - '.dockerignore'
+      - '!bindings/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp'
   merge_group:
 
 concurrency:
@@ -40,4 +42,4 @@ jobs:
           submodules: recursive
 
       - name: Build the Docker image
-        run: docker build --build-arg NUMBER_OF_JOBS=2 . --file Dockerfile --tag fiction:$(date +%s)
+        run: docker build --build-arg NUMBER_OF_JOBS=4 . --file Dockerfile --tag fiction:$(date +%s)

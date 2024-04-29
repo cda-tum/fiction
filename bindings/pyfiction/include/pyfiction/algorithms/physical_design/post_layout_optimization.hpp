@@ -15,26 +15,23 @@
 namespace pyfiction
 {
 
-namespace detail
-{
-
-template <typename Lyt>
-void post_layout_optimization(pybind11::module& m)
-{
-    using namespace pybind11::literals;
-
-    m.def("post_layout_optimization", &fiction::post_layout_optimization<Lyt>, "lyt"_a, "pst"_a = nullptr,
-          DOC(fiction_post_layout_optimization));
-}
-
-}  // namespace detail
-
+/**
+ * Post-layout optimization.
+ */
 inline void post_layout_optimization(pybind11::module& m)
 {
-    pybind11::class_<fiction::post_layout_optimization_stats>(m, "post_layout_optimization_stats",
-                                                              DOC(fiction_post_layout_optimization_stats))
-        .def(pybind11::init<>())
-        .def_readonly("time_total", &fiction::post_layout_optimization_stats::time_total)
+    namespace py = pybind11;
+    using namespace pybind11::literals;
+
+    py::class_<fiction::post_layout_optimization_params>(m, "post_layout_optimization_params",
+                                                         DOC(fiction_post_layout_optimization_params))
+        .def(py::init<>())
+
+        ;
+
+    py::class_<fiction::post_layout_optimization_stats>(m, "post_layout_optimization_stats",
+                                                        DOC(fiction_post_layout_optimization_stats))
+        .def(py::init<>())
         .def("__repr__",
              [](const fiction::post_layout_optimization_stats& stats)
              {
@@ -42,10 +39,13 @@ inline void post_layout_optimization(pybind11::module& m)
                  stats.report(stream);
                  return stream.str();
              })
+        .def_readonly("time_total", &fiction::post_layout_optimization_stats::time_total)
 
         ;
 
-    detail::post_layout_optimization<py_cartesian_gate_layout>(m);
+    m.def("post_layout_optimization", &fiction::post_layout_optimization<py_cartesian_gate_layout>, "layout"_a,
+          "parameters"_a = fiction::post_layout_optimization_params{}, "statistics"_a = nullptr,
+          DOC(fiction_post_layout_optimization));
 }
 
 }  // namespace pyfiction
