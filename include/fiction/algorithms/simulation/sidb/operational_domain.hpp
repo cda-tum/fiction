@@ -188,22 +188,22 @@ static bool compare_parameter_point(const operational_domain::parameter_point& p
     return std::abs(p1.x - p2.x) < tolerance && std::abs(p1.y - p2.y) < tolerance;
 }
 /**
- * This function searches for a parameter point, specified by the `parameter`,
- * in the provided locked_parallel_flat_hash_map `suitable_parameters` with tolerance.
+ * This function searches for a parameter point, specified by the `key`, in the provided map
+ * `map` with tolerance. It compares each key in the map to the specified key using the
+ * `compare_parameter_point` function.
  *
- * @param suitable_parameters The map containing parameter points as keys and associated values.
- * @param pp The parameter point to search for in the map.
- * @return An iterator to the found parameter point in the map, or end() if not found.
+ * @tparam MapType The type of the map containing parameter points as keys.
+ * @param map The map containing parameter points as keys and associated values.
+ * @param key The parameter point to search for in the map.
+ * @return An iterator to the found parameter point in the map, or `map.end()` if not found.
  */
-static locked_parallel_flat_hash_map<operational_domain::parameter_point, uint64_t>::const_iterator
-find_parameter_point_with_tolerance(
-    const locked_parallel_flat_hash_map<operational_domain::parameter_point, uint64_t>& suitable_parameters,
-    const operational_domain::parameter_point&                                          pp)
+template <typename MapType>
+[[maybe_unused]] static typename MapType::const_iterator
+find_parameter_point_with_tolerance(const MapType& map, const typename MapType::key_type& key)
 {
-    auto compare_keys = [&pp](const auto& pair) { return compare_parameter_point(pair.first, pp); };
-    return std::find_if(suitable_parameters.begin(), suitable_parameters.end(), compare_keys);
+    auto compare_keys = [&key](const auto& pair) { return compare_parameter_point(pair.first, key); };
+    return std::find_if(map.begin(), map.end(), compare_keys);
 }
-
 /**
  * Parameters for the operational domain computation. The parameters are used across the different operational domain
  * computation algorithms.
@@ -836,7 +836,7 @@ class operational_domain_impl
      */
     [[nodiscard]] inline std::optional<operational_status> has_already_been_sampled(const step_point& sp) const noexcept
     {
-        if (const auto it = op_domain.operational_values.find(to_parameter_point(sp));
+        if (const auto it = find_parameter_point_with_tolerance(op_domain.operational_values, to_parameter_point(sp));
             it != op_domain.operational_values.cend())
         {
             return it->second;
