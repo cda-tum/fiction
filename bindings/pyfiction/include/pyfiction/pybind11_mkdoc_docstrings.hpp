@@ -187,6 +187,41 @@ Parameter ``n``:
 Returns:
     A vector of all possible edge paths leading from terminals to `v`.)doc";
 
+static const char *__doc_fiction_all_standard_2_input_functions =
+R"doc(Auxiliary function to create technology mapping parameters for AND,
+OR, NAND, NOR, XOR, XNOR, and NOT gates.
+
+Returns:
+    Technology mapping parameters.)doc";
+
+static const char *__doc_fiction_all_standard_3_input_functions =
+R"doc(Auxiliary function to create technology mapping parameters for AND3,
+XOR_AND, OR_AND, ONEHOT, MAJ3, GAMBLE, DOT, MUX, and AND_XOR gates.
+
+Returns:
+    Technology mapping parameters.)doc";
+
+static const char *__doc_fiction_all_supported_standard_functions =
+R"doc(Auxiliary function to create technology mapping parameters for all
+supported standard functions.
+
+Returns:
+    Technology mapping parameters.)doc";
+
+static const char *__doc_fiction_and_or_not =
+R"doc(Auxiliary function to create technology mapping parameters for AND,
+OR, and NOT gates.
+
+Returns:
+    Technology mapping parameters.)doc";
+
+static const char *__doc_fiction_and_or_not_maj =
+R"doc(Auxiliary function to create technology mapping parameters for AND,
+OR, NOT, and MAJ gates.
+
+Returns:
+    Technology mapping parameters.)doc";
+
 static const char *__doc_fiction_apply_gate_library =
 R"doc(Applies a gate library to a given gate-level layout and, thereby,
 creates and returns a cell-level layout. The gate library type should
@@ -6411,6 +6446,36 @@ Parameter ``param``:
 
 Returns:
     The string representation of the sweep parameter.)doc";
+
+static const char *__doc_fiction_detail_technology_mapping_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_technology_mapping_impl_ntk = R"doc(Input network to be mapped.)doc";
+
+static const char *__doc_fiction_detail_technology_mapping_impl_params = R"doc(Technology mapping parameters.)doc";
+
+static const char *__doc_fiction_detail_technology_mapping_impl_perform_mapping =
+R"doc(Perform technology mapping with the given number of inputs.
+
+Template parameter ``NumInp``:
+    Maximum input number of the gates in the technology library.
+
+Parameter ``gates``:
+    Technology library.
+
+Returns:
+    Mapped network.)doc";
+
+static const char *__doc_fiction_detail_technology_mapping_impl_run = R"doc()doc";
+
+static const char *__doc_fiction_detail_technology_mapping_impl_set_up_gates =
+R"doc(Create a mockturtle gate library from the given parameters.
+
+Returns:
+    A vector of mockturtle gates.)doc";
+
+static const char *__doc_fiction_detail_technology_mapping_impl_stats = R"doc(Technology mapping statistics.)doc";
+
+static const char *__doc_fiction_detail_technology_mapping_impl_technology_mapping_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_to_hex =
 R"doc(Utility function to transform a Cartesian tile into a hexagonal one.
@@ -14557,6 +14622,74 @@ static const char *__doc_fiction_technology_dot_drawer_node_fillcolor = R"doc()d
 static const char *__doc_fiction_technology_dot_drawer_node_label = R"doc()doc";
 
 static const char *__doc_fiction_technology_dot_drawer_node_label_callback = R"doc()doc";
+
+static const char *__doc_fiction_technology_mapping =
+R"doc(Performs technology mapping on the given network. Technology mapping
+is the process of replacing the gates in a network with gates from a
+given technology library. This function utilizes `mockturtle::map` to
+perform the technology mapping. This function is a wrapper around that
+interface to provide a more convenient usage.
+
+Template parameter ``Ntk``:
+    Input logic network type.
+
+Parameter ``ntk``:
+    Input logic network.
+
+Parameter ``params``:
+    Technology mapping parameters.
+
+Parameter ``pst``:
+    Technology mapping statistics.
+
+Returns:
+    Mapped network exclusively using gates from the provided library.)doc";
+
+static const char *__doc_fiction_technology_mapping_params = R"doc()doc";
+
+static const char *__doc_fiction_technology_mapping_params_and2 = R"doc(2-input AND gate.)doc";
+
+static const char *__doc_fiction_technology_mapping_params_and3 = R"doc(3-input AND gate.)doc";
+
+static const char *__doc_fiction_technology_mapping_params_and_xor = R"doc(3-input AND-XOR gate.)doc";
+
+static const char *__doc_fiction_technology_mapping_params_decay =
+R"doc(Enforce the application of at least one constant input to three-input
+gates.)doc";
+
+static const char *__doc_fiction_technology_mapping_params_dot = R"doc(3-input DOT gate.)doc";
+
+static const char *__doc_fiction_technology_mapping_params_gamble = R"doc(3-input GAMBLE gate.)doc";
+
+static const char *__doc_fiction_technology_mapping_params_inv = R"doc()doc";
+
+static const char *__doc_fiction_technology_mapping_params_maj3 = R"doc(3-input MAJ gate.)doc";
+
+static const char *__doc_fiction_technology_mapping_params_mapper_params = R"doc(mockturtle's mapper parameters.)doc";
+
+static const char *__doc_fiction_technology_mapping_params_mux = R"doc(3-input MUX gate.)doc";
+
+static const char *__doc_fiction_technology_mapping_params_nand2 = R"doc(2-input NAND gate.)doc";
+
+static const char *__doc_fiction_technology_mapping_params_nor2 = R"doc(2-input NOR gate.)doc";
+
+static const char *__doc_fiction_technology_mapping_params_onehot = R"doc(3-input ONEHOT gate.)doc";
+
+static const char *__doc_fiction_technology_mapping_params_or2 = R"doc(2-input OR gate.)doc";
+
+static const char *__doc_fiction_technology_mapping_params_or_and = R"doc(3-input OR-AND gate.)doc";
+
+static const char *__doc_fiction_technology_mapping_params_xnor2 = R"doc(2-input XNOR gate.)doc";
+
+static const char *__doc_fiction_technology_mapping_params_xor2 = R"doc(2-input XOR gate.)doc";
+
+static const char *__doc_fiction_technology_mapping_params_xor_and = R"doc(3-input XOR-AND gate.)doc";
+
+static const char *__doc_fiction_technology_mapping_stats = R"doc(Statistics for technology mapping.)doc";
+
+static const char *__doc_fiction_technology_mapping_stats_mapper_stats = R"doc(Statistics for mockturtle's mapper.)doc";
+
+static const char *__doc_fiction_technology_mapping_stats_report = R"doc(Report statistics.)doc";
 
 static const char *__doc_fiction_technology_network =
 R"doc(A `mockturtle` logic network type that extends `klut_network`. It
