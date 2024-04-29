@@ -31,7 +31,11 @@ struct maximum_defect_influence_position_and_distance_of_sidb_gate_params
 /**
  * This function calculates the maximum influence position and distance of a defect on the ground state
  * of an SiDB gate layout. It iterates over all input combinations and finds the defect position at maximum position
- * that affects the gate's behavior.
+ * that affects the gate's ground state.
+ *
+ * @Note The defect influence distance describes the distance at which an defect influences the ground state. It does
+ * check when the successful operation starts to fail, since a change in the ground state can still lead to an
+ * operational gate.
  *
  * @tparam Lyt Lyt SiDB cell-level layout type.
  * @tparam TT  Truth table type.
