@@ -39,7 +39,7 @@ struct defect_influence_operational_domain_params
     /**
      * Parameters for the `is_operational` algorithm.
      */
-    is_operational_params is_operational_params{};
+    is_operational_params operational_params{};
 };
 /**
  * A defect operational domain defines the positions where a specific atomic defect may exist along with corresponding
@@ -321,7 +321,7 @@ class defect_influence_operational_domain_impl
         }
 
         layout.assign_sidb_defect(c, params.defect_influence_params.defect);
-        const auto& [status, sim_calls] = is_operational(layout, truth_table, params.is_operational_params);
+        const auto& [status, sim_calls] = is_operational(layout, truth_table, params.operational_params);
         layout.assign_sidb_defect(c, sidb_defect{sidb_defect_type::NONE});
         num_simulator_invocations += sim_calls;
 
