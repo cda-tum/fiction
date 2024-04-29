@@ -296,15 +296,6 @@ class cell_level_layout : public ClockedLayout
         return strg->layout_name.data();
     }
     /**
-     * Returns the assigned layout name.
-     *
-     * @return The layout name.
-     */
-    [[nodiscard]] auto get_cell_type_map() const noexcept
-    {
-        return strg->cell_type_map;
-    }
-    /**
      * Returns the number of non-empty cell types that were assigned to the layout.
      *
      * @return Number of non-empty cell types in the layout.

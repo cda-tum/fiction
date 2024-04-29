@@ -2,11 +2,10 @@
 // Created by Jan Drewniok on 21.03.24.
 //
 
-#ifndef FICTION_DISPLACEMENT_ROBUSTNESS_HPP
-#define FICTION_DISPLACEMENT_ROBUSTNESS_HPP
+#ifndef FICTION_DETERMINE_DISPLACEMENT_ROBUSTNESS_HPP
+#define FICTION_DETERMINE_DISPLACEMENT_ROBUSTNESS_HPP
 
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
-#include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/layouts/coordinates.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/layout_utils.hpp"
@@ -23,23 +22,22 @@
 #include <mutex>
 #include <random>
 #include <set>
-#include <stdexcept>
-#include <string>
 #include <thread>
 #include <utility>
 #include <vector>
 
 namespace fiction
 {
+
 /**
- * A displacement robustness domain encompasses SiDB layouts obtained from an original SiDB gate by displacing
- * individual SiDBs. These layouts remain valid gate implementations if they fulfill the required logic.
+ * A displacement robustness domain encompasses SiDB layouts obtained from an original SiDB layout by displacing
+ * individual SiDBs. These layouts remain valid SiDB gate implementations if they fulfill the required logic.
  */
 template <typename Lyt>
 struct displacement_robustness_domain
 {
     /**
-     * Represents a domain of displacement robustness for layouts resulting from applying a displacement to a given gate
+     * Represents a domain of displacement robustness for layouts resulting from applying a displacement to a given SiDB
      * layout.
      *
      * @note The original layout is not stored.
@@ -47,10 +45,10 @@ struct displacement_robustness_domain
     std::vector<std::pair<Lyt, operational_status>> operational_values{};
 };
 /**
- * Parameters for the `determine_sidb_gate_displace_robustness_domain` and
- * `determine_probability_of_fabricating_operational_gate_for_given_error_rate` algorithm.
+ * Parameters for the `determine_displacement_robustness_domain` and
+ * `determine_propability_of_fabricating_operational_gate` algorithm.
  *
- * @param Lyt SiDB cell-level layout Type.
+ * @param Lyt SiDB cell-level layout type.
  */
 template <typename Lyt>
 struct sidb_gate_displacement_robustness_params
@@ -69,6 +67,10 @@ struct sidb_gate_displacement_robustness_params
          */
         RANDOM_SAMPLING,
     };
+    /**
+     * This parameter defines the mode of the displacement analysis. The default value is `ALL_POSSIBLE_DISPLACEMENTS`.
+     * For faster simulation results, `RANDOM_SAMPLING` can be used.
+     */
     displacement_analysis_mode analysis_mode{displacement_analysis_mode::ALL_POSSIBLE_DISPLACEMENTS};
     /**
      * This parameter defines the percentage of all possible displaced SiDB layouts that are analyzed. The default value
@@ -84,10 +86,6 @@ struct sidb_gate_displacement_robustness_params
      * The atomic displacement in x- and y-direction, respectively. The default value is (0, 0).
      */
     std::pair<uint64_t, uint64_t> displacement_variations = {0, 0};
-    /**
-     * The simulation engine used.
-     */
-    sidb_simulation_engine sim_engine{sidb_simulation_engine::QUICKEXACT};
     /**
      * Parameters to check the operation status.
      */
@@ -136,15 +134,15 @@ class displacement_robustness_domain_impl
      * @param st Statistics related to the displacement robustness computation.
      */
     displacement_robustness_domain_impl(const Lyt& lyt, const std::vector<TT>& spec,
-                                        sidb_gate_displacement_robustness_params<Lyt>& ps,
-                                        displacement_robustness_domain_stats&          st) noexcept :
+                                        const sidb_gate_displacement_robustness_params<Lyt>& ps,
+                                        displacement_robustness_domain_stats&                st) noexcept :
             layout{lyt},
             params{ps},
             stats{st},
-            truth_table{spec}
+            truth_table{spec},
+            generator(rd())
     {
-        sidbs_of_the_original_layout.reserve(layout.num_cells());
-        for (const auto& c : params.fixed_cells)
+        for ([[maybe_unused]] const auto& c : params.fixed_cells)
         {
             assert(!layout.is_empty_cell(c) && "Not all fixed cells are part of the layout");
         }
@@ -153,8 +151,9 @@ class displacement_robustness_domain_impl
             (is_operational(layout, truth_table, params.operational_params).first == operational_status::OPERATIONAL) &&
             "The given layout is not a valid SiDB gate implementation");
 
+        sidbs_of_the_original_layout.reserve(layout.num_cells());
         layout.foreach_cell([&](const auto& c) { sidbs_of_the_original_layout.push_back(c); });
-        calculate_allowed_displacements_for_each_sidb();
+        calculate_permitted_displacements_for_each_sidb();
     };
     /**
      * This function calculates the robustness domain of the SiDB gate based on the provided truth table specification
@@ -163,24 +162,30 @@ class displacement_robustness_domain_impl
     displacement_robustness_domain<Lyt> determine_robustness_domain()
     {
         mockturtle::stopwatch stop{stats.time_total};
-        calculate_allowed_displacements_for_each_sidb();
+        calculate_permitted_displacements_for_each_sidb();
         // Shuffle the layouts vector randomly
-        std::random_device rd;
-        std::mt19937       g(rd());  // Initialize random number generator with a seed
-        std::vector<Lyt>   layouts{};
-        try
-        {
-            layouts = generate_valid_displaced_sidb_layouts();
-        }
-        catch (const std::runtime_error& e)
-        {
-            throw std::runtime_error(fmt::format("Could not determine robustness domain: {}\n", std::string(e.what())));
-        }
-        std::shuffle(layouts.begin(), layouts.end(), g);
+        std::vector<Lyt> layouts{};
+
+        layouts = generate_valid_displaced_sidb_layouts();
+
+        std::shuffle(layouts.begin(), layouts.end(), generator);
 
         displacement_robustness_domain<Lyt> domain{};
 
-        std::mutex mutex_to_protect_shared_resources;  // Mutex for protecting shared resources
+        const auto status_original_layout = is_operational(layout, truth_table, params.operational_params).first;
+
+        domain.operational_values.emplace_back(layout, status_original_layout);
+
+        if (status_original_layout == operational_status::OPERATIONAL)
+        {
+            stats.num_operational_sidb_displacements++;
+        }
+        else
+        {
+            stats.num_non_operational_sidb_displacements++;
+        }
+
+        std::mutex mutex_to_protect_shared_resources;
 
         const auto check_operation_status =
             [this, &mutex_to_protect_shared_resources, &domain](const std::vector<Lyt>& layouts) noexcept
@@ -234,7 +239,7 @@ class displacement_robustness_domain_impl
 
     /**
      * The manufacturing error rate is highly dependent on the speed of the manufacturing process. Therefore, fast
-     * fabrication requires gates with high displacement tolerance to ensure functionality in the presence of
+     * fabrication requires SiDB gates with high displacement tolerance to ensure functionality in the presence of
      * displacements. This function determines the probability of fabricating a working gate for a given SiDB gate and
      * fabrication error rate. If the fabrication error rate is 0.0 or negative, it means that the gate is designed
      * without displacement, hence it works properly.
@@ -284,14 +289,9 @@ class displacement_robustness_domain_impl
                 const auto cells = sidbs_of_the_original_layout[c];
                 params.fixed_cells.erase(cells);
             }
-            try
-            {
-                determine_robustness_domain();
-            }
-            catch (const std::runtime_error& e)
-            {
-                throw std::runtime_error(fmt::format("{}\n", std::string(e.what())));
-            }
+
+            determine_robustness_domain();
+
             number_of_tested_misplaced_cell_combinations++;
         }
 
@@ -302,9 +302,9 @@ class displacement_robustness_domain_impl
 
   private:
     /**
-     * This function calculates all allowed displacements for each SiDB based on the specified allowed displacements.
+     * This function calculates all permitted displacements for each SiDB based on the specified allowed displacements.
      */
-    void calculate_allowed_displacements_for_each_sidb() noexcept
+    void calculate_permitted_displacements_for_each_sidb() noexcept
     {
         std::vector<std::vector<cell<Lyt>>> all_possible_sidb_misplacements = {};
         all_possible_sidb_misplacements.reserve(layout.num_cells());
@@ -386,9 +386,7 @@ class displacement_robustness_domain_impl
         std::vector<cell<Lyt>>              current_combination{};
         generate_combinations(all_possible_sidb_displacement, current_combination, 0);
 
-        std::random_device rd;
-        std::mt19937       g(rd());  // Initialize random number generator with a seed
-        std::shuffle(all_possible_sidb_displacement.begin(), all_possible_sidb_displacement.end(), g);
+        std::shuffle(all_possible_sidb_displacement.begin(), all_possible_sidb_displacement.end(), generator);
 
         std::vector<Lyt> layouts{};
         layouts.reserve(all_possible_sidb_displacement.size());
@@ -434,10 +432,6 @@ class displacement_robustness_domain_impl
             }
             number_of_layouts_with_displaced_sidbs++;
         }
-        if (layouts.empty())
-        {
-            throw std::runtime_error("No valid displaced SiDB layouts could be generated.");
-        }
         return layouts;
     }
     /**
@@ -447,7 +441,7 @@ class displacement_robustness_domain_impl
     /**
      * The parameters for the displacement robustness computation.
      */
-    sidb_gate_displacement_robustness_params<Lyt>& params;
+    sidb_gate_displacement_robustness_params<Lyt> params;
     /**
      * The statistics of the displacement robustness computation.
      */
@@ -465,16 +459,26 @@ class displacement_robustness_domain_impl
      * The specification of the layout.
      */
     const std::vector<TT>& truth_table;
+    /**
+     * Random device for obtaining seed for the random number generator.
+     * Provides a source of non-deterministic random numbers.
+     */
+    std::random_device rd;
+    /**
+     * Mersenne Twister random number generator.
+     * Generates high-quality pseudo-random numbers using a random seed from 'rd'.
+     */
+    std::mt19937 generator;
 };
 
 }  // namespace detail
 
 /**
- * This function determines the operational status of all possible displacements of the SiDBs in the SiDB gate,
+ * This function determines the operational status of all possible displacements of the SiDBs of the given SiDB gate,
  * based on the provided truth table specification and displacement robustness computation parameters.
  * The number of displacements grows exponentially with the number of SiDBs. For small layouts, all displacements
- * can be analyzed. For larger layouts, random sampling can be applied, controllable by the ``analysis_mode`` and
- * ``percentage_of_analyzed_displaced_layouts`` in sidb_gate_displacement_robustness_params.
+ * can be analyzed. For larger layouts, random sampling can be applied, controllable by the `analysis_mode` and
+ * `percentage_of_analyzed_displaced_layouts` in `params.
  *
  * @tparam Lyt The SiDB cell-level layout type.
  * @tparam TT The type of the truth table specifying the gate behavior.
@@ -485,30 +489,25 @@ class displacement_robustness_domain_impl
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] displacement_robustness_domain<Lyt>
-determine_sidb_gate_displace_robustness_domain(const Lyt& layout, const std::vector<TT>& spec,
-                                               sidb_gate_displacement_robustness_params<Lyt>& params,
-                                               displacement_robustness_domain_stats*          stats = nullptr)
+determine_displacement_robustness_domain(const Lyt& layout, const std::vector<TT>& spec,
+                                         const sidb_gate_displacement_robustness_params<Lyt>& params = {},
+                                         displacement_robustness_domain_stats*                stats  = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-    displacement_robustness_domain_stats st{};
-    try
-    {
-        detail::displacement_robustness_domain_impl<Lyt, TT> p{layout, spec, params, st};
-        const auto                                           result = p.determine_robustness_domain();
-        if (stats)
-        {
-            *stats = st;
-        }
-        return result;
-    }
-    catch (const std::runtime_error& e)
-    {
-        throw std::runtime_error(fmt::format("{}\n", std::string(e.what())));
-    }
-}
+    displacement_robustness_domain_stats                 st{};
+    detail::displacement_robustness_domain_impl<Lyt, TT> p{layout, spec, params, st};
 
+    const auto result = p.determine_robustness_domain();
+
+    if (stats)
+    {
+        *stats = st;
+    }
+
+    return result;
+}
 /**
  * The manufacturing error rate is highly dependent on the speed of the manufacturing process. Therefore, fast
  * fabrication requires gates with high displacement tolerance to ensure functionality in the presence of displacements.
@@ -518,16 +517,18 @@ determine_sidb_gate_displace_robustness_domain(const Lyt& layout, const std::vec
  *
  * @tparam Lyt The SiDB cell-level layout type.
  * @tparam TT The type of the truth table specifying the gate behavior.
- * @param truth_table_spec Vector of truth table specifications.
+ * @param layout The SiDB cell-level layout which is analyzed.
+ * @param spec Vector of truth table specifications.
  * @param params Parameters for the displacement robustness computation.
  * @param fabrication_error_rate The fabrication error rate. For example, 0.1 describes that 10% of all manufactured
  *        SiDBs have a slight displacement.
  * @return The displacement robustness of the SiDB gate.
  */
 template <typename Lyt, typename TT>
-[[nodiscard]] double determine_probability_of_fabricating_operational_gate_for_given_error_rate(
-    const Lyt& layout, const std::vector<TT>& spec, sidb_gate_displacement_robustness_params<Lyt>& params,
-    const double fabrication_error_rate)
+[[nodiscard]] double
+determine_propability_of_fabricating_operational_gate(const Lyt& layout, const std::vector<TT>& spec,
+                                                      const sidb_gate_displacement_robustness_params<Lyt>& params = {},
+                                                      const double fabrication_error_rate                         = 1.0)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -535,16 +536,9 @@ template <typename Lyt, typename TT>
     displacement_robustness_domain_stats                 st{};
     detail::displacement_robustness_domain_impl<Lyt, TT> p{layout, spec, params, st};
 
-    try
-    {
-        return p.determine_propability_of_fabricating_operational_gate(fabrication_error_rate);
-    }
-    catch (const std::runtime_error& e)
-    {
-        throw std::runtime_error(fmt::format("{}\n", std::string(e.what())));
-    }
+    return p.determine_propability_of_fabricating_operational_gate(fabrication_error_rate);
 }
 
 }  // namespace fiction
 
-#endif  // FICTION_DISPLACEMENT_ROBUSTNESS_HPP
+#endif  // FICTION_DETERMINE_DISPLACEMENT_ROBUSTNESS_HPP

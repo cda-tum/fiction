@@ -277,15 +277,15 @@ Displacement Robustness Domain
 
 **Header:** ``fiction/algorithms/simulation/sidb/displacement_robustness.hpp``
 
-.. doxygenstruct:: fiction::displacement_robustness_domain
+.. doxygenstruct:: fiction::determine_displacement_robustness_domain
    :members:
 
 .. doxygenstruct:: fiction::sidb_gate_displacement_robustness_params
    :members:
 .. doxygenstruct:: fiction::displacement_robustness_domain_stats
    :members:
-.. doxygenfunction:: fiction::determine_sidb_gate_displace_robustness_domain
-.. doxygenfunction:: fiction::determine_probability_of_fabricating_operational_gate_for_given_error_rate
+.. doxygenfunction:: fiction::determine_displacement_robustness_domain
+.. doxygenfunction:: fiction::determine_propability_of_fabricating_operational_gate
 
 
 Utility Functions
