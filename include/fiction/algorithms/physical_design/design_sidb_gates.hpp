@@ -40,7 +40,7 @@ namespace fiction
 /**
  * Parameters for Simulated Annealing-based gate design.
  */
-struct design_sidb_gates_sa_params
+struct design_sidb_gates_metric_driven_simulated_annealing_params
 {
     /**
      * Type of temperature schedule used in Simulated Annealing.
@@ -287,9 +287,11 @@ class design_sidb_gates_impl
      * This function designs gates with Simulated Annealing. The cost function involves the critical temperature and the
      * operational domain. The importance of the individual figures of merit can be adjusted by the weights.
      *
+     * @param sa_params Simulated Annealing parameters.
      * @return Designed SiDB gate with minimal cost.
      */
-    [[nodiscard]] Lyt run_sa_design(const design_sidb_gates_sa_params& sa_params) noexcept
+    [[nodiscard]] Lyt run_metric_driven_design_process(
+        const design_sidb_gates_metric_driven_simulated_annealing_params& sa_params) noexcept
     {
         mockturtle::stopwatch                         stop{stats.time_total};
         generate_random_sidb_layout_params<cell<Lyt>> parameter{
@@ -374,9 +376,14 @@ class design_sidb_gates_impl
      * All SiDBs within the canvas.
      */
     std::vector<typename Lyt::cell> canvas_sidbs;
-
-    std::vector<typename Lyt::cell>                   old_canvas_sidbs;
-    std::pair<typename Lyt::cell, typename Lyt::cell> swaped_pair{};
+    /**
+     * Canvas SiDBs before move.
+     */
+    std::vector<typename Lyt::cell> canvas_sidbs_before_move;
+    /**
+     * Canvas SiDB was moved from one cell (first cell) to another cell (second cell).
+     */
+    std::pair<typename Lyt::cell, typename Lyt::cell> sidb_moved_from_to{};
     /**
      * A random-number generator.
      */
@@ -389,7 +396,14 @@ class design_sidb_gates_impl
      *
      */
     std::uniform_int_distribution<uint64_t> random_canvas_cell_functor;
-
+    /**
+     * This function iterates over each cell in the provided layout `lyt` and checks if the cell
+     * corresponds to a canvas SiDB. Canvas SiDBs are defined as SiDBs that are part of the canvas
+     * region. It populates a vector with the canvas SiDBs found in the layout and returns it.
+     *
+     * @param lyt The layout from which canvas SiDBs are to be determined.
+     * @return A vector containing the canvas SiDBs found in the layout.
+     */
     [[nodiscard]] std::vector<typename Lyt::cell> determine_canvas_sidbs(const Lyt& lyt) const noexcept
     {
         std::vector<typename Lyt::cell> placed_canvas_sidbs = {};
@@ -405,7 +419,16 @@ class design_sidb_gates_impl
             });
         return placed_canvas_sidbs;
     }
-
+    /**
+     * This function randomly selects a canvas cell from the layout `lyt` and a canvas SiDB
+     * to replace it with. It then moves the selected canvas SiDB to the randomly chosen
+     * canvas cell, updating the layout accordingly. If the randomly chosen canvas cell is not
+     * empty, the layout remains unchanged.
+     *
+     * @param lyt The layout from which a canvas SiDB is to be moved.
+     * @return The layout after the canvas SiDB has been moved, or the original layout if the
+     *         randomly chosen canvas cell was not empty.
+     */
     [[nodiscard]] Lyt move_sidb(Lyt& lyt) noexcept
     {
         const auto random_index         = random_canvas_cell_functor(generator);
@@ -420,18 +443,11 @@ class design_sidb_gates_impl
         }
         lyt.assign_cell_type(replace_sidb, Lyt::technology::cell_type::EMPTY);
         lyt.assign_cell_type(random_cell, Lyt::technology::cell_type::NORMAL);
-        swaped_pair                        = {replace_sidb, random_cell};
-        old_canvas_sidbs                   = canvas_sidbs;
+        sidb_moved_from_to                 = {replace_sidb, random_cell};
+        canvas_sidbs_before_move           = canvas_sidbs;
         canvas_sidbs[random_index_replace] = random_cell;
         return lyt;
     }
-
-    void undo_swap(const Lyt& lyt)
-    {
-        lyt.assign_cell_type(swaped_pair.firsr, Lyt::technology::cell_type::NORMAL);
-        lyt.assign_cell_type(swaped_pair.second, Lyt::technology::cell_type::NORMAL);
-    }
-
     /**
      * Checks if any SiDBs within the specified cell indices are located too closely together, with a distance of less
      * than 0.5 nanometers.
@@ -552,26 +568,22 @@ design_sidb_gates(const Lyt& skeleton, const std::vector<TT>& spec, const design
 }
 
 /**
- * Designs SiDB gates using metric-driven simulated annealing.
+ * This function designs SiDB gates to minimize the cost function \f$\chi\f$, considering a layout skeleton, a set of
+ * truth tables, and specified parameters for gate design and simulated annealing. Currently, only the critical
+ * temperature and the operational domain are incorporated into the cost function.
  *
- * This function designs SiDB gates based on a given layout skeleton, a set of truth tables, and specified parameters
- * for gate design and simulated annealing. The function employs a metric-driven approach to optimize gate placement
- * and configuration, utilizing simulated annealing to explore the solution space.
- *
- * * @tparam Lyt SiDB cell-level layout type.
- * @tparam TT The type of the truth table specifying the gate behavior.
- * @param skeleton The skeleton layout used as a starting point for gate design.
+ * @param skeleton The layout skeleton used as the basis for gate design.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
- * @param params The parameters for SiDB gate design.
- * @param sa_params The parameters for simulated annealing.
- * @param pst Pointer to a statistics object to store the design statistics.
- * @return The designed layout with SiDB gates.
+ * @param params The parameters for gate design.
+ * @param sa_params Parameters for simulated annealing.
+ * @param pst Statistics for gate design.
+ * @return A layout with SiDB gates designed to minimize the cost function.
  */
 template <typename Lyt, typename TT>
-[[nodiscard]] Lyt design_sidb_gates_metric_driven_simulated_annealing(const Lyt& skeleton, const std::vector<TT>& spec,
-                                                                      const design_sidb_gates_params<Lyt>& params,
-                                                                      const design_sidb_gates_sa_params&   sa_params,
-                                                                      design_sidb_gates_stats* pst = nullptr) noexcept
+[[nodiscard]] Lyt design_sidb_gates_metric_driven_simulated_annealing(
+    const Lyt& skeleton, const std::vector<TT>& spec, const design_sidb_gates_params<Lyt>& params,
+    const design_sidb_gates_metric_driven_simulated_annealing_params& sa_params,
+    design_sidb_gates_stats*                                          pst = nullptr) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -589,7 +601,7 @@ template <typename Lyt, typename TT>
     design_sidb_gates_stats                 st{};
     detail::design_sidb_gates_impl<Lyt, TT> p{skeleton, spec, params, st};
 
-    const auto result = p.run_sa_design(sa_params);
+    const auto result = p.run_metric_driven_design_process(sa_params);
 
     if (pst)
     {

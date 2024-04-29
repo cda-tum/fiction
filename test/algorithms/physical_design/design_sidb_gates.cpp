@@ -309,9 +309,9 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
                                          sidb_defect{sidb_defect_type::DB, -1, params.simulation_parameters.epsilon_r,
                                                      params.simulation_parameters.lambda_tf});
 
-        const critical_temperature_params ct_params{params.simulation_parameters};
-        const operational_domain_params   op_params{params.simulation_parameters};
-        design_sidb_gates_sa_params       sa_params{};
+        const critical_temperature_params                          ct_params{params.simulation_parameters};
+        const operational_domain_params                            op_params{params.simulation_parameters};
+        design_sidb_gates_metric_driven_simulated_annealing_params sa_params{};
         sa_params.ct_params                 = ct_params;
         sa_params.op_params                 = op_params;
         sa_params.weight_temperature        = -1.0;
