@@ -12,7 +12,6 @@
 #include "fiction/technology/sidb_defect_surface.hpp"
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/execution_utils.hpp"
 #include "fiction/utils/layout_utils.hpp"
 
 #include <mockturtle/utils/stopwatch.hpp>
@@ -20,8 +19,10 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
-#include <future>
+#include <cstdlib>
 #include <limits>
+#include <mutex>
+#include <thread>
 #include <utility>
 #include <vector>
 
@@ -79,10 +80,10 @@ class maximum_defect_influence_position_and_distance_impl
 {
   public:
     maximum_defect_influence_position_and_distance_impl(
-        const Lyt& lyt, const maximum_defect_influence_position_and_distance_params& sim_params,
+        const Lyt& lyt, maximum_defect_influence_position_and_distance_params sim_params,
         maximum_defect_influence_position_and_distance_stats& st) :
             layout{lyt},
-            params{sim_params},
+            params{std::move(sim_params)},
             stats{st}
     {
         collect_all_defect_cells();
@@ -179,15 +180,15 @@ class maximum_defect_influence_position_and_distance_impl
             }
         };
 
-        const size_t num_threads = std::thread::hardware_concurrency();
+        const std::size_t num_threads = std::thread::hardware_concurrency();
 
-        const size_t chunk_size = (defect_cells.size() + num_threads - 1) / num_threads;
+        const std::size_t chunk_size = (defect_cells.size() + num_threads - 1) / num_threads;
 
         std::vector<std::thread> threads;
         threads.reserve(num_threads);
 
         auto defect_it = defect_cells.begin();
-        for (size_t i = 0; i < num_threads; ++i)
+        for (std::size_t i = 0; i < num_threads; ++i)
         {
 
             auto chunk_start = defect_it;

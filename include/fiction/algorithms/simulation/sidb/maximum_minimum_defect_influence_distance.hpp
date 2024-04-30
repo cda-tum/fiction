@@ -51,6 +51,7 @@ maximum_minimum_defect_influence_distance(const Lyt&                            
     }
     return max_distance;
 }
+
 }  // namespace fiction
 
 #endif  // FICTION_MAXIMUM_MINIMUM_DEFECT_INFLUENCE_DISTANCE_HPP
