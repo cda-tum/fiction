@@ -580,10 +580,8 @@ class operational_domain_impl
         std::for_each(x_indices.cbegin(), x_indices.cend(),
                       [this, &lyt](const auto x)
                       {
-                          std::for_each(y_indices.cbegin(), y_indices.cend(),
-                                        [this, &lyt, x](const auto y) {
-                                            is_step_point_suitable_for_given_cds({x, y}, lyt);
-                                        });
+                          std::for_each(y_indices.cbegin(), y_indices.cend(), [this, &lyt, x](const auto y)
+                                        { is_step_point_suitable_for_given_cds({x, y}, lyt); });
                       });
 
         sidb_simulation_parameters simulation_parameters = params.simulation_parameters;
