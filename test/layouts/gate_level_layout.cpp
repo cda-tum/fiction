@@ -1047,34 +1047,22 @@ TEST_CASE("Crossings", "[gate-level-layout]")
     CHECK(layout.fanin_size(layout.get_node({2, 2})) == 2);
 
     layout.foreach_fanout(layout.get_node({1, 1}),
-                          [&layout](const auto& fon) {
-                              CHECK(fon == layout.get_node({2, 1, 1}));
-                          });
+                          [&layout](const auto& fon) { CHECK(fon == layout.get_node({2, 1, 1})); });
 
     layout.foreach_fanout(layout.get_node({2, 1}),
-                          [&layout](const auto& fon) {
-                              CHECK(fon == layout.get_node({2, 2}));
-                          });
+                          [&layout](const auto& fon) { CHECK(fon == layout.get_node({2, 2})); });
 
     layout.foreach_fanout(layout.get_node({2, 1, 1}),
-                          [&layout](const auto& fon) {
-                              CHECK(fon == layout.get_node({3, 1}));
-                          });
+                          [&layout](const auto& fon) { CHECK(fon == layout.get_node({3, 1})); });
 
     layout.foreach_fanin(layout.get_node({2, 1}),
-                         [&layout](const auto& fi) {
-                             CHECK(layout.get_node(fi) == layout.get_node({2, 0}));
-                         });
+                         [&layout](const auto& fi) { CHECK(layout.get_node(fi) == layout.get_node({2, 0})); });
 
     layout.foreach_fanin(layout.get_node({2, 1, 1}),
-                         [&layout](const auto& fi) {
-                             CHECK(layout.get_node(fi) == layout.get_node({1, 1}));
-                         });
+                         [&layout](const auto& fi) { CHECK(layout.get_node(fi) == layout.get_node({1, 1})); });
 
     layout.foreach_fanin(layout.get_node({3, 1}),
-                         [&layout](const auto& fi) {
-                             CHECK(layout.get_node(fi) == layout.get_node({2, 1, 1}));
-                         });
+                         [&layout](const auto& fi) { CHECK(layout.get_node(fi) == layout.get_node({2, 1, 1})); });
 }
 
 TEST_CASE("Move nodes", "[gate-level-layout]")
@@ -1136,14 +1124,10 @@ TEST_CASE("Move nodes", "[gate-level-layout]")
                          });
 
     layout.foreach_fanout(and_node,
-                          [&layout](const auto& fon) {
-                              CHECK(layout.get_tile(fon) == tile<gate_layout>{3, 1});
-                          });
+                          [&layout](const auto& fon) { CHECK(layout.get_tile(fon) == tile<gate_layout>{3, 1}); });
 
     layout.foreach_fanout(or_node,
-                          [&layout](const auto& fon) {
-                              CHECK(layout.get_tile(fon) == tile<gate_layout>{0, 0});
-                          });
+                          [&layout](const auto& fon) { CHECK(layout.get_tile(fon) == tile<gate_layout>{0, 0}); });
 
     // move PI
 
