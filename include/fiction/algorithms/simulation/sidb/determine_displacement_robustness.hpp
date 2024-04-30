@@ -39,8 +39,6 @@ struct displacement_robustness_domain
     /**
      * Represents a domain of displacement robustness for layouts resulting from applying a displacement to a given SiDB
      * layout.
-     *
-     * @note The original layout is not stored.
      */
     std::vector<std::pair<Lyt, operational_status>> operational_values{};
 };
@@ -172,8 +170,8 @@ class displacement_robustness_domain_impl
 
         displacement_robustness_domain<Lyt> domain{};
 
+        // add operation status of the original layout
         const auto status_original_layout = is_operational(layout, truth_table, params.operational_params).first;
-
         domain.operational_values.emplace_back(layout, status_original_layout);
 
         if (status_original_layout == operational_status::OPERATIONAL)
