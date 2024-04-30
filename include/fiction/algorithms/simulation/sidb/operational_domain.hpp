@@ -384,7 +384,9 @@ class operational_domain_impl
                       {
                           // for each y value in parallel
                           std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ y_indices.cbegin(), y_indices.cend(),
-                                        [this, x](const auto y) { is_step_point_operational({x, y}); });
+                                        [this, x](const auto y) {
+                                            is_step_point_operational({x, y});
+                                        });
                       });
 
         log_stats();
@@ -580,8 +582,10 @@ class operational_domain_impl
         std::for_each(x_indices.cbegin(), x_indices.cend(),
                       [this, &lyt](const auto x)
                       {
-                          std::for_each(y_indices.cbegin(), y_indices.cend(), [this, &lyt, x](const auto y)
-                                        { is_step_point_suitable_for_given_cds({x, y}, lyt); });
+                          std::for_each(y_indices.cbegin(), y_indices.cend(),
+                                        [this, &lyt, x](const auto y) {
+                                            is_step_point_suitable_for_given_cds({x, y}, lyt);
+                                        });
                       });
 
         sidb_simulation_parameters simulation_parameters = params.simulation_parameters;
@@ -1342,10 +1346,9 @@ operational_domain operational_domain_contour_tracing(const Lyt& lyt, const std:
     return result;
 }
 /**
- * This function computes the physical parameters necessary for ensuring the physical validity of the given charge
- * distribution surface `cds`. It not only identifies the physical parameters that render the charge
- * distribution physically valid but also determines the excited state number. The ground state corresponds to zero,
- * and each subsequent excited state is numbered accordingly.
+ * This function computes the parameters necessary for ensuring the physical validity of the charge distribution and
+ * determines the corresponding excited state number. The ground state is denoted by zero, with each subsequent excited
+ * state incrementally numbered.
  *
  * @tparam Lyt The charge distribution surface type.
  * @param cds The charge distribution surface for which physical parameters are to be determined.
