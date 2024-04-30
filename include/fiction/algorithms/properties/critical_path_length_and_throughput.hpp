@@ -82,7 +82,7 @@ class critical_path_length_and_throughput_impl
     struct path_info
     {
         path_info() = default;
-        path_info(const uint64_t len, const uint64_t dly, const uint64_t dff) : length(len), delay(dly), diff(dff){};
+        path_info(const uint64_t len, const uint64_t dly, const uint64_t dff) : length(len), delay(dly), diff(dff) {};
 
         uint64_t length{0ull}, delay{0ull}, diff{0ull};
     };
