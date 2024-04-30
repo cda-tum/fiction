@@ -52,10 +52,12 @@ void check_op_domain_params_and_operational_status(const operational_domain&    
         CHECK(coord.y - params.y_min > -physical_constants::POP_STABILITY_ERR);
         CHECK(params.y_max - coord.y > -physical_constants::POP_STABILITY_ERR);
 
-        if (*status == operational_status::OPERATIONAL)
+        if (status.has_value())
         {
-            // std::cout << fmt::format("({}, {})\n", coord.x, coord.y);
-            // CHECK(op_value == *status);
+            if (status.value() == operational_status::OPERATIONAL)
+            {
+                CHECK(op_value == *status);
+            }
         }
     }
 }
