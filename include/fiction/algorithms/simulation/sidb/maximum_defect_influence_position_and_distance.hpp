@@ -182,7 +182,7 @@ class maximum_defect_influence_position_and_distance_impl
 
         const std::size_t num_threads = std::thread::hardware_concurrency();
 
-        const std::size_t chunk_size = (defect_cells.size() + num_threads - 1) / num_threads;
+        const std::size_t chunk_size = defect_cells.size() / num_threads;
 
         std::vector<std::thread> threads;
         threads.reserve(num_threads);
@@ -190,18 +190,20 @@ class maximum_defect_influence_position_and_distance_impl
         auto defect_it = defect_cells.begin();
         for (std::size_t i = 0; i < num_threads; ++i)
         {
-
             auto chunk_start = defect_it;
             auto chunk_end   = std::min(defect_it + chunk_size, defect_cells.end());
 
             threads.emplace_back(process_defect, std::vector<typename Lyt::cell>(chunk_start, chunk_end));
 
             defect_it = chunk_end;
-            if (defect_it == defect_cells.end())
-            {
-                break;
-            }
         }
+
+        auto chunk_start = defect_it;
+        auto chunk_end   = defect_cells.end();
+
+        const auto chunk_vector = std::vector<typename Lyt::cell>(chunk_start, chunk_end);
+
+        threads.emplace_back(process_defect, chunk_vector);
 
         for (auto& thread : threads)
         {
