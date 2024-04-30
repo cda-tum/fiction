@@ -51,7 +51,7 @@ struct displacement_robustness_domain
  * @param Lyt SiDB cell-level layout type.
  */
 template <typename Lyt>
-struct sidb_gate_displacement_robustness_params
+struct displacement_robustness_domain_params
 {
     /**
      * Possible operational status of a layout.
@@ -134,7 +134,7 @@ class displacement_robustness_domain_impl
      * @param st Statistics related to the displacement robustness computation.
      */
     displacement_robustness_domain_impl(const Lyt& lyt, const std::vector<TT>& spec,
-                                        const sidb_gate_displacement_robustness_params<Lyt>& ps,
+                                        const displacement_robustness_domain_params<Lyt>& ps,
                                         displacement_robustness_domain_stats&                st) noexcept :
             layout{lyt},
             params{ps},
@@ -395,7 +395,7 @@ class displacement_robustness_domain_impl
 
         double percentage_of_layouts = 1.0;
         if (params.analysis_mode ==
-            sidb_gate_displacement_robustness_params<Lyt>::displacement_analysis_mode::RANDOM_SAMPLING)
+            displacement_robustness_domain_params<Lyt>::displacement_analysis_mode::RANDOM_SAMPLING)
         {
             percentage_of_layouts = params.percentage_of_analyzed_displaced_layouts;
         }
@@ -441,7 +441,7 @@ class displacement_robustness_domain_impl
     /**
      * The parameters for the displacement robustness computation.
      */
-    sidb_gate_displacement_robustness_params<Lyt> params;
+    displacement_robustness_domain_params<Lyt> params;
     /**
      * The statistics of the displacement robustness computation.
      */
@@ -490,7 +490,7 @@ class displacement_robustness_domain_impl
 template <typename Lyt, typename TT>
 [[nodiscard]] displacement_robustness_domain<Lyt>
 determine_displacement_robustness_domain(const Lyt& layout, const std::vector<TT>& spec,
-                                         const sidb_gate_displacement_robustness_params<Lyt>& params = {},
+                                         const displacement_robustness_domain_params<Lyt>& params = {},
                                          displacement_robustness_domain_stats*                stats  = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
@@ -527,7 +527,7 @@ determine_displacement_robustness_domain(const Lyt& layout, const std::vector<TT
 template <typename Lyt, typename TT>
 [[nodiscard]] double
 determine_propability_of_fabricating_operational_gate(const Lyt& layout, const std::vector<TT>& spec,
-                                                      const sidb_gate_displacement_robustness_params<Lyt>& params = {},
+                                                      const displacement_robustness_domain_params<Lyt>& params = {},
                                                       const double fabrication_error_rate                         = 1.0)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");

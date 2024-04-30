@@ -271,16 +271,14 @@ Operational Domain Computation
         .. autofunction:: mnt.pyfiction.operational_domain_contour_tracing
 
 
-
 Displacement Robustness Domain
 ##############################
 
-**Header:** ``fiction/algorithms/simulation/sidb/displacement_robustness.hpp``
+**Header:** ``fiction/algorithms/simulation/sidb/determine_displacement_robustness.hpp``
 
-.. doxygenstruct:: fiction::determine_displacement_robustness_domain
+.. doxygenstruct:: fiction::displacement_robustness_domain
    :members:
-
-.. doxygenstruct:: fiction::sidb_gate_displacement_robustness_params
+.. doxygenstruct:: fiction::displacement_robustness_domain_params
    :members:
 .. doxygenstruct:: fiction::displacement_robustness_domain_stats
    :members:
