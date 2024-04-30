@@ -33,6 +33,7 @@ jobs:
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
             -DFICTION_CLI=ON
             -DFICTION_TEST=ON
+            -DFICTION_BENCHMARK=OFF
             -DFICTION_EXPERIMENTS=ON
             -DMOCKTURTLE_EXAMPLES=OFF
           build_dir: build

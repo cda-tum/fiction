@@ -42,10 +42,9 @@ void charge_distribution_surface_layout(pybind11::module& m, const std::string& 
         "sign_to_charge_state", [](int8_t sg) { return fiction::sign_to_charge_state(sg); }, "sg"_a,
         DOC(fiction_sign_to_charge_state));
     m.def(
-        "charge_configuration_to_string",
-        [](std::vector<fiction::sidb_charge_state> charge_distribution)
-        { return fiction::charge_configuration_to_string(charge_distribution); },
-        "charge_distribution"_a, DOC(fiction_charge_configuration_to_string));
+        "charge_configuration_to_string", [](std::vector<fiction::sidb_charge_state> charge_distribution)
+        { return fiction::charge_configuration_to_string(charge_distribution); }, "charge_distribution"_a,
+        DOC(fiction_charge_configuration_to_string));
 
     using py_cds = py_charge_distribution_surface_layout<Lyt>;
 
@@ -65,15 +64,11 @@ void charge_distribution_surface_layout(pybind11::module& m, const std::string& 
 
         .def("get_all_sidb_locations_in_nm", [](py_cds& cds) { return cds.get_all_sidb_locations_in_nm(); })
         .def(
-            "assign_cell_type",
-            [](py_cds& cds, fiction::cell<py_cds> c, typename py_cds::cell_type ct)
-            { return cds.assign_cell_type(c, ct); },
-            "c"_a, "ct"_a)
+            "assign_cell_type", [](py_cds& cds, fiction::cell<py_cds> c, typename py_cds::cell_type ct)
+            { return cds.assign_cell_type(c, ct); }, "c"_a, "ct"_a)
         .def(
-            "assign_physical_parameters",
-            [](py_cds& cds, fiction::sidb_simulation_parameters params)
-            { return cds.assign_physical_parameters(params); },
-            "params"_a)
+            "assign_physical_parameters", [](py_cds& cds, fiction::sidb_simulation_parameters params)
+            { return cds.assign_physical_parameters(params); }, "params"_a)
         .def("get_phys_params", [](py_cds& cds) { return cds.get_simulation_params(); })
         .def(
             "charge_exists", [](py_cds& cds, fiction::sidb_charge_state cs) { return cds.charge_exists(cs); }, "cs"_a)
@@ -82,35 +77,31 @@ void charge_distribution_surface_layout(pybind11::module& m, const std::string& 
         .def(
             "assign_charge_state",
             [](py_cds& cds, fiction::cell<py_cds> c, fiction::sidb_charge_state cs, bool update_charge_index = true)
-            { return cds.assign_charge_state(c, cs, update_charge_index); },
-            "c"_a, "cs"_a, "update_charge_index"_a = true)
+            { return cds.assign_charge_state(c, cs, update_charge_index); }, "c"_a, "cs"_a,
+            "update_charge_index"_a = true)
         .def(
-            "assign_charge_by_cell_index",
-            [](py_cds& cds, uint64_t i, fiction::sidb_charge_state cs)
-            { return cds.assign_charge_by_cell_index(i, cs); },
-            "i"_a, "cs"_a)
+            "assign_charge_by_cell_index", [](py_cds& cds, uint64_t i, fiction::sidb_charge_state cs)
+            { return cds.assign_charge_by_cell_index(i, cs); }, "i"_a, "cs"_a)
         .def(
             "assign_all_charge_states",
             [](py_cds& cds, fiction::sidb_charge_state cs) { return cds.assign_all_charge_states(cs); }, "cs"_a)
         .def(
-            "assign_dependent_cell",
-            [](py_cds& cds, fiction::cell<py_cds> dependent_cell) { return cds.assign_dependent_cell(dependent_cell); },
-            "dependent_cell"_a)
+            "assign_dependent_cell", [](py_cds& cds, fiction::cell<py_cds> dependent_cell)
+            { return cds.assign_dependent_cell(dependent_cell); }, "dependent_cell"_a)
         .def(
             "assign_base_number", [](py_cds& cds, uint8_t base) { return cds.assign_base_number(base); }, "base"_a)
         .def(
             "add_sidb_defect_to_potential_landscape",
             [](py_cds& cds, fiction::cell<py_cds> c, fiction::sidb_defect defect)
-            { return cds.add_sidb_defect_to_potential_landscape(c, defect); },
-            "c"_a, "defect"_a)
+            { return cds.add_sidb_defect_to_potential_landscape(c, defect); }, "c"_a, "defect"_a)
         .def(
             "erase_defect", [](py_cds& cds, fiction::cell<py_cds> c) { return cds.erase_defect(c); }, "c"_a)
 
         .def(
             "assign_charge_state_by_cell_index",
             [](py_cds& cds, uint64_t index, fiction::sidb_charge_state cs, bool update_charge_configuration = true)
-            { return cds.assign_charge_state_by_cell_index(index, cs, update_charge_configuration); },
-            "index"_a, "cs"_a, "update_charge_configuration"_a = true)
+            { return cds.assign_charge_state_by_cell_index(index, cs, update_charge_configuration); }, "index"_a,
+            "cs"_a, "update_charge_configuration"_a = true)
         .def(
             "get_charge_state", [](py_cds& cds, fiction::cell<py_cds> c) { return cds.get_charge_state(c); }, "c"_a)
         .def(
@@ -120,45 +111,32 @@ void charge_distribution_surface_layout(pybind11::module& m, const std::string& 
 
         .def("negative_sidb_detection", [](py_cds& cds) { return cds.negative_sidb_detection(); })
         .def(
-            "get_nm_distance_between_sidbs",
-            [](py_cds& cds, fiction::cell<py_cds> c1, fiction::cell<py_cds> c2)
-            { return cds.get_nm_distance_between_sidbs(c1, c2); },
-            "c1"_a, "c2"_a)
+            "get_nm_distance_between_sidbs", [](py_cds& cds, fiction::cell<py_cds> c1, fiction::cell<py_cds> c2)
+            { return cds.get_nm_distance_between_sidbs(c1, c2); }, "c1"_a, "c2"_a)
         .def(
-            "get_nm_distance_by_indices",
-            [](py_cds& cds, uint64_t index1, uint64_t index2)
-            { return cds.get_nm_distance_by_indices(index1, index2); },
-            "index1"_a, "index2"_a)
+            "get_nm_distance_by_indices", [](py_cds& cds, uint64_t index1, uint64_t index2)
+            { return cds.get_nm_distance_by_indices(index1, index2); }, "index1"_a, "index2"_a)
         .def(
-            "calculate_chargeless_potential_between_sidbs_by_index",
-            [](py_cds& cds, uint64_t index1, uint64_t index2)
-            { return cds.calculate_chargeless_potential_between_sidbs_by_index(index1, index2); },
-            "index1"_a, "index2"_a)
+            "calculate_chargeless_potential_between_sidbs_by_index", [](py_cds& cds, uint64_t index1, uint64_t index2)
+            { return cds.calculate_chargeless_potential_between_sidbs_by_index(index1, index2); }, "index1"_a,
+            "index2"_a)
         .def(
             "calculate_chargeless_potential_between_sidbs",
             [](py_cds& cds, fiction::cell<py_cds> c1, fiction::cell<py_cds> c2)
-            { return cds.calculate_chargeless_potential_between_sidbs(c1, c2); },
-            "c1"_a, "c2"_a)
+            { return cds.calculate_chargeless_potential_between_sidbs(c1, c2); }, "c1"_a, "c2"_a)
         .def(
             "get_chargeless_potential_between_sidbs",
             [](py_cds& cds, fiction::cell<py_cds> c1, fiction::cell<py_cds> c2)
-            { return cds.get_chargeless_potential_between_sidbs(c1, c2); },
-            "c1"_a, "c2"_a)
+            { return cds.get_chargeless_potential_between_sidbs(c1, c2); }, "c1"_a, "c2"_a)
         .def(
-            "get_chargless_potential_by_indices",
-            [](py_cds& cds, uint64_t index1, uint64_t index2)
-            { return cds.get_chargeless_potential_by_indices(index1, index2); },
-            "index1"_a, "index2"_a)
+            "get_chargless_potential_by_indices", [](py_cds& cds, uint64_t index1, uint64_t index2)
+            { return cds.get_chargeless_potential_by_indices(index1, index2); }, "index1"_a, "index2"_a)
         .def(
-            "get_potential_between_sidbs",
-            [](py_cds& cds, fiction::cell<py_cds> c1, fiction::cell<py_cds> c2)
-            { return cds.get_potential_between_sidbs(c1, c2); },
-            "c1"_a, "c2"_a)
+            "get_potential_between_sidbs", [](py_cds& cds, fiction::cell<py_cds> c1, fiction::cell<py_cds> c2)
+            { return cds.get_potential_between_sidbs(c1, c2); }, "c1"_a, "c2"_a)
         .def(
-            "update_local_potential",
-            [](py_cds& cds, fiction::charge_distribution_history history_mode)
-            { return cds.update_local_potential(history_mode); },
-            "consider_history"_a)
+            "update_local_potential", [](py_cds& cds, fiction::charge_distribution_history history_mode)
+            { return cds.update_local_potential(history_mode); }, "consider_history"_a)
         .def(
             "get_local_potential", [](py_cds& cds, fiction::cell<py_cds> c) { return cds.get_local_potential(c); },
             "c"_a)
@@ -266,9 +244,8 @@ void charge_distribution_surface_layout(pybind11::module& m, const std::string& 
              })
 
         .def(
-            "is_within_bounds",
-            [](const py_cds& lyt, const fiction::coordinate<py_cds>& c) { return lyt.is_within_bounds(c); }, "c"_a,
-            DOC(fiction_cartesian_layout_is_within_bounds))
+            "is_within_bounds", [](const py_cds& lyt, const fiction::coordinate<py_cds>& c)
+            { return lyt.is_within_bounds(c); }, "c"_a, DOC(fiction_cartesian_layout_is_within_bounds))
 
         .def(
             "bounding_box_2d",

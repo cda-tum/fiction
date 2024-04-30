@@ -104,19 +104,16 @@ void gate_level_layout(pybind11::module& m, const std::string& topology)
         .def("is_empty", &GateLyt::is_empty, DOC(fiction_gate_level_layout_is_empty))
 
         .def(
-            "fanin_size",
-            [](const GateLyt& layout, const uint64_t node) { return layout.template fanin_size<true>(node); }, "n"_a,
-            DOC(fiction_gate_level_layout_fanin_size))
+            "fanin_size", [](const GateLyt& layout, const uint64_t node)
+            { return layout.template fanin_size<true>(node); }, "n"_a, DOC(fiction_gate_level_layout_fanin_size))
 
         .def(
-            "fanout_size",
-            [](const GateLyt& layout, const uint64_t node) { return layout.template fanout_size<true>(node); }, "n"_a,
-            DOC(fiction_gate_level_layout_fanout_size))
+            "fanout_size", [](const GateLyt& layout, const uint64_t node)
+            { return layout.template fanout_size<true>(node); }, "n"_a, DOC(fiction_gate_level_layout_fanout_size))
 
         .def(
-            "get_node",
-            [](const GateLyt& layout, const py_offset_coordinate& coordinate) { return layout.get_node(coordinate); },
-            "t"_a, DOC(fiction_gate_level_layout_get_node))
+            "get_node", [](const GateLyt& layout, const py_offset_coordinate& coordinate)
+            { return layout.get_node(coordinate); }, "t"_a, DOC(fiction_gate_level_layout_get_node))
         .def("get_tile", &GateLyt::get_tile, "n"_a, DOC(fiction_gate_level_layout_get_tile))
         .def("make_signal", &GateLyt::make_signal, "n"_a, DOC(fiction_gate_level_layout_make_signal))
 
@@ -163,136 +160,114 @@ void gate_level_layout(pybind11::module& m, const std::string& topology)
              })
 
         .def(
-            "fanins",
-            [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
-            { return layout.template incoming_data_flow<true>(tile); },
-            "t"_a)
+            "fanins", [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
+            { return layout.template incoming_data_flow<true>(tile); }, "t"_a)
 
         .def(
-            "fanouts",
-            [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
-            { return layout.template outgoing_data_flow<true>(tile); },
-            "t"_a)
+            "fanouts", [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
+            { return layout.template outgoing_data_flow<true>(tile); }, "t"_a)
 
         .def(
             "is_incoming_signal",
             [](const GateLyt& layout, const fiction::tile<GateLyt>& tile, const typename GateLyt::signal& signal)
-            { return layout.template is_incoming_signal<true>(tile, signal); },
-            "t"_a, "s"_a, DOC(fiction_gate_level_layout_is_incoming_signal))
+            { return layout.template is_incoming_signal<true>(tile, signal); }, "t"_a, "s"_a,
+            DOC(fiction_gate_level_layout_is_incoming_signal))
 
         .def(
-            "has_no_incoming_signal",
-            [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
-            { return layout.template has_no_incoming_signal<true>(tile); },
-            "t"_a, DOC(fiction_gate_level_layout_has_no_incoming_signal))
+            "has_no_incoming_signal", [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
+            { return layout.template has_no_incoming_signal<true>(tile); }, "t"_a,
+            DOC(fiction_gate_level_layout_has_no_incoming_signal))
 
         .def(
-            "has_northern_incoming_signal",
-            [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
-            { return layout.template has_northern_incoming_signal<true>(tile); },
-            "t"_a, DOC(fiction_gate_level_layout_has_northern_incoming_signal))
+            "has_northern_incoming_signal", [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
+            { return layout.template has_northern_incoming_signal<true>(tile); }, "t"_a,
+            DOC(fiction_gate_level_layout_has_northern_incoming_signal))
 
         .def(
-            "has_north_eastern_incoming_signal",
-            [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
-            { return layout.template has_north_eastern_incoming_signal<true>(tile); },
-            "t"_a, DOC(fiction_gate_level_layout_has_north_eastern_incoming_signal))
+            "has_north_eastern_incoming_signal", [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
+            { return layout.template has_north_eastern_incoming_signal<true>(tile); }, "t"_a,
+            DOC(fiction_gate_level_layout_has_north_eastern_incoming_signal))
 
         .def(
-            "has_eastern_incoming_signal",
-            [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
-            { return layout.template has_eastern_incoming_signal<true>(tile); },
-            "t"_a, DOC(fiction_gate_level_layout_has_eastern_incoming_signal))
+            "has_eastern_incoming_signal", [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
+            { return layout.template has_eastern_incoming_signal<true>(tile); }, "t"_a,
+            DOC(fiction_gate_level_layout_has_eastern_incoming_signal))
 
         .def(
-            "has_south_eastern_incoming_signal",
-            [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
-            { return layout.template has_south_eastern_incoming_signal<true>(tile); },
-            "t"_a, DOC(fiction_gate_level_layout_has_south_eastern_incoming_signal))
+            "has_south_eastern_incoming_signal", [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
+            { return layout.template has_south_eastern_incoming_signal<true>(tile); }, "t"_a,
+            DOC(fiction_gate_level_layout_has_south_eastern_incoming_signal))
 
         .def(
-            "has_southern_incoming_signal",
-            [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
-            { return layout.template has_southern_incoming_signal<true>(tile); },
-            "t"_a, DOC(fiction_gate_level_layout_has_southern_incoming_signal))
+            "has_southern_incoming_signal", [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
+            { return layout.template has_southern_incoming_signal<true>(tile); }, "t"_a,
+            DOC(fiction_gate_level_layout_has_southern_incoming_signal))
 
         .def(
-            "has_south_western_incoming_signal",
-            [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
-            { return layout.template has_south_western_incoming_signal<true>(tile); },
-            "t"_a, DOC(fiction_gate_level_layout_has_south_western_incoming_signal))
+            "has_south_western_incoming_signal", [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
+            { return layout.template has_south_western_incoming_signal<true>(tile); }, "t"_a,
+            DOC(fiction_gate_level_layout_has_south_western_incoming_signal))
 
         .def(
-            "has_western_incoming_signal",
-            [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
-            { return layout.template has_western_incoming_signal<true>(tile); },
-            "t"_a, DOC(fiction_gate_level_layout_has_western_incoming_signal))
+            "has_western_incoming_signal", [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
+            { return layout.template has_western_incoming_signal<true>(tile); }, "t"_a,
+            DOC(fiction_gate_level_layout_has_western_incoming_signal))
 
         .def(
-            "has_north_western_incoming_signal",
-            [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
-            { return layout.template has_north_western_incoming_signal<true>(tile); },
-            "t"_a, DOC(fiction_gate_level_layout_has_north_western_incoming_signal))
+            "has_north_western_incoming_signal", [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
+            { return layout.template has_north_western_incoming_signal<true>(tile); }, "t"_a,
+            DOC(fiction_gate_level_layout_has_north_western_incoming_signal))
 
         .def(
             "is_outgoing_signal",
             [](const GateLyt& layout, const fiction::tile<GateLyt>& tile, const typename GateLyt::signal& signal)
-            { return layout.template is_outgoing_signal<true>(tile, signal); },
-            "t"_a, "s"_a, DOC(fiction_gate_level_layout_is_outgoing_signal))
+            { return layout.template is_outgoing_signal<true>(tile, signal); }, "t"_a, "s"_a,
+            DOC(fiction_gate_level_layout_is_outgoing_signal))
 
         .def(
-            "has_no_outgoing_signal",
-            [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
-            { return layout.template has_no_outgoing_signal<true>(tile); },
-            "t"_a, DOC(fiction_gate_level_layout_has_no_outgoing_signal))
+            "has_no_outgoing_signal", [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
+            { return layout.template has_no_outgoing_signal<true>(tile); }, "t"_a,
+            DOC(fiction_gate_level_layout_has_no_outgoing_signal))
 
         .def(
-            "has_northern_outgoing_signal",
-            [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
-            { return layout.template has_northern_outgoing_signal<true>(tile); },
-            "t"_a, DOC(fiction_gate_level_layout_has_northern_outgoing_signal))
+            "has_northern_outgoing_signal", [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
+            { return layout.template has_northern_outgoing_signal<true>(tile); }, "t"_a,
+            DOC(fiction_gate_level_layout_has_northern_outgoing_signal))
 
         .def(
-            "has_north_eastern_outgoing_signal",
-            [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
-            { return layout.template has_north_eastern_outgoing_signal<true>(tile); },
-            "t"_a, DOC(fiction_gate_level_layout_has_north_eastern_outgoing_signal))
+            "has_north_eastern_outgoing_signal", [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
+            { return layout.template has_north_eastern_outgoing_signal<true>(tile); }, "t"_a,
+            DOC(fiction_gate_level_layout_has_north_eastern_outgoing_signal))
 
         .def(
-            "has_eastern_outgoing_signal",
-            [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
-            { return layout.template has_eastern_outgoing_signal<true>(tile); },
-            "t"_a, DOC(fiction_gate_level_layout_has_eastern_outgoing_signal))
+            "has_eastern_outgoing_signal", [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
+            { return layout.template has_eastern_outgoing_signal<true>(tile); }, "t"_a,
+            DOC(fiction_gate_level_layout_has_eastern_outgoing_signal))
 
         .def(
-            "has_south_eastern_outgoing_signal",
-            [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
-            { return layout.template has_south_eastern_outgoing_signal<true>(tile); },
-            "t"_a, DOC(fiction_gate_level_layout_has_south_eastern_outgoing_signal))
+            "has_south_eastern_outgoing_signal", [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
+            { return layout.template has_south_eastern_outgoing_signal<true>(tile); }, "t"_a,
+            DOC(fiction_gate_level_layout_has_south_eastern_outgoing_signal))
 
         .def(
-            "has_southern_outgoing_signal",
-            [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
-            { return layout.template has_southern_outgoing_signal<true>(tile); },
-            "t"_a, DOC(fiction_gate_level_layout_has_southern_outgoing_signal))
+            "has_southern_outgoing_signal", [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
+            { return layout.template has_southern_outgoing_signal<true>(tile); }, "t"_a,
+            DOC(fiction_gate_level_layout_has_southern_outgoing_signal))
 
         .def(
-            "has_south_western_outgoing_signal",
-            [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
-            { return layout.template has_south_western_outgoing_signal<true>(tile); },
-            "t"_a, DOC(fiction_gate_level_layout_has_south_western_outgoing_signal))
+            "has_south_western_outgoing_signal", [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
+            { return layout.template has_south_western_outgoing_signal<true>(tile); }, "t"_a,
+            DOC(fiction_gate_level_layout_has_south_western_outgoing_signal))
 
         .def(
-            "has_western_outgoing_signal",
-            [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
-            { return layout.template has_western_outgoing_signal<true>(tile); },
-            "t"_a, DOC(fiction_gate_level_layout_has_western_outgoing_signal))
+            "has_western_outgoing_signal", [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
+            { return layout.template has_western_outgoing_signal<true>(tile); }, "t"_a,
+            DOC(fiction_gate_level_layout_has_western_outgoing_signal))
 
         .def(
-            "has_north_western_outgoing_signal",
-            [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
-            { return layout.template has_north_western_outgoing_signal<true>(tile); },
-            "t"_a, DOC(fiction_gate_level_layout_has_north_western_outgoing_signal))
+            "has_north_western_outgoing_signal", [](const GateLyt& layout, const fiction::tile<GateLyt>& tile)
+            { return layout.template has_north_western_outgoing_signal<true>(tile); }, "t"_a,
+            DOC(fiction_gate_level_layout_has_north_western_outgoing_signal))
 
         .def(
             "bounding_box_2d",

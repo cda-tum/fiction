@@ -407,9 +407,8 @@ class read_sqd_layout_impl
             }
 
             std::for_each(incl_cells.begin(), incl_cells.end(),
-                          [this, &defect_type, &charge, &eps_r, &lambda_tf](const auto& cell) {
-                              lyt.assign_sidb_defect(cell, sidb_defect{defect_type, charge, eps_r, lambda_tf});
-                          });
+                          [this, &defect_type, &charge, &eps_r, &lambda_tf](const auto& cell)
+                          { lyt.assign_sidb_defect(cell, sidb_defect{defect_type, charge, eps_r, lambda_tf}); });
         }
     }
 };
