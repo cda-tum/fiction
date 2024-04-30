@@ -578,12 +578,11 @@ class operational_domain_impl
 
         mockturtle::stopwatch stop{stats.time_total};
 
-        // for each x value in parallel
-        std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ x_indices.cbegin(), x_indices.cend(),
+        // step points are analyzed sequentially since
+        std::for_each(x_indices.cbegin(), x_indices.cend(),
                       [this, &lyt](const auto x)
                       {
-                          // for each y value in parallel
-                          std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ y_indices.cbegin(), y_indices.cend(),
+                          std::for_each(y_indices.cbegin(), y_indices.cend(),
                                         [this, &lyt, x](const auto y) {
                                             is_step_point_suitable_for_given_cds({x, y}, lyt);
                                         });
