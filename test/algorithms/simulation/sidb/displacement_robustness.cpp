@@ -110,9 +110,8 @@ TEST_CASE("Determine the probability of fabricating an operational Bestagon AND 
         params.operational_params.simulation_parameters       = sidb_simulation_parameters{2, -0.32};
         params.operational_params.bdl_params.maximum_distance = 2.0;
         params.operational_params.bdl_params.minimum_distance = 0.2;
-        params.analysis_mode                                  =
-            displacement_robustness_domain_params<
-                                             sidb_cell_clk_lyt_siqad>::displacement_analysis_mode::RANDOM_SAMPLING;
+        params.analysis_mode =
+            displacement_robustness_domain_params<sidb_cell_clk_lyt_siqad>::displacement_analysis_mode::RANDOM_SAMPLING;
         params.percentage_of_analyzed_displaced_layouts  = 0.1;
         params.percentage_of_displaced_sidb_combinations = 0.1;
 
@@ -149,9 +148,8 @@ TEST_CASE("Determine the probability of fabricating an operational BDL wire with
         params.operational_params.simulation_parameters       = sidb_simulation_parameters{2, -0.32};
         params.operational_params.bdl_params.maximum_distance = 2.0;
         params.operational_params.bdl_params.minimum_distance = 0.2;
-        params.analysis_mode                                  =
-            displacement_robustness_domain_params<
-                                             sidb_cell_clk_lyt_siqad>::displacement_analysis_mode::RANDOM_SAMPLING;
+        params.analysis_mode =
+            displacement_robustness_domain_params<sidb_cell_clk_lyt_siqad>::displacement_analysis_mode::RANDOM_SAMPLING;
 
         const auto result =
             determine_propability_of_fabricating_operational_gate(lyt, std::vector<tt>{create_id_tt()}, params, 0.2);

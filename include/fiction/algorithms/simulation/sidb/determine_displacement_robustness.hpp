@@ -135,7 +135,7 @@ class displacement_robustness_domain_impl
      */
     displacement_robustness_domain_impl(const Lyt& lyt, const std::vector<TT>& spec,
                                         const displacement_robustness_domain_params<Lyt>& ps,
-                                        displacement_robustness_domain_stats&                st) noexcept :
+                                        displacement_robustness_domain_stats&             st) noexcept :
             layout{lyt},
             params{ps},
             stats{st},
@@ -491,7 +491,7 @@ template <typename Lyt, typename TT>
 [[nodiscard]] displacement_robustness_domain<Lyt>
 determine_displacement_robustness_domain(const Lyt& layout, const std::vector<TT>& spec,
                                          const displacement_robustness_domain_params<Lyt>& params = {},
-                                         displacement_robustness_domain_stats*                stats  = nullptr)
+                                         displacement_robustness_domain_stats*             stats  = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -528,7 +528,7 @@ template <typename Lyt, typename TT>
 [[nodiscard]] double
 determine_propability_of_fabricating_operational_gate(const Lyt& layout, const std::vector<TT>& spec,
                                                       const displacement_robustness_domain_params<Lyt>& params = {},
-                                                      const double fabrication_error_rate                         = 1.0)
+                                                      const double fabrication_error_rate                      = 1.0)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
