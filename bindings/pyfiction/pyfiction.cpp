@@ -6,6 +6,7 @@
 
 #include "pyfiction/algorithms/network_transformation/fanout_substitution.hpp"
 #include "pyfiction/algorithms/network_transformation/network_balancing.hpp"
+#include "pyfiction/algorithms/network_transformation/technology_mapping.hpp"
 #include "pyfiction/algorithms/path_finding/a_star.hpp"
 #include "pyfiction/algorithms/path_finding/distance.hpp"
 #include "pyfiction/algorithms/path_finding/enumerate_all_paths.hpp"
@@ -145,6 +146,7 @@ PYBIND11_MODULE(pyfiction, m)
      */
     pyfiction::fanout_substitution(m);
     pyfiction::network_balancing(m);
+    pyfiction::technology_mapping(m);
     /**
      * Algorithms: Path Finding
      */

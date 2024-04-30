@@ -36,10 +36,8 @@ void place(pybind11::module& m)
     using namespace pybind11::literals;
 
     m.def(
-        "place",
-        [](Lyt& lyt, const fiction::tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n)
-        { return fiction::place(lyt, t, ntk, n); },
-        "lyt"_a, "t"_a, "ntk"_a, "n"_a);  // TODO, DOC(fiction_place));
+        "place", [](Lyt& lyt, const fiction::tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n)
+        { return fiction::place(lyt, t, ntk, n); }, "lyt"_a, "t"_a, "ntk"_a, "n"_a);  // TODO, DOC(fiction_place));
 
     m.def(
         "place",

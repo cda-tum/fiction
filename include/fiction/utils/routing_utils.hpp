@@ -196,11 +196,9 @@ void route_path(Lyt& lyt, const Path& path) noexcept
     auto incoming_signal = static_cast<mockturtle::signal<Lyt>>(path.source());
 
     // exclude source and target
-    std::for_each(path.cbegin() + 1, path.cend() - 1,
-                  [&lyt, &incoming_signal](const auto& coord) {
-                      incoming_signal =
-                          lyt.create_buf(incoming_signal, lyt.is_empty_tile(coord) ? coord : lyt.above(coord));
-                  });
+    std::for_each(
+        path.cbegin() + 1, path.cend() - 1, [&lyt, &incoming_signal](const auto& coord)
+        { incoming_signal = lyt.create_buf(incoming_signal, lyt.is_empty_tile(coord) ? coord : lyt.above(coord)); });
 
     // establish final connection to target node
     lyt.connect(incoming_signal, lyt.get_node(path.target()));
