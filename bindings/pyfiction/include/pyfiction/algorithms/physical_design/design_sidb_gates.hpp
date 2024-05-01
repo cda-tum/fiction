@@ -26,16 +26,6 @@ void design_sidb_gates(pybind11::module& m)
     using namespace py::literals;
 
     /**
-     * Design approach selector type.
-     */
-    pybind11::enum_<fiction::design_sidb_gates_mode>(m, "design_sidb_gates_mode",
-                                                     DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode))
-        .value("EXHAUSTIVE", fiction::design_sidb_gates_mode::EXHAUSTIVE,
-               DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_EXHAUSTIVE))
-        .value("RANDOM", fiction::design_sidb_gates_mode::RANDOM,
-               DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_RANDOM));
-
-    /**
      * Parameters.
      */
     py::class_<fiction::design_sidb_gates_params<Lyt>>(m, "design_sidb_gates_params",
@@ -50,8 +40,12 @@ void design_sidb_gates(pybind11::module& m)
         .def_readwrite("sim_engine", &fiction::design_sidb_gates_params<Lyt>::sim_engine,
                        DOC(fiction_design_sidb_gates_params_sim_engine));
 
+    py::class_<fiction::design_sidb_gates_stats>(m, "exact_stats", DOC(fiction_exact_physical_design_stats))
+        .def(py::init<>());
+
     m.def("design_sidb_gates", &fiction::design_sidb_gates<Lyt, py_tt>, "skeleton"_a, "spec"_a,
-          "params"_a = fiction::design_sidb_gates_params<Lyt>{}, "design_mode"_a, "pstats"_a = nullptr,
+          "params"_a      = fiction::design_sidb_gates_params<Lyt>{},
+          "design_mode"_a = fiction::design_sidb_gates_mode::EXHAUSTIVE, "stats"_a = nullptr,
           DOC(fiction_design_sidb_gates));
 }
 
@@ -59,6 +53,17 @@ void design_sidb_gates(pybind11::module& m)
 
 inline void design_sidb_gates(pybind11::module& m)
 {
+    namespace py = pybind11;
+    /**
+     * Design approach selector type.
+     */
+    py::enum_<fiction::design_sidb_gates_mode>(m, "design_sidb_gates_mode",
+                                               DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode))
+        .value("EXHAUSTIVE", fiction::design_sidb_gates_mode::EXHAUSTIVE,
+               DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_EXHAUSTIVE))
+        .value("RANDOM", fiction::design_sidb_gates_mode::RANDOM,
+               DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_RANDOM));
+
     detail::design_sidb_gates<py_sidb_layout>(m);
 }
 

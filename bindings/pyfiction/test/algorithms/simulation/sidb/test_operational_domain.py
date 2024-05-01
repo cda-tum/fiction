@@ -27,7 +27,7 @@ class TestOperationalDomain(unittest.TestCase):
         self.assertGreater(stats_grid.num_operational_parameter_combinations, 0)
 
         stats_flood_fill = operational_domain_stats()
-        opdomain = operational_domain_flood_fill(lyt, [create_xor_tt()], 100, params, stats_flood_fill)
+        opdomain = operational_domain_flood_fill(lyt, [create_xor_tt()], 100, params, None, stats_flood_fill)
         self.assertGreater(stats_flood_fill.num_operational_parameter_combinations, 0)
 
         stats_random_sampling = operational_domain_stats()
@@ -35,7 +35,7 @@ class TestOperationalDomain(unittest.TestCase):
         self.assertGreater(stats_random_sampling.num_operational_parameter_combinations, 0)
 
         stats_contour_tracing = operational_domain_stats()
-        opdomain = operational_domain_contour_tracing(lyt, [create_xor_tt()], 100, params, stats_contour_tracing)
+        opdomain = operational_domain_contour_tracing(lyt, [create_xor_tt()], 100, params, None, stats_contour_tracing)
         self.assertGreater(stats_contour_tracing.num_operational_parameter_combinations, 0)
 
     def test_and_gate_111_lattice(self):
@@ -59,7 +59,7 @@ class TestOperationalDomain(unittest.TestCase):
         self.assertGreater(stats_grid.num_operational_parameter_combinations, 0)
 
         stats_flood_fill = operational_domain_stats()
-        opdomain = operational_domain_flood_fill(lyt, [create_and_tt()], 100, params, stats_flood_fill)
+        opdomain = operational_domain_flood_fill(lyt, [create_and_tt()], 100, params, None,stats_flood_fill)
         self.assertGreater(stats_flood_fill.num_operational_parameter_combinations, 0)
 
         stats_random_sampling = operational_domain_stats()
@@ -67,7 +67,7 @@ class TestOperationalDomain(unittest.TestCase):
         self.assertGreater(stats_random_sampling.num_operational_parameter_combinations, 0)
 
         stats_contour_tracing = operational_domain_stats()
-        opdomain = operational_domain_contour_tracing(lyt, [create_and_tt()], 100, params, stats_contour_tracing)
+        opdomain = operational_domain_contour_tracing(lyt, [create_and_tt()], 100, params, None, stats_contour_tracing)
         self.assertGreater(stats_contour_tracing.num_operational_parameter_combinations, 0)
 
 

@@ -526,13 +526,15 @@ class design_sidb_gates_impl
  * @param skeleton The skeleton layout used as a starting point for gate design.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
  * @param params Parameters for the *SiDB Gate Designer*.
+ * @param design_mode The design mode to use.
+ * @param stats The design statistics.
  * @return A vector of designed SiDB gate layouts.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] std::vector<Lyt>
 design_sidb_gates(const Lyt& skeleton, const std::vector<TT>& spec, const design_sidb_gates_params<Lyt>& params = {},
-                  design_sidb_gates_mode   design_mode = design_sidb_gates_mode::EXHAUSTIVE,
-                  design_sidb_gates_stats* pst         = nullptr) noexcept
+                  const design_sidb_gates_mode design_mode = design_sidb_gates_mode::EXHAUSTIVE,
+                  design_sidb_gates_stats*     stats       = nullptr) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -560,9 +562,9 @@ design_sidb_gates(const Lyt& skeleton, const std::vector<TT>& spec, const design
     {
         result = p.run_random_design(params.maximal_random_solutions);
     }
-    if (pst)
+    if (stats)
     {
-        *pst = st;
+        *stats = st;
     }
     return result;
 }
@@ -576,14 +578,14 @@ design_sidb_gates(const Lyt& skeleton, const std::vector<TT>& spec, const design
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
  * @param params The parameters for gate design.
  * @param sa_params Parameters for simulated annealing.
- * @param pst Statistics for gate design.
+ * @param stats Statistics for gate design.
  * @return A layout with SiDB gates designed to minimize the cost function.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] Lyt design_sidb_gates_metric_driven_simulated_annealing(
     const Lyt& skeleton, const std::vector<TT>& spec, const design_sidb_gates_params<Lyt>& params,
     const design_sidb_gates_metric_driven_simulated_annealing_params& sa_params,
-    design_sidb_gates_stats*                                          pst = nullptr) noexcept
+    design_sidb_gates_stats*                                          stats = nullptr) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -603,9 +605,9 @@ template <typename Lyt, typename TT>
 
     const auto result = p.run_metric_driven_design_process(sa_params);
 
-    if (pst)
+    if (stats)
     {
-        *pst = st;
+        *stats = st;
     }
     return result;
 }
