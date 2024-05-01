@@ -145,24 +145,6 @@ struct operational_domain
                 return y;
             }
         }
-        /**
-         * This function compares two parameter_point objects, `p1` and `p2`, by comparing their
-         * coordinates with a defined tolerance value. It checks if the absolute difference
-         * between the x-coordinates and y-coordinates of the two points is less than a specified
-         * tolerance value.
-         *
-         * @param p1 The first parameter_point object to compare.
-         * @param p2 The second parameter_point object to compare.
-         * @return True if the x and y coordinates of p1 and p2 are within the tolerance level,
-         *         indicating that the points are considered equal. False otherwise.
-         */
-        bool compare_parameter_point(const parameter_point& p1, const parameter_point& p2)
-        {
-            constexpr double tolerance = std::numeric_limits<double>::epsilon();  // Tolerance for comparison
-
-            // Compare each coordinate with a tolerance
-            return std::abs(p1.x - p2.x) < tolerance || std::abs(p1.y - p2.y) < tolerance;
-        }
     };
     /**
      * The operational status of the layout for each specified parameter combination. This constitutes the operational
@@ -213,7 +195,7 @@ template <typename MapType>
 find_parameter_point_with_tolerance(const MapType& map, const typename MapType::key_type& key)
 {
     auto compare_keys = [&key](const auto& pair) { return compare_parameter_point(pair.first, key); };
-    return std::find_if(map.begin(), map.end(), compare_keys);
+    return std::find_if(map.cbegin(), map.cend(), compare_keys);
 }
 /**
  * This function searches for a parameter point, specified by the `key`, in the provided map
