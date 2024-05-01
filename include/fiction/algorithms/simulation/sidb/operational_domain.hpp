@@ -28,6 +28,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <iterator>
+#include <limits>
 #include <numeric>
 #include <optional>
 #include <queue>
@@ -144,13 +145,23 @@ struct operational_domain
                 return y;
             }
         }
-        // Custom comparison function for parameter_point
+        /**
+         * This function compares two parameter_point objects, `p1` and `p2`, by comparing their
+         * coordinates with a defined tolerance value. It checks if the absolute difference
+         * between the x-coordinates and y-coordinates of the two points is less than a specified
+         * tolerance value.
+         *
+         * @param p1 The first parameter_point object to compare.
+         * @param p2 The second parameter_point object to compare.
+         * @return True if the x and y coordinates of p1 and p2 are within the tolerance level,
+         *         indicating that the points are considered equal. False otherwise.
+         */
         bool compare_parameter_point(const parameter_point& p1, const parameter_point& p2)
         {
             constexpr double tolerance = std::numeric_limits<double>::epsilon();  // Tolerance for comparison
 
             // Compare each coordinate with a tolerance
-            return std::abs(p1.x - p2.x) < tolerance && std::abs(p1.y - p2.y) < tolerance;
+            return std::abs(p1.x - p2.x) < tolerance || std::abs(p1.y - p2.y) < tolerance;
         }
     };
     /**
@@ -384,7 +395,9 @@ class operational_domain_impl
                       {
                           // for each y value in parallel
                           std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ y_indices.cbegin(), y_indices.cend(),
-                                        [this, x](const auto y) { is_step_point_operational({x, y}); });
+                                        [this, x](const auto y) {
+                                            is_step_point_operational({x, y});
+                                        });
                       });
 
         log_stats();
@@ -580,8 +593,10 @@ class operational_domain_impl
         std::for_each(x_indices.cbegin(), x_indices.cend(),
                       [this, &lyt](const auto x)
                       {
-                          std::for_each(y_indices.cbegin(), y_indices.cend(), [this, &lyt, x](const auto y)
-                                        { is_step_point_suitable_for_given_cds({x, y}, lyt); });
+                          std::for_each(y_indices.cbegin(), y_indices.cend(),
+                                        [this, &lyt, x](const auto y) {
+                                            is_step_point_suitable_for_given_cds({x, y}, lyt);
+                                        });
                       });
 
         sidb_simulation_parameters simulation_parameters = params.simulation_parameters;
