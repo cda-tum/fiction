@@ -102,7 +102,7 @@ enum class design_sidb_gates_mode
  * @tparam Cell-level layout type.
  *
  */
-template <typename Lyt>
+template <typename CellType>
 struct design_sidb_gates_params
 {
     /**
@@ -112,7 +112,7 @@ struct design_sidb_gates_params
     /**
      * Canvas spanned by the northwest and southeast cell.
      */
-    std::pair<cell<Lyt>, cell<Lyt>> canvas{};
+    std::pair<CellType, CellType> canvas{};
     /**
      * Number of SiDBs placed in the canvas to create a working gate.
      */
@@ -157,8 +157,8 @@ class design_sidb_gates_impl
      * @param ps Parameters and settings for the gate designer.
      * @param st Statistics for the gate designer.
      */
-    design_sidb_gates_impl(const Lyt& skeleton, const std::vector<TT>& tt, const design_sidb_gates_params<Lyt>& ps,
-                           design_sidb_gates_stats& st) :
+    design_sidb_gates_impl(const Lyt& skeleton, const std::vector<TT>& tt,
+                           const design_sidb_gates_params<cell<Lyt>>& ps, design_sidb_gates_stats& st) :
             skeleton_layout{skeleton},
             truth_table{tt},
             params{ps},
@@ -345,7 +345,6 @@ class design_sidb_gates_impl
                 const auto lyt_swap = move_sidb(lyt);
                 return lyt_swap;
             });
-        std::cout << fmt::format("final cost: {}", optimized_net_cost) << std::endl;
         stats.gate_cost = optimized_net_cost;
         return optimized_gate_design;
     }
@@ -363,7 +362,7 @@ class design_sidb_gates_impl
     /**
      * Parameters for the *SiDB Gate Designer*.
      */
-    const design_sidb_gates_params<Lyt>& params;
+    const design_sidb_gates_params<cell<Lyt>>& params;
     /**
      * The statistics of the gate design.
      */
@@ -532,9 +531,10 @@ class design_sidb_gates_impl
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] std::vector<Lyt>
-design_sidb_gates(const Lyt& skeleton, const std::vector<TT>& spec, const design_sidb_gates_params<Lyt>& params = {},
-                  const design_sidb_gates_mode design_mode = design_sidb_gates_mode::EXHAUSTIVE,
-                  design_sidb_gates_stats*     stats       = nullptr) noexcept
+design_sidb_gates(const Lyt& skeleton, const std::vector<TT>& spec,
+                  const design_sidb_gates_params<cell<Lyt>>& params      = {},
+                  const design_sidb_gates_mode               design_mode = design_sidb_gates_mode::EXHAUSTIVE,
+                  design_sidb_gates_stats*                   stats       = nullptr) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -583,7 +583,7 @@ design_sidb_gates(const Lyt& skeleton, const std::vector<TT>& spec, const design
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] Lyt design_sidb_gates_metric_driven_simulated_annealing(
-    const Lyt& skeleton, const std::vector<TT>& spec, const design_sidb_gates_params<Lyt>& params,
+    const Lyt& skeleton, const std::vector<TT>& spec, const design_sidb_gates_params<cell<Lyt>>& params,
     const design_sidb_gates_metric_driven_simulated_annealing_params& sa_params,
     design_sidb_gates_stats*                                          stats = nullptr) noexcept
 {

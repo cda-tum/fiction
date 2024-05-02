@@ -167,7 +167,7 @@ class maximum_defect_influence_position_and_distance_impl
                             });
 
                         {
-                            std::lock_guard<std::mutex> lock(mutex);
+                            const std::lock_guard<std::mutex> lock(mutex);
                             // the distance is larger than the current maximum one.
                             if (distance > avoidance_distance)
                             {
