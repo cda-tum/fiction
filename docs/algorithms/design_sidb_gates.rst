@@ -9,7 +9,7 @@ SiDB Gate Designer
 
         .. doxygenstruct:: fiction::design_sidb_gates_metric_driven_simulated_annealing_params
            :members:
-        .. doxygenstruct:: fiction::design_sidb_gates_mode
+        .. doxygenenum:: fiction::design_sidb_gates_mode
            :members:
         .. doxygenstruct:: fiction::design_sidb_gates_params
            :members:
