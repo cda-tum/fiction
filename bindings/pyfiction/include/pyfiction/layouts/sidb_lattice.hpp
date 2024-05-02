@@ -10,11 +10,14 @@
 
 #include <fiction/io/print_layout.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
+#include <fiction/traits.hpp>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include <algorithm>
 #include <cstdint>
+#include <string>
 #include <vector>
 
 namespace pyfiction
