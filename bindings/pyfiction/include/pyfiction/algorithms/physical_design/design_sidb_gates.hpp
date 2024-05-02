@@ -40,7 +40,7 @@ void design_sidb_gates(pybind11::module& m)
         .def_readwrite("sim_engine", &fiction::design_sidb_gates_params<Lyt>::sim_engine,
                        DOC(fiction_design_sidb_gates_params_sim_engine));
 
-    py::class_<fiction::design_sidb_gates_stats>(m, "exact_stats", DOC(fiction_exact_physical_design_stats))
+    py::class_<fiction::design_sidb_gates_stats>(m, "design_sidb_gates_stats", DOC(fiction_exact_physical_design_stats))
         .def(py::init<>());
 
     m.def("design_sidb_gates", &fiction::design_sidb_gates<Lyt, py_tt>, "skeleton"_a, "spec"_a,
