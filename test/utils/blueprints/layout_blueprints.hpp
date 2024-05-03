@@ -682,8 +682,8 @@ CellLyt single_layer_inml_crosswire() noexcept
 }
 /**
  * This layout represents the AND Gate, as proposed in the paper
- * titled \"Hexagons are the Bestagons: Design Automation for Silicon Dangling Bond Logic\" authored by
- * Marcel Walter, Samuel Sze Hang Ng, Konrad Walus, and Robert Wille.
+ * titled \"Hexagons are the Bestagons: Design Automation for Silicon Dangling Bond Logic\" by
+ * Marcel Walter, Samuel Sze Hang Ng, Konrad Walus, and Robert Wille in DAC 2022.
  *
  * (https://github.com/cda-tum/mnt-bestagon-library/blob/main/bestagon-gates/2i1o_and/21_hex_inputsdbp_and_v19.sqd)
  */
@@ -729,7 +729,7 @@ Lyt bestagon_and_gate() noexcept
 };
 /**
  * This layout represents the AND Gate implemented on the H-Si(111)-1x1 surface, as proposed in the paper
- * titled \"Unlocking Flexible Silicon Dangling Bond Logic Designs on Alternative Silicon Orientations\" authored by
+ * titled \"Unlocking Flexible Silicon Dangling Bond Logic Designs on Alternative Silicon Orientations\" by
  * Samuel Sze Hang Ng, Jan Drewniok, Marcel Walter, Jacob Retallick, Robert Wille, and Konrad Walus.
  *
  * (https://github.com/samuelngsh/si-111-paper-supplementary/blob/main/bestagon-111-gates/gates/AND_mu_032_0.sqd)

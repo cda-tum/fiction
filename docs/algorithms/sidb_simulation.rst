@@ -247,7 +247,7 @@ Operational Domain Computation
         .. doxygenfunction:: fiction::operational_domain_random_sampling
         .. doxygenfunction:: fiction::operational_domain_flood_fill
         .. doxygenfunction:: fiction::operational_domain_contour_tracing
-        .. doxygenfunction:: fiction::find_valid_physical_parameters_and_excited_state_number
+        .. doxygenfunction:: fiction::determine_physically_valid_parameters
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.operational_status
