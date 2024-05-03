@@ -28,7 +28,6 @@
 
 namespace fiction
 {
-
 /**
  * This struct stores the parameters for the maximum_defect_influence_position_and_distance algorithm.
  */

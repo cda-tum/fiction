@@ -40,7 +40,8 @@ struct calculate_min_potential_for_charge_change_for_all_input_combinations_para
  * @param lyt The SiDB layout object.
  * @param spec Expected Boolean function of the layout, provided as a multi-output truth table.
  * @param params Parameters for assessing physical population stability.
- * @param charge_state_change Optional parameter indicating the direction of charge state change (default is 1).
+ * @param charge_state_change Optional parameter indicating the direction of the considered charge state change (default
+ * is 1).
  * @return The minimum potential required for charge change across all input combinations.
  */
 template <typename Lyt, typename TT>

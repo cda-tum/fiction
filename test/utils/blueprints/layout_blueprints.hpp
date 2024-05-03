@@ -717,6 +717,8 @@ Lyt siqad_and_gate() noexcept
  * Samuel Sze Hang Ng, Jan Drewniok, Marcel Walter, Jacob Retallick, Robert Wille, and Konrad Walus.
  *
  * (https://github.com/samuelngsh/si-111-paper-supplementary/blob/main/bestagon-111-gates/gates/AND_mu_032_0.sqd)
+ *
+ *  @tparam Lyt SiDB cell-level layout type based on SiQAD-coordinates.
  */
 template <typename Lyt>
 Lyt and_gate_111() noexcept
@@ -766,13 +768,15 @@ Lyt and_gate_111() noexcept
  * Marcel Walter, Samuel Sze Hang Ng, Konrad Walus, and Robert Wille.
  *
  * (https://github.com/cda-tum/mnt-bestagon-library/blob/main/bestagon-gates/2i1o_and/21_hex_inputsdbp_and_v19.sqd)
+ *
+ *  @tparam Lyt SiDB cell-level layout type based on SiQAD-coordinates.
  */
 template <typename Lyt>
 Lyt bestagon_and_gate() noexcept
 {
     static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD-coordinates");
 
     Lyt lyt{};
 
@@ -813,13 +817,15 @@ Lyt bestagon_and_gate() noexcept
  * Marcel Walter, Samuel Sze Hang Ng, Konrad Walus, and Robert Wille.
  *
  * (https://github.com/cda-tum/mnt-bestagon-library/blob/main/bestagon-gates/2i2o_cx/22_hex_inputsdbp_cx_try2_v0.sqd)
+ *
+ * @tparam Lyt SiDB cell-level layout type based on SiQAD-coordinates.
  */
 template <typename Lyt>
 Lyt bestagon_crossing_gate() noexcept
 {
     static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(fiction::is_sidb_lattice_100_v<Lyt>, "Lyt should have 111 as lattice orientation");
+    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD-coordinates");
 
     Lyt lyt{};
 

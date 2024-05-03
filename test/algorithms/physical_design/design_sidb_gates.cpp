@@ -2,17 +2,16 @@
 // Created by Jan Drewniok on 12.09.23.
 //
 
-#include <catch2/catch_template_test_macros.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include <fiction/algorithms/physical_design/design_sidb_gates.hpp>
 #include <fiction/algorithms/simulation/sidb/critical_temperature.hpp>
+#include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/cell_technologies.hpp>
-#include <fiction/technology/sidb_defect_surface.hpp>
 #include <fiction/technology/sidb_defects.hpp>
-#include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/layout_utils.hpp>
@@ -119,10 +118,10 @@ TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[
 
     lyt.assign_cell_type({10, 9, 1}, sidb_technology::cell_type::NORMAL);
 
-    design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{sidb_simulation_parameters{2, -0.28},
-                                                                       {{4, 4, 0}, {14, 5, 1}},
-                                                                       1,
-                                                                       sidb_simulation_engine::EXGS};
+    const design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{sidb_simulation_parameters{2, -0.28},
+                                                                             {{4, 4, 0}, {14, 5, 1}},
+                                                                             1,
+                                                                             sidb_simulation_engine::EXGS};
 
     SECTION("Exhaustive Generation")
     {

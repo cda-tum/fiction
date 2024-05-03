@@ -503,7 +503,6 @@ class defect_influence_operational_domain_impl
 
         return neighbors;
     };
-
     /**
      * The SiDB cell-level layout to investigate.
      */
@@ -557,6 +556,7 @@ class defect_influence_operational_domain_impl
      */
     std::atomic<std::size_t> num_evaluated_defect_positions{0};
 };
+
 }  // namespace detail
 
 /**
