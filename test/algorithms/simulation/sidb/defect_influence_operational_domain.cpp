@@ -5,10 +5,10 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#include <fiction/algorithms/simulation/sidb/defect_avoidance_distance.hpp>
 #include <fiction/algorithms/simulation/sidb/defect_influence_operational_domain.hpp>
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/algorithms/simulation/sidb/maximum_defect_influence_position_and_distance.hpp>
-#include <fiction/algorithms/simulation/sidb/maximum_minimum_defect_influence_distance.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
@@ -75,7 +75,7 @@ TEST_CASE("novel designed AND Gate influence distance function which fails again
         defect_influence_operational_domain_stats stats{};
         const auto defect_influence_domain = defect_influence_operational_domain_grid_search(
             cube_lyt, std::vector<tt>{create_or_tt()}, 5, params, &stats);
-        CHECK_THAT(maximum_minimum_defect_influence_distance(cube_lyt, defect_influence_domain),
+        CHECK_THAT(defect_avoidance_distance(cube_lyt, defect_influence_domain),
                    Catch::Matchers::WithinAbs(11.6138152646, physical_constants::POP_STABILITY_ERR));
     }
     SECTION("Random Sampling")
@@ -85,7 +85,7 @@ TEST_CASE("novel designed AND Gate influence distance function which fails again
         const auto defect_influence_domain = defect_influence_operational_domain_random_sampling(
             cube_lyt, std::vector<tt>{create_or_tt()}, 100, params, &stats);
         CHECK(defect_influence_domain.operational_values.size() == 100);
-        CHECK(maximum_minimum_defect_influence_distance(cube_lyt, defect_influence_domain) < 11.61);
+        CHECK(defect_avoidance_distance(cube_lyt, defect_influence_domain) < 11.61);
     }
     SECTION("Contour Tracing")
     {
@@ -93,6 +93,6 @@ TEST_CASE("novel designed AND Gate influence distance function which fails again
         defect_influence_operational_domain_stats stats{};
         const auto defect_influence_domain = defect_influence_operational_domain_contour_tracing(
             cube_lyt, std::vector<tt>{create_or_tt()}, 10, params, &stats);
-        CHECK(maximum_minimum_defect_influence_distance(cube_lyt, defect_influence_domain) > 11.61);
+        CHECK(defect_avoidance_distance(cube_lyt, defect_influence_domain) > 11.61);
     }
 }

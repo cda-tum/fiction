@@ -28,7 +28,6 @@
 #include <cstdlib>
 #include <future>
 #include <mutex>
-#include <numeric>
 #include <random>
 #include <thread>
 #include <utility>
@@ -99,7 +98,7 @@ enum class design_sidb_gates_mode
 /**
  * This struct contains parameters and settings to design SiDB gates.
  *
- * @tparam Cell-level layout type.
+ * @tparam CellType Cell type.
  *
  */
 template <typename CellType>
@@ -267,7 +266,6 @@ class design_sidb_gates_impl
                             const std::lock_guard lock{mutex_to_protect_designed_gate_layouts};
                             randomly_designed_gate_layouts.push_back(result_lyt);
                             num_solutions_found++;
-                            // break;  // Break out of the loop after finding a solution
                         }
                     }
                 });
@@ -574,6 +572,8 @@ design_sidb_gates(const Lyt& skeleton, const std::vector<TT>& spec,
  * truth tables, and specified parameters for gate design and simulated annealing. Currently, only the critical
  * temperature and the operational domain are incorporated into the cost function.
  *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @tparam TT The type of the truth table specifying the gate behavior.
  * @param skeleton The layout skeleton used as the basis for gate design.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
  * @param params The parameters for gate design.

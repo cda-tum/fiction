@@ -407,6 +407,6 @@ Convert Potential to Distance
 Maximum Minimum Defect Influence Distance
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**Header:** ``fiction/algorithms/simulation/sidb/maximum_minimum_defect_influence_distance.hpp``
+**Header:** ``fiction/algorithms/simulation/sidb/defect_avoidance_distance.hpp``
 
-.. doxygenfunction:: fiction::maximum_minimum_defect_influence_distance
+.. doxygenfunction:: fiction::defect_avoidance_distance

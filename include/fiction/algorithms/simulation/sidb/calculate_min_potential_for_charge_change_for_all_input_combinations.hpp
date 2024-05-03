@@ -24,10 +24,13 @@ namespace fiction
 struct calculate_min_potential_for_charge_change_for_all_input_combinations_params
 {
     /**
-     * TODO
+     * Parameters for the `assessing physical population stability` simulation
      */
     assess_physical_population_stability_params assess_population_stability_params{};
-    detect_bdl_pairs_params                     detect_pair_params{};
+    /**
+     * Parameters to identify the output pairs used to read the output.
+     */
+    detect_bdl_pairs_params detect_pair_params{};
 };
 /**
  * Calculates the minimum potential required to induce charge changes in an SiDB layout for all input combinations.
