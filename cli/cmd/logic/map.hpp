@@ -10,6 +10,8 @@
 
 #include <alice/alice.hpp>
 
+#include <algorithm>
+#include <array>
 #include <iostream>
 #include <memory>
 #include <variant>
@@ -56,9 +58,9 @@ class map_command : public command
         add_flag("--all3", "Enable the use of all supported 3-input gates + inverters");
         add_flag("--all", "Enable the use of all supported gates");
 
-        add_flag("--decay", "Enforce the application of at least one constant input to three-input gates");
-        add_flag("--logic_sharing,-s", "Enable logic sharing optimization");
-        add_flag("--verbose,-v", "Be verbose");
+        add_flag("--decay", ps.decay, "Enforce the application of at least one constant input to three-input gates");
+        add_flag("--logic_sharing,-s", ps.mapper_params.enable_logic_sharing, "Enable logic sharing optimization");
+        add_flag("--verbose,-v", ps.mapper_params.verbose, "Be verbose");
     }
 
   protected:
@@ -86,7 +88,7 @@ class map_command : public command
 
         if (is_set("all2"))
         {
-            ps = fiction::all_2_input_functions();
+            ps = fiction::all_standard_2_input_functions();
         }
         else if (is_set("all3"))
         {
@@ -94,20 +96,16 @@ class map_command : public command
         }
         else if (is_set("all"))
         {
-            ps = fiction::all_supported_functions();
+            ps = fiction::all_supported_standard_functions();
         }
 
-        ps.decay                              = is_set("decay");
-        ps.mapper_params.enable_logic_sharing = is_set("logic_sharing");
-        ps.mapper_params.verbose              = is_set("verbose");
+        const std::array gate_flags{is_set("and"),    is_set("nand"),   is_set("or"),      is_set("nor"),
+                                    is_set("xor"),    is_set("xnor"),   is_set("inv"),     is_set("maj"),
+                                    is_set("dot"),    is_set("and3"),   is_set("xor_and"), is_set("or_and"),
+                                    is_set("onehot"), is_set("gamble"), is_set("mux"),     is_set("and_xor"),
+                                    is_set("all2"),   is_set("all3"),   is_set("all")};
 
-        const std::vector<bool> gate_flags{is_set("and"),    is_set("nand"),   is_set("or"),      is_set("nor"),
-                                           is_set("xor"),    is_set("xnor"),   is_set("inv"),     is_set("maj"),
-                                           is_set("dot"),    is_set("and3"),   is_set("xor_and"), is_set("or_and"),
-                                           is_set("onehot"), is_set("gamble"), is_set("mux"),     is_set("and_xor"),
-                                           is_set("all2"),   is_set("all3"),   is_set("all")};
-
-        if (std::none_of(gate_flags.cbegin(), gate_flags.cend(), [](const auto& f) { return f; }))
+        if (std::none_of(gate_flags.cbegin(), gate_flags.cend(), [](const auto f) { return f; }))
         {
             env->out() << "[e] no gates specified; cannot perform technology mapping" << std::endl;
             ps = {};

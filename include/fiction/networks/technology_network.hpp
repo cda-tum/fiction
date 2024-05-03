@@ -57,8 +57,7 @@ class technology_network : public mockturtle::klut_network
      */
     [[nodiscard]] bool is_po(const node& n) const
     {
-        return std::find_if(_storage->outputs.cbegin(), _storage->outputs.cend(),
-                            [this, &n](const auto& p)
+        return std::find_if(_storage->outputs.cbegin(), _storage->outputs.cend(), [this, &n](const auto& p)
                             { return this->get_node(p.index) == n; }) != _storage->outputs.cend();
     }
 

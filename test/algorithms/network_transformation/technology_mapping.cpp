@@ -86,7 +86,7 @@ void map_and_check_aoim(const Ntk& ntk)
 }
 
 template <typename Ntk>
-void map_and_check_all_standard_2_inp(const Ntk& ntk)
+void map_and_check_all_2_inp(const Ntk& ntk)
 {
     technology_mapping_stats stats{};
 
@@ -98,15 +98,6 @@ void map_and_check_all_standard_2_inp(const Ntk& ntk)
 
     count_gate_types_stats gt_stats{};
     count_gate_types(mapped_ntk, &gt_stats);
-
-    CHECK(gt_stats.num_inv >= 0);
-
-    CHECK(gt_stats.num_and2 >= 0);
-    CHECK(gt_stats.num_or2 >= 0);
-    CHECK(gt_stats.num_nand2 >= 0);
-    CHECK(gt_stats.num_nor2 >= 0);
-    CHECK(gt_stats.num_xor2 >= 0);
-    CHECK(gt_stats.num_xnor2 >= 0);
 
     CHECK(gt_stats.num_and3 == 0);
     CHECK(gt_stats.num_xor_and == 0);
@@ -120,6 +111,7 @@ void map_and_check_all_standard_2_inp(const Ntk& ntk)
 }
 
 template <typename Ntk>
+void map_and_check_all_3_inp(const Ntk& ntk)
 void map_and_check_all_2_inp(const Ntk& ntk)
 {
     technology_mapping_stats stats{};
@@ -191,6 +183,7 @@ void map_and_check_all_standard_3_inp(const Ntk& ntk)
 }
 
 template <typename Ntk>
+void map_and_check_all_func(const Ntk& ntk)
 void map_and_check_all_standard_func(const Ntk& ntk)
 {
     technology_mapping_stats stats{};
@@ -278,11 +271,29 @@ TEMPLATE_TEST_CASE("Complex 2-input network mapping", "[technology-mapping]", mo
 TEMPLATE_TEST_CASE("Complex 3-input network mapping", "[technology-mapping]", mockturtle::aig_network,
                    mockturtle::xag_network, mockturtle::mig_network, mockturtle::xmg_network)
 {
+    map_and_check_all_3_inp(blueprints::maj4_network<TestType>());
     map_and_check_all_standard_3_inp(blueprints::maj4_network<TestType>());
 }
 
 TEMPLATE_TEST_CASE("Complex all function network mapping", "[technology-mapping]", mockturtle::aig_network,
                    mockturtle::xag_network, mockturtle::mig_network, mockturtle::xmg_network)
 {
+    map_and_check_all_func(blueprints::maj4_network<TestType>());
+}
+
+TEMPLATE_TEST_CASE("Name conservation after technology mapping", "[technology-mapping]", mockturtle::aig_network,
+                   mockturtle::xag_network, mockturtle::mig_network, mockturtle::xmg_network)
+{
+    auto maj = blueprints::maj1_network<mockturtle::names_view<TestType>>();
+    maj.set_network_name("maj");
+
+    technology_mapping_stats stats{};
+
+    const auto mapped_maj = technology_mapping(maj, and_or_not_maj(), &stats);
+
+    REQUIRE(!stats.mapper_stats.mapping_error);
+
+    // network name
+    CHECK(mapped_maj.get_network_name() == "maj");
     map_and_check_all_standard_func(blueprints::maj4_network<TestType>());
 }

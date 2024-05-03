@@ -49,10 +49,9 @@ void write_dot_network(pybind11::module& m)
     using namespace pybind11::literals;
 
     m.def(
-        "write_dot_network",
-        [](const Ntk& ntk, const std::string_view& filename)
-        { mockturtle::write_dot(ntk, filename.data(), fiction::technology_dot_drawer<Ntk>{}); },
-        "network"_a, "filename"_a);
+        "write_dot_network", [](const Ntk& ntk, const std::string_view& filename)
+        { mockturtle::write_dot(ntk, filename.data(), fiction::technology_dot_drawer<Ntk>{}); }, "network"_a,
+        "filename"_a);
 }
 
 }  // namespace detail

@@ -63,8 +63,7 @@ void extract_routing_objectives(pybind11::module& m)
 
             const auto objectives = fiction::extract_routing_objectives(lyt);
 
-            std::for_each(objectives.cbegin(), objectives.cend(),
-                          [&converted_objectives](const auto& objective)
+            std::for_each(objectives.cbegin(), objectives.cend(), [&converted_objectives](const auto& objective)
                           { converted_objectives.emplace_back(objective.source, objective.target); });
 
             return converted_objectives;

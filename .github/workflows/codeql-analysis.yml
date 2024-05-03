@@ -11,6 +11,7 @@ on:
       - '**/*.py'
       - 'libs/**'
       - '.github/workflows/codeql-analysis.yml'
+      - '!bindings/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp'
   pull_request:
     branches: [ 'main' ]
     paths:
@@ -21,6 +22,7 @@ on:
       - '**/*.py'
       - 'libs/**'
       - '.github/workflows/codeql-analysis.yml'
+      - '!bindings/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp'
   merge_group:
   schedule:
     - cron: '30 5 * * 6'
@@ -72,7 +74,7 @@ jobs:
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: '${{matrix.os}}-${{matrix.compiler}}-${{matrix.build_type}}'
+          key: '${{matrix.os}}-${{matrix.compiler}}'
           variant: ccache
           save: true
           max-size: 10G
@@ -80,7 +82,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.9.x'
+          python-version: '3.10.x'
           cache: 'pip'
 
       - name: Setup mold

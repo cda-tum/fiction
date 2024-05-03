@@ -990,8 +990,7 @@ class gate_level_layout : public ClockedLayout
     void foreach_node(Fn&& fn) const
     {
         auto r = mockturtle::range<node>(static_cast<node>(strg->nodes.size()));
-        mockturtle::detail::foreach_element_if(
-            r.begin(), r.end(), [this](const auto& n) { return !is_dead(n); }, fn);
+        mockturtle::detail::foreach_element_if(r.begin(), r.end(), [this](const auto& n) { return !is_dead(n); }, fn);
     }
     /**
      * Applies a function to all gates (excluding dead ones) in the layout. Uses `is_gate` to check whether a node is a

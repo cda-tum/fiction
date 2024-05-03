@@ -28,11 +28,11 @@ class TestFanoutSubstitution(unittest.TestCase):
         self.assertEqual(substituted_breadth.num_gates(), 6)
         self.assertTrue(is_fanout_substituted(substituted_breadth, breadth_params))
 
-        threashold_params = fanout_substitution_params()
-        threashold_params.threshold = 2
-        substituted_threshold = fanout_substitution(network, threashold_params)
+        threshold_params = fanout_substitution_params()
+        threshold_params.threshold = 2
+        substituted_threshold = fanout_substitution(network, threshold_params)
         self.assertEqual(substituted_threshold.num_gates(), 5)
-        self.assertTrue(is_fanout_substituted(substituted_threshold, threashold_params))
+        self.assertTrue(is_fanout_substituted(substituted_threshold, threshold_params))
         self.assertFalse(is_fanout_substituted(substituted_threshold, depth_params))
         self.assertFalse(is_fanout_substituted(substituted_threshold, breadth_params))
 

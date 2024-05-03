@@ -27,9 +27,8 @@ void write_fgl_layout(pybind11::module& m)
     using namespace pybind11::literals;
 
     m.def(
-        "write_fgl_layout",
-        [](const Lyt& lyt, const std::string_view& filename) { fiction::write_fgl_layout<Lyt>(lyt, filename); },
-        "layout"_a, "filename"_a, DOC(fiction_write_fgl_layout_2));
+        "write_fgl_layout", [](const Lyt& lyt, const std::string_view& filename)
+        { fiction::write_fgl_layout<Lyt>(lyt, filename); }, "layout"_a, "filename"_a, DOC(fiction_write_fgl_layout_2));
 }
 
 }  // namespace detail
