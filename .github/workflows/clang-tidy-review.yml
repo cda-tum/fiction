@@ -24,6 +24,27 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10.x'
+          cache: 'pip'
+
+      - name: Install pip packages
+        uses: BSFishy/pip-action@v1
+        with:
+          requirements: ${{github.workspace}}/libs/mugen/requirements.txt
+
+      - name: Setup Z3 Solver
+        id: z3
+        uses: cda-tum/setup-z3@v1
+        with:
+          version: ${{env.Z3_VERSION}}
+          platform: linux
+          architecture: x64
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
       - name: Review code with Clang-Tidy
         uses: ZedThree/clang-tidy-review@v0.18.0
         id: review
@@ -35,6 +56,9 @@ jobs:
             -DFICTION_TEST=ON
             -DFICTION_BENCHMARK=OFF
             -DFICTION_EXPERIMENTS=ON
+            -DFICTION_Z3=ON
+            -DFICTION_ENABLE_MUGEN=ON
+            -DFICTION_PYTHON_BINDINGS=ON
             -DMOCKTURTLE_EXAMPLES=OFF
           build_dir: build
           config_file: '.clang-tidy'
