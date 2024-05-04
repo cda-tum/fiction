@@ -2,6 +2,18 @@ name: pyfiction CI
 
 on:
   push:
+    branches: [ 'main' ]
+    paths:
+      - 'bindings/pyfiction/**'
+      - '**/*.py'
+      - '**/*.hpp'
+      - '**/*.cpp'
+      - '**/*.cmake'
+      - '**/CMakeLists.txt'
+      - 'libs/**'
+      - '.github/workflows/python-bindings.yml'
+  pull_request:
+    branches: [ 'main' ]
     paths:
       - 'bindings/pyfiction/**'
       - '**/*.py'
