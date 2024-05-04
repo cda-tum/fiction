@@ -50,12 +50,10 @@ Let there be a *fiction*
    :caption: Technology
 
    technology/cell_technologies.rst
+   technology/hsi_lattices.rst
    technology/defects.rst
    technology/simulation.rst
    technology/gate_libraries.rst
-   technology/properties.rst
-   technology/sidb_lattice.rst
-   technology/sidb_lattice_orientations.rst
 
 .. toctree::
    :maxdepth: 2

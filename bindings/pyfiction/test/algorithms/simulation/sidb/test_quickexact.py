@@ -5,7 +5,7 @@ import os
 class TestQuickExact(unittest.TestCase):
 
     def test_three_sidbs(self):
-        layout = sidb_lattice_100((2, 1))
+        layout = sidb_100_lattice((2, 1))
         layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((1, 0), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((2, 0), sidb_technology.cell_type.NORMAL)
@@ -36,7 +36,7 @@ class TestQuickExact(unittest.TestCase):
         self.assertLessEqual(len(result.charge_distributions), 2)
 
     def test_perturber_and_sidb_pair_111(self):
-        layout = sidb_lattice_111((4, 1))
+        layout = sidb_111_lattice((4, 1))
         layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((1, 0), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((2, 0), sidb_technology.cell_type.NORMAL)

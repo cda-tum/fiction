@@ -7,7 +7,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 class TestIsOperational(unittest.TestCase):
 
     def test_is_operational(self):
-        lyt = sidb_lattice_100()
+        lyt = sidb_100_lattice()
 
         lyt.assign_cell_type((0, 1), sidb_technology.cell_type.INPUT)
         lyt.assign_cell_type((2, 3), sidb_technology.cell_type.INPUT)

@@ -45,6 +45,10 @@ distributions of the SiDBs. Charge distribution surfaces are returned by the SiD
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.charge_distribution_surface
             :members:
+        .. autoclass:: mnt.pyfiction.charge_distribution_surface_100
+            :members:
+        .. autoclass:: mnt.pyfiction.charge_distribution_surface_111
+            :members:
 
 
 Physical Constants

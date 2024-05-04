@@ -5,7 +5,7 @@ import os
 class TestExhaustiveGroundStateSimulation(unittest.TestCase):
 
     def test_perturber_and_sidb_pair(self):
-        layout = sidb_lattice_100((10, 10))
+        layout = sidb_100_lattice((10, 10))
         layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((4, 1), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((6, 1), sidb_technology.cell_type.NORMAL)
@@ -26,7 +26,7 @@ class TestExhaustiveGroundStateSimulation(unittest.TestCase):
         self.assertEqual(groundstate.get_charge_state((6, 1)), sidb_charge_state.NEGATIVE)
 
     def test_perturber_and_sidb_pair_111(self):
-        layout = sidb_lattice_111((4, 1))
+        layout = sidb_111_lattice((4, 1))
         layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((1, 0), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((2, 0), sidb_technology.cell_type.NORMAL)

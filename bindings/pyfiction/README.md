@@ -5,19 +5,23 @@ with [pybind11](https://github.com/pybind/pybind11).
 
 ## Installation
 
-The bindings can either be build and installed automatically with `pip` or build with `CMake` and manually installed.
+The bindings can either be built and installed automatically with `pip` or built with `CMake` and installed manually.
 
-### Building the bindings with pip
+### Building the bindings with `pip`
 
 ```bash
 pip install .
 ```
 
-If you want to include the functions dependent on the Z3 solver, set `z3=ON` before running `pip`:
+If you want to include the functions dependent on the [Z3 Solver](https://github.com/Z3Prover/z3), set `z3=ON` before
+running `pip`:
 
 ```bash
 z3=ON pip install .
 ```
+
+See [the documentation](https://fiction.readthedocs.io/en/latest/getting_started.html#enabling-dependent-functions) for
+more information on dependent functions.
 
 ### Building the bindings with CMake
 
@@ -35,7 +39,7 @@ To run tests locally, build the binding with its dependencies using `pip`:
 pip install '.[test]'
 ```
 
-Alternatively, install the following dependency before the `CMake` call:
+Alternatively, install the following dependency before the `cmake` call:
 
 ```bash
 pip install python-dotenv==0.21.1
@@ -69,21 +73,25 @@ We try to keep the bindings as close to the C++ API as possible. However, due to
 functionality might not be available in Python or differ slightly in its syntax compared to its C++ counterpart.
 
 Our goal is to expose as much of *fiction*'s library features in some way in `pyfiction` as well. Therefore, whenever a
-new feature is added to the C++ library, please also add the respective bindings here. In order to not duplicate
+new feature is added to the C++ library, please also add the respective bindings here. To not duplicate
 docstrings and run out of sync, we use the `pybind11_mkdoc` tool to generate the documentation from the C++ docstrings.
 
 ### Docstrings
 
-There is an auto-generated file called `include/pybind11_mkdoc_docstrings.hpp`. It contains all docstrings extracted
-from the C++ code. Since it does not have include guards, we offer the (manually created)
-file `include/documentation.hpp`, which acts as a wrapper around the aforementioned docstrings.
+The auto-generated file `include/pybind11_mkdoc_docstrings.hpp` contains all docstrings extracted from the C++ code.
+Since it does not contain include guards, we offer the (manually created)
+file `include/documentation.hpp`, which acts as a wrapper around the aforementioned docstrings. Should it be necessary
+to adjust certain docstrings for Python bindings, this can be done here.
 
 > ⚠️ **Do not directly include the auto-generated file!** Due to the lack of header guards, it leads to compilation
 > errors. Instead, only include `documentation.hpp`.
 
-The docstrings are extended  and updated automatically by the GitHub Action [pyfiction-docstring-generator](https://github.com/cda-tum/fiction/actions/workflows/pyfiction-docstring-generator.yml), which will regenerate `pybind11_mkdoc_docstrings.hpp` and override the existing one everytime new commits are pushed to a branch.
+The docstrings are extended and updated automatically by the GitHub
+Action [pyfiction-docstring-generator](https://github.com/cda-tum/fiction/actions/workflows/pyfiction-docstring-generator.yml),
+which regenerates `pybind11_mkdoc_docstrings.hpp` and overrides the existing one every time changes to
+any `*.hpp` file are pushed to a branch.
 
-Alternatively, you can also run `pybind11_mkdoc` locally using the `pybind11_mkdoc` tool:
+Alternatively, you can also run `pybind11_mkdoc` locally using the `pybind11_mkdoc` tool (not recommended):
 
 ```bash
 pip install pybind11_mkdoc clang==14
