@@ -351,9 +351,12 @@ The Munich Nanotech Toolkit has been supported by the Bavarian State Ministry fo
 Distinguished Professorship Program.
 
 <p align="center">
-<picture style="margin-right: 50px;">
+<picture>
 <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/cda-tum/mqt/main/docs/_static/tum_dark.svg" width="28%">
 <img src="https://raw.githubusercontent.com/cda-tum/mqt/main/docs/_static/tum_light.svg" width="28%" alt="TUM Logo">
+</picture>
+<picture>
+<img src="https://via.placeholder.com/50x1" alt="" style="max-height:0;"> <!-- Invisible spacer -->
 </picture>
 <picture>
 <img src="https://raw.githubusercontent.com/cda-tum/mqt/main/docs/_static/logo-bavaria.svg" width="16%" alt="Coat of Arms of Bavaria">
