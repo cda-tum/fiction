@@ -1,7 +1,8 @@
 H-Si Lattice Orientations
 =========================
 
-A collection of the two supported H-Si(100)-2x1 surface and H-Si(111)-1x1 surface lattice orientations.
+A collection of the supported H-Si surface lattice orientations for SiDB creation. We currently support
+H-Si(100)-2x1 and H-Si(111)-1x1.
 
 .. tabs::
     .. tab:: C++

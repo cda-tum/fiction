@@ -282,7 +282,7 @@ inline void charge_distribution_surfaces(pybind11::module& m)
         .value("VARIABLE", fiction::dependent_cell_mode::VARIABLE, DOC(fiction_dependent_cell_mode_VARIABLE))
 
         ;
-    //
+
     /**
      * Energy calculation.
      */
