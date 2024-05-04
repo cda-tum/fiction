@@ -27,17 +27,6 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10.x'
-          cache: 'pip'
-
-      - name: Install pip packages
-        uses: BSFishy/pip-action@v1
-        with:
-          requirements: ${{github.workspace}}/libs/mugen/requirements.txt
-
       - name: Review code with Clang-Tidy
         uses: ZedThree/clang-tidy-review@v0.18.0
         id: review
@@ -52,6 +41,7 @@ jobs:
             -DFICTION_PYTHON_BINDINGS=ON
             -DMOCKTURTLE_EXAMPLES=OFF
           build_dir: build
+          apt_packages: 'libreadline-dev,libtbb-dev,python3'
           config_file: '.clang-tidy'
           exclude: 'libs/*,docs/*,benchmarks/*,bib/*,*/pyfiction/pybind11_mkdoc_docstrings.hpp,*/pyfiction/documentation.hpp'
           split_workflow: true
