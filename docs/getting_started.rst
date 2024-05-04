@@ -27,6 +27,10 @@ At the time of writing, for parallel STL algorithms to work when using GCC, the 
 needed. It is an optional dependency that can be installed for a performance boost in certain scenarios. For your
 preferred compiler, see the current implementation state of `P0024R2 <https://en.cppreference.com/w/cpp/compiler_support/17>`_.
 
+On Ubuntu, all required and optional dependencies can be installed via::
+
+  sudo apt-get install build-essential cmake libreadline-dev libtbb-dev
+
 
 .. _cli:
 
@@ -34,7 +38,7 @@ Using *fiction* as a stand-alone CLI tool
 -----------------------------------------
 
 It is possible to compile *fiction* as a stand-alone CLI tool. For auto-completion in the CLI, it is recommended but not
-required to install the ``libreadline-dev`` package.
+required to install the ``libreadline-dev`` package (see above).
 The build system CMake can be invoked from the command line as follows::
 
   cmake . -B build
