@@ -202,17 +202,6 @@ Unit tests can be built with CMake via a respective flag on the command line and
   ctest
 
 
-Building experiments
---------------------
-
-The ``experiments`` folder provides a playground for quickly scripting some ideas by plugging algorithms together.
-A ``fictionlib_demo.cpp`` demonstrates the usage. Any ``*.cpp`` file that is placed in that folder is automatically
-linked against *fiction* and compiled as a stand-alone binary using the following commands::
-
-  cmake . -B build -DFICTION_EXPERIMENTS=ON
-  cd build
-  cmake --build . -j4
-
 
 Building code benchmarks
 ------------------------
