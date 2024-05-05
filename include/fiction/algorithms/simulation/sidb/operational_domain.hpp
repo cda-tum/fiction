@@ -202,6 +202,7 @@ template <typename MapType>
 [[maybe_unused]] static typename MapType::const_iterator find_key_with_tolerance(const MapType&                    map,
                                                                                  const typename MapType::key_type& key)
 {
+    static_assert(std::is_arithmetic_v<typename MapType::key_type>, "Map key type must be numeric");
     constexpr double tolerance = fiction::physical_constants::POP_STABILITY_ERR;
     auto compare_keys = [&key, &tolerance](const auto& pair) { return std::abs(pair.first - key) < tolerance; };
     return std::find_if(map.begin(), map.end(), compare_keys);
@@ -412,7 +413,9 @@ class operational_domain_impl
                       {
                           // for each y value in parallel
                           std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ y_indices.cbegin(), y_indices.cend(),
-                                        [this, x](const auto y) { is_step_point_operational({x, y}); });
+                                        [this, x](const auto y) {
+                                            is_step_point_operational({x, y});
+                                        });
                       });
 
         log_stats();
@@ -609,7 +612,9 @@ class operational_domain_impl
                       [this, &lyt](const auto x)
                       {
                           std::for_each(y_indices.cbegin(), y_indices.cend(),
-                                        [this, &lyt, x](const auto y) { is_step_point_suitable({x, y}, lyt); });
+                                        [this, &lyt, x](const auto y) {
+                                            is_step_point_suitable({x, y}, lyt);
+                                        });
                       });
 
         sidb_simulation_parameters simulation_parameters = params.simulation_parameters;
@@ -634,27 +639,31 @@ class operational_domain_impl
                                             simulation_parameters,
                                             quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF});
                 }
-                if (params.sim_engine == sidb_simulation_engine::EXGS)
+                else if (params.sim_engine == sidb_simulation_engine::EXGS)
                 {
                     // perform an exhaustive ground state simulation
                     sim_results = exhaustive_ground_state_simulation(lyt, params.simulation_parameters);
                 }
-                if (params.sim_engine == sidb_simulation_engine::QUICKSIM)
+                else if (params.sim_engine == sidb_simulation_engine::QUICKSIM)
                 {
                     // perform a heuristic simulation
                     const quicksim_params qs_params{params.simulation_parameters, 500, 0.6};
                     sim_results = quicksim(lyt, qs_params);
                 }
-                assert(false && "unsupported simulation engine");
+                else
+                {
+                    assert(false && "unsupported simulation engine");
+                }
 
                 const auto energy_dist = energy_distribution(sim_results.charge_distributions);
                 lyt.assign_physical_parameters(simulation_parameters);
                 const auto position = find_key_with_tolerance(energy_dist, lyt.get_system_energy());
-                if (position != energy_dist.cend())
+                if (position == energy_dist.cend())
                 {
-                    const auto excited_state_number = std::distance(energy_dist.cbegin(), position);
-                    suitable_params_domain.operational_domain_values.emplace(param_point, excited_state_number);
+                    continue;
                 }
+                const auto excited_state_number = std::distance(energy_dist.begin(), position);
+                suitable_params_domain.operational_domain_values.emplace(param_point, excited_state_number);
             }
         }
 

@@ -233,11 +233,14 @@ Operational Domain Computation
 
         **Header:** ``fiction/algorithms/simulation/sidb/operational_domain.hpp``
 
+        .. doxygenstruct:: fiction::parameter_point
+           :members:
+        .. doxygenenum:: fiction::sweep_parameter
         .. doxygenstruct:: fiction::operational_domain
            :members:
-        .. doxygenstruct:: fiction::valid_physical_parameters_with_excited_state_number
-           :members:
-
+        .. doxygenfunction:: fiction::check_parameter_points_for_equality
+        .. doxygenfunction:: fiction::find_parameter_point_with_tolerance
+        .. doxygenfunction:: fiction::find_key_with_tolerance
         .. doxygenstruct:: fiction::operational_domain_params
            :members:
         .. doxygenstruct:: fiction::operational_domain_stats
@@ -247,7 +250,6 @@ Operational Domain Computation
         .. doxygenfunction:: fiction::operational_domain_random_sampling
         .. doxygenfunction:: fiction::operational_domain_flood_fill
         .. doxygenfunction:: fiction::operational_domain_contour_tracing
-        .. doxygenfunction:: fiction::determine_physically_valid_parameters
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.operational_status
@@ -273,6 +275,15 @@ Operational Domain Computation
         .. autofunction:: mnt.pyfiction.operational_domain_flood_fill
         .. autofunction:: mnt.pyfiction.operational_domain_contour_tracing
 
+
+Determine Physically Valid Parameters for Given CDS
+###################################################
+
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/algorithms/simulation/sidb/determine_physically_valid_parameters.hpp``
+
+        .. doxygenfunction:: fiction::determine_physically_valid_parameters
 
 
 Utility Functions
