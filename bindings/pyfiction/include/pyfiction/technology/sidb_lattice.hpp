@@ -10,11 +10,16 @@
 
 #include <fiction/io/print_layout.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
+#include <fiction/technology/sidb_lattice_orientations.hpp>
+#include <fiction/traits.hpp>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
+#include <algorithm>
+#include <cctype>
 #include <cstdint>
+#include <string>
 #include <vector>
 
 namespace pyfiction
@@ -38,7 +43,7 @@ void sidb_lattice_cell_level_layout(pybind11::module& m)
     /**
      * SiDB lattice.
      */
-    py::class_<py_sidb_lattice, py_sidb_layout>(m, fmt::format("sidb_lattice{}", orientation).c_str(),
+    py::class_<py_sidb_lattice, py_sidb_layout>(m, fmt::format("sidb_{}_lattice", orientation).c_str(),
                                                 DOC(fiction_cell_level_layout), py::module_local())
         .def(py::init<>())
         .def(py::init<const fiction::aspect_ratio<py_sidb_layout>&, const std::string&>(), "dimension"_a, "name"_a = "",
@@ -49,7 +54,7 @@ void sidb_lattice_cell_level_layout(pybind11::module& m)
 
 }  // namespace detail
 
-inline void sidb_lattice_cell_level_layouts(pybind11::module& m)
+inline void sidb_lattices(pybind11::module& m)
 {
     detail::sidb_lattice_cell_level_layout<fiction::sidb_100_lattice>(m);
     detail::sidb_lattice_cell_level_layout<fiction::sidb_111_lattice>(m);

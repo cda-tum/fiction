@@ -37,6 +37,7 @@ jobs:
             -DFICTION_EXPERIMENTS=ON
             -DMOCKTURTLE_EXAMPLES=OFF
           build_dir: build
+          apt_packages: 'libreadline-dev,libtbb-dev'
           config_file: '.clang-tidy'
           exclude: 'libs/*,docs/*,benchmarks/*,bib/*,*/pyfiction/pybind11_mkdoc_docstrings.hpp,*/pyfiction/documentation.hpp'
           split_workflow: true

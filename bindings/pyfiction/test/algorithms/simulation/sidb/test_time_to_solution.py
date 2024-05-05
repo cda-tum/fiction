@@ -5,7 +5,7 @@ import os
 class TestTimeToSolution(unittest.TestCase):
 
     def test_one_sidb_100_lattice(self):
-        layout = sidb_lattice_100((0, 0))
+        layout = sidb_100_lattice((0, 0))
         layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
 
         quicksim_parameter = quicksim_params()
@@ -24,7 +24,7 @@ class TestTimeToSolution(unittest.TestCase):
         self.assertGreater(stats.mean_single_runtime, 0.0)
 
     def test_one_DBs_111_lattice(self):
-        layout = sidb_lattice_111((0, 0))
+        layout = sidb_111_lattice((0, 0))
         layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
 
         quicksim_parameter = quicksim_params()

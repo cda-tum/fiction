@@ -2,10 +2,10 @@ from mnt.pyfiction import *
 import unittest
 
 
-class TestSiDB100CellLevelLayout(unittest.TestCase):
+class TestSiDBLattice(unittest.TestCase):
 
     def test_qca_cell_layout_inheritance(self):
-        layout = sidb_lattice_100((9, 9))
+        layout = sidb_100_lattice((9, 9))
 
         for t in layout.coordinates():
             self.assertTrue(t <= (9, 9, 1))
@@ -20,7 +20,7 @@ class TestSiDB100CellLevelLayout(unittest.TestCase):
             self.assertIn(t, [(1, 2), (2, 1), (3, 2), (2, 3)])
 
     def test_cell_type_assignment_100_lattice(self):
-        layout = sidb_lattice_100((4, 4), "AND")
+        layout = sidb_100_lattice((4, 4), "AND")
 
         self.assertTrue(layout.is_empty())
 
@@ -88,7 +88,7 @@ class TestSiDB100CellLevelLayout(unittest.TestCase):
         self.assertFalse(layout.is_empty_cell((4, 2)))
 
     def test_cell_type_assignment_111_lattice(self):
-        layout = sidb_lattice_111((4, 4), "AND")
+        layout = sidb_111_lattice((4, 4), "AND")
 
         self.assertTrue(layout.is_empty())
 
