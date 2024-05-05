@@ -30,7 +30,9 @@ Simulation Result
            :members:
 
     .. tab:: Python
-        .. autoclass:: mnt.pyfiction.sidb_simulation_result
+        .. autoclass:: mnt.pyfiction.sidb_simulation_result_100
+            :members:
+        .. autoclass:: mnt.pyfiction.sidb_simulation_result_111
             :members:
 
 
