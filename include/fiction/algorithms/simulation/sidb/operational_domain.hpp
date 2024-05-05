@@ -413,9 +413,7 @@ class operational_domain_impl
                       {
                           // for each y value in parallel
                           std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ y_indices.cbegin(), y_indices.cend(),
-                                        [this, x](const auto y) {
-                                            is_step_point_operational({x, y});
-                                        });
+                                        [this, x](const auto y) { is_step_point_operational({x, y}); });
                       });
 
         log_stats();
@@ -612,9 +610,7 @@ class operational_domain_impl
                       [this, &lyt](const auto x)
                       {
                           std::for_each(y_indices.cbegin(), y_indices.cend(),
-                                        [this, &lyt, x](const auto y) {
-                                            is_step_point_suitable({x, y}, lyt);
-                                        });
+                                        [this, &lyt, x](const auto y) { is_step_point_suitable({x, y}, lyt); });
                       });
 
         sidb_simulation_parameters simulation_parameters = params.simulation_parameters;
