@@ -138,6 +138,9 @@ enum class sweep_parameter
  * parameters and checking the operational status of the layout for each parameter combination. The operational domain
  * is then defined as the set of all parameter combinations for which the layout is operational. Different techniques
  * for performing these sweep are implemented.
+ *
+ * @tparam Key The type representing the key. Defaults to `parameter point`.
+ * @tparam Value The type representing the value. Defaults to `operational status`.
  */
 template <typename Key = parameter_point, typename Value = operational_status>
 struct operational_domain
@@ -351,6 +354,13 @@ class operational_domain_impl
             y_values.push_back(params.y_min + static_cast<double>(i) * params.y_step);
         }
     }
+    /**
+     * Additional Constructor. Initializes the layout, the parameters and the statistics.
+     *
+     * @param lyt SiDB cell-level layout to be evaluated.
+     * @param ps Parameters for the operational domain computation.
+     * @param st Statistics of the process.
+     */
     operational_domain_impl(const Lyt& lyt, const operational_domain_params& ps, operational_domain_stats& st) noexcept
             :
             layout{lyt},
@@ -413,7 +423,9 @@ class operational_domain_impl
                       {
                           // for each y value in parallel
                           std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ y_indices.cbegin(), y_indices.cend(),
-                                        [this, x](const auto y) { is_step_point_operational({x, y}); });
+                                        [this, x](const auto y) {
+                                            is_step_point_operational({x, y});
+                                        });
                       });
 
         log_stats();
@@ -593,7 +605,7 @@ class operational_domain_impl
     }
     /**
      * Performs a grid search over the specified parameter ranges. For each physical
-     * parameter combination found for which the given cds is physically valid, it is determined whether the cds is the
+     * parameter combination found for which the given CDS is physically valid, it is determined whether the CDS is the
      * ground state or the n-th excited state.
      *
      * @return All physically valid physical parameters and the excited state number.
@@ -604,13 +616,15 @@ class operational_domain_impl
 
         mockturtle::stopwatch stop{stats.time_total};
 
-        // step points are analyzed sequentially because the cds is updated for each step point, so parallelizing may
+        // step points are analyzed sequentially because the CDS is updated for each step point, so parallelizing may
         // result in unexpected behavior.
         std::for_each(x_indices.cbegin(), x_indices.cend(),
                       [this, &lyt](const auto x)
                       {
                           std::for_each(y_indices.cbegin(), y_indices.cend(),
-                                        [this, &lyt, x](const auto y) { is_step_point_suitable({x, y}, lyt); });
+                                        [this, &lyt, x](const auto y) {
+                                            is_step_point_suitable({x, y}, lyt);
+                                        });
                       });
 
         sidb_simulation_parameters simulation_parameters = params.simulation_parameters;
@@ -630,6 +644,7 @@ class operational_domain_impl
 
                 if (params.sim_engine == sidb_simulation_engine::QUICKEXACT)
                 {
+                    // perform an exact ground state simulation
                     sim_results =
                         quickexact(lyt, quickexact_params<cell<Lyt>>{
                                             simulation_parameters,
@@ -686,7 +701,7 @@ class operational_domain_impl
     /**
      * The output BDL pair of the layout.
      */
-    const std::vector<bdl_pair<Lyt>> output_bdl_pairs{};
+    const std::vector<bdl_pair<Lyt>> output_bdl_pairs;
     /**
      * X dimension steps.
      */
@@ -707,10 +722,6 @@ class operational_domain_impl
      * The operational domain of the layout.
      */
     OPDomain op_domain{};
-    /**
-     * The operational domain of the layout.
-     */
-    operational_domain<> suitable_parameters{};
     /**
      * Number of simulator invocations.
      */

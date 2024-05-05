@@ -24,7 +24,7 @@ namespace fiction
  * point.
  */
 template <typename Lyt>
-[[nodiscard]] auto determine_physically_valid_parameters(Lyt& cds, const operational_domain_params& params = {})
+[[nodiscard]] auto determine_physically_valid_parameters(Lyt& cds, const operational_domain_params& params = {}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
