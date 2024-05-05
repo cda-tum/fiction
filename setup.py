@@ -100,7 +100,7 @@ with open(README_PATH, encoding="utf8") as readme_file:
 
 setup(
     name='mnt.pyfiction',
-    version='0.5.0',
+    version='0.6.0',
     author='Marcel Walter',
     author_email='marcel.walter@tum.de',
     description='Design Automation for Field-coupled Nanotechnologies',
@@ -111,7 +111,7 @@ setup(
     ext_modules=[CMakeExtension('pyfiction', namespace='mnt')],
     cmdclass={"build_ext": CMakeBuild},
     zip_safe=False,
-    python_requires=">=3.7",
+    python_requires=">=3.8",
     classifiers=[
         'Development Status :: 4 - Beta',
         'Programming Language :: Python :: 3',
