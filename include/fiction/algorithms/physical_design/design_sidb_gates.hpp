@@ -58,11 +58,11 @@ struct design_sidb_gates_metric_driven_simulated_annealing_params
      */
     std::size_t number_of_cycles{10};
     /**
-     * Parameters for simulating the critical temperature.
+     * Parameters for simulating the Critical Temperature.
      */
     critical_temperature_params ct_params{};
     /**
-     * Parameters for simulating the operational domain.
+     * Parameters for simulating the Operational Domain.
      */
     operational_domain_params op_params{};
     /**

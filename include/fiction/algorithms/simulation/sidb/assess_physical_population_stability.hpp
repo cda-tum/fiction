@@ -67,16 +67,15 @@ struct population_stability_information
      */
     typename Lyt::cell critical_cell{};
     /**
-     * Charge transition from the current charge state to the closest one.
+     * This map collects all charge transition types, the corresponding critical cells and the required
+     * electrostatic potential required to conduct the transition.
      */
     std::unordered_map<transition_type, std::pair<typename Lyt::cell, double>>
         transition_from_to_with_cell_and_required_pot{};
     /**
-     * Absolute electrostatic potential (unit: V) required for the charge state transition.
-     */
-    std::unordered_map<transition_type, double> minimum_potential_difference_to_transition{};
-    /**
-     * Distance (unit: nm) corresponding to the minimum potential difference.
+     * This map collects for all charge transition types, the electrostatic potential difference which is
+     * required to conduct a charge change as a distance in nanometer. This is possible since the electrostatic
+     * potential is connected to the distance.
      */
     std::unordered_map<transition_type, double> distance_corresponding_to_potential{};
     /**
@@ -158,14 +157,14 @@ class assess_physical_population_stability_impl
 
             population_stability_information<Lyt> population_stability_info{};
 
-            population_stability_info.minimum_potential_difference_to_transition[transition_type::NEUTRAL_TO_NEGATIVE] =
-                std::numeric_limits<double>::infinity();
-            population_stability_info.minimum_potential_difference_to_transition[transition_type::NEGATIVE_TO_NEUTRAL] =
-                std::numeric_limits<double>::infinity();
-            population_stability_info.minimum_potential_difference_to_transition[transition_type::NEUTRAL_TO_POSITIVE] =
-                std::numeric_limits<double>::infinity();
-            population_stability_info.minimum_potential_difference_to_transition[transition_type::POSITIVE_TO_NEUTRAL] =
-                std::numeric_limits<double>::infinity();
+            population_stability_info.transition_from_to_with_cell_and_required_pot.insert(
+                {transition_type::NEUTRAL_TO_NEGATIVE, {cell<Lyt>{}, std::numeric_limits<double>::infinity()}});
+            population_stability_info.transition_from_to_with_cell_and_required_pot.insert(
+                {transition_type::NEGATIVE_TO_NEUTRAL, {cell<Lyt>{}, std::numeric_limits<double>::infinity()}});
+            population_stability_info.transition_from_to_with_cell_and_required_pot.insert(
+                {transition_type::NEUTRAL_TO_POSITIVE, {cell<Lyt>{}, std::numeric_limits<double>::infinity()}});
+            population_stability_info.transition_from_to_with_cell_and_required_pot.insert(
+                {transition_type::POSITIVE_TO_NEUTRAL, {cell<Lyt>{}, std::numeric_limits<double>::infinity()}});
 
             charge_lyt.foreach_cell(
                 [this, &charge_lyt, &population_stability_info](const auto& c)
@@ -258,18 +257,17 @@ class assess_physical_population_stability_impl
     {
         auto updated_pop_stability_information = pop_stability_information;
 
-        if (std::abs(-local_potential + params.simulation_parameters.mu_minus) <
-            updated_pop_stability_information.minimum_potential_difference_to_transition.at(
-                transition_type::NEGATIVE_TO_NEUTRAL))
+        const auto required_potential_to_conduct_transition_negative_to_neutral =
+            std::abs(-local_potential + params.simulation_parameters.mu_minus);
+
+        if (required_potential_to_conduct_transition_negative_to_neutral <
+            updated_pop_stability_information.transition_from_to_with_cell_and_required_pot
+                .at(transition_type::NEGATIVE_TO_NEUTRAL)
+                .second)
         {
-            updated_pop_stability_information.minimum_potential_difference_to_transition.at(
-                transition_type::NEGATIVE_TO_NEUTRAL) =
-                std::abs(-local_potential + params.simulation_parameters.mu_minus);
-            updated_pop_stability_information.critical_cell = c;
             updated_pop_stability_information
                 .transition_from_to_with_cell_and_required_pot[transition_type::NEGATIVE_TO_NEUTRAL] = {
-                c, updated_pop_stability_information.minimum_potential_difference_to_transition.at(
-                       transition_type::NEGATIVE_TO_NEUTRAL)};
+                c, required_potential_to_conduct_transition_negative_to_neutral};
         }
 
         return updated_pop_stability_information;
@@ -291,37 +289,34 @@ class assess_physical_population_stability_impl
                            const population_stability_information<Lyt>& pop_stability_information) noexcept
     {
         auto updated_pop_stability_information = pop_stability_information;
-        if (std::abs(-local_potential + params.simulation_parameters.mu_minus) <
+
+        const auto required_potential_to_conduct_transition_neutral_to_negative =
+            std::abs(-local_potential + params.simulation_parameters.mu_minus);
+        if (required_potential_to_conduct_transition_neutral_to_negative <
             std::abs(-local_potential + params.simulation_parameters.mu_plus()))
         {
             if (std::abs(-local_potential + params.simulation_parameters.mu_minus) <
-                updated_pop_stability_information.minimum_potential_difference_to_transition.at(
-                    transition_type::NEUTRAL_TO_NEGATIVE))
+                updated_pop_stability_information.transition_from_to_with_cell_and_required_pot
+                    .at(transition_type::NEUTRAL_TO_NEGATIVE)
+                    .second)
             {
-                updated_pop_stability_information.minimum_potential_difference_to_transition.at(
-                    transition_type::NEUTRAL_TO_NEGATIVE) =
-                    std::abs(-local_potential + params.simulation_parameters.mu_minus);
-                updated_pop_stability_information.critical_cell = c;
                 updated_pop_stability_information
                     .transition_from_to_with_cell_and_required_pot[transition_type::NEUTRAL_TO_NEGATIVE] = {
-                    c, updated_pop_stability_information.minimum_potential_difference_to_transition.at(
-                           transition_type::NEUTRAL_TO_NEGATIVE)};
+                    c, required_potential_to_conduct_transition_neutral_to_negative};
             }
         }
         else
         {
+            const auto required_potential_to_conduct_transition_neutral_to_positive =
+                -local_potential + params.simulation_parameters.mu_plus();
             if (std::abs(-local_potential + params.simulation_parameters.mu_plus()) <
-                updated_pop_stability_information
-                    .minimum_potential_difference_to_transition[transition_type::NEUTRAL_TO_POSITIVE])
+                updated_pop_stability_information.transition_from_to_with_cell_and_required_pot
+                    .at(transition_type::NEUTRAL_TO_POSITIVE)
+                    .second)
             {
                 updated_pop_stability_information
-                    .minimum_potential_difference_to_transition[transition_type::NEUTRAL_TO_POSITIVE] =
-                    std::abs(-local_potential + params.simulation_parameters.mu_plus());
-                updated_pop_stability_information.critical_cell = c;
-                updated_pop_stability_information
                     .transition_from_to_with_cell_and_required_pot[transition_type::NEUTRAL_TO_POSITIVE] = {
-                    c, updated_pop_stability_information
-                           .minimum_potential_difference_to_transition[transition_type::NEUTRAL_TO_POSITIVE]};
+                    c, required_potential_to_conduct_transition_neutral_to_positive};
             }
         }
 
@@ -344,18 +339,16 @@ class assess_physical_population_stability_impl
                             const population_stability_information<Lyt>& pop_stability_information) noexcept
     {
         auto updated_pop_stability_information = pop_stability_information;
+
+        const auto required_potential_to_conduct_transition_from_positive_to_neutral =
+            std::abs(-local_potential + params.simulation_parameters.mu_plus());
+
         if (std::abs(-local_potential + params.simulation_parameters.mu_plus()) <
-            updated_pop_stability_information
-                .minimum_potential_difference_to_transition[transition_type::POSITIVE_TO_NEUTRAL])
+            required_potential_to_conduct_transition_from_positive_to_neutral)
         {
             updated_pop_stability_information
-                .minimum_potential_difference_to_transition[transition_type::POSITIVE_TO_NEUTRAL] =
-                std::abs(-local_potential + params.simulation_parameters.mu_plus());
-            updated_pop_stability_information.critical_cell = c;
-            updated_pop_stability_information
                 .transition_from_to_with_cell_and_required_pot[transition_type::POSITIVE_TO_NEUTRAL] = {
-                c, updated_pop_stability_information
-                       .minimum_potential_difference_to_transition[transition_type::POSITIVE_TO_NEUTRAL]};
+                c, required_potential_to_conduct_transition_from_positive_to_neutral};
         }
 
         return updated_pop_stability_information;
@@ -378,8 +371,10 @@ class assess_physical_population_stability_impl
 
         std::transform(
             sim_results.charge_distributions.cbegin(), sim_results.charge_distributions.cend(),
-            std::back_inserter(energy_charge_index), [](const auto& ch_lyt)
-            { return energy_and_charge_index{ch_lyt.get_system_energy(), ch_lyt.get_charge_index_and_base().first}; });
+            std::back_inserter(energy_charge_index),
+            [](const auto& ch_lyt) {
+                return energy_and_charge_index{ch_lyt.get_system_energy(), ch_lyt.get_charge_index_and_base().first};
+            });
 
         // Sort the vector in ascending order of the energy value
         std::sort(energy_charge_index.begin(), energy_charge_index.end(),

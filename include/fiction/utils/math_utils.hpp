@@ -120,7 +120,8 @@ determine_all_combinations_of_distributing_k_entities_on_n_positions(const std::
 }
 
 /**
- * Calculates the cost function \f$ \chi \f$ by summing the product of chi values and weights.
+ * Calculates the cost function \f$ \chi = \sum_{i=1} w_{i} \cdot \chi_{i} \f$ by summing the product of normalized chi
+ * values \f$ \chi_{i} \f$ and weights \f$ w_{i} \f$.
  *
  * @param chis The vector containing the chi values.
  * @param weights The vector containing the weights.

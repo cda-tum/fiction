@@ -14,6 +14,8 @@
 #include <fiction/types.hpp>
 #include <fiction/utils/layout_utils.hpp>
 
+#include <limits>
+
 using namespace fiction;
 
 using layout = sidb_100_cell_clk_lyt_siqad;
@@ -30,13 +32,19 @@ TEST_CASE("Single SiDB", "[assess-physical-population-stability]")
         REQUIRE(result.size() == 1);
         const auto& population_stability_detail = result[0];
         CHECK(population_stability_detail.critical_cell == siqad::coord_t{1, 1, 0});
-        REQUIRE(population_stability_detail.transition_from_to_with_cell_and_required_pot.size() == 1);
+        REQUIRE(population_stability_detail.transition_from_to_with_cell_and_required_pot.size() == 4);
         CHECK(population_stability_detail.transition_from_to_with_cell_and_required_pot
                   .at(transition_type::NEGATIVE_TO_NEUTRAL)
                   .first == siqad::coord_t{1, 1, 0});
         CHECK(population_stability_detail.transition_from_to_with_cell_and_required_pot
                   .at(transition_type::NEGATIVE_TO_NEUTRAL)
                   .second == 0.29);
+        CHECK(population_stability_detail.transition_from_to_with_cell_and_required_pot
+                  .at(transition_type::NEUTRAL_TO_POSITIVE)
+                  .second == std::numeric_limits<double>::infinity());
+        CHECK(population_stability_detail.transition_from_to_with_cell_and_required_pot
+                  .at(transition_type::POSITIVE_TO_NEUTRAL)
+                  .second == std::numeric_limits<double>::infinity());
 
         REQUIRE_THAT(
             population_stability_detail.distance_corresponding_to_potential.at(transition_type::NEGATIVE_TO_NEUTRAL),
@@ -82,10 +90,12 @@ TEST_CASE("Three SiDBs with positive charge states", "[assess-physical-populatio
         CHECK(population_stability_detail.transition_from_to_with_cell_and_required_pot
                   .at(transition_type::NEGATIVE_TO_NEUTRAL)
                   .first == siqad::coord_t{2, 1, 0});
-        CHECK(population_stability_detail.minimum_potential_difference_to_transition.at(
-                  transition_type::NEGATIVE_TO_NEUTRAL) < 0.43);
-        CHECK(population_stability_detail.minimum_potential_difference_to_transition.at(
-                  transition_type::POSITIVE_TO_NEUTRAL) < 0.81);
+        CHECK(population_stability_detail.transition_from_to_with_cell_and_required_pot
+                  .at(transition_type::NEGATIVE_TO_NEUTRAL)
+                  .second < 0.43);
+        CHECK(population_stability_detail.transition_from_to_with_cell_and_required_pot
+                  .at(transition_type::POSITIVE_TO_NEUTRAL)
+                  .second < 0.81);
         REQUIRE_THAT(
             population_stability_detail.distance_corresponding_to_potential.at(transition_type::NEGATIVE_TO_NEUTRAL),
             Catch::Matchers::WithinAbs(0.56, 1e-5));
@@ -164,8 +174,9 @@ TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]")
         REQUIRE(result.size() == 2);
         const auto& population_stability_detail = result[0];
         CHECK(population_stability_detail.critical_cell == siqad::coord_t{14, 5, 0});
-        CHECK(population_stability_detail.minimum_potential_difference_to_transition.at(
-                  transition_type::NEUTRAL_TO_NEGATIVE) < 0.026);
+        CHECK(population_stability_detail.transition_from_to_with_cell_and_required_pot
+                  .at(transition_type::NEUTRAL_TO_NEGATIVE)
+                  .second < 0.026);
         REQUIRE_THAT(
             population_stability_detail.distance_corresponding_to_potential.at(transition_type::NEUTRAL_TO_NEGATIVE),
             Catch::Matchers::WithinAbs(4.32, 1e-5));
@@ -180,8 +191,9 @@ TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]")
         REQUIRE(result.size() == 4);
         const auto& population_stability_detail = result[0];
         CHECK(population_stability_detail.critical_cell == siqad::coord_t{32, 18, 0});
-        CHECK(population_stability_detail.minimum_potential_difference_to_transition.at(
-                  transition_type::NEUTRAL_TO_NEGATIVE) < 0.041);
+        CHECK(population_stability_detail.transition_from_to_with_cell_and_required_pot
+                  .at(transition_type::NEUTRAL_TO_NEGATIVE)
+                  .second < 0.041);
         REQUIRE_THAT(
             population_stability_detail.distance_corresponding_to_potential.at(transition_type::NEUTRAL_TO_NEGATIVE),
             Catch::Matchers::WithinAbs(3.3, 1e-5));
@@ -196,8 +208,9 @@ TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]")
         REQUIRE(result.size() == 8);
         const auto& population_stability_detail = result[0];
         CHECK(population_stability_detail.critical_cell == siqad::coord_t{19, 8, 0});
-        CHECK(population_stability_detail.minimum_potential_difference_to_transition.at(
-                  transition_type::NEUTRAL_TO_NEGATIVE) < 0.02);
+        CHECK(population_stability_detail.transition_from_to_with_cell_and_required_pot
+                  .at(transition_type::NEUTRAL_TO_NEGATIVE)
+                  .second < 0.02);
         REQUIRE_THAT(
             population_stability_detail.distance_corresponding_to_potential.at(transition_type::NEUTRAL_TO_NEGATIVE),
             Catch::Matchers::WithinAbs(4.87, 1e-5));
@@ -212,8 +225,9 @@ TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]")
         REQUIRE(result.size() == 2);
         const auto& population_stability_detail = result[0];
         CHECK(population_stability_detail.critical_cell == siqad::coord_t{14, 5, 0});
-        CHECK(population_stability_detail.minimum_potential_difference_to_transition.at(
-                  transition_type::NEUTRAL_TO_NEGATIVE) < 0.026);
+        CHECK(population_stability_detail.transition_from_to_with_cell_and_required_pot
+                  .at(transition_type::NEUTRAL_TO_NEGATIVE)
+                  .second < 0.026);
         REQUIRE_THAT(
             population_stability_detail.distance_corresponding_to_potential.at(transition_type::NEUTRAL_TO_NEGATIVE),
             Catch::Matchers::WithinAbs(4.32, 1e-5));
@@ -234,8 +248,9 @@ TEST_CASE("Bestagon CROSSING gate input 11, using siqad coordinates", "[assess-p
     REQUIRE(result.size() == 20);
     const auto& population_stability_detail = result[0];
     CHECK(population_stability_detail.critical_cell == siqad::coord_t{14, 9, 0});
-    CHECK(population_stability_detail.minimum_potential_difference_to_transition.at(
-              transition_type::NEUTRAL_TO_NEGATIVE) < 0.01);
+    CHECK(population_stability_detail.transition_from_to_with_cell_and_required_pot
+              .at(transition_type::NEUTRAL_TO_NEGATIVE)
+              .second < 0.01);
     REQUIRE_THAT(
         population_stability_detail.distance_corresponding_to_potential.at(transition_type::NEUTRAL_TO_NEGATIVE),
         Catch::Matchers::WithinAbs(6.88, 1e-5));
@@ -257,8 +272,9 @@ TEST_CASE("Bestagon CROSSING gate input 11, using cube coordinates", "[assess-ph
     REQUIRE(result.size() == 20);
     const auto& population_stability_detail = result[0];
     CHECK(population_stability_detail.critical_cell == cube::coord_t{14, 18, 0});
-    CHECK(population_stability_detail.minimum_potential_difference_to_transition.at(
-              transition_type::NEUTRAL_TO_NEGATIVE) < 0.01);
+    CHECK(population_stability_detail.transition_from_to_with_cell_and_required_pot
+              .at(transition_type::NEUTRAL_TO_NEGATIVE)
+              .second < 0.01);
     REQUIRE_THAT(
         population_stability_detail.distance_corresponding_to_potential.at(transition_type::NEUTRAL_TO_NEGATIVE),
         Catch::Matchers::WithinAbs(6.88, 1e-5));
@@ -280,8 +296,9 @@ TEST_CASE("Bestagon CROSSING gate input 11, using offset coordinates", "[assess-
     REQUIRE(result.size() == 20);
     const auto& population_stability_detail = result[0];
     CHECK(population_stability_detail.critical_cell == offset::ucoord_t{14, 18, 0});
-    CHECK(population_stability_detail.minimum_potential_difference_to_transition.at(
-              transition_type::NEUTRAL_TO_NEGATIVE) < 0.01);
+    CHECK(population_stability_detail.transition_from_to_with_cell_and_required_pot
+              .at(transition_type::NEUTRAL_TO_NEGATIVE)
+              .second < 0.01);
     REQUIRE_THAT(
         population_stability_detail.distance_corresponding_to_potential.at(transition_type::NEUTRAL_TO_NEGATIVE),
         Catch::Matchers::WithinAbs(6.88, 1e-5));

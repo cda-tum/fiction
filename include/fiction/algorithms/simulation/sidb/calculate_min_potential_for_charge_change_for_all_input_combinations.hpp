@@ -81,24 +81,27 @@ template <typename Lyt, typename TT>
             assess_physical_population_stability<Lyt>(lyt, params.assess_population_stability_params);
         if (!pop_stability.empty())
         {
-            const auto stability_for_given_input = pop_stability.front().minimum_potential_difference_to_transition;
+            const auto ground_state_stability_for_given_input = pop_stability.front();
 
             if (charge_state_change.has_value())
             {
                 if (charge_state_change.value() == 1)
                 {
                     const auto potential_negative_to_neutral =
-                        stability_for_given_input.at(transition_type::NEGATIVE_TO_NEUTRAL);
+                        ground_state_stability_for_given_input.transition_from_to_with_cell_and_required_pot
+                            .at(transition_type::NEGATIVE_TO_NEUTRAL)
+                            .second;
                     if (potential_negative_to_neutral < minimal_pop_stability_for_all_inputs)
                     {
                         minimal_pop_stability_for_all_inputs = potential_negative_to_neutral;
                     }
                 }
-
                 if (charge_state_change.value() == -1)
                 {
                     const auto potential_neutral_to_negative =
-                        stability_for_given_input.at(transition_type::NEUTRAL_TO_NEGATIVE);
+                        ground_state_stability_for_given_input.transition_from_to_with_cell_and_required_pot
+                            .at(transition_type::NEUTRAL_TO_NEGATIVE)
+                            .second;
                     if (potential_neutral_to_negative < minimal_pop_stability_for_all_inputs)
                     {
                         minimal_pop_stability_for_all_inputs = potential_neutral_to_negative;
