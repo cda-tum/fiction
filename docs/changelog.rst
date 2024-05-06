@@ -5,6 +5,114 @@ All notable changes to this project will be documented in this file.
 
 The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`_.
 
+v0.6.0 - 2024-05-05
+-------------------
+*When it comes to the past, everyone writes fiction.* --- Stephen King
+
+Added
+#####
+- Python bindings:
+    - Python bindings for most of the core functionality of *fiction* using `pybind11 <https://github.com/pybind/pybind11>`_
+    - Hosted on `PyPI <https://pypi.org/project/mnt.pyfiction/>`_
+- Technology:
+    - H-Si lattice orientation support
+        - H-Si(100)-2x1
+        - H-Si(111)-1x1
+- Algorithms:
+    - Post-layout optimization and wiring reduction for 2DDWave-clocked Cartesian gate-level layouts (based on `this paper <https://www.cda.cit.tum.de/files/eda/2023_nanoarch_post-layout_optimization_for_fcn.pdf>`_)
+    - SAT-based clock number assignment
+    - Added an upper bound option for the total layout area to ``exact``
+    - Automatic and exhaustive SiDB gate designer (based on `this paper <https://www.cda.cit.tum.de/files/eda/2023_nanoarch_minimal_gate_design.pdf>`_)
+    - Operational domain computation for SiDB layouts (based on `this paper <https://www.cda.cit.tum.de/files/eda/2023_nanoarch_reducing_the_complexity_of_operational_domain_computation_in_silicon_dangling_bond_logic.pdf>`_)
+    - Novel SiDB simulator ``quickexact`` for exhaustive but fast SiDB layout simulation including atomic defects (based on `this paper <https://www.cda.cit.tum.de/files/eda/2024_aspdac_efficient_exact_simulation.pdf>`_)
+    - Random SiDB layout generator
+    - 2DDWave distance function
+    - Hexagonalization algorithm for transforming Cartesian 2DDWave-clocked layouts into ROW-clocked hexagonal layouts (based on `this paper <https://www.cda.cit.tum.de/files/eda/2023_ieeenano_45_degree_sidb_design.pdf>`_)
+    - Temperature-aware SiDB simulation (based on `this paper <https://www.cda.cit.tum.de/files/eda/2023_ieeenano_temperature_behavior.pdf>`_)
+    - Atomic defect-aware physical design for SiDB layouts. Many thanks to Jeremiah Croshaw and Samuel Sze Hang Ng for the collaboration on `the paper <https://arxiv.org/abs/2311.12042>`_!
+- Data types:
+    - Distance maps for faster path-finding via caching or pre-computation
+    - Enable ``coord_iterator`` for ``siqad::coord_t``
+- I/O:
+    - Unified ``print_layout`` function for all layout types
+    - Support ``charge_distribution_surface`` in ``print_layout``
+    - Support atomic defects in ``print_layout``
+    - Support atomic defects in reading and writing SQD files
+    - Proprietary file format writer for SiDB layouts together with simulation results
+    - SiDB simulation file writer for `SiQAD <https://github.com/siqad/siqad>`_
+- Clocking schemes:
+    - Ripple
+- CLI:
+    - Commands ``miginvopt`` and ``miginvprop`` for MIG network optimization and inverter propagation from ``mockturtle``
+- Utils:
+    - Function to round a number to ``n`` decimal places
+- Libraries:
+    - Updated all libraries to the latest versions
+- Continuous integration:
+    - Added a workflow to build and test the Python bindings
+    - Added a workflow to publish the Python bindings to `PyPI <https://pypi.org/project/mnt.pyfiction/>`_
+    - Added a workflow to extract the docstrings from C++ to make them available in Python
+    - Added a `CodeCov <https://about.codecov.io/>`_ configuration file
+    - Setup `pre-commit <https://pre-commit.com/>`_ checks for code formatting and linting
+- Build and documentation:
+    - Added documentation on the Python bindings
+    - Overhauled the README
+    - Flags to partially compile select features of the CLI
+    - Added latest paper references to the documentation
+    - Added the new Munich Nanotech Toolkit logo
+    - Added missing thanks to Giuliana Beretta
+    - Added contribution and support info
+- Benchmarks:
+    - Combinational networks from the `IWLS93 suite <https://ddd.fit.cvut.cz/www/prj/Benchmarks/IWLS93.pdf>`_
+    - Code benchmarking via `Catch2 <https://github.com/catchorg/Catch2>`_
+
+Changed
+#######
+- Usability:
+    - Added return types to the ``area``, ``critical_path_length_and_throughput``, and ``equivalence_checking`` functions instead of relying on the passed statistics objects
+    - Refactored the technology mapping interface
+    - Enabled ``offset::ucoord_t`` and ``cube::coord_t`` as coordinate types for SiDB simulations
+    - Enhanced path-finding versatility by enabling them on all layout abstractions
+    - ``random_coordinate`` function for all layout types
+    - Added the EPFL and ISCAS85 benchmarks to the benchmark selector in the experiments
+    - Changed the unit of the ``lambda_tf`` physical parameter from meter to nanometer
+- Continuous integration:
+    - Increased parallelism for building and testing in the Ubuntu and Windows workflows
+    - Use ``mold`` instead of ``ld`` for faster link times
+    - Switched to the newest OS versions in the GitHub Actions workflows
+- Build and documentation:
+    - Overhauled and modernized the CMake build system
+    - Updated the Doxygen documentation system
+- Linting:
+    - Make ClangFormat aware of different line ending types and enforce ``LF``
+- Miscellaneous:
+    - Updated the linguist attributes
+    - ``fiction`` moved to the ``cda-tum`` GitHub organization
+
+Fixed
+#####
+- Minor oversights in using ``static constexpr`` and ``noexcept``
+- Fixed conversion of cube coordinate with negative y-value to SiQAD coordinate
+- Fixed an inconsistency in SiDB layout printing
+- Fixed hop energy calculation from neutral to positive SiDB
+- ``read_sqd_layout`` now updates the aspect ratio properly for SiQAD-coordinate based layouts
+- Atomic defects can now be updated and new ones can be assigned to specific coordinates
+- Case style of experiments folders corrected in ``fiction_experiments.hpp``
+- Fixed CodeQL warnings
+- Fixed a bug that caused pre-mature termination of ``sidb_surface_analysis``
+- Fixed design-rule violation testing and equivalence checking on empty gate-level layouts
+- Fixed compiler warnings
+- Fixed a documentation bug in the physical constants section
+- Fixed the bug that some physical parameters were not correctly passed to the simulators
+- Fixed ``equivalence_checking`` on ``obstruction_layout`` objects
+- Fixed fragments from the move to ``cda-tum`` and adjusted the tracking of publications
+- Missing physical validity check in ``quicksim`` for special cases
+- Bug fixes and improvements related to the coordinate system
+- Fixed wrong SiDB locations in a Bestagon tile's input wire
+- Fixed an issue with ``charge_distribution_surface`` not being recognized as a ``cell_level_layout``
+- Fixed port routing determination for unconnected gates in the Bestagon library
+
+
 v0.5.0 - 2023-03-30
 -------------------
 *Fiction is a way to challenge the status quo and to push the boundaries of conventional thinking.* --- unknown

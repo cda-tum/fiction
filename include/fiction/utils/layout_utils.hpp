@@ -303,19 +303,19 @@ auto convert_to_siqad_coordinates(const LytSrc& lyt) noexcept
     static_assert(is_cell_level_layout_v<LytSrc>, "LytSrc is not a cell-level layout");
     static_assert(has_sidb_technology_v<LytSrc>, "LytSrc is not an SiDB layout");
 
-    auto process_layout = [](auto& lyt, auto lyt_new)
+    auto process_layout = [](auto& lyt_orig, auto lyt_new)
     {
-        lyt_new.resize({lyt.x(), (lyt.y() - lyt.y() % 2) / 2});
-        lyt_new.set_layout_name(lyt.get_layout_name());
-        lyt_new.set_tile_size_x(lyt.get_tile_size_x());
-        lyt_new.set_tile_size_y(lyt.get_tile_size_y());
+        lyt_new.resize({lyt_orig.x(), (lyt_orig.y() - lyt_orig.y() % 2) / 2});
+        lyt_new.set_layout_name(lyt_orig.get_layout_name());
+        lyt_new.set_tile_size_x(lyt_orig.get_tile_size_x());
+        lyt_new.set_tile_size_y(lyt_orig.get_tile_size_y());
 
-        lyt.foreach_cell(
-            [&lyt_new, &lyt](const auto& c)
+        lyt_orig.foreach_cell(
+            [&lyt_new, &lyt_orig](const auto& c)
             {
-                lyt_new.assign_cell_type(siqad::to_siqad_coord(c), lyt.get_cell_type(c));
-                lyt_new.assign_cell_mode(siqad::to_siqad_coord(c), lyt.get_cell_mode(c));
-                lyt_new.assign_cell_name(siqad::to_siqad_coord(c), lyt.get_cell_name(c));
+                lyt_new.assign_cell_type(siqad::to_siqad_coord(c), lyt_orig.get_cell_type(c));
+                lyt_new.assign_cell_mode(siqad::to_siqad_coord(c), lyt_orig.get_cell_mode(c));
+                lyt_new.assign_cell_name(siqad::to_siqad_coord(c), lyt_orig.get_cell_name(c));
             });
 
         if constexpr (is_charge_distribution_surface_v<LytSrc> && is_sidb_defect_surface_v<LytSrc>)
@@ -323,33 +323,35 @@ auto convert_to_siqad_coordinates(const LytSrc& lyt) noexcept
             charge_distribution_surface<decltype(sidb_defect_surface{lyt_new})> lyt_new_cds{
                 sidb_defect_surface{lyt_new}};
 
-            lyt.foreach_cell(
-                [&lyt_new_cds, &lyt](const auto& c)
-                { lyt_new_cds.assign_charge_state(siqad::to_siqad_coord(c), lyt.get_charge_state(c), false); });
+            lyt_orig.foreach_cell(
+                [&lyt_new_cds, &lyt_orig](const auto& c)
+                { lyt_new_cds.assign_charge_state(siqad::to_siqad_coord(c), lyt_orig.get_charge_state(c), false); });
 
-            lyt_new_cds.assign_physical_parameters(lyt.get_simulation_params());
+            lyt_new_cds.assign_physical_parameters(lyt_orig.get_simulation_params());
 
-            lyt.foreach_sidb_defect([&lyt_new_cds](const auto& cd)
-                                    { lyt_new_cds.assign_sidb_defect(siqad::to_siqad_coord(cd.first), cd.second); });
+            lyt_orig.foreach_sidb_defect(
+                [&lyt_new_cds](const auto& cd)
+                { lyt_new_cds.assign_sidb_defect(siqad::to_siqad_coord(cd.first), cd.second); });
             return lyt_new_cds;
         }
         else if constexpr (is_sidb_defect_surface_v<LytSrc> && !is_charge_distribution_surface_v<LytSrc>)
         {
             sidb_defect_surface<decltype(lyt_new)> lyt_surface{lyt_new};
-            lyt.foreach_sidb_defect(
-                [&lyt_surface, &lyt](const auto& cd)
-                { lyt_surface.assign_sidb_defect(siqad::to_siqad_coord(cd.first), lyt.get_sidb_defect(cd.first)); });
+            lyt_orig.foreach_sidb_defect(
+                [&lyt_surface, &lyt_orig](const auto& cd) {
+                    lyt_surface.assign_sidb_defect(siqad::to_siqad_coord(cd.first), lyt_orig.get_sidb_defect(cd.first));
+                });
             return lyt_surface;
         }
         else if constexpr (is_charge_distribution_surface_v<LytSrc> && !is_sidb_defect_surface_v<LytSrc>)
         {
             charge_distribution_surface<decltype(lyt_new)> lyt_new_cds{lyt_new};
 
-            lyt.foreach_cell(
-                [&lyt_new_cds, &lyt](const auto& c)
-                { lyt_new_cds.assign_charge_state(siqad::to_siqad_coord(c), lyt.get_charge_state(c), false); });
+            lyt_orig.foreach_cell(
+                [&lyt_new_cds, &lyt_orig](const auto& c)
+                { lyt_new_cds.assign_charge_state(siqad::to_siqad_coord(c), lyt_orig.get_charge_state(c), false); });
 
-            lyt_new_cds.assign_physical_parameters(lyt.get_simulation_params());
+            lyt_new_cds.assign_physical_parameters(lyt_orig.get_simulation_params());
 
             return lyt_new_cds;
         }

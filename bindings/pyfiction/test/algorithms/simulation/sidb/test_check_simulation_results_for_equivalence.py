@@ -7,7 +7,7 @@ class TestCheckSimulationResultsForEquivalence(unittest.TestCase):
 
     def test_cds_with_two_sidbs_100_lattice(self):
         # Use standard constructor.
-        lattice_100 = sidb_lattice_100()
+        lattice_100 = sidb_100_lattice()
         lattice_100.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
         lattice_100.assign_cell_type((0, 3), sidb_technology.cell_type.NORMAL)
 
@@ -23,7 +23,7 @@ class TestCheckSimulationResultsForEquivalence(unittest.TestCase):
 
     def test_cds_with_two_sidbs_111_lattice(self):
         # Use standard constructor.
-        lattice_111 = sidb_lattice_111()
+        lattice_111 = sidb_111_lattice()
         lattice_111.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
         lattice_111.assign_cell_type((0, 3), sidb_technology.cell_type.NORMAL)
 

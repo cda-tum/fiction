@@ -326,7 +326,7 @@ Additionally, the [benchmarks](https://github.com/cda-tum/fiction/tree/main/benc
 descriptions of frequently used benchmark sets in Verilog format (``.v``) provided
 by [MNT Bench](https://www.cda.cit.tum.de/mntbench/).
 
-# Reference
+## Reference
 
 Since *fiction* is academic software, we would be thankful if you referred to it by citing the following publication:
 
@@ -344,3 +344,19 @@ Since *fiction* is academic software, we would be thankful if you referred to it
 
 Additionally, many algorithms implemented in *fiction* have been published individually. For a full list of
 publications, please refer to the [documentation](https://fiction.readthedocs.io/en/latest/publications.html).
+
+## Acknowledgements
+
+The Munich Nanotech Toolkit has been supported by the Bavarian State Ministry for Science and Arts through the
+Distinguished Professorship Program.
+
+<p align="center">
+<picture>
+<source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/cda-tum/mqt/main/docs/_static/tum_dark.svg" width="28%">
+<img src="https://raw.githubusercontent.com/cda-tum/mqt/main/docs/_static/tum_light.svg" width="28%" alt="TUM Logo">
+</picture>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <!-- Non-breaking spaces for spacing -->
+<picture>
+<img src="https://raw.githubusercontent.com/cda-tum/mqt/main/docs/_static/logo-bavaria.svg" width="16%" alt="Coat of Arms of Bavaria">
+</picture>
+</p>

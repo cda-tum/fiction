@@ -5,7 +5,7 @@ import os
 
 class TestSiDBNmDistance(unittest.TestCase):
     def test_sidb_nm_distance_100_lattice(self):
-        layout_one = sidb_lattice_100((10, 10))
+        layout_one = sidb_100_lattice((10, 10))
 
         # Replace the placeholders with actual values or function calls
         self.assertEqual(sidb_nm_distance_100(layout_one, (0, 0), (0, 0)), 0)
@@ -17,7 +17,7 @@ class TestSiDBNmDistance(unittest.TestCase):
         self.assertAlmostEqual(sidb_nm_distance_100(layout_one, (0, 0), (0, 1)), 0.225)
 
     def test_sidb_nm_distance_100_lattice(self):
-        layout_one = sidb_lattice_111((10, 10))
+        layout_one = sidb_111_lattice((10, 10))
 
         # Replace the placeholders with actual values or function calls
         self.assertEqual(sidb_nm_distance_111(layout_one, (0, 0), (0, 0)), 0)

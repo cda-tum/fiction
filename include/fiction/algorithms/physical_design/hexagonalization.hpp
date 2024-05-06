@@ -5,6 +5,9 @@
 #ifndef FICTION_HEXAGONALIZATION_HPP
 #define FICTION_HEXAGONALIZATION_HPP
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
+
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
@@ -37,7 +40,7 @@ struct hexagonalization_stats
      */
     void report(std::ostream& out = std::cout) const
     {
-        out << fmt::format("[i] total time  = {:.2f} secs\n", mockturtle::to_seconds(time_total));
+        out << fmt::format("[i] total time = {:.2f} secs\n", mockturtle::to_seconds(time_total));
     }
 };
 
@@ -49,7 +52,6 @@ namespace detail
  *
  * @param cartesian_tile Tile on the Cartesian grid.
  * @param cartesian_layout_height Height of the Cartesian layout.
- *
  * @return corresponding tile on the hexagonal grid.
  */
 template <typename CartLyt, typename HexLyt>
@@ -82,7 +84,6 @@ template <typename CartLyt, typename HexLyt>
  * @param lyt 2DDWave-clocked Cartesian gate-level layout to hexagonalize.
  * @param cartesian_layout_width Width of the Cartesian layout.
  * @param cartesian_layout_height Height of the Cartesian layout.
- *
  * @return offset.
  */
 template <typename HexLyt, typename CartLyt>
@@ -171,7 +172,7 @@ template <typename HexLyt, typename CartLyt>
             {
                 const auto    old_coord = lyt.get_tile(gate);
                 tile<CartLyt> hex{detail::to_hex<CartLyt, HexLyt>(old_coord, layout_height)};
-                hex.x -= offset;
+                hex.x -= static_cast<decltype(hex.x)>(offset);
                 hex_layout.create_pi(lyt.get_name(lyt.get_node(old_coord)), hex);
             });
 
@@ -189,7 +190,7 @@ template <typename HexLyt, typename CartLyt>
                         const tile<CartLyt> old_coord{x, y, z};
                         // new tile
                         tile<CartLyt> hex{detail::to_hex<CartLyt, HexLyt>(old_coord, layout_height)};
-                        hex.x -= offset;
+                        hex.x -= static_cast<decltype(hex.x)>(offset);
 
                         if (lyt.is_empty_tile(old_coord))
                         {
@@ -208,7 +209,7 @@ template <typename HexLyt, typename CartLyt>
 
                             auto hex_tile = detail::to_hex<CartLyt, HexLyt>(signal, layout_height);
 
-                            hex_tile.x -= offset;
+                            hex_tile.x -= static_cast<decltype(hex_tile.x)>(offset);
 
                             const auto hex_signal = hex_layout.make_signal(hex_layout.get_node(hex_tile));
 
@@ -229,8 +230,8 @@ template <typename HexLyt, typename CartLyt>
                             auto       hex_tile_a = detail::to_hex<CartLyt, HexLyt>(signal_a, layout_height);
                             auto       hex_tile_b = detail::to_hex<CartLyt, HexLyt>(signal_b, layout_height);
 
-                            hex_tile_a.x -= offset;
-                            hex_tile_b.x -= offset;
+                            hex_tile_a.x -= static_cast<decltype(hex_tile_a.x)>(offset);
+                            hex_tile_b.x -= static_cast<decltype(hex_tile_b.x)>(offset);
 
                             const auto hex_signal_a = hex_layout.make_signal(hex_layout.get_node(hex_tile_a));
                             const auto hex_signal_b = hex_layout.make_signal(hex_layout.get_node(hex_tile_b));
@@ -280,8 +281,8 @@ template <typename HexLyt, typename CartLyt>
 
                 tile<CartLyt> hex{detail::to_hex<CartLyt, HexLyt>(old_coord, layout_height)};
                 auto          hex_tile = detail::to_hex<CartLyt, HexLyt>(signal, layout_height);
-                hex.x -= offset;
-                hex_tile.x -= offset;
+                hex.x -= static_cast<decltype(hex.x)>(offset);
+                hex_tile.x -= static_cast<decltype(hex_tile.x)>(offset);
 
                 const auto hex_signal = hex_layout.make_signal(hex_layout.get_node(hex_tile));
                 hex_layout.create_po(hex_signal, lyt.get_name(lyt.get_node(old_coord)), hex);
@@ -307,5 +308,7 @@ template <typename HexLyt, typename CartLyt>
 }
 
 }  // namespace fiction
+
+#pragma GCC diagnostic pop
 
 #endif  // FICTION_HEXAGONALIZATION_HPP
