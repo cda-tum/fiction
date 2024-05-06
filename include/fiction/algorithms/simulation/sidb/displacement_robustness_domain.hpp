@@ -163,9 +163,15 @@ class displacement_robustness_domain_impl
     /**
      * This function calculates the robustness domain of the SiDB layout based on the provided truth table specification
      * and displacement robustness computation parameters.
+     *
+     * @param update_permitted_displacements If `true`, permitted displacements are updated, `false` otherwise.
      */
-    displacement_robustness_domain<Lyt> determine_robustness_domain()
+    displacement_robustness_domain<Lyt> determine_robustness_domain(bool update_permitted_displacements = false)
     {
+        if (update_permitted_displacements)
+        {
+            calculate_permitted_displacements_for_each_sidb();
+        }
         mockturtle::stopwatch stop{stats.time_total};
         // Shuffle the layouts vector randomly
         std::vector<Lyt> layouts{};
@@ -300,7 +306,7 @@ class displacement_robustness_domain_impl
                 params.fixed_sidbs.erase(cells);
             }
 
-            determine_robustness_domain();
+            determine_robustness_domain(true);
 
             number_of_tested_misplaced_cell_combinations++;
         }
