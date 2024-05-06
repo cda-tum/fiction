@@ -711,7 +711,9 @@ Lyt bdl_wire() noexcept
 };
 /**
  * This layout represents the AND Gate, as proposed in the paper
- * titled \"SiQAD: A Design and Simulation Tool for Atomic Silicon Quantum Dot Circuits\".
+ * titled \"SiQAD: A Design and Simulation Tool for Atomic Silicon Quantum Dot Circuits\" by Samuel Sze Hang Ng, Jacob
+ * Retallick, Hsi Nien Chiu, Robert Lupoiu, Lucian Livadaru, Taleana Huff, Mohammad Rashidi, Wyatt Vine, Thomas Dienel,
+ * Robert A. Wolkow, and Konrad Walus in IEEE TRANSACTIONS ON NANOTECHNOLOGY, Volume 19, 2020.
  */
 template <typename Lyt>
 Lyt siqad_and_gate() noexcept
@@ -742,8 +744,8 @@ Lyt siqad_and_gate() noexcept
 };
 /**
  * This layout represents the AND Gate, as proposed in the paper
- * titled \"Hexagons are the Bestagons: Design Automation for Silicon Dangling Bond Logic\" authored by
- * Marcel Walter, Samuel Sze Hang Ng, Konrad Walus, and Robert Wille.
+ * titled \"Hexagons are the Bestagons: Design Automation for Silicon Dangling Bond Logic\" by
+ * Marcel Walter, Samuel Sze Hang Ng, Konrad Walus, and Robert Wille in DAC 2022.
  *
  * (https://github.com/cda-tum/mnt-bestagon-library/blob/main/bestagon-gates/2i1o_and/21_hex_inputsdbp_and_v19.sqd)
  */

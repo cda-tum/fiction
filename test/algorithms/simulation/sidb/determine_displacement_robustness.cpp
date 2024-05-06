@@ -2,18 +2,19 @@
 // Created by Jan Drewniok on 21.03.24.
 //
 
-#include <catch2/catch_template_test_macros.hpp>
+#include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
-#include <fiction/algorithms/simulation/sidb/determine_displacement_robustness.hpp>
+#include <fiction/algorithms/simulation/sidb/displacement_robustness_domain.hpp>
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/technology/physical_constants.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/truth_table_utils.hpp>
 
 #include <cmath>
+#include <cstdlib>
 #include <limits>
 #include <vector>
 
@@ -43,7 +44,7 @@ TEST_CASE("Determine the SiDB gate displacement robustness of the Y-shaped SiDB 
     params.operational_params.simulation_parameters       = sidb_simulation_parameters{2, -0.28};
     params.operational_params.bdl_params.maximum_distance = 2.0;
     params.operational_params.bdl_params.minimum_distance = 0.2;
-    params.fixed_cells = {{0, 0, 1}, {2, 1, 1}, {20, 0, 1}, {18, 1, 1}, {14, 3, 1}, {16, 2, 1}, {10, 7, 0}, {10, 9, 1}};
+    params.fixed_sidbs = {{0, 0, 1}, {2, 1, 1}, {20, 0, 1}, {18, 1, 1}, {14, 3, 1}, {16, 2, 1}, {10, 7, 0}, {10, 9, 1}};
     params.percentage_of_analyzed_displaced_layouts = 0.1;
     params.allow_dimer_change_in_y_direction        = true;
 
@@ -54,9 +55,9 @@ TEST_CASE("Determine the SiDB gate displacement robustness of the Y-shaped SiDB 
         const auto robustness_domain =
             determine_displacement_robustness_domain(lyt, std::vector<tt>{create_and_tt()}, params, &stats);
         CHECK((stats.num_non_operational_sidb_displacements + stats.num_operational_sidb_displacements) ==
-              static_cast<std::size_t>(std::pow(6, lyt.num_cells() - params.fixed_cells.size())));
+              static_cast<std::size_t>(std::pow(6, lyt.num_cells() - params.fixed_sidbs.size())));
         CHECK(static_cast<std::size_t>(robustness_domain.operational_values.size()) ==
-              static_cast<std::size_t>(std::pow(6, lyt.num_cells() - params.fixed_cells.size())));
+              static_cast<std::size_t>(std::pow(6, lyt.num_cells() - params.fixed_sidbs.size())));
         check_identical_information_of_stats_and_domain(robustness_domain, stats);
     }
 
@@ -71,9 +72,9 @@ TEST_CASE("Determine the SiDB gate displacement robustness of the Y-shaped SiDB 
         const auto robustness_domain =
             determine_displacement_robustness_domain(lyt, std::vector<tt>{create_and_tt()}, params, &stats);
         CHECK((stats.num_non_operational_sidb_displacements + stats.num_operational_sidb_displacements) <
-              static_cast<std::size_t>(std::pow(9, lyt.num_cells() - params.fixed_cells.size())));
+              static_cast<std::size_t>(std::pow(9, lyt.num_cells() - params.fixed_sidbs.size())));
         CHECK(static_cast<std::size_t>(robustness_domain.operational_values.size()) <
-              static_cast<std::size_t>(std::pow(9, lyt.num_cells() - params.fixed_cells.size())));
+              static_cast<std::size_t>(std::pow(9, lyt.num_cells() - params.fixed_sidbs.size())));
         check_identical_information_of_stats_and_domain(robustness_domain, stats);
     }
 }
@@ -111,7 +112,7 @@ TEST_CASE("Determine the probability of fabricating an operational Bestagon AND 
         params.operational_params.bdl_params.maximum_distance = 2.0;
         params.operational_params.bdl_params.minimum_distance = 0.2;
         params.analysis_mode =
-            displacement_robustness_domain_params<sidb_cell_clk_lyt_siqad>::displacement_analysis_mode::RANDOM_SAMPLING;
+            displacement_robustness_domain_params<sidb_cell_clk_lyt_siqad>::displacement_analysis_mode::RANDOM;
         params.percentage_of_analyzed_displaced_layouts  = 0.1;
         params.percentage_of_displaced_sidb_combinations = 0.1;
 
@@ -133,8 +134,8 @@ TEST_CASE("Determine the probability of fabricating an operational BDL wire with
         params.operational_params.bdl_params.maximum_distance = 2.0;
         params.operational_params.bdl_params.minimum_distance = 0.2;
         params.allow_dimer_change_in_y_direction              = false;
-        params.analysis_mode                                  = displacement_robustness_domain_params<
-                                             sidb_cell_clk_lyt_siqad>::displacement_analysis_mode::ALL_POSSIBLE_DISPLACEMENTS;
+        params.analysis_mode =
+            displacement_robustness_domain_params<sidb_cell_clk_lyt_siqad>::displacement_analysis_mode::EXHAUSTIVE;
 
         const auto result =
             determine_propability_of_fabricating_operational_gate(lyt, std::vector<tt>{create_id_tt()}, params, 0.2);
@@ -149,7 +150,7 @@ TEST_CASE("Determine the probability of fabricating an operational BDL wire with
         params.operational_params.bdl_params.maximum_distance = 2.0;
         params.operational_params.bdl_params.minimum_distance = 0.2;
         params.analysis_mode =
-            displacement_robustness_domain_params<sidb_cell_clk_lyt_siqad>::displacement_analysis_mode::RANDOM_SAMPLING;
+            displacement_robustness_domain_params<sidb_cell_clk_lyt_siqad>::displacement_analysis_mode::RANDOM;
 
         const auto result =
             determine_propability_of_fabricating_operational_gate(lyt, std::vector<tt>{create_id_tt()}, params, 0.2);
