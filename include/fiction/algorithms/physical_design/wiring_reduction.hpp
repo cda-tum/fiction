@@ -962,7 +962,7 @@ void delete_wires(Lyt& lyt, WiringReductionLyt& wiring_reduction_layout,
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
 
-    const auto offset_matrix = calculate_offset_matrix<WiringReductionLyt>(wiring_reduction_layout, to_delete);
+    const auto off_mat = calculate_offset_matrix<WiringReductionLyt>(wiring_reduction_layout, to_delete);
 
     // Create a copy of the original layout for reference
     const auto layout_copy = lyt.clone();
@@ -983,7 +983,7 @@ void delete_wires(Lyt& lyt, WiringReductionLyt& wiring_reduction_layout,
             {
                 for (uint64_t z = 0; z <= lyt.z(); ++z)
                 {
-                    adjust_tile(lyt, layout_copy, wiring_reduction_layout, x, y, z, offset_matrix);
+                    adjust_tile(lyt, layout_copy, wiring_reduction_layout, x, y, z, off_mat);
                 }
             }
         }
@@ -1016,7 +1016,8 @@ class wiring_reduction_impl
         pst.x_size_before    = plyt.x() + 1;
         pst.y_size_before    = plyt.y() + 1;
 
-        auto                                                                  layout    = obstruction_layout<Lyt>(plyt);
+        auto layout = obstruction_layout<Lyt>(plyt);
+
         layout_coordinate_path<wiring_reduction_layout_type<coordinate<Lyt>>> to_delete = {};
 
         bool found_wires = true;
@@ -1057,17 +1058,23 @@ class wiring_reduction_impl
             }
         }
 
-        pst.x_size_after           = plyt.x() + 1;
-        pst.y_size_after           = plyt.y() + 1;
+        pst.x_size_after = plyt.x() + 1;
+        pst.y_size_after = plyt.y() + 1;
+
         const uint64_t area_before = pst.x_size_before * pst.y_size_before;
         const uint64_t area_after  = pst.x_size_after * pst.y_size_after;
-        double         area_percentage_difference =
+
+        double area_percentage_difference =
             static_cast<double>(area_before - area_after) / static_cast<double>(area_before) * 100.0;
-        area_percentage_difference          = std::round(area_percentage_difference * 100) / 100;
-        pst.area_improvement                = area_percentage_difference;
-        pst.num_wires_after                 = plyt.num_wires() - plyt.num_pis() - plyt.num_pos();
+
+        area_percentage_difference = std::round(area_percentage_difference * 100) / 100;
+
+        pst.area_improvement = area_percentage_difference;
+        pst.num_wires_after  = plyt.num_wires() - plyt.num_pis() - plyt.num_pos();
+
         double wiring_percentage_difference = static_cast<double>(pst.num_wires_before - pst.num_wires_after) /
                                               static_cast<double>(pst.num_wires_before) * 100.0;
+
         wiring_percentage_difference = std::round(wiring_percentage_difference * 100) / 100;
         pst.wiring_improvement       = wiring_percentage_difference;
     }
