@@ -34,9 +34,8 @@ namespace fiction
  * This means that an SiDB is fabricated close to the desired one, typically one or a few H-Si
  * positions away. Consequently, depending on the fabrication speed, a certain number of SiDBs may experience
  * displacement. To address and analyze this occurrence, we introduce the *Displacement Robustness Domain*. This domain
- * consists of SiDB layouts derived from an original layout, each exhibiting displaced SiDBs. These layouts indicate
- * whether the displaced SiDBs maintain their `operational` status or transition to `non-operational` status, based on
- * the specified logic.
+ * consists of SiDB layouts derived from an original layout, each showing displaced SiDBs, together with the
+ * `operational` or `non-operational` status, based on the specified logic.
  */
 template <typename Lyt>
 struct displacement_robustness_domain
@@ -526,8 +525,7 @@ determine_displacement_robustness_domain(const Lyt& layout, const std::vector<TT
  * positions away. The percentage of displaced SiDBs depends on the fabrication speed. Therefore, SiDB layouts with high
  * displacement tolerance are preferred to speed up the fabrication process. This function calculates the probability of
  * fabricating an operational SiDB layout for an originally given SiDB layout and fabrication error rate. A fabrication
- * error rate of 0.0 or negative indicates that the SiDB layout is designed without displacement, thus ensuring proper
- * functionality.
+ * error rate of 0.0 or negative indicates that the SiDB layout is designed without displacement.
  *
  * @tparam Lyt The SiDB cell-level layout type.
  * @tparam TT The type of the truth table.
