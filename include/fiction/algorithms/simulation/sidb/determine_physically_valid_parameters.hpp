@@ -20,8 +20,8 @@ namespace fiction
  * state incrementally numbered.
  *
  * This function is designed to derive the physical parameters from charge distribution measurements of SiDB layouts,
- * often acquired through Atomic Force Microscopy (AFM). Given a specific charge distribution, the function typically yields
- * several physically valid parameters.
+ * often acquired through Atomic Force Microscopy (AFM). Given a specific charge distribution, the function typically
+ * yields several physically valid parameters.
  *
  * As more SiDB layouts with corresponding charge distributions are recorded, the number of physically valid
  * parameters for all layouts decreases. Consequently, this enables a more precise determination of the physical
