@@ -370,7 +370,7 @@ class cell_level_layout : public ClockedLayout
      *
      * @param tile_size_x Tile size in the x-dimension in number of cells.
      */
-    void set_tile_size_x(const uint64_t tile_size_x) noexcept
+    void set_tile_size_x(const uint16_t tile_size_x) noexcept
     {
         strg->tile_size_x = tile_size_x;
     }
@@ -389,7 +389,7 @@ class cell_level_layout : public ClockedLayout
      *
      * @param tile_size_y Tile size in the y-dimension in number of cells.
      */
-    void set_tile_size_y(const uint64_t tile_size_y) noexcept
+    void set_tile_size_y(const uint16_t tile_size_y) noexcept
     {
         strg->tile_size_y = tile_size_y;
     }

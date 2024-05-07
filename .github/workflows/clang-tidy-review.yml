@@ -36,11 +36,13 @@ jobs:
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
             -DFICTION_CLI=ON
             -DFICTION_TEST=ON
+            -DFICTION_BENCHMARK=OFF
             -DFICTION_EXPERIMENTS=ON
             -DFICTION_ALGLIB=ON
             -DCMAKE_INSTALL_PREFIX=/usr/local/lib/cmake/ALGLIB
             -DMOCKTURTLE_EXAMPLES=OFF
           build_dir: build
+          apt_packages: 'libreadline-dev,libtbb-dev'
           config_file: '.clang-tidy'
           exclude: 'libs/*,docs/*,benchmarks/*,bib/*,*/pyfiction/pybind11_mkdoc_docstrings.hpp,*/pyfiction/documentation.hpp'
           split_workflow: true

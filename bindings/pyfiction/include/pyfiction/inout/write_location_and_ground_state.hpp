@@ -30,8 +30,8 @@ void write_location_and_ground_state(pybind11::module& m)
     m.def(
         "write_location_and_ground_state",
         [](const fiction::sidb_simulation_result<Lyt>& sim_result, const std::string_view& filename)
-        { fiction::write_location_and_ground_state(sim_result, filename); },
-        "sim_result"_a, "filename"_a, DOC(fiction_write_location_and_ground_state));
+        { fiction::write_location_and_ground_state(sim_result, filename); }, "sim_result"_a, "filename"_a,
+        DOC(fiction_write_location_and_ground_state));
 }
 
 }  // namespace detail

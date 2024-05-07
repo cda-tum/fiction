@@ -9,7 +9,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 class TestCriticalTemperature(unittest.TestCase):
 
     def test_perturber_and_DB_pair(self):
-        layout = sidb_lattice_100((10, 10))
+        layout = sidb_100_lattice((10, 10))
         layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((4, 1), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((6, 1), sidb_technology.cell_type.NORMAL)

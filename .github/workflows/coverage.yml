@@ -108,6 +108,7 @@ jobs:
           -DFICTION_ENABLE_PCH=ON
           -DFICTION_CLI=OFF
           -DFICTION_TEST=ON
+          -DFICTION_BENCHMARK=OFF
           -DFICTION_Z3=ON
           -DFICTION_ALGLIB=ON
           -DFICTION_ENABLE_MUGEN=ON

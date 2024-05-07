@@ -42,6 +42,7 @@ RUN . venv/bin/activate \
       -DFICTION_ENABLE_PCH=ON \
       -DFICTION_CLI=ON \
       -DFICTION_TEST=OFF \
+      -DFICTION_BENCHMARK=OFF \
       -DFICTION_EXPERIMENTS=OFF \
       -DFICTION_Z3=ON \
       -DFICTION_ALGLIB=ON \

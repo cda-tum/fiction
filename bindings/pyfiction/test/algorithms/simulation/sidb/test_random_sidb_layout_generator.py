@@ -9,7 +9,7 @@ class TestRandomSiDBLayoutGenerator(unittest.TestCase):
         params = generate_random_sidb_layout_params()
         params.number_of_sidbs = 1
         params.coordinate_pair = ((10,10), (10,10))
-        result_lyt = generate_random_sidb_layout(sidb_lattice_100(), params)
+        result_lyt = generate_random_sidb_layout(sidb_100_lattice(), params)
         self.assertEqual(result_lyt.num_cells(), 1)
         cell = (result_lyt.cells())[0]
         self.assertEqual(cell.x, 10)
@@ -19,7 +19,7 @@ class TestRandomSiDBLayoutGenerator(unittest.TestCase):
         params = generate_random_sidb_layout_params()
         params.number_of_sidbs = 1
         params.coordinate_pair = ((10, 10), (10, 10))
-        result_lyt = generate_random_sidb_layout(sidb_lattice_111(), params)
+        result_lyt = generate_random_sidb_layout(sidb_111_lattice(), params)
         self.assertEqual(result_lyt.num_cells(), 1)
         cell = (result_lyt.cells())[0]
         self.assertEqual(cell.x, 10)

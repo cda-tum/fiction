@@ -2120,8 +2120,8 @@ template <class T>
 charge_distribution_surface(const T&, const sidb_simulation_parameters&) -> charge_distribution_surface<T>;
 
 template <class T>
-charge_distribution_surface(const T&, const sidb_simulation_parameters&, sidb_charge_state cs)
-    -> charge_distribution_surface<T>;
+charge_distribution_surface(const T&, const sidb_simulation_parameters&,
+                            sidb_charge_state cs) -> charge_distribution_surface<T>;
 
 }  // namespace fiction
 
