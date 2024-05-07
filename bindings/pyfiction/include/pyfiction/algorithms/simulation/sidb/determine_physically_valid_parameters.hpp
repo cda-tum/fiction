@@ -27,6 +27,11 @@ void determine_physically_valid_parameters(pybind11::module& m)
 
     m.def("determine_physically_valid_parameters", &fiction::determine_physically_valid_parameters<Lyt>, "cds"_a,
           "params"_a = fiction::operational_domain_params{});
+
+    m.def("find_parameter_point_with_tolerance",
+          &fiction::find_parameter_point_with_tolerance<
+              fiction::locked_parallel_flat_hash_map<fiction::parameter_point, uint64_t>>,
+          "map"_a, "key"_a);
 }
 
 }  // namespace detail
