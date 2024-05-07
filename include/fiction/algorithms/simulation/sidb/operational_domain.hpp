@@ -30,7 +30,6 @@
 #include <cstdint>
 #include <cstdlib>
 #include <iterator>
-#include <limits>
 #include <numeric>
 #include <optional>
 #include <queue>
@@ -75,7 +74,8 @@ struct parameter_point
      */
     [[nodiscard]] bool operator==(const parameter_point& other) const noexcept
     {
-        return x == other.x && y == other.y;
+        constexpr auto tolerance = physical_constants::POP_STABILITY_ERR;
+        return std::abs(x - other.x) < tolerance && std::abs(y - other.y) < tolerance;
     }
     /**
      * Inequality operator.
@@ -157,22 +157,8 @@ struct operational_domain
      * This can store different information depending on the use case. If the operational domain is simulated for
      * different physical parameters, the parameters are stored with the corresponding operating status.
      */
-    locked_parallel_flat_hash_map<Key, Value> operational_domain_values{};
+    locked_parallel_flat_hash_map<Key, Value> operational_values{};
 };
-/**
- * This function compares two parameter points, `p1` and `p2`, for equality with tolerance
- * (`std::numeric_limits<double>::epsilon()`). It checks if the difference between each coordinate of the parameter
- * points is within a specified tolerance.
- *
- * @param p1 The first parameter point to compare.
- * @param p2 The second parameter point to compare.
- * @return `true` if the parameter points are considered equal within the specified tolerance, `false otherwise.
- */
-static bool check_parameter_points_for_equality(const parameter_point& p1, const parameter_point& p2)
-{
-    constexpr auto tolerance = physical_constants::POP_STABILITY_ERR;
-    return std::abs(p1.x - p2.x) < tolerance && std::abs(p1.y - p2.y) < tolerance;
-}
 /**
  * This function searches for a parameter point, specified by the `key`, in the provided map
  * `map` with tolerance. It compares each key in the map to the specified key using the
@@ -188,8 +174,7 @@ template <typename MapType>
 find_parameter_point_with_tolerance(const MapType& map, const typename MapType::key_type& key)
 {
     static_assert(std::is_same_v<typename MapType::key_type, parameter_point>, "Map key type must be parameter_point");
-    const auto compare_keys = [&key](const auto& pair) { return check_parameter_points_for_equality(pair.first, key); };
-    return std::find_if(map.cbegin(), map.cend(), compare_keys);
+    return std::find_if(map.cbegin(), map.cend(), [&key](const auto& pair) { return pair.first == key; });
 }
 /**
  * This function searches for a parameter point, specified by the `key`, in the provided map
@@ -199,13 +184,13 @@ find_parameter_point_with_tolerance(const MapType& map, const typename MapType::
  * @tparam MapType The type of the map containing parameter points as keys.
  * @param map The map containing parameter points as keys and associated values.
  * @param key The parameter point to search for in the map.
- * @return An iterator to the found parameter point in the map, or `map.end()` if not found.
+ * @return An iterator to the found parameter point in the map, or `map.cend()` if not found.
  */
 template <typename MapType>
 [[maybe_unused]] static typename MapType::const_iterator find_key_with_tolerance(const MapType&                    map,
                                                                                  const typename MapType::key_type& key)
 {
-    static_assert(std::is_arithmetic_v<typename MapType::key_type>, "Map key type must be numeric");
+    static_assert(std::is_floating_point_v<typename MapType::key_type>, "Map key type must be floating-point");
     constexpr double tolerance = fiction::physical_constants::POP_STABILITY_ERR;
     auto compare_keys = [&key, &tolerance](const auto& pair) { return std::abs(pair.first - key) < tolerance; };
     return std::find_if(map.begin(), map.end(), compare_keys);
@@ -303,18 +288,18 @@ class operational_domain_impl
      * detects the output BDL pair, which is necessary for the operational domain computation. The layout must
      * have exactly one output BDL pair.
      *
-     * @param lyt SiDB cell-level layout to be evaluated.
+     * @param layout SiDB cell-level layout to be evaluated.
      * @param spec Expected Boolean function of the layout given as a multi-output truth table.
      * @param ps Parameters for the operational domain computation.
      * @param st Statistics of the process.
      */
-    operational_domain_impl(const Lyt& lyt, const std::vector<TT>& tt, const operational_domain_params& ps,
+    operational_domain_impl(const Lyt& layout, const std::vector<TT>& tt, const operational_domain_params& ps,
                             operational_domain_stats& st) noexcept :
-            layout{lyt},
+            layout{layout},
             truth_table{tt},
             params{ps},
             stats{st},
-            output_bdl_pairs{detect_bdl_pairs<Lyt>(lyt, sidb_technology::cell_type::OUTPUT, ps.bdl_params)},
+            output_bdl_pairs{detect_bdl_pairs<Lyt>(layout, sidb_technology::cell_type::OUTPUT, ps.bdl_params)},
             x_indices(num_x_steps() + 1),  // pre-allocate the x dimension indices
             y_indices(num_y_steps() + 1)   // pre-allocate the y dimension indices
     {
@@ -413,7 +398,7 @@ class operational_domain_impl
      *
      * @return The operational domain of the layout.
      */
-    [[nodiscard]] auto grid_search() noexcept
+    [[nodiscard]] operational_domain<parameter_point, operational_status> grid_search() noexcept
     {
         mockturtle::stopwatch stop{stats.time_total};
 
@@ -423,7 +408,9 @@ class operational_domain_impl
                       {
                           // for each y value in parallel
                           std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ y_indices.cbegin(), y_indices.cend(),
-                                        [this, x](const auto y) { is_step_point_operational({x, y}); });
+                                        [this, x](const auto y) {
+                                            is_step_point_operational({x, y});
+                                        });
                       });
 
         log_stats();
@@ -437,7 +424,8 @@ class operational_domain_impl
      * @param samples Number of random samples to be taken.
      * @return The (partial) operational domain of the layout.
      */
-    [[nodiscard]] auto random_sampling(const std::size_t samples) noexcept
+    [[nodiscard]] operational_domain<parameter_point, operational_status>
+    random_sampling(const std::size_t samples) noexcept
     {
         mockturtle::stopwatch stop{stats.time_total};
 
@@ -461,7 +449,7 @@ class operational_domain_impl
      * @param samples Maximum number of random samples to be taken before flood fill.
      * @return The (partial) operational domain of the layout.
      */
-    [[nodiscard]] auto flood_fill(const std::size_t samples) noexcept
+    [[nodiscard]] operational_domain<parameter_point, operational_status> flood_fill(const std::size_t samples) noexcept
     {
         mockturtle::stopwatch stop{stats.time_total};
 
@@ -487,7 +475,7 @@ class operational_domain_impl
         };
 
         // add the neighbors of each operational point to the queue
-        for (const auto& [param_point, status] : op_domain.operational_domain_values)
+        for (const auto& [param_point, status] : op_domain.operational_values)
         {
             if (status == operational_status::OPERATIONAL)
             {
@@ -533,7 +521,8 @@ class operational_domain_impl
      * @param samples Maximum number of random samples to be taken before contour tracing.
      * @return The (partial) operational domain of the layout.
      */
-    [[nodiscard]] auto contour_tracing(const std::size_t samples) noexcept
+    [[nodiscard]] operational_domain<parameter_point, operational_status>
+    contour_tracing(const std::size_t samples) noexcept
     {
         mockturtle::stopwatch stop{stats.time_total};
 
@@ -606,9 +595,11 @@ class operational_domain_impl
      * parameter combination found for which the given CDS is physically valid, it is determined whether the CDS is the
      * ground state or the n-th excited state.
      *
+     * @param lyt SiDB cell-level layout that is simulated and compared to the given CDS.
      * @return All physically valid physical parameters and the excited state number.
      */
-    [[nodiscard]] auto grid_search_for_physically_valid_parameters(Lyt& lyt) noexcept
+    [[nodiscard]] operational_domain<parameter_point, uint64_t>
+    grid_search_for_physically_valid_parameters(Lyt& lyt) noexcept
     {
         operational_domain<parameter_point, uint64_t> suitable_params_domain{};
 
@@ -620,12 +611,14 @@ class operational_domain_impl
                       [this, &lyt](const auto x)
                       {
                           std::for_each(y_indices.cbegin(), y_indices.cend(),
-                                        [this, &lyt, x](const auto y) { is_step_point_suitable({x, y}, lyt); });
+                                        [this, &lyt, x](const auto y) {
+                                            is_step_point_suitable(lyt, {x, y});
+                                        });
                       });
 
         sidb_simulation_parameters simulation_parameters = params.simulation_parameters;
 
-        for (const auto& [param_point, status] : op_domain.operational_domain_values)
+        for (const auto& [param_point, status] : op_domain.operational_values)
         {
             if constexpr (std::is_same_v<OPDomain, operational_domain<parameter_point, operational_status>>)
             {
@@ -670,7 +663,7 @@ class operational_domain_impl
                     continue;
                 }
                 const auto excited_state_number = std::distance(energy_dist.begin(), position);
-                suitable_params_domain.operational_domain_values.emplace(param_point, excited_state_number);
+                suitable_params_domain.operational_values.emplace(param_point, excited_state_number);
             }
         }
 
@@ -750,7 +743,7 @@ class operational_domain_impl
          */
         std::size_t x;
         /**
-         * Y dimension step value.
+         * Y dimension step value.x
          */
         std::size_t y;
         /**
@@ -915,9 +908,8 @@ class operational_domain_impl
      */
     [[nodiscard]] inline std::optional<operational_status> has_already_been_sampled(const step_point& sp) const noexcept
     {
-        if (const auto it =
-                find_parameter_point_with_tolerance(op_domain.operational_domain_values, to_parameter_point(sp));
-            it != op_domain.operational_domain_values.cend())
+        if (const auto it = find_parameter_point_with_tolerance(op_domain.operational_values, to_parameter_point(sp));
+            it != op_domain.operational_values.cend())
         {
             return it->second;
         }
@@ -949,14 +941,14 @@ class operational_domain_impl
 
         const auto operational = [this, &param_point]()
         {
-            op_domain.operational_domain_values[param_point] = operational_status::OPERATIONAL;
+            op_domain.operational_values[param_point] = operational_status::OPERATIONAL;
 
             return operational_status::OPERATIONAL;
         };
 
         const auto non_operational = [this, &param_point]()
         {
-            op_domain.operational_domain_values[param_point] = operational_status::NON_OPERATIONAL;
+            op_domain.operational_values[param_point] = operational_status::NON_OPERATIONAL;
 
             return operational_status::NON_OPERATIONAL;
         };
@@ -981,13 +973,14 @@ class operational_domain_impl
         return operational();
     }
     /**
-     * This function checks if the given CDS is physically valid for the parameter point represented by the step point
-     * `sp`.
+     * This function checks if the given charge distribution surface (CDS) is physically valid for the parameter point
+     * represented by the step point `sp`.
      *
+     * @param lyt CDS to check.
      * @param sp Step point to be investigated.
      * @return The operational status of the layout under the given simulation parameters.
      */
-    operational_status is_step_point_suitable(const step_point& sp, Lyt& lyt) noexcept
+    operational_status is_step_point_suitable(Lyt& lyt, const step_point& sp) noexcept
     {
         // if the point has already been sampled, return the stored operational status
         if (const auto op_value = has_already_been_sampled(sp); op_value.has_value())
@@ -1000,14 +993,14 @@ class operational_domain_impl
 
         const auto operational = [this, &param_point]()
         {
-            op_domain.operational_domain_values[param_point] = operational_status::OPERATIONAL;
+            op_domain.operational_values[param_point] = operational_status::OPERATIONAL;
 
             return operational_status::OPERATIONAL;
         };
 
         const auto non_operational = [this, &param_point]()
         {
-            op_domain.operational_domain_values[param_point] = operational_status::NON_OPERATIONAL;
+            op_domain.operational_values[param_point] = operational_status::NON_OPERATIONAL;
 
             return operational_status::NON_OPERATIONAL;
         };
@@ -1194,7 +1187,7 @@ class operational_domain_impl
         stats.num_simulator_invocations            = num_simulator_invocations;
         stats.num_evaluated_parameter_combinations = num_evaluated_parameter_combinations;
 
-        for (const auto& [param_point, status] : op_domain.operational_domain_values)
+        for (const auto& [param_point, status] : op_domain.operational_values)
         {
             if (status == operational_status::OPERATIONAL)
             {
@@ -1233,9 +1226,9 @@ class operational_domain_impl
  * @return The operational domain of the layout.
  */
 template <typename Lyt, typename TT>
-auto operational_domain_grid_search(const Lyt& lyt, const std::vector<TT>& spec,
-                                    const operational_domain_params& params = {},
-                                    operational_domain_stats*        stats  = nullptr)
+operational_domain<parameter_point, operational_status>
+operational_domain_grid_search(const Lyt& lyt, const std::vector<TT>& spec,
+                               const operational_domain_params& params = {}, operational_domain_stats* stats = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -1276,9 +1269,10 @@ auto operational_domain_grid_search(const Lyt& lyt, const std::vector<TT>& spec,
  * @return The (partial) operational domain of the layout.
  */
 template <typename Lyt, typename TT>
-auto operational_domain_random_sampling(const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples,
-                                        const operational_domain_params& params = {},
-                                        operational_domain_stats*        stats  = nullptr)
+operational_domain<parameter_point, operational_status>
+operational_domain_random_sampling(const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples,
+                                   const operational_domain_params& params = {},
+                                   operational_domain_stats*        stats  = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -1329,9 +1323,9 @@ auto operational_domain_random_sampling(const Lyt& lyt, const std::vector<TT>& s
  * @return The (partial) operational domain of the layout.
  */
 template <typename Lyt, typename TT>
-auto operational_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples,
-                                   const operational_domain_params& params = {},
-                                   operational_domain_stats*        stats  = nullptr)
+operational_domain<parameter_point, operational_status>
+operational_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples,
+                              const operational_domain_params& params = {}, operational_domain_stats* stats = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -1384,9 +1378,10 @@ auto operational_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& spec, 
  * @return The (partial) operational domain of the layout.
  */
 template <typename Lyt, typename TT>
-auto operational_domain_contour_tracing(const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples,
-                                        const operational_domain_params& params = {},
-                                        operational_domain_stats*        stats  = nullptr)
+operational_domain<parameter_point, operational_status>
+operational_domain_contour_tracing(const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples,
+                                   const operational_domain_params& params = {},
+                                   operational_domain_stats*        stats  = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");

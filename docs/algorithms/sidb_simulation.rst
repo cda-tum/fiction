@@ -278,8 +278,8 @@ Operational Domain Computation
         .. autofunction:: mnt.pyfiction.operational_domain_contour_tracing
 
 
-Determine Physically Valid Parameters for Given CDS
-###################################################
+Determine Physically Valid Parameters
+#####################################
 
 .. tabs::
     .. tab:: C++

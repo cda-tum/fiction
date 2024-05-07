@@ -83,10 +83,10 @@ inline void operational_domain(pybind11::module& m)
         .def_readwrite("y_dimension",
                        &fiction::operational_domain<fiction::parameter_point, fiction::operational_status>::y_dimension,
                        DOC(fiction_operational_domain_y_dimension))
-        .def_readwrite("operational_values",
-                       &fiction::operational_domain<fiction::parameter_point,
-                                                    fiction::operational_status>::operational_domain_values,
-                       DOC(fiction_operational_domain_operational_values));
+        .def_readwrite(
+            "operational_values",
+            &fiction::operational_domain<fiction::parameter_point, fiction::operational_status>::operational_values,
+            DOC(fiction_operational_domain_operational_values));
 
     py::class_<fiction::operational_domain_params>(m, "operational_domain_params",
                                                    DOC(fiction_operational_domain_params))

@@ -81,15 +81,15 @@ namespace detail
  * @param params The parameters used for writing, including the operational and non-operational tags. Defaults to an
  * empty `write_operational_domain_params` object, which provides standard tags.
  */
-inline void write_operational_domain(const operational_domain<>& opdom, std::ostream& os,
-                                     const write_operational_domain_params& params = {})
+inline void write_operational_domain(const operational_domain<parameter_point, operational_status>& opdom,
+                                     std::ostream& os, const write_operational_domain_params& params = {})
 {
     csv_writer writer{os};
 
     writer.write_line(detail::sweep_parameter_to_string(opdom.x_dimension),
                       detail::sweep_parameter_to_string(opdom.y_dimension), "operational status");
 
-    for (const auto& [sim_param, op_val] : opdom.operational_domain_values)
+    for (const auto& [sim_param, op_val] : opdom.operational_values)
     {
         writer.write_line(sim_param.x, sim_param.y,
                           op_val == operational_status::OPERATIONAL ? params.operational_tag :
@@ -113,8 +113,9 @@ inline void write_operational_domain(const operational_domain<>& opdom, std::ost
  * @param params The parameters used for writing, including the operational and non-operational tags. Defaults to an
  * empty `write_operational_domain_params` object, which provides standard tags.
  */
-inline void write_operational_domain(const operational_domain<>& opdom, const std::string_view& filename,
-                                     const write_operational_domain_params& params = {})
+inline void write_operational_domain(const operational_domain<parameter_point, operational_status>& opdom,
+                                     const std::string_view&                                        filename,
+                                     const write_operational_domain_params&                         params = {})
 {
     std::ofstream os{filename.data(), std::ofstream::out};
 

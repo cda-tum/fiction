@@ -18,7 +18,7 @@
 
 using namespace fiction;
 
-TEST_CASE("Determine physical parameters for cds of SiQAD Y-shaped AND gate, 10 input combination",
+TEST_CASE("Determine physical parameters for CDS of SiQAD Y-shaped AND gate, 10 input combination",
           "[operational-domain]")
 {
     using layout = sidb_cell_clk_lyt_siqad;
@@ -50,7 +50,7 @@ TEST_CASE("Determine physical parameters for cds of SiQAD Y-shaped AND gate, 10 
     op_domain_params.y_max                 = 6.0;
     op_domain_params.y_step                = 0.1;
 
-    SECTION("Using the typical groundstate as given cds")
+    SECTION("Using the typical groundstate as given CDS")
     {
         cds.assign_charge_state({-2, -1, 1}, sidb_charge_state::NEGATIVE);
         cds.assign_charge_state({0, 0, 1}, sidb_charge_state::NEUTRAL);
@@ -63,10 +63,10 @@ TEST_CASE("Determine physical parameters for cds of SiQAD Y-shaped AND gate, 10 
         cds.update_after_charge_change();
 
         const auto valid_parameters = determine_physically_valid_parameters(cds, op_domain_params);
-        CHECK(valid_parameters.operational_domain_values.size() == 356);
+        CHECK(valid_parameters.operational_values.size() == 356);
     }
 
-    SECTION("Using the 2nd excited charge distribution for default physical parameters as given cds")
+    SECTION("Using the 2nd excited charge distribution for default physical parameters as given CDS")
     {
         cds.assign_charge_state({-2, -1, 1}, sidb_charge_state::NEGATIVE);
         cds.assign_charge_state({0, 0, 1}, sidb_charge_state::NEUTRAL);
@@ -79,14 +79,14 @@ TEST_CASE("Determine physical parameters for cds of SiQAD Y-shaped AND gate, 10 
         cds.update_after_charge_change();
 
         const auto valid_parameters = determine_physically_valid_parameters(cds, op_domain_params);
-        CHECK(valid_parameters.operational_domain_values.size() == 98);
-        CHECK(find_parameter_point_with_tolerance(valid_parameters.operational_domain_values, parameter_point{5.9, 5.5})
+        CHECK(valid_parameters.operational_values.size() == 98);
+        CHECK(find_parameter_point_with_tolerance(valid_parameters.operational_values, parameter_point{5.9, 5.5})
                   ->second == 1);
-        CHECK(find_parameter_point_with_tolerance(valid_parameters.operational_domain_values, parameter_point{5.8, 4.4})
+        CHECK(find_parameter_point_with_tolerance(valid_parameters.operational_values, parameter_point{5.8, 4.4})
                   ->second == 0);
-        CHECK(find_parameter_point_with_tolerance(valid_parameters.operational_domain_values, parameter_point{5.8, 4.4})
+        CHECK(find_parameter_point_with_tolerance(valid_parameters.operational_values, parameter_point{5.8, 4.4})
                   ->second == 0);
-        CHECK(find_parameter_point_with_tolerance(valid_parameters.operational_domain_values, parameter_point{6.0, 6.0})
+        CHECK(find_parameter_point_with_tolerance(valid_parameters.operational_values, parameter_point{6.0, 6.0})
                   ->second == 1);
     }
 }
@@ -150,14 +150,14 @@ TEST_CASE(
         cds.update_after_charge_change();
 
         const auto valid_parameters = determine_physically_valid_parameters(cds, op_domain_params);
-        CHECK(valid_parameters.operational_domain_values.size() == 100);
-        CHECK(find_parameter_point_with_tolerance(valid_parameters.operational_domain_values, parameter_point{5.6, 5.0})
+        CHECK(valid_parameters.operational_values.size() == 100);
+        CHECK(find_parameter_point_with_tolerance(valid_parameters.operational_values, parameter_point{5.6, 5.0})
                   ->second == 0);
-        CHECK(find_parameter_point_with_tolerance(valid_parameters.operational_domain_values, parameter_point{5.0, 5.9})
+        CHECK(find_parameter_point_with_tolerance(valid_parameters.operational_values, parameter_point{5.0, 5.9})
                   ->second == 2);
-        CHECK(find_parameter_point_with_tolerance(valid_parameters.operational_domain_values, parameter_point{5.4, 5.3})
+        CHECK(find_parameter_point_with_tolerance(valid_parameters.operational_values, parameter_point{5.4, 5.3})
                   ->second == 1);
-        CHECK(find_parameter_point_with_tolerance(valid_parameters.operational_domain_values, parameter_point{5.8, 5.3})
+        CHECK(find_parameter_point_with_tolerance(valid_parameters.operational_values, parameter_point{5.8, 5.3})
                   ->second == 0);
     }
 }
