@@ -893,7 +893,7 @@ struct sidb_cluster_ptr_hash
 #if (DEBUG_SIDB_CLUSTER_HIERARCHY)
 using sidb_clustering = std::set<sidb_cluster_ptr>;
 #else
-using sidb_clustering = phmap::flat_hash_set<sidb_cluster_ptr, sidb_cluster_ptr_hash>;
+using sidb_clustering                 = phmap::flat_hash_set<sidb_cluster_ptr, sidb_cluster_ptr_hash>;
 #endif
 // clang-format on
 /**

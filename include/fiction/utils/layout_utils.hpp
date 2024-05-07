@@ -326,7 +326,7 @@ auto convert_to_siqad_coordinates(const LytSrc& lyt) noexcept
                 [&lyt_new_cds, &lyt_orig](const auto& c)
                 { lyt_new_cds.assign_charge_state(siqad::to_siqad_coord(c), lyt_orig.get_charge_state(c), false); });
 
-            lyt_new_cds.assign_physical_parameters(lyt_orig.get_simulation_params());
+            lyt_new_cds.assign_simulation_parameters(lyt_orig.get_simulation_params());
 
             lyt_orig.foreach_sidb_defect(
                 [&lyt_new_cds](const auto& cd)
@@ -350,7 +350,7 @@ auto convert_to_siqad_coordinates(const LytSrc& lyt) noexcept
                 [&lyt_new_cds, &lyt_orig](const auto& c)
                 { lyt_new_cds.assign_charge_state(siqad::to_siqad_coord(c), lyt_orig.get_charge_state(c), false); });
 
-            lyt_new_cds.assign_physical_parameters(lyt_orig.get_simulation_params());
+            lyt_new_cds.assign_simulation_parameters(lyt_orig.get_simulation_params());
 
             return lyt_new_cds;
         }
