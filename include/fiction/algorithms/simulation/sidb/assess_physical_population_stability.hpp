@@ -308,8 +308,8 @@ class assess_physical_population_stability_impl
         else
         {
             const auto required_potential_to_conduct_transition_neutral_to_positive =
-                -local_potential + params.simulation_parameters.mu_plus();
-            if (std::abs(-local_potential + params.simulation_parameters.mu_plus()) <
+                std::abs(-local_potential + params.simulation_parameters.mu_plus());
+            if (required_potential_to_conduct_transition_neutral_to_positive <
                 updated_pop_stability_information.transition_from_to_with_cell_and_required_pot
                     .at(transition_type::NEUTRAL_TO_POSITIVE)
                     .second)
@@ -343,8 +343,10 @@ class assess_physical_population_stability_impl
         const auto required_potential_to_conduct_transition_from_positive_to_neutral =
             std::abs(-local_potential + params.simulation_parameters.mu_plus());
 
-        if (std::abs(-local_potential + params.simulation_parameters.mu_plus()) <
-            required_potential_to_conduct_transition_from_positive_to_neutral)
+        if (required_potential_to_conduct_transition_from_positive_to_neutral <
+            updated_pop_stability_information.transition_from_to_with_cell_and_required_pot
+                .at(transition_type::POSITIVE_TO_NEUTRAL)
+                .second)
         {
             updated_pop_stability_information
                 .transition_from_to_with_cell_and_required_pot[transition_type::POSITIVE_TO_NEUTRAL] = {
@@ -371,8 +373,10 @@ class assess_physical_population_stability_impl
 
         std::transform(
             sim_results.charge_distributions.cbegin(), sim_results.charge_distributions.cend(),
-            std::back_inserter(energy_charge_index), [](const auto& ch_lyt)
-            { return energy_and_charge_index{ch_lyt.get_system_energy(), ch_lyt.get_charge_index_and_base().first}; });
+            std::back_inserter(energy_charge_index),
+            [](const auto& ch_lyt) {
+                return energy_and_charge_index{ch_lyt.get_system_energy(), ch_lyt.get_charge_index_and_base().first};
+            });
 
         // Sort the vector in ascending order of the energy value
         std::sort(energy_charge_index.begin(), energy_charge_index.end(),
