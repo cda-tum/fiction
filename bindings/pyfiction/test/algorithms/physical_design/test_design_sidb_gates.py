@@ -4,7 +4,7 @@ from mnt.pyfiction import *
 class TestDesignSiDBGates(unittest.TestCase):
 
     def test_siqad_and_gate_skeleton(self):
-        layout = sidb_lattice_100((20, 20))
+        layout = sidb_100_lattice((20, 20))
 
         layout.assign_cell_type((0, 1), sidb_technology.cell_type.INPUT)
         layout.assign_cell_type((2, 3), sidb_technology.cell_type.INPUT)
