@@ -62,8 +62,8 @@ inline void determine_physically_valid_parameters(pybind11::module& m)
             },
             "pp"_a);
 
-        // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
-        detail::determine_physically_valid_parameters<py_charge_distribution_surface_100>(m);
+    // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
+    detail::determine_physically_valid_parameters<py_charge_distribution_surface_100>(m);
     detail::determine_physically_valid_parameters<py_charge_distribution_surface_111>(m);
 }
 
