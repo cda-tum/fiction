@@ -51,10 +51,14 @@ inline void determine_physically_valid_parameters(pybind11::module& m)
         .def(
             "get_excited_state_number_for_parameter",
             [](const fiction::operational_domain<fiction::parameter_point, uint64_t>& domain,
-               const fiction::parameter_point& pp) {
-                try {
+               const fiction::parameter_point&                                        pp)
+            {
+                try
+                {
                     return domain.get_value(pp);
-                } catch (const std::runtime_error& e) {
+                }
+                catch (const std::runtime_error& e)
+                {
                     // Handle the exception here, e.what() contains the error message
                     PyErr_SetString(PyExc_RuntimeError, e.what());
                     throw py::error_already_set();
