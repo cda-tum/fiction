@@ -134,6 +134,22 @@ inline void operational_domain(pybind11::module& m)
 
         ;
 
+    m.def(
+        "find_parameter_point_with_tolerance",
+        [](const fiction::locked_parallel_flat_hash_map<fiction::parameter_point, uint64_t>& map,
+           const fiction::parameter_point&                                                   key)
+        {
+            if (fiction::find_parameter_point_with_tolerance(map, key) != map.cend())
+            {
+                return (static_cast<uint64_t>(fiction::find_parameter_point_with_tolerance(map, key)->second));
+            }
+            else
+            {
+                throw std::runtime_error("Key not found in the map");
+            }
+        },
+        "map"_a, "key"_a);
+
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
     detail::operational_domain<py_sidb_100_lattice>(m);
