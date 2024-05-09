@@ -12,6 +12,8 @@ class TestDeterminePhysicallyValidParameters(unittest.TestCase):
 
         valid_parameters = determine_physically_valid_parameters(cds)
 
+        find_parameter_point_with_tolerance(valid_parameters.physically_valid_parameters, parameter_point(5.0, 5.0))
+
         self.assertEqual(find_parameter_point_with_tolerance(valid_parameters.physically_valid_parameters, parameter_point(5, 5)),
             0)
 

@@ -137,7 +137,7 @@ inline void operational_domain(pybind11::module& m)
     m.def(
         "find_parameter_point_with_tolerance",
         [](const fiction::locked_parallel_flat_hash_map<fiction::parameter_point, uint64_t>& map,
-           const fiction::parameter_point&                                                   key)
+           const fiction::parameter_point&                                                   key) -> uint64_t
         {
             if (fiction::find_parameter_point_with_tolerance(map, key) != map.cend())
             {
