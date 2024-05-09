@@ -12,14 +12,16 @@ class TestDeterminePhysicallyValidParameters(unittest.TestCase):
 
         valid_parameters = determine_physically_valid_parameters(cds)
 
-        find_parameter_point_with_tolerance(valid_parameters.physically_valid_parameters, parameter_point(5.0, 5.0))
-
-        self.assertEqual(find_parameter_point_with_tolerance(valid_parameters.physically_valid_parameters, parameter_point(5, 5)),
+        self.assertEqual(valid_parameters.get_excited_state_number_for_parameter(parameter_point(5, 5)),
             0)
 
         self.assertEqual(
-            find_parameter_point_with_tolerance(valid_parameters.physically_valid_parameters, parameter_point(5.1, 5.1)),
+            valid_parameters.get_excited_state_number_for_parameter(parameter_point(5.1, 5.1)),
             0)
+
+        # Testing for an invalid parameter point that raises an exception
+        with self.assertRaisesRegex(RuntimeError, "Key not found in the map"):
+            valid_parameters.get_excited_state_number_for_parameter(parameter_point(15, 15))
 
     def test_one_DB_111_lattice(self):
         layout = sidb_111_lattice((10, 10))
@@ -28,13 +30,16 @@ class TestDeterminePhysicallyValidParameters(unittest.TestCase):
 
         valid_parameters = determine_physically_valid_parameters(cds)
 
-        # self.assertEqual(
-        #     find_parameter_point_with_tolerance(valid_parameters.physically_valid_parameters, parameter_point(5, 5)),
-        #     operational_status.OPERATIONAL)
-        #
-        # self.assertEqual(
-        #     valid_parameters.physically_valid_parameters.find_parameter_point_with_tolerance(parameter_point(5.1, 5.1)),
-        #     operational_status.OPERATIONAL)
+        self.assertEqual(valid_parameters.get_excited_state_number_for_parameter(parameter_point(5, 5)),
+                     0)
+
+        self.assertEqual(
+        valid_parameters.get_excited_state_number_for_parameter(parameter_point(5.1, 5.1)),
+        0)
+
+        # Testing for an invalid parameter point that raises an exception
+        with self.assertRaisesRegex(RuntimeError, "Key not found in the map"):
+            valid_parameters.get_excited_state_number_for_parameter(parameter_point(15, 15))
 
 
 if __name__ == '__main__':

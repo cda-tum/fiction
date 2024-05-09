@@ -35,6 +35,7 @@
 #include <queue>
 #include <random>
 #include <set>
+#include <stdexcept>
 #include <tuple>
 #include <type_traits>
 #include <vector>
@@ -158,6 +159,23 @@ struct operational_domain
      * different physical parameters, the parameters are stored with the corresponding operating status.
      */
     locked_parallel_flat_hash_map<Key, Value> operational_values{};
+    /**
+     * This function retrieves the value associated with the provided parameter point
+     * from the operational domain. If the parameter point is found in the domain,
+     * its corresponding value is returned. Otherwise, a runtime error is thrown.
+     *
+     * @param pp The parameter point to look up.
+     * @return The value associated with the parameter point.
+     */
+    [[nodiscard]] uint64_t get_value(const parameter_point& pp) const
+    {
+        auto it = find_parameter_point_with_tolerance(operational_values, pp);
+        if (it != operational_values.cend())
+        {
+            return it->second;
+        }
+        throw std::runtime_error("Key not found in the map");
+    }
 };
 /**
  * This function searches for a parameter point, specified by the `key`, in the provided map
@@ -408,7 +426,9 @@ class operational_domain_impl
                       {
                           // for each y value in parallel
                           std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ y_indices.cbegin(), y_indices.cend(),
-                                        [this, x](const auto y) { is_step_point_operational({x, y}); });
+                                        [this, x](const auto y) {
+                                            is_step_point_operational({x, y});
+                                        });
                       });
 
         log_stats();
@@ -609,7 +629,9 @@ class operational_domain_impl
                       [this, &lyt](const auto x)
                       {
                           std::for_each(y_indices.cbegin(), y_indices.cend(),
-                                        [this, &lyt, x](const auto y) { is_step_point_suitable(lyt, {x, y}); });
+                                        [this, &lyt, x](const auto y) {
+                                            is_step_point_suitable(lyt, {x, y});
+                                        });
                       });
 
         sidb_simulation_parameters simulation_parameters = params.simulation_parameters;
