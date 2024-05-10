@@ -52,7 +52,20 @@ Truth Table Utils
         .. doxygenfunction:: fiction::create_nor_tt
         .. doxygenfunction:: fiction::create_xor_tt
         .. doxygenfunction:: fiction::create_xnor_tt
+        .. doxygenfunction:: fiction::create_lt_tt
+        .. doxygenfunction:: fiction::create_gt_tt
+        .. doxygenfunction:: fiction::create_le_tt
+        .. doxygenfunction:: fiction::create_ge_tt
+        .. doxygenfunction:: fiction::create_and3_tt
+        .. doxygenfunction:: fiction::create_xor_and_tt
+        .. doxygenfunction:: fiction::create_or_and_tt
+        .. doxygenfunction:: fiction::create_onehot_tt
         .. doxygenfunction:: fiction::create_maj_tt
+        .. doxygenfunction:: fiction::create_gamble_tt
+        .. doxygenfunction:: fiction::create_dot_tt
+        .. doxygenfunction:: fiction::create_ite_tt
+        .. doxygenfunction:: fiction::create_and_xor_tt
+        .. doxygenfunction:: fiction::create_and_xor3_tt
         .. doxygenfunction:: fiction::create_double_wire_tt
         .. doxygenfunction:: fiction::create_crossing_wire_tt
         .. doxygenfunction:: fiction::create_fan_out_tt
