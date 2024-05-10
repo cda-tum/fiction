@@ -65,7 +65,7 @@ Truth Table Utils
         .. doxygenfunction:: fiction::create_dot_tt
         .. doxygenfunction:: fiction::create_ite_tt
         .. doxygenfunction:: fiction::create_and_xor_tt
-        .. doxygenfunction:: fiction::create_and_xor3_tt
+        .. doxygenfunction:: fiction::create_xor3_tt
         .. doxygenfunction:: fiction::create_double_wire_tt
         .. doxygenfunction:: fiction::create_crossing_wire_tt
         .. doxygenfunction:: fiction::create_fan_out_tt
