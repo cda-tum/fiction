@@ -9,6 +9,7 @@
 #include <kitty/dynamic_truth_table.hpp>
 
 #include <cstdint>
+#include <vector>
 
 namespace fiction
 {
@@ -184,6 +185,62 @@ namespace fiction
     return table;
 }
 /**
+ * Creates and returns a truth table that implements the conjunction in three variables.
+ *
+ * @return Conjunction in three variables.
+ */
+[[nodiscard]] inline kitty::dynamic_truth_table create_and3_tt() noexcept
+{
+    constexpr const uint64_t lit = 0x80;
+
+    kitty::dynamic_truth_table table{3};
+    kitty::create_from_words(table, &lit, &lit + 1);
+
+    return table;
+}
+/**
+ * Creates and returns a truth table that implements the XOR-AND function (a and (b xor c)) in three variables.
+ *
+ * @return XOR-AND in three variables.
+ */
+[[nodiscard]] inline kitty::dynamic_truth_table create_xor_and_tt() noexcept
+{
+    constexpr const uint64_t lit = 0x28;
+
+    kitty::dynamic_truth_table table{3};
+    kitty::create_from_words(table, &lit, &lit + 1);
+
+    return table;
+}
+/**
+ * Creates and returns a truth table that implements the OR-AND function (a and (b or c)) in three variables.
+ *
+ * @return OR-AND in three variables.
+ */
+[[nodiscard]] inline kitty::dynamic_truth_table create_or_and_tt() noexcept
+{
+    constexpr const uint64_t lit = 0xa8;
+
+    kitty::dynamic_truth_table table{3};
+    kitty::create_from_words(table, &lit, &lit + 1);
+
+    return table;
+}
+/**
+ * Creates and returns a truth table that implements the Onehot function (exactly one of a,b,c) in three variables.
+ *
+ * @return Onehot in three variables.
+ */
+[[nodiscard]] inline kitty::dynamic_truth_table create_onehot_tt() noexcept
+{
+    constexpr const uint64_t lit = 0x16;
+
+    kitty::dynamic_truth_table table{3};
+    kitty::create_from_words(table, &lit, &lit + 1);
+
+    return table;
+}
+/**
  * Creates and returns a truth table that implements the majority function in three variables.
  *
  * @return Majority function in three variables.
@@ -191,6 +248,76 @@ namespace fiction
 [[nodiscard]] inline kitty::dynamic_truth_table create_maj_tt() noexcept
 {
     constexpr const uint64_t lit = 0xe8;
+
+    kitty::dynamic_truth_table table{3};
+    kitty::create_from_words(table, &lit, &lit + 1);
+
+    return table;
+}
+/**
+ * Creates and returns a truth table that implements the Gamble function (all or none of a,b,c) in three variables.
+ *
+ * @return Gamble in three variables.
+ */
+[[nodiscard]] inline kitty::dynamic_truth_table create_gamble_tt() noexcept
+{
+    constexpr const uint64_t lit = 0x81;
+
+    kitty::dynamic_truth_table table{3};
+    kitty::create_from_words(table, &lit, &lit + 1);
+
+    return table;
+}
+/**
+ * Creates and returns a truth table that implements the Dot function (a xor (c or a and b)) in three variables.
+ *
+ * @return Dot function in three variables.
+ */
+[[nodiscard]] inline kitty::dynamic_truth_table create_dot_tt() noexcept
+{
+    constexpr const uint64_t lit = 0x52;
+
+    kitty::dynamic_truth_table table{3};
+    kitty::create_from_words(table, &lit, &lit + 1);
+
+    return table;
+}
+/**
+ * Creates and returns a truth table that implements the ITE (MUX) function (if a then b else c) in three variables.
+ *
+ * @return ITE (MUX) in three variables.
+ */
+[[nodiscard]] inline kitty::dynamic_truth_table create_ite_tt() noexcept
+{
+    constexpr const uint64_t lit = 0xd8;
+
+    kitty::dynamic_truth_table table{3};
+    kitty::create_from_words(table, &lit, &lit + 1);
+
+    return table;
+}
+/**
+ * Creates and returns a truth table that implements the AND-XOR function (a xor b and c) in three variables.
+ *
+ * @return AND-XOR in three variables.
+ */
+[[nodiscard]] inline kitty::dynamic_truth_table create_and_xor_tt() noexcept
+{
+    constexpr const uint64_t lit = 0x6a;
+
+    kitty::dynamic_truth_table table{3};
+    kitty::create_from_words(table, &lit, &lit + 1);
+
+    return table;
+}
+/**
+ * Creates and returns a truth table that implements the exclusive disjunction in three variables.
+ *
+ * @return Exclusive disjunction in three variables.
+ */
+[[nodiscard]] inline kitty::dynamic_truth_table create_xor3_tt() noexcept
+{
+    constexpr const uint64_t lit = 0x96;
 
     kitty::dynamic_truth_table table{3};
     kitty::create_from_words(table, &lit, &lit + 1);
