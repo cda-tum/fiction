@@ -2614,12 +2614,26 @@ static const char *__doc_fiction_cp_and_tp_throughput =
 R"doc(Throughput of the layout in clock cycles as :math:`\frac{1}{x}` where
 only :math:`x` is stored.)doc";
 
+static const char *__doc_fiction_create_and3_tt =
+R"doc(Creates and returns a truth table that implements the conjunction in
+three variables.
+
+Returns:
+    Conjunction in three variables.)doc";
+
 static const char *__doc_fiction_create_and_tt =
 R"doc(Creates and returns a truth table that implements the conjunction in
 two variables.
 
 Returns:
     Conjunction in two variables.)doc";
+
+static const char *__doc_fiction_create_and_xor_tt =
+R"doc(Creates and returns a truth table that implements the AND-XOR function
+(a xor b and c) in three variables.
+
+Returns:
+    AND-XOR in three variables.)doc";
 
 static const char *__doc_fiction_create_array =
 R"doc(Creates an array of size `N` and initializes its fields with value of
@@ -2650,6 +2664,13 @@ Returns:
     Vector of truth tables, each representing an output of the
     crossing wire function.)doc";
 
+static const char *__doc_fiction_create_dot_tt =
+R"doc(Creates and returns a truth table that implements the Dot function (a
+xor (c or a and b)) in three variables.
+
+Returns:
+    Dot function in three variables.)doc";
+
 static const char *__doc_fiction_create_double_wire_tt =
 R"doc(Creates and returns a vector of truth tables for a double wire multi-
 output function.
@@ -2672,6 +2693,13 @@ one of the outputs of a multi-output function in two variables.
 Returns:
     Vector of truth tables, each representing an output of the
     identity function.)doc";
+
+static const char *__doc_fiction_create_gamble_tt =
+R"doc(Creates and returns a truth table that implements the Gamble function
+(all or none of a,b,c) in three variables.
+
+Returns:
+    Gamble in three variables.)doc";
 
 static const char *__doc_fiction_create_ge_tt =
 R"doc(Creates and returns a truth table that implements the greater-than-or-
@@ -2705,6 +2733,13 @@ function in one variable.
 
 Returns:
     Identity function in one variable.)doc";
+
+static const char *__doc_fiction_create_ite_tt =
+R"doc(Creates and returns a truth table that implements the ITE (MUX)
+function (if a then b else c) in three variables.
+
+Returns:
+    ITE (MUX) in three variables.)doc";
 
 static const char *__doc_fiction_create_le_tt =
 R"doc(Creates and returns a truth table that implements the less-than-or-
@@ -2748,6 +2783,20 @@ variable.
 Returns:
     Negation in one variable.)doc";
 
+static const char *__doc_fiction_create_onehot_tt =
+R"doc(Creates and returns a truth table that implements the Onehot function
+(exactly one of a,b,c) in three variables.
+
+Returns:
+    Onehot in three variables.)doc";
+
+static const char *__doc_fiction_create_or_and_tt =
+R"doc(Creates and returns a truth table that implements the OR-AND function
+(a and (b or c)) in three variables.
+
+Returns:
+    OR-AND in three variables.)doc";
+
 static const char *__doc_fiction_create_or_tt =
 R"doc(Creates and returns a truth table that implements the disjunction in
 two variables.
@@ -2761,6 +2810,20 @@ exclusive disjunction in two variables.
 
 Returns:
     Negated exclusive disjunction in two variables.)doc";
+
+static const char *__doc_fiction_create_xor3_tt =
+R"doc(Creates and returns a truth table that implements the exclusive
+disjunction in three variables.
+
+Returns:
+    Exclusive disjunction in three variables.)doc";
+
+static const char *__doc_fiction_create_xor_and_tt =
+R"doc(Creates and returns a truth table that implements the XOR-AND function
+(a and (b xor c)) in three variables.
+
+Returns:
+    XOR-AND in three variables.)doc";
 
 static const char *__doc_fiction_create_xor_tt =
 R"doc(Creates and returns a truth table that implements the exclusive
