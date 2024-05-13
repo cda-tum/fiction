@@ -78,7 +78,7 @@ jobs:
       - name: Upload wheel as an artifact
         uses: actions/upload-artifact@v4
         with:
-          name: artifact-${{ matrix.config.os }}-${{ matrix.config.arch }}
+          name: cibw-wheels-${{ matrix.arch }}-${{ matrix.python }}
           path: ./wheelhouse/*.whl
           overwrite: true
 
@@ -122,7 +122,7 @@ jobs:
       - name: Upload sdist as an artifact
         uses: actions/upload-artifact@v4
         with:
-          name: artifact-sdist
+          name: cibw-sdist
           path: dist/*.tar.gz
           overwrite: true
 
@@ -135,7 +135,7 @@ jobs:
       - name: Download the previously stored artifacts
         uses: actions/download-artifact@v4
         with:
-          pattern: artifact-*
+          pattern: cibw-*
           path: dist
           merge-multiple: true
 
