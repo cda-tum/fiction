@@ -1,6 +1,6 @@
 # this file is heavily based on https://github.com/cda-tum/qmap/blob/main/.github/workflows/deploy.yml
 
-name: pyfiction PyPI Deployment
+name: 🐍 pyfiction PyPI Deployment
 
 on:
   release:
@@ -26,7 +26,7 @@ env:
 
 jobs:
   build_wheels:
-    name: 🎡 Wheels for ${{ matrix.python }} on ${{ matrix.config.os }} (${{ matrix.config.arch }})
+    name: 🎡 Wheels for Python ${{ matrix.python }} on ${{ matrix.config.os }} (${{ matrix.config.arch }})
     runs-on: ${{ matrix.config.os }}
     strategy:
       fail-fast: false
@@ -84,7 +84,7 @@ jobs:
           overwrite: true
 
   build_sdist:
-    name: Build Source Distribution
+    name: 📦 Build Source Distribution
     runs-on: ubuntu-latest
     steps:
       - name: Clone respository
