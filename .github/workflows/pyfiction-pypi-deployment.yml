@@ -135,7 +135,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           pattern: wheels-*
-          name: artifact
           path: dist
           merge-multiple: true
 
