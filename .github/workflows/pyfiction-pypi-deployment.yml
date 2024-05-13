@@ -70,6 +70,7 @@ jobs:
 
       - name: Build wheel
         uses: pypa/cibuildwheel@v2.17.0
+        id: bw
         env:
           CIBW_BEFORE_ALL_LINUX: /opt/python/cp39-cp39/bin/pip install z3-solver==${{ env.Z3_VERSION }}
           CIBW_TEST_EXTRAS: test
@@ -78,7 +79,7 @@ jobs:
       - name: Upload wheel as an artifact
         uses: actions/upload-artifact@v4
         with:
-          name: cibw-wheels-${{ matrix.arch }}-${{ matrix.python }}
+          name: cibw-wheels-${{ matrix.config.os }}-${{ matrix.config.arch }}-${{ steps.bw.outputs.python-version }}
           path: ./wheelhouse/*.whl
           overwrite: true
 
