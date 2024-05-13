@@ -26,7 +26,7 @@ env:
 
 jobs:
   build_wheels:
-    name: 🎡 Wheels for ${{ matrix.config.python-version }} on ${{ matrix.config.os }} (${{ matrix.config.arch }})
+    name: 🎡 Wheels for ${{ matrix.python }} on ${{ matrix.config.os }} (${{ matrix.config.arch }})
     runs-on: ${{ matrix.config.os }}
     strategy:
       fail-fast: false
@@ -36,7 +36,7 @@ jobs:
           - { os: macos-latest, arch: x64 }
           - { os: macos-latest, arch: arm64 }
           - { os: windows-latest, arch: x64 }
-          - python: '>=3.9'
+        python: ['3.8', '3.9', '3.10', '3.11', '3.12']
     steps:
       - uses: actions/checkout@v4
         with:
@@ -79,7 +79,7 @@ jobs:
       - name: Upload wheel as an artifact
         uses: actions/upload-artifact@v4
         with:
-          name: cibw-wheels-${{ matrix.config.os }}-${{ matrix.config.arch }}-${{ matrix.config.python-version }}
+          name: cibw-wheels-${{ matrix.config.os }}-${{ matrix.config.arch }}-${{ matrix.python }}
           path: ./wheelhouse/*.whl
           overwrite: true
 
