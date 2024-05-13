@@ -78,6 +78,7 @@ jobs:
       - name: Upload wheel as an artifact
         uses: actions/upload-artifact@v4
         with:
+          name: wheels-${{ matrix.config.os }}-${{ matrix.config.arch }}
           path: ./wheelhouse/*.whl
           overwrite: true
 
@@ -133,8 +134,10 @@ jobs:
       - name: Download the previously stored artifacts
         uses: actions/download-artifact@v4
         with:
+          pattern: wheels-*
           name: artifact
           path: dist
+          merge-multiple: true
 
       - name: Deploy to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
