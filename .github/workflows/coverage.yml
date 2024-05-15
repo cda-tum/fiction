@@ -1,4 +1,4 @@
-name: Coverage CI
+name: 📈 • Coverage
 
 on:
   push:
