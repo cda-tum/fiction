@@ -1,4 +1,4 @@
-name: 🏁 • CI
+name: 🪟 • CI
 
 on:
   push:
@@ -51,7 +51,7 @@ jobs:
           - os: windows-2022
             toolset: v142
 
-    name: 🏁 ${{matrix.os}} with ${{matrix.env}} and ${{matrix.toolset}} toolset
+    name: 🪟 ${{matrix.os}} with ${{matrix.env}} and ${{matrix.toolset}} toolset
     runs-on: ${{matrix.os}}
 
     steps:
