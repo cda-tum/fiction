@@ -192,6 +192,12 @@ FCN circuit implementation of some specification under the provided parameters. 
 
 The possible parameters are similar to the ones used for ``exact``. See ``onepass -h`` for a full list.
 
+Hexagonalization (``hex``)
+##########################################
+
+Transforms a 2DDWave-clocked Cartesian layout into a hexagonal even row clocked layout suitable for SiDBs by
+remapping all gates and wires as originally proposed in `Scalable Physical Design for Silicon Dangling Bond Logic:
+How a 45° Turn Prevents the Reinvention of the Wheel <https://ieeexplore.ieee.org/document/10231278>`_.
 
 Design rule checking (``check``)
 --------------------------------
