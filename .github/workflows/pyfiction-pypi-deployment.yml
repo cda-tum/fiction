@@ -1,15 +1,33 @@
 # this file is heavily based on https://github.com/cda-tum/qmap/blob/main/.github/workflows/deploy.yml
 
 name: 🐍 Packaging
-
+ 
 on:
   release:
     types: [ published ]
-  pull_request:
   merge_group:
   push:
-    branches:
-      - main
+    branches: [ 'main' ]
+    paths:
+      - 'bindings/pyfiction/**'
+      - '**/*.py'
+      - '**/*.hpp'
+      - '**/*.cpp'
+      - '**/*.cmake'
+      - '**/CMakeLists.txt'
+      - 'libs/**'
+      - '.github/workflows/pyfiction-pypi-deployment.yml'
+  pull_request:
+    branches: [ 'main' ]
+    paths:
+      - 'bindings/pyfiction/**'
+      - '**/*.py'
+      - '**/*.hpp'
+      - '**/*.cpp'
+      - '**/*.cmake'
+      - '**/CMakeLists.txt'
+      - 'libs/**'
+      - '.github/workflows/pyfiction-pypi-deployment.yml'
   workflow_dispatch:
   workflow_run:
     workflows: [ "pyfiction Docstring Generator" ]
