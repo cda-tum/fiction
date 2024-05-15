@@ -1,4 +1,4 @@
-name: Ubuntu CI
+name: 🐧 • CI
 
 on:
   push:
@@ -57,7 +57,7 @@ jobs:
             cppstandard: -DCMAKE_CXX_STANDARD=20
             cppname: C++20
 
-    name: ${{matrix.os}} with ${{matrix.compiler}} ${{matrix.cppname}}
+    name: 🐧 ${{matrix.os}} with ${{matrix.compiler}} ${{matrix.cppname}}
     runs-on: ${{matrix.os}}
 
     steps:
