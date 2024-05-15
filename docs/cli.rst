@@ -204,7 +204,7 @@ Post-Layout Optimization (``optimize``)
 A post-layout optimization algorithm that can be used to reduce the area of a given sub-optimal Cartesian gate-level layout
 created by heuristics or machine learning. This optimization utilizes the distinct characteristics of the 2DDWave clocking scheme,
 which only allows information flow from top to bottom and left to right, therefore only aforementioned clocking scheme is supported.
-For more information, see `this paper <https://dl.acm.org/doi/10.1145/3611315.3633247>`_ or 
+For more information, see `this paper <https://dl.acm.org/doi/10.1145/3611315.3633247>`_ or
 `this paper <https://www.cda.cit.tum.de/files/eda/2024_dac_wiring_reduction_for_field-coupled_nanotechnologies.pdf>`_.
 
 Possible parameters:
