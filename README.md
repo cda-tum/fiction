@@ -202,7 +202,7 @@ plus several path-finding algorithms that work on generic layouts:
 - shortest path via the [A* algorithm](https://ieeexplore.ieee.org/document/4082128)
 - *k* shortest paths via [Yen's algorithm](https://www.ams.org/journals/qam/1970-27-04/S0033-569X-1970-0253822-7/)
 
-On top, there is an [hexagonalization algorithm](https://ieeexplore.ieee.org/document/10231278) to transform Cartesian layouts suitable for QCA into hexagonal layouts suitable for SiDBs
+On top, there is a [hexagonalization algorithm](https://ieeexplore.ieee.org/document/10231278) to transform Cartesian layouts suitable for QCA into hexagonal layouts suitable for SiDBs,
 and multiple algorithms to optimize gate-level layouts post-placement:
 
 - [post-layout optimzation](https://dl.acm.org/doi/10.1145/3611315.3633247)
