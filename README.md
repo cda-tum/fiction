@@ -206,7 +206,7 @@ On top, there is an [hexagonalization algorithm](https://ieeexplore.ieee.org/doc
 and multiple algorithms to optimize gate-level layouts post-placement:
 
 - [post-layout optimzation](https://dl.acm.org/doi/10.1145/3611315.3633247)
-- [wiring reduction]([https://www.ams.org/journals/qam/1970-27-04/S0033-569X-1970-0253822-7/](https://www.cda.cit.tum.de/files/eda/2024_dac_wiring_reduction_for_field-coupled_nanotechnologies.pdf))
+- [wiring reduction](https://www.cda.cit.tum.de/files/eda/2024_dac_wiring_reduction_for_field-coupled_nanotechnologies.pdf)
 
 ### Verification
 
