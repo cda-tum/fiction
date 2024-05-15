@@ -195,7 +195,7 @@ The possible parameters are similar to the ones used for ``exact``. See ``onepas
 Hexagonalization (``hex``)
 ##########################################
 
-Transforms a 2DDWave-clocked Cartesian layout into a hexagonal even row clocked layout suitable for SiDBs by
+Transforms a 2DDWave-clocked Cartesian layout into a hexagonal row-clocked layout suitable for SiDBs by
 remapping all gates and wires. For more information, see `the paper <https://ieeexplore.ieee.org/document/10231278>`_.
 
 Post-Layout Optimization (``optimize``)
