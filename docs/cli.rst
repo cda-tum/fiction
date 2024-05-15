@@ -196,8 +196,21 @@ Hexagonalization (``hex``)
 ##########################################
 
 Transforms a 2DDWave-clocked Cartesian layout into a hexagonal even row clocked layout suitable for SiDBs by
-remapping all gates and wires as originally proposed in `Scalable Physical Design for Silicon Dangling Bond Logic:
-How a 45° Turn Prevents the Reinvention of the Wheel <https://ieeexplore.ieee.org/document/10231278>`_.
+remapping all gates and wires. For more information, see `the paper <https://ieeexplore.ieee.org/document/10231278>`_.
+
+Post-Layout Optimization (``optimize``)
+##########################################
+
+A post-layout optimization algorithm that can be used to reduce the area of a given sub-optimal Cartesian gate-level layout
+created by heuristics or machine learning. This optimization utilizes the distinct characteristics of the 2DDWave clocking scheme,
+which only allows information flow from top to bottom and left to right, therefore only aforementioned clocking scheme is supported.
+For more information, see `this paper <https://dl.acm.org/doi/10.1145/3611315.3633247>`_ or 
+`this paper <https://www.cda.cit.tum.de/files/eda/2024_dac_wiring_reduction_for_field-coupled_nanotechnologies.pdf>`_.
+
+Possible parameters:
+
+- Number of maximum gate relocations (``-m``), should be set to 1 for layouts with more than 100000 tiles, defaults to :math:`\max`.
+- Wiring reduction only (``-w``), should be set for layouts with more than 20000000 tiles, not set by default.
 
 Design rule checking (``check``)
 --------------------------------
