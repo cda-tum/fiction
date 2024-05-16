@@ -240,7 +240,6 @@ Operational Domain Computation
         .. doxygenenum:: fiction::sweep_parameter
         .. doxygenstruct:: fiction::operational_domain
            :members:
-        .. doxygenfunction:: fiction::check_parameter_points_for_equality
         .. doxygenfunction:: fiction::find_parameter_point_with_tolerance
         .. doxygenfunction:: fiction::find_key_with_tolerance
         .. doxygenstruct:: fiction::operational_domain_params
@@ -286,6 +285,9 @@ Determine Physically Valid Parameters
         **Header:** ``fiction/algorithms/simulation/sidb/determine_physically_valid_parameters.hpp``
 
         .. doxygenfunction:: fiction::determine_physically_valid_parameters
+
+   .. tab:: Python
+        .. autofunction:: mnt.pyfiction.determine_physically_valid_parameters
 
 
 Utility Functions

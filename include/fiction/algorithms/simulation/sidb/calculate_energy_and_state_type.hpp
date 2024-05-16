@@ -5,7 +5,6 @@
 #ifndef FICTION_CALCULATE_ENERGY_AND_STATE_TYPE_HPP
 #define FICTION_CALCULATE_ENERGY_AND_STATE_TYPE_HPP
 
-#include "fiction/algorithms/iter/bdl_input_iterator.hpp"
 #include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/physical_constants.hpp"
@@ -13,8 +12,6 @@
 
 #include <cmath>
 #include <cstdint>
-#include <map>
-#include <string>
 #include <utility>
 #include <vector>
 

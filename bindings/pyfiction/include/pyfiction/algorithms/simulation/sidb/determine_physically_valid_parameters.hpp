@@ -36,7 +36,7 @@ inline void determine_physically_valid_parameters(pybind11::module& m)
     namespace py = pybind11;
     using namespace pybind11::literals;
 
-    py::class_<fiction::operational_domain<fiction::parameter_point, uint64_t>>(m, "physically_valid_parameter_domain",
+    py::class_<fiction::operational_domain<fiction::parameter_point, uint64_t>>(m, "physically_valid_parameters_domain",
                                                                                 DOC(fiction_operational_domain))
         .def(py::init<>())
         .def_readwrite("x_dimension_parameter",

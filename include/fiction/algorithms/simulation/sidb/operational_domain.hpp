@@ -19,6 +19,7 @@
 #include "fiction/utils/hash.hpp"
 #include "fiction/utils/phmap_utils.hpp"
 
+#include <fmt/format.h>
 #include <kitty/traits.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 #include <phmap.h>
@@ -68,7 +69,8 @@ struct parameter_point
      */
     double y;
     /**
-     * Equality operator.
+     * Equality operator. Checks if this parameter point is equal to another point within a specified tolerance.
+     * The tolerance is defined by `physical_constants::POP_STABILITY_ERR`.
      *
      * @param other Other parameter point to compare with.
      * @return `true` iff the parameter points are equal.
@@ -79,7 +81,8 @@ struct parameter_point
         return std::abs(x - other.x) < tolerance && std::abs(y - other.y) < tolerance;
     }
     /**
-     * Inequality operator.
+     * Inequality operator. Checks if this parameter point is unequal to another point within a specified tolerance.
+     * The tolerance is defined by `physical_constants::POP_STABILITY_ERR`.
      *
      * @param other Other parameter point to compare with.
      * @return `true` iff the parameter points are not equal.
@@ -140,8 +143,8 @@ enum class sweep_parameter
  * is then defined as the set of all parameter combinations for which the layout is operational. Different techniques
  * for performing these sweep are implemented.
  *
- * @tparam Key The type representing the key. Defaults to `parameter point`.
- * @tparam Value The type representing the value. Defaults to `operational status`.
+ * @tparam Key The type representing the key. Defaults to `parameter_point`.
+ * @tparam Value The type representing the value. Defaults to `operational_status`.
  */
 template <typename Key = parameter_point, typename Value = operational_status>
 struct operational_domain
@@ -169,18 +172,17 @@ struct operational_domain
      */
     [[nodiscard]] uint64_t get_value(const parameter_point& pp) const
     {
-        auto it = find_parameter_point_with_tolerance(operational_values, pp);
-        if (it != operational_values.cend())
+        if (const auto it = find_parameter_point_with_tolerance(operational_values, pp);
+            it != operational_values.cend())
         {
             return it->second;
         }
-        throw std::runtime_error("Key not found in the map");
+        throw std::out_of_range(fmt::format("({},{}) not found in the operational domain", pp.x, pp.y).c_str());
     }
 };
 /**
  * This function searches for a parameter point, specified by the `key`, in the provided map
- * `map` with tolerance. It compares each key in the map to the specified key using the
- * `check_parameter_points_for_equality` function.
+ * `map` with tolerance.
  *
  * @tparam MapType The type of the map containing parameter points as keys.
  * @param map The map containing parameter points as keys and associated values.
@@ -192,12 +194,13 @@ template <typename MapType>
 find_parameter_point_with_tolerance(const MapType& map, const typename MapType::key_type& key)
 {
     static_assert(std::is_same_v<typename MapType::key_type, parameter_point>, "Map key type must be parameter_point");
+
     return std::find_if(map.cbegin(), map.cend(), [&key](const auto& pair) { return pair.first == key; });
 }
 /**
- * This function searches for a parameter point, specified by the `key`, in the provided map
- * `map` with tolerance. It compares each key in the map to the specified key using the
- * `check_parameter_points_for_equality` function.
+ * This function searches for a floating-point value specified by the `key` in the provided map `map`,
+ * applying a tolerance specified by `fiction::physical_constants::POP_STABILITY_ERR`.
+ * Each key in the map is compared to the specified key within this tolerance.
  *
  * @tparam MapType The type of the map containing parameter points as keys.
  * @param map The map containing parameter points as keys and associated values.
@@ -302,22 +305,22 @@ class operational_domain_impl
 {
   public:
     /**
-     * Standard constructor. Initializes the layout, the truth table, the parameters and the statistics. Also
-     * detects the output BDL pair, which is necessary for the operational domain computation. The layout must
+     * Standard constructor. Initializes the lyt, the truth table, the parameters and the statistics. Also
+     * detects the output BDL pair, which is necessary for the operational domain computation. The lyt must
      * have exactly one output BDL pair.
      *
-     * @param layout SiDB cell-level layout to be evaluated.
-     * @param spec Expected Boolean function of the layout given as a multi-output truth table.
+     * @param lyt SiDB cell-level lyt to be evaluated.
+     * @param spec Expected Boolean function of the lyt given as a multi-output truth table.
      * @param ps Parameters for the operational domain computation.
      * @param st Statistics of the process.
      */
-    operational_domain_impl(const Lyt& layout, const std::vector<TT>& tt, const operational_domain_params& ps,
+    operational_domain_impl(const Lyt& lyt, const std::vector<TT>& tt, const operational_domain_params& ps,
                             operational_domain_stats& st) noexcept :
-            layout{layout},
+            layout{lyt},
             truth_table{tt},
             params{ps},
             stats{st},
-            output_bdl_pairs{detect_bdl_pairs<Lyt>(layout, sidb_technology::cell_type::OUTPUT, ps.bdl_params)},
+            output_bdl_pairs{detect_bdl_pairs<Lyt>(lyt, sidb_technology::cell_type::OUTPUT, ps.bdl_params)},
             x_indices(num_x_steps() + 1),  // pre-allocate the x dimension indices
             y_indices(num_y_steps() + 1)   // pre-allocate the y dimension indices
     {
@@ -426,7 +429,9 @@ class operational_domain_impl
                       {
                           // for each y value in parallel
                           std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ y_indices.cbegin(), y_indices.cend(),
-                                        [this, x](const auto y) { is_step_point_operational({x, y}); });
+                                        [this, x](const auto y) {
+                                            is_step_point_operational({x, y});
+                                        });
                       });
 
         log_stats();
@@ -627,7 +632,9 @@ class operational_domain_impl
                       [this, &lyt](const auto x)
                       {
                           std::for_each(y_indices.cbegin(), y_indices.cend(),
-                                        [this, &lyt, x](const auto y) { is_step_point_suitable(lyt, {x, y}); });
+                                        [this, &lyt, x](const auto y) {
+                                            is_step_point_suitable(lyt, {x, y});
+                                        });
                       });
 
         sidb_simulation_parameters simulation_parameters = params.simulation_parameters;
@@ -757,7 +764,7 @@ class operational_domain_impl
          */
         std::size_t x;
         /**
-         * Y dimension step value.x
+         * Y dimension step value.
          */
         std::size_t y;
         /**
