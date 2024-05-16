@@ -1,6 +1,6 @@
 # this file is heavily based on https://github.com/cda-tum/qmap/blob/main/.github/workflows/deploy.yml
 
-name: 🐍 Packaging
+name: 🐍 • Packaging
 
 on:
   release:
@@ -149,7 +149,7 @@ jobs:
   publish_to_pypi:
     needs: [ build_wheels, build_sdist ]
     runs-on: ubuntu-latest
-    name: Publish to PyPI
+    name: 🚀 Publish to PyPI
     if: github.event_name == 'release' && github.event.action == 'published'
     steps:
       - name: Download the previously stored artifacts

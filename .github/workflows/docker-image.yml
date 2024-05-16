@@ -1,4 +1,4 @@
-name: Docker Image CI
+name: 🐳 • Docker Image
 
 on:
   push:
@@ -33,7 +33,7 @@ concurrency:
 
 jobs:
   build:
-    name: Build Docker image
+    name: 🐳 Build Docker image
     runs-on: ubuntu-latest
 
     steps:
