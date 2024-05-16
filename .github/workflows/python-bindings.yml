@@ -1,4 +1,4 @@
-name: pyfiction CI
+name: 🐍 • CI
 
 on:
   push:
@@ -57,7 +57,7 @@ jobs:
             z3_platform: windows
             architecture: x64
 
-    name: pyfiction on ${{matrix.os}} with Python ${{matrix.python_version}}
+    name: 🐍 on ${{matrix.os}} with Python ${{matrix.python_version}}
     runs-on: ${{matrix.os}}
 
     steps:
