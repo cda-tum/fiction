@@ -69,6 +69,10 @@ jobs:
           save: true
           max-size: 10G
 
+      - if: ${{ matrix.config.os == 'macos-latest' }} && ${{ matrix.config.arch == 'x64' }}
+        name: Set MACOSX_DEPLOYMENT_TARGET to 10.9
+        run: echo "MACOSX_DEPLOYMENT_TARGET=10.9" >> $GITHUB_ENV
+
       # on Linux, the action does not work because it can't install to the manylinux container
       - if: runner.os != 'Linux'
         name: Install Z3
