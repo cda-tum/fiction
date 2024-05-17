@@ -5,6 +5,28 @@ All notable changes to this project will be documented in this file.
 
 The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`_.
 
+
+v0.6.1 - 2024-05-16
+-------------------
+
+Added
+#####
+- Utils:
+    - Truth table helpers for the creation of 3-input functions (NPN class representatives)
+- Documentation:
+    - Information on hexagonalization and post-layout optimization in README and ReadTheDocs
+
+Changed
+#######
+- Continuous integration:
+    - Limit the number of CI runs for PyPI deployment
+
+Fixed
+#####
+- Continuous deployment:
+    - Fixed the PyPI deployment workflow to publish all wheels properly
+
+
 v0.6.0 - 2024-05-05
 -------------------
 *When it comes to the past, everyone writes fiction.* --- Stephen King
