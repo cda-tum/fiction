@@ -1,4 +1,4 @@
-name: Ubuntu CI
+name: 🐧 • CI
 
 on:
   push:
@@ -42,6 +42,8 @@ jobs:
         compiler: [ g++-10, g++-11, g++-12, clang++-10, clang++-11, clang++-12 ]
         exclude:
           - os: ubuntu-20.04
+            compiler: g++-11
+          - os: ubuntu-20.04
             compiler: g++-12
           - os: ubuntu-22.04
             compiler: clang++-10
@@ -57,7 +59,7 @@ jobs:
             cppstandard: -DCMAKE_CXX_STANDARD=20
             cppname: C++20
 
-    name: ${{matrix.os}} with ${{matrix.compiler}} ${{matrix.cppname}}
+    name: 🐧 ${{matrix.os}} with ${{matrix.compiler}} ${{matrix.cppname}}
     runs-on: ${{matrix.os}}
 
     steps:
