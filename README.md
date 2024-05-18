@@ -202,7 +202,8 @@ plus several path-finding algorithms that work on generic layouts:
 - shortest path via the [A* algorithm](https://ieeexplore.ieee.org/document/4082128)
 - *k* shortest paths via [Yen's algorithm](https://www.ams.org/journals/qam/1970-27-04/S0033-569X-1970-0253822-7/)
 
-On top, there is a [hexagonalization algorithm](https://ieeexplore.ieee.org/document/10231278) to transform Cartesian layouts suitable for QCA into hexagonal layouts suitable for SiDBs,
+On top, there is a [hexagonalization algorithm](https://ieeexplore.ieee.org/document/10231278) to transform Cartesian
+layouts suitable for QCA into hexagonal layouts suitable for SiDBs,
 and multiple algorithms to optimize gate-level layouts post-placement:
 
 - [post-layout optimzation](https://dl.acm.org/doi/10.1145/3611315.3633247)
@@ -242,17 +243,17 @@ with variable amounts of clock numbers as QCA for instance uses four clock phase
 
 Built-in schemes are
 
-|      [Columnar](https://ieeexplore.ieee.org/document/573740)       |    [Row](https://ieeexplore.ieee.org/document/573740)    |     [2DDWave](https://ieeexplore.ieee.org/document/1717097)      |
-|:------------------------------------------------------------------:|:--------------------------------------------------------:|:----------------------------------------------------------------:|
-| <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/columnar.png" alt="Columnar" height="200"/> | <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/row.png" alt="Row" height="200"/> | <img src="docs/_static/2ddwave.png" alt="2DDWave" height="200"/> |
+|                                  [Columnar](https://ieeexplore.ieee.org/document/573740)                                  |                               [Row](https://ieeexplore.ieee.org/document/573740)                                |                                 [2DDWave](https://ieeexplore.ieee.org/document/1717097)                                 |
+|:-------------------------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------------------:|
+| <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/columnar.png" alt="Columnar" height="200"/> | <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/row.png" alt="Row" height="200"/> | <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/2ddwave.png" alt="2DDWave" height="200"/> |
 
-|   [USE](https://ieeexplore.ieee.org/document/7219390)    | [RES](https://www.tandfonline.com/doi/abs/10.1080/21681724.2019.1570551) | [ESR](https://link.springer.com/content/pdf/10.1007/s10470-020-01760-4.pdf) |
-|:--------------------------------------------------------:|:------------------------------------------------------------------------:|:---------------------------------------------------------------------------:|
-| <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/use.png" alt="USE" height="200"/> |         <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/res.png" alt="RES" height="200"/>         |          <img src="docs/_static/esr.png" alt="ESR" height="200"/>           |
+|                               [USE](https://ieeexplore.ieee.org/document/7219390)                               |                    [RES](https://www.tandfonline.com/doi/abs/10.1080/21681724.2019.1570551)                     |                   [ESR](https://link.springer.com/content/pdf/10.1007/s10470-020-01760-4.pdf)                   |
+|:---------------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------------:|
+| <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/use.png" alt="USE" height="200"/> | <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/res.png" alt="RES" height="200"/> | <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/esr.png" alt="ESR" height="200"/> |
 
-| [CFE](https://ietresearch.onlinelibrary.wiley.com/doi/10.1049/iet-cds.2019.0096) | [Ripple](https://scholarworks.rit.edu/cgi/viewcontent.cgi?referer=&httpsredir=1&article=8266&context=theses) |    [BANCS](https://ieeexplore.ieee.org/document/8533251)     |
-|:--------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------:|
-|             <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/cfe.png" alt="CFE" height="200"/>             |                        <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/ripple.png" alt="Ripple" height="200"/>                        | <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/bancs.png" alt="BANCS" height="300"/> |
+|                [CFE](https://ietresearch.onlinelibrary.wiley.com/doi/10.1049/iet-cds.2019.0096)                 |     [Ripple](https://scholarworks.rit.edu/cgi/viewcontent.cgi?referer=&httpsredir=1&article=8266&context=theses)      |                                [BANCS](https://ieeexplore.ieee.org/document/8533251)                                |
+|:---------------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------------------------------------:|
+| <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/cfe.png" alt="CFE" height="200"/> | <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/ripple.png" alt="Ripple" height="200"/> | <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/bancs.png" alt="BANCS" height="300"/> |
 
 plus the mentioned irregular open clocking that works via a clock map instead of a regular extrapolated cutout.
 
