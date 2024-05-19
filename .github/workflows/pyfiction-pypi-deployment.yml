@@ -1,16 +1,38 @@
 # this file is heavily based on https://github.com/cda-tum/qmap/blob/main/.github/workflows/deploy.yml
 
-name: pyfiction PyPI Deployment
+name: 🐍 • Packaging
 
 on:
   release:
     types: [ published ]
-  pull_request:
   merge_group:
   push:
-    branches:
-      - main
+    branches: [ 'main' ]
+    paths:
+      - 'bindings/pyfiction/**'
+      - '**/*.py'
+      - '**/*.hpp'
+      - '**/*.cpp'
+      - '**/*.cmake'
+      - '**/CMakeLists.txt'
+      - 'libs/**'
+      - '.github/workflows/pyfiction-pypi-deployment.yml'
+  pull_request:
+    branches: [ 'main' ]
+    paths:
+      - 'bindings/pyfiction/**'
+      - '**/*.py'
+      - '**/*.hpp'
+      - '**/*.cpp'
+      - '**/*.cmake'
+      - '**/CMakeLists.txt'
+      - 'libs/**'
+      - '.github/workflows/pyfiction-pypi-deployment.yml'
   workflow_dispatch:
+  workflow_run:
+    workflows: [ "pyfiction Docstring Generator" ]
+    types:
+      - completed
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -22,7 +44,7 @@ env:
 
 jobs:
   build_wheels:
-    name: Wheels for ${{ matrix.config.os }} (${{ matrix.config.arch }})
+    name: 🎡 Wheels for ${{ matrix.python }} on ${{ matrix.config.os }} (${{ matrix.config.arch }})
     runs-on: ${{ matrix.config.os }}
     strategy:
       fail-fast: false
@@ -32,8 +54,9 @@ jobs:
           - { os: macos-latest, arch: x64 }
           - { os: macos-latest, arch: arm64 }
           - { os: windows-latest, arch: x64 }
+        python: ['cp38', 'cp39', 'cp310', 'cp311', 'cp312']
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: recursive
           fetch-depth: 0
@@ -65,23 +88,27 @@ jobs:
         run: echo "CIBW_ARCHS_MACOS=arm64" >> $GITHUB_ENV
 
       - name: Build wheel
-        uses: pypa/cibuildwheel@v2.17.0
+        uses: pypa/cibuildwheel@v2.18.0
         env:
           CIBW_BEFORE_ALL_LINUX: /opt/python/cp39-cp39/bin/pip install z3-solver==${{ env.Z3_VERSION }}
+          CIBW_BUILD: ${{ matrix.python }}-*
+          CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=10.15
           CIBW_TEST_EXTRAS: test
           CIBW_TEST_COMMAND: 'python -m unittest discover --start-directory {project} --verbose'
 
       - name: Upload wheel as an artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
+          name: cibw-wheels-${{ matrix.config.os }}-${{ matrix.config.arch }}-${{ matrix.python }}
           path: ./wheelhouse/*.whl
+          overwrite: true
 
   build_sdist:
-    name: Build Source Distribution
+    name: 📦 Build Source Distribution
     runs-on: ubuntu-latest
     steps:
       - name: Clone respository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           submodules: recursive
           fetch-depth: 0
@@ -95,7 +122,7 @@ jobs:
           max-size: 10G
 
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
           cache: 'pip'
@@ -114,21 +141,24 @@ jobs:
         run: z3=${{env.ENABLE_Z3}} pip install dist/*.tar.gz --verbose
 
       - name: Upload sdist as an artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
+          name: cibw-sdist
           path: dist/*.tar.gz
+          overwrite: true
 
   publish_to_pypi:
     needs: [ build_wheels, build_sdist ]
     runs-on: ubuntu-latest
-    name: Publish to PyPI
+    name: 🚀 Publish to PyPI
     if: github.event_name == 'release' && github.event.action == 'published'
     steps:
       - name: Download the previously stored artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: artifact
+          pattern: cibw-*
           path: dist
+          merge-multiple: true
 
       - name: Deploy to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1

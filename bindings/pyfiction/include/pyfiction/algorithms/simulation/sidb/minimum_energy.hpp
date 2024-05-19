@@ -28,10 +28,9 @@ void minimum_energy(pybind11::module& m)
     using namespace pybind11::literals;
 
     m.def(
-        "minimum_energy",
-        [](const std::vector<Lyt>& layouts) -> double
-        { return fiction::minimum_energy(layouts.cbegin(), layouts.cend()); },
-        "layouts"_a, DOC(fiction_minimum_energy));
+        "minimum_energy", [](const std::vector<Lyt>& layouts) -> double
+        { return fiction::minimum_energy(layouts.cbegin(), layouts.cend()); }, "layouts"_a,
+        DOC(fiction_minimum_energy));
 }
 
 }  // namespace detail

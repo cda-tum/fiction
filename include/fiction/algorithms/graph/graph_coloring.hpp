@@ -492,10 +492,8 @@ class sat_coloring_handler
                               vc.reserve(clique.size());
 
                               // for each vertex in clique
-                              std::for_each(clique.cbegin(), clique.cend(),
-                                            [&instance, &c, &vc](const auto& v) {
-                                                vc.push_back({instance->variables[{v, c}], bill::positive_polarity});
-                                            });
+                              std::for_each(clique.cbegin(), clique.cend(), [&instance, &c, &vc](const auto& v)
+                                            { vc.push_back({instance->variables[{v, c}], bill::positive_polarity}); });
 
                               color_c_in_each_clique.push_back(bill::add_tseytin_or(instance->solver, vc));
                           });

@@ -3,13 +3,13 @@ requires = [
     "setuptools>=45",
     "setuptools_scm[toml]>=7",
     "ninja>=1.10; sys_platform != 'win32'",
-    "cmake>=3.15",
+    "cmake>=3.21",
 ]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "mnt.pyfiction"
-version = "0.5.0"
+version = "0.6.1"
 description = "Design Automation for Field-coupled Nanotechnologies"
 readme = "README.md"
 authors = [
@@ -35,7 +35,7 @@ classifiers = [
     'Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)',
 ]
 
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 
 [project.urls]
 Source = 'https://github.com/cda-tum/fiction'

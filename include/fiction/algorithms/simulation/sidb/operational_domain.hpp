@@ -271,14 +271,14 @@ class operational_domain_impl
 
         // if the value of the x-parameter is greater than params.x_max after num_x_steps() steps, this value is
         // ignored in the operational domain calculation.
-        if ((params.x_min + (x_indices.size() - 1) * params.x_step) - params.x_max >
+        if ((params.x_min + static_cast<double>(x_indices.size() - 1) * params.x_step) - params.x_max >
             physical_constants::POP_STABILITY_ERR)
         {
             x_indices.pop_back();
         }
         // if the value of the y-parameter is greater than params.y_max after num_y_steps() steps, this value is
         // ignored in the operational domain calculation.
-        if (((params.y_min + (y_indices.size() - 1) * params.y_step) - params.y_max) >
+        if (((params.y_min + static_cast<double>(y_indices.size() - 1) * params.y_step) - params.y_max) >
             physical_constants::POP_STABILITY_ERR)
         {
             y_indices.pop_back();
@@ -312,9 +312,7 @@ class operational_domain_impl
                       {
                           // for each y value in parallel
                           std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ y_indices.cbegin(), y_indices.cend(),
-                                        [this, x](const auto y) {
-                                            is_step_point_operational({x, y});
-                                        });
+                                        [this, x](const auto y) { is_step_point_operational({x, y}); });
                       });
 
         log_stats();

@@ -1,4 +1,4 @@
-name: Clang-Tidy Review
+name: 🚨 • Clang-Tidy Review
 
 on:
   pull_request:
@@ -7,6 +7,7 @@ on:
       - '**/*.cpp'
       - 'libs/**'
       - '.github/workflows/clang-tidy-review.yml'
+      - '!bindings/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
@@ -24,7 +25,7 @@ jobs:
           submodules: recursive
 
       - name: Review code with Clang-Tidy
-        uses: ZedThree/clang-tidy-review@v0.18.0
+        uses: ZedThree/clang-tidy-review@v0.19.0
         id: review
         with:
           cmake_command: >
@@ -32,9 +33,11 @@ jobs:
             -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
             -DFICTION_CLI=ON
             -DFICTION_TEST=ON
+            -DFICTION_BENCHMARK=OFF
             -DFICTION_EXPERIMENTS=ON
             -DMOCKTURTLE_EXAMPLES=OFF
           build_dir: build
+          apt_packages: 'libreadline-dev,libtbb-dev'
           config_file: '.clang-tidy'
           exclude: 'libs/*,docs/*,benchmarks/*,bib/*,*/pyfiction/pybind11_mkdoc_docstrings.hpp,*/pyfiction/documentation.hpp'
           split_workflow: true

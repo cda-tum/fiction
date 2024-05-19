@@ -4,8 +4,12 @@
 
 #define PYBIND11_DETAILED_ERROR_MESSAGES
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
+
 #include "pyfiction/algorithms/network_transformation/fanout_substitution.hpp"
 #include "pyfiction/algorithms/network_transformation/network_balancing.hpp"
+#include "pyfiction/algorithms/network_transformation/technology_mapping.hpp"
 #include "pyfiction/algorithms/path_finding/a_star.hpp"
 #include "pyfiction/algorithms/path_finding/distance.hpp"
 #include "pyfiction/algorithms/path_finding/enumerate_all_paths.hpp"
@@ -17,6 +21,7 @@
 #include "pyfiction/algorithms/physical_design/hexagonalization.hpp"
 #include "pyfiction/algorithms/physical_design/orthogonal.hpp"
 #include "pyfiction/algorithms/physical_design/post_layout_optimization.hpp"
+#include "pyfiction/algorithms/physical_design/wiring_reduction.hpp"
 #include "pyfiction/algorithms/properties/critical_path_length_and_throughput.hpp"
 #include "pyfiction/algorithms/simulation/logic_simulation.hpp"
 #include "pyfiction/algorithms/simulation/sidb/calculate_energy_and_state_type.hpp"
@@ -66,13 +71,13 @@
 #include "pyfiction/layouts/hexagonal_layout.hpp"
 #include "pyfiction/layouts/obstruction_layout.hpp"
 #include "pyfiction/layouts/shifted_cartesian_layout.hpp"
-#include "pyfiction/layouts/sidb_lattice.hpp"
 #include "pyfiction/networks/logic_networks.hpp"
 #include "pyfiction/networks/truth_tables.hpp"
 #include "pyfiction/technology/area.hpp"
 #include "pyfiction/technology/charge_distribution_surface.hpp"
 #include "pyfiction/technology/sidb_charge_state.hpp"
 #include "pyfiction/technology/sidb_defects.hpp"
+#include "pyfiction/technology/sidb_lattice.hpp"
 #include "pyfiction/technology/sidb_nm_distance.hpp"
 #include "pyfiction/technology/sidb_nm_position.hpp"
 #include "pyfiction/utils/layout_utils.hpp"
@@ -106,7 +111,6 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::gate_level_layouts(m);
     pyfiction::cell_level_layouts(m);
     pyfiction::obstruction_layouts(m);
-    pyfiction::sidb_lattice_cell_level_layouts(m);
     /**
      * Algorithms: Simulation
      */
@@ -144,6 +148,7 @@ PYBIND11_MODULE(pyfiction, m)
      */
     pyfiction::fanout_substitution(m);
     pyfiction::network_balancing(m);
+    pyfiction::technology_mapping(m);
     /**
      * Algorithms: Path Finding
      */
@@ -160,6 +165,7 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::color_routing(m);
     pyfiction::hexagonalization(m);
     pyfiction::post_layout_optimization(m);
+    pyfiction::wiring_reduction(m);
     pyfiction::design_sidb_gates(m);
     /**
      * Algorithms: Properties
@@ -178,6 +184,7 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::sidb_charge_state(m);
     pyfiction::sidb_nm_position(m);
     pyfiction::sidb_nm_distance(m);
+    pyfiction::sidb_lattices(m);
     pyfiction::charge_distribution_surfaces(m);
     /**
      * Input/Output
@@ -207,3 +214,5 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::placement_utils(m);
     pyfiction::truth_table_utils(m);
 }
+
+#pragma GCC diagnostic pop
