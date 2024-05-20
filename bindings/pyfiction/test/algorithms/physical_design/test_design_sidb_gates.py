@@ -42,7 +42,7 @@ class TestDesignSiDBGates(unittest.TestCase):
 
         self.assertEqual(len(designed_gates), 23)
 
-    def test_siqad_and_gate_skeleton_100(self):
+    def test_siqad_and_gate_skeleton_111(self):
         layout = sidb_111_lattice((20, 20))
 
         layout.assign_cell_type((0, 0), sidb_technology.cell_type.INPUT)
