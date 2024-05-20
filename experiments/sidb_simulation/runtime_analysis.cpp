@@ -31,11 +31,11 @@ int main()  // NOLINT
         "Benchmark",
         "Gate Name",
         "#Instances",
-        "Exhaustive Runtime in s",
-        "QuickExact Runtime in s",
-        "Average QuickSim Accuracy of all instances",
-        "QuickSim Single Runtime in s",
-        "Sum of TTS of QuickSim in s"};
+        "Exhaustive Runtime [s]",
+        "QuickExact Runtime [s]",
+        "Average QuickSim Accuracy",
+        "QuickSim Single Runtime [s]",
+        "Total QuickSim TTS [s]"};
 
     static const std::string folder = fmt::format("{}bestagon_gates_type_tags/", EXPERIMENTS_PATH);
 
@@ -53,9 +53,9 @@ int main()  // NOLINT
         std::make_pair("inv", std::vector<tt>{create_not_tt()}),
         std::make_pair("wire", std::vector<tt>{create_id_tt()})};
 
-    const sidb_simulation_parameters        parameters{2, -0.32};
-    const quicksim_params                   qs_params{parameters};
-    const quickexact_params<siqad::coord_t> qe_params{parameters};
+    const sidb_simulation_parameters        sim_params{2, -0.32};
+    const quicksim_params                   qs_params{sim_params};
+    const quickexact_params<siqad::coord_t> qe_params{sim_params};
     const time_to_solution_params           tts_params{};
 
     for (const auto& [gate, truth_table] : gates)
@@ -72,7 +72,7 @@ int main()  // NOLINT
             double      quicksim_single_runtime = 0.0;
 
             // simulate layout with no input pattern
-            const auto             exhaustive_results_layout = exhaustive_ground_state_simulation(layout, parameters);
+            const auto             exhaustive_results_layout = exhaustive_ground_state_simulation(layout, sim_params);
             time_to_solution_stats stats{};
             time_to_solution(layout, qs_params, tts_params, &stats);
             const auto quickexact_results_layout = quickexact(layout, qe_params);
@@ -90,7 +90,7 @@ int main()  // NOLINT
 
             for (auto i = 0u; i < num_input_patterns; ++i, ++bii)
             {
-                const auto             exhaustive_results = exhaustive_ground_state_simulation(*bii, parameters);
+                const auto             exhaustive_results = exhaustive_ground_state_simulation(*bii, sim_params);
                 time_to_solution_stats tts_stats{};
                 time_to_solution(*bii, qs_params, tts_params, &tts_stats);
                 const auto quickexact_results = quickexact(*bii, qe_params);
