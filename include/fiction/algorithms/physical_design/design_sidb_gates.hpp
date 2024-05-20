@@ -33,10 +33,10 @@ namespace fiction
 /**
  * This struct contains parameters and settings to design SiDB gates.
  *
- * @tparam Cell-level layout type.
+ * @tparam CellType Cell type.
  *
  */
-template <typename Lyt>
+template <typename CellType>
 struct design_sidb_gates_params
 {
     /**
@@ -64,7 +64,7 @@ struct design_sidb_gates_params
     /**
      * Canvas spanned by the northwest and southeast cell.
      */
-    std::pair<typename Lyt::cell, typename Lyt::cell> canvas{};
+    std::pair<CellType, CellType> canvas{};
     /**
      * Number of SiDBs placed in the canvas to create a working gate.
      */
@@ -90,7 +90,8 @@ class design_sidb_gates_impl
      * @param tt Expected Boolean function of the layout given as a multi-output truth table.
      * @param ps Parameters and settings for the gate designer.
      */
-    design_sidb_gates_impl(const Lyt& skeleton, const std::vector<TT>& tt, const design_sidb_gates_params<Lyt>& ps) :
+    design_sidb_gates_impl(const Lyt& skeleton, const std::vector<TT>& tt,
+                           const design_sidb_gates_params<cell<Lyt>>& ps) :
             skeleton_layout{skeleton},
             truth_table{tt},
             params{ps},
@@ -219,7 +220,7 @@ class design_sidb_gates_impl
     /**
      * Parameters for the *SiDB Gate Designer*.
      */
-    const design_sidb_gates_params<Lyt>& params;
+    const design_sidb_gates_params<cell<Lyt>>& params;
     /**
      * All cells within the canvas.
      */
@@ -305,7 +306,7 @@ class design_sidb_gates_impl
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] std::vector<Lyt> design_sidb_gates(const Lyt& skeleton, const std::vector<TT>& spec,
-                                                 const design_sidb_gates_params<Lyt>& params = {}) noexcept
+                                                 const design_sidb_gates_params<cell<Lyt>>& params = {}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -322,7 +323,7 @@ template <typename Lyt, typename TT>
 
     detail::design_sidb_gates_impl<Lyt, TT> p{skeleton, spec, params};
 
-    if (params.design_mode == design_sidb_gates_params<Lyt>::design_sidb_gates_mode::EXHAUSTIVE)
+    if (params.design_mode == design_sidb_gates_params<cell<Lyt>>::design_sidb_gates_mode::EXHAUSTIVE)
     {
         return p.run_exhaustive_design();
     }
