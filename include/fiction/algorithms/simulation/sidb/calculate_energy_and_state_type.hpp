@@ -9,6 +9,7 @@
 #include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/physical_constants.hpp"
+#include "fiction/traits.hpp"
 #include "fiction/utils/math_utils.hpp"
 
 #include <kitty/bit_operations.hpp>
