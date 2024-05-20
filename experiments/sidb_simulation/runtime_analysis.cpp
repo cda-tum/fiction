@@ -18,6 +18,7 @@
 #include <fmt/format.h>
 
 #include <array>
+#include <cstdlib>
 #include <filesystem>
 #include <string>
 #include <utility>
