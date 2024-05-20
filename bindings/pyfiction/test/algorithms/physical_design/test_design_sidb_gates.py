@@ -3,8 +3,8 @@ from mnt.pyfiction import *
 
 class TestDesignSiDBGates(unittest.TestCase):
 
-    def test_siqad_and_gate_skeleton(self):
-        layout = sidb_layout((20, 20))
+    def test_siqad_and_gate_skeleton_100(self):
+        layout = sidb_100_lattice((20, 20))
 
         layout.assign_cell_type((0, 1), sidb_technology.cell_type.INPUT)
         layout.assign_cell_type((2, 3), sidb_technology.cell_type.INPUT)
@@ -39,7 +39,6 @@ class TestDesignSiDBGates(unittest.TestCase):
         designed_gates = design_sidb_gates(layout, [create_and_tt()], params)
 
         self.assertEqual(len(designed_gates), 23)
-
 
 if __name__ == '__main__':
     unittest.main()

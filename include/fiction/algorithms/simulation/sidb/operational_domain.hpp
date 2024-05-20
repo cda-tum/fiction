@@ -312,7 +312,9 @@ class operational_domain_impl
                       {
                           // for each y value in parallel
                           std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ y_indices.cbegin(), y_indices.cend(),
-                                        [this, x](const auto y) { is_step_point_operational({x, y}); });
+                                        [this, x](const auto y) {
+                                            is_step_point_operational({x, y});
+                                        });
                       });
 
         log_stats();
@@ -511,7 +513,7 @@ class operational_domain_impl
     /**
      * The output BDL pair of the layout.
      */
-    const std::vector<bdl_pair<Lyt>> output_bdl_pairs;
+    const std::vector<bdl_pair<cell<Lyt>>> output_bdl_pairs;
     /**
      * X dimension steps.
      */

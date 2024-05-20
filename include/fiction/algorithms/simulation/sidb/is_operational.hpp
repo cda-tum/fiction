@@ -291,7 +291,7 @@ class is_operational_impl
     /**
      * Output BDL pairs.
      */
-    std::vector<bdl_pair<Lyt>> output_bdl_pairs;
+    std::vector<bdl_pair<cell<Lyt>>> output_bdl_pairs;
     /**
      * Iterator that iterates over all possible input states.
      */
@@ -368,7 +368,8 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
 
     assert(!spec.empty());
     // all elements in tts must have the same number of variables
-    assert(std::adjacent_find(spec.cbegin(), spec.cend(), [](const auto& a, const auto& b)
+    assert(std::adjacent_find(spec.cbegin(), spec.cend(),
+                              [](const auto& a, const auto& b)
                               { return a.num_vars() != b.num_vars(); }) == spec.cend());
 
     detail::is_operational_impl<Lyt, TT> p{lyt, spec, params};
