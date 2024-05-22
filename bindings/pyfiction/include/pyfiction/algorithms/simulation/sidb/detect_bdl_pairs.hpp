@@ -9,9 +9,14 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp>
+#include <fiction/technology/cell_technologies.hpp>
+#include <fiction/traits.hpp>
 
+#include <fmt/format.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+
+#include <string>
 
 namespace pyfiction
 {
@@ -25,7 +30,7 @@ void detect_bdl_pairs(pybind11::module& m, const std::string& lattice = "")
     namespace py = pybind11;
     using namespace pybind11::literals;
 
-    py::class_<fiction::bdl_pair<Lyt>>(m, fmt::format("bdl_pair{}", lattice).c_str(), DOC(fiction_bdl_pair))
+    py::class_<fiction::bdl_pair<Lyt>>(m, fmt::format("bdl_pair_{}", lattice).c_str(), DOC(fiction_bdl_pair))
         .def(py::init<>(), DOC(fiction_bdl_pair_bdl_pair))
         .def(py::init<fiction::sidb_technology::cell_type, fiction::cell<Lyt>, fiction::cell<Lyt>>(), "t"_a, "u"_a,
              "l"_a, DOC(fiction_bdl_pair_bdl_pair_2))
@@ -50,12 +55,14 @@ inline void detect_bdl_pairs(pybind11::module& m)
         .def_readwrite("minimum_distance", &fiction::detect_bdl_pairs_params::minimum_distance,
                        DOC(fiction_detect_bdl_pairs_params_minimum_distance))
         .def_readwrite("maximum_distance", &fiction::detect_bdl_pairs_params::maximum_distance,
-                       DOC(fiction_detect_bdl_pairs_params_maximum_distance));
+                       DOC(fiction_detect_bdl_pairs_params_maximum_distance))
+
+        ;
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::detect_bdl_pairs<py_sidb_100_lattice>(m, "_100");
-    detail::detect_bdl_pairs<py_sidb_111_lattice>(m, "_111");
+    detail::detect_bdl_pairs<py_sidb_100_lattice>(m, "100");
+    detail::detect_bdl_pairs<py_sidb_111_lattice>(m, "111");
 }
 
 }  // namespace pyfiction

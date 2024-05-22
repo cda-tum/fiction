@@ -24,7 +24,7 @@ inline void cartesian_layout(pybind11::module& m)
     namespace py = pybind11;
     using namespace pybind11::literals;
 
-    /**
+    /**ü
      * Cartesian layout.
      */
     py::class_<py_cartesian_layout>(m, "cartesian_layout", DOC(fiction_cartesian_layout_overridden))

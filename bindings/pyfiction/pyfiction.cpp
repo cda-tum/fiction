@@ -7,6 +7,7 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
 
+#include "pyfiction/algorithms/iter/bdl_input_iterator.hpp"
 #include "pyfiction/algorithms/network_transformation/fanout_substitution.hpp"
 #include "pyfiction/algorithms/network_transformation/network_balancing.hpp"
 #include "pyfiction/algorithms/network_transformation/technology_mapping.hpp"
@@ -102,6 +103,11 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::siqad_coordinate(m);
     pyfiction::coordinate_utility(m);
     /**
+     * Logic
+     */
+    pyfiction::logic_networks(m);
+    pyfiction::truth_tables(m);
+    /**
      * Layouts
      */
     pyfiction::cartesian_layout(m);
@@ -139,10 +145,9 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::determine_groundstate_from_simulation_results(m);
     pyfiction::check_simulation_results_for_equivalence(m);
     /**
-     * Logic
+     * Algorithms: Iterators
      */
-    pyfiction::logic_networks(m);
-    pyfiction::truth_tables(m);
+    pyfiction::bdl_input_iterator(m);
     /**
      * Algorithms: Network Transformation
      */
