@@ -711,7 +711,7 @@ class operational_domain_impl
     /**
      * The output BDL pair of the layout.
      */
-    const std::vector<bdl_pair<Lyt>> output_bdl_pairs;
+    const std::vector<bdl_pair<cell<Lyt>>> output_bdl_pairs;
     /**
      * X dimension steps.
      */

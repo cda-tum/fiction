@@ -8,8 +8,13 @@
 #include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/physical_constants.hpp"
+#include "fiction/traits.hpp"
 #include "fiction/utils/math_utils.hpp"
 
+#include <kitty/bit_operations.hpp>
+#include <kitty/traits.hpp>
+
+#include <cassert>
 #include <cmath>
 #include <cstdint>
 #include <utility>
@@ -41,7 +46,7 @@ template <typename Lyt, typename TT>
 [[nodiscard]] sidb_energy_and_state_type
 calculate_energy_and_state_type(const sidb_energy_distribution&                      energy_distribution,
                                 const std::vector<charge_distribution_surface<Lyt>>& valid_charge_distributions,
-                                const std::vector<bdl_pair<Lyt>>& output_bdl_pairs, const std::vector<TT>& spec,
+                                const std::vector<bdl_pair<cell<Lyt>>>& output_bdl_pairs, const std::vector<TT>& spec,
                                 const uint64_t input_index) noexcept
 
 {

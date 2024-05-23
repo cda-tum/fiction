@@ -42,6 +42,8 @@ jobs:
         compiler: [ g++-10, g++-11, g++-12, clang++-10, clang++-11, clang++-12 ]
         exclude:
           - os: ubuntu-20.04
+            compiler: g++-11
+          - os: ubuntu-20.04
             compiler: g++-12
           - os: ubuntu-22.04
             compiler: clang++-10
