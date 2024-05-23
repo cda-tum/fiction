@@ -5,6 +5,7 @@
 #ifndef FICTION_CALCULATE_ENERGY_AND_STATE_TYPE_HPP
 #define FICTION_CALCULATE_ENERGY_AND_STATE_TYPE_HPP
 
+#include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
 #include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/physical_constants.hpp"
