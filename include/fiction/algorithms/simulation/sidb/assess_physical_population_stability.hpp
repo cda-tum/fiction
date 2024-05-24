@@ -55,15 +55,15 @@ enum class transition_type
  * transition, the corresponding distance, and the total electrostatic energy of the
  * given charge distribution.
  *
- * @tparam Lyt SiDB cell-level layout type.
+ * @tparam CellType Type of the used cells.
  */
-template <typename Lyt>
+template <typename CellType>
 struct population_stability_information
 {
     /**
      * SiDB cell which is closest to a charge transition.
      */
-    typename Lyt::cell critical_cell{};
+    CellType critical_cell{};
     /**
      * Charge transition from the current charge state to the closest one.
      */
@@ -126,13 +126,13 @@ class assess_physical_population_stability_impl
      * distribution in ascending energy order. Each structure contains details about the critical SiDB, the type of
      * charge state transition, and the minimum electrostatic potential required for the charge transition.
      */
-    [[nodiscard]] std::vector<population_stability_information<Lyt>> run() noexcept
+    [[nodiscard]] std::vector<population_stability_information<cell<Lyt>>> run() noexcept
     {
         const quickexact_params<cell<Lyt>> quickexact_parameters{params.simulation_parameters};
         const auto                         simulation_results = quickexact(layout, quickexact_parameters);
         const auto energy_and_unique_charge_index             = collect_energy_and_charge_index(simulation_results);
 
-        std::vector<population_stability_information<Lyt>> popstability_information{};
+        std::vector<population_stability_information<cell<Lyt>>> popstability_information{};
         popstability_information.reserve(simulation_results.charge_distributions.size());
 
         // Access the unique indices
@@ -153,7 +153,7 @@ class assess_physical_population_stability_impl
 
             const auto& charge_lyt = *it;
 
-            population_stability_information<Lyt> population_stability_info{};
+            population_stability_information<cell<Lyt>> population_stability_info{};
             population_stability_info.minimum_potential_difference_to_transition =
                 std::numeric_limits<double>::infinity();
 
@@ -231,9 +231,9 @@ class assess_physical_population_stability_impl
      *
      * @return An updated population stability information with potential transition details.
      */
-    [[nodiscard]] population_stability_information<Lyt>
+    [[nodiscard]] population_stability_information<cell<Lyt>>
     handle_negative_charges(const double local_potential, const typename Lyt::cell& c,
-                            const population_stability_information<Lyt>& pop_stability_information) noexcept
+                            const population_stability_information<cell<Lyt>>& pop_stability_information) noexcept
     {
         auto updated_pop_stability_information = pop_stability_information;
 
@@ -259,9 +259,9 @@ class assess_physical_population_stability_impl
      *
      * @return An updated population stability information with potential transition details.
      */
-    [[nodiscard]] population_stability_information<Lyt>
+    [[nodiscard]] population_stability_information<cell<Lyt>>
     handle_neutral_charges(const double local_potential, const typename Lyt::cell& c,
-                           const population_stability_information<Lyt>& pop_stability_information) noexcept
+                           const population_stability_information<cell<Lyt>>& pop_stability_information) noexcept
     {
         auto updated_pop_stability_information = pop_stability_information;
         if (std::abs(-local_potential + params.simulation_parameters.mu_minus) <
@@ -302,9 +302,9 @@ class assess_physical_population_stability_impl
      *
      * @return An updated population stability information with potential transition details.
      */
-    [[nodiscard]] population_stability_information<Lyt>
+    [[nodiscard]] population_stability_information<cell<Lyt>>
     handle_positive_charges(const double local_potential, const typename Lyt::cell& c,
-                            const population_stability_information<Lyt>& pop_stability_information) noexcept
+                            const population_stability_information<cell<Lyt>>& pop_stability_information) noexcept
     {
         auto updated_pop_stability_information = pop_stability_information;
         if (std::abs(-local_potential + params.simulation_parameters.mu_plus()) <
@@ -335,8 +335,10 @@ class assess_physical_population_stability_impl
 
         std::transform(
             sim_results.charge_distributions.cbegin(), sim_results.charge_distributions.cend(),
-            std::back_inserter(energy_charge_index), [](const auto& ch_lyt)
-            { return energy_and_charge_index{ch_lyt.get_system_energy(), ch_lyt.get_charge_index_and_base().first}; });
+            std::back_inserter(energy_charge_index),
+            [](const auto& ch_lyt) {
+                return energy_and_charge_index{ch_lyt.get_system_energy(), ch_lyt.get_charge_index_and_base().first};
+            });
 
         // Sort the vector in ascending order of the energy value
         std::sort(energy_charge_index.begin(), energy_charge_index.end(),
@@ -360,7 +362,7 @@ class assess_physical_population_stability_impl
  * layout.
  */
 template <typename Lyt>
-[[nodiscard]] std::vector<population_stability_information<Lyt>>
+[[nodiscard]] std::vector<population_stability_information<cell<Lyt>>>
 assess_physical_population_stability(const Lyt& lyt, const assess_physical_population_stability_params& params) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");

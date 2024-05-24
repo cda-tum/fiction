@@ -133,7 +133,6 @@ SiQAD
     .. tab:: Python
         .. autofunction:: mnt.pyfiction.write_sqd_layout
         .. autofunction:: mnt.pyfiction.write_sqd_sim_result
-        .. autofunction:: mnt.pyfiction.write_location_and_ground_state
         .. autofunction:: mnt.pyfiction.read_sqd_layout_100
         .. autofunction:: mnt.pyfiction.read_sqd_layout_111
 

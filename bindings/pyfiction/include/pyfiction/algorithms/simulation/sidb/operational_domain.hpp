@@ -130,9 +130,7 @@ inline void operational_domain(pybind11::module& m)
                        DOC(fiction_operational_domain_stats_num_operational_parameter_combinations))
         .def_readwrite("num_non_operational_parameter_combinations",
                        &fiction::operational_domain_stats::num_non_operational_parameter_combinations,
-                       DOC(fiction_operational_domain_stats_num_non_operational_parameter_combinations))
-
-        ;
+                       DOC(fiction_operational_domain_stats_num_non_operational_parameter_combinations));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 

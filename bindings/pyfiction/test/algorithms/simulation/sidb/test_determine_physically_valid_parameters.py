@@ -20,8 +20,9 @@ class TestDeterminePhysicallyValidParameters(unittest.TestCase):
             0)
 
         # Testing for an invalid parameter point that raises an exception
-        with self.assertRaisesRegex(RuntimeError, "Key not found in the map"):
+        with self.assertRaises(ValueError):
             valid_parameters.get_excited_state_number_for_parameter(parameter_point(15, 15))
+
 
     def test_one_DB_111_lattice(self):
         layout = sidb_111_lattice((10, 10))
@@ -38,7 +39,7 @@ class TestDeterminePhysicallyValidParameters(unittest.TestCase):
         0)
 
         # Testing for an invalid parameter point that raises an exception
-        with self.assertRaisesRegex(RuntimeError, "Key not found in the map"):
+        with self.assertRaises(ValueError):
             valid_parameters.get_excited_state_number_for_parameter(parameter_point(15, 15))
 
 

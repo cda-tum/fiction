@@ -57,11 +57,9 @@ inline void determine_physically_valid_parameters(pybind11::module& m)
                 {
                     return domain.get_value(pp);
                 }
-                catch (const std::runtime_error& e)
+                catch (const std::out_of_range& e)
                 {
-                    // Handle the exception here, e.what() contains the error message
-                    PyErr_SetString(PyExc_RuntimeError, e.what());
-                    throw py::error_already_set();
+                    throw py::value_error(e.what());
                 }
             },
             "pp"_a);

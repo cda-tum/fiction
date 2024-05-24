@@ -152,8 +152,6 @@ Temperature Behavior
         .. doxygenfunction:: fiction::calculate_energy_and_state_type
 
     .. tab:: Python
-        .. autoclass:: mnt.pyfiction.critical_temperature_mode
-            :members:
         .. autoclass:: mnt.pyfiction.simulation_engine
             :members:
         .. autoclass:: mnt.pyfiction.critical_temperature_params
