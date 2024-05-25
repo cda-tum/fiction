@@ -19,7 +19,13 @@ Gray Code Iterator
 BDL Input Iterator
 ------------------
 
-**Header:** ``fiction/algorithms/iter/bdl_input_iterator.hpp``
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/algorithms/iter/bdl_input_iterator.hpp``
 
-.. doxygenclass:: fiction::bdl_input_iterator
-   :members:
+        .. doxygenclass:: fiction::bdl_input_iterator
+           :members:
+
+    .. tab:: Python
+        .. autoclass:: mnt.pyfiction.bdl_input_iterator
+            :members:
