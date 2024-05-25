@@ -31,7 +31,7 @@ class TestDetectBDLPairs(unittest.TestCase):
         self.assertEqual(len(output_bdl_pairs), 0)
         self.assertEqual(len(normal_bdl_pairs), 2)
 
-    def test_detect_bdl_pairs_100_lattice(self):
+    def test_detect_bdl_pairs_111_lattice(self):
         lyt = sidb_111_lattice((7, 0))
 
         lyt = charge_distribution_surface_111(lyt)

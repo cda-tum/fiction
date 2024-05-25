@@ -38,6 +38,11 @@ void bdl_input_iterator(pybind11::module& m, const std::string& lattice)
             "__next__",
             [](fiction::bdl_input_iterator<Lyt>& self) -> Lyt&
             {
+                if (self >= ((1ull << self.num_input_pairs()) - 1))
+                {
+                    throw py::stop_iteration();
+                }
+
                 auto result = *self;
                 ++self;
                 return result;
@@ -87,8 +92,10 @@ void bdl_input_iterator(pybind11::module& m, const std::string& lattice)
             "__getitem__", [](const fiction::bdl_input_iterator<Lyt>& self, int m) -> fiction::bdl_input_iterator<Lyt>
             { return self[m]; }, "m"_a, DOC(fiction_bdl_input_iterator_operator_array))
 
-        .def("num_input_pairs", &fiction::bdl_input_iterator<Lyt>::num_input_pairs);
-    ;
+        .def("num_input_pairs", &fiction::bdl_input_iterator<Lyt>::num_input_pairs)
+        .def("get_layout", [](const fiction::bdl_input_iterator<Lyt>& self) -> const Lyt& { return *self; })
+
+        ;
 }
 
 }  // namespace detail

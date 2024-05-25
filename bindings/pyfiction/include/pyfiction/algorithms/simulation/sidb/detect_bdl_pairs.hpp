@@ -40,7 +40,7 @@ void detect_bdl_pairs(pybind11::module& m, const std::string& lattice = "")
 
         ;
 
-    m.def(fmt::format("detect_bdl_pairs{}", lattice).c_str(), &fiction::detect_bdl_pairs<Lyt>, "lyt"_a, "type"_a,
+    m.def(fmt::format("detect_bdl_pairs_{}", lattice).c_str(), &fiction::detect_bdl_pairs<Lyt>, "lyt"_a, "type"_a,
           "params"_a = fiction::detect_bdl_pairs_params{}, DOC(fiction_detect_bdl_pairs));
 }
 
