@@ -12219,7 +12219,7 @@ Parameter ``spec``:
     Vector of truth table specifications.
 
 Parameter ``params``:
-    Parameters to simualte if a input combination is operational.
+    Parameters to simulate if a input combination is operational.
 
 Returns:
     The count of operational input combinations.)doc";
@@ -15476,9 +15476,11 @@ output stream. The data are written as rows, each corresponding to one
 set of simulation parameters and their corresponding operational
 status.
 
-The output CSV format is as follows: X_DIMENSION, Y_DIMENSION,
-OPERATIONAL STATUS ... subsequent rows for each set of simulation
-parameters.
+The output CSV format is e.g. as follows: \verbatim embed:rst .. code-
+block:: RST
+
+epsilon_r, lambda_tf, operational status 0.0, 0.0, 0 0.1, 0.0, 1 ...
+subsequent rows for each set of simulation parameters \endverbatim
 
 The operational status is a binary value represented by specified tags
 in `params` indicating whether the simulation parameters are within
@@ -15505,9 +15507,11 @@ R"doc(Writes a CSV representation of an operational domain to the specified
 file. The data are written as rows, each corresponding to one set of
 simulation parameters and their corresponding operational status.
 
-The output CSV format is as follows: X_DIMENSION, Y_DIMENSION,
-OPERATIONAL STATUS ... subsequent rows for each set of simulation
-parameters.
+The output CSV format is e.g. as follows: \verbatim embed:rst .. code-
+block:: RST
+
+epsilon_r, lambda_tf, operational status 0.0, 0.0, 0 0.1, 0.0, 1 ...
+subsequent rows for each set of simulation parameters \endverbatim
 
 The operational status is a binary value represented by specified tags
 in `params` indicating whether the simulation parameters are within
