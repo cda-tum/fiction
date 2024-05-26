@@ -20,9 +20,9 @@ namespace fiction
 /**
  * A Binary-dot Logic (BDL) pair is a pair of SiDBs that are close to each other and, thus, most likely share a charge.
  *
- * @tparam Lyt SiDB cell-level layout type.
+ * @tparam CellType Cell type.
  */
-template <typename Lyt>
+template <typename CellType>
 struct bdl_pair
 {
     /**
@@ -33,11 +33,11 @@ struct bdl_pair
     /**
      * The upper SiDB of the pair. Upper and lower are defined relative to each other via the `operator<` overload.
      */
-    const cell<Lyt> upper{};
+    const CellType upper{};
     /**
      * The lower SiDB of the pair. Upper and lower are defined relative to each other via the `operator<` overload.
      */
-    const cell<Lyt> lower{};
+    const CellType lower{};
     /**
      * Standard constructor for empty BDL pairs.
      */
@@ -49,14 +49,11 @@ struct bdl_pair
      * @param u The upper SiDB of the pair.
      * @param l The lower SiDB of the pair.
      */
-    bdl_pair(const sidb_technology::cell_type t, const cell<Lyt>& u, const cell<Lyt>& l) noexcept :
+    bdl_pair(const sidb_technology::cell_type t, const CellType& u, const CellType& l) noexcept :
             type{t},
             upper{u},
             lower{l}
-    {
-        static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-        static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    }
+    {}
 };
 
 /**
@@ -90,8 +87,8 @@ struct detect_bdl_pairs_params
  * @return A vector of BDL pairs.
  */
 template <typename Lyt>
-std::vector<bdl_pair<Lyt>> detect_bdl_pairs(const Lyt& lyt, const typename technology<Lyt>::cell_type type,
-                                            const detect_bdl_pairs_params& params = {}) noexcept
+std::vector<bdl_pair<cell<Lyt>>> detect_bdl_pairs(const Lyt& lyt, const typename technology<Lyt>::cell_type type,
+                                                  const detect_bdl_pairs_params& params = {}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -105,7 +102,7 @@ std::vector<bdl_pair<Lyt>> detect_bdl_pairs(const Lyt& lyt, const typename techn
      * as input.
      */
     const auto pair_up_dots = [&params, &type,
-                               &lyt](const std::vector<cell<Lyt>>& dots) noexcept -> std::vector<bdl_pair<Lyt>>
+                               &lyt](const std::vector<cell<Lyt>>& dots) noexcept -> std::vector<bdl_pair<cell<Lyt>>>
     {
         /**
          * Container for pairwise dot distances used in the pairing algorithm.
@@ -166,7 +163,7 @@ std::vector<bdl_pair<Lyt>> detect_bdl_pairs(const Lyt& lyt, const typename techn
         { return lhs.distance < rhs.distance; };
 
         // container for the detected BDL pairs
-        std::vector<bdl_pair<Lyt>> bdl_pairs{};
+        std::vector<bdl_pair<cell<Lyt>>> bdl_pairs{};
         bdl_pairs.reserve(dots.size() / 2);
 
         // compute pairwise distances

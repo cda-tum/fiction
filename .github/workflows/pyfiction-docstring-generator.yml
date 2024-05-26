@@ -1,12 +1,15 @@
-name: pyfiction Docstring Generator
+name: 🐍 • Docstring Generator
 
 on:
   push:
+    paths:
+      - '**/*.hpp'
+      - '.github/workflows/pyfiction-docstring-generator.yml'
   workflow_dispatch:
 
 jobs:
   get_docstrings:
-    name: Auto-generate docstrings for pyfiction from C++ code
+    name: 🐍 Auto-generate docstrings for pyfiction from C++ code
     runs-on: ubuntu-latest
     steps:
       - name: Clone Repository

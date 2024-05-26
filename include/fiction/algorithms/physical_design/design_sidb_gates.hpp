@@ -36,7 +36,7 @@ namespace fiction
 /**
  * This struct contains parameters and settings to design SiDB gates.
  *
- * @tparam CellType Type of the cells used.
+ * @tparam CellType Cell type.
  *
  */
 template <typename CellType>
@@ -113,7 +113,7 @@ class design_sidb_gates_impl
      * @param spec Expected Boolean function of the layout given as a multi-output truth table.
      * @param ps Parameters and settings for the gate designer.
      */
-    design_sidb_gates_impl(const Lyt& skeleton, const std::vector<TT>& spec,
+    design_sidb_gates_impl(const Lyt& skeleton, const std::vector<TT>& tt,
                            const design_sidb_gates_params<cell<Lyt>>& ps) :
             skeleton_layout{skeleton},
             truth_table{spec},
@@ -292,7 +292,7 @@ class design_sidb_gates_impl
     /**
      * Parameters for the *SiDB Gate Designer*.
      */
-    design_sidb_gates_params<typename Lyt::cell> params;
+    const design_sidb_gates_params<cell<Lyt>>& params;
     /**
      * All cells within the canvas.
      */

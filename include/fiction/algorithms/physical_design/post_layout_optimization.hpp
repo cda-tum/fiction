@@ -498,9 +498,11 @@ bool improve_gate_location(Lyt& lyt, const tile<Lyt>& old_pos, const tile<Lyt>& 
     // fix wires that cross over empty tiles
     fix_wires(lyt, to_clear);
 
-    auto     moved_gate           = false;
-    auto     current_pos          = old_pos;
+    auto moved_gate  = false;
+    auto current_pos = old_pos;
+
     uint64_t num_gate_relocations = 0;
+
     // iterate over layout diagonally
     for (uint64_t k = 0; k < lyt.x() + lyt.y() + 1; ++k)
     {
@@ -517,8 +519,8 @@ bool improve_gate_location(Lyt& lyt, const tile<Lyt>& old_pos, const tile<Lyt>& 
             if (lyt.y() >= y && y >= min_y && lyt.x() >= x && x >= min_x && ((x + y) <= max_diagonal) &&
                 (((x + y) < max_diagonal) || (y <= max_y)) &&
                 ((!lyt.is_pi_tile(current_pos)) || (lyt.is_pi_tile(current_pos) && (x == 0 || y == 0))) &&
-                !(lyt.is_po_tile(current_pos) &&
-                  (((x <= max_non_po.x) && (y <= max_non_po.y)) || ((x + y) == (old_pos.x + old_pos.y)))))
+                !(lyt.is_po_tile(current_pos) && (((x <= max_non_po.x) && (y <= max_non_po.y)) ||
+                                                  ((x + y) == static_cast<uint64_t>(old_pos.x + old_pos.y)))))
             {
                 new_pos = tile<Lyt>{x, y};
                 if (lyt.is_empty_tile(new_pos) && lyt.is_empty_tile({new_pos.x, new_pos.y, 1}))

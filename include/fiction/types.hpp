@@ -148,8 +148,8 @@ inline constexpr const char* tech_cell_name = std::is_same_v<std::decay_t<Tech>,
                                               std::is_same_v<std::decay_t<Tech>, sidb_technology> ? sidb_cell_name :
                                                                                                     "?";
 
-constexpr const char* sidb_100_name = "_100";
-constexpr const char* sidb_111_name = "_111";
+constexpr const char* sidb_100_name = "100";
+constexpr const char* sidb_111_name = "111";
 
 template <class Orientation>
 inline constexpr const char* sidb_lattice_name =

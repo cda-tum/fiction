@@ -13,14 +13,14 @@ class TestSiDBNmPosition(unittest.TestCase):
         self.assertEqual(result, (0, 0))
 
     def test_layout_with_100_lattice_orientation(self):
-        layout_one = sidb_lattice_100((10, 10))
+        layout_one = sidb_100_lattice((10, 10))
 
         result = sidb_nm_position(layout_one, (0, 0))
 
         self.assertEqual(result, (0, 0))
 
     def test_layout_with_111_lattice_orientation(self):
-        layout_one = sidb_lattice_111((10, 10))
+        layout_one = sidb_111_lattice((10, 10))
 
         result = sidb_nm_position(layout_one, (0, 0))
 

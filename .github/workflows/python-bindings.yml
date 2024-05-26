@@ -1,7 +1,19 @@
-name: pyfiction CI
+name: 🐍 • CI
 
 on:
   push:
+    branches: [ 'main' ]
+    paths:
+      - 'bindings/pyfiction/**'
+      - '**/*.py'
+      - '**/*.hpp'
+      - '**/*.cpp'
+      - '**/*.cmake'
+      - '**/CMakeLists.txt'
+      - 'libs/**'
+      - '.github/workflows/python-bindings.yml'
+  pull_request:
+    branches: [ 'main' ]
     paths:
       - 'bindings/pyfiction/**'
       - '**/*.py'
@@ -33,7 +45,7 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest, macos-latest, windows-latest ]
-        python_version: [ '3.8.x', '3.9.x', '3.10.x', '3.11.x', '3.12.x' ]
+        python_version: [ '3.8.x', '3.12.x' ]
         include:
           - os: ubuntu-latest
             z3_platform: linux
@@ -45,7 +57,7 @@ jobs:
             z3_platform: windows
             architecture: x64
 
-    name: pyfiction on ${{matrix.os}} with Python ${{matrix.python_version}}
+    name: 🐍 on ${{matrix.os}} with Python ${{matrix.python_version}}
     runs-on: ${{matrix.os}}
 
     steps:
