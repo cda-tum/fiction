@@ -51,7 +51,7 @@
 int main()  // NOLINT
 {
     using gate_lyt = fiction::hex_even_row_gate_clk_lyt;
-    using cell_lyt = fiction::sidb_cell_clk_lyt;
+    using cell_lyt = fiction::sidb_cell_clk_lyt_cube;
 
     fiction::design_sidb_gates_params<fiction::cube::coord_t> design_gate_params{};
     design_gate_params.simulation_parameters = fiction::sidb_simulation_parameters{2, -0.32};
@@ -71,7 +71,7 @@ int main()  // NOLINT
         fmt::format("{}/physical_design_with_on_the_fly_gate_design/layouts", EXPERIMENTS_PATH);
 
     auto surface_lattice_initial = fiction::read_sidb_surface_defects<cell_lyt>(
-        "../../experiments/defect_aware_physical_design/1_percent_with_charged_surface.txt");
+        "../../experiments/physical_design_with_on_the_fly_gate_design/1_percent_with_charged_surface.txt");
 
     fiction::sidb_defect_surface<cell_lyt> surface_lattice{
         {std::numeric_limits<uint64_t>::max(), std::numeric_limits<uint64_t>::max()}};

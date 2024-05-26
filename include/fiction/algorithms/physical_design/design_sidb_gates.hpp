@@ -113,7 +113,7 @@ class design_sidb_gates_impl
      * @param spec Expected Boolean function of the layout given as a multi-output truth table.
      * @param ps Parameters and settings for the gate designer.
      */
-    design_sidb_gates_impl(const Lyt& skeleton, const std::vector<TT>& tt,
+    design_sidb_gates_impl(const Lyt& skeleton, const std::vector<TT>& spec,
                            const design_sidb_gates_params<cell<Lyt>>& ps) :
             skeleton_layout{skeleton},
             truth_table{spec},

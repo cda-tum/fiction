@@ -61,10 +61,6 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
         {{10, 4, 0}, {10, 4, 0}},
         1,
         sidb_simulation_engine::QUICKEXACT};
-        design_sidb_gates_params<cell<siqad_layout>>::design_sidb_gates_mode::EXHAUSTIVE,
-        {{10, 4, 0}, {10, 4, 0}},
-        1,
-        sidb_simulation_engine::QUICKEXACT};
 
     SECTION("One cell in canvas")
     {
@@ -99,15 +95,15 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
         CHECK(found_gate_layouts_cube[0].get_cell_type(siqad::to_fiction_coord<cube::coord_t>(
                   siqad::coord_t{10, 4, 0})) == siqad_layout::technology::NORMAL);
 
-    // using offset coordinates
-    const auto lyt_in_offset_coord = convert_to_fiction_coordinates<offset_layout>(lyt);
-    const design_sidb_gates_params<cell<offset_layout>> params_offset{
-        sidb_simulation_parameters{2, -0.32},
-        design_sidb_gates_params<cell<offset_layout>>::design_sidb_gates_mode::EXHAUSTIVE,
-        {siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{10, 4, 0}),
-         siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{10, 4, 0})},
-        1,
-        sidb_simulation_engine::QUICKEXACT};
+        // using offset coordinates
+        const auto lyt_in_offset_coord = convert_to_fiction_coordinates<offset_layout>(lyt);
+        const design_sidb_gates_params<cell<offset_layout>> params_offset{
+            sidb_simulation_parameters{2, -0.32},
+            design_sidb_gates_params<cell<offset_layout>>::design_sidb_gates_mode::EXHAUSTIVE,
+            {siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{10, 4, 0}),
+             siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{10, 4, 0})},
+            1,
+            sidb_simulation_engine::QUICKEXACT};
 
         const auto found_gate_layouts_offset =
             design_sidb_gates(lyt_in_offset_coord, std::vector<tt>{create_xnor_tt()}, params_offset);
