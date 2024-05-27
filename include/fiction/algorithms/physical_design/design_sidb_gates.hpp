@@ -10,6 +10,7 @@
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/technology/cell_technologies.hpp"
+#include "fiction/technology/sidb_defects.hpp"
 #include "fiction/technology/sidb_nm_distance.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/layout_utils.hpp"
