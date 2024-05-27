@@ -13,7 +13,8 @@
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>  // choose design engine (ExGS, QuickSim, QuickExact)
 #include <fiction/io/read_sidb_surface_defects.hpp>                       // reader for simulated SiDB surfaces
-#include <fiction/io/write_sqd_layout.hpp>                    // writer for SiQAD files (physical simulation)
+#include <fiction/io/write_sqd_layout.hpp>  // writer for SiQAD files (physical simulation)
+#include <fiction/layouts/bounding_box.hpp>
 #include <fiction/layouts/coordinates.hpp>                    // layout coordinates
 #include <fiction/networks/technology_network.hpp>            // technology-mapped network type
 #include <fiction/technology/area.hpp>                        // area requirement calculations
@@ -23,7 +24,8 @@
 #include <fiction/technology/sidb_defects.hpp>                // Atomic defects
 #include <fiction/technology/sidb_skeleton_bestagon_library.hpp>  // a static skeleton SiDB gate library defining the input/output wires
 #include <fiction/technology/sidb_surface_analysis.hpp>  // Analyzes a given defective SiDB surface and matches it against gate tiles provided by a library
-#include <fiction/types.hpp>  // pre-defined types suitable for the FCN domain
+#include <fiction/traits.hpp>                            // pre-defined traits
+#include <fiction/types.hpp>                             // pre-defined types suitable for the FCN domain
 
 #include <fmt/format.h>                                        // output formatting
 #include <lorina/lorina.hpp>                                   // Verilog/BLIF/AIGER/... file parsing
@@ -73,8 +75,8 @@ int main()  // NOLINT
     auto surface_lattice_initial = fiction::read_sidb_surface_defects<cell_lyt>(
         "../../experiments/physical_design_with_on_the_fly_gate_design/1_percent_with_charged_surface.txt");
 
-    fiction::sidb_defect_surface<cell_lyt> surface_lattice{
-        {std::numeric_limits<uint64_t>::max(), std::numeric_limits<uint64_t>::max()}};
+    // create an empty surface with the maximal possible dimension.
+    fiction::sidb_defect_surface<cell_lyt> surface_lattice{};
 
     surface_lattice_initial.foreach_sidb_defect(
         [&surface_lattice, &stray_db, &si_vacancy](const auto& cd)
@@ -92,6 +94,10 @@ int main()  // NOLINT
                 surface_lattice.assign_sidb_defect(cd.first, cd.second);
             }
         });
+
+    const auto bb = fiction::bounding_box_2d{surface_lattice};
+
+    surface_lattice.resize(bb.get_max());
 
     const auto lattice_tiling = gate_lyt{{11, 30}};
 
