@@ -393,39 +393,6 @@ void print_sidb_layout(std::ostream& os, const Lyt& lyt, const bool lat_color = 
         auto min_nw = bb.get_min();
         auto max_se = bb.get_max();
 
-        std::vector<typename Lyt::cell> defects{};
-
-        // if defects exist in the layout
-        if constexpr (has_get_sidb_defect_v<Lyt>)
-        {
-            if (lyt.num_defects() != 0)
-            {
-                defects.reserve(lyt.num_defects());
-                lyt.foreach_sidb_defect([&defects](const auto& c) { defects.push_back(c.first); });
-
-                std::sort(defects.begin(), defects.end());
-
-                if (min_nw.x > defects.front().x)
-                {
-                    min_nw.x = defects.front().x;
-                }
-                else if (min_nw.y > defects.front().y)
-                {
-                    min_nw.y = defects.front().y;
-                }
-
-                if (max_se.x < defects.back().x)
-                {
-                    max_se.x = defects.back().x;
-                }
-                else if (max_se.y < defects.back().y)
-                {
-                    max_se.y = defects.back().y;
-                }
-                // if a defect is more south-east than se, this position is used as max
-            }
-        }
-
         if (crop_layout)
         {
             // apply padding of maximally one dimer row and two columns

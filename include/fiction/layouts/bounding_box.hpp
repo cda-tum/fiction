@@ -5,13 +5,11 @@
 #ifndef FICTION_BOUNDING_BOX_HPP
 #define FICTION_BOUNDING_BOX_HPP
 
-#include "fiction/layouts/cell_level_layout.hpp"
-#include "fiction/layouts/coordinates.hpp"
-#include "fiction/technology/cell_ports.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 #include "fiction/utils/layout_utils.hpp"
 
+#include <algorithm>
 #include <cstdint>
 #include <limits>
 
@@ -169,8 +167,11 @@ class bounding_box_2d
                 const auto min_defect = coordinate<Lyt>{min_x_defect, min_y_defect, min_z_defect};
                 const auto max_defect = coordinate<Lyt>{max_x_defect, max_y_defect, max_z_defect};
 
-                min = (min_cell < min_defect) ? min_cell : min_defect;
-                max = (max_cell > max_defect) ? max_cell : max_defect;
+                min = cell<Lyt>{std::min(min_cell.x, min_defect.x), std::min(min_cell.y, min_defect.y),
+                                std::min(min_cell.z, min_defect.z)};
+                max = cell<Lyt>{std::max(max_cell.x, max_defect.x), std::max(max_cell.y, max_defect.y),
+                                std::max(max_cell.z, max_defect.z)};
+                ;
             }
         }
         else
@@ -265,8 +266,11 @@ class bounding_box_2d
                 const auto min_defect = coordinate<Lyt>{min_x_defect, min_y_defect};
                 const auto max_defect = coordinate<Lyt>{max_x_defect, max_y_defect};
 
-                min = (min < min_defect) ? min : min_defect;
-                max = (max > max_defect) ? max : max_defect;
+                min = cell<Lyt>{std::min(min.x, min_defect.x), std::min(min.y, min_defect.y),
+                                std::min(min.z, min_defect.z)};
+                max = cell<Lyt>{std::max(max.x, max_defect.x), std::max(max.y, max_defect.y),
+                                std::max(max.z, max_defect.z)};
+                ;
             }
         }
 
