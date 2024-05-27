@@ -24,8 +24,8 @@
 #include <fiction/technology/sidb_defects.hpp>                // Atomic defects
 #include <fiction/technology/sidb_skeleton_bestagon_library.hpp>  // a static skeleton SiDB gate library defining the input/output wires
 #include <fiction/technology/sidb_surface_analysis.hpp>  // Analyzes a given defective SiDB surface and matches it against gate tiles provided by a library
-#include <fiction/traits.hpp>                            // pre-defined traits
-#include <fiction/types.hpp>                             // pre-defined types suitable for the FCN domain
+#include <fiction/traits.hpp>  // pre-defined traits
+#include <fiction/types.hpp>   // pre-defined types suitable for the FCN domain
 
 #include <fmt/format.h>                                        // output formatting
 #include <lorina/lorina.hpp>                                   // Verilog/BLIF/AIGER/... file parsing
