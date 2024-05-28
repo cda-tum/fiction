@@ -10,7 +10,6 @@
 #include <fiction/algorithms/physical_design/apply_gate_library.hpp>         // layout conversion to cell-level
 #include <fiction/algorithms/physical_design/design_sidb_gates.hpp>          // design gate
 #include <fiction/algorithms/physical_design/exact.hpp>                      // SMT-based physical design of FCN layouts
-#include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>  // choose design engine (ExGS, QuickSim, QuickExact)
 #include <fiction/io/read_sidb_surface_defects.hpp>                       // reader for simulated SiDB surfaces
 #include <fiction/io/write_sqd_layout.hpp>  // writer for SiQAD files (physical simulation)
@@ -42,7 +41,6 @@
 #include <cstdint>
 #include <cstdlib>
 #include <exception>
-#include <limits>
 #include <optional>
 #include <string>
 #include <utility>
@@ -95,38 +93,20 @@ int main()  // NOLINT
             }
         });
 
+    // ddetermine the bounding box around the defective surface.
     const auto bb = fiction::bounding_box_2d{surface_lattice};
-
     surface_lattice.resize(bb.get_max());
 
     const auto lattice_tiling = gate_lyt{{11, 30}};
 
-    experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint64_t, uint64_t,
-                            uint64_t, uint32_t, uint32_t, uint64_t, uint64_t, double, bool, uint64_t, double>
-        sidb_circuits_with_defects{"sidb_circuits_with_defects",
-                                   "benchmark",
-                                   "inputs",
-                                   "outputs",
-                                   "initial nodes",
-                                   "initial depth",
-                                   "optimized nodes",
-                                   "optimized depth",
-                                   "layout width (in tiles)",
-                                   "layout height (in tiles)",
-                                   "layout area (in tiles)",
-                                   "gates",
-                                   "wires",
-                                   "critical path",
-                                   "throughput",
-                                   "runtime (in sec)",
-                                   "equivalent",
-                                   "SiDB dots",
-                                   "layout area in nm²"};
+    experiments::experiment<std::string, double, bool, double, uint64_t> sidb_circuits_with_defects{
+        "sidb_circuits_with_defects", "benchmark", "runtime (in sec)", "equivalent", "layout area in nm²",
+        "number of aspect ratios"};
 
     // parameters for SMT-based physical design
     fiction::exact_physical_design_params exact_params{};
     exact_params.scheme        = "ROW4";
-    exact_params.crossings     = false;
+    exact_params.crossings     = true;
     exact_params.border_io     = false;
     exact_params.desynchronize = true;
     exact_params.upper_bound_x = 11;         // 12 x 31 tiles
@@ -137,7 +117,7 @@ int main()  // NOLINT
         fiction_experiments::all & ~fiction_experiments::parity & ~fiction_experiments::two_bit_add_maj &
         ~fiction_experiments::b1_r2 & ~fiction_experiments::clpl & ~fiction_experiments::iscas85 &
         ~fiction_experiments::epfl & ~fiction_experiments::half_adder & ~fiction_experiments::full_adder &
-        ~fiction_experiments::one_bit_add_aoig & ~fiction_experiments::one_bit_add_maj;
+        ~fiction_experiments::one_bit_add_aoig & ~fiction_experiments::one_bit_add_maj & ~fiction_experiments::cm82a_5;
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
@@ -183,12 +163,14 @@ int main()  // NOLINT
 
         auto gate_design_failed = true;
 
+        fiction::exact_physical_design_stats exact_stats{};
+
         {
             const mockturtle::stopwatch stop{time_counter};
 
             while (!gate_level_layout.has_value() || gate_design_failed)
             {
-                fiction::exact_physical_design_stats exact_stats{};
+                exact_stats = {};
                 if (!gate_level_layout.has_value() && attempts > 0)
                 {
                     break;
@@ -234,15 +216,14 @@ int main()  // NOLINT
         const auto eq    = mockturtle::equivalence_checking(*miter);
         assert(eq.has_value());
 
-        // compute critical path and throughput
-        const auto cp_tp_stats = fiction::critical_path_length_and_throughput(*gate_level_layout);
-
-        // apply dynamic gate library
+        // determine bounding box
+        const auto bb_final = fiction::bounding_box_2d<cell_lyt>(cell_level_layout);
 
         // compute area
         fiction::area_stats                            area_stats{};
         fiction::area_params<fiction::sidb_technology> area_ps{};
-        fiction::area(cell_level_layout, area_ps, &area_stats);
+        fiction::area(bb_final, area_ps, &area_stats);
+
         fiction::sidb_defect_surface<cell_lyt> defect_surface{cell_level_layout};
 
         // add defects to the file
@@ -253,12 +234,8 @@ int main()  // NOLINT
                                   fmt::format("{}/{}_percent_after_big_change.sqd", layouts_folder, benchmark));
 
         // log results
-        sidb_circuits_with_defects(
-            benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(), mapped_network.num_gates(),
-            depth_mapped_network.depth(), gate_level_layout->x() + 1, gate_level_layout->y() + 1,
-            (gate_level_layout->x() + 1) * (gate_level_layout->y() + 1), gate_level_layout->num_gates(),
-            gate_level_layout->num_wires(), cp_tp_stats.critical_path_length, cp_tp_stats.throughput,
-            mockturtle::to_seconds(time_counter), *eq, cell_level_layout.num_cells(), area_stats.area);
+        sidb_circuits_with_defects(benchmark, mockturtle::to_seconds(time_counter), *eq, area_stats.area,
+                                   exact_stats.num_aspect_ratios);
         sidb_circuits_with_defects.save();
         sidb_circuits_with_defects.table();
     }
