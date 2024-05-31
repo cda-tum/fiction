@@ -73,7 +73,6 @@ class TestDesignSiDBGates(unittest.TestCase):
         params = design_sidb_gates_params()
         params.simulation_parameters.base = 2
         params.simulation_parameters.mu_minus = -0.32
-        params.design_mode = design_sidb_gates_mode.EXHAUSTIVE
         params.canvas = [(10, 22), (14, 34)]
         params.number_of_sidbs = 3
         params.sim_engine = sidb_simulation_engine.QUICKEXACT
