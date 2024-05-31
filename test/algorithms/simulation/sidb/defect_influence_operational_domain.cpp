@@ -92,7 +92,7 @@ TEST_CASE("novel designed AND Gate influence distance function which fails again
         params.defect_influence_params.additional_scanning_area = {20, 20};
         defect_influence_operational_domain_stats stats{};
         const auto defect_influence_domain = defect_influence_operational_domain_contour_tracing(
-            cube_lyt, std::vector<tt>{create_or_tt()}, 10, params, &stats);
+            cube_lyt, std::vector<tt>{create_or_tt()}, 30, params, &stats);
         CHECK(defect_avoidance_distance(cube_lyt, defect_influence_domain) > 11.61);
     }
 }
