@@ -351,14 +351,11 @@ Binary-dot Logic (BDL) Pair Detection
         .. doxygenfunction:: fiction::detect_bdl_pairs
 
     .. tab:: Python
-        .. autoclass:: mnt.pyfiction.bdl_pair_100
-            :members:
-        .. autoclass:: mnt.pyfiction.bdl_pair_111
+        .. autoclass:: mnt.pyfiction.bdl_pair
             :members:
         .. autoclass:: mnt.pyfiction.detect_bdl_pairs_params
             :members:
-        .. autofunction:: mnt.pyfiction.detect_bdl_pairs_100
-        .. autofunction:: mnt.pyfiction.detect_bdl_pairs_111
+        .. autofunction:: mnt.pyfiction.detect_bdl_pairs
 
 
 Assess Population Stability

@@ -88,7 +88,7 @@ inline void critical_temperature(pybind11::module& m)
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
     detail::critical_temperature<py_sidb_100_lattice>(m);
-    detail::critical_temperature<py_sidb_100_lattice>(m);
+    detail::critical_temperature<py_sidb_111_lattice>(m);
 }
 
 }  // namespace pyfiction

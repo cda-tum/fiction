@@ -16,7 +16,7 @@
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="docs/_static/mnt_light.svg" width="60%">
-    <img src="docs/_static/mnt_dark.svg" width="60%">
+    <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/mnt_dark.svg" width="60%">
   </picture>
 </p>
 
@@ -76,7 +76,7 @@ cli/fiction
 > Here is an example of running *fiction* to perform a full physical design flow on a QCA circuit layout that can
 > afterward be simulated in QCADesigner:
 
-![CLI example](docs/_static/fiction_cli_example.gif)
+![CLI example](https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/fiction_cli_example.gif)
 
 ### The Header-only Library
 
@@ -124,7 +124,7 @@ Additionally, output formats for external physical simulator engines are also su
 
 ### Quantum-dot Cellular Automata (QCA)
 
-<img src="docs/_static/qca_cells.png" alt="QCA cells" align="right" height="70"/>
+<img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/qca_cells.png" alt="QCA cells" align="right" height="70"/>
 
 Gate libraries:
 
@@ -142,7 +142,7 @@ QCA-STACK format, and to Sophia Kuhn for implementing the SVG writer!
 
 ### in-plane Nanomagnet Logic (iNML)
 
-<img src="docs/_static/nml_cells.png" alt="iNML cells" align="right" height="70"/>
+<img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/nml_cells.png" alt="iNML cells" align="right" height="70"/>
 
 Gate libraries:
 
@@ -157,7 +157,7 @@ Many thanks to Umberto Garlando, Fabrizio Riente, and Giuliana Beretta for their
 
 ### Silicon Dangling Bonds (SiDBs)
 
-<img src="docs/_static/sidb_cells.png" alt="SiDB cells" align="right" height="70"/>
+<img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/sidb_cells.png" alt="SiDB cells" align="right" height="70"/>
 
 Gate libraries:
 
@@ -188,7 +188,7 @@ For automatic FCN layout obtainment, *fiction* provides algorithms that
 receive [mockturtle logic networks](https://mockturtle.readthedocs.io/en/latest/implementations.html) as input
 specification and output placed, routed, and clocked generic FCN circuits.
 
-<img src="docs/_static/compare1.png" alt="QCA Layout" align="right" width="280"/>
+<img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/compare1.png" alt="QCA Layout" align="right" width="280"/>
 
 Among these algorithms are
 
@@ -202,6 +202,13 @@ plus several path-finding algorithms that work on generic layouts:
 - shortest path via the [A* algorithm](https://ieeexplore.ieee.org/document/4082128)
 - *k* shortest paths via [Yen's algorithm](https://www.ams.org/journals/qam/1970-27-04/S0033-569X-1970-0253822-7/)
 
+On top, there is a [hexagonalization algorithm](https://ieeexplore.ieee.org/document/10231278) to transform Cartesian
+layouts suitable for QCA into hexagonal layouts suitable for SiDBs,
+and multiple algorithms to optimize gate-level layouts post-placement:
+
+- [post-layout optimzation](https://dl.acm.org/doi/10.1145/3611315.3633247)
+- [wiring reduction](https://www.cda.cit.tum.de/files/eda/2024_dac_wiring_reduction_for_field-coupled_nanotechnologies.pdf)
+
 ### Verification
 
 Layout correctness can be [validated](https://fiction.readthedocs.io/en/latest/algorithms/algorithms.html#verification)
@@ -213,7 +220,7 @@ using
 
 ### Physical Simulation
 
-<img src="docs/_static/sidb_simulation.png" alt="SiDB simulation result" align="right" width="270"/>
+<img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/sidb_simulation.png" alt="SiDB simulation result" align="right" width="270"/>
 
 When a layout is compiled to the cell level via the application of a technology-dependent gate library, it can be
 simulated using a physical model. Currently, the following simulation algorithms are implemented in *fiction*:
@@ -236,23 +243,23 @@ with variable amounts of clock numbers as QCA for instance uses four clock phase
 
 Built-in schemes are
 
-|      [Columnar](https://ieeexplore.ieee.org/document/573740)       |    [Row](https://ieeexplore.ieee.org/document/573740)    |     [2DDWave](https://ieeexplore.ieee.org/document/1717097)      |
-|:------------------------------------------------------------------:|:--------------------------------------------------------:|:----------------------------------------------------------------:|
-| <img src="docs/_static/columnar.png" alt="Columnar" height="200"/> | <img src="docs/_static/row.png" alt="Row" height="200"/> | <img src="docs/_static/2ddwave.png" alt="2DDWave" height="200"/> |
+|                                  [Columnar](https://ieeexplore.ieee.org/document/573740)                                  |                               [Row](https://ieeexplore.ieee.org/document/573740)                                |                                 [2DDWave](https://ieeexplore.ieee.org/document/1717097)                                 |
+|:-------------------------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------------------:|
+| <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/columnar.png" alt="Columnar" height="200"/> | <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/row.png" alt="Row" height="200"/> | <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/2ddwave.png" alt="2DDWave" height="200"/> |
 
-|   [USE](https://ieeexplore.ieee.org/document/7219390)    | [RES](https://www.tandfonline.com/doi/abs/10.1080/21681724.2019.1570551) | [ESR](https://link.springer.com/content/pdf/10.1007/s10470-020-01760-4.pdf) |
-|:--------------------------------------------------------:|:------------------------------------------------------------------------:|:---------------------------------------------------------------------------:|
-| <img src="docs/_static/use.png" alt="USE" height="200"/> |         <img src="docs/_static/res.png" alt="RES" height="200"/>         |          <img src="docs/_static/esr.png" alt="ESR" height="200"/>           |
+|                               [USE](https://ieeexplore.ieee.org/document/7219390)                               |                    [RES](https://www.tandfonline.com/doi/abs/10.1080/21681724.2019.1570551)                     |                   [ESR](https://link.springer.com/content/pdf/10.1007/s10470-020-01760-4.pdf)                   |
+|:---------------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------------:|
+| <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/use.png" alt="USE" height="200"/> | <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/res.png" alt="RES" height="200"/> | <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/esr.png" alt="ESR" height="200"/> |
 
-| [CFE](https://ietresearch.onlinelibrary.wiley.com/doi/10.1049/iet-cds.2019.0096) | [Ripple](https://scholarworks.rit.edu/cgi/viewcontent.cgi?referer=&httpsredir=1&article=8266&context=theses) |    [BANCS](https://ieeexplore.ieee.org/document/8533251)     |
-|:--------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------:|
-|             <img src="docs/_static/cfe.png" alt="CFE" height="200"/>             |                        <img src="docs/_static/ripple.png" alt="Ripple" height="200"/>                        | <img src="docs/_static/bancs.png" alt="BANCS" height="300"/> |
+|                [CFE](https://ietresearch.onlinelibrary.wiley.com/doi/10.1049/iet-cds.2019.0096)                 |     [Ripple](https://scholarworks.rit.edu/cgi/viewcontent.cgi?referer=&httpsredir=1&article=8266&context=theses)      |                                [BANCS](https://ieeexplore.ieee.org/document/8533251)                                |
+|:---------------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------------------:|:-------------------------------------------------------------------------------------------------------------------:|
+| <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/cfe.png" alt="CFE" height="200"/> | <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/ripple.png" alt="Ripple" height="200"/> | <img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/bancs.png" alt="BANCS" height="300"/> |
 
 plus the mentioned irregular open clocking that works via a clock map instead of a regular extrapolated cutout.
 
 ## Wire Crossings
 
-<img src="docs/_static/cross.png" alt="Second layer crossing" align="left" width="200"/>
+<img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/cross.png" alt="Second layer crossing" align="left" width="200"/>
 
 With many FCN technologies considered planar, wire crossings should be minimized if possible. However, there are some
 options in QCA where, using a second layer, crossings over short distances and co-planar rotated cells become possible.
@@ -265,7 +272,7 @@ Wires are only allowed to cross other wires! Wires crossing gates is considered 
 
 ## Gate Pins vs. Designated I/Os
 
-<img src="docs/_static/io.png" alt="Input pin and cell output" align="right" width="200"/>
+<img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/io.png" alt="Input pin and cell output" align="right" width="200"/>
 
 In the literature, both are seen: having input cells (pins) directly located in the gate structure or using designated
 I/O elements that are located outside of gates. This distinction only makes sense on the gate level and *fiction*
@@ -273,7 +280,7 @@ supports both approaches and offers usage in the implemented physical design alg
 
 ## Multi Wires
 
-<img src="docs/_static/multi.png" alt="Multi wires" align="left" width="200"/>
+<img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/multi.png" alt="Multi wires" align="left" width="200"/>
 
 Gate-level abstraction has its limits. Often, chip area is wasted when only using a single wire per tile. In *fiction*,
 cell-level layouts allow for precise control over cell placement and can, thus, also create multiple wire segments per
@@ -282,7 +289,7 @@ functionality.
 
 ## Synchronization Elements
 
-<img src="docs/_static/se.png" alt="Synchronization element" align="right" width="150"/>
+<img src="https://raw.githubusercontent.com/cda-tum/fiction/main/docs/_static/se.png" alt="Synchronization element" align="right" width="150"/>
 
 A technology extension proposes to utilize the external clock signal generator in an unconventional way: by creating
 further asymmetric clock signals with extended *Hold* phases that are assigned to specific wire
