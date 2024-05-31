@@ -292,7 +292,7 @@ class is_operational_impl
     /**
      * Output BDL pairs.
      */
-    std::vector<bdl_pair<Lyt>> output_bdl_pairs;
+    std::vector<bdl_pair<cell<Lyt>>> output_bdl_pairs;
     /**
      * Iterator that iterates over all possible input states.
      */

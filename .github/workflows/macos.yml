@@ -1,4 +1,4 @@
-name: macOS CI
+name: 🍎 • CI
 
 on:
   push:
@@ -59,7 +59,7 @@ jobs:
           - os: macos-14
             compiler: g++-13
 
-    name: ${{matrix.os}} with ${{matrix.compiler}}
+    name: 🍎 ${{matrix.os}} with ${{matrix.compiler}}
     runs-on: ${{matrix.os}}
 
     steps:

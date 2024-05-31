@@ -8,7 +8,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 
 class TestCriticalTemperature(unittest.TestCase):
 
-    def test_perturber_and_DB_pair(self):
+    def test_perturber_and_DB_pair_100(self):
         layout = sidb_100_lattice((10, 10))
         layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((4, 1), sidb_technology.cell_type.NORMAL)
@@ -20,6 +20,24 @@ class TestCriticalTemperature(unittest.TestCase):
         stats = critical_temperature_stats()
 
         cds = charge_distribution_surface_100(layout)
+
+        self.assertEqual(critical_temperature_non_gate_based(cds, params, stats), 400)
+
+        self.assertEqual(stats.algorithm_name, "QuickExact")
+        self.assertEqual(stats.num_valid_lyt, 1)
+
+    def test_perturber_and_DB_pair_111(self):
+        layout = sidb_111_lattice((10, 10))
+        layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
+        layout.assign_cell_type((4, 1), sidb_technology.cell_type.NORMAL)
+        layout.assign_cell_type((6, 1), sidb_technology.cell_type.NORMAL)
+
+        params = critical_temperature_params()
+        params.engine = simulation_engine.EXACT
+
+        stats = critical_temperature_stats()
+
+        cds = charge_distribution_surface_111(layout)
 
         self.assertEqual(critical_temperature_non_gate_based(cds, params, stats), 400)
 

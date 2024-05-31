@@ -1,4 +1,4 @@
-name: pyfiction CI
+name: 🐍 • CI
 
 on:
   push:
@@ -61,7 +61,7 @@ jobs:
             architecture: x64
             alglib: 'OFF'
 
-    name: pyfiction on ${{matrix.os}} with Python ${{matrix.python_version}}
+    name: 🐍 on ${{matrix.os}} with Python ${{matrix.python_version}}
     runs-on: ${{matrix.os}}
 
     steps:
