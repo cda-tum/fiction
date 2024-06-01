@@ -1,5 +1,8 @@
 include(${PROJECT_SOURCE_DIR}/cmake/CheckSubmodules.cmake)
 
+# Prefer config files in the project over system-wide versions
+set(CMAKE_FIND_PACKAGE_PREFER_CONFIG TRUE)
+
 # Include pybind11
 add_subdirectory(pybind11)
 
