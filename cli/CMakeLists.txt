@@ -6,8 +6,8 @@ include_directories(${PROJECT_BINARY_DIR}/include/)
 # Build executable
 add_executable(fiction ${SOURCES})
 
-# Link against the project settings, libfiction and alice
-target_link_libraries(fiction PRIVATE libfiction alice)
+# Link against libfiction and alice
+target_link_system_libraries(fiction PRIVATE libfiction alice)
 
 # Compile-time decisions on which flows to compile
 
