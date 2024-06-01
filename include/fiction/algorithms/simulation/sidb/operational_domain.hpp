@@ -32,6 +32,7 @@
 #include <queue>
 #include <random>
 #include <set>
+#include <thread>
 #include <tuple>
 #include <type_traits>
 #include <vector>
@@ -306,14 +307,55 @@ class operational_domain_impl
     {
         mockturtle::stopwatch stop{stats.time_total};
 
-        // for each x value in parallel
-        std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ x_indices.cbegin(), x_indices.cend(),
-                      [this](const auto x)
-                      {
-                          // for each y value in parallel
-                          std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ y_indices.cbegin(), y_indices.cend(),
-                                        [this, x](const auto y) { is_step_point_operational({x, y}); });
-                      });
+        // calculate the size of each slice
+        const auto x_slice_size = (x_indices.size() + num_threads - 1) / num_threads;
+
+        std::vector<std::thread> threads{};
+        threads.reserve(num_threads);
+
+        // launch threads, each with its own slice of the x indices
+        for (auto i = 0ul; i < num_threads; ++i)
+        {
+            const auto start = i * x_slice_size;
+            const auto end   = std::min(start + x_slice_size, x_indices.size());
+
+            // no more work to distribute
+            if (start >= end)
+            {
+                break;
+            }
+
+            threads.emplace_back(
+                [this, start, end]
+                {
+                    for (auto it = x_indices.begin() + start; it != x_indices.begin() + end; ++it)
+                    {
+                        const auto x = *it;
+
+                        // process y_indices sequentially on each thread
+                        std::for_each(y_indices.cbegin(), y_indices.cend(),
+                                      [this, x](const auto y) { is_step_point_operational({x, y}); });
+                    }
+                });
+        }
+
+        // wait for all threads to complete
+        for (auto& thread : threads)
+        {
+            if (thread.joinable())
+            {
+                thread.join();
+            }
+        }
+
+        //        // for each x value in parallel
+        //        std::for_each(std::execution::par_unseq, x_indices.cbegin(), x_indices.cend(),
+        //                      [this](const auto x)
+        //                      {
+        //                          // for each y value in parallel
+        //                          std::for_each(std::execution::par_unseq, y_indices.cbegin(), y_indices.cend(),
+        //                                        [this, x](const auto y) { is_step_point_operational({x, y}); });
+        //                      });
 
         log_stats();
 
@@ -540,6 +582,10 @@ class operational_domain_impl
      * Number of evaluated parameter combinations.
      */
     std::atomic<std::size_t> num_evaluated_parameter_combinations{0};
+    /**
+     * Number of available hardware threads.
+     */
+    const std::size_t num_threads{std::thread::hardware_concurrency()};
     /**
      * A step point represents a point in the x and y dimension from 0 to the maximum number of steps. A step point does
      * not hold the actual parameter values, but the step values in the x and y dimension, respectively.
