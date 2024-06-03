@@ -33,7 +33,7 @@ class TestCriticalTemperature(unittest.TestCase):
         layout.assign_cell_type((6, 1), sidb_technology.cell_type.NORMAL)
 
         params = critical_temperature_params()
-        params.engine = simulation_engine.EXACT
+        params.engine = sidb_simulation_engine.QUICKEXACT
 
         stats = critical_temperature_stats()
 
