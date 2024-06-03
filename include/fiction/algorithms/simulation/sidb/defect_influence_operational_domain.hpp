@@ -197,11 +197,13 @@ class defect_influence_operational_domain_impl
                                             next_clockwise_point(current_neighborhood, backtrack_point);
 
             bool contour_goes_around_layout = false;
-            while (next_point != contour_starting_point)
+
+            uint64_t counter = 0;
+            while (next_point != contour_starting_point && counter < 100000)
             {
                 const auto operational_status = is_defect_position_operational(next_point);
                 // check if the contour goes around the layout.
-                if (next_point.x >= se_bb_layout.x)
+                if (next_point.x >= se_bb_layout.x && next_point.y >= se_bb_layout.y)
                 {
                     contour_goes_around_layout = true;
                 }
@@ -220,6 +222,7 @@ class defect_influence_operational_domain_impl
 
                 current_neighborhood = moore_neighborhood(current_contour_point);
                 next_point           = next_clockwise_point(current_neighborhood, backtrack_point);
+                counter++;
             }
             number_of_random_start_positions++;
             if (!contour_goes_around_layout)
@@ -294,6 +297,7 @@ class defect_influence_operational_domain_impl
      */
     operational_status is_defect_position_operational(const typename Lyt::cell& c) noexcept
     {
+        auto lyt_copy = layout.clone();
         // if the point has already been sampled, return the stored operational status
         if (const auto op_value = has_already_been_sampled(c); op_value.has_value())
         {
@@ -317,14 +321,14 @@ class defect_influence_operational_domain_impl
         // increment the number of evaluated parameter combinations
         ++num_evaluated_defect_positions;
 
-        if (!layout.is_empty_cell(c))
+        if (!lyt_copy.is_empty_cell(c))
         {
             return non_operational();
         }
 
-        layout.assign_sidb_defect(c, params.defect_influence_params.defect);
-        const auto& [status, sim_calls] = is_operational(layout, truth_table, params.operational_params);
-        layout.assign_sidb_defect(c, sidb_defect{sidb_defect_type::NONE});
+        lyt_copy.assign_sidb_defect(c, params.defect_influence_params.defect);
+        const auto& [status, sim_calls] = is_operational(lyt_copy, truth_table, params.operational_params);
+        lyt_copy.assign_sidb_defect(c, sidb_defect{sidb_defect_type::NONE});
         num_simulator_invocations += sim_calls;
 
         if (status == operational_status::NON_OPERATIONAL)
@@ -680,7 +684,7 @@ defect_influence_operational_domain_contour_tracing(const Lyt& lyt, const std::v
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
-    static_assert(has_cube_coord_v<Lyt> || has_siqad_coord_v<Lyt>, "Lyt is not based on cube coordinates");
+    static_assert(has_cube_coord_v<Lyt>, "Lyt is not based on cube coordinates");
 
     defect_influence_operational_domain_stats                 st{};
     detail::defect_influence_operational_domain_impl<Lyt, TT> p{lyt, spec, params, st};
