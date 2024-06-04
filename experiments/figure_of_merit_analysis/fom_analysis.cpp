@@ -23,6 +23,7 @@
 #include <fiction/io/write_sqd_layout.hpp>
 #include <fiction/technology/sidb_defects.hpp>
 #include <fiction/types.hpp>
+#include <fiction/utils/math_utils.hpp>
 #include <fiction/utils/truth_table_utils.hpp>
 
 #include <fmt/core.h>
@@ -53,12 +54,9 @@ int main()  // NOLINT
 
     const auto skeleton = read_sqd_layout<Lyt>(folder);
 
-    design_sidb_gates_params<fiction::cell<Lyt>> params{sidb_simulation_parameters{2, -0.32},
-                                                        {{17, 14, 0}, {21, 22, 0}},
-                                                        2,
-                                                        sidb_simulation_engine::QUICKEXACT};
+    const auto sim_params = sidb_simulation_parameters{2, -0.32};
 
-    params.maximal_random_solutions = 100;
+    design_sidb_gates_params<fiction::cell<Lyt>> params{sim_params, {{17, 14, 0}, {21, 22, 0}}, 2};
 
     const auto truth_tables = std::vector<std::vector<tt>>{
         std::vector<tt>{create_and_tt()}, std::vector<tt>{create_nand_tt()}, std::vector<tt>{create_or_tt()},
@@ -68,14 +66,10 @@ int main()  // NOLINT
 
     const auto gate_names = std::vector<std::string>{"and", "nand", "or", "nor", "xor", "xnor", "lt", "gt", "le", "ge"};
 
-    const critical_temperature_params ct_params{sidb_simulation_parameters{2, params.simulation_parameters.mu_minus,
-                                                                           params.simulation_parameters.epsilon_r,
-                                                                           params.simulation_parameters.lambda_tf}};
+    const critical_temperature_params ct_params{sim_params};
 
     // defining the operational domain parameters
-    operational_domain_params op_domain_params{sidb_simulation_parameters{2, params.simulation_parameters.mu_minus,
-                                                                          params.simulation_parameters.epsilon_r,
-                                                                          params.simulation_parameters.lambda_tf}};
+    operational_domain_params op_domain_params{sim_params};
 
     // setting the operational domain range
     op_domain_params.x_min  = 4.0;
@@ -87,18 +81,16 @@ int main()  // NOLINT
     op_domain_params.y_step = 0.2;
 
     const calculate_min_potential_for_charge_change_for_all_input_combinations_params assess_params{
-        assess_physical_population_stability_params{
-            sidb_simulation_parameters{2, params.simulation_parameters.mu_minus, params.simulation_parameters.epsilon_r,
-                                       params.simulation_parameters.lambda_tf}}};
+        assess_physical_population_stability_params{sim_params}};
 
     const maximum_defect_influence_position_and_distance_params defect_avoidance_params_arsenic{
         sidb_defect{sidb_defect_type::UNKNOWN, 1, 9.7, 2.1},
-        params.simulation_parameters,
+        sim_params,
         {30, 20}};
 
     const maximum_defect_influence_position_and_distance_params defect_avoidance_params_vacancy{
         sidb_defect{sidb_defect_type::SI_VACANCY, -1, 10.6, 5.9},
-        params.simulation_parameters,
+        sim_params,
         {30, 20}};
 
     uint64_t counter = 0;
@@ -117,6 +109,7 @@ int main()  // NOLINT
             std::vector<double> defect_influence_vacancy          = {};
             std::vector<double> pop_stability_neutral_to_negative = {};
             std::vector<double> pop_stability_negative_to_neutral = {};
+            std::vector<double> bbr_all                           = {};
             std::vector<double> runtime                           = {};
             {
                 mockturtle::stopwatch stop{time_total};
@@ -134,13 +127,12 @@ int main()  // NOLINT
                     op_domains.push_back(op_stats.percentual_operational_area);
 
                     defect_influence_operational_domain_stats arsenic_stats{};
-                    //                    const auto defect_influence_domain_arsenic =
-                    //                    defect_influence_operational_domain_grid_search(
-                    //                        gate, truth_table, 2,
-                    //                        defect_influence_operational_domain_params{
-                    //                            defect_avoidance_params_arsenic,
-                    //                            is_operational_params{defect_avoidance_params_arsenic.simulation_parameters}},
-                    //                        &arsenic_stats);
+                    const auto defect_influence_domain_arsenic = defect_influence_operational_domain_grid_search(
+                        gate, truth_table, 2,
+                        defect_influence_operational_domain_params{
+                            defect_avoidance_params_arsenic,
+                            is_operational_params{defect_avoidance_params_arsenic.simulation_parameters}},
+                        &arsenic_stats);
                     std::cout << fmt::format("runtime: {}", mockturtle::to_seconds(arsenic_stats.time_total)) << '\n';
                     runtime.push_back(mockturtle::to_seconds(arsenic_stats.time_total));
 
@@ -165,12 +157,28 @@ int main()  // NOLINT
                             calculate_min_potential_for_charge_change_for_all_input_combinations_params{assess_params},
                             -1) *
                         1000);
+
+                    const auto bbr_neu_to_neg =
+                        calculate_min_potential_for_charge_change_for_all_input_combinations(
+                            gate, truth_table,
+                            calculate_min_potential_for_charge_change_for_all_input_combinations_params{assess_params},
+                            1) *
+                        1000;
+
                     pop_stability_negative_to_neutral.push_back(
                         calculate_min_potential_for_charge_change_for_all_input_combinations(
                             gate, truth_table,
                             calculate_min_potential_for_charge_change_for_all_input_combinations_params{assess_params},
                             1) *
                         1000);
+                    const auto bbr_neg_to_neu =
+                        calculate_min_potential_for_charge_change_for_all_input_combinations(
+                            gate, truth_table,
+                            calculate_min_potential_for_charge_change_for_all_input_combinations_params{assess_params},
+                            1) *
+                        1000;
+
+                    bbr_all.push_back(std::min(bbr_neu_to_neg, bbr_neg_to_neu));
                 }
 
                 if (temps.size() != 0)
@@ -186,19 +194,21 @@ int main()  // NOLINT
                     const auto max_pop_stability_negative_to_neutral = *std::max_element(
                         pop_stability_negative_to_neutral.begin(), pop_stability_negative_to_neutral.end());
 
-                    const auto bbr =
+                    const auto bbr_max =
                         std::max(max_pop_stability_neutral_to_negative, max_pop_stability_negative_to_neutral);
 
                     // log results
-                    fom_exp(gate_names[counter], max_temp, max_op_domain, 0, 0, bbr);
+                    fom_exp(gate_names[counter], max_temp, max_op_domain, 0, 0, bbr_max);
 
                     fom_exp.save();
                     fom_exp.table();
                     for (auto i = 0; i < temps.size(); i++)
                     {
-                        cost_function_chi(temps[i] / max_temp, op_domains[i] / max_op_domain,
-                                          defect_influence_arsenic[i] / max_defect_influence_arsenic,
-                                          defect_influence_vacancy[i]/max_defect_influence_vacancy, bbr[i], bbr, -1,-1,1,1,-1);
+                        cost_function_chi({temps[i] / max_temp, op_domains[i] / max_op_domain,
+                                           defect_influence_arsenic[i] / max_defect_influence_arsenic,
+                                           defect_influence_vacancy[i] / max_defect_influence_vacancy,
+                                           bbr_all[i] / bbr_max},
+                                          {-1, -1, 1, 1, -1});
                     }
                 }
             }
