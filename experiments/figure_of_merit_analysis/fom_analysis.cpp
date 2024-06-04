@@ -134,29 +134,30 @@ int main()  // NOLINT
                     op_domains.push_back(op_stats.percentual_operational_area);
 
                     defect_influence_operational_domain_stats arsenic_stats{};
-//                    const auto defect_influence_domain_arsenic = defect_influence_operational_domain_grid_search(
-//                        gate, truth_table, 2,
-//                        defect_influence_operational_domain_params{
-//                            defect_avoidance_params_arsenic,
-//                            is_operational_params{defect_avoidance_params_arsenic.simulation_parameters}},
-//                        &arsenic_stats);
+                    //                    const auto defect_influence_domain_arsenic =
+                    //                    defect_influence_operational_domain_grid_search(
+                    //                        gate, truth_table, 2,
+                    //                        defect_influence_operational_domain_params{
+                    //                            defect_avoidance_params_arsenic,
+                    //                            is_operational_params{defect_avoidance_params_arsenic.simulation_parameters}},
+                    //                        &arsenic_stats);
                     std::cout << fmt::format("runtime: {}", mockturtle::to_seconds(arsenic_stats.time_total)) << '\n';
                     runtime.push_back(mockturtle::to_seconds(arsenic_stats.time_total));
 
-//                    defect_influence_arsenic.push_back(
-//                        defect_avoidance_distance(gate, defect_influence_domain_arsenic));
+                    defect_influence_arsenic.push_back(
+                        defect_avoidance_distance(gate, defect_influence_domain_arsenic));
 
                     defect_influence_operational_domain_stats vacancy_stats{};
-//                    const auto defect_influence_domain_vacancy = defect_influence_operational_domain_grid_search(
-//                        gate, truth_table, 2,
-//                        defect_influence_operational_domain_params{
-//                            defect_avoidance_params_vacancy,
-//                            is_operational_params{defect_avoidance_params_arsenic.simulation_parameters}},
-//                        &vacancy_stats);
+                    const auto defect_influence_domain_vacancy = defect_influence_operational_domain_grid_search(
+                        gate, truth_table, 2,
+                        defect_influence_operational_domain_params{
+                            defect_avoidance_params_vacancy,
+                            is_operational_params{defect_avoidance_params_arsenic.simulation_parameters}},
+                        &vacancy_stats);
                     std::cout << fmt::format("runtime: {}", mockturtle::to_seconds(arsenic_stats.time_total)) << '\n';
 
-//                    defect_influence_vacancy.push_back(
-//                        defect_avoidance_distance(gate, defect_influence_domain_vacancy));
+                    defect_influence_vacancy.push_back(
+                        defect_avoidance_distance(gate, defect_influence_domain_vacancy));
 
                     pop_stability_neutral_to_negative.push_back(
                         calculate_min_potential_for_charge_change_for_all_input_combinations(
@@ -176,10 +177,10 @@ int main()  // NOLINT
                 {
                     const auto max_temp      = *std::max_element(temps.begin(), temps.end());
                     const auto max_op_domain = *std::max_element(op_domains.begin(), op_domains.end());
-//                    const auto max_defect_influence_arsenic =
-//                        *std::min_element(defect_influence_arsenic.begin(), defect_influence_arsenic.end());
-//                    const auto max_defect_influence_vacancy =
-//                        *std::min_element(defect_influence_vacancy.begin(), defect_influence_vacancy.end());
+                    const auto max_defect_influence_arsenic =
+                        *std::min_element(defect_influence_arsenic.begin(), defect_influence_arsenic.end());
+                    const auto max_defect_influence_vacancy =
+                        *std::min_element(defect_influence_vacancy.begin(), defect_influence_vacancy.end());
                     const auto max_pop_stability_neutral_to_negative = *std::max_element(
                         pop_stability_neutral_to_negative.begin(), pop_stability_neutral_to_negative.end());
                     const auto max_pop_stability_negative_to_neutral = *std::max_element(
@@ -189,11 +190,16 @@ int main()  // NOLINT
                         std::max(max_pop_stability_neutral_to_negative, max_pop_stability_negative_to_neutral);
 
                     // log results
-                    fom_exp(gate_names[counter], max_temp, max_op_domain, 0,
-                            0, bbr);
+                    fom_exp(gate_names[counter], max_temp, max_op_domain, 0, 0, bbr);
 
                     fom_exp.save();
                     fom_exp.table();
+                    for (auto i = 0; i < temps.size(); i++)
+                    {
+                        cost_function_chi(temps[i] / max_temp, op_domains[i] / max_op_domain,
+                                          defect_influence_arsenic[i] / max_defect_influence_arsenic,
+                                          defect_influence_vacancy[i]/max_defect_influence_vacancy, bbr[i], bbr, -1,-1,1,1,-1);
+                    }
                 }
             }
         }
