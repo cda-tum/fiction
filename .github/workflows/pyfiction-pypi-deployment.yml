@@ -88,10 +88,11 @@ jobs:
         run: echo "CIBW_ARCHS_MACOS=arm64" >> $GITHUB_ENV
 
       - name: Build wheel
-        uses: pypa/cibuildwheel@v2.17.0
+        uses: pypa/cibuildwheel@v2.18.1
         env:
           CIBW_BEFORE_ALL_LINUX: /opt/python/cp39-cp39/bin/pip install z3-solver==${{ env.Z3_VERSION }}
           CIBW_BUILD: ${{ matrix.python }}-*
+          CIBW_ENVIRONMENT_MACOS: MACOSX_DEPLOYMENT_TARGET=10.15
           CIBW_TEST_EXTRAS: test
           CIBW_TEST_COMMAND: 'python -m unittest discover --start-directory {project} --verbose'
 
