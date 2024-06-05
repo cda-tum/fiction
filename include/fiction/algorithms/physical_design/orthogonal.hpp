@@ -382,6 +382,72 @@ mockturtle::signal<Lyt> connect_and_place(Lyt& lyt, const tile<Lyt>& t, const Nt
     return {};      // fix -Wreturn-type warning
 }
 
+/**
+ * Places the POs in the layout.
+ *
+ * @tparam Lyt Desired gate-level layout type.
+ * @tparam Ntk Network type that acts as specification.
+ * @param layout Current gate-level layout.
+ * @param ctn Contains the colored network.
+ * @param node2pos Mapping from network nodes to layout signals, i.e., a pointer to their position in the layout. The
+ * map is used to fetch location of the fanins. The `mockturtle::node_map` is not updated by this function.
+ */
+template <typename Ntk, typename Lyt>
+void place_outputs(Lyt& layout, const coloring_container<Ntk>& ctn,
+                   mockturtle::node_map<mockturtle::signal<Lyt>, decltype(ctn.color_ntk)>& node2pos)
+{
+    bool                               multi_out_node = false;
+    std::vector<mockturtle::node<Ntk>> out_nodes;
+    tile<Lyt>                          po_tile{};
+    uint32_t                           po_counter{0};
+    ctn.color_ntk.foreach_po(
+        [&po_counter, &out_nodes, &multi_out_node, &node2pos, &ctn, &layout, &po_tile](const auto& po)
+        {
+            if (!ctn.color_ntk.is_constant(po))
+            {
+                const auto n_s = node2pos[po];
+
+                if (std::find(out_nodes.begin(), out_nodes.end(), po) != out_nodes.end())
+                {
+                    multi_out_node = true;
+                }
+
+                po_tile = static_cast<tile<Lyt>>(n_s);
+                // determine PO orientation
+                if (!is_eastern_po_orientation_available(ctn, po) || multi_out_node)
+                {
+                    po_tile = static_cast<tile<Lyt>>(wire_south(layout, po_tile, {po_tile.x, po_tile.y + 2}));
+                }
+                // check if PO position is located at the border
+                if (layout.is_at_eastern_border({po_tile.x + 1, po_tile.y}) && !multi_out_node)
+                {
+                    ++po_tile.x;
+                    layout.create_po(n_s,
+                                     ctn.color_ntk.has_output_name(po_counter) ?
+                                         ctn.color_ntk.get_output_name(po_counter++) :
+                                         fmt::format("po{}", po_counter++),
+                                     po_tile);
+                }
+                // place PO at the border and connect it by wire segments
+                else
+                {
+                    const tile<Lyt> anker{po_tile};
+
+                    po_tile = layout.eastern_border_of(po_tile);
+
+                    layout.create_po(wire_east(layout, anker, po_tile),
+                                     ctn.color_ntk.has_output_name(po_counter) ?
+                                         ctn.color_ntk.get_output_name(po_counter++) :
+                                         fmt::format("po{}", po_counter++),
+                                     po_tile);
+                    multi_out_node = false;
+                }
+
+                out_nodes.push_back(po);
+            }
+        });
+}
+
 template <typename Lyt, typename Ntk>
 class orthogonal_impl
 {
@@ -553,56 +619,12 @@ class orthogonal_impl
                         node2pos[n] = connect_and_place(layout, t, ctn.color_ntk, n, pre1_t, pre2_t, fc.constant_fanin);
                     }
 
-                    // create PO at applicable position
                     if (ctn.color_ntk.is_po(n))
                     {
-                        const auto n_s = node2pos[n];
-
-                        tile<Lyt> po_tile{};
-
-                        bool multi_out_node = false;
-                        if (std::find(multi_out_nodes.begin(), multi_out_nodes.end(), n) != multi_out_nodes.end())
+                        if (!is_eastern_po_orientation_available(ctn, n) ||
+                            std::find(multi_out_nodes.begin(), multi_out_nodes.end(), n) != multi_out_nodes.end())
                         {
-                            multi_out_node = true;
-                        }
-                        // if a node has multiple POs, place them both
-                        const uint64_t num_pos_to_place = multi_out_node ? 2 : 1;
-                        for (uint64_t num_po = 0; num_po < num_pos_to_place; num_po++)
-                        {
-                            // determine PO orientation
-                            if (is_eastern_po_orientation_available(ctn, n) && (num_po == 0))
-                            {
-                                po_tile = layout.east(static_cast<tile<Lyt>>(n_s));
-                                ++latest_pos.x;
-                            }
-                            else
-                            {
-                                po_tile = layout.south(static_cast<tile<Lyt>>(n_s));
-                                ++latest_pos.y;
-                            }
-
-                            // check if PO position is located at the border
-                            if (layout.is_at_eastern_border(po_tile))
-                            {
-                                layout.create_po(n_s,
-                                                 ctn.color_ntk.has_output_name(po_counter) ?
-                                                     ctn.color_ntk.get_output_name(po_counter++) :
-                                                     fmt::format("po{}", po_counter++),
-                                                 po_tile);
-                            }
-                            // place PO at the border and connect it by wire segments
-                            else
-                            {
-                                const auto anker = layout.create_buf(n_s, po_tile);
-
-                                po_tile = layout.eastern_border_of(po_tile);
-
-                                layout.create_po(wire_east(layout, static_cast<tile<Lyt>>(anker), po_tile),
-                                                 ctn.color_ntk.has_output_name(po_counter) ?
-                                                     ctn.color_ntk.get_output_name(po_counter++) :
-                                                     fmt::format("po{}", po_counter++),
-                                                 po_tile);
-                            }
+                            ++latest_pos.y;
                         }
                     }
                 }
@@ -612,6 +634,9 @@ class orthogonal_impl
                 bar(i);
 #endif
             });
+
+        // Place outputs after the main algorithm to handle possible multi-output nodes
+        place_outputs(layout, ctn, node2pos);
 
         // restore possibly set signal names
         restore_names(ctn.color_ntk, layout, node2pos);
@@ -630,8 +655,6 @@ class orthogonal_impl
 
     orthogonal_physical_design_params ps;
     orthogonal_physical_design_stats& pst;
-
-    uint32_t po_counter{0};
 };
 
 }  // namespace detail
