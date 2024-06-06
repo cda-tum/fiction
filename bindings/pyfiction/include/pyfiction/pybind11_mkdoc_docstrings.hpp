@@ -6038,13 +6038,32 @@ static const char *__doc_fiction_detail_orthogonal_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_orthogonal_impl_orthogonal_impl = R"doc()doc";
 
-static const char *__doc_fiction_detail_orthogonal_impl_po_counter = R"doc()doc";
-
 static const char *__doc_fiction_detail_orthogonal_impl_ps = R"doc()doc";
 
 static const char *__doc_fiction_detail_orthogonal_impl_pst = R"doc()doc";
 
 static const char *__doc_fiction_detail_orthogonal_impl_run = R"doc()doc";
+
+static const char *__doc_fiction_detail_place_outputs =
+R"doc(Places the POs in the layout.
+
+Template parameter ``Lyt``:
+    Desired gate-level layout type.
+
+Template parameter ``Ntk``:
+    Network type that acts as specification.
+
+Parameter ``layout``:
+    Current gate-level layout.
+
+Parameter ``ctn``:
+    Contains the colored network.
+
+Parameter ``node2pos``:
+    Mapping from network nodes to layout signals, i.e., a pointer to
+    their position in the layout. The map is used to fetch location of
+    the fanins. The `mockturtle::node_map` is not updated by this
+    function.)doc";
 
 static const char *__doc_fiction_detail_post_layout_optimization_impl = R"doc()doc";
 
