@@ -6038,6 +6038,8 @@ static const char *__doc_fiction_detail_orthogonal_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_orthogonal_impl_orthogonal_impl = R"doc()doc";
 
+static const char *__doc_fiction_detail_orthogonal_impl_po_counter = R"doc()doc";
+
 static const char *__doc_fiction_detail_orthogonal_impl_ps = R"doc()doc";
 
 static const char *__doc_fiction_detail_orthogonal_impl_pst = R"doc()doc";
@@ -6058,6 +6060,9 @@ Parameter ``layout``:
 
 Parameter ``ctn``:
     Contains the colored network.
+
+Parameter ``po_counter``:
+    Counter for POs.
 
 Parameter ``node2pos``:
     Mapping from network nodes to layout signals, i.e., a pointer to
