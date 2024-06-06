@@ -471,6 +471,8 @@ class orthogonal_impl
         std::vector<mockturtle::node<Ntk>> output_nodes;
         std::vector<mockturtle::node<Ntk>> multi_out_nodes;
         uint32_t                           num_multi_output_pos{0};
+        bool                               place_outputs_last = false;
+        mockturtle::node<Ntk>              last_po_index      = 0;
         ctn.color_ntk.foreach_po(
             [&](const auto& po)
             {
@@ -478,8 +480,16 @@ class orthogonal_impl
                 {
                     multi_out_nodes.push_back(po);
                     ++num_multi_output_pos;
+                    place_outputs_last = true;
                 }
                 output_nodes.push_back(po);
+
+                // check if POs appear ordered in the network, otherwise also place them last
+                if (po < last_po_index)
+                {
+                    place_outputs_last = true;
+                }
+                last_po_index = po;
             });
 
         // instantiate the layout
@@ -621,7 +631,7 @@ class orthogonal_impl
 
                     if (ctn.color_ntk.is_po(n))
                     {
-                        if (num_multi_output_pos > 0)
+                        if (place_outputs_last)
                         {
                             if (!is_eastern_po_orientation_available(ctn, n) ||
                                 std::find(multi_out_nodes.begin(), multi_out_nodes.end(), n) != multi_out_nodes.end())
@@ -679,7 +689,7 @@ class orthogonal_impl
 #endif
             });
 
-        if (num_multi_output_pos > 0)
+        if (place_outputs_last)
         {
             // Place outputs after the main algorithm to handle possible multi-output nodes
             place_outputs(layout, ctn, po_counter, node2pos);
