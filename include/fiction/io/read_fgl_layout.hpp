@@ -19,10 +19,10 @@
 #include <array>
 #include <cctype>
 #include <cstdlib>
-#include <exception>
 #include <fstream>
 #include <istream>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -37,7 +37,7 @@ class fgl_parsing_error : public std::runtime_error
 {
   public:
     /**
-     * Constructs a fgl_parsing_error object with the given error message.
+     * Constructs a `fgl_parsing_error` object with the given error message.
      *
      * @param msg The error message describing the parsing error.
      */
@@ -714,7 +714,7 @@ class read_fgl_layout_impl
 /**
  * Reads a gate-level layout from an FGL file provided as an input stream.
  *
- * May throw an `fgl_parsing_exception` if the FGL file is malformed.
+ * May throw an `fgl_parsing_error` if the FGL file is malformed.
  *
  * @tparam Lyt The layout type to be created from an input.
  * @param is The input stream to read from.
@@ -734,9 +734,9 @@ template <typename Lyt>
 /**
  * Reads a gate-level layout from an FGL file provided as an input stream.
  *
- * May throw an `fgl_parsing_exception` if the FGL file is malformed.
+ * May throw an `fgl_parsing_error` if the FGL file is malformed.
  *
- * This is an in-place version of read_fgl_layout that utilizes the given layout as a target to write to.
+ * This is an in-place version of `read_fgl_layout` that utilizes the given layout as a target to write to.
  *
  * @tparam Lyt The layout type to be used as input.
  * @param lyt The layout to write to.
@@ -752,9 +752,9 @@ void read_fgl_layout(Lyt& lyt, std::istream& is)
     lyt = p.run();
 }
 /**
- * Reads a gate-level layout from an FGL file provided as an input stream.
+ * Reads a gate-level layout from an FGL file provided as a file name.
  *
- * May throw an `fgl_parsing_exception` if the FGL file is malformed.
+ * May throw an `fgl_parsing_error` if the FGL file is malformed.
  *
  * @tparam Lyt The layout type to be created from an input.
  * @param filename The file name to open and read from.
@@ -776,9 +776,9 @@ template <typename Lyt>
     return lyt;
 }
 /**
- * Reads a gate-level layout from an FGL file provided as an input stream.
+ * Reads a gate-level layout from an FGL file provided as a file name.
  *
- * May throw an `fgl_parsing_exception` if the FGL file is malformed.
+ * May throw an `fgl_parsing_error` if the FGL file is malformed.
  *
  * This is an in-place version of `read_fgl_layout` that utilizes the given layout as a target to write to.
  *

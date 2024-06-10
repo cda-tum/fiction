@@ -13,6 +13,7 @@
 #include <cstdint>
 #include <functional>
 #include <optional>
+#include <stdexcept>
 #include <type_traits>
 #include <vector>
 
@@ -248,13 +249,11 @@ uint32_t num_constant_fanins(const Ntk& ntk, const mockturtle::node<Ntk>& n) noe
 /**
  * Exception class that can be thrown if some network exceeds a legal number of fanins.
  */
-class high_degree_fanin_exception : public std::exception
+class high_degree_fanin_exception : public std::invalid_argument
 {
   public:
-    [[nodiscard]] const char* what() const noexcept override
-    {
-        return "network contains nodes that exceed the supported non-constant fanin size";
-    }
+    high_degree_fanin_exception() : std::invalid_argument("network contains nodes that exceed the supported fanin size")
+    {}
 };
 /**
  * Checks if a given network exceeds a given fanin threshold in any of its nodes.
@@ -455,9 +454,8 @@ std::vector<uint32_t> inverse_levels(const Ntk& ntk) noexcept
             set_discovered(n);
 
             // determine successor's maximum level
-            const auto post_l =
-                std::max_element(fos.cbegin(), fos.cend(),
-                                 [&](const auto& n1, const auto& n2) { return get_inv_level(n1) < get_inv_level(n2); });
+            const auto post_l = std::max_element(fos.cbegin(), fos.cend(), [&](const auto& n1, const auto& n2)
+                                                 { return get_inv_level(n1) < get_inv_level(n2); });
 
             // if there are no successors, the level of current node is 0, else it is 1 higher than theirs
             set_inv_level(n, post_l != fos.cend() ? std::max(get_inv_level(n), get_inv_level(*post_l) + 1u) : 0u);

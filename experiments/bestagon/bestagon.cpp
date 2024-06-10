@@ -98,8 +98,8 @@ int main()  // NOLINT
     mockturtle::tech_library<2> gate_lib{gates};
 
     // parameters for SMT-based physical design
-    fiction::exact_physical_design_params<gate_lyt> exact_params{};
-    exact_params.scheme        = fiction::ptr<gate_lyt>(fiction::row_clocking<gate_lyt>(fiction::num_clks::FOUR));
+    fiction::exact_physical_design_params exact_params{};
+    exact_params.scheme        = "Row";
     exact_params.crossings     = true;
     exact_params.border_io     = true;
     exact_params.desynchronize = true;
@@ -144,8 +144,7 @@ int main()  // NOLINT
             assert(eq.has_value());
 
             // compute critical path and throughput
-            fiction::critical_path_length_and_throughput_stats cp_tp_stats{};
-            fiction::critical_path_length_and_throughput(*gate_level_layout, &cp_tp_stats);
+            const auto cp_tp = fiction::critical_path_length_and_throughput(*gate_level_layout);
 
             // apply gate library
             const auto cell_level_layout =
@@ -164,7 +163,7 @@ int main()  // NOLINT
                          cut_xag.num_gates(), depth_cut_xag.depth(), mapped_network.num_gates(),
                          depth_mapped_network.depth(), gate_level_layout->x() + 1, gate_level_layout->y() + 1,
                          (gate_level_layout->x() + 1) * (gate_level_layout->y() + 1), gate_level_layout->num_gates(),
-                         gate_level_layout->num_wires(), cp_tp_stats.critical_path_length, cp_tp_stats.throughput,
+                         gate_level_layout->num_wires(), cp_tp.critical_path_length, cp_tp.throughput,
                          mockturtle::to_seconds(exact_stats.time_total), *eq, cell_level_layout.num_cells(),
                          area_stats.area);
         }

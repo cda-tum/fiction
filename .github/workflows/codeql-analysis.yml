@@ -1,4 +1,4 @@
-name: CodeQL
+name: 📝 • CodeQL
 
 on:
   push:
@@ -11,6 +11,7 @@ on:
       - '**/*.py'
       - 'libs/**'
       - '.github/workflows/codeql-analysis.yml'
+      - '!bindings/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp'
   pull_request:
     branches: [ 'main' ]
     paths:
@@ -21,6 +22,7 @@ on:
       - '**/*.py'
       - 'libs/**'
       - '.github/workflows/codeql-analysis.yml'
+      - '!bindings/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp'
   merge_group:
   schedule:
     - cron: '30 5 * * 6'
@@ -63,11 +65,6 @@ jobs:
       - name: Install libraries and the respective compiler
         run: sudo apt-get update && sudo apt-get install -yq libtbb-dev ${{matrix.compiler}}
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.9.x'
-
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -77,10 +74,16 @@ jobs:
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: '${{matrix.os}}-${{matrix.compiler}}-${{matrix.build_type}}'
+          key: '${{matrix.os}}-${{matrix.compiler}}'
           variant: ccache
           save: true
           max-size: 10G
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10.x'
+          cache: 'pip'
 
       - name: Setup mold
         uses: rui314/setup-mold@v1
@@ -122,6 +125,7 @@ jobs:
           -DFICTION_ENABLE_PCH=ON
           -DFICTION_CLI=ON
           -DFICTION_TEST=ON
+          -DFICTION_BENCHMARK=OFF
           -DFICTION_EXPERIMENTS=ON
           -DFICTION_Z3=ON
           -DFICTION_ENABLE_MUGEN=ON

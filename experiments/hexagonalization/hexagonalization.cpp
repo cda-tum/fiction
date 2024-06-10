@@ -5,10 +5,9 @@
 #include <fiction/algorithms/physical_design/orthogonal.hpp>  // scalable heuristic for physical design of FCN layouts
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/algorithms/verification/equivalence_checking.hpp>               // SAT-based equivalence checking
-#include <fiction/layouts/bounding_box.hpp>  // computes a minimum-sized box around all non-empty coordinates in a given layout
-#include <fiction/technology/area.hpp>                        // area requirement calculations
-#include <fiction/technology/cell_technologies.hpp>           // cell implementations
-#include <fiction/technology/sidb_bestagon_library.hpp>       // a pre-defined SiDB gate library
+#include <fiction/technology/area.hpp>                                            // area requirement calculations
+#include <fiction/technology/cell_technologies.hpp>                               // cell implementations
+#include <fiction/technology/sidb_bestagon_library.hpp>                           // a pre-defined SiDB gate library
 #include <fiction/technology/technology_mapping_library.hpp>  // pre-defined gate types for technology mapping
 #include <fiction/traits.hpp>                                 // traits for type-checking
 #include <fiction/types.hpp>                                  // pre-defined types suitable for the FCN domain
@@ -25,7 +24,6 @@
 #include <mockturtle/utils/tech_library.hpp>                   // technology library utils
 
 #include <cassert>
-#include <chrono>
 #include <cstdint>
 #include <cstdlib>
 #include <sstream>
@@ -128,8 +126,7 @@ int main()  // NOLINT
         const auto gate_level_layout = fiction::orthogonal<gate_lyt>(mapped_network, {}, &orthogonal_stats);
 
         // compute critical path and throughput
-        fiction::critical_path_length_and_throughput_stats cp_tp_stats{};
-        fiction::critical_path_length_and_throughput(gate_level_layout, &cp_tp_stats);
+        const auto cp_tp = fiction::critical_path_length_and_throughput(gate_level_layout);
 
         const auto hex_layout =
             fiction::hexagonalization<hex_lyt, gate_lyt>(gate_level_layout, &hexagonalization_stats);
@@ -152,15 +149,15 @@ int main()  // NOLINT
         fiction::area(cell_level_layout, area_ps, &area_stats);
 
         // log results
-        hexagonalization_exp(
-            benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(), cut_xag.num_gates(),
-            depth_cut_xag.depth(), mapped_network.num_gates(), depth_mapped_network.depth(), gate_level_layout.x() + 1,
-            gate_level_layout.y() + 1, (gate_level_layout.x() + 1) * (gate_level_layout.y() + 1), (hex_layout.x() + 1),
-            (hex_layout.y() + 1), (hex_layout.x() + 1) * (hex_layout.y() + 1), gate_level_layout.num_gates(),
-            gate_level_layout.num_wires(), cp_tp_stats.critical_path_length, cp_tp_stats.throughput,
-            mockturtle::to_seconds(orthogonal_stats.time_total),
-            mockturtle::to_seconds(hexagonalization_stats.time_total), eq_result, cell_level_layout.num_cells(),
-            area_stats.area);
+        hexagonalization_exp(benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(),
+                             cut_xag.num_gates(), depth_cut_xag.depth(), mapped_network.num_gates(),
+                             depth_mapped_network.depth(), gate_level_layout.x() + 1, gate_level_layout.y() + 1,
+                             (gate_level_layout.x() + 1) * (gate_level_layout.y() + 1), (hex_layout.x() + 1),
+                             (hex_layout.y() + 1), (hex_layout.x() + 1) * (hex_layout.y() + 1),
+                             gate_level_layout.num_gates(), gate_level_layout.num_wires(), cp_tp.critical_path_length,
+                             cp_tp.throughput, mockturtle::to_seconds(orthogonal_stats.time_total),
+                             mockturtle::to_seconds(hexagonalization_stats.time_total), eq_result,
+                             cell_level_layout.num_cells(), area_stats.area);
 
         hexagonalization_exp.save();
         hexagonalization_exp.table();

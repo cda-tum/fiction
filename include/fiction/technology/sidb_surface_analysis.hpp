@@ -7,7 +7,7 @@
 
 #include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/cell_technologies.hpp"
-#include "fiction/technology/sidb_surface.hpp"
+#include "fiction/technology/sidb_defect_surface.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/layout_utils.hpp"
 
@@ -52,7 +52,7 @@ using surface_black_list =
  * @return A black list of gate functions associated with tiles.
  */
 template <typename GateLibrary, typename GateLyt, typename CellLyt>
-[[nodiscard]] auto sidb_surface_analysis(const GateLyt& gate_lyt, const sidb_surface<CellLyt>& surface) noexcept
+[[nodiscard]] auto sidb_surface_analysis(const GateLyt& gate_lyt, const sidb_defect_surface<CellLyt>& surface) noexcept
 {
     static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
     static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");

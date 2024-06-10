@@ -13,6 +13,8 @@
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/coordinates.hpp>
 
+#include <cstdint>
+
 using namespace fiction;
 
 template <typename Lyt, typename Dist>

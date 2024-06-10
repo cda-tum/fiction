@@ -8,6 +8,7 @@
 #include "fiction/layouts/cartesian_layout.hpp"
 #include "fiction/layouts/cell_level_layout.hpp"
 #include "fiction/layouts/clocked_layout.hpp"
+#include "fiction/layouts/coordinates.hpp"
 #include "fiction/layouts/gate_level_layout.hpp"
 #include "fiction/layouts/hexagonal_layout.hpp"
 #include "fiction/layouts/shifted_cartesian_layout.hpp"
@@ -16,7 +17,9 @@
 #include "fiction/networks/technology_network.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
-#include "fiction/technology/sidb_surface.hpp"
+#include "fiction/technology/sidb_defect_surface.hpp"
+#include "fiction/technology/sidb_lattice.hpp"
+#include "fiction/technology/sidb_lattice_orientations.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/io/write_dot.hpp>
@@ -145,6 +148,15 @@ inline constexpr const char* tech_cell_name = std::is_same_v<std::decay_t<Tech>,
                                               std::is_same_v<std::decay_t<Tech>, sidb_technology> ? sidb_cell_name :
                                                                                                     "?";
 
+constexpr const char* sidb_100_name = "100";
+constexpr const char* sidb_111_name = "111";
+
+template <class Orientation>
+inline constexpr const char* sidb_lattice_name =
+    std::is_same_v<std::decay_t<Orientation>, sidb_100_lattice> ? sidb_100_name :
+    std::is_same_v<std::decay_t<Orientation>, sidb_111_lattice> ? sidb_111_name :
+                                                                  "?";
+
 /**
  * FCN cell-level layouts.
  */
@@ -163,18 +175,89 @@ using inml_cell_clk_lyt_ptr = std::shared_ptr<inml_cell_clk_lyt>;
 using sidb_cell_clk_lyt     = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 using sidb_cell_clk_lyt_ptr = std::shared_ptr<sidb_cell_clk_lyt>;
 
-using cds_sidb_cell_clk_lyt =
-    charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
-using cds_sidb_cell_clk_lyt_ptr = std::shared_ptr<cds_sidb_cell_clk_lyt>;
-
 using sidb_cell_clk_lyt_siqad = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>;
 using sidb_cell_clk_lyt_siqad_ptr = std::shared_ptr<sidb_cell_clk_lyt_siqad>;
 
-using sidb_defect_cell_clk_lyt_siqad     = sidb_surface<sidb_cell_clk_lyt_siqad>;
+using sidb_cell_clk_lyt_cube     = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>;
+using sidb_cell_clk_lyt_cube_ptr = std::shared_ptr<sidb_cell_clk_lyt_cube>;
+
+using sidb_100_cell_clk_lyt     = sidb_lattice<sidb_100_lattice, sidb_cell_clk_lyt>;
+using sidb_100_cell_clk_lyt_ptr = std::shared_ptr<sidb_100_cell_clk_lyt>;
+
+using sidb_100_cell_clk_lyt_siqad     = sidb_lattice<sidb_100_lattice, sidb_cell_clk_lyt_siqad>;
+using sidb_100_cell_clk_lyt_siqad_ptr = std::shared_ptr<sidb_100_cell_clk_lyt_siqad>;
+
+using sidb_100_cell_clk_lyt_cube     = sidb_lattice<sidb_100_lattice, sidb_cell_clk_lyt_cube>;
+using sidb_100_cell_clk_lyt_cube_ptr = std::shared_ptr<sidb_100_cell_clk_lyt_cube>;
+
+using sidb_111_cell_clk_lyt     = sidb_lattice<sidb_111_lattice, sidb_cell_clk_lyt>;
+using sidb_111_cell_clk_lyt_ptr = std::shared_ptr<sidb_111_cell_clk_lyt>;
+
+using sidb_111_cell_clk_lyt_siqad     = sidb_lattice<sidb_111_lattice, sidb_cell_clk_lyt_siqad>;
+using sidb_111_cell_clk_lyt_siqad_ptr = std::shared_ptr<sidb_111_cell_clk_lyt>;
+
+using sidb_111_cell_clk_lyt_cube     = sidb_lattice<sidb_111_lattice, sidb_cell_clk_lyt_cube>;
+using sidb_111_cell_clk_lyt_cube_ptr = std::shared_ptr<sidb_111_cell_clk_lyt_cube>;
+
+using cds_sidb_100_cell_clk_lyt     = charge_distribution_surface<sidb_100_cell_clk_lyt>;
+using cds_sidb_100_cell_clk_lyt_ptr = std::shared_ptr<cds_sidb_100_cell_clk_lyt>;
+
+using cds_sidb_cell_clk_lyt     = charge_distribution_surface<sidb_cell_clk_lyt>;
+using cds_sidb_cell_clk_lyt_ptr = std::shared_ptr<cds_sidb_cell_clk_lyt>;
+
+using cds_sidb_cell_clk_lyt_siqad     = charge_distribution_surface<sidb_cell_clk_lyt_siqad>;
+using cds_sidb_cell_clk_lyt_siqad_ptr = std::shared_ptr<cds_sidb_cell_clk_lyt_siqad>;
+
+using cds_sidb_cell_clk_lyt_cube     = charge_distribution_surface<sidb_cell_clk_lyt_siqad>;
+using cds_sidb_cell_clk_lyt_cube_ptr = std::shared_ptr<cds_sidb_cell_clk_lyt_cube>;
+
+using cds_sidb_100_cell_clk_lyt_siqad     = charge_distribution_surface<sidb_100_cell_clk_lyt_siqad>;
+using cds_sidb_100_cell_clk_lyt_siqad_ptr = std::shared_ptr<cds_sidb_100_cell_clk_lyt_siqad>;
+
+using cds_sidb_100_cell_clk_lyt_cube     = charge_distribution_surface<sidb_100_cell_clk_lyt_cube>;
+using cds_sidb_100_cell_clk_lyt_cube_ptr = std::shared_ptr<cds_sidb_100_cell_clk_lyt_cube>;
+
+using cds_sidb_111_cell_clk_lyt     = charge_distribution_surface<sidb_111_cell_clk_lyt>;
+using cds_sidb_111_cell_clk_lyt_ptr = std::shared_ptr<cds_sidb_111_cell_clk_lyt>;
+
+using cds_sidb_111_cell_clk_lyt_siqad     = charge_distribution_surface<sidb_111_cell_clk_lyt_siqad>;
+using cds_sidb_111_cell_clk_lyt_siqad_ptr = std::shared_ptr<sidb_111_cell_clk_lyt_siqad>;
+
+using cds_sidb_111_cell_clk_lyt_cube     = charge_distribution_surface<sidb_111_cell_clk_lyt_cube>;
+using cds_sidb_111_cell_clk_lyt_cube_ptr = std::shared_ptr<sidb_111_cell_clk_lyt_cube>;
+
+using sidb_defect_cell_clk_lyt     = sidb_defect_surface<sidb_cell_clk_lyt>;
+using sidb_defect_cell_clk_lyt_ptr = std::shared_ptr<sidb_defect_cell_clk_lyt>;
+
+using sidb_defect_cell_clk_lyt_siqad     = sidb_defect_surface<sidb_cell_clk_lyt_siqad>;
 using sidb_defect_cell_clk_lyt_siqad_ptr = std::shared_ptr<sidb_defect_cell_clk_lyt_siqad>;
 
-using cell_layout_t = std::variant<qca_cell_clk_lyt_ptr, stacked_qca_cell_clk_lyt_ptr, inml_cell_clk_lyt_ptr,
-                                   sidb_cell_clk_lyt_ptr, cds_sidb_cell_clk_lyt_ptr>;
+using sidb_defect_cell_clk_lyt_cube     = sidb_defect_surface<sidb_cell_clk_lyt_cube>;
+using sidb_defect_cell_clk_lyt_cube_ptr = std::shared_ptr<sidb_defect_cell_clk_lyt_cube>;
+
+using sidb_defect_100_cell_clk_lyt     = sidb_defect_surface<sidb_100_cell_clk_lyt>;
+using sidb_defect_100_cell_clk_lyt_ptr = std::shared_ptr<sidb_defect_100_cell_clk_lyt>;
+
+using sidb_defect_100_cell_clk_lyt_siqad     = sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>;
+using sidb_defect_100_cell_clk_lyt_siqad_ptr = std::shared_ptr<sidb_defect_100_cell_clk_lyt_siqad>;
+
+using sidb_defect_100_cell_clk_lyt_cube     = sidb_defect_surface<sidb_100_cell_clk_lyt_cube>;
+using sidb_defect_100_cell_clk_lyt_cube_ptr = std::shared_ptr<sidb_defect_100_cell_clk_lyt_cube>;
+
+using cds_sidb_defect_100_cell_clk_lyt     = charge_distribution_surface<sidb_defect_surface<sidb_100_cell_clk_lyt>>;
+using cds_sidb_defect_100_cell_clk_lyt_ptr = std::shared_ptr<cds_sidb_defect_100_cell_clk_lyt>;
+
+using cds_sidb_defect_100_cell_clk_lyt_siqad =
+    charge_distribution_surface<sidb_defect_surface<sidb_100_cell_clk_lyt_siqad>>;
+using cds_sidb_defect_100_cell_clk_lyt_siqad_ptr = std::shared_ptr<cds_sidb_defect_100_cell_clk_lyt_siqad>;
+
+using cds_sidb_defect_100_cell_clk_lyt_cube =
+    charge_distribution_surface<sidb_defect_surface<sidb_100_cell_clk_lyt_cube>>;
+using cds_sidb_defect_100_cell_clk_lyt_cube_ptr = std::shared_ptr<cds_sidb_defect_100_cell_clk_lyt_cube>;
+
+using cell_layout_t =
+    std::variant<qca_cell_clk_lyt_ptr, stacked_qca_cell_clk_lyt_ptr, inml_cell_clk_lyt_ptr, sidb_100_cell_clk_lyt_ptr,
+                 sidb_111_cell_clk_lyt_ptr, cds_sidb_100_cell_clk_lyt_ptr, cds_sidb_111_cell_clk_lyt_ptr>;
 
 }  // namespace fiction
 

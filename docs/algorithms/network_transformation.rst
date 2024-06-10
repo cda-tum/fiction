@@ -8,17 +8,66 @@ Network Conversion
 Network Balancing
 ------------------
 
-**Header:** ``fiction/algorithms/network_transformation/network_balancing.hpp``
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/algorithms/network_transformation/network_balancing.hpp``
 
-.. doxygenstruct:: fiction::network_balancing_params
-   :members:
-.. doxygenfunction:: fiction::network_balancing
+        .. doxygenstruct:: fiction::network_balancing_params
+           :members:
+        .. doxygenfunction:: fiction::network_balancing
+
+    .. tab:: Python
+        .. autoclass:: mnt.pyfiction.network_balancing_params
+            :members:
+        .. autofunction:: mnt.pyfiction.network_balancing
+        .. autofunction:: mnt.pyfiction.is_balanced
 
 Fanout Substitution
 -------------------
 
-**Header:** ``fiction/algorithms/network_transformation/fanout_substitution.hpp``
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/algorithms/network_transformation/fanout_substitution.hpp``
 
-.. doxygenstruct:: fiction::fanout_substitution_params
-   :members:
-.. doxygenfunction:: fiction::fanout_substitution
+        .. doxygenstruct:: fiction::fanout_substitution_params
+            :members:
+        .. doxygenfunction:: fiction::fanout_substitution
+
+    .. tab:: Python
+        .. autoclass:: mnt.pyfiction.fanout_substitution_params
+            :members:
+        .. autoclass:: mnt.pyfiction.substitution_strategy
+            :members:
+        .. autofunction:: mnt.pyfiction.fanout_substitution
+        .. autofunction:: mnt.pyfiction.is_fanout_substituted
+
+
+Technology Mapping
+------------------
+
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/algorithms/network_transformation/technology_mapping.hpp``
+
+        .. doxygenstruct:: fiction::technology_mapping_params
+           :members:
+        .. doxygenfunction:: fiction::and_or_not
+        .. doxygenfunction:: fiction::and_or_not_maj
+        .. doxygenfunction:: fiction::all_standard_2_input_functions
+        .. doxygenfunction:: fiction::all_standard_3_input_functions
+        .. doxygenfunction:: fiction::all_supported_standard_functions
+        .. doxygenstruct:: fiction::technology_mapping_stats
+           :members:
+        .. doxygenfunction:: fiction::technology_mapping
+
+    .. tab:: Python
+        .. autoclass:: mnt.pyfiction.technology_mapping_params
+            :members:
+        .. autofunction:: mnt.pyfiction.and_or_not
+        .. autofunction:: mnt.pyfiction.and_or_not_maj
+        .. autofunction:: mnt.pyfiction.all_standard_2_input_functions
+        .. autofunction:: mnt.pyfiction.all_standard_3_input_functions
+        .. autofunction:: mnt.pyfiction.all_supported_standard_functions
+        .. autoclass:: mnt.pyfiction.technology_mapping_stats
+            :members:
+        .. autofunction:: mnt.pyfiction.technology_mapping

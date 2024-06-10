@@ -1,12 +1,13 @@
 //
 // Created by marcel on 13.01.22.
 //
-
-#include <catch2/catch_test_macros.hpp>
+#include <catch2/catch_template_test_macros.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/layouts/bounding_box.hpp>
+#include <fiction/technology/cell_technologies.hpp>
+#include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -26,7 +27,7 @@ TEST_CASE("Initialize 2D gate-level bounding box", "[bounding-box]")
 {
     const auto lyt_xor_maj = blueprints::xor_maj_gate_layout<cart_gate_clk_lyt>();
 
-    bounding_box_2d bb_xor_maj{lyt_xor_maj};
+    const bounding_box_2d bb_xor_maj{lyt_xor_maj};
 
     CHECK(bb_xor_maj.get_min() == tile<cart_gate_clk_lyt>{0, 0});
     CHECK(bb_xor_maj.get_max() == tile<cart_gate_clk_lyt>{3, 2});
@@ -44,7 +45,7 @@ TEST_CASE("Initialize 2D gate-level bounding box", "[bounding-box]")
 
     const auto lyt_crossing = blueprints::crossing_layout<cart_gate_clk_lyt>();
 
-    bounding_box_2d bb_crossing{lyt_crossing};
+    const bounding_box_2d bb_crossing{lyt_crossing};
 
     CHECK(bb_crossing.get_min() == tile<cart_gate_clk_lyt>{0, 0});
     CHECK(bb_crossing.get_max() == tile<cart_gate_clk_lyt>{3, 2});
@@ -133,11 +134,12 @@ TEST_CASE("Update 2D cell-level bounding box", "[bounding-box]")
     CHECK(bb_and.get_y_size() == 5);
 }
 
-TEST_CASE("2D bounding box for siqad layout", "[bounding-box]")
+TEMPLATE_TEST_CASE("2D bounding box for siqad layout", "[bounding-box]", sidb_cell_clk_lyt_siqad,
+                   sidb_111_cell_clk_lyt_siqad, sidb_100_cell_clk_lyt_siqad)
 {
     SECTION("empyt layout")
     {
-        const sidb_cell_clk_lyt_siqad lyt{};
+        const TestType lyt{};
 
         const bounding_box_2d bb{lyt};
         const auto            nw = bb.get_min();
@@ -149,8 +151,8 @@ TEST_CASE("2D bounding box for siqad layout", "[bounding-box]")
 
     SECTION("one cell")
     {
-        sidb_cell_clk_lyt_siqad lyt{};
-        lyt.assign_cell_type({1, 0, 0}, sidb_cell_clk_lyt_siqad::technology::NORMAL);
+        TestType lyt{};
+        lyt.assign_cell_type({1, 0, 0}, TestType::technology::NORMAL);
 
         const bounding_box_2d bb{lyt};
         const auto            nw = bb.get_min();
@@ -162,10 +164,10 @@ TEST_CASE("2D bounding box for siqad layout", "[bounding-box]")
 
     SECTION("three cells as input, switched correct order")
     {
-        sidb_cell_clk_lyt_siqad lyt{};
-        lyt.assign_cell_type({0, 1, 0}, sidb_cell_clk_lyt_siqad::technology::NORMAL);
-        lyt.assign_cell_type({10, 0, 1}, sidb_cell_clk_lyt_siqad::technology::NORMAL);
-        lyt.assign_cell_type({5, 8, 0}, sidb_cell_clk_lyt_siqad::technology::NORMAL);
+        TestType lyt{};
+        lyt.assign_cell_type({0, 1, 0}, TestType::technology::NORMAL);
+        lyt.assign_cell_type({10, 0, 1}, TestType::technology::NORMAL);
+        lyt.assign_cell_type({5, 8, 0}, TestType::technology::NORMAL);
 
         const bounding_box_2d bb{lyt};
         const auto            nw = bb.get_min();
@@ -177,9 +179,9 @@ TEST_CASE("2D bounding box for siqad layout", "[bounding-box]")
 
     SECTION("two cells as input, on the same height in y-direction")
     {
-        sidb_cell_clk_lyt_siqad lyt{};
-        lyt.assign_cell_type({-3, 0, 1}, sidb_cell_clk_lyt_siqad::technology::NORMAL);
-        lyt.assign_cell_type({3, 0, 1}, sidb_cell_clk_lyt_siqad::technology::NORMAL);
+        TestType lyt{};
+        lyt.assign_cell_type({-3, 0, 1}, TestType::technology::NORMAL);
+        lyt.assign_cell_type({3, 0, 1}, TestType::technology::NORMAL);
 
         const bounding_box_2d bb{lyt};
         const auto            nw = bb.get_min();
@@ -191,11 +193,11 @@ TEST_CASE("2D bounding box for siqad layout", "[bounding-box]")
 
     SECTION("four cells as input, three on the same dimer")
     {
-        sidb_cell_clk_lyt_siqad lyt{};
-        lyt.assign_cell_type({3, 0, 0}, sidb_cell_clk_lyt_siqad::technology::NORMAL);
-        lyt.assign_cell_type({0, 3, 1}, sidb_cell_clk_lyt_siqad::technology::NORMAL);
-        lyt.assign_cell_type({5, 3, 0}, sidb_cell_clk_lyt_siqad::technology::NORMAL);
-        lyt.assign_cell_type({10, 3, 1}, sidb_cell_clk_lyt_siqad::technology::NORMAL);
+        TestType lyt{};
+        lyt.assign_cell_type({3, 0, 0}, TestType::technology::NORMAL);
+        lyt.assign_cell_type({0, 3, 1}, TestType::technology::NORMAL);
+        lyt.assign_cell_type({5, 3, 0}, TestType::technology::NORMAL);
+        lyt.assign_cell_type({10, 3, 1}, TestType::technology::NORMAL);
 
         const bounding_box_2d bb{lyt};
         const auto            nw = bb.get_min();
@@ -207,11 +209,11 @@ TEST_CASE("2D bounding box for siqad layout", "[bounding-box]")
 
     SECTION("four cells as input, two on the same dimer")
     {
-        sidb_cell_clk_lyt_siqad lyt{};
-        lyt.assign_cell_type({0, 0, 0}, sidb_cell_clk_lyt_siqad::technology::NORMAL);
-        lyt.assign_cell_type({1, 0, 1}, sidb_cell_clk_lyt_siqad::technology::NORMAL);
-        lyt.assign_cell_type({-2, 4, 0}, sidb_cell_clk_lyt_siqad::technology::NORMAL);
-        lyt.assign_cell_type({2, 4, 1}, sidb_cell_clk_lyt_siqad::technology::NORMAL);
+        TestType lyt{};
+        lyt.assign_cell_type({0, 0, 0}, TestType::technology::NORMAL);
+        lyt.assign_cell_type({1, 0, 1}, TestType::technology::NORMAL);
+        lyt.assign_cell_type({-2, 4, 0}, TestType::technology::NORMAL);
+        lyt.assign_cell_type({2, 4, 1}, TestType::technology::NORMAL);
 
         const bounding_box_2d bb{lyt};
         const auto            nw = bb.get_min();

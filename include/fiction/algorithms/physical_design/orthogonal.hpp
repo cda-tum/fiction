@@ -164,11 +164,10 @@ coloring_container<Ntk> east_south_edge_coloring(const Ntk& ntk) noexcept
             const auto finc = fanin_edges(ctn.color_ntk, n);
 
             // if any incoming edge is colored east, color them all east, and south otherwise
-            const auto color =
-                std::any_of(finc.fanin_edges.cbegin(), finc.fanin_edges.cend(),
-                            [&ctn](const auto& fe) { return ctn.color_ntk.edge_color(fe) == ctn.color_east; }) ?
-                    ctn.color_east :
-                    ctn.color_south;
+            const auto color = std::any_of(finc.fanin_edges.cbegin(), finc.fanin_edges.cend(), [&ctn](const auto& fe)
+                                           { return ctn.color_ntk.edge_color(fe) == ctn.color_east; }) ?
+                                   ctn.color_east :
+                                   ctn.color_south;
 
             std::for_each(finc.fanin_edges.cbegin(), finc.fanin_edges.cend(),
                           [&ctn, &color](const auto& fe) { recursively_paint_edges(ctn, fe, color); });
@@ -628,9 +627,9 @@ class orthogonal_impl
  * network directly used instead of relabeling the edges according to its DFS tree, ordering the vertices using
  * topological sorting instead of DFS, and adding an extra placement rule for nodes without predecessors.
  *
- * The algorithm works in polynomial time \f$ \mathcal{O}(3|N| + |L|) \f$ where \f$ |N| \f$ is the number of nodes in
- * the given network and \f$ |L| \f$ is the resulting layout size given by \f$ x \cdot y \f$, which approaches \f$
- * (\frac{|N|}{2})^2 \f$ asymptotically.
+ * The algorithm works in polynomial time \f$\mathcal{O}(3|N| + |L|)\f$ where \f$|N|\f$ is the number of nodes the given
+ * network and \f$|L|\f$ is the resulting layout size given by \f$x \cdot y\f$, which approaches \f$(\frac{|N|}{2})^2\f$
+ * asymptotically.
  *
  * May throw a high_degree_fanin_exception if `ntk` contains any node with a fan-in larger than 2.
  *

@@ -23,24 +23,11 @@
 
 namespace fiction
 {
-/**
- * Base number required for the correct physical simulation.
- */
-enum class required_simulation_base_number
-{
-    /**
-     * Two state simulation (i.e., negative and neutral) is sufficient.
-     */
-    TWO,
-    /**
-     * Three state simulation (i.e., negative, neutral, and positive) is required.
-     */
-    THREE
-};
+
 /**
  * This struct stores the parameters for the *QuickExact* algorithm.
  */
-template <typename Lyt>
+template <typename CellType>
 struct quickexact_params
 {
     /**
@@ -49,7 +36,7 @@ struct quickexact_params
     enum class automatic_base_number_detection
     {
         /**
-         * Simulation is conducted with the required base number (i.e, if positively charged SiDBs can occur, three
+         * Simulation is conducted with the required base number (i.e., if positively charged SiDBs can occur, three
          * state simulation is conducted).
          */
         ON,
@@ -61,16 +48,16 @@ struct quickexact_params
     /**
      * All parameters for physical SiDB simulations.
      */
-    sidb_simulation_parameters physical_parameters{};
+    sidb_simulation_parameters simulation_parameters{};
     /**
      * If `ON`, *QuickExact* checks which base number is required for the simulation, i.e., whether 3-state is
      * necessary or 2-state simulation is sufficient.
      */
     automatic_base_number_detection base_number_detection = automatic_base_number_detection::ON;
     /**
-     * Local external electrostatic potentials (e.g locally applied electrodes).
+     * Local external electrostatic potentials (e.g., locally applied electrodes).
      */
-    std::unordered_map<cell<Lyt>, double> local_external_potential = {};
+    std::unordered_map<CellType, double> local_external_potential = {};
     /**
      * Global external electrostatic potential. Value is applied on each cell in the layout.
      */
@@ -84,19 +71,19 @@ template <typename Lyt>
 class quickexact_impl
 {
   public:
-    quickexact_impl(const Lyt& lyt, const quickexact_params<Lyt>& parameter) :
+    quickexact_impl(const Lyt& lyt, const quickexact_params<cell<Lyt>>& parameter) :
             layout{lyt.clone()},
             charge_lyt{lyt},
             params{parameter}
     {
         charge_lyt.assign_all_charge_states(sidb_charge_state::NEGATIVE);
-        charge_lyt.assign_physical_parameters(parameter.physical_parameters);
+        charge_lyt.assign_physical_parameters(parameter.simulation_parameters);
     }
 
     sidb_simulation_result<Lyt> run() noexcept
     {
-        result.algorithm_name      = "QuickExact";
-        result.physical_parameters = params.physical_parameters;
+        result.algorithm_name        = "QuickExact";
+        result.simulation_parameters = params.simulation_parameters;
         result.additional_simulation_parameters.emplace("global_potential", params.global_potential);
 
         mockturtle::stopwatch<>::duration time_counter{};
@@ -107,10 +94,11 @@ class quickexact_impl
 
             // Determine if three state simulation (i.e., positively charged SiDBs can occur) is required.
             required_simulation_base_number base_number =
-                (params.base_number_detection == quickexact_params<Lyt>::automatic_base_number_detection::ON &&
+                (params.base_number_detection == quickexact_params<cell<Lyt>>::automatic_base_number_detection::ON &&
                  charge_lyt.is_three_state_simulation_required()) ||
-                        (params.base_number_detection == quickexact_params<Lyt>::automatic_base_number_detection::OFF &&
-                         params.physical_parameters.base == 3) ?
+                        (params.base_number_detection ==
+                             quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF &&
+                         params.simulation_parameters.base == 3) ?
                     required_simulation_base_number::THREE :
                     required_simulation_base_number::TWO;
 
@@ -223,7 +211,7 @@ class quickexact_impl
     /**
      * Parameters used for the simulation.
      */
-    quickexact_params<Lyt> params{};
+    quickexact_params<cell<Lyt>> params{};
     /**
      * Indices of all SiDBs that are pre-assigned to be negatively charged in a physically valid layout.
      */
@@ -249,6 +237,20 @@ class quickexact_impl
      */
     sidb_simulation_result<Lyt> result{};
     /**
+     * Base number required for the correct physical simulation.
+     */
+    enum class required_simulation_base_number
+    {
+        /**
+         * Two state simulation (i.e., negative and neutral) is sufficient.
+         */
+        TWO,
+        /**
+         * Three state simulation (i.e., negative, neutral, and positive) is required.
+         */
+        THREE
+    };
+    /**
      * This function initializes the charge layout with necessary parameters, and conducts
      * the physical simulation based on whether a three-state simulation is required.
      *
@@ -271,7 +273,7 @@ class quickexact_impl
         {
             charge_lyt.assign_base_number(2);
         }
-        charge_layout.assign_physical_parameters(params.physical_parameters);
+        charge_layout.assign_physical_parameters(params.simulation_parameters);
         charge_layout.assign_all_charge_states(sidb_charge_state::NEUTRAL);
         charge_layout.assign_dependent_cell(all_sidbs_in_lyt_without_negative_preassigned_ones[0]);
 
@@ -285,8 +287,8 @@ class quickexact_impl
         for (const auto& cell : preassigned_negative_sidbs)
         {
             charge_layout.add_sidb_defect_to_potential_landscape(
-                cell, sidb_defect{sidb_defect_type::UNKNOWN, -1, charge_layout.get_phys_params().epsilon_r,
-                                  charge_layout.get_phys_params().lambda_tf});
+                cell, sidb_defect{sidb_defect_type::UNKNOWN, -1, charge_layout.get_simulation_params().epsilon_r,
+                                  charge_layout.get_simulation_params().lambda_tf});
         }
 
         // Update all local potentials, system energy, and physical validity. The flag is set to
@@ -395,6 +397,7 @@ class quickexact_impl
 
                     charge_lyt_copy.update_after_charge_change();
                     charge_lyt_copy.recompute_system_energy();
+                    charge_lyt_copy.charge_distribution_to_index_general();
                     result.charge_distributions.push_back(charge_lyt_copy);
                 }
 
@@ -416,6 +419,7 @@ class quickexact_impl
 
                 charge_lyt_copy.update_after_charge_change();
                 charge_lyt_copy.recompute_system_energy();
+                charge_lyt_copy.charge_distribution_to_index_general();
                 result.charge_distributions.push_back(charge_lyt_copy);
             }
 
@@ -426,7 +430,7 @@ class quickexact_impl
 
             charge_layout.increase_charge_index_by_one(
                 dependent_cell_mode::VARIABLE, energy_calculation::KEEP_OLD_ENERGY_VALUE,
-                charge_distribution_history::CONSIDER,
+                charge_distribution_history::NEGLECT,
                 exhaustive_sidb_simulation_engine::QUICKEXACT);  // "false" allows that the charge state of the
                                                                  // dependent cell is automatically changed based on the
                                                                  // new charge distribution.
@@ -545,8 +549,9 @@ class quickexact_impl
 /**
  * *QuickExact* is a quick and exact physical simulation algorithm designed specifically for SiDB layouts. It was
  * proposed in \"The Need for Speed: Efficient Exact Simulation of Silicon Dangling Bond Logic\" by J. Drewniok, M.
- * Walter, and R. Wille in ASP-DAC 2024. It determines all physically valid charge configurations of a given SiDB
- * layout, providing a significant performance advantage of more than three orders of magnitude over *ExGS*
+ * Walter, and R. Wille in ASP-DAC 2024 (https://ieeexplore.ieee.org/document/10473946). It determines all physically
+ * valid charge configurations of a given SiDB layout, providing a significant performance advantage of more than three
+ * orders of magnitude over *ExGS*
  * (`exhaustive_ground_state_simulation`).
  *
  * The performance improvement of *QuickExact* can be attributed to the incorporation of three key ideas:
@@ -576,7 +581,8 @@ class quickexact_impl
  * @return Simulation Results.
  */
 template <typename Lyt>
-[[nodiscard]] sidb_simulation_result<Lyt> quickexact(const Lyt& lyt, const quickexact_params<Lyt>& params = {}) noexcept
+[[nodiscard]] sidb_simulation_result<Lyt> quickexact(const Lyt&                          lyt,
+                                                     const quickexact_params<cell<Lyt>>& params = {}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");

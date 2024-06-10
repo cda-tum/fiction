@@ -66,9 +66,9 @@ enum class graph_coloring_engine
      */
     LMXRLF,  // randomized
     /**
-     * A \f$ k \f$-coloring algorithm using tabu search proposed in \"Using Tabu Search Techniques for Graph Coloring\"
+     * A \f$k\f$-coloring algorithm using tabu search proposed in \"Using Tabu Search Techniques for Graph Coloring\"
      * by A. Hertz and D. de Werra in Computing 1987. The authors claim that it significantly outperforms simulated
-     * annealing. However, since it is a \f$ k \f$-coloring algorithm, it is required to set `k_color_value` in
+     * annealing. However, since it is a \f$k\f$-coloring algorithm, it is required to set `k_color_value` in
      * `determine_vertex_coloring_params` to the chromatic number that is to be checked for.
      */
     TABUCOL,  // k-coloring
@@ -83,19 +83,19 @@ enum class graph_coloring_engine
 enum class graph_coloring_sat_search_tactic
 {
     /**
-     * Ascend linearly by checking for \f$ k = 1, 2, 3, \dots \f$ until SAT. If at least one clique is passed, \f$ k \f$
-     * starts at the largest clique size \f$ |C| \f$ instead with \f$ k = |C|, |C| + 1, |C| + 2, \dots \f$
+     * Ascend linearly by checking for \f$k = 1, 2, 3, \dots\f$ until SAT. If at least one clique is passed, \f$k\f$
+     * starts at the largest clique size \f$|C|\f$ instead with \f$k = |C|, |C| + 1, |C| + 2, \dots\f$
      */
     LINEARLY_ASCENDING,
     /**
-     * Descend linearly by checking for \f$ k = |G|, |G| - 1, |G| - 2, \dots \f$ until UNSAT.
+     * Descend linearly by checking for \f$k = |G|, |G| - 1, |G| - 2, \dots\f$ until UNSAT.
      */
     LINEARLY_DESCENDING,
     /**
-     * First ascend exponentially by checking for \f$ k = 2^0, 2^1, 2^2, \dots \f$  until SAT, then perform binary
-     * search in the window \f$ [2^{h-1}, 2^h] \f$, where \f$ 2^h \f$ was the first SAT. If at least one clique is
-     * passed, \f$ k \f$ starts at the largest clique size \f$ |C| \f$ instead with \f$ k = 2^0 \cdot |C|, 2^1 \cdot
-     * |C|, 2^2 \cdot |C|, \dots \f$
+     * First ascend exponentially by checking for \f$k = 2^0, 2^1, 2^2, \dots\f$ until SAT, then perform binary
+     * search in the window \f$[2^{h-1}, 2^h]\f$, where \f$2^h\f$ was the first SAT. If at least one clique is
+     * passed, \f$k\f$ starts at the largest clique size \f$|C|\f$ instead with \f$k = 2^0 \cdot |C|, 2^1 \cdot
+     * |C|, 2^2 \cdot |C|, \dots\f$
      */
     BINARY_SEARCH
 };
@@ -132,7 +132,7 @@ struct determine_vertex_coloring_sat_params
 struct determine_vertex_coloring_heuristic_params
 {
     /**
-     * \f$ k \f$-color value for \f$ k \f$-coloring algorithms, e.g., TABUCOL.
+     * \f$k\f$-color value for \f$k\f$-coloring algorithms, e.g., TABUCOL.
      */
     std::size_t k_color_value = 0;
 };
@@ -492,10 +492,8 @@ class sat_coloring_handler
                               vc.reserve(clique.size());
 
                               // for each vertex in clique
-                              std::for_each(clique.cbegin(), clique.cend(),
-                                            [&instance, &c, &vc](const auto& v) {
-                                                vc.push_back({instance->variables[{v, c}], bill::positive_polarity});
-                                            });
+                              std::for_each(clique.cbegin(), clique.cend(), [&instance, &c, &vc](const auto& v)
+                                            { vc.push_back({instance->variables[{v, c}], bill::positive_polarity}); });
 
                               color_c_in_each_clique.push_back(bill::add_tseytin_or(instance->solver, vc));
                           });
@@ -985,8 +983,8 @@ class graph_coloring_impl
 /**
  * This function provides an interface to call various vertex coloring algorithms on the given graph. A vertex coloring
  * is the assignment of colors to graph vertices such that no two vertices that share an edge receive the same color. If
- * a graph is colorable with \f$ k \f$ colors, the graph is said to be \f$ k \f$-colorable. The minimum value of \f$ k
- * \f$ for a graph is called its chromatic number. To determine the chromatic number of a graph is \f$ NP \f$-complete
+ * a graph is colorable with \f$k\f$ colors, the graph is said to be \f$k\f$-colorable. The minimum value of \f$k\f$
+ * for a graph is called its chromatic number. To determine the chromatic number of a graph is \f$NP\f$-complete
  * in general. The provided algorithms attempt to get as close to the optimum coloring as possible. However, no
  * heuristic can give an optimality guarantee. If the exact chromatic number is required, the SAT-based engine must be
  * used. This may require exponential runtime in the worst case but is, on average, a lot faster due to the smart

@@ -18,7 +18,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Set the project name and version
 project(
   fiction
-  VERSION 0.5.0
+  VERSION 0.6.2
   DESCRIPTION
     "An open-source design automation framework for Field-coupled Nanotechnologies"
   HOMEPAGE_URL "https://github.com/cda-tum/fiction"
@@ -74,6 +74,13 @@ option(FICTION_EXPERIMENTS "Build fiction experiments" OFF)
 if(FICTION_EXPERIMENTS)
   message(STATUS "Building fiction experiments")
   add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/experiments)
+endif()
+
+# Python Bindings
+option(FICTION_PYTHON_BINDINGS "Build fiction Python bindings" OFF)
+if(FICTION_PYTHON_BINDINGS)
+  message(STATUS "Building fiction Python bindings")
+  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/bindings/)
 endif()
 
 # Testing

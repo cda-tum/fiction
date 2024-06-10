@@ -4,6 +4,12 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "fiction/layouts/cell_level_layout.hpp"
+#include "fiction/layouts/clocking_scheme.hpp"
+#include "fiction/layouts/coordinates.hpp"
+#include "fiction/technology/sidb_defect_surface.hpp"
+#include "fiction/technology/sidb_defects.hpp"
+#include "fiction/utils/layout_utils.hpp"
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/algorithms/physical_design/apply_gate_library.hpp>
@@ -14,8 +20,11 @@
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/technology/charge_distribution_surface.hpp>
 #include <fiction/technology/sidb_bestagon_library.hpp>
+#include <fiction/technology/sidb_lattice.hpp>
+#include <fiction/technology/sidb_lattice_orientations.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
+#include <fiction/utils/layout_utils.hpp>
 
 #include <sstream>
 
@@ -214,9 +223,10 @@ TEST_CASE("Print wire crossing cell-level layout", "[print-cell-level-layout]")
 
 TEST_CASE("Print empty charge layout", "[print-charge-layout]")
 {
-    using sqd_lyt = sidb_cell_clk_lyt_siqad;
+    const sidb_cell_clk_lyt_siqad     lyt{{2, 2}, "Empty"};
+    const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
-    const charge_distribution_surface<sqd_lyt> layout{sqd_lyt{{2, 2}, "Empty"}};
+    const charge_distribution_surface layout{lat};
 
     constexpr const char* layout_print = "[i] empty layout\n";
 
@@ -233,11 +243,13 @@ TEST_CASE("Print empty charge layout", "[print-charge-layout]")
     CHECK(print_stream.str() == layout_print);
 }
 
-TEST_CASE("layout which is sidb_surface and charge distribution surface but empty", "[print-charge-layout]")
+TEST_CASE("layout which is sidb_defect_surface and charge distribution surface but empty", "[print-charge-layout]")
 {
-    const sidb_surface<sidb_cell_clk_lyt_siqad> sidb_layout{{2, 2}};
+    const sidb_defect_surface<sidb_cell_clk_lyt_siqad> sidb_layout{{2, 2}};
 
-    const charge_distribution_surface<sidb_surface<sidb_cell_clk_lyt_siqad>> layout{sidb_layout};
+    const sidb_lattice<sidb_100_lattice, sidb_defect_surface<sidb_cell_clk_lyt_siqad>> lat{sidb_layout};
+
+    const charge_distribution_surface layout{lat};
 
     constexpr const char* layout_print = "[i] empty layout\n";
 
@@ -262,9 +274,10 @@ TEST_CASE("Print Bestagon OR-gate without defect", "[print-charge-layout]")
 
     layout.create_or({}, {}, {0, 0});
 
-    charge_distribution_surface<sidb_cell_clk_lyt_siqad> cl{
-        convert_to_siqad_coordinates(apply_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library>(layout)),
-        sidb_simulation_parameters{3, -0.32}, sidb_charge_state::NEGATIVE};
+    const auto lyt =
+        convert_to_siqad_coordinates(apply_gate_library<sidb_100_cell_clk_lyt, sidb_bestagon_library>(layout));
+
+    charge_distribution_surface cl{lyt, sidb_simulation_parameters{3, -0.32}, sidb_charge_state::NEGATIVE};
 
     cl.assign_charge_state({16, 3, 0}, sidb_charge_state::NEUTRAL);
     cl.assign_charge_state({42, 3, 0}, sidb_charge_state::NEGATIVE);
@@ -347,12 +360,11 @@ TEST_CASE("Print Bestagon OR-gate without defect", "[print-charge-layout]")
             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
             "\n"
             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
-            " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
-            "\n"
-            "\n";
+            " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n";
 
         CHECK(layout_print == print_stream.str());
     }
+
     SECTION("No crop")
     {
         print_stream.clear();
@@ -408,9 +420,7 @@ TEST_CASE("Print Bestagon OR-gate without defect", "[print-charge-layout]")
             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ●  ·  · \n"
             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
             "\n"
-            " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ● \n"
-            "\n"
-            "\n";
+            " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ● \n";
         CHECK(layout_print == print_stream.str());
     }
 }
@@ -423,10 +433,10 @@ TEST_CASE("Print Bestagon OR-gate with defect", "[print-charge-layout]")
 
     layout.create_or({}, {}, {0, 0});
 
-    charge_distribution_surface<sidb_surface<sidb_cell_clk_lyt_siqad>> cl{
-        sidb_surface{
-            convert_to_siqad_coordinates(apply_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library>(layout))},
-        sidb_simulation_parameters{3, -0.32}, sidb_charge_state::NEGATIVE};
+    const auto lyt = sidb_defect_surface{
+        convert_to_siqad_coordinates(apply_gate_library<sidb_100_cell_clk_lyt, sidb_bestagon_library>(layout))};
+
+    charge_distribution_surface cl{lyt, sidb_simulation_parameters{3, -0.32}, sidb_charge_state::NEGATIVE};
 
     cl.assign_sidb_defect({18, 3, 0}, sidb_defect{sidb_defect_type::UNKNOWN, 1});
     cl.assign_sidb_defect({40, 3, 0}, sidb_defect{sidb_defect_type::UNKNOWN, -1});
@@ -513,18 +523,16 @@ TEST_CASE("Print Bestagon OR-gate with defect", "[print-charge-layout]")
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
         "\n"
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
-        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
-        "\n"
-        "\n";
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n";
 
     CHECK(layout_print == print_stream.str());
 }
 
 TEST_CASE("Print layout without charges but defects", "[print-charge-layout]")
 {
-    const sidb_cell_clk_lyt layout{{2, 2}};
+    const sidb_100_cell_clk_lyt layout{};
 
-    sidb_surface<sidb_cell_clk_lyt_siqad> cl{convert_to_siqad_coordinates(layout)};
+    sidb_defect_surface<sidb_cell_clk_lyt_siqad> cl{convert_to_siqad_coordinates(layout)};
 
     cl.assign_cell_type({0, 0, 0}, sidb_cell_clk_lyt_siqad::technology::NORMAL);
     cl.assign_cell_type({1, 0, 1}, sidb_cell_clk_lyt_siqad::technology::NORMAL);
@@ -538,8 +546,10 @@ TEST_CASE("Print layout without charges but defects", "[print-charge-layout]")
 
     SECTION("crop_layout option activated")
     {
-        print_sidb_layout(print_stream, cl, false, true, true);
-        //
+        print_sidb_layout(print_stream,
+                          sidb_lattice<sidb_100_lattice, sidb_defect_surface<sidb_cell_clk_lyt_siqad>>{cl}, false, true,
+                          true);
+
         constexpr const char* layout_print = " ·  ·  ·  ·  ·  ·  ·  ·  · \n"
                                              " ·  ·  ·  ·  ·  ·  ·  ·  · \n"
                                              "\n"
@@ -547,21 +557,19 @@ TEST_CASE("Print layout without charges but defects", "[print-charge-layout]")
                                              " ·  ·  ·  ⊡  ·  ·  ⊟  ·  · \n"
                                              "\n"
                                              " ·  ·  ·  ·  ·  ·  ·  ·  · \n"
-                                             " ·  ·  ·  ·  ·  ·  ·  ·  · \n"
-                                             "\n"
-                                             "\n";
+                                             " ·  ·  ·  ·  ·  ·  ·  ·  · \n";
 
         CHECK(layout_print == print_stream.str());
     }
 
     SECTION("crop_layout option deactivated")
     {
-        print_sidb_layout(print_stream, cl, false, false, true);
-        //
+        print_sidb_layout(print_stream,
+                          sidb_lattice<sidb_100_lattice, sidb_defect_surface<sidb_cell_clk_lyt_siqad>>{cl}, false,
+                          false, true);
+
         constexpr const char* layout_print = " ⊞  ·  ·  ·  · \n"
-                                             " ·  ⊡  ·  ·  ⊟ \n"
-                                             "\n"
-                                             "\n";
+                                             " ·  ⊡  ·  ·  ⊟ \n";
 
         CHECK(layout_print == print_stream.str());
     }
@@ -573,45 +581,21 @@ TEST_CASE("Print Bestagon OR-gate", "[print-charge-layout]")
 
     hex_gate_lyt layout{aspect_ratio<hex_gate_lyt>{0, 0}};
 
-    layout.create_or({}, {}, {0, 0});
-
-    const auto cell_layout_or       = apply_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library>(layout);
-    const auto cell_layout_or_siqad = convert_to_siqad_coordinates(cell_layout_or);
-
-    std::stringstream print_stream{};
-
-    print_sidb_layout(print_stream, cell_layout_or_siqad, false, true, true);
-
     constexpr const char* layout_print =
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
         "\n"
-        " ·  ·  o  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  o  ·  · \n"
+        " ·  ·  ◯  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ◯  ·  · \n"
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
         "\n"
-        " ·  ·  ·  ·  o  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  o  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ◯  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ◯  ·  ·  ·  · \n"
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
         "\n"
-        " ·  ·  ·  ·  ·  ·  ·  ·  o  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  o  ·  ·  ·  ·  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ◯  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ◯  ·  ·  ·  ·  ·  ·  ·  · \n"
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
         "\n"
-        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  o  ·  ·  ·  ·  ·  ·  ·  ·  ·  o  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ◯  ·  ·  ·  ·  ·  ·  ·  ·  ·  ◯  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
-        "\n"
-        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
-        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
-        "\n"
-        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
-        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
-        "\n"
-        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  o  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
-        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
-        "\n"
-        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  o  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
-        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  o  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
-        "\n"
-        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
-        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  o  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
         "\n"
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
@@ -619,28 +603,187 @@ TEST_CASE("Print Bestagon OR-gate", "[print-charge-layout]")
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
         "\n"
-        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  o  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ◯  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
         "\n"
-        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  o  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
-        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ◯  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ◯  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
         "\n"
-        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  o  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ◯  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
         "\n"
-        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  o  ·  ·  ·  ·  ·  ·  ·  · \n"
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
-        "\n"
-        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  o  ·  ·  ·  · \n"
-        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
-        "\n"
-        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  o  ·  · \n"
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
         "\n"
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
         "\n"
-        "\n";
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ◯  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ◯  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ◯  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ◯  ·  ·  ·  ·  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ◯  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ◯  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        "\n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+        " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n";
 
-    CHECK(layout_print == print_stream.str());
+    SECTION("No lattice orientation is provided, SiDB cell-level layout is used as input")
+    {
+        layout.create_or({}, {}, {0, 0});
+
+        const auto cell_layout_or       = apply_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library>(layout);
+        const auto cell_layout_or_siqad = convert_to_siqad_coordinates(cell_layout_or);
+
+        std::stringstream print_stream{};
+
+        print_sidb_layout(print_stream, cell_layout_or_siqad, false, true, true);
+        CHECK(layout_print == print_stream.str());
+    }
+
+    SECTION("Lattice orientation is provided, sidb lattice is used as input")
+    {
+        layout.create_or({}, {}, {0, 0});
+
+        const auto cell_layout_or       = apply_gate_library<sidb_100_cell_clk_lyt, sidb_bestagon_library>(layout);
+        const auto cell_layout_or_siqad = convert_to_siqad_coordinates(cell_layout_or);
+
+        std::stringstream print_stream{};
+
+        print_sidb_layout(print_stream, cell_layout_or_siqad, false, true, true);
+        CHECK(layout_print == print_stream.str());
+    }
+}
+
+TEST_CASE("Print H-Si 111 surface with six cells, defined with siqad::coord_t", "[print-charge-layout]")
+{
+    sidb_cell_clk_lyt_siqad lyt{};
+
+    lyt.assign_cell_type({0, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+    lyt.assign_cell_type({1, 1, 1}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+    lyt.assign_cell_type({2, 2, 1}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+
+    lyt.assign_cell_type({8, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 1, 1}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+    lyt.assign_cell_type({5, 2, 1}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+
+    SECTION("Print the cell-level layout")
+    {
+        constexpr const char* layout_print = " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             "  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             " ·  ·  ◯  ·  ·  ·  ·  ·  ·  ·  ◯  ·  · \n"
+                                             "  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             "  ·  ·  ·  ◯  ·  ·  ·  ·  ◯  ·  ·  ·  · \n"
+                                             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             "  ·  ·  ·  ·  ◯  ·  ·  ◯  ·  ·  ·  ·  · \n"
+                                             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             "  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             "\n"
+                                             "\n";
+
+        const sidb_lattice<sidb_111_lattice, decltype(lyt)> lattice_lyt{lyt};
+
+        std::stringstream print_stream{};
+
+        print_sidb_layout(print_stream, lattice_lyt, false, true, true);
+        CHECK(layout_print == print_stream.str());
+    }
+
+    SECTION("Print charge distribution cell-level layout")
+    {
+        constexpr const char* layout_print = " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             "  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             " ·  ·  ●  ·  ·  ·  ·  ·  ·  ·  ●  ·  · \n"
+                                             "  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             "  ·  ·  ·  ●  ·  ·  ·  ·  ●  ·  ·  ·  · \n"
+                                             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             "  ·  ·  ·  ·  ●  ·  ·  ●  ·  ·  ·  ·  · \n"
+                                             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             "  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             "\n"
+                                             "\n";
+
+        const sidb_lattice<sidb_111_lattice, decltype(lyt)> lattice_lyt{lyt};
+
+        std::stringstream print_stream{};
+
+        const auto cds = charge_distribution_surface{lattice_lyt};
+
+        print_sidb_layout(print_stream, cds, false, true, true);
+        CHECK(layout_print == print_stream.str());
+    }
+}
+
+TEST_CASE("Print H-Si 111 surface with six cells, defined with offset::ucoord_t coordinates", "[print-charge-layout]")
+{
+    sidb_cell_clk_lyt lyt{};
+
+    lyt.assign_cell_type({0, 0}, sidb_cell_clk_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({1, 3}, sidb_cell_clk_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({2, 5}, sidb_cell_clk_lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({8, 0}, sidb_cell_clk_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 3}, sidb_cell_clk_lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({5, 5}, sidb_cell_clk_lyt::cell_type::NORMAL);
+
+    SECTION("Print the cell-level layout")
+    {
+        constexpr const char* layout_print = " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             "  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             " ·  ·  ◯  ·  ·  ·  ·  ·  ·  ·  ◯  ·  · \n"
+                                             "  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             "  ·  ·  ·  ◯  ·  ·  ·  ·  ◯  ·  ·  ·  · \n"
+                                             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             "  ·  ·  ·  ·  ◯  ·  ·  ◯  ·  ·  ·  ·  · \n"
+                                             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             "  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             "\n"
+                                             "\n";
+
+        const sidb_lattice<sidb_111_lattice, decltype(lyt)> lattice_lyt{lyt};
+
+        std::stringstream print_stream{};
+
+        print_sidb_layout(print_stream, lattice_lyt, false, true);
+        CHECK(layout_print == print_stream.str());
+    }
+
+    SECTION("Print charge distribution cell-level layout")
+    {
+        constexpr const char* layout_print = " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             "  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             " ·  ·  ●  ·  ·  ·  ·  ·  ·  ·  ●  ·  · \n"
+                                             "  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             "  ·  ·  ·  ●  ·  ·  ·  ·  ●  ·  ·  ·  · \n"
+                                             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             "  ·  ·  ·  ·  ●  ·  ·  ●  ·  ·  ·  ·  · \n"
+                                             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             "  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
+                                             "\n"
+                                             "\n";
+
+        const sidb_lattice<sidb_111_lattice, decltype(lyt)> lattice_lyt{lyt};
+
+        std::stringstream print_stream{};
+
+        const auto cds = charge_distribution_surface{lattice_lyt};
+
+        print_sidb_layout(print_stream, cds, false, true);
+        CHECK(layout_print == print_stream.str());
+    }
 }

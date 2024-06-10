@@ -20,9 +20,9 @@ namespace fiction
 
 /**
  * A distance map is a two-dimensional array of distances between coordinates. The distance map is accessed via the
- * indices of the coordinates in the associated layout. A coordinate index \f$ i \f$ is calculated as follows:
- * \f$ i = y \cdot W + x \f$, with \f$ W \f$ being the width of the layout. As an example, in a layout of size
- * \f$ 3 \times 3 \f$, the coordinate index of the coordinate \f$ (2, 1) \f$ has index \f$ 1 \cdot 3 + 2 = 5 \f$.
+ * indices of the coordinates in the associated layout. A coordinate index \f$i\f$ is calculated as follows:
+ * \f$i = y \cdot W + x\f$, with \f$W\f$ being the width of the layout. As an example, in a layout of size
+ * \f$3 \times 3\f$, the coordinate index of the coordinate \f$(2, 1)\f$ has index \f$1 \cdot 3 + 2 = 5\f$.
  *
  * The `distance_map` is to be preferred over the `sparse_distance_map` in most cases when performance is the main goal.
  */
@@ -41,7 +41,7 @@ using sparse_distance_map = phmap::parallel_flat_hash_map<std::pair<coordinate<L
  * This function fully initializes a `distance_map` for a given layout and distance functor. It computes the distances
  * between all pairs of coordinates in the layout and stores them in the distance map for quick subsequent access.
  *
- * This function performs \f$ \mathcal{O}(|L|^2) \f$ distance computations, where \f$ |L| \f$ is the number of
+ * This function performs \f$\mathcal{O}(|L|^2)\f$ distance computations, where \f$|L|\f$ is the number of
  * coordinates in the layout.
  *
  * @tparam Lyt Coordinate layout type.
@@ -74,7 +74,7 @@ template <typename Lyt, typename Dist>
  * distances between all pairs of coordinates in the layout and stores them in the distance map for quick subsequent
  * access.
  *
- * This function performs \f$ \mathcal{O}(|L|^2) \f$ distance computations, where \f$ |L| \f$ is the number of
+ * This function performs \f$\mathcal{O}(|L|^2)\f$ distance computations, where \f$|L|\f$ is the number of
  * coordinates in the layout.
  *
  * @tparam Lyt Coordinate layout type.
@@ -97,10 +97,8 @@ initialize_sparse_distance_map(const Lyt& lyt, const distance_functor<Lyt, Dist>
     lyt.foreach_coordinate(
         [&lyt, &dist_fn, &dist_map](const auto& c1)
         {
-            lyt.foreach_coordinate(
-                [&lyt, &dist_fn, &dist_map, &c1](const auto& c2) {
-                    dist_map[{c1, c2}] = dist_fn(lyt, c1, c2);
-                });
+            lyt.foreach_coordinate([&lyt, &dist_fn, &dist_map, &c1](const auto& c2)
+                                   { dist_map[{c1, c2}] = dist_fn(lyt, c1, c2); });
         });
 
     return dist_map;

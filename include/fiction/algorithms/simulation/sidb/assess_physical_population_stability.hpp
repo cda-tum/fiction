@@ -8,18 +8,18 @@
 #include "fiction/algorithms/simulation/sidb/convert_potential_to_distance.hpp"
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
-#include "fiction/layouts/cell_level_layout.hpp"
+#include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
+#include "fiction/technology/charge_distribution_surface.hpp"
+#include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/types.hpp"
 
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <cstdlib>
 #include <iterator>
 #include <limits>
-#include <tuple>
-#include <unordered_map>
-#include <utility>
+#include <vector>
 
 namespace fiction
 {
@@ -90,7 +90,7 @@ struct assess_physical_population_stability_params
     /**
      * Parameters for the electrostatic potential.
      */
-    sidb_simulation_parameters physical_parameters{};
+    sidb_simulation_parameters simulation_parameters{};
     /**
      * The precision level for the conversion from the minimum potential difference to the corresponding
      * distance.
@@ -128,9 +128,9 @@ class assess_physical_population_stability_impl
      */
     [[nodiscard]] std::vector<population_stability_information<Lyt>> run() noexcept
     {
-        const quickexact_params<Lyt> quickexact_parameters{params.physical_parameters};
-        const auto                   simulation_results = quickexact(layout, quickexact_parameters);
-        const auto energy_and_unique_charge_index       = collect_energy_and_charge_index(simulation_results);
+        const quickexact_params<cell<Lyt>> quickexact_parameters{params.simulation_parameters};
+        const auto                         simulation_results = quickexact(layout, quickexact_parameters);
+        const auto energy_and_unique_charge_index             = collect_energy_and_charge_index(simulation_results);
 
         std::vector<population_stability_information<Lyt>> popstability_information{};
         popstability_information.reserve(simulation_results.charge_distributions.size());
@@ -188,7 +188,7 @@ class assess_physical_population_stability_impl
                 });
             population_stability_info.system_energy                       = charge_lyt.get_system_energy();
             population_stability_info.distance_corresponding_to_potential = convert_potential_to_distance(
-                population_stability_info.minimum_potential_difference_to_transition, params.physical_parameters,
+                population_stability_info.minimum_potential_difference_to_transition, params.simulation_parameters,
                 params.precision_for_distance_corresponding_to_potential);
             popstability_information.push_back(population_stability_info);
         }
@@ -237,11 +237,11 @@ class assess_physical_population_stability_impl
     {
         auto updated_pop_stability_information = pop_stability_information;
 
-        if (std::abs(-local_potential + params.physical_parameters.mu_minus) <
+        if (std::abs(-local_potential + params.simulation_parameters.mu_minus) <
             updated_pop_stability_information.minimum_potential_difference_to_transition)
         {
             updated_pop_stability_information.minimum_potential_difference_to_transition =
-                std::abs(-local_potential + params.physical_parameters.mu_minus);
+                std::abs(-local_potential + params.simulation_parameters.mu_minus);
             updated_pop_stability_information.critical_cell      = c;
             updated_pop_stability_information.transition_from_to = transition_type::NEGATIVE_TO_NEUTRAL;
         }
@@ -264,14 +264,14 @@ class assess_physical_population_stability_impl
                            const population_stability_information<Lyt>& pop_stability_information) noexcept
     {
         auto updated_pop_stability_information = pop_stability_information;
-        if (std::abs(-local_potential + params.physical_parameters.mu_minus) <
-            std::abs(-local_potential + params.physical_parameters.mu_plus()))
+        if (std::abs(-local_potential + params.simulation_parameters.mu_minus) <
+            std::abs(-local_potential + params.simulation_parameters.mu_plus()))
         {
-            if (std::abs(-local_potential + params.physical_parameters.mu_minus) <
+            if (std::abs(-local_potential + params.simulation_parameters.mu_minus) <
                 updated_pop_stability_information.minimum_potential_difference_to_transition)
             {
                 updated_pop_stability_information.minimum_potential_difference_to_transition =
-                    std::abs(-local_potential + params.physical_parameters.mu_minus);
+                    std::abs(-local_potential + params.simulation_parameters.mu_minus);
                 updated_pop_stability_information.critical_cell      = c;
                 updated_pop_stability_information.transition_from_to = transition_type::NEUTRAL_TO_NEGATIVE;
             }
@@ -279,11 +279,11 @@ class assess_physical_population_stability_impl
 
         else
         {
-            if (std::abs(-local_potential + params.physical_parameters.mu_plus()) <
+            if (std::abs(-local_potential + params.simulation_parameters.mu_plus()) <
                 updated_pop_stability_information.minimum_potential_difference_to_transition)
             {
                 updated_pop_stability_information.minimum_potential_difference_to_transition =
-                    std::abs(-local_potential + params.physical_parameters.mu_plus());
+                    std::abs(-local_potential + params.simulation_parameters.mu_plus());
                 updated_pop_stability_information.critical_cell      = c;
                 updated_pop_stability_information.transition_from_to = transition_type::NEUTRAL_TO_POSITIVE;
             }
@@ -307,11 +307,11 @@ class assess_physical_population_stability_impl
                             const population_stability_information<Lyt>& pop_stability_information) noexcept
     {
         auto updated_pop_stability_information = pop_stability_information;
-        if (std::abs(-local_potential + params.physical_parameters.mu_plus()) <
+        if (std::abs(-local_potential + params.simulation_parameters.mu_plus()) <
             updated_pop_stability_information.minimum_potential_difference_to_transition)
         {
             updated_pop_stability_information.minimum_potential_difference_to_transition =
-                std::abs(-local_potential + params.physical_parameters.mu_plus());
+                std::abs(-local_potential + params.simulation_parameters.mu_plus());
             updated_pop_stability_information.critical_cell      = c;
             updated_pop_stability_information.transition_from_to = transition_type::POSITIVE_TO_NEUTRAL;
         }
@@ -335,10 +335,8 @@ class assess_physical_population_stability_impl
 
         std::transform(
             sim_results.charge_distributions.cbegin(), sim_results.charge_distributions.cend(),
-            std::back_inserter(energy_charge_index),
-            [](const auto& ch_lyt) {
-                return energy_and_charge_index{ch_lyt.get_system_energy(), ch_lyt.get_charge_index_and_base().first};
-            });
+            std::back_inserter(energy_charge_index), [](const auto& ch_lyt)
+            { return energy_and_charge_index{ch_lyt.get_system_energy(), ch_lyt.get_charge_index_and_base().first}; });
 
         // Sort the vector in ascending order of the energy value
         std::sort(energy_charge_index.begin(), energy_charge_index.end(),
@@ -367,7 +365,6 @@ assess_physical_population_stability(const Lyt& lyt, const assess_physical_popul
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(!is_charge_distribution_surface_v<Lyt>, "Lyt cannot be a charge distribution surface");
 
     detail::assess_physical_population_stability_impl<Lyt> p{lyt, params};
     return p.run();

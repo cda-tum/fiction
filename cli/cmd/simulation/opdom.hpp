@@ -40,9 +40,12 @@ class opdom_command : public command
      * @param e alice::environment that specifies stores etc.
      */
     explicit opdom_command(const environment::ptr& e) :
-            command(e, "Opdom is a quick and exact electrostatic ground state simulation algorithm designed "
-                       "specifically for SiDB layouts. It provides a significant performance advantage of more than "
-                       "three orders of magnitude over ExGS from SiQAD.")
+            command(
+                e,
+                "Computes the operational domain for the current SiDB cell-level layout in store. An operational "
+                "domain is a set of simulation parameter values for which a given SiDB layout is logically operational."
+                "This means that a layout is deemed operational if the layout's ground state corresponds with a given "
+                "Boolean function at the layout's outputs for all possible input combinations.")
     {
         add_option("--random_sampling,-r", num_random_samples,
                    "Use random sampling instead of grid search with this many random samples");
@@ -54,10 +57,10 @@ class opdom_command : public command
 
         add_option("filename", filename, "CSV filename to write the operational domain to")->required();
 
-        add_option("--epsilon_r,-e", physical_params.epsilon_r, "Electric permittivity of the substrate (unit-less)",
+        add_option("--epsilon_r,-e", simulation_params.epsilon_r, "Electric permittivity of the substrate (unit-less)",
                    true);
-        add_option("--lambda_tf,-l", physical_params.lambda_tf, "Thomas-Fermi screening distance (unit: nm)", true);
-        add_option("--mu_minus,-m", physical_params.mu_minus, "Energy transition level (0/-) (unit: eV)", true);
+        add_option("--lambda_tf,-l", simulation_params.lambda_tf, "Thomas-Fermi screening distance (unit: nm)", true);
+        add_option("--mu_minus,-m", simulation_params.mu_minus, "Energy transition level (0/-) (unit: eV)", true);
 
         add_option("--x_sweep", x_sweep, "Sweep parameter of the x dimension [epsilon_r, lambda_tf, mu_minus]", true);
         add_option("--y_sweep", y_sweep, "Sweep parameter of the y dimension [epsilon_r, lambda_tf, mu_minus]", true);
@@ -80,13 +83,13 @@ class opdom_command : public command
         op_domain = {};
         stats     = {};
 
-        if (physical_params.epsilon_r <= 0)
+        if (simulation_params.epsilon_r <= 0)
         {
             env->out() << "[e] epsilon_r must be positive" << std::endl;
             reset_params();
             return;
         }
-        if (physical_params.lambda_tf <= 0)
+        if (simulation_params.lambda_tf <= 0)
         {
             env->out() << "[e] lambda_tf must be positive" << std::endl;
             reset_params();
@@ -221,7 +224,7 @@ class opdom_command : public command
                     return;
                 }
 
-                params.sim_params = physical_params;
+                params.simulation_parameters = simulation_params;
 
                 if (is_set("random_sampling"))
                 {
@@ -261,7 +264,7 @@ class opdom_command : public command
     /**
      * Physical parameters for the simulation.
      */
-    fiction::sidb_simulation_parameters physical_params{2, -0.32, 5.6, 5.0};
+    fiction::sidb_simulation_parameters simulation_params{2, -0.32, 5.6, 5.0};
     /**
      * Operational domain parameters.
      */
@@ -326,11 +329,11 @@ class opdom_command : public command
      */
     void reset_params()
     {
-        physical_params = fiction::sidb_simulation_parameters{2, -0.32, 5.6, 5.0};
-        params          = {};
-        x_sweep         = {};
-        y_sweep         = {};
-        filename        = {};
+        simulation_params = fiction::sidb_simulation_parameters{2, -0.32, 5.6, 5.0};
+        params            = {};
+        x_sweep           = {};
+        y_sweep           = {};
+        filename          = {};
     }
 };
 

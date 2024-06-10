@@ -94,7 +94,7 @@ Furthermore, if you use any of the design automation algorithms, please consider
           title={{\emph{QuickSim}: Efficient \emph{and} Accurate Physical Simulation of Silicon Dangling Bond Logic}},
           author={Drewniok, Jan and Walter, Marcel and Ng, Samuel Sze Hang and Walus, Konrad and Wille, Robert},
           booktitle={IEEE International Conference on Nanotechnology (IEEE NANO)},
-          pages={817-822},
+          pages={817--822},
           year={2023}
         }
 
@@ -106,6 +106,7 @@ Furthermore, if you use any of the design automation algorithms, please consider
           title={{The Need for Speed: Efficient Exact Simulation of Silicon Dangling Bond Logic}},
           author={Drewniok, Jan and Walter, Marcel and Wille, Robert},
           booktitle={Asia and South Pacific Design Automation Conference (ASP-DAC)},
+          pages={576--581},
           year={2024}
         }
 
@@ -117,17 +118,28 @@ Furthermore, if you use any of the design automation algorithms, please consider
           title={{Temperature Behavior of Silicon Dangling Bond Logic}},
           author={Drewniok, Jan and Walter, Marcel and Wille, Robert},
           booktitle={IEEE International Conference on Nanotechnology (IEEE NANO)},
-          pages={925-930},
+          pages={925--930},
           year={2023}
         }
 
-* :ref:`Operational Domain computation <operational_domain_flood_fill / operational_domain_contour_tracing>` (``opdom``):
+* :ref:`Operational Domain computation <opdom>` (``opdom``):
 
     .. code-block:: tex
 
         @inproceedings{walter2023opdom,
           title={{Reducing the Complexity of Operational Domain Computation in Silicon Dangling Bond Logic}},
           author={Walter, Marcel and Drewniok, Jan and Ng, Samuel Sze Hang and Walus, Konrad and Wille, Robert},
+          booktitle={International Symposium on Nanoscale Architectures (NANOARCH)},
+          year={2023}
+        }
+
+* :ref:`SiDB Gate Design <gate_design>` (``gate_design``):
+
+    .. code-block:: tex
+
+        @inproceedings{drewniok2023gatedesigner,
+          title={{Minimal Design of SiDB Gates: An Optimal Basis for Circuits Based on Silicon Dangling Bonds.}},
+          author={Drewniok, Jan and Walter, Marcel and Wille, Robert},
           booktitle={International Symposium on Nanoscale Architectures (NANOARCH)},
           year={2023}
         }
@@ -140,7 +152,7 @@ Furthermore, if you use any of the design automation algorithms, please consider
           title={{Scalable Physical Design for Silicon Dangling Bond Logic: How a 45\textdegree~Turn Prevents the Reinvention of the Wheel}},
           author={Hofmann, Simon and Walter, Marcel and Wille, Robert},
           booktitle={IEEE International Conference on Nanotechnology (IEEE NANO)},
-          pages={872-877},
+          pages={872--877},
           year={2023}
         }
 

@@ -79,7 +79,7 @@ class clocking_scheme
             return std::invoke(fn, cz);
         }
 
-        if (auto it = override.find(cz); it != override.end())
+        if (const auto it = override.find(cz); it != override.cend())
         {
             return it->second;
         }
@@ -736,6 +736,19 @@ bool is_linear_scheme(const clocking_scheme<clock_zone<Lyt>>& scheme) noexcept
     return std::any_of(linear_schemes.cbegin(), linear_schemes.cend(),
                        [&scheme](const auto& name) { return scheme == name; });
 }
+/**
+ * Exception to be thrown when an unsupported clocking scheme is requested.
+ */
+class unsupported_clocking_scheme_exception : public std::exception
+{
+  public:
+    explicit unsupported_clocking_scheme_exception() noexcept : std::exception() {}
+
+    [[nodiscard]] const char* what() const noexcept
+    {
+        return "given clocking scheme is unsupported";
+    }
+};
 /**
  * Returns a clocking scheme by name.
  *

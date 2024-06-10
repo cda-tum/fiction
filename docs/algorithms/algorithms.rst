@@ -51,9 +51,11 @@ Physical Design
    orthogonal.rst
    one_pass_synthesis.rst
    color_routing.rst
-   apply_gate_library.rst
    hexagonalization.rst
    post_layout_optimization.rst
+   wiring_reduction.rst
+   determine_clocking.rst
+   apply_gate_library.rst
    design_sidb_gates.rst
 
 
