@@ -153,6 +153,18 @@ static const char *__doc_fiction_a_star_params_crossings =
 R"doc(Allow paths to cross over obstructed tiles if they are occupied by
 wire segments.)doc";
 
+static const char *__doc_fiction_a_star_pr = R"doc()doc";
+
+static const char *__doc_fiction_a_star_pr_stats = R"doc(This struct stores statistics about the wiring reduction process.)doc";
+
+static const char *__doc_fiction_a_star_pr_stats_duration = R"doc(Runtime of the wiring reduction process.)doc";
+
+static const char *__doc_fiction_a_star_pr_stats_report =
+R"doc(Reports the statistics to the given output stream.
+
+Parameter ``out``:
+    Output stream.)doc";
+
 static const char *__doc_fiction_all_coordinates_in_spanned_area =
 R"doc(Generates a vector of all coordinates within an area spanned by two
 coordinates.
@@ -3321,6 +3333,18 @@ computation.)doc";
 
 static const char *__doc_fiction_design_sidb_gates_params_simulation_parameters = R"doc(All Parameters for physical SiDB simulations.)doc";
 
+static const char *__doc_fiction_detail_NestedVectorHash = R"doc()doc";
+
+static const char *__doc_fiction_detail_NestedVectorHash_operator_call = R"doc()doc";
+
+static const char *__doc_fiction_detail_PriorityQueue = R"doc()doc";
+
+static const char *__doc_fiction_detail_PriorityQueue_empty = R"doc()doc";
+
+static const char *__doc_fiction_detail_PriorityQueue_get = R"doc()doc";
+
+static const char *__doc_fiction_detail_PriorityQueue_put = R"doc()doc";
+
 static const char *__doc_fiction_detail_a_star_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_a_star_impl_a_star_impl = R"doc()doc";
@@ -3759,6 +3783,8 @@ Parameter ``to_delete``:
 
 Returns:
     A 2D vector representing the calculated offset matrix.)doc";
+
+static const char *__doc_fiction_detail_calculate_reward = R"doc()doc";
 
 static const char *__doc_fiction_detail_color_routing_impl = R"doc()doc";
 
@@ -5319,6 +5345,8 @@ Returns:
 
 static const char *__doc_fiction_detail_get_po_levels = R"doc()doc";
 
+static const char *__doc_fiction_detail_get_possible_actions = R"doc()doc";
+
 static const char *__doc_fiction_detail_graph_coloring_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_graph_coloring_impl_convert_node_index =
@@ -5691,6 +5719,8 @@ static const char *__doc_fiction_detail_maximum_defect_influence_position_and_di
 
 static const char *__doc_fiction_detail_maximum_defect_influence_position_and_distance_impl_run = R"doc()doc";
 
+static const char *__doc_fiction_detail_neighbors = R"doc()doc";
+
 static const char *__doc_fiction_detail_network_balancing_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_network_balancing_impl_network_balancing_impl = R"doc()doc";
@@ -6046,6 +6076,10 @@ static const char *__doc_fiction_detail_orthogonal_impl_pst = R"doc()doc";
 
 static const char *__doc_fiction_detail_orthogonal_impl_run = R"doc()doc";
 
+static const char *__doc_fiction_detail_place_node_with_1_input = R"doc()doc";
+
+static const char *__doc_fiction_detail_place_node_with_2_inputs = R"doc()doc";
+
 static const char *__doc_fiction_detail_post_layout_optimization_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_post_layout_optimization_impl_plyt = R"doc(2DDWave-clocked Cartesian gate-level layout to optimize.)doc";
@@ -6354,6 +6388,8 @@ Parameter ``cell``:
 
 static const char *__doc_fiction_detail_recursively_paint_edges = R"doc()doc";
 
+static const char *__doc_fiction_detail_reset = R"doc()doc";
+
 static const char *__doc_fiction_detail_sat_clocking_handler = R"doc()doc";
 
 static const char *__doc_fiction_detail_sat_clocking_handler_assign_clock_numbers =
@@ -6500,6 +6536,8 @@ static const char *__doc_fiction_detail_search_direction_HORIZONTAL = R"doc(Sear
 
 static const char *__doc_fiction_detail_search_direction_VERTICAL = R"doc(Search from top to bottom.)doc";
 
+static const char *__doc_fiction_detail_step = R"doc()doc";
+
 static const char *__doc_fiction_detail_sweep_parameter_to_string =
 R"doc(Converts a sweep parameter to a string representation. This is used to
 write the parameter name to the CSV file.
@@ -6577,6 +6615,8 @@ Parameter ``possible_path``:
 Parameter ``to_delete``:
     Reference to the to-delete list to be updated with new
     coordinates.)doc";
+
+static const char *__doc_fiction_detail_valid_layout = R"doc()doc";
 
 static const char *__doc_fiction_detail_wire_east = R"doc()doc";
 
@@ -15005,6 +15045,72 @@ R"doc(Single simulation runtime of the exhaustive ground state searcher in
 seconds.)doc";
 
 static const char *__doc_fiction_time_to_solution_stats_time_to_solution = R"doc(Time-to-solution in seconds.)doc";
+
+static const char *__doc_fiction_topo_view_ci_to_co = R"doc()doc";
+
+static const char *__doc_fiction_topo_view_ci_to_co_2 = R"doc()doc";
+
+static const char *__doc_fiction_topo_view_ci_to_co_3 = R"doc()doc";
+
+static const char *__doc_fiction_topo_view_ci_to_co_create_topo_rec = R"doc()doc";
+
+static const char *__doc_fiction_topo_view_ci_to_co_foreach_gate = R"doc(! Reimplementation of `foreach_gate`. */)doc";
+
+static const char *__doc_fiction_topo_view_ci_to_co_foreach_gate_reverse = R"doc(! Implementation of `foreach_gate` in reverse topological order. */)doc";
+
+static const char *__doc_fiction_topo_view_ci_to_co_foreach_node = R"doc(! Reimplementation of `foreach_node`. */)doc";
+
+static const char *__doc_fiction_topo_view_ci_to_co_foreach_node_reverse = R"doc(! Implementation of `foreach_node` in reverse topological order. */)doc";
+
+static const char *__doc_fiction_topo_view_ci_to_co_index_to_node = R"doc(! Reimplementation of `index_to_node`. */)doc";
+
+static const char *__doc_fiction_topo_view_ci_to_co_node_to_index = R"doc(! Reimplementation of `node_to_index`. */)doc";
+
+static const char *__doc_fiction_topo_view_ci_to_co_num_gates = R"doc(! Reimplementation of `num_gates`. */)doc";
+
+static const char *__doc_fiction_topo_view_ci_to_co_size = R"doc(! Reimplementation of `size`. */)doc";
+
+static const char *__doc_fiction_topo_view_ci_to_co_topo_order = R"doc()doc";
+
+static const char *__doc_fiction_topo_view_ci_to_co_topo_view_ci_to_co =
+R"doc(! Default constructor.
+
+Constructs topological view on another network.)doc";
+
+static const char *__doc_fiction_topo_view_ci_to_co_update_topo = R"doc()doc";
+
+static const char *__doc_fiction_topo_view_co_to_ci = R"doc()doc";
+
+static const char *__doc_fiction_topo_view_co_to_ci_2 = R"doc()doc";
+
+static const char *__doc_fiction_topo_view_co_to_ci_3 = R"doc()doc";
+
+static const char *__doc_fiction_topo_view_co_to_ci_create_topo_rec = R"doc()doc";
+
+static const char *__doc_fiction_topo_view_co_to_ci_foreach_gate = R"doc(! Reimplementation of `foreach_gate`. */)doc";
+
+static const char *__doc_fiction_topo_view_co_to_ci_foreach_gate_reverse = R"doc(! Implementation of `foreach_gate` in reverse topological order. */)doc";
+
+static const char *__doc_fiction_topo_view_co_to_ci_foreach_node = R"doc(! Reimplementation of `foreach_node`. */)doc";
+
+static const char *__doc_fiction_topo_view_co_to_ci_foreach_node_reverse = R"doc(! Implementation of `foreach_node` in reverse topological order. */)doc";
+
+static const char *__doc_fiction_topo_view_co_to_ci_index_to_node = R"doc(! Reimplementation of `index_to_node`. */)doc";
+
+static const char *__doc_fiction_topo_view_co_to_ci_node_to_index = R"doc(! Reimplementation of `node_to_index`. */)doc";
+
+static const char *__doc_fiction_topo_view_co_to_ci_num_gates = R"doc(! Reimplementation of `num_gates`. */)doc";
+
+static const char *__doc_fiction_topo_view_co_to_ci_size = R"doc(! Reimplementation of `size`. */)doc";
+
+static const char *__doc_fiction_topo_view_co_to_ci_topo_order = R"doc()doc";
+
+static const char *__doc_fiction_topo_view_co_to_ci_topo_view_co_to_ci =
+R"doc(! Default constructor.
+
+Constructs topological view on another network.)doc";
+
+static const char *__doc_fiction_topo_view_co_to_ci_update_topo = R"doc()doc";
 
 static const char *__doc_fiction_transition_type =
 R"doc(Possible types of charge transitions that can occur in an SiDB layout.
