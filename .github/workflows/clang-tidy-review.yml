@@ -2,7 +2,7 @@ name: 🚨 • Clang-Tidy Review
 
 on:
   pull_request:
-    paths: 
+    paths:
       - '**/*.hpp'
       - '**/*.cpp'
       - 'libs/**'
