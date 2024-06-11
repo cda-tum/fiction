@@ -67,8 +67,8 @@ void charge_distribution_surface_layout(pybind11::module& m, const std::string& 
             "assign_cell_type", [](py_cds& cds, fiction::cell<py_cds> c, typename py_cds::cell_type ct)
             { return cds.assign_cell_type(c, ct); }, "c"_a, "ct"_a)
         .def(
-            "assign_physical_parameters", [](py_cds& cds, fiction::sidb_simulation_parameters params)
-            { return cds.assign_physical_parameters(params); }, "params"_a)
+            "assign_simulation_parameters", [](py_cds& cds, fiction::sidb_simulation_parameters params)
+            { return cds.assign_simulation_parameters(params); }, "params"_a)
         .def("get_phys_params", [](py_cds& cds) { return cds.get_simulation_params(); })
         .def(
             "charge_exists", [](py_cds& cds, fiction::sidb_charge_state cs) { return cds.charge_exists(cs); }, "cs"_a)
@@ -194,6 +194,7 @@ void charge_distribution_surface_layout(pybind11::module& m, const std::string& 
              "defect"_a = fiction::sidb_defect{})
         .def("assign_local_external_potential", &py_cds::assign_local_external_potential, "external_potential"_a)
         .def("get_local_external_potentials", &py_cds::get_local_external_potentials)
+        .def("reset_local_external_potential", &py_cds::reset_local_external_potentials)
         .def("get_local_defect_potentials", &py_cds::get_local_defect_potentials)
         .def("get_defects", &py_cds::get_defects)
         //

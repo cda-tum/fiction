@@ -85,7 +85,7 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
         charge_distribution_surface<Lyt> charge_lyt{lyt};
 
         // set the given physical parameters
-        charge_lyt.assign_physical_parameters(ps.simulation_parameters);
+        charge_lyt.assign_simulation_parameters(ps.simulation_parameters);
         charge_lyt.assign_base_number(2);
         charge_lyt.assign_all_charge_states(sidb_charge_state::NEGATIVE);
         charge_lyt.update_after_charge_change(dependent_cell_mode::VARIABLE);

@@ -58,15 +58,24 @@ Heuristic Ground State Simulation
 Exhaustive Ground State Simulation
 ##################################
 
-.. _quickexact:
-
 .. tabs::
     .. tab:: C++
+
+        .. _quickexact:
+
         **Header:** ``fiction/algorithms/simulation/sidb/quickexact.hpp``
 
         .. doxygenstruct:: fiction::quickexact_params
            :members:
         .. doxygenfunction:: fiction::quickexact
+
+        .. _clustercomplete:
+
+        **Header:** ``fiction/algorithms/simulation/sidb/clustercomplete.hpp``
+
+        .. doxygenstruct:: fiction::clustercomplete_params
+           :members:
+        .. doxygenfunction:: fiction::clustercomplete
 
         **Header:** ``fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp``
 
@@ -76,6 +85,9 @@ Exhaustive Ground State Simulation
         .. autoclass:: mnt.pyfiction.quickexact_params
             :members:
         .. autofunction:: mnt.pyfiction.quickexact
+        .. autoclass:: mnt.pyfiction.clustercomplete_params
+            :members:
+        .. autofunction:: mnt.pyfiction.clustercomplete
         .. autofunction:: mnt.pyfiction.exhaustive_ground_state_simulation
 
 
@@ -88,13 +100,17 @@ Engine Selectors
 
         .. doxygenenum:: fiction::sidb_simulation_engine
         .. doxygenenum:: fiction::exhaustive_sidb_simulation_engine
+        .. doxygenenum:: fiction::heuristic_sidb_simulation_engine
+        .. doxygenfunction:: fiction::sidb_simulation_engine_name
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.sidb_simulation_engine
             :members:
         .. autoclass:: mnt.pyfiction.exhaustive_sidb_simulation_engine
             :members:
-
+        .. autoclass:: mnt.pyfiction.heuristic_sidb_simulation_engine
+            :members:
+        .. autofunction:: mnt.pyfiction.sidb_simulation_engine_name
 
 Energy Calculation
 ##################
@@ -173,6 +189,18 @@ Maximum Defect Influence Distance
 .. doxygenstruct:: fiction::maximum_defect_influence_distance_params
    :members:
 .. doxygenfunction:: fiction::maximum_defect_influence_position_and_distance
+
+
+Ground State Space Construction
+###############################
+
+.. _ground_state_space:
+
+**Header:** ``fiction/algorithms/simulation/sidb/ground_state_space.hpp``
+
+.. doxygenstruct:: fiction::ground_state_space_result
+   :members:
+.. doxygenfunction:: fiction::ground_state_space
 
 
 Time-to-Solution (TTS) Statistics
