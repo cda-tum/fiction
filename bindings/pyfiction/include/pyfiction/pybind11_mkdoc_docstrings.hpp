@@ -153,11 +153,46 @@ static const char *__doc_fiction_a_star_params_crossings =
 R"doc(Allow paths to cross over obstructed tiles if they are occupied by
 wire segments.)doc";
 
-static const char *__doc_fiction_a_star_pr = R"doc()doc";
+static const char *__doc_fiction_a_star_pr =
+R"doc(Executes the A* P&R algorithm for the given network and returns the
+resulting layout.
 
-static const char *__doc_fiction_a_star_pr_stats = R"doc(This struct stores statistics about the wiring reduction process.)doc";
+Template parameter ``Lyt``:
+    Cartesian gate-level layout type.
 
-static const char *__doc_fiction_a_star_pr_stats_duration = R"doc(Runtime of the wiring reduction process.)doc";
+Template parameter ``Ntk``:
+    Network type.
+
+Parameter ``ntk``:
+    The network to be placed and routed.
+
+Parameter ``ps``:
+    The parameters for the A* priority routing algorithm. Defaults to
+    an empty parameter set.
+
+Parameter ``pst``:
+    A pointer to a statistics object to record execution details.
+    Defaults to nullptr.
+
+Returns:
+    The resulting layout after applying the A* priority routing
+    algorithm.
+
+Throws:
+    high_degree_fanin_exception If the network has nodes with a fanin
+    degree higher than 2.)doc";
+
+static const char *__doc_fiction_a_star_pr_params = R"doc(Parameters for the A* P&R algorithm.)doc";
+
+static const char *__doc_fiction_a_star_pr_params_high_effort = R"doc(High effort mode.)doc";
+
+static const char *__doc_fiction_a_star_pr_params_timeout = R"doc(Timeout limit.)doc";
+
+static const char *__doc_fiction_a_star_pr_params_verbose = R"doc(Verbosity.)doc";
+
+static const char *__doc_fiction_a_star_pr_stats = R"doc(This struct stores statistics about the A* P&R process.)doc";
+
+static const char *__doc_fiction_a_star_pr_stats_duration = R"doc(Runtime of the A* P&R process.)doc";
 
 static const char *__doc_fiction_a_star_pr_stats_report =
 R"doc(Reports the statistics to the given output stream.
@@ -3333,18 +3368,6 @@ computation.)doc";
 
 static const char *__doc_fiction_design_sidb_gates_params_simulation_parameters = R"doc(All Parameters for physical SiDB simulations.)doc";
 
-static const char *__doc_fiction_detail_NestedVectorHash = R"doc()doc";
-
-static const char *__doc_fiction_detail_NestedVectorHash_operator_call = R"doc()doc";
-
-static const char *__doc_fiction_detail_PriorityQueue = R"doc()doc";
-
-static const char *__doc_fiction_detail_PriorityQueue_empty = R"doc()doc";
-
-static const char *__doc_fiction_detail_PriorityQueue_get = R"doc()doc";
-
-static const char *__doc_fiction_detail_PriorityQueue_put = R"doc()doc";
-
 static const char *__doc_fiction_detail_a_star_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_a_star_impl_a_star_impl = R"doc()doc";
@@ -3783,8 +3806,6 @@ Parameter ``to_delete``:
 
 Returns:
     A 2D vector representing the calculated offset matrix.)doc";
-
-static const char *__doc_fiction_detail_calculate_reward = R"doc()doc";
 
 static const char *__doc_fiction_detail_color_routing_impl = R"doc()doc";
 
@@ -5345,8 +5366,6 @@ Returns:
 
 static const char *__doc_fiction_detail_get_po_levels = R"doc()doc";
 
-static const char *__doc_fiction_detail_get_possible_actions = R"doc()doc";
-
 static const char *__doc_fiction_detail_graph_coloring_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_graph_coloring_impl_convert_node_index =
@@ -5719,7 +5738,22 @@ static const char *__doc_fiction_detail_maximum_defect_influence_position_and_di
 
 static const char *__doc_fiction_detail_maximum_defect_influence_position_and_distance_impl_run = R"doc()doc";
 
-static const char *__doc_fiction_detail_neighbors = R"doc()doc";
+static const char *__doc_fiction_detail_nested_vector_hash =
+R"doc(This struct defines a hash function for a nested vector of layout
+tiles. It calculates a combined hash value for a vector of tiles based
+on the coordinates of each tile.
+
+Template parameter ``Lyt``:
+    Cartesian gate-level layout type.)doc";
+
+static const char *__doc_fiction_detail_nested_vector_hash_operator_call =
+R"doc(Computes a hash value for a vector of `fiction::tile` objects.
+
+Parameter ``vec``:
+    The vector of tiles to be hashed.
+
+Returns:
+    A combined hash value for the vector of tiles.)doc";
 
 static const char *__doc_fiction_detail_network_balancing_impl = R"doc()doc";
 
@@ -6076,10 +6110,6 @@ static const char *__doc_fiction_detail_orthogonal_impl_pst = R"doc()doc";
 
 static const char *__doc_fiction_detail_orthogonal_impl_run = R"doc()doc";
 
-static const char *__doc_fiction_detail_place_node_with_1_input = R"doc()doc";
-
-static const char *__doc_fiction_detail_place_node_with_2_inputs = R"doc()doc";
-
 static const char *__doc_fiction_detail_post_layout_optimization_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_post_layout_optimization_impl_plyt = R"doc(2DDWave-clocked Cartesian gate-level layout to optimize.)doc";
@@ -6091,6 +6121,38 @@ static const char *__doc_fiction_detail_post_layout_optimization_impl_ps = R"doc
 static const char *__doc_fiction_detail_post_layout_optimization_impl_pst = R"doc(Statistics about the post-layout optimization process.)doc";
 
 static const char *__doc_fiction_detail_post_layout_optimization_impl_run = R"doc()doc";
+
+static const char *__doc_fiction_detail_priority_queue =
+R"doc(A priority queue class for managing elements with associated
+priorities. The elements are stored in a priority queue, with the
+highest priority elements being retrieved first.
+
+Template parameter ``Lyt``:
+    Cartesian gate-level layout type.)doc";
+
+static const char *__doc_fiction_detail_priority_queue_counter = R"doc()doc";
+
+static const char *__doc_fiction_detail_priority_queue_empty =
+R"doc(Checks if the priority queue is empty.
+
+Returns:
+    True if the priority queue is empty, false otherwise.)doc";
+
+static const char *__doc_fiction_detail_priority_queue_get =
+R"doc(Retrieves and removes the element with the highest priority from the
+queue.
+
+Returns:
+    The element with the highest priority.)doc";
+
+static const char *__doc_fiction_detail_priority_queue_put =
+R"doc(Adds an element to the priority queue with a given priority.
+
+Parameter ``item``:
+    The element to be added.
+
+Parameter ``priority``:
+    The priority of the element.)doc";
 
 static const char *__doc_fiction_detail_qca_energy_dissipation_impl = R"doc()doc";
 
@@ -6388,8 +6450,6 @@ Parameter ``cell``:
 
 static const char *__doc_fiction_detail_recursively_paint_edges = R"doc()doc";
 
-static const char *__doc_fiction_detail_reset = R"doc()doc";
-
 static const char *__doc_fiction_detail_sat_clocking_handler = R"doc()doc";
 
 static const char *__doc_fiction_detail_sat_clocking_handler_assign_clock_numbers =
@@ -6536,8 +6596,6 @@ static const char *__doc_fiction_detail_search_direction_HORIZONTAL = R"doc(Sear
 
 static const char *__doc_fiction_detail_search_direction_VERTICAL = R"doc(Search from top to bottom.)doc";
 
-static const char *__doc_fiction_detail_step = R"doc()doc";
-
 static const char *__doc_fiction_detail_sweep_parameter_to_string =
 R"doc(Converts a sweep parameter to a string representation. This is used to
 write the parameter name to the CSV file.
@@ -6615,8 +6673,6 @@ Parameter ``possible_path``:
 Parameter ``to_delete``:
     Reference to the to-delete list to be updated with new
     coordinates.)doc";
-
-static const char *__doc_fiction_detail_valid_layout = R"doc()doc";
 
 static const char *__doc_fiction_detail_wire_east = R"doc()doc";
 
