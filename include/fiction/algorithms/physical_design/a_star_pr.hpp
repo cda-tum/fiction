@@ -9,7 +9,6 @@
 #include "fiction/algorithms/path_finding/cost.hpp"
 #include "fiction/algorithms/path_finding/distance.hpp"
 #include "fiction/algorithms/verification/equivalence_checking.hpp"
-#include "fiction/io/print_layout.hpp"
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/cartesian_layout.hpp"
 #include "fiction/layouts/clocked_layout.hpp"
@@ -203,29 +202,12 @@ const a_star_params A_STAR_PARAMS{true};
 template <typename Lyt, typename Ntk>
 using node_dict_type = std::unordered_map<mockturtle::node<Ntk>, mockturtle::node<Lyt>>;
 /**
- * Alias for an unordered map that maps a vertex in the search space graph to the coordinate of the last tile placed.
- * placed.
- *
- * @tparam Lyt Cartesian gate-level layout type.
- */
-template <typename Lyt>
-using vertex_to_last_action_type =
-    std::unordered_map<coord_vec_type<Lyt>, fiction::tile<Lyt>, detail::nested_vector_hash<Lyt>>;
-/**
  * Alias for a priority queue containing vertices of the search space graph.
  *
  * @tparam Lyt Cartesian gate-level layout type.
  */
 template <typename Lyt>
 using frontiers_type = detail::priority_queue<Lyt>;
-/**
- * Alias for an unordered map that maps a vertex in the search space graph to its preceding vertex.
- *
- * @tparam Lyt Cartesian gate-level layout type.
- */
-template <typename Lyt>
-using preceding_vertex_type =
-    std::unordered_map<coord_vec_type<Lyt>, coord_vec_type<Lyt>, detail::nested_vector_hash<Lyt>>;
 /**
  * Alias for an unordered map that maps a vertex in the search space graph to its accumulated cost value.
  *
@@ -561,7 +543,7 @@ get_possible_positions(Lyt& layout, Ntk& network, std::vector<mockturtle::node<N
 
     if (network.is_pi(actions[current_node]))
     {
-        return detail::get_possible_positions_pis(layout, pis_top, pis_left, expansions);
+        return detail::get_possible_positions_pis(layout, pis_top, pis_left, network.num_pis());
     }
     if (network.is_po(actions[current_node]))
     {
@@ -925,8 +907,6 @@ Lyt reset(uint64_t min_layout_width, uint64_t min_layout_height)
  * @tparam Lyt Cartesian gate-level layout type.
  * @tparam Ntk Network type.
  * @param current_vertex The current vertex in the layout.
- * @param vertex_to_last_action A reference to a mapping from vertices to their last actions.
- * @param preceding_vertex A reference to a mapping from vertices to their preceding vertices.
  * @param count The number of evaluated paths.
  * @param improv_mode Boolean flag indicating if the improvement mode is active.
  * @param best_solution The best solution found so far in terms of layout area.
@@ -945,48 +925,38 @@ Lyt reset(uint64_t min_layout_width, uint64_t min_layout_height)
  */
 template <typename Lyt, typename Ntk>
 std::pair<std::vector<std::pair<coord_vec_type<Lyt>, double>>, std::optional<Lyt>>
-neighbors(coord_vec_type<Lyt> current_vertex, vertex_to_last_action_type<Lyt>& vertex_to_last_action,
-          preceding_vertex_type<Lyt>& preceding_vertex, uint64_t count, bool& improv_mode, uint64_t& best_solution,
-          Ntk& network, std::vector<mockturtle::node<Ntk>>& actions, std::vector<std::string>& po_names,
-          uint64_t& max_placed_nodes, std::chrono::time_point<std::chrono::high_resolution_clock> start_time,
-          bool pis_top, bool pis_left, uint64_t expansions, bool verbose)
+neighbors(coord_vec_type<Lyt> current_vertex, uint64_t count, bool& improv_mode, uint64_t& best_solution, Ntk& network,
+          std::vector<mockturtle::node<Ntk>>& actions, std::vector<std::string>& po_names, uint64_t& max_placed_nodes,
+          std::chrono::time_point<std::chrono::high_resolution_clock> start_time, bool pis_top, bool pis_left,
+          uint64_t expansions, bool verbose)
 {
-    bool                                                             placement_possible = true;
-    uint64_t                                                         current_pi         = 0;
-    uint64_t                                                         current_po         = 0;
-    uint64_t                                                         current_node       = 0;
-    const uint64_t                                                   min_layout_width   = network.num_pis();
-    const uint64_t                                                   min_layout_height  = 1;
-    const uint64_t                                                   max_layout_width   = actions.size();
-    const uint64_t                                                   max_layout_height  = actions.size();
+    bool     placement_possible = true;
+    uint64_t current_pi         = 0;
+    uint64_t current_po         = 0;
+    uint64_t current_node       = 0;
+
+    const uint64_t min_layout_width  = network.num_pis();
+    const uint64_t min_layout_height = 1;
+    const uint64_t max_layout_width  = actions.size();
+    const uint64_t max_layout_height = actions.size();
+
     std::unordered_map<mockturtle::node<Ntk>, mockturtle::node<Lyt>> node_dict{};
     std::vector<std::pair<coord_vec_type<Lyt>, double>>              next_actions;
-    coord_vec_type<Lyt>                                              sequence;
-    coord_vec_type<Lyt>                                              start = {{1000, 1000}};
-    if (current_vertex != start)
-    {
-        sequence.push_back(vertex_to_last_action[current_vertex]);
-        while (preceding_vertex[current_vertex] != start)
-        {
-            current_vertex = preceding_vertex[current_vertex];
-            sequence.push_back(vertex_to_last_action[current_vertex]);
-        }
-    }
-    std::reverse(sequence.begin(), sequence.end());
+
     Lyt  layout  = detail::reset<Lyt, Ntk>(min_layout_width, min_layout_height);
     auto pi2node = reserve_input_nodes(layout, network);
 
     bool                   done = false;
     std::vector<tile<Lyt>> possible_actions{};
-    if (sequence.empty())
+    if (current_vertex.empty())
     {
         possible_actions = detail::get_possible_positions<Lyt, Ntk>(layout, network, actions, current_node, node_dict,
                                                                     pis_top, pis_left, expansions);
     }
 
-    for (uint64_t idx = 0; idx < sequence.size(); ++idx)
+    for (uint64_t idx = 0; idx < current_vertex.size(); ++idx)
     {
-        auto action = sequence[idx];
+        auto action = current_vertex[idx];
 
         if (!done)
         {
@@ -1063,7 +1033,7 @@ neighbors(coord_vec_type<Lyt> current_vertex, vertex_to_last_action_type<Lyt>& v
         {
             layout.resize({layout.x(), layout.y() + 1, layout.z()});
         }
-        if (idx == (sequence.size() - 1))
+        if (idx == (current_vertex.size() - 1))
         {
             if (!valid_layout<Lyt, Ntk>(layout, network, node_dict, placement_possible))
             {
@@ -1076,10 +1046,9 @@ neighbors(coord_vec_type<Lyt> current_vertex, vertex_to_last_action_type<Lyt>& v
     }
     for (auto action : possible_actions)
     {
-        auto new_sequence = sequence;
+        auto new_sequence = current_vertex;
         new_sequence.push_back(action);
-        vertex_to_last_action[new_sequence] = action;
-        const double rest_actions           = actions.size() - (sequence.size() + 1);
+        const double rest_actions = actions.size() - (current_vertex.size() + 1);
         const double size1 =
             static_cast<double>(((std::max(layout.x() - 1, action.x) + 1) * (std::max(layout.y() - 1, action.y) + 1))) /
             static_cast<double>((max_layout_width * max_layout_height));
@@ -1231,11 +1200,8 @@ class a_star_pr_impl
         uint64_t count = 0;
         using ObstrLyt = decltype(layout);
 
-        std::vector<vertex_to_last_action_type<ObstrLyt>> vertex_to_last_action(12);
-        std::vector<frontiers_type<ObstrLyt>>             frontiers(12);
-        std::vector<preceding_vertex_type<ObstrLyt>>      preceding_vertex(12);
-        std::vector<coord_vec_type<ObstrLyt>>             current_vertex(
-            12, coord_vec_type<ObstrLyt>{fiction::tile<ObstrLyt>{1000, 1000}});
+        std::vector<frontiers_type<ObstrLyt>>   frontiers(12);
+        std::vector<coord_vec_type<ObstrLyt>>   current_vertex(12);
         std::vector<cost_so_far_type<ObstrLyt>> cost_so_far(12);
         std::vector<bool> pis_top{true, true, true, true, false, false, false, false, true, true, true, true};
         std::vector<bool> pis_left{false, false, false, false, true, true, true, true, true, true, true, true};
@@ -1267,9 +1233,8 @@ class a_star_pr_impl
                 {
                     count++;
                     auto neighbors = detail::neighbors<decltype(layout)>(
-                        current_vertex[i], vertex_to_last_action[i], preceding_vertex[i], count, improv_mode,
-                        best_solution, networks[i], actions_ntk[i], po_names, max_placed_nodes, start, pis_top[i],
-                        pis_left[i], 4, verbose);
+                        current_vertex[i], count, improv_mode, best_solution, networks[i], actions_ntk[i], po_names,
+                        max_placed_nodes, start, pis_top[i], pis_left[i], 4, verbose);
                     if (neighbors.second)
                     {
                         best_lyt = *neighbors.second;
@@ -1281,7 +1246,6 @@ class a_star_pr_impl
                             cost_so_far[i][next] = cost;
                             double priority      = cost;
                             frontiers[i].put(next, priority);
-                            preceding_vertex[i][next] = current_vertex[i];
                         }
                     }
                 }
