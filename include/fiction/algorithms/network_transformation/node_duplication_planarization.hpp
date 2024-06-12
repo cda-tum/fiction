@@ -103,7 +103,7 @@ std::vector<node_pair<Ntk>> calculate_pairs(const std::vector<mockturtle::node<N
 
     return pairwise_combinations;
 }
-// ToDo: Hande combinations with more than two nodes. Then all the other nodes inbetween can be palced in arbitrary order
+// ToDo: Hande combinations with more than two nodes. Then all the other nodes in between can be placed in arbitrary order
 template <typename Ntk>
 class node_duplication_planarization_impl
 {
@@ -166,16 +166,51 @@ class node_duplication_planarization_impl
 
     mockturtle::rank_view<Ntk> run()
     {
-        std::vector<mockturtle::node<Ntk>> next_level; // needed to start the next level
+        // ToDo: Determine the PO order
+        std::vector<mockturtle::node<Ntk>> po_level; // save the nodes of the next level
+        ntk_lvls.push_back(po_level);
+        std::vector<mockturtle::node<Ntk>> next_level; // save the nodes of the next level
+        std::vector<mockturtle::node<Ntk>> real_next_level; // save the nodes of the next level
+        // Process the first level
         ntk.foreach_po([this, &next_level](auto po){
+                           // Recalculate the levels to start from the pos
                            std::cout << ntk.level(po) << std::endl;
-                           /*ntk.set_level(po, ntk.depth());
-                           std::cout << ntk.level(po) << std::endl;*/
+                           ntk.set_level(po, ntk.depth());
                            cur_fis.clear();
                            compute_slice_delays(po, next_level);
         });
+        std::cout << cur_lvl_pairs.size() << std::endl;
+
+        const auto& combinations = cur_lvl_pairs.back();
+
+        auto minimum_it = std::min_element(combinations.begin(), combinations.end(),
+                                           [](const node_pair<Ntk>& a, const node_pair<Ntk>& b) {
+                                               return a.delay < b.delay;
+                                           });
+
+        if (minimum_it != combinations.end())
+        {
+            std::shared_ptr<node_pair<Ntk>> fanin_combination = minimum_it->fanin_pair;
+
+            while (fanin_combination) {
+                real_next_level.insert(real_next_level.begin(), fanin_combination->pair.first);
+                fanin_combination = fanin_combination->fanin_pair;
+            }
+
+            const auto& min_combination = *minimum_it;
+            std::cout << "Minimum delay: " << min_combination.delay << std::endl;
+
+            real_next_level.insert(real_next_level.begin(), min_combination.pair.first);
+        }
+        /*ToDo: When pushing the real next level there will be the duplicated nodes and then the trav id wont be correct anymore
+         * The handling of duplicated nodes has to be thought over
+         * */
+        // first push back the pos
+        ntk_lvls.push_back(next_level);
+        // Process all other levels
         while (!next_level.empty())
         {
+            // ToDo: Recalculate the levels
             // We need to create a new vector to store the nodes of the next level
             std::vector<mockturtle::node<Ntk>> new_level;
             for (const auto& cur_node : next_level)
@@ -207,6 +242,7 @@ class node_duplication_planarization_impl
     mockturtle::rank_view<Ntk> ntk;
     std::vector<std::vector<node_pair<Ntk>>> cur_lvl_pairs;
     std::vector<mockturtle::node<Ntk>> cur_fis;
+    std::vector<std::vector<mockturtle::node<Ntk>>> ntk_lvls;
     // std::vector<node_pair<Ntk>> slice_node_pairs;
 
 };
