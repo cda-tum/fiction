@@ -39,44 +39,48 @@ int main()  // NOLINT
     using gate_lyt =
         fiction::gate_level_layout<fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<>>>>;
 
-    experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint64_t, uint64_t,
-                            uint64_t, uint32_t, uint32_t, uint64_t, uint64_t, double, std::string>
+    experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint32_t, uint32_t,
+                            uint64_t, uint64_t, double, std::string>
         a_star_pr_exp{"a_star_pr_exp",
-                             "benchmark",
-                             "inputs",
-                             "outputs",
-                             "initial nodes",
-                             "layout width (in tiles)",
-                             "layout height (in tiles)",
-                             "layout area (in tiles)",
-                             "gates",
-                             "wires",
-                             "critical path",
-                             "throughput",
-                             "runtime a_star_pr (in sec)",
-                             "equivalent"};
+                      "benchmark",
+                      "inputs",
+                      "outputs",
+                      "initial nodes",
+                      "layout width (in tiles)",
+                      "layout height (in tiles)",
+                      "layout area (in tiles)",
+                      "gates",
+                      "wires",
+                      "critical path",
+                      "throughput",
+                      "runtime a_star_pr (in sec)",
+                      "equivalent"};
 
-    fiction::a_star_pr_stats a_star_pr_stats{};
+    fiction::a_star_pr_stats  a_star_pr_stats{};
+    fiction::a_star_pr_params a_star_pr_params{};
+    a_star_pr_params.high_effort = true;
+    a_star_pr_params.verbose     = true;
+    a_star_pr_params.timeout     = 1000;
 
-    static constexpr const uint64_t bench_select = fiction_experiments::parity;
+    static constexpr const uint64_t bench_select = fiction_experiments::xor5_maj;
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
         auto network = read_ntk<fiction::tec_nt>(benchmark);
 
-        auto gate_level_layout = fiction::a_star_pr<gate_lyt, fiction::tec_nt>(network, &a_star_pr_stats, true);
+        auto gate_level_layout =
+            fiction::a_star_pr<gate_lyt, fiction::tec_nt>(network, a_star_pr_params, &a_star_pr_stats);
 
         //  compute critical path and throughput
-        fiction::critical_path_length_and_throughput_stats cp_tp_stats{};
-        fiction::critical_path_length_and_throughput(gate_level_layout, &cp_tp_stats);
+        const auto cp_tp = fiction::critical_path_length_and_throughput(gate_level_layout);
 
         // check equivalence
-        fiction::equivalence_checking_stats eq_stats{};
-        fiction::equivalence_checking<fiction::technology_network, gate_lyt>(network, gate_level_layout, &eq_stats);
+        const auto eq_stats =
+            fiction::equivalence_checking<fiction::technology_network, gate_lyt>(network, gate_level_layout);
 
-        const std::string eq_result = eq_stats.eq == fiction::eq_type::STRONG ? "STRONG" :
-                                      eq_stats.eq == fiction::eq_type::WEAK   ? "WEAK" :
-                                                                                "NO";
+        const std::string eq_result = eq_stats == fiction::eq_type::STRONG ? "STRONG" :
+                                      eq_stats == fiction::eq_type::WEAK   ? "WEAK" :
+                                                                             "NO";
 
         // calculate bounding box
         const auto bounding_box = fiction::bounding_box_2d(gate_level_layout);
@@ -86,12 +90,9 @@ int main()  // NOLINT
         const auto area   = width * height;
 
         // log results
-        a_star_pr_exp(benchmark, network.num_pis(), network.num_pos(), network.num_gates(),
-                             width, height,
-                             area, gate_level_layout.num_gates(), gate_level_layout.num_wires(),
-                             cp_tp_stats.critical_path_length, cp_tp_stats.throughput,
-                             mockturtle::to_seconds(a_star_pr_stats.time_total),
-                             eq_result);
+        a_star_pr_exp(benchmark, network.num_pis(), network.num_pos(), network.num_gates(), width, height, area,
+                      gate_level_layout.num_gates(), gate_level_layout.num_wires(), cp_tp.critical_path_length,
+                      cp_tp.throughput, mockturtle::to_seconds(a_star_pr_stats.time_total), eq_result);
 
         a_star_pr_exp.save();
         a_star_pr_exp.table();

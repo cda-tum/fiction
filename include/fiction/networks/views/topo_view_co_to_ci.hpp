@@ -1,5 +1,5 @@
 /*!
- \file topo_view_ci_to_co.hpp
+ \file topo_view_co_to_ci.hpp
  \brief Reimplements foreach_node to guarantee topological order
 
  \author Alessandro Tempia Calvino
@@ -58,18 +58,18 @@ namespace fiction
      aig_network aig = ...;
 
      // create a topological view on the network
-     topo_view_ci_to_co aig_topo{aig};
+     topo_view_co_to_ci aig_topo{aig};
 
      // call algorithm that requires topological order
      cut_enumeration( aig_topo );
   \endverbatim
 */
 template <class Ntk, bool sorted = mockturtle::is_topologically_sorted_v<Ntk>>
-class topo_view_ci_to_co
+class topo_view_co_to_ci
 {};
 
 template <typename Ntk>
-class topo_view_ci_to_co<Ntk, false> : public mockturtle::immutable_view<Ntk>
+class topo_view_co_to_ci<Ntk, false> : public mockturtle::immutable_view<Ntk>
 {
   public:
     using storage                                 = typename Ntk::storage;
@@ -81,7 +81,7 @@ class topo_view_ci_to_co<Ntk, false> : public mockturtle::immutable_view<Ntk>
      *
      * Constructs topological view on another network.
      */
-    topo_view_ci_to_co(Ntk const& ntk) : mockturtle::immutable_view<Ntk>(ntk)
+    topo_view_co_to_ci(Ntk const& ntk) : mockturtle::immutable_view<Ntk>(ntk)
     {
         static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
         static_assert(mockturtle::has_size_v<Ntk>, "Ntk does not implement the size method");
@@ -172,22 +172,14 @@ class topo_view_ci_to_co<Ntk, false> : public mockturtle::immutable_view<Ntk>
             this->set_visited(c1, this->trav_id());
         }
 
-        /*this->foreach_ci( [this]( auto n ) {
-                             if ( this->visited( n ) != this->trav_id() )
-                             {
-                                 topo_order.push_back( n );
-                                 this->set_visited( n, this->trav_id() );
-                             }
-                         } );*/
-
-        Ntk::foreach_ci(
-            [this](auto n)
+        Ntk::foreach_co(
+            [this](auto f)
             {
                 /* node was already visited */
-                if (this->visited(n) == this->trav_id())
+                if (this->visited(this->get_node(f)) == this->trav_id())
                     return;
 
-                create_topo_rec(n);
+                create_topo_rec(this->get_node(f));
             });
     }
 
@@ -197,19 +189,21 @@ class topo_view_ci_to_co<Ntk, false> : public mockturtle::immutable_view<Ntk>
         /* is permanently marked? */
         if (this->visited(n) == this->trav_id())
             return;
-        bool not_visited = false;
-        this->foreach_fanin(n, [this, &not_visited](signal const& f) { if(this->visited(this->get_node(f)) != this->trav_id()){not_visited=true;}; });
-        if (not_visited){
-            return;
-        }
+
+        /* ensure that the node is not temporarily marked */
+        assert(this->visited(n) != this->trav_id() - 1);
+
+        /* mark node temporarily */
+        this->set_visited(n, this->trav_id() - 1);
+
+        /* mark children */
+        this->foreach_fanin(n, [this](signal const& f) { create_topo_rec(this->get_node(f)); });
+
         /* mark node n permanently */
         this->set_visited(n, this->trav_id());
 
         /* visit node */
         topo_order.push_back(n);
-
-        /* mark children */
-        this->foreach_fanout(n, [this](node const& n) { create_topo_rec(n); });
     }
 
   private:
@@ -217,16 +211,16 @@ class topo_view_ci_to_co<Ntk, false> : public mockturtle::immutable_view<Ntk>
 };
 
 template <typename Ntk>
-class topo_view_ci_to_co<Ntk, true> : public Ntk
+class topo_view_co_to_ci<Ntk, true> : public Ntk
 {
   public:
-    topo_view_ci_to_co(Ntk const& ntk) : Ntk(ntk) {}
+    topo_view_co_to_ci(Ntk const& ntk) : Ntk(ntk) {}
 };
 
 template <class T>
-topo_view_ci_to_co(T const&) -> topo_view_ci_to_co<T>;
+topo_view_co_to_ci(T const&) -> topo_view_co_to_ci<T>;
 
 template <class T>
-topo_view_ci_to_co(T const&, typename T::signal const&) -> topo_view_ci_to_co<T>;
+topo_view_co_to_ci(T const&, typename T::signal const&) -> topo_view_co_to_ci<T>;
 
 }  // namespace fiction
