@@ -264,25 +264,25 @@ class node_duplication_planarization_impl
         // ToDo: Determine the PO order
         /*static std::mt19937                     generator(std::random_device{}());
         std::uniform_int_distribution<uint32_t> distribution(0, ntk.rank_width(r) - 1);*/
-        std::vector<mockturtle::node<Ntk>> v_po_level;  // save the nodes of the next level
-        std::vector<mockturtle::node<Ntk>> v_next_level;  // save the nodes of the next level
+        std::vector<mockturtle::node<Ntk>> v_level;  // save the nodes of the next level
         // Process the first level
         ntk.foreach_po(
-            [this, &v_po_level](auto po)
+            [this, &v_level](auto po)
             {
                 // Recalculate the levels to start from the pos
                 std::cout << ntk.level(po) << std::endl;
                 ntk.set_level(po, ntk.depth());
                 cur_fis.clear();
                 compute_slice_delays(po, border_pis);
-                v_po_level.push_back(po);
+                v_level.push_back(po);
             });
         int level = ntk.depth();
         std::cout << "push lvl: " << level << std::endl;
-        ntk_lvls.push_back(v_po_level);
+        ntk_lvls.push_back(v_level);
+        v_level.clear();
         // ToDo: try to push PIs to the beginning or end of he vector, since they have to be propagated with buffers
         // until the last levels thsi should only happen if border_pis == true
-        compute_node_order_next_level(v_next_level);
+        compute_node_order_next_level(v_level);
 
         // This function gets the nodes of the next level passed. They should be reordered and the duplicated nodes have
         // to be inserted so that they will keep the same functionality reorder_and_duplicate_nodes(next_level)
@@ -290,33 +290,36 @@ class node_duplication_planarization_impl
         // first push back the pos
 
         bool f_final_level = true;
-        check_final_level(v_next_level, f_final_level);
+        check_final_level(v_level, f_final_level);
 
         // Process all other levels
-        while (!v_next_level.empty() && !f_final_level)
+        while (!v_level.empty() && !f_final_level)
         {
             level--;
             std::cout << "push lvl: " << level << std::endl;
-            ntk_lvls.push_back(v_next_level);
+            // Push the level to the network
+            ntk_lvls.push_back(v_level);
             cur_lvl_pairs.clear();
             // We need to create a new vector to store the nodes of the next level
-            for (const auto& cur_node : v_next_level)
+            for (const auto& cur_node : v_level)
             {
                 cur_fis.clear();
                 // There is one slice in the H-Graph per node in the level
                 compute_slice_delays(cur_node, border_pis);
             }
-            //
-            v_next_level.clear();
-            // The new level becomes the next level for the next iteration
-            compute_node_order_next_level(v_next_level);
+            // Clear before starting computations on the enxt level
+            v_level.clear();
+            // Compute the next level
+            compute_node_order_next_level(v_level);
+            // Check if we are at the final level
             f_final_level = true;
-            check_final_level(v_next_level, f_final_level);
-            if (f_final_level)
-            {
-                std::cout << "push lvl: " << level - 1 << std::endl;
-                ntk_lvls.push_back(v_next_level);
-            }
+            check_final_level(v_level, f_final_level);
+        }
+
+        if (f_final_level)
+        {
+            std::cout << "push lvl: " << level - 1 << std::endl;
+            ntk_lvls.push_back(v_level);
         }
 
         std::cout << "width: " << ntk.width() << std::endl;
