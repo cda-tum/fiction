@@ -32,7 +32,8 @@ inline void a_star_pr(pybind11::module& m)
         .def_readwrite("verbose", &fiction::a_star_pr_params::verbose, DOC(fiction_a_star_pr_params_verbose))
         .def_readwrite("high_effort", &fiction::a_star_pr_params::high_effort,
                        DOC(fiction_a_star_pr_params_high_effort))
-        .def_readwrite("timeout", &fiction::a_star_pr_params::return_first, DOC(fiction_a_star_pr_params_return_first))
+        .def_readwrite("return_first", &fiction::a_star_pr_params::return_first,
+                       DOC(fiction_a_star_pr_params_return_first))
 
         ;
 
