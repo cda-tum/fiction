@@ -186,6 +186,8 @@ static const char *__doc_fiction_a_star_pr_params = R"doc(Parameters for the A* 
 
 static const char *__doc_fiction_a_star_pr_params_high_effort = R"doc(High effort mode.)doc";
 
+static const char *__doc_fiction_a_star_pr_params_return_first = R"doc(Return first found layout.)doc";
+
 static const char *__doc_fiction_a_star_pr_params_timeout = R"doc(Timeout limit.)doc";
 
 static const char *__doc_fiction_a_star_pr_params_verbose = R"doc(Verbosity.)doc";
