@@ -75,6 +75,7 @@ template <typename Ntk>
 struct node_pair
 {
     std::pair<mockturtle::node<Ntk>, mockturtle::node<Ntk>> pair;
+    std::vector<mockturtle::node<Ntk>>                      middle_nodes;
     std::shared_ptr<node_pair<Ntk>>                         fanin_pair;
     uint64_t                                                delay;
     // constructor
@@ -88,6 +89,7 @@ template <typename Ntk>
 std::vector<node_pair<Ntk>> calculate_pairs(const std::vector<mockturtle::node<Ntk>>& nodes)
 {
     std::vector<node_pair<Ntk>> pairwise_combinations;
+    std::vector<mockturtle::node<Ntk>> middle_nodes;
 
     if (nodes.size() == 1)
     {
@@ -100,8 +102,25 @@ std::vector<node_pair<Ntk>> calculate_pairs(const std::vector<mockturtle::node<N
     {
         for (auto it2 = it1 + 1; it2 != nodes.end(); ++it2)
         {
+            // Clear middle_nodes before the next pair
+            middle_nodes.clear();
+
+            // fill middle_nodes with non-pair members
+            for (auto it = nodes.begin(); it != nodes.end(); ++it)
+            {
+                if (it != it1 && it != it2)
+                {
+                    middle_nodes.push_back(*it);
+                }
+            }
+
             node_pair<Ntk> pair1 = {*it1, *it2, std::numeric_limits<uint64_t>::max()};  // Initialize delay to inf
             node_pair<Ntk> pair2 = {*it2, *it1, std::numeric_limits<uint64_t>::max()};  // Initialize delay to inf
+
+            // Add middle_nodes to pairs
+            pair1.middle_nodes = middle_nodes;
+            pair2.middle_nodes = middle_nodes;
+
             pairwise_combinations.push_back(pair1);
             pairwise_combinations.push_back(pair2);
         }
@@ -109,7 +128,8 @@ std::vector<node_pair<Ntk>> calculate_pairs(const std::vector<mockturtle::node<N
 
     return pairwise_combinations;
 }
-// ToDo: Hande combinations with more than two nodes. Then all the other nodes in between can be placed in arbitrary
+
+// ToDo: Handle combinations with more than two nodes. Then all the other nodes in between can be placed in arbitrary
 // order
 template <typename Ntk>
 class node_duplication_planarization_impl
@@ -179,32 +199,64 @@ class node_duplication_planarization_impl
         cur_lvl_pairs.push_back(combinations);
     }
 
+    void insert_if_unique(mockturtle::node<Ntk> node, std::vector<mockturtle::node<Ntk>>& vec)
+    {
+        if(vec.empty() || vec.front() != node)
+        {
+            vec.insert(vec.begin(), node);
+        }
+    }
+
     void compute_node_order_next_level(std::vector<mockturtle::node<Ntk>>& next_level)
     {
         const auto& combinations = cur_lvl_pairs.back();
+        // select the path with the least delay and follow it via fanin relations
         auto        minimum_it =
             std::min_element(combinations.begin(), combinations.end(),
                              [](const node_pair<Ntk>& a, const node_pair<Ntk>& b) { return a.delay < b.delay; });
         if (minimum_it != combinations.end())
         {
+            const auto &min_combination = *minimum_it;
+            std::cout << "Minimum delay: " << min_combination.delay << std::endl;
+
+            // Insert the terminal node
+            insert_if_unique(min_combination.pair.second, next_level);
+
+            // insert middle_nodes
+            for (const auto &node : min_combination.middle_nodes)
+            {
+                insert_if_unique(node, next_level);
+            }
+
+            // Insert the first node
+            insert_if_unique(min_combination.pair.first, next_level);
+
             std::shared_ptr<node_pair<Ntk>> fanin_combination = minimum_it->fanin_pair;
 
             while (fanin_combination)
             {
-                next_level.insert(next_level.begin(), fanin_combination->pair.first);
+                // Insert the terminal node
+                insert_if_unique(fanin_combination->pair.second, next_level);
+
+                // Insert middle_nodes
+                for (const auto &node : fanin_combination->middle_nodes)
+                {
+                    insert_if_unique(node, next_level);
+                }
+
+                // insert the first node
+                insert_if_unique(fanin_combination->pair.first, next_level);
+
                 fanin_combination = fanin_combination->fanin_pair;
             }
-
-            const auto& min_combination = *minimum_it;
-            std::cout << "Minimum delay: " << min_combination.delay << std::endl;
-
-            next_level.insert(next_level.begin(), min_combination.pair.first);
         }
     }
 
     mockturtle::rank_view<Ntk> run()
     {
         // ToDo: Determine the PO order
+        /*static std::mt19937                     generator(std::random_device{}());
+        std::uniform_int_distribution<uint32_t> distribution(0, ntk.rank_width(r) - 1);*/
         std::vector<mockturtle::node<Ntk>> po_level;  // save the nodes of the next level
         ntk_lvls.push_back(po_level);
         std::vector<mockturtle::node<Ntk>> next_level;       // save the nodes of the next level
@@ -222,8 +274,11 @@ class node_duplication_planarization_impl
         compute_node_order_next_level(real_next_level);
 
         /*ToDo: When pushing the real next level there will be the duplicated nodes and then the trav id wont be correct
-         * anymore The handling of duplicated nodes has to be thought over
+         * anymore. The handling of duplicated nodes has to be thought over.
          * */
+        // This function gets the nodes of the next level passed. They should be reordered and the duplicated nodes have
+        // to be inserted so that they will keep the same functionality reorder_and_duplicate_nodes(next_level)
+
         // first push back the pos
         ntk_lvls.push_back(next_level);
         // Process all other levels
@@ -236,22 +291,13 @@ class node_duplication_planarization_impl
             for (const auto& cur_node : next_level)
             {
                 cur_fis.clear();
+                // There is one slice in the H-Graph per node in the level
                 compute_slice_delays(cur_node, new_level);
             }
             // The new level becomes the next level for the next iteration
             next_level = new_level;
+            // compute_node_order_next_level(next_level);
         }
-        // Create random node ranks for POs: maybe here a heuristic or some clustering algorithm can assist
-        // Iterate from POs to PIs and watch the current rank plus the fanin nodes at one time
-        // A between these two ranks: compute the Graph H and compute the shortest path
-        // B this might be simplified by just collecting all fanins also from the node with rank current_rank - 1
-        // the order can then has to be applied before going to the next iteration step
-        /*static std::mt19937                     generator(std::random_device{}());
-        std::uniform_int_distribution<uint32_t> distribution(0, ntk.rank_width(r) - 1);*/
-        /*for(const auto node : cur_level)
-        {
-            assert( ntk.is_pi(node) );
-        }*/
 
         std::cout << "width: " << ntk.width() << std::endl;
         std::cout << "depth: " << ntk.depth() << std::endl;
@@ -263,13 +309,17 @@ class node_duplication_planarization_impl
     std::vector<std::vector<node_pair<Ntk>>>        cur_lvl_pairs;
     std::vector<mockturtle::node<Ntk>>              cur_fis;
     std::vector<std::vector<mockturtle::node<Ntk>>> ntk_lvls;
-    // std::vector<node_pair<Ntk>> slice_node_pairs;
 };
 
 }  // namespace detail
 
 /**
  * ToDo: Description
+ * This implementation utilizes an H-Graph to capture all edge relations between two layers of a graph.
+ * The Node Duplication Crossing Minimization (NDCE) problem is addressed by finding the shortest x-y path on the
+ * H-Graph. Note that this minimization is valid only under a specific order at the primary output (PO) level. The
+ * algorithm traverses from primary outputs (POs) to primary inputs (PIs), constructing the H-Graph and computing the
+ * shortest x-y paths at each level of the graph.
  */
 template <typename NtkDest, typename NtkSrc>
 mockturtle::rank_view<NtkDest> node_duplication_planarization(const NtkSrc& ntk_src, node_duplication_params ps = {})
