@@ -84,7 +84,7 @@ class astar_command : public command
 
   private:
     /**
-     * Number of clock phases.
+     * Timeout.
      */
     uint64_t timeout = 0;
     /**
