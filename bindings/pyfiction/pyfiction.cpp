@@ -14,6 +14,7 @@
 #include "pyfiction/algorithms/path_finding/distance.hpp"
 #include "pyfiction/algorithms/path_finding/enumerate_all_paths.hpp"
 #include "pyfiction/algorithms/path_finding/k_shortest_paths.hpp"
+#include "pyfiction/algorithms/physical_design/a_star_pr.hpp"
 #include "pyfiction/algorithms/physical_design/apply_gate_library.hpp"
 #include "pyfiction/algorithms/physical_design/color_routing.hpp"
 #include "pyfiction/algorithms/physical_design/design_sidb_gates.hpp"
@@ -161,6 +162,7 @@ PYBIND11_MODULE(pyfiction, m)
      */
     pyfiction::exact(m);
     pyfiction::orthogonal(m);
+    pyfiction::a_star_pr(m);
     pyfiction::apply_gate_library(m);
     pyfiction::color_routing(m);
     pyfiction::hexagonalization(m);

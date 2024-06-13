@@ -1,14 +1,14 @@
 //
-// Created by marcel on 08.06.22.
+// Created by simon on 13.06.24.
 //
 
-#ifndef PYFICTION_ORTHOGONAL_HPP
-#define PYFICTION_ORTHOGONAL_HPP
+#ifndef PYFICTION_A_STAR_PR_HPP
+#define PYFICTION_A_STAR_PR_HPP
 
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/algorithms/physical_design/orthogonal.hpp>
+#include <fiction/algorithms/physical_design/a_star_pr.hpp>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
@@ -19,24 +19,21 @@ namespace pyfiction
 {
 
 /**
- * OGD-based physical design.
+ * A*-based physical design.
  */
-inline void orthogonal(pybind11::module& m)
+inline void a_star_pr(pybind11::module& m)
 {
     namespace py = pybind11;
     using namespace pybind11::literals;
 
-    py::class_<fiction::orthogonal_physical_design_params>(m, "orthogonal_params",
-                                                           DOC(fiction_orthogonal_physical_design_params))
-        .def(py::init<>())
+    py::class_<fiction::a_star_pr_params>(m, "a_star_pr_params", DOC(fiction_a_star_pr_params)).def(py::init<>())
 
         ;
 
-    py::class_<fiction::orthogonal_physical_design_stats>(m, "orthogonal_stats",
-                                                          DOC(fiction_orthogonal_physical_design_stats))
+    py::class_<fiction::a_star_pr_stats>(m, "a_star_pr_stats", DOC(fiction_a_star_pr_stats))
         .def(py::init<>())
         .def("__repr__",
-             [](const fiction::orthogonal_physical_design_stats& stats)
+             [](const fiction::a_star_pr_stats& stats)
              {
                  std::stringstream stream{};
                  stats.report(stream);
@@ -45,11 +42,10 @@ inline void orthogonal(pybind11::module& m)
 
         ;
 
-    m.def("orthogonal", &fiction::orthogonal<py_cartesian_gate_layout, py_logic_network>, "network"_a,
-          "parameters"_a = fiction::orthogonal_physical_design_params{}, "statistics"_a = nullptr,
-          DOC(fiction_orthogonal));
+    m.def("a_star_pr", &fiction::a_star_pr<py_cartesian_gate_layout, py_logic_network>, "network"_a,
+          "parameters"_a = fiction::a_star_pr_params{}, "statistics"_a = nullptr, DOC(fiction_a_star_pr));
 }
 
 }  // namespace pyfiction
 
-#endif  // PYFICTION_ORTHOGONAL_HPP
+#endif  // PYFICTION_A_STAR_PR_HPP
