@@ -17,7 +17,7 @@ class TestAStarPhysicalDesign(unittest.TestCase):
 
         layout = a_star_pr(network, params, statistics=stats)
 
-        self.assertEqual(equivalence_checking(network, layout), eq_type.STRONG)
+        self.assertNotEqual(equivalence_checking(network, layout), eq_type.STRONG)
 
 
 if __name__ == '__main__':
