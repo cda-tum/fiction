@@ -3368,6 +3368,38 @@ computation.)doc";
 
 static const char *__doc_fiction_design_sidb_gates_params_simulation_parameters = R"doc(All Parameters for physical SiDB simulations.)doc";
 
+static const char *__doc_fiction_detail_SearchSpaceGraph =
+R"doc(A structure representing a search space graph.
+
+This struct encapsulates all the necessary data for managing a search
+space graph during the A*-based placement and routing algorithm. It
+holds the current vertex, network, nodes to be placed, and other
+relevant information.
+
+Template parameter ``Lyt``:
+    The layout type.
+
+Template parameter ``Ntk``:
+    The network type.)doc";
+
+static const char *__doc_fiction_detail_SearchSpaceGraph_cost_so_far = R"doc(The cost so far for reaching each vertex in the layout.)doc";
+
+static const char *__doc_fiction_detail_SearchSpaceGraph_current_vertex = R"doc(The current vertex in the search space graph.)doc";
+
+static const char *__doc_fiction_detail_SearchSpaceGraph_frontier = R"doc(Priority queue containing vertices of the search space graph.)doc";
+
+static const char *__doc_fiction_detail_SearchSpaceGraph_frontier_flag = R"doc(Flag indicating if this graph's frontier is active.)doc";
+
+static const char *__doc_fiction_detail_SearchSpaceGraph_network = R"doc(The network associated with this search space graph.)doc";
+
+static const char *__doc_fiction_detail_SearchSpaceGraph_num_expansions = R"doc(The maximum number of positions to be considered for expansions.)doc";
+
+static const char *__doc_fiction_detail_SearchSpaceGraph_pis_left = R"doc(Flag indicating if primary inputs (PIs) can be placed at the left.)doc";
+
+static const char *__doc_fiction_detail_SearchSpaceGraph_pis_top = R"doc(Flag indicating if primary inputs (PIs) can be placed at the top.)doc";
+
+static const char *__doc_fiction_detail_SearchSpaceGraph_po_names = R"doc(Primary output (PO) names.)doc";
+
 static const char *__doc_fiction_detail_a_star_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_a_star_impl_a_star_impl = R"doc()doc";
