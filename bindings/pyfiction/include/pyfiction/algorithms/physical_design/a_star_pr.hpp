@@ -26,7 +26,13 @@ inline void a_star_pr(pybind11::module& m)
     namespace py = pybind11;
     using namespace pybind11::literals;
 
-    py::class_<fiction::a_star_pr_params>(m, "a_star_pr_params", DOC(fiction_a_star_pr_params)).def(py::init<>())
+    py::class_<fiction::a_star_pr_params>(m, "a_star_pr_params", DOC(fiction_a_star_pr_params))
+        .def(py::init<>())
+        .def_readwrite("timeout", &fiction::a_star_pr_params::timeout, DOC(fiction_a_star_pr_params_timeout))
+        .def_readwrite("verbose", &fiction::a_star_pr_params::verbose, DOC(fiction_a_star_pr_params_verbose))
+        .def_readwrite("high_effort", &fiction::a_star_pr_params::high_effort,
+                       DOC(fiction_a_star_pr_params_high_effort))
+        .def_readwrite("timeout", &fiction::a_star_pr_params::return_first, DOC(fiction_a_star_pr_params_return_first))
 
         ;
 
