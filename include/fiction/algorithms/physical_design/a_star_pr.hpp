@@ -56,6 +56,10 @@ struct a_star_pr_params
      */
     bool high_effort = false;
     /**
+     * Return first found layout.
+     */
+    bool return_first = false;
+    /**
      * Timeout limit.
      */
     uint64_t timeout;
@@ -749,7 +753,7 @@ void place_node_with_2_inputs(Lyt& layout, Ntk& network, fiction::tile<Lyt> posi
     }
 }
 /**
- * Calculates the reward for placing a node in the network layout and determines if the placement process is done.
+ * Calculates the reward for placing a node in the layout and determines if the placement process is done.
  * The reward system assigns a high reward if all nodes are placed, a small reward if a node is placed, and no reward
  * otherwise.
  *
@@ -936,26 +940,6 @@ std::pair<double, bool> place(fiction::tile<Lyt> position, Lyt& layout, Ntk& net
     return {reward, done};
 }
 /**
- * Resets and initializes a new layout with the specified minimum width and height.
- * The new layout is set up with 2DDWave clocking and can be obstructed.
- *
- * @tparam Lyt Cartesian gate-level layout type.
- * @param min_layout_width The minimum width of the layout.
- * @param min_layout_height The minimum height of the layout.
- * @return A new layout initialized with the specified dimensions and clocking.
- */
-template <typename Lyt, typename Ntk>
-Lyt reset(uint64_t min_layout_width, uint64_t min_layout_height)
-{
-    fiction::gate_level_layout<fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<>>>> lyt{
-        {min_layout_width - 1, min_layout_height - 1, 1},
-        twoddwave_clocking<Lyt>()};
-    auto layout = fiction::obstruction_layout<
-        fiction::gate_level_layout<fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<>>>>>(
-        lyt);
-    return layout;
-}
-/**
  * Computes possible expansions and their priorities for the current vertex in the search space graph.
  * It handles placement of nodes, checks for valid paths, and finds potential next positions based on priorities.
  *
@@ -972,7 +956,7 @@ Lyt reset(uint64_t min_layout_width, uint64_t min_layout_height)
  * If an improved solution is found, the layout is returned.
  * If the layout is invalid or no improvement is possible, std::nullopt is returned.
  */
-template <typename Lyt, typename Ntk>
+template <typename OrigLyt, typename Lyt, typename Ntk>
 std::pair<std::vector<std::pair<coord_vec_type<Lyt>, double>>, std::optional<Lyt>>
 neighbors(SearchSpaceGraph<Lyt>& search_space_graph, uint64_t count, bool& improv_mode, uint64_t& best_solution,
           uint64_t& max_placed_nodes, std::chrono::time_point<std::chrono::high_resolution_clock> start_time,
@@ -991,8 +975,9 @@ neighbors(SearchSpaceGraph<Lyt>& search_space_graph, uint64_t count, bool& impro
     std::unordered_map<mockturtle::node<Ntk>, mockturtle::node<Lyt>> node_dict{};
     std::vector<std::pair<coord_vec_type<Lyt>, double>>              next_positions;
 
-    Lyt  layout  = detail::reset<Lyt, Ntk>(min_layout_width, min_layout_height);
-    auto pi2node = reserve_input_nodes(layout, search_space_graph.network);
+    OrigLyt lyt{{min_layout_width - 1, min_layout_height - 1, 1}, twoddwave_clocking<Lyt>()};
+    auto    layout  = fiction::obstruction_layout<OrigLyt>(lyt);
+    auto    pi2node = reserve_input_nodes(layout, search_space_graph.network);
 
     bool                   done = false;
     std::vector<tile<Lyt>> possible_positions{};
@@ -1203,8 +1188,15 @@ void initialize_networks_and_nodes_to_place(Ntk& ntk, std::vector<SearchSpaceGra
                 nodes_to_place_depth_ci_to_co.push_back(n);
                 for (auto& graph : search_space_graphs)
                 {
-                    graph.po_names.push_back(
-                        network_substituted_breadth.get_output_name(network_substituted_breadth.po_index(n)));
+                    if (network_substituted_breadth.has_output_name(network_substituted_breadth.po_index(n)))
+                    {
+                        graph.po_names.push_back(
+                            network_substituted_breadth.get_output_name(network_substituted_breadth.po_index(n)));
+                    }
+                    else
+                    {
+                        graph.po_names.push_back("");
+                    }
                 }
             }
         });
@@ -1314,11 +1306,16 @@ class a_star_pr_impl
                 if (search_space_graph.frontier_flag)
                 {
                     count++;
-                    auto neighbors = detail::neighbors<decltype(layout), fiction::tec_nt>(
+                    auto neighbors = detail::neighbors<Lyt, ObstrLyt, fiction::tec_nt>(
                         search_space_graph, count, improv_mode, best_solution, max_placed_nodes, start, verbose);
                     if (neighbors.second)
                     {
                         best_lyt = *neighbors.second;
+                        if (ps.return_first)
+                        {
+                            best_lyt.set_layout_name(search_space_graph.network.get_network_name());
+                            return best_lyt;
+                        }
                     }
                     for (const auto& [next, cost] : neighbors.first)
                     {
@@ -1358,7 +1355,7 @@ class a_star_pr_impl
             }
         }
 
-        best_lyt.set_layout_name(ntk.get_network_name());
+        best_lyt.set_layout_name(search_space_graphs[0].network.get_network_name());
         return best_lyt;
     }
 
