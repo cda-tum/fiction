@@ -291,14 +291,14 @@ struct SearchSpaceGraph
  */
 template <typename Lyt>
 std::pair<bool, std::optional<fiction::layout_coordinate_path<Lyt>>>
-check_path(Lyt& layout, fiction::tile<Lyt>& src, fiction::tile<Lyt>& dest, bool src_is_new_pos = false,
-           bool dest_is_new_pos = false, bool return_path = false)
+check_path(const Lyt& layout, const fiction::tile<Lyt>& src, const fiction::tile<Lyt>& dest,
+           const bool src_is_new_pos = false, const bool dest_is_new_pos = false, const bool return_path = false)
 {
     if ((layout.is_empty_tile(src) & src_is_new_pos) || (layout.is_empty_tile(dest) & dest_is_new_pos) ||
         (!src_is_new_pos && !dest_is_new_pos))
     {
-        auto path = fiction::a_star<fiction::layout_coordinate_path<Lyt>>(layout, {src, dest}, dist<Lyt>(), cost<Lyt>(),
-                                                                          A_STAR_PARAMS<Lyt>);
+        const auto path = fiction::a_star<fiction::layout_coordinate_path<Lyt>>(layout, {src, dest}, dist<Lyt>(),
+                                                                                cost<Lyt>(), A_STAR_PARAMS<Lyt>);
 
         if (!path.empty())
         {
@@ -319,89 +319,57 @@ check_path(Lyt& layout, fiction::tile<Lyt>& src, fiction::tile<Lyt>& dest, bool 
  * @param layout The layout in which to find the possible positions for PIs.
  * @param pis_top Flag indicating if PIs are allowed at the top side of the layout.
  * @param pis_left Flag indicating if PIs are allowed at the left side of the layout.
- * @param expansions The maximum number of positions to be returned (is doubled for PIs).
+ * @param num_expansions The maximum number of positions to be returned (is doubled for PIs).
  * @return A vector of tiles representing the possible positions for PIs.
  * @throws std::runtime_error If neither top nor left positions are allowed for PIs.
  */
 template <typename Lyt>
 std::vector<fiction::tile<Lyt>> get_possible_positions_pis(Lyt& layout, bool pis_top, bool pis_left,
-                                                           uint64_t expansions)
+                                                           uint64_t num_expansions)
 {
     uint64_t                        count = 0;
     std::vector<fiction::tile<Lyt>> possible_positions{};
 
     layout.resize({layout.x() + 1, layout.y() + 1, 1});
-    fiction::tile<Lyt> drain{layout.x(), layout.y(), 0};
+    const fiction::tile<Lyt> drain{layout.x(), layout.y(), 0};
 
-    if (pis_top && pis_left)
+    // Check if path from Input to drain exists
+    auto check_tile = [&](uint64_t x, uint64_t y)
     {
-        for (uint64_t k = 0; k < std::max(layout.x(), layout.y()); k++)
+        const fiction::tile<Lyt> tile{x, y, 0};
+        if (detail::check_path(layout, tile, drain, true, false, false).first)
         {
-            fiction::tile<Lyt> tile_top{k, 0, 0};
+            count++;
+            possible_positions.push_back(tile);
+        }
+    };
 
-            if (detail::check_path(layout, tile_top, drain, true, false, false).first)
-            {
-                count++;
-                possible_positions.push_back(tile_top);
-            }
+    const uint64_t max_iterations =
+        (pis_top && pis_left) ? std::max(layout.x(), layout.y()) : (pis_top ? layout.x() : layout.y());
+    const uint64_t expansion_limit = (pis_top && pis_left) ? 2 * num_expansions : num_expansions;
 
-            fiction::tile<Lyt> tile_left{0, k, 0};
-
-            if (detail::check_path(layout, tile_left, drain, true, false, false).first)
-            {
-                count++;
-                possible_positions.push_back(tile_left);
-            }
-
-            if (count >= 2 * expansions)
-            {
-                layout.resize({layout.x() - 1, layout.y() - 1, 1});
-                return possible_positions;
-            }
+    for (uint64_t k = 0; k < max_iterations; k++)
+    {
+        if (pis_top && k < layout.x())
+        {
+            check_tile(k, 0);
+        }
+        if (pis_left && k < layout.y())
+        {
+            check_tile(0, k);
+        }
+        if (count >= expansion_limit)
+        {
+            layout.resize({layout.x() - 1, layout.y() - 1, 1});
+            return possible_positions;
         }
     }
-    else if (pis_top)
-    {
-        for (uint64_t k = 0; k < layout.x(); k++)
-        {
-            fiction::tile<Lyt> tile_top{k, 0, 0};
 
-            if (detail::check_path(layout, tile_top, drain, true, false, false).first)
-            {
-                count++;
-                possible_positions.push_back(tile_top);
-            }
-
-            if (count >= expansions)
-            {
-                layout.resize({layout.x() - 1, layout.y() - 1, 1});
-                return possible_positions;
-            }
-        }
-    }
-    else if (pis_left)
-    {
-        for (uint64_t k = 0; k < layout.y(); k++)
-        {
-            fiction::tile<Lyt> tile_left{0, k, 0};
-
-            if (detail::check_path(layout, tile_left, drain, true, false, false).first)
-            {
-                count++;
-                possible_positions.push_back(tile_left);
-            }
-
-            if (count >= expansions)
-            {
-                layout.resize({layout.x() - 1, layout.y() - 1, 1});
-                return possible_positions;
-            }
-        }
-    }
-    else
+    if (!pis_top && !pis_left)
     {
         throw std::runtime_error("Allowed positions for PIs have to be specified");
     }
+
     layout.resize({layout.x() - 1, layout.y() - 1, 1});
     return possible_positions;
 }
@@ -421,24 +389,25 @@ std::vector<fiction::tile<Lyt>> get_possible_positions_pos(Lyt& layout, node_dic
                                                            std::vector<mockturtle::node<Ntk>>& preceding_nodes)
 {
     std::vector<fiction::tile<Lyt>> possible_positions{};
-    auto                            loc = layout.get_tile(node_dict[preceding_nodes[0]]);
-    for (uint64_t k = 0; k <= std::max(layout.x() - loc.x, layout.y() - loc.y); ++k)
+    const auto                      preceding_node_loc = layout.get_tile(node_dict[preceding_nodes[0]]);
+    const auto max_iterations = std::max(layout.x() - preceding_node_loc.x, layout.y() - preceding_node_loc.y);
+
+    // Check if path from previous tile to PO exists
+    auto check_tile = [&](uint64_t x, uint64_t y)
     {
-        fiction::tile<Lyt> tile_bottom_border{loc.x + k, static_cast<int>(layout.y()), 0};
-        fiction::tile<Lyt> src{loc.x, loc.y, 0};
-
-        if (detail::check_path(layout, src, tile_bottom_border, false, true, false).first)
+        const fiction::tile<Lyt> tile{x, y, 0};
+        if (detail::check_path(layout, preceding_node_loc, tile, false, true, false).first)
         {
-            possible_positions.push_back(tile_bottom_border);
+            possible_positions.push_back(tile);
         }
+    };
 
-        fiction::tile<Lyt> tile_right_border{static_cast<int>(layout.x()), loc.y + k, 0};
-
-        if (detail::check_path(layout, src, tile_right_border, false, true, false).first)
-        {
-            possible_positions.push_back(tile_right_border);
-        }
+    for (uint64_t k = 0; k <= max_iterations; ++k)
+    {
+        check_tile(preceding_node_loc.x + k, layout.y());
+        check_tile(layout.x(), preceding_node_loc.y + k);
     }
+
     return possible_positions;
 }
 /**
@@ -449,44 +418,49 @@ std::vector<fiction::tile<Lyt>> get_possible_positions_pos(Lyt& layout, node_dic
  * @tparam Ntk Network type.
  * @param layout The layout in which to find the possible positions for a single fan-in node.
  * @param node_dict A dictionary mapping nodes from the network to tiles in the layout.
- * @param expansions The maximum number of positions to be returned.
+ * @param num_expansions The maximum number of positions to be returned.
  * @param preceding_nodes A vector of nodes that precede the single fanin node.
  * @return A vector of tiles representing the possible positions for a single fan-in node.
  */
 template <typename Lyt, typename Ntk>
 std::vector<fiction::tile<Lyt>> get_possible_positions_single_fanin(Lyt& layout, node_dict_type<Lyt, Ntk>& node_dict,
-                                                                    uint64_t                            expansions,
+                                                                    uint64_t                            num_expansions,
                                                                     std::vector<mockturtle::node<Ntk>>& preceding_nodes)
 {
     std::vector<fiction::tile<Lyt>> possible_positions{};
-    uint64_t                        count = 0;
-    auto                            node  = node_dict[preceding_nodes[0]];
-    auto                            loc   = layout.get_tile(node);
-    // iterate through cartesian layout diagonally
+    uint64_t                        count              = 0;
+    const auto                      preceding_node_loc = layout.get_tile(node_dict[preceding_nodes[0]]);
+
+    // Check if path from previous tile to new tile and from new tile to drain exist
+    auto check_tile = [&](uint64_t x, uint64_t y)
+    {
+        const fiction::tile<Lyt> new_pos{preceding_node_loc.x + x, preceding_node_loc.y + y, 0};
+
+        if (detail::check_path(layout, preceding_node_loc, new_pos, false, true, false).first)
+        {
+            layout.resize({layout.x() + 1, layout.y() + 1, 1});
+            const fiction::tile<Lyt> drain{layout.x(), layout.y(), 0};
+
+            if (detail::check_path(layout, new_pos, drain, true, false, false).first)
+            {
+                possible_positions.push_back(new_pos);
+                count++;
+            }
+            layout.resize({layout.x() - 1, layout.y() - 1, 1});
+        }
+    };
+
+    // Iterate diagonally
     for (uint64_t k = 0; k < layout.x() + layout.y() + 1; ++k)
     {
         for (uint64_t x = 0; x < k + 1; ++x)
         {
             const auto y = k - x;
-            if ((loc.y + y) <= layout.y() && (loc.x + x) <= layout.x())
+            if ((preceding_node_loc.y + y) <= layout.y() && (preceding_node_loc.x + x) <= layout.x())
             {
-                fiction::tile<Lyt> new_pos{loc.x + x, loc.y + y, 0};
-                fiction::tile<Lyt> src{loc.x, loc.y, 0};
-
-                if (detail::check_path(layout, src, new_pos, false, true, false).first)
-                {
-                    layout.resize({layout.x() + 1, layout.y() + 1, 1});
-                    fiction::tile<Lyt> drain{layout.x(), layout.y(), 0};
-
-                    if (detail::check_path(layout, new_pos, drain, true, false, false).first)
-                    {
-                        possible_positions.push_back(new_pos);
-                        count++;
-                    }
-                    layout.resize({layout.x() - 1, layout.y() - 1, 1});
-                }
+                check_tile(x, y);
             }
-            if (count >= expansions)
+            if (count >= num_expansions)
             {
                 return possible_positions;
             }
@@ -502,31 +476,59 @@ std::vector<fiction::tile<Lyt>> get_possible_positions_single_fanin(Lyt& layout,
  * @tparam Ntk Network type.
  * @param layout The layout in which to find the possible positions for a double fan-in node.
  * @param node_dict A dictionary mapping nodes from the network to tiles in the layout.
- * @param expansions The maximum number of positions to be returned.
+ * @param num_expansions The maximum number of positions to be returned.
  * @param preceding_nodes A vector of nodes that precede the double fanin node.
  * @return A vector of tiles representing the possible positions for a double fan-in node.
  */
 template <typename Lyt, typename Ntk>
 std::vector<fiction::tile<Lyt>> get_possible_positions_double_fanin(Lyt& layout, node_dict_type<Lyt, Ntk>& node_dict,
-                                                                    uint64_t                            expansions,
+                                                                    uint64_t                            num_expansions,
                                                                     std::vector<mockturtle::node<Ntk>>& preceding_nodes)
 {
     std::vector<fiction::tile<Lyt>> possible_positions{};
-    uint64_t                        count  = 0;
-    auto                            node_1 = node_dict[preceding_nodes[0]];
-    auto                            loc_1  = layout.get_tile(node_1);
-    auto                            node_2 = node_dict[preceding_nodes[1]];
-    auto                            loc_2  = layout.get_tile(node_2);
-    auto                            min_x  = std::max(loc_1.x, loc_2.x);
-    auto                            min_y  = std::max(loc_1.y, loc_2.y);
-    if (loc_1.x == loc_2.x)
+    uint64_t                        count                = 0;
+    const auto                      preceding_node_1_loc = layout.get_tile(node_dict[preceding_nodes[0]]);
+    const auto                      preceding_node_2_loc = layout.get_tile(node_dict[preceding_nodes[1]]);
+    const auto                      min_x                = std::max(preceding_node_1_loc.x, preceding_node_2_loc.x) +
+                       (preceding_node_1_loc.x == preceding_node_2_loc.x ? 1 : 0);
+    const auto min_y = std::max(preceding_node_1_loc.y, preceding_node_2_loc.y) +
+                       (preceding_node_1_loc.y == preceding_node_2_loc.y ? 1 : 0);
+
+    // Check if path from previous tiles to new tile and from new tile to drain exist
+    auto check_tile = [&](uint64_t x, uint64_t y)
     {
-        min_x += 1;
-    }
-    if (loc_1.y == loc_2.y)
-    {
-        min_y += 1;
-    }
+        const fiction::tile<Lyt> new_pos{min_x + x, min_y + y, 0};
+
+        const auto path_1 = detail::check_path(layout, preceding_node_1_loc, new_pos, false, true, true);
+        if (path_1.first)
+        {
+            for (const auto& el : *path_1.second)
+            {
+                layout.obstruct_coordinate(el);
+            }
+
+            if (detail::check_path(layout, preceding_node_2_loc, new_pos, false, true, false).first)
+            {
+                layout.resize({layout.x() + 1, layout.y() + 1, 1});
+                const fiction::tile<Lyt> drain{layout.x(), layout.y(), 0};
+
+                if (detail::check_path(layout, new_pos, drain, true, false, false).first)
+                {
+                    possible_positions.push_back(new_pos);
+                    count++;
+                }
+
+                layout.resize({layout.x() - 1, layout.y() - 1, 1});
+            }
+
+            for (const auto& el : *path_1.second)
+            {
+                layout.clear_obstructed_coordinate(el);
+            }
+        }
+    };
+
+    // Iterate diagonally
     for (uint64_t k = 0; k < layout.x() + layout.y() + 1; ++k)
     {
         for (uint64_t x = 0; x < k + 1; ++x)
@@ -534,43 +536,15 @@ std::vector<fiction::tile<Lyt>> get_possible_positions_double_fanin(Lyt& layout,
             const auto y = k - x;
             if ((min_y + y) <= layout.y() && (min_x + x) <= layout.x())
             {
-                fiction::tile<Lyt> tile{min_x + x, min_y + y, 0};
-                fiction::tile<Lyt> start_1{loc_1.x, loc_1.y, loc_1.z};
-                fiction::tile<Lyt> start_2{loc_2.x, loc_2.y, loc_2.z};
-
-                auto path_1 = detail::check_path(layout, start_1, tile, false, true, true);
-                if (path_1.first)
-                {
-                    for (auto el : *path_1.second)
-                    {
-                        layout.obstruct_coordinate(el);
-                    }
-
-                    if (detail::check_path(layout, start_2, tile, false, true, false).first)
-                    {
-                        layout.resize({layout.x() + 1, layout.y() + 1, 1});
-                        fiction::coordinate<Lyt> drain{layout.x(), layout.y(), 0};
-
-                        if (detail::check_path(layout, tile, drain, true, false, false).first)
-                        {
-                            possible_positions.push_back(tile);
-                            count++;
-                        }
-
-                        layout.resize({layout.x() - 1, layout.y() - 1, 1});
-                    }
-                    for (auto el : *path_1.second)
-                    {
-                        layout.clear_obstructed_coordinate(el);
-                    }
-                }
+                check_tile(x, y);
             }
-            if (count >= expansions)
+            if (count >= num_expansions)
             {
                 return possible_positions;
             }
         }
     }
+
     return possible_positions;
 }
 /**
@@ -632,39 +606,54 @@ std::vector<fiction::tile<Lyt>> get_possible_positions(Lyt& layout, SearchSpaceG
 template <typename Lyt, typename Ntk>
 bool valid_layout(Lyt& layout, Ntk& network, node_dict_type<Lyt, Ntk>& node_dict, bool& placement_possible)
 {
-    for (auto& node : node_dict)
+    auto check_tile = [&](const fiction::tile<Lyt>& tile)
     {
-        auto tile = layout.get_tile(node.second);
-        if ((!layout.is_po_tile(layout.get_tile(node.second)) && (layout.fanout_size(node.second) == 0)) ||
-            ((layout.fanout_size(node.second) == 1) && network.is_fanout(node.first)))
-        {
-            layout.resize({layout.x() + 1, layout.y() + 1, 1});
-            fiction::tile<Lyt> dest{layout.x(), layout.y(), 0};
+        layout.resize({layout.x() + 1, layout.y() + 1, 1});
+        const fiction::tile<Lyt> drain{layout.x(), layout.y(), 0};
+        const bool               path_exists = detail::check_path(layout, tile, drain, false, true, false).first;
+        layout.resize({layout.x() - 1, layout.y() - 1, 1});
+        return path_exists;
+    };
 
-            if (!detail::check_path(layout, tile, dest, false, true, false).first)
+    auto is_empty_tile_or_crossable = [&](const fiction::tile<Lyt>& tile)
+    {
+        return layout.is_empty_tile(tile) ||
+               (layout.is_empty_tile({tile.x, tile.y, 1}) && !layout.is_obstructed_coordinate({tile.x, tile.y, 1}));
+    };
+
+    for (const auto& node : node_dict)
+    {
+        const auto tile                 = layout.get_tile(node.second);
+        const bool no_fanout_and_not_po = !layout.is_po_tile(tile) && (layout.fanout_size(node.second) == 0);
+        const bool one_dangling_fanout  = (layout.fanout_size(node.second) == 1) && network.is_fanout(node.first);
+
+        if (no_fanout_and_not_po || one_dangling_fanout)
+        {
+            if (!check_tile(tile))
             {
                 placement_possible = false;
                 return false;
             }
-
-            layout.resize({layout.x() - 1, layout.y() - 1, 1});
         }
-        if ((layout.fanout_size(node.second) == 0) && network.is_fanout(node.first))
+
+        const bool two_dangling_fanouts = (layout.fanout_size(node.second) == 0) && network.is_fanout(node.first);
+
+        if (two_dangling_fanouts)
         {
-            if (!((layout.is_empty_tile({tile.x + 1, tile.y, 0}) ||
-                   (layout.is_empty_tile({tile.x + 1, tile.y, 1}) &&
-                    !layout.is_obstructed_coordinate({tile.x + 1, tile.y, 1}))) &&
-                  (layout.is_empty_tile({tile.x, tile.y + 1, 0}) ||
-                   (layout.is_empty_tile({tile.x, tile.y + 1, 1}) &&
-                    !layout.is_obstructed_coordinate({tile.x, tile.y + 1, 1})))))
+            fiction::tile<Lyt> right_tile{tile.x + 1, tile.y, 0};
+            fiction::tile<Lyt> bottom_tile{tile.x, tile.y + 1, 0};
+
+            if (!(is_empty_tile_or_crossable(right_tile) && is_empty_tile_or_crossable(bottom_tile)))
             {
                 placement_possible = false;
                 return false;
             }
         }
     }
+
     return true;
 }
+
 /**
  * Places a node with one input in the given layout based on the specified position and signal.
  * It handles different types of nodes, such as inverters, primary outputs, and buffers.
@@ -817,127 +806,177 @@ std::pair<double, bool> place(fiction::tile<Lyt> position, Lyt& layout, Ntk& net
     network.foreach_fanin(nodes_to_place[current_node],
                           [&preceding_nodes](const auto& f) { preceding_nodes.push_back(f); });
 
-    bool   done   = false;
-    double reward = 0;
-
     if (!placement_possible || !layout.is_empty_tile(position))
     {
-        done = true;
+        return {0, true};
     }
-    else
-    {
-        uint64_t placed_node = 0;
-        auto     num_fanins  = preceding_nodes.size();
 
-        if (num_fanins == 0)
+    auto place_single_input_node = [&](auto& position, auto& layout, auto& network, auto& current_node,
+                                       auto& nodes_to_place, auto& current_po, auto& po_names)
+    {
+        const auto preceding_node     = node_dict[preceding_nodes[0]];
+        const auto preceding_node_loc = layout.get_tile(preceding_node);
+        const auto signal             = layout.make_signal(preceding_node);
+
+        place_node_with_1_input(layout, network, position, signal, current_node, nodes_to_place, current_po, po_names);
+        layout.move_node(layout.get_node(position), position, {});
+
+        const auto path = detail::check_path(layout, preceding_node_loc, position, false, false, true);
+        if (!path.first)
         {
+            placement_possible = false;
+            return false;
+        }
+
+        fiction::route_path(layout, *path.second);
+        if (network.is_po(nodes_to_place[current_node]))
+        {
+            current_po += 1;
+        }
+
+        for (const auto& el : *path.second)
+        {
+            layout.obstruct_coordinate(el);
+        }
+
+        return true;
+    };
+
+    auto place_double_input_node =
+        [&](auto& position, auto& layout, auto& network, auto& current_node, auto& nodes_to_place)
+    {
+        const auto preceding_node_1     = node_dict[preceding_nodes[0]];
+        const auto preceding_node_1_loc = layout.get_tile(preceding_node_1);
+        const auto signal_1             = layout.make_signal(preceding_node_1);
+
+        const auto preceding_node_2     = node_dict[preceding_nodes[1]];
+        const auto preceding_node_2_loc = layout.get_tile(preceding_node_2);
+        const auto signal_2             = layout.make_signal(preceding_node_2);
+
+        place_node_with_2_inputs(layout, network, position, signal_1, signal_2, current_node, nodes_to_place);
+        layout.move_node(layout.get_node(position), position, {});
+
+        const auto path_1 = detail::check_path(layout, preceding_node_1_loc, position, false, false, true);
+        if (!path_1.first)
+        {
+            placement_possible = false;
+            return false;
+        }
+
+        for (const auto& el : *path_1.second)
+        {
+            layout.obstruct_coordinate(el);
+        }
+
+        const auto path_2 = detail::check_path(layout, preceding_node_2_loc, position, false, false, true);
+        if (!path_2.first)
+        {
+            placement_possible = false;
+            for (const auto& el : *path_1.second)
+            {
+                layout.clear_obstructed_coordinate(el);
+            }
+            return false;
+        }
+
+        for (const auto& el : *path_2.second)
+        {
+            layout.obstruct_coordinate(el);
+        }
+
+        fiction::route_path(layout, *path_1.second);
+        fiction::route_path(layout, *path_2.second);
+
+        return true;
+    };
+
+    bool     done        = false;
+    double   reward      = 0;
+    uint64_t placed_node = 0;
+
+    switch (preceding_nodes.size())
+    {
+        case 0:
             layout.move_node(pi2node[nodes_to_place[current_node]], position);
             placed_node = 1;
             current_pi += 1;
-        }
-        else if (num_fanins == 1)
-        {
-            auto                    layout_node = node_dict[preceding_nodes[0]];
-            auto                    src         = layout.get_tile(layout_node);
-            mockturtle::signal<Lyt> signal      = layout.make_signal(layout_node);
-
-            place_node_with_1_input(layout, network, position, signal, current_node, nodes_to_place, current_po,
-                                    po_names);
-            layout.move_node(layout.get_node(position), position, {});
-
-            auto path = detail::check_path(layout, src, position, false, false, true);
-            if (!path.first)
+            break;
+        case 1:
+            if (!place_single_input_node(position, layout, network, current_node, nodes_to_place, current_po, po_names))
             {
-                placement_possible = false;
-                done               = true;
+                done = true;
             }
             else
             {
-                fiction::route_path(layout, *path.second);
                 placed_node = 1;
-
-                if (network.is_po(nodes_to_place[current_node]))
-                {
-                    current_po += 1;
-                }
-
-                for (auto el : *path.second)
-                {
-                    layout.obstruct_coordinate(el);
-                }
             }
-        }
-        else if (num_fanins == 2)
-        {
-            mockturtle::node<Lyt>   layout_node_1 = node_dict[preceding_nodes[0]];
-            auto                    src_1         = layout.get_tile(layout_node_1);
-            mockturtle::signal<Lyt> signal_1      = layout.make_signal(layout_node_1);
-
-            mockturtle::node<Lyt>   layout_node_2 = node_dict[preceding_nodes[1]];
-            auto                    src_2         = layout.get_tile(layout_node_2);
-            mockturtle::signal<Lyt> signal_2      = layout.make_signal(layout_node_2);
-
-            place_node_with_2_inputs(layout, network, position, signal_1, signal_2, current_node, nodes_to_place);
-            layout.move_node(layout.get_node(position), position, {});
-
-            auto path_1 = detail::check_path(layout, src_1, position, false, false, true);
-
-            if (path_1.first)
+            break;
+        case 2:
+            if (!place_double_input_node(position, layout, network, current_node, nodes_to_place))
             {
-                for (auto el : *path_1.second)
-                {
-                    layout.obstruct_coordinate(el);
-                }
-
-                auto path_2 = detail::check_path(layout, src_2, position, false, false, true);
-
-                if (path_2.first)
-                {
-                    for (auto el : *path_2.second)
-                    {
-                        layout.obstruct_coordinate(el);
-                    }
-
-                    placed_node = 1;
-                    fiction::route_path(layout, *path_1.second);
-                    fiction::route_path(layout, *path_2.second);
-                }
-                else
-                {
-                    placement_possible = false;
-                    done               = true;
-
-                    for (auto el : *path_1.second)
-                    {
-                        layout.clear_obstructed_coordinate(el);
-                    }
-                }
+                done = true;
             }
             else
             {
-                placement_possible = false;
-                done               = true;
+                placed_node = 1;
             }
-        }
-        else
-        {
-            std::string error_message = "Not a valid node: " + std::to_string(nodes_to_place[current_node]);
-            throw std::runtime_error(error_message);
-        }
-
-        if (placed_node == 1)
-        {
-            node_dict[nodes_to_place[current_node]] = layout.get_node(position);
-            current_node += 1;
-            layout.obstruct_coordinate({position.x, position.y, 0});
-            layout.obstruct_coordinate({position.x, position.y, 1});
-        }
-
-        std::tie(reward, done) =
-            calculate_reward<Ntk>(placed_node, current_node, nodes_to_place, placement_possible, max_placed_nodes);
+            break;
+        default: throw std::runtime_error("Not a valid node: " + std::to_string(nodes_to_place[current_node]));
     }
 
+    if (placed_node == 1)
+    {
+        node_dict[nodes_to_place[current_node]] = layout.get_node(position);
+        current_node += 1;
+        layout.obstruct_coordinate({position.x, position.y, 0});
+        layout.obstruct_coordinate({position.x, position.y, 1});
+    }
+
+    std::tie(reward, done) =
+        calculate_reward<Ntk>(placed_node, current_node, nodes_to_place, placement_possible, max_placed_nodes);
+
     return {reward, done};
+}
+/**
+ * Outputs placement information.
+ *
+ * @tparam Lyt Cartesian gate-level layout type.
+ * @tparam Ntk Network type.
+ * @param lyt Current layout.
+ * @param search_space_graph The search space graph.
+ * @param start_time The start time point for performance measurement.
+ * @param count The number of evaluated paths.
+ * @param area Layout area (in tiles).
+ */
+template <typename Lyt, typename Ntk>
+void print_placement_info(Lyt& lyt, SearchSpaceGraph<Lyt>& search_space_graph,
+                          std::chrono::time_point<std::chrono::high_resolution_clock> start_time, uint64_t count,
+                          uint64_t area)
+{
+    std::cout << "Found improved solution:\n";
+
+    // Calculate the duration between start and end
+    auto end      = std::chrono::high_resolution_clock::now();
+    auto duration = end - start_time;
+
+    // Extract the duration components
+    auto us  = std::chrono::duration_cast<std::chrono::microseconds>(duration).count() % 1000;
+    auto ms  = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count() % 1000;
+    auto sec = std::chrono::duration_cast<std::chrono::seconds>(duration).count();
+
+    // Output the elapsed time
+    std::cout << "Time taken: " << sec << " seconds, " << ms << " milliseconds, and " << us << " microseconds\n";
+    std::cout << "Evaluated Paths: " << count << "\n";
+    std::cout << "Layout Dimension: " << lyt.x() + 1 << " x " << lyt.y() + 1 << " = " << area << std::endl;
+
+    // Check equivalence
+    fiction::equivalence_checking_stats eq_stats{};
+    fiction::equivalence_checking<Ntk, Lyt>(search_space_graph.network, lyt, &eq_stats);
+
+    const std::string eq_result = eq_stats.eq == fiction::eq_type::STRONG ? "STRONG" :
+                                  eq_stats.eq == fiction::eq_type::WEAK   ? "WEAK" :
+                                                                            "NO";
+    std::cout << "Equivalent: " << eq_result << "\n\n";
 }
 /**
  * Computes possible expansions and their priorities for the current vertex in the search space graph.
@@ -1011,34 +1050,7 @@ neighbors(SearchSpaceGraph<Lyt>& search_space_graph, uint64_t count, bool& impro
                 area = (layout.x() + 1) * (layout.y() + 1);
                 if (verbose)
                 {
-                    std::cout << "Found improved solution:\n";
-                    // Get the current time point after the operation
-                    auto end = std::chrono::high_resolution_clock::now();
-                    // Calculate the duration between start and end
-                    auto duration_us  = std::chrono::duration_cast<std::chrono::microseconds>(end - start_time);
-                    auto duration_ms  = std::chrono::duration_cast<std::chrono::milliseconds>(duration_us);
-                    auto duration_sec = std::chrono::duration_cast<std::chrono::seconds>(duration_us);
-
-                    // Extract microseconds, milliseconds, and seconds from the durations
-                    auto us  = duration_us.count() % 1000;
-                    auto ms  = duration_ms.count() % 1000;
-                    auto sec = duration_sec.count();
-
-                    // Output the elapsed time
-                    std::cout << "Time taken: " << sec << " seconds, " << ms << " milliseconds, and " << us
-                              << " microseconds\n";
-                    std::cout << "Evaluated Paths: " << count << "\n";
-                    std::cout << "Layout Dimension: " << layout.x() + 1 << " x " << layout.y() + 1 << " = " << area
-                              << std::endl;
-                    // check equivalence
-                    fiction::equivalence_checking_stats eq_stats{};
-                    fiction::equivalence_checking<Ntk, Lyt>(search_space_graph.network, layout, &eq_stats);
-
-                    const std::string eq_result = eq_stats.eq == fiction::eq_type::STRONG ? "STRONG" :
-                                                  eq_stats.eq == fiction::eq_type::WEAK   ? "WEAK" :
-                                                                                            "NO";
-                    std::cout << "Equivalent: " << eq_result << "\n";
-                    std::cout << "\n";
+                    print_placement_info<Lyt, Ntk>(layout, search_space_graph, start_time, count, area);
                 }
                 best_solution = area;
                 improv_mode   = true;
