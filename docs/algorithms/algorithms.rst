@@ -49,7 +49,7 @@ Physical Design
 
    exact.rst
    orthogonal.rst
-   a_star_pr.rst
+   graph_enhanced_layout_search.rst
    one_pass_synthesis.rst
    color_routing.rst
    hexagonalization.rst

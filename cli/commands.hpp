@@ -36,8 +36,8 @@
 
 // physical design and validation commands
 #ifdef FICTION_PHYSICAL_DESIGN_FLOW
-#include "cmd/physical_design/astar.hpp"
 #include "cmd/physical_design/exact.hpp"
+#include "cmd/physical_design/gels.hpp"
 #include "cmd/physical_design/hex.hpp"
 #include "cmd/physical_design/onepass.hpp"
 #include "cmd/physical_design/optimize.hpp"

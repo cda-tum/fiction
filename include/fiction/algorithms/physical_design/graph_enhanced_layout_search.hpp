@@ -1,8 +1,8 @@
 //
 // Created by Simon Hofmann on 30.01.24.
 //
-#ifndef FICTION_A_STAR_PR_HPP
-#define FICTION_A_STAR_PR_HPP
+#ifndef FICTION_GRAPH_ENHANCED_LAYOUT_SEARCH_HPP
+#define FICTION_GRAPH_ENHANCED_LAYOUT_SEARCH_HPP
 
 #include "fiction/algorithms/network_transformation/fanout_substitution.hpp"
 #include "fiction/algorithms/path_finding/a_star.hpp"
@@ -43,9 +43,9 @@ namespace fiction
 {
 
 /**
- * Parameters for the A* P&R algorithm.
+ * Parameters for the graph-enhanced layout search algorithm.
  */
-struct a_star_pr_params
+struct graph_enhanced_layout_search_params
 {
     /**
      * High effort mode.
@@ -58,19 +58,19 @@ struct a_star_pr_params
     /**
      * Timeout limit (in ms).
      */
-    uint64_t timeout;
+    std::optional<uint64_t> timeout = std::nullopt;
     /**
      * Verbosity.
      */
     bool verbose = false;
 };
 /**
- * This struct stores statistics about the A* P&R process.
+ * This struct stores statistics about the graph-enhanced layout search process.
  */
-struct a_star_pr_stats
+struct graph_enhanced_layout_search_stats
 {
     /**
-     * Runtime of the A* P&R process.
+     * Runtime of the graph-enhanced layout search process.
      */
     mockturtle::stopwatch<>::duration time_total{0};
     /**
@@ -655,7 +655,6 @@ bool valid_layout(Lyt& layout, Ntk& network, node_dict_type<Lyt, Ntk>& node_dict
 
     return true;
 }
-
 /**
  * Places a node with one input in the given layout based on the specified position and signal.
  * It handles different types of nodes, such as inverters, primary outputs, and buffers.
@@ -673,7 +672,7 @@ bool valid_layout(Lyt& layout, Ntk& network, node_dict_type<Lyt, Ntk>& node_dict
  * @throws std::runtime_error If the node type is invalid.
  */
 template <typename Lyt, typename Ntk>
-void place_node_with_1_input(Lyt& layout, Ntk& network, fiction::tile<Lyt> position, mockturtle::signal<Lyt> signal,
+void place_single_input_node(Lyt& layout, Ntk& network, fiction::tile<Lyt> position, mockturtle::signal<Lyt> signal,
                              uint64_t current_node, std::vector<mockturtle::node<Ntk>>& nodes_to_place,
                              uint64_t current_po, std::vector<std::string>& po_names)
 {
@@ -710,9 +709,9 @@ void place_node_with_1_input(Lyt& layout, Ntk& network, fiction::tile<Lyt> posit
  * @throws std::runtime_error If the node type is invalid.
  */
 template <typename Lyt, typename Ntk>
-void place_node_with_2_inputs(Lyt& layout, Ntk& network, fiction::tile<Lyt> position, mockturtle::signal<Lyt> signal_1,
-                              mockturtle::signal<Lyt> signal_2, uint64_t current_node,
-                              std::vector<mockturtle::node<Ntk>>& nodes_to_place)
+void place_double_input_node(Lyt& layout, Ntk& network, fiction::tile<Lyt> position, mockturtle::signal<Lyt> signal_1,
+                             mockturtle::signal<Lyt> signal_2, uint64_t current_node,
+                             std::vector<mockturtle::node<Ntk>>& nodes_to_place)
 {
     if (network.is_and(nodes_to_place[current_node]))
     {
@@ -742,6 +741,121 @@ void place_node_with_2_inputs(Lyt& layout, Ntk& network, fiction::tile<Lyt> posi
     {
         throw std::runtime_error("Invalid node type");
     }
+}
+/**
+ * Places a node with a single input in the layout and tries to route it.
+ *
+ * @tparam Lyt Cartesian gate-level layout type.
+ * @tparam Ntk Network type.
+ * @param position The tile representing the position for placement.
+ * @param layout The layout in which to place the node.
+ * @param network The network containing the nodes.
+ * @param current_node The current node index in the nodes_to_place vector.
+ * @param nodes_to_place A vector representing the nodes to be placed.
+ * @param current_po The current primary output index.
+ * @param po_names A vector of primary output names.
+ * @param node_dict A dictionary mapping nodes from the network to tiles in the layout.
+ * @param placement_possible Boolean flag indicating if the placement is possible.
+ * @param preceding_nodes A vector of nodes that precede the single fanin node.
+ * @return Boolean indicating if the placement was successful.
+ */
+template <typename Lyt, typename Ntk>
+bool place_and_route_single_input_node(fiction::tile<Lyt> position, Lyt& layout, Ntk& network, uint64_t& current_node,
+                                       std::vector<mockturtle::node<Ntk>>& nodes_to_place, uint64_t& current_po,
+                                       std::vector<std::string>& po_names, node_dict_type<Lyt, Ntk>& node_dict,
+                                       bool& placement_possible, std::vector<mockturtle::signal<Lyt>> preceding_nodes)
+{
+    const auto preceding_node     = node_dict[preceding_nodes[0]];
+    const auto preceding_node_loc = layout.get_tile(preceding_node);
+    const auto signal             = layout.make_signal(preceding_node);
+
+    place_single_input_node(layout, network, position, signal, current_node, nodes_to_place, current_po, po_names);
+    layout.move_node(layout.get_node(position), position, {});
+
+    const auto path = detail::check_path(layout, preceding_node_loc, position, false, false, true);
+    if (!path.first)
+    {
+        placement_possible = false;
+        return false;
+    }
+
+    fiction::route_path(layout, *path.second);
+    if (network.is_po(nodes_to_place[current_node]))
+    {
+        current_po += 1;
+    }
+
+    for (const auto& el : *path.second)
+    {
+        layout.obstruct_coordinate(el);
+    }
+
+    return true;
+}
+/**
+ * Places a node with two inputs in the layout and tries to route it.
+ *
+ * @tparam Lyt Cartesian gate-level layout type.
+ * @tparam Ntk Network type.
+ * @param position The tile representing the position for placement.
+ * @param layout The layout in which to place the node.
+ * @param network The network containing the nodes.
+ * @param current_node The current node index in the nodes_to_place vector.
+ * @param nodes_to_place A vector representing the nodes to be placed.
+ * @param node_dict A dictionary mapping nodes from the network to tiles in the layout.
+ * @param placement_possible Boolean flag indicating if the placement is possible.
+ * @param preceding_nodes A vector of nodes that precede the double fanin node.
+ * @return Boolean indicating if the placement was successful.
+ */
+template <typename Lyt, typename Ntk>
+bool place_and_route_double_input_node(fiction::tile<Lyt> position, Lyt& layout, Ntk& network, uint64_t& current_node,
+                                       std::vector<mockturtle::node<Ntk>>& nodes_to_place,
+                                       node_dict_type<Lyt, Ntk>& node_dict, bool& placement_possible,
+                                       std::vector<mockturtle::signal<Lyt>> preceding_nodes)
+{
+    const auto preceding_node_1     = node_dict[preceding_nodes[0]];
+    const auto preceding_node_1_loc = layout.get_tile(preceding_node_1);
+    const auto signal_1             = layout.make_signal(preceding_node_1);
+
+    const auto preceding_node_2     = node_dict[preceding_nodes[1]];
+    const auto preceding_node_2_loc = layout.get_tile(preceding_node_2);
+    const auto signal_2             = layout.make_signal(preceding_node_2);
+
+    place_double_input_node(layout, network, position, signal_1, signal_2, current_node, nodes_to_place);
+    layout.move_node(layout.get_node(position), position, {});
+
+    const auto path_1 = detail::check_path(layout, preceding_node_1_loc, position, false, false, true);
+    if (!path_1.first)
+    {
+        placement_possible = false;
+        return false;
+    }
+
+    for (const auto& el : *path_1.second)
+    {
+        layout.obstruct_coordinate(el);
+    }
+
+    const auto path_2 = detail::check_path(layout, preceding_node_2_loc, position, false, false, true);
+    if (!path_2.first)
+    {
+        placement_possible = false;
+        for (const auto& el : *path_1.second)
+        {
+            layout.clear_obstructed_coordinate(el);
+        }
+        return false;
+    }
+
+    for (const auto& el : *path_2.second)
+    {
+        layout.obstruct_coordinate(el);
+    }
+
+    fiction::route_path(layout, *path_1.second);
+    fiction::route_path(layout, *path_2.second);
+
+    return true;
 }
 /**
  * Calculates the reward for placing a node in the layout and determines if the placement process is done.
@@ -815,87 +929,6 @@ std::pair<double, bool> place(fiction::tile<Lyt> position, Lyt& layout, Ntk& net
         return {0, true};
     }
 
-    // Lambda to place a node with a single input
-    auto place_single_input_node = [&](auto& position, auto& layout, auto& network, auto& current_node,
-                                       auto& nodes_to_place, auto& current_po, auto& po_names)
-    {
-        const auto preceding_node     = node_dict[preceding_nodes[0]];
-        const auto preceding_node_loc = layout.get_tile(preceding_node);
-        const auto signal             = layout.make_signal(preceding_node);
-
-        place_node_with_1_input(layout, network, position, signal, current_node, nodes_to_place, current_po, po_names);
-        layout.move_node(layout.get_node(position), position, {});
-
-        const auto path = detail::check_path(layout, preceding_node_loc, position, false, false, true);
-        if (!path.first)
-        {
-            placement_possible = false;
-            return false;
-        }
-
-        fiction::route_path(layout, *path.second);
-        if (network.is_po(nodes_to_place[current_node]))
-        {
-            current_po += 1;
-        }
-
-        for (const auto& el : *path.second)
-        {
-            layout.obstruct_coordinate(el);
-        }
-
-        return true;
-    };
-
-    // Lambda to place a node with two inputs
-    auto place_double_input_node =
-        [&](auto& position, auto& layout, auto& network, auto& current_node, auto& nodes_to_place)
-    {
-        const auto preceding_node_1     = node_dict[preceding_nodes[0]];
-        const auto preceding_node_1_loc = layout.get_tile(preceding_node_1);
-        const auto signal_1             = layout.make_signal(preceding_node_1);
-
-        const auto preceding_node_2     = node_dict[preceding_nodes[1]];
-        const auto preceding_node_2_loc = layout.get_tile(preceding_node_2);
-        const auto signal_2             = layout.make_signal(preceding_node_2);
-
-        place_node_with_2_inputs(layout, network, position, signal_1, signal_2, current_node, nodes_to_place);
-        layout.move_node(layout.get_node(position), position, {});
-
-        const auto path_1 = detail::check_path(layout, preceding_node_1_loc, position, false, false, true);
-        if (!path_1.first)
-        {
-            placement_possible = false;
-            return false;
-        }
-
-        for (const auto& el : *path_1.second)
-        {
-            layout.obstruct_coordinate(el);
-        }
-
-        const auto path_2 = detail::check_path(layout, preceding_node_2_loc, position, false, false, true);
-        if (!path_2.first)
-        {
-            placement_possible = false;
-            for (const auto& el : *path_1.second)
-            {
-                layout.clear_obstructed_coordinate(el);
-            }
-            return false;
-        }
-
-        for (const auto& el : *path_2.second)
-        {
-            layout.obstruct_coordinate(el);
-        }
-
-        fiction::route_path(layout, *path_1.second);
-        fiction::route_path(layout, *path_2.second);
-
-        return true;
-    };
-
     // Variables to track placement status
     bool     done        = false;
     double   reward      = 0;
@@ -912,7 +945,8 @@ std::pair<double, bool> place(fiction::tile<Lyt> position, Lyt& layout, Ntk& net
             break;
         case 1:
             // Place single input node
-            if (!place_single_input_node(position, layout, network, current_node, nodes_to_place, current_po, po_names))
+            if (!place_and_route_single_input_node(position, layout, network, current_node, nodes_to_place, current_po,
+                                                   po_names, node_dict, placement_possible, preceding_nodes))
             {
                 done = true;
             }
@@ -923,7 +957,8 @@ std::pair<double, bool> place(fiction::tile<Lyt> position, Lyt& layout, Ntk& net
             break;
         case 2:
             // Place double input node
-            if (!place_double_input_node(position, layout, network, current_node, nodes_to_place))
+            if (!place_and_route_double_input_node(position, layout, network, current_node, nodes_to_place, node_dict,
+                                                   placement_possible, preceding_nodes))
             {
                 done = true;
             }
@@ -1268,17 +1303,22 @@ void initialize_frontiers_flags(std::vector<SearchSpaceGraph<Lyt>>& search_space
  * @tparam Ntk Network type.
  */
 template <typename Lyt, typename Ntk>
-class a_star_pr_impl
+class graph_enhanced_layout_search_impl
 {
   public:
     /**
-     * Constructor for the A* P&R algorithm.
+     * Constructor for the graph-enhanced layout search algorithm.
      *
      * @param src The source network to be placed.
-     * @param p The parameters for the A* priority routing algorithm.
+     * @param p The parameters for the graph-enhanced layout search algorithm.
      * @param st The statistics object to record execution details.
      */
-    a_star_pr_impl(const Ntk& src, const a_star_pr_params& p, a_star_pr_stats& st) : ntk{src}, ps{p}, pst{st} {}
+    graph_enhanced_layout_search_impl(const Ntk& src, const graph_enhanced_layout_search_params& p,
+                                      graph_enhanced_layout_search_stats& st) :
+            ntk{src},
+            ps{p},
+            pst{st}
+    {}
     /**
      * Executes the A* P&R algorithm and returns the best found layout.
      *
@@ -1291,7 +1331,7 @@ class a_star_pr_impl
         auto                  start = std::chrono::high_resolution_clock::now();
 
         // Set timeout based on parameters
-        uint64_t timeout = ps.timeout ? ps.timeout : (ps.high_effort ? 1000000 : 10000);
+        uint64_t timeout = ps.timeout.value_or(ps.high_effort ? 1000000 : 10000);
         bool     verbose = ps.verbose;
 
         // Initialize empty layout
@@ -1390,9 +1430,9 @@ class a_star_pr_impl
     }
 
   private:
-    Ntk              ntk;
-    a_star_pr_params ps;
-    a_star_pr_stats& pst;
+    Ntk                                 ntk;
+    graph_enhanced_layout_search_params ps;
+    graph_enhanced_layout_search_stats& pst;
 };
 
 }  // namespace detail
@@ -1421,7 +1461,8 @@ class a_star_pr_impl
  * @throws high_degree_fanin_exception If the network has nodes with a fanin degree higher than 2.
  */
 template <typename Lyt, typename Ntk>
-Lyt a_star_pr(Ntk& ntk, a_star_pr_params ps = {}, a_star_pr_stats* pst = nullptr)
+Lyt graph_enhanced_layout_search(Ntk& ntk, graph_enhanced_layout_search_params ps = {},
+                                 graph_enhanced_layout_search_stats* pst = nullptr)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(mockturtle::is_network_type_v<Ntk>,
@@ -1434,8 +1475,8 @@ Lyt a_star_pr(Ntk& ntk, a_star_pr_params ps = {}, a_star_pr_stats* pst = nullptr
         throw high_degree_fanin_exception();
     }
 
-    a_star_pr_stats                  st{};
-    detail::a_star_pr_impl<Lyt, Ntk> p{ntk, ps, st};
+    graph_enhanced_layout_search_stats                  st{};
+    detail::graph_enhanced_layout_search_impl<Lyt, Ntk> p{ntk, ps, st};
 
     auto result = p.run();
 
@@ -1449,4 +1490,4 @@ Lyt a_star_pr(Ntk& ntk, a_star_pr_params ps = {}, a_star_pr_stats* pst = nullptr
 
 }  // namespace fiction
 
-#endif  // FICTION_A_STAR_PR_HPP
+#endif  // FICTION_GRAPH_ENHANCED_LAYOUT_SEARCH_HPP

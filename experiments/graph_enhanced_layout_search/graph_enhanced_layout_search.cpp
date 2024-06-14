@@ -3,8 +3,7 @@
 //
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/physical_design/a_star_pr.hpp>  // wiring reduction algorithm
-#include <fiction/algorithms/physical_design/orthogonal.hpp>
+#include <fiction/algorithms/physical_design/graph_enhanced_layout_search.hpp>  // wiring reduction algorithm
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/algorithms/verification/equivalence_checking.hpp>               // SAT-based equivalence checking
 #include <fiction/io/network_reader.hpp>                                          // read networks from files
@@ -41,35 +40,35 @@ int main()  // NOLINT
 
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint32_t, uint32_t,
                             uint64_t, uint64_t, double, std::string>
-        a_star_pr_exp{"a_star_pr_exp",
-                      "benchmark",
-                      "inputs",
-                      "outputs",
-                      "initial nodes",
-                      "layout width (in tiles)",
-                      "layout height (in tiles)",
-                      "layout area (in tiles)",
-                      "gates",
-                      "wires",
-                      "critical path",
-                      "throughput",
-                      "runtime a_star_pr (in sec)",
-                      "equivalent"};
+        graph_enhanced_layout_search_exp{"graph_enhanced_layout_search_exp",
+                                         "benchmark",
+                                         "inputs",
+                                         "outputs",
+                                         "initial nodes",
+                                         "layout width (in tiles)",
+                                         "layout height (in tiles)",
+                                         "layout area (in tiles)",
+                                         "gates",
+                                         "wires",
+                                         "critical path",
+                                         "throughput",
+                                         "runtime graph_enhanced_layout_search (in sec)",
+                                         "equivalent"};
 
-    fiction::a_star_pr_stats  a_star_pr_stats{};
-    fiction::a_star_pr_params a_star_pr_params{};
-    a_star_pr_params.high_effort = true;
-    a_star_pr_params.verbose     = true;
-    a_star_pr_params.timeout     = 1000;
+    fiction::graph_enhanced_layout_search_stats  graph_enhanced_layout_search_stats{};
+    fiction::graph_enhanced_layout_search_params graph_enhanced_layout_search_params{};
+    graph_enhanced_layout_search_params.high_effort  = true;
+    graph_enhanced_layout_search_params.verbose      = true;
+    graph_enhanced_layout_search_params.return_first = false;
 
-    static constexpr const uint64_t bench_select = fiction_experiments::xor5_maj;
+    static constexpr const uint64_t bench_select = fiction_experiments::trindade16 | fiction_experiments::fontes18;
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
         auto network = read_ntk<fiction::tec_nt>(benchmark);
 
-        auto gate_level_layout =
-            fiction::a_star_pr<gate_lyt, fiction::tec_nt>(network, a_star_pr_params, &a_star_pr_stats);
+        auto gate_level_layout = fiction::graph_enhanced_layout_search<gate_lyt, fiction::tec_nt>(
+            network, graph_enhanced_layout_search_params, &graph_enhanced_layout_search_stats);
 
         //  compute critical path and throughput
         const auto cp_tp = fiction::critical_path_length_and_throughput(gate_level_layout);
@@ -90,12 +89,13 @@ int main()  // NOLINT
         const auto area   = width * height;
 
         // log results
-        a_star_pr_exp(benchmark, network.num_pis(), network.num_pos(), network.num_gates(), width, height, area,
-                      gate_level_layout.num_gates(), gate_level_layout.num_wires(), cp_tp.critical_path_length,
-                      cp_tp.throughput, mockturtle::to_seconds(a_star_pr_stats.time_total), eq_result);
+        graph_enhanced_layout_search_exp(
+            benchmark, network.num_pis(), network.num_pos(), network.num_gates(), width, height, area,
+            gate_level_layout.num_gates(), gate_level_layout.num_wires(), cp_tp.critical_path_length, cp_tp.throughput,
+            mockturtle::to_seconds(graph_enhanced_layout_search_stats.time_total), eq_result);
 
-        a_star_pr_exp.save();
-        a_star_pr_exp.table();
+        graph_enhanced_layout_search_exp.save();
+        graph_enhanced_layout_search_exp.table();
     }
 
     return EXIT_SUCCESS;

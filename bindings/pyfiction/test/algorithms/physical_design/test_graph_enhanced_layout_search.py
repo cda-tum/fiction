@@ -5,17 +5,17 @@ import os
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
-class TestAStarPhysicalDesign(unittest.TestCase):
+class TestGraphEnhancedLayoutSearch(unittest.TestCase):
 
     def test_a_star_pr(self):
         network = read_technology_network(dir_path + "/../../resources/mux21.v")
 
-        params = a_star_pr_params()
+        params = graph_enhanced_layout_search_params()
         params.return_first = True
 
-        stats = a_star_pr_stats()
+        stats = graph_enhanced_layout_search_stats()
 
-        layout = a_star_pr(network, params, statistics=stats)
+        layout = graph_enhanced_layout_search(network, params, statistics=stats)
 
         self.assertNotEqual(equivalence_checking(network, layout), eq_type.STRONG)
 

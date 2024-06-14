@@ -1,4 +1,4 @@
-.. _a_star_pr:
+.. _graph_enhanced_layout_search:
 
 A* Physical Design
 ------------------
@@ -12,17 +12,17 @@ to a 3-graph. At the same time, the output layout will always be 2DDWave-clocked
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/physical_design/a_star_pr.hpp``
+        **Header:** ``fiction/algorithms/physical_design/graph_enhanced_layout_search.hpp``
 
-        .. doxygenstruct:: fiction::a_star_pr_params
+        .. doxygenstruct:: fiction::graph_enhanced_layout_search_params
            :members:
-        .. doxygenstruct:: fiction::a_star_pr_stats
+        .. doxygenstruct:: fiction::graph_enhanced_layout_search_stats
            :members:
-        .. doxygenfunction:: fiction::a_star_pr
+        .. doxygenfunction:: fiction::graph_enhanced_layout_search
 
     .. tab:: Python
-        .. autoclass:: mnt.pyfiction.a_star_pr_params
+        .. autoclass:: mnt.pyfiction.graph_enhanced_layout_search_params
             :members:
-        .. autoclass:: mnt.pyfiction.a_star_pr_stats
+        .. autoclass:: mnt.pyfiction.graph_enhanced_layout_search_stats
             :members:
-        .. autofunction:: mnt.pyfiction.a_star_pr
+        .. autofunction:: mnt.pyfiction.graph_enhanced_layout_search
