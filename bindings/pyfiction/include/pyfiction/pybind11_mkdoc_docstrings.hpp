@@ -153,73 +153,6 @@ static const char *__doc_fiction_a_star_params_crossings =
 R"doc(Allow paths to cross over obstructed tiles if they are occupied by
 wire segments.)doc";
 
-static const char *__doc_fiction_a_star_pr =
-R"doc(A scalable and efficient placement & routing approach based on
-spanning a search space graph of partial layouts and finding a path to
-one of its leafs, i.e., a complete layout.
-
-The search space graph start with an empty layout and then expands it
-based on where the first node in a topological sort of the logic
-network can be placed. Based on the position of this first node, a
-cost is assigned to each expansion based on the position of the placed
-node. The vertex with the least cost, which is the smallest layout
-w.r.t. area, is then chosen for the next expansion. This iterative
-process continues until a leaf node is found, which is a layout with
-all nodes placed. The algorithm then continues to backtrack thourgh
-the search space graph to find other complete layouts with less cost.
-
-The imposed restrictions are that the input logic network has to be a
-3-graph, i.e., cannot have any node exceeding degree 3 (combined input
-and output), and that the resulting layout is always 2DDWave-clocked.
-
-May throw a high_degree_fanin_exception if `ntk` contains any node
-with a fan-in larger than 2.
-
-Template parameter ``Lyt``:
-    Cartesian gate-level layout type.
-
-Template parameter ``Ntk``:
-    Network type.
-
-Parameter ``ntk``:
-    The network to be placed and routed.
-
-Parameter ``ps``:
-    The parameters for the A* priority routing algorithm. Defaults to
-    an empty parameter set.
-
-Parameter ``pst``:
-    A pointer to a statistics object to record execution details.
-    Defaults to nullptr.
-
-Returns:
-    The resulting layout after applying the A* priority routing
-    algorithm.
-
-Throws:
-    high_degree_fanin_exception If the network has nodes with a fanin
-    degree higher than 2.)doc";
-
-static const char *__doc_fiction_a_star_pr_params = R"doc(Parameters for the A* P&R algorithm.)doc";
-
-static const char *__doc_fiction_a_star_pr_params_high_effort = R"doc(High effort mode.)doc";
-
-static const char *__doc_fiction_a_star_pr_params_return_first = R"doc(Return first found layout.)doc";
-
-static const char *__doc_fiction_a_star_pr_params_timeout = R"doc(Timeout limit (in ms).)doc";
-
-static const char *__doc_fiction_a_star_pr_params_verbose = R"doc(Verbosity.)doc";
-
-static const char *__doc_fiction_a_star_pr_stats = R"doc(This struct stores statistics about the A* P&R process.)doc";
-
-static const char *__doc_fiction_a_star_pr_stats_duration = R"doc(Runtime of the A* P&R process.)doc";
-
-static const char *__doc_fiction_a_star_pr_stats_report =
-R"doc(Reports the statistics to the given output stream.
-
-Parameter ``out``:
-    Output stream.)doc";
-
 static const char *__doc_fiction_all_coordinates_in_spanned_area =
 R"doc(Generates a vector of all coordinates within an area spanned by two
 coordinates.
@@ -9786,6 +9719,75 @@ clique size :math:`|C|` instead with :math:`k = |C|, |C| + 1, |C| + 2,
 static const char *__doc_fiction_graph_coloring_sat_search_tactic_LINEARLY_DESCENDING =
 R"doc(Descend linearly by checking for :math:`k = |G|, |G| - 1, |G| - 2,
 \dots` until UNSAT.)doc";
+
+static const char *__doc_fiction_graph_enhanced_layout_search =
+R"doc(A scalable and efficient placement & routing approach based on
+spanning a search space graph of partial layouts and finding a path to
+one of its leafs, i.e., a complete layout.
+
+The search space graph start with an empty layout and then expands it
+based on where the first node in a topological sort of the logic
+network can be placed. Based on the position of this first node, a
+cost is assigned to each expansion based on the position of the placed
+node. The vertex with the least cost, which is the smallest layout
+w.r.t. area, is then chosen for the next expansion. This iterative
+process continues until a leaf node is found, which is a layout with
+all nodes placed. The algorithm then continues to backtrack thourgh
+the search space graph to find other complete layouts with less cost.
+
+The imposed restrictions are that the input logic network has to be a
+3-graph, i.e., cannot have any node exceeding degree 3 (combined input
+and output), and that the resulting layout is always 2DDWave-clocked.
+
+May throw a high_degree_fanin_exception if `ntk` contains any node
+with a fan-in larger than 2.
+
+Template parameter ``Lyt``:
+    Cartesian gate-level layout type.
+
+Template parameter ``Ntk``:
+    Network type.
+
+Parameter ``ntk``:
+    The network to be placed and routed.
+
+Parameter ``ps``:
+    The parameters for the A* priority routing algorithm. Defaults to
+    an empty parameter set.
+
+Parameter ``pst``:
+    A pointer to a statistics object to record execution details.
+    Defaults to nullptr.
+
+Returns:
+    The resulting layout after applying the A* priority routing
+    algorithm.
+
+Throws:
+    high_degree_fanin_exception If the network has nodes with a fanin
+    degree higher than 2.)doc";
+
+static const char *__doc_fiction_graph_enhanced_layout_search_params = R"doc(Parameters for the graph-enhanced layout search algorithm.)doc";
+
+static const char *__doc_fiction_graph_enhanced_layout_search_params_high_effort = R"doc(High effort mode.)doc";
+
+static const char *__doc_fiction_graph_enhanced_layout_search_params_return_first = R"doc(Return first found layout.)doc";
+
+static const char *__doc_fiction_graph_enhanced_layout_search_params_timeout = R"doc(Timeout limit (in ms).)doc";
+
+static const char *__doc_fiction_graph_enhanced_layout_search_params_verbose = R"doc(Verbosity.)doc";
+
+static const char *__doc_fiction_graph_enhanced_layout_search_stats =
+R"doc(This struct stores statistics about the graph-enhanced layout search
+process.)doc";
+
+static const char *__doc_fiction_graph_enhanced_layout_search_stats_duration = R"doc(Runtime of the graph-enhanced layout search process.)doc";
+
+static const char *__doc_fiction_graph_enhanced_layout_search_stats_report =
+R"doc(Reports the statistics to the given output stream.
+
+Parameter ``out``:
+    Output stream.)doc";
 
 static const char *__doc_fiction_gray_code_iterator =
 R"doc(An iterator type that iterates over Gray code representations for
