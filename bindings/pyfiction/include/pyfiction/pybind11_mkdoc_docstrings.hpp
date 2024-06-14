@@ -9735,12 +9735,7 @@ process continues until a leaf node is found, which is a layout with
 all nodes placed. The algorithm then continues to backtrack thourgh
 the search space graph to find other complete layouts with less cost.
 
-The imposed restrictions are that the input logic network has to be a
-3-graph, i.e., cannot have any node exceeding degree 3 (combined input
-and output), and that the resulting layout is always 2DDWave-clocked.
-
-May throw a high_degree_fanin_exception if `ntk` contains any node
-with a fan-in larger than 2.
+Only works for 2DDWave-clocked layouts.
 
 Template parameter ``Lyt``:
     Cartesian gate-level layout type.
@@ -9761,11 +9756,7 @@ Parameter ``pst``:
 
 Returns:
     The resulting layout after applying the A* priority routing
-    algorithm.
-
-Throws:
-    high_degree_fanin_exception If the network has nodes with a fanin
-    degree higher than 2.)doc";
+    algorithm.)doc";
 
 static const char *__doc_fiction_graph_enhanced_layout_search_params = R"doc(Parameters for the graph-enhanced layout search algorithm.)doc";
 
