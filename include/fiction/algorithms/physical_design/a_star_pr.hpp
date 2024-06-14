@@ -10,12 +10,8 @@
 #include "fiction/algorithms/path_finding/distance.hpp"
 #include "fiction/algorithms/verification/equivalence_checking.hpp"
 #include "fiction/layouts/bounding_box.hpp"
-#include "fiction/layouts/cartesian_layout.hpp"
-#include "fiction/layouts/clocked_layout.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
-#include "fiction/layouts/gate_level_layout.hpp"
 #include "fiction/layouts/obstruction_layout.hpp"
-#include "fiction/layouts/tile_based_layout.hpp"
 #include "fiction/networks/technology_network.hpp"
 #include "fiction/networks/views/topo_view_ci_to_co.hpp"
 #include "fiction/networks/views/topo_view_co_to_ci.hpp"
@@ -60,7 +56,7 @@ struct a_star_pr_params
      */
     bool return_first = false;
     /**
-     * Timeout limit.
+     * Timeout limit (in ms).
      */
     uint64_t timeout;
     /**
@@ -404,8 +400,14 @@ std::vector<fiction::tile<Lyt>> get_possible_positions_pos(Lyt& layout, node_dic
 
     for (uint64_t k = 0; k <= max_iterations; ++k)
     {
-        check_tile(preceding_node_loc.x + k, layout.y());
-        check_tile(layout.x(), preceding_node_loc.y + k);
+        if (preceding_node_loc.x + k <= layout.x())
+        {
+            check_tile(preceding_node_loc.x + k, layout.y());
+        }
+        if (preceding_node_loc.y + k < layout.y())
+        {
+            check_tile(layout.x(), preceding_node_loc.y + k);
+        }
     }
 
     return possible_positions;
@@ -785,7 +787,7 @@ std::tuple<double, bool> calculate_reward(bool placed_node, uint64_t& current_no
  * @param network The network containing the nodes.
  * @param placement_possible Boolean flag indicating if the placement is possible.
  * @param current_node The current node index in the nodes_to_place vector.
- * @param nodes_to_placed A vector representing the nodes to be placed.
+ * @param nodes_to_place A vector representing the nodes to be placed.
  * @param po_names A vector of primary output names.
  * @param current_pi The current primary input index.
  * @param current_po The current primary output index.
@@ -802,15 +804,18 @@ std::pair<double, bool> place(fiction::tile<Lyt> position, Lyt& layout, Ntk& net
                               node_dict_type<Lyt, Ntk>& node_dict, uint64_t& max_placed_nodes,
                               mockturtle::node_map<mockturtle::node<Lyt>, Ntk>& pi2node)
 {
+    // Vector to store preceding nodes
     std::vector<mockturtle::signal<Lyt>> preceding_nodes{};
     network.foreach_fanin(nodes_to_place[current_node],
                           [&preceding_nodes](const auto& f) { preceding_nodes.push_back(f); });
 
+    // Check if placement is possible or the tile is empty
     if (!placement_possible || !layout.is_empty_tile(position))
     {
         return {0, true};
     }
 
+    // Lambda to place a node with a single input
     auto place_single_input_node = [&](auto& position, auto& layout, auto& network, auto& current_node,
                                        auto& nodes_to_place, auto& current_po, auto& po_names)
     {
@@ -842,6 +847,7 @@ std::pair<double, bool> place(fiction::tile<Lyt> position, Lyt& layout, Ntk& net
         return true;
     };
 
+    // Lambda to place a node with two inputs
     auto place_double_input_node =
         [&](auto& position, auto& layout, auto& network, auto& current_node, auto& nodes_to_place)
     {
@@ -890,18 +896,22 @@ std::pair<double, bool> place(fiction::tile<Lyt> position, Lyt& layout, Ntk& net
         return true;
     };
 
+    // Variables to track placement status
     bool     done        = false;
     double   reward      = 0;
     uint64_t placed_node = 0;
 
+    // Switch statement to handle different numbers of preceding nodes
     switch (preceding_nodes.size())
     {
         case 0:
+            // Place primary input node
             layout.move_node(pi2node[nodes_to_place[current_node]], position);
             placed_node = 1;
             current_pi += 1;
             break;
         case 1:
+            // Place single input node
             if (!place_single_input_node(position, layout, network, current_node, nodes_to_place, current_po, po_names))
             {
                 done = true;
@@ -912,6 +922,7 @@ std::pair<double, bool> place(fiction::tile<Lyt> position, Lyt& layout, Ntk& net
             }
             break;
         case 2:
+            // Place double input node
             if (!place_double_input_node(position, layout, network, current_node, nodes_to_place))
             {
                 done = true;
@@ -924,6 +935,7 @@ std::pair<double, bool> place(fiction::tile<Lyt> position, Lyt& layout, Ntk& net
         default: throw std::runtime_error("Not a valid node: " + std::to_string(nodes_to_place[current_node]));
     }
 
+    // Update layout and node dictionary if node was placed
     if (placed_node == 1)
     {
         node_dict[nodes_to_place[current_node]] = layout.get_node(position);
@@ -932,6 +944,7 @@ std::pair<double, bool> place(fiction::tile<Lyt> position, Lyt& layout, Ntk& net
         layout.obstruct_coordinate({position.x, position.y, 1});
     }
 
+    // Calculate the reward and update done status
     std::tie(reward, done) =
         calculate_reward<Ntk>(placed_node, current_node, nodes_to_place, placement_possible, max_placed_nodes);
 
@@ -1037,12 +1050,14 @@ neighbors(SearchSpaceGraph<Lyt>& search_space_graph, uint64_t count, bool& impro
                 place<Lyt, Ntk>(position, layout, search_space_graph.network, placement_possible, current_node,
                                 search_space_graph.nodes_to_place, search_space_graph.po_names, current_pi, current_po,
                                 node_dict, max_placed_nodes, pi2node);
+
             uint64_t area = 0;
             if (improv_mode)
             {
                 auto bb = fiction::bounding_box_2d(layout);
                 area    = (bb.get_x_size() + 1) * (bb.get_y_size() + 1);
             }
+
             if (reward > 1000 && (!improv_mode || (area < best_solution)))
             {
                 auto bb = fiction::bounding_box_2d(layout);
@@ -1054,23 +1069,20 @@ neighbors(SearchSpaceGraph<Lyt>& search_space_graph, uint64_t count, bool& impro
                 }
                 best_solution = area;
                 improv_mode   = true;
-                std::pair<std::vector<std::pair<coord_vec_type<Lyt>, double>>, std::optional<Lyt>> return_val({},
-                                                                                                              layout);
-                return return_val;
+                return {{}, layout};
             }
-            if (improv_mode)
+
+            if (improv_mode && area >= best_solution)
             {
-                if (area >= best_solution)
-                {
-                    return std::pair<std::vector<std::pair<coord_vec_type<Lyt>, double>>, std::optional<Lyt>>(
-                        {}, std::nullopt);
-                }
+                return {{}, std::nullopt};
             }
         }
         else
         {
-            return std::pair<std::vector<std::pair<coord_vec_type<Lyt>, double>>, std::optional<Lyt>>({}, std::nullopt);
+            return {{}, std::nullopt};
         }
+
+        // Expand layout dimensions if needed
         if (position.x == layout.x() && layout.x() < (max_layout_width - 1))
         {
             layout.resize({layout.x() + 1, layout.y(), layout.z()});
@@ -1079,34 +1091,39 @@ neighbors(SearchSpaceGraph<Lyt>& search_space_graph, uint64_t count, bool& impro
         {
             layout.resize({layout.x(), layout.y() + 1, layout.z()});
         }
+
+        // Check if it's the last position in the current vertex
         if (idx == (search_space_graph.current_vertex.size() - 1))
         {
             if (!valid_layout<Lyt, Ntk>(layout, search_space_graph.network, node_dict, placement_possible))
             {
-                return std::pair<std::vector<std::pair<coord_vec_type<Lyt>, double>>, std::optional<Lyt>>({},
-                                                                                                          std::nullopt);
+                return {{}, std::nullopt};
             }
             possible_positions =
                 detail::get_possible_positions<Lyt, Ntk>(layout, search_space_graph, current_node, node_dict);
         }
     }
-    for (auto position : possible_positions)
+
+    // Generate next possible positions with their priorities
+    for (const auto& position : possible_positions)
     {
         auto new_sequence = search_space_graph.current_vertex;
         new_sequence.push_back(position);
-        const double rest_nodes_to_place =
+        const double remaining_nodes_to_place =
             search_space_graph.nodes_to_place.size() - (search_space_graph.current_vertex.size() + 1);
-        const double size1 = static_cast<double>(((std::max(layout.x() - 1, position.x) + 1) *
+        // Current layout size
+        const double cost1 = static_cast<double>(((std::max(layout.x() - 1, position.x) + 1) *
                                                   (std::max(layout.y() - 1, position.y) + 1))) /
                              static_cast<double>((max_layout_width * max_layout_height));
-        const double size2 = static_cast<double>(((position.x + 1) * (position.y + 1))) /
+        // Positions of last placed node
+        const double cost2 = static_cast<double>(((position.x + 1) * (position.y + 1))) /
                              static_cast<double>((max_layout_width * max_layout_height));
 
-        double priority = rest_nodes_to_place + size1 + size2;
+        double priority = remaining_nodes_to_place + cost1 + cost2;
         next_positions.push_back({new_sequence, priority});
     }
-    return std::pair<std::vector<std::pair<coord_vec_type<Lyt>, double>>, std::optional<Lyt>>(next_positions,
-                                                                                              std::nullopt);
+
+    return {next_positions, std::nullopt};
 }
 /**
  * Initializes the allowed positions for primary inputs (PIs), the cost for each search space graph and the maximum
@@ -1274,7 +1291,7 @@ class a_star_pr_impl
         auto                  start = std::chrono::high_resolution_clock::now();
 
         // Set timeout based on parameters
-        uint64_t timeout = ps.timeout ? ps.timeout : (ps.high_effort ? 1000 : 10);
+        uint64_t timeout = ps.timeout ? ps.timeout : (ps.high_effort ? 1000000 : 10000);
         bool     verbose = ps.verbose;
 
         // Initialize empty layout
@@ -1359,9 +1376,10 @@ class a_star_pr_impl
                                                  [](const SearchSpaceGraph<decltype(layout)>& search_space_graph)
                                                  { return search_space_graph.frontier_flag; });
 
-            auto end          = std::chrono::high_resolution_clock::now();
-            auto duration_sec = std::chrono::duration_cast<std::chrono::seconds>(end - start);
-            if (duration_sec.count() >= timeout)
+            auto end = std::chrono::high_resolution_clock::now();
+            auto duration_ms =
+                static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
+            if (duration_ms >= timeout)
             {
                 timeout_limit_reached = true;
             }
@@ -1379,7 +1397,20 @@ class a_star_pr_impl
 
 }  // namespace detail
 /**
- * Executes the A* P&R algorithm for the given network and returns the resulting layout.
+ * A scalable and efficient placement & routing approach based on spanning a search space graph of partial layouts and
+ * finding a path to one of its leafs, i.e., a complete layout.
+ *
+ * The search space graph start with an empty layout and then expands it based on where the first node in a topological
+ * sort of the logic network can be placed. Based on the position of this first node, a cost is assigned to each
+ * expansion based on the position of the placed node. The vertex with the least cost, which is the smallest layout
+ * w.r.t. area, is then chosen for the next expansion. This iterative process continues until a leaf node is found,
+ * which is a layout with all nodes placed. The algorithm then continues to backtrack thourgh the search space graph to
+ * find other complete layouts with less cost.
+ *
+ * The imposed restrictions are that the input logic network has to be a 3-graph, i.e., cannot have any node exceeding
+ * degree 3 (combined input and output), and that the resulting layout is always 2DDWave-clocked.
+ *
+ * May throw a high_degree_fanin_exception if `ntk` contains any node with a fan-in larger than 2.
  *
  * @tparam Lyt Cartesian gate-level layout type.
  * @tparam Ntk Network type.
