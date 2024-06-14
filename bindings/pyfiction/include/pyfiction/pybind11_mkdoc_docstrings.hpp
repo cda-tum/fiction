@@ -154,8 +154,26 @@ R"doc(Allow paths to cross over obstructed tiles if they are occupied by
 wire segments.)doc";
 
 static const char *__doc_fiction_a_star_pr =
-R"doc(Executes the A* P&R algorithm for the given network and returns the
-resulting layout.
+R"doc(A scalable and efficient placement & routing approach based on
+spanning a search space graph of partial layouts and finding a path to
+one of its leafs, i.e., a complete layout.
+
+The search space graph start with an empty layout and then expands it
+based on where the first node in a topological sort of the logic
+network can be placed. Based on the position of this first node, a
+cost is assigned to each expansion based on the position of the placed
+node. The vertex with the least cost, which is the smallest layout
+w.r.t. area, is then chosen for the next expansion. This iterative
+process continues until a leaf node is found, which is a layout with
+all nodes placed. The algorithm then continues to backtrack thourgh
+the search space graph to find other complete layouts with less cost.
+
+The imposed restrictions are that the input logic network has to be a
+3-graph, i.e., cannot have any node exceeding degree 3 (combined input
+and output), and that the resulting layout is always 2DDWave-clocked.
+
+May throw a high_degree_fanin_exception if `ntk` contains any node
+with a fan-in larger than 2.
 
 Template parameter ``Lyt``:
     Cartesian gate-level layout type.
@@ -188,7 +206,7 @@ static const char *__doc_fiction_a_star_pr_params_high_effort = R"doc(High effor
 
 static const char *__doc_fiction_a_star_pr_params_return_first = R"doc(Return first found layout.)doc";
 
-static const char *__doc_fiction_a_star_pr_params_timeout = R"doc(Timeout limit.)doc";
+static const char *__doc_fiction_a_star_pr_params_timeout = R"doc(Timeout limit (in ms).)doc";
 
 static const char *__doc_fiction_a_star_pr_params_verbose = R"doc(Verbosity.)doc";
 
