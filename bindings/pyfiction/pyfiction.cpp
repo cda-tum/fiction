@@ -162,7 +162,7 @@ PYBIND11_MODULE(pyfiction, m)
      */
     pyfiction::exact(m);
     pyfiction::orthogonal(m);
-    pyfiction::a_star_pr(m);
+    pyfiction::graph_enhanced_layout_search(m);
     pyfiction::apply_gate_library(m);
     pyfiction::color_routing(m);
     pyfiction::hexagonalization(m);
