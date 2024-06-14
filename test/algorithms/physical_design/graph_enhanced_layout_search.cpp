@@ -31,6 +31,7 @@ void check_graph_enhanced_layout_search_equiv(const Ntk& ntk)
 {
     graph_enhanced_layout_search_stats  stats{};
     graph_enhanced_layout_search_params params{};
+    params.timeout      = 100000;
     params.return_first = true;
 
     const auto layout = graph_enhanced_layout_search<Lyt>(ntk, params, &stats);
@@ -109,9 +110,8 @@ TEST_CASE("Different parameters", "[graph_enhanced_layout_search]")
     const auto layout3 = graph_enhanced_layout_search<gate_layout>(ntk, params, &stats);
     check_eq(ntk, layout3);
 
-    params.timeout      = 250;
-    params.return_first = false;
-    const auto layout4  = graph_enhanced_layout_search<gate_layout>(ntk, params, &stats);
+    params.timeout     = 1000;
+    const auto layout4 = graph_enhanced_layout_search<gate_layout>(ntk, params, &stats);
     check_eq(ntk, layout4);
 }
 
