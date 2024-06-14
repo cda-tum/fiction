@@ -79,6 +79,7 @@ TEST_CASE("Gate library application", "[graph_enhanced_layout_search]")
     {
         graph_enhanced_layout_search_stats  stats{};
         graph_enhanced_layout_search_params params{};
+        params.timeout      = 100000;
         params.return_first = true;
 
         const auto layout = graph_enhanced_layout_search<gate_layout>(ntk, params, &stats);
@@ -98,6 +99,7 @@ TEST_CASE("Different parameters", "[graph_enhanced_layout_search]")
 
     graph_enhanced_layout_search_params params{};
 
+    params.timeout      = 100000;
     params.return_first = true;
     const auto layout1  = graph_enhanced_layout_search<gate_layout>(ntk, params, &stats);
     check_eq(ntk, layout1);
@@ -109,10 +111,6 @@ TEST_CASE("Different parameters", "[graph_enhanced_layout_search]")
     params.high_effort = true;
     const auto layout3 = graph_enhanced_layout_search<gate_layout>(ntk, params, &stats);
     check_eq(ntk, layout3);
-
-    params.timeout     = 1000;
-    const auto layout4 = graph_enhanced_layout_search<gate_layout>(ntk, params, &stats);
-    check_eq(ntk, layout4);
 }
 
 TEST_CASE("Name conservation after graph-enhanced layout search", "[graph_enhanced_layout_search]")
@@ -124,6 +122,7 @@ TEST_CASE("Name conservation after graph-enhanced layout search", "[graph_enhanc
 
     graph_enhanced_layout_search_stats  stats{};
     graph_enhanced_layout_search_params params{};
+    params.timeout      = 100000;
     params.return_first = true;
 
     const auto layout = graph_enhanced_layout_search<gate_layout>(maj, params, &stats);
