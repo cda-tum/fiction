@@ -16,6 +16,7 @@
 #include "fiction/networks/views/topo_view_ci_to_co.hpp"
 #include "fiction/networks/views/topo_view_co_to_ci.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/types.hpp"
 #include "fiction/utils/routing_utils.hpp"
 
 #include <fmt/core.h>
@@ -32,7 +33,6 @@
 #include <iostream>
 #include <optional>
 #include <queue>
-#include <stdexcept>
 #include <string>
 #include <tuple>
 #include <unordered_map>
@@ -263,7 +263,7 @@ struct SearchSpaceGraph
     /**
      * The maximum number of positions to be considered for expansions.
      */
-    uint64_t num_expansions;
+    uint64_t num_expansions = 4;
     /**
      * Priority queue containing vertices of the search space graph.
      */
@@ -286,9 +286,10 @@ struct SearchSpaceGraph
  * and the second element is an optional path (returned if `return_path` is true).
  */
 template <typename Lyt>
-std::pair<bool, std::optional<fiction::layout_coordinate_path<Lyt>>>
+[[nodiscard]] std::pair<bool, std::optional<fiction::layout_coordinate_path<Lyt>>>
 check_path(const Lyt& layout, const fiction::tile<Lyt>& src, const fiction::tile<Lyt>& dest,
-           const bool src_is_new_pos = false, const bool dest_is_new_pos = false, const bool return_path = false)
+           const bool src_is_new_pos = false, const bool dest_is_new_pos = false,
+           const bool return_path = false) noexcept
 {
     if ((layout.is_empty_tile(src) & src_is_new_pos) || (layout.is_empty_tile(dest) & dest_is_new_pos) ||
         (!src_is_new_pos && !dest_is_new_pos))
@@ -319,8 +320,8 @@ check_path(const Lyt& layout, const fiction::tile<Lyt>& src, const fiction::tile
  * @return A vector of tiles representing the possible positions for PIs.
  */
 template <typename Lyt>
-std::vector<fiction::tile<Lyt>> get_possible_positions_pis(Lyt& layout, bool pis_top, bool pis_left,
-                                                           uint64_t num_expansions)
+[[nodiscard]] std::vector<fiction::tile<Lyt>>
+get_possible_positions_pis(Lyt& layout, const bool pis_top, const bool pis_left, const uint64_t num_expansions) noexcept
 {
     uint64_t                        count = 0;
     std::vector<fiction::tile<Lyt>> possible_positions{};
@@ -342,6 +343,7 @@ std::vector<fiction::tile<Lyt>> get_possible_positions_pis(Lyt& layout, bool pis
     const uint64_t max_iterations =
         (pis_top && pis_left) ? std::max(layout.x(), layout.y()) : (pis_top ? layout.x() : layout.y());
     const uint64_t expansion_limit = (pis_top && pis_left) ? 2 * num_expansions : num_expansions;
+    possible_positions.reserve(expansion_limit);
 
     for (uint64_t k = 0; k < max_iterations; k++)
     {
@@ -375,12 +377,14 @@ std::vector<fiction::tile<Lyt>> get_possible_positions_pis(Lyt& layout, bool pis
  * @return A vector of tiles representing the possible positions for POs.
  */
 template <typename Lyt, typename Ntk>
-std::vector<fiction::tile<Lyt>> get_possible_positions_pos(Lyt& layout, node_dict_type<Lyt, Ntk>& node_dict,
-                                                           std::vector<mockturtle::node<Ntk>>& preceding_nodes)
+[[nodiscard]] std::vector<fiction::tile<Lyt>>
+get_possible_positions_pos(const Lyt& layout, node_dict_type<Lyt, Ntk>& node_dict,
+                           const std::vector<mockturtle::node<Ntk>>& preceding_nodes) noexcept
 {
     std::vector<fiction::tile<Lyt>> possible_positions{};
     const auto                      preceding_node_loc = layout.get_tile(node_dict[preceding_nodes[0]]);
-    const auto max_iterations = std::max(layout.x() - preceding_node_loc.x, layout.y() - preceding_node_loc.y);
+    const auto expansion_limit = std::max(layout.x() - preceding_node_loc.x, layout.y() - preceding_node_loc.y);
+    possible_positions.reserve(expansion_limit);
 
     // Check if path from previous tile to PO exists
     auto check_tile = [&](uint64_t x, uint64_t y)
@@ -392,7 +396,7 @@ std::vector<fiction::tile<Lyt>> get_possible_positions_pos(Lyt& layout, node_dic
         }
     };
 
-    for (uint64_t k = 0; k <= max_iterations; ++k)
+    for (uint64_t k = 0; k <= expansion_limit; ++k)
     {
         if (preceding_node_loc.x + k <= layout.x())
         {
@@ -419,13 +423,14 @@ std::vector<fiction::tile<Lyt>> get_possible_positions_pos(Lyt& layout, node_dic
  * @return A vector of tiles representing the possible positions for a single fan-in node.
  */
 template <typename Lyt, typename Ntk>
-std::vector<fiction::tile<Lyt>> get_possible_positions_single_fanin(Lyt& layout, node_dict_type<Lyt, Ntk>& node_dict,
-                                                                    uint64_t                            num_expansions,
-                                                                    std::vector<mockturtle::node<Ntk>>& preceding_nodes)
+[[nodiscard]] std::vector<fiction::tile<Lyt>>
+get_possible_positions_single_fanin(Lyt& layout, node_dict_type<Lyt, Ntk>& node_dict, const uint64_t num_expansions,
+                                    const std::vector<mockturtle::node<Ntk>>& preceding_nodes) noexcept
 {
     std::vector<fiction::tile<Lyt>> possible_positions{};
-    uint64_t                        count              = 0;
-    const auto                      preceding_node_loc = layout.get_tile(node_dict[preceding_nodes[0]]);
+    possible_positions.reserve(num_expansions);
+    uint64_t   count              = 0;
+    const auto preceding_node_loc = layout.get_tile(node_dict[preceding_nodes[0]]);
 
     // Check if path from previous tile to new tile and from new tile to drain exist
     auto check_tile = [&](uint64_t x, uint64_t y)
@@ -477,15 +482,16 @@ std::vector<fiction::tile<Lyt>> get_possible_positions_single_fanin(Lyt& layout,
  * @return A vector of tiles representing the possible positions for a double fan-in node.
  */
 template <typename Lyt, typename Ntk>
-std::vector<fiction::tile<Lyt>> get_possible_positions_double_fanin(Lyt& layout, node_dict_type<Lyt, Ntk>& node_dict,
-                                                                    uint64_t                            num_expansions,
-                                                                    std::vector<mockturtle::node<Ntk>>& preceding_nodes)
+[[nodiscard]] std::vector<fiction::tile<Lyt>>
+get_possible_positions_double_fanin(Lyt& layout, node_dict_type<Lyt, Ntk>& node_dict, const uint64_t num_expansions,
+                                    const std::vector<mockturtle::node<Ntk>>& preceding_nodes) noexcept
 {
     std::vector<fiction::tile<Lyt>> possible_positions{};
-    uint64_t                        count                = 0;
-    const auto                      preceding_node_1_loc = layout.get_tile(node_dict[preceding_nodes[0]]);
-    const auto                      preceding_node_2_loc = layout.get_tile(node_dict[preceding_nodes[1]]);
-    const auto                      min_x                = std::max(preceding_node_1_loc.x, preceding_node_2_loc.x) +
+    possible_positions.reserve(num_expansions);
+    uint64_t   count                = 0;
+    const auto preceding_node_1_loc = layout.get_tile(node_dict[preceding_nodes[0]]);
+    const auto preceding_node_2_loc = layout.get_tile(node_dict[preceding_nodes[1]]);
+    const auto min_x                = std::max(preceding_node_1_loc.x, preceding_node_2_loc.x) +
                        (preceding_node_1_loc.x == preceding_node_2_loc.x ? 1 : 0);
     const auto min_y = std::max(preceding_node_1_loc.y, preceding_node_2_loc.y) +
                        (preceding_node_1_loc.y == preceding_node_2_loc.y ? 1 : 0);
@@ -557,10 +563,12 @@ std::vector<fiction::tile<Lyt>> get_possible_positions_double_fanin(Lyt& layout,
  * @return A vector of tiles representing the possible positions for the current node.
  */
 template <typename Lyt, typename Ntk>
-std::vector<fiction::tile<Lyt>> get_possible_positions(Lyt& layout, SearchSpaceGraph<Lyt>& search_space_graph,
-                                                       uint64_t& current_node, node_dict_type<Lyt, Ntk>& node_dict)
+[[nodiscard]] std::vector<fiction::tile<Lyt>>
+get_possible_positions(Lyt& layout, const SearchSpaceGraph<Lyt>& search_space_graph, const uint64_t& current_node,
+                       node_dict_type<Lyt, Ntk>& node_dict) noexcept
 {
     std::vector<mockturtle::node<Ntk>> preceding_nodes{};
+    preceding_nodes.reserve(2);
     search_space_graph.network.foreach_fanin(search_space_graph.nodes_to_place[current_node],
                                              [&preceding_nodes](const auto& f) { preceding_nodes.push_back(f); });
 
@@ -598,7 +606,7 @@ std::vector<fiction::tile<Lyt>> get_possible_positions(Lyt& layout, SearchSpaceG
  * @param placement_possible A boolean flag that will be set to false if placement is not possible.
  */
 template <typename Lyt, typename Ntk>
-bool valid_layout(Lyt& layout, Ntk& network, node_dict_type<Lyt, Ntk>& node_dict)
+[[nodiscard]] bool valid_layout(Lyt& layout, const Ntk& network, node_dict_type<Lyt, Ntk>& node_dict) noexcept
 {
     auto check_tile = [&](const fiction::tile<Lyt>& tile)
     {
@@ -661,9 +669,10 @@ bool valid_layout(Lyt& layout, Ntk& network, node_dict_type<Lyt, Ntk>& node_dict
  * @param po_names A vector of primary output names.
  */
 template <typename Lyt, typename Ntk>
-void place_single_input_node(Lyt& layout, Ntk& network, fiction::tile<Lyt> position, mockturtle::signal<Lyt> signal,
-                             uint64_t current_node, std::vector<mockturtle::node<Ntk>>& nodes_to_place,
-                             uint64_t current_po, std::vector<std::string>& po_names)
+void place_single_input_node(Lyt& layout, const Ntk& network, const fiction::tile<Lyt> position,
+                             const mockturtle::signal<Lyt> signal, const uint64_t current_node,
+                             const std::vector<mockturtle::node<Ntk>>& nodes_to_place, const uint64_t current_po,
+                             const std::vector<std::string>& po_names) noexcept
 {
     if (network.is_inv(nodes_to_place[current_node]))
     {
@@ -693,9 +702,9 @@ void place_single_input_node(Lyt& layout, Ntk& network, fiction::tile<Lyt> posit
  * @param nodes_to_place A vector representing the nodes to be placed.
  */
 template <typename Lyt, typename Ntk>
-void place_double_input_node(Lyt& layout, Ntk& network, fiction::tile<Lyt> position, mockturtle::signal<Lyt> signal_1,
-                             mockturtle::signal<Lyt> signal_2, uint64_t current_node,
-                             std::vector<mockturtle::node<Ntk>>& nodes_to_place)
+void place_double_input_node(Lyt& layout, const Ntk& network, const fiction::tile<Lyt> position,
+                             const mockturtle::signal<Lyt> signal_1, const mockturtle::signal<Lyt> signal_2,
+                             const uint64_t current_node, std::vector<mockturtle::node<Ntk>>& nodes_to_place) noexcept
 {
     if (network.is_and(nodes_to_place[current_node]))
     {
@@ -738,10 +747,11 @@ void place_double_input_node(Lyt& layout, Ntk& network, fiction::tile<Lyt> posit
  * @param preceding_nodes A vector of nodes that precede the single fanin node.
  */
 template <typename Lyt, typename Ntk>
-void place_and_route_single_input_node(fiction::tile<Lyt> position, Lyt& layout, Ntk& network, uint64_t& current_node,
-                                       std::vector<mockturtle::node<Ntk>>& nodes_to_place, uint64_t& current_po,
-                                       std::vector<std::string>& po_names, node_dict_type<Lyt, Ntk>& node_dict,
-                                       std::vector<mockturtle::signal<Lyt>> preceding_nodes)
+void place_and_route_single_input_node(const fiction::tile<Lyt> position, Lyt& layout, const Ntk& network,
+                                       const uint64_t& current_node, std::vector<mockturtle::node<Ntk>>& nodes_to_place,
+                                       uint64_t& current_po, std::vector<std::string>& po_names,
+                                       node_dict_type<Lyt, Ntk>&            node_dict,
+                                       std::vector<mockturtle::signal<Lyt>> preceding_nodes) noexcept
 {
     const auto preceding_node     = node_dict[preceding_nodes[0]];
     const auto preceding_node_loc = layout.get_tile(preceding_node);
@@ -777,10 +787,10 @@ void place_and_route_single_input_node(fiction::tile<Lyt> position, Lyt& layout,
  * @param preceding_nodes A vector of nodes that precede the double fanin node.
  */
 template <typename Lyt, typename Ntk>
-void place_and_route_double_input_node(fiction::tile<Lyt> position, Lyt& layout, Ntk& network, uint64_t& current_node,
-                                       std::vector<mockturtle::node<Ntk>>&  nodes_to_place,
+void place_and_route_double_input_node(const fiction::tile<Lyt> position, Lyt& layout, const Ntk& network,
+                                       const uint64_t& current_node, std::vector<mockturtle::node<Ntk>>& nodes_to_place,
                                        node_dict_type<Lyt, Ntk>&            node_dict,
-                                       std::vector<mockturtle::signal<Lyt>> preceding_nodes)
+                                       std::vector<mockturtle::signal<Lyt>> preceding_nodes) noexcept
 {
     const auto preceding_node_1     = node_dict[preceding_nodes[0]];
     const auto preceding_node_1_loc = layout.get_tile(preceding_node_1);
@@ -831,13 +841,14 @@ void place_and_route_double_input_node(fiction::tile<Lyt> position, Lyt& layout,
  * @throws std::runtime_error If the node type is invalid or not recognized.
  */
 template <typename Lyt, typename Ntk>
-bool place(fiction::tile<Lyt> position, Lyt& layout, Ntk& network, uint64_t& current_node,
-           std::vector<mockturtle::node<Ntk>>& nodes_to_place, std::vector<std::string>& po_names, uint64_t& current_pi,
-           uint64_t& current_po, node_dict_type<Lyt, Ntk>& node_dict, uint64_t& max_placed_nodes,
-           mockturtle::node_map<mockturtle::node<Lyt>, Ntk>& pi2node)
+[[nodiscard]] bool place(const fiction::tile<Lyt> position, Lyt& layout, const Ntk& network, uint64_t& current_node,
+                         std::vector<mockturtle::node<Ntk>>& nodes_to_place, std::vector<std::string>& po_names,
+                         uint64_t& current_pi, uint64_t& current_po, node_dict_type<Lyt, Ntk>& node_dict,
+                         uint64_t& max_placed_nodes, mockturtle::node_map<mockturtle::node<Lyt>, Ntk>& pi2node) noexcept
 {
     // Vector to store preceding nodes
     std::vector<mockturtle::signal<Lyt>> preceding_nodes{};
+    preceding_nodes.reserve(2);
     network.foreach_fanin(nodes_to_place[current_node],
                           [&preceding_nodes](const auto& f) { preceding_nodes.push_back(f); });
 
@@ -859,7 +870,6 @@ bool place(fiction::tile<Lyt> position, Lyt& layout, Ntk& network, uint64_t& cur
             place_and_route_double_input_node(position, layout, network, current_node, nodes_to_place, node_dict,
                                               preceding_nodes);
             break;
-        default: throw std::runtime_error("Not a valid node: " + std::to_string(nodes_to_place[current_node]));
     }
 
     node_dict[nodes_to_place[current_node]] = layout.get_node(position);
@@ -885,9 +895,9 @@ bool place(fiction::tile<Lyt> position, Lyt& layout, Ntk& network, uint64_t& cur
  * @param area Layout area (in tiles).
  */
 template <typename Lyt, typename Ntk>
-void print_placement_info(Lyt& lyt, SearchSpaceGraph<Lyt>& search_space_graph,
-                          std::chrono::time_point<std::chrono::high_resolution_clock> start_time, uint64_t count,
-                          uint64_t area)
+void print_placement_info(const Lyt& lyt, const SearchSpaceGraph<Lyt>& search_space_graph,
+                          const std::chrono::time_point<std::chrono::high_resolution_clock> start_time,
+                          const uint64_t count, const uint64_t area) noexcept
 {
     std::cout << "Found improved solution:\n";
 
@@ -932,22 +942,24 @@ void print_placement_info(Lyt& lyt, SearchSpaceGraph<Lyt>& search_space_graph,
  * If the layout is invalid or no improvement is possible, std::nullopt is returned.
  */
 template <typename OrigLyt, typename Lyt, typename Ntk>
-std::pair<std::vector<std::pair<coord_vec_type<Lyt>, double>>, std::optional<Lyt>>
-neighbors(SearchSpaceGraph<Lyt>& search_space_graph, uint64_t count, bool& improv_mode, uint64_t& best_solution,
-          uint64_t& max_placed_nodes, std::chrono::time_point<std::chrono::high_resolution_clock> start_time,
-          bool verbose)
+[[nodiscard]] std::pair<std::vector<std::pair<coord_vec_type<Lyt>, double>>, std::optional<Lyt>>
+neighbors(SearchSpaceGraph<Lyt>& search_space_graph, const uint64_t count, bool& improv_mode, uint64_t& best_solution,
+          uint64_t& max_placed_nodes, const std::chrono::time_point<std::chrono::high_resolution_clock> start_time,
+          const bool verbose) noexcept
 {
     uint64_t current_pi   = 0;
     uint64_t current_po   = 0;
     uint64_t current_node = 0;
 
-    const uint64_t min_layout_width  = search_space_graph.network.num_pis();
+    const auto     min_layout_width  = search_space_graph.network.num_pis();
     const uint64_t min_layout_height = 1;
-    const uint64_t max_layout_width  = search_space_graph.nodes_to_place.size();
-    const uint64_t max_layout_height = search_space_graph.nodes_to_place.size();
+    const auto     max_layout_width  = search_space_graph.nodes_to_place.size();
+    const auto     max_layout_height = search_space_graph.nodes_to_place.size();
 
-    std::unordered_map<mockturtle::node<Ntk>, mockturtle::node<Lyt>> node_dict{};
-    std::vector<std::pair<coord_vec_type<Lyt>, double>>              next_positions;
+    node_dict_type<Lyt, Ntk> node_dict{};
+    node_dict.reserve(search_space_graph.nodes_to_place.size());
+    std::vector<std::pair<coord_vec_type<Lyt>, double>> next_positions;
+    next_positions.reserve(2 * search_space_graph.num_expansions);
 
     OrigLyt lyt{{min_layout_width - 1, min_layout_height - 1, 1}, twoddwave_clocking<Lyt>()};
     auto    layout  = fiction::obstruction_layout<OrigLyt>(lyt);
@@ -955,6 +967,8 @@ neighbors(SearchSpaceGraph<Lyt>& search_space_graph, uint64_t count, bool& impro
 
     bool                   found_solution = false;
     std::vector<tile<Lyt>> possible_positions{};
+    possible_positions.reserve(2 * search_space_graph.num_expansions);
+
     if (search_space_graph.current_vertex.empty())
     {
         possible_positions =
@@ -963,22 +977,22 @@ neighbors(SearchSpaceGraph<Lyt>& search_space_graph, uint64_t count, bool& impro
 
     for (uint64_t idx = 0; idx < search_space_graph.current_vertex.size(); ++idx)
     {
-        auto position = search_space_graph.current_vertex[idx];
+        const auto position = search_space_graph.current_vertex[idx];
 
-        found_solution = place<Lyt, Ntk>(position, layout, search_space_graph.network, current_node,
-                                         search_space_graph.nodes_to_place, search_space_graph.po_names, current_pi,
-                                         current_po, node_dict, max_placed_nodes, pi2node);
+        found_solution = detail::place<Lyt, Ntk>(position, layout, search_space_graph.network, current_node,
+                                                 search_space_graph.nodes_to_place, search_space_graph.po_names,
+                                                 current_pi, current_po, node_dict, max_placed_nodes, pi2node);
 
         uint64_t area = 0;
         if (improv_mode)
         {
-            auto bb = fiction::bounding_box_2d(layout);
-            area    = (bb.get_x_size() + 1) * (bb.get_y_size() + 1);
+            const auto bb = fiction::bounding_box_2d(layout);
+            area          = (bb.get_x_size() + 1) * (bb.get_y_size() + 1);
         }
 
         if (found_solution && (!improv_mode || (area < best_solution)))
         {
-            auto bb = fiction::bounding_box_2d(layout);
+            const auto bb = fiction::bounding_box_2d(layout);
             layout.resize({bb.get_x_size(), bb.get_y_size(), layout.z()});
             area = (layout.x() + 1) * (layout.y() + 1);
             if (verbose)
@@ -1046,10 +1060,10 @@ neighbors(SearchSpaceGraph<Lyt>& search_space_graph, uint64_t count, bool& impro
  * @param search_space_graphs The vector of search space graphs to be initialized.
  */
 template <typename Lyt>
-void initialize_pis_cost_and_num_expansions(std::vector<SearchSpaceGraph<Lyt>>& search_space_graphs)
+void initialize_pis_cost_and_num_expansions(std::vector<SearchSpaceGraph<Lyt>>& search_space_graphs) noexcept
 {
-    std::vector<bool> pis_top  = {true, true, true, true, false, false, false, false, true, true, true, true};
-    std::vector<bool> pis_left = {false, false, false, false, true, true, true, true, true, true, true, true};
+    const std::vector<bool> pis_top  = {true, true, true, true, false, false, false, false, true, true, true, true};
+    const std::vector<bool> pis_left = {false, false, false, false, true, true, true, true, true, true, true, true};
 
     for (uint64_t i = 0; i < search_space_graphs.size(); ++i)
     {
@@ -1068,7 +1082,7 @@ void initialize_pis_cost_and_num_expansions(std::vector<SearchSpaceGraph<Lyt>>& 
  * @param search_space_graphs The vector of search space graphs to be initialized.
  */
 template <typename Lyt, typename Ntk>
-void initialize_networks_and_nodes_to_place(Ntk& ntk, std::vector<SearchSpaceGraph<Lyt>>& search_space_graphs)
+void initialize_networks_and_nodes_to_place(Ntk& ntk, std::vector<SearchSpaceGraph<Lyt>>& search_space_graphs) noexcept
 {
     // Convert network and apply fanout substitution
     auto tec_ntk = fiction::convert_network<fiction::tec_nt, Ntk>(ntk);
@@ -1160,7 +1174,8 @@ void initialize_networks_and_nodes_to_place(Ntk& ntk, std::vector<SearchSpaceGra
  * @param high_effort Flag indicating if high effort mode is enabled
  */
 template <typename Lyt>
-void initialize_frontiers_flags(std::vector<SearchSpaceGraph<Lyt>>& search_space_graphs, bool high_effort)
+void initialize_frontiers_flags(std::vector<SearchSpaceGraph<Lyt>>& search_space_graphs,
+                                const bool                          high_effort) noexcept
 {
     search_space_graphs[0].frontier_flag = true;
     search_space_graphs[4].frontier_flag = true;
@@ -1206,11 +1221,11 @@ class graph_enhanced_layout_search_impl
     {
         // measure run time
         mockturtle::stopwatch stop{pst.time_total};
-        auto                  start = std::chrono::high_resolution_clock::now();
+        const auto            start = std::chrono::high_resolution_clock::now();
 
         // Set timeout based on parameters
-        uint64_t timeout = ps.timeout.value_or(ps.high_effort ? 1000000 : 10000);
-        bool     verbose = ps.verbose;
+        const uint64_t timeout = ps.timeout.value_or(ps.high_effort ? 1000000 : 10000);
+        const bool     verbose = ps.verbose;
 
         // Initialize empty layout
         Lyt  lyt{{}, twoddwave_clocking<Lyt>()};
@@ -1294,8 +1309,8 @@ class graph_enhanced_layout_search_impl
                                                  [](const SearchSpaceGraph<decltype(layout)>& search_space_graph)
                                                  { return search_space_graph.frontier_flag; });
 
-            auto end = std::chrono::high_resolution_clock::now();
-            auto duration_ms =
+            const auto end = std::chrono::high_resolution_clock::now();
+            const auto duration_ms =
                 static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
             if (duration_ms >= timeout)
             {
