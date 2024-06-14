@@ -172,15 +172,7 @@ class topo_view_ci_to_co<Ntk, false> : public mockturtle::immutable_view<Ntk>
             this->set_visited(c1, this->trav_id());
         }
 
-        Ntk::foreach_ci(
-            [this](auto n)
-            {
-                /* node was already visited */
-                if (this->visited(n) == this->trav_id())
-                    return;
-
-                create_topo_rec(n);
-            });
+        Ntk::foreach_ci([this](auto n) { create_topo_rec(n); });
     }
 
   private:
