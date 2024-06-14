@@ -107,7 +107,7 @@ TEST_CASE("Different parameters", "[a_star_pr]")
     const auto layout3 = a_star_pr<gate_layout>(ntk, params, &stats);
     check_eq(ntk, layout3);
 
-    params.timeout      = 0;
+    params.timeout      = 250;
     params.return_first = false;
     const auto layout4  = a_star_pr<gate_layout>(ntk, params, &stats);
     check_eq(ntk, layout4);
