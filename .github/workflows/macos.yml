@@ -72,10 +72,6 @@ jobs:
       - name: Setup TBB
         run: brew install tbb
 
-      # The fmt library pre-installed on the runners causes conflicts with the version shipped with alice
-      - name: Remove fmt
-        run: brew uninstall fmt
-
       - name: Setup XCode version
         uses: maxim-lobanov/setup-xcode@v1
         with:
