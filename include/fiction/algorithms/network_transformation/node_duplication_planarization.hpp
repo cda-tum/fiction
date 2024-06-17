@@ -280,14 +280,10 @@ class node_duplication_planarization_impl
         std::cout << "push lvl: " << level << std::endl;
         ntk_lvls.push_back(v_level);
         v_level.clear();
+
         // ToDo: try to push PIs to the beginning or end of he vector, since they have to be propagated with buffers
-        // until the last levels thsi should only happen if border_pis == true
+        // until the last levels this should only happen if border_pis == true
         compute_node_order_next_level(v_level);
-
-        // This function gets the nodes of the next level passed. They should be reordered and the duplicated nodes have
-        // to be inserted so that they will keep the same functionality reorder_and_duplicate_nodes(next_level)
-
-        // first push back the pos
 
         bool f_final_level = true;
         check_final_level(v_level, f_final_level);
