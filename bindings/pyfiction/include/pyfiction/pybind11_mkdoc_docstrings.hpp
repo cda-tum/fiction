@@ -5351,22 +5351,22 @@ static const char *__doc_fiction_detail_graph_coloring_impl_pst = R"doc(Statisti
 
 static const char *__doc_fiction_detail_graph_coloring_impl_run = R"doc()doc";
 
-static const char *__doc_fiction_detail_graph_enhanced_layout_search_impl =
-R"doc(Implementation of the A* P&R algorithm. This class handles the
-initialization and execution of the algorithm.
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl =
+R"doc(Implementation of the graph-oriented layout design algorithm. This
+class handles the initialization and execution of the algorithm.
 
 Template parameter ``Plyt``:
     Cartesian gate-level layout type.
 
-Template parameter ``Ntk``:
+Template parameter ``Pntk``:
     Network type.)doc";
 
-static const char *__doc_fiction_detail_graph_enhanced_layout_search_impl_best_solution = R"doc()doc";
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_best_solution = R"doc()doc";
 
-static const char *__doc_fiction_detail_graph_enhanced_layout_search_impl_count = R"doc()doc";
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_count = R"doc()doc";
 
-static const char *__doc_fiction_detail_graph_enhanced_layout_search_impl_graph_enhanced_layout_search_impl =
-R"doc(Constructor for the graph-enhanced layout search algorithm.
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_graph_oriented_layout_design_impl =
+R"doc(Constructor for the graph-oriented layout design algorithm.
 
 Parameter ``src``:
     The source network to be placed.
@@ -5377,31 +5377,32 @@ Parameter ``p``:
 Parameter ``st``:
     The statistics object to record execution details.)doc";
 
-static const char *__doc_fiction_detail_graph_enhanced_layout_search_impl_high_effort = R"doc()doc";
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_high_effort = R"doc()doc";
 
-static const char *__doc_fiction_detail_graph_enhanced_layout_search_impl_improv_mode = R"doc()doc";
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_improv_mode = R"doc()doc";
 
-static const char *__doc_fiction_detail_graph_enhanced_layout_search_impl_max_placed_nodes = R"doc()doc";
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_max_placed_nodes = R"doc()doc";
 
-static const char *__doc_fiction_detail_graph_enhanced_layout_search_impl_ntk = R"doc()doc";
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_ntk = R"doc()doc";
 
-static const char *__doc_fiction_detail_graph_enhanced_layout_search_impl_num_search_space_graphs = R"doc()doc";
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_num_search_space_graphs = R"doc()doc";
 
-static const char *__doc_fiction_detail_graph_enhanced_layout_search_impl_ps = R"doc()doc";
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_ps = R"doc()doc";
 
-static const char *__doc_fiction_detail_graph_enhanced_layout_search_impl_pst = R"doc()doc";
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_pst = R"doc()doc";
 
-static const char *__doc_fiction_detail_graph_enhanced_layout_search_impl_run =
-R"doc(Executes the A* P&R algorithm and returns the best found layout.
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_run =
+R"doc(Executes the graph-oriented layout design algorithm and returns the
+best found layout.
 
 Returns:
     The best layout found by the algorithm.)doc";
 
-static const char *__doc_fiction_detail_graph_enhanced_layout_search_impl_start = R"doc()doc";
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_start = R"doc()doc";
 
-static const char *__doc_fiction_detail_graph_enhanced_layout_search_impl_timeout = R"doc()doc";
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_timeout = R"doc()doc";
 
-static const char *__doc_fiction_detail_graph_enhanced_layout_search_impl_verbose = R"doc()doc";
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_verbose = R"doc()doc";
 
 static const char *__doc_fiction_detail_improve_gate_location =
 R"doc(Utility function that moves gates to new coordinates and checks if
@@ -6613,9 +6614,9 @@ static const char *__doc_fiction_detail_search_space_graph =
 R"doc(A structure representing a search space graph.
 
 This struct encapsulates all the necessary data for managing a search
-space graph during the A*-based placement and routing algorithm. It
-holds the current vertex, network, nodes to be placed, and other
-relevant information.
+space graph during the graph-oriented layout design process. It holds
+the current vertex, network, nodes to be placed, and other relevant
+information.
 
 Template parameter ``Lyt``:
     The layout type.
@@ -9805,7 +9806,7 @@ static const char *__doc_fiction_graph_coloring_sat_search_tactic_LINEARLY_DESCE
 R"doc(Descend linearly by checking for :math:`k = |G|, |G| - 1, |G| - 2,
 \dots` until UNSAT.)doc";
 
-static const char *__doc_fiction_graph_enhanced_layout_search =
+static const char *__doc_fiction_graph_oriented_layout_design =
 R"doc(A scalable and efficient placement & routing approach based on
 spanning a search space graph of partial layouts and finding a path to
 one of its leafs, i.e., a complete layout.
@@ -9817,7 +9818,7 @@ cost is assigned to each expansion based on the position of the placed
 node. The vertex with the least cost, which is the smallest layout
 w.r.t. area, is then chosen for the next expansion. This iterative
 process continues until a leaf node is found, which is a layout with
-all nodes placed. The algorithm then continues to backtrack thourgh
+all nodes placed. The algorithm then continues to backtrack through
 the search space graph to find other complete layouts with less cost.
 
 Only works for 2DDWave-clocked layouts.
@@ -9843,23 +9844,23 @@ Returns:
     The resulting layout after applying the A* priority routing
     algorithm.)doc";
 
-static const char *__doc_fiction_graph_enhanced_layout_search_params = R"doc(Parameters for the graph-enhanced layout search algorithm.)doc";
+static const char *__doc_fiction_graph_oriented_layout_design_params = R"doc(Parameters for the graph-oriented layout design algorithm.)doc";
 
-static const char *__doc_fiction_graph_enhanced_layout_search_params_high_effort = R"doc(High effort mode.)doc";
+static const char *__doc_fiction_graph_oriented_layout_design_params_high_effort = R"doc(High effort mode.)doc";
 
-static const char *__doc_fiction_graph_enhanced_layout_search_params_return_first = R"doc(Return first found layout.)doc";
+static const char *__doc_fiction_graph_oriented_layout_design_params_return_first = R"doc(Return first found layout.)doc";
 
-static const char *__doc_fiction_graph_enhanced_layout_search_params_timeout = R"doc(Timeout limit (in ms).)doc";
+static const char *__doc_fiction_graph_oriented_layout_design_params_timeout = R"doc(Timeout limit (in ms).)doc";
 
-static const char *__doc_fiction_graph_enhanced_layout_search_params_verbose = R"doc(Verbosity.)doc";
+static const char *__doc_fiction_graph_oriented_layout_design_params_verbose = R"doc(Verbosity.)doc";
 
-static const char *__doc_fiction_graph_enhanced_layout_search_stats =
-R"doc(This struct stores statistics about the graph-enhanced layout search
+static const char *__doc_fiction_graph_oriented_layout_design_stats =
+R"doc(This struct stores statistics about the graph-oriented layout design
 process.)doc";
 
-static const char *__doc_fiction_graph_enhanced_layout_search_stats_duration = R"doc(Runtime of the graph-enhanced layout search process.)doc";
+static const char *__doc_fiction_graph_oriented_layout_design_stats_duration = R"doc(Runtime of the graph-oriented layout design process.)doc";
 
-static const char *__doc_fiction_graph_enhanced_layout_search_stats_report =
+static const char *__doc_fiction_graph_oriented_layout_design_stats_report =
 R"doc(Reports the statistics to the given output stream.
 
 Parameter ``out``:
