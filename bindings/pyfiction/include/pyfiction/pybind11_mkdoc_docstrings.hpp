@@ -3321,38 +3321,6 @@ computation.)doc";
 
 static const char *__doc_fiction_design_sidb_gates_params_simulation_parameters = R"doc(All Parameters for physical SiDB simulations.)doc";
 
-static const char *__doc_fiction_detail_SearchSpaceGraph =
-R"doc(A structure representing a search space graph.
-
-This struct encapsulates all the necessary data for managing a search
-space graph during the A*-based placement and routing algorithm. It
-holds the current vertex, network, nodes to be placed, and other
-relevant information.
-
-Template parameter ``Lyt``:
-    The layout type.
-
-Template parameter ``Ntk``:
-    The network type.)doc";
-
-static const char *__doc_fiction_detail_SearchSpaceGraph_cost_so_far = R"doc(The cost so far for reaching each vertex in the layout.)doc";
-
-static const char *__doc_fiction_detail_SearchSpaceGraph_current_vertex = R"doc(The current vertex in the search space graph.)doc";
-
-static const char *__doc_fiction_detail_SearchSpaceGraph_frontier = R"doc(Priority queue containing vertices of the search space graph.)doc";
-
-static const char *__doc_fiction_detail_SearchSpaceGraph_frontier_flag = R"doc(Flag indicating if this graph's frontier is active.)doc";
-
-static const char *__doc_fiction_detail_SearchSpaceGraph_network = R"doc(The network associated with this search space graph.)doc";
-
-static const char *__doc_fiction_detail_SearchSpaceGraph_num_expansions = R"doc(The maximum number of positions to be considered for expansions.)doc";
-
-static const char *__doc_fiction_detail_SearchSpaceGraph_pis_left = R"doc(Flag indicating if primary inputs (PIs) can be placed at the left.)doc";
-
-static const char *__doc_fiction_detail_SearchSpaceGraph_pis_top = R"doc(Flag indicating if primary inputs (PIs) can be placed at the top.)doc";
-
-static const char *__doc_fiction_detail_SearchSpaceGraph_po_names = R"doc(Primary output (PO) names.)doc";
-
 static const char *__doc_fiction_detail_a_star_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_a_star_impl_a_star_impl = R"doc()doc";
@@ -5383,6 +5351,58 @@ static const char *__doc_fiction_detail_graph_coloring_impl_pst = R"doc(Statisti
 
 static const char *__doc_fiction_detail_graph_coloring_impl_run = R"doc()doc";
 
+static const char *__doc_fiction_detail_graph_enhanced_layout_search_impl =
+R"doc(Implementation of the A* P&R algorithm. This class handles the
+initialization and execution of the algorithm.
+
+Template parameter ``Plyt``:
+    Cartesian gate-level layout type.
+
+Template parameter ``Ntk``:
+    Network type.)doc";
+
+static const char *__doc_fiction_detail_graph_enhanced_layout_search_impl_best_solution = R"doc()doc";
+
+static const char *__doc_fiction_detail_graph_enhanced_layout_search_impl_count = R"doc()doc";
+
+static const char *__doc_fiction_detail_graph_enhanced_layout_search_impl_graph_enhanced_layout_search_impl =
+R"doc(Constructor for the graph-enhanced layout search algorithm.
+
+Parameter ``src``:
+    The source network to be placed.
+
+Parameter ``p``:
+    The parameters for the graph-enhanced layout search algorithm.
+
+Parameter ``st``:
+    The statistics object to record execution details.)doc";
+
+static const char *__doc_fiction_detail_graph_enhanced_layout_search_impl_high_effort = R"doc()doc";
+
+static const char *__doc_fiction_detail_graph_enhanced_layout_search_impl_improv_mode = R"doc()doc";
+
+static const char *__doc_fiction_detail_graph_enhanced_layout_search_impl_max_placed_nodes = R"doc()doc";
+
+static const char *__doc_fiction_detail_graph_enhanced_layout_search_impl_ntk = R"doc()doc";
+
+static const char *__doc_fiction_detail_graph_enhanced_layout_search_impl_num_search_space_graphs = R"doc()doc";
+
+static const char *__doc_fiction_detail_graph_enhanced_layout_search_impl_ps = R"doc()doc";
+
+static const char *__doc_fiction_detail_graph_enhanced_layout_search_impl_pst = R"doc()doc";
+
+static const char *__doc_fiction_detail_graph_enhanced_layout_search_impl_run =
+R"doc(Executes the A* P&R algorithm and returns the best found layout.
+
+Returns:
+    The best layout found by the algorithm.)doc";
+
+static const char *__doc_fiction_detail_graph_enhanced_layout_search_impl_start = R"doc()doc";
+
+static const char *__doc_fiction_detail_graph_enhanced_layout_search_impl_timeout = R"doc()doc";
+
+static const char *__doc_fiction_detail_graph_enhanced_layout_search_impl_verbose = R"doc()doc";
+
 static const char *__doc_fiction_detail_improve_gate_location =
 R"doc(Utility function that moves gates to new coordinates and checks if
 routing is possible. This includes:
@@ -6095,6 +6115,14 @@ static const char *__doc_fiction_detail_orthogonal_impl_pst = R"doc()doc";
 
 static const char *__doc_fiction_detail_orthogonal_impl_run = R"doc()doc";
 
+static const char *__doc_fiction_detail_pi_locations =
+R"doc(This struct holds two boolean values indicating the allowed positions
+for PIs.)doc";
+
+static const char *__doc_fiction_detail_pi_locations_left = R"doc(Flag indicating if primary inputs (PIs) can be placed at the left.)doc";
+
+static const char *__doc_fiction_detail_pi_locations_top = R"doc(Flag indicating if primary inputs (PIs) can be placed at the top.)doc";
+
 static const char *__doc_fiction_detail_post_layout_optimization_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_post_layout_optimization_impl_plyt = R"doc(2DDWave-clocked Cartesian gate-level layout to optimize.)doc";
@@ -6581,6 +6609,36 @@ static const char *__doc_fiction_detail_search_direction_HORIZONTAL = R"doc(Sear
 
 static const char *__doc_fiction_detail_search_direction_VERTICAL = R"doc(Search from top to bottom.)doc";
 
+static const char *__doc_fiction_detail_search_space_graph =
+R"doc(A structure representing a search space graph.
+
+This struct encapsulates all the necessary data for managing a search
+space graph during the A*-based placement and routing algorithm. It
+holds the current vertex, network, nodes to be placed, and other
+relevant information.
+
+Template parameter ``Lyt``:
+    The layout type.
+
+Template parameter ``Ntk``:
+    The network type.)doc";
+
+static const char *__doc_fiction_detail_search_space_graph_cost_so_far = R"doc(The cost so far for reaching each vertex in the layout.)doc";
+
+static const char *__doc_fiction_detail_search_space_graph_current_vertex = R"doc(The current vertex in the search space graph.)doc";
+
+static const char *__doc_fiction_detail_search_space_graph_frontier = R"doc(Priority queue containing vertices of the search space graph.)doc";
+
+static const char *__doc_fiction_detail_search_space_graph_frontier_flag = R"doc(Flag indicating if this graph's frontier is active.)doc";
+
+static const char *__doc_fiction_detail_search_space_graph_network = R"doc(The network associated with this search space graph.)doc";
+
+static const char *__doc_fiction_detail_search_space_graph_num_expansions = R"doc(The maximum number of positions to be considered for expansions.)doc";
+
+static const char *__doc_fiction_detail_search_space_graph_pi_locs =
+R"doc(Flags indicating if primary inputs (PIs) can be placed at the top or
+left.)doc";
+
 static const char *__doc_fiction_detail_sweep_parameter_to_string =
 R"doc(Converts a sweep parameter to a string representation. This is used to
 write the parameter name to the CSV file.
@@ -6620,6 +6678,33 @@ Returns:
 static const char *__doc_fiction_detail_technology_mapping_impl_stats = R"doc(Technology mapping statistics.)doc";
 
 static const char *__doc_fiction_detail_technology_mapping_impl_technology_mapping_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_timeout_settings =
+R"doc(@struct TimeoutSettings A structure to encapsulate the timeout
+settings based on given parameters.
+
+This struct holds a single `timeout` value which is determined based
+on the provided optional timeout value and a boolean indicating if
+high effort is required.)doc";
+
+static const char *__doc_fiction_detail_timeout_settings_timeout = R"doc()doc";
+
+static const char *__doc_fiction_detail_timeout_settings_timeout_settings =
+R"doc(Constructs a TimeoutSettings object.
+
+This constructor initializes the `timeout` member. If `timeout_opt`
+has a value, it uses that value for the timeout. If `timeout_opt` does
+not have a value, it sets the timeout to 1000000 milliseconds (1000
+seconds) if `high_effort` is true, or to 10000 milliseconds (10
+seconds) if `high_effort` is false.
+
+Parameter ``timeout_opt``:
+    An optional unsigned value representing the desired timeout in
+    microseconds.
+
+Parameter ``high_effort``:
+    A boolean indicating whether a high effort (longer timeout) is
+    required.)doc";
 
 static const char *__doc_fiction_detail_to_hex =
 R"doc(Utility function to transform a Cartesian tile into a hexagonal one.
