@@ -3,7 +3,7 @@
 //
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/physical_design/graph_enhanced_layout_search.hpp>  // graph enhanced layout search algorithm
+#include <fiction/algorithms/physical_design/graph_oriented_layout_design.hpp>  // graph enhanced layout search algorithm
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/algorithms/verification/equivalence_checking.hpp>               // SAT-based equivalence checking
 #include <fiction/io/network_reader.hpp>                                          // read networks from files
@@ -40,7 +40,7 @@ int main()  // NOLINT
 
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint32_t, uint32_t,
                             uint64_t, uint64_t, double, std::string>
-        graph_enhanced_layout_search_exp{"graph_enhanced_layout_search_exp",
+        graph_oriented_layout_design_exp{"graph_oriented_layout_design_exp",
                                          "benchmark",
                                          "inputs",
                                          "outputs",
@@ -52,14 +52,14 @@ int main()  // NOLINT
                                          "wires",
                                          "critical path",
                                          "throughput",
-                                         "runtime graph_enhanced_layout_search (in sec)",
+                                         "runtime graph_oriented_layout_design (in sec)",
                                          "equivalent"};
 
-    fiction::graph_enhanced_layout_search_stats  graph_enhanced_layout_search_stats{};
-    fiction::graph_enhanced_layout_search_params graph_enhanced_layout_search_params{};
-    graph_enhanced_layout_search_params.high_effort  = true;
-    graph_enhanced_layout_search_params.verbose      = true;
-    graph_enhanced_layout_search_params.return_first = false;
+    fiction::graph_oriented_layout_design_stats  graph_oriented_layout_design_stats{};
+    fiction::graph_oriented_layout_design_params graph_oriented_layout_design_params{};
+    graph_oriented_layout_design_params.high_effort  = false;
+    graph_oriented_layout_design_params.verbose      = true;
+    graph_oriented_layout_design_params.return_first = false;
 
     static constexpr const uint64_t bench_select = fiction_experiments::trindade16 | fiction_experiments::fontes18;
 
@@ -67,8 +67,8 @@ int main()  // NOLINT
     {
         auto network = read_ntk<fiction::tec_nt>(benchmark);
 
-        auto gate_level_layout = fiction::graph_enhanced_layout_search<gate_lyt, fiction::tec_nt>(
-            network, graph_enhanced_layout_search_params, &graph_enhanced_layout_search_stats);
+        auto gate_level_layout = fiction::graph_oriented_layout_design<gate_lyt, fiction::tec_nt>(
+            network, graph_oriented_layout_design_params, &graph_oriented_layout_design_stats);
 
         //  compute critical path and throughput
         const auto cp_tp = fiction::critical_path_length_and_throughput(gate_level_layout);
@@ -89,13 +89,13 @@ int main()  // NOLINT
         const auto area   = width * height;
 
         // log results
-        graph_enhanced_layout_search_exp(
+        graph_oriented_layout_design_exp(
             benchmark, network.num_pis(), network.num_pos(), network.num_gates(), width, height, area,
             gate_level_layout.num_gates(), gate_level_layout.num_wires(), cp_tp.critical_path_length, cp_tp.throughput,
-            mockturtle::to_seconds(graph_enhanced_layout_search_stats.time_total), eq_result);
+            mockturtle::to_seconds(graph_oriented_layout_design_stats.time_total), eq_result);
 
-        graph_enhanced_layout_search_exp.save();
-        graph_enhanced_layout_search_exp.table();
+        graph_oriented_layout_design_exp.save();
+        graph_oriented_layout_design_exp.table();
     }
 
     return EXIT_SUCCESS;

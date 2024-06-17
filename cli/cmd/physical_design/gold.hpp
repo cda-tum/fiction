@@ -2,10 +2,10 @@
 // Created by simon on 12.06.2024.
 //
 
-#ifndef FICTION_CMD_GELS_HPP
-#define FICTION_CMD_GELS_HPP
+#ifndef FICTION_CMD_GOLD_HPP
+#define FICTION_CMD_GOLD_HPP
 
-#include <fiction/algorithms/physical_design/graph_enhanced_layout_search.hpp>
+#include <fiction/algorithms/physical_design/graph_oriented_layout_design.hpp>
 #include <fiction/traits.hpp>
 
 #include <alice/alice.hpp>
@@ -18,7 +18,7 @@ namespace alice
 /**
  *
  */
-class gels_command : public command
+class gold_command : public command
 {
   public:
     /**
@@ -26,7 +26,7 @@ class gels_command : public command
      *
      * @param e alice::environment that specifies stores etc.
      */
-    explicit gels_command(const environment::ptr& e) :
+    explicit gold_command(const environment::ptr& e) :
             command(e, "Performs scalable placement and routing of the current logic network in store. "
                        "An FCN layout that is not minimal will be found in reasonable runtime.")
     {
@@ -67,7 +67,7 @@ class gels_command : public command
             ps.verbose = true;
         }
 
-        graph_enhanced_layout_search<fiction::cart_gate_clk_lyt>();
+        graph_oriented_layout_design<fiction::cart_gate_clk_lyt>();
 
         ps = {};
     }
@@ -90,17 +90,17 @@ class gels_command : public command
     /**
      * Parameters.
      */
-    fiction::graph_enhanced_layout_search_params ps{};
+    fiction::graph_oriented_layout_design_params ps{};
     /**
      * Statistics.
      */
-    fiction::graph_enhanced_layout_search_stats st{};
+    fiction::graph_oriented_layout_design_stats st{};
 
     template <typename Lyt>
-    void graph_enhanced_layout_search()
+    void graph_oriented_layout_design()
     {
         const auto perform_physical_design = [this](auto&& ntk_ptr)
-        { return fiction::graph_enhanced_layout_search<Lyt>(*ntk_ptr, ps, &st); };
+        { return fiction::graph_oriented_layout_design<Lyt>(*ntk_ptr, ps, &st); };
 
         const auto& ntk_ptr = store<fiction::logic_network_t>().current();
 
@@ -117,7 +117,7 @@ class gels_command : public command
     }
 };
 
-ALICE_ADD_COMMAND(gels, "Physical Design")
+ALICE_ADD_COMMAND(gold, "Physical Design")
 
 }  // namespace alice
 

@@ -1,7 +1,7 @@
-.. _graph_enhanced_layout_search:
+.. _graph_oriented_layout_design:
 
-A* Physical Design
-------------------
+Graph-oriented Layout Design
+----------------------------
 
 Generates FCN gate-level layouts from logic network specifications by spanning a search space graph where each placement
 event can be represented as a search space vertex characterized by a partial layout at that instance. Edges between a
@@ -12,17 +12,17 @@ to a 3-graph. At the same time, the output layout will always be 2DDWave-clocked
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/physical_design/graph_enhanced_layout_search.hpp``
+        **Header:** ``fiction/algorithms/physical_design/graph_oriented_layout_design.hpp``
 
-        .. doxygenstruct:: fiction::graph_enhanced_layout_search_params
+        .. doxygenstruct:: fiction::graph_oriented_layout_design_params
            :members:
-        .. doxygenstruct:: fiction::graph_enhanced_layout_search_stats
+        .. doxygenstruct:: fiction::graph_oriented_layout_design_stats
            :members:
-        .. doxygenfunction:: fiction::graph_enhanced_layout_search
+        .. doxygenfunction:: fiction::graph_oriented_layout_design
 
     .. tab:: Python
-        .. autoclass:: mnt.pyfiction.graph_enhanced_layout_search_params
+        .. autoclass:: mnt.pyfiction.graph_oriented_layout_design_params
             :members:
-        .. autoclass:: mnt.pyfiction.graph_enhanced_layout_search_stats
+        .. autoclass:: mnt.pyfiction.graph_oriented_layout_design_stats
             :members:
-        .. autofunction:: mnt.pyfiction.graph_enhanced_layout_search
+        .. autofunction:: mnt.pyfiction.graph_oriented_layout_design

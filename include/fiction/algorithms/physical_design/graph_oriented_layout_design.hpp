@@ -1,8 +1,8 @@
 //
 // Created by Simon Hofmann on 30.01.24.
 //
-#ifndef FICTION_GRAPH_ENHANCED_LAYOUT_SEARCH_HPP
-#define FICTION_GRAPH_ENHANCED_LAYOUT_SEARCH_HPP
+#ifndef FICTION_GRAPH_ORIENTED_LAYOUT_DESIGN_HPP
+#define FICTION_GRAPH_ORIENTED_LAYOUT_DESIGN_HPP
 
 #include "fiction/algorithms/network_transformation/fanout_substitution.hpp"
 #include "fiction/algorithms/path_finding/a_star.hpp"
@@ -44,9 +44,9 @@ namespace fiction
 {
 
 /**
- * Parameters for the graph-enhanced layout search algorithm.
+ * Parameters for the graph-oriented layout design algorithm.
  */
-struct graph_enhanced_layout_search_params
+struct graph_oriented_layout_design_params
 {
     /**
      * High effort mode.
@@ -66,12 +66,12 @@ struct graph_enhanced_layout_search_params
     bool verbose = false;
 };
 /**
- * This struct stores statistics about the graph-enhanced layout search process.
+ * This struct stores statistics about the graph-oriented layout design process.
  */
-struct graph_enhanced_layout_search_stats
+struct graph_oriented_layout_design_stats
 {
     /**
-     * Runtime of the graph-enhanced layout search process.
+     * Runtime of the graph-oriented layout design process.
      */
     mockturtle::stopwatch<>::duration time_total{0};
     /**
@@ -234,7 +234,7 @@ struct pi_locations
  * A structure representing a search space graph.
  *
  * This struct encapsulates all the necessary data for managing a search space graph
- * during the A*-based placement and routing algorithm. It holds the current vertex,
+ * during the graph-oriented layout design process. It holds the current vertex,
  * network, nodes to be placed, and other relevant information.
  *
  * @tparam Lyt The layout type.
@@ -304,25 +304,25 @@ struct timeout_settings
     }
 };
 /**
- * Implementation of the A* P&R algorithm.
+ * Implementation of the graph-oriented layout design algorithm.
  * This class handles the initialization and execution of the algorithm.
  *
  * @tparam Plyt Cartesian gate-level layout type.
- * @tparam Ntk Network type.
+ * @tparam Pntk Network type.
  */
 template <typename Plyt, typename Pntk>
-class graph_enhanced_layout_search_impl
+class graph_oriented_layout_design_impl
 {
   public:
     /**
-     * Constructor for the graph-enhanced layout search algorithm.
+     * Constructor for the graph-oriented layout design algorithm.
      *
      * @param src The source network to be placed.
      * @param p The parameters for the graph-enhanced layout search algorithm.
      * @param st The statistics object to record execution details.
      */
-    graph_enhanced_layout_search_impl(const Pntk& src, const graph_enhanced_layout_search_params& p,
-                                      graph_enhanced_layout_search_stats& st) :
+    graph_oriented_layout_design_impl(const Pntk& src, const graph_oriented_layout_design_params& p,
+                                      graph_oriented_layout_design_stats& st) :
             ntk{mockturtle::names_view<Pntk>(src)},
             ps{p},
             pst{st},
@@ -333,7 +333,7 @@ class graph_enhanced_layout_search_impl
             num_search_space_graphs{ps.high_effort ? 12u : 2u}
     {}
     /**
-     * Executes the A* P&R algorithm and returns the best found layout.
+     * Executes the graph-oriented layout design algorithm and returns the best found layout.
      *
      * @return The best layout found by the algorithm.
      */
@@ -425,8 +425,8 @@ class graph_enhanced_layout_search_impl
 
   private:
     mockturtle::names_view<Pntk>                                ntk;
-    graph_enhanced_layout_search_params                         ps;
-    graph_enhanced_layout_search_stats&                         pst;
+    graph_oriented_layout_design_params                         ps;
+    graph_oriented_layout_design_stats&                         pst;
     bool                                                        high_effort;
     bool                                                        verbose;
     uint64_t                                                    timeout;
@@ -1335,7 +1335,7 @@ class graph_enhanced_layout_search_impl
  * sort of the logic network can be placed. Based on the position of this first node, a cost is assigned to each
  * expansion based on the position of the placed node. The vertex with the least cost, which is the smallest layout
  * w.r.t. area, is then chosen for the next expansion. This iterative process continues until a leaf node is found,
- * which is a layout with all nodes placed. The algorithm then continues to backtrack thourgh the search space graph to
+ * which is a layout with all nodes placed. The algorithm then continues to backtrack through the search space graph to
  * find other complete layouts with less cost.
  *
  * Only works for 2DDWave-clocked layouts.
@@ -1348,15 +1348,15 @@ class graph_enhanced_layout_search_impl
  * @return The resulting layout after applying the A* priority routing algorithm.
  */
 template <typename Lyt, typename Ntk>
-Lyt graph_enhanced_layout_search(Ntk& ntk, graph_enhanced_layout_search_params ps = {},
-                                 graph_enhanced_layout_search_stats* pst = nullptr)
+Lyt graph_oriented_layout_design(Ntk& ntk, graph_oriented_layout_design_params ps = {},
+                                 graph_oriented_layout_design_stats* pst = nullptr)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(mockturtle::is_network_type_v<Ntk>,
                   "Ntk is not a network type");  // Ntk is being converted to a topology_network anyway, therefore,
                                                  // this is the only relevant check here
-    graph_enhanced_layout_search_stats                  st{};
-    detail::graph_enhanced_layout_search_impl<Lyt, Ntk> p{ntk, ps, st};
+    graph_oriented_layout_design_stats                  st{};
+    detail::graph_oriented_layout_design_impl<Lyt, Ntk> p{ntk, ps, st};
 
     auto result = p.run();
 
@@ -1370,4 +1370,4 @@ Lyt graph_enhanced_layout_search(Ntk& ntk, graph_enhanced_layout_search_params p
 
 }  // namespace fiction
 
-#endif  // FICTION_GRAPH_ENHANCED_LAYOUT_SEARCH_HPP
+#endif  // FICTION_GRAPH_ORIENTED_LAYOUT_DESIGN_HPP
