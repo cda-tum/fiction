@@ -42,12 +42,12 @@ class virtual_pi_network : public technology_network
 
     auto size() const
     {
-        return static_cast<uint32_t>(_storage->nodes.size() - virtual_inputs.size());
+        return static_cast<uint32_t>(_storage->nodes.size());
     }
 
-    [[nodiscard]] auto size_virtual() const
+    [[nodiscard]] auto size_real() const
     {
-        return static_cast<uint32_t>(_storage->nodes.size());
+        return static_cast<uint32_t>(_storage->nodes.size() - virtual_inputs.size());
     }
 
     /*! \brief Creates a new virtual PI */
