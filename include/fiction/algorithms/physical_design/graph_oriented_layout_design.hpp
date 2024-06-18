@@ -12,11 +12,11 @@
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/layouts/obstruction_layout.hpp"
 #include "fiction/networks/technology_network.hpp"
-#include "fiction/networks/views/topo_view_ci_to_co.hpp"
-#include "fiction/networks/views/topo_view_co_to_ci.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 #include "fiction/utils/name_utils.hpp"
+#include "fiction/utils/network_utils.hpp"
+#include "fiction/utils/placement_utils.hpp"
 #include "fiction/utils/routing_utils.hpp"
 
 #include <fmt/core.h>
@@ -24,9 +24,11 @@
 #include <mockturtle/utils/node_map.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 #include <mockturtle/views/fanout_view.hpp>
+#include <mockturtle/views/immutable_view.hpp>
 #include <mockturtle/views/names_view.hpp>
 
 #include <array>
+#include <cassert>
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
@@ -195,13 +197,13 @@ using cost = unit_cost_functor<Lyt, uint8_t>;
 template <typename Lyt>
 const a_star_params A_STAR_PARAMS{true};
 /**
- * Alias for a dictionary that maps nodes from a mockturtle network to nodes in a layout.
+ * Alias for a dictionary that maps nodes from a mockturtle network to signals in a layout.
  *
  * @tparam Lyt Cartesian gate-level layout type.
  * @tparam Ntk Type of the mockturtle network.
  */
 template <typename Lyt, typename Ntk>
-using node_dict_type = std::unordered_map<mockturtle::node<Ntk>, mockturtle::node<Lyt>>;
+using node_dict_type = mockturtle::node_map<mockturtle::signal<Lyt>, Ntk>;
 /**
  * Alias for a priority queue containing vertices of the search space graph.
  *
@@ -304,6 +306,241 @@ struct timeout_settings
     }
 };
 /**
+ * @brief Custom view class derived from mockturtle::topo_view.
+ *
+ * This class inherits from mockturtle::topo_view and overrides certain functions
+ * to provide custom behavior. The topological order is generated from COs to CIs.
+ */
+template <class Ntk>
+class topo_view_co_to_ci : public mockturtle::immutable_view<Ntk>
+{
+  public:
+    using node   = typename Ntk::node;
+    using signal = typename Ntk::signal;
+
+    /*! \brief Default constructor.
+     *
+     * Constructs topological view on another network.
+     */
+    topo_view_co_to_ci(Ntk const& ntk) : mockturtle::immutable_view<Ntk>(ntk)
+    {
+        update_topo();
+    }
+    /*! \brief Reimplementation of `size`. */
+    auto size() const
+    {
+        return static_cast<uint32_t>(topo_order.size());
+    }
+    /*! \brief Reimplementation of `num_gates`. */
+    auto num_gates() const
+    {
+        uint32_t const offset = 1u + this->num_pis() +
+                                (this->get_node(this->get_constant(true)) != this->get_node(this->get_constant(false)));
+        return static_cast<uint32_t>(topo_order.size() - offset);
+    }
+    /*! \brief Reimplementation of `node_to_index`. */
+    uint32_t node_to_index(node const& n) const
+    {
+        return std::distance(std::begin(topo_order), std::find(std::begin(topo_order), std::end(topo_order), n));
+    }
+    /*! \brief Reimplementation of `index_to_node`. */
+    node index_to_node(uint32_t index) const
+    {
+        return topo_order.at(index);
+    }
+    /*! \brief Reimplementation of `foreach_node`. */
+    template <typename Fn>
+    void foreach_node(Fn&& fn) const
+    {
+        mockturtle::detail::foreach_element(topo_order.begin(), topo_order.end(), fn);
+    }
+    /*! \brief Reimplementation of `foreach_gate`. */
+    template <typename Fn>
+    void foreach_gate(Fn&& fn) const
+    {
+        uint32_t const offset = 1u + this->num_pis() +
+                                (this->get_node(this->get_constant(true)) != this->get_node(this->get_constant(false)));
+        mockturtle::detail::foreach_element(topo_order.begin() + offset, topo_order.end(), fn);
+    }
+    /*! \brief Implementation of `foreach_gate` in reverse topological order. */
+    template <typename Fn>
+    void foreach_gate_reverse(Fn&& fn) const
+    {
+        uint32_t const offset = 1u + this->num_pis() +
+                                (this->get_node(this->get_constant(true)) != this->get_node(this->get_constant(false)));
+        mockturtle::detail::foreach_element(topo_order.rbegin(), topo_order.rend() - offset, fn);
+    }
+    void update_topo()
+    {
+        this->incr_trav_id();
+        this->incr_trav_id();
+        topo_order.reserve(this->size());
+
+        /* constants and PIs */
+        const auto c0 = this->get_node(this->get_constant(false));
+        topo_order.push_back(c0);
+        this->set_visited(c0, this->trav_id());
+
+        if (const auto c1 = this->get_node(this->get_constant(true)); this->visited(c1) != this->trav_id())
+        {
+            topo_order.push_back(c1);
+            this->set_visited(c1, this->trav_id());
+        }
+
+        Ntk::foreach_co([this](auto f) { create_topo_rec(this->get_node(f)); });
+    }
+
+  private:
+    void create_topo_rec(node const& n)
+    {
+        /* is permanently marked? */
+        if (this->visited(n) == this->trav_id())
+        {
+            return;
+        }
+
+        /* ensure that the node is not temporarily marked */
+        assert(this->visited(n) != this->trav_id() - 1);
+
+        /* mark node temporarily */
+        this->set_visited(n, this->trav_id() - 1);
+
+        /* mark children */
+        this->foreach_fanin(n, [this](signal const& f) { create_topo_rec(this->get_node(f)); });
+
+        /* mark node n permanently */
+        this->set_visited(n, this->trav_id());
+
+        /* visit node */
+        topo_order.push_back(n);
+    }
+
+    std::vector<node> topo_order;
+};
+/**
+ * @brief Custom view class derived from mockturtle::topo_view.
+ *
+ * This class inherits from mockturtle::topo_view and overrides certain functions
+ * to provide custom behavior. The topological order is generated from CIs to COs.
+ */
+template <class Ntk>
+class topo_view_ci_to_co : public mockturtle::immutable_view<Ntk>
+{
+  public:
+    // Use the base class constructor
+    using node   = typename Ntk::node;
+    using signal = typename Ntk::signal;
+    /*! \brief Default constructor.
+     *
+     * Constructs topological view on another network.
+     */
+    topo_view_ci_to_co(Ntk const& ntk) : mockturtle::immutable_view<Ntk>(ntk)
+    {
+        update_topo();
+    }
+    /*! \brief Reimplementation of `size`. */
+    auto size() const
+    {
+        return static_cast<uint32_t>(topo_order.size());
+    }
+    /*! \brief Reimplementation of `num_gates`. */
+    auto num_gates() const
+    {
+        uint32_t const offset = 1u + this->num_pis() +
+                                (this->get_node(this->get_constant(true)) != this->get_node(this->get_constant(false)));
+        return static_cast<uint32_t>(topo_order.size() - offset);
+    }
+    /*! \brief Reimplementation of `node_to_index`. */
+    uint32_t node_to_index(node const& n) const
+    {
+        return std::distance(std::begin(topo_order), std::find(std::begin(topo_order), std::end(topo_order), n));
+    }
+    /*! \brief Reimplementation of `index_to_node`. */
+    node index_to_node(uint32_t index) const
+    {
+        return topo_order.at(index);
+    }
+    /*! \brief Reimplementation of `foreach_node`. */
+    template <typename Fn>
+    void foreach_node(Fn&& fn) const
+    {
+        mockturtle::detail::foreach_element(topo_order.begin(), topo_order.end(), fn);
+    }
+    /*! \brief Reimplementation of `foreach_gate`. */
+    template <typename Fn>
+    void foreach_gate(Fn&& fn) const
+    {
+        uint32_t const offset = 1u + this->num_pis() +
+                                (this->get_node(this->get_constant(true)) != this->get_node(this->get_constant(false)));
+        mockturtle::detail::foreach_element(topo_order.begin() + offset, topo_order.end(), fn);
+    }
+    /*! \brief Implementation of `foreach_gate` in reverse topological order. */
+    template <typename Fn>
+    void foreach_gate_reverse(Fn&& fn) const
+    {
+        uint32_t const offset = 1u + this->num_pis() +
+                                (this->get_node(this->get_constant(true)) != this->get_node(this->get_constant(false)));
+        mockturtle::detail::foreach_element(topo_order.rbegin(), topo_order.rend() - offset, fn);
+    }
+
+    void update_topo()
+    {
+        this->incr_trav_id();
+        this->incr_trav_id();
+        topo_order.reserve(this->size());
+
+        /* constants and PIs */
+        const auto c0 = this->get_node(this->get_constant(false));
+        topo_order.push_back(c0);
+        this->set_visited(c0, this->trav_id());
+
+        if (const auto c1 = this->get_node(this->get_constant(true)); this->visited(c1) != this->trav_id())
+        {
+            topo_order.push_back(c1);
+            this->set_visited(c1, this->trav_id());
+        }
+
+        Ntk::foreach_ci([this](auto n) { create_topo_rec(n); });
+    }
+
+  private:
+    void create_topo_rec(node const& n)
+    {
+        /* is permanently marked? */
+        if (this->visited(n) == this->trav_id())
+        {
+            return;
+        }
+
+        bool not_visited = false;
+
+        this->foreach_fanin(n,
+                            [this, &not_visited](signal const& f)
+                            {
+                                if (this->visited(this->get_node(f)) != this->trav_id())
+                                {
+                                    not_visited = true;
+                                };
+                            });
+
+        if (not_visited)
+        {
+            return;
+        }
+
+        /* mark node n permanently */
+        this->set_visited(n, this->trav_id());
+
+        /* visit node */
+        topo_order.push_back(n);
+
+        /* mark children */
+        this->foreach_fanout(n, [this](node const& n) { create_topo_rec(n); });
+    }
+
+    std::vector<node> topo_order;
+};
+/**
  * Implementation of the graph-oriented layout design algorithm.
  * This class handles the initialization and execution of the algorithm.
  *
@@ -371,17 +608,17 @@ class graph_oriented_layout_design_impl
                 if (search_space_graph.frontier_flag)
                 {
                     count++;
-                    auto vertex_neighbors = neighbors<Plyt, Lyt, fiction::tec_nt>(search_space_graph);
-                    if (vertex_neighbors.second)
+                    auto expansion = expand<Plyt, Lyt, fiction::tec_nt>(search_space_graph);
+                    if (expansion.second)
                     {
-                        best_lyt = *vertex_neighbors.second;
+                        best_lyt = *expansion.second;
                         restore_names(search_space_graph.network, best_lyt);
                         if (ps.return_first)
                         {
                             return best_lyt;
                         }
                     }
-                    for (const auto& [next, cost] : vertex_neighbors.first)
+                    for (const auto& [next, cost] : expansion.first)
                     {
                         if (search_space_graph.cost_so_far.find(next) == search_space_graph.cost_so_far.end() ||
                             cost < search_space_graph.cost_so_far[next])
@@ -424,23 +661,45 @@ class graph_oriented_layout_design_impl
     }
 
   private:
-    mockturtle::names_view<Pntk>                                ntk;
-    graph_oriented_layout_design_params                         ps;
-    graph_oriented_layout_design_stats&                         pst;
-    bool                                                        high_effort;
-    bool                                                        verbose;
-    uint64_t                                                    timeout;
+    mockturtle::names_view<Pntk>        ntk;
+    graph_oriented_layout_design_params ps;
+    graph_oriented_layout_design_stats& pst;
+    /**
+     * High effort mode.
+     */
+    bool high_effort;
+    /**
+     * Be verbose.
+     */
+    bool verbose;
+    /**
+     * Timeout limit (in ms).
+     */
+    uint64_t timeout;
+    /**
+     * Start time.
+     */
     std::chrono::time_point<std::chrono::high_resolution_clock> start;
-    uint64_t                                                    num_search_space_graphs;
-    // Count evaluated paths in the search space graphs
+    /**
+     * Number of search space graphs.
+     */
+    uint64_t num_search_space_graphs;
+    /**
+     * Count evaluated paths in the search space graphs.
+     */
     uint64_t count{0};
-    // Keep track of the maximum number of placed nodes
+    /**
+     * Keep track of the maximum number of placed nodes.
+     */
     uint64_t max_placed_nodes{0};
-    // Current best solution w.r.t. area
+    /**
+     * Current best solution w.r.t. area.
+     */
     uint64_t best_solution{100000};
-    // Flag indicating if initial solution was already found and other search space graphs should be pruned
+    /**
+     * Flag indicating if initial solution was already found and other search space graphs should be pruned.
+     */
     bool improv_mode{false};
-
     /**
      * Checks if there is a path between the source and destination tiles in the given layout.
      * Optionally returns the path if specified.
@@ -543,25 +802,26 @@ class graph_oriented_layout_design_impl
      * @tparam Lyt Cartesian gate-level layout type.
      * @tparam Ntk Network type.
      * @param layout The layout in which to find the possible positions for POs.
-     * @param node_dict A dictionary mapping nodes from the network to tiles in the layout.
-     * @param preceding_nodes A vector of nodes that precede the PO nodes.
+     * @param node2pos A dictionary mapping nodes from the network to signals in the layout.
+     * @param fc A vector of nodes that precede the PO nodes.
      * @return A vector of tiles representing the possible positions for POs.
      */
     template <typename Lyt, typename Ntk>
     [[nodiscard]] std::vector<fiction::tile<Lyt>>
-    get_possible_positions_pos(const Lyt& layout, node_dict_type<Lyt, Ntk>& node_dict,
-                               const std::vector<mockturtle::node<Ntk>>& preceding_nodes) noexcept
+    get_possible_positions_pos(const Lyt& layout, node_dict_type<Lyt, Ntk>& node2pos,
+                               const fanin_container<mockturtle::names_view<technology_network>>& fc) noexcept
     {
         std::vector<fiction::tile<Lyt>> possible_positions{};
-        const auto                      preceding_node_loc = layout.get_tile(node_dict[preceding_nodes[0]]);
-        const auto expansion_limit = std::max(layout.x() - preceding_node_loc.x, layout.y() - preceding_node_loc.y);
+        const auto&                     pre             = fc.fanin_nodes[0];
+        const auto                      pre_t           = static_cast<tile<Lyt>>(node2pos[pre]);
+        const auto                      expansion_limit = std::max(layout.x() - pre_t.x, layout.y() - pre_t.y);
         possible_positions.reserve(expansion_limit);
 
         // Check if path from previous tile to PO exists
         auto check_tile = [&](uint64_t x, uint64_t y)
         {
             const fiction::tile<Lyt> tile{x, y, 0};
-            if (check_path(layout, preceding_node_loc, tile, false, true, false).first)
+            if (check_path(layout, pre_t, tile, false, true, false).first)
             {
                 possible_positions.push_back(tile);
             }
@@ -569,13 +829,13 @@ class graph_oriented_layout_design_impl
 
         for (uint64_t k = 0; k <= expansion_limit; ++k)
         {
-            if (preceding_node_loc.x + k <= layout.x())
+            if (pre_t.x + k <= layout.x())
             {
-                check_tile(preceding_node_loc.x + k, layout.y());
+                check_tile(pre_t.x + k, layout.y());
             }
-            if (preceding_node_loc.y + k < layout.y())
+            if (pre_t.y + k < layout.y())
             {
-                check_tile(layout.x(), preceding_node_loc.y + k);
+                check_tile(layout.x(), pre_t.y + k);
             }
         }
 
@@ -588,27 +848,28 @@ class graph_oriented_layout_design_impl
      * @tparam Lyt Cartesian gate-level layout type.
      * @tparam Ntk Network type.
      * @param layout The layout in which to find the possible positions for a single fan-in node.
-     * @param node_dict A dictionary mapping nodes from the network to tiles in the layout.
+     * @param node2pos A dictionary mapping nodes from the network to signals in the layout.
      * @param num_expansions The maximum number of positions to be returned.
-     * @param preceding_nodes A vector of nodes that precede the single fanin node.
+     * @param fc A vector of nodes that precede the single fanin node.
      * @return A vector of tiles representing the possible positions for a single fan-in node.
      */
     template <typename Lyt, typename Ntk>
     [[nodiscard]] std::vector<fiction::tile<Lyt>>
-    get_possible_positions_single_fanin(Lyt& layout, node_dict_type<Lyt, Ntk>& node_dict, const uint64_t num_expansions,
-                                        const std::vector<mockturtle::node<Ntk>>& preceding_nodes) noexcept
+    get_possible_positions_single_fanin(Lyt& layout, node_dict_type<Lyt, Ntk>& node2pos, const uint64_t num_expansions,
+                                        const fanin_container<mockturtle::names_view<technology_network>>& fc) noexcept
     {
         std::vector<fiction::tile<Lyt>> possible_positions{};
         possible_positions.reserve(num_expansions);
-        uint64_t   count_expansions   = 0;
-        const auto preceding_node_loc = layout.get_tile(node_dict[preceding_nodes[0]]);
+        uint64_t    count_expansions = 0;
+        const auto& pre              = fc.fanin_nodes[0];
+        const auto  pre_t            = static_cast<tile<Lyt>>(node2pos[pre]);
 
         // Check if path from previous tile to new tile and from new tile to drain exist
         auto check_tile = [&](uint64_t x, uint64_t y)
         {
-            const fiction::tile<Lyt> new_pos{preceding_node_loc.x + x, preceding_node_loc.y + y, 0};
+            const fiction::tile<Lyt> new_pos{pre_t.x + x, pre_t.y + y, 0};
 
-            if (check_path(layout, preceding_node_loc, new_pos, false, true, false).first)
+            if (check_path(layout, pre_t, new_pos, false, true, false).first)
             {
                 layout.resize({layout.x() + 1, layout.y() + 1, 1});
                 const fiction::tile<Lyt> drain{layout.x(), layout.y(), 0};
@@ -628,7 +889,7 @@ class graph_oriented_layout_design_impl
             for (uint64_t x = 0; x < k + 1; ++x)
             {
                 const auto y = k - x;
-                if ((preceding_node_loc.y + y) <= layout.y() && (preceding_node_loc.x + x) <= layout.x())
+                if ((pre_t.y + y) <= layout.y() && (pre_t.x + x) <= layout.x())
                 {
                     check_tile(x, y);
                 }
@@ -647,32 +908,33 @@ class graph_oriented_layout_design_impl
      * @tparam Lyt Cartesian gate-level layout type.
      * @tparam Ntk Network type.
      * @param layout The layout in which to find the possible positions for a double fan-in node.
-     * @param node_dict A dictionary mapping nodes from the network to tiles in the layout.
+     * @param node2pos A dictionary mapping nodes from the network to signals in the layout.
      * @param num_expansions The maximum number of positions to be returned.
-     * @param preceding_nodes A vector of nodes that precede the double fanin node.
+     * @param fc A vector of nodes that precede the double fanin node.
      * @return A vector of tiles representing the possible positions for a double fan-in node.
      */
     template <typename Lyt, typename Ntk>
     [[nodiscard]] std::vector<fiction::tile<Lyt>>
-    get_possible_positions_double_fanin(Lyt& layout, node_dict_type<Lyt, Ntk>& node_dict, const uint64_t num_expansions,
-                                        const std::vector<mockturtle::node<Ntk>>& preceding_nodes) noexcept
+    get_possible_positions_double_fanin(Lyt& layout, node_dict_type<Lyt, Ntk>& node2pos, const uint64_t num_expansions,
+                                        const fanin_container<mockturtle::names_view<technology_network>>& fc) noexcept
     {
         std::vector<fiction::tile<Lyt>> possible_positions{};
         possible_positions.reserve(num_expansions);
-        uint64_t   count_expansions     = 0;
-        const auto preceding_node_1_loc = layout.get_tile(node_dict[preceding_nodes[0]]);
-        const auto preceding_node_2_loc = layout.get_tile(node_dict[preceding_nodes[1]]);
-        const auto min_x                = std::max(preceding_node_1_loc.x, preceding_node_2_loc.x) +
-                           (preceding_node_1_loc.x == preceding_node_2_loc.x ? 1 : 0);
-        const auto min_y = std::max(preceding_node_1_loc.y, preceding_node_2_loc.y) +
-                           (preceding_node_1_loc.y == preceding_node_2_loc.y ? 1 : 0);
+        uint64_t count_expansions = 0;
+
+        const auto &pre1 = fc.fanin_nodes[0], pre2 = fc.fanin_nodes[1];
+
+        auto pre1_t = static_cast<tile<Lyt>>(node2pos[pre1]), pre2_t = static_cast<tile<Lyt>>(node2pos[pre2]);
+
+        const auto min_x = std::max(pre1_t.x, pre2_t.x) + (pre1_t.x == pre2_t.x ? 1 : 0);
+        const auto min_y = std::max(pre1_t.y, pre2_t.y) + (pre1_t.y == pre2_t.y ? 1 : 0);
 
         // Check if path from previous tiles to new tile and from new tile to drain exist
         auto check_tile = [&](uint64_t x, uint64_t y)
         {
             const fiction::tile<Lyt> new_pos{min_x + x, min_y + y, 0};
 
-            const auto path_1 = check_path(layout, preceding_node_1_loc, new_pos, false, true, true);
+            const auto path_1 = check_path(layout, pre1_t, new_pos, false, true, true);
             if (path_1.first)
             {
                 for (const auto& el : *path_1.second)
@@ -680,7 +942,7 @@ class graph_oriented_layout_design_impl
                     layout.obstruct_coordinate(el);
                 }
 
-                if (check_path(layout, preceding_node_2_loc, new_pos, false, true, false).first)
+                if (check_path(layout, pre2_t, new_pos, false, true, false).first)
                 {
                     layout.resize({layout.x() + 1, layout.y() + 1, 1});
                     const fiction::tile<Lyt> drain{layout.x(), layout.y(), 0};
@@ -730,18 +992,15 @@ class graph_oriented_layout_design_impl
      * @param layout The layout in which to find the possible positions.
      * @param search_space_graph The search space graph.
      * @param current_node The current node index in the nodes_to_place vector.
-     * @param node_dict A dictionary mapping nodes from the network to tiles in the layout.
+     * @param node2pos A dictionary mapping nodes from the network to signals in the layout.
      * @return A vector of tiles representing the possible positions for the current node.
      */
     template <typename Lyt, typename Ntk>
     [[nodiscard]] std::vector<fiction::tile<Lyt>>
     get_possible_positions(Lyt& layout, const search_space_graph<Lyt>& search_space_graph, const uint64_t& current_node,
-                           node_dict_type<Lyt, Ntk>& node_dict) noexcept
+                           node_dict_type<Lyt, Ntk>& node2pos) noexcept
     {
-        std::vector<mockturtle::node<Ntk>> preceding_nodes{};
-        preceding_nodes.reserve(2);
-        search_space_graph.network.foreach_fanin(search_space_graph.nodes_to_place[current_node],
-                                                 [&preceding_nodes](const auto& f) { preceding_nodes.push_back(f); });
+        const auto fc = fanins(search_space_graph.network, search_space_graph.nodes_to_place[current_node]);
 
         if (search_space_graph.network.is_pi(search_space_graph.nodes_to_place[current_node]))
         {
@@ -749,19 +1008,18 @@ class graph_oriented_layout_design_impl
         }
         if (search_space_graph.network.is_po(search_space_graph.nodes_to_place[current_node]))
         {
-            return get_possible_positions_pos<Lyt, Ntk>(layout, node_dict, preceding_nodes);
+            return get_possible_positions_pos<Lyt, Ntk>(layout, node2pos, fc);
         }
-        if (preceding_nodes.size() == 1)
+        if (fc.fanin_nodes.size() == 1)
         {
-            return get_possible_positions_single_fanin<Lyt, Ntk>(layout, node_dict, search_space_graph.num_expansions,
-                                                                 preceding_nodes);
+            return get_possible_positions_single_fanin<Lyt, Ntk>(layout, node2pos, search_space_graph.num_expansions,
+                                                                 fc);
         }
-        if (preceding_nodes.size() == 2)
+        if (fc.fanin_nodes.size() == 2)
         {
-            return get_possible_positions_double_fanin<Lyt, Ntk>(layout, node_dict, search_space_graph.num_expansions,
-                                                                 preceding_nodes);
+            return get_possible_positions_double_fanin<Lyt, Ntk>(layout, node2pos, search_space_graph.num_expansions,
+                                                                 fc);
         }
-        return {};
     }
     /**
      * Validates the given layout based on the nodes in the network and their mappings in the node dictionary.
@@ -772,11 +1030,12 @@ class graph_oriented_layout_design_impl
      * @tparam Ntk Network type.
      * @param layout The layout to be validated.
      * @param network The network containing the nodes.
-     * @param node_dict A dictionary mapping nodes from the network to tiles in the layout.
+     * @param node2pos A dictionary mapping nodes from the network to signals in the layout.
      * @param placement_possible A boolean flag that will be set to false if placement is not possible.
      */
     template <typename Lyt, typename Ntk>
-    [[nodiscard]] bool valid_layout(Lyt& layout, const Ntk& network, node_dict_type<Lyt, Ntk>& node_dict) noexcept
+    [[nodiscard]] bool valid_layout(Lyt& layout, const Ntk& network, node_dict_type<Lyt, Ntk>& node2pos,
+                                    std::vector<mockturtle::node<Ntk>>& nodes_to_place, uint64_t& current_node) noexcept
     {
         auto check_tile = [&](const fiction::tile<Lyt>& tile)
         {
@@ -793,26 +1052,29 @@ class graph_oriented_layout_design_impl
                    (layout.is_empty_tile({tile.x, tile.y, 1}) && !layout.is_obstructed_coordinate({tile.x, tile.y, 1}));
         };
 
-        for (const auto& node : node_dict)
+        for (uint64_t node = 0; node < current_node; node++)
         {
-            const auto tile                 = layout.get_tile(node.second);
-            const bool no_fanout_and_not_po = !layout.is_po_tile(tile) && (layout.fanout_size(node.second) == 0);
-            const bool one_dangling_fanout  = (layout.fanout_size(node.second) == 1) && network.is_fanout(node.first);
+            const auto layout_tile = static_cast<fiction::tile<Lyt>>(node2pos[nodes_to_place[node]]);
+            const bool no_fanout_and_not_po =
+                !layout.is_po_tile(layout_tile) && (layout.fanout_size(layout.get_node(layout_tile)) == 0);
+            const bool one_dangling_fanout =
+                (layout.fanout_size(layout.get_node(layout_tile)) == 1) && network.is_fanout(nodes_to_place[node]);
 
             if (no_fanout_and_not_po || one_dangling_fanout)
             {
-                if (!check_tile(tile))
+                if (!check_tile(layout_tile))
                 {
                     return false;
                 }
             }
 
-            const bool two_dangling_fanouts = (layout.fanout_size(node.second) == 0) && network.is_fanout(node.first);
+            const bool two_dangling_fanouts =
+                (layout.fanout_size(layout.get_node(layout_tile)) == 0) && network.is_fanout(nodes_to_place[node]);
 
             if (two_dangling_fanouts)
             {
-                fiction::tile<Lyt> right_tile{tile.x + 1, tile.y, 0};
-                fiction::tile<Lyt> bottom_tile{tile.x, tile.y + 1, 0};
+                fiction::tile<Lyt> right_tile{layout_tile.x + 1, layout_tile.y, 0};
+                fiction::tile<Lyt> bottom_tile{layout_tile.x, layout_tile.y + 1, 0};
 
                 if (!(is_empty_tile_or_crossable(right_tile) && is_empty_tile_or_crossable(bottom_tile)))
                 {
@@ -824,118 +1086,27 @@ class graph_oriented_layout_design_impl
         return true;
     }
     /**
-     * Places a node with one input in the given layout based on the specified position and signal.
-     * It handles different types of nodes, such as inverters, primary outputs, and buffers.
-     *
-     * @tparam Lyt Cartesian gate-level layout type.
-     * @tparam Ntk Network type.
-     * @param layout The layout in which to place the node.
-     * @param network The network containing the nodes.
-     * @param position The tile representing the position for placement.
-     * @param signal The signal associated with the preceding node.
-     * @param current_node The current node index in the nodes_to_place vector.
-     * @param nodes_to_place A vector representing the nodes to be placed
-     * @param current_po The current primary output index.
-     */
-    template <typename Lyt, typename Ntk>
-    void place_single_input_node(Lyt& layout, const Ntk& network, const fiction::tile<Lyt> position,
-                                 const mockturtle::signal<Lyt> signal, const uint64_t current_node,
-                                 const std::vector<mockturtle::node<Ntk>>& nodes_to_place,
-                                 const uint64_t                            current_po) noexcept
-    {
-        if (network.is_inv(nodes_to_place[current_node]))
-        {
-            layout.create_not(signal, position);
-        }
-        else if (network.is_po(nodes_to_place[current_node]))
-        {
-            layout.create_po(signal, fmt::format("po{}", current_po), position);
-        }
-        else if (network.is_fanout(nodes_to_place[current_node]) || network.is_buf(nodes_to_place[current_node]))
-        {
-            layout.create_buf(signal, position);
-        }
-    }
-    /**
-     * Places a node with two inputs in the given layout based on the specified position and signals.
-     * It handles different types of nodes, such as AND, NAND, OR, NOR, XOR, and XNOR gates.
-     *
-     * @tparam Lyt Cartesian gate-level layout type.
-     * @tparam Ntk Network type.
-     * @param layout The layout in which to place the node.
-     * @param network The network containing the nodes.
-     * @param position The tile representing the position for placement.
-     * @param signal_1 The signal associated with the first preceding node.
-     * @param signal_2 The signal associated with the second preceding node.
-     * @param current_node The current node index in the nodes_to_place vector.
-     * @param nodes_to_place A vector representing the nodes to be placed.
-     */
-    template <typename Lyt, typename Ntk>
-    void place_double_input_node(Lyt& layout, const Ntk& network, const fiction::tile<Lyt> position,
-                                 const mockturtle::signal<Lyt> signal_1, const mockturtle::signal<Lyt> signal_2,
-                                 const uint64_t                      current_node,
-                                 std::vector<mockturtle::node<Ntk>>& nodes_to_place) noexcept
-    {
-        if (network.is_and(nodes_to_place[current_node]))
-        {
-            layout.create_and(signal_1, signal_2, position);
-        }
-        else if (network.is_nand(nodes_to_place[current_node]))
-        {
-            layout.create_nand(signal_1, signal_2, position);
-        }
-        else if (network.is_or(nodes_to_place[current_node]))
-        {
-            layout.create_or(signal_1, signal_2, position);
-        }
-        else if (network.is_nor(nodes_to_place[current_node]))
-        {
-            layout.create_nor(signal_1, signal_2, position);
-        }
-        else if (network.is_xor(nodes_to_place[current_node]))
-        {
-            layout.create_xor(signal_1, signal_2, position);
-        }
-        else if (network.is_xnor(nodes_to_place[current_node]))
-        {
-            layout.create_xnor(signal_1, signal_2, position);
-        }
-    }
-    /**
      * Places a node with a single input in the layout and routes it.
      *
      * @tparam Lyt Cartesian gate-level layout type.
      * @tparam Ntk Network type.
      * @param position The tile representing the position for placement.
      * @param layout The layout in which to place the node.
-     * @param network The network containing the nodes.
-     * @param current_node The current node index in the nodes_to_place vector.
-     * @param nodes_to_place A vector representing the nodes to be placed.
-     * @param current_po The current primary output index.
-     * @param node_dict A dictionary mapping nodes from the network to tiles in the layout.
-     * @param preceding_nodes A vector of nodes that precede the single fanin node.
+     * @param node2pos A dictionary mapping nodes from the network to signals in the layout.
+     * @param fc A vector of nodes that precede the single fanin node.
      */
     template <typename Lyt, typename Ntk>
-    void place_and_route_single_input_node(const fiction::tile<Lyt> position, Lyt& layout, const Ntk& network,
-                                           const uint64_t&                     current_node,
-                                           std::vector<mockturtle::node<Ntk>>& nodes_to_place, uint64_t& current_po,
-                                           node_dict_type<Lyt, Ntk>&            node_dict,
-                                           std::vector<mockturtle::signal<Lyt>> preceding_nodes) noexcept
+    void route_single_input_node(const fiction::tile<Lyt> position, Lyt& layout, node_dict_type<Lyt, Ntk>& node2pos,
+                                 const fanin_container<mockturtle::names_view<technology_network>>& fc) noexcept
     {
-        const auto preceding_node     = node_dict[preceding_nodes[0]];
-        const auto preceding_node_loc = layout.get_tile(preceding_node);
-        const auto signal             = layout.make_signal(preceding_node);
+        const auto& pre   = fc.fanin_nodes[0];
+        const auto  pre_t = static_cast<tile<Lyt>>(node2pos[pre]);
 
-        place_single_input_node(layout, network, position, signal, current_node, nodes_to_place, current_po);
         layout.move_node(layout.get_node(position), position, {});
 
-        const auto path = check_path(layout, preceding_node_loc, position, false, false, true);
+        const auto path = check_path(layout, pre_t, position, false, false, true);
 
         fiction::route_path(layout, *path.second);
-        if (network.is_po(nodes_to_place[current_node]))
-        {
-            current_po += 1;
-        }
 
         for (const auto& el : *path.second)
         {
@@ -949,38 +1120,27 @@ class graph_oriented_layout_design_impl
      * @tparam Ntk Network type.
      * @param position The tile representing the position for placement.
      * @param layout The layout in which to place the node.
-     * @param network The network containing the nodes.
-     * @param current_node The current node index in the nodes_to_place vector.
-     * @param nodes_to_place A vector representing the nodes to be placed.
-     * @param node_dict A dictionary mapping nodes from the network to tiles in the layout.
-     * @param preceding_nodes A vector of nodes that precede the double fanin node.
+     * @param node2pos A dictionary mapping nodes from the network to signals in the layout.
+     * @param fc A vector of nodes that precede the double fanin node.
      */
     template <typename Lyt, typename Ntk>
-    void place_and_route_double_input_node(const fiction::tile<Lyt> position, Lyt& layout, const Ntk& network,
-                                           const uint64_t&                      current_node,
-                                           std::vector<mockturtle::node<Ntk>>&  nodes_to_place,
-                                           node_dict_type<Lyt, Ntk>&            node_dict,
-                                           std::vector<mockturtle::signal<Lyt>> preceding_nodes) noexcept
+    void route_double_input_node(const fiction::tile<Lyt> position, Lyt& layout, node_dict_type<Lyt, Ntk>& node2pos,
+                                 const fanin_container<mockturtle::names_view<technology_network>>& fc) noexcept
     {
-        const auto preceding_node_1     = node_dict[preceding_nodes[0]];
-        const auto preceding_node_1_loc = layout.get_tile(preceding_node_1);
-        const auto signal_1             = layout.make_signal(preceding_node_1);
+        const auto &pre1 = fc.fanin_nodes[0], pre2 = fc.fanin_nodes[1];
 
-        const auto preceding_node_2     = node_dict[preceding_nodes[1]];
-        const auto preceding_node_2_loc = layout.get_tile(preceding_node_2);
-        const auto signal_2             = layout.make_signal(preceding_node_2);
+        auto pre1_t = static_cast<tile<Lyt>>(node2pos[pre1]), pre2_t = static_cast<tile<Lyt>>(node2pos[pre2]);
 
-        place_double_input_node(layout, network, position, signal_1, signal_2, current_node, nodes_to_place);
         layout.move_node(layout.get_node(position), position, {});
 
-        const auto path_1 = check_path(layout, preceding_node_1_loc, position, false, false, true);
+        const auto path_1 = check_path(layout, pre1_t, position, false, false, true);
 
         for (const auto& el : *path_1.second)
         {
             layout.obstruct_coordinate(el);
         }
 
-        const auto path_2 = check_path(layout, preceding_node_2_loc, position, false, false, true);
+        const auto path_2 = check_path(layout, pre2_t, position, false, false, true);
 
         for (const auto& el : *path_2.second)
         {
@@ -1001,46 +1161,58 @@ class graph_oriented_layout_design_impl
      * @param network The network containing the nodes.
      * @param current_node The current node index in the nodes_to_place vector.
      * @param nodes_to_place A vector representing the nodes to be placed.
-     * @param current_pi The current primary input index.
      * @param current_po The current primary output index.
-     * @param node_dict A dictionary mapping nodes from the network to tiles in the layout.
+     * @param node2pos A dictionary mapping nodes from the network to signals in the layout.
      * @param pi2node A mapping of primary input nodes to layout nodes.
      * @return A boolean indicating if a solution was found.
      * @throws std::runtime_error If the node type is invalid or not recognized.
      */
     template <typename Lyt, typename Ntk>
-    [[nodiscard]] bool place(const fiction::tile<Lyt> position, Lyt& layout, const Ntk& network, uint64_t& current_node,
-                             std::vector<mockturtle::node<Ntk>>& nodes_to_place, uint64_t& current_pi,
-                             uint64_t& current_po, node_dict_type<Lyt, Ntk>& node_dict,
-                             mockturtle::node_map<mockturtle::node<Lyt>, Ntk>& pi2node) noexcept
+    [[nodiscard]] bool place_and_route(const fiction::tile<Lyt> position, Lyt& layout, const Ntk& network,
+                                       uint64_t& current_node, std::vector<mockturtle::node<Ntk>>& nodes_to_place,
+                                       uint64_t& current_po, node_dict_type<Lyt, Ntk>& node2pos,
+                                       mockturtle::node_map<mockturtle::node<Lyt>, Ntk>& pi2node) noexcept
     {
         // Vector to store preceding nodes
-        std::vector<mockturtle::signal<Lyt>> preceding_nodes{};
-        preceding_nodes.reserve(2);
-        network.foreach_fanin(nodes_to_place[current_node],
-                              [&preceding_nodes](const auto& f) { preceding_nodes.push_back(f); });
+        const auto fc = fanins(network, nodes_to_place[current_node]);
 
-        // Switch statement to handle different numbers of preceding nodes
-        switch (preceding_nodes.size())
+        if (network.is_pi(nodes_to_place[current_node]))
         {
-            case 0:
-                // Place primary input node
-                layout.move_node(pi2node[nodes_to_place[current_node]], position);
-                current_pi += 1;
-                break;
-            case 1:
-                // Place single input node
-                place_and_route_single_input_node(position, layout, network, current_node, nodes_to_place, current_po,
-                                                  node_dict, preceding_nodes);
-                break;
-            case 2:
-                // Place double input node
-                place_and_route_double_input_node(position, layout, network, current_node, nodes_to_place, node_dict,
-                                                  preceding_nodes);
-                break;
+            // Place primary input node
+            node2pos[nodes_to_place[current_node]] = layout.move_node(pi2node[nodes_to_place[current_node]], position);
+        }
+        else if (fc.fanin_nodes.size() == 1)
+        {
+            const auto& pre = fc.fanin_nodes[0];
+            // Place single input node
+            if (network.is_po(nodes_to_place[current_node]))
+            {
+                node2pos[nodes_to_place[current_node]] =
+                    layout.create_po(node2pos[pre], fmt::format("po{}", current_po++), position);
+            }
+            else
+            {
+                const auto pre_t = static_cast<tile<Lyt>>(node2pos[pre]);
+                auto       a     = static_cast<mockturtle::signal<Lyt>>(pre_t);
+
+                node2pos[nodes_to_place[current_node]] =
+                    place(layout, position, network, nodes_to_place[current_node], a);
+            }
+
+            route_single_input_node(position, layout, node2pos, fc);
+        }
+        else
+        {
+            // Place double input node
+            const auto &pre1 = fc.fanin_nodes[0], pre2 = fc.fanin_nodes[1];
+            auto a1 = static_cast<mockturtle::signal<Lyt>>(pre1), a2 = static_cast<mockturtle::signal<Lyt>>(pre2);
+
+            node2pos[nodes_to_place[current_node]] =
+                place(layout, position, network, nodes_to_place[current_node], a1, a2, fc.constant_fanin);
+
+            route_double_input_node(position, layout, node2pos, fc);
         }
 
-        node_dict[nodes_to_place[current_node]] = layout.get_node(position);
         current_node += 1;
         layout.obstruct_coordinate({position.x, position.y, 0});
         layout.obstruct_coordinate({position.x, position.y, 1});
@@ -1092,9 +1264,8 @@ class graph_oriented_layout_design_impl
      */
     template <typename OrigLyt, typename Lyt, typename Ntk>
     [[nodiscard]] std::pair<std::vector<std::pair<coord_vec_type<Lyt>, double>>, std::optional<Lyt>>
-    neighbors(search_space_graph<Lyt>& search_space_graph) noexcept
+    expand(search_space_graph<Lyt>& search_space_graph) noexcept
     {
-        uint64_t current_pi   = 0;
         uint64_t current_po   = 0;
         uint64_t current_node = 0;
 
@@ -1103,8 +1274,7 @@ class graph_oriented_layout_design_impl
         const auto     max_layout_width  = search_space_graph.nodes_to_place.size();
         const auto     max_layout_height = search_space_graph.nodes_to_place.size();
 
-        node_dict_type<Lyt, Ntk> node_dict{};
-        node_dict.reserve(search_space_graph.nodes_to_place.size());
+        node_dict_type<Lyt, Ntk>                            node2pos{search_space_graph.network};
         std::vector<std::pair<coord_vec_type<Lyt>, double>> next_positions;
         next_positions.reserve(2 * search_space_graph.num_expansions);
 
@@ -1118,7 +1288,7 @@ class graph_oriented_layout_design_impl
 
         if (search_space_graph.current_vertex.empty())
         {
-            possible_positions = get_possible_positions<Lyt, Ntk>(layout, search_space_graph, current_node, node_dict);
+            possible_positions = get_possible_positions<Lyt, Ntk>(layout, search_space_graph, current_node, node2pos);
         }
 
         for (uint64_t idx = 0; idx < search_space_graph.current_vertex.size(); ++idx)
@@ -1126,8 +1296,8 @@ class graph_oriented_layout_design_impl
             const auto position = search_space_graph.current_vertex[idx];
 
             found_solution =
-                place<Lyt, Ntk>(position, layout, search_space_graph.network, current_node,
-                                search_space_graph.nodes_to_place, current_pi, current_po, node_dict, pi2node);
+                place_and_route<Lyt, Ntk>(position, layout, search_space_graph.network, current_node,
+                                          search_space_graph.nodes_to_place, current_po, node2pos, pi2node);
 
             uint64_t area = 0;
             if (improv_mode)
@@ -1168,12 +1338,13 @@ class graph_oriented_layout_design_impl
             // Check if it's the last position in the current vertex
             if (idx == (search_space_graph.current_vertex.size() - 1))
             {
-                if (!valid_layout<Lyt, Ntk>(layout, search_space_graph.network, node_dict))
+                if (!valid_layout<Lyt, Ntk>(layout, search_space_graph.network, node2pos,
+                                            search_space_graph.nodes_to_place, current_node))
                 {
                     return {{}, std::nullopt};
                 }
                 possible_positions =
-                    get_possible_positions<Lyt, Ntk>(layout, search_space_graph, current_node, node_dict);
+                    get_possible_positions<Lyt, Ntk>(layout, search_space_graph, current_node, node2pos);
             }
         }
 
@@ -1188,7 +1359,7 @@ class graph_oriented_layout_design_impl
             const double cost1 = static_cast<double>(((std::max(layout.x() - 1, position.x) + 1) *
                                                       (std::max(layout.y() - 1, position.y) + 1))) /
                                  static_cast<double>((max_layout_width * max_layout_height));
-            // Positions of last placed node
+            // Position of last placed node
             const double cost2 = static_cast<double>(((position.x + 1) * (position.y + 1))) /
                                  static_cast<double>((max_layout_width * max_layout_height));
 
@@ -1262,7 +1433,7 @@ class graph_oriented_layout_design_impl
         mockturtle::fanout_view network_substituted_breadth{
             fanout_substitution<mockturtle::names_view<fiction::technology_network>>(tec_ntk, params)};
 
-        fiction::topo_view_co_to_ci network_breadth_co_to_ci{network_substituted_breadth};
+        topo_view_co_to_ci network_breadth_co_to_ci{network_substituted_breadth};
 
         // Initialize search space graphs with networks
         search_space_graphs[0].network = network_breadth_co_to_ci;
@@ -1280,9 +1451,9 @@ class graph_oriented_layout_design_impl
             mockturtle::fanout_view network_substituted_depth{
                 fanout_substitution<mockturtle::names_view<fiction::technology_network>>(tec_ntk, params)};
 
-            fiction::topo_view_ci_to_co network_breadth_ci_to_co{network_substituted_breadth};
-            fiction::topo_view_co_to_ci network_depth_co_to_ci{network_substituted_depth};
-            fiction::topo_view_ci_to_co network_depth_ci_to_co{network_substituted_depth};
+            topo_view_ci_to_co network_breadth_ci_to_co{network_substituted_breadth};
+            topo_view_co_to_ci network_depth_co_to_ci{network_substituted_depth};
+            topo_view_ci_to_co network_depth_ci_to_co{network_substituted_depth};
 
             // Initialize search space graphs with networks
             search_space_graphs[2].network = network_breadth_co_to_ci;
