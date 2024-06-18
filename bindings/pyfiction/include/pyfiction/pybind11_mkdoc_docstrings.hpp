@@ -5361,9 +5361,9 @@ Template parameter ``Plyt``:
 Template parameter ``Pntk``:
     Network type.)doc";
 
-static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_best_solution = R"doc()doc";
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_best_solution = R"doc(Current best solution w.r.t. area.)doc";
 
-static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_count = R"doc()doc";
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_count = R"doc(Count evaluated paths in the search space graphs.)doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_graph_oriented_layout_design_impl =
 R"doc(Constructor for the graph-oriented layout design algorithm.
@@ -5377,15 +5377,17 @@ Parameter ``p``:
 Parameter ``st``:
     The statistics object to record execution details.)doc";
 
-static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_high_effort = R"doc()doc";
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_high_effort = R"doc(High effort mode.)doc";
 
-static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_improv_mode = R"doc()doc";
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_improv_mode =
+R"doc(Flag indicating if initial solution was already found and other search
+space graphs should be pruned.)doc";
 
-static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_max_placed_nodes = R"doc()doc";
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_max_placed_nodes = R"doc(Keep track of the maximum number of placed nodes.)doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_ntk = R"doc()doc";
 
-static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_num_search_space_graphs = R"doc()doc";
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_num_search_space_graphs = R"doc(Number of search space graphs.)doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_ps = R"doc()doc";
 
@@ -5398,11 +5400,11 @@ best found layout.
 Returns:
     The best layout found by the algorithm.)doc";
 
-static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_start = R"doc()doc";
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_start = R"doc(Start time.)doc";
 
-static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_timeout = R"doc()doc";
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_timeout = R"doc(Timeout limit (in ms).)doc";
 
-static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_verbose = R"doc()doc";
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_verbose = R"doc(Be verbose.)doc";
 
 static const char *__doc_fiction_detail_improve_gate_location =
 R"doc(Utility function that moves gates to new coordinates and checks if
@@ -6718,6 +6720,70 @@ Parameter ``cartesian_layout_height``:
 
 Returns:
     corresponding tile on the hexagonal grid.)doc";
+
+static const char *__doc_fiction_detail_topo_view_ci_to_co =
+R"doc(Custom view class derived from mockturtle::topo_view.
+
+This class inherits from mockturtle::topo_view and overrides certain
+functions to provide custom behavior. The topological order is
+generated from CIs to COs.)doc";
+
+static const char *__doc_fiction_detail_topo_view_ci_to_co_create_topo_rec = R"doc()doc";
+
+static const char *__doc_fiction_detail_topo_view_ci_to_co_foreach_gate = R"doc(! Reimplementation of `foreach_gate`. */)doc";
+
+static const char *__doc_fiction_detail_topo_view_ci_to_co_foreach_gate_reverse = R"doc(! Implementation of `foreach_gate` in reverse topological order. */)doc";
+
+static const char *__doc_fiction_detail_topo_view_ci_to_co_foreach_node = R"doc(! Reimplementation of `foreach_node`. */)doc";
+
+static const char *__doc_fiction_detail_topo_view_ci_to_co_index_to_node = R"doc(! Reimplementation of `index_to_node`. */)doc";
+
+static const char *__doc_fiction_detail_topo_view_ci_to_co_node_to_index = R"doc(! Reimplementation of `node_to_index`. */)doc";
+
+static const char *__doc_fiction_detail_topo_view_ci_to_co_num_gates = R"doc(! Reimplementation of `num_gates`. */)doc";
+
+static const char *__doc_fiction_detail_topo_view_ci_to_co_size = R"doc(! Reimplementation of `size`. */)doc";
+
+static const char *__doc_fiction_detail_topo_view_ci_to_co_topo_order = R"doc()doc";
+
+static const char *__doc_fiction_detail_topo_view_ci_to_co_topo_view_ci_to_co =
+R"doc(! Default constructor.
+
+Constructs topological view on another network.)doc";
+
+static const char *__doc_fiction_detail_topo_view_ci_to_co_update_topo = R"doc()doc";
+
+static const char *__doc_fiction_detail_topo_view_co_to_ci =
+R"doc(Custom view class derived from mockturtle::topo_view.
+
+This class inherits from mockturtle::topo_view and overrides certain
+functions to provide custom behavior. The topological order is
+generated from COs to CIs.)doc";
+
+static const char *__doc_fiction_detail_topo_view_co_to_ci_create_topo_rec = R"doc()doc";
+
+static const char *__doc_fiction_detail_topo_view_co_to_ci_foreach_gate = R"doc(! Reimplementation of `foreach_gate`. */)doc";
+
+static const char *__doc_fiction_detail_topo_view_co_to_ci_foreach_gate_reverse = R"doc(! Implementation of `foreach_gate` in reverse topological order. */)doc";
+
+static const char *__doc_fiction_detail_topo_view_co_to_ci_foreach_node = R"doc(! Reimplementation of `foreach_node`. */)doc";
+
+static const char *__doc_fiction_detail_topo_view_co_to_ci_index_to_node = R"doc(! Reimplementation of `index_to_node`. */)doc";
+
+static const char *__doc_fiction_detail_topo_view_co_to_ci_node_to_index = R"doc(! Reimplementation of `node_to_index`. */)doc";
+
+static const char *__doc_fiction_detail_topo_view_co_to_ci_num_gates = R"doc(! Reimplementation of `num_gates`. */)doc";
+
+static const char *__doc_fiction_detail_topo_view_co_to_ci_size = R"doc(! Reimplementation of `size`. */)doc";
+
+static const char *__doc_fiction_detail_topo_view_co_to_ci_topo_order = R"doc()doc";
+
+static const char *__doc_fiction_detail_topo_view_co_to_ci_topo_view_co_to_ci =
+R"doc(! Default constructor.
+
+Constructs topological view on another network.)doc";
+
+static const char *__doc_fiction_detail_topo_view_co_to_ci_update_topo = R"doc()doc";
 
 static const char *__doc_fiction_detail_update_to_delete_list =
 R"doc(Update the to-delete list based on a possible path in a
