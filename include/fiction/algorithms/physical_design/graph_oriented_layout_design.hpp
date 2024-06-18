@@ -1015,7 +1015,7 @@ class graph_oriented_layout_design_impl
             return get_possible_positions_single_fanin<Lyt, Ntk>(layout, node2pos, search_space_graph.num_expansions,
                                                                  fc);
         }
-        if (fc.fanin_nodes.size() == 2)
+        else
         {
             return get_possible_positions_double_fanin<Lyt, Ntk>(layout, node2pos, search_space_graph.num_expansions,
                                                                  fc);
@@ -1392,11 +1392,17 @@ class graph_oriented_layout_design_impl
                                                            {false, true},
                                                            {true, true}}};
 
-        for (uint64_t i = 0; i < search_space_graphs.size(); ++i)
+        auto pi_loc_it = pi_locs.begin();
+        for (auto& graph : search_space_graphs)
         {
-            search_space_graphs[i].pi_locs                                            = pi_locs[i];
-            search_space_graphs[i].cost_so_far[search_space_graphs[i].current_vertex] = 0;
-            search_space_graphs[i].num_expansions                                     = 4;
+            if (pi_loc_it != pi_locs.end())
+            {
+                graph.pi_locs = *pi_loc_it;
+                ++pi_loc_it;
+            }
+
+            graph.cost_so_far[graph.current_vertex] = 0;
+            graph.num_expansions                    = 4;
         }
     }
     /**
