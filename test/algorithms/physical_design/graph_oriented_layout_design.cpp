@@ -99,18 +99,31 @@ TEST_CASE("Different parameters", "[graph_oriented_layout_design]")
 
     graph_oriented_layout_design_params params{};
 
+    // Timeout and return first found layout
     params.timeout      = 100000;
     params.return_first = true;
     const auto layout1  = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
     check_eq(ntk, layout1);
 
+    // Verbose mode
     params.verbose     = true;
     const auto layout2 = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
     check_eq(ntk, layout2);
 
+    // High effort mode
     params.high_effort = true;
+    params.verbose     = false;
     const auto layout3 = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
     check_eq(ntk, layout3);
+
+    // Full search
+    params.return_first = false;
+    const auto layout4  = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
+    check_eq(ntk, layout4);
+
+    // Timeout limit reached
+    params.timeout     = 0;
+    const auto layout5 = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
 }
 
 TEST_CASE("Name conservation after graph-enhanced layout search", "[graph_oriented_layout_design]")
