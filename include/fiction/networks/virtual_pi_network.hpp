@@ -127,9 +127,9 @@ class virtual_pi_network : public technology_network
     void remove_virtual_input_nodes()
     {
         std::sort(virtual_inputs.begin(), virtual_inputs.end(), std::greater<uint64_t>());
-        for (uint64_t i : virtual_inputs) {
+        for (uint32_t i : virtual_inputs) {
             if(i < _storage->nodes.size()) {
-                uint64_t new_node = i;
+                uint64_t new_node = ( _storage->outputs.begin() + i )->index;
                 for (const auto& pair : map) {
                     if (pair.first == i) {
                         new_node = pair.second;
@@ -137,6 +137,11 @@ class virtual_pi_network : public technology_network
                     }
                 }
                 substitute_node(i, new_node);
+                // The outputs iterators also need to be adjusted with -1
+                for ( auto& output : _storage->outputs )
+                {
+                    --output.index;
+                }
                 _storage->nodes.erase(_storage->nodes.begin() + i);
             }
         }
@@ -147,7 +152,7 @@ class virtual_pi_network : public technology_network
     }
 
   protected:
-    std::vector<uint64_t>                      virtual_inputs;
+    std::vector<uint32_t>                      virtual_inputs;
     std::vector<std::pair<uint64_t, uint64_t>> map;
 }; /* color_view */
 
