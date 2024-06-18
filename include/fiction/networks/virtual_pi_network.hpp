@@ -61,14 +61,41 @@ class virtual_pi_network : public technology_network
         return index;
     }
 
-    [[nodiscard]] bool is_virtual_pi(node const& n) const
+    [[nodiscard]] bool is_pi(node const& n) const
+    {
+        return std::find(virtual_inputs.begin(), virtual_inputs.end(), n) != virtual_inputs.end() ||
+               std::find(_storage->inputs.begin(), _storage->inputs.end(), n) != _storage->inputs.end();
+    }
+
+    [[nodiscard]] bool is_pi_virtual(node const& n) const
     {
         return std::find(virtual_inputs.begin(), virtual_inputs.end(), n) != virtual_inputs.end();
     }
 
-    [[nodiscard]] bool is_virtual_ci(node const& n) const
+    [[nodiscard]] bool is_pi_real(node const& n) const
+    {
+        return std::find(_storage->inputs.begin(), _storage->inputs.end(), n) != _storage->inputs.end();
+    }
+
+    [[nodiscard]] bool is_ci(node const& n) const
+    {
+        return std::find(virtual_inputs.begin(), virtual_inputs.end(), n) != virtual_inputs.end() ||
+               std::find(_storage->inputs.begin(), _storage->inputs.end(), n) != _storage->inputs.end();
+    }
+
+    [[nodiscard]] bool is_ci_virtual(node const& n) const
     {
         return std::find(virtual_inputs.begin(), virtual_inputs.end(), n) != virtual_inputs.end();
+    }
+
+    [[nodiscard]] bool is_ci_real(node const& n) const
+    {
+        return std::find(_storage->inputs.begin(), _storage->inputs.end(), n) != _storage->inputs.end();
+    }
+
+    [[nodiscard]] auto num_cis() const
+    {
+        return static_cast<uint32_t>(_storage->inputs.size() + virtual_inputs.size());
     }
 
     [[nodiscard]] auto num_cis_virtual() const
@@ -76,19 +103,24 @@ class virtual_pi_network : public technology_network
         return static_cast<uint32_t>(virtual_inputs.size());
     }
 
+    [[nodiscard]] auto num_cis_real() const
+    {
+        return static_cast<uint32_t>(_storage->inputs.size());
+    }
+
+    [[nodiscard]] auto num_pis() const
+    {
+        return static_cast<uint32_t>(_storage->inputs.size() + virtual_inputs.size());
+    }
+
     [[nodiscard]] auto num_pis_virtual() const
     {
         return static_cast<uint32_t>(virtual_inputs.size());
     }
 
-    [[nodiscard]] auto num_cis_all() const
+    [[nodiscard]] auto num_pis_real() const
     {
-        return static_cast<uint32_t>(_storage->inputs.size() + virtual_inputs.size());
-    }
-
-    [[nodiscard]] auto num_pis_all() const
-    {
-        return static_cast<uint32_t>(_storage->inputs.size() + virtual_inputs.size());
+        return static_cast<uint32_t>(_storage->inputs.size());
     }
 
     [[nodiscard]] auto get_real_pi(const node& v_pi) const
@@ -101,11 +133,36 @@ class virtual_pi_network : public technology_network
         throw std::runtime_error("Error: node is not a virtual pi");
     }
 
-    // exclude virtual_inputs
+    template<typename Fn>
+    void foreach_pi( Fn&& fn ) const
+    {
+        mockturtle::detail::foreach_element(_storage->inputs.begin(), _storage->inputs.end(), fn);
+        mockturtle::detail::foreach_element(virtual_inputs.begin(), virtual_inputs.end(), fn);
+    }
+
+    template<typename Fn>
+    void foreach_pi_real( Fn&& fn ) const
+    {
+        mockturtle::detail::foreach_element( _storage->inputs.begin(), _storage->inputs.end(), fn );
+    }
+
     template <typename Fn>
     void foreach_pi_virtual(Fn&& fn) const
     {
         mockturtle::detail::foreach_element(virtual_inputs.begin(), virtual_inputs.end(), fn);
+    }
+
+    template<typename Fn>
+    void foreach_ci( Fn&& fn ) const
+    {
+        mockturtle::detail::foreach_element(_storage->inputs.begin(), _storage->inputs.end(), fn);
+        mockturtle::detail::foreach_element(virtual_inputs.begin(), virtual_inputs.end(), fn);
+    }
+
+    template<typename Fn>
+    void foreach_ci_real( Fn&& fn ) const
+    {
+        mockturtle::detail::foreach_element( _storage->inputs.begin(), _storage->inputs.end(), fn );
     }
 
     template <typename Fn>
