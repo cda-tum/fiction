@@ -12654,6 +12654,8 @@ static const char *__doc_fiction_post_layout_optimization_params_max_gate_reloca
 R"doc(Maximum number of relocations to try for each gate. Defaults to the
 number of tiles in the given layout if not specified.)doc";
 
+static const char *__doc_fiction_post_layout_optimization_params_optimize_pos_only = R"doc(Only optimize PO positions.)doc";
+
 static const char *__doc_fiction_post_layout_optimization_stats =
 R"doc(This struct stores statistics about the post-layout optimization
 process.)doc";
