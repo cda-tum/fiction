@@ -832,7 +832,7 @@ class post_layout_optimization_impl
                     {
                         if (const tile<Lyt> tile = layout.get_tile(node);
                             (layout.is_gate(node) && !layout.is_wire(node)) || layout.is_fanout(node) ||
-                            layout.is_pi_tile(tile))
+                            layout.is_pi_tile(tile) || layout.is_po_tile(tile))
                         {
                             layout.obstruct_coordinate({tile.x, tile.y, 1});
                             gate_tiles.emplace_back(tile);
