@@ -23,9 +23,8 @@ TEST_CASE("Copy network and size consistency", "[virtual-pi-view]")
     const auto f1 = tec.create_and(a, b);
 
     virtual_pi_network vpi{tec};
-    const auto c = vpi.create_virtual_pi(a);
-    const auto d = vpi.create_virtual_pi(b);
-
+    const auto         c = vpi.create_virtual_pi(a);
+    const auto         d = vpi.create_virtual_pi(b);
 
     const auto f2 = vpi.create_and(b, c);
     const auto f3 = vpi.create_or(a, d);
@@ -104,20 +103,69 @@ TEST_CASE("Rank View on virtual PIs", "[virtual-rank-view]")
     std::cout << "real tec num_gates: " << vpi.size() << std::endl;
     std::cout << "virt tec num_gates: " << vpi.size_real() << std::endl;
 
-    vpi.foreach_node([&](const auto& nd)
-                     {
-                         std::cout << "Nd:" << nd << "\n";
-                         vpi.foreach_fanin(nd, [&](const auto& fi)
-                                           {
-                                               std::cout << "Fis:" << fi << "\n";
-                                           });
-                         if (vpi.is_virtual_pi(nd)){
-                             std::cout << "Is virtual PI \n";
-                         }
-                     });
+    /*vpi.foreach_node(
+        [&](const auto& nd)
+        {
+            std::cout << "Nd:" << nd << "\n";
+            vpi.foreach_fanin(nd, [&](const auto& fi) { std::cout << "Fis:" << fi << "\n"; });
+            if (vpi.is_virtual_pi(nd))
+            {
+                std::cout << "Is virtual PI \n";
+            }
+        });*/
 
-    //vpi.remove_virtual_input_nodes();
+    // vpi.remove_virtual_input_nodes();
 
     mockturtle::rank_view vpi_r(vpi);
+   /* vpi_r.foreach_pi([&](const auto& nd) {
+                           std::cout << "Nd:" << nd << "\n";
+                           auto rnk = vpi_r.rank_position(nd);
+                           auto lvl = vpi_r.level(nd);
+                           std::cout << "Level: " << lvl << "\n";
+                           std::cout << "Rank: " << rnk << "\n";
+                       });*/
+    std::cout << "r pis: " <<vpi_r.num_pis_virtual() << "\n";
+    std::cout << "n pis: " <<vpi.num_pis_virtual() << "\n";
+    vpi.foreach_node(
+        [&](const auto& nd)
+        {
+            std::cout << "Out_vpi:" << nd << "\n";
+        });
+    vpi_r.foreach_node(
+        [&](const auto& nd)
+        {
+            std::cout << "Out_vpi_r:" << nd << "\n";
+        });
 
+    vpi_r.remove_virtual_input_nodes();
+
+    std::cout << "r pis: " <<vpi_r.num_pis_virtual() << "\n";
+    std::cout << "n pis: " <<vpi.num_pis_virtual() << "\n";
+
+    vpi.foreach_node(
+        [&](const auto& nd)
+        {
+            std::cout << "Out_vpi:" << nd << "\n";
+        });
+    vpi_r.foreach_node(
+        [&](const auto& nd)
+        {
+            std::cout << "Out_vpi_r:" << nd << "\n";
+        });
+
+    vpi.remove_virtual_input_nodes();
+
+    std::cout << "r pis: " <<vpi_r.num_pis_virtual() << "\n";
+    std::cout << "n pis: " <<vpi.num_pis_virtual() << "\n";
+
+    vpi.foreach_node(
+        [&](const auto& nd)
+        {
+            std::cout << "Out_vpi:" << nd << "\n";
+        });
+    vpi_r.foreach_node(
+        [&](const auto& nd)
+        {
+            std::cout << "Out_vpi_r:" << nd << "\n";
+        });
 }
