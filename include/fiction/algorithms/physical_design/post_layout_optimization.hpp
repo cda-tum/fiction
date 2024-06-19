@@ -801,6 +801,7 @@ class post_layout_optimization_impl
         const mockturtle::stopwatch stop{pst.time_total};
         pst.x_size_before             = plyt.x() + 1;
         pst.y_size_before             = plyt.y() + 1;
+
         uint64_t max_gate_relocations = ps.max_gate_relocations.value_or((plyt.x() + 1) * (plyt.y() + 1));
         bool     optimize_pos_only    = ps.optimize_pos_only;
 
