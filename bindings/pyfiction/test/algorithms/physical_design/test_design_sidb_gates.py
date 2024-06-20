@@ -6,24 +6,24 @@ from mnt.pyfiction import *
 class TestDesignSiDBGates(unittest.TestCase):
 
     def test_siqad_and_gate_skeleton_100(self):
-        layout = sidb_100_lattice((20, 20))
+        layout_100 = sidb_100_lattice((20, 20))
 
-        layout.assign_cell_type((0, 1), sidb_technology.cell_type.INPUT)
-        layout.assign_cell_type((2, 3), sidb_technology.cell_type.INPUT)
+        layout_100.assign_cell_type((0, 1), sidb_technology.cell_type.INPUT)
+        layout_100.assign_cell_type((2, 3), sidb_technology.cell_type.INPUT)
 
-        layout.assign_cell_type((20, 1), sidb_technology.cell_type.INPUT)
-        layout.assign_cell_type((18, 3), sidb_technology.cell_type.INPUT)
+        layout_100.assign_cell_type((20, 1), sidb_technology.cell_type.INPUT)
+        layout_100.assign_cell_type((18, 3), sidb_technology.cell_type.INPUT)
 
-        layout.assign_cell_type((4, 5), sidb_technology.cell_type.NORMAL)
-        layout.assign_cell_type((6, 7), sidb_technology.cell_type.NORMAL)
+        layout_100.assign_cell_type((4, 5), sidb_technology.cell_type.NORMAL)
+        layout_100.assign_cell_type((6, 7), sidb_technology.cell_type.NORMAL)
 
-        layout.assign_cell_type((14, 7), sidb_technology.cell_type.NORMAL)
-        layout.assign_cell_type((16, 5), sidb_technology.cell_type.NORMAL)
+        layout_100.assign_cell_type((14, 7), sidb_technology.cell_type.NORMAL)
+        layout_100.assign_cell_type((16, 5), sidb_technology.cell_type.NORMAL)
 
-        layout.assign_cell_type((10, 12), sidb_technology.cell_type.OUTPUT)
-        layout.assign_cell_type((10, 14), sidb_technology.cell_type.OUTPUT)
+        layout_100.assign_cell_type((10, 12), sidb_technology.cell_type.OUTPUT)
+        layout_100.assign_cell_type((10, 14), sidb_technology.cell_type.OUTPUT)
 
-        layout.assign_cell_type((10, 19), sidb_technology.cell_type.NORMAL)
+        layout_100.assign_cell_type((10, 19), sidb_technology.cell_type.NORMAL)
 
         params = design_sidb_gates_params()
         params.simulation_parameters.base = 2
