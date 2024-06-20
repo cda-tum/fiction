@@ -21,7 +21,6 @@
 #include <cassert>
 #include <cstdint>
 #include <cstdlib>
-#include <future>
 #include <mutex>
 #include <thread>
 #include <utility>
@@ -120,33 +119,41 @@ class design_sidb_gates_impl
             [this, &mutex_to_protect_designer_gate_layouts, &params_is_operational,
              &designed_gate_layouts](const auto& combination) noexcept
         {
-            if (!are_sidbs_too_close(combination))
+            auto layout_with_added_cells = skeleton_layout_with_canvas_sidbs(combination);
+            if (const auto [status, sim_calls] =
+                    is_operational(layout_with_added_cells, truth_table, params_is_operational);
+                status == operational_status::OPERATIONAL)
             {
-                auto layout_with_added_cells = skeleton_layout_with_canvas_sidbs(combination);
-                if (const auto [status, sim_calls] =
-                        is_operational(layout_with_added_cells, truth_table, params_is_operational);
-                    status == operational_status::OPERATIONAL)
-                {
-                    const std::lock_guard lock_vector{mutex_to_protect_designer_gate_layouts};  // Lock the mutex
-                    designed_gate_layouts.push_back(layout_with_added_cells);
-                }
+                const std::lock_guard lock_vector{mutex_to_protect_designer_gate_layouts};  // Lock the mutex
+                designed_gate_layouts.push_back(layout_with_added_cells);
             }
         };
 
-        std::vector<std::future<void>> futures{};
-        futures.reserve(all_combinations.size());
+        const std::size_t num_threads =
+            std::min(static_cast<std::size_t>(std::thread::hardware_concurrency()), all_combinations.size());
+        const std::size_t chunk_size = (all_combinations.size() + num_threads - 1) / num_threads;  // Ceiling division
 
-        // Start asynchronous tasks to process combinations in parallel
-        for (const auto& combination : all_combinations)
+        std::vector<std::thread> threads;
+        threads.reserve(num_threads);
+
+        for (std::size_t i = 0; i < num_threads; ++i)
         {
-            futures.emplace_back(
-                std::async(std::launch::async, add_combination_to_layout_and_check_operation, combination));
+            threads.emplace_back(
+                [i, chunk_size, &all_combinations, &add_combination_to_layout_and_check_operation]()
+                {
+                    std::size_t start_index = i * chunk_size;
+                    std::size_t end_index   = std::min(start_index + chunk_size, all_combinations.size());
+
+                    for (std::size_t j = start_index; j < end_index; ++j)
+                    {
+                        add_combination_to_layout_and_check_operation(all_combinations[j]);
+                    }
+                });
         }
 
-        // Wait for all tasks to finish
-        for (auto& future : futures)
+        for (auto& thread : threads)
         {
-            future.wait();
+            thread.join();
         }
 
         return designed_gate_layouts;
