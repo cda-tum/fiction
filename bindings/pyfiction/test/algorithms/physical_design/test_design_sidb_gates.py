@@ -38,7 +38,7 @@ class TestDesignSiDBGates(unittest.TestCase):
         self.assertEqual(params.canvas[0], (4, 8, 0))
         self.assertEqual(params.canvas[1], (14, 11))
 
-        designed_gates = design_sidb_gates(layout, [create_and_tt()], params)
+        designed_gates = design_sidb_gates(layout_100, [create_and_tt()], params)
 
         self.assertEqual(len(designed_gates), 23)
 
