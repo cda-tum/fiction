@@ -55,7 +55,9 @@ class TestQuicksim(unittest.TestCase):
         self.assertEqual(params.alpha, 0.7)
         self.assertEqual(params.simulation_parameters.mu_minus, -0.32)
 
-        result = quicksim(layout_111, params)
+        cds = charge_distribution_surface_100(layout_111)
+
+        result = quicksim(cds, params)
         #
         # self.assertEqual(result.algorithm_name, "QuickSim")
         #
