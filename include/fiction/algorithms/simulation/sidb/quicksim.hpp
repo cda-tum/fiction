@@ -42,7 +42,7 @@ struct quicksim_params
     /**
      * Number of threads to spawn. By default the number of threads is set to the number of available hardware threads.
      */
-    uint64_t number_threads{std::thread::hardware_concurrency()};
+    uint64_t number_threads{1};
 };
 
 /**
