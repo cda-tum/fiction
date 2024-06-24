@@ -670,8 +670,8 @@ static const char *__doc_fiction_bdl_pair =
 R"doc(A Binary-dot Logic (BDL) pair is a pair of SiDBs that are close to
 each other and, thus, most likely share a charge.
 
-Template parameter ``Lyt``:
-    SiDB cell-level layout type.)doc";
+Template parameter ``CellType``:
+    Cell type.)doc";
 
 static const char *__doc_fiction_bdl_pair_bdl_pair = R"doc(Standard constructor for empty BDL pairs.)doc";
 
@@ -3298,8 +3298,8 @@ Returns:
 static const char *__doc_fiction_design_sidb_gates_params =
 R"doc(This struct contains parameters and settings to design SiDB gates.
 
-Template parameter ``Cell``:
-    -level layout type.)doc";
+Template parameter ``CellType``:
+    Cell type.)doc";
 
 static const char *__doc_fiction_design_sidb_gates_params_canvas = R"doc(Canvas spanned by the northwest and southeast cell.)doc";
 
