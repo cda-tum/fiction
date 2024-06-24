@@ -365,42 +365,7 @@ class operational_domain_impl
 
         const auto step_point_samples = generate_random_step_points(samples);
 
-        // calculate the size of each slice
-        const auto slice_size = (step_point_samples.size() + num_threads - 1) / num_threads;
-
-        std::vector<std::thread> threads{};
-        threads.reserve(num_threads);
-
-        // launch threads, each with its own slice of random step points
-        for (auto i = 0ul; i < num_threads; ++i)
-        {
-            const auto start = i * slice_size;
-            const auto end   = std::min(start + slice_size, step_point_samples.size());
-
-            if (start >= end)
-            {
-                break;  // no more work to distribute
-            }
-
-            threads.emplace_back(
-                [this, start, end, &step_point_samples]
-                {
-                    for (auto it = step_point_samples.cbegin() + static_cast<int64_t>(start);
-                         it != step_point_samples.cbegin() + static_cast<int64_t>(end); ++it)
-                    {
-                        is_step_point_operational(*it);
-                    }
-                });
-        }
-
-        // wait for all threads to complete
-        for (auto& thread : threads)
-        {
-            if (thread.joinable())
-            {
-                thread.join();
-            }
-        }
+        simulate_operational_status_in_parallel(step_point_samples);
 
         log_stats();
 
@@ -422,9 +387,7 @@ class operational_domain_impl
 
         const auto step_point_samples = generate_random_step_points(samples);
 
-        // for each sample point in parallel
-        std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ step_point_samples.cbegin(), step_point_samples.cend(),
-                      [this](const auto& sp) { is_step_point_operational(sp); });
+        simulate_operational_status_in_parallel(step_point_samples);
 
         // a queue of (x, y) dimension step points to be evaluated
         std::queue<step_point> queue{};
@@ -889,6 +852,51 @@ class operational_domain_impl
         }
 
         return std::vector<step_point>(step_point_samples.cbegin(), step_point_samples.cend());
+    }
+    /**
+     * Simulates the operational status of the given points in parallel. It divides the work among multiple threads to
+     * speed up the computation.
+     *
+     * @param step_points A vector of step points for which the operational status is to be simulated.
+     */
+    void simulate_operational_status_in_parallel(const std::vector<step_point>& step_points)
+    {
+        // calculate the size of each slice
+        const auto slice_size = (step_points.size() + num_threads - 1) / num_threads;
+
+        std::vector<std::thread> threads{};
+        threads.reserve(num_threads);
+
+        // launch threads, each with its own slice of random step points
+        for (auto i = 0ul; i < num_threads; ++i)
+        {
+            const auto start = i * slice_size;
+            const auto end   = std::min(start + slice_size, step_points.size());
+
+            if (start >= end)
+            {
+                break;  // no more work to distribute
+            }
+
+            threads.emplace_back(
+                [this, start, end, &step_points]
+                {
+                    for (auto it = step_points.cbegin() + static_cast<int64_t>(start);
+                         it != step_points.cbegin() + static_cast<int64_t>(end); ++it)
+                    {
+                        is_step_point_operational(*it);
+                    }
+                });
+        }
+
+        // wait for all threads to complete
+        for (auto& thread : threads)
+        {
+            if (thread.joinable())
+            {
+                thread.join();
+            }
+        }
     }
     /**
      * Performs random sampling to find any operational parameter combination. This function is useful if a single
