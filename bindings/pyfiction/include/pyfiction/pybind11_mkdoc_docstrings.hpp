@@ -5773,15 +5773,15 @@ Returns:
     The (partial) operational domain of the layout.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_generate_random_step_points =
-R"doc(Generates (potentially repeating) random `step_points` in the stored
-parameter range. The number of generated points is exactly equal to
-`samples`.
+R"doc(Generates unique random `step_points` in the stored parameter range.
+The number of generated points is at most equal to `samples`.
 
 Parameter ``samples``:
-    Number of random `step_point`s to generate.
+    Maximum number of random `step_point`s to generate.
 
 Returns:
-    A set of random `step_point`s in the stored parameter range.)doc";
+    A vector of unique random `step_point`s in the stored parameter
+    range of size at most equal to `samples`.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_grid_search =
 R"doc(Performs a grid search over the specified parameter ranges with the
@@ -5850,6 +5850,8 @@ Returns:
 static const char *__doc_fiction_detail_operational_domain_impl_num_evaluated_parameter_combinations = R"doc(Number of evaluated parameter combinations.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_num_simulator_invocations = R"doc(Number of simulator invocations.)doc";
+
+static const char *__doc_fiction_detail_operational_domain_impl_num_threads = R"doc(Number of available hardware threads.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_num_x_steps =
 R"doc(Calculates the number of steps in the x dimension based on the
