@@ -319,16 +319,16 @@ class operational_domain_impl
             const auto start = i * x_slice_size;
             const auto end   = std::min(start + x_slice_size, x_indices.size());
 
-            // no more work to distribute
             if (start >= end)
             {
-                break;
+                break;  // no more work to distribute
             }
 
             threads.emplace_back(
                 [this, start, end]
                 {
-                    for (auto it = x_indices.begin() + start; it != x_indices.begin() + end; ++it)
+                    for (auto it = x_indices.cbegin() + static_cast<int64_t>(start);
+                         it != x_indices.cbegin() + static_cast<int64_t>(end); ++it)
                     {
                         const auto x = *it;
 
@@ -348,15 +348,6 @@ class operational_domain_impl
             }
         }
 
-        //        // for each x value in parallel
-        //        std::for_each(std::execution::par_unseq, x_indices.cbegin(), x_indices.cend(),
-        //                      [this](const auto x)
-        //                      {
-        //                          // for each y value in parallel
-        //                          std::for_each(std::execution::par_unseq, y_indices.cbegin(), y_indices.cend(),
-        //                                        [this, x](const auto y) { is_step_point_operational({x, y}); });
-        //                      });
-
         log_stats();
 
         return op_domain;
@@ -374,9 +365,42 @@ class operational_domain_impl
 
         const auto step_point_samples = generate_random_step_points(samples);
 
-        // for each sample point in parallel
-        std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ step_point_samples.cbegin(), step_point_samples.cend(),
-                      [this](const auto& sp) { is_step_point_operational(sp); });
+        // calculate the size of each slice
+        const auto slice_size = (step_point_samples.size() + num_threads - 1) / num_threads;
+
+        std::vector<std::thread> threads{};
+        threads.reserve(num_threads);
+
+        // launch threads, each with its own slice of random step points
+        for (auto i = 0ul; i < num_threads; ++i)
+        {
+            const auto start = i * slice_size;
+            const auto end   = std::min(start + slice_size, step_point_samples.size());
+
+            if (start >= end)
+            {
+                break;  // no more work to distribute
+            }
+
+            threads.emplace_back(
+                [this, start, end, &step_point_samples]
+                {
+                    for (auto it = step_point_samples.cbegin() + static_cast<int64_t>(start);
+                         it != step_point_samples.cbegin() + static_cast<int64_t>(end); ++it)
+                    {
+                        is_step_point_operational(*it);
+                    }
+                });
+        }
+
+        // wait for all threads to complete
+        for (auto& thread : threads)
+        {
+            if (thread.joinable())
+            {
+                thread.join();
+            }
+        }
 
         log_stats();
 
@@ -841,13 +865,13 @@ class operational_domain_impl
         return operational();
     }
     /**
-     * Generates (potentially repeating) random `step_points` in the stored parameter range. The number of generated
-     * points is exactly equal to `samples`.
+     * Generates unique random `step_points` in the stored parameter range. The number of generated points is at most
+     * equal to `samples`.
      *
-     * @param samples Number of random `step_point`s to generate.
-     * @return A set of random `step_point`s in the stored parameter range.
+     * @param samples Maximum number of random `step_point`s to generate.
+     * @return A vector of unique random `step_point`s in the stored parameter range of size at most equal to `samples`.
      */
-    [[nodiscard]] std::set<step_point> generate_random_step_points(const std::size_t samples) noexcept
+    [[nodiscard]] std::vector<step_point> generate_random_step_points(const std::size_t samples) noexcept
     {
         static std::mt19937_64 generator{std::random_device{}()};
 
@@ -864,7 +888,7 @@ class operational_domain_impl
             step_point_samples.insert(step_point{x_distribution(generator), y_distribution(generator)});
         }
 
-        return step_point_samples;
+        return std::vector<step_point>(step_point_samples.cbegin(), step_point_samples.cend());
     }
     /**
      * Performs random sampling to find any operational parameter combination. This function is useful if a single
