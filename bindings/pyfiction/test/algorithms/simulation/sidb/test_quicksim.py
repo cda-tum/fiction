@@ -6,12 +6,12 @@ import os
 class TestQuicksim(unittest.TestCase):
 
     # def test_perturber_and_sidb_pair(self):
-    #     layout = sidb_100_lattice((10, 10))
+         layout = sidb_100_lattice((10, 10))
     #     layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
     #     layout.assign_cell_type((4, 1), sidb_technology.cell_type.NORMAL)
     #     layout.assign_cell_type((6, 1), sidb_technology.cell_type.NORMAL)
     #
-    #     params = quicksim_params()
+         params = quicksim_params()
     #     params.simulation_parameters = sidb_simulation_parameters()
     #     params.iteration_steps = 80
     #     params.alpha = 0.7
@@ -26,9 +26,9 @@ class TestQuicksim(unittest.TestCase):
     #     self.assertEqual(params_one.alpha, 0.4)
     #     self.assertEqual(params_one.number_threads, 1)
     #
-    #     cds = charge_distribution_surface(layout)
+         cds = charge_distribution_surface(layout)
     #
-    #     result = quicksim(layout, params)
+         result = quicksim(layout, params)
     #
     #     self.assertEqual(result.algorithm_name, "QuickSim")
     #     self.assertLessEqual(len(result.charge_distributions), 80)
