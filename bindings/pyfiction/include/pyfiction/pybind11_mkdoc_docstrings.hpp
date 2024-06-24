@@ -485,18 +485,16 @@ static const char *__doc_fiction_bdl_input_iterator_current_input_index =
 R"doc(The current input index. There are :math:`2^n` possible input states
 for an :math:`n`-input BDL layout.)doc";
 
-static const char *__doc_fiction_bdl_input_iterator_get_number_of_inputs =
+static const char *__doc_fiction_bdl_input_iterator_input_pairs = R"doc(The detected input BDL pairs.)doc";
+
+static const char *__doc_fiction_bdl_input_iterator_layout = R"doc(The layout to iterate over.)doc";
+
+static const char *__doc_fiction_bdl_input_iterator_num_input_pairs =
 R"doc(Returns the total number of input BDL pairs of the given SiDB gate
 layout.
 
 Returns:
     The number of input BDL pairs.)doc";
-
-static const char *__doc_fiction_bdl_input_iterator_input_pairs = R"doc(The detected input BDL pairs.)doc";
-
-static const char *__doc_fiction_bdl_input_iterator_layout = R"doc(The layout to iterate over.)doc";
-
-static const char *__doc_fiction_bdl_input_iterator_num_inputs = R"doc(The amount of input BDL pairs.)doc";
 
 static const char *__doc_fiction_bdl_input_iterator_operator_add =
 R"doc(Addition operator. Computes the input state of the current iterator
