@@ -21,25 +21,24 @@ class TestQuicksim(unittest.TestCase):
         params_one = quicksim_params()
         params_one.iteration_steps = 50
         params_one.alpha = 0.4
-        #params_one.number_threads = 1
+
         self.assertEqual(params_one.iteration_steps, 50)
         self.assertEqual(params_one.alpha, 0.4)
 
-    #
         cds = charge_distribution_surface(layout)
-    #
+
         result = quicksim(layout, params)
 
         print("len: " + str(len(result.charge_distributions)))
-    #
-    #     self.assertEqual(result.algorithm_name, "QuickSim")
-    #     self.assertLessEqual(len(result.charge_distributions), 80)
-    #
-    #     groundstate = result.charge_distributions[0]
-    #
-    #     self.assertEqual(groundstate.get_charge_state((0, 1)), sidb_charge_state.NEGATIVE)
-    #     self.assertEqual(groundstate.get_charge_state((4, 1)), sidb_charge_state.NEUTRAL)
-    #     self.assertEqual(groundstate.get_charge_state((6, 1)), sidb_charge_state.NEGATIVE)
+
+        self.assertEqual(result.algorithm_name, "QuickSim")
+        self.assertLessEqual(len(result.charge_distributions), 80)
+
+        groundstate = result.charge_distributions[0]
+
+        self.assertEqual(groundstate.get_charge_state((0, 1)), sidb_charge_state.NEGATIVE)
+        self.assertEqual(groundstate.get_charge_state((4, 1)), sidb_charge_state.NEUTRAL)
+        self.assertEqual(groundstate.get_charge_state((6, 1)), sidb_charge_state.NEGATIVE)
     #
     def test_perturber_and_sidb_pair_111(self):
         layout_111 = sidb_111_lattice((4, 1))
@@ -57,20 +56,20 @@ class TestQuicksim(unittest.TestCase):
         self.assertEqual(params.alpha, 0.7)
         self.assertEqual(params.simulation_parameters.mu_minus, -0.32)
 
-        #cds = charge_distribution_surface_111(layout_111)
+        cds = charge_distribution_surface_111(layout_111)
 
-        #result = quicksim(cds, params)
-        #
-        # self.assertEqual(result.algorithm_name, "QuickSim")
-        #
-        # groundstate = determine_groundstate_from_simulation_results(result)
-        #
-        # self.assertEqual(len(groundstate), 1)
-        #
-        # self.assertEqual(groundstate[0].get_charge_state((0, 0)), sidb_charge_state.NEGATIVE)
-        # self.assertEqual(groundstate[0].get_charge_state((1, 0)), sidb_charge_state.NEUTRAL)
-        # self.assertEqual(groundstate[0].get_charge_state((2, 0)), sidb_charge_state.NEUTRAL)
-        # self.assertEqual(groundstate[0].get_charge_state((3, 0)), sidb_charge_state.NEGATIVE)
+        result = quicksim(cds, params)
+
+        self.assertEqual(result.algorithm_name, "QuickSim")
+
+        groundstate = determine_groundstate_from_simulation_results(result)
+
+        self.assertEqual(len(groundstate), 1)
+
+        self.assertEqual(groundstate[0].get_charge_state((0, 0)), sidb_charge_state.NEGATIVE)
+        self.assertEqual(groundstate[0].get_charge_state((1, 0)), sidb_charge_state.NEUTRAL)
+        self.assertEqual(groundstate[0].get_charge_state((2, 0)), sidb_charge_state.NEUTRAL)
+        self.assertEqual(groundstate[0].get_charge_state((3, 0)), sidb_charge_state.NEGATIVE)
 
 
 if __name__ == '__main__':

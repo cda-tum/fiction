@@ -126,7 +126,7 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
 
         charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
 
-        for (uint64_t l = 0ul; l < 1000; ++l)
+        for (uint64_t l = 0ul; l < 10; ++l)
         {
             for (uint64_t i = 0ul; i < charge_lyt.num_cells(); ++i)
             {
