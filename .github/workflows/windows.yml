@@ -98,6 +98,9 @@ jobs:
           -DFICTION_Z3=ON
           -DFICTION_WARNINGS_AS_ERRORS=OFF
           -DMOCKTURTLE_EXAMPLES=OFF
+          -DFICTION_ENABLE_SANITIZER_ADDRESS=ON
+          -DFICTION_ENABLE_SANITIZER_LEAK=ON
+          -DFICTION_ENABLE_SANITIZER_UNDEFINED=ON
 
       - name: Build (Debug)
         working-directory: ${{github.workspace}}\build_debug
