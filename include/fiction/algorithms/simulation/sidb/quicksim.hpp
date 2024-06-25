@@ -125,7 +125,7 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
         charge_lyt.update_after_charge_change();
 
         // If the number of threads is initially set to zero, the simulation is run with one thread.
-        const uint64_t num_threads = 1;
+        const uint64_t num_threads = std::max(ps.number_threads, uint64_t{1});
 
         // split the iterations among threads
         const auto iter_per_thread =
@@ -149,7 +149,6 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
                         for (uint64_t i = 0ul; i < charge_lyt.num_cells(); ++i)
                         {
                             {
-                                const std::lock_guard lock{mutex};
                                 if (std::find(negative_sidb_indices.cbegin(), negative_sidb_indices.cend(), i) !=
                                     negative_sidb_indices.cend())
                                 {
