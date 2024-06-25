@@ -378,6 +378,7 @@ class design_sidb_gates_impl
         return cells;
     }
 };
+
 }  // namespace detail
 
 /**

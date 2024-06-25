@@ -251,7 +251,7 @@ template <typename CellLyt, typename GateLibrary, typename GateLyt, typename Par
 {
     static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
     static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
-    // static_assert(has_cube_coord_v<CellLyt>, "CellLyt must be based on cube coordinates");
+    static_assert(has_cube_coord_v<CellLyt>, "CellLyt must be based on cube coordinates");
     static_assert(mockturtle::has_is_constant_v<GateLyt>, "GateLyt does not implement the is_constant function");
     static_assert(mockturtle::has_foreach_node_v<GateLyt>, "GateLyt does not implement the foreach_node function");
 
