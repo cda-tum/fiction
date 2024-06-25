@@ -124,83 +124,54 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
         charge_lyt.assign_all_charge_states(sidb_charge_state::NEUTRAL);
         charge_lyt.update_after_charge_change();
 
-        // If the number of threads is initially set to zero, the simulation is run with one thread.
-        const uint64_t num_threads = std::max(ps.number_threads, uint64_t{1});
+        charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
 
-        // split the iterations among threads
-        const auto iter_per_thread =
-            std::max(ps.iteration_steps / num_threads,
-                     uint64_t{1});  // If the number of set threads is greater than the number of iterations, the
-                                    // number of threads defines how many times QuickSim is repeated
-
-        std::vector<std::thread> threads{};
-        threads.reserve(num_threads);
-        std::mutex mutex{};  // used to control access to shared resources
-
-        for (uint64_t z = 0ul; z < num_threads; z++)
+        for (uint64_t l = 0ul; l < 1000; ++l)
         {
-            threads.emplace_back(
-                [&]
+            for (uint64_t i = 0ul; i < charge_lyt.num_cells(); ++i)
+            {
                 {
-                    charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
-
-                    for (uint64_t l = 0ul; l < iter_per_thread; ++l)
+                    if (std::find(negative_sidb_indices.cbegin(), negative_sidb_indices.cend(), i) !=
+                        negative_sidb_indices.cend())
                     {
-                        for (uint64_t i = 0ul; i < charge_lyt.num_cells(); ++i)
-                        {
-                            {
-                                const std::lock_guard lock{mutex};
-                                if (std::find(negative_sidb_indices.cbegin(), negative_sidb_indices.cend(), i) !=
-                                    negative_sidb_indices.cend())
-                                {
-                                    continue;
-                                }
-                            }
-
-                            std::vector<uint64_t> index_start{i};
-
-                            charge_lyt_copy.assign_all_charge_states(sidb_charge_state::NEUTRAL);
-
-                            for (const auto& index : negative_sidb_indices)
-                            {
-                                charge_lyt_copy.assign_charge_state_by_cell_index(static_cast<uint64_t>(index),
-                                                                                  sidb_charge_state::NEGATIVE);
-                                index_start.push_back(static_cast<uint64_t>(index));
-                            }
-
-                            charge_lyt_copy.assign_charge_state_by_cell_index(i, sidb_charge_state::NEGATIVE);
-                            charge_lyt_copy.update_after_charge_change();
-
-                            if (charge_lyt_copy.is_physically_valid())
-                            {
-                                const std::lock_guard lock{mutex};
-                                st.charge_distributions.push_back(charge_distribution_surface<Lyt>{charge_lyt_copy});
-                            }
-
-                            const auto upper_limit =
-                                std::min(static_cast<uint64_t>(static_cast<double>(charge_lyt_copy.num_cells()) / 1.5),
-                                         charge_lyt.num_cells() - negative_sidb_indices.size());
-
-                            for (uint64_t num = 0ul; num < upper_limit; num++)
-                            {
-                                charge_lyt_copy.adjacent_search(ps.alpha, index_start);
-                                charge_lyt_copy.validity_check();
-
-                                if (charge_lyt_copy.is_physically_valid())
-                                {
-                                    const std::lock_guard lock{mutex};
-                                    st.charge_distributions.push_back(
-                                        charge_distribution_surface<Lyt>{charge_lyt_copy});
-                                }
-                            }
-                        }
+                        continue;
                     }
-                });
-        }
+                }
 
-        for (auto& thread : threads)
-        {
-            thread.join();
+                std::vector<uint64_t> index_start{i};
+
+                charge_lyt_copy.assign_all_charge_states(sidb_charge_state::NEUTRAL);
+
+                for (const auto& index : negative_sidb_indices)
+                {
+                    charge_lyt_copy.assign_charge_state_by_cell_index(static_cast<uint64_t>(index),
+                                                                      sidb_charge_state::NEGATIVE);
+                    index_start.push_back(static_cast<uint64_t>(index));
+                }
+
+                charge_lyt_copy.assign_charge_state_by_cell_index(i, sidb_charge_state::NEGATIVE);
+                charge_lyt_copy.update_after_charge_change();
+
+                if (charge_lyt_copy.is_physically_valid())
+                {
+                    st.charge_distributions.push_back(charge_distribution_surface<Lyt>{charge_lyt_copy});
+                }
+
+                const auto upper_limit =
+                    std::min(static_cast<uint64_t>(static_cast<double>(charge_lyt_copy.num_cells()) / 1.5),
+                             charge_lyt.num_cells() - negative_sidb_indices.size());
+
+                for (uint64_t num = 0ul; num < upper_limit; num++)
+                {
+                    charge_lyt_copy.adjacent_search(ps.alpha, index_start);
+                    charge_lyt_copy.validity_check();
+
+                    if (charge_lyt_copy.is_physically_valid())
+                    {
+                        st.charge_distributions.push_back(charge_distribution_surface<Lyt>{charge_lyt_copy});
+                    }
+                }
+            }
         }
     }
 
