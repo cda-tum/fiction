@@ -6,29 +6,31 @@ import os
 class TestQuicksim(unittest.TestCase):
 
     def test_perturber_and_sidb_pair(self):
-         layout = sidb_100_lattice((10, 10))
-    #     layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
-    #     layout.assign_cell_type((4, 1), sidb_technology.cell_type.NORMAL)
-    #     layout.assign_cell_type((6, 1), sidb_technology.cell_type.NORMAL)
+        layout = sidb_100_lattice((10, 10))
+        layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
+        layout.assign_cell_type((4, 1), sidb_technology.cell_type.NORMAL)
+        layout.assign_cell_type((6, 1), sidb_technology.cell_type.NORMAL)
     #
-         params = quicksim_params()
-    #     params.simulation_parameters = sidb_simulation_parameters()
-    #     params.iteration_steps = 80
-    #     params.alpha = 0.7
-    #     self.assertEqual(params.iteration_steps, 80)
-    #     self.assertEqual(params.alpha, 0.7)
+        params = quicksim_params()
+        params.simulation_parameters = sidb_simulation_parameters()
+        params.iteration_steps = 80
+        params.alpha = 0.7
+        self.assertEqual(params.iteration_steps, 80)
+        self.assertEqual(params.alpha, 0.7)
+
+        params_one = quicksim_params()
+        params_one.iteration_steps = 50
+        params_one.alpha = 0.4
+        #params_one.number_threads = 1
+        self.assertEqual(params_one.iteration_steps, 50)
+        self.assertEqual(params_one.alpha, 0.4)
+
     #
-    #     params_one = quicksim_params()
-    #     params_one.iteration_steps = 50
-    #     params_one.alpha = 0.4
-    #     params_one.number_threads = 1
-    #     self.assertEqual(params_one.iteration_steps, 50)
-    #     self.assertEqual(params_one.alpha, 0.4)
-    #     self.assertEqual(params_one.number_threads, 1)
+        cds = charge_distribution_surface(layout)
     #
-         cds = charge_distribution_surface(layout)
-    #
-         result = quicksim(layout, params)
+        result = quicksim(layout, params)
+
+        print("len: " + str(len(result.charge_distributions)))
     #
     #     self.assertEqual(result.algorithm_name, "QuickSim")
     #     self.assertLessEqual(len(result.charge_distributions), 80)
