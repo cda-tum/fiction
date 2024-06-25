@@ -9,7 +9,6 @@
 
 #include "fiction/algorithms/iter/aspect_ratio_iterator.hpp"
 #include "fiction/algorithms/network_transformation/fanout_substitution.hpp"
-#include "fiction/io/print_layout.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/sidb_surface_analysis.hpp"
@@ -41,8 +40,10 @@
 #include <cassert>
 #include <chrono>
 #include <cstdint>
+#include <cstdlib>
 #include <functional>
 #include <future>
+#include <limits>
 #include <memory>
 #include <mutex>
 #include <optional>
@@ -1976,9 +1977,13 @@ class exact_impl
                                         {
                                             solver->add(!(get_tn(t, n)));
 
+                                            // clang-format off
+
                                             // same for the outgoing edges
-                                            foreach_outgoing_edge(network, n, [this, &t](const auto& e)
+                                            foreach_outgoing_edge(network, n,
+                                                                  [this, &t](const auto& e)
                                                                   { solver->add(!(get_te(t, e))); });
+                                            // clang-format on
                                         }
                                         // cannot be placed with too little distance to south-east corner
                                         if (layout.x() - t.x + layout.y() - t.y < il)
@@ -1987,10 +1992,15 @@ class exact_impl
                                             // following iterations
                                             check_point->assumptions.push_back(!(get_tn(t, n)));
 
+                                            // clang-format off
+
                                             // same for the incoming edges
                                             foreach_incoming_edge(
-                                                network, n, [this, &t](const auto& e)
+                                                network, n,
+                                                [this, &t](const auto& e)
                                                 { check_point->assumptions.push_back(!(get_te(t, e))); });
+
+                                            // clang-format on
                                         }
                                     });
                             }
