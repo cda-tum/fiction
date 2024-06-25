@@ -15,8 +15,8 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <future>
 #include <mutex>
-#include <thread>
 #include <vector>
 
 namespace fiction
@@ -77,6 +77,7 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
     st.charge_distributions.reserve(ps.iteration_steps);
 
     mockturtle::stopwatch<>::duration time_counter{};
+    std::mutex                        mutex{};
 
     // measure run time (artificial scope)
     {
@@ -133,14 +134,14 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
                      uint64_t{1});  // If the number of set threads is greater than the number of iterations, the
                                     // number of threads defines how many times QuickSim is repeated
 
-        std::vector<std::thread> threads{};
-        threads.reserve(num_threads);
-        std::mutex mutex{};  // used to control access to shared resources
+        std::vector<std::future<void>> futures;
+        futures.reserve(num_threads);
 
         for (uint64_t z = 0ul; z < num_threads; z++)
         {
-            threads.emplace_back(
-                [&]
+            futures.emplace_back(std::async(
+                std::launch::async,
+                [&st, &charge_lyt, negative_sidb_indices, iter_per_thread, ps, num_threads, &mutex]
                 {
                     charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
 
@@ -148,12 +149,10 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
                     {
                         for (uint64_t i = 0ul; i < charge_lyt.num_cells(); ++i)
                         {
+                            if (std::find(negative_sidb_indices.cbegin(), negative_sidb_indices.cend(), i) !=
+                                negative_sidb_indices.cend())
                             {
-                                if (std::find(negative_sidb_indices.cbegin(), negative_sidb_indices.cend(), i) !=
-                                    negative_sidb_indices.cend())
-                                {
-                                    continue;
-                                }
+                                continue;
                             }
 
                             std::vector<uint64_t> index_start{i};
@@ -172,7 +171,7 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
 
                             if (charge_lyt_copy.is_physically_valid())
                             {
-                                const std::lock_guard lock{mutex};
+                                const std::lock_guard<std::mutex> lock{mutex};
                                 st.charge_distributions.push_back(charge_distribution_surface<Lyt>{charge_lyt_copy});
                             }
 
@@ -187,19 +186,19 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
 
                                 if (charge_lyt_copy.is_physically_valid())
                                 {
-                                    const std::lock_guard lock{mutex};
+                                    const std::lock_guard<std::mutex> lock{mutex};
                                     st.charge_distributions.push_back(
                                         charge_distribution_surface<Lyt>{charge_lyt_copy});
                                 }
                             }
                         }
                     }
-                });
+                }));
         }
 
-        for (auto& thread : threads)
+        for (auto& future : futures)
         {
-            thread.join();
+            future.get();
         }
     }
 
