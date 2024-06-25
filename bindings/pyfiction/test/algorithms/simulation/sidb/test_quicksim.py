@@ -5,7 +5,7 @@ import os
 
 class TestQuicksim(unittest.TestCase):
 
-    # def test_perturber_and_sidb_pair(self):
+    def test_perturber_and_sidb_pair(self):
          layout = sidb_100_lattice((10, 10))
     #     layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
     #     layout.assign_cell_type((4, 1), sidb_technology.cell_type.NORMAL)
