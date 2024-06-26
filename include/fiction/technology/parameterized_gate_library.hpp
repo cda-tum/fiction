@@ -151,7 +151,7 @@ class parameterized_gate_library : public fcn_gate_library<sidb_technology, 60, 
     static fcn_gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t, const Params& parameters = Params{})
     {
         static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt must be a gate-level layout");
-        // static_assert(has_offset_ucoord_v<CellLyt>, "CellLyt must be based on offset coordinates");
+        static_assert(has_cube_coord_v<CellLyt>, "CellLyt must be based on cube coordinates");
 
         const auto n = lyt.get_node(t);
         const auto f = lyt.node_function(n);
@@ -539,7 +539,7 @@ class parameterized_gate_library : public fcn_gate_library<sidb_technology, 60, 
     template <typename Lyt>
     [[nodiscard]] static Lyt cell_list_to_cell_level_layout(const fcn_gate& cell_list) noexcept
     {
-        Lyt lyt{{std::numeric_limits<uint64_t>::max(), std::numeric_limits<uint64_t>::max()}};
+        Lyt lyt{};
 
         const auto all_cell =
             all_coordinates_in_spanned_area({0, 0, 0}, cell<Lyt>{gate_x_size() - 1, gate_y_size() - 1});
@@ -600,7 +600,6 @@ class parameterized_gate_library : public fcn_gate_library<sidb_technology, 60, 
         static_assert(is_cell_level_layout_v<CellLyt>, "Lyt is not a cell-level layout");
         static_assert(has_sidb_technology_v<CellLyt>, "Lyt is not an SiDB layout");
         static_assert(has_cube_coord_v<CellLyt>, "Lyt is not based on cube coordinates");
-        ;
 
         auto skeleton_with_defect = sidb_defect_surface{skeleton};
 
@@ -609,7 +608,6 @@ class parameterized_gate_library : public fcn_gate_library<sidb_technology, 60, 
             {
                 // all defects (charged) in a distance of influence_radius_charged_defects from the center are taken
                 // into account.
-                // const auto defect_in_cube = offset_to_cube_coord(cd.first);
                 if (sidb_nm_distance(CellLyt{}, center_cell, cd.first) < parameters.influence_radius_charged_defects)
                 {
                     const auto relative_cell = cd.first - absolute_cell;

@@ -135,8 +135,9 @@ class design_sidb_gates_impl
 
         auto all_combinations = determine_all_combinations_of_distributing_k_entities_on_n_positions(
             params.number_of_sidbs, static_cast<std::size_t>(all_sidbs_in_canvas.size()));
-        std::unordered_set<typename Lyt::coordinate> sidbs_affected_by_defects = {};
+        std::unordered_set<coordinate<Lyt>> sidbs_affected_by_defects = {};
 
+        // used to collect all SiDBs that are affected due to neutrally charged defects.
         if constexpr (has_get_sidb_defect_v<Lyt>)
         {
             sidbs_affected_by_defects = skeleton_layout.all_affected_sidbs(std::make_pair(0, 0));
@@ -156,6 +157,7 @@ class design_sidb_gates_impl
         {
             for (const auto& comb : combination)
             {
+                // if sidb are too close of the position are impossible due to closely placed neutrally charged defects.
                 if (!are_sidbs_too_close(cell_indices_to_cell_vector(comb), sidbs_affected_by_defects))
                 {
                     // canvas SiDBs are added to the skeleton

@@ -15,7 +15,6 @@
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/types.hpp"
 
 #include <cassert>
 #include <vector>

@@ -13,10 +13,10 @@
 #include "fiction/utils/hash.hpp"
 #include "fiction/utils/truth_table_utils.hpp"
 
-#include <fmt/format.h>
 #include <phmap.h>
 
-#include <vector>
+#include <stdexcept>
+#include <utility>
 
 namespace fiction
 {
