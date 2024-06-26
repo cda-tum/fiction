@@ -284,7 +284,7 @@ class bdl_input_iterator
     /**
      * The detected input BDL pairs.
      */
-    const std::vector<bdl_pair<Lyt>> input_pairs;
+    const std::vector<bdl_pair<cell<Lyt>>> input_pairs;
     /**
      * The amount of input BDL pairs.
      */

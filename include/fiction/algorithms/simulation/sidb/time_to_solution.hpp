@@ -93,8 +93,8 @@ struct time_to_solution_stats
  * @param ps Pointer to a struct where the results (time_to_solution, acc, single runtime) are stored.
  */
 template <typename Lyt>
-void time_to_solution(Lyt& lyt, const quicksim_params& quicksim_params, const time_to_solution_params& tts_params = {},
-                      time_to_solution_stats* ps = nullptr) noexcept
+void time_to_solution(const Lyt& lyt, const quicksim_params& quicksim_params,
+                      const time_to_solution_params& tts_params = {}, time_to_solution_stats* ps = nullptr) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
