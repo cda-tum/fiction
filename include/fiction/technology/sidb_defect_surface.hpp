@@ -212,7 +212,10 @@ class sidb_defect_surface<Lyt, false> : public Lyt
                 for (auto x = static_cast<int64_t>(c.x - horizontal_extent);
                      x <= static_cast<int64_t>(c.x + horizontal_extent); ++x)
                 {
-                    influenced_sidbs.insert({x, y, c.z});
+                    if (const auto affected = typename Lyt::coordinate{x, y, c.z}; Lyt::is_within_bounds(affected))
+                    {
+                        influenced_sidbs.insert(affected);
+                    }
                 }
             }
         }

@@ -7,7 +7,7 @@
 
 #include "fiction/algorithms/physical_design/design_sidb_gates.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
-#include "fiction/layouts/coordinates.hpp"
+#include "fiction/layouts/bounding_box.hpp"
 #include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/fcn_gate_library.hpp"
@@ -576,6 +576,7 @@ class parameterized_gate_library : public fcn_gate_library<sidb_technology, 60, 
                 counter += 1;
             }
         }
+
         return lyt;
     }
 
@@ -614,6 +615,10 @@ class parameterized_gate_library : public fcn_gate_library<sidb_technology, 60, 
                     skeleton_with_defect.assign_sidb_defect(relative_cell, cd.second);
                 }
             });
+
+        const auto bb = bounding_box_2d(skeleton_with_defect);
+        skeleton_with_defect.resize(bb.get_max());
+
         return skeleton_with_defect;
     }
 
