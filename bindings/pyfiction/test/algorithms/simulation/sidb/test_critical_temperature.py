@@ -61,7 +61,7 @@ class TestCriticalTemperature(unittest.TestCase):
 
     def test_bestagon_inv(self):
         layout = read_sqd_layout_100(dir_path + "/../../../resources/hex_11_inputsdbp_inv_straight_v0_manual.sqd",
-                                 "inverter_input_0")
+                                     "inverter_input_0")
 
         params = critical_temperature_params()
         params.engine = simulation_engine.APPROXIMATE
@@ -71,14 +71,14 @@ class TestCriticalTemperature(unittest.TestCase):
         cds = charge_distribution_surface_100(layout)
         spec = [create_not_tt()]
 
-        # self.assertLessEqual(critical_temperature_gate_based(cds, spec, params, stats), 400)
-        #
-        # self.assertEqual(stats.algorithm_name, "QuickSim")
-        # self.assertGreater(stats.num_valid_lyt, 1)
+        self.assertLessEqual(critical_temperature_gate_based(cds, spec, params, stats), 400)
+
+        self.assertEqual(stats.algorithm_name, "QuickSim")
+        self.assertGreater(stats.num_valid_lyt, 1)
 
     def test_bestagon_inv_with_different_mu(self):
         layout = read_sqd_layout_100(dir_path + "/../../../resources/hex_11_inputsdbp_inv_straight_v0_manual.sqd",
-                                 "inverter_input_0")
+                                     "inverter_input_0")
 
         params = critical_temperature_params()
         params.simulation_parameters.base = 2
