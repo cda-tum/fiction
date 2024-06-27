@@ -14,37 +14,35 @@
 #include <fiction/types.hpp>
 #include <fiction/utils/truth_table_utils.hpp>
 
+#include <mockturtle/utils/stopwatch.hpp>
+
 #include <optional>
 #include <vector>
 
 using namespace fiction;
 
-TEST_CASE("Structured binding support for parameter_points", "[operational-domain]")
-{
-    auto param_point = operational_domain::parameter_point{1.0, 2.0};
-
-    CHECK(param_point.x == 1.0);
-    CHECK(param_point.y == 2.0);
-
-    const auto& [x, y] = param_point;
-
-    CHECK(x == 1.0);
-    CHECK(y == 2.0);
-}
-
 void check_op_domain_params_and_operational_status(const operational_domain&                op_domain,
                                                    const operational_domain_params&         params,
                                                    const std::optional<operational_status>& status) noexcept
 {
-    CHECK(op_domain.x_dimension == params.x_dimension);
-    CHECK(op_domain.y_dimension == params.y_dimension);
+    REQUIRE(params.sweep_dimensions.size() == op_domain.dimensions.size());
+
+    for (auto d = 0u; d < params.sweep_dimensions.size(); ++d)
+    {
+        CHECK(op_domain.dimensions[d] == params.sweep_dimensions[d].dimension);
+    }
 
     for (const auto& [coord, op_value] : op_domain.operational_values)
     {
-        CHECK(coord.x - params.x_min > -physical_constants::POP_STABILITY_ERR);
-        CHECK(params.x_max - coord.x > -physical_constants::POP_STABILITY_ERR);
-        CHECK(coord.y - params.y_min > -physical_constants::POP_STABILITY_ERR);
-        CHECK(params.y_max - coord.y > -physical_constants::POP_STABILITY_ERR);
+        for (auto d = 0u; d < params.sweep_dimensions.size(); ++d)
+        {
+            const auto& sweep_param = params.sweep_dimensions[d];
+            const auto& coord_value = coord.parameters[d];
+
+            CHECK(sweep_param.min <= coord_value);
+            CHECK(sweep_param.max >= coord_value);
+            CHECK(sweep_param.step > 0.0);
+        }
 
         if (status)
         {
@@ -81,20 +79,22 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
     operational_domain_params op_domain_params{};
     op_domain_params.simulation_parameters = sim_params;
-    op_domain_params.x_dimension           = operational_domain::sweep_parameter::EPSILON_R;
-    op_domain_params.y_dimension           = operational_domain::sweep_parameter::LAMBDA_TF;
+    op_domain_params.sweep_dimensions      = {{operational_domain::sweep_parameter::EPSILON_R},
+                                              {operational_domain::sweep_parameter::LAMBDA_TF}};
 
     operational_domain_stats op_domain_stats{};
 
     SECTION("operational area, only one parameter point")
     {
-        op_domain_params.x_min  = 5.5;
-        op_domain_params.x_max  = 5.5;
-        op_domain_params.x_step = 0.1;
+        // set x-dimension
+        op_domain_params.sweep_dimensions[0].min  = 5.5;
+        op_domain_params.sweep_dimensions[0].max  = 5.5;
+        op_domain_params.sweep_dimensions[0].step = 0.1;
 
-        op_domain_params.y_min  = 5.0;
-        op_domain_params.y_max  = 5.0;
-        op_domain_params.y_step = 0.1;
+        // set y-dimension
+        op_domain_params.sweep_dimensions[1].min  = 5.0;
+        op_domain_params.sweep_dimensions[1].max  = 5.0;
+        op_domain_params.sweep_dimensions[1].step = 0.1;
 
         SECTION("grid_search")
         {
@@ -169,13 +169,15 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
     SECTION("operational area, same number of steps in x- and y-direction")
     {
-        op_domain_params.x_min  = 5.1;
-        op_domain_params.x_max  = 6.0;
-        op_domain_params.x_step = 0.1;
+        // set x-dimension
+        op_domain_params.sweep_dimensions[0].min  = 5.1;
+        op_domain_params.sweep_dimensions[0].max  = 6.0;
+        op_domain_params.sweep_dimensions[0].step = 0.1;
 
-        op_domain_params.y_min  = 4.5;
-        op_domain_params.y_max  = 5.4;
-        op_domain_params.y_step = 0.1;
+        // set y-dimension
+        op_domain_params.sweep_dimensions[1].min  = 4.5;
+        op_domain_params.sweep_dimensions[1].max  = 5.4;
+        op_domain_params.sweep_dimensions[1].step = 0.1;
 
         SECTION("grid_search")
         {
@@ -250,13 +252,15 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
     SECTION("operational area, different number of steps in x- and y-direction")
     {
-        op_domain_params.x_min  = 5.1;
-        op_domain_params.x_max  = 6.0;
-        op_domain_params.x_step = 0.1;
+        // set x-dimension
+        op_domain_params.sweep_dimensions[0].min  = 5.1;
+        op_domain_params.sweep_dimensions[0].max  = 6.0;
+        op_domain_params.sweep_dimensions[0].step = 0.1;
 
-        op_domain_params.y_min  = 4.5;
-        op_domain_params.y_max  = 4.9;
-        op_domain_params.y_step = 0.1;
+        // set y-dimension
+        op_domain_params.sweep_dimensions[1].min  = 4.5;
+        op_domain_params.sweep_dimensions[1].max  = 4.9;
+        op_domain_params.sweep_dimensions[1].step = 0.1;
 
         SECTION("grid_search")
         {
@@ -332,13 +336,15 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
     SECTION("non-operational area")
     {
-        op_domain_params.x_min  = 2.5;
-        op_domain_params.x_max  = 3.4;
-        op_domain_params.x_step = 0.1;
+        // set x-dimension
+        op_domain_params.sweep_dimensions[0].min  = 2.5;
+        op_domain_params.sweep_dimensions[0].max  = 3.4;
+        op_domain_params.sweep_dimensions[0].step = 0.1;
 
-        op_domain_params.y_min  = 4.5;
-        op_domain_params.y_max  = 5.4;
-        op_domain_params.y_step = 0.1;
+        // set y-dimension
+        op_domain_params.sweep_dimensions[1].min  = 4.5;
+        op_domain_params.sweep_dimensions[1].max  = 5.4;
+        op_domain_params.sweep_dimensions[1].step = 0.1;
 
         SECTION("grid_search")
         {
@@ -415,13 +421,15 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
     }
     SECTION("floating-point error")
     {
-        op_domain_params.x_min  = 2.5;
-        op_domain_params.x_max  = 4.4;
-        op_domain_params.x_step = 0.9;
+        // set x-dimension
+        op_domain_params.sweep_dimensions[0].min  = 2.5;
+        op_domain_params.sweep_dimensions[0].max  = 4.4;
+        op_domain_params.sweep_dimensions[0].step = 0.9;
 
-        op_domain_params.y_min  = 2.5;
-        op_domain_params.y_max  = 2.5;
-        op_domain_params.y_step = 0.1;
+        // set y-dimension
+        op_domain_params.sweep_dimensions[1].min  = 2.5;
+        op_domain_params.sweep_dimensions[1].max  = 2.5;
+        op_domain_params.sweep_dimensions[1].step = 0.1;
 
         SECTION("flood_fill")
         {
@@ -437,13 +445,15 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
     }
     SECTION("semi-operational area")
     {
-        op_domain_params.x_min  = 0.5;
-        op_domain_params.x_max  = 4.25;
-        op_domain_params.x_step = 0.25;
+        // set x-dimension
+        op_domain_params.sweep_dimensions[0].min  = 0.5;
+        op_domain_params.sweep_dimensions[0].max  = 4.25;
+        op_domain_params.sweep_dimensions[0].step = 0.25;
 
-        op_domain_params.y_min  = 0.5;
-        op_domain_params.y_max  = 4.25;
-        op_domain_params.y_step = 0.25;
+        // set y-dimension
+        op_domain_params.sweep_dimensions[1].min  = 0.5;
+        op_domain_params.sweep_dimensions[1].max  = 4.25;
+        op_domain_params.sweep_dimensions[1].step = 0.25;
 
         SECTION("grid_search")
         {
@@ -547,14 +557,8 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
 
     operational_domain_params op_domain_params{};
     op_domain_params.simulation_parameters = sim_params;
-    op_domain_params.x_dimension           = operational_domain::sweep_parameter::EPSILON_R;
-    op_domain_params.x_min                 = 5.1;
-    op_domain_params.x_max                 = 6.0;
-    op_domain_params.x_step                = 0.1;
-    op_domain_params.y_dimension           = operational_domain::sweep_parameter::LAMBDA_TF;
-    op_domain_params.y_min                 = 4.5;
-    op_domain_params.y_max                 = 5.4;
-    op_domain_params.y_step                = 0.1;
+    op_domain_params.sweep_dimensions      = {{operational_domain::sweep_parameter::EPSILON_R, 5.1, 6.0, 0.1},
+                                              {operational_domain::sweep_parameter::LAMBDA_TF, 4.5, 5.4, 0.1}};
 
     operational_domain_stats op_domain_stats{};
 
@@ -670,14 +674,8 @@ TEST_CASE("SiQAD's AND gate operational domain computation, using cube coordinat
 
     operational_domain_params op_domain_params{};
     op_domain_params.simulation_parameters = sim_params;
-    op_domain_params.x_dimension           = operational_domain::sweep_parameter::EPSILON_R;
-    op_domain_params.x_min                 = 5.1;
-    op_domain_params.x_max                 = 6.0;
-    op_domain_params.x_step                = 0.1;
-    op_domain_params.y_dimension           = operational_domain::sweep_parameter::LAMBDA_TF;
-    op_domain_params.y_min                 = 4.5;
-    op_domain_params.y_max                 = 5.4;
-    op_domain_params.y_step                = 0.1;
+    op_domain_params.sweep_dimensions      = {{operational_domain::sweep_parameter::EPSILON_R, 5.1, 6.0, 0.1},
+                                              {operational_domain::sweep_parameter::LAMBDA_TF, 4.5, 5.4, 0.1}};
 
     operational_domain_stats op_domain_stats{};
 
@@ -762,14 +760,8 @@ TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[operational-domain
 
     operational_domain_params op_domain_params{};
     op_domain_params.simulation_parameters = sim_params;
-    op_domain_params.x_dimension           = operational_domain::sweep_parameter::EPSILON_R;
-    op_domain_params.x_min                 = 5.60;
-    op_domain_params.x_max                 = 5.61;
-    op_domain_params.x_step                = 0.01;
-    op_domain_params.y_dimension           = operational_domain::sweep_parameter::LAMBDA_TF;
-    op_domain_params.y_min                 = 5.0;
-    op_domain_params.y_max                 = 5.01;
-    op_domain_params.y_step                = 0.01;
+    op_domain_params.sweep_dimensions      = {{operational_domain::sweep_parameter::EPSILON_R, 5.60, 5.61, 0.01},
+                                              {operational_domain::sweep_parameter::LAMBDA_TF, 5.0, 5.01, 0.01}};
 
     operational_domain_stats op_domain_stats{};
 

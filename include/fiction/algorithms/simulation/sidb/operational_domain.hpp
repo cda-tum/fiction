@@ -12,7 +12,6 @@
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/physical_constants.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/execution_utils.hpp"
 #include "fiction/utils/hash.hpp"
 #include "fiction/utils/phmap_utils.hpp"
 
@@ -32,9 +31,8 @@
 #include <queue>
 #include <random>
 #include <set>
+#include <stdexcept>
 #include <thread>
-#include <tuple>
-#include <type_traits>
 #include <vector>
 
 namespace fiction
@@ -73,54 +71,46 @@ struct operational_domain
         MU_MINUS
     };
     /**
-     * X dimension sweep parameter.
+     * The dimensions to sweep over, ordered by priority. The first dimension is the x dimension, the second dimension
+     * is the y dimension, etc.
      */
-    sweep_parameter x_dimension{operational_domain::sweep_parameter::EPSILON_R};
+    std::vector<sweep_parameter> dimensions{};
     /**
-     * Y dimension sweep parameter.
-     */
-    sweep_parameter y_dimension{operational_domain::sweep_parameter::LAMBDA_TF};
-    /**
-     * The parameter point holds parameter values in the x and y dimension.
+     * The parameter point holds parameter values in an arbitrary number of dimensions.
      */
     struct parameter_point
     {
         /**
-         * Standard default constructor.
+         * Default constructor.
          */
         parameter_point() = default;
         /**
          * Standard constructor.
          *
-         * @param x_val X dimension parameter value.
-         * @param y_val Y dimension parameter value.
+         * @param values Parameter values for each dimension.
          */
-        parameter_point(const double x_val, const double y_val) : x{x_val}, y{y_val} {}
+        explicit parameter_point(const std::vector<double>& values) : parameters(values) {}
         /**
-         * X dimension parameter value.
+         * Parameter values for each dimension.
          */
-        double x;
-        /**
-         * Y dimension parameter value.
-         */
-        double y;
+        std::vector<double> parameters;
         /**
          * Equality operator.
          *
          * @param other Other parameter point to compare with.
-         * @return `true` iff the parameter points are equal.
+         * @return `true` if the parameter points are equal.
          */
-        [[nodiscard]] bool operator==(const parameter_point& other) const noexcept
+        bool operator==(const parameter_point& other) const noexcept
         {
-            return x == other.x && y == other.y;
+            return parameters == other.parameters;
         }
         /**
          * Inequality operator.
          *
          * @param other Other parameter point to compare with.
-         * @return `true` iff the parameter points are not equal.
+         * @return `true` if the parameter points are not equal.
          */
-        [[nodiscard]] bool operator!=(const parameter_point& other) const noexcept
+        bool operator!=(const parameter_point& other) const noexcept
         {
             return !(*this == other);
         }
@@ -131,18 +121,14 @@ struct operational_domain
          * @return The parameter value at the specified index.
          */
         template <std::size_t I>
-        auto get() const noexcept
+        auto get() const
         {
-            static_assert(I < 2, "Index out of bounds for parameter_point");
+            if (I >= parameters.size())
+            {
+                throw std::out_of_range("Index out of bounds for parameter_point");
+            }
 
-            if constexpr (I == 0)
-            {
-                return x;
-            }
-            else  // I == 1
-            {
-                return y;
-            }
+            return parameters[I];
         }
     };
     /**
@@ -152,7 +138,28 @@ struct operational_domain
      */
     locked_parallel_flat_hash_map<parameter_point, operational_status> operational_values{};
 };
-
+/**
+ * A range of values for a dimension sweep. The range is defined by a minimum value, a maximum value and a step size.
+ */
+struct operational_domain_value_range
+{
+    /**
+     * The sweep parameter of the dimension.
+     */
+    operational_domain::sweep_parameter dimension;
+    /**
+     * The minimum value of the dimension sweep.
+     */
+    double min{1.0};
+    /**
+     * The maximum value of the dimension sweep.
+     */
+    double max{10.0};
+    /**
+     * The step size of the dimension sweep.
+     */
+    double step{0.1};
+};
 /**
  * Parameters for the operational domain computation. The parameters are used across the different operational domain
  * computation algorithms.
@@ -169,37 +176,12 @@ struct operational_domain_params
      */
     sidb_simulation_engine sim_engine{sidb_simulation_engine::QUICKEXACT};
     /**
-     * The sweep parameter for the x dimension.
+     * The dimensions to sweep over together with their value ranges, ordered by priority. The first dimension is the x
+     * dimension, the second dimension is the y dimension, etc.
      */
-    operational_domain::sweep_parameter x_dimension{operational_domain::sweep_parameter::EPSILON_R};
-    /**
-     * The minimum value of the x dimension sweep.
-     */
-    double x_min{1.0};
-    /**
-     * The maximum value of the x dimension sweep.
-     */
-    double x_max{10.0};
-    /**
-     * The step size of the x dimension sweep.
-     */
-    double x_step{0.1};
-    /**
-     * The sweep parameter for the y dimension.
-     */
-    operational_domain::sweep_parameter y_dimension{operational_domain::sweep_parameter::LAMBDA_TF};
-    /**
-     * The minimum value of the y dimension sweep.
-     */
-    double y_min{1.0};
-    /**
-     * The maximum value of the y dimension sweep.
-     */
-    double y_max{10.0};
-    /**
-     * The step size of the y dimension sweep.
-     */
-    double y_step{0.1};
+    std::vector<operational_domain_value_range> sweep_dimensions{
+        operational_domain_value_range{operational_domain::sweep_parameter::EPSILON_R, 1.0, 10.0, 0.1},
+        operational_domain_value_range{operational_domain::sweep_parameter::LAMBDA_TF, 1.0, 10.0, 0.1}};
     /**
      * The parameters for the BDL pair detection, which is necessary during the operational domain computation to
      * detect input and output BDL pairs.
@@ -258,43 +240,39 @@ class operational_domain_impl
             params{ps},
             stats{st},
             output_bdl_pairs{detect_bdl_pairs<Lyt>(layout, sidb_technology::cell_type::OUTPUT, params.bdl_params)},
-            x_indices(num_x_steps() + 1),  // pre-allocate the x dimension indices
-            y_indices(num_y_steps() + 1)   // pre-allocate the y dimension indices
+            num_dimensions{params.sweep_dimensions.size()}
     {
-        x_values.reserve(num_x_steps() + 1);
-        y_values.reserve(num_y_steps() + 1);
+        op_domain.dimensions.reserve(num_dimensions);
 
-        op_domain.x_dimension = params.x_dimension;
-        op_domain.y_dimension = params.y_dimension;
+        indices.reserve(num_dimensions);
+        values.reserve(num_dimensions);
 
-        std::iota(x_indices.begin(), x_indices.end(), 0ul);
-        std::iota(y_indices.begin(), y_indices.end(), 0ul);
-
-        // if the value of the x-parameter is greater than params.x_max after num_x_steps() steps, this value is
-        // ignored in the operational domain calculation.
-        if ((params.x_min + static_cast<double>(x_indices.size() - 1) * params.x_step) - params.x_max >
-            physical_constants::POP_STABILITY_ERR)
+        for (auto d = 0u; d < num_dimensions; ++d)
         {
-            x_indices.pop_back();
-        }
-        // if the value of the y-parameter is greater than params.y_max after num_y_steps() steps, this value is
-        // ignored in the operational domain calculation.
-        if (((params.y_min + static_cast<double>(y_indices.size() - 1) * params.y_step) - params.y_max) >
-            physical_constants::POP_STABILITY_ERR)
-        {
-            y_indices.pop_back();
-        }
+            op_domain.dimensions.push_back(params.sweep_dimensions[d].dimension);
 
-        // generate the x dimension values
-        for (std::size_t i = 0; i < x_indices.size(); ++i)
-        {
-            x_values.push_back(params.x_min + static_cast<double>(i) * params.x_step);
-        }
+            // generate the step points for the dimension
+            indices.push_back(std::vector<std::size_t>(num_steps(d) + 1));
+            std::iota(indices[d].begin(), indices[d].end(), 0ul);
 
-        // generate the y dimension values
-        for (std::size_t i = 0; i < y_indices.size(); ++i)
-        {
-            y_values.push_back(params.y_min + static_cast<double>(i) * params.y_step);
+            // if the value of the parameter is greater than params.max after num_x_steps() steps, this value is
+            // ignored in the operational domain calculation.
+            if ((params.sweep_dimensions[d].min +
+                 static_cast<double>(indices[d].size() - 1) * params.sweep_dimensions[d].step) -
+                    params.sweep_dimensions[d].max >
+                physical_constants::POP_STABILITY_ERR)
+            {
+                indices[d].pop_back();
+            }
+
+            values.emplace_back();
+
+            // generate the values for the dimension
+            for (const auto i : indices[d])
+            {
+                values[d].push_back(params.sweep_dimensions[d].min +
+                                    static_cast<double>(i) * params.sweep_dimensions[d].step);
+            }
         }
     }
     /**
@@ -307,46 +285,24 @@ class operational_domain_impl
     {
         mockturtle::stopwatch stop{stats.time_total};
 
-        // calculate the size of each slice
-        const auto x_slice_size = (x_indices.size() + num_threads - 1) / num_threads;
-
-        std::vector<std::thread> threads{};
-        threads.reserve(num_threads);
-
-        // launch threads, each with its own slice of the x indices
-        for (auto i = 0ul; i < num_threads; ++i)
+        // generate all possible step point combinations via the cartesian product
+        std::vector<step_point> all_step_points{step_point{}};
+        for (const auto& dimension : indices)
         {
-            const auto start = i * x_slice_size;
-            const auto end   = std::min(start + x_slice_size, x_indices.size());
-
-            if (start >= end)
+            std::vector<step_point> expanded_products{};
+            for (const auto& product : all_step_points)
             {
-                break;  // no more work to distribute
-            }
-
-            threads.emplace_back(
-                [this, start, end]
+                for (const auto& element : dimension)
                 {
-                    for (auto it = x_indices.cbegin() + static_cast<int64_t>(start);
-                         it != x_indices.cbegin() + static_cast<int64_t>(end); ++it)
-                    {
-                        const auto x = *it;
-
-                        // process y_indices sequentially on each thread
-                        std::for_each(y_indices.cbegin(), y_indices.cend(),
-                                      [this, x](const auto y) { is_step_point_operational({x, y}); });
-                    }
-                });
-        }
-
-        // wait for all threads to complete
-        for (auto& thread : threads)
-        {
-            if (thread.joinable())
-            {
-                thread.join();
+                    step_point new_product = product;
+                    new_product.step_values.push_back(element);
+                    expanded_products.push_back(new_product);
+                }
             }
+            all_step_points = expanded_products;
         }
+
+        simulate_operational_status_in_parallel(all_step_points);
 
         log_stats();
 
@@ -383,6 +339,8 @@ class operational_domain_impl
      */
     [[nodiscard]] operational_domain flood_fill(const std::size_t samples) noexcept
     {
+        assert(num_dimensions == 2 && "Flood fill is only supported for two dimensions");
+
         mockturtle::stopwatch stop{stats.time_total};
 
         const auto step_point_samples = generate_random_step_points(samples);
@@ -453,6 +411,8 @@ class operational_domain_impl
      */
     [[nodiscard]] operational_domain contour_tracing(const std::size_t samples) noexcept
     {
+        assert(num_dimensions == 2 && "Contour tracing is only supported for two dimensions");
+
         mockturtle::stopwatch stop{stats.time_total};
 
         // first, perform random sampling to find an operational starting point
@@ -482,9 +442,11 @@ class operational_domain_impl
         const auto contour_starting_point = find_operational_contour_step_point(*starting_point);
 
         auto current_contour_point = contour_starting_point;
-        auto backtrack_point       = current_contour_point.x == 0 ?
-                                         current_contour_point :
-                                         step_point{current_contour_point.x - 1, current_contour_point.y};
+
+        const auto x = current_contour_point.step_values[0];
+        const auto y = current_contour_point.step_values[1];
+
+        auto backtrack_point = x == 0 ? current_contour_point : step_point{{x - 1, y}};
 
         auto current_neighborhood = moore_neighborhood(current_contour_point);
 
@@ -538,25 +500,21 @@ class operational_domain_impl
      */
     operational_domain_stats& stats;
     /**
-     * The output BDL pair of the layout.
+     * The output BDL pairs of the layout.
      */
     const std::vector<bdl_pair<cell<Lyt>>> output_bdl_pairs;
     /**
-     * X dimension steps.
+     * The number of dimensions.
      */
-    std::vector<std::size_t> x_indices;
+    const std::size_t num_dimensions;
     /**
-     * Y dimension steps.
+     * Dimension steps.
      */
-    std::vector<std::size_t> y_indices;
+    std::vector<std::vector<std::size_t>> indices;
     /**
-     * All x dimension values.
+     * All dimension values.
      */
-    std::vector<double> x_values;
-    /**
-     * All y dimension values.
-     */
-    std::vector<double> y_values;
+    std::vector<std::vector<double>> values;
     /**
      * The operational domain of the layout.
      */
@@ -588,18 +546,13 @@ class operational_domain_impl
         /**
          * Standard constructor.
          *
-         * @param x_step X dimension step value.
-         * @param y_step Y dimension step value.
+         * @param steps All dimension step values.
          */
-        step_point(const std::size_t x_step, const std::size_t y_step) : x{x_step}, y{y_step} {}
+        explicit step_point(const std::vector<std::size_t>& steps) : step_values(steps) {}
         /**
-         * X dimension step value.
+         * All dimension step values.
          */
-        std::size_t x;
-        /**
-         * Y dimension step value.
-         */
-        std::size_t y;
+        std::vector<std::size_t> step_values;
         /**
          * Equality operator.
          *
@@ -608,7 +561,7 @@ class operational_domain_impl
          */
         [[nodiscard]] bool operator==(const step_point& other) const noexcept
         {
-            return x == other.x && y == other.y;
+            return step_values == other.step_values;
         }
         /**
          * Inequality operator.
@@ -628,11 +581,7 @@ class operational_domain_impl
          */
         [[nodiscard]] bool operator<(const step_point& other) const noexcept
         {
-            if (y != other.y)
-            {
-                return y < other.y;
-            }
-            return x < other.x;
+            return step_values < other.step_values;
         }
     };
     /**
@@ -643,7 +592,13 @@ class operational_domain_impl
      */
     [[nodiscard]] operational_domain::parameter_point to_parameter_point(const step_point& sp) const noexcept
     {
-        return {x_values[sp.x], y_values[sp.y]};
+        std::vector<double> parameter_values{};
+        for (auto d = 0u; d < num_dimensions; ++d)
+        {
+            parameter_values.push_back(values[d][sp.step_values[d]]);
+        }
+
+        return operational_domain::parameter_point{parameter_values};
     }
     /**
      * Converts a parameter point to a step point.
@@ -653,49 +608,33 @@ class operational_domain_impl
      */
     [[nodiscard]] step_point to_step_point(const operational_domain::parameter_point& pp) const noexcept
     {
-        const auto it_x = std::lower_bound(x_values.cbegin(), x_values.cend(), pp.x);
-        const auto it_y = std::lower_bound(y_values.cbegin(), y_values.cend(), pp.y);
+        std::vector<std::size_t> step_values;
+        for (auto d = 0u; d < num_dimensions; ++d)
+        {
+            const auto it = std::lower_bound(values[d].cbegin(), values[d].cend(), pp.parameters[d]);
 
-        assert(it_x != x_values.cend() && "parameter point is outside of the x range");
-        assert(it_y != y_values.cend() && "parameter point is outside of the y range");
+            assert(it != values[d].cend() && "parameter point is outside of the value range");
 
-        const auto x_dis = std::distance(x_values.cbegin(), it_x);
-        const auto y_dis = std::distance(y_values.cbegin(), it_y);
+            const auto dis = std::distance(values[d].cbegin(), it);
 
-        return {static_cast<std::size_t>(x_dis), static_cast<std::size_t>(y_dis)};
+            step_values.push_back(static_cast<std::size_t>(dis));
+        }
+
+        return step_point{step_values};
     }
     /**
-     * Calculates the number of steps in the x dimension based on the provided parameters.
+     * Calculates the number of steps in the given dimension based on the provided parameters.
      *
-     * @return The number of steps in the x dimension.
+     * @return The number of steps in the given dimension.
      */
-    [[nodiscard]] inline std::size_t num_x_steps() const noexcept
+    [[nodiscard]] inline std::size_t num_steps(const std::size_t dimension) const noexcept
     {
-        return static_cast<std::size_t>(std::round((params.x_max - params.x_min) / params.x_step));
+        assert(dimension < num_dimensions && "Invalid dimension");
+
+        return static_cast<std::size_t>(
+            std::round((params.sweep_dimensions[dimension].max - params.sweep_dimensions[dimension].min) /
+                       params.sweep_dimensions[dimension].step));
     }
-    /**
-     * Calculates the number of steps in the y dimension based on the provided parameters.
-     *
-     * @return The number of steps in the y dimension.
-     */
-    [[nodiscard]] inline std::size_t num_y_steps() const noexcept
-    {
-        return static_cast<std::size_t>(std::round((params.y_max - params.y_min) / params.y_step));
-    }
-    /**
-     * Potential sweep dimensions.
-     */
-    enum class sweep_dimension : uint8_t
-    {
-        /**
-         * Sweep dimension X.
-         */
-        X,
-        /**
-         * Sweep dimension Y.
-         */
-        Y
-    };
     /**
      * Helper function that sets the value of a sweep dimension in the simulation parameters.
      *
@@ -704,10 +643,9 @@ class operational_domain_impl
      * @param dim Sweep dimension to set the value `val` to.
      */
     inline void set_dimension_value(sidb_simulation_parameters& sim_parameters, const double val,
-                                    const sweep_dimension dim) const noexcept
+                                    const std::size_t dim) const noexcept
     {
-        operational_domain::sweep_parameter sweep_parameter =
-            dim == sweep_dimension::X ? params.x_dimension : params.y_dimension;
+        const operational_domain::sweep_parameter sweep_parameter = op_domain.dimensions[dim];
 
         switch (sweep_parameter)
         {
@@ -733,33 +671,13 @@ class operational_domain_impl
         }
     }
     /**
-     * Helper function that sets the value of the x dimension in the simulation parameters.
-     *
-     * @param sim_params Simulation parameter object to set the x dimension value of.
-     * @param val Value to set the x dimension to.
-     */
-    inline void set_x_dimension_value(sidb_simulation_parameters& sim_params, const double val) const noexcept
-    {
-        set_dimension_value(sim_params, val, sweep_dimension::X);
-    }
-    /**
-     * Helper function that sets the value of the y dimension in the simulation parameters.
-     *
-     * @param sim_params Simulation parameter object to set the y dimension value of.
-     * @param val Value to set the y dimension to.
-     */
-    inline void set_y_dimension_value(sidb_simulation_parameters& sim_params, const double val) const noexcept
-    {
-        set_dimension_value(sim_params, val, sweep_dimension::Y);
-    }
-    /**
-     * Determines whether the point at step position `(x, y)` has already been sampled and returns the operational value
-     * at `(x, y)` if it already exists. Here, `x` and `y` represent steps in the x and y dimension, respectively, not
+     * Determines whether the point at step position `(d1, ..., dn)` has already been sampled and returns the
+     * operational value at `(d1, ..., dn)` if it already exists. Here, `di` represents steps in the i-th dimension, not
      * the actual values of the parameters.
      *
      * @param sp Step point to check.
-     * @return The operational status of the point at step position `sp = (x, y)` or `std::nullopt` if `(x, y)` has not
-     * been sampled yet.
+     * @return The operational status of the point at step position `sp = (d1, ..., dn)` or `std::nullopt` if the point
+     * `(d1, ..., dn)` has not been sampled yet.
      */
     [[nodiscard]] inline std::optional<operational_status> has_already_been_sampled(const step_point& sp) const noexcept
     {
@@ -772,11 +690,11 @@ class operational_domain_impl
         return std::nullopt;
     }
     /**
-     * Logs and returns the operational status at the given point `sp = (x, y)`. If the point has already been sampled,
-     * it returns the cached value. Otherwise, a ground state simulation is performed for all input combinations of the
-     * stored layout using the given simulation parameters. It terminates as soon as a non-operational state is found.
-     * In the worst case, the function performs \f$2^n\f$ simulations, where \f$n\f$ is the number of inputs of the
-     * layout. This function is used by all operational domain computation techniques.
+     * Logs and returns the operational status at the given point `sp = (d1, ..., dn)`. If the point has already been
+     * sampled, it returns the cached value. Otherwise, a ground state simulation is performed for all input
+     * combinations of the stored layout using the given simulation parameters. It terminates as soon as a
+     * non-operational state is found. In the worst case, the function performs \f$2^i\f$ simulations, where \f$i\f$ is
+     * the number of inputs of the layout. This function is used by all operational domain computation techniques.
      *
      * Any investigated point is added to the stored `op_domain`, regardless of its operational status.
      *
@@ -812,8 +730,10 @@ class operational_domain_impl
         ++num_evaluated_parameter_combinations;
 
         sidb_simulation_parameters sim_params = params.simulation_parameters;
-        set_x_dimension_value(sim_params, param_point.x);
-        set_y_dimension_value(sim_params, param_point.y);
+        for (auto d = 0u; d < num_dimensions; ++d)
+        {
+            set_dimension_value(sim_params, values[d][sp.step_values[d]], d);
+        }
 
         const auto& [status, sim_calls] =
             is_operational(layout, truth_table, is_operational_params{sim_params, params.sim_engine});
@@ -839,16 +759,29 @@ class operational_domain_impl
         static std::mt19937_64 generator{std::random_device{}()};
 
         // instantiate distributions
-        std::uniform_int_distribution<std::size_t> x_distribution{0, x_indices.size() - 1};
-        std::uniform_int_distribution<std::size_t> y_distribution{0, y_indices.size() - 1};
+        std::vector<std::uniform_int_distribution<std::size_t>> distributions{};
+        distributions.reserve(num_dimensions);
+
+        for (auto d = 0u; d < num_dimensions; ++d)
+        {
+            distributions.emplace_back(0, indices[d].size() - 1);
+        }
 
         // container for the random samples
         std::set<step_point> step_point_samples{};
 
         for (std::size_t i = 0; i < samples; ++i)
         {
-            // sample x and y dimension
-            step_point_samples.insert(step_point{x_distribution(generator), y_distribution(generator)});
+            std::vector<std::size_t> dimension_samples{};
+            dimension_samples.reserve(num_dimensions);
+
+            // sample all dimensions
+            for (auto d = 0u; d < num_dimensions; ++d)
+            {
+                dimension_samples.push_back(distributions[d](generator));
+            }
+
+            step_point_samples.insert(step_point{dimension_samples});
         }
 
         return std::vector<step_point>(step_point_samples.cbegin(), step_point_samples.cend());
@@ -900,7 +833,7 @@ class operational_domain_impl
     }
     /**
      * Performs random sampling to find any operational parameter combination. This function is useful if a single
-     * starting point is required within the domain to expand from. This function returns the step in x and y dimension
+     * starting point is required within the domain to expand from. This function returns the step in all dimensions
      * of the first operational point found. If no operational parameter combination can be found within the given
      * number of samples, the function returns `std::nullopt`.
      *
@@ -917,7 +850,7 @@ class operational_domain_impl
             // determine the operational status
             const auto operational_value = is_step_point_operational(sample_step_point);
 
-            // if the parameter combination is operational, return its step values in x and y dimension
+            // if the parameter combination is operational, return its step values in all dimensions
             if (operational_value == operational_status::OPERATIONAL)
             {
                 return sample_step_point;
@@ -938,12 +871,17 @@ class operational_domain_impl
      */
     [[nodiscard]] step_point find_operational_contour_step_point(const step_point& starting_point) noexcept
     {
+        assert(num_dimensions == 2 && "Contour tracing is only supported for two dimensions");
+        assert(starting_point.step_values.size() == 2 && "Given step point must have 2 dimensions");
+
         auto latest_operational_point = starting_point;
 
         // move towards the left border of the parameter range
-        for (std::size_t x = starting_point.x; x > 0; --x)
+        for (std::size_t x = starting_point.step_values[0]; x > 0; --x)
         {
-            const auto left_step = step_point{x, starting_point.y};
+            const auto y = starting_point.step_values[1];
+
+            const auto left_step = step_point{{x, y}};
 
             const auto operational_status = is_step_point_operational(left_step);
 
@@ -972,57 +910,64 @@ class operational_domain_impl
      */
     [[nodiscard]] std::vector<step_point> moore_neighborhood(const step_point& sp) const noexcept
     {
+        assert(num_dimensions == 2 && "Moore neighborhood is only supported for 2 dimensions");
+        assert(sp.step_values.size() == 2 && "Given step point must have 2 dimensions");
+
         std::vector<step_point> neighbors{};
         neighbors.reserve(8);
 
-        const auto& [x, y] = sp;
+        const auto x = sp.step_values[0];
+        const auto y = sp.step_values[1];
+
+        const auto num_x_indices = indices[0].size();
+        const auto num_y_indices = indices[1].size();
 
         const auto decr_x = (x > 0) ? x - 1 : x;
-        const auto incr_x = (x + 1 < x_indices.size()) ? x + 1 : x;
+        const auto incr_x = (x + 1 < num_x_indices) ? x + 1 : x;
         const auto decr_y = (y > 0) ? y - 1 : y;
-        const auto incr_y = (y + 1 < y_indices.size()) ? y + 1 : y;
+        const auto incr_y = (y + 1 < num_y_indices) ? y + 1 : y;
 
         // add neighbors in clockwise direction
 
         // right
         if (x != incr_x)
         {
-            neighbors.emplace_back(incr_x, y);
+            neighbors.emplace_back(std::vector<std::size_t>{incr_x, y});
         }
         // lower-right
         if (x != incr_x && y != decr_y)
         {
-            neighbors.emplace_back(incr_x, decr_y);
+            neighbors.emplace_back(std::vector<std::size_t>{incr_x, decr_y});
         }
         // down
         if (y != decr_y)
         {
-            neighbors.emplace_back(x, decr_y);
+            neighbors.emplace_back(std::vector<std::size_t>{x, decr_y});
         }
         // lower-left
         if (x != decr_x && y != decr_y)
         {
-            neighbors.emplace_back(decr_x, decr_y);
+            neighbors.emplace_back(std::vector<std::size_t>{decr_x, decr_y});
         }
         // left
         if (x != decr_x)
         {
-            neighbors.emplace_back(decr_x, y);
+            neighbors.emplace_back(std::vector<std::size_t>{decr_x, y});
         }
         // upper-left
         if (x != decr_x && y != incr_y)
         {
-            neighbors.emplace_back(decr_x, incr_y);
+            neighbors.emplace_back(std::vector<std::size_t>{decr_x, incr_y});
         }
         // up
         if (y != incr_y)
         {
-            neighbors.emplace_back(x, incr_y);
+            neighbors.emplace_back(std::vector<std::size_t>{x, incr_y});
         }
         // upper-right
         if (x != incr_x && y != incr_y)
         {
-            neighbors.emplace_back(incr_x, incr_y);
+            neighbors.emplace_back(std::vector<std::size_t>{incr_x, incr_y});
         }
 
         return neighbors;
@@ -1179,6 +1124,11 @@ operational_domain operational_domain_flood_fill(const Lyt& lyt, const std::vect
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
+    if (params.sweep_dimensions.size() != 2 && params.sweep_dimensions.size() != 3)
+    {
+        throw std::runtime_error("Flood fill is only applicable to 2 or 3 dimensions");
+    }
+
     operational_domain_stats                 st{};
     detail::operational_domain_impl<Lyt, TT> p{lyt, spec, params, st};
 
@@ -1234,6 +1184,11 @@ operational_domain operational_domain_contour_tracing(const Lyt& lyt, const std:
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
+    if (params.sweep_dimensions.size() != 2)
+    {
+        throw std::runtime_error("Contour tracing is only applicable to exactly 2 dimensions");
+    }
+
     operational_domain_stats                 st{};
     detail::operational_domain_impl<Lyt, TT> p{lyt, spec, params, st};
 
@@ -1251,16 +1206,6 @@ operational_domain operational_domain_contour_tracing(const Lyt& lyt, const std:
 
 namespace std
 {
-// make `operational_domain::parameter_point` compatible with `std::integral_constant`
-template <>
-struct tuple_size<fiction::operational_domain::parameter_point> : std::integral_constant<size_t, 2>
-{};
-// make `operational_domain::parameter_point` compatible with `std::tuple_element`
-template <size_t I>
-struct tuple_element<I, fiction::operational_domain::parameter_point>
-{
-    using type = double;
-};
 // make `operational_domain::parameter_point` compatible with `std::hash`
 template <>
 struct hash<fiction::operational_domain::parameter_point>
@@ -1268,7 +1213,10 @@ struct hash<fiction::operational_domain::parameter_point>
     size_t operator()(const fiction::operational_domain::parameter_point& p) const noexcept
     {
         size_t h = 0;
-        fiction::hash_combine(h, p.x, p.y);
+        for (const auto& d : p.parameters)
+        {
+            fiction::hash_combine(h, d);
+        }
 
         return h;
     }
