@@ -62,7 +62,7 @@ jobs:
             toolset: v144
 
 
-    name: 🐍 on ${{matrix.os}} with Python ${{matrix.python_version}}
+    name: 🐍 on ${{matrix.os}} and ${{matrix.toolset}} toolset with Python ${{matrix.python_version}}
     runs-on: ${{matrix.os}}
 
     steps:
@@ -74,7 +74,7 @@ jobs:
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: '${{matrix.os}}-pyfiction'
+          key: '${{matrix.os}}-${{matrix.toolset}}-pyfiction'
           variant: ccache
           save: true
           max-size: 10G
