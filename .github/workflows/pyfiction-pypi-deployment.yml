@@ -53,7 +53,7 @@ jobs:
           - { os: ubuntu-latest, arch: x64 }
           - { os: macos-latest, arch: x64 }
           - { os: macos-latest, arch: arm64 }
-          - { os: windows-2022, arch: x64}
+          - { os: windows-2019, arch: x64}
         python: ['cp38', 'cp39', 'cp310', 'cp311', 'cp312']
     steps:
       - uses: actions/checkout@v4
