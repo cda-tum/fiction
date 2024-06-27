@@ -44,7 +44,7 @@ jobs:
   build_and_test:
     strategy:
       matrix:
-        os: [ ubuntu-latest, macos-latest, windows-latest ]
+        os: [ ubuntu-latest, macos-latest, windows-2019 ]
         python_version: [ '3.8.x', '3.12.x' ]
         include:
           - os: ubuntu-latest
@@ -53,7 +53,7 @@ jobs:
           - os: macos-latest
             z3_platform: macOS
             architecture: arm64
-          - os: windows-latest
+          - os: windows-2019
             z3_platform: windows
             architecture: x64
 
