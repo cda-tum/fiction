@@ -3257,7 +3257,7 @@ std::optional<Lyt> exact_with_blacklist(const Ntk& ntk, const surface_black_list
         throw unsupported_clocking_scheme_exception();
     }
     // check for input degree
-    else if (has_high_degree_fanin_nodes(ntk, clocking_scheme->max_in_degree))
+    if (has_high_degree_fanin_nodes(ntk, clocking_scheme->max_in_degree))
     {
         throw high_degree_fanin_exception();
     }
@@ -3268,14 +3268,14 @@ std::optional<Lyt> exact_with_blacklist(const Ntk& ntk, const surface_black_list
         {
             std::cout << "[w] Lyt does not implement the foreach_adjacent_opposite_tiles function; straight inverters "
                          "cannot be guaranteed"
-                      << std::endl;
+                      << '\n';
         }
     }
     if constexpr (!fiction::has_synchronization_elements_v<Lyt>)
     {
         if (ps.synchronization_elements)
         {
-            std::cout << "[w] Lyt does not support synchronization elements; not using them" << std::endl;
+            std::cout << "[w] Lyt does not support synchronization elements; not using them" << '\n';
         }
     }
 

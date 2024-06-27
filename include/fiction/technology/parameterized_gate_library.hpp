@@ -23,7 +23,6 @@
 #include <cstdint>
 #include <cstdlib>
 #include <exception>
-#include <limits>
 #include <stdexcept>
 #include <utility>
 #include <vector>
@@ -111,7 +110,7 @@ struct parameterized_gate_library_params
     /**
      * This struct holds parameters to design SiDB gates on-the-fly.
      */
-    design_sidb_gates_params<cell<sidb_cell_clk_lyt_cube>> design_gate_params{};
+    design_sidb_gates_params<cell<Lyt>> design_gate_params{};
     /**
      * This variable defines the number of canvas SiDBs dedicated to complex gates, such as crossing, double wire,
      * and half-adder.

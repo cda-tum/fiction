@@ -6,44 +6,32 @@
 
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/network_transformation/technology_mapping.hpp>  // technology mapping
-#include <fiction/algorithms/physical_design/apply_gate_library.hpp>         // layout conversion to cell-level
-#include <fiction/algorithms/physical_design/design_sidb_gates.hpp>          // design gate
-#include <fiction/algorithms/physical_design/exact.hpp>                      // SMT-based physical design of FCN layouts
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>  // choose design engine (ExGS, QuickSim, QuickExact)
-#include <fiction/io/read_sidb_surface_defects.hpp>                       // reader for simulated SiDB surfaces
-#include <fiction/io/write_sqd_layout.hpp>  // writer for SiQAD files (physical simulation)
+#include <fiction/algorithms/network_transformation/technology_mapping.hpp>
+#include <fiction/algorithms/physical_design/design_sidb_gates.hpp>
+#include <fiction/algorithms/physical_design/on_the_fly_circuit_design_on_defective_surface.hpp>
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
+#include <fiction/io/read_sidb_surface_defects.hpp>
+#include <fiction/io/write_sqd_layout.hpp>
 #include <fiction/layouts/bounding_box.hpp>
-#include <fiction/layouts/coordinates.hpp>                    // layout coordinates
-#include <fiction/networks/technology_network.hpp>            // technology-mapped network type
-#include <fiction/technology/area.hpp>                        // area requirement calculations
-#include <fiction/technology/cell_technologies.hpp>           // cell implementations
-#include <fiction/technology/parameterized_gate_library.hpp>  // a dynamic SiDB gate library
-#include <fiction/technology/sidb_defect_surface.hpp>         // SiDB surface with support for atomic defects
-#include <fiction/technology/sidb_defects.hpp>                // Atomic defects
-#include <fiction/technology/sidb_skeleton_bestagon_library.hpp>  // a static skeleton SiDB gate library defining the input/output wires
-#include <fiction/technology/sidb_surface_analysis.hpp>  // Analyzes a given defective SiDB surface and matches it against gate tiles provided by a library
-#include <fiction/traits.hpp>  // pre-defined traits
-#include <fiction/types.hpp>   // pre-defined types suitable for the FCN domain
+#include <fiction/layouts/coordinates.hpp>
+#include <fiction/technology/area.hpp>
+#include <fiction/technology/cell_technologies.hpp>
+#include <fiction/technology/sidb_defect_surface.hpp>
+#include <fiction/technology/sidb_defects.hpp>
+#include <fiction/types.hpp>
 
-#include <fmt/format.h>                                        // output formatting
-#include <lorina/lorina.hpp>                                   // Verilog/BLIF/AIGER/... file parsing
-#include <mockturtle/algorithms/cut_rewriting.hpp>             // logic optimization with cut rewriting
-#include <mockturtle/algorithms/equivalence_checking.hpp>      // equivalence checking
-#include <mockturtle/algorithms/miter.hpp>                     // miter structure
-#include <mockturtle/algorithms/node_resynthesis/xag_npn.hpp>  // NPN databases for cut rewriting of XAGs and AIGs
-#include <mockturtle/io/verilog_reader.hpp>                    // call-backs to read Verilog files into networks
-#include <mockturtle/networks/xag.hpp>                         // XOR-AND-inverter graphs
-#include <mockturtle/utils/stopwatch.hpp>                      // used to measure runtime
-#include <mockturtle/views/depth_view.hpp>                     // to determine network levels
+#include <fmt/format.h>
+#include <lorina/lorina.hpp>
+#include <mockturtle/algorithms/cut_rewriting.hpp>
+#include <mockturtle/algorithms/node_resynthesis/xag_npn.hpp>
+#include <mockturtle/io/verilog_reader.hpp>
+#include <mockturtle/networks/xag.hpp>
+#include <mockturtle/utils/stopwatch.hpp>
+#include <mockturtle/views/depth_view.hpp>
 
 #include <cassert>
-#include <cstdint>
 #include <cstdlib>
-#include <exception>
-#include <optional>
 #include <string>
-#include <utility>
 
 // This script conducts defect-aware placement and routing with defect-aware on-the-fly SiDB gate design. Thereby, SiDB
 // circuits can be designed in the presence of atomic defects.
@@ -53,15 +41,15 @@ int main()  // NOLINT
     using gate_lyt = fiction::hex_even_row_gate_clk_lyt;
     using cell_lyt = fiction::sidb_cell_clk_lyt_cube;
 
-    fiction::design_sidb_gates_params<fiction::cube::coord_t> design_gate_params{};
+    fiction::design_sidb_gates_params<fiction::cell<cell_lyt>> design_gate_params{};
     design_gate_params.simulation_parameters = fiction::sidb_simulation_parameters{2, -0.32};
     design_gate_params.canvas                = {{24, 17}, {34, 28}};
     design_gate_params.number_of_sidbs       = 3;
     design_gate_params.sim_engine            = fiction::sidb_simulation_engine::QUICKEXACT;
     design_gate_params.termination_cond =
-        fiction::design_sidb_gates_params<fiction::cube::coord_t>::termination_condition::AFTER_FIRST_SOLUTION;
+        fiction::design_sidb_gates_params<fiction::cell<cell_lyt>>::termination_condition::AFTER_FIRST_SOLUTION;
 
-    // save atomic defects which their respective phyiscal parameters as exerimentally determined by T. R. Huff, T.
+    // save atomic defects which their respective phyiscal parameters as experimentally determined by T. R. Huff, T.
     // Dienel, M. Rashidi, R. Achal, L. Livadaru, J. Croshaw, and R. A. Wolkow, "Electrostatic landscape of a
     // Hydrogen-terminated Silicon Surface Probed by a Moveable Quantum Dot."
     const auto stray_db   = fiction::sidb_defect{fiction::sidb_defect_type::DB, -1, 4.1, 1.8};
@@ -93,25 +81,13 @@ int main()  // NOLINT
             }
         });
 
-    // ddetermine the bounding box around the defective surface.
-    const auto bb = fiction::bounding_box_2d{surface_lattice};
-    surface_lattice.resize(bb.get_max());
+    const auto bb_defect_surface = fiction::bounding_box_2d{surface_lattice};
+    surface_lattice.resize(bb_defect_surface.get_max());
 
     const auto lattice_tiling = gate_lyt{{11, 30}};
 
-    experiments::experiment<std::string, double, bool, double, uint64_t> sidb_circuits_with_defects{
-        "sidb_circuits_with_defects", "benchmark", "runtime (in sec)", "equivalent", "layout area in nm²",
-        "number of aspect ratios"};
-
-    // parameters for SMT-based physical design
-    fiction::exact_physical_design_params exact_params{};
-    exact_params.scheme        = "ROW4";
-    exact_params.crossings     = true;
-    exact_params.border_io     = false;
-    exact_params.desynchronize = true;
-    exact_params.upper_bound_x = 11;         // 12 x 31 tiles
-    exact_params.upper_bound_y = 30;         // 12 x 31 tiles
-    exact_params.timeout       = 3'600'000;  // 1h in ms
+    experiments::experiment<std::string, double, uint64_t> sidb_circuits_with_defects{
+        "sidb_circuits_with_defects", "benchmark", "runtime", "number of aspect ratios"};
 
     constexpr const uint64_t bench_select =
         fiction_experiments::all & ~fiction_experiments::parity & ~fiction_experiments::two_bit_add_maj &
@@ -148,96 +124,39 @@ int main()  // NOLINT
 
         // perform technology mapping
         const auto mapped_network = fiction::technology_mapping(cut_xag, tech_map_params);
-        // compute depth
-        const mockturtle::depth_view depth_mapped_network{mapped_network};
 
-        std::optional<gate_lyt> gate_level_layout = std::nullopt;
-        cell_lyt                cell_level_layout{{}, "fail"};
+        fiction::on_the_fly_circuit_design_params<cell_lyt> params{};
+        params.exact_design_parameter.scheme        = "ROW4";
+        params.exact_design_parameter.crossings     = true;
+        params.exact_design_parameter.border_io     = false;
+        params.exact_design_parameter.desynchronize = true;
+        params.exact_design_parameter.upper_bound_x = 11;         // 12 x 31 tiles
+        params.exact_design_parameter.upper_bound_y = 30;         // 12 x 31 tiles
+        params.exact_design_parameter.timeout       = 3'600'000;  // 1h in ms
 
-        auto black_list = fiction::sidb_surface_analysis<fiction::sidb_skeleton_bestagon_library>(
-            lattice_tiling, surface_lattice, std::make_pair(0, 0));
+        params.parameterized_gate_library_parameter.defect_surface     = surface_lattice;
+        params.parameterized_gate_library_parameter.design_gate_params = design_gate_params;
 
-        auto attempts = 0u;
+        fiction::on_the_fly_circuit_design_stats st{};
 
-        mockturtle::stopwatch<>::duration time_counter{};
+        const auto result =
+            fiction::on_the_fly_circuit_design_on_defective_surface<decltype(mapped_network), cell_lyt, gate_lyt>(
+                mapped_network, params, lattice_tiling, &st);
 
-        auto gate_design_failed = true;
-
-        fiction::exact_physical_design_stats exact_stats{};
-
-        {
-            const mockturtle::stopwatch stop{time_counter};
-
-            while (!gate_level_layout.has_value() || gate_design_failed)
-            {
-                exact_stats = {};
-                if (!gate_level_layout.has_value() && attempts > 0)
-                {
-                    break;
-                }
-                std::cout << black_list.size() << '\n';
-                gate_level_layout =
-                    fiction::exact_with_blacklist<gate_lyt>(mapped_network, black_list, exact_params, &exact_stats);
-                if (gate_level_layout.has_value())
-                {
-                    try
-                    {
-                        auto parameter_gate_library =
-                            fiction::parameterized_gate_library_params<cell_lyt>{surface_lattice, design_gate_params};
-
-                        cell_level_layout = fiction::apply_parameterized_gate_library<
-                            cell_lyt, fiction::parameterized_gate_library, gate_lyt,
-                            fiction::parameterized_gate_library_params<cell_lyt>>(*gate_level_layout,
-                                                                                  parameter_gate_library);
-                        gate_design_failed = false;
-                    }
-                    catch (const fiction::gate_design_exception<fiction::tt, gate_lyt>& e)
-                    {
-                        gate_design_failed = true;
-                        black_list[e.which_tile()][e.which_truth_table()].push_back(e.which_port_list());
-                    }
-
-                    catch (const std::exception& e)
-                    {
-                        std::cerr << "Caught std::exception: " << e.what() << '\n';
-                    }
-                }
-                attempts++;
-            }
-        }
-
-        if (!gate_level_layout.has_value())
-        {
-            continue;
-        }
-
-        // check equivalence
-        const auto miter = mockturtle::miter<fiction::technology_network>(mapped_network, *gate_level_layout);
-        const auto eq    = mockturtle::equivalence_checking(*miter);
-        assert(eq.has_value());
-
-        // determine bounding box
-        const auto bb_final = fiction::bounding_box_2d<cell_lyt>(cell_level_layout);
+        // determine bounding box and exclude atomic defects
+        const auto bb = fiction::bounding_box_2d<cell_lyt>(result, fiction::bounding_box_2d_selection::EXCLUDE_DEFECTS);
 
         // compute area
         fiction::area_stats                            area_stats{};
         fiction::area_params<fiction::sidb_technology> area_ps{};
-        fiction::area(bb_final, area_ps, &area_stats);
+        fiction::area(bb, area_ps, &area_stats);
 
-        fiction::sidb_defect_surface<cell_lyt> defect_surface{cell_level_layout};
-
-        // add defects to the file
-        surface_lattice.foreach_sidb_defect([&defect_surface](const auto& defect)
-                                            { defect_surface.assign_sidb_defect(defect.first, defect.second); });
-        // write a SiQAD simulation file
-        fiction::write_sqd_layout(defect_surface,
-                                  fmt::format("{}/{}_percent_after_big_change.sqd", layouts_folder, benchmark));
-
-        // log results
-        sidb_circuits_with_defects(benchmark, mockturtle::to_seconds(time_counter), *eq, area_stats.area,
-                                   exact_stats.num_aspect_ratios);
+        sidb_circuits_with_defects(benchmark, mockturtle::to_seconds(st.time_total), st.exact_stats.num_aspect_ratios);
         sidb_circuits_with_defects.save();
         sidb_circuits_with_defects.table();
+
+        // write a SiQAD simulation file
+        fiction::write_sqd_layout(result, fmt::format("{}/{}.sqd", layouts_folder, benchmark));
     }
 
     return EXIT_SUCCESS;

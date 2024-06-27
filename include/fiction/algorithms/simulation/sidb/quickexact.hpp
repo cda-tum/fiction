@@ -26,6 +26,8 @@ namespace fiction
 
 /**
  * This struct stores the parameters for the *QuickExact* algorithm.
+ *
+ * @tparam CellType Cell type.
  */
 template <typename CellType>
 struct quickexact_params
