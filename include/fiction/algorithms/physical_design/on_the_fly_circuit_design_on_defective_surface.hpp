@@ -16,8 +16,8 @@
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 
-#include <mockturtle/algorithms/equivalence_checking.hpp>  // equivalence checking
-#include <mockturtle/algorithms/miter.hpp>                 // miter structure
+#include <mockturtle/algorithms/equivalence_checking.hpp>
+#include <mockturtle/algorithms/miter.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <exception>
@@ -76,7 +76,7 @@ class on_the_fly_circuit_design_impl
     [[nodiscard]] sidb_defect_surface<CellLyt> design_circuit_on_defective_surface()
     {
         std::optional<GateLyt> gate_level_layout = std::nullopt;
-        CellLyt                cell_level_layout{{}, "fail"};
+        CellLyt                cell_level_layout{};
 
         auto black_list = sidb_surface_analysis<sidb_skeleton_bestagon_library>(
             lattice_tiling, params.parameterized_gate_library_parameter.defect_surface, std::make_pair(0, 0));
