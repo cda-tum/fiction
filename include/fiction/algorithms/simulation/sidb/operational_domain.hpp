@@ -916,6 +916,9 @@ class operational_domain_impl
         std::vector<step_point> neighbors{};
         neighbors.reserve(8);
 
+        const auto emplace = [&neighbors](const auto x, const auto y) noexcept
+        { neighbors.emplace_back(std::vector<std::size_t>{x, y}); };
+
         const auto x = sp.step_values[0];
         const auto y = sp.step_values[1];
 
@@ -932,42 +935,42 @@ class operational_domain_impl
         // right
         if (x != incr_x)
         {
-            neighbors.emplace_back(std::vector<std::size_t>{incr_x, y});
+            emplace(incr_x, y);
         }
         // lower-right
         if (x != incr_x && y != decr_y)
         {
-            neighbors.emplace_back(std::vector<std::size_t>{incr_x, decr_y});
+            emplace(incr_x, decr_y);
         }
         // down
         if (y != decr_y)
         {
-            neighbors.emplace_back(std::vector<std::size_t>{x, decr_y});
+            emplace(x, decr_y);
         }
         // lower-left
         if (x != decr_x && y != decr_y)
         {
-            neighbors.emplace_back(std::vector<std::size_t>{decr_x, decr_y});
+            emplace(decr_x, decr_y);
         }
         // left
         if (x != decr_x)
         {
-            neighbors.emplace_back(std::vector<std::size_t>{decr_x, y});
+            emplace(decr_x, y);
         }
         // upper-left
         if (x != decr_x && y != incr_y)
         {
-            neighbors.emplace_back(std::vector<std::size_t>{decr_x, incr_y});
+            emplace(decr_x, incr_y);
         }
         // up
         if (y != incr_y)
         {
-            neighbors.emplace_back(std::vector<std::size_t>{x, incr_y});
+            emplace(x, incr_y);
         }
         // upper-right
         if (x != incr_x && y != incr_y)
         {
-            neighbors.emplace_back(std::vector<std::size_t>{incr_x, incr_y});
+            emplace(incr_x, incr_y);
         }
 
         return neighbors;
