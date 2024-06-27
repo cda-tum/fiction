@@ -44,18 +44,23 @@ jobs:
   build_and_test:
     strategy:
       matrix:
-        os: [ ubuntu-latest, macos-latest, windows-2019 ]
+        os: [ ubuntu-22.04, macos-14, windows-2022 ]
+        toolset: [ v142, v143]
         python_version: [ '3.8.x', '3.12.x' ]
         include:
-          - os: ubuntu-latest
+          - os: ubuntu-22.04
             z3_platform: linux
             architecture: x64
-          - os: macos-latest
+          - os: macos-14
             z3_platform: macOS
             architecture: arm64
-          - os: windows-2019
+          - os: windows-2022
             z3_platform: windows
             architecture: x64
+        exclude:
+          - os: windows-2022
+            toolset: v144
+
 
     name: 🐍 on ${{matrix.os}} with Python ${{matrix.python_version}}
     runs-on: ${{matrix.os}}
