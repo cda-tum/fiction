@@ -779,6 +779,12 @@ R"doc(Standard constructor that computes an initial bounding box.
 Parameter ``lyt``:
     Gate-level or cell-level layout whose bounding box is desired.)doc";
 
+static const char *__doc_fiction_bounding_box_2d_bounding_box_2d_2 =
+R"doc(Standard constructor that computes an initial bounding box.
+
+Parameter ``lyt``:
+    Gate-level or cell-level layout whose bounding box is desired.)doc";
+
 static const char *__doc_fiction_bounding_box_2d_get_max =
 R"doc(Returns the maximum corner of the bounding box.
 
@@ -818,6 +824,14 @@ static const char *__doc_fiction_bounding_box_2d_layout = R"doc()doc";
 static const char *__doc_fiction_bounding_box_2d_max = R"doc()doc";
 
 static const char *__doc_fiction_bounding_box_2d_min = R"doc()doc";
+
+static const char *__doc_fiction_bounding_box_2d_selection = R"doc(Modes to use for creating the 2D-bounding box.)doc";
+
+static const char *__doc_fiction_bounding_box_2d_selection_EXCLUDE_DEFECTS =
+R"doc(The bounding box is determined based on the cells, excluding atomic
+defects.)doc";
+
+static const char *__doc_fiction_bounding_box_2d_selection_INCLUDE_DEFECTS = R"doc(The bounding box includes atomic defects.)doc";
 
 static const char *__doc_fiction_bounding_box_2d_update_bounding_box =
 R"doc(The bounding box is not automatically updated when the layout changes.
@@ -5841,6 +5855,20 @@ static const char *__doc_fiction_detail_network_balancing_impl_ntk_topo = R"doc(
 static const char *__doc_fiction_detail_network_balancing_impl_ps = R"doc()doc";
 
 static const char *__doc_fiction_detail_network_balancing_impl_run = R"doc()doc";
+
+static const char *__doc_fiction_detail_on_the_fly_circuit_design_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_on_the_fly_circuit_design_impl_design_circuit_on_defective_surface = R"doc()doc";
+
+static const char *__doc_fiction_detail_on_the_fly_circuit_design_impl_lattice_tiling = R"doc(Gate-level layout.)doc";
+
+static const char *__doc_fiction_detail_on_the_fly_circuit_design_impl_mapped_network = R"doc(Mapped network.)doc";
+
+static const char *__doc_fiction_detail_on_the_fly_circuit_design_impl_on_the_fly_circuit_design_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_on_the_fly_circuit_design_impl_params = R"doc(Parameters for the on-the-fly circuit design.)doc";
+
+static const char *__doc_fiction_detail_on_the_fly_circuit_design_impl_stats = R"doc(Statistics for the on-the-fly circuit design.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl = R"doc()doc";
 
@@ -12085,6 +12113,59 @@ static const char *__doc_fiction_offset_ucoord_t_y = R"doc(31 bit for the y coor
 
 static const char *__doc_fiction_offset_ucoord_t_z = R"doc(1 bit for the z coordinate.)doc";
 
+static const char *__doc_fiction_on_the_fly_circuit_design_on_defective_surface =
+R"doc(This function applies the on-the-fly circuit design algorithm to a
+specified defective surface, automatically creating customized SiDB
+gates while integrating atomic defects as essential components of the
+design.
+
+Template parameter ``Ntk``:
+    The type of the input network.
+
+Template parameter ``CellLyt``:
+    The type of the cell layout.
+
+Template parameter ``GateLyt``:
+    The type of the gate layout.
+
+Parameter ``mapped_network``:
+    The input network to be mapped onto the defective surface.
+
+Parameter ``design_params``:
+    The parameters used for designing the circuit, encapsulated in an
+    `on_the_fly_circuit_design_params` object.
+
+Parameter ``lattice_tiling``:
+    The lattice tiling used for the circuit design.
+
+Parameter ``defect_surface``:
+    The defective surface on which the circuit is to be designed.
+
+Parameter ``stats``:
+    Pointer to a structure for collecting statistics. If nullptr,
+    statistics are not collected.
+
+Returns:
+    A `sidb_defect_surface<CellLyt>` representing the designed circuit
+    on the defective surface.)doc";
+
+static const char *__doc_fiction_on_the_fly_circuit_design_params =
+R"doc(This struct stores the parameters to design SiDB circuit on a
+defective surface.
+
+Template parameter ``CellLyt``:
+    Cell-level layout type.)doc";
+
+static const char *__doc_fiction_on_the_fly_circuit_design_params_exact_design_parameter = R"doc(Parameters for the *exact* placement&routing algorithm.)doc";
+
+static const char *__doc_fiction_on_the_fly_circuit_design_params_parameterized_gate_library_parameter = R"doc()doc";
+
+static const char *__doc_fiction_on_the_fly_circuit_design_stats = R"doc(Statistics for the on-the-fly circuit design.)doc";
+
+static const char *__doc_fiction_on_the_fly_circuit_design_stats_duration = R"doc(The total runtime of the operational domain computation.)doc";
+
+static const char *__doc_fiction_on_the_fly_circuit_design_stats_exact_stats = R"doc(The `stats`of the *exact* algorithm.)doc";
+
 static const char *__doc_fiction_open_clocking =
 R"doc(Returns an irregular clocking that maps every coordinate to the
 standard clock. It is intended to be overridden.
@@ -13374,7 +13455,11 @@ Parameter ``params``:
 Returns:
     Simulation Results.)doc";
 
-static const char *__doc_fiction_quickexact_params = R"doc(This struct stores the parameters for the *QuickExact* algorithm.)doc";
+static const char *__doc_fiction_quickexact_params =
+R"doc(This struct stores the parameters for the *QuickExact* algorithm.
+
+Template parameter ``CellType``:
+    Cell type.)doc";
 
 static const char *__doc_fiction_quickexact_params_automatic_base_number_detection = R"doc(Modes to use for the *QuickExact* algorithm.)doc";
 
