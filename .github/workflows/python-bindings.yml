@@ -75,7 +75,7 @@ jobs:
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: '${{matrix.os}}-${{matrix.toolset}}-pyfiction'
+          key: '${{matrix.os}}-pyfiction'
           variant: ccache
           save: true
           max-size: 10G
