@@ -5743,7 +5743,7 @@ static const char *__doc_fiction_detail_operational_domain_impl_find_operational
 R"doc(Performs random sampling to find any operational parameter
 combination. This function is useful if a single starting point is
 required within the domain to expand from. This function returns the
-step in x and y dimension of the first operational point found. If no
+step in all dimensions of the first operational point found. If no
 operational parameter combination can be found within the given number
 of samples, the function returns `std::nullopt`.
 
@@ -5792,26 +5792,29 @@ Returns:
     The operational domain of the layout.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_has_already_been_sampled =
-R"doc(Determines whether the point at step position `(x, y)` has already
-been sampled and returns the operational value at `(x, y)` if it
-already exists. Here, `x` and `y` represent steps in the x and y
-dimension, respectively, not the actual values of the parameters.
+R"doc(Determines whether the point at step position `(d1, ..., dn)` has
+already been sampled and returns the operational value at `(d1, ...,
+dn)` if it already exists. Here, `di` represents steps in the i-th
+dimension, not the actual values of the parameters.
 
 Parameter ``sp``:
     Step point to check.
 
 Returns:
-    The operational status of the point at step position `sp = (x, y)`
-    or `std::nullopt` if `(x, y)` has not been sampled yet.)doc";
+    The operational status of the point at step position `sp = (d1,
+    ..., dn)` or `std::nullopt` if the point `(d1, ..., dn)` has not
+    been sampled yet.)doc";
+
+static const char *__doc_fiction_detail_operational_domain_impl_indices = R"doc(Dimension steps.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_is_step_point_operational =
-R"doc(Logs and returns the operational status at the given point `sp = (x,
-y)`. If the point has already been sampled, it returns the cached
-value. Otherwise, a ground state simulation is performed for all input
-combinations of the stored layout using the given simulation
+R"doc(Logs and returns the operational status at the given point `sp = (d1,
+..., dn)`. If the point has already been sampled, it returns the
+cached value. Otherwise, a ground state simulation is performed for
+all input combinations of the stored layout using the given simulation
 parameters. It terminates as soon as a non-operational state is found.
-In the worst case, the function performs :math:`2^n` simulations,
-where :math:`n` is the number of inputs of the layout. This function
+In the worst case, the function performs :math:`2^i` simulations,
+where :math:`i` is the number of inputs of the layout. This function
 is used by all operational domain computation techniques.
 
 Any investigated point is added to the stored `op_domain`, regardless
@@ -5847,25 +5850,20 @@ Parameter ``sp``:
 Returns:
     The Moore neighborhood of the step point at `sp = (x, y)`.)doc";
 
+static const char *__doc_fiction_detail_operational_domain_impl_num_dimensions = R"doc(The number of dimensions.)doc";
+
 static const char *__doc_fiction_detail_operational_domain_impl_num_evaluated_parameter_combinations = R"doc(Number of evaluated parameter combinations.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_num_simulator_invocations = R"doc(Number of simulator invocations.)doc";
 
+static const char *__doc_fiction_detail_operational_domain_impl_num_steps =
+R"doc(Calculates the number of steps in the given dimension based on the
+provided parameters.
+
+Returns:
+    The number of steps in the given dimension.)doc";
+
 static const char *__doc_fiction_detail_operational_domain_impl_num_threads = R"doc(Number of available hardware threads.)doc";
-
-static const char *__doc_fiction_detail_operational_domain_impl_num_x_steps =
-R"doc(Calculates the number of steps in the x dimension based on the
-provided parameters.
-
-Returns:
-    The number of steps in the x dimension.)doc";
-
-static const char *__doc_fiction_detail_operational_domain_impl_num_y_steps =
-R"doc(Calculates the number of steps in the y dimension based on the
-provided parameters.
-
-Returns:
-    The number of steps in the y dimension.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_op_domain = R"doc(The operational domain of the layout.)doc";
 
@@ -5888,7 +5886,7 @@ Parameter ``ps``:
 Parameter ``st``:
     Statistics of the process.)doc";
 
-static const char *__doc_fiction_detail_operational_domain_impl_output_bdl_pairs = R"doc(The output BDL pair of the layout.)doc";
+static const char *__doc_fiction_detail_operational_domain_impl_output_bdl_pairs = R"doc(The output BDL pairs of the layout.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_params = R"doc(The parameters for the operational domain computation.)doc";
 
@@ -5916,26 +5914,6 @@ Parameter ``val``:
 
 Parameter ``dim``:
     Sweep dimension to set the value `val` to.)doc";
-
-static const char *__doc_fiction_detail_operational_domain_impl_set_x_dimension_value =
-R"doc(Helper function that sets the value of the x dimension in the
-simulation parameters.
-
-Parameter ``sim_params``:
-    Simulation parameter object to set the x dimension value of.
-
-Parameter ``val``:
-    Value to set the x dimension to.)doc";
-
-static const char *__doc_fiction_detail_operational_domain_impl_set_y_dimension_value =
-R"doc(Helper function that sets the value of the y dimension in the
-simulation parameters.
-
-Parameter ``sim_params``:
-    Simulation parameter object to set the y dimension value of.
-
-Parameter ``val``:
-    Value to set the y dimension to.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_simulate_operational_status_in_parallel =
 R"doc(Simulates the operational status of the given points in parallel. It
@@ -5988,21 +5966,10 @@ static const char *__doc_fiction_detail_operational_domain_impl_step_point_step_
 static const char *__doc_fiction_detail_operational_domain_impl_step_point_step_point_2 =
 R"doc(Standard constructor.
 
-Parameter ``x_step``:
-    X dimension step value.
+Parameter ``steps``:
+    All dimension step values.)doc";
 
-Parameter ``y_step``:
-    Y dimension step value.)doc";
-
-static const char *__doc_fiction_detail_operational_domain_impl_step_point_x = R"doc(X dimension step value.)doc";
-
-static const char *__doc_fiction_detail_operational_domain_impl_step_point_y = R"doc(Y dimension step value.)doc";
-
-static const char *__doc_fiction_detail_operational_domain_impl_sweep_dimension = R"doc(Potential sweep dimensions.)doc";
-
-static const char *__doc_fiction_detail_operational_domain_impl_sweep_dimension_X = R"doc(Sweep dimension X.)doc";
-
-static const char *__doc_fiction_detail_operational_domain_impl_sweep_dimension_Y = R"doc(Sweep dimension Y.)doc";
+static const char *__doc_fiction_detail_operational_domain_impl_step_point_step_values = R"doc(All dimension step values.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_to_parameter_point =
 R"doc(Converts a step point to a parameter point.
@@ -6024,13 +5991,7 @@ Returns:
 
 static const char *__doc_fiction_detail_operational_domain_impl_truth_table = R"doc(The specification of the layout.)doc";
 
-static const char *__doc_fiction_detail_operational_domain_impl_x_indices = R"doc(X dimension steps.)doc";
-
-static const char *__doc_fiction_detail_operational_domain_impl_x_values = R"doc(All x dimension values.)doc";
-
-static const char *__doc_fiction_detail_operational_domain_impl_y_indices = R"doc(Y dimension steps.)doc";
-
-static const char *__doc_fiction_detail_operational_domain_impl_y_values = R"doc(All y dimension values.)doc";
+static const char *__doc_fiction_detail_operational_domain_impl_values = R"doc(All dimension values.)doc";
 
 static const char *__doc_fiction_detail_optimize_output_positions =
 R"doc(Utility function that moves outputs from the last row to the previous
@@ -11953,6 +11914,10 @@ Parameter ``stats``:
 Returns:
     The (partial) operational domain of the layout.)doc";
 
+static const char *__doc_fiction_operational_domain_dimensions =
+R"doc(The dimensions to sweep over, ordered by priority. The first dimension
+is the x dimension, the second dimension is the y dimension, etc.)doc";
+
 static const char *__doc_fiction_operational_domain_flood_fill =
 R"doc(Computes the operational domain of the given SiDB cell-level layout.
 The operational domain is the set of all parameter combinations for
@@ -12059,7 +12024,9 @@ map is the parameter point, which holds the parameter values in the x
 and y dimension. The operational status is stored as the value of the
 map.)doc";
 
-static const char *__doc_fiction_operational_domain_parameter_point = R"doc(The parameter point holds parameter values in the x and y dimension.)doc";
+static const char *__doc_fiction_operational_domain_parameter_point =
+R"doc(The parameter point holds parameter values in an arbitrary number of
+dimensions.)doc";
 
 static const char *__doc_fiction_operational_domain_parameter_point_get =
 R"doc(Support for structured bindings.
@@ -12077,7 +12044,7 @@ Parameter ``other``:
     Other parameter point to compare with.
 
 Returns:
-    `true` iff the parameter points are equal.)doc";
+    `true` if the parameter points are equal.)doc";
 
 static const char *__doc_fiction_operational_domain_parameter_point_operator_ne =
 R"doc(Inequality operator.
@@ -12086,22 +12053,17 @@ Parameter ``other``:
     Other parameter point to compare with.
 
 Returns:
-    `true` iff the parameter points are not equal.)doc";
+    `true` if the parameter points are not equal.)doc";
 
-static const char *__doc_fiction_operational_domain_parameter_point_parameter_point = R"doc(Standard default constructor.)doc";
+static const char *__doc_fiction_operational_domain_parameter_point_parameter_point = R"doc(Default constructor.)doc";
 
 static const char *__doc_fiction_operational_domain_parameter_point_parameter_point_2 =
 R"doc(Standard constructor.
 
-Parameter ``x_val``:
-    X dimension parameter value.
+Parameter ``values``:
+    Parameter values for each dimension.)doc";
 
-Parameter ``y_val``:
-    Y dimension parameter value.)doc";
-
-static const char *__doc_fiction_operational_domain_parameter_point_x = R"doc(X dimension parameter value.)doc";
-
-static const char *__doc_fiction_operational_domain_parameter_point_y = R"doc(Y dimension parameter value.)doc";
+static const char *__doc_fiction_operational_domain_parameter_point_parameters = R"doc(Parameter values for each dimension.)doc";
 
 static const char *__doc_fiction_operational_domain_params =
 R"doc(Parameters for the operational domain computation. The parameters are
@@ -12122,21 +12084,10 @@ parameters will be kept constant across sweeps, but the sweep
 parameters are adjusted in each simulation step and thus overwritten
 in this object.)doc";
 
-static const char *__doc_fiction_operational_domain_params_x_dimension = R"doc(The sweep parameter for the x dimension.)doc";
-
-static const char *__doc_fiction_operational_domain_params_x_max = R"doc(The maximum value of the x dimension sweep.)doc";
-
-static const char *__doc_fiction_operational_domain_params_x_min = R"doc(The minimum value of the x dimension sweep.)doc";
-
-static const char *__doc_fiction_operational_domain_params_x_step = R"doc(The step size of the x dimension sweep.)doc";
-
-static const char *__doc_fiction_operational_domain_params_y_dimension = R"doc(The sweep parameter for the y dimension.)doc";
-
-static const char *__doc_fiction_operational_domain_params_y_max = R"doc(The maximum value of the y dimension sweep.)doc";
-
-static const char *__doc_fiction_operational_domain_params_y_min = R"doc(The minimum value of the y dimension sweep.)doc";
-
-static const char *__doc_fiction_operational_domain_params_y_step = R"doc(The step size of the y dimension sweep.)doc";
+static const char *__doc_fiction_operational_domain_params_sweep_dimensions =
+R"doc(The dimensions to sweep over together with their value ranges, ordered
+by priority. The first dimension is the x dimension, the second
+dimension is the y dimension, etc.)doc";
 
 static const char *__doc_fiction_operational_domain_random_sampling =
 R"doc(Computes the operational domain of the given SiDB cell-level layout.
@@ -12205,9 +12156,17 @@ static const char *__doc_fiction_operational_domain_sweep_parameter_LAMBDA_TF = 
 
 static const char *__doc_fiction_operational_domain_sweep_parameter_MU_MINUS = R"doc(The energy transition level.)doc";
 
-static const char *__doc_fiction_operational_domain_x_dimension = R"doc(X dimension sweep parameter.)doc";
+static const char *__doc_fiction_operational_domain_value_range =
+R"doc(A range of values for a dimension sweep. The range is defined by a
+minimum value, a maximum value and a step size.)doc";
 
-static const char *__doc_fiction_operational_domain_y_dimension = R"doc(Y dimension sweep parameter.)doc";
+static const char *__doc_fiction_operational_domain_value_range_dimension = R"doc(The sweep parameter of the dimension.)doc";
+
+static const char *__doc_fiction_operational_domain_value_range_max = R"doc(The maximum value of the dimension sweep.)doc";
+
+static const char *__doc_fiction_operational_domain_value_range_min = R"doc(The minimum value of the dimension sweep.)doc";
+
+static const char *__doc_fiction_operational_domain_value_range_step = R"doc(The step size of the dimension sweep.)doc";
 
 static const char *__doc_fiction_operational_input_patterns =
 R"doc(This function determines the input combinations for which the SiDB-
@@ -15942,8 +15901,6 @@ static const char *__doc_std_hash_operator_call_5 = R"doc()doc";
 static const char *__doc_std_hash_operator_call_6 = R"doc()doc";
 
 static const char *__doc_std_iterator_traits = R"doc()doc";
-
-static const char *__doc_std_tuple_size = R"doc()doc";
 
 #if defined(__GNUG__)
 #pragma GCC diagnostic pop
