@@ -10,7 +10,7 @@ class TestQuicksim(unittest.TestCase):
         layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((4, 1), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((6, 1), sidb_technology.cell_type.NORMAL)
-    #
+
         params = quicksim_params()
         params.simulation_parameters = sidb_simulation_parameters()
         params.iteration_steps = 80
@@ -21,15 +21,14 @@ class TestQuicksim(unittest.TestCase):
         params_one = quicksim_params()
         params_one.iteration_steps = 50
         params_one.alpha = 0.4
-
+        params_one.number_threads = 1
         self.assertEqual(params_one.iteration_steps, 50)
         self.assertEqual(params_one.alpha, 0.4)
+        self.assertEqual(params_one.number_threads, 1)
 
         cds = charge_distribution_surface(layout)
 
         result = quicksim(layout, params)
-
-        print("len: " + str(len(result.charge_distributions)))
 
         self.assertEqual(result.algorithm_name, "QuickSim")
         self.assertLessEqual(len(result.charge_distributions), 80)
@@ -39,13 +38,13 @@ class TestQuicksim(unittest.TestCase):
         self.assertEqual(groundstate.get_charge_state((0, 1)), sidb_charge_state.NEGATIVE)
         self.assertEqual(groundstate.get_charge_state((4, 1)), sidb_charge_state.NEUTRAL)
         self.assertEqual(groundstate.get_charge_state((6, 1)), sidb_charge_state.NEGATIVE)
-    #
+
     def test_perturber_and_sidb_pair_111(self):
-        layout_111 = sidb_111_lattice((4, 1))
-        layout_111.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
-        layout_111.assign_cell_type((1, 0), sidb_technology.cell_type.NORMAL)
-        layout_111.assign_cell_type((2, 0), sidb_technology.cell_type.NORMAL)
-        layout_111.assign_cell_type((3, 0), sidb_technology.cell_type.NORMAL)
+        layout = sidb_111_lattice((4, 1))
+        layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
+        layout.assign_cell_type((1, 0), sidb_technology.cell_type.NORMAL)
+        layout.assign_cell_type((2, 0), sidb_technology.cell_type.NORMAL)
+        layout.assign_cell_type((3, 0), sidb_technology.cell_type.NORMAL)
 
         params = quicksim_params()
         params.simulation_parameters = sidb_simulation_parameters()
@@ -56,9 +55,9 @@ class TestQuicksim(unittest.TestCase):
         self.assertEqual(params.alpha, 0.7)
         self.assertEqual(params.simulation_parameters.mu_minus, -0.32)
 
-        cds = charge_distribution_surface_111(layout_111)
+        cds = charge_distribution_surface_111(layout)
 
-        result = quicksim(cds, params)
+        result = quicksim(layout, params)
 
         self.assertEqual(result.algorithm_name, "QuickSim")
 
