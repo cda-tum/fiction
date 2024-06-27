@@ -5937,6 +5937,14 @@ Parameter ``sim_params``:
 Parameter ``val``:
     Value to set the y dimension to.)doc";
 
+static const char *__doc_fiction_detail_operational_domain_impl_simulate_operational_status_in_parallel =
+R"doc(Simulates the operational status of the given points in parallel. It
+divides the work among multiple threads to speed up the computation.
+
+Parameter ``step_points``:
+    A vector of step points for which the operational status is to be
+    simulated.)doc";
+
 static const char *__doc_fiction_detail_operational_domain_impl_stats = R"doc(The statistics of the operational domain computation.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_step_point =
