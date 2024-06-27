@@ -61,9 +61,6 @@ jobs:
             z3_platform: windows
             architecture: x64
             toolset: v143
-        exclude:
-          - os: windows-2022
-            toolset: v144
 
 
     name: 🐍 on ${{matrix.os}} and ${{matrix.toolset}} toolset with Python ${{matrix.python_version}}
