@@ -803,7 +803,6 @@ class post_layout_optimization_impl
         pst.y_size_before = plyt.y() + 1;
 
         uint64_t max_gate_relocations = ps.max_gate_relocations.value_or((plyt.x() + 1) * (plyt.y() + 1));
-        bool     optimize_pos_only    = ps.optimize_pos_only;
 
         // Optimization
         auto layout                  = obstruction_layout<Lyt>(plyt);
@@ -821,7 +820,7 @@ class post_layout_optimization_impl
             {
                 reduced_wiring = false;
                 fiction::wiring_reduction_stats wiring_reduction_stats{};
-                if (moved_at_least_one_gate && !optimize_pos_only)
+                if (moved_at_least_one_gate && !ps.optimize_pos_only)
                 {
                     fiction::wiring_reduction(layout, &wiring_reduction_stats);
                     if ((wiring_reduction_stats.area_improvement != 0ull) ||
@@ -862,7 +861,7 @@ class post_layout_optimization_impl
                 moved_at_least_one_gate = false;
                 for (auto& gate_tile : gate_tiles)
                 {
-                    if (!optimize_pos_only || (optimize_pos_only && layout.is_po_tile(gate_tile)))
+                    if (!ps.optimize_pos_only || (ps.optimize_pos_only && layout.is_po_tile(gate_tile)))
                     {
                         if (detail::improve_gate_location(layout, gate_tile, max_non_po, max_gate_relocations))
                         {
