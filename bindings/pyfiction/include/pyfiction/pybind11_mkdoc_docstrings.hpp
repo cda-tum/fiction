@@ -2379,8 +2379,8 @@ Thereby, this function is very similar to
 `mockturtle::cleanup_dangling`. However, it supports real buffer nodes
 used for fanouts and path balancing in fiction.
 
-@note In contrast to `mockturtle::cleanup_dangling`, this function
-returns `ntk` if `NtkDest` and `NtkSrc` are of the same type.
+@note If `NtkDest` and `NtkSrc` are of the same type, this function
+returns `ntk` cleaned using `mockturtle::cleanup_dangling`.
 
 Template parameter ``NtkDest``:
     Type of the returned logic network.
