@@ -40,6 +40,10 @@ struct post_layout_optimization_params
      * specified.
      */
     std::optional<uint64_t> max_gate_relocations = std::nullopt;
+    /**
+     * Only optimize PO positions.
+     */
+    bool optimize_pos_only = false;
 };
 
 /**
@@ -795,8 +799,9 @@ class post_layout_optimization_impl
         static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
 
         const mockturtle::stopwatch stop{pst.time_total};
-        pst.x_size_before             = plyt.x() + 1;
-        pst.y_size_before             = plyt.y() + 1;
+        pst.x_size_before = plyt.x() + 1;
+        pst.y_size_before = plyt.y() + 1;
+
         uint64_t max_gate_relocations = ps.max_gate_relocations.value_or((plyt.x() + 1) * (plyt.y() + 1));
 
         // Optimization
@@ -815,7 +820,7 @@ class post_layout_optimization_impl
             {
                 reduced_wiring = false;
                 fiction::wiring_reduction_stats wiring_reduction_stats{};
-                if (moved_at_least_one_gate)
+                if (moved_at_least_one_gate && !ps.optimize_pos_only)
                 {
                     fiction::wiring_reduction(layout, &wiring_reduction_stats);
                     if ((wiring_reduction_stats.area_improvement != 0ull) ||
@@ -855,21 +860,24 @@ class post_layout_optimization_impl
                 moved_at_least_one_gate = false;
                 for (auto& gate_tile : gate_tiles)
                 {
-                    if (detail::improve_gate_location(layout, gate_tile, max_non_po, max_gate_relocations))
+                    if (!ps.optimize_pos_only || (ps.optimize_pos_only && layout.is_po_tile(gate_tile)))
                     {
-                        moved_at_least_one_gate = true;
+                        if (detail::improve_gate_location(layout, gate_tile, max_non_po, max_gate_relocations))
+                        {
+                            moved_at_least_one_gate = true;
+                        }
                     }
                 }
                 // calculate bounding box
                 const auto bounding_box = bounding_box_2d(layout);
-                layout.resize({bounding_box.get_x_size(), bounding_box.get_y_size(), layout.z()});
+                layout.resize({bounding_box.get_max().x, bounding_box.get_max().y, layout.z()});
             }
         }
         detail::optimize_output_positions(layout);
 
         // calculate bounding box
         const auto bounding_box = bounding_box_2d(layout);
-        layout.resize({bounding_box.get_x_size(), bounding_box.get_y_size(), layout.z()});
+        layout.resize({bounding_box.get_max().x, bounding_box.get_max().y, layout.z()});
 
         pst.x_size_after           = layout.x() + 1;
         pst.y_size_after           = layout.y() + 1;
