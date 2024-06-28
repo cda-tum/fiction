@@ -43,7 +43,11 @@ jobs:
         exclude:
           - os: ubuntu-24.04
             compiler: clang++12
+          - os: ubuntu-24.04
+            compiler: clang++13
         include:
+          - os: ubuntu-22.04
+            compiler: clang++15
           - os: ubuntu-22.04
             compiler: g++-12
             cppstandard: -DCMAKE_CXX_STANDARD=20
