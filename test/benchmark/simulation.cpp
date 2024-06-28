@@ -8,6 +8,7 @@
 #include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/algorithms/simulation/sidb/quicksim.hpp>
 #include <fiction/technology/cell_technologies.hpp>
+#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
 using namespace fiction;
@@ -61,7 +62,7 @@ TEST_CASE("Benchmark simulators", "[benchmark]")
 
     BENCHMARK("QuickExact")
     {
-        const quickexact_params<lattice> sim_params{sidb_simulation_parameters{2, -0.32}};
+        const quickexact_params<cell<lattice>> sim_params{sidb_simulation_parameters{2, -0.32}};
         return quickexact<lattice>(lyt, sim_params);
     };
 

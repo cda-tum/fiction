@@ -9,6 +9,7 @@
 #include "fiction/types.hpp"
 #include "fiction/utils/name_utils.hpp"
 
+#include <mockturtle/algorithms/cleanup.hpp>
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
 #include <mockturtle/views/topo_view.hpp>
@@ -37,7 +38,7 @@ class convert_network_impl<NtkDest, NtkSrc, true>
 
     NtkDest run()
     {
-        return ntk;
+        return mockturtle::cleanup_dangling<NtkSrc, NtkDest>(ntk, true, false);
     }
 
   private:
@@ -187,8 +188,8 @@ class convert_network_impl<NtkDest, NtkSrc, false>
  * `mockturtle::cleanup_dangling`. However, it supports real buffer nodes used for fanouts and path balancing in
  * fiction.
  *
- * @note In contrast to `mockturtle::cleanup_dangling`, this function returns `ntk` if `NtkDest` and `NtkSrc` are of the
- * same type.
+ * @note If `NtkDest` and `NtkSrc` are of the same type, this function returns `ntk` cleaned using
+ * `mockturtle::cleanup_dangling`.
  *
  * @tparam NtkDest Type of the returned logic network.
  * @tparam NtkSrc Type of the input logic network.
