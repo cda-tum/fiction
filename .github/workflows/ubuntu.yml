@@ -39,15 +39,10 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-22.04, ubuntu-24.04 ]
-        compiler: [ g++-12, g++-13, g++-14, clang++12, clang++13, clang++14 ]
-        exclude:
-          - os: ubuntu-24.04
-            compiler: clang++12
-          - os: ubuntu-24.04
-            compiler: clang++13
+        compiler: [ g++-12, g++-13, g++-14, clang++-12, clang++-13, clang++-14 ]
         include:
           - os: ubuntu-22.04
-            compiler: clang++15
+            compiler: clang++-15
           - os: ubuntu-22.04
             compiler: g++-12
             cppstandard: -DCMAKE_CXX_STANDARD=20
