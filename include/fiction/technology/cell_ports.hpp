@@ -252,7 +252,7 @@ struct formatter<fiction::port_position>
     }
 
     template <typename FormatContext>
-    auto format(const fiction::port_position& p, FormatContext& ctx)
+    auto format(const fiction::port_position& p, FormatContext& ctx) const
     {
         return format_to(ctx.out(), "({},{})", p.x, p.y);
     }
@@ -268,7 +268,7 @@ struct formatter<fiction::port_direction>
     }
 
     template <typename FormatContext>
-    auto format(const fiction::port_direction& p, FormatContext& ctx)
+    auto format(const fiction::port_direction& p, FormatContext& ctx) const
     {
         return format_to(ctx.out(), p.dir == fiction::port_direction::NORTH      ? "N" :
                                     p.dir == fiction::port_direction::NORTH_EAST ? "NE" :
