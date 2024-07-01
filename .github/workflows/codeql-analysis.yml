@@ -134,9 +134,10 @@ jobs:
           -DMOCKTURTLE_EXAMPLES=OFF
 
       - name: Build fiction
-        if: matrix.language == 'cpp'
-        working-directory: ${{github.workspace}}/build
+        if: ${{ matrix.language == 'cpp' }}
+        working-directory: ${{ github.workspace }}/build
         run: cmake --build . --config ${{matrix.build_type}} -j4
+
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
