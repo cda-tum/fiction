@@ -64,6 +64,7 @@ int main()  // NOLINT
     // create an empty surface with the maximal possible dimension.
     fiction::sidb_defect_surface<cell_lyt> surface_lattice{};
 
+    // add physical parameters of the defects to the surface.
     surface_lattice_initial.foreach_sidb_defect(
         [&surface_lattice, &stray_db, &si_vacancy](const auto& cd)
         {
