@@ -143,6 +143,20 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
             check_eq(blueprints::mux21_network<technology_network>(), layout);
         }
     }
+
+    SECTION("Optimize POs only")
+    {
+        using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
+
+        const auto layout = orthogonal<gate_layout>(blueprints::mux21_network<technology_network>(), {});
+
+        post_layout_optimization_stats  stats{};
+        post_layout_optimization_params params{};
+        params.optimize_pos_only = true;
+        post_layout_optimization<gate_layout>(layout, params, &stats);
+
+        check_eq(blueprints::mux21_network<technology_network>(), layout);
+    }
 }
 
 TEST_CASE("Optimization steps", "[post_layout_optimization]")
