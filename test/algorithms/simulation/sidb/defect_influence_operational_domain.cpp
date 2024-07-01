@@ -23,7 +23,7 @@
 using namespace fiction;
 
 TEST_CASE("novel designed AND Gate influence distance function which fails again",
-          "[defect-influence-of-sidb-gate-contour-tracing]")
+          "[defect-influence-operational-domain]")
 {
     sidb_cell_clk_lyt_siqad lyt{};
 
@@ -75,7 +75,7 @@ TEST_CASE("novel designed AND Gate influence distance function which fails again
         defect_influence_operational_domain_stats stats{};
         const auto defect_influence_domain = defect_influence_operational_domain_grid_search(
             cube_lyt, std::vector<tt>{create_or_tt()}, 5, params, &stats);
-        CHECK_THAT(defect_avoidance_distance(cube_lyt, defect_influence_domain),
+        CHECK_THAT(defect_avoidance_distance(cube_lyt, defect_influence_domain).max_min_distance,
                    Catch::Matchers::WithinAbs(11.6138152646, physical_constants::POP_STABILITY_ERR));
     }
     SECTION("Random Sampling")
@@ -85,7 +85,7 @@ TEST_CASE("novel designed AND Gate influence distance function which fails again
         const auto defect_influence_domain = defect_influence_operational_domain_random_sampling(
             cube_lyt, std::vector<tt>{create_or_tt()}, 100, params, &stats);
         CHECK(defect_influence_domain.operational_values.size() == 100);
-        CHECK(defect_avoidance_distance(cube_lyt, defect_influence_domain) < 11.61);
+        CHECK(defect_avoidance_distance(cube_lyt, defect_influence_domain).max_min_distance < 11.61);
     }
     SECTION("Contour Tracing")
     {
@@ -93,6 +93,6 @@ TEST_CASE("novel designed AND Gate influence distance function which fails again
         defect_influence_operational_domain_stats stats{};
         const auto defect_influence_domain = defect_influence_operational_domain_contour_tracing(
             cube_lyt, std::vector<tt>{create_or_tt()}, 30, params, &stats);
-        CHECK(defect_avoidance_distance(cube_lyt, defect_influence_domain) > 11.61);
+        CHECK(defect_avoidance_distance(cube_lyt, defect_influence_domain).max_min_distance > 11.61);
     }
 }

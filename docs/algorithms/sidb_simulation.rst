@@ -406,4 +406,6 @@ Maximum Minimum Defect Influence Distance
 
 **Header:** ``fiction/algorithms/simulation/sidb/defect_avoidance_distance.hpp``
 
+.. doxygenstruct:: fiction::defect_avoidance_distance_result
+   :members:
 .. doxygenfunction:: fiction::defect_avoidance_distance

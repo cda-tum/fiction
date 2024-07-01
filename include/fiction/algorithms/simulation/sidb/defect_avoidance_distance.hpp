@@ -13,6 +13,21 @@
 namespace fiction
 {
 /**
+ * Results of the defect avoidance distance calculation.
+ */
+template <typename CellType>
+struct defect_avoidance_distance_result
+{
+    /**
+     * Maximum position at which the placement of a SiDB defect still causes the gate to fail.
+     */
+    CellType max_distance_postion_of_non_operational_defect{};
+    /**
+     * Minimum distance between a SiDB of the gate and the defect at the maximum distance that causes the gate to fail.
+     */
+    double max_min_distance{};
+};
+/**
  * Calculates the defect avoidance distance of a given gate layout by a given atomic defect. This means that a defect
  * must be further away than this distance for the SiDB gate to be operational. This function requires both the defect
  * operational domain and the layout as input.
@@ -23,31 +38,36 @@ namespace fiction
  * @return The maximum minimum defect influence distance.
  */
 template <typename Lyt>
-[[nodiscard]] double defect_avoidance_distance(const Lyt&                                      lyt,
-                                               const defect_influence_operational_domain<Lyt>& defect_opdomain) noexcept
+[[nodiscard]] defect_avoidance_distance_result<cell<Lyt>>
+defect_avoidance_distance(const Lyt& lyt, const defect_influence_operational_domain<Lyt>& defect_opdomain) noexcept
 {
-    double max_distance = 0;
+    double    max_distance         = 0;
+    cell<Lyt> max_distance_postion = {};
+
     for (const auto& val : defect_opdomain.operational_values)
     {
         if (val.second == operational_status::OPERATIONAL)
         {
             continue;
         }
-        auto min_distance = std::numeric_limits<double>::infinity();
+        auto      min_distance          = std::numeric_limits<double>::infinity();
+        cell<Lyt> min_distance_position = {};
         lyt.foreach_cell(
-            [&val, &min_distance, &lyt](const auto& c)
+            [&val, &min_distance, &min_distance_position, &lyt](const auto& c)
             {
                 if (sidb_nm_distance<Lyt>(lyt, c, val.first) < min_distance)
                 {
-                    min_distance = sidb_nm_distance<Lyt>(lyt, c, val.first);
+                    min_distance          = sidb_nm_distance<Lyt>(lyt, c, val.first);
+                    min_distance_position = val.first;
                 }
             });
         if (min_distance > max_distance)
         {
-            max_distance = min_distance;
+            max_distance         = min_distance;
+            max_distance_postion = min_distance_position;
         }
     }
-    return max_distance;
+    return defect_avoidance_distance_result<cell<Lyt>>{max_distance_postion, max_distance};
 }
 
 }  // namespace fiction

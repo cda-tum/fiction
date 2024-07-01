@@ -2,8 +2,8 @@
 // Created by marcel on 02.08.23.
 //
 
-#ifndef FICTION_WRITE_OPERATIONAL_DOMAIN_HPP
-#define FICTION_WRITE_OPERATIONAL_DOMAIN_HPP
+#ifndef FICTION_WRITE_DEFECT_OPERATIONAL_DOMAIN_HPP
+#define FICTION_WRITE_DEFECT_OPERATIONAL_DOMAIN_HPP
 
 #include "fiction/algorithms/simulation/sidb/defect_influence_operational_domain.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
@@ -20,7 +20,7 @@ namespace fiction
 /**
  * Parameters for writing an operational domain to a CSV file.
  */
-struct write_operational_domain_params
+struct write_defect_operational_domain_params
 {
     /**
      * The tag used to represent the operational value of a parameter set.
@@ -47,12 +47,12 @@ struct write_operational_domain_params
  * (represented as a pair of sweep parameters for the X and Y dimensions) to their operational status.
  * @param os The output stream where the CSV representation of the operational domain is written to.
  * @param params The parameters used for writing, including the operational and non-operational tags. Defaults to an
- * empty `write_operational_domain_params` object, which provides standard tags.
+ * empty `write_defect_operational_domain_params` object, which provides standard tags.
  */
 template <typename Lyt>
 inline void write_defect_influence_operational_domain(const defect_influence_operational_domain<Lyt>& opdom,
                                                       std::ostream&                                   os,
-                                                      const write_operational_domain_params&          params = {})
+                                                      const write_defect_operational_domain_params&   params = {})
 {
     csv_writer writer{os};
 
@@ -80,12 +80,12 @@ inline void write_defect_influence_operational_domain(const defect_influence_ope
  * (represented as a pair of sweep parameters for the X and Y dimensions) to their operational status.
  * @param filename The filename where the CSV representation of the operational domain is written to.
  * @param params The parameters used for writing, including the operational and non-operational tags. Defaults to an
- * empty `write_operational_domain_params` object, which provides standard tags.
+ * empty `write_defect_operational_domain_params` object, which provides standard tags.
  */
 template <typename Lyt>
 inline void write_defect_influence_operational_domain(const defect_influence_operational_domain<Lyt>& opdom,
                                                       const std::string_view&                         filename,
-                                                      const write_operational_domain_params&          params = {})
+                                                      const write_defect_operational_domain_params&   params = {})
 {
     std::ofstream os{filename.data(), std::ofstream::out};
 
@@ -100,4 +100,4 @@ inline void write_defect_influence_operational_domain(const defect_influence_ope
 
 }  // namespace fiction
 
-#endif  // FICTION_WRITE_OPERATIONAL_DOMAIN_HPP
+#endif  // FICTION_WRITE_DEFECT_OPERATIONAL_DOMAIN_HPP

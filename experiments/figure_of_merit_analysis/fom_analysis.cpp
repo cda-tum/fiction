@@ -12,7 +12,6 @@
 #include <fiction/algorithms/simulation/sidb/critical_temperature.hpp>
 #include <fiction/algorithms/simulation/sidb/defect_avoidance_distance.hpp>
 #include <fiction/algorithms/simulation/sidb/defect_influence_operational_domain.hpp>
-#include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
 #include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
@@ -20,6 +19,7 @@
 #include <fiction/io/print_layout.hpp>
 #include <fiction/io/read_sqd_layout.hpp>
 #include <fiction/io/write_defect_influence_operational_domain.hpp>
+#include <fiction/io/write_operational_domain.hpp>
 #include <fiction/io/write_sqd_layout.hpp>
 #include <fiction/technology/sidb_defects.hpp>
 #include <fiction/types.hpp>
@@ -137,7 +137,7 @@ int main()  // NOLINT
                     runtime.push_back(mockturtle::to_seconds(arsenic_stats.time_total));
 
                     defect_influence_arsenic.push_back(
-                        defect_avoidance_distance(gate, defect_influence_domain_arsenic));
+                        defect_avoidance_distance(gate, defect_influence_domain_arsenic).max_min_distance);
 
                     defect_influence_operational_domain_stats vacancy_stats{};
                     const auto defect_influence_domain_vacancy = defect_influence_operational_domain_grid_search(
@@ -149,7 +149,7 @@ int main()  // NOLINT
                     std::cout << fmt::format("runtime: {}", mockturtle::to_seconds(arsenic_stats.time_total)) << '\n';
 
                     defect_influence_vacancy.push_back(
-                        defect_avoidance_distance(gate, defect_influence_domain_vacancy));
+                        defect_avoidance_distance(gate, defect_influence_domain_vacancy).max_min_distance);
 
                     pop_stability_neutral_to_negative.push_back(
                         calculate_min_potential_for_charge_change_for_all_input_combinations(
