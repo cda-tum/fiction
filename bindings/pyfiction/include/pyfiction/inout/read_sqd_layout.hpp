@@ -28,17 +28,20 @@ void read_sqd_layout(pybind11::module& m)
 
     py::register_exception<fiction::sqd_parsing_error>(m, "sqd_parsing_error", PyExc_RuntimeError);
 
-    Lyt (*read_sqd_layout_function_pointer)(const std::string_view&, const std::string_view&) =
-        &fiction::read_sqd_layout<Lyt>;
-
     if constexpr (fiction::is_sidb_lattice_100_v<Lyt>)
     {
-        m.def("read_sqd_layout_100", read_sqd_layout_function_pointer, "filename"_a, "layout_name"_a = "",
+        Lyt (*read_sqd_layout_function_pointer)(const std::string_view&, const std::string_view&) =
+            &fiction::read_sqd_layout<Lyt>;
+
+        m.def("read_sqd_layout_100", read_sqd_layout_function_pointer, "filename"_a, "name"_a = "",
               DOC(fiction_read_sqd_layout_3));
     }
     else
     {
-        m.def("read_sqd_layout_111", read_sqd_layout_function_pointer, "filename"_a, "layout_name"_a = "",
+        Lyt (*read_sqd_layout_function_pointer)(const std::string_view&, const std::string_view&) =
+            &fiction::read_sqd_layout<Lyt>;
+
+        m.def("read_sqd_layout_111", read_sqd_layout_function_pointer, "filename"_a, "name"_a = "",
               DOC(fiction_read_sqd_layout_3));
     }
 }

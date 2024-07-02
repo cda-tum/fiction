@@ -300,6 +300,7 @@ class is_operational_impl
      * Number of simulator invocations.
      */
     std::size_t simulator_invocations{0};
+
     /**
      * This function conducts physical simulation of the given layout (gate layout with certain input combination). The
      * simulation results are stored in the `sim_result` variable.
@@ -405,6 +406,38 @@ template <typename Lyt, typename TT>
     detail::is_operational_impl<Lyt, TT> p{lyt, spec, params};
 
     return p.determine_operational_input_patterns();
+}
+/**
+ * This function calculates the count of input combinations for which the SiDB-based logic, represented by the
+ * provided layout (`lyt`) and truth table specifications (`spec`), produces the correct output.
+ *
+ * @tparam Lyt Type of the cell-level layout.
+ * @tparam TT Type of the truth table.
+ * @param lyt The SiDB layout.
+ * @param spec Vector of truth table specifications.
+ * @param params Parameters to simualte if a input combination is operational.
+ * @return The count of operational input combinations.
+ *
+ */
+template <typename Lyt, typename TT>
+[[nodiscard]] std::size_t number_of_operational_input_combinations(const Lyt& lyt, const std::vector<TT>& spec,
+                                                                   const is_operational_params& params = {}) noexcept
+{
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
+
+    assert(lyt.num_pis() > 0 && "skeleton needs input cells");
+    assert(lyt.num_pos() > 0 && "skeleton needs output cells");
+
+    assert(!spec.empty());
+    // all elements in tts must have the same number of variables
+    assert(std::adjacent_find(spec.begin(), spec.end(),
+                              [](const auto& a, const auto& b) { return a.num_vars() != b.num_vars(); }) == spec.end());
+
+    detail::is_operational_impl<Lyt, TT> p{lyt, spec, params};
+
+    return p.count_number_of_non_operational_input_combinations();
 }
 
 }  // namespace fiction

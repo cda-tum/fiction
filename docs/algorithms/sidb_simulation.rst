@@ -170,9 +170,18 @@ Maximum Defect Influence Distance
 
 **Header:** ``fiction/algorithms/simulation/sidb/maximum_defect_influence_position_and_distance.hpp``
 
-.. doxygenstruct:: fiction::maximum_defect_influence_distance_params
+.. doxygenstruct:: fiction::maximum_defect_influence_position_and_distance_params
+   :members:
+.. doxygenstruct:: fiction::maximum_defect_influence_position_and_distance_stats
    :members:
 .. doxygenfunction:: fiction::maximum_defect_influence_position_and_distance
+
+
+**Header:** ``fiction/algorithms/simulation/sidb/maximum_defect_influence_position_and_distance_of_sidb_gate.hpp``
+
+.. doxygenstruct:: fiction::maximum_defect_influence_position_and_distance_of_sidb_gate_params
+   :members:
+.. doxygenfunction:: fiction::maximum_defect_influence_position_and_distance_of_sidb_gate
 
 
 Time-to-Solution (TTS) Statistics
@@ -271,6 +280,21 @@ Operational Domain Computation
         .. autofunction:: mnt.pyfiction.operational_domain_contour_tracing
 
 
+Defect Influence Operational Domain
+###################################
+
+**Header:** ``fiction/algorithms/simulation/sidb/defect_influence_operational_domain.hpp``
+
+.. doxygenstruct:: fiction::defect_influence_operational_domain_params
+   :members:
+.. doxygenstruct:: fiction::defect_influence_operational_domain
+   :members:
+.. doxygenstruct:: fiction::defect_influence_operational_domain_stats
+   :members:
+.. doxygenfunction:: fiction::defect_influence_operational_domain_grid_search
+.. doxygenfunction:: fiction::defect_influence_operational_domain_random_sampling
+.. doxygenfunction:: fiction::defect_influence_operational_domain_contour_tracing
+
 
 Utility Functions
 #################
@@ -348,6 +372,13 @@ Assess Population Stability
            :members:
         .. doxygenfunction:: fiction::assess_physical_population_stability
 
+        **Header:** ``fiction/algorithms/simulation/sidb/calculate_min_potential_for_charge_change_for_all_input_combinations.hpp``
+
+        .. doxygenstruct:: fiction::calculate_min_potential_for_charge_change_for_all_input_combinations_params
+           :members:
+        .. doxygenfunction:: fiction::calculate_min_potential_for_charge_change_for_all_input_combinations
+
+
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.transition_type
             :members:
@@ -368,3 +399,13 @@ Convert Potential to Distance
 
     .. tab:: Python
         .. autofunction:: mnt.pyfiction.convert_potential_to_distance
+
+
+Maximum Minimum Defect Influence Distance
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Header:** ``fiction/algorithms/simulation/sidb/defect_avoidance_distance.hpp``
+
+.. doxygenstruct:: fiction::defect_avoidance_distance_result
+   :members:
+.. doxygenfunction:: fiction::defect_avoidance_distance

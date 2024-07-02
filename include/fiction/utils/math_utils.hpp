@@ -9,6 +9,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <numeric>
+#include <stdexcept>
 #include <type_traits>
 #include <vector>
 
@@ -116,6 +117,31 @@ determine_all_combinations_of_distributing_k_entities_on_n_positions(const std::
         });
 
     return all_combinations;
+}
+
+/**
+ * Calculates the cost function \f$ \chi = \sum_{i=1} w_{i} \cdot \chi_{i} \f$ by summing the product of normalized chi
+ * values \f$ \chi_{i} \f$ and weights \f$ w_{i} \f$.
+ *
+ * @param chis The vector containing the chi values.
+ * @param weights The vector containing the weights.
+ * @return The calculated cost function \f$ \chi(L) \f$.
+ *
+ * @throws std::invalid_argument If the sizes of chis and weights vectors are different.
+ */
+[[nodiscard]] inline double cost_function_chi(const std::vector<double>& chis, const std::vector<double>& weights)
+{
+    if (chis.size() != weights.size())
+    {
+        throw std::invalid_argument("chis and weights must have the same size.");
+    }
+
+    double chi = 0.0;
+    for (std::size_t i = 0; i < chis.size(); ++i)
+    {
+        chi += weights.at(i) * chis.at(i);
+    }
+    return chi;
 }
 
 }  // namespace fiction

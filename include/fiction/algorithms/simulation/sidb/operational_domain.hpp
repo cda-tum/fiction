@@ -9,6 +9,7 @@
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
+#include "fiction/layouts/cell_level_layout.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/physical_constants.hpp"
 #include "fiction/traits.hpp"
@@ -16,6 +17,7 @@
 #include "fiction/utils/hash.hpp"
 #include "fiction/utils/phmap_utils.hpp"
 
+#include <kitty/bit_operations.hpp>
 #include <kitty/traits.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 #include <phmap.h>
@@ -27,7 +29,6 @@
 #include <cstdint>
 #include <cstdlib>
 #include <iterator>
-#include <numeric>
 #include <optional>
 #include <queue>
 #include <random>
@@ -231,6 +232,10 @@ struct operational_domain_stats
      * Number of parameter combinations, for which the layout is non-operational.
      */
     std::size_t num_non_operational_parameter_combinations{0};
+    /**
+     * The ratio of operational parameter pairs to all possible parameter pairs. Value is between 0 and 1.
+     */
+    double percentual_operational_area{0.0};
 };
 
 namespace detail
@@ -348,13 +353,25 @@ class operational_domain_impl
      * border around the domain.
      *
      * @param samples Maximum number of random samples to be taken before flood fill.
+     * @param initial_parameter Optional initial point in the parameter space for flood fill.
      * @return The (partial) operational domain of the layout.
      */
-    [[nodiscard]] operational_domain flood_fill(const std::size_t samples) noexcept
+    [[nodiscard]] operational_domain
+    flood_fill(const std::size_t                                         samples,
+               const std::optional<operational_domain::parameter_point>& initial_parameter) noexcept
     {
         mockturtle::stopwatch stop{stats.time_total};
 
-        const auto step_point_samples = generate_random_step_points(samples);
+        std::set<step_point> step_point_samples = {};
+
+        if (initial_parameter.has_value())
+        {
+            step_point_samples.insert(to_step_point(initial_parameter.value()));
+        }
+        else
+        {
+            step_point_samples = generate_random_step_points(samples);
+        }
 
         // for each sample point in parallel
         std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ step_point_samples.cbegin(), step_point_samples.cend(),
@@ -420,15 +437,33 @@ class operational_domain_impl
      * a one pixel wide border around it.
      *
      * @param samples Maximum number of random samples to be taken before contour tracing.
+     * @param initial_parameter Optional initial point in the parameter space for contour tracing.
      * @return The (partial) operational domain of the layout.
      */
-    [[nodiscard]] operational_domain contour_tracing(const std::size_t samples) noexcept
+    [[nodiscard]] operational_domain
+    contour_tracing(const std::size_t                                         samples,
+                    const std::optional<operational_domain::parameter_point>& initial_parameter_point) noexcept
     {
         mockturtle::stopwatch stop{stats.time_total};
 
-        // first, perform random sampling to find an operational starting point
-        const auto starting_point = find_operational_step_point_via_random_sampling(samples);
+        std::optional<step_point> starting_point{};
+        bool                      starting_point_is_non_operational = true;
 
+        if (initial_parameter_point.has_value())
+        {
+            const auto intital_step_point = to_step_point(initial_parameter_point.value());
+            const auto operational_value  = is_step_point_operational(intital_step_point);
+            if (operational_value == operational_status::OPERATIONAL)
+            {
+                starting_point                    = intital_step_point;
+                starting_point_is_non_operational = false;
+            }
+        }
+        if (starting_point_is_non_operational)
+        {
+            // first, perform random sampling to find an operational starting point
+            starting_point = find_operational_step_point_via_random_sampling(samples);
+        }
         // if no operational point was found within the specified number of samples, return
         if (!starting_point.has_value())
         {
@@ -970,6 +1005,14 @@ class operational_domain_impl
                 ++stats.num_non_operational_parameter_combinations;
             }
         }
+        // calculate the total number of parameter pairs
+        const std::size_t total_parameter_pairs =
+            (static_cast<std::size_t>(std::round((params.x_max - params.x_min) / params.x_step)) *
+             static_cast<std::size_t>(std::round((params.y_max - params.y_min) / params.y_step)));
+
+        // calculate the ratio of operational parameter pairs to the total number of parameter pairs
+        stats.percentual_operational_area = static_cast<double>(stats.num_operational_parameter_combinations) /
+                                            static_cast<double>(total_parameter_pairs);
     }
 };
 
@@ -1089,13 +1132,16 @@ operational_domain operational_domain_random_sampling(const Lyt& lyt, const std:
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
  * @param samples Number of samples to perform.
  * @param params Operational domain computation parameters.
+ * @param initial_parameter_point Optional initial point in the parameter space for flood fill.
  * @param stats Operational domain computation statistics.
  * @return The (partial) operational domain of the layout.
  */
 template <typename Lyt, typename TT>
-operational_domain operational_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples,
-                                                 const operational_domain_params& params = {},
-                                                 operational_domain_stats*        stats  = nullptr)
+operational_domain operational_domain_flood_fill(
+    const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples,
+    const operational_domain_params&                          params                  = {},
+    const std::optional<operational_domain::parameter_point>& initial_parameter_point = std::nullopt,
+    operational_domain_stats*                                 stats                   = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -1104,7 +1150,7 @@ operational_domain operational_domain_flood_fill(const Lyt& lyt, const std::vect
     operational_domain_stats                 st{};
     detail::operational_domain_impl<Lyt, TT> p{lyt, spec, params, st};
 
-    const auto result = p.flood_fill(samples);
+    const auto result = p.flood_fill(samples, initial_parameter_point);
 
     if (stats)
     {
@@ -1143,14 +1189,16 @@ operational_domain operational_domain_flood_fill(const Lyt& lyt, const std::vect
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
  * @param samples Number of samples to perform.
  * @param params Operational domain computation parameters.
+ * @param initial_parameter_point Optional initial point in the parameter space for contour tracing.
  * @param stats Operational domain computation statistics.
  * @return The (partial) operational domain of the layout.
  */
 template <typename Lyt, typename TT>
-operational_domain operational_domain_contour_tracing(const Lyt& lyt, const std::vector<TT>& spec,
-                                                      const std::size_t                samples,
-                                                      const operational_domain_params& params = {},
-                                                      operational_domain_stats*        stats  = nullptr)
+operational_domain operational_domain_contour_tracing(
+    const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples,
+    const operational_domain_params&                          params                  = {},
+    const std::optional<operational_domain::parameter_point>& initial_parameter_point = std::nullopt,
+    operational_domain_stats*                                 stats                   = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -1159,7 +1207,7 @@ operational_domain operational_domain_contour_tracing(const Lyt& lyt, const std:
     operational_domain_stats                 st{};
     detail::operational_domain_impl<Lyt, TT> p{lyt, spec, params, st};
 
-    const auto result = p.contour_tracing(samples);
+    const auto result = p.contour_tracing(samples, initial_parameter_point);
 
     if (stats)
     {
