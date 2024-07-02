@@ -110,31 +110,31 @@ jobs:
           languages: ${{ matrix.language }}
           config-file: .github/codeql-config.yml
 
-      - if: matrix.language == 'cpp'
-        name: Create Build Environment
-        run: cmake -E make_directory ${{github.workspace}}/build
+      - name: Create Build Environment
+        if: matrix.language == 'cpp'
+        run: cmake -E make_directory ${{ github.workspace }}/build
 
-      - if: matrix.language == 'cpp'
-        name: Configure CMake
-        working-directory: ${{github.workspace}}/build
-        run: >
-          cmake ${{github.workspace}}
-          -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
-          -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
-          -DFICTION_ENABLE_UNITY_BUILD=ON
-          -DFICTION_ENABLE_PCH=ON
-          -DFICTION_CLI=ON
-          -DFICTION_TEST=ON
-          -DFICTION_BENCHMARK=OFF
-          -DFICTION_EXPERIMENTS=ON
-          -DFICTION_Z3=ON
-          -DFICTION_ENABLE_MUGEN=OFF
-          -DFICTION_PROGRESS_BARS=OFF
-          -DFICTION_WARNINGS_AS_ERRORS=OFF
-          -DMOCKTURTLE_EXAMPLES=OFF
+      - name: Configure CMake
+        if: matrix.language == 'cpp'
+        working-directory: ${{ github.workspace }}/build
+        run: |
+          cmake ${{ github.workspace }} \
+            -DCMAKE_CXX_COMPILER=${{ matrix.compiler }} \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+            -DFICTION_ENABLE_UNITY_BUILD=ON \
+            -DFICTION_ENABLE_PCH=ON \
+            -DFICTION_CLI=ON \
+            -DFICTION_TEST=ON \
+            -DFICTION_BENCHMARK=OFF \
+            -DFICTION_EXPERIMENTS=ON \
+            -DFICTION_Z3=ON \
+            -DFICTION_ENABLE_MUGEN=OFF \
+            -DFICTION_PROGRESS_BARS=OFF \
+            -DFICTION_WARNINGS_AS_ERRORS=OFF \
+            -DMOCKTURTLE_EXAMPLES=OFF
 
       - name: Build fiction
-        if: ${{ matrix.language == 'cpp' }}
+        if: matrix.language == 'cpp'
         working-directory: ${{ github.workspace }}/build
         run: cmake --build . --config ${{matrix.build_type}} -j4
 
