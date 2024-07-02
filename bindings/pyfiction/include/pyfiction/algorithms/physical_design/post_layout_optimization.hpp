@@ -26,6 +26,8 @@ inline void post_layout_optimization(pybind11::module& m)
     py::class_<fiction::post_layout_optimization_params>(m, "post_layout_optimization_params",
                                                          DOC(fiction_post_layout_optimization_params))
         .def(py::init<>())
+        .def_readwrite("max_gate_relocations", &fiction::post_layout_optimization_params::max_gate_relocations,
+                       DOC(fiction_post_layout_optimization_params_max_gate_relocations))
 
         ;
 
@@ -39,7 +41,18 @@ inline void post_layout_optimization(pybind11::module& m)
                  stats.report(stream);
                  return stream.str();
              })
-        .def_readonly("time_total", &fiction::post_layout_optimization_stats::time_total)
+        .def_readonly("time_total", &fiction::post_layout_optimization_stats::time_total,
+                      DOC(fiction_post_layout_optimization_stats_duration))
+        .def_readonly("x_size_before", &fiction::post_layout_optimization_stats::x_size_before,
+                      DOC(fiction_post_layout_optimization_stats_x_size_before))
+        .def_readonly("y_size_before", &fiction::post_layout_optimization_stats::y_size_before,
+                      DOC(fiction_post_layout_optimization_stats_y_size_before))
+        .def_readonly("x_size_after", &fiction::post_layout_optimization_stats::x_size_after,
+                      DOC(fiction_post_layout_optimization_stats_x_size_after))
+        .def_readonly("y_size_after", &fiction::post_layout_optimization_stats::y_size_after,
+                      DOC(fiction_post_layout_optimization_stats_y_size_after))
+        .def_readonly("area_improvement", &fiction::post_layout_optimization_stats::area_improvement,
+                      DOC(fiction_post_layout_optimization_stats_area_improvement))
 
         ;
 
