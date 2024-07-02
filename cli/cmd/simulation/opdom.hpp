@@ -180,29 +180,29 @@ class opdom_command : public command
         // assign x sweep parameters
         if (x_sweep == "epsilon_r")
         {
-            params.x_dimension = fiction::operational_domain::sweep_parameter::EPSILON_R;
+            params.x_dimension = fiction::sweep_parameter::EPSILON_R;
         }
         else if (x_sweep == "lambda_tf")
         {
-            params.x_dimension = fiction::operational_domain::sweep_parameter::LAMBDA_TF;
+            params.x_dimension = fiction::sweep_parameter::LAMBDA_TF;
         }
         else if (x_sweep == "mu_minus")
         {
-            params.x_dimension = fiction::operational_domain::sweep_parameter::MU_MINUS;
+            params.x_dimension = fiction::sweep_parameter::MU_MINUS;
         }
 
         // assign y sweep parameters
         if (y_sweep == "epsilon_r")
         {
-            params.y_dimension = fiction::operational_domain::sweep_parameter::EPSILON_R;
+            params.y_dimension = fiction::sweep_parameter::EPSILON_R;
         }
         else if (y_sweep == "lambda_tf")
         {
-            params.y_dimension = fiction::operational_domain::sweep_parameter::LAMBDA_TF;
+            params.y_dimension = fiction::sweep_parameter::LAMBDA_TF;
         }
         else if (y_sweep == "mu_minus")
         {
-            params.y_dimension = fiction::operational_domain::sweep_parameter::MU_MINUS;
+            params.y_dimension = fiction::sweep_parameter::MU_MINUS;
         }
 
         const auto get_name = [](auto&& lyt_ptr) -> std::string { return fiction::get_name(*lyt_ptr); };
@@ -292,7 +292,7 @@ class opdom_command : public command
     /**
      * The operational domain.
      */
-    fiction::operational_domain op_domain{};
+    fiction::operational_domain<> op_domain{};
 
     /**
      * Writes the operational domain to the specified CSV file.

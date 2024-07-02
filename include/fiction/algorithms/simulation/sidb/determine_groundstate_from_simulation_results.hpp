@@ -40,7 +40,7 @@ determine_groundstate_from_simulation_results(const sidb_simulation_result<Lyt>&
 
     // Find all unique charge indices. This is done because simulation results can have multiple identical charge
     // distributions.
-    for (const auto& cds : charge_configurations_copy)
+    for (auto& cds : charge_configurations_copy)
     {
         cds.charge_distribution_to_index();
         charge_indices.insert(cds.get_charge_index_and_base().first);

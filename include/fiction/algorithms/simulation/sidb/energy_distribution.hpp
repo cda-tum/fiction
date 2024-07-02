@@ -6,7 +6,6 @@
 #define FICTION_ENERGY_DISTRIBUTION_HPP
 
 #include "fiction/technology/charge_distribution_surface.hpp"
-#include "fiction/utils/math_utils.hpp"
 
 #include <cmath>
 #include <cstdint>
@@ -56,9 +55,7 @@ energy_distribution(const std::vector<charge_distribution_surface<Lyt>>& input_v
             lyt.charge_distribution_to_index_general();
             if (lyt.get_charge_index_and_base().first == charge_index)
             {
-                const auto energy =
-                    round_to_n_decimal_places(lyt.get_system_energy(), 6);  // rounding to 6 decimal places
-                distribution[energy]++;
+                distribution[lyt.get_system_energy()]++;
                 break;
             }
         }

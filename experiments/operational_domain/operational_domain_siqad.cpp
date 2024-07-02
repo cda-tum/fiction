@@ -48,11 +48,11 @@ int main()  // NOLINT
     operational_domain_params op_domain_params{};
     op_domain_params.simulation_parameters = sim_params;
     op_domain_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
-    op_domain_params.x_dimension           = operational_domain::sweep_parameter::EPSILON_R;
+    op_domain_params.x_dimension           = sweep_parameter::EPSILON_R;
     op_domain_params.x_min                 = 1.0;
     op_domain_params.x_max                 = 10.0;
     op_domain_params.x_step                = 0.05;
-    op_domain_params.y_dimension           = operational_domain::sweep_parameter::LAMBDA_TF;
+    op_domain_params.y_dimension           = sweep_parameter::LAMBDA_TF;
     op_domain_params.y_min                 = 1.0;
     op_domain_params.y_max                 = 10.0;
     op_domain_params.y_step                = 0.05;
