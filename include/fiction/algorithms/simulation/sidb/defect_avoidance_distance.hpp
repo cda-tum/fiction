@@ -14,6 +14,8 @@ namespace fiction
 {
 /**
  * Results of the defect avoidance distance calculation.
+ *
+ * @tparam CellType
  */
 template <typename CellType>
 struct defect_avoidance_distance_result
