@@ -8,6 +8,7 @@
 #include <cassert>
 #include <cmath>
 #include <cstdint>
+#include <optional>
 #include <utility>
 
 namespace fiction
@@ -148,7 +149,7 @@ struct sidb_defect
  */
 [[nodiscard]] static constexpr bool is_charged_defect_type(const sidb_defect& defect) noexcept
 {
-    return defect.type == sidb_defect_type::DB || defect.type == sidb_defect_type::SI_VACANCY;
+    return defect.charge != 0 || defect.type == sidb_defect_type::DB || defect.type == sidb_defect_type::SI_VACANCY;
 }
 /**
  * Checks whether the given defect type is not a charged one. Neutral defects are to be avoided as well, but not by such
@@ -216,20 +217,36 @@ inline constexpr const uint16_t SIDB_NEUTRAL_DEFECT_HORIZONTAL_SPACING = 1u;
  */
 inline constexpr const uint16_t SIDB_NEUTRAL_DEFECT_VERTICAL_SPACING = 0u;
 /**
- * Returns the extent of a defect as a pair of SiDB distances in horizontal and vertical direction. If `defect` has the
- * `NONE` defect type, `{0, 0}` is returned.
+ * Returns the extent of a defect as a pair of SiDB distances in the horizontal and vertical directions.
+ * If the defect type is `NONE`, `{0, 0}` is returned.
  *
- * @param defect Defect to evaluate.
- * @return Number of horizontal and vertical SiDBs that are affected by the given defect.
+ * @param defect Defect type to evaluate.
+ * @param charged_defect_spacing_overwrite Override the default influence distance of charged atomic defects on SiDBs
+ * with an optional pair of horizontal and vertical distances.
+ * @param neutral_defect_spacing_overwrite Override the default influence distance of neutral atomic defects on SiDBs
+ * with an optional pair of horizontal and vertical distances.
+ * @return A pair of uint16_t values representing the number of horizontal and vertical SiDBs affected by the given
+ * defect type.
  */
-[[nodiscard]] static constexpr std::pair<uint16_t, uint16_t> defect_extent(const sidb_defect& defect) noexcept
+[[nodiscard]] static constexpr std::pair<uint16_t, uint16_t> defect_extent(
+    const sidb_defect&                                  defect,
+    const std::optional<std::pair<uint16_t, uint16_t>>& charged_defect_spacing_overwrite = std::nullopt,
+    const std::optional<std::pair<uint16_t, uint16_t>>& neutral_defect_spacing_overwrite = std::nullopt) noexcept
 {
     if (is_charged_defect_type(defect))
     {
+        if (charged_defect_spacing_overwrite.has_value())
+        {
+            return charged_defect_spacing_overwrite.value();
+        }
         return {SIDB_CHARGED_DEFECT_HORIZONTAL_SPACING, SIDB_CHARGED_DEFECT_VERTICAL_SPACING};
     }
     if (is_neutral_defect_type(defect))
     {
+        if (neutral_defect_spacing_overwrite.has_value())
+        {
+            return neutral_defect_spacing_overwrite.value();
+        }
         return {SIDB_NEUTRAL_DEFECT_HORIZONTAL_SPACING, SIDB_NEUTRAL_DEFECT_VERTICAL_SPACING};
     }
 

@@ -67,7 +67,8 @@ inline void sidb_defects(pybind11::module& m)
     m.def("is_neutrally_charged_defect", &fiction::is_neutrally_charged_defect, "defect"_a,
           DOC(fiction_is_neutrally_charged_defect));
 
-    m.def("defect_extent", &fiction::defect_extent, "defect"_a, DOC(fiction_defect_extent));
+    m.def("defect_extent", &fiction::defect_extent, "defect"_a, "charged_defect_spacing_overwrite"_a,
+          "neutral_defect_spacing_overwrite"_a, DOC(fiction_defect_extent));
 }
 
 }  // namespace pyfiction

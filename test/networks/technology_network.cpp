@@ -21,7 +21,7 @@ using namespace fiction;
 
 TEST_CASE("create and use constants in a technology network", "[technology-network]")
 {
-    technology_network tec{};
+    const technology_network tec{};
 
     CHECK(mockturtle::has_size_v<technology_network>);
     CHECK(mockturtle::has_get_constant_v<technology_network>);
@@ -550,12 +550,30 @@ TEST_CASE("Node functions of a technology network", "[technology-network]")
 {
     technology_network tec{};
 
+    CHECK(mockturtle::has_create_and_v<technology_network>);
+    CHECK(mockturtle::has_create_nand_v<technology_network>);
+    CHECK(mockturtle::has_create_or_v<technology_network>);
+    CHECK(mockturtle::has_create_nor_v<technology_network>);
+    CHECK(mockturtle::has_create_xor_v<technology_network>);
+    CHECK(mockturtle::has_create_xnor_v<technology_network>);
+    CHECK(mockturtle::has_create_lt_v<technology_network>);
+    CHECK(mockturtle::has_create_le_v<technology_network>);
+    CHECK(mockturtle::has_create_gt_v<technology_network>);
+    CHECK(mockturtle::has_create_ge_v<technology_network>);
+    CHECK(mockturtle::has_create_maj_v<technology_network>);
+    CHECK(mockturtle::has_create_ite_v<technology_network>);
+    CHECK(mockturtle::has_create_xor3_v<technology_network>);
+
     CHECK(mockturtle::has_is_and_v<technology_network>);
     CHECK(fiction::has_is_nand_v<technology_network>);
     CHECK(mockturtle::has_is_or_v<technology_network>);
     CHECK(fiction::has_is_nor_v<technology_network>);
     CHECK(mockturtle::has_is_xor_v<technology_network>);
     CHECK(fiction::has_is_xnor_v<technology_network>);
+    CHECK(fiction::has_is_lt_v<technology_network>);
+    CHECK(fiction::has_is_le_v<technology_network>);
+    CHECK(fiction::has_is_gt_v<technology_network>);
+    CHECK(fiction::has_is_ge_v<technology_network>);
     CHECK(mockturtle::has_is_maj_v<technology_network>);
     CHECK(mockturtle::has_is_ite_v<technology_network>);
     CHECK(mockturtle::has_is_xor3_v<technology_network>);
@@ -570,6 +588,10 @@ TEST_CASE("Node functions of a technology network", "[technology-network]")
     const auto nor_signal   = tec.create_nor(x1, x2);
     const auto xor2_signal  = tec.create_xor(x1, x2);
     const auto xnor2_signal = tec.create_xnor(x1, x2);
+    const auto lt_signal    = tec.create_lt(x1, x2);
+    const auto le_signal    = tec.create_le(x1, x2);
+    const auto gt_signal    = tec.create_gt(x1, x2);
+    const auto ge_signal    = tec.create_ge(x1, x2);
     const auto maj_signal   = tec.create_maj(x1, x2, x3);
     const auto dot_signal   = tec.create_dot(x1, x2, x3);
     const auto ite_signal   = tec.create_ite(x1, x2, x3);
@@ -591,6 +613,10 @@ TEST_CASE("Node functions of a technology network", "[technology-network]")
     CHECK(tec.is_or(tec.get_node(or_signal)));
     CHECK(tec.is_nor(tec.get_node(nor_signal)));
     CHECK(tec.is_xor(tec.get_node(xor2_signal)));
+    CHECK(tec.is_lt(tec.get_node(lt_signal)));
+    CHECK(tec.is_le(tec.get_node(le_signal)));
+    CHECK(tec.is_gt(tec.get_node(gt_signal)));
+    CHECK(tec.is_ge(tec.get_node(ge_signal)));
     CHECK(tec.is_xnor(tec.get_node(xnor2_signal)));
     CHECK(tec.is_maj(tec.get_node(maj_signal)));
     CHECK(tec.is_dot(tec.get_node(dot_signal)));

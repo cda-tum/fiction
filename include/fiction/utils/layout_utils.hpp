@@ -10,7 +10,6 @@
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb_defect_surface.hpp"
 #include "fiction/technology/sidb_lattice.hpp"
-#include "fiction/technology/sidb_lattice_orientations.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 
@@ -544,6 +543,7 @@ LytDest convert_to_fiction_coordinates(const LytSrc& lyt) noexcept
         }
     }
 }
+
 /**
  * Generates a random coordinate within the region spanned by two given coordinates. The two given coordinates form the
  * top left corner and the bottom right corner of the spanned region.

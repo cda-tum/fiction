@@ -38,6 +38,10 @@ class map_command : public command
         add_flag("--nor", ps.nor2, "Enable the use of NOR gates");
         add_flag("--xor,-x", ps.xor2, "Enable the use of XOR gates");
         add_flag("--xnor", ps.xnor2, "Enable the use of XNOR gates");
+        add_flag("--lt", ps.lt2, "Enable the use of LT gates");
+        add_flag("--gt", ps.gt2, "Enable the use of GT gates");
+        add_flag("--le", ps.le2, "Enable the use of LE gates");
+        add_flag("--ge", ps.ge2, "Enable the use of GE gates");
         add_flag("--inv,-i", ps.inv, "Enable the use of NOT gates");
 
         add_flag("--maj,-m", ps.maj3, "Enable the use of MAJ gates");

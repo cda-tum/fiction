@@ -119,7 +119,7 @@ class read_sidb_surface_defects_impl
             {
                 max_cell_pos.x = static_cast<decltype(max_cell_pos.x)>(row_matches.size() - 1);
             }
-            else if (row_matches.size() - 1 < max_cell_pos.x)
+            else if (static_cast<decltype(max_cell_pos.x)>(row_matches.size() - 1) < max_cell_pos.x)
             {
                 // row y has fewer SiDBs than previous rows
                 throw missing_sidb_position_exception(y);

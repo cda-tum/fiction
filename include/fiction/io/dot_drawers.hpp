@@ -92,11 +92,81 @@ class technology_dot_drawer : public mockturtle::gate_dot_drawer<Ntk>
                 return "palegreen2";
             }
         }
+        if constexpr (has_is_xnor_v<Ntk>)
+        {
+            if (ntk.is_xnor(n))
+            {
+                return "lightskyblue";
+            }
+        }
+        if constexpr (has_is_lt_v<Ntk>)
+        {
+            if (ntk.is_lt(n))
+            {
+                return "seagreen1";
+            }
+        }
+        if constexpr (has_is_le_v<Ntk>)
+        {
+            if (ntk.is_le(n))
+            {
+                return "seagreen4";
+            }
+        }
+        if constexpr (has_is_gt_v<Ntk>)
+        {
+            if (ntk.is_gt(n))
+            {
+                return "firebrick1";
+            }
+        }
+        if constexpr (has_is_ge_v<Ntk>)
+        {
+            if (ntk.is_ge(n))
+            {
+                return "firebrick4";
+            }
+        }
         if constexpr (has_is_dot_v<Ntk>)
         {
             if (ntk.is_dot(n))
             {
                 return "thistle";
+            }
+        }
+        if constexpr (has_is_xor_and_v<Ntk>)
+        {
+            if (ntk.is_xor_and(n))
+            {
+                return "lightpink";
+            }
+        }
+        if constexpr (has_is_or_and_v<Ntk>)
+        {
+            if (ntk.is_or_and(n))
+            {
+                return "lightgreen";
+            }
+        }
+        if constexpr (has_is_onehot_v<Ntk>)
+        {
+            if (ntk.is_onehot(n))
+            {
+                return "lightgoldenrod";
+            }
+        }
+        if constexpr (has_is_gamble_v<Ntk>)
+        {
+            if (ntk.is_gamble(n))
+            {
+                return "lightsteelblue";
+            }
+        }
+        if constexpr (mockturtle::has_is_ite_v<Ntk>)
+        {
+            if (ntk.is_ite(n))
+            {
+                return "lightcyan";
             }
         }
 
@@ -141,11 +211,81 @@ class technology_dot_drawer : public mockturtle::gate_dot_drawer<Ntk>
                 return "NOR";
             }
         }
+        if constexpr (has_is_xnor_v<Ntk>)
+        {
+            if (ntk.is_xnor(n))
+            {
+                return "XNOR";
+            }
+        }
+        if constexpr (has_is_lt_v<Ntk>)
+        {
+            if (ntk.is_lt(n))
+            {
+                return "LT";
+            }
+        }
+        if constexpr (has_is_le_v<Ntk>)
+        {
+            if (ntk.is_le(n))
+            {
+                return "LE";
+            }
+        }
+        if constexpr (has_is_gt_v<Ntk>)
+        {
+            if (ntk.is_gt(n))
+            {
+                return "GT";
+            }
+        }
+        if constexpr (has_is_ge_v<Ntk>)
+        {
+            if (ntk.is_ge(n))
+            {
+                return "GE";
+            }
+        }
         if constexpr (has_is_dot_v<Ntk>)
         {
             if (ntk.is_dot(n))
             {
                 return "DOT";
+            }
+        }
+        if constexpr (has_is_xor_and_v<Ntk>)
+        {
+            if (ntk.is_xor_and(n))
+            {
+                return "XOR_AND";
+            }
+        }
+        if constexpr (has_is_or_and_v<Ntk>)
+        {
+            if (ntk.is_or_and(n))
+            {
+                return "OR_AND";
+            }
+        }
+        if constexpr (has_is_onehot_v<Ntk>)
+        {
+            if (ntk.is_onehot(n))
+            {
+                return "ONEHOT";
+            }
+        }
+        if constexpr (has_is_gamble_v<Ntk>)
+        {
+            if (ntk.is_gamble(n))
+            {
+                return "GAMBLE";
+            }
+        }
+        if constexpr (mockturtle::has_is_ite_v<Ntk>)
+        {
+            if (ntk.is_ite(n))
+            {
+                return "ITE";
             }
         }
 
