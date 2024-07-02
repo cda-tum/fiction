@@ -31,13 +31,17 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
+defaults:
+  run:
+    shell: bash
+
 env:
   Z3_VERSION: 4.10.0
 
 jobs:
   analyze:
     name: Analyze ${{ matrix.language }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     permissions:
       actions: read
       contents: read
@@ -46,7 +50,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ 'cpp', 'python' ]
+        language: [ 'cpp' ]
         compiler: [ clang++-11 ]
         build_type: [ Debug ]
 
@@ -85,13 +89,13 @@ jobs:
           python-version: '3.10.x'
           cache: 'pip'
 
-      - name: Setup mold
-        uses: rui314/setup-mold@v1
-
       - name: Install pip packages
         uses: BSFishy/pip-action@v1
         with:
           requirements: ${{github.workspace}}/libs/mugen/requirements.txt
+
+      - name: Setup mold
+        uses: rui314/setup-mold@v1
 
       - name: Setup Z3 Solver
         id: z3
@@ -110,15 +114,15 @@ jobs:
           languages: ${{ matrix.language }}
           config-file: .github/codeql-config.yml
 
-      - if: matrix.language == 'cpp'
-        name: Create Build Environment
+      - name: Create Build Environment
+        if: matrix.language == 'cpp'
         run: cmake -E make_directory ${{github.workspace}}/build
 
-      - if: matrix.language == 'cpp'
-        name: Configure CMake
+      - name: Configure CMake
+        if: matrix.language == 'cpp'
         working-directory: ${{github.workspace}}/build
         run: >
-          cmake ${{github.workspace}}
+          cmake ${{github.workspace}} ${{matrix.cppstandard}}
           -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
           -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
           -DFICTION_ENABLE_UNITY_BUILD=ON
@@ -128,13 +132,13 @@ jobs:
           -DFICTION_BENCHMARK=OFF
           -DFICTION_EXPERIMENTS=ON
           -DFICTION_Z3=ON
-          -DFICTION_ENABLE_MUGEN=OFF
+          -DFICTION_ENABLE_MUGEN=ON
           -DFICTION_PROGRESS_BARS=OFF
           -DFICTION_WARNINGS_AS_ERRORS=OFF
           -DMOCKTURTLE_EXAMPLES=OFF
 
       - name: Build fiction
-        if: ${{ matrix.language == 'cpp' }}
+        if: matrix.language == 'cpp'
         working-directory: ${{ github.workspace }}/build
         run: cmake --build . --config ${{matrix.build_type}} -j4
 
