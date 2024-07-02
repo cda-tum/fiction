@@ -646,7 +646,7 @@ Lyt orthogonal(const Ntk& ntk, orthogonal_physical_design_params ps = {},
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(mockturtle::is_network_type_v<Ntk>,
-                  "Ntk is not a network type");  // Ntk is being converted to a topology_network anyway, therefore,
+                  "Ntk is not a network type");  // Ntk is being converted to a technology_network anyway, therefore,
                                                  // this is the only relevant check here
 
     // check for input degree
