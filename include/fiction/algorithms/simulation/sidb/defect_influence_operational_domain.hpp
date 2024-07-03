@@ -85,6 +85,7 @@ struct defect_influence_operational_domain_stats
 
 namespace detail
 {
+
 template <typename Lyt, typename TT>
 class defect_influence_operational_domain_impl
 {
@@ -248,8 +249,8 @@ class defect_influence_operational_domain_impl
         const auto                              siqad_layout = convert_to_siqad_coordinates(layout);
         bounding_box_2d<decltype(siqad_layout)> bb{siqad_layout};
 
-        auto nw = siqad::to_fiction_coord<cube::coord_t>(bb.get_min());  // north-west cell
-        auto se = siqad::to_fiction_coord<cube::coord_t>(bb.get_max());  // south-east cell
+        auto nw = fiction::siqad::to_fiction_coord<cube::coord_t>(bb.get_min());  // north-west cell
+        auto se = fiction::siqad::to_fiction_coord<cube::coord_t>(bb.get_max());  // south-east cell
 
         nw_bb_layout = nw;
         se_bb_layout = se;
