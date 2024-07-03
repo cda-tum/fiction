@@ -8,7 +8,7 @@
 
 #include <fiction/algorithms/physical_design/design_sidb_gates.hpp>
 #include <fiction/algorithms/simulation/sidb/assess_physical_population_stability.hpp>
-#include <fiction/algorithms/simulation/sidb/calculate_min_potential_for_charge_change_for_all_input_combinations.hpp>
+#include <fiction/algorithms/simulation/sidb/calculate_min_bbr_for_all_inputs.hpp>
 #include <fiction/algorithms/simulation/sidb/critical_temperature.hpp>
 #include <fiction/algorithms/simulation/sidb/defect_avoidance_distance.hpp>
 #include <fiction/algorithms/simulation/sidb/defect_influence_operational_domain.hpp>
@@ -80,7 +80,7 @@ int main()  // NOLINT
     op_domain_params.y_max  = 6;
     op_domain_params.y_step = 0.2;
 
-    const calculate_min_potential_for_charge_change_for_all_input_combinations_params assess_params{
+    const calculate_min_bbr_for_all_inputs_params assess_params{
         assess_physical_population_stability_params{sim_params}};
 
     const maximum_defect_influence_position_and_distance_params defect_avoidance_params_arsenic{
@@ -152,30 +152,22 @@ int main()  // NOLINT
                         defect_avoidance_distance(gate, defect_influence_domain_vacancy).max_min_distance);
 
                     pop_stability_neutral_to_negative.push_back(
-                        calculate_min_potential_for_charge_change_for_all_input_combinations(
-                            gate, truth_table,
-                            calculate_min_potential_for_charge_change_for_all_input_combinations_params{assess_params},
-                            -1) *
+                        calculate_min_bbr(gate, truth_table, calculate_min_bbr_for_all_inputs_params{assess_params},
+                                          -1) *
                         1000);
 
                     const auto bbr_neu_to_neg =
-                        calculate_min_potential_for_charge_change_for_all_input_combinations(
-                            gate, truth_table,
-                            calculate_min_potential_for_charge_change_for_all_input_combinations_params{assess_params},
-                            1) *
+                        calculate_min_bbr(gate, truth_table, calculate_min_bbr_for_all_inputs_params{assess_params},
+                                          1) *
                         1000;
 
                     pop_stability_negative_to_neutral.push_back(
-                        calculate_min_potential_for_charge_change_for_all_input_combinations(
-                            gate, truth_table,
-                            calculate_min_potential_for_charge_change_for_all_input_combinations_params{assess_params},
-                            1) *
+                        calculate_min_bbr(gate, truth_table, calculate_min_bbr_for_all_inputs_params{assess_params},
+                                          1) *
                         1000);
                     const auto bbr_neg_to_neu =
-                        calculate_min_potential_for_charge_change_for_all_input_combinations(
-                            gate, truth_table,
-                            calculate_min_potential_for_charge_change_for_all_input_combinations_params{assess_params},
-                            1) *
+                        calculate_min_bbr(gate, truth_table, calculate_min_bbr_for_all_inputs_params{assess_params},
+                                          1) *
                         1000;
 
                     bbr_all.push_back(std::min(bbr_neu_to_neg, bbr_neg_to_neu));

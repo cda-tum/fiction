@@ -2,8 +2,8 @@
 // Created by Jan Drewniok on 28.01.24.
 //
 
-#ifndef FICTION_CALCULATE_MIN_POTENTIAL_FOR_CHARGE_CHANGE_FOR_ALL_INPUT_COMBINATIONS_HPP
-#define FICTION_CALCULATE_MIN_POTENTIAL_FOR_CHARGE_CHANGE_FOR_ALL_INPUT_COMBINATIONS_HPP
+#ifndef FICTION_CALCULATE_MIN_BBR_FOR_ALL_INPUTS_HPP
+#define FICTION_CALCULATE_MIN_BBR_FOR_ALL_INPUTS_HPP
 
 #include "fiction/algorithms/iter/bdl_input_iterator.hpp"
 #include "fiction/algorithms/simulation/sidb/assess_physical_population_stability.hpp"
@@ -21,7 +21,7 @@ namespace fiction
 /**
  * This struct stores the parameters required to assess the population stability of an SiDB gate.
  */
-struct calculate_min_potential_for_charge_change_for_all_input_combinations_params
+struct calculate_min_bbr_for_all_inputs_params
 {
     /**
      * Parameters for the `assessing physical population stability` simulation
@@ -45,9 +45,9 @@ struct calculate_min_potential_for_charge_change_for_all_input_combinations_para
  * @return The minimum potential required for charge change across all input combinations.
  */
 template <typename Lyt, typename TT>
-[[nodiscard]] double calculate_min_potential_for_charge_change_for_all_input_combinations(
+[[nodiscard]] double calculate_min_bbr_for_all_inputs(
     const Lyt& lyt, const std::vector<TT>& spec,
-    const calculate_min_potential_for_charge_change_for_all_input_combinations_params& params              = {},
+    const calculate_min_bbr_for_all_inputs_params& params              = {},
     const std::optional<int8_t>                                                        charge_state_change = 1)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
@@ -115,4 +115,4 @@ template <typename Lyt, typename TT>
 
 }  // namespace fiction
 
-#endif  // FICTION_CALCULATE_MIN_POTENTIAL_FOR_CHARGE_CHANGE_FOR_ALL_INPUT_COMBINATIONS_HPP
+#endif  // FICTION_CALCULATE_MIN_BBR_FOR_ALL_INPUTS_HPP
