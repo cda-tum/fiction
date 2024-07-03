@@ -57,7 +57,7 @@ jobs:
           - os: ubuntu-24.04
             compiler: clang++-18
           - os: ubuntu-22.04
-            compiler: g++-12
+            compiler: g++-11
             cppstandard: -DCMAKE_CXX_STANDARD=20
             cppname: C++20
 
