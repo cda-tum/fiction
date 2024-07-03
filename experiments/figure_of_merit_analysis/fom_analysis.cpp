@@ -2,7 +2,6 @@
 // Created by Jan Drewniok 01.01.23
 //
 
-// pre-defined types suitable for the FCN domain
 #include "fiction_experiments.hpp"
 #include "mockturtle/utils/stopwatch.hpp"
 
@@ -152,22 +151,22 @@ int main()  // NOLINT
                         defect_avoidance_distance(gate, defect_influence_domain_vacancy).max_min_distance);
 
                     pop_stability_neutral_to_negative.push_back(
-                        calculate_min_bbr(gate, truth_table, calculate_min_bbr_for_all_inputs_params{assess_params},
-                                          -1) *
+                        calculate_min_bbr_for_all_inputs(gate, truth_table,
+                                                         calculate_min_bbr_for_all_inputs_params{assess_params}, -1) *
                         1000);
 
                     const auto bbr_neu_to_neg =
-                        calculate_min_bbr(gate, truth_table, calculate_min_bbr_for_all_inputs_params{assess_params},
-                                          1) *
+                        calculate_min_bbr_for_all_inputs(gate, truth_table,
+                                                         calculate_min_bbr_for_all_inputs_params{assess_params}, 1) *
                         1000;
 
                     pop_stability_negative_to_neutral.push_back(
-                        calculate_min_bbr(gate, truth_table, calculate_min_bbr_for_all_inputs_params{assess_params},
-                                          1) *
+                        calculate_min_bbr_for_all_inputs(gate, truth_table,
+                                                         calculate_min_bbr_for_all_inputs_params{assess_params}, 1) *
                         1000);
                     const auto bbr_neg_to_neu =
-                        calculate_min_bbr(gate, truth_table, calculate_min_bbr_for_all_inputs_params{assess_params},
-                                          1) *
+                        calculate_min_bbr_for_all_inputs(gate, truth_table,
+                                                         calculate_min_bbr_for_all_inputs_params{assess_params}, 1) *
                         1000;
 
                     bbr_all.push_back(std::min(bbr_neu_to_neg, bbr_neg_to_neu));
