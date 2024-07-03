@@ -716,7 +716,7 @@ class graph_oriented_layout_design_impl
      * @param num_expansions The maximum number of positions to be returned (is doubled for PIs).
      * @return A vector of tiles representing the possible positions for PIs.
      */
-    [[nodiscard]] coord_vec_type<ObstrLyt> get_possible_positions_pis(ObstrLyt& layout, const pi_locations pi_locs,
+    [[nodiscard]] coord_vec_type<ObstrLyt> get_possible_positions_pis(ObstrLyt& layout, const pi_locations& pi_locs,
                                                                       const uint64_t num_expansions) noexcept
     {
         uint64_t count_expansions = 0;
@@ -846,6 +846,7 @@ class graph_oriented_layout_design_impl
                     possible_positions.push_back(new_pos);
                     count_expansions++;
                 }
+
                 layout.resize({layout.x() - 1, layout.y() - 1, 1});
             }
         };
@@ -1191,18 +1192,18 @@ class graph_oriented_layout_design_impl
         std::cout << "Found improved solution:\n";
 
         // Calculate the duration between start and end
-        auto end      = std::chrono::high_resolution_clock::now();
-        auto duration = end - start;
+        const auto end      = std::chrono::high_resolution_clock::now();
+        const auto duration = end - start;
 
         // Extract the duration components
-        auto us  = std::chrono::duration_cast<std::chrono::microseconds>(duration).count() % 1000;
-        auto ms  = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count() % 1000;
-        auto sec = std::chrono::duration_cast<std::chrono::seconds>(duration).count();
+        const auto us  = std::chrono::duration_cast<std::chrono::microseconds>(duration).count() % 1000;
+        const auto ms  = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count() % 1000;
+        const auto sec = std::chrono::duration_cast<std::chrono::seconds>(duration).count();
 
         // Output the elapsed time
-        std::cout << "Time taken: " << sec << " seconds, " << ms << " milliseconds, and " << us << " microseconds\n";
-        std::cout << "Evaluated Paths: " << num_evaluated_paths << "\n";
-        std::cout << "Layout Dimension: " << lyt.x() + 1 << " x " << lyt.y() + 1 << " = " << area << std::endl;
+        std::cout << fmt::format("Time taken: {} seconds, {} milliseconds, and {} microseconds\n", sec, ms, us);
+        std::cout << fmt::format("Evaluated Paths: {}\n", num_evaluated_paths);
+        std::cout << fmt::format("Layout Dimension: {} x {} = {}\n", lyt.x() + 1, lyt.y() + 1, area);
     }
     /**
      * Computes possible expansions and their priorities for the current vertex in the search space graph.
