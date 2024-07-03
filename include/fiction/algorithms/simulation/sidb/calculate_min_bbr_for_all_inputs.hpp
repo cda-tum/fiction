@@ -45,10 +45,9 @@ struct calculate_min_bbr_for_all_inputs_params
  * @return The minimum potential required for charge change across all input combinations.
  */
 template <typename Lyt, typename TT>
-[[nodiscard]] double calculate_min_bbr_for_all_inputs(
-    const Lyt& lyt, const std::vector<TT>& spec,
-    const calculate_min_bbr_for_all_inputs_params& params              = {},
-    const std::optional<int8_t>                                                        charge_state_change = 1)
+[[nodiscard]] double calculate_min_bbr_for_all_inputs(const Lyt& lyt, const std::vector<TT>& spec,
+                                                      const calculate_min_bbr_for_all_inputs_params& params = {},
+                                                      const std::optional<int8_t> charge_state_change       = 1)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
