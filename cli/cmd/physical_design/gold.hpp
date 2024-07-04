@@ -7,16 +7,20 @@
 
 #include <fiction/algorithms/physical_design/graph_oriented_layout_design.hpp>
 #include <fiction/traits.hpp>
+#include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
 #include <nlohmann/json.hpp>
 
+#include <iostream>
 #include <memory>
+#include <variant>
 
 namespace alice
 {
 /**
- *
+ * Executes a physical design approach utilizing A* path finding in a search space graph.
+ * See algorithms/physical_design/graph_oriented_layout_search.hpp for more details.
  */
 class gold_command : public command
 {
@@ -27,13 +31,17 @@ class gold_command : public command
      * @param e alice::environment that specifies stores etc.
      */
     explicit gold_command(const environment::ptr& e) :
-            command(e, "Performs scalable placement and routing of the current logic network in store. "
-                       "An FCN layout that is not minimal will be found in reasonable runtime.")
+            command(e, "Performs scalable placement and routing of the current logic network in store using the "
+                       "Graph-Oriented Layout Design (GOLD) algorithm. GOLD generates close-to-optimal 2DDWave-clocked "
+                       "FCN gate-level layouts in reasonable runtime. Its result quality is better than 'ortho' and "
+                       "its runtime behavior superior to 'exact' and 'onepass'.")
     {
-        add_option("--timeout,-t", timeout, "Timeout (in ms)");
-        add_flag("--high_effort,-e", "High effort");
-        add_flag("--return_first,-r", "Return first found layout");
-        add_flag("--verbose,-v", "Be verbose");
+        add_option("--timeout,-t", timeout, "Timeout in milliseconds");
+        add_flag("--high_effort,-e", ps.high_effort,
+                 "Toggle high effort mode; increases runtime but might generate better results");
+        add_flag("--return_first,-r", ps.return_first,
+                 "Terminate on the first found layout; reduces runtime but might sacrifice result quality");
+        add_flag("--verbose,-v", ps.verbose, "Be verbose");
     }
 
   protected:
@@ -50,21 +58,9 @@ class gold_command : public command
             return;
         }
 
-        if (is_set("return_first"))
-        {
-            ps.return_first = true;
-        }
-        if (is_set("high_effort"))
-        {
-            ps.high_effort = true;
-        }
         if (is_set("timeout"))
         {
             ps.timeout = timeout;
-        }
-        if (is_set("verbose"))
-        {
-            ps.verbose = true;
         }
 
         graph_oriented_layout_design<fiction::cart_gate_clk_lyt>();
@@ -86,7 +82,7 @@ class gold_command : public command
     /**
      * Timeout.
      */
-    uint64_t timeout = 0;
+    uint64_t timeout = 0ul;
     /**
      * Parameters.
      */
@@ -121,4 +117,4 @@ ALICE_ADD_COMMAND(gold, "Physical Design")
 
 }  // namespace alice
 
-#endif  // FICTION_CMD_GELS_HPP
+#endif  // FICTION_CMD_GOLD_HPP
