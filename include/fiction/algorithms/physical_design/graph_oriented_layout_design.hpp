@@ -8,6 +8,8 @@
 #include "fiction/algorithms/path_finding/a_star.hpp"
 #include "fiction/algorithms/path_finding/cost.hpp"
 #include "fiction/algorithms/path_finding/distance.hpp"
+#include "fiction/algorithms/physical_design/post_layout_optimization.hpp"
+#include "fiction/io/print_layout.hpp"
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/layouts/obstruction_layout.hpp"
@@ -302,7 +304,7 @@ struct timeout_settings
      */
     timeout_settings(const std::optional<unsigned>& timeout_opt, bool high_effort)
     {
-        timeout = timeout_opt.value_or(high_effort ? 1000000u : 10000u);
+        timeout = timeout_opt.value_or(high_effort ? 1000000u : 1000u);
     }
 };
 /**
@@ -697,6 +699,10 @@ class graph_oriented_layout_design_impl
      */
     uint64_t best_solution{100000};
     /**
+     * Current best solution w.r.t. area after relocating POs.
+     */
+    uint64_t best_optimized_solution{100000};
+    /**
      * Flag indicating if initial solution was already found and other search space graphs should be pruned.
      */
     bool improv_mode{false};
@@ -1015,11 +1021,7 @@ class graph_oriented_layout_design_impl
             return get_possible_positions_single_fanin<Lyt, Ntk>(layout, node2pos, search_space_graph.num_expansions,
                                                                  fc);
         }
-        else
-        {
-            return get_possible_positions_double_fanin<Lyt, Ntk>(layout, node2pos, search_space_graph.num_expansions,
-                                                                 fc);
-        }
+        return get_possible_positions_double_fanin<Lyt, Ntk>(layout, node2pos, search_space_graph.num_expansions, fc);
     }
     /**
      * Validates the given layout based on the nodes in the network and their mappings in the node dictionary.
@@ -1303,21 +1305,33 @@ class graph_oriented_layout_design_impl
             if (improv_mode)
             {
                 const auto bb = fiction::bounding_box_2d(layout);
-                area          = (bb.get_x_size() + 1) * (bb.get_y_size() + 1);
+                area          = (bb.get_max().x + 1) * (bb.get_max().y + 1);
             }
 
-            if (found_solution && (!improv_mode || (area < best_solution)))
+            if (found_solution && (!improv_mode || (area <= best_solution)))
             {
                 const auto bb = fiction::bounding_box_2d(layout);
-                layout.resize({bb.get_x_size(), bb.get_y_size(), layout.z()});
-                area = (layout.x() + 1) * (layout.y() + 1);
-                if (verbose)
-                {
-                    print_placement_info<Lyt>(layout, area);
-                }
+                layout.resize({bb.get_max().x, bb.get_max().y, layout.z()});
+                area          = (layout.x() + 1) * (layout.y() + 1);
                 best_solution = area;
                 improv_mode   = true;
-                return {{}, layout};
+
+                fiction::post_layout_optimization_params params;
+                params.optimize_pos_only = true;
+                fiction::post_layout_optimization(layout, params);
+                const auto bb_after_plo = fiction::bounding_box_2d(layout);
+                layout.resize({bb_after_plo.get_max().x, bb_after_plo.get_max().y, layout.z()});
+                uint64_t area_after_plo = (layout.x() + 1) * (layout.y() + 1);
+                if (area_after_plo < best_optimized_solution)
+                {
+                    best_optimized_solution = area_after_plo;
+                    if (verbose)
+                    {
+                        print_placement_info<Lyt>(layout, area_after_plo);
+                    }
+                    return {{}, layout};
+                }
+                return {{}, std::nullopt};
             }
 
             if (improv_mode && area >= best_solution)
@@ -1326,11 +1340,13 @@ class graph_oriented_layout_design_impl
             }
 
             // Expand layout dimensions if needed
-            if (position.x == layout.x() && layout.x() < (max_layout_width - 1))
+            if (position.x == layout.x() && layout.x() < (max_layout_width - 1) &&
+                !search_space_graph.network.is_po(search_space_graph.nodes_to_place[current_node - 1]))
             {
                 layout.resize({layout.x() + 1, layout.y(), layout.z()});
             }
-            if (position.y == layout.y() && layout.y() < (max_layout_height - 1))
+            if (position.y == layout.y() && layout.y() < (max_layout_height - 1) &&
+                !search_space_graph.network.is_po(search_space_graph.nodes_to_place[current_node - 1]))
             {
                 layout.resize({layout.x(), layout.y() + 1, layout.z()});
             }
@@ -1423,10 +1439,17 @@ class graph_oriented_layout_design_impl
             network.foreach_node(
                 [&nodes_to_place, &network](const auto& n)
                 {
-                    if (!network.is_constant(n))
+                    if (!network.is_constant(n) && !network.is_po(n))
                     {
                         nodes_to_place.push_back(n);
                     }
+                });
+
+            network.foreach_co(
+                [&](const auto& f)
+                {
+                    auto n = network.get_node(f);
+                    nodes_to_place.push_back(n);
                 });
         };
 
