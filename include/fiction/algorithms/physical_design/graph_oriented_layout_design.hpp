@@ -77,7 +77,7 @@ struct graph_oriented_layout_design_stats
     /**
      * Runtime of the graph-oriented layout design process.
      */
-    mockturtle::stopwatch<>::duration time_total{0};
+    mockturtle::stopwatch<>::duration time_total{};
     /**
      * Reports the statistics to the given output stream.
      *
@@ -115,7 +115,7 @@ struct nested_vector_hash
      */
     std::size_t operator()(const coord_vec_type<Lyt>& vec) const
     {
-        std::size_t       hash  = 0;
+        std::size_t       hash  = 0ul;
         const std::size_t prime = 0x9e3779b9;
         for (const auto& tile : vec)
         {
@@ -174,7 +174,7 @@ class priority_queue
     /**
      * Counter to keep track of the insertion order of elements.
      */
-    std::size_t counter = 0;
+    std::size_t counter = 0ul;
     /**
      * Tuple containing the priority, counter, and element.
      */
@@ -268,10 +268,10 @@ struct timeout_settings
      * it sets the timeout to 1000000 milliseconds (1000 seconds) if `high_effort` is `true`,
      * or to 10000 milliseconds (10 seconds) if `high_effort` is false.
      *
-     * @param timeout_opt An optional unsigned value representing the desired timeout in milliseconds.
+     * @param timeout_opt An optional unsigned integer value representing the desired timeout in milliseconds.
      * @param high_effort A boolean indicating whether a high effort (longer timeout) is desired.
      */
-    timeout_settings(const std::optional<unsigned>& timeout_opt, const bool high_effort)
+    timeout_settings(const std::optional<uint64_t>& timeout_opt, const bool high_effort)
     {
         timeout = timeout_opt.value_or(high_effort ? 1000000u : 1000u);
     }
@@ -424,7 +424,7 @@ class topo_view_ci_to_co : public mockturtle::immutable_view<Ntk>
     /*! \brief Reimplementation of `node_to_index`. */
     [[nodiscard]] uint32_t node_to_index(const node& n) const
     {
-        return std::distance(std::begin(topo_order), std::find(std::begin(topo_order), std::end(topo_order), n));
+        return std::distance(std::cbegin(topo_order), std::find(std::cbegin(topo_order), std::cend(topo_order), n));
     }
     /*! \brief Reimplementation of `index_to_node`. */
     [[nodiscard]] node index_to_node(const uint32_t index) const
@@ -435,7 +435,7 @@ class topo_view_ci_to_co : public mockturtle::immutable_view<Ntk>
     template <typename Fn>
     void foreach_node(Fn&& fn) const
     {
-        mockturtle::detail::foreach_element(topo_order.begin(), topo_order.end(), std::forward<Fn>(fn));
+        mockturtle::detail::foreach_element(topo_order.cbegin(), topo_order.cend(), std::forward<Fn>(fn));
     }
     /*! \brief Reimplementation of `foreach_gate`. */
     template <typename Fn>
@@ -443,7 +443,7 @@ class topo_view_ci_to_co : public mockturtle::immutable_view<Ntk>
     {
         const uint32_t offset = 1u + this->num_pis() +
                                 (this->get_node(this->get_constant(true)) != this->get_node(this->get_constant(false)));
-        mockturtle::detail::foreach_element(topo_order.begin() + offset, topo_order.end(), std::forward<Fn>(fn));
+        mockturtle::detail::foreach_element(topo_order.cbegin() + offset, topo_order.cend(), std::forward<Fn>(fn));
     }
     /*! \brief Implementation of `foreach_gate` in reverse topological order. */
     template <typename Fn>
@@ -451,7 +451,7 @@ class topo_view_ci_to_co : public mockturtle::immutable_view<Ntk>
     {
         const uint32_t offset = 1u + this->num_pis() +
                                 (this->get_node(this->get_constant(true)) != this->get_node(this->get_constant(false)));
-        mockturtle::detail::foreach_element(topo_order.rbegin(), topo_order.rend() - offset, std::forward<Fn>(fn));
+        mockturtle::detail::foreach_element(topo_order.crbegin(), topo_order.crend() - offset, std::forward<Fn>(fn));
     }
 
     void update_topo()
@@ -660,11 +660,11 @@ class graph_oriented_layout_design_impl
     /**
      * Count evaluated paths in the search space graphs.
      */
-    uint64_t num_evaluated_paths{0};
+    uint64_t num_evaluated_paths{0ul};
     /**
      * Keep track of the maximum number of placed nodes.
      */
-    uint64_t max_placed_nodes{0};
+    uint64_t max_placed_nodes{0ul};
     /**
      * Current best solution w.r.t. area.
      */
@@ -725,7 +725,7 @@ class graph_oriented_layout_design_impl
     [[nodiscard]] coord_vec_type<ObstrLyt> get_possible_positions_pis(ObstrLyt& layout, const pi_locations& pi_locs,
                                                                       const uint64_t num_expansions) noexcept
     {
-        uint64_t count_expansions = 0;
+        uint64_t count_expansions = 0ul;
 
         coord_vec_type<ObstrLyt> possible_positions{};
 
@@ -792,7 +792,7 @@ class graph_oriented_layout_design_impl
         possible_positions.reserve(expansion_limit);
 
         // Check if path from previous tile to PO exists
-        auto check_tile = [&](uint64_t x, uint64_t y)
+        auto check_tile = [&](const uint64_t x, const uint64_t y)
         {
             const tile<ObstrLyt> tile{x, y, 0};
             if (check_path(layout, pre_t, tile, false, true).has_value())
@@ -801,7 +801,7 @@ class graph_oriented_layout_design_impl
             }
         };
 
-        for (uint64_t k = 0; k <= expansion_limit; ++k)
+        for (uint64_t k = 0ul; k <= expansion_limit; ++k)
         {
             if (pre_t.x + k <= layout.x())
             {
@@ -832,7 +832,7 @@ class graph_oriented_layout_design_impl
         coord_vec_type<ObstrLyt> possible_positions{};
         possible_positions.reserve(num_expansions);
 
-        uint64_t count_expansions = 0;
+        uint64_t count_expansions = 0ul;
 
         const auto& pre   = fc.fanin_nodes[0];
         const auto  pre_t = static_cast<tile<ObstrLyt>>(node2pos[pre]);
@@ -858,9 +858,9 @@ class graph_oriented_layout_design_impl
         };
 
         // Iterate diagonally
-        for (uint64_t k = 0; k < layout.x() + layout.y() + 1; ++k)
+        for (uint64_t k = 0ul; k < layout.x() + layout.y() + 1; ++k)
         {
-            for (uint64_t x = 0; x < k + 1; ++x)
+            for (uint64_t x = 0ul; x < k + 1; ++x)
             {
                 const auto y = k - x;
                 if ((pre_t.y + y) <= layout.y() && (pre_t.x + x) <= layout.x())
@@ -892,7 +892,7 @@ class graph_oriented_layout_design_impl
     {
         coord_vec_type<ObstrLyt> possible_positions{};
         possible_positions.reserve(num_expansions);
-        uint64_t count_expansions = 0;
+        uint64_t count_expansions = 0ul;
 
         const auto& pre1 = fc.fanin_nodes[0];
         const auto& pre2 = fc.fanin_nodes[1];
@@ -938,9 +938,9 @@ class graph_oriented_layout_design_impl
         };
 
         // Iterate diagonally
-        for (uint64_t k = 0; k < layout.x() + layout.y() + 1; ++k)
+        for (uint64_t k = 0ul; k < layout.x() + layout.y() + 1; ++k)
         {
-            for (uint64_t x = 0; x < k + 1; ++x)
+            for (uint64_t x = 0ul; x < k + 1; ++x)
             {
                 const auto y = k - x;
                 if ((min_y + y) <= layout.y() && (min_x + x) <= layout.x())
@@ -969,7 +969,7 @@ class graph_oriented_layout_design_impl
      */
     [[nodiscard]] coord_vec_type<ObstrLyt> get_possible_positions(ObstrLyt&                           layout,
                                                                   const search_space_graph<ObstrLyt>& ssg,
-                                                                  const uint64_t&                     current_node,
+                                                                  const uint64_t                      current_node,
                                                                   node_dict_type<ObstrLyt, tec_nt>&   node2pos) noexcept
     {
         const auto fc = fanins(ssg.network, ssg.nodes_to_place[current_node]);
@@ -1020,7 +1020,7 @@ class graph_oriented_layout_design_impl
                    (layout.is_empty_tile({t.x, t.y, 1}) && !layout.is_obstructed_coordinate({t.x, t.y, 1}));
         };
 
-        for (uint64_t node = 0; node < current_node; node++)
+        for (uint64_t node = 0ul; node < current_node; node++)
         {
             const auto layout_tile = static_cast<tile<ObstrLyt>>(node2pos[nodes_to_place[node]]);
             const bool no_fanout_and_not_po =
@@ -1090,9 +1090,11 @@ class graph_oriented_layout_design_impl
     void route_double_input_node(const tile<ObstrLyt>& position, ObstrLyt& layout,
                                  node_dict_type<ObstrLyt, tec_nt>& node2pos, const fanin_container<tec_nt>& fc) noexcept
     {
-        const auto &pre1 = fc.fanin_nodes[0], pre2 = fc.fanin_nodes[1];
+        const auto& pre1 = fc.fanin_nodes[0];
+        const auto& pre2 = fc.fanin_nodes[1];
 
-        auto pre1_t = static_cast<tile<ObstrLyt>>(node2pos[pre1]), pre2_t = static_cast<tile<ObstrLyt>>(node2pos[pre2]);
+        const auto pre1_t = static_cast<tile<ObstrLyt>>(node2pos[pre1]);
+        const auto pre2_t = static_cast<tile<ObstrLyt>>(node2pos[pre2]);
 
         layout.move_node(layout.get_node(position), position, {});
 
@@ -1145,6 +1147,7 @@ class graph_oriented_layout_design_impl
         else if (fc.fanin_nodes.size() == 1)
         {
             const auto& pre = fc.fanin_nodes[0];
+
             // Place single input node
             if (network.is_po(nodes_to_place[current_node]))
             {
@@ -1191,11 +1194,10 @@ class graph_oriented_layout_design_impl
      * Outputs placement information.
      *
      * @param lyt Current layout.
-     * @param area Layout area (in tiles).
      */
-    void print_placement_info(const ObstrLyt& lyt, const uint64_t area)
+    void print_placement_info(const ObstrLyt& lyt) const
     {
-        std::cout << "Found improved solution:\n";
+        std::cout << "[i] Found improved solution:\n";
 
         // Calculate the duration between start and end
         const auto end      = std::chrono::high_resolution_clock::now();
@@ -1207,9 +1209,9 @@ class graph_oriented_layout_design_impl
         const auto sec = std::chrono::duration_cast<std::chrono::seconds>(duration).count();
 
         // Output the elapsed time
-        std::cout << fmt::format("Time taken: {} seconds, {} milliseconds, and {} microseconds\n", sec, ms, us);
-        std::cout << fmt::format("Evaluated Paths: {}\n", num_evaluated_paths);
-        std::cout << fmt::format("Layout Dimension: {} x {} = {}\n", lyt.x() + 1, lyt.y() + 1, area);
+        std::cout << fmt::format("[i]   Time taken:       {} s {} ms {} µs\n", sec, ms, us);
+        std::cout << fmt::format("[i]   Evaluated paths:  {}\n", num_evaluated_paths);
+        std::cout << fmt::format("[i]   Layout dimension: {} × {} = {}\n", lyt.x() + 1, lyt.y() + 1, lyt.area());
     }
     /**
      * Computes possible expansions and their priorities for the current vertex in the search space graph.
@@ -1223,8 +1225,8 @@ class graph_oriented_layout_design_impl
     [[nodiscard]] std::pair<std::vector<std::pair<coord_vec_type<ObstrLyt>, double>>, std::optional<ObstrLyt>>
     expand(search_space_graph<ObstrLyt>& ssg) noexcept
     {
-        uint64_t current_po   = 0;
-        uint64_t current_node = 0;
+        uint64_t current_po   = 0ul;
+        uint64_t current_node = 0ul;
 
         const auto     min_layout_width  = ssg.network.num_pis();
         const uint64_t min_layout_height = 1;
@@ -1251,43 +1253,50 @@ class graph_oriented_layout_design_impl
             possible_positions = get_possible_positions(layout, ssg, current_node, node2pos);
         }
 
-        for (uint64_t idx = 0; idx < ssg.current_vertex.size(); ++idx)
+        for (uint64_t idx = 0ul; idx < ssg.current_vertex.size(); ++idx)
         {
             const auto position = ssg.current_vertex[idx];
 
             found_solution = place_and_route(position, layout, ssg.network, current_node, ssg.nodes_to_place,
                                              current_po, node2pos, pi2node);
 
-            uint64_t area = 0;
+            uint64_t area = 0ul;
+
             if (improv_mode)
             {
                 const auto bb = bounding_box_2d(layout);
-                area          = (bb.get_max().x + 1) * (bb.get_max().y + 1);
+                area          = (bb.get_max().x + 1u) * (bb.get_max().y + 1u);
             }
 
             if (found_solution && (!improv_mode || (area <= best_solution)))
             {
                 const auto bb = fiction::bounding_box_2d(layout);
                 layout.resize({bb.get_max().x, bb.get_max().y, layout.z()});
-                area          = (layout.x() + 1) * (layout.y() + 1);
+
+                area          = layout.area();
                 best_solution = area;
                 improv_mode   = true;
 
-                fiction::post_layout_optimization_params params;
-                params.optimize_pos_only = true;
-                fiction::post_layout_optimization(layout, params);
+                fiction::post_layout_optimization_params plo_params{};
+                plo_params.optimize_pos_only = true;
+
+                fiction::post_layout_optimization(layout, plo_params);
+
                 const auto bb_after_plo = fiction::bounding_box_2d(layout);
                 layout.resize({bb_after_plo.get_max().x, bb_after_plo.get_max().y, layout.z()});
-                uint64_t area_after_plo = (layout.x() + 1) * (layout.y() + 1);
-                if (area_after_plo < best_optimized_solution)
+
+                if (layout.area() < best_optimized_solution)
                 {
-                    best_optimized_solution = area_after_plo;
+                    best_optimized_solution = layout.area();
+
                     if (ps.verbose)
                     {
-                        print_placement_info(layout, area_after_plo);
+                        print_placement_info(layout);
                     }
+
                     return {{}, layout};
                 }
+
                 return {{}, std::nullopt};
             }
 
@@ -1325,12 +1334,15 @@ class graph_oriented_layout_design_impl
         {
             auto new_sequence = ssg.current_vertex;
             new_sequence.push_back(position);
+
             const auto remaining_nodes_to_place =
                 static_cast<double>(ssg.nodes_to_place.size() - (ssg.current_vertex.size() + 1));
+
             // Current layout size
             const double cost1 = static_cast<double>(((std::max(layout.x() - 1, position.x) + 1) *
                                                       (std::max(layout.y() - 1, position.y) + 1))) /
                                  static_cast<double>((max_layout_width * max_layout_height));
+
             // Position of last placed node
             const double cost2 = static_cast<double>(((position.x + 1) * (position.y + 1))) /
                                  static_cast<double>((max_layout_width * max_layout_height));
@@ -1347,23 +1359,23 @@ class graph_oriented_layout_design_impl
      */
     void initialize_pis_cost_and_num_expansions() noexcept
     {
-        constexpr std::array<pi_locations, 12> pi_locs = {{{true, false},
-                                                           {false, true},
-                                                           {true, true},
-                                                           {true, false},
-                                                           {false, true},
-                                                           {true, true},
-                                                           {true, false},
-                                                           {false, true},
-                                                           {true, true},
-                                                           {true, false},
-                                                           {false, true},
-                                                           {true, true}}};
+        static constexpr std::array<pi_locations, 12> pi_locs = {{{true, false},
+                                                                  {false, true},
+                                                                  {true, true},
+                                                                  {true, false},
+                                                                  {false, true},
+                                                                  {true, true},
+                                                                  {true, false},
+                                                                  {false, true},
+                                                                  {true, true},
+                                                                  {true, false},
+                                                                  {false, true},
+                                                                  {true, true}}};
 
-        auto pi_loc_it = pi_locs.begin();
+        auto pi_loc_it = pi_locs.cbegin();
         for (auto& graph : ssg_vec)
         {
-            if (pi_loc_it != pi_locs.end())
+            if (pi_loc_it != pi_locs.cend())
             {
                 graph.pi_locs = *pi_loc_it;
                 ++pi_loc_it;
@@ -1425,7 +1437,7 @@ class graph_oriented_layout_design_impl
 
             // Initialize search space graphs with networks
             ssg_vec[2].network = network_breadth_co_to_ci;
-            for (uint64_t i = 0; i < 3; ++i)
+            for (uint64_t i = 0ul; i < 3; ++i)
             {
                 ssg_vec[3 + i].network = network_breadth_ci_to_co;
                 ssg_vec[6 + i].network = network_depth_co_to_ci;
@@ -1443,7 +1455,7 @@ class graph_oriented_layout_design_impl
             ssg_vec[2].nodes_to_place = nodes_to_place_breadth_co_to_ci;
 
             // Assign nodes to place to each search space graphs
-            for (uint64_t i = 0; i < 3; ++i)
+            for (uint64_t i = 0ul; i < 3; ++i)
             {
                 ssg_vec[3 + i].nodes_to_place = nodes_to_place_breadth_ci_to_co;
                 ssg_vec[6 + i].nodes_to_place = nodes_to_place_depth_co_to_ci;
@@ -1456,7 +1468,7 @@ class graph_oriented_layout_design_impl
      */
     void initialize_frontiers_flags() noexcept
     {
-        for (uint64_t i = 0; i < num_search_space_graphs; ++i)
+        for (uint64_t i = 0ul; i < num_search_space_graphs; ++i)
         {
             ssg_vec[i].frontier_flag = true;
         }
@@ -1496,7 +1508,7 @@ Lyt graph_oriented_layout_design(Ntk& ntk, graph_oriented_layout_design_params p
     graph_oriented_layout_design_stats                  st{};
     detail::graph_oriented_layout_design_impl<Lyt, Ntk> p{ntk, ps, st};
 
-    auto result = p.run();
+    const auto result = p.run();
 
     if (pst)
     {
