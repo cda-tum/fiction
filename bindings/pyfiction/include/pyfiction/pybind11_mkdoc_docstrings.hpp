@@ -5361,6 +5361,8 @@ Template parameter ``Lyt``:
 Template parameter ``Ntk``:
     Network type.)doc";
 
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_best_optimized_solution = R"doc(Current best solution w.r.t. area after relocating POs.)doc";
+
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_best_solution = R"doc(Current best solution w.r.t. area.)doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_check_path =
@@ -5554,10 +5556,7 @@ static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_print_
 R"doc(Outputs placement information.
 
 Parameter ``lyt``:
-    Current layout.
-
-Parameter ``area``:
-    Layout area (in tiles).)doc";
+    Current layout.)doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_ps = R"doc(Parameters.)doc";
 
@@ -6917,8 +6916,8 @@ seconds) if `high_effort` is `true`, or to 10000 milliseconds (10
 seconds) if `high_effort` is false.
 
 Parameter ``timeout_opt``:
-    An optional unsigned value representing the desired timeout in
-    milliseconds.
+    An optional unsigned integer value representing the desired
+    timeout in milliseconds.
 
 Parameter ``high_effort``:
     A boolean indicating whether a high effort (longer timeout) is
