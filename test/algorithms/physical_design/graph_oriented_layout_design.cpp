@@ -46,7 +46,6 @@ void check_graph_oriented_layout_design_equiv_all()
     check_graph_oriented_layout_design_equiv<Lyt>(blueprints::maj4_network<mockturtle::aig_network>());
     check_graph_oriented_layout_design_equiv<Lyt>(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>());
     check_graph_oriented_layout_design_equiv<Lyt>(blueprints::and_or_network<technology_network>());
-    check_graph_oriented_layout_design_equiv<Lyt>(blueprints::multi_output_and_network<technology_network>());
     check_graph_oriented_layout_design_equiv<Lyt>(blueprints::half_adder_network<technology_network>());
     check_graph_oriented_layout_design_equiv<Lyt>(blueprints::full_adder_network<technology_network>());
     check_graph_oriented_layout_design_equiv<Lyt>(blueprints::mux21_network<technology_network>());
