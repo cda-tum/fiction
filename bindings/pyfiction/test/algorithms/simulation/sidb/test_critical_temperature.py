@@ -61,7 +61,7 @@ class TestCriticalTemperature(unittest.TestCase):
 
     def test_bestagon_inv(self):
         layout = read_sqd_layout_100(dir_path + "/../../../resources/hex_11_inputsdbp_inv_straight_v0_manual.sqd",
-                                 "inverter_input_0")
+                                     "inverter_input_0")
 
         params = critical_temperature_params()
         params.engine = sidb_simulation_engine.QUICKSIM
@@ -78,7 +78,7 @@ class TestCriticalTemperature(unittest.TestCase):
 
     def test_bestagon_inv_with_different_mu(self):
         layout = read_sqd_layout_100(dir_path + "/../../../resources/hex_11_inputsdbp_inv_straight_v0_manual.sqd",
-                                 "inverter_input_0")
+                                     "inverter_input_0")
 
         params = critical_temperature_params()
         params.simulation_parameters.base = 2
