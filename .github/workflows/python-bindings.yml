@@ -39,7 +39,6 @@ defaults:
 env:
   Z3_VERSION: 4.10.0
   ENABLE_Z3: 'ON'
-  ENABLE_ALGLIB: 'ON'
 
 jobs:
   build_and_test:
@@ -51,12 +50,12 @@ jobs:
           - os: ubuntu-22.04
             z3_platform: linux
             architecture: x64
-            alglib: ${{ env.ENABLE_ALGLIB }}
+            alglib: 'ON'
             toolset: v142
           - os: macos-14
             z3_platform: macOS
             architecture: arm64
-            alglib: ${{ env.ENABLE_ALGLIB }}
+            alglib: 'ON'
           - os: windows-2019
             z3_platform: windows
             architecture: x64
