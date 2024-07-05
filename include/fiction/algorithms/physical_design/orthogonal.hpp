@@ -250,7 +250,8 @@ uint32_t is_eastern_po_orientation_available(const coloring_container<Ntk>& ctn,
 }
 
 template <typename Lyt, typename Ntk>
-aspect_ratio<Lyt> determine_layout_size(const coloring_container<Ntk>& ctn, uint64_t num_multi_output_pos) noexcept
+aspect_ratio<Lyt> determine_layout_size(const coloring_container<Ntk>& ctn,
+                                        const uint32_t                 num_multi_output_pos) noexcept
 {
 #if (PROGRESS_BARS)
     // initialize a progress bar
@@ -397,27 +398,24 @@ template <typename Ntk, typename Lyt>
 void place_outputs(Lyt& layout, const coloring_container<Ntk>& ctn, uint32_t po_counter,
                    mockturtle::node_map<mockturtle::signal<Lyt>, decltype(ctn.color_ntk)>& node2pos)
 {
-    bool                               multi_out_node = false;
-    std::vector<mockturtle::node<Ntk>> out_nodes;
-    tile<Lyt>                          po_tile{};
+    std::vector<mockturtle::node<Ntk>> out_nodes{};
+
     ctn.color_ntk.foreach_po(
-        [&po_counter, &out_nodes, &multi_out_node, &node2pos, &ctn, &layout, &po_tile](const auto& po)
+        [&po_counter, &out_nodes, &node2pos, &ctn, &layout](const auto& po)
         {
             if (!ctn.color_ntk.is_constant(po))
             {
-                const auto n_s = node2pos[po];
+                const auto n_s     = node2pos[po];
+                auto       po_tile = static_cast<tile<Lyt>>(n_s);
 
-                if (std::find(out_nodes.begin(), out_nodes.end(), po) != out_nodes.end())
-                {
-                    multi_out_node = true;
-                }
+                const auto multi_out_node = std::find(out_nodes.cbegin(), out_nodes.cend(), po) != out_nodes.cend();
 
-                po_tile = static_cast<tile<Lyt>>(n_s);
                 // determine PO orientation
                 if (!is_eastern_po_orientation_available(ctn, po) || multi_out_node)
                 {
                     po_tile = static_cast<tile<Lyt>>(wire_south(layout, po_tile, {po_tile.x, po_tile.y + 2}));
                 }
+
                 // check if PO position is located at the border
                 if (layout.is_at_eastern_border({po_tile.x + 1, po_tile.y}) && !multi_out_node)
                 {
@@ -440,7 +438,6 @@ void place_outputs(Lyt& layout, const coloring_container<Ntk>& ctn, uint32_t po_
                                          ctn.color_ntk.get_output_name(po_counter++) :
                                          fmt::format("po{}", po_counter++),
                                      po_tile);
-                    multi_out_node = false;
                 }
 
                 out_nodes.push_back(po);
@@ -468,20 +465,22 @@ class orthogonal_impl
         mockturtle::node_map<mockturtle::signal<Lyt>, decltype(ctn.color_ntk)> node2pos{ctn.color_ntk};
 
         // Find multi_output_nodes
-        std::vector<mockturtle::node<Ntk>> output_nodes;
-        std::vector<mockturtle::node<Ntk>> multi_out_nodes;
-        uint32_t                           num_multi_output_pos{0};
-        bool                               place_outputs_last = false;
-        mockturtle::node<Ntk>              last_po_index      = 0;
+        std::vector<mockturtle::node<decltype(ntk)>> output_nodes{};
+        std::vector<mockturtle::node<decltype(ntk)>> multi_out_nodes{};
+        uint32_t                                     num_multi_output_pos{0};
+        auto                                         place_outputs_last = false;
+        mockturtle::node<decltype(ntk)>              last_po_index      = 0;
+
         ctn.color_ntk.foreach_po(
             [&](const auto& po)
             {
-                if (std::find(output_nodes.begin(), output_nodes.end(), po) != output_nodes.end())
+                if (std::find(output_nodes.cbegin(), output_nodes.cend(), po) != output_nodes.cend())
                 {
                     multi_out_nodes.push_back(po);
                     ++num_multi_output_pos;
                     place_outputs_last = true;
                 }
+
                 output_nodes.push_back(po);
 
                 // check if POs appear ordered in the network, otherwise also place them last
@@ -489,6 +488,7 @@ class orthogonal_impl
                 {
                     place_outputs_last = true;
                 }
+
                 last_po_index = po;
             });
 
@@ -634,7 +634,8 @@ class orthogonal_impl
                         if (place_outputs_last)
                         {
                             if (!is_eastern_po_orientation_available(ctn, n) ||
-                                std::find(multi_out_nodes.begin(), multi_out_nodes.end(), n) != multi_out_nodes.end())
+                                std::find(multi_out_nodes.cbegin(), multi_out_nodes.cend(), n) !=
+                                    multi_out_nodes.cend())
                             {
                                 ++latest_pos.y;
                             }
