@@ -544,6 +544,55 @@ create_wiring_reduction_layout(const Lyt& lyt, const uint64_t x_offset = 0, cons
                 wiring_reduction_lyt.obstruct_coordinate({new_coord.x, new_coord.y, 1});
 
                 // special case:
+                //   =
+                //   ↓
+                // = =
+                // ↓ ↓
+                // =→&
+                //
+                // -> No crossing between coordinate to the left and coordinate above the gate
+                if (lyt.has_northern_incoming_signal({old_coord.x - 1, old_coord.y, old_coord.z}) &&
+                    lyt.has_northern_incoming_signal({old_coord.x, old_coord.y - 1, old_coord.z}) &&
+                    lyt.is_wire_tile({old_coord.x - 1, old_coord.y, old_coord.z}) &&
+                    lyt.is_wire_tile({old_coord.x, old_coord.y - 1, old_coord.z}) &&
+                    lyt.is_wire_tile({old_coord.x - 1, old_coord.y - 1, old_coord.z}) &&
+                    lyt.is_wire_tile({old_coord.x, old_coord.y - 2, old_coord.z}) &&
+                    !lyt.is_fanout(lyt.get_node({old_coord.x - 1, old_coord.y, old_coord.z})) &&
+                    !lyt.is_fanout(lyt.get_node({old_coord.x, old_coord.y - 1, old_coord.z})) &&
+                    !lyt.is_fanout(lyt.get_node({old_coord.x - 1, old_coord.y - 1, old_coord.z})) &&
+                    !lyt.is_fanout(lyt.get_node({old_coord.x, old_coord.y - 2, old_coord.z})))
+
+                {
+                    if (wiring_reduction_lyt.get_search_direction() == search_direction::HORIZONTAL)
+                    {
+                        wiring_reduction_lyt.obstruct_coordinate({new_coord.x - 1, new_coord.y, 0});
+                        wiring_reduction_lyt.obstruct_coordinate({new_coord.x - 1, new_coord.y, 1});
+                    }
+                }
+                // special case:
+                //   =→=
+                //     ↓
+                // =→=→&
+                //
+                // -> No crossing between coordinate to the left and coordinate above the gate
+                if (lyt.has_western_incoming_signal({old_coord.x - 1, old_coord.y, old_coord.z}) &&
+                    lyt.has_western_incoming_signal({old_coord.x, old_coord.y - 1, old_coord.z}) &&
+                    lyt.is_wire_tile({old_coord.x - 1, old_coord.y, old_coord.z}) &&
+                    lyt.is_wire_tile({old_coord.x, old_coord.y - 1, old_coord.z}) &&
+                    lyt.is_wire_tile({old_coord.x - 1, old_coord.y - 1, old_coord.z}) &&
+                    lyt.is_wire_tile({old_coord.x - 2, old_coord.y, old_coord.z}) &&
+                    !lyt.is_fanout(lyt.get_node({old_coord.x - 1, old_coord.y, old_coord.z})) &&
+                    !lyt.is_fanout(lyt.get_node({old_coord.x, old_coord.y - 1, old_coord.z})) &&
+                    !lyt.is_fanout(lyt.get_node({old_coord.x - 1, old_coord.y - 1, old_coord.z})) &&
+                    !lyt.is_fanout(lyt.get_node({old_coord.x - 2, old_coord.y, old_coord.z})))
+                {
+                    if (wiring_reduction_lyt.get_search_direction() == search_direction::VERTICAL)
+                    {
+                        wiring_reduction_lyt.obstruct_coordinate({new_coord.x, new_coord.y - 1, 0});
+                        wiring_reduction_lyt.obstruct_coordinate({new_coord.x, new_coord.y - 1, 1});
+                    }
+                }
+                // special case:
                 // +→=
                 // ↓ ↓
                 // =→&
