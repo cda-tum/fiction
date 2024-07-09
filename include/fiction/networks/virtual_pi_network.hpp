@@ -186,7 +186,7 @@ class virtual_pi_network : public technology_network
         std::sort(virtual_inputs.begin(), virtual_inputs.end(), std::greater<uint64_t>());
         for (uint32_t i : virtual_inputs) {
             if(i < _storage->nodes.size()) {
-                uint64_t new_node = ( _storage->outputs.begin() + i )->index;
+                uint64_t new_node = 0; // = ( _storage->outputs.begin() + i )->index
                 for (const auto& pair : map) {
                     if (pair.first == i) {
                         new_node = pair.second;
@@ -194,7 +194,27 @@ class virtual_pi_network : public technology_network
                     }
                 }
                 substitute_node(i, new_node);
-                // The outputs iterators also need to be adjusted with -1
+                // Adjust inputs
+                for ( auto& input : _storage->inputs )
+                {
+                    if (input > i)
+                    {
+                        --input;
+                    }
+                }
+                // Adjust nodes vector
+                for ( auto j = 0u; j < _storage->nodes.size(); ++j )
+                {
+                    auto& n = _storage->nodes[j];
+                    for ( auto& child : n.children )
+                    {
+                        if (child.data > i)
+                        {
+                            --child.data;
+                        }
+                    }
+                }
+                // Adjust outputs
                 for ( auto& output : _storage->outputs )
                 {
                     --output.index;

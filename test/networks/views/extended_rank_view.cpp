@@ -10,6 +10,7 @@
 #include <fiction/networks/views/extended_rank_view.hpp>
 #include <fiction/networks/virtual_pi_network.hpp>
 
+#include <mockturtle/algorithms/aqfp/buffer_insertion.hpp>
 #include <mockturtle/views/rank_view.hpp>
 
 using namespace fiction;
@@ -37,16 +38,19 @@ TEST_CASE("Check modify ranks", "[extended-rank-view]")
     auto blc = is_balanced(tec);
     std::cout << "Balanced: " << blc << "\n";
 
-    auto tec_b = network_balancing<technology_network>(tec);
-    blc = is_balanced(tec_b);
+    network_balancing_params ps;
+    ps.unify_outputs = true;
+
+    auto tec_balanced = network_balancing<technology_network>(tec, ps);
+    blc = is_balanced(tec_balanced);
     std::cout << "Balanced: " << blc << "\n";
 
-    auto vpi_r = extended_rank_view(tec_b);
+    auto vpi_r = extended_rank_view(tec_balanced);
 
     std::vector<technology_network::node> nodes = {13, 10};
     vpi_r.modify_rank(2, nodes);
 
-    vpi_r.foreach_node([&](const auto& nd) {
+    vpi_r.foreach_po([&](const auto& nd) {
                            std::cout << "Nd:" << nd << "\n";
                            /*if (vpi_r.is_inv(nd))
                            {
