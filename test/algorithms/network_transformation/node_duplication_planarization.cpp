@@ -84,7 +84,7 @@ TEST_CASE("Balancing Test", "[node-duplication-planarization]")
     const auto x5 = tec.create_pi();
     const auto f1 = tec.create_not(x2);
     const auto f2 = tec.create_nary_and({x1, x2, x3, x4});
-    const auto f3 = tec.create_nary_and({x3, x4, x5});
+    const auto f3 = tec.create_nary_or({x3, x4, x5});
     tec.create_po(f1);
     tec.create_po(f2);
     tec.create_po(f3);
@@ -92,12 +92,15 @@ TEST_CASE("Balancing Test", "[node-duplication-planarization]")
     auto blc = is_balanced(tec);
     std::cout << "Balanced: " << blc << "\n";
 
-    auto tec_b = network_balancing<technology_network>(tec);
+    network_balancing_params ps;
+    ps.unify_outputs = true;
+
+    auto tec_b = network_balancing<technology_network>(tec, ps);
     blc = is_balanced(tec_b);
     std::cout << "Balanced: " << blc << "\n";
 
     const auto vpi_r = mockturtle::rank_view(tec_b);
-    vpi_r.foreach_node([&](const auto& nd) {
+    /*vpi_r.foreach_node([&](const auto& nd) {
                          std::cout << "Nd:" << nd << "\n";
                          if (vpi_r.is_inv(nd))
                          {
@@ -112,9 +115,73 @@ TEST_CASE("Balancing Test", "[node-duplication-planarization]")
                          auto lvl = vpi_r.level(nd);
                          std::cout << "Level: " << lvl << "\n";
                          std::cout << "Rank: " << rnk << "\n";
+                     });*/
+
+    auto planarized_maj = node_duplication_planarization<technology_network>(tec_b);
+
+    planarized_maj.foreach_node([&](const auto& nd) {
+                         std::cout << "Nd:" << nd << "\n";
+                         if (planarized_maj.is_pi_real(nd))
+                         {
+                             std::cout << "is pi real" << "\n";
+                         }
+                         if (planarized_maj.is_pi_virtual(nd))
+                         {
+                             std::cout << "is pi virtual" << "\n";
+                         }
+                         if (planarized_maj.is_inv(nd))
+                         {
+                             std::cout << "is not" << "\n";
+                         }
+                         if (planarized_maj.is_buf(nd))
+                         {
+                             std::cout << "is buf" << "\n";
+                         }
+                         if (planarized_maj.is_and(nd))
+                         {
+                             std::cout << "is and" << "\n";
+                         }
+                         if (planarized_maj.is_po(nd))
+                         {
+                             std::cout << "is po" << "\n";
+                         }
+                         planarized_maj.foreach_fanin(nd, [&](const auto& fi) { std::cout << "Fis:" << fi << "\n"; });
                      });
 
-    const auto planarized_maj = node_duplication_planarization<technology_network>(tec);
+    planarized_maj.remove_virtual_input_nodes();
+
+    planarized_maj.foreach_node([&](const auto& nd) {
+                                    std::cout << "Nd:" << nd << "\n";
+                                    if (planarized_maj.is_pi_real(nd))
+                                    {
+                                        std::cout << "is pi real" << "\n";
+                                    }
+                                    if (planarized_maj.is_pi_virtual(nd))
+                                    {
+                                        std::cout << "is pi virtual" << "\n";
+                                    }
+                                    if (planarized_maj.is_inv(nd))
+                                    {
+                                        std::cout << "is not" << "\n";
+                                    }
+                                    if (planarized_maj.is_buf(nd))
+                                    {
+                                        std::cout << "is buf" << "\n";
+                                    }
+                                    if (planarized_maj.is_and(nd))
+                                    {
+                                        std::cout << "is and" << "\n";
+                                    }
+                                    if (planarized_maj.is_po(nd))
+                                    {
+                                        std::cout << "is po" << "\n";
+                                    }
+                                    planarized_maj.foreach_fanin(nd, [&](const auto& fi) { std::cout << "Fis:" << fi << "\n"; });
+                                });
+
+    mockturtle::equivalence_checking_stats st;
+    bool cec_m = *mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(tec, planarized_maj), {}, &st);
+    CHECK(cec_m == 1);
 
     CHECK(1 == 1);
 }

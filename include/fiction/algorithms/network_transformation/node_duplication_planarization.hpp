@@ -6,6 +6,9 @@
 #define FICTION_NODE_DUPLICATION_PLANARIZATION_HPP
 
 #include "fiction/algorithms/network_transformation/fanout_substitution.hpp"
+#include "fiction/algorithms/network_transformation/network_balancing.hpp"
+#include "fiction/networks/views/extended_rank_view.hpp"
+#include "fiction/networks/virtual_pi_network.hpp"
 #include "fiction/traits.hpp"
 
 #include <mockturtle/traits.hpp>
@@ -71,6 +74,210 @@ struct node_duplication_params
 namespace detail
 {
 
+template <class NtkDest, class NtkSrc>
+std::pair<NtkDest, mockturtle::node_map<std::vector<mockturtle::signal<NtkDest>>, NtkSrc>>
+initialize_copy_network_v(NtkSrc const& src)
+{
+    static_assert(mockturtle::is_network_type_v<NtkDest>, "NtkDest is not a network type");
+    static_assert(mockturtle::is_network_type_v<NtkSrc>, "NtkSrc is not a network type");
+
+    static_assert(mockturtle::has_get_constant_v<NtkDest>, "NtkDest does not implement the get_constant method");
+    static_assert(mockturtle::has_create_pi_v<NtkDest>, "NtkDest does not implement the create_pi method");
+    static_assert(mockturtle::has_get_constant_v<NtkSrc>, "NtkSrc does not implement the get_constant method");
+    static_assert(mockturtle::has_get_node_v<NtkSrc>, "NtkSrc does not implement the get_node method");
+    static_assert(mockturtle::has_foreach_pi_v<NtkSrc>, "NtkSrc does not implement the foreach_pi method");
+
+    mockturtle::node_map<std::vector<mockturtle::signal<NtkDest>>, NtkSrc> old2new(src);
+    NtkDest                                                                dest;
+
+    // Please modify next lines as per your requirements
+
+    old2new[src.get_constant(false)].push_back(dest.get_constant(false));
+    if (src.get_node(src.get_constant(true)) != src.get_node(src.get_constant(false)))
+    {
+        old2new[src.get_constant(true)].push_back(dest.get_constant(true));
+    }
+    src.foreach_pi([&](auto const& n) { old2new[n].push_back(dest.create_pi()); });
+    return {dest, old2new};
+}
+
+template <typename Ntk>
+virtual_pi_network create_virt_pi_ntk_from_lvls(Ntk& ntk, std::vector<std::vector<mockturtle::node<Ntk>>>& ntk_lvls)
+{
+    std::vector<std::vector<mockturtle::node<Ntk>>> ntk_lvls_new;
+    std::unordered_map<mockturtle::node<Ntk>, bool> node_status;
+    // node_status[node]
+    ntk_lvls_new.resize(ntk_lvls.size());
+
+    auto  init_v     = initialize_copy_network_v<virtual_pi_network>(ntk);
+    auto& ntk_dest_v = init_v.first;
+    auto& old2new_v  = init_v.second;
+
+    const auto gather_fanin_signals = [&](const auto& n, const auto& lvl, size_t& edge_it)
+    {
+        std::vector<typename Ntk::signal> children{};
+        const auto                        edge_it_int      = edge_it;
+        int                               first_fi_edge_it = -1;
+
+        ntk.foreach_fanin(n,
+                          [&](const auto& f)
+                          {
+                              const auto fn           = ntk.get_node(f);
+                              auto       tgt_signal_v = old2new_v[fn];
+
+                              // lvl[edge_it] gives the current iterator at where the edge can be connected
+                              // to get the right signal, all nodes at old2new[n] need to be viewed
+                              // match lvl[edge_it] against áll entries in old2new[n], then try lvl[edge_it+1] then try
+                              // lvl[edge_it+2]
+
+                              assert(edge_it_int < lvl.size());
+
+                              for (const auto& possible_node : tgt_signal_v)
+                              {
+                                  for (size_t i = 0; i < 3; i++)
+                                  {
+                                      if (edge_it_int + i < lvl.size() && lvl[edge_it_int + i] == possible_node)
+                                      {
+                                          if (first_fi_edge_it != -1)
+                                          {
+                                              assert(edge_it_int + i == first_fi_edge_it + 1 ||
+                                                     edge_it_int + i == first_fi_edge_it - 1);
+                                          }
+                                          children.emplace_back(possible_node);
+                                          first_fi_edge_it = static_cast<int>(edge_it_int + i);
+                                          if (edge_it_int + i > edge_it)
+                                          {
+                                              edge_it = edge_it_int + i;
+                                          }
+                                          break;
+                                      }
+                                  }
+                                  if (first_fi_edge_it != -1)
+                                  {
+                                      break;
+                                  }
+                              }
+
+                              /*std::cout << n <<'\n';*/
+                              /*children.emplace_back(ntk.is_complemented(f) ? ntk_dest_v.create_not(tgt_signal) :
+                                                                             tgt_signal);*/
+                          });
+
+        return children;
+    };
+
+    // auto view = extended_rank_view(ntk_dest);
+    size_t edge_it = 0;
+    for (size_t i = ntk_lvls.size(); i-- > 0;)
+    {
+        /*if (i == 1)
+        {
+            std::cout << "POs" <<
+        }*/
+        edge_it       = 0;
+        auto& lvl     = ntk_lvls[i];
+        auto& lvl_new = ntk_lvls_new[i];
+        for (const auto& nd : lvl)
+        {
+            if (ntk.is_pi(nd))
+            {
+                if (node_status[nd])
+                {
+                    const auto& new_node = ntk_dest_v.create_virtual_pi(nd);
+                    lvl_new.push_back(new_node);
+                    old2new_v[nd].push_back(new_node);
+                }
+                else
+                {
+                    lvl_new.push_back(nd);
+                    node_status[nd] = true;
+                }
+            }
+            else
+            {
+                auto children = gather_fanin_signals(nd, ntk_lvls_new[i + 1], edge_it);
+
+                if (ntk.is_and(nd))
+                {
+                    const auto& new_node = ntk_dest_v.create_and(children[0], children[1]);
+                    lvl_new.push_back(new_node);
+                    old2new_v[nd].push_back(new_node);
+                    /*if (i == 0)
+                    {
+                        ntk_dest_v.create_po(new_node);
+                    }*/
+                    continue;
+                }
+                if (ntk.is_or(nd))
+                {
+                    const auto& new_node = ntk_dest_v.create_or(children[0], children[1]);
+                    lvl_new.push_back(new_node);
+                    old2new_v[nd].push_back(new_node);
+                    continue;
+                }
+                if (ntk.is_xor(nd))
+                {
+                    const auto& new_node = ntk_dest_v.create_xor(children[0], children[1]);
+                    lvl_new.push_back(new_node);
+                    old2new_v[nd].push_back(new_node);
+                    continue;
+                }
+                // ToDo:TEST 3-input functions
+                /*if (ntk.is_maj(nd))
+                {
+                    const auto& new_node = ntk_dest_v.create_maj(children[0], children[1], children[2]);
+                    lvl_new.push_back(new_node);
+                    old2new_v[nd].push_back(new_node);
+                    continue;
+                }*/
+                if (ntk.is_buf(nd))
+                {
+                    const auto& new_node = ntk_dest_v.create_buf(children[0]);
+                    lvl_new.push_back(new_node);
+                    old2new_v[nd].push_back(new_node);
+                    continue;
+                }
+                if (ntk.is_inv(nd))
+                {
+                    const auto& new_node = ntk_dest_v.create_not(children[0]);
+                    lvl_new.push_back(new_node);
+                    old2new_v[nd].push_back(new_node);
+                    continue;
+                }
+            }
+        }
+    }
+
+    ntk.foreach_po(
+        [&ntk, &ntk_dest_v, &old2new_v](const auto& po)
+        {
+            const auto tgt_signal_v = old2new_v[ntk.get_node(po)];
+            // POs dont get duplicated since the algorithm starts at the POs and duplicates other nodes according to
+            // their order
+            assert(tgt_signal_v.size() == 1);
+            const auto tgt_signal = tgt_signal_v[0];
+
+            const auto tgt_po = ntk.is_complemented(po) ? ntk_dest_v.create_not(tgt_signal) : tgt_signal;
+
+            ntk_dest_v.create_po(tgt_po);
+        });
+
+    /*ntk_dest_v.foreach_pi([&](const auto& pi)
+                   {
+                       std::cout << "PI: " << pi << '\n';
+                   });
+    ntk_dest_v.foreach_pi_real([&](const auto& pi)
+                        {
+                            std::cout << "PI real: " << pi << '\n';
+                        });
+    ntk_dest_v.foreach_pi_virtual([&](const auto& pi)
+                        {
+                            std::cout << "PI virtual: " << pi << '\n';
+                        });*/
+
+    return ntk_dest_v;
+}
+
 template <typename Ntk>
 struct node_pair
 {
@@ -133,9 +340,7 @@ template <typename Ntk>
 class node_duplication_planarization_impl
 {
   public:
-    node_duplication_planarization_impl(const Ntk& src, const node_duplication_params p) :
-            ntk(mockturtle::rank_view<Ntk>(src))
-    {}
+    node_duplication_planarization_impl(const Ntk& src, const node_duplication_params p) : ntk(src) {}
 
     void compute_slice_delays(mockturtle::node<Ntk> nd, const bool border_pis)
     {
@@ -184,11 +389,12 @@ class node_duplication_planarization_impl
             }
         }
 
-        for (const auto& node_pair : combinations)
+        // Debug output
+        /*for (const auto& node_pair : combinations)
         {
             std::cout << "Fanin Pair: (" << node_pair.pair.first << ", " << node_pair.pair.second
                       << "), Delay: " << node_pair.delay << std::endl;
-        }
+        }*/
 
         cur_lvl_pairs.push_back(combinations);
     }
@@ -211,7 +417,7 @@ class node_duplication_planarization_impl
         if (minimum_it != combinations.end())
         {
             const auto& min_combination = *minimum_it;
-            std::cout << "Minimum delay: " << min_combination.delay << std::endl;
+            // std::cout << "Minimum delay: " << min_combination.delay << std::endl;
 
             // Insert the terminal node
             insert_if_unique(min_combination.pair.second, next_level);
@@ -246,7 +452,7 @@ class node_duplication_planarization_impl
         }
     }
 
-    void check_final_level(std::vector<mockturtle::node<Ntk>>& v_next_level, bool& f_final_level )
+    void check_final_level(std::vector<mockturtle::node<Ntk>>& v_next_level, bool& f_final_level)
     {
         for (const auto& nd : v_next_level)
         {
@@ -258,7 +464,8 @@ class node_duplication_planarization_impl
         }
     }
 
-    mockturtle::rank_view<Ntk> run()
+    //mockturtle::rank_view<Ntk> run()
+    virtual_pi_network run()
     {
         const bool border_pis = true;
         // ToDo: Determine the PO order
@@ -270,14 +477,14 @@ class node_duplication_planarization_impl
             [this, &v_level](auto po)
             {
                 // Recalculate the levels to start from the pos
-                std::cout << ntk.level(po) << std::endl;
-                ntk.set_level(po, ntk.depth());
+                // std::cout << ntk.level(po) << std::endl;
+                // ntk.set_level(po, ntk.depth());
                 cur_fis.clear();
                 compute_slice_delays(po, border_pis);
                 v_level.push_back(po);
             });
-        int level = ntk.depth();
-        std::cout << "push lvl: " << level << std::endl;
+        // int level = ntk.depth();
+        // std::cout << "push lvl: " << level << std::endl;
         ntk_lvls.push_back(v_level);
         v_level.clear();
 
@@ -291,8 +498,8 @@ class node_duplication_planarization_impl
         // Process all other levels
         while (!v_level.empty() && !f_final_level)
         {
-            level--;
-            std::cout << "push lvl: " << level << std::endl;
+            // level--;
+            // std::cout << "push lvl: " << level << std::endl;
             // Push the level to the network
             ntk_lvls.push_back(v_level);
             cur_lvl_pairs.clear();
@@ -314,17 +521,49 @@ class node_duplication_planarization_impl
 
         if (f_final_level)
         {
-            std::cout << "push lvl: " << level - 1 << std::endl;
+            // std::cout << "push lvl: " << level - 1 << '\n';
             ntk_lvls.push_back(v_level);
         }
 
-        std::cout << "width: " << ntk.width() << std::endl;
-        std::cout << "depth: " << ntk.depth() << std::endl;
-        return ntk;
+        // std::cout << "width: " << ntk.width() << std::endl;
+        // std::cout << "depth: " << ntk.depth() << std::endl;
+
+        // Debug output for nodes in lvl
+        /*std::cout << "Here:" << '\n';
+        for (size_t i = 0; i < ntk_lvls.size(); ++i) {
+            std::cout << "Level: " << i << '\n';
+            for (auto n : ntk_lvls[i])
+            {
+                std::cout << "Node: " << n << '\n';
+                ntk.foreach_fanin(n, [&](const auto& fi) { std::cout << "Fis:" << fi << "\n"; });
+            }
+        }*/
+
+        /* ntk.foreach_node([&](const auto& nd) {
+                                std::cout << "Nd:" << nd << "\n";
+                                *//*if (ntk.is_inv(nd))
+                               {
+                                   std::cout << "is not" << "\n";
+                               }
+                               if (ntk.is_buf(nd))
+                               {
+                                   std::cout << "is buf" << "\n";
+                               }
+                               ntk.foreach_fanin(nd, [&](const auto& fi) { std::cout << "Fis:" << fi << "\n"; });*//*
+                               auto rnk = ntk.rank_position(nd);
+                               auto lvl = ntk.level(nd);
+                               std::cout << "Level: " << lvl << "\n";
+                               std::cout << "Rank: " << rnk << "\n";
+                           });*/
+
+        // create virtual pi network
+        auto new_ntk = create_virt_pi_ntk_from_lvls(ntk, ntk_lvls);
+
+        return new_ntk;//mockturtle::rank_view<Ntk>(ntk);
     }
 
   private:
-    mockturtle::rank_view<Ntk>                      ntk;
+    Ntk                                             ntk;
     std::vector<std::vector<node_pair<Ntk>>>        cur_lvl_pairs;
     std::vector<mockturtle::node<Ntk>>              cur_fis;
     std::vector<std::vector<mockturtle::node<Ntk>>> ntk_lvls;
@@ -341,7 +580,8 @@ class node_duplication_planarization_impl
  * shortest x-y paths at each level of the graph.
  */
 template <typename NtkDest, typename NtkSrc>
-mockturtle::rank_view<NtkDest> node_duplication_planarization(const NtkSrc& ntk_src, node_duplication_params ps = {})
+//mockturtle::rank_view<NtkDest> node_duplication_planarization(const NtkSrc& ntk_src, node_duplication_params ps = {})
+virtual_pi_network node_duplication_planarization(const NtkSrc& ntk_src, node_duplication_params ps = {})
 {
     static_assert(mockturtle::is_network_type_v<NtkSrc>, "NtkSrc is not a network type");
     static_assert(mockturtle::is_network_type_v<NtkDest>, "NtkDest is not a network type");
@@ -363,13 +603,18 @@ mockturtle::rank_view<NtkDest> node_duplication_planarization(const NtkSrc& ntk_
         throw high_degree_fanin_exception();
     }*/
 
-    auto t_ntk = convert_network<NtkDest>(ntk_src);
+    if (!is_balanced(ntk_src))
+    {
+        throw std::runtime_error("Combinations are empty. There might be a dangling node");
+    }
+
+    // auto t_ntk = convert_network<NtkDest>(ntk_src);
 
     /*if (!is_fanout_substituted(t_ntk)) {
         t_ntk =  fanout_substitution<NtkDest>(t_ntk);   // Apply fanout substitution if needed
     }*/
 
-    detail::node_duplication_planarization_impl<NtkDest> p{t_ntk, ps};
+    detail::node_duplication_planarization_impl<NtkDest> p{ntk_src, ps};
 
     auto result = p.run();
 
