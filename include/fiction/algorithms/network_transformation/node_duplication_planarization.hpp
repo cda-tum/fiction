@@ -113,6 +113,20 @@ virtual_pi_network create_virt_pi_ntk_from_lvls(Ntk& ntk, std::vector<std::vecto
     auto& ntk_dest_v = init_v.first;
     auto& old2new_v  = init_v.second;
 
+    /**
+     * The function gather_fanin_signals collects the fanin data for node n from the original ntk.
+     * For each node n there are the possible fanin candidates old2new_v[fn], which are the original node and all the
+     * nodes which are duplicates of this node.
+     *
+     * lvl[edge_it] gives the current iterator at where the edge can be connected. To get the right signal,
+     * all nodes at old2new[n] need to be viewed. Match lvl[edge_it] against all entries in old2new[n],
+     * then try lvl[edge_it+1] then try lvl[edge_it+2].
+     *
+     * @param n Variable to process.
+     * @param lvl Level to process.
+     * @param edge_it Iterator for edge.
+     * @return Vector of fanins in the virtual_pi_network connected to the processed node.
+     */
     const auto gather_fanin_signals = [&](const auto& n, const auto& lvl, size_t& edge_it)
     {
         std::vector<typename Ntk::signal> children{};
@@ -157,12 +171,7 @@ virtual_pi_network create_virt_pi_ntk_from_lvls(Ntk& ntk, std::vector<std::vecto
                                       break;
                                   }
                               }
-
-                              /*std::cout << n <<'\n';*/
-                              /*children.emplace_back(ntk.is_complemented(f) ? ntk_dest_v.create_not(tgt_signal) :
-                                                                             tgt_signal);*/
                           });
-
         return children;
     };
 
@@ -170,10 +179,6 @@ virtual_pi_network create_virt_pi_ntk_from_lvls(Ntk& ntk, std::vector<std::vecto
     size_t edge_it = 0;
     for (size_t i = ntk_lvls.size(); i-- > 0;)
     {
-        /*if (i == 1)
-        {
-            std::cout << "POs" <<
-        }*/
         edge_it       = 0;
         auto& lvl     = ntk_lvls[i];
         auto& lvl_new = ntk_lvls_new[i];
@@ -202,10 +207,6 @@ virtual_pi_network create_virt_pi_ntk_from_lvls(Ntk& ntk, std::vector<std::vecto
                     const auto& new_node = ntk_dest_v.create_and(children[0], children[1]);
                     lvl_new.push_back(new_node);
                     old2new_v[nd].push_back(new_node);
-                    /*if (i == 0)
-                    {
-                        ntk_dest_v.create_po(new_node);
-                    }*/
                     continue;
                 }
                 if (ntk.is_or(nd))
@@ -222,14 +223,13 @@ virtual_pi_network create_virt_pi_ntk_from_lvls(Ntk& ntk, std::vector<std::vecto
                     old2new_v[nd].push_back(new_node);
                     continue;
                 }
-                // ToDo:TEST 3-input functions
-                /*if (ntk.is_maj(nd))
+                if (ntk.is_maj(nd))
                 {
                     const auto& new_node = ntk_dest_v.create_maj(children[0], children[1], children[2]);
                     lvl_new.push_back(new_node);
                     old2new_v[nd].push_back(new_node);
                     continue;
-                }*/
+                }
                 if (ntk.is_buf(nd))
                 {
                     const auto& new_node = ntk_dest_v.create_buf(children[0]);
@@ -262,18 +262,6 @@ virtual_pi_network create_virt_pi_ntk_from_lvls(Ntk& ntk, std::vector<std::vecto
             ntk_dest_v.create_po(tgt_po);
         });
 
-    /*ntk_dest_v.foreach_pi([&](const auto& pi)
-                   {
-                       std::cout << "PI: " << pi << '\n';
-                   });
-    ntk_dest_v.foreach_pi_real([&](const auto& pi)
-                        {
-                            std::cout << "PI real: " << pi << '\n';
-                        });
-    ntk_dest_v.foreach_pi_virtual([&](const auto& pi)
-                        {
-                            std::cout << "PI virtual: " << pi << '\n';
-                        });*/
 
     return ntk_dest_v;
 }
@@ -464,7 +452,7 @@ class node_duplication_planarization_impl
         }
     }
 
-    //mockturtle::rank_view<Ntk> run()
+    // mockturtle::rank_view<Ntk> run()
     virtual_pi_network run()
     {
         const bool border_pis = true;
@@ -477,14 +465,10 @@ class node_duplication_planarization_impl
             [this, &v_level](auto po)
             {
                 // Recalculate the levels to start from the pos
-                // std::cout << ntk.level(po) << std::endl;
-                // ntk.set_level(po, ntk.depth());
                 cur_fis.clear();
                 compute_slice_delays(po, border_pis);
                 v_level.push_back(po);
             });
-        // int level = ntk.depth();
-        // std::cout << "push lvl: " << level << std::endl;
         ntk_lvls.push_back(v_level);
         v_level.clear();
 
@@ -498,19 +482,17 @@ class node_duplication_planarization_impl
         // Process all other levels
         while (!v_level.empty() && !f_final_level)
         {
-            // level--;
-            // std::cout << "push lvl: " << level << std::endl;
             // Push the level to the network
             ntk_lvls.push_back(v_level);
             cur_lvl_pairs.clear();
-            // We need to create a new vector to store the nodes of the next level
+            // Store the nodes of the next level
             for (const auto& cur_node : v_level)
             {
                 cur_fis.clear();
-                // There is one slice in the H-Graph per node in the level
+                // There is one slice in the H-Graph for each node in the level
                 compute_slice_delays(cur_node, border_pis);
             }
-            // Clear before starting computations on the enxt level
+            // Clear before starting computations on the next level
             v_level.clear();
             // Compute the next level
             compute_node_order_next_level(v_level);
@@ -518,48 +500,16 @@ class node_duplication_planarization_impl
             f_final_level = true;
             check_final_level(v_level, f_final_level);
         }
-
+        // Push the final level (PIs)
         if (f_final_level)
         {
-            // std::cout << "push lvl: " << level - 1 << '\n';
             ntk_lvls.push_back(v_level);
         }
-
-        // std::cout << "width: " << ntk.width() << std::endl;
-        // std::cout << "depth: " << ntk.depth() << std::endl;
-
-        // Debug output for nodes in lvl
-        /*std::cout << "Here:" << '\n';
-        for (size_t i = 0; i < ntk_lvls.size(); ++i) {
-            std::cout << "Level: " << i << '\n';
-            for (auto n : ntk_lvls[i])
-            {
-                std::cout << "Node: " << n << '\n';
-                ntk.foreach_fanin(n, [&](const auto& fi) { std::cout << "Fis:" << fi << "\n"; });
-            }
-        }*/
-
-        /* ntk.foreach_node([&](const auto& nd) {
-                                std::cout << "Nd:" << nd << "\n";
-                                *//*if (ntk.is_inv(nd))
-                               {
-                                   std::cout << "is not" << "\n";
-                               }
-                               if (ntk.is_buf(nd))
-                               {
-                                   std::cout << "is buf" << "\n";
-                               }
-                               ntk.foreach_fanin(nd, [&](const auto& fi) { std::cout << "Fis:" << fi << "\n"; });*//*
-                               auto rnk = ntk.rank_position(nd);
-                               auto lvl = ntk.level(nd);
-                               std::cout << "Level: " << lvl << "\n";
-                               std::cout << "Rank: " << rnk << "\n";
-                           });*/
 
         // create virtual pi network
         auto new_ntk = create_virt_pi_ntk_from_lvls(ntk, ntk_lvls);
 
-        return new_ntk;//mockturtle::rank_view<Ntk>(ntk);
+        return new_ntk;  // mockturtle::rank_view<Ntk>(ntk);
     }
 
   private:
@@ -580,7 +530,7 @@ class node_duplication_planarization_impl
  * shortest x-y paths at each level of the graph.
  */
 template <typename NtkDest, typename NtkSrc>
-//mockturtle::rank_view<NtkDest> node_duplication_planarization(const NtkSrc& ntk_src, node_duplication_params ps = {})
+// mockturtle::rank_view<NtkDest> node_duplication_planarization(const NtkSrc& ntk_src, node_duplication_params ps = {})
 virtual_pi_network node_duplication_planarization(const NtkSrc& ntk_src, node_duplication_params ps = {})
 {
     static_assert(mockturtle::is_network_type_v<NtkSrc>, "NtkSrc is not a network type");
@@ -617,6 +567,8 @@ virtual_pi_network node_duplication_planarization(const NtkSrc& ntk_src, node_du
     detail::node_duplication_planarization_impl<NtkDest> p{ntk_src, ps};
 
     auto result = p.run();
+
+    // ToDo: Check for planarity
 
     return result;
 }

@@ -69,7 +69,7 @@ TEST_CASE("Multi Level test", "[node-duplication-planarization]")
 }
 
 // Implement reverse balancing function. Also it should propagate PIs all to the last level
-TEST_CASE("Balancing Test", "[node-duplication-planarization]")
+TEST_CASE("2-ary Balancing Test", "[node-duplication-planarization]")
 {
     technology_network tec{};
 
@@ -178,6 +178,49 @@ TEST_CASE("Balancing Test", "[node-duplication-planarization]")
                                     }
                                     planarized_maj.foreach_fanin(nd, [&](const auto& fi) { std::cout << "Fis:" << fi << "\n"; });
                                 });
+
+    mockturtle::equivalence_checking_stats st;
+    bool cec_m = *mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(tec, planarized_maj), {}, &st);
+    CHECK(cec_m == 1);
+
+    CHECK(1 == 1);
+}
+
+TEST_CASE("3-ary Balancing Test", "[node-duplication-planarization]")
+{
+    technology_network tec{};
+
+    CHECK(mockturtle::has_clear_visited_v<technology_network>);
+    CHECK(mockturtle::has_visited_v<technology_network>);
+    CHECK(mockturtle::has_set_visited_v<technology_network>);
+
+    const auto x1 = tec.create_pi();
+    const auto x2 = tec.create_pi();
+    const auto x3 = tec.create_pi();
+    const auto x4 = tec.create_pi();
+    const auto x5 = tec.create_pi();
+    const auto f1 = tec.create_not(x2);
+    const auto f2 = tec.create_nary_and({x1, x2, x3, x4});
+    const auto f3 = tec.create_nary_or({x3, x4, x5});
+    const auto f4 = tec.create_maj(x1, x2, f3);
+    tec.create_po(f1);
+    tec.create_po(f2);
+    tec.create_po(f3);
+    tec.create_po(f4);
+
+    auto blc = is_balanced(tec);
+
+    network_balancing_params ps;
+    ps.unify_outputs = true;
+
+    auto tec_b = network_balancing<technology_network>(tec, ps);
+    blc = is_balanced(tec_b);
+
+    const auto vpi_r = mockturtle::rank_view(tec_b);
+
+    auto planarized_maj = node_duplication_planarization<technology_network>(tec_b);
+
+    planarized_maj.remove_virtual_input_nodes();
 
     mockturtle::equivalence_checking_stats st;
     bool cec_m = *mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(tec, planarized_maj), {}, &st);
