@@ -514,7 +514,7 @@ bool improve_gate_location(Lyt& lyt, const tile<Lyt>& old_pos, const tile<Lyt>& 
         {
             const uint64_t y = k - x;
 
-            if (moved_gate || (num_gate_relocations >= max_gate_relocations))
+            if (moved_gate || ((num_gate_relocations >= max_gate_relocations) && !lyt.is_po_tile(current_pos)))
             {
                 break;
             }
@@ -636,7 +636,7 @@ bool improve_gate_location(Lyt& lyt, const tile<Lyt>& old_pos, const tile<Lyt>& 
             }
         }
 
-        if (moved_gate || (num_gate_relocations >= max_gate_relocations))
+        if (moved_gate || ((num_gate_relocations >= max_gate_relocations) & !lyt.is_po_tile(current_pos)))
         {
             break;
         }
@@ -846,15 +846,14 @@ class post_layout_optimization_impl
 
                 std::sort(gate_tiles.begin(), gate_tiles.end(), detail::compare_gate_tiles<Lyt>);
 
-                tile<Lyt> max_non_po;
-                // Iterate through the vector in reverse
-                for (auto it = gate_tiles.rbegin(); it != gate_tiles.rend(); ++it)
+                tile<Lyt> max_non_po{0, 0};
+                // Determine minimal border for POs
+                for (auto gate_tile : gate_tiles)
                 {
-                    // Stop if a condition based on the element is met
-                    if (!layout.is_po_tile(*it))
+                    if (!layout.is_po_tile(gate_tile))
                     {
-                        max_non_po = *it;
-                        break;
+                        max_non_po.x = std::max(max_non_po.x, gate_tile.x);
+                        max_non_po.y = std::max(max_non_po.y, gate_tile.y);
                     }
                 }
                 moved_at_least_one_gate = false;
