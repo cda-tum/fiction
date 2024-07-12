@@ -158,7 +158,7 @@ int main()  // NOLINT
         sidb_circuits_with_defects.table();
 
         // write a SiQAD simulation file
-        fiction::write_sqd_layout(result, fmt::format("{}/{}.sqd", layouts_folder, benchmark));
+        // fiction::write_sqd_layout(result, fmt::format("{}/{}.sqd", layouts_folder, benchmark));
     }
 
     return EXIT_SUCCESS;
