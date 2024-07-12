@@ -96,7 +96,7 @@ class gate_design_exception : public std::exception
 };
 
 /**
- * This struct encapsulates parameters for the on-the-fly SiDB gate library.
+ * This struct encapsulates parameters for the parameterized SiDB gate library.
  *
  * @tparam Lyt Cell-level layout type.
  */
@@ -108,7 +108,7 @@ struct parameterized_gate_library_params
      */
     sidb_defect_surface<Lyt> defect_surface{};
     /**
-     * This struct holds parameters to design SiDB gates on-the-fly.
+     * This struct holds parameters to design SiDB gates.
      */
     design_sidb_gates_params<cell<Lyt>> design_gate_params{};
     /**
@@ -140,10 +140,10 @@ class parameterized_gate_library : public fcn_gate_library<sidb_technology, 60, 
      *
      * @tparam GateLyt Pointy-top hexagonal gate-level layout type.
      * @tparam CellLyt The type of the cell-level layout.
-     * @tparam Params Type of the parameter used for the on-the-fly gate library.
+     * @tparam Params Type of the parameter used for the gate library.
      * @param lyt Layout that hosts tile `t`.
      * @param t Tile to be realized as a Bestagon gate.
-     * @param parameters Parameter to design SiDB gates on-the-fly.
+     * @param parameters Parameter to design SiDB gates.
      * @return Bestagon gate representation of `t` including mirroring.
      */
     template <typename GateLyt, typename CellLyt, typename Params>
@@ -393,7 +393,7 @@ class parameterized_gate_library : public fcn_gate_library<sidb_technology, 60, 
      *
      * @tparam Lyt The type of the cell-level layout.
      * @tparam TT Truth table type.
-     * @tparam Params Type of the parameters used for the on-the-fly gate library.
+     * @tparam Params Type of the parameters used for the parametrized gate library.
      * @param bestagon_lyt The Bestagon gate which is to be applied.
      * @param defect_lyt The layout with defects that may affect gate applicability.
      * @param parameters Parameters for the gate design and simulation.

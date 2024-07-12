@@ -36,6 +36,9 @@ namespace fiction
 template <typename CellLyt>
 struct on_the_fly_circuit_design_params
 {
+    /**
+     * Parameters for the parameterized gate library.
+     */
     parameterized_gate_library_params<CellLyt> parameterized_gate_library_parameter = {};
     /**
      * Parameters for the *exact* placement&routing algorithm.
@@ -44,7 +47,7 @@ struct on_the_fly_circuit_design_params
 };
 
 /**
- * Statistics for the on-the-fly circuit design.
+ * Statistics for the on-the-fly defect-aware circuit design.
  */
 struct on_the_fly_circuit_design_stats
 {
@@ -53,7 +56,7 @@ struct on_the_fly_circuit_design_stats
      */
     mockturtle::stopwatch<>::duration time_total{0};
     /**
-     * The `stats`of the *exact* algorithm.
+     * The `stats` of the *exact* algorithm.
      */
     exact_physical_design_stats exact_stats{};
 };
@@ -81,7 +84,7 @@ class on_the_fly_circuit_design_impl
         auto black_list = sidb_surface_analysis<sidb_skeleton_bestagon_library>(
             lattice_tiling, params.parameterized_gate_library_parameter.defect_surface, std::make_pair(0, 0));
 
-        auto attempts = 0u;
+        auto placement_and_routing_attemps = 0u;
 
         const mockturtle::stopwatch stop{stats.time_total};
 
@@ -90,7 +93,7 @@ class on_the_fly_circuit_design_impl
         {
             while (!gate_level_layout.has_value() || gate_design_failed)
             {
-                if (!gate_level_layout.has_value() && attempts > 0)
+                if (!gate_level_layout.has_value() && placement_and_routing_attemps > 0)
                 {
                     break;
                 }
@@ -119,7 +122,7 @@ class on_the_fly_circuit_design_impl
                         std::cerr << "Caught std::exception: " << e.what() << '\n';
                     }
                 }
-                attempts++;
+                placement_and_routing_attemps++;
             }
         }
 
@@ -174,7 +177,9 @@ class on_the_fly_circuit_design_impl
 
 /**
  * This function applies the on-the-fly circuit design algorithm to a specified defective surface, automatically
- * creating customized SiDB gates while integrating atomic defects as essential components of the design.
+ * creating customized SiDB gates while integrating atomic defects as essential components of the design. It was
+ * proposed in \"On-the-fly Defect-Aware Design of Circuits based on Silicon Dangling Bond Logic\" by J. Drewniok, M.
+ * Walter, S. S. H. Ng, K. Walus, and R. Wille in IEEE NANO 2024.
  *
  * @tparam Ntk      The type of the input network.
  * @tparam CellLyt  The type of the cell layout.
@@ -202,6 +207,7 @@ template <typename Ntk, typename CellLyt, typename GateLyt>
     {
         *stats = st;
     }
+
     return result;
 }
 
