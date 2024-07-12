@@ -827,11 +827,11 @@ static const char *__doc_fiction_bounding_box_2d_min = R"doc()doc";
 
 static const char *__doc_fiction_bounding_box_2d_selection = R"doc(Modes to use for creating the 2D-bounding box.)doc";
 
-static const char *__doc_fiction_bounding_box_2d_selection_EXCLUDE_DEFECTS =
+static const char *__doc_fiction_bounding_box_2d_selection_DEFECTS_EXCLUDED =
 R"doc(The bounding box is determined based on the cells, excluding atomic
 defects.)doc";
 
-static const char *__doc_fiction_bounding_box_2d_selection_INCLUDE_DEFECTS = R"doc(The bounding box includes atomic defects.)doc";
+static const char *__doc_fiction_bounding_box_2d_selection_DEFECTS_INCLUDED = R"doc(The bounding box includes atomic defects.)doc";
 
 static const char *__doc_fiction_bounding_box_2d_update_bounding_box =
 R"doc(The bounding box is not automatically updated when the layout changes.
@@ -12117,7 +12117,9 @@ static const char *__doc_fiction_on_the_fly_circuit_design_on_defective_surface 
 R"doc(This function applies the on-the-fly circuit design algorithm to a
 specified defective surface, automatically creating customized SiDB
 gates while integrating atomic defects as essential components of the
-design.
+design. It was proposed in \"On-the-fly Defect-Aware Design of
+Circuits based on Silicon Dangling Bond Logic\" by J. Drewniok, M.
+Walter, S. S. H. Ng, K. Walus, and R. Wille in IEEE NANO 2024.
 
 Template parameter ``Ntk``:
     The type of the input network.
@@ -12158,13 +12160,13 @@ Template parameter ``CellLyt``:
 
 static const char *__doc_fiction_on_the_fly_circuit_design_params_exact_design_parameter = R"doc(Parameters for the *exact* placement&routing algorithm.)doc";
 
-static const char *__doc_fiction_on_the_fly_circuit_design_params_parameterized_gate_library_parameter = R"doc()doc";
+static const char *__doc_fiction_on_the_fly_circuit_design_params_parameterized_gate_library_parameter = R"doc(Parameters for the parameterized gate library.)doc";
 
-static const char *__doc_fiction_on_the_fly_circuit_design_stats = R"doc(Statistics for the on-the-fly circuit design.)doc";
+static const char *__doc_fiction_on_the_fly_circuit_design_stats = R"doc(Statistics for the on-the-fly defect-aware circuit design.)doc";
 
 static const char *__doc_fiction_on_the_fly_circuit_design_stats_duration = R"doc(The total runtime of the operational domain computation.)doc";
 
-static const char *__doc_fiction_on_the_fly_circuit_design_stats_exact_stats = R"doc(The `stats`of the *exact* algorithm.)doc";
+static const char *__doc_fiction_on_the_fly_circuit_design_stats_exact_stats = R"doc(The `stats` of the *exact* algorithm.)doc";
 
 static const char *__doc_fiction_open_clocking =
 R"doc(Returns an irregular clocking that maps every coordinate to the
@@ -12832,7 +12834,7 @@ Template parameter ``TT``:
     Truth table type.
 
 Template parameter ``Params``:
-    Type of the parameters used for the on-the-fly gate library.
+    Type of the parameters used for the parametrized gate library.
 
 Parameter ``bestagon_lyt``:
     The Bestagon gate which is to be applied.
@@ -12853,7 +12855,7 @@ Returns:
 static const char *__doc_fiction_parameterized_gate_library_parameterized_gate_library = R"doc()doc";
 
 static const char *__doc_fiction_parameterized_gate_library_params =
-R"doc(This struct encapsulates parameters for the on-the-fly SiDB gate
+R"doc(This struct encapsulates parameters for the parameterized SiDB gate
 library.
 
 Template parameter ``Lyt``:
@@ -12865,7 +12867,7 @@ gates, such as crossing, double wire, and half-adder.)doc";
 
 static const char *__doc_fiction_parameterized_gate_library_params_defect_surface = R"doc(This layout stores all atomic defects.)doc";
 
-static const char *__doc_fiction_parameterized_gate_library_params_design_gate_params = R"doc(This struct holds parameters to design SiDB gates on-the-fly.)doc";
+static const char *__doc_fiction_parameterized_gate_library_params_design_gate_params = R"doc(This struct holds parameters to design SiDB gates.)doc";
 
 static const char *__doc_fiction_parameterized_gate_library_params_influence_radius_charged_defects =
 R"doc(This variable specifies the radius around the middle of the hexagon
@@ -12885,7 +12887,7 @@ Template parameter ``CellLyt``:
     The type of the cell-level layout.
 
 Template parameter ``Params``:
-    Type of the parameter used for the on-the-fly gate library.
+    Type of the parameter used for the gate library.
 
 Parameter ``lyt``:
     Layout that hosts tile `t`.
@@ -12894,7 +12896,7 @@ Parameter ``t``:
     Tile to be realized as a Bestagon gate.
 
 Parameter ``parameters``:
-    Parameter to design SiDB gates on-the-fly.
+    Parameter to design SiDB gates.
 
 Returns:
     Bestagon gate representation of `t` including mirroring.)doc";
