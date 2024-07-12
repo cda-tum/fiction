@@ -145,7 +145,8 @@ int main()  // NOLINT
                 mapped_network, params, lattice_tiling, &st);
 
         // determine bounding box and exclude atomic defects
-        const auto bb = fiction::bounding_box_2d<cell_lyt>(result, fiction::bounding_box_2d_selection::EXCLUDE_DEFECTS);
+        const auto bb =
+            fiction::bounding_box_2d<cell_lyt>(result, fiction::bounding_box_2d_selection::DEFECTS_EXCLUDED);
 
         // compute area
         fiction::area_stats                            area_stats{};
