@@ -4,13 +4,13 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "fiction/algorithms/network_transformation/network_balancing.hpp"
-
+#include <fiction/algorithms/network_transformation/network_balancing.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/networks/views/extended_rank_view.hpp>
 #include <fiction/networks/virtual_pi_network.hpp>
 
-#include <mockturtle/algorithms/aqfp/buffer_insertion.hpp>
+#include <mockturtle/algorithms/equivalence_checking.hpp>
+#include <mockturtle/algorithms/miter.hpp>
 #include <mockturtle/views/rank_view.hpp>
 
 using namespace fiction;
@@ -68,6 +68,54 @@ TEST_CASE("Check modify ranks", "[extended-rank-view]")
                        });
 
     std::cout << "Valid: " << vpi_r.check_validity() << std::endl;
+
+    CHECK(1 == 1);
+}
+
+TEST_CASE("Check equivalence checking", "[extended-rank-view]")
+{
+    technology_network tec{};
+    virtual_pi_network vpi{};
+
+    const auto a = vpi.create_pi();
+    const auto b = vpi.create_pi();
+
+    const auto a_t = tec.create_pi();
+    const auto b_t = tec.create_pi();
+
+    const auto c = vpi.create_virtual_pi(a);
+    const auto d = vpi.create_virtual_pi(b);
+
+    const auto f1 = vpi.create_and(a, b);
+    const auto f2 = vpi.create_and(b, c);
+    const auto f3 = vpi.create_or(a, d);
+
+    const auto f1_t = tec.create_and(a_t, b);
+    const auto f2_t = tec.create_and(b_t, a_t);
+    const auto f3_t = tec.create_or(a_t, b_t);
+
+    vpi.create_po(f1);
+    vpi.create_po(f2);
+    vpi.create_po(f3);
+
+    tec.create_po(f1_t);
+    tec.create_po(f2_t);
+    tec.create_po(f3_t);
+
+    network_balancing_params ps;
+    ps.unify_outputs = true;
+
+    auto vpi_r = extended_rank_view(vpi);
+
+    std::cout << "Num Cis" << vpi_r.num_cis() << std::endl;
+
+    vpi_r.remove_virtual_input_nodes<virtual_pi_network>();
+
+    std::cout << "Num Cis" << vpi_r.num_cis() << std::endl;
+
+    mockturtle::equivalence_checking_stats st;
+    bool cec_m = *mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(tec, vpi), {}, &st);
+    CHECK(cec_m == 1);
 
     CHECK(1 == 1);
 }

@@ -2,6 +2,8 @@
 // Created by benjamin on 6/18/24.
 //
 
+#include <fiction/networks/virtual_pi_network.hpp>
+
 #include <mockturtle/networks/detail/foreach.hpp>
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
@@ -150,12 +152,32 @@ class extended_rank_view<Ntk, false> : public mockturtle::depth_view<Ntk>
         return rank_pos[n];
     }
 
+    // This function has the only purpose to enable an equivalence checking of this network
+    template <typename U>
+    typename std::enable_if<std::is_same<U, fiction::virtual_pi_network>::value>::type remove_virtual_input_nodes()
+    {
+        fiction::virtual_pi_network::remove_virtual_input_nodes();
+        rank_pos.reset();  // Clear the node_map
+        // Clear each vector in ranks
+        for (auto& rank : ranks)
+        {
+            rank.clear();
+        }
+        // Finally, clear the ranks vector itself
+        // ranks.clear();
+
+        // Reset max_rank_width
+        max_rank_width = 0;
+        this->init_ranks();
+        std::cout << "remove() called\n";
+    }
+
     bool check_validity() const noexcept
     {
         for (size_t i = 0; i < ranks.size(); ++i)
         {
-            const auto& rank = ranks[i];
-            uint32_t expected_rank_pos = 0;
+            const auto& rank              = ranks[i];
+            uint32_t    expected_rank_pos = 0;
             for (const auto& n : rank)
             {
                 // Check if the level is different from the rank level
@@ -164,7 +186,7 @@ class extended_rank_view<Ntk, false> : public mockturtle::depth_view<Ntk>
                     return false;
                 }
                 // Check if the rank_pos is not in ascending order
-                if(rank_pos[n] != expected_rank_pos)
+                if (rank_pos[n] != expected_rank_pos)
                 {
                     return false;
                 }
@@ -392,7 +414,7 @@ class extended_rank_view<Ntk, false> : public mockturtle::depth_view<Ntk>
 
     void insert_in_rank(node const& n, size_t rank_level) noexcept
     {
-        auto &rank = ranks[rank_level];
+        auto& rank  = ranks[rank_level];
         rank_pos[n] = rank.size();
         rank.push_back(n);
         max_rank_width = std::max(max_rank_width, static_cast<uint32_t>(rank.size()));
@@ -400,9 +422,10 @@ class extended_rank_view<Ntk, false> : public mockturtle::depth_view<Ntk>
 
     void init_ranks(std::vector<std::vector<node>> const& input_ranks) noexcept
     {
-        for(size_t i = 0; i < input_ranks.size(); ++i){
+        for (size_t i = 0; i < input_ranks.size(); ++i)
+        {
             auto const& rank_nodes = input_ranks[i];
-            for(auto const& n : rank_nodes)
+            for (auto const& n : rank_nodes)
             {
                 if (!this->is_constant(n))
                 {
@@ -411,7 +434,6 @@ class extended_rank_view<Ntk, false> : public mockturtle::depth_view<Ntk>
             }
         }
     }
-
 };
 
 template <class T>

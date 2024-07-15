@@ -102,7 +102,7 @@ initialize_copy_network_v(NtkSrc const& src)
 }
 
 template <typename Ntk>
-virtual_pi_network create_virt_pi_ntk_from_lvls(Ntk& ntk, std::vector<std::vector<mockturtle::node<Ntk>>>& ntk_lvls)
+extended_rank_view<virtual_pi_network> create_virt_pi_ntk_from_lvls(Ntk& ntk, std::vector<std::vector<mockturtle::node<Ntk>>>& ntk_lvls)
 {
     std::vector<std::vector<mockturtle::node<Ntk>>> ntk_lvls_new;
     std::unordered_map<mockturtle::node<Ntk>, bool> node_status;
@@ -262,8 +262,14 @@ virtual_pi_network create_virt_pi_ntk_from_lvls(Ntk& ntk, std::vector<std::vecto
             ntk_dest_v.create_po(tgt_po);
         });
 
+    auto ntk_dest_r = extended_rank_view<virtual_pi_network>(ntk_dest_v);
 
-    return ntk_dest_v;
+    /*for (size_t i = 0; i < ntk_lvls_new.size(); i++)
+    {
+        ntk_dest_r.modify_rank(i, ntk_lvls_new[i]);
+    }*/
+
+    return ntk_dest_r;
 }
 
 template <typename Ntk>
@@ -453,7 +459,7 @@ class node_duplication_planarization_impl
     }
 
     // mockturtle::rank_view<Ntk> run()
-    virtual_pi_network run()
+    extended_rank_view<virtual_pi_network> run()
     {
         const bool border_pis = true;
         // ToDo: Determine the PO order
@@ -530,8 +536,7 @@ class node_duplication_planarization_impl
  * shortest x-y paths at each level of the graph.
  */
 template <typename NtkDest, typename NtkSrc>
-// mockturtle::rank_view<NtkDest> node_duplication_planarization(const NtkSrc& ntk_src, node_duplication_params ps = {})
-virtual_pi_network node_duplication_planarization(const NtkSrc& ntk_src, node_duplication_params ps = {})
+extended_rank_view<virtual_pi_network> node_duplication_planarization(const NtkSrc& ntk_src, node_duplication_params ps = {})
 {
     static_assert(mockturtle::is_network_type_v<NtkSrc>, "NtkSrc is not a network type");
     static_assert(mockturtle::is_network_type_v<NtkDest>, "NtkDest is not a network type");
