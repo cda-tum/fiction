@@ -30,6 +30,14 @@ class TestWiringReduction(unittest.TestCase):
 
         self.assertEqual(equivalence_checking(network, layout), eq_type.STRONG)
         self.assertGreater(stats.time_total.total_seconds(), 0)
+        self.assertEqual(stats.x_size_before, 6)
+        self.assertEqual(stats.y_size_before, 8)
+        self.assertEqual(stats.x_size_after, 6)
+        self.assertEqual(stats.y_size_after, 5)
+        self.assertEqual(stats.num_wires_before, 21)
+        self.assertEqual(stats.num_wires_after, 15)
+        self.assertEqual(stats.wiring_improvement, 28.57)
+        self.assertEqual(stats.area_improvement, 37.50)
 
 
 if __name__ == '__main__':
