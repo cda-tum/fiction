@@ -137,7 +137,7 @@ class on_the_fly_circuit_design_impl
             return sidb_defect_surface<CellLyt>{};
         }
 
-        // in case of equality, defect-surface with the SiDBs of the circuit is returned
+        // in case of equality, an sidb_defect_surface with the SiDBs of the circuit is returned
         if (*eq)
         {
             sidb_defect_surface<CellLyt> sidbs_and_defects{cell_level_layout};
@@ -150,7 +150,7 @@ class on_the_fly_circuit_design_impl
             return sidbs_and_defects;
         }
 
-        // in case of no equality, empty defect-surface is returned
+        // in case of inequality, empty defect-surface is returned
         return sidb_defect_surface<CellLyt>{};
     }
 
