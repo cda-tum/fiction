@@ -23,6 +23,7 @@ TEST_CASE("Copy network and size consistency", "[virtual-pi-view]")
     const auto f1 = tec.create_and(a, b);
 
     virtual_pi_network vpi{tec};
+
     const auto         c = vpi.create_virtual_pi(a);
     const auto         d = vpi.create_virtual_pi(b);
 
@@ -75,151 +76,13 @@ TEST_CASE("Remove PIs and check equivalence", "[virtual-pi-view]")
     tec.create_po(f2_t);
     tec.create_po(f3_t);
 
-    vpi.foreach_node(
-       [&](const auto& nd)
-       {
-           std::cout << "Nd:" << nd << "\n";
-           if (vpi.is_pi_real(nd))
-           {
-               std::cout << "is pi real" << "\n";
-           }
-           if (vpi.is_pi_virtual(nd))
-           {
-               std::cout << "is pi virtual" << "\n";
-           }
-           if (vpi.is_inv(nd))
-           {
-               std::cout << "is not" << "\n";
-           }
-           if (vpi.is_buf(nd))
-           {
-               std::cout << "is buf" << "\n";
-           }
-           if (vpi.is_po(nd))
-           {
-               std::cout << "is po" << "\n";
-           }
-       });
-
     vpi.remove_virtual_input_nodes();
-
-    vpi.foreach_node(
-        [&](const auto& nd)
-        {
-            std::cout << "Nd:" << nd << "\n";
-            if (vpi.is_pi_real(nd))
-            {
-                std::cout << "is pi real" << "\n";
-            }
-            if (vpi.is_pi_virtual(nd))
-            {
-                std::cout << "is pi virtual" << "\n";
-            }
-            if (vpi.is_inv(nd))
-            {
-                std::cout << "is not" << "\n";
-            }
-            if (vpi.is_buf(nd))
-            {
-                std::cout << "is buf" << "\n";
-            }
-            if (vpi.is_po(nd))
-            {
-                std::cout << "is po" << "\n";
-            }
-        });
+    CHECK(vpi.size_real() == vpi.size());
+    CHECK(vpi.size() == tec.size());
 
     mockturtle::equivalence_checking_stats st;
     bool cec_m = *mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(tec, vpi), {}, &st);
     CHECK(cec_m == 1);
-}
-
-TEST_CASE("Rank View on virtual PIs", "[virtual-rank-view]")
-{
-    virtual_pi_network vpi{};
-
-    const auto a = vpi.create_pi();
-    const auto b = vpi.create_pi();
-
-    const auto c = vpi.create_virtual_pi(a);
-    const auto d = vpi.create_virtual_pi(b);
-
-    const auto f1 = vpi.create_and(a, b);
-    const auto f2 = vpi.create_and(b, c);
-    const auto f3 = vpi.create_or(a, d);
-
-    vpi.create_po(f1);
-    vpi.create_po(f2);
-    vpi.create_po(f3);
-
-    std::cout << "real tec num_gates: " << vpi.size() << std::endl;
-    std::cout << "virt tec num_gates: " << vpi.size_real() << std::endl;
-
-    /*vpi.foreach_node(
-        [&](const auto& nd)
-        {
-            std::cout << "Nd:" << nd << "\n";
-            vpi.foreach_fanin(nd, [&](const auto& fi) { std::cout << "Fis:" << fi << "\n"; });
-            if (vpi.is_virtual_pi(nd))
-            {
-                std::cout << "Is virtual PI \n";
-            }
-        });*/
-
-    // vpi.remove_virtual_input_nodes();
-
-    mockturtle::rank_view vpi_r(vpi);
-   /* vpi_r.foreach_pi([&](const auto& nd) {
-                           std::cout << "Nd:" << nd << "\n";
-                           auto rnk = vpi_r.rank_position(nd);
-                           auto lvl = vpi_r.level(nd);
-                           std::cout << "Level: " << lvl << "\n";
-                           std::cout << "Rank: " << rnk << "\n";
-                       });*/
-    std::cout << "r pis: " <<vpi_r.num_pis_virtual() << "\n";
-    std::cout << "n pis: " <<vpi.num_pis_virtual() << "\n";
-    vpi.foreach_node(
-        [&](const auto& nd)
-        {
-            std::cout << "Out_vpi:" << nd << "\n";
-        });
-    vpi_r.foreach_node(
-        [&](const auto& nd)
-        {
-            std::cout << "Out_vpi_r:" << nd << "\n";
-        });
-
-    vpi_r.remove_virtual_input_nodes();
-
-    std::cout << "r pis: " << vpi_r.num_pis_virtual() << "\n";
-    std::cout << "n pis: " << vpi.num_pis_virtual() << "\n";
-
-    vpi.foreach_node(
-        [&](const auto& nd)
-        {
-            std::cout << "Out_vpi:" << nd << "\n";
-        });
-    vpi_r.foreach_node(
-        [&](const auto& nd)
-        {
-            std::cout << "Out_vpi_r:" << nd << "\n";
-        });
-
-    vpi.remove_virtual_input_nodes();
-
-    std::cout << "r pis: " <<vpi_r.num_pis_virtual() << "\n";
-    std::cout << "n pis: " <<vpi.num_pis_virtual() << "\n";
-
-    vpi.foreach_node(
-        [&](const auto& nd)
-        {
-            std::cout << "Out_vpi:" << nd << "\n";
-        });
-    vpi_r.foreach_node(
-        [&](const auto& nd)
-        {
-            std::cout << "Out_vpi_r:" << nd << "\n";
-        });
 }
 
 TEST_CASE("Remove PIs and check equivalence second", "[virtual-pi-view]")
@@ -249,8 +112,6 @@ TEST_CASE("Remove PIs and check equivalence second", "[virtual-pi-view]")
 
     const auto e = vpi.create_pi();
 
-    // const auto d_v = vpi.create_virtual_pi(d);
-
     const auto f7 = vpi.create_not(b);
     const auto f8 = vpi.create_and(a, b);
     const auto f9 = vpi.create_and(c, d);
@@ -266,6 +127,8 @@ TEST_CASE("Remove PIs and check equivalence second", "[virtual-pi-view]")
     vpi.create_po(f14);
 
     vpi.remove_virtual_input_nodes();
+    CHECK(vpi.size_real() == vpi.size());
+    CHECK(vpi.size() - 2 == tec.size()); // the -2 is bdue to the buffers
 
     mockturtle::equivalence_checking_stats st;
     bool cec_m = *mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(tec, vpi), {}, &st);
