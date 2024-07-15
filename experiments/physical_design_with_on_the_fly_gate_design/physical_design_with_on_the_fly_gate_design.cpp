@@ -11,13 +11,12 @@
 #include <fiction/algorithms/physical_design/on_the_fly_circuit_design_on_defective_surface.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/io/read_sidb_surface_defects.hpp>
-#include <fiction/io/write_sqd_layout.hpp>
 #include <fiction/layouts/bounding_box.hpp>
-#include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/area.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/sidb_defect_surface.hpp>
 #include <fiction/technology/sidb_defects.hpp>
+#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
 #include <fmt/format.h>
@@ -43,9 +42,11 @@ int main()  // NOLINT
 
     fiction::design_sidb_gates_params<fiction::cell<cell_lyt>> design_gate_params{};
     design_gate_params.simulation_parameters = fiction::sidb_simulation_parameters{2, -0.32};
-    design_gate_params.canvas                = {{24, 17}, {34, 28}};
-    design_gate_params.number_of_sidbs       = 3;
-    design_gate_params.sim_engine            = fiction::sidb_simulation_engine::QUICKEXACT;
+    // needs to be changed if a different skeleton is used.
+    design_gate_params.canvas = {{24, 17}, {34, 28}};
+
+    design_gate_params.number_of_sidbs = 3;
+    design_gate_params.sim_engine      = fiction::sidb_simulation_engine::QUICKEXACT;
     design_gate_params.termination_cond =
         fiction::design_sidb_gates_params<fiction::cell<cell_lyt>>::termination_condition::AFTER_FIRST_SOLUTION;
 
@@ -58,13 +59,14 @@ int main()  // NOLINT
     static const std::string layouts_folder =
         fmt::format("{}/physical_design_with_on_the_fly_gate_design/layouts", EXPERIMENTS_PATH);
 
+    // read-in the initial defects. Physical parameters of the defects are not stored yet.
     auto surface_lattice_initial = fiction::read_sidb_surface_defects<cell_lyt>(
         "../../experiments/physical_design_with_on_the_fly_gate_design/1_percent_with_charged_surface.txt");
 
-    // create an empty surface with the maximal possible dimension.
+    // create an empty surface.
     fiction::sidb_defect_surface<cell_lyt> surface_lattice{};
 
-    // add physical parameters of the defects to the surface.
+    // add physical parameters of the defects to the defect-surface.
     surface_lattice_initial.foreach_sidb_defect(
         [&surface_lattice, &stray_db, &si_vacancy](const auto& cd)
         {
@@ -82,6 +84,7 @@ int main()  // NOLINT
             }
         });
 
+    // determine bounding-box of the surface to set the aspect ratio of the surface lattice.
     const auto bb_defect_surface = fiction::bounding_box_2d{surface_lattice};
     surface_lattice.resize(bb_defect_surface.get_max());
 
@@ -145,8 +148,7 @@ int main()  // NOLINT
                 mapped_network, params, lattice_tiling, &st);
 
         // determine bounding box and exclude atomic defects
-        const auto bb =
-            fiction::bounding_box_2d<cell_lyt>(result, fiction::bounding_box_2d_selection::DEFECTS_EXCLUDED);
+        const auto bb = fiction::bounding_box_2d<cell_lyt>(result, fiction::bounding_box_2d_selection::EXCLUDE_DEFECTS);
 
         // compute area
         fiction::area_stats                            area_stats{};

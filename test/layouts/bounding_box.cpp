@@ -347,7 +347,7 @@ TEMPLATE_TEST_CASE("2D bounding box for cube layout with atomic defect", "[bound
         CHECK(se == cell<TestType>{2, 0});
     }
 
-    SECTION("two cell and two defect")
+    SECTION("two cell and two defect, include defects")
     {
         TestType lyt{};
         lyt.assign_cell_type({1, 0}, TestType::technology::NORMAL);
@@ -360,6 +360,22 @@ TEMPLATE_TEST_CASE("2D bounding box for cube layout with atomic defect", "[bound
         const auto            se = bb.get_max();
 
         CHECK(nw == cell<TestType>{-3, 0});
+        CHECK(se == cell<TestType>{2, 0});
+    }
+
+    SECTION("two cell and two defect, exclude defects")
+    {
+        TestType lyt{};
+        lyt.assign_cell_type({1, 0}, TestType::technology::NORMAL);
+        lyt.assign_cell_type({2, 0}, TestType::technology::NORMAL);
+        lyt.assign_sidb_defect({-3, 0}, sidb_defect{});
+        lyt.assign_sidb_defect({2, 0}, sidb_defect{});
+
+        const bounding_box_2d bb{lyt, bounding_box_2d_selection::EXCLUDE_DEFECTS};
+        const auto            nw = bb.get_min();
+        const auto            se = bb.get_max();
+
+        CHECK(nw == cell<TestType>{1, 0});
         CHECK(se == cell<TestType>{2, 0});
     }
 }

@@ -81,51 +81,48 @@ class on_the_fly_circuit_design_impl
         std::optional<GateLyt> gate_level_layout = std::nullopt;
         CellLyt                cell_level_layout{};
 
+        // generating the blacklist based on neutral defects. The long-range electrostatic influence of charged defects
+        // is not considered as gates are designed on-the-fly.
         auto black_list = sidb_surface_analysis<sidb_skeleton_bestagon_library>(
             lattice_tiling, params.parameterized_gate_library_parameter.defect_surface, std::make_pair(0, 0));
 
-        auto placement_and_routing_attemps = 0u;
-
         const mockturtle::stopwatch stop{stats.time_total};
 
-        bool gate_design_failed = true;
-
+        while (!gate_level_layout.has_value())
         {
-            while (!gate_level_layout.has_value() || gate_design_failed)
+            // P&R with *exact* and the pre-determined blacklist
+            gate_level_layout = exact_with_blacklist<GateLyt>(mapped_network, black_list, params.exact_design_parameter,
+                                                              &stats.exact_stats);
+            if (gate_level_layout.has_value())
             {
-                if (!gate_level_layout.has_value() && placement_and_routing_attemps > 0)
+                try
                 {
-                    break;
+                    cell_level_layout = apply_parameterized_gate_library<CellLyt, parameterized_gate_library, GateLyt,
+                                                                         parameterized_gate_library_params<CellLyt>>(
+                        *gate_level_layout, params.parameterized_gate_library_parameter);
                 }
 
-                gate_level_layout = exact_with_blacklist<GateLyt>(mapped_network, black_list,
-                                                                  params.exact_design_parameter, &stats.exact_stats);
-                if (gate_level_layout.has_value())
+                // on-the-fly gate design was unsuccessful at a certain tile. Hence, this tile-gate pair is added to the
+                // blacklist.
+                catch (const gate_design_exception<tt, GateLyt>& e)
                 {
-                    try
-                    {
-
-                        cell_level_layout =
-                            apply_parameterized_gate_library<CellLyt, parameterized_gate_library, GateLyt,
-                                                             parameterized_gate_library_params<CellLyt>>(
-                                *gate_level_layout, params.parameterized_gate_library_parameter);
-                        gate_design_failed = false;
-                    }
-                    catch (const gate_design_exception<tt, GateLyt>& e)
-                    {
-                        gate_design_failed = true;
-                        black_list[e.which_tile()][e.which_truth_table()].push_back(e.which_port_list());
-                    }
-
-                    catch (const std::exception& e)
-                    {
-                        std::cerr << "Caught std::exception: " << e.what() << '\n';
-                    }
+                    black_list[e.which_tile()][e.which_truth_table()].push_back(e.which_port_list());
                 }
-                placement_and_routing_attemps++;
+
+                catch (const std::exception& e)
+                {
+                    std::cerr << "Caught std::exception: " << e.what() << '\n';
+                }
+            }
+
+            // P&R was unsuccessful
+            else
+            {
+                break;
             }
         }
 
+        // empty defect-surface is returned when no P&R solution is found
         if (!gate_level_layout.has_value())
         {
             return sidb_defect_surface<CellLyt>{};
@@ -134,11 +131,14 @@ class on_the_fly_circuit_design_impl
         // check equivalence
         const auto miter = mockturtle::miter<technology_network>(mapped_network, *gate_level_layout);
         const auto eq    = mockturtle::equivalence_checking(*miter);
+
+        // empty defect-surface is returned when equivalence check is empty
         if (!eq.has_value())
         {
             return sidb_defect_surface<CellLyt>{};
         }
 
+        // in case of equality, defect-surface with the SiDBs of the circuit is returned
         if (*eq)
         {
             sidb_defect_surface<CellLyt> sidbs_and_defects{cell_level_layout};
@@ -151,6 +151,7 @@ class on_the_fly_circuit_design_impl
             return sidbs_and_defects;
         }
 
+        // in case of no equality, empty defect-surface is returned
         return sidb_defect_surface<CellLyt>{};
     }
 

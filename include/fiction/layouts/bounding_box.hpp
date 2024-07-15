@@ -27,11 +27,11 @@ enum class bounding_box_2d_selection
     /**
      * The bounding box includes atomic defects.
      */
-    DEFECTS_INCLUDED,
+    INCLUDE_DEFECTS,
     /**
      * The bounding box is determined based on the cells, excluding atomic defects.
      */
-    DEFECTS_EXCLUDED
+    EXCLUDE_DEFECTS
 };
 
 /**
@@ -71,8 +71,10 @@ class bounding_box_2d
     }
     /**
      * The bounding box is not automatically updated when the layout changes. This function recomputes the bounding box.
+     *
+     * @param selection Modes to use for creating the bounding box.
      */
-    void update_bounding_box(const bounding_box_2d_selection& selection = bounding_box_2d_selection::DEFECTS_INCLUDED)
+    void update_bounding_box(const bounding_box_2d_selection& selection = bounding_box_2d_selection::INCLUDE_DEFECTS)
     {
         min = {0, 0, 0};
         max = {0, 0, 0};
@@ -146,7 +148,7 @@ class bounding_box_2d
 
             if constexpr (is_sidb_defect_surface_v<Lyt>)
             {
-                if (selection == bounding_box_2d_selection::DEFECTS_INCLUDED)
+                if (selection == bounding_box_2d_selection::INCLUDE_DEFECTS)
                 {
                     int32_t min_x_defect = std::numeric_limits<int32_t>::max();
                     int32_t max_x_defect = std::numeric_limits<int32_t>::min();
@@ -261,7 +263,7 @@ class bounding_box_2d
 
             if constexpr (is_sidb_defect_surface_v<Lyt>)
             {
-                if (selection == bounding_box_2d_selection::DEFECTS_INCLUDED)
+                if (selection == bounding_box_2d_selection::INCLUDE_DEFECTS)
                 {
                     auto min_x_defect = std::numeric_limits<decltype(coordinate<Lyt>::x)>::max();
                     auto max_x_defect = std::numeric_limits<decltype(coordinate<Lyt>::y)>::min();
