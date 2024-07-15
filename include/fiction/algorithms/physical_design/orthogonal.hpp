@@ -423,11 +423,11 @@ void place_outputs(Lyt& layout, const coloring_container<Ntk>& ctn, uint32_t po_
                 // determine PO orientation
                 if (!is_eastern_po_orientation_available(ctn, po) || multi_out_node)
                 {
-                    po_tile = static_cast<tile<Lyt>>(wire_south(layout, po_tile, layout.south(layout.south(po_tile))));
+                    po_tile = static_cast<tile<Lyt>>(wire_south(layout, po_tile, {po_tile.x, po_tile.y + 2}));
                 }
 
                 // check if PO position is located at the border
-                if (layout.is_at_eastern_border(layout.east(po_tile)) && !multi_out_node)
+                if (layout.is_at_eastern_border({po_tile.x + 1, po_tile.y}) && !multi_out_node)
                 {
                     ++po_tile.x;
                     layout.create_po(n_s,
