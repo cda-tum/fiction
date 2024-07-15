@@ -827,15 +827,18 @@ static const char *__doc_fiction_bounding_box_2d_min = R"doc()doc";
 
 static const char *__doc_fiction_bounding_box_2d_selection = R"doc(Modes to use for creating the 2D-bounding box.)doc";
 
-static const char *__doc_fiction_bounding_box_2d_selection_DEFECTS_EXCLUDED =
+static const char *__doc_fiction_bounding_box_2d_selection_EXCLUDE_DEFECTS =
 R"doc(The bounding box is determined based on the cells, excluding atomic
 defects.)doc";
 
-static const char *__doc_fiction_bounding_box_2d_selection_DEFECTS_INCLUDED = R"doc(The bounding box includes atomic defects.)doc";
+static const char *__doc_fiction_bounding_box_2d_selection_INCLUDE_DEFECTS = R"doc(The bounding box includes atomic defects.)doc";
 
 static const char *__doc_fiction_bounding_box_2d_update_bounding_box =
 R"doc(The bounding box is not automatically updated when the layout changes.
-This function recomputes the bounding box.)doc";
+This function recomputes the bounding box.
+
+Parameter ``selection``:
+    Modes to use for creating the bounding box.)doc";
 
 static const char *__doc_fiction_bounding_box_2d_x_size = R"doc()doc";
 
