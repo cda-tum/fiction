@@ -66,7 +66,7 @@ int main()  // NOLINT
     // create an empty surface.
     fiction::sidb_defect_surface<cell_lyt> surface_lattice{};
 
-    // add physical parameters of the defects to the defect-surface.
+    // add physical parameters of the defects to the surface_lattice.
     surface_lattice_initial.foreach_sidb_defect(
         [&surface_lattice, &stray_db, &si_vacancy](const auto& cd)
         {

@@ -6,7 +6,6 @@
 #define FICTION_ON_THE_FLY_CIRCUIT_DESIGN_ON_DEFECTIVE_SURFACE_HPP
 
 #include "fiction/algorithms/physical_design/apply_gate_library.hpp"
-#include "fiction/algorithms/physical_design/design_sidb_gates.hpp"
 #include "fiction/algorithms/physical_design/exact.hpp"
 #include "fiction/networks/technology_network.hpp"
 #include "fiction/technology/parameterized_gate_library.hpp"
