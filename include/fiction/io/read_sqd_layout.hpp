@@ -419,7 +419,7 @@ class read_sqd_layout_impl
  * Reads a cell-level SiDB layout from an sqd file provided as an input stream. The format is used by SiQAD
  * (https://github.com/siqad/siqad).
  *
- * If The provided cell-level layout type can represent SiDB defects, they will be parsed from the sqd file as well.
+ * If the provided cell-level layout type can represent SiDB defects, they will be parsed from the sqd file as well.
  *
  * May throw an `sqd_parsing_exception` if the sqd file is malformed.
  *
