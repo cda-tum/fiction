@@ -798,6 +798,34 @@ void optimize_output_positions(Lyt& lyt) noexcept
                           {lyt.make_signal(lyt.get_node({lyt.x() - 1, y}))});
         }
     }
+
+    // update bounding box
+    bounding_box.update_bounding_box();
+    lyt.resize({bounding_box.get_max().x, bounding_box.get_max().y, lyt.z()});
+
+    // Check if PO is located in bottom right corner and relocation would save more tiles (only possible for layouts with a single PO)
+    if (lyt.is_po_tile({lyt.x(), lyt.y(), 0}) && (lyt.num_pos() == 1))
+    {
+        if (lyt.has_western_incoming_signal({lyt.x(), lyt.y(), 0}) && ((lyt.x() * (lyt.y() + 2)) < ((lyt.x() + 1) * (lyt.y() + 1))))
+        {
+            std::vector<mockturtle::signal<Lyt>> signals{};
+            signals.reserve(lyt.fanin_size(lyt.get_node({lyt.x(), lyt.y()})));
+            lyt.foreach_fanin(lyt.get_node({lyt.x(), lyt.y()}),
+                              [&signals](const auto& fanin) { signals.push_back(fanin); });
+            lyt.resize({lyt.x(), lyt.y() + 1, lyt.z()});
+            lyt.move_node(lyt.get_node({lyt.x(), lyt.y() - 1}), {lyt.x() - 1, lyt.y(), 0}, signals);
+        }
+        else if (lyt.has_northern_incoming_signal({lyt.x(), lyt.y(), 0}) &&
+                 (((lyt.x() + 2) * lyt.y()) < ((lyt.x() + 1) * (lyt.y() + 1))))
+        {
+            std::vector<mockturtle::signal<Lyt>> signals{};
+            signals.reserve(lyt.fanin_size(lyt.get_node({lyt.x(), lyt.y()})));
+            lyt.foreach_fanin(lyt.get_node({lyt.x(), lyt.y()}),
+                              [&signals](const auto& fanin) { signals.push_back(fanin); });
+            lyt.resize({lyt.x() + 1, lyt.y(), lyt.z()});
+            lyt.move_node(lyt.get_node({lyt.x() - 1, lyt.y()}), {lyt.x(), lyt.y() - 1, 0}, signals);
+        }
+    }
 }
 /**
  * Custom comparison function for sorting tiles based on the sum of their coordinates that breaks ties based on the
@@ -883,7 +911,7 @@ class post_layout_optimization_impl
 
                 tile<Lyt> max_non_po{0, 0};
                 // Determine minimal border for POs
-                for (const auto& gate_tile : gate_tiles)
+                for (auto gate_tile : gate_tiles)
                 {
                     if (!layout.is_po_tile(gate_tile))
                     {
