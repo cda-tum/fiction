@@ -523,7 +523,7 @@ bool improve_gate_location(Lyt& lyt, const tile<Lyt>& old_pos, const tile<Lyt>& 
             if (lyt.y() >= y && y >= min_y && lyt.x() >= x && x >= min_x && ((x + y) <= max_diagonal) &&
                 (((x + y) < max_diagonal) || (y <= max_y)) &&
                 ((!lyt.is_pi_tile(current_pos)) || (lyt.is_pi_tile(current_pos) && (x == 0 || y == 0))) &&
-                !(lyt.is_po_tile(current_pos) && (((x <= max_non_po.x) && (y <= max_non_po.y)) ||
+                !(lyt.is_po_tile(current_pos) && (((x < max_non_po.x) && (y < max_non_po.y)) ||
                                                   ((x + y) == static_cast<uint64_t>(old_pos.x + old_pos.y)))))
             {
                 new_pos = tile<Lyt>{x, y};
@@ -636,7 +636,7 @@ bool improve_gate_location(Lyt& lyt, const tile<Lyt>& old_pos, const tile<Lyt>& 
             }
         }
 
-        if (moved_gate || ((num_gate_relocations >= max_gate_relocations) && !lyt.is_po_tile(current_pos)))
+        if (moved_gate || ((num_gate_relocations >= max_gate_relocations) & !lyt.is_po_tile(current_pos)))
         {
             break;
         }
@@ -763,6 +763,41 @@ void optimize_output_positions(Lyt& lyt) noexcept
             }
         }
     }
+    // calculate bounding box
+    auto bounding_box = bounding_box_2d(lyt);
+    lyt.resize({bounding_box.get_max().x, bounding_box.get_max().y, lyt.z()});
+
+    // Check for misplaced POs in second last row and move them down one row
+    for (uint64_t x = 0; x < lyt.x(); ++x)
+    {
+        if (lyt.is_po_tile({x, lyt.y() - 1, 0}))
+        {
+            std::vector<mockturtle::signal<Lyt>> signals{};
+            signals.reserve(lyt.fanin_size(lyt.get_node({x, lyt.y()})));
+            lyt.foreach_fanin(lyt.get_node({x, lyt.y() - 1}),
+                              [&signals](const auto& fanin) { signals.push_back(fanin); });
+            lyt.move_node(lyt.get_node({x, lyt.y() - 1}), {x, lyt.y(), 0}, {});
+            lyt.create_buf(signals[0], {x, lyt.y() - 1});
+            lyt.move_node(lyt.get_node({x, lyt.y()}), {x, lyt.y(), 0},
+                          {lyt.make_signal(lyt.get_node({x, lyt.y() - 1}))});
+        }
+    }
+
+    // Check for misplaced POs in second last column and move them to the right one column
+    for (uint64_t y = 0; y < lyt.y(); ++y)
+    {
+        if (lyt.is_po_tile({lyt.x() - 1, y, 0}))
+        {
+            std::vector<mockturtle::signal<Lyt>> signals{};
+            signals.reserve(lyt.fanin_size(lyt.get_node({lyt.x(), y})));
+            lyt.foreach_fanin(lyt.get_node({lyt.x() - 1, y}),
+                              [&signals](const auto& fanin) { signals.push_back(fanin); });
+            lyt.move_node(lyt.get_node({lyt.x() - 1, y}), {lyt.x(), y, 0}, {});
+            lyt.create_buf(signals[0], {lyt.x() - 1, y});
+            lyt.move_node(lyt.get_node({lyt.x(), y}), {lyt.x(), y, 0},
+                          {lyt.make_signal(lyt.get_node({lyt.x() - 1, y}))});
+        }
+    }
 }
 /**
  * Custom comparison function for sorting tiles based on the sum of their coordinates that breaks ties based on the
@@ -848,7 +883,7 @@ class post_layout_optimization_impl
 
                 tile<Lyt> max_non_po{0, 0};
                 // Determine minimal border for POs
-                for (const auto& gate_tile : gate_tiles)
+                for (auto gate_tile : gate_tiles)
                 {
                     if (!layout.is_po_tile(gate_tile))
                     {
