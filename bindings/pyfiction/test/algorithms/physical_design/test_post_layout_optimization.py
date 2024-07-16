@@ -46,7 +46,7 @@ class TestPostLayoutOptimiztaion(unittest.TestCase):
         self.assertEqual(stats.y_size_before, 8)
         self.assertEqual(stats.x_size_after, 5)
         self.assertEqual(stats.y_size_after, 5)
-        self.assertEqual(stats.area_improvement, 47.48)
+        self.assertEqual(stats.area_improvement, 47.92)
 
     def test_post_layout_optimization_with_stats_and_parameters(self):
         network = read_technology_network(dir_path + "/../../resources/mux21.v")
