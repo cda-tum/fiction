@@ -198,7 +198,7 @@ template <typename Lyt>
     for (const auto& bdl : bdl_pairs)
     {
         if (sidb_nm_distance<Lyt>(Lyt{}, given_bdl.upper, bdl.lower) < inter_bdl_distance &&
-            given_bdl.not_equal_ignore_type(bdl) && given_bdl > bdl)
+            !given_bdl.equal_ignore_type(bdl) && given_bdl > bdl)
         {
             return std::optional<bdl_pair<cell<Lyt>>>(bdl);
         }
