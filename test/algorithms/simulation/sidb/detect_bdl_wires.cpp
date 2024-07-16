@@ -30,13 +30,13 @@ TEST_CASE("Three separate BDL pairs on the same y-coord (three wires)", "[detect
 
     SECTION("Determine input wires")
     {
-        const auto all_bdl_wires = detect_bdl_wires(lyt, bdl_wire_selection::INPUT);
+        const auto all_bdl_wires = detect_bdl_wires(lyt, detect_bdl_wires_params{}, bdl_wire_selection::INPUT);
         REQUIRE(all_bdl_wires.size() == 1);
     }
 
     SECTION("Determine output wires")
     {
-        const auto all_bdl_wires = detect_bdl_wires(lyt, bdl_wire_selection::OUTPUT);
+        const auto all_bdl_wires = detect_bdl_wires(lyt, detect_bdl_wires_params{}, bdl_wire_selection::OUTPUT);
         REQUIRE(all_bdl_wires.size() == 1);
     }
 }
@@ -62,14 +62,14 @@ TEST_CASE("Three separate BDL pairs on the same x-coord (three wires)", "[detect
 
     SECTION("Determine input wires")
     {
-        const auto all_bdl_wires = detect_bdl_wires(lyt, bdl_wire_selection::INPUT);
+        const auto all_bdl_wires = detect_bdl_wires(lyt, detect_bdl_wires_params{}, bdl_wire_selection::INPUT);
         REQUIRE(all_bdl_wires.size() == 1);
         CHECK(determine_wire_direction<decltype(lyt)>(all_bdl_wires[0]) == bdl_wire_direction::NO_DIRECTION);
     }
 
     SECTION("Determine output wires")
     {
-        const auto all_bdl_wires = detect_bdl_wires(lyt, bdl_wire_selection::OUTPUT);
+        const auto all_bdl_wires = detect_bdl_wires(lyt, detect_bdl_wires_params{}, bdl_wire_selection::OUTPUT);
         REQUIRE(all_bdl_wires.size() == 1);
         CHECK(determine_wire_direction<decltype(lyt)>(all_bdl_wires[0]) == bdl_wire_direction::NO_DIRECTION);
     }
@@ -189,13 +189,13 @@ TEST_CASE("Three separate BDL pairs (three wires)", "[detect-bdl-wires]")
 
     SECTION("Determine input wires")
     {
-        const auto all_bdl_wires = detect_bdl_wires(lyt, bdl_wire_selection::INPUT);
+        const auto all_bdl_wires = detect_bdl_wires(lyt, detect_bdl_wires_params{}, bdl_wire_selection::INPUT);
         REQUIRE(all_bdl_wires.size() == 1);
     }
 
     SECTION("Determine output wires")
     {
-        const auto all_bdl_wires = detect_bdl_wires(lyt, bdl_wire_selection::OUTPUT);
+        const auto all_bdl_wires = detect_bdl_wires(lyt, detect_bdl_wires_params{}, bdl_wire_selection::OUTPUT);
         REQUIRE(all_bdl_wires.size() == 1);
     }
 }
@@ -237,7 +237,7 @@ TEST_CASE("Detect BDL wires", "[detect-bdl-wires]")
 
     SECTION("Determine input wires")
     {
-        const auto all_input_bdl_wires = detect_bdl_wires(lyt, bdl_wire_selection::INPUT);
+        const auto all_input_bdl_wires = detect_bdl_wires(lyt, detect_bdl_wires_params{}, bdl_wire_selection::INPUT);
         REQUIRE(all_input_bdl_wires.size() == 2);
         CHECK(determine_wire_direction<decltype(lyt)>(all_input_bdl_wires[0]) == bdl_wire_direction::NORTH_SOUTH);
         CHECK(determine_wire_direction<decltype(lyt)>(all_input_bdl_wires[1]) == bdl_wire_direction::NORTH_SOUTH);
@@ -253,7 +253,7 @@ TEST_CASE("Detect BDL wires", "[detect-bdl-wires]")
 
     SECTION("Determine output wires and direction")
     {
-        const auto all_output_bdl_wires = detect_bdl_wires(lyt, bdl_wire_selection::OUTPUT);
+        const auto all_output_bdl_wires = detect_bdl_wires(lyt, detect_bdl_wires_params{}, bdl_wire_selection::OUTPUT);
         REQUIRE(all_output_bdl_wires.size() == 1);
         const auto output_wire = all_output_bdl_wires.front();
         CHECK(output_wire.size() == 2);
@@ -302,7 +302,7 @@ TEST_CASE("Output cells at the top and input at the bottom", "[detect-bdl-wires]
 
     SECTION("Determine output wires")
     {
-        const auto all_output_bdl_wires = detect_bdl_wires(lyt, bdl_wire_selection::OUTPUT);
+        const auto all_output_bdl_wires = detect_bdl_wires(lyt, detect_bdl_wires_params{}, bdl_wire_selection::OUTPUT);
         REQUIRE(all_output_bdl_wires.size() == 2);
         CHECK(determine_wire_direction<decltype(lyt)>(all_output_bdl_wires[0]) == bdl_wire_direction::SOUTH_NORTH);
         CHECK(determine_wire_direction<decltype(lyt)>(all_output_bdl_wires[1]) == bdl_wire_direction::SOUTH_NORTH);
@@ -318,7 +318,7 @@ TEST_CASE("Output cells at the top and input at the bottom", "[detect-bdl-wires]
 
     SECTION("Determine input wires and direction")
     {
-        const auto all_input_bdl_wires = detect_bdl_wires(lyt, bdl_wire_selection::INPUT);
+        const auto all_input_bdl_wires = detect_bdl_wires(lyt, detect_bdl_wires_params{}, bdl_wire_selection::INPUT);
         REQUIRE(all_input_bdl_wires.size() == 1);
         const auto input_wire = all_input_bdl_wires.front();
         CHECK(input_wire.size() == 2);

@@ -61,6 +61,21 @@ enum class bdl_wire_selection
     OUTPUT
 };
 
+/**
+ * This struct encapsulates parameters used for detecting BDL wires.
+ */
+struct detect_bdl_wires_params
+{
+    /**
+     * Interdistance threashwol between two BDL pairs in a wire.
+     */
+    double threshold_bdl_interdistance = 4;
+    /**
+     * Parameters for the `detect_bdl_pairs` algorithm.
+     */
+    detect_bdl_pairs_params params_bdl_pairs{};
+};
+
 template <typename Lyt>
 using bdl_wire = std::vector<bdl_pair<cell<Lyt>>>;
 
@@ -183,14 +198,14 @@ template <typename Lyt>
  * @param given_bdl The BDL pair to find a neighbor for.
  * @param bdl_pairs A set of BDL pairs to search within.
  * @param inter_bdl_distance The maximum allowable inter distance between the lower SiDB of the given BDL pair and the
- * upper SiDB of the candidate BDL pair. Default is set to 4 nm.
+ * upper SiDB of the candidate BDL pair.
  * @return A std::optional containing the first BDL pair that meets the criteria, or std::nullopt if no such pair is
  * found.
  */
 template <typename Lyt>
 [[nodiscard]] std::optional<bdl_pair<cell<Lyt>>> find_bdl_neighbor_above(const bdl_pair<cell<Lyt>>&           given_bdl,
                                                                          const std::set<bdl_pair<cell<Lyt>>>& bdl_pairs,
-                                                                         const double inter_bdl_distance = 4) noexcept
+                                                                         const double inter_bdl_distance) noexcept
 {
     for (const auto& bdl : bdl_pairs)
     {
@@ -217,14 +232,14 @@ template <typename Lyt>
  * @param given_bdl The BDL pair to find a neighbor for.
  * @param bdl_pairs A set of BDL pairs to search within.
  * @param inter_bdl_distance The maximum allowable inter distance between the lower SiDB of the given BDL pair and the
- * upper SiDB of the candidate BDL pair. Default is set to 4 nm.
+ * upper SiDB of the candidate BDL pair.
  * @return A std::optional containing the first BDL pair that meets the criteria, or std::nullopt if no such pair is
  * found.
  */
 template <typename Lyt>
 [[nodiscard]] std::optional<bdl_pair<cell<Lyt>>> find_bdl_neighbor_below(const bdl_pair<cell<Lyt>>&           given_bdl,
                                                                          const std::set<bdl_pair<cell<Lyt>>>& bdl_pairs,
-                                                                         const double inter_bdl_distance = 4) noexcept
+                                                                         const double inter_bdl_distance) noexcept
 {
     for (const auto& bdl : bdl_pairs)
     {
@@ -250,7 +265,8 @@ template <typename Lyt>
  */
 template <typename Lyt>
 [[nodiscard]] std::vector<bdl_wire<Lyt>>
-detect_bdl_wires(const Lyt& lyt, const bdl_wire_selection wire_selection = bdl_wire_selection::ALL) noexcept
+detect_bdl_wires(const Lyt& lyt, const detect_bdl_wires_params& params = {},
+                 const bdl_wire_selection wire_selection = bdl_wire_selection::ALL) noexcept
 {
     std::set<bdl_pair<cell<Lyt>>> bdl_pairs{};
     const auto                    all_bdls = detect_bdl_pairs(lyt);
@@ -281,7 +297,8 @@ detect_bdl_wires(const Lyt& lyt, const bdl_wire_selection wire_selection = bdl_w
         while (neighbor_bdl_found)
         {
             // determine neighbor bdl pair below
-            const auto neighbor_below = find_bdl_neighbor_below<Lyt>(current_bdl_pair, bdl_pairs);
+            const auto neighbor_below =
+                find_bdl_neighbor_below<Lyt>(current_bdl_pair, bdl_pairs, params.threshold_bdl_interdistance);
             if (neighbor_below.has_value())
             {
                 // add neighbor bdl pair to wire
@@ -295,7 +312,8 @@ detect_bdl_wires(const Lyt& lyt, const bdl_wire_selection wire_selection = bdl_w
             else
             {
                 current_bdl_pair = initial_bdl_pair;
-                if (find_bdl_neighbor_above<Lyt>(current_bdl_pair, bdl_pairs).has_value())
+                if (find_bdl_neighbor_above<Lyt>(current_bdl_pair, bdl_pairs, params.threshold_bdl_interdistance)
+                        .has_value())
                 {
                     wire.push_back(neighbor_below.value());
                     bdl_pairs.erase(neighbor_below.value());

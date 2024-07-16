@@ -342,6 +342,8 @@ Binary-dot Logic (BDL) Wire Detection
 
         .. doxygenenum:: fiction::bdl_wire_direction
         .. doxygenenum:: fiction::bdl_wire_selection
+        .. doxygenstruct:: fiction::detect_bdl_wires_params
+           :members:
         .. doxygenfunction:: fiction::find_bdl_pair_in_wire_by_type
         .. doxygenfunction:: fiction::determine_wire_direction
         .. doxygenfunction:: fiction::find_bdl_neighbor_above
