@@ -417,7 +417,8 @@ void place_outputs(Lyt& layout, const coloring_container<Ntk>& ctn, uint32_t po_
                 const auto n_s     = node2pos[po];
                 auto       po_tile = static_cast<tile<Lyt>>(n_s);
 
-                const auto multi_output_node = std::find(output_nodes.cbegin(), output_nodes.cend(), po) != output_nodes.cend();
+                const auto multi_output_node =
+                    std::find(output_nodes.cbegin(), output_nodes.cend(), po) != output_nodes.cend();
 
                 // determine PO orientation
                 if (!is_eastern_po_orientation_available(ctn, po) || multi_output_node)
@@ -627,9 +628,9 @@ class orthogonal_impl
                         node2pos[n] = connect_and_place(layout, t, ctn.color_ntk, n, pre1_t, pre2_t, fc.constant_fanin);
                     }
 
-                    if (ctn.color_ntk.is_po(n) &&
-                        (!is_eastern_po_orientation_available(ctn, n) ||
-                         std::find(multi_output_nodes.cbegin(), multi_output_nodes.cend(), n) != multi_output_nodes.cend()))
+                    if (ctn.color_ntk.is_po(n) && (!is_eastern_po_orientation_available(ctn, n) ||
+                                                   std::find(multi_output_nodes.cbegin(), multi_output_nodes.cend(),
+                                                             n) != multi_output_nodes.cend()))
                     {
                         ++latest_pos.y;
                     }
