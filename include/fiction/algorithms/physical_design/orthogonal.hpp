@@ -410,7 +410,7 @@ void place_outputs(Lyt& layout, const coloring_container<Ntk>& ctn, uint32_t po_
     std::vector<mockturtle::node<Ntk>> output_nodes{};
 
     ctn.color_ntk.foreach_po(
-        [&po_counter, &out_nodes, &node2pos, &ctn, &layout](const auto& po)
+        [&po_counter, &output_nodes, &node2pos, &ctn, &layout](const auto& po)
         {
             if (!ctn.color_ntk.is_constant(po))
             {
@@ -492,7 +492,7 @@ class orthogonal_impl
             });
 
         // instantiate the layout
-        Lyt layout{determine_layout_size<Lyt>(ctn, num_multi_output_pos),
+        Lyt layout{determine_layout_size<Lyt>(ctn, num_multi_output_nodes),
                    twoddwave_clocking<Lyt>(ps.number_of_clock_phases)};
 
         // reserve PI nodes without positions
