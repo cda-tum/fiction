@@ -22,18 +22,16 @@ enum class bdl_wire_direction
 {
     /**
      * Defines the direction of the wire from north to south.
-     *
-     * Defines the starting point based on the position of input cells or the ending point based on the position of
-     * output cells.
+     * The starting point is determined by the position of input cells, and the ending point is determined by the
+     * position of output cells.
      *
      * @note A wire running from west to east is interpreted as north-south direction.
      */
     NORTH_SOUTH,
     /**
      * Defines the direction of the wire from south to north.
-     *
-     * Defines the starting point based on the position of input cells or the ending point based on the position of
-     * output cells.
+     * The starting point is determined by the position of input cells, and the ending point is determined by the
+     * position of output cells
      *
      * @note A wire running from east to west is interpreted as south-north direction.
      */
