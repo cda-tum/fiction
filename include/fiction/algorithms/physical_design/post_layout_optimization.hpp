@@ -803,10 +803,12 @@ void optimize_output_positions(Lyt& lyt) noexcept
     bounding_box.update_bounding_box();
     lyt.resize({bounding_box.get_max().x, bounding_box.get_max().y, lyt.z()});
 
-    // Check if PO is located in bottom right corner and relocation would save more tiles (only possible for layouts with a single PO)
+    // Check if PO is located in bottom right corner and relocation would save more tiles (only possible for layouts
+    // with a single PO)
     if (lyt.is_po_tile({lyt.x(), lyt.y(), 0}) && (lyt.num_pos() == 1))
     {
-        if (lyt.has_western_incoming_signal({lyt.x(), lyt.y(), 0}) && ((lyt.x() * (lyt.y() + 2)) < ((lyt.x() + 1) * (lyt.y() + 1))))
+        if (lyt.has_western_incoming_signal({lyt.x(), lyt.y(), 0}) &&
+            ((lyt.x() * (lyt.y() + 2)) < ((lyt.x() + 1) * (lyt.y() + 1))))
         {
             std::vector<mockturtle::signal<Lyt>> signals{};
             signals.reserve(lyt.fanin_size(lyt.get_node({lyt.x(), lyt.y()})));
