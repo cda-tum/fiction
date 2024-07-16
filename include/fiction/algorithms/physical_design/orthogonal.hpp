@@ -387,8 +387,7 @@ mockturtle::signal<Lyt> connect_and_place(Lyt& lyt, const tile<Lyt>& t, const Nt
  * Places the primary outputs (POs) in the layout.
  *
  * This function positions the POs within the provided layout. If a PO is a multi-output node (a fanout with two POs
- * connected to it), the second PO is automatically placed and connected below the first output. This arrangement
- * ensures that the outputs are correctly aligned and connected in the layout.
+ * connected to it), the second PO is automatically placed and connected below the first output.
  *
  * The positioning of multi-output nodes will follow this structure:
  *
@@ -476,7 +475,6 @@ class orthogonal_impl
 
         // Find multi_output_nodes
         std::vector<mockturtle::node<decltype(ntk)>> output_nodes{};
-        std::vector<mockturtle::node<decltype(ntk)>> multi_out_nodes{};
         uint32_t                                     num_multi_output_pos{0};
 
         ctn.color_ntk.foreach_po(
