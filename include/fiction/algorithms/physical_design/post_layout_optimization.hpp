@@ -883,7 +883,7 @@ class post_layout_optimization_impl
 
                 tile<Lyt> max_non_po{0, 0};
                 // Determine minimal border for POs
-                for (auto gate_tile : gate_tiles)
+                for (const auto& gate_tile : gate_tiles)
                 {
                     if (!layout.is_po_tile(gate_tile))
                     {
