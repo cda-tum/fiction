@@ -102,7 +102,7 @@ initialize_copy_network_v(NtkSrc const& src)
 }
 
 template <typename Ntk>
-extended_rank_view<virtual_pi_network> create_virt_pi_ntk_from_lvls(Ntk& ntk, std::vector<std::vector<mockturtle::node<Ntk>>>& ntk_lvls)
+virtual_pi_network create_virt_pi_ntk_from_lvls(Ntk& ntk, std::vector<std::vector<mockturtle::node<Ntk>>>& ntk_lvls)
 {
     std::vector<std::vector<mockturtle::node<Ntk>>> ntk_lvls_new;
     std::unordered_map<mockturtle::node<Ntk>, bool> node_status;
@@ -262,14 +262,14 @@ extended_rank_view<virtual_pi_network> create_virt_pi_ntk_from_lvls(Ntk& ntk, st
             ntk_dest_v.create_po(tgt_po);
         });
 
-    auto ntk_dest_r = extended_rank_view<virtual_pi_network>(ntk_dest_v);
+    //auto ntk_dest_r = mockturtle::rank_view<virtual_pi_network>(ntk_dest_v);
 
     /*for (size_t i = 0; i < ntk_lvls_new.size(); i++)
     {
         ntk_dest_r.modify_rank(i, ntk_lvls_new[i]);
     }*/
 
-    return ntk_dest_r;
+    return ntk_dest_v;
 }
 
 template <typename Ntk>
@@ -459,7 +459,7 @@ class node_duplication_planarization_impl
     }
 
     // mockturtle::rank_view<Ntk> run()
-    extended_rank_view<virtual_pi_network> run()
+    virtual_pi_network run()
     {
         const bool border_pis = true;
         // ToDo: Determine the PO order
@@ -571,7 +571,9 @@ extended_rank_view<virtual_pi_network> node_duplication_planarization(const NtkS
 
     detail::node_duplication_planarization_impl<NtkDest> p{ntk_src, ps};
 
-    auto result = p.run();
+    auto result_ntk = p.run();
+
+    auto result = extended_rank_view(result_ntk);
 
     // ToDo: Check for planarity
 

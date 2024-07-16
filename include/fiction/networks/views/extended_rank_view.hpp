@@ -235,7 +235,6 @@ class extended_rank_view<Ntk, false> : public mockturtle::depth_view<Ntk>
         // Reset max_rank_width
         max_rank_width = 0;
         this->init_ranks();
-        std::cout << "remove() called\n";
     }
 
     /**

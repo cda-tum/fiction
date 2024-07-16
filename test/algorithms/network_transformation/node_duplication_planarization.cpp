@@ -11,6 +11,9 @@
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/algorithms/network_transformation/node_duplication_planarization.hpp>
 
+#include <chrono>
+#include <iostream>
+
 using namespace fiction;
 
 TEST_CASE("First test", "[node-duplication-planarization]")
@@ -148,7 +151,8 @@ TEST_CASE("2-ary Balancing Test", "[node-duplication-planarization]")
                          planarized_maj.foreach_fanin(nd, [&](const auto& fi) { std::cout << "Fis:" << fi << "\n"; });
                      });
 
-    planarized_maj.remove_virtual_input_nodes();
+    // The test takes long due to the rank_pos.reset() function
+    planarized_maj.remove_virtual_input_nodes<virtual_pi_network>();
 
     planarized_maj.foreach_node([&](const auto& nd) {
                                     std::cout << "Nd:" << nd << "\n";
@@ -220,11 +224,10 @@ TEST_CASE("3-ary Balancing Test", "[node-duplication-planarization]")
 
     auto planarized_maj = node_duplication_planarization<technology_network>(tec_b);
 
-    planarized_maj.remove_virtual_input_nodes();
+    // The test takes long due to the rank_pos.reset() function
+    planarized_maj.remove_virtual_input_nodes<virtual_pi_network>();
 
     mockturtle::equivalence_checking_stats st;
     bool cec_m = *mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(tec, planarized_maj), {}, &st);
     CHECK(cec_m == 1);
-
-    CHECK(1 == 1);
 }
