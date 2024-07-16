@@ -91,7 +91,6 @@ std::optional<bdl_pair<cell<Lyt>>> find_bdl_pair_in_wire_by_type(const bdl_wire<
         return std::nullopt;  // Return std::nullopt if no BDL pair of the specified type is found
     }
 }
-
 /**
  * Determines the direction of a Binary-dot Logic (BDL) wire based on the positions of input and output cells.
  *

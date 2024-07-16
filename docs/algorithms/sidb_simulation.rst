@@ -333,6 +333,21 @@ Binary-dot Logic (BDL) Pair Detection
             :members:
         .. autofunction:: mnt.pyfiction.detect_bdl_pairs
 
+Binary-dot Logic (BDL) Wire Detection
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp``
+
+        .. doxygenenum:: fiction::bdl_wire_direction
+        .. doxygenenum:: fiction::bdl_wire_selection
+        .. doxygenfunction:: fiction::find_bdl_pair_in_wire_by_type
+        .. doxygenfunction:: fiction::determine_wire_direction
+        .. doxygenfunction:: fiction::find_bdl_neighbor_above
+        .. doxygenfunction:: fiction::find_bdl_neighbor_below
+        .. doxygenfunction:: fiction::detect_bdl_wires
+
 
 Assess Population Stability
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
