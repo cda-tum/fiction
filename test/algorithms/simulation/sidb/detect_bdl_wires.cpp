@@ -120,6 +120,30 @@ TEST_CASE("BDL wire left to right", "[detect-bdl-wires]")
     }
 }
 
+TEST_CASE("BDL wire bottom to up", "[detect-bdl-wires]")
+{
+    sidb_100_cell_clk_lyt_siqad lyt{};
+
+    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({0, 1, 0}, sidb_technology::cell_type::OUTPUT);
+
+    lyt.assign_cell_type({0, 6, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({0, 7, 0}, sidb_technology::cell_type::NORMAL);
+
+    lyt.assign_cell_type({0, 12, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({0, 13, 0}, sidb_technology::cell_type::NORMAL);
+
+    lyt.assign_cell_type({0, 18, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({0, 19, 0}, sidb_technology::cell_type::INPUT);
+
+    SECTION("Determine wire")
+    {
+        const auto all_bdl_wires = detect_bdl_wires(lyt);
+        REQUIRE(all_bdl_wires.size() == 1);
+        CHECK(determine_wire_direction<decltype(lyt)>(all_bdl_wires[0]) == bdl_wire_direction::SOUTH_NORTH);
+    }
+}
+
 TEST_CASE("BDL wire right to left", "[detect-bdl-wires]")
 {
     sidb_100_cell_clk_lyt_siqad lyt{};
