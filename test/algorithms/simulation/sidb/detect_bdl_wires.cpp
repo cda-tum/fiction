@@ -9,7 +9,7 @@
 
 using namespace fiction;
 
-TEST_CASE("Three separate BDL pairs on the same y-coord (three wires)", "[detect_bdl_wires]")
+TEST_CASE("Three separate BDL pairs on the same y-coord (three wires)", "[detect-bdl-wires]")
 {
     sidb_100_cell_clk_lyt_siqad lyt{};
 
@@ -41,7 +41,7 @@ TEST_CASE("Three separate BDL pairs on the same y-coord (three wires)", "[detect
     }
 }
 
-TEST_CASE("Three separate BDL pairs on the same x-coord (three wires)", "[detect_bdl_wires]")
+TEST_CASE("Three separate BDL pairs on the same x-coord (three wires)", "[detect-bdl-wires]")
 {
     sidb_100_cell_clk_lyt_siqad lyt{};
 
@@ -75,7 +75,7 @@ TEST_CASE("Three separate BDL pairs on the same x-coord (three wires)", "[detect
     }
 }
 
-TEST_CASE("BDL wire without I/O BDL pairs", "[detect_bdl_wires]")
+TEST_CASE("BDL wire without I/O BDL pairs", "[detect-bdl-wires]")
 {
     sidb_100_cell_clk_lyt_siqad lyt{};
 
@@ -96,7 +96,7 @@ TEST_CASE("BDL wire without I/O BDL pairs", "[detect_bdl_wires]")
     }
 }
 
-TEST_CASE("BDL wire left to right", "[detect_bdl_wires]")
+TEST_CASE("BDL wire left to right", "[detect-bdl-wires]")
 {
     sidb_100_cell_clk_lyt_siqad lyt{};
 
@@ -120,7 +120,7 @@ TEST_CASE("BDL wire left to right", "[detect_bdl_wires]")
     }
 }
 
-TEST_CASE("BDL wire right to left", "[detect_bdl_wires]")
+TEST_CASE("BDL wire right to left", "[detect-bdl-wires]")
 {
     sidb_100_cell_clk_lyt_siqad lyt{};
 
@@ -144,7 +144,7 @@ TEST_CASE("BDL wire right to left", "[detect_bdl_wires]")
     }
 }
 
-TEST_CASE("Three separate BDL pairs (three wires)", "[detect_bdl_wires]")
+TEST_CASE("Three separate BDL pairs (three wires)", "[detect-bdl-wires]")
 {
     sidb_100_cell_clk_lyt_siqad lyt{};
 
@@ -176,7 +176,7 @@ TEST_CASE("Three separate BDL pairs (three wires)", "[detect_bdl_wires]")
     }
 }
 
-TEST_CASE("Detect BDL wires", "[detect_bdl_wires]")
+TEST_CASE("Detect BDL wires", "[detect-bdl-wires]")
 {
     sidb_100_cell_clk_lyt_siqad lyt{};
 
@@ -241,7 +241,7 @@ TEST_CASE("Detect BDL wires", "[detect_bdl_wires]")
     }
 }
 
-TEST_CASE("Output cells at the top and input at the bottom", "[detect_bdl_wires]")
+TEST_CASE("Output cells at the top and input at the bottom", "[detect-bdl-wires]")
 {
     sidb_100_cell_clk_lyt_siqad lyt{};
 
