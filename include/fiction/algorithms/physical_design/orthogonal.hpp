@@ -482,7 +482,6 @@ class orthogonal_impl
             {
                 if (std::find(output_nodes.cbegin(), output_nodes.cend(), po) != output_nodes.cend())
                 {
-                    multi_out_nodes.push_back(po);
                     ++num_multi_output_pos;
                 }
 
