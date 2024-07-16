@@ -3,6 +3,7 @@
 //
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/catch_template_test_macros.hpp>
 
 #include <fiction/algorithms/network_transformation/network_balancing.hpp>
 #include <fiction/networks/technology_network.hpp>
@@ -11,9 +12,52 @@
 
 #include <mockturtle/algorithms/equivalence_checking.hpp>
 #include <mockturtle/algorithms/miter.hpp>
+#include <mockturtle/networks/aig.hpp>
+#include <mockturtle/networks/buffered.hpp>
+#include <mockturtle/networks/cover.hpp>
+#include <mockturtle/networks/crossed.hpp>
+#include <mockturtle/networks/klut.hpp>
+#include <mockturtle/networks/mig.hpp>
+#include <mockturtle/networks/xag.hpp>
+#include <mockturtle/networks/xmg.hpp>
+#include <mockturtle/traits.hpp>
 #include <mockturtle/views/rank_view.hpp>
 
 using namespace fiction;
+
+TEMPLATE_TEST_CASE( "traits", "[extended_rank_view]", mockturtle::aig_network, mockturtle::mig_network, mockturtle::xag_network, mockturtle::xmg_network, mockturtle::klut_network, mockturtle::cover_network, mockturtle::buffered_aig_network, mockturtle::buffered_mig_network, mockturtle::crossed_klut_network, mockturtle::buffered_crossed_klut_network )
+{
+    CHECK( mockturtle::is_network_type_v<TestType> );
+    CHECK( !mockturtle::has_rank_position_v<TestType> );
+    CHECK( !mockturtle::has_at_rank_position_v<TestType> );
+    CHECK( !mockturtle::has_width_v<TestType> );
+    CHECK( !mockturtle::has_sort_rank_v<TestType> );
+    CHECK( !mockturtle::has_foreach_node_in_rank_v<TestType> );
+    CHECK( !mockturtle::has_foreach_gate_in_rank_v<TestType> );
+    CHECK( !mockturtle::is_topologically_sorted_v<TestType> );
+
+    using rank_ntk = extended_rank_view<TestType>;
+
+    CHECK( mockturtle::is_network_type_v<rank_ntk> );
+    CHECK( mockturtle::has_rank_position_v<rank_ntk> );
+    CHECK( mockturtle::has_at_rank_position_v<rank_ntk> );
+    CHECK( mockturtle::has_width_v<rank_ntk> );
+    CHECK( mockturtle::has_sort_rank_v<rank_ntk> );
+    CHECK( mockturtle::has_foreach_node_in_rank_v<rank_ntk> );
+    CHECK( mockturtle::has_foreach_gate_in_rank_v<rank_ntk> );
+    CHECK( mockturtle::is_topologically_sorted_v<rank_ntk> );
+
+    using rank_rank_ntk = extended_rank_view<rank_ntk>;
+
+    CHECK( mockturtle::is_network_type_v<rank_rank_ntk> );
+    CHECK( mockturtle::has_rank_position_v<rank_rank_ntk> );
+    CHECK( mockturtle::has_at_rank_position_v<rank_rank_ntk> );
+    CHECK( mockturtle::has_width_v<rank_rank_ntk> );
+    CHECK( mockturtle::has_sort_rank_v<rank_rank_ntk> );
+    CHECK( mockturtle::has_foreach_node_in_rank_v<rank_rank_ntk> );
+    CHECK( mockturtle::has_foreach_gate_in_rank_v<rank_rank_ntk> );
+    CHECK( mockturtle::is_topologically_sorted_v<rank_rank_ntk> );
+}
 
 TEST_CASE("Check modify ranks", "[extended-rank-view]")
 {
@@ -72,7 +116,39 @@ TEST_CASE("Check modify ranks", "[extended-rank-view]")
     CHECK(1 == 1);
 }
 
-TEST_CASE("Check equivalence checking", "[extended-rank-view]")
+TEMPLATE_TEST_CASE( "Check equivalence checking", "[extended_rank_view]", mockturtle::aig_network, mockturtle::mig_network, mockturtle::xag_network, mockturtle::xmg_network, mockturtle::klut_network, mockturtle::buffered_aig_network, mockturtle::buffered_mig_network, mockturtle::crossed_klut_network, mockturtle::buffered_crossed_klut_network )
+{
+    TestType ntk{};
+
+    const auto a = ntk.create_pi();
+    const auto b = ntk.create_pi();
+
+    const auto a_t = ntk.create_pi();
+    const auto b_t = ntk.create_pi();
+
+    const auto f1 = ntk.create_and(a, b);
+
+    const auto f1_t = ntk.create_and(a_t, b);
+    const auto f2_t = ntk.create_and(b_t, a_t);
+    const auto f3_t = ntk.create_or(a_t, b_t);
+
+    ntk.create_po(f1);
+
+    ntk.create_po(f1_t);
+    ntk.create_po(f2_t);
+    ntk.create_po(f3_t);
+
+    network_balancing_params ps;
+    ps.unify_outputs = true;
+
+    auto ntk_r = extended_rank_view(ntk);
+
+    mockturtle::equivalence_checking_stats st;
+    bool cec_m = *mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(ntk, ntk_r), {}, &st);
+    CHECK(cec_m == 1);
+}
+
+TEST_CASE("Check equivalence checking for virtual PIs", "[extended-rank-view]")
 {
     technology_network tec{};
     virtual_pi_network vpi{};
@@ -107,15 +183,9 @@ TEST_CASE("Check equivalence checking", "[extended-rank-view]")
 
     auto vpi_r = extended_rank_view(vpi);
 
-    std::cout << "Num Cis" << vpi_r.num_cis() << std::endl;
-
     vpi_r.remove_virtual_input_nodes<virtual_pi_network>();
-
-    std::cout << "Num Cis" << vpi_r.num_cis() << std::endl;
 
     mockturtle::equivalence_checking_stats st;
     bool cec_m = *mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(tec, vpi), {}, &st);
     CHECK(cec_m == 1);
-
-    CHECK(1 == 1);
 }

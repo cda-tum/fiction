@@ -128,7 +128,7 @@ TEST_CASE("Remove PIs and check equivalence second", "[virtual-pi-view]")
 
     vpi.remove_virtual_input_nodes();
     CHECK(vpi.size_real() == vpi.size());
-    CHECK(vpi.size() - 2 == tec.size()); // the -2 is bdue to the buffers
+    CHECK(vpi.size() - 2 == tec.size()); // the -2 is due to the buffers
 
     mockturtle::equivalence_checking_stats st;
     bool cec_m = *mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(tec, vpi), {}, &st);
