@@ -295,8 +295,8 @@ class bdl_input_iterator
     uint64_t current_input_index{0ull};
 
     /**
-     * Sets all input cells of the layout according to the current input index. The input index is interpreted as a
-     * binary number, where the \f$i\f$-th bit represents the input state of the \f$i\f$-th input BDL pair. If the bit
+     * Sets all `n` input cells of the layout according to the current input index. The input index is interpreted as a
+     * binary number, where the \f$n-i\f$-th bit represents the input state of the \f$i\f$-th input BDL pair. If the bit
      * is `1`, the lower BDL dot is set and the upper BDL dot removed. If the bit is `0`, the upper BDL dot is removed
      * and the lower BDL dot set.
      */
@@ -304,7 +304,7 @@ class bdl_input_iterator
     {
         for (uint8_t i = 0; i < num_inputs; ++i)
         {
-            const auto& input_i = input_pairs[i];
+            const auto& input_i = input_pairs[num_inputs - 1 - i];
 
             if ((current_input_index & (uint64_t{1ull} << i)) != 0ull)
             {
