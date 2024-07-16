@@ -567,4 +567,7 @@ class extended_rank_view<Ntk, false> : public mockturtle::depth_view<Ntk>
 template <class T>
 extended_rank_view(T const&) -> extended_rank_view<T>;
 
+template <class T>
+extended_rank_view(T const&, std::vector<std::vector<typename T::node>>) -> extended_rank_view<T>;
+
 #endif  // FICTION_VIRTUAL_RANK_VIEW_HPP
