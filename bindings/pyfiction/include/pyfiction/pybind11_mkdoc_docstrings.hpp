@@ -6052,8 +6052,7 @@ R"doc(Places the primary outputs (POs) in the layout.
 This function positions the POs within the provided layout. If a PO is
 a multi-output node (a fanout with two POs connected to it), the
 second PO is automatically placed and connected below the first
-output. This arrangement ensures that the outputs are correctly
-aligned and connected in the layout.
+output.
 
 The positioning of multi-output nodes will follow this structure:
 
