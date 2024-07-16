@@ -7,7 +7,6 @@
 #include <fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp>
 #include <fiction/types.hpp>
 
-
 using namespace fiction;
 
 TEST_CASE("Three separate BDL pairs on the same y-coord (three wires)", "[detect_bdl_wires]")
