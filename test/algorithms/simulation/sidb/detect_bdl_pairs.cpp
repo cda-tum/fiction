@@ -293,29 +293,38 @@ TEST_CASE("Bestagon fan-out BDL detection", "[detect-bdl-pairs]")
 
     const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
-    const auto input_bdl_pairs  = detect_bdl_pairs(lat, sidb_technology::cell_type::INPUT);
-    const auto output_bdl_pairs = detect_bdl_pairs(lat, sidb_technology::cell_type::OUTPUT);
+    SECTION("Analyze different BDL pair types")
+    {
+        const auto input_bdl_pairs  = detect_bdl_pairs(lat, sidb_technology::cell_type::INPUT);
+        const auto output_bdl_pairs = detect_bdl_pairs(lat, sidb_technology::cell_type::OUTPUT);
 
-    REQUIRE(input_bdl_pairs.size() == 1);
-    REQUIRE(output_bdl_pairs.size() == 2);
+        REQUIRE(input_bdl_pairs.size() == 1);
+        REQUIRE(output_bdl_pairs.size() == 2);
 
-    const auto& input_pair   = input_bdl_pairs.front();
-    const auto& output_pair1 = output_bdl_pairs[0];
-    const auto& output_pair2 = output_bdl_pairs[1];
+        const auto& input_pair   = input_bdl_pairs.front();
+        const auto& output_pair1 = output_bdl_pairs[0];
+        const auto& output_pair2 = output_bdl_pairs[1];
 
-    CHECK(input_pair.type == sidb_100_cell_clk_lyt_siqad::cell_type::INPUT);
-    CHECK(input_pair.upper == cell<sidb_100_cell_clk_lyt_siqad>{2, 1, 0});
-    CHECK(input_pair.lower == cell<sidb_100_cell_clk_lyt_siqad>{4, 2, 0});
+        CHECK(input_pair.type == sidb_100_cell_clk_lyt_siqad::cell_type::INPUT);
+        CHECK(input_pair.upper == cell<sidb_100_cell_clk_lyt_siqad>{2, 1, 0});
+        CHECK(input_pair.lower == cell<sidb_100_cell_clk_lyt_siqad>{4, 2, 0});
 
-    CHECK(output_pair1.type == sidb_100_cell_clk_lyt_siqad::cell_type::OUTPUT);
-    CHECK((output_pair1.upper == cell<sidb_100_cell_clk_lyt_siqad>{10, 18, 0} ||
-           output_pair1.upper == cell<sidb_100_cell_clk_lyt_siqad>{32, 18, 0}));
-    CHECK((output_pair1.lower == cell<sidb_100_cell_clk_lyt_siqad>{8, 19, 0} ||
-           output_pair1.lower == cell<sidb_100_cell_clk_lyt_siqad>{34, 19, 0}));
+        CHECK(output_pair1.type == sidb_100_cell_clk_lyt_siqad::cell_type::OUTPUT);
+        CHECK((output_pair1.upper == cell<sidb_100_cell_clk_lyt_siqad>{10, 18, 0} ||
+               output_pair1.upper == cell<sidb_100_cell_clk_lyt_siqad>{32, 18, 0}));
+        CHECK((output_pair1.lower == cell<sidb_100_cell_clk_lyt_siqad>{8, 19, 0} ||
+               output_pair1.lower == cell<sidb_100_cell_clk_lyt_siqad>{34, 19, 0}));
 
-    CHECK(output_pair2.type == sidb_100_cell_clk_lyt_siqad::cell_type::OUTPUT);
-    CHECK((output_pair2.upper == cell<sidb_100_cell_clk_lyt_siqad>{10, 18, 0} ||
-           output_pair2.upper == cell<sidb_100_cell_clk_lyt_siqad>{32, 18, 0}));
-    CHECK((output_pair2.lower == cell<sidb_100_cell_clk_lyt_siqad>{8, 19, 0} ||
-           output_pair2.lower == cell<sidb_100_cell_clk_lyt_siqad>{34, 19, 0}));
+        CHECK(output_pair2.type == sidb_100_cell_clk_lyt_siqad::cell_type::OUTPUT);
+        CHECK((output_pair2.upper == cell<sidb_100_cell_clk_lyt_siqad>{10, 18, 0} ||
+               output_pair2.upper == cell<sidb_100_cell_clk_lyt_siqad>{32, 18, 0}));
+        CHECK((output_pair2.lower == cell<sidb_100_cell_clk_lyt_siqad>{8, 19, 0} ||
+               output_pair2.lower == cell<sidb_100_cell_clk_lyt_siqad>{34, 19, 0}));
+    }
+
+    SECTION("Detect all BDL pairs")
+    {
+        const auto all_bdl_pairs = detect_bdl_pairs(lat);
+        CHECK(all_bdl_pairs.size() == 8);
+    }
 }
