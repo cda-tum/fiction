@@ -714,10 +714,10 @@ Lyt and_gate_111() noexcept
     lyt.assign_cell_type({9, 9, 1}, Lyt::cell_type::NORMAL);
     lyt.assign_cell_type({15, 9, 1}, Lyt::cell_type::NORMAL);
 
-    lyt.assign_cell_type({13, 17, 0}, Lyt::cell_type::NORMAL);
-
-    lyt.assign_cell_type({16, 18, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({10, 18, 0}, Lyt::cell_type::NORMAL);
+    // canvas SiDBs
+    lyt.assign_cell_type({13, 17, 0}, Lyt::cell_type::LOGIC);
+    lyt.assign_cell_type({16, 18, 0}, Lyt::cell_type::LOGIC);
+    lyt.assign_cell_type({10, 18, 0}, Lyt::cell_type::LOGIC);
 
     lyt.assign_cell_type({15, 21, 1}, Lyt::cell_type::NORMAL);
     lyt.assign_cell_type({17, 23, 0}, Lyt::cell_type::NORMAL);

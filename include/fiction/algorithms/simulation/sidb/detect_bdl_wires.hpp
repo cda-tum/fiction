@@ -119,7 +119,7 @@ template <typename Lyt>
         return bdl_wire_direction::NO_DIRECTION;
     }
 
-    bool only_normal_bdls = std::all_of(wire.begin(), wire.end(),
+    bool only_normal_bdls = std::all_of(wire.cbegin(), wire.cend(),
                                         [](const auto& bdl) { return bdl.type == sidb_technology::cell_type::NORMAL; });
 
     if (only_normal_bdls)

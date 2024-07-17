@@ -332,7 +332,7 @@ TEST_CASE("Output cells at the top and input at the bottom", "[detect-bdl-wires]
     }
 }
 
-TEST_CASE("Determine I/O wires of Bestagon AND gate", "[detect-bdl-wires]")
+TEST_CASE("Determine I/O wires of Bestagon CROSSING gate", "[detect-bdl-wires]")
 {
     const auto lyt = blueprints::bestagon_crossing<sidb_cell_clk_lyt_siqad>();
 
@@ -386,6 +386,56 @@ TEST_CASE("Determine I/O wires of Bestagon AND gate", "[detect-bdl-wires]")
                                                cell<decltype(lyt)>{30, 3, 0}});
         CHECK(input_wire_second[2] == bdl_pair{sidb_technology::cell_type::NORMAL, cell<decltype(lyt)>{26, 4, 0},
                                                cell<decltype(lyt)>{24, 5, 0}});
+        CHECK(determine_wire_direction<decltype(lyt)>(input_wire_first) == bdl_wire_direction::NORTH_SOUTH);
+    }
+}
+
+TEST_CASE("Determine I/O wires of 111-AND gate", "[detect-bdl-wires]")
+{
+    const auto lyt = blueprints::and_gate_111<sidb_111_cell_clk_lyt_siqad>();
+
+    detect_bdl_wires_params params{2.0};
+
+    SECTION("Determine all wires")
+    {
+        const auto all_bdl_wires = detect_bdl_wires(lyt, params);
+        REQUIRE(all_bdl_wires.size() == 3);
+    }
+
+    SECTION("Determine output wires")
+    {
+        const auto all_output_bdl_wires = detect_bdl_wires(lyt, params, bdl_wire_selection::OUTPUT);
+        REQUIRE(all_output_bdl_wires.size() == 1);
+        CHECK(determine_wire_direction<decltype(lyt)>(all_output_bdl_wires[0]) == bdl_wire_direction::NORTH_SOUTH);
+        const auto output_wire_first = all_output_bdl_wires[0];
+        CHECK(output_wire_first.size() == 2);
+        CHECK(output_wire_first[0] == bdl_pair{sidb_technology::cell_type::NORMAL, cell<decltype(lyt)>{15, 21, 1},
+                                               cell<decltype(lyt)>{17, 23, 0}});
+        CHECK(output_wire_first[1] == bdl_pair{sidb_technology::cell_type::OUTPUT, cell<decltype(lyt)>{19, 25, 1},
+                                               cell<decltype(lyt)>{21, 27, 0}});
+    }
+
+    SECTION("Determine input wires and direction")
+    {
+        const auto all_input_bdl_wires = detect_bdl_wires(lyt, params, bdl_wire_selection::INPUT);
+        REQUIRE(all_input_bdl_wires.size() == 2);
+        const auto input_wire_first = all_input_bdl_wires[0];
+        REQUIRE(input_wire_first.size() == 3);
+        CHECK(input_wire_first[0] ==
+              bdl_pair{sidb_technology::cell_type::INPUT, cell<decltype(lyt)>{0, 0, 0}, cell<decltype(lyt)>{1, 1, 1}});
+        CHECK(input_wire_first[1] ==
+              bdl_pair{sidb_technology::cell_type::NORMAL, cell<decltype(lyt)>{4, 4, 0}, cell<decltype(lyt)>{5, 5, 1}});
+        CHECK(input_wire_first[2] ==
+              bdl_pair{sidb_technology::cell_type::NORMAL, cell<decltype(lyt)>{8, 8, 0}, cell<decltype(lyt)>{9, 9, 1}});
+        CHECK(determine_wire_direction<decltype(lyt)>(input_wire_first) == bdl_wire_direction::NORTH_SOUTH);
+
+        const auto input_wire_second = all_input_bdl_wires[1];
+        CHECK(input_wire_second[0] == bdl_pair{sidb_technology::cell_type::INPUT, cell<decltype(lyt)>{25, 0, 0},
+                                               cell<decltype(lyt)>{23, 1, 1}});
+        CHECK(input_wire_second[1] == bdl_pair{sidb_technology::cell_type::NORMAL, cell<decltype(lyt)>{21, 4, 0},
+                                               cell<decltype(lyt)>{19, 5, 1}});
+        CHECK(input_wire_second[2] == bdl_pair{sidb_technology::cell_type::NORMAL, cell<decltype(lyt)>{17, 8, 0},
+                                               cell<decltype(lyt)>{15, 9, 1}});
         CHECK(determine_wire_direction<decltype(lyt)>(input_wire_first) == bdl_wire_direction::NORTH_SOUTH);
     }
 }
