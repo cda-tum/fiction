@@ -26,14 +26,14 @@ class TestDesignSiDBGates(unittest.TestCase):
         layout.assign_cell_type((10, 19), sidb_technology.cell_type.NORMAL)
 
         params = design_sidb_gates_params()
-        params.simulation_parameters.base = 2
-        params.simulation_parameters.mu_minus = -0.28
+        params.operational_params.simulation_parameters.base = 2
+        params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
+        params.operational_params.simulation_parameters.mu_minus = -0.28
         params.design_mode = design_sidb_gates_mode.EXHAUSTIVE
         params.canvas = [(4, 8), (14, 11)]
         params.number_of_sidbs = 1
-        params.sim_engine = sidb_simulation_engine.QUICKEXACT
 
-        self.assertEqual(params.simulation_parameters.mu_minus, -0.28)
+        self.assertEqual(params.operational_params.simulation_parameters.mu_minus, -0.28)
         self.assertEqual(params.number_of_sidbs, 1)
         self.assertEqual(params.canvas[0], (4, 8, 0))
         self.assertEqual(params.canvas[1], (14, 11))
@@ -43,16 +43,16 @@ class TestDesignSiDBGates(unittest.TestCase):
         self.assertEqual(len(designed_gates), 23)
 
     def test_nor_gate_111(self):
-        layout = sidb_111_lattice((20, 20))
+        layout = sidb_111_lattice((30, 30))
 
         layout.assign_cell_type((0, 0), sidb_technology.cell_type.INPUT)
-        layout.assign_cell_type((25, 0), sidb_technology.cell_type.INPUT)
-
-        layout.assign_cell_type((23, 3), sidb_technology.cell_type.INPUT)
         layout.assign_cell_type((1, 3), sidb_technology.cell_type.INPUT)
 
+        layout.assign_cell_type((25, 0), sidb_technology.cell_type.INPUT)
+        layout.assign_cell_type((23, 3), sidb_technology.cell_type.INPUT)
+
         layout.assign_cell_type((4, 8), sidb_technology.cell_type.NORMAL)
-        layout.assign_cell_type((21, 4), sidb_technology.cell_type.NORMAL)
+        layout.assign_cell_type((21, 8), sidb_technology.cell_type.NORMAL)
 
         layout.assign_cell_type((5, 11), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((19, 11), sidb_technology.cell_type.NORMAL)
@@ -72,21 +72,21 @@ class TestDesignSiDBGates(unittest.TestCase):
         layout.assign_cell_type((23, 59), sidb_technology.cell_type.NORMAL)
 
         params = design_sidb_gates_params()
-        params.simulation_parameters.base = 2
-        params.simulation_parameters.mu_minus = -0.32
+        params.operational_params.simulation_parameters.base = 2
+        params.operational_params.simulation_parameters.mu_minus = -0.32
         params.design_mode = design_sidb_gates_mode.EXHAUSTIVE
         params.canvas = [(10, 22), (14, 34)]
         params.number_of_sidbs = 3
-        params.sim_engine = sidb_simulation_engine.QUICKEXACT
+        params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
 
-        self.assertEqual(params.simulation_parameters.mu_minus, -0.32)
+        self.assertEqual(params.operational_params.simulation_parameters.mu_minus, -0.32)
         self.assertEqual(params.number_of_sidbs, 3)
         self.assertEqual(params.canvas[0], (10, 22, 0))
         self.assertEqual(params.canvas[1], (14, 34))
 
         designed_gates = design_sidb_gates(layout, [create_nor_tt()], params)
 
-        self.assertEqual(len(designed_gates), 206)
+        self.assertEqual(len(designed_gates), 175)
 
 
 if __name__ == '__main__':

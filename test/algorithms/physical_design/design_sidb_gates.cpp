@@ -276,7 +276,7 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
     }
 }
 
-TEST_CASE("Design AND Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
+TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
 {
     auto lyt = blueprints::and_gate_111<sidb_111_cell_clk_lyt_siqad>();
 

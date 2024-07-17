@@ -82,7 +82,7 @@ inline void critical_temperature(pybind11::module& m)
                        DOC(fiction_critical_temperature_params_confidence_level))
         .def_readwrite("max_temperature", &fiction::critical_temperature_params::max_temperature,
                        DOC(fiction_critical_temperature_params_max_temperature))
-        .def_readwrite("bdl_params", &fiction::critical_temperature_params::bdl_params,
+        .def_readwrite("bdl_wire_params", &fiction::critical_temperature_params::bdl_wire_params,
                        DOC(fiction_critical_temperature_params_bdl_params));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!

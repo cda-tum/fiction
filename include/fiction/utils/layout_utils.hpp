@@ -254,8 +254,8 @@ Lyt normalize_layout_coordinates(const Lyt& lyt) noexcept
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
 
-    auto x_offset = std::numeric_limits<int32_t>::max();
-    auto y_offset = std::numeric_limits<int32_t>::max();
+    auto x_offset = std::numeric_limits<decltype(lyt.x())>::max();
+    auto y_offset = std::numeric_limits<decltype(lyt.y())>::max();
 
     lyt.foreach_cell(
         [&x_offset, &y_offset](const auto& c)
