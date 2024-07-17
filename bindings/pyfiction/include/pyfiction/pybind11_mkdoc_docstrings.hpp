@@ -6357,19 +6357,6 @@ static const char *__doc_fiction_detail_pi_locations_left = R"doc(Flag indicatin
 
 static const char *__doc_fiction_detail_pi_locations_top = R"doc(Flag indicating if primary inputs (PIs) can be placed at the top.)doc";
 
-static const char *__doc_fiction_detail_placement_info =
-R"doc(Struct to hold information necessary for gate placement during layout
-generation for one vertex.
-
-Template parameter ``ObstrLyt``:
-    The type of the layout.)doc";
-
-static const char *__doc_fiction_detail_placement_info_current_node = R"doc(The index of the current node being placed.)doc";
-
-static const char *__doc_fiction_detail_placement_info_current_po = R"doc(The index of the current primary output.)doc";
-
-static const char *__doc_fiction_detail_placement_info_node2pos = R"doc(Mapping of nodes to their positions in the layout.)doc";
-
 static const char *__doc_fiction_detail_place_outputs =
 R"doc(Places the primary outputs (POs) in the layout.
 
@@ -6402,6 +6389,19 @@ Parameter ``node2pos``:
     their position in the layout. The map is used to fetch location of
     the fanins. The `mockturtle::node_map` is not updated by this
     function.)doc";
+
+static const char *__doc_fiction_detail_placement_info =
+R"doc(Struct to hold information necessary for gate placement during layout
+generation for one vertex.
+
+Template parameter ``ObstrLyt``:
+    The type of the layout.)doc";
+
+static const char *__doc_fiction_detail_placement_info_current_node = R"doc(The index of the current node being placed.)doc";
+
+static const char *__doc_fiction_detail_placement_info_current_po = R"doc(The index of the current primary output.)doc";
+
+static const char *__doc_fiction_detail_placement_info_node2pos = R"doc(Mapping of nodes to their positions in the layout.)doc";
 
 static const char *__doc_fiction_detail_post_layout_optimization_impl = R"doc()doc";
 
