@@ -18,6 +18,17 @@ class check_planarity_impl
   public:
     check_planarity_impl(const Ntk& ntk) : ntk(ntk) {}
 
+    /**
+     * @brief Checks if a given network is planar.
+     *
+     * This function checks if the network represented by the variable `ntk` is planar.
+     * The network is planar if for any edge with starting point m and end point n there is never another edge with
+     * starting point m_ > m and ending point n_ < n or vice versa. When iterating through the ranks of one level the
+     * end points ar always increasing. Therefore only the starting points need to be checked. Therefore the highest
+     * connected starting point in the fanin gives a border m_max for every next edge.
+     *
+     * @return `true` if the network is planar, `false` otherwise.
+     */
     bool run()
     {
         bool return_false = false;
@@ -28,7 +39,7 @@ class check_planarity_impl
                                      [this, &bound, &return_false](const auto& n)
                                      {
                                          uint32_t new_bound = bound;
-                                             ntk.foreach_fanin(n,
+                                         ntk.foreach_fanin(n,
                                                            [this, &bound, &new_bound, &return_false](const auto& fi)
                                                            {
                                                                const auto fi_n = ntk.get_node(fi);
@@ -52,6 +63,17 @@ class check_planarity_impl
     Ntk ntk;
 };
 
+/**
+ * Checks if a logic network is planar.
+ *
+ * If the network is not balanced, an exception is thrown. To balance the network, insert buffers to divide multi-level
+ * edges.
+ *
+ * @tparam Ntk Logic network type.
+ * @param ntk The logic network to check for planarity.
+ * @return `true` if the network is planar, `false` otherwise.
+ * @throw std::runtime_error if the network is not balanced.
+ */
 template <typename Ntk>
 bool check_planarity(Ntk& ntk)
 {
@@ -64,7 +86,6 @@ bool check_planarity(Ntk& ntk)
 
     if (!is_balanced(ntk))
     {
-        // ToDo: Instead drag this to the implementation and insert buffers so that they divide multi-level edges
         throw std::runtime_error("Network must be balanced");
     }
 
