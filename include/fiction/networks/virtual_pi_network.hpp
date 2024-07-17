@@ -51,6 +51,222 @@ class virtual_pi_network : public technology_network
     }
 
     /**
+     * @brief A variant of the mockturtle::initialize_copy_network. It maps old nodes not only to a single node, but to
+     * multiple or duplicated nodes.
+     *
+     * @tparam NtkDest Type of the destination network
+     * @tparam NtkSrc Type of the source network
+     * @param src The source network
+     *
+     * @return A pair of the destination network and a node map from the source to the destination network.
+     *
+     * @pre NtkDest and NtkSrc must be network types (satisfy is_network_type_v).
+     * @pre NtkDest and NtkSrc must implement the methods get_constant, get_node, create_pi and foreach_pi (satisfy
+     * has_get_constant_v, has_get_node_v, has_create_pi_v and has_foreach_pi_v).
+     *
+     * @post A map (old2new) is created where old nodes from source network are mapped to new nodes in destination
+     * network.
+     * @post A destination network is created with the same structure as the source network.
+     *
+     */
+    template <class NtkDest, class NtkSrc>
+    std::pair<NtkDest, mockturtle::node_map<std::vector<mockturtle::signal<NtkDest>>, NtkSrc>>
+    initialize_copy_network_v(NtkSrc const& src)
+    {
+        static_assert(mockturtle::is_network_type_v<NtkDest>, "NtkDest is not a network type");
+        static_assert(mockturtle::is_network_type_v<NtkSrc>, "NtkSrc is not a network type");
+
+        static_assert(mockturtle::has_get_constant_v<NtkDest>, "NtkDest does not implement the get_constant method");
+        static_assert(mockturtle::has_create_pi_v<NtkDest>, "NtkDest does not implement the create_pi method");
+        static_assert(mockturtle::has_get_constant_v<NtkSrc>, "NtkSrc does not implement the get_constant method");
+        static_assert(mockturtle::has_get_node_v<NtkSrc>, "NtkSrc does not implement the get_node method");
+        static_assert(mockturtle::has_foreach_pi_v<NtkSrc>, "NtkSrc does not implement the foreach_pi method");
+
+        mockturtle::node_map<std::vector<mockturtle::signal<NtkDest>>, NtkSrc> old2new(src);
+        NtkDest                                                                dest;
+
+        old2new[src.get_constant(false)].push_back(dest.get_constant(false));
+        if (src.get_node(src.get_constant(true)) != src.get_node(src.get_constant(false)))
+        {
+            old2new[src.get_constant(true)].push_back(dest.get_constant(true));
+        }
+        src.foreach_pi([&](auto const& n) { old2new[n].push_back(dest.create_pi()); });
+        return {dest, old2new};
+    }
+
+    /**
+     * @brief Special constructor to construct a virtual_pi_network from any other network type.
+     *
+     * @tparam Ntk Network type
+     * @param ntk Source network to be utilized for the creation of the virtual_pi_network
+     * @param ntk_lvls Levels of nodes in the source network
+     * @param ntk_lvls_new Levels of newly created nodes in the virtual_pi_network
+     *
+     * This constructor creates a virtual_pi_network by using the nodes from the original network stored in ntk_lvls.
+     * It handles duplicated nodes and stores them with their newly created nodes in ntk_lvls_new.
+     * If the duplicated nodes are PIs (Primary Inputs), virtual PIs are created and the original PI is stored in a map.
+     * To manage the connections between nodes, this also uses an auxiliary function gather_fanin_signals, that
+     * collects the fanin data for a node and matches them in the virtual_pi_network.
+     *
+     */
+    template <typename Ntk>
+    explicit virtual_pi_network(Ntk& ntk, std::vector<std::vector<mockturtle::node<Ntk>>>& ntk_lvls,
+                       std::vector<std::vector<mockturtle::node<Ntk>>>& ntk_lvls_new)
+    {
+        std::unordered_map<mockturtle::node<Ntk>, bool> node_status;
+        ntk_lvls_new.resize(ntk_lvls.size());
+
+        auto  init_v     = initialize_copy_network_v<virtual_pi_network>(ntk);
+        auto& ntk_dest_v = init_v.first;
+        auto& old2new_v  = init_v.second;
+
+        /**
+         * The function gather_fanin_signals collects the fanin data for node n from the original ntk.
+         * For each node n there are the possible fanin candidates old2new_v[fn], which are the original node and all
+         * the nodes which are duplicates of this node.
+         *
+         * lvl[edge_it] gives the current iterator at where the edge can be connected. To get the right signal,
+         * all nodes at old2new[n] need to be viewed. Match lvl[edge_it] against all entries in old2new[n],
+         * then try lvl[edge_it+1] then try lvl[edge_it+2].
+         *
+         * @param n Variable to process.
+         * @param lvl Level to process.
+         * @param edge_it Iterator for edge.
+         * @return Vector of fanins in the virtual_pi_network connected to the processed node.
+         */
+        const auto gather_fanin_signals = [&](const auto& n, const auto& lvl, size_t& edge_it)
+        {
+            std::vector<typename Ntk::signal> children{};
+            const auto                        edge_it_int      = edge_it;
+            int                               first_fi_edge_it = -1;
+
+            ntk.foreach_fanin(n,
+                              [&](const auto& f)
+                              {
+                                  const auto fn           = ntk.get_node(f);
+                                  auto       tgt_signal_v = old2new_v[fn];
+
+                                  assert(edge_it_int < lvl.size());
+
+                                  for (const auto& possible_node : tgt_signal_v)
+                                  {
+                                      auto it = ntk.is_maj(n) ? 4 : 3;
+                                      for (size_t i = 0; i < it; i++)
+                                      {
+                                          if (edge_it_int + i < lvl.size() && lvl[edge_it_int + i] == possible_node)
+                                          {
+                                              if (first_fi_edge_it != -1)
+                                              {
+                                                  if (!ntk.is_maj(n))
+                                                  {
+                                                      assert(edge_it_int + i == first_fi_edge_it + 1 ||
+                                                             edge_it_int + i == first_fi_edge_it - 1);
+                                                  }
+                                              }
+                                              children.emplace_back(possible_node);
+                                              first_fi_edge_it = static_cast<int>(edge_it_int + i);
+                                              if (edge_it_int + i > edge_it)
+                                              {
+                                                  edge_it = edge_it_int + i;
+                                              }
+                                              break;
+                                          }
+                                      }
+                                  }
+                              });
+            return children;
+        };
+
+        size_t edge_it = 0;
+        for (size_t i = ntk_lvls.size(); i-- > 0;)
+        {
+            edge_it       = 0;
+            auto& lvl     = ntk_lvls[i];
+            auto& lvl_new = ntk_lvls_new[i];
+            for (const auto& nd : lvl)
+            {
+                if (ntk.is_pi(nd))
+                {
+                    if (node_status[nd])
+                    {
+                        const auto& new_node = ntk_dest_v.create_virtual_pi(nd);
+                        lvl_new.push_back(new_node);
+                        old2new_v[nd].push_back(new_node);
+                    }
+                    else
+                    {
+                        lvl_new.push_back(nd);
+                        node_status[nd] = true;
+                    }
+                }
+                else
+                {
+                    auto children = gather_fanin_signals(nd, ntk_lvls_new[i + 1], edge_it);
+
+                    if (ntk.is_and(nd))
+                    {
+                        const auto& new_node = ntk_dest_v.create_and(children[0], children[1]);
+                        lvl_new.push_back(new_node);
+                        old2new_v[nd].push_back(new_node);
+                        continue;
+                    }
+                    if (ntk.is_or(nd))
+                    {
+                        const auto& new_node = ntk_dest_v.create_or(children[0], children[1]);
+                        lvl_new.push_back(new_node);
+                        old2new_v[nd].push_back(new_node);
+                        continue;
+                    }
+                    if (ntk.is_xor(nd))
+                    {
+                        const auto& new_node = ntk_dest_v.create_xor(children[0], children[1]);
+                        lvl_new.push_back(new_node);
+                        old2new_v[nd].push_back(new_node);
+                        continue;
+                    }
+                    if (ntk.is_maj(nd))
+                    {
+                        const auto& new_node = ntk_dest_v.create_maj(children[0], children[1], children[2]);
+                        lvl_new.push_back(new_node);
+                        old2new_v[nd].push_back(new_node);
+                        continue;
+                    }
+                    if (ntk.is_buf(nd))
+                    {
+                        const auto& new_node = ntk_dest_v.create_buf(children[0]);
+                        lvl_new.push_back(new_node);
+                        old2new_v[nd].push_back(new_node);
+                        continue;
+                    }
+                    if (ntk.is_inv(nd))
+                    {
+                        const auto& new_node = ntk_dest_v.create_not(children[0]);
+                        lvl_new.push_back(new_node);
+                        old2new_v[nd].push_back(new_node);
+                        continue;
+                    }
+                }
+            }
+        }
+
+        ntk.foreach_po(
+            [&ntk, &ntk_dest_v, &old2new_v](const auto& po)
+            {
+                const auto tgt_signal_v = old2new_v[ntk.get_node(po)];
+                // POs dont get duplicated since the algorithm starts at the POs and duplicates other nodes according to
+                // their order
+                assert(tgt_signal_v.size() == 1);
+                const auto tgt_signal = tgt_signal_v[0];
+
+                const auto tgt_po = ntk.is_complemented(po) ? ntk_dest_v.create_not(tgt_signal) : tgt_signal;
+
+                ntk_dest_v.create_po(tgt_po);
+            });
+
+        *this = ntk_dest_v;
+    }
+
+    /**
      * @brief Reimplementation of num_gates(). Retrieves the number of gates in the virtual_pi_network.
      *
      * @return The number of gates in the virtual_pi_network.
@@ -383,13 +599,13 @@ class virtual_pi_network : public technology_network
     }
 
     /**
-         * @brief Applies a function to each gate in the circuit.
-         *
-         * This function iterates over each gate in the circuit, excluding the constants.
-         *
-         * @tparam Fn The type of the function.
-         * @param fn The function to apply to each gate.
-         */
+     * @brief Applies a function to each gate in the circuit.
+     *
+     * This function iterates over each gate in the circuit, excluding the constants.
+     *
+     * @tparam Fn The type of the function.
+     * @param fn The function to apply to each gate.
+     */
     template <typename Fn>
     void foreach_gate(Fn&& fn) const
     {
@@ -399,17 +615,17 @@ class virtual_pi_network : public technology_network
     }
 
     /**
-    * @brief Removes virtual input nodes from the storage. This enables equivalence checking.
-    *
-    * This function removes virtual input nodes from the storage by performing the following steps:
-    * 1. Sorts the virtual input nodes in descending order.
-    * 2. For each virtual input node, finds the corresponding real_pi index mapped to it from the map.
-    * 3. Substitute the virtual input node with the new node index, which corresponds to the real_pi.
-    * 4. Adjusts the inputs, nodes vector, and outputs.
-    * 5. Erases the virtual input node from the nodes vector.
-    *
-    * After removing the virtual input nodes, this function clears the virtual_inputs and map containers.
-    */
+     * @brief Removes virtual input nodes from the storage. This enables equivalence checking.
+     *
+     * This function removes virtual input nodes from the storage by performing the following steps:
+     * 1. Sorts the virtual input nodes in descending order.
+     * 2. For each virtual input node, finds the corresponding real_pi index mapped to it from the map.
+     * 3. Substitute the virtual input node with the new node index, which corresponds to the real_pi.
+     * 4. Adjusts the inputs, nodes vector, and outputs.
+     * 5. Erases the virtual input node from the nodes vector.
+     *
+     * After removing the virtual input nodes, this function clears the virtual_inputs and map containers.
+     */
     void remove_virtual_input_nodes()
     {
         std::sort(virtual_inputs->begin(), virtual_inputs->end(), std::greater<uint64_t>());
@@ -465,7 +681,7 @@ class virtual_pi_network : public technology_network
     /*
      * Shared pointer vector storage for virtual_inputs.
      * */
-    std::shared_ptr<std::vector<uint32_t>>     virtual_inputs;
+    std::shared_ptr<std::vector<uint32_t>> virtual_inputs;
     /*
      * Map from virtual_pis to real_pis.
      * */
