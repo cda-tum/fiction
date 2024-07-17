@@ -65,11 +65,11 @@ TEST_CASE("Determine physical parameters for CDS of SiQAD Y-shaped AND gate, 10 
         const auto valid_parameters = determine_physically_valid_parameters(cds, op_domain_params);
         CHECK(valid_parameters.operational_values.size() == 356);
 
-        op_domain_params.sim_engine = sidb_simulation_engine::EXGS;
+        op_domain_params.sim_engine      = sidb_simulation_engine::EXGS;
         const auto valid_parameters_exgs = determine_physically_valid_parameters(cds, op_domain_params);
         CHECK(valid_parameters_exgs.operational_values.size() == 356);
 
-        op_domain_params.sim_engine = sidb_simulation_engine::QUICKSIM;
+        op_domain_params.sim_engine          = sidb_simulation_engine::QUICKSIM;
         const auto valid_parameters_quicksim = determine_physically_valid_parameters(cds, op_domain_params);
         CHECK(valid_parameters_quicksim.operational_values.size() == 356);
     }
