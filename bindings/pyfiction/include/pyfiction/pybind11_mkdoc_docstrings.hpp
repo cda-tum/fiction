@@ -6046,6 +6046,39 @@ static const char *__doc_fiction_detail_orthogonal_impl_pst = R"doc()doc";
 
 static const char *__doc_fiction_detail_orthogonal_impl_run = R"doc()doc";
 
+static const char *__doc_fiction_detail_place_outputs =
+R"doc(Places the primary outputs (POs) in the layout.
+
+This function positions the POs within the provided layout. If a PO is
+a multi-output node (a fanout with two POs connected to it), the
+second PO is automatically placed and connected below the first
+output.
+
+The positioning of multi-output nodes will follow this structure:
+
+F→=→...→O ↓ =→=→...→O
+
+Template parameter ``Lyt``:
+    Desired gate-level layout type.
+
+Template parameter ``Ntk``:
+    Network type that acts as specification.
+
+Parameter ``layout``:
+    Current gate-level layout.
+
+Parameter ``ctn``:
+    Contains the colored network.
+
+Parameter ``po_counter``:
+    Counter for POs.
+
+Parameter ``node2pos``:
+    Mapping from network nodes to layout signals, i.e., a pointer to
+    their position in the layout. The map is used to fetch location of
+    the fanins. The `mockturtle::node_map` is not updated by this
+    function.)doc";
+
 static const char *__doc_fiction_detail_post_layout_optimization_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_post_layout_optimization_impl_plyt = R"doc(2DDWave-clocked Cartesian gate-level layout to optimize.)doc";
