@@ -16,8 +16,7 @@
 
 using namespace fiction;
 
-// Implement reverse balancing function. Also it should propagate PIs all to the last level
-TEST_CASE("2-ary Test", "[node-duplication-planarization]")
+TEST_CASE("2-ary nodes Test", "[node-duplication-planarization]")
 {
     technology_network tec{};
 
@@ -54,7 +53,7 @@ TEST_CASE("2-ary Test", "[node-duplication-planarization]")
     CHECK(cec_m == 1);
 }
 
-TEST_CASE("3-ary Test", "[node-duplication-planarization]")
+TEST_CASE("3-ary nodes Test", "[node-duplication-planarization]")
 {
     technology_network tec{};
 

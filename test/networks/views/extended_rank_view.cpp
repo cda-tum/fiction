@@ -79,41 +79,17 @@ TEST_CASE("Check modify ranks", "[extended-rank-view]")
     tec.create_po(f2);
     tec.create_po(f3);
 
-    auto blc = is_balanced(tec);
-    std::cout << "Balanced: " << blc << "\n";
-
     network_balancing_params ps;
     ps.unify_outputs = true;
 
     auto tec_balanced = network_balancing<technology_network>(tec, ps);
-    blc = is_balanced(tec_balanced);
-    std::cout << "Balanced: " << blc << "\n";
 
     auto vpi_r = extended_rank_view(tec_balanced);
 
     std::vector<technology_network::node> nodes = {13, 10};
     vpi_r.modify_rank(2, nodes);
 
-    vpi_r.foreach_po([&](const auto& nd) {
-                           std::cout << "Nd:" << nd << "\n";
-                           /*if (vpi_r.is_inv(nd))
-                           {
-                               std::cout << "is not" << "\n";
-                           }
-                           if (vpi_r.is_buf(nd))
-                           {
-                               std::cout << "is buf" << "\n";
-                           }
-                           vpi_r.foreach_fanin(nd, [&](const auto& fi) { std::cout << "Fis:" << fi << "\n"; });*/
-                           auto rnk = vpi_r.rank_position(nd);
-                           auto lvl = vpi_r.level(nd);
-                           std::cout << "Level: " << lvl << "\n";
-                           std::cout << "Rank: " << rnk << "\n";
-                       });
-
-    std::cout << "Valid: " << vpi_r.check_validity() << std::endl;
-
-    CHECK(1 == 1);
+    CHECK(vpi_r.check_validity() == 1);
 }
 
 TEMPLATE_TEST_CASE( "Check equivalence checking", "[extended_rank_view]", mockturtle::aig_network, mockturtle::mig_network, mockturtle::xag_network, mockturtle::xmg_network, mockturtle::klut_network, mockturtle::buffered_aig_network, mockturtle::buffered_mig_network, mockturtle::crossed_klut_network, mockturtle::buffered_crossed_klut_network )
@@ -146,6 +122,7 @@ TEMPLATE_TEST_CASE( "Check equivalence checking", "[extended_rank_view]", mocktu
     mockturtle::equivalence_checking_stats st;
     bool cec_m = *mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(ntk, ntk_r), {}, &st);
     CHECK(cec_m == 1);
+    CHECK(ntk_r.check_validity() == 1);
 }
 
 TEST_CASE("Check equivalence checking for virtual PIs", "[extended-rank-view]")
@@ -188,4 +165,5 @@ TEST_CASE("Check equivalence checking for virtual PIs", "[extended-rank-view]")
     mockturtle::equivalence_checking_stats st;
     bool cec_m = *mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(tec, vpi), {}, &st);
     CHECK(cec_m == 1);
+    CHECK(vpi_r.check_validity() == 1);
 }

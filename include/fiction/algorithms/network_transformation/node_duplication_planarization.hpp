@@ -174,7 +174,7 @@ class node_duplication_planarization_impl
      * @throws std::runtime_error if no combinations (possible node_pairs) are found, which might suggest a dangling
      * node
      */
-    void compute_slice_delays(mockturtle::node<Ntk> nd, const bool border_pis)
+    void compute_slice_delays(const mockturtle::node<Ntk>& nd, const bool border_pis)
     {
         // Pis need to be propagated into the next level, since they have to be connected without crossings
         if (ntk.is_pi(nd) && border_pis)
@@ -234,7 +234,7 @@ class node_duplication_planarization_impl
      * @param node The node to be inserted
      * @param vec The vector to insert the node into
      */
-    void insert_if_unique(mockturtle::node<Ntk> node, std::vector<mockturtle::node<Ntk>>& vec)
+    void insert_if_unique(const mockturtle::node<Ntk>& node, std::vector<mockturtle::node<Ntk>>& vec)
     {
         if (vec.empty() || vec.front() != node)
         {
@@ -304,7 +304,7 @@ class node_duplication_planarization_impl
      * @param v_next_level The vector of nodes to be checked
      * @param f_final_level A reference to a boolean indicating if the vector contains only primary inputs
      */
-    void check_final_level(std::vector<mockturtle::node<Ntk>>& v_next_level, bool& f_final_level)
+    void check_final_level(const std::vector<mockturtle::node<Ntk>>& v_next_level, bool& f_final_level)
     {
         for (const auto& nd : v_next_level)
         {

@@ -95,7 +95,7 @@ class virtual_pi_network : public technology_network
     }
 
     /**
-     * @brief Special constructor to construct a virtual_pi_network from any other network type.
+     * @brief Special constructor to construct a planar virtual_pi_network from any other network type with given ranks.
      *
      * @tparam Ntk Network type
      * @param ntk Source network to be utilized for the creation of the virtual_pi_network
@@ -111,7 +111,7 @@ class virtual_pi_network : public technology_network
      */
     template <typename Ntk>
     explicit virtual_pi_network(Ntk& ntk, std::vector<std::vector<mockturtle::node<Ntk>>>& ntk_lvls,
-                       std::vector<std::vector<mockturtle::node<Ntk>>>& ntk_lvls_new)
+                                std::vector<std::vector<mockturtle::node<Ntk>>>& ntk_lvls_new)
     {
         std::unordered_map<mockturtle::node<Ntk>, bool> node_status;
         ntk_lvls_new.resize(ntk_lvls.size());
@@ -253,8 +253,8 @@ class virtual_pi_network : public technology_network
             [&ntk, &ntk_dest_v, &old2new_v](const auto& po)
             {
                 const auto tgt_signal_v = old2new_v[ntk.get_node(po)];
-                // POs dont get duplicated since the algorithm starts at the POs and duplicates other nodes according to
-                // their order
+                // POs do not get duplicated since the algorithm starts at the POs and duplicates other nodes according
+                // to their order
                 assert(tgt_signal_v.size() == 1);
                 const auto tgt_signal = tgt_signal_v[0];
 

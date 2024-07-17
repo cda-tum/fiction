@@ -436,8 +436,6 @@ class extended_rank_view<Ntk, false> : public mockturtle::depth_view<Ntk>
     /**
      * Overrides the base class method to also call the add_event on create_pi().
      *
-     * @note This can (and in fact will) lead to issues if Ntk already calls add_event functions on create_pi()!
-     *
      * @return Newly created PI signal.
      */
     signal create_pi()
@@ -567,6 +565,16 @@ class extended_rank_view<Ntk, false> : public mockturtle::depth_view<Ntk>
 template <class T>
 extended_rank_view(T const&) -> extended_rank_view<T>;
 
+/**
+ * @brief Deduction guide for `extended_rank_view` with two constructor arguments
+ *
+ * This template helps to deduce the type argument `T` for the
+ * `extended_rank_view` class when constructed with two arguments: a network of type `T`,
+ * and a `vector` of `vector` containing network nodes.
+ *
+ * @tparam T Network type deduced from the construction context of
+ * `extended_rank_view`.
+ */
 template <class T>
 extended_rank_view(T const&, std::vector<std::vector<typename T::node>>) -> extended_rank_view<T>;
 

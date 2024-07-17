@@ -85,7 +85,7 @@ TEST_CASE("Remove PIs and check equivalence", "[virtual-pi-view]")
     CHECK(cec_m == 1);
 }
 
-TEST_CASE("Remove PIs and check equivalence second", "[virtual-pi-view]")
+TEST_CASE("Remove PIs and check equivalence copy constructor", "[virtual-pi-view]")
 {
     technology_network tec{};
 
