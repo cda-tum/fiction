@@ -2,8 +2,8 @@
 // Created by benjamin on 6/18/24.
 //
 
-#include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_template_test_macros.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include <fiction/algorithms/network_transformation/network_balancing.hpp>
 #include <fiction/networks/technology_network.hpp>
@@ -25,38 +25,41 @@
 
 using namespace fiction;
 
-TEMPLATE_TEST_CASE( "traits", "[extended_rank_view]", mockturtle::aig_network, mockturtle::mig_network, mockturtle::xag_network, mockturtle::xmg_network, mockturtle::klut_network, mockturtle::cover_network, mockturtle::buffered_aig_network, mockturtle::buffered_mig_network, mockturtle::crossed_klut_network, mockturtle::buffered_crossed_klut_network )
+TEMPLATE_TEST_CASE("traits", "[extended_rank_view]", mockturtle::aig_network, mockturtle::mig_network,
+                   mockturtle::xag_network, mockturtle::xmg_network, mockturtle::klut_network,
+                   mockturtle::cover_network, mockturtle::buffered_aig_network, mockturtle::buffered_mig_network,
+                   mockturtle::crossed_klut_network, mockturtle::buffered_crossed_klut_network)
 {
-    CHECK( mockturtle::is_network_type_v<TestType> );
-    CHECK( !mockturtle::has_rank_position_v<TestType> );
-    CHECK( !mockturtle::has_at_rank_position_v<TestType> );
-    CHECK( !mockturtle::has_width_v<TestType> );
-    CHECK( !mockturtle::has_sort_rank_v<TestType> );
-    CHECK( !mockturtle::has_foreach_node_in_rank_v<TestType> );
-    CHECK( !mockturtle::has_foreach_gate_in_rank_v<TestType> );
-    CHECK( !mockturtle::is_topologically_sorted_v<TestType> );
+    CHECK(mockturtle::is_network_type_v<TestType>);
+    CHECK(!mockturtle::has_rank_position_v<TestType>);
+    CHECK(!mockturtle::has_at_rank_position_v<TestType>);
+    CHECK(!mockturtle::has_width_v<TestType>);
+    CHECK(!mockturtle::has_sort_rank_v<TestType>);
+    CHECK(!mockturtle::has_foreach_node_in_rank_v<TestType>);
+    CHECK(!mockturtle::has_foreach_gate_in_rank_v<TestType>);
+    CHECK(!mockturtle::is_topologically_sorted_v<TestType>);
 
     using rank_ntk = extended_rank_view<TestType>;
 
-    CHECK( mockturtle::is_network_type_v<rank_ntk> );
-    CHECK( mockturtle::has_rank_position_v<rank_ntk> );
-    CHECK( mockturtle::has_at_rank_position_v<rank_ntk> );
-    CHECK( mockturtle::has_width_v<rank_ntk> );
-    CHECK( mockturtle::has_sort_rank_v<rank_ntk> );
-    CHECK( mockturtle::has_foreach_node_in_rank_v<rank_ntk> );
-    CHECK( mockturtle::has_foreach_gate_in_rank_v<rank_ntk> );
-    CHECK( mockturtle::is_topologically_sorted_v<rank_ntk> );
+    CHECK(mockturtle::is_network_type_v<rank_ntk>);
+    CHECK(mockturtle::has_rank_position_v<rank_ntk>);
+    CHECK(mockturtle::has_at_rank_position_v<rank_ntk>);
+    CHECK(mockturtle::has_width_v<rank_ntk>);
+    CHECK(mockturtle::has_sort_rank_v<rank_ntk>);
+    CHECK(mockturtle::has_foreach_node_in_rank_v<rank_ntk>);
+    CHECK(mockturtle::has_foreach_gate_in_rank_v<rank_ntk>);
+    CHECK(mockturtle::is_topologically_sorted_v<rank_ntk>);
 
     using rank_rank_ntk = extended_rank_view<rank_ntk>;
 
-    CHECK( mockturtle::is_network_type_v<rank_rank_ntk> );
-    CHECK( mockturtle::has_rank_position_v<rank_rank_ntk> );
-    CHECK( mockturtle::has_at_rank_position_v<rank_rank_ntk> );
-    CHECK( mockturtle::has_width_v<rank_rank_ntk> );
-    CHECK( mockturtle::has_sort_rank_v<rank_rank_ntk> );
-    CHECK( mockturtle::has_foreach_node_in_rank_v<rank_rank_ntk> );
-    CHECK( mockturtle::has_foreach_gate_in_rank_v<rank_rank_ntk> );
-    CHECK( mockturtle::is_topologically_sorted_v<rank_rank_ntk> );
+    CHECK(mockturtle::is_network_type_v<rank_rank_ntk>);
+    CHECK(mockturtle::has_rank_position_v<rank_rank_ntk>);
+    CHECK(mockturtle::has_at_rank_position_v<rank_rank_ntk>);
+    CHECK(mockturtle::has_width_v<rank_rank_ntk>);
+    CHECK(mockturtle::has_sort_rank_v<rank_rank_ntk>);
+    CHECK(mockturtle::has_foreach_node_in_rank_v<rank_rank_ntk>);
+    CHECK(mockturtle::has_foreach_gate_in_rank_v<rank_rank_ntk>);
+    CHECK(mockturtle::is_topologically_sorted_v<rank_rank_ntk>);
 }
 
 TEST_CASE("Check modify ranks", "[extended-rank-view]")
@@ -92,7 +95,10 @@ TEST_CASE("Check modify ranks", "[extended-rank-view]")
     CHECK(vpi_r.check_validity() == 1);
 }
 
-TEMPLATE_TEST_CASE( "Check equivalence checking", "[extended_rank_view]", mockturtle::aig_network, mockturtle::mig_network, mockturtle::xag_network, mockturtle::xmg_network, mockturtle::klut_network, mockturtle::buffered_aig_network, mockturtle::buffered_mig_network, mockturtle::crossed_klut_network, mockturtle::buffered_crossed_klut_network )
+TEMPLATE_TEST_CASE("Check equivalence checking", "[extended_rank_view]", mockturtle::aig_network,
+                   mockturtle::mig_network, mockturtle::xag_network, mockturtle::xmg_network, mockturtle::klut_network,
+                   mockturtle::buffered_aig_network, mockturtle::buffered_mig_network, mockturtle::crossed_klut_network,
+                   mockturtle::buffered_crossed_klut_network)
 {
     TestType ntk{};
 

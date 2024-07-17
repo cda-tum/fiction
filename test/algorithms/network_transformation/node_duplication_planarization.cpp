@@ -6,10 +6,11 @@
 
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
-#include <mockturtle/views/rank_view.hpp>
 
-#include <fiction/networks/technology_network.hpp>
 #include <fiction/algorithms/network_transformation/node_duplication_planarization.hpp>
+#include <fiction/networks/technology_network.hpp>
+
+#include <mockturtle/views/rank_view.hpp>
 
 #include <chrono>
 #include <iostream>
@@ -49,7 +50,8 @@ TEST_CASE("2-ary nodes Test", "[node-duplication-planarization]")
     planarized_maj.remove_virtual_input_nodes<virtual_pi_network>();
 
     mockturtle::equivalence_checking_stats st;
-    bool cec_m = *mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(tec, planarized_maj), {}, &st);
+    bool                                   cec_m =
+        *mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(tec, planarized_maj), {}, &st);
     CHECK(cec_m == 1);
 }
 
@@ -88,7 +90,8 @@ TEST_CASE("3-ary nodes Test", "[node-duplication-planarization]")
     planarized_maj.remove_virtual_input_nodes<virtual_pi_network>();
 
     mockturtle::equivalence_checking_stats st;
-    bool cec_m = *mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(tec, planarized_maj), {}, &st);
+    bool                                   cec_m =
+        *mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(tec, planarized_maj), {}, &st);
     CHECK(cec_m == 1);
 }
 
@@ -127,6 +130,7 @@ TEST_CASE("Aig Test", "[node-duplication-planarization]")
     planarized_maj.remove_virtual_input_nodes<virtual_pi_network>();
 
     mockturtle::equivalence_checking_stats st;
-    bool cec_m = *mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(aig, planarized_maj), {}, &st);
+    bool                                   cec_m =
+        *mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(aig, planarized_maj), {}, &st);
     CHECK(cec_m == 1);
 }

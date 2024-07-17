@@ -2,12 +2,13 @@
 // Created by benjamin on 7/17/24.
 //
 
+#include <catch2/catch_test_macros.hpp>
+
 #include <fiction/algorithms/properties/check_planarity.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/networks/views/extended_rank_view.hpp>
-#include <mockturtle/views/rank_view.hpp>
 
-#include <catch2/catch_test_macros.hpp>
+#include <mockturtle/views/rank_view.hpp>
 
 using namespace fiction;
 

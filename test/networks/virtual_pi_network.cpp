@@ -24,8 +24,8 @@ TEST_CASE("Copy network and size consistency", "[virtual-pi-view]")
 
     virtual_pi_network vpi{tec};
 
-    const auto         c = vpi.create_virtual_pi(a);
-    const auto         d = vpi.create_virtual_pi(b);
+    const auto c = vpi.create_virtual_pi(a);
+    const auto d = vpi.create_virtual_pi(b);
 
     const auto f2 = vpi.create_and(b, c);
     const auto f3 = vpi.create_or(a, d);
@@ -112,9 +112,9 @@ TEST_CASE("Remove PIs and check equivalence copy constructor", "[virtual-pi-view
 
     const auto e = vpi.create_pi();
 
-    const auto f7 = vpi.create_not(b);
-    const auto f8 = vpi.create_and(a, b);
-    const auto f9 = vpi.create_and(c, d);
+    const auto f7  = vpi.create_not(b);
+    const auto f8  = vpi.create_and(a, b);
+    const auto f9  = vpi.create_and(c, d);
     const auto f10 = vpi.create_buf(c);
     const auto f11 = vpi.create_and(d_v, e);
 
@@ -128,7 +128,7 @@ TEST_CASE("Remove PIs and check equivalence copy constructor", "[virtual-pi-view
 
     vpi.remove_virtual_input_nodes();
     CHECK(vpi.size_real() == vpi.size());
-    CHECK(vpi.size() - 2 == tec.size()); // the -2 is due to the buffers
+    CHECK(vpi.size() - 2 == tec.size());  // the -2 is due to the buffers
 
     mockturtle::equivalence_checking_stats st;
     bool cec_m = *mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(tec, vpi), {}, &st);
