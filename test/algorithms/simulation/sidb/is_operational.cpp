@@ -54,48 +54,16 @@ TEST_CASE("SiQAD's AND gate with input BDL pairs of different size", "[is-operat
 
 TEST_CASE("Bestagon FO2 gate", "[is-operational]")
 {
-    using layout = sidb_cell_clk_lyt_siqad;
-
-    layout lyt{};
-
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::INPUT);
-
-    lyt.assign_cell_type({21, 11, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({17, 11, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 4, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({18, 13, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 2, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 3, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({19, 7, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 5, 0}, sidb_technology::cell_type::NORMAL);
-
-    lyt.assign_cell_type({18, 6, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 15, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 16, 0}, sidb_technology::cell_type::NORMAL);
-
-    lyt.assign_cell_type({12, 16, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 15, 0}, sidb_technology::cell_type::NORMAL);
-
-    lyt.assign_cell_type({8, 17, 0}, sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({6, 18, 0}, sidb_technology::cell_type::OUTPUT);
-
-    lyt.assign_cell_type({30, 17, 0}, sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({32, 18, 0}, sidb_technology::cell_type::OUTPUT);
-
-    lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({2, 19, 0}, sidb_technology::cell_type::NORMAL);
-
-    const sidb_100_cell_clk_lyt_siqad lat{lyt};
+    const auto lyt = blueprints::bestagon_fo2<sidb_cell_clk_lyt_siqad>();
 
     SECTION("using QuickExact")
     {
         CHECK(is_operational(
-                  lat, std::vector<tt>{create_fan_out_tt()},
+                  lyt, std::vector<tt>{create_fan_out_tt()},
                   is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT})
                   .first == operational_status::OPERATIONAL);
         CHECK(is_operational(
-                  lat, std::vector<tt>{create_fan_out_tt()},
+                  lyt, std::vector<tt>{create_fan_out_tt()},
                   is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT})
                   .first == operational_status::NON_OPERATIONAL);
     }
@@ -103,11 +71,11 @@ TEST_CASE("Bestagon FO2 gate", "[is-operational]")
     SECTION("using QuickSim")
     {
         CHECK(is_operational(
-                  lat, std::vector<tt>{create_fan_out_tt()},
+                  lyt, std::vector<tt>{create_fan_out_tt()},
                   is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKSIM})
                   .first == operational_status::OPERATIONAL);
         CHECK(is_operational(
-                  lat, std::vector<tt>{create_fan_out_tt()},
+                  lyt, std::vector<tt>{create_fan_out_tt()},
                   is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKSIM})
                   .first == operational_status::NON_OPERATIONAL);
     }
@@ -115,49 +83,7 @@ TEST_CASE("Bestagon FO2 gate", "[is-operational]")
 
 TEST_CASE("Bestagon CROSSING gate", "[is-operational]")
 {
-    using layout = sidb_cell_clk_lyt_siqad;
-
-    layout lyt{};
-
-    lyt.assign_cell_type({36, 1, 0}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::INPUT);
-
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({38, 0, 0}, sidb_technology::cell_type::INPUT);
-
-    lyt.assign_cell_type({6, 2, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({20, 12, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 3, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 5, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 11, 1}, sidb_technology::cell_type::NORMAL);
-
-    lyt.assign_cell_type({12, 4, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 15, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 4, 0}, sidb_technology::cell_type::NORMAL);
-
-    lyt.assign_cell_type({14, 9, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 15, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 16, 0}, sidb_technology::cell_type::NORMAL);
-
-    lyt.assign_cell_type({18, 9, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 16, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 13, 1}, sidb_technology::cell_type::NORMAL);
-
-    lyt.assign_cell_type({24, 5, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({30, 3, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({16, 13, 1}, sidb_technology::cell_type::NORMAL);
-
-    lyt.assign_cell_type({32, 2, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({20, 8, 0}, sidb_technology::cell_type::NORMAL);
-
-    lyt.assign_cell_type({30, 17, 0}, sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({6, 18, 0}, sidb_technology::cell_type::OUTPUT);
-
-    lyt.assign_cell_type({32, 18, 0}, sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({8, 17, 0}, sidb_technology::cell_type::OUTPUT);
-
-    lyt.assign_cell_type({2, 19, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
+    const auto lyt = blueprints::bestagon_crossing<sidb_cell_clk_lyt_siqad>();
 
     CHECK(lyt.num_cells() == 29);
 
@@ -175,38 +101,7 @@ TEST_CASE("Bestagon CROSSING gate", "[is-operational]")
 
 TEST_CASE("Bestagon AND gate", "[is-operational]")
 {
-    using layout = sidb_cell_clk_lyt_siqad;
-
-    layout lyt{};
-
-    lyt.assign_cell_type({36, 1, 0}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::INPUT);
-
-    lyt.assign_cell_type({38, 0, 0}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
-
-    lyt.assign_cell_type({23, 9, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({18, 11, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({18, 9, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({19, 8, 0}, sidb_technology::cell_type::NORMAL);
-
-    lyt.assign_cell_type({20, 14, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({19, 13, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 16, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 15, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({32, 2, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({30, 3, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 4, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 5, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 4, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 5, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 2, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 3, 0}, sidb_technology::cell_type::NORMAL);
-
-    lyt.assign_cell_type({32, 18, 0}, sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({30, 17, 0}, sidb_technology::cell_type::OUTPUT);
-
-    lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
+    const auto lyt = blueprints::bestagon_and<sidb_cell_clk_lyt_siqad>();
 
     CHECK(lyt.num_cells() == 23);
 

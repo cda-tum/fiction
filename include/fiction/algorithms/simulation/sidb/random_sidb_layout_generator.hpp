@@ -132,7 +132,7 @@ Lyt generate_random_sidb_layout(const Lyt&                                      
         // the SiDB is added to the layout
         if (!constraint_violation_positive_sidbs && !random_cell_is_identical_wih_defect)
         {
-            lyt.assign_cell_type(random_coord, technology<Lyt>::cell_type::NORMAL);
+            lyt.assign_cell_type(random_coord, technology<Lyt>::cell_type::LOGIC);
         }
         attempt_counter += 1;
     }

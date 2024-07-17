@@ -304,7 +304,11 @@ struct sidb_technology
         /**
          * Symbol used for output SiDB cells.
          */
-        OUTPUT = 'o'
+        OUTPUT = 'o',
+        /**
+         * Symbol used for logic SiDB cells (e.g. canvas SiDBs).
+         */
+        LOGIC = 'l'
     };
 
     /**

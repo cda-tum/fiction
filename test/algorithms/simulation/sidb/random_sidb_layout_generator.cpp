@@ -636,7 +636,7 @@ TEMPLATE_TEST_CASE("Random siqad::coord_t layout generation with defects", "[gen
         CHECK(result_lyt.num_cells() == 1);
         CHECK(result_lyt.num_defects() == 2);
 
-        CHECK(result_lyt.get_cell_type({2, 1, 1}) == TestType::technology::cell_type::NORMAL);
+        CHECK(result_lyt.get_cell_type({2, 1, 1}) == TestType::technology::cell_type::LOGIC);
         CHECK(result_lyt.get_sidb_defect({3, 1, 1}) == sidb_defect{sidb_defect_type::DB, -1, 5.6, 5});
         CHECK(result_lyt.get_sidb_defect({4, 1, 1}) == sidb_defect{sidb_defect_type::SINGLE_DIHYDRIDE, 1, 7.6, 7});
     }

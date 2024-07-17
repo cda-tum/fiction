@@ -333,7 +333,14 @@ detect_bdl_pairs(const Lyt& lyt, const std::optional<typename technology<Lyt>::c
     else
     {
         dots_of_given_type.reserve(lyt.num_cells());
-        lyt.foreach_cell([&dots_of_given_type](const auto& c) { dots_of_given_type.push_back(c); });
+        lyt.foreach_cell(
+            [&lyt, &dots_of_given_type](const auto& c)
+            {
+                if (lyt.get_cell_type(c) != sidb_technology::LOGIC)
+                {
+                    dots_of_given_type.push_back(c);
+                }
+            });
     }
 
     // pair up dots and return the detected BDL pairs

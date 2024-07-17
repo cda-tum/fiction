@@ -267,7 +267,7 @@ class design_sidb_gates_impl
 
             if (lyt_copy.get_cell_type(all_sidbs_in_canvas[i]) == sidb_technology::cell_type::EMPTY)
             {
-                lyt_copy.assign_cell_type(all_sidbs_in_canvas[i], sidb_technology::cell_type::NORMAL);
+                lyt_copy.assign_cell_type(all_sidbs_in_canvas[i], sidb_technology::cell_type::LOGIC);
             }
         }
 

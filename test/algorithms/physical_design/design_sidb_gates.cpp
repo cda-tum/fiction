@@ -4,18 +4,16 @@
 
 #include <catch2/catch_template_test_macros.hpp>
 
+#include "utils/blueprints/layout_blueprints.hpp"
+
 #include <fiction/algorithms/physical_design/design_sidb_gates.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
-#include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/cell_technologies.hpp>
-#include <fiction/technology/sidb_defect_surface.hpp>
 #include <fiction/technology/sidb_defects.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
-#include <fiction/technology/sidb_lattice_orientations.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/layout_utils.hpp>
@@ -66,7 +64,7 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
 
     REQUIRE(found_gate_layouts.size() == 1);
     CHECK(found_gate_layouts[0].num_cells() == 14);
-    CHECK(found_gate_layouts[0].get_cell_type({10, 4, 0}) == siqad_layout::technology::NORMAL);
+    CHECK(found_gate_layouts[0].get_cell_type({10, 4, 0}) == siqad_layout::technology::LOGIC);
 
     // using cube coordinates
     const auto lyt_in_cube_coord = convert_to_fiction_coordinates<cube_layout>(lyt);
@@ -84,7 +82,7 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
     REQUIRE(found_gate_layouts_cube.size() == 1);
     CHECK(found_gate_layouts_cube[0].num_cells() == 14);
     CHECK(found_gate_layouts_cube[0].get_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{10, 4, 0})) ==
-          siqad_layout::technology::NORMAL);
+          siqad_layout::technology::LOGIC);
 
     // using offset coordinates
     const auto lyt_in_offset_coord = convert_to_fiction_coordinates<offset_layout>(lyt);
@@ -102,7 +100,7 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
     REQUIRE(found_gate_layouts_offset.size() == 1);
     CHECK(found_gate_layouts_offset[0].num_cells() == 14);
     CHECK(found_gate_layouts_offset[0].get_cell_type(
-              siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{10, 4, 0})) == siqad_layout::technology::NORMAL);
+              siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{10, 4, 0})) == siqad_layout::technology::LOGIC);
 }
 
 TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[design-sidb-gates]")
@@ -165,8 +163,8 @@ TEST_CASE("Use FO2 Bestagon gate without SiDB at {17, 11, 0} and generate origin
     lyt.assign_cell_type({8, 3, 0}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({19, 7, 0}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({14, 5, 0}, sidb_technology::cell_type::NORMAL);
-
     lyt.assign_cell_type({18, 6, 0}, sidb_technology::cell_type::NORMAL);
+
     lyt.assign_cell_type({24, 15, 0}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({26, 16, 0}, sidb_technology::cell_type::NORMAL);
 
@@ -199,7 +197,7 @@ TEST_CASE("Use FO2 Bestagon gate without SiDB at {17, 11, 0} and generate origin
 
         REQUIRE(found_gate_layouts.size() == 1);
         CHECK(found_gate_layouts[0].num_cells() == 21);
-        CHECK(found_gate_layouts[0].get_cell_type({17, 11, 0}) == sidb_100_cell_clk_lyt_siqad::technology::NORMAL);
+        CHECK(found_gate_layouts[0].get_cell_type({17, 11, 0}) == sidb_100_cell_clk_lyt_siqad::technology::LOGIC);
     }
 
     SECTION("replace the output perturbers by equivalent negatively charged defects")
@@ -228,38 +226,13 @@ TEST_CASE("Use FO2 Bestagon gate without SiDB at {17, 11, 0} and generate origin
 
         REQUIRE(found_gate_layouts.size() == 1);
         CHECK(found_gate_layouts[0].num_cells() == 19);
-        CHECK(found_gate_layouts[0].get_cell_type({17, 11, 0}) == sidb_100_cell_clk_lyt_siqad::cell_type::NORMAL);
+        CHECK(found_gate_layouts[0].get_cell_type({17, 11, 0}) == sidb_100_cell_clk_lyt_siqad::cell_type::LOGIC);
     }
 }
 
 TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
 {
-    sidb_100_cell_clk_lyt_siqad lyt{};
-
-    lyt.assign_cell_type({38, 0, 0}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
-
-    lyt.assign_cell_type({36, 1, 0}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::INPUT);
-
-    lyt.assign_cell_type({6, 2, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({32, 2, 0}, sidb_technology::cell_type::NORMAL);
-
-    lyt.assign_cell_type({30, 3, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 3, 0}, sidb_technology::cell_type::NORMAL);
-
-    lyt.assign_cell_type({26, 4, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 4, 0}, sidb_technology::cell_type::NORMAL);
-
-    lyt.assign_cell_type({24, 5, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 5, 0}, sidb_technology::cell_type::NORMAL);
-
-    lyt.assign_cell_type({24, 15, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 16, 0}, sidb_technology::cell_type::NORMAL);
-
-    lyt.assign_cell_type({30, 17, 0}, sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({32, 18, 0}, sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
+    const auto lyt = blueprints::two_input_one_output_bestagon_skeleton<sidb_cell_clk_lyt_siqad>();
 
     SECTION("Random Generation")
     {
