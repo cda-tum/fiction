@@ -405,7 +405,7 @@ mockturtle::signal<Lyt> connect_and_place(Lyt& lyt, const tile<Lyt>& t, const Nt
  */
 template <typename Ntk, typename Lyt>
 void place_outputs(Lyt& layout, const coloring_container<Ntk>& ctn, uint32_t po_counter,
-                   mockturtle::node_map<mockturtle::signal<Lyt>, decltype(ctn.color_ntk)>& node2pos)
+                   const mockturtle::node_map<mockturtle::signal<Lyt>, decltype(ctn.color_ntk)>& node2pos)
 {
     std::vector<mockturtle::node<Ntk>> output_nodes{};
 
@@ -474,7 +474,7 @@ class orthogonal_impl
 
         mockturtle::node_map<mockturtle::signal<Lyt>, decltype(ctn.color_ntk)> node2pos{ctn.color_ntk};
 
-        // Find multi_output_nodes
+        // find multi-output nodes
         std::vector<mockturtle::node<decltype(ntk)>> output_nodes{};
         std::vector<mockturtle::node<decltype(ntk)>> multi_output_nodes{};
         uint32_t                                     num_multi_output_nodes{0};
@@ -642,7 +642,7 @@ class orthogonal_impl
 #endif
             });
 
-        // Place outputs after the main algorithm to handle possible multi-output or unordered nodes
+        // place outputs after the main algorithm to handle possible multi-output or unordered nodes
         place_outputs(layout, ctn, po_counter, node2pos);
 
         // restore possibly set signal names
