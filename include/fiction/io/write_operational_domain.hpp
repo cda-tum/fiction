@@ -11,6 +11,7 @@
 
 #include <fstream>
 #include <ostream>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 
@@ -93,14 +94,46 @@ inline void write_operational_domain(const operational_domain& opdom, std::ostre
 {
     csv_writer writer{os};
 
-    writer.write_line(detail::sweep_parameter_to_string(opdom.x_dimension),
-                      detail::sweep_parameter_to_string(opdom.y_dimension), "operational status");
+    const auto num_dimensions = opdom.dimensions.size();
+
+    if (num_dimensions == 0 || num_dimensions > 3)
+    {
+        throw std::invalid_argument("unsupported number of dimensions in the given operational domain");
+    }
+
+    if (num_dimensions == 1)
+    {
+        writer.write_line(detail::sweep_parameter_to_string(opdom.dimensions[0]), "operational status");
+    }
+    else if (num_dimensions == 2)
+    {
+        writer.write_line(detail::sweep_parameter_to_string(opdom.dimensions[0]),
+                          detail::sweep_parameter_to_string(opdom.dimensions[1]), "operational status");
+    }
+    else  // num_dimensions == 3
+    {
+        writer.write_line(detail::sweep_parameter_to_string(opdom.dimensions[0]),
+                          detail::sweep_parameter_to_string(opdom.dimensions[1]),
+                          detail::sweep_parameter_to_string(opdom.dimensions[2]), "operational status");
+    }
 
     for (const auto& [sim_param, op_val] : opdom.operational_values)
     {
-        writer.write_line(sim_param.x, sim_param.y,
-                          op_val == operational_status::OPERATIONAL ? params.operational_tag :
-                                                                      params.non_operational_tag);
+        const auto tag =
+            op_val == operational_status::OPERATIONAL ? params.operational_tag : params.non_operational_tag;
+
+        if (num_dimensions == 1)
+        {
+            writer.write_line(sim_param.parameters[0], tag);
+        }
+        else if (num_dimensions == 2)
+        {
+            writer.write_line(sim_param.parameters[0], sim_param.parameters[1], tag);
+        }
+        else  // num_dimensions == 3
+        {
+            writer.write_line(sim_param.parameters[0], sim_param.parameters[1], sim_param.parameters[2], tag);
+        }
     }
 }
 /**
