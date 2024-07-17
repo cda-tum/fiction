@@ -57,10 +57,10 @@ int main()  // NOLINT
 
     fiction::graph_oriented_layout_design_stats  graph_oriented_layout_design_stats{};
     fiction::graph_oriented_layout_design_params graph_oriented_layout_design_params{};
-    graph_oriented_layout_design_params.high_effort_mode  = false;
-    graph_oriented_layout_design_params.verbose      = true;
-    graph_oriented_layout_design_params.return_first = false;
-    graph_oriented_layout_design_params.timeout = 1000;
+    graph_oriented_layout_design_params.high_effort_mode = false;
+    graph_oriented_layout_design_params.verbose          = true;
+    graph_oriented_layout_design_params.return_first     = false;
+    graph_oriented_layout_design_params.timeout          = 1000;
 
     static constexpr const uint64_t bench_select = fiction_experiments::trindade16 | fiction_experiments::fontes18;
 

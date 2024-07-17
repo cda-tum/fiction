@@ -111,8 +111,8 @@ TEST_CASE("Different parameters", "[graph_oriented_layout_design]")
 
     // High effort mode
     params.high_effort_mode = true;
-    params.verbose     = false;
-    const auto layout3 = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
+    params.verbose          = false;
+    const auto layout3      = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
     check_eq(ntk, layout3);
 
     // Full search

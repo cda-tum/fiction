@@ -1316,7 +1316,7 @@ class graph_oriented_layout_design_impl
 
         auto layout = initialize_layout(min_layout_width);
 
-        auto pi2node = reserve_input_nodes(layout, ssg.network);
+        auto                             pi2node = reserve_input_nodes(layout, ssg.network);
         node_dict_type<ObstrLyt, tec_nt> node2pos{ssg.network};
         placement_info<ObstrLyt>         place_info{0ul, 0ul, node2pos, pi2node};
 
@@ -1349,8 +1349,8 @@ class graph_oriented_layout_design_impl
                 const auto bb = fiction::bounding_box_2d(layout);
                 layout.resize({bb.get_max().x, bb.get_max().y, layout.z()});
 
-                area          = layout.area();
-                best_solution = area;
+                area                     = layout.area();
+                best_solution            = area;
                 improve_current_solution = true;
 
                 fiction::post_layout_optimization_params plo_params{};
