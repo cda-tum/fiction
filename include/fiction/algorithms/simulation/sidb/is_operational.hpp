@@ -8,6 +8,7 @@
 #include "fiction/algorithms/iter/bdl_input_iterator.hpp"
 #include "fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp"
 #include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
+#include "fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp"
 #include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
@@ -60,9 +61,9 @@ struct is_operational_params
      */
     sidb_simulation_engine sim_engine{sidb_simulation_engine::QUICKEXACT};
     /**
-     * Parameters for the BDL pair detection algorithms.
+     * Parameters for the BDL wire detection algorithms.
      */
-    detect_bdl_pairs_params bdl_params{};
+    detect_bdl_wires_params bdl_wire_params{};
 };
 
 namespace detail
@@ -93,8 +94,9 @@ class is_operational_impl
             layout{lyt},
             truth_table{tt},
             parameters{params},
-            output_bdl_pairs(detect_bdl_pairs(layout, sidb_technology::cell_type::OUTPUT, parameters.bdl_params)),
-            bii(bdl_input_iterator<Lyt>{layout, parameters.bdl_params})
+            output_bdl_pairs(detect_bdl_pairs(layout, sidb_technology::cell_type::OUTPUT,
+                                              parameters.bdl_wire_params.params_bdl_pairs)),
+            bii(bdl_input_iterator<Lyt>{layout, parameters.bdl_wire_params})
     {}
 
     /**
@@ -368,7 +370,8 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
 
     assert(!spec.empty());
     // all elements in tts must have the same number of variables
-    assert(std::adjacent_find(spec.cbegin(), spec.cend(), [](const auto& a, const auto& b)
+    assert(std::adjacent_find(spec.cbegin(), spec.cend(),
+                              [](const auto& a, const auto& b)
                               { return a.num_vars() != b.num_vars(); }) == spec.cend());
 
     detail::is_operational_impl<Lyt, TT> p{lyt, spec, params};

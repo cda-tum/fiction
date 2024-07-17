@@ -5,10 +5,10 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/algorithms/iter/bdl_input_iterator.hpp>
+#include <fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
-#include <fiction/technology/sidb_lattice_orientations.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/layout_utils.hpp>
 
@@ -235,9 +235,11 @@ TEST_CASE("SiQAD's AND gate iteration", "[bdl-input-iterator]")
 
     const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
+    const detect_bdl_wires_params params{2.0};
+
     SECTION("siqad coordinates")
     {
-        bdl_input_iterator<sidb_100_cell_clk_lyt_siqad> bii{lat};
+        bdl_input_iterator<sidb_100_cell_clk_lyt_siqad> bii{lat, params};
 
         for (auto i = 0; bii < 4; ++bii, ++i)
         {
@@ -302,7 +304,7 @@ TEST_CASE("SiQAD's AND gate iteration", "[bdl-input-iterator]")
     SECTION("cube coordinates")
     {
         const auto         layout_cube = convert_to_fiction_coordinates<sidb_cell_clk_lyt_cube>(lyt);
-        bdl_input_iterator bii{sidb_100_cell_clk_lyt_cube{layout_cube}};
+        bdl_input_iterator bii{sidb_100_cell_clk_lyt_cube{layout_cube}, params};
 
         for (auto i = 0; bii < 4; ++bii, ++i)
         {
@@ -367,7 +369,7 @@ TEST_CASE("SiQAD's AND gate iteration", "[bdl-input-iterator]")
     SECTION("offset coordinates")
     {
         const auto         layout_offset = convert_to_fiction_coordinates<sidb_cell_clk_lyt_cube>(lyt);
-        bdl_input_iterator bii{sidb_100_cell_clk_lyt_cube{layout_offset}};
+        bdl_input_iterator bii{sidb_100_cell_clk_lyt_cube{layout_offset}, params};
 
         for (auto i = 0; bii < 4; ++bii, ++i)
         {

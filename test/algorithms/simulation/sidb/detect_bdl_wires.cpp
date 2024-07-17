@@ -138,9 +138,11 @@ TEST_CASE("BDL wire bottom to up", "[detect-bdl-wires]")
     lyt.assign_cell_type({0, 18, 0}, sidb_technology::cell_type::INPUT);
     lyt.assign_cell_type({0, 19, 0}, sidb_technology::cell_type::INPUT);
 
+    const detect_bdl_wires_params params{5.0};
+
     SECTION("Determine wire")
     {
-        const auto all_bdl_wires = detect_bdl_wires(lyt);
+        const auto all_bdl_wires = detect_bdl_wires(lyt, params);
         REQUIRE(all_bdl_wires.size() == 1);
         CHECK(determine_wire_direction<decltype(lyt)>(all_bdl_wires[0]) == bdl_wire_direction::SOUTH_NORTH);
     }
@@ -336,17 +338,15 @@ TEST_CASE("Determine I/O wires of Bestagon CROSSING gate", "[detect-bdl-wires]")
 {
     const auto lyt = blueprints::bestagon_crossing<sidb_cell_clk_lyt_siqad>();
 
-    detect_bdl_wires_params params{2.0};
-
     SECTION("Determine all wires")
     {
-        const auto all_bdl_wires = detect_bdl_wires(lyt, params);
+        const auto all_bdl_wires = detect_bdl_wires(lyt);
         REQUIRE(all_bdl_wires.size() == 4);
     }
 
     SECTION("Determine output wires")
     {
-        const auto all_output_bdl_wires = detect_bdl_wires(lyt, params, bdl_wire_selection::OUTPUT);
+        const auto all_output_bdl_wires = detect_bdl_wires(lyt, detect_bdl_wires_params{}, bdl_wire_selection::OUTPUT);
         REQUIRE(all_output_bdl_wires.size() == 2);
         CHECK(determine_wire_direction<decltype(lyt)>(all_output_bdl_wires[0]) == bdl_wire_direction::NORTH_SOUTH);
         CHECK(determine_wire_direction<decltype(lyt)>(all_output_bdl_wires[1]) == bdl_wire_direction::NORTH_SOUTH);
@@ -367,7 +367,7 @@ TEST_CASE("Determine I/O wires of Bestagon CROSSING gate", "[detect-bdl-wires]")
 
     SECTION("Determine input wires and direction")
     {
-        const auto all_input_bdl_wires = detect_bdl_wires(lyt, params, bdl_wire_selection::INPUT);
+        const auto all_input_bdl_wires = detect_bdl_wires(lyt, detect_bdl_wires_params{}, bdl_wire_selection::INPUT);
         REQUIRE(all_input_bdl_wires.size() == 2);
         const auto input_wire_first = all_input_bdl_wires[0];
         REQUIRE(input_wire_first.size() == 3);

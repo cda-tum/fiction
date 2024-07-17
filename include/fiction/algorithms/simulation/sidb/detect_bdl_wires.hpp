@@ -69,7 +69,7 @@ struct detect_bdl_wires_params
     /**
      * Inter distance threshold between two BDL pairs in a wire (unit: nm).
      */
-    double threshold_bdl_interdistance = 4.0;
+    double threshold_bdl_interdistance = 3.0;
     /**
      * Parameters for the `detect_bdl_pairs` algorithm.
      */
