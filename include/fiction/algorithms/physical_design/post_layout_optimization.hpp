@@ -636,7 +636,7 @@ bool improve_gate_location(Lyt& lyt, const tile<Lyt>& old_pos, const tile<Lyt>& 
             }
         }
 
-        if (moved_gate || ((num_gate_relocations >= max_gate_relocations) && !lyt.is_po_tile(current_pos)))
+        if (moved_gate || ((num_gate_relocations >= max_gate_relocations) & !lyt.is_po_tile(current_pos)))
         {
             break;
         }
@@ -767,33 +767,47 @@ void optimize_output_positions(Lyt& lyt) noexcept
     auto bounding_box = bounding_box_2d(lyt);
     lyt.resize({bounding_box.get_max().x, bounding_box.get_max().y, lyt.z()});
 
-    // Check for misplaced POs in second last row and move them down one row
+    // Check for misplaced POs in second last row and move them one row down
     for (uint64_t x = 0; x < lyt.x(); ++x)
     {
         if (lyt.is_po_tile({x, lyt.y() - 1, 0}))
         {
+            // Get fanin signal of the PO
             std::vector<mockturtle::signal<Lyt>> signals{};
             signals.reserve(lyt.fanin_size(lyt.get_node({x, lyt.y()})));
             lyt.foreach_fanin(lyt.get_node({x, lyt.y() - 1}),
                               [&signals](const auto& fanin) { signals.push_back(fanin); });
+
+            // Move PO one row down
             lyt.move_node(lyt.get_node({x, lyt.y() - 1}), {x, lyt.y(), 0}, {});
+
+            // Create a wire segment at the previous location of the PO and connect it with its fanin
             lyt.create_buf(signals[0], {x, lyt.y() - 1});
+
+            // Connect the PO with the new wire segment
             lyt.move_node(lyt.get_node({x, lyt.y()}), {x, lyt.y(), 0},
                           {lyt.make_signal(lyt.get_node({x, lyt.y() - 1}))});
         }
     }
 
-    // Check for misplaced POs in second last column and move them to the right one column
+    // Check for misplaced POs in second last column and move them one column to the right
     for (uint64_t y = 0; y < lyt.y(); ++y)
     {
         if (lyt.is_po_tile({lyt.x() - 1, y, 0}))
         {
+            // Get fanin signal of the PO
             std::vector<mockturtle::signal<Lyt>> signals{};
             signals.reserve(lyt.fanin_size(lyt.get_node({lyt.x(), y})));
             lyt.foreach_fanin(lyt.get_node({lyt.x() - 1, y}),
                               [&signals](const auto& fanin) { signals.push_back(fanin); });
+
+            // Move PO one column to the right
             lyt.move_node(lyt.get_node({lyt.x() - 1, y}), {lyt.x(), y, 0}, {});
+
+            // Create a wire segment at the previous location of the PO and connect it with its fanin
             lyt.create_buf(signals[0], {lyt.x() - 1, y});
+
+            // Connect the PO with the new wire segment
             lyt.move_node(lyt.get_node({lyt.x(), y}), {lyt.x(), y, 0},
                           {lyt.make_signal(lyt.get_node({lyt.x() - 1, y}))});
         }
@@ -807,24 +821,36 @@ void optimize_output_positions(Lyt& lyt) noexcept
     // with a single PO)
     if (lyt.is_po_tile({lyt.x(), lyt.y(), 0}) && (lyt.num_pos() == 1))
     {
+        // Check if relocation would save tiles
         if (lyt.has_western_incoming_signal({lyt.x(), lyt.y(), 0}) &&
             ((lyt.x() * (lyt.y() + 2)) < ((lyt.x() + 1) * (lyt.y() + 1))))
         {
+            // Get fanin signal of the PO
             std::vector<mockturtle::signal<Lyt>> signals{};
             signals.reserve(lyt.fanin_size(lyt.get_node({lyt.x(), lyt.y()})));
             lyt.foreach_fanin(lyt.get_node({lyt.x(), lyt.y()}),
                               [&signals](const auto& fanin) { signals.push_back(fanin); });
+
+            // Resize layout
             lyt.resize({lyt.x(), lyt.y() + 1, lyt.z()});
+
+            // Move PO one tile down and to the left
             lyt.move_node(lyt.get_node({lyt.x(), lyt.y() - 1}), {lyt.x() - 1, lyt.y(), 0}, signals);
         }
+        // Check if relocation would save tiles
         else if (lyt.has_northern_incoming_signal({lyt.x(), lyt.y(), 0}) &&
                  (((lyt.x() + 2) * lyt.y()) < ((lyt.x() + 1) * (lyt.y() + 1))))
         {
+            // Get fanin signal of the PO
             std::vector<mockturtle::signal<Lyt>> signals{};
             signals.reserve(lyt.fanin_size(lyt.get_node({lyt.x(), lyt.y()})));
             lyt.foreach_fanin(lyt.get_node({lyt.x(), lyt.y()}),
                               [&signals](const auto& fanin) { signals.push_back(fanin); });
+
+            // Resize layout
             lyt.resize({lyt.x() + 1, lyt.y(), lyt.z()});
+
+            // Move PO one tile up and to the right
             lyt.move_node(lyt.get_node({lyt.x() - 1, lyt.y()}), {lyt.x(), lyt.y() - 1, 0}, signals);
         }
     }
@@ -913,7 +939,7 @@ class post_layout_optimization_impl
 
                 tile<Lyt> max_non_po{0, 0};
                 // Determine minimal border for POs
-                for (auto gate_tile : gate_tiles)
+                for (const auto& gate_tile : gate_tiles)
                 {
                     if (!layout.is_po_tile(gate_tile))
                     {
