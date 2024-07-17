@@ -46,9 +46,9 @@ void check_graph_oriented_layout_design_equiv_all()
     check_graph_oriented_layout_design_equiv<Lyt>(blueprints::maj4_network<mockturtle::aig_network>());
     check_graph_oriented_layout_design_equiv<Lyt>(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>());
     check_graph_oriented_layout_design_equiv<Lyt>(blueprints::and_or_network<technology_network>());
-    check_graph_oriented_layout_design_equiv<Lyt>(blueprints::half_adder_network<technology_network>());
+    check_graph_oriented_layout_design_equiv<Lyt>(blueprints::half_adder_network<mockturtle::mig_network>());
     check_graph_oriented_layout_design_equiv<Lyt>(blueprints::full_adder_network<technology_network>());
-    check_graph_oriented_layout_design_equiv<Lyt>(blueprints::mux21_network<technology_network>());
+    check_graph_oriented_layout_design_equiv<Lyt>(blueprints::mux21_network<mockturtle::xag_network>());
     check_graph_oriented_layout_design_equiv<Lyt>(blueprints::se_coloring_corner_case_network<technology_network>());
     check_graph_oriented_layout_design_equiv<Lyt>(
         blueprints::fanout_substitution_corner_case_network<technology_network>());
@@ -110,7 +110,7 @@ TEST_CASE("Different parameters", "[graph_oriented_layout_design]")
     check_eq(ntk, layout2);
 
     // High effort mode
-    params.high_effort = true;
+    params.high_effort_mode = true;
     params.verbose     = false;
     const auto layout3 = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
     check_eq(ntk, layout3);

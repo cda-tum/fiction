@@ -36,8 +36,8 @@ class gold_command : public command
                        "FCN gate-level layouts in reasonable runtime. Its result quality is better than 'ortho' and "
                        "its runtime behavior superior to 'exact' and 'onepass'.")
     {
-        add_option("--timeout,-t", timeout, "Timeout in milliseconds");
-        add_flag("--high_effort,-e", ps.high_effort,
+        add_option("--timeout,-t", ps.timeout, "Timeout in seconds");
+        add_flag("--high_effort_mode,-e", ps.high_effort_mode,
                  "Toggle high effort mode; increases runtime but might generate better results");
         add_flag("--return_first,-r", ps.return_first,
                  "Terminate on the first found layout; reduces runtime but might sacrifice result quality");
@@ -60,7 +60,8 @@ class gold_command : public command
 
         if (is_set("timeout"))
         {
-            ps.timeout = timeout;
+            // convert timeout entered in seconds to milliseconds
+            ps.timeout *= 1000;
         }
 
         graph_oriented_layout_design<fiction::cart_gate_clk_lyt>();
@@ -79,10 +80,6 @@ class gold_command : public command
     }
 
   private:
-    /**
-     * Timeout.
-     */
-    uint64_t timeout = 0ul;
     /**
      * Parameters.
      */

@@ -53,17 +53,20 @@ namespace fiction
 struct graph_oriented_layout_design_params
 {
     /**
-     * High effort mode.
+     * In high effort mode, 12 search space graphs are created with varying fanout substitution strategies, allowed PI
+     * placements, and other parameters, compared to only 2 graphs in high efficiency mode. This broader exploration
+     * increases the likelihood of discovering optimal layouts. When a solution is found in any graph, its cost is used
+     * to prune the search in the remaining graphs.
      */
-    bool high_effort = false;
+    bool high_effort_mode = false;
     /**
-     * Return first found layout.
+     * Return the first found layout, which might still have a high cost but can be found fast.
      */
     bool return_first = false;
     /**
      * Timeout limit (in ms).
      */
-    std::optional<uint64_t> timeout = std::nullopt;
+    uint64_t timeout = std::numeric_limits<uint64_t>::max();
     /**
      * Verbosity.
      */
@@ -238,7 +241,7 @@ struct search_space_graph
     /**
      * Flag indicating if this graph's frontier is active.
      */
-    bool frontier_flag = false;
+    bool frontier_flag = true;
     /**
      * The cost so far for reaching each vertex in the layout.
      */
@@ -251,30 +254,6 @@ struct search_space_graph
      * Priority queue containing vertices of the search space graph.
      */
     detail::priority_queue<Lyt> frontier{};
-};
-/**
- * This struct holds a single `timeout` value which is determined based on the
- * provided optional timeout value and a boolean indicating if high effort is required.
- */
-struct timeout_settings
-{
-    /**
-     * The timeout value in milliseconds.
-     */
-    uint64_t timeout;
-    /**
-     * This constructor initializes the `timeout` member. If `timeout_opt` has a value,
-     * it uses that value for the timeout. If `timeout_opt` does not have a value,
-     * it sets the timeout to 1000000 milliseconds (1000 seconds) if `high_effort` is `true`,
-     * or to 10000 milliseconds (10 seconds) if `high_effort` is false.
-     *
-     * @param timeout_opt An optional unsigned integer value representing the desired timeout in milliseconds.
-     * @param high_effort A boolean indicating whether a high effort (longer timeout) is desired.
-     */
-    timeout_settings(const std::optional<uint64_t>& timeout_opt, const bool high_effort)
-    {
-        timeout = timeout_opt.value_or(high_effort ? 1000000u : 1000u);
-    }
 };
 /**
  * @brief Custom view class derived from mockturtle::topo_view.
@@ -398,7 +377,7 @@ template <typename Ntk>
 class topo_view_ci_to_co : public mockturtle::immutable_view<Ntk>
 {
   public:
-    // Use the base class constructor
+    // use the base class constructor
     using node   = typename Ntk::node;
     using signal = typename Ntk::signal;
     /*! \brief Default constructor.
@@ -512,6 +491,49 @@ class topo_view_ci_to_co : public mockturtle::immutable_view<Ntk>
     std::vector<node> topo_order;
 };
 /**
+ * Enum to specify which tiles should be checked if they are empty.
+ */
+enum class check_if_empty
+{
+    /**
+     * Do not check any tiles.
+     */
+    NONE,
+    /**
+     * Check if the source tile is empty.
+     */
+    SRC,
+    /**
+     * Check if the destination tile is empty.
+     */
+    DEST
+};
+/**
+ * Struct to hold information necessary for gate placement during layout generation for one vertex.
+ *
+ * @tparam ObstrLyt The type of the layout.
+ */
+template <typename ObstrLyt>
+struct placement_info
+{
+    /**
+     * The index of the current node being placed.
+     */
+    uint64_t current_node;
+    /**
+     * The index of the current primary output.
+     */
+    uint64_t current_po;
+    /**
+     * Mapping of nodes to their positions in the layout.
+     */
+    node_dict_type<ObstrLyt, tec_nt>& node2pos;
+    /**
+     * Mapping of primary input nodes to layout nodes.
+     */
+    mockturtle::node_map<mockturtle::node<ObstrLyt>, tec_nt>& pi2node;
+};
+/**
  * Implementation of the graph-oriented layout design algorithm.
  * This class handles the initialization and execution of the algorithm.
  *
@@ -534,9 +556,9 @@ class graph_oriented_layout_design_impl
             ntk{convert_network<tec_nt>(src)},
             ps{p},
             pst{st},
-            timeout{timeout_settings(ps.timeout, ps.high_effort).timeout},
+            timeout{ps.timeout},
             start{std::chrono::high_resolution_clock::now()},
-            num_search_space_graphs{ps.high_effort ? 12u : 2u},
+            num_search_space_graphs{ps.high_effort_mode ? 12u : 2u},
             ssg_vec(num_search_space_graphs)
     {
         ntk.substitute_po_signals();
@@ -551,20 +573,14 @@ class graph_oriented_layout_design_impl
         // measure run time
         mockturtle::stopwatch stop{pst.time_total};
 
-        // Initialize layout to keep track of current best solution
+        // initialize layout to keep track of current best solution
         Lyt best_lyt{{}, twoddwave_clocking<Lyt>()};
 
-        // Initial setup for networks and nodes to place
-        initialize_networks_and_nodes_to_place();
-
-        // Initial setup for PIs and cost
-        initialize_pis_cost_and_num_expansions();
-
-        // Initial setup for frontiers flags
-        initialize_frontiers_flags();
+        // initialize search space graphs
+        initialize();
 
         bool timeout_limit_reached = false;
-        // Main A* loop
+        // main A* loop
         while (!timeout_limit_reached)
         {
             for (auto& ssg : ssg_vec)
@@ -672,46 +688,45 @@ class graph_oriented_layout_design_impl
     /**
      * Current best solution w.r.t. area after relocating POs.
      */
-    uint64_t best_optimized_solution{100000};
+    uint64_t best_optimized_solution{std::numeric_limits<uint64_t>::max()};
     /**
      * Flag indicating if an initial solution was already found, and that other search space graphs should be pruned.
      */
-    bool improv_mode{false};
+    bool improve_current_solution{false};
+    /**
+     * Number of vertices that should be explored from any vertex.
+     */
+    static constexpr uint64_t NUM_VERTEX_EXPANSIONS = 4ul;
     /**
      * Checks if there is a path between the source and destination tiles in the given layout.
-     * Optionally returns the path if specified.
      *
      * @param layout The layout to be checked.
      * @param src The source tile.
      * @param dest The destination tile.
-     * @param src_is_new_pos Flag indicating if the source is a new position and should be checked if empty. Defaults to
-     * `false`.
-     * @param dest_is_new_pos Flag indicating if the destination is a new position and should be checked if empty.
-     * Defaults to `false`.
-     * @return A path from `src` to `dest` if one exist, `std::nullopt` otherwise.
+     * @param check_if_empty Enum indicating if the src or dest have to host a new gate and therefore have to be empty.
+     * Defaults to `check_if_empty::NONE`.
+     * @return A path from `src` to `dest` if one exists.
      */
-    [[nodiscard]] std::optional<layout_coordinate_path<ObstrLyt>>
+    [[nodiscard]] layout_coordinate_path<ObstrLyt>
     check_path(const ObstrLyt& layout, const tile<ObstrLyt>& src, const tile<ObstrLyt>& dest,
-               const bool src_is_new_pos = false, const bool dest_is_new_pos = false) noexcept
+               const check_if_empty check = check_if_empty::NONE) noexcept
     {
-        if ((layout.is_empty_tile(src) & src_is_new_pos) || (layout.is_empty_tile(dest) & dest_is_new_pos) ||
-            (!src_is_new_pos && !dest_is_new_pos))
+        const bool src_is_new_pos  = (check == check_if_empty::SRC);
+        const bool dest_is_new_pos = (check == check_if_empty::DEST);
+
+        if ((layout.is_empty_tile(src) && src_is_new_pos) || (layout.is_empty_tile(dest) && dest_is_new_pos) ||
+            (check == check_if_empty::NONE))
         {
             using dist = twoddwave_distance_functor<ObstrLyt, uint64_t>;
             using cost = unit_cost_functor<ObstrLyt, uint8_t>;
 
             static constexpr a_star_params a_star_crossing_params{true};
 
-            const auto path =
-                a_star<layout_coordinate_path<ObstrLyt>>(layout, {src, dest}, dist(), cost(), a_star_crossing_params);
-
-            if (!path.empty())
-            {
-                return path;
-            }
+            return a_star<layout_coordinate_path<ObstrLyt>>(layout, {src, dest}, dist(), cost(),
+                                                            a_star_crossing_params);
         }
 
-        return std::nullopt;
+        return {};
     }
     /**
      * Retrieves the possible positions for Primary Inputs (PIs) in the given layout based on the specified
@@ -732,11 +747,11 @@ class graph_oriented_layout_design_impl
         layout.resize({layout.x() + 1, layout.y() + 1, 1});
         const tile<ObstrLyt> drain{layout.x(), layout.y(), 0};
 
-        // Check if a path from the input to the drain exists
+        // check if a path from the input to the drain exists
         const auto check_tile = [&](const uint64_t x, const uint64_t y) noexcept
         {
             const tile<ObstrLyt> tile{x, y, 0};
-            if (check_path(layout, tile, drain, true, false).has_value())
+            if (!check_path(layout, tile, drain, check_if_empty::SRC).empty())
             {
                 count_expansions++;
                 possible_positions.push_back(tile);
@@ -791,11 +806,11 @@ class graph_oriented_layout_design_impl
 
         possible_positions.reserve(expansion_limit);
 
-        // Check if path from previous tile to PO exists
+        // check if path from previous tile to PO exists
         auto check_tile = [&](const uint64_t x, const uint64_t y)
         {
             const tile<ObstrLyt> tile{x, y, 0};
-            if (check_path(layout, pre_t, tile, false, true).has_value())
+            if (!check_path(layout, pre_t, tile, check_if_empty::DEST).empty())
             {
                 possible_positions.push_back(tile);
             }
@@ -837,17 +852,17 @@ class graph_oriented_layout_design_impl
         const auto& pre   = fc.fanin_nodes[0];
         const auto  pre_t = static_cast<tile<ObstrLyt>>(node2pos[pre]);
 
-        // Check if path from previous tile to new tile and from new tile to drain exist
+        // check if path from previous tile to new tile and from new tile to drain exist
         const auto check_tile = [&](const uint64_t x, const uint64_t y) noexcept
         {
             const tile<ObstrLyt> new_pos{pre_t.x + x, pre_t.y + y, 0};
 
-            if (check_path(layout, pre_t, new_pos, false, true).has_value())
+            if (!check_path(layout, pre_t, new_pos, check_if_empty::DEST).empty())
             {
                 layout.resize({layout.x() + 1, layout.y() + 1, 1});
                 const tile<ObstrLyt> drain{layout.x(), layout.y(), 0};
 
-                if (check_path(layout, new_pos, drain, true, false).has_value())
+                if (!check_path(layout, new_pos, drain, check_if_empty::SRC).empty())
                 {
                     possible_positions.push_back(new_pos);
                     count_expansions++;
@@ -857,7 +872,7 @@ class graph_oriented_layout_design_impl
             }
         };
 
-        // Iterate diagonally
+        // iterate diagonally
         for (uint64_t k = 0ul; k < layout.x() + layout.y() + 1; ++k)
         {
             for (uint64_t x = 0ul; x < k + 1; ++x)
@@ -903,25 +918,25 @@ class graph_oriented_layout_design_impl
         const auto min_x = std::max(pre1_t.x, pre2_t.x) + (pre1_t.x == pre2_t.x ? 1 : 0);
         const auto min_y = std::max(pre1_t.y, pre2_t.y) + (pre1_t.y == pre2_t.y ? 1 : 0);
 
-        // Check if path from previous tiles to new tile and from new tile to drain exist
+        // check if path from previous tiles to new tile and from new tile to drain exist
         auto check_tile = [&](uint64_t x, uint64_t y)
         {
             const tile<ObstrLyt> new_pos{min_x + x, min_y + y, 0};
 
-            const auto path_1 = check_path(layout, pre1_t, new_pos, false, true);
-            if (path_1.has_value())
+            const auto path_1 = check_path(layout, pre1_t, new_pos, check_if_empty::DEST);
+            if (!path_1.empty())
             {
-                for (const auto& el : *path_1)
+                for (const auto& el : path_1)
                 {
                     layout.obstruct_coordinate(el);
                 }
 
-                if (check_path(layout, pre2_t, new_pos, false, true).has_value())
+                if (!check_path(layout, pre2_t, new_pos, check_if_empty::DEST).empty())
                 {
                     layout.resize({layout.x() + 1, layout.y() + 1, 1});
                     const tile<ObstrLyt> drain{layout.x(), layout.y(), 0};
 
-                    if (check_path(layout, new_pos, drain, true, false).has_value())
+                    if (!check_path(layout, new_pos, drain, check_if_empty::SRC).empty())
                     {
                         possible_positions.push_back(new_pos);
                         count_expansions++;
@@ -930,14 +945,14 @@ class graph_oriented_layout_design_impl
                     layout.resize({layout.x() - 1, layout.y() - 1, 1});
                 }
 
-                for (const auto& el : *path_1)
+                for (const auto& el : path_1)
                 {
                     layout.clear_obstructed_coordinate(el);
                 }
             }
         };
 
-        // Iterate diagonally
+        // iterate diagonally
         for (uint64_t k = 0ul; k < layout.x() + layout.y() + 1; ++k)
         {
             for (uint64_t x = 0ul; x < k + 1; ++x)
@@ -962,32 +977,31 @@ class graph_oriented_layout_design_impl
      * possible positions.
      *
      * @param layout The layout in which to find the possible positions.
+     * @param place_info The placement context containing current node, primary output index, node to position mapping,
+     * and PI to node mapping.
      * @param ssg The search space graph.
-     * @param current_node The current node index in the nodes_to_place vector.
-     * @param node2pos A dictionary mapping nodes from the network to signals in the layout.
      * @return A vector of tiles representing the possible positions for the current node.
      */
     [[nodiscard]] coord_vec_type<ObstrLyt> get_possible_positions(ObstrLyt&                           layout,
                                                                   const search_space_graph<ObstrLyt>& ssg,
-                                                                  const uint64_t                      current_node,
-                                                                  node_dict_type<ObstrLyt, tec_nt>&   node2pos) noexcept
+                                                                  const placement_info<ObstrLyt>& place_info) noexcept
     {
-        const auto fc = fanins(ssg.network, ssg.nodes_to_place[current_node]);
+        const auto fc = fanins(ssg.network, ssg.nodes_to_place[place_info.current_node]);
 
-        if (ssg.network.is_pi(ssg.nodes_to_place[current_node]))
+        if (ssg.network.is_pi(ssg.nodes_to_place[place_info.current_node]))
         {
             return get_possible_positions_pis(layout, ssg.pi_locs, ssg.network.num_pis());
         }
-        if (ssg.network.is_po(ssg.nodes_to_place[current_node]))
+        if (ssg.network.is_po(ssg.nodes_to_place[place_info.current_node]))
         {
-            return get_possible_positions_pos(layout, node2pos, fc);
+            return get_possible_positions_pos(layout, place_info.node2pos, fc);
         }
         if (fc.fanin_nodes.size() == 1)
         {
-            return get_possible_positions_single_fanin(layout, node2pos, ssg.num_expansions, fc);
+            return get_possible_positions_single_fanin(layout, place_info.node2pos, ssg.num_expansions, fc);
         }
 
-        return get_possible_positions_double_fanin(layout, node2pos, ssg.num_expansions, fc);
+        return get_possible_positions_double_fanin(layout, place_info.node2pos, ssg.num_expansions, fc);
     }
     /**
      * Validates the given layout based on the nodes in the network and their mappings in the node dictionary.
@@ -995,20 +1009,19 @@ class graph_oriented_layout_design_impl
      * the drain.
      *
      * @param layout The layout to be validated.
-     * @param network The network containing the nodes.
-     * @param node2pos A dictionary mapping nodes from the network to signals in the layout.
-     * @param placement_possible A boolean flag that will be set to false if placement is not possible.
+     * @param place_info The placement context containing current node, primary output index, node to position mapping,
+     * and PI to node mapping.
+     * @param ssg The search space graph.
      */
-    [[nodiscard]] bool valid_layout(ObstrLyt& layout, const tec_nt& network, node_dict_type<ObstrLyt, tec_nt>& node2pos,
-                                    const std::vector<mockturtle::node<tec_nt>>& nodes_to_place,
-                                    const uint64_t                               current_node) noexcept
+    [[nodiscard]] bool valid_layout(ObstrLyt& layout, const search_space_graph<ObstrLyt>& ssg,
+                                    const placement_info<ObstrLyt>& place_info) noexcept
     {
         const auto check_tile = [&](const auto& t) noexcept
         {
             layout.resize({layout.x() + 1, layout.y() + 1, 1});
             const tile<ObstrLyt> drain{layout.x(), layout.y(), 0};
 
-            const bool path_exists = check_path(layout, t, drain, false, true).has_value();
+            const bool path_exists = !check_path(layout, t, drain, check_if_empty::DEST).empty();
             layout.resize({layout.x() - 1, layout.y() - 1, 1});
 
             return path_exists;
@@ -1020,13 +1033,13 @@ class graph_oriented_layout_design_impl
                    (layout.is_empty_tile({t.x, t.y, 1}) && !layout.is_obstructed_coordinate({t.x, t.y, 1}));
         };
 
-        for (uint64_t node = 0ul; node < current_node; node++)
+        for (uint64_t node = 0ul; node < place_info.current_node; node++)
         {
-            const auto layout_tile = static_cast<tile<ObstrLyt>>(node2pos[nodes_to_place[node]]);
+            const auto layout_tile = static_cast<tile<ObstrLyt>>(place_info.node2pos[ssg.nodes_to_place[node]]);
             const bool no_fanout_and_not_po =
                 !layout.is_po_tile(layout_tile) && (layout.fanout_size(layout.get_node(layout_tile)) == 0);
-            const bool one_dangling_fanout =
-                (layout.fanout_size(layout.get_node(layout_tile)) == 1) && network.is_fanout(nodes_to_place[node]);
+            const bool one_dangling_fanout = (layout.fanout_size(layout.get_node(layout_tile)) == 1) &&
+                                             ssg.network.is_fanout(ssg.nodes_to_place[node]);
 
             if (no_fanout_and_not_po || one_dangling_fanout)
             {
@@ -1036,8 +1049,8 @@ class graph_oriented_layout_design_impl
                 }
             }
 
-            const bool two_dangling_fanouts =
-                (layout.fanout_size(layout.get_node(layout_tile)) == 0) && network.is_fanout(nodes_to_place[node]);
+            const bool two_dangling_fanouts = (layout.fanout_size(layout.get_node(layout_tile)) == 0) &&
+                                              ssg.network.is_fanout(ssg.nodes_to_place[node]);
 
             if (two_dangling_fanouts)
             {
@@ -1069,12 +1082,12 @@ class graph_oriented_layout_design_impl
 
         layout.move_node(layout.get_node(position), position, {});
 
-        const auto path = check_path(layout, pre_t, position, false, false);
-        assert(path.has_value());
+        const auto path = check_path(layout, pre_t, position);
+        assert(!path.empty());
 
-        route_path(layout, *path);
+        route_path(layout, path);
 
-        for (const auto& el : *path)
+        for (const auto& el : path)
         {
             layout.obstruct_coordinate(el);
         }
@@ -1098,24 +1111,24 @@ class graph_oriented_layout_design_impl
 
         layout.move_node(layout.get_node(position), position, {});
 
-        const auto path_1 = check_path(layout, pre1_t, position, false, false);
-        assert(path_1.has_value());
+        const auto path_1 = check_path(layout, pre1_t, position);
+        assert(!path_1.empty());
 
-        for (const auto& el : *path_1)
+        for (const auto& el : path_1)
         {
             layout.obstruct_coordinate(el);
         }
 
-        const auto path_2 = check_path(layout, pre2_t, position, false, false);
-        assert(path_2.has_value());
+        const auto path_2 = check_path(layout, pre2_t, position);
+        assert(!path_2.empty());
 
-        for (const auto& el : *path_2)
+        for (const auto& el : path_2)
         {
             layout.obstruct_coordinate(el);
         }
 
-        route_path(layout, *path_1);
-        route_path(layout, *path_2);
+        route_path(layout, path_1);
+        route_path(layout, path_2);
     }
     /**
      * Executes a single placement step in the layout for the given network node. It determines the type of the node,
@@ -1123,75 +1136,72 @@ class graph_oriented_layout_design_impl
      *
      * @param position The tile representing the position for placement.
      * @param layout The layout in which to place the node.
-     * @param network The network containing the nodes.
-     * @param current_node The current node index in the nodes_to_place vector.
-     * @param nodes_to_place A vector representing the nodes to be placed.
-     * @param current_po The current primary output index.
-     * @param node2pos A dictionary mapping nodes from the network to signals in the layout.
-     * @param pi2node A mapping of primary input nodes to layout nodes.
+     * @param place_info The placement context containing current node, primary output index, node to position mapping,
+     * and PI to node mapping.
+     * @param ssg The search space graph.
      * @return A boolean indicating if a solution was found.
      */
-    [[nodiscard]] bool place_and_route(const tile<ObstrLyt>& position, ObstrLyt& layout, const tec_nt& network,
-                                       uint64_t& current_node, std::vector<mockturtle::node<tec_nt>>& nodes_to_place,
-                                       uint64_t& current_po, node_dict_type<ObstrLyt, tec_nt>& node2pos,
-                                       mockturtle::node_map<mockturtle::node<ObstrLyt>, tec_nt>& pi2node) noexcept
+    [[nodiscard]] bool place_and_route(const tile<ObstrLyt>& position, ObstrLyt& layout,
+                                       search_space_graph<ObstrLyt>& ssg, placement_info<ObstrLyt>& place_info) noexcept
     {
-        // Vector to store preceding nodes
-        const auto fc = fanins(network, nodes_to_place[current_node]);
+        // vector to store preceding nodes
+        const auto fc = fanins(ssg.network, ssg.nodes_to_place[place_info.current_node]);
 
-        if (network.is_pi(nodes_to_place[current_node]))
+        if (ssg.network.is_pi(ssg.nodes_to_place[place_info.current_node]))
         {
-            // Place primary input node
-            node2pos[nodes_to_place[current_node]] = layout.move_node(pi2node[nodes_to_place[current_node]], position);
+            // place primary input node
+            place_info.node2pos[ssg.nodes_to_place[place_info.current_node]] =
+                layout.move_node(place_info.pi2node[ssg.nodes_to_place[place_info.current_node]], position);
         }
         else if (fc.fanin_nodes.size() == 1)
         {
             const auto& pre = fc.fanin_nodes[0];
 
-            // Place single input node
-            if (network.is_po(nodes_to_place[current_node]))
+            // place single input node
+            if (ssg.network.is_po(ssg.nodes_to_place[place_info.current_node]))
             {
-                node2pos[nodes_to_place[current_node]] =
-                    layout.create_po(node2pos[pre], fmt::format("po{}", current_po++), position);
+                place_info.node2pos[ssg.nodes_to_place[place_info.current_node]] =
+                    layout.create_po(place_info.node2pos[pre], fmt::format("po{}", place_info.current_po++), position);
             }
             else
             {
-                const auto pre_t = static_cast<tile<ObstrLyt>>(node2pos[pre]);
+                const auto pre_t = static_cast<tile<ObstrLyt>>(place_info.node2pos[pre]);
                 auto       a     = static_cast<mockturtle::signal<ObstrLyt>>(pre_t);
 
-                node2pos[nodes_to_place[current_node]] =
-                    place(layout, position, network, nodes_to_place[current_node], a);
+                place_info.node2pos[ssg.nodes_to_place[place_info.current_node]] =
+                    place(layout, position, ssg.network, ssg.nodes_to_place[place_info.current_node], a);
             }
 
-            route_single_input_node(position, layout, node2pos, fc);
+            route_single_input_node(position, layout, place_info.node2pos, fc);
         }
         else
         {
-            // Place double input node
+            // place double input node
             const auto& pre1 = fc.fanin_nodes[0];
             const auto& pre2 = fc.fanin_nodes[1];
 
             const auto a1 = static_cast<mockturtle::signal<ObstrLyt>>(pre1);
             const auto a2 = static_cast<mockturtle::signal<ObstrLyt>>(pre2);
 
-            node2pos[nodes_to_place[current_node]] =
-                place(layout, position, network, nodes_to_place[current_node], a1, a2, fc.constant_fanin);
+            place_info.node2pos[ssg.nodes_to_place[place_info.current_node]] = place(
+                layout, position, ssg.network, ssg.nodes_to_place[place_info.current_node], a1, a2, fc.constant_fanin);
 
-            route_double_input_node(position, layout, node2pos, fc);
+            route_double_input_node(position, layout, place_info.node2pos, fc);
         }
 
-        current_node++;
+        place_info.current_node++;
         layout.obstruct_coordinate({position.x, position.y, 0});
         layout.obstruct_coordinate({position.x, position.y, 1});
 
-        // Check if solution was found and update max_placed_nodes
-        const auto found_solution = (current_node == nodes_to_place.size());
-        max_placed_nodes          = std::max(current_node, max_placed_nodes);
+        // check if solution was found and update max_placed_nodes
+        const auto found_solution = (place_info.current_node == ssg.nodes_to_place.size());
+        max_placed_nodes          = std::max(place_info.current_node, max_placed_nodes);
 
         return found_solution;
     }
     /**
-     * Outputs placement information.
+     * Outputs placement information, including the current runtime, the number of evaluated paths in the search space
+     * graphs and the layout dimensions.
      *
      * @param lyt Current layout.
      */
@@ -1199,19 +1209,93 @@ class graph_oriented_layout_design_impl
     {
         std::cout << "[i] Found improved solution:\n";
 
-        // Calculate the duration between start and end
+        // calculate the duration between start and end
         const auto end      = std::chrono::high_resolution_clock::now();
         const auto duration = end - start;
 
-        // Extract the duration components
+        // extract the duration components
         const auto us  = std::chrono::duration_cast<std::chrono::microseconds>(duration).count() % 1000;
         const auto ms  = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count() % 1000;
         const auto sec = std::chrono::duration_cast<std::chrono::seconds>(duration).count();
 
-        // Output the elapsed time
+        // output the elapsed time
         std::cout << fmt::format("[i]   Time taken:       {} s {} ms {} µs\n", sec, ms, us);
         std::cout << fmt::format("[i]   Evaluated paths:  {}\n", num_evaluated_paths);
         std::cout << fmt::format("[i]   Layout dimension: {} × {} = {}\n", lyt.x() + 1, lyt.y() + 1, lyt.area());
+    }
+    /**
+     * Initializes the layout with minimum width
+     *
+     * @param min_layout_width The minimum width of the layout.
+     * @return The initialized layout.
+     */
+    ObstrLyt initialize_layout(uint64_t min_layout_width)
+    {
+        Lyt lyt{{min_layout_width - 1, 1 - 1, 1}, twoddwave_clocking<Lyt>()};
+        return obstruction_layout<Lyt>(lyt);
+    }
+    /**
+     * Adjusts the layout size based on the last position.
+     *
+     * @param position The last position in the layout.
+     * @param layout The layout to be adjusted.
+     * @param ssg The search space graph.
+     * @param place_info The placement information.
+     */
+    void adjust_layout_size(const tile<ObstrLyt>& position, ObstrLyt& layout, const search_space_graph<ObstrLyt>& ssg,
+                            const placement_info<ObstrLyt>& place_info)
+    {
+        const auto max_layout_width  = ssg.nodes_to_place.size();
+        const auto max_layout_height = ssg.nodes_to_place.size();
+
+        if (position.x == layout.x() && layout.x() < (max_layout_width - 1) &&
+            !ssg.network.is_po(ssg.nodes_to_place[place_info.current_node - 1]))
+        {
+            layout.resize({layout.x() + 1, layout.y(), layout.z()});
+        }
+        if (position.y == layout.y() && layout.y() < (max_layout_height - 1) &&
+            !ssg.network.is_po(ssg.nodes_to_place[place_info.current_node - 1]))
+        {
+            layout.resize({layout.x(), layout.y() + 1, layout.z()});
+        }
+    }
+    /**
+     * Generates the next possible positions with their priorities based on the layout and search space graph.
+     *
+     * @param possible_positions A vector of possible positions to be considered.
+     * @param layout The layout to be used.
+     * @param ssg The search space graph.
+     * @return A pair containing the next positions with their priorities and an optional layout.
+     */
+    std::pair<std::vector<std::pair<coord_vec_type<ObstrLyt>, double>>, std::optional<ObstrLyt>>
+    generate_next_positions(const coord_vec_type<ObstrLyt>& possible_positions, ObstrLyt& layout,
+                            const search_space_graph<ObstrLyt>& ssg)
+    {
+        std::vector<std::pair<coord_vec_type<ObstrLyt>, double>> next_positions;
+        next_positions.reserve(2 * ssg.num_expansions);
+
+        for (const auto& position : possible_positions)
+        {
+            auto new_sequence = ssg.current_vertex;
+            new_sequence.push_back(position);
+
+            const auto remaining_nodes_to_place =
+                static_cast<double>(ssg.nodes_to_place.size() - (ssg.current_vertex.size() + 1));
+
+            // current layout size
+            const double cost1 = static_cast<double>(((std::max(layout.x() - 1, position.x) + 1) *
+                                                      (std::max(layout.y() - 1, position.y) + 1))) /
+                                 static_cast<double>((ssg.nodes_to_place.size() * ssg.nodes_to_place.size()));
+
+            // position of last placed node
+            const double cost2 = static_cast<double>(((position.x + 1) * (position.y + 1))) /
+                                 static_cast<double>((ssg.nodes_to_place.size() * ssg.nodes_to_place.size()));
+
+            double priority = remaining_nodes_to_place + cost1 + cost2;
+            next_positions.push_back({new_sequence, priority});
+        }
+
+        return {next_positions, std::nullopt};
     }
     /**
      * Computes possible expansions and their priorities for the current vertex in the search space graph.
@@ -1220,28 +1304,21 @@ class graph_oriented_layout_design_impl
      * @param ssg The search space graph.
      * @return A pair containing a vector of next positions with their priorities and an optional layout.
      * If an improved solution is found, the layout is returned.
-     * If the layout is invalid or no improvement is possible, `std::nullopt` is returned.
+     * If the layout is invalid or no improvement is possible, std::nullopt is returned.
      */
     [[nodiscard]] std::pair<std::vector<std::pair<coord_vec_type<ObstrLyt>, double>>, std::optional<ObstrLyt>>
     expand(search_space_graph<ObstrLyt>& ssg) noexcept
     {
-        uint64_t current_po   = 0ul;
-        uint64_t current_node = 0ul;
-
-        const auto     min_layout_width  = ssg.network.num_pis();
-        const uint64_t min_layout_height = 1;
-        const auto     max_layout_width  = ssg.nodes_to_place.size();
-        const auto     max_layout_height = ssg.nodes_to_place.size();
-
-        node_dict_type<ObstrLyt, tec_nt> node2pos{ssg.network};
+        const auto min_layout_width = ssg.network.num_pis();
 
         std::vector<std::pair<coord_vec_type<ObstrLyt>, double>> next_positions;
         next_positions.reserve(2 * ssg.num_expansions);
 
-        Lyt lyt{{min_layout_width - 1, min_layout_height - 1, 1}, twoddwave_clocking<Lyt>()};
+        auto layout = initialize_layout(min_layout_width);
 
-        auto layout  = obstruction_layout<Lyt>(lyt);
         auto pi2node = reserve_input_nodes(layout, ssg.network);
+        node_dict_type<ObstrLyt, tec_nt> node2pos{ssg.network};
+        placement_info<ObstrLyt>         place_info{0ul, 0ul, node2pos, pi2node};
 
         bool found_solution = false;
 
@@ -1250,32 +1327,31 @@ class graph_oriented_layout_design_impl
 
         if (ssg.current_vertex.empty())
         {
-            possible_positions = get_possible_positions(layout, ssg, current_node, node2pos);
+            possible_positions = get_possible_positions(layout, ssg, place_info);
         }
 
         for (uint64_t idx = 0ul; idx < ssg.current_vertex.size(); ++idx)
         {
             const auto position = ssg.current_vertex[idx];
 
-            found_solution = place_and_route(position, layout, ssg.network, current_node, ssg.nodes_to_place,
-                                             current_po, node2pos, pi2node);
+            found_solution = place_and_route(position, layout, ssg, place_info);
 
             uint64_t area = 0ul;
 
-            if (improv_mode)
+            if (improve_current_solution)
             {
                 const auto bb = bounding_box_2d(layout);
                 area          = (bb.get_max().x + 1u) * (bb.get_max().y + 1u);
             }
 
-            if (found_solution && (!improv_mode || (area <= best_solution)))
+            if (found_solution && (!improve_current_solution || (area <= best_solution)))
             {
                 const auto bb = fiction::bounding_box_2d(layout);
                 layout.resize({bb.get_max().x, bb.get_max().y, layout.z()});
 
                 area          = layout.area();
                 best_solution = area;
-                improv_mode   = true;
+                improve_current_solution = true;
 
                 fiction::post_layout_optimization_params plo_params{};
                 plo_params.optimize_pos_only = true;
@@ -1300,58 +1376,25 @@ class graph_oriented_layout_design_impl
                 return {{}, std::nullopt};
             }
 
-            if (improv_mode && area >= best_solution)
+            if (improve_current_solution && area >= best_solution)
             {
                 return {{}, std::nullopt};
             }
 
-            // Expand layout dimensions if needed
-            if (position.x == layout.x() && layout.x() < (max_layout_width - 1) &&
-                !ssg.network.is_po(ssg.nodes_to_place[current_node - 1]))
-            {
-                layout.resize({layout.x() + 1, layout.y(), layout.z()});
-            }
-            if (position.y == layout.y() && layout.y() < (max_layout_height - 1) &&
-                !ssg.network.is_po(ssg.nodes_to_place[current_node - 1]))
-            {
-                layout.resize({layout.x(), layout.y() + 1, layout.z()});
-            }
-
-            // Check if it's the last position in the current vertex
+            adjust_layout_size(position, layout, ssg, place_info);
+            // check if it's the last position in the current vertex
             if (idx == (ssg.current_vertex.size() - 1))
             {
-                if (!valid_layout(layout, ssg.network, node2pos, ssg.nodes_to_place, current_node))
+                if (!valid_layout(layout, ssg, place_info))
                 {
                     return {{}, std::nullopt};
                 }
 
-                possible_positions = get_possible_positions(layout, ssg, current_node, node2pos);
+                possible_positions = get_possible_positions(layout, ssg, place_info);
             }
         }
 
-        // Generate next possible positions with their priorities
-        for (const auto& position : possible_positions)
-        {
-            auto new_sequence = ssg.current_vertex;
-            new_sequence.push_back(position);
-
-            const auto remaining_nodes_to_place =
-                static_cast<double>(ssg.nodes_to_place.size() - (ssg.current_vertex.size() + 1));
-
-            // Current layout size
-            const double cost1 = static_cast<double>(((std::max(layout.x() - 1, position.x) + 1) *
-                                                      (std::max(layout.y() - 1, position.y) + 1))) /
-                                 static_cast<double>((max_layout_width * max_layout_height));
-
-            // Position of last placed node
-            const double cost2 = static_cast<double>(((position.x + 1) * (position.y + 1))) /
-                                 static_cast<double>((max_layout_width * max_layout_height));
-
-            double priority = remaining_nodes_to_place + cost1 + cost2;
-            next_positions.push_back({new_sequence, priority});
-        }
-
-        return {next_positions, std::nullopt};
+        return generate_next_positions(possible_positions, layout, ssg);
     }
     /**
      * Initializes the allowed positions for primary inputs (PIs), the cost for each search space graph and the maximum
@@ -1382,7 +1425,7 @@ class graph_oriented_layout_design_impl
             }
 
             graph.cost_so_far[graph.current_vertex] = 0;
-            graph.num_expansions                    = 4;
+            graph.num_expansions                    = NUM_VERTEX_EXPANSIONS;
         }
     }
     /**
@@ -1390,7 +1433,7 @@ class graph_oriented_layout_design_impl
      */
     void initialize_networks_and_nodes_to_place() noexcept
     {
-        // Prepare nodes to place for each topology view
+        // prepare nodes to place for each topology view
         auto prepare_nodes_to_place = [](auto& network, auto& nodes_to_place)
         {
             network.foreach_node(
@@ -1416,7 +1459,7 @@ class graph_oriented_layout_design_impl
 
         topo_view_co_to_ci network_breadth_co_to_ci{network_substituted_breadth};
 
-        // Initialize search space graphs with networks
+        // initialize search space graphs with networks
         ssg_vec[0].network = network_breadth_co_to_ci;
         ssg_vec[1].network = network_breadth_co_to_ci;
 
@@ -1426,7 +1469,7 @@ class graph_oriented_layout_design_impl
         ssg_vec[0].nodes_to_place = nodes_to_place_breadth_co_to_ci;
         ssg_vec[1].nodes_to_place = nodes_to_place_breadth_co_to_ci;
 
-        if (ps.high_effort)
+        if (ps.high_effort_mode)
         {
             params.strategy = fanout_substitution_params::substitution_strategy::DEPTH;
             mockturtle::fanout_view network_substituted_depth{fanout_substitution<tec_nt>(ntk, params)};
@@ -1435,7 +1478,7 @@ class graph_oriented_layout_design_impl
             topo_view_co_to_ci network_depth_co_to_ci{network_substituted_depth};
             topo_view_ci_to_co network_depth_ci_to_co{network_substituted_depth};
 
-            // Initialize search space graphs with networks
+            // initialize search space graphs with networks
             ssg_vec[2].network = network_breadth_co_to_ci;
             for (uint64_t i = 0ul; i < 3; ++i)
             {
@@ -1454,7 +1497,7 @@ class graph_oriented_layout_design_impl
 
             ssg_vec[2].nodes_to_place = nodes_to_place_breadth_co_to_ci;
 
-            // Assign nodes to place to each search space graphs
+            // assign nodes to place to each search space graphs
             for (uint64_t i = 0ul; i < 3; ++i)
             {
                 ssg_vec[3 + i].nodes_to_place = nodes_to_place_breadth_ci_to_co;
@@ -1464,18 +1507,20 @@ class graph_oriented_layout_design_impl
         }
     }
     /**
-     * Initializes the enabled search space graphs.
+     * Initialize the search space graphs.
      */
-    void initialize_frontiers_flags() noexcept
+    void initialize() noexcept
     {
-        for (uint64_t i = 0ul; i < num_search_space_graphs; ++i)
-        {
-            ssg_vec[i].frontier_flag = true;
-        }
+        // initial setup for networks and nodes to place
+        initialize_networks_and_nodes_to_place();
+
+        // initial setup for PIs and cost
+        initialize_pis_cost_and_num_expansions();
     }
 };
 
 }  // namespace detail
+
 /**
  * A scalable and efficient placement & routing approach based on spanning a search space graph of partial layouts and
  * finding a path to one of its leaves, i.e., a complete layout.
@@ -1504,6 +1549,12 @@ Lyt graph_oriented_layout_design(Ntk& ntk, graph_oriented_layout_design_params p
     static_assert(mockturtle::is_network_type_v<Ntk>,
                   "Ntk is not a network type");  // Ntk is being converted to a technology_network anyway, therefore,
                                                  // this is the only relevant check here
+
+    // check for input degree
+    if (has_high_degree_fanin_nodes(ntk, 2))
+    {
+        throw high_degree_fanin_exception();
+    }
 
     graph_oriented_layout_design_stats                  st{};
     detail::graph_oriented_layout_design_impl<Lyt, Ntk> p{ntk, ps, st};

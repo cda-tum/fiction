@@ -33,8 +33,8 @@ inline void graph_oriented_layout_design(pybind11::module& m)
                        DOC(fiction_graph_oriented_layout_design_params_timeout))
         .def_readwrite("verbose", &fiction::graph_oriented_layout_design_params::verbose,
                        DOC(fiction_graph_oriented_layout_design_params_verbose))
-        .def_readwrite("high_effort", &fiction::graph_oriented_layout_design_params::high_effort,
-                       DOC(fiction_graph_oriented_layout_design_params_high_effort))
+        .def_readwrite("high_effort_mode", &fiction::graph_oriented_layout_design_params::high_effort_mode,
+                       DOC(fiction_graph_oriented_layout_design_params_high_effort_mode))
         .def_readwrite("return_first", &fiction::graph_oriented_layout_design_params::return_first,
                        DOC(fiction_graph_oriented_layout_design_params_return_first))
 

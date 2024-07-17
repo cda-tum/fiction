@@ -10126,7 +10126,7 @@ Returns:
 
 static const char *__doc_fiction_graph_oriented_layout_design_params = R"doc(Parameters for the graph-oriented layout design algorithm.)doc";
 
-static const char *__doc_fiction_graph_oriented_layout_design_params_high_effort = R"doc(High effort mode.)doc";
+static const char *__doc_fiction_graph_oriented_layout_design_params_high_effort_mode = R"doc(High effort mode.)doc";
 
 static const char *__doc_fiction_graph_oriented_layout_design_params_return_first = R"doc(Return first found layout.)doc";
 
