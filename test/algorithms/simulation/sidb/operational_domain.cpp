@@ -4,13 +4,13 @@
 
 #include <catch2/catch_template_test_macros.hpp>
 
+#include "fiction/layouts/coordinates.hpp"
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/technology/cell_technologies.hpp>
-#include <fiction/technology/physical_constants.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/truth_table_utils.hpp>
 
@@ -112,6 +112,30 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             CHECK(op_domain_stats.num_evaluated_parameter_combinations == 1);
             CHECK(op_domain_stats.num_operational_parameter_combinations == 1);
             CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
+
+            SECTION("3-dimensional")
+            {
+                const auto z_dimension =
+                    operational_domain_value_range{operational_domain::sweep_parameter::MU_MINUS, -0.32, -0.32, 0.01};
+
+                op_domain_params.sweep_dimensions.push_back(z_dimension);
+
+                const auto op_domain_3d = operational_domain_grid_search(lat, std::vector<tt>{create_id_tt()},
+                                                                         op_domain_params, &op_domain_stats);
+
+                // check if the operational domain has the correct size
+                CHECK(op_domain_3d.operational_values.size() == 1);
+
+                // for the selected range, all samples should be within the parameters and operational
+                check_op_domain_params_and_operational_status(op_domain_3d, op_domain_params,
+                                                              operational_status::OPERATIONAL);
+
+                CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
+                CHECK(op_domain_stats.num_simulator_invocations == 2);
+                CHECK(op_domain_stats.num_evaluated_parameter_combinations == 1);
+                CHECK(op_domain_stats.num_operational_parameter_combinations == 1);
+                CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
+            }
         }
         SECTION("random_sampling")
         {
@@ -130,6 +154,31 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             CHECK(op_domain_stats.num_evaluated_parameter_combinations > 0);
             CHECK(op_domain_stats.num_operational_parameter_combinations <= 100);
             CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
+
+            SECTION("3-dimensional")
+            {
+                const auto z_dimension =
+                    operational_domain_value_range{operational_domain::sweep_parameter::MU_MINUS, -0.32, -0.32, 0.01};
+
+                op_domain_params.sweep_dimensions.push_back(z_dimension);
+
+                const auto op_domain_3d = operational_domain_random_sampling(lat, std::vector<tt>{create_id_tt()}, 100,
+                                                                             op_domain_params, &op_domain_stats);
+
+                // check if the operational domain has the correct size
+                CHECK(op_domain_3d.operational_values.size() == 1);
+
+                // for the selected range, all samples should be within the parameters and operational
+                check_op_domain_params_and_operational_status(op_domain_3d, op_domain_params,
+                                                              operational_status::OPERATIONAL);
+
+                CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
+                CHECK(op_domain_stats.num_simulator_invocations <= 200);
+                CHECK(op_domain_stats.num_evaluated_parameter_combinations <= 100);
+                CHECK(op_domain_stats.num_evaluated_parameter_combinations > 0);
+                CHECK(op_domain_stats.num_operational_parameter_combinations <= 100);
+                CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
+            }
         }
         SECTION("flood_fill")
         {
@@ -147,6 +196,30 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             CHECK(op_domain_stats.num_evaluated_parameter_combinations == 1);
             CHECK(op_domain_stats.num_operational_parameter_combinations == 1);
             CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
+
+            SECTION("3-dimensional")
+            {
+                const auto z_dimension =
+                    operational_domain_value_range{operational_domain::sweep_parameter::MU_MINUS, -0.32, -0.32, 0.01};
+
+                op_domain_params.sweep_dimensions.push_back(z_dimension);
+
+                const auto op_domain_3d = operational_domain_flood_fill(lat, std::vector<tt>{create_id_tt()}, 1,
+                                                                        op_domain_params, &op_domain_stats);
+
+                // check if the operational domain has the correct size
+                CHECK(op_domain_3d.operational_values.size() == 1);
+
+                // for the selected range, all samples should be within the parameters and operational
+                check_op_domain_params_and_operational_status(op_domain_3d, op_domain_params,
+                                                              operational_status::OPERATIONAL);
+
+                CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
+                CHECK(op_domain_stats.num_simulator_invocations == 2);
+                CHECK(op_domain_stats.num_evaluated_parameter_combinations == 1);
+                CHECK(op_domain_stats.num_operational_parameter_combinations == 1);
+                CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
+            }
         }
         SECTION("contour_tracing")
         {
@@ -267,7 +340,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             const auto op_domain = operational_domain_grid_search(lat, std::vector<tt>{create_id_tt()},
                                                                   op_domain_params, &op_domain_stats);
 
-            // check if the operational domain has the correct size (10 steps in each dimension)
+            // check if the operational domain has the correct size
             CHECK(op_domain.operational_values.size() == 50);
 
             // for the selected range, all samples should be within the parameters and operational
@@ -278,6 +351,30 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             CHECK(op_domain_stats.num_evaluated_parameter_combinations == 50);
             CHECK(op_domain_stats.num_operational_parameter_combinations == 50);
             CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
+
+            SECTION("3-dimensional")
+            {
+                const auto z_dimension =
+                    operational_domain_value_range{operational_domain::sweep_parameter::MU_MINUS, -0.35, -0.29, 0.01};
+
+                op_domain_params.sweep_dimensions.push_back(z_dimension);
+
+                const auto op_domain_3d = operational_domain_grid_search(lat, std::vector<tt>{create_id_tt()},
+                                                                         op_domain_params, &op_domain_stats);
+
+                // check if the operational domain has the correct size
+                CHECK(op_domain_3d.operational_values.size() == 350);
+
+                // for the selected range, all samples should be within the parameters and operational
+                check_op_domain_params_and_operational_status(op_domain_3d, op_domain_params,
+                                                              operational_status::OPERATIONAL);
+
+                CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
+                CHECK(op_domain_stats.num_simulator_invocations == 700);
+                CHECK(op_domain_stats.num_evaluated_parameter_combinations == 350);
+                CHECK(op_domain_stats.num_operational_parameter_combinations == 350);
+                CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
+            }
         }
         SECTION("random_sampling")
         {
@@ -296,8 +393,32 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             CHECK(op_domain_stats.num_evaluated_parameter_combinations > 0);
             CHECK(op_domain_stats.num_operational_parameter_combinations <= 100);
             CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
-        }
 
+            SECTION("3-dimensional")
+            {
+                const auto z_dimension =
+                    operational_domain_value_range{operational_domain::sweep_parameter::MU_MINUS, -0.35, -0.29, 0.01};
+
+                op_domain_params.sweep_dimensions.push_back(z_dimension);
+
+                const auto op_domain_3d = operational_domain_random_sampling(lat, std::vector<tt>{create_id_tt()}, 100,
+                                                                             op_domain_params, &op_domain_stats);
+
+                // check if the operational domain has the correct size
+                CHECK(op_domain_3d.operational_values.size() <= 350);
+
+                // for the selected range, all samples should be within the parameters and operational
+                check_op_domain_params_and_operational_status(op_domain_3d, op_domain_params,
+                                                              operational_status::OPERATIONAL);
+
+                CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
+                CHECK(op_domain_stats.num_simulator_invocations <= 700);
+                CHECK(op_domain_stats.num_evaluated_parameter_combinations <= 350);
+                CHECK(op_domain_stats.num_evaluated_parameter_combinations > 0);
+                CHECK(op_domain_stats.num_operational_parameter_combinations <= 350);
+                CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
+            }
+        }
         SECTION("flood_fill")
         {
             const auto op_domain = operational_domain_flood_fill(lat, std::vector<tt>{create_id_tt()}, 1,
@@ -314,6 +435,30 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             CHECK(op_domain_stats.num_evaluated_parameter_combinations == 50);
             CHECK(op_domain_stats.num_operational_parameter_combinations == 50);
             CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
+
+            SECTION("3-dimensional")
+            {
+                const auto z_dimension =
+                    operational_domain_value_range{operational_domain::sweep_parameter::MU_MINUS, -0.35, -0.29, 0.01};
+
+                op_domain_params.sweep_dimensions.push_back(z_dimension);
+
+                const auto op_domain_3d = operational_domain_flood_fill(lat, std::vector<tt>{create_id_tt()}, 100,
+                                                                        op_domain_params, &op_domain_stats);
+
+                // check if the operational domain has the correct size
+                CHECK(op_domain_3d.operational_values.size() == 350);
+
+                // for the selected range, all samples should be within the parameters and operational
+                check_op_domain_params_and_operational_status(op_domain_3d, op_domain_params,
+                                                              operational_status::OPERATIONAL);
+
+                CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
+                CHECK(op_domain_stats.num_simulator_invocations == 700);
+                CHECK(op_domain_stats.num_evaluated_parameter_combinations == 350);
+                CHECK(op_domain_stats.num_operational_parameter_combinations == 350);
+                CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
+            }
         }
         SECTION("contour_tracing")
         {
@@ -363,6 +508,30 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             CHECK(op_domain_stats.num_evaluated_parameter_combinations == 100);
             CHECK(op_domain_stats.num_operational_parameter_combinations == 0);
             CHECK(op_domain_stats.num_non_operational_parameter_combinations == 100);
+
+            SECTION("3-dimensional")
+            {
+                const auto z_dimension =
+                    operational_domain_value_range{operational_domain::sweep_parameter::MU_MINUS, -0.14, -0.10, 0.01};
+
+                op_domain_params.sweep_dimensions.push_back(z_dimension);
+
+                const auto op_domain_3d = operational_domain_grid_search(lat, std::vector<tt>{create_id_tt()},
+                                                                         op_domain_params, &op_domain_stats);
+
+                // check if the operational domain has the correct size
+                CHECK(op_domain_3d.operational_values.size() == 500);
+
+                // for the selected range, all samples should be within the parameters and non-operational
+                check_op_domain_params_and_operational_status(op_domain_3d, op_domain_params,
+                                                              operational_status::NON_OPERATIONAL);
+
+                CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
+                CHECK(op_domain_stats.num_simulator_invocations <= 1000);
+                CHECK(op_domain_stats.num_evaluated_parameter_combinations == 500);
+                CHECK(op_domain_stats.num_operational_parameter_combinations == 0);
+                CHECK(op_domain_stats.num_non_operational_parameter_combinations == 500);
+            }
         }
         SECTION("random_sampling")
         {
@@ -381,6 +550,30 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             CHECK(op_domain_stats.num_evaluated_parameter_combinations <= 5000);
             CHECK(op_domain_stats.num_operational_parameter_combinations == 0);
             CHECK(op_domain_stats.num_non_operational_parameter_combinations <= 5000);
+
+            SECTION("3-dimensional")
+            {
+                const auto z_dimension =
+                    operational_domain_value_range{operational_domain::sweep_parameter::MU_MINUS, -0.14, -0.10, 0.01};
+
+                op_domain_params.sweep_dimensions.push_back(z_dimension);
+
+                const auto op_domain_3d = operational_domain_random_sampling(lat, std::vector<tt>{create_id_tt()}, 5000,
+                                                                             op_domain_params, &op_domain_stats);
+
+                // check if the operational domain has the correct maximum size
+                CHECK(op_domain_3d.operational_values.size() <= 5000);
+
+                // for the selected range, all samples should be within the parameters and non-operational
+                check_op_domain_params_and_operational_status(op_domain_3d, op_domain_params,
+                                                              operational_status::NON_OPERATIONAL);
+
+                CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
+                CHECK(op_domain_stats.num_simulator_invocations < 10000);
+                CHECK(op_domain_stats.num_evaluated_parameter_combinations <= 5000);
+                CHECK(op_domain_stats.num_operational_parameter_combinations == 0);
+                CHECK(op_domain_stats.num_non_operational_parameter_combinations <= 5000);
+            }
         }
         SECTION("flood_fill")
         {
@@ -399,6 +592,30 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             CHECK(op_domain_stats.num_evaluated_parameter_combinations <= 100);
             CHECK(op_domain_stats.num_operational_parameter_combinations == 0);
             CHECK(op_domain_stats.num_non_operational_parameter_combinations <= 100);
+
+            SECTION("3-dimensional")
+            {
+                const auto z_dimension =
+                    operational_domain_value_range{operational_domain::sweep_parameter::MU_MINUS, -0.14, -0.10, 0.01};
+
+                op_domain_params.sweep_dimensions.push_back(z_dimension);
+
+                const auto op_domain_3d = operational_domain_flood_fill(lat, std::vector<tt>{create_id_tt()}, 25,
+                                                                        op_domain_params, &op_domain_stats);
+
+                // check if the operational domain has the correct maximum size
+                CHECK(op_domain_3d.operational_values.size() <= 500);
+
+                // for the selected range, all samples should be within the parameters and non-operational
+                check_op_domain_params_and_operational_status(op_domain_3d, op_domain_params,
+                                                              operational_status::NON_OPERATIONAL);
+
+                CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
+                CHECK(op_domain_stats.num_simulator_invocations <= 1000);
+                CHECK(op_domain_stats.num_evaluated_parameter_combinations <= 500);
+                CHECK(op_domain_stats.num_operational_parameter_combinations == 0);
+                CHECK(op_domain_stats.num_non_operational_parameter_combinations <= 500);
+            }
         }
         SECTION("contour_tracing")
         {
