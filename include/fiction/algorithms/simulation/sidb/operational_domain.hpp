@@ -659,12 +659,12 @@ class operational_domain_impl
                 else if (params.sim_engine == sidb_simulation_engine::EXGS)
                 {
                     // perform an exhaustive ground state simulation
-                    sim_results = exhaustive_ground_state_simulation(lyt, params.simulation_parameters);
+                    sim_results = exhaustive_ground_state_simulation(lyt, simulation_parameters);
                 }
                 else if (params.sim_engine == sidb_simulation_engine::QUICKSIM)
                 {
                     // perform a heuristic simulation
-                    const quicksim_params qs_params{params.simulation_parameters, 500, 0.6};
+                    const quicksim_params qs_params{simulation_parameters, 500, 0.6};
                     sim_results = quicksim(lyt, qs_params);
                 }
                 else
