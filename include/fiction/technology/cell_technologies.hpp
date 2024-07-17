@@ -324,7 +324,7 @@ struct sidb_technology
         EMPTY  = cell_type::EMPTY,
         INPUT  = cell_type::INPUT,
         OUTPUT = cell_type::OUTPUT,
-        LOGIC = cell_type::LOGIC
+        LOGIC  = cell_type::LOGIC
     };
 
     [[nodiscard]] static constexpr bool is_empty_cell(const cell_type& c) noexcept
