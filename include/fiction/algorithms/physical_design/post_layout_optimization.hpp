@@ -636,7 +636,7 @@ bool improve_gate_location(Lyt& lyt, const tile<Lyt>& old_pos, const tile<Lyt>& 
             }
         }
 
-        if (moved_gate || ((num_gate_relocations >= max_gate_relocations) & !lyt.is_po_tile(current_pos)))
+        if (moved_gate || ((num_gate_relocations >= max_gate_relocations) && !lyt.is_po_tile(current_pos)))
         {
             break;
         }
