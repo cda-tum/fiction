@@ -339,7 +339,8 @@ class operational_domain_impl
      */
     [[nodiscard]] operational_domain flood_fill(const std::size_t samples) noexcept
     {
-        assert(num_dimensions == 2 && "Flood fill is only supported for two dimensions");
+        assert((num_dimensions == 2 || num_dimensions == 3) &&
+               "Flood fill is only supported for two and three dimensions");
 
         mockturtle::stopwatch stop{stats.time_total};
 
@@ -347,17 +348,30 @@ class operational_domain_impl
 
         simulate_operational_status_in_parallel(step_point_samples);
 
-        // a queue of (x, y) dimension step points to be evaluated
+        // a queue of (x, y[, z]) dimension step points to be evaluated
         std::queue<step_point> queue{};
 
         // a utility function that adds the adjacent points to the queue for further evaluation
         const auto queue_next_points = [this, &queue](const step_point& sp)
         {
-            for (const auto& m : moore_neighborhood(sp))
+            if (num_dimensions == 2)
             {
-                if (!has_already_been_sampled(m))
+                for (const auto& m : moore_neighborhood_2d(sp))
                 {
-                    queue.push(m);
+                    if (!has_already_been_sampled(m))
+                    {
+                        queue.push(m);
+                    }
+                }
+            }
+            else  // num_dimensions == 3
+            {
+                for (const auto& m : moore_neighborhood_3d(sp))
+                {
+                    if (!has_already_been_sampled(m))
+                    {
+                        queue.push(m);
+                    }
                 }
             }
         };
@@ -448,7 +462,7 @@ class operational_domain_impl
 
         auto backtrack_point = x == 0 ? current_contour_point : step_point{{x - 1, y}};
 
-        auto current_neighborhood = moore_neighborhood(current_contour_point);
+        auto current_neighborhood = moore_neighborhood_2d(current_contour_point);
 
         auto next_point = contour_starting_point;
 
@@ -473,7 +487,7 @@ class operational_domain_impl
                 backtrack_point = next_point;
             }
 
-            current_neighborhood = moore_neighborhood(current_contour_point);
+            current_neighborhood = moore_neighborhood_2d(current_contour_point);
             next_point           = next_clockwise_point(current_neighborhood, backtrack_point);
         }
 
@@ -900,17 +914,17 @@ class operational_domain_impl
         return latest_operational_point;
     }
     /**
-     * Returns the Moore neighborhood of the step point at `sp = (x, y)`. The Moore neighborhood is the set of all
-     * points that are adjacent to `(x, y)` including the diagonals. Thereby, the Moore neighborhood contains up to 8
-     * points as points outside of the parameter range are not gathered. The points are returned in clockwise order
-     * starting from the right neighbor.
+     * Returns the 2D Moore neighborhood of the step point at `sp = (x, y)`. The 2D Moore neighborhood is the set of all
+     * points that are adjacent to `(x, y)` in the plane including the diagonals. Thereby, the 2D Moore neighborhood
+     * contains up to 8 points as points outside of the parameter range are not gathered. The points are returned in
+     * clockwise order starting from the right neighbor.
      *
-     * @param sp Step point to get the Moore neighborhood of.
-     * @return The Moore neighborhood of the step point at `sp = (x, y)`.
+     * @param sp Step point to get the 2D Moore neighborhood of.
+     * @return The 2D Moore neighborhood of the step point at `sp = (x, y)`.
      */
-    [[nodiscard]] std::vector<step_point> moore_neighborhood(const step_point& sp) const noexcept
+    [[nodiscard]] std::vector<step_point> moore_neighborhood_2d(const step_point& sp) const noexcept
     {
-        assert(num_dimensions == 2 && "Moore neighborhood is only supported for 2 dimensions");
+        assert(num_dimensions == 2 && "2D Moore neighborhood is only supported for 2 dimensions");
         assert(sp.step_values.size() == 2 && "Given step point must have 2 dimensions");
 
         std::vector<step_point> neighbors{};
@@ -975,6 +989,67 @@ class operational_domain_impl
 
         return neighbors;
     };
+    /**
+     * Returns the 3D Moore neighborhood of the step point at `sp = (x, y)`. The 3D Moore neighborhood is the set of all
+     * points that are adjacent to `(x, y)` in the 3D space including the diagonals. Thereby, the 3D Moore neighborhood
+     * contains up to 26 points as points outside of the parameter range are not gathered. The points are returned in
+     * no particular order.
+     *
+     * @param sp Step point to get the 3D Moore neighborhood of.
+     * @return The 3D Moore neighborhood of the step point at `sp = (x, y)`.
+     */
+    [[nodiscard]] std::vector<step_point> moore_neighborhood_3d(const step_point& sp) const noexcept
+    {
+        assert(num_dimensions == 3 && "3D Moore neighborhood is only supported for 3 dimensions");
+        assert(sp.step_values.size() == 3 && "Given step point must have 3 dimensions");
+
+        std::vector<step_point> neighbors{};
+        neighbors.reserve(26);
+
+        const auto emplace = [&neighbors](const auto x, const auto y, const auto z) noexcept
+        { neighbors.emplace_back(std::vector<std::size_t>{x, y, z}); };
+
+        const auto x = sp.step_values[0];
+        const auto y = sp.step_values[1];
+        const auto z = sp.step_values[2];
+
+        const auto num_x_indices = indices[0].size();
+        const auto num_y_indices = indices[1].size();
+        const auto num_z_indices = indices[2].size();
+
+        // add neighbors in no particular order
+
+        // iterate over all combinations of (-1, 0, 1) offsets for x, y, and z
+        for (const int64_t x_offset : {-1, 0, 1})
+        {
+            for (const int64_t y_offset : {-1, 0, 1})
+            {
+                for (const int64_t z_offset : {-1, 0, 1})
+                {
+                    // skip the center cell
+                    if (x_offset == 0 && y_offset == 0 && z_offset == 0)
+                    {
+                        continue;
+                    }
+
+                    // calculate new coordinate
+                    const int64_t dx = static_cast<int64_t>(x) + x_offset;
+                    const int64_t dy = static_cast<int64_t>(y) + y_offset;
+                    const int64_t dz = static_cast<int64_t>(z) + z_offset;
+
+                    // check if the new coordinate is within the bounds
+                    if ((dx >= 0 && dx < static_cast<int64_t>(num_x_indices)) &&
+                        (dy >= 0 && dy < static_cast<int64_t>(num_y_indices)) &&
+                        (dz >= 0 && dz < static_cast<int64_t>(num_z_indices)))
+                    {
+                        emplace(static_cast<uint64_t>(dx), static_cast<uint64_t>(dy), static_cast<uint64_t>(dz));
+                    }
+                }
+            }
+        }
+
+        return neighbors;
+    }
     /**
      * Helper function that writes the the statistics of the operational domain computation to the statistics object.
      * Due to data races that can occur during the computation, each value is temporarily held in an atomic variable and
