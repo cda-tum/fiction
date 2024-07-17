@@ -3760,6 +3760,14 @@ Parameter ``to_delete``:
 Returns:
     A 2D vector representing the calculated offset matrix.)doc";
 
+static const char *__doc_fiction_detail_check_if_empty = R"doc(Enum to specify which tiles should be checked if they are empty.)doc";
+
+static const char *__doc_fiction_detail_check_if_empty_DEST = R"doc(Check if the destination tile is empty.)doc";
+
+static const char *__doc_fiction_detail_check_if_empty_NONE = R"doc(Do not check any tiles.)doc";
+
+static const char *__doc_fiction_detail_check_if_empty_SRC = R"doc(Check if the source tile is empty.)doc";
+
 static const char *__doc_fiction_detail_color_routing_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_color_routing_impl_color_routing_impl = R"doc()doc";
@@ -5361,13 +5369,28 @@ Template parameter ``Lyt``:
 Template parameter ``Ntk``:
     Network type.)doc";
 
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_adjust_layout_size =
+R"doc(Adjusts the layout size based on the last position.
+
+Parameter ``position``:
+    The last position in the layout.
+
+Parameter ``layout``:
+    The layout to be adjusted.
+
+Parameter ``ssg``:
+    The search space graph.
+
+Parameter ``place_info``:
+    The placement information.)doc";
+
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_best_optimized_solution = R"doc(Current best solution w.r.t. area after relocating POs.)doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_best_solution = R"doc(Current best solution w.r.t. area.)doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_check_path =
 R"doc(Checks if there is a path between the source and destination tiles in
-the given layout. Optionally returns the path if specified.
+the given layout.
 
 Parameter ``layout``:
     The layout to be checked.
@@ -5378,17 +5401,12 @@ Parameter ``src``:
 Parameter ``dest``:
     The destination tile.
 
-Parameter ``src_is_new_pos``:
-    Flag indicating if the source is a new position and should be
-    checked if empty. Defaults to `false`.
-
-Parameter ``dest_is_new_pos``:
-    Flag indicating if the destination is a new position and should be
-    checked if empty. Defaults to `false`.
+Parameter ``check_if_empty``:
+    Enum indicating if the src or dest have to host a new gate and
+    therefore have to be empty. Defaults to `check_if_empty::NONE`.
 
 Returns:
-    A path from `src` to `dest` if one exist, `std::nullopt`
-    otherwise.)doc";
+    A path from `src` to `dest` if one exists.)doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_get_possible_positions =
 R"doc(Retrieves the possible positions for a given node in the layout based
@@ -5399,15 +5417,12 @@ possible positions.
 Parameter ``layout``:
     The layout in which to find the possible positions.
 
+Parameter ``place_info``:
+    The placement context containing current node, primary output
+    index, node to position mapping, and PI to node mapping.
+
 Parameter ``ssg``:
     The search space graph.
-
-Parameter ``current_node``:
-    The current node index in the nodes_to_place vector.
-
-Parameter ``node2pos``:
-    A dictionary mapping nodes from the network to signals in the
-    layout.
 
 Returns:
     A vector of tiles representing the possible positions for the
@@ -5507,9 +5522,18 @@ Parameter ``p``:
 Parameter ``st``:
     The statistics object to record execution details.)doc";
 
-static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_improv_mode =
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_improve_current_solution =
 R"doc(Flag indicating if an initial solution was already found, and that
 other search space graphs should be pruned.)doc";
+
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_initialize_layout =
+R"doc(Initializes the layout with minimum width
+
+Parameter ``min_layout_width``:
+    The minimum width of the layout.
+
+Returns:
+    The initialized layout.)doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_max_placed_nodes = R"doc(Keep track of the maximum number of placed nodes.)doc";
 
@@ -5530,30 +5554,20 @@ Parameter ``position``:
 Parameter ``layout``:
     The layout in which to place the node.
 
-Parameter ``network``:
-    The network containing the nodes.
+Parameter ``place_info``:
+    The placement context containing current node, primary output
+    index, node to position mapping, and PI to node mapping.
 
-Parameter ``current_node``:
-    The current node index in the nodes_to_place vector.
-
-Parameter ``nodes_to_place``:
-    A vector representing the nodes to be placed.
-
-Parameter ``current_po``:
-    The current primary output index.
-
-Parameter ``node2pos``:
-    A dictionary mapping nodes from the network to signals in the
-    layout.
-
-Parameter ``pi2node``:
-    A mapping of primary input nodes to layout nodes.
+Parameter ``ssg``:
+    The search space graph.
 
 Returns:
     A boolean indicating if a solution was found.)doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_print_placement_info =
-R"doc(Outputs placement information.
+R"doc(Outputs placement information, including the current runtime, the
+number of evaluated paths in the search space graphs and the layout
+dimensions.
 
 Parameter ``lyt``:
     Current layout.)doc";
@@ -5616,16 +5630,12 @@ tile to the drain.
 Parameter ``layout``:
     The layout to be validated.
 
-Parameter ``network``:
-    The network containing the nodes.
+Parameter ``place_info``:
+    The placement context containing current node, primary output
+    index, node to position mapping, and PI to node mapping.
 
-Parameter ``node2pos``:
-    A dictionary mapping nodes from the network to signals in the
-    layout.
-
-Parameter ``placement_possible``:
-    A boolean flag that will be set to false if placement is not
-    possible.)doc";
+Parameter ``ssg``:
+    The search space graph.)doc";
 
 static const char *__doc_fiction_detail_improve_gate_location =
 R"doc(Utility function that moves gates to new coordinates and checks if
@@ -6347,6 +6357,19 @@ static const char *__doc_fiction_detail_pi_locations_left = R"doc(Flag indicatin
 
 static const char *__doc_fiction_detail_pi_locations_top = R"doc(Flag indicating if primary inputs (PIs) can be placed at the top.)doc";
 
+static const char *__doc_fiction_detail_placement_info =
+R"doc(Struct to hold information necessary for gate placement during layout
+generation for one vertex.
+
+Template parameter ``ObstrLyt``:
+    The type of the layout.)doc";
+
+static const char *__doc_fiction_detail_placement_info_current_node = R"doc(The index of the current node being placed.)doc";
+
+static const char *__doc_fiction_detail_placement_info_current_po = R"doc(The index of the current primary output.)doc";
+
+static const char *__doc_fiction_detail_placement_info_node2pos = R"doc(Mapping of nodes to their positions in the layout.)doc";
+
 static const char *__doc_fiction_detail_post_layout_optimization_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_post_layout_optimization_impl_plyt = R"doc(2DDWave-clocked Cartesian gate-level layout to optimize.)doc";
@@ -6900,28 +6923,6 @@ Returns:
 static const char *__doc_fiction_detail_technology_mapping_impl_stats = R"doc(Technology mapping statistics.)doc";
 
 static const char *__doc_fiction_detail_technology_mapping_impl_technology_mapping_impl = R"doc()doc";
-
-static const char *__doc_fiction_detail_timeout_settings =
-R"doc(This struct holds a single `timeout` value which is determined based
-on the provided optional timeout value and a boolean indicating if
-high effort is required.)doc";
-
-static const char *__doc_fiction_detail_timeout_settings_timeout = R"doc(The timeout value in milliseconds.)doc";
-
-static const char *__doc_fiction_detail_timeout_settings_timeout_settings =
-R"doc(This constructor initializes the `timeout` member. If `timeout_opt`
-has a value, it uses that value for the timeout. If `timeout_opt` does
-not have a value, it sets the timeout to 1000000 milliseconds (1000
-seconds) if `high_effort` is `true`, or to 10000 milliseconds (10
-seconds) if `high_effort` is false.
-
-Parameter ``timeout_opt``:
-    An optional unsigned integer value representing the desired
-    timeout in milliseconds.
-
-Parameter ``high_effort``:
-    A boolean indicating whether a high effort (longer timeout) is
-    desired.)doc";
 
 static const char *__doc_fiction_detail_to_hex =
 R"doc(Utility function to transform a Cartesian tile into a hexagonal one.
@@ -10126,9 +10127,17 @@ Returns:
 
 static const char *__doc_fiction_graph_oriented_layout_design_params = R"doc(Parameters for the graph-oriented layout design algorithm.)doc";
 
-static const char *__doc_fiction_graph_oriented_layout_design_params_high_effort_mode = R"doc(High effort mode.)doc";
+static const char *__doc_fiction_graph_oriented_layout_design_params_high_effort_mode =
+R"doc(In high effort mode, 12 search space graphs are created with varying
+fanout substitution strategies, allowed PI placements, and other
+parameters, compared to only 2 graphs in high efficiency mode. This
+broader exploration increases the likelihood of discovering optimal
+layouts. When a solution is found in any graph, its cost is used to
+prune the search in the remaining graphs.)doc";
 
-static const char *__doc_fiction_graph_oriented_layout_design_params_return_first = R"doc(Return first found layout.)doc";
+static const char *__doc_fiction_graph_oriented_layout_design_params_return_first =
+R"doc(Return the first found layout, which might still have a high cost but
+can be found fast.)doc";
 
 static const char *__doc_fiction_graph_oriented_layout_design_params_timeout = R"doc(Timeout limit (in ms).)doc";
 
