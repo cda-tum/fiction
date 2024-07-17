@@ -403,7 +403,7 @@ create_wiring_reduction_layout(const Lyt& lyt, const uint64_t x_offset = 0, cons
             // crossing:
             //
             // =
-            auto is_single_wire = [&lyt, &old_coord](uint64_t x_offset, uint64_t y_offset)
+            auto is_single_wire = [&lyt, &old_coord](const uint64_t x_offset, const uint64_t y_offset)
             {
                 return lyt.is_wire_tile({old_coord.x - x_offset, old_coord.y - y_offset, 0}) &&
                        !lyt.is_fanout(lyt.get_node({old_coord.x - x_offset, old_coord.y - y_offset, 0}) &&
@@ -415,14 +415,15 @@ create_wiring_reduction_layout(const Lyt& lyt, const uint64_t x_offset = 0, cons
             // +→=
             // ↓
             // =
-            auto is_crossing = [&lyt, &old_coord](uint64_t x_offset, uint64_t y_offset)
+            auto is_crossing = [&lyt, &old_coord](const uint64_t x_offset, const uint64_t y_offset)
             {
                 return lyt.has_northern_incoming_signal({old_coord.x - x_offset, old_coord.y - y_offset + 1, 0}) &&
                        lyt.has_western_incoming_signal({old_coord.x - x_offset + 1, old_coord.y - y_offset, 0});
             };
 
             // Utility function to fully obstruct a coordinate
-            auto obstruct_coordinate = [&wiring_reduction_lyt, &new_coord](uint64_t x_offset, uint64_t y_offset)
+            auto obstruct_coordinate =
+                [&wiring_reduction_lyt, &new_coord](const uint64_t x_offset, const uint64_t y_offset)
             {
                 wiring_reduction_lyt.obstruct_coordinate({new_coord.x - x_offset, new_coord.y - y_offset, 0});
                 wiring_reduction_lyt.obstruct_coordinate({new_coord.x - x_offset, new_coord.y - y_offset, 1});
@@ -464,15 +465,13 @@ create_wiring_reduction_layout(const Lyt& lyt, const uint64_t x_offset = 0, cons
                             // ...
                             //  ↓
                             //  =→
-                            uint64_t i = 1;
-                            while (is_single_wire(0, i))
+                            for (uint64_t i = 1; is_single_wire(0, i); ++i)
                             {
                                 if (lyt.has_western_incoming_signal({old_coord.x, old_coord.y - i, old_coord.z}))
                                 {
                                     obstruct_coordinate(0, i);
                                     break;
                                 }
-                                ++i;
                             }
                         }
                     }
@@ -498,19 +497,17 @@ create_wiring_reduction_layout(const Lyt& lyt, const uint64_t x_offset = 0, cons
                         wiring_reduction_lyt.obstruct_connection(new_coord,
                                                                  {new_coord.x + 1, new_coord.y + 1, new_coord.z});
 
-                        uint64_t i = 1;
                         // Special cases:
                         // ↓
                         // =→...→=
                         //       ↓
-                        while (is_single_wire(i, 0))
+                        for (uint64_t i = 1; is_single_wire(i, 0); ++i)
                         {
                             if (lyt.has_northern_incoming_signal({old_coord.x - i, old_coord.y, old_coord.z}))
                             {
                                 obstruct_coordinate(i, 0);
                                 break;
                             }
-                            ++i;
                         }
                     }
                 }
@@ -545,10 +542,9 @@ create_wiring_reduction_layout(const Lyt& lyt, const uint64_t x_offset = 0, cons
                 // =→+
                 if (is_single_wire(1, 0) && is_single_wire(0, 1))
                 {
-                    uint64_t i        = 1;
-                    bool     obstruct = false;
+                    bool obstruct = false;
 
-                    while (true)
+                    for (uint64_t i = 1; true; ++i)
                     {
                         if (is_crossing(1, 1))
                         {
@@ -568,7 +564,6 @@ create_wiring_reduction_layout(const Lyt& lyt, const uint64_t x_offset = 0, cons
                                 obstruct = true;
                                 break;
                             }
-                            ++i;
                         }
                         else
                         {
@@ -583,7 +578,6 @@ create_wiring_reduction_layout(const Lyt& lyt, const uint64_t x_offset = 0, cons
                                 obstruct = true;
                                 break;
                             }
-                            ++i;
                         }
                     }
 
