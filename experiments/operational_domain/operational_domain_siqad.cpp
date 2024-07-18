@@ -4,17 +4,16 @@
 
 #include "fiction_experiments.hpp"  // experiment class
 
-#include <fiction/algorithms/simulation/sidb/operational_domain.hpp>  // operational domain computation algorithms
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
-#include <fiction/io/read_sqd_layout.hpp>           // reader for SiDB layouts
-#include <fiction/io/write_operational_domain.hpp>  // writer for operational domains
-#include <fiction/technology/sidb_lattice.hpp>
+#include <fiction/algorithms/simulation/sidb/operational_domain.hpp>      // operational domain computation algorithms
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>  // SiDB simulation engines
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>  // SiDB simulation parameters
+#include <fiction/io/read_sqd_layout.hpp>                                     // reader for SiDB layouts
+#include <fiction/io/write_operational_domain.hpp>                            // writer for operational domains
 #include <fiction/types.hpp>                    // pre-defined types suitable for the FCN domain
 #include <fiction/utils/truth_table_utils.hpp>  // truth tables helper functions
 
-#include <fmt/format.h>  // string formatting
-#include <mockturtle/utils/stopwatch.hpp>
+#include <fmt/format.h>                    // string formatting
+#include <mockturtle/utils/stopwatch.hpp>  // stopwatch for measuring time
 
 #include <array>
 #include <cstdint>
@@ -32,16 +31,31 @@ int main()  // NOLINT
     experiments::experiment<std::string, uint64_t, uint64_t, double, uint64_t, double, uint64_t, double, uint64_t,
                             double, uint64_t, double, uint64_t, double, uint64_t, double, uint64_t, double>
         opdomain_exp{
-            "Operational Domain", "Name",     "#SiDBs",                         // Benchmark
-            "#Samples (GS)",      "op. (GS)", "sim calls (GS)", "t in s (GS)",  // Grid Search
-            "#Samples (RS)",      "op. (RS)", "sim calls (RS)", "t in s (RS)",  // Random Sampling
-            "#Samples (FF)",      "op. (FF)", "sim calls (FF)", "t in s (FF)",  // Flood Fill
-            "#Samples (CT)",      "op. (CT)", "sim calls (CT)", "t in s (CT)"   // Contour Tracing
+            "Operational Domain SiQAD",
+            "Name",
+            "#SiDBs",  // Benchmark
+            "#Samples (GS)",
+            "op. (GS)",
+            "sim calls (GS)",
+            "t in s (GS)",  // Grid Search
+            "#Samples (RS)",
+            "op. (RS)",
+            "sim calls (RS)",
+            "t in s (RS)",  // Random Sampling
+            "#Samples (FF)",
+            "op. (FF)",
+            "sim calls (FF)",
+            "t in s (FF)",  // Flood Fill
+            "#Samples (CT)",
+            "op. (CT)",
+            "sim calls (CT)",
+            "t in s (CT)"  // Contour Tracing
         };
 
     // simulation parameters
     sidb_simulation_parameters sim_params{};
-    sim_params.base = 2;
+    sim_params.base     = 2;
+    sim_params.mu_minus = -0.28;
 
     // operational domain parameters
     operational_domain_params op_domain_params{};
