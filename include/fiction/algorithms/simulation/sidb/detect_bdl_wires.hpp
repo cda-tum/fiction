@@ -278,27 +278,27 @@ detect_bdl_wires(const Lyt& lyt, const detect_bdl_wires_params& params = {},
 
         bool neighbor_bdl_found = true;
 
-        // choose current bdl pair
+        // choose the current bdl pair
         auto current_bdl_pair = *bdl_pairs.cbegin();
-        // store the front bdl pair as initial bdl pair
+        // store the front bdl pair as an initial bdl pair
         const auto initial_bdl_pair = current_bdl_pair;
 
         // add current bdl pair to wire
         wire.push_back(current_bdl_pair);
-        // delete bdl pair from set
+        // delete bdl pair from a set
         bdl_pairs.erase(current_bdl_pair);
 
         while (neighbor_bdl_found)
         {
-            // determine neighbor bdl pair below
+            // determine a neighbor bdl pair below
             const auto neighbor_below =
                 find_bdl_neighbor_below<Lyt>(current_bdl_pair, bdl_pairs, params.threshold_bdl_interdistance);
 
             if (neighbor_below.has_value())
             {
-                // add neighbor bdl pair to wire
+                // add a neighbor bdl pair to wire
                 wire.push_back(neighbor_below.value());
-                // delete bdl pair from set
+                // delete bdl pair from a set
                 bdl_pairs.erase(neighbor_below.value());
                 // update current bdl pair
                 current_bdl_pair = neighbor_below.value();
