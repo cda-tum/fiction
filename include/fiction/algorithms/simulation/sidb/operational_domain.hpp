@@ -1036,7 +1036,7 @@ class operational_domain_impl
             return operational();
         }
 
-        // if we made it here, the layout is operational
+        // if we made it here, the layout is non-operational
         return non_operational();
     }
     /**
