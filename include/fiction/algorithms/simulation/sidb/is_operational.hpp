@@ -123,10 +123,10 @@ class is_operational_impl
             output_bdl_wires{detect_bdl_wires(layout, parameters.bdl_wire_params, bdl_wire_selection::OUTPUT)}
     {
         // determine wire directions and store them.
-        std::transform(input_bdl_wires.begin(), input_bdl_wires.end(), std::back_inserter(input_bdl_wire_directions),
+        std::transform(input_bdl_wires.cbegin(), input_bdl_wires.cend(), std::back_inserter(input_bdl_wire_directions),
                        [](const auto& wire) { return determine_wire_direction<Lyt>(wire); });
 
-        std::transform(output_bdl_wires.begin(), output_bdl_wires.end(), std::back_inserter(output_bdl_wire_directions),
+        std::transform(output_bdl_wires.cbegin(), output_bdl_wires.cend(), std::back_inserter(output_bdl_wire_directions),
                        [](const auto& wire) { return determine_wire_direction<Lyt>(wire); });
     }
 
@@ -170,7 +170,7 @@ class is_operational_impl
                 [](const auto& lhs, const auto& rhs) { return lhs.get_system_energy() < rhs.get_system_energy(); });
 
             // ground state is degenerate
-            if ((energy_distribution(simulation_results.charge_distributions).begin()->second) > 1)
+            if ((energy_distribution(simulation_results.charge_distributions).cbegin()->second) > 1)
             {
                 return operational_status::NON_OPERATIONAL;
             }
@@ -190,8 +190,7 @@ class is_operational_impl
                 // if the expected output is 1, the expected charge states are (upper, lower) = (0, -1)
                 if (kitty::get_bit(truth_table[output], i))
                 {
-                    if (charge_state_output_upper != sidb_charge_state::NEUTRAL ||
-                        charge_state_output_lower != sidb_charge_state::NEGATIVE)
+                    if (!encodes_bit_one(*ground_state, output_bdl_pairs[output]))
                     {
                         return operational_status::NON_OPERATIONAL;
                     }
@@ -199,8 +198,7 @@ class is_operational_impl
                 // if the expected output is 0, the expected charge states are (upper, lower) = (-1, 0)
                 else
                 {
-                    if (charge_state_output_upper != sidb_charge_state::NEGATIVE ||
-                        charge_state_output_lower != sidb_charge_state::NEUTRAL)
+                    if (!encodes_bit_zero(*ground_state, output_bdl_pairs[output]))
                     {
                         return operational_status::NON_OPERATIONAL;
                     }
@@ -259,7 +257,7 @@ class is_operational_impl
                 [](const auto& lhs, const auto& rhs) { return lhs.get_system_energy() < rhs.get_system_energy(); });
 
             // ground state is degenerate
-            if ((energy_distribution(simulation_results.charge_distributions).begin()->second) > 1)
+            if ((energy_distribution(simulation_results.charge_distributions).cbegin()->second) > 1)
             {
                 continue;
             }
@@ -370,6 +368,7 @@ class is_operational_impl
     physical_simulation_of_layout(const bdl_input_iterator<Lyt>& bdl_iterator) noexcept
     {
         assert(parameters.simulation_parameters.base == 2 && "base number is set to 3");
+
         if (parameters.sim_engine == sidb_simulation_engine::EXGS)
         {
             // perform an exhaustive ground state simulation
@@ -520,7 +519,7 @@ class is_operational_impl
      * @param bdl BDL pair to be evaluated.
      * @return `true` if `0` is encoded, `false` otherwise.
      */
-    bool encodes_bit_zero(const charge_distribution_surface<Lyt>& ground_state,
+    [[nodiscard]] bool encodes_bit_zero(const charge_distribution_surface<Lyt>& ground_state,
                           const bdl_pair<cell<Lyt>>&              bdl) const noexcept
     {
         return static_cast<bool>((ground_state.get_charge_state(bdl.upper) == sidb_charge_state::NEGATIVE) &&
@@ -535,7 +534,7 @@ class is_operational_impl
      * @param bdl BDL pair to be evaluated.
      * @return `true` if `1` is encoded, `false` otherwise.
      */
-    bool encodes_bit_one(const charge_distribution_surface<Lyt>& ground_state,
+    [[nodiscard]] bool encodes_bit_one(const charge_distribution_surface<Lyt>& ground_state,
                          const bdl_pair<cell<Lyt>>&              bdl) const noexcept
     {
         return static_cast<bool>((ground_state.get_charge_state(bdl.upper) == sidb_charge_state::NEUTRAL) &&
@@ -604,8 +603,8 @@ template <typename Lyt, typename TT>
 
     assert(!spec.empty());
     // all elements in tts must have the same number of variables
-    assert(std::adjacent_find(spec.begin(), spec.end(),
-                              [](const auto& a, const auto& b) { return a.num_vars() != b.num_vars(); }) == spec.end());
+    assert(std::adjacent_find(spec.cbegin(), spec.cend(),
+                              [](const auto& a, const auto& b) { return a.num_vars() != b.num_vars(); }) == spec.cend());
 
     detail::is_operational_impl<Lyt, TT> p{lyt, spec, params};
 

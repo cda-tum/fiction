@@ -80,6 +80,11 @@ struct detect_bdl_wires_params
     detect_bdl_pairs_params params_bdl_pairs{};
 };
 
+/**
+ * This alias represents a BDL wire as a vector of BDL pairs.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ */
 template <typename Lyt>
 using bdl_wire = std::vector<bdl_pair<cell<Lyt>>>;
 
@@ -94,10 +99,10 @@ using bdl_wire = std::vector<bdl_pair<cell<Lyt>>>;
  *         or `std::nullopt` if no such BDL pair is found.
  */
 template <typename Lyt>
-std::optional<bdl_pair<cell<Lyt>>> find_bdl_pair_in_wire_by_type(const bdl_wire<Lyt>&             wire,
-                                                                 const sidb_technology::cell_type t)
+[[nodiscard]] std::optional<bdl_pair<cell<Lyt>>> find_bdl_pair_in_wire_by_type(const bdl_wire<Lyt>&             wire,
+                                                                 const sidb_technology::cell_type t) noexcept
 {
-    auto it = std::find_if(wire.begin(), wire.end(), [t](const auto& bdl) { return bdl.type == t; });
+    auto it = std::find_if(wire.cbegin(), wire.cend(), [t](const auto& bdl) { return bdl.type == t; });
 
     if (it != wire.end())
     {
@@ -129,10 +134,10 @@ template <typename Lyt>
         return bdl_wire_direction::NO_DIRECTION;
     }
 
-    bool input_exists = std::any_of(wire.begin(), wire.end(),
+    bool input_exists = std::any_of(wire.cbegin(), wire.cend(),
                                     [](const auto& bdl) { return bdl.type == sidb_technology::cell_type::INPUT; });
 
-    bool output_exists = std::any_of(wire.begin(), wire.end(),
+    bool output_exists = std::any_of(wire.cbegin(), wire.cend(),
                                      [](const auto& bdl) { return bdl.type == sidb_technology::cell_type::OUTPUT; });
 
     if (input_exists && output_exists)
@@ -158,7 +163,7 @@ template <typename Lyt>
         const auto input_bdl = find_bdl_pair_in_wire_by_type<Lyt>(wire, sidb_technology::cell_type::INPUT);
 
         bool bdl_above_exists =
-            std::any_of(wire.begin(), wire.end(), [&input_bdl](const auto& bdl) { return bdl > input_bdl; });
+            std::any_of(wire.cbegin(), wire.cend(), [&input_bdl](const auto& bdl) { return bdl > input_bdl; });
 
         if (bdl_above_exists)
         {
@@ -170,7 +175,7 @@ template <typename Lyt>
 
     const auto output_bdl = find_bdl_pair_in_wire_by_type<Lyt>(wire, sidb_technology::cell_type::OUTPUT);
     bool       bdl_above_exists =
-        std::any_of(wire.begin(), wire.end(), [&output_bdl](const auto& bdl) { return bdl > output_bdl; });
+        std::any_of(wire.cbegin(), wire.cend(), [&output_bdl](const auto& bdl) { return bdl > output_bdl; });
 
     if (bdl_above_exists)
     {

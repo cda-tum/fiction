@@ -310,13 +310,13 @@ class bdl_input_iterator
      *
      * @return A vector of `bdl_wire_direction` representing the directions of the input BDL wires.
      */
-    [[nodiscard]] std::vector<bdl_wire_direction> determine_input_bdl_wire_directions() noexcept
+    [[nodiscard]] std::vector<bdl_wire_direction> determine_input_bdl_wire_directions() const noexcept
     {
         std::vector<bdl_wire_direction> directions{};
         // Reserve space for the directions
         directions.reserve(input_bdl_wires.size());
 
-        std::transform(input_bdl_wires.begin(), input_bdl_wires.end(), std::back_inserter(directions),
+        std::transform(input_bdl_wires.cbegin(), input_bdl_wires.cend(), std::back_inserter(directions),
                        [](const auto& wire) { return determine_wire_direction<Lyt>(wire); });
 
         return directions;
