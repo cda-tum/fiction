@@ -1341,7 +1341,7 @@ class graph_oriented_layout_design_impl
             if (improve_current_solution)
             {
                 const auto bb = bounding_box_2d(layout);
-                area          = (bb.get_max().x + 1u) * (bb.get_max().y + 1u);
+                area = static_cast<uint64_t>(bb.get_max().x + 1u) * static_cast<uint64_t>(bb.get_max().y + 1u);
             }
 
             if (found_solution && (!improve_current_solution || (area <= best_solution)))
