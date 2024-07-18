@@ -126,7 +126,8 @@ class is_operational_impl
         std::transform(input_bdl_wires.cbegin(), input_bdl_wires.cend(), std::back_inserter(input_bdl_wire_directions),
                        [](const auto& wire) { return determine_wire_direction<Lyt>(wire); });
 
-        std::transform(output_bdl_wires.cbegin(), output_bdl_wires.cend(), std::back_inserter(output_bdl_wire_directions),
+        std::transform(output_bdl_wires.cbegin(), output_bdl_wires.cend(),
+                       std::back_inserter(output_bdl_wire_directions),
                        [](const auto& wire) { return determine_wire_direction<Lyt>(wire); });
     }
 
@@ -520,7 +521,7 @@ class is_operational_impl
      * @return `true` if `0` is encoded, `false` otherwise.
      */
     [[nodiscard]] bool encodes_bit_zero(const charge_distribution_surface<Lyt>& ground_state,
-                          const bdl_pair<cell<Lyt>>&              bdl) const noexcept
+                                        const bdl_pair<cell<Lyt>>&              bdl) const noexcept
     {
         return static_cast<bool>((ground_state.get_charge_state(bdl.upper) == sidb_charge_state::NEGATIVE) &&
                                  (ground_state.get_charge_state(bdl.lower) == sidb_charge_state::NEUTRAL));
@@ -535,7 +536,7 @@ class is_operational_impl
      * @return `true` if `1` is encoded, `false` otherwise.
      */
     [[nodiscard]] bool encodes_bit_one(const charge_distribution_surface<Lyt>& ground_state,
-                         const bdl_pair<cell<Lyt>>&              bdl) const noexcept
+                                       const bdl_pair<cell<Lyt>>&              bdl) const noexcept
     {
         return static_cast<bool>((ground_state.get_charge_state(bdl.upper) == sidb_charge_state::NEUTRAL) &&
                                  (ground_state.get_charge_state(bdl.lower) == sidb_charge_state::NEGATIVE));
@@ -603,8 +604,8 @@ template <typename Lyt, typename TT>
 
     assert(!spec.empty());
     // all elements in tts must have the same number of variables
-    assert(std::adjacent_find(spec.cbegin(), spec.cend(),
-                              [](const auto& a, const auto& b) { return a.num_vars() != b.num_vars(); }) == spec.cend());
+    assert(std::adjacent_find(spec.cbegin(), spec.cend(), [](const auto& a, const auto& b)
+                              { return a.num_vars() != b.num_vars(); }) == spec.cend());
 
     detail::is_operational_impl<Lyt, TT> p{lyt, spec, params};
 

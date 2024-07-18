@@ -99,8 +99,8 @@ using bdl_wire = std::vector<bdl_pair<cell<Lyt>>>;
  *         or `std::nullopt` if no such BDL pair is found.
  */
 template <typename Lyt>
-[[nodiscard]] std::optional<bdl_pair<cell<Lyt>>> find_bdl_pair_in_wire_by_type(const bdl_wire<Lyt>&             wire,
-                                                                 const sidb_technology::cell_type t) noexcept
+[[nodiscard]] std::optional<bdl_pair<cell<Lyt>>>
+find_bdl_pair_in_wire_by_type(const bdl_wire<Lyt>& wire, const sidb_technology::cell_type t) noexcept
 {
     auto it = std::find_if(wire.cbegin(), wire.cend(), [t](const auto& bdl) { return bdl.type == t; });
 
