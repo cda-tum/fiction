@@ -5,6 +5,10 @@ on:
     paths:
       - '**/*.hpp'
       - '.github/workflows/pyfiction-docstring-generator.yml'
+  pull_request:
+    paths:
+      - '**/*.hpp'
+      - '.github/workflows/pyfiction-docstring-generator.yml'
   workflow_dispatch:
 
 jobs:
