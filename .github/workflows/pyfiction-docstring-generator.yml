@@ -23,6 +23,10 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Determine Branch Name
+        id: branch_name
+        run: echo "${GITHUB_REF#refs/heads/}"
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -60,4 +64,4 @@ jobs:
           git commit -m ":memo: Update pyfiction docstrings"
 
       - name: Push changes
-        run: git push origin main
+        run: git push origin HEAD:"${{ steps.branch_name.outputs.branch }}"
