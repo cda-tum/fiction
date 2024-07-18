@@ -46,11 +46,11 @@ class bdl_input_iterator
             layout{lyt.clone()},
             input_pairs{detect_bdl_pairs<Lyt>(lyt, sidb_technology::cell_type::INPUT, params.params_bdl_pairs)},
             input_bdl_wires{detect_bdl_wires<Lyt>(lyt, params, bdl_wire_selection::INPUT)},
-            num_inputs{static_cast<uint8_t>(input_pairs.size())}
+            num_inputs{static_cast<uint8_t>(input_pairs.size())},
+            input_wire_directions{determine_input_bdl_wire_directions()}
     {
         static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
         static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-        bdl_wire_directions = wire_directions();
         set_all_inputs();
     }
 
@@ -289,10 +289,14 @@ class bdl_input_iterator
      * The detected input BDL pairs.
      */
     const std::vector<bdl_pair<cell<Lyt>>> input_pairs;
-
+    /**
+     * The detected input BDL wires.
+     */
     const std::vector<bdl_wire<Lyt>> input_bdl_wires;
-
-    std::vector<bdl_wire_direction> bdl_wire_directions;
+    /**
+     * The detected directions of the input BDL wires.
+     */
+    const std::vector<bdl_wire_direction> input_wire_directions;
     /**
      * The amount of input BDL pairs.
      */
@@ -301,12 +305,16 @@ class bdl_input_iterator
      * The current input index. There are \f$2^n\f$ possible input states for an \f$n\f$-input BDL layout.
      */
     uint64_t current_input_index{0ull};
-
-    [[nodiscard]] std::vector<bdl_wire_direction> wire_directions() noexcept
+    /**
+     * This function determines the directions of the input bdl wires.
+     *
+     * @return A vector of `bdl_wire_direction` representing the directions of the input BDL wires.
+     */
+    [[nodiscard]] std::vector<bdl_wire_direction> determine_input_bdl_wire_directions() noexcept
     {
         std::vector<bdl_wire_direction> directions{};
-
-        directions.reserve(input_bdl_wires.size());  // Reserve space for the directions
+        // Reserve space for the directions
+        directions.reserve(input_bdl_wires.size());
 
         std::transform(input_bdl_wires.begin(), input_bdl_wires.end(), std::back_inserter(directions),
                        [](const auto& wire) { return determine_wire_direction<Lyt>(wire); });
@@ -326,7 +334,7 @@ class bdl_input_iterator
         {
             const auto& input_i = input_pairs[num_inputs - 1 - i];
 
-            if (bdl_wire_directions[num_inputs - 1 - i] == bdl_wire_direction::NORTH_SOUTH)
+            if (input_wire_directions[num_inputs - 1 - i] == bdl_wire_direction::NORTH_SOUTH)
             {
                 if ((current_input_index & (uint64_t{1ull} << i)) != 0ull)
                 {
