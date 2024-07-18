@@ -53,10 +53,11 @@ jobs:
           overwrite: true
 
       - name: Add and Commit changes
-        uses: EndBug/add-and-commit@v9
-        with:
-          author_name: 'GitHub Actions'
-          author_email: 'actions@github.com'
-          message: ':memo: Update pyfiction docstrings'
-          add: '.'
-          cwd: '.'
+        run: |
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Actions"
+          git add .
+          git commit -m ":memo: Update pyfiction docstrings"
+
+      - name: Push changes
+        run: git push origin main
