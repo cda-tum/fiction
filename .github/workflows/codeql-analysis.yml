@@ -54,13 +54,13 @@ jobs:
       - name: Free Disk Space (Ubuntu)
         uses: jlumbroso/free-disk-space@main
         with:
-          tool-cache: false
+          tool-cache: true
           android: true
-          dotnet: false
-          haskell: false
-          large-packages: false
-          docker-images: false
-          swap-storage: false
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
 
       - name: Install libraries and the respective compiler
         run: sudo apt-get update && sudo apt-get install -yq libtbb-dev ${{matrix.compiler}}
@@ -123,7 +123,7 @@ jobs:
           -DCMAKE_BUILD_TYPE=${{matrix.build_type}}
           -DFICTION_ENABLE_UNITY_BUILD=ON
           -DFICTION_ENABLE_PCH=ON
-          -DFICTION_CLI=ON
+          -DFICTION_CLI=OFF
           -DFICTION_TEST=ON
           -DFICTION_BENCHMARK=OFF
           -DFICTION_EXPERIMENTS=ON
