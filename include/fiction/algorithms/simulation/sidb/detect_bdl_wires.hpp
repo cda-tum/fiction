@@ -6,6 +6,8 @@
 #define FICTION_DETECT_BDL_WIRES_HPP
 
 #include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
+#include "fiction/technology/cell_technologies.hpp"
+#include "fiction/traits.hpp"
 
 #include <algorithm>
 #include <optional>
@@ -67,7 +69,7 @@ enum class bdl_wire_selection
 struct detect_bdl_wires_params
 {
     /**
-     * Inter distance threshold between two BDL pairs in a wire (unit: nm).
+     * A distance threshold, which is used to determine if two pairs of BDLs are part of the same wire. (unit: nm).
      */
     double threshold_bdl_interdistance = 2.0;
     /**
@@ -99,10 +101,8 @@ std::optional<bdl_pair<cell<Lyt>>> find_bdl_pair_in_wire_by_type(const bdl_wire<
     {
         return *it;  // Return the first BDL pair of the specified type found
     }
-    else
-    {
-        return std::nullopt;  // Return std::nullopt if no BDL pair of the specified type is found
-    }
+
+    return std::nullopt;  // Return std::nullopt if no BDL pair of the specified type is found
 }
 /**
  * Determines the direction of a Binary-dot Logic (BDL) wire based on the positions of input and output cells.
@@ -137,21 +137,21 @@ template <typename Lyt>
     {
         const auto input_bdl  = find_bdl_pair_in_wire_by_type<Lyt>(wire, sidb_technology::cell_type::INPUT).value();
         const auto output_bdl = find_bdl_pair_in_wire_by_type<Lyt>(wire, sidb_technology::cell_type::OUTPUT).value();
+
         if (input_bdl < output_bdl)
         {
             return bdl_wire_direction::NORTH_SOUTH;
         }
-        else if (input_bdl.equal_ignore_type(output_bdl))
+
+        if (input_bdl.equal_ignore_type(output_bdl))
         {
             return bdl_wire_direction::NO_DIRECTION;
         }
-        else
-        {
-            return bdl_wire_direction::SOUTH_NORTH;
-        }
+
+        return bdl_wire_direction::SOUTH_NORTH;
     }
 
-    else if (input_exists)
+    if (input_exists)
     {
         const auto input_bdl = find_bdl_pair_in_wire_by_type<Lyt>(wire, sidb_technology::cell_type::INPUT);
 
@@ -162,27 +162,20 @@ template <typename Lyt>
         {
             return bdl_wire_direction::NORTH_SOUTH;
         }
-        else
-        {
-            return bdl_wire_direction::SOUTH_NORTH;
-        }
+
+        return bdl_wire_direction::SOUTH_NORTH;
     }
 
-    else
+    const auto output_bdl = find_bdl_pair_in_wire_by_type<Lyt>(wire, sidb_technology::cell_type::OUTPUT);
+    bool       bdl_above_exists =
+        std::any_of(wire.begin(), wire.end(), [&output_bdl](const auto& bdl) { return bdl > output_bdl; });
+
+    if (bdl_above_exists)
     {
-        const auto output_bdl = find_bdl_pair_in_wire_by_type<Lyt>(wire, sidb_technology::cell_type::OUTPUT);
-        bool       bdl_above_exists =
-            std::any_of(wire.begin(), wire.end(), [&output_bdl](const auto& bdl) { return bdl > output_bdl; });
-
-        if (bdl_above_exists)
-        {
-            return bdl_wire_direction::SOUTH_NORTH;
-        }
-        else
-        {
-            return bdl_wire_direction::NORTH_SOUTH;
-        }
+        return bdl_wire_direction::SOUTH_NORTH;
     }
+
+    return bdl_wire_direction::NORTH_SOUTH;
 }
 
 /**
@@ -249,6 +242,7 @@ template <typename Lyt>
             return std::optional<bdl_pair<cell<Lyt>>>(bdl);
         }
     }
+
     return std::nullopt;
 };
 
@@ -299,6 +293,7 @@ detect_bdl_wires(const Lyt& lyt, const detect_bdl_wires_params& params = {},
             // determine neighbor bdl pair below
             const auto neighbor_below =
                 find_bdl_neighbor_below<Lyt>(current_bdl_pair, bdl_pairs, params.threshold_bdl_interdistance);
+
             if (neighbor_below.has_value())
             {
                 // add neighbor bdl pair to wire
@@ -330,6 +325,7 @@ detect_bdl_wires(const Lyt& lyt, const detect_bdl_wires_params& params = {},
     if (wire_selection == bdl_wire_selection::INPUT)
     {
         std::vector<bdl_wire<Lyt>> input_wires{};
+
         for (const auto& wire : wires)
         {
             for (const auto& bdl : wire)
@@ -338,7 +334,6 @@ detect_bdl_wires(const Lyt& lyt, const detect_bdl_wires_params& params = {},
                 {
                     input_wires.push_back(wire);
                 }
-                continue;
             }
         }
 
@@ -348,6 +343,7 @@ detect_bdl_wires(const Lyt& lyt, const detect_bdl_wires_params& params = {},
     if (wire_selection == bdl_wire_selection::OUTPUT)
     {
         std::vector<bdl_wire<Lyt>> output_wires{};
+
         for (const auto& wire : wires)
         {
             for (const auto& bdl : wire)
@@ -356,7 +352,6 @@ detect_bdl_wires(const Lyt& lyt, const detect_bdl_wires_params& params = {},
                 {
                     output_wires.push_back(wire);
                 }
-                continue;
             }
         }
 
