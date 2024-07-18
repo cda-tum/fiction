@@ -2,10 +2,12 @@ name: 🐍 • Docstring Generator
 
 on:
   push:
+    branches: [ 'main' ]
     paths:
       - '**/*.hpp'
       - '.github/workflows/pyfiction-docstring-generator.yml'
   pull_request:
+    branches: [ 'main' ]
     paths:
       - '**/*.hpp'
       - '.github/workflows/pyfiction-docstring-generator.yml'
