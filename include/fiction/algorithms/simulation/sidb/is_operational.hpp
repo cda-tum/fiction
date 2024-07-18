@@ -85,7 +85,7 @@ struct is_operational_params
     /**
      * Condition which is used to decide if a layout is `operational` or `non-operational`.
      */
-    operational_condition condition = operational_condition::ALLOW_KINKS;
+    operational_condition op_condition = operational_condition::ALLOW_KINKS;
 };
 
 namespace detail
@@ -206,7 +206,7 @@ class is_operational_impl
                 }
             }
 
-            if (parameters.condition == operational_condition::FORBID_KINKS)
+            if (parameters.op_condition == operational_condition::FORBID_KINKS)
             {
                 if (check_existence_of_kinks_in_input_wires(*ground_state, i) ||
                     check_existence_of_kinks_in_output_wires(*ground_state, i))

@@ -56,7 +56,7 @@ inline void is_operational(pybind11::module& m)
         .def_readwrite("sim_engine", &fiction::is_operational_params::sim_engine,
                        DOC(fiction_is_operational_params_sim_engine))
         .def_readwrite("bdl_wire_params", &fiction::is_operational_params::bdl_wire_params)
-        .def_readwrite("condition", &fiction::is_operational_params::condition);
+        .def_readwrite("op_condition", &fiction::is_operational_params::op_condition);
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
