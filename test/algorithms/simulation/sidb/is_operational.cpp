@@ -6,6 +6,7 @@
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
+#include <fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp>
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/technology/cell_technologies.hpp>
@@ -178,5 +179,25 @@ TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[is-operational]", 
             is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT});
         CHECK(op_inputs.size() == 2);
         CHECK(op_inputs == std::set<uint64_t>{0, 3});
+    }
+}
+
+TEST_CASE("AND gate with bestagon structure and kink state at right input wire for input 01", "[is-operational]")
+{
+    const auto lyt = blueprints::and_gate_with_kink_states<sidb_cell_clk_lyt_siqad>();
+
+    SECTION("allow kink states")
+    {
+        CHECK(is_operational(lyt, std::vector<tt>{create_and_tt()},
+                             is_operational_params{sidb_simulation_parameters{2, -0.32}})
+                  .first == operational_status::OPERATIONAL);
+    }
+    SECTION("Forbid kink states")
+    {
+        CHECK(is_operational(lyt, std::vector<tt>{create_and_tt()},
+                             is_operational_params{sidb_simulation_parameters{2, -0.32},
+                                                   sidb_simulation_engine::QUICKEXACT, detect_bdl_wires_params{},
+                                                   operational_condition::FORBID_KINKS})
+                  .first == operational_status::NON_OPERATIONAL);
     }
 }

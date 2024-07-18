@@ -17,6 +17,7 @@
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/cell_technologies.hpp"
+#include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/traits.hpp"
 
@@ -27,6 +28,7 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <iterator>
 #include <set>
 #include <utility>
 #include <vector>
@@ -47,6 +49,22 @@ enum class operational_status
      */
     NON_OPERATIONAL
 };
+
+/**
+ * Condition which is used to decide if a layout is `operational` or `non-operational`.
+ */
+enum class operational_condition
+{
+    /**
+     * Even if the I/O pins show kinks, the layout is still considered as `operational`.
+     */
+    ALLOW_KINKS,
+    /**
+     * The I/O pins are not allowed to show kinks. Otherwise it is considered as `non-operational`.
+     */
+    FORBID_KINKS
+};
+
 /**
  * Parameters for the `is_operational` algorithm.
  */
@@ -64,6 +82,10 @@ struct is_operational_params
      * Parameters for the BDL wire detection algorithms.
      */
     detect_bdl_wires_params bdl_wire_params{};
+    /**
+     * Condition which is used to decide if a layout is `operational` or `non-operational`.
+     */
+    operational_condition condition = operational_condition::ALLOW_KINKS;
 };
 
 namespace detail
@@ -96,8 +118,17 @@ class is_operational_impl
             parameters{params},
             output_bdl_pairs(detect_bdl_pairs(layout, sidb_technology::cell_type::OUTPUT,
                                               parameters.bdl_wire_params.params_bdl_pairs)),
-            bii(bdl_input_iterator<Lyt>{layout, parameters.bdl_wire_params})
-    {}
+            bii(bdl_input_iterator<Lyt>{layout, parameters.bdl_wire_params}),
+            input_bdl_wires{detect_bdl_wires(layout, parameters.bdl_wire_params, bdl_wire_selection::INPUT)},
+            output_bdl_wires{detect_bdl_wires(layout, parameters.bdl_wire_params, bdl_wire_selection::OUTPUT)}
+    {
+        // determine wire directions and store them.
+        std::transform(input_bdl_wires.begin(), input_bdl_wires.end(), std::back_inserter(input_bdl_wire_directions),
+                       [](const auto& wire) { return determine_wire_direction<Lyt>(wire); });
+
+        std::transform(output_bdl_wires.begin(), output_bdl_wires.end(), std::back_inserter(output_bdl_wire_directions),
+                       [](const auto& wire) { return determine_wire_direction<Lyt>(wire); });
+    }
 
     /**
      * Run the `is_operational` algorithm.
@@ -173,6 +204,15 @@ class is_operational_impl
                     {
                         return operational_status::NON_OPERATIONAL;
                     }
+                }
+            }
+
+            if (parameters.condition == operational_condition::FORBID_KINKS)
+            {
+                if (check_existence_of_kinks_in_input_wires(*ground_state, i) ||
+                    check_existence_of_kinks_in_output_wires(*ground_state, i))
+                {
+                    return operational_status::NON_OPERATIONAL;
                 }
             }
         }
@@ -299,6 +339,22 @@ class is_operational_impl
      */
     bdl_input_iterator<Lyt> bii;
     /**
+     * Input BDL wires.
+     */
+    std::vector<bdl_wire<Lyt>> input_bdl_wires;
+    /**
+     * Output BDL wires.
+     */
+    std::vector<bdl_wire<Lyt>> output_bdl_wires;
+    /**
+     * Directions of the input wires.
+     */
+    std::vector<bdl_wire_direction> input_bdl_wire_directions{};
+    /**
+     * Directions of the output wires.
+     */
+    std::vector<bdl_wire_direction> output_bdl_wire_directions{};
+    /**
      * Number of simulator invocations.
      */
     std::size_t simulator_invocations{0};
@@ -338,6 +394,153 @@ class is_operational_impl
 
         return sidb_simulation_result<Lyt>{};
     }
+    /**
+     * This function iterates through the input wires and evaluates their charge states against the expected
+     * states derived from the input pattern. A kink is considered to exist if an input wire's charge state does not
+     * match the expected value (i.e., bit one or bit zero) for the given input index.
+     *
+     * @tparam Lyt SiDB cell-level layout type
+     * @param ground_state The ground state charge distribution surface.
+     * @param current_input_index The current input index used to retrieve the expected output from the truth table.
+     * @return `true` if any input wire contains a kink (i.e., an unexpected charge state), `false` otherwise.
+     */
+    [[nodiscard]] bool check_existence_of_kinks_in_input_wires(const charge_distribution_surface<Lyt>& ground_state,
+                                                               const uint64_t current_input_index) const noexcept
+    {
+        for (auto i = 0u; i < input_bdl_wires.size(); i++)
+        {
+            if (input_bdl_wire_directions[input_bdl_wires.size() - 1 - i] == bdl_wire_direction::NORTH_SOUTH)
+            {
+                if ((current_input_index & (uint64_t{1ull} << i)) != 0ull)
+                {
+                    for (const auto& bdl : input_bdl_wires[input_bdl_wires.size() - 1 - i])
+                    {
+                        if (bdl.type == sidb_technology::INPUT)
+                        {
+                            continue;
+                        }
+                        if (!encodes_bit_one(ground_state, bdl))
+                        {
+                            return true;
+                        }
+                    }
+                }
+                else
+                {
+                    for (const auto& bdl : input_bdl_wires[input_bdl_wires.size() - 1 - i])
+                    {
+                        if (bdl.type == sidb_technology::INPUT)
+                        {
+                            continue;
+                        }
+                        if (!encodes_bit_zero(ground_state, bdl))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+            else if (input_bdl_wire_directions[input_bdl_wires.size() - 1 - i] == bdl_wire_direction::SOUTH_NORTH)
+            {
+                if ((current_input_index & (uint64_t{1ull} << i)) != 0ull)
+                {
+                    for (const auto& bdl : input_bdl_wires[input_bdl_wires.size() - 1 - i])
+                    {
+                        if (bdl.type == sidb_technology::INPUT)
+                        {
+                            continue;
+                        }
+                        if (!encodes_bit_zero(ground_state, bdl))
+                        {
+                            return true;
+                        }
+                    }
+                }
+                else
+                {
+                    for (const auto& bdl : input_bdl_wires[input_bdl_wires.size() - 1 - i])
+                    {
+                        if (bdl.type == sidb_technology::INPUT)
+                        {
+                            continue;
+                        }
+                        if (!encodes_bit_one(ground_state, bdl))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * This function iterates through the output wires and evaluates their charge states against the expected
+     * states derived from the truth table. A kink is considered to exist if an output wire's charge state does not
+     * match the expected value (i.e., bit one or bit zero) for the given input index.
+     *
+     * @tparam Lyt SiDB cell-level layout type
+     * @param ground_state The ground state charge distribution surface.
+     * @param current_input_index The current input index used to retrieve the expected output from the truth table.
+     * @return `true` if any output wire contains a kink (i.e., an unexpected charge state), `false` otherwise.
+     */
+    [[nodiscard]] bool check_existence_of_kinks_in_output_wires(const charge_distribution_surface<Lyt>& ground_state,
+                                                                const uint64_t current_input_index) const noexcept
+    {
+        for (auto i = 0u; i < output_bdl_wires.size(); i++)
+        {
+            for (const auto& bdl : output_bdl_wires[i])
+            {
+                if (kitty::get_bit(truth_table[i], current_input_index))
+                {
+                    if (!encodes_bit_one(ground_state, bdl))
+                    {
+                        return true;
+                    };
+                }
+                else
+                {
+                    if (!encodes_bit_zero(ground_state, bdl))
+                    {
+                        return true;
+                    };
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * This function return `true` if `0` is encoded in the charge state of the given BDL pair. `false` otherwise.
+     *
+     * @tparam Lyt SiDB cell-level layout type.
+     * @param ground_state The ground state charge distribution surface.
+     * @param bdl BDL pair to be evaluated.
+     * @return `true` if `0` is encoded, `false` otherwise.
+     */
+    bool encodes_bit_zero(const charge_distribution_surface<Lyt>& ground_state,
+                          const bdl_pair<cell<Lyt>>&              bdl) const noexcept
+    {
+        return static_cast<bool>((ground_state.get_charge_state(bdl.upper) == sidb_charge_state::NEGATIVE) &&
+                                 (ground_state.get_charge_state(bdl.lower) == sidb_charge_state::NEUTRAL));
+    }
+
+    /**
+     * This function return `true` if `1` is encoded in the charge state of the given BDL pair. `false` otherwise.
+     *
+     * @tparam Lyt SiDB cell-level layout type.
+     * @param ground_state The ground state charge distribution surface.
+     * @param bdl BDL pair to be evaluated.
+     * @return `true` if `1` is encoded, `false` otherwise.
+     */
+    bool encodes_bit_one(const charge_distribution_surface<Lyt>& ground_state,
+                         const bdl_pair<cell<Lyt>>&              bdl) const noexcept
+    {
+        return static_cast<bool>((ground_state.get_charge_state(bdl.upper) == sidb_charge_state::NEUTRAL) &&
+                                 (ground_state.get_charge_state(bdl.lower) == sidb_charge_state::NEGATIVE));
+    }
 };
 
 }  // namespace detail
@@ -370,7 +573,8 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
 
     assert(!spec.empty());
     // all elements in tts must have the same number of variables
-    assert(std::adjacent_find(spec.cbegin(), spec.cend(), [](const auto& a, const auto& b)
+    assert(std::adjacent_find(spec.cbegin(), spec.cend(),
+                              [](const auto& a, const auto& b)
                               { return a.num_vars() != b.num_vars(); }) == spec.cend());
 
     detail::is_operational_impl<Lyt, TT> p{lyt, spec, params};

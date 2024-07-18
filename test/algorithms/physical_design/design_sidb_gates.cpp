@@ -233,7 +233,8 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
     SECTION("Random Generation")
     {
         const design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
-            is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT},
+            is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
+                                  detect_bdl_wires_params{}, operational_condition::ALLOW_KINKS},
             design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::RANDOM,
             {{14, 6, 0}, {24, 12, 0}},
             3};
@@ -303,7 +304,7 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
         CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
     }
 
-    SECTION("Exhaustive Generation")
+    SECTION("Exhaustive Generation, allow kinks")
     {
         const design_sidb_gates_params<cell<sidb_111_cell_clk_lyt_siqad>> params{
             is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT},
@@ -313,6 +314,20 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
 
         const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_nor_tt()}, params);
         REQUIRE(found_gate_layouts.size() == 175);
+        CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
+    }
+
+    SECTION("Exhaustive Generation, forbid kinks")
+    {
+        const design_sidb_gates_params<cell<sidb_111_cell_clk_lyt_siqad>> params{
+            is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
+                                  detect_bdl_wires_params{}, operational_condition::FORBID_KINKS},
+            design_sidb_gates_params<cell<sidb_111_cell_clk_lyt_siqad>>::design_sidb_gates_mode::EXHAUSTIVE,
+            {{10, 11, 0}, {14, 17, 0}},
+            3};
+
+        const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_nor_tt()}, params);
+        REQUIRE(found_gate_layouts.size() == 44);
         CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
     }
 }

@@ -44,14 +44,19 @@ inline void is_operational(pybind11::module& m)
         .value("NON_OPERATIONAL", fiction::operational_status::NON_OPERATIONAL,
                DOC(fiction_operational_status_NON_OPERATIONAL));
 
+    // TODO add docu
+    py::enum_<fiction::operational_condition>(m, "operational_condition")
+        .value("ALLOW_KINKS", fiction::operational_condition::ALLOW_KINKS)
+        .value("FORBID_KINKS", fiction::operational_condition::FORBID_KINKS);
+
     py::class_<fiction::is_operational_params>(m, "is_operational_params", DOC(fiction_is_operational_params))
         .def(py::init<>())
         .def_readwrite("simulation_parameters", &fiction::is_operational_params::simulation_parameters,
                        DOC(fiction_is_operational_params))
         .def_readwrite("sim_engine", &fiction::is_operational_params::sim_engine,
                        DOC(fiction_is_operational_params_sim_engine))
-        .def_readwrite("bdl_wire_params", &fiction::is_operational_params::bdl_wire_params,
-                       DOC(fiction_is_operational_params_bdl_params));
+        .def_readwrite("bdl_wire_params", &fiction::is_operational_params::bdl_wire_params)
+        .def_readwrite("condition", &fiction::is_operational_params::condition);
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 

@@ -9,6 +9,7 @@
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
+#include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/physical_constants.hpp>
 #include <fiction/types.hpp>
@@ -80,9 +81,9 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
     sim_params.base = 2;
 
     operational_domain_params op_domain_params{};
-    op_domain_params.simulation_parameters = sim_params;
-    op_domain_params.x_dimension           = operational_domain::sweep_parameter::EPSILON_R;
-    op_domain_params.y_dimension           = operational_domain::sweep_parameter::LAMBDA_TF;
+    op_domain_params.operational_params.simulation_parameters = sim_params;
+    op_domain_params.x_dimension                              = operational_domain::sweep_parameter::EPSILON_R;
+    op_domain_params.y_dimension                              = operational_domain::sweep_parameter::LAMBDA_TF;
 
     operational_domain_stats op_domain_stats{};
 
@@ -546,15 +547,15 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
     sim_params.mu_minus = -0.28;
 
     operational_domain_params op_domain_params{};
-    op_domain_params.simulation_parameters = sim_params;
-    op_domain_params.x_dimension           = operational_domain::sweep_parameter::EPSILON_R;
-    op_domain_params.x_min                 = 5.1;
-    op_domain_params.x_max                 = 6.0;
-    op_domain_params.x_step                = 0.1;
-    op_domain_params.y_dimension           = operational_domain::sweep_parameter::LAMBDA_TF;
-    op_domain_params.y_min                 = 4.5;
-    op_domain_params.y_max                 = 5.4;
-    op_domain_params.y_step                = 0.1;
+    op_domain_params.operational_params.simulation_parameters = sim_params;
+    op_domain_params.x_dimension                              = operational_domain::sweep_parameter::EPSILON_R;
+    op_domain_params.x_min                                    = 5.1;
+    op_domain_params.x_max                                    = 6.0;
+    op_domain_params.x_step                                   = 0.1;
+    op_domain_params.y_dimension                              = operational_domain::sweep_parameter::LAMBDA_TF;
+    op_domain_params.y_min                                    = 4.5;
+    op_domain_params.y_max                                    = 5.4;
+    op_domain_params.y_step                                   = 0.1;
 
     operational_domain_stats op_domain_stats{};
 
@@ -669,15 +670,15 @@ TEST_CASE("SiQAD's AND gate operational domain computation, using cube coordinat
     sim_params.mu_minus = -0.28;
 
     operational_domain_params op_domain_params{};
-    op_domain_params.simulation_parameters = sim_params;
-    op_domain_params.x_dimension           = operational_domain::sweep_parameter::EPSILON_R;
-    op_domain_params.x_min                 = 5.1;
-    op_domain_params.x_max                 = 6.0;
-    op_domain_params.x_step                = 0.1;
-    op_domain_params.y_dimension           = operational_domain::sweep_parameter::LAMBDA_TF;
-    op_domain_params.y_min                 = 4.5;
-    op_domain_params.y_max                 = 5.4;
-    op_domain_params.y_step                = 0.1;
+    op_domain_params.operational_params.simulation_parameters = sim_params;
+    op_domain_params.x_dimension                              = operational_domain::sweep_parameter::EPSILON_R;
+    op_domain_params.x_min                                    = 5.1;
+    op_domain_params.x_max                                    = 6.0;
+    op_domain_params.x_step                                   = 0.1;
+    op_domain_params.y_dimension                              = operational_domain::sweep_parameter::LAMBDA_TF;
+    op_domain_params.y_min                                    = 4.5;
+    op_domain_params.y_max                                    = 5.4;
+    op_domain_params.y_step                                   = 0.1;
 
     operational_domain_stats op_domain_stats{};
 
@@ -761,15 +762,15 @@ TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[operational-domain
     sim_params.mu_minus = -0.32;
 
     operational_domain_params op_domain_params{};
-    op_domain_params.simulation_parameters = sim_params;
-    op_domain_params.x_dimension           = operational_domain::sweep_parameter::EPSILON_R;
-    op_domain_params.x_min                 = 5.60;
-    op_domain_params.x_max                 = 5.61;
-    op_domain_params.x_step                = 0.01;
-    op_domain_params.y_dimension           = operational_domain::sweep_parameter::LAMBDA_TF;
-    op_domain_params.y_min                 = 5.0;
-    op_domain_params.y_max                 = 5.01;
-    op_domain_params.y_step                = 0.01;
+    op_domain_params.operational_params.simulation_parameters = sim_params;
+    op_domain_params.x_dimension                              = operational_domain::sweep_parameter::EPSILON_R;
+    op_domain_params.x_min                                    = 5.60;
+    op_domain_params.x_max                                    = 5.61;
+    op_domain_params.x_step                                   = 0.01;
+    op_domain_params.y_dimension                              = operational_domain::sweep_parameter::LAMBDA_TF;
+    op_domain_params.y_min                                    = 5.0;
+    op_domain_params.y_max                                    = 5.01;
+    op_domain_params.y_step                                   = 0.01;
 
     operational_domain_stats op_domain_stats{};
 
@@ -840,5 +841,56 @@ TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[operational-domain
         CHECK(op_domain_stats.num_evaluated_parameter_combinations <= 4);
         CHECK(op_domain_stats.num_operational_parameter_combinations <= 4);
         CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
+    }
+}
+
+TEMPLATE_TEST_CASE("AND gate with Bestagon shape and kink states at default physical parameters",
+                   "[operational-domain]", sidb_100_cell_clk_lyt_siqad, cds_sidb_100_cell_clk_lyt_siqad)
+{
+    const auto layout = blueprints::and_gate_with_kink_states<TestType>();
+
+    sidb_simulation_parameters sim_params{};
+    sim_params.base     = 2;
+    sim_params.mu_minus = -0.32;
+
+    operational_domain_params op_domain_params{};
+    op_domain_params.operational_params.simulation_parameters = sim_params;
+    op_domain_params.x_dimension                              = operational_domain::sweep_parameter::EPSILON_R;
+    op_domain_params.x_min                                    = 4.00;
+    op_domain_params.x_max                                    = 6.00;
+    op_domain_params.x_step                                   = 0.4;
+    op_domain_params.y_dimension                              = operational_domain::sweep_parameter::LAMBDA_TF;
+    op_domain_params.y_min                                    = 4.0;
+    op_domain_params.y_max                                    = 6.0;
+    op_domain_params.y_step                                   = 0.4;
+
+    operational_domain_stats op_domain_stats{};
+
+    SECTION("grid_search, allow kinks")
+    {
+        const auto op_domain = operational_domain_grid_search(layout, std::vector<tt>{create_and_tt()},
+                                                              op_domain_params, &op_domain_stats);
+
+        // check if the operational domain has the correct size (10 steps in each dimension)
+        CHECK(op_domain.operational_values.size() == 36);
+
+        CHECK(op_domain_stats.num_evaluated_parameter_combinations == 36);
+        CHECK(op_domain_stats.num_operational_parameter_combinations == 3);
+        CHECK(op_domain_stats.num_non_operational_parameter_combinations == 33);
+    }
+
+    SECTION("grid_search, forbid kinks")
+    {
+        op_domain_params.operational_params.condition = operational_condition::FORBID_KINKS;
+
+        const auto op_domain = operational_domain_grid_search(layout, std::vector<tt>{create_and_tt()},
+                                                              op_domain_params, &op_domain_stats);
+
+        // check if the operational domain has the correct size (10 steps in each dimension)
+        CHECK(op_domain.operational_values.size() == 36);
+
+        CHECK(op_domain_stats.num_evaluated_parameter_combinations == 36);
+        CHECK(op_domain_stats.num_operational_parameter_combinations == 0);
+        CHECK(op_domain_stats.num_non_operational_parameter_combinations == 36);
     }
 }

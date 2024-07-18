@@ -10,6 +10,8 @@
 #include "fiction/traits.hpp"
 
 #include <algorithm>
+#include <cassert>
+#include <cstdint>
 #include <optional>
 #include <set>
 #include <vector>
@@ -326,6 +328,8 @@ detect_bdl_wires(const Lyt& lyt, const detect_bdl_wires_params& params = {},
     {
         std::vector<bdl_wire<Lyt>> input_wires{};
 
+        std::set<uint64_t> input_wire_length{};
+
         for (const auto& wire : wires)
         {
             for (const auto& bdl : wire)
@@ -333,9 +337,12 @@ detect_bdl_wires(const Lyt& lyt, const detect_bdl_wires_params& params = {},
                 if (bdl.type == sidb_technology::cell_type::INPUT)
                 {
                     input_wires.push_back(wire);
+                    input_wire_length.insert(wire.size());
                 }
             }
         }
+
+        assert(input_wire_length.size() < 2 && "input wires have different length");
 
         return input_wires;
     }
@@ -344,6 +351,8 @@ detect_bdl_wires(const Lyt& lyt, const detect_bdl_wires_params& params = {},
     {
         std::vector<bdl_wire<Lyt>> output_wires{};
 
+        std::set<uint64_t> output_wire_length{};
+
         for (const auto& wire : wires)
         {
             for (const auto& bdl : wire)
@@ -351,9 +360,12 @@ detect_bdl_wires(const Lyt& lyt, const detect_bdl_wires_params& params = {},
                 if (bdl.type == sidb_technology::cell_type::OUTPUT)
                 {
                     output_wires.push_back(wire);
+                    output_wire_length.insert(wire.size());
                 }
             }
         }
+
+        assert(output_wire_length.size() < 2 && "output wires have different length");
 
         return output_wires;
     }

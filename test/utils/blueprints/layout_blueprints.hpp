@@ -985,6 +985,54 @@ Lyt two_input_one_output_bestagon_skeleton() noexcept
     return lyt;
 };
 
+/**
+ * This layout represents an AND gate with the typical Bestagon skeleton. However, it shows kinks in the I/O pins for
+ * certain input pattern.
+ */
+template <typename Lyt>
+Lyt and_gate_with_kink_states() noexcept
+{
+    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+
+    Lyt lyt{};
+
+    // input wires
+    lyt.assign_cell_type({0, 0, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({38, 0, 0}, Lyt::cell_type::INPUT);
+
+    lyt.assign_cell_type({2, 1, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({36, 1, 0}, Lyt::cell_type::INPUT);
+
+    lyt.assign_cell_type({32, 2, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 2, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({30, 3, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 3, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({26, 4, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 4, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 5, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 5, 0}, Lyt::cell_type::NORMAL);
+
+    // canvas SiDBs
+    lyt.assign_cell_type({19, 7, 0}, Lyt::cell_type::LOGIC);
+    lyt.assign_cell_type({17, 11, 0}, Lyt::cell_type::LOGIC);
+    lyt.assign_cell_type({21, 10, 0}, Lyt::cell_type::LOGIC);
+
+    // output wire
+    lyt.assign_cell_type({19, 13, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({20, 14, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 15, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 16, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({30, 17, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({32, 18, 0}, Lyt::cell_type::OUTPUT);
+
+    lyt.assign_cell_type({36, 19, 0}, Lyt::cell_type::NORMAL);
+
+    return lyt;
+};
+
 }  // namespace blueprints
 
 #endif  // FICTION_LAYOUT_BLUEPRINTS_HPP

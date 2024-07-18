@@ -57,10 +57,12 @@ class opdom_command : public command
 
         add_option("filename", filename, "CSV filename to write the operational domain to")->required();
 
-        add_option("--epsilon_r,-e", simulation_params.epsilon_r, "Electric permittivity of the substrate (unit-less)",
-                   true);
-        add_option("--lambda_tf,-l", simulation_params.lambda_tf, "Thomas-Fermi screening distance (unit: nm)", true);
-        add_option("--mu_minus,-m", simulation_params.mu_minus, "Energy transition level (0/-) (unit: eV)", true);
+        add_option("--epsilon_r,-e", params.operational_params.simulation_parameters.epsilon_r,
+                   "Electric permittivity of the substrate (unit-less)", true);
+        add_option("--lambda_tf,-l", params.operational_params.simulation_parameters.lambda_tf,
+                   "Thomas-Fermi screening distance (unit: nm)", true);
+        add_option("--mu_minus,-m", params.operational_params.simulation_parameters.mu_minus,
+                   "Energy transition level (0/-) (unit: eV)", true);
 
         add_option("--x_sweep", x_sweep, "Sweep parameter of the x dimension [epsilon_r, lambda_tf, mu_minus]", true);
         add_option("--y_sweep", y_sweep, "Sweep parameter of the y dimension [epsilon_r, lambda_tf, mu_minus]", true);
@@ -83,13 +85,13 @@ class opdom_command : public command
         op_domain = {};
         stats     = {};
 
-        if (simulation_params.epsilon_r <= 0)
+        if (params.operational_params.simulation_parameters.epsilon_r <= 0)
         {
             env->out() << "[e] epsilon_r must be positive" << std::endl;
             reset_params();
             return;
         }
-        if (simulation_params.lambda_tf <= 0)
+        if (params.operational_params.simulation_parameters.lambda_tf <= 0)
         {
             env->out() << "[e] lambda_tf must be positive" << std::endl;
             reset_params();
@@ -224,8 +226,6 @@ class opdom_command : public command
                     return;
                 }
 
-                params.simulation_parameters = simulation_params;
-
                 if (is_set("random_sampling"))
                 {
                     op_domain = fiction::operational_domain_random_sampling(*lyt_ptr, std::vector<fiction::tt>{*tt_ptr},
@@ -262,10 +262,6 @@ class opdom_command : public command
 
   private:
     /**
-     * Physical parameters for the simulation.
-     */
-    fiction::sidb_simulation_parameters simulation_params{2, -0.32, 5.6, 5.0};
-    /**
      * Operational domain parameters.
      */
     fiction::operational_domain_params params{};
@@ -293,7 +289,6 @@ class opdom_command : public command
      * The operational domain.
      */
     fiction::operational_domain op_domain{};
-
     /**
      * Writes the operational domain to the specified CSV file.
      */
@@ -329,11 +324,11 @@ class opdom_command : public command
      */
     void reset_params()
     {
-        simulation_params = fiction::sidb_simulation_parameters{2, -0.32, 5.6, 5.0};
-        params            = {};
-        x_sweep           = {};
-        y_sweep           = {};
-        filename          = {};
+        params                                          = {};
+        params.operational_params.simulation_parameters = fiction::sidb_simulation_parameters{2, -0.32, 5.6, 5.0};
+        x_sweep                                         = {};
+        y_sweep                                         = {};
+        filename                                        = {};
     }
 };
 

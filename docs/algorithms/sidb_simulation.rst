@@ -226,6 +226,7 @@ Operational Domain Computation
         **Header:** ``fiction/algorithms/simulation/sidb/is_operational.hpp``
 
         .. doxygenenum:: fiction::operational_status
+        .. doxygenenum:: fiction::operational_condition
         .. doxygenstruct:: fiction::is_operational_params
            :members:
         .. doxygenfunction:: fiction::is_operational
@@ -248,6 +249,8 @@ Operational Domain Computation
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.operational_status
+            :members:
+        .. autoclass:: mnt.pyfiction.operational_condition
             :members:
         .. autoclass:: mnt.pyfiction.is_operational_params
             :members:
