@@ -55,8 +55,3 @@ jobs:
           message: ':memo: Update pyfiction docstrings'
           author_name: GitHub Actions
           author_email: actions@github.com
-
-      - name: Push changes
-        run: git push origin HEAD:${{ github.ref }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
