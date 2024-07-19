@@ -943,8 +943,8 @@ class post_layout_optimization_impl
                 {
                     if (!layout.is_po_tile(gate_tile))
                     {
-                        max_non_po.x = std::max(max_non_po.x, static_cast<decltype(max_non_po.x)>(gate_tile.x));
-                        max_non_po.y = std::max(max_non_po.y, static_cast<decltype(max_non_po.y)>(gate_tile.y));
+                        max_non_po.x = static_cast<decltype(max_non_po.x)>(std::max(max_non_po.x, static_cast<decltype(max_non_po.x)>(gate_tile.x)));
+                        max_non_po.y = static_cast<decltype(max_non_po.x)>(std::max(max_non_po.y, static_cast<decltype(max_non_po.y)>(gate_tile.y)));
                     }
                 }
                 moved_at_least_one_gate = false;
