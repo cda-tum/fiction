@@ -5542,7 +5542,7 @@ Returns:
     `true` if `1` is encoded, `false` otherwise.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_encodes_bit_zero =
-R"doc(This function return `true` if `0` is encoded in the charge state of
+R"doc(This function returns `true` if `0` is encoded in the charge state of
 the given BDL pair. `false` otherwise.
 
 Template parameter ``Lyt``:
