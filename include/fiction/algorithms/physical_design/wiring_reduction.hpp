@@ -417,7 +417,8 @@ create_wiring_reduction_layout(const Lyt& lyt, const uint64_t x_offset = 0, cons
             // =
             auto is_crossing = [&lyt, &old_coord](const uint64_t add_x_offset, const uint64_t add_y_offset)
             {
-                return lyt.has_northern_incoming_signal({old_coord.x - add_x_offset, old_coord.y - add_y_offset + 1, 0}) &&
+                return lyt.has_northern_incoming_signal(
+                           {old_coord.x - add_x_offset, old_coord.y - add_y_offset + 1, 0}) &&
                        lyt.has_western_incoming_signal({old_coord.x - add_x_offset + 1, old_coord.y - add_y_offset, 0});
             };
 
