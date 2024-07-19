@@ -1,4 +1,4 @@
-sphinx==7.3.7
+sphinx==7.4.6
 breathe==4.35.0
 sphinx-rtd-theme==2.0.0
 sphinx-tabs==3.4.5
