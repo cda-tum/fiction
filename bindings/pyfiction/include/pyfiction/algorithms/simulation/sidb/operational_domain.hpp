@@ -51,23 +51,23 @@ inline void operational_domain(pybind11::module& m)
     namespace py = pybind11;
     using namespace pybind11::literals;
 
-    py::enum_<fiction::sweep_parameter>(m, "sweep_parameter", DOC(fiction_operational_domain_sweep_parameter))
+    py::enum_<fiction::sweep_parameter>(m, "sweep_parameter", DOC(fiction_sweep_parameter))
         .value("EPSILON_R", fiction::sweep_parameter::EPSILON_R,
-               DOC(fiction_operational_domain_sweep_parameter_EPSILON_R))
+               DOC(fiction_sweep_parameter_EPSILON_R))
         .value("LAMBDA_TF", fiction::sweep_parameter::LAMBDA_TF,
-               DOC(fiction_operational_domain_sweep_parameter_LAMBDA_TF))
-        .value("MU_MINUS", fiction::sweep_parameter::MU_MINUS, DOC(fiction_operational_domain_sweep_parameter_MU_MINUS))
+               DOC(fiction_sweep_parameter_LAMBDA_TF))
+        .value("MU_MINUS", fiction::sweep_parameter::MU_MINUS, DOC(fiction_sweep_parameter_MU_MINUS))
 
         ;
 
-    py::class_<fiction::parameter_point>(m, "parameter_point", DOC(fiction_operational_domain_parameter_point))
+    py::class_<fiction::parameter_point>(m, "parameter_point", DOC(fiction_parameter_point))
         .def(py::init<>())
         .def(py::init<const double, const double>(), "x_val"_a, "y_val"_a)
-        .def_readwrite("x", &fiction::parameter_point::x, DOC(fiction_operational_domain_parameter_point_x))
-        .def_readwrite("y", &fiction::parameter_point::y, DOC(fiction_operational_domain_parameter_point_y))
+        .def_readwrite("x", &fiction::parameter_point::x, DOC(fiction_parameter_point_x))
+        .def_readwrite("y", &fiction::parameter_point::y, DOC(fiction_parameter_point_y))
 
-        .def(py::self == py::self, "other"_a, DOC(fiction_operational_domain_parameter_point_operator_eq))
-        .def(py::self != py::self, "other"_a, DOC(fiction_operational_domain_parameter_point_operator_ne))
+        .def(py::self == py::self, "other"_a, DOC(fiction_parameter_point_operator_eq))
+        .def(py::self != py::self, "other"_a, DOC(fiction_parameter_point_operator_ne))
 
         .def("__hash__",
              [](const fiction::parameter_point& self) { return std::hash<fiction::parameter_point>{}(self); })
