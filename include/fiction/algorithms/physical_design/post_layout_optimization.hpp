@@ -5,6 +5,9 @@
 #ifndef FICTION_POST_LAYOUT_OPTIMIZATION_HPP
 #define FICTION_POST_LAYOUT_OPTIMIZATION_HPP
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
+
 #include "fiction/algorithms/path_finding/a_star.hpp"
 #include "fiction/algorithms/path_finding/cost.hpp"
 #include "fiction/algorithms/path_finding/distance.hpp"
@@ -1046,5 +1049,7 @@ void post_layout_optimization(const Lyt& lyt, post_layout_optimization_params ps
 }
 
 }  // namespace fiction
+
+#pragma GCC diagnostic pop
 
 #endif  // FICTION_POST_LAYOUT_OPTIMIZATION_HPP
