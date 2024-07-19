@@ -5836,19 +5836,33 @@ can occur during the computation, each value is temporarily held in an
 atomic variable and written to the statistics object only after the
 computation has finished.)doc";
 
-static const char *__doc_fiction_detail_operational_domain_impl_moore_neighborhood =
-R"doc(Returns the Moore neighborhood of the step point at `sp = (x, y)`. The
-Moore neighborhood is the set of all points that are adjacent to `(x,
-y)` including the diagonals. Thereby, the Moore neighborhood contains
-up to 8 points as points outside of the parameter range are not
-gathered. The points are returned in clockwise order starting from the
-right neighbor.
+static const char *__doc_fiction_detail_operational_domain_impl_moore_neighborhood_2d =
+R"doc(Returns the 2D Moore neighborhood of the step point at `sp = (x, y)`.
+The 2D Moore neighborhood is the set of all points that are adjacent
+to `(x, y)` in the plane including the diagonals. Thereby, the 2D
+Moore neighborhood contains up to 8 points as points outside of the
+parameter range are not gathered. The points are returned in clockwise
+order starting from the right neighbor.
 
 Parameter ``sp``:
-    Step point to get the Moore neighborhood of.
+    Step point to get the 2D Moore neighborhood of.
 
 Returns:
-    The Moore neighborhood of the step point at `sp = (x, y)`.)doc";
+    The 2D Moore neighborhood of the step point at `sp = (x, y)`.)doc";
+
+static const char *__doc_fiction_detail_operational_domain_impl_moore_neighborhood_3d =
+R"doc(Returns the 3D Moore neighborhood of the step point at `sp = (x, y)`.
+The 3D Moore neighborhood is the set of all points that are adjacent
+to `(x, y)` in the 3D space including the diagonals. Thereby, the 3D
+Moore neighborhood contains up to 26 points as points outside of the
+parameter range are not gathered. The points are returned in no
+particular order.
+
+Parameter ``sp``:
+    Step point to get the 3D Moore neighborhood of.
+
+Returns:
+    The 3D Moore neighborhood of the step point at `sp = (x, y)`.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_num_dimensions = R"doc(The number of dimensions.)doc";
 
