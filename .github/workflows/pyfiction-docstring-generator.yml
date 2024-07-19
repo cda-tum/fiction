@@ -5,10 +5,6 @@ on:
     paths:
       - '**/*.hpp'
       - '.github/workflows/pyfiction-docstring-generator.yml'
-  pull_request:
-    paths:
-      - '**/*.hpp'
-      - '.github/workflows/pyfiction-docstring-generator.yml'
   workflow_dispatch:
 
 jobs:
@@ -20,6 +16,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+          ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Setup Python
         uses: actions/setup-python@v5
