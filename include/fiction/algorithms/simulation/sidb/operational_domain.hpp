@@ -15,6 +15,7 @@
 #include "fiction/utils/hash.hpp"
 #include "fiction/utils/phmap_utils.hpp"
 
+#include <btree.h>
 #include <kitty/traits.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 #include <phmap.h>
@@ -30,7 +31,6 @@
 #include <optional>
 #include <queue>
 #include <random>
-#include <set>
 #include <stdexcept>
 #include <thread>
 #include <vector>
@@ -429,14 +429,9 @@ class operational_domain_impl
 
         mockturtle::stopwatch stop{stats.time_total};
 
-        // first, perform random sampling to find an operational starting point
-        const auto starting_point = find_operational_step_point_via_random_sampling(samples);
+        const auto step_point_samples = generate_random_step_points(samples);
 
-        // if no operational point was found within the specified number of samples, return
-        if (!starting_point.has_value())
-        {
-            return op_domain;
-        }
+        simulate_operational_status_in_parallel(step_point_samples);
 
         const auto next_clockwise_point = [](std::vector<step_point>& neighborhood,
                                              const step_point&        backtrack) noexcept -> step_point
@@ -452,43 +447,61 @@ class operational_domain_impl
             return neighborhood.front();
         };
 
-        // find an operational point on the contour starting from the randomly determined starting point
-        const auto contour_starting_point = find_operational_contour_step_point(*starting_point);
-
-        auto current_contour_point = contour_starting_point;
-
-        const auto x = current_contour_point.step_values[0];
-        const auto y = current_contour_point.step_values[1];
-
-        auto backtrack_point = x == 0 ? current_contour_point : step_point{{x - 1, y}};
-
-        auto current_neighborhood = moore_neighborhood_2d(current_contour_point);
-
-        auto next_point = contour_starting_point;
-
-        if (!current_neighborhood.empty())
+        // for each sampled point
+        for (const auto& starting_point : step_point_samples)
         {
-            next_point = current_contour_point == backtrack_point ?
-                             current_neighborhood.front() :
-                             next_clockwise_point(current_neighborhood, backtrack_point);
-        }
-
-        while (next_point != contour_starting_point)
-        {
-            const auto operational_status = is_step_point_operational(next_point);
-
-            if (operational_status == operational_status::OPERATIONAL)
+            // if the current starting point is non-operational, skip to the next one
+            if (op_domain.operational_values[to_parameter_point(starting_point)] == operational_status::NON_OPERATIONAL)
             {
-                backtrack_point       = current_contour_point;
-                current_contour_point = next_point;
-            }
-            else
-            {
-                backtrack_point = next_point;
+                continue;
             }
 
-            current_neighborhood = moore_neighborhood_2d(current_contour_point);
-            next_point           = next_clockwise_point(current_neighborhood, backtrack_point);
+            // if the current step point has been inferred as operational, skip to the next one
+            if (is_step_point_inferred_operational(starting_point))
+            {
+                continue;
+            }
+
+            // find an operational point on the contour starting from the randomly determined starting point
+            const auto contour_starting_point = find_operational_contour_step_point(starting_point);
+
+            auto current_contour_point = contour_starting_point;
+
+            const auto x = current_contour_point.step_values[0];
+            const auto y = current_contour_point.step_values[1];
+
+            auto backtrack_point = x == 0 ? current_contour_point : step_point{{x - 1, y}};
+
+            auto current_neighborhood = moore_neighborhood_2d(current_contour_point);
+
+            auto next_point = contour_starting_point;
+
+            if (!current_neighborhood.empty())
+            {
+                next_point = current_contour_point == backtrack_point ?
+                                 current_neighborhood.front() :
+                                 next_clockwise_point(current_neighborhood, backtrack_point);
+            }
+
+            while (next_point != contour_starting_point)
+            {
+                const auto operational_status = is_step_point_operational(next_point);
+
+                if (operational_status == operational_status::OPERATIONAL)
+                {
+                    backtrack_point       = current_contour_point;
+                    current_contour_point = next_point;
+                }
+                else
+                {
+                    backtrack_point = next_point;
+                }
+
+                current_neighborhood = moore_neighborhood_2d(current_contour_point);
+                next_point           = next_clockwise_point(current_neighborhood, backtrack_point);
+            }
+
+            infer_operational_status_in_enclosing_contour(starting_point);
         }
 
         log_stats();
@@ -533,6 +546,14 @@ class operational_domain_impl
      * The operational domain of the layout.
      */
     operational_domain op_domain{};
+    /**
+     * Forward-declare step_point.
+     */
+    struct step_point;
+    /**
+     * All the points inferred (assumed) to be operational but not actually simulated.
+     */
+    phmap::btree_set<step_point> inferred_op_domain;
     /**
      * Number of simulator invocations.
      */
@@ -762,6 +783,21 @@ class operational_domain_impl
         return operational();
     }
     /**
+     * Checks whether the given step point is part of the inferred operational domain. If it is, the point is marked as
+     * enclosed in the operational domain. No simulation is performed on `sp`. If `sp` is not contained in the inferred
+     * operational domain, it does not mean that `sp` is definitely non-operational. It could still appear in the
+     * regular operational domain with either status.
+     *
+     * This function is used by the contour tracing algorithm.
+     *
+     * @param sp Step point to check for inferred operational status.
+     * @return `true` iff `sp` is contained in `inferred_op_domain`.
+     */
+    [[nodiscard]] inline bool is_step_point_inferred_operational(const step_point& sp) noexcept
+    {
+        return inferred_op_domain.count(sp) > 0;
+    }
+    /**
      * Generates unique random `step_points` in the stored parameter range. The number of generated points is at most
      * equal to `samples`.
      *
@@ -782,7 +818,7 @@ class operational_domain_impl
         }
 
         // container for the random samples
-        std::set<step_point> step_point_samples{};
+        phmap::btree_set<step_point> step_point_samples{};
 
         for (std::size_t i = 0; i < samples; ++i)
         {
@@ -1049,6 +1085,87 @@ class operational_domain_impl
         }
 
         return neighbors;
+    }
+    /**
+     * Given a starting point, this function marks all points that are enclosed by the operational domain contour as
+     * 'inferred operational'. This assumes that the operational domain does not have holes. To the best of the author's
+     * knowledge, at the time of writing this code, there exists no proof that operational domains are always
+     * continuous, i.e., hole-free. Marking points as 'inferred operational' can be useful to avoid recomputation in,
+     * e.g., contour tracing if an operational domain with multiple islands is investigated.
+     *
+     * The function starts at the given starting point and performs flood fill to mark all points that are reachable
+     * from the starting point until it encounters the non-operational edges.
+     *
+     * Note that no physical simulation is conducted by this function!
+     *
+     * @param starting_point Step point at which to start the inference. If `starting_point` is non-operational, this
+     * function might invoke undefined behavior.
+     */
+    void infer_operational_status_in_enclosing_contour(const step_point& starting_point) noexcept
+    {
+        assert(num_dimensions == 2 && "This function is only supported for two dimensions");
+        assert(is_step_point_operational(starting_point) == operational_status::OPERATIONAL &&
+               "starting_point must be within the operational domain");
+
+        // a queue of (x, y) dimension step points to be marked as inferred operational
+        std::queue<step_point> queue{};
+
+        // a utility function that adds the adjacent points to the queue for further evaluation
+        const auto queue_next_points = [this, &queue](const step_point& sp) noexcept
+        {
+            for (const auto& m : moore_neighborhood_2d(sp))
+            {
+                // if the point has already been inferred as operational, continue with the next
+                if (is_step_point_inferred_operational(m))
+                {
+                    continue;
+                }
+
+                // if the point has already been sampled
+                if (const auto operational_status = has_already_been_sampled(m); operational_status.has_value())
+                {
+                    // and found to be non-operational, continue with the next
+                    if (operational_status.value() == operational_status::NON_OPERATIONAL)
+                    {
+                        continue;
+                    }
+                }
+
+                // otherwise, it is either found operational or can be inferred as such
+                queue.push(m);
+                inferred_op_domain.insert(m);
+            }
+        };
+
+        // if the starting point has not already been inferred as operational
+        if (is_step_point_inferred_operational(starting_point))
+        {
+            // mark the starting point as inferred operational
+            inferred_op_domain.insert(starting_point);
+
+            // add the starting point's neighbors to the queue
+            queue_next_points(starting_point);
+        }
+
+        // for each point in the queue
+        while (!queue.empty())
+        {
+            // fetch the step point and remove it from the queue
+            const auto sp = queue.front();
+            queue.pop();
+
+            // if the point is known to be non-operational continue with the next
+            if (const auto operational_status = has_already_been_sampled(sp); operational_status.has_value())
+            {
+                if (operational_status.value() == operational_status::NON_OPERATIONAL)
+                {
+                    continue;
+                }
+            }
+
+            // otherwise (operational or unknown), queue its neighbors
+            queue_next_points(sp);
+        }
     }
     /**
      * Helper function that writes the the statistics of the operational domain computation to the statistics object.
