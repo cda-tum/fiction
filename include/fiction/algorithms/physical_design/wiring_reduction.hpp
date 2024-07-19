@@ -403,11 +403,11 @@ create_wiring_reduction_layout(const Lyt& lyt, const uint64_t x_offset = 0, cons
             // crossing:
             //
             // =
-            auto is_single_wire = [&lyt, &old_coord](const uint64_t x_offset, const uint64_t y_offset)
+            auto is_single_wire = [&lyt, &old_coord](const uint64_t add_x_offset, const uint64_t add_y_offset)
             {
-                return lyt.is_wire_tile({old_coord.x - x_offset, old_coord.y - y_offset, 0}) &&
-                       !lyt.is_fanout(lyt.get_node({old_coord.x - x_offset, old_coord.y - y_offset, 0}) &&
-                                      lyt.is_empty_tile({old_coord.x - x_offset, old_coord.y - y_offset, 1}));
+                return lyt.is_wire_tile({old_coord.x - add_x_offset, old_coord.y - add_y_offset, 0}) &&
+                       !lyt.is_fanout(lyt.get_node({old_coord.x - add_x_offset, old_coord.y - add_y_offset, 0}) &&
+                                      lyt.is_empty_tile({old_coord.x - add_x_offset, old_coord.y - add_y_offset, 1}));
             };
 
             // utility function to check for crossings with outgoing wires to the bottom layer:
@@ -415,18 +415,18 @@ create_wiring_reduction_layout(const Lyt& lyt, const uint64_t x_offset = 0, cons
             // +→=
             // ↓
             // =
-            auto is_crossing = [&lyt, &old_coord](const uint64_t x_offset, const uint64_t y_offset)
+            auto is_crossing = [&lyt, &old_coord](const uint64_t add_x_offset, const uint64_t add_y_offset)
             {
-                return lyt.has_northern_incoming_signal({old_coord.x - x_offset, old_coord.y - y_offset + 1, 0}) &&
-                       lyt.has_western_incoming_signal({old_coord.x - x_offset + 1, old_coord.y - y_offset, 0});
+                return lyt.has_northern_incoming_signal({old_coord.x - add_x_offset, old_coord.y - add_y_offset + 1, 0}) &&
+                       lyt.has_western_incoming_signal({old_coord.x - add_x_offset + 1, old_coord.y - add_y_offset, 0});
             };
 
             // utility function to fully obstruct a coordinate
             auto obstruct_coordinate =
-                [&wiring_reduction_lyt, &new_coord](const uint64_t x_offset, const uint64_t y_offset)
+                [&wiring_reduction_lyt, &new_coord](const uint64_t add_x_offset, const uint64_t add_y_offset)
             {
-                wiring_reduction_lyt.obstruct_coordinate({new_coord.x - x_offset, new_coord.y - y_offset, 0});
-                wiring_reduction_lyt.obstruct_coordinate({new_coord.x - x_offset, new_coord.y - y_offset, 1});
+                wiring_reduction_lyt.obstruct_coordinate({new_coord.x - add_x_offset, new_coord.y - add_y_offset, 0});
+                wiring_reduction_lyt.obstruct_coordinate({new_coord.x - add_x_offset, new_coord.y - add_y_offset, 1});
             };
 
             // handle single input gates and wires
