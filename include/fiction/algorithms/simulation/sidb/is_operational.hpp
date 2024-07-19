@@ -528,7 +528,7 @@ class is_operational_impl
     }
 
     /**
-     * This function return `true` if `1` is encoded in the charge state of the given BDL pair. `false` otherwise.
+     * This function returns `true` if `1` is encoded in the charge state of the given BDL pair. `false` otherwise.
      *
      * @tparam Lyt SiDB cell-level layout type.
      * @param ground_state The ground state charge distribution surface.
