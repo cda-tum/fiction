@@ -52,10 +52,8 @@ inline void operational_domain(pybind11::module& m)
     using namespace pybind11::literals;
 
     py::enum_<fiction::sweep_parameter>(m, "sweep_parameter", DOC(fiction_sweep_parameter))
-        .value("EPSILON_R", fiction::sweep_parameter::EPSILON_R,
-               DOC(fiction_sweep_parameter_EPSILON_R))
-        .value("LAMBDA_TF", fiction::sweep_parameter::LAMBDA_TF,
-               DOC(fiction_sweep_parameter_LAMBDA_TF))
+        .value("EPSILON_R", fiction::sweep_parameter::EPSILON_R, DOC(fiction_sweep_parameter_EPSILON_R))
+        .value("LAMBDA_TF", fiction::sweep_parameter::LAMBDA_TF, DOC(fiction_sweep_parameter_LAMBDA_TF))
         .value("MU_MINUS", fiction::sweep_parameter::MU_MINUS, DOC(fiction_sweep_parameter_MU_MINUS))
 
         ;
