@@ -627,8 +627,7 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
 
     assert(!spec.empty());
     // all elements in tts must have the same number of variables
-    assert(std::adjacent_find(spec.cbegin(), spec.cend(),
-                              [](const auto& a, const auto& b)
+    assert(std::adjacent_find(spec.cbegin(), spec.cend(), [](const auto& a, const auto& b)
                               { return a.num_vars() != b.num_vars(); }) == spec.cend());
 
     if (input_bdl_wire.has_value() && output_bdl_wire.has_value() && input_bdl_wire_direction.has_value())
@@ -666,8 +665,7 @@ template <typename Lyt, typename TT>
 
     assert(!spec.empty());
     // all elements in tts must have the same number of variables
-    assert(std::adjacent_find(spec.cbegin(), spec.cend(),
-                              [](const auto& a, const auto& b)
+    assert(std::adjacent_find(spec.cbegin(), spec.cend(), [](const auto& a, const auto& b)
                               { return a.num_vars() != b.num_vars(); }) == spec.cend());
 
     detail::is_operational_impl<Lyt, TT> p{lyt, spec, params};
