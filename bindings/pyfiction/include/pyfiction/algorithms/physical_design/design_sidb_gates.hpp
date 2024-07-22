@@ -44,12 +44,10 @@ inline void design_sidb_gates(pybind11::module& m)
     /**
      * Design approach selector type.
      */
-    py::enum_<fiction::design_sidb_gates_mode>(m, "design_sidb_gates_mode",
-                                               DOC(fiction_design_sidb_gates_mode))
+    py::enum_<fiction::design_sidb_gates_mode>(m, "design_sidb_gates_mode", DOC(fiction_design_sidb_gates_mode))
         .value("EXHAUSTIVE", fiction::design_sidb_gates_mode::EXHAUSTIVE,
                DOC(fiction_design_sidb_gates_mode_EXHAUSTIVE))
-        .value("RANDOM", fiction::design_sidb_gates_mode::RANDOM,
-               DOC(fiction_design_sidb_gates_mode_RANDOM));
+        .value("RANDOM", fiction::design_sidb_gates_mode::RANDOM, DOC(fiction_design_sidb_gates_mode_RANDOM));
     /**
      * Parameters.
      */
