@@ -26,7 +26,7 @@
 #include <cassert>
 #include <cstdint>
 #include <cstdlib>
-#include <future>
+#include <iostream>
 #include <iterator>
 #include <limits>
 #include <mutex>
@@ -255,13 +255,40 @@ class design_sidb_gates_impl
         std::vector<Lyt> gate_layouts{};
         gate_layouts.reserve(gate_candidates.size());
 
-        for (const auto& candidate : gate_candidates)
+        const std::size_t num_threads =
+            std::min(static_cast<std::size_t>(std::thread::hardware_concurrency()), gate_candidates.size());
+        const std::size_t chunk_size = (gate_candidates.size() + num_threads - 1) / num_threads;  // Ceiling division
+
+        std::vector<std::thread> threads;
+        threads.reserve(num_threads);
+
+        const auto check_operational_status = [this, &gate_layouts](const auto& candidate) noexcept
         {
             if (const auto [status, sim_calls] = is_operational(candidate, truth_table, params.operational_params);
                 status == operational_status::OPERATIONAL)
             {
                 gate_layouts.push_back(candidate);
             }
+        };
+
+        for (std::size_t i = 0; i < num_threads; ++i)
+        {
+            threads.emplace_back(
+                [i, chunk_size, &gate_candidates, &check_operational_status]()
+                {
+                    std::size_t start_index = i * chunk_size;
+                    std::size_t end_index   = std::min(start_index + chunk_size, gate_candidates.size());
+
+                    for (std::size_t j = start_index; j < end_index; ++j)
+                    {
+                        check_operational_status(gate_candidates[j]);
+                    }
+                });
+        }
+
+        for (auto& thread : threads)
+        {
+            thread.join();
         }
 
         return gate_layouts;
@@ -786,33 +813,6 @@ class design_sidb_gates_impl
         }
 
         return designed_gate_layouts;
-    }
-
-    /**
-     * Checks if any SiDBs within the specified cell indices are located too closely together, with a distance of less
-     * than 0.5 nanometers.
-     *
-     * This function iterates through the provided cell indices and compares the distance between SiDBs. If it finds any
-     * pair of SiDBs within a distance of 0.5 nanometers, it returns `true` to indicate that SiDBs are too close;
-     * otherwise, it returns `false`.
-     *
-     * @param cell_indices A vector of cell indices to check for SiDB proximity.
-     * @return `true` if any SiDBs are too close; otherwise, `false`.
-     */
-    [[nodiscard]] bool are_sidbs_too_close(const std::vector<std::size_t>& cell_indices) noexcept
-    {
-        for (std::size_t i = 0; i < cell_indices.size(); i++)
-        {
-            for (std::size_t j = i + 1; j < cell_indices.size(); j++)
-            {
-                if (sidb_nm_distance<Lyt>(Lyt{}, all_sidbs_in_canvas[cell_indices[i]],
-                                          all_sidbs_in_canvas[cell_indices[j]]) < 0.5)
-                {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
     /**
      * This function adds SiDBs (given by indices) to the skeleton layout that is returned afterwards.

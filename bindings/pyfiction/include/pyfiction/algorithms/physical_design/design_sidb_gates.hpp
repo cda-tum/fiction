@@ -35,7 +35,7 @@ inline void design_sidb_gates(pybind11::module& m)
 {
     namespace py = pybind11;
 
-    py::class_<fiction::design_sidb_gates_stats>(m, "design_sidb_gates_stats")
+    py::class_<fiction::design_sidb_gates_stats>(m, "design_sidb_gates_stats", DOC(fiction_design_sidb_gates_stats))
         .def(py::init<>())
         .def("__repr__",
              [](const fiction::design_sidb_gates_stats& stats)
@@ -45,18 +45,18 @@ inline void design_sidb_gates(pybind11::module& m)
                  return stream.str();
              });
 
-    // TODO add docu
-
     /**
      * Design approach selector type.
      */
     pybind11::enum_<typename fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_sidb_gates_mode>(
         m, "design_sidb_gates_mode", DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode))
         .value("QUICKCELL",
-               fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_sidb_gates_mode::QUICKCELL)
+               fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_sidb_gates_mode::QUICKCELL,
+               DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_QUICKCELL))
         .value("AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER",
                fiction::design_sidb_gates_params<
-                   fiction::offset::ucoord_t>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER)
+                   fiction::offset::ucoord_t>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+               DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_QUICKCELL))
         .value("RANDOM", fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_sidb_gates_mode::RANDOM,
                DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_RANDOM));
 
