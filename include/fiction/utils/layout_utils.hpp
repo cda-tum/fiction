@@ -10,13 +10,13 @@
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb_defect_surface.hpp"
 #include "fiction/technology/sidb_lattice.hpp"
-#include "fiction/technology/sidb_lattice_orientations.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
+#include <cstdlib>
 #include <limits>
 #include <random>
 #include <type_traits>
@@ -586,42 +586,50 @@ CoordinateType random_coordinate(CoordinateType coordinate1, CoordinateType coor
  * Generates a vector of all coordinates within an area spanned by two coordinates.
  *
  * This function calculates and returns a vector of all coordinates that span the area
- * between the northwest (cell_nw) and southeast (cell_se) cells, inclusive.
+ * between the northwest (cell_first_corner) and southeast (cell_second_corner) cells, inclusive.
  * The cells are generated in a top-down, left-to-right fashion within the specified area.
  *
  * @tparam CoordinateType Coordinate Type.
- * @param cell_nw The northwest cell defining the starting point of the area.
- * @param cell_se The southeast cell defining the ending point of the area.
+ * @param cell_first_corner The cell defining the first corner of the area.
+ * @param cell_second_corner The cell defining the second corner of the area.
  * @return A vector containing all cells within the specified area.
  */
 template <typename CoordinateType>
-[[nodiscard]] inline std::vector<CoordinateType> all_coordinates_in_spanned_area(const CoordinateType& cell_nw,
-                                                                                 const CoordinateType& cell_se) noexcept
+[[nodiscard]] inline std::vector<CoordinateType>
+all_coordinates_in_spanned_area(const CoordinateType& cell_first_corner,
+                                const CoordinateType& cell_second_corner) noexcept
 {
     // for SiQAD coordinates
     if constexpr (std::is_same_v<CoordinateType, siqad::coord_t>)
     {
-        const auto c1_cube          = siqad::to_fiction_coord<cube::coord_t>(cell_nw);
-        const auto c2_cube          = siqad::to_fiction_coord<cube::coord_t>(cell_se);
-        const auto total_cell_count = static_cast<uint64_t>(std::abs(c1_cube.x - c2_cube.x) + 1) *
-                                      static_cast<uint64_t>(std::abs(c1_cube.y - c2_cube.y) + 1);
+        auto cell_first_corner_cube  = siqad::to_fiction_coord<cube::coord_t>(cell_first_corner);
+        auto cell_second_corner_cube = siqad::to_fiction_coord<cube::coord_t>(cell_second_corner);
+
+        cube::coord_t nw_cell{std::min(cell_first_corner_cube.x, cell_second_corner_cube.x),
+                              std::min(cell_first_corner_cube.y, cell_second_corner_cube.y)};
+        cube::coord_t se_cell{std::max(cell_first_corner_cube.x, cell_second_corner_cube.x),
+                              std::max(cell_first_corner_cube.y, cell_second_corner_cube.y)};
+
+        const auto total_cell_count = static_cast<uint64_t>(std::abs(nw_cell.x - se_cell.x) + 1) *
+                                      static_cast<uint64_t>(std::abs(nw_cell.y - se_cell.y) + 1);
+
         std::vector<CoordinateType> all_cells{};
         all_cells.reserve(total_cell_count);
 
-        auto current_cell = c1_cube;
+        auto current_cell = nw_cell;
 
         // collect all cells in the area (spanned by the nw `north-west` and se `south-east` cell) going from top to
         // down from left to right.
-        while (current_cell <= c2_cube)
+        while (current_cell <= se_cell)
         {
             all_cells.push_back(siqad::to_siqad_coord(current_cell));
-            if (current_cell.x < cell_se.x)
+            if (current_cell.x < se_cell.x)
             {
                 current_cell.x += 1;
             }
             else
             {
-                current_cell.x = cell_nw.x;
+                current_cell.x = nw_cell.x;
                 current_cell.y += 1;
             }
         }
@@ -631,28 +639,32 @@ template <typename CoordinateType>
     // for cube and offset coordinates
     else
     {
+        CoordinateType nw_cell{std::min(cell_first_corner.x, cell_second_corner.x),
+                               std::min(cell_first_corner.y, cell_second_corner.y)};
+        CoordinateType se_cell{std::max(cell_first_corner.x, cell_second_corner.x),
+                               std::max(cell_first_corner.y, cell_second_corner.y)};
+
         const auto total_cell_count =
-            static_cast<uint64_t>(std::abs(static_cast<int64_t>(cell_nw.x) - static_cast<int64_t>(cell_se.x)) + 1) *
-            static_cast<uint64_t>(std::abs(static_cast<int64_t>(cell_nw.y) - static_cast<int64_t>(cell_se.y)) + 1);
+            static_cast<uint64_t>(std::abs(static_cast<int64_t>(nw_cell.x) - static_cast<int64_t>(se_cell.x)) + 1) *
+            static_cast<uint64_t>(std::abs(static_cast<int64_t>(nw_cell.y) - static_cast<int64_t>(se_cell.y)) + 1);
         std::vector<CoordinateType> all_cells{};
         all_cells.reserve(total_cell_count);
 
-        auto current_cell = cell_nw;
+        auto current_cell = nw_cell;
 
         // collect all cells in the area (spanned by the nw `north-west` and se `south-east` cell) going from top to
         // down from left to right.
-        while (current_cell <= cell_se)
+        while (current_cell <= se_cell)
         {
-
             all_cells.push_back(current_cell);
 
-            if (current_cell.x < cell_se.x)
+            if (current_cell.x < se_cell.x)
             {
                 current_cell.x += 1;
             }
             else
             {
-                current_cell.x = cell_nw.x;
+                current_cell.x = nw_cell.x;
                 current_cell.y += 1;
             }
         }

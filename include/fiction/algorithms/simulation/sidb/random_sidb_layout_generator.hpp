@@ -11,8 +11,6 @@
 #include "fiction/utils/layout_utils.hpp"
 
 #include <cstdint>
-#include <iostream>
-#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -95,7 +93,7 @@ Lyt generate_random_sidb_layout(const Lyt&                                      
 
     const uint64_t number_of_sidbs_of_final_layout = lyt_skeleton.num_cells() + params.number_of_sidbs;
 
-    Lyt lyt{lyt_skeleton.clone()};
+    auto lyt = lyt_skeleton.clone();
     // counts the attempts to place the given number of SiDBs
     uint64_t attempt_counter = 0;
 
