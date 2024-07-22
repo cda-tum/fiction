@@ -622,6 +622,12 @@ class design_sidb_gates_impl
                     min_energy = cds_layout.get_system_energy();
                 }
             }
+
+            if (cds_canvas.get_charge_index_and_base().first == cds_canvas.get_max_charge_index())
+            {
+                break;
+            }
+
             canvas_charge_index++;
             cds_canvas.assign_charge_index(canvas_charge_index);
         }
