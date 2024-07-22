@@ -153,7 +153,7 @@ class design_sidb_gates_impl
         const auto add_combination_to_layout_and_check_operation =
             [this, &mutex_to_protect_designer_gate_layouts, &designed_gate_layouts](const auto& combination) noexcept
         {
-            auto layout_with_added_cells = skeleton_layout_with_canvas_sidbs(combination);
+            const auto layout_with_added_cells = skeleton_layout_with_canvas_sidbs(combination);
             if (const auto [status, sim_calls] =
                     is_operational(layout_with_added_cells, truth_table, params.operational_params, input_bdl_wires,
                                    output_bdl_wires, input_bdl_wire_directions);
@@ -844,7 +844,7 @@ class design_sidb_gates_impl
      * @param cell_indices A vector of indices of cells to be added to the skeleton layout.
      * @return A copy of the original layout (`skeleton_layout`) with SiDB cells added at specified indices.
      */
-    [[nodiscard]] Lyt skeleton_layout_with_canvas_sidbs(const std::vector<std::size_t>& cell_indices) noexcept
+    [[nodiscard]] Lyt skeleton_layout_with_canvas_sidbs(const std::vector<std::size_t>& cell_indices) const noexcept
     {
         Lyt lyt_copy{skeleton_layout.clone()};
 
