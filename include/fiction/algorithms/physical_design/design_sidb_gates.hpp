@@ -120,7 +120,11 @@ class design_sidb_gates_impl
             truth_table{tt},
             params{ps},
             all_sidbs_in_canvas{all_coordinates_in_spanned_area(params.canvas.first, params.canvas.second)},
-            stats{st}
+            stats{st},
+            input_bdl_wires{detect_bdl_wires(skeleton_layout, params.operational_params.bdl_wire_params,
+                                             bdl_wire_selection::INPUT)},
+            output_bdl_wires{detect_bdl_wires(skeleton_layout, params.operational_params.bdl_wire_params,
+                                              bdl_wire_selection::OUTPUT)}
     {
         initialize();
     }
@@ -151,7 +155,8 @@ class design_sidb_gates_impl
         {
             auto layout_with_added_cells = skeleton_layout_with_canvas_sidbs(combination);
             if (const auto [status, sim_calls] =
-                    is_operational(layout_with_added_cells, truth_table, params.operational_params);
+                    is_operational(layout_with_added_cells, truth_table, params.operational_params, input_bdl_wires,
+                                   output_bdl_wires, input_bdl_wire_directions);
                 status == operational_status::OPERATIONAL)
             {
                 const std::lock_guard lock_vector{mutex_to_protect_designer_gate_layouts};  // Lock the mutex
@@ -227,7 +232,8 @@ class design_sidb_gates_impl
                     {
                         const auto result_lyt = generate_random_sidb_layout<Lyt>(skeleton_layout, parameter);
                         if (const auto [status, sim_calls] =
-                                is_operational(result_lyt, truth_table, params.operational_params);
+                                is_operational(result_lyt, truth_table, params.operational_params, input_bdl_wires,
+                                               output_bdl_wires, input_bdl_wire_directions);
                             status == operational_status::OPERATIONAL)
                         {
                             const std::lock_guard lock{mutex_to_protect_designed_gate_layouts};
@@ -264,6 +270,8 @@ class design_sidb_gates_impl
             return gate_layouts;
         }
 
+        std::mutex mutex_to_protect_gates{};  // used to control access to shared resources
+
         gate_layouts.reserve(gate_candidates.size());
 
         const std::size_t num_threads =
@@ -273,11 +281,15 @@ class design_sidb_gates_impl
         std::vector<std::thread> threads;
         threads.reserve(num_threads);
 
-        const auto check_operational_status = [this, &gate_layouts](const auto& candidate) noexcept
+        const auto check_operational_status =
+            [this, &gate_layouts, &mutex_to_protect_gates](const auto& candidate) noexcept
         {
-            if (const auto [status, sim_calls] = is_operational(candidate, truth_table, params.operational_params);
+            if (const auto [status, sim_calls] =
+                    is_operational(candidate, truth_table, params.operational_params, input_bdl_wires, output_bdl_wires,
+                                   input_bdl_wire_directions);
                 status == operational_status::OPERATIONAL)
             {
+                const std::lock_guard lock{mutex_to_protect_gates};
                 gate_layouts.push_back(candidate);
             }
         };
@@ -357,11 +369,6 @@ class design_sidb_gates_impl
      */
     void initialize() noexcept
     {
-        input_bdl_wires =
-            detect_bdl_wires(skeleton_layout, params.operational_params.bdl_wire_params, bdl_wire_selection::INPUT);
-        output_bdl_wires =
-            detect_bdl_wires(skeleton_layout, params.operational_params.bdl_wire_params, bdl_wire_selection::OUTPUT);
-
         input_bdl_wire_directions.reserve(input_bdl_wires.size());
 
         std::transform(input_bdl_wires.cbegin(), input_bdl_wires.cend(), std::back_inserter(input_bdl_wire_directions),

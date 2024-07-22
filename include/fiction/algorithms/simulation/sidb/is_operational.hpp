@@ -29,6 +29,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
+#include <optional>
 #include <set>
 #include <utility>
 #include <vector>
@@ -119,6 +120,37 @@ class is_operational_impl
             output_bdl_pairs(detect_bdl_pairs(layout, sidb_technology::cell_type::OUTPUT,
                                               parameters.bdl_wire_params.params_bdl_pairs)),
             bii(bdl_input_iterator<Lyt>{layout, parameters.bdl_wire_params}),
+            input_bdl_wires{detect_bdl_wires(layout, parameters.bdl_wire_params, bdl_wire_selection::INPUT)},
+            output_bdl_wires{detect_bdl_wires(layout, parameters.bdl_wire_params, bdl_wire_selection::OUTPUT)}
+    {
+        // determine wire directions and store them.
+        std::transform(input_bdl_wires.cbegin(), input_bdl_wires.cend(), std::back_inserter(input_bdl_wire_directions),
+                       [](const auto& wire) { return determine_wire_direction<Lyt>(wire); });
+
+        std::transform(output_bdl_wires.cbegin(), output_bdl_wires.cend(),
+                       std::back_inserter(output_bdl_wire_directions),
+                       [](const auto& wire) { return determine_wire_direction<Lyt>(wire); });
+    }
+    /**
+     * Constructor to initialize the algorithm with a layout and parameters.
+     *
+     * @param lyt The SiDB cell-level layout to be checked.
+     * @param spec Expected Boolean function of the layout given as a multi-output truth table.
+     * @param params Parameters for the `is_operational` algorithm.
+     * @param input_bdl_wire Optional BDL input wires of lyt.
+     * @param output_bdl_wire Optional BDL output wires of lyt.
+     * @param input_bdl_wire_direction Optional BDL input wire directions of lyt.
+     */
+    is_operational_impl(const Lyt& lyt, const std::vector<TT>& tt, const is_operational_params& params,
+                        const std::vector<bdl_wire<Lyt>>&      input_bdl_wires,
+                        const std::vector<bdl_wire<Lyt>>&      output_bdl_wires,
+                        const std::vector<bdl_wire_direction>& input_wire_directions) :
+            layout{lyt},
+            truth_table{tt},
+            parameters{params},
+            output_bdl_pairs(detect_bdl_pairs(layout, sidb_technology::cell_type::OUTPUT,
+                                              parameters.bdl_wire_params.params_bdl_pairs)),
+            bii{bdl_input_iterator<Lyt>{layout, parameters.bdl_wire_params, input_bdl_wires, input_wire_directions}},
             input_bdl_wires{detect_bdl_wires(layout, parameters.bdl_wire_params, bdl_wire_selection::INPUT)},
             output_bdl_wires{detect_bdl_wires(layout, parameters.bdl_wire_params, bdl_wire_selection::OUTPUT)}
     {
@@ -573,12 +605,18 @@ class is_operational_impl
  * @param lyt The SiDB cell-level layout to be checked.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
  * @param params Parameters for the `is_operational` algorithm.
+ * @param input_bdl_wire Optional BDL input wires of lyt.
+ * @param output_bdl_wire Optional BDL output wires of lyt.
+ * @param input_bdl_wire_direction Optional BDL input wire directions of lyt.
  * @return A pair containing the operational status of the gate layout (either `OPERATIONAL` or `NON_OPERATIONAL`) and
  * the number of input combinations tested.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] std::pair<operational_status, std::size_t>
-is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params = {}) noexcept
+is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params = {},
+               const std::optional<std::vector<bdl_wire<Lyt>>>&      input_bdl_wire           = std::nullopt,
+               const std::optional<std::vector<bdl_wire<Lyt>>>&      output_bdl_wire          = std::nullopt,
+               const std::optional<std::vector<bdl_wire_direction>>& input_bdl_wire_direction = std::nullopt)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -589,8 +627,16 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
 
     assert(!spec.empty());
     // all elements in tts must have the same number of variables
-    assert(std::adjacent_find(spec.cbegin(), spec.cend(), [](const auto& a, const auto& b)
+    assert(std::adjacent_find(spec.cbegin(), spec.cend(),
+                              [](const auto& a, const auto& b)
                               { return a.num_vars() != b.num_vars(); }) == spec.cend());
+
+    if (input_bdl_wire.has_value() && output_bdl_wire.has_value() && input_bdl_wire_direction.has_value())
+    {
+        detail::is_operational_impl<Lyt, TT> p{
+            lyt, spec, params, input_bdl_wire.value(), output_bdl_wire.value(), input_bdl_wire_direction.value()};
+        return {p.run(), p.get_number_of_simulator_invocations()};
+    }
 
     detail::is_operational_impl<Lyt, TT> p{lyt, spec, params};
 
@@ -620,7 +666,8 @@ template <typename Lyt, typename TT>
 
     assert(!spec.empty());
     // all elements in tts must have the same number of variables
-    assert(std::adjacent_find(spec.cbegin(), spec.cend(), [](const auto& a, const auto& b)
+    assert(std::adjacent_find(spec.cbegin(), spec.cend(),
+                              [](const auto& a, const auto& b)
                               { return a.num_vars() != b.num_vars(); }) == spec.cend());
 
     detail::is_operational_impl<Lyt, TT> p{lyt, spec, params};

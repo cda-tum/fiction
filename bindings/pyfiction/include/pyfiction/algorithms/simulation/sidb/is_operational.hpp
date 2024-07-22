@@ -27,7 +27,8 @@ void is_operational(pybind11::module& m)
     using namespace pybind11::literals;
 
     m.def("is_operational", &fiction::is_operational<Lyt, py_tt>, "lyt"_a, "spec"_a,
-          "params"_a = fiction::is_operational_params{}, DOC(fiction_is_operational));
+          "params"_a = fiction::is_operational_params{}, "input_bdl_wire"_a = nullptr, "output_bdl_wire"_a = nullptr,
+          "input_bdl_wire_direction"_a = nullptr, DOC(fiction_is_operational));
 
     m.def("operational_input_patterns", &fiction::operational_input_patterns<Lyt, py_tt>, "lyt"_a, "spec"_a,
           "params"_a = fiction::is_operational_params{}, DOC(fiction_is_operational));
@@ -60,7 +61,6 @@ inline void is_operational(pybind11::module& m)
         .def_readwrite("op_condition", &fiction::is_operational_params::op_condition);
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
-
     detail::is_operational<py_sidb_100_lattice>(m);
     detail::is_operational<py_sidb_111_lattice>(m);
 }
