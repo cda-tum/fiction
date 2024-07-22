@@ -418,7 +418,8 @@ class is_operational_impl
                         {
                             continue;
                         }
-                        if (!encodes_bit_one(ground_state, bdl, input_bdl_wire_directions[input_bdl_wires.size() - 1 - i]))
+                        if (!encodes_bit_one(ground_state, bdl,
+                                             input_bdl_wire_directions[input_bdl_wires.size() - 1 - i]))
                         {
                             return true;
                         }
@@ -432,7 +433,8 @@ class is_operational_impl
                         {
                             continue;
                         }
-                        if (!encodes_bit_zero(ground_state, bdl, input_bdl_wire_directions[input_bdl_wires.size() - 1 - i]))
+                        if (!encodes_bit_zero(ground_state, bdl,
+                                              input_bdl_wire_directions[input_bdl_wires.size() - 1 - i]))
                         {
                             return true;
                         }
@@ -449,7 +451,8 @@ class is_operational_impl
                         {
                             continue;
                         }
-                        if (!encodes_bit_one(ground_state, bdl, input_bdl_wire_directions[input_bdl_wires.size() - 1 - i]))
+                        if (!encodes_bit_one(ground_state, bdl,
+                                             input_bdl_wire_directions[input_bdl_wires.size() - 1 - i]))
                         {
                             return true;
                         }
@@ -463,7 +466,8 @@ class is_operational_impl
                         {
                             continue;
                         }
-                        if (!encodes_bit_zero(ground_state, bdl, input_bdl_wire_directions[input_bdl_wires.size() - 1 - i]))
+                        if (!encodes_bit_zero(ground_state, bdl,
+                                              input_bdl_wire_directions[input_bdl_wires.size() - 1 - i]))
                         {
                             return true;
                         }
@@ -550,8 +554,8 @@ class is_operational_impl
                                      (ground_state.get_charge_state(bdl.lower) == sidb_charge_state::NEGATIVE));
         }
 
-            return static_cast<bool>((ground_state.get_charge_state(bdl.upper) == sidb_charge_state::NEGATIVE) &&
-                                     (ground_state.get_charge_state(bdl.lower) == sidb_charge_state::NEUTRAL));
+        return static_cast<bool>((ground_state.get_charge_state(bdl.upper) == sidb_charge_state::NEGATIVE) &&
+                                 (ground_state.get_charge_state(bdl.lower) == sidb_charge_state::NEUTRAL));
     }
 };
 
@@ -585,8 +589,7 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
 
     assert(!spec.empty());
     // all elements in tts must have the same number of variables
-    assert(std::adjacent_find(spec.cbegin(), spec.cend(),
-                              [](const auto& a, const auto& b)
+    assert(std::adjacent_find(spec.cbegin(), spec.cend(), [](const auto& a, const auto& b)
                               { return a.num_vars() != b.num_vars(); }) == spec.cend());
 
     detail::is_operational_impl<Lyt, TT> p{lyt, spec, params};
@@ -617,8 +620,7 @@ template <typename Lyt, typename TT>
 
     assert(!spec.empty());
     // all elements in tts must have the same number of variables
-    assert(std::adjacent_find(spec.cbegin(), spec.cend(),
-                              [](const auto& a, const auto& b)
+    assert(std::adjacent_find(spec.cbegin(), spec.cend(), [](const auto& a, const auto& b)
                               { return a.num_vars() != b.num_vars(); }) == spec.cend());
 
     detail::is_operational_impl<Lyt, TT> p{lyt, spec, params};

@@ -1305,10 +1305,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     {
         if (potential_value != 0.0)
         {
-            this->foreach_cell(
-                [this, &potential_value](const auto& c) {
-                    strg->local_external_pot.insert({c, potential_value});
-                });
+            this->foreach_cell([this, &potential_value](const auto& c)
+                               { strg->local_external_pot.insert({c, potential_value}); });
             this->update_after_charge_change(dep_cell);
         }
     }
@@ -1864,7 +1862,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     void
     initialize(const sidb_charge_state cs            = sidb_charge_state::NEGATIVE,
-              const cds_configuration configuration = cds_configuration::CHARGE_LOCATION_AND_ELECTROSTATIC) noexcept
+               const cds_configuration configuration = cds_configuration::CHARGE_LOCATION_AND_ELECTROSTATIC) noexcept
     {
         strg->sidb_order  = {};
         strg->cell_charge = {};
@@ -2115,8 +2113,8 @@ template <class T>
 charge_distribution_surface(const T&, const sidb_simulation_parameters&) -> charge_distribution_surface<T>;
 
 template <class T>
-charge_distribution_surface(const T&, const sidb_simulation_parameters&, sidb_charge_state cs)
-    -> charge_distribution_surface<T>;
+charge_distribution_surface(const T&, const sidb_simulation_parameters&,
+                            sidb_charge_state cs) -> charge_distribution_surface<T>;
 
 template <class T>
 charge_distribution_surface(const T&, const sidb_simulation_parameters&, sidb_charge_state cs,
