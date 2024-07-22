@@ -4093,21 +4093,6 @@ static const char *__doc_fiction_detail_design_sidb_gates_impl_all_canvas_layout
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_all_sidbs_in_canvas = R"doc(All cells within the canvas.)doc";
 
-static const char *__doc_fiction_detail_design_sidb_gates_impl_are_sidbs_too_close =
-R"doc(Checks if any SiDBs within the specified cell indices are located too
-closely together, with a distance of less than 0.5 nanometers.
-
-This function iterates through the provided cell indices and compares
-the distance between SiDBs. If it finds any pair of SiDBs within a
-distance of 0.5 nanometers, it returns `true` to indicate that SiDBs
-are too close; otherwise, it returns `false`.
-
-Parameter ``cell_indices``:
-    A vector of cell indices to check for SiDB proximity.
-
-Returns:
-    `true` if any SiDBs are too close; otherwise, `false`.)doc";
-
 static const char *__doc_fiction_detail_design_sidb_gates_impl_canvas_sidb_layout =
 R"doc(This function generates canvas SiDb layouts.
 
