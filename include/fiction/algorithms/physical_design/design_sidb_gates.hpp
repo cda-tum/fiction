@@ -159,6 +159,11 @@ class design_sidb_gates_impl
             }
         };
 
+        if (all_combinations.empty())
+        {
+            return designed_gate_layouts;
+        }
+
         const std::size_t num_threads =
             std::min(static_cast<std::size_t>(std::thread::hardware_concurrency()), all_combinations.size());
         const std::size_t chunk_size = (all_combinations.size() + num_threads - 1) / num_threads;  // Ceiling division
@@ -253,6 +258,12 @@ class design_sidb_gates_impl
         const auto            gate_candidates = run_pruning();
 
         std::vector<Lyt> gate_layouts{};
+
+        if (gate_candidates.empty())
+        {
+            return gate_layouts;
+        }
+
         gate_layouts.reserve(gate_candidates.size());
 
         const std::size_t num_threads =
@@ -731,7 +742,6 @@ class design_sidb_gates_impl
     [[nodiscard]] std::vector<Lyt> run_pruning() noexcept
     {
         std::vector<Lyt> gate_candidate = {};
-        gate_candidate.reserve(all_canvas_layouts.size());
 
         std::mutex mutex_to_protect_gate_candidates{};  // used to control access to shared resources
 
@@ -754,6 +764,13 @@ class design_sidb_gates_impl
                 gate_candidate.push_back(current_layout);
             }
         };
+
+        if (all_canvas_layouts.empty())
+        {
+            return gate_candidate;
+        }
+
+        gate_candidate.reserve(all_canvas_layouts.size());
 
         const std::size_t num_threads =
             std::min(static_cast<std::size_t>(std::thread::hardware_concurrency()), all_canvas_layouts.size());
