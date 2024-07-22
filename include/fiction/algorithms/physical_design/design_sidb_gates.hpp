@@ -597,7 +597,7 @@ class design_sidb_gates_impl
             if (cds_layout.is_physically_valid())
             {
                 cds_layout.recompute_system_energy();
-                if (cds_layout.get_system_energy() < min_energy)
+                if (cds_layout.get_system_energy() + physical_constants::POP_STABILITY_ERR < min_energy)
                 {
                     min_energy = cds_layout.get_system_energy();
                 }
