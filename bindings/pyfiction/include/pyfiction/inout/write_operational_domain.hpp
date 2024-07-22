@@ -30,9 +30,9 @@ inline void write_operational_domain(pybind11::module& m)
 
         ;
 
-    void (*write_operational_domain_pointer)(const fiction::operational_domain&, const std::string_view&,
-                                             const fiction::write_operational_domain_params&) =
-        &fiction::write_operational_domain;
+    void (*write_operational_domain_pointer)(
+        const fiction::operational_domain<fiction::parameter_point, fiction::operational_status>&,
+        const std::string_view&, const fiction::write_operational_domain_params&) = &fiction::write_operational_domain;
 
     m.def("write_operational_domain", write_operational_domain_pointer, "opdom"_a, "filename"_a,
           "params"_a = fiction::write_operational_domain_params{}, DOC(fiction_write_operational_domain));

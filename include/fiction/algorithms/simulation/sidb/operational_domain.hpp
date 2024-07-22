@@ -6,13 +6,19 @@
 #define FICTION_OPERATIONAL_DOMAIN_HPP
 
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
+#include "fiction/algorithms/simulation/sidb/quickexact.hpp"
+#include "fiction/algorithms/simulation/sidb/quicksim.hpp"
+#include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
+#include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
+#include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/physical_constants.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/execution_utils.hpp"
 #include "fiction/utils/hash.hpp"
 #include "fiction/utils/phmap_utils.hpp"
 
+#include <fmt/format.h>
 #include <kitty/traits.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 #include <phmap.h>
@@ -29,12 +35,100 @@
 #include <queue>
 #include <random>
 #include <set>
+#include <stdexcept>
 #include <tuple>
 #include <type_traits>
 #include <vector>
 
 namespace fiction
 {
+
+/**
+ * The parameter point holds parameter values in the x and y dimension.
+ */
+struct parameter_point
+{
+    /**
+     * Standard default constructor.
+     */
+    parameter_point() = default;
+    /**
+     * Standard constructor.
+     *
+     * @param x_val X dimension parameter value.
+     * @param y_val Y dimension parameter value.
+     */
+    parameter_point(const double x_val, const double y_val) : x{x_val}, y{y_val} {}
+    /**
+     * X dimension parameter value.
+     */
+    double x;
+    /**
+     * Y dimension parameter value.
+     */
+    double y;
+    /**
+     * Equality operator. Checks if this parameter point is equal to another point within a specified tolerance.
+     * The tolerance is defined by `physical_constants::POP_STABILITY_ERR`.
+     *
+     * @param other Other parameter point to compare with.
+     * @return `true` iff the parameter points are equal.
+     */
+    [[nodiscard]] bool operator==(const parameter_point& other) const noexcept
+    {
+        constexpr auto tolerance = physical_constants::POP_STABILITY_ERR;
+        return std::abs(x - other.x) < tolerance && std::abs(y - other.y) < tolerance;
+    }
+    /**
+     * Inequality operator. Checks if this parameter point is unequal to another point within a specified tolerance.
+     * The tolerance is defined by `physical_constants::POP_STABILITY_ERR`.
+     *
+     * @param other Other parameter point to compare with.
+     * @return `true` iff the parameter points are not equal.
+     */
+    [[nodiscard]] bool operator!=(const parameter_point& other) const noexcept
+    {
+        return !(*this == other);
+    }
+    /**
+     * Support for structured bindings.
+     *
+     * @tparam I Index of the parameter value to be returned.
+     * @return The parameter value at the specified index.
+     */
+    template <std::size_t I>
+    auto get() const noexcept
+    {
+        static_assert(I < 2, "Index out of bounds for parameter_point");
+
+        if constexpr (I == 0)
+        {
+            return x;
+        }
+        else  // I == 1
+        {
+            return y;
+        }
+    }
+};
+/**
+ * Possible sweep parameters for the operational domain computation.
+ */
+enum class sweep_parameter
+{
+    /**
+     * The relative permittivity of the dielectric material.
+     */
+    EPSILON_R,
+    /**
+     * The Thomas-Fermi screening length.
+     */
+    LAMBDA_TF,
+    /**
+     * The energy transition level.
+     */
+    MU_MINUS
+};
 
 /**
  * An operational domain is a set of simulation parameter values for which a given SiDB layout is logically operational.
@@ -47,108 +141,80 @@ namespace fiction
  * parameters and checking the operational status of the layout for each parameter combination. The operational domain
  * is then defined as the set of all parameter combinations for which the layout is operational. Different techniques
  * for performing these sweep are implemented.
+ *
+ * @tparam Key The type representing the key. Defaults to `parameter_point`.
+ * @tparam Value The type representing the value. Defaults to `operational_status`.
  */
+template <typename Key = parameter_point, typename Value = operational_status>
 struct operational_domain
 {
     /**
-     * Possible sweep parameters for the operational domain computation.
-     */
-    enum class sweep_parameter
-    {
-        /**
-         * The relative permittivity of the dielectric material.
-         */
-        EPSILON_R,
-        /**
-         * The Thomas-Fermi screening length.
-         */
-        LAMBDA_TF,
-        /**
-         * The energy transition level.
-         */
-        MU_MINUS
-    };
-    /**
      * X dimension sweep parameter.
      */
-    sweep_parameter x_dimension{operational_domain::sweep_parameter::EPSILON_R};
+    sweep_parameter x_dimension{sweep_parameter::EPSILON_R};
     /**
      * Y dimension sweep parameter.
      */
-    sweep_parameter y_dimension{operational_domain::sweep_parameter::LAMBDA_TF};
+    sweep_parameter y_dimension{sweep_parameter::LAMBDA_TF};
     /**
-     * The parameter point holds parameter values in the x and y dimension.
+     * This can store different information depending on the use case. If the operational domain is simulated for
+     * different physical parameters, the parameters are stored with the corresponding operating status.
      */
-    struct parameter_point
+    locked_parallel_flat_hash_map<Key, Value> operational_values{};
+    /**
+     * This function retrieves the value associated with the provided parameter point
+     * from the operational domain. If the parameter point is found in the domain,
+     * its corresponding value is returned. Otherwise, a runtime error is thrown.
+     *
+     * @param pp The parameter point to look up.
+     * @return The value associated with the parameter point.
+     */
+    [[nodiscard]] uint64_t get_value(const parameter_point& pp) const
     {
-        /**
-         * Standard default constructor.
-         */
-        parameter_point() = default;
-        /**
-         * Standard constructor.
-         *
-         * @param x_val X dimension parameter value.
-         * @param y_val Y dimension parameter value.
-         */
-        parameter_point(const double x_val, const double y_val) : x{x_val}, y{y_val} {}
-        /**
-         * X dimension parameter value.
-         */
-        double x;
-        /**
-         * Y dimension parameter value.
-         */
-        double y;
-        /**
-         * Equality operator.
-         *
-         * @param other Other parameter point to compare with.
-         * @return `true` iff the parameter points are equal.
-         */
-        [[nodiscard]] bool operator==(const parameter_point& other) const noexcept
+        if (const auto it = find_parameter_point_with_tolerance(operational_values, pp);
+            it != operational_values.cend())
         {
-            return x == other.x && y == other.y;
+            return it->second;
         }
-        /**
-         * Inequality operator.
-         *
-         * @param other Other parameter point to compare with.
-         * @return `true` iff the parameter points are not equal.
-         */
-        [[nodiscard]] bool operator!=(const parameter_point& other) const noexcept
-        {
-            return !(*this == other);
-        }
-        /**
-         * Support for structured bindings.
-         *
-         * @tparam I Index of the parameter value to be returned.
-         * @return The parameter value at the specified index.
-         */
-        template <std::size_t I>
-        auto get() const noexcept
-        {
-            static_assert(I < 2, "Index out of bounds for parameter_point");
-
-            if constexpr (I == 0)
-            {
-                return x;
-            }
-            else  // I == 1
-            {
-                return y;
-            }
-        }
-    };
-    /**
-     * The operational status of the layout for each specified parameter combination. This constitutes the operational
-     * domain. The key of the map is the parameter point, which holds the parameter values in the x and y dimension.
-     * The operational status is stored as the value of the map.
-     */
-    locked_parallel_flat_hash_map<parameter_point, operational_status> operational_values{};
+        throw std::out_of_range(fmt::format("({},{}) not found in the operational domain", pp.x, pp.y).c_str());
+    }
 };
+/**
+ * This function searches for a parameter point, specified by the `key`, in the provided map
+ * `map` with tolerance.
+ *
+ * @tparam MapType The type of the map containing parameter points as keys.
+ * @param map The map containing parameter points as keys and associated values.
+ * @param key The parameter point to search for in the map.
+ * @return An iterator to the found parameter point in the map, or `map.cend()` if not found.
+ */
+template <typename MapType>
+[[maybe_unused]] static typename MapType::const_iterator
+find_parameter_point_with_tolerance(const MapType& map, const typename MapType::key_type& key)
+{
+    static_assert(std::is_same_v<typename MapType::key_type, parameter_point>, "Map key type must be parameter_point");
 
+    return std::find_if(map.cbegin(), map.cend(), [&key](const auto& pair) { return pair.first == key; });
+}
+/**
+ * This function searches for a floating-point value specified by the `key` in the provided map `map`,
+ * applying a tolerance specified by `fiction::physical_constants::POP_STABILITY_ERR`.
+ * Each key in the map is compared to the specified key within this tolerance.
+ *
+ * @tparam MapType The type of the map containing parameter points as keys.
+ * @param map The map containing parameter points as keys and associated values.
+ * @param key The parameter point to search for in the map.
+ * @return An iterator to the found parameter point in the map, or `map.cend()` if not found.
+ */
+template <typename MapType>
+[[maybe_unused]] static typename MapType::const_iterator find_key_with_tolerance(const MapType&                    map,
+                                                                                 const typename MapType::key_type& key)
+{
+    static_assert(std::is_floating_point_v<typename MapType::key_type>, "Map key type must be floating-point");
+    constexpr double tolerance = fiction::physical_constants::POP_STABILITY_ERR;
+    auto compare_keys = [&key, &tolerance](const auto& pair) { return std::abs(pair.first - key) < tolerance; };
+    return std::find_if(map.begin(), map.end(), compare_keys);
+}
 /**
  * Parameters for the operational domain computation. The parameters are used across the different operational domain
  * computation algorithms.
@@ -158,7 +224,7 @@ struct operational_domain_params
     /**
      * The sweep parameter for the x dimension.
      */
-    operational_domain::sweep_parameter x_dimension{operational_domain::sweep_parameter::EPSILON_R};
+    sweep_parameter x_dimension{sweep_parameter::EPSILON_R};
     /**
      * The minimum value of the x dimension sweep.
      */
@@ -174,7 +240,7 @@ struct operational_domain_params
     /**
      * The sweep parameter for the y dimension.
      */
-    operational_domain::sweep_parameter y_dimension{operational_domain::sweep_parameter::LAMBDA_TF};
+    sweep_parameter y_dimension{sweep_parameter::LAMBDA_TF};
     /**
      * The minimum value of the y dimension sweep.
      */
@@ -223,17 +289,17 @@ struct operational_domain_stats
 namespace detail
 {
 
-template <typename Lyt, typename TT>
+template <typename Lyt, typename TT, typename OPDomain>
 class operational_domain_impl
 {
   public:
     /**
-     * Standard constructor. Initializes the layout, the truth table, the parameters and the statistics. Also
-     * detects the output BDL pair, which is necessary for the operational domain computation. The layout must
+     * Standard constructor. Initializes the lyt, the truth table, the parameters and the statistics. Also
+     * detects the output BDL pair, which is necessary for the operational domain computation. The lyt must
      * have exactly one output BDL pair.
      *
-     * @param lyt SiDB cell-level layout to be evaluated.
-     * @param spec Expected Boolean function of the layout given as a multi-output truth table.
+     * @param lyt SiDB cell-level lyt to be evaluated.
+     * @param spec Expected Boolean function of the lyt given as a multi-output truth table.
      * @param ps Parameters for the operational domain computation.
      * @param st Statistics of the process.
      */
@@ -243,6 +309,7 @@ class operational_domain_impl
             truth_table{tt},
             params{ps},
             stats{st},
+            output_bdl_pairs{detect_bdl_pairs<Lyt>(lyt, sidb_technology::cell_type::OUTPUT, ps.bdl_params)},
             x_indices(num_x_steps() + 1),  // pre-allocate the x dimension indices
             y_indices(num_y_steps() + 1)   // pre-allocate the y dimension indices
     {
@@ -283,12 +350,65 @@ class operational_domain_impl
         }
     }
     /**
+     * Additional Constructor. Initializes the layout, the parameters and the statistics.
+     *
+     * @param lyt SiDB cell-level layout to be evaluated.
+     * @param ps Parameters for the operational domain computation.
+     * @param st Statistics of the process.
+     */
+    operational_domain_impl(const Lyt& lyt, const operational_domain_params& ps, operational_domain_stats& st) noexcept
+            :
+            layout{lyt},
+            truth_table{std::vector<TT>{}},
+            params{ps},
+            stats{st},
+            x_indices(num_x_steps() + 1),  // pre-allocate the x dimension indices
+            y_indices(num_y_steps() + 1)   // pre-allocate the y dimension indices
+    {
+
+        x_values.reserve(num_x_steps() + 1);
+        y_values.reserve(num_y_steps() + 1);
+
+        op_domain.x_dimension = params.x_dimension;
+        op_domain.y_dimension = params.y_dimension;
+
+        std::iota(x_indices.begin(), x_indices.end(), 0ul);
+        std::iota(y_indices.begin(), y_indices.end(), 0ul);
+
+        // if the value of the x-parameter is greater than params.x_max after num_x_steps() steps, this value is
+        // ignored in the operational domain calculation.
+        if ((params.x_min + (x_indices.size() - 1) * params.x_step) - params.x_max >
+            physical_constants::POP_STABILITY_ERR)
+        {
+            x_indices.pop_back();
+        }
+        // if the value of the y-parameter is greater than params.y_max after num_y_steps() steps, this value is
+        // ignored in the operational domain calculation.
+        if (((params.y_min + (y_indices.size() - 1) * params.y_step) - params.y_max) >
+            physical_constants::POP_STABILITY_ERR)
+        {
+            y_indices.pop_back();
+        }
+
+        // generate the x dimension values
+        for (std::size_t i = 0; i < x_indices.size(); ++i)
+        {
+            x_values.push_back(params.x_min + static_cast<double>(i) * params.x_step);
+        }
+
+        // generate the y dimension values
+        for (std::size_t i = 0; i < y_indices.size(); ++i)
+        {
+            y_values.push_back(params.y_min + static_cast<double>(i) * params.y_step);
+        }
+    }
+    /**
      * Performs a grid search over the specified parameter ranges with the specified step sizes. The grid search always
      * has quadratic complexity. The operational status is computed for each parameter combination.
      *
      * @return The operational domain of the layout.
      */
-    [[nodiscard]] operational_domain grid_search() noexcept
+    [[nodiscard]] operational_domain<parameter_point, operational_status> grid_search() noexcept
     {
         mockturtle::stopwatch stop{stats.time_total};
 
@@ -312,7 +432,8 @@ class operational_domain_impl
      * @param samples Number of random samples to be taken.
      * @return The (partial) operational domain of the layout.
      */
-    [[nodiscard]] operational_domain random_sampling(const std::size_t samples) noexcept
+    [[nodiscard]] operational_domain<parameter_point, operational_status>
+    random_sampling(const std::size_t samples) noexcept
     {
         mockturtle::stopwatch stop{stats.time_total};
 
@@ -336,7 +457,7 @@ class operational_domain_impl
      * @param samples Maximum number of random samples to be taken before flood fill.
      * @return The (partial) operational domain of the layout.
      */
-    [[nodiscard]] operational_domain flood_fill(const std::size_t samples) noexcept
+    [[nodiscard]] operational_domain<parameter_point, operational_status> flood_fill(const std::size_t samples) noexcept
     {
         mockturtle::stopwatch stop{stats.time_total};
 
@@ -408,7 +529,8 @@ class operational_domain_impl
      * @param samples Maximum number of random samples to be taken before contour tracing.
      * @return The (partial) operational domain of the layout.
      */
-    [[nodiscard]] operational_domain contour_tracing(const std::size_t samples) noexcept
+    [[nodiscard]] operational_domain<parameter_point, operational_status>
+    contour_tracing(const std::size_t samples) noexcept
     {
         mockturtle::stopwatch stop{stats.time_total};
 
@@ -476,6 +598,83 @@ class operational_domain_impl
 
         return op_domain;
     }
+    /**
+     * Performs a grid search over the specified parameter ranges. For each physical
+     * parameter combination found for which the given CDS is physically valid, it is determined whether the CDS is the
+     * ground state or the n-th excited state.
+     *
+     * @param lyt SiDB cell-level layout that is simulated and compared to the given CDS.
+     * @return All physically valid physical parameters and the excited state number.
+     */
+    [[nodiscard]] operational_domain<parameter_point, uint64_t>
+    grid_search_for_physically_valid_parameters(Lyt& lyt) noexcept
+    {
+        operational_domain<parameter_point, uint64_t> suitable_params_domain{};
+
+        mockturtle::stopwatch stop{stats.time_total};
+
+        // step points are analyzed sequentially because the CDS is updated for each step point, so parallelizing may
+        // result in unexpected behavior.
+        std::for_each(x_indices.cbegin(), x_indices.cend(),
+                      [this, &lyt](const auto x)
+                      {
+                          std::for_each(y_indices.cbegin(), y_indices.cend(),
+                                        [this, &lyt, x](const auto y) { is_step_point_suitable(lyt, {x, y}); });
+                      });
+
+        sidb_simulation_parameters simulation_parameters = params.simulation_parameters;
+
+        for (const auto& [param_point, status] : op_domain.operational_values)
+        {
+            if constexpr (std::is_same_v<OPDomain, operational_domain<parameter_point, operational_status>>)
+            {
+                if (status == operational_status::NON_OPERATIONAL)
+                {
+                    continue;
+                }
+                set_x_dimension_value(simulation_parameters, param_point.x);
+                set_y_dimension_value(simulation_parameters, param_point.y);
+
+                auto sim_results = sidb_simulation_result<Lyt>{};
+
+                if (params.sim_engine == sidb_simulation_engine::QUICKEXACT)
+                {
+                    // perform an exact ground state simulation
+                    sim_results =
+                        quickexact(lyt, quickexact_params<cell<Lyt>>{
+                                            simulation_parameters,
+                                            quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF});
+                }
+                else if (params.sim_engine == sidb_simulation_engine::EXGS)
+                {
+                    // perform an exhaustive ground state simulation
+                    sim_results = exhaustive_ground_state_simulation(lyt, simulation_parameters);
+                }
+                else if (params.sim_engine == sidb_simulation_engine::QUICKSIM)
+                {
+                    // perform a heuristic simulation
+                    const quicksim_params qs_params{simulation_parameters, 500, 0.6};
+                    sim_results = quicksim(lyt, qs_params);
+                }
+                else
+                {
+                    assert(false && "unsupported simulation engine");
+                }
+
+                const auto energy_dist = energy_distribution(sim_results.charge_distributions);
+                lyt.assign_physical_parameters(simulation_parameters);
+                const auto position = find_key_with_tolerance(energy_dist, lyt.get_system_energy());
+                if (position == energy_dist.cend())
+                {
+                    continue;
+                }
+                const auto excited_state_number = std::distance(energy_dist.begin(), position);
+                suitable_params_domain.operational_values.emplace(param_point, excited_state_number);
+            }
+        }
+
+        return suitable_params_domain;
+    }
 
   private:
     /**
@@ -485,7 +684,7 @@ class operational_domain_impl
     /**
      * The specification of the layout.
      */
-    const std::vector<TT>& truth_table;
+    const std::vector<TT> truth_table;
     /**
      * The parameters for the operational domain computation.
      */
@@ -513,7 +712,7 @@ class operational_domain_impl
     /**
      * The operational domain of the layout.
      */
-    operational_domain op_domain{};
+    OPDomain op_domain{};
     /**
      * Number of simulator invocations.
      */
@@ -590,7 +789,7 @@ class operational_domain_impl
      * @param sp Step point to convert.
      * @return The parameter point corresponding to the step point `sp`.
      */
-    [[nodiscard]] operational_domain::parameter_point to_parameter_point(const step_point& sp) const noexcept
+    [[nodiscard]] parameter_point to_parameter_point(const step_point& sp) const noexcept
     {
         return {x_values[sp.x], y_values[sp.y]};
     }
@@ -600,7 +799,7 @@ class operational_domain_impl
      * @param pp Parameter point to convert.
      * @return The step point corresponding to the parameter point `pp`.
      */
-    [[nodiscard]] step_point to_step_point(const operational_domain::parameter_point& pp) const noexcept
+    [[nodiscard]] step_point to_step_point(const parameter_point& pp) const noexcept
     {
         const auto it_x = std::lower_bound(x_values.cbegin(), x_values.cend(), pp.x);
         const auto it_y = std::lower_bound(y_values.cbegin(), y_values.cend(), pp.y);
@@ -655,22 +854,21 @@ class operational_domain_impl
     inline void set_dimension_value(sidb_simulation_parameters& sim_parameters, const double val,
                                     const sweep_dimension dim) const noexcept
     {
-        operational_domain::sweep_parameter sweep_parameter =
-            dim == sweep_dimension::X ? params.x_dimension : params.y_dimension;
+        sweep_parameter sweep_parameter = dim == sweep_dimension::X ? params.x_dimension : params.y_dimension;
 
         switch (sweep_parameter)
         {
-            case operational_domain::sweep_parameter::EPSILON_R:
+            case sweep_parameter::EPSILON_R:
             {
                 sim_parameters.epsilon_r = val;
                 break;
             }
-            case operational_domain::sweep_parameter::LAMBDA_TF:
+            case sweep_parameter::LAMBDA_TF:
             {
                 sim_parameters.lambda_tf = val;
                 break;
             }
-            case operational_domain::sweep_parameter::MU_MINUS:
+            case sweep_parameter::MU_MINUS:
             {
                 sim_parameters.mu_minus = val;
                 break;
@@ -712,7 +910,7 @@ class operational_domain_impl
      */
     [[nodiscard]] inline std::optional<operational_status> has_already_been_sampled(const step_point& sp) const noexcept
     {
-        if (const auto it = op_domain.operational_values.find(to_parameter_point(sp));
+        if (const auto it = find_parameter_point_with_tolerance(op_domain.operational_values, to_parameter_point(sp));
             it != op_domain.operational_values.cend())
         {
             return it->second;
@@ -773,6 +971,56 @@ class operational_domain_impl
 
         // if we made it here, the layout is operational
         return operational();
+    }
+    /**
+     * This function checks if the given charge distribution surface (CDS) is physically valid for the parameter point
+     * represented by the step point `sp`.
+     *
+     * @param lyt CDS to check.
+     * @param sp Step point to be investigated.
+     * @return The operational status of the layout under the given simulation parameters.
+     */
+    operational_status is_step_point_suitable(Lyt& lyt, const step_point& sp) noexcept
+    {
+        // if the point has already been sampled, return the stored operational status
+        if (const auto op_value = has_already_been_sampled(sp); op_value.has_value())
+        {
+            return *op_value;
+        }
+
+        // fetch the x and y dimension values
+        const auto param_point = to_parameter_point(sp);
+
+        const auto operational = [this, &param_point]()
+        {
+            op_domain.operational_values[param_point] = operational_status::OPERATIONAL;
+
+            return operational_status::OPERATIONAL;
+        };
+
+        const auto non_operational = [this, &param_point]()
+        {
+            op_domain.operational_values[param_point] = operational_status::NON_OPERATIONAL;
+
+            return operational_status::NON_OPERATIONAL;
+        };
+
+        // increment the number of evaluated parameter combinations
+        ++num_evaluated_parameter_combinations;
+
+        sidb_simulation_parameters sim_params = params.simulation_parameters;
+        set_x_dimension_value(sim_params, param_point.x);
+        set_y_dimension_value(sim_params, param_point.y);
+
+        lyt.assign_physical_parameters(sim_params);
+
+        if (lyt.is_physically_valid())
+        {
+            return operational();
+        }
+
+        // if we made it here, the layout is non-operational
+        return non_operational();
     }
     /**
      * Generates (potentially repeating) random `step_points` in the stored parameter range. The number of generated
@@ -978,16 +1226,17 @@ class operational_domain_impl
  * @return The operational domain of the layout.
  */
 template <typename Lyt, typename TT>
-operational_domain operational_domain_grid_search(const Lyt& lyt, const std::vector<TT>& spec,
-                                                  const operational_domain_params& params = {},
-                                                  operational_domain_stats*        stats  = nullptr)
+operational_domain<parameter_point, operational_status>
+operational_domain_grid_search(const Lyt& lyt, const std::vector<TT>& spec,
+                               const operational_domain_params& params = {}, operational_domain_stats* stats = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
-    operational_domain_stats                 st{};
-    detail::operational_domain_impl<Lyt, TT> p{lyt, spec, params, st};
+    operational_domain_stats                                                                          st{};
+    detail::operational_domain_impl<Lyt, TT, operational_domain<parameter_point, operational_status>> p{lyt, spec,
+                                                                                                        params, st};
 
     const auto result = p.grid_search();
 
@@ -1020,17 +1269,18 @@ operational_domain operational_domain_grid_search(const Lyt& lyt, const std::vec
  * @return The (partial) operational domain of the layout.
  */
 template <typename Lyt, typename TT>
-operational_domain operational_domain_random_sampling(const Lyt& lyt, const std::vector<TT>& spec,
-                                                      const std::size_t                samples,
-                                                      const operational_domain_params& params = {},
-                                                      operational_domain_stats*        stats  = nullptr)
+operational_domain<parameter_point, operational_status>
+operational_domain_random_sampling(const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples,
+                                   const operational_domain_params& params = {},
+                                   operational_domain_stats*        stats  = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
-    operational_domain_stats                 st{};
-    detail::operational_domain_impl<Lyt, TT> p{lyt, spec, params, st};
+    operational_domain_stats                                                                          st{};
+    detail::operational_domain_impl<Lyt, TT, operational_domain<parameter_point, operational_status>> p{lyt, spec,
+                                                                                                        params, st};
 
     const auto result = p.random_sampling(samples);
 
@@ -1073,16 +1323,17 @@ operational_domain operational_domain_random_sampling(const Lyt& lyt, const std:
  * @return The (partial) operational domain of the layout.
  */
 template <typename Lyt, typename TT>
-operational_domain operational_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples,
-                                                 const operational_domain_params& params = {},
-                                                 operational_domain_stats*        stats  = nullptr)
+operational_domain<parameter_point, operational_status>
+operational_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples,
+                              const operational_domain_params& params = {}, operational_domain_stats* stats = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
-    operational_domain_stats                 st{};
-    detail::operational_domain_impl<Lyt, TT> p{lyt, spec, params, st};
+    operational_domain_stats                                                                          st{};
+    detail::operational_domain_impl<Lyt, TT, operational_domain<parameter_point, operational_status>> p{lyt, spec,
+                                                                                                        params, st};
 
     const auto result = p.flood_fill(samples);
 
@@ -1127,17 +1378,18 @@ operational_domain operational_domain_flood_fill(const Lyt& lyt, const std::vect
  * @return The (partial) operational domain of the layout.
  */
 template <typename Lyt, typename TT>
-operational_domain operational_domain_contour_tracing(const Lyt& lyt, const std::vector<TT>& spec,
-                                                      const std::size_t                samples,
-                                                      const operational_domain_params& params = {},
-                                                      operational_domain_stats*        stats  = nullptr)
+operational_domain<parameter_point, operational_status>
+operational_domain_contour_tracing(const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples,
+                                   const operational_domain_params& params = {},
+                                   operational_domain_stats*        stats  = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
-    operational_domain_stats                 st{};
-    detail::operational_domain_impl<Lyt, TT> p{lyt, spec, params, st};
+    operational_domain_stats                                                                          st{};
+    detail::operational_domain_impl<Lyt, TT, operational_domain<parameter_point, operational_status>> p{lyt, spec,
+                                                                                                        params, st};
 
     const auto result = p.contour_tracing(samples);
 
@@ -1155,19 +1407,19 @@ namespace std
 {
 // make `operational_domain::parameter_point` compatible with `std::integral_constant`
 template <>
-struct tuple_size<fiction::operational_domain::parameter_point> : std::integral_constant<size_t, 2>
+struct tuple_size<fiction::parameter_point> : std::integral_constant<size_t, 2>
 {};
 // make `operational_domain::parameter_point` compatible with `std::tuple_element`
 template <size_t I>
-struct tuple_element<I, fiction::operational_domain::parameter_point>
+struct tuple_element<I, fiction::parameter_point>
 {
     using type = double;
 };
 // make `operational_domain::parameter_point` compatible with `std::hash`
 template <>
-struct hash<fiction::operational_domain::parameter_point>
+struct hash<fiction::parameter_point>
 {
-    size_t operator()(const fiction::operational_domain::parameter_point& p) const noexcept
+    size_t operator()(const fiction::parameter_point& p) const noexcept
     {
         size_t h = 0;
         fiction::hash_combine(h, p.x, p.y);
@@ -1175,6 +1427,7 @@ struct hash<fiction::operational_domain::parameter_point>
         return h;
     }
 };
+
 }  // namespace std
 
 #endif  // FICTION_OPERATIONAL_DOMAIN_HPP
