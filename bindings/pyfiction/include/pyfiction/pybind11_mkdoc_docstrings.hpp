@@ -5807,6 +5807,28 @@ Parameter ``spec``:
 Parameter ``params``:
     Parameters for the `is_operational` algorithm.)doc";
 
+static const char *__doc_fiction_detail_is_operational_impl_is_operational_impl_2 =
+R"doc(Constructor to initialize the algorithm with a layout and parameters.
+
+Parameter ``lyt``:
+    The SiDB cell-level layout to be checked.
+
+Parameter ``spec``:
+    Expected Boolean function of the layout given as a multi-output
+    truth table.
+
+Parameter ``params``:
+    Parameters for the `is_operational` algorithm.
+
+Parameter ``input_bdl_wire``:
+    Optional BDL input wires of lyt.
+
+Parameter ``output_bdl_wire``:
+    Optional BDL output wires of lyt.
+
+Parameter ``input_bdl_wire_direction``:
+    Optional BDL input wire directions of lyt.)doc";
+
 static const char *__doc_fiction_detail_is_operational_impl_layout = R"doc(SiDB cell-level layout.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_output_bdl_pairs = R"doc(Output BDL pairs.)doc";
@@ -11732,6 +11754,15 @@ Parameter ``spec``:
 
 Parameter ``params``:
     Parameters for the `is_operational` algorithm.
+
+Parameter ``input_bdl_wire``:
+    Optional BDL input wires of lyt.
+
+Parameter ``output_bdl_wire``:
+    Optional BDL output wires of lyt.
+
+Parameter ``input_bdl_wire_direction``:
+    Optional BDL input wire directions of lyt.
 
 Returns:
     A pair containing the operational status of the gate layout
