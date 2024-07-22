@@ -35,6 +35,11 @@ distributions of the SiDBs. Charge distribution surfaces are returned by the SiD
     .. tab:: C++
         **Header:** ``fiction/technology/charge_distribution_surface.hpp``
 
+        .. doxygenenum:: fiction::dependent_cell_mode
+        .. doxygenenum:: fiction::energy_calculation
+        .. doxygenenum:: fiction::cds_configuration
+        .. doxygenenum:: fiction::charge_distribution_history
+        .. doxygenenum:: fiction::charge_index_recomputation
         .. doxygenclass:: fiction::charge_distribution_surface
            :members:
         .. doxygenclass:: fiction::charge_distribution_surface< Lyt, true >

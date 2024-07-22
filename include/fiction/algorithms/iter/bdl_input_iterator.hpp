@@ -55,6 +55,26 @@ class bdl_input_iterator
     }
 
     /**
+     * Constructor with pre-detected input wires and directions. It alters the layout to set the first input state,
+     * which assigns binary `0` to all input BDL pairs.
+     *
+     * @param lyt The SiDB BDL layout to iterate over.
+     * @param params Parameters for the BDL wire detection.
+     * @param input_wires Pre-detected input BDL wires.
+     * @param input_directions Pre-determined directions for the input BDL wires.
+     */
+    explicit bdl_input_iterator(const Lyt& lyt,  const detect_bdl_wires_params& params, const std::vector<bdl_wire<Lyt>>& input_wires, const std::vector<bdl_wire_direction>& input_directions) noexcept :
+            layout{lyt.clone()},
+            input_pairs{detect_bdl_pairs<Lyt>(lyt, sidb_technology::cell_type::INPUT, params.params_bdl_pairs)},
+            input_bdl_wires{input_wires},
+            num_inputs{static_cast<uint8_t>(input_pairs.size())},
+            input_wire_directions{input_directions}
+    {
+        static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+        static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+        set_all_inputs();
+    }
+    /**
      * Dereference operator. Returns a reference to the layout with the current input state.
      *
      * @return Reference to the current layout.
@@ -294,13 +314,13 @@ class bdl_input_iterator
      */
     const std::vector<bdl_wire<Lyt>> input_bdl_wires;
     /**
-     * The detected directions of the input BDL wires.
-     */
-    const std::vector<bdl_wire_direction> input_wire_directions;
-    /**
      * The amount of input BDL pairs.
      */
     const uint8_t num_inputs;
+    /**
+     * Directions of the input BDL wires.
+     */
+    const std::vector<bdl_wire_direction> input_wire_directions;
     /**
      * The current input index. There are \f$2^n\f$ possible input states for an \f$n\f$-input BDL layout.
      */

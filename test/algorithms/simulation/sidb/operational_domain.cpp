@@ -881,7 +881,7 @@ TEMPLATE_TEST_CASE("AND gate with Bestagon shape and kink states at default phys
 
     SECTION("grid_search, forbid kinks")
     {
-        op_domain_params.operational_params.op_condition = operational_condition::FORBID_KINKS;
+        op_domain_params.operational_params.op_condition = operational_condition::FORBIDDING_KINKS;
 
         const auto op_domain = operational_domain_grid_search(layout, std::vector<tt>{create_and_tt()},
                                                               op_domain_params, &op_domain_stats);
