@@ -861,11 +861,11 @@ TEMPLATE_TEST_CASE("AND gate with Bestagon shape and kink states at default phys
 
     operational_domain_params op_domain_params{};
     op_domain_params.operational_params.simulation_parameters = sim_params;
-    op_domain_params.x_dimension                              = operational_domain::sweep_parameter::EPSILON_R;
+    op_domain_params.x_dimension                              = sweep_parameter::EPSILON_R;
     op_domain_params.x_min                                    = 4.00;
     op_domain_params.x_max                                    = 6.00;
     op_domain_params.x_step                                   = 0.4;
-    op_domain_params.y_dimension                              = operational_domain::sweep_parameter::LAMBDA_TF;
+    op_domain_params.y_dimension                              = sweep_parameter::LAMBDA_TF;
     op_domain_params.y_min                                    = 4.0;
     op_domain_params.y_max                                    = 6.0;
     op_domain_params.y_step                                   = 0.4;

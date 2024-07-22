@@ -309,7 +309,6 @@ class operational_domain_impl
             truth_table{tt},
             params{ps},
             stats{st},
-            output_bdl_pairs{detect_bdl_pairs<Lyt>(lyt, sidb_technology::cell_type::OUTPUT, ps.bdl_params)},
             x_indices(num_x_steps() + 1),  // pre-allocate the x dimension indices
             y_indices(num_y_steps() + 1)   // pre-allocate the y dimension indices
     {
@@ -418,7 +417,9 @@ class operational_domain_impl
                       {
                           // for each y value in parallel
                           std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ y_indices.cbegin(), y_indices.cend(),
-                                        [this, x](const auto y) { is_step_point_operational({x, y}); });
+                                        [this, x](const auto y) {
+                                            is_step_point_operational({x, y});
+                                        });
                       });
 
         log_stats();
@@ -619,10 +620,12 @@ class operational_domain_impl
                       [this, &lyt](const auto x)
                       {
                           std::for_each(y_indices.cbegin(), y_indices.cend(),
-                                        [this, &lyt, x](const auto y) { is_step_point_suitable(lyt, {x, y}); });
+                                        [this, &lyt, x](const auto y) {
+                                            is_step_point_suitable(lyt, {x, y});
+                                        });
                       });
 
-        sidb_simulation_parameters simulation_parameters = params.simulation_parameters;
+        sidb_simulation_parameters simulation_parameters = params.operational_params.simulation_parameters;
 
         for (const auto& [param_point, status] : op_domain.operational_values)
         {
@@ -637,7 +640,7 @@ class operational_domain_impl
 
                 auto sim_results = sidb_simulation_result<Lyt>{};
 
-                if (params.sim_engine == sidb_simulation_engine::QUICKEXACT)
+                if (params.operational_params.sim_engine == sidb_simulation_engine::QUICKEXACT)
                 {
                     // perform an exact ground state simulation
                     sim_results =
@@ -645,12 +648,12 @@ class operational_domain_impl
                                             simulation_parameters,
                                             quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF});
                 }
-                else if (params.sim_engine == sidb_simulation_engine::EXGS)
+                else if (params.operational_params.sim_engine == sidb_simulation_engine::EXGS)
                 {
                     // perform an exhaustive ground state simulation
                     sim_results = exhaustive_ground_state_simulation(lyt, simulation_parameters);
                 }
-                else if (params.sim_engine == sidb_simulation_engine::QUICKSIM)
+                else if (params.operational_params.sim_engine == sidb_simulation_engine::QUICKSIM)
                 {
                     // perform a heuristic simulation
                     const quicksim_params qs_params{simulation_parameters, 500, 0.6};
@@ -1008,7 +1011,8 @@ class operational_domain_impl
         // increment the number of evaluated parameter combinations
         ++num_evaluated_parameter_combinations;
 
-        sidb_simulation_parameters sim_params = params.simulation_parameters;
+        sidb_simulation_parameters sim_params = params.operational_params.simulation_parameters;
+
         set_x_dimension_value(sim_params, param_point.x);
         set_y_dimension_value(sim_params, param_point.y);
 
