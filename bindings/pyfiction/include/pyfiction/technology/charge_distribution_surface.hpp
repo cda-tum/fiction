@@ -295,6 +295,13 @@ inline void charge_distribution_surfaces(pybind11::module& m)
         ;
 
     /**
+     * Setup mode of the cds
+     */
+    py::enum_<fiction::cds_configuration>(m, "cds_configuration", py::module_local())
+        .value("ONLY_CHARGE_LOCATION", fiction::cds_configuration::ONLY_CHARGE_LOCATION)
+        .value("CHARGE_LOCATION_AND_ELECTROSTATIC", fiction::cds_configuration::CHARGE_LOCATION_AND_ELECTROSTATIC);
+
+    /**
      * Charge distribution history.
      */
     py::enum_<fiction::charge_distribution_history>(m, "charge_distribution_history",

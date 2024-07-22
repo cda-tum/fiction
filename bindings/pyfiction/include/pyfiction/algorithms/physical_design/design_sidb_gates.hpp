@@ -25,7 +25,8 @@ void design_sidb_gates(pybind11::module& m)
     using namespace py::literals;
 
     m.def("design_sidb_gates", &fiction::design_sidb_gates<Lyt, py_tt>, "skeleton"_a, "spec"_a,
-          "params"_a = fiction::design_sidb_gates_params<fiction::cell<Lyt>>{}, DOC(fiction_design_sidb_gates));
+          "params"_a = fiction::design_sidb_gates_params<fiction::cell<Lyt>>{}, "stats"_a = nullptr,
+          DOC(fiction_design_sidb_gates));
 }
 
 }  // namespace detail
@@ -33,14 +34,29 @@ void design_sidb_gates(pybind11::module& m)
 inline void design_sidb_gates(pybind11::module& m)
 {
     namespace py = pybind11;
+
+    py::class_<fiction::design_sidb_gates_stats>(m, "design_sidb_gates_stats")
+        .def(py::init<>())
+        .def("__repr__",
+             [](const fiction::design_sidb_gates_stats& stats)
+             {
+                 std::stringstream stream{};
+                 stats.report(stream);
+                 return stream.str();
+             });
+
+    // TODO add docu
+
     /**
      * Design approach selector type.
      */
     pybind11::enum_<typename fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_sidb_gates_mode>(
         m, "design_sidb_gates_mode", DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode))
-        .value("EXHAUSTIVE",
-               fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_sidb_gates_mode::EXHAUSTIVE,
-               DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_EXHAUSTIVE))
+        .value("QUICKCELL",
+               fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_sidb_gates_mode::QUICKCELL)
+        .value("AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER",
+               fiction::design_sidb_gates_params<
+                   fiction::offset::ucoord_t>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER)
         .value("RANDOM", fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_sidb_gates_mode::RANDOM,
                DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_RANDOM));
 

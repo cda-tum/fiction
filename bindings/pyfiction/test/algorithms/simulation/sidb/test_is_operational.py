@@ -50,7 +50,7 @@ class TestIsOperational(unittest.TestCase):
 
         self.assertEqual(op_status, operational_status.OPERATIONAL)
 
-        params.op_condition = operational_condition.FORBID_KINKS
+        params.op_condition = operational_condition.FORBIDDING_KINKS
 
         [op_status, evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], params)
 

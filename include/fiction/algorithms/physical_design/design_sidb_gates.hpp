@@ -72,7 +72,7 @@ struct design_sidb_gates_params
     /**
      * Gate design mode.
      */
-    design_sidb_gates_mode design_mode = design_sidb_gates_mode::EXHAUSTIVE;
+    design_sidb_gates_mode design_mode = design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
     /**
      * Canvas spanned by the northwest and southeast cell.
      */
@@ -92,6 +92,11 @@ struct design_sidb_gates_stats
      * The total runtime of SiDB gate design process.
      */
     mockturtle::stopwatch<>::duration time_total{0};
+
+    void report(std::ostream& out = std::cout) const
+    {
+        out << fmt::format("[i] total time  = {:.2f} secs\n", mockturtle::to_seconds(time_total));
+    }
 };
 
 namespace detail

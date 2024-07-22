@@ -46,8 +46,8 @@ inline void is_operational(pybind11::module& m)
 
     // TODO add docu
     py::enum_<fiction::operational_condition>(m, "operational_condition")
-        .value("ALLOW_KINKS", fiction::operational_condition::ALLOW_KINKS)
-        .value("FORBID_KINKS", fiction::operational_condition::FORBID_KINKS);
+        .value("ALLOWING_KINKS", fiction::operational_condition::ALLOWING_KINKS)
+        .value("FORBIDDING_KINKS", fiction::operational_condition::FORBIDDING_KINKS);
 
     py::class_<fiction::is_operational_params>(m, "is_operational_params", DOC(fiction_is_operational_params))
         .def(py::init<>())
