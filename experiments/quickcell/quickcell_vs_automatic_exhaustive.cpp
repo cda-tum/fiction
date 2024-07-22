@@ -107,11 +107,13 @@ int main()  // NOLINT
 
         params_2_in_1_out.design_mode =
             design_sidb_gates_params<fiction::cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL;
-        // QuickCell automatically prevents kinks, so enabling it in the parameters can help reduce runtime during the check.
+        // QuickCell automatically prevents kinks, so enabling it in the parameters can help reduce runtime during the
+        // check.
         params_2_in_1_out.operational_params.op_condition = operational_condition::ALLOWING_KINKS;
         params_2_in_2_out.design_mode =
             design_sidb_gates_params<fiction::cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL;
-        // QuickCell automatically prevents kinks, so enabling it in the parameters can help reduce runtime during the check.
+        // QuickCell automatically prevents kinks, so enabling it in the parameters can help reduce runtime during the
+        // check.
         params_2_in_2_out.operational_params.op_condition = operational_condition::ALLOWING_KINKS;
 
         if (gate_names[i] == "cx" || gate_names[i] == "ha" || gate_names[i] == "hourglass")
