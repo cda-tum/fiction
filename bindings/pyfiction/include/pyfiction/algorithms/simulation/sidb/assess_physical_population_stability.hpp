@@ -33,7 +33,7 @@ void assess_physical_population_stability(pybind11::module& m, const std::string
                        DOC(fiction_population_stability_information_critical_cell))
         .def_readwrite("transition_from_to_with_cell_and_required_pot",
                        &fiction::population_stability_information<Lyt>::transition_from_to_with_cell_and_required_pot,
-                       DOC(fiction_population_stability_information_transition_from_to))
+                       DOC(fiction_population_stability_information_transition_from_to_with_cell_and_required_pot))
         .def_readwrite("distance_corresponding_to_potential",
                        &fiction::population_stability_information<Lyt>::distance_corresponding_to_potential,
                        DOC(fiction_population_stability_information_distance_corresponding_to_potential))
