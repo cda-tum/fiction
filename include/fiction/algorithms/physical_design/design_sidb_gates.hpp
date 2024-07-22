@@ -336,6 +336,10 @@ class design_sidb_gates_impl
      */
     const std::vector<typename Lyt::cell> all_sidbs_in_canvas;
     /**
+     * The statistics of the gate design.
+     */
+    design_sidb_gates_stats& stats;
+    /**
      * Input BDL wires.
      */
     std::vector<bdl_wire<Lyt>> input_bdl_wires;
@@ -351,12 +355,10 @@ class design_sidb_gates_impl
      * Directions of the output wires.
      */
     std::vector<bdl_wire_direction> output_bdl_wire_directions{};
-
-    std::vector<Lyt> all_canvas_layouts{};
     /**
-     * The statistics of the gate design.
+     * All Canvas SiDB layout (without I/O pins).
      */
-    design_sidb_gates_stats& stats;
+    std::vector<Lyt> all_canvas_layouts{};
 
     /**
      * This function performs the following steps to initialize the necessary components for the layout evaluation:
@@ -750,6 +752,11 @@ class design_sidb_gates_impl
     {
         std::vector<Lyt> gate_candidate = {};
 
+        if (all_canvas_layouts.empty())
+        {
+            return gate_candidate;
+        }
+
         std::mutex mutex_to_protect_gate_candidates{};  // used to control access to shared resources
 
         // Function to check validity and add layout to all_designs
@@ -771,11 +778,6 @@ class design_sidb_gates_impl
                 gate_candidate.push_back(current_layout);
             }
         };
-
-        if (all_canvas_layouts.empty())
-        {
-            return gate_candidate;
-        }
 
         gate_candidate.reserve(all_canvas_layouts.size());
 

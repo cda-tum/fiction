@@ -33,7 +33,7 @@ int main()  // NOLINT
         "#Gates (Automatic Exhaustive)",
         "#Gates (QuickCell)",
         "runtime (QuickCell)",
-        "percentual time reduction"};
+        "runtime (Automatic Exhaustive) / runtime (QuickCell)"};
 
     const auto truth_tables = std::vector<std::vector<tt>>{
         std::vector<tt>{create_and_tt()}, std::vector<tt>{create_nand_tt()}, std::vector<tt>{create_or_tt()},
@@ -45,15 +45,13 @@ int main()  // NOLINT
     static const std::array<std::string, 13> gate_names = {"and", "nand", "or", "nor", "xor", "xnor",     "lt",
                                                            "gt",  "le",   "ge", "cx",  "ha",  "hourglass"};
 
-    const auto skeleton_one_input_two_output = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(
-        "/Users/jandrewniok/CLionProjects/fiction_copy/fiction/experiments/skeleton_bestagons_with_tags/"
-        "skeleton_hex_inputsdbp_2i1o.sqd",
-        "skeleton");
+    static const std::string folder = fmt::format("{}skeleton_bestagons_with_tags", EXPERIMENTS_PATH);
 
-    const auto skeleton_two_input_two_output = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(
-        "/Users/jandrewniok/CLionProjects/fiction_copy/fiction/experiments/skeleton_bestagons_with_tags/"
-        "skeleton_hex_inputsdbp_2i2o.sqd",
-        "skeleton");
+    const auto skeleton_one_input_two_output =
+        read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}", folder, "skeleton_hex_inputsdbp_2i1o.sqd"));
+
+    const auto skeleton_two_input_two_output =
+        read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}", folder, "skeleton_hex_inputsdbp_2i2o.sqd"));
 
     design_sidb_gates_params<fiction::cell<sidb_100_cell_clk_lyt_siqad>> params_2_in_1_out{
         is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
@@ -86,7 +84,7 @@ int main()  // NOLINT
             fiction::cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
         params_2_in_1_out.operational_params.op_condition = operational_condition::FORBIDDING_KINKS;
         params_2_in_2_out.design_mode                     = design_sidb_gates_params<
-                                fiction::cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
+            fiction::cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
         params_2_in_2_out.operational_params.op_condition = operational_condition::FORBIDDING_KINKS;
 
         if (gate_names[i] == "cx" || gate_names[i] == "ha" || gate_names[i] == "hourglass")
