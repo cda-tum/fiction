@@ -345,30 +345,14 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     void assign_physical_parameters(const sidb_simulation_parameters& params) noexcept
     {
-        if ((strg->simulation_parameters.base == params.base) &&
-            (strg->simulation_parameters.epsilon_r == params.epsilon_r) &&
-            (strg->simulation_parameters.lambda_tf == params.lambda_tf))
-        {
-            strg->simulation_parameters        = params;
-            strg->charge_index_and_base.second = params.base;
-            strg->max_charge_index =
-                static_cast<uint64_t>(std::pow(strg->simulation_parameters.base, this->num_cells())) - 1;
-            this->update_local_potential();
-            this->recompute_system_energy();
-            this->validity_check();
-        }
-        else
-        {
-            strg->simulation_parameters = params;
-            this->initialize_nm_distance_matrix();
-            this->initialize_potential_matrix();
-            strg->charge_index_and_base.second = params.base;
-            strg->max_charge_index =
-                static_cast<uint64_t>(std::pow(strg->simulation_parameters.base, this->num_cells())) - 1;
-            this->update_local_potential();
-            this->recompute_system_energy();
-            this->validity_check();
-        }
+        strg->simulation_parameters        = params;
+        strg->charge_index_and_base.second = params.base;
+        strg->max_charge_index =
+            static_cast<uint64_t>(std::pow(strg->simulation_parameters.base, this->num_cells())) - 1;
+        this->initialize_potential_matrix();
+        this->update_local_potential();
+        this->recompute_system_energy();
+        this->validity_check();
     }
     /**
      * This function retrieves the physical parameters of the simulation.
