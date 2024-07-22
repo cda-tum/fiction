@@ -180,6 +180,17 @@ TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[is-operational]", 
         CHECK(op_inputs.size() == 2);
         CHECK(op_inputs == std::set<uint64_t>{0, 3});
     }
+
+    SECTION("Verify the operational status of the AND gate, which is mirrored on the x-axis. Note that the input BDL "
+            "pairs are located at the bottom, while the output BDL pairs are at the top.")
+    {
+        const auto lyt_mirrored_x = blueprints::and_gate_111_mirrored_on_the_x_axis<TestType>();
+        const auto op_inputs      = operational_input_patterns(
+            lyt_mirrored_x, std::vector<tt>{create_and_tt()},
+            is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT});
+        CHECK(op_inputs.size() == 4);
+        CHECK(op_inputs == std::set<uint64_t>{0, 1, 2, 3});
+    }
 }
 
 TEST_CASE("AND gate with bestagon structure and kink state at right input wire for input 01", "[is-operational]")
@@ -197,7 +208,17 @@ TEST_CASE("AND gate with bestagon structure and kink state at right input wire f
         CHECK(is_operational(lyt, std::vector<tt>{create_and_tt()},
                              is_operational_params{sidb_simulation_parameters{2, -0.32},
                                                    sidb_simulation_engine::QUICKEXACT, detect_bdl_wires_params{},
-                                                   operational_condition::FORBID_KINKS})
+                                                   operational_condition::FORBIDDING_KINKS})
                   .first == operational_status::NON_OPERATIONAL);
     }
+}
+
+TEST_CASE("flipped CX bestagon gate", "[is-operational]")
+{
+    const auto lyt = blueprints::crossing_bestagon_shape_input_down_output_up<sidb_cell_clk_lyt_siqad>();
+
+    CHECK(is_operational(lyt, create_crossing_wire_tt(),
+                         is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
+                                               detect_bdl_wires_params{}, operational_condition::FORBIDDING_KINKS})
+              .first == operational_status::OPERATIONAL);
 }

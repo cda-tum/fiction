@@ -58,11 +58,11 @@ enum class operational_condition
     /**
      * Even if the I/O pins show kinks, the layout is still considered as `operational`.
      */
-    ALLOW_KINKS,
+    ALLOWING_KINKS,
     /**
      * The I/O pins are not allowed to show kinks. If kinks exist, the layout is considered as `non-operational`.
      */
-    FORBID_KINKS
+    FORBIDDING_KINKS
 };
 
 /**
@@ -85,7 +85,7 @@ struct is_operational_params
     /**
      * Condition which is used to decide if a layout is `operational` or `non-operational`.
      */
-    operational_condition op_condition = operational_condition::ALLOW_KINKS;
+    operational_condition op_condition = operational_condition::ALLOWING_KINKS;
 };
 
 namespace detail
@@ -191,7 +191,7 @@ class is_operational_impl
                 // if the expected output is 1, the expected charge states are (upper, lower) = (0, -1)
                 if (kitty::get_bit(truth_table[output], i))
                 {
-                    if (!encodes_bit_one(*ground_state, output_bdl_pairs[output]))
+                    if (!encodes_bit_one(*ground_state, output_bdl_pairs[output], output_bdl_wire_directions[output]))
                     {
                         return operational_status::NON_OPERATIONAL;
                     }
@@ -199,14 +199,14 @@ class is_operational_impl
                 // if the expected output is 0, the expected charge states are (upper, lower) = (-1, 0)
                 else
                 {
-                    if (!encodes_bit_zero(*ground_state, output_bdl_pairs[output]))
+                    if (!encodes_bit_zero(*ground_state, output_bdl_pairs[output], output_bdl_wire_directions[output]))
                     {
                         return operational_status::NON_OPERATIONAL;
                     }
                 }
             }
 
-            if (parameters.op_condition == operational_condition::FORBID_KINKS)
+            if (parameters.op_condition == operational_condition::FORBIDDING_KINKS)
             {
                 if (check_existence_of_kinks_in_input_wires(*ground_state, i) ||
                     check_existence_of_kinks_in_output_wires(*ground_state, i))
@@ -267,8 +267,8 @@ class is_operational_impl
             // fetch the charge states of the output BDL pair
             for (auto output = 0u; output < output_bdl_pairs.size(); output++)
             {
-                auto charge_state_output_upper = ground_state->get_charge_state(output_bdl_pairs[output].upper);
-                auto charge_state_output_lower = ground_state->get_charge_state(output_bdl_pairs[output].lower);
+                const auto charge_state_output_upper = ground_state->get_charge_state(output_bdl_pairs[output].upper);
+                const auto charge_state_output_lower = ground_state->get_charge_state(output_bdl_pairs[output].lower);
 
                 // if the output charge states are equal, the layout is not operational
                 if (charge_state_output_lower == charge_state_output_upper)
@@ -280,8 +280,7 @@ class is_operational_impl
                 // if the expected output is 1, the expected charge states are (upper, lower) = (0, -1)
                 if (kitty::get_bit(truth_table[output], i))
                 {
-                    if (charge_state_output_lower != sidb_charge_state::NEGATIVE ||
-                        charge_state_output_upper != sidb_charge_state::NEUTRAL)
+                    if (!encodes_bit_one(*ground_state, output_bdl_pairs[output], output_bdl_wire_directions[output]))
                     {
                         correct_output = false;
                     }
@@ -289,13 +288,13 @@ class is_operational_impl
                 // if the expected output is 0, the expected charge states are (upper, lower) = (-1, 0)
                 else
                 {
-                    if (charge_state_output_lower != sidb_charge_state::NEUTRAL ||
-                        charge_state_output_upper != sidb_charge_state::NEGATIVE)
+                    if (!encodes_bit_zero(*ground_state, output_bdl_pairs[output], output_bdl_wire_directions[output]))
                     {
                         correct_output = false;
                     }
                 }
             }
+
             if (correct_output)
             {
                 operational_inputs.insert(i);
@@ -419,7 +418,7 @@ class is_operational_impl
                         {
                             continue;
                         }
-                        if (!encodes_bit_one(ground_state, bdl))
+                        if (!encodes_bit_one(ground_state, bdl, input_bdl_wire_directions[input_bdl_wires.size() - 1 - i]))
                         {
                             return true;
                         }
@@ -433,7 +432,7 @@ class is_operational_impl
                         {
                             continue;
                         }
-                        if (!encodes_bit_zero(ground_state, bdl))
+                        if (!encodes_bit_zero(ground_state, bdl, input_bdl_wire_directions[input_bdl_wires.size() - 1 - i]))
                         {
                             return true;
                         }
@@ -450,7 +449,7 @@ class is_operational_impl
                         {
                             continue;
                         }
-                        if (!encodes_bit_zero(ground_state, bdl))
+                        if (!encodes_bit_one(ground_state, bdl, input_bdl_wire_directions[input_bdl_wires.size() - 1 - i]))
                         {
                             return true;
                         }
@@ -464,7 +463,7 @@ class is_operational_impl
                         {
                             continue;
                         }
-                        if (!encodes_bit_one(ground_state, bdl))
+                        if (!encodes_bit_zero(ground_state, bdl, input_bdl_wire_directions[input_bdl_wires.size() - 1 - i]))
                         {
                             return true;
                         }
@@ -495,14 +494,14 @@ class is_operational_impl
             {
                 if (kitty::get_bit(truth_table[i], current_input_index))
                 {
-                    if (!encodes_bit_one(ground_state, bdl))
+                    if (!encodes_bit_one(ground_state, bdl, output_bdl_wire_directions[i]))
                     {
                         return true;
                     };
                 }
                 else
                 {
-                    if (!encodes_bit_zero(ground_state, bdl))
+                    if (!encodes_bit_zero(ground_state, bdl, output_bdl_wire_directions[i]))
                     {
                         return true;
                     };
@@ -521,10 +520,16 @@ class is_operational_impl
      * @return `true` if `0` is encoded, `false` otherwise.
      */
     [[nodiscard]] bool encodes_bit_zero(const charge_distribution_surface<Lyt>& ground_state,
-                                        const bdl_pair<cell<Lyt>>&              bdl) const noexcept
+                                        const bdl_pair<cell<Lyt>>&              bdl,
+                                        const bdl_wire_direction                direction) const noexcept
     {
-        return static_cast<bool>((ground_state.get_charge_state(bdl.upper) == sidb_charge_state::NEGATIVE) &&
-                                 (ground_state.get_charge_state(bdl.lower) == sidb_charge_state::NEUTRAL));
+        if (direction == bdl_wire_direction::NORTH_SOUTH || direction == bdl_wire_direction::NO_DIRECTION)
+        {
+            return static_cast<bool>((ground_state.get_charge_state(bdl.upper) == sidb_charge_state::NEGATIVE) &&
+                                     (ground_state.get_charge_state(bdl.lower) == sidb_charge_state::NEUTRAL));
+        }
+        return static_cast<bool>((ground_state.get_charge_state(bdl.upper) == sidb_charge_state::NEUTRAL) &&
+                                 (ground_state.get_charge_state(bdl.lower) == sidb_charge_state::NEGATIVE));
     }
 
     /**
@@ -536,10 +541,17 @@ class is_operational_impl
      * @return `true` if `1` is encoded, `false` otherwise.
      */
     [[nodiscard]] bool encodes_bit_one(const charge_distribution_surface<Lyt>& ground_state,
-                                       const bdl_pair<cell<Lyt>>&              bdl) const noexcept
+                                       const bdl_pair<cell<Lyt>>&              bdl,
+                                       const bdl_wire_direction                direction) const noexcept
     {
-        return static_cast<bool>((ground_state.get_charge_state(bdl.upper) == sidb_charge_state::NEUTRAL) &&
-                                 (ground_state.get_charge_state(bdl.lower) == sidb_charge_state::NEGATIVE));
+        if (direction == bdl_wire_direction::NORTH_SOUTH || direction == bdl_wire_direction::NO_DIRECTION)
+        {
+            return static_cast<bool>((ground_state.get_charge_state(bdl.upper) == sidb_charge_state::NEUTRAL) &&
+                                     (ground_state.get_charge_state(bdl.lower) == sidb_charge_state::NEGATIVE));
+        }
+
+            return static_cast<bool>((ground_state.get_charge_state(bdl.upper) == sidb_charge_state::NEGATIVE) &&
+                                     (ground_state.get_charge_state(bdl.lower) == sidb_charge_state::NEUTRAL));
     }
 };
 
@@ -573,7 +585,8 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
 
     assert(!spec.empty());
     // all elements in tts must have the same number of variables
-    assert(std::adjacent_find(spec.cbegin(), spec.cend(), [](const auto& a, const auto& b)
+    assert(std::adjacent_find(spec.cbegin(), spec.cend(),
+                              [](const auto& a, const auto& b)
                               { return a.num_vars() != b.num_vars(); }) == spec.cend());
 
     detail::is_operational_impl<Lyt, TT> p{lyt, spec, params};
@@ -604,7 +617,8 @@ template <typename Lyt, typename TT>
 
     assert(!spec.empty());
     // all elements in tts must have the same number of variables
-    assert(std::adjacent_find(spec.cbegin(), spec.cend(), [](const auto& a, const auto& b)
+    assert(std::adjacent_find(spec.cbegin(), spec.cend(),
+                              [](const auto& a, const auto& b)
                               { return a.num_vars() != b.num_vars(); }) == spec.cend());
 
     detail::is_operational_impl<Lyt, TT> p{lyt, spec, params};
