@@ -13,7 +13,7 @@
 #include <fiction/types.hpp>
 #include <fiction/utils/truth_table_utils.hpp>
 
-#include <fmt/format.h>  // output formatting
+#include <fmt/format.h>
 
 #include <array>
 #include <cstdint>
@@ -21,6 +21,10 @@
 #include <iostream>
 #include <string>
 #include <vector>
+
+// This script uses the *Automatic Exhaustive Gate Designer* and *QuickCell* to design gate implementations for 2-input
+// Boolean functions. It records the number of designed gate implementations and the runtime required for each
+// algorithm. The final column displays the runtime reduction factor achieved by *QuickCell*.
 
 using namespace fiction;
 
@@ -45,7 +49,7 @@ int main()  // NOLINT
     static const std::array<std::string, 13> gate_names = {"and", "nand", "or", "nor", "xor", "xnor",     "lt",
                                                            "gt",  "le",   "ge", "cx",  "ha",  "hourglass"};
 
-    static const std::string folder = fmt::format("{}skeleton_bestagons_with_tags", EXPERIMENTS_PATH);
+    static const std::string folder = fmt::format("{}/gate_skeletons/skeleton_bestagons_with_tags", EXPERIMENTS_PATH);
 
     const auto skeleton_one_input_two_output =
         read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}", folder, "skeleton_hex_inputsdbp_2i1o.sqd"));
@@ -84,7 +88,7 @@ int main()  // NOLINT
             fiction::cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
         params_2_in_1_out.operational_params.op_condition = operational_condition::FORBIDDING_KINKS;
         params_2_in_2_out.design_mode                     = design_sidb_gates_params<
-                                fiction::cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
+            fiction::cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
         params_2_in_2_out.operational_params.op_condition = operational_condition::FORBIDDING_KINKS;
 
         if (gate_names[i] == "cx" || gate_names[i] == "ha" || gate_names[i] == "hourglass")
@@ -105,14 +109,9 @@ int main()  // NOLINT
 
         params_2_in_1_out.design_mode =
             design_sidb_gates_params<fiction::cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL;
-        // QuickCell automatically prevents kinks, so enabling it in the parameters can help reduce runtime during the
-        // check.
-        params_2_in_1_out.operational_params.op_condition = operational_condition::ALLOWING_KINKS;
+        ;
         params_2_in_2_out.design_mode =
             design_sidb_gates_params<fiction::cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL;
-        // QuickCell automatically prevents kinks, so enabling it in the parameters can help reduce runtime during the
-        // check.
-        params_2_in_2_out.operational_params.op_condition = operational_condition::ALLOWING_KINKS;
 
         if (gate_names[i] == "cx" || gate_names[i] == "ha" || gate_names[i] == "hourglass")
         {
