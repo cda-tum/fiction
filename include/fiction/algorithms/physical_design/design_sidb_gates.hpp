@@ -19,6 +19,7 @@
 
 #include <kitty/traits.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
+#include <fmt/format.h>
 
 #include <algorithm>
 #include <atomic>
@@ -623,10 +624,10 @@ class design_sidb_gates_impl
                 }
             }
 
-            if (cds_canvas.get_charge_index_and_base().first == cds_canvas.get_max_charge_index())
-            {
-                break;
-            }
+//            if (cds_canvas.get_charge_index_and_base().first == cds_canvas.get_max_charge_index())
+//            {
+//                break;
+//            }
 
             canvas_charge_index++;
             cds_canvas.assign_charge_index(canvas_charge_index);
