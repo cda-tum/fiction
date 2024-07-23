@@ -673,7 +673,7 @@ class operational_domain_impl
                 }
 
                 const auto energy_dist = energy_distribution(sim_results.charge_distributions);
-                lyt.assign_physical_parameters(simulation_parameters);
+                lyt.assign_simulation_parameters(simulation_parameters);
                 const auto position = find_key_with_tolerance(energy_dist, lyt.get_system_energy());
                 if (position == energy_dist.cend())
                 {
@@ -1029,7 +1029,7 @@ class operational_domain_impl
         set_x_dimension_value(sim_params, param_point.x);
         set_y_dimension_value(sim_params, param_point.y);
 
-        lyt.assign_physical_parameters(sim_params);
+        lyt.assign_simulation_parameters(sim_params);
 
         if (lyt.is_physically_valid())
         {
