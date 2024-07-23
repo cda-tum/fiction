@@ -95,14 +95,14 @@ class read_sqd_layout_impl
             throw sqd_parsing_error("Error parsing SQD file: no element 'lat_vec'");
         }
 
-        const auto* const name = lat_vec_element->FirstChildElement("name");
-
         std::string lattice_orientation = "Si(100) 2x1";
 
-        if (name != nullptr)
+        if (const auto* const name = lat_vec_element->FirstChildElement("name"); name != nullptr)
         {
-            const auto* const text = name->GetText();
-            lattice_orientation    = std::string{text};
+            if (const auto* const text = name->GetText(); text != nullptr)
+            {
+                lattice_orientation = text;
+            }
         }
 
         parse_lat_type(lattice_orientation);
@@ -407,8 +407,9 @@ class read_sqd_layout_impl
             }
 
             std::for_each(incl_cells.begin(), incl_cells.end(),
-                          [this, &defect_type, &charge, &eps_r, &lambda_tf](const auto& cell)
-                          { lyt.assign_sidb_defect(cell, sidb_defect{defect_type, charge, eps_r, lambda_tf}); });
+                          [this, &defect_type, &charge, &eps_r, &lambda_tf](const auto& cell) {
+                              lyt.assign_sidb_defect(cell, sidb_defect{defect_type, charge, eps_r, lambda_tf});
+                          });
         }
     }
 };
