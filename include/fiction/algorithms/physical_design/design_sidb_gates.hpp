@@ -17,9 +17,9 @@
 #include "fiction/utils/layout_utils.hpp"
 #include "fiction/utils/math_utils.hpp"
 
+#include <fmt/format.h>
 #include <kitty/traits.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
-#include <fmt/format.h>
 
 #include <algorithm>
 #include <atomic>
