@@ -6,10 +6,10 @@
 #define FICTION_ENERGY_DISTRIBUTION_HPP
 
 #include "fiction/technology/charge_distribution_surface.hpp"
+#include "fiction/technology/physical_constants.hpp"
 
 #include <cmath>
 #include <cstdint>
-#include <limits>
 #include <map>
 #include <set>
 #include <vector>
@@ -60,7 +60,7 @@ energy_distribution(const std::vector<charge_distribution_surface<Lyt>>& input_v
 
                 for (auto& energy_index : distribution)
                 {
-                    if (std::abs(energy_index.first - energy) < std::numeric_limits<double>::epsilon())
+                    if (std::abs(energy_index.first - energy) < physical_constants::POP_STABILITY_ERR)
                     {
                         energy_index.second++;
                         found = true;
