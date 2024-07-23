@@ -9,6 +9,7 @@
 
 #include <cmath>
 #include <cstdint>
+#include <limits>
 #include <map>
 #include <set>
 #include <vector>
@@ -42,7 +43,7 @@ energy_distribution(const std::vector<charge_distribution_surface<Lyt>>& input_v
 
     // collect all unique charge indices
     std::set<uint64_t> unique_charge_index{};
-    for (auto& lyt : input_vec)
+    for (const auto& lyt : input_vec)
     {
         lyt.charge_distribution_to_index_general();
         unique_charge_index.insert(lyt.get_charge_index_and_base().first);
@@ -50,12 +51,27 @@ energy_distribution(const std::vector<charge_distribution_surface<Lyt>>& input_v
 
     for (const auto& charge_index : unique_charge_index)
     {
-        for (auto& lyt : input_vec)
+        for (const auto& lyt : input_vec)
         {
-            lyt.charge_distribution_to_index_general();
             if (lyt.get_charge_index_and_base().first == charge_index)
             {
-                distribution[lyt.get_system_energy()]++;
+                const double energy = lyt.get_system_energy();
+                bool         found  = false;
+
+                for (auto& energy_index : distribution)
+                {
+                    if (std::abs(energy_index.first - energy) < std::numeric_limits<double>::epsilon())
+                    {
+                        energy_index.second++;
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found)
+                {
+                    distribution[energy] = 1;
+                }
                 break;
             }
         }
