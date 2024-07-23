@@ -290,6 +290,8 @@ class operational_domain_impl
         for (const auto& dimension : indices)
         {
             std::vector<step_point> expanded_products{};
+            expanded_products.reserve(all_step_points.size() * dimension.size());
+
             for (const auto& product : all_step_points)
             {
                 for (const auto& element : dimension)
@@ -643,7 +645,9 @@ class operational_domain_impl
      */
     [[nodiscard]] step_point to_step_point(const operational_domain::parameter_point& pp) const noexcept
     {
-        std::vector<std::size_t> step_values;
+        std::vector<std::size_t> step_values{};
+        step_values.reserve(num_dimensions);
+
         for (auto d = 0u; d < num_dimensions; ++d)
         {
             const auto it = std::lower_bound(values[d].cbegin(), values[d].cend(), pp.parameters[d]);
