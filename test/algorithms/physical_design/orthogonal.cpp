@@ -85,6 +85,9 @@ void check_ortho_equiv_all()
 
     // constant input network
     check_ortho_equiv<Lyt>(blueprints::unbalanced_and_inv_network<mockturtle::mig_network>());
+
+    // multi-output network
+    check_ortho_equiv<Lyt>(blueprints::multi_output_network<technology_network>());
 }
 
 TEST_CASE("Layout equivalence", "[algorithms]")

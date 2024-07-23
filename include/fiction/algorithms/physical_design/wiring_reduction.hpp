@@ -373,125 +373,110 @@ create_wiring_reduction_layout(const Lyt& lyt, const uint64_t x_offset = 0, cons
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
 
-    // Create a wiring_reduction_layout with specified offsets
+    // create a wiring_reduction_layout with specified offsets
     wiring_reduction_layout<coordinate<Lyt>> obs_wiring_reduction_layout{
         {lyt.x() + x_offset + 1, lyt.y() + y_offset + 1, lyt.z()},
         direction};
 
     auto wiring_reduction_lyt = wiring_reduction_layout_type<coordinate<Lyt>>(obs_wiring_reduction_layout);
 
-    // Iterate through nodes in the layout
+    // iterate through nodes in the layout
     lyt.foreach_node(
         [&lyt, &wiring_reduction_lyt, &x_offset, &y_offset](const auto& node)
         {
             const tile<Lyt> old_coord = lyt.get_tile(node);
             const tile<Lyt> new_coord{old_coord.x + x_offset, old_coord.y + y_offset, old_coord.z};
 
-            // Skip if the tile is empty
+            // skip if the tile is empty
             if (lyt.is_empty_tile(old_coord))
             {
                 return;
             }
-            // Handle Primary Inputs (PI) and Primary Outputs (PO)
+            // handle Primary Inputs (PI) and Primary Outputs (PO)
             if (lyt.is_pi(node) || lyt.is_po(node))
             {
                 wiring_reduction_lyt.obstruct_coordinate(new_coord);
                 wiring_reduction_lyt.obstruct_coordinate({new_coord.x, new_coord.y, 1});
             }
 
-            // Handle single input gates and wires
+            // utility function to check if a tile hosts a single wire only, which is not a fanout or hosts a
+            // crossing:
+            //
+            // =
+            auto is_single_wire = [&lyt, &old_coord](const uint64_t add_x_offset, const uint64_t add_y_offset)
+            {
+                return lyt.is_wire_tile({old_coord.x - add_x_offset, old_coord.y - add_y_offset, 0}) &&
+                       !lyt.is_fanout(lyt.get_node({old_coord.x - add_x_offset, old_coord.y - add_y_offset, 0}) &&
+                                      lyt.is_empty_tile({old_coord.x - add_x_offset, old_coord.y - add_y_offset, 1}));
+            };
+
+            // utility function to check for crossings with outgoing wires to the bottom layer:
+            //
+            // +→=
+            // ↓
+            // =
+            auto is_crossing = [&lyt, &old_coord](const uint64_t add_x_offset, const uint64_t add_y_offset)
+            {
+                return lyt.has_northern_incoming_signal(
+                           {old_coord.x - add_x_offset, old_coord.y - add_y_offset + 1, 0}) &&
+                       lyt.has_western_incoming_signal({old_coord.x - add_x_offset + 1, old_coord.y - add_y_offset, 0});
+            };
+
+            // utility function to fully obstruct a coordinate
+            auto obstruct_coordinate =
+                [&wiring_reduction_lyt, &new_coord](const uint64_t add_x_offset, const uint64_t add_y_offset)
+            {
+                wiring_reduction_lyt.obstruct_coordinate({new_coord.x - add_x_offset, new_coord.y - add_y_offset, 0});
+                wiring_reduction_lyt.obstruct_coordinate({new_coord.x - add_x_offset, new_coord.y - add_y_offset, 1});
+            };
+
+            // handle single input gates and wires
             if (const auto signals = lyt.incoming_data_flow(old_coord); signals.size() == 1)
             {
                 const auto      incoming_signal = signals[0];
                 const tile<Lyt> shifted_tile{incoming_signal.x + x_offset, incoming_signal.y + y_offset,
                                              incoming_signal.z};
 
-                // Obstruct the connection between the gate and its incoming signal
+                // obstruct the connection between the gate and its incoming signal
                 wiring_reduction_lyt.obstruct_connection(shifted_tile, new_coord);
 
-                // Obstruct horizontal/vertical wires, non-wire gates (inv) and fanouts
+                // obstruct horizontal/vertical wires, non-wire gates (inv) and fanouts
                 if (!lyt.is_wire(node) || (lyt.fanout_size(node) != 1) || (old_coord.z != 0) ||
                     (lyt.has_western_incoming_signal({old_coord}) && lyt.has_eastern_outgoing_signal({old_coord}) &&
                      (wiring_reduction_lyt.get_search_direction() == search_direction::HORIZONTAL)) ||
                     (lyt.has_northern_incoming_signal({old_coord}) && lyt.has_southern_outgoing_signal({old_coord}) &&
                      (wiring_reduction_lyt.get_search_direction() == search_direction::VERTICAL)))
                 {
-                    wiring_reduction_lyt.obstruct_coordinate({new_coord.x, new_coord.y, 0});
-                    wiring_reduction_lyt.obstruct_coordinate({new_coord.x, new_coord.y, 1});
-
-                    if (old_coord.z == 0)
-                    {
-                        return;
-                    }
-
-                    // special case 1:
-                    // +→=
-                    // ↓ ↓
-                    // =→+
-                    //
-                    // special case 2:
-                    //   =
-                    //   ↓
-                    // = =
-                    // ↓ ↓
-                    // =→+
-                    //
-                    // special case 3:
-                    //
-                    //   =→=
-                    //     ↓
-                    // =→=→+
-                    const auto special_case_1 = lyt.has_northern_incoming_signal({old_coord.x - 1, old_coord.y, 0}) &&
-                                                lyt.has_western_incoming_signal({old_coord.x, old_coord.y - 1, 0});
-                    const auto special_case_2 = lyt.has_northern_incoming_signal({old_coord.x - 1, old_coord.y, 0}) &&
-                                                lyt.has_northern_incoming_signal({old_coord.x, old_coord.y - 1, 0}) &&
-                                                lyt.is_wire_tile({old_coord.x, old_coord.y - 2, 0}) &&
-                                                lyt.is_wire_tile({old_coord.x - 1, old_coord.y - 1, 0});
-                    const auto special_case_3 = lyt.has_western_incoming_signal({old_coord.x - 1, old_coord.y, 0}) &&
-                                                lyt.has_western_incoming_signal({old_coord.x, old_coord.y - 1, 0}) &&
-                                                lyt.is_wire_tile({old_coord.x - 2, old_coord.y, 0}) &&
-                                                lyt.is_wire_tile({old_coord.x - 1, old_coord.y - 1, 0});
-                    if (!(special_case_1 || special_case_2 || special_case_3))
-                    {
-                        return;
-                    }
-
-                    // -> No crossing between coordinate to the left and coordinate above the gate
-                    if ((wiring_reduction_lyt.get_search_direction() == search_direction::HORIZONTAL) &&
-                        (special_case_1 || special_case_2))
-                    {
-                        wiring_reduction_lyt.obstruct_connection({new_coord.x - 1, new_coord.y, 0},
-                                                                 {new_coord.x, new_coord.y - 1, 0});
-                    }
-                    else if ((wiring_reduction_lyt.get_search_direction() == search_direction::VERTICAL) &&
-                             (special_case_1 || special_case_3))
-                    {
-                        wiring_reduction_lyt.obstruct_connection({new_coord.x, new_coord.y - 1, 0},
-                                                                 {new_coord.x - 1, new_coord.y, 0});
-                    }
+                    obstruct_coordinate(0, 0);
                 }
 
-                // For bent wires from north to east, obstruct the connection between the wire and the
+                // for bent wires from north to east, obstruct the connection between the wire and the
                 // coordinate to the bottom right/ top left
                 else if (lyt.has_northern_incoming_signal({old_coord}) && lyt.has_eastern_outgoing_signal({old_coord}))
                 {
                     if (wiring_reduction_lyt.get_search_direction() == search_direction::HORIZONTAL)
                     {
-                        wiring_reduction_lyt.obstruct_connection(new_coord,
-                                                                 {new_coord.x + 1, new_coord.y + 1, new_coord.z});
-                        // special case:
-                        // →=
-                        //  ↓
-                        //  =→
-                        //
-                        // -> Only one wire can be deleted
-                        if (lyt.has_western_incoming_signal({old_coord.x, old_coord.y - 1, old_coord.z}) &&
-                            lyt.is_wire(lyt.get_node({old_coord.x, old_coord.y - 1, old_coord.z})))
                         {
-                            wiring_reduction_lyt.obstruct_coordinate({new_coord.x, new_coord.y - 1, 0});
-                            wiring_reduction_lyt.obstruct_coordinate({new_coord.x, new_coord.y - 1, 1});
+                            wiring_reduction_lyt.obstruct_connection(new_coord,
+                                                                     {new_coord.x + 1, new_coord.y + 1, new_coord.z});
+
+                            // special cases:
+                            // →=
+                            //  ↓
+                            // ...
+                            //  ↓
+                            //  =→
+                            for (uint64_t i = 1; is_single_wire(0, i); ++i)
+                            {
+                                if (lyt.has_western_incoming_signal({old_coord.x, old_coord.y - i, old_coord.z}))
+                                {
+                                    obstruct_coordinate(0, i);
+                                    break;
+                                }
+                            }
                         }
                     }
+
                     else
                     {
                         wiring_reduction_lyt.obstruct_connection({new_coord.x - 1, new_coord.y - 1, new_coord.z},
@@ -499,7 +484,7 @@ create_wiring_reduction_layout(const Lyt& lyt, const uint64_t x_offset = 0, cons
                     }
                 }
 
-                // For bent wires from west to south, obstruct the connection between the wire and the
+                // for bent wires from west to south, obstruct the connection between the wire and the
                 // coordinate to the top left/ bottom right
                 else if (lyt.has_western_incoming_signal({old_coord}) && lyt.has_southern_outgoing_signal({old_coord}))
                 {
@@ -512,23 +497,24 @@ create_wiring_reduction_layout(const Lyt& lyt, const uint64_t x_offset = 0, cons
                     {
                         wiring_reduction_lyt.obstruct_connection(new_coord,
                                                                  {new_coord.x + 1, new_coord.y + 1, new_coord.z});
-                        // special case:
+
+                        // special cases:
                         // ↓
-                        // =→=
-                        //   ↓
-                        //
-                        // -> Only one wire can be deleted
-                        if (lyt.has_northern_incoming_signal({old_coord.x - 1, old_coord.y, old_coord.z}) &&
-                            lyt.is_wire(lyt.get_node({old_coord.x - 1, old_coord.y, old_coord.z})))
+                        // =→...→=
+                        //       ↓
+                        for (uint64_t i = 1; is_single_wire(i, 0); ++i)
                         {
-                            wiring_reduction_lyt.obstruct_coordinate({new_coord.x - 1, new_coord.y, 0});
-                            wiring_reduction_lyt.obstruct_coordinate({new_coord.x - 1, new_coord.y, 1});
+                            if (lyt.has_northern_incoming_signal({old_coord.x - i, old_coord.y, old_coord.z}))
+                            {
+                                obstruct_coordinate(i, 0);
+                                break;
+                            }
                         }
                     }
                 }
             }
 
-            // Handle double input gates (AND, OR, ...)
+            // handle double input gates (AND, OR, ...)
             else if (signals.size() == 2)
             {
                 const auto signal_a = signals[0];
@@ -540,29 +526,73 @@ create_wiring_reduction_layout(const Lyt& lyt, const uint64_t x_offset = 0, cons
                 wiring_reduction_lyt.obstruct_connection(shifted_tile_a, new_coord);
                 wiring_reduction_lyt.obstruct_connection(shifted_tile_b, new_coord);
 
-                wiring_reduction_lyt.obstruct_coordinate(new_coord);
-                wiring_reduction_lyt.obstruct_coordinate({new_coord.x, new_coord.y, 1});
+                obstruct_coordinate(0, 0);
+            }
 
-                // special case:
+            if (const auto signals = lyt.incoming_data_flow(old_coord); (old_coord.z == 1) || (signals.size() == 2))
+            {
+                // special cases (where the crossing can also be placed further to the left or top):
                 // +→=
                 // ↓ ↓
                 // =→&
                 //
-                // -> No crossing between coordinate to the left and coordinate above the gate
-                if (!(lyt.has_northern_incoming_signal({old_coord.x - 1, old_coord.y, old_coord.z}) &&
-                      lyt.has_western_incoming_signal({old_coord.x, old_coord.y - 1, old_coord.z})))
+                // or:
+                //
+                // +→=
+                // ↓ ↓
+                // =→+
+                if (is_single_wire(1, 0) && is_single_wire(0, 1))
                 {
-                    return;
-                }
-                if (wiring_reduction_lyt.get_search_direction() == search_direction::HORIZONTAL)
-                {
-                    wiring_reduction_lyt.obstruct_connection({new_coord.x - 1, new_coord.y, new_coord.z},
-                                                             {new_coord.x, new_coord.y - 1, new_coord.z});
-                }
-                else
-                {
-                    wiring_reduction_lyt.obstruct_connection({new_coord.x, new_coord.y - 1, new_coord.z},
-                                                             {new_coord.x - 1, new_coord.y, new_coord.z});
+                    bool obstruct = false;
+
+                    for (uint64_t i = 1; true; ++i)
+                    {
+                        if (is_crossing(1, 1))
+                        {
+                            obstruct = true;
+                            break;
+                        }
+                        if (wiring_reduction_lyt.get_search_direction() == search_direction::HORIZONTAL)
+                        {
+                            if (!is_single_wire(1, i) || !is_single_wire(0, i + 1) ||
+                                !lyt.has_northern_incoming_signal({old_coord.x - 1, old_coord.y - i + 1, 0}) ||
+                                !lyt.has_northern_incoming_signal({old_coord.x, old_coord.y - i, 0}))
+                            {
+                                break;
+                            }
+                            if (is_crossing(1, i + 1))
+                            {
+                                obstruct = true;
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            if (!is_single_wire(i, 1) || !is_single_wire(i + 1, 0) ||
+                                !lyt.has_western_incoming_signal({old_coord.x - i, old_coord.y, 0}) ||
+                                !lyt.has_western_incoming_signal({old_coord.x - i + 1, old_coord.y - i, 0}))
+                            {
+                                break;
+                            }
+                            if (is_crossing(i + 1, 1))
+                            {
+                                obstruct = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (obstruct)
+                    {
+                        if (wiring_reduction_lyt.get_search_direction() == search_direction::HORIZONTAL)
+                        {
+                            obstruct_coordinate(1, 0);
+                        }
+                        else
+                        {
+                            obstruct_coordinate(0, 1);
+                        }
+                    }
                 }
             }
         });
@@ -584,14 +614,14 @@ void add_obstructions(WiringReductionLyt& lyt) noexcept
 {
     if (lyt.get_search_direction() == search_direction::HORIZONTAL)
     {
-        // Add obstructions to the top edge of the layout
+        // add obstructions to the top edge of the layout
         for (uint64_t x = 1; x <= lyt.x(); x++)
         {
             lyt.obstruct_coordinate({x, 0, 0});
             lyt.obstruct_coordinate({x, 0, 1});
         }
 
-        // Add obstructions to the bottom edge of the layout
+        // add obstructions to the bottom edge of the layout
         for (uint64_t x = 0; x < lyt.x(); x++)
         {
             lyt.obstruct_coordinate({x, lyt.y(), 0});
@@ -600,14 +630,14 @@ void add_obstructions(WiringReductionLyt& lyt) noexcept
     }
     else
     {
-        // Add obstructions to the left edge of the layout
+        // add obstructions to the left edge of the layout
         for (uint64_t y = 1; y <= lyt.y(); y++)
         {
             lyt.obstruct_coordinate({0, y, 0});
             lyt.obstruct_coordinate({0, y, 1});
         }
 
-        // Add obstructions to the right edge of the layout
+        // add obstructions to the right edge of the layout
         for (uint64_t y = 0; y < lyt.y(); y++)
         {
             lyt.obstruct_coordinate({lyt.x(), y, 0});
@@ -656,17 +686,17 @@ void update_to_delete_list(WiringReductionLyt& lyt, const layout_coordinate_path
 {
     for (const auto& coord : possible_path)
     {
-        // Check if the coordinate is not at the leftmost or rightmost position
+        // check if the coordinate is not at the leftmost or rightmost position
         if (((lyt.get_search_direction() == search_direction::HORIZONTAL) && coord.x != 0 && coord.x != lyt.x()) ||
             ((lyt.get_search_direction() == search_direction::VERTICAL) && coord.y != 0 && coord.y != lyt.y()))
         {
-            // Create the corresponding coordinate on the original layout
+            // create the corresponding coordinate on the original layout
             const fiction::coordinate<WiringReductionLyt> shifted_coord{coord.x - 1, coord.y - 1, 0};
 
-            // Append the corresponding coordinate to the to-delete list
+            // append the corresponding coordinate to the to-delete list
             to_delete.append(shifted_coord);
 
-            // Obstruct the coordinate in both layers
+            // obstruct the coordinate in both layers
             lyt.obstruct_coordinate({coord.x, coord.y, 0});
             lyt.obstruct_coordinate({coord.x, coord.y, 1});
         }
@@ -695,10 +725,10 @@ template <typename Lyt, typename WiringReductionLyt>
 calculate_offset_matrix(const WiringReductionLyt&                         lyt,
                         const layout_coordinate_path<WiringReductionLyt>& to_delete) noexcept
 {
-    // Initialize matrix with zeros
+    // initialize matrix with zeros
     offset_matrix matrix(lyt.y() + 1, std::vector<uint64_t>(lyt.x() + 1, 0));
 
-    // Update matrix based on coordinates
+    // update matrix based on coordinates
     for (const auto& coord : to_delete)
     {
         const auto x = coord.x;
@@ -780,7 +810,7 @@ void adjust_tile_horizontal_search_dir(Lyt& lyt, const LytCpy& layout_copy, tile
     {
         bool traversing_deleted_wires = false;
 
-        // Check if traversing through deleted wires
+        // check if traversing through deleted wires
         if (offset_mtrx[fanin.y + 1][fanin.x] != offset_mtrx[fanin.y][fanin.x])
         {
             fanin                    = {fanin.x, fanin.y, 0};
@@ -789,7 +819,7 @@ void adjust_tile_horizontal_search_dir(Lyt& lyt, const LytCpy& layout_copy, tile
 
         uint64_t offset_offset = 0;
 
-        // If traversing through deleted wires, update the offset
+        // if traversing through deleted wires, update the offset
         if (traversing_deleted_wires)
         {
             for (uint64_t o = 0; o < offset; ++o)
@@ -808,7 +838,7 @@ void adjust_tile_horizontal_search_dir(Lyt& lyt, const LytCpy& layout_copy, tile
             }
         }
 
-        // Create signals for the new coordinates
+        // create signals for the new coordinates
         signals.push_back(lyt.make_signal(lyt.get_node({fanin.x, fanin.y - offset + offset_offset, fanin.z})));
     }
 }
@@ -842,7 +872,7 @@ void adjust_tile_vertical_search_dir(Lyt& lyt, const LytCpy& layout_copy, tile<L
     {
         bool traversing_deleted_wires = false;
 
-        // Check if traversing through deleted wires
+        // check if traversing through deleted wires
         if (offset_mtrx[fanin.y][fanin.x + 1] != offset_mtrx[fanin.y][fanin.x])
         {
             fanin                    = {fanin.x, fanin.y, 0};
@@ -851,7 +881,7 @@ void adjust_tile_vertical_search_dir(Lyt& lyt, const LytCpy& layout_copy, tile<L
 
         uint64_t excess_offset = 0;
 
-        // If traversing through deleted wires, update the offset
+        // if traversing through deleted wires, update the offset
         if (traversing_deleted_wires)
         {
             for (uint64_t o = 0; o < offset; ++o)
@@ -870,7 +900,7 @@ void adjust_tile_vertical_search_dir(Lyt& lyt, const LytCpy& layout_copy, tile<L
             }
         }
 
-        // Create signals for the new coordinates
+        // create signals for the new coordinates
         signals.push_back(lyt.make_signal(lyt.get_node({fanin.x - offset + excess_offset, fanin.y, fanin.z})));
     }
 }
@@ -899,14 +929,14 @@ void adjust_tile(Lyt& lyt, const LytCpy& layout_copy, const WiringReductionLyt& 
     const auto      offset    = offset_mtrx[y][x];
     const tile<Lyt> old_coord = {x, y, z};
 
-    // Check if the tile is not empty and has an offset
+    // check if the tile is not empty and has an offset
     if (!(lyt.is_empty_tile(old_coord)) && (offset != 0))
     {
         const auto new_coord = determine_new_coord<Lyt, WiringReductionLyt>(wiring_reduction_lyt, x, y, z, offset);
         std::vector<mockturtle::signal<Lyt>> signals{};
         signals.reserve(layout_copy.fanin_size(layout_copy.get_node(old_coord)));
 
-        // Iterate through fanin and create signals for the new coordinates
+        // iterate through fanins and create signals for the new coordinates
         layout_copy.foreach_fanin(
             layout_copy.get_node(old_coord),
             [&lyt, &signals, &offset, &old_coord, &layout_copy, &offset_mtrx, &wiring_reduction_lyt](const auto& fi)
@@ -927,19 +957,21 @@ void adjust_tile(Lyt& lyt, const LytCpy& layout_copy, const WiringReductionLyt& 
         if (lyt.is_po(lyt.get_node(old_coord)))
         {
             if ((wiring_reduction_lyt.get_search_direction() == search_direction::HORIZONTAL) &&
-                !lyt.is_empty_tile({new_coord.x + 1, new_coord.y, new_coord.z}))
+                !lyt.is_empty_tile({new_coord.x + 1, new_coord.y, new_coord.z}) &&
+                lyt.has_western_incoming_signal({new_coord.x + 1, new_coord.y, new_coord.z}))
             {
                 lyt.move_node(lyt.get_node({new_coord.x + 1, new_coord.y, new_coord.z}),
                               {new_coord.x + 1, new_coord.y, new_coord.z}, {});
             }
             if ((wiring_reduction_lyt.get_search_direction() == search_direction::VERTICAL) &&
-                !lyt.is_empty_tile({new_coord.x, new_coord.y + 1, new_coord.z}))
+                !lyt.is_empty_tile({new_coord.x, new_coord.y + 1, new_coord.z}) &&
+                lyt.has_northern_incoming_signal({new_coord.x, new_coord.y + 1, new_coord.z}))
             {
                 lyt.move_node(lyt.get_node({new_coord.x, new_coord.y + 1, new_coord.z}),
                               {new_coord.x, new_coord.y + 1, new_coord.z}, {});
             }
         }
-        // Move the node to the new coordinates
+        // move the node to the new coordinates
         lyt.move_node(lyt.get_node(old_coord), new_coord, signals);
     }
 }
@@ -964,16 +996,16 @@ void delete_wires(Lyt& lyt, WiringReductionLyt& wiring_reduction_layout,
 
     const auto off_mat = calculate_offset_matrix<WiringReductionLyt>(wiring_reduction_layout, to_delete);
 
-    // Create a copy of the original layout for reference
+    // create a copy of the original layout for reference
     const auto layout_copy = lyt.clone();
 
-    // Clear tiles based on the to-delete list
+    // clear tiles based on the to-delete list
     for (const auto& tile_to_delete : to_delete)
     {
         lyt.clear_tile(tile_to_delete);
     }
 
-    // Iterate over the layout to delete wires and adjust the layout
+    // iterate over the layout to delete wires and adjust the layout
     for (uint64_t k = 0; k < lyt.x() + lyt.y() + 1; ++k)
     {
         for (uint64_t x = 0; x < k + 1; ++x)
@@ -989,12 +1021,12 @@ void delete_wires(Lyt& lyt, WiringReductionLyt& wiring_reduction_layout,
         }
     }
 
-    // Calculate bounding box for optimized layout size
+    // calculate bounding box for optimized layout size
     const auto bounding_box            = bounding_box_2d(lyt);
     const auto optimized_layout_width  = bounding_box.get_x_size();
     const auto optimized_layout_height = bounding_box.get_y_size();
 
-    // Resize the layout to the optimized size
+    // resize the layout to the optimized size
     lyt.resize({optimized_layout_width, optimized_layout_height, lyt.z()});
 }
 
@@ -1022,10 +1054,10 @@ class wiring_reduction_impl
 
         bool found_wires = true;
 
-        // Perform wiring reduction iteratively until no further wires can be deleted
+        // perform wiring reduction iteratively until no further wires can be deleted
         while (found_wires)
         {
-            // Continue until no further wires can be deleted
+            // continue until no further wires can be deleted
             found_wires = false;
 
             for (const auto direction : {search_direction::HORIZONTAL, search_direction::VERTICAL})
@@ -1034,24 +1066,24 @@ class wiring_reduction_impl
                 add_obstructions(wiring_reduction_lyt);
                 to_delete = {};
 
-                // Get the initial possible path
+                // get the initial possible path
                 auto possible_path =
                     get_path(wiring_reduction_lyt, {0, 0}, {wiring_reduction_lyt.x(), wiring_reduction_lyt.y()});
 
-                // Iterate while there is a possible path
+                // iterate while there is a possible path
                 while (!possible_path.empty())
                 {
                     update_to_delete_list<Lyt, wiring_reduction_layout_type<coordinate<Lyt>>>(wiring_reduction_lyt,
                                                                                               possible_path, to_delete);
 
-                    // Update possible_path for the next iteration
+                    // update possible_path for the next iteration
                     possible_path =
                         get_path(wiring_reduction_lyt, {0, 0}, {wiring_reduction_lyt.x(), wiring_reduction_lyt.y()});
                 }
 
                 if (!to_delete.empty())
                 {
-                    // Calculate offset matrix and delete wires based on to-delete list
+                    // calculate offset matrix and delete wires based on to-delete list
                     delete_wires(layout, wiring_reduction_lyt, to_delete);
                     found_wires = true;
                 }
@@ -1112,14 +1144,14 @@ void wiring_reduction(const Lyt& lyt, wiring_reduction_stats* pst = nullptr) noe
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
 
-    // Check if the clocking scheme is 2DDWave
+    // check if the clocking scheme is 2DDWave
     if (!lyt.is_clocking_scheme(clock_name::TWODDWAVE))
     {
         std::cout << "[e] the given layout has to be 2DDWave-clocked\n";
         return;
     }
 
-    // Initialize stats for runtime measurement
+    // initialize stats for runtime measurement
     wiring_reduction_stats             st{};
     detail::wiring_reduction_impl<Lyt> p{lyt, st};
 
