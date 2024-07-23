@@ -256,7 +256,7 @@ class operational_domain_impl
             std::iota(indices[d].begin(), indices[d].end(), 0ul);
 
             // if the value of the parameter is greater than params.max after num_x_steps() steps, this value is
-            // ignored in the operational domain calculation.
+            // ignored in the operational domain calculation
             if ((params.sweep_dimensions[d].min +
                  static_cast<double>(indices[d].size() - 1) * params.sweep_dimensions[d].step) -
                     params.sweep_dimensions[d].max >

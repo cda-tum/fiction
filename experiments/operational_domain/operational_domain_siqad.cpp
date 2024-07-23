@@ -93,6 +93,12 @@ int main()  // NOLINT
     static std::size_t total_sim_calls_ff = 0;
     static std::size_t total_sim_calls_ct = 0;
 
+    // total runtime
+    static double total_runtime_gs = 0.0;
+    static double total_runtime_rs = 0.0;
+    static double total_runtime_ff = 0.0;
+    static double total_runtime_ct = 0.0;
+
     for (const auto& [gate, truth_table] : gates)
     {
         for (const auto& file : std::filesystem::directory_iterator(fmt::format("{}{}", folder, gate)))
@@ -145,6 +151,12 @@ int main()  // NOLINT
             total_sim_calls_ff += op_domain_stats_ff.num_simulator_invocations;
             total_sim_calls_ct += op_domain_stats_ct.num_simulator_invocations;
 
+            // update the total runtime
+            total_runtime_gs += mockturtle::to_seconds(op_domain_stats_gs.time_total);
+            total_runtime_rs += mockturtle::to_seconds(op_domain_stats_rs.time_total);
+            total_runtime_ff += mockturtle::to_seconds(op_domain_stats_ff.time_total);
+            total_runtime_ct += mockturtle::to_seconds(op_domain_stats_ct.time_total);
+
             // compute the operational percentages
             const auto operational_percentage_gs =
                 static_cast<double>(op_domain_stats_gs.num_operational_parameter_combinations) /
@@ -177,7 +189,9 @@ int main()  // NOLINT
 
                 // Contour Tracing
                 op_domain_stats_ct.num_evaluated_parameter_combinations, operational_percentage_ct,
-                op_domain_stats_ct.num_simulator_invocations, mockturtle::to_seconds(op_domain_stats_ct.time_total));
+                op_domain_stats_ct.num_simulator_invocations, mockturtle::to_seconds(op_domain_stats_ct.time_total)
+
+            );
         }
 
         opdomain_exp.save();
@@ -190,16 +204,18 @@ int main()  // NOLINT
         "Total", 0,
 
         // Grid Search
-        total_samples_gs, 0.0, total_sim_calls_gs, 0.0,
+        total_samples_gs, 0.0, total_sim_calls_gs, total_runtime_gs,
 
         // Random Sampling
-        total_samples_rs, 0.0, total_sim_calls_rs, 0.0,
+        total_samples_rs, 0.0, total_sim_calls_rs, total_runtime_rs,
 
         // Flood Fill
-        total_samples_ff, 0.0, total_sim_calls_ff, 0.0,
+        total_samples_ff, 0.0, total_sim_calls_ff, total_runtime_ff,
 
         // Contour Tracing
-        total_samples_ct, 0.0, total_sim_calls_ct, 0.0);
+        total_samples_ct, 0.0, total_sim_calls_ct, total_runtime_ct
+
+    );
 
     opdomain_exp.save();
     opdomain_exp.table();
