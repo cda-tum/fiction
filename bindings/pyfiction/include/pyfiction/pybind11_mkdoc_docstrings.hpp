@@ -5807,6 +5807,46 @@ Returns:
 
 static const char *__doc_fiction_detail_operational_domain_impl_indices = R"doc(Dimension steps.)doc";
 
+static const char *__doc_fiction_detail_operational_domain_impl_infer_operational_status_in_enclosing_contour =
+R"doc(Given a starting point, this function marks all points that are
+enclosed by the operational domain contour as 'inferred operational'.
+This assumes that the operational domain does not have holes. To the
+best of the author's knowledge, at the time of writing this code,
+there exists no proof that operational domains are always continuous,
+i.e., hole-free. Marking points as 'inferred operational' can be
+useful to avoid recomputation in, e.g., contour tracing if an
+operational domain with multiple islands is investigated.
+
+The function starts at the given starting point and performs flood
+fill to mark all points that are reachable from the starting point
+until it encounters the non-operational edges.
+
+Note that no physical simulation is conducted by this function!
+
+Parameter ``starting_point``:
+    Step point at which to start the inference. If `starting_point` is
+    non-operational, this function might invoke undefined behavior.)doc";
+
+static const char *__doc_fiction_detail_operational_domain_impl_inferred_op_domain =
+R"doc(All the points inferred (assumed) to be operational but not actually
+simulated.)doc";
+
+static const char *__doc_fiction_detail_operational_domain_impl_is_step_point_inferred_operational =
+R"doc(Checks whether the given step point is part of the inferred
+operational domain. If it is, the point is marked as enclosed in the
+operational domain. No simulation is performed on `sp`. If `sp` is not
+contained in the inferred operational domain, it does not mean that
+`sp` is definitely non-operational. It could still appear in the
+regular operational domain with either status.
+
+This function is used by the contour tracing algorithm.
+
+Parameter ``sp``:
+    Step point to check for inferred operational status.
+
+Returns:
+    `true` iff `sp` is contained in `inferred_op_domain`.)doc";
+
 static const char *__doc_fiction_detail_operational_domain_impl_is_step_point_operational =
 R"doc(Logs and returns the operational status at the given point `sp = (d1,
 ..., dn)`. If the point has already been sampled, it returns the
@@ -5939,14 +5979,9 @@ Parameter ``step_points``:
 
 static const char *__doc_fiction_detail_operational_domain_impl_stats = R"doc(The statistics of the operational domain computation.)doc";
 
-static const char *__doc_fiction_detail_operational_domain_impl_step_point =
-R"doc(A step point represents a point in the x and y dimension from 0 to the
-maximum number of steps. A step point does not hold the actual
-parameter values, but the step values in the x and y dimension,
-respectively.
+static const char *__doc_fiction_detail_operational_domain_impl_step_point = R"doc(Forward-declare step_point.)doc";
 
-See `operational_domain::parameter_point` for a point that holds the
-actual parameter values.)doc";
+static const char *__doc_fiction_detail_operational_domain_impl_step_point_2 = R"doc(Forward-declare step_point.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_step_point_operator_eq =
 R"doc(Equality operator.
