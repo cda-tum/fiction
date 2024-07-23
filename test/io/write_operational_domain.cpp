@@ -88,6 +88,24 @@ TEST_CASE("Write simple operational domain", "[write-operational-domain]")
             CHECK(expected.find(line) != expected.end());
         }
     }
+
+    SECTION("skip non-operational samples")
+    {
+        write_operational_domain_params params{};
+        params.write_non_operational_samples = false;
+
+        std::set<std::string> expected{"epsilon_r,lambda_tf,operational status", "0,0,1"};
+
+        write_operational_domain(opdom, os, params);
+        const auto os_str = os.str();
+
+        std::istringstream is{os_str};
+
+        for (std::string line{}; std::getline(is, line);)
+        {
+            CHECK(expected.find(line) != expected.end());
+        }
+    }
 }
 
 TEST_CASE("Write operational domain with floating-point parameter values", "[write-operational-domain]")
@@ -126,6 +144,24 @@ TEST_CASE("Write operational domain with floating-point parameter values", "[wri
 
         std::set<std::string> expected{"epsilon_r,lambda_tf,operational status", "0.1,0.2,operational",
                                        "0.3,0.4,non-operational", "1.2,1.4,operational", "2.4,5.75,non-operational"};
+
+        write_operational_domain(opdom, os, params);
+        const auto os_str = os.str();
+
+        std::istringstream is{os_str};
+
+        for (std::string line{}; std::getline(is, line);)
+        {
+            CHECK(expected.find(line) != expected.end());
+        }
+    }
+
+    SECTION("skip non-operational samples")
+    {
+        write_operational_domain_params params{};
+        params.write_non_operational_samples = false;
+
+        std::set<std::string> expected{"epsilon_r,lambda_tf,operational status", "0.1,0.2,1", "1.2,1.4,1"};
 
         write_operational_domain(opdom, os, params);
         const auto os_str = os.str();

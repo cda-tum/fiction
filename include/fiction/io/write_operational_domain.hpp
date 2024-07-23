@@ -31,6 +31,12 @@ struct write_operational_domain_params
      * The tag used to represent the non-operational value of a parameter set.
      */
     std::string_view non_operational_tag = "0";
+    /**
+     * Whether to write non-operational samples to the CSV file. If set to `false`, only operational samples are
+     * written. This yields a significantly smaller CSV file. It is recommended to set this option for 3D plots because
+     * the non-operational samples would shadow the operational samples anyway.
+     */
+    bool write_non_operational_samples = true;
 };
 
 namespace detail
@@ -119,6 +125,12 @@ inline void write_operational_domain(const operational_domain& opdom, std::ostre
 
     for (const auto& [sim_param, op_val] : opdom.operational_values)
     {
+        // skip non-operational samples if the respective flag is set
+        if (!params.write_non_operational_samples && op_val == operational_status::NON_OPERATIONAL)
+        {
+            continue;
+        }
+
         const auto tag =
             op_val == operational_status::OPERATIONAL ? params.operational_tag : params.non_operational_tag;
 
