@@ -17,7 +17,7 @@ TEST_CASE("Test energy_distribution function", "[energy-distribution]")
 {
     SECTION("one empty layout")
     {
-        sidb_100_cell_clk_lyt_siqad lyt{};
+        sidb_100_cell_clk_lyt_siqad                                           lyt{};
         std::vector<charge_distribution_surface<sidb_100_cell_clk_lyt_siqad>> all_lyts{};
         const charge_distribution_surface                                     charge_layout{lyt};
         all_lyts.push_back(charge_layout);
@@ -55,7 +55,7 @@ TEST_CASE("Test energy_distribution function", "[energy-distribution]")
         charge_distribution_surface                                           charge_layout_first{lyt, sim_param};
 
         charge_layout_first.assign_charge_state({10, 10}, sidb_charge_state::NEUTRAL, false);
-        charge_layout_first.assign_charge_state({11, 10}, sidb_charge_state::NEUTRAL,false);
+        charge_layout_first.assign_charge_state({11, 10}, sidb_charge_state::NEUTRAL, false);
         charge_layout_first.assign_charge_state({12, 10}, sidb_charge_state::NEUTRAL, false);
         charge_layout_first.update_local_potential();
         charge_layout_first.recompute_system_energy();
