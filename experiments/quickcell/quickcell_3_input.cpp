@@ -43,9 +43,11 @@ int main()  // NOLINT
 
     static const std::string folder = fmt::format("{}/gate_skeletons/skeleton_3_input_1_output/", EXPERIMENTS_PATH);
 
+    // this skeleton is used for the design of AND3 and Gamble
     const auto skeleton_one =
         read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}", folder, "3_in_1_out_skeleton_one.sqd"));
 
+    // this skeleton is used for the design of all Boolean functions, except for AND3 and Gamble
     const auto skeleton_two =
         read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}", folder, "3_in_1_out_skeleton_two.sqd"));
 
@@ -53,17 +55,9 @@ int main()  // NOLINT
         is_operational_params{sidb_simulation_parameters{2, -0.31}, sidb_simulation_engine::QUICKEXACT,
                               detect_bdl_wires_params{}, operational_condition::FORBIDDING_KINKS},
         design_sidb_gates_params<
-            fiction::cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+            fiction::cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL,
         {{22, 6, 0}, {32, 12, 0}},
         4};
-
-    const design_sidb_gates_params<fiction::cell<sidb_100_cell_clk_lyt_siqad>> params_2_in_2_out{
-        is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
-                              detect_bdl_wires_params{}, operational_condition::FORBIDDING_KINKS},
-        design_sidb_gates_params<
-            fiction::cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
-        {{14, 6, 0}, {24, 14, 0}},
-        3};
 
     double sum_quickcell_runtime = 0;
 
