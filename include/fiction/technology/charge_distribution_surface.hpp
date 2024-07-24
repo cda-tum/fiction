@@ -1943,8 +1943,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         {
             for (const auto& c : strg->three_state_cells)
             {
-                this->assign_charge_state(c, sidb_charge_state::NEGATIVE,
-                                          charge_index_mode::KEEP_CHARGE_INDEX);
+                this->assign_charge_state(c, sidb_charge_state::NEGATIVE, charge_index_mode::KEEP_CHARGE_INDEX);
             }
         }
 
@@ -1952,8 +1951,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         {
             for (const auto& c : strg->sidb_order_without_three_state_cells)
             {
-                this->assign_charge_state(c, sidb_charge_state::NEGATIVE,
-                                          charge_index_mode::KEEP_CHARGE_INDEX);
+                this->assign_charge_state(c, sidb_charge_state::NEGATIVE, charge_index_mode::KEEP_CHARGE_INDEX);
             }
         }
 

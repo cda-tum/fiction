@@ -1858,9 +1858,9 @@ static const char *__doc_fiction_charge_index_mode =
 R"doc(An enumeration of modes for handling the charge index during charge
 state assignment.)doc";
 
-static const char *__doc_fiction_charge_index_mode_DO_NOT_UPDATE_CHARGE_INDEX =
-R"doc(The charge state is assigned to the cell but the charge index is not
-updated.)doc";
+static const char *__doc_fiction_charge_index_mode_KEEP_CHARGE_INDEX =
+R"doc(The charge state is assigned to the cell but the old charge index is
+kept.)doc";
 
 static const char *__doc_fiction_charge_index_mode_UPDATE_CHARGE_INDEX =
 R"doc(The charge state is assigned to the cell and the charge index is
