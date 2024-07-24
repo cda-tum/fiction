@@ -12815,6 +12815,54 @@ Parameter ``e``:
 Parameter ``other``:
     Edge whose color is to be used to paint `e`.)doc";
 
+static const char *__doc_fiction_parameter_point = R"doc(The parameter point holds parameter values in the x and y dimension.)doc";
+
+static const char *__doc_fiction_parameter_point_get =
+R"doc(Support for structured bindings.
+
+Template parameter ``I``:
+    Index of the parameter value to be returned.
+
+Returns:
+    The parameter value at the specified index.)doc";
+
+static const char *__doc_fiction_parameter_point_operator_eq =
+R"doc(Equality operator. Checks if this parameter point is equal to another
+point within a specified tolerance. The tolerance is defined by
+`physical_constants::POP_STABILITY_ERR`.
+
+Parameter ``other``:
+    Other parameter point to compare with.
+
+Returns:
+    `true` iff the parameter points are equal.)doc";
+
+static const char *__doc_fiction_parameter_point_operator_ne =
+R"doc(Inequality operator. Checks if this parameter point is unequal to
+another point within a specified tolerance. The tolerance is defined
+by `physical_constants::POP_STABILITY_ERR`.
+
+Parameter ``other``:
+    Other parameter point to compare with.
+
+Returns:
+    `true` iff the parameter points are not equal.)doc";
+
+static const char *__doc_fiction_parameter_point_parameter_point = R"doc(Standard default constructor.)doc";
+
+static const char *__doc_fiction_parameter_point_parameter_point_2 =
+R"doc(Standard constructor.
+
+Parameter ``x_val``:
+    X dimension parameter value.
+
+Parameter ``y_val``:
+    Y dimension parameter value.)doc";
+
+static const char *__doc_fiction_parameter_point_x = R"doc(X dimension parameter value.)doc";
+
+static const char *__doc_fiction_parameter_point_y = R"doc(Y dimension parameter value.)doc";
+
 static const char *__doc_fiction_parameterized_gate_library =
 R"doc(A parameterized gate library for SiDB technology. It allows the design
 of SiDB gates tailored to given atomic defects, thus enabling the
@@ -13009,54 +13057,6 @@ Parameter ``parameters``:
 
 Returns:
     Bestagon gate representation of `t` including mirroring.)doc";
-
-static const char *__doc_fiction_parameter_point = R"doc(The parameter point holds parameter values in the x and y dimension.)doc";
-
-static const char *__doc_fiction_parameter_point_get =
-R"doc(Support for structured bindings.
-
-Template parameter ``I``:
-    Index of the parameter value to be returned.
-
-Returns:
-    The parameter value at the specified index.)doc";
-
-static const char *__doc_fiction_parameter_point_operator_eq =
-R"doc(Equality operator. Checks if this parameter point is equal to another
-point within a specified tolerance. The tolerance is defined by
-`physical_constants::POP_STABILITY_ERR`.
-
-Parameter ``other``:
-    Other parameter point to compare with.
-
-Returns:
-    `true` iff the parameter points are equal.)doc";
-
-static const char *__doc_fiction_parameter_point_operator_ne =
-R"doc(Inequality operator. Checks if this parameter point is unequal to
-another point within a specified tolerance. The tolerance is defined
-by `physical_constants::POP_STABILITY_ERR`.
-
-Parameter ``other``:
-    Other parameter point to compare with.
-
-Returns:
-    `true` iff the parameter points are not equal.)doc";
-
-static const char *__doc_fiction_parameter_point_parameter_point = R"doc(Standard default constructor.)doc";
-
-static const char *__doc_fiction_parameter_point_parameter_point_2 =
-R"doc(Standard constructor.
-
-Parameter ``x_val``:
-    X dimension parameter value.
-
-Parameter ``y_val``:
-    Y dimension parameter value.)doc";
-
-static const char *__doc_fiction_parameter_point_x = R"doc(X dimension parameter value.)doc";
-
-static const char *__doc_fiction_parameter_point_y = R"doc(Y dimension parameter value.)doc";
 
 static const char *__doc_fiction_path_collection =
 R"doc(An ordered collection of multiple paths in a layout.
