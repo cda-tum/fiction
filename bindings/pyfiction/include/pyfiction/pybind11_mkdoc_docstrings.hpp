@@ -7532,7 +7532,7 @@ R"doc(This function takes in a vector of `charge_distribution_surface`
 objects and returns a map containing the system energy and the number
 of occurrences of that energy in the input vector. To compare two
 energy values for equality, the comparison uses a tolerance specified
-by physical_constants::POP_STABILITY_ERR`.
+by `physical_constants::POP_STABILITY_ERR`.
 
 Template parameter ``Lyt``:
     Cell-level layout type.
