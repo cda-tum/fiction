@@ -16,7 +16,11 @@ function(
     endif()
 
     if(${ENABLE_SANITIZER_LEAK})
-      list(APPEND SANITIZERS "leak")
+      if(CMAKE_CXX_COMPILER_ID MATCHES "AppleClang")
+        message(SEND_ERROR "Leak sanitizer is not supported on Apple Clang.")
+      else()
+        list(APPEND SANITIZERS "leak")
+      endif()
     endif()
 
     if(${ENABLE_SANITIZER_UNDEFINED_BEHAVIOR})
