@@ -50,18 +50,27 @@ class TestChargeDistributionSurface(unittest.TestCase):
         self.assertEqual(charge_lyt.get_charge_state((1, 1)), sidb_charge_state.NEGATIVE)
         self.assertEqual(charge_lyt.get_charge_state((2, 1)), sidb_charge_state.NEGATIVE)
 
-        charge_lyt.assign_charge_state((0, 1), sidb_charge_state.NEUTRAL)
-        charge_lyt.assign_charge_state((1, 1), sidb_charge_state.NEGATIVE)
-        charge_lyt.assign_charge_state((2, 1), sidb_charge_state.NEUTRAL)
+        self.assertEqual(charge_lyt.get_charge_index_and_base()[0], 0)
+
+        charge_lyt.assign_charge_state((0, 1), sidb_charge_state.NEUTRAL, charge_index_mode.DO_NOT_UPDATE_CHARGE_INDEX)
+        charge_lyt.assign_charge_state((1, 1), sidb_charge_state.NEGATIVE, charge_index_mode.DO_NOT_UPDATE_CHARGE_INDEX)
+        charge_lyt.assign_charge_state((2, 1), sidb_charge_state.NEUTRAL, charge_index_mode.DO_NOT_UPDATE_CHARGE_INDEX)
+
+        self.assertEqual(charge_lyt.get_charge_index_and_base()[0], 0)
+
         self.assertEqual(charge_lyt.get_charge_state((0, 1)), sidb_charge_state.NEUTRAL)
         self.assertEqual(charge_lyt.get_charge_state((1, 1)), sidb_charge_state.NEGATIVE)
         self.assertEqual(charge_lyt.get_charge_state((2, 1)), sidb_charge_state.NEUTRAL)
+
         charge_lyt.update_after_charge_change()
         self.assertTrue(charge_lyt.is_physically_valid())
 
         charge_lyt.assign_charge_state((0, 1), sidb_charge_state.NEGATIVE)
         charge_lyt.assign_charge_state((1, 1), sidb_charge_state.NEUTRAL)
         charge_lyt.assign_charge_state((2, 1), sidb_charge_state.NEGATIVE)
+
+        self.assertNotEqual(charge_lyt.get_charge_index_and_base()[0], 0)
+
         charge_lyt.update_after_charge_change()
         self.assertTrue(charge_lyt.is_physically_valid())
 
