@@ -37,7 +37,7 @@ TEST_CASE("Benchmark Graph-Oriented Layout Design", "[benchmark]")
     BENCHMARK("graph_oriented_layout_design: high effort")
     {
         params.high_effort = true;
-        
+
         return graph_oriented_layout_design<gate_layout>(ntk, params);
     };
 }
