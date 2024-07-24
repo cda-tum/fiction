@@ -12,7 +12,7 @@
 #include <fiction/layouts/clocked_layout.hpp>                                     // clocked layout
 #include <fiction/layouts/gate_level_layout.hpp>                                  // gate-level layout
 #include <fiction/layouts/tile_based_layout.hpp>                                  // tile-based layout
-#include <fiction/networks/technology_network.hpp>  // technology network
+#include <fiction/networks/technology_network.hpp>                                // technology network
 
 #include <fmt/format.h>  // output formatting
 
@@ -93,8 +93,8 @@ int main()  // NOLINT
             // log results
             graph_oriented_layout_design_exp(
                 benchmark, network.num_pis(), network.num_pos(), network.num_gates(), width, height, area,
-                gate_level_layout->num_gates(), gate_level_layout->num_wires(), cp_tp.critical_path_length, cp_tp.throughput,
-                mockturtle::to_seconds(graph_oriented_layout_design_stats.time_total), eq_result);
+                gate_level_layout->num_gates(), gate_level_layout->num_wires(), cp_tp.critical_path_length,
+                cp_tp.throughput, mockturtle::to_seconds(graph_oriented_layout_design_stats.time_total), eq_result);
         }
 
         graph_oriented_layout_design_exp.save();

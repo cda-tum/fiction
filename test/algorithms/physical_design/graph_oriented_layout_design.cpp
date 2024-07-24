@@ -132,9 +132,9 @@ TEST_CASE("Different parameters", "[graph_oriented_layout_design]")
     check_eq(ntk, *layout4);
 
     // More vertex expansions
-    params.return_first = true;
+    params.return_first          = true;
     params.num_vertex_expansions = 8;
-    const auto layout5  = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
+    const auto layout5           = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
 
     REQUIRE(layout5.has_value());
     check_eq(ntk, *layout4);

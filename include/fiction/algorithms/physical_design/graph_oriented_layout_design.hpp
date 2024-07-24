@@ -60,10 +60,10 @@ struct graph_oriented_layout_design_params
      */
     bool high_effort_mode = false;
     /**
-     * Number of expansions for each vertex that should be explored. For each partial layout, `num_vertex_expansions` positions
-     * will be checked for the next node/gate to be placed. A lower value requires less runtime, but the layout might
-     * have a larger area or it could also lead to no solution being found. A higher value might lead to better solutions,
-     * but also requires more runtime. Defaults to 4 expansions for each vertex.
+     * Number of expansions for each vertex that should be explored. For each partial layout, `num_vertex_expansions`
+     * positions will be checked for the next node/gate to be placed. A lower value requires less runtime, but the
+     * layout might have a larger area or it could also lead to no solution being found. A higher value might lead to
+     * better solutions, but also requires more runtime. Defaults to 4 expansions for each vertex.
      *
      */
     uint64_t num_vertex_expansions = 4u;
@@ -89,14 +89,14 @@ struct graph_oriented_layout_design_stats
      * Runtime of the graph-oriented layout design process.
      */
     mockturtle::stopwatch<>::duration time_total{};
-     /**
-      * Layout width.
-      */
+    /**
+     * Layout width.
+     */
     uint64_t x_size{0ull};
     /**
      * Layout height.
      */
-    uint64_t  y_size{0ull};
+    uint64_t y_size{0ull};
     /**
      * Number of gates.
      */
@@ -679,7 +679,8 @@ class graph_oriented_layout_design_impl
 
             if (duration_ms >= timeout)
             {
-                // terminate algorithm if specified timeout was set or at least one solution was found in high-efficiency mode
+                // terminate algorithm if specified timeout was set or at least one solution was found in
+                // high-efficiency mode
                 if (timeout_set || (!ps.high_effort_mode && improve_current_solution))
                 {
                     timeout_limit_reached = true;
@@ -813,8 +814,9 @@ class graph_oriented_layout_design_impl
             }
         };
 
-        const uint64_t max_iterations =
-            (pi_locs == pi_locations::TOP_AND_LEFT) ? std::max(layout.x(), layout.y()) : ((pi_locs == pi_locations::TOP) ? layout.x() : layout.y());
+        const uint64_t max_iterations  = (pi_locs == pi_locations::TOP_AND_LEFT) ?
+                                             std::max(layout.x(), layout.y()) :
+                                             ((pi_locs == pi_locations::TOP) ? layout.x() : layout.y());
         const uint64_t expansion_limit = (pi_locs == pi_locations::TOP_AND_LEFT) ? 2 * num_expansions : num_expansions;
         possible_positions.reserve(expansion_limit);
 
@@ -850,9 +852,9 @@ class graph_oriented_layout_design_impl
      * @param fc A vector of nodes that precede the PO nodes.
      * @return A vector of tiles representing the possible positions for POs.
      */
-    [[nodiscard]] coord_vec_type<ObstrLyt> get_possible_positions_pos(const ObstrLyt&                   layout,
+    [[nodiscard]] coord_vec_type<ObstrLyt> get_possible_positions_pos(const ObstrLyt&                 layout,
                                                                       const placement_info<ObstrLyt>& place_info,
-                                                                      const fanin_container<tec_nt>&    fc) noexcept
+                                                                      const fanin_container<tec_nt>&  fc) noexcept
     {
         coord_vec_type<ObstrLyt> possible_positions{};
 
@@ -1460,18 +1462,10 @@ class graph_oriented_layout_design_impl
      */
     void initialize_pis_cost_and_num_expansions() noexcept
     {
-        static constexpr std::array<pi_locations, 12> pi_locs = {{pi_locations::TOP,
-                                                                  pi_locations::LEFT,
-                                                                  pi_locations::TOP_AND_LEFT,
-                                                                  pi_locations::TOP,
-                                                                  pi_locations::LEFT,
-                                                                  pi_locations::TOP_AND_LEFT,
-                                                                  pi_locations::TOP,
-                                                                  pi_locations::LEFT,
-                                                                  pi_locations::TOP_AND_LEFT,
-                                                                  pi_locations::TOP,
-                                                                  pi_locations::LEFT,
-                                                                  pi_locations::TOP_AND_LEFT}};
+        static constexpr std::array<pi_locations, 12> pi_locs = {
+            {pi_locations::TOP, pi_locations::LEFT, pi_locations::TOP_AND_LEFT, pi_locations::TOP, pi_locations::LEFT,
+             pi_locations::TOP_AND_LEFT, pi_locations::TOP, pi_locations::LEFT, pi_locations::TOP_AND_LEFT,
+             pi_locations::TOP, pi_locations::LEFT, pi_locations::TOP_AND_LEFT}};
 
         auto pi_loc_it = pi_locs.cbegin();
         for (auto& graph : ssg_vec)
@@ -1601,7 +1595,7 @@ class graph_oriented_layout_design_impl
  */
 template <typename Lyt, typename Ntk>
 std::optional<Lyt> graph_oriented_layout_design(Ntk& ntk, graph_oriented_layout_design_params ps = {},
-                                 graph_oriented_layout_design_stats* pst = nullptr)
+                                                graph_oriented_layout_design_stats* pst = nullptr)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(mockturtle::is_network_type_v<Ntk>,
