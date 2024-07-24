@@ -53,15 +53,15 @@ inline void graph_oriented_layout_design(pybind11::module& m)
                  return stream.str();
              })
         .def_readonly("time_total", &fiction::graph_oriented_layout_design_stats::time_total,
-                      DOC(fiction_graph_oriented_layout_design_stats_time_total))
-        .def_readonly("x_size", &fiction::graph_oriented_layout_design_stats::x_size_before,
+                      DOC(fiction_graph_oriented_layout_design_stats_duration))
+        .def_readonly("x_size", &fiction::graph_oriented_layout_design_stats::x_size,
                       DOC(fiction_graph_oriented_layout_design_stats_x_size))
-        .def_readonly("y_size", &fiction::graph_oriented_layout_design_stats::y_size_before,
+        .def_readonly("y_size", &fiction::graph_oriented_layout_design_stats::y_size,
                       DOC(fiction_graph_oriented_layout_design_stats_y_size))
-        .def_readonly("num_gates", &fiction::graph_oriented_layout_design_stats::x_size_after,
+        .def_readonly("num_gates", &fiction::graph_oriented_layout_design_stats::num_gates,
                       DOC(fiction_graph_oriented_layout_design_stats_num_gates))
-        .def_readonly("num_wires", &fiction::graph_oriented_layout_design_stats::x_size_after,
-                      DOC(fiction_graph_oriented_layout_design_stats_num_gates))
+        .def_readonly("num_wires", &fiction::graph_oriented_layout_design_stats::num_wires,
+                      DOC(fiction_graph_oriented_layout_design_stats_num_wires))
 
         ;
 
