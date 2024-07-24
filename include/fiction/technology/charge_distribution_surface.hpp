@@ -98,6 +98,21 @@ enum class charge_index_recomputation
 };
 
 /**
+ * An enumeration of modes for handling the charge index during charge state assignment.
+ */
+enum class assign_charge_state_mode
+{
+    /**
+     * The charge state is assigned to the cell and the charge index is updated.
+     */
+    UPDATE_CHARGE_INDEX,
+    /**
+     * The charge state is assigned to the cell but the charge index is not updated.
+     */
+    DO_NOT_UPDATE_CHARGE_INDEX
+};
+
+/**
  * A layout type to layer on top of any SiDB cell-level layout. It implements an interface to store and access
  * SiDBs' charge states.
  *
@@ -395,16 +410,17 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @param c The cell to which a charge state is to be assigned.
      * @param cs The charge state to be assigned to the cell.
-     * @param update_charge_index `true` if the charge index should be changed, `false` otherwise.
+     * @param assign_charge Mode to determine whether the charge state should be updated.
      */
-    void assign_charge_state(const typename Lyt::cell& c, const sidb_charge_state cs,
-                             const bool update_charge_index = true) noexcept
+    void assign_charge_state(
+        const typename Lyt::cell& c, const sidb_charge_state cs,
+        const assign_charge_state_mode assign_charge = assign_charge_state_mode::UPDATE_CHARGE_INDEX) noexcept
     {
         if (auto index = cell_to_index(c); index != -1)
         {
             strg->cell_charge[static_cast<uint64_t>(index)] = cs;
         }
-        if (update_charge_index)
+        if (assign_charge == assign_charge_state_mode::UPDATE_CHARGE_INDEX)
         {
             this->charge_distribution_to_index();
         }
@@ -1268,8 +1284,10 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     {
         if (potential_value != 0.0)
         {
-            this->foreach_cell([this, &potential_value](const auto& c)
-                               { strg->local_external_pot.insert({c, potential_value}); });
+            this->foreach_cell(
+                [this, &potential_value](const auto& c) {
+                    strg->local_external_pot.insert({c, potential_value});
+                });
             this->update_after_charge_change(dep_cell);
         }
     }
@@ -1926,7 +1944,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         {
             for (const auto& c : strg->three_state_cells)
             {
-                this->assign_charge_state(c, sidb_charge_state::NEGATIVE, false);
+                this->assign_charge_state(c, sidb_charge_state::NEGATIVE,
+                                          assign_charge_state_mode::DO_NOT_UPDATE_CHARGE_INDEX);
             }
         }
 
@@ -1934,7 +1953,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         {
             for (const auto& c : strg->sidb_order_without_three_state_cells)
             {
-                this->assign_charge_state(c, sidb_charge_state::NEGATIVE, false);
+                this->assign_charge_state(c, sidb_charge_state::NEGATIVE,
+                                          assign_charge_state_mode::DO_NOT_UPDATE_CHARGE_INDEX);
             }
         }
 
@@ -2068,8 +2088,8 @@ template <class T>
 charge_distribution_surface(const T&, const sidb_simulation_parameters&) -> charge_distribution_surface<T>;
 
 template <class T>
-charge_distribution_surface(const T&, const sidb_simulation_parameters&,
-                            sidb_charge_state cs) -> charge_distribution_surface<T>;
+charge_distribution_surface(const T&, const sidb_simulation_parameters&, sidb_charge_state cs)
+    -> charge_distribution_surface<T>;
 
 }  // namespace fiction
 
