@@ -410,16 +410,16 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @param c The cell to which a charge state is to be assigned.
      * @param cs The charge state to be assigned to the cell.
-     * @param charge_index_mode Mode to determine whether the charge index should be updated.
+     * @param index_mode Mode to determine whether the charge index should be updated.
      */
     void assign_charge_state(const typename Lyt::cell& c, const sidb_charge_state cs,
-                             const charge_index_mode assign_charge = charge_index_mode::UPDATE_CHARGE_INDEX) noexcept
+                             const charge_index_mode index_mode = charge_index_mode::UPDATE_CHARGE_INDEX) noexcept
     {
         if (auto index = cell_to_index(c); index != -1)
         {
             strg->cell_charge[static_cast<uint64_t>(index)] = cs;
         }
-        if (assign_charge == charge_index_mode::UPDATE_CHARGE_INDEX)
+        if (index_mode == charge_index_mode::UPDATE_CHARGE_INDEX)
         {
             this->charge_distribution_to_index();
         }
@@ -567,15 +567,15 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @param index The index of the cell to which a charge state is to be assigned.
      * @param cs The charge state to be assigned to the cell.
-     * @param charge_index_mode Mode to determine whether the charge index should be updated.
+     * @param index_mode Mode to determine whether the charge index should be updated.
      */
     void assign_charge_state_by_cell_index(
         const uint64_t index, const sidb_charge_state cs,
-        const charge_index_mode charge_index_mode = charge_index_mode::UPDATE_CHARGE_INDEX) noexcept
+        const charge_index_mode index_mode = charge_index_mode::UPDATE_CHARGE_INDEX) noexcept
     {
         strg->cell_charge[index] = cs;
 
-        if (charge_index_mode == charge_index_mode::UPDATE_CHARGE_INDEX)
+        if (index_mode == charge_index_mode::UPDATE_CHARGE_INDEX)
         {
             this->charge_distribution_to_index();
         }

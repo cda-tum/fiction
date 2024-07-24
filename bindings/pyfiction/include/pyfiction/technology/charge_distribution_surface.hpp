@@ -81,9 +81,9 @@ void charge_distribution_surface_layout(pybind11::module& m, const std::string& 
         .def(
             "assign_charge_state",
             [](py_cds& cds, fiction::cell<py_cds> c, fiction::sidb_charge_state cs,
-               fiction::charge_index_mode assign_charge_mode)
-            { return cds.assign_charge_state(c, cs, assign_charge_mode); },
-            "c"_a, "cs"_a, "assign_charge"_a = fiction::charge_index_mode::UPDATE_CHARGE_INDEX)
+               fiction::charge_index_mode index_mode)
+            { return cds.assign_charge_state(c, cs, index_mode); },
+            "c"_a, "cs"_a, "index_mode"_a = fiction::charge_index_mode::UPDATE_CHARGE_INDEX)
         .def(
             "assign_charge_by_cell_index",
             [](py_cds& cds, uint64_t i, fiction::sidb_charge_state cs)
@@ -109,9 +109,9 @@ void charge_distribution_surface_layout(pybind11::module& m, const std::string& 
         .def(
             "assign_charge_state_by_cell_index",
             [](py_cds& cds, uint64_t index, fiction::sidb_charge_state cs,
-               fiction::charge_index_mode index_mode = fiction::charge_index_mode::UPDATE_CHARGE_INDEX)
+               fiction::charge_index_mode index_mode)
             { return cds.assign_charge_state_by_cell_index(index, cs, index_mode); },
-            "index"_a, "cs"_a, "update_charge_configuration"_a = true)
+            "index"_a, "cs"_a, "index_mode"_a = fiction::charge_index_mode::UPDATE_CHARGE_INDEX)
         .def(
             "get_charge_state", [](py_cds& cds, fiction::cell<py_cds> c) { return cds.get_charge_state(c); }, "c"_a)
         .def(
