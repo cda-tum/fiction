@@ -82,8 +82,8 @@ void charge_distribution_surface_layout(pybind11::module& m, const std::string& 
         .def(
             "assign_charge_state",
             [](py_cds& cds, fiction::cell<py_cds> c, fiction::sidb_charge_state cs,
-               fiction::assign_charge_state_mode assign_charge_mode =
-                   fiction::assign_charge_state_mode::UPDATE_CHARGE_INDEX)
+               fiction::charge_index_mode assign_charge_mode =
+                   fiction::charge_index_mode::UPDATE_CHARGE_INDEX)
             { return cds.assign_charge_state(c, cs, assign_charge_mode); },
             "c"_a, "cs"_a, "update_charge_index"_a = true)
         .def(
@@ -322,12 +322,11 @@ inline void charge_distribution_surfaces(pybind11::module& m)
     /**
      * Assign charge state mode.
      */
-    py::enum_<fiction::assign_charge_state_mode>(m, "assign_charge_state_mode", DOC(fiction_energy_calculation),
+     // TODO add documentation
+    py::enum_<fiction::charge_index_mode>(m, "charge_index_mode", DOC(fiction_energy_calculation),
                                                  py::module_local())
-        .value("KEEP_OLD_ENERGY_VALUE", fiction::assign_charge_state_mode::UPDATE_CHARGE_INDEX,
-               DOC(fiction_assign_charge_state_mode_UPDATE_CHARGE_INDEX))
-        .value("UPDATE_ENERGY", fiction::assign_charge_state_mode::DO_NOT_UPDATE_CHARGE_INDEX,
-               DOC(fiction_assign_charge_state_mode_DO_NOT_UPDATE_CHARGE_INDEX))
+        .value("KEEP_OLD_ENERGY_VALUE", fiction::charge_index_mode::UPDATE_CHARGE_INDEX)
+        .value("UPDATE_ENERGY", fiction::charge_index_mode::DO_NOT_UPDATE_CHARGE_INDEX)
 
         ;
 

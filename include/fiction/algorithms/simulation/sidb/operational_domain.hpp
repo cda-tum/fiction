@@ -212,7 +212,7 @@ template <typename MapType>
                                                                                  const typename MapType::key_type& key)
 {
     static_assert(std::is_floating_point_v<typename MapType::key_type>, "Map key type must be floating-point");
-    constexpr double tolerance = fiction::physical_constants::POP_STABILITY_ERR;
+    constexpr double tolerance = physical_constants::POP_STABILITY_ERR;
     auto compare_keys = [&key, &tolerance](const auto& pair) { return std::abs(pair.first - key) < tolerance; };
     return std::find_if(map.begin(), map.end(), compare_keys);
 }
@@ -429,7 +429,9 @@ class operational_domain_impl
                       {
                           // for each y value in parallel
                           std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ y_indices.cbegin(), y_indices.cend(),
-                                        [this, x](const auto y) { is_step_point_operational({x, y}); });
+                                        [this, x](const auto y) {
+                                            is_step_point_operational({x, y});
+                                        });
                       });
 
         log_stats();
@@ -630,7 +632,9 @@ class operational_domain_impl
                       [this, &lyt](const auto x)
                       {
                           std::for_each(y_indices.cbegin(), y_indices.cend(),
-                                        [this, &lyt, x](const auto y) { is_step_point_suitable(lyt, {x, y}); });
+                                        [this, &lyt, x](const auto y) {
+                                            is_step_point_suitable(lyt, {x, y});
+                                        });
                       });
 
         sidb_simulation_parameters simulation_parameters = params.simulation_parameters;

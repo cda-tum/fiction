@@ -228,7 +228,7 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
 
         // assign charge state to cells, but not to the dependent cell
         charge_layout.assign_charge_state({6, 5}, sidb_charge_state::POSITIVE,
-                                          assign_charge_state_mode::DO_NOT_UPDATE_CHARGE_INDEX);
+                                          charge_index_mode::DO_NOT_UPDATE_CHARGE_INDEX);
         CHECK(charge_layout.get_charge_state({6, 5}) == sidb_charge_state::POSITIVE);
 
         CHECK(charge_layout.get_charge_index_and_base().first == 0);
