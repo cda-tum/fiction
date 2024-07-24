@@ -3760,14 +3760,6 @@ Parameter ``to_delete``:
 Returns:
     A 2D vector representing the calculated offset matrix.)doc";
 
-static const char *__doc_fiction_detail_check_if_empty = R"doc(Enum to specify which tiles should be checked if they are empty.)doc";
-
-static const char *__doc_fiction_detail_check_if_empty_DEST = R"doc(Check if the destination tile is empty.)doc";
-
-static const char *__doc_fiction_detail_check_if_empty_NONE = R"doc(Do not check any tiles.)doc";
-
-static const char *__doc_fiction_detail_check_if_empty_SRC = R"doc(Check if the source tile is empty.)doc";
-
 static const char *__doc_fiction_detail_color_routing_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_color_routing_impl_color_routing_impl = R"doc()doc";
@@ -5401,9 +5393,9 @@ Parameter ``src``:
 Parameter ``dest``:
     The destination tile.
 
-Parameter ``check_if_empty``:
+Parameter ``new_gate_loc``:
     Enum indicating if the src or dest have to host a new gate and
-    therefore have to be empty. Defaults to `check_if_empty::NONE`.
+    therefore have to be empty. Defaults to `new_gate_location::NONE`.
 
 Returns:
     A path from `src` to `dest` if one exists.)doc";
@@ -5437,9 +5429,9 @@ Parameter ``layout``:
     The layout in which to find the possible positions for a double
     fan-in node.
 
-Parameter ``node2pos``:
-    A dictionary mapping nodes from the network to signals in the
-    layout.
+Parameter ``place_info``:
+    The placement context containing current node, primary output
+    index, node to position mapping, and PI to node mapping.
 
 Parameter ``num_expansions``:
     The maximum number of positions to be returned.
@@ -5477,9 +5469,9 @@ given layout based on the positions of the preceding nodes.
 Parameter ``layout``:
     The layout in which to find the possible positions for POs.
 
-Parameter ``node2pos``:
-    A dictionary mapping nodes from the network to signals in the
-    layout.
+Parameter ``place_info``:
+    The placement context containing current node, primary output
+    index, node to position mapping, and PI to node mapping.
 
 Parameter ``fc``:
     A vector of nodes that precede the PO nodes.
@@ -5496,9 +5488,9 @@ Parameter ``layout``:
     The layout in which to find the possible positions for a single
     fan-in node.
 
-Parameter ``node2pos``:
-    A dictionary mapping nodes from the network to signals in the
-    layout.
+Parameter ``place_info``:
+    The placement context containing current node, primary output
+    index, node to position mapping, and PI to node mapping.
 
 Parameter ``num_expansions``:
     The maximum number of positions to be returned.
@@ -5542,6 +5534,8 @@ static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_ntk = 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_num_evaluated_paths = R"doc(Count evaluated paths in the search space graphs.)doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_num_search_space_graphs = R"doc(Number of search space graphs.)doc";
+
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_num_vertex_expansions = R"doc(Number of vertices that should be explored from any vertex..)doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_place_and_route =
 R"doc(Executes a single placement step in the layout for the given network
@@ -6008,6 +6002,17 @@ static const char *__doc_fiction_detail_network_balancing_impl_ps = R"doc()doc";
 
 static const char *__doc_fiction_detail_network_balancing_impl_run = R"doc()doc";
 
+static const char *__doc_fiction_detail_new_gate_location =
+R"doc(When checking for possible paths on a layout between two tiles SRC and
+DEST, one of them could also be the new tile for the next gate to be
+placed and it therefore has to be checked if said tile is still empty)doc";
+
+static const char *__doc_fiction_detail_new_gate_location_DEST = R"doc(Check if the destination tile is empty.)doc";
+
+static const char *__doc_fiction_detail_new_gate_location_NONE = R"doc(Do not check any tiles.)doc";
+
+static const char *__doc_fiction_detail_new_gate_location_SRC = R"doc(Check if the source tile is empty.)doc";
+
 static const char *__doc_fiction_detail_operational_domain_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_contour_tracing =
@@ -6349,13 +6354,15 @@ static const char *__doc_fiction_detail_orthogonal_impl_pst = R"doc()doc";
 
 static const char *__doc_fiction_detail_orthogonal_impl_run = R"doc()doc";
 
-static const char *__doc_fiction_detail_pi_locations =
-R"doc(This struct holds two boolean values indicating the allowed positions
-for PIs.)doc";
+static const char *__doc_fiction_detail_pi_locations = R"doc(This enum class indicates the allowed positions for PIs.)doc";
 
-static const char *__doc_fiction_detail_pi_locations_left = R"doc(Flag indicating if primary inputs (PIs) can be placed at the left.)doc";
+static const char *__doc_fiction_detail_pi_locations_LEFT = R"doc(Flag indicating if primary inputs (PIs) can be placed at the left.)doc";
 
-static const char *__doc_fiction_detail_pi_locations_top = R"doc(Flag indicating if primary inputs (PIs) can be placed at the top.)doc";
+static const char *__doc_fiction_detail_pi_locations_TOP = R"doc(Flag indicating if primary inputs (PIs) can be placed at the top.)doc";
+
+static const char *__doc_fiction_detail_pi_locations_TOP_AND_LEFT =
+R"doc(Flag indicating if primary inputs (PIs) can be placed at the top and
+at the left.)doc";
 
 static const char *__doc_fiction_detail_place_outputs =
 R"doc(Places the primary outputs (POs) in the layout.
@@ -6914,7 +6921,7 @@ static const char *__doc_fiction_detail_search_space_graph_network = R"doc(The n
 static const char *__doc_fiction_detail_search_space_graph_num_expansions = R"doc(The maximum number of positions to be considered for expansions.)doc";
 
 static const char *__doc_fiction_detail_search_space_graph_pi_locs =
-R"doc(Flags indicating if primary inputs (PIs) can be placed at the top or
+R"doc(Enum indicating if primary inputs (PIs) can be placed at the top or
 left.)doc";
 
 static const char *__doc_fiction_detail_sweep_parameter_to_string =
@@ -10165,8 +10172,17 @@ R"doc(In high effort mode, 12 search space graphs are created with varying
 fanout substitution strategies, allowed PI placements, and other
 parameters, compared to only 2 graphs in high efficiency mode. This
 broader exploration increases the likelihood of discovering optimal
-layouts. When a solution is found in any graph, its cost is used to
-prune the search in the remaining graphs.)doc";
+layouts, but also increases runtime. When a solution is found in any
+graph, its cost is used to prune the search in the remaining graphs.)doc";
+
+static const char *__doc_fiction_graph_oriented_layout_design_params_num_vertex_expansions =
+R"doc(Number of expansions for each vertex that should be explored. For each
+partial layout, `num_vertex_expansions` positions will be checked for
+the next node/gate to be placed. A lower value requires less runtime,
+but the layout might have a larger area or it could also lead to no
+solution being found. A higher value might lead to better solutions,
+but also requires more runtime. Defaults to 4 expansions for each
+vertex.)doc";
 
 static const char *__doc_fiction_graph_oriented_layout_design_params_return_first =
 R"doc(Return the first found layout, which might still have a high cost but
@@ -10182,11 +10198,19 @@ process.)doc";
 
 static const char *__doc_fiction_graph_oriented_layout_design_stats_duration = R"doc(Runtime of the graph-oriented layout design process.)doc";
 
+static const char *__doc_fiction_graph_oriented_layout_design_stats_num_gates = R"doc(Number of gates.)doc";
+
+static const char *__doc_fiction_graph_oriented_layout_design_stats_num_wires = R"doc(Number of wires.)doc";
+
 static const char *__doc_fiction_graph_oriented_layout_design_stats_report =
 R"doc(Reports the statistics to the given output stream.
 
 Parameter ``out``:
     Output stream.)doc";
+
+static const char *__doc_fiction_graph_oriented_layout_design_stats_x_size = R"doc(Layout width.)doc";
+
+static const char *__doc_fiction_graph_oriented_layout_design_stats_y_size = R"doc(Layout height.)doc";
 
 static const char *__doc_fiction_gray_code_iterator =
 R"doc(An iterator type that iterates over Gray code representations for
