@@ -300,7 +300,7 @@ inline void charge_distribution_surfaces(pybind11::module& m)
         .value("UPDATE_CHARGE_INDEX", fiction::charge_index_mode::UPDATE_CHARGE_INDEX,
                DOC(fiction_charge_index_mode_UPDATE_CHARGE_INDEX))
         .value("KEEP_CHARGE_INDEX", fiction::charge_index_mode::KEEP_CHARGE_INDEX,
-               DOC(fiction_charge_index_mode_DO_NOT_UPDATE_CHARGE_INDEX))
+               DOC(fiction_charge_index_mode_KEEP_CHARGE_INDEX))
 
         ;
 
