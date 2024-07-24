@@ -212,7 +212,7 @@ template <typename MapType>
                                                                                  const typename MapType::key_type& key)
 {
     static_assert(std::is_floating_point_v<typename MapType::key_type>, "Map key type must be floating-point");
-    constexpr double tolerance = fiction::physical_constants::POP_STABILITY_ERR;
+    constexpr double tolerance = physical_constants::POP_STABILITY_ERR;
     auto compare_keys = [&key, &tolerance](const auto& pair) { return std::abs(pair.first - key) < tolerance; };
     return std::find_if(map.begin(), map.end(), compare_keys);
 }
