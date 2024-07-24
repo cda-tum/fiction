@@ -754,6 +754,7 @@ Lyt bestagon_and_gate() noexcept
 {
     static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not an SiDB layout");
 
     Lyt lyt{};
 
@@ -790,7 +791,7 @@ Lyt bestagon_and_gate() noexcept
 };
 /**
  * This layout represents the AND Gate implemented on the H-Si(111)-1x1 surface, as proposed in the paper
- * titled \"Unlocking Flexible Silicon Dangling Bond Logic Designs on Alternative Silicon Orientations\" authored by
+ * titled \"Unlocking Flexible Silicon Dangling Bond Logic Designs on Alternative Silicon Orientations\" by
  * Samuel Sze Hang Ng, Jan Drewniok, Marcel Walter, Jacob Retallick, Robert Wille, and Konrad Walus.
  *
  * (https://github.com/samuelngsh/si-111-paper-supplementary/blob/main/bestagon-111-gates/gates/AND_mu_032_0.sqd)
@@ -801,6 +802,7 @@ Lyt and_gate_111() noexcept
     static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(fiction::is_sidb_lattice_111_v<Lyt>, "Lyt should have 111 as lattice orientation");
+    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not an SiDB layout");
 
     Lyt lyt{};
 

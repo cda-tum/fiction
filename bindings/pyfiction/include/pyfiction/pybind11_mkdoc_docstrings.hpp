@@ -5793,6 +5793,20 @@ The operational status is computed for each parameter combination.
 Returns:
     The operational domain of the layout.)doc";
 
+static const char *__doc_fiction_detail_operational_domain_impl_grid_search_for_physically_valid_parameters =
+R"doc(Performs a grid search over the specified parameter ranges. For each
+physical parameter combination found for which the given CDS is
+physically valid, it is determined whether the CDS is the ground state
+or the n-th excited state.
+
+Parameter ``lyt``:
+    SiDB cell-level layout that is simulated and compared to the given
+    CDS.
+
+Returns:
+    All physically valid physical parameters and the excited state
+    number.)doc";
+
 static const char *__doc_fiction_detail_operational_domain_impl_has_already_been_sampled =
 R"doc(Determines whether the point at step position `(x, y)` has already
 been sampled and returns the operational value at `(x, y)` if it
@@ -5818,6 +5832,21 @@ is used by all operational domain computation techniques.
 
 Any investigated point is added to the stored `op_domain`, regardless
 of its operational status.
+
+Parameter ``sp``:
+    Step point to be investigated.
+
+Returns:
+    The operational status of the layout under the given simulation
+    parameters.)doc";
+
+static const char *__doc_fiction_detail_operational_domain_impl_is_step_point_suitable =
+R"doc(This function checks if the given charge distribution surface (CDS) is
+physically valid for the parameter point represented by the step point
+`sp`.
+
+Parameter ``lyt``:
+    CDS to check.
 
 Parameter ``sp``:
     Step point to be investigated.
@@ -5870,17 +5899,30 @@ Returns:
 static const char *__doc_fiction_detail_operational_domain_impl_op_domain = R"doc(The operational domain of the layout.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_operational_domain_impl =
-R"doc(Standard constructor. Initializes the layout, the truth table, the
+R"doc(Standard constructor. Initializes the lyt, the truth table, the
 parameters and the statistics. Also detects the output BDL pair, which
-is necessary for the operational domain computation. The layout must
-have exactly one output BDL pair.
+is necessary for the operational domain computation. The lyt must have
+exactly one output BDL pair.
+
+Parameter ``lyt``:
+    SiDB cell-level lyt to be evaluated.
+
+Parameter ``spec``:
+    Expected Boolean function of the lyt given as a multi-output truth
+    table.
+
+Parameter ``ps``:
+    Parameters for the operational domain computation.
+
+Parameter ``st``:
+    Statistics of the process.)doc";
+
+static const char *__doc_fiction_detail_operational_domain_impl_operational_domain_impl_2 =
+R"doc(Additional Constructor. Initializes the layout, the parameters and the
+statistics.
 
 Parameter ``lyt``:
     SiDB cell-level layout to be evaluated.
-
-Parameter ``spec``:
-    Expected Boolean function of the layout given as a multi-output
-    truth table.
 
 Parameter ``ps``:
     Parameters for the operational domain computation.
@@ -6045,6 +6087,39 @@ static const char *__doc_fiction_detail_orthogonal_impl_ps = R"doc()doc";
 static const char *__doc_fiction_detail_orthogonal_impl_pst = R"doc()doc";
 
 static const char *__doc_fiction_detail_orthogonal_impl_run = R"doc()doc";
+
+static const char *__doc_fiction_detail_place_outputs =
+R"doc(Places the primary outputs (POs) in the layout.
+
+This function positions the POs within the provided layout. If a PO is
+a multi-output node (a fanout with two POs connected to it), the
+second PO is automatically placed and connected below the first
+output.
+
+The positioning of multi-output nodes will follow this structure:
+
+F→=→...→O ↓ =→=→...→O
+
+Template parameter ``Lyt``:
+    Desired gate-level layout type.
+
+Template parameter ``Ntk``:
+    Network type that acts as specification.
+
+Parameter ``layout``:
+    Current gate-level layout.
+
+Parameter ``ctn``:
+    Contains the colored network.
+
+Parameter ``po_counter``:
+    Counter for POs.
+
+Parameter ``node2pos``:
+    Mapping from network nodes to layout signals, i.e., a pointer to
+    their position in the layout. The map is used to fetch location of
+    the fanins. The `mockturtle::node_map` is not updated by this
+    function.)doc";
 
 static const char *__doc_fiction_detail_post_layout_optimization_impl = R"doc()doc";
 
@@ -7182,6 +7257,37 @@ Parameter ``simulation_results``:
 Returns:
     A vector of charge distributions with the minimal energy.)doc";
 
+static const char *__doc_fiction_determine_physically_valid_parameters =
+R"doc(This function computes the parameters necessary for ensuring the
+physical validity of a given charge distribution and determines the
+corresponding excited state number. The ground state is denoted by
+zero, with each subsequent excited state incrementally numbered.
+
+This function is designed to derive the physical parameters from
+charge distribution measurements of SiDB layouts, often acquired
+through Atomic Force Microscopy (AFM). Given a specific charge
+distribution, the function typically yields several physically valid
+parameters.
+
+As more SiDB layouts with corresponding charge distributions are
+recorded, the number of physically valid parameters for all layouts
+decreases. Consequently, this enables a more precise determination of
+the physical parameters present on the surface.
+
+Template parameter ``Lyt``:
+    The charge distribution surface type.
+
+Parameter ``cds``:
+    The charge distribution surface for which physical parameters are
+    to be determined.
+
+Parameter ``params``:
+    Operational domain parameters.
+
+Returns:
+    Physically valid parameters with the corresponding excited state
+    number of the given cds for each parameter point.)doc";
+
 static const char *__doc_fiction_determine_vertex_coloring =
 R"doc(This function provides an interface to call various vertex coloring
 algorithms on the given graph. A vertex coloring is the assignment of
@@ -8202,6 +8308,42 @@ Returns:
     Iterator in the range `[first, last)` to the first position of the
     first 2-element sub-sequence shared between the two ranges, or
     `last` if no such shared sub-sequence exists.)doc";
+
+static const char *__doc_fiction_find_key_with_tolerance =
+R"doc(This function searches for a floating-point value specified by the
+`key` in the provided map `map`, applying a tolerance specified by
+`fiction::physical_constants::POP_STABILITY_ERR`. Each key in the map
+is compared to the specified key within this tolerance.
+
+Template parameter ``MapType``:
+    The type of the map containing parameter points as keys.
+
+Parameter ``map``:
+    The map containing parameter points as keys and associated values.
+
+Parameter ``key``:
+    The parameter point to search for in the map.
+
+Returns:
+    An iterator to the found parameter point in the map, or
+    `map.cend()` if not found.)doc";
+
+static const char *__doc_fiction_find_parameter_point_with_tolerance =
+R"doc(This function searches for a parameter point, specified by the `key`,
+in the provided map `map` with tolerance.
+
+Template parameter ``MapType``:
+    The type of the map containing parameter points as keys.
+
+Parameter ``map``:
+    The map containing parameter points as keys and associated values.
+
+Parameter ``key``:
+    The parameter point to search for in the map.
+
+Returns:
+    An iterator to the found parameter point in the map, or
+    `map.cend()` if not found.)doc";
 
 static const char *__doc_fiction_flat_top_hex = R"doc(\verbatim _____ / \ / \ \ / \_____/ \endverbatim)doc";
 
@@ -11884,7 +12026,13 @@ simulation parameters and checking the operational status of the
 layout for each parameter combination. The operational domain is then
 defined as the set of all parameter combinations for which the layout
 is operational. Different techniques for performing these sweep are
-implemented.)doc";
+implemented.
+
+Template parameter ``Key``:
+    The type representing the key. Defaults to `parameter_point`.
+
+Template parameter ``Value``:
+    The type representing the value. Defaults to `operational_status`.)doc";
 
 static const char *__doc_fiction_operational_domain_contour_tracing =
 R"doc(Computes the operational domain of the given SiDB cell-level layout.
@@ -12002,6 +12150,18 @@ Parameter ``stats``:
 Returns:
     The (partial) operational domain of the layout.)doc";
 
+static const char *__doc_fiction_operational_domain_get_value =
+R"doc(This function retrieves the value associated with the provided
+parameter point from the operational domain. If the parameter point is
+found in the domain, its corresponding value is returned. Otherwise, a
+runtime error is thrown.
+
+Parameter ``pp``:
+    The parameter point to look up.
+
+Returns:
+    The value associated with the parameter point.)doc";
+
 static const char *__doc_fiction_operational_domain_grid_search =
 R"doc(Computes the operational domain of the given SiDB cell-level layout.
 The operational domain is the set of all parameter combinations for
@@ -12045,55 +12205,9 @@ Returns:
     The operational domain of the layout.)doc";
 
 static const char *__doc_fiction_operational_domain_operational_values =
-R"doc(The operational status of the layout for each specified parameter
-combination. This constitutes the operational domain. The key of the
-map is the parameter point, which holds the parameter values in the x
-and y dimension. The operational status is stored as the value of the
-map.)doc";
-
-static const char *__doc_fiction_operational_domain_parameter_point = R"doc(The parameter point holds parameter values in the x and y dimension.)doc";
-
-static const char *__doc_fiction_operational_domain_parameter_point_get =
-R"doc(Support for structured bindings.
-
-Template parameter ``I``:
-    Index of the parameter value to be returned.
-
-Returns:
-    The parameter value at the specified index.)doc";
-
-static const char *__doc_fiction_operational_domain_parameter_point_operator_eq =
-R"doc(Equality operator.
-
-Parameter ``other``:
-    Other parameter point to compare with.
-
-Returns:
-    `true` iff the parameter points are equal.)doc";
-
-static const char *__doc_fiction_operational_domain_parameter_point_operator_ne =
-R"doc(Inequality operator.
-
-Parameter ``other``:
-    Other parameter point to compare with.
-
-Returns:
-    `true` iff the parameter points are not equal.)doc";
-
-static const char *__doc_fiction_operational_domain_parameter_point_parameter_point = R"doc(Standard default constructor.)doc";
-
-static const char *__doc_fiction_operational_domain_parameter_point_parameter_point_2 =
-R"doc(Standard constructor.
-
-Parameter ``x_val``:
-    X dimension parameter value.
-
-Parameter ``y_val``:
-    Y dimension parameter value.)doc";
-
-static const char *__doc_fiction_operational_domain_parameter_point_x = R"doc(X dimension parameter value.)doc";
-
-static const char *__doc_fiction_operational_domain_parameter_point_y = R"doc(Y dimension parameter value.)doc";
+R"doc(This can store different information depending on the use case. If the
+operational domain is simulated for different physical parameters, the
+parameters are stored with the corresponding operating status.)doc";
 
 static const char *__doc_fiction_operational_domain_params =
 R"doc(Parameters for the operational domain computation. The parameters are
@@ -12188,14 +12302,6 @@ operational.)doc";
 static const char *__doc_fiction_operational_domain_stats_num_operational_parameter_combinations = R"doc(Number of parameter combinations, for which the layout is operational.)doc";
 
 static const char *__doc_fiction_operational_domain_stats_num_simulator_invocations = R"doc(Number of simulator invocations.)doc";
-
-static const char *__doc_fiction_operational_domain_sweep_parameter = R"doc(Possible sweep parameters for the operational domain computation.)doc";
-
-static const char *__doc_fiction_operational_domain_sweep_parameter_EPSILON_R = R"doc(The relative permittivity of the dielectric material.)doc";
-
-static const char *__doc_fiction_operational_domain_sweep_parameter_LAMBDA_TF = R"doc(The Thomas-Fermi screening length.)doc";
-
-static const char *__doc_fiction_operational_domain_sweep_parameter_MU_MINUS = R"doc(The energy transition level.)doc";
 
 static const char *__doc_fiction_operational_domain_x_dimension = R"doc(X dimension sweep parameter.)doc";
 
@@ -12392,6 +12498,54 @@ Parameter ``e``:
 Parameter ``other``:
     Edge whose color is to be used to paint `e`.)doc";
 
+static const char *__doc_fiction_parameter_point = R"doc(The parameter point holds parameter values in the x and y dimension.)doc";
+
+static const char *__doc_fiction_parameter_point_get =
+R"doc(Support for structured bindings.
+
+Template parameter ``I``:
+    Index of the parameter value to be returned.
+
+Returns:
+    The parameter value at the specified index.)doc";
+
+static const char *__doc_fiction_parameter_point_operator_eq =
+R"doc(Equality operator. Checks if this parameter point is equal to another
+point within a specified tolerance. The tolerance is defined by
+`physical_constants::POP_STABILITY_ERR`.
+
+Parameter ``other``:
+    Other parameter point to compare with.
+
+Returns:
+    `true` iff the parameter points are equal.)doc";
+
+static const char *__doc_fiction_parameter_point_operator_ne =
+R"doc(Inequality operator. Checks if this parameter point is unequal to
+another point within a specified tolerance. The tolerance is defined
+by `physical_constants::POP_STABILITY_ERR`.
+
+Parameter ``other``:
+    Other parameter point to compare with.
+
+Returns:
+    `true` iff the parameter points are not equal.)doc";
+
+static const char *__doc_fiction_parameter_point_parameter_point = R"doc(Standard default constructor.)doc";
+
+static const char *__doc_fiction_parameter_point_parameter_point_2 =
+R"doc(Standard constructor.
+
+Parameter ``x_val``:
+    X dimension parameter value.
+
+Parameter ``y_val``:
+    Y dimension parameter value.)doc";
+
+static const char *__doc_fiction_parameter_point_x = R"doc(X dimension parameter value.)doc";
+
+static const char *__doc_fiction_parameter_point_y = R"doc(Y dimension parameter value.)doc";
+
 static const char *__doc_fiction_path_collection =
 R"doc(An ordered collection of multiple paths in a layout.
 
@@ -12456,8 +12610,8 @@ state transition, the electrostatic potential difference required for
 the transition, the corresponding distance, and the total
 electrostatic energy of the given charge distribution.
 
-Template parameter ``Lyt``:
-    SiDB cell-level layout type.)doc";
+Template parameter ``CellType``:
+    Type of the used cells.)doc";
 
 static const char *__doc_fiction_population_stability_information_critical_cell = R"doc(SiDB cell which is closest to a charge transition.)doc";
 
@@ -14430,6 +14584,14 @@ Parameter ``sdm``:
 static const char *__doc_fiction_sqd_parsing_error = R"doc(Exception thrown when an error occurs during parsing of an SQD file.)doc";
 
 static const char *__doc_fiction_sqd_parsing_error_sqd_parsing_error = R"doc()doc";
+
+static const char *__doc_fiction_sweep_parameter = R"doc(Possible sweep parameters for the operational domain computation.)doc";
+
+static const char *__doc_fiction_sweep_parameter_EPSILON_R = R"doc(The relative permittivity of the dielectric material.)doc";
+
+static const char *__doc_fiction_sweep_parameter_LAMBDA_TF = R"doc(The Thomas-Fermi screening length.)doc";
+
+static const char *__doc_fiction_sweep_parameter_MU_MINUS = R"doc(The energy transition level.)doc";
 
 static const char *__doc_fiction_synchronization_element_layout =
 R"doc(This layout provides synchronization elements on top of a clocked
