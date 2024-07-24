@@ -23,7 +23,6 @@ using namespace fiction;
 TEST_CASE("Benchmark Graph-Oriented Layout Design", "[benchmark]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
-    using Ntk         = mockturtle::aig_network;
 
     auto ntk    = blueprints::mux21_network<mockturtle::aig_network>();
     auto params = fiction::graph_oriented_layout_design_params{};
@@ -32,13 +31,14 @@ TEST_CASE("Benchmark Graph-Oriented Layout Design", "[benchmark]")
     {
         params.high_effort = false;
 
-        return graph_oriented_layout_design<gate_layout, Ntk>(ntk, params);
+        return graph_oriented_layout_design<gate_layout>(ntk, params);
     };
 
     BENCHMARK("graph_oriented_layout_design: high effort")
     {
         params.high_effort = true;
-        return graph_oriented_layout_design<gate_layout, Ntk>(ntk, params);
+        
+        return graph_oriented_layout_design<gate_layout>(ntk, params);
     };
 }
 

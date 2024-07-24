@@ -16,8 +16,8 @@
 
 #include <fmt/format.h>  // output formatting
 
-#include <chrono>
 #include <cstdlib>
+#include <ostream>
 #include <string>
 
 template <typename Ntk>

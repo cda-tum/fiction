@@ -149,7 +149,6 @@ class priority_queue
     {
         return elements.empty();
     }
-
     /**
      * Adds an element to the priority queue with a given priority.
      *
@@ -160,7 +159,6 @@ class priority_queue
     {
         elements.emplace(priority, counter++, item);
     }
-
     /**
      * Retrieves and removes the element with the highest priority from the queue.
      *
@@ -703,7 +701,7 @@ class graph_oriented_layout_design_impl
      * @param layout The layout to be checked.
      * @param src The source tile.
      * @param dest The destination tile.
-     * @param check_if_empty Enum indicating if the src or dest have to host a new gate and therefore have to be empty.
+     * @param check Enum indicating if the src or dest have to host a new gate and therefore have to be empty.
      * Defaults to `check_if_empty::NONE`.
      * @return A path from `src` to `dest` if one exists.
      */
@@ -1434,7 +1432,7 @@ class graph_oriented_layout_design_impl
     void initialize_networks_and_nodes_to_place() noexcept
     {
         // prepare nodes to place for each topology view
-        auto prepare_nodes_to_place = [](auto& network, auto& nodes_to_place)
+        const auto prepare_nodes_to_place = [](auto& network, auto& nodes_to_place) noexcept
         {
             network.foreach_node(
                 [&nodes_to_place, &network](const auto& n)
