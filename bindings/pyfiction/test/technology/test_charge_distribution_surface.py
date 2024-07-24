@@ -52,9 +52,9 @@ class TestChargeDistributionSurface(unittest.TestCase):
 
         self.assertEqual(charge_lyt.get_charge_index_and_base()[0], 0)
 
-        charge_lyt.assign_charge_state((0, 1), sidb_charge_state.NEUTRAL, charge_index_mode.DO_NOT_UPDATE_CHARGE_INDEX)
-        charge_lyt.assign_charge_state((1, 1), sidb_charge_state.NEGATIVE, charge_index_mode.DO_NOT_UPDATE_CHARGE_INDEX)
-        charge_lyt.assign_charge_state((2, 1), sidb_charge_state.NEUTRAL, charge_index_mode.DO_NOT_UPDATE_CHARGE_INDEX)
+        charge_lyt.assign_charge_state((0, 1), sidb_charge_state.NEUTRAL, charge_index_mode.KEEP_CHARGE_INDEX)
+        charge_lyt.assign_charge_state((1, 1), sidb_charge_state.NEGATIVE, charge_index_mode.KEEP_CHARGE_INDEX)
+        charge_lyt.assign_charge_state((2, 1), sidb_charge_state.NEUTRAL, charge_index_mode.KEEP_CHARGE_INDEX)
 
         self.assertEqual(charge_lyt.get_charge_index_and_base()[0], 0)
 
