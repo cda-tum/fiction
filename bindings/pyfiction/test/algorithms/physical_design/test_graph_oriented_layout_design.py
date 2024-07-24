@@ -7,14 +7,14 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 
 class TestGraphOrientedLayoutDesign(unittest.TestCase):
 
-    def test_a_star_pr(self):
+    def test_graph_oriented_layout_design(self):
         network = read_technology_network(dir_path + "/../../resources/mux21.v")
 
         layout = graph_oriented_layout_design(network)
 
         self.assertNotEqual(equivalence_checking(network, layout), eq_type.NO)
 
-    def test_a_star_pr_with_parameters(self):
+    def test_graph_oriented_layout_design_with_parameters(self):
         network = read_technology_network(dir_path + "/../../resources/mux21.v")
 
         params = graph_oriented_layout_design_params()
@@ -24,7 +24,7 @@ class TestGraphOrientedLayoutDesign(unittest.TestCase):
 
         self.assertNotEqual(equivalence_checking(network, layout), eq_type.NO)
 
-    def test_a_star_pr_with_stats(self):
+    def test_graph_oriented_layout_design_with_stats(self):
         network = read_technology_network(dir_path + "/../../resources/mux21.v")
 
         stats = graph_oriented_layout_design_stats()
@@ -33,7 +33,7 @@ class TestGraphOrientedLayoutDesign(unittest.TestCase):
 
         self.assertNotEqual(equivalence_checking(network, layout), eq_type.NO)
 
-    def test_a_star_pr_with_stats_and_parameters(self):
+    def test_graph_oriented_layout_design_with_stats_and_parameters(self):
         network = read_technology_network(dir_path + "/../../resources/mux21.v")
 
         params = graph_oriented_layout_design_params()
