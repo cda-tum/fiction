@@ -109,7 +109,7 @@ TEST_CASE("Different parameters", "[graph_oriented_layout_design]")
     check_eq(ntk, *layout1);
 
     // Verbose mode and timeout
-    params.timeout      = 100000;
+    params.timeout     = 100000;
     params.verbose     = true;
     const auto layout2 = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
 
