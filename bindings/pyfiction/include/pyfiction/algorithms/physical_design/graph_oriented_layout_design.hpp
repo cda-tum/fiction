@@ -31,6 +31,8 @@ inline void graph_oriented_layout_design(pybind11::module& m)
         .def(py::init<>())
         .def_readwrite("timeout", &fiction::graph_oriented_layout_design_params::timeout,
                        DOC(fiction_graph_oriented_layout_design_params_timeout))
+        .def_readwrite("num_vertex_expansions", &fiction::graph_oriented_layout_design_params::num_vertex_expansions,
+                       DOC(fiction_graph_oriented_layout_design_params_num_vertex_expansions))
         .def_readwrite("verbose", &fiction::graph_oriented_layout_design_params::verbose,
                        DOC(fiction_graph_oriented_layout_design_params_verbose))
         .def_readwrite("high_effort_mode", &fiction::graph_oriented_layout_design_params::high_effort_mode,
@@ -50,6 +52,16 @@ inline void graph_oriented_layout_design(pybind11::module& m)
                  stats.report(stream);
                  return stream.str();
              })
+        .def_readonly("time_total", &fiction::graph_oriented_layout_design_stats::time_total,
+                      DOC(fiction_graph_oriented_layout_design_stats_time_total))
+        .def_readonly("x_size", &fiction::graph_oriented_layout_design_stats::x_size_before,
+                      DOC(fiction_graph_oriented_layout_design_stats_x_size))
+        .def_readonly("y_size", &fiction::graph_oriented_layout_design_stats::y_size_before,
+                      DOC(fiction_graph_oriented_layout_design_stats_y_size))
+        .def_readonly("num_gates", &fiction::graph_oriented_layout_design_stats::x_size_after,
+                      DOC(fiction_graph_oriented_layout_design_stats_num_gates))
+        .def_readonly("num_wires", &fiction::graph_oriented_layout_design_stats::x_size_after,
+                      DOC(fiction_graph_oriented_layout_design_stats_num_gates))
 
         ;
 

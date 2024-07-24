@@ -16,6 +16,7 @@
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/technology/qca_one_library.hpp>
+#include <fiction/utils/network_utils.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
@@ -35,8 +36,9 @@ void check_graph_oriented_layout_design_equiv(const Ntk& ntk)
     params.return_first = true;
 
     const auto layout = graph_oriented_layout_design<Lyt>(ntk, params, &stats);
+    REQUIRE(layout.has_value());
 
-    check_eq(ntk, layout);
+    check_eq(ntk, *layout);
 }
 
 template <typename Lyt>
@@ -82,8 +84,9 @@ TEST_CASE("Gate library application", "[graph_oriented_layout_design]")
         params.return_first = true;
 
         const auto layout = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
+        REQUIRE(layout.has_value());
 
-        CHECK_NOTHROW(apply_gate_library<cell_layout, qca_one_library>(layout));
+        CHECK_NOTHROW(apply_gate_library<cell_layout, qca_one_library>(*layout));
     };
 
     check(blueprints::maj1_network<mockturtle::names_view<mockturtle::aig_network>>());
@@ -102,27 +105,45 @@ TEST_CASE("Different parameters", "[graph_oriented_layout_design]")
     params.timeout      = 100000;
     params.return_first = true;
     const auto layout1  = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
-    check_eq(ntk, layout1);
+
+    REQUIRE(layout1.has_value());
+    check_eq(ntk, *layout1);
 
     // Verbose mode
     params.verbose     = true;
     const auto layout2 = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
-    check_eq(ntk, layout2);
+
+    REQUIRE(layout2.has_value());
+    check_eq(ntk, *layout2);
 
     // High effort mode
     params.high_effort_mode = true;
     params.verbose          = false;
     const auto layout3      = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
-    check_eq(ntk, layout3);
+
+    REQUIRE(layout3.has_value());
+    check_eq(ntk, *layout3);
 
     // Full search
     params.return_first = false;
     const auto layout4  = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
-    check_eq(ntk, layout4);
+
+    REQUIRE(layout4.has_value());
+    check_eq(ntk, *layout4);
+
+    // More vertex expansions
+    params.return_first = true;
+    params.num_vertex_expansions = 8;
+    const auto layout5  = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
+
+    REQUIRE(layout5.has_value());
+    check_eq(ntk, *layout4);
 
     // Timeout limit reached
     params.timeout     = 0;
-    const auto layout5 = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
+    const auto layout6 = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
+
+    CHECK(!layout6.has_value());
 }
 
 TEST_CASE("Name conservation after graph-enhanced layout search", "[graph_oriented_layout_design]")
@@ -139,14 +160,28 @@ TEST_CASE("Name conservation after graph-enhanced layout search", "[graph_orient
 
     const auto layout = graph_oriented_layout_design<gate_layout>(maj, params, &stats);
 
+    REQUIRE(layout.has_value());
+
     // network name
-    CHECK(layout.get_layout_name() == "maj");
+    CHECK(layout->get_layout_name() == "maj");
 
     // PI names
-    CHECK(layout.get_name(layout.pi_at(0)) == "a");  // first PI
-    CHECK(layout.get_name(layout.pi_at(1)) == "b");  // second PI
-    CHECK(layout.get_name(layout.pi_at(2)) == "c");  // third PI
+    CHECK(layout->get_name(layout->pi_at(0)) == "a");  // first PI
+    CHECK(layout->get_name(layout->pi_at(1)) == "b");  // second PI
+    CHECK(layout->get_name(layout->pi_at(2)) == "c");  // third PI
 
     // PO names
-    CHECK(layout.get_output_name(0) == "f");
+    CHECK(layout->get_output_name(0) == "f");
+}
+
+TEST_CASE("High fanin exception", "[graph_oriented_layout_design]")
+{
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+    const auto ntk    = blueprints::maj1_network<technology_network>();
+
+    graph_oriented_layout_design_stats stats{};
+
+    graph_oriented_layout_design_params params{};
+
+    CHECK_THROWS_AS(graph_oriented_layout_design<gate_layout>(ntk, params, &stats), high_degree_fanin_exception);
 }

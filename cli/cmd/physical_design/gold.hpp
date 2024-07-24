@@ -37,6 +37,7 @@ class gold_command : public command
                        "its runtime behavior superior to 'exact' and 'onepass'.")
     {
         add_option("--timeout,-t", ps.timeout, "Timeout in seconds");
+        add_option("--num_vertex_expansions,-n", ps.num_vertex_expansions, "Number of vertex expansions during search");
         add_flag("--high_effort_mode,-e", ps.high_effort_mode,
                  "Toggle high effort mode; increases runtime but might generate better results");
         add_flag("--return_first,-r", ps.return_first,
@@ -92,6 +93,8 @@ class gold_command : public command
     template <typename Lyt>
     void graph_oriented_layout_design()
     {
+        const auto get_name = [](auto&& ntk_ptr) -> std::string { return ntk_ptr->get_network_name(); };
+
         const auto perform_physical_design = [this](auto&& ntk_ptr)
         { return fiction::graph_oriented_layout_design<Lyt>(*ntk_ptr, ps, &st); };
 
@@ -99,13 +102,28 @@ class gold_command : public command
 
         try
         {
-            auto lyt = std::visit(perform_physical_design, ntk_ptr);
+            const auto lyt = std::visit(perform_physical_design, ntk_ptr);
 
-            store<fiction::gate_layout_t>().extend() = std::make_shared<Lyt>(lyt);
+            if (lyt.has_value())
+            {
+                store<fiction::gate_layout_t>().extend() = std::make_shared<Lyt>(*lyt);
+            }
+            else
+            {
+                env->out() << fmt::format("[e] impossible to place and route '{}' within the given parameters",
+                                          std::visit(get_name, ntk_ptr))
+                           << std::endl;
+            }
         }
         catch (const fiction::high_degree_fanin_exception& e)
         {
             env->out() << fmt::format("[e] {}", e.what()) << std::endl;
+        }
+        catch (...)
+        {
+            env->out() << fmt::format("[e] an error occurred while placing and routing '{}' with the given parameters",
+                                      std::visit(get_name, ntk_ptr))
+                       << std::endl;
         }
     }
 };
