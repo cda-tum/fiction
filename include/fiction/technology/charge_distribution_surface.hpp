@@ -107,9 +107,9 @@ enum class charge_index_mode
      */
     UPDATE_CHARGE_INDEX,
     /**
-     * The charge state is assigned to the cell but the charge index is not updated.
+     * The charge state is assigned to the cell but the old charge index is kept.
      */
-    DO_NOT_UPDATE_CHARGE_INDEX
+    KEEP_CHARGE_INDEX
 };
 
 /**
@@ -1678,14 +1678,14 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 strg->cell_history_gray_code.first  = static_cast<int64_t>(index_changed);
                 strg->cell_history_gray_code.second = sign_old;
                 this->assign_charge_state_by_cell_index(index_changed, sign_to_charge_state(sign_new),
-                                                        charge_index_mode::DO_NOT_UPDATE_CHARGE_INDEX);
+                                                        charge_index_mode::KEEP_CHARGE_INDEX);
             }
             else
             {
                 strg->cell_history_gray_code.first  = static_cast<int64_t>(index_changed) + 1;
                 strg->cell_history_gray_code.second = sign_old;
                 this->assign_charge_state_by_cell_index(index_changed + 1, sign_to_charge_state(sign_new),
-                                                        charge_index_mode::DO_NOT_UPDATE_CHARGE_INDEX);
+                                                        charge_index_mode::KEEP_CHARGE_INDEX);
             }
         }
         else
@@ -1944,7 +1944,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             for (const auto& c : strg->three_state_cells)
             {
                 this->assign_charge_state(c, sidb_charge_state::NEGATIVE,
-                                          charge_index_mode::DO_NOT_UPDATE_CHARGE_INDEX);
+                                          charge_index_mode::KEEP_CHARGE_INDEX);
             }
         }
 
@@ -1953,7 +1953,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             for (const auto& c : strg->sidb_order_without_three_state_cells)
             {
                 this->assign_charge_state(c, sidb_charge_state::NEGATIVE,
-                                          charge_index_mode::DO_NOT_UPDATE_CHARGE_INDEX);
+                                          charge_index_mode::KEEP_CHARGE_INDEX);
             }
         }
 
@@ -1980,7 +1980,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                     charge_state_to_sign(new_chargesign));
                 this->assign_charge_state_by_cell_index(
                     static_cast<uint64_t>(cell_to_index(index_to_three_state_cell(counter))), sign,
-                    charge_index_mode::DO_NOT_UPDATE_CHARGE_INDEX);
+                    charge_index_mode::KEEP_CHARGE_INDEX);
             }
             counter -= 1;
         }
@@ -2014,7 +2014,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                                                 charge_state_to_sign(new_chargesign));
                 this->assign_charge_state_by_cell_index(static_cast<uint64_t>(cell_to_index(index_to_two_state_cell(
                                                             static_cast<uint64_t>(counter_negative)))),
-                                                        sign, charge_index_mode::DO_NOT_UPDATE_CHARGE_INDEX);
+                                                        sign, charge_index_mode::KEEP_CHARGE_INDEX);
             }
             counter_negative -= 1;
             // If the current position is the dependent cell position, first the counter_negative is decremented
@@ -2063,7 +2063,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             }
 
             this->assign_charge_state_by_cell_index(static_cast<uint64_t>(counter), charge_state,
-                                                    charge_index_mode::DO_NOT_UPDATE_CHARGE_INDEX);
+                                                    charge_index_mode::KEEP_CHARGE_INDEX);
 
             charge_quot /= base;
             counter -= 1;
@@ -2078,7 +2078,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         for (uint64_t i = 0; static_cast<int64_t>(i) <= counter; ++i)
         {
             this->assign_charge_state_by_cell_index(i, sidb_charge_state::NEGATIVE,
-                                                    charge_index_mode::DO_NOT_UPDATE_CHARGE_INDEX);
+                                                    charge_index_mode::KEEP_CHARGE_INDEX);
         }
     }
 };

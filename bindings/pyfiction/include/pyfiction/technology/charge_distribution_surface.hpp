@@ -299,7 +299,7 @@ inline void charge_distribution_surfaces(pybind11::module& m)
     py::enum_<fiction::charge_index_mode>(m, "charge_index_mode", DOC(fiction_energy_calculation), py::module_local())
         .value("UPDATE_CHARGE_INDEX", fiction::charge_index_mode::UPDATE_CHARGE_INDEX,
                DOC(fiction_charge_index_mode_UPDATE_CHARGE_INDEX))
-        .value("DO_NOT_UPDATE_CHARGE_INDEX", fiction::charge_index_mode::DO_NOT_UPDATE_CHARGE_INDEX,
+        .value("KEEP_CHARGE_INDEX", fiction::charge_index_mode::KEEP_CHARGE_INDEX,
                DOC(fiction_charge_index_mode_DO_NOT_UPDATE_CHARGE_INDEX))
 
         ;

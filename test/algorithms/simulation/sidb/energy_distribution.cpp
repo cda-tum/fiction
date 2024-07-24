@@ -55,11 +55,11 @@ TEST_CASE("Test energy_distribution function", "[energy-distribution]")
         charge_distribution_surface                                           charge_layout_first{lyt, sim_param};
 
         charge_layout_first.assign_charge_state({10, 10}, sidb_charge_state::NEUTRAL,
-                                                charge_index_mode::DO_NOT_UPDATE_CHARGE_INDEX);
+                                                charge_index_mode::KEEP_CHARGE_INDEX);
         charge_layout_first.assign_charge_state({11, 10}, sidb_charge_state::NEUTRAL,
-                                                charge_index_mode::DO_NOT_UPDATE_CHARGE_INDEX);
+                                                charge_index_mode::KEEP_CHARGE_INDEX);
         charge_layout_first.assign_charge_state({12, 10}, sidb_charge_state::NEUTRAL,
-                                                charge_index_mode::DO_NOT_UPDATE_CHARGE_INDEX);
+                                                charge_index_mode::KEEP_CHARGE_INDEX);
         charge_layout_first.update_local_potential();
         charge_layout_first.recompute_system_energy();
         all_lyts.push_back(charge_layout_first);
@@ -68,11 +68,11 @@ TEST_CASE("Test energy_distribution function", "[energy-distribution]")
 
         charge_distribution_surface charge_layout_second{lyt};
         charge_layout_second.assign_charge_state({10, 10}, sidb_charge_state::NEUTRAL,
-                                                 charge_index_mode::DO_NOT_UPDATE_CHARGE_INDEX);
+                                                 charge_index_mode::KEEP_CHARGE_INDEX);
         charge_layout_second.assign_charge_state({11, 10}, sidb_charge_state::NEGATIVE,
-                                                 charge_index_mode::DO_NOT_UPDATE_CHARGE_INDEX);
+                                                 charge_index_mode::KEEP_CHARGE_INDEX);
         charge_layout_second.assign_charge_state({12, 10}, sidb_charge_state::NEUTRAL,
-                                                 charge_index_mode::DO_NOT_UPDATE_CHARGE_INDEX);
+                                                 charge_index_mode::KEEP_CHARGE_INDEX);
         charge_layout_second.update_local_potential();
         charge_layout_second.recompute_system_energy();
         all_lyts.push_back(charge_layout_second);
@@ -82,11 +82,11 @@ TEST_CASE("Test energy_distribution function", "[energy-distribution]")
 
         charge_distribution_surface charge_layout_third{lyt};
         charge_layout_third.assign_charge_state({10, 10}, sidb_charge_state::NEGATIVE,
-                                                charge_index_mode::DO_NOT_UPDATE_CHARGE_INDEX);
+                                                charge_index_mode::KEEP_CHARGE_INDEX);
         charge_layout_third.assign_charge_state({11, 10}, sidb_charge_state::NEGATIVE,
-                                                charge_index_mode::DO_NOT_UPDATE_CHARGE_INDEX);
+                                                charge_index_mode::KEEP_CHARGE_INDEX);
         charge_layout_third.assign_charge_state({12, 10}, sidb_charge_state::NEGATIVE,
-                                                charge_index_mode::DO_NOT_UPDATE_CHARGE_INDEX);
+                                                charge_index_mode::KEEP_CHARGE_INDEX);
         charge_layout_third.update_local_potential();
         charge_layout_third.recompute_system_energy();
         all_lyts.push_back(charge_layout_third);
