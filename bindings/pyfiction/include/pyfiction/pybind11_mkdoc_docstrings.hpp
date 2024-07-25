@@ -3993,7 +3993,7 @@ charge distribution.)doc";
 
 static const char *__doc_fiction_detail_assess_physical_population_stability_impl_energy_and_charge_index_charge_index = R"doc(Charge index of the charge distribution.)doc";
 
-static const char *__doc_fiction_detail_assess_physical_population_stability_impl_energy_and_charge_index_energy = R"doc(Electrostatic energy of the charge distribution.)doc";
+static const char *__doc_fiction_detail_assess_physical_population_stability_impl_energy_and_charge_index_energy = R"doc(Electrostatic energy of the charge distribution (unit: eV).)doc";
 
 static const char *__doc_fiction_detail_assess_physical_population_stability_impl_handle_negative_charges =
 R"doc(This function checks if the absolute difference between the given
@@ -13204,8 +13204,8 @@ static const char *__doc_fiction_population_stability_information_system_energy 
 
 static const char *__doc_fiction_population_stability_information_transition_from_to_with_cell_and_required_pot =
 R"doc(This map collects all charge transition types, the corresponding
-critical cells and the required electrostatic potential required to
-conduct the transition.)doc";
+critical cells and the required electrostatic potential (unit: V)
+required to conduct the transition.)doc";
 
 static const char *__doc_fiction_port_direction =
 R"doc(A port direction is a relative (cardinal) direction of a port within a
