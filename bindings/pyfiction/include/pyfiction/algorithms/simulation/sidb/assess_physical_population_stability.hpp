@@ -20,7 +20,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void assess_physical_population_stability(pybind11::module& m, const std::string& lattice = "")
+void assess_physical_population_stability(pybind11::module& m)
 {
     namespace py = pybind11;
     using namespace pybind11::literals;
@@ -62,6 +62,27 @@ inline void assess_physical_population_stability(pybind11::module& m)
         .value("POSITIVE_TO_NEUTRAL", fiction::transition_type::POSITIVE_TO_NEUTRAL,
                DOC(fiction_transition_type_POSITIVE_TO_NEUTRAL));
 
+    py::class_<fiction::population_stability_information<fiction::offset::ucoord_t>>(
+        m, "population_stability_information", DOC(fiction_population_stability_information))
+        .def(py::init<>())
+        .def_readwrite("critical_cell",
+                       &fiction::population_stability_information<fiction::offset::ucoord_t>::critical_cell,
+                       DOC(fiction_population_stability_information_critical_cell))
+        .def_readwrite("transition_from_to",
+                       &fiction::population_stability_information<fiction::offset::ucoord_t>::transition_from_to,
+                       DOC(fiction_population_stability_information_transition_from_to))
+        .def_readwrite("minimum_potential_difference_to_transition",
+                       &fiction::population_stability_information<
+                           fiction::offset::ucoord_t>::minimum_potential_difference_to_transition,
+                       DOC(fiction_population_stability_information_minimum_potential_difference_to_transition))
+        .def_readwrite(
+            "distance_corresponding_to_potential",
+            &fiction::population_stability_information<fiction::offset::ucoord_t>::distance_corresponding_to_potential,
+            DOC(fiction_population_stability_information_distance_corresponding_to_potential))
+        .def_readwrite("system_energy",
+                       &fiction::population_stability_information<fiction::offset::ucoord_t>::system_energy,
+                       DOC(fiction_population_stability_information_system_energy));
+
     /**
      * Parameters.
      */
@@ -78,8 +99,8 @@ inline void assess_physical_population_stability(pybind11::module& m)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
-    detail::assess_physical_population_stability<py_sidb_100_lattice>(m, "_100");
-    detail::assess_physical_population_stability<py_sidb_111_lattice>(m, "_111");
+    detail::assess_physical_population_stability<py_sidb_100_lattice>(m);
+    detail::assess_physical_population_stability<py_sidb_111_lattice>(m);
 }
 
 }  // namespace pyfiction
