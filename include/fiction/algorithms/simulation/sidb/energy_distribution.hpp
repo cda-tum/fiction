@@ -25,7 +25,8 @@ using sidb_energy_distribution = std::map<double, uint64_t>;  // unit: (eV, unit
 
 /**
  * This function takes in a vector of `charge_distribution_surface` objects and returns a map containing the system
- * energy and the number of occurrences of that energy in the input vector.
+ * energy and the number of occurrences of that energy in the input vector. To compare two energy values for equality,
+ * the comparison uses a tolerance specified by `physical_constants::POP_STABILITY_ERR`.
  *
  * @tparam Lyt Cell-level layout type.
  * @param input_vec A vector of `charge_distribution_surface` objects for which statistics are to be computed.
@@ -55,8 +56,8 @@ energy_distribution(const std::vector<charge_distribution_surface<Lyt>>& input_v
         {
             if (lyt.get_charge_index_and_base().first == charge_index)
             {
-                const double energy = lyt.get_system_energy();
-                bool         found  = false;
+                const auto energy = lyt.get_system_energy();
+                bool       found  = false;
 
                 for (auto& energy_index : distribution)
                 {
