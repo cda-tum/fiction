@@ -12,31 +12,22 @@
 #include <fiction/algorithms/simulation/sidb/defect_avoidance_distance.hpp>
 #include <fiction/algorithms/simulation/sidb/defect_influence_operational_domain.hpp>
 #include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
-#include <fiction/algorithms/simulation/sidb/quickexact.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
-#include <fiction/io/print_layout.hpp>
+#include <fiction/algorithms/simulation/sidb/maximum_defect_influence_position_and_distance.hpp>
 #include <fiction/io/read_sqd_layout.hpp>
-#include <fiction/io/write_defect_influence_operational_domain.hpp>
-#include <fiction/io/write_operational_domain.hpp>
-#include <fiction/io/write_sqd_layout.hpp>
 #include <fiction/technology/sidb_defects.hpp>
 #include <fiction/types.hpp>
+#include <fiction/traits.hpp>
 #include <fiction/utils/math_utils.hpp>
 #include <fiction/utils/truth_table_utils.hpp>
 
 #include <fmt/core.h>
 
 #include <algorithm>
-#include <cstddef>
 #include <cstdint>
 #include <cstdlib>
-#include <fstream>
 #include <iostream>
-#include <mutex>
-#include <numeric>
 #include <string>
-#include <thread>
 #include <vector>
 
 using namespace fiction;
@@ -49,7 +40,7 @@ int main()  // NOLINT
         fmt::format("{}skeleton_bestagons_with_tags/skeleton_hex_inputsdbp_2i1o.sqd", EXPERIMENTS_PATH);
 
     experiments::experiment<std::string, double, double, double, double, double> fom_exp{
-        "FOM", "benchmark", "CT max", "OPD max", "MDC_ars_min", "MDC_vac_max", "BBR"};
+        "FOM", "benchmark", "CT max (K)", "OPD max", "MDC_ars_min (nm)", "MDC_vac_max (nm)", "BBR"};
 
     const auto skeleton = read_sqd_layout<Lyt>(folder);
 
@@ -172,7 +163,7 @@ int main()  // NOLINT
                     bbr_all.push_back(std::min(bbr_neu_to_neg, bbr_neg_to_neu));
                 }
 
-                if (temps.size() != 0)
+                if (!temps.empty())
                 {
                     const auto max_temp      = *std::max_element(temps.begin(), temps.end());
                     const auto max_op_domain = *std::max_element(op_domains.begin(), op_domains.end());
@@ -193,7 +184,7 @@ int main()  // NOLINT
 
                     fom_exp.save();
                     fom_exp.table();
-                    for (auto i = 0; i < temps.size(); i++)
+                    for (std::size_t i = 0; i < temps.size(); i++)
                     {
                         cost_function_chi({temps[i] / max_temp, op_domains[i] / max_op_domain,
                                            defect_influence_arsenic[i] / max_defect_influence_arsenic,

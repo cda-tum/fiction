@@ -68,7 +68,7 @@ struct population_stability_information
     typename Lyt::cell critical_cell{};
     /**
      * This map collects all charge transition types, the corresponding critical cells and the required
-     * electrostatic potential required to conduct the transition.
+     * electrostatic potential (unit: V) required to conduct the transition.
      */
     std::unordered_map<transition_type, std::pair<typename Lyt::cell, double>>
         transition_from_to_with_cell_and_required_pot{};
@@ -223,7 +223,7 @@ class assess_physical_population_stability_impl
     struct energy_and_charge_index
     {
         /**
-         * Electrostatic energy of the charge distribution.
+         * Electrostatic energy of the charge distribution (unit: eV).
          */
         double energy;
         /**
@@ -373,8 +373,10 @@ class assess_physical_population_stability_impl
 
         std::transform(
             sim_results.charge_distributions.cbegin(), sim_results.charge_distributions.cend(),
-            std::back_inserter(energy_charge_index), [](const auto& ch_lyt)
-            { return energy_and_charge_index{ch_lyt.get_system_energy(), ch_lyt.get_charge_index_and_base().first}; });
+            std::back_inserter(energy_charge_index),
+            [](const auto& ch_lyt) {
+                return energy_and_charge_index{ch_lyt.get_system_energy(), ch_lyt.get_charge_index_and_base().first};
+            });
 
         // Sort the vector in ascending order of the energy value
         std::sort(energy_charge_index.begin(), energy_charge_index.end(),
