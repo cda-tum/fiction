@@ -11,13 +11,13 @@
 #include <fiction/algorithms/simulation/sidb/critical_temperature.hpp>
 #include <fiction/algorithms/simulation/sidb/defect_avoidance_distance.hpp>
 #include <fiction/algorithms/simulation/sidb/defect_influence_operational_domain.hpp>
+#include <fiction/algorithms/simulation/sidb/maximum_defect_influence_position_and_distance.hpp>
 #include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
-#include <fiction/algorithms/simulation/sidb/maximum_defect_influence_position_and_distance.hpp>
 #include <fiction/io/read_sqd_layout.hpp>
 #include <fiction/technology/sidb_defects.hpp>
-#include <fiction/types.hpp>
 #include <fiction/traits.hpp>
+#include <fiction/types.hpp>
 #include <fiction/utils/math_utils.hpp>
 #include <fiction/utils/truth_table_utils.hpp>
 
