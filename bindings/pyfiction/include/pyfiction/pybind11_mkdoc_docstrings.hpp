@@ -3961,7 +3961,15 @@ static const char *__doc_fiction_detail_apply_gate_library_impl_gate_lyt = R"doc
 
 static const char *__doc_fiction_detail_apply_gate_library_impl_run = R"doc()doc";
 
-static const char *__doc_fiction_detail_assess_physical_population_stability_impl = R"doc()doc";
+static const char *__doc_fiction_detail_assess_physical_population_stability_impl =
+R"doc(This class implements the population stability assessment for a given
+SiDB layout. It determines the minimum electrostatic potential
+required for charge state transitions within the layout and identifies
+the corresponding critical SiDB along with the type of charge state
+transition.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.)doc";
 
 static const char *__doc_fiction_detail_assess_physical_population_stability_impl_assess_physical_population_stability_impl =
 R"doc(Constructor for assess_physical_population_stability_impl.
