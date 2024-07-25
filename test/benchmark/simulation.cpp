@@ -85,33 +85,33 @@ TEST_CASE("Benchmark simulators", "[benchmark]")
     };
 #endif  // FICTION_ALGLIB_ENABLED
 }
-//  Mac M1, Ventura 13.0, Apple clang version 14.0.0 (22.11.23)
-
-//    Before PR #388:
-//    benchmark name    samples          iterations          est run time
-//                      mean             low mean            high mean
-//                      std dev          low std dev         high std dev
-//    -------------------------------------------------------------------------------
-//    QuickExact        100             1                    1.75185 m
-//                      1.03471 s       1.03254 s            1.03694 s
-//                      11.2095 ms      10.2241 ms           12.5137 ms
+//      Mac M1, Ventura 13.0, Apple clang version 14.0.0 (24.07.24)
 //
-//    QuickSim          100              1                   449.61 ms
-//                      4.49349 ms      4.47125 ms           4.51652 ms
-//                      115.682 us      101.563 us           135.051 us
-
-//    PR #388:
-//    benchmark name    samples          iterations          est run time
-//                      mean             low mean            high mean
-//                      std dev          low std dev         high std dev
-//    -------------------------------------------------------------------------------
-//    QuickExact        100             1                    1.69339 m
-//                      1.03102 s       1.028 s              1.03517 s
-//                      17.8754  ms     14.3439 ms           27.4865 ms
+//      Before PR #483:
+//      benchmark name      samples             iterations              est run time
+//                          mean                low mean                high mean
+//                          std dev             low std dev             high std dev
+//      -----------------------------------------------------------------------------
+//      QuickExact          100                 1                       1.7502 m
+//                          1.06044 s           1.05536 s               1.06813 s
+//                          31.4551 ms          23.1414 ms              44.911 ms
 //
-//    QuickSim          100             1                   437.706 ms
-//                      4.32637 ms      4.29823 ms          4.358931 ms
-//                      154.258 us      132.162 us          194.857 us
+//      QuickSim            100                 1                       570.56 ms
+//                          6.02459 ms          5.92537 ms              6.12262 ms
+//                          505.788 us          450.737 us              574.389 us
+
+//      PR #483:
+//      benchmark name      samples             iterations              est run time
+//                          mean                low mean                high mean
+//                          std dev             low std dev             high std dev
+//      -----------------------------------------------------------------------------
+//      QuickExact          100                 1                       1.69216 m
+//                          1.01658 s           1.01384 s               1.02149 s
+//                          18.1717 ms          11.4147 ms              28.4481 ms
+//
+//      QuickSim            100                 1                       492.005 ms
+//                          4.85343 ms          4.80376 ms              4.98192 ms
+//                          381.332 us          184.008 us              801.102 us
 
 //  Intel Core i6700HQ (8 cores @ 2.60 GHz), Ubuntu 22.04.2 LTS, Ubuntu clang version 14.0.0 (13.04.24)
 
