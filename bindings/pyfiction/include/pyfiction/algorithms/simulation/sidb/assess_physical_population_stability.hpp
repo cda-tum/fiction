@@ -43,7 +43,8 @@ void assess_physical_population_stability(pybind11::module& m, const std::string
     // TODO add docu.
     m.def(fmt::format("assess_physical_population_stability{}", lattice).c_str(),
           &fiction::assess_physical_population_stability<Lyt>, "lyt"_a,
-          "params"_a = fiction::assess_physical_population_stability_params{});
+          "params"_a = fiction::assess_physical_population_stability_params{},
+          DOC(fiction_assess_physical_population_stability));
 }
 
 }  // namespace detail
