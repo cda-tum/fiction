@@ -241,7 +241,8 @@ class clustercomplete_impl
         {
             const uint64_t sidb_ix = get_singleton_sidb_ix(pst->cluster);
             charge_layout_copy.assign_charge_state_by_cell_index(
-                sidb_ix, singleton_multiset_conf_to_charge_state(pst->multiset_conf), false);
+                sidb_ix, singleton_multiset_conf_to_charge_state(pst->multiset_conf),
+                charge_index_mode::KEEP_CHARGE_INDEX);
 
             charge_layout_copy.assign_local_potential_by_index(
                 sidb_ix, -clustering_state.pot_bounds.get<bound_direction::LOWER>(sidb_ix));
