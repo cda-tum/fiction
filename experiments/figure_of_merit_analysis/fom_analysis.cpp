@@ -121,8 +121,8 @@ int main()  // NOLINT
                 {
                     temps.push_back(critical_temperature_gate_based(gate, truth_table, ct_params));
                     operational_domain_stats op_stats{};
-                    const auto               op_domain = operational_domain_flood_fill(
-                        gate, truth_table, 0, op_domain_params, parameter_point{5.6, 5}, &op_stats);
+                    const auto op_domain = operational_domain_flood_fill(gate, truth_table, 0, op_domain_params,
+                                                                         parameter_point{5.6, 5}, &op_stats);
                     op_domains.push_back(op_stats.percentual_operational_area);
 
                     defect_influence_operational_domain_stats arsenic_stats{};
