@@ -404,8 +404,10 @@ class design_sidb_gates_impl
                         {
                             continue;
                         }
-                        layout.assign_charge_state(bdl.upper, sidb_charge_state::NEUTRAL, false);
-                        layout.assign_charge_state(bdl.lower, sidb_charge_state::NEGATIVE, false);
+                        layout.assign_charge_state(bdl.upper, sidb_charge_state::NEUTRAL,
+                                                   charge_index_mode::KEEP_CHARGE_INDEX);
+                        layout.assign_charge_state(bdl.lower, sidb_charge_state::NEGATIVE,
+                                                   charge_index_mode::KEEP_CHARGE_INDEX);
                     }
                 }
                 else
@@ -416,8 +418,10 @@ class design_sidb_gates_impl
                         {
                             continue;
                         }
-                        layout.assign_charge_state(bdl.upper, sidb_charge_state::NEGATIVE, false);
-                        layout.assign_charge_state(bdl.lower, sidb_charge_state::NEUTRAL, false);
+                        layout.assign_charge_state(bdl.upper, sidb_charge_state::NEGATIVE,
+                                                   charge_index_mode::KEEP_CHARGE_INDEX);
+                        layout.assign_charge_state(bdl.lower, sidb_charge_state::NEUTRAL,
+                                                   charge_index_mode::KEEP_CHARGE_INDEX);
                     }
                 }
             }
@@ -431,8 +435,10 @@ class design_sidb_gates_impl
                         {
                             continue;
                         }
-                        layout.assign_charge_state(bdl.upper, sidb_charge_state::NEGATIVE, false);
-                        layout.assign_charge_state(bdl.lower, sidb_charge_state::NEUTRAL, false);
+                        layout.assign_charge_state(bdl.upper, sidb_charge_state::NEGATIVE,
+                                                   charge_index_mode::KEEP_CHARGE_INDEX);
+                        layout.assign_charge_state(bdl.lower, sidb_charge_state::NEUTRAL,
+                                                   charge_index_mode::KEEP_CHARGE_INDEX);
                     }
                 }
                 else
@@ -443,8 +449,10 @@ class design_sidb_gates_impl
                         {
                             continue;
                         }
-                        layout.assign_charge_state(bdl.upper, sidb_charge_state::NEUTRAL, false);
-                        layout.assign_charge_state(bdl.lower, sidb_charge_state::NEGATIVE, false);
+                        layout.assign_charge_state(bdl.upper, sidb_charge_state::NEUTRAL,
+                                                   charge_index_mode::KEEP_CHARGE_INDEX);
+                        layout.assign_charge_state(bdl.lower, sidb_charge_state::NEGATIVE,
+                                                   charge_index_mode::KEEP_CHARGE_INDEX);
                     }
                 }
             }
@@ -478,16 +486,20 @@ class design_sidb_gates_impl
                 {
                     for (const auto& bdl : output_bdl_wires[i])
                     {
-                        layout.assign_charge_state(bdl.upper, sidb_charge_state::NEUTRAL, false);
-                        layout.assign_charge_state(bdl.lower, sidb_charge_state::NEGATIVE, false);
+                        layout.assign_charge_state(bdl.upper, sidb_charge_state::NEUTRAL,
+                                                   charge_index_mode::KEEP_CHARGE_INDEX);
+                        layout.assign_charge_state(bdl.lower, sidb_charge_state::NEGATIVE,
+                                                   charge_index_mode::KEEP_CHARGE_INDEX);
                     }
                 }
                 else
                 {
                     for (const auto& bdl : output_bdl_wires[i])
                     {
-                        layout.assign_charge_state(bdl.upper, sidb_charge_state::NEGATIVE, false);
-                        layout.assign_charge_state(bdl.lower, sidb_charge_state::NEUTRAL, false);
+                        layout.assign_charge_state(bdl.upper, sidb_charge_state::NEGATIVE,
+                                                   charge_index_mode::KEEP_CHARGE_INDEX);
+                        layout.assign_charge_state(bdl.lower, sidb_charge_state::NEUTRAL,
+                                                   charge_index_mode::KEEP_CHARGE_INDEX);
                     }
                 }
             }
@@ -501,16 +513,20 @@ class design_sidb_gates_impl
                         {
                             continue;
                         }
-                        layout.assign_charge_state(bdl.upper, sidb_charge_state::NEGATIVE, false);
-                        layout.assign_charge_state(bdl.lower, sidb_charge_state::NEUTRAL, false);
+                        layout.assign_charge_state(bdl.upper, sidb_charge_state::NEGATIVE,
+                                                   charge_index_mode::KEEP_CHARGE_INDEX);
+                        layout.assign_charge_state(bdl.lower, sidb_charge_state::NEUTRAL,
+                                                   charge_index_mode::KEEP_CHARGE_INDEX);
                     }
                 }
                 else
                 {
                     for (const auto& bdl : output_bdl_wires[i])
                     {
-                        layout.assign_charge_state(bdl.upper, sidb_charge_state::NEUTRAL, false);
-                        layout.assign_charge_state(bdl.lower, sidb_charge_state::NEGATIVE, false);
+                        layout.assign_charge_state(bdl.upper, sidb_charge_state::NEUTRAL,
+                                                   charge_index_mode::KEEP_CHARGE_INDEX);
+                        layout.assign_charge_state(bdl.lower, sidb_charge_state::NEGATIVE,
+                                                   charge_index_mode::KEEP_CHARGE_INDEX);
                     }
                 }
             }
@@ -553,16 +569,20 @@ class design_sidb_gates_impl
                 {
                     for (const auto& bdl : output_bdl_wires[i])
                     {
-                        layout.assign_charge_state(bdl.upper, sidb_charge_state::NEUTRAL, false);
-                        layout.assign_charge_state(bdl.lower, sidb_charge_state::NEGATIVE, false);
+                        layout.assign_charge_state(bdl.upper, sidb_charge_state::NEUTRAL,
+                                                   charge_index_mode::KEEP_CHARGE_INDEX);
+                        layout.assign_charge_state(bdl.lower, sidb_charge_state::NEGATIVE,
+                                                   charge_index_mode::KEEP_CHARGE_INDEX);
                     }
                 }
                 else
                 {
                     for (const auto& bdl : output_bdl_wires[i])
                     {
-                        layout.assign_charge_state(bdl.upper, sidb_charge_state::NEGATIVE, false);
-                        layout.assign_charge_state(bdl.lower, sidb_charge_state::NEUTRAL, false);
+                        layout.assign_charge_state(bdl.upper, sidb_charge_state::NEGATIVE,
+                                                   charge_index_mode::KEEP_CHARGE_INDEX);
+                        layout.assign_charge_state(bdl.lower, sidb_charge_state::NEUTRAL,
+                                                   charge_index_mode::KEEP_CHARGE_INDEX);
                     }
                 }
             }
@@ -572,16 +592,20 @@ class design_sidb_gates_impl
                 {
                     for (const auto& bdl : output_bdl_wires[i])
                     {
-                        layout.assign_charge_state(bdl.upper, sidb_charge_state::NEGATIVE, false);
-                        layout.assign_charge_state(bdl.lower, sidb_charge_state::NEUTRAL, false);
+                        layout.assign_charge_state(bdl.upper, sidb_charge_state::NEGATIVE,
+                                                   charge_index_mode::KEEP_CHARGE_INDEX);
+                        layout.assign_charge_state(bdl.lower, sidb_charge_state::NEUTRAL,
+                                                   charge_index_mode::KEEP_CHARGE_INDEX);
                     }
                 }
                 else
                 {
                     for (const auto& bdl : output_bdl_wires[i])
                     {
-                        layout.assign_charge_state(bdl.upper, sidb_charge_state::NEUTRAL, false);
-                        layout.assign_charge_state(bdl.lower, sidb_charge_state::NEGATIVE, false);
+                        layout.assign_charge_state(bdl.upper, sidb_charge_state::NEUTRAL,
+                                                   charge_index_mode::KEEP_CHARGE_INDEX);
+                        layout.assign_charge_state(bdl.lower, sidb_charge_state::NEGATIVE,
+                                                   charge_index_mode::KEEP_CHARGE_INDEX);
                     }
                 }
             }
@@ -610,8 +634,11 @@ class design_sidb_gates_impl
 
         while (cds_canvas.get_charge_index_and_base().first <= cds_canvas.get_max_charge_index())
         {
-            cds_canvas.foreach_cell([&](const auto& c)
-                                    { cds_layout.assign_charge_state(c, cds_canvas.get_charge_state(c), false); });
+            cds_canvas.foreach_cell(
+                [&](const auto& c) {
+                    cds_layout.assign_charge_state(c, cds_canvas.get_charge_state(c),
+                                                   charge_index_mode::KEEP_CHARGE_INDEX);
+                });
             cds_layout.update_after_charge_change(dependent_cell_mode::VARIABLE,
                                                   energy_calculation::KEEP_OLD_ENERGY_VALUE);
 
