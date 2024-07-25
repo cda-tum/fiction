@@ -23,6 +23,27 @@
 #endif
 
 
+static const char *__doc_assess_physical_population_stability =
+R"doc(This function assesses the population stability of each physically
+valid charge distributions of a given SiDB layout. It determines the
+minimum absolute electrostatic potential required to induce a charge
+distribution transition. The function also identifies the SiDB for
+which this is the case (critical SiDB) and the corresponding charge
+state transition (i.e., the change from one charge state to another).
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Parameter ``lyt``:
+    The layout for which the population stability is assessed.
+
+Parameter ``params``:
+    Parameters used to assess the population stability.
+
+Returns:
+    A vector of population stability information for all physically
+    valid charge distributions of the given SiDB layout.)doc";
+
 static const char *__doc_fiction_a_star =
 R"doc(The A* path finding algorithm for shortest loop-less paths between a
 given source and target coordinate in a layout. This function
@@ -408,27 +429,6 @@ static const char *__doc_fiction_aspect_ratio_iterator_operator_mul = R"doc()doc
 static const char *__doc_fiction_aspect_ratio_iterator_operator_ne = R"doc()doc";
 
 static const char *__doc_fiction_aspect_ratio_iterator_operator_ne_2 = R"doc()doc";
-
-static const char *__doc_fiction_assess_physical_population_stability =
-R"doc(This function assesses the population stability of each physically
-valid charge distributions of a given SiDB layout. It determines the
-minimum absolute electrostatic potential required to induce a charge
-distribution transition. The function also identifies the SiDB for
-which this is the case (critical SiDB) and the corresponding charge
-state transition (i.e., the change from one charge state to another).
-
-Template parameter ``Lyt``:
-    SiDB cell-level layout type.
-
-Parameter ``lyt``:
-    The layout for which the population stability is assessed.
-
-Parameter ``params``:
-    Parameters used to assess the population stability.
-
-Returns:
-    A vector of population stability information for all physically
-    valid charge distributions of the given SiDB layout.)doc";
 
 static const char *__doc_fiction_assess_physical_population_stability_params =
 R"doc(This struct stores the parameters required to assess the population
@@ -12882,14 +12882,6 @@ static const char *__doc_fiction_operational_domain_stats_percentual_operational
 R"doc(The ratio of operational parameter pairs to all possible parameter
 pairs. Value is between 0 and 1.)doc";
 
-static const char *__doc_fiction_operational_domain_sweep_parameter = R"doc(Possible sweep parameters for the operational domain computation.)doc";
-
-static const char *__doc_fiction_operational_domain_sweep_parameter_EPSILON_R = R"doc(The relative permittivity of the dielectric material.)doc";
-
-static const char *__doc_fiction_operational_domain_sweep_parameter_LAMBDA_TF = R"doc(The Thomas-Fermi screening length.)doc";
-
-static const char *__doc_fiction_operational_domain_sweep_parameter_MU_MINUS = R"doc(The energy transition level.)doc";
-
 static const char *__doc_fiction_operational_domain_x_dimension = R"doc(X dimension sweep parameter.)doc";
 
 static const char *__doc_fiction_operational_domain_y_dimension = R"doc(Y dimension sweep parameter.)doc";
@@ -13197,8 +13189,8 @@ state transition, the electrostatic potential difference required for
 the transition, the corresponding distance, and the total
 electrostatic energy of the given charge distribution.
 
-Template parameter ``CellType``:
-    Type of the used cells.)doc";
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.)doc";
 
 static const char *__doc_fiction_population_stability_information_critical_cell = R"doc(SiDB cell which is closest to a charge transition.)doc";
 
