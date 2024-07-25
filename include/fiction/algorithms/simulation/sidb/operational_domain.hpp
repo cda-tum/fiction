@@ -434,7 +434,9 @@ class operational_domain_impl
                       {
                           // for each y value in parallel
                           std::for_each(FICTION_EXECUTION_POLICY_PAR_UNSEQ y_indices.cbegin(), y_indices.cend(),
-                                        [this, x](const auto y) { is_step_point_operational({x, y}); });
+                                        [this, x](const auto y) {
+                                            is_step_point_operational({x, y});
+                                        });
                       });
 
         log_stats();
@@ -474,9 +476,8 @@ class operational_domain_impl
      * @param initial_parameter Optional initial point in the parameter space for flood fill.
      * @return The (partial) operational domain of the layout.
      */
-    [[nodiscard]] operational_domain
-    flood_fill(const std::size_t                                         samples,
-               const std::optional<operational_domain::parameter_point>& initial_parameter) noexcept
+    [[nodiscard]] operational_domain<parameter_point, operational_status>
+    flood_fill(const std::size_t samples, const std::optional<parameter_point>& initial_parameter) noexcept
     {
         mockturtle::stopwatch stop{stats.time_total};
 
@@ -558,9 +559,8 @@ class operational_domain_impl
      * @param initial_parameter Optional initial point in the parameter space for contour tracing.
      * @return The (partial) operational domain of the layout.
      */
-    [[nodiscard]] operational_domain
-    contour_tracing(const std::size_t                                         samples,
-                    const std::optional<operational_domain::parameter_point>& initial_parameter_point) noexcept
+    [[nodiscard]] operational_domain<parameter_point, operational_status>
+    contour_tracing(const std::size_t samples, const std::optional<parameter_point>& initial_parameter_point) noexcept
     {
         mockturtle::stopwatch stop{stats.time_total};
 
@@ -664,7 +664,9 @@ class operational_domain_impl
                       [this, &lyt](const auto x)
                       {
                           std::for_each(y_indices.cbegin(), y_indices.cend(),
-                                        [this, &lyt, x](const auto y) { is_step_point_suitable(lyt, {x, y}); });
+                                        [this, &lyt, x](const auto y) {
+                                            is_step_point_suitable(lyt, {x, y});
+                                        });
                       });
 
         sidb_simulation_parameters simulation_parameters = params.simulation_parameters;
@@ -1383,11 +1385,11 @@ operational_domain_random_sampling(const Lyt& lyt, const std::vector<TT>& spec, 
  * @return The (partial) operational domain of the layout.
  */
 template <typename Lyt, typename TT>
-operational_domain operational_domain_flood_fill(
-    const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples,
-    const operational_domain_params&                          params                  = {},
-    const std::optional<operational_domain::parameter_point>& initial_parameter_point = std::nullopt,
-    operational_domain_stats*                                 stats                   = nullptr)
+operational_domain<parameter_point, operational_status>
+operational_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples,
+                              const operational_domain_params&      params                  = {},
+                              const std::optional<parameter_point>& initial_parameter_point = std::nullopt,
+                              operational_domain_stats*             stats                   = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -1441,11 +1443,11 @@ operational_domain operational_domain_flood_fill(
  * @return The (partial) operational domain of the layout.
  */
 template <typename Lyt, typename TT>
-operational_domain operational_domain_contour_tracing(
-    const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples,
-    const operational_domain_params&                          params                  = {},
-    const std::optional<operational_domain::parameter_point>& initial_parameter_point = std::nullopt,
-    operational_domain_stats*                                 stats                   = nullptr)
+operational_domain<parameter_point, operational_status>
+operational_domain_contour_tracing(const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples,
+                                   const operational_domain_params&      params                  = {},
+                                   const std::optional<parameter_point>& initial_parameter_point = std::nullopt,
+                                   operational_domain_stats*             stats                   = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");

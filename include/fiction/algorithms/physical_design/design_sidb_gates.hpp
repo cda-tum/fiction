@@ -325,11 +325,11 @@ class design_sidb_gates_impl
                     if (sa_params.weight_operational_domain != 0.0)
                     {
                         operational_domain_stats stats_op{};
-                        const auto               op_domain = operational_domain_flood_fill(
-                            lyt, truth_table, 0, sa_params.op_params,
-                            operational_domain::parameter_point{params.simulation_parameters.epsilon_r,
-                                                                params.simulation_parameters.lambda_tf},
-                            &stats_op);
+                        const auto               op_domain =
+                            operational_domain_flood_fill(lyt, truth_table, 0, sa_params.op_params,
+                                                          parameter_point{params.simulation_parameters.epsilon_r,
+                                                                          params.simulation_parameters.lambda_tf},
+                                                          &stats_op);
                         opo_cost = stats_op.percentual_operational_area;
                     }
                 }

@@ -603,7 +603,7 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
     {
         const auto op_domain = operational_domain_flood_fill(
             lat, std::vector<tt>{create_and_tt()}, 1, op_domain_params,
-            operational_domain::parameter_point{op_domain_params.simulation_parameters.epsilon_r,
+            parameter_point{op_domain_params.simulation_parameters.epsilon_r,
                                                 op_domain_params.simulation_parameters.lambda_tf},
             &op_domain_stats);
 
@@ -729,7 +729,7 @@ TEST_CASE("SiQAD's AND gate operational domain computation, using cube coordinat
     {
         const auto op_domain = operational_domain_flood_fill(
             lat, std::vector<tt>{create_and_tt()}, 1, op_domain_params,
-            operational_domain::parameter_point{op_domain_params.simulation_parameters.epsilon_r,
+            parameter_point{op_domain_params.simulation_parameters.epsilon_r,
                                                 op_domain_params.simulation_parameters.lambda_tf},
             &op_domain_stats);
 
@@ -749,7 +749,7 @@ TEST_CASE("SiQAD's AND gate operational domain computation, using cube coordinat
     {
         const auto op_domain = operational_domain_contour_tracing(
             lat, std::vector<tt>{create_and_tt()}, 1, op_domain_params,
-            operational_domain::parameter_point{op_domain_params.simulation_parameters.epsilon_r,
+            parameter_point{op_domain_params.simulation_parameters.epsilon_r,
                                                 op_domain_params.simulation_parameters.lambda_tf},
             &op_domain_stats);
 
@@ -827,7 +827,7 @@ TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[operational-domain
     {
         const auto op_domain = operational_domain_flood_fill(
             layout, std::vector<tt>{create_and_tt()}, 1, op_domain_params,
-            operational_domain::parameter_point{op_domain_params.simulation_parameters.epsilon_r,
+            parameter_point{op_domain_params.simulation_parameters.epsilon_r,
                                                 op_domain_params.simulation_parameters.lambda_tf},
             &op_domain_stats);
 
