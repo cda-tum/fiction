@@ -388,12 +388,6 @@ Assess Population Stability
            :members:
         .. doxygenfunction:: fiction::assess_physical_population_stability
 
-        **Header:** ``fiction/algorithms/simulation/sidb/calculate_min_bbr.hpp``
-
-        .. doxygenstruct:: fiction::calculate_min_bbr_for_all_inputs_params
-           :members:
-        .. doxygenfunction:: fiction::calculate_min_bbr_for_all_inputs
-
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.transition_type
@@ -403,6 +397,14 @@ Assess Population Stability
         .. autoclass:: mnt.pyfiction.assess_physical_population_stability_params
             :members:
         .. autofunction:: mnt.pyfiction.assess_physical_population_stability
+
+
+        **Header:** ``fiction/algorithms/simulation/sidb/calculate_min_bbr.hpp``
+
+        .. doxygenstruct:: fiction::calculate_min_bbr_for_all_inputs_params
+           :members:
+        .. doxygenfunction:: fiction::calculate_min_bbr_for_all_inputs
+
 
 Convert Potential to Distance
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

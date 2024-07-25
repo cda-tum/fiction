@@ -24,9 +24,8 @@ void determine_groundstate_from_simulation_results(pybind11::module& m)
 {
     using namespace pybind11::literals;
 
-    // TODO add Docu
     m.def("determine_groundstate_from_simulation_results", &fiction::determine_groundstate_from_simulation_results<Lyt>,
-          "simulation_results"_a);
+          "simulation_results"_a, DOC(fiction_determine_groundstate_from_simulation_results));
 }
 
 }  // namespace detail
