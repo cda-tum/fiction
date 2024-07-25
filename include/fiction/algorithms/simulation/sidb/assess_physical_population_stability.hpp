@@ -102,7 +102,13 @@ struct assess_physical_population_stability_params
 
 namespace detail
 {
-
+/**
+ * This class implements the population stability assessment for a given SiDB layout.
+ * It determines the minimum electrostatic potential required for charge state transitions within the layout and
+ * identifies the corresponding critical SiDB along with the type of charge state transition.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ */
 template <typename Lyt>
 class assess_physical_population_stability_impl
 {
