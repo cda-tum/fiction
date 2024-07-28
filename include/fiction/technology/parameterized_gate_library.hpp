@@ -496,8 +496,8 @@ class parameterized_gate_library : public fcn_gate_library<sidb_technology, 60, 
         static_assert(has_sidb_technology_v<CellLyt>, "Lyt is not an SiDB layout");
         static_assert(has_cube_coord_v<CellLyt>, "Lyt is not based on cube coordinates");
 
-        const auto params = is_sidb_gate_design_impossible_params{parameters.design_gate_params.simulation_parameters,
-                                                                  parameters.design_gate_params.sim_engine};
+        const auto params = is_sidb_gate_design_impossible_params{parameters.design_gate_params.simulation_parameters};
+
         if (spec == create_crossing_wire_tt() || spec == create_double_wire_tt())
         {
             if (is_sidb_gate_design_impossible(skeleton_with_defects, spec, params))

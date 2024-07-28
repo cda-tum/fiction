@@ -48,6 +48,7 @@ struct on_the_fly_circuit_design_params
 /**
  * Statistics for the on-the-fly defect-aware circuit design.
  */
+template <typename GateLyt>
 struct on_the_fly_circuit_design_stats
 {
     /**
@@ -58,6 +59,10 @@ struct on_the_fly_circuit_design_stats
      * The `stats` of the *exact* algorithm.
      */
     exact_physical_design_stats exact_stats{};
+    /**
+     * The gate-level layout after P&R.
+     */
+    std::optional<GateLyt> gate_layout{};
 };
 
 namespace detail
@@ -67,10 +72,10 @@ template <typename Ntk, typename CellLyt, typename GateLyt>
 class on_the_fly_circuit_design_impl
 {
   public:
-    on_the_fly_circuit_design_impl(const Ntk& network, const on_the_fly_circuit_design_params<CellLyt>& design_params,
-                                   const GateLyt& tiling, on_the_fly_circuit_design_stats& st) :
+    on_the_fly_circuit_design_impl(const Ntk& ntk, const on_the_fly_circuit_design_params<CellLyt>& design_params,
+                                   const GateLyt& tiling, on_the_fly_circuit_design_stats<GateLyt>& st) :
             lattice_tiling{tiling},
-            mapped_network{network},
+            network{ntk},
             params{design_params},
             stats{st}
     {}
@@ -85,20 +90,21 @@ class on_the_fly_circuit_design_impl
         // generating the blacklist based on neutral defects. The long-range electrostatic influence of charged defects
         // is not considered as gates are designed on-the-fly.
         auto black_list = sidb_surface_analysis<sidb_skeleton_bestagon_library>(
-            lattice_tiling, params.parameterized_gate_library_parameter.defect_surface, std::make_pair(0, 0));
+            lattice_tiling, params.parameterized_gate_library_parameters.defect_surface, std::make_pair(0, 0));
 
         while (!gate_level_layout.has_value())
         {
             // P&R with *exact* and the pre-determined blacklist
-            gate_level_layout = exact_with_blacklist<GateLyt>(mapped_network, black_list, params.exact_design_parameter,
-                                                              &stats.exact_stats);
+            gate_level_layout =
+                exact_with_blacklist<GateLyt>(network, black_list, params.exact_design_parameter, &stats.exact_stats);
+
             if (gate_level_layout.has_value())
             {
                 try
                 {
                     lyt = apply_parameterized_gate_library<CellLyt, parameterized_gate_library, GateLyt,
                                                            parameterized_gate_library_params<CellLyt>>(
-                        *gate_level_layout, params.parameterized_gate_library_parameter);
+                        *gate_level_layout, params.parameterized_gate_library_parameters);
                 }
 
                 // on-the-fly gate design was unsuccessful at a certain tile. Hence, this tile-gate pair is added to the
@@ -120,37 +126,16 @@ class on_the_fly_circuit_design_impl
             }
         }
 
-        // empty defect-surface is returned when no P&R solution is found
-        if (!gate_level_layout.has_value())
-        {
-            return sidb_defect_surface<CellLyt>{};
-        }
+        stats.gate_layout = gate_level_layout;
 
-        // check equivalence
-        const auto miter = mockturtle::miter<technology_network>(mapped_network, *gate_level_layout);
-        const auto eq    = mockturtle::equivalence_checking(*miter);
+        sidb_defect_surface<CellLyt> sidbs_and_defects{lyt};
 
-        // empty defect-surface is returned when equivalence check is empty
-        if (!eq.has_value())
-        {
-            return sidb_defect_surface<CellLyt>{};
-        }
+        // add defects to the circuit.
+        params.parameterized_gate_library_parameters.defect_surface.foreach_sidb_defect(
+            [&sidbs_and_defects](const auto& defect)
+            { sidbs_and_defects.assign_sidb_defect(defect.first, defect.second); });
 
-        // in case of equality, an sidb_defect_surface with the SiDBs of the circuit is returned
-        if (*eq)
-        {
-            sidb_defect_surface<CellLyt> sidbs_and_defects{lyt};
-
-            // add defects to the circuit.
-            params.parameterized_gate_library_parameter.defect_surface.foreach_sidb_defect(
-                [&sidbs_and_defects](const auto& defect)
-                { sidbs_and_defects.assign_sidb_defect(defect.first, defect.second); });
-
-            return sidbs_and_defects;
-        }
-
-        // in case of inequality, empty defect-surface is returned
-        return sidb_defect_surface<CellLyt>{};
+        return sidbs_and_defects;
     }
 
   private:
@@ -159,9 +144,9 @@ class on_the_fly_circuit_design_impl
      */
     GateLyt lattice_tiling;
     /**
-     * Mapped network.
+     * Network.
      */
-    Ntk mapped_network;
+    Ntk network;
     /**
      * Parameters for the on-the-fly circuit design.
      */
@@ -169,7 +154,7 @@ class on_the_fly_circuit_design_impl
     /**
      * Statistics for the on-the-fly circuit design.
      */
-    on_the_fly_circuit_design_stats& stats;
+    on_the_fly_circuit_design_stats<GateLyt>& stats;
 };
 
 }  // namespace detail
@@ -183,21 +168,26 @@ class on_the_fly_circuit_design_impl
  * @tparam Ntk  The type of the input network.
  * @tparam CellLyt  The type of the cell layout.
  * @tparam GateLyt  The type of the gate layout.
- * @param mapped_network    The input network to be mapped onto the defective surface.
- * @param design_params The parameters used for designing the circuit, encapsulated in an
- * `on_the_fly_circuit_design_params` object.
+ * @param network    The input network to be mapped onto the defective surface.
  * @param lattice_tiling    The lattice tiling used for the circuit design.
+ * @param params The parameters used for designing the circuit, encapsulated in an
+ * `on_the_fly_circuit_design_params` object.
  * @param stats Pointer to a structure for collecting statistics. If nullptr, statistics are not collected.
  *
  * @return A `sidb_defect_surface<CellLyt>` representing the designed circuit on the defective surface.
  */
 template <typename Ntk, typename CellLyt, typename GateLyt>
-[[nodiscard]] sidb_defect_surface<CellLyt> on_the_fly_circuit_design_on_defective_surface(
-    const Ntk& mapped_network, const on_the_fly_circuit_design_params<CellLyt>& design_params,
-    const GateLyt& lattice_tiling, on_the_fly_circuit_design_stats* stats = nullptr)
+[[nodiscard]] sidb_defect_surface<CellLyt>
+on_the_fly_circuit_design_on_defective_surface(const Ntk& ntk, const GateLyt& lattice_tiling,
+                                               const on_the_fly_circuit_design_params<CellLyt>& params = {},
+                                               on_the_fly_circuit_design_stats<GateLyt>*        stats  = nullptr)
 {
-    on_the_fly_circuit_design_stats                               st{};
-    detail::on_the_fly_circuit_design_impl<Ntk, CellLyt, GateLyt> p{mapped_network, design_params, lattice_tiling, st};
+    static_assert(is_gate_level_layout_v<GateLyt>, "Lyt is not a gate-level layout");
+    static_assert(is_tile_based_layout_v<CellLyt>, "Lyt is not a tile-based layout");
+    static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
+
+    on_the_fly_circuit_design_stats<GateLyt>                      st{};
+    detail::on_the_fly_circuit_design_impl<Ntk, CellLyt, GateLyt> p{ntk, params, lattice_tiling, st};
 
     const auto result = p.design_circuit_on_defective_surface();
 

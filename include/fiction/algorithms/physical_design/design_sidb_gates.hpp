@@ -49,7 +49,7 @@ struct design_sidb_gates_params
     enum class termination_condition
     {
         /**
-         * The design process is terminated when a valid SiDB gate design is found.
+         * The design process is terminated as soon as the first valid SiDB gate design is found.
          */
         AFTER_FIRST_SOLUTION,
         /**
@@ -144,15 +144,15 @@ class design_sidb_gates_impl
         }
 
         std::vector<Lyt>  designed_gate_layouts = {};
-        std::mutex        mutex_to_protect_designer_gate_layouts;
+        std::mutex        mutex_to_protect_designed_gate_layouts;
         std::atomic<bool> solution_found = false;
 
         // Shuffle the combinations before dividing them among threads
         std::shuffle(all_combinations.begin(), all_combinations.end(),
-                     std::default_random_engine(std::random_device()()));
+                     std::default_random_engine(std::random_device{}()));
 
         const auto add_combination_to_layout_and_check_operation =
-            [this, &mutex_to_protect_designer_gate_layouts, &params_is_operational, &designed_gate_layouts,
+            [this, &mutex_to_protect_designed_gate_layouts, &params_is_operational, &designed_gate_layouts,
              &sidbs_affected_by_defects, &solution_found](const auto& combination) noexcept
         {
             for (const auto& comb : combination)
@@ -161,13 +161,13 @@ class design_sidb_gates_impl
                 if (!are_sidbs_too_close(cell_indices_to_cell_vector(comb), sidbs_affected_by_defects))
                 {
                     // canvas SiDBs are added to the skeleton
-                    auto layout_with_added_cells = skeleton_layout_with_canvas_sidbs(comb);
+                    auto layout_with_added_cells = add_canvas_sidbs_to_skeleton_layout(comb);
                     if (const auto [status, sim_calls] =
                             is_operational(layout_with_added_cells, truth_table, params_is_operational);
                         status == operational_status::OPERATIONAL)
                     {
                         {
-                            const std::lock_guard lock_vector{mutex_to_protect_designer_gate_layouts};
+                            const std::lock_guard lock_vector{mutex_to_protect_designed_gate_layouts};
                             designed_gate_layouts.push_back(layout_with_added_cells);
                         }
                         solution_found = true;
@@ -183,7 +183,7 @@ class design_sidb_gates_impl
             }
         };
 
-        const auto num_threads = std::thread::hardware_concurrency();
+        static const auto num_threads = std::thread::hardware_concurrency();
         const auto chunk_size  = all_combinations.size() / num_threads;
 
         std::vector<std::thread> threads{};
@@ -348,7 +348,7 @@ class design_sidb_gates_impl
      * @param cell_indices A vector of indices of cells to be added to the skeleton layout.
      * @return A copy of the original layout (`skeleton_layout`) with SiDB cells added at specified indices.
      */
-    [[nodiscard]] Lyt skeleton_layout_with_canvas_sidbs(const std::vector<std::size_t>& cell_indices) const noexcept
+    [[nodiscard]] Lyt add_canvas_sidbs_to_skeleton_layout(const std::vector<std::size_t>& cell_indices) const noexcept
     {
         Lyt lyt_copy{skeleton_layout.clone()};
 

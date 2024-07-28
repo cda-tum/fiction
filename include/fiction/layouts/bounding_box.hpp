@@ -176,7 +176,7 @@ class bounding_box_2d
         else
         {
             min = coordinate<Lyt>{std::numeric_limits<decltype(coordinate<Lyt>::x)>::max(),
-                                  std::numeric_limits<decltype(coordinate<Lyt>::x)>::max()};
+                                  std::numeric_limits<decltype(coordinate<Lyt>::y)>::max()};
 
             if constexpr (is_gate_level_layout_v<Lyt>)
             {

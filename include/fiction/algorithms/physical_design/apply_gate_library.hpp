@@ -53,8 +53,8 @@ class apply_gate_library_impl
      *
      * This function performs the cell layout generation process based on the gate library and the gate-level layout
      * information provided by `GateLibrary` and `gate_lyt`. It iterates through the nodes in the gate-level layout and
-     * assigns gates to cells based on their corresponding positions and types. Optionally, it performs post-layout
-     * optimization and sets the layout name if certain conditions are met.
+     * maps gates to cell implementations based on their corresponding positions and types. Optionally, it performs
+     * post-layout optimization and sets the layout name if certain conditions are met.
      *
      * @return A `CellLyt` object representing the generated cell layout.
      */
@@ -103,8 +103,8 @@ class apply_gate_library_impl
      *
      * This function performs the cell layout generation process based on the parameterized gate library and the
      * gate-level layout information provided by `GateLibrary` and `gate_lyt`. It iterates through the nodes in the
-     * gate-level layout and assigns gates to cells based on their corresponding positions and types. Optionally, it
-     * performs post-layout optimization and sets the layout name if certain conditions are met.
+     * gate-level layout and maps gates to cell implementations based on their corresponding positions and types.
+     * Optionally, it performs post-layout optimization and sets the layout name if certain conditions are met.
      *
      * @tparam Type of the Parameters used for the parameterized gate library.
      * @param params Parameters used for the parameterized gate library.
@@ -162,7 +162,7 @@ class apply_gate_library_impl
     CellLyt cell_lyt;
 
     /**
-     * This function assigns a given SiDB gate implemetation to the total cell layout.
+     * This function assigns a given FCN gate implementation to the total cell layout.
      *
      * @param c Top-left cell of the tile where the gate is placed.
      * @param g Gate implementation.
@@ -246,7 +246,7 @@ template <typename CellLyt, typename GateLibrary, typename GateLyt>
  * @return A cell-level layout that implements `lyt`'s gate types with building blocks defined in `GateLibrary`.
  */
 template <typename CellLyt, typename GateLibrary, typename GateLyt, typename Params>
-[[nodiscard]] CellLyt apply_parameterized_gate_library(const GateLyt& lyt, Params& params)
+[[nodiscard]] CellLyt apply_parameterized_gate_library(const GateLyt& lyt, const Params& params)
 {
     static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
     static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");

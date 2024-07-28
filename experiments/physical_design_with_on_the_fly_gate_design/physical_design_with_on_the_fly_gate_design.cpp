@@ -90,8 +90,8 @@ int main()  // NOLINT
 
     const auto lattice_tiling = gate_lyt{{11, 30}};
 
-    experiments::experiment<std::string, double, uint64_t> sidb_circuits_with_defects{
-        "sidb_circuits_with_defects", "benchmark", "runtime", "number of aspect ratios"};
+    experiments::experiment<std::string, double, uint64_t, bool> sidb_circuits_with_defects{
+        "sidb_circuits_with_defects", "benchmark", "runtime", "number of aspect ratios", "equivalent"};
 
     constexpr const uint64_t bench_select =
         fiction_experiments::all & ~fiction_experiments::parity & ~fiction_experiments::two_bit_add_maj &
@@ -138,24 +138,30 @@ int main()  // NOLINT
         params.exact_design_parameter.upper_bound_y = 30;         // 12 x 31 tiles
         params.exact_design_parameter.timeout       = 3'600'000;  // 1h in ms
 
-        params.parameterized_gate_library_parameter.defect_surface     = surface_lattice;
-        params.parameterized_gate_library_parameter.design_gate_params = design_gate_params;
+        params.parameterized_gate_library_parameters.defect_surface     = surface_lattice;
+        params.parameterized_gate_library_parameters.design_gate_params = design_gate_params;
 
-        fiction::on_the_fly_circuit_design_stats st{};
+        fiction::on_the_fly_circuit_design_stats<gate_lyt> st{};
 
         const auto result =
             fiction::on_the_fly_circuit_design_on_defective_surface<decltype(mapped_network), cell_lyt, gate_lyt>(
                 mapped_network, params, lattice_tiling, &st);
 
+        // check equivalence
+        const auto miter = mockturtle::miter<mockturtle::klut_network>(mapped_network, st.gate_layout.value());
+        const auto eq    = mockturtle::equivalence_checking(*miter);
+        assert(eq.has_value());
+
         // determine bounding box and exclude atomic defects
-        const auto bb = fiction::bounding_box_2d<cell_lyt>(result, fiction::bounding_box_2d_selection::EXCLUDE_DEFECTS);
+        const auto bb = fiction::bounding_box_2d<cell_lyt>(static_cast<cell_lyt>(result));
 
         // compute area
         fiction::area_stats                            area_stats{};
         fiction::area_params<fiction::sidb_technology> area_ps{};
         fiction::area(bb, area_ps, &area_stats);
 
-        sidb_circuits_with_defects(benchmark, mockturtle::to_seconds(st.time_total), st.exact_stats.num_aspect_ratios);
+        sidb_circuits_with_defects(benchmark, mockturtle::to_seconds(st.time_total), st.exact_stats.num_aspect_ratios,
+                                   *eq);
         sidb_circuits_with_defects.save();
         sidb_circuits_with_defects.table();
 
