@@ -1226,6 +1226,43 @@ Lyt and_gate_with_kink_states() noexcept
     return lyt;
 };
 
+template <typename Lyt>
+Lyt two_input_left_one_output_right_top() noexcept
+{
+    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+
+    Lyt lyt{};
+
+    // first input wire
+    lyt.assign_cell_type({0, 0, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({2, 1, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({6, 2, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 3, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 4, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 5, 0}, Lyt::cell_type::NORMAL);
+
+    // second input wire
+    lyt.assign_cell_type({0, 15, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({2, 14, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({6, 13, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 12, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 11, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 10, 0}, Lyt::cell_type::NORMAL);
+
+
+    // output wire
+    lyt.assign_cell_type({26, 5, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({28, 4, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({32, 3, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({34, 2, 0}, Lyt::cell_type::OUTPUT);
+
+    lyt.assign_cell_type({38, 1, 0}, Lyt::cell_type::NORMAL);
+
+    return lyt;
+};
+
+
 }  // namespace blueprints
 
 #endif  // FICTION_LAYOUT_BLUEPRINTS_HPP

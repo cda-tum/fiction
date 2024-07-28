@@ -398,8 +398,28 @@ TEST_CASE("Design Bestagon shaped CX gate with QuickCell (flipped)", "[design-si
             {{16, 7, 0}, {22, 15, 0}},
             3};
 
-        const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_crossing_wire_tt()}, params);
+        const auto found_gate_layouts = design_sidb_gates(lyt,create_crossing_wire_tt(), params);
         REQUIRE(found_gate_layouts.size() == 2);
         CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
+    }
+}
+
+TEST_CASE("Design AND gate with input left and output top-right with QuickCell (flipped)", "[design-sidb-gates]")
+{
+    auto lyt = blueprints::two_input_left_one_output_right_top<sidb_100_cell_clk_lyt_siqad>();
+
+    SECTION("Exhaustive Generation, QuickCell")
+    {
+        const design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
+            is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
+                                  detect_bdl_wires_params{}, operational_condition::FORBIDDING_KINKS},
+            design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL,
+            {{17, 5, 0}, {24, 8, 0}},
+            3};
+
+        const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_and_tt()}, params);
+        REQUIRE(found_gate_layouts.size() == 234);
+        const auto first_gate = found_gate_layouts.front();
+        CHECK(is_operational(first_gate, std::vector<tt>{create_and_tt()}, params.operational_params).first == operational_status::OPERATIONAL);
     }
 }
