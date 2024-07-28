@@ -171,6 +171,10 @@ Parameter ``cell_nw``:
 Parameter ``cell_se``:
     The southeast cell defining the ending point of the area.
 
+Parameter ``obstructed_cell``:
+    Optional cell which is obstructed and therefore not included in
+    the returned vector.
+
 Returns:
     A vector containing all cells within the specified area.)doc";
 
@@ -4126,6 +4130,118 @@ Parameter ``offset``:
 Returns:
     The new coordinates of the tile after adjustment.)doc";
 
+static const char *__doc_fiction_detail_displacement_robustness_domain_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_displacement_robustness_domain_impl_all_possible_sidb_displacements =
+R"doc(This stores all possible displacements for all SiDBs in the SiDB
+layout. This means e.g. the first vector describes all possible
+positions of the first SiDB due to the allowed/possible displacements.)doc";
+
+static const char *__doc_fiction_detail_displacement_robustness_domain_impl_calculate_permitted_displacements_for_each_sidb =
+R"doc(This function calculates all permitted displacements for each SiDB
+based on the specified allowed displacements.)doc";
+
+static const char *__doc_fiction_detail_displacement_robustness_domain_impl_determine_propability_of_fabricating_operational_gate =
+R"doc(The manufacturing error rate is highly dependent on the speed of the
+manufacturing process. Therefore, fast fabrication requires SiDB
+layouts with high displacement tolerance to ensure functionality in
+the presence of displacements. This function determines the
+probability of fabricating an operational SiDB layout for a given
+fabrication error rate. If the fabrication error rate is 0.0 or
+negative, it means that the SiDB layout is designed without
+displacement.
+
+Parameter ``fabrication_error_rate``:
+    The fabrication error rate. For example, 0.1 describes that 10% of
+    all manufactured SiDBs have a slight displacement.
+
+Returns:
+    Probability of fabricating a working SiDB gate implementation.)doc";
+
+static const char *__doc_fiction_detail_displacement_robustness_domain_impl_determine_robustness_domain =
+R"doc(This function calculates the robustness domain of the SiDB layout
+based on the provided truth table specification and displacement
+robustness computation parameters.)doc";
+
+static const char *__doc_fiction_detail_displacement_robustness_domain_impl_displacement_robustness_domain_impl =
+R"doc(Standard constructor. Initializes the layout, the truth table, the
+parameters, and the statistics.
+
+Parameter ``lyt``:
+    SiDB cell-level layout to be evaluated regarding displacement
+    robustness.
+
+Parameter ``spec``:
+    Expected Boolean function of the layout given as a multi-output
+    truth table.
+
+Parameter ``ps``:
+    Parameters for the displacement robustness computation.
+
+Parameter ``st``:
+    Statistics related to the displacement robustness computation.)doc";
+
+static const char *__doc_fiction_detail_displacement_robustness_domain_impl_generate_combinations =
+R"doc(This is a helper function, which recursively generates combinations of
+SiDB displacements for all SiDBs based on the provided vector of
+displacement vectors.
+
+Parameter ``result``:
+    The vector to store the generated combinations.
+
+Parameter ``current_combination``:
+    The current combination being constructed.
+
+Parameter ``cell_index``:
+    The current cell_index in the vector of displacement vectors.)doc";
+
+static const char *__doc_fiction_detail_displacement_robustness_domain_impl_generate_valid_displaced_sidb_layouts =
+R"doc(This function generates all SiDB layouts with displacements based on
+the original layout. It filters out layouts where two or more SiDBs
+would be on the same spot due to displacement.
+
+Returns:
+    A vector containing all valid SiDB layouts with displacements.)doc";
+
+static const char *__doc_fiction_detail_displacement_robustness_domain_impl_generator =
+R"doc(Mersenne Twister random number generator. Generates high-quality
+pseudo-random numbers using a random seed from 'rd'.)doc";
+
+static const char *__doc_fiction_detail_displacement_robustness_domain_impl_layout =
+R"doc(The SiDB layout for which the displacement robustness calculation is
+performed.)doc";
+
+static const char *__doc_fiction_detail_displacement_robustness_domain_impl_params = R"doc(The parameters for the displacement robustness computation.)doc";
+
+static const char *__doc_fiction_detail_displacement_robustness_domain_impl_rd =
+R"doc(Random device for obtaining seed for the random number generator.
+Provides a source of quasi-non-deterministic pseudo-random numbers.)doc";
+
+static const char *__doc_fiction_detail_displacement_robustness_domain_impl_sidbs_of_the_original_layout = R"doc(SiDB positions of the originally given SiDB layout.)doc";
+
+static const char *__doc_fiction_detail_displacement_robustness_domain_impl_stats = R"doc(The statistics of the displacement robustness computation.)doc";
+
+static const char *__doc_fiction_detail_displacement_robustness_domain_impl_truth_table = R"doc(The logical specification of the layout.)doc";
+
+static const char *__doc_fiction_detail_displacement_robustness_domain_impl_update_displacement_robustness_domain =
+R"doc(This function adds the provided layout and its corresponding
+operational status to the list of operational values in the
+displacement robustness domain. Depending on the operational status,
+it also updates the count of operational or non-operational SiDB
+displacements in the statistics.
+
+Template parameter ``Lyt``:
+    SiDB cell-layout type.
+
+Parameter ``domain``:
+    The displacement robustness domain to be updated.
+
+Parameter ``lyt``:
+    The SiDB layout to be added.
+
+Parameter ``status``:
+    The operational status of the provided layout.)doc";
+
 static const char *__doc_fiction_detail_east_south_edge_coloring = R"doc()doc";
 
 static const char *__doc_fiction_detail_enumerate_all_paths_impl = R"doc()doc";
@@ -6068,7 +6184,7 @@ Parameter ``pp``:
 Returns:
     The step point corresponding to the parameter point `pp`.)doc";
 
-static const char *__doc_fiction_detail_operational_domain_impl_truth_table = R"doc(The specification of the layout.)doc";
+static const char *__doc_fiction_detail_operational_domain_impl_truth_table = R"doc(The logical specification of the layout.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_x_indices = R"doc(X dimension steps.)doc";
 
@@ -7251,6 +7367,40 @@ R"doc(Reports the statistics to the given output stream.
 Parameter ``out``:
     The output stream to report to.)doc";
 
+static const char *__doc_fiction_determine_displacement_robustness_domain =
+R"doc(During fabrication, SiDBs may not align precisely with their intended
+atomic positions, resulting in displacement. This means that an SiDB
+is fabricated close to the desired one, typically one or a few H-Si
+positions away. Consequently, depending on the fabrication speed, a
+certain number of SiDBs may experience displacement.
+
+This function determines the operational status of all possible
+displacements of the SiDBs of the given SiDB layout, based on the
+provided truth table specification and displacement robustness
+computation parameters. The number of displacements grows
+exponentially with the number of SiDBs. For small layouts, all
+displacements can be analyzed. For larger layouts, random sampling can
+be applied, controllable by the `analysis_mode` and
+`percentage_of_analyzed_displaced_layouts` in `params.
+
+Template parameter ``Lyt``:
+    The SiDB cell-level layout type.
+
+Template parameter ``TT``:
+    Truth table type.
+
+Parameter ``truth_table_spec``:
+    Vector of truth table specifications.
+
+Parameter ``params``:
+    Parameters for the displacement robustness computation.
+
+Parameter ``stats``:
+    Statistics related to the displacement robustness computation.
+
+Returns:
+    The displacement robustness domain of the SiDB layout.)doc";
+
 static const char *__doc_fiction_determine_groundstate_from_simulation_results =
 R"doc(This function calculates the ground state charge distributions from
 the provided simulation results. The ground state charge distributions
@@ -7299,6 +7449,40 @@ Parameter ``params``:
 Returns:
     Physically valid parameters with the corresponding excited state
     number of the given cds for each parameter point.)doc";
+
+static const char *__doc_fiction_determine_propability_of_fabricating_operational_gate =
+R"doc(During fabrication, SiDBs may not align precisely with their intended
+atomic positions, resulting in displacement. This means that an SiDB
+is fabricated close to the desired one, typically one or a few H-Si
+positions away. The percentage of displaced SiDBs depends on the
+fabrication speed. Therefore, SiDB layouts with high displacement
+tolerance are preferred to speed up the fabrication process. This
+function calculates the probability of fabricating an operational SiDB
+layout for an originally given SiDB layout and fabrication error rate.
+A fabrication error rate of 0.0 or negative indicates that the SiDB
+layout is designed without displacement.
+
+Template parameter ``Lyt``:
+    The SiDB cell-level layout type.
+
+Template parameter ``TT``:
+    The type of the truth table.
+
+Parameter ``layout``:
+    The SiDB cell-level layout which is analyzed.
+
+Parameter ``spec``:
+    Vector of truth table specifications.
+
+Parameter ``params``:
+    Parameters for the displacement robustness computation.
+
+Parameter ``fabrication_error_rate``:
+    The fabrication error rate. For example, 0.1 describes that 10% of
+    all manufactured SiDBs have a slight displacement.
+
+Returns:
+    The probability of fabricating an operational SiDB layout.)doc";
 
 static const char *__doc_fiction_determine_vertex_coloring =
 R"doc(This function provides an interface to call various vertex coloring
@@ -7395,6 +7579,75 @@ R"doc(Validation result of the coloring (std::nullopt = none attempted, true
 static const char *__doc_fiction_determine_vertex_coloring_stats_duration = R"doc(Runtime measurement.)doc";
 
 static const char *__doc_fiction_determine_vertex_coloring_stats_most_frequent_color = R"doc(The color that appeared the most.)doc";
+
+static const char *__doc_fiction_displacement_robustness_domain =
+R"doc(During fabrication, SiDBs may not align precisely with their intended
+atomic positions, resulting in displacement. This means that an SiDB
+is fabricated close to the desired one, typically one or a few H-Si
+positions away. Consequently, depending on the fabrication speed, a
+certain number of SiDBs may experience displacement. To address and
+analyze this occurrence, we introduce the *Displacement Robustness
+Domain*. This domain consists of SiDB layouts derived from an original
+layout, each showing displaced SiDBs, together with the `operational`
+or `non-operational` status, based on the specified logic.)doc";
+
+static const char *__doc_fiction_displacement_robustness_domain_operational_values =
+R"doc(Represents a domain of displacement robustness for layouts resulting
+from applying a displacement to a given SiDB layout.)doc";
+
+static const char *__doc_fiction_displacement_robustness_domain_params =
+R"doc(Parameters for the `determine_displacement_robustness_domain` and
+`determine_propability_of_fabricating_operational_gate` algorithms.
+
+Parameter ``Lyt``:
+    SiDB cell-level layout type.)doc";
+
+static const char *__doc_fiction_displacement_robustness_domain_params_allow_dimer_change_in_y_direction =
+R"doc(This flag controls whether the displacement in the y-direction can
+lead to changes in the Si dimer.)doc";
+
+static const char *__doc_fiction_displacement_robustness_domain_params_analysis_mode =
+R"doc(This parameter defines the mode of the displacement analysis. The
+default value is `EXHAUSTIVE`. For faster simulation results, `RANDOM`
+can be used. However, this leads to a reduction in the accuracy of the
+results.)doc";
+
+static const char *__doc_fiction_displacement_robustness_domain_params_displacement_analysis_mode = R"doc(Possible modes to determine the displacement robustness domain.)doc";
+
+static const char *__doc_fiction_displacement_robustness_domain_params_displacement_analysis_mode_EXHAUSTIVE = R"doc(All possible displacements are analyzed.)doc";
+
+static const char *__doc_fiction_displacement_robustness_domain_params_displacement_analysis_mode_RANDOM =
+R"doc(A certain amount of all possible displacements is analyzed randomly.
+Defined by `percentage_of_analyzed_displaced_layouts`.)doc";
+
+static const char *__doc_fiction_displacement_robustness_domain_params_displacement_variations =
+R"doc(Possible displacement range of H-Si positions in the x- and
+y-directions. The default value is (1, 0), which means that
+displacements of ±1 position in the x-direction are analyzed, with no
+displacement in the y-direction.)doc";
+
+static const char *__doc_fiction_displacement_robustness_domain_params_fixed_sidbs = R"doc(SiDBs in the given layout which shall not be affected by variations.)doc";
+
+static const char *__doc_fiction_displacement_robustness_domain_params_operational_params = R"doc(Parameters to check the operation status of the SiDB layout.)doc";
+
+static const char *__doc_fiction_displacement_robustness_domain_params_percentage_of_analyzed_displaced_layouts =
+R"doc(This parameter defines the percentage of all possible displaced SiDB
+layouts that are analyzed. The default value is 1.0 (100 %), which
+means that all possible displacements are covered.)doc";
+
+static const char *__doc_fiction_displacement_robustness_domain_stats = R"doc(Statistics for the displacement robustness domain computation.)doc";
+
+static const char *__doc_fiction_displacement_robustness_domain_stats_duration =
+R"doc(Total runtime in seconds to determine the robustness of the passed
+SiDB layout.)doc";
+
+static const char *__doc_fiction_displacement_robustness_domain_stats_num_non_operational_sidb_displacements =
+R"doc(The number of non-operational SiDB layouts resulting from the given
+layout by displacements.)doc";
+
+static const char *__doc_fiction_displacement_robustness_domain_stats_num_operational_sidb_displacements =
+R"doc(The number of operational SiDB layouts resulting from the given layout
+by displacements.)doc";
 
 static const char *__doc_fiction_distance_functor =
 R"doc(A functor that computes distances between coordinates and can be
