@@ -56,7 +56,7 @@ SiDB Gate design is deemed impossible
 
 **Header:** ``fiction/technology/is_sidb_gate_design_impossible.hpp``
 
-.. doxygenstruct:: fiction::is_gate_design_impossible_params
+.. doxygenstruct:: fiction::is_sidb_gate_design_impossible_params
    :members:
 .. doxygenfunction:: fiction::is_sidb_gate_design_impossible
 

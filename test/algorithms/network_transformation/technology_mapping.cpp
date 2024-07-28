@@ -31,10 +31,6 @@ void map_and_check_aoi(const Ntk& ntk)
     count_gate_types_stats gt_stats{};
     count_gate_types(mapped_ntk, &gt_stats);
 
-    CHECK(gt_stats.num_inv >= 0);
-    CHECK(gt_stats.num_and2 >= 0);
-    CHECK(gt_stats.num_or2 >= 0);
-
     CHECK(gt_stats.num_nand2 == 0);
     CHECK(gt_stats.num_nor2 == 0);
     CHECK(gt_stats.num_xor2 == 0);
@@ -64,11 +60,6 @@ void map_and_check_aoim(const Ntk& ntk)
 
     count_gate_types_stats gt_stats{};
     count_gate_types(mapped_ntk, &gt_stats);
-
-    CHECK(gt_stats.num_inv >= 0);
-    CHECK(gt_stats.num_and2 >= 0);
-    CHECK(gt_stats.num_or2 >= 0);
-    CHECK(gt_stats.num_maj3 >= 0);
 
     CHECK(gt_stats.num_nand2 == 0);
     CHECK(gt_stats.num_nor2 == 0);
@@ -154,17 +145,6 @@ void map_and_check_all_standard_3_inp(const Ntk& ntk)
     count_gate_types_stats gt_stats{};
     count_gate_types(mapped_ntk, &gt_stats);
 
-    CHECK(gt_stats.num_inv >= 0);
-    CHECK(gt_stats.num_and3 >= 0);
-    CHECK(gt_stats.num_xor_and >= 0);
-    CHECK(gt_stats.num_or_and >= 0);
-    CHECK(gt_stats.num_onehot >= 0);
-    CHECK(gt_stats.num_maj3 >= 0);
-    CHECK(gt_stats.num_gamble >= 0);
-    CHECK(gt_stats.num_dot >= 0);
-    CHECK(gt_stats.num_mux >= 0);
-    CHECK(gt_stats.num_and_xor >= 0);
-
     CHECK(gt_stats.num_and2 == 0);
     CHECK(gt_stats.num_or2 == 0);
     CHECK(gt_stats.num_nand2 == 0);
@@ -187,17 +167,6 @@ void map_and_check_all_3_inp(const Ntk& ntk)
     count_gate_types_stats gt_stats{};
     count_gate_types(mapped_ntk, &gt_stats);
 
-    CHECK(gt_stats.num_inv >= 0);
-    CHECK(gt_stats.num_and3 >= 0);
-    CHECK(gt_stats.num_xor_and >= 0);
-    CHECK(gt_stats.num_or_and >= 0);
-    CHECK(gt_stats.num_onehot >= 0);
-    CHECK(gt_stats.num_maj3 >= 0);
-    CHECK(gt_stats.num_gamble >= 0);
-    CHECK(gt_stats.num_dot >= 0);
-    CHECK(gt_stats.num_mux >= 0);
-    CHECK(gt_stats.num_and_xor >= 0);
-
     CHECK(gt_stats.num_and2 == 0);
     CHECK(gt_stats.num_or2 == 0);
     CHECK(gt_stats.num_nand2 == 0);
@@ -219,17 +188,6 @@ void map_and_check_all_func(const Ntk& ntk)
 
     count_gate_types_stats gt_stats{};
     count_gate_types(mapped_ntk, &gt_stats);
-
-    CHECK(gt_stats.num_inv >= 0);
-    CHECK(gt_stats.num_and3 >= 0);
-    CHECK(gt_stats.num_xor_and >= 0);
-    CHECK(gt_stats.num_or_and >= 0);
-    CHECK(gt_stats.num_onehot >= 0);
-    CHECK(gt_stats.num_maj3 >= 0);
-    CHECK(gt_stats.num_gamble >= 0);
-    CHECK(gt_stats.num_dot >= 0);
-    CHECK(gt_stats.num_mux >= 0);
-    CHECK(gt_stats.num_and_xor >= 0);
 
     CHECK(gt_stats.num_and2 == 0);
     CHECK(gt_stats.num_or2 == 0);
@@ -257,17 +215,6 @@ void map_and_check_all_standard_func(const Ntk& ntk)
 
     count_gate_types_stats gt_stats{};
     count_gate_types(mapped_ntk, &gt_stats);
-
-    CHECK(gt_stats.num_inv >= 0);
-    CHECK(gt_stats.num_and3 >= 0);
-    CHECK(gt_stats.num_xor_and >= 0);
-    CHECK(gt_stats.num_or_and >= 0);
-    CHECK(gt_stats.num_onehot >= 0);
-    CHECK(gt_stats.num_maj3 >= 0);
-    CHECK(gt_stats.num_gamble >= 0);
-    CHECK(gt_stats.num_dot >= 0);
-    CHECK(gt_stats.num_mux >= 0);
-    CHECK(gt_stats.num_and_xor >= 0);
 
     CHECK(gt_stats.num_and2 == 0);
     CHECK(gt_stats.num_or2 == 0);

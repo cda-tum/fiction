@@ -543,7 +543,6 @@ LytDest convert_to_fiction_coordinates(const LytSrc& lyt) noexcept
         }
     }
 }
-
 /**
  * Generates a random coordinate within the region spanned by two given coordinates. The two given coordinates form the
  * top left corner and the bottom right corner of the spanned region.

@@ -15,13 +15,3 @@ SiDB Gate Designer
         .. autoclass:: mnt.pyfiction.design_sidb_gates_params
             :members:
         .. autofunction:: mnt.pyfiction.design_sidb_gates
-
-
-Utility Functions
-#################
-
-**Header:** ``fiction/technology/is_sidb_gate_design_impossible.hpp``
-
-.. doxygenstruct:: fiction::is_gate_design_impossible_params
-   :members:
-.. doxygenfunction:: fiction::is_gate_design_impossible

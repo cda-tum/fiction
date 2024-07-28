@@ -1175,7 +1175,7 @@ TEMPLATE_TEST_CASE("QuickExact simulation of a Y-shaped SiDB OR gate with input 
 
     SECTION("Check if QuickExact is deterministic")
     {
-        SECTION("Epsilon_r = 8")
+        SECTION("epsilon_r = 8")
         {
             params.simulation_parameters.epsilon_r = 8;
             std::set<double>   ground_state{};
@@ -1191,7 +1191,7 @@ TEMPLATE_TEST_CASE("QuickExact simulation of a Y-shaped SiDB OR gate with input 
             CHECK(ground_state.size() == 1);
             CHECK(charge_index.size() == 1);
         }
-        SECTION("Epsilon_r = 2")
+        SECTION("epsilon_r = 2")
         {
             params.simulation_parameters.epsilon_r = 2;
             std::set<double>   ground_state{};

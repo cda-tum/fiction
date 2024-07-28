@@ -200,7 +200,10 @@ class design_sidb_gates_impl
 
         for (auto& thread : threads)
         {
-            thread.join();
+            if (thread.joinable())
+            {
+                thread.join();
+            }
         }
 
         return designed_gate_layouts;

@@ -10,7 +10,7 @@
 
 using namespace fiction;
 
-TEST_CASE("Parameterized gate library traits", "[sidb-dynamic-gate-library]")
+TEST_CASE("Parameterized gate library traits", "[parameterized-gate-library]")
 {
     CHECK(!has_post_layout_optimization_v<parameterized_gate_library, qca_cell_clk_lyt>);
     CHECK(!has_post_layout_optimization_v<parameterized_gate_library, inml_cell_clk_lyt>);

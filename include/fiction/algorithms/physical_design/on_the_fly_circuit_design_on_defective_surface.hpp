@@ -28,7 +28,7 @@ namespace fiction
 {
 
 /**
- * This struct stores the parameters to design SiDB circuit on a defective surface.
+ * This struct stores the parameters to design an SiDB circuit on a defective surface.
  *
  * @tparam CellLyt Cell-level layout type.
  */
@@ -38,7 +38,7 @@ struct on_the_fly_circuit_design_params
     /**
      * Parameters for the parameterized gate library.
      */
-    parameterized_gate_library_params<CellLyt> parameterized_gate_library_parameter = {};
+    parameterized_gate_library_params<CellLyt> parameterized_gate_library_parameters = {};
     /**
      * Parameters for the *exact* placement&routing algorithm.
      */
@@ -77,15 +77,15 @@ class on_the_fly_circuit_design_impl
 
     [[nodiscard]] sidb_defect_surface<CellLyt> design_circuit_on_defective_surface()
     {
+        const mockturtle::stopwatch stop{stats.time_total};
+
         std::optional<GateLyt> gate_level_layout = std::nullopt;
-        CellLyt                cell_level_layout{};
+        CellLyt                lyt{};
 
         // generating the blacklist based on neutral defects. The long-range electrostatic influence of charged defects
         // is not considered as gates are designed on-the-fly.
         auto black_list = sidb_surface_analysis<sidb_skeleton_bestagon_library>(
             lattice_tiling, params.parameterized_gate_library_parameter.defect_surface, std::make_pair(0, 0));
-
-        const mockturtle::stopwatch stop{stats.time_total};
 
         while (!gate_level_layout.has_value())
         {
@@ -96,8 +96,8 @@ class on_the_fly_circuit_design_impl
             {
                 try
                 {
-                    cell_level_layout = apply_parameterized_gate_library<CellLyt, parameterized_gate_library, GateLyt,
-                                                                         parameterized_gate_library_params<CellLyt>>(
+                    lyt = apply_parameterized_gate_library<CellLyt, parameterized_gate_library, GateLyt,
+                                                           parameterized_gate_library_params<CellLyt>>(
                         *gate_level_layout, params.parameterized_gate_library_parameter);
                 }
 
@@ -113,7 +113,6 @@ class on_the_fly_circuit_design_impl
                     std::cerr << "Caught std::exception: " << e.what() << '\n';
                 }
             }
-
             // P&R was unsuccessful
             else
             {
@@ -140,7 +139,7 @@ class on_the_fly_circuit_design_impl
         // in case of equality, an sidb_defect_surface with the SiDBs of the circuit is returned
         if (*eq)
         {
-            sidb_defect_surface<CellLyt> sidbs_and_defects{cell_level_layout};
+            sidb_defect_surface<CellLyt> sidbs_and_defects{lyt};
 
             // add defects to the circuit.
             params.parameterized_gate_library_parameter.defect_surface.foreach_sidb_defect(
@@ -162,11 +161,11 @@ class on_the_fly_circuit_design_impl
     /**
      * Mapped network.
      */
-    Ntk mapped_network{};
+    Ntk mapped_network;
     /**
      * Parameters for the on-the-fly circuit design.
      */
-    on_the_fly_circuit_design_params<CellLyt> params{};
+    const on_the_fly_circuit_design_params<CellLyt> params{};
     /**
      * Statistics for the on-the-fly circuit design.
      */
@@ -181,15 +180,14 @@ class on_the_fly_circuit_design_impl
  * proposed in \"On-the-fly Defect-Aware Design of Circuits based on Silicon Dangling Bond Logic\" by J. Drewniok, M.
  * Walter, S. S. H. Ng, K. Walus, and R. Wille in IEEE NANO 2024.
  *
- * @tparam Ntk      The type of the input network.
+ * @tparam Ntk  The type of the input network.
  * @tparam CellLyt  The type of the cell layout.
  * @tparam GateLyt  The type of the gate layout.
- * @param mapped_network  The input network to be mapped onto the defective surface.
- * @param design_params   The parameters used for designing the circuit, encapsulated in an
+ * @param mapped_network    The input network to be mapped onto the defective surface.
+ * @param design_params The parameters used for designing the circuit, encapsulated in an
  * `on_the_fly_circuit_design_params` object.
- * @param lattice_tiling  The lattice tiling used for the circuit design.
- * @param defect_surface  The defective surface on which the circuit is to be designed.
- * @param stats           Pointer to a structure for collecting statistics. If nullptr, statistics are not collected.
+ * @param lattice_tiling    The lattice tiling used for the circuit design.
+ * @param stats Pointer to a structure for collecting statistics. If nullptr, statistics are not collected.
  *
  * @return A `sidb_defect_surface<CellLyt>` representing the designed circuit on the defective surface.
  */

@@ -1977,13 +1977,9 @@ class exact_impl
                                         {
                                             solver->add(!(get_tn(t, n)));
 
-                                            // clang-format off
-
                                             // same for the outgoing edges
-                                            foreach_outgoing_edge(network, n,
-                                                                  [this, &t](const auto& e)
+                                            foreach_outgoing_edge(network, n, [this, &t](const auto& e)
                                                                   { solver->add(!(get_te(t, e))); });
-                                            // clang-format on
                                         }
                                         // cannot be placed with too little distance to south-east corner
                                         if (layout.x() - t.x + layout.y() - t.y < il)
@@ -1992,15 +1988,10 @@ class exact_impl
                                             // following iterations
                                             check_point->assumptions.push_back(!(get_tn(t, n)));
 
-                                            // clang-format off
-
                                             // same for the incoming edges
                                             foreach_incoming_edge(
-                                                network, n,
-                                                [this, &t](const auto& e)
+                                                network, n, [this, &t](const auto& e)
                                                 { check_point->assumptions.push_back(!(get_te(t, e))); });
-
-                                            // clang-format on
                                         }
                                     });
                             }
@@ -2972,7 +2963,7 @@ class exact_impl
      */
     [[nodiscard]] std::optional<Lyt> run_asynchronously()
     {
-        std::cout << "You have called an unstable beta feature that might crash." << std::endl;
+        std::cout << "You have called an unstable beta feature that might crash.\n";
 
         Lyt layout{{}, scheme};
 
@@ -3203,7 +3194,7 @@ std::optional<Lyt> exact(const Ntk& ntk, const exact_physical_design_params& ps 
     {
         if (ps.synchronization_elements)
         {
-            std::cout << "[w] Lyt does not support synchronization elements; not using them" << std::endl;
+            std::cout << "[w] Lyt does not support synchronization elements; not using them\n";
         }
     }
 
@@ -3267,15 +3258,14 @@ std::optional<Lyt> exact_with_blacklist(const Ntk& ntk, const surface_black_list
         if (ps.straight_inverters)
         {
             std::cout << "[w] Lyt does not implement the foreach_adjacent_opposite_tiles function; straight inverters "
-                         "cannot be guaranteed"
-                      << '\n';
+                         "cannot be guaranteed\n";
         }
     }
     if constexpr (!fiction::has_synchronization_elements_v<Lyt>)
     {
         if (ps.synchronization_elements)
         {
-            std::cout << "[w] Lyt does not support synchronization elements; not using them" << '\n';
+            std::cout << "[w] Lyt does not support synchronization elements; not using them\n";
         }
     }
 

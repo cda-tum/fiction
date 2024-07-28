@@ -59,8 +59,8 @@ SiDB Bestagon Library
 .. doxygenclass:: fiction::sidb_bestagon_library
    :members:
 
-On-the-fly SiDB Library
------------------------
+Parameterized SiDB Library
+--------------------------
 
 **Header:** ``fiction/technology/parameterized_gate_library.hpp``
 
