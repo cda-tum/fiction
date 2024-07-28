@@ -184,7 +184,7 @@ class design_sidb_gates_impl
         };
 
         static const auto num_threads = std::thread::hardware_concurrency();
-        const auto chunk_size  = all_combinations.size() / num_threads;
+        const auto        chunk_size  = all_combinations.size() / num_threads;
 
         std::vector<std::thread> threads{};
         threads.reserve(num_threads);
