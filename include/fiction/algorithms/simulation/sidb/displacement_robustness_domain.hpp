@@ -180,15 +180,14 @@ class displacement_robustness_domain_impl
 
         std::mutex mutex_to_protect_shared_resources{};
 
-        auto check_operational_status =
-            [this, &mutex_to_protect_shared_resources, &domain](const Lyt& lyt) noexcept
+        auto check_operational_status = [this, &mutex_to_protect_shared_resources, &domain](const Lyt& lyt) noexcept
         {
-                const auto op_status = is_operational(lyt, truth_table, params.operational_params);
-                {
-                    const std::lock_guard lock_domain{mutex_to_protect_shared_resources};
+            const auto op_status = is_operational(lyt, truth_table, params.operational_params);
+            {
+                const std::lock_guard lock_domain{mutex_to_protect_shared_resources};
 
-                    update_displacement_robustness_domain(domain, lyt, op_status.first);
-                }
+                update_displacement_robustness_domain(domain, lyt, op_status.first);
+            }
         };
 
         const std::size_t num_threads = std::max(static_cast<std::size_t>(std::thread::hardware_concurrency()),
