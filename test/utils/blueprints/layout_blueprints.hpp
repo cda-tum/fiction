@@ -1250,7 +1250,6 @@ Lyt two_input_left_one_output_right_top() noexcept
     lyt.assign_cell_type({12, 11, 0}, Lyt::cell_type::NORMAL);
     lyt.assign_cell_type({14, 10, 0}, Lyt::cell_type::NORMAL);
 
-
     // output wire
     lyt.assign_cell_type({26, 5, 0}, Lyt::cell_type::NORMAL);
     lyt.assign_cell_type({28, 4, 0}, Lyt::cell_type::NORMAL);
@@ -1261,7 +1260,6 @@ Lyt two_input_left_one_output_right_top() noexcept
 
     return lyt;
 };
-
 
 }  // namespace blueprints
 

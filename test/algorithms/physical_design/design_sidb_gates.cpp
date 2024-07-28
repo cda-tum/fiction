@@ -398,7 +398,7 @@ TEST_CASE("Design Bestagon shaped CX gate with QuickCell (flipped)", "[design-si
             {{16, 7, 0}, {22, 15, 0}},
             3};
 
-        const auto found_gate_layouts = design_sidb_gates(lyt,create_crossing_wire_tt(), params);
+        const auto found_gate_layouts = design_sidb_gates(lyt, create_crossing_wire_tt(), params);
         REQUIRE(found_gate_layouts.size() == 2);
         CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
     }
@@ -420,6 +420,7 @@ TEST_CASE("Design AND gate with input left and output top-right with QuickCell (
         const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_and_tt()}, params);
         REQUIRE(found_gate_layouts.size() == 234);
         const auto first_gate = found_gate_layouts.front();
-        CHECK(is_operational(first_gate, std::vector<tt>{create_and_tt()}, params.operational_params).first == operational_status::OPERATIONAL);
+        CHECK(is_operational(first_gate, std::vector<tt>{create_and_tt()}, params.operational_params).first ==
+              operational_status::OPERATIONAL);
     }
 }
