@@ -396,20 +396,20 @@ class design_sidb_gates_impl
     }
 
     /**
- * This function assigns the charge states of the input wires in the layout according to the provided input pattern index.
- * It performs the following steps:
- * - For `NORTH-SOUTH` direction wires, if the corresponding bit in the input pattern is set, assigns `NEUTRAL` charge
- *   to the upper part and `NEGATIVE` charge to the lower part of the BDLs of the wire.
- * - For `NORTH-SOUTH` direction wires, if the corresponding bit in the input pattern is not set, assigns `NEGATIVE`
- *   charge to the upper part and `NEUTRAL` charge to the lower part of the BDLs of the wire.
- * - For `SOUTH-NORTH` direction wires, if the corresponding bit in the input pattern is set, assigns `NEGATIVE` charge
- *   to the upper part and `NEUTRAL` charge to the lower part of the BDLs of the wire.
- * - For `SOUTH-NORTH` direction wires, if the corresponding bit in the input pattern is not set, assigns `NEUTRAL`
- *   charge to the upper part and `NEGATIVE` charge to the lower part of the BDLs of the wire.
- *
- * @tparam Lyt The type representing the layout.
- * @param layout The charge distribution surface layout to be modified.
- * @param current_input_index The index representing the current input pattern.
+     * This function assigns the charge states of the input wires in the layout according to the provided input pattern
+     * index. It performs the following steps:
+     * - For `NORTH-SOUTH` direction wires, if the corresponding bit in the input pattern is set, assigns `NEUTRAL`
+     * charge to the upper part and `NEGATIVE` charge to the lower part of the BDLs of the wire.
+     * - For `NORTH-SOUTH` direction wires, if the corresponding bit in the input pattern is not set, assigns `NEGATIVE`
+     *   charge to the upper part and `NEUTRAL` charge to the lower part of the BDLs of the wire.
+     * - For `SOUTH-NORTH` direction wires, if the corresponding bit in the input pattern is set, assigns `NEGATIVE`
+     * charge to the upper part and `NEUTRAL` charge to the lower part of the BDLs of the wire.
+     * - For `SOUTH-NORTH` direction wires, if the corresponding bit in the input pattern is not set, assigns `NEUTRAL`
+     *   charge to the upper part and `NEGATIVE` charge to the lower part of the BDLs of the wire.
+     *
+     * @tparam Lyt The type representing the layout.
+     * @param layout The charge distribution surface layout to be modified.
+     * @param current_input_index The index representing the current input pattern.
      */
     void
     set_charge_distribution_of_input_wires_based_on_input_pattern(charge_distribution_surface<Lyt>& layout,
