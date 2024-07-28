@@ -779,12 +779,6 @@ R"doc(Standard constructor that computes an initial bounding box.
 Parameter ``lyt``:
     Gate-level or cell-level layout whose bounding box is desired.)doc";
 
-static const char *__doc_fiction_bounding_box_2d_bounding_box_2d_2 =
-R"doc(Standard constructor that computes an initial bounding box.
-
-Parameter ``lyt``:
-    Gate-level or cell-level layout whose bounding box is desired.)doc";
-
 static const char *__doc_fiction_bounding_box_2d_get_max =
 R"doc(Returns the maximum corner of the bounding box.
 
@@ -817,32 +811,28 @@ R"doc(Returns the vertical size of the bounding box in layout coordinates.
 Returns:
     Bounding box size along the y-axis.)doc";
 
-static const char *__doc_fiction_bounding_box_2d_is_empty_coordinate = R"doc()doc";
+static const char *__doc_fiction_bounding_box_2d_is_empty_coordinate =
+R"doc(Checks if a given coordinate is empty in the layout.
 
-static const char *__doc_fiction_bounding_box_2d_layout = R"doc()doc";
+Parameter ``c``:
+    The coordinate to check.
+
+Returns:
+    True if the coordinate is empty, false otherwise.)doc";
+
+static const char *__doc_fiction_bounding_box_2d_layout = R"doc(The layout whose bounding box is being computed.)doc";
 
 static const char *__doc_fiction_bounding_box_2d_max = R"doc()doc";
 
-static const char *__doc_fiction_bounding_box_2d_min = R"doc()doc";
-
-static const char *__doc_fiction_bounding_box_2d_selection = R"doc(Modes to use for creating the 2D-bounding box.)doc";
-
-static const char *__doc_fiction_bounding_box_2d_selection_EXCLUDE_DEFECTS =
-R"doc(The bounding box is determined based on the cells, excluding atomic
-defects.)doc";
-
-static const char *__doc_fiction_bounding_box_2d_selection_INCLUDE_DEFECTS = R"doc(The bounding box includes atomic defects.)doc";
+static const char *__doc_fiction_bounding_box_2d_min = R"doc(The minimum and maximum coordinates of the bounding box.)doc";
 
 static const char *__doc_fiction_bounding_box_2d_update_bounding_box =
 R"doc(The bounding box is not automatically updated when the layout changes.
-This function recomputes the bounding box.
+This function recomputes the bounding box.)doc";
 
-Parameter ``selection``:
-    Modes to use for creating the bounding box.)doc";
+static const char *__doc_fiction_bounding_box_2d_x_size = R"doc(The horizontal size of the bounding box in layout coordinates.)doc";
 
-static const char *__doc_fiction_bounding_box_2d_x_size = R"doc()doc";
-
-static const char *__doc_fiction_bounding_box_2d_y_size = R"doc()doc";
+static const char *__doc_fiction_bounding_box_2d_y_size = R"doc(The vertical size of the bounding box in layout coordinates.)doc";
 
 static const char *__doc_fiction_calculate_energy_and_state_type =
 R"doc(This function takes in an SiDB energy distribution. For each charge
@@ -11501,40 +11491,6 @@ Returns:
     `true` iff `ntk` is properly fanout-substituted with regard to
     `ps`.)doc";
 
-static const char *__doc_fiction_is_gate_design_impossible =
-R"doc(This function evaluates whether it is impossible to design a SiDB gate
-for a given truth table in the given layout due to atomic defects. It
-determines the possible charge states at the output BDL pairs. Atomic
-defects can cause a BDL pair to be neutrally charged only. Thus, the
-BDL pair would not work as intended.
-
-Template parameter ``Lyt``:
-    Cell-level layout type.
-
-Template parameter ``TT``:
-    The type of the truth table.
-
-Parameter ``layout``:
-    The layout for which gate design feasibility is being checked.
-
-Parameter ``spec``:
-    A vector of truth tables (each truth table is representing one
-    output) representing the gate's functionality.
-
-Parameter ``params``:
-    Parameter to determine if the gate design is impossible.
-
-Returns:
-    `true` if gate design is impossible, `false` otherwise.)doc";
-
-static const char *__doc_fiction_is_gate_design_impossible_params =
-R"doc(This struct contains parameters to determine if SiDB gate design is
-impossible.)doc";
-
-static const char *__doc_fiction_is_gate_design_impossible_params_phys_params = R"doc(All parameters for physical SiDB simulations.)doc";
-
-static const char *__doc_fiction_is_gate_design_impossible_params_sim_engine = R"doc(The simulation engine to be used for simulation.)doc";
-
 static const char *__doc_fiction_is_gate_level_layout = R"doc()doc";
 
 static const char *__doc_fiction_is_ground_state =
@@ -11662,6 +11618,40 @@ Returns:
 static const char *__doc_fiction_is_shifted_cartesian_layout = R"doc()doc";
 
 static const char *__doc_fiction_is_sidb_defect_surface = R"doc()doc";
+
+static const char *__doc_fiction_is_sidb_gate_design_impossible =
+R"doc(This function evaluates whether it is impossible to design an SiDB
+gate for a given truth table and a given skeleton with atomic defects.
+It determines the possible charge states at the output BDL pairs.
+Atomic defects can cause a BDL pair to be neutrally charged only.
+Thus, the BDL pair would not work as intended.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Template parameter ``TT``:
+    The truth table type.
+
+Parameter ``skeleton_with_defects``:
+    An SiDB skeleton layout with atomic defects.
+
+Parameter ``spec``:
+    A vector of truth tables (each truth table is representing one
+    output) representing the gate's intended functionality.
+
+Parameter ``params``:
+    Parameters to determine if the gate design is impossible.
+
+Returns:
+    `true` if gate design is impossible, `false` otherwise.)doc";
+
+static const char *__doc_fiction_is_sidb_gate_design_impossible_params =
+R"doc(This struct contains parameters to determine if SiDB gate design is
+impossible.)doc";
+
+static const char *__doc_fiction_is_sidb_gate_design_impossible_params_detect_bdl_params = R"doc(Parameters used to determine BDL pairs.)doc";
+
+static const char *__doc_fiction_is_sidb_gate_design_impossible_params_simulation_params = R"doc(All parameters for physical SiDB simulations.)doc";
 
 static const char *__doc_fiction_is_sidb_lattice = R"doc()doc";
 
@@ -12092,7 +12082,14 @@ Parameter ``coord``:
     Offset coordinate to convert to a cube coordinate.
 
 Returns:
-    Cube coordinate.)doc";
+    Cube coordinate.
+
+@note This function assumes that the input coordinates are within the
+valid range for cube coordinates. Specifically, the x, y, and z
+coordinates should be within the range of :math:`(0, 0, 0)` to
+:math:`(2^{31} - 1, 2^{31} - 1, 1)`. If the input coordinates are
+outside this range, the behavior of the function is undefined. If the
+input coordinate is dead, a dead cube coordinate is returned.)doc";
 
 static const char *__doc_fiction_offset_ucoord_t =
 R"doc(Unsigned offset coordinates.
@@ -12299,9 +12296,6 @@ Parameter ``design_params``:
 Parameter ``lattice_tiling``:
     The lattice tiling used for the circuit design.
 
-Parameter ``defect_surface``:
-    The defective surface on which the circuit is to be designed.
-
 Parameter ``stats``:
     Pointer to a structure for collecting statistics. If nullptr,
     statistics are not collected.
@@ -12311,7 +12305,7 @@ Returns:
     on the defective surface.)doc";
 
 static const char *__doc_fiction_on_the_fly_circuit_design_params =
-R"doc(This struct stores the parameters to design SiDB circuit on a
+R"doc(This struct stores the parameters to design an SiDB circuit on a
 defective surface.
 
 Template parameter ``CellLyt``:
@@ -12319,7 +12313,7 @@ Template parameter ``CellLyt``:
 
 static const char *__doc_fiction_on_the_fly_circuit_design_params_exact_design_parameter = R"doc(Parameters for the *exact* placement&routing algorithm.)doc";
 
-static const char *__doc_fiction_on_the_fly_circuit_design_params_parameterized_gate_library_parameter = R"doc(Parameters for the parameterized gate library.)doc";
+static const char *__doc_fiction_on_the_fly_circuit_design_params_parameterized_gate_library_parameters = R"doc(Parameters for the parameterized gate library.)doc";
 
 static const char *__doc_fiction_on_the_fly_circuit_design_stats = R"doc(Statistics for the on-the-fly defect-aware circuit design.)doc";
 
