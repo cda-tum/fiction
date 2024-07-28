@@ -3415,8 +3415,8 @@ R"doc(Selector for the different termination conditions for the SiDB gate
 design process.)doc";
 
 static const char *__doc_fiction_design_sidb_gates_params_termination_condition_AFTER_FIRST_SOLUTION =
-R"doc(The design process is terminated when a valid SiDB gate design is
-found.)doc";
+R"doc(The design process is terminated as soon as the first valid SiDB gate
+design is found.)doc";
 
 static const char *__doc_fiction_design_sidb_gates_params_termination_condition_ALL_COMBINATIONS_ENUMERATED =
 R"doc(The design process ends after all possible combinations of SiDBs
@@ -3715,7 +3715,7 @@ static const char *__doc_fiction_detail_apply_gate_library_impl = R"doc()doc";
 static const char *__doc_fiction_detail_apply_gate_library_impl_apply_gate_library_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_apply_gate_library_impl_assign_gate =
-R"doc(This function assigns a given SiDB gate implemetation to the total
+R"doc(This function assigns a given FCN gate implementation to the total
 cell layout.
 
 Parameter ``c``:
@@ -3737,10 +3737,10 @@ R"doc(Run the cell layout generation process.
 This function performs the cell layout generation process based on the
 parameterized gate library and the gate-level layout information
 provided by `GateLibrary` and `gate_lyt`. It iterates through the
-nodes in the gate-level layout and assigns gates to cells based on
-their corresponding positions and types. Optionally, it performs post-
-layout optimization and sets the layout name if certain conditions are
-met.
+nodes in the gate-level layout and maps gates to cell implementations
+based on their corresponding positions and types. Optionally, it
+performs post-layout optimization and sets the layout name if certain
+conditions are met.
 
 Template parameter ``Type``:
     of the Parameters used for the parameterized gate library.
@@ -3757,9 +3757,10 @@ R"doc(Run the cell layout generation process.
 This function performs the cell layout generation process based on the
 gate library and the gate-level layout information provided by
 `GateLibrary` and `gate_lyt`. It iterates through the nodes in the
-gate-level layout and assigns gates to cells based on their
-corresponding positions and types. Optionally, it performs post-layout
-optimization and sets the layout name if certain conditions are met.
+gate-level layout and maps gates to cell implementations based on
+their corresponding positions and types. Optionally, it performs post-
+layout optimization and sets the layout name if certain conditions are
+met.
 
 Returns:
     A `CellLyt` object representing the generated cell layout.)doc";
@@ -4142,6 +4143,17 @@ Parameter ``to_delete``:
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl = R"doc()doc";
 
+static const char *__doc_fiction_detail_design_sidb_gates_impl_add_canvas_sidbs_to_skeleton_layout =
+R"doc(This function adds SiDBs (given by indices) to the skeleton layout
+that is returned afterwards.
+
+Parameter ``cell_indices``:
+    A vector of indices of cells to be added to the skeleton layout.
+
+Returns:
+    A copy of the original layout (`skeleton_layout`) with SiDB cells
+    added at specified indices.)doc";
+
 static const char *__doc_fiction_detail_design_sidb_gates_impl_all_sidbs_in_canvas = R"doc(All cells within the canvas.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_are_sidbs_too_close =
@@ -4213,17 +4225,6 @@ static const char *__doc_fiction_detail_design_sidb_gates_impl_skeleton_layout =
 R"doc(The skeleton layout serves as a starting layout to which SiDBs are
 added to create unique SiDB layouts and, if possible, working gates.
 It defines input and output wires.)doc";
-
-static const char *__doc_fiction_detail_design_sidb_gates_impl_skeleton_layout_with_canvas_sidbs =
-R"doc(This function adds SiDBs (given by indices) to the skeleton layout
-that is returned afterwards.
-
-Parameter ``cell_indices``:
-    A vector of indices of cells to be added to the skeleton layout.
-
-Returns:
-    A copy of the original layout (`skeleton_layout`) with SiDB cells
-    added at specified indices.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_truth_table = R"doc(Truth table of the given gate.)doc";
 
@@ -5867,7 +5868,7 @@ static const char *__doc_fiction_detail_on_the_fly_circuit_design_impl_design_ci
 
 static const char *__doc_fiction_detail_on_the_fly_circuit_design_impl_lattice_tiling = R"doc(Gate-level layout.)doc";
 
-static const char *__doc_fiction_detail_on_the_fly_circuit_design_impl_mapped_network = R"doc(Mapped network.)doc";
+static const char *__doc_fiction_detail_on_the_fly_circuit_design_impl_network = R"doc(Network.)doc";
 
 static const char *__doc_fiction_detail_on_the_fly_circuit_design_impl_on_the_fly_circuit_design_impl = R"doc()doc";
 
@@ -12286,15 +12287,15 @@ Template parameter ``CellLyt``:
 Template parameter ``GateLyt``:
     The type of the gate layout.
 
-Parameter ``mapped_network``:
+Parameter ``network``:
     The input network to be mapped onto the defective surface.
-
-Parameter ``design_params``:
-    The parameters used for designing the circuit, encapsulated in an
-    `on_the_fly_circuit_design_params` object.
 
 Parameter ``lattice_tiling``:
     The lattice tiling used for the circuit design.
+
+Parameter ``params``:
+    The parameters used for designing the circuit, encapsulated in an
+    `on_the_fly_circuit_design_params` object.
 
 Parameter ``stats``:
     Pointer to a structure for collecting statistics. If nullptr,
@@ -12320,6 +12321,8 @@ static const char *__doc_fiction_on_the_fly_circuit_design_stats = R"doc(Statist
 static const char *__doc_fiction_on_the_fly_circuit_design_stats_duration = R"doc(The total runtime of the operational domain computation.)doc";
 
 static const char *__doc_fiction_on_the_fly_circuit_design_stats_exact_stats = R"doc(The `stats` of the *exact* algorithm.)doc";
+
+static const char *__doc_fiction_on_the_fly_circuit_design_stats_gate_layout = R"doc(The gate-level layout after P&R.)doc";
 
 static const char *__doc_fiction_open_clocking =
 R"doc(Returns an irregular clocking that maps every coordinate to the
