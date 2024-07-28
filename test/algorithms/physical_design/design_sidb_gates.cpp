@@ -144,6 +144,20 @@ TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[
         const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_and_tt()}, params);
         CHECK(!found_gate_layouts.empty());
     }
+
+    SECTION("no canvas")
+    {
+        params.canvas = {{4, 4, 0}, {4, 4, 0}};
+        params.number_of_sidbs = 0;
+        params.design_mode =
+            design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
+        const auto found_gate_layouts_exhaustive = design_sidb_gates(lyt, std::vector<tt>{create_and_tt()}, params);
+        CHECK(found_gate_layouts_exhaustive.empty());
+        params.design_mode =
+            design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL;
+        const auto found_gate_layouts_quickcell = design_sidb_gates(lyt, std::vector<tt>{create_and_tt()}, params);
+        CHECK(found_gate_layouts_quickcell.empty());
+    }
 }
 
 TEST_CASE("Use FO2 Bestagon gate without SiDB at {17, 11, 0} and generate original one", "[design-sidb-gates]")

@@ -369,6 +369,15 @@ Binary-dot Logic (BDL) Wire Detection
         .. doxygenfunction:: fiction::find_bdl_neighbor_below
         .. doxygenfunction:: fiction::detect_bdl_wires
 
+    .. tab:: Python
+        .. autoclass:: mnt.pyfiction.bdl_wire_direction
+            :members:
+        .. autoclass:: mnt.pyfiction.bdl_wire_selection
+            :members:
+        .. autoclass:: mnt.pyfiction.detect_bdl_wires_params
+            :members:
+        .. autofunction:: mnt.pyfiction.detect_bdl_wires
+
 
 Assess Population Stability
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -131,7 +131,7 @@ class design_sidb_gates_impl
     }
 
     /**
-     * Design gates by using the *Automatic Exhaustive Gate Desginer*. This algorithm which was proposed in \"Minimal
+     * Design gates by using the *Automatic Exhaustive Gate Desginer*. This algorithm was proposed in \"Minimal
      * Design of SiDB Gates: An Optimal Basis for Circuits Based on Silicon Dangling Bonds\" by J. Drewniok, M. Walter,
      * and R. Wille in NANOARCH 2023 (https://dl.acm.org/doi/10.1145/3611315.3633241).
      *
@@ -140,7 +140,7 @@ class design_sidb_gates_impl
      *
      * @return A vector of designed SiDB gate layouts.
      */
-    [[nodiscard]] std::vector<Lyt> run_automatic_exhaustive_gate_designer() noexcept
+    [[nodiscard]] std::vector<Lyt> run_automatic_exhaustive_gate_designer() const noexcept
     {
         mockturtle::stopwatch stop{stats.time_total};
 
@@ -194,7 +194,10 @@ class design_sidb_gates_impl
 
         for (auto& thread : threads)
         {
-            thread.join();
+            if (thread.joinable())
+            {
+                thread.join();
+            }
         }
 
         return designed_gate_layouts;
@@ -208,7 +211,7 @@ class design_sidb_gates_impl
      *
      * @return A vector of designed SiDB gate layouts.
      */
-    [[nodiscard]] std::vector<Lyt> run_random_design() noexcept
+    [[nodiscard]] std::vector<Lyt> run_random_design() const noexcept
     {
         std::vector<Lyt> randomly_designed_gate_layouts = {};
 
@@ -248,7 +251,10 @@ class design_sidb_gates_impl
 
         for (auto& thread : threads)
         {
-            thread.join();
+            if (thread.joinable())
+            {
+                thread.join();
+            }
         }
 
         return randomly_designed_gate_layouts;
@@ -259,7 +265,7 @@ class design_sidb_gates_impl
      *
      * @return A vector of designed SiDB gate layouts.
      */
-    [[nodiscard]] std::vector<Lyt> run_quickcell() noexcept
+    [[nodiscard]] std::vector<Lyt> run_quickcell() const noexcept
     {
         mockturtle::stopwatch stop{stats.time_total};
         const auto            gate_candidates = run_pruning();
@@ -312,7 +318,10 @@ class design_sidb_gates_impl
 
         for (auto& thread : threads)
         {
-            thread.join();
+            if (thread.joinable())
+            {
+                thread.join();
+            }
         }
 
         return gate_layouts;
@@ -386,6 +395,22 @@ class design_sidb_gates_impl
         all_canvas_layouts = determine_all_possible_canvas_layouts();
     }
 
+    /**
+ * This function assigns the charge states of the input wires in the layout according to the provided input pattern index.
+ * It performs the following steps:
+ * - For `NORTH-SOUTH` direction wires, if the corresponding bit in the input pattern is set, assigns `NEUTRAL` charge
+ *   to the upper part and `NEGATIVE` charge to the lower part of the BDLs of the wire.
+ * - For `NORTH-SOUTH` direction wires, if the corresponding bit in the input pattern is not set, assigns `NEGATIVE`
+ *   charge to the upper part and `NEUTRAL` charge to the lower part of the BDLs of the wire.
+ * - For `SOUTH-NORTH` direction wires, if the corresponding bit in the input pattern is set, assigns `NEGATIVE` charge
+ *   to the upper part and `NEUTRAL` charge to the lower part of the BDLs of the wire.
+ * - For `SOUTH-NORTH` direction wires, if the corresponding bit in the input pattern is not set, assigns `NEUTRAL`
+ *   charge to the upper part and `NEGATIVE` charge to the lower part of the BDLs of the wire.
+ *
+ * @tparam Lyt The type representing the layout.
+ * @param layout The charge distribution surface layout to be modified.
+ * @param current_input_index The index representing the current input pattern.
+     */
     void
     set_charge_distribution_of_input_wires_based_on_input_pattern(charge_distribution_surface<Lyt>& layout,
                                                                   const uint64_t current_input_index) const noexcept
@@ -782,7 +807,7 @@ class design_sidb_gates_impl
      * @tparam Lyt SiDB cell-level layout type.
      * @return A vector containing the valid gate candidates that were not pruned.
      */
-    [[nodiscard]] std::vector<Lyt> run_pruning() noexcept
+    [[nodiscard]] std::vector<Lyt> run_pruning() const noexcept
     {
         std::vector<Lyt> gate_candidate = {};
 
@@ -839,7 +864,10 @@ class design_sidb_gates_impl
 
         for (auto& thread : threads)
         {
-            thread.join();
+            if (thread.joinable())
+            {
+                thread.join();
+            }
         }
 
         return gate_candidate;
@@ -852,7 +880,7 @@ class design_sidb_gates_impl
      * @tparam Lyt SiDB cell-level layout type.
      * @return A vector containing all possible gate layouts generated from the combinations.
      */
-    [[nodiscard]] std::vector<Lyt> determine_all_possible_canvas_layouts() noexcept
+    [[nodiscard]] std::vector<Lyt> determine_all_possible_canvas_layouts() const noexcept
     {
         const auto all_combinations = determine_all_combinations_of_distributing_k_entities_on_n_positions(
             params.number_of_sidbs, static_cast<std::size_t>(all_sidbs_in_canvas.size()));
@@ -863,7 +891,7 @@ class design_sidb_gates_impl
         const auto add_combination_to_layout_and_check_operation =
             [this, &designed_gate_layouts](const auto& combination) noexcept
         {
-            auto layout_with_added_cells = canvas_sidb_layout(combination);
+            auto layout_with_added_cells = convert_canvas_cell_indices_to_layout(combination);
             designed_gate_layouts.push_back(layout_with_added_cells);
         };
 
@@ -902,7 +930,7 @@ class design_sidb_gates_impl
      * @param cell_indices A vector of indices of cells to be added to the skeleton layout.
      * @return An SiDB cell-level layout consisting of canvas SidBs.
      */
-    [[nodiscard]] Lyt canvas_sidb_layout(const std::vector<std::size_t>& cell_indices) noexcept
+    [[nodiscard]] Lyt convert_canvas_cell_indices_to_layout(const std::vector<std::size_t>& cell_indices) const noexcept
     {
         Lyt lyt{};
 
@@ -942,9 +970,10 @@ class design_sidb_gates_impl
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT The type of the truth table specifying the gate behavior.
- * @param skeleton The skeleton layout used as a starting point for gate design.
+ * @param skeleton The skeleton layout used for gate design.
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
  * @param params Parameters for the *SiDB Gate Designer*.
+ * @param stats Statistics.
  * @return A vector of designed SiDB gate layouts.
  */
 template <typename Lyt, typename TT>

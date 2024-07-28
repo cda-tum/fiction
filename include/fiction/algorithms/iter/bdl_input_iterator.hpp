@@ -328,7 +328,7 @@ class bdl_input_iterator
      */
     uint64_t current_input_index{0ull};
     /**
-     * This function determines the directions of the input bdl wires.
+     * This function determines the directions of the input BDL wires.
      *
      * @return A vector of `bdl_wire_direction` representing the directions of the input BDL wires.
      */
