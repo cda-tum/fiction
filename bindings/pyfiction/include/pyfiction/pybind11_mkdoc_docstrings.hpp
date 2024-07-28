@@ -503,7 +503,7 @@ R"doc(The current input index. There are :math:`2^n` possible input states
 for an :math:`n`-input BDL layout.)doc";
 
 static const char *__doc_fiction_bdl_input_iterator_determine_input_bdl_wire_directions =
-R"doc(This function determines the directions of the input bdl wires.
+R"doc(This function determines the directions of the input BDL wires.
 
 Returns:
     A vector of `bdl_wire_direction` representing the directions of
@@ -3383,7 +3383,7 @@ Template parameter ``TT``:
     The type of the truth table specifying the gate behavior.
 
 Parameter ``skeleton``:
-    The skeleton layout used as a starting point for gate design.
+    The skeleton layout used for gate design.
 
 Parameter ``spec``:
     Expected Boolean function of the layout given as a multi-output
@@ -3391,6 +3391,9 @@ Parameter ``spec``:
 
 Parameter ``params``:
     Parameters for the *SiDB Gate Designer*.
+
+Parameter ``stats``:
+    Statistics.
 
 Returns:
     A vector of designed SiDB gate layouts.)doc";
@@ -4105,7 +4108,7 @@ static const char *__doc_fiction_detail_design_sidb_gates_impl_all_canvas_layout
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_all_sidbs_in_canvas = R"doc(All cells within the canvas.)doc";
 
-static const char *__doc_fiction_detail_design_sidb_gates_impl_canvas_sidb_layout =
+static const char *__doc_fiction_detail_design_sidb_gates_impl_convert_canvas_cell_indices_to_layout =
 R"doc(This function generates canvas SiDb layouts.
 
 Parameter ``cell_indices``:
@@ -4254,9 +4257,9 @@ static const char *__doc_fiction_detail_design_sidb_gates_impl_params = R"doc(Pa
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_run_automatic_exhaustive_gate_designer =
 R"doc(Design gates by using the *Automatic Exhaustive Gate Desginer*. This
-algorithm which was proposed in \"Minimal Design of SiDB Gates: An
-Optimal Basis for Circuits Based on Silicon Dangling Bonds\" by J.
-Drewniok, M. Walter, and R. Wille in NANOARCH 2023
+algorithm was proposed in \"Minimal Design of SiDB Gates: An Optimal
+Basis for Circuits Based on Silicon Dangling Bonds\" by J. Drewniok,
+M. Walter, and R. Wille in NANOARCH 2023
 (https://dl.acm.org/doi/10.1145/3611315.3633241).
 
 This function adds each cell combination to the given skeleton, and
@@ -4295,7 +4298,31 @@ parameters. The design process is parallelized to improve performance.
 Returns:
     A vector of designed SiDB gate layouts.)doc";
 
-static const char *__doc_fiction_detail_design_sidb_gates_impl_set_charge_distribution_of_input_wires_based_on_input_pattern = R"doc()doc";
+static const char *__doc_fiction_detail_design_sidb_gates_impl_set_charge_distribution_of_input_wires_based_on_input_pattern =
+R"doc(This function assigns the charge states of the input wires in the
+layout according to the provided input pattern index. It performs the
+following steps: - For `NORTH-SOUTH` direction wires, if the
+corresponding bit in the input pattern is set, assigns `NEUTRAL`
+charge to the upper part and `NEGATIVE` charge to the lower part of
+the BDLs of the wire. - For `NORTH-SOUTH` direction wires, if the
+corresponding bit in the input pattern is not set, assigns `NEGATIVE`
+charge to the upper part and `NEUTRAL` charge to the lower part of the
+BDLs of the wire. - For `SOUTH-NORTH` direction wires, if the
+corresponding bit in the input pattern is set, assigns `NEGATIVE`
+charge to the upper part and `NEUTRAL` charge to the lower part of the
+BDLs of the wire. - For `SOUTH-NORTH` direction wires, if the
+corresponding bit in the input pattern is not set, assigns `NEUTRAL`
+charge to the upper part and `NEGATIVE` charge to the lower part of
+the BDLs of the wire.
+
+Template parameter ``Lyt``:
+    The type representing the layout.
+
+Parameter ``layout``:
+    The charge distribution surface layout to be modified.
+
+Parameter ``current_input_index``:
+    The index representing the current input pattern.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_set_charge_distribution_of_output_wires_based_on_output_index =
 R"doc(This function assigns the charge states of the input wires in the
