@@ -180,43 +180,55 @@ class displacement_robustness_domain_impl
 
         std::mutex mutex_to_protect_shared_resources{};
 
-        const auto check_operational_status =
-            [this, &mutex_to_protect_shared_resources, &domain](const std::vector<Lyt>& layouts) noexcept
+        auto check_operational_status =
+            [this, &mutex_to_protect_shared_resources, &domain](const Lyt& lyt) noexcept
         {
-            for (const auto& lyt : layouts)
-            {
                 const auto op_status = is_operational(lyt, truth_table, params.operational_params);
                 {
                     const std::lock_guard lock_domain{mutex_to_protect_shared_resources};
 
                     update_displacement_robustness_domain(domain, lyt, op_status.first);
                 }
-            }
         };
 
         const std::size_t num_threads = std::max(static_cast<std::size_t>(std::thread::hardware_concurrency()),
                                                  static_cast<std::size_t>(layouts.size()));
-        const std::size_t chunk_size  = layouts.size() / num_threads;
+
+        // calculate the size of each slice
+        const auto slice_size = (layouts.size() + num_threads - 1) / num_threads;
 
         std::vector<std::thread> threads{};
         threads.reserve(num_threads);
 
-        // Start threads to process layouts in parallel
-        auto layouts_start = layouts.cbegin();
-        auto layouts_end   = layouts_start;
-        for (std::size_t i = 0; i < num_threads - 1; ++i)
+        // launch threads, each with its own slice of random step points
+        for (auto i = 0ul; i < num_threads; ++i)
         {
-            std::advance(layouts_end, chunk_size);
-            threads.emplace_back(check_operational_status, std::vector<Lyt>{layouts_start, layouts_end});
-            layouts_start = layouts_end;
-        }
-        // Remaining layouts are assigned to the last thread
-        threads.emplace_back(check_operational_status, std::vector<Lyt>{layouts_start, layouts.cend()});
+            const auto start = i * slice_size;
+            const auto end   = std::min(start + slice_size, layouts.size());
 
-        // Wait for all threads to finish
+            if (start >= end)
+            {
+                break;  // no more work to distribute
+            }
+
+            threads.emplace_back(
+                [this, start, end, &layouts, &check_operational_status]
+                {
+                    for (auto it = layouts.cbegin() + static_cast<int64_t>(start);
+                         it != layouts.cbegin() + static_cast<int64_t>(end); ++it)
+                    {
+                        check_operational_status(*it);
+                    }
+                });
+        }
+
+        // wait for all threads to complete
         for (auto& thread : threads)
         {
-            thread.join();
+            if (thread.joinable())
+            {
+                thread.join();
+            }
         }
 
         return domain;

@@ -357,7 +357,7 @@ class quickexact_impl
             }
         }
 
-        // The cells of the pre-assigned negatively-charged SiDBs are added to the cell level layout.
+        // The cells of the pre-assigned negatively charged SiDBs are added to the cell level layout.
         for (const auto& cell : preassigned_negative_sidbs)
         {
             layout.assign_cell_type(cell, Lyt::cell_type::NORMAL);
