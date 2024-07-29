@@ -93,7 +93,12 @@ struct design_sidb_gates_stats
      * The total runtime of SiDB gate design process.
      */
     mockturtle::stopwatch<>::duration time_total{0};
-
+    /**
+     * This function outputs the total time taken for the SiDB gate design process to the provided output stream.
+     * If no output stream is provided, it defaults to standard output (`std::cout`).
+     *
+     * @param out The output stream to which the report will be written.
+     */
     void report(std::ostream& out = std::cout) const
     {
         out << fmt::format("[i] total time  = {:.2f} secs\n", mockturtle::to_seconds(time_total));
@@ -125,7 +130,10 @@ class design_sidb_gates_impl
             input_bdl_wires{detect_bdl_wires(skeleton_layout, params.operational_params.bdl_wire_params,
                                              bdl_wire_selection::INPUT)},
             output_bdl_wires{detect_bdl_wires(skeleton_layout, params.operational_params.bdl_wire_params,
-                                              bdl_wire_selection::OUTPUT)}
+                                              bdl_wire_selection::OUTPUT)},
+            number_of_input_wires{input_bdl_wires.size()},
+            number_of_output_wires{output_bdl_wires.size()},
+            all_canvas_layouts{determine_all_possible_canvas_layouts()}
     {
         initialize();
     }
@@ -172,9 +180,10 @@ class design_sidb_gates_impl
 
         const std::size_t num_threads =
             std::min(static_cast<std::size_t>(std::thread::hardware_concurrency()), all_combinations.size());
+
         const std::size_t chunk_size = (all_combinations.size() + num_threads - 1) / num_threads;  // Ceiling division
 
-        std::vector<std::thread> threads;
+        std::vector<std::thread> threads{};
         threads.reserve(num_threads);
 
         for (std::size_t i = 0; i < num_threads; ++i)
@@ -332,11 +341,11 @@ class design_sidb_gates_impl
      * The skeleton layout serves as a starting layout to which SiDBs are added to create unique SiDB layouts and, if
      * possible, working gates. It defines input and output wires.
      */
-    Lyt skeleton_layout;
+    const Lyt skeleton_layout;
     /**
      * Truth table of the given gate.
      */
-    std::vector<TT> truth_table;
+    const std::vector<TT> truth_table;
     /**
      * Parameters for the *SiDB Gate Designer*.
      */
@@ -352,11 +361,23 @@ class design_sidb_gates_impl
     /**
      * Input BDL wires.
      */
-    std::vector<bdl_wire<Lyt>> input_bdl_wires;
+    const std::vector<bdl_wire<Lyt>> input_bdl_wires;
     /**
      * Output BDL wires.
      */
-    std::vector<bdl_wire<Lyt>> output_bdl_wires;
+    const std::vector<bdl_wire<Lyt>> output_bdl_wires;
+    /**
+     * Number of input BDL wires.
+     */
+    const std::size_t number_of_input_wires;
+    /**
+     * Number of output BDL wires.
+     */
+    const std::size_t number_of_output_wires;
+    /**
+     * All Canvas SiDB layout (without I/O pins).
+     */
+    const std::vector<Lyt> all_canvas_layouts{};
     /**
      * Directions of the input wires.
      */
@@ -365,10 +386,6 @@ class design_sidb_gates_impl
      * Directions of the output wires.
      */
     std::vector<bdl_wire_direction> output_bdl_wire_directions{};
-    /**
-     * All Canvas SiDB layout (without I/O pins).
-     */
-    std::vector<Lyt> all_canvas_layouts{};
 
     /**
      * This function performs the following steps to initialize the necessary components for the layout evaluation:
@@ -381,18 +398,16 @@ class design_sidb_gates_impl
      */
     void initialize() noexcept
     {
-        input_bdl_wire_directions.reserve(input_bdl_wires.size());
+        input_bdl_wire_directions.reserve(number_of_input_wires);
 
         std::transform(input_bdl_wires.cbegin(), input_bdl_wires.cend(), std::back_inserter(input_bdl_wire_directions),
                        [](const auto& wire) { return determine_wire_direction<Lyt>(wire); });
 
-        output_bdl_wire_directions.reserve(output_bdl_wires.size());
+        output_bdl_wire_directions.reserve(number_of_output_wires);
 
         std::transform(output_bdl_wires.cbegin(), output_bdl_wires.cend(),
                        std::back_inserter(output_bdl_wire_directions),
                        [](const auto& wire) { return determine_wire_direction<Lyt>(wire); });
-
-        all_canvas_layouts = determine_all_possible_canvas_layouts();
     }
 
     /**
@@ -417,13 +432,13 @@ class design_sidb_gates_impl
     {
         layout.assign_all_charge_states(sidb_charge_state::NEGATIVE, false);
 
-        for (auto i = 0u; i < input_bdl_wires.size(); i++)
+        for (auto i = 0u; i < number_of_input_wires; i++)
         {
-            if (input_bdl_wire_directions[input_bdl_wires.size() - 1 - i] == bdl_wire_direction::NORTH_SOUTH)
+            if (input_bdl_wire_directions[number_of_input_wires - 1 - i] == bdl_wire_direction::NORTH_SOUTH)
             {
                 if ((current_input_index & (uint64_t{1ull} << i)) != 0ull)
                 {
-                    for (const auto& bdl : input_bdl_wires[input_bdl_wires.size() - 1 - i])
+                    for (const auto& bdl : input_bdl_wires[number_of_input_wires - 1 - i])
                     {
                         if (bdl.type == sidb_technology::INPUT)
                         {
@@ -437,7 +452,7 @@ class design_sidb_gates_impl
                 }
                 else
                 {
-                    for (const auto& bdl : input_bdl_wires[input_bdl_wires.size() - 1 - i])
+                    for (const auto& bdl : input_bdl_wires[number_of_input_wires - 1 - i])
                     {
                         if (bdl.type == sidb_technology::INPUT)
                         {
@@ -450,11 +465,11 @@ class design_sidb_gates_impl
                     }
                 }
             }
-            else if (input_bdl_wire_directions[input_bdl_wires.size() - 1 - i] == bdl_wire_direction::SOUTH_NORTH)
+            else if (input_bdl_wire_directions[number_of_input_wires - 1 - i] == bdl_wire_direction::SOUTH_NORTH)
             {
                 if ((current_input_index & (uint64_t{1ull} << i)) != 0ull)
                 {
-                    for (const auto& bdl : input_bdl_wires[input_bdl_wires.size() - 1 - i])
+                    for (const auto& bdl : input_bdl_wires[number_of_input_wires - 1 - i])
                     {
                         if (bdl.type == sidb_technology::INPUT)
                         {
@@ -468,7 +483,7 @@ class design_sidb_gates_impl
                 }
                 else
                 {
-                    for (const auto& bdl : input_bdl_wires[input_bdl_wires.size() - 1 - i])
+                    for (const auto& bdl : input_bdl_wires[number_of_input_wires - 1 - i])
                     {
                         if (bdl.type == sidb_technology::INPUT)
                         {
@@ -483,6 +498,7 @@ class design_sidb_gates_impl
             }
         }
     }
+
     /**
      * This function assigns the charge states of the input wires in the layout according to the provided input pattern
      * index. It performs the following steps:
@@ -503,7 +519,7 @@ class design_sidb_gates_impl
     void set_charge_distribution_of_output_wires_based_on_output_index(charge_distribution_surface<Lyt>& layout,
                                                                        const uint64_t output_wire_index) const noexcept
     {
-        for (auto i = 0u; i < output_bdl_wires.size(); i++)
+        for (auto i = 0u; i < number_of_output_wires; i++)
         {
             if (output_bdl_wire_directions[i] == bdl_wire_direction::NORTH_SOUTH)
             {
@@ -560,20 +576,20 @@ class design_sidb_gates_impl
 
     /**
      * This function calculates the output index for a given input index by evaluating the truth table.
-     * The result is a bitset where each bit represents the output state for a corresponding BDL wire.
      *
      * @param current_input_index The index representing the current input pattern.
-     * @return uint64_t The output index derived from the truth table for the given input index.
+     * @return The output index derived from the truth table for the given input index.
      */
     [[nodiscard]] uint64_t determine_output_index_of_output(const uint64_t current_input_index) const noexcept
     {
         std::bitset<64> bits{};
-        for (auto i = 0u; i < output_bdl_wires.size(); i++)
+        for (auto i = 0u; i < number_of_output_wires; i++)
         {
             bits[i] = kitty::get_bit(truth_table[i], current_input_index);
         }
         return bits.to_ulong();
     }
+
     /**
      * This function assigns the charge states of the output wires in the layout according to the values in the truth
      * table for the provided input pattern index.
@@ -586,7 +602,7 @@ class design_sidb_gates_impl
     void set_charge_distribution_of_output_wires_based_on_truth_table(charge_distribution_surface<Lyt>& layout,
                                                                       const uint64_t input_index) const noexcept
     {
-        for (auto i = 0u; i < output_bdl_wires.size(); i++)
+        for (auto i = 0u; i < number_of_output_wires; i++)
         {
             if (output_bdl_wire_directions[i] == bdl_wire_direction::NORTH_SOUTH)
             {
@@ -639,14 +655,12 @@ class design_sidb_gates_impl
 
     /**
      * This function determines if there is a charge distribution of the canvas SiDBs for which the charge distribution
-     * of the whole layout is physically valid
+     * of the whole layout is physically valid.
      *
-     * @tparam Lyt SiDB cell-level layout type.
      * @param cds_layout The charge distribution surface layout to be evaluated.
      * @param cds_canvas The charge distribution surface of the canvas SiDBs. All possible configurations are enumerated
      * @return The minimum energy value if a physically valid configuration is found, `std::nullopt`
      * otherwise.
-     *
      */
     [[nodiscard]] std::optional<double>
     is_physical_validity_feasible(charge_distribution_surface<Lyt>& cds_layout,
@@ -697,7 +711,6 @@ class design_sidb_gates_impl
      * This function iterates through various input patterns and output wire indices to determine if any configuration
      * results in a physically valid layout with energy below the given energy value, indicating I/O signal instability.
      *
-     * @tparam Lyt SiDB-cell level layout type.
      * @param cds_layout The charge distribution surface layout to be modified and checked.
      * @param cds_canvas The charge distribution of the canvas SiDBs.
      * @param max_input_pattern_index The maximum index for input pattern
@@ -715,7 +728,7 @@ class design_sidb_gates_impl
     {
         for (auto kink_states_input = 0u; kink_states_input < max_input_pattern_index; ++kink_states_input)
         {
-            for (auto output_wire_index = 0u; output_wire_index < std::pow(2, output_bdl_wires.size());
+            for (auto output_wire_index = 0u; output_wire_index < std::pow(2, number_of_output_wires);
                  output_wire_index++)
             {
                 if (output_wire_index == logical_correct_output_pattern && kink_states_input == input_pattern)
@@ -738,6 +751,7 @@ class design_sidb_gates_impl
                 }
             }
         }
+
         return false;
     }
 
@@ -796,6 +810,7 @@ class design_sidb_gates_impl
                 return true;
             }
         }
+
         return false;
     }
 
@@ -804,7 +819,6 @@ class design_sidb_gates_impl
      * pruned. It leverages multi-threading to accelerate the evaluation and ensures thread-safe access to shared
      * resources.
      *
-     * @tparam Lyt SiDB cell-level layout type.
      * @return A vector containing the valid gate candidates that were not pruned.
      */
     [[nodiscard]] std::vector<Lyt> run_pruning() const noexcept
@@ -877,7 +891,6 @@ class design_sidb_gates_impl
      * This function calculates all combinations of distributing a given number of SiDBs across a specified number of
      * positions in the canvas. Each combination is then used to create a gate layout candidate.
      *
-     * @tparam Lyt SiDB cell-level layout type.
      * @return A vector containing all possible gate layouts generated from the combinations.
      */
     [[nodiscard]] std::vector<Lyt> determine_all_possible_canvas_layouts() const noexcept
@@ -902,6 +915,7 @@ class design_sidb_gates_impl
 
         return designed_gate_layouts;
     }
+
     /**
      * This function adds SiDBs (given by indices) to the skeleton layout that is returned afterwards.
      *
@@ -924,6 +938,7 @@ class design_sidb_gates_impl
 
         return lyt_copy;
     }
+
     /**
      * This function generates canvas SiDb layouts.
      *

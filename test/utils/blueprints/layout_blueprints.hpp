@@ -1226,8 +1226,12 @@ Lyt and_gate_with_kink_states() noexcept
     return lyt;
 };
 
+/**
+ * This layout represents an SiDB skeleton with a Bestagon shape.
+ * The layout features input on the left side and output on the right-top.
+ */
 template <typename Lyt>
-Lyt two_input_left_one_output_right_top() noexcept
+Lyt two_input_left_one_output_right_top_skeleton() noexcept
 {
     static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
