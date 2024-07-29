@@ -135,7 +135,7 @@ jobs:
         working-directory: ${{github.workspace}}/build_debug
         run: |
             ./test/run_tests "~[quality]"
-            cctest -C Debug --verbose --output-on-failure --repeat until-pass:3 --parallel 4
+            ctest -C Debug --verbose --output-on-failure --repeat until-pass:3 --parallel 4
 
 
       # Build and test pipeline for Release mode
