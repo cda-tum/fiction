@@ -3424,7 +3424,13 @@ static const char *__doc_fiction_design_sidb_gates_stats = R"doc(Statistics for 
 
 static const char *__doc_fiction_design_sidb_gates_stats_duration = R"doc(The total runtime of SiDB gate design process.)doc";
 
-static const char *__doc_fiction_design_sidb_gates_stats_report = R"doc()doc";
+static const char *__doc_fiction_design_sidb_gates_stats_report =
+R"doc(This function outputs the total time taken for the SiDB gate design
+process to the provided output stream. If no output stream is
+provided, it defaults to standard output (`std::cout`).
+
+Parameter ``out``:
+    The output stream to which the report will be written.)doc";
 
 static const char *__doc_fiction_detail_a_star_impl = R"doc()doc";
 
@@ -4137,24 +4143,20 @@ R"doc(This function calculates all combinations of distributing a given
 number of SiDBs across a specified number of positions in the canvas.
 Each combination is then used to create a gate layout candidate.
 
-Template parameter ``Lyt``:
-    SiDB cell-level layout type.
-
 Returns:
     A vector containing all possible gate layouts generated from the
     combinations.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_determine_output_index_of_output =
 R"doc(This function calculates the output index for a given input index by
-evaluating the truth table. The result is a bitset where each bit
-represents the output state for a corresponding BDL wire.
+evaluating the truth table.
 
 Parameter ``current_input_index``:
     The index representing the current input pattern.
 
 Returns:
-    uint64_t The output index derived from the truth table for the
-    given input index.)doc";
+    The output index derived from the truth table for the given input
+    index.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_initialize =
 R"doc(This function performs the following steps to initialize the necessary
@@ -4178,9 +4180,6 @@ R"doc(This function iterates through various input patterns and output wire
 indices to determine if any configuration results in a physically
 valid layout with energy below the given energy value, indicating I/O
 signal instability.
-
-Template parameter ``Lyt``:
-    SiDB-cell level layout type.
 
 Parameter ``cds_layout``:
     The charge distribution surface layout to be modified and checked.
@@ -4208,10 +4207,7 @@ Returns:
 static const char *__doc_fiction_detail_design_sidb_gates_impl_is_physical_validity_feasible =
 R"doc(This function determines if there is a charge distribution of the
 canvas SiDBs for which the charge distribution of the whole layout is
-physically valid
-
-Template parameter ``Lyt``:
-    SiDB cell-level layout type.
+physically valid.
 
 Parameter ``cds_layout``:
     The charge distribution surface layout to be evaluated.
@@ -4249,6 +4245,10 @@ Returns:
     implementation. Physical simulation is required as a second step
     to conduct the final validation.)doc";
 
+static const char *__doc_fiction_detail_design_sidb_gates_impl_number_of_input_wires = R"doc(Number of input BDL wires.)doc";
+
+static const char *__doc_fiction_detail_design_sidb_gates_impl_number_of_output_wires = R"doc(Number of output BDL wires.)doc";
+
 static const char *__doc_fiction_detail_design_sidb_gates_impl_output_bdl_wire_directions = R"doc(Directions of the output wires.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_output_bdl_wires = R"doc(Output BDL wires.)doc";
@@ -4274,9 +4274,6 @@ R"doc(This function processes each layout to determine if it represents a
 valid gate implementation or if it can be pruned. It leverages multi-
 threading to accelerate the evaluation and ensures thread-safe access
 to shared resources.
-
-Template parameter ``Lyt``:
-    SiDB cell-level layout type.
 
 Returns:
     A vector containing the valid gate candidates that were not
