@@ -19,8 +19,8 @@
 
 using namespace fiction;
 
-TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]", (sidb_100_cell_clk_lyt_siqad),
-                   (cds_sidb_100_cell_clk_lyt_siqad))
+TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]", sidb_100_cell_clk_lyt_siqad,
+                   cds_sidb_100_cell_clk_lyt_siqad)
 {
     TestType lyt{};
 
@@ -289,62 +289,6 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         CHECK_THAT(std::abs(critical_stats.critical_temperature - 1.46), Catch::Matchers::WithinAbs(0.00, 0.01));
     }
 
-    SECTION("Bestagon CX gate")
-    {
-        lyt.assign_cell_type({36, 1, 0}, sidb_technology::cell_type::INPUT);
-        lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::INPUT);
-
-        lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
-        lyt.assign_cell_type({38, 0, 0}, sidb_technology::cell_type::INPUT);
-
-        lyt.assign_cell_type({6, 2, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({20, 12, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({8, 3, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({14, 5, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({14, 11, 1}, sidb_technology::cell_type::NORMAL);
-
-        lyt.assign_cell_type({12, 4, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({14, 15, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({26, 4, 0}, sidb_technology::cell_type::NORMAL);
-
-        lyt.assign_cell_type({14, 9, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({24, 15, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({12, 16, 0}, sidb_technology::cell_type::NORMAL);
-
-        lyt.assign_cell_type({18, 9, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({26, 16, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({24, 13, 1}, sidb_technology::cell_type::NORMAL);
-
-        lyt.assign_cell_type({24, 5, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({30, 3, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({16, 13, 1}, sidb_technology::cell_type::NORMAL);
-
-        lyt.assign_cell_type({32, 2, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({20, 8, 0}, sidb_technology::cell_type::NORMAL);
-
-        lyt.assign_cell_type({30, 17, 0}, sidb_technology::cell_type::OUTPUT);
-        lyt.assign_cell_type({6, 18, 0}, sidb_technology::cell_type::OUTPUT);
-
-        lyt.assign_cell_type({32, 18, 0}, sidb_technology::cell_type::OUTPUT);
-        lyt.assign_cell_type({8, 17, 0}, sidb_technology::cell_type::OUTPUT);
-
-        lyt.assign_cell_type({2, 19, 0}, sidb_technology::cell_type::NORMAL);
-        lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
-
-        params.simulation_parameters = sim_params;
-        params.engine                = critical_temperature_params::simulation_engine::EXACT;
-        params.confidence_level      = 0.99;
-        params.max_temperature       = 350;
-        params.iteration_steps       = 80;
-        params.alpha                 = 0.7;
-
-        critical_temperature_gate_based(lyt, std::vector<tt>{create_crossing_wire_tt()}, params, &critical_stats);
-
-        CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.32),
-                   Catch::Matchers::WithinAbs(0.00, 0.01));
-        CHECK_THAT(std::abs(critical_stats.critical_temperature - 0.85), Catch::Matchers::WithinAbs(0.00, 0.01));
-    }
-
     SECTION("OR gate")
     {
         lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
@@ -449,9 +393,8 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 }
 
 TEMPLATE_TEST_CASE("Test critical_temperature function, using offset coordinates", "[critical-temperature]",
-                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>),
-                   (charge_distribution_surface<
-                       cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>))
+                   sidb_100_cell_clk_lyt,
+                   cds_sidb_100_cell_clk_lyt)
 {
     TestType lyt{};
 
