@@ -191,8 +191,8 @@ class design_sidb_gates_impl
             threads.emplace_back(
                 [i, chunk_size, &all_combinations, &add_combination_to_layout_and_check_operation]()
                 {
-                    std::size_t start_index = i * chunk_size;
-                    std::size_t end_index   = std::min(start_index + chunk_size, all_combinations.size());
+                    const std::size_t start_index = i * chunk_size;
+                    const std::size_t end_index   = std::min(start_index + chunk_size, all_combinations.size());
 
                     for (std::size_t j = start_index; j < end_index; ++j)
                     {
@@ -228,9 +228,10 @@ class design_sidb_gates_impl
             params.canvas, params.number_of_sidbs,
             generate_random_sidb_layout_params<cell<Lyt>>::positive_charges::FORBIDDEN};
 
-        const std::size_t        num_threads = std::thread::hardware_concurrency();
+        static const std::size_t        num_threads = std::thread::hardware_concurrency();
         std::vector<std::thread> threads{};
         threads.reserve(num_threads);
+
         std::mutex mutex_to_protect_designed_gate_layouts{};  // used to control access to shared resources
 
         std::atomic<bool> gate_layout_is_found(false);
