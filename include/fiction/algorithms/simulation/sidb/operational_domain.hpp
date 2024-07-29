@@ -684,7 +684,7 @@ class operational_domain_impl
     inline void set_dimension_value(sidb_simulation_parameters& sim_parameters, const double val,
                                     const std::size_t dim) const noexcept
     {
-        const operational_domain::sweep_parameter sweep_parameter = op_domain.dimensions[dim];
+        const operational_domain::sweep_parameter sweep_parameter = params.sweep_dimensions[dim].dimension;
 
         switch (sweep_parameter)
         {

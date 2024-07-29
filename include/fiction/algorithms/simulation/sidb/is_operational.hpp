@@ -32,6 +32,7 @@
 
 namespace fiction
 {
+
 /**
  * Possible operational status of a layout.
  */
@@ -46,6 +47,7 @@ enum class operational_status : uint8_t
      */
     NON_OPERATIONAL
 };
+
 /**
  * Parameters for the `is_operational` algorithm.
  */
@@ -312,6 +314,7 @@ class is_operational_impl
     physical_simulation_of_layout(const bdl_input_iterator<Lyt>& bdl_iterator) noexcept
     {
         assert(parameters.simulation_parameters.base == 2 && "base number is set to 3");
+
         if (parameters.sim_engine == sidb_simulation_engine::EXGS)
         {
             // perform an exhaustive ground state simulation
