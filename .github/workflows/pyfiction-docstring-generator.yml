@@ -16,6 +16,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+          fetch-depth: 0 # Fetch all history for all branches and tags
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -46,7 +47,8 @@ jobs:
           path: ${{ github.workspace }}/bindings/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp
           overwrite: true
 
-      - uses: EndBug/add-and-commit@v9
+      - name: Commit docstrings
+        uses: EndBug/add-and-commit@v9
         with:
           add: 'bindings/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp'
           commit: '--signoff'
