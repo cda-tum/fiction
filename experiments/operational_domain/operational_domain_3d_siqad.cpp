@@ -31,7 +31,7 @@ int main()  // NOLINT
     experiments::experiment<std::string, uint64_t, uint64_t, double, uint64_t, double, uint64_t, double, uint64_t,
                             double, uint64_t, double, uint64_t, double>
         opdomain_exp{
-            "Operational Domain SiQAD",
+            "Operational Domain SiQAD 3D",
             "Name",
             "#SiDBs",  // Benchmark
             "#Samples (GS)",
@@ -68,10 +68,10 @@ int main()  // NOLINT
     op_domain_params.sweep_dimensions[1].step = 0.05;
     op_domain_params.sweep_dimensions[2].min  = -0.50;
     op_domain_params.sweep_dimensions[2].max  = -0.10;
-    op_domain_params.sweep_dimensions[2].step = 0.01;
+    op_domain_params.sweep_dimensions[2].step = 0.005;
 
     // write operational domain parameters
-    static const write_operational_domain_params write_op_domain_params{"1", "0"};
+    static const write_operational_domain_params write_op_domain_params{"1", "0", false};
 
     static const std::string folder = fmt::format("{}siqad_gates_type_tags/", EXPERIMENTS_PATH);
 
