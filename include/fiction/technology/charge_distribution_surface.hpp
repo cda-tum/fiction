@@ -1283,8 +1283,10 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     {
         if (potential_value != 0.0)
         {
-            this->foreach_cell([this, &potential_value](const auto& c)
-                               { strg->local_external_pot.insert({c, potential_value}); });
+            this->foreach_cell(
+                [this, &potential_value](const auto& c) {
+                    strg->local_external_pot.insert({c, potential_value});
+                });
             this->update_after_charge_change(dep_cell);
         }
     }
@@ -1378,7 +1380,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     [[nodiscard]] std::size_t num_neutral_sidbs() const noexcept
     {
-        uint64_t count_neutral_sidbs = 0;
+        std::size_t count_neutral_sidbs = 0;
         this->foreach_cell([this, &count_neutral_sidbs](const auto& c)
                            { count_neutral_sidbs += (get_charge_state(c) == sidb_charge_state::NEUTRAL) ? 1 : 0; });
         return count_neutral_sidbs;
@@ -1390,7 +1392,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     [[nodiscard]] std::size_t num_positive_sidbs() const noexcept
     {
-        uint64_t count_positive_sidbs = 0;
+        std::size_t count_positive_sidbs = 0;
         this->foreach_cell([this, &count_positive_sidbs](const auto& c)
                            { count_positive_sidbs += (get_charge_state(c) == sidb_charge_state::POSITIVE) ? 1 : 0; });
         return count_positive_sidbs;
@@ -2088,8 +2090,8 @@ template <class T>
 charge_distribution_surface(const T&, const sidb_simulation_parameters&) -> charge_distribution_surface<T>;
 
 template <class T>
-charge_distribution_surface(const T&, const sidb_simulation_parameters&,
-                            sidb_charge_state cs) -> charge_distribution_surface<T>;
+charge_distribution_surface(const T&, const sidb_simulation_parameters&, sidb_charge_state cs)
+    -> charge_distribution_surface<T>;
 
 }  // namespace fiction
 
