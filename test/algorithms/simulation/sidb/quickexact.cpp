@@ -1319,6 +1319,76 @@ TEMPLATE_TEST_CASE("QuickExact simulation of a Y-shaped SiDB OR gate with input 
     }
 }
 
+TEMPLATE_TEST_CASE("QuickExact simulation of a Y-shaped SiDB OR gate with input 01", "[quickexact], [quality]",
+                   sidb_100_cell_clk_lyt_siqad, cds_sidb_100_cell_clk_lyt_siqad)
+{
+    SECTION("Check if QuickExact is deterministic")
+    {
+        TestType lyt{};
+
+        lyt.assign_cell_type({6, 2, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({8, 3, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({12, 3, 0}, TestType::cell_type::NORMAL);
+
+        lyt.assign_cell_type({14, 2, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({10, 5, 0}, TestType::cell_type::NORMAL);
+
+        lyt.assign_cell_type({10, 6, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({10, 8, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({16, 1, 0}, TestType::cell_type::NORMAL);
+
+        quickexact_params<cell<TestType>> params{
+            sidb_simulation_parameters{2, -0.28},
+            quickexact_params<cell<TestType>>::automatic_base_number_detection::OFF};
+
+        std::set<double>   ground_state{};
+        std::set<uint64_t> charge_index{};
+        for (auto i = 0; i < 100000; i++)
+        {
+            const auto simulation_results = quickexact<TestType>(lyt, params);
+            auto&      charge_lyt_first   = simulation_results.charge_distributions.front();
+            ground_state.insert(charge_lyt_first.get_system_energy());
+            charge_lyt_first.charge_distribution_to_index_general();
+            charge_index.insert(charge_lyt_first.get_charge_index_and_base().first);
+        }
+        CHECK(ground_state.size() == 1);
+        CHECK(charge_index.size() == 1);
+    }
+
+    SECTION("Special layout")
+    {
+        TestType lyt{};
+
+        lyt.assign_cell_type({22, 1, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({24, 2, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({23, 3, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({13, 4, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({10, 4, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({1, 5, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({0, 6, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({1, 6, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({24, 6, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({4, 6, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({3, 7, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({0, 8, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({1, 8, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({9, 9, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({24, 9, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({22, 9, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({13, 10, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({14, 10, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({1, 11, 1}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({17, 11, 1}, TestType::cell_type::NORMAL);
+
+        const quickexact_params<cell<TestType>> params{
+            sidb_simulation_parameters{2, -0.32},
+            quickexact_params<cell<TestType>>::automatic_base_number_detection::ON};
+
+        const auto simulation_results = quickexact<TestType>(lyt, params);
+        CHECK(simulation_results.charge_distributions.size() == 21);
+    }
+}
+
 TEMPLATE_TEST_CASE("QuickExact simulation of a 3 DB Wire", "[quickexact]",
                    (sidb_lattice<sidb_100_lattice, sidb_cell_clk_lyt_siqad>),
                    (charge_distribution_surface<sidb_lattice<sidb_100_lattice, sidb_cell_clk_lyt_siqad>>))
