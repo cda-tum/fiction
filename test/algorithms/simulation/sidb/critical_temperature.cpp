@@ -393,8 +393,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 }
 
 TEMPLATE_TEST_CASE("Test critical_temperature function, using offset coordinates", "[critical-temperature]",
-                   sidb_100_cell_clk_lyt,
-                   cds_sidb_100_cell_clk_lyt)
+                   sidb_100_cell_clk_lyt, cds_sidb_100_cell_clk_lyt)
 {
     TestType lyt{};
 

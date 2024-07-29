@@ -395,8 +395,8 @@ class operational_domain_impl
         }
         // if the value of the y-parameter is greater than params.y_max after num_y_steps() steps, this value is
         // ignored in the operational domain calculation.
-        if (((params.y_min + static_cast<decltype(params.y_step)>(y_indices.size() - 1) * params.y_step) - params.y_max) >
-            physical_constants::POP_STABILITY_ERR)
+        if (((params.y_min + static_cast<decltype(params.y_step)>(y_indices.size() - 1) * params.y_step) -
+             params.y_max) > physical_constants::POP_STABILITY_ERR)
         {
             y_indices.pop_back();
         }

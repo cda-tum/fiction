@@ -48,9 +48,8 @@ TEST_CASE("Single SiDB", "[assess-physical-population-stability]")
     }
 }
 
-TEMPLATE_TEST_CASE(
-    "Three SiDBs with positive charge states", "[assess-physical-population-stability]",
-    sidb_cell_clk_lyt_siqad, cds_sidb_cell_clk_lyt_siqad)
+TEMPLATE_TEST_CASE("Three SiDBs with positive charge states", "[assess-physical-population-stability]",
+                   sidb_cell_clk_lyt_siqad, cds_sidb_cell_clk_lyt_siqad)
 {
     sidb_cell_clk_lyt_siqad lyt{};
     const auto              params = assess_physical_population_stability_params{};
@@ -99,13 +98,12 @@ TEMPLATE_TEST_CASE(
     }
 }
 
-TEMPLATE_TEST_CASE(
-    "Bestagon AND gate", "[assess-physical-population-stability]",
-    sidb_cell_clk_lyt_siqad, cds_sidb_cell_clk_lyt_siqad)
+TEMPLATE_TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]", sidb_cell_clk_lyt_siqad,
+                   cds_sidb_cell_clk_lyt_siqad)
 {
     TestType lyt{};
 
-    const auto              params = assess_physical_population_stability_params{};
+    const auto params = assess_physical_population_stability_params{};
 
     lyt.assign_cell_type({36, 1, 0}, sidb_technology::cell_type::INPUT);
     lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::INPUT);
