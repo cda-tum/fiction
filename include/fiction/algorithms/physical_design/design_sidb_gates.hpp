@@ -228,7 +228,7 @@ class design_sidb_gates_impl
             params.canvas, params.number_of_sidbs,
             generate_random_sidb_layout_params<cell<Lyt>>::positive_charges::FORBIDDEN};
 
-        static const std::size_t        num_threads = std::thread::hardware_concurrency();
+        static const std::size_t num_threads = std::thread::hardware_concurrency();
         std::vector<std::thread> threads{};
         threads.reserve(num_threads);
 
