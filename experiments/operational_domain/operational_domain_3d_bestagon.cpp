@@ -68,7 +68,7 @@ int main()  // NOLINT
     op_domain_params.sweep_dimensions[1].step = 0.05;
     op_domain_params.sweep_dimensions[2].min  = -0.50;
     op_domain_params.sweep_dimensions[2].max  = -0.10;
-    op_domain_params.sweep_dimensions[2].step = 0.005;
+    op_domain_params.sweep_dimensions[2].step = 0.0025;
 
     // write operational domain parameters
     const write_operational_domain_params write_op_domain_params{"1", "0", false};
@@ -121,9 +121,9 @@ int main()  // NOLINT
             const auto op_domain_gs =
                 operational_domain_grid_search(lyt, truth_table, op_domain_params, &op_domain_stats_gs);
             const auto op_domain_rs =
-                operational_domain_random_sampling(lyt, truth_table, 10000, op_domain_params, &op_domain_stats_rs);
+                operational_domain_random_sampling(lyt, truth_table, 20000, op_domain_params, &op_domain_stats_rs);
             const auto op_domain_ff =
-                operational_domain_flood_fill(lyt, truth_table, 1000, op_domain_params, &op_domain_stats_ff);
+                operational_domain_flood_fill(lyt, truth_table, 2000, op_domain_params, &op_domain_stats_ff);
 
             // write the operational domains to a CSV file
             write_operational_domain(op_domain_gs,
