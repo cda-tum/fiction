@@ -56,7 +56,7 @@ int main()  // NOLINT
     graph_oriented_layout_design_params.verbose          = true;
     graph_oriented_layout_design_params.return_first     = false;
 
-    static constexpr const uint64_t bench_select = fiction_experiments::parity;
+    static constexpr const uint64_t bench_select = fiction_experiments::trindade16 | fiction_experiments::fontes18;
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {

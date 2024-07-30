@@ -44,6 +44,10 @@
 #include <utility>
 #include <vector>
 
+#if (PROGRESS_BARS)
+#include <mockturtle/utils/progress_bar.hpp>
+#endif
+
 namespace fiction
 {
 
@@ -619,6 +623,13 @@ class graph_oriented_layout_design_impl
             timeout = 10000u;
         }
         bool timeout_limit_reached = false;
+
+#if (PROGRESS_BARS)
+        // initialize a progress bar
+        mockturtle::progress_bar bar{ssg_vec[0].network.size(), "[i] arranging layout: |{0}|"};
+        uint64_t                 max_placed_nodes_tracker = 0u;
+#endif
+
         // main A* loop
         while (!timeout_limit_reached)
         {
@@ -667,6 +678,15 @@ class graph_oriented_layout_design_impl
                     {
                         ssg.frontier_flag = false;
                     }
+
+#if (PROGRESS_BARS)
+                    if (max_placed_nodes > max_placed_nodes_tracker)
+                    {
+                        max_placed_nodes_tracker = max_placed_nodes;
+                        // update progress
+                        bar(max_placed_nodes_tracker);
+                    }
+#endif
                 }
             }
 
@@ -1267,7 +1287,7 @@ class graph_oriented_layout_design_impl
      */
     void print_placement_info(const ObstrLyt& lyt) const
     {
-        std::cout << "[i] Found improved solution:\n";
+        std::cout << "\n[i] Found improved solution:\n";
 
         // calculate the duration between start and end
         const auto end      = std::chrono::high_resolution_clock::now();
@@ -1291,7 +1311,7 @@ class graph_oriented_layout_design_impl
      */
     ObstrLyt initialize_layout(uint64_t min_layout_width)
     {
-        Lyt lyt{{min_layout_width - 1, 1 - 1, 1}, twoddwave_clocking<Lyt>()};
+        Lyt lyt{{min_layout_width - 1, 0, 1}, twoddwave_clocking<Lyt>()};
         return obstruction_layout<Lyt>(lyt);
     }
     /**
