@@ -101,15 +101,15 @@ TEST_CASE("Different parameters", "[graph_oriented_layout_design]")
 
     graph_oriented_layout_design_params params{};
 
-    // Timeout and return first found layout
-    params.timeout      = 100000;
+    // Default timeout  return first found layout
     params.return_first = true;
     const auto layout1  = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
 
     REQUIRE(layout1.has_value());
     check_eq(ntk, *layout1);
 
-    // Verbose mode
+    // Verbose mode and timeout
+    params.timeout     = 100000;
     params.verbose     = true;
     const auto layout2 = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
 
