@@ -1854,6 +1854,18 @@ static const char *__doc_fiction_charge_distribution_surface_4 = R"doc()doc";
 
 static const char *__doc_fiction_charge_distribution_surface_charge_distribution_surface = R"doc()doc";
 
+static const char *__doc_fiction_charge_index_mode =
+R"doc(An enumeration of modes for handling the charge index during charge
+state assignment.)doc";
+
+static const char *__doc_fiction_charge_index_mode_KEEP_CHARGE_INDEX =
+R"doc(The charge state is assigned to the cell but the old charge index is
+kept.)doc";
+
+static const char *__doc_fiction_charge_index_mode_UPDATE_CHARGE_INDEX =
+R"doc(The charge state is assigned to the cell and the charge index is
+updated.)doc";
+
 static const char *__doc_fiction_charge_index_recomputation =
 R"doc(An enumeration of modes to specifying if the charge index should be
 recomputed fully.)doc";
@@ -7973,7 +7985,9 @@ static const char *__doc_fiction_energy_dissipation_stats_unknown = R"doc()doc";
 static const char *__doc_fiction_energy_distribution =
 R"doc(This function takes in a vector of `charge_distribution_surface`
 objects and returns a map containing the system energy and the number
-of occurrences of that energy in the input vector.
+of occurrences of that energy in the input vector. To compare two
+energy values for equality, the comparison uses a tolerance specified
+by `physical_constants::POP_STABILITY_ERR`.
 
 Template parameter ``Lyt``:
     Cell-level layout type.

@@ -6,6 +6,7 @@
 #define FICTION_ENERGY_DISTRIBUTION_HPP
 
 #include "fiction/technology/charge_distribution_surface.hpp"
+#include "fiction/technology/physical_constants.hpp"
 
 #include <cmath>
 #include <cstdint>
@@ -24,7 +25,8 @@ using sidb_energy_distribution = std::map<double, uint64_t>;  // unit: (eV, unit
 
 /**
  * This function takes in a vector of `charge_distribution_surface` objects and returns a map containing the system
- * energy and the number of occurrences of that energy in the input vector.
+ * energy and the number of occurrences of that energy in the input vector. To compare two energy values for equality,
+ * the comparison uses a tolerance specified by `physical_constants::POP_STABILITY_ERR`.
  *
  * @tparam Lyt Cell-level layout type.
  * @param input_vec A vector of `charge_distribution_surface` objects for which statistics are to be computed.
@@ -42,7 +44,7 @@ energy_distribution(const std::vector<charge_distribution_surface<Lyt>>& input_v
 
     // collect all unique charge indices
     std::set<uint64_t> unique_charge_index{};
-    for (auto& lyt : input_vec)
+    for (const auto& lyt : input_vec)
     {
         lyt.charge_distribution_to_index_general();
         unique_charge_index.insert(lyt.get_charge_index_and_base().first);
@@ -50,12 +52,27 @@ energy_distribution(const std::vector<charge_distribution_surface<Lyt>>& input_v
 
     for (const auto& charge_index : unique_charge_index)
     {
-        for (auto& lyt : input_vec)
+        for (const auto& lyt : input_vec)
         {
-            lyt.charge_distribution_to_index_general();
             if (lyt.get_charge_index_and_base().first == charge_index)
             {
-                distribution[lyt.get_system_energy()]++;
+                const auto energy = lyt.get_system_energy();
+                bool       found  = false;
+
+                for (auto& energy_index : distribution)
+                {
+                    if (std::abs(energy_index.first - energy) < physical_constants::POP_STABILITY_ERR)
+                    {
+                        energy_index.second++;
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found)
+                {
+                    distribution[energy] = 1;
+                }
                 break;
             }
         }
