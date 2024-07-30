@@ -1790,10 +1790,9 @@ TEMPLATE_TEST_CASE("Special test cases", "[quickexact]", (sidb_100_cell_clk_lyt_
         // default physical parameters
         const sidb_simulation_parameters params{3, -0.32};
 
-        sidb_simulation_result<TestType> qe_res = quickexact(
-            lyt,
-            quickexact_params<cell<TestType>>{params,
-                                              quickexact_params<cell<TestType>>::automatic_base_number_detection::ON});
+        sidb_simulation_result<TestType> qe_res =
+            quickexact(lyt, quickexact_params<cell<TestType>>{
+                                params, quickexact_params<cell<TestType>>::automatic_base_number_detection::ON});
 
         std::sort(qe_res.charge_distributions.begin(), qe_res.charge_distributions.end(),
                   [](const auto& lhs, const auto& rhs) { return lhs.get_system_energy() < rhs.get_system_energy(); });
