@@ -1,8 +1,8 @@
 //
-// Created by benjamin on 6/18/24.
+// Created by benjamin on 18.06.24.
 //
 
-#include <fiction/networks/virtual_pi_network.hpp>
+#include "fiction/networks/virtual_pi_network.hpp"
 
 #include <mockturtle/networks/detail/foreach.hpp>
 #include <mockturtle/traits.hpp>
@@ -12,19 +12,20 @@
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
-#include <functional>
+#include <memory>
 #include <utility>
 #include <vector>
 
 #ifndef FICTION_VIRTUAL_RANK_VIEW_HPP
 #define FICTION_VIRTUAL_RANK_VIEW_HPP
 
-// this rank view can assign specific ranks to nodes in one level
-// to check validity of the rank view you can use check_rank_validity()
 /**
  * @class extended_rank_view. Extends the mockturtle::rank_view
  *
- * Provides a view with node ranks for given networks. It adds some functionalities to modify ranks.
+ * Provides a view with node ranks for given networks. It adds functionalities to modify ranks. Most importantly, the
+ * new `init_ranks()` function allows an array of nodes to be provided, which sets the levels and ranks of the nodes in
+ * the network. Additionally, the `modify_rank()` function allows a vector to be passed to a rank, assigning the ranks at
+ * this level.
  *
  */
 template <class Ntk, bool has_rank_interface =
@@ -280,7 +281,7 @@ class extended_rank_view<Ntk, false> : public mockturtle::depth_view<Ntk>
      * \param level The level at which to modify the rank.
      * \param nodes The new set of nodes for the specified level.
      */
-    void modify_rank(uint32_t const level, std::vector<node>& nodes)
+    void modify_rank(uint32_t const level, const std::vector<node>& nodes)
     {
         auto& rank = ranks[level];
         rank       = nodes;

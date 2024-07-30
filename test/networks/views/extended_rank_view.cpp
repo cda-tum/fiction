@@ -1,9 +1,8 @@
 //
-// Created by benjamin on 6/18/24.
+// Created by benjamin on 18.06.24.
 //
 
 #include <catch2/catch_template_test_macros.hpp>
-#include <catch2/catch_test_macros.hpp>
 
 #include <fiction/algorithms/network_transformation/network_balancing.hpp>
 #include <fiction/networks/technology_network.hpp>
@@ -85,11 +84,11 @@ TEST_CASE("Check modify ranks", "[extended-rank-view]")
     network_balancing_params ps;
     ps.unify_outputs = true;
 
-    auto tec_balanced = network_balancing<technology_network>(tec, ps);
+    const auto tec_balanced = network_balancing<technology_network>(tec, ps);
 
     auto vpi_r = extended_rank_view(tec_balanced);
 
-    std::vector<technology_network::node> nodes = {13, 10};
+    const std::vector<technology_network::node> nodes = {13, 10};
     vpi_r.modify_rank(2, nodes);
 
     CHECK(vpi_r.check_validity() == 1);
@@ -123,10 +122,12 @@ TEMPLATE_TEST_CASE("Check equivalence checking", "[extended_rank_view]", mocktur
     network_balancing_params ps;
     ps.unify_outputs = true;
 
-    auto ntk_r = extended_rank_view(ntk);
+    const auto ntk_r = extended_rank_view(ntk);
 
     mockturtle::equivalence_checking_stats st;
-    bool cec_m = *mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(ntk, ntk_r), {}, &st);
+    const auto maybe_cec_m = mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(ntk, ntk_r), {}, &st);
+    REQUIRE(maybe_cec_m.has_value());
+    const bool cec_m = *maybe_cec_m;
     CHECK(cec_m == 1);
     CHECK(ntk_r.check_validity() == 1);
 }
@@ -169,7 +170,9 @@ TEST_CASE("Check equivalence checking for virtual PIs", "[extended-rank-view]")
     vpi_r.remove_virtual_input_nodes<virtual_pi_network>();
 
     mockturtle::equivalence_checking_stats st;
-    bool cec_m = *mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(tec, vpi), {}, &st);
+    const auto maybe_cec_m = mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(tec, vpi_r), {}, &st);
+    REQUIRE(maybe_cec_m.has_value());
+    const bool cec_m = *maybe_cec_m;
     CHECK(cec_m == 1);
     CHECK(vpi_r.check_validity() == 1);
 }

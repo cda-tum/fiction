@@ -1,5 +1,5 @@
 //
-// Created by benjamin on 6/11/24.
+// Created by benjamin on 11.06.24.
 //
 
 #include <catch2/catch_test_macros.hpp>
@@ -11,9 +11,6 @@
 #include <fiction/networks/technology_network.hpp>
 
 #include <mockturtle/views/rank_view.hpp>
-
-#include <chrono>
-#include <iostream>
 
 using namespace fiction;
 
@@ -40,7 +37,7 @@ TEST_CASE("2-ary nodes Test", "[node-duplication-planarization]")
     network_balancing_params ps;
     ps.unify_outputs = true;
 
-    auto tec_b = network_balancing<technology_network>(tec, ps);
+    const auto tec_b = network_balancing<technology_network>(tec, ps);
 
     const auto vpi_r = mockturtle::rank_view(tec_b);
 
@@ -50,8 +47,9 @@ TEST_CASE("2-ary nodes Test", "[node-duplication-planarization]")
     planarized_maj.remove_virtual_input_nodes<virtual_pi_network>();
 
     mockturtle::equivalence_checking_stats st;
-    bool                                   cec_m =
-        *mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(tec, planarized_maj), {}, &st);
+    const auto maybe_cec_m = mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(tec, planarized_maj), {}, &st);
+    REQUIRE(maybe_cec_m.has_value());
+    const bool cec_m = *maybe_cec_m;
     CHECK(cec_m == 1);
 }
 
@@ -80,7 +78,7 @@ TEST_CASE("3-ary nodes Test", "[node-duplication-planarization]")
     network_balancing_params ps;
     ps.unify_outputs = true;
 
-    auto tec_b = network_balancing<technology_network>(tec, ps);
+    const auto tec_b = network_balancing<technology_network>(tec, ps);
 
     const auto vpi_r = mockturtle::rank_view(tec_b);
 
@@ -90,8 +88,9 @@ TEST_CASE("3-ary nodes Test", "[node-duplication-planarization]")
     planarized_maj.remove_virtual_input_nodes<virtual_pi_network>();
 
     mockturtle::equivalence_checking_stats st;
-    bool                                   cec_m =
-        *mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(tec, planarized_maj), {}, &st);
+    const auto maybe_cec_m = mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(tec, planarized_maj), {}, &st);
+    REQUIRE(maybe_cec_m.has_value());
+    const bool cec_m = *maybe_cec_m;
     CHECK(cec_m == 1);
 }
 
@@ -120,7 +119,7 @@ TEST_CASE("Aig Test", "[node-duplication-planarization]")
     network_balancing_params ps;
     ps.unify_outputs = true;
 
-    auto aig_b = network_balancing<technology_network>(aig, ps);
+    const auto aig_b = network_balancing<technology_network>(aig, ps);
 
     const auto vpi_r = mockturtle::rank_view(aig_b);
 
@@ -130,7 +129,8 @@ TEST_CASE("Aig Test", "[node-duplication-planarization]")
     planarized_maj.remove_virtual_input_nodes<virtual_pi_network>();
 
     mockturtle::equivalence_checking_stats st;
-    bool                                   cec_m =
-        *mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(aig, planarized_maj), {}, &st);
+    const auto maybe_cec_m = mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(aig, planarized_maj), {}, &st);
+    REQUIRE(maybe_cec_m.has_value());
+    const bool cec_m = *maybe_cec_m;
     CHECK(cec_m == 1);
 }

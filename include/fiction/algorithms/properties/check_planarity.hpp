@@ -1,5 +1,5 @@
 //
-// Created by benjamin on 7/17/24.
+// Created by benjamin on 17.07.24.
 //
 
 #ifndef FICTION_CHECK_PLANARITY_HPP
@@ -7,6 +7,10 @@
 
 #include "fiction/algorithms/network_transformation/network_balancing.hpp"
 
+#include <mockturtle/traits.hpp>
+
+#include <algorithm>
+#include <cstdint>
 #include <stdexcept>
 
 namespace fiction
@@ -22,10 +26,10 @@ class check_planarity_impl
      * @brief Checks if a given network is planar.
      *
      * This function checks if the network represented by the variable `ntk` is planar.
-     * The network is planar if for any edge with starting point m and end point n there is never another edge with
-     * starting point m_ > m and ending point n_ < n or vice versa. When iterating through the ranks of one level the
-     * end points ar always increasing. Therefore only the starting points need to be checked. Therefore the highest
-     * connected starting point in the fanin gives a border m_max for every next edge.
+     * The network is planar if for any edge with starting point m and endpoint n (represented by the node ranks), there
+     * is never another edge with starting point m_ > m and endpoint n_ < n, or vice versa. When iterating through
+     * the ranks of one level, the endpoints are always increasing. Therefore, only the starting points need to be
+     * checked. Thus, the highest connected starting point in the fan-in gives a border m_max for every subsequent edge.
      *
      * @return `true` if the network is planar, `false` otherwise.
      */
@@ -60,11 +64,11 @@ class check_planarity_impl
     }
 
   private:
-    Ntk ntk;
+    const Ntk ntk;
 };
 
 /**
- * Checks if a logic network is planar.
+ * Checks if a logic network is planar. To perform this check, the network must have ranks assigned.
  *
  * If the network is not balanced, an exception is thrown. To balance the network, insert buffers to divide multi-level
  * edges.
@@ -75,14 +79,13 @@ class check_planarity_impl
  * @throw std::runtime_error if the network is not balanced.
  */
 template <typename Ntk>
-bool check_planarity(Ntk& ntk)
+bool check_planarity(const Ntk& ntk)
 {
-    static_assert(mockturtle::has_rank_position_v<Ntk>, "Ntk does not have rank position trait");
-    static_assert(mockturtle::has_at_rank_position_v<Ntk>, "Ntk does not have at rank position trait");
-    static_assert(mockturtle::has_swap_v<Ntk>, "Ntk does not have swap trait");
-    static_assert(mockturtle::has_width_v<Ntk>, "Ntk does not have width trait");
-    static_assert(mockturtle::has_foreach_node_in_rank_v<Ntk>, "Ntk does not have foreach node in rank trait");
-    static_assert(mockturtle::has_foreach_gate_in_rank_v<Ntk>, "Ntk does not have foreach gate in rank trait");
+    static_assert(mockturtle::has_get_node_v<Ntk>, "Ntk does not have get_node trait");
+    static_assert(mockturtle::has_foreach_fanin_v<Ntk>, "Ntk does not have foreach_fanin trait");
+    static_assert(mockturtle::has_depth_v<Ntk>, "Ntk does not have depth trait");
+    static_assert(mockturtle::has_rank_position_v<Ntk>, "Ntk does not have rank_position trait");
+    static_assert(mockturtle::has_foreach_node_in_rank_v<Ntk>, "Ntk does not have foreach_node_in_rank trait");
 
     if (!is_balanced(ntk))
     {
@@ -91,7 +94,7 @@ bool check_planarity(Ntk& ntk)
 
     check_planarity_impl<Ntk> p{ntk};
 
-    auto result = p.run();
+    const auto result = p.run();
 
     return result;
 }

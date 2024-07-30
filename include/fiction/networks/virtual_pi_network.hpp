@@ -1,25 +1,37 @@
 //
-// Created by benjamin on 6/14/24.
+// Created by benjamin on 14.06.24.
 //
 
-#ifndef FICTION_NODE_DUPLICATION_VIEW_HPP
-#define FICTION_NODE_DUPLICATION_VIEW_HPP
+#ifndef FICTION_VIRTUAL_PI_NETWORK_HPP
+#define FICTION_VIRTUAL_PI_NETWORK_HPP
 
-#include "fiction/algorithms/network_transformation/network_conversion.hpp"
+#include "fiction/types.hpp"
+#include "fiction/networks/technology_network.hpp"
 
-#include <mockturtle/traits.hpp>
-// #include <mockturtle/networks/klut.hpp>
 #include <mockturtle/networks/detail/foreach.hpp>
+#include <mockturtle/networks/klut.hpp>
+#include <mockturtle/traits.hpp>
 
+#include <algorithm>
+#include <cassert>
 #include <cstdint>
+#include <cstdlib>
+#include <stdexcept>
+#include <memory>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
 namespace fiction
 {
 
-/*!\brief Manager view for virtual PIs
+/*!\brief Network with additional "virtual" PIs.
  *
- * Virtual PIs are mapping of a "virtual" PI onto a "real" PI in the network.
- * Virtual PIs handle PI-duplications.
+ * "Virtual" PIs (Primary Inputs) are used to manage the duplication of PIs in the network. Each "real" PI can have
+ * an arbitrary number of "virtual" PIs, which are copies of the original "real" PI.
+ * A "virtual" PI can be created by duplicating a "real" PI.
+ * To keep track of this relationship, there is a mapping of each "virtual" PI to its corresponding "real" PI in the
+ * network.
  */
 class virtual_pi_network : public technology_network
 {
@@ -78,9 +90,15 @@ class virtual_pi_network : public technology_network
 
         static_assert(mockturtle::has_get_constant_v<NtkDest>, "NtkDest does not implement the get_constant method");
         static_assert(mockturtle::has_create_pi_v<NtkDest>, "NtkDest does not implement the create_pi method");
+        static_assert(mockturtle::has_is_pi_v<NtkDest>, "NtkDest does not implement the is_pi method");
+        static_assert(mockturtle::has_create_not_v<NtkDest>, "NtkDest does not implement the create_not method");
         static_assert(mockturtle::has_get_constant_v<NtkSrc>, "NtkSrc does not implement the get_constant method");
         static_assert(mockturtle::has_get_node_v<NtkSrc>, "NtkSrc does not implement the get_node method");
         static_assert(mockturtle::has_foreach_pi_v<NtkSrc>, "NtkSrc does not implement the foreach_pi method");
+        static_assert(mockturtle::has_foreach_po_v<NtkSrc>, "NtkSrc does not implement the foreach_po method");
+        static_assert(mockturtle::has_is_complemented_v<NtkSrc>,
+                      "NtkSrc does not implement the is_complemented method");
+        static_assert(mockturtle::has_foreach_fanin_v<NtkSrc>, "NtkSrc does not implement the foreach_fanin method");
 
         mockturtle::node_map<std::vector<mockturtle::signal<NtkDest>>, NtkSrc> old2new(src);
         NtkDest                                                                dest;
@@ -150,7 +168,7 @@ class virtual_pi_network : public technology_network
 
                                   for (const auto& possible_node : tgt_signal_v)
                                   {
-                                      auto it = ntk.is_maj(n) ? 4 : 3;
+                                      const auto it = ntk.is_maj(n) ? 4 : 3;
                                       for (size_t i = 0; i < it; i++)
                                       {
                                           if (edge_it_int + i < lvl.size() && lvl[edge_it_int + i] == possible_node)
@@ -180,9 +198,9 @@ class virtual_pi_network : public technology_network
         size_t edge_it = 0;
         for (size_t i = ntk_lvls.size(); i-- > 0;)
         {
-            edge_it       = 0;
-            auto& lvl     = ntk_lvls[i];
-            auto& lvl_new = ntk_lvls_new[i];
+            edge_it             = 0;
+            const auto& lvl     = ntk_lvls[i];
+            auto&       lvl_new = ntk_lvls_new[i];
             for (const auto& nd : lvl)
             {
                 if (ntk.is_pi(nd))
@@ -201,7 +219,7 @@ class virtual_pi_network : public technology_network
                 }
                 else
                 {
-                    auto children = gather_fanin_signals(nd, ntk_lvls_new[i + 1], edge_it);
+                    const auto children = gather_fanin_signals(nd, ntk_lvls_new[i + 1], edge_it);
 
                     if (ntk.is_and(nd))
                     {
@@ -329,8 +347,8 @@ class virtual_pi_network : public technology_network
      */
     [[nodiscard]] bool is_pi(node const& n) const
     {
-        return std::find(virtual_inputs->begin(), virtual_inputs->end(), n) != virtual_inputs->end() ||
-               std::find(_storage->inputs.begin(), _storage->inputs.end(), n) != _storage->inputs.end();
+        return std::find(virtual_inputs->cbegin(), virtual_inputs->cend(), n) != virtual_inputs->cend() ||
+               std::find(_storage->inputs.cbegin(), _storage->inputs.cend(), n) != _storage->inputs.cend();
     }
 
     /**
@@ -343,7 +361,7 @@ class virtual_pi_network : public technology_network
      */
     [[nodiscard]] bool is_pi_virtual(node const& n) const
     {
-        return std::find(virtual_inputs->begin(), virtual_inputs->end(), n) != virtual_inputs->end();
+        return std::find(virtual_inputs->cbegin(), virtual_inputs->cend(), n) != virtual_inputs->cend();
     }
 
     /**
@@ -356,7 +374,7 @@ class virtual_pi_network : public technology_network
      */
     [[nodiscard]] bool is_pi_real(node const& n) const
     {
-        return std::find(_storage->inputs.begin(), _storage->inputs.end(), n) != _storage->inputs.end();
+        return std::find(_storage->inputs.cbegin(), _storage->inputs.cend(), n) != _storage->inputs.cend();
     }
 
     /**
@@ -370,8 +388,8 @@ class virtual_pi_network : public technology_network
      */
     [[nodiscard]] bool is_ci(node const& n) const
     {
-        return std::find(virtual_inputs->begin(), virtual_inputs->end(), n) != virtual_inputs->end() ||
-               std::find(_storage->inputs.begin(), _storage->inputs.end(), n) != _storage->inputs.end();
+        return std::find(virtual_inputs->cbegin(), virtual_inputs->cend(), n) != virtual_inputs->cend() ||
+               std::find(_storage->inputs.cbegin(), _storage->inputs.cend(), n) != _storage->inputs.cend();
     }
 
     /**
@@ -384,7 +402,7 @@ class virtual_pi_network : public technology_network
      */
     [[nodiscard]] bool is_ci_virtual(node const& n) const
     {
-        return std::find(virtual_inputs->begin(), virtual_inputs->end(), n) != virtual_inputs->end();
+        return std::find(virtual_inputs->cbegin(), virtual_inputs->cend(), n) != virtual_inputs->cend();
     }
 
     /**
@@ -397,7 +415,7 @@ class virtual_pi_network : public technology_network
      */
     [[nodiscard]] bool is_ci_real(node const& n) const
     {
-        return std::find(_storage->inputs.begin(), _storage->inputs.end(), n) != _storage->inputs.end();
+        return std::find(_storage->inputs.cbegin(), _storage->inputs.cend(), n) != _storage->inputs.cend();
     }
 
     /**
@@ -490,7 +508,7 @@ class virtual_pi_network : public technology_network
      */
     [[nodiscard]] auto get_real_pi(const node& v_pi) const
     {
-        auto it = std::find_if(map.begin(), map.end(), [v_pi](const auto& pair) { return pair.first == v_pi; });
+        auto it = std::find_if(map.cbegin(), map.cend(), [v_pi](const auto& pair) { return pair.first == v_pi; });
 
         if (it != map.end())
             return it->second;
@@ -510,8 +528,8 @@ class virtual_pi_network : public technology_network
     template <typename Fn>
     void foreach_pi(Fn&& fn) const
     {
-        mockturtle::detail::foreach_element(_storage->inputs.begin(), _storage->inputs.end(), fn);
-        mockturtle::detail::foreach_element(virtual_inputs->begin(), virtual_inputs->end(), fn);
+        mockturtle::detail::foreach_element(_storage->inputs.cbegin(), _storage->inputs.cend(), fn);
+        mockturtle::detail::foreach_element(virtual_inputs->cbegin(), virtual_inputs->cend(), fn);
     }
 
     /**
@@ -527,14 +545,14 @@ class virtual_pi_network : public technology_network
     template <typename Fn>
     void foreach_pi_real(Fn&& fn) const
     {
-        mockturtle::detail::foreach_element(_storage->inputs.begin(), _storage->inputs.end(), fn);
+        mockturtle::detail::foreach_element(_storage->inputs.cbegin(), _storage->inputs.cend(), fn);
     }
 
     /**
      * @brief Applies a given function to each element in a container.
      *
      * This function applies the provided function to each element in the container `Fn`. The container must support
-     * iteration using `begin()` and `end()` methods.
+     * iteration using `cbegin()` and `cend()` methods.
      *
      * @tparam Fn The container type.
      * @param fn The function to apply to each element.
@@ -544,7 +562,7 @@ class virtual_pi_network : public technology_network
     template <typename Fn>
     void foreach_pi_virtual(Fn&& fn) const
     {
-        mockturtle::detail::foreach_element(virtual_inputs->begin(), virtual_inputs->end(), fn);
+        mockturtle::detail::foreach_element(virtual_inputs->cbegin(), virtual_inputs->cend(), fn);
     }
 
     /**
@@ -561,8 +579,8 @@ class virtual_pi_network : public technology_network
     template <typename Fn>
     void foreach_ci(Fn&& fn) const
     {
-        mockturtle::detail::foreach_element(_storage->inputs.begin(), _storage->inputs.end(), fn);
-        mockturtle::detail::foreach_element(virtual_inputs->begin(), virtual_inputs->end(), fn);
+        mockturtle::detail::foreach_element(_storage->inputs.cbegin(), _storage->inputs.cend(), fn);
+        mockturtle::detail::foreach_element(virtual_inputs->cbegin(), virtual_inputs->cend(), fn);
     }
 
     /**
@@ -577,7 +595,7 @@ class virtual_pi_network : public technology_network
     template <typename Fn>
     void foreach_ci_real(Fn&& fn) const
     {
-        mockturtle::detail::foreach_element(_storage->inputs.begin(), _storage->inputs.end(), fn);
+        mockturtle::detail::foreach_element(_storage->inputs.cbegin(), _storage->inputs.cend(), fn);
     }
 
     /**
@@ -595,7 +613,7 @@ class virtual_pi_network : public technology_network
     template <typename Fn>
     void foreach_ci_virtual(Fn&& fn) const
     {
-        mockturtle::detail::foreach_element(virtual_inputs->begin(), virtual_inputs->end(), fn);
+        mockturtle::detail::foreach_element(virtual_inputs->cbegin(), virtual_inputs->cend(), fn);
     }
 
     /**
@@ -633,7 +651,7 @@ class virtual_pi_network : public technology_network
         {
             if (i < _storage->nodes.size())
             {
-                uint64_t new_node = 0;  // = ( _storage->outputs.begin() + i )->index
+                uint64_t new_node = 0;
                 for (const auto& pair : map)
                 {
                     if (pair.first == i)
@@ -668,7 +686,7 @@ class virtual_pi_network : public technology_network
                 {
                     --output.index;
                 }
-                _storage->nodes.erase(_storage->nodes.begin() + i);
+                _storage->nodes.erase(_storage->nodes.cbegin() + i);
             }
         }
 
@@ -678,16 +696,16 @@ class virtual_pi_network : public technology_network
     }
 
   protected:
-    /*
+    /**
      * Shared pointer vector storage for virtual_inputs.
-     * */
+     */
     std::shared_ptr<std::vector<uint32_t>> virtual_inputs;
-    /*
+    /**
      * Map from virtual_pis to real_pis.
-     * */
+     */
     std::vector<std::pair<uint64_t, uint64_t>> map;
-}; /* color_view */
+};
 
 }  // namespace fiction
 
-#endif  // FICTION_NODE_DUPLICATION_VIEW_HPP
+#endif  // FICTION_VIRTUAL_PI_NETWORK_HPP

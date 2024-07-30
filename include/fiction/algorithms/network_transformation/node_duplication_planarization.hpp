@@ -1,11 +1,10 @@
 //
-// Created by benjamin on 6/11/24.
+// Created by benjamin on 11.06.24.
 //
 
 #ifndef FICTION_NODE_DUPLICATION_PLANARIZATION_HPP
 #define FICTION_NODE_DUPLICATION_PLANARIZATION_HPP
 
-#include "fiction/algorithms/network_transformation/fanout_substitution.hpp"
 #include "fiction/algorithms/network_transformation/network_balancing.hpp"
 #include "fiction/algorithms/properties/check_planarity.hpp"
 #include "fiction/networks/views/extended_rank_view.hpp"
@@ -32,14 +31,14 @@ namespace fiction
 {
 
 /**
- * Parameters for the fanout substitution algorithm.
+ * Parameters for the node duplication algorithm.
  */
 struct node_duplication_params
 {
-    /*
+    /**
      * The output order determines the starting layer for this algorithm. If this option is turned off, the output order
      * remains the same as in the provided network. If it is turned on, the outputs are ordered randomly.
-     * */
+     */
     bool random_output_order = false;
 };
 
@@ -390,7 +389,7 @@ class node_duplication_planarization_impl
     /*
      * The input network.
      */
-    Ntk ntk;
+    const Ntk ntk;
     /*
      * The currently node_pairs used in the current level.
      */
@@ -412,7 +411,7 @@ class node_duplication_planarization_impl
 }  // namespace detail
 
 /**
- * @brief Implements a planarization mechanism for Mockturtle networks using a H-Graph strategy and node duplication.
+ * @brief Implements a planarization mechanism for networks using a H-Graph strategy for node duplication.
  *
  * @tparam NtkDest Destination network type
  * @tparam NtkSrc Source network type
@@ -420,9 +419,11 @@ class node_duplication_planarization_impl
  * @param ps Node duplication parameters used in the computation
  *
  * The planarization achieved by this function solves the Node Duplication Crossing Minimization (NDCE) problem by
- * finding the shortest x-y path in the H-graph for every level in the network. The function constructs an H-graph that
- * captures edge relations between two levels within the graph and computes the shortest x-y paths on the H-graph. The
- * graph is traversed from Primary Outputs (POs) towards Primary Inputs (PIs).
+ * finding the shortest x-y path in the H-graph for every level in the network. An H-graph describes edge relations
+ * between two levels in a network, with one level assumed as fixed, starting at the Primary Outputs (POs). By finding
+ * the shortest path from the source (x) to the sink (y) in this H-graph, an optimal solution for the NDCE problem is
+ * found. The function constructs an H-graph that captures edge relations between two levels within the graph and
+ * computes the shortest x-y paths on the H-graph, traversing from the POs towards the Primary Inputs (PIs).
  *
  * @return A view of the planarized virtual_pi_network created in the format of extended_rank_view
  *
@@ -443,8 +444,6 @@ extended_rank_view<virtual_pi_network> node_duplication_planarization(const NtkS
     static_assert(mockturtle::has_create_po_v<NtkDest>, "NtkDest does not implement the create_po function");
     static_assert(mockturtle::has_create_buf_v<NtkDest>, "NtkDest does not implement the create_buf function");
     static_assert(mockturtle::has_clone_node_v<NtkDest>, "NtkDest does not implement the clone_node function");
-    static_assert(mockturtle::has_fanout_size_v<NtkDest>, "NtkDest does not implement the fanout_size function");
-    static_assert(mockturtle::has_foreach_gate_v<NtkDest>, "NtkDest does not implement the foreach_gate function");
     static_assert(mockturtle::has_foreach_fanin_v<NtkDest>, "NtkDest does not implement the foreach_fanin function");
     static_assert(mockturtle::has_foreach_po_v<NtkDest>, "NtkDest does not implement the foreach_po function");
 
