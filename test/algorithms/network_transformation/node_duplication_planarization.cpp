@@ -47,7 +47,8 @@ TEST_CASE("2-ary nodes Test", "[node-duplication-planarization]")
     planarized_maj.remove_virtual_input_nodes<virtual_pi_network>();
 
     mockturtle::equivalence_checking_stats st;
-    const auto maybe_cec_m = mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(tec, planarized_maj), {}, &st);
+    const auto                             maybe_cec_m =
+        mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(tec, planarized_maj), {}, &st);
     REQUIRE(maybe_cec_m.has_value());
     const bool cec_m = *maybe_cec_m;
     CHECK(cec_m == 1);
@@ -88,7 +89,8 @@ TEST_CASE("3-ary nodes Test", "[node-duplication-planarization]")
     planarized_maj.remove_virtual_input_nodes<virtual_pi_network>();
 
     mockturtle::equivalence_checking_stats st;
-    const auto maybe_cec_m = mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(tec, planarized_maj), {}, &st);
+    const auto                             maybe_cec_m =
+        mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(tec, planarized_maj), {}, &st);
     REQUIRE(maybe_cec_m.has_value());
     const bool cec_m = *maybe_cec_m;
     CHECK(cec_m == 1);
@@ -129,7 +131,8 @@ TEST_CASE("Aig Test", "[node-duplication-planarization]")
     planarized_maj.remove_virtual_input_nodes<virtual_pi_network>();
 
     mockturtle::equivalence_checking_stats st;
-    const auto maybe_cec_m = mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(aig, planarized_maj), {}, &st);
+    const auto                             maybe_cec_m =
+        mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(aig, planarized_maj), {}, &st);
     REQUIRE(maybe_cec_m.has_value());
     const bool cec_m = *maybe_cec_m;
     CHECK(cec_m == 1);

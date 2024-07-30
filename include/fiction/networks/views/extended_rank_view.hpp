@@ -24,8 +24,8 @@
  *
  * Provides a view with node ranks for given networks. It adds functionalities to modify ranks. Most importantly, the
  * new `init_ranks()` function allows an array of nodes to be provided, which sets the levels and ranks of the nodes in
- * the network. Additionally, the `modify_rank()` function allows a vector to be passed to a rank, assigning the ranks at
- * this level.
+ * the network. Additionally, the `modify_rank()` function allows a vector to be passed to a rank, assigning the ranks
+ * at this level.
  *
  */
 template <class Ntk, bool has_rank_interface =

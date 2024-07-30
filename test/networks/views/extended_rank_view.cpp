@@ -125,7 +125,8 @@ TEMPLATE_TEST_CASE("Check equivalence checking", "[extended_rank_view]", mocktur
     const auto ntk_r = extended_rank_view(ntk);
 
     mockturtle::equivalence_checking_stats st;
-    const auto maybe_cec_m = mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(ntk, ntk_r), {}, &st);
+    const auto                             maybe_cec_m =
+        mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(ntk, ntk_r), {}, &st);
     REQUIRE(maybe_cec_m.has_value());
     const bool cec_m = *maybe_cec_m;
     CHECK(cec_m == 1);
@@ -170,7 +171,8 @@ TEST_CASE("Check equivalence checking for virtual PIs", "[extended-rank-view]")
     vpi_r.remove_virtual_input_nodes<virtual_pi_network>();
 
     mockturtle::equivalence_checking_stats st;
-    const auto maybe_cec_m = mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(tec, vpi_r), {}, &st);
+    const auto                             maybe_cec_m =
+        mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(tec, vpi_r), {}, &st);
     REQUIRE(maybe_cec_m.has_value());
     const bool cec_m = *maybe_cec_m;
     CHECK(cec_m == 1);

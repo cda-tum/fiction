@@ -81,7 +81,8 @@ TEST_CASE("Remove PIs and check equivalence", "[virtual-pi-view]")
     CHECK(vpi.size() == tec.size());
 
     mockturtle::equivalence_checking_stats st;
-    const auto maybe_cec_m = mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(tec, vpi), {}, &st);
+    const auto                             maybe_cec_m =
+        mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(tec, vpi), {}, &st);
     REQUIRE(maybe_cec_m.has_value());
     const bool cec_m = *maybe_cec_m;
     CHECK(cec_m == 1);
@@ -133,7 +134,8 @@ TEST_CASE("Remove PIs and check equivalence copy constructor", "[virtual-pi-view
     CHECK(vpi.size() - 2 == tec.size());  // the -2 is due to the buffers
 
     mockturtle::equivalence_checking_stats st;
-    const auto maybe_cec_m = mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(tec, vpi), {}, &st);
+    const auto                             maybe_cec_m =
+        mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(tec, vpi), {}, &st);
     REQUIRE(maybe_cec_m.has_value());
     const bool cec_m = *maybe_cec_m;
     CHECK(cec_m == 1);

@@ -5,8 +5,8 @@
 #ifndef FICTION_VIRTUAL_PI_NETWORK_HPP
 #define FICTION_VIRTUAL_PI_NETWORK_HPP
 
-#include "fiction/types.hpp"
 #include "fiction/networks/technology_network.hpp"
+#include "fiction/types.hpp"
 
 #include <mockturtle/networks/detail/foreach.hpp>
 #include <mockturtle/networks/klut.hpp>
@@ -16,8 +16,8 @@
 #include <cassert>
 #include <cstdint>
 #include <cstdlib>
-#include <stdexcept>
 #include <memory>
+#include <stdexcept>
 #include <unordered_map>
 #include <utility>
 #include <vector>
