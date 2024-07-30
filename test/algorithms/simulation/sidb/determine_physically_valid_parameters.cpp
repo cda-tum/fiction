@@ -172,4 +172,3 @@ TEST_CASE(
                   ->second == 0);
     }
 }
-

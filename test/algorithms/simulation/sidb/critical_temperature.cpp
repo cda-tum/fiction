@@ -537,8 +537,8 @@ TEMPLATE_TEST_CASE("Test critical_temperature function, using offset coordinates
     }
 }
 
-TEMPLATE_TEST_CASE("Critical temperature of Bestagon CX, QuickSim", "[critical-temperature], [quality]", sidb_100_cell_clk_lyt_siqad,
-                   cds_sidb_100_cell_clk_lyt_siqad)
+TEMPLATE_TEST_CASE("Critical temperature of Bestagon CX, QuickSim", "[critical-temperature], [quality]",
+                   sidb_100_cell_clk_lyt_siqad, cds_sidb_100_cell_clk_lyt_siqad)
 {
     TestType lyt{};
 
