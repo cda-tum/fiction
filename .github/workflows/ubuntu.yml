@@ -133,7 +133,7 @@ jobs:
 
       - name: Test (Debug)
         working-directory: ${{github.workspace}}/build_debug
-        run: ctest -C Debug --verbose --output-on-failure --repeat until-pass:3 --parallel 4 --exclude-regex "quality"
+        run: ctest -C Debug --verbose --output-on-failure --repeat until-pass:3 --parallel 4 --exclude-regex "(.*\[quality\].*)"
 
 
       # Build and test pipeline for Release mode
