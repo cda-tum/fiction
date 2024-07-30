@@ -23,6 +23,37 @@
 #endif
 
 
+static const char *__doc_extended_rank_view =
+R"doc(@class extended_rank_view (specialization)
+
+A derived class from depth_view.)doc";
+
+static const char *__doc_extended_rank_view_2 =
+R"doc(Deduction guide for `extended_rank_view'
+
+This template helps to deduce the type argument `T` for the
+`extended_rank_view` class when constructed with an argument of type
+`T`.
+
+Template parameter ``T``:
+    Network type deduced from the construction context of
+    `extended_rank_view`.)doc";
+
+static const char *__doc_extended_rank_view_3 =
+R"doc(Deduction guide for `extended_rank_view` with two constructor
+arguments
+
+This template helps to deduce the type argument `T` for the
+`extended_rank_view` class when constructed with two arguments: a
+network of type `T`, and a `vector` of `vector` containing network
+nodes.
+
+Template parameter ``T``:
+    Network type deduced from the construction context of
+    `extended_rank_view`.)doc";
+
+static const char *__doc_extended_rank_view_extended_rank_view = R"doc()doc";
+
 static const char *__doc_fiction_a_star =
 R"doc(The A* path finding algorithm for shortest loop-less paths between a
 given source and target coordinate in a layout. This function
@@ -1885,6 +1916,46 @@ Parameter ``cs``:
 
 Returns:
     Integer representing the SiDB's charge state.)doc";
+
+static const char *__doc_fiction_check_planarity =
+R"doc(Checks if a logic network is planar. To perform this check, the
+network must have ranks assigned.
+
+If the network is not balanced, an exception is thrown. To balance the
+network, insert buffers to divide multi-level edges.
+
+Template parameter ``Ntk``:
+    Logic network type.
+
+Parameter ``ntk``:
+    The logic network to check for planarity.
+
+Returns:
+    `true` if the network is planar, `false` otherwise.
+
+Throws:
+    std::runtime_error if the network is not balanced.)doc";
+
+static const char *__doc_fiction_check_planarity_impl = R"doc()doc";
+
+static const char *__doc_fiction_check_planarity_impl_check_planarity_impl = R"doc()doc";
+
+static const char *__doc_fiction_check_planarity_impl_ntk = R"doc()doc";
+
+static const char *__doc_fiction_check_planarity_impl_run =
+R"doc(Checks if a given network is planar.
+
+This function checks if the network represented by the variable `ntk`
+is planar. The network is planar if for any edge with starting point m
+and endpoint n (represented by the node ranks), there is never another
+edge with starting point m_ > m and endpoint n_ < n, or vice versa.
+When iterating through the ranks of one level, the endpoints are
+always increasing. Therefore, only the starting points need to be
+checked. Thus, the highest connected starting point in the fan-in
+gives a border m_max for every subsequent edge.
+
+Returns:
+    `true` if the network is planar, `false` otherwise.)doc";
 
 static const char *__doc_fiction_check_simulation_results_for_equivalence =
 R"doc(This function compares two SiDB simulation results for equivalence.
@@ -3771,6 +3842,23 @@ Parameter ``to_delete``:
 
 Returns:
     A 2D vector representing the calculated offset matrix.)doc";
+
+static const char *__doc_fiction_detail_calculate_pairs =
+R"doc(Calculates pairs of nodes from a given vector of nodes.
+
+This function takes a vector of nodes and returns a vector of node
+pairs. Each node pair consists of two nodes from the input vector and
+an optional vector of middle nodes. The delay of each node pair is
+initialized to infinity.
+
+Template parameter ``Ntk``:
+    The network type.
+
+Parameter ``nodes``:
+    The vector of nodes.
+
+Returns:
+    The vector of node pairs.)doc";
 
 static const char *__doc_fiction_detail_color_routing_impl = R"doc()doc";
 
@@ -5716,6 +5804,125 @@ static const char *__doc_fiction_detail_network_balancing_impl_ntk_topo = R"doc(
 static const char *__doc_fiction_detail_network_balancing_impl_ps = R"doc()doc";
 
 static const char *__doc_fiction_detail_network_balancing_impl_run = R"doc()doc";
+
+static const char *__doc_fiction_detail_node_duplication_planarization_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_node_duplication_planarization_impl_check_final_level =
+R"doc(Checks if the given vector of nodes contains any non-primary inputs.
+
+This function iterates through each node in the vector and checks if
+it is a primary input. If a non-primary input is found, the
+`f_final_level` parameter is set to false and the loop is exited.
+
+Parameter ``v_next_level``:
+    The vector of nodes to be checked
+
+Parameter ``f_final_level``:
+    A reference to a boolean indicating if the vector contains only
+    primary inputs)doc";
+
+static const char *__doc_fiction_detail_node_duplication_planarization_impl_compute_node_order_next_level =
+R"doc(Computes the order of nodes in the next level based on delay
+
+Parameter ``next_level``:
+    The vector to store the nodes in the next level
+
+This function computes the order of nodes in the next level based on
+their delay in the H-graph of the level. It selects the path with the
+least delay from the current level pairs and follows it via fanin
+relations. The nodes are inserted into the next level vector in the
+order they are encountered.)doc";
+
+static const char *__doc_fiction_detail_node_duplication_planarization_impl_compute_slice_delays =
+R"doc(Computes the delay in a given slice (each possible order of
+node_pairs) of an H-graph
+
+Parameter ``nd``:
+    Node in the H-graph
+
+Parameter ``border_pis``:
+    A boolean indicating whether the input PIs (Primary Inputs) should
+    be propagated to the next level
+
+This function iterates over the fanins of the given node and computes
+the delay for all possible orders of these nodes that form a
+node_pair. The delay computation depends on the node's connections and
+position within the graph. If there is a connection between two
+node_pairs, the delay is incremented by 1. If not, the delay is
+incremented by 2. Default delay for the first node is 1. If a
+node_pair doesn't have a connection and its delay (when increased by
+two) is less than the existing delay, then this node_pair's delay is
+updated.
+
+The processed node_pairs are pushed back to the 'lvl_pairs' data
+member for subsequent delay calculations.
+
+Throws:
+    std::runtime_error if no combinations (possible node_pairs) are
+    found, which might suggest a dangling node)doc";
+
+static const char *__doc_fiction_detail_node_duplication_planarization_impl_insert_if_unique =
+R"doc(Inserts a node into a vector if it is unique
+
+This function inserts a node into a vector only if the vector is empty
+or the node is not equal to the first element of the vector. If the
+vector is not empty and the node is equal to the first element, it
+does nothing.
+
+Template parameter ``Ntk``:
+    The network type
+
+Parameter ``node``:
+    The node to be inserted
+
+Parameter ``vec``:
+    The vector to insert the node into)doc";
+
+static const char *__doc_fiction_detail_node_duplication_planarization_impl_lvl_pairs = R"doc()doc";
+
+static const char *__doc_fiction_detail_node_duplication_planarization_impl_node_duplication_planarization_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_node_duplication_planarization_impl_ntk = R"doc()doc";
+
+static const char *__doc_fiction_detail_node_duplication_planarization_impl_ps = R"doc()doc";
+
+static const char *__doc_fiction_detail_node_duplication_planarization_impl_run = R"doc()doc";
+
+static const char *__doc_fiction_detail_node_pair =
+R"doc(A structure representing a pair of nodes in an H-graph
+
+Template parameter ``Ntk``:
+    Network type for the nodes in the pair
+
+The nodes stored in this struct describe the fanin-edges of a node in
+an H-graph. A node pair object holds two nodes, which are saved in the
+member 'pair'. These two outer nodes are connected through zero or
+more 'middle_nodes'. The fanin order starts with the first node in
+'pair', then proceeds through the 'middle_nodes', and ends with the
+second node in 'pair'. The order of 'middle_nodes' is arbitrary as
+they cannot be further connected to any other nodes. For the
+planarization, only the nodes inside the 'pair' are relevant.
+
+@note The edges connecting to the nodes in 'pair' effectively block
+the 'middle_nodes'.)doc";
+
+static const char *__doc_fiction_detail_node_pair_delay = R"doc(Specifies the delay value for the node)doc";
+
+static const char *__doc_fiction_detail_node_pair_fanin_pair =
+R"doc(Shared pointer to another instance of node_pair detailing fanin-edge
+alignment)doc";
+
+static const char *__doc_fiction_detail_node_pair_node_pair =
+R"doc(node_pair constructor
+
+Parameter ``node1``:
+    The first node of the fanin-edged node
+
+Parameter ``node2``:
+    The second node of the fanin-edged node
+
+Parameter ``delayValue``:
+    The delay value for the node)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl = R"doc()doc";
 
@@ -11731,6 +11938,49 @@ Parameter ``file``:
 Parameter ``rfun``:
     The actual parsing function.)doc";
 
+static const char *__doc_fiction_node_duplication_params = R"doc(Parameters for the node duplication algorithm.)doc";
+
+static const char *__doc_fiction_node_duplication_params_random_output_order =
+R"doc(The output order determines the starting layer for this algorithm. If
+this option is turned off, the output order remains the same as in the
+provided network. If it is turned on, the outputs are ordered
+randomly.)doc";
+
+static const char *__doc_fiction_node_duplication_planarization =
+R"doc(Implements a planarization mechanism for networks using a H-Graph
+strategy for node duplication.
+
+Template parameter ``NtkDest``:
+    Destination network type
+
+Template parameter ``NtkSrc``:
+    Source network type
+
+Parameter ``ntk_src``:
+    Source network to be utilized for the planarization
+
+Parameter ``ps``:
+    Node duplication parameters used in the computation
+
+The planarization achieved by this function solves the Node
+Duplication Crossing Minimization (NDCE) problem by finding the
+shortest x-y path in the H-graph for every level in the network. An
+H-graph describes edge relations between two levels in a network, with
+one level assumed as fixed, starting at the Primary Outputs (POs). By
+finding the shortest path from the source (x) to the sink (y) in this
+H-graph, an optimal solution for the NDCE problem is found. The
+function constructs an H-graph that captures edge relations between
+two levels within the graph and computes the shortest x-y paths on the
+H-graph, traversing from the POs towards the Primary Inputs (PIs).
+
+Returns:
+    A view of the planarized virtual_pi_network created in the format
+    of extended_rank_view
+
+Throws:
+    std::runtime_error if input network not balanced, if no node
+    combinations are found or if the created network is non-planar)doc";
+
 static const char *__doc_fiction_normalize_layout_coordinates =
 R"doc(A new layout is constructed and returned that is equivalent to the
 given cell-level layout. However, its coordinates are normalized,
@@ -15448,6 +15698,35 @@ Template parameter ``Color``:
 static const char *__doc_fiction_vertical_shift_cartesian =
 R"doc(\verbatim +-------+ | | | +-------+ | | | +-------+ | | | +-------+
 \endverbatim)doc";
+
+static const char *__doc_fiction_virtual_pi_network =
+R"doc(!Network with additional "virtual" PIs.
+
+"Virtual" PIs (Primary Inputs) are used to manage the duplication of
+PIs in the network. Each "real" PI can have an arbitrary number of
+"virtual" PIs, which are copies of the original "real" PI. A "virtual"
+PI can be created by duplicating a "real" PI. To keep track of this
+relationship, there is a mapping of each "virtual" PI to its
+corresponding "real" PI in the network.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_map = R"doc(Map from virtual_pis to real_pis.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_virtual_pi_network =
+R"doc(A default constructor for the `virtual_pi_network` class.
+
+This constructor initializes `virtual_inputs` with a shared pointer to
+an empty std::vector of uint32_t.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_virtual_pi_network_2 =
+R"doc(A parameterized constructor for the `virtual_pi_network` class.
+
+This constructor creates a `virtual_pi_network` using the `other`
+`technology_network` and initializes `virtual_inputs` with a shared
+pointer to an empty std::vector of uint32_t.
+
+Parameter ``other``:
+    A `technology_network` object to create an instance of
+    `virtual_pi_network`.)doc";
 
 static const char *__doc_fiction_volume =
 R"doc(Computes the volume of a given coordinate assuming its origin is (0,
