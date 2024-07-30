@@ -1650,6 +1650,7 @@ TEMPLATE_TEST_CASE("Special test cases", "[quickexact]", (sidb_100_cell_clk_lyt_
         lyt.assign_cell_type({1, 1, 1}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({1, 2, 0}, TestType::cell_type::NORMAL);
 
+        // default physical parameters and automatic base number detection
         const quickexact_params<cell<TestType>> params{
             sidb_simulation_parameters{2, -0.32},
             quickexact_params<cell<TestType>>::automatic_base_number_detection::ON};
@@ -1657,10 +1658,12 @@ TEMPLATE_TEST_CASE("Special test cases", "[quickexact]", (sidb_100_cell_clk_lyt_
         const auto simulation_results = quickexact<TestType>(lyt, params);
         CHECK(simulation_results.charge_distributions.size() == 2);
     }
+
     SECTION("Test case 2")
     {
         TestType lyt{};
 
+        // adding 20 normal cells to the layout
         lyt.assign_cell_type({22, 1, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({24, 2, 1}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({23, 3, 1}, TestType::cell_type::NORMAL);
@@ -1682,10 +1685,12 @@ TEMPLATE_TEST_CASE("Special test cases", "[quickexact]", (sidb_100_cell_clk_lyt_
         lyt.assign_cell_type({1, 11, 1}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({17, 11, 1}, TestType::cell_type::NORMAL);
 
+        // default physical parameters with automatic base number detection
         const quickexact_params<cell<TestType>> params{
             sidb_simulation_parameters{2, -0.32},
             quickexact_params<cell<TestType>>::automatic_base_number_detection::ON};
 
+        // default physical parameters and automatic base number detection
         const auto simulation_results = quickexact<TestType>(lyt, params);
         CHECK(simulation_results.charge_distributions.size() == 21);
     }
@@ -1694,6 +1699,7 @@ TEMPLATE_TEST_CASE("Special test cases", "[quickexact]", (sidb_100_cell_clk_lyt_
     {
         TestType lyt{};
 
+        // adding four normal cells to the layout
         lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({1, 0, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({3, 0, 0}, TestType::cell_type::NORMAL);
@@ -1708,6 +1714,7 @@ TEMPLATE_TEST_CASE("Special test cases", "[quickexact]", (sidb_100_cell_clk_lyt_
             const auto simulation_results = quickexact<TestType>(lyt, params);
             CHECK(simulation_results.charge_distributions.size() == 3);
         }
+
         SECTION("automatic base number detection off")
         {
             const quickexact_params<cell<TestType>> params{
@@ -1723,11 +1730,13 @@ TEMPLATE_TEST_CASE("Special test cases", "[quickexact]", (sidb_100_cell_clk_lyt_
     {
         TestType lyt{};
 
-        lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
+        // adding four cells with a different cell type to the layout
+        lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::INPUT);
         lyt.assign_cell_type({0, 1, 1}, TestType::cell_type::NORMAL);
-        lyt.assign_cell_type({9, 3, 0}, TestType::cell_type::NORMAL);
-        lyt.assign_cell_type({2, 4, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({9, 3, 0}, TestType::cell_type::LOGIC);
+        lyt.assign_cell_type({2, 4, 0}, TestType::cell_type::OUTPUT);
 
+        // default physical parameters with automatic base number detection
         const quickexact_params<cell<TestType>> params{
             sidb_simulation_parameters{3, -0.32},
             quickexact_params<cell<TestType>>::automatic_base_number_detection::ON};
@@ -1740,6 +1749,7 @@ TEMPLATE_TEST_CASE("Special test cases", "[quickexact]", (sidb_100_cell_clk_lyt_
     {
         TestType lyt{};
 
+        // adding five cells to the layout
         lyt.assign_cell_type({2, 2, 1}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({2, 3, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({7, 3, 1}, TestType::cell_type::NORMAL);
@@ -1755,6 +1765,7 @@ TEMPLATE_TEST_CASE("Special test cases", "[quickexact]", (sidb_100_cell_clk_lyt_
     {
         TestType lyt{};
 
+        // adding 20 cells to the layout
         lyt.assign_cell_type({3, 0, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({4, 0, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({13, 0, 1}, TestType::cell_type::NORMAL);
@@ -1776,14 +1787,13 @@ TEMPLATE_TEST_CASE("Special test cases", "[quickexact]", (sidb_100_cell_clk_lyt_
         lyt.assign_cell_type({13, 12, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({24, 12, 0}, TestType::cell_type::NORMAL);
 
-        const sidb_simulation_parameters params{3, -0.32, 5.6, 5.0};
+        // default physical parameters
+        const sidb_simulation_parameters params{3, -0.32};
 
         sidb_simulation_result<TestType> qe_res = quickexact(
             lyt,
             quickexact_params<cell<TestType>>{params,
-                                              quickexact_params<cell<TestType>>::automatic_base_number_detection::ON,
-                                              {},
-                                              0});
+                                              quickexact_params<cell<TestType>>::automatic_base_number_detection::ON});
 
         std::sort(qe_res.charge_distributions.begin(), qe_res.charge_distributions.end(),
                   [](const auto& lhs, const auto& rhs) { return lhs.get_system_energy() < rhs.get_system_energy(); });
