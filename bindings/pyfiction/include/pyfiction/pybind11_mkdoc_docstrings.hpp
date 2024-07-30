@@ -745,14 +745,12 @@ static const char *__doc_fiction_bdl_pair_upper =
 R"doc(The upper SiDB of the pair. Upper and lower are defined relative to
 each other via the `operator<` overload.)doc";
 
-static const char *__doc_fiction_bdl_wire_direction =
-R"doc(Possible directions of a BDL wire. Directions in west-east are not
-considered.)doc";
+static const char *__doc_fiction_bdl_wire_direction = R"doc(Possible directions of a BDL wire.)doc";
 
 static const char *__doc_fiction_bdl_wire_direction_NORTH_SOUTH =
 R"doc(Defines the direction of the wire from north to south. The starting
-point is determined by the position of input cells, and the ending
-point is determined by the position of output cells.
+point is defined by the position of input cells, and the ending point
+is defined by the position of output cells.
 
 @note A wire running from west to east is interpreted as north-south
 direction.)doc";
@@ -761,15 +759,15 @@ static const char *__doc_fiction_bdl_wire_direction_NO_DIRECTION = R"doc(A wire 
 
 static const char *__doc_fiction_bdl_wire_direction_SOUTH_NORTH =
 R"doc(Defines the direction of the wire from south to north. The starting
-point is determined by the position of input cells, and the ending
-point is determined by the position of output cells
+point is defined by the position of input cells, and the ending point
+is defined by the position of output cells.
 
 @note A wire running from east to west is interpreted as south-north
 direction.)doc";
 
 static const char *__doc_fiction_bdl_wire_selection = R"doc(An enumeration of the selection of different types of wires.)doc";
 
-static const char *__doc_fiction_bdl_wire_selection_ALL = R"doc(Select all BDL wires regardless of cell type.)doc";
+static const char *__doc_fiction_bdl_wire_selection_ALL = R"doc(Select all BDL wires.)doc";
 
 static const char *__doc_fiction_bdl_wire_selection_INPUT = R"doc(Select only BDL wires that start with input cells.)doc";
 
