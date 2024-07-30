@@ -20,13 +20,13 @@ namespace fiction
 {
 
 /**
- * Possible directions of a BDL wire. Directions in west-east are not considered.
+ * Possible directions of a BDL wire.
  */
 enum class bdl_wire_direction
 {
     /**
      * Defines the direction of the wire from north to south.
-     * The starting point is determined by the position of input cells, and the ending point is determined by the
+     * The starting point is defined by the position of input cells, and the ending point is defined by the
      * position of output cells.
      *
      * @note A wire running from west to east is interpreted as north-south direction.
@@ -34,8 +34,8 @@ enum class bdl_wire_direction
     NORTH_SOUTH,
     /**
      * Defines the direction of the wire from south to north.
-     * The starting point is determined by the position of input cells, and the ending point is determined by the
-     * position of output cells
+     * The starting point is defined by the position of input cells, and the ending point is defined by the
+     * position of output cells.
      *
      * @note A wire running from east to west is interpreted as south-north direction.
      */
@@ -52,7 +52,7 @@ enum class bdl_wire_direction
 enum class bdl_wire_selection
 {
     /**
-     * Select all BDL wires regardless of cell type.
+     * Select all BDL wires.
      */
     ALL,
     /**
@@ -121,23 +121,25 @@ find_bdl_pair_in_wire_by_type(const bdl_wire<Lyt>& wire, const sidb_technology::
 template <typename Lyt>
 [[nodiscard]] bdl_wire_direction determine_wire_direction(const bdl_wire<Lyt>& wire) noexcept
 {
+    // A BDL wire fewer than two BDL pairs does not have a direction.
     if (wire.size() < 2)
     {
         return bdl_wire_direction::NO_DIRECTION;
     }
 
-    bool only_normal_bdls = std::all_of(wire.cbegin(), wire.cend(),
-                                        [](const auto& bdl) { return bdl.type == sidb_technology::cell_type::NORMAL; });
-
-    if (only_normal_bdls)
+    // check if the wire contains only normal cells
+    if (std::all_of(wire.cbegin(), wire.cend(),
+                    [](const auto& bdl) { return bdl.type == sidb_technology::cell_type::NORMAL; }))
     {
         return bdl_wire_direction::NO_DIRECTION;
     }
 
-    bool input_exists = std::any_of(wire.cbegin(), wire.cend(),
+    // check if the wire exhibits an input BDL pair
+    const auto input_exists = std::any_of(wire.cbegin(), wire.cend(),
                                     [](const auto& bdl) { return bdl.type == sidb_technology::cell_type::INPUT; });
 
-    bool output_exists = std::any_of(wire.cbegin(), wire.cend(),
+    // check if the wire exhibits an output BDL pair
+    const auto output_exists = std::any_of(wire.cbegin(), wire.cend(),
                                      [](const auto& bdl) { return bdl.type == sidb_technology::cell_type::OUTPUT; });
 
     if (input_exists && output_exists)
@@ -145,24 +147,28 @@ template <typename Lyt>
         const auto input_bdl  = find_bdl_pair_in_wire_by_type<Lyt>(wire, sidb_technology::cell_type::INPUT).value();
         const auto output_bdl = find_bdl_pair_in_wire_by_type<Lyt>(wire, sidb_technology::cell_type::OUTPUT).value();
 
+        // if the input BDL pair is above the output BDL pair, the wire runs from north to south
         if (input_bdl < output_bdl)
         {
             return bdl_wire_direction::NORTH_SOUTH;
         }
 
+        // if the input BDL pair and the output BDL pair are at the same position, the wire does not have a direction
         if (input_bdl.equal_ignore_type(output_bdl))
         {
+            assert(false && "input and output BDL pairs are at the same position");
             return bdl_wire_direction::NO_DIRECTION;
         }
 
         return bdl_wire_direction::SOUTH_NORTH;
     }
 
+    // if the wire contains only input and normal BDL pairs
     if (input_exists)
     {
         const auto input_bdl = find_bdl_pair_in_wire_by_type<Lyt>(wire, sidb_technology::cell_type::INPUT);
 
-        bool bdl_above_exists =
+        const auto bdl_above_exists =
             std::any_of(wire.cbegin(), wire.cend(), [&input_bdl](const auto& bdl) { return bdl > input_bdl; });
 
         if (bdl_above_exists)
@@ -174,7 +180,8 @@ template <typename Lyt>
     }
 
     const auto output_bdl = find_bdl_pair_in_wire_by_type<Lyt>(wire, sidb_technology::cell_type::OUTPUT);
-    bool       bdl_above_exists =
+
+    const auto       bdl_above_exists =
         std::any_of(wire.cbegin(), wire.cend(), [&output_bdl](const auto& bdl) { return bdl > output_bdl; });
 
     if (bdl_above_exists)
@@ -314,6 +321,7 @@ detect_bdl_wires(const Lyt& lyt, const detect_bdl_wires_params& params = {},
             else
             {
                 current_bdl_pair = initial_bdl_pair;
+
                 if (find_bdl_neighbor_above<Lyt>(current_bdl_pair, bdl_pairs, params.threshold_bdl_interdistance)
                         .has_value())
                 {
