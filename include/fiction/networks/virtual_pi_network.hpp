@@ -322,7 +322,7 @@ class virtual_pi_network : public Ntk
     }
 
     /**
-     * Check if a given node is a virtual PI in the virtual_pi_network.
+     * Check if a given node is a virtual PI. Virtual PIs are created with create_virtual_pi().
      *
      * @param n The node to check.
      * @return True if the node is a virtual PI, false otherwise.
@@ -334,7 +334,7 @@ class virtual_pi_network : public Ntk
     }
 
     /**
-     * Check if a given node is a real PI in the virtual_pi_network.
+     * Check if a given node is a real PI. Real PIs are created with create_pi().
      *
      * @param n The node to check.
      * @return True if the node is a real PI, false otherwise.
