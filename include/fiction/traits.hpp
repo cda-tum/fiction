@@ -1228,6 +1228,33 @@ template <class Ntk>
 inline constexpr bool has_is_and_xor_v = has_is_and_xor<Ntk>::value;
 #pragma endregion
 
+#pragma region has_num_real_pis
+template <class Ntk, class = void>
+struct has_num_real_pis : std::false_type
+{};
+
+template <class Ntk>
+struct has_num_real_pis<Ntk, std::void_t<decltype(std::declval<Ntk>().num_real_pis())>>
+        : std::true_type
+{};
+
+template <class Ntk>
+inline constexpr bool has_num_real_pis_v = has_num_real_pis<Ntk>::value;
+#pragma endregion
+
+#pragma region has_remove_virtual_input_nodes
+template <class Ntk, class = void>
+struct has_remove_virtual_input_nodes : std::false_type
+{};
+
+template <class Ntk>
+struct has_remove_virtual_input_nodes<Ntk, std::void_t<decltype(std::declval<Ntk>().remove_virtual_input_nodes())>>
+        : std::true_type
+{};
+
+template <class Ntk>
+inline constexpr bool has_remove_virtual_input_nodes_v = has_remove_virtual_input_nodes<Ntk>::value;
+#pragma endregion
 }  // namespace fiction
 
 #endif  // FICTION_TRAITS_HPP

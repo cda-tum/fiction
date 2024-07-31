@@ -5,18 +5,18 @@
 #ifndef FICTION_VIRTUAL_PI_NETWORK_HPP
 #define FICTION_VIRTUAL_PI_NETWORK_HPP
 
-#include "fiction/networks/technology_network.hpp"
 #include "fiction/types.hpp"
 
 #include <mockturtle/networks/detail/foreach.hpp>
-#include <mockturtle/networks/klut.hpp>
 #include <mockturtle/traits.hpp>
+#include <mockturtle/algorithms/cleanup.hpp>
 
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
 #include <cstdlib>
 #include <memory>
+#include <type_traits>
 #include <stdexcept>
 #include <unordered_map>
 #include <utility>
@@ -33,11 +33,13 @@ namespace fiction
  * To keep track of this relationship, there is a mapping of each "virtual" PI to its corresponding "real" PI in the
  * network.
  */
-class virtual_pi_network : public technology_network
+template <typename Ntk>
+class virtual_pi_network : public Ntk
 {
   public:
-    using node   = typename technology_network::node;
-    using signal = typename technology_network::signal;
+    using storage = typename Ntk::storage;
+    using node    = typename Ntk::node;
+    using signal  = typename Ntk::signal;
 
   public:
     /**
@@ -46,20 +48,18 @@ class virtual_pi_network : public technology_network
      * This constructor initializes `virtual_inputs` with a shared pointer to an empty
      * std::vector of uint32_t.
      */
-    explicit virtual_pi_network() : virtual_inputs(std::make_shared<std::vector<uint32_t>>()) {}
+    explicit virtual_pi_network() : virtual_inputs(std::make_shared<std::vector<signal>>()) {}
 
     /**
-     * A parameterized constructor for the `virtual_pi_network` class.
+     * A default constructor for the `virtual_pi_network` class.
      *
-     * This constructor creates a `virtual_pi_network` using the `other` `technology_network`
-     * and initializes `virtual_inputs` with a shared pointer to an empty std::vector of uint32_t.
-     *
-     * @param other A `technology_network` object to create an instance of `virtual_pi_network`.
+     * This constructor initializes `virtual_inputs` with a shared pointer to an empty
+     * std::vector of uint32_t.
      */
-    explicit virtual_pi_network(const technology_network& other) :
-            virtual_inputs(std::make_shared<std::vector<uint32_t>>())
+    explicit virtual_pi_network(const Ntk& ntk) :
+            Ntk(ntk.clone()),
+            virtual_inputs(std::make_shared<std::vector<signal>>())
     {
-        _storage = std::make_shared<mockturtle::klut_storage>(*(other._storage));  // create deep copy of storage
     }
 
     /**
@@ -127,7 +127,6 @@ class virtual_pi_network : public technology_network
      * collects the fanin data for a node and matches them in the virtual_pi_network.
      *
      */
-    template <typename Ntk>
     explicit virtual_pi_network(Ntk& ntk, std::vector<std::vector<mockturtle::node<Ntk>>>& ntk_lvls,
                                 std::vector<std::vector<mockturtle::node<Ntk>>>& ntk_lvls_new)
     {
@@ -285,26 +284,6 @@ class virtual_pi_network : public technology_network
     }
 
     /**
-     * @brief Reimplementation of num_gates(). Retrieves the number of gates in the virtual_pi_network.
-     *
-     * @return The number of gates in the virtual_pi_network.
-     */
-    auto num_gates() const
-    {
-        return static_cast<uint32_t>(_storage->nodes.size() - virtual_inputs->size() - _storage->inputs.size() - 2);
-    }
-
-    /**
-     * @brief Reimplementation of size(). Get the size of the virtual_pi_network.
-     *
-     * @return The size of the virtual_pi_network as a uint32_t.
-     */
-    auto size() const
-    {
-        return static_cast<uint32_t>(_storage->nodes.size());
-    }
-
-    /**
      * \brief Calculate the real size of the virtual_pi_network.
      *
      * This function calculates the real size of the virtual_pi_network by subtracting the size of the virtual_inputs
@@ -312,9 +291,9 @@ class virtual_pi_network : public technology_network
      *
      * \return The real size of the virtual_pi_network as a uint32_t.
      */
-    [[nodiscard]] auto size_real() const
+    [[nodiscard]] auto real_size() const
     {
-        return static_cast<uint32_t>(_storage->nodes.size() - virtual_inputs->size());
+        return static_cast<uint32_t>(Ntk::size() - virtual_inputs->size());
     }
 
     /**
@@ -327,28 +306,12 @@ class virtual_pi_network : public technology_network
      * @param real_pi The node representing the real PI in the network.
      * @return The index of the newly created virtual PI.
      */
-    signal create_virtual_pi(const node& real_pi)
+    signal create_virtual_pi(const signal& real_pi)
     {
-        const auto index = _storage->nodes.size();
-        _storage->nodes.emplace_back();
-        virtual_inputs->emplace_back(index);
-        _storage->nodes[index].data[1].h1 = 2;
-        map.emplace_back(index, real_pi);
-        return index;
-    }
-
-    /**
-     * @brief Reimplementation of is_pi(). Check if a given node is a primary input (PI) in the virtual_pi_network.
-     *
-     * A node is considered a PI if it exists in the virtual_inputs vector or the inputs vector of the _storage object.
-     *
-     * @param n The node to check.
-     * @return True if the node is a PI, false otherwise.
-     */
-    [[nodiscard]] bool is_pi(node const& n) const
-    {
-        return std::find(virtual_inputs->cbegin(), virtual_inputs->cend(), n) != virtual_inputs->cend() ||
-               std::find(_storage->inputs.cbegin(), _storage->inputs.cend(), n) != _storage->inputs.cend();
+        signal s = Ntk::create_pi();
+        virtual_inputs->emplace_back(s);
+        map.emplace_back(s, real_pi);
+        return s;
     }
 
     /**
@@ -359,7 +322,7 @@ class virtual_pi_network : public technology_network
      * @param n The node to check.
      * @return True if the node is a virtual PI, false otherwise.
      */
-    [[nodiscard]] bool is_pi_virtual(node const& n) const
+    [[nodiscard]] bool is_virtual_pi(node const& n) const
     {
         return std::find(virtual_inputs->cbegin(), virtual_inputs->cend(), n) != virtual_inputs->cend();
     }
@@ -372,24 +335,9 @@ class virtual_pi_network : public technology_network
      * @param n The node to check.
      * @return True if the node is a real PI, false otherwise.
      */
-    [[nodiscard]] bool is_pi_real(node const& n) const
+    [[nodiscard]] bool is_real_pi(node const& n) const
     {
-        return std::find(_storage->inputs.cbegin(), _storage->inputs.cend(), n) != _storage->inputs.cend();
-    }
-
-    /**
-     * Check if a node is a const input in the virtual_pi_network.
-     *
-     * A node is considered a const input if it exists in the virtual_inputs vector or the inputs vector of the _storage
-     * object.
-     *
-     * @param n The node to check.
-     * @return True if the node is a const input, false otherwise.
-     */
-    [[nodiscard]] bool is_ci(node const& n) const
-    {
-        return std::find(virtual_inputs->cbegin(), virtual_inputs->cend(), n) != virtual_inputs->cend() ||
-               std::find(_storage->inputs.cbegin(), _storage->inputs.cend(), n) != _storage->inputs.cend();
+        return (Ntk::is_pi(n) && !is_virtual_pi(n));
     }
 
     /**
@@ -400,7 +348,7 @@ class virtual_pi_network : public technology_network
      * @param n The node to check.
      * @return True if the node is a virtual CI, false otherwise.
      */
-    [[nodiscard]] bool is_ci_virtual(node const& n) const
+    [[nodiscard]] bool is_virtual_ci(node const& n) const
     {
         return std::find(virtual_inputs->cbegin(), virtual_inputs->cend(), n) != virtual_inputs->cend();
     }
@@ -413,22 +361,9 @@ class virtual_pi_network : public technology_network
      * @param n The node to check.
      * @return True if the node is a real CI, false otherwise.
      */
-    [[nodiscard]] bool is_ci_real(node const& n) const
+    [[nodiscard]] bool is_real_ci(node const& n) const
     {
-        return std::find(_storage->inputs.cbegin(), _storage->inputs.cend(), n) != _storage->inputs.cend();
-    }
-
-    /**
-     * @brief Retrieve the number of combinatorial inputs (CIs) in the virtual_pi_network.
-     *
-     * The num_cis() function returns the total number of CIs in the virtual_pi_network.
-     * It includes both virtual constant inputs and real constant inputs.
-     *
-     * @return The number of CIs as a uint32_t.
-     */
-    [[nodiscard]] auto num_cis() const
-    {
-        return static_cast<uint32_t>(_storage->inputs.size() + virtual_inputs->size());
+        return (Ntk::is_ci(n) && !is_virtual_ci(n));
     }
 
     /**
@@ -439,7 +374,7 @@ class virtual_pi_network : public technology_network
      *
      * @return The number of virtual CIs as a uint32_t.
      */
-    [[nodiscard]] auto num_cis_virtual() const
+    [[nodiscard]] auto num_virtual_cis() const
     {
         return static_cast<uint32_t>(virtual_inputs->size());
     }
@@ -452,22 +387,9 @@ class virtual_pi_network : public technology_network
      *
      * @return The number of real CIs as a uint32_t.
      */
-    [[nodiscard]] auto num_cis_real() const
+    [[nodiscard]] auto num_real_cis() const
     {
-        return static_cast<uint32_t>(_storage->inputs.size());
-    }
-
-    /**
-     * @brief Reimplementation of num_pis(). Get the number of primary inputs (PIs) in the virtual_pi_network.
-     *
-     * The num_pis() function returns the total number of PIs in the virtual_pi_network.
-     * It includes both virtual PIs and real PIs.
-     *
-     * @return The number of PIs as a uint32_t.
-     */
-    [[nodiscard]] auto num_pis() const
-    {
-        return static_cast<uint32_t>(_storage->inputs.size() + virtual_inputs->size());
+        return static_cast<uint32_t>(Ntk::num_cis()-num_virtual_cis());
     }
 
     /**
@@ -478,7 +400,7 @@ class virtual_pi_network : public technology_network
      *
      * @return The number of virtual PIs as a uint32_t.
      */
-    [[nodiscard]] auto num_pis_virtual() const
+    [[nodiscard]] auto num_virtual_pis() const
     {
         return static_cast<uint32_t>(virtual_inputs->size());
     }
@@ -491,9 +413,9 @@ class virtual_pi_network : public technology_network
      *
      * @return The number of real PIs as a uint32_t.
      */
-    [[nodiscard]] auto num_pis_real() const
+    [[nodiscard]] auto num_real_pis() const
     {
-        return static_cast<uint32_t>(_storage->inputs.size());
+        return static_cast<uint32_t>(Ntk::num_pis()-num_virtual_pis());
     }
 
     /**
@@ -517,22 +439,6 @@ class virtual_pi_network : public technology_network
     }
 
     /**
-     * @brief Reimplementation of foreach_pi(). Apply a given function to each primary input in the virtual_pi_network.
-     *
-     * This function iterates over all primary inputs in the virtual_pi_network and applies the given function to each
-     * primary input.
-     *
-     * @tparam Fn The type of function to apply to each primary input.
-     * @param fn The function to apply to each primary input.
-     */
-    template <typename Fn>
-    void foreach_pi(Fn&& fn) const
-    {
-        mockturtle::detail::foreach_element(_storage->inputs.cbegin(), _storage->inputs.cend(), fn);
-        mockturtle::detail::foreach_element(virtual_inputs->cbegin(), virtual_inputs->cend(), fn);
-    }
-
-    /**
      * @brief Iterates over the primary inputs of the circuit and applies a given
      * function.
      *
@@ -543,9 +449,13 @@ class virtual_pi_network : public technology_network
      * @param fn The function to be applied to each primary input.
      */
     template <typename Fn>
-    void foreach_pi_real(Fn&& fn) const
+    void foreach_real_pi(Fn&& fn)
     {
-        mockturtle::detail::foreach_element(_storage->inputs.cbegin(), _storage->inputs.cend(), fn);
+        static_cast<Ntk*>(this)->foreach_pi([&](const auto& i){
+                                                if (!is_virtual_pi(i)) {
+                                                    std::forward<Fn>(fn)(i);
+                                                }
+                                            });
     }
 
     /**
@@ -560,26 +470,8 @@ class virtual_pi_network : public technology_network
      * @see mockturtle::detail::foreach_element
      */
     template <typename Fn>
-    void foreach_pi_virtual(Fn&& fn) const
+    void foreach_virtual_pi(Fn&& fn) const
     {
-        mockturtle::detail::foreach_element(virtual_inputs->cbegin(), virtual_inputs->cend(), fn);
-    }
-
-    /**
-     * @brief Applies a function to each combinatorial input.
-     *
-     * This function applies the given function to each input stored in the circuit.
-     * It also applies the function to each virtual input.
-     * The data types of the function passed to this function must be compatible
-     * with the data types stored in the inputs and virtual_inputs of the circuit.
-     *
-     * @tparam Fn The type of the function to apply to each input.
-     * @param fn The function to apply to each input.
-     */
-    template <typename Fn>
-    void foreach_ci(Fn&& fn) const
-    {
-        mockturtle::detail::foreach_element(_storage->inputs.cbegin(), _storage->inputs.cend(), fn);
         mockturtle::detail::foreach_element(virtual_inputs->cbegin(), virtual_inputs->cend(), fn);
     }
 
@@ -593,9 +485,13 @@ class virtual_pi_network : public technology_network
      * @param fn The function to be applied
      */
     template <typename Fn>
-    void foreach_ci_real(Fn&& fn) const
+    void foreach_real_ci(Fn&& fn)
     {
-        mockturtle::detail::foreach_element(_storage->inputs.cbegin(), _storage->inputs.cend(), fn);
+        static_cast<Ntk*>(this)->foreach_ci([&](const auto& i){
+                                                if (!is_virtual_ci(i)) {
+                                                    std::forward<Fn>(fn)(i);
+                                                }
+                                            });
     }
 
     /**
@@ -611,25 +507,9 @@ class virtual_pi_network : public technology_network
      *       the elements in the container.
      */
     template <typename Fn>
-    void foreach_ci_virtual(Fn&& fn) const
+    void foreach_virtual_ci(Fn&& fn) const
     {
         mockturtle::detail::foreach_element(virtual_inputs->cbegin(), virtual_inputs->cend(), fn);
-    }
-
-    /**
-     * @brief Applies a function to each gate in the circuit.
-     *
-     * This function iterates over each gate in the circuit, excluding the constants.
-     *
-     * @tparam Fn The type of the function.
-     * @param fn The function to apply to each gate.
-     */
-    template <typename Fn>
-    void foreach_gate(Fn&& fn) const
-    {
-        auto r = mockturtle::range<uint64_t>(2u, _storage->nodes.size()); /* start from 2 to avoid constants */
-        mockturtle::detail::foreach_element_if(
-            r.begin(), r.end(), [this](auto n) { return (!is_ci(n) && !is_virtual_ci(n)); }, fn);
     }
 
     /**
@@ -646,49 +526,12 @@ class virtual_pi_network : public technology_network
      */
     void remove_virtual_input_nodes()
     {
-        std::sort(virtual_inputs->begin(), virtual_inputs->end(), std::greater<uint64_t>());
-        for (uint32_t i : *virtual_inputs)
+        for (const auto &map_item : map)
         {
-            if (i < _storage->nodes.size())
-            {
-                uint64_t new_node = 0;
-                for (const auto& pair : map)
-                {
-                    if (pair.first == i)
-                    {
-                        new_node = pair.second;
-                        break;
-                    }
-                }
-                substitute_node(i, new_node);
-                // Adjust inputs
-                for (auto& input : _storage->inputs)
-                {
-                    if (input > i)
-                    {
-                        --input;
-                    }
-                }
-                // Adjust nodes vector in the technology_network _storage
-                for (auto j = 0u; j < _storage->nodes.size(); ++j)
-                {
-                    auto& n = _storage->nodes[j];
-                    for (auto& child : n.children)
-                    {
-                        if (child.data > i)
-                        {
-                            --child.data;
-                        }
-                    }
-                }
-                // Adjust outputs
-                for (auto& output : _storage->outputs)
-                {
-                    --output.index;
-                }
-                _storage->nodes.erase(_storage->nodes.cbegin() + i);
-            }
+            Ntk::substitute_node(Ntk::get_node(map_item.first), map_item.second);
         }
+
+        *this = mockturtle::cleanup_dangling(*this, 1);
 
         // Clear virtual_inputs after using it
         virtual_inputs->clear();
@@ -699,11 +542,11 @@ class virtual_pi_network : public technology_network
     /**
      * Shared pointer vector storage for virtual_inputs.
      */
-    std::shared_ptr<std::vector<uint32_t>> virtual_inputs;
+    std::shared_ptr<std::vector<signal>> virtual_inputs;
     /**
      * Map from virtual_pis to real_pis.
      */
-    std::vector<std::pair<uint64_t, uint64_t>> map;
+    std::vector<std::pair<signal, signal>> map;
 };
 
 }  // namespace fiction
