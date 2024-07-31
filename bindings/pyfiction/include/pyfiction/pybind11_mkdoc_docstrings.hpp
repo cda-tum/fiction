@@ -10378,9 +10378,13 @@ static const char *__doc_fiction_has_north_east = R"doc()doc";
 
 static const char *__doc_fiction_has_north_west = R"doc()doc";
 
+static const char *__doc_fiction_has_num_real_pis = R"doc()doc";
+
 static const char *__doc_fiction_has_ordinal_operations = R"doc()doc";
 
 static const char *__doc_fiction_has_post_layout_optimization = R"doc()doc";
+
+static const char *__doc_fiction_has_remove_virtual_input_nodes = R"doc()doc";
 
 static const char *__doc_fiction_has_set_layout_name = R"doc()doc";
 
@@ -11853,6 +11857,20 @@ static const char *__doc_fiction_missing_sidb_position_exception_line = R"doc()d
 static const char *__doc_fiction_missing_sidb_position_exception_missing_sidb_position_exception = R"doc()doc";
 
 static const char *__doc_fiction_missing_sidb_position_exception_where = R"doc()doc";
+
+static const char *__doc_fiction_miter =
+R"doc(! Creates a combinational miter from two networks.
+
+This method combines two networks that have the same number of primary
+inputs and the same number of primary outputs into a miter. The miter
+has the same number of inputs and one primary output. This output is
+the OR of XORs of all primary output pairs. In other words, the miter
+outputs 1 for all input assignments in which the two input networks
+differ.
+
+All networks may have different types. The method returns an optional,
+which is `nullopt`, whenever the two input networks don't match in
+their number of primary inputs and primary outputs.)doc";
 
 static const char *__doc_fiction_network_balancing =
 R"doc(Balances a logic network with buffer nodes that compute the identity
@@ -15718,15 +15736,10 @@ This constructor initializes `virtual_inputs` with a shared pointer to
 an empty std::vector of uint32_t.)doc";
 
 static const char *__doc_fiction_virtual_pi_network_virtual_pi_network_2 =
-R"doc(A parameterized constructor for the `virtual_pi_network` class.
+R"doc(A default constructor for the `virtual_pi_network` class.
 
-This constructor creates a `virtual_pi_network` using the `other`
-`technology_network` and initializes `virtual_inputs` with a shared
-pointer to an empty std::vector of uint32_t.
-
-Parameter ``other``:
-    A `technology_network` object to create an instance of
-    `virtual_pi_network`.)doc";
+This constructor initializes `virtual_inputs` with a shared pointer to
+an empty std::vector of uint32_t.)doc";
 
 static const char *__doc_fiction_volume =
 R"doc(Computes the volume of a given coordinate assuming its origin is (0,
