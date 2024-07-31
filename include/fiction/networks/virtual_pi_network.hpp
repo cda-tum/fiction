@@ -7,17 +7,17 @@
 
 #include "fiction/types.hpp"
 
+#include <mockturtle/algorithms/cleanup.hpp>
 #include <mockturtle/networks/detail/foreach.hpp>
 #include <mockturtle/traits.hpp>
-#include <mockturtle/algorithms/cleanup.hpp>
 
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
 #include <cstdlib>
 #include <memory>
-#include <type_traits>
 #include <stdexcept>
+#include <type_traits>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -59,8 +59,7 @@ class virtual_pi_network : public Ntk
     explicit virtual_pi_network(const Ntk& ntk) :
             Ntk(ntk.clone()),
             virtual_inputs(std::make_shared<std::vector<signal>>())
-    {
-    }
+    {}
 
     /**
      * @brief A variant of the mockturtle::initialize_copy_network. It maps old nodes not only to a single node, but to
@@ -389,7 +388,7 @@ class virtual_pi_network : public Ntk
      */
     [[nodiscard]] auto num_real_cis() const
     {
-        return static_cast<uint32_t>(Ntk::num_cis()-num_virtual_cis());
+        return static_cast<uint32_t>(Ntk::num_cis() - num_virtual_cis());
     }
 
     /**
@@ -415,7 +414,7 @@ class virtual_pi_network : public Ntk
      */
     [[nodiscard]] auto num_real_pis() const
     {
-        return static_cast<uint32_t>(Ntk::num_pis()-num_virtual_pis());
+        return static_cast<uint32_t>(Ntk::num_pis() - num_virtual_pis());
     }
 
     /**
@@ -451,11 +450,14 @@ class virtual_pi_network : public Ntk
     template <typename Fn>
     void foreach_real_pi(Fn&& fn)
     {
-        static_cast<Ntk*>(this)->foreach_pi([&](const auto& i){
-                                                if (!is_virtual_pi(i)) {
-                                                    std::forward<Fn>(fn)(i);
-                                                }
-                                            });
+        static_cast<Ntk*>(this)->foreach_pi(
+            [&](const auto& i)
+            {
+                if (!is_virtual_pi(i))
+                {
+                    std::forward<Fn>(fn)(i);
+                }
+            });
     }
 
     /**
@@ -487,11 +489,14 @@ class virtual_pi_network : public Ntk
     template <typename Fn>
     void foreach_real_ci(Fn&& fn)
     {
-        static_cast<Ntk*>(this)->foreach_ci([&](const auto& i){
-                                                if (!is_virtual_ci(i)) {
-                                                    std::forward<Fn>(fn)(i);
-                                                }
-                                            });
+        static_cast<Ntk*>(this)->foreach_ci(
+            [&](const auto& i)
+            {
+                if (!is_virtual_ci(i))
+                {
+                    std::forward<Fn>(fn)(i);
+                }
+            });
     }
 
     /**
@@ -526,7 +531,7 @@ class virtual_pi_network : public Ntk
      */
     void remove_virtual_input_nodes()
     {
-        for (const auto &map_item : map)
+        for (const auto& map_item : map)
         {
             Ntk::substitute_node(Ntk::get_node(map_item.first), map_item.second);
         }
