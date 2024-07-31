@@ -15717,29 +15717,25 @@ static const char *__doc_fiction_vertical_shift_cartesian =
 R"doc(\verbatim +-------+ | | | +-------+ | | | +-------+ | | | +-------+
 \endverbatim)doc";
 
-static const char *__doc_fiction_virtual_pi_network =
-R"doc(!Network with additional "virtual" PIs.
-
-"Virtual" PIs (Primary Inputs) are used to manage the duplication of
-PIs in the network. Each "real" PI can have an arbitrary number of
-"virtual" PIs, which are copies of the original "real" PI. A "virtual"
-PI can be created by duplicating a "real" PI. To keep track of this
-relationship, there is a mapping of each "virtual" PI to its
-corresponding "real" PI in the network.)doc";
-
-static const char *__doc_fiction_virtual_pi_network_map = R"doc(Map from virtual_pis to real_pis.)doc";
+static const char *__doc_fiction_virtual_pi_network = R"doc()doc";
 
 static const char *__doc_fiction_virtual_pi_network_virtual_pi_network =
-R"doc(A default constructor for the `virtual_pi_network` class.
-
-This constructor initializes `virtual_inputs` with a shared pointer to
-an empty std::vector of uint32_t.)doc";
+R"doc(Default constructor for the `virtual_pi_network` class. Initializes
+`_storage` as a shared pointer.)doc";
 
 static const char *__doc_fiction_virtual_pi_network_virtual_pi_network_2 =
-R"doc(A default constructor for the `virtual_pi_network` class.
+R"doc(Copy constructor for the `virtual_pi_network` class. Given a network
+`ntk`, constructs a new `virtual_pi_network` as a clone of `ntk`.
+Initializes `_storage` as a shared pointer.
 
-This constructor initializes `virtual_inputs` with a shared pointer to
-an empty std::vector of uint32_t.)doc";
+Parameter ``ntk``:
+    The network to clone into this object.)doc";
+
+static const char *__doc_fiction_virtual_storage = R"doc()doc";
+
+static const char *__doc_fiction_virtual_storage_map_virt_to_real_pi = R"doc(Map from virtual_pis to real_pis.)doc";
+
+static const char *__doc_fiction_virtual_storage_virtual_inputs = R"doc(Shared pointer vector storage for virtual_inputs.)doc";
 
 static const char *__doc_fiction_volume =
 R"doc(Computes the volume of a given coordinate assuming its origin is (0,
