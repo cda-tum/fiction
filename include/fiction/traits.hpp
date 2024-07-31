@@ -1234,8 +1234,7 @@ struct has_num_real_pis : std::false_type
 {};
 
 template <class Ntk>
-struct has_num_real_pis<Ntk, std::void_t<decltype(std::declval<Ntk>().num_real_pis())>>
-        : std::true_type
+struct has_num_real_pis<Ntk, std::void_t<decltype(std::declval<Ntk>().num_real_pis())>> : std::true_type
 {};
 
 template <class Ntk>

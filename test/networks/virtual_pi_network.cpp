@@ -2,8 +2,8 @@
 // Created by benjamin on 14.06.24.
 //
 
-#include <catch2/catch_test_macros.hpp>
 #include <catch2/catch_template_test_macros.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include <fiction/algorithms/verification/virtual_miter.hpp>
 #include <fiction/networks/technology_network.hpp>
