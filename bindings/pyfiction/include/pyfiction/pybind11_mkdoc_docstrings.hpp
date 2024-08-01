@@ -7456,11 +7456,12 @@ atomic positions, resulting in displacement. This means that an SiDB
 is fabricated close to the desired one, typically one or a few H-Si
 positions away. The percentage of displaced SiDBs depends on the
 fabrication speed. Therefore, SiDB layouts with high displacement
-tolerance are preferred to speed up the fabrication process. This
-function calculates the probability of fabricating an operational SiDB
-layout for an originally given SiDB layout and fabrication error rate.
-A fabrication error rate of 0.0 or negative indicates that the SiDB
-layout is designed without displacement.
+tolerance are preferred to speed up the fabrication process.
+
+This function calculates the probability of fabricating an operational
+SiDB layout for an originally given SiDB layout and a given
+fabrication error rate. A fabrication error rate of 0.0 or negative
+indicates that the SiDB layout is designed without displacement.
 
 Template parameter ``Lyt``:
     The SiDB cell-level layout type.
@@ -7580,6 +7581,16 @@ static const char *__doc_fiction_determine_vertex_coloring_stats_duration = R"do
 
 static const char *__doc_fiction_determine_vertex_coloring_stats_most_frequent_color = R"doc(The color that appeared the most.)doc";
 
+static const char *__doc_fiction_dimer_displacement_policy = R"doc(Specifies the allowed displacement range options for SiDB placement.)doc";
+
+static const char *__doc_fiction_dimer_displacement_policy_ALLOW_OTHER_DIMER =
+R"doc(In this mode, SiDBs are allowed to be displaced from the original
+dimer to any other dimer within the layout.)doc";
+
+static const char *__doc_fiction_dimer_displacement_policy_STAY_ON_ORIGINAL_DIMER =
+R"doc(In this mode, any displacement of SiDBs must remain within the
+boundaries of the initial dimer they are placed on.)doc";
+
 static const char *__doc_fiction_displacement_robustness_domain =
 R"doc(During fabrication, SiDBs may not align precisely with their intended
 atomic positions, resulting in displacement. This means that an SiDB
@@ -7599,18 +7610,18 @@ static const char *__doc_fiction_displacement_robustness_domain_params =
 R"doc(Parameters for the `determine_displacement_robustness_domain` and
 `determine_propability_of_fabricating_operational_gate` algorithms.
 
-Parameter ``Lyt``:
-    SiDB cell-level layout type.)doc";
-
-static const char *__doc_fiction_displacement_robustness_domain_params_allow_dimer_change_in_y_direction =
-R"doc(This flag controls whether the displacement in the y-direction can
-lead to changes in the Si dimer.)doc";
+Parameter ``CellType``:
+    cell type.)doc";
 
 static const char *__doc_fiction_displacement_robustness_domain_params_analysis_mode =
 R"doc(This parameter defines the mode of the displacement analysis. The
 default value is `EXHAUSTIVE`. For faster simulation results, `RANDOM`
 can be used. However, this leads to a reduction in the accuracy of the
 results.)doc";
+
+static const char *__doc_fiction_displacement_robustness_domain_params_dimer_policy =
+R"doc(This flag controls whether the displacement in the y-direction can
+lead to changes in the Si dimer.)doc";
 
 static const char *__doc_fiction_displacement_robustness_domain_params_displacement_analysis_mode = R"doc(Possible modes to determine the displacement robustness domain.)doc";
 
