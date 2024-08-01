@@ -24,9 +24,21 @@
  *
  * Provides a view with node ranks for given networks. It adds functionalities to modify ranks. Most importantly, the
  * new `init_ranks()` function allows an array of nodes to be provided, which sets the levels and ranks of the nodes in
- * the network. Additionally, the `modify_rank()` function allows a vector to be passed to a rank, assigning the ranks
- * at this level.
+ * the network. Additionally, the `modify_rank()` function allows to pass a vector to assign the ranks of nodes in one
+ * specific level.
  *
+ * This class template is specialized depending on whether the provided network has a rank interface or not. The rank
+ * interface is detected using the type traits defined in mockturtle. Specifically,
+ * - has_rank_position_v<Ntk>
+ * - has_at_rank_position_v<Ntk>
+ * - has_swap_v<Ntk>
+ * - has_width_v<Ntk>
+ * - has_foreach_node_in_rank_v<Ntk>
+ * - has_foreach_gate_in_rank_v<Ntk>
+ *
+ * @tparam Ntk - The network type.
+ * @tparam has_rank_interface - Boolean flag checked compile-time, determines if the provided Ntk supports the rank
+ * interface
  */
 template <class Ntk, bool has_rank_interface =
                          mockturtle::has_rank_position_v<Ntk> && mockturtle::has_at_rank_position_v<Ntk> &&
@@ -36,10 +48,11 @@ class extended_rank_view
 {};
 
 /**
- * @class extended_rank_view (specialization)
+ * @class extended_rank_view<Ntk, true>
  *
- * A derived class from depth_view.
+ * If already a rank_interface exists only the depth_view constructor gets called.
  *
+ * @tparam Ntk - The network type.
  */
 template <class Ntk>
 class extended_rank_view<Ntk, true> : public mockturtle::depth_view<Ntk>
@@ -49,10 +62,11 @@ class extended_rank_view<Ntk, true> : public mockturtle::depth_view<Ntk>
 };
 
 /**
- * @class extended_rank_view (specialization)
+ * @class extended_rank_view<Ntk, false>
  *
- * A derived class from depth_view.
+ * If no rank_interface exists, inherits from mockturtle::depth_view<Ntk> and initializes ranks for the network.
  *
+ * @tparam Ntk - The network type.
  */
 template <class Ntk>
 class extended_rank_view<Ntk, false> : public mockturtle::depth_view<Ntk>
@@ -64,9 +78,9 @@ class extended_rank_view<Ntk, false> : public mockturtle::depth_view<Ntk>
     using signal                                  = typename Ntk::signal;
 
     /**
-     * @class extended_rank_view (specialization)
-     *
-     * Can assign specific ranks.
+     * Default constructor.
+     * Constructs an empty extended_rank_view object, initializes base class and class variables, and verifies that the
+     * Network Type (Ntk) needs to support certain methods.
      */
     explicit extended_rank_view() : mockturtle::depth_view<Ntk>(), rank_pos{*this}, ranks{}, max_rank_width{0}
     {
@@ -81,14 +95,11 @@ class extended_rank_view<Ntk, false> : public mockturtle::depth_view<Ntk>
     }
 
     /**
-     * @class extended_rank_view
+     * Constructs an extended_rank_view from an existing network.
+     * Calls the base class constructor with the provided network, initializes class members, and registers network
+     * events. Also, it ensures that the Network Type (Ntk) needs to support certain methods.
      *
-     * @brief A derived class from depth_view that represents a network with ranks assigned to nodes.
-     *
-     * This class provides functionality to assign and modify ranks for nodes in a network. It also provides methods to
-     * access and manipulate nodes based on their rank position.
-     *
-     * @tparam Ntk Network type
+     * @param ntk - Reference to the network.
      */
     explicit extended_rank_view(Ntk const& ntk) :
             mockturtle::depth_view<Ntk>{ntk},
@@ -107,17 +118,14 @@ class extended_rank_view<Ntk, false> : public mockturtle::depth_view<Ntk>
 
         add_event = Ntk::events().register_add_event([this](auto const& n) { on_add(n); });
     }
-    /*!
-     * \brief Overloaded constructor with ranks specification.
+
+    /**
+     * Constructs an extended_rank_view from an existing network and a specific initial rank configuration.
      *
-     * This constructor is similar to the standard one, with the addition of specifying initial node ranks within the
-     * network.
-     *
-     * \param ntk Base network
-     * \param ranks A vector of vectors containing nodes, each sub-vector represents a particular rank, and the nodes
-     * within it.
+     * @param ntk - Reference to the network.
+     * @param ranks - A vector of vectors specifying initial ranks for the nodes within the network.
      */
-    explicit extended_rank_view(Ntk const& ntk, std::vector<std::vector<node>> ranks) :
+    explicit extended_rank_view(Ntk const& ntk, const std::vector<std::vector<node>>& ranks) :
             mockturtle::depth_view<Ntk>{ntk},
             rank_pos{ntk},
             ranks{this->depth() + 1},
@@ -136,17 +144,13 @@ class extended_rank_view<Ntk, false> : public mockturtle::depth_view<Ntk>
     }
 
     /**
-     * @brief Copy constructor for extended_rank_view
+     * Copy constructor creates a new extended_rank_view by copying the content of another extended_rank_view.
      *
-     * This constructor creates a new extended_rank_view object by copying the content of another object of the same
-     * type.
-     *
-     * @tparam Ntk Network type
-     * @param other The extended_rank_view object to be copied
+     * @param other - The other extended_rank_view object to be copied.
      */
     extended_rank_view(extended_rank_view<Ntk, false> const& other) :
             mockturtle::depth_view<Ntk>(other),
-            rank_pos{other.rank_pos},
+            rank_pos{other},
             ranks{other.ranks},
             max_rank_width{other.max_rank_width}
     {
@@ -154,15 +158,10 @@ class extended_rank_view<Ntk, false> : public mockturtle::depth_view<Ntk>
     }
 
     /**
-     * @brief Assigns the content of another `extended_rank_view` object to this object.
+     * Overloaded assignment operator for copying `extended_rank_view` content of another `extended_rank_view` object.
      *
-     * This assignment operator replaces the content of this object with the content of another `extended_rank_view`
-     * object. It first releases the add event of this network, then updates the base class with the storage and events
-     * of the other object. It then copies the rank position, ranks, and max rank width from the other object. Finally,
-     * it registers a new add event in the other network and returns a reference to this object.
-     *
-     * @param other The `extended_rank_view` object to be assigned to this object.
-     * @return Reference to this object.
+     * @param other - The source `extended_rank_view` object whose contents are being copied.
+     * @return A reference to the current object, enabling chain assignments.
      */
     extended_rank_view<Ntk, false>& operator=(extended_rank_view<Ntk, false> const& other)
     {
@@ -185,16 +184,14 @@ class extended_rank_view<Ntk, false> : public mockturtle::depth_view<Ntk>
     }
 
     /**
-     * @brief Destructor for extended_rank_view.
-     *
-     * This destructor releases the add event associated with the extended_rank_view object.
+     * Destructor for extended_rank_view.
      */
     ~extended_rank_view()
     {
         Ntk::events().release_add_event(add_event);
     }
     /**
-     * \brief Returns the rank position of a node.
+     * Returns the rank position of a node.
      *
      * @param n Node to get the rank position of.
      * @return Rank position of node `n`.
@@ -206,24 +203,20 @@ class extended_rank_view<Ntk, false> : public mockturtle::depth_view<Ntk>
         return rank_pos[n];
     }
 
-    /**
-     * @brief Remove virtual input nodes from the network.
+    /*
+     * Removes all virtual input nodes from the network.
      *
-     * This function removes all virtual input nodes from the network. It first calls the base class function
-     * `remove_virtual_input_nodes()` to remove the virtual input nodes. Then, it resets the `rank_pos` node map, clears
-     * each vector in the `ranks` vector, and resets the `max_rank_width` to 0. Finally, it initializes the ranks again
-     * by calling the `init_ranks()` function and prints a message indicating that the `remove()` function was called.
-     *
-     * This function is used to enable equivalence checking with the network.
-     *
-     * Note: This function should only be used for network types that are the same as `fiction::virtual_pi_network`.
-     *
-     * @tparam U The network type.
+     * The purpose of this function is to facilitate network equivalence checking. This function is primarily
+     * intended for network types that resemble `fiction::virtual_pi_network`.
      */
-    template <typename U>
-    typename std::enable_if<std::is_same<U, fiction::virtual_pi_network>::value>::type remove_virtual_input_nodes()
+    // template <typename U>
+    // typename std::enable_if<fiction::has_remove_virtual_input_nodes_v<U>>::type remove_virtual_input_nodes()
+    void remove_virtual_input_nodes()
     {
-        fiction::virtual_pi_network::remove_virtual_input_nodes();
+        if constexpr (fiction::has_remove_virtual_input_nodes_v<Ntk>)
+        {
+            Ntk::remove_virtual_input_nodes();
+        }
         rank_pos.reset();  // Clear the node_map
         // Clear each vector in ranks
         for (auto& rank : ranks)
@@ -239,18 +232,13 @@ class extended_rank_view<Ntk, false> : public mockturtle::depth_view<Ntk>
     }
 
     /**
-     * @brief Checks the validity of the ranks and rank positions in the extended_rank_view class.
+     * Verifies the validity of ranks and rank positions within the extended_rank_view context.
      *
-     * This function checks if the ranks and rank positions are valid in the extended_rank_view class. It iterates over
-     *each rank and checks if the level of each node matches the rank level . It also checks if the rank positions are
-     *in ascending order for each rank. If any inconsistency is found, the function returns false. Otherwise, it returns
-     *true, indicating that the ranks and rank positions are valid.
-     *
-     * @return True if the ranks and rank positions are valid, false otherwise.
+     * @return A boolean indicating whether the ranks and rank positions are valid (true) or not (false).
      */
     bool check_validity() const noexcept
     {
-        for (size_t i = 0; i < ranks.size(); ++i)
+        for (std::size_t i = 0; i < ranks.size(); ++i)
         {
             const auto& rank              = ranks[i];
             uint32_t    expected_rank_pos = 0;
@@ -273,13 +261,10 @@ class extended_rank_view<Ntk, false> : public mockturtle::depth_view<Ntk>
     }
 
     /**
-     * \brief Modifies the rank by updating the nodes at the specified level with the given nodes.
+     * Updates the nodes and associated rank positions for a specific level within the rank.
      *
-     * This function replaces the nodes at the specified level with the given nodes and updates the rank positions
-     * accordingly.
-     *
-     * \param level The level at which to modify the rank.
-     * \param nodes The new set of nodes for the specified level.
+     * @param level Level at which to replace nodes.
+     * @param nodes The new nodes to be set at the given level.
      */
     void modify_rank(uint32_t const level, const std::vector<node>& nodes)
     {
@@ -287,12 +272,13 @@ class extended_rank_view<Ntk, false> : public mockturtle::depth_view<Ntk>
         rank       = nodes;
         std::for_each(rank.cbegin(), rank.cend(), [this, i = 0u](auto const& n) mutable { rank_pos[n] = i++; });
     }
+
     /**
-     * \brief Returns the node at a certain rank position.
+     * Fetches a node at a specific rank position
      *
-     * @param level Level in the network, i.e., rank to get the node from.
-     * @param pos Position in the rank to get the node from.
-     * @return Node at position `pos` in rank `level`.
+     * @param level The level in the network, from which the node is to be fetched.
+     * @param pos The position within the rank from which to obtain the node.
+     * @return The node that resides at the `pos` in the `level`.
      */
     node at_rank_position(uint32_t const level, uint32_t const pos) const noexcept
     {
@@ -302,7 +288,7 @@ class extended_rank_view<Ntk, false> : public mockturtle::depth_view<Ntk>
         return ranks[level][pos];
     }
     /**
-     * \brief Returns the width of the widest rank in the network.
+     * Returns the width of the widest rank in the network.
      *
      * @return Width of the widest rank in the network.
      */
@@ -311,7 +297,7 @@ class extended_rank_view<Ntk, false> : public mockturtle::depth_view<Ntk>
         return max_rank_width;
     }
     /**
-     * \brief Swaps the positions of two nodes in the same rank.
+     * Swaps the positions of two nodes in the same rank.
      *
      * @param n1 First node to swap.
      * @param n2 Second node to swap.
@@ -327,7 +313,7 @@ class extended_rank_view<Ntk, false> : public mockturtle::depth_view<Ntk>
         std::swap(pos1, pos2);
     }
     /**
-     * \brief Sorts the given rank according to a comparator.
+     * Sorts the given rank according to a comparator.
      *
      * @tparam Cmp Functor type that compares two nodes. It needs to fulfill the requirements of `Compare` (named C++
      * requirement).
@@ -347,7 +333,7 @@ class extended_rank_view<Ntk, false> : public mockturtle::depth_view<Ntk>
         }
     }
     /**
-     * \brief Applies a given function to each node in the rank level in order.
+     * Applies a given function to each node in the rank level in order.
      *
      * @tparam Fn Functor type.
      * @param level The rank to apply fn to.
@@ -365,7 +351,7 @@ class extended_rank_view<Ntk, false> : public mockturtle::depth_view<Ntk>
         }
     }
     /**
-     * \brief Applies a given function to each node in rank order.
+     * Applies a given function to each node in rank order.
      *
      * This function overrides the `foreach_node` method of the base class.
      *
@@ -381,7 +367,7 @@ class extended_rank_view<Ntk, false> : public mockturtle::depth_view<Ntk>
         }
     }
     /**
-     * \brief Applies a given function to each gate in the rank level in order.
+     * Applies a given function to each gate in the rank level in order.
      *
      * @tparam Fn Functor type.
      * @param level The rank to apply fn to.
@@ -400,7 +386,7 @@ class extended_rank_view<Ntk, false> : public mockturtle::depth_view<Ntk>
         }
     }
     /**
-     * \brief Applies a given function to each gate in rank order.
+     * Applies a given function to each gate in rank order.
      *
      * This function overrides the `foreach_gate` method of the base class.
      *
@@ -416,7 +402,7 @@ class extended_rank_view<Ntk, false> : public mockturtle::depth_view<Ntk>
         }
     }
     /**
-     * \brief Applies a given function to each PI in rank order.
+     * Applies a given function to each PI in rank order.
      *
      * This function overrides the `foreach_pi` method of the base class.
      *
@@ -455,9 +441,7 @@ class extended_rank_view<Ntk, false> : public mockturtle::depth_view<Ntk>
     std::shared_ptr<typename mockturtle::network_events<Ntk>::add_event_type> add_event;
 
     /**
-     * @brief Inserts a node into the rank.
-     *
-     * This function inserts a node into the rank and updates the rank position, ranks, and max rank width accordingly.
+     * Inserts a node into the rank and updates the rank position, ranks, and max rank width accordingly.
      *
      * @param n The node to insert into the rank.
      */
@@ -471,6 +455,7 @@ class extended_rank_view<Ntk, false> : public mockturtle::depth_view<Ntk>
 
     /**
      * Adds a new node to the skip list.
+     *
      * @param n The node to be added.
      */
     void on_add(node const& n) noexcept
@@ -486,10 +471,8 @@ class extended_rank_view<Ntk, false> : public mockturtle::depth_view<Ntk>
     }
 
     /**
-     * @brief Initializes the ranks for the given network.
-     *
-     * This function initializes the ranks for the given network. It traverses the nodes in the network using a
-     * depth-first search and inserts each non-constant node into the rank.
+     * Initializes the ranks for the given network. It traverses the nodes in the network using a depth-first search and
+     * inserts each non-constant node into the rank.
      *
      * This function is noexcept.
      */
@@ -506,18 +489,12 @@ class extended_rank_view<Ntk, false> : public mockturtle::depth_view<Ntk>
     }
 
     /**
-     * @brief Inserts a node into the rank list at the specified rank level.
-     * @param n The node to insert.
-     * @param rank_level The rank level at which to insert the node.
-     * @note This function modifies the rank list by adding the node at the specified rank level.
-     * @note This function updates the rank position and the maximum rank width.
-     * @warning This function assumes that the node n is a valid node.
-     * @warning This function assumes that the rank list and rank positions have been initialized before calling this
-     * function.
+     * Implements a node into the rank list at the given rank level.
      *
-     * @see ranks, rank_pos, max_rank_width
+     * @param n The node to be inserted.
+     * @param rank_level The level at which the node should be inserted in the rank.
      */
-    void insert_in_rank(node const& n, size_t rank_level) noexcept
+    void insert_in_rank(node const& n, std::size_t rank_level) noexcept
     {
         if (rank_level >= ranks.size())
         {
@@ -530,17 +507,14 @@ class extended_rank_view<Ntk, false> : public mockturtle::depth_view<Ntk>
     }
 
     /**
-     * @brief Initializes the ranks with the given vector of nodes.
-     *
-     * This function takes in a 2D vector of nodes and initializes the ranks accordingly.
-     * Each node in the input ranks is inserted into its corresponding rank, unless it is a constant node.
+     * Initializes the ranks with the given array of nodes.
      *
      * @param input_ranks The input vector of ranks.
      * @return void
      */
     void init_ranks(std::vector<std::vector<node>> const& input_ranks) noexcept
     {
-        for (size_t i = 0; i < input_ranks.size(); ++i)
+        for (std::size_t i = 0; i < input_ranks.size(); ++i)
         {
             auto const& rank_nodes = input_ranks[i];
             for (auto const& n : rank_nodes)
@@ -555,26 +529,17 @@ class extended_rank_view<Ntk, false> : public mockturtle::depth_view<Ntk>
 };
 
 /**
- * @brief Deduction guide for `extended_rank_view'
+ * Deduction guide for `extended_rank_view'
  *
- * This template helps to deduce the type argument `T` for the
- * `extended_rank_view` class when constructed with an argument of type `T`.
- *
- * @tparam T Network type deduced from the construction context of
- * `extended_rank_view`.
+ * @tparam T Network type deduced from the construction context of `extended_rank_view`.
  */
 template <class T>
 extended_rank_view(T const&) -> extended_rank_view<T>;
 
 /**
- * @brief Deduction guide for `extended_rank_view` with two constructor arguments
+ * Deduction guide for `extended_rank_view` with two constructor arguments
  *
- * This template helps to deduce the type argument `T` for the
- * `extended_rank_view` class when constructed with two arguments: a network of type `T`,
- * and a `vector` of `vector` containing network nodes.
- *
- * @tparam T Network type deduced from the construction context of
- * `extended_rank_view`.
+ * @tparam T Network type deduced from the construction context of `extended_rank_view`.
  */
 template <class T>
 extended_rank_view(T const&, std::vector<std::vector<typename T::node>>) -> extended_rank_view<T>;

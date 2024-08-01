@@ -3,11 +3,13 @@
 //
 
 #include <catch2/catch_template_test_macros.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include <fiction/algorithms/network_transformation/network_balancing.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/networks/views/extended_rank_view.hpp>
 #include <fiction/networks/virtual_pi_network.hpp>
+#include <fiction/algorithms/verification/virtual_miter.hpp>
 
 #include <mockturtle/algorithms/equivalence_checking.hpp>
 #include <mockturtle/algorithms/miter.hpp>
@@ -20,7 +22,6 @@
 #include <mockturtle/networks/xag.hpp>
 #include <mockturtle/networks/xmg.hpp>
 #include <mockturtle/traits.hpp>
-#include <mockturtle/views/rank_view.hpp>
 
 using namespace fiction;
 
@@ -136,7 +137,7 @@ TEMPLATE_TEST_CASE("Check equivalence checking", "[extended_rank_view]", mocktur
 TEST_CASE("Check equivalence checking for virtual PIs", "[extended-rank-view]")
 {
     technology_network tec{};
-    virtual_pi_network vpi{};
+    virtual_pi_network<technology_network> vpi{};
 
     const auto a = vpi.create_pi();
     const auto b = vpi.create_pi();
@@ -168,11 +169,9 @@ TEST_CASE("Check equivalence checking for virtual PIs", "[extended-rank-view]")
 
     auto vpi_r = extended_rank_view(vpi);
 
-    vpi_r.remove_virtual_input_nodes<virtual_pi_network>();
-
     mockturtle::equivalence_checking_stats st;
     const auto                             maybe_cec_m =
-        mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(tec, vpi_r), {}, &st);
+        mockturtle::equivalence_checking(*fiction::miter<technology_network>(tec, vpi_r), {}, &st);
     REQUIRE(maybe_cec_m.has_value());
     const bool cec_m = *maybe_cec_m;
     CHECK(cec_m == 1);
