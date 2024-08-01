@@ -150,7 +150,7 @@ TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[
         params.canvas          = {{4, 4, 0}, {4, 4, 0}};
         params.number_of_sidbs = 0;
         params.design_mode     = design_sidb_gates_params<
-                cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
+            cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
         const auto found_gate_layouts_exhaustive = design_sidb_gates(lyt, std::vector<tt>{create_and_tt()}, params);
         CHECK(found_gate_layouts_exhaustive.empty());
         params.design_mode =
@@ -315,9 +315,6 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
             is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT},
             design_sidb_gates_params<cell<sidb_111_cell_clk_lyt_siqad>>::design_sidb_gates_mode::RANDOM,
             {{10, 11, 0}, {14, 15, 0}},
-            3,
-            sidb_simulation_engine::QUICKEXACT};
-            {{10, 11, 0}, {14, 17, 0}},
             3};
 
         const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_nor_tt()}, params);
@@ -325,7 +322,6 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
         CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
     }
 
-    SECTION("Exhaustive Generation")
     SECTION("Exhaustive Generation, allowing kinks")
     {
         const design_sidb_gates_params<cell<sidb_111_cell_clk_lyt_siqad>> params{
@@ -343,11 +339,6 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
     SECTION("Exhaustive Generation, forbidding kinks")
     {
         const design_sidb_gates_params<cell<sidb_111_cell_clk_lyt_siqad>> params{
-            sidb_simulation_parameters{2, -0.32},
-            design_sidb_gates_params<cell<sidb_111_cell_clk_lyt_siqad>>::design_sidb_gates_mode::EXHAUSTIVE,
-            {{11, 11, 0}, {14, 16, 0}},
-            3,
-            sidb_simulation_engine::QUICKEXACT};
             is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
                                   detect_bdl_wires_params{}, operational_condition::FORBIDDING_KINKS},
             design_sidb_gates_params<
