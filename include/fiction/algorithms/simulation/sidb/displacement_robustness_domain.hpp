@@ -155,7 +155,7 @@ class displacement_robustness_domain_impl
      */
     displacement_robustness_domain_impl(const Lyt& lyt, const std::vector<TT>& spec,
                                         const displacement_robustness_domain_params<cell<Lyt>>& ps,
-                                        displacement_robustness_domain_stats&             st) noexcept :
+                                        displacement_robustness_domain_stats&                   st) noexcept :
             layout{lyt},
             params{ps},
             stats{st},
@@ -166,7 +166,8 @@ class displacement_robustness_domain_impl
             (is_operational(layout, truth_table, params.operational_params).first == operational_status::OPERATIONAL) &&
             "The given layout is not a valid SiDB layout for the given Boolean function");
 
-        if (params.analysis_mode == displacement_robustness_domain_params<cell<Lyt>>::displacement_analysis_mode::RANDOM)
+        if (params.analysis_mode ==
+            displacement_robustness_domain_params<cell<Lyt>>::displacement_analysis_mode::RANDOM)
         {
             assert(params.percentage_of_analyzed_displaced_layouts >= 0.0 &&
                    params.percentage_of_analyzed_displaced_layouts <= 1.0 &&
@@ -549,7 +550,7 @@ template <typename Lyt, typename TT>
 [[nodiscard]] displacement_robustness_domain<Lyt>
 determine_displacement_robustness_domain(const Lyt& layout, const std::vector<TT>& spec,
                                          const displacement_robustness_domain_params<cell<Lyt>>& params = {},
-                                         displacement_robustness_domain_stats*             stats  = nullptr)
+                                         displacement_robustness_domain_stats*                   stats  = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -586,10 +587,9 @@ determine_displacement_robustness_domain(const Lyt& layout, const std::vector<TT
  * @return The probability of fabricating an operational SiDB layout.
  */
 template <typename Lyt, typename TT>
-[[nodiscard]] double
-determine_propability_of_fabricating_operational_gate(const Lyt& layout, const std::vector<TT>& spec,
-                                                      const displacement_robustness_domain_params<cell<Lyt>>& params = {},
-                                                      const double fabrication_error_rate                      = 1.0)
+[[nodiscard]] double determine_propability_of_fabricating_operational_gate(
+    const Lyt& layout, const std::vector<TT>& spec, const displacement_robustness_domain_params<cell<Lyt>>& params = {},
+    const double fabrication_error_rate = 1.0)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");

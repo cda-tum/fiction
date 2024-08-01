@@ -137,7 +137,7 @@ TEST_CASE("Determine the probability of fabricating an operational BDL wire with
         params.operational_params.bdl_params.minimum_distance = 0.2;
         params.dimer_policy                                   = dimer_displacement_policy::STAY_ON_ORIGINAL_DIMER;
         params.analysis_mode                                  = displacement_robustness_domain_params<
-            cell<sidb_cell_clk_lyt_siqad>>::displacement_analysis_mode::EXHAUSTIVE;
+                                             cell<sidb_cell_clk_lyt_siqad>>::displacement_analysis_mode::EXHAUSTIVE;
 
         const auto result =
             determine_propability_of_fabricating_operational_gate(lyt, std::vector<tt>{create_id_tt()}, params, 0.2);
