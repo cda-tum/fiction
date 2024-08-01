@@ -46,6 +46,24 @@ struct displacement_robustness_domain
      */
     std::vector<std::pair<Lyt, operational_status>> operational_values{};
 };
+
+/**
+ * Specifies the allowed displacement range options for SiDB placement.
+ */
+enum class displacement_dimer_mode
+{
+    /**
+     * In this mode, any displacement of SiDBs must remain within the boundaries
+     * of the initial dimer they are placed on.
+     */
+    STAY_ON_ORIGINAL_DIMER,
+    /**
+     * In this mode, SiDBs are allowed to be displaced from the original dimer
+     * to any other dimer within the layout.
+     */
+    ALLOW_OTHER_DIMER
+};
+
 /**
  * Parameters for the `determine_displacement_robustness_domain` and
  * `determine_propability_of_fabricating_operational_gate` algorithms.
@@ -98,8 +116,9 @@ struct displacement_robustness_domain_params
     /**
      * This flag controls whether the displacement in the y-direction can lead to changes in the Si dimer.
      */
-    bool allow_dimer_change_in_y_direction = false;
+    displacement_dimer_mode dimer_change = displacement_dimer_mode::STAY_ON_ORIGINAL_DIMER;
 };
+
 /**
  * Statistics for the displacement robustness domain computation.
  */
@@ -161,7 +180,7 @@ class displacement_robustness_domain_impl
      * This function calculates the robustness domain of the SiDB layout based on the provided truth table specification
      * and displacement robustness computation parameters.
      */
-    displacement_robustness_domain<Lyt> determine_robustness_domain()
+    displacement_robustness_domain<Lyt> determine_robustness_domain() noexcept
     {
         mockturtle::stopwatch stop{stats.time_total};
         calculate_permitted_displacements_for_each_sidb();
@@ -257,11 +276,13 @@ class displacement_robustness_domain_impl
 
         const auto number_of_displaced_sidbs =
             static_cast<uint64_t>(static_cast<double>(sidbs_of_the_original_layout.size()) * fabrication_error_rate);
+
         if (number_of_displaced_sidbs == 0)
         {
             assert(false && "The error rate is too small for the given SiDB layout. Hence, no SiDB is misplaced");
             return 1.0;
         }
+
         const auto all_combinations_of_fabricating_misplaced_sidbs =
             determine_all_combinations_of_distributing_k_entities_on_n_positions(number_of_displaced_sidbs,
                                                                                  sidbs_of_the_original_layout.size());
@@ -271,7 +292,7 @@ class displacement_robustness_domain_impl
         const auto number_of_maximal_tested_misplaced_cell_combinations =
             std::max(uint64_t{2},
                      static_cast<uint64_t>(static_cast<double>(all_combinations_of_fabricating_misplaced_sidbs.size()) *
-                                           params.percentage_of_analyzed_displaced_layouts));
+                                           std::min(params.percentage_of_analyzed_displaced_layouts, 1.0)));
 
         uint64_t number_of_tested_misplaced_cell_combinations = 0;
 
@@ -360,7 +381,7 @@ class displacement_robustness_domain_impl
                         new_pos_se.x -= static_cast<decltype(new_pos_se.x)>(params.displacement_variations.first);
                         new_pos_nw.x += static_cast<decltype(new_pos_nw.x)>(params.displacement_variations.first);
 
-                        if (params.allow_dimer_change_in_y_direction)
+                        if (params.dimer_change == displacement_dimer_mode::ALLOW_OTHER_DIMER)
                         {
                             new_pos_nw.y = siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{c.x, c.y, 0}).y;
                             new_pos_se.y = siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{c.x, c.y, 1}).y;
@@ -428,7 +449,7 @@ class displacement_robustness_domain_impl
      *
      * @return A vector containing all valid SiDB layouts with displacements.
      */
-    [[nodiscard]] std::vector<Lyt> generate_valid_displaced_sidb_layouts()
+    [[nodiscard]] std::vector<Lyt> generate_valid_displaced_sidb_layouts() noexcept
     {
         std::vector<std::vector<cell<Lyt>>> all_possible_sidb_displacement{};
         std::vector<cell<Lyt>>              current_combination{};
@@ -444,8 +465,8 @@ class displacement_robustness_domain_impl
         // the "2" is used so that at least one further displaced layout is analyzed in addition to the original SiDB
         // layout.
         const auto max_number_of_layouts_with_displaced_sidbs = std::max(
-            std::size_t{2}, static_cast<std::size_t>(params.percentage_of_analyzed_displaced_layouts *
-                                                     static_cast<double>(all_possible_sidb_displacement.size())));
+            uint64_t{2}, static_cast<uint64_t>(static_cast<double>(all_possible_sidb_displacement.size()) *
+                                               std::min(params.percentage_of_analyzed_displaced_layouts, 1.0)));
 
         for (const auto& cell_displacements : all_possible_sidb_displacement)
         {
@@ -453,8 +474,10 @@ class displacement_robustness_domain_impl
             {
                 break;
             }
+
             Lyt         displaced_lyt{};
             std::size_t identical_cells_to_original_layout = 0;
+
             for (std::size_t i = 0; i < cell_displacements.size(); ++i)
             {
                 displaced_lyt.assign_cell_type(cell_displacements[i],
@@ -464,6 +487,7 @@ class displacement_robustness_domain_impl
                     identical_cells_to_original_layout++;
                 }
             }
+
             if (displaced_lyt.num_cells() == layout.num_cells() &&
                 identical_cells_to_original_layout != layout.num_cells())
             {
@@ -471,6 +495,7 @@ class displacement_robustness_domain_impl
             }
             number_of_layouts_with_displaced_sidbs++;
         }
+
         return layouts;
     }
     /**
@@ -484,9 +509,10 @@ class displacement_robustness_domain_impl
      * @param status The operational status of the provided layout.
      */
     void update_displacement_robustness_domain(displacement_robustness_domain<Lyt>& domain, const Lyt& lyt,
-                                               const operational_status status)
+                                               const operational_status status) noexcept
     {
         domain.operational_values.emplace_back(lyt, status);
+
         if (status == operational_status::OPERATIONAL)
         {
             stats.num_operational_sidb_displacements++;
@@ -544,9 +570,11 @@ determine_displacement_robustness_domain(const Lyt& layout, const std::vector<TT
  * During fabrication, SiDBs may not align precisely with their intended atomic positions, resulting in displacement.
  * This means that an SiDB is fabricated close to the desired one, typically one or a few H-Si
  * positions away. The percentage of displaced SiDBs depends on the fabrication speed. Therefore, SiDB layouts with high
- * displacement tolerance are preferred to speed up the fabrication process. This function calculates the probability of
- * fabricating an operational SiDB layout for an originally given SiDB layout and fabrication error rate. A fabrication
- * error rate of 0.0 or negative indicates that the SiDB layout is designed without displacement.
+ * displacement tolerance are preferred to speed up the fabrication process.
+ *
+ * This function calculates the probability of
+ * fabricating an operational SiDB layout for an originally given SiDB layout and a given fabrication error rate. A
+ * fabrication error rate of 0.0 or negative indicates that the SiDB layout is designed without displacement.
  *
  * @tparam Lyt The SiDB cell-level layout type.
  * @tparam TT The type of the truth table.

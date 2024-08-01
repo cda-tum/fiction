@@ -46,7 +46,7 @@ TEST_CASE("Determine the SiDB gate displacement robustness of the Y-shaped SiDB 
     params.operational_params.bdl_params.minimum_distance = 0.2;
     params.fixed_sidbs = {{0, 0, 1}, {2, 1, 1}, {20, 0, 1}, {18, 1, 1}, {14, 3, 1}, {16, 2, 1}, {10, 7, 0}, {10, 9, 1}};
     params.percentage_of_analyzed_displaced_layouts = 0.1;
-    params.allow_dimer_change_in_y_direction        = true;
+    params.dimer_change        = displacement_dimer_mode::ALLOW_OTHER_DIMER;
 
     SECTION("One displacement variation in the x- and y-directions, allow dimer change")
     {
@@ -65,7 +65,7 @@ TEST_CASE("Determine the SiDB gate displacement robustness of the Y-shaped SiDB 
     {
         displacement_robustness_domain_stats stats{};
         params.displacement_variations                        = {0, 2};
-        params.allow_dimer_change_in_y_direction              = false;
+        params.dimer_change              = displacement_dimer_mode::STAY_ON_ORIGINAL_DIMER;
         params.operational_params.bdl_params.maximum_distance = 3.0;
         params.operational_params.bdl_params.minimum_distance = 0.2;
 
@@ -125,6 +125,7 @@ TEST_CASE("Determine the probability of fabricating an operational BDL wire with
           "[displacement-robustness]")
 {
     const auto lyt = blueprints::bdl_wire<sidb_cell_clk_lyt_siqad>();
+
     SECTION("one displacement variation in y-direction")
     {
         displacement_robustness_domain_params<sidb_cell_clk_lyt_siqad> params{};
@@ -132,7 +133,7 @@ TEST_CASE("Determine the probability of fabricating an operational BDL wire with
         params.operational_params.simulation_parameters       = sidb_simulation_parameters{2, -0.32};
         params.operational_params.bdl_params.maximum_distance = 2.0;
         params.operational_params.bdl_params.minimum_distance = 0.2;
-        params.allow_dimer_change_in_y_direction              = false;
+        params.dimer_change              = displacement_dimer_mode::STAY_ON_ORIGINAL_DIMER;
         params.analysis_mode =
             displacement_robustness_domain_params<sidb_cell_clk_lyt_siqad>::displacement_analysis_mode::EXHAUSTIVE;
 

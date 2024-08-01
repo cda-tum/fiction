@@ -287,11 +287,14 @@ Determine Physically Valid Parameters
    .. tab:: Python
         .. autofunction:: mnt.pyfiction.determine_physically_valid_parameters
 
+
 Displacement Robustness Domain
 ##############################
 
 **Header:** ``fiction/algorithms/simulation/sidb/determine_displacement_robustness.hpp``
 
+.. doxygenstruct:: fiction::displacement_dimer_mode
+   :members:
 .. doxygenstruct:: fiction::displacement_robustness_domain
    :members:
 .. doxygenstruct:: fiction::displacement_robustness_domain_params
