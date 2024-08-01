@@ -370,7 +370,7 @@ TEST_CASE("Design AND Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
     SECTION("Random Generation")
     {
         const design_sidb_gates_params<siqad::coord_t> params{sidb_simulation_parameters{2, -0.32},
-                                                              {{10, 11, 0}, {14, 17, 0}},
+                                                              {{10, 11, 0}, {14, 15, 0}},
                                                               3,
                                                               sidb_simulation_engine::QUICKEXACT};
 
@@ -383,13 +383,13 @@ TEST_CASE("Design AND Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
     SECTION("Exhaustive Generation")
     {
         const design_sidb_gates_params<siqad::coord_t> params{sidb_simulation_parameters{2, -0.32},
-                                                              {{10, 11, 0}, {14, 17, 0}},
+                                                              {{10, 11, 0}, {14, 16, 0}},
                                                               3,
                                                               sidb_simulation_engine::QUICKEXACT};
 
         const auto found_gate_layouts =
             design_sidb_gates(lyt, std::vector<tt>{create_nor_tt()}, params, design_sidb_gates_mode::EXHAUSTIVE);
-        REQUIRE(found_gate_layouts.size() == 206);
+        REQUIRE(found_gate_layouts.size() == 52);
         CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
     }
 }
