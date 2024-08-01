@@ -117,96 +117,101 @@ class maximum_defect_influence_position_and_distance_impl
         }
 
         // simulate the impact of the defect at a given position on the ground state of the SiDB layout
-        const auto process_defect = [&](const std::vector<typename Lyt::cell>& defect_chunk) noexcept
+        const auto process_defect = [&](const cell<Lyt>& defect_pos) noexcept
         {
-            for (const auto& defect : defect_chunk)
+            if (layout.get_cell_type(defect_pos) == Lyt::technology::cell_type::EMPTY)
             {
-                if (layout.get_cell_type(defect) == Lyt::technology::cell_type::EMPTY)
+                sidb_defect_surface<Lyt> lyt_defect{};
+
+                layout.foreach_cell([this, &lyt_defect](const auto& cell)
+                                    { lyt_defect.assign_cell_type(cell, layout.get_cell_type(cell)); });
+
+                // assign defect to layout
+                lyt_defect.assign_sidb_defect(defect_pos, params.defect);
+                // conduct simulation with defect
+                auto simulation_result_defect = quickexact(lyt_defect, params_defect);
+
+                const auto min_energy_defect = minimum_energy(simulation_result_defect.charge_distributions.cbegin(),
+                                                              simulation_result_defect.charge_distributions.cend());
+
+                uint64_t charge_index_defect_layout = 0;
+
+                // get the charge index of the ground state
+                for (const auto& lyt_simulation_with_defect : simulation_result_defect.charge_distributions)
                 {
-                    sidb_defect_surface<Lyt> lyt_defect{};
-
-                    layout.foreach_cell([this, &lyt_defect](const auto& cell)
-                                        { lyt_defect.assign_cell_type(cell, layout.get_cell_type(cell)); });
-
-                    // assign defect to layout
-                    lyt_defect.assign_sidb_defect(defect, params.defect);
-                    // conduct simulation with defect
-                    auto simulation_result_defect = quickexact(lyt_defect, params_defect);
-
-                    const auto min_energy_defect =
-                        minimum_energy(simulation_result_defect.charge_distributions.cbegin(),
-                                       simulation_result_defect.charge_distributions.cend());
-
-                    uint64_t charge_index_defect_layout = 0;
-
-                    // get the charge index of the ground state
-                    for (const auto& lyt_simulation_with_defect : simulation_result_defect.charge_distributions)
+                    if (std::fabs(round_to_n_decimal_places(lyt_simulation_with_defect.get_system_energy(), 6) -
+                                  round_to_n_decimal_places(min_energy_defect, 6)) <
+                        std::numeric_limits<double>::epsilon())
                     {
-                        if (std::fabs(round_to_n_decimal_places(lyt_simulation_with_defect.get_system_energy(), 6) -
-                                      round_to_n_decimal_places(min_energy_defect, 6)) <
-                            std::numeric_limits<double>::epsilon())
-                        {
-                            lyt_simulation_with_defect.charge_distribution_to_index_general();
-                            charge_index_defect_layout = lyt_simulation_with_defect.get_charge_index_and_base().first;
-                        }
+                        lyt_simulation_with_defect.charge_distribution_to_index_general();
+                        charge_index_defect_layout = lyt_simulation_with_defect.get_charge_index_and_base().first;
                     }
+                }
 
-                    // defect changes the ground state, i.e., the charge index is changed compared to the charge
-                    // distribution without placed defect.
-                    if (charge_index_defect_layout != charge_index_layout)
-                    {
-                        auto distance = std::numeric_limits<double>::max();
-                        layout.foreach_cell(
-                            [this, &defect, &distance](const auto& cell)
-                            {
-                                if (sidb_nm_distance<Lyt>(layout, cell, defect) < distance)
-                                {
-                                    distance = sidb_nm_distance<Lyt>(layout, cell, defect);
-                                }
-                            });
-
+                // defect changes the ground state, i.e., the charge index is changed compared to the charge
+                // distribution without placed defect.
+                if (charge_index_defect_layout != charge_index_layout)
+                {
+                    auto distance = std::numeric_limits<double>::max();
+                    layout.foreach_cell(
+                        [this, &defect_pos, &distance](const auto& cell)
                         {
-                            const std::lock_guard<std::mutex> lock(mutex);
-                            // the distance is larger than the current maximum one.
-                            if (distance > avoidance_distance)
+                            if (sidb_nm_distance<Lyt>(layout, cell, defect_pos) < distance)
                             {
-                                max_defect_position = defect;
-                                avoidance_distance  = distance;
+                                distance = sidb_nm_distance<Lyt>(layout, cell, defect_pos);
                             }
+                        });
+
+                    {
+                        const std::lock_guard<std::mutex> lock(mutex);
+                        // the distance is larger than the current maximum one.
+                        if (distance > avoidance_distance)
+                        {
+                            max_defect_position = defect_pos;
+                            avoidance_distance  = distance;
                         }
                     }
                 }
             }
         };
 
-        const std::size_t num_threads = std::thread::hardware_concurrency();
+        static const std::size_t num_threads = std::thread::hardware_concurrency();
 
-        const std::size_t chunk_size = defect_cells.size() / num_threads;
+        // calculate the size of each slice
+        const auto slice_size = (defect_cells.size() + -1) / num_threads;
 
-        std::vector<std::thread> threads;
+        std::vector<std::thread> threads{};
         threads.reserve(num_threads);
 
-        auto defect_it = defect_cells.begin();
-        for (std::size_t i = 0; i < num_threads; ++i)
+        // launch threads, each with its own slice of random step points
+        for (auto i = 0ul; i < num_threads; ++i)
         {
-            auto chunk_start = defect_it;
-            auto chunk_end   = std::min(defect_it + chunk_size, defect_cells.end());
+            const auto start = i * slice_size;
+            const auto end   = std::min(start + slice_size, defect_cells.size());
 
-            threads.emplace_back(process_defect, std::vector<typename Lyt::cell>(chunk_start, chunk_end));
+            if (start >= end)
+            {
+                break;  // no more work to distribute
+            }
 
-            defect_it = chunk_end;
+            threads.emplace_back(
+                [this, start, end, &process_defect]
+                {
+                    for (auto it = defect_cells.cbegin() + static_cast<int64_t>(start);
+                         it != defect_cells.cbegin() + static_cast<int64_t>(end); ++it)
+                    {
+                        process_defect(*it);
+                    }
+                });
         }
 
-        auto chunk_start = defect_it;
-        auto chunk_end   = defect_cells.end();
-
-        const auto chunk_vector = std::vector<typename Lyt::cell>(chunk_start, chunk_end);
-
-        threads.emplace_back(process_defect, chunk_vector);
-
+        // wait for all threads to complete
         for (auto& thread : threads)
         {
-            thread.join();
+            if (thread.joinable())
+            {
+                thread.join();
+            }
         }
 
         return {max_defect_position, avoidance_distance};

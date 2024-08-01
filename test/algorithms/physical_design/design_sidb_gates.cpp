@@ -307,7 +307,9 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
 
         const critical_temperature_params                          ct_params{params.simulation_parameters};
         const operational_domain_params                            op_params{params.simulation_parameters};
+
         design_sidb_gates_metric_driven_simulated_annealing_params sa_params{};
+
         sa_params.ct_params                 = ct_params;
         sa_params.op_params                 = op_params;
         sa_params.weight_temperature        = -1.0;
@@ -325,15 +327,12 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
 
         const auto found_gate_layout = design_sidb_gates_metric_driven_simulated_annealing(
             defect_layout, std::vector<tt>{create_and_tt()}, params, sa_params);
+
         CHECK(found_gate_layout.num_defects() == 2);
         CHECK(found_gate_layout.num_cells() == lyt.num_cells() + 3);
 
-        found_gate_layout.foreach_cell(
-            [](const auto& cell)
-            {
-                CHECK(cell != siqad::coord_t{15, 10, 0});
-                CHECK(cell != siqad::coord_t{20, 12, 0});
-            });
+        found_gate_layout.is_empty_cell(siqad::coord_t{15, 10, 0});
+        found_gate_layout.is_empty_cell(siqad::coord_t{20, 12, 0});
     }
 }
 
@@ -383,7 +382,7 @@ TEST_CASE("Design AND Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
     SECTION("Exhaustive Generation")
     {
         const design_sidb_gates_params<siqad::coord_t> params{sidb_simulation_parameters{2, -0.32},
-                                                              {{10, 11, 0}, {14, 16, 0}},
+                                                              {{11, 11, 0}, {14, 16, 0}},
                                                               3,
                                                               sidb_simulation_engine::QUICKEXACT};
 

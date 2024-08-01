@@ -409,7 +409,6 @@ assess_physical_population_stability(const Lyt& lyt, const assess_physical_popul
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(!is_charge_distribution_surface_v<Lyt>, "Lyt cannot be a charge distribution surface");
 
     detail::assess_physical_population_stability_impl<Lyt> p{lyt, params};
     return p.run();

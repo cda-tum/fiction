@@ -7,6 +7,8 @@
 
 #include "fiction/algorithms/simulation/sidb/defect_influence_operational_domain.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
+#include "fiction/technology/sidb_nm_distance.hpp"
+#include "fiction/traits.hpp"
 
 #include <limits>
 
@@ -52,8 +54,10 @@ defect_avoidance_distance(const Lyt& lyt, const defect_influence_operational_dom
         {
             continue;
         }
+
         auto      min_distance          = std::numeric_limits<double>::infinity();
         cell<Lyt> min_distance_position = {};
+
         lyt.foreach_cell(
             [&val, &min_distance, &min_distance_position, &lyt](const auto& c)
             {
@@ -63,12 +67,14 @@ defect_avoidance_distance(const Lyt& lyt, const defect_influence_operational_dom
                     min_distance_position = val.first;
                 }
             });
+
         if (min_distance > max_distance)
         {
             max_distance         = min_distance;
             max_distance_postion = min_distance_position;
         }
     }
+
     return defect_avoidance_distance_result<cell<Lyt>>{max_distance_postion, max_distance};
 }
 
