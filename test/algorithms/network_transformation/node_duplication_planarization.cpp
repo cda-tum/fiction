@@ -4,23 +4,21 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "fiction/algorithms/network_transformation/network_balancing.hpp"
 #include "utils/blueprints/network_blueprints.hpp"
-#include "utils/equivalence_checking_utils.hpp"
 
 #include <fiction/algorithms/network_transformation/node_duplication_planarization.hpp>
+#include <fiction/algorithms/verification/virtual_miter.hpp>
 #include <fiction/networks/technology_network.hpp>
 
-#include <mockturtle/views/rank_view.hpp>
+#include <mockturtle/algorithms/equivalence_checking.hpp>
+#include <mockturtle/traits.hpp>
 
 using namespace fiction;
 
 TEST_CASE("2-ary nodes Test", "[node-duplication-planarization]")
 {
     technology_network tec{};
-
-    CHECK(mockturtle::has_clear_visited_v<technology_network>);
-    CHECK(mockturtle::has_visited_v<technology_network>);
-    CHECK(mockturtle::has_set_visited_v<technology_network>);
 
     const auto x1 = tec.create_pi();
     const auto x2 = tec.create_pi();
@@ -43,24 +41,16 @@ TEST_CASE("2-ary nodes Test", "[node-duplication-planarization]")
 
     auto planarized_maj = node_duplication_planarization<technology_network>(tec_b);
 
-    // The test takes long due to the rank_pos.reset() function
-    planarized_maj.remove_virtual_input_nodes<virtual_pi_network>();
-
     mockturtle::equivalence_checking_stats st;
-    const auto                             maybe_cec_m =
-        mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(tec, planarized_maj), {}, &st);
-    REQUIRE(maybe_cec_m.has_value());
-    const bool cec_m = *maybe_cec_m;
-    CHECK(cec_m == 1);
+    const auto                             cec_m =
+        mockturtle::equivalence_checking(*fiction::miter<technology_network>(tec, planarized_maj), {}, &st);
+    REQUIRE(cec_m.has_value());
+    CHECK(*cec_m == 1);
 }
 
 TEST_CASE("3-ary nodes Test", "[node-duplication-planarization]")
 {
     technology_network tec{};
-
-    CHECK(mockturtle::has_clear_visited_v<technology_network>);
-    CHECK(mockturtle::has_visited_v<technology_network>);
-    CHECK(mockturtle::has_set_visited_v<technology_network>);
 
     const auto x1 = tec.create_pi();
     const auto x2 = tec.create_pi();
@@ -85,24 +75,16 @@ TEST_CASE("3-ary nodes Test", "[node-duplication-planarization]")
 
     auto planarized_maj = node_duplication_planarization<technology_network>(tec_b);
 
-    // The test takes long due to the rank_pos.reset() function
-    planarized_maj.remove_virtual_input_nodes<virtual_pi_network>();
-
     mockturtle::equivalence_checking_stats st;
-    const auto                             maybe_cec_m =
-        mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(tec, planarized_maj), {}, &st);
-    REQUIRE(maybe_cec_m.has_value());
-    const bool cec_m = *maybe_cec_m;
-    CHECK(cec_m == 1);
+    const auto                             cec_m =
+        mockturtle::equivalence_checking(*fiction::miter<technology_network>(tec, planarized_maj), {}, &st);
+    REQUIRE(cec_m.has_value());
+    CHECK(*cec_m == 1);
 }
 
 TEST_CASE("Aig Test", "[node-duplication-planarization]")
 {
     mockturtle::aig_network aig{};
-
-    CHECK(mockturtle::has_clear_visited_v<technology_network>);
-    CHECK(mockturtle::has_visited_v<technology_network>);
-    CHECK(mockturtle::has_set_visited_v<technology_network>);
 
     const auto x1 = aig.create_pi();
     const auto x2 = aig.create_pi();
@@ -127,13 +109,9 @@ TEST_CASE("Aig Test", "[node-duplication-planarization]")
 
     auto planarized_maj = node_duplication_planarization<technology_network>(aig_b);
 
-    // The test takes long due to the rank_pos.reset() function
-    planarized_maj.remove_virtual_input_nodes<virtual_pi_network>();
-
     mockturtle::equivalence_checking_stats st;
-    const auto                             maybe_cec_m =
-        mockturtle::equivalence_checking(*mockturtle::miter<technology_network>(aig, planarized_maj), {}, &st);
-    REQUIRE(maybe_cec_m.has_value());
-    const bool cec_m = *maybe_cec_m;
-    CHECK(cec_m == 1);
+    const auto                             cec_m =
+        mockturtle::equivalence_checking(*fiction::miter<technology_network>(aig, planarized_maj), {}, &st);
+    REQUIRE(cec_m.has_value());
+    CHECK(*cec_m == 1);
 }

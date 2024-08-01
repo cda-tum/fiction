@@ -315,7 +315,7 @@ class node_duplication_planarization_impl
         }
     }
 
-    virtual_pi_network run(std::vector<std::vector<mockturtle::node<Ntk>>>& ntk_lvls_new)
+    virtual_pi_network<Ntk> run(std::vector<std::vector<mockturtle::node<Ntk>>>& ntk_lvls_new)
     {
         const bool border_pis = true;
 
@@ -389,7 +389,7 @@ class node_duplication_planarization_impl
     /*
      * The input network.
      */
-    const Ntk ntk;
+    Ntk ntk;
     /*
      * The currently node_pairs used in the current level.
      */
@@ -431,30 +431,23 @@ class node_duplication_planarization_impl
  * the created network is non-planar
  *
  */
-template <typename NtkDest, typename NtkSrc>
-extended_rank_view<virtual_pi_network> node_duplication_planarization(const NtkSrc&           ntk_src,
-                                                                      node_duplication_params ps = {})
+template <typename NtkSrc>
+extended_rank_view<virtual_pi_network<technology_network>>
+node_duplication_planarization(const NtkSrc& ntk_src, node_duplication_params ps = {})
 {
     static_assert(mockturtle::is_network_type_v<NtkSrc>, "NtkSrc is not a network type");
-    static_assert(mockturtle::is_network_type_v<NtkDest>, "NtkDest is not a network type");
 
-    static_assert(mockturtle::has_is_constant_v<NtkDest>, "NtkSrc does not implement the is_constant function");
-    static_assert(mockturtle::has_create_pi_v<NtkDest>, "NtkDest does not implement the create_pi function");
-    static_assert(mockturtle::has_create_not_v<NtkDest>, "NtkDest does not implement the create_not function");
-    static_assert(mockturtle::has_create_po_v<NtkDest>, "NtkDest does not implement the create_po function");
-    static_assert(mockturtle::has_create_buf_v<NtkDest>, "NtkDest does not implement the create_buf function");
-    static_assert(mockturtle::has_clone_node_v<NtkDest>, "NtkDest does not implement the clone_node function");
-    static_assert(mockturtle::has_foreach_fanin_v<NtkDest>, "NtkDest does not implement the foreach_fanin function");
-    static_assert(mockturtle::has_foreach_po_v<NtkDest>, "NtkDest does not implement the foreach_po function");
+    // check the network to be a technology network (is there a better check/trait?)
+    static_assert(mockturtle::has_create_le_v<NtkSrc>, "T must be of type const ExpectedType");
 
     if (!is_balanced(ntk_src))
     {
         throw std::runtime_error("Combinations are empty. There might be a dangling node");
     }
 
-    detail::node_duplication_planarization_impl<NtkDest> p{ntk_src, ps};
+    detail::node_duplication_planarization_impl p{ntk_src, ps};
 
-    std::vector<std::vector<mockturtle::node<NtkDest>>> ntk_lvls_new;
+    std::vector<std::vector<mockturtle::node<technology_network>>> ntk_lvls_new;
 
     auto result_ntk = p.run(ntk_lvls_new);
 
