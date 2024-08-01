@@ -1,7 +1,5 @@
 from mnt.pyfiction import *
 import unittest
-import os
-
 
 class TestAssessPhysicalPopulationStability(unittest.TestCase):
 
