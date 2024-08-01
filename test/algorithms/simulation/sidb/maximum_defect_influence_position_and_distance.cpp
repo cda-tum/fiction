@@ -109,7 +109,7 @@ TEST_CASE("Test influence distance function", "[maximum-defect-influence-positio
         const sidb_defect defect{sidb_defect_type::UNKNOWN, -1, sidb_simulation_parameters{}.epsilon_r,
                                  sidb_simulation_parameters{}.lambda_tf};
         const maximum_defect_influence_position_and_distance_params sim_params{defect, sidb_simulation_parameters{2}};
-        sidb_cell_clk_lyt_siqad                        lyt{};
+        sidb_cell_clk_lyt_siqad                                     lyt{};
 
         lyt.assign_cell_type({10, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
         lyt.assign_cell_type({0, 1, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
@@ -132,8 +132,8 @@ TEST_CASE("Test influence distance function", "[maximum-defect-influence-positio
 
         // number of threads given by the hardware
         const sidb_defect high_screening{sidb_defect_type::UNKNOWN, -1, sidb_simulation_parameters{}.epsilon_r, 1};
-        const maximum_defect_influence_position_and_distance_params sim_params_high_screening{high_screening,
-                                                                                 sidb_simulation_parameters{2}};
+        const maximum_defect_influence_position_and_distance_params sim_params_high_screening{
+            high_screening, sidb_simulation_parameters{2}};
 
         const auto [defect_pos_high_screening, distance_high_screening] =
             maximum_defect_influence_position_and_distance(lat, sim_params_high_screening);
@@ -146,7 +146,7 @@ TEST_CASE("Test influence distance function", "[maximum-defect-influence-positio
         const sidb_defect defect{sidb_defect_type::UNKNOWN, -1, sidb_simulation_parameters{}.epsilon_r,
                                  sidb_simulation_parameters{}.lambda_tf};
         const maximum_defect_influence_position_and_distance_params sim_params{defect, sidb_simulation_parameters{2}};
-        sidb_cell_clk_lyt_cube                         lyt{{30, 30}};
+        sidb_cell_clk_lyt_cube                                      lyt{{30, 30}};
 
         lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{10, 0, 0}),
                              sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
