@@ -24,16 +24,16 @@
 
 
 static const char *__doc_extended_rank_view =
-R"doc(@class extended_rank_view (specialization)
+R"doc(@class extended_rank_view<Ntk, true>
 
-A derived class from depth_view.)doc";
+If already a rank_interface exists only the depth_view constructor
+gets called.
+
+Template parameter ``Ntk``:
+    - The network type.)doc";
 
 static const char *__doc_extended_rank_view_2 =
 R"doc(Deduction guide for `extended_rank_view'
-
-This template helps to deduce the type argument `T` for the
-`extended_rank_view` class when constructed with an argument of type
-`T`.
 
 Template parameter ``T``:
     Network type deduced from the construction context of
@@ -42,11 +42,6 @@ Template parameter ``T``:
 static const char *__doc_extended_rank_view_3 =
 R"doc(Deduction guide for `extended_rank_view` with two constructor
 arguments
-
-This template helps to deduce the type argument `T` for the
-`extended_rank_view` class when constructed with two arguments: a
-network of type `T`, and a `vector` of `vector` containing network
-nodes.
 
 Template parameter ``T``:
     Network type deduced from the construction context of
