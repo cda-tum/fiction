@@ -38,6 +38,7 @@
 #include "pyfiction/algorithms/simulation/sidb/check_simulation_results_for_equivalence.hpp"
 #include "pyfiction/algorithms/simulation/sidb/convert_potential_to_distance.hpp"
 #include "pyfiction/algorithms/simulation/sidb/determine_groundstate_from_simulation_results.hpp"
+#include "pyfiction/algorithms/simulation/sidb/displacement_robustness_domain.hpp"
 #include "pyfiction/algorithms/simulation/sidb/minimum_energy.hpp"
 #include "pyfiction/algorithms/simulation/sidb/occupation_probability_of_excited_states.hpp"
 #include "pyfiction/algorithms/simulation/sidb/operational_domain.hpp"

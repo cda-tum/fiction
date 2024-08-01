@@ -285,24 +285,36 @@ Determine Physically Valid Parameters
         .. doxygenfunction:: fiction::determine_physically_valid_parameters
 
    .. tab:: Python
-        .. autofunction:: mnt.pyfiction.determine_physically_valid_parameters
+        .. autoclass:: mnt.pyfiction.determine_physically_valid_parameters
 
 
 Displacement Robustness Domain
 ##############################
 
-**Header:** ``fiction/algorithms/simulation/sidb/determine_displacement_robustness.hpp``
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/algorithms/simulation/sidb/determine_displacement_robustness.hpp``
 
-.. doxygenstruct:: fiction::displacement_dimer_mode
-   :members:
-.. doxygenstruct:: fiction::displacement_robustness_domain
-   :members:
-.. doxygenstruct:: fiction::displacement_robustness_domain_params
-   :members:
-.. doxygenstruct:: fiction::displacement_robustness_domain_stats
-   :members:
-.. doxygenfunction:: fiction::determine_displacement_robustness_domain
-.. doxygenfunction:: fiction::determine_propability_of_fabricating_operational_gate
+        .. doxygenstruct:: fiction::dimer_displacement_policy
+           :members:
+        .. doxygenstruct:: fiction::displacement_robustness_domain
+           :members:
+        .. doxygenstruct:: fiction::displacement_robustness_domain_params
+           :members:
+        .. doxygenstruct:: fiction::displacement_robustness_domain_stats
+           :members:
+        .. doxygenfunction:: fiction::determine_displacement_robustness_domain
+        .. doxygenfunction:: fiction::determine_propability_of_fabricating_operational_gate
+
+    .. tab:: Python
+        .. autoclass:: mnt.pyfiction.displacement_analysis_mode
+            :members:
+        .. autofunction:: mnt.pyfiction.displacement_robustness_domain_params
+        .. autofunction:: mnt.pyfiction.displacement_robustness_domain_stats
+        .. autofunction:: mnt.pyfiction.displacement_robustness_domain_100
+        .. autofunction:: mnt.pyfiction.displacement_robustness_domain_111
+        .. autofunction:: mnt.pyfiction.determine_displacement_robustness_domain_100
+        .. autofunction:: mnt.pyfiction.determine_displacement_robustness_domain_111
 
 
 Utility Functions
