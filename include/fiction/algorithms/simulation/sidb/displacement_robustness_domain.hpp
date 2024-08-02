@@ -89,9 +89,8 @@ struct displacement_robustness_domain_params
         RANDOM,
     };
     /**
-     * This parameter defines the mode of the displacement analysis. The default value is `EXHAUSTIVE`.
-     * For faster simulation results, `RANDOM` can be used. However, this leads to a reduction in the accuracy of the
-     * results.
+     * This parameter defines the mode of the displacement. If `EXHAUSTIVE`, all possible displacements are analyzed.
+     * Otherwise, a certain amount of all possible displacements is analyzed randomly.
      */
     displacement_analysis_mode analysis_mode{displacement_analysis_mode::EXHAUSTIVE};
     /**
@@ -184,7 +183,7 @@ class displacement_robustness_domain_impl
     displacement_robustness_domain<Lyt> determine_robustness_domain() noexcept
     {
         mockturtle::stopwatch stop{stats.time_total};
-        calculate_permitted_displacements_for_each_sidb();
+        calculate_all_possible_displacements_for_each_sidb();
 
         auto layouts = generate_valid_displaced_sidb_layouts();
 
@@ -205,12 +204,11 @@ class displacement_robustness_domain_impl
             const auto op_status = is_operational(lyt, truth_table, params.operational_params);
             {
                 const std::lock_guard lock_domain{mutex_to_protect_shared_resources};
-
                 update_displacement_robustness_domain(domain, lyt, op_status.first);
             }
         };
 
-        const std::size_t num_threads = std::max(static_cast<std::size_t>(std::thread::hardware_concurrency()),
+        const std::size_t num_threads = std::min(static_cast<std::size_t>(std::thread::hardware_concurrency()),
                                                  static_cast<std::size_t>(layouts.size()));
 
         // calculate the size of each slice
@@ -231,7 +229,7 @@ class displacement_robustness_domain_impl
             }
 
             threads.emplace_back(
-                [this, start, end, &layouts, &check_operational_status]
+                [start, end, &layouts, &check_operational_status]
                 {
                     for (auto it = layouts.cbegin() + static_cast<int64_t>(start);
                          it != layouts.cbegin() + static_cast<int64_t>(end); ++it)
@@ -363,9 +361,10 @@ class displacement_robustness_domain_impl
     /**
      * This function calculates all permitted displacements for each SiDB based on the specified allowed displacements.
      */
-    void calculate_permitted_displacements_for_each_sidb() noexcept
+    void calculate_all_possible_displacements_for_each_sidb() noexcept
     {
         std::vector<std::vector<cell<Lyt>>> all_possible_sidb_misplacements = {};
+
         all_possible_sidb_misplacements.reserve(layout.num_cells());
 
         layout.foreach_cell(
@@ -382,31 +381,53 @@ class displacement_robustness_domain_impl
                         new_pos_se.x -= static_cast<decltype(new_pos_se.x)>(params.displacement_variations.first);
                         new_pos_nw.x += static_cast<decltype(new_pos_nw.x)>(params.displacement_variations.first);
 
-                        if (params.dimer_policy == dimer_displacement_policy::ALLOW_OTHER_DIMER)
+                        if (params.dimer_policy == dimer_displacement_policy::STAY_ON_ORIGINAL_DIMER &&
+                            params.displacement_variations.second > 0)
                         {
                             new_pos_nw.y = siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{c.x, c.y, 0}).y;
                             new_pos_se.y = siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{c.x, c.y, 1}).y;
                         }
-
-                        new_pos_se.y -= static_cast<decltype(new_pos_se.y)>(params.displacement_variations.second);
-                        new_pos_nw.y += static_cast<decltype(new_pos_nw.y)>(params.displacement_variations.second);
+                        else
+                        {
+                            new_pos_se.y -= static_cast<decltype(new_pos_se.y)>(params.displacement_variations.second);
+                            new_pos_nw.y += static_cast<decltype(new_pos_nw.y)>(params.displacement_variations.second);
+                        }
                     }
 
                     const auto all_coord = all_coordinates_in_spanned_area<cell<Lyt>>(
-                        siqad::to_siqad_coord(new_pos_se), siqad::to_siqad_coord(new_pos_nw));
+                        siqad::to_siqad_coord(new_pos_nw), siqad::to_siqad_coord(new_pos_se));
                     all_possible_sidb_misplacements.push_back(all_coord);
                 }
+
                 else
                 {
                     auto new_pos_se = c;
                     auto new_pos_nw = c;
+                    // the cell c is not a fixed cell, i.e., displacement is considered.
 
                     if (params.fixed_sidbs.find(c) == params.fixed_sidbs.cend())
                     {
-                        new_pos_se.x -= params.displacement_variations.first;
-                        new_pos_se.y -= params.displacement_variations.second;
-                        new_pos_nw.x += params.displacement_variations.first;
-                        new_pos_nw.y += params.displacement_variations.second;
+                        new_pos_se.x -= static_cast<decltype(new_pos_se.x)>(params.displacement_variations.first);
+                        new_pos_nw.x += static_cast<decltype(new_pos_nw.x)>(params.displacement_variations.first);
+
+                        if (params.dimer_policy == dimer_displacement_policy::STAY_ON_ORIGINAL_DIMER &&
+                            params.displacement_variations.second > 0)
+                        {
+                            auto new_pos_se_siqad = siqad::to_siqad_coord(c);
+                            auto new_pos_nw_siqad = siqad::to_siqad_coord(c);
+
+                            new_pos_se_siqad.z = 0;
+                            new_pos_nw_siqad.z = 1;
+
+                            new_pos_nw = siqad::to_fiction_coord<coordinate<Lyt>>(new_pos_nw_siqad);
+                            new_pos_se = siqad::to_fiction_coord<coordinate<Lyt>>(new_pos_se_siqad);
+                        }
+
+                        else
+                        {
+                            new_pos_se.y -= static_cast<decltype(new_pos_se.y)>(params.displacement_variations.second);
+                            new_pos_nw.y += static_cast<decltype(new_pos_nw.y)>(params.displacement_variations.second);
+                        }
                     }
 
                     const auto all_coord = all_coordinates_in_spanned_area<cell<Lyt>>(new_pos_se, new_pos_nw);
@@ -465,9 +486,9 @@ class displacement_robustness_domain_impl
 
         // the "2" is used so that at least one further displaced layout is analyzed in addition to the original SiDB
         // layout.
-        const auto max_number_of_layouts_with_displaced_sidbs = std::max(
-            uint64_t{2}, static_cast<uint64_t>(static_cast<double>(all_possible_sidb_displacement.size()) *
-                                               std::min(params.percentage_of_analyzed_displaced_layouts, 1.0)));
+        const auto max_number_of_layouts_with_displaced_sidbs =
+            static_cast<std::size_t>(static_cast<double>(all_possible_sidb_displacement.size()) *
+                                     std::min(params.percentage_of_analyzed_displaced_layouts, 1.0));
 
         for (const auto& cell_displacements : all_possible_sidb_displacement)
         {
@@ -476,7 +497,8 @@ class displacement_robustness_domain_impl
                 break;
             }
 
-            Lyt         displaced_lyt{};
+            Lyt displaced_lyt{};
+
             std::size_t identical_cells_to_original_layout = 0;
 
             for (std::size_t i = 0; i < cell_displacements.size(); ++i)

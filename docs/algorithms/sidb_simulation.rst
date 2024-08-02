@@ -295,8 +295,7 @@ Displacement Robustness Domain
     .. tab:: C++
         **Header:** ``fiction/algorithms/simulation/sidb/determine_displacement_robustness.hpp``
 
-        .. doxygenstruct:: fiction::dimer_displacement_policy
-           :members:
+        .. doxygenenum:: fiction::dimer_displacement_policy
         .. doxygenstruct:: fiction::displacement_robustness_domain
            :members:
         .. doxygenstruct:: fiction::displacement_robustness_domain_params

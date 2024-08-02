@@ -141,6 +141,7 @@ PYBIND11_MODULE(pyfiction, m)
     pyfiction::determine_groundstate_from_simulation_results(m);
     pyfiction::check_simulation_results_for_equivalence(m);
     pyfiction::determine_physically_valid_parameters(m);
+    pyfiction::determine_displacement_robustness_domain(m);
     /**
      * Logic
      */
