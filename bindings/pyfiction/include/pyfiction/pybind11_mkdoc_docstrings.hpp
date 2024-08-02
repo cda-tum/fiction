@@ -4137,7 +4137,7 @@ R"doc(This stores all possible displacements for all SiDBs in the SiDB
 layout. This means e.g. the first vector describes all possible
 positions of the first SiDB due to the allowed/possible displacements.)doc";
 
-static const char *__doc_fiction_detail_displacement_robustness_domain_impl_calculate_permitted_displacements_for_each_sidb =
+static const char *__doc_fiction_detail_displacement_robustness_domain_impl_calculate_all_possible_displacements_for_each_sidb =
 R"doc(This function calculates all permitted displacements for each SiDB
 based on the specified allowed displacements.)doc";
 
@@ -7614,10 +7614,9 @@ Parameter ``CellType``:
     cell type.)doc";
 
 static const char *__doc_fiction_displacement_robustness_domain_params_analysis_mode =
-R"doc(This parameter defines the mode of the displacement analysis. The
-default value is `EXHAUSTIVE`. For faster simulation results, `RANDOM`
-can be used. However, this leads to a reduction in the accuracy of the
-results.)doc";
+R"doc(This parameter defines the mode of the displacement. If `EXHAUSTIVE`,
+all possible displacements are analyzed. Otherwise, a certain amount
+of all possible displacements is analyzed randomly.)doc";
 
 static const char *__doc_fiction_displacement_robustness_domain_params_dimer_policy =
 R"doc(This flag controls whether the displacement in the y-direction can
