@@ -44,8 +44,7 @@ inline void determine_displacement_robustness_domain(pybind11::module& m)
     namespace py = pybind11;
     using namespace pybind11::literals;
 
-    py::enum_<fiction::dimer_displacement_policy>(
-        m, "dimer_displacement_policy")
+    py::enum_<fiction::dimer_displacement_policy>(m, "dimer_displacement_policy")
         .value("STAY_ON_ORIGINAL_DIMER", fiction::dimer_displacement_policy::STAY_ON_ORIGINAL_DIMER)
         .value("ALLOW_OTHER_DIMER", fiction::dimer_displacement_policy::ALLOW_OTHER_DIMER);
 
