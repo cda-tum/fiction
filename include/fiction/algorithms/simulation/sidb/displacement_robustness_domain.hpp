@@ -378,8 +378,8 @@ class displacement_robustness_domain_impl
 
                     if (params.fixed_sidbs.find(c) == params.fixed_sidbs.cend())
                     {
-                        new_pos_se.x -= static_cast<decltype(new_pos_se.x)>(params.displacement_variations.first);
-                        new_pos_nw.x += static_cast<decltype(new_pos_nw.x)>(params.displacement_variations.first);
+                        new_pos_se.x += static_cast<decltype(new_pos_se.x)>(params.displacement_variations.first);
+                        new_pos_nw.x -= static_cast<decltype(new_pos_nw.x)>(params.displacement_variations.first);
 
                         if (params.dimer_policy == dimer_displacement_policy::STAY_ON_ORIGINAL_DIMER &&
                             params.displacement_variations.second > 0)
@@ -389,8 +389,8 @@ class displacement_robustness_domain_impl
                         }
                         else
                         {
-                            new_pos_se.y -= static_cast<decltype(new_pos_se.y)>(params.displacement_variations.second);
-                            new_pos_nw.y += static_cast<decltype(new_pos_nw.y)>(params.displacement_variations.second);
+                            new_pos_se.y += static_cast<decltype(new_pos_se.y)>(params.displacement_variations.second);
+                            new_pos_nw.y -= static_cast<decltype(new_pos_nw.y)>(params.displacement_variations.second);
                         }
                     }
 
@@ -405,11 +405,33 @@ class displacement_robustness_domain_impl
                     auto new_pos_nw = c;
                     // the cell c is not a fixed cell, i.e., displacement is considered.
 
+                    // if the cell is not fixed, it can be displaced.
                     if (params.fixed_sidbs.find(c) == params.fixed_sidbs.cend())
                     {
-                        new_pos_se.x -= static_cast<decltype(new_pos_se.x)>(params.displacement_variations.first);
-                        new_pos_nw.x += static_cast<decltype(new_pos_nw.x)>(params.displacement_variations.first);
+                        // treating the x-coordinate
+                        if constexpr (has_offset_ucoord_v<Lyt>)
+                        {
+                            // ensuring that the displacement does not exceed the boundaries of the layout/coordinate
+                            // system
+                            if (new_pos_nw.x <
+                                static_cast<decltype(new_pos_se.x)>(params.displacement_variations.first))
+                            {
+                                new_pos_nw.x = 0;
+                            }
+                            else
+                            {
+                                new_pos_nw.x -=
+                                    static_cast<decltype(new_pos_nw.x)>(params.displacement_variations.first);
+                            }
+                            new_pos_se.x += static_cast<decltype(new_pos_se.x)>(params.displacement_variations.first);
+                        }
+                        else
+                        {
+                            new_pos_nw.x -= static_cast<decltype(new_pos_nw.x)>(params.displacement_variations.first);
+                            new_pos_se.x += static_cast<decltype(new_pos_se.x)>(params.displacement_variations.first);
+                        }
 
+                        // treating the y-coordinate
                         if (params.dimer_policy == dimer_displacement_policy::STAY_ON_ORIGINAL_DIMER &&
                             params.displacement_variations.second > 0)
                         {
@@ -425,8 +447,28 @@ class displacement_robustness_domain_impl
 
                         else
                         {
-                            new_pos_se.y -= static_cast<decltype(new_pos_se.y)>(params.displacement_variations.second);
-                            new_pos_nw.y += static_cast<decltype(new_pos_nw.y)>(params.displacement_variations.second);
+                            if constexpr (has_offset_ucoord_v<Lyt>)
+                            {
+                                if (new_pos_nw.y <
+                                    static_cast<decltype(new_pos_nw.y)>(params.displacement_variations.second))
+                                {
+                                    new_pos_nw.y = 0;
+                                }
+                                else
+                                {
+                                    new_pos_nw.y -=
+                                        static_cast<decltype(new_pos_nw.y)>(params.displacement_variations.second);
+                                }
+                                new_pos_se.y +=
+                                    static_cast<decltype(new_pos_se.y)>(params.displacement_variations.second);
+                            }
+                            else
+                            {
+                                new_pos_nw.y -=
+                                    static_cast<decltype(new_pos_nw.y)>(params.displacement_variations.second);
+                                new_pos_se.y +=
+                                    static_cast<decltype(new_pos_se.y)>(params.displacement_variations.second);
+                            }
                         }
                     }
 
