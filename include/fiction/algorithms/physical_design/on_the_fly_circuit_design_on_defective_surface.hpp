@@ -86,7 +86,7 @@ class on_the_fly_circuit_design_impl
 
         std::optional<GateLyt> gate_level_layout = std::nullopt;
 
-        CellLyt                lyt{};
+        CellLyt lyt{};
 
         // generating the blacklist based on neutral defects. The long-range electrostatic influence of charged defects
         // is not considered as gates are designed on-the-fly.
