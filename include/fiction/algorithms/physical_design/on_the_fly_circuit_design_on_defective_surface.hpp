@@ -85,6 +85,7 @@ class on_the_fly_circuit_design_impl
         const mockturtle::stopwatch stop{stats.time_total};
 
         std::optional<GateLyt> gate_level_layout = std::nullopt;
+
         CellLyt                lyt{};
 
         // generating the blacklist based on neutral defects. The long-range electrostatic influence of charged defects
@@ -126,7 +127,7 @@ class on_the_fly_circuit_design_impl
             }
         }
 
-        stats.gate_layout = gate_level_layout;
+        stats.gate_layout = std::optional{gate_level_layout};
 
         sidb_defect_surface<CellLyt> sidbs_and_defects{lyt};
 
@@ -183,7 +184,7 @@ on_the_fly_circuit_design_on_defective_surface(const Ntk& ntk, const GateLyt& la
                                                on_the_fly_circuit_design_stats<GateLyt>*        stats  = nullptr)
 {
     static_assert(is_gate_level_layout_v<GateLyt>, "Lyt is not a gate-level layout");
-    static_assert(is_tile_based_layout_v<CellLyt>, "Lyt is not a tile-based layout");
+    static_assert(is_cell_level_layout_v<CellLyt>, "Lyt is not a cell-level layout");
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
 
     on_the_fly_circuit_design_stats<GateLyt>                      st{};

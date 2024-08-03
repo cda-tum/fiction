@@ -145,7 +145,7 @@ int main()  // NOLINT
 
         const auto result =
             fiction::on_the_fly_circuit_design_on_defective_surface<decltype(mapped_network), cell_lyt, gate_lyt>(
-                mapped_network, params, lattice_tiling, &st);
+                mapped_network, lattice_tiling, params, &st);
 
         // check equivalence
         const auto miter = mockturtle::miter<mockturtle::klut_network>(mapped_network, st.gate_layout.value());
