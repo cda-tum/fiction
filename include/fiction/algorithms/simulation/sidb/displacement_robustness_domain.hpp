@@ -385,9 +385,9 @@ class displacement_robustness_domain_impl
                             params.displacement_variations.second > 0)
                         {
                             new_pos_nw.y =
-                                fiction::siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{c.x, c.y, 0}).y;
+                                fiction::siqad::to_fiction_coord<cube::coord_t>(fiction::siqad::coord_t{c.x, c.y, 0}).y;
                             new_pos_se.y =
-                                fiction::siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{c.x, c.y, 1}).y;
+                                fiction::siqad::to_fiction_coord<cube::coord_t>(fiction::siqad::coord_t{c.x, c.y, 1}).y;
                         }
                         else
                         {
@@ -397,7 +397,7 @@ class displacement_robustness_domain_impl
                     }
 
                     const auto all_coord = all_coordinates_in_spanned_area<cell<Lyt>>(
-                        siqad::to_siqad_coord(new_pos_nw), siqad::to_siqad_coord(new_pos_se));
+                        fiction::siqad::to_siqad_coord(new_pos_nw), fiction::siqad::to_siqad_coord(new_pos_se));
                     all_possible_sidb_misplacements.push_back(all_coord);
                 }
 
@@ -437,8 +437,8 @@ class displacement_robustness_domain_impl
                         if (params.dimer_policy == dimer_displacement_policy::STAY_ON_ORIGINAL_DIMER &&
                             params.displacement_variations.second > 0)
                         {
-                            auto new_pos_se_siqad = siqad::to_siqad_coord(c);
-                            auto new_pos_nw_siqad = siqad::to_siqad_coord(c);
+                            auto new_pos_se_siqad = fiction::siqad::to_siqad_coord(c);
+                            auto new_pos_nw_siqad = fiction::siqad::to_siqad_coord(c);
 
                             new_pos_se_siqad.z = 0;
                             new_pos_nw_siqad.z = 1;
