@@ -13,7 +13,7 @@ This algorithm is designed to create SiDB circuits on a clocked surface, accommo
 
 2. **Gate-Level Layout Design**:
 
-   Using the generated blacklist, a gate-level layout is designed with the `exact` algorithm. This process involves:
+   Using the generated blacklist, a gate-level layout is designed with the ``exact`` algorithm. This process involves:
 
    - **Valid Layout Found**:
 
