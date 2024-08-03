@@ -47,7 +47,7 @@ TEST_CASE("Determine the SiDB gate displacement robustness of the Y-shaped SiDB 
     params.operational_params.bdl_params.maximum_distance = 2.0;
     params.operational_params.bdl_params.minimum_distance = 0.2;
     params.fixed_sidbs                                    = {{0, 0, 1},  {2, 1, 1},  {20, 0, 1}, {18, 1, 1}, {14, 3, 1},
-                                                             {16, 2, 1}, {10, 7, 0}, {10, 9, 1}, {4, 2, 1}};
+                                                             {16, 2, 1}, {10, 7, 0}, {10, 6, 0}, {10, 9, 1}, {4, 2, 1}};
     params.percentage_of_analyzed_displaced_layouts       = 0.1;
     params.dimer_policy                                   = dimer_displacement_policy::ALLOW_OTHER_DIMER;
 
