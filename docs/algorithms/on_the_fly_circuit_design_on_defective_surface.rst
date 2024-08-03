@@ -32,6 +32,8 @@ This iterative approach ensures that the designed SiDB circuits can effectively 
 
         .. doxygenstruct:: fiction::on_the_fly_circuit_design_params
            :members:
-     .. doxygenstruct:: fiction::on_the_fly_circuit_design_stats
-           :members:
-        .. doxygenfunction:: fiction::on_the_fly_circuit_design_on_defective_surface
+        .. doxygenstruct:: fiction::on_the_fly_circuit_design_stats
+            :members:
+        .. doxygenfunction:: fiction::on_the_fly_circuit_design_on_defective_surface(const Ntk& ntk, const GateLyt& lattice_tiling,
+                                               const on_the_fly_circuit_design_params<CellLyt>& params = {},
+                                               on_the_fly_circuit_design_stats<GateLyt>*        stats  = nullptr)
