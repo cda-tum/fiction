@@ -187,15 +187,15 @@ class displacement_robustness_domain_impl
 
         auto layouts = generate_valid_displaced_sidb_layouts();
 
+        if (layouts.empty())
+        {
+            return displacement_robustness_domain<Lyt>{};
+        }
+
         // Shuffle the layouts vector to have random displaced layouts
         std::shuffle(layouts.begin(), layouts.end(), generator);
 
         displacement_robustness_domain<Lyt> domain{};
-
-        // add operation status of the original layout
-        const auto status_original_layout = is_operational(layout, truth_table, params.operational_params).first;
-
-        update_displacement_robustness_domain(domain, layout, status_original_layout);
 
         std::mutex mutex_to_protect_shared_resources{};
 
@@ -286,10 +286,8 @@ class displacement_robustness_domain_impl
             determine_all_combinations_of_distributing_k_entities_on_n_positions(number_of_displaced_sidbs,
                                                                                  sidbs_of_the_original_layout.size());
 
-        // the "2" is used so that at least one further displaced layout is analyzed in addition to the original SiDB
-        // layout.
         const auto number_of_maximal_tested_misplaced_cell_combinations =
-            std::max(uint64_t{2},
+            std::max(uint64_t{1},
                      static_cast<uint64_t>(static_cast<double>(all_combinations_of_fabricating_misplaced_sidbs.size()) *
                                            std::min(params.percentage_of_analyzed_displaced_layouts, 1.0)));
 
@@ -528,35 +526,36 @@ class displacement_robustness_domain_impl
 
         std::size_t number_of_layouts_with_displaced_sidbs = 0;
 
-        // the "2" is used so that at least one further displaced layout is analyzed in addition to the original SiDB
-        // layout.
-        const auto max_number_of_layouts_with_displaced_sidbs =
-            static_cast<std::size_t>(static_cast<double>(all_possible_sidb_displacement.size()) *
-                                     std::min(params.percentage_of_analyzed_displaced_layouts, 1.0));
+        auto max_number_of_layouts_with_displaced_sidbs = all_possible_sidb_displacement.size();
+
+        if (params.analysis_mode ==
+            displacement_robustness_domain_params<cell<Lyt>>::displacement_analysis_mode::RANDOM)
+        {
+            // the "2" is used so that at least one further displaced layout is analyzed in addition to the original
+            // SiDB layout.
+            max_number_of_layouts_with_displaced_sidbs =
+                std::max(std::size_t{1},
+                         static_cast<std::size_t>(static_cast<double>(all_possible_sidb_displacement.size()) *
+                                                  std::min(params.percentage_of_analyzed_displaced_layouts, 1.0)));
+        }
 
         for (const auto& cell_displacements : all_possible_sidb_displacement)
         {
-            if (number_of_layouts_with_displaced_sidbs >= max_number_of_layouts_with_displaced_sidbs)
+            if (number_of_layouts_with_displaced_sidbs >= max_number_of_layouts_with_displaced_sidbs ||
+                ((number_of_layouts_with_displaced_sidbs == 1) && (max_number_of_layouts_with_displaced_sidbs == 1)))
             {
                 break;
             }
 
             Lyt displaced_lyt{};
 
-            std::size_t identical_cells_to_original_layout = 0;
-
             for (std::size_t i = 0; i < cell_displacements.size(); ++i)
             {
                 displaced_lyt.assign_cell_type(cell_displacements[i],
                                                layout.get_cell_type(sidbs_of_the_original_layout[i]));
-                if (!layout.is_empty_cell(cell_displacements[i]))
-                {
-                    identical_cells_to_original_layout++;
-                }
             }
 
-            if (displaced_lyt.num_cells() == layout.num_cells() &&
-                identical_cells_to_original_layout != layout.num_cells())
+            if (displaced_lyt.num_cells() == layout.num_cells())
             {
                 layouts.push_back(displaced_lyt);
             }
