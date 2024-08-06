@@ -163,7 +163,7 @@ class quickexact_impl
                 if (charge_lyt.is_physically_valid())
                 {
                     charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
-                    if constexpr (has_get_sidb_defect_v<Lyt>)
+                    if constexpr (is_sidb_defect_surface_v<Lyt>)
                     {
                         layout.foreach_sidb_defect([&charge_lyt_copy](const auto& cd)
                                                    { charge_lyt_copy.assign_sidb_defect(cd.first, cd.second); });
