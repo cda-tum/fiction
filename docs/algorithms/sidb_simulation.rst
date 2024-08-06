@@ -90,6 +90,8 @@ Exhaustive Ground State Simulation
         .. autofunction:: mnt.pyfiction.quickexact
         .. autoclass:: mnt.pyfiction.clustercomplete_params
             :members:
+        .. autoclass:: mnt.pyfiction.ground_state_space_reporting
+            :members:
         .. autofunction:: mnt.pyfiction.clustercomplete
         .. autofunction:: mnt.pyfiction.exhaustive_ground_state_simulation
 
