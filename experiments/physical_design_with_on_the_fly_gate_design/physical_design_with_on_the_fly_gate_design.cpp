@@ -22,8 +22,11 @@
 #include <fmt/format.h>
 #include <lorina/lorina.hpp>
 #include <mockturtle/algorithms/cut_rewriting.hpp>
+#include <mockturtle/algorithms/equivalence_checking.hpp>
+#include <mockturtle/algorithms/miter.hpp>
 #include <mockturtle/algorithms/node_resynthesis/xag_npn.hpp>
 #include <mockturtle/io/verilog_reader.hpp>
+#include <mockturtle/networks/klut.hpp>
 #include <mockturtle/networks/xag.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 #include <mockturtle/views/depth_view.hpp>
