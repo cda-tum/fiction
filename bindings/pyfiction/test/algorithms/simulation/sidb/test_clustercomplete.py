@@ -22,7 +22,7 @@ class TestClusterComplete(unittest.TestCase):
         params.validity_witness_partitioning_max_cluster_size_gss = 15
         params.num_overlapping_witnesses_limit_gss = 8
         params.available_threads = 4
-        params.ground_state_space_reporting = ground_state_space_reporting.ENABLED
+        params.report_gss_stats = ground_state_space_reporting.ENABLED
         self.assertEqual(params.simulation_parameters.base, 2)
         self.assertEqual(params.simulation_parameters.mu_minus, -0.25)
         self.assertEqual(params.validity_witness_partitioning_max_cluster_size_gss, 15)
