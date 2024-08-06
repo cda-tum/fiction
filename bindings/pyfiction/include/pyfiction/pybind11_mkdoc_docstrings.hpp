@@ -2310,12 +2310,8 @@ be runtime-impairing, then limiting specifically the length of the
 input to the factorial call.)doc";
 
 static const char *__doc_fiction_clustercomplete_params_report_gss_stats =
-R"doc(Report the *Ground State Space* statistics to standard output. These
-statistic may be used especially to configure the validity witness
-partitioning options for *Ground State Space*, that may impair
-runtimes when set too high, but could provide a large benefit to the
-complexity of the unfolding process of large simulation problems by
-performing more involved pruning procedures in the construction stage.)doc";
+R"doc(Option to decide if the *Ground State Space* statistics are reported
+to the standard output. By default, this option is disabled.)doc";
 
 static const char *__doc_fiction_clustercomplete_params_simulation_parameters = R"doc(Physical simulation parameters.)doc";
 
@@ -3873,7 +3869,9 @@ static const char *__doc_fiction_detail_clustercomplete_impl_add_or_subtract_par
 
 static const char *__doc_fiction_detail_clustercomplete_impl_add_physically_valid_charge_configurations = R"doc()doc";
 
-static const char *__doc_fiction_detail_clustercomplete_impl_charge_layout = R"doc()doc";
+static const char *__doc_fiction_detail_clustercomplete_impl_charge_layout =
+R"doc(The base layout, along with the map of placed defects, that are used
+to create charge distribution surface copies.)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_clustercomplete_impl = R"doc()doc";
 
@@ -3887,25 +3885,34 @@ static const char *__doc_fiction_detail_clustercomplete_impl_fail_onto_positive_
 
 static const char *__doc_fiction_detail_clustercomplete_impl_get_projector_state_bound_pot = R"doc()doc";
 
-static const char *__doc_fiction_detail_clustercomplete_impl_initialize_charge_layout = R"doc()doc";
+static const char *__doc_fiction_detail_clustercomplete_impl_initialize_charge_layout =
+R"doc(Function to initialize the charge layout.
+
+Parameter ``lyt``:
+    Layout to simulate.
+
+Parameter ``params``:
+    Parameters for ClusterComplete.)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_lb_fail_onto_neutral_charge = R"doc()doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_meets_population_stability_criterion = R"doc()doc";
 
-static const char *__doc_fiction_detail_clustercomplete_impl_mu_bounds_with_error = R"doc()doc";
+static const char *__doc_fiction_detail_clustercomplete_impl_mu_bounds_with_error =
+R"doc(Globally available array of bounds that section the band gap, used for
+pruning.)doc";
 
-static const char *__doc_fiction_detail_clustercomplete_impl_potential_bound_update_operation = R"doc()doc";
+static const char *__doc_fiction_detail_clustercomplete_impl_mutex_to_protect_the_simulation_results = R"doc(Mutex to protect the simulation results.)doc";
 
-static const char *__doc_fiction_detail_clustercomplete_impl_potential_bound_update_operation_ADD = R"doc()doc";
+static const char *__doc_fiction_detail_clustercomplete_impl_potential_bound_update_operation = R"doc(Enumeration for specifying operations on potential bounds.)doc";
 
-static const char *__doc_fiction_detail_clustercomplete_impl_potential_bound_update_operation_SUBTRACT = R"doc()doc";
+static const char *__doc_fiction_detail_clustercomplete_impl_potential_bound_update_operation_ADD = R"doc(Potential bounds of the parent are added.)doc";
 
-static const char *__doc_fiction_detail_clustercomplete_impl_real_placed_defects = R"doc()doc";
+static const char *__doc_fiction_detail_clustercomplete_impl_potential_bound_update_operation_SUBTRACT = R"doc(Potential bounds of the parent are subtracted.)doc";
 
-static const char *__doc_fiction_detail_clustercomplete_impl_res = R"doc()doc";
+static const char *__doc_fiction_detail_clustercomplete_impl_real_placed_defects = R"doc(Atomic defects that are placed in the layout.)doc";
 
-static const char *__doc_fiction_detail_clustercomplete_impl_res_mutex = R"doc()doc";
+static const char *__doc_fiction_detail_clustercomplete_impl_result = R"doc(Simulation results.)doc";
 
 static const char *__doc_fiction_detail_clustercomplete_impl_run = R"doc()doc";
 
@@ -10374,6 +10381,23 @@ with the requirements may be rejected. The defaulted value is chosen
 such that some extra pruning may be performed, while the impact on the
 runtime remains negligible. Validity witness partitioning parameters
 are relevant for large simulation problems.)doc";
+
+static const char *__doc_fiction_ground_state_space_reporting =
+R"doc(This enum class provides meaningful options for configuring the
+reporting of the *Ground State Space* statistics. These statistic may
+be used especially to configure the validity witness partitioning
+options for *Ground State Space*, that may impair runtimes when set
+too high, but could provide a large benefit to the complexity of the
+unfolding process of large simulation problems by performing more
+involved pruning procedures in the construction stage.)doc";
+
+static const char *__doc_fiction_ground_state_space_reporting_DISABLED =
+R"doc(Disabling this option will suppress the output of *Ground State Space*
+statistics.)doc";
+
+static const char *__doc_fiction_ground_state_space_reporting_ENABLED =
+R"doc(Enabling this option will output *Ground State Space* statistics to
+the standard output.)doc";
 
 static const char *__doc_fiction_ground_state_space_results =
 R"doc(This struct is used to store the results of the *Ground State Space*
