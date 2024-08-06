@@ -7,7 +7,6 @@
 
 #include "fiction/algorithms/physical_design/apply_gate_library.hpp"
 #include "fiction/algorithms/physical_design/exact.hpp"
-#include "fiction/networks/technology_network.hpp"
 #include "fiction/technology/parameterized_gate_library.hpp"
 #include "fiction/technology/sidb_defect_surface.hpp"
 #include "fiction/technology/sidb_skeleton_bestagon_library.hpp"
@@ -15,8 +14,6 @@
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 
-#include <mockturtle/algorithms/equivalence_checking.hpp>
-#include <mockturtle/algorithms/miter.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <exception>
