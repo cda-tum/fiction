@@ -565,20 +565,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             }
         }
     }
-
-    /**
-     * This method iterates over all SiDB defects present in the layout and adds
-     * each defect to the potential landscape. It ensures that the charge
-     * distribution surface is updated with all defects.
-     */
-    [[maybe_unused]] void add_all_sidb_defects_to_charge_distribution_surface() noexcept
-    {
-        if constexpr (is_sidb_defect_surface_v<Lyt>)
-        {
-            this->foreach_sidb_defect([this](const auto& cd)
-                                      { this->add_sidb_defect_to_potential_landscape(cd.first, cd.second); });
-        }
-    }
     /**
      * This function erases a defect to the layout.
      *
@@ -1909,7 +1895,6 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         {
             this->initialize_nm_distance_matrix();
             this->initialize_potential_matrix();
-            this->add_all_sidb_defects_to_charge_distribution_surface();
             this->update_local_potential();
             this->recompute_system_energy();
             this->validity_check();

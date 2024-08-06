@@ -26,6 +26,8 @@ namespace fiction
 
 /**
  * This struct stores the parameters for the *QuickExact* algorithm.
+ *
+ * @tparam CellType Cell type.
  */
 template <typename CellType>
 struct quickexact_params
@@ -128,6 +130,13 @@ class quickexact_impl
                 else if (all_sidbs_in_lyt_without_negative_preassigned_ones.empty())
                 {
                     charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
+                    if constexpr (is_sidb_defect_surface_v<Lyt>)
+                    {
+                        for (const auto& [cell, defect] : real_placed_defects)
+                        {
+                            charge_lyt_copy.assign_sidb_defect(cell, defect);
+                        }
+                    }
                     result.charge_distributions.push_back(charge_lyt_copy);
                 }
             }
@@ -151,6 +160,13 @@ class quickexact_impl
                     if (charge_lyt.is_physically_valid())
                     {
                         charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
+                        if constexpr (is_sidb_defect_surface_v<Lyt>)
+                        {
+                            for (const auto& [cell, defect] : real_placed_defects)
+                            {
+                                charge_lyt_copy.assign_sidb_defect(cell, defect);
+                            }
+                        }
                         result.charge_distributions.push_back(charge_lyt_copy);
                     }
 
@@ -165,8 +181,10 @@ class quickexact_impl
                     charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
                     if constexpr (is_sidb_defect_surface_v<Lyt>)
                     {
-                        layout.foreach_sidb_defect([&charge_lyt_copy](const auto& cd)
-                                                   { charge_lyt_copy.assign_sidb_defect(cd.first, cd.second); });
+                        for (const auto& [cell, defect] : real_placed_defects)
+                        {
+                            charge_lyt_copy.assign_sidb_defect(cell, defect);
+                        }
                     }
                     result.charge_distributions.push_back(charge_lyt_copy);
                 }
@@ -208,6 +226,10 @@ class quickexact_impl
      * All SiDBs of the layout but without the negatively-charged SiDBs.
      */
     std::vector<typename Lyt::cell> all_sidbs_in_lyt_without_negative_preassigned_ones{};
+    /**
+     * Collection of defects that are placed in addition to the SiDBs.
+     */
+    std::unordered_map<typename Lyt::cell, const sidb_defect> real_placed_defects{};
     /**
      * Number of SiDBs of the input layout.
      */
@@ -275,6 +297,14 @@ class quickexact_impl
         // `VARIABLE` to allow the dependent cell to change its charge state based on the N-1 SiDBs to
         // fulfill the local population stability at its position.
         charge_layout.update_after_charge_change(dependent_cell_mode::VARIABLE);
+
+        if constexpr (has_get_sidb_defect_v<Lyt>)
+        {
+            for (const auto& [cell, defect] : real_placed_defects)
+            {
+                charge_layout.add_sidb_defect_to_potential_landscape(cell, defect);
+            }
+        }
 
         if (base_number == required_simulation_base_number::TWO)
         {
@@ -484,6 +514,7 @@ class quickexact_impl
         preassigned_negative_sidbs.reserve(preassigned_negative_sidb_indices.size());
 
         all_sidbs_in_lyt_without_negative_preassigned_ones = charge_lyt.get_sidb_order();
+        real_placed_defects                                = charge_lyt.get_defects();
         // store the number of SiDBs, since the number of active cells changes during simulation.
         number_of_sidbs = charge_lyt.num_cells();
     }
