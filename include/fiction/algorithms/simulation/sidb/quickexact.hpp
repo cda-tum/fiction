@@ -165,9 +165,8 @@ class quickexact_impl
                     charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
                     if constexpr (has_get_sidb_defect_v<Lyt>)
                     {
-                        layout.foreach_sidb_defect(
-                            [&charge_lyt_copy](const auto& cd)
-                            { charge_lyt_copy.assign_sidb_defect(cd.first, cd.second); });
+                        layout.foreach_sidb_defect([&charge_lyt_copy](const auto& cd)
+                                                   { charge_lyt_copy.assign_sidb_defect(cd.first, cd.second); });
                     }
                     result.charge_distributions.push_back(charge_lyt_copy);
                 }
