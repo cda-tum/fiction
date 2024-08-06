@@ -13,6 +13,7 @@
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/physical_constants.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
+#include "fiction/technology/sidb_defects.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/layout_utils.hpp"
 #include "fiction/utils/math_utils.hpp"
@@ -25,6 +26,7 @@
 #include <atomic>
 #include <bitset>
 #include <cassert>
+#include <cmath>
 #include <cstdint>
 #include <cstdlib>
 #include <iostream>
@@ -431,7 +433,7 @@ class design_sidb_gates_impl
     set_charge_distribution_of_input_wires_based_on_input_pattern(charge_distribution_surface<Lyt>& layout,
                                                                   const uint64_t current_input_index) const noexcept
     {
-        layout.assign_all_charge_states(sidb_charge_state::NEGATIVE, false);
+        layout.assign_all_charge_states(sidb_charge_state::NEGATIVE, charge_index_mode::KEEP_CHARGE_INDEX);
 
         for (auto i = 0u; i < number_of_input_wires; i++)
         {
@@ -902,8 +904,7 @@ class design_sidb_gates_impl
         std::vector<Lyt> designed_gate_layouts = {};
         designed_gate_layouts.reserve(all_combinations.size());
 
-        const auto add_combination_to_layout_and_check_operation =
-            [this, &designed_gate_layouts](const auto& combination) noexcept
+        const auto add_cell_combination_to_layout = [this, &designed_gate_layouts](const auto& combination) noexcept
         {
             auto layout_with_added_cells = convert_canvas_cell_indices_to_layout(combination);
             designed_gate_layouts.push_back(layout_with_added_cells);
@@ -911,7 +912,7 @@ class design_sidb_gates_impl
 
         for (const auto& combination : all_combinations)
         {
-            add_combination_to_layout_and_check_operation(combination);
+            add_cell_combination_to_layout(combination);
         }
 
         return designed_gate_layouts;
@@ -954,8 +955,26 @@ class design_sidb_gates_impl
         {
             assert(i < all_sidbs_in_canvas.size() && "cell indices are out-of-range");
 
+            // SiDBs cannot be placed on positions which are already occupied by atomic defects.
+            if constexpr (is_sidb_defect_surface_v<Lyt>)
+            {
+                if (skeleton_layout.get_sidb_defect(all_sidbs_in_canvas[i]).type != sidb_defect_type::NONE)
+                {
+                    continue;
+                }
+            }
             lyt.assign_cell_type(all_sidbs_in_canvas[i], sidb_technology::cell_type::LOGIC);
         }
+
+        // the skeleton can already exhibit some canvas SiDBs (partially filled canvas)
+        skeleton_layout.foreach_cell(
+            [&](const auto& c)
+            {
+                if (skeleton_layout.get_cell_type(c) == sidb_technology::cell_type::LOGIC)
+                {
+                    lyt.assign_cell_type(c, Lyt::technology::cell_type::LOGIC);
+                }
+            });
 
         return lyt;
     }
