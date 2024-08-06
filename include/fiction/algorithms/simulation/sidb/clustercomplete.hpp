@@ -35,6 +35,25 @@ namespace fiction
 {
 
 /**
+ * This enum class provides meaningful options for configuring the reporting of the *Ground State Space* statistics.
+ * These statistic may be used especially to configure the validity witness partitioning options for *Ground State
+ * Space*, that may impair runtimes when set too high, but could provide a large benefit to the complexity of the
+ * unfolding process of large simulation problems by performing more involved pruning procedures in the construction
+ * stage.
+ */
+enum class ground_state_space_reporting
+{
+    /**
+     * Enabling this option will output *Ground State Space* statistics to the standard output.
+     */
+    ENABLED,
+    /**
+     * Disabling this option will suppress the output of *Ground State Space* statistics.
+     */
+    DISABLED
+};
+
+/**
  * The struct containing the parameters both passed on to pre-simulator Ground State Space, and used during simulation.
  */
 template <typename CellType = siqad::coord_t>
@@ -72,12 +91,10 @@ struct clustercomplete_params
      */
     uint64_t available_threads = std::thread::hardware_concurrency();
     /**
-     * Report the *Ground State Space* statistics to standard output. These statistic may be used especially to
-     * configure the validity witness partitioning options for *Ground State Space*, that may impair runtimes when set
-     * too high, but could provide a large benefit to the complexity of the unfolding process of large simulation
-     * problems by performing more involved pruning procedures in the construction stage.
+     * Option to decide if the *Ground State Space* statistics are reported to the  standard output. By default, this
+     * option is disabled.
      */
-    bool report_gss_stats = false;
+    ground_state_space_reporting report_gss_stats = ground_state_space_reporting::DISABLED;
 };
 
 namespace detail
@@ -96,15 +113,15 @@ class clustercomplete_impl
                                  -physical_constants::POP_STABILITY_ERR - params.simulation_parameters.mu_plus()}
     {}
 
-    sidb_simulation_result<Lyt> run(const clustercomplete_params<cell<Lyt>>& params) noexcept
+    [[nodiscard]] sidb_simulation_result<Lyt> run(const clustercomplete_params<cell<Lyt>>& params) noexcept
     {
-        res.simulation_parameters = params.simulation_parameters;
-        res.algorithm_name        = "ClusterComplete";
-        res.additional_simulation_parameters.emplace("global_potential", params.global_potential);
-        res.additional_simulation_parameters.emplace("validity_witness_partitioning_limit",
-                                                     params.validity_witness_partitioning_max_cluster_size_gss);
-        res.additional_simulation_parameters.emplace("num_overlapping_witnesses_limit",
-                                                     params.num_overlapping_witnesses_limit_gss);
+        result.simulation_parameters = params.simulation_parameters;
+        result.algorithm_name        = "ClusterComplete";
+        result.additional_simulation_parameters.emplace("global_potential", params.global_potential);
+        result.additional_simulation_parameters.emplace("validity_witness_partitioning_limit",
+                                                        params.validity_witness_partitioning_max_cluster_size_gss);
+        result.additional_simulation_parameters.emplace("num_overlapping_witnesses_limit",
+                                                        params.num_overlapping_witnesses_limit_gss);
 
         // run Ground State Space to obtain the complete hierarchical charge space
         const ground_state_space_results& gss_stats = ground_state_space(
@@ -114,10 +131,10 @@ class clustercomplete_impl
 
         if (!gss_stats.top_cluster)
         {
-            return res;
+            return result;
         }
 
-        if (params.report_gss_stats)
+        if (params.report_gss_stats == ground_state_space_reporting::ENABLED)
         {
             gss_stats.report();
         }
@@ -133,13 +150,40 @@ class clustercomplete_impl
         }
 
         // The ClusterComplete runtime includes the runtime for the Ground State Space procedure
-        res.simulation_runtime = time_counter + gss_stats.runtime;
+        result.simulation_runtime = time_counter + gss_stats.runtime;
 
-        return res;
+        return result;
     }
 
   private:
-    static charge_distribution_surface<Lyt>
+    /**
+     * Simulation results.
+     */
+    sidb_simulation_result<Lyt> result{};
+    /**
+     * Mutex to protect the simulation results.
+     */
+    std::mutex mutex_to_protect_the_simulation_results{};
+    /**
+     * The base layout, along with the map of placed defects, that are used to create charge distribution surface
+     * copies.
+     */
+    const charge_distribution_surface<Lyt> charge_layout;
+    /**
+     * Atomic defects that are placed in the layout.
+     */
+    const std::unordered_map<typename Lyt::cell, const sidb_defect> real_placed_defects;
+    /**
+     * Globally available array of bounds that section the band gap, used for pruning.
+     */
+    const std::array<double, 4> mu_bounds_with_error;
+    /**
+     * Function to initialize the charge layout.
+     *
+     * @param lyt Layout to simulate.
+     * @param params Parameters for ClusterComplete.
+     */
+    [[nodiscard]] static charge_distribution_surface<Lyt>
     initialize_charge_layout(const Lyt& lyt, const clustercomplete_params<cell<Lyt>>& params) noexcept
     {
         charge_distribution_surface<Lyt> cds{lyt};
@@ -268,23 +312,30 @@ class clustercomplete_impl
         }
 
         {
-            const std::lock_guard lock{res_mutex};
-            res.charge_distributions.emplace_back(charge_layout_copy);
+            const std::lock_guard lock{mutex_to_protect_the_simulation_results};
+            result.charge_distributions.emplace_back(charge_layout_copy);
         }
     }
 
     template <bound_direction bound>
-    static constexpr inline double get_projector_state_bound_pot(const sidb_cluster_projector_state& pst,
-                                                                 const uint64_t                      sidb_ix) noexcept
+    [[nodiscard]] static constexpr inline double get_projector_state_bound_pot(const sidb_cluster_projector_state& pst,
+                                                                               const uint64_t sidb_ix) noexcept
     {
         return pst.cluster->pot_projs.at(sidb_ix).get_pot_proj_for_m_conf<bound>(pst.multiset_conf).pot_val;
     }
 
+    /**
+     * Enumeration for specifying operations on potential bounds.
+     */
     enum class potential_bound_update_operation
     {
-        // potential bounds (of the parent) are added
+        /**
+         * Potential bounds of the parent are added.
+         */
         ADD,
-        // potential bounds (of the parent) are subtracted
+        /**
+         * Potential bounds of the parent are subtracted.
+         */
         SUBTRACT
     };
 
@@ -329,6 +380,7 @@ class clustercomplete_impl
         // max_pst <- find the cluster of maximum size
         uint64_t max_cluster_size = clustering_state.proj_states.front()->cluster->num_sidbs();
         uint64_t max_pst_ix       = 0;
+
         for (uint64_t ix = 1; ix < clustering_state.proj_states.size(); ++ix)
         {
             if (const uint64_t cluster_size = clustering_state.proj_states.at(ix)->cluster->num_sidbs();
@@ -433,13 +485,13 @@ class clustercomplete_impl
             end   = i == num_threads_to_use - 2 ? top_level_multisets - 1 : start + chunk_size - 1;
         }
 
-        std::vector<std::thread> threads_vec{};
-        threads_vec.reserve(num_threads_to_use);
+        std::vector<std::thread> threads{};
+        threads.reserve(num_threads_to_use);
 
         // the threads each consider a range of the top cluster charge space
         for (const auto& [range_start, range_end] : ranges)
         {
-            threads_vec.emplace_back(
+            threads.emplace_back(
                 [&, start = range_start, end = range_end]
                 {
                     // iterate over all multiset charge configurations in the assigned range
@@ -460,22 +512,15 @@ class clustercomplete_impl
                 });
         }
 
-        for (std::thread& t : threads_vec)
+        // wait for all threads to complete
+        for (auto& thread : threads)
         {
-            t.join();
+            if (thread.joinable())
+            {
+                thread.join();
+            }
         }
     }
-
-    // simulation results that the physically valid charge distributions are stored in
-    sidb_simulation_result<Lyt> res{};
-    std::mutex                  res_mutex{};
-
-    // the base layout, along with the map of placed defects, that are used to create charge distribution surface copies
-    const charge_distribution_surface<Lyt>                          charge_layout;
-    const std::unordered_map<typename Lyt::cell, const sidb_defect> real_placed_defects;
-
-    // globally available array of bounds that section the band gap, used for pruning
-    const std::array<double, 4> mu_bounds_with_error;
 };
 
 }  // namespace detail

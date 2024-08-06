@@ -40,6 +40,14 @@ inline void clustercomplete(pybind11::module& m)
     using namespace pybind11::literals;
 
     /**
+     * Report *Ground State Space* stats.
+     */
+    // TODO: add docu
+    py::enum_<fiction::ground_state_space_reporting>(m, "ground_state_space_reporting")
+        .value("ENABLE", fiction::ground_state_space_reporting::ENABLED)
+        .value("DISABLE", fiction::ground_state_space_reporting::DISABLED);
+
+    /**
      * ClusterComplete parameters.
      */
     py::class_<fiction::clustercomplete_params<fiction::offset::ucoord_t>>(m, "clustercomplete_params",

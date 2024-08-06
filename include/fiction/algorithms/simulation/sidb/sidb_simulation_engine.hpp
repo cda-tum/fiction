@@ -10,7 +10,6 @@
 
 namespace fiction
 {
-
 /**
  * Selector for the available SiDB simulation engines.
  */
