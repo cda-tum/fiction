@@ -127,66 +127,6 @@ TEST_CASE("Bestagon FO2 gate", "[is-operational]")
 #endif
 }
 
-TEST_CASE("Bestagon CROSSING gate", "[is-operational]")
-{
-    using layout = sidb_cell_clk_lyt_siqad;
-
-    layout lyt{};
-
-    lyt.assign_cell_type({36, 1, 0}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::INPUT);
-
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({38, 0, 0}, sidb_technology::cell_type::INPUT);
-
-    lyt.assign_cell_type({6, 2, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({20, 12, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 3, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 5, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 11, 1}, sidb_technology::cell_type::NORMAL);
-
-    lyt.assign_cell_type({12, 4, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 15, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 4, 0}, sidb_technology::cell_type::NORMAL);
-
-    lyt.assign_cell_type({14, 9, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 15, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 16, 0}, sidb_technology::cell_type::NORMAL);
-
-    lyt.assign_cell_type({18, 9, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 16, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 13, 1}, sidb_technology::cell_type::NORMAL);
-
-    lyt.assign_cell_type({24, 5, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({30, 3, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({16, 13, 1}, sidb_technology::cell_type::NORMAL);
-
-    lyt.assign_cell_type({32, 2, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({20, 8, 0}, sidb_technology::cell_type::NORMAL);
-
-    lyt.assign_cell_type({30, 17, 0}, sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({6, 18, 0}, sidb_technology::cell_type::OUTPUT);
-
-    lyt.assign_cell_type({32, 18, 0}, sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({8, 17, 0}, sidb_technology::cell_type::OUTPUT);
-
-    lyt.assign_cell_type({2, 19, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
-
-    CHECK(lyt.num_cells() == 29);
-
-    const sidb_100_cell_clk_lyt_siqad lat{lyt};
-
-    CHECK(
-        is_operational(lat, create_crossing_wire_tt(),
-                       is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT})
-            .first == operational_status::OPERATIONAL);
-    CHECK(
-        is_operational(lat, create_crossing_wire_tt(),
-                       is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT})
-            .first == operational_status::NON_OPERATIONAL);
-}
-
 TEST_CASE("Bestagon AND gate", "[is-operational]")
 {
     using layout = sidb_cell_clk_lyt_siqad;
@@ -299,4 +239,64 @@ TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[is-operational]", 
         CHECK(op_inputs.size() == 2);
         CHECK(op_inputs == std::set<uint64_t>{0, 3});
     }
+}
+
+TEST_CASE("is operational check for Bestagon CX gate", "[is-operational], [quality]")
+{
+    using layout = sidb_cell_clk_lyt_siqad;
+
+    layout lyt{};
+
+    lyt.assign_cell_type({36, 1, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::INPUT);
+
+    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({38, 0, 0}, sidb_technology::cell_type::INPUT);
+
+    lyt.assign_cell_type({6, 2, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({20, 12, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 3, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 5, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 11, 1}, sidb_technology::cell_type::NORMAL);
+
+    lyt.assign_cell_type({12, 4, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 15, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 4, 0}, sidb_technology::cell_type::NORMAL);
+
+    lyt.assign_cell_type({14, 9, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 15, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 16, 0}, sidb_technology::cell_type::NORMAL);
+
+    lyt.assign_cell_type({18, 9, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 16, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 13, 1}, sidb_technology::cell_type::NORMAL);
+
+    lyt.assign_cell_type({24, 5, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({30, 3, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({16, 13, 1}, sidb_technology::cell_type::NORMAL);
+
+    lyt.assign_cell_type({32, 2, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({20, 8, 0}, sidb_technology::cell_type::NORMAL);
+
+    lyt.assign_cell_type({30, 17, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({6, 18, 0}, sidb_technology::cell_type::OUTPUT);
+
+    lyt.assign_cell_type({32, 18, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({8, 17, 0}, sidb_technology::cell_type::OUTPUT);
+
+    lyt.assign_cell_type({2, 19, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
+
+    CHECK(lyt.num_cells() == 29);
+
+    const sidb_100_cell_clk_lyt_siqad lat{lyt};
+
+    CHECK(
+        is_operational(lat, create_crossing_wire_tt(),
+                       is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT})
+            .first == operational_status::OPERATIONAL);
+    CHECK(
+        is_operational(lat, create_crossing_wire_tt(),
+                       is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT})
+            .first == operational_status::NON_OPERATIONAL);
 }
