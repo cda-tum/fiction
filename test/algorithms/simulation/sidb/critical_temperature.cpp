@@ -742,7 +742,7 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon CX, QuickSim", "[critical-t
     critical_temperature_stats critical_stats{};
 
     params.simulation_parameters = sim_params;
-    params.engine                = critical_temperature_params::simulation_engine::EXACT;
+    params.engine                = sidb_simulation_engine::QUICKEXACT;
     params.confidence_level      = 0.99;
     params.max_temperature       = 350;
     params.iteration_steps       = 80;
