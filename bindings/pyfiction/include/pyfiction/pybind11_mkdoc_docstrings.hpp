@@ -12271,12 +12271,25 @@ static const char *__doc_fiction_offset_ucoord_t_y = R"doc(31 bit for the y coor
 static const char *__doc_fiction_offset_ucoord_t_z = R"doc(1 bit for the z coordinate.)doc";
 
 static const char *__doc_fiction_on_the_fly_circuit_design_on_defective_surface =
-R"doc(This function applies the on-the-fly circuit design algorithm to a
-specified defective surface, automatically creating customized SiDB
-gates while integrating atomic defects as essential components of the
-design. It was proposed in \"On-the-fly Defect-Aware Design of
-Circuits based on Silicon Dangling Bond Logic\" by J. Drewniok, M.
-Walter, S. S. H. Ng, K. Walus, and R. Wille in IEEE NANO 2024.
+R"doc(This function implements an on-the-fly circuit design algorithm for a
+defective SiDB surface.
+
+The process begins with placement and routing using a blacklist and
+the `exact` method. The blacklist includes skeleton-tile pairs that
+are excluded due to collisions between skeleton and neutral defects on
+specific tiles. After identifying a valid placement and routing, a
+defect-aware SiDB gate design algorithm is applied. This algorithm
+designs gates for each tile while accounting for atomic defects. If
+the gate design is unsuccessful, the blacklist is updated with the
+problematic skeleton-gate pair, and the placement and routing process
+is restarted. If the gate design succeeds, the algorithm finalizes the
+design and returns the SiDB circuit. This approach ensures that the
+circuit remains functional even in the presence of defects.
+
+This methodology is detailed in the paper "On-the-fly Defect-Aware
+Design of Circuits based on Silicon Dangling Bond Logic" by J.
+Drewniok, M. Walter, S. S. H. Ng, K. Walus, and R. Wille, IEEE NANO
+2024.
 
 Template parameter ``Ntk``:
     The type of the input network.
