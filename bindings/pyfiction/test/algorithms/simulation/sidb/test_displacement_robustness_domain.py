@@ -40,12 +40,13 @@ class TestDisplacementRobustnessDomain(unittest.TestCase):
 
         params.percentage_of_analyzed_displaced_layouts = 0.1
         params.dimer_policy = dimer_displacement_policy.ALLOW_OTHER_DIMER
+        params.analysis_mode = displacement_analysis_mode.RANDOM
 
         stats = displacement_robustness_domain_stats()
 
         displacement_domain = determine_displacement_robustness_domain_100(layout, [create_and_tt()], params, stats)
 
-        self.assertEqual(stats.num_non_operational_sidb_displacements + stats.num_operational_sidb_displacements, 9)
+        self.assertEqual(stats.num_non_operational_sidb_displacements + stats.num_operational_sidb_displacements, 8)
 
 
 if __name__ == '__main__':
