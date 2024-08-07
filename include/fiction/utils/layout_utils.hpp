@@ -17,7 +17,6 @@
 #include <cassert>
 #include <cstdint>
 #include <limits>
-#include <optional>
 #include <random>
 #include <type_traits>
 #include <utility>
@@ -601,13 +600,11 @@ CoordinateType random_coordinate(CoordinateType coordinate1, CoordinateType coor
  * @tparam CoordinateType Coordinate Type.
  * @param cell_nw The northwest cell defining the starting point of the area.
  * @param cell_se The southeast cell defining the ending point of the area.
- * @param obstructed_cell Optional cell which is obstructed and therefore not included in the returned vector.
  * @return A vector containing all cells within the specified area.
  */
 template <typename CoordinateType>
-[[nodiscard]] inline std::vector<CoordinateType>
-all_coordinates_in_spanned_area(CoordinateType coord_nw, CoordinateType coord_se,
-                                const std::optional<CoordinateType>& obstructed_cell = std::nullopt) noexcept
+[[nodiscard]] inline std::vector<CoordinateType> all_coordinates_in_spanned_area(CoordinateType coord_nw,
+                                                                                 CoordinateType coord_se) noexcept
 {
     if (coord_nw > coord_se)
     {
@@ -631,17 +628,9 @@ all_coordinates_in_spanned_area(CoordinateType coord_nw, CoordinateType coord_se
         while (current_cell <= c2_cube)
         {
             const auto current_cell_siqad = siqad::to_siqad_coord(current_cell);
-            if (obstructed_cell.has_value())
-            {
-                if (siqad::to_siqad_coord(obstructed_cell.value()) != current_cell_siqad)
-                {
-                    all_cells.push_back(current_cell_siqad);
-                }
-            }
-            else
-            {
-                all_cells.push_back(current_cell_siqad);
-            }
+
+            all_cells.push_back(current_cell_siqad);
+
             if (current_cell.x < coord_se.x)
             {
                 current_cell.x += 1;
@@ -670,17 +659,7 @@ all_coordinates_in_spanned_area(CoordinateType coord_nw, CoordinateType coord_se
         // down from left to right.
         while (current_cell <= coord_se)
         {
-            if (obstructed_cell.has_value())
-            {
-                if (obstructed_cell.value() != current_cell)
-                {
-                    all_cells.push_back(current_cell);
-                }
-            }
-            else
-            {
-                all_cells.push_back(current_cell);
-            }
+            all_cells.push_back(current_cell);
 
             if (current_cell.x < coord_se.x)
             {

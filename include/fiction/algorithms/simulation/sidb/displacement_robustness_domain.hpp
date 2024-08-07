@@ -20,6 +20,7 @@
 #include <cstdlib>
 #include <limits>
 #include <mutex>
+#include <numeric>
 #include <random>
 #include <set>
 #include <thread>
@@ -48,27 +49,10 @@ struct displacement_robustness_domain
 };
 
 /**
- * Specifies the allowed displacement range options for SiDB placement.
- */
-enum class dimer_displacement_policy
-{
-    /**
-     * In this mode, any displacement of SiDBs must remain within the boundaries
-     * of the initial dimer they are placed on.
-     */
-    STAY_ON_ORIGINAL_DIMER,
-    /**
-     * In this mode, SiDBs are allowed to be displaced from the original dimer
-     * to any other dimer within the layout.
-     */
-    ALLOW_OTHER_DIMER
-};
-
-/**
  * Parameters for the `determine_displacement_robustness_domain` and
  * `determine_propability_of_fabricating_operational_gate` algorithms.
  *
- * @param CellType cell type.
+ * @param CellType SiDB layout cell type.
  */
 template <typename CellType>
 struct displacement_robustness_domain_params
@@ -87,6 +71,22 @@ struct displacement_robustness_domain_params
          * `percentage_of_analyzed_displaced_layouts`.
          */
         RANDOM,
+    };
+    /**
+     * Specifies the allowed displacement range options for SiDB fabrication simulation.
+     */
+    enum class dimer_displacement_policy
+    {
+        /**
+         * In this mode, any displacement of SiDBs must remain within the boundaries
+         * of the initial dimer they are placed on.
+         */
+        STAY_ON_ORIGINAL_DIMER,
+        /**
+         * In this mode, SiDBs are allowed to be displaced from the original dimer
+         * to any other dimer within the layout.
+         */
+        ALLOW_OTHER_DIMER
     };
     /**
      * This parameter defines the mode of the displacement. If `EXHAUSTIVE`, all possible displacements are analyzed.
@@ -115,7 +115,7 @@ struct displacement_robustness_domain_params
     /**
      * This flag controls whether the displacement in the y-direction can lead to changes in the Si dimer.
      */
-    dimer_displacement_policy dimer_policy = dimer_displacement_policy::STAY_ON_ORIGINAL_DIMER;
+    dimer_displacement_policy dimer_policy{dimer_displacement_policy::STAY_ON_ORIGINAL_DIMER};
 };
 
 /**
@@ -174,7 +174,7 @@ class displacement_robustness_domain_impl
         }
 
         sidbs_of_the_original_layout.reserve(layout.num_cells());
-        layout.foreach_cell([&](const auto& c) { sidbs_of_the_original_layout.push_back(c); });
+        layout.foreach_cell([this](const auto& c) { sidbs_of_the_original_layout.push_back(c); });
     };
     /**
      * This function calculates the robustness domain of the SiDB layout based on the provided truth table specification
@@ -183,7 +183,7 @@ class displacement_robustness_domain_impl
     displacement_robustness_domain<Lyt> determine_robustness_domain() noexcept
     {
         mockturtle::stopwatch stop{stats.time_total};
-        calculate_all_possible_displacements_for_each_sidb();
+        all_possible_sidb_displacements = calculate_all_possible_displacements_for_each_sidb();
 
         auto layouts = generate_valid_displaced_sidb_layouts();
 
@@ -197,13 +197,14 @@ class displacement_robustness_domain_impl
 
         displacement_robustness_domain<Lyt> domain{};
 
-        std::mutex mutex_to_protect_shared_resources{};
+        std::mutex mutex_to_protect_displacement_robustness_domain{};
 
-        auto check_operational_status = [this, &mutex_to_protect_shared_resources, &domain](const Lyt& lyt) noexcept
+        const auto check_operational_status =
+            [this, &mutex_to_protect_displacement_robustness_domain, &domain](const Lyt& lyt) noexcept
         {
             const auto op_status = is_operational(lyt, truth_table, params.operational_params);
             {
-                const std::lock_guard lock_domain{mutex_to_protect_shared_resources};
+                const std::lock_guard lock_domain{mutex_to_protect_displacement_robustness_domain};
                 update_displacement_robustness_domain(domain, lyt, op_status.first);
             }
         };
@@ -358,8 +359,10 @@ class displacement_robustness_domain_impl
     std::mt19937 generator;
     /**
      * This function calculates all permitted displacements for each SiDB based on the specified allowed displacements.
+     *
+     * @return A vector containing all possible displacements for each SiDB.
      */
-    void calculate_all_possible_displacements_for_each_sidb() noexcept
+    [[nodiscard]] std::vector<std::vector<cell<Lyt>>> calculate_all_possible_displacements_for_each_sidb() noexcept
     {
         std::vector<std::vector<cell<Lyt>>> all_possible_sidb_misplacements = {};
 
@@ -379,7 +382,8 @@ class displacement_robustness_domain_impl
                         new_pos_se.x += static_cast<decltype(new_pos_se.x)>(params.displacement_variations.first);
                         new_pos_nw.x -= static_cast<decltype(new_pos_nw.x)>(params.displacement_variations.first);
 
-                        if (params.dimer_policy == dimer_displacement_policy::STAY_ON_ORIGINAL_DIMER &&
+                        if (params.dimer_policy == displacement_robustness_domain_params<
+                                                       cell<Lyt>>::dimer_displacement_policy::STAY_ON_ORIGINAL_DIMER &&
                             params.displacement_variations.second > 0)
                         {
                             new_pos_nw.y =
@@ -432,7 +436,8 @@ class displacement_robustness_domain_impl
                         }
 
                         // treating the y-coordinate
-                        if (params.dimer_policy == dimer_displacement_policy::STAY_ON_ORIGINAL_DIMER &&
+                        if (params.dimer_policy == displacement_robustness_domain_params<
+                                                       cell<Lyt>>::dimer_displacement_policy::STAY_ON_ORIGINAL_DIMER &&
                             params.displacement_variations.second > 0)
                         {
                             auto new_pos_se_siqad = fiction::siqad::to_siqad_coord(c);
@@ -441,8 +446,8 @@ class displacement_robustness_domain_impl
                             new_pos_se_siqad.z = 0;
                             new_pos_nw_siqad.z = 1;
 
-                            new_pos_nw = fiction::siqad::to_fiction_coord<coordinate<Lyt>>(new_pos_nw_siqad);
-                            new_pos_se = fiction::siqad::to_fiction_coord<coordinate<Lyt>>(new_pos_se_siqad);
+                            new_pos_nw = fiction::siqad::to_fiction_coord<cell<Lyt>>(new_pos_nw_siqad);
+                            new_pos_se = fiction::siqad::to_fiction_coord<cell<Lyt>>(new_pos_se_siqad);
                         }
 
                         else
@@ -477,18 +482,20 @@ class displacement_robustness_domain_impl
                 }
             });
 
-        all_possible_sidb_displacements = all_possible_sidb_misplacements;
+        return all_possible_sidb_misplacements;
     }
     /**
      * This is a helper function, which recursively generates combinations of SiDB displacements for all SiDBs
      * based on the provided vector of displacement vectors.
      *
-     * @param result The vector to store the generated combinations.
+     * @param result The vector to store the generated combinations. The first element describes the SiDBs of the first
+     * displaced layout.
      * @param current_combination The current combination being constructed.
      * @param cell_index The current cell_index in the vector of displacement vectors.
      */
-    void generate_combinations(std::vector<std::vector<cell<Lyt>>>& result, std::vector<cell<Lyt>>& current_combination,
-                               std::size_t cell_index) noexcept
+    void generate_all_possible_combinations_of_displacements(std::vector<std::vector<cell<Lyt>>>& result,
+                                                             std::vector<cell<Lyt>>&              current_combination,
+                                                             const std::size_t                    cell_index) noexcept
     {
         if (cell_index == all_possible_sidb_displacements.size())
         {
@@ -502,7 +509,7 @@ class displacement_robustness_domain_impl
             // Add current cell to the combination
             current_combination.push_back(c);
             // Recursively generate next combinations
-            generate_combinations(result, current_combination, cell_index + 1);
+            generate_all_possible_combinations_of_displacements(result, current_combination, cell_index + 1);
             // Backtrack: remove current cell to explore other combinations
             current_combination.pop_back();
         }
@@ -517,7 +524,7 @@ class displacement_robustness_domain_impl
     {
         std::vector<std::vector<cell<Lyt>>> all_possible_sidb_displacement{};
         std::vector<cell<Lyt>>              current_combination{};
-        generate_combinations(all_possible_sidb_displacement, current_combination, 0);
+        generate_all_possible_combinations_of_displacements(all_possible_sidb_displacement, current_combination, 0);
 
         std::shuffle(all_possible_sidb_displacement.begin(), all_possible_sidb_displacement.end(), generator);
 
@@ -531,8 +538,7 @@ class displacement_robustness_domain_impl
         if (params.analysis_mode ==
             displacement_robustness_domain_params<cell<Lyt>>::displacement_analysis_mode::RANDOM)
         {
-            // the "2" is used so that at least one further displaced layout is analyzed in addition to the original
-            // SiDB layout.
+            // the "1" is used so that at least one displaced layout is analyzed.
             max_number_of_layouts_with_displaced_sidbs =
                 std::max(std::size_t{1},
                          static_cast<std::size_t>(static_cast<double>(all_possible_sidb_displacement.size()) *
