@@ -37,7 +37,8 @@ class gold_command : public command
                        "its runtime behavior superior to 'exact' and 'onepass'.")
     {
         add_option("--timeout,-t", ps.timeout, "Timeout in seconds");
-        add_option("--num_vertex_expansions,-n", ps.num_vertex_expansions, "Number of vertex expansions during search");
+        add_option("--num_vertex_expansions,-n", ps.num_vertex_expansions, "Number of vertex expansions during search",
+                   true);
         add_flag("--high_effort_mode,-e", ps.high_effort_mode,
                  "Toggle high effort mode; increases runtime but might generate better results");
         add_flag("--return_first,-r", ps.return_first,

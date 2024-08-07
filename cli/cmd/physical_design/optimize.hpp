@@ -42,7 +42,7 @@ class optimize_command : public command
                  "Do not attempt gate repositioning, but apply wiring reduction "
                  "exclusively (recommended for logic functions with >200 gates due to scalability reasons).");
         add_option("--max_gate_relocations,-m", max_gate_relocations,
-                   "Specify the maximum number of relocations to try for each gate (Defaults "
+                   "Specify the maximum number of relocations to try for each gate (defaults "
                    "to the number of tiles in the layout).");
         add_flag("--verbose,-v", "Be verbose");
     }
