@@ -6628,8 +6628,6 @@ physically valid layout.)doc";
 
 static const char *__doc_fiction_detail_quickexact_impl_quickexact_impl = R"doc()doc";
 
-static const char *__doc_fiction_detail_quickexact_impl_real_placed_defects = R"doc(Collection of defects that are placed in addition to the SiDBs.)doc";
-
 static const char *__doc_fiction_detail_quickexact_impl_required_simulation_base_number = R"doc(Base number required for the correct physical simulation.)doc";
 
 static const char *__doc_fiction_detail_quickexact_impl_required_simulation_base_number_THREE =
