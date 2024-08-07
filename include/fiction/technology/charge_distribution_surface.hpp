@@ -1875,8 +1875,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     initialize(const sidb_charge_state cs            = sidb_charge_state::NEGATIVE,
                const cds_configuration configuration = cds_configuration::CHARGE_LOCATION_AND_ELECTROSTATIC) noexcept
     {
-        const auto param_copy = strg->simulation_parameters;
-        strg = std::make_shared<charge_distribution_storage>();
+        const auto param_copy       = strg->simulation_parameters;
+        strg                        = std::make_shared<charge_distribution_storage>();
         strg->simulation_parameters = param_copy;
         strg->sidb_order.reserve(this->num_cells());
         strg->cell_charge.reserve(this->num_cells());
