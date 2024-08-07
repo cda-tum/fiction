@@ -9,6 +9,7 @@
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
+#include "fiction/layouts/coordinates.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/technology/sidb_defects.hpp"
@@ -27,7 +28,7 @@ namespace fiction
 /**
  * This struct stores the parameters for the *QuickExact* algorithm.
  */
-template <typename CellType>
+template <typename CellType = siqad::coord_t>
 struct quickexact_params
 {
     /**
@@ -77,7 +78,7 @@ class quickexact_impl
             params{parameter}
     {
         charge_lyt.assign_all_charge_states(sidb_charge_state::NEGATIVE);
-        charge_lyt.assign_physical_parameters(parameter.simulation_parameters);
+        charge_lyt.assign_simulation_parameters(parameter.simulation_parameters);
     }
 
     sidb_simulation_result<Lyt> run() noexcept
@@ -273,7 +274,7 @@ class quickexact_impl
         {
             charge_lyt.assign_base_number(2);
         }
-        charge_layout.assign_physical_parameters(params.simulation_parameters);
+        charge_layout.assign_simulation_parameters(params.simulation_parameters);
         charge_layout.assign_all_charge_states(sidb_charge_state::NEUTRAL);
         charge_layout.assign_dependent_cell(all_sidbs_in_lyt_without_negative_preassigned_ones[0]);
 

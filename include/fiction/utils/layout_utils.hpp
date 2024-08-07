@@ -328,7 +328,7 @@ auto convert_to_siqad_coordinates(const LytSrc& lyt) noexcept
                                                     charge_index_mode::KEEP_CHARGE_INDEX);
                 });
 
-            lyt_new_cds.assign_physical_parameters(lyt_orig.get_simulation_params());
+            lyt_new_cds.assign_simulation_parameters(lyt_orig.get_simulation_params());
 
             lyt_orig.foreach_sidb_defect(
                 [&lyt_new_cds](const auto& cd)
@@ -355,7 +355,7 @@ auto convert_to_siqad_coordinates(const LytSrc& lyt) noexcept
                                                     charge_index_mode::KEEP_CHARGE_INDEX);
                 });
 
-            lyt_new_cds.assign_physical_parameters(lyt_orig.get_simulation_params());
+            lyt_new_cds.assign_simulation_parameters(lyt_orig.get_simulation_params());
 
             return lyt_new_cds;
         }
@@ -453,7 +453,7 @@ LytDest convert_to_fiction_coordinates(const LytSrc& lyt) noexcept
                                                         lyt.get_charge_state(c), charge_index_mode::KEEP_CHARGE_INDEX);
                     });
 
-                lyt_new_cds.assign_physical_parameters(lyt.get_simulation_params());
+                lyt_new_cds.assign_simulation_parameters(lyt.get_simulation_params());
 
                 lyt.foreach_sidb_defect(
                     [&lyt_new_cds](const auto& cd) {
@@ -484,7 +484,7 @@ LytDest convert_to_fiction_coordinates(const LytSrc& lyt) noexcept
                                                         lyt.get_charge_state(c), charge_index_mode::KEEP_CHARGE_INDEX);
                     });
 
-                lyt_new_cds.assign_physical_parameters(lyt.get_simulation_params());
+                lyt_new_cds.assign_simulation_parameters(lyt.get_simulation_params());
 
                 return lyt_new_cds;
             }
@@ -504,7 +504,7 @@ LytDest convert_to_fiction_coordinates(const LytSrc& lyt) noexcept
             lyt.foreach_cell([&lyt_100, &lyt](const auto& c)
                              { lyt_100.assign_charge_state(c, lyt.get_charge_state(c), false); });
 
-            lyt_100.assign_physical_parameters(lyt.get_simulation_params());
+            lyt_100.assign_simulation_parameters(lyt.get_simulation_params());
 
             lyt.foreach_sidb_defect([&lyt_100](const auto& cd) { lyt_100.assign_sidb_defect(cd.first, cd.second); });
             return convert_to_fiction_coordinates<LytDest, cds_sidb_defect_100_cell_clk_lyt_siqad>(lyt_100);
@@ -517,7 +517,7 @@ LytDest convert_to_fiction_coordinates(const LytSrc& lyt) noexcept
                 [&cds_lyt_100, &lyt](const auto& c)
                 { cds_lyt_100.assign_charge_state(c, lyt.get_charge_state(c), charge_index_mode::KEEP_CHARGE_INDEX); });
 
-            cds_lyt_100.assign_physical_parameters(lyt.get_simulation_params());
+            cds_lyt_100.assign_simulation_parameters(lyt.get_simulation_params());
 
             return convert_to_fiction_coordinates<LytDest, cds_sidb_100_cell_clk_lyt_siqad>(cds_lyt_100);
         }
