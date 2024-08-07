@@ -545,7 +545,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             }
             else
             {
-                this->foreach_cell(
+                Lyt::foreach_cell(
                     [this, &c, &defect](const auto& c1)
                     {
                         const auto dist = sidb_nm_distance<Lyt>(*this, c1, c);
@@ -1309,8 +1309,10 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     {
         if (potential_value != 0.0)
         {
-            this->foreach_cell([this, &potential_value](const auto& c)
-                               { strg->local_external_pot.insert({c, potential_value}); });
+            this->foreach_cell(
+                [this, &potential_value](const auto& c) {
+                    strg->local_external_pot.insert({c, potential_value});
+                });
             this->update_after_charge_change(dep_cell);
         }
     }
@@ -1875,8 +1877,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     initialize(const sidb_charge_state cs            = sidb_charge_state::NEGATIVE,
                const cds_configuration configuration = cds_configuration::CHARGE_LOCATION_AND_ELECTROSTATIC) noexcept
     {
-        strg->sidb_order  = {};
-        strg->cell_charge = {};
+        strg = std::make_shared<charge_distribution_storage>();
         strg->sidb_order.reserve(this->num_cells());
         strg->cell_charge.reserve(this->num_cells());
         this->foreach_cell([this](const auto& c1) { strg->sidb_order.push_back(c1); });
@@ -1895,6 +1896,11 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         {
             this->initialize_nm_distance_matrix();
             this->initialize_potential_matrix();
+            if constexpr (is_sidb_defect_surface_v<Lyt>)
+            {
+                Lyt::foreach_sidb_defect([this](const auto cd)
+                                         { add_sidb_defect_to_potential_landscape(cd.first, cd.second); });
+            }
             this->update_local_potential();
             this->recompute_system_energy();
             this->validity_check();
@@ -2127,8 +2133,8 @@ template <class T>
 charge_distribution_surface(const T&, const sidb_simulation_parameters&) -> charge_distribution_surface<T>;
 
 template <class T>
-charge_distribution_surface(const T&, const sidb_simulation_parameters&,
-                            const sidb_charge_state cs) -> charge_distribution_surface<T>;
+charge_distribution_surface(const T&, const sidb_simulation_parameters&, const sidb_charge_state cs)
+    -> charge_distribution_surface<T>;
 
 template <class T>
 charge_distribution_surface(const T&, const sidb_simulation_parameters&, sidb_charge_state cs,
