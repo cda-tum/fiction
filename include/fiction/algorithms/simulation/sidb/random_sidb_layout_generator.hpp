@@ -91,9 +91,10 @@ Lyt generate_random_sidb_layout(const Lyt&                                      
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-    const uint64_t number_of_sidbs_of_final_layout = lyt_skeleton.num_cells() + params.number_of_sidbs;
-
     auto lyt = lyt_skeleton.clone();
+
+    const uint64_t number_of_sidbs_of_final_layout = lyt.num_cells() + params.number_of_sidbs;
+
     // counts the attempts to place the given number of SiDBs
     uint64_t attempt_counter = 0;
 
