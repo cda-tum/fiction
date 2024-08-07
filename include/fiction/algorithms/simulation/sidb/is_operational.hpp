@@ -354,8 +354,7 @@ class is_operational_impl
     /**
      * The specification of the layout.
      */
-    const std::vector<TT>&
-        truth_table;  // TODO implement the matching of multi-input truth table inputs and BDL pair ordering
+    const std::vector<TT>& truth_table;
     /**
      * Parameters for the `is_operational` algorithm.
      */
@@ -406,11 +405,14 @@ class is_operational_impl
             // perform an exhaustive ground state simulation
             return exhaustive_ground_state_simulation(*bdl_iterator, parameters.simulation_parameters);
         }
-        if (parameters.sim_engine == sidb_simulation_engine::QUICKSIM)
+        if constexpr (!is_sidb_defect_surface_v<Lyt>)
         {
-            // perform a heuristic simulation
-            const quicksim_params qs_params{parameters.simulation_parameters, 500, 0.6};
-            return quicksim(*bdl_iterator, qs_params);
+            if (parameters.sim_engine == sidb_simulation_engine::QUICKSIM)
+            {
+                // perform a heuristic simulation
+                const quicksim_params qs_params{parameters.simulation_parameters, 500, 0.6};
+                return quicksim(*bdl_iterator, qs_params);
+            }
         }
         if (parameters.sim_engine == sidb_simulation_engine::QUICKEXACT)
         {
