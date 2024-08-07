@@ -53,6 +53,8 @@ struct quicksim_params
  * charge distribution layout. Depending on the simulation parameters, the ground state is found with a certain
  * probability after one run.
  *
+ * @note *QuickSim* currently does not support atomic defect simulation.
+ *
  * @tparam Lyt SiDB cell-level layout type.
  * @param lyt The layout to simulate.
  * @param ps Physical parameters. They are material-specific and may vary from experiment to experiment.
@@ -63,6 +65,8 @@ sidb_simulation_result<Lyt> quicksim(const Lyt& lyt, const quicksim_params& ps =
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
+    static_assert(is_sidb_defect_surface_v<Lyt>,
+                  "Lyt cannot be an SiDB defect surface, defects are not supported by the QuickSim algorithm");
 
     if (ps.iteration_steps == 0)
     {
