@@ -13694,6 +13694,8 @@ energy) of a given (already initialized) charge distribution layout.
 Depending on the simulation parameters, the ground state is found with
 a certain probability after one run.
 
+@note *QuickSim* currently does not support atomic defect simulation.
+
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
 
