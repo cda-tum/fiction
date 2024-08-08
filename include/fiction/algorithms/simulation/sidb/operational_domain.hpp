@@ -285,7 +285,7 @@ class operational_domain_impl
     {
         mockturtle::stopwatch stop{stats.time_total};
 
-        // generate all possible step point combinations via the cartesian product
+        // generate all possible step point combinations via the Cartesian product of all dimensions
         std::vector<step_point> all_step_points{step_point{}};
         for (const auto& dimension : indices)
         {
@@ -303,6 +303,13 @@ class operational_domain_impl
             }
             all_step_points = expanded_products;
         }
+
+        // shuffle the step points to simulate in random order. This helps with load-balancing since
+        // operational/non-operational points are usually clustered. However, non-operational points can be simulated
+        // faster on average because of the early termination condition. Thus, threads that mainly simulate
+        // non-operational points will finish earlier and will be idle while other threads are still simulating the more
+        // expensive operational points
+        std::shuffle(all_step_points.begin(), all_step_points.end(), std::mt19937_64{std::random_device{}()});
 
         simulate_operational_status_in_parallel(all_step_points);
 
@@ -797,7 +804,7 @@ class operational_domain_impl
      * @param sp Step point to check for inferred operational status.
      * @return `true` iff `sp` is contained in `inferred_op_domain`.
      */
-    [[nodiscard]] inline bool is_step_point_inferred_operational(const step_point& sp) noexcept
+    [[nodiscard]] inline bool is_step_point_inferred_operational(const step_point& sp) const noexcept
     {
         return inferred_op_domain.count(sp) > 0;
     }
@@ -808,7 +815,7 @@ class operational_domain_impl
      * @param samples Maximum number of random `step_point`s to generate.
      * @return A vector of unique random `step_point`s in the stored parameter range of size at most equal to `samples`.
      */
-    [[nodiscard]] std::vector<step_point> generate_random_step_points(const std::size_t samples) noexcept
+    [[nodiscard]] std::vector<step_point> generate_random_step_points(const std::size_t samples) const noexcept
     {
         static std::mt19937_64 generator{std::random_device{}()};
 
@@ -844,9 +851,14 @@ class operational_domain_impl
      * Simulates the operational status of the given points in parallel. It divides the work among multiple threads to
      * speed up the computation.
      *
+     * @note The distribution of the work among threads is a simple slice-based approach. If your step points are
+     * ordered, consider shuffling the vector first for better load balancing. Otherwise, some threads might finish
+     * early if they got assigned a larger slice with mainly non-operational samples, which are faster to compute due to
+     * the early termination condition.
+     *
      * @param step_points A vector of step points for which the operational status is to be simulated.
      */
-    void simulate_operational_status_in_parallel(const std::vector<step_point>& step_points)
+    void simulate_operational_status_in_parallel(const std::vector<step_point>& step_points) noexcept
     {
         // calculate the size of each slice
         const auto slice_size = (step_points.size() + num_threads - 1) / num_threads;
@@ -896,7 +908,7 @@ class operational_domain_impl
      * @param samples Maximum number of samples to take. Works as a timeout.
      * @return The first operational step point, if any could be found, `std::nullopt` otherwise.
      */
-    [[nodiscard]] std::optional<step_point>
+    [[maybe_unused]] [[nodiscard]] std::optional<step_point>
     find_operational_step_point_via_random_sampling(const std::size_t samples) noexcept
     {
         for (const auto& sample_step_point : generate_random_step_points(samples))
