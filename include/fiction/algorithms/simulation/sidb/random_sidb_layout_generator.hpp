@@ -141,8 +141,8 @@ Lyt generate_random_sidb_layout(const Lyt&                                      
         return lyt;
     }
 
-    // if not all SiDBs could be placed, an empty layout is returned
-    return Lyt{};
+    // if not all SiDBs can be placed, the originally given skeleton layout is returned
+    return lyt_skeleton;
 }
 
 /**

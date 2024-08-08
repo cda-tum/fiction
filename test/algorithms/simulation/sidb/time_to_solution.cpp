@@ -93,9 +93,7 @@ TEMPLATE_TEST_CASE("time to solution test", "[time-to-solution]", (sidb_100_cell
 }
 
 TEMPLATE_TEST_CASE("time to solution test, using offset coordinates", "[time-to-solution]",
-                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>),
-                   (charge_distribution_surface<
-                       cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>))
+                   sidb_cell_clk_lyt, cds_sidb_cell_clk_lyt)
 {
 
     TestType lyt{};
