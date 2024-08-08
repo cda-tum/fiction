@@ -10,6 +10,7 @@
 
 #include <fiction/algorithms/network_transformation/fanout_substitution.hpp>
 
+#include <pybind11/cast.h>
 #include <pybind11/pybind11.h>
 
 namespace pyfiction

@@ -64,6 +64,22 @@ struct technology_mapping_params
      * 2-input XNOR gate.
      */
     bool xnor2{false};
+    /**
+     * 2-input less-than gate.
+     */
+    bool lt2{false};
+    /**
+     * 2-input greater-than gate.
+     */
+    bool gt2{false};
+    /**
+     * 2-input less-or-equal gate.
+     */
+    bool le2{false};
+    /**
+     * 2-input greater-or-equal gate.
+     */
+    bool ge2{false};
 
     // 3-input functions
 
@@ -156,6 +172,31 @@ struct technology_mapping_params
     return params;
 }
 /**
+ * Auxiliary function to create technology mapping parameters for AND, OR, NAND, NOR, XOR, XNOR, LE, GE, LT, GT,
+ * and NOT gates.
+ *
+ * @return Technology mapping parameters.
+ */
+[[nodiscard]] inline technology_mapping_params all_2_input_functions() noexcept
+{
+    technology_mapping_params params{};
+
+    params.inv = true;
+
+    params.and2  = true;
+    params.nand2 = true;
+    params.or2   = true;
+    params.nor2  = true;
+    params.xor2  = true;
+    params.xnor2 = true;
+    params.lt2   = true;
+    params.gt2   = true;
+    params.le2   = true;
+    params.ge2   = true;
+
+    return params;
+}
+/**
  * Auxiliary function to create technology mapping parameters for AND3, XOR_AND, OR_AND, ONEHOT, MAJ3, GAMBLE, DOT, MUX,
  * and AND_XOR gates.
  *
@@ -196,6 +237,40 @@ struct technology_mapping_params
     params.nor2  = true;
     params.xor2  = true;
     params.xnor2 = true;
+
+    params.and3    = true;
+    params.xor_and = true;
+    params.or_and  = true;
+    params.onehot  = true;
+    params.maj3    = true;
+    params.gamble  = true;
+    params.dot     = true;
+    params.mux     = true;
+    params.and_xor = true;
+
+    return params;
+}
+/**
+ * Auxiliary function to create technology mapping parameters for all supported functions.
+ *
+ * @return Technology mapping parameters.
+ */
+[[nodiscard]] inline technology_mapping_params all_supported_functions() noexcept
+{
+    technology_mapping_params params{};
+
+    params.inv = true;
+
+    params.and2  = true;
+    params.nand2 = true;
+    params.or2   = true;
+    params.nor2  = true;
+    params.xor2  = true;
+    params.xnor2 = true;
+    params.lt2   = true;
+    params.gt2   = true;
+    params.le2   = true;
+    params.ge2   = true;
 
     params.and3    = true;
     params.xor_and = true;
@@ -318,6 +393,22 @@ class technology_mapping_impl
         if (params.xnor2)
         {
             library_stream << fiction::GATE_XNOR2;
+        }
+        if (params.lt2)
+        {
+            library_stream << fiction::GATE_LT2;
+        }
+        if (params.gt2)
+        {
+            library_stream << fiction::GATE_GT2;
+        }
+        if (params.le2)
+        {
+            library_stream << fiction::GATE_LE2;
+        }
+        if (params.ge2)
+        {
+            library_stream << fiction::GATE_GE2;
         }
         // 3-input functions
         if (params.maj3)
@@ -451,8 +542,8 @@ class technology_mapping_impl
  * @return Mapped network exclusively using gates from the provided library.
  */
 template <typename Ntk>
-tec_nt technology_mapping(const Ntk& ntk, const technology_mapping_params& params = {},
-                          technology_mapping_stats* pst = nullptr)
+[[nodiscard]] tec_nt technology_mapping(const Ntk& ntk, const technology_mapping_params& params = {},
+                                        technology_mapping_stats* pst = nullptr)
 {
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
 

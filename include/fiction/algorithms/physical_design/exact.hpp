@@ -9,7 +9,6 @@
 
 #include "fiction/algorithms/iter/aspect_ratio_iterator.hpp"
 #include "fiction/algorithms/network_transformation/fanout_substitution.hpp"
-#include "fiction/io/print_layout.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/sidb_surface_analysis.hpp"
@@ -41,8 +40,10 @@
 #include <cassert>
 #include <chrono>
 #include <cstdint>
+#include <cstdlib>
 #include <functional>
 #include <future>
+#include <limits>
 #include <memory>
 #include <mutex>
 #include <optional>
@@ -2962,7 +2963,7 @@ class exact_impl
      */
     [[nodiscard]] std::optional<Lyt> run_asynchronously()
     {
-        std::cout << "You have called an unstable beta feature that might crash." << std::endl;
+        std::cout << "You have called an unstable beta feature that might crash.\n";
 
         Lyt layout{{}, scheme};
 
@@ -3193,7 +3194,7 @@ std::optional<Lyt> exact(const Ntk& ntk, const exact_physical_design_params& ps 
     {
         if (ps.synchronization_elements)
         {
-            std::cout << "[w] Lyt does not support synchronization elements; not using them" << std::endl;
+            std::cout << "[w] Lyt does not support synchronization elements; not using them\n";
         }
     }
 
@@ -3247,7 +3248,7 @@ std::optional<Lyt> exact_with_blacklist(const Ntk& ntk, const surface_black_list
         throw unsupported_clocking_scheme_exception();
     }
     // check for input degree
-    else if (has_high_degree_fanin_nodes(ntk, clocking_scheme->max_in_degree))
+    if (has_high_degree_fanin_nodes(ntk, clocking_scheme->max_in_degree))
     {
         throw high_degree_fanin_exception();
     }
@@ -3257,15 +3258,14 @@ std::optional<Lyt> exact_with_blacklist(const Ntk& ntk, const surface_black_list
         if (ps.straight_inverters)
         {
             std::cout << "[w] Lyt does not implement the foreach_adjacent_opposite_tiles function; straight inverters "
-                         "cannot be guaranteed"
-                      << std::endl;
+                         "cannot be guaranteed\n";
         }
     }
     if constexpr (!fiction::has_synchronization_elements_v<Lyt>)
     {
         if (ps.synchronization_elements)
         {
-            std::cout << "[w] Lyt does not support synchronization elements; not using them" << std::endl;
+            std::cout << "[w] Lyt does not support synchronization elements; not using them\n";
         }
     }
 

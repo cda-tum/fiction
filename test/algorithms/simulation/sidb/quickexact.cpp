@@ -1173,6 +1173,42 @@ TEMPLATE_TEST_CASE("QuickExact simulation of a Y-shaped SiDB OR gate with input 
     quickexact_params<cell<TestType>> params{sidb_simulation_parameters{2, -0.28},
                                              quickexact_params<cell<TestType>>::automatic_base_number_detection::OFF};
 
+    SECTION("Check if QuickExact is deterministic")
+    {
+        SECTION("epsilon_r = 8")
+        {
+            params.simulation_parameters.epsilon_r = 8;
+            std::set<double>   ground_state{};
+            std::set<uint64_t> charge_index{};
+            for (auto i = 0; i < 10000; i++)
+            {
+                const auto simulation_results = quickexact<TestType>(lyt, params);
+                auto&      charge_lyt_first   = simulation_results.charge_distributions.front();
+                ground_state.insert(charge_lyt_first.get_system_energy());
+                charge_lyt_first.charge_distribution_to_index_general();
+                charge_index.insert(charge_lyt_first.get_charge_index_and_base().first);
+            }
+            CHECK(ground_state.size() == 1);
+            CHECK(charge_index.size() == 1);
+        }
+        SECTION("epsilon_r = 2")
+        {
+            params.simulation_parameters.epsilon_r = 2;
+            std::set<double>   ground_state{};
+            std::set<uint64_t> charge_index{};
+            for (auto i = 0; i < 10000; i++)
+            {
+                const auto simulation_results = quickexact<TestType>(lyt, params);
+                auto&      charge_lyt_first   = simulation_results.charge_distributions.front();
+                ground_state.insert(charge_lyt_first.get_system_energy());
+                charge_lyt_first.charge_distribution_to_index_general();
+                charge_index.insert(charge_lyt_first.get_charge_index_and_base().first);
+            }
+            CHECK(ground_state.size() == 1);
+            CHECK(charge_index.size() == 1);
+        }
+    }
+
     SECTION("Add SiDBs which are positively charged in the ground state, layout does not fulfill the logic anymore.")
     {
         params.simulation_parameters.base = 3;

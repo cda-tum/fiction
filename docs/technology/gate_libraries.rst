@@ -58,3 +58,13 @@ SiDB Bestagon Library
 
 .. doxygenclass:: fiction::sidb_bestagon_library
    :members:
+
+Parameterized SiDB Library
+--------------------------
+
+**Header:** ``fiction/technology/parameterized_gate_library.hpp``
+
+.. doxygenstruct:: fiction::parameterized_gate_library_params
+   :members:
+.. doxygenclass:: fiction::parameterized_gate_library
+   :members:

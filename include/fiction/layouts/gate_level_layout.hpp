@@ -872,6 +872,26 @@ class gate_level_layout : public ClockedLayout
     {
         return strg->nodes[n].data[1].h1 == 10;
     }
+
+    [[nodiscard]] bool is_lt(const node n) const noexcept
+    {
+        return strg->nodes[n].data[1].h1 == 11;
+    }
+
+    [[nodiscard]] bool is_gt(const node n) const noexcept
+    {
+        return strg->nodes[n].data[1].h1 == 12;
+    }
+
+    [[nodiscard]] bool is_ge(const node n) const noexcept
+    {
+        return strg->nodes[n].data[1].h1 == 13;
+    }
+
+    [[nodiscard]] bool is_le(const node n) const noexcept
+    {
+        return strg->nodes[n].data[1].h1 == 14;
+    }
     /**
      * Returns whether `n` is a wire and has multiple outputs, thereby, acting as a fanout gate. Note that a fanout will
      * return `true` for both `is_wire` and `is_fanout`.
@@ -1621,13 +1641,18 @@ class gate_level_layout : public ClockedLayout
             strg->data.fn_cache.insert(tt);
         };
 
-        static constexpr const uint64_t lit_not = 0x1, lit_and = 0x8, lit_or = 0xe, lit_xor = 0x6, lit_maj = 0xe8;
+        static constexpr const uint64_t lit_not = 0x1, lit_and = 0x8, lit_or = 0xe, lit_xor = 0x6, lit_maj = 0xe8,
+                                        lit_lt = 0x2, lit_gt = 0x4, lit_ge = 0x13, lit_le = 0x11;
 
         create_and_cache(lit_not, 1);  // since NOT is not normal, its complement, i.e., the identity, is stored
         create_and_cache(lit_and, 2);
         create_and_cache(lit_or, 2);
         create_and_cache(lit_xor, 2);
         create_and_cache(lit_maj, 3);
+        create_and_cache(lit_lt, 2);
+        create_and_cache(lit_gt, 2);
+        create_and_cache(lit_ge, 2);
+        create_and_cache(lit_le, 2);
     }
 
     void assign_node(const tile& t, const node n)

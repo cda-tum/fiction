@@ -7,7 +7,7 @@
 
 #include <fiction/layouts/bounding_box.hpp>
 #include <fiction/technology/cell_technologies.hpp>
-#include <fiction/technology/sidb_lattice.hpp>
+#include <fiction/technology/sidb_defect_surface.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -36,7 +36,7 @@ TEST_CASE("Initialize 2D gate-level bounding box", "[bounding-box]")
 
     const auto lyt_or_not = blueprints::or_not_gate_layout<cart_gate_clk_lyt>();
 
-    bounding_box_2d bb_or_not{lyt_or_not};
+    const bounding_box_2d bb_or_not{lyt_or_not};
 
     CHECK(bb_or_not.get_min() == tile<cart_gate_clk_lyt>{0, 0});
     CHECK(bb_or_not.get_max() == tile<cart_gate_clk_lyt>{2, 2});
@@ -93,7 +93,7 @@ TEST_CASE("Initialize 2D cell-level bounding box", "[bounding-box]")
 {
     const auto lyt_and = blueprints::single_layer_qca_and_gate<qca_cell_clk_lyt>();
 
-    bounding_box_2d bb_and{lyt_and};
+    const bounding_box_2d bb_and{lyt_and};
 
     CHECK(bb_and.get_min() == cell<qca_cell_clk_lyt>{0, 0});
     CHECK(bb_and.get_max() == cell<qca_cell_clk_lyt>{4, 4});
@@ -221,5 +221,158 @@ TEMPLATE_TEST_CASE("2D bounding box for siqad layout", "[bounding-box]", sidb_ce
 
         CHECK(nw == siqad::coord_t{-2, 0, 0});
         CHECK(se == siqad::coord_t{2, 4, 1});
+    }
+}
+
+TEMPLATE_TEST_CASE("2D bounding box for siqad layout with atomic defect", "[bounding-box]",
+                   sidb_defect_cell_clk_lyt_siqad, sidb_111_cell_clk_lyt_siqad, sidb_defect_100_cell_clk_lyt_siqad)
+{
+    SECTION("empyt layout")
+    {
+        const TestType lyt{};
+
+        const bounding_box_2d bb{lyt};
+        const auto            nw = bb.get_min();
+        const auto            se = bb.get_max();
+
+        CHECK(nw == siqad::coord_t(0, 0, 0));
+        CHECK(se == siqad::coord_t(0, 0, 0));
+    }
+
+    SECTION("one cell and one defect")
+    {
+        sidb_defect_surface<TestType> lyt{TestType{}};
+        lyt.assign_cell_type({1, 0, 0}, TestType::technology::NORMAL);
+        lyt.assign_sidb_defect({2, 0, 0}, sidb_defect{});
+
+        const bounding_box_2d bb{lyt};
+        const auto            nw = bb.get_min();
+        const auto            se = bb.get_max();
+
+        CHECK(nw == siqad::coord_t{1, 0, 0});
+        CHECK(se == siqad::coord_t{2, 0, 0});
+    }
+
+    SECTION("two cell and two defect")
+    {
+        sidb_defect_surface<TestType> lyt{TestType{}};
+        lyt.assign_cell_type({1, 0, 0}, TestType::technology::NORMAL);
+        lyt.assign_cell_type({-2, 0, 0}, TestType::technology::NORMAL);
+        lyt.assign_sidb_defect({2, 0, 0}, sidb_defect{});
+        lyt.assign_sidb_defect({2, 0, 1}, sidb_defect{});
+
+        const bounding_box_2d bb{lyt};
+        const auto            nw = bb.get_min();
+        const auto            se = bb.get_max();
+
+        CHECK(nw == siqad::coord_t{-2, 0, 0});
+        CHECK(se == siqad::coord_t{2, 0, 1});
+    }
+}
+
+TEMPLATE_TEST_CASE("2D bounding box for layout with atomic defect", "[bounding-box]", sidb_defect_cell_clk_lyt)
+{
+    SECTION("empyt layout")
+    {
+        const TestType lyt{};
+
+        const bounding_box_2d bb{lyt};
+        const auto            nw = bb.get_min();
+        const auto            se = bb.get_max();
+
+        CHECK(nw == cell<TestType>{0, 0, 0});
+        CHECK(se == cell<TestType>{0, 0, 0});
+    }
+
+    SECTION("one cell and one defect")
+    {
+        sidb_defect_surface<TestType> lyt{TestType{}};
+        lyt.assign_cell_type({1, 0, 0}, TestType::technology::NORMAL);
+        lyt.assign_sidb_defect({2, 0, 0}, sidb_defect{});
+
+        const bounding_box_2d bb{lyt};
+        const auto            nw = bb.get_min();
+        const auto            se = bb.get_max();
+
+        CHECK(nw == cell<TestType>{1, 0, 0});
+        CHECK(se == cell<TestType>{2, 0, 0});
+    }
+
+    SECTION("two cell and two defect")
+    {
+        sidb_defect_surface<TestType> lyt{TestType{}};
+        lyt.assign_cell_type({1, 0}, TestType::technology::NORMAL);
+        lyt.assign_cell_type({3, 0}, TestType::technology::NORMAL);
+        lyt.assign_sidb_defect({2, 0}, sidb_defect{});
+        lyt.assign_sidb_defect({2, 0}, sidb_defect{});
+
+        const bounding_box_2d bb{lyt};
+        const auto            nw = bb.get_min();
+        const auto            se = bb.get_max();
+
+        CHECK(nw == cell<TestType>{1, 0});
+        CHECK(se == cell<TestType>{3, 0});
+    }
+}
+
+TEMPLATE_TEST_CASE("2D bounding box for cube layout with atomic defect", "[bounding-box]", sidb_cell_clk_lyt_cube,
+                   sidb_111_cell_clk_lyt_cube, sidb_100_cell_clk_lyt_cube)
+{
+    SECTION("empyt layout")
+    {
+        const TestType lyt{};
+
+        const bounding_box_2d bb{lyt};
+        const auto            nw = bb.get_min();
+        const auto            se = bb.get_max();
+
+        CHECK(nw == cell<TestType>{0, 0});
+        CHECK(se == cell<TestType>{0, 0});
+    }
+
+    SECTION("one cell and one defect")
+    {
+        sidb_defect_surface<TestType> lyt{TestType{}};
+        lyt.assign_cell_type({1, 0}, TestType::technology::NORMAL);
+        lyt.assign_sidb_defect({2, 0}, sidb_defect{});
+
+        const bounding_box_2d bb{lyt};
+        const auto            nw = bb.get_min();
+        const auto            se = bb.get_max();
+
+        CHECK(nw == cell<TestType>{1, 0});
+        CHECK(se == cell<TestType>{2, 0});
+    }
+
+    SECTION("two cell and two defect, include defects")
+    {
+        sidb_defect_surface<TestType> lyt{TestType{}};
+        lyt.assign_cell_type({1, 0}, TestType::technology::NORMAL);
+        lyt.assign_cell_type({2, 0}, TestType::technology::NORMAL);
+        lyt.assign_sidb_defect({-3, 0}, sidb_defect{});
+        lyt.assign_sidb_defect({2, 0}, sidb_defect{});
+
+        const bounding_box_2d bb{lyt};
+        const auto            nw = bb.get_min();
+        const auto            se = bb.get_max();
+
+        CHECK(nw == cell<TestType>{-3, 0});
+        CHECK(se == cell<TestType>{2, 0});
+    }
+
+    SECTION("two cell and two defect, exclude defects")
+    {
+        sidb_defect_surface<TestType> lyt{TestType{}};
+        lyt.assign_cell_type({1, 0}, TestType::technology::NORMAL);
+        lyt.assign_cell_type({2, 0}, TestType::technology::NORMAL);
+        lyt.assign_sidb_defect({-3, 0}, sidb_defect{});
+        lyt.assign_sidb_defect({2, 0}, sidb_defect{});
+
+        const bounding_box_2d bb{static_cast<TestType>(lyt)};
+        const auto            nw = bb.get_min();
+        const auto            se = bb.get_max();
+
+        CHECK(nw == cell<TestType>{1, 0, 0});
+        CHECK(se == cell<TestType>{2, 0, 0});
     }
 }
