@@ -23,9 +23,9 @@
 
 using namespace fiction;
 
-void check_op_domain_params_and_operational_status(const operational_domain&                op_domain,
-                                                   const operational_domain_params&         params,
-                                                   const std::optional<operational_status>& status) noexcept
+void check_op_domain_params_and_operational_status(
+    const operational_domain<parameter_point, operational_status>& op_domain, const operational_domain_params& params,
+    const std::optional<operational_status>& status) noexcept
 {
     REQUIRE(params.sweep_dimensions.size() == op_domain.dimensions.size());
 
@@ -84,8 +84,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
     operational_domain_params op_domain_params{};
     op_domain_params.simulation_parameters = sim_params;
-    op_domain_params.sweep_dimensions      = {{sweep_parameter::EPSILON_R},
-                                              {sweep_parameter::LAMBDA_TF}};
+    op_domain_params.sweep_dimensions      = {{sweep_parameter::EPSILON_R}, {sweep_parameter::LAMBDA_TF}};
 
     operational_domain_stats op_domain_stats{};
 
@@ -120,8 +119,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
             SECTION("3-dimensional")
             {
-                const auto z_dimension =
-                    operational_domain_value_range{operational_domain::sweep_parameter::MU_MINUS, -0.32, -0.32, 0.01};
+                const auto z_dimension = operational_domain_value_range{sweep_parameter::MU_MINUS, -0.32, -0.32, 0.01};
 
                 op_domain_params.sweep_dimensions.push_back(z_dimension);
 
@@ -162,8 +160,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
             SECTION("3-dimensional")
             {
-                const auto z_dimension =
-                    operational_domain_value_range{operational_domain::sweep_parameter::MU_MINUS, -0.32, -0.32, 0.01};
+                const auto z_dimension = operational_domain_value_range{sweep_parameter::MU_MINUS, -0.32, -0.32, 0.01};
 
                 op_domain_params.sweep_dimensions.push_back(z_dimension);
 
@@ -204,8 +201,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
             SECTION("3-dimensional")
             {
-                const auto z_dimension =
-                    operational_domain_value_range{operational_domain::sweep_parameter::MU_MINUS, -0.32, -0.32, 0.01};
+                const auto z_dimension = operational_domain_value_range{sweep_parameter::MU_MINUS, -0.32, -0.32, 0.01};
 
                 op_domain_params.sweep_dimensions.push_back(z_dimension);
 
@@ -359,8 +355,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
             SECTION("3-dimensional")
             {
-                const auto z_dimension =
-                    operational_domain_value_range{operational_domain::sweep_parameter::MU_MINUS, -0.35, -0.29, 0.01};
+                const auto z_dimension = operational_domain_value_range{sweep_parameter::MU_MINUS, -0.35, -0.29, 0.01};
 
                 op_domain_params.sweep_dimensions.push_back(z_dimension);
 
@@ -401,8 +396,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
             SECTION("3-dimensional")
             {
-                const auto z_dimension =
-                    operational_domain_value_range{operational_domain::sweep_parameter::MU_MINUS, -0.35, -0.29, 0.01};
+                const auto z_dimension = operational_domain_value_range{sweep_parameter::MU_MINUS, -0.35, -0.29, 0.01};
 
                 op_domain_params.sweep_dimensions.push_back(z_dimension);
 
@@ -443,8 +437,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
             SECTION("3-dimensional")
             {
-                const auto z_dimension =
-                    operational_domain_value_range{operational_domain::sweep_parameter::MU_MINUS, -0.35, -0.29, 0.01};
+                const auto z_dimension = operational_domain_value_range{sweep_parameter::MU_MINUS, -0.35, -0.29, 0.01};
 
                 op_domain_params.sweep_dimensions.push_back(z_dimension);
 
@@ -516,8 +509,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
             SECTION("3-dimensional")
             {
-                const auto z_dimension =
-                    operational_domain_value_range{operational_domain::sweep_parameter::MU_MINUS, -0.14, -0.10, 0.01};
+                const auto z_dimension = operational_domain_value_range{sweep_parameter::MU_MINUS, -0.14, -0.10, 0.01};
 
                 op_domain_params.sweep_dimensions.push_back(z_dimension);
 
@@ -558,8 +550,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
             SECTION("3-dimensional")
             {
-                const auto z_dimension =
-                    operational_domain_value_range{operational_domain::sweep_parameter::MU_MINUS, -0.14, -0.10, 0.01};
+                const auto z_dimension = operational_domain_value_range{sweep_parameter::MU_MINUS, -0.14, -0.10, 0.01};
 
                 op_domain_params.sweep_dimensions.push_back(z_dimension);
 
@@ -600,8 +591,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
             SECTION("3-dimensional")
             {
-                const auto z_dimension =
-                    operational_domain_value_range{operational_domain::sweep_parameter::MU_MINUS, -0.14, -0.10, 0.01};
+                const auto z_dimension = operational_domain_value_range{sweep_parameter::MU_MINUS, -0.14, -0.10, 0.01};
 
                 op_domain_params.sweep_dimensions.push_back(z_dimension);
 

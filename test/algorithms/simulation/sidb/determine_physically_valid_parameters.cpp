@@ -8,6 +8,7 @@
 
 #include <fiction/algorithms/simulation/sidb/determine_physically_valid_parameters.hpp>
 #include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/cell_technologies.hpp>
@@ -41,19 +42,14 @@ TEST_CASE("Determine physical parameters for CDS of SiQAD Y-shaped AND gate, 10 
 
     operational_domain_params op_domain_params{};
     op_domain_params.simulation_parameters = sim_params;
-    op_domain_params.x_dimension           = sweep_parameter::EPSILON_R;
-    op_domain_params.x_min                 = 4.1;
-    op_domain_params.x_max                 = 6.0;
-    op_domain_params.x_step                = 0.1;
-    op_domain_params.y_dimension           = sweep_parameter::LAMBDA_TF;
-    op_domain_params.y_min                 = 4.1;
-    op_domain_params.y_max                 = 6.0;
-    op_domain_params.y_step                = 0.1;
+
+    op_domain_params.sweep_dimensions = {operational_domain_value_range{sweep_parameter::EPSILON_R, 4.1, 6.0, 0.1},
+                                         operational_domain_value_range{sweep_parameter::LAMBDA_TF, 4.1, 6.0, 0.1}};
 
     SECTION("Using the typical ground state as given CDS")
     {
-        op_domain_params.x_step = 0.3;
-        op_domain_params.y_step = 0.3;
+        op_domain_params.sweep_dimensions[0].step = 0.3;
+        op_domain_params.sweep_dimensions[1].step = 0.3;
 
         cds.assign_charge_state({-2, -1, 1}, sidb_charge_state::NEGATIVE);
         cds.assign_charge_state({0, 0, 1}, sidb_charge_state::NEUTRAL);
@@ -91,13 +87,13 @@ TEST_CASE("Determine physical parameters for CDS of SiQAD Y-shaped AND gate, 10 
 
         const auto valid_parameters = determine_physically_valid_parameters(cds, op_domain_params);
         CHECK(valid_parameters.operational_values.size() == 98);
-        CHECK(find_parameter_point_with_tolerance(valid_parameters.operational_values, parameter_point{5.9, 5.5})
+        CHECK(find_parameter_point_with_tolerance(valid_parameters.operational_values, parameter_point{{5.9, 5.5}})
                   ->second == 1);
-        CHECK(find_parameter_point_with_tolerance(valid_parameters.operational_values, parameter_point{5.8, 4.4})
+        CHECK(find_parameter_point_with_tolerance(valid_parameters.operational_values, parameter_point{{5.8, 4.4}})
                   ->second == 0);
-        CHECK(find_parameter_point_with_tolerance(valid_parameters.operational_values, parameter_point{5.8, 4.4})
+        CHECK(find_parameter_point_with_tolerance(valid_parameters.operational_values, parameter_point{{5.8, 4.4}})
                   ->second == 0);
-        CHECK(find_parameter_point_with_tolerance(valid_parameters.operational_values, parameter_point{6.0, 6.0})
+        CHECK(find_parameter_point_with_tolerance(valid_parameters.operational_values, parameter_point{{6.0, 6.0}})
                   ->second == 1);
     }
 }
@@ -118,14 +114,8 @@ TEST_CASE(
 
     operational_domain_params op_domain_params{};
     op_domain_params.simulation_parameters = sim_params;
-    op_domain_params.x_dimension           = sweep_parameter::EPSILON_R;
-    op_domain_params.x_min                 = 5.0;
-    op_domain_params.x_max                 = 5.9;
-    op_domain_params.x_step                = 0.1;
-    op_domain_params.y_dimension           = sweep_parameter::LAMBDA_TF;
-    op_domain_params.y_min                 = 5.0;
-    op_domain_params.y_max                 = 5.9;
-    op_domain_params.y_step                = 0.1;
+    op_domain_params.sweep_dimensions      = {operational_domain_value_range{sweep_parameter::EPSILON_R, 5.0, 5.9, 0.1},
+                                              operational_domain_value_range{sweep_parameter::LAMBDA_TF, 5.0, 5.9, 0.1}};
 
     SECTION("Using the ground state of default physical parameters as given CDS")
     {
@@ -161,14 +151,14 @@ TEST_CASE(
         cds.update_after_charge_change();
 
         const auto valid_parameters = determine_physically_valid_parameters(cds, op_domain_params);
-        CHECK(valid_parameters.operational_values.size() == 100);
-        CHECK(find_parameter_point_with_tolerance(valid_parameters.operational_values, parameter_point{5.6, 5.0})
+        REQUIRE(valid_parameters.operational_values.size() == 100);
+        CHECK(find_parameter_point_with_tolerance(valid_parameters.operational_values, parameter_point{{5.6, 5.0}})
                   ->second == 0);
-        CHECK(find_parameter_point_with_tolerance(valid_parameters.operational_values, parameter_point{5.0, 5.9})
+        CHECK(find_parameter_point_with_tolerance(valid_parameters.operational_values, parameter_point{{5.0, 5.9}})
                   ->second == 2);
-        CHECK(find_parameter_point_with_tolerance(valid_parameters.operational_values, parameter_point{5.4, 5.3})
+        CHECK(find_parameter_point_with_tolerance(valid_parameters.operational_values, parameter_point{{5.4, 5.3}})
                   ->second == 1);
-        CHECK(find_parameter_point_with_tolerance(valid_parameters.operational_values, parameter_point{5.8, 5.3})
+        CHECK(find_parameter_point_with_tolerance(valid_parameters.operational_values, parameter_point{{5.8, 5.3}})
                   ->second == 0);
     }
 }

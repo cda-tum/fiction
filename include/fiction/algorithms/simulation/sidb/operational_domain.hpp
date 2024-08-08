@@ -163,7 +163,20 @@ struct operational_domain
         {
             return it->second;
         }
-        throw std::out_of_range(fmt::format("({},{}) not found in the operational domain", pp.x, pp.y).c_str());
+        // Create a stringstream to hold the string representation
+        std::stringstream ss;
+
+        // Iterate over the vector and add elements to the stringstream
+        for (std::size_t i = 0; i < pp.parameters.size(); ++i)
+        {
+            ss << pp.parameters[i];
+            // Add a separator (e.g., comma) between elements
+            if (i != pp.parameters.size() - 1)
+            {
+                ss << ", ";
+            }
+        }
+        throw std::out_of_range(fmt::format("{} not found in the operational domain", ss.str()).c_str());
     }
 };
 /**
@@ -174,7 +187,7 @@ struct operational_domain_value_range
     /**
      * The sweep parameter of the dimension.
      */
-    operational_domain::sweep_parameter dimension;
+    sweep_parameter dimension;
     /**
      * The minimum value of the dimension sweep.
      */
@@ -304,6 +317,54 @@ class operational_domain_impl
             params{ps},
             stats{st},
             output_bdl_pairs{detect_bdl_pairs<Lyt>(layout, sidb_technology::cell_type::OUTPUT, params.bdl_params)},
+            num_dimensions{params.sweep_dimensions.size()}
+    {
+        op_domain.dimensions.reserve(num_dimensions);
+
+        indices.reserve(num_dimensions);
+        values.reserve(num_dimensions);
+
+        for (auto d = 0u; d < num_dimensions; ++d)
+        {
+            op_domain.dimensions.push_back(params.sweep_dimensions[d].dimension);
+
+            // generate the step points for the dimension
+            indices.push_back(std::vector<std::size_t>(num_steps(d) + 1));
+            std::iota(indices[d].begin(), indices[d].end(), 0ul);
+
+            // if the value of the parameter is greater than params.max after num_x_steps() steps, this value is
+            // ignored in the operational domain calculation
+            if ((params.sweep_dimensions[d].min +
+                 static_cast<double>(indices[d].size() - 1) * params.sweep_dimensions[d].step) -
+                    params.sweep_dimensions[d].max >
+                physical_constants::POP_STABILITY_ERR)
+            {
+                indices[d].pop_back();
+            }
+
+            values.emplace_back();
+
+            // generate the values for the dimension
+            for (const auto i : indices[d])
+            {
+                values[d].push_back(params.sweep_dimensions[d].min +
+                                    static_cast<double>(i) * params.sweep_dimensions[d].step);
+            }
+        }
+    }
+    /**
+     * Additional Constructor. Initializes the layout, the parameters and the statistics.
+     *
+     * @param lyt SiDB cell-level layout to be evaluated.
+     * @param ps Parameters for the operational domain computation.
+     * @param st Statistics of the process.
+     */
+    operational_domain_impl(const Lyt& lyt, const operational_domain_params& ps, operational_domain_stats& st) noexcept
+            :
+            layout{lyt},
+            truth_table{std::vector<TT>{}},
+            params{ps},
+            stats{st},
             num_dimensions{params.sweep_dimensions.size()}
     {
         op_domain.dimensions.reserve(num_dimensions);
@@ -598,14 +659,11 @@ class operational_domain_impl
 
         mockturtle::stopwatch stop{stats.time_total};
 
+        // TODO needs to be fixed
         // step points are analyzed sequentially because the CDS is updated for each step point, so parallelizing may
         // result in unexpected behavior.
-        std::for_each(x_indices.cbegin(), x_indices.cend(),
-                      [this, &lyt](const auto x)
-                      {
-                          std::for_each(y_indices.cbegin(), y_indices.cend(),
-                                        [this, &lyt, x](const auto y) { is_step_point_suitable(lyt, {x, y}); });
-                      });
+        std::for_each(indices.cbegin(), indices.cend(),
+                      [this, &lyt](const auto id) { is_step_point_suitable(lyt, step_point{id}); });
 
         sidb_simulation_parameters simulation_parameters = params.simulation_parameters;
 
@@ -617,8 +675,9 @@ class operational_domain_impl
                 {
                     continue;
                 }
-                set_x_dimension_value(simulation_parameters, param_point.x);
-                set_y_dimension_value(simulation_parameters, param_point.y);
+
+                set_dimension_value(simulation_parameters, param_point.parameters[0], 0);
+                set_dimension_value(simulation_parameters, param_point.parameters[1], 1);
 
                 auto sim_results = sidb_simulation_result<Lyt>{};
 
@@ -944,6 +1003,7 @@ class operational_domain_impl
      * @param sp Step point to be investigated.
      * @return The operational status of the layout under the given simulation parameters.
      */
+    // TODO needs some rewrite
     operational_status is_step_point_suitable(Lyt& lyt, const step_point& sp) noexcept
     {
         // if the point has already been sampled, return the stored operational status
@@ -973,8 +1033,8 @@ class operational_domain_impl
         ++num_evaluated_parameter_combinations;
 
         sidb_simulation_parameters sim_params = params.simulation_parameters;
-        set_x_dimension_value(sim_params, param_point.x);
-        set_y_dimension_value(sim_params, param_point.y);
+        set_dimension_value(sim_params, param_point.parameters[0], 0);
+        set_dimension_value(sim_params, param_point.parameters[1], 1);
 
         lyt.assign_physical_parameters(sim_params);
 
@@ -1536,7 +1596,8 @@ operational_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& spec, const
     }
 
     operational_domain_stats                 st{};
-    detail::operational_domain_impl<Lyt, TT> p{lyt, spec, params, st};
+    detail::operational_domain_impl<Lyt, TT, operational_domain<parameter_point, operational_status>> p{lyt, spec,
+                                                                                                        params, st};
 
     const auto result = p.flood_fill(samples);
 
@@ -1596,7 +1657,8 @@ operational_domain_contour_tracing(const Lyt& lyt, const std::vector<TT>& spec, 
     }
 
     operational_domain_stats                 st{};
-    detail::operational_domain_impl<Lyt, TT> p{lyt, spec, params, st};
+    detail::operational_domain_impl<Lyt, TT, operational_domain<parameter_point, operational_status>> p{lyt, spec,
+                                                                                                        params, st};
 
     const auto result = p.contour_tracing(samples);
 
