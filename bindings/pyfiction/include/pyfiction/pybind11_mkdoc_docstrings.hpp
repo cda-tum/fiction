@@ -171,10 +171,6 @@ Parameter ``cell_nw``:
 Parameter ``cell_se``:
     The southeast cell defining the ending point of the area.
 
-Parameter ``obstructed_cell``:
-    Optional cell which is obstructed and therefore not included in
-    the returned vector.
-
 Returns:
     A vector containing all cells within the specified area.)doc";
 
@@ -4137,7 +4133,10 @@ positions of the first SiDB due to the allowed/possible displacements.)doc";
 
 static const char *__doc_fiction_detail_displacement_robustness_domain_impl_calculate_all_possible_displacements_for_each_sidb =
 R"doc(This function calculates all permitted displacements for each SiDB
-based on the specified allowed displacements.)doc";
+based on the specified allowed displacements.
+
+Returns:
+    A vector containing all possible displacements for each SiDB.)doc";
 
 static const char *__doc_fiction_detail_displacement_robustness_domain_impl_determine_propability_of_fabricating_operational_gate =
 R"doc(The manufacturing error rate is highly dependent on the speed of the
@@ -4179,13 +4178,14 @@ Parameter ``ps``:
 Parameter ``st``:
     Statistics related to the displacement robustness computation.)doc";
 
-static const char *__doc_fiction_detail_displacement_robustness_domain_impl_generate_combinations =
+static const char *__doc_fiction_detail_displacement_robustness_domain_impl_generate_all_possible_combinations_of_displacements =
 R"doc(This is a helper function, which recursively generates combinations of
 SiDB displacements for all SiDBs based on the provided vector of
 displacement vectors.
 
 Parameter ``result``:
-    The vector to store the generated combinations.
+    The vector to store the generated combinations. The first element
+    describes the SiDBs of the first displaced layout.
 
 Parameter ``current_combination``:
     The current combination being constructed.
@@ -7606,16 +7606,6 @@ static const char *__doc_fiction_determine_vertex_coloring_stats_duration = R"do
 
 static const char *__doc_fiction_determine_vertex_coloring_stats_most_frequent_color = R"doc(The color that appeared the most.)doc";
 
-static const char *__doc_fiction_dimer_displacement_policy = R"doc(Specifies the allowed displacement range options for SiDB placement.)doc";
-
-static const char *__doc_fiction_dimer_displacement_policy_ALLOW_OTHER_DIMER =
-R"doc(In this mode, SiDBs are allowed to be displaced from the original
-dimer to any other dimer within the layout.)doc";
-
-static const char *__doc_fiction_dimer_displacement_policy_STAY_ON_ORIGINAL_DIMER =
-R"doc(In this mode, any displacement of SiDBs must remain within the
-boundaries of the initial dimer they are placed on.)doc";
-
 static const char *__doc_fiction_displacement_robustness_domain =
 R"doc(During fabrication, SiDBs may not align precisely with their intended
 atomic positions, resulting in displacement. This means that an SiDB
@@ -7636,12 +7626,24 @@ R"doc(Parameters for the `determine_displacement_robustness_domain` and
 `determine_propability_of_fabricating_operational_gate` algorithms.
 
 Parameter ``CellType``:
-    cell type.)doc";
+    SiDB layout cell type.)doc";
 
 static const char *__doc_fiction_displacement_robustness_domain_params_analysis_mode =
 R"doc(This parameter defines the mode of the displacement. If `EXHAUSTIVE`,
 all possible displacements are analyzed. Otherwise, a certain amount
 of all possible displacements is analyzed randomly.)doc";
+
+static const char *__doc_fiction_displacement_robustness_domain_params_dimer_displacement_policy =
+R"doc(Specifies the allowed displacement range options for SiDB fabrication
+simulation.)doc";
+
+static const char *__doc_fiction_displacement_robustness_domain_params_dimer_displacement_policy_ALLOW_OTHER_DIMER =
+R"doc(In this mode, SiDBs are allowed to be displaced from the original
+dimer to any other dimer within the layout.)doc";
+
+static const char *__doc_fiction_displacement_robustness_domain_params_dimer_displacement_policy_STAY_ON_ORIGINAL_DIMER =
+R"doc(In this mode, any displacement of SiDBs must remain within the
+boundaries of the initial dimer they are placed on.)doc";
 
 static const char *__doc_fiction_displacement_robustness_domain_params_dimer_policy =
 R"doc(This flag controls whether the displacement in the y-direction can
@@ -12511,52 +12513,9 @@ Returns:
     The operational domain of the layout.)doc";
 
 static const char *__doc_fiction_operational_domain_operational_values =
-R"doc(The operational status of the layout for each specified parameter
-combination. This constitutes the operational domain. The key of the
-map is the parameter point, which holds the parameter values in the x
-and y dimension. The operational status is stored as the value of the
-map.)doc";
-
-static const char *__doc_fiction_operational_domain_parameter_point =
-R"doc(The parameter point holds parameter values in an arbitrary number of
-dimensions.)doc";
-
-static const char *__doc_fiction_operational_domain_parameter_point_get =
-R"doc(Support for structured bindings.
-
-Template parameter ``I``:
-    Index of the parameter value to be returned.
-
-Returns:
-    The parameter value at the specified index.)doc";
-
-static const char *__doc_fiction_operational_domain_parameter_point_operator_eq =
-R"doc(Equality operator.
-
-Parameter ``other``:
-    Other parameter point to compare with.
-
-Returns:
-    `true` if the parameter points are equal.)doc";
-
-static const char *__doc_fiction_operational_domain_parameter_point_operator_ne =
-R"doc(Inequality operator.
-
-Parameter ``other``:
-    Other parameter point to compare with.
-
-Returns:
-    `true` if the parameter points are not equal.)doc";
-
-static const char *__doc_fiction_operational_domain_parameter_point_parameter_point = R"doc(Default constructor.)doc";
-
-static const char *__doc_fiction_operational_domain_parameter_point_parameter_point_2 =
-R"doc(Standard constructor.
-
-Parameter ``values``:
-    Parameter values for each dimension.)doc";
-
-static const char *__doc_fiction_operational_domain_parameter_point_parameters = R"doc(Parameter values for each dimension.)doc";
+R"doc(This can store different information depending on the use case. If the
+operational domain is simulated for different physical parameters, the
+parameters are stored with the corresponding operating status.)doc";
 
 static const char *__doc_fiction_operational_domain_params =
 R"doc(Parameters for the operational domain computation. The parameters are
@@ -12640,14 +12599,6 @@ operational.)doc";
 static const char *__doc_fiction_operational_domain_stats_num_operational_parameter_combinations = R"doc(Number of parameter combinations, for which the layout is operational.)doc";
 
 static const char *__doc_fiction_operational_domain_stats_num_simulator_invocations = R"doc(Number of simulator invocations.)doc";
-
-static const char *__doc_fiction_operational_domain_sweep_parameter = R"doc(Possible sweep parameters for the operational domain computation.)doc";
-
-static const char *__doc_fiction_operational_domain_sweep_parameter_EPSILON_R = R"doc(The relative permittivity of the dielectric material.)doc";
-
-static const char *__doc_fiction_operational_domain_sweep_parameter_LAMBDA_TF = R"doc(The Thomas-Fermi screening length.)doc";
-
-static const char *__doc_fiction_operational_domain_sweep_parameter_MU_MINUS = R"doc(The energy transition level.)doc";
 
 static const char *__doc_fiction_operational_domain_value_range =
 R"doc(A range of values for a dimension sweep. The range is defined by a
@@ -12864,41 +12815,32 @@ Returns:
     The parameter value at the specified index.)doc";
 
 static const char *__doc_fiction_parameter_point_operator_eq =
-R"doc(Equality operator. Checks if this parameter point is equal to another
-point within a specified tolerance. The tolerance is defined by
-`physical_constants::POP_STABILITY_ERR`.
+R"doc(Equality operator.
 
 Parameter ``other``:
     Other parameter point to compare with.
 
 Returns:
-    `true` iff the parameter points are equal.)doc";
+    `true` if the parameter points are equal.)doc";
 
 static const char *__doc_fiction_parameter_point_operator_ne =
-R"doc(Inequality operator. Checks if this parameter point is unequal to
-another point within a specified tolerance. The tolerance is defined
-by `physical_constants::POP_STABILITY_ERR`.
+R"doc(Inequality operator.
 
 Parameter ``other``:
     Other parameter point to compare with.
 
 Returns:
-    `true` iff the parameter points are not equal.)doc";
+    `true` if the parameter points are not equal.)doc";
 
-static const char *__doc_fiction_parameter_point_parameter_point = R"doc(Standard default constructor.)doc";
+static const char *__doc_fiction_parameter_point_parameter_point = R"doc(Default constructor.)doc";
 
 static const char *__doc_fiction_parameter_point_parameter_point_2 =
 R"doc(Standard constructor.
 
-Parameter ``x_val``:
-    X dimension parameter value.
+Parameter ``values``:
+    Parameter values for each dimension.)doc";
 
-Parameter ``y_val``:
-    Y dimension parameter value.)doc";
-
-static const char *__doc_fiction_parameter_point_x = R"doc(X dimension parameter value.)doc";
-
-static const char *__doc_fiction_parameter_point_y = R"doc(Y dimension parameter value.)doc";
+static const char *__doc_fiction_parameter_point_parameters = R"doc(Parameter values for each dimension.)doc";
 
 static const char *__doc_fiction_path_collection =
 R"doc(An ordered collection of multiple paths in a layout.
@@ -16459,6 +16401,8 @@ static const char *__doc_std_hash_operator_call_5 = R"doc()doc";
 static const char *__doc_std_hash_operator_call_6 = R"doc()doc";
 
 static const char *__doc_std_iterator_traits = R"doc()doc";
+
+static const char *__doc_std_tuple_size = R"doc()doc";
 
 #if defined(__GNUG__)
 #pragma GCC diagnostic pop
