@@ -136,7 +136,13 @@ Lyt generate_random_sidb_layout(const Lyt&                                      
         attempt_counter += 1;
     }
 
-    return lyt;
+    if (lyt.num_cells() == number_of_sidbs_of_final_layout)
+    {
+        return lyt;
+    }
+
+    // if not all SiDBs could be placed, an empty layout is returned
+    return Lyt{};
 }
 
 /**
