@@ -5976,8 +5976,8 @@ divides the work among multiple threads to speed up the computation.
 @note The distribution of the work among threads is a simple slice-
 based approach. If your step points are ordered, consider shuffling
 the vector first for better load balancing. Otherwise, some threads
-might finish early if they got assigned a larger slice with mainly
-non-operational samples, which are faster to compute due to the early
+might finish early if they got assigned a slice with mainly non-
+operational samples, which are faster to compute due to the early
 termination condition.
 
 Parameter ``step_points``:
