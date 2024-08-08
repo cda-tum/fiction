@@ -5973,6 +5973,13 @@ static const char *__doc_fiction_detail_operational_domain_impl_simulate_operati
 R"doc(Simulates the operational status of the given points in parallel. It
 divides the work among multiple threads to speed up the computation.
 
+@note The distribution of the work among threads is a simple slice-
+based approach. If your step points are ordered, consider shuffling
+the vector first for better load balancing. Otherwise, some threads
+might finish early if they got assigned a larger slice with mainly
+non-operational samples, which are faster to compute due to the early
+termination condition.
+
 Parameter ``step_points``:
     A vector of step points for which the operational status is to be
     simulated.)doc";
