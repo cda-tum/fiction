@@ -70,7 +70,7 @@ void fcn_technology_cell_level_layout(pybind11::module& m)
     }
     else if constexpr (std::is_same_v<Technology, fiction::sidb_technology>)
     {
-        // no additional cell types required
+        cell_type.value("LOGIC", Technology::cell_type::LOGIC);
     }
     // NOTE: more technologies go here
 

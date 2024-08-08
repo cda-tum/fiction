@@ -226,6 +226,7 @@ Operational Domain Computation
         **Header:** ``fiction/algorithms/simulation/sidb/is_operational.hpp``
 
         .. doxygenenum:: fiction::operational_status
+        .. doxygenenum:: fiction::operational_condition
         .. doxygenstruct:: fiction::is_operational_params
            :members:
         .. doxygenfunction:: fiction::is_operational
@@ -252,6 +253,8 @@ Operational Domain Computation
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.operational_status
+            :members:
+        .. autoclass:: mnt.pyfiction.operational_condition
             :members:
         .. autoclass:: mnt.pyfiction.is_operational_params
             :members:
@@ -348,6 +351,32 @@ Binary-dot Logic (BDL) Pair Detection
         .. autoclass:: mnt.pyfiction.detect_bdl_pairs_params
             :members:
         .. autofunction:: mnt.pyfiction.detect_bdl_pairs
+
+Binary-dot Logic (BDL) Wire Detection
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp``
+
+        .. doxygenenum:: fiction::bdl_wire_direction
+        .. doxygenenum:: fiction::bdl_wire_selection
+        .. doxygenstruct:: fiction::detect_bdl_wires_params
+           :members:
+        .. doxygenfunction:: fiction::find_bdl_pair_in_wire_by_type
+        .. doxygenfunction:: fiction::determine_wire_direction
+        .. doxygenfunction:: fiction::find_bdl_neighbor_above
+        .. doxygenfunction:: fiction::find_bdl_neighbor_below
+        .. doxygenfunction:: fiction::detect_bdl_wires
+
+    .. tab:: Python
+        .. autoclass:: mnt.pyfiction.bdl_wire_direction
+            :members:
+        .. autoclass:: mnt.pyfiction.bdl_wire_selection
+            :members:
+        .. autoclass:: mnt.pyfiction.detect_bdl_wires_params
+            :members:
+        .. autofunction:: mnt.pyfiction.detect_bdl_wires
 
 
 Assess Population Stability

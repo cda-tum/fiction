@@ -27,7 +27,8 @@ void is_operational(pybind11::module& m)
     using namespace pybind11::literals;
 
     m.def("is_operational", &fiction::is_operational<Lyt, py_tt>, "lyt"_a, "spec"_a,
-          "params"_a = fiction::is_operational_params{}, DOC(fiction_is_operational));
+          "params"_a = fiction::is_operational_params{}, "input_bdl_wire"_a = nullptr, "output_bdl_wire"_a = nullptr,
+          "input_bdl_wire_direction"_a = nullptr, DOC(fiction_is_operational));
 
     m.def("operational_input_patterns", &fiction::operational_input_patterns<Lyt, py_tt>, "lyt"_a, "spec"_a,
           "params"_a = fiction::is_operational_params{}, DOC(fiction_is_operational));
@@ -44,17 +45,22 @@ inline void is_operational(pybind11::module& m)
         .value("NON_OPERATIONAL", fiction::operational_status::NON_OPERATIONAL,
                DOC(fiction_operational_status_NON_OPERATIONAL));
 
+    py::enum_<fiction::operational_condition>(m, "operational_condition", DOC(fiction_operational_condition))
+        .value("ALLOWING_KINKS", fiction::operational_condition::ALLOWING_KINKS,
+               DOC(fiction_operational_condition_ALLOWING_KINKS))
+        .value("FORBIDDING_KINKS", fiction::operational_condition::FORBIDDING_KINKS,
+               DOC(fiction_operational_condition_FORBIDDING_KINKS));
+
     py::class_<fiction::is_operational_params>(m, "is_operational_params", DOC(fiction_is_operational_params))
         .def(py::init<>())
         .def_readwrite("simulation_parameters", &fiction::is_operational_params::simulation_parameters,
                        DOC(fiction_is_operational_params))
         .def_readwrite("sim_engine", &fiction::is_operational_params::sim_engine,
                        DOC(fiction_is_operational_params_sim_engine))
-        .def_readwrite("bdl_params", &fiction::is_operational_params::bdl_params,
-                       DOC(fiction_is_operational_params_bdl_params));
+        .def_readwrite("bdl_wire_params", &fiction::is_operational_params::bdl_wire_params)
+        .def_readwrite("op_condition", &fiction::is_operational_params::op_condition);
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
-
     detail::is_operational<py_sidb_100_lattice>(m);
     detail::is_operational<py_sidb_111_lattice>(m);
 }

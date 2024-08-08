@@ -9,7 +9,6 @@
 #include <fiction/algorithms/simulation/sidb/determine_physically_valid_parameters.hpp>
 #include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
-#include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/charge_distribution_surface.hpp>
 #include <fiction/technology/sidb_charge_state.hpp>
@@ -40,15 +39,15 @@ TEST_CASE("Determine physical parameters for CDS of SiQAD Y-shaped AND gate, 10 
     charge_distribution_surface cds{lyt, sim_params};
 
     operational_domain_params op_domain_params{};
-    op_domain_params.simulation_parameters = sim_params;
-    op_domain_params.x_dimension           = sweep_parameter::EPSILON_R;
-    op_domain_params.x_min                 = 4.1;
-    op_domain_params.x_max                 = 6.0;
-    op_domain_params.x_step                = 0.1;
-    op_domain_params.y_dimension           = sweep_parameter::LAMBDA_TF;
-    op_domain_params.y_min                 = 4.1;
-    op_domain_params.y_max                 = 6.0;
-    op_domain_params.y_step                = 0.1;
+    op_domain_params.operational_params.simulation_parameters = sim_params;
+    op_domain_params.x_dimension                              = sweep_parameter::EPSILON_R;
+    op_domain_params.x_min                                    = 4.1;
+    op_domain_params.x_max                                    = 6.0;
+    op_domain_params.x_step                                   = 0.1;
+    op_domain_params.y_dimension                              = sweep_parameter::LAMBDA_TF;
+    op_domain_params.y_min                                    = 4.1;
+    op_domain_params.y_max                                    = 6.0;
+    op_domain_params.y_step                                   = 0.1;
 
     SECTION("Using the typical ground state as given CDS")
     {
@@ -68,12 +67,12 @@ TEST_CASE("Determine physical parameters for CDS of SiQAD Y-shaped AND gate, 10 
         const auto valid_parameters = determine_physically_valid_parameters(cds, op_domain_params);
         CHECK(valid_parameters.operational_values.size() == 43);
 
-        op_domain_params.sim_engine      = sidb_simulation_engine::EXGS;
-        const auto valid_parameters_exgs = determine_physically_valid_parameters(cds, op_domain_params);
+        op_domain_params.operational_params.sim_engine = sidb_simulation_engine::EXGS;
+        const auto valid_parameters_exgs               = determine_physically_valid_parameters(cds, op_domain_params);
         CHECK(valid_parameters_exgs.operational_values.size() == 43);
 
-        op_domain_params.sim_engine          = sidb_simulation_engine::QUICKSIM;
-        const auto valid_parameters_quicksim = determine_physically_valid_parameters(cds, op_domain_params);
+        op_domain_params.operational_params.sim_engine = sidb_simulation_engine::QUICKSIM;
+        const auto valid_parameters_quicksim           = determine_physically_valid_parameters(cds, op_domain_params);
         CHECK(valid_parameters_quicksim.operational_values.size() == 43);
     }
 
@@ -117,15 +116,15 @@ TEST_CASE(
     charge_distribution_surface cds{lyt, sim_params};
 
     operational_domain_params op_domain_params{};
-    op_domain_params.simulation_parameters = sim_params;
-    op_domain_params.x_dimension           = sweep_parameter::EPSILON_R;
-    op_domain_params.x_min                 = 5.0;
-    op_domain_params.x_max                 = 5.9;
-    op_domain_params.x_step                = 0.1;
-    op_domain_params.y_dimension           = sweep_parameter::LAMBDA_TF;
-    op_domain_params.y_min                 = 5.0;
-    op_domain_params.y_max                 = 5.9;
-    op_domain_params.y_step                = 0.1;
+    op_domain_params.operational_params.simulation_parameters = sim_params;
+    op_domain_params.x_dimension                              = sweep_parameter::EPSILON_R;
+    op_domain_params.x_min                                    = 5.0;
+    op_domain_params.x_max                                    = 5.9;
+    op_domain_params.x_step                                   = 0.1;
+    op_domain_params.y_dimension                              = sweep_parameter::LAMBDA_TF;
+    op_domain_params.y_min                                    = 5.0;
+    op_domain_params.y_max                                    = 5.9;
+    op_domain_params.y_step                                   = 0.1;
 
     SECTION("Using the ground state of default physical parameters as given CDS")
     {

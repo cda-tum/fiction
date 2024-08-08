@@ -10,7 +10,6 @@
 #include <fiction/io/read_sqd_layout.hpp>           // reader for SiDB layouts
 #include <fiction/io/write_operational_domain.hpp>  // writer for operational domains
 #include <fiction/technology/sidb_lattice.hpp>
-#include <fiction/technology/sidb_lattice_orientations.hpp>
 #include <fiction/types.hpp>                    // pre-defined types suitable for the FCN domain
 #include <fiction/utils/truth_table_utils.hpp>  // truth tables helper functions
 
@@ -46,16 +45,15 @@ int main()  // NOLINT
 
     // operational domain parameters
     operational_domain_params op_domain_params{};
-    op_domain_params.simulation_parameters = sim_params;
-    op_domain_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
-    op_domain_params.x_dimension           = sweep_parameter::EPSILON_R;
-    op_domain_params.x_min                 = 1.0;
-    op_domain_params.x_max                 = 10.0;
-    op_domain_params.x_step                = 0.05;
-    op_domain_params.y_dimension           = sweep_parameter::LAMBDA_TF;
-    op_domain_params.y_min                 = 1.0;
-    op_domain_params.y_max                 = 10.0;
-    op_domain_params.y_step                = 0.05;
+    op_domain_params.operational_params.simulation_parameters = sim_params;
+    op_domain_params.x_dimension                              = sweep_parameter::EPSILON_R;
+    op_domain_params.x_min                                    = 1.0;
+    op_domain_params.x_max                                    = 10.0;
+    op_domain_params.x_step                                   = 0.05;
+    op_domain_params.y_dimension                              = sweep_parameter::LAMBDA_TF;
+    op_domain_params.y_min                                    = 1.0;
+    op_domain_params.y_max                                    = 10.0;
+    op_domain_params.y_step                                   = 0.05;
 
     // write operational domain parameters
     static const write_operational_domain_params write_op_domain_params{"1", "0"};

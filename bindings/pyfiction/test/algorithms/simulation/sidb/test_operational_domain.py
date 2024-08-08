@@ -11,8 +11,8 @@ class TestOperationalDomain(unittest.TestCase):
         lyt = read_sqd_layout_100(dir_path + "/../../../resources/hex_21_inputsdbp_xor_v1.sqd")
 
         params = operational_domain_params()
-        params.sim_engine = sidb_simulation_engine.QUICKEXACT
-        params.simulation_parameters.base = 2
+        params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
+        params.operational_params.simulation_parameters.base = 2
         params.x_dimension = sweep_parameter.EPSILON_R
         params.y_dimension = sweep_parameter.LAMBDA_TF
         params.x_min = 5.55
@@ -43,8 +43,8 @@ class TestOperationalDomain(unittest.TestCase):
 
         params = operational_domain_params()
 
-        params.sim_engine = sidb_simulation_engine.QUICKEXACT
-        params.simulation_parameters.base = 2
+        params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
+        params.operational_params.simulation_parameters.base = 2
         params.x_dimension = sweep_parameter.EPSILON_R
         params.y_dimension = sweep_parameter.LAMBDA_TF
         params.x_min = 5.60

@@ -48,7 +48,16 @@ distributions of the SiDBs. Charge distribution surfaces are returned by the SiD
            :members:
 
     .. tab:: Python
-        .. autoclass:: mnt.pyfiction.charge_distribution_surface
+
+        .. autoclass:: mnt.pyfiction.dependent_cell_mode
+            :members:
+        .. autoclass:: mnt.pyfiction.energy_calculation
+            :members:
+        .. autoclass:: mnt.pyfiction.charge_index_mode
+            :members:
+        .. autoclass:: mnt.pyfiction.charge_index_mode
+            :members:
+        .. autoclass:: mnt.pyfiction.charge_distribution_history
             :members:
         .. autoclass:: mnt.pyfiction.charge_distribution_surface_100
             :members:

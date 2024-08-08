@@ -8,7 +8,7 @@
 #include "fiction/algorithms/iter/bdl_input_iterator.hpp"
 #include "fiction/algorithms/simulation/sidb/calculate_energy_and_state_type.hpp"
 #include "fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp"
-#include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
+#include "fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp"
 #include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "fiction/algorithms/simulation/sidb/occupation_probability_of_excited_states.hpp"
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
@@ -77,9 +77,9 @@ struct critical_temperature_params
      */
     double max_temperature{400};
     /**
-     * Parameters for the BDL pair detection algorithms.
+     * Parameters for the BDL wire detection algorithms.
      */
-    detect_bdl_pairs_params bdl_params{};
+    detect_bdl_wires_params bdl_wire_params{};
     /**
      * Number of iteration steps for the *QuickSim* algorithm (only applicable if engine == APPROXIMATE).
      */
@@ -150,7 +150,7 @@ class critical_temperature_impl
             layout{lyt},
             params{ps},
             stats{st},
-            bii(bdl_input_iterator<Lyt>{layout, params.bdl_params})
+            bii(bdl_input_iterator<Lyt>{layout, params.bdl_wire_params})
 
     {
         stats.simulation_parameters = params.simulation_parameters;
@@ -177,7 +177,7 @@ class critical_temperature_impl
         if (layout.num_cells() > 1)
         {
             const auto output_bdl_pairs =
-                detect_bdl_pairs(layout, sidb_technology::cell_type::OUTPUT, params.bdl_params);
+                detect_bdl_pairs(layout, sidb_technology::cell_type::OUTPUT, params.bdl_wire_params.params_bdl_pairs);
 
             // number of different input combinations
             for (auto i = 0u; i < spec.front().num_bits(); ++i, ++bii)

@@ -11,8 +11,6 @@
 #include "fiction/utils/layout_utils.hpp"
 
 #include <cstdint>
-#include <iostream>
-#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -93,9 +91,10 @@ Lyt generate_random_sidb_layout(const Lyt&                                      
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-    const uint64_t number_of_sidbs_of_final_layout = lyt_skeleton.num_cells() + params.number_of_sidbs;
+    auto lyt = lyt_skeleton.clone();
 
-    Lyt lyt{lyt_skeleton.clone()};
+    const uint64_t number_of_sidbs_of_final_layout = lyt.num_cells() + params.number_of_sidbs;
+
     // counts the attempts to place the given number of SiDBs
     uint64_t attempt_counter = 0;
 
@@ -132,12 +131,18 @@ Lyt generate_random_sidb_layout(const Lyt&                                      
         // the SiDB is added to the layout
         if (!constraint_violation_positive_sidbs && !random_cell_is_identical_wih_defect)
         {
-            lyt.assign_cell_type(random_coord, technology<Lyt>::cell_type::NORMAL);
+            lyt.assign_cell_type(random_coord, technology<Lyt>::cell_type::LOGIC);
         }
         attempt_counter += 1;
     }
 
-    return lyt;
+    if (lyt.num_cells() == number_of_sidbs_of_final_layout)
+    {
+        return lyt;
+    }
+
+    // if not all SiDBs can be placed, the originally given skeleton layout is returned
+    return lyt_skeleton;
 }
 
 /**
