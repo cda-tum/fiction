@@ -21,8 +21,8 @@ TEST_CASE("Write empty operational domain", "[write-operational-domain]")
     {
         operational_domain opdom{};
 
-        opdom.dimensions.push_back(operational_domain::sweep_parameter::EPSILON_R);
-        opdom.dimensions.push_back(operational_domain::sweep_parameter::LAMBDA_TF);
+        opdom.dimensions.push_back(sweep_parameter::EPSILON_R);
+        opdom.dimensions.push_back(sweep_parameter::LAMBDA_TF);
 
         static constexpr const char* expected = "epsilon_r,lambda_tf,operational status\n";
 
@@ -34,8 +34,8 @@ TEST_CASE("Write empty operational domain", "[write-operational-domain]")
     {
         operational_domain opdom{};
 
-        opdom.dimensions.push_back(operational_domain::sweep_parameter::LAMBDA_TF);
-        opdom.dimensions.push_back(operational_domain::sweep_parameter::MU_MINUS);
+        opdom.dimensions.push_back(sweep_parameter::LAMBDA_TF);
+        opdom.dimensions.push_back(sweep_parameter::MU_MINUS);
 
         static constexpr const char* expected = "lambda_tf,mu_minus,operational status\n";
 
@@ -49,11 +49,11 @@ TEST_CASE("Write simple operational domain", "[write-operational-domain]")
 {
     operational_domain opdom{};
 
-    opdom.dimensions.push_back(operational_domain::sweep_parameter::EPSILON_R);
-    opdom.dimensions.push_back(operational_domain::sweep_parameter::LAMBDA_TF);
+    opdom.dimensions.push_back(sweep_parameter::EPSILON_R);
+    opdom.dimensions.push_back(sweep_parameter::LAMBDA_TF);
 
-    opdom.operational_values = {{operational_domain::parameter_point{{0, 0}}, operational_status::OPERATIONAL},
-                                {operational_domain::parameter_point{{0, 1}}, operational_status::NON_OPERATIONAL}};
+    opdom.operational_values = {{parameter_point{{0, 0}}, operational_status::OPERATIONAL},
+                                {parameter_point{{0, 1}}, operational_status::NON_OPERATIONAL}};
 
     std::ostringstream os{};
 
@@ -112,14 +112,14 @@ TEST_CASE("Write operational domain with floating-point parameter values", "[wri
 {
     operational_domain opdom{};
 
-    opdom.dimensions.push_back(operational_domain::sweep_parameter::EPSILON_R);
-    opdom.dimensions.push_back(operational_domain::sweep_parameter::LAMBDA_TF);
+    opdom.dimensions.push_back(sweep_parameter::EPSILON_R);
+    opdom.dimensions.push_back(sweep_parameter::LAMBDA_TF);
 
     opdom.operational_values = {
-        {operational_domain::parameter_point{{0.1, 0.2}}, operational_status::OPERATIONAL},
-        {operational_domain::parameter_point{{0.3, 0.4}}, operational_status::NON_OPERATIONAL},
-        {operational_domain::parameter_point{{1.2, 1.4}}, operational_status::OPERATIONAL},
-        {operational_domain::parameter_point{{2.4, 5.75}}, operational_status::NON_OPERATIONAL}};
+        {parameter_point{{0.1, 0.2}}, operational_status::OPERATIONAL},
+        {parameter_point{{0.3, 0.4}}, operational_status::NON_OPERATIONAL},
+        {parameter_point{{1.2, 1.4}}, operational_status::OPERATIONAL},
+        {parameter_point{{2.4, 5.75}}, operational_status::NON_OPERATIONAL}};
 
     std::ostringstream os{};
 

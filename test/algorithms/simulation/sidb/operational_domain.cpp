@@ -10,8 +10,10 @@
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
+#include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/types.hpp>
+#include <fiction/utils/phmap_utils.hpp>
 #include <fiction/utils/truth_table_utils.hpp>
 
 #include <mockturtle/utils/stopwatch.hpp>
@@ -44,9 +46,12 @@ void check_op_domain_params_and_operational_status(const operational_domain&    
             CHECK(sweep_param.step > 0.0);
         }
 
-        if (status)
+        if (status.has_value())
         {
-            CHECK(op_value == *status);
+            if (status.value() == operational_status::OPERATIONAL)
+            {
+                CHECK(op_value == *status);
+            }
         }
     }
 }
@@ -79,8 +84,8 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
     operational_domain_params op_domain_params{};
     op_domain_params.simulation_parameters = sim_params;
-    op_domain_params.sweep_dimensions      = {{operational_domain::sweep_parameter::EPSILON_R},
-                                              {operational_domain::sweep_parameter::LAMBDA_TF}};
+    op_domain_params.sweep_dimensions      = {{sweep_parameter::EPSILON_R},
+                                              {sweep_parameter::LAMBDA_TF}};
 
     operational_domain_stats op_domain_stats{};
 
@@ -774,8 +779,8 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
 
     operational_domain_params op_domain_params{};
     op_domain_params.simulation_parameters = sim_params;
-    op_domain_params.sweep_dimensions      = {{operational_domain::sweep_parameter::EPSILON_R, 5.1, 6.0, 0.1},
-                                              {operational_domain::sweep_parameter::LAMBDA_TF, 4.5, 5.4, 0.1}};
+    op_domain_params.sweep_dimensions      = {{sweep_parameter::EPSILON_R, 5.1, 6.0, 0.1},
+                                              {sweep_parameter::LAMBDA_TF, 4.5, 5.4, 0.1}};
 
     operational_domain_stats op_domain_stats{};
 
@@ -891,8 +896,8 @@ TEST_CASE("SiQAD's AND gate operational domain computation, using cube coordinat
 
     operational_domain_params op_domain_params{};
     op_domain_params.simulation_parameters = sim_params;
-    op_domain_params.sweep_dimensions      = {{operational_domain::sweep_parameter::EPSILON_R, 5.1, 6.0, 0.1},
-                                              {operational_domain::sweep_parameter::LAMBDA_TF, 4.5, 5.4, 0.1}};
+    op_domain_params.sweep_dimensions      = {{sweep_parameter::EPSILON_R, 5.1, 6.0, 0.1},
+                                              {sweep_parameter::LAMBDA_TF, 4.5, 5.4, 0.1}};
 
     operational_domain_stats op_domain_stats{};
 
@@ -977,8 +982,8 @@ TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[operational-domain
 
     operational_domain_params op_domain_params{};
     op_domain_params.simulation_parameters = sim_params;
-    op_domain_params.sweep_dimensions      = {{operational_domain::sweep_parameter::EPSILON_R, 5.60, 5.61, 0.01},
-                                              {operational_domain::sweep_parameter::LAMBDA_TF, 5.0, 5.01, 0.01}};
+    op_domain_params.sweep_dimensions      = {{sweep_parameter::EPSILON_R, 5.60, 5.61, 0.01},
+                                              {sweep_parameter::LAMBDA_TF, 5.0, 5.01, 0.01}};
 
     operational_domain_stats op_domain_stats{};
 

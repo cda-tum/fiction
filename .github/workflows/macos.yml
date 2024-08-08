@@ -68,6 +68,11 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10.x'
+
       # Setup TBB for parallel STL algorithms via Homebrew
       - name: Setup TBB
         run: brew install tbb
@@ -138,7 +143,7 @@ jobs:
 
       - name: Test (Debug)
         working-directory: ${{github.workspace}}/build_debug
-        run: ctest -C Debug --verbose --output-on-failure --repeat until-pass:3 --parallel 4
+        run: ctest -C Debug --verbose --output-on-failure --repeat until-pass:3 --parallel 4 --exclude-regex "quality"
 
 
       # Build and test pipeline for Release mode

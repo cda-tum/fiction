@@ -48,20 +48,19 @@ namespace detail
  * @param param The sweep parameter to be converted.
  * @return The string representation of the sweep parameter.
  */
-[[nodiscard]] static inline std::string
-sweep_parameter_to_string(const operational_domain::sweep_parameter& param) noexcept
+[[nodiscard]] static inline std::string sweep_parameter_to_string(const sweep_parameter& param) noexcept
 {
     switch (param)
     {
-        case operational_domain::sweep_parameter::EPSILON_R:
+        case sweep_parameter::EPSILON_R:
         {
             return "epsilon_r";
         }
-        case operational_domain::sweep_parameter::LAMBDA_TF:
+        case sweep_parameter::LAMBDA_TF:
         {
             return "lambda_tf";
         }
-        case operational_domain::sweep_parameter::MU_MINUS:
+        case sweep_parameter::MU_MINUS:
         {
             return "mu_minus";
         }
@@ -95,8 +94,8 @@ sweep_parameter_to_string(const operational_domain::sweep_parameter& param) noex
  * @param params The parameters used for writing, including the operational and non-operational tags. Defaults to an
  * empty `write_operational_domain_params` object, which provides standard tags.
  */
-inline void write_operational_domain(const operational_domain& opdom, std::ostream& os,
-                                     const write_operational_domain_params& params = {})
+inline void write_operational_domain(const operational_domain<parameter_point, operational_status>& opdom,
+                                     std::ostream& os, const write_operational_domain_params& params = {})
 {
     csv_writer writer{os};
 
@@ -171,8 +170,9 @@ inline void write_operational_domain(const operational_domain& opdom, std::ostre
  * @param params The parameters used for writing, including the operational and non-operational tags. Defaults to an
  * empty `write_operational_domain_params` object, which provides standard tags.
  */
-inline void write_operational_domain(const operational_domain& opdom, const std::string_view& filename,
-                                     const write_operational_domain_params& params = {})
+inline void write_operational_domain(const operational_domain<parameter_point, operational_status>& opdom,
+                                     const std::string_view&                                        filename,
+                                     const write_operational_domain_params&                         params = {})
 {
     std::ofstream os{filename.data(), std::ofstream::out};
 

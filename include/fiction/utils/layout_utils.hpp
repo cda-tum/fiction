@@ -10,7 +10,6 @@
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb_defect_surface.hpp"
 #include "fiction/technology/sidb_lattice.hpp"
-#include "fiction/technology/sidb_lattice_orientations.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 
@@ -324,7 +323,10 @@ auto convert_to_siqad_coordinates(const LytSrc& lyt) noexcept
 
             lyt_orig.foreach_cell(
                 [&lyt_new_cds, &lyt_orig](const auto& c)
-                { lyt_new_cds.assign_charge_state(siqad::to_siqad_coord(c), lyt_orig.get_charge_state(c), false); });
+                {
+                    lyt_new_cds.assign_charge_state(siqad::to_siqad_coord(c), lyt_orig.get_charge_state(c),
+                                                    charge_index_mode::KEEP_CHARGE_INDEX);
+                });
 
             lyt_new_cds.assign_physical_parameters(lyt_orig.get_simulation_params());
 
@@ -348,7 +350,10 @@ auto convert_to_siqad_coordinates(const LytSrc& lyt) noexcept
 
             lyt_orig.foreach_cell(
                 [&lyt_new_cds, &lyt_orig](const auto& c)
-                { lyt_new_cds.assign_charge_state(siqad::to_siqad_coord(c), lyt_orig.get_charge_state(c), false); });
+                {
+                    lyt_new_cds.assign_charge_state(siqad::to_siqad_coord(c), lyt_orig.get_charge_state(c),
+                                                    charge_index_mode::KEEP_CHARGE_INDEX);
+                });
 
             lyt_new_cds.assign_physical_parameters(lyt_orig.get_simulation_params());
 
@@ -380,7 +385,7 @@ auto convert_to_siqad_coordinates(const LytSrc& lyt) noexcept
  * @return A new equivalent layout based on fiction coordinates.
  */
 template <typename LytDest, typename LytSrc>
-LytDest convert_to_fiction_coordinates(const LytSrc& lyt) noexcept
+[[nodiscard]] LytDest convert_to_fiction_coordinates(const LytSrc& lyt) noexcept
 {
     static_assert(is_cartesian_layout_v<LytSrc>, "LytSrc is not a Cartesian layout");
     static_assert(is_cell_level_layout_v<LytSrc>, "LytSrc is not a cell-level layout");
@@ -442,9 +447,10 @@ LytDest convert_to_fiction_coordinates(const LytSrc& lyt) noexcept
                 LytDest lyt_new_cds{sidb_defect_surface{lyt_new}};
 
                 lyt.foreach_cell(
-                    [&lyt_new_cds, &lyt](const auto& c) {
+                    [&lyt_new_cds, &lyt](const auto& c)
+                    {
                         lyt_new_cds.assign_charge_state(siqad::to_fiction_coord<coordinate<LytDest>>(c),
-                                                        lyt.get_charge_state(c), false);
+                                                        lyt.get_charge_state(c), charge_index_mode::KEEP_CHARGE_INDEX);
                     });
 
                 lyt_new_cds.assign_physical_parameters(lyt.get_simulation_params());
@@ -474,9 +480,10 @@ LytDest convert_to_fiction_coordinates(const LytSrc& lyt) noexcept
                 LytDest lyt_new_cds{sidb_defect_surface{lyt_new}};
 
                 lyt.foreach_cell(
-                    [&lyt_new_cds, &lyt](const auto& c) {
+                    [&lyt_new_cds, &lyt](const auto& c)
+                    {
                         lyt_new_cds.assign_charge_state(siqad::to_fiction_coord<coordinate<LytDest>>(c),
-                                                        lyt.get_charge_state(c), false);
+                                                        lyt.get_charge_state(c), charge_index_mode::KEEP_CHARGE_INDEX);
                     });
 
                 lyt_new_cds.assign_physical_parameters(lyt.get_simulation_params());
@@ -508,8 +515,9 @@ LytDest convert_to_fiction_coordinates(const LytSrc& lyt) noexcept
         {
             const sidb_100_cell_clk_lyt_siqad lyt_100{lyt};
             cds_sidb_100_cell_clk_lyt_siqad   cds_lyt_100{lyt_100};
-            lyt.foreach_cell([&cds_lyt_100, &lyt](const auto& c)
-                             { cds_lyt_100.assign_charge_state(c, lyt.get_charge_state(c), false); });
+            lyt.foreach_cell(
+                [&cds_lyt_100, &lyt](const auto& c)
+                { cds_lyt_100.assign_charge_state(c, lyt.get_charge_state(c), charge_index_mode::KEEP_CHARGE_INDEX); });
 
             cds_lyt_100.assign_physical_parameters(lyt.get_simulation_params());
 
@@ -597,14 +605,19 @@ CoordinateType random_coordinate(CoordinateType coordinate1, CoordinateType coor
  * @return A vector containing all cells within the specified area.
  */
 template <typename CoordinateType>
-[[nodiscard]] inline std::vector<CoordinateType> all_coordinates_in_spanned_area(const CoordinateType& cell_nw,
-                                                                                 const CoordinateType& cell_se) noexcept
+[[nodiscard]] inline std::vector<CoordinateType> all_coordinates_in_spanned_area(CoordinateType coord_nw,
+                                                                                 CoordinateType coord_se) noexcept
 {
+    if (coord_nw > coord_se)
+    {
+        std::swap(coord_nw, coord_se);
+    }
+
     // for SiQAD coordinates
     if constexpr (std::is_same_v<CoordinateType, siqad::coord_t>)
     {
-        const auto c1_cube          = siqad::to_fiction_coord<cube::coord_t>(cell_nw);
-        const auto c2_cube          = siqad::to_fiction_coord<cube::coord_t>(cell_se);
+        const auto c1_cube          = siqad::to_fiction_coord<cube::coord_t>(coord_nw);
+        const auto c2_cube          = siqad::to_fiction_coord<cube::coord_t>(coord_se);
         const auto total_cell_count = static_cast<uint64_t>(std::abs(c1_cube.x - c2_cube.x) + 1) *
                                       static_cast<uint64_t>(std::abs(c1_cube.y - c2_cube.y) + 1);
         std::vector<CoordinateType> all_cells{};
@@ -616,14 +629,17 @@ template <typename CoordinateType>
         // down from left to right.
         while (current_cell <= c2_cube)
         {
-            all_cells.push_back(siqad::to_siqad_coord(current_cell));
-            if (current_cell.x < cell_se.x)
+            const auto current_cell_siqad = siqad::to_siqad_coord(current_cell);
+
+            all_cells.push_back(current_cell_siqad);
+
+            if (current_cell.x < coord_se.x)
             {
                 current_cell.x += 1;
             }
             else
             {
-                current_cell.x = cell_nw.x;
+                current_cell.x = coord_nw.x;
                 current_cell.y += 1;
             }
         }
@@ -634,27 +650,26 @@ template <typename CoordinateType>
     else
     {
         const auto total_cell_count =
-            static_cast<uint64_t>(std::abs(static_cast<int64_t>(cell_nw.x) - static_cast<int64_t>(cell_se.x)) + 1) *
-            static_cast<uint64_t>(std::abs(static_cast<int64_t>(cell_nw.y) - static_cast<int64_t>(cell_se.y)) + 1);
+            static_cast<uint64_t>(std::abs(static_cast<int64_t>(coord_nw.x) - static_cast<int64_t>(coord_se.x)) + 1) *
+            static_cast<uint64_t>(std::abs(static_cast<int64_t>(coord_nw.y) - static_cast<int64_t>(coord_se.y)) + 1);
         std::vector<CoordinateType> all_cells{};
         all_cells.reserve(total_cell_count);
 
-        auto current_cell = cell_nw;
+        auto current_cell = coord_nw;
 
         // collect all cells in the area (spanned by the nw `north-west` and se `south-east` cell) going from top to
         // down from left to right.
-        while (current_cell <= cell_se)
+        while (current_cell <= coord_se)
         {
-
             all_cells.push_back(current_cell);
 
-            if (current_cell.x < cell_se.x)
+            if (current_cell.x < coord_se.x)
             {
                 current_cell.x += 1;
             }
             else
             {
-                current_cell.x = cell_nw.x;
+                current_cell.x = coord_nw.x;
                 current_cell.y += 1;
             }
         }
