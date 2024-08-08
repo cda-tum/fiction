@@ -115,11 +115,10 @@ TEST_CASE("Write operational domain with floating-point parameter values", "[wri
     opdom.dimensions.push_back(sweep_parameter::EPSILON_R);
     opdom.dimensions.push_back(sweep_parameter::LAMBDA_TF);
 
-    opdom.operational_values = {
-        {parameter_point{{0.1, 0.2}}, operational_status::OPERATIONAL},
-        {parameter_point{{0.3, 0.4}}, operational_status::NON_OPERATIONAL},
-        {parameter_point{{1.2, 1.4}}, operational_status::OPERATIONAL},
-        {parameter_point{{2.4, 5.75}}, operational_status::NON_OPERATIONAL}};
+    opdom.operational_values = {{parameter_point{{0.1, 0.2}}, operational_status::OPERATIONAL},
+                                {parameter_point{{0.3, 0.4}}, operational_status::NON_OPERATIONAL},
+                                {parameter_point{{1.2, 1.4}}, operational_status::OPERATIONAL},
+                                {parameter_point{{2.4, 5.75}}, operational_status::NON_OPERATIONAL}};
 
     std::ostringstream os{};
 

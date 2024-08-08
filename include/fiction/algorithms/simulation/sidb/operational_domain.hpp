@@ -35,9 +35,9 @@
 #include <optional>
 #include <queue>
 #include <random>
+#include <set>
 #include <stdexcept>
 #include <thread>
-#include <set>
 #include <tuple>
 #include <type_traits>
 #include <vector>
@@ -51,44 +51,44 @@ namespace fiction
 struct parameter_point
 {
     /**
-         * Default constructor.
+     * Default constructor.
      */
     parameter_point() = default;
     /**
-         * Standard constructor.
-         *
-         * @param values Parameter values for each dimension.
+     * Standard constructor.
+     *
+     * @param values Parameter values for each dimension.
      */
     explicit parameter_point(const std::vector<double>& values) : parameters(values) {}
     /**
-         * Parameter values for each dimension.
+     * Parameter values for each dimension.
      */
     std::vector<double> parameters;
     /**
-         * Equality operator.
-         *
-         * @param other Other parameter point to compare with.
-         * @return `true` if the parameter points are equal.
+     * Equality operator.
+     *
+     * @param other Other parameter point to compare with.
+     * @return `true` if the parameter points are equal.
      */
     bool operator==(const parameter_point& other) const noexcept
     {
         return parameters == other.parameters;
     }
     /**
-         * Inequality operator.
-         *
-         * @param other Other parameter point to compare with.
-         * @return `true` if the parameter points are not equal.
+     * Inequality operator.
+     *
+     * @param other Other parameter point to compare with.
+     * @return `true` if the parameter points are not equal.
      */
     bool operator!=(const parameter_point& other) const noexcept
     {
         return !(*this == other);
     }
     /**
-         * Support for structured bindings.
-         *
-         * @tparam I Index of the parameter value to be returned.
-         * @return The parameter value at the specified index.
+     * Support for structured bindings.
+     *
+     * @tparam I Index of the parameter value to be returned.
+     * @return The parameter value at the specified index.
      */
     template <std::size_t I>
     auto get() const
@@ -1595,7 +1595,7 @@ operational_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& spec, const
         throw std::runtime_error("Flood fill is only applicable to 2 or 3 dimensions");
     }
 
-    operational_domain_stats                 st{};
+    operational_domain_stats                                                                          st{};
     detail::operational_domain_impl<Lyt, TT, operational_domain<parameter_point, operational_status>> p{lyt, spec,
                                                                                                         params, st};
 
@@ -1656,7 +1656,7 @@ operational_domain_contour_tracing(const Lyt& lyt, const std::vector<TT>& spec, 
         throw std::runtime_error("Contour tracing is only applicable to exactly 2 dimensions");
     }
 
-    operational_domain_stats                 st{};
+    operational_domain_stats                                                                          st{};
     detail::operational_domain_impl<Lyt, TT, operational_domain<parameter_point, operational_status>> p{lyt, spec,
                                                                                                         params, st};
 
