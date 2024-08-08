@@ -6,6 +6,7 @@
 #define PYFICTION_DESIGN_SIDB_GATES_HPP
 
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/physical_design/design_sidb_gates.hpp>
 #include <fiction/types.hpp>
@@ -25,7 +26,9 @@ void design_sidb_gates(pybind11::module& m)
     using namespace py::literals;
 
     m.def("design_sidb_gates", &fiction::design_sidb_gates<Lyt, py_tt>, "skeleton"_a, "spec"_a,
-          "params"_a = fiction::design_sidb_gates_params<fiction::cell<Lyt>>{}, DOC(fiction_design_sidb_gates));
+          "params"_a      = fiction::design_sidb_gates_params<fiction::offset::ucoord_t>{},
+          "design_mode"_a = fiction::design_sidb_gates_mode::EXHAUSTIVE, "stats"_a = nullptr,
+          DOC(fiction_design_sidb_gates));
 }
 
 }  // namespace detail
@@ -34,16 +37,17 @@ inline void design_sidb_gates(pybind11::module& m)
 {
     namespace py = pybind11;
     /**
+     * Stats object
+     */
+    py::class_<fiction::design_sidb_gates_stats>(m, "design_sidb_gates_stats", DOC(fiction_exact_physical_design_stats))
+        .def(py::init<>());
+    /**
      * Design approach selector type.
      */
-    pybind11::enum_<typename fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_sidb_gates_mode>(
-        m, "design_sidb_gates_mode", DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode))
-        .value("EXHAUSTIVE",
-               fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_sidb_gates_mode::EXHAUSTIVE,
-               DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_EXHAUSTIVE))
-        .value("RANDOM", fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_sidb_gates_mode::RANDOM,
-               DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_RANDOM));
-
+    py::enum_<fiction::design_sidb_gates_mode>(m, "design_sidb_gates_mode", DOC(fiction_design_sidb_gates_mode))
+        .value("EXHAUSTIVE", fiction::design_sidb_gates_mode::EXHAUSTIVE,
+               DOC(fiction_design_sidb_gates_mode_EXHAUSTIVE))
+        .value("RANDOM", fiction::design_sidb_gates_mode::RANDOM, DOC(fiction_design_sidb_gates_mode_RANDOM));
     /**
      * Parameters.
      */
@@ -53,8 +57,6 @@ inline void design_sidb_gates(pybind11::module& m)
         .def_readwrite("simulation_parameters",
                        &fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::simulation_parameters,
                        DOC(fiction_design_sidb_gates_params))
-        .def_readwrite("design_mode", &fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_mode,
-                       DOC(fiction_design_sidb_gates_params_design_mode))
         .def_readwrite("canvas", &fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::canvas,
                        DOC(fiction_design_sidb_gates_params_canvas))
         .def_readwrite("number_of_sidbs",

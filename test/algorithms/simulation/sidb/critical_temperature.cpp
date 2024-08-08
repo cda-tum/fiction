@@ -5,6 +5,8 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#include "mockturtle/utils/stopwatch.hpp"
+
 #include <fiction/algorithms/simulation/sidb/critical_temperature.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/technology/cell_technologies.hpp>
@@ -283,13 +285,69 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         params.alpha                 = 0.7;
 
         critical_temperature_gate_based(lyt, std::vector<tt>{create_fan_out_tt()}, params, &critical_stats);
-
+        CHECK(mockturtle::to_seconds(critical_stats.time_total) > 0);
         CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.56),
                    Catch::Matchers::WithinAbs(0.00, 0.01));
         CHECK_THAT(std::abs(critical_stats.critical_temperature - 1.46), Catch::Matchers::WithinAbs(0.00, 0.01));
     }
 
-    SECTION("OR gate")
+    SECTION("Bestagon CX gate")
+    {
+        lyt.assign_cell_type({36, 1, 0}, sidb_technology::cell_type::INPUT);
+        lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::INPUT);
+
+        lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
+        lyt.assign_cell_type({38, 0, 0}, sidb_technology::cell_type::INPUT);
+
+        lyt.assign_cell_type({6, 2, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({20, 12, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({8, 3, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({14, 5, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({14, 11, 1}, sidb_technology::cell_type::NORMAL);
+
+        lyt.assign_cell_type({12, 4, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({14, 15, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({26, 4, 0}, sidb_technology::cell_type::NORMAL);
+
+        lyt.assign_cell_type({14, 9, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({24, 15, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({12, 16, 0}, sidb_technology::cell_type::NORMAL);
+
+        lyt.assign_cell_type({18, 9, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({26, 16, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({24, 13, 1}, sidb_technology::cell_type::NORMAL);
+
+        lyt.assign_cell_type({24, 5, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({30, 3, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({16, 13, 1}, sidb_technology::cell_type::NORMAL);
+
+        lyt.assign_cell_type({32, 2, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({20, 8, 0}, sidb_technology::cell_type::NORMAL);
+
+        lyt.assign_cell_type({30, 17, 0}, sidb_technology::cell_type::OUTPUT);
+        lyt.assign_cell_type({6, 18, 0}, sidb_technology::cell_type::OUTPUT);
+
+        lyt.assign_cell_type({32, 18, 0}, sidb_technology::cell_type::OUTPUT);
+        lyt.assign_cell_type({8, 17, 0}, sidb_technology::cell_type::OUTPUT);
+
+        lyt.assign_cell_type({2, 19, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
+
+        params.simulation_parameters = sim_params;
+        params.engine                = critical_temperature_params::simulation_engine::EXACT;
+        params.confidence_level      = 0.99;
+        params.max_temperature       = 350;
+        params.iteration_steps       = 80;
+        params.alpha                 = 0.7;
+
+        critical_temperature_gate_based(lyt, std::vector<tt>{create_crossing_wire_tt()}, params, &critical_stats);
+
+        CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.32),
+                   Catch::Matchers::WithinAbs(0.00, 0.01));
+        CHECK_THAT(std::abs(critical_stats.critical_temperature - 0.85), Catch::Matchers::WithinAbs(0.00, 0.01));
+    }
+
+    SECTION("SiQAD OR gate")
     {
         lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
         lyt.assign_cell_type({26, 0, 0}, sidb_technology::cell_type::INPUT);
@@ -385,6 +443,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         params.alpha                 = 0.6;
 
         critical_temperature_non_gate_based(lyt, params, &critical_stats);
+        CHECK(mockturtle::to_seconds(critical_stats.time_total) > 0);
 
         CHECK(critical_stats.algorithm_name == "QuickSim");
 

@@ -63,7 +63,7 @@ struct generate_random_sidb_layout_params
      * is small and many SiDBs are to be placed, several tries are required to generate a layout with no positively
      * charged SiDBs.
      */
-    uint64_t maximal_attempts = 10E6;
+    uint64_t maximal_attempts = static_cast<uint64_t>(10E6);
     /**
      * The desired number of unique layouts to be generated.
      */

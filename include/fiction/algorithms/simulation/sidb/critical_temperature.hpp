@@ -96,6 +96,10 @@ struct critical_temperature_params
 struct critical_temperature_stats
 {
     /**
+     * The total runtime of the critical temperature computation.
+     */
+    mockturtle::stopwatch<>::duration time_total{0};
+    /**
      * All parameters for physical SiDB simulations.
      */
     sidb_simulation_parameters simulation_parameters{};
@@ -168,6 +172,7 @@ class critical_temperature_impl
     template <typename TT>
     void gate_based_simulation(const std::vector<TT>& spec) noexcept
     {
+        mockturtle::stopwatch stop{stats.time_total};
         if (layout.is_empty())
         {
             stats.critical_temperature = 0.0;
@@ -230,6 +235,7 @@ class critical_temperature_impl
      */
     void non_gate_based_simulation() noexcept
     {
+        mockturtle::stopwatch       stop{stats.time_total};
         sidb_simulation_result<Lyt> simulation_results{};
 
         if (params.engine == critical_temperature_params::simulation_engine::EXACT)
@@ -271,9 +277,12 @@ class critical_temperature_impl
         }
 
         std::vector<double> temp_values{};  // unit: K
-        temp_values.reserve(static_cast<uint64_t>(params.max_temperature * 100));
 
-        for (uint64_t i = 1; i <= static_cast<uint64_t>(params.max_temperature * 100); i++)
+        // Calculate the number of iterations as an integer
+        uint64_t num_iterations = static_cast<uint64_t>(std::round(params.max_temperature * 100));
+        // Reserve space for the vector
+        temp_values.reserve(num_iterations);
+        for (uint64_t i = 1; i <= num_iterations; i++)
         {
             temp_values.emplace_back(static_cast<double>(i) / 100.0);
         }
@@ -458,8 +467,8 @@ double critical_temperature_gate_based(const Lyt& lyt, const std::vector<TT>& sp
 
     assert(!spec.empty());
     // all elements in tts must have the same number of variables
-    assert(std::adjacent_find(spec.begin(), spec.end(),
-                              [](const auto& a, const auto& b) { return a.num_vars() != b.num_vars(); }) == spec.end());
+    assert(std::adjacent_find(spec.cbegin(), spec.cend(), [](const auto& a, const auto& b)
+                              { return a.num_vars() != b.num_vars(); }) == spec.cend());
 
     critical_temperature_stats st{};
 
