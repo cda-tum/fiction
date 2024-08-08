@@ -853,8 +853,8 @@ class operational_domain_impl
      *
      * @note The distribution of the work among threads is a simple slice-based approach. If your step points are
      * ordered, consider shuffling the vector first for better load balancing. Otherwise, some threads might finish
-     * early if they got assigned a larger slice with mainly non-operational samples, which are faster to compute due to
-     * the early termination condition.
+     * early if they got assigned a slice with mainly non-operational samples, which are faster to compute due to the
+     * early termination condition.
      *
      * @param step_points A vector of step points for which the operational status is to be simulated.
      */
