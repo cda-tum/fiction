@@ -36,7 +36,6 @@
 #include <optional>
 #include <queue>
 #include <random>
-#include <set>
 #include <sstream>
 #include <stdexcept>
 #include <thread>
@@ -428,29 +427,6 @@ class operational_domain_impl
         }
     }
 
-    // todo add docstring
-    auto determine_step_points_grid() noexcept
-    {
-        // generate all possible step point combinations via the Cartesian product of all dimensions
-        std::vector<step_point> all_step_points{step_point{}};
-        for (const auto& dimension : indices)
-        {
-            std::vector<step_point> expanded_products{};
-            expanded_products.reserve(all_step_points.size() * dimension.size());
-
-            for (const auto& product : all_step_points)
-            {
-                for (const auto& element : dimension)
-                {
-                    step_point new_product = product;
-                    new_product.step_values.push_back(element);
-                    expanded_products.push_back(new_product);
-                }
-            }
-            all_step_points = expanded_products;
-        }
-        return all_step_points;
-    }
     /**
      * Performs a grid search over the specified parameter ranges with the specified step sizes. The grid search always
      * has quadratic complexity. The operational status is computed for each parameter combination.
@@ -461,7 +437,14 @@ class operational_domain_impl
     {
         mockturtle::stopwatch stop{stats.time_total};
 
-        auto all_step_points = determine_step_points_grid();
+        auto                    all_index_combination = compute_cartesian_combinations(indices);
+        std::vector<step_point> all_step_points{};
+        all_step_points.reserve(all_index_combination.size());
+
+        for (const auto& comb : all_index_combination)
+        {
+            all_step_points.push_back(step_point{comb});
+        }
 
         // shuffle the step points to simulate in random order. This helps with load-balancing since
         // operational/non-operational points are usually clustered. However, non-operational points can be simulated
@@ -693,10 +676,44 @@ class operational_domain_impl
 
         mockturtle::stopwatch stop{stats.time_total};
 
-        const auto all_step_points = determine_step_points_grid();
+        const auto all_step_points = compute_cartesian_combinations(indices);
 
-        std::for_each(all_step_points.cbegin(), all_step_points.cend(),
-                      [this, &lyt](const auto& sp) { is_step_point_suitable(lyt, sp); });
+        // calculate the size of each slice
+        const auto slice_size = (all_step_points.size() + num_threads - 1) / num_threads;
+
+        std::vector<std::thread> threads{};
+        threads.reserve(num_threads);
+
+        // launch threads, each with its own slice of random step points
+        for (auto i = 0ul; i < num_threads; ++i)
+        {
+            const auto start = i * slice_size;
+            const auto end   = std::min(start + slice_size, all_step_points.size());
+
+            if (start >= end)
+            {
+                break;  // no more work to distribute
+            }
+
+            threads.emplace_back(
+                [this, &lyt, start, end, &all_step_points]
+                {
+                    for (auto it = all_step_points.cbegin() + static_cast<int64_t>(start);
+                         it != all_step_points.cbegin() + static_cast<int64_t>(end); ++it)
+                    {
+                        is_step_point_suitable(lyt, step_point{*it});
+                    }
+                });
+        }
+
+        // wait for all threads to complete
+        for (auto& thread : threads)
+        {
+            if (thread.joinable())
+            {
+                thread.join();
+            }
+        }
 
         sidb_simulation_parameters simulation_parameters = params.simulation_parameters;
 
@@ -811,7 +828,6 @@ class operational_domain_impl
     /**
      * Number of available hardware threads.
      */
-    // TODO fix issue with multithreading
     const std::size_t num_threads{std::thread::hardware_concurrency()};
     /**
      * A step point represents a point in the x and y dimension from 0 to the maximum number of steps. A step point does
@@ -1048,13 +1064,17 @@ class operational_domain_impl
      * @param sp Step point to be investigated.
      * @return The operational status of the layout under the given simulation parameters.
      */
-    // TODO needs some rewrite
-    operational_status is_step_point_suitable(Lyt& lyt, const step_point& sp) noexcept
+    operational_status is_step_point_suitable(Lyt lyt, const step_point& sp) noexcept
     {
-        // if the point has already been sampled, return the stored operational status
-        if (const auto op_value = has_already_been_sampled(sp); op_value.has_value())
+        static std::mutex mutex_to_protect_member_variables;
+
         {
-            return *op_value;
+            const std::lock_guard lock{mutex_to_protect_member_variables};
+            // if the point has already been sampled, return the stored operational status
+            if (const auto op_value = has_already_been_sampled(sp); op_value.has_value())
+            {
+                return *op_value;
+            }
         }
 
         // fetch the x and y dimension values
@@ -1062,6 +1082,7 @@ class operational_domain_impl
 
         const auto operational = [this, &param_point]()
         {
+            const std::lock_guard lock(mutex_to_protect_member_variables);
             op_domain.operational_values[param_point] = operational_status::OPERATIONAL;
 
             return operational_status::OPERATIONAL;
@@ -1069,13 +1090,17 @@ class operational_domain_impl
 
         const auto non_operational = [this, &param_point]()
         {
+            const std::lock_guard lock(mutex_to_protect_member_variables);
             op_domain.operational_values[param_point] = operational_status::NON_OPERATIONAL;
 
             return operational_status::NON_OPERATIONAL;
         };
 
-        // increment the number of evaluated parameter combinations
-        ++num_evaluated_parameter_combinations;
+        {
+            const std::lock_guard lock(mutex_to_protect_member_variables);
+            // increment the number of evaluated parameter combinations
+            ++num_evaluated_parameter_combinations;
+        }
 
         sidb_simulation_parameters sim_params = params.simulation_parameters;
 

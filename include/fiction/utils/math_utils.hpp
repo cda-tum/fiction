@@ -117,61 +117,42 @@ determine_all_combinations_of_distributing_k_entities_on_n_positions(const std::
 
     return all_combinations;
 }
-
 /**
- * This function traverses through each vector in the `indices` and builds combinations by
- * taking one element from each vector. The generated combinations are stored in the `result` vector.
+ * This function computes the Cartesian product of a list of vectors. Each vector in the input list
+ * represents a dimension, and the function produces all possible combinations where each combination
+ * consists of one element from each dimension vector.
  *
- * @tparam VectorDataType The type of elements stored in the input vectors.
- * @param indices A vector of vectors from which combinations are generated.
- * @param currentCombination A vector that holds the current combination being generated.
- * @param depth The current recursion depth, which corresponds to the index of the vector in `indices`.
- * @param result A reference to a vector where the generated combinations are stored.
- */
-template <typename VectorDataType>
-void generateCombinations(const std::vector<std::vector<VectorDataType>>& indices,
-                          std::vector<VectorDataType>& currentCombination, const std::size_t depth,
-                          std::vector<std::vector<VectorDataType>>& result)
-{
-    if (depth == indices.size())
-    {
-        // Store the current combination in the result vector
-        result.push_back(currentCombination);
-        return;
-    }
-
-    // Iterate over each element in the current vector
-    for (std::size_t i = 0; i < indices[depth].size(); ++i)
-    {
-        currentCombination[depth] = indices[depth][i];
-        generateCombinations(indices, currentCombination, depth + 1, result);
-    }
-}
-
-/**
- * This function initializes the necessary data structures and calls the recursive
- * `generateCombinations` function to generate and return all possible combinations
- * where one element is taken from each vector in the input `indices`.
- *
- * @tparam VectorDataType The type of elements stored in the input vectors.
- * @param indices A vector of vectors from which combinations are generated.
- * @return A vector containing all possible combinations generated from the input `indices`.
+ * @tparam VectorDataType The type of elements in the vectors.
+ * @param indices A vector of vectors, where each inner vector represents a dimension. The function
+ *                generates combinations using one element from each dimension vector.
+ * @return A vector of vectors, where each inner vector represents a combination of elements,
+ *         one from each dimension. The total number of combinations is the product of the sizes
+ *         of the input vectors.
  */
 template <typename VectorDataType>
 [[nodiscard]] inline std::vector<std::vector<VectorDataType>>
-generateAllCombinations(const std::vector<std::vector<VectorDataType>>& indices)
+compute_cartesian_combinations(const std::vector<std::vector<VectorDataType>>& indices) noexcept
 {
-    std::vector<std::vector<VectorDataType>> result;  // Vector to store all combinations
+    std::vector<std::vector<VectorDataType>> all_combinations{{}};
 
-    if (indices.empty())
+    for (const auto& dimension : indices)
     {
-        return result;  // Handle empty input
+        std::vector<std::vector<VectorDataType>> expanded_products{};
+        expanded_products.reserve(all_combinations.size() * dimension.size());
+
+        for (const auto& product : all_combinations)
+        {
+            for (const auto& element : dimension)
+            {
+                std::vector<VectorDataType> new_product = product;
+                new_product.push_back(element);
+                expanded_products.push_back(new_product);
+            }
+        }
+        all_combinations = expanded_products;
     }
 
-    std::vector<VectorDataType> currentCombination(indices.size());
-    generateCombinations(indices, currentCombination, 0, result);
-
-    return result;
+    return all_combinations;  // Return the final list of combinations
 }
 
 }  // namespace fiction
