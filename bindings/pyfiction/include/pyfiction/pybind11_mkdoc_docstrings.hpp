@@ -5836,6 +5836,8 @@ Parameter ``samples``:
 Returns:
     The (partial) operational domain of the layout.)doc";
 
+static const char *__doc_fiction_detail_operational_domain_impl_determine_step_points_grid = R"doc()doc";
+
 static const char *__doc_fiction_detail_operational_domain_impl_find_operational_contour_step_point =
 R"doc(Finds a boundary starting point for the contour tracing algorithm.
 This function starts at the given starting point and moves towards the
