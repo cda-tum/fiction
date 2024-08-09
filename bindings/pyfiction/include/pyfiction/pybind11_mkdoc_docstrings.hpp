@@ -2340,6 +2340,25 @@ Parameter ``n``:
 Returns:
     Columnar clocking scheme.)doc";
 
+static const char *__doc_fiction_compute_cartesian_combinations =
+R"doc(This function computes the Cartesian product of a list of vectors.
+Each vector in the input list represents a dimension, and the function
+produces all possible combinations where each combination consists of
+one element from each dimension vector.
+
+Template parameter ``VectorDataType``:
+    The type of elements in the vectors.
+
+Parameter ``indices``:
+    A vector of vectors, where each inner vector represents a
+    dimension. The function generates combinations using one element
+    from each dimension vector.
+
+Returns:
+    A vector of vectors, where each inner vector represents a
+    combination of elements, one from each dimension. The total number
+    of combinations is the product of the sizes of the input vectors.)doc";
+
 static const char *__doc_fiction_convert_array =
 R"doc(Converts an array of size `N` and type `T` to an array of size `N` and
 type `ElementType` by applying `static_cast` at compile time.
@@ -5835,8 +5854,6 @@ Parameter ``samples``:
 
 Returns:
     The (partial) operational domain of the layout.)doc";
-
-static const char *__doc_fiction_detail_operational_domain_impl_determine_step_points_grid = R"doc()doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_find_operational_contour_step_point =
 R"doc(Finds a boundary starting point for the contour tracing algorithm.
@@ -9840,44 +9857,6 @@ static const char *__doc_fiction_gate_level_layout_trav_id = R"doc()doc";
 static const char *__doc_fiction_gate_level_layout_value = R"doc()doc";
 
 static const char *__doc_fiction_gate_level_layout_visited = R"doc()doc";
-
-static const char *__doc_fiction_generateAllCombinations =
-R"doc(This function initializes the necessary data structures and calls the
-recursive `generateCombinations` function to generate and return all
-possible combinations where one element is taken from each vector in
-the input `indices`.
-
-Template parameter ``VectorDataType``:
-    The type of elements stored in the input vectors.
-
-Parameter ``indices``:
-    A vector of vectors from which combinations are generated.
-
-Returns:
-    A vector containing all possible combinations generated from the
-    input `indices`.)doc";
-
-static const char *__doc_fiction_generateCombinations =
-R"doc(This function traverses through each vector in the `indices` and
-builds combinations by taking one element from each vector. The
-generated combinations are stored in the `result` vector.
-
-Template parameter ``VectorDataType``:
-    The type of elements stored in the input vectors.
-
-Parameter ``indices``:
-    A vector of vectors from which combinations are generated.
-
-Parameter ``currentCombination``:
-    A vector that holds the current combination being generated.
-
-Parameter ``depth``:
-    The current recursion depth, which corresponds to the index of the
-    vector in `indices`.
-
-Parameter ``result``:
-    A reference to a vector where the generated combinations are
-    stored.)doc";
 
 static const char *__doc_fiction_generate_edge_intersection_graph =
 R"doc(Creates an edge intersection graph of all paths that satisfy a given
