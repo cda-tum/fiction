@@ -425,16 +425,10 @@ class operational_domain_impl
             }
         }
     }
-    /**
-     * Performs a grid search over the specified parameter ranges with the specified step sizes. The grid search always
-     * has quadratic complexity. The operational status is computed for each parameter combination.
-     *
-     * @return The operational domain of the layout.
-     */
-    [[nodiscard]] operational_domain<parameter_point, operational_status> grid_search() noexcept
-    {
-        mockturtle::stopwatch stop{stats.time_total};
 
+    // todo add docstring
+    auto determine_step_points_grid() noexcept
+    {
         // generate all possible step point combinations via the Cartesian product of all dimensions
         std::vector<step_point> all_step_points{step_point{}};
         for (const auto& dimension : indices)
@@ -453,6 +447,19 @@ class operational_domain_impl
             }
             all_step_points = expanded_products;
         }
+        return all_step_points;
+    }
+    /**
+     * Performs a grid search over the specified parameter ranges with the specified step sizes. The grid search always
+     * has quadratic complexity. The operational status is computed for each parameter combination.
+     *
+     * @return The operational domain of the layout.
+     */
+    [[nodiscard]] operational_domain<parameter_point, operational_status> grid_search() noexcept
+    {
+        mockturtle::stopwatch stop{stats.time_total};
+
+        auto all_step_points = determine_step_points_grid();
 
         // shuffle the step points to simulate in random order. This helps with load-balancing since
         // operational/non-operational points are usually clustered. However, non-operational points can be simulated
@@ -684,13 +691,10 @@ class operational_domain_impl
 
         mockturtle::stopwatch stop{stats.time_total};
 
-        // TODO needs to be fixed
-        // step points are analyzed sequentially because the CDS is updated for each step point, so parallelizing may
-        // result in unexpected behavior.
-        const auto all_indice_combinations = generateAllCombinations(indices);
+        const auto all_step_points = determine_step_points_grid();
 
-        std::for_each(all_indice_combinations.cbegin(), all_indice_combinations.cend(),
-                      [this, &lyt](const auto id) { is_step_point_suitable(lyt, step_point{id}); });
+        std::for_each(all_step_points.cbegin(), all_step_points.cend(),
+                      [this, &lyt](const auto& sp) { is_step_point_suitable(lyt, sp); });
 
         sidb_simulation_parameters simulation_parameters = params.simulation_parameters;
 
@@ -805,7 +809,8 @@ class operational_domain_impl
     /**
      * Number of available hardware threads.
      */
-    const std::size_t num_threads{std::thread::hardware_concurrency()};
+    // TODO fix issue with multithreading
+    const std::size_t num_threads{1};
     /**
      * A step point represents a point in the x and y dimension from 0 to the maximum number of steps. A step point does
      * not hold the actual parameter values, but the step values in the x and y dimension, respectively.
@@ -980,41 +985,59 @@ class operational_domain_impl
      */
     operational_status is_step_point_operational(const step_point& sp) noexcept
     {
-        // if the point has already been sampled, return the stored operational status
-        if (const auto op_value = has_already_been_sampled(sp); op_value.has_value())
+        // todo analyse thread issue
+        std::mutex mutex_to_protect_member_variables{};  // Lock the mutex
+
         {
-            return *op_value;
+            const std::lock_guard lock{mutex_to_protect_member_variables};
+            // if the point has already been sampled, return the stored operational status
+            if (const auto op_value = has_already_been_sampled(sp); op_value.has_value())
+            {
+                return *op_value;
+            }
         }
 
         // fetch the x and y dimension values
         const auto param_point = to_parameter_point(sp);
 
-        const auto operational = [this, &param_point]()
+        const auto operational = [this, &param_point, &mutex_to_protect_member_variables]()
         {
+            const std::lock_guard lock{mutex_to_protect_member_variables};
+
             op_domain.operational_values[param_point] = operational_status::OPERATIONAL;
 
             return operational_status::OPERATIONAL;
         };
 
-        const auto non_operational = [this, &param_point]()
+        const auto non_operational = [this, &param_point, &mutex_to_protect_member_variables]()
         {
+            const std::lock_guard lock{mutex_to_protect_member_variables};
+
             op_domain.operational_values[param_point] = operational_status::NON_OPERATIONAL;
 
             return operational_status::NON_OPERATIONAL;
         };
 
-        // increment the number of evaluated parameter combinations
-        ++num_evaluated_parameter_combinations;
+        {
+            const std::lock_guard lock{mutex_to_protect_member_variables};
+            // increment the number of evaluated parameter combinations
+            ++num_evaluated_parameter_combinations;
+        }
 
         sidb_simulation_parameters sim_params = params.simulation_parameters;
+
         for (auto d = 0u; d < num_dimensions; ++d)
         {
+            const std::lock_guard lock{mutex_to_protect_member_variables};
             set_dimension_value(sim_params, values[d][sp.step_values[d]], d);
         }
 
         const auto& [status, sim_calls] =
             is_operational(layout, truth_table, is_operational_params{sim_params, params.sim_engine});
-        num_simulator_invocations += sim_calls;
+        {
+            const std::lock_guard lock{mutex_to_protect_member_variables};
+            num_simulator_invocations += sim_calls;
+        }
 
         if (status == operational_status::NON_OPERATIONAL)
         {

@@ -85,6 +85,7 @@ inline void operational_domain(pybind11::module& m)
     // add docu
     py::class_<fiction::operational_domain_value_range>(m, "operational_domain_value_range")
         .def(py::init<>())
+        .def(py::init<fiction::sweep_parameter, double, double, double>(), "dimension"_a, "min"_a, "max"_a, "step"_a)
         .def_readwrite("dimension", &fiction::operational_domain_value_range::dimension)
         .def_readwrite("min", &fiction::operational_domain_value_range::min)
         .def_readwrite("max", &fiction::operational_domain_value_range::max)
