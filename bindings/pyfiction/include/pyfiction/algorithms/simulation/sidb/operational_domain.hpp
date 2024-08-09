@@ -60,8 +60,8 @@ inline void operational_domain(pybind11::module& m)
         ;
 
     py::class_<fiction::parameter_point>(m, "parameter_point", DOC(fiction_parameter_point))
-        .def(py::init<>())
-        .def(py::init<const std::vector<double>>(), "values"_a)
+        .def(py::init<>(), DOC(fiction_parameter_point_parameter_point))
+        .def(py::init<const std::vector<double>>(), "values"_a, DOC(fiction_parameter_point_parameter_point_2))
         .def_readwrite("parameters", &fiction::parameter_point::parameters, DOC(fiction_parameter_point))
 
         .def(py::self == py::self, "other"_a, DOC(fiction_parameter_point_operator_eq))
@@ -76,20 +76,26 @@ inline void operational_domain(pybind11::module& m)
         m, "operational_domain", DOC(fiction_operational_domain))
         .def(py::init<>())
         .def_readwrite("dimensions",
-                       &fiction::operational_domain<fiction::parameter_point, fiction::operational_status>::dimensions)
+                       &fiction::operational_domain<fiction::parameter_point, fiction::operational_status>::dimensions,
+                       DOC())
         .def_readwrite(
             "operational_values",
             &fiction::operational_domain<fiction::parameter_point, fiction::operational_status>::operational_values,
             DOC(fiction_operational_domain_operational_values));
 
     // add docu
-    py::class_<fiction::operational_domain_value_range>(m, "operational_domain_value_range")
+    py::class_<fiction::operational_domain_value_range>(m, "operational_domain_value_range",
+                                                        DOC(fiction_operational_domain_value_range))
         .def(py::init<>())
         .def(py::init<fiction::sweep_parameter, double, double, double>(), "dimension"_a, "min"_a, "max"_a, "step"_a)
-        .def_readwrite("dimension", &fiction::operational_domain_value_range::dimension)
-        .def_readwrite("min", &fiction::operational_domain_value_range::min)
-        .def_readwrite("max", &fiction::operational_domain_value_range::max)
-        .def_readwrite("step", &fiction::operational_domain_value_range::step);
+        .def_readwrite("dimension", &fiction::operational_domain_value_range::dimension,
+                       DOC(fiction_operational_domain_value_range_dimension))
+        .def_readwrite("min", &fiction::operational_domain_value_range::min,
+                       DOC(fiction_operational_domain_value_range_dimension))
+        .def_readwrite("max", &fiction::operational_domain_value_range::max,
+                       DOC(fiction_operational_domain_value_range_max))
+        .def_readwrite("step", &fiction::operational_domain_value_range::step,
+                       DOC(fiction_operational_domain_value_range_step));
 
     py::class_<fiction::operational_domain_params>(m, "operational_domain_params",
                                                    DOC(fiction_operational_domain_params))
