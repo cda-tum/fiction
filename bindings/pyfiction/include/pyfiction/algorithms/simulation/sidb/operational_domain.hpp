@@ -15,6 +15,7 @@
 #include <pybind11/stl.h>
 
 #include <string>
+#include <vector>
 
 namespace pyfiction
 {
@@ -61,7 +62,7 @@ inline void operational_domain(pybind11::module& m)
     py::class_<fiction::parameter_point>(m, "parameter_point", DOC(fiction_parameter_point))
         .def(py::init<>())
         .def(py::init<const std::vector<double>>(), "values"_a)
-        .def_readwrite("parameters", &fiction::parameter_point::parameters, DOC(fiction_parameter_point_x))
+        .def_readwrite("parameters", &fiction::parameter_point::parameters, DOC(fiction_parameter_point))
 
         .def(py::self == py::self, "other"_a, DOC(fiction_parameter_point_operator_eq))
         .def(py::self != py::self, "other"_a, DOC(fiction_parameter_point_operator_ne))

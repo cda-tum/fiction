@@ -485,36 +485,6 @@ class displacement_robustness_domain_impl
         return all_possible_sidb_misplacements;
     }
     /**
-     * This is a helper function, which recursively generates combinations of SiDB displacements for all SiDBs
-     * based on the provided vector of displacement vectors.
-     *
-     * @param result The vector to store the generated combinations. The first element describes the SiDBs of the first
-     * displaced layout.
-     * @param current_combination The current combination being constructed.
-     * @param cell_index The current cell_index in the vector of displacement vectors.
-     */
-    void generate_all_possible_combinations_of_displacements(std::vector<std::vector<cell<Lyt>>>& result,
-                                                             std::vector<cell<Lyt>>&              current_combination,
-                                                             const std::size_t                    cell_index) noexcept
-    {
-        if (cell_index == all_possible_sidb_displacements.size())
-        {
-            result.push_back(current_combination);
-            return;
-        }
-
-        // Recursively generate combinations for each cell in the current displacement vector
-        for (const auto& c : all_possible_sidb_displacements[cell_index])
-        {
-            // Add current cell to the combination
-            current_combination.push_back(c);
-            // Recursively generate next combinations
-            generate_all_possible_combinations_of_displacements(result, current_combination, cell_index + 1);
-            // Backtrack: remove current cell to explore other combinations
-            current_combination.pop_back();
-        }
-    }
-    /**
      * This function generates all SiDB layouts with displacements based on the original layout.
      * It filters out layouts where two or more SiDBs would be on the same spot due to displacement.
      *
@@ -522,9 +492,7 @@ class displacement_robustness_domain_impl
      */
     [[nodiscard]] std::vector<Lyt> generate_valid_displaced_sidb_layouts() noexcept
     {
-        std::vector<std::vector<cell<Lyt>>> all_possible_sidb_displacement{};
-        std::vector<cell<Lyt>>              current_combination{};
-        generate_all_possible_combinations_of_displacements(all_possible_sidb_displacement, current_combination, 0);
+        auto all_possible_sidb_displacement = generateAllCombinations(all_possible_sidb_displacements);
 
         std::shuffle(all_possible_sidb_displacement.begin(), all_possible_sidb_displacement.end(), generator);
 

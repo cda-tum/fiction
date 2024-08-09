@@ -64,13 +64,17 @@ class opdom_command : public command
 
         add_option("--x_sweep", x_sweep, "Sweep parameter of the x dimension [epsilon_r, lambda_tf, mu_minus]", true);
         add_option("--y_sweep", y_sweep, "Sweep parameter of the y dimension [epsilon_r, lambda_tf, mu_minus]", true);
+        add_option("--z_sweep", z_sweep, "Sweep parameter of the z dimension [epsilon_r, lambda_tf, mu_minus]", true);
 
-        add_option("--x_min", params.x_min, "Minimum value of the x dimension sweep", true);
-        add_option("--x_max", params.x_max, "Maximum value of the x dimension sweep", true);
-        add_option("--x_step", params.x_step, "Step size of the x dimension sweep", true);
-        add_option("--y_min", params.y_min, "Minimum value of the y dimension sweep", true);
-        add_option("--y_max", params.y_max, "Maximum value of the y dimension sweep", true);
-        add_option("--y_step", params.y_step, "Step size of the y dimension sweep", true);
+        add_option("--x_min", params.sweep_dimensions[0].min, "Minimum value of the x dimension sweep", true);
+        add_option("--x_max", params.sweep_dimensions[0].max, "Maximum value of the x dimension sweep", true);
+        add_option("--x_step", params.sweep_dimensions[0].step, "Step size of the x dimension sweep", true);
+        add_option("--y_min", params.sweep_dimensions[1].min, "Minimum value of the y dimension sweep", true);
+        add_option("--y_max", params.sweep_dimensions[1].max, "Maximum value of the y dimension sweep", true);
+        add_option("--y_step", params.sweep_dimensions[1].step, "Step size of the y dimension sweep", true);
+        add_option("--z_min", params.sweep_dimensions[2].min, "Minimum value of the y dimension sweep", true);
+        add_option("--z_max", params.sweep_dimensions[2].max, "Maximum value of the y dimension sweep", true);
+        add_option("--z_step", params.sweep_dimensions[2].step, "Step size of the y dimension sweep", true);
     }
 
   protected:
@@ -97,15 +101,10 @@ class opdom_command : public command
         }
 
         // check for valid x and y parameter bounds
-        if (params.x_min >= params.x_max)
+        for (const auto &dim : params.sweep_dimensions)
+        if (dim.min >= dim.max)
         {
-            env->out() << "[e] x_min must be smaller than x_max" << std::endl;
-            reset_params();
-            return;
-        }
-        if (params.y_min >= params.y_max)
-        {
-            env->out() << "[e] y_min must be smaller than y_max" << std::endl;
+            env->out() << "[e] min must be smaller than max" << std::endl;
             reset_params();
             return;
         }
@@ -180,29 +179,43 @@ class opdom_command : public command
         // assign x sweep parameters
         if (x_sweep == "epsilon_r")
         {
-            params.x_dimension = fiction::sweep_parameter::EPSILON_R;
+            params.sweep_dimensions[0].dimension = fiction::sweep_parameter::EPSILON_R;
         }
         else if (x_sweep == "lambda_tf")
         {
-            params.x_dimension = fiction::sweep_parameter::LAMBDA_TF;
+            params.sweep_dimensions[0].dimension = fiction::sweep_parameter::LAMBDA_TF;
         }
         else if (x_sweep == "mu_minus")
         {
-            params.x_dimension = fiction::sweep_parameter::MU_MINUS;
+            params.sweep_dimensions[0].dimension = fiction::sweep_parameter::MU_MINUS;
         }
 
         // assign y sweep parameters
         if (y_sweep == "epsilon_r")
         {
-            params.y_dimension = fiction::sweep_parameter::EPSILON_R;
+            params.sweep_dimensions[1].dimension = fiction::sweep_parameter::EPSILON_R;
         }
         else if (y_sweep == "lambda_tf")
         {
-            params.y_dimension = fiction::sweep_parameter::LAMBDA_TF;
+            params.sweep_dimensions[1].dimension = fiction::sweep_parameter::LAMBDA_TF;
         }
         else if (y_sweep == "mu_minus")
         {
-            params.y_dimension = fiction::sweep_parameter::MU_MINUS;
+            params.sweep_dimensions[1].dimension = fiction::sweep_parameter::MU_MINUS;
+        }
+
+        // assign z sweep parameters
+        if (z_sweep == "epsilon_r")
+        {
+            params.sweep_dimensions[2].dimension = fiction::sweep_parameter::EPSILON_R;
+        }
+        else if (z_sweep == "lambda_tf")
+        {
+            params.sweep_dimensions[2].dimension = fiction::sweep_parameter::LAMBDA_TF;
+        }
+        else if (z_sweep == "mu_minus")
+        {
+            params.sweep_dimensions[2].dimension = fiction::sweep_parameter::MU_MINUS;
         }
 
         const auto get_name = [](auto&& lyt_ptr) -> std::string { return fiction::get_name(*lyt_ptr); };
@@ -285,6 +298,10 @@ class opdom_command : public command
      * User input for the y dimension sweep parameter.
      */
     std::string y_sweep{};
+    /**
+     * User input for the z dimension sweep parameter.
+     */
+    std::string z_sweep{};
     /**
      * CSV filename to write the operational domain to.
      */

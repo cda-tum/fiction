@@ -70,9 +70,30 @@ struct parameter_point
      * @param other Other parameter point to compare with.
      * @return `true` if the parameter points are equal.
      */
-    bool operator==(const parameter_point& other) const noexcept
-    {
-        return parameters == other.parameters;
+    /**
+     * Equality operator. Checks if this parameter point is equal to another point within a specified tolerance.
+     * The tolerance is defined by `physical_constants::POP_STABILITY_ERR`.
+     *
+     * @param other Other parameter point to compare with.
+     * @return `true` iff the parameter points are equal.
+     */
+    [[nodiscard]] bool operator==(const parameter_point& other) const noexcept {
+        // Check if sizes are equal
+        if (parameters.size() != other.parameters.size()) {
+            return false;
+        }
+
+        // Define tolerance for comparison
+        constexpr auto tolerance = physical_constants::POP_STABILITY_ERR;
+
+        // Compare each element with tolerance
+        for (std::size_t i = 0; i < parameters.size(); ++i) {
+            if (std::abs(parameters[i] - other.parameters[i]) > tolerance) {
+                return false;
+            }
+        }
+
+        return true;
     }
     /**
      * Inequality operator.
@@ -662,8 +683,12 @@ class operational_domain_impl
         // TODO needs to be fixed
         // step points are analyzed sequentially because the CDS is updated for each step point, so parallelizing may
         // result in unexpected behavior.
-        std::for_each(indices.cbegin(), indices.cend(),
-                      [this, &lyt](const auto id) { is_step_point_suitable(lyt, step_point{id}); });
+        const auto all_indice_combinations = generateAllCombinations(indices);
+
+        std::for_each(all_indice_combinations.cbegin(), all_indice_combinations.cend(),
+                      [this, &lyt](const auto id) {
+                          is_step_point_suitable(lyt, step_point{id});
+                      });
 
         sidb_simulation_parameters simulation_parameters = params.simulation_parameters;
 
@@ -676,8 +701,10 @@ class operational_domain_impl
                     continue;
                 }
 
-                set_dimension_value(simulation_parameters, param_point.parameters[0], 0);
-                set_dimension_value(simulation_parameters, param_point.parameters[1], 1);
+                for (auto d = 0u; d < num_dimensions; ++d)
+                {
+                    set_dimension_value(simulation_parameters, param_point.parameters[d], d);
+                }
 
                 auto sim_results = sidb_simulation_result<Lyt>{};
 
@@ -1033,8 +1060,11 @@ class operational_domain_impl
         ++num_evaluated_parameter_combinations;
 
         sidb_simulation_parameters sim_params = params.simulation_parameters;
-        set_dimension_value(sim_params, param_point.parameters[0], 0);
-        set_dimension_value(sim_params, param_point.parameters[1], 1);
+
+        for (auto d = 0u; d < num_dimensions; ++d)
+        {
+            set_dimension_value(sim_params, param_point.parameters[d], d);
+        }
 
         lyt.assign_physical_parameters(sim_params);
 
