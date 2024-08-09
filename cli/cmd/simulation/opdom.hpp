@@ -101,13 +101,13 @@ class opdom_command : public command
         }
 
         // check for valid x and y parameter bounds
-        for (const auto &dim : params.sweep_dimensions)
-        if (dim.min >= dim.max)
-        {
-            env->out() << "[e] min must be smaller than max" << std::endl;
-            reset_params();
-            return;
-        }
+        for (const auto& dim : params.sweep_dimensions)
+            if (dim.min >= dim.max)
+            {
+                env->out() << "[e] min must be smaller than max" << std::endl;
+                reset_params();
+                return;
+            }
 
         // make sure that at most one algorithm is selected
         const std::array algorithm_selections = {is_set("random_sampling"), is_set("flood_fill"),

@@ -77,9 +77,11 @@ struct parameter_point
      * @param other Other parameter point to compare with.
      * @return `true` iff the parameter points are equal.
      */
-    [[nodiscard]] bool operator==(const parameter_point& other) const noexcept {
+    [[nodiscard]] bool operator==(const parameter_point& other) const noexcept
+    {
         // Check if sizes are equal
-        if (parameters.size() != other.parameters.size()) {
+        if (parameters.size() != other.parameters.size())
+        {
             return false;
         }
 
@@ -87,8 +89,10 @@ struct parameter_point
         constexpr auto tolerance = physical_constants::POP_STABILITY_ERR;
 
         // Compare each element with tolerance
-        for (std::size_t i = 0; i < parameters.size(); ++i) {
-            if (std::abs(parameters[i] - other.parameters[i]) > tolerance) {
+        for (std::size_t i = 0; i < parameters.size(); ++i)
+        {
+            if (std::abs(parameters[i] - other.parameters[i]) > tolerance)
+            {
                 return false;
             }
         }
@@ -686,9 +690,7 @@ class operational_domain_impl
         const auto all_indice_combinations = generateAllCombinations(indices);
 
         std::for_each(all_indice_combinations.cbegin(), all_indice_combinations.cend(),
-                      [this, &lyt](const auto id) {
-                          is_step_point_suitable(lyt, step_point{id});
-                      });
+                      [this, &lyt](const auto id) { is_step_point_suitable(lyt, step_point{id}); });
 
         sidb_simulation_parameters simulation_parameters = params.simulation_parameters;
 
