@@ -3,7 +3,7 @@
 //
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/physical_design/graph_oriented_layout_design.hpp>  // graph enhanced layout search algorithm
+#include <fiction/algorithms/physical_design/graph_oriented_layout_design.hpp>  // graph-oriented layout design algorithm
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/algorithms/verification/equivalence_checking.hpp>               // SAT-based equivalence checking
 #include <fiction/io/network_reader.hpp>                                          // read networks from files

@@ -61,7 +61,7 @@ void check_graph_oriented_layout_design_equiv_all()
     check_graph_oriented_layout_design_equiv<Lyt>(blueprints::nand_xnor_network<technology_network>());
 }
 
-TEST_CASE("Layout equivalence", "[algorithms]")
+TEST_CASE("Layout equivalence after graph-oriented layout design", "[graph-oriented-layout-design]")
 {
     SECTION("Cartesian layouts")
     {
@@ -146,7 +146,7 @@ TEST_CASE("Different parameters", "[graph_oriented_layout_design]")
     CHECK(!layout6.has_value());
 }
 
-TEST_CASE("Name conservation after graph-enhanced layout search", "[graph_oriented_layout_design]")
+TEST_CASE("Name conservation after graph-oriented layout design", "[graph_oriented_layout_design]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
 
