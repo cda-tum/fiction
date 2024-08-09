@@ -4197,21 +4197,6 @@ Parameter ``ps``:
 Parameter ``st``:
     Statistics related to the displacement robustness computation.)doc";
 
-static const char *__doc_fiction_detail_displacement_robustness_domain_impl_generate_all_possible_combinations_of_displacements =
-R"doc(This is a helper function, which recursively generates combinations of
-SiDB displacements for all SiDBs based on the provided vector of
-displacement vectors.
-
-Parameter ``result``:
-    The vector to store the generated combinations. The first element
-    describes the SiDBs of the first displaced layout.
-
-Parameter ``current_combination``:
-    The current combination being constructed.
-
-Parameter ``cell_index``:
-    The current cell_index in the vector of displacement vectors.)doc";
-
 static const char *__doc_fiction_detail_displacement_robustness_domain_impl_generate_valid_displaced_sidb_layouts =
 R"doc(This function generates all SiDB layouts with displacements based on
 the original layout. It filters out layouts where two or more SiDBs
