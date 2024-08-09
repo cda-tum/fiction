@@ -196,7 +196,7 @@ struct operational_domain
         for (std::size_t i = 0; i < pp.parameters.size(); ++i)
         {
             ss << pp.parameters[i];
-            // Add a separator (e.g., comma) between elements
+
             if (i != pp.parameters.size() - 1)
             {
                 ss << ", ";
@@ -437,14 +437,13 @@ class operational_domain_impl
     {
         mockturtle::stopwatch stop{stats.time_total};
 
-        auto                    all_index_combination = compute_cartesian_combinations(indices);
-        std::vector<step_point> all_step_points{};
+        const auto all_index_combination = compute_cartesian_combinations(indices);
+
+        std::vector<step_point> all_step_points;
         all_step_points.reserve(all_index_combination.size());
 
-        for (const auto& comb : all_index_combination)
-        {
-            all_step_points.push_back(step_point{comb});
-        }
+        std::transform(all_index_combination.begin(), all_index_combination.end(), std::back_inserter(all_step_points),
+                       [](const auto& comb) { return step_point{comb}; });
 
         // shuffle the step points to simulate in random order. This helps with load-balancing since
         // operational/non-operational points are usually clustered. However, non-operational points can be simulated
