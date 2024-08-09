@@ -485,18 +485,16 @@ static const char *__doc_fiction_bdl_input_iterator_current_input_index =
 R"doc(The current input index. There are :math:`2^n` possible input states
 for an :math:`n`-input BDL layout.)doc";
 
-static const char *__doc_fiction_bdl_input_iterator_get_number_of_inputs =
+static const char *__doc_fiction_bdl_input_iterator_input_pairs = R"doc(The detected input BDL pairs.)doc";
+
+static const char *__doc_fiction_bdl_input_iterator_layout = R"doc(The layout to iterate over.)doc";
+
+static const char *__doc_fiction_bdl_input_iterator_num_input_pairs =
 R"doc(Returns the total number of input BDL pairs of the given SiDB gate
 layout.
 
 Returns:
     The number of input BDL pairs.)doc";
-
-static const char *__doc_fiction_bdl_input_iterator_input_pairs = R"doc(The detected input BDL pairs.)doc";
-
-static const char *__doc_fiction_bdl_input_iterator_layout = R"doc(The layout to iterate over.)doc";
-
-static const char *__doc_fiction_bdl_input_iterator_num_inputs = R"doc(The amount of input BDL pairs.)doc";
 
 static const char *__doc_fiction_bdl_input_iterator_operator_add =
 R"doc(Addition operator. Computes the input state of the current iterator
@@ -2342,6 +2340,25 @@ Parameter ``n``:
 Returns:
     Columnar clocking scheme.)doc";
 
+static const char *__doc_fiction_compute_cartesian_combinations =
+R"doc(This function computes the Cartesian product of a list of vectors.
+Each vector in the input list represents a dimension, and the function
+produces all possible combinations where each combination consists of
+one element from each dimension vector.
+
+Template parameter ``VectorDataType``:
+    The type of elements in the vectors.
+
+Parameter ``indices``:
+    A vector of vectors, where each inner vector represents a
+    dimension. The function generates combinations using one element
+    from each dimension vector.
+
+Returns:
+    A vector of vectors, where each inner vector represents a
+    combination of elements, one from each dimension. The total number
+    of combinations is the product of the sizes of the input vectors.)doc";
+
 static const char *__doc_fiction_convert_array =
 R"doc(Converts an array of size `N` and type `T` to an array of size `N` and
 type `ElementType` by applying `static_cast` at compile time.
@@ -4179,21 +4196,6 @@ Parameter ``ps``:
 
 Parameter ``st``:
     Statistics related to the displacement robustness computation.)doc";
-
-static const char *__doc_fiction_detail_displacement_robustness_domain_impl_generate_all_possible_combinations_of_displacements =
-R"doc(This is a helper function, which recursively generates combinations of
-SiDB displacements for all SiDBs based on the provided vector of
-displacement vectors.
-
-Parameter ``result``:
-    The vector to store the generated combinations. The first element
-    describes the SiDBs of the first displaced layout.
-
-Parameter ``current_combination``:
-    The current combination being constructed.
-
-Parameter ``cell_index``:
-    The current cell_index in the vector of displacement vectors.)doc";
 
 static const char *__doc_fiction_detail_displacement_robustness_domain_impl_generate_valid_displaced_sidb_layouts =
 R"doc(This function generates all SiDB layouts with displacements based on
@@ -6179,7 +6181,7 @@ static const char *__doc_fiction_detail_operational_domain_impl_find_operational
 R"doc(Performs random sampling to find any operational parameter
 combination. This function is useful if a single starting point is
 required within the domain to expand from. This function returns the
-step in x and y dimension of the first operational point found. If no
+step in all dimensions of the first operational point found. If no
 operational parameter combination can be found within the given number
 of samples, the function returns `std::nullopt`.
 
@@ -6209,15 +6211,15 @@ Returns:
     The (partial) operational domain of the layout.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_generate_random_step_points =
-R"doc(Generates (potentially repeating) random `step_points` in the stored
-parameter range. The number of generated points is exactly equal to
-`samples`.
+R"doc(Generates unique random `step_points` in the stored parameter range.
+The number of generated points is at most equal to `samples`.
 
 Parameter ``samples``:
-    Number of random `step_point`s to generate.
+    Maximum number of random `step_point`s to generate.
 
 Returns:
-    A set of random `step_point`s in the stored parameter range.)doc";
+    A vector of unique random `step_point`s in the stored parameter
+    range of size at most equal to `samples`.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_grid_search =
 R"doc(Performs a grid search over the specified parameter ranges with the
@@ -6242,26 +6244,69 @@ Returns:
     number.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_has_already_been_sampled =
-R"doc(Determines whether the point at step position `(x, y)` has already
-been sampled and returns the operational value at `(x, y)` if it
-already exists. Here, `x` and `y` represent steps in the x and y
-dimension, respectively, not the actual values of the parameters.
+R"doc(Determines whether the point at step position `(d1, ..., dn)` has
+already been sampled and returns the operational value at `(d1, ...,
+dn)` if it already exists. Here, `di` represents steps in the i-th
+dimension, not the actual values of the parameters.
 
 Parameter ``sp``:
     Step point to check.
 
 Returns:
-    The operational status of the point at step position `sp = (x, y)`
-    or `std::nullopt` if `(x, y)` has not been sampled yet.)doc";
+    The operational status of the point at step position `sp = (d1,
+    ..., dn)` or `std::nullopt` if the point `(d1, ..., dn)` has not
+    been sampled yet.)doc";
+
+static const char *__doc_fiction_detail_operational_domain_impl_indices = R"doc(Dimension steps.)doc";
+
+static const char *__doc_fiction_detail_operational_domain_impl_infer_operational_status_in_enclosing_contour =
+R"doc(Given a starting point, this function marks all points that are
+enclosed by the operational domain contour as 'inferred operational'.
+This assumes that the operational domain does not have holes. To the
+best of the author's knowledge, at the time of writing this code,
+there exists no proof that operational domains are always continuous,
+i.e., hole-free. Marking points as 'inferred operational' can be
+useful to avoid recomputation in, e.g., contour tracing if an
+operational domain with multiple islands is investigated.
+
+The function starts at the given starting point and performs flood
+fill to mark all points that are reachable from the starting point
+until it encounters the non-operational edges.
+
+Note that no physical simulation is conducted by this function!
+
+Parameter ``starting_point``:
+    Step point at which to start the inference. If `starting_point` is
+    non-operational, this function might invoke undefined behavior.)doc";
+
+static const char *__doc_fiction_detail_operational_domain_impl_inferred_op_domain =
+R"doc(All the points inferred (assumed) to be operational but not actually
+simulated.)doc";
+
+static const char *__doc_fiction_detail_operational_domain_impl_is_step_point_inferred_operational =
+R"doc(Checks whether the given step point is part of the inferred
+operational domain. If it is, the point is marked as enclosed in the
+operational domain. No simulation is performed on `sp`. If `sp` is not
+contained in the inferred operational domain, it does not mean that
+`sp` is definitely non-operational. It could still appear in the
+regular operational domain with either status.
+
+This function is used by the contour tracing algorithm.
+
+Parameter ``sp``:
+    Step point to check for inferred operational status.
+
+Returns:
+    `true` iff `sp` is contained in `inferred_op_domain`.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_is_step_point_operational =
-R"doc(Logs and returns the operational status at the given point `sp = (x,
-y)`. If the point has already been sampled, it returns the cached
-value. Otherwise, a ground state simulation is performed for all input
-combinations of the stored layout using the given simulation
+R"doc(Logs and returns the operational status at the given point `sp = (d1,
+..., dn)`. If the point has already been sampled, it returns the
+cached value. Otherwise, a ground state simulation is performed for
+all input combinations of the stored layout using the given simulation
 parameters. It terminates as soon as a non-operational state is found.
-In the worst case, the function performs :math:`2^n` simulations,
-where :math:`n` is the number of inputs of the layout. This function
+In the worst case, the function performs :math:`2^i` simulations,
+where :math:`i` is the number of inputs of the layout. This function
 is used by all operational domain computation techniques.
 
 Any investigated point is added to the stored `op_domain`, regardless
@@ -6298,37 +6343,48 @@ can occur during the computation, each value is temporarily held in an
 atomic variable and written to the statistics object only after the
 computation has finished.)doc";
 
-static const char *__doc_fiction_detail_operational_domain_impl_moore_neighborhood =
-R"doc(Returns the Moore neighborhood of the step point at `sp = (x, y)`. The
-Moore neighborhood is the set of all points that are adjacent to `(x,
-y)` including the diagonals. Thereby, the Moore neighborhood contains
-up to 8 points as points outside of the parameter range are not
-gathered. The points are returned in clockwise order starting from the
-right neighbor.
+static const char *__doc_fiction_detail_operational_domain_impl_moore_neighborhood_2d =
+R"doc(Returns the 2D Moore neighborhood of the step point at `sp = (x, y)`.
+The 2D Moore neighborhood is the set of all points that are adjacent
+to `(x, y)` in the plane including the diagonals. Thereby, the 2D
+Moore neighborhood contains up to 8 points as points outside of the
+parameter range are not gathered. The points are returned in clockwise
+order starting from the right neighbor.
 
 Parameter ``sp``:
-    Step point to get the Moore neighborhood of.
+    Step point to get the 2D Moore neighborhood of.
 
 Returns:
-    The Moore neighborhood of the step point at `sp = (x, y)`.)doc";
+    The 2D Moore neighborhood of the step point at `sp = (x, y)`.)doc";
+
+static const char *__doc_fiction_detail_operational_domain_impl_moore_neighborhood_3d =
+R"doc(Returns the 3D Moore neighborhood of the step point at `sp = (x, y)`.
+The 3D Moore neighborhood is the set of all points that are adjacent
+to `(x, y)` in the 3D space including the diagonals. Thereby, the 3D
+Moore neighborhood contains up to 26 points as points outside of the
+parameter range are not gathered. The points are returned in no
+particular order.
+
+Parameter ``sp``:
+    Step point to get the 3D Moore neighborhood of.
+
+Returns:
+    The 3D Moore neighborhood of the step point at `sp = (x, y)`.)doc";
+
+static const char *__doc_fiction_detail_operational_domain_impl_num_dimensions = R"doc(The number of dimensions.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_num_evaluated_parameter_combinations = R"doc(Number of evaluated parameter combinations.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_num_simulator_invocations = R"doc(Number of simulator invocations.)doc";
 
-static const char *__doc_fiction_detail_operational_domain_impl_num_x_steps =
-R"doc(Calculates the number of steps in the x dimension based on the
+static const char *__doc_fiction_detail_operational_domain_impl_num_steps =
+R"doc(Calculates the number of steps in the given dimension based on the
 provided parameters.
 
 Returns:
-    The number of steps in the x dimension.)doc";
+    The number of steps in the given dimension.)doc";
 
-static const char *__doc_fiction_detail_operational_domain_impl_num_y_steps =
-R"doc(Calculates the number of steps in the y dimension based on the
-provided parameters.
-
-Returns:
-    The number of steps in the y dimension.)doc";
+static const char *__doc_fiction_detail_operational_domain_impl_num_threads = R"doc(Number of available hardware threads.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_op_domain = R"doc(The operational domain of the layout.)doc";
 
@@ -6364,7 +6420,7 @@ Parameter ``ps``:
 Parameter ``st``:
     Statistics of the process.)doc";
 
-static const char *__doc_fiction_detail_operational_domain_impl_output_bdl_pairs = R"doc(The output BDL pair of the layout.)doc";
+static const char *__doc_fiction_detail_operational_domain_impl_output_bdl_pairs = R"doc(The output BDL pairs of the layout.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_params = R"doc(The parameters for the operational domain computation.)doc";
 
@@ -6393,36 +6449,26 @@ Parameter ``val``:
 Parameter ``dim``:
     Sweep dimension to set the value `val` to.)doc";
 
-static const char *__doc_fiction_detail_operational_domain_impl_set_x_dimension_value =
-R"doc(Helper function that sets the value of the x dimension in the
-simulation parameters.
+static const char *__doc_fiction_detail_operational_domain_impl_simulate_operational_status_in_parallel =
+R"doc(Simulates the operational status of the given points in parallel. It
+divides the work among multiple threads to speed up the computation.
 
-Parameter ``sim_params``:
-    Simulation parameter object to set the x dimension value of.
+@note The distribution of the work among threads is a simple slice-
+based approach. If your step points are ordered, consider shuffling
+the vector first for better load balancing. Otherwise, some threads
+might finish early if they got assigned a slice with mainly non-
+operational samples, which are faster to compute due to the early
+termination condition.
 
-Parameter ``val``:
-    Value to set the x dimension to.)doc";
-
-static const char *__doc_fiction_detail_operational_domain_impl_set_y_dimension_value =
-R"doc(Helper function that sets the value of the y dimension in the
-simulation parameters.
-
-Parameter ``sim_params``:
-    Simulation parameter object to set the y dimension value of.
-
-Parameter ``val``:
-    Value to set the y dimension to.)doc";
+Parameter ``step_points``:
+    A vector of step points for which the operational status is to be
+    simulated.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_stats = R"doc(The statistics of the operational domain computation.)doc";
 
-static const char *__doc_fiction_detail_operational_domain_impl_step_point =
-R"doc(A step point represents a point in the x and y dimension from 0 to the
-maximum number of steps. A step point does not hold the actual
-parameter values, but the step values in the x and y dimension,
-respectively.
+static const char *__doc_fiction_detail_operational_domain_impl_step_point = R"doc(Forward-declare step_point.)doc";
 
-See `operational_domain::parameter_point` for a point that holds the
-actual parameter values.)doc";
+static const char *__doc_fiction_detail_operational_domain_impl_step_point_2 = R"doc(Forward-declare step_point.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_step_point_operator_eq =
 R"doc(Equality operator.
@@ -6456,21 +6502,10 @@ static const char *__doc_fiction_detail_operational_domain_impl_step_point_step_
 static const char *__doc_fiction_detail_operational_domain_impl_step_point_step_point_2 =
 R"doc(Standard constructor.
 
-Parameter ``x_step``:
-    X dimension step value.
+Parameter ``steps``:
+    All dimension step values.)doc";
 
-Parameter ``y_step``:
-    Y dimension step value.)doc";
-
-static const char *__doc_fiction_detail_operational_domain_impl_step_point_x = R"doc(X dimension step value.)doc";
-
-static const char *__doc_fiction_detail_operational_domain_impl_step_point_y = R"doc(Y dimension step value.)doc";
-
-static const char *__doc_fiction_detail_operational_domain_impl_sweep_dimension = R"doc(Potential sweep dimensions.)doc";
-
-static const char *__doc_fiction_detail_operational_domain_impl_sweep_dimension_X = R"doc(Sweep dimension X.)doc";
-
-static const char *__doc_fiction_detail_operational_domain_impl_sweep_dimension_Y = R"doc(Sweep dimension Y.)doc";
+static const char *__doc_fiction_detail_operational_domain_impl_step_point_step_values = R"doc(All dimension step values.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_to_parameter_point =
 R"doc(Converts a step point to a parameter point.
@@ -6492,13 +6527,7 @@ Returns:
 
 static const char *__doc_fiction_detail_operational_domain_impl_truth_table = R"doc(The logical specification of the layout.)doc";
 
-static const char *__doc_fiction_detail_operational_domain_impl_x_indices = R"doc(X dimension steps.)doc";
-
-static const char *__doc_fiction_detail_operational_domain_impl_x_values = R"doc(All x dimension values.)doc";
-
-static const char *__doc_fiction_detail_operational_domain_impl_y_indices = R"doc(Y dimension steps.)doc";
-
-static const char *__doc_fiction_detail_operational_domain_impl_y_values = R"doc(All y dimension values.)doc";
+static const char *__doc_fiction_detail_operational_domain_impl_values = R"doc(All dimension values.)doc";
 
 static const char *__doc_fiction_detail_optimize_output_positions =
 R"doc(Utility function that moves outputs from the last row to the previous
@@ -12910,6 +12939,10 @@ Parameter ``stats``:
 Returns:
     The (partial) operational domain of the layout.)doc";
 
+static const char *__doc_fiction_operational_domain_dimensions =
+R"doc(The dimensions to sweep over, ordered by priority. The first dimension
+is the x dimension, the second dimension is the y dimension, etc.)doc";
+
 static const char *__doc_fiction_operational_domain_flood_fill =
 R"doc(Computes the operational domain of the given SiDB cell-level layout.
 The operational domain is the set of all parameter combinations for
@@ -13045,21 +13078,10 @@ parameters will be kept constant across sweeps, but the sweep
 parameters are adjusted in each simulation step and thus overwritten
 in this object.)doc";
 
-static const char *__doc_fiction_operational_domain_params_x_dimension = R"doc(The sweep parameter for the x dimension.)doc";
-
-static const char *__doc_fiction_operational_domain_params_x_max = R"doc(The maximum value of the x dimension sweep.)doc";
-
-static const char *__doc_fiction_operational_domain_params_x_min = R"doc(The minimum value of the x dimension sweep.)doc";
-
-static const char *__doc_fiction_operational_domain_params_x_step = R"doc(The step size of the x dimension sweep.)doc";
-
-static const char *__doc_fiction_operational_domain_params_y_dimension = R"doc(The sweep parameter for the y dimension.)doc";
-
-static const char *__doc_fiction_operational_domain_params_y_max = R"doc(The maximum value of the y dimension sweep.)doc";
-
-static const char *__doc_fiction_operational_domain_params_y_min = R"doc(The minimum value of the y dimension sweep.)doc";
-
-static const char *__doc_fiction_operational_domain_params_y_step = R"doc(The step size of the y dimension sweep.)doc";
+static const char *__doc_fiction_operational_domain_params_sweep_dimensions =
+R"doc(The dimensions to sweep over together with their value ranges, ordered
+by priority. The first dimension is the x dimension, the second
+dimension is the y dimension, etc.)doc";
 
 static const char *__doc_fiction_operational_domain_random_sampling =
 R"doc(Computes the operational domain of the given SiDB cell-level layout.
@@ -13120,9 +13142,17 @@ static const char *__doc_fiction_operational_domain_stats_num_operational_parame
 
 static const char *__doc_fiction_operational_domain_stats_num_simulator_invocations = R"doc(Number of simulator invocations.)doc";
 
-static const char *__doc_fiction_operational_domain_x_dimension = R"doc(X dimension sweep parameter.)doc";
+static const char *__doc_fiction_operational_domain_value_range =
+R"doc(A range of values for a dimension sweep. The range is defined by a
+minimum value, a maximum value and a step size.)doc";
 
-static const char *__doc_fiction_operational_domain_y_dimension = R"doc(Y dimension sweep parameter.)doc";
+static const char *__doc_fiction_operational_domain_value_range_dimension = R"doc(The sweep parameter of the dimension.)doc";
+
+static const char *__doc_fiction_operational_domain_value_range_max = R"doc(The maximum value of the dimension sweep.)doc";
+
+static const char *__doc_fiction_operational_domain_value_range_min = R"doc(The minimum value of the dimension sweep.)doc";
+
+static const char *__doc_fiction_operational_domain_value_range_step = R"doc(The step size of the dimension sweep.)doc";
 
 static const char *__doc_fiction_operational_input_patterns =
 R"doc(This function determines the input combinations for which the SiDB-
@@ -13142,7 +13172,7 @@ Parameter ``spec``:
     Vector of truth table specifications.
 
 Parameter ``params``:
-    Parameters to simualte if a input combination is operational.
+    Parameters to simulate if a input combination is operational.
 
 Returns:
     The count of operational input combinations.)doc";
@@ -13327,7 +13357,15 @@ Returns:
     The parameter value at the specified index.)doc";
 
 static const char *__doc_fiction_parameter_point_operator_eq =
-R"doc(Equality operator. Checks if this parameter point is equal to another
+R"doc(Equality operator.
+
+Parameter ``other``:
+    Other parameter point to compare with.
+
+Returns:
+    `true` if the parameter points are equal.
+
+Equality operator. Checks if this parameter point is equal to another
 point within a specified tolerance. The tolerance is defined by
 `physical_constants::POP_STABILITY_ERR`.
 
@@ -13338,30 +13376,23 @@ Returns:
     `true` iff the parameter points are equal.)doc";
 
 static const char *__doc_fiction_parameter_point_operator_ne =
-R"doc(Inequality operator. Checks if this parameter point is unequal to
-another point within a specified tolerance. The tolerance is defined
-by `physical_constants::POP_STABILITY_ERR`.
+R"doc(Inequality operator.
 
 Parameter ``other``:
     Other parameter point to compare with.
 
 Returns:
-    `true` iff the parameter points are not equal.)doc";
+    `true` if the parameter points are not equal.)doc";
 
-static const char *__doc_fiction_parameter_point_parameter_point = R"doc(Standard default constructor.)doc";
+static const char *__doc_fiction_parameter_point_parameter_point = R"doc(Default constructor.)doc";
 
 static const char *__doc_fiction_parameter_point_parameter_point_2 =
 R"doc(Standard constructor.
 
-Parameter ``x_val``:
-    X dimension parameter value.
+Parameter ``values``:
+    Parameter values for each dimension.)doc";
 
-Parameter ``y_val``:
-    Y dimension parameter value.)doc";
-
-static const char *__doc_fiction_parameter_point_x = R"doc(X dimension parameter value.)doc";
-
-static const char *__doc_fiction_parameter_point_y = R"doc(Y dimension parameter value.)doc";
+static const char *__doc_fiction_parameter_point_parameters = R"doc(Parameter values for each dimension.)doc";
 
 static const char *__doc_fiction_path_collection =
 R"doc(An ordered collection of multiple paths in a layout.
@@ -16457,9 +16488,11 @@ output stream. The data are written as rows, each corresponding to one
 set of simulation parameters and their corresponding operational
 status.
 
-The output CSV format is as follows: X_DIMENSION, Y_DIMENSION,
-OPERATIONAL STATUS ... subsequent rows for each set of simulation
-parameters.
+The output CSV format is e.g. as follows: \verbatim embed:rst .. code-
+block:: RST
+
+epsilon_r, lambda_tf, operational status 0.0, 0.0, 0 0.1, 0.0, 1 ...
+subsequent rows for each set of simulation parameters \endverbatim
 
 The operational status is a binary value represented by specified tags
 in `params` indicating whether the simulation parameters are within
@@ -16486,9 +16519,11 @@ R"doc(Writes a CSV representation of an operational domain to the specified
 file. The data are written as rows, each corresponding to one set of
 simulation parameters and their corresponding operational status.
 
-The output CSV format is as follows: X_DIMENSION, Y_DIMENSION,
-OPERATIONAL STATUS ... subsequent rows for each set of simulation
-parameters.
+The output CSV format is e.g. as follows: \verbatim embed:rst .. code-
+block:: RST
+
+epsilon_r, lambda_tf, operational status 0.0, 0.0, 0 0.1, 0.0, 1 ...
+subsequent rows for each set of simulation parameters \endverbatim
 
 The operational status is a binary value represented by specified tags
 in `params` indicating whether the simulation parameters are within
@@ -16517,6 +16552,13 @@ R"doc(The tag used to represent the non-operational value of a parameter
 set.)doc";
 
 static const char *__doc_fiction_write_operational_domain_params_operational_tag = R"doc(The tag used to represent the operational value of a parameter set.)doc";
+
+static const char *__doc_fiction_write_operational_domain_params_write_non_operational_samples =
+R"doc(Whether to write non-operational samples to the CSV file. If set to
+`false`, only operational samples are written. This yields a
+significantly smaller CSV file. It is recommended to set this option
+for 3D plots because the non-operational samples would shadow the
+operational samples anyway.)doc";
 
 static const char *__doc_fiction_write_qca_layout =
 R"doc(Writes a cell-level QCA layout to a qca file that is used by

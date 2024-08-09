@@ -264,6 +264,8 @@ Operational Domain Computation
             :members:
         .. autoclass:: mnt.pyfiction.operational_domain
             :members:
+        .. autoclass:: mnt.pyfiction.operational_domain_value_range
+            :members:
         .. autoclass:: mnt.pyfiction.operational_domain_params
             :members:
         .. autoclass:: mnt.pyfiction.operational_domain_stats

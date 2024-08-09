@@ -23,7 +23,7 @@ class TestTimeToSolution(unittest.TestCase):
         self.assertGreater(stats.time_to_solution, 0.0)
         self.assertGreater(stats.mean_single_runtime, 0.0)
 
-    def test_one_DBs_111_lattice(self):
+    def test_one_sidb_111_lattice(self):
         layout = sidb_111_lattice((0, 0))
         layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
 

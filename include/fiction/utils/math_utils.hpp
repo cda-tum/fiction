@@ -117,6 +117,43 @@ determine_all_combinations_of_distributing_k_entities_on_n_positions(const std::
 
     return all_combinations;
 }
+/**
+ * This function computes the Cartesian product of a list of vectors. Each vector in the input list
+ * represents a dimension, and the function produces all possible combinations where each combination
+ * consists of one element from each dimension vector.
+ *
+ * @tparam VectorDataType The type of elements in the vectors.
+ * @param indices A vector of vectors, where each inner vector represents a dimension. The function
+ *                generates combinations using one element from each dimension vector.
+ * @return A vector of vectors, where each inner vector represents a combination of elements,
+ *         one from each dimension. The total number of combinations is the product of the sizes
+ *         of the input vectors.
+ */
+template <typename VectorDataType>
+[[nodiscard]] inline std::vector<std::vector<VectorDataType>>
+compute_cartesian_combinations(const std::vector<std::vector<VectorDataType>>& indices) noexcept
+{
+    std::vector<std::vector<VectorDataType>> all_combinations{{}};
+
+    for (const auto& dimension : indices)
+    {
+        std::vector<std::vector<VectorDataType>> expanded_products{};
+        expanded_products.reserve(all_combinations.size() * dimension.size());
+
+        for (const auto& product : all_combinations)
+        {
+            for (const auto& element : dimension)
+            {
+                std::vector<VectorDataType> new_product = product;
+                new_product.push_back(element);
+                expanded_products.push_back(new_product);
+            }
+        }
+        all_combinations = expanded_products;
+    }
+
+    return all_combinations;  // Return the final list of combinations
+}
 
 }  // namespace fiction
 

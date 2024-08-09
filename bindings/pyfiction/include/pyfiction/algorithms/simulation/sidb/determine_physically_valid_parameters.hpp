@@ -38,13 +38,9 @@ inline void determine_physically_valid_parameters(pybind11::module& m)
 
     py::class_<fiction::operational_domain<fiction::parameter_point, uint64_t>>(m, "physically_valid_parameters_domain",
                                                                                 DOC(fiction_operational_domain))
+        // todo add docu
         .def(py::init<>())
-        .def_readwrite("x_dimension_parameter",
-                       &fiction::operational_domain<fiction::parameter_point, uint64_t>::x_dimension,
-                       DOC(fiction_operational_domain_x_dimension))
-        .def_readwrite("y_dimension_parameter",
-                       &fiction::operational_domain<fiction::parameter_point, uint64_t>::y_dimension,
-                       DOC(fiction_operational_domain_y_dimension))
+        .def_readwrite("dimensions", &fiction::operational_domain<fiction::parameter_point, uint64_t>::dimensions)
 
         .def(
             "get_excited_state_number_for_parameter",

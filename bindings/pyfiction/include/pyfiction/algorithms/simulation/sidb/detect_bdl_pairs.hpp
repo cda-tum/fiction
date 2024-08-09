@@ -9,9 +9,14 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp>
+#include <fiction/technology/cell_technologies.hpp>
+#include <fiction/traits.hpp>
 
+#include <fmt/format.h>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+
+#include <string>
 
 namespace pyfiction
 {
@@ -49,7 +54,9 @@ inline void detect_bdl_pairs(pybind11::module& m)
         .def_readwrite("minimum_distance", &fiction::detect_bdl_pairs_params::minimum_distance,
                        DOC(fiction_detect_bdl_pairs_params_minimum_distance))
         .def_readwrite("maximum_distance", &fiction::detect_bdl_pairs_params::maximum_distance,
-                       DOC(fiction_detect_bdl_pairs_params_maximum_distance));
+                       DOC(fiction_detect_bdl_pairs_params_maximum_distance))
+
+        ;
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 

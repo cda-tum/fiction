@@ -460,6 +460,7 @@ template <typename LytDest, typename LytSrc>
                         lyt_new_cds.assign_sidb_defect(siqad::to_fiction_coord<coordinate<LytDest>>(cd.first),
                                                        cd.second);
                     });
+
                 return lyt_new_cds;
             }
             else if constexpr (is_sidb_defect_surface_v<LytSrc> && !is_charge_distribution_surface_v<LytSrc>)
@@ -471,6 +472,7 @@ template <typename LytDest, typename LytSrc>
                         lyt_surface.assign_sidb_defect(siqad::to_fiction_coord<coordinate<LytDest>>(cd.first),
                                                        lyt.get_sidb_defect(cd.first));
                     });
+
                 return lyt_surface;
             }
             else if constexpr (is_charge_distribution_surface_v<LytSrc> && !is_sidb_defect_surface_v<LytSrc>)
