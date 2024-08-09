@@ -44,9 +44,6 @@
 #include <utility>
 #include <vector>
 
-#if (PROGRESS_BARS)
-#include <mockturtle/utils/progress_bar.hpp>
-#endif
 
 namespace fiction
 {
@@ -591,7 +588,6 @@ class graph_oriented_layout_design_impl
             ps{p},
             pst{st},
             timeout{ps.timeout},
-            num_vertex_expansions{ps.num_vertex_expansions},
             start{std::chrono::high_resolution_clock::now()},
             num_search_space_graphs{ps.high_effort_mode ? 12u : 2u},
             ssg_vec(num_search_space_graphs)
@@ -623,12 +619,6 @@ class graph_oriented_layout_design_impl
             timeout = 10000u;
         }
         bool timeout_limit_reached = false;
-
-#if (PROGRESS_BARS)
-        // initialize a progress bar
-        mockturtle::progress_bar bar{ssg_vec[0].network.size(), "[i] arranging layout: |{0}|"};
-        uint64_t                 max_placed_nodes_tracker = 0u;
-#endif
 
         // main A* loop
         while (!timeout_limit_reached)
@@ -678,15 +668,6 @@ class graph_oriented_layout_design_impl
                     {
                         ssg.frontier_flag = false;
                     }
-
-#if (PROGRESS_BARS)
-                    if (max_placed_nodes > max_placed_nodes_tracker)
-                    {
-                        max_placed_nodes_tracker = max_placed_nodes;
-                        // update progress
-                        bar(max_placed_nodes_tracker);
-                    }
-#endif
                 }
             }
 
@@ -737,10 +718,6 @@ class graph_oriented_layout_design_impl
      * Timeout limit (in ms).
      */
     uint64_t timeout;
-    /**
-     * Number of vertices that should be explored from any vertex..
-     */
-    uint64_t num_vertex_expansions;
     /**
      * Start time.
      */
@@ -1497,7 +1474,7 @@ class graph_oriented_layout_design_impl
             }
 
             graph.cost_so_far[graph.current_vertex] = 0;
-            graph.num_expansions                    = num_vertex_expansions;
+            graph.num_expansions                    = ps.num_vertex_expansions;
         }
     }
     /**

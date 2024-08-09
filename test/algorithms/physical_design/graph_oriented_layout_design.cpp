@@ -71,7 +71,7 @@ TEST_CASE("Layout equivalence after graph-oriented layout design", "[graph-orien
     }
 }
 
-TEST_CASE("Gate library application", "[graph_oriented_layout_design]")
+TEST_CASE("Gate library application", "[graph-oriented-layout-design]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
     using cell_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
@@ -92,7 +92,7 @@ TEST_CASE("Gate library application", "[graph_oriented_layout_design]")
     check(blueprints::maj1_network<mockturtle::names_view<mockturtle::aig_network>>());
 }
 
-TEST_CASE("Different parameters", "[graph_oriented_layout_design]")
+TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
     const auto ntk    = blueprints::mux21_network<technology_network>();
@@ -146,7 +146,7 @@ TEST_CASE("Different parameters", "[graph_oriented_layout_design]")
     CHECK(!layout6.has_value());
 }
 
-TEST_CASE("Name conservation after graph-oriented layout design", "[graph_oriented_layout_design]")
+TEST_CASE("Name conservation after graph-oriented layout design", "[graph-oriented-layout-design]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
 
@@ -174,7 +174,7 @@ TEST_CASE("Name conservation after graph-oriented layout design", "[graph_orient
     CHECK(layout->get_output_name(0) == "f");
 }
 
-TEST_CASE("High fanin exception", "[graph_oriented_layout_design]")
+TEST_CASE("High fanin exception", "[graph-oriented-layout-design]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
     const auto ntk    = blueprints::maj1_network<technology_network>();

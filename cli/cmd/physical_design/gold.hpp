@@ -60,6 +60,13 @@ class gold_command : public command
             return;
         }
 
+        if (ps.num_vertex_expansions == 0)
+        {
+            env->out() << "[w] the number of vertex expansions has to be at least 1" << std::endl;
+            ps = {};
+            return;
+        }
+
         if (is_set("timeout"))
         {
             // convert timeout entered in seconds to milliseconds
@@ -78,7 +85,11 @@ class gold_command : public command
      */
     nlohmann::json log() const override
     {
-        return nlohmann::json{{"runtime in seconds", mockturtle::to_seconds(st.time_total)}};
+        return nlohmann::json{
+            {"runtime in seconds", mockturtle::to_seconds(st.time_total)},
+            {"number of gates", st.num_gates},
+            {"number of wires", st.num_wires},
+            {"layout", {{"x-size", st.x_size}, {"y-size", st.y_size}, {"area", st.x_size * st.y_size}}}};
     }
 
   private:

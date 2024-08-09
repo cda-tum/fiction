@@ -29,20 +29,20 @@ TEST_CASE("Benchmark Graph-Oriented Layout Design", "[benchmark]")
 
     BENCHMARK("graph_oriented_layout_design: low effort")
     {
-        params.high_effort = false;
+        params.high_effort_mode = false;
 
         return graph_oriented_layout_design<gate_layout>(ntk, params);
     };
 
     BENCHMARK("graph_oriented_layout_design: high effort")
     {
-        params.high_effort = true;
+        params.high_effort_mode = true;
 
         return graph_oriented_layout_design<gate_layout>(ntk, params);
     };
 }
 
-//  Mac M1, Sonoma 14.5, Apple clang version 15.0.0 (20.06.24)
+//  Mac M1, Sonoma 14.5, Apple clang version 15.0.0 (09.08.24)
 
 // -------------------------------------------------------------------------------
 // Benchmark Graph-Oriented Layout Design
@@ -56,13 +56,13 @@ TEST_CASE("Benchmark Graph-Oriented Layout Design", "[benchmark]")
 // -------------------------------------------------------------------------------
 // graph_oriented_layout_design: low
 //
-//                                         192.194 ms    185.732 ms     200.42 ms
-//                                         36.8634 ms    30.3139 ms    51.0752 ms
+//                                         157.227 ms    155.044 ms    159.725 ms
+//                                         11.8494 ms    10.1235 ms    14.8552 ms
 //
 // graph_oriented_layout_design: high
 //
-//                                          1.53332 s     1.49446 s     1.57515 s
-//                                         205.485 ms    179.755 ms    237.039 ms
+//                                          1.34778 s     1.32165 s     1.37673 s
+//                                          1.34778 s     1.32165 s     1.37673 s
 //
 //
 // ===============================================================================
