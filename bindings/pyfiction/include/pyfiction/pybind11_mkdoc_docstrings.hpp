@@ -4178,21 +4178,6 @@ Parameter ``ps``:
 Parameter ``st``:
     Statistics related to the displacement robustness computation.)doc";
 
-static const char *__doc_fiction_detail_displacement_robustness_domain_impl_generate_all_possible_combinations_of_displacements =
-R"doc(This is a helper function, which recursively generates combinations of
-SiDB displacements for all SiDBs based on the provided vector of
-displacement vectors.
-
-Parameter ``result``:
-    The vector to store the generated combinations. The first element
-    describes the SiDBs of the first displaced layout.
-
-Parameter ``current_combination``:
-    The current combination being constructed.
-
-Parameter ``cell_index``:
-    The current cell_index in the vector of displacement vectors.)doc";
-
 static const char *__doc_fiction_detail_displacement_robustness_domain_impl_generate_valid_displaced_sidb_layouts =
 R"doc(This function generates all SiDB layouts with displacements based on
 the original layout. It filters out layouts where two or more SiDBs
@@ -9854,6 +9839,44 @@ static const char *__doc_fiction_gate_level_layout_value = R"doc()doc";
 
 static const char *__doc_fiction_gate_level_layout_visited = R"doc()doc";
 
+static const char *__doc_fiction_generateAllCombinations =
+R"doc(This function initializes the necessary data structures and calls the
+recursive `generateCombinations` function to generate and return all
+possible combinations where one element is taken from each vector in
+the input `indices`.
+
+Template parameter ``VectorDataType``:
+    The type of elements stored in the input vectors.
+
+Parameter ``indices``:
+    A vector of vectors from which combinations are generated.
+
+Returns:
+    A vector containing all possible combinations generated from the
+    input `indices`.)doc";
+
+static const char *__doc_fiction_generateCombinations =
+R"doc(This function traverses through each vector in the `indices` and
+builds combinations by taking one element from each vector. The
+generated combinations are stored in the `result` vector.
+
+Template parameter ``VectorDataType``:
+    The type of elements stored in the input vectors.
+
+Parameter ``indices``:
+    A vector of vectors from which combinations are generated.
+
+Parameter ``currentCombination``:
+    A vector that holds the current combination being generated.
+
+Parameter ``depth``:
+    The current recursion depth, which corresponds to the index of the
+    vector in `indices`.
+
+Parameter ``result``:
+    A reference to a vector where the generated combinations are
+    stored.)doc";
+
 static const char *__doc_fiction_generate_edge_intersection_graph =
 R"doc(Creates an edge intersection graph of all paths that satisfy a given
 list of routing objectives. That is, this function generates an
@@ -12821,7 +12844,17 @@ Parameter ``other``:
     Other parameter point to compare with.
 
 Returns:
-    `true` if the parameter points are equal.)doc";
+    `true` if the parameter points are equal.
+
+Equality operator. Checks if this parameter point is equal to another
+point within a specified tolerance. The tolerance is defined by
+`physical_constants::POP_STABILITY_ERR`.
+
+Parameter ``other``:
+    Other parameter point to compare with.
+
+Returns:
+    `true` iff the parameter points are equal.)doc";
 
 static const char *__doc_fiction_parameter_point_operator_ne =
 R"doc(Inequality operator.
