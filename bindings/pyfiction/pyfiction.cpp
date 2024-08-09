@@ -19,6 +19,7 @@
 #include "pyfiction/algorithms/physical_design/color_routing.hpp"
 #include "pyfiction/algorithms/physical_design/design_sidb_gates.hpp"
 #include "pyfiction/algorithms/physical_design/exact.hpp"
+#include "pyfiction/algorithms/physical_design/graph_oriented_layout_design.hpp"
 #include "pyfiction/algorithms/physical_design/hexagonalization.hpp"
 #include "pyfiction/algorithms/physical_design/orthogonal.hpp"
 #include "pyfiction/algorithms/physical_design/post_layout_optimization.hpp"
@@ -170,6 +171,7 @@ PYBIND11_MODULE(pyfiction, m)
      */
     pyfiction::exact(m);
     pyfiction::orthogonal(m);
+    pyfiction::graph_oriented_layout_design(m);
     pyfiction::apply_gate_library(m);
     pyfiction::color_routing(m);
     pyfiction::hexagonalization(m);
