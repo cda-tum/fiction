@@ -31,11 +31,13 @@
 #include <cstdint>
 #include <cstdlib>
 #include <iterator>
+#include <mutex>
 #include <numeric>
 #include <optional>
 #include <queue>
 #include <random>
 #include <set>
+#include <sstream>
 #include <stdexcept>
 #include <thread>
 #include <tuple>
@@ -810,7 +812,7 @@ class operational_domain_impl
      * Number of available hardware threads.
      */
     // TODO fix issue with multithreading
-    const std::size_t num_threads{1};
+    const std::size_t num_threads{std::thread::hardware_concurrency()};
     /**
      * A step point represents a point in the x and y dimension from 0 to the maximum number of steps. A step point does
      * not hold the actual parameter values, but the step values in the x and y dimension, respectively.
@@ -985,42 +987,34 @@ class operational_domain_impl
      */
     operational_status is_step_point_operational(const step_point& sp) noexcept
     {
-        // todo analyse thread issue
-        std::mutex mutex_to_protect_member_variables{};  // Lock the mutex
+        static std::mutex mutex_to_protect_member_variables;
 
         {
             const std::lock_guard lock{mutex_to_protect_member_variables};
-            // if the point has already been sampled, return the stored operational status
             if (const auto op_value = has_already_been_sampled(sp); op_value.has_value())
             {
                 return *op_value;
             }
         }
 
-        // fetch the x and y dimension values
         const auto param_point = to_parameter_point(sp);
 
-        const auto operational = [this, &param_point, &mutex_to_protect_member_variables]()
+        const auto operational = [this, &param_point]()
         {
-            const std::lock_guard lock{mutex_to_protect_member_variables};
-
+            const std::lock_guard lock(mutex_to_protect_member_variables);
             op_domain.operational_values[param_point] = operational_status::OPERATIONAL;
-
             return operational_status::OPERATIONAL;
         };
 
-        const auto non_operational = [this, &param_point, &mutex_to_protect_member_variables]()
+        const auto non_operational = [this, &param_point]()
         {
-            const std::lock_guard lock{mutex_to_protect_member_variables};
-
+            const std::lock_guard lock(mutex_to_protect_member_variables);
             op_domain.operational_values[param_point] = operational_status::NON_OPERATIONAL;
-
             return operational_status::NON_OPERATIONAL;
         };
 
         {
-            const std::lock_guard lock{mutex_to_protect_member_variables};
-            // increment the number of evaluated parameter combinations
+            const std::lock_guard lock(mutex_to_protect_member_variables);
             ++num_evaluated_parameter_combinations;
         }
 
@@ -1028,14 +1022,14 @@ class operational_domain_impl
 
         for (auto d = 0u; d < num_dimensions; ++d)
         {
-            const std::lock_guard lock{mutex_to_protect_member_variables};
-            set_dimension_value(sim_params, values[d][sp.step_values[d]], d);
+            set_dimension_value(sim_params, values[d][sp.step_values[d]], d);  // lock not needed here
         }
 
         const auto& [status, sim_calls] =
             is_operational(layout, truth_table, is_operational_params{sim_params, params.sim_engine});
+
         {
-            const std::lock_guard lock{mutex_to_protect_member_variables};
+            const std::lock_guard lock(mutex_to_protect_member_variables);
             num_simulator_invocations += sim_calls;
         }
 
@@ -1044,7 +1038,6 @@ class operational_domain_impl
             return non_operational();
         }
 
-        // if we made it here, the layout is operational
         return operational();
     }
     /**
