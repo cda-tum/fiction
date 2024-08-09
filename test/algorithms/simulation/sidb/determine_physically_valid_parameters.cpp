@@ -19,7 +19,7 @@
 using namespace fiction;
 
 TEST_CASE("Determine physical parameters for CDS of SiQAD Y-shaped AND gate, 10 input combination",
-          "[operational-domain]")
+          "[determine-physically-valid-parameters]")
 {
     using layout = sidb_cell_clk_lyt_siqad;
 
@@ -50,8 +50,11 @@ TEST_CASE("Determine physical parameters for CDS of SiQAD Y-shaped AND gate, 10 
     op_domain_params.y_max                 = 6.0;
     op_domain_params.y_step                = 0.1;
 
-    SECTION("Using the typical groundstate as given CDS")
+    SECTION("Using the typical ground state as given CDS")
     {
+        op_domain_params.x_step = 0.3;
+        op_domain_params.y_step = 0.3;
+
         cds.assign_charge_state({-2, -1, 1}, sidb_charge_state::NEGATIVE);
         cds.assign_charge_state({0, 0, 1}, sidb_charge_state::NEUTRAL);
         cds.assign_charge_state({12, 0, 1}, sidb_charge_state::NEGATIVE);
@@ -63,15 +66,15 @@ TEST_CASE("Determine physical parameters for CDS of SiQAD Y-shaped AND gate, 10 
         cds.update_after_charge_change();
 
         const auto valid_parameters = determine_physically_valid_parameters(cds, op_domain_params);
-        CHECK(valid_parameters.operational_values.size() == 356);
+        CHECK(valid_parameters.operational_values.size() == 43);
 
         op_domain_params.sim_engine      = sidb_simulation_engine::EXGS;
         const auto valid_parameters_exgs = determine_physically_valid_parameters(cds, op_domain_params);
-        CHECK(valid_parameters_exgs.operational_values.size() == 356);
+        CHECK(valid_parameters_exgs.operational_values.size() == 43);
 
         op_domain_params.sim_engine          = sidb_simulation_engine::QUICKSIM;
         const auto valid_parameters_quicksim = determine_physically_valid_parameters(cds, op_domain_params);
-        CHECK(valid_parameters_quicksim.operational_values.size() == 356);
+        CHECK(valid_parameters_quicksim.operational_values.size() == 43);
     }
 
     SECTION("Using the 2nd excited charge distribution for default physical parameters as given CDS")
@@ -101,7 +104,7 @@ TEST_CASE("Determine physical parameters for CDS of SiQAD Y-shaped AND gate, 10 
 
 TEST_CASE(
     "Determine physical parameters for CDS (default physical parameters) of Bestagon AND gate, 10 input combination",
-    "[operational-domain]")
+    "[determine-physically-valid-parameters], [quality]")
 {
     auto lyt = blueprints::bestagon_and_gate<sidb_cell_clk_lyt_siqad>();
 

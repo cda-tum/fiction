@@ -1378,7 +1378,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     [[nodiscard]] std::size_t num_neutral_sidbs() const noexcept
     {
-        uint64_t count_neutral_sidbs = 0;
+        std::size_t count_neutral_sidbs = 0;
         this->foreach_cell([this, &count_neutral_sidbs](const auto& c)
                            { count_neutral_sidbs += (get_charge_state(c) == sidb_charge_state::NEUTRAL) ? 1 : 0; });
         return count_neutral_sidbs;
@@ -1390,7 +1390,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     [[nodiscard]] std::size_t num_positive_sidbs() const noexcept
     {
-        uint64_t count_positive_sidbs = 0;
+        std::size_t count_positive_sidbs = 0;
         this->foreach_cell([this, &count_positive_sidbs](const auto& c)
                            { count_positive_sidbs += (get_charge_state(c) == sidb_charge_state::POSITIVE) ? 1 : 0; });
         return count_positive_sidbs;
