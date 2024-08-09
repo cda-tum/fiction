@@ -358,6 +358,21 @@ mockturtle::names_view<Ntk> topolinano_network()
     return ntk;
 }
 
+template <typename Ntk>
+mockturtle::names_view<Ntk> multi_output_network()
+{
+    mockturtle::names_view<Ntk> ntk{};
+
+    const auto x1 = ntk.create_pi("x1");
+    const auto x2 = ntk.create_pi("x2");
+
+    const auto a1 = ntk.create_and(x1, x2);
+
+    ntk.create_po(a1, "f1");
+    ntk.create_po(a1, "f2");
+
+    return ntk;
+}
 }  // namespace blueprints
 
 #endif  // FICTION_NETWORK_BLUEPRINTS_HPP

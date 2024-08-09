@@ -681,8 +681,117 @@ CellLyt single_layer_inml_crosswire() noexcept
     return layout;
 }
 /**
+ * This layout represents a BDL wire comprising of 3 BDL pairs and an output perturber SiDB.
+ *
+ */
+template <typename Lyt>
+Lyt bdl_wire() noexcept
+{
+    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+
+    Lyt lyt{{24, 0}, "BDL wire"};
+
+    lyt.assign_cell_type({0, 0, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({3, 0, 0}, Lyt::cell_type::INPUT);
+
+    lyt.assign_cell_type({6, 0, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 0, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({12, 0, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 0, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({18, 0, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({20, 0, 0}, Lyt::cell_type::OUTPUT);
+
+    // output perturber
+    lyt.assign_cell_type({24, 0, 0}, Lyt::cell_type::NORMAL);
+
+    return lyt;
+};
+/**
+ * This layout represents the AND Gate, as proposed in the paper
+ * titled \"SiQAD: A Design and Simulation Tool for Atomic Silicon Quantum Dot Circuits\" by Samuel Sze Hang Ng, Jacob
+ * Retallick, Hsi Nien Chiu, Robert Lupoiu, Lucian Livadaru, Taleana Huff, Mohammad Rashidi, Wyatt Vine, Thomas Dienel,
+ * Robert A. Wolkow, and Konrad Walus in IEEE TRANSACTIONS ON NANOTECHNOLOGY, Volume 19, 2020.
+ */
+template <typename Lyt>
+Lyt siqad_and_gate() noexcept
+{
+    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+
+    Lyt lyt{};
+
+    lyt.assign_cell_type({0, 0, 1}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({2, 1, 1}, Lyt::cell_type::INPUT);
+
+    lyt.assign_cell_type({20, 0, 1}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({18, 1, 1}, Lyt::cell_type::INPUT);
+
+    lyt.assign_cell_type({4, 2, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 3, 1}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({14, 3, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({16, 2, 1}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({10, 6, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({10, 7, 0}, Lyt::cell_type::OUTPUT);
+
+    lyt.assign_cell_type({10, 9, 1}, Lyt::cell_type::NORMAL);
+
+    return lyt;
+};
+/**
+ * This layout represents the AND Gate, as proposed in the paper
+ * titled \"Hexagons are the Bestagons: Design Automation for Silicon Dangling Bond Logic\" by
+ * Marcel Walter, Samuel Sze Hang Ng, Konrad Walus, and Robert Wille in DAC 2022.
+ *
+ * (https://github.com/cda-tum/mnt-bestagon-library/blob/main/bestagon-gates/2i1o_and/21_hex_inputsdbp_and_v19.sqd)
+ */
+template <typename Lyt>
+Lyt bestagon_and_gate() noexcept
+{
+    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not an SiDB layout");
+
+    Lyt lyt{};
+
+    lyt.assign_cell_type({36, 1, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({2, 1, 0}, Lyt::cell_type::INPUT);
+
+    lyt.assign_cell_type({38, 0, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({0, 0, 0}, Lyt::cell_type::INPUT);
+
+    lyt.assign_cell_type({23, 9, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({18, 11, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({18, 9, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({19, 8, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({20, 14, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({19, 13, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 16, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 15, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({32, 2, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({30, 3, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 4, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 5, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 4, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 5, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 2, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 3, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({32, 18, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({30, 17, 0}, Lyt::cell_type::OUTPUT);
+
+    lyt.assign_cell_type({36, 19, 0}, Lyt::cell_type::NORMAL);
+
+    return lyt;
+};
+/**
  * This layout represents the AND Gate implemented on the H-Si(111)-1x1 surface, as proposed in the paper
- * titled \"Unlocking Flexible Silicon Dangling Bond Logic Designs on Alternative Silicon Orientations\" authored by
+ * titled \"Unlocking Flexible Silicon Dangling Bond Logic Designs on Alternative Silicon Orientations\" by
  * Samuel Sze Hang Ng, Jan Drewniok, Marcel Walter, Jacob Retallick, Robert Wille, and Konrad Walus.
  *
  * (https://github.com/samuelngsh/si-111-paper-supplementary/blob/main/bestagon-111-gates/gates/AND_mu_032_0.sqd)
@@ -693,6 +802,7 @@ Lyt and_gate_111() noexcept
     static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(fiction::is_sidb_lattice_111_v<Lyt>, "Lyt should have 111 as lattice orientation");
+    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not an SiDB layout");
 
     Lyt lyt{};
 

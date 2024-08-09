@@ -120,7 +120,6 @@ Layout Utils
         .. autofunction:: mnt.pyfiction.num_adjacent_coordinates
         .. autofunction:: mnt.pyfiction.normalize_layout_coordinates
         .. autofunction:: mnt.pyfiction.convert_to_siqad_coordinates
-        .. autofunction:: mnt.pyfiction.convert_to_fiction_coordinates
         .. autofunction:: mnt.pyfiction.random_coordinate
 
 
