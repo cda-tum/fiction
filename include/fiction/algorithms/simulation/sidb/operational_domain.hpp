@@ -681,7 +681,7 @@ class operational_domain_impl
      */
     const Lyt& layout;
     /**
-     * The specification of the layout.
+     * The logical specification of the layout.
      */
     const std::vector<TT> truth_table;
     /**

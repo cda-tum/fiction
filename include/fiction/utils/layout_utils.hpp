@@ -386,7 +386,7 @@ auto convert_to_siqad_coordinates(const LytSrc& lyt) noexcept
  * @return A new equivalent layout based on fiction coordinates.
  */
 template <typename LytDest, typename LytSrc>
-LytDest convert_to_fiction_coordinates(const LytSrc& lyt) noexcept
+[[nodiscard]] LytDest convert_to_fiction_coordinates(const LytSrc& lyt) noexcept
 {
     static_assert(is_cartesian_layout_v<LytSrc>, "LytSrc is not a Cartesian layout");
     static_assert(is_cell_level_layout_v<LytSrc>, "LytSrc is not a cell-level layout");
@@ -608,6 +608,11 @@ template <typename CoordinateType>
 all_coordinates_in_spanned_area(const CoordinateType& cell_first_corner,
                                 const CoordinateType& cell_second_corner) noexcept
 {
+    if (coord_nw > coord_se)
+    {
+        std::swap(coord_nw, coord_se);
+    }
+
     // for SiQAD coordinates
     if constexpr (std::is_same_v<CoordinateType, siqad::coord_t>)
     {
