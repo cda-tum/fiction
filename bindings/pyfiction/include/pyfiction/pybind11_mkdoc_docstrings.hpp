@@ -157,10 +157,11 @@ static const char *__doc_fiction_all_coordinates_in_spanned_area =
 R"doc(Generates a vector of all coordinates within an area spanned by two
 coordinates.
 
-This function calculates and returns a vector of all coordinates that
-span the area between the northwest (cell_first_corner) and southeast
-(cell_second_corner) cells, inclusive. The cells are generated in a
-top-down, left-to-right fashion within the specified area.
+This function calculates and returns a list of all coordinates within
+a rectangular area defined by two corner coordinates, inclusive of the
+boundaries. The coordinates are generated in a top-to-bottom, left-to-
+right order, covering the entire area between the two specified
+corners.
 
 Template parameter ``CoordinateType``:
     Coordinate Type.
