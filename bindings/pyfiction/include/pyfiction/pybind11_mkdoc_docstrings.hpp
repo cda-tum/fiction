@@ -6273,6 +6273,17 @@ static const char *__doc_fiction_detail_network_balancing_impl_ps = R"doc()doc";
 
 static const char *__doc_fiction_detail_network_balancing_impl_run = R"doc()doc";
 
+static const char *__doc_fiction_detail_new_gate_location =
+R"doc(When checking for possible paths on a layout between two tiles SRC and
+DEST, one of them could also be the new tile for the next gate to be
+placed and it therefore has to be checked if said tile is still empty)doc";
+
+static const char *__doc_fiction_detail_new_gate_location_DEST = R"doc(Check if the destination tile is empty.)doc";
+
+static const char *__doc_fiction_detail_new_gate_location_NONE = R"doc(Do not check any tiles.)doc";
+
+static const char *__doc_fiction_detail_new_gate_location_SRC = R"doc(Check if the source tile is empty.)doc";
+
 static const char *__doc_fiction_detail_on_the_fly_circuit_design_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_on_the_fly_circuit_design_impl_design_circuit_on_defective_surface = R"doc()doc";
@@ -6286,17 +6297,6 @@ static const char *__doc_fiction_detail_on_the_fly_circuit_design_impl_on_the_fl
 static const char *__doc_fiction_detail_on_the_fly_circuit_design_impl_params = R"doc(Parameters for the on-the-fly circuit design.)doc";
 
 static const char *__doc_fiction_detail_on_the_fly_circuit_design_impl_stats = R"doc(Statistics for the on-the-fly circuit design.)doc";
-
-static const char *__doc_fiction_detail_new_gate_location =
-R"doc(When checking for possible paths on a layout between two tiles SRC and
-DEST, one of them could also be the new tile for the next gate to be
-placed and it therefore has to be checked if said tile is still empty)doc";
-
-static const char *__doc_fiction_detail_new_gate_location_DEST = R"doc(Check if the destination tile is empty.)doc";
-
-static const char *__doc_fiction_detail_new_gate_location_NONE = R"doc(Do not check any tiles.)doc";
-
-static const char *__doc_fiction_detail_new_gate_location_SRC = R"doc(Check if the source tile is empty.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl = R"doc()doc";
 
