@@ -6,6 +6,9 @@
 
 #include <fiction/utils/math_utils.hpp>
 
+#include <cstddef>
+#include <vector>
+
 using namespace fiction;
 
 TEST_CASE("round_to_n_decimal_places should round an input number to n decimal places", "[round_to_n_decimal_places]")

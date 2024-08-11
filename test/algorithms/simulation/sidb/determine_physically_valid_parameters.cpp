@@ -102,23 +102,24 @@ TEST_CASE(
     "Determine physical parameters for CDS (default physical parameters) of Bestagon AND gate, 10 input combination",
     "[determine-physically-valid-parameters], [quality]")
 {
-    auto lyt = blueprints::bestagon_and_gate<sidb_cell_clk_lyt_siqad>();
+    auto bestagon_and = blueprints::bestagon_and_gate<sidb_cell_clk_lyt_siqad>();
 
-    lyt.assign_cell_type({36, 1, 0}, sidb_cell_clk_lyt_siqad::cell_type::EMPTY);
-    lyt.assign_cell_type({0, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::EMPTY);
+    bestagon_and.assign_cell_type({36, 1, 0}, sidb_cell_clk_lyt_siqad::cell_type::EMPTY);
+    bestagon_and.assign_cell_type({0, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::EMPTY);
 
     sidb_simulation_parameters sim_params{};
     sim_params.base = 2;
 
-    charge_distribution_surface cds{lyt, sim_params};
+    charge_distribution_surface cds{bestagon_and, sim_params};
 
     operational_domain_params op_domain_params{};
     op_domain_params.simulation_parameters = sim_params;
-    op_domain_params.sweep_dimensions      = {operational_domain_value_range{sweep_parameter::EPSILON_R, 5.0, 5.9, 0.1},
-                                              operational_domain_value_range{sweep_parameter::LAMBDA_TF, 5.0, 5.9, 0.1}};
 
-    SECTION("Using the ground state of default physical parameters as given CDS")
+    SECTION("Using the ground state of default physical parameters as given CDS, two dimensional sweep")
     {
+        op_domain_params.sweep_dimensions = {operational_domain_value_range{sweep_parameter::EPSILON_R, 5.0, 5.9, 0.1},
+                                             operational_domain_value_range{sweep_parameter::LAMBDA_TF, 5.0, 5.9, 0.1}};
+
         cds.assign_charge_state({38, 0, 0}, sidb_charge_state::NEGATIVE);
         cds.assign_charge_state({2, 1, 0}, sidb_charge_state::NEGATIVE);
 
@@ -160,5 +161,59 @@ TEST_CASE(
                   ->second == 1);
         CHECK(find_parameter_point_with_tolerance(valid_parameters.operational_values, parameter_point{{5.8, 5.3}})
                   ->second == 0);
+    }
+
+    SECTION("Using the ground state of default physical parameters as given CDS, three dimensional sweep")
+    {
+        op_domain_params.sweep_dimensions = {
+            operational_domain_value_range{sweep_parameter::EPSILON_R, 5.5, 5.7, 0.1},
+            operational_domain_value_range{sweep_parameter::LAMBDA_TF, 5.0, 5.2, 0.1},
+            operational_domain_value_range{sweep_parameter::MU_MINUS, -0.33, -0.31, 0.01}};
+
+        cds.assign_charge_state({38, 0, 0}, sidb_charge_state::NEGATIVE);
+        cds.assign_charge_state({2, 1, 0}, sidb_charge_state::NEGATIVE);
+
+        cds.assign_charge_state({6, 2, 0}, sidb_charge_state::NEUTRAL);
+        cds.assign_charge_state({32, 2, 0}, sidb_charge_state::NEGATIVE);
+        cds.assign_charge_state({8, 3, 0}, sidb_charge_state::NEGATIVE);
+        cds.assign_charge_state({30, 3, 0}, sidb_charge_state::NEUTRAL);
+
+        cds.assign_charge_state({12, 4, 0}, sidb_charge_state::NEUTRAL);
+        cds.assign_charge_state({26, 4, 0}, sidb_charge_state::NEGATIVE);
+        cds.assign_charge_state({14, 5, 0}, sidb_charge_state::NEGATIVE);
+        cds.assign_charge_state({24, 5, 0}, sidb_charge_state::NEUTRAL);
+
+        cds.assign_charge_state({19, 8, 0}, sidb_charge_state::NEUTRAL);
+        cds.assign_charge_state({18, 9, 0}, sidb_charge_state::NEGATIVE);
+        cds.assign_charge_state({23, 9, 0}, sidb_charge_state::NEGATIVE);
+        cds.assign_charge_state({18, 11, 1}, sidb_charge_state::NEUTRAL);
+
+        cds.assign_charge_state({19, 13, 0}, sidb_charge_state::NEGATIVE);
+        cds.assign_charge_state({20, 14, 0}, sidb_charge_state::NEUTRAL);
+
+        cds.assign_charge_state({24, 15, 0}, sidb_charge_state::NEGATIVE);
+        cds.assign_charge_state({26, 16, 0}, sidb_charge_state::NEUTRAL);
+
+        cds.assign_charge_state({30, 17, 0}, sidb_charge_state::NEGATIVE);
+        cds.assign_charge_state({32, 18, 0}, sidb_charge_state::NEUTRAL);
+
+        cds.assign_charge_state({36, 19, 0}, sidb_charge_state::NEGATIVE);
+
+        cds.update_after_charge_change();
+
+        const auto valid_parameters = determine_physically_valid_parameters(cds, op_domain_params);
+        REQUIRE(valid_parameters.operational_values.size() == 27);
+        CHECK(
+            find_parameter_point_with_tolerance(valid_parameters.operational_values, parameter_point{{5.6, 5.0, -0.32}})
+                ->second == 0);
+        CHECK(
+            find_parameter_point_with_tolerance(valid_parameters.operational_values, parameter_point{{5.6, 5.0, -0.33}})
+                ->second == 0);
+        CHECK(
+            find_parameter_point_with_tolerance(valid_parameters.operational_values, parameter_point{{5.6, 5.0, -0.31}})
+                ->second == 1);
+        CHECK(
+            find_parameter_point_with_tolerance(valid_parameters.operational_values, parameter_point{{5.7, 5.2, -0.33}})
+                ->second == 0);
     }
 }
