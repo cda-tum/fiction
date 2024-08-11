@@ -3166,7 +3166,7 @@ std::optional<Lyt> exact(const Ntk& ntk, const exact_physical_design_params& ps 
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(is_tile_based_layout_v<Lyt>, "Lyt is not a tile-based layout");
     static_assert(mockturtle::is_network_type_v<Ntk>,
-                  "Ntk is not a network type");  // Ntk is being converted to a topology_network anyway, therefore,
+                  "Ntk is not a network type");  // Ntk is being converted to a technology_network anyway, therefore,
                                                  // this is the only relevant check here
 
     const auto clocking_scheme = get_clocking_scheme<Lyt>(ps.scheme);
@@ -3238,7 +3238,7 @@ std::optional<Lyt> exact_with_blacklist(const Ntk& ntk, const surface_black_list
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(is_tile_based_layout_v<Lyt>, "Lyt is not a tile-based layout");
     static_assert(mockturtle::is_network_type_v<Ntk>,
-                  "Ntk is not a network type");  // Ntk is being converted to a topology_network anyway, therefore,
+                  "Ntk is not a network type");  // Ntk is being converted to a technology_network anyway, therefore,
                                                  // this is the only relevant check here
 
     const auto clocking_scheme = get_clocking_scheme<Lyt>(ps.scheme);
