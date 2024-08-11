@@ -112,3 +112,149 @@ TEST_CASE("Binomial Coefficient Tests")
         REQUIRE(result == 126410606437752);  // C(50, 25) = 126,410,606,437,752
     }
 }
+
+TEST_CASE("Test the computation of the cartesian combinations", "[compute_cartesian_combinations]")
+{
+    SECTION("Single dimension")
+    {
+        const std::vector<std::vector<int>> input{{1, 2, 3}};
+        const std::vector<std::vector<int>> expected{{1}, {2}, {3}};
+
+        auto result = compute_cartesian_combinations(input);
+
+        REQUIRE(result == expected);
+    }
+
+    SECTION("Two dimensions")
+    {
+        const std::vector<std::vector<int>> input{{1, 2}, {3, 4}};
+        const std::vector<std::vector<int>> expected{{1, 3}, {1, 4}, {2, 3}, {2, 4}};
+
+        auto result = compute_cartesian_combinations(input);
+
+        REQUIRE(result == expected);
+    }
+
+    SECTION("Three dimensions")
+    {
+        const std::vector<std::vector<int>> input{{1, 2}, {3, 4}, {5, 6}};
+        const std::vector<std::vector<int>> expected{{1, 3, 5}, {1, 3, 6}, {1, 4, 5}, {1, 4, 6},
+                                                     {2, 3, 5}, {2, 3, 6}, {2, 4, 5}, {2, 4, 6}};
+
+        auto result = compute_cartesian_combinations(input);
+
+        REQUIRE(result == expected);
+    }
+
+    SECTION("Empty input")
+    {
+        const std::vector<std::vector<int>> input{};
+        const std::vector<std::vector<int>> expected{{}};
+
+        auto result = compute_cartesian_combinations(input);
+
+        REQUIRE(result == expected);
+    }
+
+    SECTION("Empty dimension")
+    {
+        const std::vector<std::vector<int>> input{{1, 2}, {}};
+        const std::vector<std::vector<int>> expected{};
+
+        auto result = compute_cartesian_combinations(input);
+
+        REQUIRE(result == expected);
+    }
+
+    SECTION("Mixed types")
+    {
+        const std::vector<std::vector<std::string>> input{{"a", "b"}, {"x", "y"}};
+        const std::vector<std::vector<std::string>> expected{{"a", "x"}, {"a", "y"}, {"b", "x"}, {"b", "y"}};
+
+        auto result = compute_cartesian_combinations(input);
+
+        REQUIRE(result == expected);
+    }
+}
+
+TEST_CASE("Test the determination of all combinations of distributing k entities on n positions",
+          "[determine_all_combinations_of_distributing_k_entities_on_n_positions]")
+{
+    SECTION("k = 0, n = 0")
+    {
+        const std::size_t                           k = 0;
+        const std::size_t                           n = 0;
+        const std::vector<std::vector<std::size_t>> expected{{}};
+
+        auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(k, n);
+
+        REQUIRE(result == expected);
+    }
+
+    SECTION("k = 1, n = 1")
+    {
+        const std::size_t                           k = 1;
+        const std::size_t                           n = 1;
+        const std::vector<std::vector<std::size_t>> expected{{0}};
+
+        auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(k, n);
+
+        REQUIRE(result == expected);
+    }
+
+    SECTION("k = 2, n = 3")
+    {
+        const std::size_t                           k = 2;
+        const std::size_t                           n = 3;
+        const std::vector<std::vector<std::size_t>> expected{{0, 1}, {0, 2}, {1, 2}};
+
+        auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(k, n);
+
+        REQUIRE(result == expected);
+    }
+
+    SECTION("k = 3, n = 5")
+    {
+        const std::size_t                           k = 3;
+        const std::size_t                           n = 5;
+        const std::vector<std::vector<std::size_t>> expected{{0, 1, 2}, {0, 1, 3}, {0, 1, 4}, {0, 2, 3}, {0, 2, 4},
+                                                             {0, 3, 4}, {1, 2, 3}, {1, 2, 4}, {1, 3, 4}, {2, 3, 4}};
+
+        auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(k, n);
+
+        REQUIRE(result == expected);
+    }
+
+    SECTION("k = 0, n = 5")
+    {
+        const std::size_t                           k = 0;
+        const std::size_t                           n = 5;
+        const std::vector<std::vector<std::size_t>> expected{{}};
+
+        auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(k, n);
+
+        REQUIRE(result == expected);
+    }
+
+    SECTION("k = 5, n = 5")
+    {
+        const std::size_t                           k = 5;
+        const std::size_t                           n = 5;
+        const std::vector<std::vector<std::size_t>> expected{{0, 1, 2, 3, 4}};
+
+        auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(k, n);
+
+        REQUIRE(result == expected);
+    }
+
+    SECTION("k > n (invalid case)")
+    {
+        const std::size_t                           k = 6;
+        const std::size_t                           n = 5;
+        const std::vector<std::vector<std::size_t>> expected{};
+
+        auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(k, n);
+
+        REQUIRE(result == expected);
+    }
+}
