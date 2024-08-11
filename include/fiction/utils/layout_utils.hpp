@@ -594,9 +594,9 @@ CoordinateType random_coordinate(CoordinateType coordinate1, CoordinateType coor
 /**
  * Generates a vector of all coordinates within an area spanned by two coordinates.
  *
- * This function calculates and returns a vector of all coordinates that span the area
- * between the northwest (cell_first_corner) and southeast (cell_second_corner) cells, inclusive.
- * The cells are generated in a top-down, left-to-right fashion within the specified area.
+ * This function calculates and returns a list of all coordinates within a rectangular area defined by two corner
+ * coordinates, inclusive of the boundaries. The coordinates are generated in a top-to-bottom, left-to-right order, covering
+ * the entire area between the two specified corners.
  *
  * @tparam CoordinateType Coordinate Type.
  * @param cell_first_corner The cell defining the first corner of the area.
@@ -608,11 +608,6 @@ template <typename CoordinateType>
 all_coordinates_in_spanned_area(const CoordinateType& cell_first_corner,
                                 const CoordinateType& cell_second_corner) noexcept
 {
-    if (coord_nw > coord_se)
-    {
-        std::swap(coord_nw, coord_se);
-    }
-
     // for SiQAD coordinates
     if constexpr (std::is_same_v<CoordinateType, siqad::coord_t>)
     {
