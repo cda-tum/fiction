@@ -595,8 +595,8 @@ CoordinateType random_coordinate(CoordinateType coordinate1, CoordinateType coor
  * Generates a vector of all coordinates within an area spanned by two coordinates.
  *
  * This function calculates and returns a list of all coordinates within a rectangular area defined by two corner
- * coordinates, inclusive of the boundaries. The coordinates are generated in a top-to-bottom, left-to-right order, covering
- * the entire area between the two specified corners.
+ * coordinates, inclusive of the boundaries. The coordinates are generated in a top-to-bottom, left-to-right order,
+ * covering the entire area between the two specified corners.
  *
  * @tparam CoordinateType Coordinate Type.
  * @param cell_first_corner The cell defining the first corner of the area.
