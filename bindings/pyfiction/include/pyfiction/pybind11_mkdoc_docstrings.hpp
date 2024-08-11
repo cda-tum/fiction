@@ -5625,70 +5625,6 @@ static const char *__doc_fiction_detail_graph_coloring_impl_pst = R"doc(Statisti
 
 static const char *__doc_fiction_detail_graph_coloring_impl_run = R"doc()doc";
 
-static const char *__doc_fiction_detail_ground_state_space_impl = R"doc()doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_check_charge_space = R"doc()doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_clustering = R"doc()doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_compute_external_pot_bounds_for_saved_compositions = R"doc()doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_compute_meets_for_internal_pot_bounds = R"doc()doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_construct_merged_charge_state_space = R"doc()doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_construct_merged_potential_projections = R"doc()doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_derive_children_received_bounds_without_siblings = R"doc()doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_fail_onto_negative_charge = R"doc()doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_fail_onto_positive_charge = R"doc()doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_fill_merged_charge_state_space = R"doc()doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_find_valid_witness_partitioning = R"doc()doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_get_received_potential_bounds = R"doc()doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_ground_state_space_impl = R"doc()doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_lb_fail_onto_neutral_charge = R"doc()doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_maximum_top_level_multisets = R"doc()doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_merge_pot_projection_bounds = R"doc()doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_move_up_hierarchy = R"doc()doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_mu_bounds_with_error = R"doc()doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_params = R"doc()doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_perform_potential_bound_analysis = R"doc()doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_potential_bound_analysis_mode = R"doc()doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_potential_bound_analysis_mode_ANALYZE_COMPOSITION = R"doc()doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_potential_bound_analysis_mode_ANALYZE_MULTISET = R"doc()doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_projector_state_count = R"doc()doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_run = R"doc()doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_subtract_sibling_pot_from_received_ext_pot_bound = R"doc()doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_terminate = R"doc()doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_top_cluster = R"doc()doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_ub_fail_onto_neutral_charge = R"doc()doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_update_charge_spaces = R"doc()doc";
-
-static const char *__doc_fiction_detail_ground_state_space_impl_verify_composition = R"doc()doc";
-
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl =
 R"doc(Implementation of the graph-oriented layout design algorithm. This
 class handles the initialization and execution of the algorithm.
@@ -5966,6 +5902,70 @@ Parameter ``place_info``:
 
 Parameter ``ssg``:
     The search space graph.)doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_check_charge_space = R"doc()doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_clustering = R"doc()doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_compute_external_pot_bounds_for_saved_compositions = R"doc()doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_compute_meets_for_internal_pot_bounds = R"doc()doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_construct_merged_charge_state_space = R"doc()doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_construct_merged_potential_projections = R"doc()doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_derive_children_received_bounds_without_siblings = R"doc()doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_fail_onto_negative_charge = R"doc()doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_fail_onto_positive_charge = R"doc()doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_fill_merged_charge_state_space = R"doc()doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_find_valid_witness_partitioning = R"doc()doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_get_received_potential_bounds = R"doc()doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_ground_state_space_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_lb_fail_onto_neutral_charge = R"doc()doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_maximum_top_level_multisets = R"doc()doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_merge_pot_projection_bounds = R"doc()doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_move_up_hierarchy = R"doc()doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_mu_bounds_with_error = R"doc()doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_params = R"doc()doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_perform_potential_bound_analysis = R"doc()doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_potential_bound_analysis_mode = R"doc()doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_potential_bound_analysis_mode_ANALYZE_COMPOSITION = R"doc()doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_potential_bound_analysis_mode_ANALYZE_MULTISET = R"doc()doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_projector_state_count = R"doc()doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_run = R"doc()doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_subtract_sibling_pot_from_received_ext_pot_bound = R"doc()doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_terminate = R"doc()doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_top_cluster = R"doc()doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_ub_fail_onto_neutral_charge = R"doc()doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_update_charge_spaces = R"doc()doc";
+
+static const char *__doc_fiction_detail_ground_state_space_impl_verify_composition = R"doc()doc";
 
 static const char *__doc_fiction_detail_improve_gate_location =
 R"doc(Utility function that moves gates to new coordinates and checks if
