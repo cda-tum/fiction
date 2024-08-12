@@ -147,7 +147,7 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
 
     // Planar layout
     params.timeout     = 100000;
-    params.planar = true;
+    params.planar      = true;
     const auto layout7 = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
 
     REQUIRE(layout7.has_value());

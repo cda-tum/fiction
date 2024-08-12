@@ -291,7 +291,7 @@ struct search_space_graph
     /**
      * Create planar layouts.
      */
-     bool planar = false;
+    bool planar = false;
 };
 /**
  * @brief Custom view class derived from mockturtle::topo_view.
@@ -802,7 +802,8 @@ class graph_oriented_layout_design_impl
      * @return A vector of tiles representing the possible positions for PIs.
      */
     [[nodiscard]] coord_vec_type<ObstrLyt> get_possible_positions_pis(ObstrLyt& layout, const pi_locations& pi_locs,
-                                                                      const uint64_t num_expansions, const bool planar = false) noexcept
+                                                                      const uint64_t num_expansions,
+                                                                      const bool     planar = false) noexcept
     {
         uint64_t count_expansions = 0ul;
 
@@ -863,7 +864,8 @@ class graph_oriented_layout_design_impl
      */
     [[nodiscard]] coord_vec_type<ObstrLyt> get_possible_positions_pos(const ObstrLyt&                 layout,
                                                                       const placement_info<ObstrLyt>& place_info,
-                                                                      const fanin_container<tec_nt>&  fc, const bool planar = false) noexcept
+                                                                      const fanin_container<tec_nt>&  fc,
+                                                                      const bool planar = false) noexcept
     {
         coord_vec_type<ObstrLyt> possible_positions{};
 
@@ -911,7 +913,8 @@ class graph_oriented_layout_design_impl
      */
     [[nodiscard]] coord_vec_type<ObstrLyt>
     get_possible_positions_single_fanin(ObstrLyt& layout, const placement_info<ObstrLyt>& place_info,
-                                        const uint64_t num_expansions, const fanin_container<tec_nt>& fc, const bool planar = false) noexcept
+                                        const uint64_t num_expansions, const fanin_container<tec_nt>& fc,
+                                        const bool planar = false) noexcept
     {
         coord_vec_type<ObstrLyt> possible_positions{};
         possible_positions.reserve(num_expansions);
@@ -974,7 +977,8 @@ class graph_oriented_layout_design_impl
      */
     [[nodiscard]] coord_vec_type<ObstrLyt>
     get_possible_positions_double_fanin(ObstrLyt& layout, const placement_info<ObstrLyt>& place_info,
-                                        const uint64_t num_expansions, const fanin_container<tec_nt>& fc, const bool planar = false) noexcept
+                                        const uint64_t num_expansions, const fanin_container<tec_nt>& fc,
+                                        const bool planar = false) noexcept
     {
         coord_vec_type<ObstrLyt> possible_positions{};
         possible_positions.reserve(num_expansions);
@@ -1147,7 +1151,8 @@ class graph_oriented_layout_design_impl
      * @param planar Only consider crossing-free paths.
      */
     void route_single_input_node(const tile<ObstrLyt>& position, ObstrLyt& layout,
-                                 node_dict_type<ObstrLyt, tec_nt>& node2pos, const fanin_container<tec_nt>& fc, const bool planar = false) noexcept
+                                 node_dict_type<ObstrLyt, tec_nt>& node2pos, const fanin_container<tec_nt>& fc,
+                                 const bool planar = false) noexcept
     {
         const auto& pre   = fc.fanin_nodes[0];
         const auto  pre_t = static_cast<tile<ObstrLyt>>(node2pos[pre]);
@@ -1174,7 +1179,8 @@ class graph_oriented_layout_design_impl
      * @param planar Only consider crossing-free paths.
      */
     void route_double_input_node(const tile<ObstrLyt>& position, ObstrLyt& layout,
-                                 node_dict_type<ObstrLyt, tec_nt>& node2pos, const fanin_container<tec_nt>& fc, const bool planar = false) noexcept
+                                 node_dict_type<ObstrLyt, tec_nt>& node2pos, const fanin_container<tec_nt>& fc,
+                                 const bool planar = false) noexcept
     {
         const auto& pre1 = fc.fanin_nodes[0];
         const auto& pre2 = fc.fanin_nodes[1];
@@ -1306,7 +1312,7 @@ class graph_oriented_layout_design_impl
     ObstrLyt initialize_layout(uint64_t min_layout_width, const bool planar = false)
     {
         const auto layout_depth = planar ? 0 : 1;
-        Lyt lyt{{min_layout_width - 1, 0, layout_depth}, twoddwave_clocking<Lyt>()};
+        Lyt        lyt{{min_layout_width - 1, 0, layout_depth}, twoddwave_clocking<Lyt>()};
         return obstruction_layout<Lyt>(lyt);
     }
     /**
@@ -1429,7 +1435,7 @@ class graph_oriented_layout_design_impl
                 improve_current_solution = true;
 
                 fiction::post_layout_optimization_params plo_params{};
-                plo_params.optimize_pos_only = true;
+                plo_params.optimize_pos_only   = true;
                 plo_params.planar_optimization = ssg.planar;
 
                 fiction::post_layout_optimization(layout, plo_params);
@@ -1494,7 +1500,7 @@ class graph_oriented_layout_design_impl
 
             graph.cost_so_far[graph.current_vertex] = 0;
             graph.num_expansions                    = ps.num_vertex_expansions;
-            graph.planar = ps.planar;
+            graph.planar                            = ps.planar;
         }
     }
     /**
