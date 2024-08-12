@@ -1,6 +1,6 @@
 .. _on_the_fly_design:
 
-SiDB Circuit Design Algorithm in the presence of Atomic Defects
+SiDB Circuit Design Algorithm in the Presence of Atomic Defects
 ---------------------------------------------------------------
 
 **Header:** ``fiction/algorithms/physical_design/on_the_fly_circuit_design_on_defective_surface.hpp``
@@ -17,7 +17,7 @@ This algorithm is designed to create SiDB circuits on a clocked surface, accommo
 
    - **Valid Layout Found**:
 
-     If a valid gate-level layout is found, the corresponding gates are designed.
+     If a valid gate-level layout is found, the corresponding gates are implemented with SiDBs.
 
    - **Invalid Layout**:
 
