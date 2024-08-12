@@ -49,6 +49,9 @@ class bdl_input_iterator
             num_inputs{static_cast<uint8_t>(input_pairs.size())},
             input_wire_directions{determine_input_bdl_wire_directions()}
     {
+        assert(input_bdl_wires.size() == input_wire_directions.size() &&
+               "Input BDL wires, and directions must have the same size.");
+
         static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
         static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
         set_all_inputs();

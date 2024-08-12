@@ -277,9 +277,22 @@ detect_bdl_wires(const Lyt& lyt, const detect_bdl_wires_params& params = {},
                  const bdl_wire_selection wire_selection = bdl_wire_selection::ALL) noexcept
 {
     std::set<bdl_pair<cell<Lyt>>> bdl_pairs{};
-    const auto                    all_bdls = detect_bdl_pairs(lyt);
 
-    for (const auto& bdl : all_bdls)
+    const auto                    all_input_bdls = detect_bdl_pairs(lyt, Lyt::cell_type::INPUT, params.params_bdl_pairs);
+    const auto                    all_output_bdls = detect_bdl_pairs(lyt, Lyt::cell_type::OUTPUT, params.params_bdl_pairs);
+    const auto                    all_normal_bdls = detect_bdl_pairs(lyt, Lyt::cell_type::NORMAL, params.params_bdl_pairs);
+
+    for (const auto& bdl : all_input_bdls)
+    {
+        bdl_pairs.insert(bdl);
+    }
+
+    for (const auto& bdl : all_output_bdls)
+    {
+        bdl_pairs.insert(bdl);
+    }
+
+    for (const auto& bdl : all_normal_bdls)
     {
         bdl_pairs.insert(bdl);
     }
@@ -353,6 +366,11 @@ detect_bdl_wires(const Lyt& lyt, const detect_bdl_wires_params& params = {},
                     input_wire_length.insert(wire.size());
                 }
             }
+        }
+
+        if (input_wires.empty())
+        {
+            return {};
         }
 
         assert(input_wire_length.size() < 2 && "input wires have different length");

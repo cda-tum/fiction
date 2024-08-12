@@ -20,6 +20,47 @@ TEST_CASE("Empty layout BDL detection", "[detect-bdl-pairs]")
     CHECK(result.empty());
 }
 
+TEST_CASE("BDL wire", "[detect-bdl-pairs]")
+{
+    sidb_cell_clk_lyt_siqad lyt{{24, 0}, "Atomic wire"};
+
+    lyt.assign_cell_type({-1, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::INPUT);
+    lyt.assign_cell_type({3, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::INPUT);
+
+    lyt.assign_cell_type({6, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+
+    lyt.assign_cell_type({12, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+
+    lyt.assign_cell_type({18, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::OUTPUT);
+    lyt.assign_cell_type({20, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::OUTPUT);
+
+    // output perturber
+    lyt.assign_cell_type({24, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+
+    detect_bdl_pairs_params params{};
+
+    params.minimum_distance = 0.2;
+    params.maximum_distance = 2.2;
+
+    const sidb_100_cell_clk_lyt_siqad lat{lyt};
+
+    SECTION("default lower threshold")
+    {
+        const auto input_bdl_pairs  = detect_bdl_pairs(lat, sidb_technology::cell_type::INPUT, params);
+        const auto output_bdl_pairs = detect_bdl_pairs(lat, sidb_technology::cell_type::OUTPUT, params);
+        const auto normal_bdl_pairs = detect_bdl_pairs(lat, sidb_technology::cell_type::NORMAL, params);
+
+        const auto all_bdl_pairs = detect_bdl_pairs(lat, std::nullopt, params);
+
+        REQUIRE(input_bdl_pairs.size() == 1);
+        REQUIRE(output_bdl_pairs.size() == 1);
+        REQUIRE(normal_bdl_pairs.size() == 2);
+        REQUIRE(all_bdl_pairs.size() == 4);
+    }
+}
+
 TEST_CASE("Atomic wire BDL detection", "[detect-bdl-pairs]")
 {
     sidb_cell_clk_lyt_siqad lyt{{7, 0}, "Atomic wire"};

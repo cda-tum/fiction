@@ -183,6 +183,7 @@ class displacement_robustness_domain_impl
     displacement_robustness_domain<Lyt> determine_robustness_domain() noexcept
     {
         mockturtle::stopwatch stop{stats.time_total};
+
         all_possible_sidb_displacements = calculate_all_possible_displacements_for_each_sidb();
 
         auto layouts = generate_valid_displaced_sidb_layouts();

@@ -332,15 +332,28 @@ detect_bdl_pairs(const Lyt& lyt, const std::optional<typename technology<Lyt>::c
 
     else
     {
-        dots_of_given_type.reserve(lyt.num_cells());
-        lyt.foreach_cell(
-            [&lyt, &dots_of_given_type](const auto& c)
-            {
-                if (lyt.get_cell_type(c) != sidb_technology::LOGIC)
-                {
-                    dots_of_given_type.push_back(c);
-                }
-            });
+        const auto input_bdl   = detect_bdl_pairs(lyt, technology<Lyt>::cell_type::INPUT, params);
+        const auto output_bdls = detect_bdl_pairs(lyt, technology<Lyt>::cell_type::OUTPUT, params);
+        const auto normal_bdls = detect_bdl_pairs(lyt, technology<Lyt>::cell_type::NORMAL, params);
+
+        std::vector<bdl_pair<cell<Lyt>>> all_bdls{};
+        all_bdls.reserve(input_bdl.size() + output_bdls.size() + normal_bdls.size());
+
+        for (const auto& bdl : input_bdl)
+        {
+            all_bdls.push_back(bdl);
+        }
+
+        for (const auto& bdl : output_bdls)
+        {
+            all_bdls.push_back(bdl);
+        }
+
+        for (const auto& bdl : normal_bdls)
+        {
+            all_bdls.push_back(bdl);
+        }
+        return all_bdls;
     }
 
     // pair up dots and return the detected BDL pairs
