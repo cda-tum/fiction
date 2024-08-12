@@ -48,7 +48,7 @@ struct post_layout_optimization_params
      */
     bool optimize_pos_only = false;
     /**
-     * Allow the creation of crossings during optimization. If set to true, gates will only be relocated if a
+     * Disable the creation of crossings during optimization. If set to true, gates will only be relocated if a
      * crossing-free wiring is found. Defaults to false.
      */
     bool planar_optimization = false;
