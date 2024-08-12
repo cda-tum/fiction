@@ -144,6 +144,15 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
     const auto layout6 = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
 
     CHECK(!layout6.has_value());
+
+    // Planar layout
+    params.timeout     = 100000;
+    params.planar = true;
+    const auto layout7 = graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
+
+    REQUIRE(layout7.has_value());
+    check_eq(ntk, *layout7);
+    CHECK(layout7->z() == 0);
 }
 
 TEST_CASE("Name conservation after graph-oriented layout design", "[graph-oriented-layout-design]")
