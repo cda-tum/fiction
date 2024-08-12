@@ -157,6 +157,39 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
 
         check_eq(blueprints::mux21_network<technology_network>(), layout);
     }
+
+    SECTION("Planar Optimization with Planar Layout")
+    {
+        using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
+
+        const auto layout = blueprints::planar_unoptimized_layout<gate_layout>();
+
+        post_layout_optimization_stats  stats{};
+        post_layout_optimization_params params{};
+        params.planar_optimization = true;
+        post_layout_optimization<gate_layout>(layout, params, &stats);
+
+        check_eq(blueprints::planar_unoptimized_layout<gate_layout>(), layout);
+        CHECK(layout.z() == 0);
+    }
+
+    SECTION("Planar Optimization with Crossing Layout")
+    {
+        using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
+
+        const auto layout = blueprints::planar_optimization_layout<gate_layout>();
+
+        post_layout_optimization_stats  stats{};
+        post_layout_optimization_params params{};
+
+        params.planar_optimization = true;
+        post_layout_optimization<gate_layout>(layout, params, &stats);
+        CHECK(!layout.is_inv(layout.get_node({1, 0})));
+
+        params.planar_optimization = false;
+        post_layout_optimization<gate_layout>(layout, params, &stats);
+        CHECK(layout.is_inv(layout.get_node({1, 0})));
+    }
 }
 
 TEST_CASE("Optimization steps", "[post_layout_optimization]")

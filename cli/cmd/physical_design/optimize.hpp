@@ -44,6 +44,7 @@ class optimize_command : public command
         add_option("--max_gate_relocations,-m", max_gate_relocations,
                    "Specify the maximum number of relocations to try for each gate (Defaults "
                    "to the number of tiles in the layout).");
+        add_flag("--planar_optimization,-p", ps.planar_optimization, "Enable planar optimization");
         add_flag("--verbose,-v", "Be verbose");
     }
 
