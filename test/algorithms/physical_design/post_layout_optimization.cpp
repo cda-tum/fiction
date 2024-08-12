@@ -106,7 +106,7 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
         check_layout_equiv_all<gate_layout>();
     }
 
-    SECTION("Corner Cases")
+    SECTION("Corner cases")
     {
         using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
 
@@ -127,7 +127,7 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
         }
     }
 
-    SECTION("Maximum Gate Relocations")
+    SECTION("Maximum gate relocations")
     {
         using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
 
@@ -158,7 +158,7 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
         check_eq(blueprints::mux21_network<technology_network>(), layout);
     }
 
-    SECTION("Planar Optimization with Planar Layout")
+    SECTION("Planar optimization with planar layout")
     {
         using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
 
@@ -173,7 +173,7 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
         CHECK(layout.z() == 0);
     }
 
-    SECTION("Planar Optimization with Crossing Layout")
+    SECTION("Planar optimization with crossing layout")
     {
         using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
 

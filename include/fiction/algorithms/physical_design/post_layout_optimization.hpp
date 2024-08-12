@@ -381,12 +381,12 @@ template <typename Lyt>
  * @param lyt Reference to the layout.
  * @param start The starting coordinate of the path.
  * @param end The ending coordinate of the path.
- * @param planar_optimization Only allow relocation if a crossing-free wiring can be found.
+ * @param planar_optimization Only allow relocation if a crossing-free wiring can be found. Defaults to false.
  * @return The computed path as a sequence of coordinates in the layout.
  */
 template <typename Lyt>
 layout_coordinate_path<Lyt> get_path_and_obstruct(Lyt& lyt, const tile<Lyt>& start, const tile<Lyt>& end,
-                                                  const bool planar_optimization)
+                                                  const bool planar_optimization = false)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
@@ -420,7 +420,7 @@ layout_coordinate_path<Lyt> get_path_and_obstruct(Lyt& lyt, const tile<Lyt>& sta
  * @tparam Lyt Cartesian obstruction gate-level layout type.
  * @param lyt 2DDWave-clocked cartesian obstruction gate-level layout.
  * @param old_pos Old position of the gate to be moved.
- * @param planar_optimization Only allow relocation if a crossing-free wiring can be found.
+ * @param planar_optimization Only allow relocation if a crossing-free wiring can be found. Defaults to false.
  * @return `true` if the gate was moved successfully, `false` otherwise.
  */
 template <typename Lyt>
