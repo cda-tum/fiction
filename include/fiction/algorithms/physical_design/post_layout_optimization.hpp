@@ -385,7 +385,8 @@ template <typename Lyt>
  * @return The computed path as a sequence of coordinates in the layout.
  */
 template <typename Lyt>
-layout_coordinate_path<Lyt> get_path_and_obstruct(Lyt& lyt, const tile<Lyt>& start, const tile<Lyt>& end, const bool planar_optimization)
+layout_coordinate_path<Lyt> get_path_and_obstruct(Lyt& lyt, const tile<Lyt>& start, const tile<Lyt>& end,
+                                                  const bool planar_optimization)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
@@ -554,22 +555,26 @@ bool improve_gate_location(Lyt& lyt, const tile<Lyt>& old_pos, const tile<Lyt>& 
                     // get paths for fanins and fanouts
                     if (!fanins.empty())
                     {
-                        new_path_from_fanin_1_to_gate = get_path_and_obstruct(lyt, fanins[0], new_pos, planar_optimization);
+                        new_path_from_fanin_1_to_gate =
+                            get_path_and_obstruct(lyt, fanins[0], new_pos, planar_optimization);
                     }
 
                     if (fanins.size() == 2)
                     {
-                        new_path_from_fanin_2_to_gate = get_path_and_obstruct(lyt, fanins[1], new_pos, planar_optimization);
+                        new_path_from_fanin_2_to_gate =
+                            get_path_and_obstruct(lyt, fanins[1], new_pos, planar_optimization);
                     }
 
                     if (!fanouts.empty())
                     {
-                        new_path_from_gate_to_fanout_1 = get_path_and_obstruct(lyt, new_pos, fanouts[0], planar_optimization);
+                        new_path_from_gate_to_fanout_1 =
+                            get_path_and_obstruct(lyt, new_pos, fanouts[0], planar_optimization);
                     }
 
                     if (fanouts.size() == 2)
                     {
-                        new_path_from_gate_to_fanout_2 = get_path_and_obstruct(lyt, new_pos, fanouts[1], planar_optimization);
+                        new_path_from_gate_to_fanout_2 =
+                            get_path_and_obstruct(lyt, new_pos, fanouts[1], planar_optimization);
                     }
 
                     // if possible routing was found, it will be applied
@@ -963,7 +968,8 @@ class post_layout_optimization_impl
                 {
                     if (!ps.optimize_pos_only || (ps.optimize_pos_only && layout.is_po_tile(gate_tile)))
                     {
-                        if (detail::improve_gate_location(layout, gate_tile, max_non_po, max_gate_relocations, ps.planar_optimization))
+                        if (detail::improve_gate_location(layout, gate_tile, max_non_po, max_gate_relocations,
+                                                          ps.planar_optimization))
                         {
                             moved_at_least_one_gate = true;
                         }
