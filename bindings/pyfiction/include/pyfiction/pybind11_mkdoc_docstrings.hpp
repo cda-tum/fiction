@@ -5444,6 +5444,7 @@ Parameter ``end``:
 
 Parameter ``planar_optimization``:
     Only allow relocation if a crossing-free wiring can be found.
+    Defaults to false.
 
 Returns:
     The computed path as a sequence of coordinates in the layout.)doc";
@@ -5783,6 +5784,7 @@ Parameter ``old_pos``:
 
 Parameter ``planar_optimization``:
     Only allow relocation if a crossing-free wiring can be found.
+    Defaults to false.
 
 Returns:
     `true` if the gate was moved successfully, `false` otherwise.)doc";
