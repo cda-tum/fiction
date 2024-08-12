@@ -56,6 +56,50 @@ void check_op_domain_params_and_operational_status(
     }
 }
 
+TEST_CASE("Test parameter point", "[operational-domain]")
+{
+    // Test default constructor
+    parameter_point p_default;
+    REQUIRE(p_default.parameters.empty());
+
+    // Test parameterized constructor
+    std::vector<double> values = {1.0, 2.0, 3.0};
+    parameter_point     p_param(values);
+    REQUIRE(p_param.parameters == values);
+
+    // Test equality operator
+    parameter_point p1({1.0, 2.0, 3.0});
+    parameter_point p2({1.0, 2.0, 3.0});
+    parameter_point p3({1.0, 2.0, 3.0000001});
+
+    SECTION("Equality operator - exact equality")
+    {
+        REQUIRE(p1 == p2);
+    }
+
+    SECTION("Equality operator - within tolerance")
+    {
+        REQUIRE(p1 == p3);
+    }
+
+    // Test inequality operator
+    parameter_point p4({1.0, 2.0, 3.1});
+    REQUIRE(p1 != p4);
+
+    // Test structured bindings (get<I>() method)
+    SECTION("Structured bindings - valid index")
+    {
+        REQUIRE(p1.get<0>() == 1.0);
+        REQUIRE(p1.get<1>() == 2.0);
+        REQUIRE(p1.get<2>() == 3.0);
+    }
+
+    SECTION("Structured bindings - invalid index")
+    {
+        REQUIRE_THROWS_AS(p1.get<3>(), std::out_of_range);
+    }
+}
+
 TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 {
     using layout = sidb_cell_clk_lyt_siqad;
