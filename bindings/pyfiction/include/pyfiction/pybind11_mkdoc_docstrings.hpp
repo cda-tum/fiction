@@ -13634,7 +13634,7 @@ number of tiles in the given layout if not specified.)doc";
 static const char *__doc_fiction_post_layout_optimization_params_optimize_pos_only = R"doc(Only optimize PO positions.)doc";
 
 static const char *__doc_fiction_post_layout_optimization_params_planar_optimization =
-R"doc(Allow the creation of crossings during optimization. If set to true,
+R"doc(Disable the creation of crossings during optimization. If set to true,
 gates will only be relocated if a crossing-free wiring is found.
 Defaults to false.)doc";
 
