@@ -278,9 +278,9 @@ detect_bdl_wires(const Lyt& lyt, const detect_bdl_wires_params& params = {},
 {
     std::set<bdl_pair<cell<Lyt>>> bdl_pairs{};
 
-    const auto                    all_input_bdls = detect_bdl_pairs(lyt, Lyt::cell_type::INPUT, params.params_bdl_pairs);
-    const auto                    all_output_bdls = detect_bdl_pairs(lyt, Lyt::cell_type::OUTPUT, params.params_bdl_pairs);
-    const auto                    all_normal_bdls = detect_bdl_pairs(lyt, Lyt::cell_type::NORMAL, params.params_bdl_pairs);
+    const auto all_input_bdls  = detect_bdl_pairs(lyt, Lyt::cell_type::INPUT, params.params_bdl_pairs);
+    const auto all_output_bdls = detect_bdl_pairs(lyt, Lyt::cell_type::OUTPUT, params.params_bdl_pairs);
+    const auto all_normal_bdls = detect_bdl_pairs(lyt, Lyt::cell_type::NORMAL, params.params_bdl_pairs);
 
     for (const auto& bdl : all_input_bdls)
     {
