@@ -44,6 +44,10 @@ class optimize_command : public command
         add_option("--max_gate_relocations,-m", max_gate_relocations,
                    "Specify the maximum number of relocations to try for each gate (defaults "
                    "to the number of tiles in the layout).");
+        add_flag("--planar_optimization,-p", ps.planar_optimization,
+                 "During optimization, only relocate gates if the new wiring contains no crossings. For planar "
+                 "layouts, the resulting layout will also be planar. If the layout already contains crossings, the "
+                 "optimized layout will have the same number of crossings or less.");
         add_flag("--verbose,-v", "Be verbose");
     }
 

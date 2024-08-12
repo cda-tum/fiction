@@ -5442,6 +5442,10 @@ Parameter ``start``:
 Parameter ``end``:
     The ending coordinate of the path.
 
+Parameter ``planar_optimization``:
+    Only allow relocation if a crossing-free wiring can be found.
+    Defaults to false.
+
 Returns:
     The computed path as a sequence of coordinates in the layout.)doc";
 
@@ -5777,6 +5781,10 @@ Parameter ``lyt``:
 
 Parameter ``old_pos``:
     Old position of the gate to be moved.
+
+Parameter ``planar_optimization``:
+    Only allow relocation if a crossing-free wiring can be found.
+    Defaults to false.
 
 Returns:
     `true` if the gate was moved successfully, `false` otherwise.)doc";
@@ -13626,6 +13634,11 @@ R"doc(Maximum number of relocations to try for each gate. Defaults to the
 number of tiles in the given layout if not specified.)doc";
 
 static const char *__doc_fiction_post_layout_optimization_params_optimize_pos_only = R"doc(Only optimize PO positions.)doc";
+
+static const char *__doc_fiction_post_layout_optimization_params_planar_optimization =
+R"doc(Disable the creation of crossings during optimization. If set to true,
+gates will only be relocated if a crossing-free wiring is found.
+Defaults to false.)doc";
 
 static const char *__doc_fiction_post_layout_optimization_stats =
 R"doc(This struct stores statistics about the post-layout optimization
