@@ -825,6 +825,26 @@ Parameter ``sim_params``:
     Physical parameters used to determine whether positively charged
     SiDBs can occur.)doc";
 
+static const char *__doc_fiction_cartesian_combinations =
+R"doc(This function computes the Cartesian product of a list of vectors.
+Each vector in the input list represents a dimension, and the function
+produces all possible combinations where each combination consists of
+one element from each dimension vector.
+
+Template parameter ``VectorDataType``:
+    The type of elements in the vectors.
+
+Parameter ``sets``:
+    The sets to compute the Cartesian product for. In this
+    implementation, a vector of vectors is utilized for efficiency.
+    Each inner vector represents one dimension. The function generates
+    combinations using one element from each dimension vector.
+
+Returns:
+    A vector of vectors, where each inner vector represents a
+    combination of elements, one from each dimension. The total number
+    of combinations is the product of the sizes of the input vectors.)doc";
+
 static const char *__doc_fiction_cartesian_layout =
 R"doc(A layout type that utilizes offset coordinates to represent a
 Cartesian grid. Its faces are organized in the following way:
@@ -2339,25 +2359,6 @@ Parameter ``n``:
 
 Returns:
     Columnar clocking scheme.)doc";
-
-static const char *__doc_fiction_compute_cartesian_combinations =
-R"doc(This function computes the Cartesian product of a list of vectors.
-Each vector in the input list represents a dimension, and the function
-produces all possible combinations where each combination consists of
-one element from each dimension vector.
-
-Template parameter ``VectorDataType``:
-    The type of elements in the vectors.
-
-Parameter ``indices``:
-    A vector of vectors, where each inner vector represents a
-    dimension. The function generates combinations using one element
-    from each dimension vector.
-
-Returns:
-    A vector of vectors, where each inner vector represents a
-    combination of elements, one from each dimension. The total number
-    of combinations is the product of the sizes of the input vectors.)doc";
 
 static const char *__doc_fiction_convert_array =
 R"doc(Converts an array of size `N` and type `T` to an array of size `N` and
