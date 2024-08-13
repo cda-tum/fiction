@@ -5745,6 +5745,10 @@ Parameter ``start``:
 Parameter ``end``:
     The ending coordinate of the path.
 
+Parameter ``planar_optimization``:
+    Only allow relocation if a crossing-free wiring can be found.
+    Defaults to false.
+
 Returns:
     The computed path as a sequence of coordinates in the layout.)doc";
 
@@ -5828,6 +5832,9 @@ Parameter ``new_gate_loc``:
     Enum indicating if the src or dest have to host a new gate and
     therefore have to be empty. Defaults to `new_gate_location::NONE`.
 
+Parameter ``planar``:
+    Only consider crossing-free paths.
+
 Returns:
     A path from `src` to `dest` if one exists.)doc";
 
@@ -5870,6 +5877,9 @@ Parameter ``num_expansions``:
 Parameter ``fc``:
     A vector of nodes that precede the double fanin node.
 
+Parameter ``planar``:
+    Only consider crossing-free paths.
+
 Returns:
     A vector of tiles representing the possible positions for a double
     fan-in node.)doc";
@@ -5890,6 +5900,9 @@ Parameter ``num_expansions``:
     The maximum number of positions to be returned (is doubled for
     PIs).
 
+Parameter ``planar``:
+    Only consider crossing-free paths.
+
 Returns:
     A vector of tiles representing the possible positions for PIs.)doc";
 
@@ -5906,6 +5919,9 @@ Parameter ``place_info``:
 
 Parameter ``fc``:
     A vector of nodes that precede the PO nodes.
+
+Parameter ``planar``:
+    Only consider crossing-free paths.
 
 Returns:
     A vector of tiles representing the possible positions for POs.)doc";
@@ -5928,6 +5944,9 @@ Parameter ``num_expansions``:
 
 Parameter ``fc``:
     A vector of nodes that precede the single fanin node.
+
+Parameter ``planar``:
+    Only consider crossing-free paths.
 
 Returns:
     A vector of tiles representing the possible positions for a single
@@ -5954,6 +5973,9 @@ R"doc(Initializes the layout with minimum width
 
 Parameter ``min_layout_width``:
     The minimum width of the layout.
+
+Parameter ``planar``:
+    Create planar layouts with a depth of 0.
 
 Returns:
     The initialized layout.)doc";
@@ -6013,7 +6035,10 @@ Parameter ``node2pos``:
     layout.
 
 Parameter ``fc``:
-    A vector of nodes that precede the double fanin node.)doc";
+    A vector of nodes that precede the double fanin node.
+
+Parameter ``planar``:
+    Only consider crossing-free paths.)doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_route_single_input_node =
 R"doc(Places a node with a single input in the layout and routes it.
@@ -6029,7 +6054,10 @@ Parameter ``node2pos``:
     layout.
 
 Parameter ``fc``:
-    A vector of nodes that precede the single fanin node.)doc";
+    A vector of nodes that precede the single fanin node.
+
+Parameter ``planar``:
+    Only consider crossing-free paths.)doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_run =
 R"doc(Executes the graph-oriented layout design algorithm and returns the
@@ -6080,6 +6108,10 @@ Parameter ``lyt``:
 
 Parameter ``old_pos``:
     Old position of the gate to be moved.
+
+Parameter ``planar_optimization``:
+    Only allow relocation if a crossing-free wiring can be found.
+    Defaults to false.
 
 Returns:
     `true` if the gate was moved successfully, `false` otherwise.)doc";
@@ -7494,6 +7526,8 @@ static const char *__doc_fiction_detail_search_space_graph_num_expansions = R"do
 static const char *__doc_fiction_detail_search_space_graph_pi_locs =
 R"doc(Enum indicating if primary inputs (PIs) can be placed at the top or
 left.)doc";
+
+static const char *__doc_fiction_detail_search_space_graph_planar = R"doc(Create planar layouts.)doc";
 
 static const char *__doc_fiction_detail_sweep_parameter_to_string =
 R"doc(Converts a sweep parameter to a string representation. This is used to
@@ -11090,6 +11124,11 @@ solution being found. A higher value might lead to better solutions,
 but also requires more runtime. Defaults to 4 expansions for each
 vertex.)doc";
 
+static const char *__doc_fiction_graph_oriented_layout_design_params_planar =
+R"doc(Disable the creation of crossings during layout generation. If set to
+true, gates will only be placed if a crossing-free wiring is found.
+Defaults to false.)doc";
+
 static const char *__doc_fiction_graph_oriented_layout_design_params_return_first =
 R"doc(Return the first found layout, which might still have a high cost but
 can be found fast.)doc";
@@ -14160,6 +14199,11 @@ R"doc(Maximum number of relocations to try for each gate. Defaults to the
 number of tiles in the given layout if not specified.)doc";
 
 static const char *__doc_fiction_post_layout_optimization_params_optimize_pos_only = R"doc(Only optimize PO positions.)doc";
+
+static const char *__doc_fiction_post_layout_optimization_params_planar_optimization =
+R"doc(Disable the creation of crossings during optimization. If set to true,
+gates will only be relocated if a crossing-free wiring is found.
+Defaults to false.)doc";
 
 static const char *__doc_fiction_post_layout_optimization_stats =
 R"doc(This struct stores statistics about the post-layout optimization

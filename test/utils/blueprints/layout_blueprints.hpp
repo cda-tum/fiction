@@ -535,6 +535,47 @@ GateLyt optimization_layout_corner_case_outputs_2() noexcept
     return layout;
 }
 
+template <typename GateLyt>
+GateLyt planar_unoptimized_layout() noexcept
+{
+    GateLyt layout{{4, 4, 0}, fiction::twoddwave_clocking<GateLyt>()};
+
+    const auto x1 = layout.create_pi("x1", {2, 0});
+    const auto x2 = layout.create_pi("x2", {0, 2});
+
+    const auto w1   = layout.create_buf(x1, {2, 1});
+    const auto w2   = layout.create_buf(x2, {1, 2});
+    const auto and1 = layout.create_and(w1, w2, {2, 2});
+    const auto w3   = layout.create_buf(and1, {3, 2});
+    const auto not2 = layout.create_not(w3, {4, 2});
+    const auto w4   = layout.create_buf(not2, {4, 3});
+
+    layout.create_po(w4, "f1", {4, 4});
+
+    return layout;
+}
+
+template <typename GateLyt>
+GateLyt planar_optimization_layout() noexcept
+{
+    GateLyt layout{{2, 2, 1}, fiction::twoddwave_clocking<GateLyt>()};
+
+    const auto x1 = layout.create_pi("x1", {0, 0});
+    const auto x2 = layout.create_pi("x2", {0, 1});
+    layout.create_pi("x3", {0, 2});
+    layout.create_pi("x4", {2, 0});
+
+    const auto w1   = layout.create_buf(x1, {1, 0});
+    const auto w2   = layout.create_buf(x2, {1, 1});
+    const auto w3   = layout.create_buf(w1, {1, 1, 1});
+    const auto not1 = layout.create_not(w3, {1, 2});
+
+    layout.create_po(w2, "f1", {2, 1});
+    layout.create_po(not1, "f2", {2, 2});
+
+    return layout;
+}
+
 template <typename CellLyt>
 CellLyt single_layer_qca_and_gate() noexcept
 {
