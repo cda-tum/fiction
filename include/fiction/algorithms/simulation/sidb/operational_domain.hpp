@@ -1020,24 +1020,21 @@ class operational_domain_impl
 
         const auto param_point = to_parameter_point(sp);
 
-        const auto operational = [this, &param_point]()
+        const auto operational = [this, &param_point]() noexcept
         {
             const std::lock_guard lock(mutex_to_protect_member_variables);
             op_domain.operational_values[param_point] = operational_status::OPERATIONAL;
             return operational_status::OPERATIONAL;
         };
 
-        const auto non_operational = [this, &param_point]()
+        const auto non_operational = [this, &param_point]() noexcept
         {
             const std::lock_guard lock(mutex_to_protect_member_variables);
             op_domain.operational_values[param_point] = operational_status::NON_OPERATIONAL;
             return operational_status::NON_OPERATIONAL;
         };
 
-        {
-            const std::lock_guard lock(mutex_to_protect_member_variables);
-            ++num_evaluated_parameter_combinations;
-        }
+        ++num_evaluated_parameter_combinations;
 
         sidb_simulation_parameters sim_params = params.simulation_parameters;
 
@@ -1049,10 +1046,7 @@ class operational_domain_impl
         const auto& [status, sim_calls] =
             is_operational(layout, truth_table, is_operational_params{sim_params, params.sim_engine});
 
-        {
-            const std::lock_guard lock(mutex_to_protect_member_variables);
-            num_simulator_invocations += sim_calls;
-        }
+        num_simulator_invocations += sim_calls;
 
         if (status == operational_status::NON_OPERATIONAL)
         {
