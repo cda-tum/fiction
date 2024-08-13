@@ -16,6 +16,7 @@
 #include "fiction/technology/physical_constants.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/hash.hpp"
+#include "fiction/utils/math_utils.hpp"
 #include "fiction/utils/phmap_utils.hpp"
 
 #include <btree.h>
@@ -189,10 +190,11 @@ struct operational_domain
         {
             return it->second;
         }
-        // Create a stringstream to hold the string representation
+
+        // Create a string stream to hold the string representation
         std::stringstream ss;
 
-        // Iterate over the vector and add elements to the stringstream
+        // Iterate over the vector and add elements to the string stream
         for (std::size_t i = 0; i < pp.parameters.size(); ++i)
         {
             ss << pp.parameters[i];
@@ -202,6 +204,7 @@ struct operational_domain
                 ss << ", ";
             }
         }
+
         throw std::out_of_range(fmt::format("{} not found in the operational domain", ss.str()).c_str());
     }
 };
@@ -245,9 +248,9 @@ find_parameter_point_with_tolerance(const MapType& map, const typename MapType::
     return std::find_if(map.cbegin(), map.cend(), [&key](const auto& pair) { return pair.first == key; });
 }
 /**
- * This function searches for a floating-point value specified by the `key` in the provided map `map`,
- * applying a tolerance specified by `fiction::physical_constants::POP_STABILITY_ERR`.
- * Each key in the map is compared to the specified key within this tolerance.
+ * This function searches for a floating-point value specified by the `key` in the provided map `map`, applying a
+ * tolerance specified by `fiction::physical_constants::POP_STABILITY_ERR`. Each key in the map is compared to the
+ * specified key within this tolerance.
  *
  * @tparam MapType The type of the map containing parameter points as keys.
  * @param map The map containing parameter points as keys and associated values.
@@ -322,7 +325,7 @@ struct operational_domain_stats
 namespace detail
 {
 
-template <typename Lyt, typename TT, typename OPDomain>
+template <typename Lyt, typename TT, typename OpDomain>
 class operational_domain_impl
 {
   public:
@@ -437,7 +440,7 @@ class operational_domain_impl
     {
         mockturtle::stopwatch stop{stats.time_total};
 
-        const auto all_index_combination = compute_cartesian_combinations(indices);
+        const auto all_index_combination = cartesian_combinations(indices);
 
         std::vector<step_point> all_step_points;
         all_step_points.reserve(all_index_combination.size());
@@ -661,9 +664,9 @@ class operational_domain_impl
         return op_domain;
     }
     /**
-     * Performs a grid search over the specified parameter ranges. For each physical
-     * parameter combination found for which the given CDS is physically valid, it is determined whether the CDS is the
-     * ground state or the n-th excited state.
+     * Performs a grid search over the specified parameter ranges. For each physical parameter combination found for
+     * which the given CDS is physically valid, it is determined whether the CDS is the ground state or the n-th excited
+     * state.
      *
      * @param lyt SiDB cell-level layout that is simulated and compared to the given CDS.
      * @return All physically valid physical parameters and the excited state number.
@@ -675,7 +678,7 @@ class operational_domain_impl
 
         mockturtle::stopwatch stop{stats.time_total};
 
-        const auto all_step_points = compute_cartesian_combinations(indices);
+        const auto all_step_points = cartesian_combinations(indices);
 
         // calculate the size of each slice
         const auto slice_size = (all_step_points.size() + num_threads - 1) / num_threads;
@@ -718,7 +721,7 @@ class operational_domain_impl
 
         for (const auto& [param_point, status] : op_domain.operational_values)
         {
-            if constexpr (std::is_same_v<OPDomain, operational_domain<parameter_point, operational_status>>)
+            if constexpr (std::is_same_v<OpDomain, operational_domain<parameter_point, operational_status>>)
             {
                 if (status == operational_status::NON_OPERATIONAL)
                 {
@@ -757,13 +760,16 @@ class operational_domain_impl
                 }
 
                 const auto energy_dist = energy_distribution(sim_results.charge_distributions);
+
                 lyt.assign_physical_parameters(simulation_parameters);
                 const auto position = find_key_with_tolerance(energy_dist, lyt.get_system_energy());
+
                 if (position == energy_dist.cend())
                 {
                     continue;
                 }
-                const auto excited_state_number = std::distance(energy_dist.begin(), position);
+
+                const auto excited_state_number = std::distance(energy_dist.cbegin(), position);
                 suitable_params_domain.operational_values.emplace(param_point, excited_state_number);
             }
         }
@@ -807,7 +813,7 @@ class operational_domain_impl
     /**
      * The operational domain of the layout.
      */
-    OPDomain op_domain{};
+    OpDomain op_domain{};
     /**
      * Forward-declare step_point.
      */
@@ -1286,7 +1292,7 @@ class operational_domain_impl
             }
         }
 
-        // if no boundary point was found, the operational area extends outside the parameter range
+        // if no boundary point was found, the operational area extends outside the parameter range;
         // return the latest operational point
         return latest_operational_point;
     }
@@ -1746,16 +1752,19 @@ operational_domain_contour_tracing(const Lyt& lyt, const std::vector<TT>& spec, 
 
 namespace std
 {
+
 // make `operational_domain::parameter_point` compatible with `std::integral_constant`
 template <>
 struct tuple_size<fiction::parameter_point> : std::integral_constant<size_t, 2>
 {};
+
 // make `operational_domain::parameter_point` compatible with `std::tuple_element`
 template <size_t I>
 struct tuple_element<I, fiction::parameter_point>
 {
     using type = double;
 };
+
 // make `operational_domain::parameter_point` compatible with `std::hash`
 template <>
 struct hash<fiction::parameter_point>

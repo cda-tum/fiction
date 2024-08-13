@@ -492,7 +492,7 @@ class displacement_robustness_domain_impl
      */
     [[nodiscard]] std::vector<Lyt> generate_valid_displaced_sidb_layouts() noexcept
     {
-        auto all_possible_sidb_displacement = compute_cartesian_combinations(all_possible_sidb_displacements);
+        auto all_possible_sidb_displacement = cartesian_combinations(all_possible_sidb_displacements);
 
         std::shuffle(all_possible_sidb_displacement.begin(), all_possible_sidb_displacement.end(), generator);
 

@@ -26,14 +26,13 @@ namespace fiction
  * @return The number rounded to n decimal places.
  */
 template <typename T>
-T round_to_n_decimal_places(const T number, const uint64_t n) noexcept
+[[nodiscard]] inline T round_to_n_decimal_places(const T number, const uint64_t n) noexcept
 {
     static_assert(std::is_arithmetic_v<T>, "T is not a number type");
 
     const auto factor = std::pow(10.0, static_cast<double>(n));
     return static_cast<T>(std::round(static_cast<double>(number) * factor) / factor);
 }
-
 /**
  * Takes the absolute value of an integral number if it is signed, and otherwise computes the identity. This avoids a
  * compiler warning when taking the absolute value of an unsigned number.
@@ -42,7 +41,7 @@ T round_to_n_decimal_places(const T number, const uint64_t n) noexcept
  * @return |n|.
  */
 template <typename T>
-T integral_abs(const T n) noexcept
+[[nodiscard]] inline T integral_abs(const T n) noexcept
 {
     static_assert(std::is_integral_v<T>, "T is not an integral number type");
 
@@ -53,7 +52,6 @@ T integral_abs(const T n) noexcept
 
     return static_cast<T>(std::abs(static_cast<int64_t>(n)));  // needed to solve ambiguity of std::abs
 }
-
 /**
  * Calculates the binomial coefficient \f$\binom{n}{k}\f$.
  *
@@ -67,15 +65,19 @@ T integral_abs(const T n) noexcept
     {
         return 0;
     }
+
     uint64_t result = 1;
+
     if (2 * k > n)
     {
         k = n - k;
     }
+
     for (uint64_t i = 1; i <= k; i++)
     {
         result = result * (n + 1 - i) / i;
     }
+
     return result;
 }
 
@@ -97,6 +99,7 @@ determine_all_combinations_of_distributing_k_entities_on_n_positions(const std::
     {
         return {};
     }
+
     std::vector<std::vector<std::size_t>> all_combinations{};
     all_combinations.reserve(binomial_coefficient(n, k));
 
@@ -128,19 +131,19 @@ determine_all_combinations_of_distributing_k_entities_on_n_positions(const std::
  * consists of one element from each dimension vector.
  *
  * @tparam VectorDataType The type of elements in the vectors.
- * @param indices A vector of vectors, where each inner vector represents a dimension. The function
- *                generates combinations using one element from each dimension vector.
- * @return A vector of vectors, where each inner vector represents a combination of elements,
- *         one from each dimension. The total number of combinations is the product of the sizes
- *         of the input vectors.
+ * @param sets The sets to compute the Cartesian product for. In this implementation, a vector of vectors is utilized
+ * for efficiency. Each inner vector represents one dimension. The function generates combinations using one element
+ * from each dimension vector.
+ * @return A vector of vectors, where each inner vector represents a combination of elements, one from each dimension.
+ * The total number of combinations is the product of the sizes of the input vectors.
  */
 template <typename VectorDataType>
 [[nodiscard]] inline std::vector<std::vector<VectorDataType>>
-compute_cartesian_combinations(const std::vector<std::vector<VectorDataType>>& indices) noexcept
+cartesian_combinations(const std::vector<std::vector<VectorDataType>>& sets) noexcept
 {
     std::vector<std::vector<VectorDataType>> all_combinations{{}};
 
-    for (const auto& dimension : indices)
+    for (const auto& dimension : sets)
     {
         std::vector<std::vector<VectorDataType>> expanded_products{};
         expanded_products.reserve(all_combinations.size() * dimension.size());

@@ -116,14 +116,14 @@ TEST_CASE("Binomial Coefficient Tests")
     }
 }
 
-TEST_CASE("Test the computation of the cartesian combinations", "[compute_cartesian_combinations]")
+TEST_CASE("Test the computation of the cartesian combinations", "[cartesian_combinations]")
 {
     SECTION("Single dimension")
     {
         const std::vector<std::vector<int>> input{{1, 2, 3}};
         const std::vector<std::vector<int>> expected{{1}, {2}, {3}};
 
-        auto result = compute_cartesian_combinations(input);
+        auto result = cartesian_combinations(input);
 
         REQUIRE(result == expected);
     }
@@ -133,7 +133,7 @@ TEST_CASE("Test the computation of the cartesian combinations", "[compute_cartes
         const std::vector<std::vector<int>> input{{1, 2}, {3, 4}};
         const std::vector<std::vector<int>> expected{{1, 3}, {1, 4}, {2, 3}, {2, 4}};
 
-        auto result = compute_cartesian_combinations(input);
+        auto result = cartesian_combinations(input);
 
         REQUIRE(result == expected);
     }
@@ -144,7 +144,7 @@ TEST_CASE("Test the computation of the cartesian combinations", "[compute_cartes
         const std::vector<std::vector<int>> expected{{1, 3, 5}, {1, 3, 6}, {1, 4, 5}, {1, 4, 6},
                                                      {2, 3, 5}, {2, 3, 6}, {2, 4, 5}, {2, 4, 6}};
 
-        auto result = compute_cartesian_combinations(input);
+        auto result = cartesian_combinations(input);
 
         REQUIRE(result == expected);
     }
@@ -154,7 +154,7 @@ TEST_CASE("Test the computation of the cartesian combinations", "[compute_cartes
         const std::vector<std::vector<int>> input{};
         const std::vector<std::vector<int>> expected{{}};
 
-        auto result = compute_cartesian_combinations(input);
+        auto result = cartesian_combinations(input);
 
         REQUIRE(result == expected);
     }
@@ -164,7 +164,7 @@ TEST_CASE("Test the computation of the cartesian combinations", "[compute_cartes
         const std::vector<std::vector<int>> input{{1, 2}, {}};
         const std::vector<std::vector<int>> expected{};
 
-        auto result = compute_cartesian_combinations(input);
+        auto result = cartesian_combinations(input);
 
         REQUIRE(result == expected);
     }
@@ -174,7 +174,7 @@ TEST_CASE("Test the computation of the cartesian combinations", "[compute_cartes
         const std::vector<std::vector<std::string>> input{{"a", "b"}, {"x", "y"}};
         const std::vector<std::vector<std::string>> expected{{"a", "x"}, {"a", "y"}, {"b", "x"}, {"b", "y"}};
 
-        auto result = compute_cartesian_combinations(input);
+        auto result = cartesian_combinations(input);
 
         REQUIRE(result == expected);
     }
