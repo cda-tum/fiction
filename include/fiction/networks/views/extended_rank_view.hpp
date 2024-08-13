@@ -297,6 +297,16 @@ class extended_rank_view<Ntk, false> : public mockturtle::depth_view<Ntk>
         return max_rank_width;
     }
     /**
+     * Returns the width of the rank.
+     *
+     * @return Width of the rank.
+     */
+    uint32_t rank_width(uint32_t const level) noexcept
+    {
+        auto& rank  = ranks[level];
+        return rank.size();
+    }
+    /**
      * Swaps the positions of two nodes in the same rank.
      *
      * @param n1 First node to swap.
