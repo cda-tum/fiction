@@ -1012,6 +1012,7 @@ class operational_domain_impl
 
         {
             const std::lock_guard lock{mutex_to_protect_member_variables};
+
             if (const auto op_value = has_already_been_sampled(sp); op_value.has_value())
             {
                 return *op_value;
@@ -1069,6 +1070,7 @@ class operational_domain_impl
 
         {
             const std::lock_guard lock{mutex_to_protect_member_variables};
+
             // if the point has already been sampled, return the stored operational status
             if (const auto op_value = has_already_been_sampled(sp); op_value.has_value())
             {
@@ -1095,11 +1097,8 @@ class operational_domain_impl
             return operational_status::NON_OPERATIONAL;
         };
 
-        {
-            const std::lock_guard lock(mutex_to_protect_member_variables);
-            // increment the number of evaluated parameter combinations
-            ++num_evaluated_parameter_combinations;
-        }
+        // increment the number of evaluated parameter combinations
+        ++num_evaluated_parameter_combinations;
 
         sidb_simulation_parameters sim_params = params.simulation_parameters;
 
