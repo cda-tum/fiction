@@ -37,7 +37,7 @@ defaults:
     shell: bash
 
 env:
-  Z3_VERSION: 4.10.0
+  Z3_VERSION: 4.13.0
   ENABLE_Z3: 'ON'
 
 jobs:
