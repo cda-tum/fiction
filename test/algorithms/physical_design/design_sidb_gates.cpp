@@ -284,10 +284,10 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
             is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
                                   detect_bdl_wires_params{}, operational_condition::FORBIDDING_KINKS},
             design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::RANDOM,
-            {{16, 6, 0}, {22, 12, 0}},
+            {{16, 7, 0}, {21, 12, 0}},
             3};
 
-        defect_layout.assign_sidb_defect({16, 10, 0},
+        defect_layout.assign_sidb_defect({17, 10, 0},
                                          sidb_defect{sidb_defect_type::DB, -1,
                                                      params.operational_params.simulation_parameters.epsilon_r,
                                                      params.operational_params.simulation_parameters.lambda_tf});
