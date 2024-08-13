@@ -39,7 +39,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  Z3_VERSION: 4.13.0
+  Z3_VERSION: 4.13.0 # latest version of Z3
   ENABLE_Z3: 'ON'
 
 jobs:
