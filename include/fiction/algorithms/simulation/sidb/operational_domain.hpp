@@ -1023,15 +1023,15 @@ class operational_domain_impl
 
         const auto operational = [this, &param_point]() noexcept
         {
-            const std::lock_guard lock(mutex_to_protect_member_variables);
-            op_domain.operational_values[param_point] = operational_status::OPERATIONAL;
+            op_domain.operational_values.try_emplace(param_point, operational_status::OPERATIONAL);
+
             return operational_status::OPERATIONAL;
         };
 
         const auto non_operational = [this, &param_point]() noexcept
         {
-            const std::lock_guard lock(mutex_to_protect_member_variables);
-            op_domain.operational_values[param_point] = operational_status::NON_OPERATIONAL;
+            op_domain.operational_values.try_emplace(param_point, operational_status::NON_OPERATIONAL);
+
             return operational_status::NON_OPERATIONAL;
         };
 
@@ -1083,16 +1083,14 @@ class operational_domain_impl
 
         const auto operational = [this, &param_point]()
         {
-            const std::lock_guard lock(mutex_to_protect_member_variables);
-            op_domain.operational_values[param_point] = operational_status::OPERATIONAL;
+            op_domain.operational_values.try_emplace(param_point, operational_status::OPERATIONAL);
 
             return operational_status::OPERATIONAL;
         };
 
         const auto non_operational = [this, &param_point]()
         {
-            const std::lock_guard lock(mutex_to_protect_member_variables);
-            op_domain.operational_values[param_point] = operational_status::NON_OPERATIONAL;
+            op_domain.operational_values.try_emplace(param_point, operational_status::NON_OPERATIONAL);
 
             return operational_status::NON_OPERATIONAL;
         };
@@ -1514,8 +1512,8 @@ class operational_domain_impl
      */
     void log_stats() const noexcept
     {
-        stats.num_simulator_invocations            = num_simulator_invocations;
-        stats.num_evaluated_parameter_combinations = num_evaluated_parameter_combinations;
+        stats.num_simulator_invocations            = num_simulator_invocations.load();
+        stats.num_evaluated_parameter_combinations = num_evaluated_parameter_combinations.load();
 
         for (const auto& [param_point, status] : op_domain.operational_values)
         {
