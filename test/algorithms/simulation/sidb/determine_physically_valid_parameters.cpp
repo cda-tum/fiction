@@ -10,12 +10,10 @@
 #include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
-#include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/charge_distribution_surface.hpp>
 #include <fiction/technology/sidb_charge_state.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/phmap_utils.hpp>
 
 using namespace fiction;
 
@@ -87,14 +85,22 @@ TEST_CASE("Determine physical parameters for CDS of SiQAD Y-shaped AND gate, 10 
 
         const auto valid_parameters = determine_physically_valid_parameters(cds, op_domain_params);
         CHECK(valid_parameters.operational_values.size() == 98);
-        CHECK(find_parameter_point_with_tolerance(valid_parameters.operational_values, parameter_point{{5.9, 5.5}})
-                  ->second == 1);
-        CHECK(find_parameter_point_with_tolerance(valid_parameters.operational_values, parameter_point{{5.8, 4.4}})
-                  ->second == 0);
-        CHECK(find_parameter_point_with_tolerance(valid_parameters.operational_values, parameter_point{{5.8, 4.4}})
-                  ->second == 0);
-        CHECK(find_parameter_point_with_tolerance(valid_parameters.operational_values, parameter_point{{6.0, 6.0}})
-                  ->second == 1);
+
+        const auto p1 = contains_parameter_point(valid_parameters.operational_values, parameter_point{{5.9, 5.5}});
+        REQUIRE(p1.has_value());
+        CHECK(p1->second == 1);
+
+        const auto p2 = contains_parameter_point(valid_parameters.operational_values, parameter_point{{5.8, 4.4}});
+        REQUIRE(p2.has_value());
+        CHECK(p2->second == 0);
+
+        const auto p3 = contains_parameter_point(valid_parameters.operational_values, parameter_point{{5.8, 4.4}});
+        REQUIRE(p3.has_value());
+        CHECK(p3->second == 0);
+
+        const auto p4 = contains_parameter_point(valid_parameters.operational_values, parameter_point{{6.0, 6.0}});
+        REQUIRE(p4.has_value());
+        CHECK(p4->second == 1);
     }
 }
 
@@ -153,14 +159,22 @@ TEST_CASE(
 
         const auto valid_parameters = determine_physically_valid_parameters(cds, op_domain_params);
         REQUIRE(valid_parameters.operational_values.size() == 100);
-        CHECK(find_parameter_point_with_tolerance(valid_parameters.operational_values, parameter_point{{5.6, 5.0}})
-                  ->second == 0);
-        CHECK(find_parameter_point_with_tolerance(valid_parameters.operational_values, parameter_point{{5.0, 5.9}})
-                  ->second == 2);
-        CHECK(find_parameter_point_with_tolerance(valid_parameters.operational_values, parameter_point{{5.4, 5.3}})
-                  ->second == 1);
-        CHECK(find_parameter_point_with_tolerance(valid_parameters.operational_values, parameter_point{{5.8, 5.3}})
-                  ->second == 0);
+
+        const auto p1 = contains_parameter_point(valid_parameters.operational_values, parameter_point{{5.6, 5.0}});
+        REQUIRE(p1.has_value());
+        CHECK(p1->second == 0);
+
+        const auto p2 = contains_parameter_point(valid_parameters.operational_values, parameter_point{{5.0, 5.9}});
+        REQUIRE(p2.has_value());
+        CHECK(p2->second == 2);
+
+        const auto p3 = contains_parameter_point(valid_parameters.operational_values, parameter_point{{5.4, 5.3}});
+        REQUIRE(p3.has_value());
+        CHECK(p3->second == 1);
+
+        const auto p4 = contains_parameter_point(valid_parameters.operational_values, parameter_point{{5.8, 5.3}});
+        REQUIRE(p4.has_value());
+        CHECK(p4->second == 0);
     }
 
     SECTION("Using the ground state of default physical parameters as given CDS, three dimensional sweep")
@@ -203,17 +217,24 @@ TEST_CASE(
 
         const auto valid_parameters = determine_physically_valid_parameters(cds, op_domain_params);
         REQUIRE(valid_parameters.operational_values.size() == 27);
-        CHECK(
-            find_parameter_point_with_tolerance(valid_parameters.operational_values, parameter_point{{5.6, 5.0, -0.32}})
-                ->second == 0);
-        CHECK(
-            find_parameter_point_with_tolerance(valid_parameters.operational_values, parameter_point{{5.6, 5.0, -0.33}})
-                ->second == 0);
-        CHECK(
-            find_parameter_point_with_tolerance(valid_parameters.operational_values, parameter_point{{5.6, 5.0, -0.31}})
-                ->second == 1);
-        CHECK(
-            find_parameter_point_with_tolerance(valid_parameters.operational_values, parameter_point{{5.7, 5.2, -0.33}})
-                ->second == 0);
+        const auto p1 =
+            contains_parameter_point(valid_parameters.operational_values, parameter_point{{5.6, 5.0, -0.32}});
+        REQUIRE(p1.has_value());
+        CHECK(p1->second == 0);
+
+        const auto p2 =
+            contains_parameter_point(valid_parameters.operational_values, parameter_point{{5.6, 5.0, -0.33}});
+        REQUIRE(p2.has_value());
+        CHECK(p2->second == 0);
+
+        const auto p3 =
+            contains_parameter_point(valid_parameters.operational_values, parameter_point{{5.6, 5.0, -0.31}});
+        REQUIRE(p3.has_value());
+        CHECK(p3->second == 1);
+
+        const auto p4 =
+            contains_parameter_point(valid_parameters.operational_values, parameter_point{{5.7, 5.2, -0.33}});
+        REQUIRE(p4.has_value());
+        CHECK(p4->second == 0);
     }
 }

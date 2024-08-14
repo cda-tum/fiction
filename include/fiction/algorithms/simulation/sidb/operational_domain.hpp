@@ -36,7 +36,6 @@
 #include <optional>
 #include <queue>
 #include <random>
-#include <shared_mutex>
 #include <sstream>
 #include <stdexcept>
 #include <thread>
@@ -87,7 +86,7 @@ struct parameter_point
         // Compare each element with tolerance
         for (std::size_t i = 0; i < parameters.size(); ++i)
         {
-            if (std::abs(parameters[i] - other.parameters[i]) > tolerance)
+            if (std::fabs(parameters[i] - other.parameters[i]) >= tolerance)
             {
                 return false;
             }
@@ -179,10 +178,9 @@ struct operational_domain
      */
     [[nodiscard]] uint64_t get_value(const parameter_point& pp) const
     {
-        if (const auto it = find_parameter_point_with_tolerance(operational_values, pp);
-            it != operational_values.cend())
+        if (const auto v = contains_parameter_point(operational_values, pp); v.has_value())
         {
-            return it->second;
+            return v.value().second;
         }
 
         // Create a string stream to hold the string representation
@@ -225,20 +223,26 @@ struct operational_domain_value_range
     double step{0.1};
 };
 /**
- * This function searches for a parameter point, specified by the `key`, in the provided map `map` with tolerance.
+ * This function checks for the containment of a parameter point, specified by `key`, in the provided map `map`. If the
+ * parameter point is found in the map, the associated `MapType::value_type` is returned. Otherwise, `std::nullopt` is
+ * returned.
  *
  * @tparam MapType The type of the map containing parameter points as keys.
- * @param map The map containing parameter points as keys and associated values.
- * @param key The parameter point to search for in the map.
- * @return An iterator to the found parameter point in the map, or `map.cend()` if not found.
+ * @param map The map in which to search for `key`.
+ * @param key The parameter point to search for in `map`.
+ * @return The associated `MapType::value_type` of `key` in `map`, or `std::nullopt` if `key` is not contained in `map`.
  */
 template <typename MapType>
-[[maybe_unused]] static typename MapType::const_iterator
-find_parameter_point_with_tolerance(const MapType& map, const typename MapType::key_type& key)
+[[maybe_unused]] static std::optional<typename MapType::value_type>
+contains_parameter_point(const MapType& map, const typename MapType::key_type& key)
 {
     static_assert(std::is_same_v<typename MapType::key_type, parameter_point>, "Map key type must be parameter_point");
 
-    return std::find_if(map.cbegin(), map.cend(), [&key](const auto& pair) { return pair.first == key; });
+    std::optional<typename MapType::value_type> result = std::nullopt;
+
+    map.if_contains(key, [&result](const typename MapType::value_type& v) { result.emplace(v); });
+
+    return result;
 }
 /**
  * This function searches for a floating-point value specified by the `key` in the provided map `map`, applying a
@@ -810,10 +814,6 @@ class operational_domain_impl
      */
     OpDomain op_domain{};
     /**
-     * A shared mutex for unlimited read access but restricted write access to the operational domain.
-     */
-    std::shared_mutex read_write_op_domain_mutex{};
-    /**
      * Forward-declare step_point.
      */
     struct step_point;
@@ -985,10 +985,10 @@ class operational_domain_impl
      */
     [[nodiscard]] inline std::optional<operational_status> has_already_been_sampled(const step_point& sp) const noexcept
     {
-        if (const auto it = find_parameter_point_with_tolerance(op_domain.operational_values, to_parameter_point(sp));
-            it != op_domain.operational_values.cend())
+        if (const auto v = contains_parameter_point(op_domain.operational_values, to_parameter_point(sp));
+            v.has_value())
         {
-            return it->second;
+            return v.value().second;
         }
 
         return std::nullopt;
@@ -1007,23 +1007,15 @@ class operational_domain_impl
      */
     operational_status is_step_point_operational(const step_point& sp) noexcept
     {
+        if (const auto op_value = has_already_been_sampled(sp); op_value.has_value())
         {
-            // shared read access
-            const std::shared_lock lock{read_write_op_domain_mutex};
-
-            if (const auto op_value = has_already_been_sampled(sp); op_value.has_value())
-            {
-                return *op_value;
-            }
+            return *op_value;
         }
 
         const auto param_point = to_parameter_point(sp);
 
         const auto operational = [this, &param_point]() noexcept
         {
-            // unique write access
-            const std::unique_lock lock{read_write_op_domain_mutex};
-
             op_domain.operational_values.try_emplace(param_point, operational_status::OPERATIONAL);
 
             return operational_status::OPERATIONAL;
@@ -1031,9 +1023,6 @@ class operational_domain_impl
 
         const auto non_operational = [this, &param_point]() noexcept
         {
-            // unique write access
-            const std::unique_lock lock{read_write_op_domain_mutex};
-
             op_domain.operational_values.try_emplace(param_point, operational_status::NON_OPERATIONAL);
 
             return operational_status::NON_OPERATIONAL;
@@ -1045,7 +1034,7 @@ class operational_domain_impl
 
         for (auto d = 0u; d < num_dimensions; ++d)
         {
-            set_dimension_value(sim_params, values[d][sp.step_values[d]], d);  // lock not needed here
+            set_dimension_value(sim_params, values[d][sp.step_values[d]], d);
         }
 
         const auto& [status, sim_calls] =
@@ -1070,15 +1059,10 @@ class operational_domain_impl
      */
     operational_status is_step_point_suitable(Lyt lyt, const step_point& sp) noexcept
     {
+        // if the point has already been sampled, return the stored operational status
+        if (const auto op_value = has_already_been_sampled(sp); op_value.has_value())
         {
-            // shared read access
-            const std::shared_lock lock{read_write_op_domain_mutex};
-
-            // if the point has already been sampled, return the stored operational status
-            if (const auto op_value = has_already_been_sampled(sp); op_value.has_value())
-            {
-                return *op_value;
-            }
+            return *op_value;
         }
 
         // fetch the x and y dimension values
@@ -1086,9 +1070,6 @@ class operational_domain_impl
 
         const auto operational = [this, &param_point]()
         {
-            // unique write access
-            const std::unique_lock lock{read_write_op_domain_mutex};
-
             op_domain.operational_values.try_emplace(param_point, operational_status::OPERATIONAL);
 
             return operational_status::OPERATIONAL;
@@ -1096,9 +1077,6 @@ class operational_domain_impl
 
         const auto non_operational = [this, &param_point]()
         {
-            // unique write access
-            const std::unique_lock lock{read_write_op_domain_mutex};
-
             op_domain.operational_values.try_emplace(param_point, operational_status::NON_OPERATIONAL);
 
             return operational_status::NON_OPERATIONAL;
@@ -1769,12 +1747,16 @@ struct tuple_element<I, fiction::parameter_point>
 template <>
 struct hash<fiction::parameter_point>
 {
+    // tolerance for double hashing
+    static constexpr auto tolerance = fiction::physical_constants::POP_STABILITY_ERR;
+
     size_t operator()(const fiction::parameter_point& p) const noexcept
     {
         size_t h = 0;
         for (const auto& d : p.parameters)
         {
-            fiction::hash_combine(h, d);
+            // hash the double values with tolerance
+            fiction::hash_combine(h, static_cast<size_t>(d / tolerance));
         }
 
         return h;
