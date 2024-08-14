@@ -77,20 +77,6 @@ jobs:
       - name: Setup TBB
         run: brew install tbb
 
-      # The fmt library pre-installed on the runners causes conflicts with the version shipped with alice
-      - name: Uninstall fmt
-        run: |
-          if [ -d "/usr/local/include/fmt" ]; then
-            if rm -rf /usr/local/include/fmt; then
-              echo "Pre-installed fmt removed successfully."
-            else
-              echo "Failed to remove pre-installed fmt."
-              exit 1
-            fi
-          else
-            echo "No pre-installed fmt found, skipping removal."
-          fi
-
       - name: Setup XCode version
         uses: maxim-lobanov/setup-xcode@v1
         with:
