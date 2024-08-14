@@ -6,6 +6,7 @@
 #define FICTION_PHMAP_UTILS_HPP
 
 #include <phmap.h>
+#include <phmap_fwd_decl.h>
 
 #include <memory>
 #include <mutex>

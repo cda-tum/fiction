@@ -65,13 +65,7 @@ struct parameter_point
     /**
      * Parameter values for each dimension.
      */
-    std::vector<double> parameters;
-    /**
-     * Equality operator.
-     *
-     * @param other Other parameter point to compare with.
-     * @return `true` if the parameter points are equal.
-     */
+    std::vector<double> parameters{};
     /**
      * Equality operator. Checks if this parameter point is equal to another point within a specified tolerance.
      * The tolerance is defined by `physical_constants::POP_STABILITY_ERR`.
@@ -231,8 +225,7 @@ struct operational_domain_value_range
     double step{0.1};
 };
 /**
- * This function searches for a parameter point, specified by the `key`, in the provided map
- * `map` with tolerance.
+ * This function searches for a parameter point, specified by the `key`, in the provided map `map` with tolerance.
  *
  * @tparam MapType The type of the map containing parameter points as keys.
  * @param map The map containing parameter points as keys and associated values.
@@ -262,9 +255,12 @@ template <typename MapType>
                                                                                  const typename MapType::key_type& key)
 {
     static_assert(std::is_floating_point_v<typename MapType::key_type>, "Map key type must be floating-point");
+
     constexpr double tolerance = physical_constants::POP_STABILITY_ERR;
+
     auto compare_keys = [&key, &tolerance](const auto& pair) { return std::abs(pair.first - key) < tolerance; };
-    return std::find_if(map.begin(), map.end(), compare_keys);
+
+    return std::find_if(map.cbegin(), map.cend(), compare_keys);
 }
 /**
  * Parameters for the operational domain computation. The parameters are used across the different operational domain
@@ -429,7 +425,6 @@ class operational_domain_impl
             }
         }
     }
-
     /**
      * Performs a grid search over the specified parameter ranges with the specified step sizes. The grid search always
      * has quadratic complexity. The operational status is computed for each parameter combination.
