@@ -4160,10 +4160,10 @@ static const char *__doc_fiction_detail_design_sidb_gates_impl_are_sidbs_too_clo
 R"doc(Checks if any SiDBs within the specified cell indices are located too
 closely together, with a distance of less than 0.5 nanometers.
 
-This function iterates through the provided cell indices and compares
-the distance between SiDBs. If it finds any pair of SiDBs within a
-distance of 0.5 nanometers, it returns `true` to indicate that SiDBs
-are too close; otherwise, it returns `false`.
+This function iterates over the provided cell indices and compares the
+distance between SiDBs. If it finds any pair of SiDBs within a
+distance of less than 0.5 nanometers, it returns `true` indicating
+that SiDBs are too close; otherwise, it returns `false`.
 
 Parameter ``cells``:
     A vector of cells to check for proximity.
@@ -4198,6 +4198,8 @@ Parameter ``spec``:
 
 Parameter ``ps``:
     Parameters and settings for the gate designer.)doc";
+
+static const char *__doc_fiction_detail_design_sidb_gates_impl_num_threads = R"doc(Number of threads to be used for parallel execution.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_params = R"doc(Parameters for the *SiDB Gate Designer*.)doc";
 
@@ -12880,20 +12882,20 @@ R"doc(\verbatim / \ / \ / \ / \ / \ / \ | (0,0) | (1,0) | (2,0) | | | | | \
 static const char *__doc_fiction_offset_operator_lshift = R"doc()doc";
 
 static const char *__doc_fiction_offset_to_cube_coord =
-R"doc(Converts offset coordinates to cube coordinates
-
-Parameter ``coord``:
-    Offset coordinate to convert to a cube coordinate.
-
-Returns:
-    Cube coordinate.
+R"doc(Converts offset coordinates to cube coordinates.
 
 @note This function assumes that the input coordinates are within the
 valid range for cube coordinates. Specifically, the x, y, and z
 coordinates should be within the range of :math:`(0, 0, 0)` to
 :math:`(2^{31} - 1, 2^{31} - 1, 1)`. If the input coordinates are
 outside this range, the behavior of the function is undefined. If the
-input coordinate is dead, a dead cube coordinate is returned.)doc";
+input coordinate is dead, a dead cube coordinate is returned.
+
+Parameter ``coord``:
+    Offset coordinate to convert to a cube coordinate.
+
+Returns:
+    Cube coordinate equivalent to `coord`.)doc";
 
 static const char *__doc_fiction_offset_ucoord_t =
 R"doc(Unsigned offset coordinates.
@@ -13098,10 +13100,10 @@ Template parameter ``Ntk``:
     The type of the input network.
 
 Template parameter ``CellLyt``:
-    The type of the cell layout.
+    Cell-level layout type.
 
 Template parameter ``GateLyt``:
-    The type of the gate layout.
+    Gate-level layout type.
 
 Parameter ``network``:
     The input network to be mapped onto the defective surface.
@@ -13128,7 +13130,7 @@ defective surface.
 Template parameter ``CellLyt``:
     Cell-level layout type.)doc";
 
-static const char *__doc_fiction_on_the_fly_circuit_design_params_exact_design_parameter = R"doc(Parameters for the *exact* placement&routing algorithm.)doc";
+static const char *__doc_fiction_on_the_fly_circuit_design_params_exact_design_parameter = R"doc(Parameters for the *exact* placement and routing algorithm.)doc";
 
 static const char *__doc_fiction_on_the_fly_circuit_design_params_parameterized_gate_library_parameters = R"doc(Parameters for the parameterized gate library.)doc";
 
@@ -13729,7 +13731,7 @@ static const char *__doc_fiction_parameterized_gate_library_cell_level_layout_to
 R"doc(Generates a cell-level layout as a 2D array of characters based on the
 provided cell layout information.
 
-Template parameter ``CellLyt``:
+Template parameter ``Lyt``:
     Cell-level layout type.
 
 Parameter ``lyt``:
@@ -13787,7 +13789,7 @@ Parameter ``tile``:
     The specific tile on which the gate should be designed.
 
 Returns:
-    A fcn gate object.)doc";
+    An `fcn_gate` object.)doc";
 
 static const char *__doc_fiction_parameterized_gate_library_determine_port_routing =
 R"doc(This function determines the port routing for a specific tile within a
@@ -13795,6 +13797,9 @@ layout represented by the object `lyt` of type `Lyt`. It examines the
 tile's characteristics and connectivity to determine the appropriate
 incoming and outgoing connector ports and populates them in a
 `port_list` object.
+
+Template parameter ``Lyt``:
+    Cell-level layout type.
 
 Parameter ``lyt``:
     A reference to an object of type `Lyt` representing the layout.
@@ -13823,14 +13828,11 @@ Template parameter ``Params``:
 Parameter ``bestagon_lyt``:
     The Bestagon gate which is to be applied.
 
-Parameter ``defect_lyt``:
-    The layout with defects that may affect gate applicability.
+Parameter ``truth_table``:
+    The truth table representing the gate's logic function.
 
 Parameter ``parameters``:
     Parameters for the gate design and simulation.
-
-Parameter ``truth_table``:
-    The truth table representing the gate's logic function.
 
 Returns:
     `true` if the Bestagon gate is applicable to the layout,
@@ -13854,8 +13856,9 @@ static const char *__doc_fiction_parameterized_gate_library_params_defect_surfac
 static const char *__doc_fiction_parameterized_gate_library_params_design_gate_params = R"doc(This struct holds parameters to design SiDB gates.)doc";
 
 static const char *__doc_fiction_parameterized_gate_library_params_influence_radius_charged_defects =
-R"doc(This variable specifies the radius around the middle of the hexagon
-where atomic defects are incorporated into the gate design.)doc";
+R"doc(This variable specifies the radius in nanometers around the center of
+the hexagon where atomic defects are incorporated into the gate
+design.)doc";
 
 static const char *__doc_fiction_parameterized_gate_library_set_up_gate =
 R"doc(Overrides the corresponding function in fcn_gate_library. Given a tile
