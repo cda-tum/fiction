@@ -6436,6 +6436,10 @@ Parameter ``samples``:
 Returns:
     The (partial) operational domain of the layout.)doc";
 
+static const char *__doc_fiction_detail_operational_domain_impl_read_write_op_domain_mutex =
+R"doc(A shared mutex for unlimited read access but restricted write access
+to the operational domain.)doc";
+
 static const char *__doc_fiction_detail_operational_domain_impl_set_dimension_value =
 R"doc(Helper function that sets the value of a sweep dimension in the
 simulation parameters.
@@ -13358,15 +13362,7 @@ Returns:
     The parameter value at the specified index.)doc";
 
 static const char *__doc_fiction_parameter_point_operator_eq =
-R"doc(Equality operator.
-
-Parameter ``other``:
-    Other parameter point to compare with.
-
-Returns:
-    `true` if the parameter points are equal.
-
-Equality operator. Checks if this parameter point is equal to another
+R"doc(Equality operator. Checks if this parameter point is equal to another
 point within a specified tolerance. The tolerance is defined by
 `physical_constants::POP_STABILITY_ERR`.
 
