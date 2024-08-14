@@ -32,11 +32,11 @@
 #include <cstdint>
 #include <cstdlib>
 #include <iterator>
-#include <mutex>
 #include <numeric>
 #include <optional>
 #include <queue>
 #include <random>
+#include <shared_mutex>
 #include <sstream>
 #include <stdexcept>
 #include <thread>
@@ -810,6 +810,10 @@ class operational_domain_impl
      */
     OpDomain op_domain{};
     /**
+     * A shared mutex for unlimited read access but restricted write access to the operational domain.
+     */
+    std::shared_mutex read_write_op_domain_mutex{};
+    /**
      * Forward-declare step_point.
      */
     struct step_point;
@@ -1003,10 +1007,9 @@ class operational_domain_impl
      */
     operational_status is_step_point_operational(const step_point& sp) noexcept
     {
-        static std::mutex mutex_to_protect_member_variables;
-
         {
-            const std::lock_guard lock{mutex_to_protect_member_variables};
+            // shared read access
+            const std::shared_lock lock{read_write_op_domain_mutex};
 
             if (const auto op_value = has_already_been_sampled(sp); op_value.has_value())
             {
@@ -1018,6 +1021,9 @@ class operational_domain_impl
 
         const auto operational = [this, &param_point]() noexcept
         {
+            // unique write access
+            const std::unique_lock lock{read_write_op_domain_mutex};
+
             op_domain.operational_values.try_emplace(param_point, operational_status::OPERATIONAL);
 
             return operational_status::OPERATIONAL;
@@ -1025,6 +1031,9 @@ class operational_domain_impl
 
         const auto non_operational = [this, &param_point]() noexcept
         {
+            // unique write access
+            const std::unique_lock lock{read_write_op_domain_mutex};
+
             op_domain.operational_values.try_emplace(param_point, operational_status::NON_OPERATIONAL);
 
             return operational_status::NON_OPERATIONAL;
@@ -1061,10 +1070,9 @@ class operational_domain_impl
      */
     operational_status is_step_point_suitable(Lyt lyt, const step_point& sp) noexcept
     {
-        static std::mutex mutex_to_protect_member_variables;
-
         {
-            const std::lock_guard lock{mutex_to_protect_member_variables};
+            // shared read access
+            const std::shared_lock lock{read_write_op_domain_mutex};
 
             // if the point has already been sampled, return the stored operational status
             if (const auto op_value = has_already_been_sampled(sp); op_value.has_value())
@@ -1078,6 +1086,9 @@ class operational_domain_impl
 
         const auto operational = [this, &param_point]()
         {
+            // unique write access
+            const std::unique_lock lock{read_write_op_domain_mutex};
+
             op_domain.operational_values.try_emplace(param_point, operational_status::OPERATIONAL);
 
             return operational_status::OPERATIONAL;
@@ -1085,6 +1096,9 @@ class operational_domain_impl
 
         const auto non_operational = [this, &param_point]()
         {
+            // unique write access
+            const std::unique_lock lock{read_write_op_domain_mutex};
+
             op_domain.operational_values.try_emplace(param_point, operational_status::NON_OPERATIONAL);
 
             return operational_status::NON_OPERATIONAL;
