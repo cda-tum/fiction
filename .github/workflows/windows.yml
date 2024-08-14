@@ -32,7 +32,7 @@ defaults:
     shell: pwsh  # use pwsh as directory handling does not seem to work with bash
 
 env:
-  Z3_VERSION: 4.13.0 # latest version of Z3
+  Z3_VERSION: 4.13.0
 
 jobs:
   build_and_test:
