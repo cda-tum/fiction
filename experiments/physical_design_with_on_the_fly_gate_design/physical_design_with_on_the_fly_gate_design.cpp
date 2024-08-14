@@ -53,7 +53,7 @@ int main()  // NOLINT
     design_gate_params.termination_cond =
         fiction::design_sidb_gates_params<fiction::cell<cell_lyt>>::termination_condition::AFTER_FIRST_SOLUTION;
 
-    // save atomic defects which their respective phyiscal parameters as experimentally determined by T. R. Huff, T.
+    // save atomic defects which their respective physical parameters as experimentally determined by T. R. Huff, T.
     // Dienel, M. Rashidi, R. Achal, L. Livadaru, J. Croshaw, and R. A. Wolkow, "Electrostatic landscape of a
     // Hydrogen-terminated Silicon Surface Probed by a Moveable Quantum Dot."
     const auto stray_db   = fiction::sidb_defect{fiction::sidb_defect_type::DB, -1, 4.1, 1.8};
@@ -107,7 +107,7 @@ int main()  // NOLINT
         fmt::print("[attempts] processing {}\n", benchmark);
         mockturtle::xag_network xag{};
 
-        const auto read_verilog_result =
+        [[maybe_unused]] const auto read_verilog_result =
             lorina::read_verilog(fiction_experiments::benchmark_path(benchmark), mockturtle::verilog_reader(xag));
         assert(read_verilog_result == lorina::return_code::success);
 

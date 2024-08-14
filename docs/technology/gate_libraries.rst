@@ -20,7 +20,9 @@ Abstract Gate Library
    :members:
 
 .. doxygenclass:: fiction::unsupported_gate_type_exception
+    :members:
 .. doxygenclass:: fiction::unsupported_gate_orientation_exception
+    :members:
 
 **Header:** ``fiction/technology/cell_ports.hpp``
 
@@ -67,4 +69,7 @@ Parameterized SiDB Library
 .. doxygenstruct:: fiction::parameterized_gate_library_params
    :members:
 .. doxygenclass:: fiction::parameterized_gate_library
+   :members:
+
+.. doxygenclass:: fiction::gate_design_exception
    :members:

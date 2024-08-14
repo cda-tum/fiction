@@ -590,6 +590,8 @@ CoordinateType random_coordinate(CoordinateType coordinate1, CoordinateType coor
         return {dist_x(generator), dist_y(generator), dist_z(generator)};
     }
 }
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
 /**
  * Generates a vector of all coordinates within an area spanned by two coordinates.
  *
@@ -618,6 +620,7 @@ template <typename CoordinateType>
         const auto c2_cube          = siqad::to_fiction_coord<cube::coord_t>(coord_se);
         const auto total_cell_count = static_cast<uint64_t>(std::abs(c1_cube.x - c2_cube.x) + 1) *
                                       static_cast<uint64_t>(std::abs(c1_cube.y - c2_cube.y) + 1);
+
         std::vector<CoordinateType> all_cells{};
         all_cells.reserve(total_cell_count);
 
@@ -644,19 +647,19 @@ template <typename CoordinateType>
 
         return all_cells;
     }
-    // for cube and offset coordinates
-    else
+    else  // for cube and offset coordinates
     {
         const auto total_cell_count =
             static_cast<uint64_t>(std::abs(static_cast<int64_t>(coord_nw.x) - static_cast<int64_t>(coord_se.x)) + 1) *
             static_cast<uint64_t>(std::abs(static_cast<int64_t>(coord_nw.y) - static_cast<int64_t>(coord_se.y)) + 1);
+
         std::vector<CoordinateType> all_cells{};
         all_cells.reserve(total_cell_count);
 
         auto current_cell = coord_nw;
 
         // collect all cells in the area (spanned by the nw `north-west` and se `south-east` cell) going from top to
-        // down from left to right.
+        // bottom from left to right.
         while (current_cell <= coord_se)
         {
             all_cells.push_back(current_cell);
@@ -675,6 +678,7 @@ template <typename CoordinateType>
         return all_cells;
     }
 }
+#pragma GCC diagnostic pop
 
 }  // namespace fiction
 

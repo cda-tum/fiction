@@ -37,7 +37,7 @@ struct on_the_fly_circuit_design_params
      */
     parameterized_gate_library_params<CellLyt> parameterized_gate_library_parameters = {};
     /**
-     * Parameters for the *exact* placement&routing algorithm.
+     * Parameters for the *exact* placement and routing algorithm.
      */
     exact_physical_design_params exact_design_parameter = {};
 };
@@ -106,7 +106,7 @@ class on_the_fly_circuit_design_impl
                 }
 
                 // on-the-fly gate design was unsuccessful at a certain tile. Hence, this tile-gate pair is added to the
-                // blacklist.
+                // blacklist and the process is rerun.
                 catch (const gate_design_exception<tt, GateLyt>& e)
                 {
                     black_list[e.which_tile()][e.which_truth_table()].push_back(e.which_port_list());
@@ -114,7 +114,7 @@ class on_the_fly_circuit_design_impl
 
                 catch (const std::exception& e)
                 {
-                    std::cerr << "Caught std::exception: " << e.what() << '\n';
+                    std::cerr << e.what() << '\n';
                 }
             }
             // P&R was unsuccessful
@@ -160,26 +160,25 @@ class on_the_fly_circuit_design_impl
 /**
  * This function implements an on-the-fly circuit design algorithm for a defective SiDB surface.
  *
- * The process begins with placement and routing using a blacklist and the `exact` method. The blacklist
- * includes skeleton-tile pairs that are excluded due to collisions between skeleton and neutral defects on specific
- * tiles. After identifying a valid placement and routing, a defect-aware SiDB gate design algorithm is applied. This
- * algorithm designs gates for each tile while accounting for atomic defects. If the gate design is unsuccessful, the
- * blacklist is updated with the problematic skeleton-gate pair, and the placement and routing process is restarted. If
- * the gate design succeeds, the algorithm finalizes the design and returns the SiDB circuit. This approach ensures
- * that the circuit remains functional even in the presence of defects.
+ * The process begins with placement and routing using a blacklist and the `exact` method. The blacklist includes
+ * skeleton-tile pairs that are excluded due to collisions between skeleton and neutral defects on specific tiles. After
+ * identifying a valid placement and routing, a defect-aware SiDB gate design algorithm is applied. This algorithm
+ * designs gates for each tile while accounting for atomic defects. If the gate design is unsuccessful, the blacklist is
+ * updated with the problematic skeleton-gate pair, and the placement and routing process is restarted. If the gate
+ * design succeeds, the algorithm finalizes the design and returns the SiDB circuit. This approach ensures that the
+ * circuit remains functional even in the presence of defects.
  *
  * This methodology is detailed in the paper "On-the-fly Defect-Aware Design of Circuits based on Silicon Dangling Bond
  * Logic" by J. Drewniok, M. Walter, S. S. H. Ng, K. Walus, and R. Wille, IEEE NANO 2024.
  *
- * @tparam Ntk  The type of the input network.
- * @tparam CellLyt  The type of the cell layout.
- * @tparam GateLyt  The type of the gate layout.
- * @param network    The input network to be mapped onto the defective surface.
- * @param lattice_tiling    The lattice tiling used for the circuit design.
+ * @tparam Ntk The type of the input network.
+ * @tparam CellLyt Cell-level layout type.
+ * @tparam GateLyt Gate-level layout type.
+ * @param network The input network to be mapped onto the defective surface.
+ * @param lattice_tiling The lattice tiling used for the circuit design.
  * @param params The parameters used for designing the circuit, encapsulated in an
  * `on_the_fly_circuit_design_params` object.
  * @param stats Pointer to a structure for collecting statistics. If nullptr, statistics are not collected.
- *
  * @return A `sidb_defect_surface<CellLyt>` representing the designed circuit on the defective surface.
  */
 template <typename Ntk, typename CellLyt, typename GateLyt>
@@ -192,7 +191,8 @@ on_the_fly_circuit_design_on_defective_surface(const Ntk& ntk, const GateLyt& la
     static_assert(is_cell_level_layout_v<CellLyt>, "Lyt is not a cell-level layout");
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
 
-    on_the_fly_circuit_design_stats<GateLyt>                      st{};
+    on_the_fly_circuit_design_stats<GateLyt> st{};
+
     detail::on_the_fly_circuit_design_impl<Ntk, CellLyt, GateLyt> p{ntk, params, lattice_tiling, st};
 
     const auto result = p.design_circuit_on_defective_surface();

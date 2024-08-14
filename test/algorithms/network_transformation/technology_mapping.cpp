@@ -195,11 +195,6 @@ void map_and_check_all_func(const Ntk& ntk)
     CHECK(gt_stats.num_nor2 == 0);
     CHECK(gt_stats.num_xor2 == 0);
     CHECK(gt_stats.num_xnor2 == 0);
-
-    CHECK(gt_stats.num_lt2 >= 0);
-    CHECK(gt_stats.num_gt2 >= 0);
-    CHECK(gt_stats.num_le2 >= 0);
-    CHECK(gt_stats.num_ge2 >= 0);
 }
 
 template <typename Ntk>

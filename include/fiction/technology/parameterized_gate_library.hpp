@@ -19,6 +19,8 @@
 #include "fiction/utils/layout_utils.hpp"
 #include "fiction/utils/truth_table_utils.hpp"
 
+#include <phmap.h>
+
 #include <array>
 #include <cstdint>
 #include <cstdlib>
@@ -55,7 +57,6 @@ class gate_design_exception : public std::exception
             truth_table{spec},
             p{portlist}
     {}
-
     /**
      * Get the tile associated with the exception.
      */
@@ -63,7 +64,6 @@ class gate_design_exception : public std::exception
     {
         return error_tile;
     }
-
     /**
      * Get the truth table associated with the exception.
      */
@@ -71,7 +71,6 @@ class gate_design_exception : public std::exception
     {
         return truth_table;
     }
-
     /**
      * Get the port list associated with the exception.
      */
@@ -117,8 +116,8 @@ struct parameterized_gate_library_params
      */
     uint64_t canvas_sidb_complex_gates = 3;
     /**
-     * This variable specifies the radius around the middle of the hexagon where atomic defects are incorporated into
-     * the gate design.
+     * This variable specifies the radius in nanometers around the center of the hexagon where atomic defects are
+     * incorporated into the gate design.
      */
     double influence_radius_charged_defects = 15;  // (unit: nm)
 };
@@ -156,7 +155,7 @@ class parameterized_gate_library : public fcn_gate_library<sidb_technology, 60, 
         const auto f = lyt.node_function(n);
         const auto p = determine_port_routing(lyt, t);
 
-        // center cell of the bestagon tile
+        // center cell of the Bestagon tile
         auto center_cell = relative_to_absolute_cell_position<gate_x_size(), gate_y_size(), GateLyt, CellLyt>(
             lyt, t, cell<CellLyt>{gate_x_size() / 2, gate_y_size() / 2});
         // center cell of the current tile
@@ -395,9 +394,8 @@ class parameterized_gate_library : public fcn_gate_library<sidb_technology, 60, 
      * @tparam TT Truth table type.
      * @tparam Params Type of the parameters used for the parametrized gate library.
      * @param bestagon_lyt The Bestagon gate which is to be applied.
-     * @param defect_lyt The layout with defects that may affect gate applicability.
-     * @param parameters Parameters for the gate design and simulation.
      * @param truth_table The truth table representing the gate's logic function.
+     * @param parameters Parameters for the gate design and simulation.
      * @return `true` if the Bestagon gate is applicable to the layout, considering the provided conditions;
      *         otherwise, returns `false`.
      */
@@ -439,11 +437,10 @@ class parameterized_gate_library : public fcn_gate_library<sidb_technology, 60, 
                                 .first;
         return static_cast<bool>(status == operational_status::OPERATIONAL);
     }
-
     /**
      * Generates a cell-level layout as a 2D array of characters based on the provided cell layout information.
      *
-     * @tparam CellLyt Cell-level layout type.
+     * @tparam Lyt Cell-level layout type.
      * @param lyt Cell-level layout
      * @return A 2D array of characters representing the cell-level layout.
      */
@@ -468,6 +465,7 @@ class parameterized_gate_library : public fcn_gate_library<sidb_technology, 60, 
                 counter++;
             }
         }
+
         return result;
     }
     /**
@@ -485,10 +483,10 @@ class parameterized_gate_library : public fcn_gate_library<sidb_technology, 60, 
      * @param parameters Parameters for the SiDB gate design process.
      * @param p The list of ports and their directions.
      * @param tile The specific tile on which the gate should be designed.
-     * @return A fcn gate object.
+     * @return An `fcn_gate` object.
      */
     template <typename LytSkeleton, typename TT, typename CellLyt, typename GateLyt>
-    [[nodiscard]] static fcn_gate design_gate(const LytSkeleton& skeleton_with_defects, const std::vector<TT>& spec,
+    [[nodiscard]] static fcn_gate design_gate(const LytSkeleton& skeleton, const std::vector<TT>& spec,
                                               const parameterized_gate_library_params<CellLyt>& parameters,
                                               const port_list<port_direction>& p, const tile<GateLyt>& tile)
     {
@@ -500,33 +498,33 @@ class parameterized_gate_library : public fcn_gate_library<sidb_technology, 60, 
 
         if (spec == create_crossing_wire_tt() || spec == create_double_wire_tt())
         {
-            if (is_sidb_gate_design_impossible(skeleton_with_defects, spec, params))
+            if (is_sidb_gate_design_impossible(skeleton, spec, params))
             {
                 throw gate_design_exception<tt, GateLyt>(tile, create_id_tt(), p);
             }
-            const auto found_gate_layouts =
-                design_sidb_gates(skeleton_with_defects, spec, parameters.design_gate_params);
+
+            const auto found_gate_layouts = design_sidb_gates(skeleton, spec, parameters.design_gate_params);
             if (found_gate_layouts.empty())
             {
                 throw gate_design_exception<tt, GateLyt>(tile, create_id_tt(), p);
             }
-            const auto lyt = cell_list_to_gate<char>(cell_level_layout_to_list(found_gate_layouts.front()));
-            return lyt;
+
+            return cell_list_to_gate<char>(cell_level_layout_to_list(found_gate_layouts.front()));
         }
 
-        if (is_sidb_gate_design_impossible(skeleton_with_defects, spec, params))
+        if (is_sidb_gate_design_impossible(skeleton, spec, params))
         {
             throw gate_design_exception<tt, GateLyt>(tile, spec.front(), p);
         }
-        const auto found_gate_layouts = design_sidb_gates(skeleton_with_defects, spec, parameters.design_gate_params);
+
+        const auto found_gate_layouts = design_sidb_gates(skeleton, spec, parameters.design_gate_params);
         if (found_gate_layouts.empty())
         {
             throw gate_design_exception<tt, GateLyt>(tile, spec.front(), p);
         }
-        const auto lyt = cell_list_to_gate<char>(cell_level_layout_to_list(found_gate_layouts.front()));
-        return lyt;
-    }
 
+        return cell_list_to_gate<char>(cell_level_layout_to_list(found_gate_layouts.front()));
+    }
     /**
      * The function generates a layout where each cell is assigned a specific
      * cell type according to the characters in the cell list/input grid.
@@ -578,7 +576,6 @@ class parameterized_gate_library : public fcn_gate_library<sidb_technology, 60, 
 
         return lyt;
     }
-
     /**
      * This function takes a defect surface and a skeleton skeleton and adds defects from the surrounding area
      * to the skeleton. The defects within a specified distance from the center cell are taken into account.
@@ -620,12 +617,12 @@ class parameterized_gate_library : public fcn_gate_library<sidb_technology, 60, 
 
         return skeleton_with_defect;
     }
-
     /**
      * This function determines the port routing for a specific tile within a layout represented by the object `lyt` of
      * type `Lyt`. It examines the tile's characteristics and connectivity to determine the appropriate incoming and
      * outgoing connector ports and populates them in a `port_list` object.
      *
+     * @tparam Lyt Cell-level layout type.
      * @param lyt A reference to an object of type `Lyt` representing the layout.
      * @param t The tile for which port routing is being determined.
      * @return A `port_list` object containing the determined port directions for incoming and outgoing signals.
@@ -1233,7 +1230,7 @@ class parameterized_gate_library : public fcn_gate_library<sidb_technology, 60, 
     using double_port_gate_map =
         phmap::flat_hash_map<std::pair<port_list<port_direction>, port_list<port_direction>>, fcn_gate>;
     /**
-     * Lookup table for one input Boolean functions.
+     * Lookup table for 1-input/1-output Boolean functions.
      */
     static inline const port_gate_map ONE_IN_ONE_OUT_MAP = {
         // primary inputs
@@ -1259,7 +1256,6 @@ class parameterized_gate_library : public fcn_gate_library<sidb_technology, 60, 
         // empty gate (for crossing layer)
         {{{}, {}}, EMPTY_GATE},
     };
-
     /**
      * Lookup table for wire crossings and hourglass wires.
      */
@@ -1286,7 +1282,7 @@ class parameterized_gate_library : public fcn_gate_library<sidb_technology, 60, 
          CROSSING},
     };
     /**
-     * Lookup table for two input Boolean function (e.g., AND, OR, ...).
+     * Lookup table for 2-input/1-output Boolean function (e.g., AND, OR, ...).
      */
     static inline const port_gate_map TWO_IN_ONE_OUT_MAP = {
         {{{port_direction(port_direction::cardinal::NORTH_WEST), port_direction(port_direction::cardinal::NORTH_EAST)},

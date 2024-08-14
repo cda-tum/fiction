@@ -7,9 +7,6 @@
 #include <fiction/algorithms/physical_design/design_sidb_gates.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
-#include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/cell_level_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/sidb_defect_surface.hpp>
@@ -55,7 +52,7 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
 
     CHECK(lyt.num_cells() == 13);
 
-    const design_sidb_gates_params<cell<siqad_layout>> params{
+    design_sidb_gates_params<cell<siqad_layout>> params{
         sidb_simulation_parameters{2, -0.32},
         design_sidb_gates_params<cell<siqad_layout>>::design_sidb_gates_mode::EXHAUSTIVE,
         {{10, 4, 0}, {10, 4, 0}},
@@ -90,6 +87,7 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
 
         // using offset coordinates
         const auto lyt_in_offset_coord = convert_to_fiction_coordinates<offset_layout>(lyt);
+
         const design_sidb_gates_params<cell<offset_layout>> params_offset{
             sidb_simulation_parameters{2, -0.32},
             design_sidb_gates_params<cell<offset_layout>>::design_sidb_gates_mode::EXHAUSTIVE,
@@ -108,7 +106,7 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
     }
     SECTION("Four cells in canvas, design all gates")
     {
-        const design_sidb_gates_params<cell<siqad_layout>> params{
+        params = design_sidb_gates_params<cell<siqad_layout>>{
             sidb_simulation_parameters{2, -0.32},
             design_sidb_gates_params<cell<siqad_layout>>::design_sidb_gates_mode::EXHAUSTIVE,
             {{10, 4, 0}, {13, 4, 0}},
@@ -121,7 +119,7 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
     }
     SECTION("Four cells in canvas, design process is terminated after first solution is found")
     {
-        const design_sidb_gates_params<cell<siqad_layout>> params{
+        params = design_sidb_gates_params<cell<siqad_layout>>{
             sidb_simulation_parameters{2, -0.32},
             design_sidb_gates_params<cell<siqad_layout>>::design_sidb_gates_mode::EXHAUSTIVE,
             {{10, 4, 0}, {10, 4, 0}},

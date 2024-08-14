@@ -26,14 +26,10 @@ This algorithm is designed to create SiDB circuits on a clocked surface, accommo
 This iterative approach ensures that the designed SiDB circuits can effectively handle defects present on the surface.
 
 
-.. tabs::
-    .. tab:: C++
-        **Header:** ``fiction/algorithms/physical_design/on_the_fly_circuit_design_on_defective_surface.hpp``
+**Header:** ``fiction/algorithms/physical_design/on_the_fly_circuit_design_on_defective_surface.hpp``
 
-        .. doxygenstruct:: fiction::on_the_fly_circuit_design_params
-           :members:
-        .. doxygenstruct:: fiction::on_the_fly_circuit_design_stats
-            :members:
-        .. doxygenfunction:: fiction::on_the_fly_circuit_design_on_defective_surface(const Ntk& ntk, const GateLyt& lattice_tiling,
-                                               const on_the_fly_circuit_design_params<CellLyt>& params = {},
-                                               on_the_fly_circuit_design_stats<GateLyt>*        stats  = nullptr)
+.. doxygenstruct:: fiction::on_the_fly_circuit_design_params
+   :members:
+.. doxygenstruct:: fiction::on_the_fly_circuit_design_stats
+    :members:
+.. doxygenfunction:: fiction::on_the_fly_circuit_design_on_defective_surface

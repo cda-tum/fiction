@@ -171,9 +171,9 @@ class apply_gate_library_impl
     void assign_gate(const cell<CellLyt>& c, const typename GateLibrary::fcn_gate& g,
                      const mockturtle::node<GateLyt>& n)
     {
-        auto start_x = c.x;
-        auto start_y = c.y;
-        auto layer   = c.z;
+        const auto start_x = c.x;
+        const auto start_y = c.y;
+        const auto layer   = c.z;
 
         for (auto y = 0ul; y < g.size(); ++y)
         {

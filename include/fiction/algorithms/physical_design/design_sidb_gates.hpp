@@ -157,11 +157,12 @@ class design_sidb_gates_impl
         {
             for (const auto& comb : combination)
             {
-                // if sidb are too close of the position are impossible due to closely placed neutrally charged defects.
+                // if SiDBs are too close of the position are impossible due to closely placed neutrally charged defects
                 if (!are_sidbs_too_close(cell_indices_to_cell_vector(comb), sidbs_affected_by_defects))
                 {
                     // canvas SiDBs are added to the skeleton
                     auto layout_with_added_cells = add_canvas_sidbs_to_skeleton_layout(comb);
+
                     if (const auto [status, sim_calls] =
                             is_operational(layout_with_added_cells, truth_table, params_is_operational);
                         status == operational_status::OPERATIONAL)
@@ -170,31 +171,36 @@ class design_sidb_gates_impl
                             const std::lock_guard lock_vector{mutex_to_protect_designed_gate_layouts};
                             designed_gate_layouts.push_back(layout_with_added_cells);
                         }
+
                         solution_found = true;
                     }
+
                     if (solution_found &&
                         (params.termination_cond ==
                          design_sidb_gates_params<cell<Lyt>>::termination_condition::AFTER_FIRST_SOLUTION))
                     {
                         return;
                     }
+
                     continue;
                 }
             }
         };
 
-        static const auto num_threads = std::thread::hardware_concurrency();
-        const auto        chunk_size  = all_combinations.size() / num_threads;
+        const auto chunk_size = all_combinations.size() / num_threads;
 
         std::vector<std::thread> threads{};
         threads.reserve(num_threads);
 
         for (auto i = 0u; i < num_threads; ++i)
         {
-            const auto start = i * chunk_size;
-            const auto end   = (i == num_threads - 1) ? all_combinations.size() : (i + 1) * chunk_size;
-            std::vector<std::vector<std::size_t>> chunk_combinations(all_combinations.cbegin() + start,
-                                                                     all_combinations.cbegin() + end);
+            const std::size_t start = i * chunk_size;
+            const std::size_t end   = (i == num_threads - 1) ? all_combinations.size() : (i + 1) * chunk_size;
+
+            std::vector<std::vector<std::size_t>> chunk_combinations(
+                all_combinations.cbegin() + static_cast<int64_t>(start),
+                all_combinations.cbegin() + static_cast<int64_t>(end));
+
             threads.emplace_back(add_combination_to_layout_and_check_operation, chunk_combinations);
         }
 
@@ -226,9 +232,9 @@ class design_sidb_gates_impl
             params.canvas, params.number_of_sidbs,
             generate_random_sidb_layout_params<cell<Lyt>>::positive_charges::FORBIDDEN};
 
-        const std::size_t        num_threads = std::thread::hardware_concurrency();
         std::vector<std::thread> threads{};
         threads.reserve(num_threads);
+
         std::mutex mutex_to_protect_designed_gate_layouts{};  // used to control access to shared resources
 
         std::atomic<bool> gate_layout_is_found(false);
@@ -279,7 +285,10 @@ class design_sidb_gates_impl
 
         for (auto& thread : threads)
         {
-            thread.join();
+            if (thread.joinable())
+            {
+                thread.join();
+            }
         }
 
         return randomly_designed_gate_layouts;
@@ -304,12 +313,16 @@ class design_sidb_gates_impl
      */
     std::vector<typename Lyt::cell> all_sidbs_in_canvas;
     /**
+     * Number of threads to be used for parallel execution.
+     */
+    const std::size_t num_threads{std::thread::hardware_concurrency()};
+    /**
      * Checks if any SiDBs within the specified cell indices are located too closely together, with a distance of less
      * than 0.5 nanometers.
      *
-     * This function iterates through the provided cell indices and compares the distance between SiDBs. If it finds any
-     * pair of SiDBs within a distance of 0.5 nanometers, it returns `true` to indicate that SiDBs are too close;
-     * otherwise, it returns `false`.
+     * This function iterates over the provided cell indices and compares the distance between SiDBs. If it finds any
+     * pair of SiDBs within a distance of less than 0.5 nanometers, it returns `true` indicating that SiDBs are too
+     * close; otherwise, it returns `false`.
      *
      * @param cells A vector of cells to check for proximity.
      * @tparam affected_cells All SiDBs that are affected by atomic defects.
