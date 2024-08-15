@@ -20,12 +20,14 @@ namespace detail
 {
 
 template <typename Lyt>
-void time_to_solution(pybind11::module& m, const std::string& lattice = "")
+void time_to_solution(pybind11::module& m)
 {
     using namespace pybind11::literals;
 
     m.def("time_to_solution", &fiction::time_to_solution<Lyt>, "lyt"_a, "quickim_params"_a,
           "tts_params"_a = fiction::time_to_solution_params{}, "ps"_a = nullptr, DOC(fiction_time_to_solution));
+    // todo add docu
+    m.def("time_to_solution_for_given_simulation_results", &fiction::time_to_solution_for_given_simulation_results<Lyt>, "results_exact"_a, "results_heuristic"_a, "confidence_level"_a = 0.997, "ps"_a = nullptr);
 }
 
 }  // namespace detail

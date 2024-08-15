@@ -187,6 +187,7 @@ Time-to-Solution (TTS) Statistics
         .. doxygenstruct:: fiction::time_to_solution_stats
            :members:
         .. doxygenfunction:: fiction::time_to_solution
+        .. doxygenfunction:: fiction::time_to_solution_for_given_simulation_results
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.time_to_solution_params
@@ -194,6 +195,7 @@ Time-to-Solution (TTS) Statistics
         .. autoclass:: mnt.pyfiction.time_to_solution_stats
             :members:
         .. autofunction:: mnt.pyfiction.time_to_solution
+        .. autofunction:: mnt.pyfiction.time_to_solution_for_given_simulation_results
 
 
 Random SiDB Layout Generator

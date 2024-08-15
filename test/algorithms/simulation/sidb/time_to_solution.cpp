@@ -5,20 +5,25 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/algorithms/simulation/sidb/quicksim.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 #include <fiction/algorithms/simulation/sidb/time_to_solution.hpp>
 #include <fiction/technology/physical_constants.hpp>
+#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
 #include <cmath>
+#include <cstddef>
 #include <limits>
+#include <vector>
 
 using namespace fiction;
 
-TEMPLATE_TEST_CASE("time to solution test", "[time-to-solution]", (sidb_100_cell_clk_lyt_siqad),
-                   (cds_sidb_100_cell_clk_lyt_siqad))
+TEMPLATE_TEST_CASE("time to solution test", "[time-to-solution]", sidb_100_cell_clk_lyt_siqad,
+                   cds_sidb_100_cell_clk_lyt_siqad)
 {
     TestType lyt{};
 
@@ -92,12 +97,9 @@ TEMPLATE_TEST_CASE("time to solution test", "[time-to-solution]", (sidb_100_cell
     }
 }
 
-TEMPLATE_TEST_CASE("time to solution test, using offset coordinates", "[time-to-solution]",
-                   (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>),
-                   (charge_distribution_surface<
-                       cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>))
+TEMPLATE_TEST_CASE("time to solution test, using offset coordinates", "[time-to-solution]", cds_sidb_100_cell_clk_lyt,
+                   cds_sidb_100_cell_clk_lyt)
 {
-
     TestType lyt{};
 
     SECTION("layout with seven SiDBs placed")
@@ -141,6 +143,60 @@ TEMPLATE_TEST_CASE("time to solution test, using offset coordinates", "[time-to-
                               std::log(1.0 - tts_stat_quickexact.acc));
         }
         CHECK_THAT(tts_stat_quickexact.time_to_solution - tts_calculated,
+                   Catch::Matchers::WithinAbs(0.0, physical_constants::POP_STABILITY_ERR));
+    }
+}
+
+TEMPLATE_TEST_CASE("time to solution test with simulation results, using offset coordinates", "[time-to-solution]",
+                   cds_sidb_100_cell_clk_lyt, cds_sidb_100_cell_clk_lyt)
+{
+    TestType lyt{};
+
+    SECTION("layout with seven SiDBs placed")
+    {
+        lyt.assign_cell_type({1, 6, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({3, 6, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({5, 6, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({7, 6, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({10, 6, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({12, 6, 0}, TestType::cell_type::NORMAL);
+
+        const sidb_simulation_parameters params{3, -0.32};
+        const quicksim_params            quicksim_params{params};
+
+        std::size_t number_of_repetitions = 100;
+
+        std::vector<sidb_simulation_result<TestType>> simulation_results_quicksim{};
+        simulation_results_quicksim.reserve(number_of_repetitions);
+
+        for (auto i = 0u; i < simulation_results_quicksim.size(); i++)
+        {
+            simulation_results_quicksim.push_back(quicksim<TestType>(lyt, quicksim_params));
+        }
+
+        const auto simulation_results_quickexact =
+            quickexact(lyt, quickexact_params<cell<TestType>>{quicksim_params.simulation_parameters});
+
+        time_to_solution_stats st{};
+        time_to_solution_for_given_simulation_results(simulation_results_quickexact, simulation_results_quicksim, 0.997,
+                                                      &st);
+
+        REQUIRE(st.acc == 100);
+        CHECK(st.time_to_solution > 0.0);
+        CHECK(st.mean_single_runtime > 0.0);
+
+        // calculate tts manually.
+        double tts_calculated = 0.0;
+
+        if (st.acc == 100)
+        {
+            tts_calculated = st.mean_single_runtime;
+        }
+        else
+        {
+            tts_calculated = (st.mean_single_runtime * std::log(1.0 - 0.997) / std::log(1.0 - st.acc));
+        }
+        CHECK_THAT(st.time_to_solution - tts_calculated,
                    Catch::Matchers::WithinAbs(0.0, physical_constants::POP_STABILITY_ERR));
     }
 }

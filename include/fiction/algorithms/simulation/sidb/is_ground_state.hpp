@@ -5,9 +5,7 @@
 #ifndef FICTION_IS_GROUND_STATE_HPP
 #define FICTION_IS_GROUND_STATE_HPP
 
-#include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
-#include "fiction/algorithms/simulation/sidb/quickexact.hpp"
-#include "fiction/algorithms/simulation/sidb/quicksim.hpp"
+#include "fiction/algorithms/simulation/sidb/determine_groundstate_from_simulation_results.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/math_utils.hpp"
@@ -18,7 +16,7 @@ namespace fiction
 {
 
 /**
- * This function checks if the ground state is found by the *QuickSim* algorithm.
+ * This function checks if the ground state is found by the heuristic.
  *
  * @tparam Lyt Cell-level layout type.
  * @param heuristic_results All found physically valid charge distribution surfaces obtained by a heuristic algorithm.
@@ -38,12 +36,29 @@ template <typename Lyt>
         return false;
     }
 
-    const auto min_energy_exact = minimum_energy(exhaustive_results.charge_distributions.cbegin(),
-                                                 exhaustive_results.charge_distributions.cend());
-    const auto min_energy_heuristic =
-        minimum_energy(heuristic_results.charge_distributions.cbegin(), heuristic_results.charge_distributions.cend());
+    const auto ground_state_charge_distributions_exhaustive =
+        determine_groundstate_from_simulation_results(exhaustive_results);
 
-    return round_to_n_decimal_places(std::abs(min_energy_exact - min_energy_heuristic), 6) == 0;
+    const auto ground_state_charge_distributions_heuristic =
+        determine_groundstate_from_simulation_results(heuristic_results);
+
+    if (ground_state_charge_distributions_exhaustive.size() != ground_state_charge_distributions_heuristic.size())
+    {
+        return false;
+    }
+
+    for (const auto& cds_exhaustive : ground_state_charge_distributions_exhaustive)
+    {
+        for (const auto& cds_heuristic : ground_state_charge_distributions_exhaustive)
+        {
+            if (cds_exhaustive.get_charge_index_and_base().first != cds_heuristic.get_charge_index_and_base().first)
+            {
+                return false;
+            }
+        }
+    }
+
+    return true;
 }
 
 }  // namespace fiction

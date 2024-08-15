@@ -98,6 +98,22 @@ enum class charge_index_recomputation
 };
 
 /**
+ * An enumeration of modes for handling the charge distribution.
+ */
+enum class charge_distribution_mode
+{
+    /**
+     * The charge distribution is updated.
+     */
+    UPDATE_CHARGE_DISTRIBUTION,
+    /**
+     * The charge distribution is kept is not update based on the charge index.
+     */
+    KEEP_CHARGE_DISTRIBUTION
+
+};
+
+/**
  * An enumeration of modes for handling the charge index during charge state assignment.
  */
 enum class charge_index_mode
@@ -505,14 +521,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                         const auto dist = sidb_nm_distance<Lyt>(*this, c1, c);
                         const auto pot  = chargeless_potential_generated_by_defect_at_given_distance(dist, defect);
 
-                        if (strg->defect_local_pot.empty())
-                        {
-                            strg->defect_local_pot.insert(std::make_pair(c1, pot * static_cast<double>(defect.charge)));
-                        }
-                        else
-                        {
-                            strg->defect_local_pot[c1] += pot * static_cast<double>(defect.charge);
-                        }
+                        strg->defect_local_pot[c1] += pot * static_cast<double>(defect.charge);
                     });
 
                 this->update_after_charge_change(dependent_cell_mode::FIXED);
@@ -1195,12 +1204,18 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * according to the set charge index.
      *
      * @param charge_index charge index of the new charge distribution.
+     * @param cdc Setting to determine if the charge distribution should be updated after the charge index is assigned.
      */
-    void assign_charge_index(const uint64_t charge_index) noexcept
+    void assign_charge_index(const uint64_t                        charge_index,
+                             const charge_distribution_mode cdc = charge_distribution_mode::UPDATE_CHARGE_DISTRIBUTION) noexcept
     {
         assert((charge_index <= strg->max_charge_index) && "charge index is too large");
         strg->charge_index_and_base.first = charge_index;
-        this->index_to_charge_distribution();
+
+        if (cdc == charge_distribution_mode::UPDATE_CHARGE_DISTRIBUTION)
+        {
+            this->index_to_charge_distribution();
+        }
     }
     /**
      * This function is used for the *QuickSim* algorithm (see quicksim.hpp). It gets a vector with indices representing

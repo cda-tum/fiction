@@ -5,6 +5,7 @@
 #ifndef FICTION_TIME_TO_SOLUTION_HPP
 #define FICTION_TIME_TO_SOLUTION_HPP
 
+#include "fiction/algorithms/simulation/sidb/determine_groundstate_from_simulation_results.hpp"
 #include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
 #include "fiction/algorithms/simulation/sidb/is_ground_state.hpp"
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
@@ -114,41 +115,68 @@ void time_to_solution(const Lyt& lyt, const quicksim_params& quicksim_params,
         simulation_result = exhaustive_ground_state_simulation(lyt, quicksim_params.simulation_parameters);
     }
 
-    st.single_runtime_exhaustive = mockturtle::to_seconds(simulation_result.simulation_runtime);
-
-    std::size_t         gs_count = 0;
-    std::vector<double> time{};
-    time.reserve(tts_params.repetitions);
+    std::vector<sidb_simulation_result<Lyt>> simulation_results_quicksim{};
+    simulation_results_quicksim.reserve(tts_params.repetitions);
 
     for (auto i = 0u; i < tts_params.repetitions; ++i)
     {
-        sidb_simulation_result<Lyt> stats_quick{};
-
-        const auto t_start = std::chrono::high_resolution_clock::now();
-
-        const auto simulation_results_quicksim = quicksim<Lyt>(lyt, quicksim_params);
-
-        const auto t_end      = std::chrono::high_resolution_clock::now();
-        const auto elapsed    = t_end - t_start;
-        const auto diff_first = std::chrono::duration<double>(elapsed).count();
-
-        time.push_back(diff_first);
-
-        if (is_ground_state(simulation_results_quicksim, simulation_result))
-        {
-            gs_count += 1;
-        }
+        simulation_results_quicksim.push_back(quicksim<Lyt>(lyt, quicksim_params));
     }
 
-    const auto single_runtime =
-        std::accumulate(time.cbegin(), time.cend(), 0.0) / static_cast<double>(tts_params.repetitions);
-    const auto acc = static_cast<double>(gs_count) / static_cast<double>(tts_params.repetitions);
+    time_to_solution_for_given_simulation_results(simulation_result, simulation_results_quicksim,
+                                                  tts_params.confidence_level, &st);
+
+    if (ps)
+    {
+        *ps = st;
+    }
+}
+
+/**
+ * This function calculates the Time-to-Solution (TTS) by analyzing the simulation results of a heuristic algorithm
+ * in comparison to those of an exact algorithm. It provides further statistical metrics, including the accuracy of the
+ * heuristic algorithm, and individual runtimes.
+ *
+ * @tparam Lyt Cell-level layout type.
+ * @param results_exact Simulation results of the exact algorithm.
+ * @param results_heuristic Simulation of the heuristic for which the TTS is determined.
+ * @param confidence_level Confidence level for the TTS computation
+ * @param ps Pointer to a struct where the results (time_to_solution, acc, single runtime) are stored.
+ */
+template <typename Lyt>
+void time_to_solution_for_given_simulation_results(const sidb_simulation_result<Lyt>&              results_exact,
+                                                   const std::vector<sidb_simulation_result<Lyt>>& results_heuristic,
+                                                   const double            confidence_level = 0.997,
+                                                   time_to_solution_stats* ps               = nullptr) noexcept
+{
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+
+    time_to_solution_stats st{};
+
+    const auto ground_state = determine_groundstate_from_simulation_results(results_exact);
+
+    auto        total_runtime_heuristic = 0.0;
+    std::size_t gs_count                = 0;
+
+    for (const auto& heuristic : results_heuristic)
+    {
+        if (is_ground_state(heuristic, results_exact))
+        {
+            ++gs_count;
+        }
+        total_runtime_heuristic += mockturtle::to_seconds(heuristic.simulation_runtime);
+    }
+
+    const auto single_runtime_heuristic_average = total_runtime_heuristic / results_heuristic.size();
+
+    const auto acc = static_cast<double>(gs_count) / static_cast<double>(results_heuristic.size());
 
     double tts = 0.0;
 
     if (acc == 1)
     {
-        tts = single_runtime;
+        tts = single_runtime_heuristic_average;
     }
     else if (acc == 0)
     {
@@ -156,16 +184,18 @@ void time_to_solution(const Lyt& lyt, const quicksim_params& quicksim_params,
     }
     else
     {
-        tts = (single_runtime * std::log(1.0 - tts_params.confidence_level) / std::log(1.0 - acc));
+        tts = (single_runtime_heuristic_average * std::log(1.0 - confidence_level) / std::log(1.0 - acc));
     }
 
-    st.time_to_solution    = tts;
-    st.acc                 = acc * 100;
-    st.mean_single_runtime = single_runtime;
+    st.single_runtime_exhaustive = mockturtle::to_seconds(results_exact.simulation_runtime);
+    st.time_to_solution          = tts;
+    st.acc                       = acc * 100;
+    st.mean_single_runtime       = single_runtime_heuristic_average;
 
     if (ps)
     {
-        *ps = st;
+        st.algorithm = (*ps).algorithm;
+        *ps          = st;
     }
 }
 

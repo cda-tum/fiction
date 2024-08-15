@@ -2,6 +2,7 @@ from mnt.pyfiction import *
 import unittest
 import os
 
+# todo add test for new function
 class TestTimeToSolution(unittest.TestCase):
 
     def test_one_sidb_100_lattice(self):

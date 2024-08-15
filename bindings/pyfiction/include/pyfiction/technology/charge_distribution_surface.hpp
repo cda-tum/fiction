@@ -175,7 +175,7 @@ void charge_distribution_surface_layout(pybind11::module& m, const std::string& 
             "engine"_a                  = fiction::exhaustive_sidb_simulation_engine::EXGS)
 
         .def("get_max_charge_index", &py_cds::get_max_charge_index)
-        .def("assign_charge_index", &py_cds::assign_charge_index, "charge_index"_a)
+        .def("assign_charge_index", &py_cds::assign_charge_index, "charge_index"_a, "cdc"_a)
         .def("adjacent_search", &py_cds::adjacent_search, "alpha"_a, "negative_indices"_a)
         .def("assign_global_external_potential", &py_cds::assign_global_external_potential, "potential_value"_a,
              "dependent_cell"_a = fiction::dependent_cell_mode::FIXED)
@@ -290,6 +290,18 @@ inline void charge_distribution_surfaces(pybind11::module& m)
                DOC(fiction_energy_calculation_KEEP_OLD_ENERGY_VALUE))
         .value("UPDATE_ENERGY", fiction::energy_calculation::UPDATE_ENERGY,
                DOC(fiction_energy_calculation_UPDATE_ENERGY))
+
+        ;
+
+    /**
+     * Charge distribution mode.
+     */
+     // todo add docu
+    py::enum_<fiction::charge_distribution_mode>(m, "charge_distribution_mode", py::module_local())
+        .value("UPDATE_CHARGE_DISTRIBUTION", fiction::charge_distribution_mode::UPDATE_CHARGE_DISTRIBUTION,
+               DOC(fiction_charge_index_mode_UPDATE_CHARGE_INDEX))
+        .value("KEEP_CHARGE_DISTRIBUTION", fiction::charge_distribution_mode::KEEP_CHARGE_DISTRIBUTION,
+               DOC(fiction_charge_index_mode_KEEP_CHARGE_INDEX))
 
         ;
 
