@@ -69,7 +69,7 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
     CHECK(found_gate_layouts[0].get_cell_type({10, 4, 0}) == siqad_layout::technology::NORMAL);
 
     // using cube coordinates
-    const auto lyt_in_cube_coord = convert_to_fiction_coordinates<cube_layout>(lyt);
+    const auto lyt_in_cube_coord = convert_layout_to_fiction_coordinates<cube_layout>(lyt);
     const design_sidb_gates_params<cell<cube_layout>> params_cube{
         sidb_simulation_parameters{2, -0.32},
         design_sidb_gates_params<cell<cube_layout>>::design_sidb_gates_mode::EXHAUSTIVE,
@@ -87,7 +87,7 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
           siqad_layout::technology::NORMAL);
 
     // using offset coordinates
-    const auto lyt_in_offset_coord = convert_to_fiction_coordinates<offset_layout>(lyt);
+    const auto lyt_in_offset_coord = convert_layout_to_fiction_coordinates<offset_layout>(lyt);
     const design_sidb_gates_params<cell<offset_layout>> params_offset{
         sidb_simulation_parameters{2, -0.32},
         design_sidb_gates_params<cell<offset_layout>>::design_sidb_gates_mode::EXHAUSTIVE,
