@@ -296,12 +296,11 @@ inline void charge_distribution_surfaces(pybind11::module& m)
     /**
      * Charge distribution mode.
      */
-     // todo add docu
-    py::enum_<fiction::charge_distribution_mode>(m, "charge_distribution_mode", py::module_local())
+    py::enum_<fiction::charge_distribution_mode>(m, "charge_distribution_mode", py::module_local(), DOC(fiction_charge_distribution_mode))
         .value("UPDATE_CHARGE_DISTRIBUTION", fiction::charge_distribution_mode::UPDATE_CHARGE_DISTRIBUTION,
-               DOC(fiction_charge_index_mode_UPDATE_CHARGE_INDEX))
+               DOC(fiction_charge_distribution_mode_UPDATE_CHARGE_DISTRIBUTION))
         .value("KEEP_CHARGE_DISTRIBUTION", fiction::charge_distribution_mode::KEEP_CHARGE_DISTRIBUTION,
-               DOC(fiction_charge_index_mode_KEEP_CHARGE_INDEX))
+               DOC(fiction_charge_distribution_mode_KEEP_CHARGE_DISTRIBUTION))
 
         ;
 

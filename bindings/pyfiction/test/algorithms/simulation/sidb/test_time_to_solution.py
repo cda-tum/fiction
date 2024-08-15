@@ -43,5 +43,57 @@ class TestTimeToSolution(unittest.TestCase):
         self.assertGreater(stats.time_to_solution, 0.0)
         self.assertGreater(stats.mean_single_runtime, 0.0)
 
+    def test_time_to_solution_with_simulation_results(self):
+        layout = sidb_100_lattice((0, 0))
+
+        # Assign SiDBs to the layout
+        layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
+        layout.assign_cell_type((1, 6, 0), sidb_technology.cell_type.NORMAL)
+        layout.assign_cell_type((3, 6, 0), sidb_technology.cell_type.NORMAL)
+        layout.assign_cell_type((5, 6, 0), sidb_technology.cell_type.NORMAL)
+        layout.assign_cell_type((7, 6, 0), sidb_technology.cell_type.NORMAL)
+        layout.assign_cell_type((10, 6, 0), sidb_technology.cell_type.NORMAL)
+        layout.assign_cell_type((12, 6, 0), sidb_technology.cell_type.NORMAL)
+
+        # Define simulation parameters
+        params = sidb_simulation_parameters(3, -0.32)
+        quicksim_params_inst = quicksim_params()
+        quicksim_params_inst.simulation_parameters = params
+
+        number_of_repetitions = 100
+        simulation_results_quicksim = []
+
+        # Run the quicksim simulations
+        for _ in range(number_of_repetitions):
+            simulation_results_quicksim.append(quicksim(layout, quicksim_params_inst))
+
+
+        quickexact_params_inst = quickexact_params()
+        quickexact_params_inst.simulation_parameters = params
+        quickexact_params_inst.base_number_detection = automatic_base_number_detection.OFF
+        self.assertEqual(quickexact_params_inst.simulation_parameters.mu_minus, -0.32)
+        self.assertEqual(quickexact_params_inst.base_number_detection, automatic_base_number_detection.OFF)
+
+        # Run the quickexact simulation
+        simulation_results_quickexact = quickexact(layout, quickexact_params_inst)
+
+        # Calculate time-to-solution using the simulation results
+        st = time_to_solution_stats()
+        time_to_solution_for_given_simulation_results(
+            simulation_results_quickexact, simulation_results_quicksim, 0.997, st)
+
+        # Assertions
+        self.assertEqual(st.acc, 100)
+        self.assertGreater(st.time_to_solution, 0.0)
+        self.assertGreater(st.mean_single_runtime, 0.0)
+
+        # Calculate the time-to-solution manually
+        tts_calculated = (st.mean_single_runtime if st.acc == 100 else
+                          (st.mean_single_runtime * math.log(1.0 - 0.997) / math.log(1.0 - st.acc)))
+
+        self.assertAlmostEqual(st.time_to_solution - tts_calculated, 0.0, delta=1e-6)
+
+
+
 if __name__ == '__main__':
     unittest.main()
