@@ -1844,6 +1844,14 @@ R"doc(The previous charge distribution is not used. Hence, the local
 electrostatic potential of the given charge distribution is calculated
 from scratch.)doc";
 
+static const char *__doc_fiction_charge_distribution_mode = R"doc(An enumeration of modes for handling the charge distribution.)doc";
+
+static const char *__doc_fiction_charge_distribution_mode_KEEP_CHARGE_DISTRIBUTION =
+R"doc(The charge distribution is kept is not update based on the charge
+index.)doc";
+
+static const char *__doc_fiction_charge_distribution_mode_UPDATE_CHARGE_DISTRIBUTION = R"doc(The charge distribution is updated.)doc";
+
 static const char *__doc_fiction_charge_distribution_surface = R"doc()doc";
 
 static const char *__doc_fiction_charge_distribution_surface_2 = R"doc()doc";
@@ -12127,8 +12135,7 @@ Returns:
 static const char *__doc_fiction_is_gate_level_layout = R"doc()doc";
 
 static const char *__doc_fiction_is_ground_state =
-R"doc(This function checks if the ground state is found by the *QuickSim*
-algorithm.
+R"doc(This function checks if the ground state is found by the heuristic.
 
 Template parameter ``Lyt``:
     Cell-level layout type.
@@ -15987,6 +15994,28 @@ Parameter ``quicksim_params``:
 
 Parameter ``tts_params``:
     Parameters used for the time-to-solution calculation.
+
+Parameter ``ps``:
+    Pointer to a struct where the results (time_to_solution, acc,
+    single runtime) are stored.)doc";
+
+static const char *__doc_fiction_time_to_solution_for_given_simulation_results =
+R"doc(This function calculates the Time-to-Solution (TTS) by analyzing the
+simulation results of a heuristic algorithm in comparison to those of
+an exact algorithm. It provides further statistical metrics, including
+the accuracy of the heuristic algorithm, and individual runtimes.
+
+Template parameter ``Lyt``:
+    Cell-level layout type.
+
+Parameter ``results_exact``:
+    Simulation results of the exact algorithm.
+
+Parameter ``results_heuristic``:
+    Simulation of the heuristic for which the TTS is determined.
+
+Parameter ``confidence_level``:
+    Confidence level for the TTS computation
 
 Parameter ``ps``:
     Pointer to a struct where the results (time_to_solution, acc,
