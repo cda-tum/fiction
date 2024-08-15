@@ -1206,8 +1206,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param charge_index charge index of the new charge distribution.
      * @param cdc Setting to determine if the charge distribution should be updated after the charge index is assigned.
      */
-    void assign_charge_index(const uint64_t                        charge_index,
-                             const charge_distribution_mode cdc = charge_distribution_mode::UPDATE_CHARGE_DISTRIBUTION) noexcept
+    void assign_charge_index(
+        const uint64_t                 charge_index,
+        const charge_distribution_mode cdc = charge_distribution_mode::UPDATE_CHARGE_DISTRIBUTION) noexcept
     {
         assert((charge_index <= strg->max_charge_index) && "charge index is too large");
         strg->charge_index_and_base.first = charge_index;
