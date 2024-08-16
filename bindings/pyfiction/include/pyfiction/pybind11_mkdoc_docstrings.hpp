@@ -8674,6 +8674,17 @@ static const char *__doc_fiction_exact_physical_design_stats_x_size = R"doc()doc
 
 static const char *__doc_fiction_exact_physical_design_stats_y_size = R"doc()doc";
 
+static const char *__doc_fiction_exact_sidb_simulation_engine = R"doc(Selector exclusively for exact SiDB simulation engines.)doc";
+
+static const char *__doc_fiction_exact_sidb_simulation_engine_EXGS =
+R"doc(*Exhaustive Ground State Search* (EXGS) is an exact simulation engine
+that always has exponential runtime.)doc";
+
+static const char *__doc_fiction_exact_sidb_simulation_engine_QUICKEXACT =
+R"doc(*QuickExact* is also an exact simulation engine that requires
+exponential runtime, but it scales a lot better than ExGS due to its
+effective search-space pruning.)doc";
+
 static const char *__doc_fiction_exact_with_blacklist =
 R"doc(The same as `exact` but with a black list of tiles that are not
 allowed to be used to a specified set of Boolean functions and their
@@ -8736,17 +8747,6 @@ Parameter ``ps``:
 
 Returns:
     sidb_simulation_result is returned with all results.)doc";
-
-static const char *__doc_fiction_exhaustive_sidb_simulation_engine = R"doc(Selector exclusively for exhaustive SiDB simulation engines.)doc";
-
-static const char *__doc_fiction_exhaustive_sidb_simulation_engine_EXGS =
-R"doc(*Exhaustive Ground State Search* (EXGS) is an exact simulation engine
-that always has exponential runtime.)doc";
-
-static const char *__doc_fiction_exhaustive_sidb_simulation_engine_QUICKEXACT =
-R"doc(*QuickExact* is also an exact simulation engine that requires
-exponential runtime, but it scales a lot better than ExGS due to its
-effective search-space pruning.)doc";
 
 static const char *__doc_fiction_extract_routing_objectives =
 R"doc(Extracts all routing objectives from the given layout. To this end,
@@ -12144,7 +12144,7 @@ Parameter ``heuristic_results``:
     All found physically valid charge distribution surfaces obtained
     by a heuristic algorithm.
 
-Parameter ``exhaustive_results``:
+Parameter ``exact_results``:
     All valid charge distribution surfaces determined by ExGS.
 
 Returns:
@@ -16043,7 +16043,7 @@ configurations found by the exact algorithm.)doc";
 static const char *__doc_fiction_time_to_solution_stats_acc = R"doc(Accuracy of the simulation.)doc";
 
 static const char *__doc_fiction_time_to_solution_stats_algorithm =
-R"doc(Exhaustive simulation algorithm used to simulate the ground state as
+R"doc(Exact simulation algorithm used to simulate the ground state as
 reference.)doc";
 
 static const char *__doc_fiction_time_to_solution_stats_mean_single_runtime = R"doc(Average single simulation runtime in seconds.)doc";
@@ -16054,9 +16054,9 @@ R"doc(Print the results to the given output stream.
 Parameter ``out``:
     Output stream.)doc";
 
-static const char *__doc_fiction_time_to_solution_stats_single_runtime_exhaustive =
-R"doc(Single simulation runtime of the exhaustive ground state searcher in
-seconds.)doc";
+static const char *__doc_fiction_time_to_solution_stats_single_runtime_exact =
+R"doc(Single simulation runtime of the exact ground state simulation
+algorithm.)doc";
 
 static const char *__doc_fiction_time_to_solution_stats_time_to_solution = R"doc(Time-to-solution in seconds.)doc";
 
