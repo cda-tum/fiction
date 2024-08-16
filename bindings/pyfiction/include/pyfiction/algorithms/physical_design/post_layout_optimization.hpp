@@ -30,6 +30,8 @@ inline void post_layout_optimization(pybind11::module& m)
                        DOC(fiction_post_layout_optimization_params_max_gate_relocations))
         .def_readwrite("optimize_pos_only", &fiction::post_layout_optimization_params::optimize_pos_only,
                        DOC(fiction_post_layout_optimization_params_optimize_pos_only))
+        .def_readwrite("planar_optimization", &fiction::post_layout_optimization_params::planar_optimization,
+                       DOC(fiction_post_layout_optimization_params_planar_optimization))
 
         ;
 
