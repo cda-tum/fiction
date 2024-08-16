@@ -68,14 +68,6 @@ jobs:
       - name: Install libraries and the respective compiler
         run: sudo apt-get update && sudo apt-get install -yq libtbb-dev ${{matrix.compiler}}
 
-      # TODO remove before merging
-      - name: Verify Compilers Installation
-        run: |
-          echo "Verifying installed compilers"
-          clang++ --version || echo "clang++ not found"
-          g++ --version || echo "g++ not found"
-          which ${{matrix.compiler}} || echo "${{matrix.compiler}} not found"
-
       - name: Clone Repository
         uses: actions/checkout@v4
         with:
