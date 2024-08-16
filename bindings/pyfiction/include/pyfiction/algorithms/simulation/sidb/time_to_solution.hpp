@@ -57,8 +57,8 @@ inline void time_to_solution(pybind11::module& m)
         .def_readwrite("acc", &fiction::time_to_solution_stats::acc, DOC(fiction_time_to_solution_stats_acc))
         .def_readwrite("mean_single_runtime", &fiction::time_to_solution_stats::mean_single_runtime,
                        DOC(fiction_time_to_solution_stats_mean_single_runtime))
-        .def_readwrite("single_runtime_exact", &fiction::time_to_solution_stats::single_runtime_exact
-                       DOC(fiction_time_to_solution_stats_single_runtime_exact))
+        .def_readwrite("single_runtime_exact", &fiction::time_to_solution_stats::single_runtime_exact DOC(
+                                                   fiction_time_to_solution_stats_single_runtime_exact))
         .def_readwrite("algorithm", &fiction::time_to_solution_stats::algorithm,
                        DOC(fiction_time_to_solution_stats_algorithm))
         .def("report", &fiction::time_to_solution_stats::report, DOC(fiction_time_to_solution_stats_report));
