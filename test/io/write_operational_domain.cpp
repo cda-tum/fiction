@@ -29,8 +29,8 @@ TEST_CASE("Write empty operational domain", "[write-operational-domain]")
     }
     SECTION("custom sweep dimensions")
     {
-        opdom.x_dimension = operational_domain::sweep_parameter::LAMBDA_TF;
-        opdom.y_dimension = operational_domain::sweep_parameter::MU_MINUS;
+        opdom.x_dimension = sweep_parameter::LAMBDA_TF;
+        opdom.y_dimension = sweep_parameter::MU_MINUS;
 
         static constexpr const char* expected = "lambda_tf,mu_minus,operational status\n";
 

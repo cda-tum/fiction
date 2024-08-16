@@ -30,7 +30,9 @@ Simulation Result
            :members:
 
     .. tab:: Python
-        .. autoclass:: mnt.pyfiction.sidb_simulation_result
+        .. autoclass:: mnt.pyfiction.sidb_simulation_result_100
+            :members:
+        .. autoclass:: mnt.pyfiction.sidb_simulation_result_111
             :members:
 
 
@@ -150,8 +152,6 @@ Temperature Behavior
         .. doxygenfunction:: fiction::calculate_energy_and_state_type
 
     .. tab:: Python
-        .. autoclass:: mnt.pyfiction.critical_temperature_mode
-            :members:
         .. autoclass:: mnt.pyfiction.simulation_engine
             :members:
         .. autoclass:: mnt.pyfiction.critical_temperature_params
@@ -233,9 +233,13 @@ Operational Domain Computation
 
         **Header:** ``fiction/algorithms/simulation/sidb/operational_domain.hpp``
 
+        .. doxygenstruct:: fiction::parameter_point
+           :members:
+        .. doxygenenum:: fiction::sweep_parameter
         .. doxygenstruct:: fiction::operational_domain
            :members:
-
+        .. doxygenfunction:: fiction::find_parameter_point_with_tolerance
+        .. doxygenfunction:: fiction::find_key_with_tolerance
         .. doxygenstruct:: fiction::operational_domain_params
            :members:
         .. doxygenstruct:: fiction::operational_domain_stats
@@ -270,6 +274,46 @@ Operational Domain Computation
         .. autofunction:: mnt.pyfiction.operational_domain_flood_fill
         .. autofunction:: mnt.pyfiction.operational_domain_contour_tracing
 
+
+Determine Physically Valid Parameters
+#####################################
+
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/algorithms/simulation/sidb/determine_physically_valid_parameters.hpp``
+
+        .. doxygenfunction:: fiction::determine_physically_valid_parameters
+
+   .. tab:: Python
+        .. autoclass:: mnt.pyfiction.determine_physically_valid_parameters
+
+
+Displacement Robustness Domain
+##############################
+
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/algorithms/simulation/sidb/determine_displacement_robustness.hpp``
+
+        .. doxygenenum:: fiction::dimer_displacement_policy
+        .. doxygenstruct:: fiction::displacement_robustness_domain
+           :members:
+        .. doxygenstruct:: fiction::displacement_robustness_domain_params
+           :members:
+        .. doxygenstruct:: fiction::displacement_robustness_domain_stats
+           :members:
+        .. doxygenfunction:: fiction::determine_displacement_robustness_domain
+        .. doxygenfunction:: fiction::determine_propability_of_fabricating_operational_gate
+
+    .. tab:: Python
+        .. autoclass:: mnt.pyfiction.displacement_analysis_mode
+            :members:
+        .. autofunction:: mnt.pyfiction.displacement_robustness_domain_params
+        .. autofunction:: mnt.pyfiction.displacement_robustness_domain_stats
+        .. autofunction:: mnt.pyfiction.displacement_robustness_domain_100
+        .. autofunction:: mnt.pyfiction.displacement_robustness_domain_111
+        .. autofunction:: mnt.pyfiction.determine_displacement_robustness_domain_100
+        .. autofunction:: mnt.pyfiction.determine_displacement_robustness_domain_111
 
 
 Utility Functions

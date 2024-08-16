@@ -10,7 +10,6 @@
 
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
-#include <fiction/io/print_layout.hpp>
 #include <fiction/technology/charge_distribution_surface.hpp>
 #include <fiction/technology/sidb_charge_state.hpp>
 #include <fiction/technology/sidb_defects.hpp>
@@ -76,9 +75,9 @@ void charge_distribution_surface_layout(pybind11::module& m, const std::string& 
             "cell_to_index", [](py_cds& cds, fiction::cell<py_cds> c) { return cds.cell_to_index(c); }, "c"_a)
         .def(
             "assign_charge_state",
-            [](py_cds& cds, fiction::cell<py_cds> c, fiction::sidb_charge_state cs, bool update_charge_index = true)
-            { return cds.assign_charge_state(c, cs, update_charge_index); }, "c"_a, "cs"_a,
-            "update_charge_index"_a = true)
+            [](py_cds& cds, fiction::cell<py_cds> c, fiction::sidb_charge_state cs,
+               fiction::charge_index_mode index_mode) { return cds.assign_charge_state(c, cs, index_mode); },
+            "c"_a, "cs"_a, "index_mode"_a = fiction::charge_index_mode::UPDATE_CHARGE_INDEX)
         .def(
             "assign_charge_by_cell_index", [](py_cds& cds, uint64_t i, fiction::sidb_charge_state cs)
             { return cds.assign_charge_by_cell_index(i, cs); }, "i"_a, "cs"_a)
@@ -99,9 +98,9 @@ void charge_distribution_surface_layout(pybind11::module& m, const std::string& 
 
         .def(
             "assign_charge_state_by_cell_index",
-            [](py_cds& cds, uint64_t index, fiction::sidb_charge_state cs, bool update_charge_configuration = true)
-            { return cds.assign_charge_state_by_cell_index(index, cs, update_charge_configuration); }, "index"_a,
-            "cs"_a, "update_charge_configuration"_a = true)
+            [](py_cds& cds, uint64_t index, fiction::sidb_charge_state cs, fiction::charge_index_mode index_mode)
+            { return cds.assign_charge_state_by_cell_index(index, cs, index_mode); }, "index"_a, "cs"_a,
+            "index_mode"_a = fiction::charge_index_mode::UPDATE_CHARGE_INDEX)
         .def(
             "get_charge_state", [](py_cds& cds, fiction::cell<py_cds> c) { return cds.get_charge_state(c); }, "c"_a)
         .def(
@@ -260,7 +259,7 @@ void charge_distribution_surface_layout(pybind11::module& m, const std::string& 
              [](const py_cds& lyt)
              {
                  std::stringstream ss;
-                 print_layout(fiction::convert_to_siqad_coordinates(lyt), ss);
+                 print_layout(fiction::convert_layout_to_siqad_coordinates(lyt), ss);
                  return ss.str();
              })
 
@@ -291,6 +290,17 @@ inline void charge_distribution_surfaces(pybind11::module& m)
                DOC(fiction_energy_calculation_KEEP_OLD_ENERGY_VALUE))
         .value("UPDATE_ENERGY", fiction::energy_calculation::UPDATE_ENERGY,
                DOC(fiction_energy_calculation_UPDATE_ENERGY))
+
+        ;
+
+    /**
+     * Charge index mode.
+     */
+    py::enum_<fiction::charge_index_mode>(m, "charge_index_mode", DOC(fiction_energy_calculation), py::module_local())
+        .value("UPDATE_CHARGE_INDEX", fiction::charge_index_mode::UPDATE_CHARGE_INDEX,
+               DOC(fiction_charge_index_mode_UPDATE_CHARGE_INDEX))
+        .value("KEEP_CHARGE_INDEX", fiction::charge_index_mode::KEEP_CHARGE_INDEX,
+               DOC(fiction_charge_index_mode_KEEP_CHARGE_INDEX))
 
         ;
 

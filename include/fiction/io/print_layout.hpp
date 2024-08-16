@@ -359,7 +359,7 @@ void print_sidb_layout(std::ostream& os, const Lyt& lyt, const bool lat_color = 
 
     if constexpr (!has_siqad_coord_v<Lyt>)
     {
-        return print_sidb_layout(os, convert_to_siqad_coordinates(lyt), lat_color, crop_layout, draw_lattice);
+        return print_sidb_layout(os, convert_layout_to_siqad_coordinates(lyt), lat_color, crop_layout, draw_lattice);
     }
 
     if constexpr (!is_sidb_lattice_v<Lyt>)

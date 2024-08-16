@@ -301,7 +301,7 @@ TEST_CASE("SiQAD's AND gate iteration", "[bdl-input-iterator]")
 
     SECTION("cube coordinates")
     {
-        const auto         layout_cube = convert_to_fiction_coordinates<sidb_cell_clk_lyt_cube>(lyt);
+        const auto         layout_cube = convert_layout_to_fiction_coordinates<sidb_cell_clk_lyt_cube>(lyt);
         bdl_input_iterator bii{sidb_100_cell_clk_lyt_cube{layout_cube}};
 
         for (auto i = 0; bii < 4; ++bii, ++i)
@@ -366,7 +366,7 @@ TEST_CASE("SiQAD's AND gate iteration", "[bdl-input-iterator]")
 
     SECTION("offset coordinates")
     {
-        const auto         layout_offset = convert_to_fiction_coordinates<sidb_cell_clk_lyt_cube>(lyt);
+        const auto         layout_offset = convert_layout_to_fiction_coordinates<sidb_cell_clk_lyt_cube>(lyt);
         bdl_input_iterator bii{sidb_100_cell_clk_lyt_cube{layout_offset}};
 
         for (auto i = 0; bii < 4; ++bii, ++i)

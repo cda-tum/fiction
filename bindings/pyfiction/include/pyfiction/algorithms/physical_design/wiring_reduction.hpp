@@ -32,7 +32,25 @@ inline void wiring_reduction(pybind11::module& m)
                  stats.report(stream);
                  return stream.str();
              })
-        .def_readonly("time_total", &fiction::wiring_reduction_stats::time_total)
+
+        .def_readonly("time_total", &fiction::wiring_reduction_stats::time_total,
+                      DOC(fiction_wiring_reduction_stats_duration))
+        .def_readonly("x_size_before", &fiction::wiring_reduction_stats::x_size_before,
+                      DOC(fiction_wiring_reduction_stats_x_size_before))
+        .def_readonly("y_size_before", &fiction::wiring_reduction_stats::y_size_before,
+                      DOC(fiction_wiring_reduction_stats_y_size_before))
+        .def_readonly("x_size_after", &fiction::wiring_reduction_stats::x_size_after,
+                      DOC(fiction_wiring_reduction_stats_x_size_after))
+        .def_readonly("y_size_after", &fiction::wiring_reduction_stats::y_size_after,
+                      DOC(fiction_wiring_reduction_stats_y_size_after))
+        .def_readonly("num_wires_before", &fiction::wiring_reduction_stats::num_wires_before,
+                      DOC(fiction_wiring_reduction_stats_num_wires_before))
+        .def_readonly("num_wires_after", &fiction::wiring_reduction_stats::num_wires_after,
+                      DOC(fiction_wiring_reduction_stats_num_wires_after))
+        .def_readonly("wiring_improvement", &fiction::wiring_reduction_stats::wiring_improvement,
+                      DOC(fiction_wiring_reduction_stats_wiring_improvement))
+        .def_readonly("area_improvement", &fiction::wiring_reduction_stats::area_improvement,
+                      DOC(fiction_wiring_reduction_stats_area_improvement))
 
         ;
 

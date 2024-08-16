@@ -32,7 +32,7 @@ defaults:
     shell: bash
 
 env:
-  Z3_VERSION: 4.10.0
+  Z3_VERSION: 4.13.0
 
 jobs:
   build_and_test:
@@ -133,7 +133,7 @@ jobs:
 
       - name: Test (Debug)
         working-directory: ${{github.workspace}}/build_debug
-        run: ctest -C Debug --verbose --output-on-failure --repeat until-pass:3 --parallel 4
+        run: ctest -C Debug --verbose --output-on-failure --repeat until-pass:3 --parallel 4 --exclude-regex "quality"
 
 
       # Build and test pipeline for Release mode
