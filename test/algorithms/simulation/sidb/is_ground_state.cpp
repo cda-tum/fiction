@@ -51,7 +51,7 @@ TEMPLATE_TEST_CASE("check if ground state is found", "[is-ground-state]", sidb_1
             CHECK(!is_ground_state(simulation_result_heuristic, simulation_result_exhaustive));
         }
 
-        SECTION("two idential ground state stored in the simulation results")
+        SECTION("two idential ground states are stored in the simulation results")
         {
             simulation_result_exhaustive.charge_distributions = {{charge_layout_first, charge_layout_first}};
             sidb_simulation_result<TestType> simulation_result_heuristic{};
