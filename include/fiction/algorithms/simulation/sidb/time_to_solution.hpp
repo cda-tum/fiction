@@ -16,13 +16,11 @@
 
 #include <fmt/format.h>
 
-#include <chrono>
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
 #include <iostream>
 #include <limits>
-#include <numeric>
 #include <string>
 #include <vector>
 
@@ -34,7 +32,7 @@ struct time_to_solution_params
     /**
      * Exhaustive simulation algorithm used to simulate the ground state as reference.
      */
-    exhaustive_sidb_simulation_engine engine = exhaustive_sidb_simulation_engine::QUICKEXACT;
+    exact_sidb_simulation_engine engine = exact_sidb_simulation_engine::QUICKEXACT;
     /**
      * Number of iterations of the heuristic algorithm used to determine the simulation accuracy (`repetitions = 100`
      * means that accuracy is precise to 1%).
@@ -66,11 +64,11 @@ struct time_to_solution_stats
      */
     double mean_single_runtime{};
     /**
-     * Single simulation runtime of the exhaustive ground state searcher in seconds.
+     * Single simulation runtime of the exact ground state simulation algorithm.
      */
-    double single_runtime_exhaustive{};
+    double single_runtime_exact{};
     /**
-     * Exhaustive simulation algorithm used to simulate the ground state as reference.
+     * Exact simulation algorithm used to simulate the ground state as reference.
      */
     std::string algorithm;
     /**
@@ -80,8 +78,8 @@ struct time_to_solution_stats
      */
     void report(std::ostream& out = std::cout)
     {
-        out << fmt::format("time_to_solution: {} \n acc: {} \n t_(s): {} \n t_exhaustive(s): {} \n exact alg.: {}\n",
-                           time_to_solution, acc, mean_single_runtime, single_runtime_exhaustive, algorithm);
+        out << fmt::format("time_to_solution: {} \n acc: {} \n t_(s): {} \n t_exact(s): {} \n exact alg.: {}\n",
+                           time_to_solution, acc, mean_single_runtime, single_runtime_exact, algorithm);
     }
 };
 /**
@@ -103,7 +101,7 @@ void time_to_solution(const Lyt& lyt, const quicksim_params& quicksim_params,
     time_to_solution_stats st{};
 
     sidb_simulation_result<Lyt> simulation_result{};
-    if (tts_params.engine == exhaustive_sidb_simulation_engine::QUICKEXACT)
+    if (tts_params.engine == exact_sidb_simulation_engine::QUICKEXACT)
     {
         const quickexact_params<cell<Lyt>> params{quicksim_params.simulation_parameters};
         st.algorithm      = "QuickExact";
@@ -187,10 +185,10 @@ void time_to_solution_for_given_simulation_results(const sidb_simulation_result<
         tts = (single_runtime_heuristic_average * std::log(1.0 - confidence_level) / std::log(1.0 - acc));
     }
 
-    st.single_runtime_exhaustive = mockturtle::to_seconds(results_exact.simulation_runtime);
-    st.time_to_solution          = tts;
-    st.acc                       = acc * 100;
-    st.mean_single_runtime       = single_runtime_heuristic_average;
+    st.single_runtime_exact = mockturtle::to_seconds(results_exact.simulation_runtime);
+    st.time_to_solution     = tts;
+    st.acc                  = acc * 100;
+    st.mean_single_runtime  = single_runtime_heuristic_average;
 
     if (ps)
     {

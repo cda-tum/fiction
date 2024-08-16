@@ -20,29 +20,29 @@ namespace fiction
  *
  * @tparam Lyt Cell-level layout type.
  * @param heuristic_results All found physically valid charge distribution surfaces obtained by a heuristic algorithm.
- * @param exhaustive_results All valid charge distribution surfaces determined by ExGS.
+ * @param exact_results All valid charge distribution surfaces determined by ExGS.
  * @return Returns `true` if the relative difference between the lowest energies of the two sets is less than
  * \f$0.00001\f$, `false` otherwise.
  */
 template <typename Lyt>
 [[nodiscard]] bool is_ground_state(const sidb_simulation_result<Lyt>& heuristic_results,
-                                   const sidb_simulation_result<Lyt>& exhaustive_results) noexcept
+                                   const sidb_simulation_result<Lyt>& exact_results) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-    if (exhaustive_results.charge_distributions.empty())
+    if (exact_results.charge_distributions.empty())
     {
         return false;
     }
 
-    const auto ground_state_charge_distributions_exhaustive =
-        determine_groundstate_from_simulation_results(exhaustive_results);
+    const auto ground_state_charge_distributions_exact =
+        determine_groundstate_from_simulation_results(exact_results);
 
     const auto ground_state_charge_distributions_heuristic =
         determine_groundstate_from_simulation_results(heuristic_results);
 
-    if (ground_state_charge_distributions_exhaustive.size() != ground_state_charge_distributions_heuristic.size())
+    if (ground_state_charge_distributions_exact.size() != ground_state_charge_distributions_heuristic.size())
     {
         return false;
     }
@@ -56,7 +56,7 @@ template <typename Lyt>
     }
 
     // Check if the heuristic has found all ground states.
-    for (const auto& cds : ground_state_charge_distributions_exhaustive)
+    for (const auto& cds : ground_state_charge_distributions_exact)
     {
         if (indices_ground_state_heuristic.find(cds.get_charge_index_and_base().first) ==
             indices_ground_state_heuristic.cend())

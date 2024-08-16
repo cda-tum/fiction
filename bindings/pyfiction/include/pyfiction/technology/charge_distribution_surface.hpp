@@ -164,7 +164,7 @@ void charge_distribution_surface_layout(pybind11::module& m, const std::string& 
             "increase_charge_index_by_one",
             [](py_cds& cds, fiction::dependent_cell_mode dependent_cell_fixed,
                fiction::energy_calculation          recompute_system_energy,
-               fiction::charge_distribution_history consider_history, fiction::exhaustive_sidb_simulation_engine engine)
+               fiction::charge_distribution_history consider_history, fiction::exact_sidb_simulation_engine engine)
             {
                 return cds.increase_charge_index_by_one(dependent_cell_fixed, recompute_system_energy, consider_history,
                                                         engine);
@@ -172,7 +172,7 @@ void charge_distribution_surface_layout(pybind11::module& m, const std::string& 
             "dependent_cell_fixed"_a    = fiction::dependent_cell_mode::FIXED,
             "recompute_system_energy"_a = fiction::energy_calculation::UPDATE_ENERGY,
             "consider_history"_a        = fiction::charge_distribution_history::NEGLECT,
-            "engine"_a                  = fiction::exhaustive_sidb_simulation_engine::EXGS)
+            "engine"_a                  = fiction::exact_sidb_simulation_engine::EXGS)
 
         .def("get_max_charge_index", &py_cds::get_max_charge_index)
         .def("assign_charge_index", &py_cds::assign_charge_index, "charge_index"_a, "cdc"_a)
@@ -205,7 +205,7 @@ void charge_distribution_surface_layout(pybind11::module& m, const std::string& 
              "dependent_cell_fixed"_a    = fiction::dependent_cell_mode::FIXED,
              "recompute_system_energy"_a = fiction::energy_calculation::UPDATE_ENERGY,
              "consider_history"_a        = fiction::charge_distribution_history::NEGLECT,
-             "engine"_a                  = fiction::exhaustive_sidb_simulation_engine::EXGS)
+             "engine"_a                  = fiction::exact_sidb_simulation_engine::EXGS)
         .def("assign_charge_index_by_gray_code", &py_cds::assign_charge_index_by_gray_code, "current_gray_code"_a,
              "previous_gray_code"_a, "dependent_cell"_a = fiction::dependent_cell_mode::FIXED,
              "energy_calc_mode"_a = fiction::energy_calculation::UPDATE_ENERGY,

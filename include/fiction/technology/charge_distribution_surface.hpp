@@ -1167,19 +1167,19 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param history_mode charge_distribution_history::NEGLECT if the information (local electrostatic energy) of the
      * previous charge distribution is used to make the update more efficient, charge_distribution_history::CONSIDER
      * otherwise.
-     * @param engine exhaustive_sidb_simulation_engine::EXGS if *ExGS* should be used,
-     * exhaustive_sidb_simulation_engine::QUICKEXACT for *QuickExact*.
+     * @param engine exact_sidb_simulation_engine::EXGS if *ExGS* should be used,
+     * exact_sidb_simulation_engine::QUICKEXACT for *QuickExact*.
      */
     void increase_charge_index_by_one(
         const dependent_cell_mode               dep_cell                = dependent_cell_mode::FIXED,
         const energy_calculation                energy_calculation_mode = energy_calculation::UPDATE_ENERGY,
         const charge_distribution_history       history_mode            = charge_distribution_history::NEGLECT,
-        const exhaustive_sidb_simulation_engine engine = exhaustive_sidb_simulation_engine::EXGS) noexcept
+        const exact_sidb_simulation_engine engine = exact_sidb_simulation_engine::EXGS) noexcept
     {
         if (strg->charge_index_and_base.first < strg->max_charge_index)
         {
             strg->charge_index_and_base.first += 1;
-            if (engine == exhaustive_sidb_simulation_engine::QUICKEXACT)
+            if (engine == exact_sidb_simulation_engine::QUICKEXACT)
             {
                 this->index_to_charge_distribution_for_quickexact_simulation();
             }
@@ -1720,19 +1720,19 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param history_mode charge_distribution_history::NEGLECT if the information (local electrostatic energy) of the
      * previous charge distribution is used to make the update more efficient, charge_distribution_history::CONSIDER
      * otherwise.
-     * @param engine exhaustive_sidb_simulation_engine::EXGS if `ExGS``should be used,
-     * exhaustive_sidb_simulation_engine::QUICKEXACT for `QuickExact`.
+     * @param engine exact_sidb_simulation_engine::EXGS if `ExGS``should be used,
+     * exact_sidb_simulation_engine::QUICKEXACT for `QuickExact`.
      */
     void increase_charge_index_of_sub_layout_by_one(
         const dependent_cell_mode               dependent_cell_fixed    = dependent_cell_mode::FIXED,
         const energy_calculation                recompute_system_energy = energy_calculation::UPDATE_ENERGY,
         const charge_distribution_history       consider_history        = charge_distribution_history::NEGLECT,
-        const exhaustive_sidb_simulation_engine engine = exhaustive_sidb_simulation_engine::QUICKEXACT) noexcept
+        const exact_sidb_simulation_engine engine = exact_sidb_simulation_engine::QUICKEXACT) noexcept
     {
         if (strg->charge_index_sublayout < strg->max_charge_index_sulayout)
         {
             strg->charge_index_sublayout += 1;
-            if (engine == exhaustive_sidb_simulation_engine::QUICKEXACT)
+            if (engine == exact_sidb_simulation_engine::QUICKEXACT)
             {
                 this->index_to_charge_distribution_for_quickexact_simulation();
             }
@@ -1772,10 +1772,10 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * Resets the charge index of the sublayout (cells of the layout that can also be positively charged).
      */
     void reset_charge_index_sub_layout(
-        const exhaustive_sidb_simulation_engine engine = exhaustive_sidb_simulation_engine::QUICKEXACT) noexcept
+        const exact_sidb_simulation_engine engine = exact_sidb_simulation_engine::QUICKEXACT) noexcept
     {
         strg->charge_index_sublayout = 0;
-        if (engine == exhaustive_sidb_simulation_engine::QUICKEXACT)
+        if (engine == exact_sidb_simulation_engine::QUICKEXACT)
         {
             this->index_to_charge_distribution_for_quickexact_simulation();
         }

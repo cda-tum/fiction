@@ -33,7 +33,7 @@ TEMPLATE_TEST_CASE("Basic time-to-solution test with varying layouts", "[time-to
         const sidb_simulation_parameters params{2, -0.30};
         const quicksim_params            quicksim_params{params};
         time_to_solution_stats           tts_stat_quickexact{};
-        const time_to_solution_params    tts_params_quickexact{exhaustive_sidb_simulation_engine::QUICKEXACT};
+        const time_to_solution_params    tts_params_quickexact{exact_sidb_simulation_engine::QUICKEXACT};
         time_to_solution<TestType>(lyt, quicksim_params, tts_params_quickexact, &tts_stat_quickexact);
 
         CHECK(tts_stat_quickexact.algorithm == "QuickExact");
@@ -43,7 +43,7 @@ TEMPLATE_TEST_CASE("Basic time-to-solution test with varying layouts", "[time-to
         CHECK(tts_stat_quickexact.mean_single_runtime > 0.0);
 
         time_to_solution_stats        tts_stat_exgs{};
-        const time_to_solution_params tts_params_exgs{exhaustive_sidb_simulation_engine::EXGS};
+        const time_to_solution_params tts_params_exgs{exact_sidb_simulation_engine::EXGS};
         time_to_solution<TestType>(lyt, quicksim_params, tts_params_exgs, &tts_stat_exgs);
 
         CHECK(tts_stat_exgs.algorithm == "ExGS");
@@ -65,7 +65,7 @@ TEMPLATE_TEST_CASE("Basic time-to-solution test with varying layouts", "[time-to
         const sidb_simulation_parameters params{2, -0.30};
         const quicksim_params            quicksim_params{params};
 
-        const time_to_solution_params tts_params_exgs{exhaustive_sidb_simulation_engine::EXGS};
+        const time_to_solution_params tts_params_exgs{exact_sidb_simulation_engine::EXGS};
         time_to_solution_stats        tts_stat_exgs{};
         time_to_solution<TestType>(lyt, quicksim_params, tts_params_exgs, &tts_stat_exgs);
 
@@ -74,7 +74,7 @@ TEMPLATE_TEST_CASE("Basic time-to-solution test with varying layouts", "[time-to
         CHECK(tts_stat_exgs.mean_single_runtime > 0.0);
 
         time_to_solution_stats        tts_stat_quickexact{};
-        const time_to_solution_params tts_params{exhaustive_sidb_simulation_engine::QUICKEXACT};
+        const time_to_solution_params tts_params{exact_sidb_simulation_engine::QUICKEXACT};
         time_to_solution<TestType>(lyt, quicksim_params, tts_params, &tts_stat_quickexact);
 
         REQUIRE(tts_stat_quickexact.acc == 100.0);
@@ -109,7 +109,7 @@ TEMPLATE_TEST_CASE("time-to-solution test with offset coordinates", "[time-to-so
         const sidb_simulation_parameters params{3, -0.32};
         const quicksim_params            quicksim_params{params};
 
-        const time_to_solution_params tts_params_exgs{exhaustive_sidb_simulation_engine::EXGS};
+        const time_to_solution_params tts_params_exgs{exact_sidb_simulation_engine::EXGS};
         time_to_solution_stats        tts_stat_exgs{};
         time_to_solution<TestType>(lyt, quicksim_params, tts_params_exgs, &tts_stat_exgs);
 
@@ -118,7 +118,7 @@ TEMPLATE_TEST_CASE("time-to-solution test with offset coordinates", "[time-to-so
         CHECK(tts_stat_exgs.mean_single_runtime > 0.0);
 
         time_to_solution_stats        tts_stat_quickexact{};
-        const time_to_solution_params tts_params{exhaustive_sidb_simulation_engine::QUICKEXACT};
+        const time_to_solution_params tts_params{exact_sidb_simulation_engine::QUICKEXACT};
         time_to_solution<TestType>(lyt, quicksim_params, tts_params, &tts_stat_quickexact);
 
         REQUIRE(tts_stat_quickexact.acc == 100);
