@@ -101,13 +101,13 @@ class apply_gate_library_impl
     /**
      * Run the cell layout generation process.
      *
-     * This function performs the cell layout generation process based on the parameterized gate library and the
+     * This function performs the cell layout generation process based on the SiDB on-the-fly gate library and the
      * gate-level layout information provided by `GateLibrary` and `gate_lyt`. It iterates through the nodes in the
      * gate-level layout and maps gates to cell implementations based on their corresponding positions and types.
      * Optionally, it performs post-layout optimization and sets the layout name if certain conditions are met.
      *
-     * @tparam Type of the Parameters used for the parameterized gate library.
-     * @param params Parameters used for the parameterized gate library.
+     * @tparam Type of the Parameters used for the SiDB on-the-fly gate library.
+     * @param params Parameters used for the SiDB on-the-fly gate library.
      * @return A `CellLyt` object representing the generated cell layout.
      */
     template <typename Params>
