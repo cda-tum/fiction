@@ -1,8 +1,7 @@
 from mnt.pyfiction import *
 import unittest
-import os
+import math
 
-# todo add test for new function
 class TestTimeToSolution(unittest.TestCase):
 
     def test_one_sidb_100_lattice(self):
@@ -13,7 +12,7 @@ class TestTimeToSolution(unittest.TestCase):
         quicksim_parameter.simulation_parameters = sidb_simulation_parameters(3, -0.3)
 
         tts_params = time_to_solution_params()
-        tts_params.engine = exhaustive_sidb_simulation_engine.QUICKEXACT
+        tts_params.engine = exact_sidb_simulation_engine.QUICKEXACT
         stats = time_to_solution_stats()
 
         cds = charge_distribution_surface_100(layout)
@@ -32,7 +31,7 @@ class TestTimeToSolution(unittest.TestCase):
         quicksim_parameter.simulation_parameters = sidb_simulation_parameters(3, -0.3)
 
         tts_params = time_to_solution_params()
-        tts_params.engine = exhaustive_sidb_simulation_engine.QUICKEXACT
+        tts_params.engine = exact_sidb_simulation_engine.QUICKEXACT
         stats = time_to_solution_stats()
 
         cds = charge_distribution_surface_111(layout)
@@ -51,12 +50,12 @@ class TestTimeToSolution(unittest.TestCase):
         layout.assign_cell_type((1, 6, 0), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((3, 6, 0), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((5, 6, 0), sidb_technology.cell_type.NORMAL)
-        layout.assign_cell_type((7, 6, 0), sidb_technology.cell_type.NORMAL)
         layout.assign_cell_type((10, 6, 0), sidb_technology.cell_type.NORMAL)
-        layout.assign_cell_type((12, 6, 0), sidb_technology.cell_type.NORMAL)
+        layout.assign_cell_type((15, 6, 0), sidb_technology.cell_type.NORMAL)
+        layout.assign_cell_type((18, 6, 0), sidb_technology.cell_type.NORMAL)
 
         # Define simulation parameters
-        params = sidb_simulation_parameters(3, -0.32)
+        params = sidb_simulation_parameters(2, -0.32)
         quicksim_params_inst = quicksim_params()
         quicksim_params_inst.simulation_parameters = params
 
@@ -83,13 +82,18 @@ class TestTimeToSolution(unittest.TestCase):
             simulation_results_quickexact, simulation_results_quicksim, 0.997, st)
 
         # Assertions
-        self.assertEqual(st.acc, 100)
+        sef.assertEqual(st.acc, 100.0)
         self.assertGreater(st.time_to_solution, 0.0)
         self.assertGreater(st.mean_single_runtime, 0.0)
 
-        # Calculate the time-to-solution manually
-        tts_calculated = (st.mean_single_runtime if st.acc == 100 else
-                          (st.mean_single_runtime * math.log(1.0 - 0.997) / math.log(1.0 - st.acc)))
+        print(st.acc)
+
+        if st.acc == 100:
+                tts_calculated = st.mean_single_runtime
+        else:
+            # To avoid division by zero, ensure st.acc is not 1.0
+            tts_calculated = (st.mean_single_runtime * math.log(1.0 - 0.997) /
+                      math.log(1.0 - st.acc))
 
         self.assertAlmostEqual(st.time_to_solution - tts_calculated, 0.0, delta=1e-6)
 
