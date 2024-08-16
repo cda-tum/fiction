@@ -182,10 +182,10 @@ on_the_fly_circuit_design_on_defective_surface(const Ntk& ntk, const GateLyt& la
                                                const on_the_fly_circuit_design_params<CellLyt>& params = {},
                                                on_the_fly_circuit_design_stats<GateLyt>*        stats  = nullptr)
 {
-    static_assert(is_gate_level_layout_v<GateLyt>, "Lyt is not a gate-level layout");
-    static_assert(is_hexagonal_layout_v<GateLyt>, "Lyt is not a gate-level layout");
+    static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
+    static_assert(is_hexagonal_layout_v<GateLyt>, "GateLyt is not a hexagonal");
     static_assert(is_cell_level_layout_v<CellLyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<CellLyt>, "Ntk is not a network type");
+    static_assert(has_sidb_technology_v<CellLyt>, "Lyt is not an SiDB layout");
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
 
     on_the_fly_circuit_design_stats<GateLyt> st{};
