@@ -100,8 +100,8 @@ class on_the_fly_circuit_design_impl
             {
                 try
                 {
-                    lyt = apply_sidb_on_the_fly_gate_library<CellLyt, sidb_on_the_fly_gate_library, GateLyt,
-                                                             sidb_on_the_fly_gate_library_params<CellLyt>>(
+                    lyt = apply_parameterized_gate_library<CellLyt, sidb_on_the_fly_gate_library, GateLyt,
+                                                           sidb_on_the_fly_gate_library_params<CellLyt>>(
                         *gate_level_layout, params.sidb_on_the_fly_gate_library_parameters);
                 }
 
