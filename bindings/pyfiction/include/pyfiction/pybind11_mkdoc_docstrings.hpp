@@ -264,9 +264,9 @@ Returns:
     A cell-level layout that implements `lyt`'s gate types with
     building blocks defined in `GateLibrary`.)doc";
 
-static const char *__doc_fiction_apply_sidb_on_the_fly_gate_library =
-R"doc(Applies an SiDB on-the-fly gate library to a given gate-level layout
-and, thereby, creates and returns a cell-level layout.
+static const char *__doc_fiction_apply_parameterized_gate_library =
+R"doc(Applies a parameterized gate library to a given gate-level layout and,
+thereby, creates and returns a cell-level layout.
 
 May pass through, and thereby throw, an
 `unsupported_gate_type_exception`, an
