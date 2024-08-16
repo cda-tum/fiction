@@ -2393,6 +2393,42 @@ Returns:
     was created by casting each element in `a` to `ElementType` using
     `static_cast`.)doc";
 
+static const char *__doc_fiction_convert_layout_to_fiction_coordinates =
+R"doc(Converts the coordinates of a given SiDB cell-level layout (cds and
+defect surface can be layered on top) to alternative coordinates, such
+as `offset::ucoord_t` or `cube::coord_t`. Returns a new layout
+equivalent to the original layout but based on the specified
+coordinate system.
+
+Template parameter ``LytDest``:
+    Source SiDB cell-level layout type.
+
+Template parameter ``LytSrc``:
+    Target SiDB cell-level layout type.
+
+Parameter ``lyt``:
+    The layout that is to be converted to a new layout based on
+    fiction coordinates.
+
+Returns:
+    A new equivalent layout based on fiction coordinates.)doc";
+
+static const char *__doc_fiction_convert_layout_to_siqad_coordinates =
+R"doc(Converts the coordinates of a given cell-level layout (cds and defect
+surface can be layered on top) to SiQAD coordinates. A new equivalent
+layout based on SiQAD coordinates is returned.
+
+Template parameter ``Lyt``:
+    Cell-level layout type based on fiction coordinates, e.g.,
+    `offset::ucoord_t` or `cube::coord_t`.
+
+Parameter ``lyt``:
+    The layout that is to be converted to a new layout based on SiQAD
+    coordinates.
+
+Returns:
+    A new equivalent layout based on SiQAD coordinates.)doc";
+
 static const char *__doc_fiction_convert_network =
 R"doc(Converts a logic network into an equivalent one of another type.
 Thereby, this function is very similar to
@@ -2441,42 +2477,6 @@ Parameter ``precision``:
 Returns:
     The distance (unit: nm) corresponding to the given electrostatic
     potential.)doc";
-
-static const char *__doc_fiction_convert_to_fiction_coordinates =
-R"doc(Converts the coordinates of a given SiDB cell-level layout (cds and
-defect surface can be layered on top) to alternative coordinates, such
-as `offset::ucoord_t` or `cube::coord_t`. Returns a new layout
-equivalent to the original layout but based on the specified
-coordinate system.
-
-Template parameter ``LytDest``:
-    Source SiDB cell-level layout type.
-
-Template parameter ``LytSrc``:
-    Target SiDB cell-level layout type.
-
-Parameter ``lyt``:
-    The layout that is to be converted to a new layout based on
-    fiction coordinates.
-
-Returns:
-    A new equivalent layout based on fiction coordinates.)doc";
-
-static const char *__doc_fiction_convert_to_siqad_coordinates =
-R"doc(Converts the coordinates of a given cell-level layout (cds and defect
-surface can be layered on top) to SiQAD coordinates. A new equivalent
-layout based on SiQAD coordinates is returned.
-
-Template parameter ``Lyt``:
-    Cell-level layout type based on fiction coordinates, e.g.,
-    `offset::ucoord_t` or `cube::coord_t`.
-
-Parameter ``lyt``:
-    The layout that is to be converted to a new layout based on SiQAD
-    coordinates.
-
-Returns:
-    A new equivalent layout based on SiQAD coordinates.)doc";
 
 static const char *__doc_fiction_coord_iterator =
 R"doc(An iterator type that allows to enumerate coordinates in order within

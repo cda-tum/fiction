@@ -39,7 +39,7 @@ jobs:
     strategy:
       matrix:
         os: [ macos-13, macos-14 ]
-        compiler: [ g++-11, g++-12, g++-13, clang++ ]
+        compiler: [ g++-12, g++-13, g++-14, clang++ ]
         include:
           - os: macos-13
             architecture: x64
@@ -47,17 +47,19 @@ jobs:
             architecture: arm64
           - compiler: clang++
             ccompiler: clang
-          - compiler: g++-11
-            ccompiler: gcc-11
           - compiler: g++-12
             ccompiler: gcc-12
+          - compiler: g++-13
+            ccompiler: gcc-13
+          - compiler: g++-14
+            ccompiler: gcc-14
         exclude:
-          - os: macos-14
-            compiler: g++-11
           - os: macos-14
             compiler: g++-12
           - os: macos-14
             compiler: g++-13
+          - os: macos-14
+            compiler: g++-14
 
     name: 🍎 ${{matrix.os}} with ${{matrix.compiler}}
     runs-on: ${{matrix.os}}
@@ -76,20 +78,6 @@ jobs:
       # Setup TBB for parallel STL algorithms via Homebrew
       - name: Setup TBB
         run: brew install tbb
-
-      # The fmt library pre-installed on the runners causes conflicts with the version shipped with alice
-      - name: Uninstall fmt
-        run: |
-          if [ -d "/usr/local/include/fmt" ]; then
-            if rm -rf /usr/local/include/fmt; then
-              echo "Pre-installed fmt removed successfully."
-            else
-              echo "Failed to remove pre-installed fmt."
-              exit 1
-            fi
-          else
-            echo "No pre-installed fmt found, skipping removal."
-          fi
 
       - name: Setup XCode version
         uses: maxim-lobanov/setup-xcode@v1
