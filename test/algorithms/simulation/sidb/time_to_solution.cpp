@@ -131,14 +131,14 @@ TEMPLATE_TEST_CASE("time-to-solution test with offset coordinates", "[time-to-so
 
         if (tts_stat_quickexact.acc == 100)
         {
-            tts_calculated = tts_stat_quickexact.single_runtime_exact;
+            tts_calculated = tts_stat_quickexact.mean_single_runtime;
             CHECK_THAT(tts_stat_quickexact.time_to_solution - tts_calculated,
                        Catch::Matchers::WithinAbs(0.0, physical_constants::POP_STABILITY_ERR));
         }
         else if (tts_stat_quickexact.acc != 0)
         {
             tts_calculated = (tts_stat_quickexact.mean_single_runtime * std::log(1.0 - tts_params.confidence_level) /
-                              std::log(1.0 - tts_stat_quickexact.acc / 100));
+                              std::log(1.0 - tts_stat_quickexact.acc/100));
             CHECK_THAT(tts_stat_quickexact.time_to_solution - tts_calculated,
                        Catch::Matchers::WithinAbs(0.0, physical_constants::POP_STABILITY_ERR));
         }
