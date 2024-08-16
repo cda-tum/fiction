@@ -73,7 +73,7 @@ class bounding_box_2d
         {
             if constexpr (has_siqad_coord_v<Lyt>)
             {
-                auto coord_siqad = siqad::to_fiction_coord<cube::coord_t>(coord);
+                auto coord_siqad    = siqad::to_fiction_coord<cube::coord_t>(coord);
                 auto min_coord_cube = siqad::to_fiction_coord<cube::coord_t>(min_coord);
                 auto max_coord_cube = siqad::to_fiction_coord<cube::coord_t>(max_coord);
 

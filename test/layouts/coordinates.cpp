@@ -12,10 +12,10 @@
 
 #include <fmt/format.h>
 
+#include <limits>
 #include <map>
 #include <sstream>
 #include <vector>
-#include <limits>
 
 using namespace fiction;
 
@@ -154,17 +154,16 @@ TEST_CASE("SiQAD coordinate conversion", "[coordinates]")
     CHECK(t8_fiction == siqad::to_fiction_coord<coordinate_fiction>(t8_siqad));
 
     // Test for overflow scenario
-    auto t9        = coordinate{1, (std::numeric_limits<int32_t>::max()-1) / 2, 1};
+    auto t9        = coordinate{1, (std::numeric_limits<int32_t>::max() - 1) / 2, 1};
     auto fiction_9 = siqad::to_fiction_coord<coordinate_fiction>(t9);
     CHECK(fiction_9.x == t9.x);
     CHECK(fiction_9.y == std::numeric_limits<int32_t>::max());
 
     // Test for underflow scenario
-    auto t10        = coordinate{1, (std::numeric_limits<int32_t>::min()+1) / 2};
+    auto t10        = coordinate{1, (std::numeric_limits<int32_t>::min() + 1) / 2};
     auto fiction_10 = siqad::to_fiction_coord<coordinate_fiction>(t10);
     CHECK(fiction_10.x == t10.x);
-    CHECK(fiction_10.y == std::numeric_limits<int32_t>::min()+2);
-
+    CHECK(fiction_10.y == std::numeric_limits<int32_t>::min() + 2);
 }
 
 TEST_CASE("Offset to cube coordinate conversion", "[coordinates]")
