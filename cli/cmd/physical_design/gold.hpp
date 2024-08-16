@@ -43,6 +43,7 @@ class gold_command : public command
                  "Toggle high effort mode; increases runtime but might generate better results");
         add_flag("--return_first,-r", ps.return_first,
                  "Terminate on the first found layout; reduces runtime but might sacrifice result quality");
+        add_flag("--planar,-p", ps.planar, "Enable planar layout generation");
         add_flag("--verbose,-v", ps.verbose, "Be verbose");
     }
 
