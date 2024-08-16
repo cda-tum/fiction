@@ -790,6 +790,18 @@ constexpr CoordinateType to_fiction_coord(const siqad::coord_t& coord) noexcept
 {
     if (!coord.is_dead())
     {
+        if (2 * static_cast<double>(coord.y) + static_cast<double>(coord.z) >
+            static_cast<double>(std::numeric_limits<decltype(siqad::coord_t::y)>::max()))
+        {
+            return {coord.x, std::numeric_limits<decltype(siqad::coord_t::y)>::max()};
+        }
+
+        if (2 * static_cast<double>(coord.y) + static_cast<double>(coord.z) <
+            static_cast<double>(std::numeric_limits<decltype(siqad::coord_t::y)>::min()))
+        {
+            return {coord.x, std::numeric_limits<decltype(siqad::coord_t::y)>::min()};
+        }
+
         return {coord.x, coord.y * 2 + coord.z};
     }
 

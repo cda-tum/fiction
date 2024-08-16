@@ -15,6 +15,7 @@
 #include <map>
 #include <sstream>
 #include <vector>
+#include <limits>
 
 using namespace fiction;
 
@@ -151,6 +152,19 @@ TEST_CASE("SiQAD coordinate conversion", "[coordinates]")
     CHECK(t8_siqad.y == -2);
     CHECK(t8_siqad.z == 0);
     CHECK(t8_fiction == siqad::to_fiction_coord<coordinate_fiction>(t8_siqad));
+
+    // Test for overflow scenario
+    auto t9        = coordinate{1, (std::numeric_limits<int32_t>::max()-1) / 2, 1};
+    auto fiction_9 = siqad::to_fiction_coord<coordinate_fiction>(t9);
+    CHECK(fiction_9.x == t9.x);
+    CHECK(fiction_9.y == std::numeric_limits<int32_t>::max());
+
+    // Test for underflow scenario
+    auto t10        = coordinate{1, (std::numeric_limits<int32_t>::min()+1) / 2};
+    auto fiction_10 = siqad::to_fiction_coord<coordinate_fiction>(t10);
+    CHECK(fiction_10.x == t10.x);
+    CHECK(fiction_10.y == std::numeric_limits<int32_t>::min()+2);
+
 }
 
 TEST_CASE("Offset to cube coordinate conversion", "[coordinates]")
@@ -193,7 +207,7 @@ TEMPLATE_TEST_CASE("Coordinate iteration", "[coordinates]", offset::ucoord_t, cu
     {
         lyt.foreach_coordinate(fill_coord_vector, {1, 0, 0}, {1, 1, 1});
 
-        CHECK(coord_vector.size() == 6);
+        REQUIRE(coord_vector.size() == 6);
 
         CHECK(coord_vector[0] == TestType{1, 0, 0});
 
