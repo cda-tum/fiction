@@ -9,9 +9,9 @@
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/traits.hpp"
 
+#include <cassert>
 #include <cstdint>
 #include <unordered_set>
-#include <cassert>
 
 namespace fiction
 {
@@ -42,7 +42,6 @@ template <typename Lyt>
 
     const auto ground_state_charge_distributions_heuristic =
         determine_groundstate_from_simulation_results(heuristic_results);
-
 
     assert(ground_state_charge_distributions_heuristic.size() <= ground_state_charge_distributions_exact.size() &&
            "The heuristic results must be less equal than the exact results.");

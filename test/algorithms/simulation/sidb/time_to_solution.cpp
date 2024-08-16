@@ -110,7 +110,7 @@ TEMPLATE_TEST_CASE("time-to-solution test with offset coordinates", "[time-to-so
 
         const sidb_simulation_parameters params{2, -0.32};
 
-        quicksim_params            quicksim_params{params};
+        quicksim_params quicksim_params{params};
         quicksim_params.iteration_steps = 10;
 
         const time_to_solution_params tts_params_exgs{exact_sidb_simulation_engine::EXGS};
