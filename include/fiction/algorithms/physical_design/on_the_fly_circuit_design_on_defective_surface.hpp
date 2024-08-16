@@ -7,8 +7,8 @@
 
 #include "fiction/algorithms/physical_design/apply_gate_library.hpp"
 #include "fiction/algorithms/physical_design/exact.hpp"
-#include "fiction/technology/parameterized_gate_library.hpp"
 #include "fiction/technology/sidb_defect_surface.hpp"
+#include "fiction/technology/sidb_on_the_fly_gate_library.hpp"
 #include "fiction/technology/sidb_skeleton_bestagon_library.hpp"
 #include "fiction/technology/sidb_surface_analysis.hpp"
 #include "fiction/traits.hpp"
@@ -33,9 +33,9 @@ template <typename CellLyt>
 struct on_the_fly_circuit_design_params
 {
     /**
-     * Parameters for the parameterized gate library.
+     * Parameters for the SiDB on-the-fly gate library.
      */
-    parameterized_gate_library_params<CellLyt> parameterized_gate_library_parameters = {};
+    sidb_on_the_fly_gate_library_params<CellLyt> sidb_on_the_fly_gate_library_parameters = {};
     /**
      * Parameters for the *exact* placement and routing algorithm.
      */
@@ -88,7 +88,7 @@ class on_the_fly_circuit_design_impl
         // generating the blacklist based on neutral defects. The long-range electrostatic influence of charged defects
         // is not considered as gates are designed on-the-fly.
         auto black_list = sidb_surface_analysis<sidb_skeleton_bestagon_library>(
-            lattice_tiling, params.parameterized_gate_library_parameters.defect_surface, std::make_pair(0, 0));
+            lattice_tiling, params.sidb_on_the_fly_gate_library_parameters.defect_surface, std::make_pair(0, 0));
 
         while (!gate_level_layout.has_value())
         {
@@ -100,9 +100,9 @@ class on_the_fly_circuit_design_impl
             {
                 try
                 {
-                    lyt = apply_parameterized_gate_library<CellLyt, parameterized_gate_library, GateLyt,
-                                                           parameterized_gate_library_params<CellLyt>>(
-                        *gate_level_layout, params.parameterized_gate_library_parameters);
+                    lyt = apply_sidb_on_the_fly_gate_library<CellLyt, sidb_on_the_fly_gate_library, GateLyt,
+                                                             sidb_on_the_fly_gate_library_params<CellLyt>>(
+                        *gate_level_layout, params.sidb_on_the_fly_gate_library_parameters);
                 }
 
                 // on-the-fly gate design was unsuccessful at a certain tile. Hence, this tile-gate pair is added to the
@@ -110,11 +110,6 @@ class on_the_fly_circuit_design_impl
                 catch (const gate_design_exception<tt, GateLyt>& e)
                 {
                     black_list[e.which_tile()][e.which_truth_table()].push_back(e.which_port_list());
-                }
-
-                catch (const std::exception& e)
-                {
-                    std::cerr << e.what() << '\n';
                 }
             }
             // P&R was unsuccessful
@@ -129,7 +124,7 @@ class on_the_fly_circuit_design_impl
         sidb_defect_surface<CellLyt> sidbs_and_defects{lyt};
 
         // add defects to the circuit.
-        params.parameterized_gate_library_parameters.defect_surface.foreach_sidb_defect(
+        params.sidb_on_the_fly_gate_library_parameters.defect_surface.foreach_sidb_defect(
             [&sidbs_and_defects](const auto& defect)
             { sidbs_and_defects.assign_sidb_defect(defect.first, defect.second); });
 
@@ -188,7 +183,9 @@ on_the_fly_circuit_design_on_defective_surface(const Ntk& ntk, const GateLyt& la
                                                on_the_fly_circuit_design_stats<GateLyt>*        stats  = nullptr)
 {
     static_assert(is_gate_level_layout_v<GateLyt>, "Lyt is not a gate-level layout");
+    static_assert(is_hexagonal_layout_v<GateLyt>, "Lyt is not a gate-level layout");
     static_assert(is_cell_level_layout_v<CellLyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<CellLyt>, "Ntk is not a network type");
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
 
     on_the_fly_circuit_design_stats<GateLyt> st{};

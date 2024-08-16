@@ -2,8 +2,8 @@
 // Created by Jan Drewniok 20.09.23.
 //
 
-#ifndef FICTION_PARAMETERIZED_GATE_LIBRARY_HPP
-#define FICTION_PARAMETERIZED_GATE_LIBRARY_HPP
+#ifndef FICTION_SIDB_ON_THE_FLY_GATE_LIBRARY_HPP
+#define FICTION_SIDB_ON_THE_FLY_GATE_LIBRARY_HPP
 
 #include "fiction/algorithms/physical_design/design_sidb_gates.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
@@ -100,7 +100,7 @@ class gate_design_exception : public std::exception
  * @tparam Lyt Cell-level layout type.
  */
 template <typename Lyt>
-struct parameterized_gate_library_params
+struct sidb_on_the_fly_gate_library_params
 {
     /**
      * This layout stores all atomic defects.
@@ -127,10 +127,10 @@ struct parameterized_gate_library_params
  * defects, thus enabling the design of SiDB circuits in the presence of atomic defects. The skeleton (i.e., the
  * pre-defined input and output wires) are hexagonal in shape.
  */
-class parameterized_gate_library : public fcn_gate_library<sidb_technology, 60, 46>  // width and height of a hexagon
+class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60, 46>  // width and height of a hexagon
 {
   public:
-    explicit parameterized_gate_library() = delete;
+    explicit sidb_on_the_fly_gate_library() = delete;
 
     /**
      * Overrides the corresponding function in fcn_gate_library. Given a tile `t`, this function takes all necessary
@@ -487,7 +487,7 @@ class parameterized_gate_library : public fcn_gate_library<sidb_technology, 60, 
      */
     template <typename LytSkeleton, typename TT, typename CellLyt, typename GateLyt>
     [[nodiscard]] static fcn_gate design_gate(const LytSkeleton& skeleton, const std::vector<TT>& spec,
-                                              const parameterized_gate_library_params<CellLyt>& parameters,
+                                              const sidb_on_the_fly_gate_library_params<CellLyt>& parameters,
                                               const port_list<port_direction>& p, const tile<GateLyt>& tile)
     {
         static_assert(is_cell_level_layout_v<CellLyt>, "Lyt is not a cell-level layout");
@@ -1305,4 +1305,4 @@ class parameterized_gate_library : public fcn_gate_library<sidb_technology, 60, 
 
 }  // namespace fiction
 
-#endif  // FICTION_PARAMETERIZED_GATE_LIBRARY_HPP
+#endif  // FICTION_SIDB_ON_THE_FLY_GATE_LIBRARY_HPP

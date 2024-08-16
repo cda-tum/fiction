@@ -64,11 +64,11 @@ SiDB Bestagon Library
 Parameterized SiDB Library
 --------------------------
 
-**Header:** ``fiction/technology/parameterized_gate_library.hpp``
+**Header:** ``fiction/technology/sidb_on_the_fly_gate_library.hpp``
 
-.. doxygenstruct:: fiction::parameterized_gate_library_params
+.. doxygenstruct:: fiction::sidb_on_the_fly_gate_library_params
    :members:
-.. doxygenclass:: fiction::parameterized_gate_library
+.. doxygenclass:: fiction::sidb_on_the_fly_gate_library
    :members:
 
 .. doxygenclass:: fiction::gate_design_exception
