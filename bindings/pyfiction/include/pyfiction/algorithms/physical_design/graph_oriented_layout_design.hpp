@@ -39,6 +39,8 @@ inline void graph_oriented_layout_design(pybind11::module& m)
                        DOC(fiction_graph_oriented_layout_design_params_high_effort_mode))
         .def_readwrite("return_first", &fiction::graph_oriented_layout_design_params::return_first,
                        DOC(fiction_graph_oriented_layout_design_params_return_first))
+        .def_readwrite("planar", &fiction::graph_oriented_layout_design_params::planar,
+                       DOC(fiction_graph_oriented_layout_design_params_planar))
 
         ;
 

@@ -47,6 +47,11 @@ struct post_layout_optimization_params
      * Only optimize PO positions.
      */
     bool optimize_pos_only = false;
+    /**
+     * Disable the creation of crossings during optimization. If set to true, gates will only be relocated if a
+     * crossing-free wiring is found. Defaults to false.
+     */
+    bool planar_optimization = false;
 };
 
 /**
@@ -376,17 +381,20 @@ template <typename Lyt>
  * @param lyt Reference to the layout.
  * @param start The starting coordinate of the path.
  * @param end The ending coordinate of the path.
+ * @param planar_optimization Only allow relocation if a crossing-free wiring can be found. Defaults to false.
  * @return The computed path as a sequence of coordinates in the layout.
  */
 template <typename Lyt>
-layout_coordinate_path<Lyt> get_path_and_obstruct(Lyt& lyt, const tile<Lyt>& start, const tile<Lyt>& end)
+layout_coordinate_path<Lyt> get_path_and_obstruct(Lyt& lyt, const tile<Lyt>& start, const tile<Lyt>& end,
+                                                  const bool planar_optimization = false)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
 
     using dist = twoddwave_distance_functor<Lyt, uint64_t>;
     using cost = unit_cost_functor<Lyt, uint8_t>;
-    static const a_star_params params{true};
+    static a_star_params params{};
+    params.crossings = !planar_optimization;
 
     layout_coordinate_path<Lyt> path = a_star<layout_coordinate_path<Lyt>>(lyt, {start, end}, dist(), cost(), params);
 
@@ -412,11 +420,12 @@ layout_coordinate_path<Lyt> get_path_and_obstruct(Lyt& lyt, const tile<Lyt>& sta
  * @tparam Lyt Cartesian obstruction gate-level layout type.
  * @param lyt 2DDWave-clocked cartesian obstruction gate-level layout.
  * @param old_pos Old position of the gate to be moved.
+ * @param planar_optimization Only allow relocation if a crossing-free wiring can be found. Defaults to false.
  * @return `true` if the gate was moved successfully, `false` otherwise.
  */
 template <typename Lyt>
 bool improve_gate_location(Lyt& lyt, const tile<Lyt>& old_pos, const tile<Lyt>& max_non_po,
-                           const uint64_t max_gate_relocations) noexcept
+                           const uint64_t max_gate_relocations, const bool planar_optimization = false) noexcept
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
@@ -546,22 +555,26 @@ bool improve_gate_location(Lyt& lyt, const tile<Lyt>& old_pos, const tile<Lyt>& 
                     // get paths for fanins and fanouts
                     if (!fanins.empty())
                     {
-                        new_path_from_fanin_1_to_gate = get_path_and_obstruct(lyt, fanins[0], new_pos);
+                        new_path_from_fanin_1_to_gate =
+                            get_path_and_obstruct(lyt, fanins[0], new_pos, planar_optimization);
                     }
 
                     if (fanins.size() == 2)
                     {
-                        new_path_from_fanin_2_to_gate = get_path_and_obstruct(lyt, fanins[1], new_pos);
+                        new_path_from_fanin_2_to_gate =
+                            get_path_and_obstruct(lyt, fanins[1], new_pos, planar_optimization);
                     }
 
                     if (!fanouts.empty())
                     {
-                        new_path_from_gate_to_fanout_1 = get_path_and_obstruct(lyt, new_pos, fanouts[0]);
+                        new_path_from_gate_to_fanout_1 =
+                            get_path_and_obstruct(lyt, new_pos, fanouts[0], planar_optimization);
                     }
 
                     if (fanouts.size() == 2)
                     {
-                        new_path_from_gate_to_fanout_2 = get_path_and_obstruct(lyt, new_pos, fanouts[1]);
+                        new_path_from_gate_to_fanout_2 =
+                            get_path_and_obstruct(lyt, new_pos, fanouts[1], planar_optimization);
                     }
 
                     // if possible routing was found, it will be applied
@@ -955,7 +968,8 @@ class post_layout_optimization_impl
                 {
                     if (!ps.optimize_pos_only || (ps.optimize_pos_only && layout.is_po_tile(gate_tile)))
                     {
-                        if (detail::improve_gate_location(layout, gate_tile, max_non_po, max_gate_relocations))
+                        if (detail::improve_gate_location(layout, gate_tile, max_non_po, max_gate_relocations,
+                                                          ps.planar_optimization))
                         {
                             moved_at_least_one_gate = true;
                         }

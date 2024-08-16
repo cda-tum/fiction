@@ -217,7 +217,7 @@ TEST_CASE("Determine the probability of fabricating an operational BDL, offset c
 {
     auto lyt = blueprints::bdl_wire<sidb_cell_clk_lyt_siqad>();
 
-    const auto lyt_offset = convert_to_fiction_coordinates<sidb_cell_clk_lyt>(lyt);
+    const auto lyt_offset = convert_layout_to_fiction_coordinates<sidb_cell_clk_lyt>(lyt);
 
     SECTION("one displacement variation in y-direction")
     {
