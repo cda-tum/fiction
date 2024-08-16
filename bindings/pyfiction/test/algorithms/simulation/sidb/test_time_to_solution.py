@@ -82,7 +82,7 @@ class TestTimeToSolution(unittest.TestCase):
             simulation_results_quickexact, simulation_results_quicksim, 0.997, st)
 
         # Assertions
-        sef.assertEqual(st.acc, 100.0)
+        self.assertEqual(st.acc, 100.0)
         self.assertGreater(st.time_to_solution, 0.0)
         self.assertGreater(st.mean_single_runtime, 0.0)
 
