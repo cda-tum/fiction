@@ -8,9 +8,9 @@
 #include "fiction/algorithms/simulation/sidb/determine_groundstate_from_simulation_results.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/math_utils.hpp"
 
-#include <cmath>
+#include <cstdint>
+#include <unordered_set>
 
 namespace fiction
 {
@@ -47,14 +47,21 @@ template <typename Lyt>
         return false;
     }
 
-    for (const auto& cds_exhaustive : ground_state_charge_distributions_exhaustive)
+    std::unordered_set<uint64_t> indices_ground_state_heuristic{};
+
+    // Collect all charge indices of the ground states simulated by the heuristic.
+    for (const auto& cds : ground_state_charge_distributions_heuristic)
     {
-        for (const auto& cds_heuristic : ground_state_charge_distributions_exhaustive)
+        indices_ground_state_heuristic.insert(cds.get_charge_index_and_base().first);
+    }
+
+    // Check if the heuristic has found all ground states.
+    for (const auto& cds : ground_state_charge_distributions_exhaustive)
+    {
+        if (indices_ground_state_heuristic.find(cds.get_charge_index_and_base().first) ==
+            indices_ground_state_heuristic.cend())
         {
-            if (cds_exhaustive.get_charge_index_and_base().first != cds_heuristic.get_charge_index_and_base().first)
-            {
-                return false;
-            }
+            return false;
         }
     }
 
