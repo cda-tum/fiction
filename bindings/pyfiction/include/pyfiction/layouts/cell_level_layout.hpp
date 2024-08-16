@@ -164,7 +164,7 @@ void fcn_technology_cell_level_layout(pybind11::module& m)
 
                  if constexpr (std::is_same_v<Technology, fiction::sidb_technology>)
                  {
-                     print_layout(convert_to_siqad_coordinates(lyt), stream);
+                     print_layout(convert_layout_to_siqad_coordinates(lyt), stream);
                  }
                  else
                  {

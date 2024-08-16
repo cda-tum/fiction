@@ -44,8 +44,8 @@ void convert_to_siqad_coordinates(pybind11::module& m)
 {
     using namespace pybind11::literals;
 
-    m.def("convert_to_siqad_coordinates", &fiction::convert_to_siqad_coordinates<Lyt>, "lyt"_a,
-          DOC(fiction_convert_to_siqad_coordinates));
+    m.def("convert_layout_to_siqad_coordinates", &fiction::convert_layout_to_siqad_coordinates<Lyt>, "lyt"_a,
+          DOC(fiction_convert_layout_to_siqad_coordinates));
 }
 
 template <typename Lyt>
