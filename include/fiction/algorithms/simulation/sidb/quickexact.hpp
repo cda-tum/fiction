@@ -169,7 +169,7 @@ class quickexact_impl
                     }
 
                     charge_lyt.increase_charge_index_by_one(
-                        dependent_cell_mode::VARIABLE);  // "Variable" allows that the charge state of the dependent
+                        dependent_cell_mode::VARIABLE);  // `dependent_cell_mode::VARIABLE` allows that the charge state of the dependent
                                                          // cell is automatically changed based on the new charge
                                                          // distribution.
                 }
@@ -292,7 +292,7 @@ class quickexact_impl
         }
 
         // Update all local potentials, system energy, and physical validity. The flag is set to
-        // `VARIABLE` to allow the dependent cell to change its charge state based on the N-1 SiDBs to
+        // `dependent_cell_mode::VARIABLE` to allow the dependent cell to change its charge state based on the N-1 SiDBs to
         // fulfill the local population stability at its position.
         charge_layout.update_after_charge_change(dependent_cell_mode::VARIABLE);
 
@@ -404,7 +404,7 @@ class quickexact_impl
                 charge_layout.increase_charge_index_of_sub_layout_by_one(
                     dependent_cell_mode::VARIABLE, energy_calculation::KEEP_OLD_ENERGY_VALUE,
                     charge_distribution_history::CONSIDER,
-                    exact_sidb_simulation_engine::QUICKEXACT);  // "false" allows that the charge state of the
+                    exact_sidb_simulation_engine::QUICKEXACT);  // `dependent_cell_mode::VARIABLE` allows that the charge state of the
                                                                 // dependent cell is automatically changed based on
                                                                 // the new charge distribution.
             }
@@ -431,7 +431,7 @@ class quickexact_impl
             charge_layout.increase_charge_index_by_one(
                 dependent_cell_mode::VARIABLE, energy_calculation::KEEP_OLD_ENERGY_VALUE,
                 charge_distribution_history::NEGLECT,
-                exact_sidb_simulation_engine::QUICKEXACT);  // "false" allows that the charge state of the
+                exact_sidb_simulation_engine::QUICKEXACT);  // `dependent_cell_mode::VARIABLE` allows that the charge state of the
                                                             // dependent cell is automatically changed based on the
                                                             // new charge distribution.
         }

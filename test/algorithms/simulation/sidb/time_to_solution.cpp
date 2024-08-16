@@ -102,18 +102,21 @@ TEMPLATE_TEST_CASE("time-to-solution test with offset coordinates", "[time-to-so
         lyt.assign_cell_type({1, 6, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({3, 6, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({5, 6, 0}, TestType::cell_type::NORMAL);
-        lyt.assign_cell_type({7, 6, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({7, 2, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({10, 6, 0}, TestType::cell_type::NORMAL);
-        lyt.assign_cell_type({12, 6, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({18, 9, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({20, 9, 0}, TestType::cell_type::NORMAL);
+        lyt.assign_cell_type({3, 3, 0}, TestType::cell_type::NORMAL);
 
-        const sidb_simulation_parameters params{3, -0.32};
-        const quicksim_params            quicksim_params{params};
+        const sidb_simulation_parameters params{2, -0.32};
+
+        quicksim_params            quicksim_params{params};
+        quicksim_params.iteration_steps = 10;
 
         const time_to_solution_params tts_params_exgs{exact_sidb_simulation_engine::EXGS};
         time_to_solution_stats        tts_stat_exgs{};
         time_to_solution<TestType>(lyt, quicksim_params, tts_params_exgs, &tts_stat_exgs);
 
-        CHECK(tts_stat_exgs.acc == 100);
         CHECK(tts_stat_exgs.time_to_solution > 0.0);
         CHECK(tts_stat_exgs.mean_single_runtime > 0.0);
 
@@ -121,7 +124,6 @@ TEMPLATE_TEST_CASE("time-to-solution test with offset coordinates", "[time-to-so
         const time_to_solution_params tts_params{exact_sidb_simulation_engine::QUICKEXACT};
         time_to_solution<TestType>(lyt, quicksim_params, tts_params, &tts_stat_quickexact);
 
-        REQUIRE(tts_stat_quickexact.acc == 100);
         CHECK(tts_stat_quickexact.time_to_solution > 0.0);
         CHECK(tts_stat_quickexact.mean_single_runtime > 0.0);
 

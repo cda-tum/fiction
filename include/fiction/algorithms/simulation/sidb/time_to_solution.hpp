@@ -39,7 +39,9 @@ struct time_to_solution_params
      */
     uint64_t repetitions = 100;
     /**
-     * Confidence level.
+     * The confidence level represents the probability that the confidence interval calculated from the simulation
+     * contains the true value. For example, a 95 % (0.95) confidence level means that if the simulation were repeated
+     * many times, approximately 95 out of 100 of the calculated confidence intervals would contain the true value.
      */
     double confidence_level = 0.997;
 };
@@ -56,7 +58,7 @@ struct time_to_solution_stats
      */
     double time_to_solution{0};
     /**
-     * Accuracy of the simulation.
+     * Accuracy of the simulation in %.
      */
     double acc{};
     /**
@@ -78,14 +80,14 @@ struct time_to_solution_stats
      */
     void report(std::ostream& out = std::cout)
     {
-        out << fmt::format("time_to_solution: {} \n acc: {} \n t_(s): {} \n t_exact(s): {} \n exact alg.: {}\n",
+        out << fmt::format("time_to_solution: {} \n acc: {} \n t[s]: {} \n t_exact[s]: {} \n exact alg.: {}\n",
                            time_to_solution, acc, mean_single_runtime, single_runtime_exact, algorithm);
     }
 };
 /**
  * This function determines the time-to-solution (TTS) and the accuracy (acc) of the *QuickSim* algorithm.
  *
- * @tparam Lyt Cell-level layout type.
+ * @tparam Lyt SiDB cell-level layout type.
  * @param lyt Layout that is used for the simulation.
  * @param quicksim_params Parameters required for the *QuickSim* algorithm.
  * @param tts_params Parameters used for the time-to-solution calculation.
@@ -135,11 +137,15 @@ void time_to_solution(const Lyt& lyt, const quicksim_params& quicksim_params,
  * in comparison to those of an exact algorithm. It provides further statistical metrics, including the accuracy of the
  * heuristic algorithm, and individual runtimes.
  *
- * @tparam Lyt Cell-level layout type.
+ * @tparam Lyt SiDB ell-level layout type.
  * @param results_exact Simulation results of the exact algorithm.
  * @param results_heuristic Simulation of the heuristic for which the TTS is determined.
- * @param confidence_level Confidence level for the TTS computation
- * @param ps Pointer to a struct where the results (time_to_solution, acc, single runtime) are stored.
+ * @param confidence_level Confidence level for the TTS computation. The confidence level represents the probability
+ * that the confidence interval calculated from the simulation contains the true value. For example, a 95 % (0.95)
+ * confidence level means that if the simulation were repeated many times, approximately 95 out of 100 of the calculated
+ * confidence intervals would contain the true value.
+ * @param ps Pointer to a struct where the statistics of this function call (time_to_solution, acc, single runtime) are
+ * to be stored.
  */
 template <typename Lyt>
 void time_to_solution_for_given_simulation_results(const sidb_simulation_result<Lyt>&              results_exact,
@@ -151,8 +157,6 @@ void time_to_solution_for_given_simulation_results(const sidb_simulation_result<
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
     time_to_solution_stats st{};
-
-    const auto ground_state = determine_groundstate_from_simulation_results(results_exact);
 
     auto        total_runtime_heuristic = 0.0;
     std::size_t gs_count                = 0;

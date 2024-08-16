@@ -11,18 +11,20 @@
 
 #include <cstdint>
 #include <unordered_set>
+#include <cassert>
 
 namespace fiction
 {
 
 /**
- * This function checks if the ground state is found by the heuristic.
+ * This function checks if the elstrostatic ground state of an SiDB layout is found by a heuristic for the physical
+ * simulation (e.g., *QuickSim* or *SimAnneal*).
  *
- * @tparam Lyt Cell-level layout type.
- * @param heuristic_results All found physically valid charge distribution surfaces obtained by a heuristic algorithm.
- * @param exact_results All valid charge distribution surfaces determined by ExGS.
- * @return Returns `true` if the relative difference between the lowest energies of the two sets is less than
- * \f$0.00001\f$, `false` otherwise.
+ * @tparam Lyt SiDB cell-level layout type.
+ * @param heuristic_results Simulation results obtained from a heuristic physical simulation.
+ * @param exact_results Simulation results obtained from an exact physical simulation.
+ * @return Returns `true` if the ground state is contained in the simulation result provided by the heuristic physical
+ * simulation. `false` otherwise.
  */
 template <typename Lyt>
 [[nodiscard]] bool is_ground_state(const sidb_simulation_result<Lyt>& heuristic_results,
@@ -40,6 +42,10 @@ template <typename Lyt>
 
     const auto ground_state_charge_distributions_heuristic =
         determine_groundstate_from_simulation_results(heuristic_results);
+
+
+    assert(ground_state_charge_distributions_heuristic.size() <= ground_state_charge_distributions_exact.size() &&
+           "The heuristic results must be less equal than the exact results.");
 
     if (ground_state_charge_distributions_exact.size() != ground_state_charge_distributions_heuristic.size())
     {

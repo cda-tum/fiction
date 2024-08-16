@@ -62,10 +62,9 @@ class TestTimeToSolution(unittest.TestCase):
         number_of_repetitions = 100
         simulation_results_quicksim = []
 
-        # Run the quicksim simulations
+        # Run the QuickSim simulations
         for _ in range(number_of_repetitions):
             simulation_results_quicksim.append(quicksim(layout, quicksim_params_inst))
-
 
         quickexact_params_inst = quickexact_params()
         quickexact_params_inst.simulation_parameters = params
@@ -73,7 +72,7 @@ class TestTimeToSolution(unittest.TestCase):
         self.assertEqual(quickexact_params_inst.simulation_parameters.mu_minus, -0.32)
         self.assertEqual(quickexact_params_inst.base_number_detection, automatic_base_number_detection.OFF)
 
-        # Run the quickexact simulation
+        # Run the QuickExact simulation
         simulation_results_quickexact = quickexact(layout, quickexact_params_inst)
 
         # Calculate time-to-solution using the simulation results
@@ -81,7 +80,6 @@ class TestTimeToSolution(unittest.TestCase):
         time_to_solution_for_given_simulation_results(
             simulation_results_quickexact, simulation_results_quicksim, 0.997, st)
 
-        # Assertions
         self.assertEqual(st.acc, 100.0)
         self.assertGreater(st.time_to_solution, 0.0)
         self.assertGreater(st.mean_single_runtime, 0.0)
