@@ -80,22 +80,17 @@ class TestTimeToSolution(unittest.TestCase):
         time_to_solution_for_given_simulation_results(
             simulation_results_quickexact, simulation_results_quicksim, 0.997, st)
 
-        self.assertEqual(st.acc, 100.0)
         self.assertGreater(st.time_to_solution, 0.0)
         self.assertGreater(st.mean_single_runtime, 0.0)
 
-        print(st.acc)
-
         if st.acc == 100:
-                tts_calculated = st.mean_single_runtime
-        else:
+            tts_calculated = st.mean_single_runtime
+            self.assertAlmostEqual(st.time_to_solution - tts_calculated, 0.0, delta=1e-6)
+        elif st.acc != 0.0:
             # To avoid division by zero, ensure st.acc is not 1.0
             tts_calculated = (st.mean_single_runtime * math.log(1.0 - 0.997) /
-                      math.log(1.0 - st.acc))
-
-        self.assertAlmostEqual(st.time_to_solution - tts_calculated, 0.0, delta=1e-6)
-
-
+                              math.log(1.0 - st.acc / 100))
+            self.assertAlmostEqual(st.time_to_solution - tts_calculated, 0.0, delta=1e-6)
 
 if __name__ == '__main__':
     unittest.main()

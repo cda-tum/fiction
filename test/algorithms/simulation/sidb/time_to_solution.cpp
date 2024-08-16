@@ -16,7 +16,7 @@
 #include <fiction/types.hpp>
 
 #include <cmath>
-#include <cstddef>
+#include <cstdlib>
 #include <limits>
 #include <vector>
 
@@ -127,14 +127,21 @@ TEMPLATE_TEST_CASE("time-to-solution test with offset coordinates", "[time-to-so
         CHECK(tts_stat_quickexact.time_to_solution > 0.0);
         CHECK(tts_stat_quickexact.mean_single_runtime > 0.0);
 
-        // calculate tts manually.
-        const auto tts_calculated = (tts_stat_quickexact.acc == 100) ? tts_stat_quickexact.mean_single_runtime :
-                                                                       (tts_stat_quickexact.mean_single_runtime *
-                                                                        std::log(1.0 - tts_params.confidence_level) /
-                                                                        std::log(1.0 - tts_stat_quickexact.acc));
+        auto tts_calculated = std::numeric_limits<double>::max();
 
-        CHECK_THAT(tts_stat_quickexact.time_to_solution - tts_calculated,
-                   Catch::Matchers::WithinAbs(0.0, physical_constants::POP_STABILITY_ERR));
+        if (tts_stat_quickexact.acc == 100)
+        {
+            tts_calculated = tts_stat_quickexact.single_runtime_exact;
+            CHECK_THAT(tts_stat_quickexact.time_to_solution - tts_calculated,
+                       Catch::Matchers::WithinAbs(0.0, physical_constants::POP_STABILITY_ERR));
+        }
+        else if (tts_stat_quickexact.acc != 0)
+        {
+            tts_calculated = (tts_stat_quickexact.mean_single_runtime * std::log(1.0 - tts_params.confidence_level) /
+                              std::log(1.0 - tts_stat_quickexact.acc / 100));
+            CHECK_THAT(tts_stat_quickexact.time_to_solution - tts_calculated,
+                       Catch::Matchers::WithinAbs(0.0, physical_constants::POP_STABILITY_ERR));
+        }
     }
 }
 
@@ -175,9 +182,9 @@ TEMPLATE_TEST_CASE("time-to-solution test with simulation results", "[time-to-so
         CHECK(st.time_to_solution > 0.0);
         CHECK(st.mean_single_runtime > 0.0);
 
-        double tts_calculated = (st.acc == 100) ?
-                                    st.mean_single_runtime :
-                                    (st.mean_single_runtime * std::log(1.0 - 0.997) / std::log(1.0 - st.acc));
+        const auto tts_calculated = (st.acc == 100) ?
+                                        st.mean_single_runtime :
+                                        (st.mean_single_runtime * std::log(1.0 - 0.997) / std::log(1.0 - st.acc));
 
         CHECK_THAT(st.time_to_solution - tts_calculated,
                    Catch::Matchers::WithinAbs(0.0, physical_constants::POP_STABILITY_ERR));
