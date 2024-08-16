@@ -1171,10 +1171,10 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * exact_sidb_simulation_engine::QUICKEXACT for *QuickExact*.
      */
     void increase_charge_index_by_one(
-        const dependent_cell_mode               dep_cell                = dependent_cell_mode::FIXED,
-        const energy_calculation                energy_calculation_mode = energy_calculation::UPDATE_ENERGY,
-        const charge_distribution_history       history_mode            = charge_distribution_history::NEGLECT,
-        const exact_sidb_simulation_engine engine = exact_sidb_simulation_engine::EXGS) noexcept
+        const dependent_cell_mode          dep_cell                = dependent_cell_mode::FIXED,
+        const energy_calculation           energy_calculation_mode = energy_calculation::UPDATE_ENERGY,
+        const charge_distribution_history  history_mode            = charge_distribution_history::NEGLECT,
+        const exact_sidb_simulation_engine engine                  = exact_sidb_simulation_engine::EXGS) noexcept
     {
         if (strg->charge_index_and_base.first < strg->max_charge_index)
         {
@@ -1724,10 +1724,10 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * exact_sidb_simulation_engine::QUICKEXACT for `QuickExact`.
      */
     void increase_charge_index_of_sub_layout_by_one(
-        const dependent_cell_mode               dependent_cell_fixed    = dependent_cell_mode::FIXED,
-        const energy_calculation                recompute_system_energy = energy_calculation::UPDATE_ENERGY,
-        const charge_distribution_history       consider_history        = charge_distribution_history::NEGLECT,
-        const exact_sidb_simulation_engine engine = exact_sidb_simulation_engine::QUICKEXACT) noexcept
+        const dependent_cell_mode          dependent_cell_fixed    = dependent_cell_mode::FIXED,
+        const energy_calculation           recompute_system_energy = energy_calculation::UPDATE_ENERGY,
+        const charge_distribution_history  consider_history        = charge_distribution_history::NEGLECT,
+        const exact_sidb_simulation_engine engine                  = exact_sidb_simulation_engine::QUICKEXACT) noexcept
     {
         if (strg->charge_index_sublayout < strg->max_charge_index_sulayout)
         {

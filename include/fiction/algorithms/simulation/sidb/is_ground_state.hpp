@@ -36,8 +36,7 @@ template <typename Lyt>
         return false;
     }
 
-    const auto ground_state_charge_distributions_exact =
-        determine_groundstate_from_simulation_results(exact_results);
+    const auto ground_state_charge_distributions_exact = determine_groundstate_from_simulation_results(exact_results);
 
     const auto ground_state_charge_distributions_heuristic =
         determine_groundstate_from_simulation_results(heuristic_results);
