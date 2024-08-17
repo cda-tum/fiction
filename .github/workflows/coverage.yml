@@ -39,8 +39,8 @@ jobs:
   build_and_test:
     strategy:
       matrix:
-        os: [ ubuntu-22.04 ]
-        compiler: [ g++-11 ]
+        os: [ macos-latest ]
+        compiler: [ gcc-14 ]
 
     name: Coverage on ${{matrix.os}} with ${{matrix.compiler}}
     runs-on: ${{matrix.os}}
