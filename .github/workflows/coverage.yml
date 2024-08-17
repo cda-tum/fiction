@@ -125,9 +125,17 @@ jobs:
 
         run: ctest -C $BUILD_TYPE --verbose --output-on-failure --repeat until-pass:3 --parallel 4
 
+      - name: Install lcov
+        run: |
+          if ! command -v brew &> /dev/null; then
+            echo "Homebrew not found. Installing..."
+            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+          fi
+          brew install lcov
+
       - name: Setup and run lcov
         run: |
-          sudo apt-get install lcov
+          ls -la ${{github.workspace}}/build/
           lcov -t "result" -o lcov.info -c -d ${{github.workspace}}/build/
           lcov -e lcov.info "${{github.workspace}}/include*" -o lcov_filtered.info
           lcov -l lcov_filtered.info

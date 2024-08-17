@@ -133,13 +133,13 @@ int main()  // NOLINT
         const auto mapped_network = fiction::technology_mapping(cut_xag, tech_map_params);
 
         fiction::on_the_fly_circuit_design_params<cell_lyt> params{};
-        params.exact_design_parameter.scheme        = "ROW4";
-        params.exact_design_parameter.crossings     = true;
-        params.exact_design_parameter.border_io     = false;
-        params.exact_design_parameter.desynchronize = true;
-        params.exact_design_parameter.upper_bound_x = 11;         // 12 x 31 tiles
-        params.exact_design_parameter.upper_bound_y = 30;         // 12 x 31 tiles
-        params.exact_design_parameter.timeout       = 3'600'000;  // 1h in ms
+        params.exact_design_parameters.scheme        = "ROW4";
+        params.exact_design_parameters.crossings     = true;
+        params.exact_design_parameters.border_io     = false;
+        params.exact_design_parameters.desynchronize = true;
+        params.exact_design_parameters.upper_bound_x = 11;         // 12 x 31 tiles
+        params.exact_design_parameters.upper_bound_y = 30;         // 12 x 31 tiles
+        params.exact_design_parameters.timeout       = 3'600'000;  // 1h in ms
 
         params.sidb_on_the_fly_gate_library_parameters.defect_surface     = surface_lattice;
         params.sidb_on_the_fly_gate_library_parameters.design_gate_params = design_gate_params;
