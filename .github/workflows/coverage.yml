@@ -59,10 +59,10 @@ jobs:
       - name: Setup mold
         uses: rui314/setup-mold@v1
 
-      - name: Install pip packages
-        uses: BSFishy/pip-action@v1
-        with:
-          requirements: ${{github.workspace}}/libs/mugen/requirements.txt
+      #      - name: Install pip packages
+      #        uses: BSFishy/pip-action@v1
+      #        with:
+      #          requirements: ${{github.workspace}}/libs/mugen/requirements.txt
 
       - name: Setup TBB
         run: brew install tbb
@@ -111,7 +111,6 @@ jobs:
           -DFICTION_TEST=ON
           -DFICTION_BENCHMARK=OFF
           -DFICTION_Z3=ON
-          -DFICTION_ENABLE_MUGEN=ON
           -DFICTION_PROGRESS_BARS=OFF
           -DFICTION_WARNINGS_AS_ERRORS=OFF
           -DFICTION_ENABLE_COVERAGE=ON
