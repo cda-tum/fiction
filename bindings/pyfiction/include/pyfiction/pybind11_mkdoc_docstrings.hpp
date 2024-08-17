@@ -3731,7 +3731,7 @@ static const char *__doc_fiction_detail_apply_gate_library_impl_cell_lyt = R"doc
 
 static const char *__doc_fiction_detail_apply_gate_library_impl_gate_lyt = R"doc(Gate-level layout.)doc";
 
-static const char *__doc_fiction_detail_apply_gate_library_impl_run_sidb_on_the_fly_gate_library =
+static const char *__doc_fiction_detail_apply_gate_library_impl_run_parameterized_gate_library =
 R"doc(Run the cell layout generation process.
 
 This function performs the cell layout generation process based on the
@@ -13169,7 +13169,7 @@ defective surface.
 Template parameter ``CellLyt``:
     Cell-level layout type.)doc";
 
-static const char *__doc_fiction_on_the_fly_circuit_design_params_exact_design_parameter = R"doc(Parameters for the *exact* placement and routing algorithm.)doc";
+static const char *__doc_fiction_on_the_fly_circuit_design_params_exact_design_parameters = R"doc(Parameters for the *exact* placement and routing algorithm.)doc";
 
 static const char *__doc_fiction_on_the_fly_circuit_design_params_sidb_on_the_fly_gate_library_parameters = R"doc(Parameters for the SiDB on-the-fly gate library.)doc";
 
