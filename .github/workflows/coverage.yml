@@ -78,8 +78,8 @@ jobs:
         uses: cda-tum/setup-z3@v1
         with:
           version: ${{env.Z3_VERSION}}
-          platform: linux
-          architecture: x64
+          platform: macOS
+          architecture: ${{matrix.architecture}}
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
