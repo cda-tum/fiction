@@ -10,10 +10,12 @@
 #include <fmt/format.h>
 
 #include <algorithm>
+#include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <iostream>
+#include <limits>
 #include <type_traits>
 
 // data types cannot properly be converted to bit field types
@@ -788,6 +790,18 @@ constexpr CoordinateType to_fiction_coord(const siqad::coord_t& coord) noexcept
 {
     if (!coord.is_dead())
     {
+        if (2 * static_cast<double>(coord.y) + static_cast<double>(coord.z) >
+            static_cast<double>(std::numeric_limits<decltype(siqad::coord_t::y)>::max()))
+        {
+            return {coord.x, std::numeric_limits<decltype(siqad::coord_t::y)>::max()};
+        }
+
+        if (2 * static_cast<double>(coord.y) + static_cast<double>(coord.z) <
+            static_cast<double>(std::numeric_limits<decltype(siqad::coord_t::y)>::min()))
+        {
+            return {coord.x, std::numeric_limits<decltype(siqad::coord_t::y)>::min()};
+        }
+
         return {coord.x, coord.y * 2 + coord.z};
     }
 
@@ -799,6 +813,7 @@ constexpr CoordinateType to_fiction_coord(const siqad::coord_t& coord) noexcept
  * @tparam CoordinateType Coordinate type to convert.
  * @param coord Coordinate to convert.
  * @return SiQAD coordinate representation of `coord`.
+ *
  */
 template <typename CoordinateType>
 constexpr coord_t to_siqad_coord(const CoordinateType& coord) noexcept
@@ -812,6 +827,30 @@ constexpr coord_t to_siqad_coord(const CoordinateType& coord) noexcept
 
 }  // namespace siqad
 
+/**
+ * Converts offset coordinates to cube coordinates.
+ *
+ * @note This function assumes that the input coordinates are within the valid range for cube coordinates. Specifically,
+ * the x, y, and z coordinates should be within the range of \f$(0, 0, 0)\f$ to \f$(2^{31} - 1, 2^{31} - 1, 1)\f$. If
+ * the input coordinates are outside this range, the behavior of the function is undefined. If the input coordinate is
+ * dead, a dead cube coordinate is returned.
+ *
+ * @param coord Offset coordinate to convert to a cube coordinate.
+ * @return Cube coordinate equivalent to `coord`.
+ */
+constexpr cube::coord_t offset_to_cube_coord(const offset::ucoord_t& coord) noexcept
+{
+    assert(coord.x <= std::numeric_limits<int32_t>::max() && coord.y <= std::numeric_limits<int32_t>::max() &&
+           coord.z <= std::numeric_limits<int32_t>::max() && "Coordinate is out-of-range and cannot be transformed");
+
+    if (coord.is_dead())
+    {
+        return cube::coord_t{};
+    }
+
+    return {static_cast<decltype(cube::coord_t::x)>(coord.x), static_cast<decltype(cube::coord_t::y)>(coord.y),
+            static_cast<decltype(cube::coord_t::z)>(coord.z)};
+}
 /**
  * Computes the area of a given coordinate assuming its origin is (0, 0, 0). Calculates \f$(|x| + 1) \cdot (|y| + 1)\f$
  * by default. The exception is SiQAD coordinates, for which it computes \f$(|x| + 1) \cdot (2 \cdot |y| + |z| + 1)\f$.

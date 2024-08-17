@@ -7,9 +7,6 @@
 #include <fiction/algorithms/physical_design/design_sidb_gates.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
-#include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/cell_level_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/sidb_defect_surface.hpp>
@@ -55,54 +52,86 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
 
     CHECK(lyt.num_cells() == 13);
 
-    const design_sidb_gates_params<cell<siqad_layout>> params{
+    design_sidb_gates_params<cell<siqad_layout>> params{
         sidb_simulation_parameters{2, -0.32},
         design_sidb_gates_params<cell<siqad_layout>>::design_sidb_gates_mode::EXHAUSTIVE,
         {{10, 4, 0}, {10, 4, 0}},
         1,
         sidb_simulation_engine::QUICKEXACT};
 
-    const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_xnor_tt()}, params);
+    SECTION("One cell in canvas")
+    {
+        const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_xnor_tt()}, params);
 
-    REQUIRE(found_gate_layouts.size() == 1);
-    CHECK(found_gate_layouts[0].num_cells() == 14);
-    CHECK(found_gate_layouts[0].get_cell_type({10, 4, 0}) == siqad_layout::technology::NORMAL);
+        REQUIRE(found_gate_layouts.size() == 1);
+        CHECK(found_gate_layouts[0].num_cells() == 14);
+        CHECK(found_gate_layouts[0].get_cell_type({10, 4, 0}) == siqad_layout::technology::NORMAL);
 
-    // using cube coordinates
-    const auto lyt_in_cube_coord = convert_layout_to_fiction_coordinates<cube_layout>(lyt);
-    const design_sidb_gates_params<cell<cube_layout>> params_cube{
-        sidb_simulation_parameters{2, -0.32},
-        design_sidb_gates_params<cell<cube_layout>>::design_sidb_gates_mode::EXHAUSTIVE,
-        {siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{10, 4, 0}),
-         siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{10, 4, 0})},
-        1,
-        sidb_simulation_engine::QUICKEXACT};
+        // using cube coordinates
+        const auto lyt_in_cube_coord = convert_layout_to_fiction_coordinates<cube_layout>(lyt);
+        const design_sidb_gates_params<cell<cube_layout>> params_cube{
+            sidb_simulation_parameters{2, -0.32},
+            design_sidb_gates_params<cell<cube_layout>>::design_sidb_gates_mode::EXHAUSTIVE,
+            {siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{10, 4, 0}),
+             siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{10, 4, 0})},
+            1,
+            sidb_simulation_engine::QUICKEXACT};
 
-    const auto found_gate_layouts_cube =
-        design_sidb_gates(lyt_in_cube_coord, std::vector<tt>{create_xnor_tt()}, params_cube);
+        const auto found_gate_layouts_cube =
+            design_sidb_gates(lyt_in_cube_coord, std::vector<tt>{create_xnor_tt()}, params_cube);
 
-    REQUIRE(found_gate_layouts_cube.size() == 1);
-    CHECK(found_gate_layouts_cube[0].num_cells() == 14);
-    CHECK(found_gate_layouts_cube[0].get_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{10, 4, 0})) ==
-          siqad_layout::technology::NORMAL);
+        REQUIRE(found_gate_layouts_cube.size() == 1);
+        CHECK(found_gate_layouts_cube[0].num_cells() == 14);
+        CHECK(found_gate_layouts_cube[0].get_cell_type(siqad::to_fiction_coord<cube::coord_t>(
+                  siqad::coord_t{10, 4, 0})) == siqad_layout::technology::NORMAL);
 
-    // using offset coordinates
-    const auto lyt_in_offset_coord = convert_layout_to_fiction_coordinates<offset_layout>(lyt);
-    const design_sidb_gates_params<cell<offset_layout>> params_offset{
-        sidb_simulation_parameters{2, -0.32},
-        design_sidb_gates_params<cell<offset_layout>>::design_sidb_gates_mode::EXHAUSTIVE,
-        {siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{10, 4, 0}),
-         siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{10, 4, 0})},
-        1,
-        sidb_simulation_engine::QUICKEXACT};
+        // using offset coordinates
+        const auto lyt_in_offset_coord = convert_layout_to_fiction_coordinates<offset_layout>(lyt);
+        const design_sidb_gates_params<cell<offset_layout>> params_offset{
+            sidb_simulation_parameters{2, -0.32},
+            design_sidb_gates_params<cell<offset_layout>>::design_sidb_gates_mode::EXHAUSTIVE,
+            {siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{10, 4, 0}),
+             siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{10, 4, 0})},
+            1,
+            sidb_simulation_engine::QUICKEXACT};
 
-    const auto found_gate_layouts_offset =
-        design_sidb_gates(lyt_in_offset_coord, std::vector<tt>{create_xnor_tt()}, params_offset);
+        const auto found_gate_layouts_offset =
+            design_sidb_gates(lyt_in_offset_coord, std::vector<tt>{create_xnor_tt()}, params_offset);
 
-    REQUIRE(found_gate_layouts_offset.size() == 1);
-    CHECK(found_gate_layouts_offset[0].num_cells() == 14);
-    CHECK(found_gate_layouts_offset[0].get_cell_type(
-              siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{10, 4, 0})) == siqad_layout::technology::NORMAL);
+        REQUIRE(found_gate_layouts_offset.size() == 1);
+        CHECK(found_gate_layouts_offset[0].num_cells() == 14);
+        CHECK(found_gate_layouts_offset[0].get_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(
+                  siqad::coord_t{10, 4, 0})) == offset_layout::technology::NORMAL);
+    }
+    SECTION("Four cells in canvas, design all gates")
+    {
+        params = design_sidb_gates_params<cell<siqad_layout>>{
+            sidb_simulation_parameters{2, -0.32},
+            design_sidb_gates_params<cell<siqad_layout>>::design_sidb_gates_mode::EXHAUSTIVE,
+            {{10, 4, 0}, {13, 4, 0}},
+            1,
+            sidb_simulation_engine::QUICKEXACT};
+
+        const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_xnor_tt()}, params);
+
+        REQUIRE(found_gate_layouts.size() == 4);
+    }
+    SECTION("Four cells in canvas, design process is terminated after first solution is found")
+    {
+        params = design_sidb_gates_params<cell<siqad_layout>>{
+            sidb_simulation_parameters{2, -0.32},
+            design_sidb_gates_params<cell<siqad_layout>>::design_sidb_gates_mode::EXHAUSTIVE,
+            {{10, 4, 0}, {10, 4, 0}},
+            1,
+            sidb_simulation_engine::QUICKEXACT,
+            design_sidb_gates_params<cell<siqad_layout>>::termination_condition::AFTER_FIRST_SOLUTION};
+
+        const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_xnor_tt()}, params);
+
+        REQUIRE(found_gate_layouts.size() == 1);
+        CHECK(found_gate_layouts[0].num_cells() == 14);
+        CHECK(found_gate_layouts[0].get_cell_type({10, 4, 0}) == siqad_layout::technology::NORMAL);
+    }
 }
 
 TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[design-sidb-gates]")
@@ -204,9 +233,9 @@ TEST_CASE("Use FO2 Bestagon gate without SiDB at {17, 11, 0} and generate origin
 
     SECTION("replace the output perturbers by equivalent negatively charged defects")
     {
-        const design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
+        const design_sidb_gates_params<cell<sidb_defect_100_cell_clk_lyt_siqad>> params{
             sidb_simulation_parameters{2, -0.32},
-            design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::EXHAUSTIVE,
+            design_sidb_gates_params<cell<sidb_defect_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::EXHAUSTIVE,
             {{17, 11, 0}, {17, 11, 0}},
             1,
             sidb_simulation_engine::QUICKEXACT};
@@ -292,10 +321,11 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
         defect_layout.assign_sidb_defect({20, 12, 0},
                                          sidb_defect{sidb_defect_type::DB, -1, params.simulation_parameters.epsilon_r,
                                                      params.simulation_parameters.lambda_tf});
+        defect_layout.assign_sidb_defect({23, 12, 0}, sidb_defect{sidb_defect_type::GUNK});
 
         const auto found_gate_layouts = design_sidb_gates(defect_layout, std::vector<tt>{create_and_tt()}, params);
         REQUIRE(!found_gate_layouts.empty());
-        CHECK(found_gate_layouts.front().num_defects() == 2);
+        CHECK(found_gate_layouts.front().num_defects() == 3);
         CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
 
         found_gate_layouts.front().foreach_cell(
