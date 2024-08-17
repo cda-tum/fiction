@@ -42,8 +42,8 @@ jobs:
         os: [ macos-latest ]
         compiler: [ gcc-14 ]
 
-    name: Coverage on ${{matrix.os}} with ${{matrix.compiler}}
-    runs-on: ${{matrix.os}}
+    #    name: Coverage on ${{matrix.os}} with ${{matrix.compiler}}
+    #    runs-on: ${{matrix.os}}
 
     steps:
       - name: Install the Compiler
