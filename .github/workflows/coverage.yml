@@ -79,7 +79,7 @@ jobs:
         with:
           version: ${{env.Z3_VERSION}}
           platform: macOS
-          architecture: ${{matrix.architecture}}
+          architecture: arm64
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
