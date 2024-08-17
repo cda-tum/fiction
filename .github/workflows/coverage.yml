@@ -68,10 +68,10 @@ jobs:
       - name: Setup mold
         uses: rui314/setup-mold@v1
 
-      - name: Install pip packages
-        uses: BSFishy/pip-action@v1
-        with:
-          requirements: ${{github.workspace}}/libs/mugen/requirements.txt
+      #      - name: Install pip packages
+      #        uses: BSFishy/pip-action@v1
+      #        with:
+      #          requirements: ${{github.workspace}}/libs/mugen/requirements.txt
 
       - name: Setup Z3 Solver
         id: z3
