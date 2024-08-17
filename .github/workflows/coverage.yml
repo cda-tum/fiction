@@ -51,6 +51,19 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10.x'
+
+      - name: Setup TBB
+        run: brew install tbb
+
+      - name: Setup XCode version
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: "^14.2"
+
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
@@ -59,14 +72,6 @@ jobs:
           save: true
           max-size: 10G
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.10.x'
-          cache: 'pip'
-
-      - name: Setup mold
-        uses: rui314/setup-mold@v1
 
       #      - name: Install pip packages
       #        uses: BSFishy/pip-action@v1
