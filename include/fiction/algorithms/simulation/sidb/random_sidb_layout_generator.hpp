@@ -11,8 +11,7 @@
 #include "fiction/utils/layout_utils.hpp"
 
 #include <cstdint>
-#include <iostream>
-#include <string_view>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -93,6 +92,13 @@ Lyt generate_random_sidb_layout(const Lyt&                                      
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
+    std::unordered_set<typename Lyt::coordinate> sidbs_affected_by_defects = {};
+
+    if constexpr (has_get_sidb_defect_v<Lyt>)
+    {
+        sidbs_affected_by_defects = lyt_skeleton.all_affected_sidbs(std::make_pair(0, 0));
+    }
+
     const uint64_t number_of_sidbs_of_final_layout = lyt_skeleton.num_cells() + params.number_of_sidbs;
 
     Lyt lyt{lyt_skeleton.clone()};
@@ -104,8 +110,8 @@ Lyt generate_random_sidb_layout(const Lyt&                                      
     {
         // random coordinate within given area
         const auto random_coord = random_coordinate(params.coordinate_pair.first, params.coordinate_pair.second);
-
-        bool constraint_violation_positive_sidbs = false;
+        bool       next_to_neutral_defect              = false;
+        bool       constraint_violation_positive_sidbs = false;
 
         if (params.positive_sidbs == generate_random_sidb_layout_params<coordinate<Lyt>>::positive_charges::FORBIDDEN)
         {
@@ -121,6 +127,11 @@ Lyt generate_random_sidb_layout(const Lyt&                                      
                 });
         }
 
+        if (sidbs_affected_by_defects.count(random_coord) > 0)
+        {
+            next_to_neutral_defect = true;
+        }
+
         bool random_cell_is_identical_wih_defect = false;
         // check if a defect does not yet occupy random coordinate.
         if constexpr (has_get_sidb_defect_v<Lyt>)
@@ -130,7 +141,7 @@ Lyt generate_random_sidb_layout(const Lyt&                                      
 
         // if the constraints that no positive SiDBs occur and the cell is not yet occupied by a defect are satisfied,
         // the SiDB is added to the layout
-        if (!constraint_violation_positive_sidbs && !random_cell_is_identical_wih_defect)
+        if (!constraint_violation_positive_sidbs && !random_cell_is_identical_wih_defect && !next_to_neutral_defect)
         {
             lyt.assign_cell_type(random_coord, technology<Lyt>::cell_type::NORMAL);
         }

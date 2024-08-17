@@ -56,6 +56,16 @@ distributions of the SiDBs. Charge distribution surfaces are returned by the SiD
             :members:
 
 
+Is SiDB gate design deemed impossible
+-------------------------------------
+
+**Header:** ``fiction/technology/is_sidb_gate_design_impossible.hpp``
+
+.. doxygenstruct:: fiction::is_sidb_gate_design_impossible_params
+   :members:
+.. doxygenfunction:: fiction::is_sidb_gate_design_impossible
+
+
 Physical Constants
 ------------------
 

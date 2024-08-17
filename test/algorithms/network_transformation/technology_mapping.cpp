@@ -102,6 +102,58 @@ void map_and_check_all_2_inp(const Ntk& ntk)
 }
 
 template <typename Ntk>
+void map_and_check_all_standard_2_inp(const Ntk& ntk)
+{
+    technology_mapping_stats stats{};
+
+    const auto mapped_ntk = technology_mapping(ntk, all_standard_2_input_functions(), &stats);
+
+    REQUIRE(!stats.mapper_stats.mapping_error);
+
+    check_eq(ntk, mapped_ntk);
+
+    count_gate_types_stats gt_stats{};
+    count_gate_types(mapped_ntk, &gt_stats);
+
+    CHECK(gt_stats.num_lt2 == 0);
+    CHECK(gt_stats.num_gt2 == 0);
+    CHECK(gt_stats.num_le2 == 0);
+    CHECK(gt_stats.num_ge2 == 0);
+
+    CHECK(gt_stats.num_and3 == 0);
+    CHECK(gt_stats.num_xor_and == 0);
+    CHECK(gt_stats.num_or_and == 0);
+    CHECK(gt_stats.num_onehot == 0);
+    CHECK(gt_stats.num_maj3 == 0);
+    CHECK(gt_stats.num_gamble == 0);
+    CHECK(gt_stats.num_dot == 0);
+    CHECK(gt_stats.num_mux == 0);
+    CHECK(gt_stats.num_and_xor == 0);
+}
+
+template <typename Ntk>
+void map_and_check_all_standard_3_inp(const Ntk& ntk)
+{
+    technology_mapping_stats stats{};
+
+    const auto mapped_ntk = technology_mapping(ntk, all_standard_3_input_functions(), &stats);
+
+    REQUIRE(!stats.mapper_stats.mapping_error);
+
+    check_eq(ntk, mapped_ntk);
+
+    count_gate_types_stats gt_stats{};
+    count_gate_types(mapped_ntk, &gt_stats);
+
+    CHECK(gt_stats.num_and2 == 0);
+    CHECK(gt_stats.num_or2 == 0);
+    CHECK(gt_stats.num_nand2 == 0);
+    CHECK(gt_stats.num_nor2 == 0);
+    CHECK(gt_stats.num_xor2 == 0);
+    CHECK(gt_stats.num_xnor2 == 0);
+}
+
+template <typename Ntk>
 void map_and_check_all_3_inp(const Ntk& ntk)
 {
     technology_mapping_stats stats{};
@@ -128,11 +180,43 @@ void map_and_check_all_func(const Ntk& ntk)
 {
     technology_mapping_stats stats{};
 
-    const auto mapped_ntk = technology_mapping(ntk, all_supported_standard_functions(), &stats);
+    const auto mapped_ntk = technology_mapping(ntk, all_standard_3_input_functions(), &stats);
 
     REQUIRE(!stats.mapper_stats.mapping_error);
 
     check_eq(ntk, mapped_ntk);
+
+    count_gate_types_stats gt_stats{};
+    count_gate_types(mapped_ntk, &gt_stats);
+
+    CHECK(gt_stats.num_and2 == 0);
+    CHECK(gt_stats.num_or2 == 0);
+    CHECK(gt_stats.num_nand2 == 0);
+    CHECK(gt_stats.num_nor2 == 0);
+    CHECK(gt_stats.num_xor2 == 0);
+    CHECK(gt_stats.num_xnor2 == 0);
+}
+
+template <typename Ntk>
+void map_and_check_all_standard_func(const Ntk& ntk)
+{
+    technology_mapping_stats stats{};
+
+    const auto mapped_ntk = technology_mapping(ntk, all_standard_3_input_functions(), &stats);
+
+    REQUIRE(!stats.mapper_stats.mapping_error);
+
+    check_eq(ntk, mapped_ntk);
+
+    count_gate_types_stats gt_stats{};
+    count_gate_types(mapped_ntk, &gt_stats);
+
+    CHECK(gt_stats.num_and2 == 0);
+    CHECK(gt_stats.num_or2 == 0);
+    CHECK(gt_stats.num_nand2 == 0);
+    CHECK(gt_stats.num_nor2 == 0);
+    CHECK(gt_stats.num_xor2 == 0);
+    CHECK(gt_stats.num_xnor2 == 0);
 }
 
 TEMPLATE_TEST_CASE("Simple AOI network mapping", "[technology-mapping]", mockturtle::aig_network)
@@ -153,6 +237,10 @@ TEMPLATE_TEST_CASE("Simple AOIM network mapping", "[technology-mapping]", mocktu
 TEMPLATE_TEST_CASE("Simple 2-input network mapping", "[technology-mapping]", mockturtle::aig_network,
                    mockturtle::xag_network)
 {
+    map_and_check_all_standard_2_inp(blueprints::maj1_network<TestType>());
+    map_and_check_all_standard_2_inp(blueprints::and_or_network<TestType>());
+    map_and_check_all_standard_2_inp(blueprints::inverter_network<TestType>());
+
     map_and_check_all_2_inp(blueprints::maj1_network<TestType>());
     map_and_check_all_2_inp(blueprints::and_or_network<TestType>());
     map_and_check_all_2_inp(blueprints::inverter_network<TestType>());
@@ -161,6 +249,8 @@ TEMPLATE_TEST_CASE("Simple 2-input network mapping", "[technology-mapping]", moc
 TEMPLATE_TEST_CASE("Complex 2-input network mapping", "[technology-mapping]", mockturtle::aig_network,
                    mockturtle::xag_network)
 {
+    map_and_check_all_standard_2_inp(blueprints::maj4_network<TestType>());
+
     map_and_check_all_2_inp(blueprints::maj4_network<TestType>());
 }
 
@@ -168,6 +258,7 @@ TEMPLATE_TEST_CASE("Complex 3-input network mapping", "[technology-mapping]", mo
                    mockturtle::xag_network, mockturtle::mig_network, mockturtle::xmg_network)
 {
     map_and_check_all_3_inp(blueprints::maj4_network<TestType>());
+    map_and_check_all_standard_3_inp(blueprints::maj4_network<TestType>());
 }
 
 TEMPLATE_TEST_CASE("Complex all function network mapping", "[technology-mapping]", mockturtle::aig_network,
@@ -190,4 +281,5 @@ TEMPLATE_TEST_CASE("Name conservation after technology mapping", "[technology-ma
 
     // network name
     CHECK(mapped_maj.get_network_name() == "maj");
+    map_and_check_all_standard_func(blueprints::maj4_network<TestType>());
 }

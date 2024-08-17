@@ -111,6 +111,16 @@ class technology_network : public mockturtle::klut_network
         return _create_node({a, b}, 8);
     }
 
+    signal create_ge(signal a, signal b)
+    {
+        return _create_node({a, b}, 9);
+    }
+
+    signal create_gt(signal a, signal b)
+    {
+        return _create_node({a, b}, 10);
+    }
+
     signal create_le(signal a, signal b)
     {
         return _create_node({a, b}, 11);
@@ -275,6 +285,26 @@ class technology_network : public mockturtle::klut_network
     [[nodiscard]] bool is_nor(const node& n) const noexcept
     {
         return _storage->nodes[n].data[1].h1 == 7;
+    }
+
+    [[nodiscard]] bool is_lt(const node& n) const noexcept
+    {
+        return _storage->nodes[n].data[1].h1 == 8;
+    }
+
+    [[nodiscard]] bool is_ge(const node& n) const noexcept
+    {
+        return _storage->nodes[n].data[1].h1 == 9;
+    }
+
+    [[nodiscard]] bool is_gt(const node& n) const noexcept
+    {
+        return _storage->nodes[n].data[1].h1 == 10;
+    }
+
+    [[nodiscard]] bool is_le(const node& n) const noexcept
+    {
+        return _storage->nodes[n].data[1].h1 == 11;
     }
 
     [[nodiscard]] bool is_xor(const node& n) const noexcept
