@@ -111,7 +111,7 @@ class apply_gate_library_impl
      * @return A `CellLyt` object representing the generated cell layout.
      */
     template <typename Params>
-    [[nodiscard]] CellLyt run_sidb_on_the_fly_gate_library(const Params& params)
+    [[nodiscard]] CellLyt run_parameterized_gate_library(const Params& params)
     {
 #if (PROGRESS_BARS)
         // initialize a progress bar
@@ -259,7 +259,7 @@ template <typename CellLyt, typename GateLibrary, typename GateLyt, typename Par
 
     detail::apply_gate_library_impl<CellLyt, GateLibrary, GateLyt> p{lyt};
 
-    return p.template run_sidb_on_the_fly_gate_library<Params>(params);
+    return p.template run_parameterized_gate_library<Params>(params);
 }
 
 }  // namespace fiction

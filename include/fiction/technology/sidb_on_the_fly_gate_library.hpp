@@ -490,9 +490,9 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
                                               const sidb_on_the_fly_gate_library_params<CellLyt>& parameters,
                                               const port_list<port_direction>& p, const tile<GateLyt>& tile)
     {
-        static_assert(is_cell_level_layout_v<CellLyt>, "Lyt is not a cell-level layout");
-        static_assert(has_sidb_technology_v<CellLyt>, "Lyt is not an SiDB layout");
-        static_assert(has_cube_coord_v<CellLyt>, "Lyt is not based on cube coordinates");
+        static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
+        static_assert(has_sidb_technology_v<CellLyt>, "CellLyt is not an SiDB layout");
+        static_assert(has_cube_coord_v<CellLyt>, "CellLyt is not based on cube coordinates");
 
         const auto params = is_sidb_gate_design_impossible_params{parameters.design_gate_params.simulation_parameters};
 
@@ -594,9 +594,9 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
     add_defect_to_skeleton(const CellLyt& skeleton, const cell<CellLyt>& center_cell,
                            const cell<CellLyt>& absolute_cell, const Params& parameters)
     {
-        static_assert(is_cell_level_layout_v<CellLyt>, "Lyt is not a cell-level layout");
-        static_assert(has_sidb_technology_v<CellLyt>, "Lyt is not an SiDB layout");
-        static_assert(has_cube_coord_v<CellLyt>, "Lyt is not based on cube coordinates");
+        static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
+        static_assert(has_sidb_technology_v<CellLyt>, "CellLyt is not an SiDB layout");
+        static_assert(has_cube_coord_v<CellLyt>, "CellLyt is not based on cube coordinates");
 
         auto skeleton_with_defect = sidb_defect_surface{skeleton};
 

@@ -39,7 +39,7 @@ struct on_the_fly_circuit_design_params
     /**
      * Parameters for the *exact* placement and routing algorithm.
      */
-    exact_physical_design_params exact_design_parameter = {};
+    exact_physical_design_params exact_design_parameters = {};
 };
 
 /**
@@ -94,7 +94,7 @@ class on_the_fly_circuit_design_impl
         {
             // P&R with *exact* and the pre-determined blacklist
             gate_level_layout =
-                exact_with_blacklist<GateLyt>(network, black_list, params.exact_design_parameter, &stats.exact_stats);
+                exact_with_blacklist<GateLyt>(network, black_list, params.exact_design_parameters, &stats.exact_stats);
 
             if (gate_level_layout.has_value())
             {
@@ -184,8 +184,8 @@ on_the_fly_circuit_design_on_defective_surface(const Ntk& ntk, const GateLyt& la
 {
     static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
     static_assert(is_hexagonal_layout_v<GateLyt>, "GateLyt is not a hexagonal");
-    static_assert(is_cell_level_layout_v<CellLyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<CellLyt>, "Lyt is not an SiDB layout");
+    static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<CellLyt>, "CellLyt is not an SiDB layout");
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
 
     on_the_fly_circuit_design_stats<GateLyt> st{};

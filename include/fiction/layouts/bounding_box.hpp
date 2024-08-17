@@ -69,7 +69,7 @@ class bounding_box_2d
         }
 
         // Helper function to update bounding box
-        auto update_min_max = [](auto& min_coord, auto& max_coord, const auto& coord)
+        const auto update_min_max = [](auto& min_coord, auto& max_coord, const auto& coord) noexcept
         {
             if constexpr (has_siqad_coord_v<Lyt>)
             {
