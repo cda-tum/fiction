@@ -40,7 +40,7 @@ jobs:
     strategy:
       matrix:
         os: [ macos-latest ]
-        compiler: [ gcc-14 ]
+        compiler: [ clang++ ]
 
     name: Coverage on ${{matrix.os}} with ${{matrix.compiler}}
     runs-on: ${{matrix.os}}
