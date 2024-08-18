@@ -13018,7 +13018,7 @@ static const char *__doc_fiction_is_sidb_gate_design_impossible_params =
 R"doc(This struct contains parameters to determine if SiDB gate design is
 impossible.)doc";
 
-static const char *__doc_fiction_is_sidb_gate_design_impossible_params_detect_bdl_wires_params = R"doc(Parameters used to determine BDL wires.)doc";
+static const char *__doc_fiction_is_sidb_gate_design_impossible_params_detect_wire_params = R"doc(Parameters used to determine BDL wires.)doc";
 
 static const char *__doc_fiction_is_sidb_gate_design_impossible_params_simulation_params = R"doc(All parameters for physical SiDB simulations.)doc";
 
