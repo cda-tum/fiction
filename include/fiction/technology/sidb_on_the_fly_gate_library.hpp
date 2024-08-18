@@ -431,8 +431,8 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
         }
         bestagon_lyt.foreach_cell([&defect_copy, &bestagon_lyt](const auto& c)
                                   { defect_copy.assign_cell_type(c, bestagon_lyt.get_cell_type(c)); });
-        const auto status = is_operational(defect_copy, truth_table,
-                                           parameters.design_gate_params.operational_params).first;
+        const auto status =
+            is_operational(defect_copy, truth_table, parameters.design_gate_params.operational_params).first;
 
         return static_cast<bool>(status == operational_status::OPERATIONAL);
     }
