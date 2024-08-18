@@ -432,9 +432,8 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
         bestagon_lyt.foreach_cell([&defect_copy, &bestagon_lyt](const auto& c)
                                   { defect_copy.assign_cell_type(c, bestagon_lyt.get_cell_type(c)); });
         const auto status = is_operational(defect_copy, truth_table,
-                                           is_operational_params{parameters.design_gate_params.simulation_parameters,
-                                                                 parameters.design_gate_params.sim_engine})
-                                .first;
+                                           parameters.design_gate_params.operational_params).first;
+
         return static_cast<bool>(status == operational_status::OPERATIONAL);
     }
     /**
@@ -494,7 +493,8 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
         static_assert(has_sidb_technology_v<CellLyt>, "CellLyt is not an SiDB layout");
         static_assert(has_cube_coord_v<CellLyt>, "CellLyt is not based on cube coordinates");
 
-        const auto params = is_sidb_gate_design_impossible_params{parameters.design_gate_params.simulation_parameters};
+        const auto params = is_sidb_gate_design_impossible_params{
+            parameters.design_gate_params.operational_params.simulation_parameters};
 
         if (spec == create_crossing_wire_tt() || spec == create_double_wire_tt())
         {
