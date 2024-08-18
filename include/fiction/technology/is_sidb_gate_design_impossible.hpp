@@ -32,7 +32,7 @@ struct is_sidb_gate_design_impossible_params
     /**
      * Parameters used to determine BDL wires.
      */
-    detect_bdl_wires_params detect_bdl_wires_params{};
+    detect_bdl_wires_params detect_wire_params{};
 };
 /**
  * This function evaluates whether it is impossible to design an SiDB gate for a given truth table and a given skeleton
@@ -60,11 +60,11 @@ template <typename Lyt, typename TT>
     assert(skeleton_with_defects.num_pos() > 0 && "lyt needs output cells");
 
     const auto output_pairs = detect_bdl_pairs(skeleton_with_defects, sidb_technology::cell_type::OUTPUT,
-                                               params.detect_bdl_wires_params.params_bdl_pairs);
+                                               params.detect_wire_params.params_bdl_pairs);
 
     assert(output_pairs.empty() == false && "lyt needs output BDL pairs");
 
-    auto bdl_iter = bdl_input_iterator<Lyt>{skeleton_with_defects, params.detect_bdl_wires_params};
+    auto bdl_iter = bdl_input_iterator<Lyt>{skeleton_with_defects, params.detect_wire_params};
 
     for (auto i = 0u; i < spec.front().num_bits(); ++i, ++bdl_iter)
     {
