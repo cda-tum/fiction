@@ -14,7 +14,6 @@
 #include "fiction/technology/physical_constants.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/technology/sidb_defects.hpp"
-#include "fiction/technology/sidb_defects.hpp"
 #include "fiction/technology/sidb_nm_distance.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/layout_utils.hpp"
@@ -103,6 +102,12 @@ struct design_sidb_gates_params
      * Number of SiDBs placed in the canvas to create a working gate.
      */
     std::size_t number_of_sidbs = 1;
+    /**
+     * The design process is terminated after a valid SiDB gate design is found.
+     *
+     * @note This parameter has no effect unless the gate design is exhaustive.
+     */
+    termination_condition termination_cond = termination_condition::ALL_COMBINATIONS_ENUMERATED;
 };
 
 /**
@@ -118,12 +123,6 @@ struct design_sidb_gates_stats
      * The simulation engine to be used for the operational domain computation.
      */
     sidb_simulation_engine sim_engine{sidb_simulation_engine::QUICKEXACT};
-    /**
-     * The design process is terminated after a valid SiDB gate design is found.
-     *
-     * @note This parameter has no effect unless the gate design is exhaustive.
-     */
-    termination_condition termination_cond = termination_condition::ALL_COMBINATIONS_ENUMERATED;
     /**
      * This function outputs the total time taken for the SiDB gate design process to the provided output stream.
      * If no output stream is provided, it defaults to standard output (`std::cout`).
@@ -152,7 +151,7 @@ class design_sidb_gates_impl
      * @param ps Parameters and settings for the gate designer.
      */
     design_sidb_gates_impl(const Lyt& skeleton, const std::vector<TT>& spec,
-                           const design_sidb_gates_params<cell<Lyt>>& ps) :
+                           const design_sidb_gates_params<cell<Lyt>>& ps, design_sidb_gates_stats& st) :
             skeleton_layout{skeleton},
             truth_table{spec},
             params{ps},
@@ -186,7 +185,7 @@ class design_sidb_gates_impl
         auto all_combinations = determine_all_combinations_of_distributing_k_entities_on_n_positions(
             params.number_of_sidbs, static_cast<std::size_t>(all_sidbs_in_canvas.size()));
 
-        std::vector<Lyt>  designed_gate_layouts = {};
+        std::vector<Lyt> designed_gate_layouts = {};
 
         if (all_combinations.empty())
         {
@@ -208,45 +207,42 @@ class design_sidb_gates_impl
         std::shuffle(all_combinations.begin(), all_combinations.end(),
                      std::default_random_engine(std::random_device{}()));
 
-        const auto add_combination_to_layout_and_check_operation =
-            [this, &mutex_to_protect_designed_gate_layouts, &params_is_operational, &designed_gate_layouts,
-             &sidbs_affected_by_defects, &solution_found](const auto& combination) noexcept
+        const auto add_combination_to_layout_and_check_operation = [this, &mutex_to_protect_designed_gate_layouts,
+                                                                    &designed_gate_layouts, &sidbs_affected_by_defects,
+                                                                    &solution_found](const auto& combination) noexcept
         {
-            for (const auto& comb : combination)
+            // canvas SiDBs are added to the skeleton
+            const auto layout_with_added_cells = skeleton_layout_with_canvas_sidbs(combination);
+
+            if (const auto [status, sim_calls] =
+                    is_operational(layout_with_added_cells, truth_table, params.operational_params, input_bdl_wires,
+                                   output_bdl_wires, input_bdl_wire_directions);
+                status == operational_status::OPERATIONAL)
             {
+                {
+                    const std::lock_guard lock_vector{mutex_to_protect_designed_gate_layouts};
+                    designed_gate_layouts.push_back(layout_with_added_cells);
+                }
 
-                    // canvas SiDBs are added to the skeleton
-                    auto layout_with_added_cells = add_canvas_sidbs_to_skeleton_layout(comb);
+                solution_found = true;
+            }
 
-                    if (const auto [status, sim_calls] =
-                            is_operational(layout_with_added_cells, truth_table, params_is_operational);
-                        status == operational_status::OPERATIONAL)
-                    {
-                        {
-                            const std::lock_guard lock_vector{mutex_to_protect_designed_gate_layouts};
-                            designed_gate_layouts.push_back(layout_with_added_cells);
-                        }
-
-                        solution_found = true;
-                    }
-
-                    if (solution_found &&
-                        (params.termination_cond ==
-                         design_sidb_gates_params<cell<Lyt>>::termination_condition::AFTER_FIRST_SOLUTION))
-                    {
-                        return;
-                    }
-
-                    continue;
+            if (solution_found && (params.termination_cond ==
+                                   design_sidb_gates_params<cell<Lyt>>::termination_condition::AFTER_FIRST_SOLUTION))
+            {
+                return;
             }
         };
 
-        const auto chunk_size = all_combinations.size() / num_threads;
+        const std::size_t number_of_used_threads =
+            std::min(static_cast<std::size_t>(num_threads), all_combinations.size());
+
+        const std::size_t chunk_size = (all_combinations.size() + number_of_used_threads - 1) / number_of_used_threads;  // Ceiling division
 
         std::vector<std::thread> threads{};
-        threads.reserve(num_threads);
+        threads.reserve(number_of_used_threads);
 
-        for (std::size_t i = 0; i < num_threads; ++i)
+        for (std::size_t i = 0; i < number_of_used_threads; ++i)
         {
             threads.emplace_back(
                 [i, chunk_size, &all_combinations, &add_combination_to_layout_and_check_operation]()
@@ -287,7 +283,6 @@ class design_sidb_gates_impl
             params.canvas, params.number_of_sidbs,
             generate_random_sidb_layout_params<cell<Lyt>>::positive_charges::FORBIDDEN};
 
-        static const std::size_t num_threads = std::thread::hardware_concurrency();
         std::vector<std::thread> threads{};
         threads.reserve(num_threads);
 
@@ -303,7 +298,7 @@ class design_sidb_gates_impl
                 {
                     while (!gate_layout_is_found)
                     {
-                        auto result_lyt = generate_random_sidb_layout<Lyt>(skeleton_layout, parameter_random_layout);
+                        auto result_lyt = generate_random_sidb_layout<Lyt>(skeleton_layout, parameter);
                         if constexpr (has_get_sidb_defect_v<Lyt>)
                         {
                             result_lyt.foreach_sidb_defect(
@@ -332,6 +327,7 @@ class design_sidb_gates_impl
                                         }
                                     });
                             }
+
                             randomly_designed_gate_layouts.push_back(result_lyt);
                             gate_layout_is_found = true;
                             break;
@@ -372,27 +368,38 @@ class design_sidb_gates_impl
 
         gate_layouts.reserve(gate_candidates.size());
 
-        const std::size_t num_threads =
+        const std::size_t number_of_threads =
             std::min(static_cast<std::size_t>(std::thread::hardware_concurrency()), gate_candidates.size());
         const std::size_t chunk_size = (gate_candidates.size() + num_threads - 1) / num_threads;  // Ceiling division
 
         std::vector<std::thread> threads;
-        threads.reserve(num_threads);
+        threads.reserve(number_of_threads);
+
+        std::atomic<bool> gate_design_found = false;
 
         const auto check_operational_status =
-            [this, &gate_layouts, &mutex_to_protect_gates](const auto& candidate) noexcept
+            [this, &gate_layouts, &mutex_to_protect_gates, &gate_design_found](const auto& candidate) noexcept
         {
             if (const auto [status, sim_calls] =
                     is_operational(candidate, truth_table, params.operational_params, input_bdl_wires, output_bdl_wires,
                                    input_bdl_wire_directions);
                 status == operational_status::OPERATIONAL)
             {
-                const std::lock_guard lock{mutex_to_protect_gates};
-                gate_layouts.push_back(candidate);
+                {
+                    const std::lock_guard lock{mutex_to_protect_gates};
+                    gate_layouts.push_back(candidate);
+                }
+                gate_design_found = true;
+            }
+            if (gate_design_found &&
+                (params.termination_cond ==
+                 design_sidb_gates_params<cell<Lyt>>::termination_condition::AFTER_FIRST_SOLUTION))
+            {
+                return;
             }
         };
 
-        for (std::size_t i = 0; i < num_threads; ++i)
+        for (std::size_t i = 0; i < number_of_threads; ++i)
         {
             threads.emplace_back(
                 [i, chunk_size, &gate_candidates, &check_operational_status]()
@@ -940,14 +947,14 @@ class design_sidb_gates_impl
 
         gate_candidate.reserve(all_canvas_layouts.size());
 
-        const std::size_t num_threads =
+        const std::size_t number_of_threads =
             std::min(static_cast<std::size_t>(std::thread::hardware_concurrency()), all_canvas_layouts.size());
-        const std::size_t chunk_size = (all_canvas_layouts.size() + num_threads - 1) / num_threads;
+        const std::size_t chunk_size = (all_canvas_layouts.size() + number_of_threads - 1) / number_of_threads;
 
         std::vector<std::thread> threads{};
-        threads.reserve(num_threads);
+        threads.reserve(number_of_threads);
 
-        for (std::size_t i = 0; i < num_threads; ++i)
+        for (std::size_t i = 0; i < number_of_threads; ++i)
         {
             threads.emplace_back(
                 [i, chunk_size, this, &conduct_pruning_steps]()
