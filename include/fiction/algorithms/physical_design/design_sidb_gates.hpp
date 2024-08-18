@@ -237,7 +237,8 @@ class design_sidb_gates_impl
         const std::size_t number_of_used_threads =
             std::min(static_cast<std::size_t>(num_threads), all_combinations.size());
 
-        const std::size_t chunk_size = (all_combinations.size() + number_of_used_threads - 1) / number_of_used_threads;  // Ceiling division
+        const std::size_t chunk_size =
+            (all_combinations.size() + number_of_used_threads - 1) / number_of_used_threads;  // Ceiling division
 
         std::vector<std::thread> threads{};
         threads.reserve(number_of_used_threads);
@@ -391,9 +392,8 @@ class design_sidb_gates_impl
                 }
                 gate_design_found = true;
             }
-            if (gate_design_found &&
-                (params.termination_cond ==
-                 design_sidb_gates_params<cell<Lyt>>::termination_condition::AFTER_FIRST_SOLUTION))
+            if (gate_design_found && (params.termination_cond ==
+                                      design_sidb_gates_params<cell<Lyt>>::termination_condition::AFTER_FIRST_SOLUTION))
             {
                 return;
             }

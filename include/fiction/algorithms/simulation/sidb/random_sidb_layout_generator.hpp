@@ -101,7 +101,6 @@ Lyt generate_random_sidb_layout(const Lyt&                                      
         sidbs_affected_by_defects = lyt_skeleton.all_affected_sidbs(std::make_pair(0, 0));
     }
 
-
     const uint64_t number_of_sidbs_of_final_layout = lyt.num_cells() + params.number_of_sidbs;
 
     // counts the attempts to place the given number of SiDBs
