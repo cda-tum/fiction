@@ -3489,18 +3489,6 @@ static const char *__doc_fiction_design_sidb_gates_params_number_of_sidbs = R"do
 
 static const char *__doc_fiction_design_sidb_gates_params_operational_params = R"doc(Parameters to check the operation of the designed gate.)doc";
 
-static const char *__doc_fiction_design_sidb_gates_stats = R"doc(Statistics for the design of SiDB gates.)doc";
-
-static const char *__doc_fiction_design_sidb_gates_stats_duration = R"doc(The total runtime of SiDB gate design process.)doc";
-
-static const char *__doc_fiction_design_sidb_gates_stats_report =
-R"doc(This function outputs the total time taken for the SiDB gate design
-process to the provided output stream. If no output stream is
-provided, it defaults to standard output (`std::cout`).
-
-Parameter ``out``:
-    The output stream to which the report will be written.)doc";
-
 static const char *__doc_fiction_design_sidb_gates_params_termination_cond =
 R"doc(The design process is terminated after a valid SiDB gate design is
 found.
@@ -3519,6 +3507,22 @@ design is found.)doc";
 static const char *__doc_fiction_design_sidb_gates_params_termination_condition_ALL_COMBINATIONS_ENUMERATED =
 R"doc(The design process ends after all possible combinations of SiDBs
 within the canvas are enumerated.)doc";
+
+static const char *__doc_fiction_design_sidb_gates_stats = R"doc(Statistics for the design of SiDB gates.)doc";
+
+static const char *__doc_fiction_design_sidb_gates_stats_duration = R"doc(The total runtime of SiDB gate design process.)doc";
+
+static const char *__doc_fiction_design_sidb_gates_stats_report =
+R"doc(This function outputs the total time taken for the SiDB gate design
+process to the provided output stream. If no output stream is
+provided, it defaults to standard output (`std::cout`).
+
+Parameter ``out``:
+    The output stream to which the report will be written.)doc";
+
+static const char *__doc_fiction_design_sidb_gates_stats_sim_engine =
+R"doc(The simulation engine to be used for the operational domain
+computation.)doc";
 
 static const char *__doc_fiction_detail_a_star_impl = R"doc()doc";
 
@@ -4243,17 +4247,6 @@ static const char *__doc_fiction_detail_design_sidb_gates_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_all_canvas_layouts = R"doc(All Canvas SiDB layout (without I/O pins).)doc";
 
-static const char *__doc_fiction_detail_design_sidb_gates_impl_add_canvas_sidbs_to_skeleton_layout =
-R"doc(This function adds SiDBs (given by indices) to the skeleton layout
-that is returned afterwards.
-
-Parameter ``cell_indices``:
-    A vector of indices of cells to be added to the skeleton layout.
-
-Returns:
-    A copy of the original layout (`skeleton_layout`) with SiDB cells
-    added at specified indices.)doc";
-
 static const char *__doc_fiction_detail_design_sidb_gates_impl_all_sidbs_in_canvas = R"doc(All cells within the canvas.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_convert_canvas_cell_indices_to_layout =
@@ -4264,16 +4257,6 @@ Parameter ``cell_indices``:
 
 Returns:
     An SiDB cell-level layout consisting of canvas SidBs.)doc";
-
-static const char *__doc_fiction_detail_design_sidb_gates_impl_cell_indices_to_cell_vector =
-R"doc(Converts a vector of cell indices to a vector of corresponding cells
-in the layout.
-
-Parameter ``cell_indices``:
-    Vector of cell indices to convert.
-
-Returns:
-    A vector of cells corresponding to the given indices.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_design_sidb_gates_impl =
 R"doc(This constructor initializes an instance of the *SiDB Gate Designer*
@@ -4396,6 +4379,8 @@ Returns:
     which means that the layout is a candidate to be a valid gate
     implementation. Physical simulation is required as a second step
     to conduct the final validation.)doc";
+
+static const char *__doc_fiction_detail_design_sidb_gates_impl_num_threads = R"doc(Number of threads to be used for parallel execution.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_number_of_input_wires = R"doc(Number of input BDL wires.)doc";
 
@@ -13033,7 +13018,7 @@ static const char *__doc_fiction_is_sidb_gate_design_impossible_params =
 R"doc(This struct contains parameters to determine if SiDB gate design is
 impossible.)doc";
 
-static const char *__doc_fiction_is_sidb_gate_design_impossible_params_detect_bdl_params = R"doc(Parameters used to determine BDL pairs.)doc";
+static const char *__doc_fiction_is_sidb_gate_design_impossible_params_detect_bdl_wires_params = R"doc(Parameters used to determine BDL wires.)doc";
 
 static const char *__doc_fiction_is_sidb_gate_design_impossible_params_simulation_params = R"doc(All parameters for physical SiDB simulations.)doc";
 
