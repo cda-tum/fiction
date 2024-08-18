@@ -20,7 +20,9 @@ Abstract Gate Library
    :members:
 
 .. doxygenclass:: fiction::unsupported_gate_type_exception
+    :members:
 .. doxygenclass:: fiction::unsupported_gate_orientation_exception
+    :members:
 
 **Header:** ``fiction/technology/cell_ports.hpp``
 
@@ -57,4 +59,17 @@ SiDB Bestagon Library
 **Header:** ``fiction/technology/sidb_bestagon_library.hpp``
 
 .. doxygenclass:: fiction::sidb_bestagon_library
+   :members:
+
+Parameterized SiDB Library
+--------------------------
+
+**Header:** ``fiction/technology/sidb_on_the_fly_gate_library.hpp``
+
+.. doxygenstruct:: fiction::sidb_on_the_fly_gate_library_params
+   :members:
+.. doxygenclass:: fiction::sidb_on_the_fly_gate_library
+   :members:
+
+.. doxygenclass:: fiction::gate_design_exception
    :members:

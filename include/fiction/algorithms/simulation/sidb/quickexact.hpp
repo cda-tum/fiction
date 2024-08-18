@@ -469,7 +469,7 @@ class quickexact_impl
                 {
                     const auto& [cell, defect] = cd;
 
-                    if (defect.type != sidb_defect_type::NONE)
+                    if (defect.type != sidb_defect_type::NONE && is_charged_defect_type(cd.second))
                     {
                         charge_lyt.add_sidb_defect_to_potential_landscape(cell, layout.get_sidb_defect(cell));
                     }
