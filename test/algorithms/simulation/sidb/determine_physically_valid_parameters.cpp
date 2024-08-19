@@ -86,19 +86,23 @@ TEST_CASE("Determine physical parameters for CDS of SiQAD Y-shaped AND gate, 10 
         const auto valid_parameters = determine_physically_valid_parameters(cds, op_domain_params);
         CHECK(valid_parameters.operational_values.size() == 98);
 
-        const auto p1 = contains_parameter_point(valid_parameters.operational_values, parameter_point{{5.9, 5.5}});
+        const auto p1 =
+            detail::contains_parameter_point(valid_parameters.operational_values, parameter_point{{5.9, 5.5}});
         REQUIRE(p1.has_value());
         CHECK(p1->second == 1);
 
-        const auto p2 = contains_parameter_point(valid_parameters.operational_values, parameter_point{{5.8, 4.4}});
+        const auto p2 =
+            detail::contains_parameter_point(valid_parameters.operational_values, parameter_point{{5.8, 4.4}});
         REQUIRE(p2.has_value());
         CHECK(p2->second == 0);
 
-        const auto p3 = contains_parameter_point(valid_parameters.operational_values, parameter_point{{5.8, 4.4}});
+        const auto p3 =
+            detail::contains_parameter_point(valid_parameters.operational_values, parameter_point{{5.8, 4.4}});
         REQUIRE(p3.has_value());
         CHECK(p3->second == 0);
 
-        const auto p4 = contains_parameter_point(valid_parameters.operational_values, parameter_point{{6.0, 6.0}});
+        const auto p4 =
+            detail::contains_parameter_point(valid_parameters.operational_values, parameter_point{{6.0, 6.0}});
         REQUIRE(p4.has_value());
         CHECK(p4->second == 1);
     }
@@ -160,19 +164,23 @@ TEST_CASE(
         const auto valid_parameters = determine_physically_valid_parameters(cds, op_domain_params);
         REQUIRE(valid_parameters.operational_values.size() == 100);
 
-        const auto p1 = contains_parameter_point(valid_parameters.operational_values, parameter_point{{5.6, 5.0}});
+        const auto p1 =
+            detail::contains_parameter_point(valid_parameters.operational_values, parameter_point{{5.6, 5.0}});
         REQUIRE(p1.has_value());
         CHECK(p1->second == 0);
 
-        const auto p2 = contains_parameter_point(valid_parameters.operational_values, parameter_point{{5.0, 5.9}});
+        const auto p2 =
+            detail::contains_parameter_point(valid_parameters.operational_values, parameter_point{{5.0, 5.9}});
         REQUIRE(p2.has_value());
         CHECK(p2->second == 2);
 
-        const auto p3 = contains_parameter_point(valid_parameters.operational_values, parameter_point{{5.4, 5.3}});
+        const auto p3 =
+            detail::contains_parameter_point(valid_parameters.operational_values, parameter_point{{5.4, 5.3}});
         REQUIRE(p3.has_value());
         CHECK(p3->second == 1);
 
-        const auto p4 = contains_parameter_point(valid_parameters.operational_values, parameter_point{{5.8, 5.3}});
+        const auto p4 =
+            detail::contains_parameter_point(valid_parameters.operational_values, parameter_point{{5.8, 5.3}});
         REQUIRE(p4.has_value());
         CHECK(p4->second == 0);
     }
@@ -218,22 +226,22 @@ TEST_CASE(
         const auto valid_parameters = determine_physically_valid_parameters(cds, op_domain_params);
         REQUIRE(valid_parameters.operational_values.size() == 27);
         const auto p1 =
-            contains_parameter_point(valid_parameters.operational_values, parameter_point{{5.6, 5.0, -0.32}});
+            detail::contains_parameter_point(valid_parameters.operational_values, parameter_point{{5.6, 5.0, -0.32}});
         REQUIRE(p1.has_value());
         CHECK(p1->second == 0);
 
         const auto p2 =
-            contains_parameter_point(valid_parameters.operational_values, parameter_point{{5.6, 5.0, -0.33}});
+            detail::contains_parameter_point(valid_parameters.operational_values, parameter_point{{5.6, 5.0, -0.33}});
         REQUIRE(p2.has_value());
         CHECK(p2->second == 0);
 
         const auto p3 =
-            contains_parameter_point(valid_parameters.operational_values, parameter_point{{5.6, 5.0, -0.31}});
+            detail::contains_parameter_point(valid_parameters.operational_values, parameter_point{{5.6, 5.0, -0.31}});
         REQUIRE(p3.has_value());
         CHECK(p3->second == 1);
 
         const auto p4 =
-            contains_parameter_point(valid_parameters.operational_values, parameter_point{{5.7, 5.2, -0.33}});
+            detail::contains_parameter_point(valid_parameters.operational_values, parameter_point{{5.7, 5.2, -0.33}});
         REQUIRE(p4.has_value());
         CHECK(p4->second == 0);
     }
