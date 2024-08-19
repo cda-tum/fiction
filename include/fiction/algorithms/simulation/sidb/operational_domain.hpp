@@ -325,6 +325,27 @@ struct operational_domain_stats
 namespace detail
 {
 
+/**
+ * This function validates the given sweep parameters for the operational domain computation. It checks if the minimum
+ * value of any sweep dimension is larger than the corresponding maximum value. If this is the case, an
+ * `std::invalid_argument` is thrown.
+ *
+ * @param params The operational domain parameters to validate.
+ */
+void validate_sweep_parameters(const operational_domain_params& params)
+{
+    for (auto d = 0u; d < params.sweep_dimensions.size(); ++d)
+    {
+        if (params.sweep_dimensions[d].max < params.sweep_dimensions[d].min)
+        {
+            throw std::invalid_argument(
+                fmt::format("Invalid sweep dimension: 'max' value is smaller than 'min' value for "
+                            "dimension {}",
+                            d));
+        }
+    }
+}
+
 template <typename Lyt, typename TT, typename OpDomain>
 class operational_domain_impl
 {
@@ -1531,6 +1552,8 @@ class operational_domain_impl
  * state simulations, where \f$n\f$ is the number of inputs of the layout. Each exact ground state simulation has
  * exponential complexity in of itself. Therefore, the algorithm is only feasible for small layouts with few inputs.
  *
+ * This function may throw an `std::invalid_argument` exception if the given sweep parameters are invalid.
+ *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
  * @param lyt Layout to compute the operational domain for.
@@ -1548,6 +1571,9 @@ operational_domain_grid_search(const Lyt& lyt, const std::vector<TT>& spec,
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
+
+    // this may throw an `std::invalid_argument` exception
+    detail::validate_sweep_parameters(params);
 
     operational_domain_stats                                                                          st{};
     detail::operational_domain_impl<Lyt, TT, operational_domain<parameter_point, operational_status>> p{lyt, spec,
@@ -1574,6 +1600,8 @@ operational_domain_grid_search(const Lyt& lyt, const std::vector<TT>& spec,
  * ground state simulations, where \f$n\f$ is the number of inputs of the layout. Each exact ground state simulation
  * has exponential complexity in of itself. Therefore, the algorithm is only feasible for small layouts with few inputs.
  *
+ * This function may throw an `std::invalid_argument` exception if the given sweep parameters are invalid.
+ *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
  * @param lyt Layout to compute the operational domain for.
@@ -1592,6 +1620,9 @@ operational_domain_random_sampling(const Lyt& lyt, const std::vector<TT>& spec, 
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
+
+    // this may throw an `std::invalid_argument` exception
+    detail::validate_sweep_parameters(params);
 
     operational_domain_stats                                                                          st{};
     detail::operational_domain_impl<Lyt, TT, operational_domain<parameter_point, operational_status>> p{lyt, spec,
@@ -1628,6 +1659,8 @@ operational_domain_random_sampling(const Lyt& lyt, const std::vector<TT>& spec, 
  * Computation in Silicon Dangling Bond Logic\" by M. Walter, J. Drewniok, S. S. H. Ng, K. Walus, and R. Wille in
  * NANOARCH 2023.
  *
+ * This function may throw an `std::invalid_argument` exception if the given sweep parameters are invalid.
+ *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
  * @param lyt Layout to compute the operational domain for.
@@ -1648,8 +1681,11 @@ operational_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& spec, const
 
     if (params.sweep_dimensions.size() != 2 && params.sweep_dimensions.size() != 3)
     {
-        throw std::runtime_error("Flood fill is only applicable to 2 or 3 dimensions");
+        throw std::invalid_argument("Flood fill is only applicable to 2 or 3 dimensions");
     }
+
+    // this may throw an `std::invalid_argument` exception
+    detail::validate_sweep_parameters(params);
 
     operational_domain_stats                                                                          st{};
     detail::operational_domain_impl<Lyt, TT, operational_domain<parameter_point, operational_status>> p{lyt, spec,
@@ -1688,6 +1724,8 @@ operational_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& spec, const
  * Computation in Silicon Dangling Bond Logic\" by M. Walter, J. Drewniok, S. S. H. Ng, K. Walus, and R. Wille in
  * NANOARCH 2023.
  *
+ * This function may throw an `std::invalid_argument` exception if the given sweep parameters are invalid.
+ *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
  * @param lyt Layout to compute the operational domain for.
@@ -1709,8 +1747,11 @@ operational_domain_contour_tracing(const Lyt& lyt, const std::vector<TT>& spec, 
 
     if (params.sweep_dimensions.size() != 2)
     {
-        throw std::runtime_error("Contour tracing is only applicable to exactly 2 dimensions");
+        throw std::invalid_argument("Contour tracing is only applicable to exactly 2 dimensions");
     }
+
+    // this may throw an `std::invalid_argument` exception
+    detail::validate_sweep_parameters(params);
 
     operational_domain_stats                                                                          st{};
     detail::operational_domain_impl<Lyt, TT, operational_domain<parameter_point, operational_status>> p{lyt, spec,

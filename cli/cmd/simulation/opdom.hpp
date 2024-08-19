@@ -239,25 +239,38 @@ class opdom_command : public command
 
                 params.simulation_parameters = simulation_params;
 
-                if (is_set("random_sampling"))
+                try
                 {
-                    op_domain = fiction::operational_domain_random_sampling(*lyt_ptr, std::vector<fiction::tt>{*tt_ptr},
-                                                                            num_random_samples, params, &stats);
+                    if (is_set("random_sampling"))
+                    {
+                        op_domain = fiction::operational_domain_random_sampling(
+                            *lyt_ptr, std::vector<fiction::tt>{*tt_ptr}, num_random_samples, params, &stats);
+                    }
+                    else if (is_set("flood_fill"))
+                    {
+                        op_domain = fiction::operational_domain_flood_fill(*lyt_ptr, std::vector<fiction::tt>{*tt_ptr},
+                                                                           num_random_samples, params, &stats);
+                    }
+                    else if (is_set("contour_tracing"))
+                    {
+                        op_domain = fiction::operational_domain_contour_tracing(
+                            *lyt_ptr, std::vector<fiction::tt>{*tt_ptr}, num_random_samples, params, &stats);
+                    }
+                    else
+                    {
+                        op_domain = fiction::operational_domain_grid_search(*lyt_ptr, std::vector<fiction::tt>{*tt_ptr},
+                                                                            params, &stats);
+                    }
                 }
-                else if (is_set("flood_fill"))
+                catch (std::exception& e)
                 {
-                    op_domain = fiction::operational_domain_flood_fill(*lyt_ptr, std::vector<fiction::tt>{*tt_ptr},
-                                                                       num_random_samples, params, &stats);
+                    env->out() << fmt::format("[e] {}", e.what()) << std::endl;
+                    return;
                 }
-                else if (is_set("contour_tracing"))
+                catch (..)
                 {
-                    op_domain = fiction::operational_domain_contour_tracing(*lyt_ptr, std::vector<fiction::tt>{*tt_ptr},
-                                                                            num_random_samples, params, &stats);
-                }
-                else
-                {
-                    op_domain = fiction::operational_domain_grid_search(*lyt_ptr, std::vector<fiction::tt>{*tt_ptr},
-                                                                        params, &stats);
+                    env->out() << "[e] an unknown error occurred during operational domain computation" << std::endl;
+                    return;
                 }
             }
             else
@@ -317,6 +330,7 @@ class opdom_command : public command
     void write_op_domain() const
     {
         static const fiction::write_operational_domain_params write_opdom_params{"1", "0"};
+
         try
         {
             fiction::write_operational_domain(op_domain, filename, write_opdom_params);
@@ -324,6 +338,10 @@ class opdom_command : public command
         catch (const std::exception& e)
         {
             env->out() << fmt::format("[e] {}", e.what()) << std::endl;
+        }
+        catch (...)
+        {
+            env->out() << "[e] an unknown error occurred while writing the operational domain data" << std::endl;
         }
     }
     /**

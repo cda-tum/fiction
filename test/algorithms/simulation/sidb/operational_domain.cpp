@@ -100,6 +100,107 @@ TEST_CASE("Test parameter point", "[operational-domain]")
     }
 }
 
+TEST_CASE("Error handling of operational domain algorithms", "[operational-domain]")
+{
+    const sidb_100_cell_clk_lyt_siqad lat{sidb_cell_clk_lyt_siqad{}};  // empty layout
+
+    SECTION("invalid number of dimensions")
+    {
+        operational_domain_params zero_dimensional_params{};
+        operational_domain_params one_dimensional_params{};
+        operational_domain_params three_dimensional_params{};
+        operational_domain_params four_dimensional_params{};
+
+        // 0-dimensional
+        zero_dimensional_params.sweep_dimensions = {};
+
+        // 1-dimensional
+        one_dimensional_params.sweep_dimensions = {{sweep_parameter::EPSILON_R}};
+
+        // 3-dimensional
+        three_dimensional_params.sweep_dimensions = {{sweep_parameter::EPSILON_R},
+                                                     {sweep_parameter::LAMBDA_TF},
+                                                     {sweep_parameter::MU_MINUS}};
+
+        // 4-dimensional
+        four_dimensional_params.sweep_dimensions = {{sweep_parameter::EPSILON_R},
+                                                    {sweep_parameter::LAMBDA_TF},
+                                                    {sweep_parameter::MU_MINUS},
+                                                    {sweep_parameter::EPSILON_R}};
+
+        SECTION("flood_fill")
+        {
+            // flood fill operates on 2-dimensional and 3-dimensional parameter spaces
+            for (const auto& params : {zero_dimensional_params, one_dimensional_params, four_dimensional_params})
+            {
+                CHECK_THROWS_AS(operational_domain_flood_fill(lat, std::vector<tt>{create_id_tt()}, 1, params),
+                                std::invalid_argument);
+            }
+        }
+        SECTION("contour_tracing")
+        {
+            // contour tracing operates only on 2-dimensional parameter spaces
+            for (const auto& params :
+                 {zero_dimensional_params, one_dimensional_params, three_dimensional_params, four_dimensional_params})
+            {
+                CHECK_THROWS_AS(operational_domain_contour_tracing(lat, std::vector<tt>{create_id_tt()}, 1, params),
+                                std::invalid_argument);
+            }
+        }
+    }
+
+    SECTION("invalid sweep dimensions")
+    {
+        operational_domain_params invalid_params_1{};
+        operational_domain_params invalid_params_2{};
+        operational_domain_params invalid_params_3{};
+
+        // 1-dimensional with invalid min/max on 1st dimension
+        invalid_params_1.sweep_dimensions         = {{sweep_parameter::EPSILON_R}};
+        invalid_params_1.sweep_dimensions[0].min  = 10.0;
+        invalid_params_1.sweep_dimensions[0].max  = 1.0;
+        invalid_params_1.sweep_dimensions[0].step = 0.1;
+
+        // 2-dimensional with invalid min/max on 2nd dimension
+        invalid_params_2.sweep_dimensions         = {{sweep_parameter::EPSILON_R}, {sweep_parameter::LAMBDA_TF}};
+        invalid_params_2.sweep_dimensions[1].min  = 5.5;
+        invalid_params_2.sweep_dimensions[1].max  = 5.4;
+        invalid_params_2.sweep_dimensions[1].step = 0.1;
+
+        // 3-dimensional with invalid min/max on 3rd dimension
+        invalid_params_3.sweep_dimensions         = {{sweep_parameter::EPSILON_R},
+                                                     {sweep_parameter::LAMBDA_TF},
+                                                     {sweep_parameter::MU_MINUS}};
+        invalid_params_3.sweep_dimensions[2].min  = -0.4;
+        invalid_params_3.sweep_dimensions[2].max  = -0.5;
+        invalid_params_3.sweep_dimensions[2].step = 0.01;
+
+        for (const auto& params : {invalid_params_1, invalid_params_2, invalid_params_3})
+        {
+            SECTION("grid_search")
+            {
+                CHECK_THROWS_AS(operational_domain_grid_search(lat, std::vector<tt>{create_id_tt()}, params),
+                                std::invalid_argument);
+            }
+            SECTION("random_sampling")
+            {
+                CHECK_THROWS_AS(operational_domain_random_sampling(lat, std::vector<tt>{create_id_tt()}, 100, params),
+                                std::invalid_argument);
+            }
+            SECTION("flood_fill")
+            {
+                CHECK_THROWS_AS(operational_domain_flood_fill(lat, std::vector<tt>{create_id_tt()}, 1, params),
+                                std::invalid_argument);
+            }
+            SECTION("contour_tracing")
+            {
+                CHECK_THROWS_AS(operational_domain_contour_tracing(lat, std::vector<tt>{create_id_tt()}, 1, params),
+                                std::invalid_argument);
+            }
+        }
+    }
+}
+
 TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 {
     using layout = sidb_cell_clk_lyt_siqad;
