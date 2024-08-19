@@ -14,7 +14,6 @@
 #include "fiction/technology/physical_constants.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/technology/sidb_defects.hpp"
-#include "fiction/technology/sidb_nm_distance.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/layout_utils.hpp"
 #include "fiction/utils/math_utils.hpp"
@@ -404,8 +403,8 @@ class design_sidb_gates_impl
             threads.emplace_back(
                 [i, chunk_size, &gate_candidates, &check_operational_status]()
                 {
-                    std::size_t start_index = i * chunk_size;
-                    std::size_t end_index   = std::min(start_index + chunk_size, gate_candidates.size());
+                    const std::size_t start_index = i * chunk_size;
+                    const std::size_t end_index   = std::min(start_index + chunk_size, gate_candidates.size());
 
                     for (std::size_t j = start_index; j < end_index; ++j)
                     {
@@ -479,7 +478,6 @@ class design_sidb_gates_impl
      * Directions of the output wires.
      */
     std::vector<bdl_wire_direction> output_bdl_wire_directions{};
-
     /**
      * This function performs the following steps to initialize the necessary components for the layout evaluation:
      * 1. Detects the input and output BDL wires in the skeleton layout using the specified BDL wire parameters.

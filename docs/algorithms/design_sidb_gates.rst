@@ -9,16 +9,12 @@ SiDB Gate Designer
 
         .. doxygenstruct:: fiction::design_sidb_gates_stats
            :members:
-      .. doxygenstruct:: fiction::design_sidb_gates_mode
-           :members:
         .. doxygenstruct:: fiction::design_sidb_gates_params
            :members:
         .. doxygenfunction:: fiction::design_sidb_gates
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.design_sidb_gates_stats
-            :members:
-        .. autoclass:: mnt.pyfiction.design_sidb_gates_mode
             :members:
         .. autoclass:: mnt.pyfiction.design_sidb_gates_params
             :members:
