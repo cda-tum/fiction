@@ -139,7 +139,15 @@ enum class sweep_parameter : uint8_t
      */
     MU_MINUS
 };
-
+namespace detail
+{
+/**
+ * Forward-declaration for `operational_domain`.
+ */
+template <typename MapType>
+std::optional<typename MapType::value_type> contains_parameter_point(const MapType&                    map,
+                                                                     const typename MapType::key_type& key);
+}  // namespace detail
 /**
  * An operational domain is a set of simulation parameter values for which a given SiDB layout is logically operational.
  * This means that a layout is deemed operational if the layout's ground state corresponds with a given Boolean function
@@ -178,7 +186,7 @@ struct operational_domain
      */
     [[nodiscard]] Value get_value(const parameter_point& pp) const
     {
-        if (const auto v = contains_parameter_point(operational_values, pp); v.has_value())
+        if (const auto v = detail::contains_parameter_point(operational_values, pp); v.has_value())
         {
             return v.value().second;
         }
@@ -319,8 +327,8 @@ void validate_sweep_parameters(const operational_domain_params& params)
  * @return The associated `MapType::value_type` of `key` in `map`, or `std::nullopt` if `key` is not contained in `map`.
  */
 template <typename MapType>
-[[maybe_unused]] static std::optional<typename MapType::value_type>
-contains_parameter_point(const MapType& map, const typename MapType::key_type& key)
+std::optional<typename MapType::value_type> contains_parameter_point(const MapType&                    map,
+                                                                     const typename MapType::key_type& key)
 {
     static_assert(std::is_same_v<typename MapType::key_type, parameter_point>, "Map key type must be parameter_point");
 
@@ -341,8 +349,7 @@ contains_parameter_point(const MapType& map, const typename MapType::key_type& k
  * @return An iterator to the found parameter point in the map, or `map.cend()` if not found.
  */
 template <typename MapType>
-[[maybe_unused]] static typename MapType::const_iterator find_key_with_tolerance(const MapType&                    map,
-                                                                                 const typename MapType::key_type& key)
+typename MapType::const_iterator find_key_with_tolerance(const MapType& map, const typename MapType::key_type& key)
 {
     static_assert(std::is_floating_point_v<typename MapType::key_type>, "Map key type must be floating-point");
 
