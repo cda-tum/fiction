@@ -327,8 +327,10 @@ namespace detail
 
 /**
  * This function validates the given sweep parameters for the operational domain computation. It checks if the minimum
- * value of any sweep dimension is larger than the corresponding maximum value. If this is the case, an
- * `std::invalid_argument` is thrown.
+ * value of any sweep dimension is larger than the corresponding maximum value. Additionally, it checks if the step size
+ * of any sweep dimension is negative or zero.
+ *
+ * If any of this is the case, an `std::invalid_argument` is thrown.
  *
  * @param params The operational domain parameters to validate.
  */
