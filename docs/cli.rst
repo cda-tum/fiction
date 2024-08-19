@@ -364,8 +364,9 @@ processed by other tools.
 The parameter space to sweep over can be specified by the user via the flags
 - ``--x_sweep``
 - ``--y_sweep``
+- ``--z_sweep``
 which have to be either ``epsilon_r``, ``lambda_tf``, or ``mu_minus``. The default is ``epsilon_r`` for ``--x_sweep`` and
-``lambda_tf`` for ``--y_sweep``.
+``lambda_tf`` for ``--y_sweep``, with ``--z_sweep`` being an optional third sweep dimension.
 
 Additionally, min, max, and step size values can be specified for each parameter using the flags
 - ``--x_min``
@@ -374,7 +375,12 @@ Additionally, min, max, and step size values can be specified for each parameter
 - ``--y_min``
 - ``--y_max``
 - ``--y_step``
-respectively. The default values are 1, 10, and 0.1 on both axis, for min, max, and step, respectively.
+- ``--z_min``
+- ``--z_max``
+- ``--z_step``
+respectively. The default values are 1, 10, and 0.1 on x and y axis, for min, max, and step, respectively. The z axis
+is not used by default. However, if ``--z_sweep`` is specified, the default values are -0.5, -0.1, and 0.025 for min, max,
+and step, respectively, assuming z to be used for ``mu_minus``.
 
 By default, grid search is applied to explore the operational domain. The algorithm can be changed by specifying one of
 the following options:
