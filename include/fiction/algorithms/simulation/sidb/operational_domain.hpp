@@ -169,14 +169,14 @@ struct operational_domain
      */
     locked_parallel_flat_hash_map<Key, Value> operational_values{};
     /**
-     * This function retrieves the value associated with the provided parameter point
-     * from the operational domain. If the parameter point is found in the domain,
-     * its corresponding value is returned. Otherwise, a runtime error is thrown.
+     * This function retrieves the value associated with the provided parameter point from the operational domain. If
+     * the parameter point is found in the domain, its corresponding value is returned. Otherwise, `std::out_of_range`
+     * is thrown.
      *
      * @param pp The parameter point to look up.
      * @return The value associated with the parameter point.
      */
-    [[nodiscard]] uint64_t get_value(const parameter_point& pp) const
+    [[nodiscard]] Value get_value(const parameter_point& pp) const
     {
         if (const auto v = contains_parameter_point(operational_values, pp); v.has_value())
         {
