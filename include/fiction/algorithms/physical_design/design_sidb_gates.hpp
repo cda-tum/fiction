@@ -9,6 +9,7 @@
 #include "fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp"
+#include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/physical_constants.hpp"
@@ -148,6 +149,7 @@ class design_sidb_gates_impl
      * @param skeleton The skeleton layout used as a basis for gate design.
      * @param spec Expected Boolean function of the layout given as a multi-output truth table.
      * @param ps Parameters and settings for the gate designer.
+     * @param st Statistics for the gate design process.
      */
     design_sidb_gates_impl(const Lyt& skeleton, const std::vector<TT>& spec,
                            const design_sidb_gates_params<cell<Lyt>>& ps, design_sidb_gates_stats& st) :
@@ -199,7 +201,8 @@ class design_sidb_gates_impl
             sidbs_affected_by_defects = skeleton_layout.all_affected_sidbs(std::make_pair(0, 0));
         }
 
-        std::mutex        mutex_to_protect_designed_gate_layouts;
+        std::mutex mutex_to_protect_designed_gate_layouts{};
+
         std::atomic<bool> solution_found = false;
 
         // Shuffle the combinations before dividing them among threads
@@ -358,13 +361,14 @@ class design_sidb_gates_impl
         const auto            gate_candidates = run_pruning();
 
         std::vector<Lyt> gate_layouts{};
+        gate_layouts.reserve(gate_candidates.size());
 
         if (gate_candidates.empty())
         {
             return gate_layouts;
         }
 
-        std::mutex mutex_to_protect_gates{};  // used to control access to shared resources
+        std::mutex mutex_to_protect_gate_designs{};
 
         gate_layouts.reserve(gate_candidates.size());
 
@@ -378,36 +382,45 @@ class design_sidb_gates_impl
         std::atomic<bool> gate_design_found = false;
 
         const auto check_operational_status =
-            [this, &gate_layouts, &mutex_to_protect_gates, &gate_design_found](const auto& candidate) noexcept
+            [this, &gate_layouts, &mutex_to_protect_gate_designs, &gate_design_found](const auto& candidate) noexcept
         {
+            // Early exit if a solution is found and only the first solution is required
+            if (gate_design_found && (params.termination_cond ==
+                                      design_sidb_gates_params<cell<Lyt>>::termination_condition::AFTER_FIRST_SOLUTION))
+            {
+                return;
+            }
             if (const auto [status, sim_calls] =
                     is_operational(candidate, truth_table, params.operational_params, input_bdl_wires, output_bdl_wires,
                                    input_bdl_wire_directions);
                 status == operational_status::OPERATIONAL)
             {
+                // Lock and update shared resources
                 {
-                    const std::lock_guard lock{mutex_to_protect_gates};
+                    const std::lock_guard lock{mutex_to_protect_gate_designs};
                     gate_layouts.push_back(candidate);
                 }
-                gate_design_found = true;
-            }
-            if (gate_design_found && (params.termination_cond ==
-                                      design_sidb_gates_params<cell<Lyt>>::termination_condition::AFTER_FIRST_SOLUTION))
-            {
-                return;
+                gate_design_found = true;  // Notify all threads that a solution has been found
             }
         };
 
         for (std::size_t i = 0; i < number_of_threads; ++i)
         {
             threads.emplace_back(
-                [i, chunk_size, &gate_candidates, &check_operational_status]()
+                [this, i, chunk_size, &gate_candidates, &check_operational_status, &gate_design_found]()
                 {
                     const std::size_t start_index = i * chunk_size;
                     const std::size_t end_index   = std::min(start_index + chunk_size, gate_candidates.size());
 
                     for (std::size_t j = start_index; j < end_index; ++j)
                     {
+                        if (gate_design_found &&
+                            (params.termination_cond ==
+                             design_sidb_gates_params<cell<Lyt>>::termination_condition::AFTER_FIRST_SOLUTION))
+                        {
+                            return;
+                        }
+
                         check_operational_status(gate_candidates[j]);
                     }
                 });
@@ -685,10 +698,8 @@ class design_sidb_gates_impl
      * This function assigns the charge states of the output wires in the layout according to the values in the truth
      * table for the provided input pattern index.
      *
-     * @tparam Lyt The type representing the layout.
      * @param layout The charge distribution surface layout to be modified.
      * @param input_index The index representing the current input pattern.
-     * @return void
      */
     void set_charge_distribution_of_output_wires_based_on_truth_table(charge_distribution_surface<Lyt>& layout,
                                                                       const uint64_t input_index) const noexcept
@@ -907,8 +918,8 @@ class design_sidb_gates_impl
 
     /**
      * This function processes each layout to determine if it represents a valid gate implementation or if it can be
-     * pruned. It leverages multi-threading to accelerate the evaluation and ensures thread-safe access to shared
-     * resources.
+     * pruned by using three distinct physically-informed pruning steps. It leverages multi-threading to accelerate the
+     * evaluation and ensures thread-safe access to shared resources.
      *
      * @return A vector containing the valid gate candidates that were not pruned.
      */
@@ -957,8 +968,8 @@ class design_sidb_gates_impl
             threads.emplace_back(
                 [i, chunk_size, this, &conduct_pruning_steps]()
                 {
-                    std::size_t start_index = i * chunk_size;
-                    std::size_t end_index   = std::min(start_index + chunk_size, all_canvas_layouts.size());
+                    const std::size_t start_index = i * chunk_size;
+                    const std::size_t end_index   = std::min(start_index + chunk_size, all_canvas_layouts.size());
 
                     for (std::size_t j = start_index; j < end_index; ++j)
                     {
@@ -994,7 +1005,7 @@ class design_sidb_gates_impl
 
         const auto add_cell_combination_to_layout = [this, &designed_gate_layouts](const auto& combination) noexcept
         {
-            auto layout_with_added_cells = convert_canvas_cell_indices_to_layout(combination);
+            const auto layout_with_added_cells = convert_canvas_cell_indices_to_layout(combination);
             designed_gate_layouts.push_back(layout_with_added_cells);
         };
 

@@ -26,7 +26,7 @@ enum class bdl_wire_direction
 {
     /**
      * Defines the direction of the wire from north to south.
-     * The starting point is defined by the position of input cells, and the ending point is defined by the
+     * The starting point is defined by the position of input cells, or the ending point is defined by the
      * position of output cells.
      *
      * @note A wire running from west to east is interpreted as north-south direction.
@@ -34,7 +34,7 @@ enum class bdl_wire_direction
     NORTH_SOUTH,
     /**
      * Defines the direction of the wire from south to north.
-     * The starting point is defined by the position of input cells, and the ending point is defined by the
+     * The starting point is defined by the position of input cells, or the ending point is defined by the
      * position of output cells.
      *
      * @note A wire running from east to west is interpreted as south-north direction.
@@ -100,11 +100,11 @@ using bdl_wire = std::vector<bdl_pair<cell<Lyt>>>;
  */
 template <typename Lyt>
 [[nodiscard]] std::optional<bdl_pair<cell<Lyt>>>
-find_bdl_pair_in_wire_by_type(const bdl_wire<Lyt>& wire, const sidb_technology::cell_type t) noexcept
+find_bdl_pair_in_wire_by_type(const bdl_wire<Lyt>& wire, const sidb_technology::cell_type& ct) noexcept
 {
-    auto it = std::find_if(wire.cbegin(), wire.cend(), [t](const auto& bdl) { return bdl.type == t; });
+    auto it = std::find_if(wire.cbegin(), wire.cend(), [&ct](const auto& bdl) { return bdl.type == ct; });
 
-    if (it != wire.end())
+    if (it != wire.cend())
     {
         return *it;  // Return the first BDL pair of the specified type found
     }
@@ -166,12 +166,13 @@ template <typename Lyt>
     // if the wire contains only input and normal BDL pairs
     if (input_exists)
     {
-        const auto input_bdl = find_bdl_pair_in_wire_by_type<Lyt>(wire, sidb_technology::cell_type::INPUT);
+        const auto input_bdl_pair = find_bdl_pair_in_wire_by_type<Lyt>(wire, sidb_technology::cell_type::INPUT);
 
-        const auto bdl_above_exists =
-            std::any_of(wire.cbegin(), wire.cend(), [&input_bdl](const auto& bdl) { return bdl > input_bdl; });
+        // check if an BDL pair above the input BDL pair exists
+        const auto bdl_pair_above_found = std::any_of(wire.cbegin(), wire.cend(), [&input_bdl_pair](const auto& bdl)
+                                                      { return bdl > input_bdl_pair; });
 
-        if (bdl_above_exists)
+        if (bdl_pair_above_found)
         {
             return bdl_wire_direction::NORTH_SOUTH;
         }
@@ -179,12 +180,13 @@ template <typename Lyt>
         return bdl_wire_direction::SOUTH_NORTH;
     }
 
-    const auto output_bdl = find_bdl_pair_in_wire_by_type<Lyt>(wire, sidb_technology::cell_type::OUTPUT);
+    const auto output_bdl_pair = find_bdl_pair_in_wire_by_type<Lyt>(wire, sidb_technology::cell_type::OUTPUT);
 
-    const auto bdl_above_exists =
-        std::any_of(wire.cbegin(), wire.cend(), [&output_bdl](const auto& bdl) { return bdl > output_bdl; });
+    // check if an BDL pair above the output BDL pair exists
+    const auto bdl_pair_above_found =
+        std::any_of(wire.cbegin(), wire.cend(), [&output_bdl_pair](const auto& bdl) { return bdl > output_bdl_pair; });
 
-    if (bdl_above_exists)
+    if (bdl_pair_above_found)
     {
         return bdl_wire_direction::SOUTH_NORTH;
     }
@@ -204,8 +206,8 @@ template <typename Lyt>
  * @tparam Lyt SiDB cell-level layout type.
  * @param given_bdl The BDL pair to find a neighbor for.
  * @param bdl_pairs A set of BDL pairs to search within.
- * @param inter_bdl_distance The maximum allowable inter distance between the lower SiDB of the given BDL pair and the
- * upper SiDB of the candidate BDL pair.
+ * @param inter_bdl_distance The maximum allowable distance between the lower SiDB of the given BDL pair and the
+ * upper SiDB of the potential neighbor BDL pair.
  * @return A std::optional containing the first BDL pair that meets the criteria, or std::nullopt if no such pair is
  * found.
  */
@@ -238,8 +240,8 @@ template <typename Lyt>
  * @tparam Lyt SiDB cell-level layout type.
  * @param given_bdl The BDL pair to find a neighbor for.
  * @param bdl_pairs A set of BDL pairs to search within.
- * @param inter_bdl_distance The maximum allowable inter distance between the lower SiDB of the given BDL pair and the
- * upper SiDB of the candidate BDL pair.
+ * @param inter_bdl_distance The maximum allowable distance between the lower SiDB of the given BDL pair and the
+ * upper SiDB of the potential neighbor BDL pair.
  * @return A std::optional containing the first BDL pair that meets the criteria, or std::nullopt if no such pair is
  * found.
  */
@@ -267,6 +269,7 @@ template <typename Lyt>
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @param lyt The SiDB layout to detect BDL wires in.
+ * @param params Parameters used for detecting BDL wires.
  * @param wire_selection The type of wires to detect, specified by the `bdl_wire_selection` enum. Default is
  * `bdl_wire_selection::ALL`.
  * @return A vector of BDL wires, where each wire is represented as a vector of BDL pairs.
@@ -276,11 +279,11 @@ template <typename Lyt>
 detect_bdl_wires(const Lyt& lyt, const detect_bdl_wires_params& params = {},
                  const bdl_wire_selection wire_selection = bdl_wire_selection::ALL) noexcept
 {
-    std::set<bdl_pair<cell<Lyt>>> bdl_pairs{};
-
     const auto all_input_bdls  = detect_bdl_pairs(lyt, Lyt::cell_type::INPUT, params.params_bdl_pairs);
     const auto all_output_bdls = detect_bdl_pairs(lyt, Lyt::cell_type::OUTPUT, params.params_bdl_pairs);
     const auto all_normal_bdls = detect_bdl_pairs(lyt, Lyt::cell_type::NORMAL, params.params_bdl_pairs);
+
+    std::set<bdl_pair<cell<Lyt>>> bdl_pairs{};
 
     for (const auto& bdl : all_input_bdls)
     {

@@ -22,6 +22,7 @@
 #include <fiction/utils/layout_utils.hpp>
 #include <fiction/utils/truth_table_utils.hpp>
 
+#include <thread>
 #include <vector>
 
 using namespace fiction;
@@ -416,6 +417,20 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
 
         const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_nor_tt()}, params);
         REQUIRE(found_gate_layouts.size() == 3);
+        CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
+    }
+    SECTION("Stop after first gate design is finished, QuickCell")
+    {
+        const design_sidb_gates_params<cell<sidb_111_cell_clk_lyt_siqad>> params{
+            is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
+                                  detect_bdl_wires_params{}},
+            design_sidb_gates_params<cell<sidb_111_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL,
+            {{8, 13, 0}, {17, 17, 0}},
+            3,
+            design_sidb_gates_params<cell<sidb_111_cell_clk_lyt_siqad>>::termination_condition::AFTER_FIRST_SOLUTION};
+
+        const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_nor_tt()}, params);
+        REQUIRE(found_gate_layouts.size() <= std::thread::hardware_concurrency());
         CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
     }
 }
