@@ -1379,13 +1379,13 @@ class operational_domain_impl
         return neighbors;
     };
     /**
-     * Returns the 3D Moore neighborhood of the step point at `sp = (x, y)`. The 3D Moore neighborhood is the set of all
-     * points that are adjacent to `(x, y)` in the 3D space including the diagonals. Thereby, the 3D Moore neighborhood
-     * contains up to 26 points as points outside of the parameter range are not gathered. The points are returned in
-     * no particular order.
+     * Returns the 3D Moore neighborhood of the step point at `sp = (x, y, z)`. The 3D Moore neighborhood is the set of
+     * all points that are adjacent to `(x, y, z)` in the 3D space including the diagonals. Thereby, the 3D Moore
+     * neighborhood contains up to 26 points as points outside of the parameter range are not gathered. The points are
+     * returned in no particular order.
      *
      * @param sp Step point to get the 3D Moore neighborhood of.
-     * @return The 3D Moore neighborhood of the step point at `sp = (x, y)`.
+     * @return The 3D Moore neighborhood of the step point at `sp = (x, y, z)`.
      */
     [[nodiscard]] std::vector<step_point> moore_neighborhood_3d(const step_point& sp) const noexcept
     {
