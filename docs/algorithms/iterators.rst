@@ -27,5 +27,7 @@ BDL Input Iterator
            :members:
 
     .. tab:: Python
-        .. autoclass:: mnt.pyfiction.bdl_input_iterator
+        .. autoclass:: mnt.pyfiction.bdl_input_iterator_100
+            :members:
+        .. autoclass:: mnt.pyfiction.bdl_input_iterator_111
             :members:
