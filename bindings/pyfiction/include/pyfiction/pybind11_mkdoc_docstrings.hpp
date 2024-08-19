@@ -6571,18 +6571,18 @@ Returns:
     The 2D Moore neighborhood of the step point at `sp = (x, y)`.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_moore_neighborhood_3d =
-R"doc(Returns the 3D Moore neighborhood of the step point at `sp = (x, y)`.
-The 3D Moore neighborhood is the set of all points that are adjacent
-to `(x, y)` in the 3D space including the diagonals. Thereby, the 3D
-Moore neighborhood contains up to 26 points as points outside of the
-parameter range are not gathered. The points are returned in no
-particular order.
+R"doc(Returns the 3D Moore neighborhood of the step point at `sp = (x, y,
+z)`. The 3D Moore neighborhood is the set of all points that are
+adjacent to `(x, y, z)` in the 3D space including the diagonals.
+Thereby, the 3D Moore neighborhood contains up to 26 points as points
+outside of the parameter range are not gathered. The points are
+returned in no particular order.
 
 Parameter ``sp``:
     Step point to get the 3D Moore neighborhood of.
 
 Returns:
-    The 3D Moore neighborhood of the step point at `sp = (x, y)`.)doc";
+    The 3D Moore neighborhood of the step point at `sp = (x, y, z)`.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_num_dimensions = R"doc(The number of dimensions.)doc";
 
@@ -7477,6 +7477,18 @@ Parameter ``possible_path``:
 Parameter ``to_delete``:
     Reference to the to-delete list to be updated with new
     coordinates.)doc";
+
+static const char *__doc_fiction_detail_validate_sweep_parameters =
+R"doc(This function validates the given sweep parameters for the operational
+domain computation. It checks if the minimum value of any sweep
+dimension is larger than the corresponding maximum value.
+Additionally, it checks if the step size of any sweep dimension is
+negative or zero.
+
+If any of this is the case, an `std::invalid_argument` is thrown.
+
+Parameter ``params``:
+    The operational domain parameters to validate.)doc";
 
 static const char *__doc_fiction_detail_wire_east = R"doc()doc";
 
@@ -13260,31 +13272,35 @@ defined as the layout implementing the given truth table. The input
 BDL pairs of the layout are assumed to be in the same order as the
 inputs of the truth table.
 
-This algorithm first uses random sampling to find a single operational
+This algorithm first uses random sampling to find a set of operational
 point within the parameter range. From there, it traverses outwards to
 find the edge of the operational area and performs Moore neighborhood
-contour tracing to explore the contour of the operational domain. If
-the operational domain is connected, the algorithm is guaranteed to
-find the contours of the entire operational domain within the
-parameter range if the initial random sampling found an operational
-point.
+contour tracing to explore the contour of the operational domain. This
+is repeated for all initially sampled points that do not lie within a
+contour. The algorithm is guaranteed to determine the contours of all
+operational "islands" if the initial random sampling found at least
+one operational point within them. Thereby, this algorithm works for
+disconnected operational domains.
 
-It performs up to `samples` uniformly-distributed random samples
-within the parameter range until an operational point is found. From
-there, it performs another number of samples equal to the distance to
-an edge of the operational area. Finally, it performs up to 8 samples
-for each contour point (however, the actual number is usually much
-lower). For each sample, the algorithm performs one operational check
-on the layout, where each operational check consists of up to
-:math:`2^n` exact ground state simulations, where :math:`n` is the
-number of inputs of the layout. Each exact ground state simulation has
-exponential complexity in of itself. Therefore, the algorithm is only
-feasible for small layouts with few inputs.
+It performs `samples` uniformly-distributed random samples within the
+parameter range. For each thusly discovered operational island, it
+performs another number of samples equal to the distance to an edge of
+each operational area. Finally, it performs up to 8 samples for each
+contour point (however, the actual number is usually lower). For each
+sample, the algorithm performs one operational check on the layout,
+where each operational check consists of up to :math:`2^n` exact
+ground state simulations, where :math:`n` is the number of inputs of
+the layout. Each exact ground state simulation has exponential
+complexity in of itself. Therefore, the algorithm is only feasible for
+small layouts with few inputs.
 
 This flavor of operational domain computation was proposed in
 \"Reducing the Complexity of Operational Domain Computation in Silicon
 Dangling Bond Logic\" by M. Walter, J. Drewniok, S. S. H. Ng, K.
 Walus, and R. Wille in NANOARCH 2023.
+
+This function may throw an `std::invalid_argument` exception if the
+given sweep parameters are invalid.
 
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
@@ -13326,10 +13342,10 @@ inputs of the truth table.
 This algorithm first uses random sampling to find several operational
 points within the parameter range. From there, it employs the "flood
 fill" algorithm to explore the operational domain. The algorithm is
-guaranteed to find all operational areas in their entirety if the
-initial random sampling found at least one operational point within
-them. Thereby, this algorithm works for disconnected operational
-domains.
+guaranteed to determine all operational "islands" in their entirety if
+the initial random sampling found at least one operational point
+within them. Thereby, this algorithm works for disconnected
+operational domains.
 
 It performs `samples` uniformly-distributed random samples within the
 parameter range. From there, it performs another number of samples
@@ -13346,6 +13362,9 @@ This flavor of operational domain computation was proposed in
 \"Reducing the Complexity of Operational Domain Computation in Silicon
 Dangling Bond Logic\" by M. Walter, J. Drewniok, S. S. H. Ng, K.
 Walus, and R. Wille in NANOARCH 2023.
+
+This function may throw an `std::invalid_argument` exception if the
+given sweep parameters are invalid.
 
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
@@ -13403,6 +13422,9 @@ simulations, where :math:`n` is the number of inputs of the layout.
 Each exact ground state simulation has exponential complexity in of
 itself. Therefore, the algorithm is only feasible for small layouts
 with few inputs.
+
+This function may throw an `std::invalid_argument` exception if the
+given sweep parameters are invalid.
 
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
@@ -13472,6 +13494,9 @@ exact ground state simulations, where :math:`n` is the number of
 inputs of the layout. Each exact ground state simulation has
 exponential complexity in of itself. Therefore, the algorithm is only
 feasible for small layouts with few inputs.
+
+This function may throw an `std::invalid_argument` exception if the
+given sweep parameters are invalid.
 
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
