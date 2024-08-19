@@ -13394,8 +13394,8 @@ Returns:
 static const char *__doc_fiction_operational_domain_get_value =
 R"doc(This function retrieves the value associated with the provided
 parameter point from the operational domain. If the parameter point is
-found in the domain, its corresponding value is returned. Otherwise, a
-runtime error is thrown.
+found in the domain, its corresponding value is returned. Otherwise,
+`std::out_of_range` is thrown.
 
 Parameter ``pp``:
     The parameter point to look up.
