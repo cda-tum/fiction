@@ -6,6 +6,7 @@
 #define FICTION_CMD_OPDOM_HPP
 
 #include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/io/write_operational_domain.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
@@ -21,6 +22,7 @@
 #include <cstdlib>
 #include <exception>
 #include <iostream>
+#include <stdexcept>
 #include <string>
 #include <type_traits>
 #include <variant>
@@ -52,8 +54,7 @@ class opdom_command : public command
         add_option("--flood_fill,-f", num_random_samples,
                    "Use flood fill instead of grid search with this many initial random samples");
         add_option("--contour_tracing,-c", num_random_samples,
-                   "Use contour tracing instead of grid search with up to this many random "
-                   "samples");
+                   "Use contour tracing instead of grid search with this many random samples");
 
         add_option("filename", filename, "CSV filename to write the operational domain to")->required();
 
@@ -62,9 +63,12 @@ class opdom_command : public command
         add_option("--lambda_tf,-l", simulation_params.lambda_tf, "Thomas-Fermi screening distance (unit: nm)", true);
         add_option("--mu_minus,-m", simulation_params.mu_minus, "Energy transition level (0/-) (unit: eV)", true);
 
-        add_option("--x_sweep", x_sweep, "Sweep parameter of the x dimension [epsilon_r, lambda_tf, mu_minus]", true);
-        add_option("--y_sweep", y_sweep, "Sweep parameter of the y dimension [epsilon_r, lambda_tf, mu_minus]", true);
-        add_option("--z_sweep", z_sweep, "Sweep parameter of the z dimension [epsilon_r, lambda_tf, mu_minus]", true);
+        add_option("--x_sweep,-x", x_sweep, "Sweep parameter of the x dimension [epsilon_r, lambda_tf, mu_minus]",
+                   true);
+        add_option("--y_sweep,-y", y_sweep, "Sweep parameter of the y dimension [epsilon_r, lambda_tf, mu_minus]",
+                   true);
+        add_option("--z_sweep,-z", z_sweep,
+                   "Sweep parameter of the z dimension (optional) [epsilon_r, lambda_tf, mu_minus]");
 
         add_option("--x_min", params.sweep_dimensions[0].min, "Minimum value of the x dimension sweep", true);
         add_option("--x_max", params.sweep_dimensions[0].max, "Maximum value of the x dimension sweep", true);
@@ -72,9 +76,9 @@ class opdom_command : public command
         add_option("--y_min", params.sweep_dimensions[1].min, "Minimum value of the y dimension sweep", true);
         add_option("--y_max", params.sweep_dimensions[1].max, "Maximum value of the y dimension sweep", true);
         add_option("--y_step", params.sweep_dimensions[1].step, "Step size of the y dimension sweep", true);
-        add_option("--z_min", params.sweep_dimensions[2].min, "Minimum value of the y dimension sweep", true);
-        add_option("--z_max", params.sweep_dimensions[2].max, "Maximum value of the y dimension sweep", true);
-        add_option("--z_step", params.sweep_dimensions[2].step, "Step size of the y dimension sweep", true);
+        add_option("--z_min", params.sweep_dimensions[2].min, "Minimum value of the z dimension sweep");
+        add_option("--z_max", params.sweep_dimensions[2].max, "Maximum value of the z dimension sweep");
+        add_option("--z_step", params.sweep_dimensions[2].step, "Step size of the z dimension sweep");
     }
 
   protected:
@@ -86,38 +90,6 @@ class opdom_command : public command
         // reset operational domain and stats
         op_domain = {};
         stats     = {};
-
-        if (simulation_params.epsilon_r <= 0)
-        {
-            env->out() << "[e] epsilon_r must be positive" << std::endl;
-            reset_params();
-            return;
-        }
-        if (simulation_params.lambda_tf <= 0)
-        {
-            env->out() << "[e] lambda_tf must be positive" << std::endl;
-            reset_params();
-            return;
-        }
-
-        // check for valid x and y parameter bounds
-        for (const auto& dim : params.sweep_dimensions)
-            if (dim.min >= dim.max)
-            {
-                env->out() << "[e] min must be smaller than max" << std::endl;
-                reset_params();
-                return;
-            }
-
-        // make sure that at most one algorithm is selected
-        const std::array algorithm_selections = {is_set("random_sampling"), is_set("flood_fill"),
-                                                 is_set("contour_tracing")};
-        if (std::count(algorithm_selections.cbegin(), algorithm_selections.cend(), true) > 1)
-        {
-            env->out() << "[e] only one algorithm can be selected at a time" << std::endl;
-            reset_params();
-            return;
-        }
 
         auto& cs = store<fiction::cell_layout_t>();
 
@@ -139,35 +111,78 @@ class opdom_command : public command
             return;
         }
 
-        // default sweep parameters
-        if (x_sweep.empty() && y_sweep.empty())
+        if (simulation_params.epsilon_r <= 0)
         {
-            x_sweep = "epsilon_r";
-            y_sweep = "lambda_tf";
+            env->out() << "[e] epsilon_r must be positive" << std::endl;
+            reset_params();
+            return;
         }
-        else
+        if (simulation_params.lambda_tf <= 0)
         {
-            // overwrite x and y sweep with their respective lower-case string representations
-            std::transform(x_sweep.begin(), x_sweep.end(), x_sweep.begin(), ::tolower);
-            std::transform(y_sweep.begin(), y_sweep.end(), y_sweep.begin(), ::tolower);
+            env->out() << "[e] lambda_tf must be positive" << std::endl;
+            reset_params();
+            return;
+        }
 
-            static constexpr const std::array valid_sweep_params = {"epsilon_r", "lambda_tf", "mu_minus"};
+        // make sure that at most one algorithm is selected
+        const std::array algorithm_selections = {is_set("random_sampling"), is_set("flood_fill"),
+                                                 is_set("contour_tracing")};
+        if (std::count(algorithm_selections.cbegin(), algorithm_selections.cend(), true) > 1)
+        {
+            env->out() << "[e] only one algorithm can be selected at a time" << std::endl;
+            reset_params();
+            return;
+        }
 
-            // check if x sweep parameter is valid
-            if (std::find(valid_sweep_params.cbegin(), valid_sweep_params.cend(), x_sweep) == valid_sweep_params.cend())
+        // make sure that z is not set if y is not, and that y is not set if x is not
+        if (is_set("z_sweep") && !is_set("y_sweep"))
+        {
+            env->out() << "[e] z sweep parameter cannot be set if y sweep parameter is not set" << std::endl;
+            reset_params();
+            return;
+        }
+        if (is_set("y_sweep") && !is_set("x_sweep"))
+        {
+            env->out() << "[e] y sweep parameter cannot be set if x sweep parameter is not set" << std::endl;
+            reset_params();
+            return;
+        }
+
+        // overwrite the sweeps with their respective lower-case string representations
+        std::transform(x_sweep.begin(), x_sweep.end(), x_sweep.begin(), ::tolower);
+        std::transform(y_sweep.begin(), y_sweep.end(), y_sweep.begin(), ::tolower);
+        std::transform(z_sweep.begin(), z_sweep.end(), z_sweep.begin(), ::tolower);
+
+        static constexpr const std::array valid_sweep_params = {"epsilon_r", "lambda_tf", "mu_minus"};
+
+        // check if x sweep parameter is valid
+        if (std::find(valid_sweep_params.cbegin(), valid_sweep_params.cend(), x_sweep) == valid_sweep_params.cend())
+        {
+            env->out() << "[e] invalid x sweep parameter \"" << x_sweep
+                       << "\". Has to be one of [epsilon_r, lambda_tf, "
+                          "mu_minus]"
+                       << std::endl;
+            reset_params();
+            return;
+        }
+
+        // check if y sweep parameter is valid
+        if (std::find(valid_sweep_params.cbegin(), valid_sweep_params.cend(), y_sweep) == valid_sweep_params.cend())
+        {
+            env->out() << "[e] invalid y sweep parameter \"" << y_sweep
+                       << "\". Has to be one of [epsilon_r, lambda_tf, "
+                          "mu_minus]"
+                       << std::endl;
+            reset_params();
+            return;
+        }
+
+        // check if z sweep parameter is valid if set
+        if (is_set("z_sweep"))
+        {
+            if (std::find(valid_sweep_params.cbegin(), valid_sweep_params.cend(), z_sweep) == valid_sweep_params.cend())
             {
-                env->out() << "[e] invalid x sweep parameter \"" << x_sweep
-                           << "\". Has to be one of [epsilon_r, lambda_tf, "
-                              "mu_minus]"
-                           << std::endl;
-                reset_params();
-                return;
-            }
-
-            // check if y sweep parameter is valid
-            if (std::find(valid_sweep_params.cbegin(), valid_sweep_params.cend(), y_sweep) == valid_sweep_params.cend())
-            {
-                env->out() << "[e] invalid y sweep parameter \"" << y_sweep
+                env->out() << "[e] invalid z sweep parameter \"" << z_sweep
                            << "\". Has to be one of [epsilon_r, lambda_tf, "
                               "mu_minus]"
                            << std::endl;
@@ -204,18 +219,26 @@ class opdom_command : public command
             params.sweep_dimensions[1].dimension = fiction::sweep_parameter::MU_MINUS;
         }
 
-        // assign z sweep parameters
-        if (z_sweep == "epsilon_r")
+        if (is_set("z_sweep"))
         {
-            params.sweep_dimensions[2].dimension = fiction::sweep_parameter::EPSILON_R;
+            // assign z sweep parameters
+            if (z_sweep == "epsilon_r")
+            {
+                params.sweep_dimensions[2].dimension = fiction::sweep_parameter::EPSILON_R;
+            }
+            else if (z_sweep == "lambda_tf")
+            {
+                params.sweep_dimensions[2].dimension = fiction::sweep_parameter::LAMBDA_TF;
+            }
+            else if (z_sweep == "mu_minus")
+            {
+                params.sweep_dimensions[2].dimension = fiction::sweep_parameter::MU_MINUS;
+            }
         }
-        else if (z_sweep == "lambda_tf")
+        else
         {
-            params.sweep_dimensions[2].dimension = fiction::sweep_parameter::LAMBDA_TF;
-        }
-        else if (z_sweep == "mu_minus")
-        {
-            params.sweep_dimensions[2].dimension = fiction::sweep_parameter::MU_MINUS;
+            // remove z sweep parameter if not set
+            params.sweep_dimensions.pop_back();
         }
 
         const auto get_name = [](auto&& lyt_ptr) -> std::string { return fiction::get_name(*lyt_ptr); };
@@ -234,6 +257,7 @@ class opdom_command : public command
                                               "Boolean function",
                                               get_name(lyt_ptr))
                                << std::endl;
+                    reset_params();
                     return;
                 }
 
@@ -262,20 +286,24 @@ class opdom_command : public command
                                                                             params, &stats);
                     }
                 }
-                catch (std::exception& e)
+                catch (std::invalid_argument& e)
                 {
                     env->out() << fmt::format("[e] {}", e.what()) << std::endl;
+                    reset_params();
                     return;
                 }
-                catch (..)
+                catch (...)
                 {
                     env->out() << "[e] an unknown error occurred during operational domain computation" << std::endl;
+                    reset_params();
                     return;
                 }
             }
             else
             {
                 env->out() << fmt::format("[e] {} is not an SiDB layout", get_name(lyt_ptr)) << std::endl;
+                reset_params();
+                return;
             }
         };
 
@@ -294,7 +322,12 @@ class opdom_command : public command
     /**
      * Operational domain parameters.
      */
-    fiction::operational_domain_params params{};
+    fiction::operational_domain_params params{simulation_params, fiction::sidb_simulation_engine::QUICKEXACT,
+                                              std::vector<fiction::operational_domain_value_range>{{
+                                                  {fiction::sweep_parameter::EPSILON_R, 1.0, 10.0, 0.1},
+                                                  {fiction::sweep_parameter::LAMBDA_TF, 1.0, 10.0, 0.1},
+                                                  {fiction::sweep_parameter::MU_MINUS, -0.50, -0.10, 0.025},
+                                              }}};
     /**
      * Operational domain stats.
      */
@@ -306,11 +339,11 @@ class opdom_command : public command
     /**
      * User input for the x dimension sweep parameter.
      */
-    std::string x_sweep{};
+    std::string x_sweep{"epsilon_r"};
     /**
      * User input for the y dimension sweep parameter.
      */
-    std::string y_sweep{};
+    std::string y_sweep{"lambda_tf"};
     /**
      * User input for the z dimension sweep parameter.
      */
@@ -327,9 +360,16 @@ class opdom_command : public command
     /**
      * Writes the operational domain to the specified CSV file.
      */
-    void write_op_domain() const
+    void write_op_domain()
     {
         static const fiction::write_operational_domain_params write_opdom_params{"1", "0"};
+
+        // if the operational domain call was unsuccessful, do not attempt writing anything
+        if (op_domain.operational_values.empty())
+        {
+            reset_params();
+            return;
+        }
 
         try
         {
@@ -338,10 +378,14 @@ class opdom_command : public command
         catch (const std::exception& e)
         {
             env->out() << fmt::format("[e] {}", e.what()) << std::endl;
+            reset_params();
+            return;
         }
         catch (...)
         {
             env->out() << "[e] an unknown error occurred while writing the operational domain data" << std::endl;
+            reset_params();
+            return;
         }
     }
     /**
@@ -365,10 +409,18 @@ class opdom_command : public command
     void reset_params()
     {
         simulation_params = fiction::sidb_simulation_parameters{2, -0.32, 5.6, 5.0};
-        params            = {};
-        x_sweep           = {};
-        y_sweep           = {};
-        filename          = {};
+
+        params.simulation_parameters = simulation_params;
+        params.sweep_dimensions      = std::vector<fiction::operational_domain_value_range>{
+            {fiction::sweep_parameter::EPSILON_R, 1.0, 10.0, 0.1},
+            {fiction::sweep_parameter::LAMBDA_TF, 1.0, 10.0, 0.1},
+            {fiction::sweep_parameter::MU_MINUS, -0.50, -0.10, 0.025},
+        };
+
+        x_sweep  = "epsilon_r";
+        y_sweep  = "lambda_tf";
+        z_sweep  = "";
+        filename = "";
     }
 };
 
