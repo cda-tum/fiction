@@ -437,7 +437,7 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
 
 TEST_CASE("Design Bestagon shaped CX gate with QuickCell", "[design-sidb-gates]")
 {
-    auto lyt = blueprints::two_input_two_output_bestagon_skeleton<sidb_100_cell_clk_lyt_siqad>();
+    const auto lyt = blueprints::two_input_two_output_bestagon_skeleton<sidb_100_cell_clk_lyt_siqad>();
 
     SECTION("Exhaustive Generation, QuickCell")
     {
@@ -456,7 +456,7 @@ TEST_CASE("Design Bestagon shaped CX gate with QuickCell", "[design-sidb-gates]"
 
 TEST_CASE("Design Bestagon shaped CX gate with QuickCell (flipped)", "[design-sidb-gates]")
 {
-    auto lyt = blueprints::two_input_two_output_bestagon_skeleton_input_down_output_up<sidb_100_cell_clk_lyt_siqad>();
+    const auto lyt = blueprints::two_input_two_output_bestagon_skeleton_input_down_output_up<sidb_100_cell_clk_lyt_siqad>();
 
     SECTION("Exhaustive Generation, QuickCell")
     {
@@ -475,7 +475,7 @@ TEST_CASE("Design Bestagon shaped CX gate with QuickCell (flipped)", "[design-si
 
 TEST_CASE("Design AND gate with input left and output top-right with QuickCell (flipped)", "[design-sidb-gates]")
 {
-    auto lyt = blueprints::two_input_left_one_output_right_top_skeleton<sidb_100_cell_clk_lyt_siqad>();
+    const auto lyt = blueprints::two_input_left_one_output_right_top_skeleton<sidb_100_cell_clk_lyt_siqad>();
 
     SECTION("Exhaustive Generation, QuickCell")
     {
