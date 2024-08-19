@@ -2412,25 +2412,6 @@ Parameter ``n``:
 Returns:
     Columnar clocking scheme.)doc";
 
-static const char *__doc_fiction_contains_parameter_point =
-R"doc(This function checks for the containment of a parameter point,
-specified by `key`, in the provided map `map`. If the parameter point
-is found in the map, the associated `MapType::value_type` is returned.
-Otherwise, `std::nullopt` is returned.
-
-Template parameter ``MapType``:
-    The type of the map containing parameter points as keys.
-
-Parameter ``map``:
-    The map in which to search for `key`.
-
-Parameter ``key``:
-    The parameter point to search for in `map`.
-
-Returns:
-    The associated `MapType::value_type` of `key` in `map`, or
-    `std::nullopt` if `key` is not contained in `map`.)doc";
-
 static const char *__doc_fiction_convert_array =
 R"doc(Converts an array of size `N` and type `T` to an array of size `N` and
 type `ElementType` by applying `static_cast` at compile time.
@@ -3998,6 +3979,25 @@ static const char *__doc_fiction_detail_connect_and_place = R"doc()doc";
 
 static const char *__doc_fiction_detail_connect_and_place_2 = R"doc()doc";
 
+static const char *__doc_fiction_detail_contains_parameter_point =
+R"doc(This function checks for the containment of a parameter point,
+specified by `key`, in the provided map `map`. If the parameter point
+is found in the map, the associated `MapType::value_type` is returned.
+Otherwise, `std::nullopt` is returned.
+
+Template parameter ``MapType``:
+    The type of the map containing parameter points as keys.
+
+Parameter ``map``:
+    The map in which to search for `key`.
+
+Parameter ``key``:
+    The parameter point to search for in `map`.
+
+Returns:
+    The associated `MapType::value_type` of `key` in `map`, or
+    `std::nullopt` if `key` is not contained in `map`.)doc";
+
 static const char *__doc_fiction_detail_convert_array =
 R"doc(Based on https://stackoverflow.com/questions/57756557/initializing-a-
 stdarray-with-a-constant-value)doc";
@@ -5278,6 +5278,25 @@ static const char *__doc_fiction_detail_fanout_substitution_impl_ntk_topo = R"do
 static const char *__doc_fiction_detail_fanout_substitution_impl_ps = R"doc()doc";
 
 static const char *__doc_fiction_detail_fanout_substitution_impl_run = R"doc()doc";
+
+static const char *__doc_fiction_detail_find_key_with_tolerance =
+R"doc(This function searches for a floating-point value specified by the
+`key` in the provided map `map`, applying a tolerance specified by
+`fiction::physical_constants::POP_STABILITY_ERR`. Each key in the map
+is compared to the specified key within this tolerance.
+
+Template parameter ``MapType``:
+    The type of the map containing parameter points as keys.
+
+Parameter ``map``:
+    The map containing parameter points as keys and associated values.
+
+Parameter ``key``:
+    The parameter point to search for in the map.
+
+Returns:
+    An iterator to the found parameter point in the map, or
+    `map.cend()` if not found.)doc";
 
 static const char *__doc_fiction_detail_fix_wires =
 R"doc(Utility function to move wires that cross over empty tiles down one
@@ -9297,25 +9316,6 @@ Returns:
     Iterator in the range `[first, last)` to the first position of the
     first 2-element sub-sequence shared between the two ranges, or
     `last` if no such shared sub-sequence exists.)doc";
-
-static const char *__doc_fiction_find_key_with_tolerance =
-R"doc(This function searches for a floating-point value specified by the
-`key` in the provided map `map`, applying a tolerance specified by
-`fiction::physical_constants::POP_STABILITY_ERR`. Each key in the map
-is compared to the specified key within this tolerance.
-
-Template parameter ``MapType``:
-    The type of the map containing parameter points as keys.
-
-Parameter ``map``:
-    The map containing parameter points as keys and associated values.
-
-Parameter ``key``:
-    The parameter point to search for in the map.
-
-Returns:
-    An iterator to the found parameter point in the map, or
-    `map.cend()` if not found.)doc";
 
 static const char *__doc_fiction_flat_top_hex = R"doc(\verbatim _____ / \ / \ \ / \_____/ \endverbatim)doc";
 
