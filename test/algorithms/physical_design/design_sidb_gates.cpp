@@ -456,7 +456,8 @@ TEST_CASE("Design Bestagon shaped CX gate with QuickCell", "[design-sidb-gates]"
 
 TEST_CASE("Design Bestagon shaped CX gate with QuickCell (flipped)", "[design-sidb-gates]")
 {
-    const auto lyt = blueprints::two_input_two_output_bestagon_skeleton_input_down_output_up<sidb_100_cell_clk_lyt_siqad>();
+    const auto lyt =
+        blueprints::two_input_two_output_bestagon_skeleton_input_down_output_up<sidb_100_cell_clk_lyt_siqad>();
 
     SECTION("Exhaustive Generation, QuickCell")
     {
