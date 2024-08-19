@@ -223,50 +223,6 @@ struct operational_domain_value_range
     double step{0.1};
 };
 /**
- * This function checks for the containment of a parameter point, specified by `key`, in the provided map `map`. If the
- * parameter point is found in the map, the associated `MapType::value_type` is returned. Otherwise, `std::nullopt` is
- * returned.
- *
- * @tparam MapType The type of the map containing parameter points as keys.
- * @param map The map in which to search for `key`.
- * @param key The parameter point to search for in `map`.
- * @return The associated `MapType::value_type` of `key` in `map`, or `std::nullopt` if `key` is not contained in `map`.
- */
-template <typename MapType>
-[[maybe_unused]] static std::optional<typename MapType::value_type>
-contains_parameter_point(const MapType& map, const typename MapType::key_type& key)
-{
-    static_assert(std::is_same_v<typename MapType::key_type, parameter_point>, "Map key type must be parameter_point");
-
-    std::optional<typename MapType::value_type> result = std::nullopt;
-
-    map.if_contains(key, [&result](const typename MapType::value_type& v) { result.emplace(v); });
-
-    return result;
-}
-/**
- * This function searches for a floating-point value specified by the `key` in the provided map `map`, applying a
- * tolerance specified by `fiction::physical_constants::POP_STABILITY_ERR`. Each key in the map is compared to the
- * specified key within this tolerance.
- *
- * @tparam MapType The type of the map containing parameter points as keys.
- * @param map The map containing parameter points as keys and associated values.
- * @param key The parameter point to search for in the map.
- * @return An iterator to the found parameter point in the map, or `map.cend()` if not found.
- */
-template <typename MapType>
-[[maybe_unused]] static typename MapType::const_iterator find_key_with_tolerance(const MapType&                    map,
-                                                                                 const typename MapType::key_type& key)
-{
-    static_assert(std::is_floating_point_v<typename MapType::key_type>, "Map key type must be floating-point");
-
-    constexpr double tolerance = physical_constants::POP_STABILITY_ERR;
-
-    auto compare_keys = [&key, &tolerance](const auto& pair) { return std::abs(pair.first - key) < tolerance; };
-
-    return std::find_if(map.cbegin(), map.cend(), compare_keys);
-}
-/**
  * Parameters for the operational domain computation. The parameters are used across the different operational domain
  * computation algorithms.
  */
@@ -351,6 +307,50 @@ void validate_sweep_parameters(const operational_domain_params& params)
                 fmt::format("Invalid sweep dimension: 'step' size is negative or 0 for dimension {}", d));
         }
     }
+}
+/**
+ * This function checks for the containment of a parameter point, specified by `key`, in the provided map `map`. If the
+ * parameter point is found in the map, the associated `MapType::value_type` is returned. Otherwise, `std::nullopt` is
+ * returned.
+ *
+ * @tparam MapType The type of the map containing parameter points as keys.
+ * @param map The map in which to search for `key`.
+ * @param key The parameter point to search for in `map`.
+ * @return The associated `MapType::value_type` of `key` in `map`, or `std::nullopt` if `key` is not contained in `map`.
+ */
+template <typename MapType>
+[[maybe_unused]] static std::optional<typename MapType::value_type>
+contains_parameter_point(const MapType& map, const typename MapType::key_type& key)
+{
+    static_assert(std::is_same_v<typename MapType::key_type, parameter_point>, "Map key type must be parameter_point");
+
+    std::optional<typename MapType::value_type> result = std::nullopt;
+
+    map.if_contains(key, [&result](const typename MapType::value_type& v) { result.emplace(v); });
+
+    return result;
+}
+/**
+ * This function searches for a floating-point value specified by the `key` in the provided map `map`, applying a
+ * tolerance specified by `fiction::physical_constants::POP_STABILITY_ERR`. Each key in the map is compared to the
+ * specified key within this tolerance.
+ *
+ * @tparam MapType The type of the map containing parameter points as keys.
+ * @param map The map containing parameter points as keys and associated values.
+ * @param key The parameter point to search for in the map.
+ * @return An iterator to the found parameter point in the map, or `map.cend()` if not found.
+ */
+template <typename MapType>
+[[maybe_unused]] static typename MapType::const_iterator find_key_with_tolerance(const MapType&                    map,
+                                                                                 const typename MapType::key_type& key)
+{
+    static_assert(std::is_floating_point_v<typename MapType::key_type>, "Map key type must be floating-point");
+
+    constexpr double tolerance = physical_constants::POP_STABILITY_ERR;
+
+    auto compare_keys = [&key, &tolerance](const auto& pair) { return std::abs(pair.first - key) < tolerance; };
+
+    return std::find_if(map.cbegin(), map.cend(), compare_keys);
 }
 
 template <typename Lyt, typename TT, typename OpDomain>
