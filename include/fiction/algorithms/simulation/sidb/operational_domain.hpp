@@ -1644,9 +1644,9 @@ operational_domain_random_sampling(const Lyt& lyt, const std::vector<TT>& spec, 
  * inputs of the truth table.
  *
  * This algorithm first uses random sampling to find several operational points within the parameter range. From there,
- * it employs the "flood fill" algorithm to explore the operational domain. The algorithm is guaranteed to find all
- * operational areas in their entirety if the initial random sampling found at least one operational point within them.
- * Thereby, this algorithm works for disconnected operational domains.
+ * it employs the "flood fill" algorithm to explore the operational domain. The algorithm is guaranteed to determine all
+ * operational "islands" in their entirety if the initial random sampling found at least one operational point within
+ * them. Thereby, this algorithm works for disconnected operational domains.
  *
  * It performs `samples` uniformly-distributed random samples within the parameter range. From there, it performs
  * another number of samples equal to the number of points within the operational domain plus the first non-operational
@@ -1706,15 +1706,16 @@ operational_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& spec, const
  * implementing the given truth table. The input BDL pairs of the layout are assumed to be in the same order as the
  * inputs of the truth table.
  *
- * This algorithm first uses random sampling to find a single operational point within the parameter range. From there,
+ * This algorithm first uses random sampling to find a set of operational point within the parameter range. From there,
  * it traverses outwards to find the edge of the operational area and performs Moore neighborhood contour tracing to
- * explore the contour of the operational domain. If the operational domain is connected, the algorithm is guaranteed to
- * find the contours of the entire operational domain within the parameter range if the initial random sampling found an
- * operational point.
+ * explore the contour of the operational domain. This is repeated for all initially sampled points that do not lie
+ * within a contour. The algorithm is guaranteed to determine the contours of all operational "islands" if the initial
+ * random sampling found at least one operational point within them. Thereby, this algorithm works for disconnected
+ * operational domains.
  *
- * It performs up to `samples` uniformly-distributed random samples within the parameter range until an operational
- * point is found. From there, it performs another number of samples equal to the distance to an edge of the operational
- * area. Finally, it performs up to 8 samples for each contour point (however, the actual number is usually much lower).
+ * It performs `samples` uniformly-distributed random samples within the parameter range. For each thusly discovered
+ * operational island, it performs another number of samples equal to the distance to an edge of each operational
+ * area. Finally, it performs up to 8 samples for each contour point (however, the actual number is usually lower).
  * For each sample, the algorithm performs one operational check on the layout, where each operational check consists of
  * up to \f$2^n\f$ exact ground state simulations, where \f$n\f$ is the number of inputs of the layout. Each exact
  * ground state simulation has exponential complexity in of itself. Therefore, the algorithm is only feasible for small
