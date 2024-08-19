@@ -75,8 +75,8 @@ Truth tables
 ############
 
 The ``truth_table`` store (``-t``) can hold logic descriptions in binary format as implemented in the ``kitty`` library
-by Mathias Soeken. These can either be loaded via command ``tt`` by specifying a bit/hex string or a Boolean expression,
-or be obtained by :ref:`simulating<command simulate>` a ``network`` or ``gate_layout`` via command
+by Mathias Soeken. These can either be loaded via command ``tt`` by specifying a bit/hex string (``-t``) or a Boolean
+expression (``-e``), or be obtained by :ref:`simulating<command simulate>` a ``network`` or ``gate_layout`` via command
 ``simulate``. Generating a ``truth_table`` from an expression uses the following syntax (from the
 `kitty documentation <https://libkitty.readthedocs.io/en/latest/reference.html#_CPPv4I0EN5kitty22create_from_expressionEbR2TTRKNSt6stringE>`_):
 
@@ -87,7 +87,7 @@ if-then-else, or ``!{!a!b}`` to describe the application of De Morgan's law to `
 fit the largest variable in the expression, e.g., if ``c`` is the largest variable, then the truth table has at least
 three variables.
 
-Alternatively, ``tt 0110`` or ``tt 0xaffe`` generate a ``truth_table`` from bit/hex strings.
+For example, ``tt -t 0110`` and ``tt -t 0xaffe`` generate a ``truth_table`` from bit and hex strings, respectively.
 
 Logic synthesis
 ###############
