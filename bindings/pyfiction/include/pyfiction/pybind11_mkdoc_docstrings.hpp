@@ -3979,7 +3979,9 @@ static const char *__doc_fiction_detail_connect_and_place = R"doc()doc";
 
 static const char *__doc_fiction_detail_connect_and_place_2 = R"doc()doc";
 
-static const char *__doc_fiction_detail_contains_parameter_point =
+static const char *__doc_fiction_detail_contains_parameter_point = R"doc(Forward-declaration for `operational_domain`.)doc";
+
+static const char *__doc_fiction_detail_contains_parameter_point_2 =
 R"doc(This function checks for the containment of a parameter point,
 specified by `key`, in the provided map `map`. If the parameter point
 is found in the map, the associated `MapType::value_type` is returned.
