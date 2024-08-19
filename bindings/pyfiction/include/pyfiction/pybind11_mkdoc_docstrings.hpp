@@ -795,7 +795,7 @@ static const char *__doc_fiction_bdl_wire_direction = R"doc(Possible directions 
 
 static const char *__doc_fiction_bdl_wire_direction_NORTH_SOUTH =
 R"doc(Defines the direction of the wire from north to south. The starting
-point is defined by the position of input cells, and the ending point
+point is defined by the position of input cells, or the ending point
 is defined by the position of output cells.
 
 @note A wire running from west to east is interpreted as north-south
@@ -805,7 +805,7 @@ static const char *__doc_fiction_bdl_wire_direction_NO_DIRECTION = R"doc(A wire 
 
 static const char *__doc_fiction_bdl_wire_direction_SOUTH_NORTH =
 R"doc(Defines the direction of the wire from south to north. The starting
-point is defined by the position of input cells, and the ending point
+point is defined by the position of input cells, or the ending point
 is defined by the position of output cells.
 
 @note A wire running from east to west is interpreted as south-north
@@ -4271,7 +4271,10 @@ Parameter ``spec``:
     truth table.
 
 Parameter ``ps``:
-    Parameters and settings for the gate designer.)doc";
+    Parameters and settings for the gate designer.
+
+Parameter ``st``:
+    Statistics for the gate design process.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_determine_all_possible_canvas_layouts =
 R"doc(This function calculates all combinations of distributing a given
@@ -4408,7 +4411,8 @@ Returns:
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_run_pruning =
 R"doc(This function processes each layout to determine if it represents a
-valid gate implementation or if it can be pruned. It leverages multi-
+valid gate implementation or if it can be pruned by using three
+distinct physically-informed pruning steps. It leverages multi-
 threading to accelerate the evaluation and ensures thread-safe access
 to shared resources.
 
@@ -4492,17 +4496,11 @@ R"doc(This function assigns the charge states of the output wires in the
 layout according to the values in the truth table for the provided
 input pattern index.
 
-Template parameter ``Lyt``:
-    The type representing the layout.
-
 Parameter ``layout``:
     The charge distribution surface layout to be modified.
 
 Parameter ``input_index``:
-    The index representing the current input pattern.
-
-Returns:
-    void)doc";
+    The index representing the current input pattern.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_skeleton_layout =
 R"doc(The skeleton layout serves as a starting layout to which SiDBs are
@@ -8364,6 +8362,9 @@ Template parameter ``Lyt``:
 Parameter ``lyt``:
     The SiDB layout to detect BDL wires in.
 
+Parameter ``params``:
+    Parameters used for detecting BDL wires.
+
 Parameter ``wire_selection``:
     The type of wires to detect, specified by the `bdl_wire_selection`
     enum. Default is `bdl_wire_selection::ALL`.
@@ -9656,8 +9657,8 @@ Parameter ``bdl_pairs``:
     A set of BDL pairs to search within.
 
 Parameter ``inter_bdl_distance``:
-    The maximum allowable inter distance between the lower SiDB of the
-    given BDL pair and the upper SiDB of the candidate BDL pair.
+    The maximum allowable distance between the lower SiDB of the given
+    BDL pair and the upper SiDB of the potential neighbor BDL pair.
 
 Returns:
     A std::optional containing the first BDL pair that meets the
@@ -9684,8 +9685,8 @@ Parameter ``bdl_pairs``:
     A set of BDL pairs to search within.
 
 Parameter ``inter_bdl_distance``:
-    The maximum allowable inter distance between the lower SiDB of the
-    given BDL pair and the upper SiDB of the candidate BDL pair.
+    The maximum allowable distance between the lower SiDB of the given
+    BDL pair and the upper SiDB of the potential neighbor BDL pair.
 
 Returns:
     A std::optional containing the first BDL pair that meets the
