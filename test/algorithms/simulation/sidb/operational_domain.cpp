@@ -4,7 +4,6 @@
 
 #include <catch2/catch_template_test_macros.hpp>
 
-#include "fiction/layouts/coordinates.hpp"
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
@@ -13,12 +12,12 @@
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/phmap_utils.hpp>
 #include <fiction/utils/truth_table_utils.hpp>
 
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <optional>
+#include <stdexcept>
 #include <vector>
 
 using namespace fiction;
@@ -59,18 +58,18 @@ void check_op_domain_params_and_operational_status(
 TEST_CASE("Test parameter point", "[operational-domain]")
 {
     // Test default constructor
-    parameter_point p_default;
+    const parameter_point p_default;
     REQUIRE(p_default.parameters.empty());
 
     // Test parameterized constructor
-    std::vector<double> values = {1.0, 2.0, 3.0};
-    parameter_point     p_param(values);
+    const std::vector<double> values = {1.0, 2.0, 3.0};
+    const parameter_point     p_param(values);
     REQUIRE(p_param.parameters == values);
 
     // Test equality operator
-    parameter_point p1({1.0, 2.0, 3.0});
-    parameter_point p2({1.0, 2.0, 3.0});
-    parameter_point p3({1.0, 2.0, 3.0000001});
+    const parameter_point p1({1.0, 2.0, 3.0});
+    const parameter_point p2({1.0, 2.0, 3.0});
+    const parameter_point p3({1.0, 2.0, 3.0000001});
 
     SECTION("Equality operator - exact equality")
     {
@@ -83,7 +82,7 @@ TEST_CASE("Test parameter point", "[operational-domain]")
     }
 
     // Test inequality operator
-    parameter_point p4({1.0, 2.0, 3.1});
+    const parameter_point p4({1.0, 2.0, 3.1});
     REQUIRE(p1 != p4);
 
     // Test structured bindings (get<I>() method)
