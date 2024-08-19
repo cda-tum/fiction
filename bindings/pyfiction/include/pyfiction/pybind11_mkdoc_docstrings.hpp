@@ -2548,7 +2548,7 @@ surface can be layered on top) to SiQAD coordinates. A new equivalent
 layout based on SiQAD coordinates is returned.
 
 Template parameter ``Lyt``:
-    Cell-level layout type based on fiction coordinates, e.g.,
+    SiDB cell-level layout type based on fiction coordinates, e.g.,
     `offset::ucoord_t` or `cube::coord_t`.
 
 Parameter ``lyt``:
@@ -8884,7 +8884,7 @@ energy values for equality, the comparison uses a tolerance specified
 by `physical_constants::POP_STABILITY_ERR`.
 
 Template parameter ``Lyt``:
-    Cell-level layout type.
+    SiDB cell-level layout type.
 
 Parameter ``input_vec``:
     A vector of `charge_distribution_surface` objects for which
@@ -9312,7 +9312,7 @@ replaced by *QuickExact* due to the much better runtimes and more
 functionality.
 
 Template parameter ``Lyt``:
-    Cell-level layout type.
+    SiDB cell-level layout type.
 
 Parameter ``lyt``:
     The layout to simulate.
@@ -11096,7 +11096,7 @@ provided layout skeleton. The layout skeleton serves as the starting
 layout to which SiDBs are added to create unique SiDB layouts.
 
 Template parameter ``Lyt``:
-    Cell-level SiDB layout type.
+    SiDB cell-level SiDB layout type.
 
 Parameter ``lyt_skeleton``:
     A layout to which random SiDBs are added to create unique layouts.
@@ -11113,7 +11113,7 @@ layout skeleton. The layout skeleton serves as the starting layout to
 which SiDBs are added to create the final layout.
 
 Template parameter ``Lyt``:
-    Cell-level SiDB layout type.
+    SiDB cell-level SiDB layout type.
 
 Parameter ``lyt_skeleton``:
     A layout to which random cells are added to create the final
@@ -12854,7 +12854,7 @@ R"doc(This function checks if the ground state is found by the *QuickSim*
 algorithm.
 
 Template parameter ``Lyt``:
-    Cell-level layout type.
+    SiDB cell-level layout type.
 
 Parameter ``heuristic_results``:
     All found physically valid charge distribution surfaces obtained
@@ -13350,7 +13350,7 @@ i.e., start at `(0, 0)` and are all positive. To this end, all
 existing coordinates are shifted by an x and y offset.
 
 Template parameter ``Lyt``:
-    Cell-level layout type.
+    SiDB cell-level layout type.
 
 Parameter ``lyt``:
     The layout which is to be normalized.
@@ -13663,7 +13663,7 @@ Template parameter ``Ntk``:
     The type of the input network.
 
 Template parameter ``CellLyt``:
-    Cell-level layout type.
+    SiDB cell-level layout type.
 
 Template parameter ``GateLyt``:
     Gate-level layout type.
@@ -13691,7 +13691,7 @@ R"doc(This struct stores the parameters to design an SiDB circuit on a
 defective surface.
 
 Template parameter ``CellLyt``:
-    Cell-level layout type.)doc";
+    SiDB cell-level layout type.)doc";
 
 static const char *__doc_fiction_on_the_fly_circuit_design_params_exact_design_parameters = R"doc(Parameters for the *exact* placement and routing algorithm.)doc";
 
@@ -16087,7 +16087,7 @@ algorithm, the physical parameters used in the simulation, and
 (optional) algorithm-specific named simulation parameters.
 
 Template parameter ``Lyt``:
-    Cell-level layout type.)doc";
+    SiDB cell-level layout type.)doc";
 
 static const char *__doc_fiction_sidb_simulation_result_additional_simulation_parameters =
 R"doc(Additional named simulation parameters. This is used to store
@@ -16157,7 +16157,8 @@ Template parameter ``GateLyt``:
     surface.
 
 Template parameter ``CellLyt``:
-    Cell-level layout type that is underlying to the SiDB surface.
+    SiDB cell-level layout type that is underlying to the SiDB
+    surface.
 
 Parameter ``gate_lyt``:
     Gate-level layout instance that specifies the aspect ratio.
@@ -17100,7 +17101,7 @@ R"doc(This function determines the time-to-solution (TTS) and the accuracy
 (acc) of the *QuickSim* algorithm.
 
 Template parameter ``Lyt``:
-    Cell-level layout type.
+    SiDB cell-level layout type.
 
 Parameter ``lyt``:
     Layout that is used for the simulation.
@@ -17595,7 +17596,7 @@ charge distribution of the ground state(s) to a file.
 This overload uses an output stream to write into.
 
 Template parameter ``Lyt``:
-    Cell-level SiDB layout type.
+    SiDB cell-level SiDB layout type.
 
 Parameter ``sim_result``:
     The simulation result to write.
@@ -17610,7 +17611,7 @@ charge distribution of the ground state(s) to a file.
 This overload uses a file name to create and write into.
 
 Template parameter ``Lyt``:
-    Cell-level SiDB layout type.
+    SiDB cell-level SiDB layout type.
 
 Template parameter ``sim_result``:
     The simulation result to write.
@@ -17914,7 +17915,7 @@ technology platform.
 This overload uses an output stream to write into.
 
 Template parameter ``Lyt``:
-    Cell-level SiDB layout type.
+    SiDB cell-level SiDB layout type.
 
 Parameter ``sim_result``:
     The simulation result to write.
@@ -17930,7 +17931,7 @@ technology platform.
 This overload uses a file name to create and write into.
 
 Template parameter ``Lyt``:
-    Cell-level SiDB layout type.
+    SiDB cell-level SiDB layout type.
 
 Parameter ``sim_result``:
     The simulation result to write.
