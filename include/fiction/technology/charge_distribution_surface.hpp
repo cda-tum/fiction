@@ -299,7 +299,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     /**
      * Standard constructor for existing layouts.
      *
-     * @param lyt Cell-level layout.
+     * @param lyt SiDB cell-level layout.
      * @param params Physical parameters used for the simulation (µ_minus, base number, ...).
      * @param cs The charge state used for the initialization of all SiDBs, default is a negative charge.
      * @param configuration Specifies the configuration for charge distribution settings.

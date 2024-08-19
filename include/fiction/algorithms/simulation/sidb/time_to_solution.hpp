@@ -86,7 +86,7 @@ struct time_to_solution_stats
 /**
  * This function determines the time-to-solution (TTS) and the accuracy (acc) of the *QuickSim* algorithm.
  *
- * @tparam Lyt Cell-level layout type.
+ * @tparam Lyt SiDB cell-level layout type.
  * @param lyt Layout that is used for the simulation.
  * @param quicksim_params Parameters required for the *QuickSim* algorithm.
  * @param tts_params Parameters used for the time-to-solution calculation.

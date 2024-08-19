@@ -80,7 +80,7 @@ struct generate_random_sidb_layout_params
  * Generates a random layout of SiDBs by adding them to the provided layout skeleton.
  * The layout skeleton serves as the starting layout to which SiDBs are added to create the final layout.
  *
- * @tparam Lyt Cell-level SiDB layout type.
+ * @tparam Lyt SiDB cell-level SiDB layout type.
  * @param lyt_skeleton A layout to which random cells are added to create the final layout.
  * @param params The parameters for generating the random layout.
  * @return A randomly-generated layout of SiDBs.
@@ -162,7 +162,7 @@ Lyt generate_random_sidb_layout(const Lyt&                                      
  * Generates multiple unique random SiDB layouts by adding them to the provided layout skeleton.
  * The layout skeleton serves as the starting layout to which SiDBs are added to create unique SiDB layouts.
  *
- * @tparam Lyt Cell-level SiDB layout type.
+ * @tparam Lyt SiDB cell-level SiDB layout type.
  * @param lyt_skeleton A layout to which random SiDBs are added to create unique layouts.
  * @param params The parameters for generating the random SiDB layouts.
  * @return A vector containing the unique randomly generated SiDB layouts.

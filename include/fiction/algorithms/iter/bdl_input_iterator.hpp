@@ -9,12 +9,12 @@
 #include "fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/types.hpp"
 
 #include <algorithm>
 #include <cstdint>
 #include <iterator>
 #include <vector>
+#include <cassert>
 
 namespace fiction
 {

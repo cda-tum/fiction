@@ -20,7 +20,7 @@ namespace fiction
 /**
  * This function checks if the ground state is found by the *QuickSim* algorithm.
  *
- * @tparam Lyt Cell-level layout type.
+ * @tparam Lyt SiDB cell-level layout type.
  * @param heuristic_results All found physically valid charge distribution surfaces obtained by a heuristic algorithm.
  * @param exhaustive_results All valid charge distribution surfaces determined by ExGS.
  * @return Returns `true` if the relative difference between the lowest energies of the two sets is less than

@@ -244,7 +244,7 @@ template <typename Lyt>
  * are normalized, i.e., start at `(0, 0)` and are all positive. To this end, all existing coordinates are shifted by an
  * x and y offset.
  *
- * @tparam Lyt Cell-level layout type.
+ * @tparam Lyt SiDB cell-level layout type.
  * @param lyt The layout which is to be normalized.
  * @return New normalized equivalent layout.
  */
@@ -291,16 +291,16 @@ Lyt normalize_layout_coordinates(const Lyt& lyt) noexcept
  * Converts the coordinates of a given cell-level layout (cds and defect surface can be layered on top) to SiQAD
  * coordinates. A new equivalent layout based on SiQAD coordinates is returned.
  *
- * @tparam Lyt Cell-level layout type based on fiction coordinates, e.g., `offset::ucoord_t` or `cube::coord_t`.
+ * @tparam Lyt SiDB cell-level layout type based on fiction coordinates, e.g., `offset::ucoord_t` or `cube::coord_t`.
  * @param lyt The layout that is to be converted to a new layout based on SiQAD coordinates.
  * @return A new equivalent layout based on SiQAD coordinates.
  */
-template <typename LytSrc>
-auto convert_layout_to_siqad_coordinates(const LytSrc& lyt) noexcept
+template <typename Lyt>
+auto convert_layout_to_siqad_coordinates(const Lyt& lyt) noexcept
 {
-    static_assert(is_cartesian_layout_v<LytSrc>, "LytSrc is not a Cartesian layout");
-    static_assert(is_cell_level_layout_v<LytSrc>, "LytSrc is not a cell-level layout");
-    static_assert(has_sidb_technology_v<LytSrc>, "LytSrc is not an SiDB layout");
+    static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
     auto process_layout = [](auto& lyt_orig, auto lyt_new)
     {
@@ -317,7 +317,7 @@ auto convert_layout_to_siqad_coordinates(const LytSrc& lyt) noexcept
                 lyt_new.assign_cell_name(siqad::to_siqad_coord(c), lyt_orig.get_cell_name(c));
             });
 
-        if constexpr (is_charge_distribution_surface_v<LytSrc> && is_sidb_defect_surface_v<LytSrc>)
+        if constexpr (is_charge_distribution_surface_v<Lyt> && is_sidb_defect_surface_v<Lyt>)
         {
             auto lyt_defect = sidb_defect_surface{lyt_new};
 
@@ -338,7 +338,7 @@ auto convert_layout_to_siqad_coordinates(const LytSrc& lyt) noexcept
 
             return lyt_cds_defect;
         }
-        else if constexpr (is_sidb_defect_surface_v<LytSrc> && !is_charge_distribution_surface_v<LytSrc>)
+        else if constexpr (is_sidb_defect_surface_v<Lyt> && !is_charge_distribution_surface_v<Lyt>)
         {
             sidb_defect_surface<decltype(lyt_new)> lyt_surface{lyt_new};
             lyt_orig.foreach_sidb_defect(
@@ -347,7 +347,7 @@ auto convert_layout_to_siqad_coordinates(const LytSrc& lyt) noexcept
                 });
             return lyt_surface;
         }
-        else if constexpr (is_charge_distribution_surface_v<LytSrc> && !is_sidb_defect_surface_v<LytSrc>)
+        else if constexpr (is_charge_distribution_surface_v<Lyt> && !is_sidb_defect_surface_v<Lyt>)
         {
             charge_distribution_surface<decltype(lyt_new)> lyt_new_cds{lyt_new};
 
@@ -368,13 +368,13 @@ auto convert_layout_to_siqad_coordinates(const LytSrc& lyt) noexcept
         }
     };
 
-    if constexpr (!is_sidb_lattice_v<LytSrc>)
+    if constexpr (!is_sidb_lattice_v<Lyt>)
     {
         return process_layout(lyt, sidb_cell_clk_lyt_siqad{});
     }
     else
     {
-        return process_layout(lyt, sidb_lattice<lattice_orientation<LytSrc>, sidb_cell_clk_lyt_siqad>{});
+        return process_layout(lyt, sidb_lattice<lattice_orientation<Lyt>, sidb_cell_clk_lyt_siqad>{});
     }
 }
 /**
