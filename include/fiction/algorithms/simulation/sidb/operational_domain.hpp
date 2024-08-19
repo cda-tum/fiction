@@ -343,6 +343,11 @@ void validate_sweep_parameters(const operational_domain_params& params)
                             "dimension {}",
                             d));
         }
+        if (params.sweep_dimensions[d].step <= 0.0)
+        {
+            throw std::invalid_argument(
+                fmt::format("Invalid sweep dimension: 'step' size is negative or 0 for dimension {}", d));
+        }
     }
 }
 

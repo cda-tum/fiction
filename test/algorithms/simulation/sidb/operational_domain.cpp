@@ -155,47 +155,99 @@ TEST_CASE("Error handling of operational domain algorithms", "[operational-domai
         operational_domain_params invalid_params_2{};
         operational_domain_params invalid_params_3{};
 
-        // 1-dimensional with invalid min/max on 1st dimension
-        invalid_params_1.sweep_dimensions         = {{sweep_parameter::EPSILON_R}};
-        invalid_params_1.sweep_dimensions[0].min  = 10.0;
-        invalid_params_1.sweep_dimensions[0].max  = 1.0;
-        invalid_params_1.sweep_dimensions[0].step = 0.1;
-
-        // 2-dimensional with invalid min/max on 2nd dimension
-        invalid_params_2.sweep_dimensions         = {{sweep_parameter::EPSILON_R}, {sweep_parameter::LAMBDA_TF}};
-        invalid_params_2.sweep_dimensions[1].min  = 5.5;
-        invalid_params_2.sweep_dimensions[1].max  = 5.4;
-        invalid_params_2.sweep_dimensions[1].step = 0.1;
-
-        // 3-dimensional with invalid min/max on 3rd dimension
-        invalid_params_3.sweep_dimensions         = {{sweep_parameter::EPSILON_R},
-                                                     {sweep_parameter::LAMBDA_TF},
-                                                     {sweep_parameter::MU_MINUS}};
-        invalid_params_3.sweep_dimensions[2].min  = -0.4;
-        invalid_params_3.sweep_dimensions[2].max  = -0.5;
-        invalid_params_3.sweep_dimensions[2].step = 0.01;
-
-        for (const auto& params : {invalid_params_1, invalid_params_2, invalid_params_3})
+        SECTION("min/max mismatch")
         {
-            SECTION("grid_search")
+            // 1-dimensional with invalid min/max on 1st dimension
+            invalid_params_1.sweep_dimensions         = {{sweep_parameter::EPSILON_R}};
+            invalid_params_1.sweep_dimensions[0].min  = 10.0;
+            invalid_params_1.sweep_dimensions[0].max  = 1.0;
+            invalid_params_1.sweep_dimensions[0].step = 0.1;
+
+            // 2-dimensional with invalid min/max on 2nd dimension
+            invalid_params_2.sweep_dimensions         = {{sweep_parameter::EPSILON_R}, {sweep_parameter::LAMBDA_TF}};
+            invalid_params_2.sweep_dimensions[1].min  = 5.5;
+            invalid_params_2.sweep_dimensions[1].max  = 5.4;
+            invalid_params_2.sweep_dimensions[1].step = 0.1;
+
+            // 3-dimensional with invalid min/max on 3rd dimension
+            invalid_params_3.sweep_dimensions         = {{sweep_parameter::EPSILON_R},
+                                                         {sweep_parameter::LAMBDA_TF},
+                                                         {sweep_parameter::MU_MINUS}};
+            invalid_params_3.sweep_dimensions[2].min  = -0.4;
+            invalid_params_3.sweep_dimensions[2].max  = -0.5;
+            invalid_params_3.sweep_dimensions[2].step = 0.01;
+
+            for (const auto& params : {invalid_params_1, invalid_params_2, invalid_params_3})
             {
-                CHECK_THROWS_AS(operational_domain_grid_search(lat, std::vector<tt>{create_id_tt()}, params),
-                                std::invalid_argument);
+                SECTION("grid_search")
+                {
+                    CHECK_THROWS_AS(operational_domain_grid_search(lat, std::vector<tt>{create_id_tt()}, params),
+                                    std::invalid_argument);
+                }
+                SECTION("random_sampling")
+                {
+                    CHECK_THROWS_AS(
+                        operational_domain_random_sampling(lat, std::vector<tt>{create_id_tt()}, 100, params),
+                        std::invalid_argument);
+                }
+                SECTION("flood_fill")
+                {
+                    CHECK_THROWS_AS(operational_domain_flood_fill(lat, std::vector<tt>{create_id_tt()}, 1, params),
+                                    std::invalid_argument);
+                }
+                SECTION("contour_tracing")
+                {
+                    CHECK_THROWS_AS(operational_domain_contour_tracing(lat, std::vector<tt>{create_id_tt()}, 1, params),
+                                    std::invalid_argument);
+                }
             }
-            SECTION("random_sampling")
+        }
+
+        SECTION("negative step size")
+        {
+            // 1-dimensional with negative step size on 1st dimension
+            invalid_params_1.sweep_dimensions         = {{sweep_parameter::EPSILON_R}};
+            invalid_params_1.sweep_dimensions[0].min  = 1.0;
+            invalid_params_1.sweep_dimensions[0].max  = 10.0;
+            invalid_params_1.sweep_dimensions[0].step = -0.5;
+
+            // 2-dimensional with negative step size on 2nd dimension
+            invalid_params_2.sweep_dimensions         = {{sweep_parameter::EPSILON_R}, {sweep_parameter::LAMBDA_TF}};
+            invalid_params_2.sweep_dimensions[1].min  = 5.5;
+            invalid_params_2.sweep_dimensions[1].max  = 5.6;
+            invalid_params_2.sweep_dimensions[1].step = -0.1;
+
+            // 3-dimensional with negative step size on 3rd dimension
+            invalid_params_3.sweep_dimensions         = {{sweep_parameter::EPSILON_R},
+                                                         {sweep_parameter::LAMBDA_TF},
+                                                         {sweep_parameter::MU_MINUS}};
+            invalid_params_3.sweep_dimensions[2].min  = -0.4;
+            invalid_params_3.sweep_dimensions[2].max  = -0.5;
+            invalid_params_3.sweep_dimensions[2].step = -0.01;
+
+            for (const auto& params : {invalid_params_1, invalid_params_2, invalid_params_3})
             {
-                CHECK_THROWS_AS(operational_domain_random_sampling(lat, std::vector<tt>{create_id_tt()}, 100, params),
-                                std::invalid_argument);
-            }
-            SECTION("flood_fill")
-            {
-                CHECK_THROWS_AS(operational_domain_flood_fill(lat, std::vector<tt>{create_id_tt()}, 1, params),
-                                std::invalid_argument);
-            }
-            SECTION("contour_tracing")
-            {
-                CHECK_THROWS_AS(operational_domain_contour_tracing(lat, std::vector<tt>{create_id_tt()}, 1, params),
-                                std::invalid_argument);
+                SECTION("grid_search")
+                {
+                    CHECK_THROWS_AS(operational_domain_grid_search(lat, std::vector<tt>{create_id_tt()}, params),
+                                    std::invalid_argument);
+                }
+                SECTION("random_sampling")
+                {
+                    CHECK_THROWS_AS(
+                        operational_domain_random_sampling(lat, std::vector<tt>{create_id_tt()}, 100, params),
+                        std::invalid_argument);
+                }
+                SECTION("flood_fill")
+                {
+                    CHECK_THROWS_AS(operational_domain_flood_fill(lat, std::vector<tt>{create_id_tt()}, 1, params),
+                                    std::invalid_argument);
+                }
+                SECTION("contour_tracing")
+                {
+                    CHECK_THROWS_AS(operational_domain_contour_tracing(lat, std::vector<tt>{create_id_tt()}, 1, params),
+                                    std::invalid_argument);
+                }
             }
         }
     }
