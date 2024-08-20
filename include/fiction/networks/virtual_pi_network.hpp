@@ -177,6 +177,10 @@ class virtual_pi_network : public Ntk
                                   for (const auto& possible_node : tgt_signal_v)
                                   {
                                       const auto it = ntk.is_maj(n) ? 4 : 3;
+                                      if (ntk.fanin_size(n) == children.size())
+                                      {
+                                          break;
+                                      }
                                       for (std::size_t i = 0; i < it; i++)
                                       {
                                           if (edge_it_int + i < lvl.size() && lvl[edge_it_int + i] == possible_node)
