@@ -303,7 +303,7 @@ class extended_rank_view<Ntk, false> : public mockturtle::depth_view<Ntk>
      */
     uint32_t rank_width(uint32_t const level) noexcept
     {
-        auto& rank  = ranks[level];
+        auto& rank = ranks[level];
         return rank.size();
     }
     /**
