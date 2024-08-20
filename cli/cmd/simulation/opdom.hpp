@@ -31,7 +31,22 @@
 namespace alice
 {
 /**
+ * Executes operational domain computation for the current SiDB cell-level layout in store. The operational domain is a
+ * set of simulation parameter values for which a given SiDB layout is logically operational. This means that a layout
+ * is deemed operational if the layout's ground state corresponds with a given Boolean function at the layout's outputs
+ * for all possible input combinations.
  *
+ * The computation comes in different flavors:
+ * - Grid search: Evaluates all possible parameter combinations within the specified ranges.
+ * - Random sampling: Evaluates a specified number of random parameter combinations.
+ * - Flood fill: Evaluates a specified number of random parameter combinations and then performs a flood fill to find
+ *  the operational domain.
+ *  - Contour tracing: Evaluates a specified number of random parameter combinations and then performs contour tracing
+ *  to find the edges of the operational domain.
+ *
+ * The operational domain is written to a CSV file, which can be used for further analysis or visualization.
+ *
+ * For more information, see algorithms/simulation/sidb/operational_domain.hpp.
  */
 class opdom_command : public command
 {
@@ -57,6 +72,9 @@ class opdom_command : public command
                    "Use contour tracing instead of grid search with this many random samples");
 
         add_option("filename", filename, "CSV filename to write the operational domain to")->required();
+        add_flag(
+            "--omit_non_op_samples,-o", omit_non_operational_samples,
+            "Omit non-operational samples in the CSV file to reduce file size and increase visibility in 3D plots");
 
         add_option("--epsilon_r,-e", simulation_params.epsilon_r, "Electric permittivity of the substrate (unit-less)",
                    true);
@@ -353,6 +371,10 @@ class opdom_command : public command
      */
     std::string filename{};
     /**
+     * Flag to omit non-operational samples.
+     */
+    bool omit_non_operational_samples = false;
+    /**
      * The operational domain.
      */
     fiction::operational_domain<> op_domain{};
@@ -362,7 +384,14 @@ class opdom_command : public command
      */
     void write_op_domain()
     {
-        static const fiction::write_operational_domain_params write_opdom_params{"1", "0"};
+        // set up parameters
+        fiction::write_operational_domain_params write_opdom_params{};
+        write_opdom_params.non_operational_tag = "0";
+        write_opdom_params.operational_tag     = "1";
+        write_opdom_params.writing_mode =
+            omit_non_operational_samples ?
+                fiction::write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY :
+                fiction::write_operational_domain_params::sample_writing_mode::ALL_SAMPLES;
 
         // if the operational domain call was unsuccessful, do not attempt writing anything
         if (op_domain.operational_values.empty())
@@ -421,6 +450,8 @@ class opdom_command : public command
         y_sweep  = "lambda_tf";
         z_sweep  = "";
         filename = "";
+
+        omit_non_operational_samples = false;
     }
 };
 

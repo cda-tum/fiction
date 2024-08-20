@@ -92,7 +92,7 @@ TEST_CASE("Write simple operational domain", "[write-operational-domain]")
     SECTION("skip non-operational samples")
     {
         write_operational_domain_params params{};
-        params.write_non_operational_samples = false;
+        params.writing_mode = write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY;
 
         std::set<std::string> expected{"epsilon_r,lambda_tf,operational status", "0,0,1"};
 
@@ -158,7 +158,7 @@ TEST_CASE("Write operational domain with floating-point parameter values", "[wri
     SECTION("skip non-operational samples")
     {
         write_operational_domain_params params{};
-        params.write_non_operational_samples = false;
+        params.writing_mode = write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY;
 
         std::set<std::string> expected{"epsilon_r,lambda_tf,operational status", "0.1,0.2,1", "1.2,1.4,1"};
 

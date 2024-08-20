@@ -9,6 +9,7 @@
 #include "fiction/algorithms/simulation/sidb/operational_domain.hpp"
 #include "fiction/io/csv_writer.hpp"
 
+#include <cstdint>
 #include <fstream>
 #include <ostream>
 #include <stdexcept>
@@ -24,6 +25,20 @@ namespace fiction
 struct write_operational_domain_params
 {
     /**
+     * Mode selector for writing samples to file.
+     */
+    enum class sample_writing_mode : uint8_t
+    {
+        /**
+         * Write all samples, including non-operational ones. This may lead to large file sizes.
+         */
+        ALL_SAMPLES,
+        /**
+         * Write operational samples only. This can drastically reduce file size and help with visibility in 3D plots.
+         */
+        OPERATIONAL_ONLY
+    };
+    /**
      * The tag used to represent the operational value of a parameter set.
      */
     std::string_view operational_tag = "1";
@@ -32,11 +47,11 @@ struct write_operational_domain_params
      */
     std::string_view non_operational_tag = "0";
     /**
-     * Whether to write non-operational samples to the CSV file. If set to `false`, only operational samples are
-     * written. This yields a significantly smaller CSV file. It is recommended to set this option for 3D plots because
-     * the non-operational samples would shadow the operational samples anyway.
+     * Whether to write non-operational samples to the CSV file. If set to `OPERATIONAL_ONLY`, operational samples are
+     * written exclusively. This yields a significantly smaller CSV file. It is recommended to set this option for 3D
+     * plots because the non-operational samples would shadow the operational samples anyway.
      */
-    bool write_non_operational_samples = true;
+    sample_writing_mode writing_mode = sample_writing_mode::ALL_SAMPLES;
 };
 
 namespace detail
@@ -125,7 +140,8 @@ inline void write_operational_domain(const operational_domain<parameter_point, o
     for (const auto& [sim_param, op_val] : opdom.operational_values)
     {
         // skip non-operational samples if the respective flag is set
-        if (!params.write_non_operational_samples && op_val == operational_status::NON_OPERATIONAL)
+        if (params.writing_mode == write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY &&
+            op_val == operational_status::NON_OPERATIONAL)
         {
             continue;
         }

@@ -70,7 +70,10 @@ int main()  // NOLINT
     op_domain_params.sweep_dimensions[1].step = 0.05;
 
     // write operational domain parameters
-    const write_operational_domain_params write_op_domain_params{"1", "0"};
+    write_operational_domain_params write_op_domain_params{};
+    write_op_domain_params.non_operational_tag = "0";
+    write_op_domain_params.operational_tag     = "1";
+    write_op_domain_params.writing_mode        = write_operational_domain_params::sample_writing_mode::ALL_SAMPLES;
 
     static const std::string folder = fmt::format("{}bestagon_gates_type_tags/", EXPERIMENTS_PATH);
 

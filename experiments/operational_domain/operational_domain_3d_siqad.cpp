@@ -71,7 +71,10 @@ int main()  // NOLINT
     op_domain_params.sweep_dimensions[2].step = 0.0025;
 
     // write operational domain parameters
-    static const write_operational_domain_params write_op_domain_params{"1", "0", false};
+    write_operational_domain_params write_op_domain_params{};
+    write_op_domain_params.non_operational_tag = "0";
+    write_op_domain_params.operational_tag     = "1";
+    write_op_domain_params.writing_mode        = write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY;
 
     static const std::string folder = fmt::format("{}siqad_gates_type_tags/", EXPERIMENTS_PATH);
 

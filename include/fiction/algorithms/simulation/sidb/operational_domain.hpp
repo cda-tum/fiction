@@ -474,13 +474,13 @@ class operational_domain_impl
     {
         mockturtle::stopwatch stop{stats.time_total};
 
-        const auto all_index_combination = cartesian_combinations(indices);
+        const auto all_index_combinations = cartesian_combinations(indices);
 
-        std::vector<step_point> all_step_points;
-        all_step_points.reserve(all_index_combination.size());
+        std::vector<step_point> all_step_points{};
+        all_step_points.reserve(all_index_combinations.size());
 
-        std::transform(all_index_combination.begin(), all_index_combination.end(), std::back_inserter(all_step_points),
-                       [](const auto& comb) { return step_point{comb}; });
+        std::transform(all_index_combinations.cbegin(), all_index_combinations.cend(),
+                       std::back_inserter(all_step_points), [](const auto& comb) noexcept { return step_point{comb}; });
 
         // shuffle the step points to simulate in random order. This helps with load-balancing since
         // operational/non-operational points are usually clustered. However, non-operational points can be simulated
@@ -712,10 +712,11 @@ class operational_domain_impl
 
         mockturtle::stopwatch stop{stats.time_total};
 
-        const auto all_step_points = cartesian_combinations(indices);
+        // Cartesian product of all step point indices
+        const auto all_index_combinations = cartesian_combinations(indices);
 
         // calculate the size of each slice
-        const auto slice_size = (all_step_points.size() + num_threads - 1) / num_threads;
+        const auto slice_size = (all_index_combinations.size() + num_threads - 1) / num_threads;
 
         std::vector<std::thread> threads{};
         threads.reserve(num_threads);
@@ -724,7 +725,7 @@ class operational_domain_impl
         for (auto i = 0ul; i < num_threads; ++i)
         {
             const auto start = i * slice_size;
-            const auto end   = std::min(start + slice_size, all_step_points.size());
+            const auto end   = std::min(start + slice_size, all_index_combinations.size());
 
             if (start >= end)
             {
@@ -732,12 +733,12 @@ class operational_domain_impl
             }
 
             threads.emplace_back(
-                [this, &lyt, start, end, &all_step_points]
+                [this, &lyt, start, end, &all_index_combinations]
                 {
-                    for (auto it = all_step_points.cbegin() + static_cast<int64_t>(start);
-                         it != all_step_points.cbegin() + static_cast<int64_t>(end); ++it)
+                    for (auto it = all_index_combinations.cbegin() + static_cast<int64_t>(start);
+                         it != all_index_combinations.cbegin() + static_cast<int64_t>(end); ++it)
                     {
-                        is_step_point_suitable(lyt, step_point{*it});
+                        is_step_point_suitable(lyt, step_point{*it});  // construct a step_point
                     }
                 });
         }
