@@ -535,6 +535,47 @@ GateLyt optimization_layout_corner_case_outputs_2() noexcept
     return layout;
 }
 
+template <typename GateLyt>
+GateLyt planar_unoptimized_layout() noexcept
+{
+    GateLyt layout{{4, 4, 0}, fiction::twoddwave_clocking<GateLyt>()};
+
+    const auto x1 = layout.create_pi("x1", {2, 0});
+    const auto x2 = layout.create_pi("x2", {0, 2});
+
+    const auto w1   = layout.create_buf(x1, {2, 1});
+    const auto w2   = layout.create_buf(x2, {1, 2});
+    const auto and1 = layout.create_and(w1, w2, {2, 2});
+    const auto w3   = layout.create_buf(and1, {3, 2});
+    const auto not2 = layout.create_not(w3, {4, 2});
+    const auto w4   = layout.create_buf(not2, {4, 3});
+
+    layout.create_po(w4, "f1", {4, 4});
+
+    return layout;
+}
+
+template <typename GateLyt>
+GateLyt planar_optimization_layout() noexcept
+{
+    GateLyt layout{{2, 2, 1}, fiction::twoddwave_clocking<GateLyt>()};
+
+    const auto x1 = layout.create_pi("x1", {0, 0});
+    const auto x2 = layout.create_pi("x2", {0, 1});
+    layout.create_pi("x3", {0, 2});
+    layout.create_pi("x4", {2, 0});
+
+    const auto w1   = layout.create_buf(x1, {1, 0});
+    const auto w2   = layout.create_buf(x2, {1, 1});
+    const auto w3   = layout.create_buf(w1, {1, 1, 1});
+    const auto not1 = layout.create_not(w3, {1, 2});
+
+    layout.create_po(w2, "f1", {2, 1});
+    layout.create_po(not1, "f2", {2, 2});
+
+    return layout;
+}
+
 template <typename CellLyt>
 CellLyt single_layer_qca_and_gate() noexcept
 {
@@ -680,6 +721,68 @@ CellLyt single_layer_inml_crosswire() noexcept
 
     return layout;
 }
+/**
+ * This layout represents a BDL wire comprising of 3 BDL pairs and an output perturber SiDB.
+ *
+ */
+template <typename Lyt>
+Lyt bdl_wire() noexcept
+{
+    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+
+    Lyt lyt{{24, 0}, "BDL wire"};
+
+    lyt.assign_cell_type({0, 0, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({3, 0, 0}, Lyt::cell_type::INPUT);
+
+    lyt.assign_cell_type({6, 0, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 0, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({12, 0, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 0, 0}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({18, 0, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({20, 0, 0}, Lyt::cell_type::OUTPUT);
+
+    // output perturber
+    lyt.assign_cell_type({24, 0, 0}, Lyt::cell_type::NORMAL);
+
+    return lyt;
+};
+/**
+ * This layout represents the AND Gate, as proposed in the paper
+ * titled \"SiQAD: A Design and Simulation Tool for Atomic Silicon Quantum Dot Circuits\" by Samuel Sze Hang Ng, Jacob
+ * Retallick, Hsi Nien Chiu, Robert Lupoiu, Lucian Livadaru, Taleana Huff, Mohammad Rashidi, Wyatt Vine, Thomas Dienel,
+ * Robert A. Wolkow, and Konrad Walus in IEEE TRANSACTIONS ON NANOTECHNOLOGY, Volume 19, 2020.
+ */
+template <typename Lyt>
+Lyt siqad_and_gate() noexcept
+{
+    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+
+    Lyt lyt{};
+
+    lyt.assign_cell_type({0, 0, 1}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({2, 1, 1}, Lyt::cell_type::INPUT);
+
+    lyt.assign_cell_type({20, 0, 1}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({18, 1, 1}, Lyt::cell_type::INPUT);
+
+    lyt.assign_cell_type({4, 2, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 3, 1}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({14, 3, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({16, 2, 1}, Lyt::cell_type::NORMAL);
+
+    lyt.assign_cell_type({10, 6, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({10, 7, 0}, Lyt::cell_type::OUTPUT);
+
+    lyt.assign_cell_type({10, 9, 1}, Lyt::cell_type::NORMAL);
+
+    return lyt;
+};
 /**
  * This layout represents the AND Gate, as proposed in the paper
  * titled \"Hexagons are the Bestagons: Design Automation for Silicon Dangling Bond Logic\" by

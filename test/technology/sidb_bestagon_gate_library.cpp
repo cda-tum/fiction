@@ -10,7 +10,7 @@
 
 using namespace fiction;
 
-TEST_CASE("Bestagon traits", "[sidb-bestagon-library]")
+TEST_CASE("Bestagon traits", "[sidb-bestagon-gate-library]")
 {
     CHECK(!has_post_layout_optimization_v<sidb_bestagon_library, qca_cell_clk_lyt>);
     CHECK(!has_post_layout_optimization_v<sidb_bestagon_library, inml_cell_clk_lyt>);

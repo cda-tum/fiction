@@ -1101,6 +1101,62 @@ template <class Ntk>
 inline constexpr bool has_is_xnor_v = has_is_xnor<Ntk>::value;
 #pragma endregion
 
+#pragma region has_is_le
+template <class Ntk, class = void>
+struct has_is_le : std::false_type
+{};
+
+template <class Ntk>
+struct has_is_le<Ntk, std::void_t<decltype(std::declval<Ntk>().is_le(std::declval<mockturtle::node<Ntk>>()))>>
+        : std::true_type
+{};
+
+template <class Ntk>
+inline constexpr bool has_is_le_v = has_is_le<Ntk>::value;
+#pragma endregion
+
+#pragma region has_is_ge
+template <class Ntk, class = void>
+struct has_is_ge : std::false_type
+{};
+
+template <class Ntk>
+struct has_is_ge<Ntk, std::void_t<decltype(std::declval<Ntk>().is_ge(std::declval<mockturtle::node<Ntk>>()))>>
+        : std::true_type
+{};
+
+template <class Ntk>
+inline constexpr bool has_is_ge_v = has_is_ge<Ntk>::value;
+#pragma endregion
+
+#pragma region has_is_gt
+template <class Ntk, class = void>
+struct has_is_gt : std::false_type
+{};
+
+template <class Ntk>
+struct has_is_gt<Ntk, std::void_t<decltype(std::declval<Ntk>().is_gt(std::declval<mockturtle::node<Ntk>>()))>>
+        : std::true_type
+{};
+
+template <class Ntk>
+inline constexpr bool has_is_gt_v = has_is_gt<Ntk>::value;
+#pragma endregion
+
+#pragma region has_is_lt
+template <class Ntk, class = void>
+struct has_is_lt : std::false_type
+{};
+
+template <class Ntk>
+struct has_is_lt<Ntk, std::void_t<decltype(std::declval<Ntk>().is_lt(std::declval<mockturtle::node<Ntk>>()))>>
+        : std::true_type
+{};
+
+template <class Ntk>
+inline constexpr bool has_is_lt_v = has_is_lt<Ntk>::value;
+#pragma endregion
+
 #pragma region has_is_and3
 template <class Ntk, class = void>
 struct has_is_and3 : std::false_type
