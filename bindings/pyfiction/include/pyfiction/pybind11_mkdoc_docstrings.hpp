@@ -17210,12 +17210,22 @@ set.)doc";
 
 static const char *__doc_fiction_write_operational_domain_params_operational_tag = R"doc(The tag used to represent the operational value of a parameter set.)doc";
 
-static const char *__doc_fiction_write_operational_domain_params_write_non_operational_samples =
+static const char *__doc_fiction_write_operational_domain_params_sample_writing_mode = R"doc(Mode selector for writing samples to file.)doc";
+
+static const char *__doc_fiction_write_operational_domain_params_sample_writing_mode_ALL_SAMPLES =
+R"doc(Write all samples, including non-operational ones. This may lead to
+large file sizes.)doc";
+
+static const char *__doc_fiction_write_operational_domain_params_sample_writing_mode_OPERATIONAL_ONLY =
+R"doc(Write operational samples only. This can drastically reduce file size
+and help with visibility in 3D plots.)doc";
+
+static const char *__doc_fiction_write_operational_domain_params_writing_mode =
 R"doc(Whether to write non-operational samples to the CSV file. If set to
-`false`, only operational samples are written. This yields a
-significantly smaller CSV file. It is recommended to set this option
-for 3D plots because the non-operational samples would shadow the
-operational samples anyway.)doc";
+`OPERATIONAL_ONLY`, operational samples are written exclusively. This
+yields a significantly smaller CSV file. It is recommended to set this
+option for 3D plots because the non-operational samples would shadow
+the operational samples anyway.)doc";
 
 static const char *__doc_fiction_write_qca_layout =
 R"doc(Writes a cell-level QCA layout to a qca file that is used by
