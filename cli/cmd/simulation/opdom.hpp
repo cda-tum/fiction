@@ -88,15 +88,15 @@ class opdom_command : public command
         add_option("--z_sweep,-z", z_sweep,
                    "Sweep parameter of the z dimension (optional) [epsilon_r, lambda_tf, mu_minus]");
 
-        add_option("--x_min", params.sweep_dimensions[0].min, "Minimum value of the x dimension sweep", true);
-        add_option("--x_max", params.sweep_dimensions[0].max, "Maximum value of the x dimension sweep", true);
-        add_option("--x_step", params.sweep_dimensions[0].step, "Step size of the x dimension sweep", true);
-        add_option("--y_min", params.sweep_dimensions[1].min, "Minimum value of the y dimension sweep", true);
-        add_option("--y_max", params.sweep_dimensions[1].max, "Maximum value of the y dimension sweep", true);
-        add_option("--y_step", params.sweep_dimensions[1].step, "Step size of the y dimension sweep", true);
-        add_option("--z_min", params.sweep_dimensions[2].min, "Minimum value of the z dimension sweep");
-        add_option("--z_max", params.sweep_dimensions[2].max, "Maximum value of the z dimension sweep");
-        add_option("--z_step", params.sweep_dimensions[2].step, "Step size of the z dimension sweep");
+        add_option("--x_min", sweep_dimensions[0].min, "Minimum value of the x dimension sweep", true);
+        add_option("--x_max", sweep_dimensions[0].max, "Maximum value of the x dimension sweep", true);
+        add_option("--x_step", sweep_dimensions[0].step, "Step size of the x dimension sweep", true);
+        add_option("--y_min", sweep_dimensions[1].min, "Minimum value of the y dimension sweep", true);
+        add_option("--y_max", sweep_dimensions[1].max, "Maximum value of the y dimension sweep", true);
+        add_option("--y_step", sweep_dimensions[1].step, "Step size of the y dimension sweep", true);
+        add_option("--z_min", sweep_dimensions[2].min, "Minimum value of the z dimension sweep");
+        add_option("--z_max", sweep_dimensions[2].max, "Maximum value of the z dimension sweep");
+        add_option("--z_step", sweep_dimensions[2].step, "Step size of the z dimension sweep");
     }
 
   protected:
@@ -212,29 +212,29 @@ class opdom_command : public command
         // assign x sweep parameters
         if (x_sweep == "epsilon_r")
         {
-            params.sweep_dimensions[0].dimension = fiction::sweep_parameter::EPSILON_R;
+            sweep_dimensions[0].dimension = fiction::sweep_parameter::EPSILON_R;
         }
         else if (x_sweep == "lambda_tf")
         {
-            params.sweep_dimensions[0].dimension = fiction::sweep_parameter::LAMBDA_TF;
+            sweep_dimensions[0].dimension = fiction::sweep_parameter::LAMBDA_TF;
         }
         else if (x_sweep == "mu_minus")
         {
-            params.sweep_dimensions[0].dimension = fiction::sweep_parameter::MU_MINUS;
+            sweep_dimensions[0].dimension = fiction::sweep_parameter::MU_MINUS;
         }
 
         // assign y sweep parameters
         if (y_sweep == "epsilon_r")
         {
-            params.sweep_dimensions[1].dimension = fiction::sweep_parameter::EPSILON_R;
+            sweep_dimensions[1].dimension = fiction::sweep_parameter::EPSILON_R;
         }
         else if (y_sweep == "lambda_tf")
         {
-            params.sweep_dimensions[1].dimension = fiction::sweep_parameter::LAMBDA_TF;
+            sweep_dimensions[1].dimension = fiction::sweep_parameter::LAMBDA_TF;
         }
         else if (y_sweep == "mu_minus")
         {
-            params.sweep_dimensions[1].dimension = fiction::sweep_parameter::MU_MINUS;
+            sweep_dimensions[1].dimension = fiction::sweep_parameter::MU_MINUS;
         }
 
         if (is_set("z_sweep"))
@@ -242,21 +242,21 @@ class opdom_command : public command
             // assign z sweep parameters
             if (z_sweep == "epsilon_r")
             {
-                params.sweep_dimensions[2].dimension = fiction::sweep_parameter::EPSILON_R;
+                sweep_dimensions[2].dimension = fiction::sweep_parameter::EPSILON_R;
             }
             else if (z_sweep == "lambda_tf")
             {
-                params.sweep_dimensions[2].dimension = fiction::sweep_parameter::LAMBDA_TF;
+                sweep_dimensions[2].dimension = fiction::sweep_parameter::LAMBDA_TF;
             }
             else if (z_sweep == "mu_minus")
             {
-                params.sweep_dimensions[2].dimension = fiction::sweep_parameter::MU_MINUS;
+                sweep_dimensions[2].dimension = fiction::sweep_parameter::MU_MINUS;
             }
         }
         else
         {
             // remove z sweep parameter if not set
-            params.sweep_dimensions.pop_back();
+            sweep_dimensions.pop_back();
         }
 
         const auto get_name = [](auto&& lyt_ptr) -> std::string { return fiction::get_name(*lyt_ptr); };
@@ -271,7 +271,7 @@ class opdom_command : public command
             {
                 if (lyt_ptr->num_pis() == 0 || lyt_ptr->num_pos() == 0)
                 {
-                    env->out() << fmt::format("[e] {} requires primary input and output cells to simulate its "
+                    env->out() << fmt::format("[e] '{}' requires primary input and output cells to simulate its "
                                               "Boolean function",
                                               get_name(lyt_ptr))
                                << std::endl;
@@ -279,7 +279,10 @@ class opdom_command : public command
                     return;
                 }
 
+                // set parameters
                 params.simulation_parameters = simulation_params;
+                params.sim_engine            = fiction::sidb_simulation_engine::QUICKEXACT;
+                params.sweep_dimensions      = sweep_dimensions;
 
                 try
                 {
@@ -334,18 +337,20 @@ class opdom_command : public command
 
   private:
     /**
-     * Physical parameters for the simulation.
+     * Default physical parameters for the simulation.
      */
     fiction::sidb_simulation_parameters simulation_params{2, -0.32, 5.6, 5.0};
     /**
+     * Default value ranges for sweeping.
+     */
+    std::vector<fiction::operational_domain_value_range> sweep_dimensions{
+        {fiction::sweep_parameter::EPSILON_R, 1.0, 10.0, 0.1},
+        {fiction::sweep_parameter::LAMBDA_TF, 1.0, 10.0, 0.1},
+        {fiction::sweep_parameter::MU_MINUS, -0.50, -0.10, 0.025}};
+    /**
      * Operational domain parameters.
      */
-    fiction::operational_domain_params params{simulation_params, fiction::sidb_simulation_engine::QUICKEXACT,
-                                              std::vector<fiction::operational_domain_value_range>{{
-                                                  {fiction::sweep_parameter::EPSILON_R, 1.0, 10.0, 0.1},
-                                                  {fiction::sweep_parameter::LAMBDA_TF, 1.0, 10.0, 0.1},
-                                                  {fiction::sweep_parameter::MU_MINUS, -0.50, -0.10, 0.025},
-                                              }}};
+    fiction::operational_domain_params params{};
     /**
      * Operational domain stats.
      */
@@ -384,6 +389,13 @@ class opdom_command : public command
      */
     void write_op_domain()
     {
+        // if the operational domain call was unsuccessful, do not attempt writing anything
+        if (op_domain.operational_values.empty())
+        {
+            reset_params();
+            return;
+        }
+
         // set up parameters
         fiction::write_operational_domain_params write_opdom_params{};
         write_opdom_params.non_operational_tag = "0";
@@ -392,13 +404,6 @@ class opdom_command : public command
             omit_non_operational_samples ?
                 fiction::write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY :
                 fiction::write_operational_domain_params::sample_writing_mode::ALL_SAMPLES;
-
-        // if the operational domain call was unsuccessful, do not attempt writing anything
-        if (op_domain.operational_values.empty())
-        {
-            reset_params();
-            return;
-        }
 
         try
         {
@@ -438,13 +443,11 @@ class opdom_command : public command
     void reset_params()
     {
         simulation_params = fiction::sidb_simulation_parameters{2, -0.32, 5.6, 5.0};
-
-        params.simulation_parameters = simulation_params;
-        params.sweep_dimensions      = std::vector<fiction::operational_domain_value_range>{
+        sweep_dimensions  = std::vector<fiction::operational_domain_value_range>{
             {fiction::sweep_parameter::EPSILON_R, 1.0, 10.0, 0.1},
             {fiction::sweep_parameter::LAMBDA_TF, 1.0, 10.0, 0.1},
-            {fiction::sweep_parameter::MU_MINUS, -0.50, -0.10, 0.025},
-        };
+            {fiction::sweep_parameter::MU_MINUS, -0.50, -0.10, 0.025}};
+        params = {};
 
         x_sweep  = "epsilon_r";
         y_sweep  = "lambda_tf";
