@@ -59,8 +59,8 @@ int main()  // NOLINT
 
     // operational domain parameters
     operational_domain_params op_domain_params{};
-    op_domain_params.simulation_parameters    = sim_params;
-    op_domain_params.sim_engine               = sidb_simulation_engine::QUICKEXACT;
+    op_domain_params.operational_params.simulation_parameters    = sim_params;
+    op_domain_params.operational_params.sim_engine               = sidb_simulation_engine::QUICKEXACT;
     op_domain_params.sweep_dimensions         = {{sweep_parameter::EPSILON_R}, {sweep_parameter::LAMBDA_TF}};
     op_domain_params.sweep_dimensions[0].min  = 1.0;
     op_domain_params.sweep_dimensions[0].max  = 10.0;
