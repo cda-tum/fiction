@@ -7,6 +7,7 @@ on:
       - '**/*.cpp'
       - 'libs/**'
       - '.github/workflows/clang-tidy-review.yml'
+      - '.github/workflows/clang-tidy-review-post.yml'
       - '!bindings/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp'
 
 concurrency:
