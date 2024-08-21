@@ -861,7 +861,7 @@ class operational_domain_impl
     /**
      * Number of available hardware threads.
      */
-    const std::size_t num_threads{1};
+    const std::size_t num_threads{std::thread::hardware_concurrency()};
     /**
      * A step point represents a point in the x and y dimension from 0 to the maximum number of steps. A step point does
      * not hold the actual parameter values, but the step values in the x and y dimension, respectively.

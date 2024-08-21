@@ -6975,33 +6975,9 @@ can occur during the computation, each value is temporarily held in an
 atomic variable and written to the statistics object only after the
 computation has finished.)doc";
 
-static const char *__doc_fiction_detail_operational_domain_impl_moore_neighborhood_2d =
-R"doc(Returns the 2D Moore neighborhood of the step point at `sp = (x, y)`.
-The 2D Moore neighborhood is the set of all points that are adjacent
-to `(x, y)` in the plane including the diagonals. Thereby, the 2D
-Moore neighborhood contains up to 8 points as points outside of the
-parameter range are not gathered. The points are returned in clockwise
-order starting from the right neighbor.
 
-Parameter ``sp``:
-    Step point to get the 2D Moore neighborhood of.
 
-Returns:
-    The 2D Moore neighborhood of the step point at `sp = (x, y)`.)doc";
 
-static const char *__doc_fiction_detail_operational_domain_impl_moore_neighborhood_3d =
-R"doc(Returns the 3D Moore neighborhood of the step point at `sp = (x, y,
-z)`. The 3D Moore neighborhood is the set of all points that are
-adjacent to `(x, y, z)` in the 3D space including the diagonals.
-Thereby, the 3D Moore neighborhood contains up to 26 points as points
-outside of the parameter range are not gathered. The points are
-returned in no particular order.
-
-Parameter ``sp``:
-    Step point to get the 3D Moore neighborhood of.
-
-Returns:
-    The 3D Moore neighborhood of the step point at `sp = (x, y, z)`.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_num_dimensions = R"doc(The number of dimensions.)doc";
 
@@ -7009,12 +6985,6 @@ static const char *__doc_fiction_detail_operational_domain_impl_num_evaluated_pa
 
 static const char *__doc_fiction_detail_operational_domain_impl_num_simulator_invocations = R"doc(Number of simulator invocations.)doc";
 
-static const char *__doc_fiction_detail_operational_domain_impl_num_steps =
-R"doc(Calculates the number of steps in the given dimension based on the
-provided parameters.
-
-Returns:
-    The number of steps in the given dimension.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_num_threads = R"doc(Number of available hardware threads.)doc";
 
@@ -14008,10 +13978,11 @@ static const char *__doc_fiction_operational_domain_params_sim_engine =
 R"doc(The simulation engine to be used for the operational domain
 computation.)doc";
 
-static const char *__doc_fiction_operational_domain_params_sweep_dimensions =
-R"doc(The dimensions to sweep over together with their value ranges, ordered
-by priority. The first dimension is the x dimension, the second
-dimension is the y dimension, etc.)doc";
+static const char *__doc_fiction_operational_domain_params_simulation_parameters =
+R"doc(The simulation parameters for the operational domain computation. Most
+parameters will be kept constant across sweeps, but the sweep
+parameters are adjusted in each simulation step and thus overwritten
+in this object.)doc";
 
 static const char *__doc_fiction_operational_domain_random_sampling =
 R"doc(Computes the operational domain of the given SiDB cell-level layout.
