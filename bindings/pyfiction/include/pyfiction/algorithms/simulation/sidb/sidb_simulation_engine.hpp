@@ -26,12 +26,11 @@ inline void sidb_simulation_engine(pybind11::module& m)
 
         ;
 
-    py::enum_<fiction::exhaustive_sidb_simulation_engine>(m, "exhaustive_sidb_simulation_engine",
-                                                          DOC(fiction_exhaustive_sidb_simulation_engine))
-        .value("EXGS", fiction::exhaustive_sidb_simulation_engine::EXGS,
-               DOC(fiction_exhaustive_sidb_simulation_engine_EXGS))
-        .value("QUICKEXACT", fiction::exhaustive_sidb_simulation_engine::QUICKEXACT,
-               DOC(fiction_exhaustive_sidb_simulation_engine_QUICKEXACT))
+    py::enum_<fiction::exact_sidb_simulation_engine>(m, "exact_sidb_simulation_engine",
+                                                     DOC(fiction_exact_sidb_simulation_engine))
+        .value("EXGS", fiction::exact_sidb_simulation_engine::EXGS, DOC(fiction_exact_sidb_simulation_engine_EXGS))
+        .value("QUICKEXACT", fiction::exact_sidb_simulation_engine::QUICKEXACT,
+               DOC(fiction_exact_sidb_simulation_engine_QUICKEXACT))
 
         ;
 }

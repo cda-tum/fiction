@@ -89,12 +89,12 @@ Engine Selectors
         **Header:** ``fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp``
 
         .. doxygenenum:: fiction::sidb_simulation_engine
-        .. doxygenenum:: fiction::exhaustive_sidb_simulation_engine
+        .. doxygenenum:: fiction::exact_sidb_simulation_engine
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.sidb_simulation_engine
             :members:
-        .. autoclass:: mnt.pyfiction.exhaustive_sidb_simulation_engine
+        .. autoclass:: mnt.pyfiction.exact_sidb_simulation_engine
             :members:
 
 
@@ -187,6 +187,7 @@ Time-to-Solution (TTS) Statistics
         .. doxygenstruct:: fiction::time_to_solution_stats
            :members:
         .. doxygenfunction:: fiction::time_to_solution
+        .. doxygenfunction:: fiction::time_to_solution_for_given_simulation_results
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.time_to_solution_params
@@ -194,6 +195,7 @@ Time-to-Solution (TTS) Statistics
         .. autoclass:: mnt.pyfiction.time_to_solution_stats
             :members:
         .. autofunction:: mnt.pyfiction.time_to_solution
+        .. autofunction:: mnt.pyfiction.time_to_solution_for_given_simulation_results
 
 
 Random SiDB Layout Generator
