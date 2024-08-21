@@ -32,10 +32,11 @@
 
 namespace fiction
 {
+
 /**
  * Possible operational status of a layout.
  */
-enum class operational_status
+enum class operational_status : uint8_t
 {
     /**
      * The layout is operational.
@@ -46,6 +47,7 @@ enum class operational_status
      */
     NON_OPERATIONAL
 };
+
 /**
  * Parameters for the `is_operational` algorithm.
  */
@@ -312,6 +314,7 @@ class is_operational_impl
     physical_simulation_of_layout(const bdl_input_iterator<Lyt>& bdl_iterator) noexcept
     {
         assert(parameters.simulation_parameters.base == 2 && "base number is set to 3");
+
         if (parameters.sim_engine == sidb_simulation_engine::EXGS)
         {
             // perform an exhaustive ground state simulation
@@ -383,7 +386,7 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
  * @tparam TT Type of the truth table.
  * @param lyt The SiDB layout.
  * @param spec Vector of truth table specifications.
- * @param params Parameters to simualte if a input combination is operational.
+ * @param params Parameters to simulate if a input combination is operational.
  * @return The count of operational input combinations.
  */
 template <typename Lyt, typename TT>

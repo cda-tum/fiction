@@ -12,16 +12,16 @@ class TestDeterminePhysicallyValidParameters(unittest.TestCase):
 
         valid_parameters = determine_physically_valid_parameters(cds)
 
-        self.assertEqual(valid_parameters.get_excited_state_number_for_parameter(parameter_point(5, 5)),
+        self.assertEqual(valid_parameters.get_excited_state_number_for_parameter(parameter_point([5, 5])),
             0)
 
         self.assertEqual(
-            valid_parameters.get_excited_state_number_for_parameter(parameter_point(5.1, 5.1)),
+            valid_parameters.get_excited_state_number_for_parameter(parameter_point([5.1, 5.1])),
             0)
 
         # Testing for an invalid parameter point that raises an exception
         with self.assertRaises(ValueError):
-            valid_parameters.get_excited_state_number_for_parameter(parameter_point(15, 15))
+            valid_parameters.get_excited_state_number_for_parameter(parameter_point([15, 15]))
 
 
     def test_one_DB_111_lattice(self):
@@ -31,16 +31,16 @@ class TestDeterminePhysicallyValidParameters(unittest.TestCase):
 
         valid_parameters = determine_physically_valid_parameters(cds)
 
-        self.assertEqual(valid_parameters.get_excited_state_number_for_parameter(parameter_point(5, 5)),
+        self.assertEqual(valid_parameters.get_excited_state_number_for_parameter(parameter_point([5, 5])),
                      0)
 
         self.assertEqual(
-        valid_parameters.get_excited_state_number_for_parameter(parameter_point(5.1, 5.1)),
+            valid_parameters.get_excited_state_number_for_parameter(parameter_point([5.1, 5.1])),
         0)
 
         # Testing for an invalid parameter point that raises an exception
         with self.assertRaises(ValueError):
-            valid_parameters.get_excited_state_number_for_parameter(parameter_point(15, 15))
+            valid_parameters.get_excited_state_number_for_parameter(parameter_point([15, 15]))
 
 
 if __name__ == '__main__':
