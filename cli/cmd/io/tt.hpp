@@ -41,7 +41,7 @@ class tt_command : public command
                        "table must fit the largest variable in the expression, e.g., if c is the largest "
                        "variable, then the truth table have at least three variables.")
     {
-        add_option("table", table, "Truth table (prefix with 0x to parse as hexadecimal)");
+        add_option("--table,-t", table, "Truth table (prefix with 0x to parse as hexadecimal)");
         add_option("--expression,-e", expression, "Creates truth table from expression");
         add_option("--random,-r", random_vars, "Creates a random truth table over <INPUT> variables");
     }
@@ -54,19 +54,19 @@ class tt_command : public command
     {
         if (is_set("table") && is_set("expression"))
         {
-            env->out() << "[w] 'table' and 'expression' cannot be set at the same time" << std::endl;
+            env->out() << "[e] 'table' and 'expression' cannot be set at the same time" << std::endl;
             reset_flags();
             return;
         }
         if (is_set("table") && is_set("random"))
         {
-            env->out() << "[w] 'table' and 'random' cannot be set at the same time" << std::endl;
+            env->out() << "[e] 'table' and 'random' cannot be set at the same time" << std::endl;
             reset_flags();
             return;
         }
         if (is_set("expression") && is_set("random"))
         {
-            env->out() << "[w] 'expression' and 'random' cannot be set at the same time" << std::endl;
+            env->out() << "[e] 'expression' and 'random' cannot be set at the same time" << std::endl;
             reset_flags();
             return;
         }
@@ -140,7 +140,7 @@ class tt_command : public command
         }
         else
         {
-            env->out() << "[w] no truth table generation approach specified" << std::endl;
+            env->out() << "[e] no truth table generation approach specified" << std::endl;
         }
 
         reset_flags();

@@ -7,6 +7,7 @@
 
 #include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
 #include "fiction/technology/cell_technologies.hpp"
+#include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 
 #include <cstdint>
@@ -42,8 +43,7 @@ class bdl_input_iterator
      */
     explicit bdl_input_iterator(const Lyt& lyt, const detect_bdl_pairs_params& params = {}) noexcept :
             layout{lyt.clone()},
-            input_pairs{detect_bdl_pairs<Lyt>(layout, sidb_technology::cell_type::INPUT, params)},
-            num_inputs{static_cast<uint8_t>(input_pairs.size())}
+            input_pairs{detect_bdl_pairs<Lyt>(layout, sidb_technology::cell_type::INPUT, params)}
     {
         static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
         static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -271,9 +271,9 @@ class bdl_input_iterator
      *
      * @return The number of input BDL pairs.
      */
-    [[nodiscard]] uint64_t get_number_of_inputs() const noexcept
+    [[nodiscard]] uint64_t num_input_pairs() const noexcept
     {
-        return num_inputs;
+        return input_pairs.size();
     }
 
   private:
@@ -285,10 +285,6 @@ class bdl_input_iterator
      * The detected input BDL pairs.
      */
     const std::vector<bdl_pair<cell<Lyt>>> input_pairs;
-    /**
-     * The amount of input BDL pairs.
-     */
-    const uint8_t num_inputs;
     /**
      * The current input index. There are \f$2^n\f$ possible input states for an \f$n\f$-input BDL layout.
      */
@@ -302,7 +298,7 @@ class bdl_input_iterator
      */
     void set_all_inputs() noexcept
     {
-        for (uint8_t i = 0; i < num_inputs; ++i)
+        for (uint64_t i = 0; i < input_pairs.size(); ++i)
         {
             const auto& input_i = input_pairs[i];
 
