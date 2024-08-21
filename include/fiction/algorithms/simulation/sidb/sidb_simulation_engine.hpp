@@ -29,9 +29,9 @@ enum class sidb_simulation_engine
 };
 
 /**
- * Selector exclusively for exhaustive SiDB simulation engines.
+ * Selector exclusively for exact SiDB simulation engines.
  */
-enum class exhaustive_sidb_simulation_engine
+enum class exact_sidb_simulation_engine
 {
     /**
      * *Exhaustive Ground State Search* (EXGS) is an exact simulation engine that always has exponential runtime.

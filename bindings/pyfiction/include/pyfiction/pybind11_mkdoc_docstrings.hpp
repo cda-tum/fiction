@@ -1914,6 +1914,18 @@ R"doc(The previous charge distribution is not used. Hence, the local
 electrostatic potential of the given charge distribution is calculated
 from scratch.)doc";
 
+static const char *__doc_fiction_charge_distribution_mode =
+R"doc(An enumeration of modes for handling the charge distribution when
+assigning a charge index to the charge distribution surface.)doc";
+
+static const char *__doc_fiction_charge_distribution_mode_KEEP_CHARGE_DISTRIBUTION =
+R"doc(The charge distribution is kept and is not updated after a charge
+index is assigned to the charge distribution surface.)doc";
+
+static const char *__doc_fiction_charge_distribution_mode_UPDATE_CHARGE_DISTRIBUTION =
+R"doc(The charge distribution is updated after the charge index is assigned
+to the charge distribution surface.)doc";
+
 static const char *__doc_fiction_charge_distribution_surface = R"doc()doc";
 
 static const char *__doc_fiction_charge_distribution_surface_2 = R"doc()doc";
@@ -8910,6 +8922,17 @@ static const char *__doc_fiction_exact_physical_design_stats_x_size = R"doc()doc
 
 static const char *__doc_fiction_exact_physical_design_stats_y_size = R"doc()doc";
 
+static const char *__doc_fiction_exact_sidb_simulation_engine = R"doc(Selector exclusively for exact SiDB simulation engines.)doc";
+
+static const char *__doc_fiction_exact_sidb_simulation_engine_EXGS =
+R"doc(*Exhaustive Ground State Search* (EXGS) is an exact simulation engine
+that always has exponential runtime.)doc";
+
+static const char *__doc_fiction_exact_sidb_simulation_engine_QUICKEXACT =
+R"doc(*QuickExact* is also an exact simulation engine that requires
+exponential runtime, but it scales a lot better than ExGS due to its
+effective search-space pruning.)doc";
+
 static const char *__doc_fiction_exact_with_blacklist =
 R"doc(The same as `exact` but with a black list of tiles that are not
 allowed to be used to a specified set of Boolean functions and their
@@ -8972,17 +8995,6 @@ Parameter ``ps``:
 
 Returns:
     sidb_simulation_result is returned with all results.)doc";
-
-static const char *__doc_fiction_exhaustive_sidb_simulation_engine = R"doc(Selector exclusively for exhaustive SiDB simulation engines.)doc";
-
-static const char *__doc_fiction_exhaustive_sidb_simulation_engine_EXGS =
-R"doc(*Exhaustive Ground State Search* (EXGS) is an exact simulation engine
-that always has exponential runtime.)doc";
-
-static const char *__doc_fiction_exhaustive_sidb_simulation_engine_QUICKEXACT =
-R"doc(*QuickExact* is also an exact simulation engine that requires
-exponential runtime, but it scales a lot better than ExGS due to its
-effective search-space pruning.)doc";
 
 static const char *__doc_fiction_extract_routing_objectives =
 R"doc(Extracts all routing objectives from the given layout. To this end,
@@ -12386,22 +12398,22 @@ Returns:
 static const char *__doc_fiction_is_gate_level_layout = R"doc()doc";
 
 static const char *__doc_fiction_is_ground_state =
-R"doc(This function checks if the ground state is found by the *QuickSim*
-algorithm.
+R"doc(This function checks if the elstrostatic ground state of an SiDB
+layout is found by a heuristic for the physical simulation (e.g.,
+*QuickSim* or *SimAnneal*).
 
 Template parameter ``Lyt``:
-    Cell-level layout type.
+    SiDB cell-level layout type.
 
 Parameter ``heuristic_results``:
-    All found physically valid charge distribution surfaces obtained
-    by a heuristic algorithm.
+    Simulation results obtained from a heuristic physical simulation.
 
-Parameter ``exhaustive_results``:
-    All valid charge distribution surfaces determined by ExGS.
+Parameter ``exact_results``:
+    Simulation results obtained from an exact physical simulation.
 
 Returns:
-    Returns `true` if the relative difference between the lowest
-    energies of the two sets is less than :math:`0.00001`, `false`
+    Returns `true` if the ground state is contained in the simulation
+    result provided by the heuristic physical simulation. `false`
     otherwise.)doc";
 
 static const char *__doc_fiction_is_hexagonal_layout = R"doc()doc";
@@ -15614,7 +15626,7 @@ algorithm, the physical parameters used in the simulation, and
 (optional) algorithm-specific named simulation parameters.
 
 Template parameter ``Lyt``:
-    Cell-level layout type.)doc";
+    SiDB cell-level layout type.)doc";
 
 static const char *__doc_fiction_sidb_simulation_result_additional_simulation_parameters =
 R"doc(Additional named simulation parameters. This is used to store
@@ -16621,7 +16633,7 @@ R"doc(This function determines the time-to-solution (TTS) and the accuracy
 (acc) of the *QuickSim* algorithm.
 
 Template parameter ``Lyt``:
-    Cell-level layout type.
+    SiDB cell-level layout type.
 
 Parameter ``lyt``:
     Layout that is used for the simulation.
@@ -16636,9 +16648,41 @@ Parameter ``ps``:
     Pointer to a struct where the results (time_to_solution, acc,
     single runtime) are stored.)doc";
 
+static const char *__doc_fiction_time_to_solution_for_given_simulation_results =
+R"doc(This function calculates the Time-to-Solution (TTS) by analyzing the
+simulation results of a heuristic algorithm in comparison to those of
+an exact algorithm. It provides further statistical metrics, including
+the accuracy of the heuristic algorithm, and individual runtimes.
+
+Template parameter ``Lyt``:
+    SiDB ell-level layout type.
+
+Parameter ``results_exact``:
+    Simulation results of the exact algorithm.
+
+Parameter ``results_heuristic``:
+    Simulation of the heuristic for which the TTS is determined.
+
+Parameter ``confidence_level``:
+    Confidence level for the TTS computation. The confidence level
+    represents the probability that the confidence interval calculated
+    from the simulation contains the true value. For example, a 95 %
+    (0.95) confidence level means that if the simulation were repeated
+    many times, approximately 95 out of 100 of the calculated
+    confidence intervals would contain the true value.
+
+Parameter ``ps``:
+    Pointer to a struct where the statistics of this function call
+    (time_to_solution, acc, single runtime) are to be stored.)doc";
+
 static const char *__doc_fiction_time_to_solution_params = R"doc()doc";
 
-static const char *__doc_fiction_time_to_solution_params_confidence_level = R"doc(Confidence level.)doc";
+static const char *__doc_fiction_time_to_solution_params_confidence_level =
+R"doc(The confidence level represents the probability that the confidence
+interval calculated from the simulation contains the true value. For
+example, a 99.7 % (0.997) confidence level means that if the
+simulation were repeated many times, approximately 997 out of 1000 of
+the calculated confidence intervals would contain the true value.)doc";
 
 static const char *__doc_fiction_time_to_solution_params_engine =
 R"doc(Exhaustive simulation algorithm used to simulate the ground state as
@@ -16655,10 +16699,10 @@ the average single simulation runtime of *QuickSim*, the single
 runtime of the exact simulator used, and the number of valid charge
 configurations found by the exact algorithm.)doc";
 
-static const char *__doc_fiction_time_to_solution_stats_acc = R"doc(Accuracy of the simulation.)doc";
+static const char *__doc_fiction_time_to_solution_stats_acc = R"doc(Accuracy of the simulation in %.)doc";
 
 static const char *__doc_fiction_time_to_solution_stats_algorithm =
-R"doc(Exhaustive simulation algorithm used to simulate the ground state as
+R"doc(Exact simulation algorithm used to simulate the ground state as
 reference.)doc";
 
 static const char *__doc_fiction_time_to_solution_stats_mean_single_runtime = R"doc(Average single simulation runtime in seconds.)doc";
@@ -16669,9 +16713,9 @@ R"doc(Print the results to the given output stream.
 Parameter ``out``:
     Output stream.)doc";
 
-static const char *__doc_fiction_time_to_solution_stats_single_runtime_exhaustive =
-R"doc(Single simulation runtime of the exhaustive ground state searcher in
-seconds.)doc";
+static const char *__doc_fiction_time_to_solution_stats_single_runtime_exact =
+R"doc(Single simulation runtime of the exact ground state simulation
+algorithm.)doc";
 
 static const char *__doc_fiction_time_to_solution_stats_time_to_solution = R"doc(Time-to-solution in seconds.)doc";
 
