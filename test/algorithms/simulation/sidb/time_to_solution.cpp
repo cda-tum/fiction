@@ -162,7 +162,7 @@ TEMPLATE_TEST_CASE("time-to-solution test with simulation results", "[time-to-so
         const sidb_simulation_parameters params{3, -0.32};
         const quicksim_params            quicksim_params{params};
 
-        const std::size_t                                   number_of_repetitions = 100;
+        const std::size_t                             number_of_repetitions = 100;
         std::vector<sidb_simulation_result<TestType>> simulation_results_quicksim{};
         simulation_results_quicksim.reserve(number_of_repetitions);
 
