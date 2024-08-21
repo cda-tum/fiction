@@ -14004,10 +14004,6 @@ static const char *__doc_fiction_operational_domain_params_operational_params =
 R"doc(The parameters used to determine if a layout is `operational` or `non-
 operational`.)doc";
 
-static const char *__doc_fiction_operational_domain_params_sim_engine =
-R"doc(The simulation engine to be used for the operational domain
-computation.)doc";
-
 static const char *__doc_fiction_operational_domain_params_sweep_dimensions =
 R"doc(The dimensions to sweep over together with their value ranges, ordered
 by priority. The first dimension is the x dimension, the second
