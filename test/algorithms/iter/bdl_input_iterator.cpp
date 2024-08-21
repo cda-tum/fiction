@@ -12,7 +12,6 @@
 #include <fiction/types.hpp>
 #include <fiction/utils/layout_utils.hpp>
 
-#include <cstdint>
 #include <iterator>
 #include <type_traits>
 
@@ -113,16 +112,20 @@ TEST_CASE("Empty layout iteration", "[bdl-input-iterator]")
 
     bdl_input_iterator<layout> bii{lyt};
 
+    CHECK(bii.num_input_pairs() == 0);
     CHECK((*bii).num_cells() == 0);
 
     // increment
 
     ++bii;
 
+    CHECK(bii.num_input_pairs() == 0);
     CHECK((*bii).num_cells() == 0);
 
     auto bii_cp = bii++;
 
+    CHECK(bii.num_input_pairs() == 0);
+    CHECK(bii_cp.num_input_pairs() == 0);
     CHECK((*bii).num_cells() == 0);
     CHECK((*bii_cp).num_cells() == 0);
 
@@ -130,12 +133,15 @@ TEST_CASE("Empty layout iteration", "[bdl-input-iterator]")
 
     --bii;
 
+    CHECK(bii.num_input_pairs() == 0);
     CHECK((*bii).num_cells() == 0);
 
     auto bii_cm = bii--;
 
+    CHECK(bii.num_input_pairs() == 0);
     CHECK((*bii).num_cells() == 0);
 
+    CHECK(bii_cm.num_input_pairs() == 0);
     CHECK((*bii_cm).num_cells() == 0);
 }
 
@@ -160,6 +166,10 @@ TEST_CASE("BDL wire iteration", "[bdl-input-iterator]")
     const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
     bdl_input_iterator<sidb_100_cell_clk_lyt_siqad> bii{lat};
+
+    CHECK((*bii).num_cells() == 7);  // 2 inputs (1 already deleted for input pattern 0), 4 normal, 2 outputs
+
+    CHECK(bii.num_input_pairs() == 1);
 
     CHECK(bii == 0ull);
 
@@ -237,7 +247,7 @@ TEST_CASE("SiQAD's AND gate iteration", "[bdl-input-iterator]")
 
     const detect_bdl_wires_params params{2.0};
 
-    SECTION("siqad coordinates")
+    SECTION("SiQAD coordinates")
     {
         bdl_input_iterator<sidb_100_cell_clk_lyt_siqad> bii{lat, params};
 

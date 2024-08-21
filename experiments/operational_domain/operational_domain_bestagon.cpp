@@ -12,8 +12,8 @@
 #include <fiction/types.hpp>                    // pre-defined types suitable for the FCN domain
 #include <fiction/utils/truth_table_utils.hpp>  // truth tables helper functions
 
-#include <fmt/format.h>                    // string formatting
-#include <mockturtle/utils/stopwatch.hpp>  // stopwatch for measuring time
+#include <fmt/format.h>                    // output formatting
+#include <mockturtle/utils/stopwatch.hpp>  // stopwatch for time measurement
 
 #include <array>
 #include <cstdint>
@@ -31,7 +31,7 @@ int main()  // NOLINT
     experiments::experiment<std::string, uint64_t, uint64_t, double, uint64_t, double, uint64_t, double, uint64_t,
                             double, uint64_t, double, uint64_t, double, uint64_t, double, uint64_t, double>
         opdomain_exp{
-            "Operational Domain SiQAD",
+            "Operational Domain Bestagon",
             "Name",
             "#SiDBs",  // Benchmark
             "#Samples (GS)",
@@ -55,7 +55,7 @@ int main()  // NOLINT
     // simulation parameters
     sidb_simulation_parameters sim_params{};
     sim_params.base     = 2;
-    sim_params.mu_minus = -0.28;
+    sim_params.mu_minus = -0.32;
 
     // operational domain parameters
     operational_domain_params op_domain_params{};
@@ -75,13 +75,19 @@ int main()  // NOLINT
     write_op_domain_params.operational_tag     = "1";
     write_op_domain_params.writing_mode        = write_operational_domain_params::sample_writing_mode::ALL_SAMPLES;
 
-    static const std::string folder = fmt::format("{}siqad_gates_type_tags/", EXPERIMENTS_PATH);
+    static const std::string folder = fmt::format("{}bestagon_gates_type_tags/", EXPERIMENTS_PATH);
 
-    static const std::array<std::pair<std::string, std::vector<tt>>, 5> gates = {
+    static const std::array<std::pair<std::string, std::vector<tt>>, 10> gates = {
         std::make_pair("and", std::vector<tt>{create_and_tt()}),
         std::make_pair("nand", std::vector<tt>{create_nand_tt()}),
+        std::make_pair("nor", std::vector<tt>{create_nor_tt()}),
         std::make_pair("xnor", std::vector<tt>{create_xnor_tt()}),
-        std::make_pair("xor", std::vector<tt>{create_xor_tt()}), std::make_pair("or", std::vector<tt>{create_or_tt()})};
+        std::make_pair("xor", std::vector<tt>{create_xor_tt()}),
+        std::make_pair("or", std::vector<tt>{create_or_tt()}),
+        std::make_pair("wire", std::vector<tt>{create_id_tt()}),
+        std::make_pair("wire_diag", std::vector<tt>{create_id_tt()}),
+        std::make_pair("inv", std::vector<tt>{create_not_tt()}),
+        std::make_pair("inv_diag", std::vector<tt>{create_not_tt()})};
 
     // total number of samples
     static std::size_t total_samples_gs = 0;
@@ -109,7 +115,7 @@ int main()  // NOLINT
 
             std::cout << benchmark << std::endl;
 
-            const auto lyt = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(benchmark.string(), gate);
+            auto lyt = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(benchmark.string(), gate);
 
             // operational domain stats
             operational_domain_stats op_domain_stats_gs{};
@@ -129,16 +135,16 @@ int main()  // NOLINT
 
             // write the operational domains to a CSV file
             write_operational_domain(op_domain_gs,
-                                     fmt::format("{}operational_domain_grid_search_siqad_{}.csv", folder, gate),
+                                     fmt::format("{}operational_domain_grid_search_bestagon_{}.csv", folder, gate),
                                      write_op_domain_params);
             write_operational_domain(op_domain_rs,
-                                     fmt::format("{}operational_domain_random_sampling_siqad_{}.csv", folder, gate),
+                                     fmt::format("{}operational_domain_random_sampling_bestagon_{}.csv", folder, gate),
                                      write_op_domain_params);
             write_operational_domain(op_domain_ff,
-                                     fmt::format("{}operational_domain_flood_fill_siqad_{}.csv", folder, gate),
+                                     fmt::format("{}operational_domain_flood_fill_bestagon_{}.csv", folder, gate),
                                      write_op_domain_params);
             write_operational_domain(op_domain_ct,
-                                     fmt::format("{}operational_domain_contour_tracing_siqad_{}.csv", folder, gate),
+                                     fmt::format("{}operational_domain_contour_tracing_bestagon_{}.csv", folder, gate),
                                      write_op_domain_params);
 
             // update the total number of samples
@@ -197,7 +203,7 @@ int main()  // NOLINT
         }
 
         opdomain_exp.save();
-        // opdomain_exp.table();
+        opdomain_exp.table();
     }
 
     // log the total number of samples and simulator calls
@@ -220,7 +226,7 @@ int main()  // NOLINT
     );
 
     opdomain_exp.save();
-    // opdomain_exp.table();
+    opdomain_exp.table();
 
     return EXIT_SUCCESS;
 }

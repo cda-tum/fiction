@@ -36,10 +36,11 @@
 
 namespace fiction
 {
+
 /**
  * Possible operational status of a layout.
  */
-enum class operational_status
+enum class operational_status : uint8_t
 {
     /**
      * The layout is operational.
@@ -651,7 +652,7 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
  * @tparam TT Type of the truth table.
  * @param lyt The SiDB layout.
  * @param spec Vector of truth table specifications.
- * @param params Parameters to simualte if a input combination is operational.
+ * @param params Parameters to simulate if a input combination is operational.
  * @return The count of operational input combinations.
  */
 template <typename Lyt, typename TT>

@@ -1,5 +1,5 @@
 //
-// Created by marcel on 08.08.23.
+// Created by marcel on 22.07.24.
 //
 
 #include "fiction_experiments.hpp"  // experiment class
@@ -29,9 +29,9 @@ using namespace fiction;
 int main()  // NOLINT
 {
     experiments::experiment<std::string, uint64_t, uint64_t, double, uint64_t, double, uint64_t, double, uint64_t,
-                            double, uint64_t, double, uint64_t, double, uint64_t, double, uint64_t, double>
+                            double, uint64_t, double, uint64_t, double>
         opdomain_exp{
-            "Operational Domain SiQAD",
+            "Operational Domain SiQAD 3D",
             "Name",
             "#SiDBs",  // Benchmark
             "#Samples (GS)",
@@ -45,11 +45,7 @@ int main()  // NOLINT
             "#Samples (FF)",
             "op. (FF)",
             "sim calls (FF)",
-            "t in s (FF)",  // Flood Fill
-            "#Samples (CT)",
-            "op. (CT)",
-            "sim calls (CT)",
-            "t in s (CT)"  // Contour Tracing
+            "t in s (FF)"  // Flood Fill
         };
 
     // simulation parameters
@@ -61,19 +57,24 @@ int main()  // NOLINT
     operational_domain_params op_domain_params{};
     op_domain_params.simulation_parameters    = sim_params;
     op_domain_params.sim_engine               = sidb_simulation_engine::QUICKEXACT;
-    op_domain_params.sweep_dimensions         = {{sweep_parameter::EPSILON_R}, {sweep_parameter::LAMBDA_TF}};
+    op_domain_params.sweep_dimensions         = {{sweep_parameter::EPSILON_R},
+                                                 {sweep_parameter::LAMBDA_TF},
+                                                 {sweep_parameter::MU_MINUS}};
     op_domain_params.sweep_dimensions[0].min  = 1.0;
     op_domain_params.sweep_dimensions[0].max  = 10.0;
     op_domain_params.sweep_dimensions[0].step = 0.05;
     op_domain_params.sweep_dimensions[1].min  = 1.0;
     op_domain_params.sweep_dimensions[1].max  = 10.0;
     op_domain_params.sweep_dimensions[1].step = 0.05;
+    op_domain_params.sweep_dimensions[2].min  = -0.50;
+    op_domain_params.sweep_dimensions[2].max  = -0.10;
+    op_domain_params.sweep_dimensions[2].step = 0.0025;
 
     // write operational domain parameters
     write_operational_domain_params write_op_domain_params{};
     write_op_domain_params.non_operational_tag = "0";
     write_op_domain_params.operational_tag     = "1";
-    write_op_domain_params.writing_mode        = write_operational_domain_params::sample_writing_mode::ALL_SAMPLES;
+    write_op_domain_params.writing_mode        = write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY;
 
     static const std::string folder = fmt::format("{}siqad_gates_type_tags/", EXPERIMENTS_PATH);
 
@@ -87,19 +88,16 @@ int main()  // NOLINT
     static std::size_t total_samples_gs = 0;
     static std::size_t total_samples_rs = 0;
     static std::size_t total_samples_ff = 0;
-    static std::size_t total_samples_ct = 0;
 
     // total number of simulator calls
     static std::size_t total_sim_calls_gs = 0;
     static std::size_t total_sim_calls_rs = 0;
     static std::size_t total_sim_calls_ff = 0;
-    static std::size_t total_sim_calls_ct = 0;
 
     // total runtime
     static double total_runtime_gs = 0.0;
     static double total_runtime_rs = 0.0;
     static double total_runtime_ff = 0.0;
-    static double total_runtime_ct = 0.0;
 
     for (const auto& [gate, truth_table] : gates)
     {
@@ -115,49 +113,40 @@ int main()  // NOLINT
             operational_domain_stats op_domain_stats_gs{};
             operational_domain_stats op_domain_stats_rs{};
             operational_domain_stats op_domain_stats_ff{};
-            operational_domain_stats op_domain_stats_ct{};
 
             // compute the operational domains
             const auto op_domain_gs =
                 operational_domain_grid_search(lyt, truth_table, op_domain_params, &op_domain_stats_gs);
             const auto op_domain_rs =
-                operational_domain_random_sampling(lyt, truth_table, 2500, op_domain_params, &op_domain_stats_rs);
+                operational_domain_random_sampling(lyt, truth_table, 20000, op_domain_params, &op_domain_stats_rs);
             const auto op_domain_ff =
-                operational_domain_flood_fill(lyt, truth_table, 250, op_domain_params, &op_domain_stats_ff);
-            const auto op_domain_ct =
-                operational_domain_contour_tracing(lyt, truth_table, 100, op_domain_params, &op_domain_stats_ct);
+                operational_domain_flood_fill(lyt, truth_table, 2000, op_domain_params, &op_domain_stats_ff);
 
             // write the operational domains to a CSV file
             write_operational_domain(op_domain_gs,
-                                     fmt::format("{}operational_domain_grid_search_siqad_{}.csv", folder, gate),
+                                     fmt::format("{}operational_domain_grid_search_3d_siqad_{}.csv", folder, gate),
                                      write_op_domain_params);
             write_operational_domain(op_domain_rs,
-                                     fmt::format("{}operational_domain_random_sampling_siqad_{}.csv", folder, gate),
+                                     fmt::format("{}operational_domain_random_sampling_3d_siqad_{}.csv", folder, gate),
                                      write_op_domain_params);
             write_operational_domain(op_domain_ff,
-                                     fmt::format("{}operational_domain_flood_fill_siqad_{}.csv", folder, gate),
-                                     write_op_domain_params);
-            write_operational_domain(op_domain_ct,
-                                     fmt::format("{}operational_domain_contour_tracing_siqad_{}.csv", folder, gate),
+                                     fmt::format("{}operational_domain_flood_fill_3d_siqad_{}.csv", folder, gate),
                                      write_op_domain_params);
 
             // update the total number of samples
             total_samples_gs += op_domain_stats_gs.num_evaluated_parameter_combinations;
             total_samples_rs += op_domain_stats_rs.num_evaluated_parameter_combinations;
             total_samples_ff += op_domain_stats_ff.num_evaluated_parameter_combinations;
-            total_samples_ct += op_domain_stats_ct.num_evaluated_parameter_combinations;
 
             // update the total number of simulator calls
             total_sim_calls_gs += op_domain_stats_gs.num_simulator_invocations;
             total_sim_calls_rs += op_domain_stats_rs.num_simulator_invocations;
             total_sim_calls_ff += op_domain_stats_ff.num_simulator_invocations;
-            total_sim_calls_ct += op_domain_stats_ct.num_simulator_invocations;
 
             // update the total runtime
             total_runtime_gs += mockturtle::to_seconds(op_domain_stats_gs.time_total);
             total_runtime_rs += mockturtle::to_seconds(op_domain_stats_rs.time_total);
             total_runtime_ff += mockturtle::to_seconds(op_domain_stats_ff.time_total);
-            total_runtime_ct += mockturtle::to_seconds(op_domain_stats_ct.time_total);
 
             // compute the operational percentages
             const auto operational_percentage_gs =
@@ -169,9 +158,6 @@ int main()  // NOLINT
             const auto operational_percentage_ff =
                 static_cast<double>(op_domain_stats_ff.num_operational_parameter_combinations) /
                 static_cast<double>(op_domain_stats_ff.num_evaluated_parameter_combinations);
-            const auto operational_percentage_ct =
-                static_cast<double>(op_domain_stats_ct.num_operational_parameter_combinations) /
-                static_cast<double>(op_domain_stats_ct.num_evaluated_parameter_combinations);
 
             opdomain_exp(
                 // Benchmark
@@ -187,17 +173,13 @@ int main()  // NOLINT
 
                 // Flood Fill
                 op_domain_stats_ff.num_evaluated_parameter_combinations, operational_percentage_ff,
-                op_domain_stats_ff.num_simulator_invocations, mockturtle::to_seconds(op_domain_stats_ff.time_total),
-
-                // Contour Tracing
-                op_domain_stats_ct.num_evaluated_parameter_combinations, operational_percentage_ct,
-                op_domain_stats_ct.num_simulator_invocations, mockturtle::to_seconds(op_domain_stats_ct.time_total)
+                op_domain_stats_ff.num_simulator_invocations, mockturtle::to_seconds(op_domain_stats_ff.time_total)
 
             );
         }
 
         opdomain_exp.save();
-        // opdomain_exp.table();
+        opdomain_exp.table();
     }
 
     // log the total number of samples and simulator calls
@@ -212,15 +194,12 @@ int main()  // NOLINT
         total_samples_rs, 0.0, total_sim_calls_rs, total_runtime_rs,
 
         // Flood Fill
-        total_samples_ff, 0.0, total_sim_calls_ff, total_runtime_ff,
-
-        // Contour Tracing
-        total_samples_ct, 0.0, total_sim_calls_ct, total_runtime_ct
+        total_samples_ff, 0.0, total_sim_calls_ff, total_runtime_ff
 
     );
 
     opdomain_exp.save();
-    // opdomain_exp.table();
+    opdomain_exp.table();
 
     return EXIT_SUCCESS;
 }

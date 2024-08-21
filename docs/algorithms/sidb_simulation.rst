@@ -239,8 +239,6 @@ Operational Domain Computation
         .. doxygenenum:: fiction::sweep_parameter
         .. doxygenstruct:: fiction::operational_domain
            :members:
-        .. doxygenfunction:: fiction::find_parameter_point_with_tolerance
-        .. doxygenfunction:: fiction::find_key_with_tolerance
         .. doxygenstruct:: fiction::operational_domain_params
            :members:
         .. doxygenstruct:: fiction::operational_domain_stats
@@ -266,6 +264,8 @@ Operational Domain Computation
         .. autoclass:: mnt.pyfiction.parameter_point
             :members:
         .. autoclass:: mnt.pyfiction.operational_domain
+            :members:
+        .. autoclass:: mnt.pyfiction.operational_domain_value_range
             :members:
         .. autoclass:: mnt.pyfiction.operational_domain_params
             :members:

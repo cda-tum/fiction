@@ -75,8 +75,8 @@ Truth tables
 ############
 
 The ``truth_table`` store (``-t``) can hold logic descriptions in binary format as implemented in the ``kitty`` library
-by Mathias Soeken. These can either be loaded via command ``tt`` by specifying a bit/hex string or a Boolean expression,
-or be obtained by :ref:`simulating<command simulate>` a ``network`` or ``gate_layout`` via command
+by Mathias Soeken. These can either be loaded via command ``tt`` by specifying a bit/hex string (``-t``) or a Boolean
+expression (``-e``), or be obtained by :ref:`simulating<command simulate>` a ``network`` or ``gate_layout`` via command
 ``simulate``. Generating a ``truth_table`` from an expression uses the following syntax (from the
 `kitty documentation <https://libkitty.readthedocs.io/en/latest/reference.html#_CPPv4I0EN5kitty22create_from_expressionEbR2TTRKNSt6stringE>`_):
 
@@ -87,7 +87,7 @@ if-then-else, or ``!{!a!b}`` to describe the application of De Morgan's law to `
 fit the largest variable in the expression, e.g., if ``c`` is the largest variable, then the truth table has at least
 three variables.
 
-Alternatively, ``tt 0110`` or ``tt 0xaffe`` generate a ``truth_table`` from bit/hex strings.
+For example, ``tt -t 0110`` and ``tt -t 0xaffe`` generate a ``truth_table`` from bit and hex strings, respectively.
 
 Logic synthesis
 ###############
@@ -364,8 +364,9 @@ processed by other tools.
 The parameter space to sweep over can be specified by the user via the flags
 - ``--x_sweep``
 - ``--y_sweep``
+- ``--z_sweep``
 which have to be either ``epsilon_r``, ``lambda_tf``, or ``mu_minus``. The default is ``epsilon_r`` for ``--x_sweep`` and
-``lambda_tf`` for ``--y_sweep``.
+``lambda_tf`` for ``--y_sweep``, with ``--z_sweep`` being an optional third sweep dimension.
 
 Additionally, min, max, and step size values can be specified for each parameter using the flags
 - ``--x_min``
@@ -374,7 +375,12 @@ Additionally, min, max, and step size values can be specified for each parameter
 - ``--y_min``
 - ``--y_max``
 - ``--y_step``
-respectively. The default values are 1, 10, and 0.1 on both axis, for min, max, and step, respectively.
+- ``--z_min``
+- ``--z_max``
+- ``--z_step``
+respectively. The default values are 1, 10, and 0.1 on x and y axis, for min, max, and step, respectively. The z axis
+is not used by default. However, if ``--z_sweep`` is specified, the default values are -0.5, -0.1, and 0.025 for min, max,
+and step, respectively, assuming z to be used for ``mu_minus``.
 
 By default, grid search is applied to explore the operational domain. The algorithm can be changed by specifying one of
 the following options:

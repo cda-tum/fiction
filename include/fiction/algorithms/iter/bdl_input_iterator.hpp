@@ -9,6 +9,7 @@
 #include "fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/types.hpp"
 
 #include <algorithm>
 #include <cassert>
@@ -300,9 +301,9 @@ class bdl_input_iterator
      *
      * @return The number of input BDL pairs.
      */
-    [[nodiscard]] uint64_t get_number_of_inputs() const noexcept
+    [[nodiscard]] uint64_t num_input_pairs() const noexcept
     {
-        return num_inputs;
+        return input_pairs.size();
     }
 
   private:
@@ -355,7 +356,7 @@ class bdl_input_iterator
      */
     void set_all_inputs() noexcept
     {
-        for (uint8_t i = 0; i < num_inputs; ++i)
+        for (uint64_t i = 0; i < input_pairs.size(); ++i)
         {
             const auto& input_i = input_pairs[num_inputs - 1 - i];
 
