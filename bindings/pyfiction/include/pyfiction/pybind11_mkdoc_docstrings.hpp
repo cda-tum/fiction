@@ -16680,9 +16680,9 @@ static const char *__doc_fiction_time_to_solution_params = R"doc()doc";
 static const char *__doc_fiction_time_to_solution_params_confidence_level =
 R"doc(The confidence level represents the probability that the confidence
 interval calculated from the simulation contains the true value. For
-example, a 95 % (0.95) confidence level means that if the simulation
-were repeated many times, approximately 95 out of 100 of the
-calculated confidence intervals would contain the true value.)doc";
+example, a 99.7 % (0.997) confidence level means that if the
+simulation were repeated many times, approximately 997 out of 1000 of
+the calculated confidence intervals would contain the true value.)doc";
 
 static const char *__doc_fiction_time_to_solution_params_engine =
 R"doc(Exhaustive simulation algorithm used to simulate the ground state as
