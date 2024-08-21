@@ -1063,8 +1063,7 @@ class operational_domain_impl
             set_dimension_value(sim_params, values[d][sp.step_values[d]], d);
         }
 
-        const auto& [status, sim_calls] =
-            is_operational(layout, truth_table, is_operational_params{sim_params, params.sim_engine});
+        const auto& [status, sim_calls] = is_operational(layout, truth_table, params.operational_params);
 
         num_simulator_invocations += sim_calls;
 
