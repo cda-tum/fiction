@@ -287,8 +287,8 @@ class opdom_command : public command
 
                 // set parameters
                 params.operational_params.simulation_parameters = simulation_params;
-                params.sim_engine            = fiction::sidb_simulation_engine::QUICKEXACT;
-                params.sweep_dimensions      = sweep_dimensions;
+                params.sim_engine                               = fiction::sidb_simulation_engine::QUICKEXACT;
+                params.sweep_dimensions                         = sweep_dimensions;
 
                 try
                 {
