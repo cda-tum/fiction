@@ -33,11 +33,11 @@ int main()  // NOLINT
     experiments::experiment<std::string, double, uint64_t, uint64_t, double, double> simulation_exp{
         "benchmark",
         "gate",
-        "runtime (Automatic Exhaustive)",
+        "runtime (Automatic Exhaustive) [s]",
         "#Gates (Automatic Exhaustive)",
         "#Gates (QuickCell)",
-        "runtime (QuickCell)",
-        "runtime (Automatic Exhaustive) / runtime (QuickCell)"};
+        "runtime (QuickCell) [s]",
+        "runtime (Automatic Exhaustive) / runtime (QuickCell) [s]"};
 
     const auto truth_tables = std::vector<std::vector<tt>>{
         std::vector<tt>{create_and_tt()}, std::vector<tt>{create_nand_tt()}, std::vector<tt>{create_or_tt()},

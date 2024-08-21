@@ -166,7 +166,7 @@ class design_sidb_gates_impl
             number_of_output_wires{output_bdl_wires.size()},
             all_canvas_layouts{determine_all_possible_canvas_layouts()}
     {
-        initialize();
+        initialize_bdl_wires_with_directions();
     }
 
     /**
@@ -351,7 +351,7 @@ class design_sidb_gates_impl
     }
 
     /**
-     * Design Standard Cells/gates by using the *QuickCell* algorithm
+     * Design Standard Cells/gates by using the *QuickCell* algorithm.
      *
      * @return A vector of designed SiDB gate layouts.
      */
@@ -500,7 +500,7 @@ class design_sidb_gates_impl
      *
      * @tparam Lyt The type representing the layout.
      */
-    void initialize() noexcept
+    void initialize_bdl_wires_with_directions() noexcept
     {
         input_bdl_wire_directions.reserve(number_of_input_wires);
 
@@ -526,7 +526,6 @@ class design_sidb_gates_impl
      * - For `SOUTH-NORTH` direction wires, if the corresponding bit in the input pattern is not set, assigns `NEUTRAL`
      *   charge to the upper part and `NEGATIVE` charge to the lower part of the BDLs of the wire.
      *
-     * @tparam Lyt The type representing the layout.
      * @param layout The charge distribution surface layout to be modified.
      * @param current_input_index The index representing the current input pattern.
      */
@@ -615,7 +614,6 @@ class design_sidb_gates_impl
      *    - For `SOUTH-NORTH` direction wires, if the corresponding bit in the input pattern is not set, assigns
      * `NEUTRAL` charge to the upper part and `NEGATIVE` charge to the lower part of the BDLs of the wire.
      *
-     * @tparam Lyt The type representing the layout.
      * @param layout The charge distribution surface layout to be modified.
      * @param current_input_index The index representing the current input pattern.
      * @return void

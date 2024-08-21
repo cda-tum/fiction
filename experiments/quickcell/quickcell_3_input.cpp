@@ -14,6 +14,7 @@
 #include <fiction/utils/truth_table_utils.hpp>
 
 #include <fmt/format.h>
+#include <mockturtle/utils/stopwatch.hpp>
 
 #include <array>
 #include <cstdint>
@@ -30,7 +31,7 @@ using namespace fiction;
 int main()  // NOLINT
 {
     experiments::experiment<std::string, uint64_t, double> simulation_exp{"benchmark", "gate", "#Gates (QuickCell)",
-                                                                          "runtime (QuickCell)"};
+                                                                          "runtime (QuickCell) [s]"};
 
     const auto truth_tables = std::vector<std::vector<tt>>{
         std::vector<tt>{create_and3_tt()},   std::vector<tt>{create_xor_and_tt()}, std::vector<tt>{create_or_and_tt()},
