@@ -7,6 +7,7 @@
 #include <fiction/utils/math_utils.hpp>
 
 #include <cstddef>
+#include <string>
 #include <vector>
 
 using namespace fiction;
@@ -187,7 +188,7 @@ TEST_CASE("Test the determination of all combinations of distributing k entities
     {
         const std::size_t                           k = 0;
         const std::size_t                           n = 0;
-        const std::vector<std::vector<std::size_t>> expected{{}};
+        const std::vector<std::vector<std::size_t>> expected{};
 
         auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(k, n);
 
@@ -232,7 +233,7 @@ TEST_CASE("Test the determination of all combinations of distributing k entities
     {
         const std::size_t                           k = 0;
         const std::size_t                           n = 5;
-        const std::vector<std::vector<std::size_t>> expected{{}};
+        const std::vector<std::vector<std::size_t>> expected{};
 
         auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(k, n);
 
