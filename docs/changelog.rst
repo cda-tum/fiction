@@ -24,6 +24,7 @@ Added
 Changed
 #######
 - Switched from execution policy-based multithreading to manual thread management in operational domain computation for platform-independence and better performance in the Python bindings
+- Extended time-to-solution (TTS) calculation functions
 - Add a warning when leak sanitizers are used with AppleClang since they are not supported
 - Switched to new compiler and OS versions in the GitHub Actions workflows
 - Updated all libraries to the latest versions
