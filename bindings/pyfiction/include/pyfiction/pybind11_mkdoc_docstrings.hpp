@@ -548,16 +548,27 @@ static const char *__doc_fiction_bdl_input_iterator_current_input_index =
 R"doc(The current input index. There are :math:`2^n` possible input states
 for an :math:`n`-input BDL layout.)doc";
 
-static const char *__doc_fiction_bdl_input_iterator_get_number_of_inputs =
+static const char *__doc_fiction_bdl_input_iterator_determine_input_bdl_wire_directions =
+R"doc(This function determines the directions of the input BDL wires.
+
+Returns:
+    A vector of `bdl_wire_direction` representing the directions of
+    the input BDL wires.)doc";
+
+static const char *__doc_fiction_bdl_input_iterator_input_bdl_wires = R"doc(The detected input BDL wires.)doc";
+
+static const char *__doc_fiction_bdl_input_iterator_input_pairs = R"doc(The detected input BDL pairs.)doc";
+
+static const char *__doc_fiction_bdl_input_iterator_input_wire_directions = R"doc(Directions of the input BDL wires.)doc";
+
+static const char *__doc_fiction_bdl_input_iterator_layout = R"doc(The layout to iterate over.)doc";
+
+static const char *__doc_fiction_bdl_input_iterator_num_input_pairs =
 R"doc(Returns the total number of input BDL pairs of the given SiDB gate
 layout.
 
 Returns:
     The number of input BDL pairs.)doc";
-
-static const char *__doc_fiction_bdl_input_iterator_input_bdl_wires = R"doc(The detected input BDL wires.)doc";
-
-static const char *__doc_fiction_bdl_input_iterator_input_wire_directions = R"doc(Directions of the input BDL wires.)doc";
 
 static const char *__doc_fiction_bdl_input_iterator_num_inputs = R"doc(The amount of input BDL pairs.)doc";
 
@@ -7041,7 +7052,7 @@ Parameter ``ps``:
 Parameter ``st``:
     Statistics of the process.)doc";
 
-static const char *__doc_fiction_detail_operational_domain_impl_output_bdl_pairs = R"doc(The output BDL pair of the layout.)doc";
+static const char *__doc_fiction_detail_operational_domain_impl_output_bdl_pairs = R"doc(The output BDL pairs of the layout.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_params = R"doc(The parameters for the operational domain computation.)doc";
 
@@ -13992,6 +14003,10 @@ used across the different operational domain computation algorithms.)doc";
 static const char *__doc_fiction_operational_domain_params_operational_params =
 R"doc(The parameters used to determine if a layout is `operational` or `non-
 operational`.)doc";
+
+static const char *__doc_fiction_operational_domain_params_sim_engine =
+R"doc(The simulation engine to be used for the operational domain
+computation.)doc";
 
 static const char *__doc_fiction_operational_domain_params_sweep_dimensions =
 R"doc(The dimensions to sweep over together with their value ranges, ordered
