@@ -171,7 +171,8 @@ void time_to_solution_for_given_simulation_results(const sidb_simulation_result<
         total_runtime_heuristic += mockturtle::to_seconds(heuristic.simulation_runtime);
     }
 
-    const auto single_runtime_heuristic_average = total_runtime_heuristic / static_cast<double>(results_heuristic.size());
+    const auto single_runtime_heuristic_average =
+        total_runtime_heuristic / static_cast<double>(results_heuristic.size());
 
     const auto acc = static_cast<double>(gs_count) / static_cast<double>(results_heuristic.size());
 
