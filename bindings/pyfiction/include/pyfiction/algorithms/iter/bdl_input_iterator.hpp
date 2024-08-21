@@ -32,8 +32,8 @@ void bdl_input_iterator(pybind11::module& m, const std::string& lattice)
 
     py::class_<fiction::bdl_input_iterator<Lyt>>(m, fmt::format("bdl_input_iterator_{}", lattice).c_str(),
                                                  DOC(fiction_bdl_input_iterator))
-        .def(py::init<const Lyt&, const fiction::detect_bdl_pairs_params&>(), "lyt"_a,
-             "params"_a = fiction::detect_bdl_pairs_params{}, DOC(fiction_bdl_input_iterator_bdl_input_iterator))
+        .def(py::init<const Lyt&, const fiction::detect_bdl_wires_params&>(), "lyt"_a,
+             "params"_a = fiction::detect_bdl_wires_params{}, DOC(fiction_bdl_input_iterator_bdl_input_iterator))
         .def(
             "__next__",
             [](fiction::bdl_input_iterator<Lyt>& self) -> Lyt&

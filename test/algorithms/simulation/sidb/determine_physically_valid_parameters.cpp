@@ -39,7 +39,7 @@ TEST_CASE("Determine physical parameters for CDS of SiQAD Y-shaped AND gate, 10 
     charge_distribution_surface cds{lyt, sim_params};
 
     operational_domain_params op_domain_params{};
-    op_domain_params.simulation_parameters = sim_params;
+    op_domain_params.operational_params.simulation_parameters = sim_params;
 
     op_domain_params.sweep_dimensions = {operational_domain_value_range{sweep_parameter::EPSILON_R, 4.1, 6.0, 0.1},
                                          operational_domain_value_range{sweep_parameter::LAMBDA_TF, 4.1, 6.0, 0.1}};
@@ -123,7 +123,7 @@ TEST_CASE(
     charge_distribution_surface cds{bestagon_and, sim_params};
 
     operational_domain_params op_domain_params{};
-    op_domain_params.simulation_parameters = sim_params;
+    op_domain_params.operational_params.simulation_parameters = sim_params;
 
     SECTION("Using the ground state of default physical parameters as given CDS, two dimensional sweep")
     {

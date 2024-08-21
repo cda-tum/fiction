@@ -236,14 +236,9 @@ struct operational_domain_value_range
 struct operational_domain_params
 {
     /**
-     * The simulation parameters for the operational domain computation. Most parameters will be kept constant across
-     * sweeps, but the sweep parameters are adjusted in each simulation step and thus overwritten in this object.
+     * The parameters used to determine if a layout is `operational` or `non-operational`.
      */
-    sidb_simulation_parameters simulation_parameters{};
-    /**
-     * The simulation engine to be used for the operational domain computation.
-     */
-    sidb_simulation_engine sim_engine{sidb_simulation_engine::QUICKEXACT};
+    is_operational_params operational_params{};
     /**
      * The dimensions to sweep over together with their value ranges, ordered by priority. The first dimension is the x
      * dimension, the second dimension is the y dimension, etc.
@@ -252,9 +247,9 @@ struct operational_domain_params
         operational_domain_value_range{sweep_parameter::EPSILON_R, 1.0, 10.0, 0.1},
         operational_domain_value_range{sweep_parameter::LAMBDA_TF, 1.0, 10.0, 0.1}};
     /**
-     * The parameters used to determine if a layout is `operational` or `non-operational`.
+     * The simulation engine to be used for the operational domain computation.
      */
-    is_operational_params operational_params{};
+    sidb_simulation_engine sim_engine{sidb_simulation_engine::QUICKEXACT};
 };
 /**
  * Statistics for the operational domain computation. The statistics are used across the different operational domain
@@ -378,7 +373,7 @@ class operational_domain_impl
             truth_table{tt},
             params{ps},
             stats{st},
-            output_bdl_pairs{detect_bdl_pairs<Lyt>(layout, sidb_technology::cell_type::OUTPUT, params.bdl_params)},
+            output_bdl_pairs{detect_bdl_pairs<Lyt>(layout, sidb_technology::cell_type::OUTPUT, ps.operational_params.bdl_wire_params.params_bdl_pairs)},
             num_dimensions{params.sweep_dimensions.size()}
     {
         op_domain.dimensions.reserve(num_dimensions);
@@ -866,7 +861,7 @@ class operational_domain_impl
     /**
      * Number of available hardware threads.
      */
-    const std::size_t num_threads{std::thread::hardware_concurrency()};
+    const std::size_t num_threads{1};
     /**
      * A step point represents a point in the x and y dimension from 0 to the maximum number of steps. A step point does
      * not hold the actual parameter values, but the step values in the x and y dimension, respectively.
@@ -1064,7 +1059,7 @@ class operational_domain_impl
 
         ++num_evaluated_parameter_combinations;
 
-        sidb_simulation_parameters sim_params = params.simulation_parameters;
+        sidb_simulation_parameters sim_params = params.operational_params.simulation_parameters;
 
         for (auto d = 0u; d < num_dimensions; ++d)
         {
@@ -1119,7 +1114,7 @@ class operational_domain_impl
         // increment the number of evaluated parameter combinations
         ++num_evaluated_parameter_combinations;
 
-        sidb_simulation_parameters sim_params = params.simulation_parameters;
+        sidb_simulation_parameters sim_params = params.operational_params.simulation_parameters;
 
         for (auto d = 0u; d < num_dimensions; ++d)
         {

@@ -279,7 +279,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
     sim_params.base = 2;
 
     operational_domain_params op_domain_params{};
-    op_domain_params.simulation_parameters = sim_params;
+    op_domain_params.operational_params.simulation_parameters = sim_params;
     op_domain_params.sweep_dimensions      = {{sweep_parameter::EPSILON_R}, {sweep_parameter::LAMBDA_TF}};
 
     operational_domain_stats op_domain_stats{};
@@ -964,7 +964,7 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
     sim_params.mu_minus = -0.28;
 
     operational_domain_params op_domain_params{};
-    op_domain_params.simulation_parameters = sim_params;
+    op_domain_params.operational_params.simulation_parameters = sim_params;
     op_domain_params.sweep_dimensions      = {{sweep_parameter::EPSILON_R, 5.1, 6.0, 0.1},
                                               {sweep_parameter::LAMBDA_TF, 4.5, 5.4, 0.1}};
 
@@ -1081,7 +1081,7 @@ TEST_CASE("SiQAD's AND gate operational domain computation, using cube coordinat
     sim_params.mu_minus = -0.28;
 
     operational_domain_params op_domain_params{};
-    op_domain_params.simulation_parameters = sim_params;
+    op_domain_params.operational_params.simulation_parameters = sim_params;
     op_domain_params.sweep_dimensions      = {{sweep_parameter::EPSILON_R, 5.1, 6.0, 0.1},
                                               {sweep_parameter::LAMBDA_TF, 4.5, 5.4, 0.1}};
 
@@ -1167,7 +1167,7 @@ TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[operational-domain
     sim_params.mu_minus = -0.32;
 
     operational_domain_params op_domain_params{};
-    op_domain_params.simulation_parameters = sim_params;
+    op_domain_params.operational_params.simulation_parameters = sim_params;
     op_domain_params.sweep_dimensions      = {{sweep_parameter::EPSILON_R, 5.60, 5.61, 0.01},
                                               {sweep_parameter::LAMBDA_TF, 5.0, 5.01, 0.01}};
 
@@ -1254,14 +1254,8 @@ TEMPLATE_TEST_CASE("AND gate with Bestagon shape and kink states at default phys
 
     operational_domain_params op_domain_params{};
     op_domain_params.operational_params.simulation_parameters = sim_params;
-    op_domain_params.x_dimension                              = sweep_parameter::EPSILON_R;
-    op_domain_params.x_min                                    = 4.00;
-    op_domain_params.x_max                                    = 6.00;
-    op_domain_params.x_step                                   = 0.4;
-    op_domain_params.y_dimension                              = sweep_parameter::LAMBDA_TF;
-    op_domain_params.y_min                                    = 4.0;
-    op_domain_params.y_max                                    = 6.0;
-    op_domain_params.y_step                                   = 0.4;
+    op_domain_params.sweep_dimensions      = {{sweep_parameter::EPSILON_R, 4.0, 6.0, 0.4},
+                                                                 {sweep_parameter::LAMBDA_TF, 4.0, 6.0, 0.4}};
 
     operational_domain_stats op_domain_stats{};
 

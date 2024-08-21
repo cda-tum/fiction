@@ -358,6 +358,8 @@ class bdl_input_iterator
     {
         for (uint64_t i = 0; i < input_pairs.size(); ++i)
         {
+            // The "num_input - 1 - i" is to reduce confusion. This means that if the current_input_index is 10, the
+            // left BDL pair is set to 1 and the right pair is set to 0, not the other way around.
             const auto& input_i = input_pairs[num_inputs - 1 - i];
 
             if (input_wire_directions[num_inputs - 1 - i] == bdl_wire_direction::NORTH_SOUTH)
