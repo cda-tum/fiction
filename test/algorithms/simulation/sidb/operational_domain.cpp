@@ -280,7 +280,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
     operational_domain_params op_domain_params{};
     op_domain_params.operational_params.simulation_parameters = sim_params;
-    op_domain_params.sweep_dimensions      = {{sweep_parameter::EPSILON_R}, {sweep_parameter::LAMBDA_TF}};
+    op_domain_params.sweep_dimensions = {{sweep_parameter::EPSILON_R}, {sweep_parameter::LAMBDA_TF}};
 
     operational_domain_stats op_domain_stats{};
 
