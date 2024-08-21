@@ -319,8 +319,17 @@ class node_duplication_planarization_impl
     {
         const bool border_pis = true;
 
+        std::unordered_map<typename Ntk::node, int> po_counts;
+
+        ntk.foreach_po([&po_counts](auto po) {
+                           po_counts[po]++;
+                       });
+
         std::vector<typename Ntk::node> pos;
-        ntk.foreach_po([&pos](auto po) { pos.push_back(po); });
+        for(const auto& kv : po_counts) {
+            pos.push_back(kv.first);
+        }
+
         // Randomize the PO order
         if (ps.random_output_order)
         {

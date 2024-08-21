@@ -142,3 +142,33 @@ TEST_CASE("Aig Test 2", "[node-duplication-planarization]")
     REQUIRE(cec_m.has_value());
     CHECK(*cec_m == 1);
 }
+
+TEST_CASE("Multi output network", "[node-duplication-planarization]")
+{
+    mockturtle::aig_network aig{};
+
+    const auto x1 = aig.create_pi();
+    const auto x2 = aig.create_pi();
+
+    const auto a1 = aig.create_and(x1, x2);
+
+    aig.create_po(a1);
+    aig.create_po(a1);
+    /*aig.create_po(a1);
+    aig.create_po(a1);*/
+
+    network_balancing_params ps;
+    ps.unify_outputs = true;
+
+    const auto aig_b = network_balancing<technology_network>(aig, ps);
+
+    const auto vpi_r = mockturtle::rank_view(aig_b);
+
+    auto planarized_maj = node_duplication_planarization<technology_network>(aig_b);
+
+    mockturtle::equivalence_checking_stats st;
+    const auto                             cec_m =
+        mockturtle::equivalence_checking(*fiction::miter<technology_network>(aig, planarized_maj), {}, &st);
+    REQUIRE(cec_m.has_value());
+    CHECK(*cec_m == 1);
+}
