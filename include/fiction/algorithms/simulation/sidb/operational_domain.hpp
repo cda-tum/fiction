@@ -246,10 +246,6 @@ struct operational_domain_params
     std::vector<operational_domain_value_range> sweep_dimensions{
         operational_domain_value_range{sweep_parameter::EPSILON_R, 1.0, 10.0, 0.1},
         operational_domain_value_range{sweep_parameter::LAMBDA_TF, 1.0, 10.0, 0.1}};
-    /**
-     * The simulation engine to be used for the operational domain computation.
-     */
-    sidb_simulation_engine sim_engine{sidb_simulation_engine::QUICKEXACT};
 };
 /**
  * Statistics for the operational domain computation. The statistics are used across the different operational domain

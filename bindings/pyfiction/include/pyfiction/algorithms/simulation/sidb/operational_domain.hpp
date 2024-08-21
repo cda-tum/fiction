@@ -104,11 +104,11 @@ inline void operational_domain(pybind11::module& m)
 
         ;
 
-    // todo update docu
     py::class_<fiction::operational_domain_params>(m, "operational_domain_params",
                                                    DOC(fiction_operational_domain_params))
         .def(py::init<>())
-        .def_readwrite("operational_params", &fiction::operational_domain_params::operational_params)
+        .def_readwrite("operational_params", &fiction::operational_domain_params::operational_params,
+                       DOC(fiction_operational_domain_params_operational_params))
         .def_readwrite("sweep_dimensions", &fiction::operational_domain_params::sweep_dimensions,
                        DOC(fiction_operational_domain_params_sweep_dimensions))
 
