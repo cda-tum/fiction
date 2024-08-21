@@ -4337,7 +4337,7 @@ Returns:
     The output index derived from the truth table for the given input
     index.)doc";
 
-static const char *__doc_fiction_detail_design_sidb_gates_impl_initialize =
+static const char *__doc_fiction_detail_design_sidb_gates_impl_initialize_bdl_wires_with_directions =
 R"doc(This function performs the following steps to initialize the necessary
 components for the layout evaluation: 1. Detects the input and output
 BDL wires in the skeleton layout using the specified BDL wire
@@ -4462,7 +4462,7 @@ Returns:
     pruned.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_run_quickcell =
-R"doc(Design Standard Cells/gates by using the *QuickCell* algorithm
+R"doc(Design Standard Cells/gates by using the *QuickCell* algorithm.
 
 Returns:
     A vector of designed SiDB gate layouts.)doc";
@@ -4494,9 +4494,6 @@ corresponding bit in the input pattern is not set, assigns `NEUTRAL`
 charge to the upper part and `NEGATIVE` charge to the lower part of
 the BDLs of the wire.
 
-Template parameter ``Lyt``:
-    The type representing the layout.
-
 Parameter ``layout``:
     The charge distribution surface layout to be modified.
 
@@ -4519,9 +4516,6 @@ BDLs of the wire. - For `SOUTH-NORTH` direction wires, if the
 corresponding bit in the input pattern is not set, assigns `NEUTRAL`
 charge to the upper part and `NEGATIVE` charge to the lower part of
 the BDLs of the wire.
-
-Template parameter ``Lyt``:
-    The type representing the layout.
 
 Parameter ``layout``:
     The charge distribution surface layout to be modified.
