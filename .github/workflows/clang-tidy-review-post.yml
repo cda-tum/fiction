@@ -2,7 +2,7 @@ name: 🚨 • Post Clang-Tidy Review
 
 on:
   workflow_run:
-    workflows: [ "🐛 Clang-Tidy Review" ]
+    workflows: [ "🚨 Clang-Tidy Review" ]
     types:
       - completed
 
