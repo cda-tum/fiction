@@ -1,4 +1,4 @@
-name: Clang-Tidy Review
+name: 🚨 Clang-Tidy Review
 
 on:
   pull_request:
