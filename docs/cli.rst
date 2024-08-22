@@ -192,6 +192,20 @@ FCN circuit implementation of some specification under the provided parameters. 
 
 The possible parameters are similar to the ones used for ``exact``. See ``onepass -h`` for a full list.
 
+Graph-oriented layout design (``gold``)
+#######################################
+
+Generates gate-level layouts from logic network specifications by spanning a search space graph where each placement event can be represented as a search space vertex characterized by a partial layout at that instance. Edges between a partial layout ``a`` and ``b`` exist iff a can be transformed into ``b`` via a single placement event. Similar to navigating through a maze, A*-search can be employed to discover a path from the starting vertex (the empty layout) to the exit of the maze (a layout with all gates placed). This approach is scalable but requires that the input network is restricted to a 3-graph. At the same time, the output layout will always be 2DDWave-clocked and is not always optimal. For more information, see
+`the paper <https://www.cda.cit.tum.de/files/eda/2024_ieee_nano_a_star_is_born.pdf>`_.
+
+Possible parameters:
+
+- Timeout (``-t``), in seconds.
+- Number of expansions (``-n``) for each vertex in the search space graph, defaults to 4.
+- High effort mode (``-e``), should be set if more runtime is available to find layouts with even less area, not set by default.
+- Return first (``-r``), to return the first found layout, not set by default.
+- Planar (-p), should be set to create layouts without crossings, not set by default.
+
 Hexagonalization (``hex``)
 ##########################
 
@@ -211,6 +225,7 @@ Possible parameters:
 
 - Number of maximum gate relocations (``-m``), should be set to 1 for layouts with more than 100000 tiles, defaults to the number of tiles in the layout.
 - Wiring reduction only (``-w``), should be set for layouts with more than 20000000 tiles, not set by default.
+- Planar optimization (``-p``), should be set if during optimization, gates should only be relocated if the new wiring contains no crossings, not set by default.
 
 Design rule checking (``check``)
 --------------------------------
