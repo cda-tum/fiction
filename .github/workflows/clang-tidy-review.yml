@@ -16,7 +16,7 @@ concurrency:
 jobs:
   clangtidy:
     runs-on: ubuntu-latest
-    name: Clang-Tidy
+    name: 🚨 Clang-Tidy
 
     steps:
       - name: Clone Repository
