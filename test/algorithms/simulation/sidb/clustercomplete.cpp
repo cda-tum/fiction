@@ -34,6 +34,8 @@
 #include <algorithm>
 #include <any>
 #include <cstdint>
+#include <set>
+#include <vector>
 
 using namespace fiction;
 
@@ -75,11 +77,11 @@ template <typename Lyt>
 static bool verify_clustercomplete_result(const charge_distribution_surface<Lyt>&              qe_cds,
                                           const std::vector<charge_distribution_surface<Lyt>>& cc_cdss) noexcept
 {
-    for (const charge_distribution_surface<Lyt>& cc_cds : cc_cdss)
+    for (const auto& cc_cds : cc_cdss)
     {
         bool is_same = true;
 
-        for (const cell<Lyt>& c : qe_cds.get_sidb_order())
+        for (const auto& c : qe_cds.get_sidb_order())
         {
             if (qe_cds.get_charge_state(c) != cc_cds.get_charge_state(c))
             {

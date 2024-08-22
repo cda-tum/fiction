@@ -223,13 +223,11 @@ TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
     const lattice cl{convert_to_siqad_coordinates(
         apply_gate_library<sidb_100_cell_clk_lyt, sidb_bestagon_library, hex_odd_row_gate_clk_lyt>(lyt))};
 
-#if (FICTION_ALGLIB_ENABLED)
     BENCHMARK("3 Segment Diagonal Bestagon Wire")
     {
         const clustercomplete_params<cell<lattice>> sim_params{sidb_simulation_parameters{3, -0.32}};
         return clustercomplete<lattice>(cl, sim_params);
     };
-#endif  // FICTION_ALGLIB_ENABLED
 }
 #endif  // FICTION_ALGLIB_ENABLED
 //  Intel Core i6700HQ (8 cores @ 2.60 GHz), Ubuntu 22.04.2 LTS, Ubuntu clang version 14.0.0 (13.04.24)

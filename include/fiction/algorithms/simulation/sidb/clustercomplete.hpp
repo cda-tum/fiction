@@ -41,7 +41,7 @@ namespace fiction
  * unfolding process of large simulation problems by performing more involved pruning procedures in the construction
  * stage.
  */
-enum class ground_state_space_reporting
+enum class ground_state_space_reporting : uint8_t
 {
     /**
      * Enabling this option will output *Ground State Space* statistics to the standard output.
@@ -240,11 +240,11 @@ class clustercomplete_impl
         for (const sidb_cluster_projector_state_ptr& pst : clustering_state.proj_states)
         {
             // number of respective witnesses to count
-            uint64_t required_neg_count  = pst->get_count<sidb_charge_state::NEGATIVE>(),
-                     required_pos_count  = pst->get_count<sidb_charge_state::POSITIVE>(),
-                     required_neut_count = pst->get_count<sidb_charge_state::NEUTRAL>();
+            uint64_t required_neg_count  = pst->get_count<sidb_charge_state::NEGATIVE>();
+            uint64_t required_pos_count  = pst->get_count<sidb_charge_state::POSITIVE>();
+            uint64_t required_neut_count = pst->get_count<sidb_charge_state::NEUTRAL>();
 
-            for (const uint64_t sidb_ix : pst->cluster->sidbs)
+            for (const auto sidb_ix : pst->cluster->sidbs)
             {
                 const double recv_pot_lb = clustering_state.pot_bounds.get<bound_direction::LOWER>(sidb_ix);
                 const double recv_pot_ub = clustering_state.pot_bounds.get<bound_direction::UPPER>(sidb_ix);
@@ -281,7 +281,7 @@ class clustercomplete_impl
         charge_distribution_surface charge_layout_copy{charge_layout};
 
         // convert bottom clustering state to charge distribution
-        for (const sidb_cluster_projector_state_ptr& pst : clustering_state.proj_states)
+        for (const auto& pst : clustering_state.proj_states)
         {
             const uint64_t sidb_ix = get_singleton_sidb_ix(pst->cluster);
             charge_layout_copy.assign_charge_state_by_cell_index(
@@ -327,7 +327,7 @@ class clustercomplete_impl
     /**
      * Enumeration for specifying operations on potential bounds.
      */
-    enum class potential_bound_update_operation
+    enum class potential_bound_update_operation : uint8_t
     {
         /**
          * Potential bounds of the parent are added.
@@ -471,7 +471,7 @@ class clustercomplete_impl
         const uint64_t num_threads_to_use = std::min(std::max(num_threads, uint64_t{1}), top_level_multisets);
 
         // define the top cluster charge space ranges per thread
-        std::vector<std::pair<uint64_t, uint64_t>> ranges;
+        std::vector<std::pair<uint64_t, uint64_t>> ranges{};
         ranges.reserve(num_threads_to_use);
 
         const uint64_t chunk_size = std::max(top_level_multisets / num_threads_to_use, uint64_t{1});
