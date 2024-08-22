@@ -25,6 +25,7 @@
 #include <optional>
 #include <set>
 #include <vector>
+#include <cstdint>
 
 #if (PROGRESS_BARS)
 #include <mockturtle/utils/progress_bar.hpp>
