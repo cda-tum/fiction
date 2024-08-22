@@ -204,7 +204,7 @@ Possible parameters:
 - Number of expansions (``-n``) for each vertex in the search space graph, defaults to 4.
 - High effort mode (``-e``), should be set if more runtime is available to find layouts with even less area, not set by default.
 - Return first (``-r``), to return the first found layout, not set by default.
-- Planar (-p), should be set to create layouts without crossings, not set by default.
+- Planar (``-p``), should be set to create layouts without crossings, not set by default.
 
 Hexagonalization (``hex``)
 ##########################
