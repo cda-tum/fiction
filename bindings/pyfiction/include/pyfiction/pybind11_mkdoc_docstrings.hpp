@@ -3971,6 +3971,20 @@ static const char *__doc_fiction_detail_color_routing_impl_pst = R"doc(Statistic
 
 static const char *__doc_fiction_detail_color_routing_impl_run = R"doc()doc";
 
+static const char *__doc_fiction_detail_coloring_container = R"doc()doc";
+
+static const char *__doc_fiction_detail_coloring_container_color_east = R"doc()doc";
+
+static const char *__doc_fiction_detail_coloring_container_color_ntk = R"doc()doc";
+
+static const char *__doc_fiction_detail_coloring_container_color_null = R"doc()doc";
+
+static const char *__doc_fiction_detail_coloring_container_color_south = R"doc()doc";
+
+static const char *__doc_fiction_detail_coloring_container_coloring_container = R"doc()doc";
+
+static const char *__doc_fiction_detail_coloring_container_opposite_color = R"doc()doc";
+
 static const char *__doc_fiction_detail_compare_gate_tiles =
 R"doc(Custom comparison function for sorting tiles based on the sum of their
 coordinates that breaks ties based on the x-coordinate.
