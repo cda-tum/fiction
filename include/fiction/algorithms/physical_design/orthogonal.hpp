@@ -63,36 +63,6 @@ struct orthogonal_physical_design_stats
 namespace detail
 {
 
-/**
- * Determine siblings of the given node. A sibling is a node that shares the same fan-in with n.
- * @param n Node to consider.
- * @return Siblings of n.
- */
-template <typename Ntk>
-std::vector<mockturtle::node<Ntk>> siblings(const Ntk& ntk, const mockturtle::node<Ntk> n) noexcept
-{
-    std::vector<mockturtle::node<Ntk>> sibs{};
-    ntk.foreach_fanin(n,
-                      [&ntk, &sibs, &n](const auto& fi)
-                      {
-                          // skip constants
-                          if (const auto fin = ntk.get_node(fi); !ntk.is_constant(fin))
-                          {
-                              ntk.foreach_fanout(fin,
-                                                 [&ntk, &sibs, &n](const auto& fon)
-                                                 {
-                                                     // do not consider constants or n itself
-                                                     if (!ntk.is_constant(fon) && (fon != n))
-                                                     {
-                                                         sibs.push_back(fon);
-                                                     }
-                                                 });
-                          }
-                      });
-
-    return sibs;
-}
-
 template <typename Ntk>
 struct coloring_container
 {
@@ -104,7 +74,7 @@ struct coloring_container
 
     out_of_place_edge_color_view<Ntk> color_ntk;
 
-    const uint32_t color_null = 0ul, color_east, color_south;
+    uint32_t color_null = 0ul, color_east, color_south;
 
     [[nodiscard]] uint32_t opposite_color(const uint32_t c) const noexcept
     {
