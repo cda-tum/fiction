@@ -15475,15 +15475,9 @@ Returns:
 
 static const char *__doc_fiction_sidb_bestagon_library_sidb_bestagon_library = R"doc()doc";
 
-static const char *__doc_fiction_sidb_binary_cluster_hierarchy_node =
-R"doc(The struct used to store a binary cluster hierarchy that may be used
-to store the result of the hierarchical clustering returned by ALGLIB
-functionality.)doc";
+static const char *__doc_fiction_sidb_binary_cluster_hierarchy_node = R"doc(Forward-declaration of sidb_binary_cluster_hierarchy_node.)doc";
 
-static const char *__doc_fiction_sidb_binary_cluster_hierarchy_node_2 =
-R"doc(The struct used to store a binary cluster hierarchy that may be used
-to store the result of the hierarchical clustering returned by ALGLIB
-functionality.)doc";
+static const char *__doc_fiction_sidb_binary_cluster_hierarchy_node_2 = R"doc(Forward-declaration of sidb_binary_cluster_hierarchy_node.)doc";
 
 static const char *__doc_fiction_sidb_binary_cluster_hierarchy_node_c = R"doc()doc";
 
