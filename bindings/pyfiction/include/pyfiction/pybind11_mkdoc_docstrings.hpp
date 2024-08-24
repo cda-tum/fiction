@@ -23,32 +23,6 @@
 #endif
 
 
-static const char *__doc_extended_rank_view =
-R"doc(@class extended_rank_view<Ntk, true>
-
-If already a rank_interface exists only the depth_view constructor
-gets called.
-
-Template parameter ``Ntk``:
-    - The network type.)doc";
-
-static const char *__doc_extended_rank_view_2 =
-R"doc(Deduction guide for `extended_rank_view'
-
-Template parameter ``T``:
-    Network type deduced from the construction context of
-    `extended_rank_view`.)doc";
-
-static const char *__doc_extended_rank_view_3 =
-R"doc(Deduction guide for `extended_rank_view` with two constructor
-arguments
-
-Template parameter ``T``:
-    Network type deduced from the construction context of
-    `extended_rank_view`.)doc";
-
-static const char *__doc_extended_rank_view_extended_rank_view = R"doc()doc";
-
 static const char *__doc_fiction_a_star =
 R"doc(The A* path finding algorithm for shortest loop-less paths between a
 given source and target coordinate in a layout. This function
@@ -6411,34 +6385,23 @@ it is a primary input. If a non-primary input is found, the
 `f_final_level` parameter is set to false and the loop is exited.
 
 Parameter ``v_next_level``:
-    The vector of nodes to be checked
-
-Parameter ``f_final_level``:
-    A reference to a boolean indicating if the vector contains only
-    primary inputs)doc";
+    The vector of nodes to be checked.)doc";
 
 static const char *__doc_fiction_detail_node_duplication_planarization_impl_compute_node_order_next_level =
 R"doc(Computes the order of nodes in the next level based on delay
-
-Parameter ``next_level``:
-    The vector to store the nodes in the next level
 
 This function computes the order of nodes in the next level based on
 their delay in the H-graph of the level. It selects the path with the
 least delay from the current level pairs and follows it via fanin
 relations. The nodes are inserted into the next level vector in the
-order they are encountered.)doc";
+order they are encountered.
+
+Parameter ``next_level``:
+    The vector to store the nodes in the next level.)doc";
 
 static const char *__doc_fiction_detail_node_duplication_planarization_impl_compute_slice_delays =
 R"doc(Computes the delay in a given slice (each possible order of
-node_pairs) of an H-graph
-
-Parameter ``nd``:
-    Node in the H-graph
-
-Parameter ``border_pis``:
-    A boolean indicating whether the input PIs (Primary Inputs) should
-    be propagated to the next level
+node_pairs) of an H-graph.
 
 This function iterates over the fanins of the given node and computes
 the delay for all possible orders of these nodes that form a
@@ -6453,26 +6416,26 @@ updated.
 The processed node_pairs are pushed back to the 'lvl_pairs' data
 member for subsequent delay calculations.
 
-Throws:
-    std::runtime_error if no combinations (possible node_pairs) are
-    found, which might suggest a dangling node)doc";
+Parameter ``nd``:
+    Node in the H-graph.
 
-static const char *__doc_fiction_detail_node_duplication_planarization_impl_insert_if_unique =
-R"doc(Inserts a node into a vector if it is unique
+Parameter ``border_pis``:
+    A boolean indicating whether the input PIs (Primary Inputs) should
+    be propagated to the next level.)doc";
+
+static const char *__doc_fiction_detail_node_duplication_planarization_impl_insert_if_not_first =
+R"doc(Inserts a node into a vector if it is unique.
 
 This function inserts a node into a vector only if the vector is empty
 or the node is not equal to the first element of the vector. If the
 vector is not empty and the node is equal to the first element, it
 does nothing.
 
-Template parameter ``Ntk``:
-    The network type
-
 Parameter ``node``:
-    The node to be inserted
+    The node to be inserted.
 
 Parameter ``vec``:
-    The vector to insert the node into)doc";
+    The vector to insert the node into.)doc";
 
 static const char *__doc_fiction_detail_node_duplication_planarization_impl_lvl_pairs = R"doc()doc";
 
@@ -6485,10 +6448,7 @@ static const char *__doc_fiction_detail_node_duplication_planarization_impl_ps =
 static const char *__doc_fiction_detail_node_duplication_planarization_impl_run = R"doc()doc";
 
 static const char *__doc_fiction_detail_node_pair =
-R"doc(A structure representing a pair of nodes in an H-graph
-
-Template parameter ``Ntk``:
-    Network type for the nodes in the pair
+R"doc(A structure representing a pair of nodes in an H-graph.
 
 The nodes stored in this struct describe the fanin-edges of a node in
 an H-graph. A node pair object holds two nodes, which are saved in the
@@ -6499,26 +6459,26 @@ second node in 'pair'. The order of 'middle_nodes' is arbitrary as
 they cannot be further connected to any other nodes. For the
 planarization, only the nodes inside the 'pair' are relevant.
 
-@note The edges connecting to the nodes in 'pair' effectively block
-the 'middle_nodes'.)doc";
+Template parameter ``Ntk``:
+    Network type for the nodes in the pair.)doc";
 
-static const char *__doc_fiction_detail_node_pair_delay = R"doc(Specifies the delay value for the node)doc";
+static const char *__doc_fiction_detail_node_pair_delay = R"doc(Specifies the delay value for the node.)doc";
 
 static const char *__doc_fiction_detail_node_pair_fanin_pair =
 R"doc(Shared pointer to another instance of node_pair detailing fanin-edge
-alignment)doc";
+alignment.)doc";
 
 static const char *__doc_fiction_detail_node_pair_node_pair =
-R"doc(node_pair constructor
+R"doc(Standard constructor.
 
 Parameter ``node1``:
-    The first node of the fanin-edged node
+    The first node of the fanin-edged node.
 
 Parameter ``node2``:
-    The second node of the fanin-edged node
+    The second node of the fanin-edged node.
 
 Parameter ``delayValue``:
-    The delay value for the node)doc";
+    The delay value for the node.)doc";
 
 static const char *__doc_fiction_detail_on_the_fly_circuit_design_impl = R"doc()doc";
 
@@ -9103,6 +9063,32 @@ R"doc(*QuickExact* is also an exact simulation engine that requires
 exponential runtime, but it scales a lot better than ExGS due to its
 effective search-space pruning.)doc";
 
+static const char *__doc_fiction_extended_rank_view =
+R"doc(@class extended_rank_view<Ntk, true>
+
+If already a rank_interface exists only the depth_view constructor
+gets called.
+
+Template parameter ``Ntk``:
+    The network type.)doc";
+
+static const char *__doc_fiction_extended_rank_view_2 =
+R"doc(Deduction guide for `extended_rank_view'
+
+Template parameter ``T``:
+    Network type deduced from the construction context of
+    `extended_rank_view`.)doc";
+
+static const char *__doc_fiction_extended_rank_view_3 =
+R"doc(Deduction guide for `extended_rank_view` with two constructor
+arguments
+
+Template parameter ``T``:
+    Network type deduced from the construction context of
+    `extended_rank_view`.)doc";
+
+static const char *__doc_fiction_extended_rank_view_extended_rank_view = R"doc()doc";
+
 static const char *__doc_fiction_extract_routing_objectives =
 R"doc(Extracts all routing objectives from the given layout. To this end,
 all routing paths in the layout are traversed, starting at each PI.
@@ -11319,6 +11305,8 @@ static const char *__doc_fiction_has_foreach_incoming_clocked_zone = R"doc()doc"
 
 static const char *__doc_fiction_has_foreach_outgoing_clocked_zone = R"doc()doc";
 
+static const char *__doc_fiction_has_foreach_real_pi = R"doc()doc";
+
 static const char *__doc_fiction_has_foreach_sidb_defect = R"doc()doc";
 
 static const char *__doc_fiction_has_foreach_tile = R"doc()doc";
@@ -11330,6 +11318,8 @@ static const char *__doc_fiction_has_get_functional_implementations = R"doc()doc
 static const char *__doc_fiction_has_get_gate_ports = R"doc()doc";
 
 static const char *__doc_fiction_has_get_layout_name = R"doc()doc";
+
+static const char *__doc_fiction_has_get_real_pi = R"doc()doc";
 
 static const char *__doc_fiction_has_get_sidb_defect = R"doc()doc";
 
@@ -11428,6 +11418,8 @@ static const char *__doc_fiction_has_north_east = R"doc()doc";
 static const char *__doc_fiction_has_north_west = R"doc()doc";
 
 static const char *__doc_fiction_has_num_real_pis = R"doc()doc";
+
+static const char *__doc_fiction_has_num_virtual_pis = R"doc()doc";
 
 static const char *__doc_fiction_has_ordinal_operations = R"doc()doc";
 
@@ -13039,29 +13031,9 @@ Parameter ``file``:
 Parameter ``rfun``:
     The actual parsing function.)doc";
 
-static const char *__doc_fiction_node_duplication_params = R"doc(Parameters for the node duplication algorithm.)doc";
-
-static const char *__doc_fiction_node_duplication_params_random_output_order =
-R"doc(The output order determines the starting layer for this algorithm. If
-this option is turned off, the output order remains the same as in the
-provided network. If it is turned on, the outputs are ordered
-randomly.)doc";
-
 static const char *__doc_fiction_node_duplication_planarization =
 R"doc(Implements a planarization mechanism for networks using a H-Graph
 strategy for node duplication.
-
-Template parameter ``NtkDest``:
-    Destination network type
-
-Template parameter ``NtkSrc``:
-    Source network type
-
-Parameter ``ntk_src``:
-    Source network to be utilized for the planarization
-
-Parameter ``ps``:
-    Node duplication parameters used in the computation
 
 The planarization achieved by this function solves the Node
 Duplication Crossing Minimization (NDCE) problem by finding the
@@ -13076,11 +13048,31 @@ H-graph, traversing from the POs towards the Primary Inputs (PIs).
 
 Returns:
     A view of the planarized virtual_pi_network created in the format
-    of extended_rank_view
+    of extended_rank_view.
+
+Template parameter ``NtkDest``:
+    Destination network type.
+
+Template parameter ``NtkSrc``:
+    Source network type.
+
+Parameter ``ntk_src``:
+    Source network to be utilized for the planarization.
+
+Parameter ``ps``:
+    Node duplication parameters used in the computation.
 
 Throws:
     std::runtime_error if input network not balanced, if no node
-    combinations are found or if the created network is non-planar)doc";
+    combinations are found or if the created network is non-planar.)doc";
+
+static const char *__doc_fiction_node_duplication_planarization_params = R"doc(Parameters for the node duplication algorithm.)doc";
+
+static const char *__doc_fiction_node_duplication_planarization_params_random_output_order =
+R"doc(The output order determines the starting layer for this algorithm. If
+this option is turned off, the output order remains the same as in the
+provided network. If it is turned on, the outputs are ordered
+randomly.)doc";
 
 static const char *__doc_fiction_normalize_layout_coordinates =
 R"doc(A new layout is constructed and returned that is equivalent to the
