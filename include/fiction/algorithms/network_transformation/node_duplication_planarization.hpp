@@ -321,12 +321,11 @@ class node_duplication_planarization_impl
 
         std::unordered_map<typename Ntk::node, int> po_counts;
 
-        ntk.foreach_po([&po_counts](auto po) {
-                           po_counts[po]++;
-                       });
+        ntk.foreach_po([&po_counts](auto po) { po_counts[po]++; });
 
         std::vector<typename Ntk::node> pos;
-        for(const auto& kv : po_counts) {
+        for (const auto& kv : po_counts)
+        {
             pos.push_back(kv.first);
         }
 
