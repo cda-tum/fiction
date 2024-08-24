@@ -24,6 +24,21 @@ If you use *fiction* in your work, we would appreciate if you cited
       month = {May}
     }
 
+and
+
+    Marcel Walter, Jan Drewniok, Simon T. Hofmann, Benjamin Hien, and Robert Wille: "The Munich Nanotech Toolkit (MNT)",
+    IEEE International Conference on Nanotechnology (IEEE NANO), 2024.
+
+.. code-block:: tex
+
+    @inproceedings{mnt,
+      author = {Walter, Marcel and Drewniok, Jan and Hofmann, Simon T. and Hien, Benjamin and Wille, Robert},
+      title = {{The Munich Nanotech Toolkit (MNT)}},
+      booktitle = {IEEE International Conference on Nanotechnology (IEEE NANO)},
+      pages = {454--459},
+      year = {2024}
+    }
+
 Furthermore, if you use any of the design automation algorithms, please consider citing their respective papers as well.
 
 * :ref:`Exact physical design <exact>` (``exact``):
@@ -156,7 +171,6 @@ Furthermore, if you use any of the design automation algorithms, please consider
           year={2023}
         }
 
-
 * :ref:`Post-layout optimization <post_layout_optimization>` (``post_layout_optimization``):
 
     .. code-block:: tex
@@ -166,6 +180,18 @@ Furthermore, if you use any of the design automation algorithms, please consider
           author={Hofmann, Simon and Walter, Marcel and Wille, Robert},
           booktitle={International Symposium on Nanoscale Architectures (NANOARCH)},
           year={2023}
+        }
+
+* :ref:`SAT-based Clock Number assignment <determine_clocking>`:
+
+    .. code-block:: tex
+
+        @inproceedings{walter2022clocknumber,
+          title={{Ending the Tyranny of the Clock: SAT-Based Clock Number Assignment for Field-coupled Nanotechnologies}},
+          author={Walter, Marcel and Drewniok, Jan and Wille, Robert},
+          booktitle={IEEE International Conference on Nanotechnology (IEEE NANO)},
+          pages={68--73},
+          year={2024}
         }
 
 * :ref:`SiDB Bestagon library <bestagon>`:
