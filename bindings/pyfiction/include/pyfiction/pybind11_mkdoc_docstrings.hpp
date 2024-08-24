@@ -8082,16 +8082,21 @@ Returns:
     distributing k entities on n positions.)doc";
 
 static const char *__doc_fiction_determine_clocking =
-R"doc(Determines clock numbers for the given gate-level layout. This
-algorithm parses the layout's gate and wire connections, disregarding
-any existing clocking information, and constructs a SAT instance to
-find a valid clock number assignment under which the information flow
-is respected. It then assigns these clock numbers as an irregular
-clock map to the given layout via the `assign_clock_number` function,
-overriding any existing clocking scheme.
+R"doc(Determines clock numbers for the given (unclocked) gate-level layout.
+This algorithm parses the layout's gate and wire connections,
+disregarding any existing clocking information, and constructs a SAT
+instance to find a valid clock number assignment under which the
+information flow is respected. It then assigns these clock numbers as
+an irregular clock map to the given layout via the
+`assign_clock_number` function, overriding any existing clocking
+scheme.
 
 If no valid clock number assignment exists for `lyt`, this function
 returns `false` and does not modify `lyt`.
+
+This algorithm was proposed in \"Ending the Tyranny of the Clock: SAT-
+based Clock Number Assignment for Field-coupled Nanotechnologies\" by
+M. Walter, J. Drewniok, and R. Wille in IEEE NANO 2024.
 
 Template parameter ``Lyt``:
     Gate-level layout type.
