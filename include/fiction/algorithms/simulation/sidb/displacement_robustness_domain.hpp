@@ -50,7 +50,7 @@ struct displacement_robustness_domain
 
 /**
  * Parameters for the `determine_displacement_robustness_domain` and
- * `determine_propability_of_fabricating_operational_gate` algorithms.
+ * `determine_probability_of_fabricating_operational_gate` algorithms.
  *
  * @param CellType SiDB layout cell type.
  */
@@ -263,7 +263,7 @@ class displacement_robustness_domain_impl
      *        SiDBs have a slight displacement.
      * @return Probability of fabricating a working SiDB gate implementation.
      */
-    [[nodiscard]] double determine_propability_of_fabricating_operational_gate(double fabrication_error_rate)
+    [[nodiscard]] double determine_probability_of_fabricating_operational_gate(double fabrication_error_rate)
     {
         // The maximum error rate is 1.0.
         fabrication_error_rate = std::min(1.0, fabrication_error_rate);
@@ -626,7 +626,7 @@ determine_displacement_robustness_domain(const Lyt& layout, const std::vector<TT
  * @return The probability of fabricating an operational SiDB layout.
  */
 template <typename Lyt, typename TT>
-[[nodiscard]] double determine_propability_of_fabricating_operational_gate(
+[[nodiscard]] double determine_probability_of_fabricating_operational_gate(
     const Lyt& layout, const std::vector<TT>& spec, const displacement_robustness_domain_params<cell<Lyt>>& params = {},
     const double fabrication_error_rate = 1.0)
 {
@@ -636,7 +636,7 @@ template <typename Lyt, typename TT>
     displacement_robustness_domain_stats                 st{};
     detail::displacement_robustness_domain_impl<Lyt, TT> p{layout, spec, params, st};
 
-    return p.determine_propability_of_fabricating_operational_gate(fabrication_error_rate);
+    return p.determine_probability_of_fabricating_operational_gate(fabrication_error_rate);
 }
 
 }  // namespace fiction
