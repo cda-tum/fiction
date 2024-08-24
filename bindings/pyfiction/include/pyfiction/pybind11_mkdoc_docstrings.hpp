@@ -4352,7 +4352,7 @@ based on the specified allowed displacements.
 Returns:
     A vector containing all possible displacements for each SiDB.)doc";
 
-static const char *__doc_fiction_detail_displacement_robustness_domain_impl_determine_propability_of_fabricating_operational_gate =
+static const char *__doc_fiction_detail_displacement_robustness_domain_impl_determine_probability_of_fabricating_operational_gate =
 R"doc(The manufacturing error rate is highly dependent on the speed of the
 manufacturing process. Therefore, fast fabrication requires SiDB
 layouts with high displacement tolerance to ensure functionality in
@@ -8207,7 +8207,7 @@ Returns:
     number of the given charge distribution surface for each parameter
     point.)doc";
 
-static const char *__doc_fiction_determine_propability_of_fabricating_operational_gate =
+static const char *__doc_fiction_determine_probability_of_fabricating_operational_gate =
 R"doc(During fabrication, SiDBs may not align precisely with their intended
 atomic positions, resulting in displacement. This means that an SiDB
 is fabricated close to the desired one, typically one or a few H-Si
@@ -8355,7 +8355,7 @@ from applying a displacement to a given SiDB layout.)doc";
 
 static const char *__doc_fiction_displacement_robustness_domain_params =
 R"doc(Parameters for the `determine_displacement_robustness_domain` and
-`determine_propability_of_fabricating_operational_gate` algorithms.
+`determine_probability_of_fabricating_operational_gate` algorithms.
 
 Parameter ``CellType``:
     SiDB layout cell type.)doc";
