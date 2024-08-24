@@ -15,9 +15,9 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <cstdint>
 #include <limits>
 #include <memory>
-#include <cstdint>
 #include <random>
 #include <unordered_map>
 #include <utility>
@@ -102,12 +102,13 @@ struct node_pair
 template <typename Ntk>
 [[nodiscard]] std::vector<node_pair<Ntk>> calculate_pairs(const std::vector<mockturtle::node<Ntk>>& nodes) noexcept
 {
-    std::vector<node_pair<Ntk>>        pairwise_combinations{};
+    std::vector<node_pair<Ntk>> pairwise_combinations{};
     pairwise_combinations.reserve(nodes.size() * (nodes.size() - 1));
 
     if (nodes.size() == 1)
     {
-        const node_pair<Ntk> pair = {nodes[0], nodes[0], std::numeric_limits<uint64_t>::max()};  // Initialize delay to inf
+        const node_pair<Ntk> pair = {nodes[0], nodes[0],
+                                     std::numeric_limits<uint64_t>::max()};  // Initialize delay to inf
         pairwise_combinations.push_back(pair);
         return pairwise_combinations;
     }
@@ -147,7 +148,9 @@ template <typename Ntk>
 class node_duplication_planarization_impl
 {
   public:
-    node_duplication_planarization_impl(const Ntk& src, const node_duplication_planarization_params& p) : ntk(src), ps{p}
+    node_duplication_planarization_impl(const Ntk& src, const node_duplication_planarization_params& p) :
+            ntk(src),
+            ps{p}
     {}
 
     /**
@@ -435,7 +438,7 @@ node_duplication_planarization(const NtkSrc& ntk_src, const node_duplication_pla
     // check the network to be a technology network (is there a better check/trait?)
     static_assert(mockturtle::has_create_le_v<NtkSrc>, "T must be of type const ExpectedType");
 
-    assert (is_balanced(ntk_src) && "Networks have to be balanced for this duplication");
+    assert(is_balanced(ntk_src) && "Networks have to be balanced for this duplication");
 
     detail::node_duplication_planarization_impl p{ntk_src, ps};
 
