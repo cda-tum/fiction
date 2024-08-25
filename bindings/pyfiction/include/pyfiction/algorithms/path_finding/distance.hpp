@@ -27,8 +27,12 @@ void distance(pybind11::module& m)
           DOC(fiction_manhattan_distance));
     m.def("euclidean_distance", &fiction::euclidean_distance<Lyt>, "layout"_a, "source"_a, "target"_a,
           DOC(fiction_euclidean_distance));
+    m.def("squared_euclidean_distance", &fiction::squared_euclidean_distance<Lyt>, "layout"_a, "source"_a, "target"_a,
+          DOC(fiction_squared_euclidean_distance));
     m.def("twoddwave_distance", &fiction::twoddwave_distance<Lyt>, "layout"_a, "source"_a, "target"_a,
           DOC(fiction_twoddwave_distance));
+    m.def("chebyshev_distance", &fiction::chebyshev_distance<Lyt>, "layout"_a, "source"_a, "target"_a,
+          DOC(fiction_chebyshev_distance));
 }
 
 }  // namespace detail
