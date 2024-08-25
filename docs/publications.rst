@@ -101,6 +101,8 @@ Furthermore, if you use any of the design automation algorithms, please consider
           year={2022}
         }
 
+    `Multi-path routing experiment script <https://github.com/cda-tum/fiction/tree/main/experiments/color_routing>`_
+
 * :ref:`QuickSim <quicksim>` (``quicksim``):
 
     .. code-block:: tex
@@ -112,6 +114,8 @@ Furthermore, if you use any of the design automation algorithms, please consider
           pages={817--822},
           year={2023}
         }
+
+    `QuickSim experiment script <https://github.com/cda-tum/fiction/tree/main/experiments/sidb_simulation>`_
 
 * :ref:`QuickExact <quickexact>` (``quickexact``):
 
@@ -125,6 +129,8 @@ Furthermore, if you use any of the design automation algorithms, please consider
           year={2024}
         }
 
+    `QuickExact experiment script <https://github.com/cda-tum/fiction/tree/main/experiments/sidb_simulation>`_
+
 * :ref:`Critical temperature simulation <critical_temperature>` (``critical_temperature``):
 
     .. code-block:: tex
@@ -137,7 +143,7 @@ Furthermore, if you use any of the design automation algorithms, please consider
           year={2023}
         }
 
-* :ref:`Operational Domain computation <opdom>` (``opdom``):
+* :ref:`Operational domain computation <opdom>` (``opdom``):
 
     .. code-block:: tex
 
@@ -148,7 +154,9 @@ Furthermore, if you use any of the design automation algorithms, please consider
           year={2023}
         }
 
-* :ref:`SiDB Gate Design <gate_design>` (``gate_design``):
+    `Operational domain experiment scripts <https://github.com/cda-tum/fiction/tree/main/experiments/operational_domain>`_
+
+* :ref:`SiDB gate design <gate_design>` (``gate_design``):
 
     .. code-block:: tex
 
@@ -171,6 +179,8 @@ Furthermore, if you use any of the design automation algorithms, please consider
           year={2023}
         }
 
+    `Hexagonalization experiment script <https://github.com/cda-tum/fiction/tree/main/experiments/hexagonalization>`_
+
 * :ref:`Post-layout optimization <post_layout_optimization>` (``post_layout_optimization``):
 
     .. code-block:: tex
@@ -182,7 +192,9 @@ Furthermore, if you use any of the design automation algorithms, please consider
           year={2023}
         }
 
-* :ref:`SAT-based Clock Number assignment <determine_clocking>`:
+    `Post-layout optimization experiment script <https://github.com/cda-tum/fiction/tree/main/experiments/post_layout_optimization>`_
+
+* :ref:`SAT-based clock number assignment <determine_clocking>`:
 
     .. code-block:: tex
 
@@ -193,6 +205,8 @@ Furthermore, if you use any of the design automation algorithms, please consider
           pages={68--73},
           year={2024}
         }
+
+    `Clock number assignment experiment script <https://github.com/cda-tum/fiction/tree/main/experiments/clock_number_assignment>`_
 
 * :ref:`SiDB Bestagon library <bestagon>`:
 
@@ -205,3 +219,5 @@ Furthermore, if you use any of the design automation algorithms, please consider
           pages = {739--744},
           year={2022}
         }
+
+    `Bestagon experiment script <https://github.com/cda-tum/fiction/tree/main/experiments/bestagon>`_
