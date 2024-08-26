@@ -17152,14 +17152,16 @@ R"doc(\verbatim +-------+ | | | +-------+ | | | +-------+ | | | +-------+
 \endverbatim)doc";
 
 static const char *__doc_fiction_virtual_miter =
-R"doc(! Creates a combinational miter from two networks.
+R"doc(This method combines two networks to a combinational miter like a
+mockturtle::miter. Additionally, either of the input networks can be a
+network with virtual inputs, which are duplicated PIs. In this case
+the duplicated PIs are deleted and all edges connecting to them are
+remapped on their originating PI.
 
-This method combines two networks that have the same number of primary
-inputs and the same number of primary outputs into a miter. The miter
-has the same number of inputs and one primary output. This output is
-the OR of XORs of all primary output pairs. In other words, the miter
-outputs 1 for all input assignments in which the two input networks
-differ.
+Therefore, the miter has the same number of inputs and one primary
+output. This output is the OR of XORs of all primary output pairs. In
+other words, the miter outputs 1 for all input assignments in which
+the two input networks differ.
 
 All networks may have different types. The method returns an optional,
 which is `nullopt`, whenever the two input networks don't match in
