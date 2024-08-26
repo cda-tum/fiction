@@ -26,7 +26,7 @@ If you use *fiction* in your work, we would appreciate if you cited
 
 and
 
-    Marcel Walter, Jan Drewniok, Simon T. Hofmann, Benjamin Hien, and Robert Wille: "The Munich Nanotech Toolkit (MNT)",
+    Marcel Walter, Jan Drewniok, Simon Hofmann, Benjamin Hien, and Robert Wille: "The Munich Nanotech Toolkit (MNT)",
     IEEE International Conference on Nanotechnology (IEEE NANO), 2024.
 
 .. code-block:: tex
@@ -193,6 +193,20 @@ Furthermore, if you use any of the design automation algorithms, please consider
         }
 
     `Post-layout optimization experiment script <https://github.com/cda-tum/fiction/tree/main/experiments/post_layout_optimization>`_
+
+* :ref:`Graph-oriented layout design <graph_oriented_layout_design>` (``graph_oriented_layout_design``):
+
+    .. code-block:: tex
+
+        @inproceedings{hofmann2024gold,
+          title={{A* is Born: Efficient and Scalable Physical Design for Field-coupled Nanocomputing}},
+          author={Hofmann, Simon and Walter, Marcel and Wille, Robert},
+          booktitle={IEEE International Conference on Nanotechnology (IEEE NANO)},
+          pages={80--85},
+          year={2024}
+        }
+
+    `Graph-oriented layout design experiment script <https://github.com/cda-tum/fiction/tree/main/experiments/graph_oriented_layout_design>`_
 
 * :ref:`SAT-based clock number assignment <determine_clocking>`:
 
