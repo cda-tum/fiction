@@ -7,6 +7,7 @@
 
 #include "fiction/traits.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <cstdint>
 #include <functional>
