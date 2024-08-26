@@ -10846,6 +10846,10 @@ the search space graph to find other complete layouts with lower cost.
 
 Exclusively generates 2DDWave-clocked layouts.
 
+This algorithm was proposed in \"A* is Born: Efficient and Scalable
+Physical Design for Field-coupled Nanocomputing\" by S. Hofmann, M.
+Walter, and R. Wille in IEEE NANO 2024.
+
 Template parameter ``Lyt``:
     Cartesian gate-level layout type.
 
