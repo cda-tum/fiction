@@ -354,7 +354,7 @@ and
 
 ```bibtex
 @inproceedings{mnt,
-    author = {Walter, Marcel and Drewniok, Jan and Hofmann, Simon T. and Hien, Benjamin and Wille, Robert},
+    author = {Walter, Marcel and Drewniok, Jan and Hofmann, Simon and Hien, Benjamin and Wille, Robert},
     title = {{The Munich Nanotech Toolkit (MNT)}},
     booktitle = {IEEE International Conference on Nanotechnology (IEEE NANO)},
     pages = {454--459},
