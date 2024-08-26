@@ -212,7 +212,7 @@ Furthermore, if you use any of the design automation algorithms, please consider
 
     .. code-block:: tex
 
-        @inproceedings{walter2022clocknumber,
+        @inproceedings{walter2024clocknumber,
           title={{Ending the Tyranny of the Clock: SAT-Based Clock Number Assignment for Field-coupled Nanotechnologies}},
           author={Walter, Marcel and Drewniok, Jan and Wille, Robert},
           booktitle={IEEE International Conference on Nanotechnology (IEEE NANO)},
