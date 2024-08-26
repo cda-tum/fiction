@@ -11,6 +11,7 @@
 #include <mockturtle/algorithms/cleanup.hpp>
 #include <mockturtle/networks/detail/foreach.hpp>
 #include <mockturtle/traits.hpp>
+#include <mockturtle/views/topo_view.hpp>
 
 #include <algorithm>
 #include <cassert>
@@ -534,7 +535,7 @@ class virtual_pi_network : public Ntk
         v_storage->map_virt_to_real_pi.clear();
     }*/
 
-  protected:
+  private:
     /**
      * Shared pointer if the virtual PI storage.
      */
@@ -575,17 +576,14 @@ class delete_virtual_pis_impl
   public:
     explicit delete_virtual_pis_impl(const Ntk& ntk_src) : ntk{ntk_src}, ntk_topo{ntk_src} {}
 
-    // if ntk is not a virtual_pi_network just return the network
-
     // auto run() -> decltype(this->ntk.clone())
     auto run() -> decltype(std::declval<Ntk>().clone())
     {
         auto  init     = initialize_copy_virtual_pi_network(ntk);
         auto& ntk_dest_ref = init.first;
+        // cloning resolves runtime issues with rank_views, but might return a different network type.
         auto ntk_dest = ntk_dest_ref.clone();
         auto& old2new  = init.second;
-
-        // ntk_dest.create_and(2, 3);
 
         const auto gather_fanin_signals = [this, &ntk_dest, &old2new](const auto& n)
         {
@@ -730,28 +728,26 @@ class delete_virtual_pis_impl
 template <typename Ntk>
 auto delete_virtual_pis(const Ntk& ntk) -> decltype(std::declval<Ntk>().clone())
 {
-    static_assert(mockturtle::is_network_type_v<Ntk>, "NtkSrc is not a network type");
-    static_assert(mockturtle::is_network_type_v<Ntk>, "NtkDest is not a network type");
+    static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
 
-    static_assert(mockturtle::has_get_node_v<Ntk>, "NtkSrc does not implement the get_node function");
-    static_assert(mockturtle::has_is_complemented_v<Ntk>, "NtkSrc does not implement the is_complemented function");
-    static_assert(mockturtle::has_foreach_pi_v<Ntk>, "NtkSrc does not implement the foreach_pi function");
-    static_assert(has_get_real_pi_v<Ntk>, "NtkSrc does not implement the has_get_real_pi function");
-    static_assert(has_num_real_pis_v<Ntk>, "NtkSrc does not implement the has_get_real_pi function");
-    static_assert(mockturtle::has_foreach_gate_v<Ntk>, "NtkSrc does not implement the foreach_gate function");
-    static_assert(mockturtle::has_foreach_po_v<Ntk>, "NtkSrc does not implement the foreach_po function");
-    static_assert(mockturtle::has_foreach_fanin_v<Ntk>, "NtkSrc does not implement the foreach_fanin function");
+    static_assert(mockturtle::has_get_node_v<Ntk>, "Ntk does not implement the get_node function");
+    static_assert(mockturtle::has_is_complemented_v<Ntk>, "Ntk does not implement the is_complemented function");
+    static_assert(mockturtle::has_foreach_pi_v<Ntk>, "Ntk does not implement the foreach_pi function");
+    static_assert(has_get_real_pi_v<Ntk>, "Ntk does not implement the has_get_real_pi function");
+    static_assert(has_num_real_pis_v<Ntk>, "Ntk does not implement the has_num_real_pis function");
+    static_assert(mockturtle::has_foreach_gate_v<Ntk>, "Ntk does not implement the foreach_gate function");
+    static_assert(mockturtle::has_foreach_po_v<Ntk>, "Ntk does not implement the foreach_po function");
+    static_assert(mockturtle::has_foreach_fanin_v<Ntk>, "Ntk does not implement the foreach_fanin function");
 
-    static_assert(mockturtle::has_get_constant_v<Ntk>, "NtkSrc does not implement the get_constant function");
-    static_assert(mockturtle::has_get_constant_v<Ntk>, "NtkDest does not implement the get_constant function");
+    static_assert(mockturtle::has_get_constant_v<Ntk>, "Ntk does not implement the get_constant function");
 
-    static_assert(mockturtle::has_create_pi_v<Ntk>, "NtkDest does not implement the create_pi function");
-    static_assert(mockturtle::has_create_po_v<Ntk>, "NtkDest does not implement the create_po function");
-    static_assert(mockturtle::has_create_not_v<Ntk>, "NtkDest does not implement the create_not function");
-    static_assert(mockturtle::has_create_and_v<Ntk>, "NtkDest does not implement the create_and function");
-    static_assert(mockturtle::has_create_or_v<Ntk>, "NtkDest does not implement the create_or function");
-    static_assert(mockturtle::has_create_xor_v<Ntk>, "NtkDest does not implement the create_xor function");
-    static_assert(mockturtle::has_create_maj_v<Ntk>, "NtkDest does not implement the create_maj function");
+    static_assert(mockturtle::has_create_pi_v<Ntk>, "Ntk does not implement the create_pi function");
+    static_assert(mockturtle::has_create_po_v<Ntk>, "Ntk does not implement the create_po function");
+    static_assert(mockturtle::has_create_not_v<Ntk>, "Ntk does not implement the create_not function");
+    static_assert(mockturtle::has_create_and_v<Ntk>, "Ntk does not implement the create_and function");
+    static_assert(mockturtle::has_create_or_v<Ntk>, "Ntk does not implement the create_or function");
+    static_assert(mockturtle::has_create_xor_v<Ntk>, "Ntk does not implement the create_xor function");
+    static_assert(mockturtle::has_create_maj_v<Ntk>, "Ntk does not implement the create_maj function");
 
     assert(ntk.is_combinational() && "Network has to be combinational");
 

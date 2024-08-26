@@ -5,7 +5,6 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 
-#include "fiction/algorithms/network_transformation/network_conversion.hpp"
 #include <fiction/networks/views/extended_rank_view.hpp>
 
 #include <fiction/algorithms/verification/virtual_miter.hpp>
@@ -16,7 +15,6 @@
 #include <mockturtle/algorithms/miter.hpp>
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/xag.hpp>
-#include <mockturtle/views/rank_view.hpp>
 
 using namespace fiction;
 
@@ -84,13 +82,13 @@ TEMPLATE_TEST_CASE("Copy networks and size consistency", "[virtual-pi-view]", mo
     CHECK(vpi.size() == 8);
     const auto non_vpi = delete_virtual_pis(vpi);
     // After removing/remapping the virtual PIs to their real PIs the sizes are equal
+    CHECK(non_vpi.real_size() == non_vpi.size());
     // Minus one, since AIG nodes get hashed when creating the new AIG
-    CHECK(non_vpi.real_size() == non_vpi.size() - 1);
     CHECK(non_vpi.size() == vpi.size() - vpi.num_virtual_pis() - 1);
-    CHECK(non_vpi.size() == 6 - 1);
+    CHECK(non_vpi.size() == 5);
 }
 
-TEST_CASE("Remove PIs from technology network and check equivalence", "[virtual-pi-view]")
+TEST_CASE("Check equivalence of an extended_rank view", "[virtual-pi-view]")
 {
     technology_network                     tec{};
     virtual_pi_network<technology_network> vpi{};
@@ -120,22 +118,7 @@ TEST_CASE("Remove PIs from technology network and check equivalence", "[virtual-
     tec.create_po(f2_t);
     tec.create_po(f3_t);
 
-    auto vvv = vpi.clone();
-
     auto ntk_r     = extended_rank_view(vpi);
-
-    /*auto  init     = mockturtle::initialize_copy_network<extended_rank_view<technology_network> >(ntk_r);
-    auto& ntk_dest = init.first;
-    auto& old2new  = init.second;
-    auto nw = ntk_dest.clone();
-    auto xx = nw.create_and(2, 3);*/
-
-    // auto non_vpi_r = delete_virtual_pis(ntk_r);
-
-    // auto z = convert_network<extended_rank_view<technology_network>>(ntk_r);
-
-    /*CHECK(non_vpi_r.real_size() == non_vpi_r.size());
-    CHECK(non_vpi_r.size() == vpi.size() - vpi.num_virtual_pis());*/
 
     mockturtle::equivalence_checking_stats st;
     const auto                             maybe_cec_m =
@@ -174,8 +157,6 @@ TEMPLATE_TEST_CASE("Remove PIs and check equivalence", "[virtual-pi-view]", mock
     tec.create_po(f1_t);
     tec.create_po(f2_t);
     tec.create_po(f3_t);
-
-    const auto n_pi = vpi.get_real_pi(3);
 
     auto non_virt = delete_virtual_pis(vpi);
     CHECK(non_virt.size() ==

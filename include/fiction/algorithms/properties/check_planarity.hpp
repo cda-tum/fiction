@@ -10,8 +10,8 @@
 #include <mockturtle/traits.hpp>
 
 #include <algorithm>
+#include <cassert>
 #include <cstdint>
-#include <stdexcept>
 
 namespace fiction
 {
