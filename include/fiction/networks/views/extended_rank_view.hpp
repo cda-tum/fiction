@@ -403,6 +403,25 @@ class extended_rank_view<Ntk, false> : public mockturtle::depth_view<Ntk>
         mockturtle::detail::foreach_element(pis.cbegin(), pis.cend(), std::forward<Fn>(fn));
     }
     /**
+     * Applies a given function to each CI in rank order.
+     *
+     * This function overrides the `foreach_ci` method of the base class.
+     *
+     * @tparam Fn Functor type.
+     * @param fn The function to apply.
+     */
+    template <typename Fn>
+    void foreach_ci(Fn&& fn) const
+    {
+        std::vector<node> pis{};
+        pis.reserve(this->num_pis());
+
+        mockturtle::depth_view<Ntk>::foreach_ci([&pis](auto const& pi) { pis.push_back(pi); });
+        std::sort(pis.begin(), pis.end(),
+                  [this](auto const& n1, auto const& n2) { return rank_pos[n1] < rank_pos[n2]; });
+        mockturtle::detail::foreach_element(pis.cbegin(), pis.cend(), std::forward<Fn>(fn));
+    }
+    /**
      * Overrides the base class method to also call the add_event on create_pi().
      *
      * @return Newly created PI signal.
