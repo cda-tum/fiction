@@ -175,7 +175,17 @@ class node_duplication_planarization_impl
         {
             fis.push_back(nd);
         }
-        ntk.foreach_fanin(nd, [this](auto fi) { fis.push_back(fi); });
+
+        ntk.foreach_fanin(nd,
+                          [this](auto fi)
+                          {
+                              if (!ntk.is_constant(fi))
+                              {
+                                  fis.push_back(fi);
+                              }
+                          });
+
+        assert(!fis.size() == 0 && "Node is a buffered PI that is a PO");
         // Compute the combinations in one slice
         auto combinations = calculate_pairs<Ntk>(fis);
         assert(!combinations.empty() && "Combinations are empty. There might be a dangling node");
@@ -307,7 +317,8 @@ class node_duplication_planarization_impl
         return true;
     }
 
-    [[nodiscard]] virtual_pi_network<Ntk> run(std::vector<std::vector<mockturtle::node<Ntk>>>& ntk_lvls_new)
+    [[nodiscard]] std::optional<virtual_pi_network<Ntk>>
+    run(std::vector<std::vector<mockturtle::node<Ntk>>>& ntk_lvls_new)
     {
         // ToDO: implement border_pis (if there is a choice ush pis to the borders (first or last rank))
         const bool border_pis = true;
@@ -353,9 +364,15 @@ class node_duplication_planarization_impl
 
         bool f_final_level = check_final_level(v_level);
 
+        int lvl_it = 0;
         // Process all other levels
         while (!v_level.empty() && !f_final_level)
         {
+            // ToDo: Fix segmentation fault
+            if (v_level.size() > 25000)
+            {
+                return std::nullopt;
+            }
             // Push the level to the network
             ntk_lvls.push_back(v_level);
             lvl_pairs.clear();
@@ -372,6 +389,7 @@ class node_duplication_planarization_impl
             compute_node_order_next_level(v_level);
             // Check if we are at the final level
             f_final_level = check_final_level(v_level);
+            ++lvl_it;
         }
         // Push the final level (PIs)
         if (f_final_level)
@@ -446,9 +464,15 @@ node_duplication_planarization(const NtkSrc& ntk_src, const node_duplication_pla
 
     auto result_ntk = p.run(ntk_lvls_new);
 
+    if (!result_ntk)
+    {
+        std::cout << "The network is to wide to be processed by the planarization algorithm" << std::endl;
+        return extended_rank_view<virtual_pi_network<NtkSrc>>(virtual_pi_network<NtkSrc>(ntk_src));
+    }
+
     std::reverse(ntk_lvls_new.begin(), ntk_lvls_new.end());
 
-    auto result = extended_rank_view(result_ntk, ntk_lvls_new);
+    auto result = extended_rank_view(*result_ntk, ntk_lvls_new);
 
     if (!check_planarity(result))
     {

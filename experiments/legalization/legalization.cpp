@@ -53,7 +53,8 @@ int main()  // NOLINT
         "planarization", "benchmark", "inputs", "outputs", "initial nodes", "nodes_after", "is_planar", "equivalent"};
 
     static constexpr const uint64_t bench_select =
-        (fiction_experiments::trindade16 | fiction_experiments::fontes18) & ~fiction_experiments::clpl;
+        (fiction_experiments::epfl) & //fiction_experiments::iscas85 & ~
+        ~fiction_experiments::clpl; // fiction_experiments::trindade16 | fiction_experiments::fontes18 | fiction_experiments::epfl | fiction_experiments::iscas85
     // static constexpr const uint64_t bench_select = (fiction_experiments::one_bit_add_maj);
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
@@ -62,6 +63,28 @@ int main()  // NOLINT
 
         fiction::network_balancing_params ps;
         ps.unify_outputs = true;
+
+        if (benchmark_network.num_gates() > 2500)
+        {
+            std::cout << "the number of gates is too high\n";
+            continue;
+        }
+
+        bool cont = false;
+        benchmark_network.foreach_pi(
+            [&benchmark_network, &cont](auto pi)
+            {
+                if (benchmark_network.is_po(pi))
+                {
+                    cont = true;
+                    std::cout << "Pi is Po\n";
+
+                }
+            });
+        if(cont)
+        {
+            continue;
+        }
 
         const auto _b = fiction::network_balancing<fiction::technology_network>(
             fiction::fanout_substitution<fiction::technology_network>(benchmark_network), ps);

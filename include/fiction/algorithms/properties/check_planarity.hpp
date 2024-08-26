@@ -47,17 +47,20 @@ class check_planarity_impl
                                      {
                                          uint32_t new_bound = bound;
                                          ntk.foreach_fanin(n,
-                                                           [this, &bound, &new_bound, &return_false](const auto& fi)
+                                                           [this, &n, &bound, &new_bound, &return_false](const auto& fi)
                                                            {
                                                                const auto fi_n = ntk.get_node(fi);
-                                                               if (ntk.rank_position(fi_n) < bound)
+                                                               if (!ntk.is_constant(fi_n))
                                                                {
-                                                                   return_false = true;
-                                                                   return false;  // stop iterating
+                                                                   if (ntk.rank_position(fi_n) < bound)
+                                                                   {
+                                                                       return_false = true;
+                                                                       return false;  // stop iterating
+                                                                   }
+
+                                                                   new_bound =
+                                                                       std::max(new_bound, ntk.rank_position(fi_n));
                                                                }
-
-                                                               new_bound = std::max(new_bound, ntk.rank_position(fi_n));
-
                                                                return true;  // keep iterating
                                                            });
                                          if (return_false)
