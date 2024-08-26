@@ -20,7 +20,7 @@ template <typename Ntk>
 class check_planarity_impl
 {
   public:
-    check_planarity_impl(const Ntk& ntk) : ntk(ntk) {}
+    explicit check_planarity_impl(const Ntk& ntk) : ntk(ntk) {}
 
     /**
      * Checks if a given network is planar.

@@ -5,10 +5,8 @@
 #ifndef FICTION_VIRTUAL_PI_NETWORK_HPP
 #define FICTION_VIRTUAL_PI_NETWORK_HPP
 
-#include "fiction/types.hpp"
 #include "fiction/utils/name_utils.hpp"
 
-#include <mockturtle/algorithms/cleanup.hpp>
 #include <mockturtle/networks/detail/foreach.hpp>
 #include <mockturtle/traits.hpp>
 #include <mockturtle/views/topo_view.hpp>
@@ -18,8 +16,6 @@
 #include <cstdint>
 #include <cstdlib>
 #include <memory>
-#include <stdexcept>
-#include <type_traits>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -85,7 +81,9 @@ class virtual_pi_network : public Ntk
     explicit virtual_pi_network(const Ntk& ntk) : Ntk(ntk.clone()), v_storage(std::make_shared<virtual_storage<Ntk>>())
     {}
 
-    explicit virtual_pi_network(const Ntk& ntk, std::shared_ptr<virtual_storage<Ntk>> s) : Ntk(ntk), v_storage(std::move(s))
+    explicit virtual_pi_network(const Ntk& ntk, std::shared_ptr<virtual_storage<Ntk>> s) :
+            Ntk(ntk),
+            v_storage(std::move(s))
     {}
 
     /**
@@ -201,16 +199,18 @@ class virtual_pi_network : public Ntk
 
                                   assert(edge_it_int < lvl.size());
 
+                                  bool break_loop = false;
                                   for (const auto& possible_node : tgt_signal_v)
                                   {
-                                      const auto it = ntk.is_maj(n) ? 4 : 3;
+                                      const auto it = ntk.fanin_size(n) + 1;
                                       if (ntk.fanin_size(n) == children.size())
                                       {
                                           break;
                                       }
                                       for (std::size_t i = 0; i < it; i++)
                                       {
-                                          if (edge_it_int + i < lvl.size() && lvl[edge_it_int + i] == possible_node)
+                                          if (edge_it_int + i < lvl.size() && lvl[edge_it_int + i] == possible_node &&
+                                              ntk_dest_v.fanout_size(possible_node) < 2)
                                           {
                                               if (first_fi_edge_it != -1)
                                               {
@@ -226,8 +226,13 @@ class virtual_pi_network : public Ntk
                                               {
                                                   edge_it = edge_it_int + i;
                                               }
+                                              break_loop = true;
                                               break;
                                           }
+                                      }
+                                      if (break_loop)
+                                      {
+                                          break;
                                       }
                                   }
                               });
@@ -545,29 +550,27 @@ class virtual_pi_network : public Ntk
 namespace detail
 {
 
-template<class Ntk>
-std::pair<Ntk, mockturtle::node_map<mockturtle::signal<Ntk>, Ntk>> initialize_copy_virtual_pi_network( Ntk& src )
+template <class Ntk>
+std::pair<Ntk, mockturtle::node_map<mockturtle::signal<Ntk>, Ntk>> initialize_copy_virtual_pi_network(Ntk& src)
 {
-    static_assert( mockturtle::is_network_type_v<Ntk>, "NtkDest is not a network type" );
-    static_assert( mockturtle::is_network_type_v<Ntk>, "NtkSrc is not a network type" );
+    static_assert(mockturtle::is_network_type_v<Ntk>, "NtkDest is not a network type");
+    static_assert(mockturtle::is_network_type_v<Ntk>, "NtkSrc is not a network type");
 
-    static_assert( mockturtle::has_get_constant_v<Ntk>, "NtkDest does not implement the get_constant method" );
-    static_assert( mockturtle::has_create_pi_v<Ntk>, "NtkDest does not implement the create_pi method" );
-    static_assert( mockturtle::has_get_constant_v<Ntk>, "NtkSrc does not implement the get_constant method" );
-    static_assert( mockturtle::has_get_node_v<Ntk>, "NtkSrc does not implement the get_node method" );
-    static_assert( has_foreach_real_pi_v<Ntk>, "NtkSrc does not implement the foreach_pi method" );
+    static_assert(mockturtle::has_get_constant_v<Ntk>, "NtkDest does not implement the get_constant method");
+    static_assert(mockturtle::has_create_pi_v<Ntk>, "NtkDest does not implement the create_pi method");
+    static_assert(mockturtle::has_get_constant_v<Ntk>, "NtkSrc does not implement the get_constant method");
+    static_assert(mockturtle::has_get_node_v<Ntk>, "NtkSrc does not implement the get_node method");
+    static_assert(has_foreach_real_pi_v<Ntk>, "NtkSrc does not implement the foreach_pi method");
 
-    mockturtle::node_map<mockturtle::signal<Ntk>, Ntk> old2new( src );
-    Ntk dest;
-    old2new[src.get_constant( false )] = dest.get_constant( false );
-    if ( src.get_node( src.get_constant( true ) ) != src.get_node( src.get_constant( false ) ) )
+    mockturtle::node_map<mockturtle::signal<Ntk>, Ntk> old2new(src);
+    Ntk                                                dest;
+    old2new[src.get_constant(false)] = dest.get_constant(false);
+    if (src.get_node(src.get_constant(true)) != src.get_node(src.get_constant(false)))
     {
-        old2new[src.get_constant( true )] = dest.get_constant( true );
+        old2new[src.get_constant(true)] = dest.get_constant(true);
     }
-    src.foreach_real_pi( [&]( auto const& n ) {
-                       old2new[n] = dest.create_pi();
-                   } );
-    return { dest, old2new };
+    src.foreach_real_pi([&](auto const& n) { old2new[n] = dest.create_pi(); });
+    return {dest, old2new};
 }
 
 template <typename Ntk>
@@ -579,10 +582,10 @@ class delete_virtual_pis_impl
     // auto run() -> decltype(this->ntk.clone())
     auto run() -> decltype(std::declval<Ntk>().clone())
     {
-        auto  init     = initialize_copy_virtual_pi_network(ntk);
+        auto  init         = initialize_copy_virtual_pi_network(ntk);
         auto& ntk_dest_ref = init.first;
         // cloning resolves runtime issues with rank_views, but might return a different network type.
-        auto ntk_dest = ntk_dest_ref.clone();
+        auto  ntk_dest = ntk_dest_ref.clone();
         auto& old2new  = init.second;
 
         const auto gather_fanin_signals = [this, &ntk_dest, &old2new](const auto& n)
@@ -592,7 +595,7 @@ class delete_virtual_pis_impl
             ntk.foreach_fanin(n,
                               [this, &ntk_dest, &old2new, &children](const auto& f)
                               {
-                                  auto fn         = ntk.get_node(f);
+                                  auto fn = ntk.get_node(f);
 
                                   if (ntk.is_virtual_pi(fn))
                                   {
@@ -707,13 +710,13 @@ class delete_virtual_pis_impl
         // restore signal names if applicable
         fiction::restore_names(ntk, ntk_dest, old2new);
 
-        return ntk_dest; // ntk_dest
+        return ntk_dest;  // ntk_dest
     }
 
   private:
     using TopoNtkSrc = mockturtle::topo_view<Ntk>;
     TopoNtkSrc ntk_topo;
-    Ntk ntk;
+    Ntk        ntk;
 };
 }  // namespace detail
 
@@ -751,7 +754,7 @@ auto delete_virtual_pis(const Ntk& ntk) -> decltype(std::declval<Ntk>().clone())
 
     assert(ntk.is_combinational() && "Network has to be combinational");
 
-    if(ntk.num_virtual_pis() == 0)
+    if (ntk.num_virtual_pis() == 0)
     {
         return ntk;
     }
