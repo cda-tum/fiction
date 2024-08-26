@@ -194,7 +194,7 @@ Furthermore, if you use any of the design automation algorithms, please consider
 
     `Post-layout optimization experiment script <https://github.com/cda-tum/fiction/tree/main/experiments/post_layout_optimization>`_
 
-* :ref:`Graph-oriented layout design <graph_oriented_layout_design>` (``graph_oriented_layout_design``):
+* :ref:`Graph-oriented layout design <graph_oriented_layout_design>` (``gold``):
 
     .. code-block:: tex
 
