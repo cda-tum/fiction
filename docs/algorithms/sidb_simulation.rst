@@ -305,7 +305,7 @@ Displacement Robustness Domain
         .. doxygenstruct:: fiction::displacement_robustness_domain_stats
            :members:
         .. doxygenfunction:: fiction::determine_displacement_robustness_domain
-        .. doxygenfunction:: fiction::determine_propability_of_fabricating_operational_gate
+        .. doxygenfunction:: fiction::determine_probability_of_fabricating_operational_gate
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.displacement_analysis_mode
