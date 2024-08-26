@@ -1620,7 +1620,7 @@ class graph_oriented_layout_design_impl
  * Exclusively generates 2DDWave-clocked layouts.
  *
  * This algorithm was proposed in \"A* is Born: Efficient and Scalable Physical Design for Field-coupled Nanocomputing\"
- * by S. Hofmann, M. Walter, and R. Wille in IEEE NANO 2024.
+ * by S. Hofmann, M. Walter, and R. Wille in IEEE NANO 2024 (https://ieeexplore.ieee.org/document/10628808).
  *
  * @tparam Lyt Cartesian gate-level layout type.
  * @tparam Ntk Network type.
