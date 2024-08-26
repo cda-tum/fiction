@@ -1939,11 +1939,21 @@ Returns:
     Integer representing the SiDB's charge state.)doc";
 
 static const char *__doc_fiction_check_planarity =
-R"doc(Checks if a logic network is planar. To perform this check, the
-network must have ranks assigned.
+R"doc(Checks if a logic network is planar for a network that is path
+balanced and has ranks assigned.
 
 If the network is not balanced, an exception is thrown. To balance the
 network, insert buffers to divide multi-level edges.
+
+It checks if the network represented by the variable `ntk` is planar.
+The network is planar if, for any edge with starting point :math:`m`
+and endpoint :math:`n` (represented by the node ranks), there is never
+another edge with starting point :math:`m' > m` and endpoint :math:`n'
+< n`, or vice versa. When iterating through the ranks of one level,
+the endpoints are always increasing. Therefore, only the starting
+points need to be checked. Thus, the highest connected starting point
+in the fan-in gives a border :math:`m_{\text{max}}` for every
+subsequent edge.
 
 Template parameter ``Ntk``:
     Logic network type.
@@ -1952,10 +1962,7 @@ Parameter ``ntk``:
     The logic network to check for planarity.
 
 Returns:
-    `true` if the network is planar, `false` otherwise.
-
-Throws:
-    std::runtime_error if the network is not balanced.)doc";
+    `true` if the network is planar, `false` otherwise.)doc";
 
 static const char *__doc_fiction_check_planarity_impl = R"doc()doc";
 
@@ -1967,13 +1974,14 @@ static const char *__doc_fiction_check_planarity_impl_run =
 R"doc(Checks if a given network is planar.
 
 This function checks if the network represented by the variable `ntk`
-is planar. The network is planar if for any edge with starting point m
-and endpoint n (represented by the node ranks), there is never another
-edge with starting point m_ > m and endpoint n_ < n, or vice versa.
-When iterating through the ranks of one level, the endpoints are
-always increasing. Therefore, only the starting points need to be
-checked. Thus, the highest connected starting point in the fan-in
-gives a border m_max for every subsequent edge.
+is planar. The network is planar if, for any edge with starting point
+:math:`m` and endpoint :math:`n` (represented by the node ranks),
+there is never another edge with starting point :math:`m' > m` and
+endpoint :math:`n' < n`, or vice versa. When iterating through the
+ranks of one level, the endpoints are always increasing. Therefore,
+only the starting points need to be checked. Thus, the highest
+connected starting point in the fan-in gives a border
+:math:`m_{\text{max}}` for every subsequent edge.
 
 Returns:
     `true` if the network is planar, `false` otherwise.)doc";
@@ -3365,6 +3373,20 @@ Parameter ``neutral_defect_spacing_overwrite``:
 Returns:
     A pair of uint16_t values representing the number of horizontal
     and vertical SiDBs affected by the given defect type.)doc";
+
+static const char *__doc_fiction_delete_virtual_pis =
+R"doc(Deletes virtual primary inputs from a network. This can mainly be used
+for equivalence checking. If the network does not have any virtual PIs
+stored, the network is returned.
+
+Template parameter ``Ntk``:
+    The type of network.
+
+Parameter ``ntk``:
+    The input network.
+
+Returns:
+    The resulting network after virtual primary inputs are deleted.)doc";
 
 static const char *__doc_fiction_dependent_cell_mode = R"doc(An enumeration of modes for the dependent cell.)doc";
 
@@ -11273,6 +11295,8 @@ Returns:
 
 static const char *__doc_fiction_gray_code_iterator_start_number = R"doc(Start number of the iteration.)doc";
 
+static const char *__doc_fiction_handle_virtual_pis = R"doc()doc";
+
 static const char *__doc_fiction_has_above = R"doc()doc";
 
 static const char *__doc_fiction_has_assign_charge_state = R"doc()doc";
@@ -12932,20 +12956,6 @@ static const char *__doc_fiction_missing_sidb_position_exception_line = R"doc()d
 static const char *__doc_fiction_missing_sidb_position_exception_missing_sidb_position_exception = R"doc()doc";
 
 static const char *__doc_fiction_missing_sidb_position_exception_where = R"doc()doc";
-
-static const char *__doc_fiction_miter =
-R"doc(! Creates a combinational miter from two networks.
-
-This method combines two networks that have the same number of primary
-inputs and the same number of primary outputs into a miter. The miter
-has the same number of inputs and one primary output. This output is
-the OR of XORs of all primary output pairs. In other words, the miter
-outputs 1 for all input assignments in which the two input networks
-differ.
-
-All networks may have different types. The method returns an optional,
-which is `nullopt`, whenever the two input networks don't match in
-their number of primary inputs and primary outputs.)doc";
 
 static const char *__doc_fiction_network_balancing =
 R"doc(Balances a logic network with buffer nodes that compute the identity
@@ -17141,19 +17151,44 @@ static const char *__doc_fiction_vertical_shift_cartesian =
 R"doc(\verbatim +-------+ | | | +-------+ | | | +-------+ | | | +-------+
 \endverbatim)doc";
 
+static const char *__doc_fiction_virtual_miter =
+R"doc(! Creates a combinational miter from two networks.
+
+This method combines two networks that have the same number of primary
+inputs and the same number of primary outputs into a miter. The miter
+has the same number of inputs and one primary output. This output is
+the OR of XORs of all primary output pairs. In other words, the miter
+outputs 1 for all input assignments in which the two input networks
+differ.
+
+All networks may have different types. The method returns an optional,
+which is `nullopt`, whenever the two input networks don't match in
+their number of primary inputs and primary outputs.)doc";
+
 static const char *__doc_fiction_virtual_pi_network = R"doc()doc";
+
+static const char *__doc_fiction_virtual_pi_network_clone = R"doc(Clones the virtual_pi_network object.)doc";
 
 static const char *__doc_fiction_virtual_pi_network_virtual_pi_network =
 R"doc(Default constructor for the `virtual_pi_network` class. Initializes
 `_storage` as a shared pointer.)doc";
 
-static const char *__doc_fiction_virtual_pi_network_virtual_pi_network_2 =
-R"doc(Copy constructor for the `virtual_pi_network` class. Given a network
-`ntk`, constructs a new `virtual_pi_network` as a clone of `ntk`.
-Initializes `_storage` as a shared pointer.
+static const char *__doc_fiction_virtual_pi_network_virtual_pi_network_2 = R"doc(Copy constructor for the `virtual_pi_network` class.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_virtual_pi_network_3 =
+R"doc(Constructor for the `virtual_pi_network` class that takes a network as
+input. Unlike other network types a virtual_pi_network can be created
+on top of any network. It initializes the base class `Ntk` with a
+clone of the provided network and creates a shared pointer to a
+`virtual_storage` object.
+
+Template parameter ``Ntk``:
+    Network type.
 
 Parameter ``ntk``:
-    The network to clone into this object.)doc";
+    Input network.)doc";
+
+static const char *__doc_fiction_virtual_pi_network_virtual_pi_network_4 = R"doc()doc";
 
 static const char *__doc_fiction_virtual_storage = R"doc()doc";
 
