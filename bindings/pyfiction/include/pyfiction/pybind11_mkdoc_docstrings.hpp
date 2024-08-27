@@ -1968,6 +1968,44 @@ Parameter ``cs``:
 Returns:
     Integer representing the SiDB's charge state.)doc";
 
+static const char *__doc_fiction_chebyshev_distance =
+R"doc(The Chebyshev distance :math:`D` between two layout coordinates
+:math:`(x_1, y_1)` and :math:`(x_2, y_2)` given by
+
+:math:`D = \max(|x_2 - x_1|, |y_2 - y_1|)`
+
+In contrast to the Manhattan distance, this function assumes the same
+cost for diagonal moves as it does for horizontal and vertical ones.
+
+Template parameter ``Lyt``:
+    Coordinate layout type.
+
+Template parameter ``Dist``:
+    Integral type for the distance.
+
+Parameter ``lyt``:
+    Layout.
+
+Parameter ``source``:
+    Source coordinate.
+
+Parameter ``target``:
+    Target coordinate.
+
+Returns:
+    Chebyshev distance between `source` and `target`.)doc";
+
+static const char *__doc_fiction_chebyshev_distance_functor =
+R"doc(A pre-defined distance functor that uses the Chebyshev distance.
+
+Template parameter ``Lyt``:
+    Coordinate layout type.
+
+Template parameter ``Dist``:
+    Integral distance type.)doc";
+
+static const char *__doc_fiction_chebyshev_distance_functor_chebyshev_distance_functor = R"doc()doc";
+
 static const char *__doc_fiction_check_simulation_results_for_equivalence =
 R"doc(This function compares two SiDB simulation results for equivalence.
 Two results are considered equivalent if they have the same number of
@@ -16095,6 +16133,48 @@ Parameter ``sdm``:
 static const char *__doc_fiction_sqd_parsing_error = R"doc(Exception thrown when an error occurs during parsing of an SQD file.)doc";
 
 static const char *__doc_fiction_sqd_parsing_error_sqd_parsing_error = R"doc()doc";
+
+static const char *__doc_fiction_squared_euclidean_distance =
+R"doc(The squared Euclidean distance :math:`D` between two layout
+coordinates :math:`(x_1, y_1)` and :math:`(x_2, y_2)` given by
+
+:math:`D = \sqrt{(x_1 - x_2)^2 + (y_1 - y_2)^2}^2 = (x_1 - x_2)^2 +
+(y_1 - y_2)^2`
+
+In contrast to the regular Euclidean distance, this function is
+differentiable and can be used in optimization algorithms that require
+gradients. Additionally, it is computationally cheaper by omitting the
+square root operation.
+
+Template parameter ``Lyt``:
+    Coordinate layout type.
+
+Template parameter ``Dist``:
+    Integral type for the distance.
+
+Parameter ``lyt``:
+    Layout.
+
+Parameter ``source``:
+    Source coordinate.
+
+Parameter ``target``:
+    Target coordinate.
+
+Returns:
+    Squared euclidean distance between `source` and `target`.)doc";
+
+static const char *__doc_fiction_squared_euclidean_distance_functor =
+R"doc(A pre-defined distance functor that uses the squared Euclidean
+distance.
+
+Template parameter ``Lyt``:
+    Coordinate layout type.
+
+Template parameter ``Dist``:
+    Integral distance type.)doc";
+
+static const char *__doc_fiction_squared_euclidean_distance_functor_squared_euclidean_distance_functor = R"doc()doc";
 
 static const char *__doc_fiction_sweep_parameter = R"doc(Possible sweep parameters for the operational domain computation.)doc";
 
