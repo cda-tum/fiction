@@ -71,7 +71,7 @@ struct node_pair
     /**
      * Shared pointer to another instance of node_pair detailing fanin-edge alignment.
      */
-    std::shared_ptr<node_pair<Ntk>> fanin_pair;
+    node_pair<Ntk>* fanin_pair;
     /**
      * Specifies the delay value for the node.
      */
@@ -85,7 +85,8 @@ struct node_pair
      */
     node_pair(mockturtle::node<Ntk> node1, mockturtle::node<Ntk> node2, uint64_t delayValue) :
             pair(node1, node2),
-            delay(delayValue)
+            delay(delayValue),
+            fanin_pair(nullptr)
     {}
 };
 
@@ -189,27 +190,26 @@ class node_duplication_planarization_impl
         // Compute the combinations in one slice
         auto combinations = calculate_pairs<Ntk>(fis);
         assert(!combinations.empty() && "Combinations are empty. There might be a dangling node");
-        std::vector<node_pair<Ntk>> combinations_last;
 
         if (!lvl_pairs.empty())
         {
-            combinations_last = lvl_pairs.back();
+            std::vector<node_pair<Ntk>>* combinations_last = &lvl_pairs.back();
 
             for (auto& node_pair_cur : combinations)
             {
-                for (auto& node_pair_last : combinations_last)
+                for (auto& node_pair_last : *combinations_last)
                 {
                     // If there is a connection between the two node pairs the delay is calculated like this
                     if ((node_pair_cur.pair.first == node_pair_last.pair.second &&
                          node_pair_last.delay + 1 < node_pair_cur.delay))
                     {
-                        node_pair_cur.fanin_pair = std::make_shared<node_pair<Ntk>>(node_pair_last);
+                        node_pair_cur.fanin_pair = &node_pair_last;
                         node_pair_cur.delay      = node_pair_last.delay + 1;
                     }
                     // If there is no connection between the two node pairs the delay is calculated like this
                     else if (node_pair_last.delay + 2 < node_pair_cur.delay)
                     {
-                        node_pair_cur.fanin_pair = std::make_shared<node_pair<Ntk>>(node_pair_last);
+                        node_pair_cur.fanin_pair = &node_pair_last;
                         node_pair_cur.delay      = node_pair_last.delay + 2;
                     }
                 }
@@ -368,7 +368,7 @@ class node_duplication_planarization_impl
         // Process all other levels
         while (!v_level.empty() && !f_final_level)
         {
-            // ToDo: Fix segmentation fault
+            // ToDo: Fix the creation of the depth_view/rank_view
             if (v_level.size() > 25000)
             {
                 return std::nullopt;

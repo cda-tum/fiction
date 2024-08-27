@@ -264,6 +264,8 @@ class virtual_pi_network : public Ntk
                 else
                 {
                     const auto children = gather_fanin_signals(nd, ntk_lvls_new[i + 1], edge_it);
+                    // std::cout << "Node: " << nd << std::endl;
+                    assert(!children.empty() && "The node has to have children");
 
                     if (ntk.is_and(nd))
                     {
