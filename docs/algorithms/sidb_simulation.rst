@@ -240,6 +240,8 @@ Operational Domain Computation
         .. doxygenenum:: fiction::sweep_parameter
         .. doxygenstruct:: fiction::operational_domain
            :members:
+        .. doxygenstruct:: fiction::operational_domain_value_range
+           :members:
         .. doxygenstruct:: fiction::operational_domain_params
            :members:
         .. doxygenstruct:: fiction::operational_domain_stats
