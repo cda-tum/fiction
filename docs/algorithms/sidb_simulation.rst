@@ -299,17 +299,18 @@ Displacement Robustness Domain
     .. tab:: C++
         **Header:** ``fiction/algorithms/simulation/sidb/determine_displacement_robustness.hpp``
 
-        .. doxygenenum:: fiction::dimer_displacement_policy
-        .. doxygenstruct:: fiction::displacement_robustness_domain
-           :members:
         .. doxygenstruct:: fiction::displacement_robustness_domain_params
            :members:
         .. doxygenstruct:: fiction::displacement_robustness_domain_stats
+           :members:
+        .. doxygenstruct:: fiction::displacement_robustness_domain
            :members:
         .. doxygenfunction:: fiction::determine_displacement_robustness_domain
         .. doxygenfunction:: fiction::determine_propability_of_fabricating_operational_gate
 
     .. tab:: Python
+        .. autoclass:: mnt.pyfiction.dimer_displacement_policy
+            :members:
         .. autoclass:: mnt.pyfiction.displacement_analysis_mode
             :members:
         .. autofunction:: mnt.pyfiction.displacement_robustness_domain_params
