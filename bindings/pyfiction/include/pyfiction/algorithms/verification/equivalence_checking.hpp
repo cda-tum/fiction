@@ -70,11 +70,11 @@ inline void equivalence_checking(pybind11::module& m)
         .def_readwrite("counter_example", &fiction::equivalence_checking_stats::counter_example,
                        DOC(fiction_equivalence_checking_stats_counter_example))
         .def_readonly("runtime", &fiction::equivalence_checking_stats::runtime,
-                      DOC(fiction_orthogonal_physical_design_stats_duration))
+                      DOC(fiction_equivalence_checking_stats_duration))
         .def_readonly("spec_drv_stats", &fiction::equivalence_checking_stats::spec_drv_stats,
-                      DOC(fiction_orthogonal_physical_design_stats_spec_drv_stats))
+                      DOC(fiction_equivalence_checking_stats_spec_drv_stats))
         .def_readonly("impl_drv_stats", &fiction::equivalence_checking_stats::impl_drv_stats,
-                      DOC(fiction_orthogonal_physical_design_stats_impl_drv_stats))
+                      DOC(fiction_equivalence_checking_stats_impl_drv_stats))
 
         ;
 
