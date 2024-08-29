@@ -13,10 +13,12 @@
 
 #include <array>
 #include <cmath>
+#include <exception>
 #include <iostream>
 #include <sstream>
 #include <string>
 #include <string_view>
+#include <tuple>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -339,7 +341,10 @@ template <typename Lyt>
 class write_qca_layout_svg_impl
 {
   public:
-    write_qca_layout_svg_impl(const Lyt& layout, std::ostream& stream, write_qca_layout_svg_params p) :
+    /**
+     * Default constructor.
+     */
+    write_qca_layout_svg_impl(const Lyt& layout, std::ostream& stream, const write_qca_layout_svg_params& p = {}) :
             lyt{layout},
             os{stream},
             ps{p}
@@ -386,6 +391,12 @@ class write_qca_layout_svg_impl
      */
     using coord_to_latch_mapping = std::unordered_map<coordinate<Lyt>, svg_latch>;
 
+    /**
+     * Generates and returns a pair of strings representing the description and color of the given cell.
+     *
+     * @param c The cell for which to generate the description and color.
+     * @return A pair of strings representing the description and color of the given cell `c`.
+     */
     std::pair<std::string, std::string> generate_description_color(const cell<Lyt>& c)
     {
         std::string cell_description, cell_color{};
@@ -466,12 +477,7 @@ class write_qca_layout_svg_impl
     }
 
     /**
-     * Returns an SVG string representing the given cell-based clocked cell layout
-     *
-     * @param fcl The cell layout to generate an SVG representation for.
-     * @param simple Flag to indicate that the SVG representation should be generated with less details. Recommended
-     *               for large layouts.
-     * @return The SVG string containing a visual representation of the given layout.
+     * Generates an SVG string representing the cell-based clocked cell layout and appends it to the output stream.
      */
     void generate_cell_based_svg()
     {
@@ -518,12 +524,7 @@ class write_qca_layout_svg_impl
     }
 
     /**
-     * Returns an SVG string representing the given tile-based clocked cell layout.
-     *
-     * @param fcl The cell layout to generate an SVG representation for.
-     * @param simple Flag to indicate that the SVG representation should be generated with less details. Recommended
-     *               for large layouts.
-     * @return The SVG string containing a visual representation of the given layout.
+     * Generates an SVG string representing the tile-based clocked cell layout and appends it to the output stream.
      */
     void generate_tile_based_svg()
     {
@@ -539,9 +540,9 @@ class write_qca_layout_svg_impl
 
         // Used to determine the color of cells, tiles and text based on its clock zone
         static constexpr const std::array<const char*, 4> tile_colors{
-            {svg::CLOCK_ZONE_1_TILE, svg::CLOCK_ZONE_2_TILE, svg::CLOCK_ZONE_3_TILE, svg::CLOCK_ZONE_4_TILE}},
-            text_colors{
-                {svg::CLOCK_ZONE_12_TEXT, svg::CLOCK_ZONE_12_TEXT, svg::CLOCK_ZONE_34_TEXT, svg::CLOCK_ZONE_34_TEXT}};
+            {svg::CLOCK_ZONE_1_TILE, svg::CLOCK_ZONE_2_TILE, svg::CLOCK_ZONE_3_TILE, svg::CLOCK_ZONE_4_TILE}};
+        static constexpr const std::array<const char*, 4> text_colors{
+            {svg::CLOCK_ZONE_12_TEXT, svg::CLOCK_ZONE_12_TEXT, svg::CLOCK_ZONE_34_TEXT, svg::CLOCK_ZONE_34_TEXT}};
 
         // Adds all non-empty cells from the layout to their correct tiles; it generates the "body"
         // of all the tile-descriptions to be used later
@@ -723,7 +724,7 @@ class write_qca_layout_svg_impl
  * The utilized color scheme is based on the standard scheme used in QCADesigner
  * (https://waluslab.ece.ubc.ca/qcadesigner/).
  *
- * May throw an unsupported_cell_type_exception.
+ * May throw an `unsupported_cell_type_exception` if it encounters unsupported cell types in the layout.
  *
  * @tparam Lyt Cell-level QCA layout type.
  * @param lyt The layout to be written.
@@ -731,7 +732,7 @@ class write_qca_layout_svg_impl
  * @param ps Parameters.
  */
 template <typename Lyt>
-void write_qca_layout_svg(const Lyt& lyt, std::ostream& os, write_qca_layout_svg_params ps = {})
+void write_qca_layout_svg(const Lyt& lyt, std::ostream& os, const write_qca_layout_svg_params& ps = {})
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_qca_technology_v<Lyt>, "Lyt must be a QCA layout");
@@ -748,7 +749,8 @@ void write_qca_layout_svg(const Lyt& lyt, std::ostream& os, write_qca_layout_svg
  * The utilized color scheme is based on the standard scheme used in QCADesigner
  * (https://waluslab.ece.ubc.ca/qcadesigner/).
  *
- * May throw an unsupported_cell_type_exception.
+ * May throw an `unsupported_cell_type_exception` if it encounters unsupported cell types in the layout. May throw an
+ * `std::ofstream::failure` if it cannot open the file.
  *
  * @tparam Lyt Cell-level QCA layout type.
  * @param lyt The layout to be written.
@@ -756,7 +758,7 @@ void write_qca_layout_svg(const Lyt& lyt, std::ostream& os, write_qca_layout_svg
  * @param ps Parameters.
  */
 template <typename Lyt>
-void write_qca_layout_svg(const Lyt& lyt, const std::string_view& filename, write_qca_layout_svg_params ps = {})
+void write_qca_layout_svg(const Lyt& lyt, const std::string_view& filename, const write_qca_layout_svg_params& ps = {})
 {
     std::ofstream os{filename.data(), std::ofstream::out};
 
