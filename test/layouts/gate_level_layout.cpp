@@ -1180,6 +1180,29 @@ TEST_CASE("Move nodes", "[gate-level-layout]")
     CHECK(layout.num_crossings() == 0);
 }
 
+TEST_CASE("Move crossing", "[gate-level-layout]")
+{
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+
+    auto layout = blueprints::crossing_layout<gate_layout>();
+
+    CHECK(layout.num_gates() == 2);
+    CHECK(layout.num_wires() == 9);
+    CHECK(layout.num_crossings() == 1);
+    CHECK(layout.num_pis() == 4);
+    CHECK(layout.num_pos() == 2);
+
+    auto crossing = layout.get_node({2, 1, 1});
+
+    // move crossing to empty location
+    layout.move_node(crossing, {3, 0}, {});
+    CHECK(layout.num_gates() == 2);
+    CHECK(layout.num_wires() == 9);
+    CHECK(layout.num_crossings() == 0);
+    CHECK(layout.num_pis() == 4);
+    CHECK(layout.num_pos() == 2);
+}
+
 TEST_CASE("Clear tiles", "[gate-level-layout]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
