@@ -7,11 +7,15 @@
 
 #include <fiction/algorithms/physical_design/orthogonal.hpp>
 #include <fiction/traits.hpp>
+#include <fiction/types.hpp>
+#include <fiction/utils/network_utils.hpp>
 
 #include <alice/alice.hpp>
+#include <mockturtle/utils/stopwatch.hpp>
 #include <mockturtle/views/names_view.hpp>
 #include <nlohmann/json.hpp>
 
+#include <cstdint>
 #include <memory>
 
 namespace alice

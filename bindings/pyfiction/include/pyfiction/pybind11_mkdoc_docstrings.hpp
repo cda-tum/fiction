@@ -2039,9 +2039,9 @@ Parameter ``lyt``:
 
 static const char *__doc_fiction_clocked_layout =
 R"doc(A layout type to layer on top of a coordinate layout, e.g.,
-cartesian_layout, hexagonal_layout, or tile_based_layout. This type
-extends the layout by providing a notion of FCN clocking. To this end,
-it utilizes a clocking scheme that assigns each coordinate in the
+`cartesian_layout`, `hexagonal_layout`, or `tile_based_layout`. This
+type extends the layout by providing a notion of FCN clocking. To this
+end, it utilizes a clocking scheme that assigns each coordinate in the
 extended coordinate layout a clock number. These clock numbers can be
 manually overwritten if necessary.
 
@@ -7852,36 +7852,23 @@ static const char *__doc_fiction_detail_write_qca_layout_impl_write_via_cells = 
 static const char *__doc_fiction_detail_write_qca_layout_svg_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_write_qca_layout_svg_impl_generate_cell_based_svg =
-R"doc(Returns an SVG string representing the given cell-based clocked cell
-layout
+R"doc(Generates an SVG string representing the cell-based clocked cell
+layout and appends it to the output stream.)doc";
 
-Parameter ``fcl``:
-    The cell layout to generate an SVG representation for.
+static const char *__doc_fiction_detail_write_qca_layout_svg_impl_generate_description_color =
+R"doc(Generates and returns a pair of strings representing the description
+and color of the given cell.
 
-Parameter ``simple``:
-    Flag to indicate that the SVG representation should be generated
-    with less details. Recommended for large layouts.
+Parameter ``c``:
+    The cell for which to generate the description and color.
 
 Returns:
-    The SVG string containing a visual representation of the given
-    layout.)doc";
-
-static const char *__doc_fiction_detail_write_qca_layout_svg_impl_generate_description_color = R"doc()doc";
+    A pair of strings representing the description and color of the
+    given cell `c`.)doc";
 
 static const char *__doc_fiction_detail_write_qca_layout_svg_impl_generate_tile_based_svg =
-R"doc(Returns an SVG string representing the given tile-based clocked cell
-layout.
-
-Parameter ``fcl``:
-    The cell layout to generate an SVG representation for.
-
-Parameter ``simple``:
-    Flag to indicate that the SVG representation should be generated
-    with less details. Recommended for large layouts.
-
-Returns:
-    The SVG string containing a visual representation of the given
-    layout.)doc";
+R"doc(Generates an SVG string representing the tile-based clocked cell
+layout and appends it to the output stream.)doc";
 
 static const char *__doc_fiction_detail_write_qca_layout_svg_impl_lyt = R"doc()doc";
 
@@ -7891,7 +7878,7 @@ static const char *__doc_fiction_detail_write_qca_layout_svg_impl_ps = R"doc()do
 
 static const char *__doc_fiction_detail_write_qca_layout_svg_impl_run = R"doc()doc";
 
-static const char *__doc_fiction_detail_write_qca_layout_svg_impl_write_qca_layout_svg_impl = R"doc()doc";
+static const char *__doc_fiction_detail_write_qca_layout_svg_impl_write_qca_layout_svg_impl = R"doc(Default constructor.)doc";
 
 static const char *__doc_fiction_detail_write_qcc_layout_impl = R"doc()doc";
 
@@ -17440,7 +17427,8 @@ supported exclusively so far.
 The utilized color scheme is based on the standard scheme used in
 QCADesigner (https://waluslab.ece.ubc.ca/qcadesigner/).
 
-May throw an unsupported_cell_type_exception.
+May throw an `unsupported_cell_type_exception` if it encounters
+unsupported cell types in the layout.
 
 Template parameter ``Lyt``:
     Cell-level QCA layout type.
@@ -17463,7 +17451,9 @@ exclusively so far.
 The utilized color scheme is based on the standard scheme used in
 QCADesigner (https://waluslab.ece.ubc.ca/qcadesigner/).
 
-May throw an unsupported_cell_type_exception.
+May throw an `unsupported_cell_type_exception` if it encounters
+unsupported cell types in the layout. May throw an
+`std::ofstream::failure` if it cannot open the file.
 
 Template parameter ``Lyt``:
     Cell-level QCA layout type.
