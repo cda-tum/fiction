@@ -79,7 +79,7 @@ struct time_to_solution_stats
      *
      * @param out Output stream.
      */
-    void report(std::ostream& out = std::cout)
+    void report(std::ostream& out = std::cout) const
     {
         out << fmt::format("time_to_solution: {} \n acc: {} \n t[s]: {} \n t_exact[s]: {} \n exact alg.: {}\n",
                            time_to_solution, acc, mean_single_runtime, single_runtime_exact, algorithm);
