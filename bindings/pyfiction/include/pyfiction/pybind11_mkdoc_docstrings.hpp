@@ -9949,6 +9949,8 @@ static const char *__doc_fiction_gate_level_layout_gate_level_layout_storage_dat
 
 static const char *__doc_fiction_gate_level_layout_gate_level_layout_storage_data_node_tile_map = R"doc()doc";
 
+static const char *__doc_fiction_gate_level_layout_gate_level_layout_storage_data_num_crossings = R"doc()doc";
+
 static const char *__doc_fiction_gate_level_layout_gate_level_layout_storage_data_num_gates = R"doc()doc";
 
 static const char *__doc_fiction_gate_level_layout_gate_level_layout_storage_data_num_wires = R"doc()doc";
@@ -10554,6 +10556,13 @@ static const char *__doc_fiction_gate_level_layout_node_to_index = R"doc()doc";
 static const char *__doc_fiction_gate_level_layout_num_cis = R"doc()doc";
 
 static const char *__doc_fiction_gate_level_layout_num_cos = R"doc()doc";
+
+static const char *__doc_fiction_gate_level_layout_num_crossings =
+R"doc(Returns the number of placed nodes in the layout that compute the
+identity function and cross other nodes.
+
+Returns:
+    Number of crossings in the layout.)doc";
 
 static const char *__doc_fiction_gate_level_layout_num_gates =
 R"doc(Returns the number of placed nodes in the layout that do not compute
