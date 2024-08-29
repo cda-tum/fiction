@@ -124,14 +124,15 @@ struct one_pass_synthesis_stats
     mockturtle::stopwatch<>::duration time_total{0};
 
     uint64_t x_size{0ull}, y_size{0ull};
-    uint64_t num_gates{0ull}, num_wires{0ull};
+    uint64_t num_gates{0ull}, num_wires{0ull}, num_crossings{0ull};
 
     void report(std::ostream& out = std::cout) const
     {
-        out << fmt::format("[i] total time  = {:.2f} secs\n", mockturtle::to_seconds(time_total));
-        out << fmt::format("[i] layout size = {} × {}\n", x_size, y_size);
-        out << fmt::format("[i] num. gates  = {}\n", num_gates);
-        out << fmt::format("[i] num. wires  = {}\n", num_wires);
+        out << fmt::format("[i] total time      = {:.2f} secs\n", mockturtle::to_seconds(time_total));
+        out << fmt::format("[i] layout size     = {} × {}\n", x_size, y_size);
+        out << fmt::format("[i] num. gates      = {}\n", num_gates);
+        out << fmt::format("[i] num. wires      = {}\n", num_wires);
+        out << fmt::format("[i] num. crossings  = {}\n", num_crossings);
     }
 };
 
@@ -757,10 +758,11 @@ class one_pass_synthesis_impl
                 if (sat)  // solution found
                 {
                     // statistical information
-                    pst.x_size    = layout.x() + 1;
-                    pst.y_size    = layout.y() + 1;
-                    pst.num_gates = layout.num_gates();
-                    pst.num_wires = layout.num_wires();
+                    pst.x_size        = layout.x() + 1;
+                    pst.y_size        = layout.y() + 1;
+                    pst.num_gates     = layout.num_gates();
+                    pst.num_wires     = layout.num_wires();
+                    pst.num_crossings = layout.num_crossings();
 
                     // restore layout name
                     if constexpr (has_set_layout_name_v<Lyt>)

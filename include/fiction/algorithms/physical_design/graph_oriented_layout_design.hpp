@@ -111,16 +111,21 @@ struct graph_oriented_layout_design_stats
      */
     uint64_t num_wires{0ull};
     /**
+     * Number of crossings.
+     */
+    uint64_t num_crossings{0ull};
+    /**
      * Reports the statistics to the given output stream.
      *
      * @param out Output stream.
      */
     void report(std::ostream& out = std::cout) const
     {
-        out << fmt::format("[i] total time  = {:.2f} secs\n", mockturtle::to_seconds(time_total));
-        out << fmt::format("[i] layout size = {} × {}\n", x_size, y_size);
-        out << fmt::format("[i] num. gates  = {}\n", num_gates);
-        out << fmt::format("[i] num. wires  = {}\n", num_wires);
+        out << fmt::format("[i] total time      = {:.2f} secs\n", mockturtle::to_seconds(time_total));
+        out << fmt::format("[i] layout size     = {} × {}\n", x_size, y_size);
+        out << fmt::format("[i] num. gates      = {}\n", num_gates);
+        out << fmt::format("[i] num. wires      = {}\n", num_wires);
+        out << fmt::format("[i] num. crossings  = {}\n", num_crossings);
     }
 };
 
@@ -643,10 +648,11 @@ class graph_oriented_layout_design_impl
                         restore_names(ssg.network, best_lyt);
 
                         // statistical information
-                        pst.x_size    = best_lyt.x() + 1;
-                        pst.y_size    = best_lyt.y() + 1;
-                        pst.num_gates = best_lyt.num_gates();
-                        pst.num_wires = best_lyt.num_wires();
+                        pst.x_size        = best_lyt.x() + 1;
+                        pst.y_size        = best_lyt.y() + 1;
+                        pst.num_gates     = best_lyt.num_gates();
+                        pst.num_wires     = best_lyt.num_wires();
+                        pst.num_crossings = best_lyt.num_crossings();
 
                         if (ps.return_first)
                         {

@@ -75,6 +75,21 @@ inline void exact(pybind11::module& m)
                  stats.report(stream);
                  return stream.str();
              })
+        .def("report", &fiction::exact_physical_design_stats::report, DOC(fiction_exact_physical_design_stats_report))
+        .def_readonly("time_total", &fiction::exact_physical_design_stats::time_total,
+                      DOC(fiction_exact_physical_design_stats_duration))
+        .def_readonly("x_size", &fiction::exact_physical_design_stats::x_size,
+                      DOC(fiction_exact_physical_design_stats_x_size))
+        .def_readonly("y_size", &fiction::exact_physical_design_stats::y_size,
+                      DOC(fiction_exact_physical_design_stats_y_size))
+        .def_readonly("num_gates", &fiction::exact_physical_design_stats::num_gates,
+                      DOC(fiction_exact_physical_design_stats_num_gates))
+        .def_readonly("num_wires", &fiction::exact_physical_design_stats::num_wires,
+                      DOC(fiction_exact_physical_design_stats_num_wires))
+        .def_readonly("num_crossings", &fiction::exact_physical_design_stats::num_crossings,
+                      DOC(fiction_exact_physical_design_stats_num_crossings))
+        .def_readonly("num_aspect_ratios", &fiction::exact_physical_design_stats::num_aspect_ratios,
+                      DOC(fiction_exact_physical_design_stats_num_aspect_ratios))
 
         ;
 
