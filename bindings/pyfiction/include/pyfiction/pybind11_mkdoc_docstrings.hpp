@@ -8964,6 +8964,8 @@ static const char *__doc_fiction_exact_physical_design_stats_duration = R"doc()d
 
 static const char *__doc_fiction_exact_physical_design_stats_num_aspect_ratios = R"doc()doc";
 
+static const char *__doc_fiction_exact_physical_design_stats_num_crossings = R"doc()doc";
+
 static const char *__doc_fiction_exact_physical_design_stats_num_gates = R"doc()doc";
 
 static const char *__doc_fiction_exact_physical_design_stats_num_wires = R"doc()doc";
@@ -10946,6 +10948,8 @@ R"doc(This struct stores statistics about the graph-oriented layout design
 process.)doc";
 
 static const char *__doc_fiction_graph_oriented_layout_design_stats_duration = R"doc(Runtime of the graph-oriented layout design process.)doc";
+
+static const char *__doc_fiction_graph_oriented_layout_design_stats_num_crossings = R"doc(Number of crossings.)doc";
 
 static const char *__doc_fiction_graph_oriented_layout_design_stats_num_gates = R"doc(Number of gates.)doc";
 
@@ -13720,6 +13724,8 @@ static const char *__doc_fiction_orthogonal_physical_design_stats = R"doc()doc";
 
 static const char *__doc_fiction_orthogonal_physical_design_stats_duration = R"doc()doc";
 
+static const char *__doc_fiction_orthogonal_physical_design_stats_num_crossings = R"doc()doc";
+
 static const char *__doc_fiction_orthogonal_physical_design_stats_num_gates = R"doc()doc";
 
 static const char *__doc_fiction_orthogonal_physical_design_stats_num_wires = R"doc()doc";
@@ -14134,6 +14140,14 @@ process.)doc";
 static const char *__doc_fiction_post_layout_optimization_stats_area_improvement = R"doc(Area reduction (in %) after the post-layout optimization process.)doc";
 
 static const char *__doc_fiction_post_layout_optimization_stats_duration = R"doc(Runtime of the post-layout optimization process.)doc";
+
+static const char *__doc_fiction_post_layout_optimization_stats_num_crossings_after = R"doc(Number of crossings after the post-layout optimization process.)doc";
+
+static const char *__doc_fiction_post_layout_optimization_stats_num_crossings_before = R"doc(Number of crossings before the post-layout optimization process.)doc";
+
+static const char *__doc_fiction_post_layout_optimization_stats_num_wires_after = R"doc(Number of wire segments after the post-layout optimization process.)doc";
+
+static const char *__doc_fiction_post_layout_optimization_stats_num_wires_before = R"doc(Number of wire segments before the post-layout optimization process.)doc";
 
 static const char *__doc_fiction_post_layout_optimization_stats_report =
 R"doc(Reports the statistics to the given output stream.
