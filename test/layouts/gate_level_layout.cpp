@@ -124,6 +124,7 @@ TEST_CASE("Creation and usage of primary inputs", "[gate-level-layout]")
     CHECK(layout.num_pis() == 1);
     CHECK(layout.num_gates() == 0);
     CHECK(layout.num_wires() == 1);
+    CHECK(layout.num_crossings() == 0);
 
     CHECK(std::is_same_v<std::decay_t<decltype(a)>, gate_layout::signal>);
 
@@ -135,6 +136,7 @@ TEST_CASE("Creation and usage of primary inputs", "[gate-level-layout]")
 
     CHECK(layout.num_pis() == 3);
     CHECK(layout.num_wires() == 3);
+    CHECK(layout.num_crossings() == 0);
 
     CHECK(layout.pi_at(0) == layout.get_node(a));
     CHECK(layout.pi_at(1) == layout.get_node(b));
@@ -220,6 +222,7 @@ TEST_CASE("Creation and usage of primary outputs", "[gate-level-layout]")
     CHECK(layout.size() == 5);
     CHECK(layout.num_pos() == 2);
     CHECK(layout.num_wires() == 3);
+    CHECK(layout.num_crossings() == 0);
 
     CHECK(layout.po_at(0) == f1);
     CHECK(layout.po_at(1) == f2);
@@ -331,6 +334,7 @@ TEST_CASE("Creation of unary operations", "[gate-level-layout]")
     CHECK(layout.size() == 5);
     CHECK(layout.num_gates() == 1);
     CHECK(layout.num_wires() == 2);
+    CHECK(layout.num_crossings() == 0);
 
     auto x2 = layout.create_pi("x2", {1, 1});
     CHECK(layout.is_pi(layout.get_node(x2)));
@@ -907,6 +911,7 @@ TEST_CASE("Gate-level layout properties", "[gate-level-layout]")
     CHECK(layout.num_pis() == 2);
     CHECK(layout.num_pos() == 2);
     CHECK(layout.num_gates() == 2);
+    CHECK(layout.num_crossings() == 0);
     CHECK(layout.fanin_size(layout.get_node(x1)) == 0);
     CHECK(layout.fanin_size(layout.get_node(x2)) == 0);
     CHECK(layout.fanin_size(layout.get_node(a1)) == 2);
@@ -1038,6 +1043,7 @@ TEST_CASE("Crossings", "[gate-level-layout]")
 
     auto layout = blueprints::crossing_layout<gate_layout>();
 
+    CHECK(layout.num_crossings() == 1);
     CHECK(layout.fanout_size(layout.get_node({1, 1})) == 1);
     CHECK(layout.fanout_size(layout.get_node({2, 1})) == 1);
     CHECK(layout.fanout_size(layout.get_node({2, 1, 1})) == 1);
@@ -1073,6 +1079,7 @@ TEST_CASE("Move nodes", "[gate-level-layout]")
 
     CHECK(layout.num_gates() == 2);
     CHECK(layout.num_wires() == 4);
+    CHECK(layout.num_crossings() == 0);
 
     auto and_node = layout.get_node({1, 0});
     auto or_node  = layout.get_node({2, 1});
@@ -1084,6 +1091,7 @@ TEST_CASE("Move nodes", "[gate-level-layout]")
 
     CHECK(layout.num_gates() == 2);
     CHECK(layout.num_wires() == 4);
+    CHECK(layout.num_crossings() == 0);
 
     // move AND where OR was
     layout.move_node(and_node, {2, 1},
@@ -1092,6 +1100,7 @@ TEST_CASE("Move nodes", "[gate-level-layout]")
 
     CHECK(layout.num_gates() == 2);
     CHECK(layout.num_wires() == 4);
+    CHECK(layout.num_crossings() == 0);
 
     // move OR where AND was
     layout.move_node(or_node, {1, 0},
@@ -1100,6 +1109,7 @@ TEST_CASE("Move nodes", "[gate-level-layout]")
 
     CHECK(layout.num_gates() == 2);
     CHECK(layout.num_wires() == 4);
+    CHECK(layout.num_crossings() == 0);
 
     CHECK(!layout.is_dead(and_node));
     CHECK(!layout.is_dead(or_node));
@@ -1141,6 +1151,7 @@ TEST_CASE("Move nodes", "[gate-level-layout]")
 
     CHECK(layout.num_gates() == 2);
     CHECK(layout.num_wires() == 4);
+    CHECK(layout.num_crossings() == 0);
 
     // move PO
 
@@ -1154,6 +1165,7 @@ TEST_CASE("Move nodes", "[gate-level-layout]")
 
     CHECK(layout.num_gates() == 2);
     CHECK(layout.num_wires() == 4);
+    CHECK(layout.num_crossings() == 0);
 
     // remove PO
 
@@ -1165,6 +1177,7 @@ TEST_CASE("Move nodes", "[gate-level-layout]")
 
     CHECK(layout.num_gates() == 2);
     CHECK(layout.num_wires() == 3);  // PO is gone now
+    CHECK(layout.num_crossings() == 0);
 }
 
 TEST_CASE("Clear tiles", "[gate-level-layout]")
@@ -1175,6 +1188,7 @@ TEST_CASE("Clear tiles", "[gate-level-layout]")
 
     REQUIRE(layout.num_gates() == 2);
     REQUIRE(layout.num_wires() == 4);
+    REQUIRE(layout.num_crossings() == 0);
     REQUIRE(layout.num_pis() == 2);
     REQUIRE(layout.num_pos() == 2);
 
@@ -1183,6 +1197,7 @@ TEST_CASE("Clear tiles", "[gate-level-layout]")
     CHECK(!layout.is_gate_tile({1, 0}));
     CHECK(layout.num_gates() == 1);
     CHECK(layout.num_wires() == 4);
+    CHECK(layout.num_crossings() == 0);
     CHECK(layout.num_pis() == 2);
     CHECK(layout.num_pos() == 2);
 
@@ -1191,6 +1206,7 @@ TEST_CASE("Clear tiles", "[gate-level-layout]")
     CHECK(!layout.is_gate_tile({2, 1}));
     CHECK(layout.num_gates() == 0);
     CHECK(layout.num_wires() == 4);
+    CHECK(layout.num_crossings() == 0);
     CHECK(layout.num_pis() == 2);
     CHECK(layout.num_pos() == 2);
 
@@ -1200,6 +1216,7 @@ TEST_CASE("Clear tiles", "[gate-level-layout]")
     CHECK(!layout.is_pi_tile({2, 0}));
     CHECK(layout.num_gates() == 0);
     CHECK(layout.num_wires() == 3);
+    CHECK(layout.num_crossings() == 0);
     CHECK(layout.num_pis() == 2);
     CHECK(layout.num_pos() == 2);
 
@@ -1209,8 +1226,32 @@ TEST_CASE("Clear tiles", "[gate-level-layout]")
     CHECK(!layout.is_po_tile({0, 0}));
     CHECK(layout.num_gates() == 0);
     CHECK(layout.num_wires() == 2);
+    CHECK(layout.num_crossings() == 0);
     CHECK(layout.num_pis() == 2);
     CHECK(layout.num_pos() == 1);
+}
+
+TEST_CASE("Clear crossing", "[gate-level-layout]")
+{
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+
+    auto layout = blueprints::crossing_layout<gate_layout>();
+
+    REQUIRE(layout.num_gates() == 2);
+    REQUIRE(layout.num_wires() == 9);
+    REQUIRE(layout.num_crossings() == 1);
+    REQUIRE(layout.num_pis() == 4);
+    REQUIRE(layout.num_pos() == 2);
+
+    layout.clear_tile({2, 1, 1});
+
+    CHECK(!layout.is_wire_tile({2, 1, 1}));
+    CHECK(layout.is_empty_tile({2, 1, 1}));
+    CHECK(layout.num_gates() == 2);
+    CHECK(layout.num_wires() == 8);
+    CHECK(layout.num_crossings() == 0);
+    CHECK(layout.num_pis() == 4);
+    CHECK(layout.num_pos() == 2);
 }
 
 TEST_CASE("Gate-level cardinal operations", "[gate-level-layout]")

@@ -185,10 +185,11 @@ ALICE_DESCRIBE_STORE(fiction::gate_layout_t, layout)
 
         const auto cp_tp = fiction::critical_path_length_and_throughput(*lyt_ptr);
 
-        return fmt::format("{} ({}) - {} × {}, I/O: {}/{}, gates: {}, wires: {}, CP: {}, TP: 1/{}, sync. elems.: {}",
-                           lyt_ptr->get_layout_name(), lyt_ptr->get_clocking_scheme().name, lyt_ptr->x() + 1,
-                           lyt_ptr->y() + 1, lyt_ptr->num_pis(), lyt_ptr->num_pos(), lyt_ptr->num_gates(),
-                           lyt_ptr->num_wires(), cp_tp.critical_path_length, cp_tp.throughput, num_se);
+        return fmt::format(
+            "{} ({}) - {} × {}, I/O: {}/{}, gates: {}, wires: {}, crossings: {}, CP: {}, TP: 1/{}, sync. elems.: {}",
+            lyt_ptr->get_layout_name(), lyt_ptr->get_clocking_scheme().name, lyt_ptr->x() + 1, lyt_ptr->y() + 1,
+            lyt_ptr->num_pis(), lyt_ptr->num_pos(), lyt_ptr->num_gates(), lyt_ptr->num_wires(),
+            lyt_ptr->num_crossings(), cp_tp.critical_path_length, cp_tp.throughput, num_se);
     };
 
     return std::visit(describe, layout);
@@ -196,7 +197,6 @@ ALICE_DESCRIBE_STORE(fiction::gate_layout_t, layout)
 
 ALICE_PRINT_STORE_STATISTICS(fiction::gate_layout_t, os, layout)
 {
-    // TODO crossings
     const auto print_statistics = [&os](auto&& lyt_ptr)
     {
         using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
@@ -210,11 +210,12 @@ ALICE_PRINT_STORE_STATISTICS(fiction::gate_layout_t, os, layout)
 
         const auto cp_tp = fiction::critical_path_length_and_throughput(*lyt_ptr);
 
-        os << fmt::format(
-            "[i] {} ({}) - {} × {}, I/O: {}/{}, gates: {}, wires: {}, CP: {}, TP: 1/{}, sync. elems.: {}\n",
-            lyt_ptr->get_layout_name(), lyt_ptr->get_clocking_scheme().name, lyt_ptr->x() + 1, lyt_ptr->y() + 1,
-            lyt_ptr->num_pis(), lyt_ptr->num_pos(), lyt_ptr->num_gates(), lyt_ptr->num_wires(),
-            cp_tp.critical_path_length, cp_tp.throughput, num_se);
+        os << fmt::format("[i] {} ({}) - {} × {}, I/O: {}/{}, gates: {}, wires: {}, crossings: {}, CP: {}, TP: 1/{}, "
+                          "sync. elems.: {}\n",
+                          lyt_ptr->get_layout_name(), lyt_ptr->get_clocking_scheme().name, lyt_ptr->x() + 1,
+                          lyt_ptr->y() + 1, lyt_ptr->num_pis(), lyt_ptr->num_pos(), lyt_ptr->num_gates(),
+                          lyt_ptr->num_wires(), lyt_ptr->num_crossings(), cp_tp.critical_path_length, cp_tp.throughput,
+                          num_se);
     };
 
     std::visit(print_statistics, layout);
@@ -242,6 +243,7 @@ ALICE_LOG_STORE_STATISTICS(fiction::gate_layout_t, layout)
             {"outputs", lyt_ptr->num_pos()},
             {"gates", lyt_ptr->num_gates()},
             {"wires", lyt_ptr->num_wires()},
+            {"crossings", lyt_ptr->num_crossings()},
             {"layout", {{"x-size", lyt_ptr->x() + 1}, {"y-size", lyt_ptr->y() + 1}, {"area", lyt_ptr->area()}}},
             // {"free tiles", area - (gate_tiles + wire_tiles - crossings)},  // free tiles in ground layer
             // {"crossings", crossings},
