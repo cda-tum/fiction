@@ -52,6 +52,14 @@ inline void time_to_solution(pybind11::module& m)
      */
     py::class_<fiction::time_to_solution_stats>(m, "time_to_solution_stats", DOC(fiction_time_to_solution_stats))
         .def(py::init<>())
+        .def("__repr__",
+             [](const fiction::time_to_solution_stats& stats)
+             {
+                 std::stringstream stream{};
+                 stats.report(stream);
+                 return stream.str();
+             })
+        .def("report", &fiction::time_to_solution_stats::report, DOC(fiction_time_to_solution_stats_report))
         .def_readwrite("time_to_solution", &fiction::time_to_solution_stats::time_to_solution,
                        DOC(fiction_time_to_solution_stats_time_to_solution))
         .def_readwrite("acc", &fiction::time_to_solution_stats::acc, DOC(fiction_time_to_solution_stats_acc))
@@ -61,7 +69,8 @@ inline void time_to_solution(pybind11::module& m)
                        DOC(fiction_time_to_solution_stats_single_runtime_exact))
         .def_readwrite("algorithm", &fiction::time_to_solution_stats::algorithm,
                        DOC(fiction_time_to_solution_stats_algorithm))
-        .def("report", &fiction::time_to_solution_stats::report, DOC(fiction_time_to_solution_stats_report));
+
+        ;
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 

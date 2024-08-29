@@ -60,8 +60,21 @@ inline void equivalence_checking(pybind11::module& m)
     py::class_<fiction::equivalence_checking_stats>(m, "equivalence_checking_stats",
                                                     DOC(fiction_equivalence_checking_stats))
         .def(py::init<>())
+        .def_readwrite("eq", &fiction::equivalence_checking_stats::eq, DOC(fiction_equivalence_checking_stats_eq))
+        .def_readwrite("tp_spec", &fiction::equivalence_checking_stats::tp_spec,
+                       DOC(fiction_equivalence_checking_stats_tp_spec))
+        .def_readwrite("tp_impl", &fiction::equivalence_checking_stats::tp_impl,
+                       DOC(fiction_equivalence_checking_stats_tp_impl))
+        .def_readwrite("tp_diff", &fiction::equivalence_checking_stats::tp_diff,
+                       DOC(fiction_equivalence_checking_stats_tp_diff))
         .def_readwrite("counter_example", &fiction::equivalence_checking_stats::counter_example,
                        DOC(fiction_equivalence_checking_stats_counter_example))
+        .def_readonly("runtime", &fiction::equivalence_checking_stats::runtime,
+                      DOC(fiction_orthogonal_physical_design_stats_duration))
+        .def_readonly("spec_drv_stats", &fiction::equivalence_checking_stats::spec_drv_stats,
+                      DOC(fiction_orthogonal_physical_design_stats_spec_drv_stats))
+        .def_readonly("impl_drv_stats", &fiction::equivalence_checking_stats::impl_drv_stats,
+                      DOC(fiction_orthogonal_physical_design_stats_impl_drv_stats))
 
         ;
 

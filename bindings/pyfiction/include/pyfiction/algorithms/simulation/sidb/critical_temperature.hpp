@@ -57,6 +57,14 @@ inline void critical_temperature(pybind11::module& m)
     py::class_<fiction::critical_temperature_stats>(m, "critical_temperature_stats",
                                                     DOC(fiction_critical_temperature_stats))
         .def(py::init<>())
+        .def("__repr__",
+             [](const fiction::critical_temperature_stats& stats)
+             {
+                 std::stringstream stream{};
+                 stats.report(stream);
+                 return stream.str();
+             })
+        .def("report", &fiction::critical_temperature_stats::report, DOC(fiction_critical_temperature_stats_report))
         .def_readwrite("algorithm_name", &fiction::critical_temperature_stats::algorithm_name,
                        DOC(fiction_critical_temperature_stats_algorithm_name))
         .def_readwrite("critical_temperature", &fiction::critical_temperature_stats::critical_temperature,
@@ -66,7 +74,8 @@ inline void critical_temperature(pybind11::module& m)
         .def_readwrite("energy_between_ground_state_and_first_erroneous",
                        &fiction::critical_temperature_stats::energy_between_ground_state_and_first_erroneous,
                        DOC(fiction_critical_temperature_stats_energy_between_ground_state_and_first_erroneous))
-        .def("report", &fiction::critical_temperature_stats::report, DOC(fiction_critical_temperature_stats_report));
+
+        ;
 
     /**
      * Critical temperature parameters.

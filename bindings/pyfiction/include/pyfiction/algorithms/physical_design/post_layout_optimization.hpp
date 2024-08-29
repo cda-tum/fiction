@@ -45,6 +45,8 @@ inline void post_layout_optimization(pybind11::module& m)
                  stats.report(stream);
                  return stream.str();
              })
+        .def("report", &fiction::post_layout_optimization_stats::report,
+             DOC(fiction_post_layout_optimization_stats_report))
         .def_readonly("time_total", &fiction::post_layout_optimization_stats::time_total,
                       DOC(fiction_post_layout_optimization_stats_duration))
         .def_readonly("x_size_before", &fiction::post_layout_optimization_stats::x_size_before,

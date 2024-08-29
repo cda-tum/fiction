@@ -32,7 +32,7 @@ inline void wiring_reduction(pybind11::module& m)
                  stats.report(stream);
                  return stream.str();
              })
-
+        .def("report", &fiction::wiring_reduction_stats::report, DOC(fiction_wiring_reduction_stats_report))
         .def_readonly("time_total", &fiction::wiring_reduction_stats::time_total,
                       DOC(fiction_wiring_reduction_stats_duration))
         .def_readonly("x_size_before", &fiction::wiring_reduction_stats::x_size_before,
