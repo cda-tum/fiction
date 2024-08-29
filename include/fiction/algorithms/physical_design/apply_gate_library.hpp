@@ -44,9 +44,23 @@ class apply_gate_library_impl
     {
         cell_lyt.resize(aspect_ratio<CellLyt>{((gate_lyt.x() + 1) * GateLibrary::gate_x_size()) - 1,
                                               ((gate_lyt.y() + 1) * GateLibrary::gate_y_size()) - 1, gate_lyt.z()});
-        cell_lyt.replace_clocking_scheme(gate_lyt.get_clocking_scheme());
         cell_lyt.set_tile_size_x(GateLibrary::gate_x_size());
         cell_lyt.set_tile_size_y(GateLibrary::gate_y_size());
+
+        // if GateLyt and CellLyt are based on the same coordinate type, copy the clocking scheme over
+        if constexpr (std::is_same_v<coordinate<CellLyt>, coordinate<GateLyt>>)
+        {
+            cell_lyt.replace_clocking_scheme(gate_lyt.get_clocking_scheme());
+        }
+        // otherwise, try to find a matching clocking scheme (this will discard overwritten clock numbers)
+        else
+        {
+            if (const auto clk_scheme = get_clocking_scheme<CellLyt>(gate_lyt.get_clocking_scheme().name);
+                clk_scheme.has_value())
+            {
+                cell_lyt.replace_clocking_scheme(clk_scheme.value());
+            }
+        }
     }
 
     /**
