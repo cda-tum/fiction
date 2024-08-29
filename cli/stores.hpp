@@ -246,7 +246,6 @@ ALICE_LOG_STORE_STATISTICS(fiction::gate_layout_t, layout)
             {"crossings", lyt_ptr->num_crossings()},
             {"layout", {{"x-size", lyt_ptr->x() + 1}, {"y-size", lyt_ptr->y() + 1}, {"area", lyt_ptr->area()}}},
             // {"free tiles", area - (gate_tiles + wire_tiles - crossings)},  // free tiles in ground layer
-            // {"crossings", crossings},
             {"synchronization elements", num_se},
             {"critical path", cp_tp.critical_path_length},
             {"throughput", fmt::format("1/{}", cp_tp.throughput)}};
