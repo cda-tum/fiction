@@ -67,7 +67,7 @@ inline void equivalence_checking(pybind11::module& m)
                       DOC(fiction_equivalence_checking_stats_tp_impl))
         .def_readonly("tp_diff", &fiction::equivalence_checking_stats::tp_diff,
                       DOC(fiction_equivalence_checking_stats_tp_diff))
-        .def_readwrite("counter_example", &fiction::equivalence_checking_stats::counter_example,
+        .def_readonly("counter_example", &fiction::equivalence_checking_stats::counter_example,
                        DOC(fiction_equivalence_checking_stats_counter_example))
         .def_readonly("runtime", &fiction::equivalence_checking_stats::runtime,
                       DOC(fiction_equivalence_checking_stats_duration))
