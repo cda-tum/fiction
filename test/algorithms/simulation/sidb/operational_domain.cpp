@@ -982,8 +982,8 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
                 CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
                 CHECK(op_domain_stats.num_evaluated_parameter_combinations == 125);
                 CHECK(op_domain_stats.num_operational_parameter_combinations == 80);
-                CHECK_THAT(op_domain_stats.operational_to_total_ratio,
-                           Catch::Matchers::WithinAbs(0.3125 - 80.0 / 512.0, 0.0));
+                CHECK_THAT(op_domain_stats.operational_to_total_ratio - 80.0 / 256.0,
+                           Catch::Matchers::WithinAbs(0.0, physical_constants::POP_STABILITY_ERR));
             }
         }
         SECTION("contour_tracing")
