@@ -5,7 +5,28 @@ All notable changes to this project will be documented in this file.
 
 The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`_.
 
-v0.6.3 - 2024-08-21
+v0.6.4 - 2024-08-30
+-------------------
+
+Added
+#####
+- Algorithms:
+    - Path-finding:
+        - Squared Euclidean distance function
+        - Chebyshev distance function
+- Data structures:
+    - ``gate_level_layout`` now tracks its number of crossings
+- CLI:
+    - ``ps -g`` and ``store -g`` now display the current ``gate_level_layout``'s number of crossings
+
+Fixed
+#####
+- Fixed disappearing clocking schemes when applying a gate library to a gate-level layout
+- Fixed a few oversights in the RTD documentation of SiDB simulation functionality
+- Fixed several typos and docstrings in the codebase
+- Addressed some ``clang-tidy`` warnings
+
+v0.6.3 - 2024-08-22
 -------------------
 
 Added

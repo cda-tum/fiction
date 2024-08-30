@@ -9,18 +9,24 @@ Distance functions compute (an approximation for) the distance between two coord
 
         .. doxygenfunction:: fiction::manhattan_distance
         .. doxygenfunction:: fiction::euclidean_distance
+        .. doxygenfunction:: fiction::squared_euclidean_distance
         .. doxygenfunction:: fiction::twoddwave_distance
+        .. doxygenfunction:: fiction::chebyshev_distance
 
         .. doxygenclass:: fiction::distance_functor
            :members:
         .. doxygenclass:: fiction::manhattan_distance_functor
         .. doxygenclass:: fiction::euclidean_distance_functor
+        .. doxygenclass:: fiction::squared_euclidean_distance_functor
         .. doxygenclass:: fiction::twoddwave_distance_functor
+        .. doxygenclass:: fiction::chebyshev_distance_functor
 
     .. tab:: Python
         .. autofunction:: mnt.pyfiction.manhattan_distance
         .. autofunction:: mnt.pyfiction.euclidean_distance
+        .. autofunction:: mnt.pyfiction.squared_euclidean_distance
         .. autofunction:: mnt.pyfiction.twoddwave_distance
+        .. autofunction:: mnt.pyfiction.chebyshev_distance
 
 Distance Maps
 -------------

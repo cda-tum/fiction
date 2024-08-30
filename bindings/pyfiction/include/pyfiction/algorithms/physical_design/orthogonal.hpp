@@ -42,6 +42,20 @@ inline void orthogonal(pybind11::module& m)
                  stats.report(stream);
                  return stream.str();
              })
+        .def("report", &fiction::orthogonal_physical_design_stats::report,
+             DOC(fiction_orthogonal_physical_design_stats_report))
+        .def_readonly("time_total", &fiction::orthogonal_physical_design_stats::time_total,
+                      DOC(fiction_orthogonal_physical_design_stats_duration))
+        .def_readonly("x_size", &fiction::orthogonal_physical_design_stats::x_size,
+                      DOC(fiction_orthogonal_physical_design_stats_x_size))
+        .def_readonly("y_size", &fiction::orthogonal_physical_design_stats::y_size,
+                      DOC(fiction_orthogonal_physical_design_stats_y_size))
+        .def_readonly("num_gates", &fiction::orthogonal_physical_design_stats::num_gates,
+                      DOC(fiction_orthogonal_physical_design_stats_num_gates))
+        .def_readonly("num_wires", &fiction::orthogonal_physical_design_stats::num_wires,
+                      DOC(fiction_orthogonal_physical_design_stats_num_wires))
+        .def_readonly("num_crossings", &fiction::orthogonal_physical_design_stats::num_crossings,
+                      DOC(fiction_orthogonal_physical_design_stats_num_crossings))
 
         ;
 

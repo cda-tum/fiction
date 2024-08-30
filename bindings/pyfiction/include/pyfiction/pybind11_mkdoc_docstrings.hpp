@@ -1968,6 +1968,44 @@ Parameter ``cs``:
 Returns:
     Integer representing the SiDB's charge state.)doc";
 
+static const char *__doc_fiction_chebyshev_distance =
+R"doc(The Chebyshev distance :math:`D` between two layout coordinates
+:math:`(x_1, y_1)` and :math:`(x_2, y_2)` given by
+
+:math:`D = \max(|x_2 - x_1|, |y_2 - y_1|)`
+
+In contrast to the Manhattan distance, this function assumes the same
+cost for diagonal moves as it does for horizontal and vertical ones.
+
+Template parameter ``Lyt``:
+    Coordinate layout type.
+
+Template parameter ``Dist``:
+    Integral type for the distance.
+
+Parameter ``lyt``:
+    Layout.
+
+Parameter ``source``:
+    Source coordinate.
+
+Parameter ``target``:
+    Target coordinate.
+
+Returns:
+    Chebyshev distance between `source` and `target`.)doc";
+
+static const char *__doc_fiction_chebyshev_distance_functor =
+R"doc(A pre-defined distance functor that uses the Chebyshev distance.
+
+Template parameter ``Lyt``:
+    Coordinate layout type.
+
+Template parameter ``Dist``:
+    Integral distance type.)doc";
+
+static const char *__doc_fiction_chebyshev_distance_functor_chebyshev_distance_functor = R"doc()doc";
+
 static const char *__doc_fiction_check_simulation_results_for_equivalence =
 R"doc(This function compares two SiDB simulation results for equivalence.
 Two results are considered equivalent if they have the same number of
@@ -2001,9 +2039,9 @@ Parameter ``lyt``:
 
 static const char *__doc_fiction_clocked_layout =
 R"doc(A layout type to layer on top of a coordinate layout, e.g.,
-cartesian_layout, hexagonal_layout, or tile_based_layout. This type
-extends the layout by providing a notion of FCN clocking. To this end,
-it utilizes a clocking scheme that assigns each coordinate in the
+`cartesian_layout`, `hexagonal_layout`, or `tile_based_layout`. This
+type extends the layout by providing a notion of FCN clocking. To this
+end, it utilizes a clocking scheme that assigns each coordinate in the
 extended coordinate layout a clock number. These clock numbers can be
 manually overwritten if necessary.
 
@@ -7814,36 +7852,23 @@ static const char *__doc_fiction_detail_write_qca_layout_impl_write_via_cells = 
 static const char *__doc_fiction_detail_write_qca_layout_svg_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_write_qca_layout_svg_impl_generate_cell_based_svg =
-R"doc(Returns an SVG string representing the given cell-based clocked cell
-layout
+R"doc(Generates an SVG string representing the cell-based clocked cell
+layout and appends it to the output stream.)doc";
 
-Parameter ``fcl``:
-    The cell layout to generate an SVG representation for.
+static const char *__doc_fiction_detail_write_qca_layout_svg_impl_generate_description_color =
+R"doc(Generates and returns a pair of strings representing the description
+and color of the given cell.
 
-Parameter ``simple``:
-    Flag to indicate that the SVG representation should be generated
-    with less details. Recommended for large layouts.
+Parameter ``c``:
+    The cell for which to generate the description and color.
 
 Returns:
-    The SVG string containing a visual representation of the given
-    layout.)doc";
-
-static const char *__doc_fiction_detail_write_qca_layout_svg_impl_generate_description_color = R"doc()doc";
+    A pair of strings representing the description and color of the
+    given cell `c`.)doc";
 
 static const char *__doc_fiction_detail_write_qca_layout_svg_impl_generate_tile_based_svg =
-R"doc(Returns an SVG string representing the given tile-based clocked cell
-layout.
-
-Parameter ``fcl``:
-    The cell layout to generate an SVG representation for.
-
-Parameter ``simple``:
-    Flag to indicate that the SVG representation should be generated
-    with less details. Recommended for large layouts.
-
-Returns:
-    The SVG string containing a visual representation of the given
-    layout.)doc";
+R"doc(Generates an SVG string representing the tile-based clocked cell
+layout and appends it to the output stream.)doc";
 
 static const char *__doc_fiction_detail_write_qca_layout_svg_impl_lyt = R"doc()doc";
 
@@ -7853,7 +7878,7 @@ static const char *__doc_fiction_detail_write_qca_layout_svg_impl_ps = R"doc()do
 
 static const char *__doc_fiction_detail_write_qca_layout_svg_impl_run = R"doc()doc";
 
-static const char *__doc_fiction_detail_write_qca_layout_svg_impl_write_qca_layout_svg_impl = R"doc()doc";
+static const char *__doc_fiction_detail_write_qca_layout_svg_impl_write_qca_layout_svg_impl = R"doc(Default constructor.)doc";
 
 static const char *__doc_fiction_detail_write_qcc_layout_impl = R"doc()doc";
 
@@ -8926,6 +8951,8 @@ static const char *__doc_fiction_exact_physical_design_stats_duration = R"doc()d
 
 static const char *__doc_fiction_exact_physical_design_stats_num_aspect_ratios = R"doc()doc";
 
+static const char *__doc_fiction_exact_physical_design_stats_num_crossings = R"doc()doc";
+
 static const char *__doc_fiction_exact_physical_design_stats_num_gates = R"doc()doc";
 
 static const char *__doc_fiction_exact_physical_design_stats_num_wires = R"doc()doc";
@@ -9911,6 +9938,8 @@ static const char *__doc_fiction_gate_level_layout_gate_level_layout_storage_dat
 
 static const char *__doc_fiction_gate_level_layout_gate_level_layout_storage_data_node_tile_map = R"doc()doc";
 
+static const char *__doc_fiction_gate_level_layout_gate_level_layout_storage_data_num_crossings = R"doc()doc";
+
 static const char *__doc_fiction_gate_level_layout_gate_level_layout_storage_data_num_gates = R"doc()doc";
 
 static const char *__doc_fiction_gate_level_layout_gate_level_layout_storage_data_num_wires = R"doc()doc";
@@ -10517,6 +10546,13 @@ static const char *__doc_fiction_gate_level_layout_num_cis = R"doc()doc";
 
 static const char *__doc_fiction_gate_level_layout_num_cos = R"doc()doc";
 
+static const char *__doc_fiction_gate_level_layout_num_crossings =
+R"doc(Returns the number of placed nodes in the layout that compute the
+identity function and cross other nodes.
+
+Returns:
+    Number of crossings in the layout.)doc";
+
 static const char *__doc_fiction_gate_level_layout_num_gates =
 R"doc(Returns the number of placed nodes in the layout that do not compute
 the identity function.
@@ -10899,6 +10935,8 @@ R"doc(This struct stores statistics about the graph-oriented layout design
 process.)doc";
 
 static const char *__doc_fiction_graph_oriented_layout_design_stats_duration = R"doc(Runtime of the graph-oriented layout design process.)doc";
+
+static const char *__doc_fiction_graph_oriented_layout_design_stats_num_crossings = R"doc(Number of crossings.)doc";
 
 static const char *__doc_fiction_graph_oriented_layout_design_stats_num_gates = R"doc(Number of gates.)doc";
 
@@ -13673,6 +13711,8 @@ static const char *__doc_fiction_orthogonal_physical_design_stats = R"doc()doc";
 
 static const char *__doc_fiction_orthogonal_physical_design_stats_duration = R"doc()doc";
 
+static const char *__doc_fiction_orthogonal_physical_design_stats_num_crossings = R"doc()doc";
+
 static const char *__doc_fiction_orthogonal_physical_design_stats_num_gates = R"doc()doc";
 
 static const char *__doc_fiction_orthogonal_physical_design_stats_num_wires = R"doc()doc";
@@ -14087,6 +14127,14 @@ process.)doc";
 static const char *__doc_fiction_post_layout_optimization_stats_area_improvement = R"doc(Area reduction (in %) after the post-layout optimization process.)doc";
 
 static const char *__doc_fiction_post_layout_optimization_stats_duration = R"doc(Runtime of the post-layout optimization process.)doc";
+
+static const char *__doc_fiction_post_layout_optimization_stats_num_crossings_after = R"doc(Number of crossings after the post-layout optimization process.)doc";
+
+static const char *__doc_fiction_post_layout_optimization_stats_num_crossings_before = R"doc(Number of crossings before the post-layout optimization process.)doc";
+
+static const char *__doc_fiction_post_layout_optimization_stats_num_wires_after = R"doc(Number of wire segments after the post-layout optimization process.)doc";
+
+static const char *__doc_fiction_post_layout_optimization_stats_num_wires_before = R"doc(Number of wire segments before the post-layout optimization process.)doc";
 
 static const char *__doc_fiction_post_layout_optimization_stats_report =
 R"doc(Reports the statistics to the given output stream.
@@ -16096,6 +16144,48 @@ static const char *__doc_fiction_sqd_parsing_error = R"doc(Exception thrown when
 
 static const char *__doc_fiction_sqd_parsing_error_sqd_parsing_error = R"doc()doc";
 
+static const char *__doc_fiction_squared_euclidean_distance =
+R"doc(The squared Euclidean distance :math:`D` between two layout
+coordinates :math:`(x_1, y_1)` and :math:`(x_2, y_2)` given by
+
+:math:`D = \sqrt{(x_1 - x_2)^2 + (y_1 - y_2)^2}^2 = (x_1 - x_2)^2 +
+(y_1 - y_2)^2`
+
+In contrast to the regular Euclidean distance, this function is
+differentiable and can be used in optimization algorithms that require
+gradients. Additionally, it is computationally cheaper by omitting the
+square root operation.
+
+Template parameter ``Lyt``:
+    Coordinate layout type.
+
+Template parameter ``Dist``:
+    Integral type for the distance.
+
+Parameter ``lyt``:
+    Layout.
+
+Parameter ``source``:
+    Source coordinate.
+
+Parameter ``target``:
+    Target coordinate.
+
+Returns:
+    Squared euclidean distance between `source` and `target`.)doc";
+
+static const char *__doc_fiction_squared_euclidean_distance_functor =
+R"doc(A pre-defined distance functor that uses the squared Euclidean
+distance.
+
+Template parameter ``Lyt``:
+    Coordinate layout type.
+
+Template parameter ``Dist``:
+    Integral distance type.)doc";
+
+static const char *__doc_fiction_squared_euclidean_distance_functor_squared_euclidean_distance_functor = R"doc()doc";
+
 static const char *__doc_fiction_sweep_parameter = R"doc(Possible sweep parameters for the operational domain computation.)doc";
 
 static const char *__doc_fiction_sweep_parameter_EPSILON_R = R"doc(The relative permittivity of the dielectric material.)doc";
@@ -17337,7 +17427,8 @@ supported exclusively so far.
 The utilized color scheme is based on the standard scheme used in
 QCADesigner (https://waluslab.ece.ubc.ca/qcadesigner/).
 
-May throw an unsupported_cell_type_exception.
+May throw an `unsupported_cell_type_exception` if it encounters
+unsupported cell types in the layout.
 
 Template parameter ``Lyt``:
     Cell-level QCA layout type.
@@ -17360,7 +17451,9 @@ exclusively so far.
 The utilized color scheme is based on the standard scheme used in
 QCADesigner (https://waluslab.ece.ubc.ca/qcadesigner/).
 
-May throw an unsupported_cell_type_exception.
+May throw an `unsupported_cell_type_exception` if it encounters
+unsupported cell types in the layout. May throw an
+`std::ofstream::failure` if it cannot open the file.
 
 Template parameter ``Lyt``:
     Cell-level QCA layout type.

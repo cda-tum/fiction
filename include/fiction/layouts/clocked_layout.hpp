@@ -23,10 +23,10 @@ namespace fiction
 {
 
 /**
- * A layout type to layer on top of a coordinate layout, e.g., cartesian_layout, hexagonal_layout, or tile_based_layout.
- * This type extends the layout by providing a notion of FCN clocking. To this end, it utilizes a clocking scheme that
- * assigns each coordinate in the extended coordinate layout a clock number. These clock numbers can be manually
- * overwritten if necessary.
+ * A layout type to layer on top of a coordinate layout, e.g., `cartesian_layout`, `hexagonal_layout`, or
+ * `tile_based_layout`. This type extends the layout by providing a notion of FCN clocking. To this end, it utilizes a
+ * clocking scheme that assigns each coordinate in the extended coordinate layout a clock number. These clock numbers
+ * can be manually overwritten if necessary.
  *
  * In the context of this layout type, coordinates are renamed as clock zones.
  *
