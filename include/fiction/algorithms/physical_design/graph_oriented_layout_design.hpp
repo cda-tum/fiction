@@ -9,6 +9,7 @@
 #include "fiction/algorithms/path_finding/cost.hpp"
 #include "fiction/algorithms/path_finding/distance.hpp"
 #include "fiction/algorithms/physical_design/post_layout_optimization.hpp"
+#include "fiction/algorithms/verification/equivalence_checking.hpp"
 #include "fiction/io/print_layout.hpp"
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
@@ -80,6 +81,12 @@ struct graph_oriented_layout_design_params
      * crossing-free wiring is found. Defaults to false.
      */
     bool planar = false;
+    /**
+     * 0: area
+     * 1: crossings
+     * 2: wires
+     */
+    uint64_t cost_function = 2;
     /**
      * Verbosity.
      */
@@ -292,6 +299,12 @@ struct search_space_graph
      * Create planar layouts.
      */
     bool planar = false;
+    /**
+     * 0: area
+     * 1: crossings
+     * 2: wires
+     */
+    uint64_t cost_function = 0;
 };
 /**
  * @brief Custom view class derived from mockturtle::topo_view.
@@ -597,7 +610,7 @@ class graph_oriented_layout_design_impl
             pst{st},
             timeout{ps.timeout},
             start{std::chrono::high_resolution_clock::now()},
-            num_search_space_graphs{ps.high_effort_mode ? 12u : 2u},
+            num_search_space_graphs{ps.high_effort_mode ? 36u : 3u},
             ssg_vec(num_search_space_graphs)
     {
         ntk.substitute_po_signals();
@@ -690,7 +703,7 @@ class graph_oriented_layout_design_impl
             {
                 // terminate algorithm if specified timeout was set or at least one solution was found in
                 // high-efficiency mode
-                if (timeout_set || (!ps.high_effort_mode && improve_current_solution))
+                if (timeout_set || (!ps.high_effort_mode && improve_current_solutions[ps.cost_function]))
                 {
                     timeout_limit_reached = true;
                 }
@@ -698,7 +711,7 @@ class graph_oriented_layout_design_impl
         }
 
         // check if any layout was found
-        if (improve_current_solution)
+        if (improve_current_solutions[ps.cost_function])
         {
             return best_lyt;
         }
@@ -749,7 +762,8 @@ class graph_oriented_layout_design_impl
     /**
      * Current best solution w.r.t. area.
      */
-    uint64_t best_solution{std::numeric_limits<uint64_t>::max()};
+    std::vector<uint64_t> best_solutions{std::numeric_limits<uint64_t>::max(), std::numeric_limits<uint64_t>::max(),
+                                         std::numeric_limits<uint64_t>::max()};
     /**
      * Current best solution w.r.t. area after relocating POs.
      */
@@ -757,7 +771,7 @@ class graph_oriented_layout_design_impl
     /**
      * Flag indicating if an initial solution was already found, and that other search space graphs should be pruned.
      */
-    bool improve_current_solution{false};
+    std::vector<bool> improve_current_solutions{false, false, false};
     /**
      * Checks if there is a path between the source and destination tiles in the given layout.
      *
@@ -1309,10 +1323,26 @@ class graph_oriented_layout_design_impl
         const auto ms  = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count() % 1000;
         const auto sec = std::chrono::duration_cast<std::chrono::seconds>(duration).count();
 
+        uint64_t num_crossings = 0;
+        uint64_t num_wires     = lyt.num_wires() - lyt.num_pis() - lyt.num_pos();
+        lyt.foreach_wire(
+            [&](const auto& n)
+            {
+                if (!(lyt.is_fanout(n) || lyt.is_pi(n) || lyt.is_po(n)))
+                {
+                    if (lyt.get_tile(n).z == 1)
+                    {
+                        num_crossings++;
+                    }
+                };
+            });
+
         // output the elapsed time
         std::cout << fmt::format("[i]   Time taken:       {} s {} ms {} µs\n", sec, ms, us);
         std::cout << fmt::format("[i]   Evaluated paths:  {}\n", num_evaluated_paths);
         std::cout << fmt::format("[i]   Layout dimension: {} × {} = {}\n", lyt.x() + 1, lyt.y() + 1, lyt.area());
+        std::cout << fmt::format("[i]   #Crossings: {}\n", num_crossings);
+        std::cout << fmt::format("[i]   #Wires: {}\n", num_wires);
     }
     /**
      * Initializes the layout with minimum width
@@ -1375,17 +1405,52 @@ class graph_oriented_layout_design_impl
             const auto remaining_nodes_to_place =
                 static_cast<double>(ssg.nodes_to_place.size() - (ssg.current_vertex.size() + 1));
 
-            // current layout size
-            const double cost1 = static_cast<double>(((std::max(layout.x() - 1, position.x) + 1) *
-                                                      (std::max(layout.y() - 1, position.y) + 1))) /
-                                 static_cast<double>((ssg.nodes_to_place.size() * ssg.nodes_to_place.size()));
+            if (ssg.cost_function == 0)
+            {
+                // current layout size
+                const double cost1 = static_cast<double>(((std::max(layout.x() - 1, position.x) + 1) *
+                                                          (std::max(layout.y() - 1, position.y) + 1))) /
+                                     static_cast<double>((ssg.nodes_to_place.size() * ssg.nodes_to_place.size()));
 
-            // position of last placed node
-            const double cost2 = static_cast<double>(((position.x + 1) * (position.y + 1))) /
-                                 static_cast<double>((ssg.nodes_to_place.size() * ssg.nodes_to_place.size()));
+                // position of last placed node
+                const double cost2 = static_cast<double>(((position.x + 1) * (position.y + 1))) /
+                                     static_cast<double>((ssg.nodes_to_place.size() * ssg.nodes_to_place.size()));
 
-            double priority = remaining_nodes_to_place + cost1 + cost2;
-            next_positions.push_back({new_sequence, priority});
+                double priority = remaining_nodes_to_place + cost1 + cost2;
+                next_positions.push_back({new_sequence, priority});
+            }
+
+            else if (ssg.cost_function == 1)
+            {
+                uint64_t num_crossings = 0;
+                layout.foreach_wire(
+                    [&](const auto& n)
+                    {
+                        if (!(layout.is_fanout(n) || layout.is_pi(n) || layout.is_po(n)))
+                        {
+                            if (layout.get_tile(n).z == 1)
+                            {
+                                num_crossings++;
+                            }
+                        };
+                    });
+                const double cost1 = static_cast<double>(num_crossings + 1) / static_cast<double>(10000);
+
+                double priority = remaining_nodes_to_place + cost1;
+
+                next_positions.push_back({new_sequence, priority});
+            }
+
+            else if (ssg.cost_function == 2)
+            {
+                uint64_t num_wires = layout.num_wires() - layout.num_pis() - layout.num_pos();
+
+                const double cost1 = static_cast<double>(num_wires + 1) / static_cast<double>(10000);
+
+                double priority = remaining_nodes_to_place + cost1;
+
+                next_positions.push_back({new_sequence, priority});
+            }
         }
 
         return {next_positions, std::nullopt};
@@ -1427,22 +1492,68 @@ class graph_oriented_layout_design_impl
 
             bool found_solution = place_and_route(position, layout, ssg, place_info);
 
-            uint64_t area = 0ul;
+            uint64_t cost         = 0ul;
+            uint64_t desired_cost = 0ul;
 
-            if (improve_current_solution)
+            if (improve_current_solutions[ssg.cost_function])
             {
-                const auto bb = bounding_box_2d(layout);
-                area          = static_cast<uint64_t>(bb.get_max().x + 1u) * static_cast<uint64_t>(bb.get_max().y + 1u);
+                if (ssg.cost_function == 0)
+                {
+                    const auto bb = bounding_box_2d(layout);
+                    cost = static_cast<uint64_t>(bb.get_max().x + 1u) * static_cast<uint64_t>(bb.get_max().y + 1u);
+                }
+                else if (ssg.cost_function == 1)
+                {
+                    layout.foreach_wire(
+                        [&](const auto& n)
+                        {
+                            if (!(layout.is_fanout(n) || layout.is_pi(n) || layout.is_po(n)))
+                            {
+                                if (layout.get_tile(n).z == 1)
+                                {
+                                    cost++;
+                                }
+                            };
+                        });
+                }
+                else if (ssg.cost_function == 2)
+                {
+                    cost = layout.num_wires() - layout.num_pis() - layout.num_pos();
+                }
             }
 
-            if (found_solution && (!improve_current_solution || (area <= best_solution)))
+            if (found_solution &&
+                (!improve_current_solutions[ssg.cost_function] || (cost <= best_solutions[ssg.cost_function])))
             {
-                const auto bb = fiction::bounding_box_2d(layout);
-                layout.resize({bb.get_max().x, bb.get_max().y, layout.z()});
+                if (ssg.cost_function == 0)
+                {
+                    const auto bb = fiction::bounding_box_2d(layout);
+                    layout.resize({bb.get_max().x, bb.get_max().y, layout.z()});
 
-                area                     = layout.area();
-                best_solution            = area;
-                improve_current_solution = true;
+                    cost = layout.area();
+                }
+                else if (ssg.cost_function == 1)
+                {
+                    cost = 0;
+                    layout.foreach_wire(
+                        [&](const auto& n)
+                        {
+                            if (!(layout.is_fanout(n) || layout.is_pi(n) || layout.is_po(n)))
+                            {
+                                if (layout.get_tile(n).z == 1)
+                                {
+                                    cost++;
+                                }
+                            };
+                        });
+                }
+                else if (ssg.cost_function == 2)
+                {
+                    cost = layout.num_wires() - layout.num_pis() - layout.num_pos();
+                }
+
+                best_solutions[ssg.cost_function]            = cost;
+                improve_current_solutions[ssg.cost_function] = true;
 
                 fiction::post_layout_optimization_params plo_params{};
                 plo_params.optimize_pos_only   = true;
@@ -1453,9 +1564,32 @@ class graph_oriented_layout_design_impl
                 const auto bb_after_plo = fiction::bounding_box_2d(layout);
                 layout.resize({bb_after_plo.get_max().x, bb_after_plo.get_max().y, layout.z()});
 
-                if (layout.area() < best_optimized_solution)
+                if (ps.cost_function == 0)
                 {
-                    best_optimized_solution = layout.area();
+                    desired_cost = layout.area();
+                }
+                else if (ps.cost_function == 1)
+                {
+                    desired_cost = 0;
+                    layout.foreach_wire(
+                        [&](const auto& n)
+                        {
+                            if (!(layout.is_fanout(n) || layout.is_pi(n) || layout.is_po(n)))
+                            {
+                                if (layout.get_tile(n).z == 1)
+                                {
+                                    desired_cost++;
+                                }
+                            };
+                        });
+                }
+                else if (ps.cost_function == 2)
+                {
+                    desired_cost = layout.num_wires() - layout.num_pis() - layout.num_pos();
+                }
+                if (desired_cost < best_optimized_solution)
+                {
+                    best_optimized_solution = desired_cost;
 
                     if (ps.verbose)
                     {
@@ -1468,7 +1602,7 @@ class graph_oriented_layout_design_impl
                 return {{}, std::nullopt};
             }
 
-            if (improve_current_solution && area >= best_solution)
+            if (improve_current_solutions[ssg.cost_function] && cost >= best_solutions[ssg.cost_function])
             {
                 return {{}, std::nullopt};
             }
@@ -1494,9 +1628,18 @@ class graph_oriented_layout_design_impl
      */
     void initialize_pis_cost_and_num_expansions() noexcept
     {
-        static constexpr std::array<pi_locations, 12> pi_locs = {
-            {pi_locations::TOP, pi_locations::LEFT, pi_locations::TOP_AND_LEFT, pi_locations::TOP, pi_locations::LEFT,
-             pi_locations::TOP_AND_LEFT, pi_locations::TOP, pi_locations::LEFT, pi_locations::TOP_AND_LEFT,
+        static constexpr std::array<pi_locations, 36> pi_locs = {
+            {pi_locations::TOP, pi_locations::LEFT, pi_locations::TOP_AND_LEFT,
+             pi_locations::TOP, pi_locations::LEFT, pi_locations::TOP_AND_LEFT,
+             pi_locations::TOP, pi_locations::LEFT, pi_locations::TOP_AND_LEFT,
+             pi_locations::TOP, pi_locations::LEFT, pi_locations::TOP_AND_LEFT,
+             pi_locations::TOP, pi_locations::LEFT, pi_locations::TOP_AND_LEFT,
+             pi_locations::TOP, pi_locations::LEFT, pi_locations::TOP_AND_LEFT,
+             pi_locations::TOP, pi_locations::LEFT, pi_locations::TOP_AND_LEFT,
+             pi_locations::TOP, pi_locations::LEFT, pi_locations::TOP_AND_LEFT,
+             pi_locations::TOP, pi_locations::LEFT, pi_locations::TOP_AND_LEFT,
+             pi_locations::TOP, pi_locations::LEFT, pi_locations::TOP_AND_LEFT,
+             pi_locations::TOP, pi_locations::LEFT, pi_locations::TOP_AND_LEFT,
              pi_locations::TOP, pi_locations::LEFT, pi_locations::TOP_AND_LEFT}};
 
         auto pi_loc_it = pi_locs.cbegin();
@@ -1547,12 +1690,14 @@ class graph_oriented_layout_design_impl
         // initialize search space graphs with networks
         ssg_vec[0].network = network_breadth_co_to_ci;
         ssg_vec[1].network = network_breadth_co_to_ci;
+        ssg_vec[2].network = network_breadth_co_to_ci;
 
         std::vector<mockturtle::node<decltype(network_breadth_co_to_ci)>> nodes_to_place_breadth_co_to_ci{};
         prepare_nodes_to_place(network_breadth_co_to_ci, nodes_to_place_breadth_co_to_ci);
 
         ssg_vec[0].nodes_to_place = nodes_to_place_breadth_co_to_ci;
         ssg_vec[1].nodes_to_place = nodes_to_place_breadth_co_to_ci;
+        ssg_vec[2].nodes_to_place = nodes_to_place_breadth_co_to_ci;
 
         if (ps.high_effort_mode)
         {
@@ -1567,9 +1712,20 @@ class graph_oriented_layout_design_impl
             ssg_vec[2].network = network_breadth_co_to_ci;
             for (uint64_t i = 0ul; i < 3; ++i)
             {
+                ssg_vec[0 + i].network = network_breadth_co_to_ci;
                 ssg_vec[3 + i].network = network_breadth_ci_to_co;
                 ssg_vec[6 + i].network = network_depth_co_to_ci;
                 ssg_vec[9 + i].network = network_depth_ci_to_co;
+
+                ssg_vec[12 + i].network = network_breadth_co_to_ci;
+                ssg_vec[15 + i].network = network_breadth_ci_to_co;
+                ssg_vec[18 + i].network = network_depth_co_to_ci;
+                ssg_vec[21 + i].network = network_depth_ci_to_co;
+
+                ssg_vec[24 + i].network = network_breadth_co_to_ci;
+                ssg_vec[27 + i].network = network_breadth_ci_to_co;
+                ssg_vec[30 + i].network = network_depth_co_to_ci;
+                ssg_vec[33 + i].network = network_depth_ci_to_co;
             }
 
             std::vector<mockturtle::node<decltype(network_breadth_ci_to_co)>> nodes_to_place_breadth_ci_to_co{};
@@ -1580,14 +1736,36 @@ class graph_oriented_layout_design_impl
             prepare_nodes_to_place(network_depth_co_to_ci, nodes_to_place_depth_co_to_ci);
             prepare_nodes_to_place(network_depth_ci_to_co, nodes_to_place_depth_ci_to_co);
 
-            ssg_vec[2].nodes_to_place = nodes_to_place_breadth_co_to_ci;
-
             // assign nodes to place to each search space graphs
             for (uint64_t i = 0ul; i < 3; ++i)
             {
+                ssg_vec[0 + i].nodes_to_place = nodes_to_place_breadth_co_to_ci;
                 ssg_vec[3 + i].nodes_to_place = nodes_to_place_breadth_ci_to_co;
                 ssg_vec[6 + i].nodes_to_place = nodes_to_place_depth_co_to_ci;
                 ssg_vec[9 + i].nodes_to_place = nodes_to_place_depth_ci_to_co;
+
+                ssg_vec[12 + i].nodes_to_place = nodes_to_place_breadth_co_to_ci;
+                ssg_vec[15 + i].nodes_to_place = nodes_to_place_breadth_ci_to_co;
+                ssg_vec[18 + i].nodes_to_place = nodes_to_place_depth_co_to_ci;
+                ssg_vec[21 + i].nodes_to_place = nodes_to_place_depth_ci_to_co;
+
+                ssg_vec[24 + i].nodes_to_place = nodes_to_place_breadth_co_to_ci;
+                ssg_vec[27 + i].nodes_to_place = nodes_to_place_breadth_ci_to_co;
+                ssg_vec[30 + i].nodes_to_place = nodes_to_place_depth_co_to_ci;
+                ssg_vec[33 + i].nodes_to_place = nodes_to_place_depth_ci_to_co;
+            }
+
+            for (uint64_t i = 0ul; i < 12; ++i)
+            {
+                ssg_vec[i].cost_function = 0;
+            }
+            for (uint64_t i = 12ul; i < 24; ++i)
+            {
+                ssg_vec[i].cost_function = 1;
+            }
+            for (uint64_t i = 24ul; i < 36; ++i)
+            {
+                ssg_vec[i].cost_function = 2;
             }
         }
     }
