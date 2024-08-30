@@ -6508,7 +6508,7 @@ Parameter ``samples``:
 Parameter ``given_parameter_points``:
     Optional parameter points in the parameter space. If they lie
     within the operational region, they are used as starting points
-    for the flood fill.
+    for flood fill.
 
 Returns:
     The (partial) operational domain of the layout.)doc";
@@ -13457,8 +13457,9 @@ Parameter ``params``:
     Operational domain computation parameters.
 
 Parameter ``given_parameter_points``:
-    Optional starting points in the parameter space. If within the
-    operational region, they initiate the flood fill process
+    Optional parameter points in the parameter space. If they lie
+    within the operational region, they are used as starting points
+    for flood fill.
 
 Parameter ``stats``:
     Operational domain computation statistics.
