@@ -6505,6 +6505,11 @@ one pixel wide border around the domain.
 Parameter ``samples``:
     Maximum number of random samples to be taken before flood fill.
 
+Parameter ``given_parameter_points``:
+    Optional parameter points in the parameter space. If they lie
+    within the operational region, they are used as starting points
+    for the flood fill.
+
 Returns:
     The (partial) operational domain of the layout.)doc";
 
@@ -13451,6 +13456,10 @@ Parameter ``samples``:
 Parameter ``params``:
     Operational domain computation parameters.
 
+Parameter ``given_parameter_points``:
+    Optional starting points in the parameter space. If within the
+    operational region, they initiate the flood fill process
+
 Parameter ``stats``:
     Operational domain computation statistics.
 
@@ -13604,6 +13613,11 @@ operational.)doc";
 static const char *__doc_fiction_operational_domain_stats_num_operational_parameter_combinations = R"doc(Number of parameter combinations, for which the layout is operational.)doc";
 
 static const char *__doc_fiction_operational_domain_stats_num_simulator_invocations = R"doc(Number of simulator invocations.)doc";
+
+static const char *__doc_fiction_operational_domain_stats_operational_to_total_ratio =
+R"doc(This value represents the proportion of parameter points that fall
+within the operational region, relative to the total number of
+possible parameter points. The ratio ranges from 0 to 1.)doc";
 
 static const char *__doc_fiction_operational_domain_value_range =
 R"doc(A range of values for a dimension sweep. The range is defined by a
