@@ -37,8 +37,8 @@ void operational_domain(pybind11::module& m)
           DOC(fiction_operational_domain_random_sampling));
 
     m.def("operational_domain_flood_fill", &fiction::operational_domain_flood_fill<Lyt, py_tt>, "lyt"_a, "spec"_a,
-          "samples"_a, "params"_a = fiction::operational_domain_params{}, "given_parameter_points"_a = nullptr, "stats"_a = nullptr,
-          DOC(fiction_operational_domain_flood_fill));
+          "samples"_a, "params"_a = fiction::operational_domain_params{}, "given_parameter_points"_a = nullptr,
+          "stats"_a = nullptr, DOC(fiction_operational_domain_flood_fill));
 
     m.def("operational_domain_contour_tracing", &fiction::operational_domain_contour_tracing<Lyt, py_tt>, "lyt"_a,
           "spec"_a, "samples"_a, "params"_a = fiction::operational_domain_params{}, "stats"_a = nullptr,
@@ -118,7 +118,6 @@ inline void operational_domain(pybind11::module& m)
 
         ;
 
-    // todo update docu
     py::class_<fiction::operational_domain_stats>(m, "operational_domain_stats", DOC(fiction_operational_domain_stats))
         .def(py::init<>())
         .def_readonly("time_total", &fiction::operational_domain_stats::time_total,
@@ -134,8 +133,8 @@ inline void operational_domain(pybind11::module& m)
         .def_readonly("num_non_operational_parameter_combinations",
                       &fiction::operational_domain_stats::num_non_operational_parameter_combinations,
                       DOC(fiction_operational_domain_stats_num_non_operational_parameter_combinations))
-        .def_readonly("percentual_operational_area",
-                      &fiction::operational_domain_stats::operational_to_total_ratio)
+        .def_readonly("percentual_operational_area", &fiction::operational_domain_stats::operational_to_total_ratio,
+                      DOC(fiction_operational_domain_stats_operational_to_total_ratio))
 
         ;
 
