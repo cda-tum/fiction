@@ -20,10 +20,10 @@
 #include <cstdlib>
 #include <filesystem>
 #include <iostream>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
-#include <optional>
 
 using namespace fiction;
 
@@ -120,8 +120,8 @@ int main()  // NOLINT
                 operational_domain_grid_search(lyt, truth_table, op_domain_params, &op_domain_stats_gs);
             const auto op_domain_rs =
                 operational_domain_random_sampling(lyt, truth_table, 20000, op_domain_params, &op_domain_stats_rs);
-            const auto op_domain_ff =
-                operational_domain_flood_fill(lyt, truth_table, 2000, op_domain_params, std::nullopt, &op_domain_stats_ff);
+            const auto op_domain_ff = operational_domain_flood_fill(lyt, truth_table, 2000, op_domain_params,
+                                                                    std::nullopt, &op_domain_stats_ff);
 
             // write the operational domains to a CSV file
             write_operational_domain(op_domain_gs,
