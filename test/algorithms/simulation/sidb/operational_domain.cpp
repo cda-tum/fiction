@@ -14,6 +14,7 @@
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/truth_table_utils.hpp>
+#include <fiction/technology/physical_constants.hpp>
 
 #include <mockturtle/utils/stopwatch.hpp>
 

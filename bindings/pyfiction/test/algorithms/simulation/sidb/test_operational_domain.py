@@ -19,25 +19,25 @@ class TestOperationalDomain(unittest.TestCase):
                                    operational_domain_value_range(sweep_parameter.LAMBDA_TF, 4.95, 5.05, 0.01)]
 
         stats_grid = operational_domain_stats()
-        opdomain = operational_domain_grid_search(lyt, [create_xor_tt()], params, stats_grid)
+        operational_domain_grid_search(lyt, [create_xor_tt()], params, stats_grid)
         self.assertGreater(stats_grid.num_operational_parameter_combinations, 0)
 
         stats_flood_fill = operational_domain_stats()
-        opdomain = operational_domain_flood_fill(lyt, [create_xor_tt()], 100, params, None, stats_flood_fill)
+        operational_domain_flood_fill(lyt, [create_xor_tt()], 100, params, None, stats_flood_fill)
         self.assertGreater(stats_flood_fill.num_operational_parameter_combinations, 0)
 
         stats_flood_fill_given_parameter_points = operational_domain_stats()
-        opdomain_given_parameter_points = operational_domain_flood_fill(lyt, [create_xor_tt()], 0, params,
+        operational_domain_flood_fill(lyt, [create_xor_tt()], 0, params,
                                                                         [parameter_point([5.60, 5.00])],
                                                                         stats_flood_fill_given_parameter_points)
         self.assertGreater(stats_flood_fill_given_parameter_points.num_operational_parameter_combinations, 0)
 
         stats_random_sampling = operational_domain_stats()
-        opdomain = operational_domain_random_sampling(lyt, [create_xor_tt()], 100, params, stats_random_sampling)
+        operational_domain_random_sampling(lyt, [create_xor_tt()], 100, params, stats_random_sampling)
         self.assertGreater(stats_random_sampling.num_operational_parameter_combinations, 0)
 
         stats_contour_tracing = operational_domain_stats()
-        opdomain = operational_domain_contour_tracing(lyt, [create_xor_tt()], 100, params, stats_contour_tracing)
+        operational_domain_contour_tracing(lyt, [create_xor_tt()], 100, params, stats_contour_tracing)
         self.assertGreater(stats_contour_tracing.num_operational_parameter_combinations, 0)
 
     def test_and_gate_111_lattice(self):
@@ -52,19 +52,19 @@ class TestOperationalDomain(unittest.TestCase):
                                    operational_domain_value_range(sweep_parameter.LAMBDA_TF, 5.00, 5.01, 0.01)];
 
         stats_grid = operational_domain_stats()
-        opdomain = operational_domain_grid_search(lyt, [create_and_tt()], params, stats_grid)
+        operational_domain_grid_search(lyt, [create_and_tt()], params, stats_grid)
         self.assertGreater(stats_grid.num_operational_parameter_combinations, 0)
 
         stats_flood_fill = operational_domain_stats()
-        opdomain = operational_domain_flood_fill(lyt, [create_and_tt()], 100, params, None, stats_flood_fill)
+        operational_domain_flood_fill(lyt, [create_and_tt()], 100, params, None, stats_flood_fill)
         self.assertGreater(stats_flood_fill.num_operational_parameter_combinations, 0)
 
         stats_random_sampling = operational_domain_stats()
-        opdomain = operational_domain_random_sampling(lyt, [create_and_tt()], 100, params, stats_random_sampling)
+        operational_domain_random_sampling(lyt, [create_and_tt()], 100, params, stats_random_sampling)
         self.assertGreater(stats_random_sampling.num_operational_parameter_combinations, 0)
 
         stats_contour_tracing = operational_domain_stats()
-        opdomain = operational_domain_contour_tracing(lyt, [create_and_tt()], 100, params, stats_contour_tracing)
+        operational_domain_contour_tracing(lyt, [create_and_tt()], 100, params, stats_contour_tracing)
         self.assertGreater(stats_contour_tracing.num_operational_parameter_combinations, 0)
 
 
