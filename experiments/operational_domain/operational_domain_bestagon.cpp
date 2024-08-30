@@ -23,6 +23,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <optional>
 
 using namespace fiction;
 
@@ -129,7 +130,7 @@ int main()  // NOLINT
             const auto op_domain_rs =
                 operational_domain_random_sampling(lyt, truth_table, 2500, op_domain_params, &op_domain_stats_rs);
             const auto op_domain_ff =
-                operational_domain_flood_fill(lyt, truth_table, 250, op_domain_params, &op_domain_stats_ff);
+                operational_domain_flood_fill(lyt, truth_table, 250, op_domain_params, std::nullopt, &op_domain_stats_ff);
             const auto op_domain_ct =
                 operational_domain_contour_tracing(lyt, truth_table, 100, op_domain_params, &op_domain_stats_ct);
 
