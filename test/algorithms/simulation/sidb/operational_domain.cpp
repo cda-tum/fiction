@@ -12,9 +12,9 @@
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/cell_technologies.hpp>
+#include <fiction/technology/physical_constants.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/truth_table_utils.hpp>
-#include <fiction/technology/physical_constants.hpp>
 
 #include <mockturtle/utils/stopwatch.hpp>
 
