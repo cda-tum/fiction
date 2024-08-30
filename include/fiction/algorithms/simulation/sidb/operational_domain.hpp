@@ -1710,8 +1710,8 @@ operational_domain_random_sampling(const Lyt& lyt, const std::vector<TT>& spec, 
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
  * @param samples Number of samples to perform.
  * @param params Operational domain computation parameters.
- * @param given_parameter_points Optional starting points in the parameter space.
- *                               If within the operational region, they initiate the flood fill process
+ * @param given_parameter_points Optional parameter points in the parameter space. If they lie within the
+ * operational region, they are used as starting points for the flood fill.
  * @param stats Operational domain computation statistics.
  * @return The (partial) operational domain of the layout.
  */
