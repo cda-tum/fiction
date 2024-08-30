@@ -529,7 +529,7 @@ class operational_domain_impl
      *
      * @param samples Maximum number of random samples to be taken before flood fill.
      * @param given_parameter_points Optional parameter points in the parameter space. If they lie within the
-     * operational region, they are used as starting points for the flood fill.
+     * operational region, they are used as starting points for flood fill.
      * @return The (partial) operational domain of the layout.
      */
     [[nodiscard]] operational_domain<parameter_point, operational_status>
@@ -1711,7 +1711,7 @@ operational_domain_random_sampling(const Lyt& lyt, const std::vector<TT>& spec, 
  * @param samples Number of samples to perform.
  * @param params Operational domain computation parameters.
  * @param given_parameter_points Optional parameter points in the parameter space. If they lie within the
- * operational region, they are used as starting points for the flood fill.
+ * operational region, they are used as starting points for flood fill.
  * @param stats Operational domain computation statistics.
  * @return The (partial) operational domain of the layout.
  */
