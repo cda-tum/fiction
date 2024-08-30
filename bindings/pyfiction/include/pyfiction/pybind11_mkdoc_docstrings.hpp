@@ -5764,7 +5764,7 @@ Parameter ``place_info``:
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_best_optimized_solution = R"doc(Current best solution w.r.t. area after relocating POs.)doc";
 
-static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_best_solution = R"doc(Current best solution w.r.t. area.)doc";
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_best_solutions = R"doc(Current best solution w.r.t. area.)doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_check_path =
 R"doc(Checks if there is a path between the source and destination tiles in
@@ -5915,7 +5915,7 @@ Parameter ``p``:
 Parameter ``st``:
     The statistics object to record execution details.)doc";
 
-static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_improve_current_solution =
+static const char *__doc_fiction_detail_graph_oriented_layout_design_impl_improve_current_solutions =
 R"doc(Flag indicating if an initial solution was already found, and that
 other search space graphs should be pruned.)doc";
 
@@ -7404,6 +7404,8 @@ Template parameter ``Lyt``:
 
 Template parameter ``Ntk``:
     The network type.)doc";
+
+static const char *__doc_fiction_detail_search_space_graph_cost_function = R"doc(0: area 1: crossings 2: wires)doc";
 
 static const char *__doc_fiction_detail_search_space_graph_current_vertex = R"doc(The current vertex in the search space graph.)doc";
 
@@ -10899,6 +10901,8 @@ Returns:
     algorithm under the given parameters.)doc";
 
 static const char *__doc_fiction_graph_oriented_layout_design_params = R"doc(Parameters for the graph-oriented layout design algorithm.)doc";
+
+static const char *__doc_fiction_graph_oriented_layout_design_params_cost_function = R"doc(0: area 1: crossings 2: wires)doc";
 
 static const char *__doc_fiction_graph_oriented_layout_design_params_high_effort_mode =
 R"doc(In high effort mode, 12 search space graphs are created with varying
