@@ -983,7 +983,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
                 CHECK(op_domain_stats.num_evaluated_parameter_combinations == 125);
                 CHECK(op_domain_stats.num_operational_parameter_combinations == 80);
                 CHECK_THAT(op_domain_stats.operational_to_total_ratio,
-                           Catch::Matchers::WithinAbs(0.3125 - 80 / 512, 0.0));
+                           Catch::Matchers::WithinAbs(0.3125 - 80.0 / 512.0, 0.0));
             }
         }
         SECTION("contour_tracing")
