@@ -426,7 +426,7 @@ void print_sidb_layout(std::ostream& os, const Lyt& lyt, const bool lat_color = 
                     }
                     case sidb_charge_state::POSITIVE:
                     {
-                        os << fmt::format(lat_color ? detail::SIDB_POS_COLOR : detail::NO_COLOR, " ⨁ ");
+                        os << fmt::format(lat_color ? detail::SIDB_POS_COLOR : detail::NO_COLOR, " ⊕ ");
                         already_printed = true;
                         break;
                     }
