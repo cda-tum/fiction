@@ -36,6 +36,7 @@
 #include <optional>
 #include <queue>
 #include <random>
+#include <set>
 #include <sstream>
 #include <stdexcept>
 #include <thread>
@@ -284,6 +285,11 @@ struct operational_domain_stats
      * Number of parameter combinations, for which the layout is non-operational.
      */
     std::size_t num_non_operational_parameter_combinations{0};
+    /**
+     * This value represents the proportion of parameter points that fall within the operational
+     * region, relative to the total number of possible parameter points. The ratio ranges from 0 to 1.
+     */
+    double operational_to_total_ratio{0.0};
 };
 
 namespace detail
@@ -523,16 +529,28 @@ class operational_domain_impl
      * border around the domain.
      *
      * @param samples Maximum number of random samples to be taken before flood fill.
+     * @param given_parameter_points Optional parameter points in the parameter space. If they lie within the
+     * operational region, they are used as starting points for the flood fill.
      * @return The (partial) operational domain of the layout.
      */
-    [[nodiscard]] operational_domain<parameter_point, operational_status> flood_fill(const std::size_t samples) noexcept
+    [[nodiscard]] operational_domain<parameter_point, operational_status>
+    flood_fill(const std::size_t                                  samples,
+               const std::optional<std::vector<parameter_point>>& given_parameter_points) noexcept
     {
         assert((num_dimensions == 2 || num_dimensions == 3) &&
                "Flood fill is only supported for two and three dimensions");
 
         mockturtle::stopwatch stop{stats.time_total};
 
-        const auto step_point_samples = generate_random_step_points(samples);
+        auto step_point_samples = generate_random_step_points(samples);
+
+        if (given_parameter_points.has_value())
+        {
+            for (const auto& step_point : given_parameter_points.value())
+            {
+                step_point_samples.push_back(to_step_point(step_point));
+            }
+        }
 
         simulate_operational_status_in_parallel(step_point_samples);
 
@@ -1549,6 +1567,17 @@ class operational_domain_impl
                 ++stats.num_non_operational_parameter_combinations;
             }
         }
+
+        // calculate the total number of parameter points
+        std::size_t total_number_of_parameter_points = 1;
+        for (const auto& val : values)
+        {
+            total_number_of_parameter_points *= val.size();
+        }
+
+        // calculate the ratio of operational parameter pairs to the total number of parameter pairs
+        stats.operational_to_total_ratio = static_cast<double>(stats.num_operational_parameter_combinations) /
+                                           static_cast<double>(total_number_of_parameter_points);
     }
 };
 
@@ -1682,13 +1711,17 @@ operational_domain_random_sampling(const Lyt& lyt, const std::vector<TT>& spec, 
  * @param spec Expected Boolean function of the layout given as a multi-output truth table.
  * @param samples Number of samples to perform.
  * @param params Operational domain computation parameters.
+ * @param given_parameter_points Optional starting points in the parameter space.
+ *                               If within the operational region, they initiate the flood fill process
  * @param stats Operational domain computation statistics.
  * @return The (partial) operational domain of the layout.
  */
 template <typename Lyt, typename TT>
 operational_domain<parameter_point, operational_status>
 operational_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples,
-                              const operational_domain_params& params = {}, operational_domain_stats* stats = nullptr)
+                              const operational_domain_params&                   params                 = {},
+                              const std::optional<std::vector<parameter_point>>& given_parameter_points = std::nullopt,
+                              operational_domain_stats*                          stats                  = nullptr)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -1706,7 +1739,7 @@ operational_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& spec, const
     detail::operational_domain_impl<Lyt, TT, operational_domain<parameter_point, operational_status>> p{lyt, spec,
                                                                                                         params, st};
 
-    const auto result = p.flood_fill(samples);
+    const auto result = p.flood_fill(samples, given_parameter_points);
 
     if (stats)
     {
