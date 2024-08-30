@@ -5,45 +5,71 @@
 #ifndef FICTION_IS_GROUND_STATE_HPP
 #define FICTION_IS_GROUND_STATE_HPP
 
-#include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
-#include "fiction/algorithms/simulation/sidb/quickexact.hpp"
-#include "fiction/algorithms/simulation/sidb/quicksim.hpp"
+#include "fiction/algorithms/simulation/sidb/determine_groundstate_from_simulation_results.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/math_utils.hpp"
 
-#include <cmath>
+#include <cassert>
+#include <cstdint>
+#include <unordered_set>
 
 namespace fiction
 {
 
 /**
- * This function checks if the ground state is found by the *QuickSim* algorithm.
+ * This function checks if the elstrostatic ground state of an SiDB layout is found by a heuristic for the physical
+ * simulation (e.g., *QuickSim* or *SimAnneal*).
  *
  * @tparam Lyt SiDB cell-level layout type.
- * @param heuristic_results All found physically valid charge distribution surfaces obtained by a heuristic algorithm.
- * @param exhaustive_results All valid charge distribution surfaces determined by ExGS.
- * @return Returns `true` if the relative difference between the lowest energies of the two sets is less than
- * \f$0.00001\f$, `false` otherwise.
+ * @param heuristic_results Simulation results obtained from a heuristic physical simulation.
+ * @param exact_results Simulation results obtained from an exact physical simulation.
+ * @return Returns `true` if the ground state is contained in the simulation result provided by the heuristic physical
+ * simulation. `false` otherwise.
  */
 template <typename Lyt>
 [[nodiscard]] bool is_ground_state(const sidb_simulation_result<Lyt>& heuristic_results,
-                                   const sidb_simulation_result<Lyt>& exhaustive_results) noexcept
+                                   const sidb_simulation_result<Lyt>& exact_results) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-    if (exhaustive_results.charge_distributions.empty())
+    if (exact_results.charge_distributions.empty())
     {
         return false;
     }
 
-    const auto min_energy_exact = minimum_energy(exhaustive_results.charge_distributions.cbegin(),
-                                                 exhaustive_results.charge_distributions.cend());
-    const auto min_energy_heuristic =
-        minimum_energy(heuristic_results.charge_distributions.cbegin(), heuristic_results.charge_distributions.cend());
+    const auto ground_state_charge_distributions_exact = determine_groundstate_from_simulation_results(exact_results);
 
-    return round_to_n_decimal_places(std::abs(min_energy_exact - min_energy_heuristic), 6) == 0;
+    const auto ground_state_charge_distributions_heuristic =
+        determine_groundstate_from_simulation_results(heuristic_results);
+
+    assert(ground_state_charge_distributions_heuristic.size() <= ground_state_charge_distributions_exact.size() &&
+           "The heuristic results must be less equal than the exact results.");
+
+    if (ground_state_charge_distributions_exact.size() != ground_state_charge_distributions_heuristic.size())
+    {
+        return false;
+    }
+
+    std::unordered_set<uint64_t> indices_ground_state_heuristic{};
+
+    // Collect all charge indices of the ground states simulated by the heuristic.
+    for (const auto& cds : ground_state_charge_distributions_heuristic)
+    {
+        indices_ground_state_heuristic.insert(cds.get_charge_index_and_base().first);
+    }
+
+    // Check if the heuristic has found all ground states.
+    for (const auto& cds : ground_state_charge_distributions_exact)
+    {
+        if (indices_ground_state_heuristic.find(cds.get_charge_index_and_base().first) ==
+            indices_ground_state_heuristic.cend())
+        {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 }  // namespace fiction

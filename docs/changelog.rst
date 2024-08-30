@@ -5,6 +5,59 @@ All notable changes to this project will be documented in this file.
 
 The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`_.
 
+v0.6.4 - 2024-08-30
+-------------------
+
+Added
+#####
+- Algorithms:
+    - Path-finding:
+        - Squared Euclidean distance function
+        - Chebyshev distance function
+- Data structures:
+    - ``gate_level_layout`` now tracks its number of crossings
+- CLI:
+    - ``ps -g`` and ``store -g`` now display the current ``gate_level_layout``'s number of crossings
+
+Fixed
+#####
+- Fixed disappearing clocking schemes when applying a gate library to a gate-level layout
+- Fixed a few oversights in the RTD documentation of SiDB simulation functionality
+- Fixed several typos and docstrings in the codebase
+- Addressed some ``clang-tidy`` warnings
+
+v0.6.3 - 2024-08-22
+-------------------
+
+Added
+#####
+- Algorithms:
+    - Physical Design:
+        - Graph-Oriented Layout Design (GOLD) for 2DDWave-clocked Cartesian gate-level layouts to trade-off runtime vs. result quality (based on `this paper <https://www.cda.cit.tum.de/files/eda/2024_ieee_nano_a_star_is_born.pdf>`_)
+        - Flag for planar post-layout optimization
+        - Flag for optimizing POs only in post-layout optimization
+    - Simulation:
+        - Defect-aware on-the-fly SiDB circuit design on defective H-Si surfaces (based on `this paper <https://www.cda.cit.tum.de/files/eda/2024_ieee_nano_on_the_fly_gate_design.pdf>`_)
+        - Displacement robustness domain simulation for SiDB layouts
+        - Finding valid physical parameters for a given SiDB layout charge distribution
+        - Multi-dimensional operational domain computation for SiDB layouts
+
+Changed
+#######
+- Switched from execution policy-based multithreading to manual thread management in operational domain computation for platform-independence and better performance in the Python bindings
+- Extended time-to-solution (TTS) calculation functions
+- Add a warning when leak sanitizers are used with AppleClang since they are not supported
+- Switched to new compiler and OS versions in the GitHub Actions workflows
+- Updated all libraries to the latest versions
+
+Fixed
+#####
+- Utilizing tolerance to mitigate floating-point inaccuracies in operational domain computation
+- Some bugs in post-layout optimization
+- Corner case in ``ortho`` regarding multi-output nodes
+- Enable relocation of all 2-input gates during post-layout optimization
+
+
 v0.6.2 - 2024-05-22
 -------------------
 
@@ -18,6 +71,7 @@ Fixed
 - Python bindings:
     - ``detect_bdl_pairs`` no longer require the ``_100`` or ``_111`` suffix
     - Minor inconsistencies
+
 
 v0.6.1 - 2024-05-16
 -------------------

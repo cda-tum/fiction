@@ -1999,6 +1999,18 @@ R"doc(The previous charge distribution is not used. Hence, the local
 electrostatic potential of the given charge distribution is calculated
 from scratch.)doc";
 
+static const char *__doc_fiction_charge_distribution_mode =
+R"doc(An enumeration of modes for handling the charge distribution when
+assigning a charge index to the charge distribution surface.)doc";
+
+static const char *__doc_fiction_charge_distribution_mode_KEEP_CHARGE_DISTRIBUTION =
+R"doc(The charge distribution is kept and is not updated after a charge
+index is assigned to the charge distribution surface.)doc";
+
+static const char *__doc_fiction_charge_distribution_mode_UPDATE_CHARGE_DISTRIBUTION =
+R"doc(The charge distribution is updated after the charge index is assigned
+to the charge distribution surface.)doc";
+
 static const char *__doc_fiction_charge_distribution_surface = R"doc()doc";
 
 static const char *__doc_fiction_charge_distribution_surface_2 = R"doc()doc";
@@ -2043,6 +2055,44 @@ Parameter ``cs``:
 Returns:
     Integer representing the SiDB's charge state.)doc";
 
+static const char *__doc_fiction_chebyshev_distance =
+R"doc(The Chebyshev distance :math:`D` between two layout coordinates
+:math:`(x_1, y_1)` and :math:`(x_2, y_2)` given by
+
+:math:`D = \max(|x_2 - x_1|, |y_2 - y_1|)`
+
+In contrast to the Manhattan distance, this function assumes the same
+cost for diagonal moves as it does for horizontal and vertical ones.
+
+Template parameter ``Lyt``:
+    Coordinate layout type.
+
+Template parameter ``Dist``:
+    Integral type for the distance.
+
+Parameter ``lyt``:
+    Layout.
+
+Parameter ``source``:
+    Source coordinate.
+
+Parameter ``target``:
+    Target coordinate.
+
+Returns:
+    Chebyshev distance between `source` and `target`.)doc";
+
+static const char *__doc_fiction_chebyshev_distance_functor =
+R"doc(A pre-defined distance functor that uses the Chebyshev distance.
+
+Template parameter ``Lyt``:
+    Coordinate layout type.
+
+Template parameter ``Dist``:
+    Integral distance type.)doc";
+
+static const char *__doc_fiction_chebyshev_distance_functor_chebyshev_distance_functor = R"doc()doc";
+
 static const char *__doc_fiction_check_simulation_results_for_equivalence =
 R"doc(This function compares two SiDB simulation results for equivalence.
 Two results are considered equivalent if they have the same number of
@@ -2076,9 +2126,9 @@ Parameter ``lyt``:
 
 static const char *__doc_fiction_clocked_layout =
 R"doc(A layout type to layer on top of a coordinate layout, e.g.,
-cartesian_layout, hexagonal_layout, or tile_based_layout. This type
-extends the layout by providing a notion of FCN clocking. To this end,
-it utilizes a clocking scheme that assigns each coordinate in the
+`cartesian_layout`, `hexagonal_layout`, or `tile_based_layout`. This
+type extends the layout by providing a notion of FCN clocking. To this
+end, it utilizes a clocking scheme that assigns each coordinate in the
 extended coordinate layout a clock number. These clock numbers can be
 manually overwritten if necessary.
 
@@ -4063,6 +4113,20 @@ static const char *__doc_fiction_detail_color_routing_impl_pst = R"doc(Statistic
 
 static const char *__doc_fiction_detail_color_routing_impl_run = R"doc()doc";
 
+static const char *__doc_fiction_detail_coloring_container = R"doc()doc";
+
+static const char *__doc_fiction_detail_coloring_container_color_east = R"doc()doc";
+
+static const char *__doc_fiction_detail_coloring_container_color_ntk = R"doc()doc";
+
+static const char *__doc_fiction_detail_coloring_container_color_null = R"doc()doc";
+
+static const char *__doc_fiction_detail_coloring_container_color_south = R"doc()doc";
+
+static const char *__doc_fiction_detail_coloring_container_coloring_container = R"doc()doc";
+
+static const char *__doc_fiction_detail_coloring_container_opposite_color = R"doc()doc";
+
 static const char *__doc_fiction_detail_compare_gate_tiles =
 R"doc(Custom comparison function for sorting tiles based on the sum of their
 coordinates that breaks ties based on the x-coordinate.
@@ -4614,7 +4678,7 @@ based on the specified allowed displacements.
 Returns:
     A vector containing all possible displacements for each SiDB.)doc";
 
-static const char *__doc_fiction_detail_displacement_robustness_domain_impl_determine_propability_of_fabricating_operational_gate =
+static const char *__doc_fiction_detail_displacement_robustness_domain_impl_determine_probability_of_fabricating_operational_gate =
 R"doc(The manufacturing error rate is highly dependent on the speed of the
 manufacturing process. Therefore, fast fabrication requires SiDB
 layouts with high displacement tolerance to ensure functionality in
@@ -8178,36 +8242,23 @@ static const char *__doc_fiction_detail_write_qca_layout_impl_write_via_cells = 
 static const char *__doc_fiction_detail_write_qca_layout_svg_impl = R"doc()doc";
 
 static const char *__doc_fiction_detail_write_qca_layout_svg_impl_generate_cell_based_svg =
-R"doc(Returns an SVG string representing the given cell-based clocked cell
-layout
+R"doc(Generates an SVG string representing the cell-based clocked cell
+layout and appends it to the output stream.)doc";
 
-Parameter ``fcl``:
-    The cell layout to generate an SVG representation for.
+static const char *__doc_fiction_detail_write_qca_layout_svg_impl_generate_description_color =
+R"doc(Generates and returns a pair of strings representing the description
+and color of the given cell.
 
-Parameter ``simple``:
-    Flag to indicate that the SVG representation should be generated
-    with less details. Recommended for large layouts.
+Parameter ``c``:
+    The cell for which to generate the description and color.
 
 Returns:
-    The SVG string containing a visual representation of the given
-    layout.)doc";
-
-static const char *__doc_fiction_detail_write_qca_layout_svg_impl_generate_description_color = R"doc()doc";
+    A pair of strings representing the description and color of the
+    given cell `c`.)doc";
 
 static const char *__doc_fiction_detail_write_qca_layout_svg_impl_generate_tile_based_svg =
-R"doc(Returns an SVG string representing the given tile-based clocked cell
-layout.
-
-Parameter ``fcl``:
-    The cell layout to generate an SVG representation for.
-
-Parameter ``simple``:
-    Flag to indicate that the SVG representation should be generated
-    with less details. Recommended for large layouts.
-
-Returns:
-    The SVG string containing a visual representation of the given
-    layout.)doc";
+R"doc(Generates an SVG string representing the tile-based clocked cell
+layout and appends it to the output stream.)doc";
 
 static const char *__doc_fiction_detail_write_qca_layout_svg_impl_lyt = R"doc()doc";
 
@@ -8217,7 +8268,7 @@ static const char *__doc_fiction_detail_write_qca_layout_svg_impl_ps = R"doc()do
 
 static const char *__doc_fiction_detail_write_qca_layout_svg_impl_run = R"doc()doc";
 
-static const char *__doc_fiction_detail_write_qca_layout_svg_impl_write_qca_layout_svg_impl = R"doc()doc";
+static const char *__doc_fiction_detail_write_qca_layout_svg_impl_write_qca_layout_svg_impl = R"doc(Default constructor.)doc";
 
 static const char *__doc_fiction_detail_write_qcc_layout_impl = R"doc()doc";
 
@@ -8602,7 +8653,7 @@ Returns:
     number of the given charge distribution surface for each parameter
     point.)doc";
 
-static const char *__doc_fiction_determine_propability_of_fabricating_operational_gate =
+static const char *__doc_fiction_determine_probability_of_fabricating_operational_gate =
 R"doc(During fabrication, SiDBs may not align precisely with their intended
 atomic positions, resulting in displacement. This means that an SiDB
 is fabricated close to the desired one, typically one or a few H-Si
@@ -8764,7 +8815,7 @@ from applying a displacement to a given SiDB layout.)doc";
 
 static const char *__doc_fiction_displacement_robustness_domain_params =
 R"doc(Parameters for the `determine_displacement_robustness_domain` and
-`determine_propability_of_fabricating_operational_gate` algorithms.
+`determine_probability_of_fabricating_operational_gate` algorithms.
 
 Parameter ``CellType``:
     SiDB layout cell type.)doc";
@@ -9335,6 +9386,8 @@ static const char *__doc_fiction_exact_physical_design_stats_duration = R"doc()d
 
 static const char *__doc_fiction_exact_physical_design_stats_num_aspect_ratios = R"doc()doc";
 
+static const char *__doc_fiction_exact_physical_design_stats_num_crossings = R"doc()doc";
+
 static const char *__doc_fiction_exact_physical_design_stats_num_gates = R"doc()doc";
 
 static const char *__doc_fiction_exact_physical_design_stats_num_wires = R"doc()doc";
@@ -9344,6 +9397,17 @@ static const char *__doc_fiction_exact_physical_design_stats_report = R"doc()doc
 static const char *__doc_fiction_exact_physical_design_stats_x_size = R"doc()doc";
 
 static const char *__doc_fiction_exact_physical_design_stats_y_size = R"doc()doc";
+
+static const char *__doc_fiction_exact_sidb_simulation_engine = R"doc(Selector exclusively for exact SiDB simulation engines.)doc";
+
+static const char *__doc_fiction_exact_sidb_simulation_engine_EXGS =
+R"doc(*Exhaustive Ground State Search* (EXGS) is an exact simulation engine
+that always has exponential runtime.)doc";
+
+static const char *__doc_fiction_exact_sidb_simulation_engine_QUICKEXACT =
+R"doc(*QuickExact* is also an exact simulation engine that requires
+exponential runtime, but it scales a lot better than ExGS due to its
+effective search-space pruning.)doc";
 
 static const char *__doc_fiction_exact_with_blacklist =
 R"doc(The same as `exact` but with a black list of tiles that are not
@@ -9407,17 +9471,6 @@ Parameter ``ps``:
 
 Returns:
     sidb_simulation_result is returned with all results.)doc";
-
-static const char *__doc_fiction_exhaustive_sidb_simulation_engine = R"doc(Selector exclusively for exhaustive SiDB simulation engines.)doc";
-
-static const char *__doc_fiction_exhaustive_sidb_simulation_engine_EXGS =
-R"doc(*Exhaustive Ground State Search* (EXGS) is an exact simulation engine
-that always has exponential runtime.)doc";
-
-static const char *__doc_fiction_exhaustive_sidb_simulation_engine_QUICKEXACT =
-R"doc(*QuickExact* is also an exact simulation engine that requires
-exponential runtime, but it scales a lot better than ExGS due to its
-effective search-space pruning.)doc";
 
 static const char *__doc_fiction_extract_routing_objectives =
 R"doc(Extracts all routing objectives from the given layout. To this end,
@@ -10395,6 +10448,8 @@ static const char *__doc_fiction_gate_level_layout_gate_level_layout_storage_dat
 
 static const char *__doc_fiction_gate_level_layout_gate_level_layout_storage_data_node_tile_map = R"doc()doc";
 
+static const char *__doc_fiction_gate_level_layout_gate_level_layout_storage_data_num_crossings = R"doc()doc";
+
 static const char *__doc_fiction_gate_level_layout_gate_level_layout_storage_data_num_gates = R"doc()doc";
 
 static const char *__doc_fiction_gate_level_layout_gate_level_layout_storage_data_num_wires = R"doc()doc";
@@ -11001,6 +11056,13 @@ static const char *__doc_fiction_gate_level_layout_num_cis = R"doc()doc";
 
 static const char *__doc_fiction_gate_level_layout_num_cos = R"doc()doc";
 
+static const char *__doc_fiction_gate_level_layout_num_crossings =
+R"doc(Returns the number of placed nodes in the layout that compute the
+identity function and cross other nodes.
+
+Returns:
+    Number of crossings in the layout.)doc";
+
 static const char *__doc_fiction_gate_level_layout_num_gates =
 R"doc(Returns the number of placed nodes in the layout that do not compute
 the identity function.
@@ -11383,6 +11445,8 @@ R"doc(This struct stores statistics about the graph-oriented layout design
 process.)doc";
 
 static const char *__doc_fiction_graph_oriented_layout_design_stats_duration = R"doc(Runtime of the graph-oriented layout design process.)doc";
+
+static const char *__doc_fiction_graph_oriented_layout_design_stats_num_crossings = R"doc(Number of crossings.)doc";
 
 static const char *__doc_fiction_graph_oriented_layout_design_stats_num_gates = R"doc(Number of gates.)doc";
 
@@ -12896,22 +12960,22 @@ Returns:
 static const char *__doc_fiction_is_gate_level_layout = R"doc()doc";
 
 static const char *__doc_fiction_is_ground_state =
-R"doc(This function checks if the ground state is found by the *QuickSim*
-algorithm.
+R"doc(This function checks if the elstrostatic ground state of an SiDB
+layout is found by a heuristic for the physical simulation (e.g.,
+*QuickSim* or *SimAnneal*).
 
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
 
 Parameter ``heuristic_results``:
-    All found physically valid charge distribution surfaces obtained
-    by a heuristic algorithm.
+    Simulation results obtained from a heuristic physical simulation.
 
-Parameter ``exhaustive_results``:
-    All valid charge distribution surfaces determined by ExGS.
+Parameter ``exact_results``:
+    Simulation results obtained from an exact physical simulation.
 
 Returns:
-    Returns `true` if the relative difference between the lowest
-    energies of the two sets is less than :math:`0.00001`, `false`
+    Returns `true` if the ground state is contained in the simulation
+    result provided by the heuristic physical simulation. `false`
     otherwise.)doc";
 
 static const char *__doc_fiction_is_hexagonal_layout = R"doc()doc";
@@ -14171,6 +14235,8 @@ static const char *__doc_fiction_orthogonal_physical_design_stats = R"doc()doc";
 
 static const char *__doc_fiction_orthogonal_physical_design_stats_duration = R"doc()doc";
 
+static const char *__doc_fiction_orthogonal_physical_design_stats_num_crossings = R"doc()doc";
+
 static const char *__doc_fiction_orthogonal_physical_design_stats_num_gates = R"doc()doc";
 
 static const char *__doc_fiction_orthogonal_physical_design_stats_num_wires = R"doc()doc";
@@ -14585,6 +14651,14 @@ process.)doc";
 static const char *__doc_fiction_post_layout_optimization_stats_area_improvement = R"doc(Area reduction (in %) after the post-layout optimization process.)doc";
 
 static const char *__doc_fiction_post_layout_optimization_stats_duration = R"doc(Runtime of the post-layout optimization process.)doc";
+
+static const char *__doc_fiction_post_layout_optimization_stats_num_crossings_after = R"doc(Number of crossings after the post-layout optimization process.)doc";
+
+static const char *__doc_fiction_post_layout_optimization_stats_num_crossings_before = R"doc(Number of crossings before the post-layout optimization process.)doc";
+
+static const char *__doc_fiction_post_layout_optimization_stats_num_wires_after = R"doc(Number of wire segments after the post-layout optimization process.)doc";
+
+static const char *__doc_fiction_post_layout_optimization_stats_num_wires_before = R"doc(Number of wire segments before the post-layout optimization process.)doc";
 
 static const char *__doc_fiction_post_layout_optimization_stats_report =
 R"doc(Reports the statistics to the given output stream.
@@ -16603,6 +16677,48 @@ static const char *__doc_fiction_sqd_parsing_error = R"doc(Exception thrown when
 
 static const char *__doc_fiction_sqd_parsing_error_sqd_parsing_error = R"doc()doc";
 
+static const char *__doc_fiction_squared_euclidean_distance =
+R"doc(The squared Euclidean distance :math:`D` between two layout
+coordinates :math:`(x_1, y_1)` and :math:`(x_2, y_2)` given by
+
+:math:`D = \sqrt{(x_1 - x_2)^2 + (y_1 - y_2)^2}^2 = (x_1 - x_2)^2 +
+(y_1 - y_2)^2`
+
+In contrast to the regular Euclidean distance, this function is
+differentiable and can be used in optimization algorithms that require
+gradients. Additionally, it is computationally cheaper by omitting the
+square root operation.
+
+Template parameter ``Lyt``:
+    Coordinate layout type.
+
+Template parameter ``Dist``:
+    Integral type for the distance.
+
+Parameter ``lyt``:
+    Layout.
+
+Parameter ``source``:
+    Source coordinate.
+
+Parameter ``target``:
+    Target coordinate.
+
+Returns:
+    Squared euclidean distance between `source` and `target`.)doc";
+
+static const char *__doc_fiction_squared_euclidean_distance_functor =
+R"doc(A pre-defined distance functor that uses the squared Euclidean
+distance.
+
+Template parameter ``Lyt``:
+    Coordinate layout type.
+
+Template parameter ``Dist``:
+    Integral distance type.)doc";
+
+static const char *__doc_fiction_squared_euclidean_distance_functor_squared_euclidean_distance_functor = R"doc()doc";
+
 static const char *__doc_fiction_sweep_parameter = R"doc(Possible sweep parameters for the operational domain computation.)doc";
 
 static const char *__doc_fiction_sweep_parameter_EPSILON_R = R"doc(The relative permittivity of the dielectric material.)doc";
@@ -17169,9 +17285,41 @@ Parameter ``ps``:
     Pointer to a struct where the results (time_to_solution, acc,
     single runtime) are stored.)doc";
 
+static const char *__doc_fiction_time_to_solution_for_given_simulation_results =
+R"doc(This function calculates the Time-to-Solution (TTS) by analyzing the
+simulation results of a heuristic algorithm in comparison to those of
+an exact algorithm. It provides further statistical metrics, including
+the accuracy of the heuristic algorithm, and individual runtimes.
+
+Template parameter ``Lyt``:
+    SiDB ell-level layout type.
+
+Parameter ``results_exact``:
+    Simulation results of the exact algorithm.
+
+Parameter ``results_heuristic``:
+    Simulation of the heuristic for which the TTS is determined.
+
+Parameter ``confidence_level``:
+    Confidence level for the TTS computation. The confidence level
+    represents the probability that the confidence interval calculated
+    from the simulation contains the true value. For example, a 95 %
+    (0.95) confidence level means that if the simulation were repeated
+    many times, approximately 95 out of 100 of the calculated
+    confidence intervals would contain the true value.
+
+Parameter ``ps``:
+    Pointer to a struct where the statistics of this function call
+    (time_to_solution, acc, single runtime) are to be stored.)doc";
+
 static const char *__doc_fiction_time_to_solution_params = R"doc()doc";
 
-static const char *__doc_fiction_time_to_solution_params_confidence_level = R"doc(Confidence level.)doc";
+static const char *__doc_fiction_time_to_solution_params_confidence_level =
+R"doc(The confidence level represents the probability that the confidence
+interval calculated from the simulation contains the true value. For
+example, a 99.7 % (0.997) confidence level means that if the
+simulation were repeated many times, approximately 997 out of 1000 of
+the calculated confidence intervals would contain the true value.)doc";
 
 static const char *__doc_fiction_time_to_solution_params_engine =
 R"doc(Exhaustive simulation algorithm used to simulate the ground state as
@@ -17188,10 +17336,10 @@ the average single simulation runtime of *QuickSim*, the single
 runtime of the exact simulator used, and the number of valid charge
 configurations found by the exact algorithm.)doc";
 
-static const char *__doc_fiction_time_to_solution_stats_acc = R"doc(Accuracy of the simulation.)doc";
+static const char *__doc_fiction_time_to_solution_stats_acc = R"doc(Accuracy of the simulation in %.)doc";
 
 static const char *__doc_fiction_time_to_solution_stats_algorithm =
-R"doc(Exhaustive simulation algorithm used to simulate the ground state as
+R"doc(Exact simulation algorithm used to simulate the ground state as
 reference.)doc";
 
 static const char *__doc_fiction_time_to_solution_stats_mean_single_runtime = R"doc(Average single simulation runtime in seconds.)doc";
@@ -17202,9 +17350,9 @@ R"doc(Print the results to the given output stream.
 Parameter ``out``:
     Output stream.)doc";
 
-static const char *__doc_fiction_time_to_solution_stats_single_runtime_exhaustive =
-R"doc(Single simulation runtime of the exhaustive ground state searcher in
-seconds.)doc";
+static const char *__doc_fiction_time_to_solution_stats_single_runtime_exact =
+R"doc(Single simulation runtime of the exact ground state simulation
+algorithm.)doc";
 
 static const char *__doc_fiction_time_to_solution_stats_time_to_solution = R"doc(Time-to-solution in seconds.)doc";
 
@@ -17812,7 +17960,8 @@ supported exclusively so far.
 The utilized color scheme is based on the standard scheme used in
 QCADesigner (https://waluslab.ece.ubc.ca/qcadesigner/).
 
-May throw an unsupported_cell_type_exception.
+May throw an `unsupported_cell_type_exception` if it encounters
+unsupported cell types in the layout.
 
 Template parameter ``Lyt``:
     Cell-level QCA layout type.
@@ -17835,7 +17984,9 @@ exclusively so far.
 The utilized color scheme is based on the standard scheme used in
 QCADesigner (https://waluslab.ece.ubc.ca/qcadesigner/).
 
-May throw an unsupported_cell_type_exception.
+May throw an `unsupported_cell_type_exception` if it encounters
+unsupported cell types in the layout. May throw an
+`std::ofstream::failure` if it cannot open the file.
 
 Template parameter ``Lyt``:
     Cell-level QCA layout type.

@@ -84,16 +84,37 @@ struct post_layout_optimization_stats
      */
     double_t area_improvement{0ull};
     /**
+     * Number of wire segments before the post-layout optimization process.
+     */
+    uint64_t num_wires_before{0ull};
+    /**
+     * Number of wire segments after the post-layout optimization process.
+     */
+    uint64_t num_wires_after{0ull};
+    /**
+     * Number of crossings before the post-layout optimization process.
+     */
+    uint64_t num_crossings_before{0ull};
+    /**
+     * Number of crossings after the post-layout optimization process.
+     */
+    uint64_t num_crossings_after{0ull};
+    /**
      * Reports the statistics to the given output stream.
      *
      * @param out Output stream.
      */
     void report(std::ostream& out = std::cout) const
     {
-        out << fmt::format("[i] total time                      = {:.2f} secs\n", mockturtle::to_seconds(time_total));
-        out << fmt::format("[i] layout size before optimization = {} × {}\n", x_size_before, y_size_before);
-        out << fmt::format("[i] layout size after optimization  = {} × {}\n", x_size_after, y_size_after);
-        out << fmt::format("[i] area reduction                  = {}%\n", area_improvement);
+        out << fmt::format("[i] total time                          = {:.2f} secs\n",
+                           mockturtle::to_seconds(time_total));
+        out << fmt::format("[i] layout size before optimization     = {} × {}\n", x_size_before, y_size_before);
+        out << fmt::format("[i] layout size after optimization      = {} × {}\n", x_size_after, y_size_after);
+        out << fmt::format("[i] area reduction                      = {}%\n", area_improvement);
+        out << fmt::format("[i] num. wires before optimization      = {}\n", num_wires_before);
+        out << fmt::format("[i] num. wires after optimization       = {}\n", num_wires_after);
+        out << fmt::format("[i] num. crossings before optimization  = {}\n", num_crossings_before);
+        out << fmt::format("[i] num. crossings after optimization   = {}\n", num_crossings_after);
     }
 };
 
@@ -906,8 +927,10 @@ class post_layout_optimization_impl
         static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
 
         const mockturtle::stopwatch stop{pst.time_total};
-        pst.x_size_before = plyt.x() + 1;
-        pst.y_size_before = plyt.y() + 1;
+        pst.x_size_before        = plyt.x() + 1;
+        pst.y_size_before        = plyt.y() + 1;
+        pst.num_wires_before     = plyt.num_wires() - plyt.num_pis() - plyt.num_pos();
+        pst.num_crossings_before = plyt.num_crossings();
 
         uint64_t max_gate_relocations = ps.max_gate_relocations.value_or((plyt.x() + 1) * (plyt.y() + 1));
 
@@ -994,6 +1017,9 @@ class post_layout_optimization_impl
             static_cast<double_t>(area_before - area_after) / static_cast<double_t>(area_before) * 100.0;
         area_percentage_difference = std::round(area_percentage_difference * 100) / 100;
         pst.area_improvement       = area_percentage_difference;
+
+        pst.num_wires_after     = plyt.num_wires() - plyt.num_pis() - plyt.num_pos();
+        pst.num_crossings_after = plyt.num_crossings();
     }
 
   private:

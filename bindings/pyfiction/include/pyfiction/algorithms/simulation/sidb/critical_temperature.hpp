@@ -57,16 +57,25 @@ inline void critical_temperature(pybind11::module& m)
     py::class_<fiction::critical_temperature_stats>(m, "critical_temperature_stats",
                                                     DOC(fiction_critical_temperature_stats))
         .def(py::init<>())
-        .def_readwrite("algorithm_name", &fiction::critical_temperature_stats::algorithm_name,
-                       DOC(fiction_critical_temperature_stats_algorithm_name))
-        .def_readwrite("critical_temperature", &fiction::critical_temperature_stats::critical_temperature,
-                       DOC(fiction_critical_temperature_stats_critical_temperature))
-        .def_readwrite("num_valid_lyt", &fiction::critical_temperature_stats::num_valid_lyt,
-                       DOC(fiction_critical_temperature_stats_num_valid_lyt))
-        .def_readwrite("energy_between_ground_state_and_first_erroneous",
-                       &fiction::critical_temperature_stats::energy_between_ground_state_and_first_erroneous,
-                       DOC(fiction_critical_temperature_stats_energy_between_ground_state_and_first_erroneous))
-        .def("report", &fiction::critical_temperature_stats::report, DOC(fiction_critical_temperature_stats_report));
+        .def("__repr__",
+             [](const fiction::critical_temperature_stats& stats)
+             {
+                 std::stringstream stream{};
+                 stats.report(stream);
+                 return stream.str();
+             })
+        .def("report", &fiction::critical_temperature_stats::report, DOC(fiction_critical_temperature_stats_report))
+        .def_readonly("algorithm_name", &fiction::critical_temperature_stats::algorithm_name,
+                      DOC(fiction_critical_temperature_stats_algorithm_name))
+        .def_readonly("critical_temperature", &fiction::critical_temperature_stats::critical_temperature,
+                      DOC(fiction_critical_temperature_stats_critical_temperature))
+        .def_readonly("num_valid_lyt", &fiction::critical_temperature_stats::num_valid_lyt,
+                      DOC(fiction_critical_temperature_stats_num_valid_lyt))
+        .def_readonly("energy_between_ground_state_and_first_erroneous",
+                      &fiction::critical_temperature_stats::energy_between_ground_state_and_first_erroneous,
+                      DOC(fiction_critical_temperature_stats_energy_between_ground_state_and_first_erroneous))
+
+        ;
 
     /**
      * Critical temperature parameters.

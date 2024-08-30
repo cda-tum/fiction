@@ -23,8 +23,6 @@
 #include <mockturtle/views/fanout_view.hpp>
 #include <mockturtle/views/names_view.hpp>
 
-#include <type_traits>
-
 using namespace fiction;
 
 template <typename Lyt, typename Ntk>

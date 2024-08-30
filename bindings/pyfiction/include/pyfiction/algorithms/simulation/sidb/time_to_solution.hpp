@@ -20,12 +20,15 @@ namespace detail
 {
 
 template <typename Lyt>
-void time_to_solution(pybind11::module& m, const std::string& lattice = "")
+void time_to_solution(pybind11::module& m)
 {
     using namespace pybind11::literals;
 
     m.def("time_to_solution", &fiction::time_to_solution<Lyt>, "lyt"_a, "quickim_params"_a,
           "tts_params"_a = fiction::time_to_solution_params{}, "ps"_a = nullptr, DOC(fiction_time_to_solution));
+    m.def("time_to_solution_for_given_simulation_results", &fiction::time_to_solution_for_given_simulation_results<Lyt>,
+          "results_exact"_a, "results_heuristic"_a, "confidence_level"_a = 0.997, "ps"_a = nullptr,
+          DOC(fiction_time_to_solution_for_given_simulation_results));
 }
 
 }  // namespace detail
@@ -49,16 +52,25 @@ inline void time_to_solution(pybind11::module& m)
      */
     py::class_<fiction::time_to_solution_stats>(m, "time_to_solution_stats", DOC(fiction_time_to_solution_stats))
         .def(py::init<>())
-        .def_readwrite("time_to_solution", &fiction::time_to_solution_stats::time_to_solution,
-                       DOC(fiction_time_to_solution_stats_time_to_solution))
-        .def_readwrite("acc", &fiction::time_to_solution_stats::acc, DOC(fiction_time_to_solution_stats_acc))
-        .def_readwrite("mean_single_runtime", &fiction::time_to_solution_stats::mean_single_runtime,
-                       DOC(fiction_time_to_solution_stats_mean_single_runtime))
-        .def_readwrite("single_runtime_exhaustive", &fiction::time_to_solution_stats::single_runtime_exhaustive,
-                       DOC(fiction_time_to_solution_stats_single_runtime_exhaustive))
-        .def_readwrite("algorithm", &fiction::time_to_solution_stats::algorithm,
-                       DOC(fiction_time_to_solution_stats_algorithm))
-        .def("report", &fiction::time_to_solution_stats::report, DOC(fiction_time_to_solution_stats_report));
+        .def("__repr__",
+             [](const fiction::time_to_solution_stats& stats)
+             {
+                 std::stringstream stream{};
+                 stats.report(stream);
+                 return stream.str();
+             })
+        .def("report", &fiction::time_to_solution_stats::report, DOC(fiction_time_to_solution_stats_report))
+        .def_readonly("time_to_solution", &fiction::time_to_solution_stats::time_to_solution,
+                      DOC(fiction_time_to_solution_stats_time_to_solution))
+        .def_readonly("acc", &fiction::time_to_solution_stats::acc, DOC(fiction_time_to_solution_stats_acc))
+        .def_readonly("mean_single_runtime", &fiction::time_to_solution_stats::mean_single_runtime,
+                      DOC(fiction_time_to_solution_stats_mean_single_runtime))
+        .def_readonly("single_runtime_exact", &fiction::time_to_solution_stats::single_runtime_exact,
+                      DOC(fiction_time_to_solution_stats_single_runtime_exact))
+        .def_readonly("algorithm", &fiction::time_to_solution_stats::algorithm,
+                      DOC(fiction_time_to_solution_stats_algorithm))
+
+        ;
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 

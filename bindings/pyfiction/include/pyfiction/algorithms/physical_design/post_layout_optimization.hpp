@@ -45,6 +45,8 @@ inline void post_layout_optimization(pybind11::module& m)
                  stats.report(stream);
                  return stream.str();
              })
+        .def("report", &fiction::post_layout_optimization_stats::report,
+             DOC(fiction_post_layout_optimization_stats_report))
         .def_readonly("time_total", &fiction::post_layout_optimization_stats::time_total,
                       DOC(fiction_post_layout_optimization_stats_duration))
         .def_readonly("x_size_before", &fiction::post_layout_optimization_stats::x_size_before,
@@ -57,6 +59,14 @@ inline void post_layout_optimization(pybind11::module& m)
                       DOC(fiction_post_layout_optimization_stats_y_size_after))
         .def_readonly("area_improvement", &fiction::post_layout_optimization_stats::area_improvement,
                       DOC(fiction_post_layout_optimization_stats_area_improvement))
+        .def_readonly("num_wires_before", &fiction::post_layout_optimization_stats::num_wires_before,
+                      DOC(fiction_post_layout_optimization_stats_num_wires_before))
+        .def_readonly("num_wires_after", &fiction::post_layout_optimization_stats::num_wires_after,
+                      DOC(fiction_post_layout_optimization_stats_num_wires_after))
+        .def_readonly("num_crossings_before", &fiction::post_layout_optimization_stats::num_crossings_before,
+                      DOC(fiction_post_layout_optimization_stats_num_crossings_before))
+        .def_readonly("num_crossings_after", &fiction::post_layout_optimization_stats::num_crossings_after,
+                      DOC(fiction_post_layout_optimization_stats_num_crossings_after))
 
         ;
 

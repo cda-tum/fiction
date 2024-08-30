@@ -89,12 +89,12 @@ Engine Selectors
         **Header:** ``fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp``
 
         .. doxygenenum:: fiction::sidb_simulation_engine
-        .. doxygenenum:: fiction::exhaustive_sidb_simulation_engine
+        .. doxygenenum:: fiction::exact_sidb_simulation_engine
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.sidb_simulation_engine
             :members:
-        .. autoclass:: mnt.pyfiction.exhaustive_sidb_simulation_engine
+        .. autoclass:: mnt.pyfiction.exact_sidb_simulation_engine
             :members:
 
 
@@ -187,6 +187,7 @@ Time-to-Solution (TTS) Statistics
         .. doxygenstruct:: fiction::time_to_solution_stats
            :members:
         .. doxygenfunction:: fiction::time_to_solution
+        .. doxygenfunction:: fiction::time_to_solution_for_given_simulation_results
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.time_to_solution_params
@@ -194,6 +195,7 @@ Time-to-Solution (TTS) Statistics
         .. autoclass:: mnt.pyfiction.time_to_solution_stats
             :members:
         .. autofunction:: mnt.pyfiction.time_to_solution
+        .. autofunction:: mnt.pyfiction.time_to_solution_for_given_simulation_results
 
 
 Random SiDB Layout Generator
@@ -238,6 +240,8 @@ Operational Domain Computation
            :members:
         .. doxygenenum:: fiction::sweep_parameter
         .. doxygenstruct:: fiction::operational_domain
+           :members:
+        .. doxygenstruct:: fiction::operational_domain_value_range
            :members:
         .. doxygenstruct:: fiction::operational_domain_params
            :members:
@@ -304,10 +308,14 @@ Displacement Robustness Domain
            :members:
         .. doxygenstruct:: fiction::displacement_robustness_domain_stats
            :members:
+        .. doxygenstruct:: fiction::displacement_robustness_domain
+           :members:
         .. doxygenfunction:: fiction::determine_displacement_robustness_domain
-        .. doxygenfunction:: fiction::determine_propability_of_fabricating_operational_gate
+        .. doxygenfunction:: fiction::determine_probability_of_fabricating_operational_gate
 
     .. tab:: Python
+        .. autoclass:: mnt.pyfiction.dimer_displacement_policy
+            :members:
         .. autoclass:: mnt.pyfiction.displacement_analysis_mode
             :members:
         .. autofunction:: mnt.pyfiction.displacement_robustness_domain_params

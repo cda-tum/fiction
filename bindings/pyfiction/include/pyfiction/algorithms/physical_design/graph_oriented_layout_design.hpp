@@ -64,8 +64,8 @@ inline void graph_oriented_layout_design(pybind11::module& m)
                       DOC(fiction_graph_oriented_layout_design_stats_num_gates))
         .def_readonly("num_wires", &fiction::graph_oriented_layout_design_stats::num_wires,
                       DOC(fiction_graph_oriented_layout_design_stats_num_wires))
-
-        ;
+        .def_readonly("num_crossings", &fiction::graph_oriented_layout_design_stats::num_crossings,
+                      DOC(fiction_graph_oriented_layout_design_stats_num_crossings));
 
     m.def("graph_oriented_layout_design",
           &fiction::graph_oriented_layout_design<py_cartesian_gate_layout, py_logic_network>, "network"_a,

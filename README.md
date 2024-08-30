@@ -196,6 +196,7 @@ Among these algorithms are
 - OGD-based [scalable placement and routing](https://dl.acm.org/citation.cfm?id=3287705)
 - SAT-based [one-pass synthesis](https://ieeexplore.ieee.org/document/9371573)
 - SAT-based [multi-path routing](https://dl.acm.org/doi/10.1145/3565478.3572539)
+- Graph-oriented [layout design](https://www.cda.cit.tum.de/files/eda/2024_ieee_nano_a_star_is_born.pdf)
 
 plus several path-finding algorithms that work on generic layouts:
 

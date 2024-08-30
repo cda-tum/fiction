@@ -111,16 +111,21 @@ struct graph_oriented_layout_design_stats
      */
     uint64_t num_wires{0ull};
     /**
+     * Number of crossings.
+     */
+    uint64_t num_crossings{0ull};
+    /**
      * Reports the statistics to the given output stream.
      *
      * @param out Output stream.
      */
     void report(std::ostream& out = std::cout) const
     {
-        out << fmt::format("[i] total time  = {:.2f} secs\n", mockturtle::to_seconds(time_total));
-        out << fmt::format("[i] layout size = {} × {}\n", x_size, y_size);
-        out << fmt::format("[i] num. gates  = {}\n", num_gates);
-        out << fmt::format("[i] num. wires  = {}\n", num_wires);
+        out << fmt::format("[i] total time      = {:.2f} secs\n", mockturtle::to_seconds(time_total));
+        out << fmt::format("[i] layout size     = {} × {}\n", x_size, y_size);
+        out << fmt::format("[i] num. gates      = {}\n", num_gates);
+        out << fmt::format("[i] num. wires      = {}\n", num_wires);
+        out << fmt::format("[i] num. crossings  = {}\n", num_crossings);
     }
 };
 
@@ -228,7 +233,7 @@ using node_dict_type = mockturtle::node_map<mockturtle::signal<Lyt>, Ntk>;
 /**
  * This enum class indicates the allowed positions for PIs.
  */
-enum class pi_locations
+enum class pi_locations : std::uint8_t
 {
     /**
      * Flag indicating if primary inputs (PIs) can be placed at the top.
@@ -263,11 +268,11 @@ struct search_space_graph
     /**
      * The network associated with this search space graph.
      */
-    tec_nt network{};
+    tec_nt network;
     /**
      * Topological list of nodes to be placed in the layout.
      */
-    std::vector<mockturtle::node<tec_nt>> nodes_to_place{};
+    std::vector<mockturtle::node<tec_nt>> nodes_to_place;
     /**
      * Enum indicating if primary inputs (PIs) can be placed at the top or left.
      */
@@ -508,7 +513,7 @@ class topo_view_ci_to_co : public mockturtle::immutable_view<Ntk>
                                 if (this->visited(this->get_node(f)) != this->trav_id())
                                 {
                                     not_visited = true;
-                                };
+                                }
                             });
 
         if (not_visited)
@@ -532,7 +537,7 @@ class topo_view_ci_to_co : public mockturtle::immutable_view<Ntk>
  * When checking for possible paths on a layout between two tiles SRC and DEST, one of them could also be the new tile
  * for the next gate to be placed and it therefore has to be checked if said tile is still empty
  */
-enum class new_gate_location
+enum class new_gate_location : std::uint8_t
 {
     /**
      * Do not check any tiles.
@@ -643,10 +648,11 @@ class graph_oriented_layout_design_impl
                         restore_names(ssg.network, best_lyt);
 
                         // statistical information
-                        pst.x_size    = best_lyt.x() + 1;
-                        pst.y_size    = best_lyt.y() + 1;
-                        pst.num_gates = best_lyt.num_gates();
-                        pst.num_wires = best_lyt.num_wires();
+                        pst.x_size        = best_lyt.x() + 1;
+                        pst.y_size        = best_lyt.y() + 1;
+                        pst.num_gates     = best_lyt.num_gates();
+                        pst.num_wires     = best_lyt.num_wires();
+                        pst.num_crossings = best_lyt.num_crossings();
 
                         if (ps.return_first)
                         {
@@ -823,9 +829,21 @@ class graph_oriented_layout_design_impl
             }
         };
 
-        const uint64_t max_iterations  = (pi_locs == pi_locations::TOP_AND_LEFT) ?
-                                             std::max(layout.x(), layout.y()) :
-                                             ((pi_locs == pi_locations::TOP) ? layout.x() : layout.y());
+        uint64_t max_iterations = 0;
+
+        if (pi_locs == pi_locations::TOP_AND_LEFT)
+        {
+            max_iterations = std::max(layout.x(), layout.y());
+        }
+        else if (pi_locs == pi_locations::TOP)
+        {
+            max_iterations = layout.x();
+        }
+        else
+        {
+            max_iterations = layout.y();
+        }
+
         const uint64_t expansion_limit = (pi_locs == pi_locations::TOP_AND_LEFT) ? 2 * num_expansions : num_expansions;
         possible_positions.reserve(expansion_limit);
 
@@ -1401,8 +1419,6 @@ class graph_oriented_layout_design_impl
         node_dict_type<ObstrLyt, tec_nt> node2pos{ssg.network};
         placement_info<ObstrLyt>         place_info{0ul, 0ul, node2pos, pi2node};
 
-        bool found_solution = false;
-
         coord_vec_type<ObstrLyt> possible_positions{};
         possible_positions.reserve(2 * ssg.num_expansions);
 
@@ -1415,7 +1431,7 @@ class graph_oriented_layout_design_impl
         {
             const auto position = ssg.current_vertex[idx];
 
-            found_solution = place_and_route(position, layout, ssg, place_info);
+            bool found_solution = place_and_route(position, layout, ssg, place_info);
 
             uint64_t area = 0ul;
 
