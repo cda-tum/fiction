@@ -539,27 +539,15 @@ Parameter ``params``:
     Parameters for the BDL wire detection.
 
 Parameter ``input_wires``:
-    Pre-detected input BDL wires.
-
-Parameter ``input_directions``:
-    Pre-determined directions for the input BDL wires.)doc";
+    Pre-detected input BDL wires.)doc";
 
 static const char *__doc_fiction_bdl_input_iterator_current_input_index =
 R"doc(The current input index. There are :math:`2^n` possible input states
 for an :math:`n`-input BDL layout.)doc";
 
-static const char *__doc_fiction_bdl_input_iterator_determine_input_bdl_wire_directions =
-R"doc(This function determines the directions of the input BDL wires.
-
-Returns:
-    A vector of `bdl_wire_direction` representing the directions of
-    the input BDL wires.)doc";
-
 static const char *__doc_fiction_bdl_input_iterator_input_bdl_wires = R"doc(The detected input BDL wires.)doc";
 
 static const char *__doc_fiction_bdl_input_iterator_input_pairs = R"doc(The detected input BDL pairs.)doc";
-
-static const char *__doc_fiction_bdl_input_iterator_input_wire_directions = R"doc(Directions of the input BDL wires.)doc";
 
 static const char *__doc_fiction_bdl_input_iterator_layout = R"doc(The layout to iterate over.)doc";
 
@@ -763,25 +751,87 @@ Parameter ``u``:
 Parameter ``l``:
     The lower SiDB of the pair.)doc";
 
-static const char *__doc_fiction_bdl_pair_equal_ignore_type = R"doc(Check equality of two BDL pairs ignoring the type of the SiDBs.)doc";
+static const char *__doc_fiction_bdl_pair_equal_ignore_type =
+R"doc(Equality check ignoring type.
+
+Parameter ``other``:
+    The other BDL pair to compare with.
+
+Returns:
+    `true` if the `upper` and `lower` attributes are equal, otherwise
+    `false`.)doc";
 
 static const char *__doc_fiction_bdl_pair_lower =
 R"doc(The lower SiDB of the pair. Upper and lower are defined relative to
 each other via the `operator<` overload.)doc";
 
-static const char *__doc_fiction_bdl_pair_not_equal_ignore_type = R"doc(Check inequality of two BDL pairs ignoring the type of the SiDBs.)doc";
+static const char *__doc_fiction_bdl_pair_not_equal_ignore_type =
+R"doc(Inequality check ignoring type.
 
-static const char *__doc_fiction_bdl_pair_operator_eq = R"doc(Equality operator (==) for comparing two BDL pairs.)doc";
+Parameter ``other``:
+    The other BDL pair to compare with.
 
-static const char *__doc_fiction_bdl_pair_operator_ge = R"doc(Greater-than-or-equal-to operator (>=) for comparing two BDL pairs.)doc";
+Returns:
+    `true` if the `upper` and `lower` attributes are not equal,
+    otherwise `false`.)doc";
 
-static const char *__doc_fiction_bdl_pair_operator_gt = R"doc(Greater-than operator (>) for comparing two BDL pairs.)doc";
+static const char *__doc_fiction_bdl_pair_operator_eq =
+R"doc(Equality operator.
 
-static const char *__doc_fiction_bdl_pair_operator_le = R"doc(Less-than-or-equal-to operator (<=) for comparing two BDL pairs.)doc";
+Parameter ``other``:
+    The other BDL pair to compare with.
 
-static const char *__doc_fiction_bdl_pair_operator_lt = R"doc(Less-than operator (<) for comparing two BDL pairs.)doc";
+Returns:
+    `true` if this BDL pair is equal to the other, `false` otherwise.)doc";
 
-static const char *__doc_fiction_bdl_pair_operator_ne = R"doc(Inequality operator (!=) for comparing two BDL pairs.)doc";
+static const char *__doc_fiction_bdl_pair_operator_ge =
+R"doc(Greater-than-or-equal-to operator.
+
+Parameter ``other``:
+    The other BDL pair to compare with.
+
+Returns:
+    `true` if this BDL pair is greater than or equal to the other,
+    otherwise `false`.)doc";
+
+static const char *__doc_fiction_bdl_pair_operator_gt =
+R"doc(Greater than operator.
+
+Parameter ``other``:
+    The other BDL pair to compare with.
+
+Returns:
+    `true` if this BDL pair is greater than the other, `false`
+    otherwise.)doc";
+
+static const char *__doc_fiction_bdl_pair_operator_le =
+R"doc(Less than or equal to operator.
+
+Parameter ``other``:
+    The other BDL pair to compare with.
+
+Returns:
+    `true` if this BDL pair is less than or equal to the other,
+    `false` otherwise.)doc";
+
+static const char *__doc_fiction_bdl_pair_operator_lt =
+R"doc(Less than operator.
+
+Parameter ``other``:
+    The other BDL pair to compare with.
+
+Returns:
+    `true` if this BDL pair is less than the other, `false` otherwise.)doc";
+
+static const char *__doc_fiction_bdl_pair_operator_ne =
+R"doc(Inequality operator.
+
+Parameter ``other``:
+    The other BDL pair to compare with.
+
+Returns:
+    `true` if this BDL pair is not equal to the other, `false`
+    otherwise.)doc";
 
 static const char *__doc_fiction_bdl_pair_type =
 R"doc(The type of the SiDBs in the pair. BDL SiDBs must be of the same type.
@@ -791,7 +841,40 @@ static const char *__doc_fiction_bdl_pair_upper =
 R"doc(The upper SiDB of the pair. Upper and lower are defined relative to
 each other via the `operator<` overload.)doc";
 
+static const char *__doc_fiction_bdl_wire =
+R"doc(This struct encapsulates a vector of `bdl_pair` objects, representing
+the pairs of SiDBs in the BDL wire.
+
+Template parameter ``CellType``:
+    Cell type.)doc";
+
+static const char *__doc_fiction_bdl_wire_add_bdl_pair =
+R"doc(Add a BDL pair to the wire.
+
+Parameter ``pair``:
+    The BDL pair to add.)doc";
+
+static const char *__doc_fiction_bdl_wire_bdl_wire = R"doc(Default constructor for an empty BDL wire.)doc";
+
+static const char *__doc_fiction_bdl_wire_bdl_wire_2 =
+R"doc(Constructor to initialize the BDL wire with a given vector of BDL
+pairs.
+
+Parameter ``p``:
+    The vector of BDL pairs to initialize the wire with.)doc";
+
+static const char *__doc_fiction_bdl_wire_bdl_wire_3 =
+R"doc(Copy constructor.
+
+Creates a new `bdl_wire` object as a copy of another `bdl_wire`
+object.
+
+Parameter ``other``:
+    The `bdl_wire` object to copy from.)doc";
+
 static const char *__doc_fiction_bdl_wire_direction = R"doc(Possible directions of a BDL wire.)doc";
+
+static const char *__doc_fiction_bdl_wire_direction_2 = R"doc(Direction of the BDL wire.)doc";
 
 static const char *__doc_fiction_bdl_wire_direction_NORTH_SOUTH =
 R"doc(Defines the direction of the wire from north to south. The starting
@@ -811,6 +894,28 @@ is defined by the position of output cells.
 @note A wire running from east to west is interpreted as south-north
 direction.)doc";
 
+static const char *__doc_fiction_bdl_wire_erase_bdl_pair =
+R"doc(Erase a specific BDL pair from the wire.
+
+Parameter ``pair``:
+    The BDL pair to remove. The pair is compared using the equality
+    operator (operator==).)doc";
+
+static const char *__doc_fiction_bdl_wire_find_bdl_pair_by_type =
+R"doc(Find the first Binary-dot Logic (BDL) pair of a specified type in the
+wire.
+
+Parameter ``t``:
+    Type of BDL pair to search for
+    (`sidb_technology::cell_type::INPUT`,
+    `sidb_technology::cell_type::OUTPUT`, etc.).
+
+Returns:
+    Optional containing the first BDL pair with the specified type
+    `t`, or `std::nullopt` if no such BDL pair is found.)doc";
+
+static const char *__doc_fiction_bdl_wire_pairs = R"doc(Vector of BDL pairs representing the wire.)doc";
+
 static const char *__doc_fiction_bdl_wire_selection = R"doc(An enumeration of the selection of different types of wires.)doc";
 
 static const char *__doc_fiction_bdl_wire_selection_ALL = R"doc(Select all BDL wires.)doc";
@@ -818,6 +923,8 @@ static const char *__doc_fiction_bdl_wire_selection_ALL = R"doc(Select all BDL w
 static const char *__doc_fiction_bdl_wire_selection_INPUT = R"doc(Select only BDL wires that start with input cells.)doc";
 
 static const char *__doc_fiction_bdl_wire_selection_OUTPUT = R"doc(Select only BDL wires that end with output cells.)doc";
+
+static const char *__doc_fiction_bdl_wire_update_direction = R"doc(Update the direction of the wire based on the current BDL pairs.)doc";
 
 static const char *__doc_fiction_binomial_coefficient =
 R"doc(Calculates the binomial coefficient :math:`\binom{n}{k}`.
@@ -4401,21 +4508,6 @@ Returns:
     The output index derived from the truth table for the given input
     index.)doc";
 
-static const char *__doc_fiction_detail_design_sidb_gates_impl_initialize_bdl_wires_with_directions =
-R"doc(This function performs the following steps to initialize the necessary
-components for the layout evaluation: 1. Detects the input and output
-BDL wires in the skeleton layout using the specified BDL wire
-parameters. 2. Determines the directions of the input BDL wires and
-stores them in the input BDL wire directions container. 3. Determines
-the directions of the output BDL wires and stores them in the output
-BDL wire directions container. 4. Determines and stores all possible
-canvas layouts.
-
-Template parameter ``Lyt``:
-    The type representing the layout.)doc";
-
-static const char *__doc_fiction_detail_design_sidb_gates_impl_input_bdl_wire_directions = R"doc(Directions of the input wires.)doc";
-
 static const char *__doc_fiction_detail_design_sidb_gates_impl_input_bdl_wires = R"doc(Input BDL wires.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_is_io_signal_unstable =
@@ -4493,8 +4585,6 @@ static const char *__doc_fiction_detail_design_sidb_gates_impl_num_threads = R"d
 static const char *__doc_fiction_detail_design_sidb_gates_impl_number_of_input_wires = R"doc(Number of input BDL wires.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_number_of_output_wires = R"doc(Number of output BDL wires.)doc";
-
-static const char *__doc_fiction_detail_design_sidb_gates_impl_output_bdl_wire_directions = R"doc(Directions of the output wires.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_output_bdl_wires = R"doc(Output BDL wires.)doc";
 
@@ -4620,6 +4710,93 @@ Returns:
 static const char *__doc_fiction_detail_design_sidb_gates_impl_stats = R"doc(The statistics of the gate design.)doc";
 
 static const char *__doc_fiction_detail_design_sidb_gates_impl_truth_table = R"doc(Truth table of the given gate.)doc";
+
+static const char *__doc_fiction_detail_detect_bdl_wires_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_detect_bdl_wires_impl_aggregate_bdl_pairs =
+R"doc(Aggregates BDL pairs of specified types into a set.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Parameter ``lyt``:
+    Layout type used for detection.
+
+Parameter ``params``:
+    Parameters containing BDL pairs.
+
+Returns:
+    A set of BDL pairs containing all pairs of the specified types.)doc";
+
+static const char *__doc_fiction_detail_detect_bdl_wires_impl_bdl_wires = R"doc(All detected BDL wires.)doc";
+
+static const char *__doc_fiction_detail_detect_bdl_wires_impl_detect_bdl_wires = R"doc()doc";
+
+static const char *__doc_fiction_detail_detect_bdl_wires_impl_detect_bdl_wires_impl = R"doc()doc";
+
+static const char *__doc_fiction_detail_detect_bdl_wires_impl_filter_wires = R"doc()doc";
+
+static const char *__doc_fiction_detail_detect_bdl_wires_impl_find_bdl_neighbor_above =
+R"doc(This function searches for the first Binary-dot Logic (BDL) pair in a
+given set of BDL pairs that is above a specified BDL pair. The
+function returns the first BDL pair that meets the following criteria:
+- The distance between the upper SiDB of the given BDL pair and the
+lower SiDB of the candidate BDL pair is less than the specified inter-
+BDL distance. - The candidate BDL pair is not equal to the given BDL
+pair (ignoring the type of SiDBs). - The y-coordinate of the upper
+SiDB of the given BDL pair is less than the y-coordinate of the lower
+SiDB of the candidate BDL pair.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Parameter ``given_bdl``:
+    The BDL pair to find a neighbor for.
+
+Parameter ``bdl_pairs``:
+    A set of BDL pairs to search within.
+
+Parameter ``inter_bdl_distance``:
+    The maximum allowable distance between the lower SiDB of the given
+    BDL pair and the upper SiDB of the potential neighbor BDL pair.
+
+Returns:
+    A std::optional containing the first BDL pair that meets the
+    criteria, or std::nullopt if no such pair is found.)doc";
+
+static const char *__doc_fiction_detail_detect_bdl_wires_impl_find_bdl_neighbor_below =
+R"doc(This function searches for the first Binary-dot Logic (BDL) pair in a
+given set of BDL pairs that is below a specified BDL pair. The
+function returns the first BDL pair that meets the following criteria:
+- The distance between the lower SiDB of the given BDL pair and the
+upper SiDB of the candidate BDL pair is less than the specified inter-
+BDL distance. - The candidate BDL pair is not equal to the given BDL
+pair (ignoring the type of SiDBs). - The y-coordinate of the lower
+SiDB of the given BDL pair is less than the y-coordinate of the upper
+SiDB of the candidate BDL pair.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Parameter ``given_bdl``:
+    The BDL pair to find a neighbor for.
+
+Parameter ``bdl_pairs``:
+    A set of BDL pairs to search within.
+
+Parameter ``inter_bdl_distance``:
+    The maximum allowable distance between the lower SiDB of the given
+    BDL pair and the upper SiDB of the potential neighbor BDL pair.
+
+Returns:
+    A std::optional containing the first BDL pair that meets the
+    criteria, or std::nullopt if no such pair is found.)doc";
+
+static const char *__doc_fiction_detail_detect_bdl_wires_impl_lyt = R"doc(SiDB cell-level layout.)doc";
+
+static const char *__doc_fiction_detail_detect_bdl_wires_impl_params = R"doc(Parameters for detecting BDL wires.)doc";
+
+static const char *__doc_fiction_detail_detect_bdl_wires_impl_selection = R"doc(Selection which BDl wires are detected.)doc";
 
 static const char *__doc_fiction_detail_determine_clocking_impl = R"doc()doc";
 
@@ -6490,8 +6667,6 @@ R"doc(Returns the total number of simulator invocations.
 Returns:
     The number of simulator invocations.)doc";
 
-static const char *__doc_fiction_detail_is_operational_impl_input_bdl_wire_directions = R"doc(Directions of the input wires.)doc";
-
 static const char *__doc_fiction_detail_is_operational_impl_input_bdl_wires = R"doc(Input BDL wires.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_is_operational_impl =
@@ -6532,8 +6707,6 @@ Parameter ``input_bdl_wire_direction``:
 static const char *__doc_fiction_detail_is_operational_impl_layout = R"doc(SiDB cell-level layout.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_output_bdl_pairs = R"doc(Output BDL pairs.)doc";
-
-static const char *__doc_fiction_detail_is_operational_impl_output_bdl_wire_directions = R"doc(Directions of the output wires.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_output_bdl_wires = R"doc(Output BDL wires.)doc";
 
@@ -8459,8 +8632,10 @@ Parameter ``lyt``:
     The layout to detect BDL pairs in.
 
 Parameter ``type``:
-    The type of the SiDBs to detect BDL pairs for, e.g., `INPUT`,
-    `OUTPUT`, `NORMAL`.
+    Optional parameter to specify the SiDB type for which BDL pairs
+    should be detected. If omitted, the function will detect BDL pairs
+    for all types. Valid types include `INPUT`, `OUTPUT`, `NORMAL`,
+    among others.
 
 Parameter ``params``:
     Parameters for the BDL pair detection algorithm.
@@ -8783,20 +8958,6 @@ R"doc(Validation result of the coloring (std::nullopt = none attempted, true
 static const char *__doc_fiction_determine_vertex_coloring_stats_duration = R"doc(Runtime measurement.)doc";
 
 static const char *__doc_fiction_determine_vertex_coloring_stats_most_frequent_color = R"doc(The color that appeared the most.)doc";
-
-static const char *__doc_fiction_determine_wire_direction =
-R"doc(Determines the direction of a Binary-dot Logic (BDL) wire based on the
-positions of input and output cells.
-
-Template parameter ``Lyt``:
-    SiDB cell-level layout type.
-
-Parameter ``wire``:
-    The BDL wire to analyze.
-
-Returns:
-    Direction of the wire: `NORTH_SOUTH`, `SOUTH_NORTH`, or
-    `NO_DIRECTION`.)doc";
 
 static const char *__doc_fiction_displacement_robustness_domain =
 R"doc(During fabrication, SiDBs may not align precisely with their intended
@@ -9769,81 +9930,6 @@ R"doc(Constructs a `fgl_parsing_error` object with the given error message.
 
 Parameter ``msg``:
     The error message describing the parsing error.)doc";
-
-static const char *__doc_fiction_find_bdl_neighbor_above =
-R"doc(This function searches for the first Binary-dot Logic (BDL) pair in a
-given set of BDL pairs that is above a specified BDL pair. The
-function returns the first BDL pair that meets the following criteria:
-- The distance between the upper SiDB of the given BDL pair and the
-lower SiDB of the candidate BDL pair is less than the specified inter-
-BDL distance. - The candidate BDL pair is not equal to the given BDL
-pair (ignoring the type of SiDBs). - The y-coordinate of the upper
-SiDB of the given BDL pair is less than the y-coordinate of the lower
-SiDB of the candidate BDL pair.
-
-Template parameter ``Lyt``:
-    SiDB cell-level layout type.
-
-Parameter ``given_bdl``:
-    The BDL pair to find a neighbor for.
-
-Parameter ``bdl_pairs``:
-    A set of BDL pairs to search within.
-
-Parameter ``inter_bdl_distance``:
-    The maximum allowable distance between the lower SiDB of the given
-    BDL pair and the upper SiDB of the potential neighbor BDL pair.
-
-Returns:
-    A std::optional containing the first BDL pair that meets the
-    criteria, or std::nullopt if no such pair is found.)doc";
-
-static const char *__doc_fiction_find_bdl_neighbor_below =
-R"doc(This function searches for the first Binary-dot Logic (BDL) pair in a
-given set of BDL pairs that is below a specified BDL pair. The
-function returns the first BDL pair that meets the following criteria:
-- The distance between the lower SiDB of the given BDL pair and the
-upper SiDB of the candidate BDL pair is less than the specified inter-
-BDL distance. - The candidate BDL pair is not equal to the given BDL
-pair (ignoring the type of SiDBs). - The y-coordinate of the lower
-SiDB of the given BDL pair is less than the y-coordinate of the upper
-SiDB of the candidate BDL pair.
-
-Template parameter ``Lyt``:
-    SiDB cell-level layout type.
-
-Parameter ``given_bdl``:
-    The BDL pair to find a neighbor for.
-
-Parameter ``bdl_pairs``:
-    A set of BDL pairs to search within.
-
-Parameter ``inter_bdl_distance``:
-    The maximum allowable distance between the lower SiDB of the given
-    BDL pair and the upper SiDB of the potential neighbor BDL pair.
-
-Returns:
-    A std::optional containing the first BDL pair that meets the
-    criteria, or std::nullopt if no such pair is found.)doc";
-
-static const char *__doc_fiction_find_bdl_pair_in_wire_by_type =
-R"doc(Finds the first Binary-dot Logic (BDL) pair of a specified type in a
-BDL wire.
-
-Template parameter ``Lyt``:
-    SiDB cell-level layout type.
-
-Parameter ``wire``:
-    BDL wire containing BDL pairs to search through.
-
-Parameter ``t``:
-    Type of BDL pair to search for
-    (`sidb_technology::cell_type::INPUT`,
-    `sidb_technology::cell_type::OUTPUT`, etc.).
-
-Returns:
-    Optional containing the first BDL pair with the specified type
-    `t`, or `std::nullopt` if no such BDL pair is found.)doc";
 
 static const char *__doc_fiction_find_first_two_of =
 R"doc(A derivative of `std::find_first_of` that uses the example
@@ -14059,8 +14145,8 @@ R"doc(Parameters for the operational domain computation. The parameters are
 used across the different operational domain computation algorithms.)doc";
 
 static const char *__doc_fiction_operational_domain_params_operational_params =
-R"doc(The parameters used to determine if a layout is `operational` or `non-
-operational`.)doc";
+R"doc(The parameters used to determine if a layout is operational or non-
+operational.)doc";
 
 static const char *__doc_fiction_operational_domain_params_sweep_dimensions =
 R"doc(The dimensions to sweep over together with their value ranges, ordered
