@@ -47,7 +47,7 @@ int main()  // NOLINT
         create_double_wire_tt()};
 
     static const std::vector<std::string> gate_names = {"and", "nand", "or", "nor", "xor", "xnor",     "lt",
-                                                           "gt",  "le",   "ge", "cx",  "ha",  "hourglass"};
+                                                        "gt",  "le",   "ge", "cx",  "ha",  "hourglass"};
 
     static const std::string folder = fmt::format("{}/gate_skeletons/skeleton_bestagons_with_tags", EXPERIMENTS_PATH);
 
