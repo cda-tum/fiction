@@ -11,6 +11,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <iterator>
 #include <optional>
 #include <unordered_set>
 #include <vector>
@@ -57,67 +58,88 @@ struct bdl_pair
     {}
 
     /**
-     * Equality operator (==) for comparing two BDL pairs.
+     * Equality operator.
+     *
+     * @param other The other BDL pair to compare with.
+     * @return `true` if this BDL pair is equal to the other, `false` otherwise.
      */
-    bool operator==(const bdl_pair<CellType>& other) const
+    [[nodiscard]] bool operator==(const bdl_pair<CellType>& other) const noexcept
     {
         return type == other.type && upper == other.upper && lower == other.lower;
     }
-
     /**
-     * Inequality operator (!=) for comparing two BDL pairs.
+     * Inequality operator.
+     *
+     * @param other The other BDL pair to compare with.
+     * @return `true` if this BDL pair is not equal to the other, `false` otherwise.
      */
-    bool operator!=(const bdl_pair<CellType>& other) const
+    [[nodiscard]] bool operator!=(const bdl_pair<CellType>& other) const noexcept
     {
         return !(*this == other);
     }
-
     /**
-     * Less-than operator (<) for comparing two BDL pairs.
+     * Less than operator.
+     *
+     * @param other The other BDL pair to compare with.
+     * @return `true` if this BDL pair is less than the other, `false` otherwise.
      */
-    bool operator<(const bdl_pair<CellType>& other) const
+    [[nodiscard]] bool operator<(const bdl_pair<CellType>& other) const noexcept
     {
         if (upper != other.upper)
+        {
             return upper < other.upper;
+        }
         return lower < other.lower;
     }
 
     /**
-     * Less-than-or-equal-to operator (<=) for comparing two BDL pairs.
+     * Less than or equal to operator.
+     *
+     * @param other The other BDL pair to compare with.
+     * @return `true` if this BDL pair is less than or equal to the other, `false` otherwise.
      */
-    bool operator<=(const bdl_pair<CellType>& other) const
+    [[nodiscard]] bool operator<=(const bdl_pair<CellType>& other) const noexcept
     {
         return (*this < other) || (*this == other);
     }
-
     /**
-     * Greater-than operator (>) for comparing two BDL pairs.
+     * Greater than operator.
+     *
+     * @param other The other BDL pair to compare with.
+     * @return `true` if this BDL pair is greater than the other, `false` otherwise.
      */
-    bool operator>(const bdl_pair<CellType>& other) const
+    [[nodiscard]] bool operator>(const bdl_pair<CellType>& other) const
     {
         return !(*this <= other);
     }
-
     /**
-     * Greater-than-or-equal-to operator (>=) for comparing two BDL pairs.
+     * Greater-than-or-equal-to operator.
+     *
+     * @param other The other BDL pair to compare with.
+     * @return `true` if this BDL pair is greater than or equal to the other, otherwise `false`.
      */
-    bool operator>=(const bdl_pair<CellType>& other) const
+    [[nodiscard]] bool operator>=(const bdl_pair<CellType>& other) const noexcept
     {
         return !(*this < other);
     }
-
     /**
-     * Check equality of two BDL pairs ignoring the type of the SiDBs.
+     * Equality check ignoring type.
+     *
+     * @param other The other BDL pair to compare with.
+     * @return `true` if the `upper` and `lower` attributes are equal, otherwise `false`.
      */
-    bool equal_ignore_type(const bdl_pair<CellType>& other) const
+    [[nodiscard]] bool equal_ignore_type(const bdl_pair<CellType>& other) const noexcept
     {
         return upper == other.upper && lower == other.lower;
     }
 
     /**
-     * Check inequality of two BDL pairs ignoring the type of the SiDBs.
+     * Inequality check ignoring type.
+     *
+     * @param other The other BDL pair to compare with.
+     * @return `true` if the `upper` and `lower` attributes are not equal, otherwise `false`.
      */
-    bool not_equal_ignore_type(const bdl_pair<CellType>& other) const
+    [[nodiscard]] bool not_equal_ignore_type(const bdl_pair<CellType>& other) const noexcept
     {
         return !equal_ignore_type(other);
     }
@@ -149,7 +171,9 @@ struct detect_bdl_pairs_params
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @param lyt The layout to detect BDL pairs in.
- * @param type The type of the SiDBs to detect BDL pairs for, e.g., `INPUT`, `OUTPUT`, `NORMAL`.
+ * @param type Optional parameter to specify the SiDB type for which BDL pairs should be detected.
+ *             If omitted, the function will detect BDL pairs for all types. Valid types include
+ *             `INPUT`, `OUTPUT`, `NORMAL`, among others.
  * @param params Parameters for the BDL pair detection algorithm.
  * @return A vector of BDL pairs.
  */
@@ -286,7 +310,7 @@ detect_bdl_pairs(const Lyt& lyt, const std::optional<typename technology<Lyt>::c
             paired_dots.insert(potential_bdl_pair.sidb2);
         }
 
-        // Sort the vector of BDL pairs to ensure a specific ordering.
+        // Sort the vector of BDL pairs using the less than operator for BDL pairs
         std::sort(bdl_pairs.begin(), bdl_pairs.end());
 
         return bdl_pairs;
@@ -330,6 +354,7 @@ detect_bdl_pairs(const Lyt& lyt, const std::optional<typename technology<Lyt>::c
         }
     }
 
+    // in case no type is given, detect BDL pairs for all types
     else
     {
         const auto input_bdl   = detect_bdl_pairs(lyt, technology<Lyt>::cell_type::INPUT, params);
@@ -339,20 +364,10 @@ detect_bdl_pairs(const Lyt& lyt, const std::optional<typename technology<Lyt>::c
         std::vector<bdl_pair<cell<Lyt>>> all_bdls{};
         all_bdls.reserve(input_bdl.size() + output_bdls.size() + normal_bdls.size());
 
-        for (const auto& bdl : input_bdl)
-        {
-            all_bdls.push_back(bdl);
-        }
+        std::copy(input_bdl.cbegin(), input_bdl.cend(), std::back_inserter(all_bdls));
+        std::copy(output_bdls.cbegin(), output_bdls.cend(), std::back_inserter(all_bdls));
+        std::copy(normal_bdls.cbegin(), normal_bdls.cend(), std::back_inserter(all_bdls));
 
-        for (const auto& bdl : output_bdls)
-        {
-            all_bdls.push_back(bdl);
-        }
-
-        for (const auto& bdl : normal_bdls)
-        {
-            all_bdls.push_back(bdl);
-        }
         return all_bdls;
     }
 

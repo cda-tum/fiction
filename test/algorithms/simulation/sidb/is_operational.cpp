@@ -14,6 +14,7 @@
 #include <fiction/utils/truth_table_utils.hpp>
 
 #include <cstdint>
+#include <optional>
 #include <set>
 #include <vector>
 
@@ -273,12 +274,31 @@ TEST_CASE("is operational check for Bestagon CX gate", "[is-operational], [quali
 
     const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
-    CHECK(
-        is_operational(lat, create_crossing_wire_tt(),
-                       is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT})
-            .first == operational_status::OPERATIONAL);
-    CHECK(
-        is_operational(lat, create_crossing_wire_tt(),
-                       is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT})
-            .first == operational_status::NON_OPERATIONAL);
+    SECTION("without predetermined wires")
+    {
+        CHECK(is_operational(
+                  lat, create_crossing_wire_tt(),
+                  is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT})
+                  .first == operational_status::OPERATIONAL);
+        CHECK(is_operational(
+                  lat, create_crossing_wire_tt(),
+                  is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT})
+                  .first == operational_status::NON_OPERATIONAL);
+    }
+    SECTION("using predetermined wires")
+    {
+        const auto input_bdl_wires  = detect_bdl_wires(lat, detect_bdl_wires_params{}, bdl_wire_selection::INPUT);
+        const auto output_bdl_wires = detect_bdl_wires(lat, detect_bdl_wires_params{}, bdl_wire_selection::OUTPUT);
+
+        CHECK(is_operational(
+                  lat, create_crossing_wire_tt(),
+                  is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT},
+                  std::optional{input_bdl_wires}, std::optional{output_bdl_wires})
+                  .first == operational_status::OPERATIONAL);
+        CHECK(is_operational(
+                  lat, create_crossing_wire_tt(),
+                  is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT},
+                  std::optional{input_bdl_wires}, std::optional{output_bdl_wires})
+                  .first == operational_status::NON_OPERATIONAL);
+    }
 }

@@ -47,12 +47,8 @@ class bdl_input_iterator
             layout{lyt.clone()},
             input_pairs{detect_bdl_pairs<Lyt>(lyt, sidb_technology::cell_type::INPUT, params.params_bdl_pairs)},
             input_bdl_wires{detect_bdl_wires<Lyt>(lyt, params, bdl_wire_selection::INPUT)},
-            num_inputs{static_cast<uint8_t>(input_pairs.size())},
-            input_wire_directions{determine_input_bdl_wire_directions()}
+            num_inputs{static_cast<uint8_t>(input_pairs.size())}
     {
-        assert(input_bdl_wires.size() == input_wire_directions.size() &&
-               "Input BDL wires, and directions must have the same size.");
-
         static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
         static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
         set_all_inputs();
@@ -65,16 +61,13 @@ class bdl_input_iterator
      * @param lyt The SiDB BDL layout to iterate over.
      * @param params Parameters for the BDL wire detection.
      * @param input_wires Pre-detected input BDL wires.
-     * @param input_directions Pre-determined directions for the input BDL wires.
      */
     explicit bdl_input_iterator(const Lyt& lyt, const detect_bdl_wires_params& params,
-                                const std::vector<bdl_wire<Lyt>>&      input_wires,
-                                const std::vector<bdl_wire_direction>& input_directions) noexcept :
+                                const std::vector<bdl_wire<cell<Lyt>>>&      input_wires) noexcept :
             layout{lyt.clone()},
             input_pairs{detect_bdl_pairs<Lyt>(lyt, sidb_technology::cell_type::INPUT, params.params_bdl_pairs)},
             input_bdl_wires{input_wires},
-            num_inputs{static_cast<uint8_t>(input_pairs.size())},
-            input_wire_directions{input_directions}
+            num_inputs{static_cast<uint8_t>(input_pairs.size())}
     {
         static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
         static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -318,35 +311,15 @@ class bdl_input_iterator
     /**
      * The detected input BDL wires.
      */
-    const std::vector<bdl_wire<Lyt>> input_bdl_wires;
+    const std::vector<bdl_wire<cell<Lyt>>> input_bdl_wires;
     /**
      * The amount of input BDL pairs.
      */
     const uint8_t num_inputs;
     /**
-     * Directions of the input BDL wires.
-     */
-    const std::vector<bdl_wire_direction> input_wire_directions;
-    /**
      * The current input index. There are \f$2^n\f$ possible input states for an \f$n\f$-input BDL layout.
      */
     uint64_t current_input_index{0ull};
-    /**
-     * This function determines the directions of the input BDL wires.
-     *
-     * @return A vector of `bdl_wire_direction` representing the directions of the input BDL wires.
-     */
-    [[nodiscard]] std::vector<bdl_wire_direction> determine_input_bdl_wire_directions() const noexcept
-    {
-        std::vector<bdl_wire_direction> directions{};
-        // Reserve space for the directions
-        directions.reserve(input_bdl_wires.size());
-
-        std::transform(input_bdl_wires.cbegin(), input_bdl_wires.cend(), std::back_inserter(directions),
-                       [](const auto& wire) { return determine_wire_direction<Lyt>(wire); });
-
-        return directions;
-    }
 
     /**
      * Sets all input cells of the layout according to the current input index. The input index is interpreted as a
@@ -362,7 +335,7 @@ class bdl_input_iterator
             // left BDL pair is set to 1 and the right pair is set to 0, not the other way around.
             const auto& input_i = input_pairs[num_inputs - 1 - i];
 
-            if (input_wire_directions[num_inputs - 1 - i] == bdl_wire_direction::NORTH_SOUTH)
+            if (input_bdl_wires[num_inputs - 1 - i].direction == bdl_wire_direction::NORTH_SOUTH)
             {
                 if ((current_input_index & (uint64_t{1ull} << i)) != 0ull)
                 {

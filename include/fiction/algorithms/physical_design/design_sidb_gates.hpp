@@ -165,9 +165,7 @@ class design_sidb_gates_impl
             number_of_input_wires{input_bdl_wires.size()},
             number_of_output_wires{output_bdl_wires.size()},
             all_canvas_layouts{determine_all_possible_canvas_layouts()}
-    {
-        initialize_bdl_wires_with_directions();
-    }
+    {}
 
     /**
      * Design gates by using the *Automatic Exhaustive Gate Desginer*. This algorithm was proposed in \"Minimal
@@ -217,8 +215,8 @@ class design_sidb_gates_impl
             const auto layout_with_added_cells = skeleton_layout_with_canvas_sidbs(combination);
 
             if (const auto [status, sim_calls] =
-                    is_operational(layout_with_added_cells, truth_table, params.operational_params, input_bdl_wires,
-                                   output_bdl_wires, input_bdl_wire_directions);
+                    is_operational(layout_with_added_cells, truth_table, params.operational_params,
+                                   std::optional{input_bdl_wires}, std::optional{output_bdl_wires});
                 status == operational_status::OPERATIONAL)
             {
                 {
@@ -313,9 +311,8 @@ class design_sidb_gates_impl
                                     }
                                 });
                         }
-                        if (const auto [status, sim_calls] =
-                                is_operational(result_lyt, truth_table, params.operational_params, input_bdl_wires,
-                                               output_bdl_wires, input_bdl_wire_directions);
+                        if (const auto [status, sim_calls] = is_operational(
+                                result_lyt, truth_table, params.operational_params, std::optional{input_bdl_wires}, std::optional{output_bdl_wires});
                             status == operational_status::OPERATIONAL)
                         {
                             const std::lock_guard lock{mutex_to_protect_designed_gate_layouts};
@@ -391,8 +388,8 @@ class design_sidb_gates_impl
                 return;
             }
             if (const auto [status, sim_calls] =
-                    is_operational(candidate, truth_table, params.operational_params, input_bdl_wires, output_bdl_wires,
-                                   input_bdl_wire_directions);
+                    is_operational(candidate, truth_table, params.operational_params, std::optional{input_bdl_wires},
+                                   std::optional{output_bdl_wires});
                 status == operational_status::OPERATIONAL)
             {
                 // Lock and update shared resources
@@ -466,11 +463,11 @@ class design_sidb_gates_impl
     /**
      * Input BDL wires.
      */
-    const std::vector<bdl_wire<Lyt>> input_bdl_wires;
+    const std::vector<bdl_wire<cell<Lyt>>> input_bdl_wires;
     /**
      * Output BDL wires.
      */
-    const std::vector<bdl_wire<Lyt>> output_bdl_wires;
+    const std::vector<bdl_wire<cell<Lyt>>> output_bdl_wires;
     /**
      * Number of input BDL wires.
      */
@@ -483,37 +480,6 @@ class design_sidb_gates_impl
      * All Canvas SiDB layout (without I/O pins).
      */
     const std::vector<Lyt> all_canvas_layouts{};
-    /**
-     * Directions of the input wires.
-     */
-    std::vector<bdl_wire_direction> input_bdl_wire_directions{};
-    /**
-     * Directions of the output wires.
-     */
-    std::vector<bdl_wire_direction> output_bdl_wire_directions{};
-    /**
-     * This function performs the following steps to initialize the necessary components for the layout evaluation:
-     * 1. Detects the input and output BDL wires in the skeleton layout using the specified BDL wire parameters.
-     * 2. Determines the directions of the input BDL wires and stores them in the input BDL wire directions container.
-     * 3. Determines the directions of the output BDL wires and stores them in the output BDL wire directions container.
-     * 4. Determines and stores all possible canvas layouts.
-     *
-     * @tparam Lyt The type representing the layout.
-     */
-    void initialize_bdl_wires_with_directions() noexcept
-    {
-        input_bdl_wire_directions.reserve(number_of_input_wires);
-
-        std::transform(input_bdl_wires.cbegin(), input_bdl_wires.cend(), std::back_inserter(input_bdl_wire_directions),
-                       [](const auto& wire) { return determine_wire_direction<Lyt>(wire); });
-
-        output_bdl_wire_directions.reserve(number_of_output_wires);
-
-        std::transform(output_bdl_wires.cbegin(), output_bdl_wires.cend(),
-                       std::back_inserter(output_bdl_wire_directions),
-                       [](const auto& wire) { return determine_wire_direction<Lyt>(wire); });
-    }
-
     /**
      * This function assigns the charge states of the input wires in the layout according to the provided input pattern
      * index. It performs the following steps:
@@ -537,11 +503,11 @@ class design_sidb_gates_impl
 
         for (auto i = 0u; i < number_of_input_wires; i++)
         {
-            if (input_bdl_wire_directions[number_of_input_wires - 1 - i] == bdl_wire_direction::NORTH_SOUTH)
+            if (input_bdl_wires[number_of_input_wires - 1 - i].direction == bdl_wire_direction::NORTH_SOUTH)
             {
                 if ((current_input_index & (uint64_t{1ull} << i)) != 0ull)
                 {
-                    for (const auto& bdl : input_bdl_wires[number_of_input_wires - 1 - i])
+                    for (const auto& bdl : input_bdl_wires[number_of_input_wires - 1 - i].pairs)
                     {
                         if (bdl.type == sidb_technology::INPUT)
                         {
@@ -555,7 +521,7 @@ class design_sidb_gates_impl
                 }
                 else
                 {
-                    for (const auto& bdl : input_bdl_wires[number_of_input_wires - 1 - i])
+                    for (const auto& bdl : input_bdl_wires[number_of_input_wires - 1 - i].pairs)
                     {
                         if (bdl.type == sidb_technology::INPUT)
                         {
@@ -568,11 +534,11 @@ class design_sidb_gates_impl
                     }
                 }
             }
-            else if (input_bdl_wire_directions[number_of_input_wires - 1 - i] == bdl_wire_direction::SOUTH_NORTH)
+            else if (input_bdl_wires[number_of_input_wires - 1 - i].direction == bdl_wire_direction::SOUTH_NORTH)
             {
                 if ((current_input_index & (uint64_t{1ull} << i)) != 0ull)
                 {
-                    for (const auto& bdl : input_bdl_wires[number_of_input_wires - 1 - i])
+                    for (const auto& bdl : input_bdl_wires[number_of_input_wires - 1 - i].pairs)
                     {
                         if (bdl.type == sidb_technology::INPUT)
                         {
@@ -586,7 +552,7 @@ class design_sidb_gates_impl
                 }
                 else
                 {
-                    for (const auto& bdl : input_bdl_wires[number_of_input_wires - 1 - i])
+                    for (const auto& bdl : input_bdl_wires[number_of_input_wires - 1 - i].pairs)
                     {
                         if (bdl.type == sidb_technology::INPUT)
                         {
@@ -623,11 +589,11 @@ class design_sidb_gates_impl
     {
         for (auto i = 0u; i < number_of_output_wires; i++)
         {
-            if (output_bdl_wire_directions[i] == bdl_wire_direction::NORTH_SOUTH)
+            if (output_bdl_wires[i].direction == bdl_wire_direction::NORTH_SOUTH)
             {
                 if ((output_wire_index & (uint64_t{1ull} << i)) != 0ull)
                 {
-                    for (const auto& bdl : output_bdl_wires[i])
+                    for (const auto& bdl : output_bdl_wires[i].pairs)
                     {
                         layout.assign_charge_state(bdl.upper, sidb_charge_state::NEUTRAL,
                                                    charge_index_mode::KEEP_CHARGE_INDEX);
@@ -637,7 +603,7 @@ class design_sidb_gates_impl
                 }
                 else
                 {
-                    for (const auto& bdl : output_bdl_wires[i])
+                    for (const auto& bdl : output_bdl_wires[i].pairs)
                     {
                         layout.assign_charge_state(bdl.upper, sidb_charge_state::NEGATIVE,
                                                    charge_index_mode::KEEP_CHARGE_INDEX);
@@ -646,11 +612,11 @@ class design_sidb_gates_impl
                     }
                 }
             }
-            else if (output_bdl_wire_directions[i] == bdl_wire_direction::SOUTH_NORTH)
+            else if (output_bdl_wires[i].direction == bdl_wire_direction::SOUTH_NORTH)
             {
                 if ((output_wire_index & (uint64_t{1ull} << i)) != 0ull)
                 {
-                    for (const auto& bdl : output_bdl_wires[i])
+                    for (const auto& bdl : output_bdl_wires[i].pairs)
                     {
                         if (bdl.type == sidb_technology::INPUT)
                         {
@@ -664,7 +630,7 @@ class design_sidb_gates_impl
                 }
                 else
                 {
-                    for (const auto& bdl : output_bdl_wires[i])
+                    for (const auto& bdl : output_bdl_wires[i].pairs)
                     {
                         layout.assign_charge_state(bdl.upper, sidb_charge_state::NEUTRAL,
                                                    charge_index_mode::KEEP_CHARGE_INDEX);
@@ -704,11 +670,11 @@ class design_sidb_gates_impl
     {
         for (auto i = 0u; i < number_of_output_wires; i++)
         {
-            if (output_bdl_wire_directions[i] == bdl_wire_direction::NORTH_SOUTH)
+            if (output_bdl_wires[i].direction == bdl_wire_direction::NORTH_SOUTH)
             {
                 if (kitty::get_bit(truth_table[i], input_index))
                 {
-                    for (const auto& bdl : output_bdl_wires[i])
+                    for (const auto& bdl : output_bdl_wires[i].pairs)
                     {
                         layout.assign_charge_state(bdl.upper, sidb_charge_state::NEUTRAL,
                                                    charge_index_mode::KEEP_CHARGE_INDEX);
@@ -718,7 +684,7 @@ class design_sidb_gates_impl
                 }
                 else
                 {
-                    for (const auto& bdl : output_bdl_wires[i])
+                    for (const auto& bdl : output_bdl_wires[i].pairs)
                     {
                         layout.assign_charge_state(bdl.upper, sidb_charge_state::NEGATIVE,
                                                    charge_index_mode::KEEP_CHARGE_INDEX);
@@ -727,11 +693,11 @@ class design_sidb_gates_impl
                     }
                 }
             }
-            else if (output_bdl_wire_directions[i] == bdl_wire_direction::SOUTH_NORTH)
+            else if (output_bdl_wires[i].direction == bdl_wire_direction::SOUTH_NORTH)
             {
                 if (kitty::get_bit(truth_table[i], input_index))
                 {
-                    for (const auto& bdl : output_bdl_wires[i])
+                    for (const auto& bdl : output_bdl_wires[i].pairs)
                     {
                         layout.assign_charge_state(bdl.upper, sidb_charge_state::NEGATIVE,
                                                    charge_index_mode::KEEP_CHARGE_INDEX);
@@ -741,7 +707,7 @@ class design_sidb_gates_impl
                 }
                 else
                 {
-                    for (const auto& bdl : output_bdl_wires[i])
+                    for (const auto& bdl : output_bdl_wires[i].pairs)
                     {
                         layout.assign_charge_state(bdl.upper, sidb_charge_state::NEUTRAL,
                                                    charge_index_mode::KEEP_CHARGE_INDEX);
@@ -878,8 +844,7 @@ class design_sidb_gates_impl
 
         cds_canvas.assign_dependent_cell(dependent_cell);
 
-        auto bii = bdl_input_iterator<Lyt>{current_layout, params.operational_params.bdl_wire_params, input_bdl_wires,
-                                           input_bdl_wire_directions};
+        auto bii = bdl_input_iterator<Lyt>{current_layout, params.operational_params.bdl_wire_params, input_bdl_wires};
 
         for (auto i = 0u; i < truth_table.front().num_bits(); ++i, ++bii)
         {

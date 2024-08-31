@@ -123,15 +123,7 @@ class is_operational_impl
             bii(bdl_input_iterator<Lyt>{layout, parameters.bdl_wire_params}),
             input_bdl_wires{detect_bdl_wires(layout, parameters.bdl_wire_params, bdl_wire_selection::INPUT)},
             output_bdl_wires{detect_bdl_wires(layout, parameters.bdl_wire_params, bdl_wire_selection::OUTPUT)}
-    {
-        // determine wire directions and store them.
-        std::transform(input_bdl_wires.cbegin(), input_bdl_wires.cend(), std::back_inserter(input_bdl_wire_directions),
-                       [](const auto& wire) { return determine_wire_direction<Lyt>(wire); });
-
-        std::transform(output_bdl_wires.cbegin(), output_bdl_wires.cend(),
-                       std::back_inserter(output_bdl_wire_directions),
-                       [](const auto& wire) { return determine_wire_direction<Lyt>(wire); });
-    }
+    {}
     /**
      * Constructor to initialize the algorithm with a layout and parameters.
      *
@@ -143,26 +135,16 @@ class is_operational_impl
      * @param input_bdl_wire_direction Optional BDL input wire directions of lyt.
      */
     is_operational_impl(const Lyt& lyt, const std::vector<TT>& tt, const is_operational_params& params,
-                        const std::vector<bdl_wire<Lyt>>&      input_bdl_wires,
-                        const std::vector<bdl_wire<Lyt>>&      output_bdl_wires,
-                        const std::vector<bdl_wire_direction>& input_wire_directions) :
+                        const std::vector<bdl_wire<cell<Lyt>>>& input_wires, const std::vector<bdl_wire<cell<Lyt>>>& output_wires) :
             layout{lyt},
             truth_table{tt},
             parameters{params},
             output_bdl_pairs(detect_bdl_pairs(layout, sidb_technology::cell_type::OUTPUT,
                                               parameters.bdl_wire_params.params_bdl_pairs)),
-            bii{bdl_input_iterator<Lyt>{layout, parameters.bdl_wire_params, input_bdl_wires, input_wire_directions}},
-            input_bdl_wires{detect_bdl_wires(layout, parameters.bdl_wire_params, bdl_wire_selection::INPUT)},
-            output_bdl_wires{detect_bdl_wires(layout, parameters.bdl_wire_params, bdl_wire_selection::OUTPUT)}
-    {
-        // determine wire directions and store them.
-        std::transform(input_bdl_wires.cbegin(), input_bdl_wires.cend(), std::back_inserter(input_bdl_wire_directions),
-                       [](const auto& wire) { return determine_wire_direction<Lyt>(wire); });
-
-        std::transform(output_bdl_wires.cbegin(), output_bdl_wires.cend(),
-                       std::back_inserter(output_bdl_wire_directions),
-                       [](const auto& wire) { return determine_wire_direction<Lyt>(wire); });
-    }
+            bii{bdl_input_iterator<Lyt>{layout, parameters.bdl_wire_params, input_wires}},
+            input_bdl_wires{input_wires},
+            output_bdl_wires{output_wires}
+    {}
 
     /**
      * Run the `is_operational` algorithm.
@@ -224,7 +206,8 @@ class is_operational_impl
                 // if the expected output is 1, the expected charge states are (upper, lower) = (0, -1)
                 if (kitty::get_bit(truth_table[output], i))
                 {
-                    if (!encodes_bit_one(*ground_state, output_bdl_pairs[output], output_bdl_wire_directions[output]))
+                    if (!encodes_bit_one(*ground_state, output_bdl_pairs[output],
+                                         output_bdl_wires[output].direction))
                     {
                         return operational_status::NON_OPERATIONAL;
                     }
@@ -232,7 +215,8 @@ class is_operational_impl
                 // if the expected output is 0, the expected charge states are (upper, lower) = (-1, 0)
                 else
                 {
-                    if (!encodes_bit_zero(*ground_state, output_bdl_pairs[output], output_bdl_wire_directions[output]))
+                    if (!encodes_bit_zero(*ground_state, output_bdl_pairs[output],
+                                          output_bdl_wires[output].direction))
                     {
                         return operational_status::NON_OPERATIONAL;
                     }
@@ -313,7 +297,8 @@ class is_operational_impl
                 // if the expected output is 1, the expected charge states are (upper, lower) = (0, -1)
                 if (kitty::get_bit(truth_table[output], i))
                 {
-                    if (!encodes_bit_one(*ground_state, output_bdl_pairs[output], output_bdl_wire_directions[output]))
+                    if (!encodes_bit_one(*ground_state, output_bdl_pairs[output],
+                                         output_bdl_wires[output].direction))
                     {
                         correct_output = false;
                     }
@@ -321,7 +306,8 @@ class is_operational_impl
                 // if the expected output is 0, the expected charge states are (upper, lower) = (-1, 0)
                 else
                 {
-                    if (!encodes_bit_zero(*ground_state, output_bdl_pairs[output], output_bdl_wire_directions[output]))
+                    if (!encodes_bit_zero(*ground_state, output_bdl_pairs[output],
+                                          output_bdl_wires[output].direction))
                     {
                         correct_output = false;
                     }
@@ -371,19 +357,11 @@ class is_operational_impl
     /**
      * Input BDL wires.
      */
-    std::vector<bdl_wire<Lyt>> input_bdl_wires;
+    std::vector<bdl_wire<cell<Lyt>>> input_bdl_wires;
     /**
      * Output BDL wires.
      */
-    std::vector<bdl_wire<Lyt>> output_bdl_wires;
-    /**
-     * Directions of the input wires.
-     */
-    std::vector<bdl_wire_direction> input_bdl_wire_directions{};
-    /**
-     * Directions of the output wires.
-     */
-    std::vector<bdl_wire_direction> output_bdl_wire_directions{};
+    std::vector<bdl_wire<cell<Lyt>>> output_bdl_wires;
     /**
      * Number of simulator invocations.
      */
@@ -443,18 +421,18 @@ class is_operational_impl
     {
         for (auto i = 0u; i < input_bdl_wires.size(); i++)
         {
-            if (input_bdl_wire_directions[input_bdl_wires.size() - 1 - i] == bdl_wire_direction::NORTH_SOUTH)
+            if (input_bdl_wires[input_bdl_wires.size() - 1 - i].direction == bdl_wire_direction::NORTH_SOUTH)
             {
                 if ((current_input_index & (uint64_t{1ull} << i)) != 0ull)
                 {
-                    for (const auto& bdl : input_bdl_wires[input_bdl_wires.size() - 1 - i])
+                    for (const auto& bdl : input_bdl_wires[input_bdl_wires.size() - 1 - i].pairs)
                     {
                         if (bdl.type == sidb_technology::INPUT)
                         {
                             continue;
                         }
                         if (!encodes_bit_one(ground_state, bdl,
-                                             input_bdl_wire_directions[input_bdl_wires.size() - 1 - i]))
+                                             input_bdl_wires[input_bdl_wires.size() - 1 - i].direction))
                         {
                             return true;
                         }
@@ -462,32 +440,32 @@ class is_operational_impl
                 }
                 else
                 {
-                    for (const auto& bdl : input_bdl_wires[input_bdl_wires.size() - 1 - i])
+                    for (const auto& bdl : input_bdl_wires[input_bdl_wires.size() - 1 - i].pairs)
                     {
                         if (bdl.type == sidb_technology::INPUT)
                         {
                             continue;
                         }
                         if (!encodes_bit_zero(ground_state, bdl,
-                                              input_bdl_wire_directions[input_bdl_wires.size() - 1 - i]))
+                                              input_bdl_wires[input_bdl_wires.size() - 1 - i].direction))
                         {
                             return true;
                         }
                     }
                 }
             }
-            else if (input_bdl_wire_directions[input_bdl_wires.size() - 1 - i] == bdl_wire_direction::SOUTH_NORTH)
+            else if (input_bdl_wires[input_bdl_wires.size() - 1 - i].direction == bdl_wire_direction::SOUTH_NORTH)
             {
                 if ((current_input_index & (uint64_t{1ull} << i)) != 0ull)
                 {
-                    for (const auto& bdl : input_bdl_wires[input_bdl_wires.size() - 1 - i])
+                    for (const auto& bdl : input_bdl_wires[input_bdl_wires.size() - 1 - i].pairs)
                     {
                         if (bdl.type == sidb_technology::INPUT)
                         {
                             continue;
                         }
                         if (!encodes_bit_one(ground_state, bdl,
-                                             input_bdl_wire_directions[input_bdl_wires.size() - 1 - i]))
+                                             input_bdl_wires[input_bdl_wires.size() - 1 - i].direction))
                         {
                             return true;
                         }
@@ -495,14 +473,14 @@ class is_operational_impl
                 }
                 else
                 {
-                    for (const auto& bdl : input_bdl_wires[input_bdl_wires.size() - 1 - i])
+                    for (const auto& bdl : input_bdl_wires[input_bdl_wires.size() - 1 - i].pairs)
                     {
                         if (bdl.type == sidb_technology::INPUT)
                         {
                             continue;
                         }
                         if (!encodes_bit_zero(ground_state, bdl,
-                                              input_bdl_wire_directions[input_bdl_wires.size() - 1 - i]))
+                                              input_bdl_wires[input_bdl_wires.size() - 1 - i].direction))
                         {
                             return true;
                         }
@@ -529,21 +507,21 @@ class is_operational_impl
     {
         for (auto i = 0u; i < output_bdl_wires.size(); i++)
         {
-            for (const auto& bdl : output_bdl_wires[i])
+            for (const auto& bdl : output_bdl_wires[i].pairs)
             {
                 if (kitty::get_bit(truth_table[i], current_input_index))
                 {
-                    if (!encodes_bit_one(ground_state, bdl, output_bdl_wire_directions[i]))
+                    if (!encodes_bit_one(ground_state, bdl, output_bdl_wires[i].direction))
                     {
                         return true;
-                    };
+                    }
                 }
                 else
                 {
-                    if (!encodes_bit_zero(ground_state, bdl, output_bdl_wire_directions[i]))
+                    if (!encodes_bit_zero(ground_state, bdl, output_bdl_wires[i].direction))
                     {
                         return true;
-                    };
+                    }
                 }
             }
         }
@@ -617,9 +595,8 @@ class is_operational_impl
 template <typename Lyt, typename TT>
 [[nodiscard]] std::pair<operational_status, std::size_t>
 is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params = {},
-               const std::optional<std::vector<bdl_wire<Lyt>>>&      input_bdl_wire           = std::nullopt,
-               const std::optional<std::vector<bdl_wire<Lyt>>>&      output_bdl_wire          = std::nullopt,
-               const std::optional<std::vector<bdl_wire_direction>>& input_bdl_wire_direction = std::nullopt)
+               const std::optional<std::vector<bdl_wire<cell<Lyt>>>>& input_bdl_wire  = std::nullopt,
+               const std::optional<std::vector<bdl_wire<cell<Lyt>>>>& output_bdl_wire = std::nullopt)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -633,10 +610,10 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
     assert(std::adjacent_find(spec.cbegin(), spec.cend(), [](const auto& a, const auto& b)
                               { return a.num_vars() != b.num_vars(); }) == spec.cend());
 
-    if (input_bdl_wire.has_value() && output_bdl_wire.has_value() && input_bdl_wire_direction.has_value())
+    if (input_bdl_wire.has_value() && output_bdl_wire.has_value())
     {
-        detail::is_operational_impl<Lyt, TT> p{
-            lyt, spec, params, input_bdl_wire.value(), output_bdl_wire.value(), input_bdl_wire_direction.value()};
+        detail::is_operational_impl<Lyt, TT> p{lyt, spec, params, input_bdl_wire.value(), output_bdl_wire.value()};
+
         return {p.run(), p.get_number_of_simulator_invocations()};
     }
 

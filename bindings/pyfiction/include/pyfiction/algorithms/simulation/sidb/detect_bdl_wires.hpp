@@ -9,9 +9,12 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp>
+#include <fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+
+#include <vector>
 
 namespace pyfiction
 {
@@ -22,7 +25,6 @@ namespace detail
 template <typename Lyt>
 void detect_bdl_wires(pybind11::module& m)
 {
-    namespace py = pybind11;
     using namespace pybind11::literals;
 
     m.def("detect_bdl_wires", &fiction::detect_bdl_wires<Lyt>, "lyt"_a, "params"_a = fiction::detect_bdl_wires_params{},
@@ -35,6 +37,13 @@ inline void detect_bdl_wires(pybind11::module& m)
 {
     namespace py = pybind11;
     using namespace pybind11::literals;
+
+    // todo add docu
+    py::class_<fiction::bdl_wire<fiction::offset::ucoord_t>>(m, "bdl_wire")
+        .def(py::init<>())
+        .def(py::init<std::vector<fiction::bdl_pair<fiction::offset::ucoord_t>>>(), "p"_a)
+        .def_readwrite("pairs", &fiction::bdl_wire<fiction::offset::ucoord_t>::pairs)
+        .def_readwrite("direction", &fiction::bdl_wire<fiction::offset::ucoord_t>::direction);
 
     py::enum_<fiction::bdl_wire_direction>(m, "bdl_wire_direction")
         .value("NORTH_SOUTH", fiction::bdl_wire_direction::NORTH_SOUTH)
