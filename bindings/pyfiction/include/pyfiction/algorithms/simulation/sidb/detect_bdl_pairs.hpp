@@ -27,7 +27,6 @@ namespace detail
 template <typename Lyt>
 void detect_bdl_pairs(pybind11::module& m)
 {
-    namespace py = pybind11;
     using namespace pybind11::literals;
 
     m.def("detect_bdl_pairs", &fiction::detect_bdl_pairs<Lyt>, "lyt"_a, "type"_a = nullptr,

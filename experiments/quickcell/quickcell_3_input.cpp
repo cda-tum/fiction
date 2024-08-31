@@ -19,7 +19,6 @@
 #include <array>
 #include <cstdint>
 #include <filesystem>
-#include <iostream>
 #include <string>
 #include <vector>
 
@@ -39,7 +38,7 @@ int main()  // NOLINT
         std::vector<tt>{create_dot_tt()},    std::vector<tt>{create_ite_tt()},     std::vector<tt>{create_and_xor_tt()},
         std::vector<tt>{create_xor3_tt()}};
 
-    static const std::array<std::string, 13> gate_names = {"and3",   "xor_and", "or_and", "onehot",  "maj",
+    static const std::vector<std::string> gate_names = {"and3",   "xor_and", "or_and", "onehot",  "maj",
                                                            "gamble", "dot",     "ite",    "and_xor", "xor3"};
 
     static const std::string folder = fmt::format("{}/gate_skeletons/skeleton_3_input_1_output/", EXPERIMENTS_PATH);

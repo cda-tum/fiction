@@ -38,12 +38,12 @@ inline void detect_bdl_wires(pybind11::module& m)
     namespace py = pybind11;
     using namespace pybind11::literals;
 
-    // todo add docu
     py::class_<fiction::bdl_wire<fiction::offset::ucoord_t>>(m, "bdl_wire")
         .def(py::init<>())
-        .def(py::init<std::vector<fiction::bdl_pair<fiction::offset::ucoord_t>>>(), "p"_a)
-        .def_readwrite("pairs", &fiction::bdl_wire<fiction::offset::ucoord_t>::pairs)
-        .def_readwrite("direction", &fiction::bdl_wire<fiction::offset::ucoord_t>::direction);
+        .def(py::init<std::vector<fiction::bdl_pair<fiction::offset::ucoord_t>>>(), "p"_a, DOC(fiction_bdl_wire))
+        .def_readwrite("pairs", &fiction::bdl_wire<fiction::offset::ucoord_t>::pairs, DOC(fiction_bdl_wire_pairs))
+        .def_readwrite("direction", &fiction::bdl_wire<fiction::offset::ucoord_t>::direction,
+                       DOC(fiction_bdl_wire_direction));
 
     py::enum_<fiction::bdl_wire_direction>(m, "bdl_wire_direction")
         .value("NORTH_SOUTH", fiction::bdl_wire_direction::NORTH_SOUTH)
