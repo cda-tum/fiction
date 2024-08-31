@@ -135,7 +135,8 @@ class is_operational_impl
      * @param input_bdl_wire_direction Optional BDL input wire directions of lyt.
      */
     is_operational_impl(const Lyt& lyt, const std::vector<TT>& tt, const is_operational_params& params,
-                        const std::vector<bdl_wire<cell<Lyt>>>& input_wires, const std::vector<bdl_wire<cell<Lyt>>>& output_wires) :
+                        const std::vector<bdl_wire<cell<Lyt>>>& input_wires,
+                        const std::vector<bdl_wire<cell<Lyt>>>& output_wires) :
             layout{lyt},
             truth_table{tt},
             parameters{params},
@@ -206,8 +207,7 @@ class is_operational_impl
                 // if the expected output is 1, the expected charge states are (upper, lower) = (0, -1)
                 if (kitty::get_bit(truth_table[output], i))
                 {
-                    if (!encodes_bit_one(*ground_state, output_bdl_pairs[output],
-                                         output_bdl_wires[output].direction))
+                    if (!encodes_bit_one(*ground_state, output_bdl_pairs[output], output_bdl_wires[output].direction))
                     {
                         return operational_status::NON_OPERATIONAL;
                     }
@@ -215,8 +215,7 @@ class is_operational_impl
                 // if the expected output is 0, the expected charge states are (upper, lower) = (-1, 0)
                 else
                 {
-                    if (!encodes_bit_zero(*ground_state, output_bdl_pairs[output],
-                                          output_bdl_wires[output].direction))
+                    if (!encodes_bit_zero(*ground_state, output_bdl_pairs[output], output_bdl_wires[output].direction))
                     {
                         return operational_status::NON_OPERATIONAL;
                     }
@@ -297,8 +296,7 @@ class is_operational_impl
                 // if the expected output is 1, the expected charge states are (upper, lower) = (0, -1)
                 if (kitty::get_bit(truth_table[output], i))
                 {
-                    if (!encodes_bit_one(*ground_state, output_bdl_pairs[output],
-                                         output_bdl_wires[output].direction))
+                    if (!encodes_bit_one(*ground_state, output_bdl_pairs[output], output_bdl_wires[output].direction))
                     {
                         correct_output = false;
                     }
@@ -306,8 +304,7 @@ class is_operational_impl
                 // if the expected output is 0, the expected charge states are (upper, lower) = (-1, 0)
                 else
                 {
-                    if (!encodes_bit_zero(*ground_state, output_bdl_pairs[output],
-                                          output_bdl_wires[output].direction))
+                    if (!encodes_bit_zero(*ground_state, output_bdl_pairs[output], output_bdl_wires[output].direction))
                     {
                         correct_output = false;
                     }

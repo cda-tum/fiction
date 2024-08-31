@@ -311,8 +311,9 @@ class design_sidb_gates_impl
                                     }
                                 });
                         }
-                        if (const auto [status, sim_calls] = is_operational(
-                                result_lyt, truth_table, params.operational_params, std::optional{input_bdl_wires}, std::optional{output_bdl_wires});
+                        if (const auto [status, sim_calls] =
+                                is_operational(result_lyt, truth_table, params.operational_params,
+                                               std::optional{input_bdl_wires}, std::optional{output_bdl_wires});
                             status == operational_status::OPERATIONAL)
                         {
                             const std::lock_guard lock{mutex_to_protect_designed_gate_layouts};

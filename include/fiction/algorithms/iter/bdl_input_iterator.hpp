@@ -63,7 +63,7 @@ class bdl_input_iterator
      * @param input_wires Pre-detected input BDL wires.
      */
     explicit bdl_input_iterator(const Lyt& lyt, const detect_bdl_wires_params& params,
-                                const std::vector<bdl_wire<cell<Lyt>>>&      input_wires) noexcept :
+                                const std::vector<bdl_wire<cell<Lyt>>>& input_wires) noexcept :
             layout{lyt.clone()},
             input_pairs{detect_bdl_pairs<Lyt>(lyt, sidb_technology::cell_type::INPUT, params.params_bdl_pairs)},
             input_bdl_wires{input_wires},

@@ -8,8 +8,8 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp>
 #include <fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp>
+#include <fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp>
 
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
