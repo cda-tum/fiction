@@ -10,10 +10,10 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <cstdlib>
 #include <random>
 #include <type_traits>
 #include <utility>
-#include <cstdlib>
 
 namespace fiction
 {
