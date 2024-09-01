@@ -170,7 +170,7 @@ class on_the_fly_circuit_design_impl
  * @tparam Ntk The type of the input network.
  * @tparam CellLyt Cell-level layout type.
  * @tparam GateLyt Gate-level layout type.
- * @param network The input network to be mapped onto the defective surface.
+ * @param ntk The input network to be mapped onto the defective surface.
  * @param lattice_tiling The lattice tiling used for the circuit design.
  * @param params The parameters used for designing the circuit, encapsulated in an
  * `on_the_fly_circuit_design_params` object.
