@@ -11,7 +11,6 @@
 #include "fiction/utils/layout_utils.hpp"
 #include "fiction/utils/math_utils.hpp"
 
-#include <fmt/format.h>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
@@ -20,7 +19,6 @@
 #include <cstdlib>
 #include <limits>
 #include <mutex>
-#include <numeric>
 #include <random>
 #include <set>
 #include <thread>
@@ -60,7 +58,7 @@ struct displacement_robustness_domain_params
     /**
      * Possible modes to determine the displacement robustness domain.
      */
-    enum class displacement_analysis_mode
+    enum class displacement_analysis_mode : uint8_t
     {
         /**
          * All possible displacements are analyzed.
@@ -75,7 +73,7 @@ struct displacement_robustness_domain_params
     /**
      * Specifies the allowed displacement range options for SiDB fabrication simulation.
      */
-    enum class dimer_displacement_policy
+    enum class dimer_displacement_policy : uint8_t
     {
         /**
          * In this mode, any displacement of SiDBs must remain within the boundaries
@@ -346,7 +344,7 @@ class displacement_robustness_domain_impl
     /**
      * The logical specification of the layout.
      */
-    const std::vector<TT>& truth_table;
+    const std::vector<TT> truth_table;
     /**
      * Random device for obtaining seed for the random number generator.
      * Provides a source of quasi-non-deterministic pseudo-random numbers.

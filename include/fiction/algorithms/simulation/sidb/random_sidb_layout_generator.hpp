@@ -28,7 +28,7 @@ struct generate_random_sidb_layout_params
      * An enumeration of modes to use for the generation of random SiDB layouts to control control the appearance of
      * positive charges.
      */
-    enum class positive_charges
+    enum class positive_charges : uint8_t
     {
         /**
          * Positive charges can occur (i.e. SiDBs can be placed right next to each other).
