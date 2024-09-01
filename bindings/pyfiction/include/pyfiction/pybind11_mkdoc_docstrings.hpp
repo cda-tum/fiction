@@ -13228,7 +13228,7 @@ Template parameter ``CellLyt``:
 Template parameter ``GateLyt``:
     Gate-level layout type.
 
-Parameter ``network``:
+Parameter ``ntk``:
     The input network to be mapped onto the defective surface.
 
 Parameter ``lattice_tiling``:
