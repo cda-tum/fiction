@@ -404,7 +404,8 @@ class determine_clocking_impl
  * If no valid clock number assignment exists for `lyt`, this function returns `false` and does not modify `lyt`.
  *
  * This algorithm was proposed in \"Ending the Tyranny of the Clock: SAT-based Clock Number Assignment for Field-coupled
- * Nanotechnologies\" by M. Walter, J. Drewniok, and R. Wille in IEEE NANO 2024.
+ * Nanotechnologies\" by M. Walter, J. Drewniok, and R. Wille in IEEE NANO 2024
+ * (https://ieeexplore.ieee.org/abstract/document/10628908).
  *
  * @tparam Lyt Gate-level layout type.
  * @param lyt The gate-level layout to assign clock numbers to.

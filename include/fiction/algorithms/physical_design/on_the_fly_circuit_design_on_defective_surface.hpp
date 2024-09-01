@@ -164,7 +164,8 @@ class on_the_fly_circuit_design_impl
  * circuit remains functional even in the presence of defects.
  *
  * This methodology is detailed in the paper "On-the-fly Defect-Aware Design of Circuits based on Silicon Dangling Bond
- * Logic" by J. Drewniok, M. Walter, S. S. H. Ng, K. Walus, and R. Wille, IEEE NANO 2024.
+ * Logic" by J. Drewniok, M. Walter, S. S. H. Ng, K. Walus, and R. Wille, IEEE NANO 2024
+ * (https://ieeexplore.ieee.org/abstract/document/10628962).
  *
  * @tparam Ntk The type of the input network.
  * @tparam CellLyt Cell-level layout type.

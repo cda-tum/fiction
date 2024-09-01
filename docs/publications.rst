@@ -222,6 +222,44 @@ Furthermore, if you use any of the design automation algorithms, please consider
 
     `Clock number assignment experiment script <https://github.com/cda-tum/fiction/tree/main/experiments/clock_number_assignment>`_
 
+* :ref:`On-the-fly Defect-Aware Design of Circuits <on_the_fly_design>`:
+
+    .. code-block:: tex
+
+        @inproceedings{drewniok2024ontheflydesign,
+          title={{On-the-fly Defect-Aware Design of Circuits based on Silicon Dangling Bond Logic}},
+          author={Drewniok, Jan and Walter, Marcel and Hang Ng, Samuel Sze and Walus, Konrad and Wille, Robert},
+          booktitle={IEEE International Conference on Nanotechnology (IEEE NANO)},
+          pages={30--35},
+          year={2024}
+        }
+
+    `On-the-fly defect-aware design of circuits experiment script <https://github.com/cda-tum/fiction/tree/main/experiments/physical_design_with_on_the_fly_gate_design>`_
+
+* :ref:`Unifying Figures of Merit for Silicon Dangling Bond Logic`:
+
+    .. code-block:: tex
+
+        @inproceedings{drewniok2024figuresofmerit,
+          title={{Unifying Figures of Merit: A Versatile Cost Function for Silicon Dangling Bond Logic}},
+          author={Drewniok, Jan and Walter, Marcel and Hang Ng, Samuel Sze and Walus, Konrad and Wille, Robert},
+          booktitle={IEEE International Conference on Nanotechnology (IEEE NANO)},
+          pages={91--96},
+          year={2024}
+        }
+
+* :ref:`Alternative Silicon Orientations <alternative_hsi_lattices>`:
+
+    .. code-block:: tex
+
+        @inproceedings{ng2024latorientations,
+          title={{Unlocking Flexible Silicon Dangling Bond Logic Designs on Alternative Silicon Orientations}},
+          author={Ng, Samuel Sze Hang and Drewniok, Jan and Walter, Marcel and Retallick, Jacob and Wille, Robert and Walus, Konrad},
+          booktitle={IEEE International Conference on Nanotechnology (IEEE NANO)},
+          pages={57--92},
+          year={2024}
+        }
+
 * :ref:`SiDB Bestagon library <bestagon>`:
 
     .. code-block:: tex
