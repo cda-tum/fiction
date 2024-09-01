@@ -8096,7 +8096,8 @@ returns `false` and does not modify `lyt`.
 
 This algorithm was proposed in \"Ending the Tyranny of the Clock: SAT-
 based Clock Number Assignment for Field-coupled Nanotechnologies\" by
-M. Walter, J. Drewniok, and R. Wille in IEEE NANO 2024.
+M. Walter, J. Drewniok, and R. Wille in IEEE NANO 2024
+(https://ieeexplore.ieee.org/abstract/document/10628908).
 
 Template parameter ``Lyt``:
     Gate-level layout type.
@@ -13216,7 +13217,7 @@ circuit remains functional even in the presence of defects.
 This methodology is detailed in the paper "On-the-fly Defect-Aware
 Design of Circuits based on Silicon Dangling Bond Logic" by J.
 Drewniok, M. Walter, S. S. H. Ng, K. Walus, and R. Wille, IEEE NANO
-2024.
+2024 (https://ieeexplore.ieee.org/abstract/document/10628962).
 
 Template parameter ``Ntk``:
     The type of the input network.
