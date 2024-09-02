@@ -24,6 +24,21 @@ If you use *fiction* in your work, we would appreciate if you cited
       month = {May}
     }
 
+and
+
+    Marcel Walter, Jan Drewniok, Simon Hofmann, Benjamin Hien, and Robert Wille: "The Munich Nanotech Toolkit (MNT)",
+    IEEE International Conference on Nanotechnology (IEEE NANO), 2024.
+
+.. code-block:: tex
+
+    @inproceedings{mnt,
+      author = {Walter, Marcel and Drewniok, Jan and Hofmann, Simon and Hien, Benjamin and Wille, Robert},
+      title = {{The Munich Nanotech Toolkit (MNT)}},
+      booktitle = {IEEE International Conference on Nanotechnology (IEEE NANO)},
+      pages = {454--459},
+      year = {2024}
+    }
+
 Furthermore, if you use any of the design automation algorithms, please consider citing their respective papers as well.
 
 * :ref:`Exact physical design <exact>` (``exact``):
@@ -86,6 +101,8 @@ Furthermore, if you use any of the design automation algorithms, please consider
           year={2022}
         }
 
+    `Multi-path routing experiment script <https://github.com/cda-tum/fiction/tree/main/experiments/color_routing>`_
+
 * :ref:`QuickSim <quicksim>` (``quicksim``):
 
     .. code-block:: tex
@@ -97,6 +114,8 @@ Furthermore, if you use any of the design automation algorithms, please consider
           pages={817--822},
           year={2023}
         }
+
+    `QuickSim experiment script <https://github.com/cda-tum/fiction/tree/main/experiments/sidb_simulation>`_
 
 * :ref:`QuickExact <quickexact>` (``quickexact``):
 
@@ -110,6 +129,8 @@ Furthermore, if you use any of the design automation algorithms, please consider
           year={2024}
         }
 
+    `QuickExact experiment script <https://github.com/cda-tum/fiction/tree/main/experiments/sidb_simulation>`_
+
 * :ref:`Critical temperature simulation <critical_temperature>` (``critical_temperature``):
 
     .. code-block:: tex
@@ -122,7 +143,7 @@ Furthermore, if you use any of the design automation algorithms, please consider
           year={2023}
         }
 
-* :ref:`Operational Domain computation <opdom>` (``opdom``):
+* :ref:`Operational domain computation <opdom>` (``opdom``):
 
     .. code-block:: tex
 
@@ -133,7 +154,9 @@ Furthermore, if you use any of the design automation algorithms, please consider
           year={2023}
         }
 
-* :ref:`SiDB Gate Design <gate_design>` (``gate_design``):
+    `Operational domain experiment scripts <https://github.com/cda-tum/fiction/tree/main/experiments/operational_domain>`_
+
+* :ref:`SiDB gate design <gate_design>` (``gate_design``):
 
     .. code-block:: tex
 
@@ -156,6 +179,7 @@ Furthermore, if you use any of the design automation algorithms, please consider
           year={2023}
         }
 
+    `Hexagonalization experiment script <https://github.com/cda-tum/fiction/tree/main/experiments/hexagonalization>`_
 
 * :ref:`Post-layout optimization <post_layout_optimization>` (``post_layout_optimization``):
 
@@ -166,6 +190,74 @@ Furthermore, if you use any of the design automation algorithms, please consider
           author={Hofmann, Simon and Walter, Marcel and Wille, Robert},
           booktitle={International Symposium on Nanoscale Architectures (NANOARCH)},
           year={2023}
+        }
+
+    `Post-layout optimization experiment script <https://github.com/cda-tum/fiction/tree/main/experiments/post_layout_optimization>`_
+
+* :ref:`Graph-oriented layout design <graph_oriented_layout_design>` (``gold``):
+
+    .. code-block:: tex
+
+        @inproceedings{hofmann2024gold,
+          title={{A* is Born: Efficient and Scalable Physical Design for Field-coupled Nanocomputing}},
+          author={Hofmann, Simon and Walter, Marcel and Wille, Robert},
+          booktitle={IEEE International Conference on Nanotechnology (IEEE NANO)},
+          pages={80--85},
+          year={2024}
+        }
+
+    `Graph-oriented layout design experiment script <https://github.com/cda-tum/fiction/tree/main/experiments/graph_oriented_layout_design>`_
+
+* :ref:`SAT-based clock number assignment <determine_clocking>`:
+
+    .. code-block:: tex
+
+        @inproceedings{walter2024clocknumber,
+          title={{Ending the Tyranny of the Clock: SAT-Based Clock Number Assignment for Field-coupled Nanotechnologies}},
+          author={Walter, Marcel and Drewniok, Jan and Wille, Robert},
+          booktitle={IEEE International Conference on Nanotechnology (IEEE NANO)},
+          pages={68--73},
+          year={2024}
+        }
+
+    `Clock number assignment experiment script <https://github.com/cda-tum/fiction/tree/main/experiments/clock_number_assignment>`_
+
+* :ref:`On-the-fly Defect-Aware Design of Circuits <on_the_fly_design>`:
+
+    .. code-block:: tex
+
+        @inproceedings{drewniok2024ontheflydesign,
+          title={{On-the-fly Defect-Aware Design of Circuits based on Silicon Dangling Bond Logic}},
+          author={Drewniok, Jan and Walter, Marcel and Hang Ng, Samuel Sze and Walus, Konrad and Wille, Robert},
+          booktitle={IEEE International Conference on Nanotechnology (IEEE NANO)},
+          pages={30--35},
+          year={2024}
+        }
+
+    `On-the-fly defect-aware design of circuits experiment script <https://github.com/cda-tum/fiction/tree/main/experiments/physical_design_with_on_the_fly_gate_design>`_
+
+* :ref:`Unifying Figures of Merit for Silicon Dangling Bond Logic`:
+
+    .. code-block:: tex
+
+        @inproceedings{drewniok2024figuresofmerit,
+          title={{Unifying Figures of Merit: A Versatile Cost Function for Silicon Dangling Bond Logic}},
+          author={Drewniok, Jan and Walter, Marcel and Hang Ng, Samuel Sze and Walus, Konrad and Wille, Robert},
+          booktitle={IEEE International Conference on Nanotechnology (IEEE NANO)},
+          pages={91--96},
+          year={2024}
+        }
+
+* :ref:`Alternative Silicon Orientations <alternative_hsi_lattices>`:
+
+    .. code-block:: tex
+
+        @inproceedings{ng2024latorientations,
+          title={{Unlocking Flexible Silicon Dangling Bond Logic Designs on Alternative Silicon Orientations}},
+          author={Ng, Samuel Sze Hang and Drewniok, Jan and Walter, Marcel and Retallick, Jacob and Wille, Robert and Walus, Konrad},
+          booktitle={IEEE International Conference on Nanotechnology (IEEE NANO)},
+          pages={57--92},
+          year={2024}
         }
 
 * :ref:`SiDB Bestagon library <bestagon>`:
@@ -179,3 +271,5 @@ Furthermore, if you use any of the design automation algorithms, please consider
           pages = {739--744},
           year={2022}
         }
+
+    `Bestagon experiment script <https://github.com/cda-tum/fiction/tree/main/experiments/bestagon>`_

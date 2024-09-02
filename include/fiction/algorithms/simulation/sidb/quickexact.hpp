@@ -35,7 +35,7 @@ struct quickexact_params
     /**
      * Modes to use for the *QuickExact* algorithm.
      */
-    enum class automatic_base_number_detection
+    enum class automatic_base_number_detection : uint8_t
     {
         /**
          * Simulation is conducted with the required base number (i.e., if positively charged SiDBs can occur, three
@@ -241,7 +241,7 @@ class quickexact_impl
     /**
      * Base number required for the correct physical simulation.
      */
-    enum class required_simulation_base_number
+    enum class required_simulation_base_number : uint8_t
     {
         /**
          * Two state simulation (i.e., negative and neutral) is sufficient.
