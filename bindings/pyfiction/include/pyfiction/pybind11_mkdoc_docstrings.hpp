@@ -872,6 +872,15 @@ object.
 Parameter ``other``:
     The `bdl_wire` object to copy from.)doc";
 
+static const char *__doc_fiction_bdl_wire_bdl_wire_4 =
+R"doc(Move constructor.
+
+Transfers ownership of the BDL pairs and direction from another
+`bdl_wire` object.
+
+Parameter ``other``:
+    The `bdl_wire` object to move from.)doc";
+
 static const char *__doc_fiction_bdl_wire_direction = R"doc(Possible directions of a BDL wire.)doc";
 
 static const char *__doc_fiction_bdl_wire_direction_2 = R"doc(Direction of the BDL wire.)doc";
@@ -913,6 +922,29 @@ Parameter ``t``:
 Returns:
     Optional containing the first BDL pair with the specified type
     `t`, or `std::nullopt` if no such BDL pair is found.)doc";
+
+static const char *__doc_fiction_bdl_wire_operator_assign =
+R"doc(Move assignment operator.
+
+Transfers ownership of the BDL pairs and direction from another
+`bdl_wire` object.
+
+Parameter ``other``:
+    The `bdl_wire` object to move from.
+
+Returns:
+    A reference to the updated object.)doc";
+
+static const char *__doc_fiction_bdl_wire_operator_assign_2 =
+R"doc(Copy assignment operator.
+
+Copies the content of another `bdl_wire` object.
+
+Parameter ``other``:
+    The `bdl_wire` object to copy from.
+
+Returns:
+    A reference to the updated object.)doc";
 
 static const char *__doc_fiction_bdl_wire_pairs = R"doc(Vector of BDL pairs representing the wire.)doc";
 
@@ -4730,11 +4762,39 @@ Returns:
 
 static const char *__doc_fiction_detail_detect_bdl_wires_impl_bdl_wires = R"doc(All detected BDL wires.)doc";
 
-static const char *__doc_fiction_detail_detect_bdl_wires_impl_detect_bdl_wires = R"doc()doc";
+static const char *__doc_fiction_detail_detect_bdl_wires_impl_detect_bdl_wires = R"doc(Function to detect BDL wires.)doc";
 
 static const char *__doc_fiction_detail_detect_bdl_wires_impl_detect_bdl_wires_impl = R"doc()doc";
 
-static const char *__doc_fiction_detail_detect_bdl_wires_impl_filter_wires = R"doc()doc";
+static const char *__doc_fiction_detail_detect_bdl_wires_impl_filter_wires =
+R"doc(This function filters the wires from the `bdl_wires` collection based
+on the current `selection`. If `selection` is set to
+`bdl_wire_selection::INPUT`, it returns all wires containing an input
+cell. If `selection` is set to `bdl_wire_selection::OUTPUT`, it
+returns all wires containing an output cell. If `selection` is set to
+any other value, it returns all the wires.
+
+The function also ensures that all selected wires of the same type
+have the same length. If wires of different lengths are found, an
+assertion is triggered.
+
+Returns:
+    A vector of filtered `bdl_wire` objects based on the current
+    selection. If no wires match the selection criteria, an empty
+    vector is returned.)doc";
+
+static const char *__doc_fiction_detail_detect_bdl_wires_impl_filter_wires_by_type =
+R"doc(This function scans through the `bdl_wires` and selects those
+containing a cell of the specified type. It also checks that all
+selected wires have the same length and triggers an assertion if wires
+of different lengths are found.
+
+Parameter ``type``:
+    The type of the cell to filter by.
+
+Returns:
+    A vector of `bdl_wire` objects containing cells of the specified
+    type. If no such wires are found, an empty vector is returned.)doc";
 
 static const char *__doc_fiction_detail_detect_bdl_wires_impl_find_bdl_neighbor_above =
 R"doc(This function searches for the first Binary-dot Logic (BDL) pair in a
@@ -4789,8 +4849,8 @@ Parameter ``inter_bdl_distance``:
     BDL pair and the upper SiDB of the potential neighbor BDL pair.
 
 Returns:
-    A std::optional containing the first BDL pair that meets the
-    criteria, or std::nullopt if no such pair is found.)doc";
+    A `std::optional` containing the first BDL pair that meets the
+    criteria, or `std::nullopt` if no such pair is found.)doc";
 
 static const char *__doc_fiction_detail_detect_bdl_wires_impl_lyt = R"doc(SiDB cell-level layout.)doc";
 
