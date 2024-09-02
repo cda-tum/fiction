@@ -124,6 +124,53 @@ struct bdl_wire
      */
     bdl_wire(const bdl_wire& other) noexcept : pairs(other.pairs), direction(other.direction) {}
     /**
+     * Move constructor.
+     *
+     * Transfers ownership of the BDL pairs and direction from another `bdl_wire` object.
+     *
+     * @param other The `bdl_wire` object to move from.
+     */
+    bdl_wire(bdl_wire&& other) noexcept : pairs(std::move(other.pairs)), direction(other.direction)
+    {
+        other.direction = bdl_wire_direction::NO_DIRECTION;  // Reset the direction of the moved-from object
+    }
+    /**
+     * Move assignment operator.
+     *
+     * Transfers ownership of the BDL pairs and direction from another `bdl_wire` object.
+     *
+     * @param other The `bdl_wire` object to move from.
+     * @return A reference to the updated object.
+     */
+    bdl_wire& operator=(bdl_wire&& other) noexcept
+    {
+        if (this != &other)
+        {
+            pairs           = std::move(other.pairs);
+            direction       = other.direction;
+            other.direction = bdl_wire_direction::NO_DIRECTION;  // Reset the direction of the moved-from object
+        }
+        return *this;
+    }
+
+    /**
+     * Copy assignment operator.
+     *
+     * Copies the content of another `bdl_wire` object.
+     *
+     * @param other The `bdl_wire` object to copy from.
+     * @return A reference to the updated object.
+     */
+    bdl_wire& operator=(const bdl_wire& other) noexcept
+    {
+        if (this != &other)
+        {
+            pairs     = other.pairs;
+            direction = other.direction;
+        }
+        return *this;
+    }
+    /**
      * Add a BDL pair to the wire.
      *
      * @param pair The BDL pair to add.
@@ -250,6 +297,9 @@ class detect_bdl_wires_impl
         detect_bdl_wires();
     }
 
+    /**
+     * Function to detect BDL wires.
+     */
     void detect_bdl_wires() noexcept
     {
         auto bdl_pairs = aggregate_bdl_pairs();
@@ -269,7 +319,7 @@ class detect_bdl_wires_impl
 
             // add current bdl pair to wire
             wire.add_bdl_pair(current_bdl_pair);
-            // delete bdl pair from a set
+            // delete bdl pair
             bdl_pairs.erase(current_bdl_pair);
 
             while (neighbor_bdl_found)
@@ -310,60 +360,37 @@ class detect_bdl_wires_impl
         bdl_wires = std::move(wires);
     }
 
+    /**
+     * This function filters the wires from the `bdl_wires` collection based on the current `selection`.
+     * If `selection` is set to `bdl_wire_selection::INPUT`, it returns all wires containing an input cell.
+     * If `selection` is set to `bdl_wire_selection::OUTPUT`, it returns all wires containing an output cell.
+     * If `selection` is set to any other value, it returns all the wires.
+     *
+     * The function also ensures that all selected wires of the same type have the same length. If wires of different
+     * lengths are found, an assertion is triggered.
+     *
+     * @return A vector of filtered `bdl_wire` objects based on the current selection. If no wires match the selection
+     * criteria, an empty vector is returned.
+     */
     [[nodiscard]] std::vector<bdl_wire<cell<Lyt>>> filter_wires() const noexcept
     {
-        if (selection == bdl_wire_selection::INPUT)
+        switch (selection)
         {
-            std::vector<bdl_wire<cell<Lyt>>> input_wires{};
-
-            std::set<uint64_t> lengths_of_input_wires{};
-
-            for (const auto& wire : bdl_wires)
+            case bdl_wire_selection::INPUT:
             {
-                for (const auto& bdl : wire.pairs)
-                {
-                    if (bdl.type == sidb_technology::cell_type::INPUT)
-                    {
-                        input_wires.push_back(wire);
-                        lengths_of_input_wires.insert(wire.pairs.size());
-                    }
-                }
+                return filter_wires_by_type(sidb_technology::cell_type::INPUT);
             }
 
-            if (input_wires.empty())
+            case bdl_wire_selection::OUTPUT:
             {
-                return {};
+                return filter_wires_by_type(sidb_technology::cell_type::OUTPUT);
             }
 
-            assert(lengths_of_input_wires.size() < 2 && "input wires have different length");
-
-            return input_wires;
+            default:
+            {
+                return bdl_wires;
+            }
         }
-
-        if (selection == bdl_wire_selection::OUTPUT)
-        {
-            std::vector<bdl_wire<cell<Lyt>>> output_wires{};
-
-            std::set<uint64_t> lengths_of_output_wires{};
-
-            for (const auto& wire : bdl_wires)
-            {
-                for (const auto& bdl : wire.pairs)
-                {
-                    if (bdl.type == sidb_technology::cell_type::OUTPUT)
-                    {
-                        output_wires.push_back(wire);
-                        lengths_of_output_wires.insert(wire.pairs.size());
-                    }
-                }
-            }
-
-            assert(lengths_of_output_wires.size() < 2 && "output wires have different length");
-
-            return output_wires;
-        }
-
-        return bdl_wires;
     }
 
   private:
@@ -404,18 +431,21 @@ class detect_bdl_wires_impl
     find_bdl_neighbor_above(const bdl_pair<cell<Lyt>>& given_bdl, const std::set<bdl_pair<cell<Lyt>>>& bdl_pairs,
                             const double inter_bdl_distance) const noexcept
     {
-        for (const auto& bdl : bdl_pairs)
+        const auto it =
+            std::find_if(bdl_pairs.cbegin(), bdl_pairs.cend(),
+                         [&given_bdl, inter_bdl_distance](const bdl_pair<cell<Lyt>>& bdl)
+                         {
+                             return sidb_nm_distance<Lyt>(Lyt{}, given_bdl.upper, bdl.lower) < inter_bdl_distance &&
+                                    !given_bdl.equal_ignore_type(bdl) && given_bdl > bdl;
+                         });
+
+        if (it != bdl_pairs.cend())
         {
-            if (sidb_nm_distance<Lyt>(Lyt{}, given_bdl.upper, bdl.lower) < inter_bdl_distance &&
-                !given_bdl.equal_ignore_type(bdl) && given_bdl > bdl)
-            {
-                return std::optional<bdl_pair<cell<Lyt>>>(bdl);
-            }
+            return std::optional<bdl_pair<cell<Lyt>>>(*it);
         }
 
         return std::nullopt;
-    };
-
+    }
     /**
      * This function searches for the first Binary-dot Logic (BDL) pair in a given set of BDL pairs that is below a
      * specified BDL pair. The function returns the first BDL pair that meets the following criteria:
@@ -430,24 +460,62 @@ class detect_bdl_wires_impl
      * @param bdl_pairs A set of BDL pairs to search within.
      * @param inter_bdl_distance The maximum allowable distance between the lower SiDB of the given BDL pair and the
      * upper SiDB of the potential neighbor BDL pair.
-     * @return A std::optional containing the first BDL pair that meets the criteria, or std::nullopt if no such pair is
-     * found.
+     * @return A `std::optional` containing the first BDL pair that meets the criteria, or `std::nullopt` if no such
+     * pair is found.
      */
     [[nodiscard]] std::optional<bdl_pair<cell<Lyt>>>
     find_bdl_neighbor_below(const bdl_pair<cell<Lyt>>& given_bdl, const std::set<bdl_pair<cell<Lyt>>>& bdl_pairs,
                             const double inter_bdl_distance) const noexcept
     {
-        for (const auto& bdl : bdl_pairs)
+        const auto it =
+            std::find_if(bdl_pairs.cbegin(), bdl_pairs.cend(),
+                         [&given_bdl, inter_bdl_distance](const bdl_pair<cell<Lyt>>& bdl)
+                         {
+                             return sidb_nm_distance<Lyt>(Lyt{}, given_bdl.lower, bdl.upper) < inter_bdl_distance &&
+                                    given_bdl.not_equal_ignore_type(bdl) && given_bdl < bdl;
+                         });
+
+        if (it != bdl_pairs.cend())
         {
-            if (sidb_nm_distance<Lyt>(Lyt{}, given_bdl.lower, bdl.upper) < inter_bdl_distance &&
-                given_bdl.not_equal_ignore_type(bdl) && given_bdl < bdl)
-            {
-                return std::optional<bdl_pair<cell<Lyt>>>(bdl);
-            }
+            return std::optional<bdl_pair<cell<Lyt>>>(*it);
         }
 
         return std::nullopt;
-    };
+    }
+    /**
+     * This function scans through the `bdl_wires` and selects those containing a cell of the specified type.
+     * It also checks that all selected wires have the same length and triggers an assertion if wires of different
+     * lengths are found.
+     *
+     * @param type The type of the cell to filter by.
+     * @return A vector of `bdl_wire` objects containing cells of the specified type. If no such wires are found,
+     *         an empty vector is returned.
+     */
+    [[nodiscard]] std::vector<bdl_wire<cell<Lyt>>>
+    filter_wires_by_type(const typename technology<Lyt>::cell_type& type) const noexcept
+    {
+        std::vector<bdl_wire<cell<Lyt>>> filtered_wires{};
+        std::set<uint64_t>               lengths_of_filtered_wires{};
+
+        for (const auto& wire : bdl_wires)
+        {
+            if (std::any_of(wire.pairs.cbegin(), wire.pairs.cend(),
+                            [&type](const auto& bdl) { return bdl.type == type; }))
+            {
+                filtered_wires.push_back(wire);
+                lengths_of_filtered_wires.insert(wire.pairs.size());
+            }
+        }
+
+        if (!filtered_wires.empty())
+        {
+            assert(lengths_of_filtered_wires.size() < 2 &&
+                   (type == sidb_technology::cell_type::INPUT ? "input wires have different length" :
+                                                                "output wires have different length"));
+        }
+
+        return filtered_wires;
+    }
     /**
      * Aggregates BDL pairs of specified types into a set.
      *
@@ -463,7 +531,7 @@ class detect_bdl_wires_impl
         const auto all_output_bdls = detect_bdl_pairs(lyt, Lyt::cell_type::OUTPUT, params.params_bdl_pairs);
         const auto all_normal_bdls = detect_bdl_pairs(lyt, Lyt::cell_type::NORMAL, params.params_bdl_pairs);
 
-        std::set<bdl_pair<cell<Lyt>>> bdl_pairs;
+        std::set<bdl_pair<cell<Lyt>>> bdl_pairs{};
 
         // Insert all detected BDL pairs into the set
         bdl_pairs.insert(all_input_bdls.begin(), all_input_bdls.end());
