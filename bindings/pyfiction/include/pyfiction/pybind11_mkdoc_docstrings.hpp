@@ -8107,16 +8107,22 @@ Returns:
     distributing k entities on n positions.)doc";
 
 static const char *__doc_fiction_determine_clocking =
-R"doc(Determines clock numbers for the given gate-level layout. This
-algorithm parses the layout's gate and wire connections, disregarding
-any existing clocking information, and constructs a SAT instance to
-find a valid clock number assignment under which the information flow
-is respected. It then assigns these clock numbers as an irregular
-clock map to the given layout via the `assign_clock_number` function,
-overriding any existing clocking scheme.
+R"doc(Determines clock numbers for the given (unclocked) gate-level layout.
+This algorithm parses the layout's gate and wire connections,
+disregarding any existing clocking information, and constructs a SAT
+instance to find a valid clock number assignment under which the
+information flow is respected. It then assigns these clock numbers as
+an irregular clock map to the given layout via the
+`assign_clock_number` function, overriding any existing clocking
+scheme.
 
 If no valid clock number assignment exists for `lyt`, this function
 returns `false` and does not modify `lyt`.
+
+This algorithm was proposed in \"Ending the Tyranny of the Clock: SAT-
+based Clock Number Assignment for Field-coupled Nanotechnologies\" by
+M. Walter, J. Drewniok, and R. Wille in IEEE NANO 2024
+(https://ieeexplore.ieee.org/abstract/document/10628908).
 
 Template parameter ``Lyt``:
     Gate-level layout type.
@@ -10877,6 +10883,11 @@ the search space graph to find other complete layouts with lower cost.
 
 Exclusively generates 2DDWave-clocked layouts.
 
+This algorithm was proposed in \"A* is Born: Efficient and Scalable
+Physical Design for Field-coupled Nanocomputing\" by S. Hofmann, M.
+Walter, and R. Wille in IEEE NANO 2024
+(https://ieeexplore.ieee.org/document/10628808).
+
 Template parameter ``Lyt``:
     Cartesian gate-level layout type.
 
@@ -13244,7 +13255,7 @@ circuit remains functional even in the presence of defects.
 This methodology is detailed in the paper "On-the-fly Defect-Aware
 Design of Circuits based on Silicon Dangling Bond Logic" by J.
 Drewniok, M. Walter, S. S. H. Ng, K. Walus, and R. Wille, IEEE NANO
-2024.
+2024 (https://ieeexplore.ieee.org/abstract/document/10628962).
 
 Template parameter ``Ntk``:
     The type of the input network.
@@ -13255,7 +13266,7 @@ Template parameter ``CellLyt``:
 Template parameter ``GateLyt``:
     Gate-level layout type.
 
-Parameter ``network``:
+Parameter ``ntk``:
     The input network to be mapped onto the defective surface.
 
 Parameter ``lattice_tiling``:
@@ -14072,7 +14083,8 @@ static const char *__doc_fiction_port_position_y = R"doc()doc";
 static const char *__doc_fiction_post_layout_optimization =
 R"doc(A post-layout optimization algorithm as originally proposed in \"Post-
 Layout Optimization for Field-coupled Nanotechnologies\" by S.
-Hofmann, M. Walter, and R. Wille in NANOARCH 2023. It can be used to
+Hofmann, M. Walter, and R. Wille in NANOARCH 2023
+(https://dl.acm.org/doi/10.1145/3611315.3633247). It can be used to
 reduce the area of a given sub-optimal Cartesian gate-level layout
 created by heuristics or machine learning. This optimization utilizes
 the distinct characteristics of the 2DDWave clocking scheme, which

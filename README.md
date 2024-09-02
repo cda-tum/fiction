@@ -336,7 +336,7 @@ by [MNT Bench](https://www.cda.cit.tum.de/mntbench/).
 
 ## Reference
 
-Since *fiction* is academic software, we would be thankful if you referred to it by citing the following publication:
+Since *fiction* is academic software, we would be thankful if you referred to it by citing the following publications:
 
 ```bibtex
 @misc{fiction,
@@ -347,6 +347,18 @@ Since *fiction* is academic software, we would be thankful if you referred to it
       note = {arXiv:1905.02477},
       year = {2019},
       month = {May}
+}
+```
+
+and
+
+```bibtex
+@inproceedings{mnt,
+    author = {Walter, Marcel and Drewniok, Jan and Hofmann, Simon and Hien, Benjamin and Wille, Robert},
+    title = {{The Munich Nanotech Toolkit (MNT)}},
+    booktitle = {IEEE International Conference on Nanotechnology (IEEE NANO)},
+    pages = {454--459},
+    year = {2024}
 }
 ```
 
