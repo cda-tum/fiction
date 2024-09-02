@@ -1,3 +1,5 @@
+.. _alternative_hsi_lattices:
+
 H-Si Lattice Orientations
 =========================
 
