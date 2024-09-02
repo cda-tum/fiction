@@ -5,6 +5,8 @@
 #ifndef FICTION_SIDB_SIMULATION_ENGINE_HPP
 #define FICTION_SIDB_SIMULATION_ENGINE_HPP
 
+#include <cstdint>
+
 namespace fiction
 {
 
