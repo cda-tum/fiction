@@ -38,6 +38,10 @@
 // This script conducts defect-aware placement and routing with defect-aware on-the-fly SiDB gate design. Thereby, SiDB
 // circuits can be designed in the presence of atomic defects.
 
+// This algorithm was proposed in \"On-the-fly Defect-Aware Design of Circuits based on Silicon Dangling Bond Logic\" by
+// J. Drewniok, M. Walter, S. S. H. Ng, K. Walus, and R. Wille in IEEE NANO 2024
+// (https://ieeexplore.ieee.org/abstract/document/10628962).
+
 int main()  // NOLINT
 {
     using gate_lyt = fiction::hex_even_row_gate_clk_lyt;
