@@ -16,8 +16,6 @@
 
 #include <mockturtle/utils/stopwatch.hpp>
 
-#include <exception>
-#include <iostream>
 #include <optional>
 #include <utility>
 

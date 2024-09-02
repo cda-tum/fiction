@@ -5,13 +5,15 @@
 #ifndef FICTION_SIDB_SIMULATION_ENGINE_HPP
 #define FICTION_SIDB_SIMULATION_ENGINE_HPP
 
+#include <cstdint>
+
 namespace fiction
 {
 
 /**
  * Selector for the available SiDB simulation engines.
  */
-enum class sidb_simulation_engine
+enum class sidb_simulation_engine : uint8_t
 {
     /**
      * *Exhaustive Ground State Search (EXGS)* is an exact simulation engine that always has exponential runtime.
@@ -31,7 +33,7 @@ enum class sidb_simulation_engine
 /**
  * Selector exclusively for exact SiDB simulation engines.
  */
-enum class exact_sidb_simulation_engine
+enum class exact_sidb_simulation_engine : uint8_t
 {
     /**
      * *Exhaustive Ground State Search* (EXGS) is an exact simulation engine that always has exponential runtime.
