@@ -37,7 +37,8 @@ void check_identical_information_of_stats_and_domain(const displacement_robustne
     CHECK(num_non_operational_layouts == stats.num_non_operational_sidb_displacements);
 }
 
-TEST_CASE("Determine the SiDB gate displacement robustness of the Y-shaped SiDB AND gate", "[displacement-robustness-domain]")
+TEST_CASE("Determine the SiDB gate displacement robustness of the Y-shaped SiDB AND gate",
+          "[displacement-robustness-domain]")
 {
     const auto lyt = blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>();
 
