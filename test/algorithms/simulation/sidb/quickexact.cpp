@@ -20,8 +20,8 @@
 #include <fiction/technology/sidb_defects.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/technology/sidb_lattice_orientations.hpp>
-#include <fiction/types.hpp>
 #include <fiction/traits.hpp>
+#include <fiction/types.hpp>
 #include <fiction/utils/math_utils.hpp>
 
 #include <cstdint>

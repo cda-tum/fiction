@@ -143,8 +143,8 @@ class temp_command : public command
 
                         const auto tt_ptr = ts.current();
 
-                        ct = fiction::critical_temperature_gate_based(*lyt_ptr, std::vector<fiction::tt>{*tt_ptr}, params,
-                                                                 &stats);
+                        ct = fiction::critical_temperature_gate_based(*lyt_ptr, std::vector<fiction::tt>{*tt_ptr},
+                                                                      params, &stats);
                     }
                     else
                     {
@@ -159,8 +159,7 @@ class temp_command : public command
                     else
                     {
                         env->out() << fmt::format("[i] critical temperature of {} is {}{} K", get_name(lyt_ptr),
-                                                  (ct == params.max_temperature ? "> " : ""),
-                                                  ct)
+                                                  (ct == params.max_temperature ? "> " : ""), ct)
                                    << std::endl;
 
                         if (stats.num_valid_lyt > 1)

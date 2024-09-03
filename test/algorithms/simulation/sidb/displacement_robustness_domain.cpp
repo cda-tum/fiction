@@ -42,13 +42,13 @@ TEST_CASE("Determine the SiDB gate displacement robustness of the Y-shaped SiDB 
     const auto lyt = blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>();
 
     displacement_robustness_domain_params<cell<sidb_cell_clk_lyt_siqad>> params{};
-    params.displacement_variations                        = {1, 1};
-    params.operational_params.simulation_parameters       = sidb_simulation_parameters{2, -0.28};
+    params.displacement_variations                  = {1, 1};
+    params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.28};
     params.operational_params.input_bdl_iterator_params.bdl_pairs_params.maximum_distance = 2.0;
     params.operational_params.input_bdl_iterator_params.bdl_pairs_params.minimum_distance = 0.2;
-    params.fixed_sidbs                                    = {{0, 0, 1},  {2, 1, 1},  {20, 0, 1}, {18, 1, 1}, {14, 3, 1},
-                                                             {16, 2, 1}, {10, 7, 0}, {10, 6, 0}, {10, 9, 1}, {4, 2, 1}};
-    params.percentage_of_analyzed_displaced_layouts       = 0.1;
+    params.fixed_sidbs                              = {{0, 0, 1},  {2, 1, 1},  {20, 0, 1}, {18, 1, 1}, {14, 3, 1},
+                                                       {16, 2, 1}, {10, 7, 0}, {10, 6, 0}, {10, 9, 1}, {4, 2, 1}};
+    params.percentage_of_analyzed_displaced_layouts = 0.1;
     params.analysis_mode =
         displacement_robustness_domain_params<cell<sidb_cell_clk_lyt_siqad>>::displacement_analysis_mode::RANDOM;
     params.dimer_policy = displacement_robustness_domain_params<
@@ -97,8 +97,8 @@ TEST_CASE("Determine the probability of fabricating an operational SiQAD Y-shape
     SECTION("only one displacement variation, SiQAD coordinate")
     {
         displacement_robustness_domain_params<cell<sidb_cell_clk_lyt_siqad>> params{};
-        params.displacement_variations                        = {1, 0};
-        params.operational_params.simulation_parameters       = sidb_simulation_parameters{2, -0.28};
+        params.displacement_variations                  = {1, 0};
+        params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.28};
         params.operational_params.input_bdl_iterator_params.bdl_pairs_params.maximum_distance = 2.0;
         params.operational_params.input_bdl_iterator_params.bdl_pairs_params.minimum_distance = 0.2;
 
@@ -117,8 +117,8 @@ TEST_CASE("Determine the probability of fabricating an operational Bestagon AND 
     SECTION("one displacement variation in x-direction")
     {
         displacement_robustness_domain_params<cell<sidb_cell_clk_lyt_siqad>> params{};
-        params.displacement_variations                        = {1, 0};
-        params.operational_params.simulation_parameters       = sidb_simulation_parameters{2, -0.32};
+        params.displacement_variations                  = {1, 0};
+        params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.32};
         params.operational_params.input_bdl_iterator_params.bdl_pairs_params.maximum_distance = 2.0;
         params.operational_params.input_bdl_iterator_params.bdl_pairs_params.minimum_distance = 0.2;
         params.analysis_mode =
@@ -139,12 +139,12 @@ TEST_CASE("Determine the probability of fabricating an operational BDL wire with
     SECTION("one displacement variation in y-direction")
     {
         displacement_robustness_domain_params<cell<sidb_cell_clk_lyt_siqad>> params{};
-        params.displacement_variations                        = {0, 1};
-        params.operational_params.simulation_parameters       = sidb_simulation_parameters{2, -0.32};
+        params.displacement_variations                  = {0, 1};
+        params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.32};
         params.operational_params.input_bdl_iterator_params.bdl_pairs_params.maximum_distance = 2.0;
         params.operational_params.input_bdl_iterator_params.bdl_pairs_params.minimum_distance = 0.2;
-        params.dimer_policy                                   = displacement_robustness_domain_params<
-                                              cell<sidb_cell_clk_lyt_siqad>>::dimer_displacement_policy::STAY_ON_ORIGINAL_DIMER;
+        params.dimer_policy = displacement_robustness_domain_params<
+            cell<sidb_cell_clk_lyt_siqad>>::dimer_displacement_policy::STAY_ON_ORIGINAL_DIMER;
         params.analysis_mode = displacement_robustness_domain_params<
             cell<sidb_cell_clk_lyt_siqad>>::displacement_analysis_mode::EXHAUSTIVE;
 
@@ -171,12 +171,12 @@ TEST_CASE("Determine the probability of fabricating an operational BDL wire with
     SECTION("one displacement variation in x-direction")
     {
         displacement_robustness_domain_params<cell<sidb_cell_clk_lyt_siqad>> params{};
-        params.displacement_variations                        = {1, 0};
-        params.operational_params.simulation_parameters       = sidb_simulation_parameters{2, -0.32};
+        params.displacement_variations                  = {1, 0};
+        params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.32};
         params.operational_params.input_bdl_iterator_params.bdl_pairs_params.maximum_distance = 2.0;
         params.operational_params.input_bdl_iterator_params.bdl_pairs_params.minimum_distance = 0.2;
-        params.dimer_policy                                   = displacement_robustness_domain_params<
-                                              cell<sidb_cell_clk_lyt_siqad>>::dimer_displacement_policy::STAY_ON_ORIGINAL_DIMER;
+        params.dimer_policy = displacement_robustness_domain_params<
+            cell<sidb_cell_clk_lyt_siqad>>::dimer_displacement_policy::STAY_ON_ORIGINAL_DIMER;
         params.analysis_mode = displacement_robustness_domain_params<
             cell<sidb_cell_clk_lyt_siqad>>::displacement_analysis_mode::EXHAUSTIVE;
 
@@ -188,8 +188,8 @@ TEST_CASE("Determine the probability of fabricating an operational BDL wire with
     SECTION("one displacement variation in x-direction, random sampling")
     {
         displacement_robustness_domain_params<cell<sidb_cell_clk_lyt_siqad>> params{};
-        params.displacement_variations                        = {1, 0};
-        params.operational_params.simulation_parameters       = sidb_simulation_parameters{2, -0.32};
+        params.displacement_variations                  = {1, 0};
+        params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.32};
         params.operational_params.input_bdl_iterator_params.bdl_pairs_params.maximum_distance = 2.0;
         params.operational_params.input_bdl_iterator_params.bdl_pairs_params.minimum_distance = 0.2;
 
@@ -201,8 +201,8 @@ TEST_CASE("Determine the probability of fabricating an operational BDL wire with
     SECTION("fabrication error rate p = 0.0")
     {
         displacement_robustness_domain_params<cell<sidb_cell_clk_lyt_siqad>> params{};
-        params.displacement_variations                        = {0, 1};
-        params.operational_params.simulation_parameters       = sidb_simulation_parameters{2, -0.32};
+        params.displacement_variations                  = {0, 1};
+        params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.32};
         params.operational_params.input_bdl_iterator_params.bdl_pairs_params.maximum_distance = 2.0;
         params.operational_params.input_bdl_iterator_params.bdl_pairs_params.minimum_distance = 0.2;
 
@@ -222,12 +222,12 @@ TEST_CASE("Determine the probability of fabricating an operational BDL, offset c
     SECTION("one displacement variation in y-direction")
     {
         displacement_robustness_domain_params<cell<sidb_cell_clk_lyt>> params{};
-        params.displacement_variations                        = {0, 1};
-        params.operational_params.simulation_parameters       = sidb_simulation_parameters{2, -0.32};
+        params.displacement_variations                  = {0, 1};
+        params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.32};
         params.operational_params.input_bdl_iterator_params.bdl_pairs_params.maximum_distance = 2.0;
         params.operational_params.input_bdl_iterator_params.bdl_pairs_params.minimum_distance = 0.2;
-        params.dimer_policy                                   = displacement_robustness_domain_params<
-                                              cell<sidb_cell_clk_lyt>>::dimer_displacement_policy::STAY_ON_ORIGINAL_DIMER;
+        params.dimer_policy = displacement_robustness_domain_params<
+            cell<sidb_cell_clk_lyt>>::dimer_displacement_policy::STAY_ON_ORIGINAL_DIMER;
         params.analysis_mode =
             displacement_robustness_domain_params<cell<sidb_cell_clk_lyt>>::displacement_analysis_mode::EXHAUSTIVE;
 
@@ -254,12 +254,12 @@ TEST_CASE("Determine the probability of fabricating an operational BDL, offset c
     SECTION("one displacement variation in x-direction")
     {
         displacement_robustness_domain_params<cell<sidb_cell_clk_lyt>> params{};
-        params.displacement_variations                        = {1, 0};
-        params.operational_params.simulation_parameters       = sidb_simulation_parameters{2, -0.32};
+        params.displacement_variations                  = {1, 0};
+        params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.32};
         params.operational_params.input_bdl_iterator_params.bdl_pairs_params.maximum_distance = 2.0;
         params.operational_params.input_bdl_iterator_params.bdl_pairs_params.minimum_distance = 0.2;
-        params.dimer_policy                                   = displacement_robustness_domain_params<
-                                              cell<sidb_cell_clk_lyt>>::dimer_displacement_policy::STAY_ON_ORIGINAL_DIMER;
+        params.dimer_policy = displacement_robustness_domain_params<
+            cell<sidb_cell_clk_lyt>>::dimer_displacement_policy::STAY_ON_ORIGINAL_DIMER;
         params.analysis_mode =
             displacement_robustness_domain_params<cell<sidb_cell_clk_lyt>>::displacement_analysis_mode::EXHAUSTIVE;
 
@@ -271,8 +271,8 @@ TEST_CASE("Determine the probability of fabricating an operational BDL, offset c
     SECTION("one displacement variation in x-direction, random sampling")
     {
         displacement_robustness_domain_params<cell<sidb_cell_clk_lyt>> params{};
-        params.displacement_variations                        = {1, 0};
-        params.operational_params.simulation_parameters       = sidb_simulation_parameters{2, -0.32};
+        params.displacement_variations                  = {1, 0};
+        params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.32};
         params.operational_params.input_bdl_iterator_params.bdl_pairs_params.maximum_distance = 2.0;
         params.operational_params.input_bdl_iterator_params.bdl_pairs_params.minimum_distance = 0.2;
 
@@ -284,8 +284,8 @@ TEST_CASE("Determine the probability of fabricating an operational BDL, offset c
     SECTION("fabrication error rate p = 0.0")
     {
         displacement_robustness_domain_params<cell<sidb_cell_clk_lyt>> params{};
-        params.displacement_variations                        = {0, 1};
-        params.operational_params.simulation_parameters       = sidb_simulation_parameters{2, -0.32};
+        params.displacement_variations                  = {0, 1};
+        params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.32};
         params.operational_params.input_bdl_iterator_params.bdl_pairs_params.maximum_distance = 2.0;
         params.operational_params.input_bdl_iterator_params.bdl_pairs_params.minimum_distance = 0.2;
 

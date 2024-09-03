@@ -964,7 +964,6 @@ Lyt bestagon_double_wire() noexcept
     lyt.assign_cell_type({27, 11, 1}, Lyt::cell_type::NORMAL);
     lyt.assign_cell_type({24, 12, 1}, Lyt::cell_type::NORMAL);
 
-
     // output wires
     lyt.assign_cell_type({14, 15, 0}, Lyt::cell_type::NORMAL);
     lyt.assign_cell_type({24, 15, 0}, Lyt::cell_type::NORMAL);
@@ -983,7 +982,6 @@ Lyt bestagon_double_wire() noexcept
 
     return lyt;
 };
-
 
 /**
  * This layout represents the half adder gate, as proposed in the paper titled \"Hexagons are the
@@ -1044,7 +1042,6 @@ Lyt bestagon_ha() noexcept
 
     return lyt;
 };
-
 
 }  // namespace blueprints
 

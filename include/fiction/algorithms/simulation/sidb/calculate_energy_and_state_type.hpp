@@ -71,7 +71,7 @@ calculate_energy_and_state_type(const sidb_energy_distribution&                 
             if (std::abs(round_to_n_decimal_places(valid_layout.get_system_energy(), 6) - energy_value) <
                 physical_constants::POP_STABILITY_ERR)
             {
-                bool       correct_output = true;
+                bool correct_output = true;
 
                 for (auto i = 0u; i < output_bdl_pairs.size(); i++)
                 {

@@ -195,8 +195,8 @@ class critical_temperature_impl
                 const auto distribution = energy_distribution(sim_result.charge_distributions);
 
                 // A label that indicates whether the state still fulfills the logic.
-                const auto energy_state_type = calculate_energy_and_state_type(distribution, sim_result.charge_distributions,
-                                                                    output_bdl_pairs, spec, i);
+                const auto energy_state_type = calculate_energy_and_state_type(
+                    distribution, sim_result.charge_distributions, output_bdl_pairs, spec, i);
 
                 const auto min_energy = energy_state_type.cbegin()->first;
 
@@ -310,7 +310,7 @@ class critical_temperature_impl
      * @return State type (i.e. transparent, erroneous) of the ground state is returned.
      */
     bool is_ground_state_transparent(const sidb_energy_and_state_type& energy_and_state_type,
-                                                         const double                      min_energy) noexcept
+                                     const double                      min_energy) noexcept
     {
         bool ground_state_is_transparent = false;
 

@@ -44,7 +44,8 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         params.iteration_steps       = 0;
         params.alpha                 = 0.0;
 
-        const auto ct = critical_temperature_gate_based<TestType>(lyt, std::vector<tt>{create_id_tt()}, params, &critical_stats);
+        const auto ct =
+            critical_temperature_gate_based<TestType>(lyt, std::vector<tt>{create_id_tt()}, params, &critical_stats);
 
         CHECK(critical_stats.num_valid_lyt == 0);
         CHECK(ct == 0.0);
@@ -169,7 +170,8 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         params.input_bdl_iterator_params.input_bdl_config =
             bdl_input_iterator_params::input_bdl_configuration::ZERO_VIA_NO_PERTURBER;
 
-        const auto ct = critical_temperature_gate_based(lyt_or_gate, std::vector<tt>{create_or_tt()}, params, &critical_stats);
+        const auto ct =
+            critical_temperature_gate_based(lyt_or_gate, std::vector<tt>{create_or_tt()}, params, &critical_stats);
 
         CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous),
                    Catch::Matchers::WithinAbs(std::numeric_limits<double>::infinity(), 0.01));
@@ -301,7 +303,8 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         params.iteration_steps       = 80;
         params.alpha                 = 0.7;
 
-        const auto ct = critical_temperature_gate_based(lyt, std::vector<tt>{create_fan_out_tt()}, params, &critical_stats);
+        const auto ct =
+            critical_temperature_gate_based(lyt, std::vector<tt>{create_fan_out_tt()}, params, &critical_stats);
 
         CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.56),
                    Catch::Matchers::WithinAbs(0.00, 0.01));
@@ -435,7 +438,8 @@ TEMPLATE_TEST_CASE("Test critical_temperature function, using offset coordinates
         params.iteration_steps       = 0;
         params.alpha                 = 0.0;
 
-        const auto ct = critical_temperature_gate_based<TestType>(lyt, std::vector<tt>{create_id_tt()}, params, &critical_stats);
+        const auto ct =
+            critical_temperature_gate_based<TestType>(lyt, std::vector<tt>{create_id_tt()}, params, &critical_stats);
 
         CHECK(critical_stats.algorithm_name == "QuickSim");
 
@@ -616,7 +620,7 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon CX, QuickExact", "[critical
 
     CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.32),
                Catch::Matchers::WithinAbs(0.00, 0.01));
-    CHECK_THAT(std::abs(ct- 0.85), Catch::Matchers::WithinAbs(0.00, 0.01));
+    CHECK_THAT(std::abs(ct - 0.85), Catch::Matchers::WithinAbs(0.00, 0.01));
 }
 
 TEMPLATE_TEST_CASE("Critical temperature of Bestagon double wire, QuickExact", "[critical-temperature], [quality]",
