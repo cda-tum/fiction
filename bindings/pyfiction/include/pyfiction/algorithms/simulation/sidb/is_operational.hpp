@@ -30,7 +30,7 @@ void is_operational(pybind11::module& m)
           "params"_a = fiction::is_operational_params{}, DOC(fiction_is_operational));
 
     m.def("operational_input_patterns", &fiction::operational_input_patterns<Lyt, py_tt>, "lyt"_a, "spec"_a,
-          "params"_a = fiction::is_operational_params{}, DOC(fiction_is_operational));
+          "params"_a = fiction::is_operational_params{}, DOC(fiction_operational_input_patterns));
 }
 
 }  // namespace detail
@@ -44,14 +44,14 @@ inline void is_operational(pybind11::module& m)
         .value("NON_OPERATIONAL", fiction::operational_status::NON_OPERATIONAL,
                DOC(fiction_operational_status_NON_OPERATIONAL));
 
-    // TODO update docu
     py::class_<fiction::is_operational_params>(m, "is_operational_params", DOC(fiction_is_operational_params))
         .def(py::init<>())
         .def_readwrite("simulation_parameters", &fiction::is_operational_params::simulation_parameters,
-                       DOC(fiction_is_operational_params))
+                       DOC(fiction_is_operational_params_simulation_parameters))
         .def_readwrite("sim_engine", &fiction::is_operational_params::sim_engine,
                        DOC(fiction_is_operational_params_sim_engine))
-        .def_readwrite("input_bdl_iterator_params", &fiction::is_operational_params::input_bdl_iterator_params);
+        .def_readwrite("input_bdl_iterator_params", &fiction::is_operational_params::input_bdl_iterator_params,
+                       DOC(fiction_is_operational_params_input_bdl_iterator_params));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 

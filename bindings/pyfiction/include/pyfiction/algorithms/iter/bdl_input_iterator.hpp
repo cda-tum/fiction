@@ -105,22 +105,21 @@ inline void bdl_input_iterator(pybind11::module& m)
     namespace py = pybind11;
     using namespace py::literals;
 
-    // todo add docu
     /**
      * Input BDL configuration
      */
     py::enum_<typename fiction::bdl_input_iterator_params::input_bdl_configuration>(m, "input_bdl_configuration")
         .value("ZERO_VIA_NO_PERTURBER",
-               fiction::bdl_input_iterator_params::input_bdl_configuration::ZERO_VIA_NO_PERTURBER)
-        .value("ZERO_VIA_PERTURBER", fiction::bdl_input_iterator_params::input_bdl_configuration::ZERO_VIA_PERTURBER);
+               fiction::bdl_input_iterator_params::input_bdl_configuration::ZERO_VIA_NO_PERTURBER, DOC(fiction_bdl_input_iterator_params_input_bdl_configuration_ZERO_VIA_NO_PERTURBER))
+        .value("ZERO_VIA_PERTURBER", fiction::bdl_input_iterator_params::input_bdl_configuration::ZERO_VIA_PERTURBER, DOC(fiction_bdl_input_iterator_params_input_bdl_configuration_ZERO_VIA_PERTURBER));
 
     /**
      * BDL input iterator parameters.
      */
     py::class_<fiction::bdl_input_iterator_params>(m, "bdl_input_iterator_params")
         .def(py::init<>())
-        .def_readwrite("input_bdl_config", &fiction::bdl_input_iterator_params::input_bdl_config)
-        .def_readwrite("bdl_pairs_params", &fiction::bdl_input_iterator_params::bdl_pairs_params);
+        .def_readwrite("input_bdl_config", &fiction::bdl_input_iterator_params::input_bdl_config, DOC(fiction_bdl_input_iterator_params_input_bdl_config))
+        .def_readwrite("bdl_pairs_params", &fiction::bdl_input_iterator_params::bdl_pairs_params, DOC(fiction_bdl_input_iterator_params_bdl_pairs_params));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
