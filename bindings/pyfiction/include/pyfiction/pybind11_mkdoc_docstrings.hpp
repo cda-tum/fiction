@@ -1967,10 +1967,6 @@ static const char *__doc_fiction_charge_index_mode_UPDATE_CHARGE_INDEX =
 R"doc(The charge state is assigned to the cell and the charge index is
 updated.)doc";
 
-static const char *__doc_fiction_charge_index_mode_WORKING_WITH_CHARGE_INDEX =
-R"doc(The charge state is assigned to the cell but the old charge index is
-kept.)doc";
-
 static const char *__doc_fiction_charge_index_recomputation =
 R"doc(An enumeration of modes to specifying if the charge index should be
 recomputed fully.)doc";
