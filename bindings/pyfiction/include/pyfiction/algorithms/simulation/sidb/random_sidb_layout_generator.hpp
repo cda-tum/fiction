@@ -42,11 +42,14 @@ inline void random_sidb_layout_generator(pybind11::module& m)
     namespace py = pybind11;
     using namespace pybind11::literals;
 
+    // todo update docu
     py::enum_<typename fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_charges>(
         m, "positive_charges", DOC(fiction_generate_random_sidb_layout_params_positive_charges))
-        .value("ON", fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_charges::ALLOWED)
-        .value("OFF",
-               fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_charges::FORBIDDEN);
+        .value("ALLOWED", fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_charges::ALLOWED)
+        .value("FORBIDDEN",
+               fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_charges::FORBIDDEN)
+        .value("CAN_OCCUR",
+               fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_charges::CAN_OCCUR);
 
     /**
      * Parameters.
@@ -63,9 +66,6 @@ inline void random_sidb_layout_generator(pybind11::module& m)
         .def_readwrite("positive_sidbs",
                        &fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_sidbs,
                        DOC(fiction_generate_random_sidb_layout_params_positive_sidbs))
-        .def_readwrite("minimal_spacing",
-                       &fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::minimal_spacing,
-                       DOC(fiction_generate_random_sidb_layout_params_minimal_spacing))
         .def_readwrite("maximal_attempts",
                        &fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::maximal_attempts,
                        DOC(fiction_generate_random_sidb_layout_params_maximal_attempts))

@@ -35,7 +35,7 @@ using namespace fiction;
  *   --SE_x <value>             Sets the x coordinate of the south-east cell corner in SiQAD coordinates.
  *   --SE_y <value>             Sets the y coordinate of the south-east cell corner in SiQAD coordinates.
  *   --positive_charges <type>  Specifies whether positively charged SiDBs are allowed ("ALLOWED") or forbidden
- * ("FORBIDDEN").
+ * ("FORBIDDEN") for default physical parameters.
  *   --lower <value>            Sets the number of SiDBs for the first bunch of layouts.
  *   --upper <value>            Sets the number of SiDBs for the last bunch of layouts.
  *   --num_layouts <value>      Sets the number of layouts to generate for each SiDB count.
@@ -95,10 +95,23 @@ int main(int argc, const char* argv[])  // NOLINT
     const int32_t se_y = std::stoi(options["--SE_y"]);
     // specifies whether positively charged SiDBs are allowed ("ALLOWED") or forbidden ("FORBIDDEN")
     const std::string charges_str = options["--positive_charges"];
-    // specifies whether positively charged SiDBs are allowed ("ALLOWED") or forbidden ("FORBIDDEN")
-    const generate_random_sidb_layout_params<offset::ucoord_t>::positive_charges charges =
-        (charges_str == "ALLOWED") ? generate_random_sidb_layout_params<offset::ucoord_t>::positive_charges::ALLOWED :
-                                     generate_random_sidb_layout_params<offset::ucoord_t>::positive_charges::FORBIDDEN;
+
+    // specifies whether positively charged SiDBs are allowed ("ALLOWED"), forbidden ("FORBIDDEN") or can occur
+    // ("CAN_OCCUR")
+    generate_random_sidb_layout_params<offset::ucoord_t>::positive_charges charges;
+    if (charges_str == "ALLOWED")
+    {
+        charges = generate_random_sidb_layout_params<offset::ucoord_t>::positive_charges::ALLOWED;
+    }
+    else if (charges_str == "CAN_OCCUR")
+    {
+        charges = generate_random_sidb_layout_params<offset::ucoord_t>::positive_charges::CAN_OCCUR;
+    }
+    else
+    {
+        charges = generate_random_sidb_layout_params<offset::ucoord_t>::positive_charges::FORBIDDEN;
+    }
+
     // sets the number of SiDBs for the first bunch of layouts
     const uint64_t lower_limit = std::stoull(options["--lower"]);
     // sets the number of SiDBs for the last bunch of layouts
@@ -165,8 +178,8 @@ int main(int argc, const char* argv[])  // NOLINT
                 }
 
                 const generate_random_sidb_layout_params<offset::ucoord_t> params{
-                    {{nw_x, nw_y}, {se_x, se_y}}, number_of_placed_sidbs, charges, 2,
-                    static_cast<uint64_t>(10E6),  number_of_layouts};
+                    {{nw_x, nw_y}, {se_x, se_y}},         number_of_placed_sidbs,      charges,
+                    sidb_simulation_parameters{3, -0.32}, static_cast<uint64_t>(10E6), number_of_layouts};
                 const auto unique_lyts = generate_multiple_random_sidb_layouts(sidb_100_cell_clk_lyt{}, params);
                 for (auto i = 0u; i < unique_lyts.size(); i++)
                 {

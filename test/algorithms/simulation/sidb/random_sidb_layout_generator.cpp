@@ -119,40 +119,29 @@ TEST_CASE("Random cube::coord_t layout generation", "[generate-random-sidb-layou
     {
         const generate_random_sidb_layout_params<cube::coord_t> params{
             {{0, 0, 0}, {90, 90, 0}},
-            100,
+            50,
             generate_random_sidb_layout_params<cube::coord_t>::positive_charges::FORBIDDEN};
 
         const auto result_lyt = generate_random_sidb_layout(sidb_cell_clk_lyt_cube{}, params);
 
-        CHECK(result_lyt.num_cells() == 100);
+        CHECK(result_lyt.num_cells() == 50);
         result_lyt.foreach_cell(
             [](const auto& cell)
             {
                 CHECK(cell.x < 91);
                 CHECK(cell.y < 91);
             });
-        // check if all cells are not closer than two cells (Euclidean distance).
-        result_lyt.foreach_cell(
-            [&result_lyt](const auto& cell_one)
-            {
-                result_lyt.foreach_cell(
-                    [&cell_one, &result_lyt](const auto& cell_two)
-                    {
-                        if (cell_one != cell_two)
-                        {
-                            CHECK(euclidean_distance(result_lyt, cell_one, cell_two) >= 2);
-                        }
-                    });
-            });
+
+        CHECK(!can_positive_charges_occur(result_lyt, sidb_simulation_parameters{}));
     }
 
     SECTION("given previous layouts")
     {
         const generate_random_sidb_layout_params<cube::coord_t> params{
-            {{-5, -2}, {9, 9}},
-            10,
+            {{-5, -2}, {20, 20}},
+            6,
             generate_random_sidb_layout_params<cube::coord_t>::positive_charges::FORBIDDEN,
-            2,
+            sidb_simulation_parameters{},
             static_cast<uint64_t>(10E6),
             3};
         const auto result_lyts = generate_multiple_random_sidb_layouts(sidb_cell_clk_lyt_cube{}, params);
@@ -163,9 +152,9 @@ TEST_CASE("Random cube::coord_t layout generation", "[generate-random-sidb-layou
             lyt.foreach_cell(
                 [](const auto& cell)
                 {
-                    CHECK(cell.x < 10);
+                    CHECK(cell.x <= 20);
                     CHECK(cell.x > -6);
-                    CHECK(cell.y < 10);
+                    CHECK(cell.y <= 20);
                     CHECK(cell.y > -3);
                 });
         }
@@ -174,32 +163,21 @@ TEST_CASE("Random cube::coord_t layout generation", "[generate-random-sidb-layou
     SECTION("Check uniqueness of two layouts")
     {
         const generate_random_sidb_layout_params<cube::coord_t> params{
-            {{0, 0}, {9, 9}},
-            10,
+            {{0, 0}, {20, 20}},
+            8,
             generate_random_sidb_layout_params<cube::coord_t>::positive_charges::FORBIDDEN,
-            2,
+            sidb_simulation_parameters{},
             static_cast<uint64_t>(10E6),
             2};
+
         const auto result_lyts = generate_multiple_random_sidb_layouts(sidb_cell_clk_lyt_cube{}, params);
+
         REQUIRE(result_lyts.size() == 2);
 
         const auto& first_lyt  = result_lyts.front();
         const auto& second_lyt = result_lyts.back();
 
-        uint64_t counter_different_cell = 0;
-        first_lyt.foreach_cell(
-            [&second_lyt, &counter_different_cell](const auto& cell_first)
-            {
-                second_lyt.foreach_cell(
-                    [&cell_first, &counter_different_cell](const auto& cell_second)
-                    {
-                        if (cell_first != cell_second)
-                        {
-                            counter_different_cell += 1;
-                        };
-                    });
-            });
-        CHECK(counter_different_cell != 0);
+        CHECK(!are_layouts_identical(first_lyt, second_lyt));
     }
 
     SECTION("Check all pairwise distances")
@@ -208,7 +186,7 @@ TEST_CASE("Random cube::coord_t layout generation", "[generate-random-sidb-layou
             {{0, 0}, {30, 30}},
             10,
             generate_random_sidb_layout_params<cube::coord_t>::positive_charges::FORBIDDEN,
-            2,
+            sidb_simulation_parameters{},
             static_cast<uint64_t>(10E6),
             10};
         const auto result_lyts = generate_multiple_random_sidb_layouts(sidb_cell_clk_lyt_cube{}, params);
@@ -216,23 +194,7 @@ TEST_CASE("Random cube::coord_t layout generation", "[generate-random-sidb-layou
 
         for (const auto& lyt : result_lyts)
         {
-            bool all_cells_fulfill_distance = true;
-            lyt.foreach_cell(
-                [&lyt, &params, &all_cells_fulfill_distance](const auto& cell_first)
-                {
-                    lyt.foreach_cell(
-                        [&lyt, &cell_first, &params, &all_cells_fulfill_distance](const auto& cell_second)
-                        {
-                            if (cell_first != cell_second)
-                            {
-                                if (euclidean_distance(lyt, cell_first, cell_second) < params.minimal_spacing)
-                                {
-                                    all_cells_fulfill_distance = false;
-                                };
-                            }
-                        });
-                });
-            CHECK(all_cells_fulfill_distance);
+            CHECK(!can_positive_charges_occur(lyt, sidb_simulation_parameters{}));
         }
     }
 }
@@ -322,7 +284,7 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[generate-random-sidb-la
     SECTION("given corner coordinates and number of placed SiDBs, and allow positive charges")
     {
         const generate_random_sidb_layout_params<offset::ucoord_t> params{
-            {{0, 0, 0}, {90, 90, 0}},
+            {{0, 0, 0}, {200, 200, 0}},
             100,
             generate_random_sidb_layout_params<offset::ucoord_t>::positive_charges::FORBIDDEN};
 
@@ -332,31 +294,20 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[generate-random-sidb-la
         result_lyt.foreach_cell(
             [](const auto& cell)
             {
-                CHECK(cell.x < 91);
-                CHECK(cell.y < 91);
+                CHECK(cell.x <= 200);
+                CHECK(cell.y <= 200);
             });
-        // check if all cells are not closer than two cells (Euclidean distance).
-        result_lyt.foreach_cell(
-            [&result_lyt](const auto& cell_one)
-            {
-                result_lyt.foreach_cell(
-                    [&cell_one, &result_lyt](const auto& cell_two)
-                    {
-                        if (cell_one != cell_two)
-                        {
-                            CHECK(euclidean_distance<sidb_100_cell_clk_lyt>(result_lyt, cell_one, cell_two) >= 2);
-                        }
-                    });
-            });
+
+        CHECK(!can_positive_charges_occur(result_lyt, sidb_simulation_parameters{}));
     }
 
     SECTION("given previous layouts")
     {
         const generate_random_sidb_layout_params<offset::ucoord_t> params{
-            {{0, 0}, {9, 9, 2}},
+            {{0, 0}, {20, 20}},
             10,
             generate_random_sidb_layout_params<offset::ucoord_t>::positive_charges::FORBIDDEN,
-            2,
+            sidb_simulation_parameters{},
             static_cast<uint64_t>(10E6),
             3};
         const auto result_lyts = generate_multiple_random_sidb_layouts(sidb_100_cell_clk_lyt{}, params);
@@ -367,8 +318,8 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[generate-random-sidb-la
             lyt.foreach_cell(
                 [](const auto& cell)
                 {
-                    CHECK(cell.x < 10);
-                    CHECK(cell.y < 10);
+                    CHECK(cell.x <= 20);
+                    CHECK(cell.y <= 20);
                 });
         }
     }
@@ -376,10 +327,10 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[generate-random-sidb-la
     SECTION("Check uniqueness of two layouts")
     {
         const generate_random_sidb_layout_params<offset::ucoord_t> params{
-            {{0, 0}, {9, 9}},
+            {{0, 0}, {20, 20}},
             10,
             generate_random_sidb_layout_params<offset::ucoord_t>::positive_charges::FORBIDDEN,
-            2,
+            sidb_simulation_parameters{},
             static_cast<uint64_t>(10E6),
             2};
         const auto result_lyts = generate_multiple_random_sidb_layouts(sidb_100_cell_clk_lyt{}, params);
@@ -388,20 +339,7 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[generate-random-sidb-la
         const auto& first_lyt  = result_lyts.front();
         const auto& second_lyt = result_lyts.back();
 
-        uint64_t counter_different_cell = 0;
-        first_lyt.foreach_cell(
-            [&second_lyt, &counter_different_cell](const auto& cell_first)
-            {
-                second_lyt.foreach_cell(
-                    [&cell_first, &counter_different_cell](const auto& cell_second)
-                    {
-                        if (cell_first != cell_second)
-                        {
-                            counter_different_cell += 1;
-                        };
-                    });
-            });
-        CHECK(counter_different_cell != 0);
+        CHECK(!are_layouts_identical(first_lyt, second_lyt));
     }
 
     SECTION("Check correct use of skeleton layout when generating only one random layout")
@@ -419,16 +357,19 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[generate-random-sidb-la
     SECTION("Check correct use of skeleton layout when generating multiple random layouts")
     {
         const generate_random_sidb_layout_params<offset::ucoord_t> params{
-            {{0, 0}, {9, 9}},
+            {{0, 0}, {20, 20}},
             10,
             generate_random_sidb_layout_params<offset::ucoord_t>::positive_charges::FORBIDDEN,
-            2,
+            sidb_simulation_parameters{},
             static_cast<uint64_t>(10E6),
             2};
+
         sidb_100_cell_clk_lyt skeleton_layout{};
+
         skeleton_layout.assign_cell_type({0, 0}, sidb_100_cell_clk_lyt::technology::NORMAL);
         skeleton_layout.assign_cell_type({3, 0}, sidb_100_cell_clk_lyt::technology::NORMAL);
         skeleton_layout.assign_cell_type({9, 1}, sidb_100_cell_clk_lyt::technology::NORMAL);
+
         const auto result_lyts = generate_multiple_random_sidb_layouts<sidb_100_cell_clk_lyt>(skeleton_layout, params);
 
         REQUIRE(result_lyts.size() == 2);
@@ -553,10 +494,10 @@ TEST_CASE("Random siqad::coord_t layout generation", "[generate-random-sidb-layo
     SECTION("given previous layouts")
     {
         const generate_random_sidb_layout_params<siqad::coord_t> params{
-            {{0, 0, 1}, {9, 9, 1}},
+            {{0, 0, 1}, {20, 20, 1}},
             10,
             generate_random_sidb_layout_params<siqad::coord_t>::positive_charges::FORBIDDEN,
-            2,
+            sidb_simulation_parameters{},
             static_cast<uint64_t>(10E6),
             3};
         const auto result_lyts = generate_multiple_random_sidb_layouts(sidb_cell_clk_lyt_siqad{}, params);
@@ -567,9 +508,9 @@ TEST_CASE("Random siqad::coord_t layout generation", "[generate-random-sidb-layo
             lyt.foreach_cell(
                 [](const auto& cell)
                 {
-                    CHECK(cell.x < 10);
+                    CHECK(cell.x <= 20);
                     CHECK(cell.x >= 0);
-                    CHECK(cell.y < 10);
+                    CHECK(cell.y <= 20);
                     CHECK(cell.y >= 0);
                     CHECK(cell.z <= 1);
                 });
@@ -604,7 +545,7 @@ TEMPLATE_TEST_CASE("Random siqad::coord_t layout generation with defects", "[gen
             {{2, 1, 1}, {2, 1, 1}},
             1,
             generate_random_sidb_layout_params<cell<TestType>>::positive_charges::FORBIDDEN,
-            2,
+            sidb_simulation_parameters{},
             5u};
 
         auto defect_layout = TestType{};
@@ -624,7 +565,7 @@ TEMPLATE_TEST_CASE("Random siqad::coord_t layout generation with defects", "[gen
             {{2, 1, 1}, {2, 1, 1}},
             1,
             generate_random_sidb_layout_params<cell<TestType>>::positive_charges::FORBIDDEN,
-            2,
+            sidb_simulation_parameters{},
             5u};
 
         auto defect_layout = TestType{};
@@ -647,7 +588,7 @@ TEMPLATE_TEST_CASE("Random siqad::coord_t layout generation with defects", "[gen
             {{0, 0, 0}, {10, 2, 0}},
             10,
             generate_random_sidb_layout_params<cell<TestType>>::positive_charges::ALLOWED,
-            2};
+            sidb_simulation_parameters{}};
 
         auto defect_layout = TestType{};
         defect_layout.assign_sidb_defect({2, 2, 0}, sidb_defect{sidb_defect_type::DB, -1, 5.6, 5});
@@ -683,7 +624,7 @@ TEST_CASE("Random cube::coord_t layout generation with defects", "[generate-rand
          siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{10, 2, 0})},
         10,
         generate_random_sidb_layout_params<cube::coord_t>::positive_charges::ALLOWED,
-        2};
+        sidb_simulation_parameters{}};
 
     lyt layout{};
 
