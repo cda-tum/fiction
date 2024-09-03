@@ -61,9 +61,9 @@ TEST_CASE("Several tests", "[check-equivalence-simulation-result]")
         auto lyt2{lyt1.clone()};
         lyt2.assign_cell_type({4, 2}, sidb_100_cell_clk_lyt::cell_type::NORMAL);
         lyt2.assign_cell_type({4, 3}, sidb_100_cell_clk_lyt::cell_type::NORMAL);
-        results2.charge_distributions = {
-            charge_distribution_surface{lyt2, sidb_simulation_parameters{}, sidb_charge_state::NEUTRAL},
-            charge_distribution_surface{lyt2}};
+        results2.charge_distributions = {charge_distribution_surface{lyt2, sidb_simulation_parameters{},
+                                                                     sidb_charge_state::NEUTRAL},
+                                         charge_distribution_surface{lyt2}};
         CHECK(!check_simulation_results_for_equivalence(results1, results2));
     }
 

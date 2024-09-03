@@ -127,8 +127,6 @@ enum class charge_index_mode
      * The charge state is assigned to the cell but the old charge index is kept.
      */
     KEEP_CHARGE_INDEX,
-
-    WORKING_WITH_CHARGE_INDEX
 };
 
 /**
@@ -291,15 +289,14 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     explicit charge_distribution_surface(
         const sidb_simulation_parameters& params  = sidb_simulation_parameters{},
-        const sidb_charge_state           cs      = sidb_charge_state::NEGATIVE,
-        const charge_index_mode           cs_mode = charge_index_mode::WORKING_WITH_CHARGE_INDEX) :
+        const sidb_charge_state           cs      = sidb_charge_state::NEGATIVE) :
             Lyt(),
             strg{std::make_shared<charge_distribution_storage>(params)}
     {
         static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
         static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-        initialize(cs, cs_mode);
+        initialize(cs);
     }
 
     /**
@@ -313,15 +310,14 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     explicit charge_distribution_surface(
         const Lyt& lyt, const sidb_simulation_parameters& params = sidb_simulation_parameters{},
-        const sidb_charge_state cs      = sidb_charge_state::NEGATIVE,
-        const charge_index_mode cs_mode = charge_index_mode::WORKING_WITH_CHARGE_INDEX) :
+        const sidb_charge_state cs      = sidb_charge_state::NEGATIVE) :
             Lyt(lyt),
             strg{std::make_shared<charge_distribution_storage>(params)}
     {
         static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
         static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-        initialize(cs, cs_mode);
+        initialize(cs);
     };
     /**
      * Copy constructor.
@@ -1861,8 +1857,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @param cs The charge state assigned to all SiDBs.
      */
-    void initialize(const sidb_charge_state cs      = sidb_charge_state::NEGATIVE,
-                    const charge_index_mode cs_mode = charge_index_mode::WORKING_WITH_CHARGE_INDEX) noexcept
+    void initialize(const sidb_charge_state cs      = sidb_charge_state::NEGATIVE) noexcept
     {
         strg->sidb_order  = {};
         strg->cell_charge = {};
@@ -1872,21 +1867,15 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         std::sort(strg->sidb_order.begin(), strg->sidb_order.end());
         this->foreach_cell([this, &cs](const auto&) { strg->cell_charge.push_back(cs); });
 
+        strg->max_charge_index = static_cast<uint64_t>(
+            std::pow(static_cast<double>(strg->simulation_parameters.base), this->num_cells()) - 1);
+        this->charge_distribution_to_index();
+
         this->initialize_nm_distance_matrix();
         this->initialize_potential_matrix();
         this->update_local_potential();
         this->recompute_system_energy();
         this->validity_check();
-
-        if (cs_mode == charge_index_mode::WORKING_WITH_CHARGE_INDEX)
-        {
-            assert((((this->num_cells() < 41) && (strg->simulation_parameters.base == 3)) ||
-                    ((strg->simulation_parameters.base == 2) && (this->num_cells() < 64))) &&
-                   "number of SiDBs is too large");
-            strg->max_charge_index = static_cast<uint64_t>(
-                std::pow(static_cast<double>(strg->simulation_parameters.base), this->num_cells()) - 1);
-            this->charge_distribution_to_index();
-        };
     };
     /**
      * This function is used when three state simulations are required (i.e., is_three_state_simulation_required = true)

@@ -118,7 +118,7 @@ TEST_CASE("Random cube::coord_t layout generation", "[generate-random-sidb-layou
     SECTION("given corner coordinates and number of placed SiDBs, and allow positive charges")
     {
         const generate_random_sidb_layout_params<cube::coord_t> params{
-            {{0, 0, 0}, {90, 90, 0}},
+            {{0, 0, 0}, {200, 200, 0}},
             50,
             generate_random_sidb_layout_params<cube::coord_t>::positive_charges::FORBIDDEN};
 
@@ -128,8 +128,8 @@ TEST_CASE("Random cube::coord_t layout generation", "[generate-random-sidb-layou
         result_lyt.foreach_cell(
             [](const auto& cell)
             {
-                CHECK(cell.x < 91);
-                CHECK(cell.y < 91);
+                CHECK(cell.x <= 200);
+                CHECK(cell.y <= 200);
             });
 
         CHECK(!can_positive_charges_occur(result_lyt, sidb_simulation_parameters{}));
@@ -183,7 +183,7 @@ TEST_CASE("Random cube::coord_t layout generation", "[generate-random-sidb-layou
     SECTION("Check all pairwise distances")
     {
         const generate_random_sidb_layout_params<cube::coord_t> params{
-            {{0, 0}, {30, 30}},
+            {{0, 0}, {40, 40}},
             10,
             generate_random_sidb_layout_params<cube::coord_t>::positive_charges::FORBIDDEN,
             sidb_simulation_parameters{},
@@ -304,7 +304,7 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[generate-random-sidb-la
     SECTION("given previous layouts")
     {
         const generate_random_sidb_layout_params<offset::ucoord_t> params{
-            {{0, 0}, {20, 20}},
+            {{0, 0}, {40, 40}},
             10,
             generate_random_sidb_layout_params<offset::ucoord_t>::positive_charges::FORBIDDEN,
             sidb_simulation_parameters{},
@@ -318,8 +318,8 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[generate-random-sidb-la
             lyt.foreach_cell(
                 [](const auto& cell)
                 {
-                    CHECK(cell.x <= 20);
-                    CHECK(cell.y <= 20);
+                    CHECK(cell.x <= 40);
+                    CHECK(cell.y <= 40);
                 });
         }
     }
@@ -357,7 +357,7 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[generate-random-sidb-la
     SECTION("Check correct use of skeleton layout when generating multiple random layouts")
     {
         const generate_random_sidb_layout_params<offset::ucoord_t> params{
-            {{0, 0}, {20, 20}},
+            {{0, 0}, {40, 40}},
             10,
             generate_random_sidb_layout_params<offset::ucoord_t>::positive_charges::FORBIDDEN,
             sidb_simulation_parameters{},
