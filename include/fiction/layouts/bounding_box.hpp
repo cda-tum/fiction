@@ -5,8 +5,8 @@
 #ifndef FICTION_BOUNDING_BOX_HPP
 #define FICTION_BOUNDING_BOX_HPP
 
+#include "fiction/layouts/coordinates.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/types.hpp"
 #include "fiction/utils/layout_utils.hpp"
 
 #include <algorithm>
