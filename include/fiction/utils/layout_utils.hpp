@@ -5,6 +5,7 @@
 #ifndef FICTION_LAYOUT_UTILS_HPP
 #define FICTION_LAYOUT_UTILS_HPP
 
+#include "fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp"
 #include "fiction/layouts/coordinates.hpp"
 #include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
@@ -12,7 +13,6 @@
 #include "fiction/technology/sidb_lattice.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
-#include "fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp"
 
 #include <algorithm>
 #include <cassert>

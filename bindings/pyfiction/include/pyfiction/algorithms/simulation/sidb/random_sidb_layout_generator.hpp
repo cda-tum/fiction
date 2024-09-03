@@ -45,7 +45,8 @@ inline void random_sidb_layout_generator(pybind11::module& m)
     // todo update docu
     py::enum_<typename fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_charges>(
         m, "positive_charges", DOC(fiction_generate_random_sidb_layout_params_positive_charges))
-        .value("ALLOWED", fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_charges::ALLOWED)
+        .value("ALLOWED",
+               fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_charges::ALLOWED)
         .value("FORBIDDEN",
                fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_charges::FORBIDDEN)
         .value("CAN_OCCUR",

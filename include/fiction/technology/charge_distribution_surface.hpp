@@ -287,9 +287,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param params Physical parameters used for the simulation (µ_minus, base number, ...).
      * @param cs The charge state used for the initialization of all SiDBs, default is a negative charge.
      */
-    explicit charge_distribution_surface(
-        const sidb_simulation_parameters& params  = sidb_simulation_parameters{},
-        const sidb_charge_state           cs      = sidb_charge_state::NEGATIVE) :
+    explicit charge_distribution_surface(const sidb_simulation_parameters& params = sidb_simulation_parameters{},
+                                         const sidb_charge_state           cs     = sidb_charge_state::NEGATIVE) :
             Lyt(),
             strg{std::make_shared<charge_distribution_storage>(params)}
     {
@@ -308,9 +307,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param variable_cells SiDB which charge state is variable (called dependent-cell).
      * @param external_potential Externally applied local electrostatic potential.
      */
-    explicit charge_distribution_surface(
-        const Lyt& lyt, const sidb_simulation_parameters& params = sidb_simulation_parameters{},
-        const sidb_charge_state cs      = sidb_charge_state::NEGATIVE) :
+    explicit charge_distribution_surface(const Lyt&                        lyt,
+                                         const sidb_simulation_parameters& params = sidb_simulation_parameters{},
+                                         const sidb_charge_state           cs     = sidb_charge_state::NEGATIVE) :
             Lyt(lyt),
             strg{std::make_shared<charge_distribution_storage>(params)}
     {
@@ -1857,7 +1856,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @param cs The charge state assigned to all SiDBs.
      */
-    void initialize(const sidb_charge_state cs      = sidb_charge_state::NEGATIVE) noexcept
+    void initialize(const sidb_charge_state cs = sidb_charge_state::NEGATIVE) noexcept
     {
         strg->sidb_order  = {};
         strg->cell_charge = {};
