@@ -229,8 +229,7 @@ class design_sidb_gates_impl
         const is_operational_params params_is_operational{params.simulation_parameters, params.sim_engine};
 
         const generate_random_sidb_layout_params<cell<Lyt>> parameter_random_layout{
-            params.canvas, params.number_of_sidbs,
-            generate_random_sidb_layout_params<cell<Lyt>>::positive_charges::FORBIDDEN};
+            params.canvas, params.number_of_sidbs, generate_random_sidb_layout_params<cell<Lyt>>::positive_charges::FORBIDDEN};
 
         std::vector<std::thread> threads{};
         threads.reserve(num_threads);

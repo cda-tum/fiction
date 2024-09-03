@@ -61,7 +61,7 @@ struct generate_random_sidb_layout_params
     /**
      * Simulation parameters.
      */
-    sidb_simulation_parameters sim_params;
+    sidb_simulation_parameters sim_params{};
     /**
      * Maximum number of steps to place the specified number of SiDBs. Example: If the area, where SiDBs can be placed,
      * is small and many SiDBs are to be placed, several tries are required to generate a layout with no positively
@@ -133,7 +133,6 @@ Lyt generate_random_sidb_layout(const Lyt&                                      
         // the SiDB is added to the layout
         if (!random_cell_is_identical_wih_defect && !next_to_neutral_defect)
         {
-
             lyt.assign_cell_type(random_coord, technology<Lyt>::cell_type::NORMAL);
 
             if (params.positive_sidbs ==
