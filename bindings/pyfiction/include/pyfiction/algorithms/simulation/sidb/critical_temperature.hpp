@@ -67,11 +67,9 @@ inline void critical_temperature(pybind11::module& m)
         .def("report", &fiction::critical_temperature_stats::report, DOC(fiction_critical_temperature_stats_report))
         .def_readonly("algorithm_name", &fiction::critical_temperature_stats::algorithm_name,
                       DOC(fiction_critical_temperature_stats_algorithm_name))
-        .def_readonly("critical_temperature", &fiction::critical_temperature_stats::critical_temperature,
-                      DOC(fiction_critical_temperature_stats_critical_temperature))
         .def_readonly("num_valid_lyt", &fiction::critical_temperature_stats::num_valid_lyt,
                       DOC(fiction_critical_temperature_stats_num_valid_lyt))
-        .def_readonly("energy_between_ground_state_and_first_erroneous",
+        .def_readonly("is_ground_state_transparent",
                       &fiction::critical_temperature_stats::energy_between_ground_state_and_first_erroneous,
                       DOC(fiction_critical_temperature_stats_energy_between_ground_state_and_first_erroneous))
 
@@ -91,7 +89,7 @@ inline void critical_temperature(pybind11::module& m)
                        DOC(fiction_critical_temperature_params_confidence_level))
         .def_readwrite("max_temperature", &fiction::critical_temperature_params::max_temperature,
                        DOC(fiction_critical_temperature_params_max_temperature))
-        .def_readwrite("bdl_params", &fiction::critical_temperature_params::bdl_params,
+        .def_readwrite("input_bdl_iterator_params", &fiction::critical_temperature_params::input_bdl_iterator_params,
                        DOC(fiction_critical_temperature_params_bdl_params));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!

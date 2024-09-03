@@ -143,12 +143,12 @@ class temp_command : public command
 
                         const auto tt_ptr = ts.current();
 
-                        fiction::critical_temperature_gate_based(*lyt_ptr, std::vector<fiction::tt>{*tt_ptr}, params,
+                        ct = fiction::critical_temperature_gate_based(*lyt_ptr, std::vector<fiction::tt>{*tt_ptr}, params,
                                                                  &stats);
                     }
                     else
                     {
-                        fiction::critical_temperature_non_gate_based(*lyt_ptr, params, &stats);
+                        ct = fiction::critical_temperature_non_gate_based(*lyt_ptr, params, &stats);
                     }
 
                     if (stats.num_valid_lyt == 0)
@@ -159,8 +159,8 @@ class temp_command : public command
                     else
                     {
                         env->out() << fmt::format("[i] critical temperature of {} is {}{} K", get_name(lyt_ptr),
-                                                  (stats.critical_temperature == params.max_temperature ? "> " : ""),
-                                                  stats.critical_temperature)
+                                                  (ct == params.max_temperature ? "> " : ""),
+                                                  ct)
                                    << std::endl;
 
                         if (stats.num_valid_lyt > 1)
@@ -198,6 +198,10 @@ class temp_command : public command
      * Critical temperature statistics.
      */
     fiction::critical_temperature_stats stats{};
+    /**
+     * Critical temperature.
+     */
+    double ct = 0.0;
 
     /**
      * Logs the resulting information in a log file.
@@ -212,7 +216,7 @@ class temp_command : public command
                                 {"epsilon_r", stats.simulation_parameters.epsilon_r},
                                 {"lambda_tf", stats.simulation_parameters.lambda_tf},
                                 {"mu_minus", stats.simulation_parameters.mu_minus}}},
-                              {"Critical temperature", stats.critical_temperature},
+                              {"Critical temperature", ct},
                               {"Number of stable states", stats.num_valid_lyt},
                               {"Energy difference between ground state and first erroneous state",
                                stats.energy_between_ground_state_and_first_erroneous}};

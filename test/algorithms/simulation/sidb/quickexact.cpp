@@ -13,7 +13,6 @@
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 #include <fiction/layouts/coordinates.hpp>
-#include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/charge_distribution_surface.hpp>
 #include <fiction/technology/physical_constants.hpp>
 #include <fiction/technology/sidb_charge_state.hpp>
@@ -22,6 +21,7 @@
 #include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/technology/sidb_lattice_orientations.hpp>
 #include <fiction/types.hpp>
+#include <fiction/traits.hpp>
 #include <fiction/utils/math_utils.hpp>
 
 #include <cstdint>
@@ -1373,7 +1373,7 @@ TEMPLATE_TEST_CASE("QuickExact simulation of a Y-shaped SiDB OR gate with input 
         lyt.assign_cell_type({10, 8, 1}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({16, 1, 0}, TestType::cell_type::NORMAL);
 
-        quickexact_params<cell<TestType>> params{
+        const quickexact_params<cell<TestType>> params{
             sidb_simulation_parameters{2, -0.28},
             quickexact_params<cell<TestType>>::automatic_base_number_detection::OFF};
 
