@@ -10795,7 +10795,7 @@ static const char *__doc_fiction_generate_random_sidb_layout_params_positive_sid
 R"doc(If positively charged SiDBs should be prevented, SiDBs are not placed
 closer than the minimal_spacing.)doc";
 
-static const char *__doc_fiction_generate_random_sidb_layout_params_sim_params = R"doc()doc";
+static const char *__doc_fiction_generate_random_sidb_layout_params_sim_params = R"doc(Simulation parameters.)doc";
 
 static const char *__doc_fiction_geometric_temperature_schedule =
 R"doc(A logarithmically decreasing temperature schedule. The temperature is
