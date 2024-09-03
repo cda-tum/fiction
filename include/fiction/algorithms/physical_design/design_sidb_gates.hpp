@@ -57,7 +57,7 @@ struct design_sidb_gates_params
     /**
      * Selector for the different termination conditions for the SiDB gate design process.
      */
-    enum class termination_condition
+    enum class termination_condition : uint8_t
     {
         /**
          * The design process is terminated as soon as the first valid SiDB gate design is found.
@@ -71,7 +71,7 @@ struct design_sidb_gates_params
     /**
      * Selector for the available design approaches.
      */
-    enum class design_sidb_gates_mode
+    enum class design_sidb_gates_mode : uint8_t
     {
         /**
          * Gates are designed by using *QuickCell*.

@@ -6,10 +6,8 @@
 #define FICTION_WRITE_SQD_SIM_RESULT_HPP
 
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
-#include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
-#include "fiction/technology/sidb_lattice_orientations.hpp"
 #include "fiction/technology/sidb_nm_position.hpp"
 #include "fiction/traits.hpp"
 #include "utils/version_info.hpp"

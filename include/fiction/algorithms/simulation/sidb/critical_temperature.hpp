@@ -24,7 +24,6 @@
 #include <kitty/bit_operations.hpp>
 #include <kitty/dynamic_truth_table.hpp>
 
-#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <cstdint>

@@ -6,7 +6,6 @@
 #define FICTION_SIDB_DEFECTS_HPP
 
 #include <cassert>
-#include <cmath>
 #include <cstdint>
 #include <optional>
 #include <utility>
@@ -19,7 +18,7 @@ namespace fiction
  * classification of the H–Si(100) surface through multi-mode scanning probe microscopy\" by Jeremiah Croshaw, Thomas
  * Dienel, Taleana Huff, and Robert Wolkow in Journal of Nanotechnology in 2020.
  */
-enum class sidb_defect_type
+enum class sidb_defect_type : uint8_t
 {
     /**
      * Defect-free H-Si.
