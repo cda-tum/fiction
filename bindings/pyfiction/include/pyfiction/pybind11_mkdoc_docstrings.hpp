@@ -295,6 +295,25 @@ Returns:
     A cell-level layout that implements `lyt`'s gate types with
     building blocks defined in `GateLibrary`.)doc";
 
+static const char *__doc_fiction_are_layouts_identical =
+R"doc(This function checks whether the given layouts `first_lyt` and
+`second_lyt` are identical by comparing various properties such as the
+number of cells, the types of cells, defects (if applicable), and
+charge states (if applicable). The comparison is done in a detailed
+manner depending on the specific layout type.
+
+Template parameter ``Lyt``:
+    The layout type. Must be a cell-level layout.
+
+Parameter ``first_lyt``:
+    The first layout to compare.
+
+Parameter ``second_lyt``:
+    The second layout to compare.
+
+Returns:
+    `true` if the layouts are identical, `false` otherwise.)doc";
+
 static const char *__doc_fiction_area =
 R"doc(Computes the area of a given coordinate assuming its origin is (0, 0,
 0). Calculates :math:`(|x| + 1) \cdot (|y| + 1)` by default. The
@@ -1947,6 +1966,10 @@ kept.)doc";
 static const char *__doc_fiction_charge_index_mode_UPDATE_CHARGE_INDEX =
 R"doc(The charge state is assigned to the cell and the charge index is
 updated.)doc";
+
+static const char *__doc_fiction_charge_index_mode_WORKING_WITH_CHARGE_INDEX =
+R"doc(The charge state is assigned to the cell but the old charge index is
+kept.)doc";
 
 static const char *__doc_fiction_charge_index_recomputation =
 R"doc(An enumeration of modes to specifying if the charge index should be
@@ -10752,10 +10775,6 @@ be difficult or even impossible to find several unique (given by
 number_of_unique_generated_layouts) layouts. Therefore, this parameter
 sets a limit for the maximum number of tries.)doc";
 
-static const char *__doc_fiction_generate_random_sidb_layout_params_minimal_spacing =
-R"doc(If positively charged SiDBs should be prevented, SiDBs are not placed
-closer than this value (Euclidean distance of two cells).)doc";
-
 static const char *__doc_fiction_generate_random_sidb_layout_params_number_of_sidbs = R"doc(Number of SiDBs that are placed on the layout.)doc";
 
 static const char *__doc_fiction_generate_random_sidb_layout_params_number_of_unique_generated_layouts = R"doc(The desired number of unique layouts to be generated.)doc";
@@ -10768,6 +10787,10 @@ static const char *__doc_fiction_generate_random_sidb_layout_params_positive_cha
 R"doc(Positive charges can occur (i.e. SiDBs can be placed right next to
 each other).)doc";
 
+static const char *__doc_fiction_generate_random_sidb_layout_params_positive_charges_CAN_OCCUR =
+R"doc(Positive charges can occur, which means that the
+`can_positive_charges_occur` function returns `true`.)doc";
+
 static const char *__doc_fiction_generate_random_sidb_layout_params_positive_charges_FORBIDDEN =
 R"doc(Positive charges are not allowed to occur (i.e. SiDBs need to be
 seperated by a few lattice points).)doc";
@@ -10775,6 +10798,8 @@ seperated by a few lattice points).)doc";
 static const char *__doc_fiction_generate_random_sidb_layout_params_positive_sidbs =
 R"doc(If positively charged SiDBs should be prevented, SiDBs are not placed
 closer than the minimal_spacing.)doc";
+
+static const char *__doc_fiction_generate_random_sidb_layout_params_sim_params = R"doc()doc";
 
 static const char *__doc_fiction_geometric_temperature_schedule =
 R"doc(A logarithmically decreasing temperature schedule. The temperature is
