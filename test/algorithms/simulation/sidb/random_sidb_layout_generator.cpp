@@ -12,6 +12,8 @@
 #include <fiction/technology/sidb_defect_surface.hpp>
 #include <fiction/technology/sidb_defects.hpp>
 #include <fiction/types.hpp>
+#include <fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp>
+#include <fiction/utils/layout_utils.hpp>
 
 #include <cstdint>
 

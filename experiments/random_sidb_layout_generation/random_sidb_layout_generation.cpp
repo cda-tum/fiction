@@ -4,6 +4,7 @@
 
 #include <fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp>
 #include <fiction/io/write_sqd_layout.hpp>
+#include <fiction/technology/cell_technologies.hpp>
 #include <fiction/types.hpp>
 
 #include <fmt/format.h>
@@ -98,7 +99,7 @@ int main(int argc, const char* argv[])  // NOLINT
 
     // specifies whether positively charged SiDBs are allowed ("ALLOWED"), forbidden ("FORBIDDEN") or can occur
     // ("CAN_OCCUR")
-    generate_random_sidb_layout_params<offset::ucoord_t>::positive_charges charges;
+    generate_random_sidb_layout_params<offset::ucoord_t>::positive_charges charges{};
     if (charges_str == "ALLOWED")
     {
         charges = generate_random_sidb_layout_params<offset::ucoord_t>::positive_charges::ALLOWED;

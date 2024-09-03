@@ -7,6 +7,7 @@
 
 #include "fiction/algorithms/path_finding/distance.hpp"
 #include "fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp"
+#include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/layout_utils.hpp"
@@ -57,8 +58,10 @@ struct generate_random_sidb_layout_params
      * If positively charged SiDBs should be prevented, SiDBs are not placed closer than the minimal_spacing.
      */
     positive_charges positive_sidbs = positive_charges::ALLOWED;
-
-    sidb_simulation_parameters sim_params{};
+    /**
+     * Simulation parameters.
+     */
+    sidb_simulation_parameters sim_params;
     /**
      * Maximum number of steps to place the specified number of SiDBs. Example: If the area, where SiDBs can be placed,
      * is small and many SiDBs are to be placed, several tries are required to generate a layout with no positively
