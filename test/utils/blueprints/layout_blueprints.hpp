@@ -921,7 +921,7 @@ Lyt and_gate_111() noexcept
  * Bestagons: Design Automation for Silicon Dangling Bond Logic\" authored by Marcel Walter, Samuel Sze Hang Ng, Konrad
  * Walus, and Robert Wille.
  *
- * (https://github.com/cda-tum/mnt-bestagon-library)
+ * (https://dl.acm.org/doi/10.1145/3489517.3530525)
  */
 template <typename Lyt>
 Lyt bestagon_double_wire() noexcept
@@ -988,7 +988,7 @@ Lyt bestagon_double_wire() noexcept
  * Bestagons: Design Automation for Silicon Dangling Bond Logic\" authored by Marcel Walter, Samuel Sze Hang Ng, Konrad
  * Walus, and Robert Wille.
  *
- * (https://github.com/cda-tum/mnt-bestagon-library)
+ * (https://dl.acm.org/doi/10.1145/3489517.3530525)
  */
 template <typename Lyt>
 Lyt bestagon_ha() noexcept
