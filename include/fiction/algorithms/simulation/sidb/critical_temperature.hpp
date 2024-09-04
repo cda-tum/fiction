@@ -143,13 +143,13 @@ class critical_temperature_impl
             layout{lyt},
             params{ps},
             stats{st},
-            bii(bdl_input_iterator<Lyt>{layout, params.input_bdl_iterator_params})
+            bii(bdl_input_iterator<Lyt>{layout, params.input_bdl_iterator_params}),
+            critical_temperature{ps.max_temperature}
 
     {
         stats.simulation_parameters = params.simulation_parameters;
         stats.algorithm_name =
             (params.engine == critical_temperature_params::simulation_engine::EXACT) ? "QuickExact" : "QuickSim";
-        critical_temperature = params.max_temperature;
     }
 
     /**

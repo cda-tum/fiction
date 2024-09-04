@@ -629,7 +629,7 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon double wire, QuickExact", "
     const auto lyt_double_wire_gate = blueprints::bestagon_double_wire<TestType>();
 
     critical_temperature_params params{};
-    sidb_simulation_parameters  sim_params{2, -0.32, 5.6, 5.0};
+    const sidb_simulation_parameters  sim_params{2, -0.32, 5.6, 5.0};
 
     critical_temperature_stats critical_stats{};
 
@@ -652,7 +652,7 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon half adder gate, QuickExact
     const auto lyt_half_adder_gate = blueprints::bestagon_ha<TestType>();
 
     critical_temperature_params params{};
-    sidb_simulation_parameters  sim_params{2, -0.32, 5.6, 5.0};
+    const sidb_simulation_parameters  sim_params{2, -0.32, 5.6, 5.0};
 
     critical_temperature_stats critical_stats{};
 

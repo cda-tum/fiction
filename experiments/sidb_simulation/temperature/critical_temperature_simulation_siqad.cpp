@@ -5,7 +5,6 @@
 #include "fiction_experiments.hpp"
 
 #include <fiction/algorithms/simulation/sidb/critical_temperature.hpp>
-#include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/io/read_sqd_layout.hpp>
 #include <fiction/types.hpp>
