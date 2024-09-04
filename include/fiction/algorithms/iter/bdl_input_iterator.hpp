@@ -38,10 +38,10 @@ struct bdl_input_iterator_params
          * by positioning the perturber farther away (as described in https://dl.acm.org/doi/10.1145/3489517.3530525).
          */
         PERTURBER_DISTANCE_ENCODED,
-       /**
-        * A perturber is used to set the input to `1`, while the absence of a perturber represents a `0`
-        * (as described in https://ieeexplore.ieee.org/abstract/document/8963859).
-        */
+        /**
+         * A perturber is used to set the input to `1`, while the absence of a perturber represents a `0`
+         * (as described in https://ieeexplore.ieee.org/abstract/document/8963859).
+         */
         PERTURBER_ABSENCE_ENCODED
     };
     /**
@@ -353,7 +353,8 @@ class bdl_input_iterator
             }
             else
             {
-                if (params.input_bdl_config == bdl_input_iterator_params::input_bdl_configuration::PERTURBER_DISTANCE_ENCODED)
+                if (params.input_bdl_config ==
+                    bdl_input_iterator_params::input_bdl_configuration::PERTURBER_DISTANCE_ENCODED)
                 {
                     // set input i to 0
                     layout.assign_cell_type(input_i.upper, technology<Lyt>::cell_type::INPUT);
