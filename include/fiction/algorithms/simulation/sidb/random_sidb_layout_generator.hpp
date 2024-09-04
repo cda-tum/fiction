@@ -184,7 +184,7 @@ generate_multiple_random_sidb_layouts(const Lyt&                                
         const auto random_lyt = generate_random_sidb_layout(lyt_skeleton, params);
 
         // indicates if a found SiDB layout is identical to an already found one.
-        const auto identical_layout = std::any_of(unique_lyts.begin(), unique_lyts.end(), [&](const auto& old_lyt)
+        const auto identical_layout = std::any_of(unique_lyts.cbegin(), unique_lyts.cend(), [&](const auto& old_lyt)
                                                   { return are_layouts_identical(random_lyt, old_lyt); });
 
         // if the randomly generated SiDB layout is not identical to a previously generated one, it is added to the
