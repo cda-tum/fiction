@@ -111,10 +111,10 @@ inline void bdl_input_iterator(pybind11::module& m)
     py::enum_<typename fiction::bdl_input_iterator_params::input_bdl_configuration>(m, "input_bdl_configuration")
         .value("PERTURBER_ABSENCE_ENCODED",
                fiction::bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED,
-               DOC(fiction_bdl_input_iterator_params_input_bdl_configuration_ZERO_VIA_NO_PERTURBER))
+               DOC(fiction_bdl_input_iterator_params_input_bdl_configuration_PERTURBER_ABSENCE_ENCODED))
         .value("PERTURBER_DISTANCE_ENCODED",
                fiction::bdl_input_iterator_params::input_bdl_configuration::PERTURBER_DISTANCE_ENCODED,
-               DOC(fiction_bdl_input_iterator_params_input_bdl_configuration_ZERO_VIA_PERTURBER));
+               DOC(fiction_bdl_input_iterator_params_input_bdl_configuration_PERTURBER_DISTANCE_ENCODED));
 
     /**
      * BDL input iterator parameters.
