@@ -14,9 +14,9 @@
 
 using namespace fiction;
 
-// This script compares the simulation runtime of the exhaustive and QuickExact simulation algorithms for randomly
+// This script compares the simulation runtime of ExGS and QuickExact for randomly
 // generated layouts that may contain positively charged SiDBs (`can_positive_charges_occur` returns `true`). The number
-// of SiDBs in the layout is varied from 5 to 20.
+// of SiDBs in the layout varies from 5 to 20.
 
 int main()  // NOLINT
 {
