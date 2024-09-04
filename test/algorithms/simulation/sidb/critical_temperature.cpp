@@ -168,7 +168,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         params.simulation_parameters = sim_params;
         params.engine                = critical_temperature_params::simulation_engine::EXACT;
         params.input_bdl_iterator_params.input_bdl_config =
-            bdl_input_iterator_params::input_bdl_configuration::ZERO_VIA_NO_PERTURBER;
+            bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED;
 
         const auto ct =
             critical_temperature_gate_based(lyt_or_gate, std::vector<tt>{create_or_tt()}, params, &critical_stats);

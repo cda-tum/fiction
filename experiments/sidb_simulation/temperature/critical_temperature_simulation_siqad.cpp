@@ -47,7 +47,7 @@ int main()  // NOLINT
     // Taleana Huff, Mohammad Rashidi, Wyatt Vine, Thomas Dienel, Robert A. Wolkow, and Konrad Walus in IEEE
     // TRANSACTIONS ON NANOTECHNOLOGY, Volume 19, 2020. (https://ieeexplore.ieee.org/abstract/document/8963859)
     ct_params.input_bdl_iterator_params.input_bdl_config =
-        bdl_input_iterator_params::input_bdl_configuration::ZERO_VIA_NO_PERTURBER;
+        bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED;
 
     for (const auto& [gate, truth_table] : gates)
     {
