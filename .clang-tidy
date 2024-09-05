@@ -15,6 +15,7 @@ Checks: |
   -cppcoreguidelines-avoid-magic-numbers,
   -cppcoreguidelines-non-private-member-variables-in-classes,
   -cppcoreguidelines-pro-type-union-access,
+  -cppcoreguidelines-avoid-const-or-ref-data-members,
   google-*,
   -google-readability-todo,
   -google-build-using-namespace,
@@ -40,6 +41,8 @@ Checks: |
 CheckOptions:
   - key: cppcoreguidelines-avoid-do-while.IgnoreMacros
     value: "true"
+  - key: misc-include-cleaner.IgnoreHeaders
+    value: ".*/experiments.hpp;.*/fiction_experiments.hpp;.*/format.h"
   - key: readability-identifier-naming.NamespaceCase
     value: lower_case
   - key: readability-identifier-naming.ClassCase
