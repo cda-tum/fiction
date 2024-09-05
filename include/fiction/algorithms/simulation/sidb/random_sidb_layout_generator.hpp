@@ -113,7 +113,7 @@ Lyt generate_random_sidb_layout(const Lyt&                                      
     // stops if either all SiDBs are placed or the maximum number of attempts was performed
     while (lyt.num_cells() < number_of_sidbs_of_final_layout && attempt_counter < params.maximal_attempts)
     {
-        // random coordinate within given area
+        // random coordinate within the area specified by two coordinates
         const auto random_coord = random_coordinate(params.coordinate_pair.first, params.coordinate_pair.second);
         bool       next_to_neutral_defect = false;
 
