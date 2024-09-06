@@ -14056,7 +14056,7 @@ Template parameter ``PortType``:
 static const char *__doc_fiction_port_list_inp = R"doc(Input and output positions.)doc";
 
 static const char *__doc_fiction_port_list_operator_eq =
-R"doc(Comparator for unordered_set/map.
+R"doc(Comparator for port lists.
 
 Parameter ``p``:
     Ports to compare to.
@@ -14065,8 +14065,8 @@ Returns:
     `true` iff these ports are equal to `p`.)doc";
 
 static const char *__doc_fiction_port_list_operator_iadd =
-R"doc(Merges two port_list objects together. The given port_list might be
-altered.
+R"doc(Merges two `port_list` objects together. The given `port_list` might
+be altered.
 
 Parameter ``p``:
     Ports to merge.
