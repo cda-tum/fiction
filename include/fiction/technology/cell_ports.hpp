@@ -293,7 +293,7 @@ struct formatter<fiction::port_list<PortType>>
     }
 
     template <typename FormatContext>
-    auto format(const fiction::port_list<PortType>& pl, FormatContext& ctx)
+    auto format(const fiction::port_list<PortType>& pl, FormatContext& ctx) const
     {
         return format_to(ctx.out(), "inp: {}, out: {}", join(pl.inp, ", "), join(pl.out, ", "));
     }
