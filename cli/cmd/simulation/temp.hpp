@@ -68,6 +68,7 @@ class temp_command : public command
     {
         // reset statistics
         stats = {};
+        ct   = 0.0;
 
         if (params.confidence_level <= 0 || params.confidence_level > 1)
         {
