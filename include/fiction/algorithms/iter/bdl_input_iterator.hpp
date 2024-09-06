@@ -329,15 +329,14 @@ class bdl_input_iterator
      */
     void set_all_inputs() noexcept
     {
-        for (uint64_t i = 0; i < input_pairs.size(); ++i)
+        for (auto i = num_inputs - 1; i >= 0; --i)
         {
-            // The "num_input - 1 - i" is to reduce confusion. This means that if the current_input_index is 10, the
-            // left BDL pair is set to 1 and the right pair is set to 0, not the other way around.
-            const auto& input_i = input_pairs[num_inputs - 1 - i];
+            // Using i directly now since we're already iterating backwards.
+            const auto& input_i = input_pairs[i];
 
-            if (input_bdl_wires[num_inputs - 1 - i].direction == bdl_wire_direction::NORTH_SOUTH)
+            if (input_bdl_wires[static_cast<uint64_t>(i)].direction == bdl_wire_direction::NORTH_SOUTH)
             {
-                if ((current_input_index & (uint64_t{1ull} << i)) != 0ull)
+                if ((current_input_index & (uint64_t{1ull} << static_cast<uint64_t>(num_inputs - 1 - i))) != 0ull)
                 {
                     // set input i to 1
                     layout.assign_cell_type(input_i.upper, technology<Lyt>::cell_type::EMPTY);
@@ -352,7 +351,7 @@ class bdl_input_iterator
             }
             else
             {
-                if ((current_input_index & (uint64_t{1ull} << i)) != 0ull)
+                if ((current_input_index & (uint64_t{1ull} << static_cast<uint64_t>(num_inputs - 1 - i))) != 0ull)
                 {
                     // set input i to 1
                     layout.assign_cell_type(input_i.upper, technology<Lyt>::cell_type::INPUT);

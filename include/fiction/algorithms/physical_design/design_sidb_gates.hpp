@@ -32,7 +32,6 @@
 #include <cstdint>
 #include <cstdlib>
 #include <iostream>
-#include <iterator>
 #include <limits>
 #include <mutex>
 #include <optional>
@@ -208,7 +207,7 @@ class design_sidb_gates_impl
                      std::default_random_engine(std::random_device{}()));
 
         const auto add_combination_to_layout_and_check_operation = [this, &mutex_to_protect_designed_gate_layouts,
-                                                                    &designed_gate_layouts, &sidbs_affected_by_defects,
+                                                                    &designed_gate_layouts,
                                                                     &solution_found](const auto& combination) noexcept
         {
             // canvas SiDBs are added to the skeleton
