@@ -8,12 +8,13 @@
 #include "fiction/utils/hash.hpp"
 
 #include <fmt/format.h>
+#include <fmt/ranges.h>
 
 #include <cassert>
 #include <cstdint>
+#include <cstdlib>
 #include <functional>
 #include <set>
-#include <unordered_map>
 #include <utility>
 
 namespace fiction
@@ -174,7 +175,7 @@ struct port_list
      */
     std::set<PortType> inp{}, out{};
     /**
-     * Comparator for unordered_set/map.
+     * Comparator for port lists.
      *
      * @param p Ports to compare to.
      * @return `true` iff these ports are equal to `p`.
@@ -184,7 +185,7 @@ struct port_list
         return this->inp == p.inp && this->out == p.out;
     }
     /**
-     * Merges two port_list objects together. The given port_list might be altered.
+     * Merges two `port_list` objects together. The given `port_list` might be altered.
      *
      * @param p Ports to merge.
      * @return Merged port lists.
