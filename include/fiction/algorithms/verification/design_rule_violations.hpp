@@ -9,6 +9,7 @@
 
 #include <fmt/color.h>
 #include <fmt/format.h>
+#include <fmt/ranges.h>
 #include <mockturtle/traits.hpp>
 #include <nlohmann/json.hpp>
 
