@@ -1,3 +1,4 @@
+#include "fiction/layouts/bounding_box.hpp"
 #include "fiction_experiments.hpp"
 
 #include <fiction/algorithms/physical_design/orthogonal.hpp>                // scalable heuristic for physical design
@@ -5,8 +6,10 @@
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/algorithms/verification/equivalence_checking.hpp>               // SAT-based equivalence checking
 #include <fiction/io/network_reader.hpp>                                          // read networks from files
+#include <fiction/types.hpp>                                                      // types suitable for the FCN domain
 
-#include <fmt/format.h>  // output formatting
+#include <fmt/format.h>                    // output formatting
+#include <mockturtle/utils/stopwatch.hpp>  // runtime measurements
 
 #include <cstdint>
 #include <cstdlib>
