@@ -23,6 +23,8 @@ BDL Input Iterator
     .. tab:: C++
         **Header:** ``fiction/algorithms/iter/bdl_input_iterator.hpp``
 
+        .. doxygenstruct:: fiction::bdl_input_iterator_params
+           :members:
         .. doxygenclass:: fiction::bdl_input_iterator
            :members:
 

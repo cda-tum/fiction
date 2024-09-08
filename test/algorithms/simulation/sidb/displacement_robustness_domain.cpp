@@ -45,11 +45,8 @@ TEST_CASE("Determine the SiDB gate displacement robustness of the Y-shaped SiDB 
     displacement_robustness_domain_params<cell<sidb_cell_clk_lyt_siqad>> params{};
     params.displacement_variations                  = {1, 1};
     params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.28};
-
-    params.operational_params.bdl_wire_params.threshold_bdl_interdistance       = 2.0;
-    params.operational_params.bdl_wire_params.params_bdl_pairs.maximum_distance = 2.0;
-    params.operational_params.bdl_wire_params.params_bdl_pairs.minimum_distance = 0.2;
-
+    params.operational_params.input_bdl_iterator_params.bdl_pairs_params.maximum_distance = 2.0;
+    params.operational_params.input_bdl_iterator_params.bdl_pairs_params.minimum_distance = 0.2;
     params.fixed_sidbs                              = {{0, 0, 1},  {2, 1, 1},  {20, 0, 1}, {18, 1, 1}, {14, 3, 1},
                                                        {16, 2, 1}, {10, 7, 0}, {10, 6, 0}, {10, 9, 1}, {4, 2, 1}};
     params.percentage_of_analyzed_displaced_layouts = 0.1;
@@ -79,8 +76,8 @@ TEST_CASE("Determine the SiDB gate displacement robustness of the Y-shaped SiDB 
         params.displacement_variations = {0, 2};
         params.dimer_policy            = displacement_robustness_domain_params<
                        cell<sidb_cell_clk_lyt_siqad>>::dimer_displacement_policy::STAY_ON_ORIGINAL_DIMER;
-        params.operational_params.bdl_wire_params.params_bdl_pairs.maximum_distance = 3.0;
-        params.operational_params.bdl_wire_params.params_bdl_pairs.minimum_distance = 0.2;
+        params.operational_params.input_bdl_iterator_params.bdl_pairs_params.maximum_distance = 3.0;
+        params.operational_params.input_bdl_iterator_params.bdl_pairs_params.minimum_distance = 0.2;
 
         const auto robustness_domain =
             determine_displacement_robustness_domain(lyt, std::vector<tt>{create_and_tt()}, params, &stats);
@@ -103,8 +100,8 @@ TEST_CASE("Determine the probability of fabricating an operational SiQAD Y-shape
         displacement_robustness_domain_params<cell<sidb_cell_clk_lyt_siqad>> params{};
         params.displacement_variations                  = {1, 0};
         params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.28};
-        params.operational_params.bdl_wire_params.params_bdl_pairs.maximum_distance = 2.0;
-        params.operational_params.bdl_wire_params.params_bdl_pairs.minimum_distance = 0.2;
+        params.operational_params.input_bdl_iterator_params.bdl_pairs_params.maximum_distance = 2.0;
+        params.operational_params.input_bdl_iterator_params.bdl_pairs_params.minimum_distance = 0.2;
 
         const auto result =
             determine_probability_of_fabricating_operational_gate(lyt, std::vector<tt>{create_and_tt()}, params, 0.3);
@@ -123,9 +120,8 @@ TEST_CASE("Determine the probability of fabricating an operational Bestagon AND 
         displacement_robustness_domain_params<cell<sidb_cell_clk_lyt_siqad>> params{};
         params.displacement_variations                  = {1, 0};
         params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.32};
-        params.operational_params.bdl_wire_params.params_bdl_pairs.maximum_distance = 2.0;
-        params.operational_params.bdl_wire_params.params_bdl_pairs.minimum_distance = 0.2;
-        params.operational_params.bdl_wire_params.threshold_bdl_interdistance       = 2.5;
+        params.operational_params.input_bdl_iterator_params.bdl_pairs_params.maximum_distance = 2.0;
+        params.operational_params.input_bdl_iterator_params.bdl_pairs_params.minimum_distance = 0.2;
         params.analysis_mode =
             displacement_robustness_domain_params<cell<sidb_cell_clk_lyt_siqad>>::displacement_analysis_mode::RANDOM;
         params.percentage_of_analyzed_displaced_layouts = 0.1;
@@ -146,8 +142,8 @@ TEST_CASE("Determine the probability of fabricating an operational BDL wire with
         displacement_robustness_domain_params<cell<sidb_cell_clk_lyt_siqad>> params{};
         params.displacement_variations                  = {0, 1};
         params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.32};
-        params.operational_params.bdl_wire_params.params_bdl_pairs.maximum_distance = 2.0;
-        params.operational_params.bdl_wire_params.params_bdl_pairs.minimum_distance = 0.2;
+        params.operational_params.input_bdl_iterator_params.bdl_pairs_params.maximum_distance = 2.0;
+        params.operational_params.input_bdl_iterator_params.bdl_pairs_params.minimum_distance = 0.2;
         params.dimer_policy = displacement_robustness_domain_params<
             cell<sidb_cell_clk_lyt_siqad>>::dimer_displacement_policy::STAY_ON_ORIGINAL_DIMER;
         params.analysis_mode = displacement_robustness_domain_params<
@@ -178,11 +174,8 @@ TEST_CASE("Determine the probability of fabricating an operational BDL wire with
         displacement_robustness_domain_params<cell<sidb_cell_clk_lyt_siqad>> params{};
         params.displacement_variations                  = {1, 0};
         params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.32};
-
-        params.operational_params.bdl_wire_params.threshold_bdl_interdistance       = 2.0;
-        params.operational_params.bdl_wire_params.params_bdl_pairs.maximum_distance = 2.0;
-        params.operational_params.bdl_wire_params.params_bdl_pairs.minimum_distance = 0.2;
-
+        params.operational_params.input_bdl_iterator_params.bdl_pairs_params.maximum_distance = 2.0;
+        params.operational_params.input_bdl_iterator_params.bdl_pairs_params.minimum_distance = 0.2;
         params.dimer_policy = displacement_robustness_domain_params<
             cell<sidb_cell_clk_lyt_siqad>>::dimer_displacement_policy::STAY_ON_ORIGINAL_DIMER;
         params.analysis_mode = displacement_robustness_domain_params<
@@ -198,8 +191,8 @@ TEST_CASE("Determine the probability of fabricating an operational BDL wire with
         displacement_robustness_domain_params<cell<sidb_cell_clk_lyt_siqad>> params{};
         params.displacement_variations                  = {1, 0};
         params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.32};
-        params.operational_params.bdl_wire_params.params_bdl_pairs.maximum_distance = 2.0;
-        params.operational_params.bdl_wire_params.params_bdl_pairs.minimum_distance = 0.2;
+        params.operational_params.input_bdl_iterator_params.bdl_pairs_params.maximum_distance = 2.0;
+        params.operational_params.input_bdl_iterator_params.bdl_pairs_params.minimum_distance = 0.2;
 
         const auto result =
             determine_probability_of_fabricating_operational_gate(lyt, std::vector<tt>{create_id_tt()}, params, 0.0);
@@ -211,8 +204,8 @@ TEST_CASE("Determine the probability of fabricating an operational BDL wire with
         displacement_robustness_domain_params<cell<sidb_cell_clk_lyt_siqad>> params{};
         params.displacement_variations                  = {0, 1};
         params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.32};
-        params.operational_params.bdl_wire_params.params_bdl_pairs.maximum_distance = 2.0;
-        params.operational_params.bdl_wire_params.params_bdl_pairs.minimum_distance = 0.2;
+        params.operational_params.input_bdl_iterator_params.bdl_pairs_params.maximum_distance = 2.0;
+        params.operational_params.input_bdl_iterator_params.bdl_pairs_params.minimum_distance = 0.2;
 
         const auto result =
             determine_probability_of_fabricating_operational_gate(lyt, std::vector<tt>{create_id_tt()}, params, 0.0);
@@ -232,8 +225,8 @@ TEST_CASE("Determine the probability of fabricating an operational BDL, offset c
         displacement_robustness_domain_params<cell<sidb_cell_clk_lyt>> params{};
         params.displacement_variations                  = {0, 1};
         params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.32};
-        params.operational_params.bdl_wire_params.params_bdl_pairs.maximum_distance = 2.0;
-        params.operational_params.bdl_wire_params.params_bdl_pairs.minimum_distance = 0.2;
+        params.operational_params.input_bdl_iterator_params.bdl_pairs_params.maximum_distance = 2.0;
+        params.operational_params.input_bdl_iterator_params.bdl_pairs_params.minimum_distance = 0.2;
         params.dimer_policy = displacement_robustness_domain_params<
             cell<sidb_cell_clk_lyt>>::dimer_displacement_policy::STAY_ON_ORIGINAL_DIMER;
         params.analysis_mode =
@@ -264,8 +257,8 @@ TEST_CASE("Determine the probability of fabricating an operational BDL, offset c
         displacement_robustness_domain_params<cell<sidb_cell_clk_lyt>> params{};
         params.displacement_variations                  = {1, 0};
         params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.32};
-        params.operational_params.bdl_wire_params.params_bdl_pairs.maximum_distance = 2.0;
-        params.operational_params.bdl_wire_params.params_bdl_pairs.minimum_distance = 0.2;
+        params.operational_params.input_bdl_iterator_params.bdl_pairs_params.maximum_distance = 2.0;
+        params.operational_params.input_bdl_iterator_params.bdl_pairs_params.minimum_distance = 0.2;
         params.dimer_policy = displacement_robustness_domain_params<
             cell<sidb_cell_clk_lyt>>::dimer_displacement_policy::STAY_ON_ORIGINAL_DIMER;
         params.analysis_mode =
@@ -281,8 +274,8 @@ TEST_CASE("Determine the probability of fabricating an operational BDL, offset c
         displacement_robustness_domain_params<cell<sidb_cell_clk_lyt>> params{};
         params.displacement_variations                  = {1, 0};
         params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.32};
-        params.operational_params.bdl_wire_params.params_bdl_pairs.maximum_distance = 2.0;
-        params.operational_params.bdl_wire_params.params_bdl_pairs.minimum_distance = 0.2;
+        params.operational_params.input_bdl_iterator_params.bdl_pairs_params.maximum_distance = 2.0;
+        params.operational_params.input_bdl_iterator_params.bdl_pairs_params.minimum_distance = 0.2;
 
         const auto result = determine_probability_of_fabricating_operational_gate(
             lyt_offset, std::vector<tt>{create_id_tt()}, params, 0.0);
@@ -294,8 +287,8 @@ TEST_CASE("Determine the probability of fabricating an operational BDL, offset c
         displacement_robustness_domain_params<cell<sidb_cell_clk_lyt>> params{};
         params.displacement_variations                  = {0, 1};
         params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.32};
-        params.operational_params.bdl_wire_params.params_bdl_pairs.maximum_distance = 2.0;
-        params.operational_params.bdl_wire_params.params_bdl_pairs.minimum_distance = 0.2;
+        params.operational_params.input_bdl_iterator_params.bdl_pairs_params.maximum_distance = 2.0;
+        params.operational_params.input_bdl_iterator_params.bdl_pairs_params.minimum_distance = 0.2;
 
         const auto result = determine_probability_of_fabricating_operational_gate(
             lyt_offset, std::vector<tt>{create_id_tt()}, params, 0.0);

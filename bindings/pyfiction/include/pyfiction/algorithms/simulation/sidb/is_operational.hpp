@@ -31,7 +31,7 @@ void is_operational(pybind11::module& m)
           DOC(fiction_is_operational));
 
     m.def("operational_input_patterns", &fiction::operational_input_patterns<Lyt, py_tt>, "lyt"_a, "spec"_a,
-          "params"_a = fiction::is_operational_params{}, DOC(fiction_is_operational));
+          "params"_a = fiction::is_operational_params{}, DOC(fiction_operational_input_patterns));
 }
 
 }  // namespace detail
@@ -54,7 +54,7 @@ inline void is_operational(pybind11::module& m)
     py::class_<fiction::is_operational_params>(m, "is_operational_params", DOC(fiction_is_operational_params))
         .def(py::init<>())
         .def_readwrite("simulation_parameters", &fiction::is_operational_params::simulation_parameters,
-                       DOC(fiction_is_operational_params))
+                       DOC(fiction_is_operational_params_simulation_parameters))
         .def_readwrite("sim_engine", &fiction::is_operational_params::sim_engine,
                        DOC(fiction_is_operational_params_sim_engine))
         .def_readwrite("bdl_wire_params", &fiction::is_operational_params::bdl_wire_params)
