@@ -3514,11 +3514,7 @@ static const char *__doc_fiction_design_sidb_gates_params_design_sidb_gates_mode
 
 static const char *__doc_fiction_design_sidb_gates_params_number_of_sidbs = R"doc(Number of SiDBs placed in the canvas to create a working gate.)doc";
 
-static const char *__doc_fiction_design_sidb_gates_params_sim_engine =
-R"doc(The simulation engine to be used for the operational domain
-computation.)doc";
-
-static const char *__doc_fiction_design_sidb_gates_params_simulation_parameters = R"doc(All Parameters for physical SiDB simulations.)doc";
+static const char *__doc_fiction_design_sidb_gates_params_operational_params = R"doc(Parameter for the `is_operational` function.)doc";
 
 static const char *__doc_fiction_design_sidb_gates_params_termination_cond =
 R"doc(The design process is terminated after a valid SiDB gate design is
