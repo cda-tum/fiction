@@ -145,9 +145,9 @@ class design_sidb_gates_impl
         std::shuffle(all_combinations.begin(), all_combinations.end(),
                      std::default_random_engine(std::random_device{}()));
 
-        const auto add_combination_to_layout_and_check_operation =
-            [this, &mutex_to_protect_designed_gate_layouts, &designed_gate_layouts,
-             &sidbs_affected_by_defects, &solution_found](const auto& combination) noexcept
+        const auto add_combination_to_layout_and_check_operation = [this, &mutex_to_protect_designed_gate_layouts,
+                                                                    &designed_gate_layouts, &sidbs_affected_by_defects,
+                                                                    &solution_found](const auto& combination) noexcept
         {
             for (const auto& comb : combination)
             {
