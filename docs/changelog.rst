@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 
 The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`_.
 
+Unreleased```
+-------------
+
+Added
+#####
+- Experiments:
+    - Script to simulate the critical temperature of SiQAD and Bestagon gates
+- Algorithms:
+    - Added support for different ways of implementing input information in SiDB technology to the BDL input iterator
+
 v0.6.4 - 2024-08-30
 -------------------
 
