@@ -50,18 +50,16 @@ inline void design_sidb_gates(pybind11::module& m)
     py::class_<fiction::design_sidb_gates_params<fiction::offset::ucoord_t>>(m, "design_sidb_gates_params",
                                                                              DOC(fiction_design_sidb_gates_params))
         .def(py::init<>())
-        .def_readwrite("simulation_parameters",
-                       &fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::simulation_parameters,
-                       DOC(fiction_design_sidb_gates_params))
+        .def_readwrite("is_operational_params",
+                       &fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::operational_params,
+                       DOC(fiction_design_sidb_gates_params_operational_params))
         .def_readwrite("design_mode", &fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_mode,
                        DOC(fiction_design_sidb_gates_params_design_mode))
         .def_readwrite("canvas", &fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::canvas,
                        DOC(fiction_design_sidb_gates_params_canvas))
         .def_readwrite("number_of_sidbs",
                        &fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::number_of_sidbs,
-                       DOC(fiction_design_sidb_gates_params_number_of_sidbs))
-        .def_readwrite("sim_engine", &fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::sim_engine,
-                       DOC(fiction_design_sidb_gates_params_sim_engine));
+                       DOC(fiction_design_sidb_gates_params_number_of_sidbs));
 
     detail::design_sidb_gates<py_sidb_100_lattice>(m);
     detail::design_sidb_gates<py_sidb_111_lattice>(m);
