@@ -72,6 +72,7 @@ calculate_energy_and_state_type(const sidb_energy_distribution&                 
                 physical_constants::POP_STABILITY_ERR)
             {
                 bool correct_output = true;
+
                 for (auto i = 0u; i < output_bdl_pairs.size(); i++)
                 {
                     if (static_cast<bool>(-charge_state_to_sign(valid_layout.get_charge_state(

@@ -73,7 +73,7 @@ struct generate_random_sidb_layout_params
      * even impossible to find several unique (given by number_of_unique_generated_layouts) layouts. Therefore, this
      * parameter sets a limit for the maximum number of tries.
      */
-    uint64_t maximal_attempts_for_multiple_layouts = 10E6;
+    uint64_t maximal_attempts_for_multiple_layouts = 1'000'000;
 };
 
 /**

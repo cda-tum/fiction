@@ -32,8 +32,8 @@ void bdl_input_iterator(pybind11::module& m, const std::string& lattice)
 
     py::class_<fiction::bdl_input_iterator<Lyt>>(m, fmt::format("bdl_input_iterator_{}", lattice).c_str(),
                                                  DOC(fiction_bdl_input_iterator))
-        .def(py::init<const Lyt&, const fiction::detect_bdl_pairs_params&>(), "lyt"_a,
-             "params"_a = fiction::detect_bdl_pairs_params{}, DOC(fiction_bdl_input_iterator_bdl_input_iterator))
+        .def(py::init<const Lyt&, const fiction::bdl_input_iterator_params&>(), "lyt"_a,
+             "params"_a = fiction::bdl_input_iterator_params{}, DOC(fiction_bdl_input_iterator_bdl_input_iterator))
         .def(
             "__next__",
             [](fiction::bdl_input_iterator<Lyt>& self) -> Lyt&
@@ -102,6 +102,30 @@ void bdl_input_iterator(pybind11::module& m, const std::string& lattice)
 
 inline void bdl_input_iterator(pybind11::module& m)
 {
+    namespace py = pybind11;
+    using namespace py::literals;
+
+    /**
+     * Input BDL configuration
+     */
+    py::enum_<typename fiction::bdl_input_iterator_params::input_bdl_configuration>(m, "input_bdl_configuration")
+        .value("PERTURBER_ABSENCE_ENCODED",
+               fiction::bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED,
+               DOC(fiction_bdl_input_iterator_params_input_bdl_configuration_PERTURBER_ABSENCE_ENCODED))
+        .value("PERTURBER_DISTANCE_ENCODED",
+               fiction::bdl_input_iterator_params::input_bdl_configuration::PERTURBER_DISTANCE_ENCODED,
+               DOC(fiction_bdl_input_iterator_params_input_bdl_configuration_PERTURBER_DISTANCE_ENCODED));
+
+    /**
+     * BDL input iterator parameters.
+     */
+    py::class_<fiction::bdl_input_iterator_params>(m, "bdl_input_iterator_params")
+        .def(py::init<>())
+        .def_readwrite("input_bdl_config", &fiction::bdl_input_iterator_params::input_bdl_config,
+                       DOC(fiction_bdl_input_iterator_params_input_bdl_config))
+        .def_readwrite("bdl_pairs_params", &fiction::bdl_input_iterator_params::bdl_pairs_params,
+                       DOC(fiction_bdl_input_iterator_params_bdl_pairs_params));
+
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
     detail::bdl_input_iterator<py_sidb_100_lattice>(m, "100");

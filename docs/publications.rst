@@ -115,7 +115,7 @@ Furthermore, if you use any of the design automation algorithms, please consider
           year={2023}
         }
 
-    `QuickSim experiment script <https://github.com/cda-tum/fiction/tree/main/experiments/sidb_simulation>`_
+    `QuickSim experiment script <https://github.com/cda-tum/fiction/tree/main/experiments/sidb_simulation/electrostatic_ground_state>`_
 
 * :ref:`QuickExact <quickexact>` (``quickexact``):
 
@@ -129,7 +129,7 @@ Furthermore, if you use any of the design automation algorithms, please consider
           year={2024}
         }
 
-    `QuickExact experiment script <https://github.com/cda-tum/fiction/tree/main/experiments/sidb_simulation>`_
+    `QuickExact experiment script <https://github.com/cda-tum/fiction/tree/main/experiments/sidb_simulation/electrostatic_ground_state>`_
 
 * :ref:`Critical temperature simulation <critical_temperature>` (``critical_temperature``):
 
@@ -142,6 +142,8 @@ Furthermore, if you use any of the design automation algorithms, please consider
           pages={925--930},
           year={2023}
         }
+
+    `Critical temperature experiment scripts <https://github.com/cda-tum/fiction/tree/main/experiments/sidb_simulation/temperature>`_
 
 * :ref:`Operational domain computation <opdom>` (``opdom``):
 
