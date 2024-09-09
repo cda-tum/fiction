@@ -77,7 +77,7 @@ struct detect_bdl_wires_params
     /**
      * Parameters for the `detect_bdl_pairs` algorithm.
      */
-    detect_bdl_pairs_params params_bdl_pairs{};
+    detect_bdl_pairs_params bdl_pairs_params{};
 };
 
 /**
@@ -357,7 +357,7 @@ class detect_bdl_wires_impl
             }
         }
 
-        bdl_wires = std::move(wires);
+        bdl_wires = wires;
     }
 
     /**
@@ -510,8 +510,7 @@ class detect_bdl_wires_impl
         if (!filtered_wires.empty())
         {
             assert(lengths_of_filtered_wires.size() < 2 &&
-                   (type == sidb_technology::cell_type::INPUT ? "input wires have different length" :
-                                                                "output wires have different length"));
+                   "input or output wires have different lengths");
         }
 
         return filtered_wires;
@@ -527,9 +526,9 @@ class detect_bdl_wires_impl
     [[nodiscard]] std::set<bdl_pair<cell<Lyt>>> aggregate_bdl_pairs() const noexcept
     {
         // Collect BDL pairs of each type
-        const auto all_input_bdls  = detect_bdl_pairs(lyt, Lyt::cell_type::INPUT, params.params_bdl_pairs);
-        const auto all_output_bdls = detect_bdl_pairs(lyt, Lyt::cell_type::OUTPUT, params.params_bdl_pairs);
-        const auto all_normal_bdls = detect_bdl_pairs(lyt, Lyt::cell_type::NORMAL, params.params_bdl_pairs);
+        const auto all_input_bdls  = detect_bdl_pairs(lyt, Lyt::cell_type::INPUT, params.bdl_pairs_params);
+        const auto all_output_bdls = detect_bdl_pairs(lyt, Lyt::cell_type::OUTPUT, params.bdl_pairs_params);
+        const auto all_normal_bdls = detect_bdl_pairs(lyt, Lyt::cell_type::NORMAL, params.bdl_pairs_params);
 
         std::set<bdl_pair<cell<Lyt>>> bdl_pairs{};
 

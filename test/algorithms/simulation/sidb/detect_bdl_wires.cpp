@@ -7,6 +7,7 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp>
+#include <fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/types.hpp>
 

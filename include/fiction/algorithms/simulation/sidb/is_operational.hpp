@@ -8,8 +8,8 @@
 #include "fiction/algorithms/iter/bdl_input_iterator.hpp"
 #include "fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp"
 #include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
-#include "fiction/algorithms/simulation/sidb/determine_groundstate_from_simulation_results.hpp"
 #include "fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp"
+#include "fiction/algorithms/simulation/sidb/determine_groundstate_from_simulation_results.hpp"
 #include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
@@ -82,13 +82,13 @@ struct is_operational_params
      */
     sidb_simulation_engine sim_engine{sidb_simulation_engine::QUICKEXACT};
     /**
-     * Condition which is used to decide if a layout is `operational` or `non-operational`.
-     */
-    operational_condition op_condition = operational_condition::ALLOWING_KINKS;
-    /**
      * Parameters for the BDL input iterator.
      */
     bdl_input_iterator_params input_bdl_iterator_params{};
+    /**
+     * Condition which is used to decide if a layout is `operational` or `non-operational`.
+     */
+    operational_condition op_condition = operational_condition::ALLOWING_KINKS;
 };
 
 namespace detail
@@ -119,11 +119,13 @@ class is_operational_impl
             layout{lyt},
             truth_table{tt},
             parameters{params},
-            output_bdl_pairs(detect_bdl_pairs(layout, sidb_technology::cell_type::OUTPUT,
-                                              parameters.bdl_wire_params.params_bdl_pairs)),
-            bii(bdl_input_iterator<Lyt>{layout, parameters.bdl_wire_params}),
-            input_bdl_wires{detect_bdl_wires(layout, parameters.bdl_wire_params, bdl_wire_selection::INPUT)},
-            output_bdl_wires{detect_bdl_wires(layout, parameters.bdl_wire_params, bdl_wire_selection::OUTPUT)}
+            output_bdl_pairs(detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT,
+                                              params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)),
+            bii(bdl_input_iterator<Lyt>{lyt, params.input_bdl_iterator_params}),
+            input_bdl_wires{
+                detect_bdl_wires(lyt, params.input_bdl_iterator_params.bdl_wire_params, bdl_wire_selection::INPUT)},
+            output_bdl_wires{
+                detect_bdl_wires(lyt, params.input_bdl_iterator_params.bdl_wire_params, bdl_wire_selection::OUTPUT)}
     {}
     /**
      * Constructor to initialize the algorithm with a layout and parameters.
@@ -142,8 +144,8 @@ class is_operational_impl
             truth_table{tt},
             parameters{params},
             output_bdl_pairs(detect_bdl_pairs(layout, sidb_technology::cell_type::OUTPUT,
-                                              parameters.bdl_wire_params.params_bdl_pairs)),
-            bii{bdl_input_iterator<Lyt>{layout, parameters.bdl_wire_params, input_wires}},
+                                              params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)),
+            bii{bdl_input_iterator<Lyt>{layout, params.input_bdl_iterator_params, input_wires}},
             input_bdl_wires{input_wires},
             output_bdl_wires{output_wires}
     {}
@@ -198,30 +200,31 @@ class is_operational_impl
                         return operational_status::NON_OPERATIONAL;
                     }
 
-                // if the expected output is 1, the expected charge states are (upper, lower) = (0, -1)
-                if (kitty::get_bit(truth_table[output], i))
-                {
-                    if (!encodes_bit_one(*ground_state, output_bdl_pairs[output], output_bdl_wires[output].direction))
+                    // if the expected output is 1, the expected charge states are (upper, lower) = (0, -1)
+                    if (kitty::get_bit(truth_table[output], i))
                     {
-                        return operational_status::NON_OPERATIONAL;
+                        if (!encodes_bit_one(gs, output_bdl_pairs[output], output_bdl_wires[output].direction))
+                        {
+                            return operational_status::NON_OPERATIONAL;
+                        }
+                    }
+                    // if the expected output is 0, the expected charge states are (upper, lower) = (-1, 0)
+                    else
+                    {
+                        if (!encodes_bit_zero(gs, output_bdl_pairs[output], output_bdl_wires[output].direction))
+                        {
+                            return operational_status::NON_OPERATIONAL;
+                        }
                     }
                 }
-                // if the expected output is 0, the expected charge states are (upper, lower) = (-1, 0)
-                else
-                {
-                    if (!encodes_bit_zero(*ground_state, output_bdl_pairs[output], output_bdl_wires[output].direction))
-                    {
-                        return operational_status::NON_OPERATIONAL;
-                    }
-                }
-            }
 
-            if (parameters.op_condition == operational_condition::FORBIDDING_KINKS)
-            {
-                if (check_existence_of_kinks_in_input_wires(*ground_state, i) ||
-                    check_existence_of_kinks_in_output_wires(*ground_state, i))
+                if (parameters.op_condition == operational_condition::FORBIDDING_KINKS)
                 {
-                    return operational_status::NON_OPERATIONAL;
+                    if (check_existence_of_kinks_in_input_wires(gs, i) ||
+                        check_existence_of_kinks_in_output_wires(gs, i))
+                    {
+                        return operational_status::NON_OPERATIONAL;
+                    }
                 }
             }
         }
@@ -332,7 +335,7 @@ class is_operational_impl
     /**
      * The specification of the layout.
      */
-    const std::vector<TT>& truth_table;
+    const std::vector<TT>& truth_table{};
     /**
      * Parameters for the `is_operational` algorithm.
      */
@@ -563,7 +566,7 @@ class is_operational_impl
     }
 };
 
-}  // namespace detail
+};  // namespace detail
 
 /**
  * Determine the operational status of an SiDB layout.

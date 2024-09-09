@@ -58,7 +58,7 @@ inline void detect_bdl_wires(pybind11::module& m)
     py::class_<fiction::detect_bdl_wires_params>(m, "detect_bdl_wires_params")
         .def(py::init<>())
         .def_readwrite("threshold_bdl_interdistance", &fiction::detect_bdl_wires_params::threshold_bdl_interdistance)
-        .def_readwrite("params_bdl_pairs", &fiction::detect_bdl_wires_params::params_bdl_pairs);
+        .def_readwrite("bdl_pairs_params", &fiction::detect_bdl_wires_params::bdl_pairs_params);
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 

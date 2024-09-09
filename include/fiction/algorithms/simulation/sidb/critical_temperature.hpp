@@ -76,9 +76,9 @@ struct critical_temperature_params
      */
     double max_temperature{400};
     /**
-     * Parameters for the BDL wire detection algorithms.
+     * Parameters for the BDL input iterator.
      */
-    detect_bdl_wires_params bdl_wire_params{};
+    bdl_input_iterator_params input_iterator_params{};
     /**
      * Number of iteration steps for the *QuickSim* algorithm (only applicable if engine == APPROXIMATE).
      */
@@ -143,7 +143,7 @@ class critical_temperature_impl
             layout{lyt},
             params{ps},
             stats{st},
-            bii(bdl_input_iterator<Lyt>{layout, params.input_bdl_iterator_params}),
+            bii(bdl_input_iterator<Lyt>{layout, params.input_iterator_params}),
             critical_temperature{ps.max_temperature}
 
     {
@@ -170,7 +170,8 @@ class critical_temperature_impl
         if (layout.num_cells() > 1)
         {
             const auto output_bdl_pairs =
-                detect_bdl_pairs(layout, sidb_technology::cell_type::OUTPUT, params.bdl_wire_params.params_bdl_pairs);
+                detect_bdl_pairs(layout, sidb_technology::cell_type::OUTPUT,
+                                 params.input_iterator_params.bdl_wire_params.bdl_pairs_params);
 
             // number of different input combinations
             for (auto i = 0u; i < spec.front().num_bits(); ++i, ++bii)

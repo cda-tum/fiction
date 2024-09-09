@@ -57,15 +57,9 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
 
     CHECK(lyt.num_cells() == 13);
 
-    design_sidb_gates_params<cell<siqad_layout>> params{
-        is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT},
-        design_sidb_gates_params<cell<siqad_layout>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
-        {{10, 4, 0}, {10, 4, 0}},
-        1};
-
     SECTION("One cell in canvas")
     {
-        params = design_sidb_gates_params<cell<siqad_layout>>{
+        const auto params = design_sidb_gates_params<cell<siqad_layout>>{
             is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT},
             design_sidb_gates_params<cell<siqad_layout>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
             {{10, 4, 0}, {10, 4, 0}},
@@ -113,7 +107,7 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
     }
     SECTION("Four cells in canvas, design all gates")
     {
-        params = design_sidb_gates_params<cell<siqad_layout>>{
+        const auto params = design_sidb_gates_params<cell<siqad_layout>>{
             is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT},
             design_sidb_gates_params<cell<siqad_layout>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
             {{10, 4, 0}, {13, 4, 0}},
@@ -125,7 +119,7 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
     }
     SECTION("Four cells in canvas, design process is terminated after first solution is found")
     {
-        params = design_sidb_gates_params<cell<siqad_layout>>{
+        const auto params = design_sidb_gates_params<cell<siqad_layout>>{
             is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT},
             design_sidb_gates_params<cell<siqad_layout>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
             {{10, 4, 0}, {10, 4, 0}},
@@ -304,7 +298,7 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
     {
         const design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
             is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
-                                  detect_bdl_wires_params{}, operational_condition::ALLOWING_KINKS},
+                                  bdl_input_iterator_params{}, operational_condition::ALLOWING_KINKS},
             design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::RANDOM,
             {{14, 6, 0}, {24, 12, 0}},
             3};
@@ -320,7 +314,7 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
 
         design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
             is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
-                                  detect_bdl_wires_params{}, operational_condition::FORBIDDING_KINKS},
+                                  bdl_input_iterator_params{}, operational_condition::FORBIDDING_KINKS},
             design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::RANDOM,
             {{16, 7, 0}, {21, 12, 0}},
             3};
@@ -395,7 +389,7 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
     {
         const design_sidb_gates_params<cell<sidb_111_cell_clk_lyt_siqad>> params{
             is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
-                                  detect_bdl_wires_params{}, operational_condition::FORBIDDING_KINKS},
+                                  bdl_input_iterator_params{}, operational_condition::FORBIDDING_KINKS},
             design_sidb_gates_params<
                 cell<sidb_111_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
             {{10, 13, 0}, {15, 17, 0}},
@@ -410,7 +404,7 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
     {
         const design_sidb_gates_params<cell<sidb_111_cell_clk_lyt_siqad>> params{
             is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
-                                  detect_bdl_wires_params{}},
+                                  bdl_input_iterator_params{}},
             design_sidb_gates_params<cell<sidb_111_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL,
             {{10, 13, 0}, {15, 17, 0}},
             3};
@@ -423,7 +417,7 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
     {
         const design_sidb_gates_params<cell<sidb_111_cell_clk_lyt_siqad>> params{
             is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
-                                  detect_bdl_wires_params{}},
+                                  bdl_input_iterator_params{}},
             design_sidb_gates_params<cell<sidb_111_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL,
             {{8, 13, 0}, {17, 17, 0}},
             3,
@@ -443,13 +437,13 @@ TEST_CASE("Design Bestagon shaped CX gate with QuickCell", "[design-sidb-gates]"
     {
         const design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
             is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
-                                  detect_bdl_wires_params{}},
+                                  bdl_input_iterator_params{}},
             design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL,
             {{16, 8, 0}, {22, 14, 0}},
             3};
 
         const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_crossing_wire_tt()}, params);
-        REQUIRE(found_gate_layouts.size() == 2);
+        REQUIRE(found_gate_layouts.size() == 3);
         CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
     }
 }
@@ -463,7 +457,7 @@ TEST_CASE("Design Bestagon shaped CX gate with QuickCell (flipped)", "[design-si
     {
         const design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
             is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
-                                  detect_bdl_wires_params{}},
+                                  bdl_input_iterator_params{}},
             design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL,
             {{16, 7, 0}, {22, 15, 0}},
             3};
@@ -482,7 +476,7 @@ TEST_CASE("Design AND gate with input left and output top-right with QuickCell (
     {
         const design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
             is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
-                                  detect_bdl_wires_params{}, operational_condition::FORBIDDING_KINKS},
+                                  bdl_input_iterator_params{}, operational_condition::FORBIDDING_KINKS},
             design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL,
             {{17, 5, 0}, {24, 8, 0}},
             3};

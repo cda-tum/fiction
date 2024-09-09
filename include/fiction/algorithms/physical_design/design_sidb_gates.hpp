@@ -53,7 +53,6 @@ namespace fiction
 template <typename CellType>
 struct design_sidb_gates_params
 {
-    // TODO (Jan Drewniok): After PR481 is merged, add bdl_input_iterator_params.
     /**
      * Selector for the different termination conditions for the SiDB gate design process.
      */
@@ -158,9 +157,11 @@ class design_sidb_gates_impl
             params{ps},
             all_sidbs_in_canvas{all_coordinates_in_spanned_area(params.canvas.first, params.canvas.second)},
             stats{st},
-            input_bdl_wires{detect_bdl_wires(skeleton_layout, params.operational_params.bdl_wire_params,
+            input_bdl_wires{detect_bdl_wires(skeleton_layout,
+                                             params.operational_params.input_bdl_iterator_params.bdl_wire_params,
                                              bdl_wire_selection::INPUT)},
-            output_bdl_wires{detect_bdl_wires(skeleton_layout, params.operational_params.bdl_wire_params,
+            output_bdl_wires{detect_bdl_wires(skeleton_layout,
+                                              params.operational_params.input_bdl_iterator_params.bdl_wire_params,
                                               bdl_wire_selection::OUTPUT)},
             number_of_input_wires{input_bdl_wires.size()},
             number_of_output_wires{output_bdl_wires.size()},
@@ -845,7 +846,8 @@ class design_sidb_gates_impl
 
         cds_canvas.assign_dependent_cell(dependent_cell);
 
-        auto bii = bdl_input_iterator<Lyt>{current_layout, params.operational_params.bdl_wire_params, input_bdl_wires};
+        auto bii = bdl_input_iterator<Lyt>{current_layout, params.operational_params.input_bdl_iterator_params,
+                                           input_bdl_wires};
 
         for (auto i = 0u; i < truth_table.front().num_bits(); ++i, ++bii)
         {

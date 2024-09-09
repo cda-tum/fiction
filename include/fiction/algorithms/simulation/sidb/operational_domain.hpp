@@ -369,8 +369,9 @@ class operational_domain_impl
             truth_table{tt},
             params{ps},
             stats{st},
-            output_bdl_pairs{detect_bdl_pairs<Lyt>(layout, sidb_technology::cell_type::OUTPUT,
-                                                   ps.operational_params.bdl_wire_params.params_bdl_pairs)},
+            output_bdl_pairs{detect_bdl_pairs<Lyt>(
+                layout, sidb_technology::cell_type::OUTPUT,
+                ps.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)},
             num_dimensions{params.sweep_dimensions.size()}
     {
         op_domain.dimensions.reserve(num_dimensions);

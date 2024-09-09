@@ -6,6 +6,7 @@
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
+#include <fiction/algorithms/iter/bdl_input_iterator.hpp>
 #include <fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp>
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
@@ -26,12 +27,23 @@ TEST_CASE("SiQAD OR gate", "[is-operational]")
 
     const sidb_100_cell_clk_lyt_siqad lat{layout_or_gate};
 
-    CHECK(is_operational(lat, std::vector<tt>{create_or_tt()},
-                         is_operational_params{sidb_simulation_parameters{2, -0.30}})
+    CHECK(is_operational(
+              lat, std::vector<tt>{create_or_tt()},
+              is_operational_params{sidb_simulation_parameters{2, -0.28}, sidb_simulation_engine::QUICKEXACT,
+                                    bdl_input_iterator_params{
+                                        detect_bdl_wires_params{1.5},
+                                        bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED},
+                                    operational_condition::FORBIDDING_KINKS})
+              .first == operational_status::NON_OPERATIONAL);
+
+    CHECK(is_operational(
+              lat, std::vector<tt>{create_or_tt()},
+              is_operational_params{sidb_simulation_parameters{2, -0.28}, sidb_simulation_engine::QUICKEXACT,
+                                    bdl_input_iterator_params{
+                                        detect_bdl_wires_params{1.5},
+                                        bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED},
+                                    operational_condition::ALLOWING_KINKS})
               .first == operational_status::OPERATIONAL);
-    CHECK(
-        is_operational(lat, std::vector<tt>{create_or_tt()}, is_operational_params{sidb_simulation_parameters{2, -0.1}})
-            .first == operational_status::NON_OPERATIONAL);
 }
 
 TEST_CASE("SiQAD's AND gate with input BDL pairs of different size", "[is-operational]")
@@ -222,7 +234,7 @@ TEST_CASE("AND gate with bestagon structure and kink state at right input wire f
     {
         CHECK(is_operational(lyt, std::vector<tt>{create_and_tt()},
                              is_operational_params{sidb_simulation_parameters{2, -0.32},
-                                                   sidb_simulation_engine::QUICKEXACT, detect_bdl_wires_params{},
+                                                   sidb_simulation_engine::QUICKEXACT, bdl_input_iterator_params{},
                                                    operational_condition::FORBIDDING_KINKS})
                   .first == operational_status::NON_OPERATIONAL);
     }
@@ -234,7 +246,7 @@ TEST_CASE("flipped CX bestagon gate", "[is-operational]")
 
     CHECK(is_operational(lyt, create_crossing_wire_tt(),
                          is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
-                                               detect_bdl_wires_params{}, operational_condition::FORBIDDING_KINKS})
+                                               bdl_input_iterator_params{}, operational_condition::FORBIDDING_KINKS})
               .first == operational_status::OPERATIONAL);
 }
 
