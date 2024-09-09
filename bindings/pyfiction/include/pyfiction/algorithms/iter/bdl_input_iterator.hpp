@@ -126,7 +126,6 @@ inline void bdl_input_iterator(pybind11::module& m)
         .def_readwrite("input_bdl_config", &fiction::bdl_input_iterator_params::input_bdl_config,
                        DOC(fiction_bdl_input_iterator_params_input_bdl_config));
 
-
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 
     detail::bdl_input_iterator<py_sidb_100_lattice>(m, "100");

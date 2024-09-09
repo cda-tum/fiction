@@ -509,8 +509,7 @@ class detect_bdl_wires_impl
 
         if (!filtered_wires.empty())
         {
-            assert(lengths_of_filtered_wires.size() < 2 &&
-                   "input or output wires have different lengths");
+            assert(lengths_of_filtered_wires.size() < 2 && "input or output wires have different lengths");
         }
 
         return filtered_wires;
