@@ -879,8 +879,9 @@ class graph_oriented_layout_design_impl
      * @param cost The cost that specifies the optimization objective for the layout design.
      * @return The number of search space graphs to be generated.
      */
-    std::uint32_t calculate_num_search_space_graphs(graph_oriented_layout_design_params::effort_mode    mode,
-                                                    graph_oriented_layout_design_params::cost_objective cost) const
+    [[nodiscard]] std::uint32_t
+    calculate_num_search_space_graphs(graph_oriented_layout_design_params::effort_mode    mode,
+                                      graph_oriented_layout_design_params::cost_objective cost) noexcept
     {
         if (mode == graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT)
         {
@@ -894,7 +895,7 @@ class graph_oriented_layout_design_impl
      * @param cost The cost objective used.
      * @return True if a solution was found for the given cost objective; otherwise, false.
      */
-    bool found_solution(graph_oriented_layout_design_params::cost_objective cost) const
+    [[nodiscard]] bool found_solution(graph_oriented_layout_design_params::cost_objective cost) noexcept
     {
         switch (cost)
         {

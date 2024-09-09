@@ -20,8 +20,9 @@
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
-#include <mockturtle/views/fanout_view.hpp>
 #include <mockturtle/views/names_view.hpp>
+
+#include <array>
 
 using namespace fiction;
 
