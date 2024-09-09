@@ -29,20 +29,27 @@ TEST_CASE("Benchmark Graph-Oriented Layout Design", "[benchmark]")
 
     BENCHMARK("graph_oriented_layout_design: low effort")
     {
-        params.high_effort_mode = false;
+        params.mode = graph_oriented_layout_design_params::effort_mode::LOW_EFFORT;
 
         return graph_oriented_layout_design<gate_layout>(ntk, params);
     };
 
     BENCHMARK("graph_oriented_layout_design: high effort")
     {
-        params.high_effort_mode = true;
+        params.mode = graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT;
+
+        return graph_oriented_layout_design<gate_layout>(ntk, params);
+    };
+
+    BENCHMARK("graph_oriented_layout_design: highest effort")
+    {
+        params.mode = graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT;
 
         return graph_oriented_layout_design<gate_layout>(ntk, params);
     };
 }
 
-//  Mac M1, Sonoma 14.5, Apple clang version 15.0.0 (09.08.24)
+//  Mac M1, Sonoma 14.6.1, Apple clang version 15.0.0 (09.09.24)
 
 // -------------------------------------------------------------------------------
 // Benchmark Graph-Oriented Layout Design
@@ -54,15 +61,20 @@ TEST_CASE("Benchmark Graph-Oriented Layout Design", "[benchmark]")
 //                                      mean          low mean      high mean
 //                                      std dev       low std dev   high std dev
 // -------------------------------------------------------------------------------
-// graph_oriented_layout_design: low
+// graph_oriented_layout_design: low effort
 //
-//                                         157.227 ms    155.044 ms    159.725 ms
-//                                         11.8494 ms    10.1235 ms    14.8552 ms
+//                                          169.42 ms    167.384 ms    171.921 ms
+//                                         11.4759 ms    9.42369 ms    15.5996 ms
 //
-// graph_oriented_layout_design: high
+// graph_oriented_layout_design: high effort
 //
-//                                          1.34778 s     1.32165 s     1.37673 s
-//                                          1.34778 s     1.32165 s     1.37673 s
+//                                          1.46627 s     1.44898 s     1.48316 s
+//                                         87.3277 ms    78.1128 ms    99.3427 ms
+//
+// graph_oriented_layout_design: highest effort
+//
+//                                          3.92325 s     3.81698 s     4.02528 s
+//                                         530.342 ms    472.996 ms    604.419 ms
 //
 //
 // ===============================================================================

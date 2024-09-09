@@ -59,7 +59,7 @@ struct graph_oriented_layout_design_params
     enum effort_mode : std::uint8_t
     {
         /**
-         * LOW_EFFORT mode generates 3 search space graphs. This option minimizes runtime but may not always yield the
+         * LOW_EFFORT mode generates 2 search space graphs. This option minimizes runtime but may not always yield the
          * optimal results.
          */
         LOW_EFFORT,
@@ -886,7 +886,7 @@ class graph_oriented_layout_design_impl
         {
             return (cost == graph_oriented_layout_design_params::cost_objective::CUSTOM) ? 60u : 48u;
         }
-        return (mode == graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT) ? 12u : 3u;
+        return (mode == graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT) ? 12u : 2u;
     }
     /**
      * Checks if a solution has been found for the specified cost objective.
@@ -1817,16 +1817,14 @@ class graph_oriented_layout_design_impl
         // initialize search space graphs with networks
         ssg_vec[0].network = network_breadth_co_to_ci;
         ssg_vec[1].network = network_breadth_co_to_ci;
-        ssg_vec[2].network = network_breadth_co_to_ci;
 
         std::vector<mockturtle::node<decltype(network_breadth_co_to_ci)>> nodes_to_place_breadth_co_to_ci{};
         prepare_nodes_to_place(network_breadth_co_to_ci, nodes_to_place_breadth_co_to_ci);
 
         ssg_vec[0].nodes_to_place = nodes_to_place_breadth_co_to_ci;
         ssg_vec[1].nodes_to_place = nodes_to_place_breadth_co_to_ci;
-        ssg_vec[2].nodes_to_place = nodes_to_place_breadth_co_to_ci;
 
-        for (uint64_t i = 0ul; i < 3; ++i)
+        for (uint64_t i = 0ul; i < 2; ++i)
         {
             ssg_vec[i].cost = ps.cost;
         }
