@@ -2,13 +2,15 @@
 // Created by Jan Drewniok on 02.09.24.
 //
 
-#include "fiction/algorithms/simulation/sidb/determine_groundstate_from_simulation_results.hpp"
-#include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
-#include "fiction/algorithms/simulation/sidb/quickexact.hpp"
-#include "fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp"
-#include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction_experiments.hpp"
-#include "mockturtle/utils/stopwatch.hpp"
+
+#include <fiction/algorithms/simulation/sidb/determine_groundstate_from_simulation_results.hpp>
+#include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
+#include <fiction/algorithms/simulation/sidb/quickexact.hpp>
+#include <fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp>
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
+
+#include <mockturtle/utils/stopwatch.hpp>
 
 #include <cstdint>
 #include <cstdlib>
@@ -75,7 +77,7 @@ int main()  // NOLINT
 
         const auto average_pos_sibs_of_gs =
             static_cast<double>(std::accumulate(number_of_positive_sidbs_of_gs_per_layout.cbegin(),
-                                                number_of_positive_sidbs_of_gs_per_layout.cend(), 0)) /
+                                                number_of_positive_sidbs_of_gs_per_layout.cend(), 0u)) /
             static_cast<double>(number_of_positive_sidbs_of_gs_per_layout.size());
 
         simulation_exp(random_layouts_params.number_of_sidbs, random_layouts.size(), runtime_exhaustive,
