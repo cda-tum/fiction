@@ -34,30 +34,51 @@ int main()  // NOLINT
     using gate_lyt =
         fiction::gate_level_layout<fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<>>>>;
 
-    experiments::experiment<std::string, std::string, uint64_t, uint64_t, uint64_t, double, std::string>
+    experiments::experiment<std::string, std::string, uint64_t, uint64_t, uint64_t, uint64_t, double, std::string>
         graph_oriented_layout_design_exp{"graph_oriented_layout_design_exp",
                                          "benchmark",
                                          "cost function",
                                          "Area",
-                                         "#Crossings",
-                                         "#Wires",
+                                         "|C|",
+                                         "|W|",
+                                         "ACP",
                                          "runtime (in sec)",
                                          "equivalent"};
 
     fiction::graph_oriented_layout_design_stats  graph_oriented_layout_design_stats{};
     fiction::graph_oriented_layout_design_params graph_oriented_layout_design_params{};
-    graph_oriented_layout_design_params.high_effort_mode = true;
-    graph_oriented_layout_design_params.verbose          = true;
-    graph_oriented_layout_design_params.return_first     = false;
-    graph_oriented_layout_design_params.timeout          = 60000;
+    graph_oriented_layout_design_params.mode =
+        fiction::graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT;
+    graph_oriented_layout_design_params.verbose      = true;
+    graph_oriented_layout_design_params.return_first = false;
+    graph_oriented_layout_design_params.timeout      = 60000;
 
-    static constexpr const uint64_t bench_select = fiction_experiments::par_check;
+    static constexpr const uint64_t bench_select = fiction_experiments::trindade16 | fiction_experiments::fontes18;
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
-        for (uint64_t cost = 0; cost < 3; cost++)
+        for (uint64_t cost = 0; cost < 4; cost++)
         {
-            graph_oriented_layout_design_params.cost_function = cost;
+            if (cost == 0)
+            {
+                graph_oriented_layout_design_params.cost =
+                    fiction::graph_oriented_layout_design_params::cost_objective::AREA;
+            }
+            else if (cost == 1)
+            {
+                graph_oriented_layout_design_params.cost =
+                    fiction::graph_oriented_layout_design_params::cost_objective::CROSSINGS;
+            }
+            else if (cost == 2)
+            {
+                graph_oriented_layout_design_params.cost =
+                    fiction::graph_oriented_layout_design_params::cost_objective::WIRES;
+            }
+            else
+            {
+                graph_oriented_layout_design_params.cost =
+                    fiction::graph_oriented_layout_design_params::cost_objective::ACP;
+            }
 
             auto network = read_ntk<fiction::tec_nt>(benchmark);
 
@@ -90,34 +111,26 @@ int main()  // NOLINT
 
                 // fiction::gate_level_drvs(*gate_level_layout, ps, &st);
 
-                uint64_t num_wires =
+                const auto num_wires =
                     gate_level_layout->num_wires() - gate_level_layout->num_pis() - gate_level_layout->num_pos();
-                uint64_t num_crossings = 0;
-                gate_level_layout->foreach_wire(
-                    [&](const auto& n)
-                    {
-                        if (!(gate_level_layout->is_fanout(n) || gate_level_layout->is_pi(n) ||
-                              gate_level_layout->is_po(n)))
-                        {
-                            if (gate_level_layout->get_tile(n).z == 1)
-                            {
-                                num_crossings++;
-                            }
-                        };
-                    });
-                std::string cost_function = "Area";
+                const auto  num_crossings = gate_level_layout->num_crossings();
+                std::string cost_function = "A";
                 if (cost == 1)
                 {
-                    cost_function = "#Crossings";
+                    cost_function = "|C|";
                 }
                 else if (cost == 2)
                 {
-                    cost_function = "#Wires";
+                    cost_function = "|W|";
+                }
+                else if (cost == 3)
+                {
+                    cost_function = "ACP";
                 }
                 // log results
-                graph_oriented_layout_design_exp(benchmark, cost_function, area, num_crossings, num_wires,
-                                                 mockturtle::to_seconds(graph_oriented_layout_design_stats.time_total),
-                                                 eq_result);
+                graph_oriented_layout_design_exp(
+                    benchmark, cost_function, area, num_crossings, num_wires, area * (num_crossings + 1),
+                    mockturtle::to_seconds(graph_oriented_layout_design_stats.time_total), eq_result);
             }
 
             graph_oriented_layout_design_exp.save();

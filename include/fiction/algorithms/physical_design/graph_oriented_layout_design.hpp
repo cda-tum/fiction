@@ -9,12 +9,9 @@
 #include "fiction/algorithms/path_finding/cost.hpp"
 #include "fiction/algorithms/path_finding/distance.hpp"
 #include "fiction/algorithms/physical_design/post_layout_optimization.hpp"
-#include "fiction/algorithms/verification/equivalence_checking.hpp"
-#include "fiction/io/print_layout.hpp"
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/layouts/obstruction_layout.hpp"
-#include "fiction/networks/technology_network.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 #include "fiction/utils/name_utils.hpp"
@@ -28,7 +25,6 @@
 #include <mockturtle/utils/stopwatch.hpp>
 #include <mockturtle/views/fanout_view.hpp>
 #include <mockturtle/views/immutable_view.hpp>
-#include <mockturtle/views/names_view.hpp>
 
 #include <array>
 #include <cassert>
@@ -37,6 +33,7 @@
 #include <cstdint>
 #include <functional>
 #include <iostream>
+#include <limits>
 #include <optional>
 #include <queue>
 #include <string>
@@ -53,20 +50,41 @@ namespace fiction
  */
 struct graph_oriented_layout_design_params
 {
+    /**
+     * The `effort_mode` enum defines different levels of computational effort for generating and exploring search space
+     * graphs for during the graph-oriented layout design process. Each mode varies in the number of search space graphs
+     * generated and the strategies employed, balancing between runtime efficiency and the likelihood of finding optimal
+     * solutions.
+     */
     enum effort_mode : std::uint8_t
     {
+        /**
+         * LOW_EFFORT mode generates 3 search space graphs. This option minimizes runtime but may not always yield the
+         * optimal results.
+         */
         LOW_EFFORT,
+
+        /**
+         * HIGH_EFFORT mode generates 12 search space graphs using various fanout substitution strategies, PI
+         * placements, and other parameters. This wider exploration increases the chance of finding optimal layouts but
+         * also extends runtime. When a solution is found in any graph, its cost is used to prune the remaining graphs.
+         */
         HIGH_EFFORT,
+
+        /**
+         * HIGHEST_EFFORT mode builds upon HIGH_EFFORT by duplicating the 12 search space graphs for different cost
+         * objectives. If the cost objective involves layout area, number of crossings, number of wire segments, or a
+         * combination of area and crossings, a total of 48 search space graphs are generated. For a custom cost
+         * objective, an additional 12 graphs are created, resulting in 60 graphs in total. This mode provides the best
+         * guarantee of finding optimal solutions but significantly increases runtime.
+         */
         HIGHEST_EFFORT
     };
-    effort_mode mode = HIGHEST_EFFORT;
+
     /**
-     * In high effort mode, 12 search space graphs are created with varying fanout substitution strategies, allowed PI
-     * placements, and other parameters, compared to only 2 graphs in high efficiency mode. This broader exploration
-     * increases the likelihood of discovering optimal layouts, but also increases runtime. When a solution is found in
-     * any graph, its cost is used to prune the search in the remaining graphs.
+     * The effort mode used. Defaults to HIGH_EFFORT.
      */
-    // bool high_effort_mode = false;
+    effort_mode mode = HIGH_EFFORT;
     /**
      * Number of expansions for each vertex that should be explored. For each partial layout, `num_vertex_expansions`
      * positions will be checked for the next node/gate to be placed. A lower value requires less runtime, but the
@@ -89,19 +107,37 @@ struct graph_oriented_layout_design_params
      */
     bool planar = false;
     /**
-     * 0: area
-     * 1: crossings
-     * 2: wires
-     * 3: acp
+     * The `cost_objective` enum defines various cost objectives that can be used in the graph-oriented layout design
+     * process. Each cost objective represents a different metric used to expand a vertex in the search space graph.
      */
-    // uint64_t cost_function = 0;
-    enum cost_function : std::uint8_t
+    enum cost_objective : std::uint8_t
     {
+        /**
+         * AREA: Optimizes for the total area of the layout, aiming to minimize the space required for the design.
+         */
         AREA,
+        /**
+         * WIRES: Optimizes for the number of wire segments in the layout, reducing the delay and increasing throughput.
+         */
         WIRES,
-        CROSSINGS
+        /**
+         * CROSSINGS: Optimizes for the number of wire crossings in the layout.
+         */
+        CROSSINGS,
+        /**
+         * ACP (Area-Crossings Product): Optimizes for a combination of layout area and the number of crossings.
+         */
+        ACP,
+        /**
+         * CUSTOM: Allows for a user-defined cost objective, enabling optimization based on specific criteria outside
+         * the predefined options.
+         */
+        CUSTOM
     };
-    cost_function cost = AREA;
+    /**
+     * The cost objective used. Defaults to AREA
+     */
+    cost_objective cost = AREA;
     /**
      * Verbosity.
      */
@@ -318,8 +354,12 @@ struct search_space_graph
     /**
      * Create planar layouts.
      */
-    bool                                               planar = false;
-    graph_oriented_layout_design_params::cost_function cost = graph_oriented_layout_design_params::cost_function::AREA;
+    bool planar = false;
+    /**
+     * The cost objective used to expand a vertex in the search space graph.
+     */
+    graph_oriented_layout_design_params::cost_objective cost =
+        graph_oriented_layout_design_params::cost_objective::AREA;
 };
 /**
  * @brief Custom view class derived from mockturtle::topo_view.
@@ -625,10 +665,7 @@ class graph_oriented_layout_design_impl
             pst{st},
             timeout{ps.timeout},
             start{std::chrono::high_resolution_clock::now()},
-            num_search_space_graphs{
-                ps.mode == graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT ?
-                    36u :
-                    (ps.mode == graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT ? 12u : 3u)},
+            num_search_space_graphs{calculate_num_search_space_graphs(ps.mode, ps.cost)},
             ssg_vec(num_search_space_graphs)
     {
         ntk.substitute_po_signals();
@@ -720,14 +757,9 @@ class graph_oriented_layout_design_impl
 
             if (duration_ms >= timeout)
             {
-                // terminate algorithm if specified timeout was set or at least one solution was found in
-                // high-efficiency mode
-                if (timeout_set || ((ps.mode == graph_oriented_layout_design_params::effort_mode::LOW_EFFORT) &&
-                                    ((ps.cost == graph_oriented_layout_design_params::cost_function::AREA) ?
-                                         improve_current_area_solution :
-                                         ((ps.cost == graph_oriented_layout_design_params::cost_function::WIRES) ?
-                                              improve_current_wires_solution :
-                                              improve_current_crossings_solution))))
+                // Terminate the algorithm if the specified timeout was set or a solution was found in low-effort mode
+                if (timeout_set || (ps.mode == graph_oriented_layout_design_params::effort_mode::LOW_EFFORT &&
+                                    found_solution(ps.cost)))
                 {
                     timeout_limit_reached = true;
                 }
@@ -735,11 +767,7 @@ class graph_oriented_layout_design_impl
         }
 
         // check if any layout was found
-        if ((ps.cost == graph_oriented_layout_design_params::cost_function::AREA) ?
-                improve_current_area_solution :
-                ((ps.cost == graph_oriented_layout_design_params::cost_function::WIRES) ?
-                     improve_current_wires_solution :
-                     improve_current_crossings_solution))
+        if (found_solution(ps.cost))
         {
             return best_lyt;
         }
@@ -788,21 +816,96 @@ class graph_oriented_layout_design_impl
      */
     uint64_t max_placed_nodes{0ul};
     /**
-     * Current best solution w.r.t. area.
+     * The current best solution with respect to area, initialized to the maximum possible value.
+     * This value will be updated as better solutions are found.
      */
-    uint64_t best_area_solution;
-    uint64_t best_wires_solution;
-    uint64_t best_crossings_solution;
+    uint64_t best_area_solution = std::numeric_limits<uint64_t>::max();
+    /**
+     * The current best solution with respect to the number of wire segments, initialized to the maximum possible value.
+     * This value will be updated as better solutions are found.
+     */
+    uint64_t best_wire_solution = std::numeric_limits<uint64_t>::max();
+    /**
+     * The current best solution with respect to the number of crossings, initialized to the maximum possible
+     * value. This value will be updated as better solutions are found.
+     */
+    uint64_t best_crossing_solution = std::numeric_limits<uint64_t>::max();
+    /**
+     * The current best solution with respect to the area-crossing product (ACP), initialized to the maximum possible
+     * value. This value will be updated as better solutions are found.
+     */
+    uint64_t best_acp_solution = std::numeric_limits<uint64_t>::max();
+    /**
+     * The current best solution with respect to a custom cost objective, initialized to the maximum possible value.
+     * This value will be updated as better solutions are found.
+     */
+    uint64_t best_custom_solution = std::numeric_limits<uint64_t>::max();
     /**
      * Current best solution w.r.t. area after relocating POs.
      */
     uint64_t best_optimized_solution{std::numeric_limits<uint64_t>::max()};
     /**
-     * Flag indicating if an initial solution was already found, and that other search space graphs should be pruned.
+     * Flag indicating if an initial solution has been found with the layout area as cost objective.
+     * When set to `true`, subsequent search space graphs with the layout area as cost objective can be pruned.
      */
-    bool improve_current_area_solution      = false;
-    bool improve_current_wires_solution     = false;
-    bool improve_current_crossings_solution = false;
+    bool improve_area_solution = false;
+    /**
+     * Flag indicating if an initial solution has been found with the number of wire segments as cost objective.
+     * When set to `true`, subsequent search space graphs with the number of wire segments as cost objective can be
+     * pruned.
+     */
+    bool improve_wire_solution = false;
+    /**
+     * Flag indicating if an initial solution has been found with the number of crossings as cost objective.
+     * When set to `true`, subsequent search space graphs with the number of crossings as cost objective can be pruned.
+     */
+    bool improve_crossing_solution = false;
+    /**
+     * Flag indicating if an initial solution has been found with the area-crossings product as cost objective.
+     * When set to `true`, subsequent search space graphs with the area-crossing product as cost objective can be
+     * pruned.
+     */
+    bool improve_acp_solution = false;
+    /**
+     * Flag indicating if an initial solution has been found with a custom cost objective.
+     * When set to `true`, subsequent search space graphs with a custom cost objective can be pruned.
+     */
+    bool improve_custom_solution = false;
+
+    /**
+     * Determines the number of search space graphs to generate based on the selected effort mode and cost objective.
+     *
+     * @param mode The effort mode chosen for the layout design, determining the level of computational effort.
+     * @param cost The cost that specifies the optimization objective for the layout design.
+     * @return The number of search space graphs to be generated.
+     */
+    std::uint32_t calculate_num_search_space_graphs(graph_oriented_layout_design_params::effort_mode    mode,
+                                                    graph_oriented_layout_design_params::cost_objective cost) const
+    {
+        if (mode == graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT)
+        {
+            return (cost == graph_oriented_layout_design_params::cost_objective::CUSTOM) ? 60u : 48u;
+        }
+        return (mode == graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT) ? 12u : 3u;
+    }
+    /**
+     * Checks if a solution has been found for the specified cost objective.
+     *
+     * @param cost The cost objective used.
+     * @return True if a solution was found for the given cost objective; otherwise, false.
+     */
+    bool found_solution(graph_oriented_layout_design_params::cost_objective cost) const
+    {
+        switch (cost)
+        {
+            case graph_oriented_layout_design_params::cost_objective::AREA: return improve_area_solution;
+            case graph_oriented_layout_design_params::cost_objective::WIRES: return improve_wire_solution;
+            case graph_oriented_layout_design_params::cost_objective::CROSSINGS: return improve_crossing_solution;
+            case graph_oriented_layout_design_params::cost_objective::ACP: return improve_acp_solution;
+            case graph_oriented_layout_design_params::cost_objective::CUSTOM: return improve_custom_solution;
+            default: return false;
+        }
+    }
     /**
      * Checks if there is a path between the source and destination tiles in the given layout.
      *
@@ -1360,6 +1463,7 @@ class graph_oriented_layout_design_impl
         std::cout << fmt::format("[i]   Layout dimension: {} × {} = {}\n", lyt.x() + 1, lyt.y() + 1, lyt.area());
         std::cout << fmt::format("[i]   #Crossings: {}\n", lyt.num_crossings());
         std::cout << fmt::format("[i]   #Wires: {}\n", lyt.num_wires() - lyt.num_pis() - lyt.num_pos());
+        std::cout << fmt::format("[i]   ACP: {}\n", lyt.area() * (lyt.num_crossings() + 1));
     }
     /**
      * Initializes the layout with minimum width
@@ -1399,6 +1503,35 @@ class graph_oriented_layout_design_impl
             layout.resize({layout.x(), layout.y() + 1, layout.z()});
         }
     }
+    std::uint64_t calculate_cost(const Lyt& layout, graph_oriented_layout_design_params::cost_objective cost_function)
+    {
+        uint64_t cost = 0;
+        if (cost_function == graph_oriented_layout_design_params::cost_objective::AREA)
+        {
+            const auto bb = bounding_box_2d(layout);
+            cost          = static_cast<uint64_t>(bb.get_max().x + 1u) * static_cast<uint64_t>(bb.get_max().y + 1u);
+        }
+        else if (cost_function == graph_oriented_layout_design_params::cost_objective::WIRES)
+        {
+            cost = layout.num_wires() - layout.num_pis() - layout.num_pos();
+        }
+        else if (cost_function == graph_oriented_layout_design_params::cost_objective::CROSSINGS)
+        {
+            cost = layout.num_crossings();
+        }
+        else if (cost_function == graph_oriented_layout_design_params::cost_objective::ACP)
+        {
+            const auto bb = bounding_box_2d(layout);
+            cost          = (layout.num_crossings() + 1) *
+                   (static_cast<uint64_t>(bb.get_max().x + 1u) * static_cast<uint64_t>(bb.get_max().y + 1u));
+        }
+        else if (cost_function == graph_oriented_layout_design_params::cost_objective::CUSTOM)
+        {
+            // define your cost function here (has to be a positive integer of type uint64_t)
+            cost = 1u;
+        }
+        return cost;
+    }
     /**
      * Generates the next possible positions with their priorities based on the layout and search space graph.
      *
@@ -1422,7 +1555,7 @@ class graph_oriented_layout_design_impl
             const auto remaining_nodes_to_place =
                 static_cast<double>(ssg.nodes_to_place.size() - (ssg.current_vertex.size() + 1));
 
-            if (ssg.cost == graph_oriented_layout_design_params::cost_function::AREA)
+            if (ssg.cost == graph_oriented_layout_design_params::cost_objective::AREA)
             {
                 // current layout size
                 const double cost1 = static_cast<double>(((std::max(layout.x() - 1, position.x) + 1) *
@@ -1436,23 +1569,11 @@ class graph_oriented_layout_design_impl
                 double priority = remaining_nodes_to_place + cost1 + cost2;
                 next_positions.push_back({new_sequence, priority});
             }
-
-            else if (ssg.cost == graph_oriented_layout_design_params::cost_function::WIRES)
+            else
             {
-                uint64_t num_crossings = layout.num_crossings();
+                uint64_t cost = calculate_cost(layout, ssg.cost);
 
-                const double cost1 = static_cast<double>(num_crossings + 1) / static_cast<double>(10000);
-
-                double priority = remaining_nodes_to_place + cost1;
-
-                next_positions.push_back({new_sequence, priority});
-            }
-
-            else if (ssg.cost == graph_oriented_layout_design_params::cost_function::CROSSINGS)
-            {
-                uint64_t num_wires = layout.num_wires() - layout.num_pis() - layout.num_pos();
-
-                const double cost1 = static_cast<double>(num_wires + 1) / static_cast<double>(10000);
+                const double cost1 = static_cast<double>(cost) / static_cast<double>(1000 * ssg.nodes_to_place.size());
 
                 double priority = remaining_nodes_to_place + cost1;
 
@@ -1502,59 +1623,61 @@ class graph_oriented_layout_design_impl
             uint64_t cost         = 0ul;
             uint64_t desired_cost = 0ul;
 
-            if ((ssg.cost == graph_oriented_layout_design_params::cost_function::AREA) ?
-                    improve_current_area_solution :
-                    ((ssg.cost == graph_oriented_layout_design_params::cost_function::WIRES) ?
-                         improve_current_wires_solution :
-                         improve_current_crossings_solution))
+            bool     improve_solution = improve_custom_solution;
+            uint64_t best_solution    = best_custom_solution;
+
+            switch (ssg.cost)
             {
-                if (ssg.cost == graph_oriented_layout_design_params::cost_function::AREA)
-                {
-                    const auto bb = bounding_box_2d(layout);
-                    cost = static_cast<uint64_t>(bb.get_max().x + 1u) * static_cast<uint64_t>(bb.get_max().y + 1u);
-                }
-                else if (ssg.cost == graph_oriented_layout_design_params::cost_function::WIRES)
-                {
-                    cost = layout.num_crossings();
-                }
-                else if (ssg.cost == graph_oriented_layout_design_params::cost_function::CROSSINGS)
-                {
-                    cost = layout.num_wires() - layout.num_pis() - layout.num_pos();
-                }
+                case graph_oriented_layout_design_params::cost_objective::AREA:
+                    improve_solution = improve_area_solution;
+                    best_solution    = best_area_solution;
+                    break;
+                case graph_oriented_layout_design_params::cost_objective::WIRES:
+                    improve_solution = improve_wire_solution;
+                    best_solution    = best_wire_solution;
+                    break;
+                case graph_oriented_layout_design_params::cost_objective::CROSSINGS:
+                    improve_solution = improve_crossing_solution;
+                    best_solution    = best_crossing_solution;
+                    break;
+                case graph_oriented_layout_design_params::cost_objective::ACP:
+                    improve_solution = improve_acp_solution;
+                    best_solution    = best_acp_solution;
+                    break;
+                default: break;
             }
 
-            if (found_solution &&
-                (!(ssg.cost == graph_oriented_layout_design_params::cost_function::AREA) ?
-                     improve_current_area_solution :
-                     ((ssg.cost == graph_oriented_layout_design_params::cost_function::WIRES) ?
-                          improve_current_wires_solution :
-                          improve_current_crossings_solution) ||
-                         (cost <= (ssg.cost == graph_oriented_layout_design_params::cost_function::AREA) ?
-                              best_area_solution :
-                              ((ssg.cost == graph_oriented_layout_design_params::cost_function::WIRES) ?
-                                   best_wires_solution :
-                                   best_crossings_solution))))
+            if (improve_solution)
             {
-                if (ssg.cost == graph_oriented_layout_design_params::cost_function::AREA)
-                {
-                    const auto bb = fiction::bounding_box_2d(layout);
-                    layout.resize({bb.get_max().x, bb.get_max().y, layout.z()});
+                cost = calculate_cost(layout, ssg.cost);
+            }
 
-                    cost                          = layout.area();
-                    best_area_solution            = cost;
-                    improve_current_area_solution = true;
-                }
-                else if (ssg.cost == graph_oriented_layout_design_params::cost_function::WIRES)
+            if (found_solution && (!improve_solution || cost <= best_solution))
+            {
+                cost = calculate_cost(layout, ssg.cost);
+
+                switch (ssg.cost)
                 {
-                    cost                           = layout.num_crossings();
-                    best_wires_solution            = cost;
-                    improve_current_wires_solution = true;
-                }
-                else if (ssg.cost == graph_oriented_layout_design_params::cost_function::CROSSINGS)
-                {
-                    cost                               = layout.num_wires() - layout.num_pis() - layout.num_pos();
-                    best_crossings_solution            = cost;
-                    improve_current_crossings_solution = true;
+                    case graph_oriented_layout_design_params::cost_objective::AREA:
+                        improve_area_solution = true;
+                        best_area_solution    = cost;
+                        break;
+                    case graph_oriented_layout_design_params::cost_objective::WIRES:
+                        improve_wire_solution = true;
+                        best_wire_solution    = cost;
+                        break;
+                    case graph_oriented_layout_design_params::cost_objective::CROSSINGS:
+                        improve_crossing_solution = true;
+                        best_crossing_solution    = cost;
+                        break;
+                    case graph_oriented_layout_design_params::cost_objective::ACP:
+                        improve_acp_solution = true;
+                        best_acp_solution    = cost;
+                        break;
+                    default:
+                        improve_custom_solution = true;
+                        best_custom_solution    = cost;
+                        break;
                 }
 
                 fiction::post_layout_optimization_params plo_params{};
@@ -1566,18 +1689,7 @@ class graph_oriented_layout_design_impl
                 const auto bb_after_plo = fiction::bounding_box_2d(layout);
                 layout.resize({bb_after_plo.get_max().x, bb_after_plo.get_max().y, layout.z()});
 
-                if (ps.cost == graph_oriented_layout_design_params::cost_function::AREA)
-                {
-                    desired_cost = layout.area();
-                }
-                else if (ps.cost == graph_oriented_layout_design_params::cost_function::WIRES)
-                {
-                    desired_cost = layout.num_crossings();
-                }
-                else if (ps.cost == graph_oriented_layout_design_params::cost_function::CROSSINGS)
-                {
-                    desired_cost = layout.num_wires() - layout.num_pis() - layout.num_pos();
-                }
+                desired_cost = calculate_cost(layout, ps.cost);
 
                 if (desired_cost < best_optimized_solution)
                 {
@@ -1594,16 +1706,30 @@ class graph_oriented_layout_design_impl
                 return {{}, std::nullopt};
             }
 
-            if ((ssg.cost == graph_oriented_layout_design_params::cost_function::AREA) ?
-                    improve_current_area_solution :
-                    ((ssg.cost == graph_oriented_layout_design_params::cost_function::WIRES) ?
-                         improve_current_wires_solution :
-                         improve_current_crossings_solution) &&
-                        (cost >= (ssg.cost == graph_oriented_layout_design_params::cost_function::AREA) ?
-                             best_area_solution :
-                             ((ssg.cost == graph_oriented_layout_design_params::cost_function::WIRES) ?
-                                  best_wires_solution :
-                                  best_crossings_solution)))
+            improve_solution = improve_custom_solution;
+            best_solution    = best_custom_solution;
+
+            switch (ssg.cost)
+            {
+                case graph_oriented_layout_design_params::cost_objective::AREA:
+                    improve_solution = improve_area_solution;
+                    best_solution    = best_area_solution;
+                    break;
+                case graph_oriented_layout_design_params::cost_objective::WIRES:
+                    improve_solution = improve_wire_solution;
+                    best_solution    = best_wire_solution;
+                    break;
+                case graph_oriented_layout_design_params::cost_objective::CROSSINGS:
+                    improve_solution = improve_crossing_solution;
+                    best_solution    = best_crossing_solution;
+                    break;
+                case graph_oriented_layout_design_params::cost_objective::ACP:
+                    improve_solution = improve_acp_solution;
+                    best_solution    = best_acp_solution;
+                    break;
+                default: break;
+            }
+            if (improve_solution && cost >= best_solution)
             {
                 return {{}, std::nullopt};
             }
@@ -1629,7 +1755,7 @@ class graph_oriented_layout_design_impl
      */
     void initialize_pis_cost_and_num_expansions() noexcept
     {
-        static constexpr std::array<pi_locations, 36> pi_locs = {
+        static constexpr std::array<pi_locations, 60> pi_locs = {
             {pi_locations::TOP, pi_locations::LEFT, pi_locations::TOP_AND_LEFT,
              pi_locations::TOP, pi_locations::LEFT, pi_locations::TOP_AND_LEFT,
              pi_locations::TOP, pi_locations::LEFT, pi_locations::TOP_AND_LEFT,
@@ -1700,7 +1826,13 @@ class graph_oriented_layout_design_impl
         ssg_vec[1].nodes_to_place = nodes_to_place_breadth_co_to_ci;
         ssg_vec[2].nodes_to_place = nodes_to_place_breadth_co_to_ci;
 
-        if (ps.mode == graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT)
+        for (uint64_t i = 0ul; i < 3; ++i)
+        {
+            ssg_vec[i].cost = ps.cost;
+        }
+
+        if ((ps.mode == graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT) ||
+            (ps.mode == graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT))
         {
             params.strategy = fanout_substitution_params::substitution_strategy::DEPTH;
             mockturtle::fanout_view network_substituted_depth{fanout_substitution<tec_nt>(ntk, params)};
@@ -1710,7 +1842,6 @@ class graph_oriented_layout_design_impl
             topo_view_ci_to_co network_depth_ci_to_co{network_substituted_depth};
 
             // initialize search space graphs with networks
-            ssg_vec[2].network = network_breadth_co_to_ci;
             for (uint64_t i = 0ul; i < 3; ++i)
             {
                 ssg_vec[0 + i].network = network_breadth_co_to_ci;
@@ -1718,15 +1849,31 @@ class graph_oriented_layout_design_impl
                 ssg_vec[6 + i].network = network_depth_co_to_ci;
                 ssg_vec[9 + i].network = network_depth_ci_to_co;
 
-                ssg_vec[12 + i].network = network_breadth_co_to_ci;
-                ssg_vec[15 + i].network = network_breadth_ci_to_co;
-                ssg_vec[18 + i].network = network_depth_co_to_ci;
-                ssg_vec[21 + i].network = network_depth_ci_to_co;
+                if (ps.mode == graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT)
+                {
+                    ssg_vec[12 + i].network = network_breadth_co_to_ci;
+                    ssg_vec[15 + i].network = network_breadth_ci_to_co;
+                    ssg_vec[18 + i].network = network_depth_co_to_ci;
+                    ssg_vec[21 + i].network = network_depth_ci_to_co;
 
-                ssg_vec[24 + i].network = network_breadth_co_to_ci;
-                ssg_vec[27 + i].network = network_breadth_ci_to_co;
-                ssg_vec[30 + i].network = network_depth_co_to_ci;
-                ssg_vec[33 + i].network = network_depth_ci_to_co;
+                    ssg_vec[24 + i].network = network_breadth_co_to_ci;
+                    ssg_vec[27 + i].network = network_breadth_ci_to_co;
+                    ssg_vec[30 + i].network = network_depth_co_to_ci;
+                    ssg_vec[33 + i].network = network_depth_ci_to_co;
+
+                    ssg_vec[36 + i].network = network_breadth_co_to_ci;
+                    ssg_vec[39 + i].network = network_breadth_ci_to_co;
+                    ssg_vec[42 + i].network = network_depth_co_to_ci;
+                    ssg_vec[45 + i].network = network_depth_ci_to_co;
+
+                    if (ps.cost == graph_oriented_layout_design_params::cost_objective::CUSTOM)
+                    {
+                        ssg_vec[48 + i].network = network_breadth_co_to_ci;
+                        ssg_vec[51 + i].network = network_breadth_ci_to_co;
+                        ssg_vec[54 + i].network = network_depth_co_to_ci;
+                        ssg_vec[57 + i].network = network_depth_ci_to_co;
+                    }
+                }
             }
 
             std::vector<mockturtle::node<decltype(network_breadth_ci_to_co)>> nodes_to_place_breadth_ci_to_co{};
@@ -1745,28 +1892,65 @@ class graph_oriented_layout_design_impl
                 ssg_vec[6 + i].nodes_to_place = nodes_to_place_depth_co_to_ci;
                 ssg_vec[9 + i].nodes_to_place = nodes_to_place_depth_ci_to_co;
 
-                ssg_vec[12 + i].nodes_to_place = nodes_to_place_breadth_co_to_ci;
-                ssg_vec[15 + i].nodes_to_place = nodes_to_place_breadth_ci_to_co;
-                ssg_vec[18 + i].nodes_to_place = nodes_to_place_depth_co_to_ci;
-                ssg_vec[21 + i].nodes_to_place = nodes_to_place_depth_ci_to_co;
+                if (ps.mode == graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT)
+                {
+                    ssg_vec[12 + i].nodes_to_place = nodes_to_place_breadth_co_to_ci;
+                    ssg_vec[15 + i].nodes_to_place = nodes_to_place_breadth_ci_to_co;
+                    ssg_vec[18 + i].nodes_to_place = nodes_to_place_depth_co_to_ci;
+                    ssg_vec[21 + i].nodes_to_place = nodes_to_place_depth_ci_to_co;
 
-                ssg_vec[24 + i].nodes_to_place = nodes_to_place_breadth_co_to_ci;
-                ssg_vec[27 + i].nodes_to_place = nodes_to_place_breadth_ci_to_co;
-                ssg_vec[30 + i].nodes_to_place = nodes_to_place_depth_co_to_ci;
-                ssg_vec[33 + i].nodes_to_place = nodes_to_place_depth_ci_to_co;
+                    ssg_vec[24 + i].nodes_to_place = nodes_to_place_breadth_co_to_ci;
+                    ssg_vec[27 + i].nodes_to_place = nodes_to_place_breadth_ci_to_co;
+                    ssg_vec[30 + i].nodes_to_place = nodes_to_place_depth_co_to_ci;
+                    ssg_vec[33 + i].nodes_to_place = nodes_to_place_depth_ci_to_co;
+
+                    ssg_vec[36 + i].nodes_to_place = nodes_to_place_breadth_co_to_ci;
+                    ssg_vec[39 + i].nodes_to_place = nodes_to_place_breadth_ci_to_co;
+                    ssg_vec[42 + i].nodes_to_place = nodes_to_place_depth_co_to_ci;
+                    ssg_vec[45 + i].nodes_to_place = nodes_to_place_depth_ci_to_co;
+
+                    if (ps.cost == graph_oriented_layout_design_params::cost_objective::CUSTOM)
+                    {
+                        ssg_vec[48 + i].nodes_to_place = nodes_to_place_breadth_co_to_ci;
+                        ssg_vec[51 + i].nodes_to_place = nodes_to_place_breadth_ci_to_co;
+                        ssg_vec[54 + i].nodes_to_place = nodes_to_place_depth_co_to_ci;
+                        ssg_vec[57 + i].nodes_to_place = nodes_to_place_depth_ci_to_co;
+                    }
+                }
             }
 
-            for (uint64_t i = 0ul; i < 12; ++i)
+            if (ps.mode == graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT)
             {
-                ssg_vec[i].cost = graph_oriented_layout_design_params::cost_function::AREA;
+                for (uint64_t i = 0ul; i < 12; ++i)
+                {
+                    ssg_vec[i].cost = ps.cost;
+                }
             }
-            for (uint64_t i = 12ul; i < 24; ++i)
+            else
             {
-                ssg_vec[i].cost = graph_oriented_layout_design_params::cost_function::WIRES;
-            }
-            for (uint64_t i = 24ul; i < 36; ++i)
-            {
-                ssg_vec[i].cost = graph_oriented_layout_design_params::cost_function::CROSSINGS;
+                for (uint64_t i = 0ul; i < 12; ++i)
+                {
+                    ssg_vec[i].cost = graph_oriented_layout_design_params::cost_objective::AREA;
+                }
+                for (uint64_t i = 12ul; i < 24; ++i)
+                {
+                    ssg_vec[i].cost = graph_oriented_layout_design_params::cost_objective::WIRES;
+                }
+                for (uint64_t i = 24ul; i < 36; ++i)
+                {
+                    ssg_vec[i].cost = graph_oriented_layout_design_params::cost_objective::CROSSINGS;
+                }
+                for (uint64_t i = 36ul; i < 48; ++i)
+                {
+                    ssg_vec[i].cost = graph_oriented_layout_design_params::cost_objective::ACP;
+                }
+                if (ps.cost == graph_oriented_layout_design_params::cost_objective::CUSTOM)
+                {
+                    for (uint64_t i = 48ul; i < 60; ++i)
+                    {
+                        ssg_vec[i].cost = graph_oriented_layout_design_params::cost_objective::CUSTOM;
+                    }
+                }
             }
         }
     }
