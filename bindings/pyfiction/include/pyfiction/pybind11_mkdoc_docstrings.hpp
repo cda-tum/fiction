@@ -525,7 +525,7 @@ Parameter ``lyt``:
     The SiDB BDL layout to iterate over.
 
 Parameter ``params``:
-    Parameters for the BDL wire detection.)doc";
+    Parameters for the BDL input iterator.)doc";
 
 static const char *__doc_fiction_bdl_input_iterator_bdl_input_iterator_2 =
 R"doc(Constructor with pre-detected input wires and directions. It alters
@@ -536,7 +536,7 @@ Parameter ``lyt``:
     The SiDB BDL layout to iterate over.
 
 Parameter ``params``:
-    Parameters for the BDL wire detection.
+    Parameters for the BDL input iterator.
 
 Parameter ``input_wires``:
     Pre-detected input BDL wires.)doc";
@@ -726,7 +726,7 @@ static const char *__doc_fiction_bdl_input_iterator_params = R"doc(Parameters fo
 
 static const char *__doc_fiction_bdl_input_iterator_params_2 = R"doc(Parameters for the BDL input iterator.)doc";
 
-static const char *__doc_fiction_bdl_input_iterator_params_bdl_pairs_params = R"doc(Parameters to detect BDL pairs.)doc";
+static const char *__doc_fiction_bdl_input_iterator_params_bdl_wire_params = R"doc(Parameters to detect BDL wires.)doc";
 
 static const char *__doc_fiction_bdl_input_iterator_params_input_bdl_config =
 R"doc(The `input_bdl_config` member allows selection between different modes
@@ -3333,8 +3333,6 @@ static const char *__doc_fiction_critical_temperature_params_alpha =
 R"doc(Alpha parameter for the *QuickSim* algorithm (only applicable if
 engine == APPROXIMATE).)doc";
 
-static const char *__doc_fiction_critical_temperature_params_bdl_wire_params = R"doc(Parameters for the BDL wire detection algorithms.)doc";
-
 static const char *__doc_fiction_critical_temperature_params_confidence_level =
 R"doc(Probability threshold for ground state population. The temperature at
 which the simulation finds the ground state to be populated with a
@@ -3344,7 +3342,7 @@ probability of erroneous calculations of the gate.)doc";
 
 static const char *__doc_fiction_critical_temperature_params_engine = R"doc(Simulation mode to determine the *Critical Temperature*.)doc";
 
-static const char *__doc_fiction_critical_temperature_params_input_bdl_iterator_params = R"doc(Parameters for the BDL input iterator.)doc";
+static const char *__doc_fiction_critical_temperature_params_input_iterator_params = R"doc(Parameters for the BDL input iterator.)doc";
 
 static const char *__doc_fiction_critical_temperature_params_iteration_steps =
 R"doc(Number of iteration steps for the *QuickSim* algorithm (only
@@ -8775,7 +8773,7 @@ Returns:
 
 static const char *__doc_fiction_detect_bdl_wires_params = R"doc(This struct encapsulates parameters used for detecting BDL wires.)doc";
 
-static const char *__doc_fiction_detect_bdl_wires_params_params_bdl_pairs = R"doc(Parameters for the `detect_bdl_pairs` algorithm.)doc";
+static const char *__doc_fiction_detect_bdl_wires_params_bdl_pairs_params = R"doc(Parameters for the `detect_bdl_pairs` algorithm.)doc";
 
 static const char *__doc_fiction_detect_bdl_wires_params_threshold_bdl_interdistance =
 R"doc(A distance threshold, which is used to determine if two pairs of BDLs
@@ -13261,7 +13259,11 @@ Returns:
 
 static const char *__doc_fiction_is_operational_params = R"doc(Parameters for the `is_operational` algorithm.)doc";
 
-static const char *__doc_fiction_is_operational_params_bdl_params = R"doc(Parameters for the BDL pair detection algorithms.)doc";
+static const char *__doc_fiction_is_operational_params_input_bdl_iterator_params = R"doc(Parameters for the BDL input iterator.)doc";
+
+static const char *__doc_fiction_is_operational_params_op_condition =
+R"doc(Condition which is used to decide if a layout is `operational` or
+`non-operational`.)doc";
 
 static const char *__doc_fiction_is_operational_params_sim_engine =
 R"doc(The simulation engine to be used for the operational domain
@@ -13315,7 +13317,7 @@ static const char *__doc_fiction_is_sidb_gate_design_impossible_params =
 R"doc(This struct contains parameters to determine if SiDB gate design is
 impossible.)doc";
 
-static const char *__doc_fiction_is_sidb_gate_design_impossible_params_detect_wire_params = R"doc(Parameters used to determine BDL wires.)doc";
+static const char *__doc_fiction_is_sidb_gate_design_impossible_params_bdl_iterator_params = R"doc(Parameters used for the BDL input iterator.)doc";
 
 static const char *__doc_fiction_is_sidb_gate_design_impossible_params_simulation_params = R"doc(All parameters for physical SiDB simulations.)doc";
 
