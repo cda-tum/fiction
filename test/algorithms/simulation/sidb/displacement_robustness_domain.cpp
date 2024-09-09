@@ -45,6 +45,7 @@ TEST_CASE("Determine the SiDB gate displacement robustness of the Y-shaped SiDB 
     displacement_robustness_domain_params<cell<sidb_cell_clk_lyt_siqad>> params{};
     params.displacement_variations                  = {1, 1};
     params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.28};
+    params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = 1.5;
     params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance = 2.0;
     params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance = 0.2;
     params.fixed_sidbs                              = {{0, 0, 1},  {2, 1, 1},  {20, 0, 1}, {18, 1, 1}, {14, 3, 1},

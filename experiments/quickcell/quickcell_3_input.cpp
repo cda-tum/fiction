@@ -4,6 +4,7 @@
 
 #include "fiction_experiments.hpp"
 
+#include <fiction/algorithms/iter/bdl_input_iterator.hpp>
 #include <fiction/algorithms/physical_design/design_sidb_gates.hpp>
 #include <fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp>
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>

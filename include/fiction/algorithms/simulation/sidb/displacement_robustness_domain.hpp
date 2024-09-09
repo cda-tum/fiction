@@ -208,7 +208,7 @@ class displacement_robustness_domain_impl
             }
         };
 
-        const std::size_t num_threads = std::min(static_cast<std::size_t>(std::thread::hardware_concurrency()),
+        const std::size_t num_threads = std::min(static_cast<std::size_t>(1),
                                                  static_cast<std::size_t>(layouts.size()));
 
         // calculate the size of each slice
