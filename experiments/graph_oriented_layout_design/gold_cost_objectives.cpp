@@ -1,14 +1,13 @@
 //
-// Created by Simon Hofmann on 30.01.24.
+// Created by Simon Hofmann on 30.08.24.
 //
 #include "fiction_experiments.hpp"
 
 #include <fiction/algorithms/physical_design/graph_oriented_layout_design.hpp>  // graph-oriented layout design algorithm
 #include <fiction/algorithms/properties/count_gate_types.hpp>
-#include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
-#include <fiction/algorithms/verification/equivalence_checking.hpp>               // SAT-based equivalence checking
-#include <fiction/io/network_reader.hpp>                                          // read networks from files
-#include <fiction/layouts/bounding_box.hpp>                                       // calculate area of generated layouts
+#include <fiction/algorithms/verification/equivalence_checking.hpp>  // SAT-based equivalence checking
+#include <fiction/io/network_reader.hpp>                             // read networks from files
+#include <fiction/layouts/bounding_box.hpp>                          // calculate area of generated layouts
 
 #include <fmt/format.h>  // output formatting
 
@@ -35,15 +34,15 @@ int main()  // NOLINT
         fiction::gate_level_layout<fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<>>>>;
 
     experiments::experiment<std::string, std::string, uint64_t, uint64_t, uint64_t, uint64_t, double, std::string>
-        graph_oriented_layout_design_exp{"graph_oriented_layout_design_exp",
-                                         "benchmark",
-                                         "cost function",
-                                         "Area",
-                                         "|C|",
-                                         "|W|",
-                                         "ACP",
-                                         "runtime (in sec)",
-                                         "equivalent"};
+        gold_cost_objectives_exp{"graph_oriented_layout_design_exp",
+                                 "benchmark",
+                                 "cost objective",
+                                 "A",
+                                 "|C|",
+                                 "|W|",
+                                 "ACP",
+                                 "runtime (in sec)",
+                                 "equivalent"};
 
     fiction::graph_oriented_layout_design_stats  graph_oriented_layout_design_stats{};
     fiction::graph_oriented_layout_design_params graph_oriented_layout_design_params{};
@@ -67,12 +66,12 @@ int main()  // NOLINT
             else if (cost == 1)
             {
                 graph_oriented_layout_design_params.cost =
-                    fiction::graph_oriented_layout_design_params::cost_objective::CROSSINGS;
+                    fiction::graph_oriented_layout_design_params::cost_objective::WIRES;
             }
             else if (cost == 2)
             {
                 graph_oriented_layout_design_params.cost =
-                    fiction::graph_oriented_layout_design_params::cost_objective::WIRES;
+                    fiction::graph_oriented_layout_design_params::cost_objective::CROSSINGS;
             }
             else
             {
@@ -102,39 +101,30 @@ int main()  // NOLINT
                 const auto height = bounding_box.get_y_size() + 1;
                 const auto area   = width * height;
 
-                // fiction::print_gate_level_layout(std::cout, *gate_level_layout);
-                // fiction::count_gate_types_stats st{};
-                // fiction::count_gate_types(*gate_level_layout, &st);
-                // st.report();
-                // fiction::gate_level_drv_params ps{};
-                // fiction::gate_level_drv_stats  st{};
-
-                // fiction::gate_level_drvs(*gate_level_layout, ps, &st);
-
                 const auto num_wires =
                     gate_level_layout->num_wires() - gate_level_layout->num_pis() - gate_level_layout->num_pos();
-                const auto  num_crossings = gate_level_layout->num_crossings();
-                std::string cost_function = "A";
+                const auto  num_crossings  = gate_level_layout->num_crossings();
+                std::string cost_objective = "A";
                 if (cost == 1)
                 {
-                    cost_function = "|C|";
+                    cost_objective = "|W|";
                 }
                 else if (cost == 2)
                 {
-                    cost_function = "|W|";
+                    cost_objective = "|C|";
                 }
                 else if (cost == 3)
                 {
-                    cost_function = "ACP";
+                    cost_objective = "ACP";
                 }
                 // log results
-                graph_oriented_layout_design_exp(
-                    benchmark, cost_function, area, num_crossings, num_wires, area * (num_crossings + 1),
+                gold_cost_objectives_exp(
+                    benchmark, cost_objective, area, num_crossings, num_wires, area * (num_crossings + 1),
                     mockturtle::to_seconds(graph_oriented_layout_design_stats.time_total), eq_result);
             }
 
-            graph_oriented_layout_design_exp.save();
-            graph_oriented_layout_design_exp.table();
+            gold_cost_objectives_exp.save();
+            gold_cost_objectives_exp.table();
         }
     }
 

@@ -1461,8 +1461,8 @@ class graph_oriented_layout_design_impl
         std::cout << fmt::format("[i]   Time taken:       {} s {} ms {} µs\n", sec, ms, us);
         std::cout << fmt::format("[i]   Evaluated paths:  {}\n", num_evaluated_paths);
         std::cout << fmt::format("[i]   Layout dimension: {} × {} = {}\n", lyt.x() + 1, lyt.y() + 1, lyt.area());
-        std::cout << fmt::format("[i]   #Crossings: {}\n", lyt.num_crossings());
         std::cout << fmt::format("[i]   #Wires: {}\n", lyt.num_wires() - lyt.num_pis() - lyt.num_pos());
+        std::cout << fmt::format("[i]   #Crossings: {}\n", lyt.num_crossings());
         std::cout << fmt::format("[i]   ACP: {}\n", lyt.area() * (lyt.num_crossings() + 1));
     }
     /**
