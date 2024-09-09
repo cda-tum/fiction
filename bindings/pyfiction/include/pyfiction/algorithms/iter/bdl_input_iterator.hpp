@@ -121,8 +121,8 @@ inline void bdl_input_iterator(pybind11::module& m)
      */
     py::class_<fiction::bdl_input_iterator_params>(m, "bdl_input_iterator_params")
         .def(py::init<>())
-        .def_readwrite("bdl_wires_params", &fiction::bdl_input_iterator_params::bdl_wire_params,
-                       DOC(fiction_bdl_input_iterator_params_bdl_pairs_params))
+        .def_readwrite("bdl_wire_params", &fiction::bdl_input_iterator_params::bdl_wire_params,
+                       DOC(fiction_bdl_input_iterator_params_bdl_wire_params))
         .def_readwrite("input_bdl_config", &fiction::bdl_input_iterator_params::input_bdl_config,
                        DOC(fiction_bdl_input_iterator_params_input_bdl_config));
 

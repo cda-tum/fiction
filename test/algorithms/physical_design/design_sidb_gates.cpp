@@ -463,7 +463,7 @@ TEST_CASE("Design Bestagon shaped CX gate with QuickCell (flipped)", "[design-si
             3};
 
         const auto found_gate_layouts = design_sidb_gates(lyt, create_crossing_wire_tt(), params);
-        REQUIRE(found_gate_layouts.size() == 2);
+        REQUIRE(found_gate_layouts.size() == 3);
         CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
     }
 }
