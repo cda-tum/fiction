@@ -11,6 +11,9 @@
 #include "mockturtle/utils/stopwatch.hpp"
 
 #include <cstdlib>
+#include <cstdint>
+#include <vector>
+#include <numeric>
 
 using namespace fiction;
 
@@ -70,8 +73,8 @@ int main()  // NOLINT
             runtime_quickexact += mockturtle::to_seconds(quickexact_results_layout.simulation_runtime);
         }
 
-        const auto average_pos_sibs_of_gs = std::accumulate(number_of_positive_sidbs_of_gs_per_layout.cbegin(),
-                                                            number_of_positive_sidbs_of_gs_per_layout.cend(), 0) /
+        const auto average_pos_sibs_of_gs = static_cast<double>(std::accumulate(number_of_positive_sidbs_of_gs_per_layout.cbegin(),
+                                                            number_of_positive_sidbs_of_gs_per_layout.cend(), 0)) /
                                             static_cast<double>(number_of_positive_sidbs_of_gs_per_layout.size());
 
         simulation_exp(random_layouts_params.number_of_sidbs, random_layouts.size(), runtime_exhaustive,

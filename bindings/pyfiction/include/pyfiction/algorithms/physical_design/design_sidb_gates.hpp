@@ -50,7 +50,7 @@ inline void design_sidb_gates(pybind11::module& m)
     py::class_<fiction::design_sidb_gates_params<fiction::offset::ucoord_t>>(m, "design_sidb_gates_params",
                                                                              DOC(fiction_design_sidb_gates_params))
         .def(py::init<>())
-        .def_readwrite("is_operational_params",
+        .def_readwrite("operational_params",
                        &fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::operational_params,
                        DOC(fiction_design_sidb_gates_params_operational_params))
         .def_readwrite("design_mode", &fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_mode,
