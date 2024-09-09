@@ -53,7 +53,8 @@ int main()  // NOLINT
 
     const design_sidb_gates_params<fiction::cell<sidb_100_cell_clk_lyt_siqad>> params{
         is_operational_params{sidb_simulation_parameters{2, -0.31}, sidb_simulation_engine::QUICKEXACT,
-                              detect_bdl_wires_params{3.0}, operational_condition::FORBIDDING_KINKS},
+                              bdl_input_iterator_params{detect_bdl_wires_params{3.0}},
+                              operational_condition::FORBIDDING_KINKS},
         design_sidb_gates_params<fiction::cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL,
         {{22, 6, 0}, {32, 12, 0}},
         4};
