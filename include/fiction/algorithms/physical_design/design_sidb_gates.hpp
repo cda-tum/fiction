@@ -43,6 +43,7 @@ namespace fiction
 template <typename CellType>
 struct design_sidb_gates_params
 {
+    // TODO (Jan Drewniok): After PR481 is merged, add bdl_input_iterator_params.
     /**
      * Selector for the different termination conditions for the SiDB gate design process.
      */

@@ -30,8 +30,8 @@ class TestDisplacementRobustnessDomain(unittest.TestCase):
         params.displacement_variations = [1, 1]
         params.operational_params.simulation_parameters = sidb_simulation_parameters(2, -0.28)
 
-        params.operational_params.bdl_params.maximum_distance = 2.0
-        params.operational_params.bdl_params.minimum_distance = 0.2
+        params.operational_params.input_bdl_iterator_params.bdl_pairs_params.maximum_distance = 2.0
+        params.operational_params.input_bdl_iterator_params.bdl_pairs_params.minimum_distance = 0.2
 
         # only offset_coordinate(4, 5) and offset_coordinate(10,12) are affected by displacement
         params.fixed_sidbs = {offset_coordinate(0, 1), offset_coordinate(2, 3), offset_coordinate(20, 1),

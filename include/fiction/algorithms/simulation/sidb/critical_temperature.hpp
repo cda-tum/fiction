@@ -76,9 +76,9 @@ struct critical_temperature_params
      */
     double max_temperature{400};
     /**
-     * Parameters for the BDL pair detection algorithms.
+     * Parameters for the BDL input iterator.
      */
-    detect_bdl_pairs_params bdl_params{};
+    bdl_input_iterator_params input_bdl_iterator_params{};
     /**
      * Number of iteration steps for the *QuickSim* algorithm (only applicable if engine == APPROXIMATE).
      */
@@ -103,10 +103,6 @@ struct critical_temperature_stats
      */
     std::string algorithm_name{};
     /**
-     * *Critical Temperature* of the given layout (unit: K).
-     */
-    double critical_temperature{0};
-    /**
      * Number of physically valid charge configurations.
      */
     uint64_t num_valid_lyt{};
@@ -121,8 +117,6 @@ struct critical_temperature_stats
      */
     void report(std::ostream& out = std::cout) const
     {
-        out << fmt::format("Critical Temperature  = {:.2f} K\n", critical_temperature);
-
         if (num_valid_lyt != 0)
         {
             out << fmt::format("'# of physically valid charge configurations': {} | Energy between ground state and "
@@ -149,13 +143,13 @@ class critical_temperature_impl
             layout{lyt},
             params{ps},
             stats{st},
-            bii(bdl_input_iterator<Lyt>{layout, params.bdl_params})
+            bii(bdl_input_iterator<Lyt>{layout, params.input_bdl_iterator_params}),
+            critical_temperature{ps.max_temperature}
 
     {
         stats.simulation_parameters = params.simulation_parameters;
         stats.algorithm_name =
             (params.engine == critical_temperature_params::simulation_engine::EXACT) ? "QuickExact" : "QuickSim";
-        stats.critical_temperature = params.max_temperature;
     }
 
     /**
@@ -169,14 +163,14 @@ class critical_temperature_impl
     {
         if (layout.is_empty())
         {
-            stats.critical_temperature = 0.0;
+            critical_temperature = 0.0;
             return;
         }
 
         if (layout.num_cells() > 1)
         {
-            const auto output_bdl_pairs =
-                detect_bdl_pairs(layout, sidb_technology::cell_type::OUTPUT, params.bdl_params);
+            const auto output_bdl_pairs = detect_bdl_pairs(layout, sidb_technology::cell_type::OUTPUT,
+                                                           params.input_bdl_iterator_params.bdl_pairs_params);
 
             // number of different input combinations
             for (auto i = 0u; i < spec.front().num_bits(); ++i, ++bii)
@@ -184,7 +178,7 @@ class critical_temperature_impl
                 // if positively charged SiDBs can occur, the SiDB layout is considered as non-operational
                 if (can_positive_charges_occur(*bii, params.simulation_parameters))
                 {
-                    stats.critical_temperature = 0.0;
+                    critical_temperature = 0.0;
                     return;
                 }
 
@@ -192,7 +186,7 @@ class critical_temperature_impl
                 const auto sim_result = physical_simulation_of_layout(bii);
                 if (sim_result.charge_distributions.empty())
                 {
-                    stats.critical_temperature = 0.0;
+                    critical_temperature = 0.0;
                     return;
                 }
                 stats.num_valid_lyt = sim_result.charge_distributions.size();
@@ -201,14 +195,12 @@ class critical_temperature_impl
                 const auto distribution = energy_distribution(sim_result.charge_distributions);
 
                 // A label that indicates whether the state still fulfills the logic.
-                sidb_energy_and_state_type energy_state_type{};
-                energy_state_type = calculate_energy_and_state_type(distribution, sim_result.charge_distributions,
-                                                                    output_bdl_pairs, spec, i);
+                const auto energy_state_type = calculate_energy_and_state_type(
+                    distribution, sim_result.charge_distributions, output_bdl_pairs, spec, i);
 
                 const auto min_energy = energy_state_type.cbegin()->first;
 
-                auto ground_state_is_transparent =
-                    energy_between_ground_state_and_first_erroneous(energy_state_type, min_energy);
+                auto ground_state_is_transparent = is_ground_state_transparent(energy_state_type, min_energy);
 
                 if (ground_state_is_transparent)
                 {
@@ -217,8 +209,8 @@ class critical_temperature_impl
 
                 else
                 {
-                    stats.critical_temperature = 0.0;  // If no ground state fulfills the logic, the Critical
-                                                       // Temperature is zero. May be worth it to change µ_.
+                    critical_temperature = 0.0;  // If no ground state fulfills the logic, the Critical
+                                                 // Temperature is zero. May be worth it to change µ_.
                 }
             }
         }
@@ -282,18 +274,18 @@ class critical_temperature_impl
         {
             // If the occupation probability of excited states exceeds the given threshold.
             if (occupation_probability_non_gate_based(distribution, temp) > (1 - params.confidence_level) &&
-                (temp < stats.critical_temperature))
+                (temp < critical_temperature))
             {
                 // The current temperature is stored as the critical temperature.
-                stats.critical_temperature = temp;
+                critical_temperature = temp;
 
                 break;
             }
 
-            if (std::abs(temp - params.max_temperature) < 0.001 && (temp < stats.critical_temperature))
+            if (std::abs(temp - params.max_temperature) < 0.001 && (temp < critical_temperature))
             {
                 // Maximal temperature is stored as the Critical Temperature.
-                stats.critical_temperature = params.max_temperature;
+                critical_temperature = params.max_temperature;
             }
         }
     }
@@ -304,7 +296,7 @@ class critical_temperature_impl
      */
     [[nodiscard]] double get_critical_temperature() const noexcept
     {
-        return stats.critical_temperature;
+        return critical_temperature;
     }
 
   private:
@@ -317,10 +309,11 @@ class critical_temperature_impl
      * @param min_energy Minimal energy of all physically valid charge distributions of a given layout (unit: eV).
      * @return State type (i.e. transparent, erroneous) of the ground state is returned.
      */
-    bool energy_between_ground_state_and_first_erroneous(const sidb_energy_and_state_type& energy_and_state_type,
-                                                         const double                      min_energy) noexcept
+    bool is_ground_state_transparent(const sidb_energy_and_state_type& energy_and_state_type,
+                                     const double                      min_energy) noexcept
     {
         bool ground_state_is_transparent = false;
+
         for (const auto& [energy, state_type] : energy_and_state_type)
         {
             // Check if there is at least one ground state that satisfies the logic (transparent). Round the energy
@@ -364,16 +357,16 @@ class critical_temperature_impl
         {
             // If the occupation probability of erroneous states exceeds the given threshold...
             if (occupation_probability_gate_based(energy_state_type, temp) > (1 - params.confidence_level) &&
-                (temp < stats.critical_temperature))
+                (temp < critical_temperature))
             {
                 // The current temperature is stored as Critical Temperature.
-                stats.critical_temperature = temp;
+                critical_temperature = temp;
                 break;
             }
-            if (std::abs(temp - params.max_temperature) < 0.001 && (temp < stats.critical_temperature))
+            if (std::abs(temp - params.max_temperature) < 0.001 && (temp < critical_temperature))
             {
                 // Maximal temperature is stored as Critical Temperature.
-                stats.critical_temperature = params.max_temperature;
+                critical_temperature = params.max_temperature;
             }
         }
     }
@@ -390,6 +383,10 @@ class critical_temperature_impl
      * Statistics.
      */
     critical_temperature_stats& stats;
+    /**
+     * Critical temperature [K].
+     */
+    double critical_temperature;
     /**
      * Iterator that iterates over all possible input states.
      */
