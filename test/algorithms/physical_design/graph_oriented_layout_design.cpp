@@ -173,8 +173,7 @@ TEST_CASE("Different cost objectives", "[graph-oriented-layout-design]")
 
     graph_oriented_layout_design_params params{};
 
-    params.return_first = true;
-    params.mode         = graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT;
+    params.mode = graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT;
 
     // Array of cost objectives to iterate over
     const std::array<graph_oriented_layout_design_params::cost_objective, 5> cost_objectives = {
