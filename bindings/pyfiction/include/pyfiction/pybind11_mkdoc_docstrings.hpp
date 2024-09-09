@@ -11040,7 +11040,7 @@ also extends runtime. When a solution is found in any graph, its cost
 is used to prune the remaining graphs.)doc";
 
 static const char *__doc_fiction_graph_oriented_layout_design_params_effort_mode_LOW_EFFORT =
-R"doc(LOW_EFFORT mode generates 3 search space graphs. This option minimizes
+R"doc(LOW_EFFORT mode generates 2 search space graphs. This option minimizes
 runtime but may not always yield the optimal results.)doc";
 
 static const char *__doc_fiction_graph_oriented_layout_design_params_mode = R"doc(The effort mode used. Defaults to HIGH_EFFORT.)doc";
