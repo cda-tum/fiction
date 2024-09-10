@@ -5,15 +5,16 @@
 #include "fiction_experiments.hpp"
 
 #include <fiction/algorithms/physical_design/design_sidb_gates.hpp>
-#include <fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp>
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
+#include <fiction/algorithms/iter/bdl_input_iterator.hpp>
 #include <fiction/io/read_sqd_layout.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/truth_table_utils.hpp>
 
 #include <fmt/format.h>
+#include <mockturtle/utils/stopwatch.hpp>
 
 #include <array>
 #include <cstdint>
@@ -21,6 +22,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <cstdlib>
 
 // This script uses the *Automatic Exhaustive Gate Designer* and *QuickCell* to design gate implementations for 2-input
 // Boolean functions. It records the number of designed gate implementations and the runtime required for each

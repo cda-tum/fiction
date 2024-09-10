@@ -12,7 +12,6 @@
 #include "fiction/types.hpp"
 
 #include <algorithm>
-#include <cassert>
 #include <cstdint>
 #include <iterator>
 #include <vector>

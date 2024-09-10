@@ -17,11 +17,10 @@
 #include <fmt/format.h>
 #include <mockturtle/utils/stopwatch.hpp>
 
-#include <array>
 #include <cstdint>
-#include <filesystem>
 #include <string>
 #include <vector>
+#include <cstdlib>
 
 using namespace fiction;
 
