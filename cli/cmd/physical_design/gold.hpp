@@ -39,22 +39,24 @@ class gold_command : public command
         add_option("--timeout,-t", ps.timeout, "Timeout in seconds");
         add_option("--num_vertex_expansions,-n", ps.num_vertex_expansions, "Number of vertex expansions during search",
                    true);
-        add_option("--effort_mode,-e", ps.mode,
-                   "Specify the effort mode of the graph-oriented layout design algorithm. Possible values for the "
-                   "effort mode:\n - `low_effort=0`: Uses minimal computational resources, resulting in fewer search "
-                   "space graphs and potentially lower quality solutions.\n - `high_effort=1`: Uses more computational "
-                   "resources, creating more search space graphs to improve the likelihood of finding optimal "
-                   "solutions.\n - `highest_effort=2`: Uses the maximum computational resources, generating the most "
-                   "search space graphs to ensure the highest chance of finding the best solution.",
-                   true)
+        add_option(
+            "--effort_mode,-e", ps.mode,
+            "Specify the effort mode of the graph-oriented layout design algorithm. Possible values for the "
+            "effort mode:\n - `0` (low_effort): Uses minimal computational resources, resulting in fewer search "
+            "space graphs and potentially lower quality solutions.\n - `1` (high_effort): Uses more computational "
+            "resources, creating more search space graphs to improve the likelihood of finding optimal "
+            "solutions.\n - `2` (highest_effort): Uses the maximum computational resources, generating the most "
+            "search space graphs to ensure the highest chance of finding the best solution.",
+            true)
             ->set_type_name("{low_effort=0, high_effort=1, highest_effort=2}");
-        add_option("--cost_objective,-c", ps.cost,
-                   "Specify the cost objective for the graph-oriented layout design algorithm."
-                   "Possible values for the cost objective:\n - `area=0`: Minimize the layout area.\n- `wires=1`: "
-                   "Minimize the number of wire segments.\n - `crossings=2`: Minimize the number of crossings.\n - "
-                   "`acp=3`: Minimize the area-crossings product (ACP), balancing area and crossings.\n - `custom=4`: "
-                   "Allows for a user-defined cost objective, enabling custom optimization criteria.",
-                   true)
+        add_option(
+            "--cost_objective,-c", ps.cost,
+            "Specify the cost objective for the graph-oriented layout design algorithm."
+            "Possible values for the cost objective:\n - `0` (area): Minimize the layout area.\n- `1` (wires): "
+            "Minimize the number of wire segments.\n - `2` (crossings): Minimize the number of crossings.\n - "
+            "`3` (acp): Minimize the area-crossing product (ACP), balancing area and crossings.\n - `4` (custom): "
+            "Allows for a user-defined cost objective, enabling custom optimization criteria.",
+            true)
             ->set_type_name("{area=0, wires=1, crossings=2, acp=3, custom=4}");
         add_flag("--return_first,-r", ps.return_first,
                  "Terminate on the first found layout; reduces runtime but might sacrifice result quality");

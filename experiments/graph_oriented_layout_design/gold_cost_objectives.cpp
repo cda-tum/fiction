@@ -6,7 +6,6 @@
 #include "fiction/layouts/gate_level_layout.hpp"
 #include "fiction/layouts/tile_based_layout.hpp"
 #include "fiction/networks/technology_network.hpp"
-#include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 #include "fiction_experiments.hpp"
 
