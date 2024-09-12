@@ -45,11 +45,14 @@ inline void random_sidb_layout_generator(pybind11::module& m)
     py::enum_<typename fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_charges>(
         m, "positive_charges", DOC(fiction_generate_random_sidb_layout_params_positive_charges))
         .value("ALLOWED",
-               fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_charges::ALLOWED, DOC(fiction_generate_random_sidb_layout_params_positive_charges_ALLOWED))
+               fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_charges::ALLOWED,
+               DOC(fiction_generate_random_sidb_layout_params_positive_charges_ALLOWED))
         .value("FORBIDDEN",
-               fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_charges::FORBIDDEN, DOC(fiction_generate_random_sidb_layout_params_positive_charges_FORBIDDEN))
+               fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_charges::FORBIDDEN,
+               DOC(fiction_generate_random_sidb_layout_params_positive_charges_FORBIDDEN))
         .value("MAY_OCCUR",
-               fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_charges::MAY_OCCUR, DOC(fiction_generate_random_sidb_layout_params_positive_charges_CAN_OCCUR));
+               fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_charges::MAY_OCCUR,
+               DOC(fiction_generate_random_sidb_layout_params_positive_charges_CAN_OCCUR));
 
     /**
      * Parameters.

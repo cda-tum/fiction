@@ -717,9 +717,9 @@ template <typename Lyt>
             if (first_lyt.get_cell_type(c) != second_lyt.get_cell_type(c))
             {
                 different_cells = true;
-                return false; // abort
+                return false;  // abort
             }
-            return true; // keep looping
+            return true;  // keep looping
         });
 
     if (different_cells)
@@ -742,9 +742,9 @@ template <typename Lyt>
                 if (first_lyt.get_sidb_defect(defect_old.first) != second_lyt.get_sidb_defect(defect_old.first))
                 {
                     different_defects = true;
-                    return false; // abort
+                    return false;  // abort
                 }
-                return true; // keep looping
+                return true;  // keep looping
             });
 
         if (different_defects)
@@ -777,9 +777,9 @@ template <typename Lyt>
                 if (first_lyt.get_charge_state(c) != second_lyt.get_charge_state(c))
                 {
                     different_charge_state = true;
-                    return false; // abort
+                    return false;  // abort
                 }
-                return true; // keep looping
+                return true;  // keep looping
             });
 
         if (different_charge_state)

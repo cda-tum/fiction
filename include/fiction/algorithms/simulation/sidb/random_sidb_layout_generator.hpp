@@ -10,8 +10,8 @@
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/layout_utils.hpp"
 #include "fiction/utils/execution_utils.hpp"
+#include "fiction/utils/layout_utils.hpp"
 
 #include <cstdint>
 #include <unordered_set>
@@ -185,8 +185,9 @@ generate_multiple_random_sidb_layouts(const Lyt&                                
         const auto random_lyt = generate_random_sidb_layout(lyt_skeleton, params);
 
         // indicates if a found SiDB layout is identical to an already found one.
-        const auto identical_layout = std::any_of(FICTION_EXECUTION_POLICY_PAR unique_lyts.cbegin(), unique_lyts.cend(), [&](const auto& old_lyt)
-                                                  { return are_cell_layouts_identical(random_lyt, old_lyt); });
+        const auto identical_layout =
+            std::any_of(FICTION_EXECUTION_POLICY_PAR unique_lyts.cbegin(), unique_lyts.cend(),
+                        [&](const auto& old_lyt) { return are_cell_layouts_identical(random_lyt, old_lyt); });
 
         // if the randomly generated SiDB layout is not identical to a previously generated one, it is added to the
         // collection of all unique SiDB layouts (unique_lyts)
