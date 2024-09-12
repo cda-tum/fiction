@@ -52,7 +52,7 @@ inline void random_sidb_layout_generator(pybind11::module& m)
                DOC(fiction_generate_random_sidb_layout_params_positive_charges_FORBIDDEN))
         .value("MAY_OCCUR",
                fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_charges::MAY_OCCUR,
-               DOC(fiction_generate_random_sidb_layout_params_positive_charges_CAN_OCCUR));
+               DOC(fiction_generate_random_sidb_layout_params_positive_charges_MAY_OCCUR));
 
     /**
      * Parameters.
